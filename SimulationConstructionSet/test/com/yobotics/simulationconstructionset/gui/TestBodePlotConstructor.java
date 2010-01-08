@@ -2,7 +2,7 @@ package com.yobotics.simulationconstructionset.gui;
 
 import junit.framework.*;
 import us.ihmc.utilities.test.HumanAssistedTestFrame;
-import us.ihmc.utilities.linearDynamicSystems.LinearTransferFunction;
+import us.ihmc.utilities.linearDynamicSystems.TransferFunction;
 
 /**
  * <p>Title: SimulationConstructionSet</p>
@@ -118,7 +118,7 @@ public class TestBodePlotConstructor extends TestCase
           {wn * wn};
       double[] denominator = new double[]
           {1.0, 2.0 * zeta * wn, wn * wn};
-      LinearTransferFunction secondOrderTransferFunction = new LinearTransferFunction(numerator, denominator);
+      TransferFunction secondOrderTransferFunction = new TransferFunction(numerator, denominator);
 
       int numFreqs = 10000;
       double w0 = 0.2;
