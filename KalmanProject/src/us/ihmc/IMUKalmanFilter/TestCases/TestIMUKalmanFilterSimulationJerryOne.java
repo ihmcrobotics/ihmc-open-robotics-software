@@ -24,7 +24,7 @@ public class TestIMUKalmanFilterSimulationJerryOne
           PROFILING,
           quaternionBasedFullIMUKalmanFilter,
           quaternionBasedFullIMUKalmanFilterTwo);
-      rob.setController(controller, "Kalman", (int) Math.round(KALMAN_UPDATE_DT/SIMULATION_DT));
+      rob.setController(controller, (int) Math.round(KALMAN_UPDATE_DT/SIMULATION_DT));
 
       SimulationConstructionSet scs;
       if(PROFILING)
