@@ -18,7 +18,7 @@ public class TestIMUKalmanFilterSimulationJerryOne
       TestIMUKalmanFilterRobot rob = new TestIMUKalmanFilterRobot();
 
       QuaternionBasedFullIMUKalmanFilter quaternionBasedFullIMUKalmanFilter = new QuaternionBasedJamaFullIMUKalmanFilter(KALMAN_UPDATE_DT);
-      QuaternionBasedFullIMUKalmanFilter quaternionBasedFullIMUKalmanFilterTwo = new QuaternionBasedArrayFullIMUKalmanFilter(KALMAN_UPDATE_DT, rob.getYoVariableRegistry());
+      QuaternionBasedFullIMUKalmanFilter quaternionBasedFullIMUKalmanFilterTwo = new QuaternionBasedArrayFullIMUKalmanFilter(KALMAN_UPDATE_DT, rob.getRobotsYoVariableRegistry());
 
       TestIMUKalmanFilterControllerJerryOne controller = new TestIMUKalmanFilterControllerJerryOne(rob,
           PROFILING,
