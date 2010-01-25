@@ -18,7 +18,7 @@ public class TestIMUKalmanFilterRobot extends Robot
    public final YoVariable qdd_wx, qdd_wy, qdd_wz; // Angular acceleration in world coordinates
 
    // Rotation of the body
-   private final YoVariableRegistry registry = this.getYoVariableRegistry();
+   private final YoVariableRegistry registry = this.getRobotsYoVariableRegistry();
    public final YoVariable yaw = new YoVariable("yaw", registry);
    public final YoVariable pitch = new YoVariable("pitch", registry);
    public final YoVariable roll = new YoVariable("roll", registry);
