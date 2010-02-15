@@ -19,11 +19,13 @@ public class DoubleGlobalParameterTest //extends TestCase
     @Before
     public void setUp() throws Exception
     {
+       GlobalParameter.clearGlobalRegistry();
     }
 
     @After
     public void tearDown() throws Exception
     {
+       GlobalParameter.clearGlobalRegistry();
     }
 
     
@@ -82,8 +84,25 @@ public class DoubleGlobalParameterTest //extends TestCase
 	assertEquals(YoVariableType.DOUBLE, doubleGlobalParameter.getYoVariableType());
     }
     
+    @Test (expected = RuntimeException.class)
+    public void testThatCantHaveParentsUnlessOverwriteUpdateMethodOne()
+    {
+	DoubleGlobalParameter parent = new DoubleGlobalParameter("parent" + counter++, "parent", DEFAULT_VALUE, null);
+	DoubleGlobalParameter invalidChild = new DoubleGlobalParameter("invalidChild" + counter++, "test description", new GlobalParameter[]{parent}, null);
+
+	parent.set(1.0); 
+    }
     
 
+    @Test(expected = RuntimeException.class)
+    public void testCantSetChild()
+    {
+       DoubleGlobalParameter parent = new DoubleGlobalParameter("parent", "", 0.7, null);
+       DoubleGlobalParameter child = new DoubleGlobalParameter("child", "", new GlobalParameter[]{parent}, null);
+
+       child.set(0.99, "Shouldn't be able to change this!");
+    }
+    
 //    @Test
 //    public void testSetOnlyIfChangeDouble()
 //    {
