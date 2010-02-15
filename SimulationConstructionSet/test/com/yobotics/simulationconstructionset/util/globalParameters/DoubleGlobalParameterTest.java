@@ -41,14 +41,19 @@ public class DoubleGlobalParameterTest //extends TestCase
     @Test
     public void testGetValue()
     {	
-	DoubleGlobalParameter doubleGlobalParameter = new DoubleGlobalParameter("testParameter" + counter++, "test description", DEFAULT_VALUE, null);
+	SystemOutGlobalParameterChangedListener systemOutGlobalParameterChangedListener = new SystemOutGlobalParameterChangedListener();
+	
+	DoubleGlobalParameter doubleGlobalParameter = new DoubleGlobalParameter("testParameter" + counter++, "test description", DEFAULT_VALUE, systemOutGlobalParameterChangedListener);
 	assertEquals(DEFAULT_VALUE, doubleGlobalParameter.getValue());
     }
     
     @Test
     public void testSetValue()
     {
-	DoubleGlobalParameter doubleGlobalParameter = new DoubleGlobalParameter("testParameter" + counter++, "test description", DEFAULT_VALUE, null);
+	SystemOutGlobalParameterChangedListener systemOutGlobalParameterChangedListener = new SystemOutGlobalParameterChangedListener();
+
+	
+	DoubleGlobalParameter doubleGlobalParameter = new DoubleGlobalParameter("testParameter" + counter++, "test description", DEFAULT_VALUE, systemOutGlobalParameterChangedListener);
 
 	double newValue = -0.045;
 	doubleGlobalParameter.set(newValue);
@@ -70,7 +75,9 @@ public class DoubleGlobalParameterTest //extends TestCase
     @Test
     public void testGetYoVariableType()
     {
-	DoubleGlobalParameter doubleGlobalParameter = new DoubleGlobalParameter("testParameter" + counter++, "test description", DEFAULT_VALUE, null);
+	SystemOutGlobalParameterChangedListener systemOutGlobalParameterChangedListener = new SystemOutGlobalParameterChangedListener();
+
+	DoubleGlobalParameter doubleGlobalParameter = new DoubleGlobalParameter("testParameter" + counter++, "test description", DEFAULT_VALUE, systemOutGlobalParameterChangedListener);
 
 	assertEquals(YoVariableType.DOUBLE, doubleGlobalParameter.getYoVariableType());
     }
@@ -96,10 +103,4 @@ public class DoubleGlobalParameterTest //extends TestCase
 //	fail("Not yet implemented");
 //    }
     
-    
-//    private class GlobalParameterChangedListener implements GlobalParameterChangedListener
-//    {
-//	
-//    }
-
 }
