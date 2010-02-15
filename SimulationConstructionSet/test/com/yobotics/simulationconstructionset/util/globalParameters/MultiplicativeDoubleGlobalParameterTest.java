@@ -13,14 +13,17 @@ public class MultiplicativeDoubleGlobalParameterTest
     @Test
     public void testSetThrowsException()
     {
+	SystemOutGlobalParameterChangedListener systemOutGlobalParameterChangedListener = new SystemOutGlobalParameterChangedListener();
+
+	
 	double valueA = 4.67;
 	double valueB = -765.7654;
 	
-	DoubleGlobalParameter doubleGlobalParameterA = new DoubleGlobalParameter("testParameter" + counter++, "test description", valueA, null);
-	DoubleGlobalParameter doubleGlobalParameterB = new DoubleGlobalParameter("testParameter" + counter++, "test description", valueB, null);
+	DoubleGlobalParameter doubleGlobalParameterA = new DoubleGlobalParameter("testParameter" + counter++, "test description", valueA, systemOutGlobalParameterChangedListener);
+	DoubleGlobalParameter doubleGlobalParameterB = new DoubleGlobalParameter("testParameter" + counter++, "test description", valueB, systemOutGlobalParameterChangedListener);
 
-	MultiplicativeDoubleGlobalParameter multiplicativeDoubleGlobalParameter = new MultiplicativeDoubleGlobalParameter("test" + counter++,
-		"multiplicative parameter", new DoubleGlobalParameter[]{doubleGlobalParameterA, doubleGlobalParameterB}, null);
+	MultiplicativeDoubleGlobalParameter multiplicativeDoubleGlobalParameter = new MultiplicativeDoubleGlobalParameter("testMulti" + counter++,
+		"multiplicative parameter", new DoubleGlobalParameter[]{doubleGlobalParameterA, doubleGlobalParameterB}, systemOutGlobalParameterChangedListener);
 	
 	try
 	{
@@ -36,14 +39,16 @@ public class MultiplicativeDoubleGlobalParameterTest
     @Test
     public void testMultiplicativeDoubleGlobalParameter()
     {
+	SystemOutGlobalParameterChangedListener systemOutGlobalParameterChangedListener = new SystemOutGlobalParameterChangedListener();
+
 	double valueA = 4.67;
 	double valueB = -765.7654;
 	
-	DoubleGlobalParameter doubleGlobalParameterA = new DoubleGlobalParameter("testParameter" + counter++, "test description", valueA, null);
-	DoubleGlobalParameter doubleGlobalParameterB = new DoubleGlobalParameter("testParameter" + counter++, "test description", valueB, null);
+	DoubleGlobalParameter doubleGlobalParameterA = new DoubleGlobalParameter("testParameter" + counter++, "test description", valueA, systemOutGlobalParameterChangedListener);
+	DoubleGlobalParameter doubleGlobalParameterB = new DoubleGlobalParameter("testParameter" + counter++, "test description", valueB, systemOutGlobalParameterChangedListener);
 
-	MultiplicativeDoubleGlobalParameter multiplicativeDoubleGlobalParameter = new MultiplicativeDoubleGlobalParameter("test" + counter++,
-		"multiplicative parameter", new DoubleGlobalParameter[]{doubleGlobalParameterA, doubleGlobalParameterB}, null);
+	MultiplicativeDoubleGlobalParameter multiplicativeDoubleGlobalParameter = new MultiplicativeDoubleGlobalParameter("testMulti" + counter++,
+		"multiplicative parameter", new DoubleGlobalParameter[]{doubleGlobalParameterA, doubleGlobalParameterB}, systemOutGlobalParameterChangedListener);
 	
 	
 	assertEquals(valueA * valueB, multiplicativeDoubleGlobalParameter.getValue());
@@ -53,14 +58,17 @@ public class MultiplicativeDoubleGlobalParameterTest
     @Test
     public void testMultiplicativeDoubleGlobalParameterUpdate()
     {
+	SystemOutGlobalParameterChangedListener systemOutGlobalParameterChangedListener = new SystemOutGlobalParameterChangedListener();
+
+	
 	double valueA = 4.67;
 	double valueB = -765.7654;
 	
-	DoubleGlobalParameter doubleGlobalParameterA = new DoubleGlobalParameter("testParameter" + counter++, "test description", valueA, null);
-	DoubleGlobalParameter doubleGlobalParameterB = new DoubleGlobalParameter("testParameter" + counter++, "test description", valueB, null);
+	DoubleGlobalParameter doubleGlobalParameterA = new DoubleGlobalParameter("testParameter" + counter++, "test description", valueA, systemOutGlobalParameterChangedListener);
+	DoubleGlobalParameter doubleGlobalParameterB = new DoubleGlobalParameter("testParameter" + counter++, "test description", valueB, systemOutGlobalParameterChangedListener);
 
-	MultiplicativeDoubleGlobalParameter multiplicativeDoubleGlobalParameter = new MultiplicativeDoubleGlobalParameter("test" + counter++,
-		"multiplicative parameter", new DoubleGlobalParameter[]{doubleGlobalParameterA, doubleGlobalParameterB}, null);
+	MultiplicativeDoubleGlobalParameter multiplicativeDoubleGlobalParameter = new MultiplicativeDoubleGlobalParameter("testMulti" + counter++,
+		"multiplicative parameter", new DoubleGlobalParameter[]{doubleGlobalParameterA, doubleGlobalParameterB}, systemOutGlobalParameterChangedListener);
 	
 	
 	valueA = -795.09;
