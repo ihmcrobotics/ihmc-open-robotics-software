@@ -45,7 +45,7 @@ public class AndBooleanGlobalParameterTest
     }
 
     @Test
-    public void testMultiplicativeDoubleGlobalParameter()
+    public void testAndBooleanGlobalParameter()
     {
 	SystemOutGlobalParameterChangedListener systemOutGlobalParameterChangedListener = new SystemOutGlobalParameterChangedListener();
 
@@ -64,7 +64,7 @@ public class AndBooleanGlobalParameterTest
     
     
     @Test
-    public void testMultiplicativeDoubleGlobalParameterUpdate()
+    public void testAndBooleanGlobalParameterUpdate()
     {
 	SystemOutGlobalParameterChangedListener systemOutGlobalParameterChangedListener = new SystemOutGlobalParameterChangedListener();
 

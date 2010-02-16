@@ -30,7 +30,7 @@ public class OrBooleanGlobalParameterTest
 	BooleanGlobalParameter booleanGlobalParameterA = new BooleanGlobalParameter("testParameterA", "test description", valueA, systemOutGlobalParameterChangedListener);
 	BooleanGlobalParameter booleanGlobalParameterB = new BooleanGlobalParameter("testParameterB", "test description", valueB, systemOutGlobalParameterChangedListener);
 
-	AndBooleanGlobalParameter multiplicativeDoubleGlobalParameter = new AndBooleanGlobalParameter("testMulti",
+	OrBooleanGlobalParameter multiplicativeDoubleGlobalParameter = new OrBooleanGlobalParameter("testMulti",
 		"multiplicative parameter", new BooleanGlobalParameter[]{booleanGlobalParameterA, booleanGlobalParameterB}, systemOutGlobalParameterChangedListener);
 	
 	try
@@ -44,7 +44,7 @@ public class OrBooleanGlobalParameterTest
     }
 
     @Test
-    public void testMultiplicativeDoubleGlobalParameter()
+    public void testAndBooleanGlobalParameter()
     {
 	SystemOutGlobalParameterChangedListener systemOutGlobalParameterChangedListener = new SystemOutGlobalParameterChangedListener();
 
@@ -54,7 +54,7 @@ public class OrBooleanGlobalParameterTest
 	BooleanGlobalParameter booleanGlobalParameterA = new BooleanGlobalParameter("testParameterA", "test description", valueA, systemOutGlobalParameterChangedListener);
 	BooleanGlobalParameter booleanGlobalParameterB = new BooleanGlobalParameter("testParameterB", "test description", valueB, systemOutGlobalParameterChangedListener);
 
-	AndBooleanGlobalParameter multiplicativeDoubleGlobalParameter = new AndBooleanGlobalParameter("testMulti",
+	OrBooleanGlobalParameter multiplicativeDoubleGlobalParameter = new OrBooleanGlobalParameter("testMulti",
 		"multiplicative parameter", new BooleanGlobalParameter[]{booleanGlobalParameterA, booleanGlobalParameterB}, systemOutGlobalParameterChangedListener);
 	
 	
@@ -63,7 +63,7 @@ public class OrBooleanGlobalParameterTest
     
     
     @Test
-    public void testMultiplicativeDoubleGlobalParameterUpdate()
+    public void testAndBooleanGlobalParameterUpdate()
     {
 	SystemOutGlobalParameterChangedListener systemOutGlobalParameterChangedListener = new SystemOutGlobalParameterChangedListener();
 
@@ -74,7 +74,7 @@ public class OrBooleanGlobalParameterTest
 	BooleanGlobalParameter booleanGlobalParameterA = new BooleanGlobalParameter("testParameterA", "test description", valueA, systemOutGlobalParameterChangedListener);
 	BooleanGlobalParameter booleanGlobalParameterB = new BooleanGlobalParameter("testParameterB", "test description", valueB, systemOutGlobalParameterChangedListener);
 
-	AndBooleanGlobalParameter multiplicativeDoubleGlobalParameter = new AndBooleanGlobalParameter("testMulti",
+	OrBooleanGlobalParameter multiplicativeDoubleGlobalParameter = new OrBooleanGlobalParameter("testMulti",
 		"multiplicative parameter", new BooleanGlobalParameter[]{booleanGlobalParameterA, booleanGlobalParameterB}, systemOutGlobalParameterChangedListener);
 	
 	
@@ -106,16 +106,16 @@ public class OrBooleanGlobalParameterTest
 	BooleanGlobalParameter grandParentA = new BooleanGlobalParameter("grandParentA", "test descriptionA", valueA, systemOutGlobalParameterChangedListener);
 	BooleanGlobalParameter grandParentB = new BooleanGlobalParameter("grandParentB", "test descriptionB", valueB, systemOutGlobalParameterChangedListener);
 
-	AndBooleanGlobalParameter parentA = new AndBooleanGlobalParameter("parentA",
+	OrBooleanGlobalParameter parentA = new OrBooleanGlobalParameter("parentA",
 		"multiplicative parameter", new BooleanGlobalParameter[]{grandParentA}, systemOutGlobalParameterChangedListener);
 	
-	AndBooleanGlobalParameter parentB = new AndBooleanGlobalParameter("parentB",
+	OrBooleanGlobalParameter parentB = new OrBooleanGlobalParameter("parentB",
 		"multiplicative parameter", new BooleanGlobalParameter[]{grandParentB}, systemOutGlobalParameterChangedListener);
 	
-	AndBooleanGlobalParameter childA = new AndBooleanGlobalParameter("childA",
+	OrBooleanGlobalParameter childA = new OrBooleanGlobalParameter("childA",
 		"multiplicative parameter", new BooleanGlobalParameter[]{grandParentA, parentA}, systemOutGlobalParameterChangedListener);
 	
-	AndBooleanGlobalParameter childB = new AndBooleanGlobalParameter("childB",
+	OrBooleanGlobalParameter childB = new OrBooleanGlobalParameter("childB",
 		"multiplicative parameter", new BooleanGlobalParameter[]{grandParentA, grandParentB, parentA, parentB}, systemOutGlobalParameterChangedListener);
 	
 	
