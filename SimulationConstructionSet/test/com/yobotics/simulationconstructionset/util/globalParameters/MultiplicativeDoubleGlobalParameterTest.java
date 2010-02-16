@@ -92,6 +92,74 @@ public class MultiplicativeDoubleGlobalParameterTest
 	doubleGlobalParameterB.set(valueB);
 	assertEquals(valueA * valueB, multiplicativeDoubleGlobalParameter.getValue());
     }
+    
+    @Test
+    public void testFamilyTree()
+    {
+//	SystemOutGlobalParameterChangedListener systemOutGlobalParameterChangedListener = new SystemOutGlobalParameterChangedListener();
+	SystemOutGlobalParameterChangedListener systemOutGlobalParameterChangedListener = null; //new SystemOutGlobalParameterChangedListener();
 
 
+	double valueA = 4.67;
+	double valueB = -765.7654;
+
+	DoubleGlobalParameter grandParentA = new DoubleGlobalParameter("grandParentA", "test descriptionA", valueA, systemOutGlobalParameterChangedListener);
+	DoubleGlobalParameter grandParentB = new DoubleGlobalParameter("grandParentB", "test descriptionB", valueB, systemOutGlobalParameterChangedListener);
+
+	MultiplicativeDoubleGlobalParameter parentA = new MultiplicativeDoubleGlobalParameter("parentA",
+		"multiplicative parameter", new DoubleGlobalParameter[]{grandParentA}, systemOutGlobalParameterChangedListener);
+	
+	MultiplicativeDoubleGlobalParameter parentB = new MultiplicativeDoubleGlobalParameter("parentB",
+		"multiplicative parameter", new DoubleGlobalParameter[]{grandParentB}, systemOutGlobalParameterChangedListener);
+	
+	MultiplicativeDoubleGlobalParameter childA = new MultiplicativeDoubleGlobalParameter("childA",
+		"multiplicative parameter", new DoubleGlobalParameter[]{grandParentA, parentA}, systemOutGlobalParameterChangedListener);
+	
+	MultiplicativeDoubleGlobalParameter childB = new MultiplicativeDoubleGlobalParameter("childB",
+		"multiplicative parameter", new DoubleGlobalParameter[]{grandParentA, grandParentB, parentA, parentB}, systemOutGlobalParameterChangedListener);
+	
+	
+	double expectedParentA = valueA;
+	assertEquals(expectedParentA, parentA.getValue());
+	
+	double expectedParentB = valueB;
+	assertEquals(expectedParentB, parentB.getValue());
+	
+	double expectedChildA = valueA * valueA;
+	assertEquals(expectedChildA, childA.getValue());
+
+	double expectedChildB = valueA * valueB * valueA * valueB;
+	assertEquals(expectedChildB, childB.getValue());
+
+	valueA = -67.835;
+	grandParentA.set(valueA);
+	expectedParentA = valueA;
+	assertEquals(expectedParentA, parentA.getValue());
+	
+	expectedParentB = valueB;
+	assertEquals(expectedParentB, parentB.getValue());
+	
+	expectedChildA = valueA * valueA;
+	assertEquals(expectedChildA, childA.getValue());
+
+	expectedChildB = valueA * valueB * valueA * valueB;
+	assertEquals(expectedChildB, childB.getValue());
+	
+	valueA = -67.835;
+	valueB = 96485.835;
+	grandParentA.set(valueA);
+	grandParentB.set(valueB);
+	
+	expectedParentA = valueA;
+	assertEquals(expectedParentA, parentA.getValue());
+	
+	expectedParentB = valueB;
+	assertEquals(expectedParentB, parentB.getValue());
+	
+	expectedChildA = valueA * valueA;
+	assertEquals(expectedChildA, childA.getValue());
+
+	expectedChildB = valueA * valueB * valueA * valueB;
+	assertEquals(expectedChildB, childB.getValue());
+    }
 }
