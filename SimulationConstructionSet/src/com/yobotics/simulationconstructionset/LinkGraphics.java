@@ -1,15 +1,23 @@
 package com.yobotics.simulationconstructionset;
 
 import javax.media.j3d.*;
+
 import com.sun.j3d.utils.picking.PickTool;
+
 import java.util.Enumeration;
+
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
+
 import com.mnstarfire.loaders3d.Loader3DS;
+
 import java.io.FileNotFoundException;
+
 import java.net.URL;
+
 import javax.vecmath.Point3f;
 import javax.vecmath.Point3d;
+
 import java.util.ArrayList;
 
 /**
@@ -26,7 +34,7 @@ import java.util.ArrayList;
  */
 public class LinkGraphics
 {
-   //private BranchGroup linkBG;
+   // private BranchGroup linkBG;
    private SharedGroup sharedGroup;
    private int numShapes;
    private Group lastGroup;
@@ -36,7 +44,7 @@ public class LinkGraphics
     */
    public LinkGraphics()
    {
-      //this.linkBG = new BranchGroup();
+      // this.linkBG = new BranchGroup();
       this.sharedGroup = new SharedGroup();
 
       sharedGroup.setCapability(BranchGroup.ALLOW_DETACH);
@@ -58,20 +66,22 @@ public class LinkGraphics
 
       this.sharedGroup.addChild(link3d);
 
-      //this.linkBG.addChild(link.linkBG);
+      // this.linkBG.addChild(link.linkBG);
    }
 
-   /*public void removeAllGraphics()
-     {
-    for(int i=0; i<linkBG.numChildren(); i++)
-    {
-      //Node child = linkBG.getChild(i);
-      linkBG.removeChild(i);
-    }
-
-    this.numShapes = 0;
-    this.lastGroup = linkBG;
-     }*/
+   /*
+    * public void removeAllGraphics()
+    * {
+    * for(int i=0; i<linkBG.numChildren(); i++)
+    * {
+    *  //Node child = linkBG.getChild(i);
+    *  linkBG.removeChild(i);
+    * }
+    *
+    * this.numShapes = 0;
+    * this.lastGroup = linkBG;
+    * }
+    */
 
 
    /**
@@ -85,48 +95,50 @@ public class LinkGraphics
     */
    private static void recursiveSetEnabling(Node node, Appearance app, int level)
    {
-      //Stuff to do to every node no matter what its type:
+      // Stuff to do to every node no matter what its type:
 
-      //node.setCapability(Node.ALLOW_PICKABLE_READ);
-      //node.setCapability(Node.ALLOW_PICKABLE_WRITE);
-      //System.out.print(level + ": ");
+      // node.setCapability(Node.ALLOW_PICKABLE_READ);
+      // node.setCapability(Node.ALLOW_PICKABLE_WRITE);
+      // System.out.print(level + ": ");
       // Stuff to do to a node if it is a leaf:
       if (node instanceof Leaf)
       {
-         //System.out.println("node is a leaf");
+         // System.out.println("node is a leaf");
          Leaf leaf = (Leaf) node;
 
          if (leaf instanceof Shape3D)
          {
-            //System.out.println("leaf is a Shape3D");
+            // System.out.println("leaf is a Shape3D");
             Shape3D shape = (Shape3D) leaf;
 
             if (app != null)
                shape.setAppearance(app);
-            //System.out.println(shape);
+
+            // System.out.println(shape);
             PickTool.setCapabilities(shape, PickTool.INTERSECT_FULL);
          }
 
          else if (leaf instanceof Light)
          {
-            //System.out.println("leaf is a light");
+            // System.out.println("leaf is a light");
             Light light = (Light) leaf;
          }
 
-         //else System.out.println("leaf is NOT a Shape3D");
+         // else System.out.println("leaf is NOT a Shape3D");
       }
 
       // Stuff to do to a node if its a Group:
       else if (node instanceof Group)
       {
          Group group = (Group) node;
-         //System.out.println("node is a group with " + group.numChildren() + "children");
+
+         // System.out.println("node is a group with " + group.numChildren() + "children");
 
          Enumeration e = group.getAllChildren();
 
-         //if (group instanceof BranchGroup) System.out.println("Group is a BranchGroup!");
-         //else if (group instanceof TransformGroup) System.out.println("Group is a TransformGroup!");
-         //else System.out.println("Group is a neither a BranchGroup or a TransformGroup!");
+         // if (group instanceof BranchGroup) System.out.println("Group is a BranchGroup!");
+         // else if (group instanceof TransformGroup) System.out.println("Group is a TransformGroup!");
+         // else System.out.println("Group is a neither a BranchGroup or a TransformGroup!");
 
          while (e.hasMoreElements())
          {
@@ -158,6 +170,7 @@ public class LinkGraphics
       Vector3d vec = new Vector3d(tx, ty, tz);
       t1.set(vec);
       TransformGroup transGroup = new TransformGroup(t1);
+
       return transGroup;
    }
 
@@ -177,12 +190,15 @@ public class LinkGraphics
          t1.rotX(rotAng);
       else if (rotAxis == Link.Y)
          t1.rotY(rotAng);
-      //else if (rotAxis == Link.Z)
+
+         // else if (rotAxis == Link.Z)
       else
          t1.rotZ(rotAng);
-      //else return;
+
+      // else return;
 
       TransformGroup transGroup = new TransformGroup(t1);
+
       return transGroup;
    }
 
@@ -199,6 +215,7 @@ public class LinkGraphics
       t1.set(rotAng, rotAxis);
 
       TransformGroup transGroup = new TransformGroup(t1);
+
       return transGroup;
    }
 
@@ -212,6 +229,7 @@ public class LinkGraphics
    {
       Transform3D t1 = new Transform3D(rotMatrix, new Vector3d(), 1.0);
       TransformGroup transGroup = new TransformGroup(t1);
+
       return transGroup;
    }
 
@@ -228,6 +246,7 @@ public class LinkGraphics
       t1.setScale(scaleFactor);
 
       TransformGroup transGroup = new TransformGroup(t1);
+
       return transGroup;
    }
 
@@ -246,6 +265,7 @@ public class LinkGraphics
       t1.setScale(scaleFactors);
 
       TransformGroup transGroup = new TransformGroup(t1);
+
       return transGroup;
    }
 
@@ -312,6 +332,7 @@ public class LinkGraphics
       lastGroup.addChild(transGroup);
       lastGroup = transGroup;
    }
+
    /**
     * Rotates the coordinate system counter clockwise around the specified axis by the given
     * angle in radians.  This does not rotate existing graphics, instead it rotates a "cursor"
@@ -465,11 +486,13 @@ public class LinkGraphics
       this.numShapes++;
    }
 
-   /*protected void addTransformGroup(TransformGroup transGroup)
-    {
-     this.lastGroup.addChild(transGroup);
-     this.numShapes++;
-    }*/
+   /*
+    * protected void addTransformGroup(TransformGroup transGroup)
+    * {
+    * this.lastGroup.addChild(transGroup);
+    * this.numShapes++;
+    * }
+    */
 
 
    /**
@@ -497,10 +520,10 @@ public class LinkGraphics
    public void addVRMLFile(URL fileURL, Appearance app)
    {
       // Use with new xj3d stuff
-      //int flag = org.web3d.j3d.loaders.VRML97Loader.LOAD_ALL; flag &= ~org.web3d.j3d.loaders.VRML97Loader.LOAD_BEHAVIOR_NODES; // Static Loads only
-      //org.web3d.j3d.loaders.VRML97Loader loader = new org.web3d.j3d.loaders.VRML97Loader(flag);
+      // int flag = org.web3d.j3d.loaders.VRML97Loader.LOAD_ALL; flag &= ~org.web3d.j3d.loaders.VRML97Loader.LOAD_BEHAVIOR_NODES; // Static Loads only
+      // org.web3d.j3d.loaders.VRML97Loader loader = new org.web3d.j3d.loaders.VRML97Loader(flag);
 
-      com.sun.j3d.loaders.vrml97.VrmlLoader loader = new com.sun.j3d.loaders.vrml97.VrmlLoader(); // Use with old x3d.jar
+      com.sun.j3d.loaders.vrml97.VrmlLoader loader = new com.sun.j3d.loaders.vrml97.VrmlLoader();    // Use with old x3d.jar
 
       com.sun.j3d.loaders.Scene model = null;
 
@@ -515,9 +538,9 @@ public class LinkGraphics
 
       BranchGroup vrmlGroup = model.getSceneGroup();
 
-      //TransformGroup viewGroups = model.getViewGroups();
-      //this.addTranfromGroup(viewGroups);
-      //System.out.println(vrmlGroup);
+      // TransformGroup viewGroups = model.getViewGroups();
+      // this.addTranfromGroup(viewGroups);
+      // System.out.println(vrmlGroup);
 
       if (app != null)
          recursiveSetEnabling(vrmlGroup, app, 0);
@@ -537,10 +560,10 @@ public class LinkGraphics
    public void addVRMLFile(String fileName, Appearance app)
    {
       // Use with new xj3d stuff
-      //int flag = org.web3d.j3d.loaders.VRML97Loader.LOAD_ALL; flag &= ~org.web3d.j3d.loaders.VRML97Loader.LOAD_BEHAVIOR_NODES; // Static Loads only
-      //org.web3d.j3d.loaders.VRML97Loader loader = new org.web3d.j3d.loaders.VRML97Loader(flag);
+      // int flag = org.web3d.j3d.loaders.VRML97Loader.LOAD_ALL; flag &= ~org.web3d.j3d.loaders.VRML97Loader.LOAD_BEHAVIOR_NODES; // Static Loads only
+      // org.web3d.j3d.loaders.VRML97Loader loader = new org.web3d.j3d.loaders.VRML97Loader(flag);
 
-      com.sun.j3d.loaders.vrml97.VrmlLoader loader = new com.sun.j3d.loaders.vrml97.VrmlLoader(); // Use with old x3d.jar
+      com.sun.j3d.loaders.vrml97.VrmlLoader loader = new com.sun.j3d.loaders.vrml97.VrmlLoader();    // Use with old x3d.jar
 
       com.sun.j3d.loaders.Scene model = null;
 
@@ -551,14 +574,15 @@ public class LinkGraphics
       catch (Exception e)
       {
          System.out.println("VRML file " + fileName + " not loaded");
+
          return;
       }
 
       BranchGroup vrmlGroup = model.getSceneGroup();
 
-      //TransformGroup viewGroups = model.getViewGroups();
-      //this.addTranfromGroup(viewGroups);
-      //System.out.println(vrmlGroup);
+      // TransformGroup viewGroups = model.getViewGroups();
+      // this.addTranfromGroup(viewGroups);
+      // System.out.println(vrmlGroup);
 
       if (app != null)
          recursiveSetEnabling(vrmlGroup, app, 0);
@@ -604,11 +628,13 @@ public class LinkGraphics
    public void add3DSFile(URL fileURL, Appearance app)
    {
       String fileName = fileURL.getFile();
-      //System.out.println("File name: " + fileName + " " + fileName.length());
+
+      // System.out.println("File name: " + fileName + " " + fileName.length());
 
       if (!fileName.equals(""))
       {
          add3DSFile(fileName, app);
+
          return;
       }
 
@@ -616,31 +642,33 @@ public class LinkGraphics
          System.out.println("Null File Name in add3DSFile");
    }
 
-   /* public void add3DSFile2(URL fileURL, Appearance app)
-    {
-     Loader3DS loader = new Loader3DS();
-     loader.setTextureLightingOn(); // turns on modulate mode for textures (lighting)
-
-
-     String URLBase = fileURL.toString();
-     System.out.println(URLBase);
-     //URLBase = URLBase.substring(URLBase.lastIndexOf("/"));
-
-     URLBase = URLBase.substring(0, URLBase.lastIndexOf("/"));
-
-     System.out.println(URLBase);
-     loader.setURLBase(URLBase);
-
-     com.sun.j3d.loaders.Scene scene = null;
-
-     try{scene = loader.load(fileURL);}
-     catch(FileNotFoundException e){System.err.println("File Not Found in add3DSFile: " + fileURL + "  " + e);return;}
-
-     BranchGroup branchGroup = scene.getSceneGroup();
-
-     if (app != null) recursiveSetEnabling(branchGroup, app, 0);
-     this.addBranchGroup(scene.getSceneGroup());
-    }*/
+   /*
+    *  public void add3DSFile2(URL fileURL, Appearance app)
+    * {
+    * Loader3DS loader = new Loader3DS();
+    * loader.setTextureLightingOn(); // turns on modulate mode for textures (lighting)
+    *
+    *
+    * String URLBase = fileURL.toString();
+    * System.out.println(URLBase);
+    * //URLBase = URLBase.substring(URLBase.lastIndexOf("/"));
+    *
+    * URLBase = URLBase.substring(0, URLBase.lastIndexOf("/"));
+    *
+    * System.out.println(URLBase);
+    * loader.setURLBase(URLBase);
+    *
+    * com.sun.j3d.loaders.Scene scene = null;
+    *
+    * try{scene = loader.load(fileURL);}
+    * catch(FileNotFoundException e){System.err.println("File Not Found in add3DSFile: " + fileURL + "  " + e);return;}
+    *
+    * BranchGroup branchGroup = scene.getSceneGroup();
+    *
+    * if (app != null) recursiveSetEnabling(branchGroup, app, 0);
+    * this.addBranchGroup(scene.getSceneGroup());
+    * }
+    */
 
    /**
     * Adds the specified 3DS Max file to the center of the current coordinate system
@@ -667,7 +695,7 @@ public class LinkGraphics
    public void add3DSFile(String fileName, Appearance app)
    {
       Loader3DS loader = new Loader3DS();
-      loader.setTextureLightingOn(); // turns on modulate mode for textures (lighting)
+      loader.setTextureLightingOn();    // turns on modulate mode for textures (lighting)
 
       com.sun.j3d.loaders.Scene scene = null;
 
@@ -678,6 +706,7 @@ public class LinkGraphics
       catch (FileNotFoundException e)
       {
          System.err.println("File Not Found in add3DSFile: " + fileName + "  " + e);
+
          return;
       }
 
@@ -689,7 +718,8 @@ public class LinkGraphics
 
       if (app != null)
          recursiveSetEnabling(branchGroup, app, 0);
-      //this.addBranchGroup(branchGroup);
+
+      // this.addBranchGroup(branchGroup);
 
       this.addGroup(transGroup);
    }
@@ -709,7 +739,7 @@ public class LinkGraphics
 
       BranchGroup base = new BranchGroup();
 
-      TransformGroup yAxisGroup = rotateTransformGroup( -Math.PI / 2.0, Link.X);
+      TransformGroup yAxisGroup = rotateTransformGroup(-Math.PI / 2.0, Link.X);
       TransformGroup xAxisGroup = rotateTransformGroup(Math.PI / 2.0, Link.Y);
 
       addShapeToGroup(bar, YoAppearance.Red(), xAxisGroup);
@@ -764,7 +794,7 @@ public class LinkGraphics
     * As is show by the graphical representation the cube is centered on the coordinate system.
     * Again, x, y and z are red, white and blue.
     * <br /><br /><img src="doc-files/LinkGraphics.addCube2.jpg">
-
+    *
     *
     * @param lx length of the cube in the x direction.
     * @param ly length of the cube in the y direction.
@@ -799,7 +829,7 @@ public class LinkGraphics
    }
 
    /**
-    * /**
+    * 
     * Adds a solid wedge with the given dimensions and appearance centered on the origin of the current
     * coordinate system.  The peak of the wedge is directly above the far edge of the cube
     * in the x direction.</ br></ br>
@@ -1068,7 +1098,7 @@ public class LinkGraphics
     * As is show by the graphical representation the hemi ellipsoid is centered on the coordinate system.
     * Again, x, y and z are red, white and blue.
     * <br /><br /><img src="doc-files/LinkGraphics.addHemiEllipsoid2.jpg">
-
+    *
     * @param xRad radius of the ellipsoid in the x direction.
     * @param yRad radius of the ellipsoid in the y direction.
     * @param zRad radius of the ellipsoid in the z direction.
@@ -1105,7 +1135,8 @@ public class LinkGraphics
    public void addArcTorus(double startAngle, double endAngle, double majorRadius, double minorRadius)
    {
       addArcTorus(startAngle, endAngle, majorRadius, minorRadius, YoAppearance.Black());
-      //addCylinder(1.0f, 0.2f);
+
+      // addCylinder(1.0f, 0.2f);
    }
 
    /**
@@ -1134,9 +1165,10 @@ public class LinkGraphics
     */
    public void addArcTorus(double startAngle, double endAngle, double majorRadius, double minorRadius, Appearance arcTorusApp)
    {
-      //System.out.println("start: " + startAngle + ", end: " + endAngle + ", MR: " + majorRadius + ", mr: " + minorRadius);
+      // System.out.println("start: " + startAngle + ", end: " + endAngle + ", MR: " + majorRadius + ", mr: " + minorRadius);
       Geometry arcTorusGeom = YoGeometry.ArcTorus(startAngle, endAngle, majorRadius, minorRadius, 15);
-      //Geometry arcTorusGeom = YoGeometry.Sphere(0.2f,15,15);
+
+      // Geometry arcTorusGeom = YoGeometry.Sphere(0.2f,15,15);
       addShape(arcTorusGeom, arcTorusApp);
    }
 
@@ -1231,7 +1263,8 @@ public class LinkGraphics
    {
       PolygonAttributes polyAttributes = new PolygonAttributes();
       polyAttributes.setCullFace(PolygonAttributes.CULL_NONE);
-      //polyAttributes.setCullFace(PolygonAttributes.CULL_BACK);
+
+      // polyAttributes.setCullFace(PolygonAttributes.CULL_BACK);
       appearance.setPolygonAttributes(polyAttributes);
 
       Geometry geometry = YoGeometry.Polygon(polygonPoints);
@@ -1264,7 +1297,8 @@ public class LinkGraphics
    {
       PolygonAttributes polyAttributes = new PolygonAttributes();
       polyAttributes.setCullFace(PolygonAttributes.CULL_NONE);
-      //polyAttributes.setCullFace(PolygonAttributes.CULL_BACK);
+
+      // polyAttributes.setCullFace(PolygonAttributes.CULL_BACK);
       appearance.setPolygonAttributes(polyAttributes);
 
       Geometry geometry = YoGeometry.Polygon(polygonPoints);
@@ -1273,20 +1307,26 @@ public class LinkGraphics
 
 
 
-   /*public String getName()
-    {
-     return this.name;
-    }*/
+   /*
+    * public String getName()
+    * {
+    * return this.name;
+    * }
+    */
 
-   /*public int getNumShapes()
-    {
-     return this.numShapes;
-    }*/
+   /*
+    * public int getNumShapes()
+    * {
+    * return this.numShapes;
+    * }
+    */
 
-   /*public BranchGroup getBranchGroup()
-    {
-     return linkBG;
-    }*/
+   /*
+    * public BranchGroup getBranchGroup()
+    * {
+    * return linkBG;
+    * }
+    */
 
    /**
     * Retrieves the shared group containing all of the graphical elements for this link.  This can be used to

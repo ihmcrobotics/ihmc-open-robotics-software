@@ -1,7 +1,9 @@
 package us.ihmc.IMUKalmanFilter.TestCases;
 
 import com.yobotics.simulationconstructionset.*;
+
 import javax.vecmath.*;
+
 import javax.media.j3d.Transform3D;
 
 public class TestIMUKalmanFilterRobot extends Robot
@@ -9,13 +11,13 @@ public class TestIMUKalmanFilterRobot extends Robot
    // Primary joints of the robot...
    public FloatingJoint rootJoint;
 
-   public final YoVariable q_x, q_y, q_z; // Position in world coordinates
-   public final YoVariable qd_x, qd_y, qd_z; // Velocity in world coordinates.
-   public final YoVariable qdd_x, qdd_y, qdd_z; // Acceleration in world coordinates.
+   public final YoVariable q_x, q_y, q_z;    // Position in world coordinates
+   public final YoVariable qd_x, qd_y, qd_z;    // Velocity in world coordinates.
+   public final YoVariable qdd_x, qdd_y, qdd_z;    // Acceleration in world coordinates.
 
-   public final YoVariable q_qs, q_qx, q_qy, q_qz; // Rotation as a quaternion.
-   public final YoVariable qd_wx, qd_wy, qd_wz; // Angular velocities in world coordinates
-   public final YoVariable qdd_wx, qdd_wy, qdd_wz; // Angular acceleration in world coordinates
+   public final YoVariable q_qs, q_qx, q_qy, q_qz;    // Rotation as a quaternion.
+   public final YoVariable qd_wx, qd_wy, qd_wz;    // Angular velocities in world coordinates
+   public final YoVariable qdd_wx, qdd_wy, qdd_wz;    // Angular acceleration in world coordinates
 
    // Rotation of the body
    private final YoVariableRegistry registry = this.getRobotsYoVariableRegistry();
@@ -23,7 +25,7 @@ public class TestIMUKalmanFilterRobot extends Robot
    public final YoVariable pitch = new YoVariable("pitch", registry);
    public final YoVariable roll = new YoVariable("roll", registry);
 
-   public final YoVariable ef_body_fx, ef_body_fy, ef_body_fz; // External Forces in world coordinates
+   public final YoVariable ef_body_fx, ef_body_fy, ef_body_fz;    // External Forces in world coordinates
 
    public TestIMUKalmanFilterRobot()
    {
