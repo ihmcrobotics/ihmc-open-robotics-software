@@ -6,164 +6,171 @@ import org.junit.*;
 
 public class OrBooleanGlobalParameterTest
 {
+   @Before
+   public void setUp()
+   {
+      GlobalParameter.clearGlobalRegistry();
+   }
 
-    @Before
-    public void setUp()
-    {
-       GlobalParameter.clearGlobalRegistry();
-    }
-    
-    @After
-    public void tearDown()
-    {
-       GlobalParameter.clearGlobalRegistry();
-    }
-    
-    @Test
-    public void testSetThrowsException()
-    {
-	SystemOutGlobalParameterChangedListener systemOutGlobalParameterChangedListener = new SystemOutGlobalParameterChangedListener();
+   @After
+   public void tearDown()
+   {
+      GlobalParameter.clearGlobalRegistry();
+   }
 
-	boolean valueA = true;
-	boolean valueB = false;
-	
-	BooleanGlobalParameter booleanGlobalParameterA = new BooleanGlobalParameter("testParameterA", "test description", valueA, systemOutGlobalParameterChangedListener);
-	BooleanGlobalParameter booleanGlobalParameterB = new BooleanGlobalParameter("testParameterB", "test description", valueB, systemOutGlobalParameterChangedListener);
+   @Test
+   public void testSetThrowsException()
+   {
+      SystemOutGlobalParameterChangedListener systemOutGlobalParameterChangedListener = new SystemOutGlobalParameterChangedListener();
 
-	OrBooleanGlobalParameter multiplicativeDoubleGlobalParameter = new OrBooleanGlobalParameter("testMulti",
-		"multiplicative parameter", new BooleanGlobalParameter[]{booleanGlobalParameterA, booleanGlobalParameterB}, systemOutGlobalParameterChangedListener);
-	
-	try
-	{
-	    multiplicativeDoubleGlobalParameter.set(false);
-	    fail();
-	}
-	catch (Exception e)
-	{
-	}
-    }
+      boolean valueA = true;
+      boolean valueB = false;
 
-    @Test
-    public void testAndBooleanGlobalParameter()
-    {
-	SystemOutGlobalParameterChangedListener systemOutGlobalParameterChangedListener = new SystemOutGlobalParameterChangedListener();
+      BooleanGlobalParameter booleanGlobalParameterA = new BooleanGlobalParameter("testParameterA", "test description", valueA,
+                                                          systemOutGlobalParameterChangedListener);
+      BooleanGlobalParameter booleanGlobalParameterB = new BooleanGlobalParameter("testParameterB", "test description", valueB,
+                                                          systemOutGlobalParameterChangedListener);
 
-	boolean valueA = true;
-	boolean valueB = false;
-	
-	BooleanGlobalParameter booleanGlobalParameterA = new BooleanGlobalParameter("testParameterA", "test description", valueA, systemOutGlobalParameterChangedListener);
-	BooleanGlobalParameter booleanGlobalParameterB = new BooleanGlobalParameter("testParameterB", "test description", valueB, systemOutGlobalParameterChangedListener);
+      OrBooleanGlobalParameter multiplicativeDoubleGlobalParameter = new OrBooleanGlobalParameter("testMulti", "multiplicative parameter",
+                                                                        new BooleanGlobalParameter[] {booleanGlobalParameterA,
+              booleanGlobalParameterB}, systemOutGlobalParameterChangedListener);
 
-	OrBooleanGlobalParameter multiplicativeDoubleGlobalParameter = new OrBooleanGlobalParameter("testMulti",
-		"multiplicative parameter", new BooleanGlobalParameter[]{booleanGlobalParameterA, booleanGlobalParameterB}, systemOutGlobalParameterChangedListener);
-	
-	
-	assertEquals(valueA || valueB, multiplicativeDoubleGlobalParameter.getValue());
-    }
-    
-    
-    @Test
-    public void testAndBooleanGlobalParameterUpdate()
-    {
-	SystemOutGlobalParameterChangedListener systemOutGlobalParameterChangedListener = new SystemOutGlobalParameterChangedListener();
+      try
+      {
+         multiplicativeDoubleGlobalParameter.set(false);
+         fail();
+      }
+      catch (Exception e)
+      {
+      }
+   }
 
-	
-	boolean valueA = true;
-	boolean valueB = false;
-	
-	BooleanGlobalParameter booleanGlobalParameterA = new BooleanGlobalParameter("testParameterA", "test description", valueA, systemOutGlobalParameterChangedListener);
-	BooleanGlobalParameter booleanGlobalParameterB = new BooleanGlobalParameter("testParameterB", "test description", valueB, systemOutGlobalParameterChangedListener);
+   @Test
+   public void testAndBooleanGlobalParameter()
+   {
+      SystemOutGlobalParameterChangedListener systemOutGlobalParameterChangedListener = new SystemOutGlobalParameterChangedListener();
 
-	OrBooleanGlobalParameter multiplicativeDoubleGlobalParameter = new OrBooleanGlobalParameter("testMulti",
-		"multiplicative parameter", new BooleanGlobalParameter[]{booleanGlobalParameterA, booleanGlobalParameterB}, systemOutGlobalParameterChangedListener);
-	
-	
-	valueA = false;
-	booleanGlobalParameterA.set(valueA);	
-	assertEquals(valueA || valueB, multiplicativeDoubleGlobalParameter.getValue());
+      boolean valueA = true;
+      boolean valueB = false;
 
-	valueB = true;
-	booleanGlobalParameterB.set(valueB);
-	assertEquals(valueA || valueB, multiplicativeDoubleGlobalParameter.getValue());
+      BooleanGlobalParameter booleanGlobalParameterA = new BooleanGlobalParameter("testParameterA", "test description", valueA,
+                                                          systemOutGlobalParameterChangedListener);
+      BooleanGlobalParameter booleanGlobalParameterB = new BooleanGlobalParameter("testParameterB", "test description", valueB,
+                                                          systemOutGlobalParameterChangedListener);
 
-	valueA = true;
-	valueB = true;
-	booleanGlobalParameterA.set(valueA);
-	booleanGlobalParameterB.set(valueB);
-	assertEquals(valueA || valueB, multiplicativeDoubleGlobalParameter.getValue());
-    }
-    
-    @Test
-    public void testFamilyTree()
-    {
-//	SystemOutGlobalParameterChangedListener systemOutGlobalParameterChangedListener = new SystemOutGlobalParameterChangedListener();
-	SystemOutGlobalParameterChangedListener systemOutGlobalParameterChangedListener = null; //new SystemOutGlobalParameterChangedListener();
+      OrBooleanGlobalParameter multiplicativeDoubleGlobalParameter = new OrBooleanGlobalParameter("testMulti", "multiplicative parameter",
+                                                                        new BooleanGlobalParameter[] {booleanGlobalParameterA,
+              booleanGlobalParameterB}, systemOutGlobalParameterChangedListener);
 
 
-	boolean valueA = false;
-	boolean valueB = true;
+      assertEquals(valueA || valueB, multiplicativeDoubleGlobalParameter.getValue());
+   }
 
-	BooleanGlobalParameter grandParentA = new BooleanGlobalParameter("grandParentA", "test descriptionA", valueA, systemOutGlobalParameterChangedListener);
-	BooleanGlobalParameter grandParentB = new BooleanGlobalParameter("grandParentB", "test descriptionB", valueB, systemOutGlobalParameterChangedListener);
 
-	OrBooleanGlobalParameter parentA = new OrBooleanGlobalParameter("parentA",
-		"multiplicative parameter", new BooleanGlobalParameter[]{grandParentA}, systemOutGlobalParameterChangedListener);
-	
-	OrBooleanGlobalParameter parentB = new OrBooleanGlobalParameter("parentB",
-		"multiplicative parameter", new BooleanGlobalParameter[]{grandParentB}, systemOutGlobalParameterChangedListener);
-	
-	OrBooleanGlobalParameter childA = new OrBooleanGlobalParameter("childA",
-		"multiplicative parameter", new BooleanGlobalParameter[]{grandParentA, parentA}, systemOutGlobalParameterChangedListener);
-	
-	OrBooleanGlobalParameter childB = new OrBooleanGlobalParameter("childB",
-		"multiplicative parameter", new BooleanGlobalParameter[]{grandParentA, grandParentB, parentA, parentB}, systemOutGlobalParameterChangedListener);
-	
-	
-	boolean expectedParentA = valueA;
-	assertEquals(expectedParentA, parentA.getValue());
-	
-	boolean expectedParentB = valueB;
-	assertEquals(expectedParentB, parentB.getValue());
-	
-	boolean expectedChildA = valueA || valueA;
-	assertEquals(expectedChildA, childA.getValue());
+   @Test
+   public void testAndBooleanGlobalParameterUpdate()
+   {
+      SystemOutGlobalParameterChangedListener systemOutGlobalParameterChangedListener = new SystemOutGlobalParameterChangedListener();
 
-	boolean expectedChildB = valueA || valueB || valueA || valueB;
-	assertEquals(expectedChildB, childB.getValue());
 
-	valueA = !valueA;
-	grandParentA.set(valueA);
-	expectedParentA = valueA;
-	assertEquals(expectedParentA, parentA.getValue());
-	
-	expectedParentB = valueB;
-	assertEquals(expectedParentB, parentB.getValue());
-	
-	expectedChildA = valueA || valueA;
-	assertEquals(expectedChildA, childA.getValue());
+      boolean valueA = true;
+      boolean valueB = false;
 
-	expectedChildB = valueA || valueB || valueA || valueB;
-	assertEquals(expectedChildB, childB.getValue());
-	
-	valueA = !valueA;
-	valueB = !valueB;
-	grandParentA.set(valueA);
-	grandParentB.set(valueB);
-	
-	expectedParentA = valueA;
-	assertEquals(expectedParentA, parentA.getValue());
-	
-	expectedParentB = valueB;
-	assertEquals(expectedParentB, parentB.getValue());
-	
-	expectedChildA = valueA || valueA;
-	assertEquals(expectedChildA, childA.getValue());
+      BooleanGlobalParameter booleanGlobalParameterA = new BooleanGlobalParameter("testParameterA", "test description", valueA,
+                                                          systemOutGlobalParameterChangedListener);
+      BooleanGlobalParameter booleanGlobalParameterB = new BooleanGlobalParameter("testParameterB", "test description", valueB,
+                                                          systemOutGlobalParameterChangedListener);
 
-	expectedChildB = valueA || valueB || valueA || valueB;
-	assertEquals(expectedChildB, childB.getValue());
-    }
+      OrBooleanGlobalParameter multiplicativeDoubleGlobalParameter = new OrBooleanGlobalParameter("testMulti", "multiplicative parameter",
+                                                                        new BooleanGlobalParameter[] {booleanGlobalParameterA,
+              booleanGlobalParameterB}, systemOutGlobalParameterChangedListener);
+
+
+      valueA = false;
+      booleanGlobalParameterA.set(valueA);
+      assertEquals(valueA || valueB, multiplicativeDoubleGlobalParameter.getValue());
+
+      valueB = true;
+      booleanGlobalParameterB.set(valueB);
+      assertEquals(valueA || valueB, multiplicativeDoubleGlobalParameter.getValue());
+
+      valueA = true;
+      valueB = true;
+      booleanGlobalParameterA.set(valueA);
+      booleanGlobalParameterB.set(valueB);
+      assertEquals(valueA || valueB, multiplicativeDoubleGlobalParameter.getValue());
+   }
+
+   @Test
+   public void testFamilyTree()
+   {
+//    SystemOutGlobalParameterChangedListener systemOutGlobalParameterChangedListener = new SystemOutGlobalParameterChangedListener();
+      SystemOutGlobalParameterChangedListener systemOutGlobalParameterChangedListener = null;    // new SystemOutGlobalParameterChangedListener();
+
+
+      boolean valueA = false;
+      boolean valueB = true;
+
+      BooleanGlobalParameter grandParentA = new BooleanGlobalParameter("grandParentA", "test descriptionA", valueA, systemOutGlobalParameterChangedListener);
+      BooleanGlobalParameter grandParentB = new BooleanGlobalParameter("grandParentB", "test descriptionB", valueB, systemOutGlobalParameterChangedListener);
+
+      OrBooleanGlobalParameter parentA = new OrBooleanGlobalParameter("parentA", "multiplicative parameter", new BooleanGlobalParameter[] {grandParentA},
+                                            systemOutGlobalParameterChangedListener);
+
+      OrBooleanGlobalParameter parentB = new OrBooleanGlobalParameter("parentB", "multiplicative parameter", new BooleanGlobalParameter[] {grandParentB},
+                                            systemOutGlobalParameterChangedListener);
+
+      OrBooleanGlobalParameter childA = new OrBooleanGlobalParameter("childA", "multiplicative parameter",
+                                           new BooleanGlobalParameter[] {grandParentA, parentA}, systemOutGlobalParameterChangedListener);
+
+      OrBooleanGlobalParameter childB = new OrBooleanGlobalParameter("childB", "multiplicative parameter", new BooleanGlobalParameter[] {grandParentA,
+              grandParentB, parentA, parentB}, systemOutGlobalParameterChangedListener);
+
+
+      boolean expectedParentA = valueA;
+      assertEquals(expectedParentA, parentA.getValue());
+
+      boolean expectedParentB = valueB;
+      assertEquals(expectedParentB, parentB.getValue());
+
+      boolean expectedChildA = valueA || valueA;
+      assertEquals(expectedChildA, childA.getValue());
+
+      boolean expectedChildB = valueA || valueB || valueA || valueB;
+      assertEquals(expectedChildB, childB.getValue());
+
+      valueA = !valueA;
+      grandParentA.set(valueA);
+      expectedParentA = valueA;
+      assertEquals(expectedParentA, parentA.getValue());
+
+      expectedParentB = valueB;
+      assertEquals(expectedParentB, parentB.getValue());
+
+      expectedChildA = valueA || valueA;
+      assertEquals(expectedChildA, childA.getValue());
+
+      expectedChildB = valueA || valueB || valueA || valueB;
+      assertEquals(expectedChildB, childB.getValue());
+
+      valueA = !valueA;
+      valueB = !valueB;
+      grandParentA.set(valueA);
+      grandParentB.set(valueB);
+
+      expectedParentA = valueA;
+      assertEquals(expectedParentA, parentA.getValue());
+
+      expectedParentB = valueB;
+      assertEquals(expectedParentB, parentB.getValue());
+
+      expectedChildA = valueA || valueA;
+      assertEquals(expectedChildA, childA.getValue());
+
+      expectedChildB = valueA || valueB || valueA || valueB;
+      assertEquals(expectedChildB, childB.getValue());
+   }
 
 
 
 }
-

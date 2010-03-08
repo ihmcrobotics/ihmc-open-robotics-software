@@ -1,9 +1,12 @@
 package us.ihmc.plotting;
 
 import java.awt.*;
+
 import java.applet.Applet;
+
 import javax.swing.JPanel;
 import javax.swing.JFrame;
+
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.MouseEvent;
@@ -12,7 +15,9 @@ import java.awt.event.MouseMotionListener;
 
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+
 import java.util.ArrayList;
+
 import javax.vecmath.Point2d;
 
 /**
@@ -24,7 +29,7 @@ import javax.vecmath.Point2d;
 public class PointAndLinePlotter extends JPanel
 {
    private int DEFAULT_OVAL_SIZE = 4;
-   private ArrayList<Point2d[]> listOfPoints = new ArrayList<Point2d[]>(); //points to be interpolated
+   private ArrayList<Point2d[]> listOfPoints = new ArrayList<Point2d[]>();    // points to be interpolated
    private ArrayList<Color> listOfColors = new ArrayList<Color>();
    private ArrayList<Integer> listOfOvalSizes = new ArrayList<Integer>();
    private int width = 1000;
@@ -38,7 +43,6 @@ public class PointAndLinePlotter extends JPanel
 
    public PointAndLinePlotter()
    {
-
    }
 
    public PointAndLinePlotter(Point2d[] points, int ovalSize)
@@ -56,32 +60,32 @@ public class PointAndLinePlotter extends JPanel
    }
 
    public PointAndLinePlotter(double[] points, int ovalSize)
-  {
-     Point2d[] arrayOfPoints = new Point2d[points.length];
+   {
+      Point2d[] arrayOfPoints = new Point2d[points.length];
 
-     double numberOfPoints = points.length;
+      double numberOfPoints = points.length;
 
-     for(int i=0; i<points.length; i++)
-     {
-        arrayOfPoints[i] = new Point2d();
-        arrayOfPoints[i].y = points[i];
-        arrayOfPoints[i].x = (double) (i + 1.0)/numberOfPoints;
-     }
+      for (int i = 0; i < points.length; i++)
+      {
+         arrayOfPoints[i] = new Point2d();
+         arrayOfPoints[i].y = points[i];
+         arrayOfPoints[i].x = (double) (i + 1.0) / numberOfPoints;
+      }
 
-     init(arrayOfPoints, ovalSize, Color.BLACK);
-  }
+      init(arrayOfPoints, ovalSize, Color.BLACK);
+   }
 
-  public void setAxisSquare(boolean squareAxes)
-  {
-     this.squareAxes = squareAxes;
-  }
+   public void setAxisSquare(boolean squareAxes)
+   {
+      this.squareAxes = squareAxes;
+   }
 
 
    private void init(Point2d[] points, int ovalSize, Color color)
    {
       Point2d[] pointList = getArrayCopy(points);
       listOfPoints.add(pointList);
-      this.setPreferredSize(new Dimension( (int) (width), (int) (height)));
+      this.setPreferredSize(new Dimension((int) (width), (int) (height)));
 
       JPanel panel = new JPanel();
       GridBagConstraints gbc = new GridBagConstraints();
@@ -108,7 +112,7 @@ public class PointAndLinePlotter extends JPanel
       f.pack();
       f.setVisible(true);
 
-      //set the scale
+      // set the scale
       xMin = Double.POSITIVE_INFINITY;
       xMax = Double.NEGATIVE_INFINITY;
 
@@ -125,7 +129,7 @@ public class PointAndLinePlotter extends JPanel
    {
       Point2d[] ret = new Point2d[array.length];
 
-      for(int i= 0; i< ret.length; i++)
+      for (int i = 0; i < ret.length; i++)
       {
          ret[i] = array[i];
       }
@@ -135,7 +139,7 @@ public class PointAndLinePlotter extends JPanel
 
    private void calcuateScaleAndWindowSize()
    {
-      for(Point2d[] array : listOfPoints)
+      for (Point2d[] array : listOfPoints)
       {
          for (int i = 0; i < array.length; i++)
          {
@@ -166,9 +170,9 @@ public class PointAndLinePlotter extends JPanel
 
    public void addPoints(Point2d[] newPoints, Color color, int ovalSize)
    {
-     Point2d[] newPointsCopy = getArrayCopy(newPoints);
+      Point2d[] newPointsCopy = getArrayCopy(newPoints);
 
-     if (!initialized)
+      if (!initialized)
          init(newPoints, ovalSize, color);
       else
       {
@@ -197,15 +201,14 @@ public class PointAndLinePlotter extends JPanel
 
    public void addPoint(Point2d newPoint, Color color, int ovalSize)
    {
-       ArrayList<Point2d> newPoints = new ArrayList<Point2d>();
-       newPoints.add(newPoint);
+      ArrayList<Point2d> newPoints = new ArrayList<Point2d>();
+      newPoints.add(newPoint);
 
-       addPoints(newPoints, color, ovalSize);
+      addPoints(newPoints, color, ovalSize);
    }
 
    public void addPoints(ArrayList<Point2d> newPoints, Color color, int ovalSize)
    {
-
       Point2d[] newPointsCopy = new Point2d[newPoints.size()];
       newPoints.toArray(newPointsCopy);
 
@@ -214,7 +217,6 @@ public class PointAndLinePlotter extends JPanel
 
    public void addPointsWithoutRepaint(ArrayList<Point2d> newPoints, Color color, int ovalSize)
    {
-
       Point2d[] newPointsCopy = new Point2d[newPoints.size()];
       newPoints.toArray(newPointsCopy);
 
@@ -222,32 +224,31 @@ public class PointAndLinePlotter extends JPanel
    }
 
 
-//   public Color getLegColor(LegName legName)
-//   {
-//      switch (legName)
-//      {
-//         case FRONT_LEFT:
-//         {
-//            return Color.YELLOW;
-//         }
-//         case FRONT_RIGHT:
-//         {
-//            return Color.ORANGE;
-//         }
-//         case HIND_RIGHT:
-//         {
-//            return Color.BLUE;
-//         }
-//         case HIND_LEFT:
-//         {
-//            return Color.BLACK;
-//         }
-//      }
+// public Color getLegColor(LegName legName)
+// {
+//    switch (legName)
+//    {
+//       case FRONT_LEFT:
+//       {
+//          return Color.YELLOW;
+//       }
+//       case FRONT_RIGHT:
+//       {
+//          return Color.ORANGE;
+//       }
+//       case HIND_RIGHT:
+//       {
+//          return Color.BLUE;
+//       }
+//       case HIND_LEFT:
+//       {
+//          return Color.BLACK;
+//       }
+//    }
 //
-//      return Color.MAGENTA;
-//   }
+//    return Color.MAGENTA;
+// }
 //
-
 
 
 
@@ -257,13 +258,13 @@ public class PointAndLinePlotter extends JPanel
       calcuateScaleAndWindowSize();
 
 
-      //Clear screen and set colors
+      // Clear screen and set colors
       setBackground(Color.white);
       g.setColor(Color.white);
       g.fillRect(0, 0, width, height);
 
 
-      for(int j=0; j< listOfPoints.size(); j++)
+      for (int j = 0; j < listOfPoints.size(); j++)
       {
          g.setColor(listOfColors.get(j));
 
@@ -280,19 +281,18 @@ public class PointAndLinePlotter extends JPanel
       }
 
 
-      //Plot points
+      // Plot points
 
    }
 
    private Point getPlotXY(Point2d point)
    {
       Point ret = new Point();
-      ret.x = (int) ( (point.x - xMin) * xScale);
-      ret.y = (int) ( (point.y - yMin) * yScale);
+      ret.x = (int) ((point.x - xMin) * xScale);
+      ret.y = (int) ((point.y - yMin) * yScale);
 
       ret.y = (int) (0.75 * height) - ret.y;
 
       return ret;
    }
 }
-
