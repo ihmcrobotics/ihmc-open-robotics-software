@@ -16,5 +16,5 @@ import java.util.ArrayList;
  */
 public interface ArtifactsChangedListener
 {
-    public void artifactsChanged(ArrayList<Artifact> newArtifacts);
+   public void artifactsChanged(ArrayList<Artifact> newArtifacts);
 }

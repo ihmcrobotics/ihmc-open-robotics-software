@@ -35,11 +35,11 @@ public class TestBodePlotConstructor extends TestCase
 
    public void DONTtestSimpleFilter()
    {
-      //        int n = 1000;
+      // int n = 1000;
       double T = 5.0;
-      double DT = 0.0025; //T/((int) n);
+      double DT = 0.0025;    // T/((int) n);
 
-      int n = ( (int) (T / DT));
+      int n = ((int) (T / DT));
 
       double[] time = generateLinearSpace(n, 0.0, DT);
 
@@ -50,7 +50,9 @@ public class TestBodePlotConstructor extends TestCase
       double[] output = filter(filter(filter(input)));
 
       double[][] timeAndInputAndOutput = new double[][]
-          {time, input, output};
+      {
+         time, input, output
+      };
       plotTimeInputOutputBode(timeAndInputAndOutput);
 
       HumanAssistedTestFrame humanAssistedTestFrame = new HumanAssistedTestFrame("HumanAssistedTestFrame");
@@ -60,23 +62,25 @@ public class TestBodePlotConstructor extends TestCase
 
    public void DONTtestSingleFreqPhaseShift()
    {
-      //        int n = 1000;
+      // int n = 1000;
       double T = 5.0;
-      double DT = 0.0025; //T/((int) n);
+      double DT = 0.0025;    // T/((int) n);
 
-      int n = ( (int) (T / DT));
+      int n = ((int) (T / DT));
 
       double[] time = generateLinearSpace(n, 0.0, DT);
 
       double freqHz = 10.0;
       double amplitude = 1.0;
-      double phaseShiftDegrees = 90.0; //1.0;
+      double phaseShiftDegrees = 90.0;    // 1.0;
 
       double[] input = generateSineWave(time, amplitude, freqHz, 0.0);
       double[] output = generateSineWave(time, amplitude, freqHz, phaseShiftDegrees);
 
       double[][] timeAndInputAndOutput = new double[][]
-          {time, input, output};
+      {
+         time, input, output
+      };
       plotTimeInputOutputBode(timeAndInputAndOutput);
 
       HumanAssistedTestFrame humanAssistedTestFrame = new HumanAssistedTestFrame("HumanAssistedTestFrame");
@@ -87,8 +91,8 @@ public class TestBodePlotConstructor extends TestCase
    public void testSecondOrderResponse()
    {
       double T = 5.0;
-      double DT = 0.0025; //T/((int) n);
-      int n = ( (int) (T / DT));
+      double DT = 0.0025;    // T/((int) n);
+      int n = ((int) (T / DT));
 
       double[] time = generateLinearSpace(n, 0.0, DT);
       double freqHz = 10.0;
@@ -101,7 +105,9 @@ public class TestBodePlotConstructor extends TestCase
       double[] output = produceSecondOrderResponse(wn, zeta, input, DT);
 
       double[][] timeAndInputAndOutput = new double[][]
-          {time, input, output};
+      {
+         time, input, output
+      };
       plotTimeInputOutputBode(timeAndInputAndOutput);
 
       deriveSecondOrderResponseUsingTransferFunctions(wn, zeta);
@@ -114,17 +120,15 @@ public class TestBodePlotConstructor extends TestCase
    private static void deriveSecondOrderResponseUsingTransferFunctions(double wn, double zeta)
    {
       // Derive the second order response using a transfer function:
-      double[] numerator = new double[]
-          {wn * wn};
-      double[] denominator = new double[]
-          {1.0, 2.0 * zeta * wn, wn * wn};
+      double[] numerator = new double[] {wn * wn};
+      double[] denominator = new double[] {1.0, 2.0 * zeta * wn, wn * wn};
       TransferFunction secondOrderTransferFunction = new TransferFunction(numerator, denominator);
 
       int numFreqs = 10000;
       double w0 = 0.2;
       double wIncrement = 0.2;
 
-      int wnIndex = (int) ( (wn - w0) / wIncrement);
+      int wnIndex = (int) ((wn - w0) / wIncrement);
 
       double[] ws = generateLinearSpace(numFreqs, w0, wIncrement);
       double[] magnitudes = secondOrderTransferFunction.getMagnitude(ws);
@@ -162,7 +166,8 @@ public class TestBodePlotConstructor extends TestCase
       for (int i = 0; i < time.length; i++)
       {
          ret[i] = amplitude * Math.sin(2.0 * Math.PI * freqHz * time[i] + phaseDegrees * Math.PI / 180.0);
-//            input[i] = amplitude * Math.cos(2.0 * Math.PI * freq * time[i] + phase) + amplitude/10.0 * Math.cos(2.0 * Math.PI * 10.0 * freq * time[i] + phase);
+
+//       input[i] = amplitude * Math.cos(2.0 * Math.PI * freq * time[i] + phase) + amplitude/10.0 * Math.cos(2.0 * Math.PI * 10.0 * freq * time[i] + phase);
       }
 
       return ret;
@@ -173,7 +178,7 @@ public class TestBodePlotConstructor extends TestCase
       double[] ret = new double[numPoints];
       for (int i = 0; i < numPoints; i++)
       {
-         ret[i] = x0 + xIncrement * ( (double) i);
+         ret[i] = x0 + xIncrement * ((double) i);
       }
 
       return ret;
@@ -184,7 +189,7 @@ public class TestBodePlotConstructor extends TestCase
       int n = input.length;
       double[] output = new double[n];
 
-      double alpha = 0.5; //0.9; // 0.99; //0.2; //0.5; //0.95;
+      double alpha = 0.5;    // 0.9; // 0.99; //0.2; //0.5; //0.95;
       double previousOutput = 0.0;
 
       for (int i = 0; i < n; i++)
@@ -230,12 +235,12 @@ public class TestBodePlotConstructor extends TestCase
       BodePlotConstructor.plotBodeFromInputToOutput("input", "output", time, input, output);
    }
 
-//public static void main(String[] args)
-//{
-////      testSingleFreqPhaseShift();
-////      testSimpleFilter();
-//  testSecondOrderResponse();
-//}
+// public static void main(String[] args)
+// {
+// //      testSingleFreqPhaseShift();
+// //      testSimpleFilter();
+//   testSecondOrderResponse();
+// }
 
 
 }
