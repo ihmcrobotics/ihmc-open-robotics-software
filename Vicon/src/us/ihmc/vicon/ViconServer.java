@@ -20,6 +20,7 @@ public class ViconServer extends ViconJavaInterface
       ViconGetFrame();
       int numBodies = ViconGetNumBodies();
       System.out.println("available models:");
+
       for (int i = 0; i < numBodies; i++)
       {
          String name = ViconGetBodyName(i);
@@ -56,22 +57,21 @@ public class ViconServer extends ViconJavaInterface
          String host = null;
          if (myNetworkInterface != null)
          {
-            for (Enumeration<InetAddress> myAddresses = myNetworkInterface.getInetAddresses();
-                 myAddresses.hasMoreElements() && !foundHost; )
+            for (Enumeration<InetAddress> myAddresses = myNetworkInterface.getInetAddresses(); myAddresses.hasMoreElements() &&!foundHost; )
             {
                InetAddress currentInetAddress = myAddresses.nextElement();
 
                if (currentInetAddress instanceof Inet4Address)
                {
-                  host = ( (Inet4Address) currentInetAddress).getHostAddress();
+                  host = ((Inet4Address) currentInetAddress).getHostAddress();
                   foundHost = true;
 
                   if (DEBUG)
-                     System.out.println("Found address for " + interfaceName + ": " +
-                                        currentInetAddress.getHostAddress());
+                     System.out.println("Found address for " + interfaceName + ": " + currentInetAddress.getHostAddress());
                }
             }
          }
+
          init(host, iPort);
       }
       catch (SocketException ex)
@@ -106,7 +106,7 @@ public class ViconServer extends ViconJavaInterface
       // Try to create server socket
       try
       {
-         serverSocket = new ServerSocket(iPort); // TODO: use hostInet4Address
+         serverSocket = new ServerSocket(iPort);    // TODO: use hostInet4Address
       }
       catch (IOException xcp)
       {
@@ -116,6 +116,7 @@ public class ViconServer extends ViconJavaInterface
          xcp.printStackTrace();
          serverSocket = null;
          port = -1;
+
          return;
       }
 
@@ -128,8 +129,7 @@ public class ViconServer extends ViconJavaInterface
       svrThrd.start();
 
       if (DEBUG)
-         System.out.println(".init: comm server started listening on:\n" + "\thost = " + this.host + "\n\tport = " +
-                            port);
+         System.out.println(".init: comm server started listening on:\n" + "\thost = " + this.host + "\n\tport = " + port);
    }
 
    /**
@@ -172,7 +172,7 @@ public class ViconServer extends ViconJavaInterface
    {
       public void run()
       {
-         while (serverSocket != null && !serverSocket.isClosed())
+         while ((serverSocket != null) &&!serverSocket.isClosed())
          {
             try
             {
@@ -184,8 +184,7 @@ public class ViconServer extends ViconJavaInterface
 
                // Create a handler for new clients
                if (DEBUG)
-                  System.out.println(".ServerThread_" + port + ": Got a connection handling on Port: " +
-                                     clientSocket.getPort());
+                  System.out.println(".ServerThread_" + port + ": Got a connection handling on Port: " + clientSocket.getPort());
 
                ClientHandler ch = new ClientHandler(clientSocket);
 
@@ -208,6 +207,7 @@ public class ViconServer extends ViconJavaInterface
       }
    }
 
+
    // -------- Client Thread
    public class ClientHandler implements Runnable
    {
@@ -222,7 +222,7 @@ public class ViconServer extends ViconJavaInterface
       /**
        * ClientHandler sets the socket
        *
-       * @param	the socket for the client handler to read from
+       * @param the socket for the client handler to read from
        */
       public ClientHandler(Socket clientSocket)
       {
@@ -240,6 +240,7 @@ public class ViconServer extends ViconJavaInterface
             _disconnected = true;
             if (DEBUG)
                System.out.println("client socket is null");
+
             return;
          }
 
@@ -263,7 +264,6 @@ public class ViconServer extends ViconJavaInterface
       {
          try
          {
-
             dataInputStream = new DataInputStream(new BufferedInputStream(clientSocket.getInputStream()));
             dataOutputStream = new DataOutputStream(new BufferedOutputStream(clientSocket.getOutputStream()));
          }
@@ -272,6 +272,7 @@ public class ViconServer extends ViconJavaInterface
             dataInputStream = null;
             _disconnected = true;
             xcp.printStackTrace();
+
             return;
          }
 
@@ -279,15 +280,17 @@ public class ViconServer extends ViconJavaInterface
          {
             try
             {
-//               long start = System.currentTimeMillis();
+//             long start = System.currentTimeMillis();
                byte unnecessaryValue = dataInputStream.readByte();
-//               long read = 0, invoke = 0, reply = 0;
-//               read = System.currentTimeMillis() - start;
+
+//             long read = 0, invoke = 0, reply = 0;
+//             read = System.currentTimeMillis() - start;
 
                try
                {
                   Pose pose = getPose("biped:biped");
-//                  invoke = System.currentTimeMillis() - (start + read);
+
+//                invoke = System.currentTimeMillis() - (start + read);
 
                   if (DEBUG)
                      System.out.println(".ClientHandler: returning " + pose);
@@ -301,7 +304,8 @@ public class ViconServer extends ViconJavaInterface
                   dataOutputStream.writeFloat(pose.zAxisRotation);
 
                   dataOutputStream.flush();
-//                  reply = System.currentTimeMillis() - (start + read + invoke);
+
+//                reply = System.currentTimeMillis() - (start + read + invoke);
 
                }
                catch (Exception ex)
@@ -309,8 +313,8 @@ public class ViconServer extends ViconJavaInterface
                   ex.printStackTrace();
                }
 
-//               System.out.println("read=" + read + "    invoke=" + invoke + "   reply=" + reply + "    objectName=" +
-//                                  objectName + "    pose=" + pose);
+//             System.out.println("read=" + read + "    invoke=" + invoke + "   reply=" + reply + "    objectName=" +
+//                                objectName + "    pose=" + pose);
             }
             catch (IOException xcp)
             {
@@ -333,17 +337,17 @@ public class ViconServer extends ViconJavaInterface
       /**
        * isConnected
        *
-       * @return	a boolean true = connected, false = NOT connected
+       * @return        a boolean true = connected, false = NOT connected
        */
       public boolean isConnected()
       {
-         return!_disconnected;
+         return !_disconnected;
       }
 
       /**
        * getHost
        *
-       * @return	host name
+       * @return        host name
        */
       public String getHost()
       {
@@ -353,13 +357,14 @@ public class ViconServer extends ViconJavaInterface
       /**
        * getPort
        *
-       * @return	port number
+       * @return        port number
        */
       public int getPort()
       {
          return clientPort;
       }
    }
+
 
    public static void main(String[] args)
    {
