@@ -1,7 +1,6 @@
 package us.ihmc.IMUKalmanFilter;
 
 import com.mathworks.jama.Matrix;
-
 import com.yobotics.simulationconstructionset.YoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
@@ -25,25 +24,23 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
    private final YoVariable k_qs, k_qxyz;
 
    // State Variables:
-// public final double[][] Quat = new double[4][1]; // Estimated orientation in quaternions.
-// public final double[][] bias = new double[3][1]; // Rate gyro bias offset estimates. The Kalman filter adapts to these.
+//   public final double[][] Quat = new double[4][1]; // Estimated orientation in quaternions.
+//   public final double[][] bias = new double[3][1]; // Rate gyro bias offset estimates. The Kalman filter adapts to these.
 
-   public final YoVariable[] Quat = new YoVariable[4];    // Estimated orientation in quaternions.
-   public final YoVariable[] bias = new YoVariable[3];    // Rate gyro bias offset estimates. The Kalman filter adapts to these.
+   public final YoVariable[] Quat = new YoVariable[4]; // Estimated orientation in quaternions.
+   public final YoVariable[] bias = new YoVariable[3]; // Rate gyro bias offset estimates. The Kalman filter adapts to these.
 
    /*
     * Covariance matrix and covariance matrix derivative are updated
     * every other state step.  This is because the covariance should change
     * at a rate somewhat slower than the dynamics of the system.
     */
+//   public final double[][] P = new double[N][N]; // Covariance matrix
 
-// public final double[][] P = new double[N][N]; // Covariance matrix
-
-   public final YoVariable[][] P = new YoVariable[N][N];    // Covariance matrix
+   public final YoVariable[][] P = new YoVariable[N][N]; // Covariance matrix
    public final YoVariable[][] KCopy = new YoVariable[N][4];
 
    private double[][] Pdot = new double[N][N];
-
    /*
     * A represents the Jacobian of the derivative of the system with respect
     * its states.  We do not allocate the bottom three rows since we know that
@@ -51,7 +48,6 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
     */
    private final double[][] A = new double[N][N];
    private final double[][] At = new double[N][N];
-
    /*
     * Q is our estimate noise variance.  It is supposed to be an NxN
     * matrix, but with elements only on the diagonals.  Additionally,
@@ -59,8 +55,7 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
     * it), those are zero.  For the gyro, we expect around 5 deg/sec noise,
     * which is 0.08 rad/sec.  The variance is then 0.08^2 ~= 0.0075.
     */
-   private final double[][] Q = new double[N][N];    // Noise estimate
-
+   private final double[][] Q = new double[N][N]; // Noise estimate
    /*
     * R is our measurement noise estimate.  Like Q, it is supposed to be
     * an NxN matrix with elements on the diagonals.  However, since we can
@@ -68,13 +63,13 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
     * We only have an expected noise in the pitch and roll accelerometers
     * and in the compass.
     */
-   private final double[][] R = new double[4][4];    // State estimate for angles
+   private final double[][] R = new double[4][4]; // State estimate for angles
 
    private final double[][] K = new double[N][4];
    private final double[][] Wxq = new double[4][4];
-   private final double[] quatError = new double[4];
+   private final double[]   quatError = new double[4];
 
-   private final double dt;    // = .001;
+   private final double dt; // = .001;
    private static final double PI = Math.PI;
 
    /*
@@ -89,18 +84,18 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
 
    // Temporary storage that does not store state between the updates:
 
-   private final double[] X = new double[N];    // Temporary storage of Quat and bias when doing the compuations.
+   private final double[] X = new double[N];  // Temporary storage of Quat and bias when doing the compuations.
 
    // Pool of scratch arrays used by various routines. They do not store state of the Kalman Filter.
    private final double[][] t1 = new double[4][N];
    private final double[][] t2 = new double[4][4];
    private final double[][] t3 = new double[N][4];
-   private final double[] t4 = new double[N];
+   private final double[]   t4 = new double[N];
    private final double[][] t5 = new double[N][N];
    private final double[][] t6 = new double[N][N];
    private final double[][] t7 = new double[N][N];
    private final double[][] t8 = new double[N][N];
-   private final double[] t9 = new double[4];
+   private final double[]   t9 = new double[4];
 
 
    private static final java.text.DecimalFormat fmt = new java.text.DecimalFormat();
@@ -126,17 +121,17 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
          bias[1] = new YoVariable("bias[1]", registry);
          bias[2] = new YoVariable("bias[2]", registry);
 
-         for (int i = 0; i < N; i++)
+         for (int i=0; i<N; i++)
          {
-            for (int j = 0; j < N; j++)
+            for (int j=0; j<N; j++)
             {
                P[i][j] = new YoVariable("P[" + i + "][" + j + "]", registry);
             }
          }
 
-         for (int i = 0; i < N; i++)
+         for (int i=0; i<N; i++)
          {
-            for (int j = 0; j < 4; j++)
+            for (int j=0; j<4; j++)
             {
                KCopy[i][j] = new YoVariable("K[" + i + "][" + j + "]", registry);
             }
@@ -154,9 +149,9 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
          bias[1] = new YoVariable("bias[1]", "", null);
          bias[2] = new YoVariable("bias[2]", "", null);
 
-         for (int i = 0; i < N; i++)
+         for(int i = 0; i < N; i++)
          {
-            for (int j = 0; j < N; j++)
+            for(int j = 0; j < N; j++)
             {
                P[i][j] = new YoVariable("P[" + i + "][" + j + "]", "", null);
             }
@@ -173,15 +168,11 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
    private static void setArray(double[][] a, double[][] d)
    {
       int m, n;
-      if ((m = a.length) == d.length && (n = a[0].length) == d[0].length)
+      if((m = a.length) == d.length && (n = a[0].length) == d[0].length)
       {
-         for (int i = 0; i < m; i++)
-         {
-            for (int j = 0; j < n; j++)
-            {
+         for(int i = 0; i < m; i++)
+            for(int j = 0; j < n; j++)
                a[i][j] = d[i][j];
-            }
-         }
       }
       else
          System.err.println("setArray: incompatible dimensions.");
@@ -190,12 +181,10 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
    private static void setArray(double[] a, double[] d)
    {
       int m;
-      if ((m = a.length) == d.length)
+      if((m = a.length) == d.length)
       {
-         for (int i = 0; i < m; i++)
-         {
-            a[i] = d[i];
-         }
+         for(int i = 0; i < m; i++)
+               a[i] = d[i];
       }
       else
          System.err.println("setArray: incompatible dimensions.");
@@ -205,12 +194,10 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
    private static void setArray(YoVariable[] a, double[] d)
    {
       int m;
-      if ((m = a.length) == d.length)
+      if((m = a.length) == d.length)
       {
-         for (int i = 0; i < m; i++)
-         {
-            a[i].val = d[i];
-         }
+         for(int i = 0; i < m; i++)
+               a[i].val = d[i];
       }
       else
          System.err.println("setArray: incompatible dimensions.");
@@ -222,15 +209,12 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
       double mag = 0;
       double s;
       int m = M.length, n = M[0].length;
-      for (int i = 0; i < m; i++)
-      {
-         for (int j = 0; j < n; j++)
+      for(int i = 0; i < m; i++)
+         for(int j = 0; j < n; j++)
          {
             s = M[i][j];
             mag += s * s;
          }
-      }
-
       Mmul(M, 1.0 / Math.sqrt(mag), M);
    }
 
@@ -239,7 +223,7 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
       double mag = 0;
       double s;
       int m = M.length;
-      for (int i = 0; i < m; i++)
+      for(int i = 0; i < m; i++)
       {
          s = M[i].val;
          mag += s * s;
@@ -253,42 +237,30 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
    {
       int m = a.length;
       int n = a[0].length;
-      if ((n != b.length) || (m != c.length) || (b[0].length != c[0].length))
+      if(n != b.length || m != c.length || b[0].length != c[0].length)
          System.err.println("Mmul: incompatible dimensions.");
-
-      for (int i = 0; i < m; i++)
-      {
-         for (int j = 0; j < b[0].length; j++)
+      for(int i = 0; i < m; i++)
+         for(int j = 0; j < b[0].length; j++)
          {
             c[i][j] = 0.0;
-
-            for (int k = 0; k < n; k++)
-            {
+            for(int k = 0; k < n; k++)
                c[i][j] += a[i][k] * b[k][j];
-            }
          }
-      }
    }
 
    private static void Mmul(YoVariable[][] a, double[][] b, double[][] c)
    {
       int m = a.length;
       int n = a[0].length;
-      if ((n != b.length) || (m != c.length) || (b[0].length != c[0].length))
+      if(n != b.length || m != c.length || b[0].length != c[0].length)
          System.err.println("Mmul: incompatible dimensions.");
-
-      for (int i = 0; i < m; i++)
-      {
-         for (int j = 0; j < b[0].length; j++)
+      for(int i = 0; i < m; i++)
+         for(int j = 0; j < b[0].length; j++)
          {
             c[i][j] = 0.0;
-
-            for (int k = 0; k < n; k++)
-            {
+            for(int k = 0; k < n; k++)
                c[i][j] += a[i][k].val * b[k][j];
-            }
          }
-      }
    }
 
 
@@ -296,41 +268,31 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
    {
       int m = a.length;
       int n = a[0].length;
-      if ((n != b.length) || (m != c.length) || (b[0].length != c[0].length))
+      if(n != b.length || m != c.length || b[0].length != c[0].length)
          System.err.println("Mmul: incompatible dimensions.");
-
-      for (int i = 0; i < m; i++)
-      {
-         for (int j = 0; j < b[0].length; j++)
+      for(int i = 0; i < m; i++)
+         for(int j = 0; j < b[0].length; j++)
          {
             c[i][j] = 0.0;
-
-            for (int k = 0; k < n; k++)
-            {
+            for(int k = 0; k < n; k++)
                c[i][j] += a[i][k] * b[k][j].val;
-            }
          }
-      }
    }
 
 
    private static void Mmul(double[][] a, double[] b, double[] c)
-   {
-      int m = a.length;
-      int n = a[0].length;
-      if ((n != b.length) || (m != c.length))
-         System.err.println("Mmul: incompatible dimensions.");
-
-      for (int i = 0; i < m; i++)
+{
+   int m = a.length;
+   int n = a[0].length;
+   if(n != b.length || m != c.length)
+      System.err.println("Mmul: incompatible dimensions.");
+   for(int i = 0; i < m; i++)
       {
          c[i] = 0.0;
-
-         for (int k = 0; k < n; k++)
-         {
+         for(int k = 0; k < n; k++)
             c[i] += a[i][k] * b[k];
-         }
       }
-   }
+}
 
 
 
@@ -338,337 +300,251 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
    {
       int m = a.length;
       int n = a[0].length;
-      if ((n != b.length) || (m != c.length) || (b[0].length != c[0].length))
+      if(n != b.length || m != c.length || b[0].length != c[0].length)
          System.err.println("MmulScalarMul: incompatible dimensions.");
-
-      for (int i = 0; i < m; i++)
-      {
-         for (int j = 0; j < b[0].length; j++)
+      for(int i = 0; i < m; i++)
+         for(int j = 0; j < b[0].length; j++)
          {
             c[i][j] = 0.0;
-
-            for (int k = 0; k < n; k++)
-            {
+            for(int k = 0; k < n; k++)
                c[i][j] += a[i][k] * b[k][j];
-            }
-
             c[i][j] *= s;
          }
-      }
    }
 
    private static void MmulScalarMul(double[][] a, YoVariable[] b, double[] c, double s)
    {
       int m = a.length;
       int n = a[0].length;
-      if ((n != b.length) || (m != c.length))
+      if(n != b.length || m != c.length)
          System.err.println("MmulScalarMul: incompatible dimensions.");
-
-      for (int i = 0; i < m; i++)
-      {
-         c[i] = 0.0;
-
-         for (int k = 0; k < n; k++)
+      for(int i = 0; i < m; i++)
          {
-            c[i] += a[i][k] * b[k].val;
+            c[i] = 0.0;
+            for(int k = 0; k < n; k++)
+            {
+               c[i] += a[i][k] * b[k].val;
+            }
+            c[i] *= s;
          }
-
-         c[i] *= s;
-      }
    }
 
 
    private static void Mmul(double[][] a, double b, double[][] c)
    {
-      if ((a.length != c.length) || (a[0].length != c[0].length))
+      if(a.length != c.length || a[0].length != c[0].length)
          System.err.println("Mul: incompatible dimensions.");
-
-      for (int i = 0; i < c.length; i++)
-      {
-         for (int j = 0; j < c[0].length; j++)
-         {
+      for(int i = 0; i < c.length; i++)
+         for(int j = 0; j < c[0].length; j++)
             c[i][j] = a[i][j] * b;
-         }
-      }
    }
 
    private static void Mmul(YoVariable[] a, double b, YoVariable[] c)
    {
-      if (a.length != c.length)
+      if(a.length != c.length)
          System.err.println("Mul: incompatible dimensions.");
-
-      for (int i = 0; i < c.length; i++)
-      {
-         c[i].val = a[i].val * b;
-      }
+      for(int i = 0; i < c.length; i++)
+            c[i].val = a[i].val * b;
    }
 
 
    private static void Mtranspose(double[][] a, double[][] b)
    {
-      if ((a.length != b[0].length) || (a[0].length != b.length))
+      if(a.length != b[0].length || a[0].length != b.length)
          System.err.println("Mtranpose: incompatible dimensions.");
-
-      for (int i = 0; i < a.length; i++)
-      {
-         for (int j = 0; j < a[0].length; j++)
-         {
+      for(int i = 0; i < a.length; i++)
+         for(int j = 0; j < a[0].length; j++)
             b[j][i] = a[i][j];
-         }
-      }
    }
 
    private static void Madd(double[][] a, double[][] b, double[][] c)
    {
-      if ((a.length != c.length) || (b[0].length != c[0].length))
+      if(a.length != c.length || b[0].length != c[0].length)
          System.err.println("Madd: incompatible dimensions.");
-
-      for (int i = 0; i < c.length; i++)
-      {
-         for (int j = 0; j < c[0].length; j++)
-         {
+      for(int i = 0; i < c.length; i++)
+         for(int j = 0; j < c[0].length; j++)
             c[i][j] = a[i][j] + b[i][j];
-         }
-      }
    }
 
    private static void Madd(YoVariable[][] a, double[][] b, YoVariable[][] c)
    {
-      if ((a.length != c.length) || (b[0].length != c[0].length))
+      if(a.length != c.length || b[0].length != c[0].length)
          System.err.println("Madd: incompatible dimensions.");
-
-      for (int i = 0; i < c.length; i++)
-      {
-         for (int j = 0; j < c[0].length; j++)
-         {
+      for(int i = 0; i < c.length; i++)
+         for(int j = 0; j < c[0].length; j++)
             c[i][j].val = a[i][j].val + b[i][j];
-         }
-      }
    }
 
 
-   private static void Madd(double[] a, double[] b, double[] c)
-   {
-      if (a.length != c.length)
+   private static void Madd(double[] a, double[] b, double[] c) {
+      if(a.length != c.length)
          System.err.println("Madd: incompatible dimensions.");
-
-      for (int i = 0; i < c.length; i++)
-      {
-         c[i] = a[i] + b[i];
-      }
+      for(int i = 0; i < c.length; i++)
+            c[i] = a[i] + b[i];
    }
 
 
    private static void Madd(YoVariable[] a, double[] b, YoVariable[] c)
    {
-      if (a.length != c.length)
+      if(a.length != c.length)
          System.err.println("Madd: incompatible dimensions.");
-
-      for (int i = 0; i < c.length; i++)
-      {
-         c[i].val = a[i].val + b[i];
-      }
+      for(int i = 0; i < c.length; i++)
+            c[i].val = a[i].val + b[i];
    }
 
 
    private static void Msub(double[][] a, double[][] b, double[][] c)
    {
-      if ((a.length != c.length) || (b[0].length != c[0].length))
+      if(a.length != c.length || b[0].length != c[0].length)
          System.err.println("Msub: incompatible dimensions.");
-
-      for (int i = 0; i < c.length; i++)
-      {
-         for (int j = 0; j < c[0].length; j++)
-         {
+      for(int i = 0; i < c.length; i++)
+         for(int j = 0; j < c[0].length; j++)
             c[i][j] = a[i][j] - b[i][j];
-         }
-      }
    }
 
    private static void Msub(YoVariable[][] a, double[][] b, YoVariable[][] c)
    {
-      if ((a.length != c.length) || (b[0].length != c[0].length))
+      if(a.length != c.length || b[0].length != c[0].length)
          System.err.println("Msub: incompatible dimensions.");
-
-      for (int i = 0; i < c.length; i++)
-      {
-         for (int j = 0; j < c[0].length; j++)
-         {
+      for(int i = 0; i < c.length; i++)
+         for(int j = 0; j < c[0].length; j++)
             c[i][j].val = a[i][j].val - b[i][j];
-         }
-      }
    }
 
 
    private static void Msub(double[][] a, YoVariable[][] b, double[][] c)
    {
-      if ((a.length != c.length) || (b[0].length != c[0].length))
+      if(a.length != c.length || b[0].length != c[0].length)
          System.err.println("Msub: incompatible dimensions.");
-
-      for (int i = 0; i < c.length; i++)
-      {
-         for (int j = 0; j < c[0].length; j++)
-         {
+      for(int i = 0; i < c.length; i++)
+         for(int j = 0; j < c[0].length; j++)
             c[i][j] = a[i][j] - b[i][j].val;
-         }
-      }
    }
 
    private static void Msub(double[] a, YoVariable[] b, double[] c)
    {
-      if (a.length != c.length)
+      if(a.length != c.length)
          System.err.println("Msub: incompatible dimensions.");
-
-      for (int i = 0; i < c.length; i++)
-      {
+      for(int i = 0; i < c.length; i++)
          c[i] = a[i] - b[i].val;
-      }
    }
 
 
 
    private static void Midentity(double[][] a)
    {
-      for (int i = 0; i < a.length; i++)
-      {
-         for (int j = 0; j < a[0].length; j++)
-         {
+      for(int i = 0; i < a.length; i++)
+         for(int j = 0; j < a[0].length; j++)
             a[i][j] = (i == j) ? 1.0 : 0.0;
-         }
-      }
    }
 
    private static void Midentity(YoVariable[][] a)
-   {
-      for (int i = 0; i < a.length; i++)
-      {
-         for (int j = 0; j < a[0].length; j++)
-         {
-            a[i][j].val = (i == j) ? 1.0 : 0.0;
-         }
-      }
-   }
+{
+   for(int i = 0; i < a.length; i++)
+      for(int j = 0; j < a[0].length; j++)
+         a[i][j].val = (i == j) ? 1.0 : 0.0;
+}
 
 
    private static double Mtrace(YoVariable[][] a)
    {
       double trace = 0.0;
-      for (int i = 0; i < a.length; i++)
-      {
-         for (int j = 0; j < a[0].length; j++)
-         {
+      for(int i = 0; i < a.length; i++)
+         for(int j = 0; j < a[0].length; j++)
             trace += (i == j) ? a[i][j].val : 0.0;
-         }
-      }
-
       return trace;
    }
 
    private static void zero(double[][] a)
    {
-      for (int i = 0; i < a.length; i++)
-      {
-         for (int j = 0; j < a[0].length; j++)
-         {
+      for(int i = 0; i < a.length; i++)
+         for(int j = 0; j < a[0].length; j++)
             a[i][j] = 0.0;
-         }
-      }
    }
 
    private static double mag(double[][] a)
    {
       double ret = 0.0;
-      for (int i = 0; i < a.length; i++)
-      {
-         for (int j = 0; j < a[0].length; j++)
-         {
+      for(int i = 0; i < a.length; i++)
+         for(int j = 0; j < a[0].length; j++)
             ret += a[i][j] * a[i][j];
-         }
-      }
-
       return Math.sqrt(ret);
    }
 
    private static double mag(double[] a)
-   {
-      double ret = 0.0;
-      for (int i = 0; i < a.length; i++)
-      {
-         ret += a[i] * a[i];
-      }
-
-      return Math.sqrt(ret);
-   }
+ {
+    double ret = 0.0;
+    for(int i = 0; i < a.length; i++)
+          ret += a[i] * a[i];
+    return Math.sqrt(ret);
+ }
 
 
 // 4x4 Matrix Inversion
 // http://www.cvl.iis.u-tokyo.ac.jp/~miyazaki/tech/teche23.html
    private static void Minverse(double[][] a, double[][] b)
    {
-      double det = a[0][0] * a[1][1] * a[2][2] * a[3][3] + a[0][0] * a[1][2] * a[2][3] * a[3][1] + a[0][0] * a[1][3] * a[2][1] * a[3][2]
-                   + a[0][1] * a[1][0] * a[2][3] * a[3][2] + a[0][1] * a[1][2] * a[2][0] * a[3][3] + a[0][1] * a[1][3] * a[2][2] * a[3][0]
-                   + a[0][2] * a[1][0] * a[2][1] * a[3][3] + a[0][2] * a[1][1] * a[2][3] * a[3][0] + a[0][2] * a[1][3] * a[2][0] * a[3][1]
-                   + a[0][3] * a[1][0] * a[2][2] * a[3][1] + a[0][3] * a[1][1] * a[2][0] * a[3][2] + a[0][3] * a[1][2] * a[2][1] * a[3][0]
-                   - a[0][0] * a[1][1] * a[2][3] * a[3][2] - a[0][0] * a[1][2] * a[2][1] * a[3][3] - a[0][0] * a[1][3] * a[2][2] * a[3][1]
-                   - a[0][1] * a[1][0] * a[2][2] * a[3][3] - a[0][1] * a[1][2] * a[2][3] * a[3][0] - a[0][1] * a[1][3] * a[2][0] * a[3][2]
-                   - a[0][2] * a[1][0] * a[2][3] * a[3][1] - a[0][2] * a[1][1] * a[2][0] * a[3][3] - a[0][2] * a[1][3] * a[2][1] * a[3][0]
-                   - a[0][3] * a[1][0] * a[2][1] * a[3][2] - a[0][3] * a[1][1] * a[2][2] * a[3][0] - a[0][3] * a[1][2] * a[2][0] * a[3][1];
-      if (det == 0.0)
+      double det = a[0][0] * a[1][1] * a[2][2] * a[3][3] + a[0][0] * a[1][2] * a[2][3] * a[3][1] + a[0][0] * a[1][3] * a[2][1] * a[3][2] + a[0][1] * a[1][0] * a[2][3] * a[3][2] +
+                   a[0][1] * a[1][2] * a[2][0] * a[3][3] + a[0][1] * a[1][3] * a[2][2] * a[3][0] + a[0][2] * a[1][0] * a[2][1] * a[3][3] + a[0][2] * a[1][1] * a[2][3] * a[3][0] +
+                   a[0][2] * a[1][3] * a[2][0] * a[3][1] + a[0][3] * a[1][0] * a[2][2] * a[3][1] + a[0][3] * a[1][1] * a[2][0] * a[3][2] + a[0][3] * a[1][2] * a[2][1] * a[3][0] -
+                   a[0][0] * a[1][1] * a[2][3] * a[3][2] - a[0][0] * a[1][2] * a[2][1] * a[3][3] - a[0][0] * a[1][3] * a[2][2] * a[3][1] - a[0][1] * a[1][0] * a[2][2] * a[3][3] -
+                   a[0][1] * a[1][2] * a[2][3] * a[3][0] - a[0][1] * a[1][3] * a[2][0] * a[3][2] - a[0][2] * a[1][0] * a[2][3] * a[3][1] - a[0][2] * a[1][1] * a[2][0] * a[3][3] -
+                   a[0][2] * a[1][3] * a[2][1] * a[3][0] - a[0][3] * a[1][0] * a[2][1] * a[3][2] - a[0][3] * a[1][1] * a[2][2] * a[3][0] - a[0][3] * a[1][2] * a[2][0] * a[3][1];
+      if(det == 0.0)
       {
          System.err.println("Minverse: determinant is zero.");
-
          return;
       }
 
       det = 1.0 / det;
-      b[0][0] = det
-                * (a[1][1] * a[2][2] * a[3][3] + a[1][2] * a[2][3] * a[3][1] + a[1][3] * a[2][1] * a[3][2] - a[1][1] * a[2][3] * a[3][2]
-                   - a[1][2] * a[2][1] * a[3][3] - a[1][3] * a[2][2] * a[3][1]);
-      b[0][1] = det
-                * (a[0][1] * a[2][3] * a[3][2] + a[0][2] * a[2][1] * a[3][3] + a[0][3] * a[2][2] * a[3][1] - a[0][1] * a[2][2] * a[3][3]
-                   - a[0][2] * a[2][3] * a[3][1] - a[0][3] * a[2][1] * a[3][2]);
-      b[0][2] = det
-                * (a[0][1] * a[1][2] * a[3][3] + a[0][2] * a[1][3] * a[3][1] + a[0][3] * a[1][1] * a[3][2] - a[0][1] * a[1][3] * a[3][2]
-                   - a[0][2] * a[1][1] * a[3][3] - a[0][3] * a[1][2] * a[3][1]);
-      b[0][3] = det
-                * (a[0][1] * a[1][3] * a[2][2] + a[0][2] * a[1][1] * a[2][3] + a[0][3] * a[1][2] * a[2][1] - a[0][1] * a[1][2] * a[2][3]
-                   - a[0][2] * a[1][3] * a[2][1] - a[0][3] * a[1][1] * a[2][2]);
-      b[1][0] = det
-                * (a[1][0] * a[2][3] * a[3][2] + a[1][2] * a[2][0] * a[3][3] + a[1][3] * a[2][2] * a[3][0] - a[1][0] * a[2][2] * a[3][3]
-                   - a[1][2] * a[2][3] * a[3][0] - a[1][3] * a[2][0] * a[3][2]);
-      b[1][1] = det
-                * (a[0][0] * a[2][2] * a[3][3] + a[0][2] * a[2][3] * a[3][0] + a[0][3] * a[2][0] * a[3][2] - a[0][0] * a[2][3] * a[3][2]
-                   - a[0][2] * a[2][0] * a[3][3] - a[0][3] * a[2][2] * a[3][0]);
-      b[1][2] = det
-                * (a[0][0] * a[1][3] * a[3][2] + a[0][2] * a[1][0] * a[3][3] + a[0][3] * a[1][2] * a[3][0] - a[0][0] * a[1][2] * a[3][3]
-                   - a[0][2] * a[1][3] * a[3][0] - a[0][3] * a[1][0] * a[3][2]);
-      b[1][3] = det
-                * (a[0][0] * a[1][2] * a[2][3] + a[0][2] * a[1][3] * a[2][0] + a[0][3] * a[1][0] * a[2][2] - a[0][0] * a[1][3] * a[2][2]
-                   - a[0][2] * a[1][0] * a[2][3] - a[0][3] * a[1][2] * a[2][0]);
-      b[2][0] = det
-                * (a[1][0] * a[2][1] * a[3][3] + a[1][1] * a[2][3] * a[3][0] + a[1][3] * a[2][0] * a[3][1] - a[1][0] * a[2][3] * a[3][1]
-                   - a[1][1] * a[2][0] * a[3][3] - a[1][3] * a[2][1] * a[3][0]);
-      b[2][1] = det
-                * (a[0][0] * a[2][3] * a[3][1] + a[0][1] * a[2][0] * a[3][3] + a[0][3] * a[2][1] * a[3][0] - a[0][0] * a[2][1] * a[3][3]
-                   - a[0][1] * a[2][3] * a[3][0] - a[0][3] * a[2][0] * a[3][1]);
-      b[2][2] = det
-                * (a[0][0] * a[1][1] * a[3][3] + a[0][1] * a[1][3] * a[3][0] + a[0][3] * a[1][0] * a[3][1] - a[0][0] * a[1][3] * a[3][1]
-                   - a[0][1] * a[1][0] * a[3][3] - a[0][3] * a[1][1] * a[3][0]);
-      b[2][3] = det
-                * (a[0][0] * a[1][3] * a[2][1] + a[0][1] * a[1][0] * a[2][3] + a[0][3] * a[1][1] * a[2][0] - a[0][0] * a[1][1] * a[2][3]
-                   - a[0][1] * a[1][3] * a[2][0] - a[0][3] * a[1][0] * a[2][1]);
-      b[3][0] = det
-                * (a[1][0] * a[2][2] * a[3][1] + a[1][1] * a[2][0] * a[3][2] + a[1][2] * a[2][1] * a[3][0] - a[1][0] * a[2][1] * a[3][2]
-                   - a[1][1] * a[2][2] * a[3][0] - a[1][2] * a[2][0] * a[3][1]);
-      b[3][1] = det
-                * (a[0][0] * a[2][1] * a[3][2] + a[0][1] * a[2][2] * a[3][0] + a[0][2] * a[2][0] * a[3][1] - a[0][0] * a[2][2] * a[3][1]
-                   - a[0][1] * a[2][0] * a[3][2] - a[0][2] * a[2][1] * a[3][0]);
-      b[3][2] = det
-                * (a[0][0] * a[1][2] * a[3][1] + a[0][1] * a[1][0] * a[3][2] + a[0][2] * a[1][1] * a[3][0] - a[0][0] * a[1][1] * a[3][2]
-                   - a[0][1] * a[1][2] * a[3][0] - a[0][2] * a[1][0] * a[3][1]);
-      b[3][3] = det
-                * (a[0][0] * a[1][1] * a[2][2] + a[0][1] * a[1][2] * a[2][0] + a[0][2] * a[1][0] * a[2][1] - a[0][0] * a[1][2] * a[2][1]
-                   - a[0][1] * a[1][0] * a[2][2] - a[0][2] * a[1][1] * a[2][0]);
+      b[0][0] = det *
+                (a[1][1] * a[2][2] * a[3][3] + a[1][2] * a[2][3] * a[3][1] + a[1][3] * a[2][1] * a[3][2] - a[1][1] * a[2][3] * a[3][2] - a[1][2] * a[2][1] * a[3][3] -
+                 a[1][3] * a[2][2] * a[3][1]);
+      b[0][1] = det *
+                (a[0][1] * a[2][3] * a[3][2] + a[0][2] * a[2][1] * a[3][3] + a[0][3] * a[2][2] * a[3][1] - a[0][1] * a[2][2] * a[3][3] - a[0][2] * a[2][3] * a[3][1] -
+                 a[0][3] * a[2][1] * a[3][2]);
+      b[0][2] = det *
+                (a[0][1] * a[1][2] * a[3][3] + a[0][2] * a[1][3] * a[3][1] + a[0][3] * a[1][1] * a[3][2] - a[0][1] * a[1][3] * a[3][2] - a[0][2] * a[1][1] * a[3][3] -
+                 a[0][3] * a[1][2] * a[3][1]);
+      b[0][3] = det *
+                (a[0][1] * a[1][3] * a[2][2] + a[0][2] * a[1][1] * a[2][3] + a[0][3] * a[1][2] * a[2][1] - a[0][1] * a[1][2] * a[2][3] - a[0][2] * a[1][3] * a[2][1] -
+                 a[0][3] * a[1][1] * a[2][2]);
+      b[1][0] = det *
+                (a[1][0] * a[2][3] * a[3][2] + a[1][2] * a[2][0] * a[3][3] + a[1][3] * a[2][2] * a[3][0] - a[1][0] * a[2][2] * a[3][3] - a[1][2] * a[2][3] * a[3][0] -
+                 a[1][3] * a[2][0] * a[3][2]);
+      b[1][1] = det *
+                (a[0][0] * a[2][2] * a[3][3] + a[0][2] * a[2][3] * a[3][0] + a[0][3] * a[2][0] * a[3][2] - a[0][0] * a[2][3] * a[3][2] - a[0][2] * a[2][0] * a[3][3] -
+                 a[0][3] * a[2][2] * a[3][0]);
+      b[1][2] = det *
+                (a[0][0] * a[1][3] * a[3][2] + a[0][2] * a[1][0] * a[3][3] + a[0][3] * a[1][2] * a[3][0] - a[0][0] * a[1][2] * a[3][3] - a[0][2] * a[1][3] * a[3][0] -
+                 a[0][3] * a[1][0] * a[3][2]);
+      b[1][3] = det *
+                (a[0][0] * a[1][2] * a[2][3] + a[0][2] * a[1][3] * a[2][0] + a[0][3] * a[1][0] * a[2][2] - a[0][0] * a[1][3] * a[2][2] - a[0][2] * a[1][0] * a[2][3] -
+                 a[0][3] * a[1][2] * a[2][0]);
+      b[2][0] = det *
+                (a[1][0] * a[2][1] * a[3][3] + a[1][1] * a[2][3] * a[3][0] + a[1][3] * a[2][0] * a[3][1] - a[1][0] * a[2][3] * a[3][1] - a[1][1] * a[2][0] * a[3][3] -
+                 a[1][3] * a[2][1] * a[3][0]);
+      b[2][1] = det *
+                (a[0][0] * a[2][3] * a[3][1] + a[0][1] * a[2][0] * a[3][3] + a[0][3] * a[2][1] * a[3][0] - a[0][0] * a[2][1] * a[3][3] - a[0][1] * a[2][3] * a[3][0] -
+                 a[0][3] * a[2][0] * a[3][1]);
+      b[2][2] = det *
+                (a[0][0] * a[1][1] * a[3][3] + a[0][1] * a[1][3] * a[3][0] + a[0][3] * a[1][0] * a[3][1] - a[0][0] * a[1][3] * a[3][1] - a[0][1] * a[1][0] * a[3][3] -
+                 a[0][3] * a[1][1] * a[3][0]);
+      b[2][3] = det *
+                (a[0][0] * a[1][3] * a[2][1] + a[0][1] * a[1][0] * a[2][3] + a[0][3] * a[1][1] * a[2][0] - a[0][0] * a[1][1] * a[2][3] - a[0][1] * a[1][3] * a[2][0] -
+                 a[0][3] * a[1][0] * a[2][1]);
+      b[3][0] = det *
+                (a[1][0] * a[2][2] * a[3][1] + a[1][1] * a[2][0] * a[3][2] + a[1][2] * a[2][1] * a[3][0] - a[1][0] * a[2][1] * a[3][2] - a[1][1] * a[2][2] * a[3][0] -
+                 a[1][2] * a[2][0] * a[3][1]);
+      b[3][1] = det *
+                (a[0][0] * a[2][1] * a[3][2] + a[0][1] * a[2][2] * a[3][0] + a[0][2] * a[2][0] * a[3][1] - a[0][0] * a[2][2] * a[3][1] - a[0][1] * a[2][0] * a[3][2] -
+                 a[0][2] * a[2][1] * a[3][0]);
+      b[3][2] = det *
+                (a[0][0] * a[1][2] * a[3][1] + a[0][1] * a[1][0] * a[3][2] + a[0][2] * a[1][1] * a[3][0] - a[0][0] * a[1][1] * a[3][2] - a[0][1] * a[1][2] * a[3][0] -
+                 a[0][2] * a[1][0] * a[3][1]);
+      b[3][3] = det *
+                (a[0][0] * a[1][1] * a[2][2] + a[0][1] * a[1][2] * a[2][0] + a[0][2] * a[1][0] * a[2][1] - a[0][0] * a[1][2] * a[2][1] - a[0][1] * a[1][0] * a[2][2] -
+                 a[0][2] * a[1][1] * a[2][0]);
    }
 
    // Private State Changing internal methods:
@@ -684,31 +560,19 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
       double q = w_xyz[1] / 2.0;
       double r = w_xyz[2] / 2.0;
 
-//    double[][] m =
-//        {
-//        {0, -p, -q, -r},
-//        {p, 0, r, -q},
-//        {q, -r, 0, p},
-//        {r, q, -p, 0}
-//    };
-//    setArray(Wxq, m);
+//      double[][] m =
+//          {
+//          {0, -p, -q, -r},
+//          {p, 0, r, -q},
+//          {q, -r, 0, p},
+//          {r, q, -p, 0}
+//      };
+//      setArray(Wxq, m);
 
-      Wxq[0][0] = 0.0;
-      Wxq[0][1] = -p;
-      Wxq[0][2] = -q;
-      Wxq[0][3] = -r;
-      Wxq[1][0] = p;
-      Wxq[1][1] = 0.0;
-      Wxq[1][2] = r;
-      Wxq[1][3] = -q;
-      Wxq[2][0] = q;
-      Wxq[2][1] = -r;
-      Wxq[2][2] = 0.0;
-      Wxq[2][3] = p;
-      Wxq[3][0] = r;
-      Wxq[3][1] = q;
-      Wxq[3][2] = -p;
-      Wxq[3][3] = 0;
+      Wxq[0][0] = 0.0;  Wxq[0][1] = -p;   Wxq[0][2] = -q;    Wxq[0][3] = -r;
+      Wxq[1][0] = p;    Wxq[1][1] = 0.0;  Wxq[1][2] =  r;    Wxq[1][3] = -q;
+      Wxq[2][0] = q;    Wxq[2][1] = -r;   Wxq[2][2] = 0.0;   Wxq[2][3] = p;
+      Wxq[3][0] = r;    Wxq[3][1] =  q;   Wxq[3][2] = -p;    Wxq[3][3] = 0;
    }
 
 
@@ -732,76 +596,34 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
       double q2 = Quat[2].val;
       double q3 = Quat[3].val;
 
-//    double[][] m =
-//        {
-//        {Wxq[0][0], Wxq[0][1], Wxq[0][2], Wxq[0][3], q1 / 2.0, q2 / 2.0, q3 / 2.0},
-//        {Wxq[1][0], Wxq[1][1], Wxq[1][2], Wxq[1][3], -q0 / 2.0, q3 / 2.0, -q2 / 2.0},
-//        {Wxq[2][0], Wxq[2][1], Wxq[2][2], Wxq[2][3], -q3 / 2.0, -q0 / 2.0, q1 / 2.0},
-//        {Wxq[3][0], Wxq[3][1], Wxq[3][2], Wxq[3][3], q2 / 2.0, -q1 / 2.0, -q0 / 2.0},
-//        {0, 0, 0, 0, 0, 0, 0},
-//        {0, 0, 0, 0, 0, 0, 0},
-//        {0, 0, 0, 0, 0, 0, 0}
-//    };
+//      double[][] m =
+//          {
+//          {Wxq[0][0], Wxq[0][1], Wxq[0][2], Wxq[0][3], q1 / 2.0, q2 / 2.0, q3 / 2.0},
+//          {Wxq[1][0], Wxq[1][1], Wxq[1][2], Wxq[1][3], -q0 / 2.0, q3 / 2.0, -q2 / 2.0},
+//          {Wxq[2][0], Wxq[2][1], Wxq[2][2], Wxq[2][3], -q3 / 2.0, -q0 / 2.0, q1 / 2.0},
+//          {Wxq[3][0], Wxq[3][1], Wxq[3][2], Wxq[3][3], q2 / 2.0, -q1 / 2.0, -q0 / 2.0},
+//          {0, 0, 0, 0, 0, 0, 0},
+//          {0, 0, 0, 0, 0, 0, 0},
+//          {0, 0, 0, 0, 0, 0, 0}
+//      };
 
-      A[0][0] = Wxq[0][0];
-      A[0][1] = Wxq[0][1];
-      A[0][2] = Wxq[0][2];
-      A[0][3] = Wxq[0][3];
-      A[0][4] = q1 / 2.0;
-      A[0][5] = q2 / 2.0;
-      A[0][6] = q3 / 2.0;
-      A[1][0] = Wxq[1][0];
-      A[1][1] = Wxq[1][1];
-      A[1][2] = Wxq[1][2];
-      A[1][3] = Wxq[1][3];
-      A[1][4] = -q0 / 2.0;
-      A[1][5] = q3 / 2.0;
-      A[1][6] = -q2 / 2.0;
-      A[2][0] = Wxq[2][0];
-      A[2][1] = Wxq[2][1];
-      A[2][2] = Wxq[2][2];
-      A[2][3] = Wxq[2][3];
-      A[2][4] = -q3 / 2.0;
-      A[2][5] = -q0 / 2.0;
-      A[2][6] = q1 / 2.0;
-      A[3][0] = Wxq[3][0];
-      A[3][1] = Wxq[3][1];
-      A[3][2] = Wxq[3][2];
-      A[3][3] = Wxq[3][3];
-      A[3][4] = q2 / 2.0;
-      A[3][5] = -q1 / 2.0;
-      A[3][6] = -q0 / 2.0;
-      A[4][0] = 0.0;
-      A[4][1] = 0.0;
-      A[4][2] = 0.0;
-      A[4][3] = 0.0;
-      A[4][4] = 0.0;
-      A[4][5] = 0.0;
-      A[4][6] = 0.0;
-      A[5][0] = 0.0;
-      A[5][1] = 0.0;
-      A[5][2] = 0.0;
-      A[5][3] = 0.0;
-      A[5][4] = 0.0;
-      A[5][5] = 0.0;
-      A[5][6] = 0.0;
-      A[6][0] = 0.0;
-      A[6][1] = 0.0;
-      A[6][2] = 0.0;
-      A[6][3] = 0.0;
-      A[6][4] = 0.0;
-      A[6][5] = 0.0;
-      A[6][6] = 0.0;
+      A[0][0] = Wxq[0][0];  A[0][1] = Wxq[0][1];  A[0][2] = Wxq[0][2];  A[0][3] = Wxq[0][3];  A[0][4] =  q1 / 2.0;  A[0][5] =  q2 / 2.0;  A[0][6] = q3 / 2.0;
+      A[1][0] = Wxq[1][0];  A[1][1] = Wxq[1][1];  A[1][2] = Wxq[1][2];  A[1][3] = Wxq[1][3];  A[1][4] = -q0 / 2.0;  A[1][5] =  q3 / 2.0;  A[1][6] = -q2 / 2.0;
+      A[2][0] = Wxq[2][0];  A[2][1] = Wxq[2][1];  A[2][2] = Wxq[2][2];  A[2][3] = Wxq[2][3];  A[2][4] = -q3 / 2.0;  A[2][5] = -q0 / 2.0;  A[2][6] = q1 / 2.0;
+      A[3][0] = Wxq[3][0];  A[3][1] = Wxq[3][1];  A[3][2] = Wxq[3][2];  A[3][3] = Wxq[3][3];  A[3][4] =  q2 / 2.0;  A[3][5] = -q1 / 2.0;  A[3][6] = -q0 / 2.0;
+      A[4][0] = 0.0;        A[4][1] = 0.0;        A[4][2] = 0.0;        A[4][3] = 0.0;        A[4][4] = 0.0;        A[4][5] = 0.0;        A[4][6] = 0.0;
+      A[5][0] = 0.0;        A[5][1] = 0.0;        A[5][2] = 0.0;        A[5][3] = 0.0;        A[5][4] = 0.0;        A[5][5] = 0.0;        A[5][6] = 0.0;
+      A[6][0] = 0.0;        A[6][1] = 0.0;        A[6][2] = 0.0;        A[6][3] = 0.0;        A[6][4] = 0.0;        A[6][5] = 0.0;        A[6][6] = 0.0;
 
 
-//    setArray(A, tempM);
+//      setArray(A, tempM);
    }
 
    private void setYoVariables(double[][] A, YoVariable[][] ACopy)
    {
-      for (int i = 0; i < A.length; i++)
+      for (int i=0; i<A.length; i++)
       {
-         for (int j = 0; j < A[i].length; j++)
+         for (int j=0; j<A[i].length; j++)
          {
             ACopy[i][j].val = A[i][j];
          }
@@ -810,9 +632,9 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
 
    private void setConstantKMatrix(double[][] K)
    {
-      for (int i = 0; i < K.length; i++)
+      for (int i=0; i<K.length; i++)
       {
-         for (int j = 0; j < K[i].length; j++)
+         for (int j=0; j<K[i].length; j++)
          {
             K[i][j] = 0.0;
          }
@@ -839,7 +661,7 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
       Mmul(t3, inverseE, K);
 
 
-//    setConstantKMatrix(K); // Use this if you want a constant K Matrix...
+//      setConstantKMatrix(K); // Use this if you want a constant K Matrix...
       setYoVariables(K, KCopy);
 
       // X += K*err;
@@ -861,28 +683,27 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
        */
 
       Midentity(C);
-
-//    double err;
-//    double[][] DCM = new double[3][3];
-//    quatDC(DCM);
-//    double DCM_0_2 = DCM[0][2];
-//    double DCM_2_2 = DCM[2][2];
-//    double DCM_1_2 = DCM[1][2];
+//      double err;
+//      double[][] DCM = new double[3][3];
+//      quatDC(DCM);
+//      double DCM_0_2 = DCM[0][2];
+//      double DCM_2_2 = DCM[2][2];
+//      double DCM_1_2 = DCM[1][2];
 //
-//    // PHI section
-//            err = 2.0 / ( DCM_2_2 * DCM_2_2 + DCM_1_2 * DCM_1_2 );
-//            C[0][0] = err * ( q1 * DCM_2_2 );
-//            C[0][1] = err * ( q0 * DCM_2_2 + 2.0 * q1 * DCM_1_2 );
-//            C[0][2] = err * ( q3 * DCM_2_2 + 2.0 * q2 * DCM_1_2 );
-//            C[0][3] = err * ( q2 * DCM_2_2 );
+//      // PHI section
+//		err = 2.0 / ( DCM_2_2 * DCM_2_2 + DCM_1_2 * DCM_1_2 );
+//		C[0][0] = err * ( q1 * DCM_2_2 );
+//		C[0][1] = err * ( q0 * DCM_2_2 + 2.0 * q1 * DCM_1_2 );
+//		C[0][2] = err * ( q3 * DCM_2_2 + 2.0 * q2 * DCM_1_2 );
+//		C[0][3] = err * ( q2 * DCM_2_2 );
 //
-//            // THETA section
-//            err = -1.0 / Math.sqrt(1.0 - DCM_0_2 * DCM_0_2 );
+//		// THETA section
+//		err = -1.0 / Math.sqrt(1.0 - DCM_0_2 * DCM_0_2 );
 //
-//            C[1][0] = -2.0 * q2 * err;
-//            C[1][1] =  2.0 * q3 * err;
-//            C[1][2] = -2.0 * q0 * err;
-//            C[1][3] =  2.0 * q1 * err;
+//		C[1][0] = -2.0 * q2 * err;
+//		C[1][1] =  2.0 * q3 * err;
+//		C[1][2] = -2.0 * q0 * err;
+//		C[1][3] =  2.0 * q1 * err;
 
 
 
@@ -917,12 +738,12 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
       // Accel to euler, then euler to quaternions:
       double g = mag(a);
 
-//    double[] euler =
-//        { -Math.atan2(a[1][0], -a[2][0]), -Math.asin(a[0][0] / -g), heading}; // Roll, Pitch, Yaw
+//      double[] euler =
+//          { -Math.atan2(a[1][0], -a[2][0]), -Math.asin(a[0][0] / -g), heading}; // Roll, Pitch, Yaw
 
-      tempEulerAngles[0] = -Math.atan2(a[1], -a[2]);    // roll
-      tempEulerAngles[1] = -Math.asin(a[0] / -g);    // pitch
-      tempEulerAngles[2] = heading;    // yaw
+      tempEulerAngles[0] = -Math.atan2(a[1], -a[2]); // roll
+      tempEulerAngles[1] = -Math.asin(a[0] / -g);       // pitch
+      tempEulerAngles[2] = heading;                        // yaw
 
 
       QuaternionTools.rollPitchYawToQuaternions(tempEulerAngles, quaternions);
@@ -931,13 +752,13 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
       double distanceSquared = 0.0;
       double distanceSquaredToNegative = 0.0;
 
-      for (int i = 0; i < 4; i++)
+      for(int i = 0; i < 4; i++)
       {
          distanceSquared += (quaternions[i] - Quat[i].val) * (quaternions[i] - Quat[i].val);
-         distanceSquaredToNegative += (-quaternions[i] - Quat[i].val) * (-quaternions[i] - Quat[i].val);
+         distanceSquaredToNegative += ( -quaternions[i] - Quat[i].val) * ( -quaternions[i] - Quat[i].val);
       }
 
-      if (distanceSquaredToNegative < distanceSquared)
+      if(distanceSquaredToNegative < distanceSquared)
       {
          quaternions[0] *= -1.0;
          quaternions[1] *= -1.0;
@@ -946,46 +767,46 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
       }
    }
 
-// /*
-//  * This will convert from quaternions to euler angles
-//  * q(4,1) -> euler[phi;theta;psi] (rad)
-//  */
-// public double[][] quat2euler(double[][] quat)
-// {
-//    double q0 = quat[0][0], q1 = quat[1][0], q2 = quat[2][0], q3 = quat[3][0];
-//    double theta = -Math.asin(2 * (q1 * q3 - q0 * q2));
-//    double phi = Math.atan2(2 * (q2 * q3 + q0 * q1), 1 - 2 * (q1 * q1 + q2 * q2));
-//    double psi = Math.atan2(2 * (q1 * q2 + q0 * q3), 1 - 2 * (q2 * q2 + q3 * q3));
+//   /*
+//    * This will convert from quaternions to euler angles
+//    * q(4,1) -> euler[phi;theta;psi] (rad)
+//    */
+//   public double[][] quat2euler(double[][] quat)
+//   {
+//      double q0 = quat[0][0], q1 = quat[1][0], q2 = quat[2][0], q3 = quat[3][0];
+//      double theta = -Math.asin(2 * (q1 * q3 - q0 * q2));
+//      double phi = Math.atan2(2 * (q2 * q3 + q0 * q1), 1 - 2 * (q1 * q1 + q2 * q2));
+//      double psi = Math.atan2(2 * (q1 * q2 + q0 * q3), 1 - 2 * (q2 * q2 + q3 * q3));
 //
-//    double[][] m =
-//        {
-//        {phi},
-//        {theta},
-//        {psi}
-//    };
-//    return m;
-// }
+//      double[][] m =
+//          {
+//          {phi},
+//          {theta},
+//          {psi}
+//      };
+//      return m;
+//   }
 //
-// public double[] euler2quat(double[] euler) {
-//    double phi = euler[0] / 2.0; // Roll
-//    double theta = euler[1] / 2.0; // Pitch
-//    double psi = euler[2] / 2.0; // Yaw
+//   public double[] euler2quat(double[] euler) {
+//      double phi = euler[0] / 2.0; // Roll
+//      double theta = euler[1] / 2.0; // Pitch
+//      double psi = euler[2] / 2.0; // Yaw
 //
-//    double shphi0 = Math.sin(phi);
-//    double chphi0 = Math.cos(phi);
+//      double shphi0 = Math.sin(phi);
+//      double chphi0 = Math.cos(phi);
 //
-//    double shtheta0 = Math.sin(theta);
-//    double chtheta0 = Math.cos(theta);
+//      double shtheta0 = Math.sin(theta);
+//      double chtheta0 = Math.cos(theta);
 //
-//    double shpsi0 = Math.sin(psi);
-//    double chpsi0 = Math.cos(psi);
+//      double shpsi0 = Math.sin(psi);
+//      double chpsi0 = Math.cos(psi);
 //
-//    double[] quaternions =
-//        {chphi0 * chtheta0 * chpsi0 + shphi0 * shtheta0 * shpsi0, -chphi0 * shtheta0 * shpsi0 + shphi0 * chtheta0 * chpsi0,
-//        chphi0 * shtheta0 * chpsi0 + shphi0 * chtheta0 * shpsi0, chphi0 * chtheta0 * shpsi0 - shphi0 * shtheta0 * chpsi0};
+//      double[] quaternions =
+//          {chphi0 * chtheta0 * chpsi0 + shphi0 * shtheta0 * shpsi0, -chphi0 * shtheta0 * shpsi0 + shphi0 * chtheta0 * chpsi0,
+//          chphi0 * shtheta0 * chpsi0 + shphi0 * chtheta0 * shpsi0, chphi0 * chtheta0 * shpsi0 - shphi0 * shtheta0 * chpsi0};
 //
-//    return quaternions;
-// }
+//      return quaternions;
+//   }
 
    /*
     * This will construct a direction cosine matrix from
@@ -995,39 +816,32 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
     * body = tBL(3,3)*NED
     * q(4,1)
     */
-   private void quatDC(double[][] DCM)
+   private void quatDC( double[][] DCM )
    {
       double q0 = Quat[0].val;
       double q1 = Quat[1].val;
       double q2 = Quat[2].val;
       double q3 = Quat[3].val;
 
-//    double[][] m =
-//        {
-//        {1.0 - 2 * (q2 * q2 + q3 * q3), 2 * (q1 * q2 + q0 * q3), 2 * (q1 * q3 - q0 * q2)},
-//        {2 * (q1 * q2 - q0 * q3), 1.0 - 2 * (q1 * q1 + q3 * q3), 2 * (q2 * q3 + q0 * q1)},
-//        {2 * (q1 * q3 + q0 * q2), 2 * (q2 * q3 - q0 * q1), 1.0 - 2 * (q1 * q1 + q2 * q2)}
-//    };
-//    MatrixTools.setArray(DCM,m);
+//      double[][] m =
+//          {
+//          {1.0 - 2 * (q2 * q2 + q3 * q3), 2 * (q1 * q2 + q0 * q3), 2 * (q1 * q3 - q0 * q2)},
+//          {2 * (q1 * q2 - q0 * q3), 1.0 - 2 * (q1 * q1 + q3 * q3), 2 * (q2 * q3 + q0 * q1)},
+//          {2 * (q1 * q3 + q0 * q2), 2 * (q2 * q3 - q0 * q1), 1.0 - 2 * (q1 * q1 + q2 * q2)}
+//      };
+//      MatrixTools.setArray(DCM,m);
 
-      DCM[0][0] = 1.0 - 2.0 * (q2 * q2 + q3 * q3);
-      DCM[0][1] = 2.0 * (q1 * q2 + q0 * q3);
-      DCM[0][2] = 2.0 * (q1 * q3 - q0 * q2);
-      DCM[1][0] = 2.0 * (q1 * q2 - q0 * q3);
-      DCM[1][1] = 1.0 - 2.0 * (q1 * q1 + q3 * q3);
-      DCM[1][2] = 2.0 * (q2 * q3 + q0 * q1);
-      DCM[2][0] = 2.0 * (q1 * q3 + q0 * q2);
-      DCM[2][1] = 2.0 * (q2 * q3 - q0 * q1);
-      DCM[2][2] = 1.0 - 2.0 * (q1 * q1 + q2 * q2);
+      DCM[0][0] = 1.0 - 2.0 * (q2 * q2 + q3 * q3);    DCM[0][1] = 2.0 * (q1 * q2 + q0 * q3);          DCM[0][2] = 2.0 * (q1 * q3 - q0 * q2);
+      DCM[1][0] = 2.0 * (q1 * q2 - q0 * q3);          DCM[1][1] = 1.0 - 2.0 * (q1 * q1 + q3 * q3);    DCM[1][2] = 2.0 * (q2 * q3 + q0 * q1);
+      DCM[2][0] = 2.0 * (q1 * q3 + q0 * q2);          DCM[2][1] = 2.0 * (q2 * q3 - q0 * q1);          DCM[2][2] = 1.0 - 2.0 * (q1 * q1 + q2 * q2);
    }
 
    private final double[] tempQuaternionM = new double[4];
-
    public void compassUpdate(double heading, double[] accel)
    {
       // Compute our measured and estimated quaternions
 
-//    double[] quaternion_m = new double[4];
+//      double[] quaternion_m = new double[4];
       accel2quaternions(accel, heading, tempQuaternionM);
 
       double q0 = Quat[0].val;
@@ -1053,31 +867,28 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
     */
    private void propagateStateOldDoesntUpdateBiases(double[] pqr)
    {
-      quatW(pqr);    // constructs quaternion W matrix in Wxq
-
+      quatW(pqr); //                           constructs quaternion W matrix in Wxq
       // q = q + W*q*dt;
       MmulScalarMul(Wxq, Quat, t9, dt);
       Madd(Quat, t9, Quat);
       normalize(Quat);
-
       // Keep copy up-to-date...
-//    unpackQuaternion(Quat);
+//      unpackQuaternion(Quat);
    }
 
 
    private void propagateState(double[] pqr)
    {
-      // quatW(pqr); //                           constructs quaternion W matrix in Wxq
+      //quatW(pqr); //                           constructs quaternion W matrix in Wxq
       // q = q + W*q*dt;
 
-      // X_dot = A*X;
+      //X_dot = A*X;
 
       MmulScalarMul(Wxq, Quat, t9, dt);
       Madd(Quat, t9, Quat);
       normalize(Quat);
-
       // Keep copy up-to-date...
-//    unpackQuaternion(Quat);
+//      unpackQuaternion(Quat);
    }
 
 
@@ -1086,10 +897,10 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
       // Implements Pdot = A*P*At + Q...
 
       // New Code:
-      Mmul(a, P, t7);    // t7 = A*P;
-      Mtranspose(a, At);    // At = A-transpose;
-      Mmul(t7, At, t8);    // t8 = A*P*At;
-      Madd(t8, Q, Pdot);    // Pdot = A*P*At + Q;
+      Mmul(a, P, t7); // t7 = A*P;
+      Mtranspose(a, At); // At = A-transpose;
+      Mmul(t7, At, t8);  // t8 = A*P*At;
+      Madd(t8, Q, Pdot);  // Pdot = A*P*At + Q;
 
       // P = P + Pdot * dt;
       Mmul(Pdot, dt, Pdot);
@@ -1099,25 +910,22 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
 
       // Old Code. Tim Hutchison found bug on Jan. 26, 2009:
       // Pdot = A*P+Q;
+      /*if (!USE_FIX)
+      {
+         setArray(Pdot, Q);
 
-      /*
-       * if (!USE_FIX)
-       * {
-       *  setArray(Pdot, Q);
-       *
-       *  Mmul(a, P, t7);
-       *  Madd(Pdot, t7, Pdot);
-       *  // Pdot = P*At + A*P+Q;
-       *  Mtranspose(a, At);
-       *  Mmul(P, At, t8);
-       *  Madd(Pdot, t8, Pdot);
-       *  // Pdot = (P*At + A*P+Q)*dt;
-       *  Mmul(Pdot, dt, Pdot);
-       *  // P = P + Pdot;
-       *  Madd(P, Pdot, P);
-       *  double trace = Mtrace(P);
-       * }
-       */
+         Mmul(a, P, t7);
+         Madd(Pdot, t7, Pdot);
+         // Pdot = P*At + A*P+Q;
+         Mtranspose(a, At);
+         Mmul(P, At, t8);
+         Madd(Pdot, t8, Pdot);
+         // Pdot = (P*At + A*P+Q)*dt;
+         Mmul(Pdot, dt, Pdot);
+         // P = P + Pdot;
+         Madd(P, Pdot, P);
+         double trace = Mtrace(P);
+      }*/
 
    }
 
@@ -1129,10 +937,10 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
       zero(Q);
       zero(R);
 
-//    Q[0][0] = q_noise * q_noise;
-//    Q[1][1] = q_noise * q_noise;
-//    Q[2][2] = q_noise * q_noise;
-//    Q[3][3] = q_noise * q_noise;
+//      Q[0][0] = q_noise * q_noise;
+//      Q[1][1] = q_noise * q_noise;
+//      Q[2][2] = q_noise * q_noise;
+//      Q[3][3] = q_noise * q_noise;
 
 
       Q[4][4] = q_noise * q_noise;
@@ -1179,52 +987,52 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
       Quat[2].val = quaternions[2];
       Quat[3].val = quaternions[3];
 
-//    System.out.println("Debug: Quat0 = " + Quat[0][0]);
+//      System.out.println("Debug: Quat0 = " + Quat[0][0]);
 
-//    unpackQuaternion(Quat);
+//      unpackQuaternion(Quat);
    }
 
    private void reset(YoVariable[][] P)
    {
       /*
-       * The covariance matrix is probably initialized incorrectly.
-       * It should be 1 for all diagonal elements of Q that are 0
-       * and zero everywhere else.
-       */
-      double q_noise = 5.0;    // 5.0; //0.05; //1.0; //10.0; //250.0;
-      double r_noise = 1.0;    // 100.0; //10.0; //25.0; //2.5; //25.0; //100.0; //10.0;
+      * The covariance matrix is probably initialized incorrectly.
+      * It should be 1 for all diagonal elements of Q that are 0
+      * and zero everywhere else.
+      */
+     double q_noise = 5.0; //5.0; //0.05; //1.0; //10.0; //250.0;
+     double r_noise = 1.0; //100.0; //10.0; //25.0; //2.5; //25.0; //100.0; //10.0;
 
-      Midentity(P);
+     Midentity(P);
 
-      setNoiseParameters(q_noise, r_noise);
+     setNoiseParameters(q_noise, r_noise);
    }
 
-// public void reset(double[][] P)
-// {
-//    /*
-//     * The covariance matrix is probably initialized incorrectly.
-//     * It should be 1 for all diagonal elements of Q that are 0
-//     * and zero everywhere else.
-//     */
-//    double q_noise = 5.0; //5.0; //0.05; //1.0; //10.0; //250.0;
-//    double r_noise = 1.0; //100.0; //10.0; //25.0; //2.5; //25.0; //100.0; //10.0;
+//   public void reset(double[][] P)
+//   {
+//      /*
+//       * The covariance matrix is probably initialized incorrectly.
+//       * It should be 1 for all diagonal elements of Q that are 0
+//       * and zero everywhere else.
+//       */
+//      double q_noise = 5.0; //5.0; //0.05; //1.0; //10.0; //250.0;
+//      double r_noise = 1.0; //100.0; //10.0; //25.0; //2.5; //25.0; //100.0; //10.0;
 //
-//    Midentity(P);
+//      Midentity(P);
 //
-//    setNoiseParameters(q_noise, r_noise);
-// }
+//      setNoiseParameters(q_noise, r_noise);
+//   }
 
    public void initialize(Matrix accel, Matrix pqr, double heading)
    {
-//    System.out.println("Initializing QuaternionBasedArrayFullIMUKalmanFilter. accel = " + QuaternionTools.format4(accel.get(0,0)) + ", " + QuaternionTools.format4(accel.get(1,0)) + ", " + QuaternionTools.format4(accel.get(2,0)));
+//      System.out.println("Initializing QuaternionBasedArrayFullIMUKalmanFilter. accel = " + QuaternionTools.format4(accel.get(0,0)) + ", " + QuaternionTools.format4(accel.get(1,0)) + ", " + QuaternionTools.format4(accel.get(2,0)));
 
-//     accel.set(0, 0, -x_accel.val);
-//     accel.set(1, 0, -y_accel.val);
-//     accel.set(2, 0, -z_accel.val);
+//       accel.set(0, 0, -x_accel.val);
+//       accel.set(1, 0, -y_accel.val);
+//       accel.set(2, 0, -z_accel.val);
 //
-//     pqr.set(0, 0, 0.0); //x_gyro.val); // + x_gyro_bias.val);
-//     pqr.set(1, 0, 0.0); //y_gyro.val); // + y_gyro_bias.val);
-//     pqr.set(2, 0, 0.0); //z_gyro.val); // + z_gyro_bias.val);
+//       pqr.set(0, 0, 0.0); //x_gyro.val); // + x_gyro_bias.val);
+//       pqr.set(1, 0, 0.0); //y_gyro.val); // + y_gyro_bias.val);
+//       pqr.set(2, 0, 0.0); //z_gyro.val); // + z_gyro_bias.val);
 
       double[] accelArray = new double[3];
       double[] pqrArray = new double[3];
@@ -1236,9 +1044,11 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
       pqrArray[1] = pqr.get(1, 0);
       pqrArray[2] = pqr.get(2, 0);
 
-      initialize(accelArray, pqrArray, heading);
+      initialize(accelArray,
+                 pqrArray,
+                 heading);
 
-//    setArray(bias, pqrArray);
+//       setArray(bias, pqrArray);
 //      double[] quaternions = accel2quaternions(accelArray, heading);
 //      Quat[0][0] = quaternions[0];
 //      Quat[1][0] = quaternions[1];
@@ -1250,25 +1060,25 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
       double q2 = Quat[2].val;
       double q3 = Quat[3].val;
 
-//    System.out.println("Initializing QuaternionBasedArrayFullIMUKalmanFilter. q0 = " + QuaternionTools.format4(q0) + ", q1 = " + QuaternionTools.format4(q1) + ", q2 = " + QuaternionTools.format4(q2) + ", q3 = " + QuaternionTools.format4(q3));
+//      System.out.println("Initializing QuaternionBasedArrayFullIMUKalmanFilter. q0 = " + QuaternionTools.format4(q0) + ", q1 = " + QuaternionTools.format4(q1) + ", q2 = " + QuaternionTools.format4(q2) + ", q3 = " + QuaternionTools.format4(q3));
 
    }
 
    public void reset()
    {
-      reset(P);
+       reset(P);
    }
 
    public void accel2quaternions(Matrix accel, double d, double[] quaternions)
    {
-//    accel2quaternions(accel.getArray()[0], d, quaternions);
+//      accel2quaternions(accel.getArray()[0], d, quaternions);
       accel2quaternions(accel.getColumnPackedCopy(), d, quaternions);
    }
 
    public void imuUpdate(Matrix pqr)
    {
-//    imuUpdate(pqr.getArray()[0]);
-      imuUpdate(pqr.getColumnPackedCopy());
+//       imuUpdate(pqr.getArray()[0]);
+       imuUpdate(pqr.getColumnPackedCopy());
    }
 
    private double[] accelArrayTemp = new double[3];
@@ -1281,17 +1091,17 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
 
       compassUpdate(heading, accelArrayTemp);
 
-//    throw new RuntimeException("implement");
+//       throw new RuntimeException("implement");
    }
 
    public double getBias(int i)
    {
-      return bias[i].val;
+       return bias[i].val;
    }
 
    public void getQuaternion(Matrix qMatrix)
    {
-//    Matrix qMatrix = new Matrix(4,1);
+//      Matrix qMatrix = new Matrix(4,1);
 
       double q0 = Quat[0].val;
       double q1 = Quat[1].val;
@@ -1303,7 +1113,7 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
       qMatrix.set(2, 0, q2);
       qMatrix.set(3, 0, q3);
 
-//    return qMatrix;
-   }
+//      return qMatrix;
+    }
 
 }
