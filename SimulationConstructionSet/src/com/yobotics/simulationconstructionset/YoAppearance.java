@@ -241,6 +241,11 @@ public class YoAppearance
       return ret;
    }
 
+   public static Appearance RGBColor(double red, double green, double blue)
+   {
+      return RGBColor((float) red, (float) green, (float) blue);
+   }
+   
    public static Appearance RGBColor(float red, float green, float blue)
    {
       Appearance ret = new Appearance();
@@ -250,6 +255,11 @@ public class YoAppearance
       ret.setMaterial(mat);
 
       return ret;
+   }
+   
+   public static Appearance RGBColorFrom8BitInts(int red, int green, int blue)
+   {
+      return RGBColor(((float) (red)) / 255.0, ((float) (green)) / 255.0, ((float) (blue)) / 255.0);
    }
 
    public static Appearance Color(Color color)
@@ -281,8 +291,19 @@ public class YoAppearance
    
    public static Appearance Pink()
    {
-      return RGBColor(255, 192, 203);
+      return RGBColorFrom8BitInts(255, 192, 203);
    }
+   
+   public static Appearance Orange()
+   {
+      return RGBColorFrom8BitInts(255, 128, 0);
+   }
+   
+   public static Appearance Orchid()
+   {
+      return RGBColorFrom8BitInts(218, 112, 214);
+   }
+ 
 
    public static Appearance DarkRed()
    {
