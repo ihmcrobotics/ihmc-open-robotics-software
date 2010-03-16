@@ -289,10 +289,14 @@ public class YoAppearance
       return RGBColor(1.0f, 0.0f, 0.0f);
    }
    
+   /**
+    * Some colors from: http://cloford.com/resources/colours/500col.htm
+    */
    public static Appearance Pink()
    {
       return RGBColorFrom8BitInts(255, 192, 203);
    }
+   
    
    public static Appearance Orange()
    {
