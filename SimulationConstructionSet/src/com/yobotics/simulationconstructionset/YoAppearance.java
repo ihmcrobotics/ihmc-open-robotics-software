@@ -278,6 +278,11 @@ public class YoAppearance
    {
       return RGBColor(1.0f, 0.0f, 0.0f);
    }
+   
+   public static Appearance Pink()
+   {
+      return RGBColor(255, 192, 203);
+   }
 
    public static Appearance DarkRed()
    {
