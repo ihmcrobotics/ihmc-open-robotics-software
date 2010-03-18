@@ -11,6 +11,7 @@ import com.yobotics.simulationconstructionset.YoVariableType;
 public class DoubleGlobalParameterTest    // extends TestCase
 {
    private final double DEFAULT_VALUE = 11.99;
+   private final double eps = 1e-10;
 
    @Before
    public void setUp() throws Exception
@@ -31,7 +32,7 @@ public class DoubleGlobalParameterTest    // extends TestCase
 
       DoubleGlobalParameter doubleGlobalParameter = new DoubleGlobalParameter("testParameter", "test description", DEFAULT_VALUE,
                                                        systemOutGlobalParameterChangedListener);
-      assertEquals(DEFAULT_VALUE, doubleGlobalParameter.getValue());
+      assertEquals(DEFAULT_VALUE, doubleGlobalParameter.getValue(), eps);
    }
 
    @Test
@@ -45,19 +46,19 @@ public class DoubleGlobalParameterTest    // extends TestCase
 
       double newValue = -0.045;
       doubleGlobalParameter.set(newValue);
-      assertEquals(newValue, doubleGlobalParameter.getValue());
+      assertEquals(newValue, doubleGlobalParameter.getValue(), eps);
 
       newValue = 1100.345;
       doubleGlobalParameter.set(newValue, "setting");
-      assertEquals(newValue, doubleGlobalParameter.getValue());
+      assertEquals(newValue, doubleGlobalParameter.getValue(), eps);
 
       newValue = 1100.345;
       doubleGlobalParameter.setOnlyIfChange(newValue, "setting");
-      assertEquals(newValue, doubleGlobalParameter.getValue());
+      assertEquals(newValue, doubleGlobalParameter.getValue(), eps);
 
       newValue = -906.345;
       doubleGlobalParameter.setOnlyIfChange(newValue, "setting");
-      assertEquals(newValue, doubleGlobalParameter.getValue());
+      assertEquals(newValue, doubleGlobalParameter.getValue(), eps);
    }
 
    @Test
@@ -75,7 +76,7 @@ public class DoubleGlobalParameterTest    // extends TestCase
    public void testThatCantHaveParentsUnlessOverwriteUpdateMethodOne()
    {
       DoubleGlobalParameter parent = new DoubleGlobalParameter("parent", "parent", DEFAULT_VALUE, null);
-      DoubleGlobalParameter invalidChild = new DoubleGlobalParameter("invalidChild", "test description", new GlobalParameter[] {parent}, null);
+      new DoubleGlobalParameter("invalidChild", "test description", new GlobalParameter[] {parent}, null); // invalid
 
       parent.set(1.0);
    }
