@@ -1,4 +1,4 @@
-package com.yobotics.simulationconstructionset.robotdefinition;
+package com.yobotics.simulationconstructionset.robotdefinition.linkgraphicinstructions;
 
 import javax.vecmath.Vector3d;
 
@@ -19,5 +19,11 @@ public class LinkGraphicsScale implements LinkGraphicsInstruction
    public Vector3d getScaleFactor()
    {
       return scaleFactor;
+   }
+   
+   public String toString()
+   {
+      
+      return "<Scale> "+scaleFactor;
    }
 }

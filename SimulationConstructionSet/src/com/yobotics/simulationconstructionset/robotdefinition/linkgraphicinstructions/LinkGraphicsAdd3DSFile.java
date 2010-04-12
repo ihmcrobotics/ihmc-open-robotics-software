@@ -1,4 +1,6 @@
-package com.yobotics.simulationconstructionset.robotdefinition;
+package com.yobotics.simulationconstructionset.robotdefinition.linkgraphicinstructions;
+
+import com.yobotics.simulationconstructionset.robotdefinition.AppearanceDefinition;
 
 public class LinkGraphicsAdd3DSFile implements LinkGraphicsInstruction
 {
@@ -24,5 +26,10 @@ public class LinkGraphicsAdd3DSFile implements LinkGraphicsInstruction
    public AppearanceDefinition getAppearence()
    {
       return appearence;
+   }
+ 
+   public String toString()
+   {
+      return "<Add3DSFile> "+fileName+" "+appearence;
    }
 }

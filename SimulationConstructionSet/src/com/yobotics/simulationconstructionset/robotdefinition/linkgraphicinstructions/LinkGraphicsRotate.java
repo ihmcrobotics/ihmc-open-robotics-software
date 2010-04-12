@@ -1,4 +1,4 @@
-package com.yobotics.simulationconstructionset.robotdefinition;
+package com.yobotics.simulationconstructionset.robotdefinition.linkgraphicinstructions;
 
 import javax.vecmath.Vector3d;
 
@@ -19,5 +19,10 @@ public class LinkGraphicsRotate implements LinkGraphicsInstruction
    public Vector3d getAxis()
    {
       return axis;
+   }
+  
+   public String toString()
+   {
+      return "<Rotate> "+angle+" "+axis.x+" "+axis.y+" "+axis.z;
    }
 }
