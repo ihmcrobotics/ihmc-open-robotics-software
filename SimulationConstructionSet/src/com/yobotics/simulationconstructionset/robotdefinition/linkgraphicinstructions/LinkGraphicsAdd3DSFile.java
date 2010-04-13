@@ -5,7 +5,7 @@ import com.yobotics.simulationconstructionset.robotdefinition.AppearanceDefiniti
 public class LinkGraphicsAdd3DSFile implements LinkGraphicsInstruction
 {
    private String fileName;
-   private AppearanceDefinition appearence;
+   private AppearanceDefinition appearance = null;
 
    public LinkGraphicsAdd3DSFile(String fileName)
    {
@@ -15,7 +15,7 @@ public class LinkGraphicsAdd3DSFile implements LinkGraphicsInstruction
    public LinkGraphicsAdd3DSFile(String fileName, AppearanceDefinition appearence)
    {
       this.fileName = fileName;
-      this.appearence = appearence;
+      this.appearance = appearence;
    }
    
    public String getFileName()
@@ -23,13 +23,13 @@ public class LinkGraphicsAdd3DSFile implements LinkGraphicsInstruction
       return fileName;
    }
    
-   public AppearanceDefinition getAppearence()
+   public AppearanceDefinition getAppearance()
    {
-      return appearence;
+      return appearance;
    }
  
    public String toString()
    {
-      return "<Add3DSFile> "+fileName+" "+appearence;
+      return "<Add3DSFile> "+fileName+" "+appearance;
    }
 }

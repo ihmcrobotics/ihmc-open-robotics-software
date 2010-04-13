@@ -1,5 +1,6 @@
 package com.yobotics.simulationconstructionset;
 
+import java.awt.Color;
 import java.io.FileNotFoundException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -43,6 +44,7 @@ import com.yobotics.simulationconstructionset.robotdefinition.linkgraphicinstruc
 import com.yobotics.simulationconstructionset.robotdefinition.linkgraphicinstructions.LinkGraphicsAddVRMLFile;
 import com.yobotics.simulationconstructionset.robotdefinition.linkgraphicinstructions.LinkGraphicsAddWedge;
 import com.yobotics.simulationconstructionset.robotdefinition.linkgraphicinstructions.LinkGraphicsIdentity;
+import com.yobotics.simulationconstructionset.robotdefinition.linkgraphicinstructions.LinkGraphicsInstruction;
 import com.yobotics.simulationconstructionset.robotdefinition.linkgraphicinstructions.LinkGraphicsRotate;
 import com.yobotics.simulationconstructionset.robotdefinition.linkgraphicinstructions.LinkGraphicsRotateDefinedAxis;
 import com.yobotics.simulationconstructionset.robotdefinition.linkgraphicinstructions.LinkGraphicsRotateMatrix;
@@ -70,6 +72,191 @@ public class LinkGraphics
    private LinkGraphicsDefinition linkGraphicsDefinition;
 
 
+   public LinkGraphics(LinkGraphicsDefinition linkGraphicsDefinition)
+   {
+      this();
+      setUpGraphicsFromDefinition(linkGraphicsDefinition);
+   }
+   
+   private void setUpGraphicsFromDefinition(LinkGraphicsDefinition graphicsDefinition)
+   {
+      //LinkGraphics this = new LinkGraphics();
+
+      for (LinkGraphicsInstruction instruction : graphicsDefinition.getInstructions())
+      {
+         if (instruction instanceof LinkGraphicsAdd3DSFile)
+         {
+            // Appearance app = new Appearance();
+
+
+            if (((LinkGraphicsAdd3DSFile) instruction).getAppearance() != null)
+            {
+               Color3f color = ((LinkGraphicsAdd3DSFile) instruction).getAppearance().getColor();
+               Appearance app = YoAppearance.Color(new Color(color.x, color.y, color.z));
+               this.add3DSFile(((LinkGraphicsAdd3DSFile) instruction).getFileName(), app);
+            }
+
+            this.add3DSFile(((LinkGraphicsAdd3DSFile) instruction).getFileName());
+
+
+         }
+         else if (instruction instanceof LinkGraphicsAddArcTorus)
+         {
+            if (((LinkGraphicsAddArcTorus) instruction).getAppearance() != null)
+            {
+               Color3f color = ((LinkGraphicsAddArcTorus) instruction).getAppearance().getColor();
+               Appearance app = YoAppearance.Color(new Color(color.x, color.y, color.z));
+               this.addArcTorus(((LinkGraphicsAddArcTorus) instruction).getStartAngle(), ((LinkGraphicsAddArcTorus) instruction).getEndAngle(),
+                                       ((LinkGraphicsAddArcTorus) instruction).getMajorRadius(), ((LinkGraphicsAddArcTorus) instruction).getMinorRadius(), app);
+            }
+
+            this.addArcTorus(((LinkGraphicsAddArcTorus) instruction).getStartAngle(), ((LinkGraphicsAddArcTorus) instruction).getEndAngle(),
+                                    ((LinkGraphicsAddArcTorus) instruction).getMajorRadius(), ((LinkGraphicsAddArcTorus) instruction).getMinorRadius());
+
+         }
+         else if (instruction instanceof LinkGraphicsAddCone)
+         {
+            if (((LinkGraphicsAddCone) instruction).getAppearance() != null)
+            {
+               Color3f color = ((LinkGraphicsAddCone) instruction).getAppearance().getColor();
+               Appearance app = YoAppearance.Color(new Color(color.x, color.y, color.z));
+
+               this.addCone(((LinkGraphicsAddCone) instruction).getHeight(), ((LinkGraphicsAddCone) instruction).getRadius(), app);
+            }
+
+            this.addCone(((LinkGraphicsAddCone) instruction).getHeight(), ((LinkGraphicsAddCone) instruction).getRadius());
+         }
+         else if (instruction instanceof LinkGraphicsAddCylinder)
+         {
+            if (((LinkGraphicsAddCylinder) instruction).getAppearance() != null)
+            {
+               Color3f color = ((LinkGraphicsAddCylinder) instruction).getAppearance().getColor();
+               Appearance app = YoAppearance.Color(new Color(color.x, color.y, color.z));
+               this.addCylinder(((LinkGraphicsAddCylinder) instruction).getHeight(), ((LinkGraphicsAddCylinder) instruction).getRadius(), app);
+
+            }
+
+            this.addCylinder(((LinkGraphicsAddCylinder) instruction).getHeight(), ((LinkGraphicsAddCylinder) instruction).getRadius());
+         }
+         else if (instruction instanceof LinkGraphicsAddCoordinateSystem)
+         {
+            this.addCoordinateSystem(((LinkGraphicsAddCoordinateSystem) instruction).getLength());
+         }
+         else if (instruction instanceof LinkGraphicsAddCube)
+         {
+            if (((LinkGraphicsAddCube) instruction).getAppearance() != null)
+            {
+               Color3f color = ((LinkGraphicsAddCube) instruction).getAppearance().getColor();
+               Appearance app = YoAppearance.Color(new Color(color.x, color.y, color.z));
+
+               this.addCube(((LinkGraphicsAddCube) instruction).getX(), ((LinkGraphicsAddCube) instruction).getY(),
+                                   ((LinkGraphicsAddCube) instruction).getZ(), app);
+            }
+
+            this.addCube(((LinkGraphicsAddCube) instruction).getX(), ((LinkGraphicsAddCube) instruction).getY(),
+                                ((LinkGraphicsAddCube) instruction).getZ());
+         }
+         else if (instruction instanceof LinkGraphicsAddEllipsoid)
+         {
+            if (((LinkGraphicsAddEllipsoid) instruction).getAppearance() != null)
+            {
+               Color3f color = ((LinkGraphicsAddEllipsoid) instruction).getAppearance().getColor();
+               Appearance app = YoAppearance.Color(new Color(color.x, color.y, color.z));
+               this.addEllipsoid(((LinkGraphicsAddEllipsoid) instruction).getXRad(), ((LinkGraphicsAddEllipsoid) instruction).getYRad(),
+                                        ((LinkGraphicsAddEllipsoid) instruction).getZRad(), app);
+            }
+
+            this.addEllipsoid(((LinkGraphicsAddEllipsoid) instruction).getXRad(), ((LinkGraphicsAddEllipsoid) instruction).getYRad(),
+                                     ((LinkGraphicsAddEllipsoid) instruction).getZRad());
+         }
+         else if (instruction instanceof LinkGraphicsAddHemiEllipsoid)
+         {
+            if (((LinkGraphicsAddHemiEllipsoid) instruction).getAppearance() != null)
+            {
+               Color3f color = ((LinkGraphicsAddHemiEllipsoid) instruction).getAppearance().getColor();
+               Appearance app = YoAppearance.Color(new Color(color.x, color.y, color.z));
+               this.addHemiEllipsoid(((LinkGraphicsAddHemiEllipsoid) instruction).getXRad(), ((LinkGraphicsAddHemiEllipsoid) instruction).getYRad(),
+                                            ((LinkGraphicsAddHemiEllipsoid) instruction).getZRad(), app);
+            }
+
+            this.addHemiEllipsoid(((LinkGraphicsAddHemiEllipsoid) instruction).getXRad(), ((LinkGraphicsAddHemiEllipsoid) instruction).getYRad(),
+                                         ((LinkGraphicsAddHemiEllipsoid) instruction).getZRad());
+
+         }
+         else if (instruction instanceof LinkGraphicsAddPyramidCube)
+         {
+            if (((LinkGraphicsAddPyramidCube) instruction).getAppearance() != null)
+            {
+               Color3f color = ((LinkGraphicsAddPyramidCube) instruction).getAppearance().getColor();
+               Appearance app = YoAppearance.Color(new Color(color.x, color.y, color.z));
+               this.addPyramidCube(((LinkGraphicsAddPyramidCube) instruction).getX(), ((LinkGraphicsAddPyramidCube) instruction).getY(),
+                                          ((LinkGraphicsAddPyramidCube) instruction).getZ(), ((LinkGraphicsAddPyramidCube) instruction).getHeight(), app);
+            }
+
+            this.addPyramidCube(((LinkGraphicsAddPyramidCube) instruction).getX(), ((LinkGraphicsAddPyramidCube) instruction).getY(),
+                                       ((LinkGraphicsAddPyramidCube) instruction).getZ(), ((LinkGraphicsAddPyramidCube) instruction).getHeight());
+         }
+         else if (instruction instanceof LinkGraphicsAddSphere)
+         {
+            if (((LinkGraphicsAddSphere) instruction).getAppearance() != null)
+            {
+               Color3f color = ((LinkGraphicsAddSphere) instruction).getAppearance().getColor();
+               Appearance app = YoAppearance.Color(new Color(color.x, color.y, color.z));
+               this.addSphere(((LinkGraphicsAddSphere) instruction).getRadius(), app);
+            }
+
+            this.addSphere(((LinkGraphicsAddSphere) instruction).getRadius());
+         }
+         else if (instruction instanceof LinkGraphicsAddVRMLFile)
+         {
+            if (((LinkGraphicsAddVRMLFile) instruction).getAppearance() != null)
+            {
+               Color3f color = ((LinkGraphicsAddVRMLFile) instruction).getAppearance().getColor();
+               Appearance app = YoAppearance.Color(new Color(color.x, color.y, color.z));
+               this.addVRMLFile(((LinkGraphicsAddVRMLFile) instruction).getFileName(), app);
+            }
+
+            this.addVRMLFile(((LinkGraphicsAddVRMLFile) instruction).getFileName());
+         }
+         else if (instruction instanceof LinkGraphicsAddWedge)
+         {
+            if (((LinkGraphicsAddWedge) instruction).getAppearance() != null)
+            {
+               Color3f color = ((LinkGraphicsAddWedge) instruction).getAppearance().getColor();
+               Appearance app = YoAppearance.Color(new Color(color.x, color.y, color.z));
+               this.addWedge(((LinkGraphicsAddWedge) instruction).getX(), ((LinkGraphicsAddWedge) instruction).getY(),
+                                    ((LinkGraphicsAddWedge) instruction).getZ(), app);
+            }
+
+            this.addWedge(((LinkGraphicsAddWedge) instruction).getX(), ((LinkGraphicsAddWedge) instruction).getY(),
+                                 ((LinkGraphicsAddWedge) instruction).getZ());
+         }
+         else if (instruction instanceof LinkGraphicsIdentity)
+         {
+            this.identity();
+         }
+         else if (instruction instanceof LinkGraphicsRotate)
+         {
+            this.rotate(((LinkGraphicsRotate) instruction).getAngle(), ((LinkGraphicsRotate) instruction).getAxis());
+         }
+         else if (instruction instanceof LinkGraphicsRotateMatrix)
+         {
+            this.rotate(((LinkGraphicsRotateMatrix) instruction).getRotationMatrix());
+         }
+         else if (instruction instanceof LinkGraphicsScale)
+         {
+            this.scale(((LinkGraphicsScale) instruction).getScaleFactor());
+         }
+         else if (instruction instanceof LinkGraphicsTranslate)
+         {
+            this.translate(((LinkGraphicsTranslate) instruction).getTranslation());
+         }
+
+      }
+
+     // return this;
+   }
+   
    /**
     * Default no-arg constructor.  This creates a new empty LinkGraphics component.
     */
@@ -614,7 +801,11 @@ public class LinkGraphics
          recursiveSetEnabling(vrmlGroup, app, 0);
 
       this.addBranchGroup(vrmlGroup);
-      linkGraphicsDefinition.addInstruction(new LinkGraphicsAddVRMLFile(fileURL.getPath(), new AppearanceDefinition(getColor(app))));
+      if (app != null)
+         linkGraphicsDefinition.addInstruction(new LinkGraphicsAddVRMLFile(fileURL.getPath(), new AppearanceDefinition(getColor(app))));
+      else
+         linkGraphicsDefinition.addInstruction(new LinkGraphicsAddVRMLFile(fileURL.getPath()));
+
    }
 
 
@@ -659,7 +850,10 @@ public class LinkGraphics
          recursiveSetEnabling(vrmlGroup, app, 0);
 
       this.addBranchGroup(vrmlGroup);
-      linkGraphicsDefinition.addInstruction(new LinkGraphicsAddVRMLFile(fileName, new AppearanceDefinition(getColor(app))));
+      if (app != null)
+         linkGraphicsDefinition.addInstruction(new LinkGraphicsAddVRMLFile(fileName, new AppearanceDefinition(getColor(app))));
+      else
+         linkGraphicsDefinition.addInstruction(new LinkGraphicsAddVRMLFile(fileName));
    }
 
    /**
@@ -715,7 +909,11 @@ public class LinkGraphics
       else
          System.out.println("Null File Name in add3DSFile");
 
-      linkGraphicsDefinition.addInstruction(new LinkGraphicsAdd3DSFile(fileURL.getPath(), new AppearanceDefinition(getColor(app))));
+
+      if (app != null)
+         linkGraphicsDefinition.addInstruction(new LinkGraphicsAdd3DSFile(fileURL.getPath(), new AppearanceDefinition(getColor(app))));
+      else
+         linkGraphicsDefinition.addInstruction(new LinkGraphicsAdd3DSFile(fileURL.getPath()));
    }
 
    /*
@@ -799,7 +997,10 @@ public class LinkGraphics
       // this.addBranchGroup(branchGroup);
 
       this.addGroup(transGroup);
-      linkGraphicsDefinition.addInstruction(new LinkGraphicsAdd3DSFile(fileName, new AppearanceDefinition(getColor(app))));
+      if (app != null)
+         linkGraphicsDefinition.addInstruction(new LinkGraphicsAdd3DSFile(fileName, new AppearanceDefinition(getColor(app))));
+      else
+         linkGraphicsDefinition.addInstruction(new LinkGraphicsAdd3DSFile(fileName));
    }
 
    /**
@@ -885,7 +1086,10 @@ public class LinkGraphics
    {
       Geometry cubeGeom = YoGeometry.Cube(lx, ly, lz);
       addShape(cubeGeom, cubeApp);
-      linkGraphicsDefinition.addInstruction(new LinkGraphicsAddCube(lx, ly, lz, new AppearanceDefinition(getColor(cubeApp))));
+      if (cubeApp != null)
+         linkGraphicsDefinition.addInstruction(new LinkGraphicsAddCube(lx, ly, lz, new AppearanceDefinition(getColor(cubeApp))));
+      else
+         linkGraphicsDefinition.addInstruction(new LinkGraphicsAddCube(lx, ly, lz));
    }
 
    /**
@@ -932,7 +1136,10 @@ public class LinkGraphics
    {
       Geometry wedgeGeom = YoGeometry.Wedge(lx, ly, lz);
       addShape(wedgeGeom, wedgeApp);
-      linkGraphicsDefinition.addInstruction(new LinkGraphicsAddWedge(lx, ly, lz, new AppearanceDefinition(getColor(wedgeApp))));
+      if (wedgeApp != null)
+         linkGraphicsDefinition.addInstruction(new LinkGraphicsAddWedge(lx, ly, lz, new AppearanceDefinition(getColor(wedgeApp))));
+      else
+         linkGraphicsDefinition.addInstruction(new LinkGraphicsAddWedge(lx, ly, lz));
    }
 
    /**
@@ -972,7 +1179,10 @@ public class LinkGraphics
    {
       Geometry sphereGeom = YoGeometry.Sphere(radius, 15, 15);
       addShape(sphereGeom, sphereApp);
-      linkGraphicsDefinition.addInstruction(new LinkGraphicsAddSphere(radius, new AppearanceDefinition(getColor(sphereApp))));
+      if (sphereApp != null)
+         linkGraphicsDefinition.addInstruction(new LinkGraphicsAddSphere(radius, new AppearanceDefinition(getColor(sphereApp))));
+      else
+         linkGraphicsDefinition.addInstruction(new LinkGraphicsAddSphere(radius));
    }
 
    /**
@@ -1016,7 +1226,10 @@ public class LinkGraphics
    {
       Geometry ellipsoidGeom = YoGeometry.Ellipsoid(xRad, yRad, zRad, 15, 15);
       addShape(ellipsoidGeom, ellipsoidApp);
-      linkGraphicsDefinition.addInstruction(new LinkGraphicsAddEllipsoid(xRad, yRad, zRad, new AppearanceDefinition(getColor(ellipsoidApp))));
+      if (ellipsoidApp != null)
+         linkGraphicsDefinition.addInstruction(new LinkGraphicsAddEllipsoid(xRad, yRad, zRad, new AppearanceDefinition(getColor(ellipsoidApp))));
+      else
+         linkGraphicsDefinition.addInstruction(new LinkGraphicsAddEllipsoid(xRad, yRad, zRad));
    }
 
    /**
@@ -1058,7 +1271,10 @@ public class LinkGraphics
    {
       Geometry cylGeom = YoGeometry.Cylinder(radius, height, 15);
       addShape(cylGeom, cylApp);
-      linkGraphicsDefinition.addInstruction(new LinkGraphicsAddCylinder(height, radius, new AppearanceDefinition(getColor(cylApp))));
+      if (cylApp != null)
+         linkGraphicsDefinition.addInstruction(new LinkGraphicsAddCylinder(height, radius, new AppearanceDefinition(getColor(cylApp))));
+      else
+         linkGraphicsDefinition.addInstruction(new LinkGraphicsAddCylinder(height, radius));
    }
 
    /**
@@ -1100,7 +1316,10 @@ public class LinkGraphics
    {
       Geometry coneGeom = YoGeometry.Cone(height, radius, 15);
       addShape(coneGeom, coneApp);
-      linkGraphicsDefinition.addInstruction(new LinkGraphicsAddCone(height, radius, new AppearanceDefinition(getColor(coneApp))));
+      if (coneApp != null)
+         linkGraphicsDefinition.addInstruction(new LinkGraphicsAddCone(height, radius, new AppearanceDefinition(getColor(coneApp))));
+      else
+         linkGraphicsDefinition.addInstruction(new LinkGraphicsAddCone(height, radius));
    }
 
    /**
@@ -1154,7 +1373,10 @@ public class LinkGraphics
    {
       Geometry genTruncatedConeGeom = YoGeometry.GenTruncatedCone(height, bx, by, tx, ty, 15);
       addShape(genTruncatedConeGeom, coneApp);
-      linkGraphicsDefinition.addInstruction(new LinkGraphicsAddTruncatedCone(height, bx, by, tx, ty, new AppearanceDefinition(getColor(coneApp))));
+      if (coneApp != null)
+         linkGraphicsDefinition.addInstruction(new LinkGraphicsAddTruncatedCone(height, bx, by, tx, ty, new AppearanceDefinition(getColor(coneApp))));
+      else
+         linkGraphicsDefinition.addInstruction(new LinkGraphicsAddTruncatedCone(height, bx, by, tx, ty));
    }
 
    /**
@@ -1202,7 +1424,10 @@ public class LinkGraphics
    {
       Geometry hEGeom = YoGeometry.HemiEllipsoid(xRad, yRad, zRad, 16, 16);
       addShape(hEGeom, hEApp);
-      linkGraphicsDefinition.addInstruction(new LinkGraphicsAddHemiEllipsoid(xRad, yRad, zRad, new AppearanceDefinition(getColor(hEApp))));
+      if (hEApp != null)
+         linkGraphicsDefinition.addInstruction(new LinkGraphicsAddHemiEllipsoid(xRad, yRad, zRad, new AppearanceDefinition(getColor(hEApp))));
+      else
+         linkGraphicsDefinition.addInstruction(new LinkGraphicsAddHemiEllipsoid(xRad, yRad, zRad));
    }
 
    /**
@@ -1266,8 +1491,11 @@ public class LinkGraphics
 
       // Geometry arcTorusGeom = YoGeometry.Sphere(0.2f,15,15);
       addShape(arcTorusGeom, arcTorusApp);
-      linkGraphicsDefinition.addInstruction(new LinkGraphicsAddArcTorus(startAngle, endAngle, majorRadius, minorRadius,
-              new AppearanceDefinition(getColor(arcTorusApp))));
+      if (arcTorusApp != null)
+         linkGraphicsDefinition.addInstruction(new LinkGraphicsAddArcTorus(startAngle, endAngle, majorRadius, minorRadius,
+                 new AppearanceDefinition(getColor(arcTorusApp))));
+      else
+         linkGraphicsDefinition.addInstruction(new LinkGraphicsAddArcTorus(startAngle, endAngle, majorRadius, minorRadius));
    }
 
    /**
@@ -1319,7 +1547,10 @@ public class LinkGraphics
    {
       Geometry cubeGeom = YoGeometry.PyramidCube(lx, ly, lz, lh);
       addShape(cubeGeom, cubeApp);
-      linkGraphicsDefinition.addInstruction(new LinkGraphicsAddPyramidCube(lx, ly, lz, lh, new AppearanceDefinition(getColor(cubeApp))));
+      if (cubeApp != null)
+         linkGraphicsDefinition.addInstruction(new LinkGraphicsAddPyramidCube(lx, ly, lz, lh, new AppearanceDefinition(getColor(cubeApp))));
+      else
+         linkGraphicsDefinition.addInstruction(new LinkGraphicsAddPyramidCube(lx, ly, lz, lh));
    }
 
    /**
@@ -1349,7 +1580,10 @@ public class LinkGraphics
    {
       Geometry geometry = YoGeometry.Polygon(polygonPoints);
       addShape(geometry, appearance);
-      linkGraphicsDefinition.addInstruction(new LinkGraphicsAddPolygonFloat(polygonPoints, new AppearanceDefinition(getColor(appearance))));
+      if (appearance != null)
+         linkGraphicsDefinition.addInstruction(new LinkGraphicsAddPolygonFloat(polygonPoints, new AppearanceDefinition(getColor(appearance))));
+      else
+         linkGraphicsDefinition.addInstruction(new LinkGraphicsAddPolygonFloat(polygonPoints));
    }
 
    /**
@@ -1371,7 +1605,10 @@ public class LinkGraphics
 
       Geometry geometry = YoGeometry.Polygon(polygonPoints);
       addShape(geometry, appearance);
-      linkGraphicsDefinition.addInstruction(new LinkGraphicsAddPolygonDouble(polygonPoints, new AppearanceDefinition(getColor(appearance))));
+      if (appearance != null)
+         linkGraphicsDefinition.addInstruction(new LinkGraphicsAddPolygonDouble(polygonPoints, new AppearanceDefinition(getColor(appearance))));
+      else
+         linkGraphicsDefinition.addInstruction(new LinkGraphicsAddPolygonDouble(polygonPoints));
    }
 
    /**
@@ -1407,7 +1644,10 @@ public class LinkGraphics
 
       Geometry geometry = YoGeometry.Polygon(polygonPoints);
       addShape(geometry, appearance);
-      linkGraphicsDefinition.addInstruction(new LinkGraphicsAddPolygonDouble(polygonPoints, new AppearanceDefinition(getColor(appearance))));
+      if (appearance != null)
+         linkGraphicsDefinition.addInstruction(new LinkGraphicsAddPolygonDouble(polygonPoints, new AppearanceDefinition(getColor(appearance))));
+      else
+         linkGraphicsDefinition.addInstruction(new LinkGraphicsAddPolygonDouble(polygonPoints));
    }
 
 
