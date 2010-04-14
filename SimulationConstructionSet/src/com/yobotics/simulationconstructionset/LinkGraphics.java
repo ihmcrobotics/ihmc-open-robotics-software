@@ -759,7 +759,7 @@ public class LinkGraphics
    public void addVRMLFile(URL fileURL)
    {
       addVRMLFile(fileURL, null);
-      linkGraphicsDefinition.addInstruction(new LinkGraphicsAddVRMLFile(fileURL.getPath()));
+      //linkGraphicsDefinition.addInstruction(new LinkGraphicsAddVRMLFile(fileURL.getPath()));
    }
 
    /**
@@ -866,7 +866,7 @@ public class LinkGraphics
    public void addVRMLFile(String fileName)
    {
       addVRMLFile(fileName, null);
-      linkGraphicsDefinition.addInstruction(new LinkGraphicsAddVRMLFile(fileName));
+      //linkGraphicsDefinition.addInstruction(new LinkGraphicsAddVRMLFile(fileName));
    }
 
    /**
@@ -880,7 +880,7 @@ public class LinkGraphics
    public void add3DSFile(URL fileURL)
    {
       add3DSFile(fileURL, null);
-      linkGraphicsDefinition.addInstruction(new LinkGraphicsAdd3DSFile(fileURL.getPath()));
+     // linkGraphicsDefinition.addInstruction(new LinkGraphicsAdd3DSFile(fileURL.getPath()));
    }
 
    /**
@@ -954,7 +954,7 @@ public class LinkGraphics
    public void add3DSFile(String fileName)
    {
       add3DSFile(fileName, null);
-      linkGraphicsDefinition.addInstruction(new LinkGraphicsAdd3DSFile(fileName));
+      //linkGraphicsDefinition.addInstruction(new LinkGraphicsAdd3DSFile(fileName));
    }
 
    /**
@@ -1061,7 +1061,7 @@ public class LinkGraphics
    public void addCube(double lx, double ly, double lz)
    {
       addCube(lx, ly, lz, YoAppearance.Black());
-      linkGraphicsDefinition.addInstruction(new LinkGraphicsAddCube(lx, ly, lz));
+     // linkGraphicsDefinition.addInstruction(new LinkGraphicsAddCube(lx, ly, lz));
    }
 
    /**
@@ -1110,7 +1110,7 @@ public class LinkGraphics
    public void addWedge(double lx, double ly, double lz)
    {
       addWedge(lx, ly, lz, YoAppearance.Black());
-      linkGraphicsDefinition.addInstruction(new LinkGraphicsAddWedge(lx, ly, lz));
+     // linkGraphicsDefinition.addInstruction(new LinkGraphicsAddWedge(lx, ly, lz));
    }
 
    /**
@@ -1157,7 +1157,7 @@ public class LinkGraphics
    public void addSphere(double radius)
    {
       addSphere(radius, YoAppearance.Black());
-      linkGraphicsDefinition.addInstruction(new LinkGraphicsAddSphere(radius));
+//      linkGraphicsDefinition.addInstruction(new LinkGraphicsAddSphere(radius));
    }
 
    /**
@@ -1202,7 +1202,7 @@ public class LinkGraphics
    public void addEllipsoid(double xRad, double yRad, double zRad)
    {
       addEllipsoid(xRad, yRad, zRad, YoAppearance.Black());
-      linkGraphicsDefinition.addInstruction(new LinkGraphicsAddEllipsoid(xRad, yRad, zRad));
+      //linkGraphicsDefinition.addInstruction(new LinkGraphicsAddEllipsoid(xRad, yRad, zRad));
    }
 
    /**
@@ -1248,7 +1248,7 @@ public class LinkGraphics
    public void addCylinder(double height, double radius)
    {
       addCylinder(height, radius, YoAppearance.Black());
-      linkGraphicsDefinition.addInstruction(new LinkGraphicsAddCylinder(height, radius));
+      //linkGraphicsDefinition.addInstruction(new LinkGraphicsAddCylinder(height, radius));
    }
 
    /**
@@ -1293,7 +1293,7 @@ public class LinkGraphics
    public void addCone(double height, double radius)
    {
       addCone(height, radius, YoAppearance.Black());
-      linkGraphicsDefinition.addInstruction(new LinkGraphicsAddCone(height, radius));
+     // linkGraphicsDefinition.addInstruction(new LinkGraphicsAddCone(height, radius));
    }
 
    /**
@@ -1343,7 +1343,7 @@ public class LinkGraphics
    public void addGenTruncatedCone(double height, double bx, double by, double tx, double ty)
    {
       addGenTruncatedCone(height, bx, by, tx, ty, YoAppearance.Black());
-      linkGraphicsDefinition.addInstruction(new LinkGraphicsAddTruncatedCone(height, bx, by, tx, ty));
+      //linkGraphicsDefinition.addInstruction(new LinkGraphicsAddTruncatedCone(height, bx, by, tx, ty));
    }
 
    /**
@@ -1398,7 +1398,7 @@ public class LinkGraphics
    public void addHemiEllipsoid(double xRad, double yRad, double zRad)
    {
       addHemiEllipsoid(xRad, yRad, zRad, YoAppearance.Black());
-      linkGraphicsDefinition.addInstruction(new LinkGraphicsAddHemiEllipsoid(xRad, yRad, zRad));
+     // linkGraphicsDefinition.addInstruction(new LinkGraphicsAddHemiEllipsoid(xRad, yRad, zRad));
    }
 
    /**
@@ -1456,7 +1456,7 @@ public class LinkGraphics
       addArcTorus(startAngle, endAngle, majorRadius, minorRadius, YoAppearance.Black());
 
       // addCylinder(1.0f, 0.2f);
-      linkGraphicsDefinition.addInstruction(new LinkGraphicsAddArcTorus(startAngle, endAngle, majorRadius, minorRadius));
+    //  linkGraphicsDefinition.addInstruction(new LinkGraphicsAddArcTorus(startAngle, endAngle, majorRadius, minorRadius));
    }
 
    /**
@@ -1519,7 +1519,7 @@ public class LinkGraphics
    public void addPyramidCube(double lx, double ly, double lz, double lh)
    {
       addPyramidCube(lx, ly, lz, lh, YoAppearance.Black());
-      linkGraphicsDefinition.addInstruction(new LinkGraphicsAddPyramidCube(lx, ly, lz, lh));
+     // linkGraphicsDefinition.addInstruction(new LinkGraphicsAddPyramidCube(lx, ly, lz, lh));
    }
 
    /**
@@ -1563,7 +1563,7 @@ public class LinkGraphics
    public void addPolygon(Point3f[] polygonPoint)
    {
       addPolygon(polygonPoint, YoAppearance.Black());
-      linkGraphicsDefinition.addInstruction(new LinkGraphicsAddPolygonFloat(polygonPoint));
+     // linkGraphicsDefinition.addInstruction(new LinkGraphicsAddPolygonFloat(polygonPoint));
    }
 
    /**
@@ -1621,7 +1621,7 @@ public class LinkGraphics
    public void addPolygon(Point3d[] polygonPoint)
    {
       addPolygon(polygonPoint, YoAppearance.Black());
-      linkGraphicsDefinition.addInstruction(new LinkGraphicsAddPolygonDouble(polygonPoint));
+     // linkGraphicsDefinition.addInstruction(new LinkGraphicsAddPolygonDouble(polygonPoint));
    }
 
    /**
