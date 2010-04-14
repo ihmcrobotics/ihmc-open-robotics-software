@@ -12,6 +12,7 @@ import javax.media.j3d.Geometry;
 import javax.media.j3d.Group;
 import javax.media.j3d.Leaf;
 import javax.media.j3d.Light;
+import javax.media.j3d.Material;
 import javax.media.j3d.Node;
 import javax.media.j3d.PolygonAttributes;
 import javax.media.j3d.Shape3D;
@@ -92,7 +93,10 @@ public class LinkGraphics
             if (((LinkGraphicsAdd3DSFile) instruction).getAppearance() != null)
             {
                Color3f color = ((LinkGraphicsAdd3DSFile) instruction).getAppearance().getColor();
-               Appearance app = YoAppearance.Color(new Color(color.x, color.y, color.z));
+               Appearance app = new Appearance();
+               Material tmp = new Material();
+               tmp.setAmbientColor(color);
+               app.setMaterial(tmp);    // YoAppearance.Color(new Color(color.x, color.y, color.z));
                this.add3DSFile(((LinkGraphicsAdd3DSFile) instruction).getFileName(), app);
             }
             else
@@ -105,7 +109,10 @@ public class LinkGraphics
             if (((LinkGraphicsAddArcTorus) instruction).getAppearance() != null)
             {
                Color3f color = ((LinkGraphicsAddArcTorus) instruction).getAppearance().getColor();
-               Appearance app = YoAppearance.Color(new Color(color.x, color.y, color.z));
+               Appearance app = new Appearance();
+               Material tmp = new Material();
+               tmp.setAmbientColor(color);
+               app.setMaterial(tmp);
                this.addArcTorus(((LinkGraphicsAddArcTorus) instruction).getStartAngle(), ((LinkGraphicsAddArcTorus) instruction).getEndAngle(),
                                 ((LinkGraphicsAddArcTorus) instruction).getMajorRadius(), ((LinkGraphicsAddArcTorus) instruction).getMinorRadius(), app);
             }
@@ -119,7 +126,10 @@ public class LinkGraphics
             if (((LinkGraphicsAddCone) instruction).getAppearance() != null)
             {
                Color3f color = ((LinkGraphicsAddCone) instruction).getAppearance().getColor();
-               Appearance app = YoAppearance.Color(new Color(color.x, color.y, color.z));
+               Appearance app = new Appearance();
+               Material tmp = new Material();
+               tmp.setAmbientColor(color);
+               app.setMaterial(tmp);
 
                this.addCone(((LinkGraphicsAddCone) instruction).getHeight(), ((LinkGraphicsAddCone) instruction).getRadius(), app);
             }
@@ -131,7 +141,10 @@ public class LinkGraphics
             if (((LinkGraphicsAddCylinder) instruction).getAppearance() != null)
             {
                Color3f color = ((LinkGraphicsAddCylinder) instruction).getAppearance().getColor();
-               Appearance app = YoAppearance.Color(new Color(color.x, color.y, color.z));
+               Appearance app = new Appearance();
+               Material tmp = new Material();
+               tmp.setAmbientColor(color);
+               app.setMaterial(tmp);
                this.addCylinder(((LinkGraphicsAddCylinder) instruction).getHeight(), ((LinkGraphicsAddCylinder) instruction).getRadius(), app);
 
             }
@@ -147,7 +160,10 @@ public class LinkGraphics
             if (((LinkGraphicsAddCube) instruction).getAppearance() != null)
             {
                Color3f color = ((LinkGraphicsAddCube) instruction).getAppearance().getColor();
-               Appearance app = YoAppearance.Color(new Color(color.x, color.y, color.z));
+               Appearance app = new Appearance();
+               Material tmp = new Material();
+               tmp.setAmbientColor(color);
+               app.setMaterial(tmp);
 
                this.addCube(((LinkGraphicsAddCube) instruction).getX(), ((LinkGraphicsAddCube) instruction).getY(), ((LinkGraphicsAddCube) instruction).getZ(),
                             app);
@@ -160,7 +176,10 @@ public class LinkGraphics
             if (((LinkGraphicsAddEllipsoid) instruction).getAppearance() != null)
             {
                Color3f color = ((LinkGraphicsAddEllipsoid) instruction).getAppearance().getColor();
-               Appearance app = YoAppearance.Color(new Color(color.x, color.y, color.z));
+               Appearance app = new Appearance();
+               Material tmp = new Material();
+               tmp.setAmbientColor(color);
+               app.setMaterial(tmp);
                this.addEllipsoid(((LinkGraphicsAddEllipsoid) instruction).getXRad(), ((LinkGraphicsAddEllipsoid) instruction).getYRad(),
                                  ((LinkGraphicsAddEllipsoid) instruction).getZRad(), app);
             }
@@ -173,7 +192,10 @@ public class LinkGraphics
             if (((LinkGraphicsAddHemiEllipsoid) instruction).getAppearance() != null)
             {
                Color3f color = ((LinkGraphicsAddHemiEllipsoid) instruction).getAppearance().getColor();
-               Appearance app = YoAppearance.Color(new Color(color.x, color.y, color.z));
+               Appearance app = new Appearance();
+               Material tmp = new Material();
+               tmp.setAmbientColor(color);
+               app.setMaterial(tmp);
                this.addHemiEllipsoid(((LinkGraphicsAddHemiEllipsoid) instruction).getXRad(), ((LinkGraphicsAddHemiEllipsoid) instruction).getYRad(),
                                      ((LinkGraphicsAddHemiEllipsoid) instruction).getZRad(), app);
             }
@@ -187,7 +209,10 @@ public class LinkGraphics
             if (((LinkGraphicsAddPyramidCube) instruction).getAppearance() != null)
             {
                Color3f color = ((LinkGraphicsAddPyramidCube) instruction).getAppearance().getColor();
-               Appearance app = YoAppearance.Color(new Color(color.x, color.y, color.z));
+               Appearance app = new Appearance();
+               Material tmp = new Material();
+               tmp.setAmbientColor(color);
+               app.setMaterial(tmp);
                this.addPyramidCube(((LinkGraphicsAddPyramidCube) instruction).getX(), ((LinkGraphicsAddPyramidCube) instruction).getY(),
                                    ((LinkGraphicsAddPyramidCube) instruction).getZ(), ((LinkGraphicsAddPyramidCube) instruction).getHeight(), app);
             }
@@ -200,7 +225,10 @@ public class LinkGraphics
             if (((LinkGraphicsAddSphere) instruction).getAppearance() != null)
             {
                Color3f color = ((LinkGraphicsAddSphere) instruction).getAppearance().getColor();
-               Appearance app = YoAppearance.Color(new Color(color.x, color.y, color.z));
+               Appearance app = new Appearance();
+               Material tmp = new Material();
+               tmp.setAmbientColor(color);
+               app.setMaterial(tmp);
                this.addSphere(((LinkGraphicsAddSphere) instruction).getRadius(), app);
             }
             else
@@ -211,7 +239,10 @@ public class LinkGraphics
             if (((LinkGraphicsAddVRMLFile) instruction).getAppearance() != null)
             {
                Color3f color = ((LinkGraphicsAddVRMLFile) instruction).getAppearance().getColor();
-               Appearance app = YoAppearance.Color(new Color(color.x, color.y, color.z));
+               Appearance app = new Appearance();
+               Material tmp = new Material();
+               tmp.setAmbientColor(color);
+               app.setMaterial(tmp);
                this.addVRMLFile(((LinkGraphicsAddVRMLFile) instruction).getFileName(), app);
             }
             else
@@ -222,7 +253,10 @@ public class LinkGraphics
             if (((LinkGraphicsAddWedge) instruction).getAppearance() != null)
             {
                Color3f color = ((LinkGraphicsAddWedge) instruction).getAppearance().getColor();
-               Appearance app = YoAppearance.Color(new Color(color.x, color.y, color.z));
+               Appearance app = new Appearance();
+               Material tmp = new Material();
+               tmp.setAmbientColor(color);
+               app.setMaterial(tmp);
                this.addWedge(((LinkGraphicsAddWedge) instruction).getX(), ((LinkGraphicsAddWedge) instruction).getY(),
                              ((LinkGraphicsAddWedge) instruction).getZ(), app);
             }
@@ -237,6 +271,10 @@ public class LinkGraphics
          else if (instruction instanceof LinkGraphicsRotate)
          {
             this.rotate(((LinkGraphicsRotate) instruction).getAngle(), ((LinkGraphicsRotate) instruction).getAxis());
+         }
+         else if (instruction instanceof LinkGraphicsRotateDefinedAxis)
+         {
+            this.rotate(((LinkGraphicsRotateDefinedAxis) instruction).getAngle(), ((LinkGraphicsRotateDefinedAxis) instruction).getAxis());
          }
          else if (instruction instanceof LinkGraphicsRotateMatrix)
          {
@@ -284,7 +322,7 @@ public class LinkGraphics
    public Color3f getColor(Appearance app)
    {
       Color3f color = new Color3f();
-      app.getMaterial().getDiffuseColor(color);
+      app.getMaterial().getAmbientColor(color);
 
       return color;
    }
@@ -759,7 +797,8 @@ public class LinkGraphics
    public void addVRMLFile(URL fileURL)
    {
       addVRMLFile(fileURL, null);
-      //linkGraphicsDefinition.addInstruction(new LinkGraphicsAddVRMLFile(fileURL.getPath()));
+
+      // linkGraphicsDefinition.addInstruction(new LinkGraphicsAddVRMLFile(fileURL.getPath()));
    }
 
    /**
@@ -866,7 +905,8 @@ public class LinkGraphics
    public void addVRMLFile(String fileName)
    {
       addVRMLFile(fileName, null);
-      //linkGraphicsDefinition.addInstruction(new LinkGraphicsAddVRMLFile(fileName));
+
+      // linkGraphicsDefinition.addInstruction(new LinkGraphicsAddVRMLFile(fileName));
    }
 
    /**
@@ -880,7 +920,8 @@ public class LinkGraphics
    public void add3DSFile(URL fileURL)
    {
       add3DSFile(fileURL, null);
-     // linkGraphicsDefinition.addInstruction(new LinkGraphicsAdd3DSFile(fileURL.getPath()));
+
+      // linkGraphicsDefinition.addInstruction(new LinkGraphicsAdd3DSFile(fileURL.getPath()));
    }
 
    /**
@@ -954,7 +995,8 @@ public class LinkGraphics
    public void add3DSFile(String fileName)
    {
       add3DSFile(fileName, null);
-      //linkGraphicsDefinition.addInstruction(new LinkGraphicsAdd3DSFile(fileName));
+
+      // linkGraphicsDefinition.addInstruction(new LinkGraphicsAdd3DSFile(fileName));
    }
 
    /**
@@ -1061,7 +1103,8 @@ public class LinkGraphics
    public void addCube(double lx, double ly, double lz)
    {
       addCube(lx, ly, lz, YoAppearance.Black());
-     // linkGraphicsDefinition.addInstruction(new LinkGraphicsAddCube(lx, ly, lz));
+
+      // linkGraphicsDefinition.addInstruction(new LinkGraphicsAddCube(lx, ly, lz));
    }
 
    /**
@@ -1085,6 +1128,10 @@ public class LinkGraphics
    {
       Geometry cubeGeom = YoGeometry.Cube(lx, ly, lz);
       addShape(cubeGeom, cubeApp);
+
+
+
+
       if (cubeApp != null)
          linkGraphicsDefinition.addInstruction(new LinkGraphicsAddCube(lx, ly, lz, new AppearanceDefinition(getColor(cubeApp))));
       else
@@ -1110,7 +1157,8 @@ public class LinkGraphics
    public void addWedge(double lx, double ly, double lz)
    {
       addWedge(lx, ly, lz, YoAppearance.Black());
-     // linkGraphicsDefinition.addInstruction(new LinkGraphicsAddWedge(lx, ly, lz));
+
+      // linkGraphicsDefinition.addInstruction(new LinkGraphicsAddWedge(lx, ly, lz));
    }
 
    /**
@@ -1157,7 +1205,8 @@ public class LinkGraphics
    public void addSphere(double radius)
    {
       addSphere(radius, YoAppearance.Black());
-//      linkGraphicsDefinition.addInstruction(new LinkGraphicsAddSphere(radius));
+
+//    linkGraphicsDefinition.addInstruction(new LinkGraphicsAddSphere(radius));
    }
 
    /**
@@ -1202,7 +1251,8 @@ public class LinkGraphics
    public void addEllipsoid(double xRad, double yRad, double zRad)
    {
       addEllipsoid(xRad, yRad, zRad, YoAppearance.Black());
-      //linkGraphicsDefinition.addInstruction(new LinkGraphicsAddEllipsoid(xRad, yRad, zRad));
+
+      // linkGraphicsDefinition.addInstruction(new LinkGraphicsAddEllipsoid(xRad, yRad, zRad));
    }
 
    /**
@@ -1248,7 +1298,8 @@ public class LinkGraphics
    public void addCylinder(double height, double radius)
    {
       addCylinder(height, radius, YoAppearance.Black());
-      //linkGraphicsDefinition.addInstruction(new LinkGraphicsAddCylinder(height, radius));
+
+      // linkGraphicsDefinition.addInstruction(new LinkGraphicsAddCylinder(height, radius));
    }
 
    /**
@@ -1293,7 +1344,8 @@ public class LinkGraphics
    public void addCone(double height, double radius)
    {
       addCone(height, radius, YoAppearance.Black());
-     // linkGraphicsDefinition.addInstruction(new LinkGraphicsAddCone(height, radius));
+
+      // linkGraphicsDefinition.addInstruction(new LinkGraphicsAddCone(height, radius));
    }
 
    /**
@@ -1343,7 +1395,8 @@ public class LinkGraphics
    public void addGenTruncatedCone(double height, double bx, double by, double tx, double ty)
    {
       addGenTruncatedCone(height, bx, by, tx, ty, YoAppearance.Black());
-      //linkGraphicsDefinition.addInstruction(new LinkGraphicsAddTruncatedCone(height, bx, by, tx, ty));
+
+      // linkGraphicsDefinition.addInstruction(new LinkGraphicsAddTruncatedCone(height, bx, by, tx, ty));
    }
 
    /**
@@ -1398,7 +1451,8 @@ public class LinkGraphics
    public void addHemiEllipsoid(double xRad, double yRad, double zRad)
    {
       addHemiEllipsoid(xRad, yRad, zRad, YoAppearance.Black());
-     // linkGraphicsDefinition.addInstruction(new LinkGraphicsAddHemiEllipsoid(xRad, yRad, zRad));
+
+      // linkGraphicsDefinition.addInstruction(new LinkGraphicsAddHemiEllipsoid(xRad, yRad, zRad));
    }
 
    /**
@@ -1456,7 +1510,7 @@ public class LinkGraphics
       addArcTorus(startAngle, endAngle, majorRadius, minorRadius, YoAppearance.Black());
 
       // addCylinder(1.0f, 0.2f);
-    //  linkGraphicsDefinition.addInstruction(new LinkGraphicsAddArcTorus(startAngle, endAngle, majorRadius, minorRadius));
+      // linkGraphicsDefinition.addInstruction(new LinkGraphicsAddArcTorus(startAngle, endAngle, majorRadius, minorRadius));
    }
 
    /**
@@ -1519,7 +1573,8 @@ public class LinkGraphics
    public void addPyramidCube(double lx, double ly, double lz, double lh)
    {
       addPyramidCube(lx, ly, lz, lh, YoAppearance.Black());
-     // linkGraphicsDefinition.addInstruction(new LinkGraphicsAddPyramidCube(lx, ly, lz, lh));
+
+      // linkGraphicsDefinition.addInstruction(new LinkGraphicsAddPyramidCube(lx, ly, lz, lh));
    }
 
    /**
@@ -1563,7 +1618,8 @@ public class LinkGraphics
    public void addPolygon(Point3f[] polygonPoint)
    {
       addPolygon(polygonPoint, YoAppearance.Black());
-     // linkGraphicsDefinition.addInstruction(new LinkGraphicsAddPolygonFloat(polygonPoint));
+
+      // linkGraphicsDefinition.addInstruction(new LinkGraphicsAddPolygonFloat(polygonPoint));
    }
 
    /**
@@ -1621,7 +1677,8 @@ public class LinkGraphics
    public void addPolygon(Point3d[] polygonPoint)
    {
       addPolygon(polygonPoint, YoAppearance.Black());
-     // linkGraphicsDefinition.addInstruction(new LinkGraphicsAddPolygonDouble(polygonPoint));
+
+      // linkGraphicsDefinition.addInstruction(new LinkGraphicsAddPolygonDouble(polygonPoint));
    }
 
    /**
