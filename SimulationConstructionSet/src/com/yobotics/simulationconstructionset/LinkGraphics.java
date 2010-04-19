@@ -19,6 +19,7 @@ import javax.media.j3d.Shape3D;
 import javax.media.j3d.SharedGroup;
 import javax.media.j3d.Transform3D;
 import javax.media.j3d.TransformGroup;
+import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Color3f;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
@@ -84,7 +85,7 @@ public class LinkGraphics
       // LinkGraphics this = new LinkGraphics();
 
       for (LinkGraphicsInstruction instruction : graphicsDefinition.getInstructions())
-      {
+      {	 
          if (instruction instanceof LinkGraphicsAdd3DSFile)
          {
             // Appearance app = new Appearance();
@@ -263,6 +264,24 @@ public class LinkGraphics
             else
                this.addWedge(((LinkGraphicsAddWedge) instruction).getX(), ((LinkGraphicsAddWedge) instruction).getY(),
                              ((LinkGraphicsAddWedge) instruction).getZ());
+         }
+         else if (instruction instanceof LinkGraphicsAddTruncatedCone)
+         {
+            if (((LinkGraphicsAddTruncatedCone) instruction).getAppearance() != null)
+            {
+               Color3f color = ((LinkGraphicsAddTruncatedCone) instruction).getAppearance().getColor();
+               Appearance app = new Appearance();
+               Material tmp = new Material();
+               tmp.setAmbientColor(color);
+               app.setMaterial(tmp);
+               this.addGenTruncatedCone(((LinkGraphicsAddTruncatedCone) instruction).getHeight(), ((LinkGraphicsAddTruncatedCone) instruction).getBX(),
+                                        ((LinkGraphicsAddTruncatedCone) instruction).getBY(), ((LinkGraphicsAddTruncatedCone) instruction).getTX(),
+                                        ((LinkGraphicsAddTruncatedCone) instruction).getTY(), app);
+            }
+            else
+               this.addGenTruncatedCone(((LinkGraphicsAddTruncatedCone) instruction).getHeight(), ((LinkGraphicsAddTruncatedCone) instruction).getBX(),
+                                        ((LinkGraphicsAddTruncatedCone) instruction).getBY(), ((LinkGraphicsAddTruncatedCone) instruction).getTX(),
+                                        ((LinkGraphicsAddTruncatedCone) instruction).getTY());
          }
          else if (instruction instanceof LinkGraphicsIdentity)
          {
@@ -486,7 +505,8 @@ public class LinkGraphics
    private static TransformGroup rotateTransformGroup(double rotAng, Vector3d rotAxis)
    {
       Transform3D t1 = new Transform3D();
-      t1.set(rotAng, rotAxis);
+      AxisAngle4d axisAngle4d = new AxisAngle4d(rotAxis, rotAng);
+      t1.setRotation(axisAngle4d);
 
       TransformGroup transGroup = new TransformGroup(t1);
 
