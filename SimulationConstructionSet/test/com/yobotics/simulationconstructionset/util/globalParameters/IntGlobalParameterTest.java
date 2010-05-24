@@ -76,6 +76,7 @@ public class IntGlobalParameterTest
    public void testThatCantHaveParentsUnlessOverwriteUpdateMethodOne()
    {
       IntGlobalParameter parent = new IntGlobalParameter("parent", "parent", DEFAULT_VALUE, null);
+      @SuppressWarnings("unused")
       IntGlobalParameter invalidChild = new IntGlobalParameter("invalidChild", "test description", new GlobalParameter[] {parent}, null);
 
       parent.set(1);

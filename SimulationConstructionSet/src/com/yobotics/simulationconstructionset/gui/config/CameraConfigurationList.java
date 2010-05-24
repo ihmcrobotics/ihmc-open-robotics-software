@@ -1,11 +1,12 @@
 package com.yobotics.simulationconstructionset.gui.config;
 
 import com.yobotics.simulationconstructionset.*;
+
 import java.util.ArrayList;
 
 public class CameraConfigurationList
 {
-   private ArrayList configs = new ArrayList();
+   private ArrayList<CameraConfiguration> configs = new ArrayList<CameraConfiguration>();
 
    public CameraConfigurationList()
    {
