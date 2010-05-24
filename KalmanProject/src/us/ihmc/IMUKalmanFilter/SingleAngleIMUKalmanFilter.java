@@ -43,10 +43,6 @@ public class SingleAngleIMUKalmanFilter
    private double t_0;
    private double t_1;
 
-   private SingleAngleIMUKalmanFilter()
-   {
-   }
-
    private YoVariable R_angle, Q_angle, Q_gyro;    // K1;
 
    public SingleAngleIMUKalmanFilter(YoVariableRegistry reg, YoVariableRegistry holder)

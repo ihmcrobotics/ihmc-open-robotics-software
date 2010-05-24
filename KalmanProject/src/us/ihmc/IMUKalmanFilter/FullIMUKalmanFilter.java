@@ -1,7 +1,6 @@
 package us.ihmc.IMUKalmanFilter;
 
 import com.mathworks.jama.Matrix;
-import java.io.PrintWriter;
 
 /**
  * <p>Title: </p>
@@ -17,6 +16,7 @@ import java.io.PrintWriter;
  */
 public class FullIMUKalmanFilter
 {
+   @SuppressWarnings("unused")
    private static final boolean verbose = true;
    private static final int N = 7;
 
@@ -73,6 +73,7 @@ public class FullIMUKalmanFilter
    private double dcm00, dcm01, dcm02, dcm12, dcm22;
 
    private double dt = .001;
+   @SuppressWarnings("unused")
    private double trace;
    private static final double PI = Math.PI;
 
@@ -82,6 +83,7 @@ public class FullIMUKalmanFilter
     */
    private Matrix C = new Matrix(3, N);
    private Matrix Ct, E;
+   @SuppressWarnings("unused")
    private static final java.text.DecimalFormat fmt = new java.text.DecimalFormat();
 
    public FullIMUKalmanFilter(double dt)

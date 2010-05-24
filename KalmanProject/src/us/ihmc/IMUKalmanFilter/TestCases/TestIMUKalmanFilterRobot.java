@@ -6,6 +6,11 @@ import javax.media.j3d.Transform3D;
 
 public class TestIMUKalmanFilterRobot extends Robot
 {
+   /**
+    *
+    */
+   private static final long serialVersionUID = -2714371959408634768L;
+
    // Primary joints of the robot...
    public FloatingJoint rootJoint;
 
@@ -32,9 +37,11 @@ public class TestIMUKalmanFilterRobot extends Robot
       rootJoint = new FloatingJoint("root", new Vector3d(0.0, 0.0, 0.0), this);
 
       Link link = new Link("ahrs");
-      link.addCoordinateSystem(0.2);
-      link.translate(0.0, 0.0, -0.05);
-      link.addCube(0.1, 0.1, 0.1);
+      LinkGraphics linkGraphics = new LinkGraphics();
+      linkGraphics.addCoordinateSystem(0.2);
+      linkGraphics.translate(0.0, 0.0, -0.05);
+      linkGraphics.addCube(0.1, 0.1, 0.1);
+      link.setLinkGraphics(linkGraphics);
 
       link.setMass(1.0);
       link.setMomentOfInertia(1.0, 1.0, 1.0);
