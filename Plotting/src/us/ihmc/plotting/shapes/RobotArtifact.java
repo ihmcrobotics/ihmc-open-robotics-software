@@ -1,12 +1,16 @@
 package us.ihmc.plotting.shapes;
 
 import java.awt.Graphics;
-import java.awt.Color;
+
 import us.ihmc.plotting.Artifact;
 import us.ihmc.plotting.Pose;
 
 public class RobotArtifact extends Artifact
 {
+   /**
+    * 
+    */
+   private static final long serialVersionUID = 874940514060462114L;
    protected Pose _pose;
 
    public RobotArtifact(String id)

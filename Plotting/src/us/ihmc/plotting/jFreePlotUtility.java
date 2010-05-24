@@ -31,6 +31,11 @@ import org.jfree.chart.axis.LogarithmicAxis;
  */
 public class jFreePlotUtility extends JFrame
 {
+   /**
+    * 
+    */
+   private static final long serialVersionUID = 2986192525063918143L;
+
    public jFreePlotUtility(String figureName)
    {
       super(figureName);

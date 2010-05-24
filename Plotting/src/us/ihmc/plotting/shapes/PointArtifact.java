@@ -2,7 +2,6 @@ package us.ihmc.plotting.shapes;
 
 import java.awt.Graphics;
 import java.awt.Color;
-import java.util.Vector;
 import java.util.*;
 import java.io.PrintWriter;
 import java.io.Serializable;
@@ -12,12 +11,17 @@ import javax.vecmath.Point2d;
 
 public class PointArtifact extends Artifact implements Serializable
 {
-   private Vector<Point2d> _sonarHistory = new Vector();
+   /**
+    * 
+    */
+   private static final long serialVersionUID = -1676323503716482842L;
+   private Vector<Point2d> _sonarHistory = new Vector<Point2d>();
    private int _historyLength = 1;
    private Color historyColor = Color.blue;
    int _medianFilterSize = 20;
    int _meanFilterSize = 999;
 
+   @SuppressWarnings("unused")
    private long _startTime;
 
    public PointArtifact(String id)
@@ -90,7 +94,7 @@ public class PointArtifact extends Artifact implements Serializable
       historyColor = color;
    }
 
-   public static double getMedian(Vector buffer)
+   public static double getMedian(Vector<?> buffer)
    {
       int n = buffer.size();
       double[] unsorted = new double[n];
@@ -110,7 +114,7 @@ public class PointArtifact extends Artifact implements Serializable
       return sorted[n / 2];
    }
 
-   public double getMean(Vector buffer)
+   public double getMean(Vector<?> buffer)
    {
       int n = buffer.size();
       double mean = 0;
@@ -128,7 +132,7 @@ public class PointArtifact extends Artifact implements Serializable
       return mean;
    }
 
-   public double getStdDev(Vector buffer, double mean)
+   public double getStdDev(Vector<?> buffer, double mean)
    {
       int n = buffer.size();
       double sd = 0;
@@ -151,10 +155,10 @@ public class PointArtifact extends Artifact implements Serializable
     */
    public void draw(Graphics g, int Xcenter, int Ycenter, double scaleFactor)
    {
-      Vector xMedianFliter = new Vector();
-      Vector yMedianFliter = new Vector();
-      Vector xMeanFilter = new Vector();
-      Vector yMeanFilter = new Vector();
+      Vector<Double> xMedianFliter = new Vector<Double>();
+      Vector<Double> yMedianFliter = new Vector<Double>();
+      Vector<Double> xMeanFilter = new Vector<Double>();
+      Vector<Double> yMeanFilter = new Vector<Double>();
 
       Point2d coordinate = null;
       for (int i = 0; i < _sonarHistory.size(); i++)

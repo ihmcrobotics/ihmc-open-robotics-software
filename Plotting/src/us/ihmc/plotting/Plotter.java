@@ -1,27 +1,40 @@
 package us.ihmc.plotting;
 
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Point;
+import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
-import java.util.Enumeration;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Vector;
 
-import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
 import javax.swing.border.Border;
 import javax.swing.event.MouseInputAdapter;
 import javax.vecmath.Point2d;
 
-import us.ihmc.plotting.shapes.PolygonArtifact;
-import us.ihmc.plotting.shapes.ShapeArtifact;
-import java.util.ArrayList;
-import java.util.HashMap;
 import us.ihmc.plotting.shapes.LineArtifact;
 import us.ihmc.plotting.shapes.PointArtifact;
-import us.ihmc.utilities.math.geometry.*;
+import us.ihmc.plotting.shapes.PolygonArtifact;
+import us.ihmc.plotting.shapes.ShapeArtifact;
+import us.ihmc.utilities.math.geometry.Line2d;
 
 public class Plotter extends JPanel
 {
+   /**
+    * 
+    */
+   private static final long serialVersionUID = 3113130298799362369L;
+
    private final ArrayList<ArtifactsChangedListener> artifactsChangedListeners = new ArrayList<ArtifactsChangedListener>();
 
    // show selections
@@ -510,6 +523,7 @@ public class Plotter extends JPanel
    }
 
 
+   @SuppressWarnings("unused")
    private Point convertCoordinates(JPanel plot, Point2D.Double pt)
    {
       // get current size and determine scaling factor
@@ -759,7 +773,7 @@ public class Plotter extends JPanel
    {
       public void mouseClicked(MouseEvent e)
       {
-         if (buttonPressed == e.BUTTON1)
+         if (buttonPressed == MouseEvent.BUTTON1)
          {
 //          _Xselected = unConvertXCoordinate(e.getX());
 //          _Yselected = unConvertYCoordinate(e.getY());
@@ -768,7 +782,7 @@ public class Plotter extends JPanel
             polygonArtifact = null;
             MAKING_POLYGON = false;
          }
-         else if (buttonPressed == e.BUTTON3)
+         else if (buttonPressed == MouseEvent.BUTTON3)
          {
 //          if (MAKING_POLYGON)
 //          {
@@ -792,7 +806,7 @@ public class Plotter extends JPanel
       {
          buttonPressed = e.getButton();
 
-         if (buttonPressed == e.BUTTON1)
+         if (buttonPressed == MouseEvent.BUTTON1)
          {
             _Xselected = unConvertXCoordinate(e.getX());
             _Yselected = unConvertYCoordinate(e.getY());
@@ -800,7 +814,7 @@ public class Plotter extends JPanel
 //          _areaX1TEMP = unConvertXCoordinate(e.getX());
 //          _areaY1TEMP = unConvertYCoordinate(e.getY());
          }
-         else if (buttonPressed == e.BUTTON3)
+         else if (buttonPressed == MouseEvent.BUTTON3)
          {
             _Xselected = unConvertXCoordinate(e.getX());
             _Yselected = unConvertYCoordinate(e.getY());
@@ -810,7 +824,7 @@ public class Plotter extends JPanel
 //          xOffsetStartOfDrag = _Xoffset;
 //          yOffsetStartOfDrag = _Yoffset;
          }
-         else if (buttonPressed == e.BUTTON2)
+         else if (buttonPressed == MouseEvent.BUTTON2)
          {
             dragStartY = e.getY();
          }
@@ -818,14 +832,14 @@ public class Plotter extends JPanel
          // check for double-clicks
          if (e.getClickCount() > 1)
          {
-            if (buttonPressed == e.BUTTON1)
+            if (buttonPressed == MouseEvent.BUTTON1)
             {
                if (_listener != null)
                {
                   _listener.doubleClicked();
                }
             }
-            else if (buttonPressed == e.BUTTON3)
+            else if (buttonPressed == MouseEvent.BUTTON3)
             {
                Coordinate offset = convertFromPixelsToMeters(new Coordinate(e.getX(), e.getY(), Coordinate.PIXEL));
                setXoffset(offset.getX());
@@ -837,14 +851,14 @@ public class Plotter extends JPanel
 
       public void mouseDragged(MouseEvent e)
       {
-         if (buttonPressed == e.BUTTON1)
+         if (buttonPressed == MouseEvent.BUTTON1)
          {
             _areaX1 = _areaX1TEMP;
             _areaY1 = _areaY1TEMP;
             _areaX2 = unConvertXCoordinate(e.getX());
             _areaY2 = unConvertYCoordinate(e.getY());
          }
-         else if (buttonPressed == e.BUTTON3)
+         else if (buttonPressed == MouseEvent.BUTTON3)
          {
 //          int idx = e.getX() - dragStartX;
 //          int idy = -(e.getY() - dragStartY);
@@ -853,7 +867,7 @@ public class Plotter extends JPanel
 //          setXoffset(xOffsetStartOfDrag - dx);
 //          setYoffset(yOffsetStartOfDrag - dy);
          }
-         else if (buttonPressed == e.BUTTON2)
+         else if (buttonPressed == MouseEvent.BUTTON2)
          {
             int yDifferenceFromStartOfDrag = -(e.getY() - dragStartY);
             double scaledYChange = new Double(yDifferenceFromStartOfDrag * 0.5);

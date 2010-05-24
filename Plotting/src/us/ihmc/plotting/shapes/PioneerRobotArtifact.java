@@ -1,14 +1,16 @@
 package us.ihmc.plotting.shapes;
 
 import java.awt.Graphics;
-import java.awt.Color;
-import java.awt.Polygon;
 
 import us.ihmc.plotting.Artifact;
 import us.ihmc.plotting.Pose;
 
 public class PioneerRobotArtifact extends Artifact
 {
+   /**
+    * 
+    */
+   private static final long serialVersionUID = -7196775480859274435L;
    protected Pose _pose;
    protected double width = 0.4826;
    protected double length = 0.5334;
