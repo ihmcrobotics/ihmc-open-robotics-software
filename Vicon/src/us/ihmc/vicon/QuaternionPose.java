@@ -2,6 +2,10 @@ package us.ihmc.vicon;
 
 public class QuaternionPose extends Pose
 {
+   /**
+    * 
+    */
+   private static final long serialVersionUID = -6213249019411848321L;
    public float w;
 
    public QuaternionPose(float xPosition, float yPosiiton, float zPosition, float xAxisRotation, float yAxisRotation, float zAxisRotation, float w)

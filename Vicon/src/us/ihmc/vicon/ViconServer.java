@@ -281,6 +281,7 @@ public class ViconServer extends ViconJavaInterface
             try
             {
 //             long start = System.currentTimeMillis();
+               @SuppressWarnings("unused")
                byte unnecessaryValue = dataInputStream.readByte();
 
 //             long read = 0, invoke = 0, reply = 0;
@@ -368,6 +369,7 @@ public class ViconServer extends ViconJavaInterface
 
    public static void main(String[] args)
    {
+      @SuppressWarnings("unused")
       ViconServer viconserver = new ViconServer();
 
       // wait around until terminated
