@@ -16,6 +16,7 @@ import com.mathworks.jama.Matrix;
  */
 public class QuaternionBasedJamaFullIMUKalmanFilter implements QuaternionBasedFullIMUKalmanFilter
 {
+   @SuppressWarnings("unused")
    private static final boolean verbose = true;
    private static final int N = 7;
 
@@ -57,6 +58,7 @@ public class QuaternionBasedJamaFullIMUKalmanFilter implements QuaternionBasedFu
    public Matrix q = new Matrix(4, 1);    // Estimated orientation in quaternions.
 
    private double dt = .001;
+   @SuppressWarnings("unused")
    private static final double PI = Math.PI;
 
    /*
@@ -65,6 +67,7 @@ public class QuaternionBasedJamaFullIMUKalmanFilter implements QuaternionBasedFu
     */
    private Matrix C = new Matrix(4, N);
    private Matrix Ct, E;
+   @SuppressWarnings("unused")
    private static final java.text.DecimalFormat fmt = new java.text.DecimalFormat();
 
    public QuaternionBasedJamaFullIMUKalmanFilter(double dt)
@@ -469,9 +472,13 @@ public class QuaternionBasedJamaFullIMUKalmanFilter implements QuaternionBasedFu
       this.setArray(q, quat_redundant);
 
 //    unpackQuaternion(q);
+      @SuppressWarnings("unused")
       double q0 = q.get(0, 0);
+      @SuppressWarnings("unused")
       double q1 = q.get(1, 0);
+      @SuppressWarnings("unused")
       double q2 = q.get(2, 0);
+      @SuppressWarnings("unused")
       double q3 = q.get(3, 0);
 
 //    System.out.println("Initializing QuaternionBasedJamaFullIMUKalmanFilter. q0 = " + QuaternionTools.format4(q0) + ", q1 = " + QuaternionTools.format4(q1) + ", q2 = " + QuaternionTools.format4(q2) + ", q3 = " + QuaternionTools.format4(q3));

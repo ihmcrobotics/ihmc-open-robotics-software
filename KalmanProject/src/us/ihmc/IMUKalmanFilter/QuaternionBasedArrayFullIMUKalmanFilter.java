@@ -18,6 +18,7 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
  */
 public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedFullIMUKalmanFilter
 {
+   @SuppressWarnings("unused")
    private static final boolean verbose = true;
    private static final int N = 7;
 
@@ -74,6 +75,7 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
    private final double[] quatError = new double[4];
 
    private final double dt;    // = .001;
+   @SuppressWarnings("unused")
    private static final double PI = Math.PI;
 
    /*
@@ -102,6 +104,7 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
    private final double[] t9 = new double[4];
 
 
+   @SuppressWarnings("unused")
    private static final java.text.DecimalFormat fmt = new java.text.DecimalFormat();
 
    public QuaternionBasedArrayFullIMUKalmanFilter(double dt)
@@ -169,6 +172,7 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
 
    // Private Static Matrix Manipulation Methods.
 
+   @SuppressWarnings("unused")
    private static void setArray(double[][] a, double[][] d)
    {
       int m, n;
@@ -186,6 +190,7 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
          System.err.println("setArray: incompatible dimensions.");
    }
 
+   @SuppressWarnings("unused")
    private static void setArray(double[] a, double[] d)
    {
       int m;
@@ -216,6 +221,7 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
    }
 
 
+   @SuppressWarnings("unused")
    private static void normalize(double[][] M)
    {
       double mag = 0;
@@ -333,6 +339,7 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
 
 
 
+   @SuppressWarnings("unused")
    private static void MmulScalarMul(double[][] a, double[][] b, double[][] c, double s)
    {
       int m = a.length;
@@ -470,6 +477,7 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
    }
 
 
+   @SuppressWarnings("unused")
    private static void Msub(double[][] a, double[][] b, double[][] c)
    {
       if ((a.length != c.length) || (b[0].length != c[0].length))
@@ -499,6 +507,7 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
    }
 
 
+   @SuppressWarnings("unused")
    private static void Msub(double[][] a, YoVariable[][] b, double[][] c)
    {
       if ((a.length != c.length) || (b[0].length != c[0].length))
@@ -574,6 +583,7 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
       }
    }
 
+   @SuppressWarnings("unused")
    private static double mag(double[][] a)
    {
       double ret = 0.0;
@@ -807,6 +817,7 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
       }
    }
 
+   @SuppressWarnings("unused")
    private void setConstantKMatrix(double[][] K)
    {
       for (int i = 0; i < K.length; i++)
@@ -994,6 +1005,7 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
     * body = tBL(3,3)*NED
     * q(4,1)
     */
+   @SuppressWarnings("unused")
    private void quatDC(double[][] DCM)
    {
       double q0 = Quat[0].val;
@@ -1050,6 +1062,7 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
     * bias_dot = [0,0,0]
     * Q += Qdot * dt
     */
+   @SuppressWarnings("unused")
    private void propagateStateOldDoesntUpdateBiases(double[] pqr)
    {
       quatW(pqr);    // constructs quaternion W matrix in Wxq
@@ -1093,6 +1106,7 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
       // P = P + Pdot * dt;
       Mmul(Pdot, dt, Pdot);
       Madd(P, Pdot, P);
+      @SuppressWarnings("unused")
       double trace = Mtrace(P);
 
 
@@ -1244,9 +1258,13 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
 //      Quat[2][0] = quaternions[2];
 //      Quat[3][0] = quaternions[3];
 
+      @SuppressWarnings("unused")
       double q0 = Quat[0].val;
+      @SuppressWarnings("unused")
       double q1 = Quat[1].val;
+      @SuppressWarnings("unused")
       double q2 = Quat[2].val;
+      @SuppressWarnings("unused")
       double q3 = Quat[3].val;
 
 //    System.out.println("Initializing QuaternionBasedArrayFullIMUKalmanFilter. q0 = " + QuaternionTools.format4(q0) + ", q1 = " + QuaternionTools.format4(q1) + ", q2 = " + QuaternionTools.format4(q2) + ", q3 = " + QuaternionTools.format4(q3));

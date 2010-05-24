@@ -37,7 +37,9 @@ public class TestIMUKalmanFilterSimulationJerryOne
       scs.setDT(SIMULATION_DT, (int) (WINDOW / SIMULATION_DT));
 
       Link coords = new Link("coords");
-      coords.addCoordinateSystem(0.2);
+      LinkGraphics linkGraphics = new LinkGraphics();
+      linkGraphics.addCoordinateSystem(0.2);
+      coords.setLinkGraphics(linkGraphics);
       scs.addStaticLink(coords);
 
       setupSimulationConstructionSet(scs);
@@ -122,7 +124,7 @@ public class TestIMUKalmanFilterSimulationJerryOne
 
    public static void main(String[] args)
    {
-      TestIMUKalmanFilterSimulationJerryOne testKalmanFilterSimulation = new TestIMUKalmanFilterSimulationJerryOne();
+      @SuppressWarnings("unused") TestIMUKalmanFilterSimulationJerryOne testKalmanFilterSimulation = new TestIMUKalmanFilterSimulationJerryOne();
    }
 
    public YoVariable[] getControlVars()

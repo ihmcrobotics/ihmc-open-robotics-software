@@ -1,16 +1,26 @@
 package us.ihmc.IMUKalmanFilter.TestCases;
 
-import com.yobotics.simulationconstructionset.*;
-import javax.vecmath.*;
-import com.mathworks.jama.Matrix;
 import java.util.Random;
 
-import us.ihmc.IMUKalmanFilter.*;
 import javax.media.j3d.Transform3D;
+import javax.vecmath.Vector3d;
+
+import us.ihmc.IMUKalmanFilter.QuaternionBasedFullIMUKalmanFilter;
+import us.ihmc.IMUKalmanFilter.QuaternionTools;
+
+import com.mathworks.jama.Matrix;
+import com.yobotics.simulationconstructionset.RobotController;
+import com.yobotics.simulationconstructionset.YoVariable;
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public class TestIMUKalmanFilterControllerJerryOne implements RobotController
 {
+   /**
+    *
+    */
+   private static final long serialVersionUID = 537073527850173163L;
    private final YoVariableRegistry registry = new YoVariableRegistry("TestIMUKalmanFilterControllerJerryOne");
+   @SuppressWarnings("unused")
    private static final boolean USING_FAST_QUAT = true;
 
    public double G = 9.81;
@@ -29,6 +39,7 @@ public class TestIMUKalmanFilterControllerJerryOne implements RobotController
 // private final FastQuaternionBasedFullIMUKalmanFilter fastQuaternionBasedFullIMUKalmanFilter;
 
    private Matrix accel = new Matrix(3, 1);
+   @SuppressWarnings("unused")
    private Matrix theta = new Matrix(3, 1);
    private Matrix pqr = new Matrix(3, 1);
 
@@ -45,10 +56,12 @@ public class TestIMUKalmanFilterControllerJerryOne implements RobotController
 
    private YoVariable fx_amp = new YoVariable("fx_amp", registry);
    private YoVariable fy_amp = new YoVariable("fy_amp", registry);
+   @SuppressWarnings("unused")
    private YoVariable fz_amp = new YoVariable("fz_amp", registry);
 
    private YoVariable fx_freq = new YoVariable("fx_freq", registry);
    private YoVariable fy_freq = new YoVariable("fy_freq", registry);
+   @SuppressWarnings("unused")
    private YoVariable fz_freq = new YoVariable("fz_freq", registry);
 
 
@@ -78,6 +91,7 @@ public class TestIMUKalmanFilterControllerJerryOne implements RobotController
    private YoVariable z_accel = new YoVariable("z_accel", registry);
 
    private YoVariable compass_noise = new YoVariable("compass_noise", registry);
+   @SuppressWarnings("unused")
    private YoVariable alpha_compass_noise = new YoVariable("alpha_compass_noise", registry);
    private YoVariable compass_offset = new YoVariable("heading_offset", registry);
    private YoVariable heading_noise = new YoVariable("heading_noise", registry);
@@ -132,12 +146,14 @@ public class TestIMUKalmanFilterControllerJerryOne implements RobotController
 // private YoVariable dt = new YoVariable("dt", this);
    private YoVariable t;
 
+   @SuppressWarnings("unused")
    private java.text.DecimalFormat fmt = new java.text.DecimalFormat();
 
    private final TestIMUKalmanFilterRobot robot;
 
    private boolean profiling;
 
+   @SuppressWarnings("unused")
    private final YoVariable ef_body_fx, ef_body_fy, ef_body_fz;
 
    public TestIMUKalmanFilterControllerJerryOne(TestIMUKalmanFilterRobot robot,
@@ -290,7 +306,9 @@ public class TestIMUKalmanFilterControllerJerryOne implements RobotController
       }
    }
 
+   @SuppressWarnings("unused")
    private boolean doneStep = false;
+   @SuppressWarnings("unused")
    private boolean doneSecondStep = false;
 
    public void doControl()
@@ -499,7 +517,7 @@ public class TestIMUKalmanFilterControllerJerryOne implements RobotController
          estimated_q2.val = quatMatrix.get(2, 0);
          estimated_q3.val = quatMatrix.get(3, 0);
 
-         double[] quat = new double[] {estimated_q0.val, estimated_q1.val, estimated_q2.val, estimated_q3.val};
+         @SuppressWarnings("unused") double[] quat = new double[] {estimated_q0.val, estimated_q1.val, estimated_q2.val, estimated_q3.val};
 
          Matrix eulerMatrix = new Matrix(3, 1);
          QuaternionTools.quaternionsToRollPitchYaw(quatMatrix, eulerMatrix);
