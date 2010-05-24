@@ -110,6 +110,7 @@ public class ViconJavaInterface
 //    }
 
 
+      @SuppressWarnings("unused")
       long start = System.currentTimeMillis();
       int count = 0;
       while (true)
