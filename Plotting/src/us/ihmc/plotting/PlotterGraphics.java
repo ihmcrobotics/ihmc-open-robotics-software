@@ -2,12 +2,29 @@ package us.ihmc.plotting;
 
 import java.awt.Graphics;
 import java.util.ArrayList;
+
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
-import us.ihmc.utilities.math.geometry.*;
 
+import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
+import us.ihmc.utilities.math.geometry.Line2d;
+import us.ihmc.utilities.math.geometry.LineSegment2d;
+
+/**
+ * <p>Title: </p>
+ *
+ * <p>Description: </p>
+ *
+ * <p>Copyright: Copyright (c) 2008</p>
+ *
+ * <p>Company: </p>
+ *
+ * @author not attributable
+ * @version 1.0
+ */
 public class PlotterGraphics
 {
+   @SuppressWarnings("unused")
    private Graphics graphics;
 
    private int xCenter, yCenter;

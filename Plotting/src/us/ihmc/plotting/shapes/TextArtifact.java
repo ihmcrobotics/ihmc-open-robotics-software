@@ -1,13 +1,16 @@
 package us.ihmc.plotting.shapes;
 
-import java.awt.*;
-import java.io.*;
+import java.awt.Graphics;
+import java.io.PrintWriter;
 
-import java.util.StringTokenizer;
 import us.ihmc.plotting.Artifact;
 
 public class TextArtifact extends Artifact
 {
+   /**
+    *
+    */
+   private static final long serialVersionUID = 4004880709697051705L;
    private double x1;
    private double y1;
    private String text;

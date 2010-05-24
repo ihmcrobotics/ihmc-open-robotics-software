@@ -4,6 +4,10 @@ import java.io.Serializable;
 
 public class Pose extends Coordinate implements Serializable
 {
+   /**
+    * 
+    */
+   private static final long serialVersionUID = 3781748456290298303L;
    private double roll;
    private double pitch;
    private double yaw;

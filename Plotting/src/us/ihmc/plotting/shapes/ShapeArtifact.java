@@ -10,6 +10,10 @@ import us.ihmc.plotting.Coordinate;
 
 public class ShapeArtifact extends Artifact
 {
+   /**
+    * 
+    */
+   private static final long serialVersionUID = 2446850336045691305L;
    private Pose _pose;
    private double _height;
    private double _width;

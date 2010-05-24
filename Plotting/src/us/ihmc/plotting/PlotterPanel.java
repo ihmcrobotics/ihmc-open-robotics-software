@@ -10,10 +10,15 @@ import java.util.Vector;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
+
 import java.util.ArrayList;
 
 public class PlotterPanel extends JPanel
 {
+   /**
+    * 
+    */
+   private static final long serialVersionUID = 4697277324924209439L;
    protected Plotter plotter;
    protected JTextArea eventTA;
    protected boolean plotMovement = false;
@@ -60,14 +65,15 @@ public class PlotterPanel extends JPanel
 //         _gpsRB.setSelected(true);
 // }
 
-   public Vector getMenus()
+   public Vector<JMenu> getMenus()
    {
       JMenu menu;
       JMenuItem menuItem;
+      @SuppressWarnings("unused")
       JRadioButtonMenuItem rbMenuItem;
       JCheckBoxMenuItem cbMenuItem;
 
-      Vector menus = new Vector();
+      Vector<JMenu> menus = new Vector<JMenu>();
 
       // Build the first menu.
       menu = new JMenu("OverHead View");
@@ -94,7 +100,9 @@ public class PlotterPanel extends JPanel
       {
          public void actionPerformed(ActionEvent ae)
          {
+            @SuppressWarnings("unused")
             Artifact gps = plotter.getArtifact("gps");
+            @SuppressWarnings("unused")
             Artifact odom = plotter.getArtifact("odom");
 
             // saveMovementPlot((PointArtifact)gps, (PointArtifact)odom);

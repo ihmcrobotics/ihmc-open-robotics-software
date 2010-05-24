@@ -10,6 +10,10 @@ import us.ihmc.utilities.math.geometry.*;
 
 public class LineArtifact extends Artifact implements Serializable
 {
+   /**
+    * 
+    */
+   private static final long serialVersionUID = -4292453853922762342L;
    private Point2d point1;
    private Point2d point2;
    private int lineThickness = 1;

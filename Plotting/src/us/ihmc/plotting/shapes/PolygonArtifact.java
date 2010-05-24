@@ -8,6 +8,10 @@ import java.util.ArrayList;
 
 public class PolygonArtifact extends Artifact
 {
+   /**
+    * 
+    */
+   private static final long serialVersionUID = -1874963815283452026L;
    private ArrayList<Point2d> points = new ArrayList<Point2d>();
    private boolean FILL_POLYGON = false;
 

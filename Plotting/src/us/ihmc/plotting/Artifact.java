@@ -6,6 +6,10 @@ import java.io.Serializable;
 
 public abstract class Artifact implements Plottable, Serializable
 {
+   /**
+    * 
+    */
+   private static final long serialVersionUID = -463773605470590581L;
    protected String id;
    protected String type;
    protected int level;

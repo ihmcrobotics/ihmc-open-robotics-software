@@ -10,6 +10,10 @@ import java.util.ArrayList;
 
 public class PolyLine extends Artifact implements Serializable
 {
+   /**
+    * 
+    */
+   private static final long serialVersionUID = -8244299057847713312L;
    private ArrayList<Point2d> points;
    private int lineThickness = 1;
 

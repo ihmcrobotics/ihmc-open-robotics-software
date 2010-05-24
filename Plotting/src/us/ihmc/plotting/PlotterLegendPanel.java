@@ -21,6 +21,10 @@ import java.util.ArrayList;
  */
 public class PlotterLegendPanel extends JPanel implements ArtifactsChangedListener
 {
+   /**
+    * 
+    */
+   private static final long serialVersionUID = -8268027977270506164L;
    private ArrayList<Artifact> artifacts = new ArrayList<Artifact>();
    private double scale;
 
@@ -59,12 +63,7 @@ public class PlotterLegendPanel extends JPanel implements ArtifactsChangedListen
       {
          artifact.drawLegend(g, artifactX, y, scale);
 
-         Color color = g.getColor();
-         int red = color.getRed();
-         int green = color.getGreen();
-         int blue = color.getBlue();
-
-//       Color newColor = new Color((red + 128) % 256, (green + 128) % 256, (blue + 128) % 256);
+         //       Color newColor = new Color((red + 128) % 256, (green + 128) % 256, (blue + 128) % 256);
 //       Color newColor = color.darker();
 //       g.setColor(newColor);
          g.setColor(Color.black);
@@ -77,7 +76,7 @@ public class PlotterLegendPanel extends JPanel implements ArtifactsChangedListen
       }
    }
 
-   public void artifactsChanged(ArrayList newArtifacts)
+   public void artifactsChanged(ArrayList<Artifact> newArtifacts)
    {
       setArtifacts(newArtifacts);
       repaint();

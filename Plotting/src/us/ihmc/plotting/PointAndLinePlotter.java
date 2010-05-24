@@ -1,18 +1,17 @@
 package us.ihmc.plotting;
 
-import java.awt.*;
-import java.applet.Applet;
-import javax.swing.JPanel;
-import javax.swing.JFrame;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Point;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
-
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
 import java.util.ArrayList;
+
+import javax.swing.JFrame;
+import javax.swing.JPanel;
 import javax.vecmath.Point2d;
 
 /**
@@ -23,6 +22,11 @@ import javax.vecmath.Point2d;
  */
 public class PointAndLinePlotter extends JPanel
 {
+   /**
+    * 
+    */
+   private static final long serialVersionUID = 3112685871773037198L;
+   @SuppressWarnings("unused")
    private int DEFAULT_OVAL_SIZE = 4;
    private ArrayList<Point2d[]> listOfPoints = new ArrayList<Point2d[]>();    // points to be interpolated
    private ArrayList<Color> listOfColors = new ArrayList<Color>();
