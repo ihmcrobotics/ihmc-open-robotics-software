@@ -1,24 +1,11 @@
 package us.ihmc.plotting;
 
 import java.awt.Graphics;
-import javax.vecmath.Point3d;
 import java.util.ArrayList;
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 import us.ihmc.utilities.math.geometry.*;
 
-/**
- * <p>Title: </p>
- *
- * <p>Description: </p>
- *
- * <p>Copyright: Copyright (c) 2008</p>
- *
- * <p>Company: </p>
- *
- * @author not attributable
- * @version 1.0
- */
 public class PlotterGraphics
 {
    private Graphics graphics;
