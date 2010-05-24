@@ -1,18 +1,19 @@
 package com.yobotics.simulationconstructionset;
 
-import java.applet.Applet;
-import java.awt.*;
-import com.sun.j3d.utils.applet.MainFrame;
-import com.sun.j3d.utils.image.*;
-import com.sun.j3d.utils.universe.*;
-import com.sun.j3d.utils.geometry.*;
-import javax.media.j3d.*;
-
-//import javax.media.j3d.Appearance;
-//import javax.media.j3d.Material;
-//import javax.media.j3d.Texture;
-import javax.vecmath.*;
+import java.awt.Color;
+import java.awt.Component;
 import java.net.URL;
+
+import javax.media.j3d.Appearance;
+import javax.media.j3d.Material;
+import javax.media.j3d.PolygonAttributes;
+import javax.media.j3d.Texture;
+import javax.media.j3d.TextureAttributes;
+import javax.media.j3d.TextureUnitState;
+import javax.media.j3d.TransparencyAttributes;
+import javax.vecmath.Color3f;
+
+import com.sun.j3d.utils.image.TextureLoader;
 
 //http://www.wdvl.com/Graphics/Colour/  has some of the color names I'm using...
 
@@ -245,7 +246,7 @@ public class YoAppearance
    {
       return RGBColor((float) red, (float) green, (float) blue);
    }
-   
+
    public static Appearance RGBColor(float red, float green, float blue)
    {
       Appearance ret = new Appearance();
@@ -256,7 +257,7 @@ public class YoAppearance
 
       return ret;
    }
-   
+
    public static Appearance RGBColorFrom8BitInts(int red, int green, int blue)
    {
       return RGBColor(((float) (red)) / 255.0, ((float) (green)) / 255.0, ((float) (blue)) / 255.0);
@@ -288,7 +289,7 @@ public class YoAppearance
    {
       return RGBColor(1.0f, 0.0f, 0.0f);
    }
-   
+
    /**
     * Some colors from: http://cloford.com/resources/colours/500col.htm
     */
@@ -296,18 +297,18 @@ public class YoAppearance
    {
       return RGBColorFrom8BitInts(255, 192, 203);
    }
-   
-   
+
+
    public static Appearance Orange()
    {
       return RGBColorFrom8BitInts(255, 128, 0);
    }
-   
+
    public static Appearance Orchid()
    {
       return RGBColorFrom8BitInts(218, 112, 214);
    }
- 
+
 
    public static Appearance DarkRed()
    {

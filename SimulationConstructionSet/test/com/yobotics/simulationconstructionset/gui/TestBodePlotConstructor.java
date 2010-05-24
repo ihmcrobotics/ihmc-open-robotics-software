@@ -44,6 +44,7 @@ public class TestBodePlotConstructor extends TestCase
       double[] time = generateLinearSpace(n, 0.0, DT);
 
       double freqHz = 10.0;
+      @SuppressWarnings("unused")
       double amplitude = 1.0;
 
       double[] input = generateChirp(time, freqHz);

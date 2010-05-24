@@ -78,6 +78,7 @@ public class BooleanGlobalParameterTest
    public void testThatCantHaveParentsUnlessOverwriteUpdateMethodOne()
    {
       BooleanGlobalParameter parent = new BooleanGlobalParameter("parent", "parent", DEFAULT_VALUE, null);
+      @SuppressWarnings("unused")
       BooleanGlobalParameter invalidChild = new BooleanGlobalParameter("invalidChild", "test description", new GlobalParameter[] {parent}, null);
 
       parent.set(false);

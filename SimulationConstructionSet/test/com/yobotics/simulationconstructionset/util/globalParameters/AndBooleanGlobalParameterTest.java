@@ -134,7 +134,7 @@ public class AndBooleanGlobalParameterTest
       boolean expectedParentB = valueB;
       assertEquals(expectedParentB, parentB.getValue());
 
-      boolean expectedChildA = valueA && valueA;
+      boolean expectedChildA = false;
       assertEquals(expectedChildA, childA.getValue());
 
       boolean expectedChildB = valueA && valueB && valueA && valueB;
@@ -148,7 +148,7 @@ public class AndBooleanGlobalParameterTest
       expectedParentB = valueB;
       assertEquals(expectedParentB, parentB.getValue());
 
-      expectedChildA = valueA && valueA;
+      expectedChildA = true;
       assertEquals(expectedChildA, childA.getValue());
 
       expectedChildB = valueA && valueB && valueA && valueB;
@@ -165,7 +165,7 @@ public class AndBooleanGlobalParameterTest
       expectedParentB = valueB;
       assertEquals(expectedParentB, parentB.getValue());
 
-      expectedChildA = valueA && valueA;
+      expectedChildA = false;
       assertEquals(expectedChildA, childA.getValue());
 
       expectedChildB = valueA && valueB && valueA && valueB;

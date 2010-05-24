@@ -1,6 +1,5 @@
 package com.yobotics.simulationconstructionset;
 
-import java.awt.Color;
 import java.io.FileNotFoundException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -414,6 +413,7 @@ public class LinkGraphics
          else if (leaf instanceof Light)
          {
             // System.out.println("leaf is a light");
+            @SuppressWarnings("unused")
             Light light = (Light) leaf;
          }
 
@@ -427,7 +427,7 @@ public class LinkGraphics
 
          // System.out.println("node is a group with " + group.numChildren() + "children");
 
-         Enumeration e = group.getAllChildren();
+         Enumeration<?> e = group.getAllChildren();
 
          // if (group instanceof BranchGroup) System.out.println("Group is a BranchGroup!");
          // else if (group instanceof TransformGroup) System.out.println("Group is a TransformGroup!");
