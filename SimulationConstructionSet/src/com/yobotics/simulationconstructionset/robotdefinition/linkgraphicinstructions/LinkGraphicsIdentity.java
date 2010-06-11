@@ -4,6 +4,6 @@ public class LinkGraphicsIdentity implements LinkGraphicsInstruction
 {
    public String toString()
    {
-      return "<Identity>";
+      return "\t\t\t<Identity>\n";
    }
 }

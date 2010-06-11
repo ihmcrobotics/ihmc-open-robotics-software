@@ -2,6 +2,8 @@ package com.yobotics.simulationconstructionset.robotdefinition.linkgraphicinstru
 
 import javax.vecmath.Vector3d;
 
+import com.yobotics.simulationconstructionset.gui.XMLReaderUtility;
+
 public class LinkGraphicsTranslate implements LinkGraphicsInstruction
 {
    private Vector3d translation = new Vector3d();
@@ -24,7 +26,6 @@ public class LinkGraphicsTranslate implements LinkGraphicsInstruction
 
    public String toString()
    {
-      return "<Translate> "+translation;
+      return "\t\t\t<Translate>" + translation + "</Translate>\n";
    }
-
 }
