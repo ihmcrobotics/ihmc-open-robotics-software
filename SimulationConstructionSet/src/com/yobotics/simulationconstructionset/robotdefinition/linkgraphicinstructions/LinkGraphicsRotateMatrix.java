@@ -2,6 +2,8 @@ package com.yobotics.simulationconstructionset.robotdefinition.linkgraphicinstru
 
 import javax.vecmath.Matrix3d;
 
+import com.yobotics.simulationconstructionset.gui.XMLReaderUtility;
+
 public class LinkGraphicsRotateMatrix implements LinkGraphicsInstruction
 {
    private Matrix3d rot;
@@ -18,6 +20,6 @@ public class LinkGraphicsRotateMatrix implements LinkGraphicsInstruction
    public String toString()
    {
    
-      return "<RotateMatrix> "+rot;
+      return "\t\t\t<RotateMatrix>"+XMLReaderUtility.matrix3DToString(rot)+"</RotateMatrix>\n";
    }
 }

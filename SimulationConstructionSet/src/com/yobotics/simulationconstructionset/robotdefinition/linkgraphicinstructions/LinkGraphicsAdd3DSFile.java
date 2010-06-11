@@ -30,6 +30,11 @@ public class LinkGraphicsAdd3DSFile implements LinkGraphicsInstruction
  
    public String toString()
    {
-      return "<Add3DSFile> "+fileName+" "+appearance;
+	   String ret = "\t\t\t<Add3DSFile>\n\t\t\t\t<Name>"+fileName+"</Name>\n";
+	   if (appearance != null) {
+		   ret += appearance;
+	   }
+	   ret += "\t\t\t</Add3DSFile>\n";
+	   return ret;
    }
 }

@@ -24,6 +24,6 @@ public class LinkGraphicsScale implements LinkGraphicsInstruction
    public String toString()
    {
       
-      return "<Scale> "+scaleFactor;
+      return "\t\t\t<Scale>"+scaleFactor+"</Scale>\n";
    }
 }
