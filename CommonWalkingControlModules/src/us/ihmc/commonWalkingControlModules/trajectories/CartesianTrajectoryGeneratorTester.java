@@ -43,9 +43,6 @@ public class CartesianTrajectoryGeneratorTester
    {
       Robot nullRobot = new Robot("null")
       {
-         /**
-          *
-          */
          private static final long serialVersionUID = 629274113314836560L;
       };
 
@@ -273,7 +270,7 @@ public class CartesianTrajectoryGeneratorTester
          }
          else
          {
-            cartesianTrajectoryGenerator.computeNextTick(DT, currentPositionFramePoint, currentVelocityFramePoint, currentAccelerationFramePoint);
+            cartesianTrajectoryGenerator.computeNextTick(currentPositionFramePoint, currentVelocityFramePoint, currentAccelerationFramePoint, DT);
 
             skipCount++;
 
