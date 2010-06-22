@@ -925,7 +925,7 @@ public class Plotter extends JPanel
 
       ret.setLayout(new BorderLayout());
       ret.add(this, "Center");
-      ret.add(plotterLegendPanel, "West");
+      ret.add(plotterLegendPanel, "South");
 
       return ret;
 
