@@ -1,6 +1,7 @@
 package us.ihmc.plotting;
 
 import javax.swing.JPanel;
+import java.awt.Font;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -22,7 +23,7 @@ import java.util.ArrayList;
 public class PlotterLegendPanel extends JPanel implements ArtifactsChangedListener
 {
    /**
-    * 
+    *
     */
    private static final long serialVersionUID = -8268027977270506164L;
    private ArrayList<Artifact> artifacts = new ArrayList<Artifact>();
@@ -56,23 +57,47 @@ public class PlotterLegendPanel extends JPanel implements ArtifactsChangedListen
       int deltaY = 30;
 
       int artifactX = 30;
-      int labelX = 120;
-      int y = 50;
+      int labelX = 200;
+      int y = 20;
+
+      Font f = new Font("Arial", Font.BOLD, 20);
+      g.setFont(f);
+      g.drawString("Plotter Legend", 130, 20);
+
+      f = new Font("Arial", Font.PLAIN, 14);
 
       for (Artifact artifact : artifacts)
       {
+         y = y + deltaY;
+         g.setFont(f);
+
+         scale = 500;
+
+         if (artifact.getID().equals("FinalDesiredSwing"))
+         {
+            scale = 200;
+         }
+
          artifact.drawLegend(g, artifactX, y, scale);
 
-         //       Color newColor = new Color((red + 128) % 256, (green + 128) % 256, (blue + 128) % 256);
-//       Color newColor = color.darker();
-//       g.setColor(newColor);
          g.setColor(Color.black);
+         String newName = "";
+         newName = artifact.getID().substring(0, 1).toUpperCase() + artifact.getID().substring(1, artifact.getID().length());
 
-//       g.fillRect(labelX - 10, y-deltaY/2, 250, deltaY-5);
+         for (int i = 1; i < newName.length(); i++)
+         {
+            int ascii = (int) newName.charAt(i);
+            if ((ascii >= 65) && (ascii <= 90))
+            {
+               if (!newName.substring(i - 1, i).equals(" "))
+               {
+                  newName = newName.substring(0, i) + " " + newName.substring(i, newName.length());
+                  i++;
+               }
+            }
+         }
 
-//       g.setColor(color);
-         g.drawString(artifact.getID(), labelX, y);
-         y = y + deltaY;
+         g.drawString(newName, labelX, y);
       }
    }
 
