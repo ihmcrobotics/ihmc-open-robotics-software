@@ -1,13 +1,13 @@
 package com.yobotics.simulationconstructionset.util.globalParameters;
 
 
-import com.yobotics.simulationconstructionset.YoVariableType;
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import com.yobotics.simulationconstructionset.YoVariableType;
 
 
 

@@ -1,7 +1,8 @@
 package com.yobotics.simulationconstructionset;
 
-import junit.framework.*;
-import java.util.*;
+import java.util.ArrayList;
+
+import junit.framework.TestCase;
 
 /**
  * <p>Title: SimulationConstructionSet</p>
