@@ -1,8 +1,8 @@
 package com.yobotics.simulationconstructionset.gui;
 
-import junit.framework.*;
-import us.ihmc.utilities.test.HumanAssistedTestFrame;
+import junit.framework.TestCase;
 import us.ihmc.utilities.linearDynamicSystems.TransferFunction;
+import us.ihmc.utilities.test.HumanAssistedTestFrame;
 
 /**
  * <p>Title: SimulationConstructionSet</p>
