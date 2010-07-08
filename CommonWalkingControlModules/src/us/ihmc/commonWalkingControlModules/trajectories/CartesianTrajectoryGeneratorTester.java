@@ -186,7 +186,7 @@ public class CartesianTrajectoryGeneratorTester
          allowEndPointShift.set(false);
          slowDownMillis.set(0);
 
-         resetEvery.val = 4.0;    // 4.0;
+         resetEvery.set(4.0);    // 4.0;
 
          this.startingTestPoint = new FramePoint(ReferenceFrame.getWorldFrame(), startingTestPoint);
          startingTestVelocity = new FrameVector(ReferenceFrame.getWorldFrame());
@@ -237,9 +237,9 @@ public class CartesianTrajectoryGeneratorTester
             e.printStackTrace();
          }
 
-         if (t.val - lastResetTime.val > resetEvery.val)
+         if (t.getDoubleValue() - lastResetTime.getDoubleValue() > resetEvery.getDoubleValue())
          {
-            lastResetTime.val = t.val;
+            lastResetTime.set(t.getDoubleValue());
 
             reset.set(true);
             testPointIndex.set(testPointIndex.getIntegerValue() + 1);
