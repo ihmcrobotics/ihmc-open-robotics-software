@@ -202,25 +202,25 @@ public class TestIMUKalmanFilterControllerJerryOne implements RobotController
 //    wy_freq.val = 2.0;
 //    wz_freq.val = 0.2;
 
-      wx_amp.val = 0.0;
-      wy_amp.val = 0.0;
-      wz_amp.val = 0.0;
+      wx_amp.set(0.0);
+      wy_amp.set(0.0);
+      wz_amp.set(0.0);
 
 
-      fx_amp.val = 1.0;
-      fx_freq.val = 1.0;
+      fx_amp.set(1.0);
+      fx_freq.set(1.0);
 
-      q_noise.val = 5.0;
-      r_noise.val = 1.0;
+      q_noise.set(5.0);
+      r_noise.set(1.0);
 
-      compass_noise.val = 0.0;    // 1.0; //0.5; //0.0; //2.0; //1.0;
-      compass_offset.val = 0.0;    // 0.5;
-      accel_noise.val = 0.0;    // 1.0; //5.0; //1.0;
-      gyro_noise.val = 0.0;    // 1.0; //2.0; //1.0;
+      compass_noise.set(0.0);    // 1.0; //0.5; //0.0; //2.0; //1.0;
+      compass_offset.set(0.0);    // 0.5;
+      accel_noise.set(0.0);    // 1.0; //5.0; //1.0;
+      gyro_noise.set(0.0);    // 1.0; //2.0; //1.0;
 
-      x_gyro_bias.val = 0.0;    // 0.5; //0.1;
-      y_gyro_bias.val = 0.0;    // 0.7; //0.2; //1.0;
-      z_gyro_bias.val = 0.0;    // 0.9; //0.3;
+      x_gyro_bias.set(0.0);    // 0.5; //0.1;
+      y_gyro_bias.set(0.0);    // 0.7; //0.2; //1.0;
+      z_gyro_bias.set(0.0);    // 0.9; //0.3;
 
       // As of March 14, 2007 9AM, the following tests seemed to work ok:
 //    robot.setYawPitchRoll(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
@@ -268,11 +268,11 @@ public class TestIMUKalmanFilterControllerJerryOne implements RobotController
 
       computeAccelerationsFromRobot();
 
-      System.out.println("Initial Yaw = " + robot.yaw.val);
+      System.out.println("Initial Yaw = " + robot.yaw.getDoubleValue());
 
-      accel.set(0, 0, -x_accel.val);
-      accel.set(1, 0, -y_accel.val);
-      accel.set(2, 0, -z_accel.val);
+      accel.set(0, 0, -x_accel.getDoubleValue());
+      accel.set(1, 0, -y_accel.getDoubleValue());
+      accel.set(2, 0, -z_accel.getDoubleValue());
 
       pqr.set(0, 0, 0.0);    // x_gyro.val); // + x_gyro_bias.val);
       pqr.set(1, 0, 0.0);    // y_gyro.val); // + y_gyro_bias.val);
@@ -294,13 +294,13 @@ public class TestIMUKalmanFilterControllerJerryOne implements RobotController
 //    }
 //    else
       {
-         imuKalmanFilter.initialize(accel, pqr, robot.yaw.val);
+         imuKalmanFilter.initialize(accel, pqr, robot.yaw.getDoubleValue());
          imuKalmanFilter.reset();
-         imuKalmanFilter.setNoiseParameters(q_noise.val, r_noise.val);
+         imuKalmanFilter.setNoiseParameters(q_noise.getDoubleValue(), r_noise.getDoubleValue());
 
-         quaternionBasedFullIMUKalmanFilterTwo.initialize(accel, pqr, robot.yaw.val);
+         quaternionBasedFullIMUKalmanFilterTwo.initialize(accel, pqr, robot.yaw.getDoubleValue());
          quaternionBasedFullIMUKalmanFilterTwo.reset();
-         quaternionBasedFullIMUKalmanFilterTwo.setNoiseParameters(q_noise.val, r_noise.val);
+         quaternionBasedFullIMUKalmanFilterTwo.setNoiseParameters(q_noise.getDoubleValue(), r_noise.getDoubleValue());
 
 
       }
@@ -341,64 +341,64 @@ public class TestIMUKalmanFilterControllerJerryOne implements RobotController
          // doneSecondStep = true;
          // }
 
-         robot.qd_wx.val = wx_amp.val * Math.sin(2.0 * Math.PI * wx_freq.val * t.val);
-         robot.qd_wy.val = wy_amp.val * Math.sin(2.0 * Math.PI * wy_freq.val * t.val);
-         robot.qd_wz.val = wz_amp.val * Math.sin(2.0 * Math.PI * wz_freq.val * t.val);
+         robot.qd_wx.set(wx_amp.getDoubleValue() * Math.sin(2.0 * Math.PI * wx_freq.getDoubleValue() * t.getDoubleValue()));
+         robot.qd_wy.set(wy_amp.getDoubleValue() * Math.sin(2.0 * Math.PI * wy_freq.getDoubleValue() * t.getDoubleValue()));
+         robot.qd_wz.set(wz_amp.getDoubleValue() * Math.sin(2.0 * Math.PI * wz_freq.getDoubleValue() * t.getDoubleValue()));
 
-         if (robot.qd_wx.val > 0.0)
-            robot.qd_wx.val = wx_amp.val;
+         if (robot.qd_wx.getDoubleValue() > 0.0)
+            robot.qd_wx.set(wx_amp.getDoubleValue());
          else
-            robot.qd_wx.val = -wx_amp.val;
+            robot.qd_wx.set(-wx_amp.getDoubleValue());
 
-         if (robot.qd_wy.val > 0.0)
-            robot.qd_wy.val = wy_amp.val;
+         if (robot.qd_wy.getDoubleValue() > 0.0)
+            robot.qd_wy.set(wy_amp.getDoubleValue());
          else
-            robot.qd_wy.val = -wy_amp.val;
+            robot.qd_wy.set(-wy_amp.getDoubleValue());
 
-         if (robot.qd_wz.val > 0.0)
-            robot.qd_wz.val = wz_amp.val;
+         if (robot.qd_wz.getDoubleValue() > 0.0)
+            robot.qd_wz.set(wz_amp.getDoubleValue());
          else
-            robot.qd_wz.val = -wz_amp.val;
+            robot.qd_wz.set(-wz_amp.getDoubleValue());
 
 
          robot.updateYawPitchRoll();
 
          // Apply upward force to prevent it from falling:
-         robot.ef_body_fx.val = fx_amp.val * Math.cos(2.0 * Math.PI * fx_freq.val * t.val);
-         robot.ef_body_fy.val = fy_amp.val * Math.cos(2.0 * Math.PI * fy_freq.val * t.val);
-         robot.ef_body_fz.val = G;
+         robot.ef_body_fx.set(fx_amp.getDoubleValue() * Math.cos(2.0 * Math.PI * fx_freq.getDoubleValue() * t.getDoubleValue()));
+         robot.ef_body_fy.set(fy_amp.getDoubleValue() * Math.cos(2.0 * Math.PI * fy_freq.getDoubleValue() * t.getDoubleValue()));
+         robot.ef_body_fz.set(G);
 
          computeAccelerationsFromRobot();
 
-         heading_noise.val = alpha_accel_noise.val * heading_noise.val + (1.0 - alpha_accel_noise.val) * (random.nextGaussian() * 1.414 * compass_noise.val);
+         heading_noise.set(alpha_accel_noise.getDoubleValue() * heading_noise.getDoubleValue() + (1.0 - alpha_accel_noise.getDoubleValue()) * (random.nextGaussian() * 1.414 * compass_noise.getDoubleValue()));
 
-         x_accel_noise.val = alpha_accel_noise.val * x_accel_noise.val + (1.0 - alpha_accel_noise.val) * (random.nextGaussian() * 1.414 * accel_noise.val);
-         y_accel_noise.val = alpha_accel_noise.val * y_accel_noise.val + (1.0 - alpha_accel_noise.val) * (random.nextGaussian() * 1.414 * accel_noise.val);
-         z_accel_noise.val = alpha_accel_noise.val * z_accel_noise.val + (1.0 - alpha_accel_noise.val) * (random.nextGaussian() * 1.414 * accel_noise.val);
+         x_accel_noise.set(alpha_accel_noise.getDoubleValue() * x_accel_noise.getDoubleValue() + (1.0 - alpha_accel_noise.getDoubleValue()) * (random.nextGaussian() * 1.414 * accel_noise.getDoubleValue()));
+         y_accel_noise.set(alpha_accel_noise.getDoubleValue() * y_accel_noise.getDoubleValue() + (1.0 - alpha_accel_noise.getDoubleValue()) * (random.nextGaussian() * 1.414 * accel_noise.getDoubleValue()));
+         z_accel_noise.set(alpha_accel_noise.getDoubleValue() * z_accel_noise.getDoubleValue() + (1.0 - alpha_accel_noise.getDoubleValue()) * (random.nextGaussian() * 1.414 * accel_noise.getDoubleValue()));
 
-         heading_sensor.val = robot.yaw.val + heading_noise.val + compass_offset.val;
+         heading_sensor.set(robot.yaw.getDoubleValue() + heading_noise.getDoubleValue() + compass_offset.getDoubleValue());
 
-         x_gyro_noise.val = alpha_gyro_noise.val * x_gyro_noise.val + (1.0 - alpha_gyro_noise.val) * (random.nextGaussian() * 1.414 * gyro_noise.val);
-         y_gyro_noise.val = alpha_gyro_noise.val * y_gyro_noise.val + (1.0 - alpha_gyro_noise.val) * (random.nextGaussian() * 1.414 * gyro_noise.val);
-         z_gyro_noise.val = alpha_gyro_noise.val * z_gyro_noise.val + (1.0 - alpha_gyro_noise.val) * (random.nextGaussian() * 1.414 * gyro_noise.val);
+         x_gyro_noise.set(alpha_gyro_noise.getDoubleValue() * x_gyro_noise.getDoubleValue() + (1.0 - alpha_gyro_noise.getDoubleValue()) * (random.nextGaussian() * 1.414 * gyro_noise.getDoubleValue()));
+         y_gyro_noise.set(alpha_gyro_noise.getDoubleValue() * y_gyro_noise.getDoubleValue() + (1.0 - alpha_gyro_noise.getDoubleValue()) * (random.nextGaussian() * 1.414 * gyro_noise.getDoubleValue()));
+         z_gyro_noise.set(alpha_gyro_noise.getDoubleValue() * z_gyro_noise.getDoubleValue() + (1.0 - alpha_gyro_noise.getDoubleValue()) * (random.nextGaussian() * 1.414 * gyro_noise.getDoubleValue()));
 
-         x_accel_sensor.val = -x_accel.val + x_accel_noise.val;
-         y_accel_sensor.val = -y_accel.val + y_accel_noise.val;
-         z_accel_sensor.val = -z_accel.val + z_accel_noise.val;
+         x_accel_sensor.set(-x_accel.getDoubleValue() + x_accel_noise.getDoubleValue());
+         y_accel_sensor.set(-y_accel.getDoubleValue() + y_accel_noise.getDoubleValue());
+         z_accel_sensor.set(-z_accel.getDoubleValue() + z_accel_noise.getDoubleValue());
 
-         accel.set(0, 0, x_accel_sensor.val);
-         accel.set(1, 0, y_accel_sensor.val);
-         accel.set(2, 0, z_accel_sensor.val);
+         accel.set(0, 0, x_accel_sensor.getDoubleValue());
+         accel.set(1, 0, y_accel_sensor.getDoubleValue());
+         accel.set(2, 0, z_accel_sensor.getDoubleValue());
 
          // pqr is in order of qd_wx, qd_wy, qd_wz
 
-         x_gyro_sensor.val = x_gyro.val + x_gyro_bias.val + x_gyro_noise.val;
-         y_gyro_sensor.val = y_gyro.val + y_gyro_bias.val + y_gyro_noise.val;
-         z_gyro_sensor.val = z_gyro.val + z_gyro_bias.val + z_gyro_noise.val;
+         x_gyro_sensor.set(x_gyro.getDoubleValue() + x_gyro_bias.getDoubleValue() + x_gyro_noise.getDoubleValue());
+         y_gyro_sensor.set(y_gyro.getDoubleValue() + y_gyro_bias.getDoubleValue() + y_gyro_noise.getDoubleValue());
+         z_gyro_sensor.set(z_gyro.getDoubleValue() + z_gyro_bias.getDoubleValue() + z_gyro_noise.getDoubleValue());
 
-         pqr.set(0, 0, x_gyro_sensor.val);
-         pqr.set(1, 0, y_gyro_sensor.val);
-         pqr.set(2, 0, z_gyro_sensor.val);
+         pqr.set(0, 0, x_gyro_sensor.getDoubleValue());
+         pqr.set(1, 0, y_gyro_sensor.getDoubleValue());
+         pqr.set(2, 0, z_gyro_sensor.getDoubleValue());
 
          // Estimates just from the accelerometer:
          // Matrix eulerAngles = fullIMUKalmanFilter.accel2euler(accel, robot.yaw.val);
@@ -410,13 +410,13 @@ public class TestIMUKalmanFilterControllerJerryOne implements RobotController
          // yaw_from_accel.val = fullIMUKalmanFilter.eulerAngles.get(2, 0);
          //
          double[] quaternions = new double[4];
-         imuKalmanFilter.accel2quaternions(accel, heading_sensor.val, quaternions);
+         imuKalmanFilter.accel2quaternions(accel, heading_sensor.getDoubleValue(), quaternions);
 
          // Matrix quaternions = QuaternionTools.euler2quat(fullIMUKalmanFilter.eulerAngles);
-         q0_from_accel.val = quaternions[0];
-         q1_from_accel.val = quaternions[1];
-         q2_from_accel.val = quaternions[2];
-         q3_from_accel.val = quaternions[3];
+         q0_from_accel.set(quaternions[0]);
+         q1_from_accel.set(quaternions[1]);
+         q2_from_accel.set(quaternions[2]);
+         q3_from_accel.set(quaternions[3]);
 
          double[] euler = new double[3];
          QuaternionTools.quaternionsToRollPitchYaw(quaternions, euler);
@@ -425,9 +425,9 @@ public class TestIMUKalmanFilterControllerJerryOne implements RobotController
          // Matrix euler = QuaternionTools.quat2euler(quaternions);
          //
 
-         roll_from_quat.val = euler[0];
-         pitch_from_quat.val = euler[1];
-         yaw_from_quat.val = euler[2];
+         roll_from_quat.set(euler[0]);
+         pitch_from_quat.set(euler[1]);
+         yaw_from_quat.set(euler[2]);
 
 //
 //       if(USING_FAST_QUAT)
@@ -480,51 +480,51 @@ public class TestIMUKalmanFilterControllerJerryOne implements RobotController
 //       {
 
 
-         quaternionBasedFullIMUKalmanFilterTwo.setNoiseParameters(q_noise.val, r_noise.val);
+         quaternionBasedFullIMUKalmanFilterTwo.setNoiseParameters(q_noise.getDoubleValue(), r_noise.getDoubleValue());
          quaternionBasedFullIMUKalmanFilterTwo.imuUpdate(pqr);
-         quaternionBasedFullIMUKalmanFilterTwo.compassUpdate(heading_sensor.val, accel);
+         quaternionBasedFullIMUKalmanFilterTwo.compassUpdate(heading_sensor.getDoubleValue(), accel);
 
          Matrix eulerMatrix_2 = new Matrix(3, 1);
          Matrix quaternionMatrix = new Matrix(4, 1);
          quaternionBasedFullIMUKalmanFilterTwo.getQuaternion(quaternionMatrix);
          QuaternionTools.quaternionsToRollPitchYaw(quaternionMatrix, eulerMatrix_2);
 
-         estimated_q0_2.val = quaternionMatrix.get(0, 0);
-         estimated_q1_2.val = quaternionMatrix.get(1, 0);
-         estimated_q2_2.val = quaternionMatrix.get(2, 0);
-         estimated_q3_2.val = quaternionMatrix.get(3, 0);
+         estimated_q0_2.set(quaternionMatrix.get(0, 0));
+         estimated_q1_2.set(quaternionMatrix.get(1, 0));
+         estimated_q2_2.set(quaternionMatrix.get(2, 0));
+         estimated_q3_2.set(quaternionMatrix.get(3, 0));
 
-         estimated_yaw_2.val = eulerMatrix_2.get(2, 0);
-         estimated_pitch_2.val = eulerMatrix_2.get(1, 0);
-         estimated_roll_2.val = eulerMatrix_2.get(0, 0);
+         estimated_yaw_2.set(eulerMatrix_2.get(2, 0));
+         estimated_pitch_2.set(eulerMatrix_2.get(1, 0));
+         estimated_roll_2.set(eulerMatrix_2.get(0, 0));
 
 
 
-         imuKalmanFilter.setNoiseParameters(q_noise.val, r_noise.val);
+         imuKalmanFilter.setNoiseParameters(q_noise.getDoubleValue(), r_noise.getDoubleValue());
          imuKalmanFilter.imuUpdate(pqr);
-         imuKalmanFilter.compassUpdate(heading_sensor.val, accel);
+         imuKalmanFilter.compassUpdate(heading_sensor.getDoubleValue(), accel);
 
-         estimated_qd_wx_bias.val = imuKalmanFilter.getBias(0);
-         estimated_qd_wy_bias.val = imuKalmanFilter.getBias(1);
-         estimated_qd_wz_bias.val = imuKalmanFilter.getBias(2);
+         estimated_qd_wx_bias.set(imuKalmanFilter.getBias(0));
+         estimated_qd_wy_bias.set(imuKalmanFilter.getBias(1));
+         estimated_qd_wz_bias.set(imuKalmanFilter.getBias(2));
 
 
          Matrix quatMatrix = new Matrix(4, 1);
          imuKalmanFilter.getQuaternion(quatMatrix);
 
-         estimated_q0.val = quatMatrix.get(0, 0);
-         estimated_q1.val = quatMatrix.get(1, 0);
-         estimated_q2.val = quatMatrix.get(2, 0);
-         estimated_q3.val = quatMatrix.get(3, 0);
+         estimated_q0.set(quatMatrix.get(0, 0));
+         estimated_q1.set(quatMatrix.get(1, 0));
+         estimated_q2.set(quatMatrix.get(2, 0));
+         estimated_q3.set(quatMatrix.get(3, 0));
 
-         @SuppressWarnings("unused") double[] quat = new double[] {estimated_q0.val, estimated_q1.val, estimated_q2.val, estimated_q3.val};
+         @SuppressWarnings("unused") double[] quat = new double[] {estimated_q0.getDoubleValue(), estimated_q1.getDoubleValue(), estimated_q2.getDoubleValue(), estimated_q3.getDoubleValue()};
 
          Matrix eulerMatrix = new Matrix(3, 1);
          QuaternionTools.quaternionsToRollPitchYaw(quatMatrix, eulerMatrix);
 
-         estimated_yaw.val = eulerMatrix.get(2, 0);
-         estimated_pitch.val = eulerMatrix.get(1, 0);
-         estimated_roll.val = eulerMatrix.get(0, 0);
+         estimated_yaw.set(eulerMatrix.get(2, 0));
+         estimated_pitch.set(eulerMatrix.get(1, 0));
+         estimated_roll.set(eulerMatrix.get(0, 0));
 
          // estimated_yaw.val = fullIMUKalmanFilter.eulerAngles.get(2, 0);
          // estimated_pitch.val = fullIMUKalmanFilter.eulerAngles.get(1, 0);
@@ -557,20 +557,20 @@ public class TestIMUKalmanFilterControllerJerryOne implements RobotController
       transformFromWorldToBody.invert();
 
       // Transform accelerations from world coordinates to body coordinates:
-      Vector3d qddBody = new Vector3d(robot.qdd_x.val, robot.qdd_y.val, (robot.qdd_z.val + 9.81));
-      Vector3d wBody = new Vector3d(robot.qd_wx.val, robot.qd_wy.val, robot.qd_wz.val);
+      Vector3d qddBody = new Vector3d(robot.qdd_x.getDoubleValue(), robot.qdd_y.getDoubleValue(), (robot.qdd_z.getDoubleValue() + 9.81));
+      Vector3d wBody = new Vector3d(robot.qd_wx.getDoubleValue(), robot.qd_wy.getDoubleValue(), robot.qd_wz.getDoubleValue());
 
       transformFromWorldToBody.transform(qddBody);
       transformFromWorldToBody.transform(wBody);
 
       // Set the IMUs acceleration and rate gyroscope inputs.
-      x_accel.val = qddBody.x;
-      y_accel.val = qddBody.y;
-      z_accel.val = qddBody.z;
+      x_accel.set(qddBody.x);
+      y_accel.set(qddBody.y);
+      z_accel.set(qddBody.z);
 
-      x_gyro.val = wBody.x;
-      y_gyro.val = wBody.y;
-      z_gyro.val = wBody.z;
+      x_gyro.set(wBody.x);
+      y_gyro.set(wBody.y);
+      z_gyro.set(wBody.z);
    }
 
    public YoVariableRegistry getYoVariableRegistry()

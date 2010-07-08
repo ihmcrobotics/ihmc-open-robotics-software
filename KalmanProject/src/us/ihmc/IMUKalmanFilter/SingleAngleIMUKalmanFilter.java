@@ -61,9 +61,9 @@ public class SingleAngleIMUKalmanFilter
             Q_gyro = new YoVariable("Q_gyro", reg);
          }
 
-         R_angle.val = R_angle_default;
-         Q_angle.val = Q_angle_default;
-         Q_gyro.val = Q_gyro_default;
+         R_angle.set(R_angle_default);
+         Q_angle.set(Q_angle_default);
+         Q_gyro.set(Q_gyro_default);
       }
 
    }
@@ -104,10 +104,10 @@ public class SingleAngleIMUKalmanFilter
       double q = q_m - q_bias;
 
       /* Compute the derivative of the covariance matrix */
-      Pdot[0] = (Q_angle == null) ? Q_angle_default : Q_angle.val - P[0][1] - P[1][0];
+      Pdot[0] = (Q_angle == null) ? Q_angle_default : Q_angle.getDoubleValue() - P[0][1] - P[1][0];
       Pdot[1] = -P[1][1];
       Pdot[2] = -P[1][1];
-      Pdot[3] = (Q_gyro == null) ? Q_gyro_default : Q_gyro.val;
+      Pdot[3] = (Q_gyro == null) ? Q_gyro_default : Q_gyro.getDoubleValue();
 
       /* Store the unbiased gyro eztimate */
       rate = q;
@@ -173,7 +173,7 @@ public class SingleAngleIMUKalmanFilter
 //    **************Measurement Update ("Correct")**************
 //    (1) Compute the Kalman gain, K
       // K = P * Ht * inv(H*P*Ht + R)
-      E = (R_angle == null) ? R_angle_default : R_angle.val + C_0 * PCt_0;
+      E = (R_angle == null) ? R_angle_default : R_angle.getDoubleValue() + C_0 * PCt_0;
       K_0 = PCt_0 / E;
       K_1 = PCt_1 / E;
 
@@ -227,17 +227,17 @@ public class SingleAngleIMUKalmanFilter
 
    public void setR_angle(double angle)
    {
-      R_angle.val = angle;
+      R_angle.set(angle);
    }
 
    public void setQ_angle(double angle)
    {
-      Q_angle.val = angle;
+      Q_angle.set(angle);
    }
 
    public void setQ_gyro(double angle)
    {
-      Q_gyro.val = angle;
+      Q_gyro.set(angle);
    }
 
    public void setDT(double dt)

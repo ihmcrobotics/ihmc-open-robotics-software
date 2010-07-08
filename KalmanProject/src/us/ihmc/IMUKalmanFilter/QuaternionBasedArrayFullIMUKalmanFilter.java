@@ -213,7 +213,7 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
       {
          for (int i = 0; i < m; i++)
          {
-            a[i].val = d[i];
+            a[i].set(d[i]);
          }
       }
       else
@@ -246,7 +246,7 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
       int m = M.length;
       for (int i = 0; i < m; i++)
       {
-         s = M[i].val;
+         s = M[i].getDoubleValue();
          mag += s * s;
       }
 
@@ -290,7 +290,7 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
 
             for (int k = 0; k < n; k++)
             {
-               c[i][j] += a[i][k].val * b[k][j];
+               c[i][j] += a[i][k].getDoubleValue() * b[k][j];
             }
          }
       }
@@ -312,7 +312,7 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
 
             for (int k = 0; k < n; k++)
             {
-               c[i][j] += a[i][k] * b[k][j].val;
+               c[i][j] += a[i][k] * b[k][j].getDoubleValue();
             }
          }
       }
@@ -376,7 +376,7 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
 
          for (int k = 0; k < n; k++)
          {
-            c[i] += a[i][k] * b[k].val;
+            c[i] += a[i][k] * b[k].getDoubleValue();
          }
 
          c[i] *= s;
@@ -405,7 +405,7 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
 
       for (int i = 0; i < c.length; i++)
       {
-         c[i].val = a[i].val * b;
+         c[i].set(a[i].getDoubleValue() * b);
       }
    }
 
@@ -447,7 +447,7 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
       {
          for (int j = 0; j < c[0].length; j++)
          {
-            c[i][j].val = a[i][j].val + b[i][j];
+            c[i][j].set(a[i][j].getDoubleValue() + b[i][j]);
          }
       }
    }
@@ -472,7 +472,7 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
 
       for (int i = 0; i < c.length; i++)
       {
-         c[i].val = a[i].val + b[i];
+         c[i].set(a[i].getDoubleValue() + b[i]);
       }
    }
 
@@ -501,7 +501,7 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
       {
          for (int j = 0; j < c[0].length; j++)
          {
-            c[i][j].val = a[i][j].val - b[i][j];
+            c[i][j].set(a[i][j].getDoubleValue() - b[i][j]);
          }
       }
    }
@@ -517,7 +517,7 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
       {
          for (int j = 0; j < c[0].length; j++)
          {
-            c[i][j] = a[i][j] - b[i][j].val;
+            c[i][j] = a[i][j] - b[i][j].getDoubleValue();
          }
       }
    }
@@ -529,7 +529,7 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
 
       for (int i = 0; i < c.length; i++)
       {
-         c[i] = a[i] - b[i].val;
+         c[i] = a[i] - b[i].getDoubleValue();
       }
    }
 
@@ -552,7 +552,7 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
       {
          for (int j = 0; j < a[0].length; j++)
          {
-            a[i][j].val = (i == j) ? 1.0 : 0.0;
+            a[i][j].set((i == j) ? 1.0 : 0.0);
          }
       }
    }
@@ -565,7 +565,7 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
       {
          for (int j = 0; j < a[0].length; j++)
          {
-            trace += (i == j) ? a[i][j].val : 0.0;
+            trace += (i == j) ? a[i][j].getDoubleValue() : 0.0;
          }
       }
 
@@ -736,10 +736,10 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
        * which is also zero.
        */
 
-      double q0 = Quat[0].val;
-      double q1 = Quat[1].val;
-      double q2 = Quat[2].val;
-      double q3 = Quat[3].val;
+      double q0 = Quat[0].getDoubleValue();
+      double q1 = Quat[1].getDoubleValue();
+      double q2 = Quat[2].getDoubleValue();
+      double q3 = Quat[3].getDoubleValue();
 
 //    double[][] m =
 //        {
@@ -812,7 +812,7 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
       {
          for (int j = 0; j < A[i].length; j++)
          {
-            ACopy[i][j].val = A[i][j];
+            ACopy[i][j].set(A[i][j]);
          }
       }
    }
@@ -828,10 +828,10 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
          }
       }
 
-      K[0][0] = k_qs.val;
-      K[1][1] = k_qxyz.val;
-      K[2][2] = k_qxyz.val;
-      K[3][3] = k_qxyz.val;
+      K[0][0] = k_qs.getDoubleValue();
+      K[1][1] = k_qxyz.getDoubleValue();
+      K[2][2] = k_qxyz.getDoubleValue();
+      K[3][3] = k_qxyz.getDoubleValue();
 
    }
 
@@ -896,24 +896,24 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
 
 
 
-      X[0] = Quat[0].val;
-      X[1] = Quat[1].val;
-      X[2] = Quat[2].val;
-      X[3] = Quat[3].val;
-      X[4] = bias[0].val;
-      X[5] = bias[1].val;
-      X[6] = bias[2].val;
+      X[0] = Quat[0].getDoubleValue();
+      X[1] = Quat[1].getDoubleValue();
+      X[2] = Quat[2].getDoubleValue();
+      X[3] = Quat[3].getDoubleValue();
+      X[4] = bias[0].getDoubleValue();
+      X[5] = bias[1].getDoubleValue();
+      X[6] = bias[2].getDoubleValue();
 
       Kalman(P, X);
 
-      Quat[0].val = X[0];
-      Quat[1].val = X[1];
-      Quat[2].val = X[2];
-      Quat[3].val = X[3];
+      Quat[0].set(X[0]);
+      Quat[1].set(X[1]);
+      Quat[2].set(X[2]);
+      Quat[3].set(X[3]);
 
-      bias[0].val = X[4];
-      bias[1].val = X[5];
-      bias[2].val = X[6];
+      bias[0].set(X[4]);
+      bias[1].set(X[5]);
+      bias[2].set(X[6]);
       normalize(Quat);
    }
 
@@ -943,8 +943,8 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
 
       for (int i = 0; i < 4; i++)
       {
-         distanceSquared += (quaternions[i] - Quat[i].val) * (quaternions[i] - Quat[i].val);
-         distanceSquaredToNegative += (-quaternions[i] - Quat[i].val) * (-quaternions[i] - Quat[i].val);
+         distanceSquared += (quaternions[i] - Quat[i].getDoubleValue()) * (quaternions[i] - Quat[i].getDoubleValue());
+         distanceSquaredToNegative += (-quaternions[i] - Quat[i].getDoubleValue()) * (-quaternions[i] - Quat[i].getDoubleValue());
       }
 
       if (distanceSquaredToNegative < distanceSquared)
@@ -1008,10 +1008,10 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
    @SuppressWarnings("unused")
    private void quatDC(double[][] DCM)
    {
-      double q0 = Quat[0].val;
-      double q1 = Quat[1].val;
-      double q2 = Quat[2].val;
-      double q3 = Quat[3].val;
+      double q0 = Quat[0].getDoubleValue();
+      double q1 = Quat[1].getDoubleValue();
+      double q2 = Quat[2].getDoubleValue();
+      double q3 = Quat[3].getDoubleValue();
 
 //    double[][] m =
 //        {
@@ -1041,10 +1041,10 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
 //    double[] quaternion_m = new double[4];
       accel2quaternions(accel, heading, tempQuaternionM);
 
-      double q0 = Quat[0].val;
-      double q1 = Quat[1].val;
-      double q2 = Quat[2].val;
-      double q3 = Quat[3].val;
+      double q0 = Quat[0].getDoubleValue();
+      double q1 = Quat[1].getDoubleValue();
+      double q2 = Quat[2].getDoubleValue();
+      double q3 = Quat[3].getDoubleValue();
 
       // Subtract to get the error in quaternions,
       quatError[0] = tempQuaternionM[0] - q0;
@@ -1187,10 +1187,10 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
       double[] quaternions = new double[4];
       accel2quaternions(Accel, heading, quaternions);
 
-      Quat[0].val = quaternions[0];
-      Quat[1].val = quaternions[1];
-      Quat[2].val = quaternions[2];
-      Quat[3].val = quaternions[3];
+      Quat[0].set(quaternions[0]);
+      Quat[1].set(quaternions[1]);
+      Quat[2].set(quaternions[2]);
+      Quat[3].set(quaternions[3]);
 
 //    System.out.println("Debug: Quat0 = " + Quat[0][0]);
 
@@ -1259,13 +1259,13 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
 //      Quat[3][0] = quaternions[3];
 
       @SuppressWarnings("unused")
-      double q0 = Quat[0].val;
+      double q0 = Quat[0].getDoubleValue();
       @SuppressWarnings("unused")
-      double q1 = Quat[1].val;
+      double q1 = Quat[1].getDoubleValue();
       @SuppressWarnings("unused")
-      double q2 = Quat[2].val;
+      double q2 = Quat[2].getDoubleValue();
       @SuppressWarnings("unused")
-      double q3 = Quat[3].val;
+      double q3 = Quat[3].getDoubleValue();
 
 //    System.out.println("Initializing QuaternionBasedArrayFullIMUKalmanFilter. q0 = " + QuaternionTools.format4(q0) + ", q1 = " + QuaternionTools.format4(q1) + ", q2 = " + QuaternionTools.format4(q2) + ", q3 = " + QuaternionTools.format4(q3));
 
@@ -1303,17 +1303,17 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
 
    public double getBias(int i)
    {
-      return bias[i].val;
+      return bias[i].getDoubleValue();
    }
 
    public void getQuaternion(Matrix qMatrix)
    {
 //    Matrix qMatrix = new Matrix(4,1);
 
-      double q0 = Quat[0].val;
-      double q1 = Quat[1].val;
-      double q2 = Quat[2].val;
-      double q3 = Quat[3].val;
+      double q0 = Quat[0].getDoubleValue();
+      double q1 = Quat[1].getDoubleValue();
+      double q2 = Quat[2].getDoubleValue();
+      double q3 = Quat[3].getDoubleValue();
 
       qMatrix.set(0, 0, q0);
       qMatrix.set(1, 0, q1);
