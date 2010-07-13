@@ -18,7 +18,7 @@ import com.yobotics.simulationconstructionset.util.graphics.BagOfBalls;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
-import com.yobotics.simulationconstructionset.util.inputdevices.EvolutionUC33E;
+import com.yobotics.simulationconstructionset.util.inputdevices.MidiSliderBoard;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 
@@ -112,7 +112,7 @@ public class CartesianTrajectoryGeneratorTester
 
       scs.selectConfiguration("CartesianTrajectory");
 
-      EvolutionUC33E evolution = new EvolutionUC33E();
+      MidiSliderBoard evolution = new MidiSliderBoard();
       evolution.setChannel(1, "endPointShiftx", scs, -0.5, 0.5);
       evolution.setChannel(2, "endPointShifty", scs, -0.5, 0.5);
       evolution.setChannel(3, "allowEndPointShift", scs, 0.0, 1.0);
