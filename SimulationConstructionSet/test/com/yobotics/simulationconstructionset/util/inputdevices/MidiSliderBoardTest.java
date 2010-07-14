@@ -23,14 +23,14 @@ public class MidiSliderBoardTest
    public void tearDown() throws Exception
    {
    }
-   
+
    @Test
    public void testWeirdCase()
    {
-	   MidiSliderBoard midiSliderBoard = new MidiSliderBoard();
-	   YoVariableRegistry registry = new YoVariableRegistry("testRegistry");
-	   YoVariable yoVariable = new YoVariable("test", registry);
-	   midiSliderBoard.setChannel(3, yoVariable, 1.5, 2.5);
+      MidiSliderBoard midiSliderBoard = new MidiSliderBoard();
+      YoVariableRegistry registry = new YoVariableRegistry("testRegistry");
+      YoVariable yoVariable = new YoVariable("test", registry);
+      midiSliderBoard.setChannel(3, yoVariable, 1.5, 2.5);
    }
 
 }
