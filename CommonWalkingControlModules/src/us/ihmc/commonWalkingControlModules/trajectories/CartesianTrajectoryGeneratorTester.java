@@ -7,6 +7,7 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
+import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.RobotController;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
@@ -156,11 +157,11 @@ public class CartesianTrajectoryGeneratorTester
       private final YoVariable lastResetTime = new YoVariable("lastResetTime", registry);
       private final YoVariable testPointIndex = new YoVariable("testPointIndex", YoVariableType.INT, registry);
 
-      private final YoVariable allowEndPointShift = new YoVariable("allowEndPointShift", YoVariableType.BOOLEAN, registry);
+      private final YoVariable allowEndPointShift = new BooleanYoVariable("allowEndPointShift", registry);
       private final YoVariable slowDownMillis = new YoVariable("slowDownMillis", YoVariableType.INT, registry);
 
 
-      private final YoVariable reset = new YoVariable("reset", YoVariableType.BOOLEAN, registry);
+      private final YoVariable reset = new BooleanYoVariable("reset", registry);
       private final YoFramePoint originalFinalDesiredPosition = new YoFramePoint("originalFinalDesiredPosition", "", ReferenceFrame.getWorldFrame(), registry);
       private final YoFramePoint finalDesiredPosition = new YoFramePoint("finalDesired", "", ReferenceFrame.getWorldFrame(), registry);
 
