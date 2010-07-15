@@ -130,7 +130,7 @@ public class CartesianTrajectoryGeneratorTester
 //       {0.01, 0.0, 0.0},
 //       {0.1, 0.0, 0.0},
 //       {0.25, 0.0, 0.0},
-    		  {0.0, -0.5, 0.0}, {0.5, 0.0, 0.0}, {0.75, 0.0, 0.0}, {1.0, 0.0, 0.0}, {0.5, 0.5, 0.0},
+         {0.0, -0.5, 0.0}, {0.5, 0.0, 0.0}, {0.75, 0.0, 0.0}, {1.0, 0.0, 0.0}, {0.5, 0.5, 0.0},
       };
 
       return ret;
@@ -155,10 +155,10 @@ public class CartesianTrajectoryGeneratorTester
 
       private final YoVariable resetEvery = new YoVariable("resetEvery", registry);
       private final YoVariable lastResetTime = new YoVariable("lastResetTime", registry);
-      private final YoVariable testPointIndex = new IntYoVariable("testPointIndex", registry);
+      private final IntYoVariable testPointIndex = new IntYoVariable("testPointIndex", registry);
 
       private final YoVariable allowEndPointShift = new BooleanYoVariable("allowEndPointShift", registry);
-      private final YoVariable slowDownMillis = new IntYoVariable("slowDownMillis", registry);
+      private final IntYoVariable slowDownMillis = new IntYoVariable("slowDownMillis", registry);
 
 
       private final YoVariable reset = new BooleanYoVariable("reset", registry);
@@ -297,4 +297,3 @@ public class CartesianTrajectoryGeneratorTester
 
 
 }
-
