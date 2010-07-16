@@ -1,7 +1,7 @@
 package us.ihmc.IMUKalmanFilter;
 
 import com.mathworks.jama.Matrix;
-import com.yobotics.simulationconstructionset.YoVariable;
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 /**
@@ -22,14 +22,14 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
    private static final boolean verbose = true;
    private static final int N = 7;
 
-   private final YoVariable k_qs, k_qxyz;
+   private final DoubleYoVariable k_qs, k_qxyz;
 
    // State Variables:
 // public final double[][] Quat = new double[4][1]; // Estimated orientation in quaternions.
 // public final double[][] bias = new double[3][1]; // Rate gyro bias offset estimates. The Kalman filter adapts to these.
 
-   public final YoVariable[] Quat = new YoVariable[4];    // Estimated orientation in quaternions.
-   public final YoVariable[] bias = new YoVariable[3];    // Rate gyro bias offset estimates. The Kalman filter adapts to these.
+   public final DoubleYoVariable[] Quat = new DoubleYoVariable[4];    // Estimated orientation in quaternions.
+   public final DoubleYoVariable[] bias = new DoubleYoVariable[3];    // Rate gyro bias offset estimates. The Kalman filter adapts to these.
 
    /*
     * Covariance matrix and covariance matrix derivative are updated
@@ -39,8 +39,8 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
 
 // public final double[][] P = new double[N][N]; // Covariance matrix
 
-   public final YoVariable[][] P = new YoVariable[N][N];    // Covariance matrix
-   public final YoVariable[][] KCopy = new YoVariable[N][4];
+   public final DoubleYoVariable[][] P = new DoubleYoVariable[N][N];    // Covariance matrix
+   public final DoubleYoVariable[][] KCopy = new DoubleYoVariable[N][4];
 
    private double[][] Pdot = new double[N][N];
 
@@ -114,25 +114,25 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
 
    public QuaternionBasedArrayFullIMUKalmanFilter(double dt, YoVariableRegistry registry)
    {
-      k_qs = new YoVariable("k_qs", registry);
-      k_qxyz = new YoVariable("k_qxyz", registry);
+      k_qs = new DoubleYoVariable("k_qs", registry);
+      k_qxyz = new DoubleYoVariable("k_qxyz", registry);
 
       if (registry != null)
       {
-         Quat[0] = new YoVariable("Quat[0]", registry);
-         Quat[1] = new YoVariable("Quat[1]", registry);
-         Quat[2] = new YoVariable("Quat[2]", registry);
-         Quat[3] = new YoVariable("Quat[3]", registry);
+         Quat[0] = new DoubleYoVariable("Quat[0]", registry);
+         Quat[1] = new DoubleYoVariable("Quat[1]", registry);
+         Quat[2] = new DoubleYoVariable("Quat[2]", registry);
+         Quat[3] = new DoubleYoVariable("Quat[3]", registry);
 
-         bias[0] = new YoVariable("bias[0]", registry);
-         bias[1] = new YoVariable("bias[1]", registry);
-         bias[2] = new YoVariable("bias[2]", registry);
+         bias[0] = new DoubleYoVariable("bias[0]", registry);
+         bias[1] = new DoubleYoVariable("bias[1]", registry);
+         bias[2] = new DoubleYoVariable("bias[2]", registry);
 
          for (int i = 0; i < N; i++)
          {
             for (int j = 0; j < N; j++)
             {
-               P[i][j] = new YoVariable("P[" + i + "][" + j + "]", registry);
+               P[i][j] = new DoubleYoVariable("P[" + i + "][" + j + "]", registry);
             }
          }
 
@@ -140,27 +140,27 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
          {
             for (int j = 0; j < 4; j++)
             {
-               KCopy[i][j] = new YoVariable("K[" + i + "][" + j + "]", registry);
+               KCopy[i][j] = new DoubleYoVariable("K[" + i + "][" + j + "]", registry);
             }
          }
       }
 
       else
       {
-         Quat[0] = new YoVariable("Quat[0]", "", null);
-         Quat[1] = new YoVariable("Quat[1]", "", null);
-         Quat[2] = new YoVariable("Quat[2]", "", null);
-         Quat[3] = new YoVariable("Quat[3]", "", null);
+         Quat[0] = new DoubleYoVariable("Quat[0]", "", null);
+         Quat[1] = new DoubleYoVariable("Quat[1]", "", null);
+         Quat[2] = new DoubleYoVariable("Quat[2]", "", null);
+         Quat[3] = new DoubleYoVariable("Quat[3]", "", null);
 
-         bias[0] = new YoVariable("bias[0]", "", null);
-         bias[1] = new YoVariable("bias[1]", "", null);
-         bias[2] = new YoVariable("bias[2]", "", null);
+         bias[0] = new DoubleYoVariable("bias[0]", "", null);
+         bias[1] = new DoubleYoVariable("bias[1]", "", null);
+         bias[2] = new DoubleYoVariable("bias[2]", "", null);
 
          for (int i = 0; i < N; i++)
          {
             for (int j = 0; j < N; j++)
             {
-               P[i][j] = new YoVariable("P[" + i + "][" + j + "]", "", null);
+               P[i][j] = new DoubleYoVariable("P[" + i + "][" + j + "]", "", null);
             }
          }
       }
@@ -206,7 +206,7 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
    }
 
 
-   private static void setArray(YoVariable[] a, double[] d)
+   private static void setArray(DoubleYoVariable[] a, double[] d)
    {
       int m;
       if ((m = a.length) == d.length)
@@ -239,7 +239,7 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
       Mmul(M, 1.0 / Math.sqrt(mag), M);
    }
 
-   private static void normalize(YoVariable[] M)
+   private static void normalize(DoubleYoVariable[] M)
    {
       double mag = 0;
       double s;
@@ -275,7 +275,7 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
       }
    }
 
-   private static void Mmul(YoVariable[][] a, double[][] b, double[][] c)
+   private static void Mmul(DoubleYoVariable[][] a, double[][] b, double[][] c)
    {
       int m = a.length;
       int n = a[0].length;
@@ -297,7 +297,7 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
    }
 
 
-   private static void Mmul(double[][] a, YoVariable[][] b, double[][] c)
+   private static void Mmul(double[][] a, DoubleYoVariable[][] b, double[][] c)
    {
       int m = a.length;
       int n = a[0].length;
@@ -363,7 +363,7 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
       }
    }
 
-   private static void MmulScalarMul(double[][] a, YoVariable[] b, double[] c, double s)
+   private static void MmulScalarMul(double[][] a, DoubleYoVariable[] b, double[] c, double s)
    {
       int m = a.length;
       int n = a[0].length;
@@ -398,7 +398,7 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
       }
    }
 
-   private static void Mmul(YoVariable[] a, double b, YoVariable[] c)
+   private static void Mmul(DoubleYoVariable[] a, double b, DoubleYoVariable[] c)
    {
       if (a.length != c.length)
          System.err.println("Mul: incompatible dimensions.");
@@ -438,7 +438,7 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
       }
    }
 
-   private static void Madd(YoVariable[][] a, double[][] b, YoVariable[][] c)
+   private static void Madd(DoubleYoVariable[][] a, double[][] b, DoubleYoVariable[][] c)
    {
       if ((a.length != c.length) || (b[0].length != c[0].length))
          System.err.println("Madd: incompatible dimensions.");
@@ -465,7 +465,7 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
    }
 
 
-   private static void Madd(YoVariable[] a, double[] b, YoVariable[] c)
+   private static void Madd(DoubleYoVariable[] a, double[] b, DoubleYoVariable[] c)
    {
       if (a.length != c.length)
          System.err.println("Madd: incompatible dimensions.");
@@ -492,7 +492,7 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
       }
    }
 
-   private static void Msub(YoVariable[][] a, double[][] b, YoVariable[][] c)
+   private static void Msub(DoubleYoVariable[][] a, double[][] b, DoubleYoVariable[][] c)
    {
       if ((a.length != c.length) || (b[0].length != c[0].length))
          System.err.println("Msub: incompatible dimensions.");
@@ -508,7 +508,7 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
 
 
    @SuppressWarnings("unused")
-   private static void Msub(double[][] a, YoVariable[][] b, double[][] c)
+   private static void Msub(double[][] a, DoubleYoVariable[][] b, double[][] c)
    {
       if ((a.length != c.length) || (b[0].length != c[0].length))
          System.err.println("Msub: incompatible dimensions.");
@@ -522,7 +522,7 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
       }
    }
 
-   private static void Msub(double[] a, YoVariable[] b, double[] c)
+   private static void Msub(double[] a, DoubleYoVariable[] b, double[] c)
    {
       if (a.length != c.length)
          System.err.println("Msub: incompatible dimensions.");
@@ -546,7 +546,7 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
       }
    }
 
-   private static void Midentity(YoVariable[][] a)
+   private static void Midentity(DoubleYoVariable[][] a)
    {
       for (int i = 0; i < a.length; i++)
       {
@@ -558,7 +558,7 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
    }
 
 
-   private static double Mtrace(YoVariable[][] a)
+   private static double Mtrace(DoubleYoVariable[][] a)
    {
       double trace = 0.0;
       for (int i = 0; i < a.length; i++)
@@ -806,7 +806,7 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
 //    setArray(A, tempM);
    }
 
-   private void setYoVariables(double[][] A, YoVariable[][] ACopy)
+   private void setYoVariables(double[][] A, DoubleYoVariable[][] ACopy)
    {
       for (int i = 0; i < A.length; i++)
       {
@@ -835,7 +835,7 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
 
    }
 
-   private void Kalman(YoVariable[][] P, double[] X)
+   private void Kalman(DoubleYoVariable[][] P, double[] X)
    {
       // E = C*P*Ct+R
       Mtranspose(C, Ct);
@@ -1197,7 +1197,7 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
 //    unpackQuaternion(Quat);
    }
 
-   private void reset(YoVariable[][] P)
+   private void reset(DoubleYoVariable[][] P)
    {
       /*
        * The covariance matrix is probably initialized incorrectly.

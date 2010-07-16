@@ -1,6 +1,6 @@
 package us.ihmc.IMUKalmanFilter;
 
-import com.yobotics.simulationconstructionset.YoVariable;
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 
@@ -43,22 +43,22 @@ public class SingleAngleIMUKalmanFilter
    private double t_0;
    private double t_1;
 
-   private YoVariable R_angle, Q_angle, Q_gyro;    // K1;
+   private DoubleYoVariable R_angle, Q_angle, Q_gyro;    // K1;
 
    public SingleAngleIMUKalmanFilter(YoVariableRegistry reg, YoVariableRegistry holder)
    {
 //    K1 = new YoVariable("K1", reg);
       if (reg != null)
       {
-         R_angle = holder.getVariable("R_angle");
-         Q_angle = holder.getVariable("Q_angle");
-         Q_gyro = holder.getVariable("Q_gyro");
+         R_angle = (DoubleYoVariable)holder.getVariable("R_angle");
+         Q_angle = (DoubleYoVariable)holder.getVariable("Q_angle");
+         Q_gyro = (DoubleYoVariable)holder.getVariable("Q_gyro");
 
          if (R_angle == null)
          {
-            R_angle = new YoVariable("R_angle", reg);
-            Q_angle = new YoVariable("Q_angle", reg);
-            Q_gyro = new YoVariable("Q_gyro", reg);
+            R_angle = new DoubleYoVariable("R_angle", reg);
+            Q_angle = new DoubleYoVariable("Q_angle", reg);
+            Q_gyro = new DoubleYoVariable("Q_gyro", reg);
          }
 
          R_angle.set(R_angle_default);

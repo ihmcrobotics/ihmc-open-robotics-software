@@ -13,7 +13,7 @@ import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.RobotController;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.YoAppearance;
-import com.yobotics.simulationconstructionset.YoVariable;
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.BagOfBalls;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
@@ -47,7 +47,7 @@ public class CartesianTrajectoryGeneratorTester
          private static final long serialVersionUID = 629274113314836560L;
       };
 
-      CartesianTrajectoryGeneratorTesterController controller = new CartesianTrajectoryGeneratorTesterController(nullRobot.getVariable("t"),
+      CartesianTrajectoryGeneratorTesterController controller = new CartesianTrajectoryGeneratorTesterController((DoubleYoVariable)nullRobot.getVariable("t"),
                                                                    cartesianTrajectoryGenerator, dynamicGraphicObjectsListRegistry);
       nullRobot.setController(controller);
 
@@ -151,10 +151,10 @@ public class CartesianTrajectoryGeneratorTester
       private final FrameVector startingTestVelocity;
       private final ArrayList<FramePoint> testPointsToCycleThrough = new ArrayList<FramePoint>();
 
-      private final YoVariable t;
+      private final DoubleYoVariable t;
 
-      private final YoVariable resetEvery = new YoVariable("resetEvery", registry);
-      private final YoVariable lastResetTime = new YoVariable("lastResetTime", registry);
+      private final DoubleYoVariable resetEvery = new DoubleYoVariable("resetEvery", registry);
+      private final DoubleYoVariable lastResetTime = new DoubleYoVariable("lastResetTime", registry);
       private final IntYoVariable testPointIndex = new IntYoVariable("testPointIndex", registry);
 
       private final BooleanYoVariable allowEndPointShift = new BooleanYoVariable("allowEndPointShift", registry);
@@ -173,13 +173,13 @@ public class CartesianTrajectoryGeneratorTester
 
 
 
-      public CartesianTrajectoryGeneratorTesterController(YoVariable t, CartesianTrajectoryGenerator cartesianTrajectoryGenerator,
+      public CartesianTrajectoryGeneratorTesterController(DoubleYoVariable t, CartesianTrajectoryGenerator cartesianTrajectoryGenerator,
               DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
       {
          this(t, cartesianTrajectoryGenerator, new double[] {0.0, 0.0, 0.0}, generateStandardFinalPoints(), dynamicGraphicObjectsListRegistry);
       }
 
-      public CartesianTrajectoryGeneratorTesterController(YoVariable t, CartesianTrajectoryGenerator cartesianTrajectoryGenerator, double[] startingTestPoint,
+      public CartesianTrajectoryGeneratorTesterController(DoubleYoVariable t, CartesianTrajectoryGenerator cartesianTrajectoryGenerator, double[] startingTestPoint,
               double[][] testPointsToCycleThrough, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
       {
          this.t = t;

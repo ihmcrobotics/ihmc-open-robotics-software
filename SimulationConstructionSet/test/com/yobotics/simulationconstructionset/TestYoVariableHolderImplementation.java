@@ -35,20 +35,20 @@ public class TestYoVariableHolderImplementation extends TestCase
       YoVariableRegistry registryC = new YoVariableRegistry("robot.registryC");
       YoVariableRegistry registryC2 = new YoVariableRegistry("robot2.registryC");
 
-      YoVariable variableOneA = new YoVariable("variableOne", registryA);
-      YoVariable variableOneB = new YoVariable("variableOne", registryB);
-      YoVariable variableOneC = new YoVariable("variableOne", registryC);
-      YoVariable variableOneC2 = new YoVariable("variableOne", registryC2);
+      DoubleYoVariable variableOneA = new DoubleYoVariable("variableOne", registryA);
+      DoubleYoVariable variableOneB = new DoubleYoVariable("variableOne", registryB);
+      DoubleYoVariable variableOneC = new DoubleYoVariable("variableOne", registryC);
+      DoubleYoVariable variableOneC2 = new DoubleYoVariable("variableOne", registryC2);
 
-      YoVariable variableTwoA = new YoVariable("variableTwo", registryA);
-      YoVariable variableTwoB = new YoVariable("variableTwo", registryB);
-      YoVariable variableTwoC = new YoVariable("variableTwo", registryC);
-      YoVariable variableTwoC2 = new YoVariable("variableTwo", registryC2);
+      DoubleYoVariable variableTwoA = new DoubleYoVariable("variableTwo", registryA);
+      DoubleYoVariable variableTwoB = new DoubleYoVariable("variableTwo", registryB);
+      DoubleYoVariable variableTwoC = new DoubleYoVariable("variableTwo", registryC);
+      DoubleYoVariable variableTwoC2 = new DoubleYoVariable("variableTwo", registryC2);
 
-      YoVariable variableThreeA = new YoVariable("variableThree", registryA);
-      YoVariable variableThreeB = new YoVariable("variableThree", registryB);
-      YoVariable variableThreeC = new YoVariable("variableThree", registryC);
-      YoVariable variableThreeC2 = new YoVariable("variableThree", registryC2);
+      DoubleYoVariable variableThreeA = new DoubleYoVariable("variableThree", registryA);
+      DoubleYoVariable variableThreeB = new DoubleYoVariable("variableThree", registryB);
+      DoubleYoVariable variableThreeC = new DoubleYoVariable("variableThree", registryC);
+      DoubleYoVariable variableThreeC2 = new DoubleYoVariable("variableThree", registryC2);
 
       yoVariableHolderImplementation.addVariableToHolder(variableOneA);
       yoVariableHolderImplementation.addVariableToHolder(variableOneB);
@@ -90,7 +90,7 @@ public class TestYoVariableHolderImplementation extends TestCase
 
       assert testPass;
 
-      YoVariable variable = yoVariableHolderImplementation.getVariable("robot.registryA.variableOne");
+      AbstractYoVariable variable = yoVariableHolderImplementation.getVariable("robot.registryA.variableOne");
       assertEquals(variable.getName(), "variableOne");
 
       variable = yoVariableHolderImplementation.getVariable("registryA.variableOne");
@@ -109,7 +109,7 @@ public class TestYoVariableHolderImplementation extends TestCase
 
    public void testGetVariable1()
    {
-      YoVariable variable = yoVariableHolderImplementation.getVariable("robot.registryA", "variableOne");
+	   AbstractYoVariable variable = yoVariableHolderImplementation.getVariable("robot.registryA", "variableOne");
       assertEquals(variable.getName(), "variableOne");
       assertEquals(variable.getFullNameWithNameSpace(), "robot.registryA.variableOne");
 
@@ -158,7 +158,7 @@ public class TestYoVariableHolderImplementation extends TestCase
    public void testGetVariables()
    {
       NameSpace nameSpace = new NameSpace("robot.registryA");
-      ArrayList<YoVariable> variables = yoVariableHolderImplementation.getVariables(nameSpace);
+      ArrayList<AbstractYoVariable> variables = yoVariableHolderImplementation.getVariables(nameSpace);
       assertEquals(3, variables.size());
 
       nameSpace = new NameSpace("robot.registryB");
@@ -185,10 +185,10 @@ public class TestYoVariableHolderImplementation extends TestCase
 
    public void testGetVariables1()
    {
-      ArrayList<YoVariable> variables = yoVariableHolderImplementation.getVariables("variableOne");
+      ArrayList<AbstractYoVariable> variables = yoVariableHolderImplementation.getVariables("variableOne");
       boolean aFound = false, bFound = false, cFound = false, c2Found = false;
 
-      for (YoVariable variable : variables)
+      for (AbstractYoVariable variable : variables)
       {
          if (variable.getFullNameWithNameSpace().equals("robot.registryA.variableOne"))
             aFound = true;
@@ -215,7 +215,7 @@ public class TestYoVariableHolderImplementation extends TestCase
 
    public void testGetVariables2()
    {
-      ArrayList<YoVariable> variables = yoVariableHolderImplementation.getVariables("robot.registryA", "variableOne");
+      ArrayList<AbstractYoVariable> variables = yoVariableHolderImplementation.getVariables("robot.registryA", "variableOne");
       assertEquals(1, variables.size());
 
       variables = yoVariableHolderImplementation.getVariables("robot", "variableOne");
@@ -225,7 +225,7 @@ public class TestYoVariableHolderImplementation extends TestCase
       assertEquals(2, variables.size());
       boolean cFound = false, c2Found = false, testPassed = true;
 
-      for (YoVariable variable : variables)
+      for (AbstractYoVariable variable : variables)
       {
          if (variable.getFullNameWithNameSpace().equals("robot.registryC.variableOne"))
             cFound = true;
