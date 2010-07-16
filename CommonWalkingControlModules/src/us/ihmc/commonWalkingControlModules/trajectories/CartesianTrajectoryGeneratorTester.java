@@ -157,11 +157,11 @@ public class CartesianTrajectoryGeneratorTester
       private final YoVariable lastResetTime = new YoVariable("lastResetTime", registry);
       private final IntYoVariable testPointIndex = new IntYoVariable("testPointIndex", registry);
 
-      private final YoVariable allowEndPointShift = new BooleanYoVariable("allowEndPointShift", registry);
+      private final BooleanYoVariable allowEndPointShift = new BooleanYoVariable("allowEndPointShift", registry);
       private final IntYoVariable slowDownMillis = new IntYoVariable("slowDownMillis", registry);
 
 
-      private final YoVariable reset = new BooleanYoVariable("reset", registry);
+      private final BooleanYoVariable reset = new BooleanYoVariable("reset", registry);
       private final YoFramePoint originalFinalDesiredPosition = new YoFramePoint("originalFinalDesiredPosition", "", ReferenceFrame.getWorldFrame(), registry);
       private final YoFramePoint finalDesiredPosition = new YoFramePoint("finalDesired", "", ReferenceFrame.getWorldFrame(), registry);
 
