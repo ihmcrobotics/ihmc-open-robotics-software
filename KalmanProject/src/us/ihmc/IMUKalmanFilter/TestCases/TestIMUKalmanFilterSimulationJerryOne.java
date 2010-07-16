@@ -127,7 +127,7 @@ public class TestIMUKalmanFilterSimulationJerryOne
       @SuppressWarnings("unused") TestIMUKalmanFilterSimulationJerryOne testKalmanFilterSimulation = new TestIMUKalmanFilterSimulationJerryOne();
    }
 
-   public YoVariable[] getControlVars()
+   public DoubleYoVariable[] getControlVars()
    {
       return null;
    }
