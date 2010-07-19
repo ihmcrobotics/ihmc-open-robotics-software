@@ -1,12 +1,12 @@
 package us.ihmc.plotting;
 
-import javax.swing.JPanel;
-import java.awt.Font;
-
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.util.ArrayList;
+
+import javax.swing.JPanel;
 
 /**
  * <p>Title: </p>

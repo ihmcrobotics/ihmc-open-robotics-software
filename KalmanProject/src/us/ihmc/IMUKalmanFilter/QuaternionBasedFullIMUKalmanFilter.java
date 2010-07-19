@@ -1,6 +1,6 @@
 package us.ihmc.IMUKalmanFilter;
 
-import com.mathworks.jama.*;
+import com.mathworks.jama.Matrix;
 
 /**
  * <p>Title: </p>

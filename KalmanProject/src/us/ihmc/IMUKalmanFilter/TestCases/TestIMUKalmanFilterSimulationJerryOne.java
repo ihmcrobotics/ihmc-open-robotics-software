@@ -1,8 +1,14 @@
 package us.ihmc.IMUKalmanFilter.TestCases;
 
-import us.ihmc.IMUKalmanFilter.*;
-import com.yobotics.simulationconstructionset.*;
-import com.yobotics.simulationconstructionset.util.inputdevices.*;
+import us.ihmc.IMUKalmanFilter.QuaternionBasedArrayFullIMUKalmanFilter;
+import us.ihmc.IMUKalmanFilter.QuaternionBasedFullIMUKalmanFilter;
+import us.ihmc.IMUKalmanFilter.QuaternionBasedJamaFullIMUKalmanFilter;
+
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.Link;
+import com.yobotics.simulationconstructionset.LinkGraphics;
+import com.yobotics.simulationconstructionset.SimulationConstructionSet;
+import com.yobotics.simulationconstructionset.util.inputdevices.MidiSliderBoard;
 
 public class TestIMUKalmanFilterSimulationJerryOne
 {

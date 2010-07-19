@@ -1,12 +1,13 @@
 package us.ihmc.plotting.shapes;
 
-import java.awt.*;
-import java.io.*;
-
+import java.awt.Graphics;
+import java.io.BufferedReader;
+import java.io.PrintWriter;
 import java.util.StringTokenizer;
+
 import us.ihmc.plotting.Artifact;
-import us.ihmc.plotting.Pose;
 import us.ihmc.plotting.Coordinate;
+import us.ihmc.plotting.Pose;
 
 public class ShapeArtifact extends Artifact
 {

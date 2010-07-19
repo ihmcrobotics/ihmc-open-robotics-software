@@ -1,7 +1,7 @@
 package us.ihmc.plotting;
 
-import java.awt.Graphics;
 import java.awt.Color;
+import java.awt.Graphics;
 import java.io.Serializable;
 
 public abstract class Artifact implements Plottable, Serializable

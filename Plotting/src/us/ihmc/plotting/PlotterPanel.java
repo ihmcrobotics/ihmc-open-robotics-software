@@ -1,17 +1,34 @@
 package us.ihmc.plotting;
 
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.BorderLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.Vector;
 
 import javax.imageio.ImageIO;
-import javax.swing.*;
-
-import java.util.ArrayList;
+import javax.swing.ButtonGroup;
+import javax.swing.JButton;
+import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JRadioButtonMenuItem;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 
 public class PlotterPanel extends JPanel
 {

@@ -7,8 +7,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.yobotics.simulationconstructionset.YoVariableType;
-
 
 
 public class BooleanGlobalParameterTest
@@ -61,17 +59,6 @@ public class BooleanGlobalParameterTest
       newValue = false;
       booleanGlobalParameter.setOnlyIfChange(newValue, "setting");
       assertEquals(newValue, booleanGlobalParameter.getValue());
-   }
-
-   @Test
-   public void testGetYoVariableType()
-   {
-      SystemOutGlobalParameterChangedListener systemOutGlobalParameterChangedListener = new SystemOutGlobalParameterChangedListener();
-
-      BooleanGlobalParameter booleanGlobalParameter = new BooleanGlobalParameter("testParameter", "test description", DEFAULT_VALUE,
-                                                         systemOutGlobalParameterChangedListener);
-
-      assertEquals(YoVariableType.BOOLEAN, booleanGlobalParameter.getYoVariableType());
    }
 
    @Test(expected = RuntimeException.class)

@@ -1,13 +1,16 @@
 package us.ihmc.plotting.shapes;
 
-import java.awt.Graphics;
 import java.awt.Color;
-import java.util.*;
+import java.awt.Graphics;
 import java.io.PrintWriter;
 import java.io.Serializable;
+import java.util.Arrays;
+import java.util.Vector;
+
+import javax.vecmath.Point2d;
+
 import us.ihmc.plotting.Artifact;
 import us.ihmc.plotting.Coordinate;
-import javax.vecmath.Point2d;
 
 public class PointArtifact extends Artifact implements Serializable
 {

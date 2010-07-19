@@ -1,7 +1,7 @@
 package us.ihmc.vicon;
 
-import javax.vecmath.Point3d;
 import javax.vecmath.Matrix3f;
+import javax.vecmath.Point3d;
 
 public class ViconJavaInterface
 {
