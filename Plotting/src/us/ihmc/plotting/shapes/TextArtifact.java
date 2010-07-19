@@ -46,8 +46,8 @@ public class TextArtifact extends Artifact
     */
    public void draw(Graphics g, int Xcenter, int Ycenter, double scaleFactor)
    {
-      int x1 = Xcenter + (new Double(this.x1 * scaleFactor).intValue());
-      int y1 = Ycenter - (new Double(this.y1 * scaleFactor).intValue());
+      int x1 = Xcenter + ((int)Math.round(this.x1 * scaleFactor));
+      int y1 = Ycenter - ((int)Math.round(this.y1 * scaleFactor));
 
 
       g.setColor(color);
@@ -58,8 +58,8 @@ public class TextArtifact extends Artifact
 
    public void drawLegend(Graphics g, int Xcenter, int Ycenter, double scaleFactor)
    {
-      int x1 = Xcenter + (new Double(this.x1 * scaleFactor).intValue());
-      int y1 = Ycenter - (new Double(this.y1 * scaleFactor).intValue());
+      int x1 = Xcenter + ((int)Math.round(this.x1 * scaleFactor));
+      int y1 = Ycenter - ((int)Math.round(this.y1 * scaleFactor));
 
 
       g.setColor(color);

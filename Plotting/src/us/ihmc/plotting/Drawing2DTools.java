@@ -28,7 +28,7 @@ public class Drawing2DTools
    public static void drawCircleWithRotatedCross(Graphics g, int x, int y, int radius, Color color)
    {
       g.setColor(color);
-      int distance = new Double(0.707 * radius / 2).intValue();
+      int distance = (int)Math.round(0.707 * radius / 2);
       g.drawOval((x - radius / 2), (y - radius / 2), radius, radius);
       g.drawLine((x - distance), (y - distance), (x + distance), (y + distance));
       g.drawLine((x - distance), (y + distance), (x + distance), (y - distance));

@@ -69,10 +69,10 @@ public class LineArtifact extends Artifact implements Serializable
    {
       if (isVisible)
       {
-         int x1 = Xcenter + (new Double(point1.x * scaleFactor).intValue());
-         int y1 = Ycenter - (new Double(point1.y * scaleFactor).intValue());
-         int x2 = Xcenter + (new Double(point2.x * scaleFactor).intValue());
-         int y2 = Ycenter - (new Double(point2.y * scaleFactor).intValue());
+         int x1 = Xcenter + ((int)Math.round(point1.x * scaleFactor));
+         int y1 = Ycenter - ((int)Math.round(point1.y * scaleFactor));
+         int x2 = Xcenter + ((int)Math.round(point2.x * scaleFactor));
+         int y2 = Ycenter - ((int)Math.round(point2.y * scaleFactor));
          g.setColor(color);
          Graphics2D g2d = (Graphics2D) g;
          Stroke currentStroke = g2d.getStroke();
