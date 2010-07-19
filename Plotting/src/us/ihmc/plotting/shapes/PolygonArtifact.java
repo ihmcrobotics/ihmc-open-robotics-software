@@ -90,16 +90,16 @@ public class PolygonArtifact extends Artifact
 
       if (nPoints == 1)
       {
-         int x = Xcenter + new Double(points.get(0).x * scaleFactor).intValue();
-         int y = Ycenter - new Double(points.get(0).y * scaleFactor).intValue();
+         int x = Xcenter + (int)Math.round(points.get(0).x * scaleFactor);
+         int y = Ycenter - (int)Math.round(points.get(0).y * scaleFactor);
          g.fillOval(x, y, 4, 4);
       }
       else
       {
          for (int i = 0; i < nPoints; i++)
          {
-            int x = Xcenter + new Double(points.get(i).x * scaleFactor).intValue();
-            int y = Ycenter - new Double(points.get(i).y * scaleFactor).intValue();
+            int x = Xcenter + (int)Math.round(points.get(i).x * scaleFactor);
+            int y = Ycenter - (int)Math.round(points.get(i).y * scaleFactor);
             xPoints[i] = x;
             yPoints[i] = y;
          }

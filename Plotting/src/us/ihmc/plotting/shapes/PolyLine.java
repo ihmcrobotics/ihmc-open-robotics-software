@@ -48,10 +48,10 @@ public class PolyLine extends Artifact implements Serializable
       {
          for (int i = 0; i < points.size(); i++)
          {
-            int x1 = Xcenter + (new Double(points.get(i - 1).x * scaleFactor).intValue());
-            int y1 = Ycenter - (new Double(points.get(i - 1).y * scaleFactor).intValue());
-            int x2 = Xcenter + (new Double(points.get(i).x * scaleFactor).intValue());
-            int y2 = Ycenter - (new Double(points.get(i).y * scaleFactor).intValue());
+            int x1 = Xcenter + ((int)Math.round(points.get(i - 1).x * scaleFactor));
+            int y1 = Ycenter - ((int)Math.round(points.get(i - 1).y * scaleFactor));
+            int x2 = Xcenter + ((int)Math.round(points.get(i).x * scaleFactor));
+            int y2 = Ycenter - ((int)Math.round(points.get(i).y * scaleFactor));
             g.setColor(color);
             Graphics2D g2d = (Graphics2D) g;
             Stroke currentStroke = g2d.getStroke();

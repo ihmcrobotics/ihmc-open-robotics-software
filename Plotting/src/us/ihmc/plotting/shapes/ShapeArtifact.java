@@ -56,8 +56,8 @@ public class ShapeArtifact extends Artifact
          return;
       }
 
-      int x = Xcenter + (new Double(_pose.getX() * scaleFactor).intValue());
-      int y = Ycenter - (new Double(_pose.getY() * scaleFactor).intValue());
+      int x = Xcenter + ((int)Math.round(_pose.getX() * scaleFactor));
+      int y = Ycenter - ((int)Math.round(_pose.getY() * scaleFactor));
 
       g.setColor(color);
       int w = (int) (_width * scaleFactor);

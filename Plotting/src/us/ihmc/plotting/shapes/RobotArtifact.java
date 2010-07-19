@@ -41,8 +41,8 @@ public class RobotArtifact extends Artifact
     */
    public void draw(Graphics g, int Xcenter, int Ycenter, double scaleFactor)
    {
-      int x = Xcenter + (new Double(_pose.getX() * scaleFactor).intValue());
-      int y = Ycenter - (new Double(_pose.getY() * scaleFactor).intValue());
+      int x = Xcenter + ((int)Math.round(_pose.getX() * scaleFactor));
+      int y = Ycenter - ((int)Math.round(_pose.getY() * scaleFactor));
 
 //    if(orientation == Plottable.X_Z){
 //            x = Xcenter + (new Double(_pose.getX()* scaleFactor).intValue());
@@ -57,8 +57,8 @@ public class RobotArtifact extends Artifact
       double w2 = 16.0;
       int w12 = 8;
       double hdg = Math.toRadians(_pose.getYaw());
-      int xHDG = x + new Double(Math.sin(hdg) * w2).intValue();
-      int yHDG = y - new Double(Math.cos(hdg) * w2).intValue();
+      int xHDG = x + (int)Math.round(Math.sin(hdg) * w2);
+      int yHDG = y - (int)Math.round(Math.cos(hdg) * w2);
 
       g.setColor(color);
       g.drawOval((x - w12), (y - w12), w1, w1);

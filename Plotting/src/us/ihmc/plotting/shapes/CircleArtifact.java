@@ -49,8 +49,8 @@ public class CircleArtifact extends Artifact
     */
    public void draw(Graphics g, int Xcenter, int Ycenter, double scaleFactor)
    {
-      int x = Xcenter + (new Double(this.x * scaleFactor).intValue());
-      int y = Ycenter - (new Double(this.y * scaleFactor).intValue());
+      int x = Xcenter + ((int)Math.round(this.x * scaleFactor));
+      int y = Ycenter - ((int)Math.round(this.y * scaleFactor));
 
       g.setColor(color);
       int d = (int) ((this.diameter * scaleFactor));
