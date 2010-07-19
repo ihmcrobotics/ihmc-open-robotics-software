@@ -6,8 +6,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.yobotics.simulationconstructionset.YoVariableType;
-
 public class DoubleGlobalParameterTest    // extends TestCase
 {
    private final double DEFAULT_VALUE = 11.99;
@@ -59,17 +57,6 @@ public class DoubleGlobalParameterTest    // extends TestCase
       newValue = -906.345;
       doubleGlobalParameter.setOnlyIfChange(newValue, "setting");
       assertEquals(newValue, doubleGlobalParameter.getValue(), eps);
-   }
-
-   @Test
-   public void testGetYoVariableType()
-   {
-      SystemOutGlobalParameterChangedListener systemOutGlobalParameterChangedListener = new SystemOutGlobalParameterChangedListener();
-
-      DoubleGlobalParameter doubleGlobalParameter = new DoubleGlobalParameter("testParameter", "test description", DEFAULT_VALUE,
-                                                       systemOutGlobalParameterChangedListener);
-
-      assertEquals(YoVariableType.DOUBLE, doubleGlobalParameter.getYoVariableType());
    }
 
    @Test(expected = RuntimeException.class)

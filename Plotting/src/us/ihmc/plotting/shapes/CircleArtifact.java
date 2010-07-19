@@ -1,9 +1,10 @@
 package us.ihmc.plotting.shapes;
 
-import java.awt.*;
-import java.io.*;
-
+import java.awt.Graphics;
+import java.io.BufferedReader;
+import java.io.PrintWriter;
 import java.util.StringTokenizer;
+
 import us.ihmc.plotting.Artifact;
 
 public class CircleArtifact extends Artifact

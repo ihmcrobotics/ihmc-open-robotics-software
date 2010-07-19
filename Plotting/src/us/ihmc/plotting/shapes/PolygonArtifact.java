@@ -1,10 +1,12 @@
 package us.ihmc.plotting.shapes;
 
-import java.awt.Graphics;
 import java.awt.Color;
-import javax.vecmath.Point2d;
-import us.ihmc.plotting.Artifact;
+import java.awt.Graphics;
 import java.util.ArrayList;
+
+import javax.vecmath.Point2d;
+
+import us.ihmc.plotting.Artifact;
 
 public class PolygonArtifact extends Artifact
 {

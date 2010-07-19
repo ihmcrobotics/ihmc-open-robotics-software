@@ -1,12 +1,15 @@
 package us.ihmc.plotting.shapes;
 
-import java.awt.*;
-import java.io.*;
-
-import javax.vecmath.*;
-
-import us.ihmc.plotting.*;
+import java.awt.BasicStroke;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Stroke;
+import java.io.Serializable;
 import java.util.ArrayList;
+
+import javax.vecmath.Point2d;
+
+import us.ihmc.plotting.Artifact;
 
 public class PolyLine extends Artifact implements Serializable
 {

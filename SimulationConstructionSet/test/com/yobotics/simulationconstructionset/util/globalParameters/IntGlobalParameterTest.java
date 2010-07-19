@@ -7,8 +7,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.yobotics.simulationconstructionset.YoVariableType;
-
 public class IntGlobalParameterTest
 {
    private final int DEFAULT_VALUE = 11;
@@ -59,17 +57,6 @@ public class IntGlobalParameterTest
       newValue = -906;
       intGlobalParameter.setOnlyIfChange(newValue, "setting");
       assertEquals(newValue, intGlobalParameter.getValue());
-   }
-
-   @Test
-   public void testGetYoVariableType()
-   {
-      SystemOutGlobalParameterChangedListener systemOutGlobalParameterChangedListener = new SystemOutGlobalParameterChangedListener();
-
-      IntGlobalParameter intGlobalParameter = new IntGlobalParameter("testParameter", "test description", DEFAULT_VALUE,
-                                                 systemOutGlobalParameterChangedListener);
-
-      assertEquals(YoVariableType.INT, intGlobalParameter.getYoVariableType());
    }
 
    @Test(expected = RuntimeException.class)

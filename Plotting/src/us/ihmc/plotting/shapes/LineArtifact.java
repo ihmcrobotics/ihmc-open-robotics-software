@@ -1,12 +1,16 @@
 package us.ihmc.plotting.shapes;
 
-import java.awt.*;
-import java.io.*;
+import java.awt.BasicStroke;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Stroke;
+import java.io.Serializable;
 
-import javax.vecmath.*;
+import javax.vecmath.Point2d;
+import javax.vecmath.Vector2d;
 
-import us.ihmc.plotting.*;
-import us.ihmc.utilities.math.geometry.*;
+import us.ihmc.plotting.Artifact;
+import us.ihmc.utilities.math.geometry.Line2d;
 
 public class LineArtifact extends Artifact implements Serializable
 {
