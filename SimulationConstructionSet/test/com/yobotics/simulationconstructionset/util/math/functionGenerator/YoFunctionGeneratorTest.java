@@ -24,7 +24,6 @@ public class YoFunctionGeneratorTest
    }
    
    
-   @SuppressWarnings("deprecation")
    @Test
    public void testZeroFrequencyDC()
    {
@@ -41,7 +40,6 @@ public class YoFunctionGeneratorTest
 	   }
    }
    
-   @SuppressWarnings("deprecation")
    @Test
    public void testZeroFrequencySine()
    {
