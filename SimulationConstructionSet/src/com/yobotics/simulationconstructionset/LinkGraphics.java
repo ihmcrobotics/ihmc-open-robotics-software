@@ -340,7 +340,10 @@ public class LinkGraphics
    public Color3f getColor(Appearance app)
    {
       Color3f color = new Color3f();
-      app.getMaterial().getAmbientColor(color);
+      if (app.getMaterial() != null)
+         app.getMaterial().getAmbientColor(color);
+      else
+         return null;
 
       return color;
    }
