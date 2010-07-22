@@ -155,21 +155,23 @@ public class TestIMUKalmanFilterControllerJerryOne implements RobotController
 
    @SuppressWarnings("unused")
    private final DoubleYoVariable ef_body_fx, ef_body_fy, ef_body_fz;
+   private String name;
 
    public TestIMUKalmanFilterControllerJerryOne(TestIMUKalmanFilterRobot robot,
 
 // double dt,
-   QuaternionBasedFullIMUKalmanFilter quaternionBasedFullIMUKalmanFilter, QuaternionBasedFullIMUKalmanFilter quaternionBasedFullIMUKalmanFilterTwo)
+   QuaternionBasedFullIMUKalmanFilter quaternionBasedFullIMUKalmanFilter, QuaternionBasedFullIMUKalmanFilter quaternionBasedFullIMUKalmanFilterTwo, String name)
    {
-      this(robot, false, quaternionBasedFullIMUKalmanFilter, quaternionBasedFullIMUKalmanFilterTwo);
+      this(robot, false, quaternionBasedFullIMUKalmanFilter, quaternionBasedFullIMUKalmanFilterTwo, name);
    }
 
    public TestIMUKalmanFilterControllerJerryOne(TestIMUKalmanFilterRobot robot,
 
 // double dt,
    boolean profiling, QuaternionBasedFullIMUKalmanFilter quaternionBasedFullIMUKalmanFilter,
-                      QuaternionBasedFullIMUKalmanFilter quaternionBasedFullIMUKalmanFilterTwo)
+                      QuaternionBasedFullIMUKalmanFilter quaternionBasedFullIMUKalmanFilterTwo, String name)
    {
+      this.name = name;
       this.profiling = profiling;
       this.imuKalmanFilter = quaternionBasedFullIMUKalmanFilter;
       this.quaternionBasedFullIMUKalmanFilterTwo = quaternionBasedFullIMUKalmanFilterTwo;
@@ -577,5 +579,9 @@ public class TestIMUKalmanFilterControllerJerryOne implements RobotController
    {
       return registry;
    }
-
+   
+   public String getName()
+   {
+      return name;
+   }
 }
