@@ -27,7 +27,7 @@ public class TestIMUKalmanFilterSimulationJerryOne
                                                                                     rob.getRobotsYoVariableRegistry());
 
       TestIMUKalmanFilterControllerJerryOne controller = new TestIMUKalmanFilterControllerJerryOne(rob, PROFILING, quaternionBasedFullIMUKalmanFilter,
-                                                            quaternionBasedFullIMUKalmanFilterTwo);
+                                                            quaternionBasedFullIMUKalmanFilterTwo, "testIMUKalmanFilterControllerJerryOne");
       rob.setController(controller, (int) Math.round(KALMAN_UPDATE_DT / SIMULATION_DT));
 
       SimulationConstructionSet scs;
