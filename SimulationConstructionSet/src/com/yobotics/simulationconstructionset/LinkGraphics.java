@@ -360,6 +360,7 @@ public class LinkGraphics
       link3d.setSharedGroup(linkGraphics.sharedGroup);
 
       this.sharedGroup.addChild(link3d);
+      this.linkGraphicsDefinition.combineGraphicsInstructions(linkGraphics.getLinkGraphicsDefinition());
 
       // this.linkBG.addChild(link.linkBG);
    }
