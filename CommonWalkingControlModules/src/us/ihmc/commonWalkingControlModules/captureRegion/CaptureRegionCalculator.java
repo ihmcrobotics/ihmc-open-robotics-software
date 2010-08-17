@@ -1,4 +1,10 @@
-//package us.ihmc.commonWalkingControlModules.captureRegion;
+package us.ihmc.commonWalkingControlModules.captureRegion;
+
+public class CaptureRegionCalculator
+{
+   
+}
+
 //
 //import java.awt.Color;
 //import java.util.ArrayList;
