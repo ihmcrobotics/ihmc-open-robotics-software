@@ -217,8 +217,8 @@ public class CartesianTrajectoryGeneratorTester
          {
             DynamicGraphicObjectsList dynamicGraphicObjectsList = new DynamicGraphicObjectsList("CartesianTrajectoryTester");
 
-            dynamicGraphicObjectsList.add(new DynamicGraphicPosition(finalDesiredPosition, 0.02, YoAppearance.Red()));
-            dynamicGraphicObjectsList.add(new DynamicGraphicPosition(originalFinalDesiredPosition, 0.02, YoAppearance.Black()));
+            dynamicGraphicObjectsList.add(new DynamicGraphicPosition("Final Desired", finalDesiredPosition, 0.02, YoAppearance.Red()));
+            dynamicGraphicObjectsList.add(new DynamicGraphicPosition("Original Final Desired", originalFinalDesiredPosition, 0.02, YoAppearance.Black()));
             dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectsList);
          }
       }
