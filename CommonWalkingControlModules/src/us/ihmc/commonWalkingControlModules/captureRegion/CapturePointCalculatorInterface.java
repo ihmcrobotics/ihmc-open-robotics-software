@@ -9,7 +9,7 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 public interface CapturePointCalculatorInterface
 {
 
-   public abstract FramePoint2d getCapturePoint2dInFrame(ReferenceFrame supportAnkleZUpFrame);
+   public abstract FramePoint2d getCapturePoint2dInFrame(ReferenceFrame referenceFrame);
 
    public void computePredictedCapturePoint(RobotSide supportLeg, double captureTime, FramePoint CoPInBodyZUp, FrameLineSegment2d guideLine);
 
