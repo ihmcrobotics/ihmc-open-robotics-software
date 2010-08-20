@@ -183,11 +183,7 @@ public class CaptureRegionCalculator
          artifactList = new ArtifactList("CaptureRegionCalculator");
                   
          DynamicGraphicYoPolygonArtifact dynamicGraphicYoPolygonArtifact = new DynamicGraphicYoPolygonArtifact("Capture Region", captureRegionGraphic, Color.LIGHT_GRAY, false);
-         
          artifactList.add(dynamicGraphicYoPolygonArtifact);
-//         YoboticsBipedPlotter.registerArtifact(dynamicGraphicYoPolygonArtifact);
-
-//         YoboticsBipedPlotter.registerDynamicGraphicPolygon("Capture Region", Color.LIGHT_GRAY, captureRegionGraphic, false);
       }
 
 
@@ -201,11 +197,8 @@ public class CaptureRegionCalculator
          {
             DynamicGraphicPosition position = new DynamicGraphicPosition("Position", captureRegionBestCaseVertices[i], DRAWN_POINT_BASE_SIZE * ((4 + i) / 4),
                                                  YoAppearance.Green(), DynamicGraphicPosition.GraphicType.BALL);
-            dynamicGraphicObjectsList.add(position);
-//            YoboticsBipedPlotter.registerDynamicGraphicPosition(pointName, position);
-            
+            dynamicGraphicObjectsList.add(position);            
             artifactList.add(position.createArtifact());
-//            YoboticsBipedPlotter.registerDynamicGraphicObject(position);
          }
       }
 
@@ -218,11 +211,8 @@ public class CaptureRegionCalculator
          {
             DynamicGraphicPosition position = new DynamicGraphicPosition(pointName, captureRegionKinematicLimitVertices[i], DRAWN_POINT_BASE_SIZE * ((4 + i) / 4),
                                                  YoAppearance.Blue(), DynamicGraphicPosition.GraphicType.BALL);
-            dynamicGraphicObjectsList.add(position);
-//            YoboticsBipedPlotter.registerDynamicGraphicPosition(pointName, position);
-            
+            dynamicGraphicObjectsList.add(position);            
             artifactList.add(position.createArtifact());
-//            YoboticsBipedPlotter.registerDynamicGraphicObject(position);
          }
       }
 
@@ -235,11 +225,8 @@ public class CaptureRegionCalculator
          {
             DynamicGraphicPosition position = new DynamicGraphicPosition(pointName, estimatedCOPExtremes[i], DRAWN_POINT_BASE_SIZE * ((4 + i) / 4), YoAppearance.Black(),
                                                  DynamicGraphicPosition.GraphicType.BALL);
-            dynamicGraphicObjectsList.add(position);
-//            YoboticsBipedPlotter.registerDynamicGraphicPosition(pointName, position);
-            
+            dynamicGraphicObjectsList.add(position);            
             artifactList.add(position.createArtifact());
-//            YoboticsBipedPlotter.registerDynamicGraphicObject(position);
          }
       }
 
@@ -255,10 +242,7 @@ public class CaptureRegionCalculator
                                                  DynamicGraphicPosition.GraphicType.BALL);
 
             dynamicGraphicObjectsList.add(position);
-//            YoboticsBipedPlotter.registerDynamicGraphicPosition(pointName, position);
-            
             artifactList.add(position.createArtifact());
-//            YoboticsBipedPlotter.registerDynamicGraphicObject(position);
          }
       }
 
