@@ -49,8 +49,9 @@ public class CartesianTrajectoryGeneratorTester
          private static final long serialVersionUID = 629274113314836560L;
       };
 
-      CartesianTrajectoryGeneratorTesterController controller = new CartesianTrajectoryGeneratorTesterController((DoubleYoVariable)nullRobot.getVariable("t"),
-                                                                   cartesianTrajectoryGenerator, dynamicGraphicObjectsListRegistry, "cartesianTrajectoryGeneratorTesterController");
+      CartesianTrajectoryGeneratorTesterController controller = new CartesianTrajectoryGeneratorTesterController((DoubleYoVariable) nullRobot.getVariable("t"),
+                                                                   cartesianTrajectoryGenerator, dynamicGraphicObjectsListRegistry,
+                                                                   "cartesianTrajectoryGeneratorTesterController");
       nullRobot.setController(controller);
 
       SimulationConstructionSet scs = new SimulationConstructionSet(nullRobot);
@@ -129,7 +130,8 @@ public class CartesianTrajectoryGeneratorTester
    {
       double[][] ret = new double[][]
       {
-       {0.01, 0.0, 0.0},
+         {0.01, 0.0, 0.0},
+
 //       {0.1, 0.0, 0.0},
 //       {0.25, 0.0, 0.0},
 //         {0.0, -0.5, 0.0}, {0.5, 0.0, 0.0}, {0.75, 0.0, 0.0}, {1.0, 0.0, 0.0}, {0.5, 0.5, 0.0},
@@ -182,8 +184,8 @@ public class CartesianTrajectoryGeneratorTester
          this(t, cartesianTrajectoryGenerator, new double[] {0.0, 0.0, 0.0}, generateStandardFinalPoints(), dynamicGraphicObjectsListRegistry, name);
       }
 
-      public CartesianTrajectoryGeneratorTesterController(DoubleYoVariable t, CartesianTrajectoryGenerator cartesianTrajectoryGenerator, double[] startingTestPoint,
-              double[][] testPointsToCycleThrough, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, String name)
+      public CartesianTrajectoryGeneratorTesterController(DoubleYoVariable t, CartesianTrajectoryGenerator cartesianTrajectoryGenerator,
+              double[] startingTestPoint, double[][] testPointsToCycleThrough, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, String name)
       {
          this.name = name;
          this.t = t;
@@ -295,7 +297,7 @@ public class CartesianTrajectoryGeneratorTester
       {
          return registry;
       }
-      
+
       public String getName()
       {
          return name;
@@ -303,7 +305,8 @@ public class CartesianTrajectoryGeneratorTester
 
 
    }
-   
+
+
    public String getName()
    {
       return name;
