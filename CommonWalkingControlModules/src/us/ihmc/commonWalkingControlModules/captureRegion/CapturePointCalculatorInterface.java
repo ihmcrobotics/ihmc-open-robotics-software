@@ -16,6 +16,7 @@ public interface CapturePointCalculatorInterface
    public abstract void hidePredictedCapturePoint();
 
    public abstract FramePoint getPredictedCapturePointInFrame(ReferenceFrame referenceFrame);
-   
+   public abstract FramePoint getCapturePointInFrame(ReferenceFrame referenceFrame);
+
 
 }
