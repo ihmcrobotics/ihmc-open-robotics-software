@@ -59,14 +59,14 @@ public class CaptureRegionCalculator
 
    private ReferenceFrame worldFrame, bodyZUpFrame;
    private final SideDependentList<ReferenceFrame> ankleZUpFrames;
-      private CapturePointCalculatorInterface capturePointCalculator;
+   private CapturePointCalculatorInterface capturePointCalculator;
 
    public static boolean DRAW_CAPTURE_REGION = true;    //
    public static final double DRAWN_POINT_BASE_SIZE = 0.004;
 
    public static double kinematicRangeFromCoP;
    public static final int NUMBER_OF_POINTS_TO_APPROXIMATE_KINEMATIC_LIMITS = 5;    // 3; //1; //10; //
-   public static final int MAX_CAPTURE_REGION_POLYGON_POINTS = 22; //20;    // 4 + NUMBER_OF_POINTS_TO_APPROXIMATE_KINEMATIC_LIMITS + 8;
+   public static final int MAX_CAPTURE_REGION_POLYGON_POINTS = 22;    // 20;    // 4 + NUMBER_OF_POINTS_TO_APPROXIMATE_KINEMATIC_LIMITS + 8;
 
    public static final double SWING_TIME_TO_ADD_FOR_CAPTURING_SAFETY_FACTOR = 0.05;    // 0.1; //
 
@@ -81,16 +81,16 @@ public class CaptureRegionCalculator
    private GlobalTimer globalTimer;
 
    public CaptureRegionCalculator(SideDependentList<ReferenceFrame> ankleZUpFrames, ReferenceFrame bodyZUpFrame, double midFootAnkleXOffset, double footWidth,
-                                      double kinematicRangeFromCoP, CapturePointCalculatorInterface capturePointCalculator, YoVariableRegistry yoVariableRegistry,
-                                      DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+                                  double kinematicRangeFromCoP, CapturePointCalculatorInterface capturePointCalculator, YoVariableRegistry yoVariableRegistry,
+                                  DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       this.worldFrame = ReferenceFrame.getWorldFrame();
       this.bodyZUpFrame = bodyZUpFrame;
       this.ankleZUpFrames = ankleZUpFrames;
-      
+
       this.capturePointCalculator = capturePointCalculator;
       this.kinematicRangeFromCoP = kinematicRangeFromCoP;
-      
+
       int numPoints = MAX_CAPTURE_REGION_POLYGON_POINTS - 1;
       double[][] reachableRegionPoints = new double[numPoints + 1][2];
       double radius = kinematicRangeFromCoP;
@@ -102,14 +102,14 @@ public class CaptureRegionCalculator
          double x = radius * Math.cos(angle);
          double y = radius * Math.sin(angle);
 
-         reachableRegionPoints[i][0] = x + midFootAnkleXOffset; 
+         reachableRegionPoints[i][0] = x + midFootAnkleXOffset;
          reachableRegionPoints[i][1] = y;
       }
 
       reachableRegionPoints[numPoints][0] = 0.0;
 
 //    reachableRegionPoints[numPoints][1] = 0.0;
-      reachableRegionPoints[numPoints][1] = -footWidth/2.0; 
+      reachableRegionPoints[numPoints][1] = -footWidth / 2.0;
 
       FrameConvexPolygon2d leftReachableRegionInSupportFootFrame = new FrameConvexPolygon2d(ankleZUpFrames.get(RobotSide.LEFT), reachableRegionPoints);
 
@@ -129,7 +129,7 @@ public class CaptureRegionCalculator
       reachableRegionPoints[numPoints][0] = 0.0;
 
 //    reachableRegionPoints[numPoints][1] = 0.0;
-      reachableRegionPoints[numPoints][1] = footWidth/2.0;
+      reachableRegionPoints[numPoints][1] = footWidth / 2.0;
 
       FrameConvexPolygon2d rightReachableRegionInSupportFootFrame = new FrameConvexPolygon2d(ankleZUpFrames.get(RobotSide.RIGHT), reachableRegionPoints);
 
@@ -150,20 +150,20 @@ public class CaptureRegionCalculator
       SideDependentList<ReferenceFrame> footZUpFrames = new SideDependentList<ReferenceFrame>(ankleZUpFrames.get(RobotSide.LEFT),
                                                            ankleZUpFrames.get(RobotSide.RIGHT));
 
-//      // set up scorer
-//      DoubleYoVariable stanceWidthForScore = new DoubleYoVariable("stanceWidthForScore", "Stance width for the scoring function.", registry);
-//      DoubleYoVariable stanceLengthForScore = new DoubleYoVariable("stanceLengthForScore", "Stance length for the scoring function.", registry);
-//      DoubleYoVariable stepAngleForScore = new DoubleYoVariable("stepAngleForScore", "Step angle for the scoring function.", registry);
-//      DoubleYoVariable stepDistanceForScore = new DoubleYoVariable("stepDistanceForScore", "Step distance for the scoring function.", registry);
+//    // set up scorer
+//    DoubleYoVariable stanceWidthForScore = new DoubleYoVariable("stanceWidthForScore", "Stance width for the scoring function.", registry);
+//    DoubleYoVariable stanceLengthForScore = new DoubleYoVariable("stanceLengthForScore", "Stance length for the scoring function.", registry);
+//    DoubleYoVariable stepAngleForScore = new DoubleYoVariable("stepAngleForScore", "Step angle for the scoring function.", registry);
+//    DoubleYoVariable stepDistanceForScore = new DoubleYoVariable("stepDistanceForScore", "Step distance for the scoring function.", registry);
 //
-//      stanceWidthForScore.set(0.22);
-//      stanceLengthForScore.set(M2V2CaptureRegionCalculator.KINEMATIC_RANGE_FROM_COP * 0.7);    // 0.40
-//      stepAngleForScore.set(Math.atan(stanceWidthForScore.getDoubleValue() / stanceLengthForScore.getDoubleValue()));
-//      stepDistanceForScore.set(Math.sqrt((stanceWidthForScore.getDoubleValue() * stanceWidthForScore.getDoubleValue())
-//                                         + (stanceLengthForScore.getDoubleValue() * stanceLengthForScore.getDoubleValue())));
+//    stanceWidthForScore.set(0.22);
+//    stanceLengthForScore.set(M2V2CaptureRegionCalculator.KINEMATIC_RANGE_FROM_COP * 0.7);    // 0.40
+//    stepAngleForScore.set(Math.atan(stanceWidthForScore.getDoubleValue() / stanceLengthForScore.getDoubleValue()));
+//    stepDistanceForScore.set(Math.sqrt((stanceWidthForScore.getDoubleValue() * stanceWidthForScore.getDoubleValue())
+//                                       + (stanceLengthForScore.getDoubleValue() * stanceLengthForScore.getDoubleValue())));
 
-//      weightedDistanceScorer = new WeightedDistanceScorer(this, footZUpFrames, stanceWidthForScore, stanceLengthForScore, stepAngleForScore,
-//              stepDistanceForScore);
+//    weightedDistanceScorer = new WeightedDistanceScorer(this, footZUpFrames, stanceWidthForScore, stanceLengthForScore, stepAngleForScore,
+//            stepDistanceForScore);
 
 
 
@@ -182,8 +182,9 @@ public class CaptureRegionCalculator
       {
          dynamicGraphicObjectsList = new DynamicGraphicObjectsList("CaptureRegionCalculator");
          artifactList = new ArtifactList("CaptureRegionCalculator");
-                  
-         DynamicGraphicYoPolygonArtifact dynamicGraphicYoPolygonArtifact = new DynamicGraphicYoPolygonArtifact("Capture Region", captureRegionGraphic, Color.LIGHT_GRAY, false);
+
+         DynamicGraphicYoPolygonArtifact dynamicGraphicYoPolygonArtifact = new DynamicGraphicYoPolygonArtifact("Capture Region", captureRegionGraphic,
+                                                                              Color.LIGHT_GRAY, false);
          artifactList.add(dynamicGraphicYoPolygonArtifact);
       }
 
@@ -198,7 +199,7 @@ public class CaptureRegionCalculator
          {
             DynamicGraphicPosition position = new DynamicGraphicPosition("Position", captureRegionBestCaseVertices[i], DRAWN_POINT_BASE_SIZE * ((4 + i) / 4),
                                                  YoAppearance.Green(), DynamicGraphicPosition.GraphicType.BALL);
-            dynamicGraphicObjectsList.add(position);            
+            dynamicGraphicObjectsList.add(position);
             artifactList.add(position.createArtifact());
          }
       }
@@ -210,9 +211,9 @@ public class CaptureRegionCalculator
 
          if (DRAW_CAPTURE_REGION && (dynamicGraphicObjectsListRegistry != null))
          {
-            DynamicGraphicPosition position = new DynamicGraphicPosition(pointName, captureRegionKinematicLimitVertices[i], DRAWN_POINT_BASE_SIZE * ((4 + i) / 4),
-                                                 YoAppearance.Blue(), DynamicGraphicPosition.GraphicType.BALL);
-            dynamicGraphicObjectsList.add(position);            
+            DynamicGraphicPosition position = new DynamicGraphicPosition(pointName, captureRegionKinematicLimitVertices[i],
+                                                 DRAWN_POINT_BASE_SIZE * ((4 + i) / 4), YoAppearance.Blue(), DynamicGraphicPosition.GraphicType.BALL);
+            dynamicGraphicObjectsList.add(position);
             artifactList.add(position.createArtifact());
          }
       }
@@ -224,9 +225,9 @@ public class CaptureRegionCalculator
 
          if (DRAW_CAPTURE_REGION && (dynamicGraphicObjectsListRegistry != null))
          {
-            DynamicGraphicPosition position = new DynamicGraphicPosition(pointName, estimatedCOPExtremes[i], DRAWN_POINT_BASE_SIZE * ((4 + i) / 4), YoAppearance.Black(),
-                                                 DynamicGraphicPosition.GraphicType.BALL);
-            dynamicGraphicObjectsList.add(position);            
+            DynamicGraphicPosition position = new DynamicGraphicPosition(pointName, estimatedCOPExtremes[i], DRAWN_POINT_BASE_SIZE * ((4 + i) / 4),
+                                                 YoAppearance.Black(), DynamicGraphicPosition.GraphicType.BALL);
+            dynamicGraphicObjectsList.add(position);
             artifactList.add(position.createArtifact());
          }
       }
@@ -239,8 +240,8 @@ public class CaptureRegionCalculator
 
          if (DRAW_CAPTURE_REGION && (dynamicGraphicObjectsListRegistry != null))
          {
-            DynamicGraphicPosition position = new DynamicGraphicPosition(pointName, additionalKinematicLimitPoints[i], DRAWN_POINT_BASE_SIZE * 0.5, YoAppearance.Aqua(),
-                                                 DynamicGraphicPosition.GraphicType.BALL);
+            DynamicGraphicPosition position = new DynamicGraphicPosition(pointName, additionalKinematicLimitPoints[i], DRAWN_POINT_BASE_SIZE * 0.5,
+                                                 YoAppearance.Aqua(), DynamicGraphicPosition.GraphicType.BALL);
 
             dynamicGraphicObjectsList.add(position);
             artifactList.add(position.createArtifact());
@@ -259,7 +260,7 @@ public class CaptureRegionCalculator
       }
    }
 
-   
+
    public void setKinematicRangeFromCoP(double kinematicRangeFromCoP)
    {
       this.kinematicRangeFromCoP = kinematicRangeFromCoP;
@@ -326,8 +327,7 @@ public class CaptureRegionCalculator
 
          FramePoint2d copExtremeInBodyZUp = extremesOfFeasibleCOP.get(i).changeFrameCopy(bodyZUpFrame);
          FramePoint2d copExtremeInSupportAnkleZUp = copExtremeInBodyZUp.changeFrameCopy(supportAnkleZUpFrame);
-         FramePoint copExtremeInBodyZUp3d = new FramePoint(bodyZUpFrame, copExtremeInBodyZUp.getX(),
-                                               copExtremeInBodyZUp.getY(), 0.0);
+         FramePoint copExtremeInBodyZUp3d = new FramePoint(bodyZUpFrame, copExtremeInBodyZUp.getX(), copExtremeInBodyZUp.getY(), 0.0);
 
          capturePointCalculator.computePredictedCapturePoint(supportLeg, swingTimeRemaining + SWING_TIME_TO_ADD_FOR_CAPTURING_SAFETY_FACTOR,
                  copExtremeInBodyZUp3d, null);
@@ -413,65 +413,65 @@ public class CaptureRegionCalculator
 
       captureRegion = captureRegion.intersectionWith(reachableRegion);
 
-//      if (DRAW_SCORE_ON_GROUND && (captureRegion != null))
-//      {
-//         if (currentSide != supportLeg)
-//         {
-//            // clear the old
-//            for (double i = 0; i < index; i++)
-//            {
-//               YoboticsBipedPlotter.deregisterArtifactNoRepaint("Point" + index);
-//            }
+//    if (DRAW_SCORE_ON_GROUND && (captureRegion != null))
+//    {
+//       if (currentSide != supportLeg)
+//       {
+//          // clear the old
+//          for (double i = 0; i < index; i++)
+//          {
+//             YoboticsBipedPlotter.deregisterArtifactNoRepaint("Point" + index);
+//          }
 //
-//            YoboticsBipedPlotter.repaint();
-//            index = 0;
+//          YoboticsBipedPlotter.repaint();
+//          index = 0;
 //
-//            currentSide = supportLeg;
-//            Point2d minPoint = new Point2d();
-//            Point2d maxPoint = new Point2d();
-//            BoundingBox2d boundingBox = captureRegion.getBoundingBox();
+//          currentSide = supportLeg;
+//          Point2d minPoint = new Point2d();
+//          Point2d maxPoint = new Point2d();
+//          BoundingBox2d boundingBox = captureRegion.getBoundingBox();
 //
-//            boundingBox.getMinPoint(minPoint);
-//            boundingBox.getMaxPoint(maxPoint);
+//          boundingBox.getMinPoint(minPoint);
+//          boundingBox.getMaxPoint(maxPoint);
 //
-//            // add colored points for score
-//            for (double i = minPoint.getX(); i <= maxPoint.getX(); i = i + 0.01)
-//            {
-//               for (double j = minPoint.getY(); j <= maxPoint.getY(); j = j + 0.01)
-//               {
-//                  Point2d desiredPoint = new Point2d(i, j);
-//                  FramePoint desiredFootLocation = new FramePoint(ankleZUpFrames.get(supportLeg), desiredPoint.getX(),
-//                                                      desiredPoint.getY(), 0.0);
-//                  Footstep desiredFootstep = new Footstep(supportLeg, desiredFootLocation, 0.0);
-//                  double stepLocationScore = weightedDistanceScorer.getStepLocationScore(supportLeg, desiredFootstep);
+//          // add colored points for score
+//          for (double i = minPoint.getX(); i <= maxPoint.getX(); i = i + 0.01)
+//          {
+//             for (double j = minPoint.getY(); j <= maxPoint.getY(); j = j + 0.01)
+//             {
+//                Point2d desiredPoint = new Point2d(i, j);
+//                FramePoint desiredFootLocation = new FramePoint(ankleZUpFrames.get(supportLeg), desiredPoint.getX(),
+//                                                    desiredPoint.getY(), 0.0);
+//                Footstep desiredFootstep = new Footstep(supportLeg, desiredFootLocation, 0.0);
+//                double stepLocationScore = weightedDistanceScorer.getStepLocationScore(supportLeg, desiredFootstep);
 //
-//                  if (stepLocationScore != 0.0)
-//                  {
-//                     FramePoint desiredFootLocationInWorld = desiredFootLocation.changeFrameCopy(ReferenceFrame.getWorldFrame());
-//                     us.ihmc.plotting.shapes.PointArtifact point1 = new us.ihmc.plotting.shapes.PointArtifact("Point" + index,
-//                                                                       new Point2d(desiredFootLocationInWorld.getX(), desiredFootLocationInWorld.getY()));
-//                     double colorIndex = (1.0 - (stepLocationScore * 0.6));    // 0.6 to lighten the color a bit
-//                     point1.setColor(new Color((float) 0.0, (float) colorIndex, (float) 0.0, (float) 0.4));
-//                     point1.setLevel(86);
-//                     YoboticsBipedPlotter.registerArtifactNoRepaint(point1);
-//                     index++;
-//                  }
-//               }
-//            }
+//                if (stepLocationScore != 0.0)
+//                {
+//                   FramePoint desiredFootLocationInWorld = desiredFootLocation.changeFrameCopy(ReferenceFrame.getWorldFrame());
+//                   us.ihmc.plotting.shapes.PointArtifact point1 = new us.ihmc.plotting.shapes.PointArtifact("Point" + index,
+//                                                                     new Point2d(desiredFootLocationInWorld.getX(), desiredFootLocationInWorld.getY()));
+//                   double colorIndex = (1.0 - (stepLocationScore * 0.6));    // 0.6 to lighten the color a bit
+//                   point1.setColor(new Color((float) 0.0, (float) colorIndex, (float) 0.0, (float) 0.4));
+//                   point1.setLevel(86);
+//                   YoboticsBipedPlotter.registerArtifactNoRepaint(point1);
+//                   index++;
+//                }
+//             }
+//          }
 //
-//            YoboticsBipedPlotter.repaint();
-//         }
-//      }
+//          YoboticsBipedPlotter.repaint();
+//       }
+//    }
 
 //    // now shrink that polygon
 //    ArrayList<FramePoint2d> shrunkPoints = new ArrayList<FramePoint2d>();
 //    for (int i = 0; i < captureRegionVertices.size(); i++)
 //    {
-//       FramePoint2d shrunkPoint = new FramePoint2d(captureRegionVertices.get(i));
-//       captureRegionFromPoints.pullPointTowardsCentroid(shrunkPoint,
-//                                                        captureRegionVertices.get(i).distance(captureRegionFromPoints.getCentroidCopy()) *
-//                                                        FINAL_CAPTURE_REGION_SAFETY_MARGIN);
-//       shrunkPoints.add(shrunkPoint);
+//     FramePoint2d shrunkPoint = new FramePoint2d(captureRegionVertices.get(i));
+//     captureRegionFromPoints.pullPointTowardsCentroid(shrunkPoint,
+//                                                      captureRegionVertices.get(i).distance(captureRegionFromPoints.getCentroidCopy()) *
+//                                                      FINAL_CAPTURE_REGION_SAFETY_MARGIN);
+//     shrunkPoints.add(shrunkPoint);
 //    }
 //    captureRegionFromPoints = new FrameConvexPolygon2d(shrunkPoints);
 
