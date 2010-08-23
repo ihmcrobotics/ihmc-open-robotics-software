@@ -13,5 +13,7 @@ public interface DesiredHeadingControlModule
 
    public abstract FrameVector getDisplacementWithRespectToFoot(RobotSide robotSide, FramePoint position);
 
+   public abstract FramePoint getPositionOffsetFromFoot(RobotSide robotSide, FrameVector offset);
+   
    public abstract void setDesiredHeading(double desiredHeading);
 }
