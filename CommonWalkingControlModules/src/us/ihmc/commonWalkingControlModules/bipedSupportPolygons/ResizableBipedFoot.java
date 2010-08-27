@@ -337,22 +337,22 @@ public class ResizableBipedFoot implements BipedFootInterface
  {
       double PREVENT_ROTATION_FACTOR = 0.75;    // 0.8;//0.8;
 
-      return createRectangularRightFoot(PREVENT_ROTATION_FACTOR, footForward, footBack, footWidth, yoboticsBipedReferenceFrames, time,
+      return createRectangularRightFoot(PREVENT_ROTATION_FACTOR, PREVENT_ROTATION_FACTOR, footForward, footBack, footWidth, yoboticsBipedReferenceFrames, time,
             yoVariableRegistry, dynamicGraphicObjectsListRegistry);
  }
    
    // Foot creators:
-   public static ResizableBipedFoot createRectangularRightFoot(double PREVENT_ROTATION_FACTOR, double footForward, double footBack, double footWidth, CommonWalkingReferenceFrames yoboticsBipedReferenceFrames, DoubleYoVariable time,
+   public static ResizableBipedFoot createRectangularRightFoot(double preventRotationFactorLength, double preventRotationFactorWidth, double footForward, double footBack, double footWidth, CommonWalkingReferenceFrames yoboticsBipedReferenceFrames, DoubleYoVariable time,
            YoVariableRegistry yoVariableRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
-      Point2d frontLeft = new Point2d(PREVENT_ROTATION_FACTOR * footForward,
-                                      PREVENT_ROTATION_FACTOR * footWidth / 2.0);
-      Point2d frontRight = new Point2d(PREVENT_ROTATION_FACTOR * footForward,
-                                       -PREVENT_ROTATION_FACTOR * footWidth / 2.0);
-      Point2d hindRight = new Point2d(-PREVENT_ROTATION_FACTOR * footBack,
-                                      -PREVENT_ROTATION_FACTOR * footWidth / 2.0);
-      Point2d hindLeft = new Point2d(-PREVENT_ROTATION_FACTOR * footBack,
-                                     PREVENT_ROTATION_FACTOR * footWidth / 2.0);
+      Point2d frontLeft = new Point2d(preventRotationFactorLength * footForward,
+            preventRotationFactorWidth * footWidth / 2.0);
+      Point2d frontRight = new Point2d(preventRotationFactorLength * footForward,
+            -preventRotationFactorWidth * footWidth / 2.0);
+      Point2d hindRight = new Point2d(-preventRotationFactorLength * footBack,
+            -preventRotationFactorWidth * footWidth / 2.0);
+      Point2d hindLeft = new Point2d(-preventRotationFactorLength * footBack,
+            preventRotationFactorWidth * footWidth / 2.0);
 
 
       // Toe:
