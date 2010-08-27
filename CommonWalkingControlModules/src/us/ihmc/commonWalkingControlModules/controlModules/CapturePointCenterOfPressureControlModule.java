@@ -41,10 +41,11 @@ public class CapturePointCenterOfPressureControlModule
    private final YoVariableRegistry registry = new YoVariableRegistry("CapturePointCenterOfPressureController");
 
    private final BooleanYoVariable turnOffCaptureControl = new BooleanYoVariable("turnOffCaptureControl", registry);
-
    {
       turnOffCaptureControl.set(false);
    }
+   
+   private final BooleanYoVariable singleSupportWasPreviousTick = new BooleanYoVariable("singleSupportWasPreviousTick", registry);
 
    private final BooleanYoVariable keepInsideFootSingleSupport = new BooleanYoVariable("keepInsideFootSingleSupport",
                                                                     "If true, just control the Capture Point to stay inside the foot the best you can.",
@@ -261,11 +262,22 @@ public class CapturePointCenterOfPressureControlModule
 //    xCaptureControl.update(unfilteredXControl.val);
 
       unfilteredXControl.set(control.getX());
-      xCaptureControl.update(unfilteredXControl.getDoubleValue());
-      control.setX(xCaptureControl.getDoubleValue());
-
       unfilteredYControl.set(control.getY());
+
+      
+      if (singleSupportWasPreviousTick.getBooleanValue())
+      {
+         xCaptureControl.reset(); 
+         yCaptureControl.reset(); 
+         
+         singleSupportWasPreviousTick.set(false);
+      }
+     
+      xCaptureControl.update(unfilteredXControl.getDoubleValue());
       yCaptureControl.update(unfilteredYControl.getDoubleValue());    // saturatedHighPassYControl);
+      
+      
+      control.setX(xCaptureControl.getDoubleValue());
       control.setY(yCaptureControl.getDoubleValue());
 
       FramePoint centerOfPressureDesired = currentCapturePoint.changeFrameCopy(midFeetZUp);
@@ -373,6 +385,8 @@ public class CapturePointCenterOfPressureControlModule
    public void XYCoPControllerSingleSupport(FramePoint currentCapturePoint, FrameLineSegment2d guideLine,
            FramePoint desiredCapturePoint, RobotSide supportLeg, ReferenceFrame referenceFrame, BipedSupportPolygons supportPolygons)    // , double percentToFarEdgeOfFoot)
    {
+      singleSupportWasPreviousTick.set(true);
+      
       // Compute and get capture point:
 //      FramePoint currentCapturePoint = yoboticsBipedCapturePointCalculator.getCapturePointInFrame(referenceFrame);
 
