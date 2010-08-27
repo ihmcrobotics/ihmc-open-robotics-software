@@ -49,7 +49,7 @@ public class CommonWalkingGuideLineCalculator implements GuideLineCalculator
       this.captureForward.set(captureForward);
    }
 
-   public void setCaptusreForwardOfSweet(double captureForwardOfSweet)
+   public void setCaptureForwardOfSweet(double captureForwardOfSweet)
    {
       this.captureForwardOfSweet.set(captureForwardOfSweet);
    }

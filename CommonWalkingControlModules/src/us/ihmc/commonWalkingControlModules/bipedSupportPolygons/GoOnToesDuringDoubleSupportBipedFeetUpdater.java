@@ -33,7 +33,7 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFrameLine2d;
 
 public class GoOnToesDuringDoubleSupportBipedFeetUpdater implements BipedFeetUpdater
 {
-   private static final boolean VISUALIZE = false;    // true;
+   private static final boolean VISUALIZE = false;    
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final ReferenceFrame midFeetZUpFrame, bodyZUpFrame, leftFootZUpFrame, rightFootZUpFrame;
@@ -115,6 +115,11 @@ public class GoOnToesDuringDoubleSupportBipedFeetUpdater implements BipedFeetUpd
 //       capturePointDesiredWorldGraphicPosition = null;
       }
 
+      if (yoVariableRegistry != null)
+      {
+         yoVariableRegistry.addChild(registry);
+      }
+      
 //      if (VarListsToRegister.REGISTER_BIPED_FEET_UPDATER)
 //      {
 //         yoVariableRegistry.addChild(registry);
@@ -351,9 +356,9 @@ public class GoOnToesDuringDoubleSupportBipedFeetUpdater implements BipedFeetUpd
       // onHeelsLines:
       SideDependentList<FramePoint2d[]> onHeelPointsLists = new SideDependentList<FramePoint2d[]>();
       onHeelPointsLists.set(RobotSide.LEFT,
-                            FramePoint2d.changeFrameCopyBatch(FramePoint2d.changeFrameCopyBatch(leftFoot.getHeelPointsCopy(), bodyZUpFrame), midFeetZUpFrame));    // ugly, but for now
+                            FramePoint2d.changeFrameCopyBatch(leftFoot.getHeelPointsCopy(), midFeetZUpFrame));    // ugly, but for now
       onHeelPointsLists.set(RobotSide.RIGHT,
-                            FramePoint2d.changeFrameCopyBatch(FramePoint2d.changeFrameCopyBatch(rightFoot.getHeelPointsCopy(), bodyZUpFrame), midFeetZUpFrame));    // ugly, but for now
+                            FramePoint2d.changeFrameCopyBatch(rightFoot.getHeelPointsCopy(), midFeetZUpFrame));    // ugly, but for now
 
       onHeelLines = getOnHeelLines(onHeelPointsLists, footPolygonsInMidFeetZUp, bodyZUpFrame);
       this.onHeelLines.set(onHeelLines);
