@@ -7,7 +7,7 @@ import us.ihmc.utilities.math.geometry.*;
 
 public interface GuideLineCalculator
 {
-   public void update(RobotSide side, BipedSupportPolygons bipedSupportPolygons, FramePoint2d capturePointInSupportFootZUp,
+   public void update(RobotSide supportLeg, BipedSupportPolygons bipedSupportPolygons, FramePoint2d capturePointInSupportFootZUp,
                       FramePoint finalDesiredSwingTarget, FrameVector2d desiredVelocityInSupportFootFrame,
                       FrameVector2d actualCenterOfMassVelocityInSupportFootFrame);
 

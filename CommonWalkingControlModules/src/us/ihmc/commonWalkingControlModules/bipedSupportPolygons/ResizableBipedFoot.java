@@ -3,7 +3,9 @@ package us.ihmc.commonWalkingControlModules.bipedSupportPolygons;
 import java.awt.Color;
 import java.util.ArrayList;
 
+import javax.media.j3d.Transform3D;
 import javax.vecmath.Point2d;
+import javax.vecmath.Point3d;
 
 import us.ihmc.commonWalkingControlModules.RobotSide;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedFootInterface;
@@ -191,6 +193,8 @@ public class ResizableBipedFoot implements BipedFootInterface
    {
       if ((shift.getDoubleValue() < 0.0) || (shift.getDoubleValue() > 1.0))
          throw new RuntimeException("shift < 0.0 || shift > 1.0");
+      
+      //TODO: Don't create this list every tick. Instead create it once at the beginning.
       ArrayList<Point2d> footPolygonPoints = new ArrayList<Point2d>(toePoints.size() + heelPoints.size());
 
       switch ((FootPolygonEnum) footPolygonInUseEnum.getEnumValue())
@@ -248,7 +252,7 @@ public class ResizableBipedFoot implements BipedFootInterface
             throw new RuntimeException("Unrecognized foot polygon");
          }
       }
-
+      
       FrameConvexPolygon2d ret = new FrameConvexPolygon2d(referenceFrame, footPolygonPoints);
 
       if (VISUALIZE)
@@ -328,12 +332,19 @@ public class ResizableBipedFoot implements BipedFootInterface
       this.shift.set(shift);
    }
 
-   // Foot creators:
    public static ResizableBipedFoot createRectangularRightFoot(double footForward, double footBack, double footWidth, CommonWalkingReferenceFrames yoboticsBipedReferenceFrames, DoubleYoVariable time,
-           YoVariableRegistry yoVariableRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
-   {
+         YoVariableRegistry yoVariableRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+ {
       double PREVENT_ROTATION_FACTOR = 0.75;    // 0.8;//0.8;
 
+      return createRectangularRightFoot(PREVENT_ROTATION_FACTOR, footForward, footBack, footWidth, yoboticsBipedReferenceFrames, time,
+            yoVariableRegistry, dynamicGraphicObjectsListRegistry);
+ }
+   
+   // Foot creators:
+   public static ResizableBipedFoot createRectangularRightFoot(double PREVENT_ROTATION_FACTOR, double footForward, double footBack, double footWidth, CommonWalkingReferenceFrames yoboticsBipedReferenceFrames, DoubleYoVariable time,
+           YoVariableRegistry yoVariableRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+   {
       Point2d frontLeft = new Point2d(PREVENT_ROTATION_FACTOR * footForward,
                                       PREVENT_ROTATION_FACTOR * footWidth / 2.0);
       Point2d frontRight = new Point2d(PREVENT_ROTATION_FACTOR * footForward,

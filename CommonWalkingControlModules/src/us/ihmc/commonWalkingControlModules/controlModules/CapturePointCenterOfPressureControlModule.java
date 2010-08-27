@@ -169,7 +169,7 @@ public class CapturePointCenterOfPressureControlModule
          dynamicGraphicObjectList.add(centerOfPressureDesiredWorldGraphicPosition);
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectList);
 
-         ArtifactList artifactList = new ArtifactList("Capture Point CoP Controller");
+         ArtifactList artifactList = new ArtifactList("Capture Point CoP Control Module");
          
          artifactList.add(centerOfPressureDesiredWorldGraphicPosition.createArtifact());
          
@@ -192,6 +192,16 @@ public class CapturePointCenterOfPressureControlModule
       }
 
    }
+   
+   
+   public void XYCoPControllerDoubleSupport(BipedSupportPolygons bipedSupportPolygons, CapturePointCalculatorInterface yoboticsBipedCapturePointCalculator,
+         FramePoint desiredCapturePoint)
+ {
+      FramePoint currentCapturePoint = yoboticsBipedCapturePointCalculator.getCapturePointInFrame(desiredCapturePoint.getReferenceFrame());
+
+      XYCoPControllerDoubleSupport(bipedSupportPolygons, currentCapturePoint,
+           desiredCapturePoint);
+ }
 
    /**
     * Finds instantaneous center of pressure to make robot move to desired x and y
@@ -201,7 +211,7 @@ public class CapturePointCenterOfPressureControlModule
     * @param processedSensors ProcessedSensors
     * @todo add stepping if outside footbase
     */
-   public void XYCoPControllerDoubleSupport(BipedSupportPolygons bipedSupportPolygons, CapturePointCalculatorInterface yoboticsBipedCapturePointCalculator,
+   public void XYCoPControllerDoubleSupport(BipedSupportPolygons bipedSupportPolygons, FramePoint currentCapturePoint,
            FramePoint desiredCapturePoint)
    {
       // Hide the guideline and parallel line since not used in double support:
@@ -214,7 +224,7 @@ public class CapturePointCenterOfPressureControlModule
          throw new RuntimeException("desiredBalancePoint Not a ZUpFrame!!");
       }
 
-      FramePoint current = yoboticsBipedCapturePointCalculator.getCapturePointInFrame(desiredCapturePoint.getReferenceFrame());
+//      FramePoint current = yoboticsBipedCapturePointCalculator.getCapturePointInFrame(desiredCapturePoint.getReferenceFrame());
 
 //    lowPassXYDot.update(processedSensors.pd_y_body_zup.val);
 
@@ -224,7 +234,7 @@ public class CapturePointCenterOfPressureControlModule
 
 //    FrameVector control = new FrameVector(hijackedDesired);
       FrameVector control = new FrameVector(desiredCapturePoint);
-      control.sub(current);
+      control.sub(currentCapturePoint);
       control.setX(control.getX() * K_capture_x.getDoubleValue());
       control.setY(control.getY() * K_capture_y.getDoubleValue());
       control.setZ(0.0);
@@ -236,9 +246,9 @@ public class CapturePointCenterOfPressureControlModule
       }
 
       // Control from here on is in MidFeetZUpFrame:
-      if (control.getReferenceFrame() != yoboticsBipedReferenceFrames.getMidFeetZUpFrame())
+      if (control.getReferenceFrame() != midFeetZUp)
       {
-         control = control.changeFrameCopy(bodyZUp);
+//         control = control.changeFrameCopy(bodyZUp);
          control = control.changeFrameCopy(midFeetZUp);
       }
 
@@ -258,7 +268,7 @@ public class CapturePointCenterOfPressureControlModule
       yCaptureControl.update(unfilteredYControl.getDoubleValue());    // saturatedHighPassYControl);
       control.setY(yCaptureControl.getDoubleValue());
 
-      FramePoint centerOfPressureDesired = yoboticsBipedCapturePointCalculator.getCapturePointInFrame(midFeetZUp);
+      FramePoint centerOfPressureDesired = currentCapturePoint.changeFrameCopy(midFeetZUp);
       centerOfPressureDesired.sub(control);
 
 
@@ -275,9 +285,8 @@ public class CapturePointCenterOfPressureControlModule
          {
             // supportPolygon.orthogonalProjection(centerOfPressureDesired2d);
 
-            if (desiredCapturePoint.getReferenceFrame() != yoboticsBipedReferenceFrames.getMidFeetZUpFrame())
+            if (desiredCapturePoint.getReferenceFrame() != midFeetZUp)
             {
-               desiredCapturePoint = desiredCapturePoint.changeFrameCopy(bodyZUp);
                desiredCapturePoint = desiredCapturePoint.changeFrameCopy(midFeetZUp);
             }
 
@@ -285,11 +294,28 @@ public class CapturePointCenterOfPressureControlModule
                                                     desiredCapturePoint.getY());
             FrameLineSegment2d desiredCaptureToDesiredCop = new FrameLineSegment2d(desiredCapturePoint2d, centerOfPressureDesired2d);
 
-            FramePoint2d[] intersections = supportPolygon.intersectionWith(desiredCaptureToDesiredCop);    // John Carff fixed this on 090625. Make sure his fix didn't break this line!!!
+            // John Carff fixed this on 090625. Make sure his fix didn't break this line!!!
+            // JEP 100826: Indeed it may have. When the desired capture point is outside of the support polygon, seems to get the wrong intersection!
+            FramePoint2d[] intersections = supportPolygon.intersectionWith(desiredCaptureToDesiredCop);    
             if (intersections != null)
             {
-               centerOfPressureDesired.setX(intersections[0].getX());
-               centerOfPressureDesired.setY(intersections[0].getY());
+               FramePoint2d intersectionToUse;
+
+               if (intersections.length == 1)
+               {
+                  intersectionToUse = intersections[0];
+               }
+               else
+               {
+                  double distanceSquaredToIntersection0 = centerOfPressureDesired2d.distanceSquared(intersections[0]);
+                  double distanceSquaredToIntersection1 = centerOfPressureDesired2d.distanceSquared(intersections[1]);
+
+                  if (distanceSquaredToIntersection0 <= distanceSquaredToIntersection1) intersectionToUse = intersections[0];
+                  else intersectionToUse = intersections[1];
+               }
+               
+               centerOfPressureDesired.setX(intersectionToUse.getX());
+               centerOfPressureDesired.setY(intersectionToUse.getY());
 
                // Move in a little along the line:
                FrameVector2d frameVector2d = desiredCaptureToDesiredCop.getVectorCopy();
@@ -298,6 +324,10 @@ public class CapturePointCenterOfPressureControlModule
 
                centerOfPressureDesired.setX(centerOfPressureDesired.getX() + frameVector2d.getX());
                centerOfPressureDesired.setY(centerOfPressureDesired.getY() + frameVector2d.getY());
+            }
+            else
+            {
+               throw new RuntimeException("Shouldn't get here");
             }
          }
       }
@@ -566,6 +596,12 @@ public class CapturePointCenterOfPressureControlModule
          return k * (error + deadZone);
       else
          return 0.0;
+   }
+   
+   public void setMaxCaptureToCoP(double maxCaptureToCoP)
+   {
+      this.maxCaptureToCoP.set(maxCaptureToCoP);
+
    }
 
    /**
