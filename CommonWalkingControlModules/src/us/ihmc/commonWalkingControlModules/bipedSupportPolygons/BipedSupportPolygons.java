@@ -132,6 +132,7 @@ public class BipedSupportPolygons
          RobotSide supportSide = leftFoot.isSupportingFoot() ? RobotSide.LEFT : RobotSide.RIGHT;
          supportPolygonInMidFeetZUp = footPolygonsInMidFeetZUp.get(supportSide);
 
+        
          connectingEdge1 = null;
          connectingEdge2 = null;
       }
