@@ -45,7 +45,7 @@ public class TakeoffLandingCartesianTrajectoryGenerator implements CartesianTraj
 
    @SuppressWarnings("unused")
    private final BooleanYoVariable accelFull = new BooleanYoVariable("accelFull", registry);
-      
+
    private final DoubleYoVariable groundZ = new DoubleYoVariable("groundZ", registry);
 
    private final YoFramePoint initialPosition;
@@ -55,13 +55,13 @@ public class TakeoffLandingCartesianTrajectoryGenerator implements CartesianTraj
    private final YoFramePoint currentPosition;
    private final YoFrameVector currentVelocity;
    private final YoFrameVector currentAcceleration;
-   
+
    private final YoFrameVector currentToFinal;
    private final YoFrameVector2d currentToFinal2d;
    private final FrameVector tempFrameVector;
    private final YoFrameVector desiredMaxVelocity;
    private final YoFrameVector desiredAcceleration;
-   
+
    private final ReferenceFrame referenceFrame;
 
    /**
@@ -82,7 +82,7 @@ public class TakeoffLandingCartesianTrajectoryGenerator implements CartesianTraj
       this.zClearance.set(zClearance);
       this.takeOffSlope.set(takeOffSlope);
       this.landingSlope.set(landingSlope);
-            
+
       initialPosition = new YoFramePoint("initialPosition", "", referenceFrame, registry);
       initialVelocity = new YoFrameVector("initialVelocity", "", referenceFrame, registry);
 
@@ -90,13 +90,13 @@ public class TakeoffLandingCartesianTrajectoryGenerator implements CartesianTraj
       currentPosition = new YoFramePoint("currentPosition", "", referenceFrame, registry);
       currentVelocity = new YoFrameVector("currentVelocity", "", referenceFrame, registry);
       currentAcceleration = new YoFrameVector("currentAcceleration", "", referenceFrame, registry);
-      
+
       currentToFinal = new YoFrameVector("currentToFinal", "", referenceFrame, registry);
       currentToFinal2d = new YoFrameVector2d("currentToFinal2d", "", referenceFrame, registry);
       tempFrameVector = new FrameVector(referenceFrame);
       desiredMaxVelocity = new YoFrameVector("desiredMaxVelocity", "", referenceFrame, registry);
       desiredAcceleration = new YoFrameVector("desiredAcceleration", "", referenceFrame, registry);
-      
+
       this.referenceFrame = referenceFrame;
 
       if (parentRegistry != null)
@@ -111,7 +111,7 @@ public class TakeoffLandingCartesianTrajectoryGenerator implements CartesianTraj
     * @param finalDesiredPosition final desired position of the trajectory (can be updated using updateFinalDesiredPosition later)
     */
    public void initialize(double groundZ, FramePoint initialPosition, FrameVector initialVelocity, FramePoint finalDesiredPosition)
-   {      
+   {
       cartesianTrajectoryState.set(SwingState.TAKE_OFF);
 
       this.initialPosition.set(initialPosition);
@@ -122,6 +122,15 @@ public class TakeoffLandingCartesianTrajectoryGenerator implements CartesianTraj
       this.currentVelocity.set(initialVelocity);
 
       this.groundZ.set(groundZ);
+   }
+
+   public void setTakeoffLandingCartesianTrajectoryParameters(double maxAccel, double maxVel, double zClearance, double takeOffSlope, double landingSlope)
+   {
+      this.maxAccel.set(maxAccel);
+      this.maxVel.set(maxVel);
+      this.zClearance.set(zClearance);
+      this.takeOffSlope.set(takeOffSlope);
+      this.landingSlope.set(landingSlope);
    }
 
    public double getZClearance()
@@ -209,7 +218,9 @@ public class TakeoffLandingCartesianTrajectoryGenerator implements CartesianTraj
             }
 
 
-            if ((ALLOW_RETAKEOFF) && (currentXYDistanceFromTarget.getDoubleValue() * landingSlope.getDoubleValue() > 1.05 * Math.max(zClearance.getDoubleValue(), Math.abs(currentToFinal.getZ()))))
+            if ((ALLOW_RETAKEOFF)
+                    && (currentXYDistanceFromTarget.getDoubleValue() * landingSlope.getDoubleValue()
+                        > 1.05 * Math.max(zClearance.getDoubleValue(), Math.abs(currentToFinal.getZ()))))
             {
                cartesianTrajectoryState.set(SwingState.TAKE_OFF);
             }
@@ -387,7 +398,7 @@ public class TakeoffLandingCartesianTrajectoryGenerator implements CartesianTraj
       double zClearance = 0.1;
       double takeOffSlope = 1.0;
       double landingSlope = 1.0;
-      
+
       ReferenceFrame referenceFrame = ReferenceFrame.getWorldFrame();
 
       CartesianTrajectoryGenerator cartesianTrajectoryGenerator = new TakeoffLandingCartesianTrajectoryGenerator(maxAccel, maxVel, zClearance, takeOffSlope,
@@ -399,7 +410,8 @@ public class TakeoffLandingCartesianTrajectoryGenerator implements CartesianTraj
 
       cartesianTrajectoryGenerator.initialize(0.0, initialPosition, initialVelocity, finalDesiredPosition);
 
-      new CartesianTrajectoryGeneratorTester(cartesianTrajectoryGenerator, yoVariableRegistry, dynamicGraphicObjectsListRegistry, "cartesianTrajectoryGeneratorTester");
+      new CartesianTrajectoryGeneratorTester(cartesianTrajectoryGenerator, yoVariableRegistry, dynamicGraphicObjectsListRegistry,
+              "cartesianTrajectoryGeneratorTester");
    }
 
    public void checkReferenceFrameMatch(ReferenceFrameHolder referenceFrameHolder)
