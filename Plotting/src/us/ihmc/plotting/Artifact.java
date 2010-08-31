@@ -83,4 +83,9 @@ public abstract class Artifact implements Plottable, Serializable
    {
       this.isVisible = isVisible;
    }
+
+   public String toString()
+   {
+      return getID();
+   }
 }
