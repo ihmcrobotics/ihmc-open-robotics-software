@@ -111,17 +111,17 @@ public class TestIMUKalmanFilterSimulationJerryOne
       evolutionUC33E.setChannel(2, "wy_amp", simulationConstructionSet, -20.0, 20.0, 3.0);
       evolutionUC33E.setChannel(3, "wz_amp", simulationConstructionSet, -20.0, 20.0, 3.0);
 
-      evolutionUC33E.setChannel(4, "wx_freq", simulationConstructionSet, 0.0, 10.0);
-      evolutionUC33E.setChannel(5, "wy_freq", simulationConstructionSet, 0.0, 10.0);
-      evolutionUC33E.setChannel(6, "wz_freq", simulationConstructionSet, 0.0, 10.0);
+      evolutionUC33E.setSlider(4, "wx_freq", simulationConstructionSet, 0.0, 10.0);
+      evolutionUC33E.setSlider(5, "wy_freq", simulationConstructionSet, 0.0, 10.0);
+      evolutionUC33E.setSlider(6, "wz_freq", simulationConstructionSet, 0.0, 10.0);
 
 //    evolutionUC33E.setChannel(4, "x_gyro_bias", simulationConstructionSet, -3.0, 3.0, 1.0);
 //    evolutionUC33E.setChannel(5, "y_gyro_bias", simulationConstructionSet, -3.0, 3.0, 1.0);
 //    evolutionUC33E.setChannel(6, "z_gyro_bias", simulationConstructionSet, -3.0, 3.0, 1.0);
 
 
-      evolutionUC33E.setChannel(7, "q_noise", simulationConstructionSet, 0.01, 100.0);
-      evolutionUC33E.setChannel(8, "r_noise", simulationConstructionSet, 0.01, 100.0);
+      evolutionUC33E.setSlider(7, "q_noise", simulationConstructionSet, 0.01, 100.0);
+      evolutionUC33E.setSlider(8, "r_noise", simulationConstructionSet, 0.01, 100.0);
 
       simulationConstructionSet.attachExitActionListener(evolutionUC33E);
 

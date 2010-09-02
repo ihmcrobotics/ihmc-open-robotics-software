@@ -117,10 +117,10 @@ public class CartesianTrajectoryGeneratorTester
       scs.selectConfiguration("CartesianTrajectory");
 
       MidiSliderBoard evolution = new MidiSliderBoard();
-      evolution.setChannel(1, "endPointShiftx", scs, -0.5, 0.5);
-      evolution.setChannel(2, "endPointShifty", scs, -0.5, 0.5);
-      evolution.setChannel(3, "allowEndPointShift", scs, 0.0, 1.0);
-      evolution.setChannel(4, "slowDownMillis", scs, 0.0, 100);
+      evolution.setSlider(1, "endPointShiftx", scs, -0.5, 0.5);
+      evolution.setSlider(2, "endPointShifty", scs, -0.5, 0.5);
+      evolution.setSlider(3, "allowEndPointShift", scs, 0.0, 1.0);
+      evolution.setSlider(4, "slowDownMillis", scs, 0.0, 100);
 
       Thread thread = new Thread(scs);
       thread.start();
