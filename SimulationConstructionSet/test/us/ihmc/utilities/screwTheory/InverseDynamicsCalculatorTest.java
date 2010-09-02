@@ -1,7 +1,8 @@
 package us.ihmc.utilities.screwTheory;
 
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertEquals;
 
+import java.util.ArrayList;
 import java.util.Random;
 
 import javax.media.j3d.Transform3D;
@@ -22,8 +23,12 @@ import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.FloatingJoint;
 import com.yobotics.simulationconstructionset.Joint;
 import com.yobotics.simulationconstructionset.Link;
+import com.yobotics.simulationconstructionset.LinkGraphics;
 import com.yobotics.simulationconstructionset.PinJoint;
 import com.yobotics.simulationconstructionset.Robot;
+import com.yobotics.simulationconstructionset.SimulationConstructionSet;
+import com.yobotics.simulationconstructionset.YoAppearance;
+import com.yobotics.simulationconstructionset.util.robotExplorer.RobotExplorer;
 
 /**
  * This currently needs to be here because it uses SCS classes to test the inverse dynamics calculator, and SCS isn't on the IHMCUtilities build path
@@ -32,7 +37,7 @@ import com.yobotics.simulationconstructionset.Robot;
  */
 public class InverseDynamicsCalculatorTest
 {
-   private final Random random = new Random();
+   private final Random random = new Random(100L);
 
    @Before
    public void setUp()
@@ -43,34 +48,83 @@ public class InverseDynamicsCalculatorTest
    public void testChain()
    {
       Robot robot = new Robot("robot");
+      robot.setGravity(0.0);
 
       ReferenceFrame inertialFrame = ReferenceFrame.constructAWorldFrame("inertial");
       ReferenceFrame worldFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("world", inertialFrame, new Transform3D());
       worldFrame.update();
       RigidBody world = new RigidBody("world", worldFrame);
 
-      createRandomChainRobotAndSetJointPositionsAndVelocities(robot, worldFrame, world);
+      int nLinks = 5;
+      ArrayList<PinJoint> revoluteJoints = new ArrayList<PinJoint>();
+      ArrayList<RevoluteJoint> inverseDynamicsRevoluteJoints = new ArrayList<RevoluteJoint>();
+
+      createRandomChainRobotAndSetJointPositionsAndVelocities(robot, revoluteJoints, inverseDynamicsRevoluteJoints, worldFrame, world, nLinks);
 
       InverseDynamicsCalculator calculator = new InverseDynamicsCalculator(inertialFrame, world);
 
-      // do inverse dynamics
       calculator.compute();
 
-      // create a simulation
+      setTorques(revoluteJoints, inverseDynamicsRevoluteJoints);
 
-      // run simulation
+      createAndStartSimulation(robot);
 
-      // compare calculated accelerations with desired accelerations
-      fail("Not yet implemented");
+      compareAccelerations(revoluteJoints, inverseDynamicsRevoluteJoints);
    }
 
-   private void createRandomChainRobotAndSetJointPositionsAndVelocities(Robot robot, ReferenceFrame worldFrame, RigidBody world)
+   private void setTorques(ArrayList<PinJoint> revoluteJoints, ArrayList<RevoluteJoint> inverseDynamicsRevoluteJoints)
    {
-      FloatingJoint rootJoint = new FloatingJoint("root", new Vector3d(), robot);
-      robot.addRootJoint(rootJoint);
-      SixDoFJoint rootInverseDynamicsJoint = new SixDoFJoint("root", world, worldFrame);
+      for (int i = 0; i < revoluteJoints.size(); i++)
+      {
+         revoluteJoints.get(i).setTau(inverseDynamicsRevoluteJoints.get(i).getTau());
+      }
+   }
 
-      int nLinks = 5;
+   private void compareAccelerations(ArrayList<PinJoint> revoluteJoints, ArrayList<RevoluteJoint> inverseDynamicsRevoluteJoints)
+   {
+      double epsilon = 1e-8;
+      for (int i = 0; i < revoluteJoints.size(); i++)
+      {
+         PinJoint revoluteJoint = revoluteJoints.get(i);
+         RevoluteJoint inverseDynamicsRevoluteJoint = inverseDynamicsRevoluteJoints.get(i);
+
+         DoubleYoVariable qddVariable = revoluteJoint.getQDD();
+         double qdd = qddVariable.getDoubleValue();
+         double qddInverse = inverseDynamicsRevoluteJoint.getQdd();
+         assertEquals(qdd, qddInverse, epsilon);
+      }
+   }
+
+   private void createAndStartSimulation(Robot robot)
+   {
+      SimulationConstructionSet scs = new SimulationConstructionSet(robot, false);
+      scs.disableGUIComponents();
+      scs.setRecordDT(scs.getDT());
+      Thread simThread = new Thread(scs, "InverseDynamicsCalculatorTest sim thread");
+      simThread.start();
+      scs.simulate(1);
+      waitForSimulationToFinish(scs);
+   }
+
+   private void createRandomChainRobotAndSetJointPositionsAndVelocities(Robot robot, ArrayList<PinJoint> revoluteJointsToPack,
+           ArrayList<RevoluteJoint> inverseDynamicsRevoluteJointsToPack, ReferenceFrame worldFrame, RigidBody world, int nLinks)
+   {
+//    FloatingJoint rootJoint = new FloatingJoint("root", new Vector3d(), robot);
+//    robot.addRootJoint(rootJoint);
+//    SixDoFJoint rootInverseDynamicsJoint = new SixDoFJoint("root", world, worldFrame);
+
+      PinJoint rootJoint = new PinJoint("root", new Vector3d(), robot, 0);
+      robot.addRootJoint(rootJoint);
+      
+      FrameVector rootJointAxis = new FrameVector(worldFrame);
+      rootJoint.getJointAxis(rootJointAxis.getVector());
+      RevoluteJoint rootInverseDynamicsJoint = new RevoluteJoint("root", world, worldFrame, rootJointAxis);
+
+      setRandomPosVelAcc(rootJoint, rootInverseDynamicsJoint);
+
+      revoluteJointsToPack.add(rootJoint);
+      inverseDynamicsRevoluteJointsToPack.add(rootInverseDynamicsJoint);
+
       Joint currentJoint = rootJoint;
       InverseDynamicsJoint currentInverseDynamicsJoint = rootInverseDynamicsJoint;
       ReferenceFrame currentFrame = worldFrame;
@@ -81,6 +135,9 @@ public class InverseDynamicsCalculatorTest
          link.setMass(random.nextDouble());
          Vector3d comOffset = new Vector3d(random.nextDouble(), random.nextDouble(), random.nextDouble());
          link.setComOffset(comOffset);
+         LinkGraphics linkGraphics = new LinkGraphics();
+         linkGraphics.createInertiaEllipsoid(link, YoAppearance.Red());
+         link.setLinkGraphics(linkGraphics);
          currentJoint.setLink(link);
 
          Matrix3d momentOfInertia = new Matrix3d();
@@ -111,6 +168,9 @@ public class InverseDynamicsCalculatorTest
 
             setRandomPosVelAcc(nextJoint, nextInverseDynamicsJoint);
 
+            revoluteJointsToPack.add(nextJoint);
+            inverseDynamicsRevoluteJointsToPack.add(nextInverseDynamicsJoint);
+
             currentJoint = nextJoint;
             currentInverseDynamicsJoint = nextInverseDynamicsJoint;
             currentFrame = nextFrame;
@@ -118,8 +178,14 @@ public class InverseDynamicsCalculatorTest
       }
 
       setRandomPosVelAcc(rootJoint, rootInverseDynamicsJoint);
+      
+      RobotExplorer explorer = new RobotExplorer(robot);
+      StringBuffer buffer = new StringBuffer();
+      explorer.getRobotInformationAsStringBuffer(buffer);
+      System.out.print(buffer);
    }
 
+   @SuppressWarnings("unused")
    private void setRandomPosVelAcc(FloatingJoint floatingJoint, SixDoFJoint sixDoFJoint)
    {
       Point3d rootPosition = new Point3d(random.nextDouble(), random.nextDouble(), random.nextDouble());
@@ -282,5 +348,23 @@ public class InverseDynamicsCalculatorTest
          translationAfterJoint.setTranslation(comOffset);
          transformToParent.mul(translationAfterJoint);
       }
+   }
+
+
+   private void waitForSimulationToFinish(SimulationConstructionSet scs)
+   {
+      while (scs.isRunning())
+      {
+         try
+         {
+            Thread.sleep(10);
+         }
+         catch (InterruptedException e)
+         {
+            e.printStackTrace();
+         }
+      }
+
+      scs = null;
    }
 }
