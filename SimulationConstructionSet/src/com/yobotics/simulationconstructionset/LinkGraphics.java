@@ -1731,6 +1731,45 @@ public class LinkGraphics
    }
 
 
+   public void createInertiaEllipsoid(Link link, Appearance appearance)
+   {
+//      LinkGraphics linkGraphics = link.getLinkGraphics();
+      this.identity();
+      Vector3d comOffSet = new Vector3d();
+      link.getComOffset(comOffSet);
+      this.translate(comOffSet);
+      Matrix3d momentOfInertia = new Matrix3d();
+      link.getMomentOfInertia(momentOfInertia);
+      double mass = link.getMass();
+
+      double[] principalMomentsOfInertia = {momentOfInertia.m00, momentOfInertia.m11, momentOfInertia.m22};
+
+      double[] ellipsoidRadii = getEllipsoidRadii(principalMomentsOfInertia, mass);
+
+      this.addEllipsoid(ellipsoidRadii[0], ellipsoidRadii[1],
+                                ellipsoidRadii[2], appearance);
+   }
+
+   /**
+    * Returns the radii of an ellipsoid given the inertia parameters, assuming a uniform mass distribution.
+    * @param principalMomentsOfInertia principal moments of inertia {Ixx, Iyy, Izz}
+    * @param mass mass of the link
+    * @return the three radii of the inertia ellipsoid
+    */
+   private double[] getEllipsoidRadii(double[] principalMomentsOfInertia, double mass)
+   {
+      double Ixx = principalMomentsOfInertia[0];
+      double Iyy = principalMomentsOfInertia[1];
+      double Izz = principalMomentsOfInertia[2];
+
+//    http://en.wikipedia.org/wiki/Ellipsoid#Mass_properties
+      double[] ret = new double[3];
+      ret[0] = Math.sqrt(5.0 / 2.0 * (Iyy + Izz - Ixx) / mass);
+      ret[1] = Math.sqrt(5.0 / 2.0 * (Izz + Ixx - Iyy) / mass);
+      ret[2] = Math.sqrt(5.0 / 2.0 * (Ixx + Iyy - Izz) / mass);
+
+      return ret;
+   }
 
    /*
     * public String getName()
