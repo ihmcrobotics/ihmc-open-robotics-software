@@ -26,7 +26,7 @@ public class MidiSliderBoardTest
       MidiSliderBoard midiSliderBoard = new MidiSliderBoard();
       YoVariableRegistry registry = new YoVariableRegistry("testRegistry");
       DoubleYoVariable yoVariable = new DoubleYoVariable("test", registry);
-      midiSliderBoard.setChannel(3, yoVariable, 1.5, 2.5);
+      midiSliderBoard.setSlider(3, yoVariable, 1.5, 2.5);
    }
 
 }
