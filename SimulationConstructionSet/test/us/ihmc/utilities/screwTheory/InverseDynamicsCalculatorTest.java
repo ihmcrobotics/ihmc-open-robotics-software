@@ -185,6 +185,8 @@ public class InverseDynamicsCalculatorTest
 
       setRandomPosVelAcc(rootJoint, rootInverseDynamicsJoint);
       
+      world.updateFramesRecursively();
+      
       RobotExplorer explorer = new RobotExplorer(robot);
       StringBuffer buffer = new StringBuffer();
       explorer.getRobotInformationAsStringBuffer(buffer);
