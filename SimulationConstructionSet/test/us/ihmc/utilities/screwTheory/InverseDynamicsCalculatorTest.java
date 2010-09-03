@@ -28,7 +28,6 @@ import com.yobotics.simulationconstructionset.PinJoint;
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.YoAppearance;
-import com.yobotics.simulationconstructionset.util.robotExplorer.RobotExplorer;
 
 /**
  * This currently needs to be here because it uses SCS classes to test the inverse dynamics calculator, and SCS isn't on the IHMCUtilities build path
@@ -55,7 +54,7 @@ public class InverseDynamicsCalculatorTest
       worldFrame.update();
       RigidBody world = new RigidBody("world", worldFrame);
 
-      int nLinks = 5;
+      int nLinks = 2;
       ArrayList<PinJoint> revoluteJoints = new ArrayList<PinJoint>();
       ArrayList<RevoluteJoint> inverseDynamicsRevoluteJoints = new ArrayList<RevoluteJoint>();
 
@@ -91,7 +90,7 @@ public class InverseDynamicsCalculatorTest
          DoubleYoVariable qddVariable = revoluteJoint.getQDD();
          double qdd = qddVariable.getDoubleValue();
          double qddInverse = inverseDynamicsRevoluteJoint.getQdd();
-         assertEquals(qdd, qddInverse, epsilon);
+         assertEquals(qddInverse, qdd, epsilon);
       }
    }
 
@@ -162,7 +161,7 @@ public class InverseDynamicsCalculatorTest
                                                  transformToParent);
             beforeJointFrame.update();
             FrameVector jointAxis = new FrameVector(beforeJointFrame);
-            currentJoint.getJointAxis(jointAxis.getVector());
+            nextJoint.getJointAxis(jointAxis.getVector());
 
             RevoluteJoint nextInverseDynamicsJoint = new RevoluteJoint("joint" + i, rigidBody, beforeJointFrame, jointAxis);
 
@@ -179,10 +178,10 @@ public class InverseDynamicsCalculatorTest
 
       setRandomPosVelAcc(rootJoint, rootInverseDynamicsJoint);
       
-      RobotExplorer explorer = new RobotExplorer(robot);
-      StringBuffer buffer = new StringBuffer();
-      explorer.getRobotInformationAsStringBuffer(buffer);
-      System.out.print(buffer);
+//      RobotExplorer explorer = new RobotExplorer(robot);
+//      StringBuffer buffer = new StringBuffer();
+//      explorer.getRobotInformationAsStringBuffer(buffer);
+//      System.out.print(buffer);
    }
 
    @SuppressWarnings("unused")
@@ -229,7 +228,12 @@ public class InverseDynamicsCalculatorTest
    {
       double q = random.nextDouble();
       double qd = random.nextDouble();
-      double desiredQdd = random.nextDouble();
+//      double desiredQdd = random.nextDouble();
+      
+//      double q = 0.0;
+//      double qd = 0.0;
+      double desiredQdd = 0.0;
+
 
       pinJoint.setInitialState(q, qd);
       revoluteJoint.setQ(q);
