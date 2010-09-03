@@ -28,6 +28,7 @@ import com.yobotics.simulationconstructionset.PinJoint;
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.YoAppearance;
+import com.yobotics.simulationconstructionset.util.robotExplorer.RobotExplorer;
 
 /**
  * This currently needs to be here because it uses SCS classes to test the inverse dynamics calculator, and SCS isn't on the IHMCUtilities build path
@@ -112,7 +113,7 @@ public class InverseDynamicsCalculatorTest
 //    robot.addRootJoint(rootJoint);
 //    SixDoFJoint rootInverseDynamicsJoint = new SixDoFJoint("root", world, worldFrame);
 
-      PinJoint rootJoint = new PinJoint("root", new Vector3d(), robot, 0);
+      PinJoint rootJoint = new PinJoint("root", new Vector3d(), robot, 1);
       robot.addRootJoint(rootJoint);
       
       FrameVector rootJointAxis = new FrameVector(worldFrame);
@@ -130,10 +131,15 @@ public class InverseDynamicsCalculatorTest
       for (int i = 0; i < nLinks; i++)
       {
          Link link = new Link("link" + i);
-         link.setMomentOfInertia(random.nextDouble(), random.nextDouble(), random.nextDouble());
-         link.setMass(random.nextDouble());
-         Vector3d comOffset = new Vector3d(random.nextDouble(), random.nextDouble(), random.nextDouble());
+//         link.setMomentOfInertia(random.nextDouble(), random.nextDouble(), random.nextDouble());
+//         link.setMass(random.nextDouble());
+         link.setMomentOfInertia(2.0, 3.0, 4.0);
+         link.setMass(0.5);
+         
+//         Vector3d comOffset = new Vector3d(random.nextDouble(), random.nextDouble(), random.nextDouble());
+         Vector3d comOffset = new Vector3d(0.0, 0.0, 1.0);
          link.setComOffset(comOffset);
+         
          LinkGraphics linkGraphics = new LinkGraphics();
          linkGraphics.createInertiaEllipsoid(link, YoAppearance.Red());
          link.setLinkGraphics(linkGraphics);
@@ -145,12 +151,13 @@ public class InverseDynamicsCalculatorTest
          nextFrame.update();
          GeneralizedInertia inertia = new GeneralizedInertia(nextFrame, momentOfInertia, link.getMass());
          RigidBody rigidBody = new RigidBody("body" + i, inertia, currentInverseDynamicsJoint);
-         currentInverseDynamicsJoint.setSuccessor(rigidBody);
 
          if (i < nLinks - 1)
          {
-            int jointAxisNumber = i % 3;
-            Vector3d offset = new Vector3d(random.nextDouble(), random.nextDouble(), random.nextDouble());
+//            int jointAxisNumber = i % 3;
+            int jointAxisNumber = 1;
+//            Vector3d offset = new Vector3d(random.nextDouble(), random.nextDouble(), random.nextDouble());
+            Vector3d offset = new Vector3d(0.0, 0.0, 2.0);
             PinJoint nextJoint = new PinJoint("joint" + i, offset, robot, jointAxisNumber);
             currentJoint.addJoint(nextJoint);
 
@@ -178,10 +185,10 @@ public class InverseDynamicsCalculatorTest
 
       setRandomPosVelAcc(rootJoint, rootInverseDynamicsJoint);
       
-//      RobotExplorer explorer = new RobotExplorer(robot);
-//      StringBuffer buffer = new StringBuffer();
-//      explorer.getRobotInformationAsStringBuffer(buffer);
-//      System.out.print(buffer);
+      RobotExplorer explorer = new RobotExplorer(robot);
+      StringBuffer buffer = new StringBuffer();
+      explorer.getRobotInformationAsStringBuffer(buffer);
+      System.out.print(buffer);
    }
 
    @SuppressWarnings("unused")
@@ -226,13 +233,13 @@ public class InverseDynamicsCalculatorTest
 
    private void setRandomPosVelAcc(PinJoint pinJoint, RevoluteJoint revoluteJoint)
    {
-      double q = random.nextDouble();
-      double qd = random.nextDouble();
+//      double q = random.nextDouble();
+//      double qd = random.nextDouble();
 //      double desiredQdd = random.nextDouble();
       
-//      double q = 0.0;
-//      double qd = 0.0;
-      double desiredQdd = 0.0;
+      double q = 1.0;
+      double qd = 1.0;
+      double desiredQdd = 1.0;
 
 
       pinJoint.setInitialState(q, qd);
