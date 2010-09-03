@@ -107,9 +107,9 @@ public class TestIMUKalmanFilterSimulationJerryOne
 //    evolutionUC33E.setChannel(2, "qd_wy", simulationConstructionSet, -20.0, 20.0, 3.0);
 //    evolutionUC33E.setChannel(3, "qd_wz", simulationConstructionSet, -20.0, 20.0, 3.0);
 
-      evolutionUC33E.setChannel(1, "wx_amp", simulationConstructionSet, -20.0, 20.0, 3.0);
-      evolutionUC33E.setChannel(2, "wy_amp", simulationConstructionSet, -20.0, 20.0, 3.0);
-      evolutionUC33E.setChannel(3, "wz_amp", simulationConstructionSet, -20.0, 20.0, 3.0);
+      evolutionUC33E.setSlider(1, "wx_amp", simulationConstructionSet, -20.0, 20.0, 3.0);
+      evolutionUC33E.setSlider(2, "wy_amp", simulationConstructionSet, -20.0, 20.0, 3.0);
+      evolutionUC33E.setSlider(3, "wz_amp", simulationConstructionSet, -20.0, 20.0, 3.0);
 
       evolutionUC33E.setSlider(4, "wx_freq", simulationConstructionSet, 0.0, 10.0);
       evolutionUC33E.setSlider(5, "wy_freq", simulationConstructionSet, 0.0, 10.0);
