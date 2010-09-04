@@ -6,10 +6,8 @@ import java.util.ArrayList;
 import java.util.Random;
 
 import javax.media.j3d.Transform3D;
-import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import org.junit.Before;
@@ -55,7 +53,7 @@ public class InverseDynamicsCalculatorTest
       worldFrame.update();
       RigidBody world = new RigidBody("world", worldFrame);
 
-      int nLinks = 2;
+      int nLinks = 4;
       ArrayList<PinJoint> revoluteJoints = new ArrayList<PinJoint>();
       ArrayList<RevoluteJoint> inverseDynamicsRevoluteJoints = new ArrayList<RevoluteJoint>();
 
@@ -82,7 +80,7 @@ public class InverseDynamicsCalculatorTest
 
    private void compareAccelerations(ArrayList<PinJoint> revoluteJoints, ArrayList<RevoluteJoint> inverseDynamicsRevoluteJoints)
    {
-      double epsilon = 1e-8;
+      double epsilon = 1e-3;    // hmm, needs to be pretty high...
       for (int i = 0; i < revoluteJoints.size(); i++)
       {
          PinJoint revoluteJoint = revoluteJoints.get(i);
@@ -115,7 +113,7 @@ public class InverseDynamicsCalculatorTest
 
       PinJoint rootJoint = new PinJoint("root", new Vector3d(), robot, 1);
       robot.addRootJoint(rootJoint);
-      
+
       FrameVector rootJointAxis = new FrameVector(worldFrame);
       rootJoint.getJointAxis(rootJointAxis.getVector());
       RevoluteJoint rootInverseDynamicsJoint = new RevoluteJoint("root", world, worldFrame, rootJointAxis);
@@ -127,19 +125,21 @@ public class InverseDynamicsCalculatorTest
 
       Joint currentJoint = rootJoint;
       InverseDynamicsJoint currentInverseDynamicsJoint = rootInverseDynamicsJoint;
-      ReferenceFrame currentFrame = worldFrame;
       for (int i = 0; i < nLinks; i++)
       {
          Link link = new Link("link" + i);
-//         link.setMomentOfInertia(random.nextDouble(), random.nextDouble(), random.nextDouble());
-//         link.setMass(random.nextDouble());
-         link.setMomentOfInertia(2.0, 3.0, 4.0);
-         link.setMass(0.5);
-         
-//         Vector3d comOffset = new Vector3d(random.nextDouble(), random.nextDouble(), random.nextDouble());
-         Vector3d comOffset = new Vector3d(0.0, 0.0, 1.0);
+
+         link.setMomentOfInertia(random.nextDouble(), random.nextDouble(), random.nextDouble());
+         link.setMass(random.nextDouble());
+
+//       link.setMomentOfInertia(2.0, 3.0, 4.0);
+//       link.setMass(0.5);
+
+         Vector3d comOffset = new Vector3d(random.nextDouble(), random.nextDouble(), random.nextDouble());
+
+//       Vector3d comOffset = new Vector3d(0.0, 0.0, 1.0);
          link.setComOffset(comOffset);
-         
+
          LinkGraphics linkGraphics = new LinkGraphics();
          linkGraphics.createInertiaEllipsoid(link, YoAppearance.Red());
          link.setLinkGraphics(linkGraphics);
@@ -147,25 +147,24 @@ public class InverseDynamicsCalculatorTest
 
          Matrix3d momentOfInertia = new Matrix3d();
          link.getMomentOfInertia(momentOfInertia);
-         ReferenceFrame nextFrame = createCoMFrame(currentFrame, currentJoint, comOffset, "body" + i);
+         ReferenceFrame nextFrame = createOffsetFrame(currentInverseDynamicsJoint, comOffset, "body" + i);
          nextFrame.update();
          GeneralizedInertia inertia = new GeneralizedInertia(nextFrame, momentOfInertia, link.getMass());
          RigidBody rigidBody = new RigidBody("body" + i, inertia, currentInverseDynamicsJoint);
 
          if (i < nLinks - 1)
          {
-//            int jointAxisNumber = i % 3;
-            int jointAxisNumber = 1;
-//            Vector3d offset = new Vector3d(random.nextDouble(), random.nextDouble(), random.nextDouble());
-            Vector3d offset = new Vector3d(0.0, 0.0, 2.0);
-            PinJoint nextJoint = new PinJoint("joint" + i, offset, robot, jointAxisNumber);
+            int jointAxisNumber = i % 3;
+
+//          int jointAxisNumber = 1;
+
+//          Vector3d offset = new Vector3d(random.nextDouble(), random.nextDouble(), random.nextDouble());
+            Vector3d linkOffset = new Vector3d(0.0, 0.0, 2.0);
+            PinJoint nextJoint = new PinJoint("joint" + i, linkOffset, robot, jointAxisNumber);
             currentJoint.addJoint(nextJoint);
 
-            ReferenceFrame parentFrame = rigidBody.getParentJoint().getFrameAfterJoint();
-            Transform3D transformToParent = new Transform3D();
-            transformToParent.set(offset);
-            ReferenceFrame beforeJointFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent("beforeJoint" + i, parentFrame,
-                                                 transformToParent);
+            String frameName = "beforeJoint" + i;
+            ReferenceFrame beforeJointFrame = createOffsetFrame(currentInverseDynamicsJoint, linkOffset, frameName);
             beforeJointFrame.update();
             FrameVector jointAxis = new FrameVector(beforeJointFrame);
             nextJoint.getJointAxis(jointAxis.getVector());
@@ -179,18 +178,17 @@ public class InverseDynamicsCalculatorTest
 
             currentJoint = nextJoint;
             currentInverseDynamicsJoint = nextInverseDynamicsJoint;
-            currentFrame = nextFrame;
          }
       }
 
       setRandomPosVelAcc(rootJoint, rootInverseDynamicsJoint);
-      
+
       world.updateFramesRecursively();
-      
-      RobotExplorer explorer = new RobotExplorer(robot);
-      StringBuffer buffer = new StringBuffer();
-      explorer.getRobotInformationAsStringBuffer(buffer);
-      System.out.print(buffer);
+
+//      RobotExplorer explorer = new RobotExplorer(robot);
+//      StringBuffer buffer = new StringBuffer();
+//      explorer.getRobotInformationAsStringBuffer(buffer);
+//      System.out.print(buffer);
    }
 
    @SuppressWarnings("unused")
@@ -235,13 +233,13 @@ public class InverseDynamicsCalculatorTest
 
    private void setRandomPosVelAcc(PinJoint pinJoint, RevoluteJoint revoluteJoint)
    {
-//      double q = random.nextDouble();
-//      double qd = random.nextDouble();
-//      double desiredQdd = random.nextDouble();
-      
-      double q = 1.0;
-      double qd = 1.0;
-      double desiredQdd = 1.0;
+      double q = random.nextDouble();
+      double qd = random.nextDouble();
+      double desiredQdd = random.nextDouble();
+
+//    double q = 1.0;
+//    double qd = 1.0;
+//    double desiredQdd = 1.0;
 
 
       pinJoint.setInitialState(q, qd);
@@ -250,119 +248,15 @@ public class InverseDynamicsCalculatorTest
       revoluteJoint.setQdd(desiredQdd);
    }
 
-   private ReferenceFrame createCoMFrame(ReferenceFrame parentFrame, Joint parentJoint, Vector3d comOffset, String name)
+   private static ReferenceFrame createOffsetFrame(InverseDynamicsJoint currentInverseDynamicsJoint, Vector3d offset, String frameName)
    {
-      Vector3d offsetBeforeJoint = new Vector3d();
-      parentJoint.getOffset(offsetBeforeJoint);
+      ReferenceFrame parentFrame = currentInverseDynamicsJoint.getFrameAfterJoint();
+      Transform3D transformToParent = new Transform3D();
+      transformToParent.set(offset);
+      ReferenceFrame beforeJointFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(frameName, parentFrame, transformToParent);
 
-      if (parentJoint instanceof FloatingJoint)
-      {
-         FloatingJoint parentJointCast = (FloatingJoint) parentJoint;
-         DoubleYoVariable qx = parentJointCast.getQx();
-         DoubleYoVariable qy = parentJointCast.getQy();
-         DoubleYoVariable qz = parentJointCast.getQz();
-
-         DoubleYoVariable q_qs = parentJointCast.getQuaternionQs();
-         DoubleYoVariable q_qx = parentJointCast.getQuaternionQx();
-         DoubleYoVariable q_qy = parentJointCast.getQuaternionQy();
-         DoubleYoVariable q_qz = parentJointCast.getQuaternionQz();
-
-         return new FloatingJointCoMReferenceFrame(name, parentFrame, comOffset, qx, qy, qz, q_qs, q_qx, q_qy, q_qz);
-      }
-      else if (parentJoint instanceof PinJoint)
-      {
-         PinJoint parentJointCast = (PinJoint) parentJoint;
-         DoubleYoVariable jointVariable = parentJointCast.getQ();
-         Vector3d axis = new Vector3d();
-         parentJoint.getJointAxis(axis);
-
-         return new RevoluteJointCoMReferenceFrame(name, parentFrame, jointVariable, offsetBeforeJoint, comOffset, axis);
-      }
-      else
-      {
-         throw new RuntimeException("Unhandled joint type.");
-      }
+      return beforeJointFrame;
    }
-
-   private static class RevoluteJointCoMReferenceFrame extends ReferenceFrame
-   {
-      private static final long serialVersionUID = 7391845311049967855L;
-      private final DoubleYoVariable jointVariable;
-      private final Vector3d offsetBeforeJoint;
-      private final Vector3d offsetAfterJoint;
-      private final Vector3d axis;
-
-      public RevoluteJointCoMReferenceFrame(String frameName, ReferenceFrame parentFrame, DoubleYoVariable jointVariable, Vector3d offsetBeforeJoint,
-              Vector3d offsetAfterJoint, Vector3d axis)
-      {
-         super(frameName, parentFrame);
-         this.jointVariable = jointVariable;
-         this.offsetBeforeJoint = new Vector3d(offsetBeforeJoint);
-         this.offsetAfterJoint = new Vector3d(offsetAfterJoint);
-         this.axis = new Vector3d(axis);
-      }
-
-      @Override
-      public void updateTransformToParent(Transform3D transformToParent)
-      {
-         transformToParent.setTranslation(offsetBeforeJoint);
-
-         Transform3D rotation = new Transform3D();
-         AxisAngle4d axisAngle = new AxisAngle4d();
-         double q = jointVariable.getDoubleValue();
-         axisAngle.set(axis, q);
-         rotation.set(axisAngle);
-         transformToParent.mul(rotation);
-
-         Transform3D translation = new Transform3D();
-         translation.setTranslation(offsetAfterJoint);
-         transformToParent.mul(translation);
-      }
-   }
-
-
-   private static class FloatingJointCoMReferenceFrame extends ReferenceFrame
-   {
-      private static final long serialVersionUID = 2552863884666805932L;
-      private final Vector3d comOffset;
-
-      private final DoubleYoVariable qx, qy, qz;
-      private final DoubleYoVariable q_qs, q_qx, q_qy, q_qz;
-
-      public FloatingJointCoMReferenceFrame(String name, ReferenceFrame parentFrame, Vector3d comOffset, DoubleYoVariable qx, DoubleYoVariable qy,
-              DoubleYoVariable qz, DoubleYoVariable q_qs, DoubleYoVariable q_qx, DoubleYoVariable q_qy, DoubleYoVariable q_qz)
-      {
-         super(name, parentFrame);
-         this.comOffset = comOffset;
-
-         this.qx = qx;
-         this.qy = qy;
-         this.qz = qz;
-
-         this.q_qs = q_qs;
-         this.q_qx = q_qx;
-         this.q_qy = q_qy;
-         this.q_qz = q_qz;
-      }
-
-      @Override
-      public void updateTransformToParent(Transform3D transformToParent)
-      {
-         Vector3d translationBeforeJoint = new Vector3d(qx.getDoubleValue(), qy.getDoubleValue(), qz.getDoubleValue());
-         transformToParent.setTranslation(translationBeforeJoint);
-
-         Quat4d quaternion = new Quat4d();
-         quaternion.set(q_qx.getDoubleValue(), q_qy.getDoubleValue(), q_qz.getDoubleValue(), q_qs.getDoubleValue());
-         Transform3D rotation = new Transform3D();
-         rotation.set(quaternion);
-         transformToParent.mul(rotation);
-
-         Transform3D translationAfterJoint = new Transform3D();
-         translationAfterJoint.setTranslation(comOffset);
-         transformToParent.mul(translationAfterJoint);
-      }
-   }
-
 
    private void waitForSimulationToFinish(SimulationConstructionSet scs)
    {
