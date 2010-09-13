@@ -23,6 +23,7 @@ import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.Line2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
+import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.plotting.YoFrameLine2dArtifact;
@@ -33,13 +34,13 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFrameLine2d;
 
 public class GoOnToesDuringDoubleSupportBipedFeetUpdater implements BipedFeetUpdater
 {
-   private static final boolean VISUALIZE = false;    
+   private static final boolean VISUALIZE = false;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final ReferenceFrame midFeetZUpFrame, bodyZUpFrame, leftFootZUpFrame, rightFootZUpFrame;
 
    private final double footForward, footBack;
-   
+
    private final SideDependentList<FrameLine2d> onToesLines = new SideDependentList<FrameLine2d>();
    private final SideDependentList<FrameLine2d> onHeelLines = new SideDependentList<FrameLine2d>();
 
@@ -49,20 +50,19 @@ public class GoOnToesDuringDoubleSupportBipedFeetUpdater implements BipedFeetUpd
    private final YoVariableRegistry registry = new YoVariableRegistry("BipedFeetUpdater");
 
    // Foot polygon decision parameters:
-   private DoubleYoVariable onToeDecisionThreshold = new DoubleYoVariable("onToeDecisionThresh",  registry);
+   private DoubleYoVariable onToeDecisionThreshold = new DoubleYoVariable("onToeDecisionThresh", registry);
    private DoubleYoVariable onHeelDecisionThreshold = new DoubleYoVariable("onHeelDecisionThresh", registry);
 
    private DoubleYoVariable onToeSaturationPercent = new DoubleYoVariable("onToeSaturationPercent", registry);
 
    private final GlobalTimer updateBipedFeeetTimer = new GlobalTimer("updateBipedFeet", registry);
 
-   public GoOnToesDuringDoubleSupportBipedFeetUpdater(CommonWalkingReferenceFrames referenceFrames, 
-         double footForward, double footBack, YoVariableRegistry yoVariableRegistry,
-         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+   public GoOnToesDuringDoubleSupportBipedFeetUpdater(CommonWalkingReferenceFrames referenceFrames, double footForward, double footBack,
+           YoVariableRegistry yoVariableRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       this.footForward = footForward;
       this.footBack = footBack;
-      
+
       onToeDecisionThreshold.set(0.0);
       onHeelDecisionThreshold.set(0.0);
 
@@ -85,20 +85,20 @@ public class GoOnToesDuringDoubleSupportBipedFeetUpdater implements BipedFeetUpd
          ArtifactList artifactList = new ArtifactList("GoOnToes");
          artifactList.add(leftOnToesArtifact);
          artifactList.add(rightOnToesArtifact);
-         
+
          dynamicGraphicObjectsListRegistry.registerArtifactList(artifactList);
-         
-//         YoboticsBipedPlotter.registerYoFrameLine2d("Left On Toes Line", Color.pink, leftOnToesLineViz);
-//         YoboticsBipedPlotter.registerYoFrameLine2d("Right On Toes Line", Color.pink, rightOnToesLineViz);
+
+//       YoboticsBipedPlotter.registerYoFrameLine2d("Left On Toes Line", Color.pink, leftOnToesLineViz);
+//       YoboticsBipedPlotter.registerYoFrameLine2d("Right On Toes Line", Color.pink, rightOnToesLineViz);
 
 //       DynamicGraphicObjectsList dynamicGraphicObjectList = new DynamicGraphicObjectsList("BipedFeetUpdater");
 //
 //       DynamicGraphicLineSegment leftOnToesLine = new DynamicGraphicLineSegment()
 //       leftOnToesLine = new
 //       capturePointDesiredWorldGraphicPosition = new DynamicGraphicPosition(capturePointDesiredWorld, 0.01,
-//                                                                            YoAppearance.Yellow(),
-//                                                                            DynamicGraphicPosition.GraphicType.
-//                                                                            ROTATED_CROSS);
+//                                                                          YoAppearance.Yellow(),
+//                                                                          DynamicGraphicPosition.GraphicType.
+//                                                                          ROTATED_CROSS);
 //
 //       YoboticsBipedPlotter.registerDynamicGraphicPosition("Desired Capture Point", capturePointDesiredWorldGraphicPosition);
 //
@@ -119,11 +119,11 @@ public class GoOnToesDuringDoubleSupportBipedFeetUpdater implements BipedFeetUpd
       {
          yoVariableRegistry.addChild(registry);
       }
-      
-//      if (VarListsToRegister.REGISTER_BIPED_FEET_UPDATER)
-//      {
-//         yoVariableRegistry.addChild(registry);
-//      }
+
+//    if (VarListsToRegister.REGISTER_BIPED_FEET_UPDATER)
+//    {
+//       yoVariableRegistry.addChild(registry);
+//    }
    }
 
    public void updateBipedFeet(BipedFootInterface leftFoot, BipedFootInterface rightFoot, RobotSide supportLeg, FramePoint capturePointInMidFeetZUp,
@@ -290,7 +290,8 @@ public class GoOnToesDuringDoubleSupportBipedFeetUpdater implements BipedFeetUpd
 
 
          // Points. Right side only:
-         if ((toeScores.get(RobotSide.RIGHT) > onToeDecisionThreshold.getDoubleValue()) && (heelScores.get(RobotSide.RIGHT) > onHeelDecisionThreshold.getDoubleValue()))
+         if ((toeScores.get(RobotSide.RIGHT) > onToeDecisionThreshold.getDoubleValue())
+                 && (heelScores.get(RobotSide.RIGHT) > onHeelDecisionThreshold.getDoubleValue()))
          {
             decisionPlotter.addFramePoint2d(capturePointInMidFeetZUp.changeFrameCopy(worldFrame), Color.black);
          }
@@ -330,35 +331,24 @@ public class GoOnToesDuringDoubleSupportBipedFeetUpdater implements BipedFeetUpd
       SideDependentList<FrameConvexPolygon2d> footPolygonsInAnkleZUp = new SideDependentList<FrameConvexPolygon2d>(leftFoot.getFlatFootPolygon(),
                                                                           rightFoot.getFlatFootPolygon());
 
-      // Change the foot polygons to bodyZUp frame
-      SideDependentList<FrameConvexPolygon2d> footPolygonsInBodyZUp = new SideDependentList<FrameConvexPolygon2d>();
-      footPolygonsInBodyZUp.set(RobotSide.LEFT, footPolygonsInAnkleZUp.get(RobotSide.LEFT).changeFrameCopy(bodyZUpFrame));
-      footPolygonsInBodyZUp.set(RobotSide.RIGHT, footPolygonsInAnkleZUp.get(RobotSide.RIGHT).changeFrameCopy(bodyZUpFrame));
-
       // Change the foot polygons to midFeetZUp frame
-      SideDependentList<FrameConvexPolygon2d> footPolygonsInMidFeetZUp = new SideDependentList<FrameConvexPolygon2d>();
-      footPolygonsInMidFeetZUp.set(RobotSide.LEFT, footPolygonsInBodyZUp.get(RobotSide.LEFT).changeFrameCopy(midFeetZUpFrame));
-      footPolygonsInMidFeetZUp.set(RobotSide.RIGHT, footPolygonsInBodyZUp.get(RobotSide.RIGHT).changeFrameCopy(midFeetZUpFrame));
+      FrameConvexPolygon2d leftPolygon = footPolygonsInAnkleZUp.get(RobotSide.LEFT).changeFrameAndProjectToXYPlaneCopy(midFeetZUpFrame);
+      FrameConvexPolygon2d rightPolygon = footPolygonsInAnkleZUp.get(RobotSide.RIGHT).changeFrameAndProjectToXYPlaneCopy(midFeetZUpFrame);
 
-
-
+      SideDependentList<FrameConvexPolygon2d> footPolygonsInMidFeetZUp = new SideDependentList<FrameConvexPolygon2d>(leftPolygon, rightPolygon);
 
       // onToesLines:
-      SideDependentList<FramePoint2d[]> onToesPointsLists = new SideDependentList<FramePoint2d[]>();
-      onToesPointsLists.set(RobotSide.LEFT,
-                            FramePoint2d.changeFrameCopyBatch(FramePoint2d.changeFrameCopyBatch(leftFoot.getToePointsCopy(), bodyZUpFrame), midFeetZUpFrame));    // ugly, but for now
-      onToesPointsLists.set(RobotSide.RIGHT,
-                            FramePoint2d.changeFrameCopyBatch(FramePoint2d.changeFrameCopyBatch(rightFoot.getToePointsCopy(), bodyZUpFrame), midFeetZUpFrame));    // ugly, but for now
+      SideDependentList<FramePoint[]> onToesPointsLists = new SideDependentList<FramePoint[]>();
+      onToesPointsLists.set(RobotSide.LEFT, FramePoint.changeFrameCopyBatch(leftFoot.getToePointsCopy(), midFeetZUpFrame));    // ugly, but for now
+      onToesPointsLists.set(RobotSide.RIGHT, FramePoint.changeFrameCopyBatch(rightFoot.getToePointsCopy(), midFeetZUpFrame));    // ugly, but for now
 
       onToesLines = getOnToesLines(onToesPointsLists, footPolygonsInMidFeetZUp, bodyZUpFrame);
       this.onToesLines.set(onToesLines);
 
       // onHeelsLines:
-      SideDependentList<FramePoint2d[]> onHeelPointsLists = new SideDependentList<FramePoint2d[]>();
-      onHeelPointsLists.set(RobotSide.LEFT,
-                            FramePoint2d.changeFrameCopyBatch(leftFoot.getHeelPointsCopy(), midFeetZUpFrame));    // ugly, but for now
-      onHeelPointsLists.set(RobotSide.RIGHT,
-                            FramePoint2d.changeFrameCopyBatch(rightFoot.getHeelPointsCopy(), midFeetZUpFrame));    // ugly, but for now
+      SideDependentList<FramePoint[]> onHeelPointsLists = new SideDependentList<FramePoint[]>();
+      onHeelPointsLists.set(RobotSide.LEFT, FramePoint.changeFrameCopyBatch(leftFoot.getHeelPointsCopy(), midFeetZUpFrame));    // ugly, but for now
+      onHeelPointsLists.set(RobotSide.RIGHT, FramePoint.changeFrameCopyBatch(rightFoot.getHeelPointsCopy(), midFeetZUpFrame));    // ugly, but for now
 
       onHeelLines = getOnHeelLines(onHeelPointsLists, footPolygonsInMidFeetZUp, bodyZUpFrame);
       this.onHeelLines.set(onHeelLines);
@@ -373,7 +363,7 @@ public class GoOnToesDuringDoubleSupportBipedFeetUpdater implements BipedFeetUpd
 
 
 
-   protected static SideDependentList<FrameLine2d> getOnToesLines(SideDependentList<FramePoint2d[]> onToesPointsLists,
+   protected static SideDependentList<FrameLine2d> getOnToesLines(SideDependentList<FramePoint[]> onToesPointsLists,
            SideDependentList<FrameConvexPolygon2d> footPolygonsInMidFeetZUp, ReferenceFrame bodyZUp)
    {
       boolean legsCrossed = footPolygonsInMidFeetZUp.get(RobotSide.RIGHT).getCentroidCopy().changeFrameCopy(bodyZUp).getY()
@@ -384,7 +374,7 @@ public class GoOnToesDuringDoubleSupportBipedFeetUpdater implements BipedFeetUpd
       for (RobotSide side : RobotSide.values())
       {
          // First point on onToesLine is the (oppositeSide)most line of sight vertex, seen from any toe point:
-         FramePoint2d firstToePoint = onToesPointsLists.get(side)[0];
+         FramePoint2d firstToePoint = onToesPointsLists.get(side)[0].toFramePoint2d();
          FramePoint2d[] lineOfSightVertices = footPolygonsInMidFeetZUp.get(side.getOppositeSide()).getLineOfSightVertices(firstToePoint);
 
          if ((lineOfSightVertices == null) || (lineOfSightVertices.length < 2))
@@ -420,8 +410,9 @@ public class GoOnToesDuringDoubleSupportBipedFeetUpdater implements BipedFeetUpd
          }
 
          // Second point on onToesLine is the (side)most toePoint seen from the first point on the onToesLine
-         FrameVector2d[] fromFirstPointToToePoints = new FrameVector2d[] {new FrameVector2d(firstPointOnOnToesLine, onToesPointsLists.get(side)[0]),
-                 new FrameVector2d(firstPointOnOnToesLine, onToesPointsLists.get(side)[1])};
+         FrameVector2d[] fromFirstPointToToePoints = new FrameVector2d[] {
+                                                        new FrameVector2d(firstPointOnOnToesLine, onToesPointsLists.get(side)[0].toFramePoint2d()),
+                 new FrameVector2d(firstPointOnOnToesLine, onToesPointsLists.get(side)[1].toFramePoint2d())};
 
          double crossProduct2 = fromFirstPointToToePoints[0].cross(fromFirstPointToToePoints[1]);
 
@@ -430,22 +421,22 @@ public class GoOnToesDuringDoubleSupportBipedFeetUpdater implements BipedFeetUpd
          {
             if (((side == RobotSide.LEFT) && (crossProduct2 < 0.0)) || ((side == RobotSide.RIGHT) && (crossProduct2 > 0.0)))
             {
-               secondPointOnOnToesLine = onToesPointsLists.get(side)[0];
+               secondPointOnOnToesLine = onToesPointsLists.get(side)[0].toFramePoint2d();
             }
             else
             {
-               secondPointOnOnToesLine = onToesPointsLists.get(side)[1];
+               secondPointOnOnToesLine = onToesPointsLists.get(side)[1].toFramePoint2d();
             }
          }
          else
          {
             if (((side == RobotSide.LEFT) && (crossProduct2 > 0.0)) || ((side == RobotSide.RIGHT) && (crossProduct2 < 0.0)))
             {
-               secondPointOnOnToesLine = onToesPointsLists.get(side)[0];
+               secondPointOnOnToesLine = onToesPointsLists.get(side)[0].toFramePoint2d();
             }
             else
             {
-               secondPointOnOnToesLine = onToesPointsLists.get(side)[1];
+               secondPointOnOnToesLine = onToesPointsLists.get(side)[1].toFramePoint2d();
             }
          }
 
@@ -455,7 +446,7 @@ public class GoOnToesDuringDoubleSupportBipedFeetUpdater implements BipedFeetUpd
       return onToesLines;
    }
 
-   protected static SideDependentList<FrameLine2d> getOnHeelLines(SideDependentList<FramePoint2d[]> onHeelPointsLists,
+   protected static SideDependentList<FrameLine2d> getOnHeelLines(SideDependentList<FramePoint[]> onHeelPointsLists,
            SideDependentList<FrameConvexPolygon2d> footPolygonsInMidFeetZUp, ReferenceFrame bodyZUp)
    {
       boolean legsCrossed = footPolygonsInMidFeetZUp.get(RobotSide.RIGHT).getCentroidCopy().changeFrameCopy(bodyZUp).getY()
@@ -466,7 +457,7 @@ public class GoOnToesDuringDoubleSupportBipedFeetUpdater implements BipedFeetUpd
       for (RobotSide side : RobotSide.values())
       {
          // First point on onToesLine is the (oppositeSide)most line of sight vertex, seen from any toe point:
-         FramePoint2d firstHeelPoint = onHeelPointsLists.get(side)[0];
+         FramePoint2d firstHeelPoint = onHeelPointsLists.get(side)[0].toFramePoint2d();
          FramePoint2d[] lineOfSightVertices = footPolygonsInMidFeetZUp.get(side.getOppositeSide()).getLineOfSightVertices(firstHeelPoint);
 
          if ((lineOfSightVertices == null) || (lineOfSightVertices.length < 2))
@@ -503,8 +494,9 @@ public class GoOnToesDuringDoubleSupportBipedFeetUpdater implements BipedFeetUpd
          }
 
          // Second point on onToesLine is the (side)most toePoint seen from the first point on the onToesLine
-         FrameVector2d[] fromFirstPointToHeelPoints = new FrameVector2d[] {new FrameVector2d(firstPointOnOnHeelLine, onHeelPointsLists.get(side)[0]),
-                 new FrameVector2d(firstPointOnOnHeelLine, onHeelPointsLists.get(side)[1])};
+         FrameVector2d[] fromFirstPointToHeelPoints = new FrameVector2d[] {
+                                                         new FrameVector2d(firstPointOnOnHeelLine, onHeelPointsLists.get(side)[0].toFramePoint2d()),
+                 new FrameVector2d(firstPointOnOnHeelLine, onHeelPointsLists.get(side)[1].toFramePoint2d())};
 
          double crossProduct2 = fromFirstPointToHeelPoints[0].cross(fromFirstPointToHeelPoints[1]);
 
@@ -513,22 +505,22 @@ public class GoOnToesDuringDoubleSupportBipedFeetUpdater implements BipedFeetUpd
          {
             if (((side == RobotSide.LEFT) && (crossProduct2 > 0.0)) || ((side == RobotSide.RIGHT) && (crossProduct2 < 0.0)))
             {
-               secondPointOnOnHeelLine = onHeelPointsLists.get(side)[0];
+               secondPointOnOnHeelLine = onHeelPointsLists.get(side)[0].toFramePoint2d();
             }
             else
             {
-               secondPointOnOnHeelLine = onHeelPointsLists.get(side)[1];
+               secondPointOnOnHeelLine = onHeelPointsLists.get(side)[1].toFramePoint2d();
             }
          }
          else
          {
             if (((side == RobotSide.LEFT) && (crossProduct2 < 0.0)) || ((side == RobotSide.RIGHT) && (crossProduct2 > 0.0)))
             {
-               secondPointOnOnHeelLine = onHeelPointsLists.get(side)[0];
+               secondPointOnOnHeelLine = onHeelPointsLists.get(side)[0].toFramePoint2d();
             }
             else
             {
-               secondPointOnOnHeelLine = onHeelPointsLists.get(side)[1];
+               secondPointOnOnHeelLine = onHeelPointsLists.get(side)[1].toFramePoint2d();
             }
          }
 
@@ -542,4 +534,3 @@ public class GoOnToesDuringDoubleSupportBipedFeetUpdater implements BipedFeetUpd
 
 
 }
-
