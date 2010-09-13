@@ -27,6 +27,7 @@ public class BipedSupportPolygons
 {
    // Reference frames:
    private final ReferenceFrame midFeetZUp, bodyZUp;
+   private final SideDependentList<ReferenceFrame> ankleZUpFrames;
 
    // Polygons:
    private final SideDependentList<FrameConvexPolygon2d> footPolygonsInAnkleZUp = new SideDependentList<FrameConvexPolygon2d>();
@@ -43,10 +44,11 @@ public class BipedSupportPolygons
    // Line segment from one sweet spot to the other:
    private FrameLineSegment2d footToFootLineSegmentInMidFeetZUp;
 
-   public BipedSupportPolygons(ReferenceFrame midFeetZUpFrame, ReferenceFrame bodyZUpFrame)
+   public BipedSupportPolygons(SideDependentList<ReferenceFrame> ankleZUpFrames, ReferenceFrame midFeetZUpFrame, ReferenceFrame bodyZUpFrame)
    {
-      this.midFeetZUp = midFeetZUpFrame;
-      this.bodyZUp = bodyZUpFrame;
+	   this.ankleZUpFrames = ankleZUpFrames;
+	   this.midFeetZUp = midFeetZUpFrame;
+	   this.bodyZUp = bodyZUpFrame;
    }
 
    public FrameConvexPolygon2d getSupportPolygonInMidFeetZUp()
@@ -98,10 +100,15 @@ public class BipedSupportPolygons
       for (RobotSide robotSide : RobotSide.values())
       {
          BipedFootInterface foot = feet.get(robotSide);
-         FrameConvexPolygon2d footPolygonInAnkleZUp = foot.getFootPolygonInUse();
+         FrameConvexPolygon2d footPolygonInFootFrame = foot.getFootPolygonInUse();
+         FrameConvexPolygon2d footPolygonInAnkleZUp = footPolygonInFootFrame.changeFrameAndProjectToXYPlaneCopy(ankleZUpFrames.get(robotSide));
+         FrameConvexPolygon2d footPolygonsInBodyZUp = footPolygonInAnkleZUp.changeFrameCopy(bodyZUp);
+         FrameConvexPolygon2d footPolygonsInMidFeetZUp = footPolygonInAnkleZUp.changeFrameCopy(midFeetZUp);
+         
+         
          this.footPolygonsInAnkleZUp.set(robotSide, footPolygonInAnkleZUp);
-         this.footPolygonsInBodyZUp.set(robotSide, footPolygonInAnkleZUp.changeFrameCopy(bodyZUp));
-         this.footPolygonsInMidFeetZUp.set(robotSide, footPolygonInAnkleZUp.changeFrameCopy(midFeetZUp));
+         this.footPolygonsInBodyZUp.set(robotSide, footPolygonsInBodyZUp);
+         this.footPolygonsInMidFeetZUp.set(robotSide, footPolygonsInMidFeetZUp);
          this.sweetSpots.set(robotSide, footPolygonsInAnkleZUp.get(robotSide).getCentroidCopy()); // Sweet spots are the centroids of the foot polygons.
 
       }
@@ -137,8 +144,8 @@ public class BipedSupportPolygons
          connectingEdge2 = null;
       }
       
-      this.footToFootLineSegmentInMidFeetZUp = new FrameLineSegment2d(sweetSpots.get(RobotSide.LEFT).changeFrameCopy(bodyZUp).changeFrameCopy(midFeetZUp),
-            sweetSpots.get(RobotSide.RIGHT).changeFrameCopy(bodyZUp).changeFrameCopy(midFeetZUp)); 
+      this.footToFootLineSegmentInMidFeetZUp = new FrameLineSegment2d(sweetSpots.get(RobotSide.LEFT).changeFrameAndProjectToXYPlaneCopy(midFeetZUp),
+            sweetSpots.get(RobotSide.RIGHT).changeFrameAndProjectToXYPlaneCopy(midFeetZUp)); 
    }
    
    public String toString()

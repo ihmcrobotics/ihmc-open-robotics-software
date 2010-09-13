@@ -13,6 +13,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.FootPolygonEnum;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.utilities.math.geometry.ConvexHullCalculator2d;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
+import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
@@ -31,9 +32,9 @@ public class ResizableBipedFoot implements BipedFootInterface
    private final YoVariableRegistry registry;
 
    private final RobotSide robotSide;
-   private final ReferenceFrame referenceFrame;
+   private final ReferenceFrame footFrame, ankleZUpFrame;
 
-   private final ArrayList<Point2d> heelPoints, toePoints;
+   private final ArrayList<FramePoint> heelPoints, toePoints;
    private final double footLength;
    private final double maxHeelPointsForward, maxToePointsBack;
 
@@ -60,11 +61,11 @@ public class ResizableBipedFoot implements BipedFootInterface
    private final YoFrameConvexPolygon2d yoFrameConvexPolygon2d;
 
 
-   private final FramePoint2d insideToePoint, outsideToePoint, insideHeelPoint, outsideHeelPoint;
+   private final FramePoint insideToePoint, outsideToePoint, insideHeelPoint, outsideHeelPoint;
 
    // Constructor:
-   public ResizableBipedFoot(CommonWalkingReferenceFrames yoboticsBipedReferenceFrames, RobotSide robotSide, ArrayList<Point2d> clockwiseToePoints,
-                    ArrayList<Point2d> clockwiseHeelPoints, double maxToePointsBack, double maxHeelPointsForward, DoubleYoVariable time,
+   public ResizableBipedFoot(CommonWalkingReferenceFrames yoboticsBipedReferenceFrames, RobotSide robotSide, ArrayList<Point3d> clockwiseToePoints,
+                    ArrayList<Point3d> clockwiseHeelPoints, double maxToePointsBack, double maxHeelPointsForward, DoubleYoVariable time,
                     YoVariableRegistry yoVariableRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       registry = new YoVariableRegistry(robotSide + "BipedFoot");
@@ -79,13 +80,13 @@ public class ResizableBipedFoot implements BipedFootInterface
       // Check foot length:
       double maxX = Double.NEGATIVE_INFINITY;
       double minX = Double.POSITIVE_INFINITY;
-      for (Point2d point : clockwiseToePoints)
+      for (Point3d point : clockwiseToePoints)
       {
          if (point.x > maxX)
             maxX = point.x;
       }
 
-      for (Point2d point : clockwiseHeelPoints)
+      for (Point3d point : clockwiseHeelPoints)
       {
          if (point.x < minX)
             minX = point.x;
@@ -96,41 +97,54 @@ public class ResizableBipedFoot implements BipedFootInterface
          throw new RuntimeException("footLength <= 0.0");
 
       // Check convex and clockwise:
-      ArrayList<Point2d> onToesPoints = new ArrayList<Point2d>();
-      for (Point2d point : clockwiseToePoints)
+      ArrayList<Point3d> onToesPoints = new ArrayList<Point3d>();
+      for (Point3d point : clockwiseToePoints)
       {
-         onToesPoints.add(new Point2d(point));
+         onToesPoints.add(new Point3d(point));
       }
 
-      for (Point2d point : clockwiseHeelPoints)
+      for (Point3d point : clockwiseHeelPoints)
       {
-         onToesPoints.add(new Point2d(point.x + maxHeelPointsForward * footLength, point.y));
+         onToesPoints.add(new Point3d(point.x + maxHeelPointsForward * footLength, point.y, point.z));
       }
 
-      if (!ConvexHullCalculator2d.isConvexAndClockwise(onToesPoints))
+      if (!ConvexHullCalculator2d.isConvexAndClockwise(projectToXYPlane(onToesPoints)))
          throw new RuntimeException("Not convex and clockwise when fully on toes!");
 
-      ArrayList<Point2d> onHeelPoints = new ArrayList<Point2d>();
-      for (Point2d point : clockwiseHeelPoints)
+      ArrayList<Point3d> onHeelPoints = new ArrayList<Point3d>();
+      for (Point3d point : clockwiseHeelPoints)
       {
-         onHeelPoints.add(new Point2d(point));
+         onHeelPoints.add(new Point3d(point));
       }
 
-      for (Point2d point : clockwiseToePoints)
+      for (Point3d point : clockwiseToePoints)
       {
-         onHeelPoints.add(new Point2d(point.x - maxToePointsBack * footLength, point.y));
+         onHeelPoints.add(new Point3d(point.x - maxToePointsBack * footLength, point.y, point.z));
       }
 
-      if (!ConvexHullCalculator2d.isConvexAndClockwise(onToesPoints))
+      if (!ConvexHullCalculator2d.isConvexAndClockwise(projectToXYPlane(onHeelPoints)))
          throw new RuntimeException("Not convex and clockwise when fully on heel!");
 
       // Actual construction:
       this.robotSide = robotSide;
 
-      this.referenceFrame = yoboticsBipedReferenceFrames.getAnkleZUpReferenceFrames().get(robotSide);
+      this.footFrame = yoboticsBipedReferenceFrames.getFootReferenceFrames().get(robotSide);
+      this.ankleZUpFrame = yoboticsBipedReferenceFrames.getAnkleZUpReferenceFrames().get(robotSide);
+
+      this.toePoints = new ArrayList<FramePoint>(clockwiseToePoints.size());
+      this.heelPoints = new ArrayList<FramePoint>(clockwiseHeelPoints.size());
       
-      this.toePoints = clockwiseToePoints;
-      this.heelPoints = clockwiseHeelPoints;
+      for (Point3d toePoint : clockwiseToePoints)
+      {
+    	  this.toePoints.add(new FramePoint(footFrame, toePoint));
+      }
+      
+      for (Point3d heelPoint : clockwiseHeelPoints)
+      {
+    	  this.heelPoints.add(new FramePoint(footFrame, heelPoint));
+      }
+      
+      
       this.footLength = footLength;
       this.maxHeelPointsForward = maxHeelPointsForward;
       this.maxToePointsBack = maxToePointsBack;
@@ -140,17 +154,17 @@ public class ResizableBipedFoot implements BipedFootInterface
 
       if (robotSide == RobotSide.LEFT)
       {
-         insideToePoint = new FramePoint2d(referenceFrame, maxXMinYPointCopy(toePoints));
-         outsideToePoint = new FramePoint2d(referenceFrame, maxXMaxYPointCopy(toePoints));
-         insideHeelPoint = new FramePoint2d(referenceFrame, minXMinYPointCopy(heelPoints));
-         outsideHeelPoint = new FramePoint2d(referenceFrame, minXMaxYPointCopy(heelPoints));
+         insideToePoint = maxXMinYPointCopy(toePoints);
+         outsideToePoint = maxXMaxYPointCopy(toePoints);
+         insideHeelPoint = minXMinYPointCopy(heelPoints);
+         outsideHeelPoint = minXMaxYPointCopy(heelPoints);
       }
       else
       {
-         insideToePoint = new FramePoint2d(referenceFrame, maxXMaxYPointCopy(toePoints));
-         outsideToePoint = new FramePoint2d(referenceFrame, maxXMinYPointCopy(toePoints));
-         insideHeelPoint = new FramePoint2d(referenceFrame, minXMaxYPointCopy(heelPoints));
-         outsideHeelPoint = new FramePoint2d(referenceFrame, minXMinYPointCopy(heelPoints));
+         insideToePoint = maxXMaxYPointCopy(toePoints);
+         outsideToePoint = maxXMinYPointCopy(toePoints);
+         insideHeelPoint = minXMaxYPointCopy(heelPoints);
+         outsideHeelPoint = minXMinYPointCopy(heelPoints);
       }
 
       if (VISUALIZE)
@@ -195,7 +209,7 @@ public class ResizableBipedFoot implements BipedFootInterface
          throw new RuntimeException("shift < 0.0 || shift > 1.0");
       
       //TODO: Don't create this list every tick. Instead create it once at the beginning.
-      ArrayList<Point2d> footPolygonPoints = new ArrayList<Point2d>(toePoints.size() + heelPoints.size());
+      ArrayList<FramePoint> footPolygonPoints = new ArrayList<FramePoint>(toePoints.size() + heelPoints.size());
 
       switch ((FootPolygonEnum) footPolygonInUseEnum.getEnumValue())
       {
@@ -205,7 +219,7 @@ public class ResizableBipedFoot implements BipedFootInterface
 
             if (VISUALIZE)
             {
-               yoFrameConvexPolygon2d.setFrameConvexPolygon2d(ret.changeFrameCopy(ReferenceFrame.getWorldFrame()));
+               yoFrameConvexPolygon2d.setFrameConvexPolygon2d(ret.changeFrameAndProjectToXYPlaneCopy(ReferenceFrame.getWorldFrame()));
             }
 
             return ret;
@@ -216,14 +230,14 @@ public class ResizableBipedFoot implements BipedFootInterface
             if (shift.getDoubleValue() > maxToePointsBack)
                shift.set(maxToePointsBack);
 
-            for (Point2d point : toePoints)
+            for (FramePoint point : toePoints)
             {
-               footPolygonPoints.add(new Point2d(point.x - shift.getDoubleValue() * footLength, point.y));
+               footPolygonPoints.add(new FramePoint(footFrame, point.getX() - shift.getDoubleValue() * footLength, point.getY(), point.getZ()));
             }
 
-            for (Point2d point : heelPoints)
+            for (FramePoint point : heelPoints)
             {
-               footPolygonPoints.add(new Point2d(point));
+               footPolygonPoints.add(new FramePoint(point));
             }
 
             break;
@@ -234,14 +248,14 @@ public class ResizableBipedFoot implements BipedFootInterface
             if (shift.getDoubleValue() > maxHeelPointsForward)
                shift.set(maxHeelPointsForward);
 
-            for (Point2d point : toePoints)
+            for (FramePoint point : toePoints)
             {
-               footPolygonPoints.add(new Point2d(point.x, point.y * narrowWidthOnToesPercentage));
+               footPolygonPoints.add(new FramePoint(footFrame, point.getX(), point.getY() * narrowWidthOnToesPercentage, point.getZ()));
             }
 
-            for (Point2d point : heelPoints)
+            for (FramePoint point : heelPoints)
             {
-               footPolygonPoints.add(new Point2d(point.x + shift.getDoubleValue() * footLength, point.y * narrowWidthOnToesPercentage));
+               footPolygonPoints.add(new FramePoint(footFrame, point.getX() + shift.getDoubleValue() * footLength, point.getY() * narrowWidthOnToesPercentage, point.getZ()));
             }
 
             break;
@@ -253,11 +267,12 @@ public class ResizableBipedFoot implements BipedFootInterface
          }
       }
       
-      FrameConvexPolygon2d ret = new FrameConvexPolygon2d(referenceFrame, footPolygonPoints);
+      ArrayList<FramePoint2d> projectedFootPolygonPoints = changeFrameToZUpAndProjectToXYPlane(ankleZUpFrame, footPolygonPoints);
+      FrameConvexPolygon2d ret = new FrameConvexPolygon2d(projectedFootPolygonPoints);
 
       if (VISUALIZE)
       {
-         yoFrameConvexPolygon2d.setFrameConvexPolygon2d(ret.changeFrameCopy(ReferenceFrame.getWorldFrame()));
+         yoFrameConvexPolygon2d.setFrameConvexPolygon2d(ret.changeFrameAndProjectToXYPlaneCopy(ReferenceFrame.getWorldFrame()));
       }
 
       return ret;
@@ -265,12 +280,44 @@ public class ResizableBipedFoot implements BipedFootInterface
 
    public FrameConvexPolygon2d getFlatFootPolygon()
    {
-      ArrayList<Point2d> footPolygonPoints = new ArrayList<Point2d>(toePoints);
+      ArrayList<FramePoint> footPolygonPoints = new ArrayList<FramePoint>(toePoints);
       footPolygonPoints.addAll(heelPoints);
 
-      return new FrameConvexPolygon2d(referenceFrame, footPolygonPoints);
+      ArrayList<FramePoint2d> projectedFootPolygonPoints = changeFrameToZUpAndProjectToXYPlane(ankleZUpFrame, footPolygonPoints);
+      return new FrameConvexPolygon2d(projectedFootPolygonPoints);
    }
 
+   private ArrayList<FramePoint2d> changeFrameToZUpAndProjectToXYPlane(ReferenceFrame zUpFrame, ArrayList<FramePoint> points)
+   {
+	   if (!zUpFrame.isZupFrame())
+	   {
+		   throw new RuntimeException("Must be a ZUp frame!");
+	   }
+	   
+	   ArrayList<FramePoint2d> ret = new ArrayList<FramePoint2d>(points.size());
+	   
+	   for (int i=0; i<points.size(); i++)
+	   {
+		   FramePoint framePoint = points.get(i);
+		   framePoint = framePoint.changeFrameCopy(zUpFrame);
+		   
+		   ret.add(framePoint.toFramePoint2d());
+	   }
+	   
+	   return ret;
+   }
+   
+   private ArrayList<Point2d> projectToXYPlane(ArrayList<Point3d> points)
+   {
+	   ArrayList<Point2d> ret = new ArrayList<Point2d>(points.size());
+	   for (int i=0; i<points.size(); i++)
+	   {
+		   Point3d point3d = points.get(i);
+		   ret.add(new Point2d(point3d.x, point3d.y));
+	   }
+	   return ret;
+   }
+   
    public void setIsSupportingFoot(boolean isSupportingFoot)
    {
       this.isSupportingFoot = isSupportingFoot;
@@ -281,40 +328,34 @@ public class ResizableBipedFoot implements BipedFootInterface
       return isSupportingFoot;
    }
 
-
-   public ReferenceFrame getReferenceFrame()
+   public FramePoint getInsideToeFramePointCopy()
    {
-      return referenceFrame;
+      return new FramePoint(insideToePoint);
    }
 
-   public FramePoint2d getInsideToeFramePointCopy()
+   public FramePoint getOutsideToeFramePointCopy()
    {
-      return new FramePoint2d(insideToePoint);
+      return new FramePoint(outsideToePoint);
    }
 
-   public FramePoint2d getOutsideToeFramePointCopy()
+   public FramePoint getInsideHeelFramePointCopy()
    {
-      return new FramePoint2d(outsideToePoint);
+      return new FramePoint(insideHeelPoint);
    }
 
-   public FramePoint2d getInsideHeelFramePointCopy()
+   public FramePoint getOutsideHeelFramePointCopy()
    {
-      return new FramePoint2d(insideHeelPoint);
+      return new FramePoint(outsideHeelPoint);
    }
 
-   public FramePoint2d getOutsideHeelFramePointCopy()
+   public FramePoint[] getToePointsCopy()
    {
-      return new FramePoint2d(outsideHeelPoint);
+      return new FramePoint[] {getInsideToeFramePointCopy(), getOutsideToeFramePointCopy()};
    }
 
-   public FramePoint2d[] getToePointsCopy()
+   public FramePoint[] getHeelPointsCopy()
    {
-      return new FramePoint2d[] {getInsideToeFramePointCopy(), getOutsideToeFramePointCopy()};
-   }
-
-   public FramePoint2d[] getHeelPointsCopy()
-   {
-      return new FramePoint2d[] {getInsideHeelFramePointCopy(), getOutsideHeelFramePointCopy()};
+      return new FramePoint[] {getInsideHeelFramePointCopy(), getOutsideHeelFramePointCopy()};
    }
 
    // Setters:
@@ -332,37 +373,41 @@ public class ResizableBipedFoot implements BipedFootInterface
       this.shift.set(shift);
    }
 
-   public static ResizableBipedFoot createRectangularRightFoot(double footForward, double footBack, double footWidth, CommonWalkingReferenceFrames yoboticsBipedReferenceFrames, DoubleYoVariable time,
+   public static ResizableBipedFoot createRectangularRightFoot(double footForward, double footBack, double footWidth, double footHeight,
+		   CommonWalkingReferenceFrames yoboticsBipedReferenceFrames, DoubleYoVariable time,
          YoVariableRegistry yoVariableRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
  {
       double PREVENT_ROTATION_FACTOR = 0.75;    // 0.8;//0.8;
 
-      return createRectangularRightFoot(PREVENT_ROTATION_FACTOR, PREVENT_ROTATION_FACTOR, footForward, footBack, footWidth, yoboticsBipedReferenceFrames, time,
+      return createRectangularRightFoot(PREVENT_ROTATION_FACTOR, PREVENT_ROTATION_FACTOR, footForward, footBack, footWidth, footHeight,
+    		  yoboticsBipedReferenceFrames, time,
             yoVariableRegistry, dynamicGraphicObjectsListRegistry);
  }
    
    // Foot creators:
-   public static ResizableBipedFoot createRectangularRightFoot(double preventRotationFactorLength, double preventRotationFactorWidth, double footForward, double footBack, double footWidth, CommonWalkingReferenceFrames yoboticsBipedReferenceFrames, DoubleYoVariable time,
+   public static ResizableBipedFoot createRectangularRightFoot(double preventRotationFactorLength, double preventRotationFactorWidth, 
+		   double footForward, double footBack, double footWidth, double footHeight,
+		   CommonWalkingReferenceFrames yoboticsBipedReferenceFrames, DoubleYoVariable time,
            YoVariableRegistry yoVariableRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
-      Point2d frontLeft = new Point2d(preventRotationFactorLength * footForward,
-            preventRotationFactorWidth * footWidth / 2.0);
-      Point2d frontRight = new Point2d(preventRotationFactorLength * footForward,
-            -preventRotationFactorWidth * footWidth / 2.0);
-      Point2d hindRight = new Point2d(-preventRotationFactorLength * footBack,
-            -preventRotationFactorWidth * footWidth / 2.0);
-      Point2d hindLeft = new Point2d(-preventRotationFactorLength * footBack,
-            preventRotationFactorWidth * footWidth / 2.0);
+      Point3d frontLeft = new Point3d(preventRotationFactorLength * footForward,
+            preventRotationFactorWidth * footWidth / 2.0, -footHeight);
+      Point3d frontRight = new Point3d(preventRotationFactorLength * footForward,
+            -preventRotationFactorWidth * footWidth / 2.0, -footHeight);
+      Point3d hindRight = new Point3d(-preventRotationFactorLength * footBack,
+            -preventRotationFactorWidth * footWidth / 2.0, -footHeight);
+      Point3d hindLeft = new Point3d(-preventRotationFactorLength * footBack,
+            preventRotationFactorWidth * footWidth / 2.0, -footHeight);
 
 
       // Toe:
-      ArrayList<Point2d> toePoints = new ArrayList<Point2d>();
+      ArrayList<Point3d> toePoints = new ArrayList<Point3d>();
       toePoints.add(frontLeft);
       toePoints.add(frontRight);
       double maxToePointsBack = 0.8;
 
       // Heel:
-      ArrayList<Point2d> heelPoints = new ArrayList<Point2d>();
+      ArrayList<Point3d> heelPoints = new ArrayList<Point3d>();
       heelPoints.add(hindRight);
       heelPoints.add(hindLeft);
       double maxHeelPointsForward = 0.8;
@@ -377,129 +422,129 @@ public class ResizableBipedFoot implements BipedFootInterface
       if (this.getRobotSide() != RobotSide.RIGHT)
          throw new RuntimeException("Implicit parameter is not a right foot!");
 
-      ArrayList<Point2d> mirrorToePoints = new ArrayList<Point2d>(toePoints.size());
+      ArrayList<Point3d> mirrorToePoints = new ArrayList<Point3d>(toePoints.size());
 
       // Add the mirrorred points in reverse order:
       for (int i = toePoints.size() - 1; i >= 0; i--)
       {
-         mirrorToePoints.add(new Point2d(toePoints.get(i).x, -toePoints.get(i).y));
+         mirrorToePoints.add(new Point3d(toePoints.get(i).getX(), -toePoints.get(i).getY(), toePoints.get(i).getZ()));
       }
 
-      ArrayList<Point2d> mirrorHeelPoints = new ArrayList<Point2d>(heelPoints.size());
+      ArrayList<Point3d> mirrorHeelPoints = new ArrayList<Point3d>(heelPoints.size());
       for (int i = heelPoints.size() - 1; i >= 0; i--)
       {
-         mirrorHeelPoints.add(new Point2d(heelPoints.get(i).x, -heelPoints.get(i).y));
+         mirrorHeelPoints.add(new Point3d(heelPoints.get(i).getX(), -heelPoints.get(i).getY(), heelPoints.get(i).getZ()));
       }
 
       return new ResizableBipedFoot(yoboticsBipedReferenceFrames, RobotSide.LEFT, mirrorToePoints, mirrorHeelPoints, this.maxToePointsBack, this.maxHeelPointsForward,
                            time, yoVariableRegistry, dynamicGraphicObjectsListRegistry);
    }
 
-   private Point2d minXMaxYPointCopy(ArrayList<Point2d> pointList)
+   private FramePoint minXMaxYPointCopy(ArrayList<FramePoint> pointList)
    {
-      Point2d ret = null;
+	   FramePoint ret = null;
       double retX = Double.POSITIVE_INFINITY;
       double retY = Double.NEGATIVE_INFINITY;
-      for (Point2d point : pointList)
+      for (FramePoint point : pointList)
       {
-         if (point.x < retX)
+         if (point.getX() < retX)
          {
             ret = point;
-            retX = point.x;
-            retY = point.y;
+            retX = point.getX();
+            retY = point.getY();
          }
-         else if ((point.x == retX) && (point.y > retY))
+         else if ((point.getX() == retX) && (point.getY() > retY))
          {
             ret = point;
-            retX = point.x;
-            retY = point.y;
+            retX = point.getX();
+            retY = point.getY();
          }
       }
 
       if (ret == null)
          throw new RuntimeException("ret is still null");
 
-      return new Point2d(ret);
+      return new FramePoint(ret);
    }
 
-   private Point2d minXMinYPointCopy(ArrayList<Point2d> pointList)
+   private FramePoint minXMinYPointCopy(ArrayList<FramePoint> pointList)
    {
-      Point2d ret = null;
+	   FramePoint ret = null;
       double retX = Double.POSITIVE_INFINITY;
       double retY = Double.POSITIVE_INFINITY;
-      for (Point2d point : pointList)
+      for (FramePoint point : pointList)
       {
-         if (point.x < retX)
+         if (point.getX() < retX)
          {
             ret = point;
-            retX = point.x;
-            retY = point.y;
+            retX = point.getX();
+            retY = point.getY();
          }
-         else if ((point.x == retX) && (point.y < retY))
+         else if ((point.getX() == retX) && (point.getY() < retY))
          {
             ret = point;
-            retX = point.x;
-            retY = point.y;
+            retX = point.getX();
+            retY = point.getY();
          }
       }
 
       if (ret == null)
          throw new RuntimeException("ret is still null");
 
-      return new Point2d(ret);
+      return new FramePoint(ret);
    }
 
-   private Point2d maxXMaxYPointCopy(ArrayList<Point2d> pointList)
+   private FramePoint maxXMaxYPointCopy(ArrayList<FramePoint> pointList)
    {
-      Point2d ret = null;
+	   FramePoint ret = null;
       double retX = Double.NEGATIVE_INFINITY;
       double retY = Double.NEGATIVE_INFINITY;
-      for (Point2d point : pointList)
+      for (FramePoint point : pointList)
       {
-         if (point.x > retX)
+         if (point.getX() > retX)
          {
             ret = point;
-            retX = point.x;
-            retY = point.y;
+            retX = point.getX();
+            retY = point.getY();
          }
-         else if ((point.x == retX) && (point.y > retY))
+         else if ((point.getX() == retX) && (point.getY() > retY))
          {
             ret = point;
-            retX = point.x;
-            retY = point.y;
+            retX = point.getX();
+            retY = point.getY();
          }
       }
 
       if (ret == null)
          throw new RuntimeException("ret is still null");
 
-      return new Point2d(ret);
+      return new FramePoint(ret);
    }
 
-   private Point2d maxXMinYPointCopy(ArrayList<Point2d> pointList)
+   private FramePoint maxXMinYPointCopy(ArrayList<FramePoint> pointList)
    {
-      Point2d ret = null;
+	   FramePoint ret = null;
       double retX = Double.NEGATIVE_INFINITY;
       double retY = Double.POSITIVE_INFINITY;
-      for (Point2d point : pointList)
+      for (FramePoint point : pointList)
       {
-         if (point.x > retX)
+         if (point.getX() > retX)
          {
             ret = point;
-            retX = point.x;
-            retY = point.y;
+            retX = point.getX();
+            retY = point.getY();
          }
-         else if ((point.x == retX) && (point.y < retY))
+         else if ((point.getX() == retX) && (point.getY() < retY))
          {
             ret = point;
-            retX = point.x;
-            retY = point.y;
+            retX = point.getX();
+            retY = point.getY();
          }
       }
 
       if (ret == null)
          throw new RuntimeException("ret is still null");
 
-      return new Point2d(ret);
+      return new FramePoint(ret);
    }
 }
