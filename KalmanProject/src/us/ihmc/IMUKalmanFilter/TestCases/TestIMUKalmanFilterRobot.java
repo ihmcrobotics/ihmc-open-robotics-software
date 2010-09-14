@@ -98,7 +98,7 @@ public class TestIMUKalmanFilterRobot extends Robot
 
    public void getTransformFromWorld(Transform3D transform3D)
    {
-      rootJoint.getTransformFromWorld(transform3D);
+      rootJoint.getTransformToWorld(transform3D);
    }
 
    public void setXYZ(double x, double y, double z, double xDot, double yDot, double zDot)
