@@ -12,6 +12,8 @@ public interface DesiredHeadingControlModule
    public abstract ReferenceFrame getDesiredHeadingFrame();
 
    public abstract FrameVector getDisplacementWithRespectToFoot(RobotSide robotSide, FramePoint position);
+   
+   public abstract FrameVector getFinalHeadingTarget();
 
    public abstract FramePoint getPositionOffsetFromFoot(RobotSide robotSide, FrameVector offset);
 
