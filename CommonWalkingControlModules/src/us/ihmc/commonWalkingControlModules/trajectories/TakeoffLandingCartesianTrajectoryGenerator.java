@@ -157,7 +157,24 @@ public class TakeoffLandingCartesianTrajectoryGenerator implements CartesianTraj
    {
       return landingSlope.getDoubleValue();
    }
+   
+   
+   public void updateDistancesToTarget()
+   {
+      // Compute the current stuff:
+      currentToFinal.sub(finalDesiredPosition.getFramePointCopy(), currentPosition.getFramePointCopy());
+      currentDistanceFromTarget.set(currentToFinal.length());
+      currentToFinal2d.set(currentToFinal.getX(), currentToFinal.getY());
+      currentXYDistanceFromTarget.set(currentToFinal2d.length());
 
+      currentVelocityMag.set(currentVelocity.length());
+   }
+   
+   public double getCurrentXYDistanceFromTarget()
+   {
+      return currentXYDistanceFromTarget.getDoubleValue();
+   }
+   
    /**
     * Packs the new desired position, velocity and acceleration.
     * @param positionToPack new desired position to pack
@@ -172,13 +189,7 @@ public class TakeoffLandingCartesianTrajectoryGenerator implements CartesianTraj
       // If too fast, slow down.
       // x = x0 + v0 t + 1/2 a * t * t;
 
-      // Compute the current stuff:
-      currentToFinal.sub(finalDesiredPosition.getFramePointCopy(), currentPosition.getFramePointCopy());
-      currentDistanceFromTarget.set(currentToFinal.length());
-      currentToFinal2d.set(currentToFinal.getX(), currentToFinal.getY());
-      currentXYDistanceFromTarget.set(currentToFinal2d.length());
-
-      currentVelocityMag.set(currentVelocity.length());
+      updateDistancesToTarget();
 
       // State Transition Conditions:
       switch ((SwingState) cartesianTrajectoryState.getEnumValue())
