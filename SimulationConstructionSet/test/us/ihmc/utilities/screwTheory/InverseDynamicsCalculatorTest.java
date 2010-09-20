@@ -278,7 +278,6 @@ public class InverseDynamicsCalculatorTest
    {
       ReferenceFrame frameBeforeJoint = sixDoFJoint.getFrameBeforeJoint();
       ReferenceFrame frameAfterJoint = sixDoFJoint.getFrameAfterJoint();
-      ReferenceFrame successorFrame = sixDoFJoint.getSuccessor().getBodyFixedFrame();
 
       double linearAccelerationX = floatingJoint.getQddx().getDoubleValue();
       double linearAccelerationY = floatingJoint.getQddy().getDoubleValue();
@@ -292,7 +291,7 @@ public class InverseDynamicsCalculatorTest
       double angularAccelerationZ = floatingJoint.getAngularAccelerationZ().getDoubleValue();
       FrameVector angularAcceleration = new FrameVector(frameAfterJoint, angularAccelerationX, angularAccelerationY, angularAccelerationZ);
 
-      SpatialAccelerationVector jointAcceleration = new SpatialAccelerationVector(successorFrame, frameBeforeJoint, successorFrame,
+      SpatialAccelerationVector jointAcceleration = new SpatialAccelerationVector(frameAfterJoint, frameBeforeJoint, frameAfterJoint,
                                                        linearAcceleration.getVector(), angularAcceleration.getVector());
 
       sixDoFJoint.setAcceleration(jointAcceleration);
