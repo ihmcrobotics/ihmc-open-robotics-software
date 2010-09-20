@@ -23,7 +23,7 @@ public class MidiSliderBoardTest
    @Test
    public void testWeirdCase()
    {
-      MidiSliderBoard midiSliderBoard = new MidiSliderBoard();
+      MidiSliderBoard midiSliderBoard = new MidiSliderBoard(false);
       YoVariableRegistry registry = new YoVariableRegistry("testRegistry");
       DoubleYoVariable yoVariable = new DoubleYoVariable("test", registry);
       midiSliderBoard.setSlider(3, yoVariable, 1.5, 2.5);
