@@ -132,6 +132,31 @@ public class TakeoffLandingCartesianTrajectoryGenerator implements CartesianTraj
       this.takeOffSlope.set(takeOffSlope);
       this.landingSlope.set(landingSlope);
    }
+   
+   public void setMaxAcceleration(double maxAccel)
+   {
+      this.maxAccel.set(maxAccel);
+   }
+   
+   public void setMaxVelocity(double maxVel)
+   {
+      this.maxVel.set(maxVel);
+   }
+   
+   public void setZClearance(double zClearance)
+   {
+      this.zClearance.set(zClearance);
+   }
+   
+   public void setTakeOffSlope(double takeOffSlope)
+   {
+      this.takeOffSlope.set(takeOffSlope);
+   }
+   
+   public void setLandingSlope(double landingSlope)
+   {
+      this.landingSlope.set(landingSlope);
+   }
 
    public double getZClearance()
    {
