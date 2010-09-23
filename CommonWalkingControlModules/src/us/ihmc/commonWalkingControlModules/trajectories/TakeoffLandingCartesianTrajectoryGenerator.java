@@ -1,14 +1,12 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
-import us.ihmc.commonWalkingControlModules.trajectories.CartesianTrajectoryGenerator;
-import us.ihmc.commonWalkingControlModules.trajectories.CartesianTrajectoryGeneratorTester;
+import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrameHolder;
 import us.ihmc.utilities.math.geometry.ReferenceFrameMismatchException;
 
-import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.EnumYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
@@ -33,7 +31,7 @@ public class TakeoffLandingCartesianTrajectoryGenerator implements CartesianTraj
 
    private final DoubleYoVariable maxAccel = new DoubleYoVariable("maxAccel", registry);
    private final DoubleYoVariable maxVel = new DoubleYoVariable("maxVel", registry);
-   private final DoubleYoVariable suggMaxVel = new DoubleYoVariable("suggMaxVel", registry);
+   private final DoubleYoVariable velocityMagnitude = new DoubleYoVariable("suggMaxVel", registry);
    private final DoubleYoVariable zClearance = new DoubleYoVariable("zClearance", registry);
    private final DoubleYoVariable takeOffSlope = new DoubleYoVariable("takeOffSlope", registry);
    private final DoubleYoVariable landingSlope = new DoubleYoVariable("landingSlope", registry);
@@ -42,9 +40,6 @@ public class TakeoffLandingCartesianTrajectoryGenerator implements CartesianTraj
    private final DoubleYoVariable currentXYDistanceFromTarget = new DoubleYoVariable("currentXYDistanceFromTarget", registry);
    private final DoubleYoVariable currentVelocityMag = new DoubleYoVariable("currentVelocityMag", registry);
    private final DoubleYoVariable currentAccelMag = new DoubleYoVariable("currentAccelMag", registry);
-
-   @SuppressWarnings("unused")
-   private final BooleanYoVariable accelFull = new BooleanYoVariable("accelFull", registry);
 
    private final DoubleYoVariable groundZ = new DoubleYoVariable("groundZ", registry);
 
@@ -56,7 +51,7 @@ public class TakeoffLandingCartesianTrajectoryGenerator implements CartesianTraj
    private final YoFrameVector currentVelocity;
    private final YoFrameVector currentAcceleration;
 
-   private final YoFrameVector currentToFinal;
+   private final YoFrameVector currentPositionToFinalPosition;
    private final YoFrameVector2d currentToFinal2d;
    private final FrameVector tempFrameVector;
    private final YoFrameVector desiredMaxVelocity;
@@ -91,7 +86,7 @@ public class TakeoffLandingCartesianTrajectoryGenerator implements CartesianTraj
       currentVelocity = new YoFrameVector("currentVelocity", "", referenceFrame, registry);
       currentAcceleration = new YoFrameVector("currentAcceleration", "", referenceFrame, registry);
 
-      currentToFinal = new YoFrameVector("currentToFinal", "", referenceFrame, registry);
+      currentPositionToFinalPosition = new YoFrameVector("currentToFinal", "", referenceFrame, registry);
       currentToFinal2d = new YoFrameVector2d("currentToFinal2d", "", referenceFrame, registry);
       tempFrameVector = new FrameVector(referenceFrame);
       desiredMaxVelocity = new YoFrameVector("desiredMaxVelocity", "", referenceFrame, registry);
@@ -103,13 +98,7 @@ public class TakeoffLandingCartesianTrajectoryGenerator implements CartesianTraj
          parentRegistry.addChild(registry);
    }
 
-   /**
-    * initializes the trajectory generator with an initial position and velocity, final position and ground height.
-    * @param groundZ height of the ground.
-    * @param initialPosition initial position of the trajectory
-    * @param initialVelocity initial velocity of the trajectory
-    * @param finalDesiredPosition final desired position of the trajectory (can be updated using updateFinalDesiredPosition later)
-    */
+
    public void initialize(double groundZ, FramePoint initialPosition, FrameVector initialVelocity, FramePoint finalDesiredPosition)
    {
       cartesianTrajectoryState.set(SwingState.TAKE_OFF);
@@ -124,6 +113,232 @@ public class TakeoffLandingCartesianTrajectoryGenerator implements CartesianTraj
       this.groundZ.set(groundZ);
    }
 
+   public void updateFinalDesiredPosition(FramePoint finalDesiredPosition)
+   {
+      this.finalDesiredPosition.set(finalDesiredPosition);
+   }
+
+   public void computeNextTick(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack, double deltaT)
+   {
+      // Simple: If not pointing in right direction, turn toward right direction.
+      // If too slow, speed up.
+      // If too fast, slow down.
+      // x = x0 + v0 t + 1/2 a * t * t;
+
+      updateDistancesToTarget();
+
+      handleStateTransitions();
+
+      computeDesiredMaxVelocity();
+
+      updatePositionVelocityAndAcceleration(deltaT);
+
+      positionToPack.set(currentPosition.getFramePointCopy());
+      velocityToPack.set(currentVelocity.getFrameVectorCopy());
+      accelerationToPack.set(currentAcceleration.getFrameVectorCopy());
+   }
+
+   public void updateDistancesToTarget()
+   {
+      // Compute the current stuff:
+      currentPositionToFinalPosition.sub(finalDesiredPosition.getFramePointCopy(), currentPosition.getFramePointCopy());
+      currentDistanceFromTarget.set(currentPositionToFinalPosition.length());
+      currentToFinal2d.set(currentPositionToFinalPosition.getX(), currentPositionToFinalPosition.getY());
+      currentXYDistanceFromTarget.set(currentToFinal2d.length());
+
+      currentVelocityMag.set(currentVelocity.length());
+   }
+
+   private void handleStateTransitions()
+   {
+      switch (cartesianTrajectoryState.getEnumValue())
+      {
+         case TAKE_OFF :
+         {
+            double minGroundClearanceFractionForTransitionToLanding = 0.3;
+            boolean reachedClearanceHeight = currentPosition.getZ() >= groundZ.getDoubleValue() + zClearance.getDoubleValue();
+            if (reachedClearanceHeight)
+            {
+               cartesianTrajectoryState.set(SwingState.CRUISE_STATE);
+            }
+            else if ((currentPosition.getZ() >= groundZ.getDoubleValue() + minGroundClearanceFractionForTransitionToLanding * zClearance.getDoubleValue())
+                     && (isAtStartOfLandingSlope()))
+            {
+               cartesianTrajectoryState.set(SwingState.LANDING);
+            }
+
+            break;
+         }
+
+         case CRUISE_STATE :
+         {
+            if (isAtStartOfLandingSlope())
+            {
+               cartesianTrajectoryState.set(SwingState.LANDING);
+            }
+
+            break;
+         }
+
+         case LANDING :
+         {
+            boolean currentPositionBelowDesired = currentPosition.getZ() < finalDesiredPosition.getZ();
+            if (currentPositionBelowDesired)
+            {
+               cartesianTrajectoryState.set(SwingState.DONE);
+            }
+
+            double overshootThreshold = 1.05;
+            boolean targetWasOvershot = currentXYDistanceFromTarget.getDoubleValue() * landingSlope.getDoubleValue()
+                                        > overshootThreshold * Math.max(zClearance.getDoubleValue(), Math.abs(currentPositionToFinalPosition.getZ()));
+            if (ALLOW_RETAKEOFF && targetWasOvershot)
+            {
+               cartesianTrajectoryState.set(SwingState.TAKE_OFF);
+            }
+
+            break;
+         }
+
+         case DONE :
+         {
+            break;
+         }
+
+         default :
+         {
+            throw new RuntimeException();
+         }
+      }
+   }
+
+   private void computeDesiredMaxVelocity()
+   {
+      switch (cartesianTrajectoryState.getEnumValue())
+      {
+         case TAKE_OFF :
+         {
+            desiredMaxVelocity.set(currentPositionToFinalPosition);
+            desiredMaxVelocity.setZ(0.0);
+
+            double distanceRemaining = (groundZ.getDoubleValue() + zClearance.getDoubleValue()) - currentPosition.getZ();
+            double percentRemaining = distanceRemaining / zClearance.getDoubleValue();
+            percentRemaining = MathTools.clipToMinMax(percentRemaining, 0.4, 1.0);
+
+            desiredMaxVelocity.setZ(desiredMaxVelocity.length() * takeOffSlope.getDoubleValue() * percentRemaining);
+
+            break;
+         }
+
+         case CRUISE_STATE :
+         {
+            desiredMaxVelocity.set(currentPositionToFinalPosition);
+            desiredMaxVelocity.setZ(0.0);
+
+            break;
+         }
+
+         case LANDING :
+         {
+            desiredMaxVelocity.set(currentPositionToFinalPosition);
+
+            break;
+         }
+
+         case DONE :
+         {
+//          this.initialPosition.set(currentPosition);
+            desiredMaxVelocity.set(0.0, 0.0, 0.0);
+
+            break;
+         }
+
+         default :
+         {
+            throw new RuntimeException();
+         }
+      }
+
+      enforceSpeedLimits();
+   }
+
+
+   private void enforceSpeedLimits()
+   {
+      double epsilon = 1e-7;
+      if (desiredMaxVelocity.lengthSquared() > epsilon)
+      {
+         desiredMaxVelocity.normalize();
+         velocityMagnitude.set(computeVelocityMagnitude());
+         desiredMaxVelocity.scale(velocityMagnitude.getDoubleValue());
+      }
+   }
+   
+   private double computeVelocityMagnitude()
+   {
+      if (cartesianTrajectoryState.getEnumValue() == SwingState.LANDING)
+      {
+         double maximumVelocityToStopInTimeSquared = 2.0 * maxAccel.getDoubleValue() * currentDistanceFromTarget.getDoubleValue();
+
+         return Math.min(maximumVelocityToStopInTimeSquared, maxVel.getDoubleValue());
+      }
+      else
+      {
+         return maxVel.getDoubleValue();
+      }
+   }
+
+   private void updatePositionVelocityAndAcceleration(double deltaT)
+   {
+      boolean alreadyDone = cartesianTrajectoryState.getEnumValue() == SwingState.DONE;
+      if (alreadyDone)
+      {
+         // don't change currentPosition
+         currentVelocity.set(0.0, 0.0, 0.0);
+         currentAcceleration.set(0.0, 0.0, 0.0);
+      }
+      else
+      {
+         computeDesiredMaxVelocity();
+
+         computeCurrentAcceleration();
+         computeCurrentVelocity(deltaT);
+         computeCurrentPosition(deltaT);
+      }
+   }
+
+   private void computeCurrentAcceleration()
+   {
+      desiredAcceleration.set(desiredMaxVelocity);
+      desiredAcceleration.sub(currentVelocity.getFrameVectorCopy());
+
+      if (desiredAcceleration.lengthSquared() < 0.01 * maxVel.getDoubleValue() * maxVel.getDoubleValue())
+      {
+         desiredAcceleration.scale(0.0);
+      }
+      else
+      {
+         desiredAcceleration.normalize();
+         desiredAcceleration.scale(maxAccel.getDoubleValue());
+      }
+
+      currentAcceleration.set(desiredAcceleration);
+      currentAccelMag.set(currentAcceleration.length());
+   }
+
+   private void computeCurrentVelocity(double deltaT)
+   {
+      tempFrameVector.set(currentAcceleration.getFrameVectorCopy());
+      tempFrameVector.scale(deltaT);
+      currentVelocity.add(tempFrameVector);
+   }
+
+   private void computeCurrentPosition(double deltaT)
+   {
+      tempFrameVector.set(currentVelocity.getFrameVectorCopy());
+      tempFrameVector.scale(deltaT);
+      currentPosition.add(tempFrameVector);
+   }
+
    public void setTakeoffLandingCartesianTrajectoryParameters(double maxAccel, double maxVel, double zClearance, double takeOffSlope, double landingSlope)
    {
       this.maxAccel.set(maxAccel);
@@ -132,27 +347,27 @@ public class TakeoffLandingCartesianTrajectoryGenerator implements CartesianTraj
       this.takeOffSlope.set(takeOffSlope);
       this.landingSlope.set(landingSlope);
    }
-   
+
    public void setMaxAcceleration(double maxAccel)
    {
       this.maxAccel.set(maxAccel);
    }
-   
+
    public void setMaxVelocity(double maxVel)
    {
       this.maxVel.set(maxVel);
    }
-   
+
    public void setZClearance(double zClearance)
    {
       this.zClearance.set(zClearance);
    }
-   
+
    public void setTakeOffSlope(double takeOffSlope)
    {
       this.takeOffSlope.set(takeOffSlope);
    }
-   
+
    public void setLandingSlope(double landingSlope)
    {
       this.landingSlope.set(landingSlope);
@@ -182,238 +397,10 @@ public class TakeoffLandingCartesianTrajectoryGenerator implements CartesianTraj
    {
       return landingSlope.getDoubleValue();
    }
-   
-   
-   public void updateDistancesToTarget()
-   {
-      // Compute the current stuff:
-      currentToFinal.sub(finalDesiredPosition.getFramePointCopy(), currentPosition.getFramePointCopy());
-      currentDistanceFromTarget.set(currentToFinal.length());
-      currentToFinal2d.set(currentToFinal.getX(), currentToFinal.getY());
-      currentXYDistanceFromTarget.set(currentToFinal2d.length());
 
-      currentVelocityMag.set(currentVelocity.length());
-   }
-   
    public double getCurrentXYDistanceFromTarget()
    {
       return currentXYDistanceFromTarget.getDoubleValue();
-   }
-   
-   /**
-    * Packs the new desired position, velocity and acceleration.
-    * @param positionToPack new desired position to pack
-    * @param velocityToPack new desired velocity to pack
-    * @param accelerationToPack new desired acceleration to pack
-    * @param deltaT time step
-    */
-   public void computeNextTick(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack, double deltaT)
-   {
-      // Simple: If not pointing in right direction, turn toward right direction.
-      // If too slow, speed up.
-      // If too fast, slow down.
-      // x = x0 + v0 t + 1/2 a * t * t;
-
-      updateDistancesToTarget();
-
-      // State Transition Conditions:
-      switch ((SwingState) cartesianTrajectoryState.getEnumValue())
-      {
-         case TAKE_OFF :
-         {
-            double minGroundClearanceFractionForTransitionToLanding = 0.3;
-
-            if (currentPosition.getZ() >= groundZ.getDoubleValue() + zClearance.getDoubleValue())
-            {
-               cartesianTrajectoryState.set(SwingState.CRUISE_STATE);
-            }
-            else if ((currentPosition.getZ() >= groundZ.getDoubleValue() + minGroundClearanceFractionForTransitionToLanding * zClearance.getDoubleValue())
-                     && (currentXYDistanceFromTarget.getDoubleValue() * landingSlope.getDoubleValue() < Math.abs(currentToFinal.getZ())))
-            {
-               cartesianTrajectoryState.set(SwingState.LANDING);
-            }
-
-            break;
-         }
-
-         case CRUISE_STATE :
-         {
-            if (currentXYDistanceFromTarget.getDoubleValue() * landingSlope.getDoubleValue() < Math.abs(currentToFinal.getZ()))
-            {
-               cartesianTrajectoryState.set(SwingState.LANDING);
-            }
-
-            break;
-         }
-
-         case LANDING :
-         {
-            if (currentPosition.getZ() < finalDesiredPosition.getZ())
-            {
-               cartesianTrajectoryState.set(SwingState.DONE);
-            }
-
-
-            if ((ALLOW_RETAKEOFF)
-                    && (currentXYDistanceFromTarget.getDoubleValue() * landingSlope.getDoubleValue()
-                        > 1.05 * Math.max(zClearance.getDoubleValue(), Math.abs(currentToFinal.getZ()))))
-            {
-               cartesianTrajectoryState.set(SwingState.TAKE_OFF);
-            }
-
-            break;
-         }
-
-         case DONE :
-         {
-//          if ((ALLOW_RETAKEOFF) && (currentXYDistanceFromTarget.val * landingSlope.val > 1.05 * Math.max(zClearance.val, Math.abs(currentToFinal.getZ()))))
-//          {
-//             cartesianTrajectoryState.set(SwingState.TAKE_OFF);
-//          }
-
-            break;
-         }
-
-         default :
-         {
-            throw new RuntimeException();
-         }
-      }
-
-      // Do the actions for each state:
-
-      switch ((SwingState) cartesianTrajectoryState.getEnumValue())
-      {
-         case TAKE_OFF :
-         {
-            desiredMaxVelocity.set(currentToFinal);
-            desiredMaxVelocity.setZ(0.0);
-
-            double distanceRemaining = (groundZ.getDoubleValue() + zClearance.getDoubleValue()) - currentPosition.getZ();
-            double percentRemaining = distanceRemaining / zClearance.getDoubleValue();
-            if (percentRemaining < 0.4)
-               percentRemaining = 0.4;
-            else if (percentRemaining > 1.0)
-               percentRemaining = 1.0;
-
-
-            desiredMaxVelocity.setZ(desiredMaxVelocity.length() * takeOffSlope.getDoubleValue() * percentRemaining);
-
-            break;
-         }
-
-         case CRUISE_STATE :
-         {
-            desiredMaxVelocity.set(currentToFinal);
-            desiredMaxVelocity.setZ(0.0);
-
-            break;
-         }
-
-         case LANDING :
-         {
-            desiredMaxVelocity.set(currentToFinal);
-
-            break;
-         }
-
-         case DONE :
-         {
-            this.initialPosition.set(currentPosition);
-            desiredMaxVelocity.set(0.0, 0.0, 0.0);
-
-            break;
-         }
-
-         default :
-         {
-            throw new RuntimeException();
-         }
-      }
-
-      if ((cartesianTrajectoryState.getEnumValue() == SwingState.DONE))
-      {
-         positionToPack.set(currentPosition.getFramePointCopy());
-         velocityToPack.set(0.0, 0.0, 0.0);
-         accelerationToPack.set(0.0, 0.0, 0.0);
-
-         return;
-      }
-
-      // Set desired maximum velocity to its max length:
-      if (desiredMaxVelocity.lengthSquared() > 1e-7)
-      {
-         desiredMaxVelocity.normalize();
-      }
-
-
-      // check if we need to slow down
-      if (cartesianTrajectoryState.getEnumValue() == SwingState.LANDING)
-         suggMaxVel.set(getSuggestedMaximumVeloicty());
-      else
-         suggMaxVel.set(maxVel.getDoubleValue());
-
-//    desiredMaxVelocity.scale(maxVel.val);
-      desiredMaxVelocity.scale(suggMaxVel.getDoubleValue());
-
-//    double minTimeToStop = currentVelocityMag.val / maxAccel.val;
-//     double distanceAtMinTimeToStop = currentVelocityMag.val * minTimeToStop + 0.5 * maxAccel.val * minTimeToStop * minTimeToStop;
-//
-//     if (distanceAtMinTimeToStop <= currentDistanceFromTarget.val)
-//        accelFull.set(true);
-//     else
-//        accelFull.set(false);
-
-
-//    if (cartesianTrajectoryState.getEnumValue() == SwingState.LANDING)
-//    {
-////  desiredMaxVelocity.scale(0.0); // Come to a halt as quickly as possible in landing?
-//    }
-//    else
-//    {
-//       desiredMaxVelocity.scale(maxVel.val);
-//    }
-
-      desiredAcceleration.set(desiredMaxVelocity);
-      desiredAcceleration.sub(currentVelocity.getFrameVectorCopy());
-
-      if (desiredAcceleration.lengthSquared() < 0.01 * maxVel.getDoubleValue() * maxVel.getDoubleValue())
-      {
-         desiredAcceleration.scale(0.0);
-      }
-      else
-      {
-         desiredAcceleration.normalize();
-         desiredAcceleration.scale(maxAccel.getDoubleValue());
-      }
-
-      currentAccelMag.set(currentAcceleration.length());
-      currentAcceleration.set(desiredAcceleration);
-
-      tempFrameVector.set(currentAcceleration.getFrameVectorCopy());
-      tempFrameVector.scale(deltaT);
-      currentVelocity.add(tempFrameVector);
-
-      tempFrameVector.set(currentVelocity.getFrameVectorCopy());
-      tempFrameVector.scale(deltaT);
-      currentPosition.add(tempFrameVector);
-
-      positionToPack.set(currentPosition.getFramePointCopy());
-      velocityToPack.set(currentVelocity.getFrameVectorCopy());
-      accelerationToPack.set(currentAcceleration.getFrameVectorCopy());
-   }
-
-   private double getSuggestedMaximumVeloicty()
-   {
-      double maximumVelocityToStopInTimeSquared = 2.0 * maxAccel.getDoubleValue() * currentDistanceFromTarget.getDoubleValue();
-
-
-      return Math.min(maximumVelocityToStopInTimeSquared, maxVel.getDoubleValue());
-   }
-
-   public void updateFinalDesiredPosition(FramePoint finalDesiredPosition)
-   {
-      this.finalDesiredPosition.set(finalDesiredPosition);
    }
 
    public boolean isDone()
@@ -421,33 +408,9 @@ public class TakeoffLandingCartesianTrajectoryGenerator implements CartesianTraj
       return (cartesianTrajectoryState.getEnumValue() == SwingState.DONE);
    }
 
-   public enum SwingState {TAKE_OFF, CRUISE_STATE, LANDING, DONE;}
-
-   public static void main(String[] args)
+   private boolean isAtStartOfLandingSlope()
    {
-      YoVariableRegistry yoVariableRegistry = new YoVariableRegistry("ParentRegistry");
-      DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
-
-      double maxVel = 1.0;
-      double maxAccel = 10.0 * maxVel;
-
-      double zClearance = 0.1;
-      double takeOffSlope = 1.0;
-      double landingSlope = 1.0;
-
-      ReferenceFrame referenceFrame = ReferenceFrame.getWorldFrame();
-
-      CartesianTrajectoryGenerator cartesianTrajectoryGenerator = new TakeoffLandingCartesianTrajectoryGenerator(maxAccel, maxVel, zClearance, takeOffSlope,
-                                                                     landingSlope, referenceFrame, yoVariableRegistry);
-
-      FramePoint initialPosition = new FramePoint(referenceFrame, 0.1, 0.1, 0.1);
-      FrameVector initialVelocity = new FrameVector(referenceFrame, 0.1, 0.1, 0.1);
-      FramePoint finalDesiredPosition = new FramePoint(referenceFrame, 1.0, 1.0, 1.0);
-
-      cartesianTrajectoryGenerator.initialize(0.0, initialPosition, initialVelocity, finalDesiredPosition);
-
-      new CartesianTrajectoryGeneratorTester(cartesianTrajectoryGenerator, yoVariableRegistry, dynamicGraphicObjectsListRegistry,
-              "cartesianTrajectoryGeneratorTester");
+      return currentXYDistanceFromTarget.getDoubleValue() * landingSlope.getDoubleValue() < Math.abs(currentPositionToFinalPosition.getZ());
    }
 
    public void checkReferenceFrameMatch(ReferenceFrameHolder referenceFrameHolder)
@@ -478,6 +441,35 @@ public class TakeoffLandingCartesianTrajectoryGenerator implements CartesianTraj
    public ReferenceFrameHolder changeFrameCopy(ReferenceFrame desiredFrame)
    {
       return null;
+   }
+
+   public enum SwingState {TAKE_OFF, CRUISE_STATE, LANDING, DONE;}
+
+   public static void main(String[] args)
+   {
+      YoVariableRegistry yoVariableRegistry = new YoVariableRegistry("ParentRegistry");
+      DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
+
+      double maxVel = 1.0;
+      double maxAccel = 10.0 * maxVel;
+
+      double zClearance = 0.1;
+      double takeOffSlope = 1.0;
+      double landingSlope = 1.0;
+
+      ReferenceFrame referenceFrame = ReferenceFrame.getWorldFrame();
+
+      CartesianTrajectoryGenerator cartesianTrajectoryGenerator = new TakeoffLandingCartesianTrajectoryGenerator(maxAccel, maxVel, zClearance, takeOffSlope,
+                                                                     landingSlope, referenceFrame, yoVariableRegistry);
+
+      FramePoint initialPosition = new FramePoint(referenceFrame, 0.1, 0.1, 0.1);
+      FrameVector initialVelocity = new FrameVector(referenceFrame, 0.1, 0.1, 0.1);
+      FramePoint finalDesiredPosition = new FramePoint(referenceFrame, 2.0, 2.0, 2.0);
+
+      cartesianTrajectoryGenerator.initialize(0.0, initialPosition, initialVelocity, finalDesiredPosition);
+
+      new CartesianTrajectoryGeneratorTester(cartesianTrajectoryGenerator, yoVariableRegistry, dynamicGraphicObjectsListRegistry,
+              "cartesianTrajectoryGeneratorTester");
    }
 
 }
