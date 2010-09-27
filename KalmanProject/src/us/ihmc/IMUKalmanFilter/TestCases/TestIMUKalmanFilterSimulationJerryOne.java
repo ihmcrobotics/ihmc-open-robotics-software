@@ -101,7 +101,7 @@ public class TestIMUKalmanFilterSimulationJerryOne
 //    simulationConstructionSet.selectConfiguration("from accel");
       simulationConstructionSet.selectConfiguration("test");
 
-      MidiSliderBoard evolutionUC33E = new MidiSliderBoard();
+      MidiSliderBoard evolutionUC33E = new MidiSliderBoard(simulationConstructionSet);
 
 //    evolutionUC33E.setChannel(1, "qd_wx", simulationConstructionSet, -20.0, 20.0, 3.0);
 //    evolutionUC33E.setChannel(2, "qd_wy", simulationConstructionSet, -20.0, 20.0, 3.0);
