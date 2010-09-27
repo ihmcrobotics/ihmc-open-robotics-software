@@ -3,6 +3,7 @@ package us.ihmc.utilities.screwTheory;
 import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Random;
 
 import javax.media.j3d.Transform3D;
@@ -85,7 +86,10 @@ public class InverseDynamicsCalculatorTest
 
       copyAccelerationFromForwardToInverse(rootJoint, rootInverseDynamicsJoint);
 
-      InverseDynamicsCalculator calculator = new InverseDynamicsCalculator(inertialFrame, world);
+      HashMap<RigidBody, Wrench> externalWrenches = new HashMap<RigidBody, Wrench>(); // no external wrenches
+      SpatialAccelerationVector rootAcceleration = new SpatialAccelerationVector(world.getBodyFixedFrame(), inertialFrame, world.getBodyFixedFrame());
+      ArrayList<InverseDynamicsJoint> jointsToIgnore = new ArrayList<InverseDynamicsJoint>();
+      InverseDynamicsCalculator calculator = new InverseDynamicsCalculator(inertialFrame, world, rootAcceleration, externalWrenches, jointsToIgnore);
       calculator.compute();
 
       Wrench outputWrench = new Wrench(null, null);
@@ -121,7 +125,10 @@ public class InverseDynamicsCalculatorTest
 
       createRandomChainRobotAndSetJointPositionsAndVelocities(robot, revoluteJoints, inverseDynamicsRevoluteJoints, worldFrame, world, nLinks);
 
-      InverseDynamicsCalculator calculator = new InverseDynamicsCalculator(inertialFrame, world);
+      HashMap<RigidBody, Wrench> externalWrenches = new HashMap<RigidBody, Wrench>(); // no external wrenches
+      SpatialAccelerationVector rootAcceleration = new SpatialAccelerationVector(world.getBodyFixedFrame(), inertialFrame, world.getBodyFixedFrame());
+      ArrayList<InverseDynamicsJoint> jointsToIgnore = new ArrayList<InverseDynamicsJoint>();
+      InverseDynamicsCalculator calculator = new InverseDynamicsCalculator(inertialFrame, world, rootAcceleration, externalWrenches, jointsToIgnore);
       calculator.compute();
 
       setTorques(revoluteJoints, inverseDynamicsRevoluteJoints);
