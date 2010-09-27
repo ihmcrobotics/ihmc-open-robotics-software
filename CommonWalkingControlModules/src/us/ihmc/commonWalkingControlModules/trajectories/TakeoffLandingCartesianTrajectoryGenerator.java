@@ -110,12 +110,14 @@ public class TakeoffLandingCartesianTrajectoryGenerator implements CartesianTraj
       this.currentPosition.set(initialPosition);
       this.currentVelocity.set(initialVelocity);
 
-      this.groundZ.set(groundZ);
+      this.groundZ.set(groundZ);  //+++
+      //+++finalDesiredPosition.setZ(this.groundZ.getDoubleValue());
    }
 
    public void updateFinalDesiredPosition(FramePoint finalDesiredPosition)
    {
       this.finalDesiredPosition.set(finalDesiredPosition);
+      //+++this.finalDesiredPosition.setZ(this.groundZ.getDoubleValue());
    }
 
    public void computeNextTick(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack, double deltaT)
