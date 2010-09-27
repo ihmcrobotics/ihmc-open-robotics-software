@@ -21,6 +21,19 @@ public class TakeoffLandingCartesianTrajectoryGeneratorTest
    @Test
    public void testOne()
    {
+      boolean pause = false;
+      System.out.println("Pausing...");
+      while(pause)
+      {
+         try
+         {
+            Thread.sleep(1000);
+         } 
+         catch (InterruptedException e)
+         {
+         }
+      }
+
       // TODO: Finish this JUnit test. It tests start, end, and zClearance, but needs to test takeOffSlope, landingSlope, maxVel, maxAccel, some of which are difficult
       double maxAccel = 20.0;
       double maxVel = 2.0;
