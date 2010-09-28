@@ -336,13 +336,13 @@ public class TakeoffLandingCartesianTrajectoryGenerator implements CartesianTraj
 
    private void computeCurrentPosition(double deltaT)
    {
-      tempFrameVector.set(currentAcceleration.getFrameVectorCopy());
-      tempFrameVector.scale(0.5 * deltaT);
-      tempFrameVector.add(currentVelocity.getFrameVectorCopy());
-      tempFrameVector.scale(deltaT);
-      
-//      tempFrameVector.set(currentVelocity.getFrameVectorCopy());
+//      tempFrameVector.set(currentAcceleration.getFrameVectorCopy());
+//      tempFrameVector.scale(0.5 * deltaT);
+//      tempFrameVector.add(currentVelocity.getFrameVectorCopy());
 //      tempFrameVector.scale(deltaT);
+      
+      tempFrameVector.set(currentVelocity.getFrameVectorCopy());
+      tempFrameVector.scale(deltaT);
       currentPosition.add(tempFrameVector);
    }
 
