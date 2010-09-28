@@ -23,7 +23,7 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector2d;
  */
 public class TakeoffLandingCartesianTrajectoryGenerator implements CartesianTrajectoryGenerator, ReferenceFrameHolder
 {
-   private final boolean ALLOW_RETAKEOFF = true;
+   private final boolean ALLOW_RETAKEOFF = false;
 
    private final YoVariableRegistry registry = new YoVariableRegistry("SimpleGenerator");
 
@@ -336,8 +336,13 @@ public class TakeoffLandingCartesianTrajectoryGenerator implements CartesianTraj
 
    private void computeCurrentPosition(double deltaT)
    {
-      tempFrameVector.set(currentVelocity.getFrameVectorCopy());
+      tempFrameVector.set(currentAcceleration.getFrameVectorCopy());
+      tempFrameVector.scale(0.5 * deltaT);
+      tempFrameVector.add(currentVelocity.getFrameVectorCopy());
       tempFrameVector.scale(deltaT);
+      
+//      tempFrameVector.set(currentVelocity.getFrameVectorCopy());
+//      tempFrameVector.scale(deltaT);
       currentPosition.add(tempFrameVector);
    }
 
