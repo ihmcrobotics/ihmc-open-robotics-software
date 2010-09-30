@@ -3,13 +3,10 @@ package us.ihmc.commonWalkingControlModules.bipedSupportPolygons;
 import java.awt.Color;
 import java.util.ArrayList;
 
-import javax.media.j3d.Transform3D;
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 
 import us.ihmc.commonWalkingControlModules.RobotSide;
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedFootInterface;
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.FootPolygonEnum;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.utilities.math.geometry.ConvexHullCalculator2d;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
@@ -133,18 +130,18 @@ public class ResizableBipedFoot implements BipedFootInterface
 
       this.toePoints = new ArrayList<FramePoint>(clockwiseToePoints.size());
       this.heelPoints = new ArrayList<FramePoint>(clockwiseHeelPoints.size());
-      
+
       for (Point3d toePoint : clockwiseToePoints)
       {
     	  this.toePoints.add(new FramePoint(footFrame, toePoint));
       }
-      
+
       for (Point3d heelPoint : clockwiseHeelPoints)
       {
     	  this.heelPoints.add(new FramePoint(footFrame, heelPoint));
       }
-      
-      
+
+
       this.footLength = footLength;
       this.maxHeelPointsForward = maxHeelPointsForward;
       this.maxToePointsBack = maxToePointsBack;
@@ -176,7 +173,7 @@ public class ResizableBipedFoot implements BipedFootInterface
          {
             DynamicGraphicYoPolygonArtifact dynamicGraphicYoPolygonArtifact = new DynamicGraphicYoPolygonArtifact(robotSide + " Foot", yoFrameConvexPolygon2d, color, false);
             dynamicGraphicObjectsListRegistry.registerArtifact(robotSide + " Foot", dynamicGraphicYoPolygonArtifact);
-            
+
 //            YoboticsBipedPlotter.registerDynamicGraphicPolygon(robotSide + " Foot", color, yoFrameConvexPolygon2d, false);
          }
       }
@@ -195,7 +192,7 @@ public class ResizableBipedFoot implements BipedFootInterface
    // Getters:
    public FootPolygonEnum getFootPolygonInUseEnum()
    {
-      return (FootPolygonEnum) footPolygonInUseEnum.getEnumValue();
+      return footPolygonInUseEnum.getEnumValue();
    }
 
    public RobotSide getRobotSide()
@@ -207,11 +204,11 @@ public class ResizableBipedFoot implements BipedFootInterface
    {
       if ((shift.getDoubleValue() < 0.0) || (shift.getDoubleValue() > 1.0))
          throw new RuntimeException("shift < 0.0 || shift > 1.0");
-      
+
       //TODO: Don't create this list every tick. Instead create it once at the beginning.
       ArrayList<FramePoint> footPolygonPoints = new ArrayList<FramePoint>(toePoints.size() + heelPoints.size());
 
-      switch ((FootPolygonEnum) footPolygonInUseEnum.getEnumValue())
+      switch (footPolygonInUseEnum.getEnumValue())
       {
          case FLAT :
          {
@@ -266,7 +263,7 @@ public class ResizableBipedFoot implements BipedFootInterface
             throw new RuntimeException("Unrecognized foot polygon");
          }
       }
-      
+
       ArrayList<FramePoint2d> projectedFootPolygonPoints = changeFrameToZUpAndProjectToXYPlane(ankleZUpFrame, footPolygonPoints);
       FrameConvexPolygon2d ret = new FrameConvexPolygon2d(projectedFootPolygonPoints);
 
@@ -293,20 +290,20 @@ public class ResizableBipedFoot implements BipedFootInterface
 	   {
 		   throw new RuntimeException("Must be a ZUp frame!");
 	   }
-	   
+
 	   ArrayList<FramePoint2d> ret = new ArrayList<FramePoint2d>(points.size());
-	   
+
 	   for (int i=0; i<points.size(); i++)
 	   {
 		   FramePoint framePoint = points.get(i);
 		   framePoint = framePoint.changeFrameCopy(zUpFrame);
-		   
+
 		   ret.add(framePoint.toFramePoint2d());
 	   }
-	   
+
 	   return ret;
    }
-   
+
    private ArrayList<Point2d> projectToXYPlane(ArrayList<Point3d> points)
    {
 	   ArrayList<Point2d> ret = new ArrayList<Point2d>(points.size());
@@ -317,7 +314,7 @@ public class ResizableBipedFoot implements BipedFootInterface
 	   }
 	   return ret;
    }
-   
+
    public void setIsSupportingFoot(boolean isSupportingFoot)
    {
       this.isSupportingFoot = isSupportingFoot;
@@ -383,9 +380,9 @@ public class ResizableBipedFoot implements BipedFootInterface
     		  yoboticsBipedReferenceFrames, time,
             yoVariableRegistry, dynamicGraphicObjectsListRegistry);
  }
-   
+
    // Foot creators:
-   public static ResizableBipedFoot createRectangularRightFoot(double preventRotationFactorLength, double preventRotationFactorWidth, 
+   public static ResizableBipedFoot createRectangularRightFoot(double preventRotationFactorLength, double preventRotationFactorWidth,
 		   double footForward, double footBack, double footWidth, double footHeight,
 		   CommonWalkingReferenceFrames yoboticsBipedReferenceFrames, DoubleYoVariable time,
            YoVariableRegistry yoVariableRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)

@@ -68,7 +68,7 @@ public class InverseDynamicsCalculatorTest
       setRandomPosition(rootJoint, rootInverseDynamicsJoint);
 
       world.updateFramesRecursively();
-      
+
       ReferenceFrame bodyFixedFrame = body.getBodyFixedFrame();
       ExternalForcePoint externalForcePoint = new ExternalForcePoint("rootExternalForcePoint", comOffset, robot);
       rootJoint.addExternalForcePoint(externalForcePoint);
@@ -273,10 +273,10 @@ public class InverseDynamicsCalculatorTest
       double yaw = random.nextDouble();
       double pitch = random.nextDouble();
       double roll = random.nextDouble();
-      
+
       floatingJoint.setPosition(rootPosition);
       floatingJoint.setYawPitchRoll(yaw, pitch, roll);
-      
+
       sixDoFJoint.setPosition(rootPosition);
       sixDoFJoint.setRotation(yaw, pitch, roll);
    }
@@ -309,7 +309,7 @@ public class InverseDynamicsCalculatorTest
       double q = random.nextDouble();
       double qd = random.nextDouble();
       double desiredQdd = random.nextDouble();
-      
+
       pinJoint.setInitialState(q, qd);
       revoluteJoint.setQ(q);
       revoluteJoint.setQd(qd);

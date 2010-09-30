@@ -15,11 +15,11 @@ public class LinkGraphicsRotateMatrix implements LinkGraphicsInstruction
    {
       return rot;
    }
-   
-   
+
+
    public String toString()
    {
-   
+
       return "\t\t\t<RotateMatrix>"+XMLReaderUtility.matrix3DToString(rot)+"</RotateMatrix>\n";
    }
 }

@@ -3,8 +3,6 @@ package us.ihmc.commonWalkingControlModules.bipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.RobotSide;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
-import us.ihmc.utilities.math.geometry.FramePoint2d;
-import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 public interface BipedFootInterface
 {
