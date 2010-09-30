@@ -179,7 +179,7 @@ public class TestBodePlotConstructor extends TestCase
       double[] ret = new double[numPoints];
       for (int i = 0; i < numPoints; i++)
       {
-         ret[i] = x0 + xIncrement * ((double) i);
+         ret[i] = x0 + xIncrement * (i);
       }
 
       return ret;

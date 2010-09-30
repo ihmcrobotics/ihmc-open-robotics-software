@@ -28,7 +28,7 @@ public class TakeoffLandingCartesianTrajectoryGeneratorTest
          try
          {
             Thread.sleep(1000);
-         } 
+         }
          catch (InterruptedException e)
          {
          }

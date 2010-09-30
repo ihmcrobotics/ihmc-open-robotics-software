@@ -44,7 +44,7 @@ public class CapturePointCenterOfPressureControlModule
    {
       turnOffCaptureControl.set(false);
    }
-   
+
    private final BooleanYoVariable singleSupportWasPreviousTick = new BooleanYoVariable("singleSupportWasPreviousTick", registry);
 
    private final BooleanYoVariable keepInsideFootSingleSupport = new BooleanYoVariable("keepInsideFootSingleSupport",
@@ -87,9 +87,9 @@ public class CapturePointCenterOfPressureControlModule
 
    private final YoFramePoint centerOfPressureDesiredWorld, centerOfPressureDesiredMidFeet, centerOfPressureDesiredLeftAnkleZUp,
                               centerOfPressureDesiredRightAnkleZUp;
-   
+
    private final SideDependentList<YoFramePoint> centerOfPressureDesiredAnkleZUp;
-   
+
    private final DynamicGraphicPosition centerOfPressureDesiredWorldGraphicPosition;
 
    private final YoFrameLineSegment2d guideLineWorld;
@@ -106,11 +106,11 @@ public class CapturePointCenterOfPressureControlModule
       this.yoboticsBipedReferenceFrames = referenceFrames;
 
       keepInsideFootSingleSupport.set(false);
-      
+
       bodyZUp = yoboticsBipedReferenceFrames.getABodyAttachedZUpFrame();
       midFeetZUp = yoboticsBipedReferenceFrames.getMidFeetZUpFrame();
       world = ReferenceFrame.getWorldFrame();
-      
+
       guideLineWorld = new YoFrameLineSegment2d("guideLine", "", world, registry);
       parallelLineWorld = new YoFrameLine2d("parallelLine", "", world, registry);
 
@@ -171,12 +171,12 @@ public class CapturePointCenterOfPressureControlModule
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectList);
 
          ArtifactList artifactList = new ArtifactList("Capture Point CoP Control Module");
-         
+
          artifactList.add(centerOfPressureDesiredWorldGraphicPosition.createArtifact());
-         
+
          YoFrameLineSegment2dArtifact dynamicGraphicYoFrameLineSegment2dArtifact = new YoFrameLineSegment2dArtifact("Guide Line", guideLineWorld, Color.RED);
          artifactList.add(dynamicGraphicYoFrameLineSegment2dArtifact);
-                  
+
          YoFrameLine2dArtifact dynamicGraphicYoFrameLine2dArtifact = new YoFrameLine2dArtifact("Parallel Line", parallelLineWorld, Color.GREEN);
          artifactList.add(dynamicGraphicYoFrameLine2dArtifact);
 
@@ -193,8 +193,8 @@ public class CapturePointCenterOfPressureControlModule
       }
 
    }
-   
-   
+
+
    public void XYCoPControllerDoubleSupport(BipedSupportPolygons bipedSupportPolygons, CapturePointCalculatorInterface yoboticsBipedCapturePointCalculator,
          FramePoint desiredCapturePoint)
  {
@@ -264,19 +264,19 @@ public class CapturePointCenterOfPressureControlModule
       unfilteredXControl.set(control.getX());
       unfilteredYControl.set(control.getY());
 
-      
+
       if (singleSupportWasPreviousTick.getBooleanValue())
       {
-         xCaptureControl.reset(); 
-         yCaptureControl.reset(); 
-         
+         xCaptureControl.reset();
+         yCaptureControl.reset();
+
          singleSupportWasPreviousTick.set(false);
       }
-     
+
       xCaptureControl.update(unfilteredXControl.getDoubleValue());
       yCaptureControl.update(unfilteredYControl.getDoubleValue());    // saturatedHighPassYControl);
-      
-      
+
+
       control.setX(xCaptureControl.getDoubleValue());
       control.setY(yCaptureControl.getDoubleValue());
 
@@ -308,7 +308,7 @@ public class CapturePointCenterOfPressureControlModule
 
             // John Carff fixed this on 090625. Make sure his fix didn't break this line!!!
             // JEP 100826: Indeed it may have. When the desired capture point is outside of the support polygon, seems to get the wrong intersection!
-            FramePoint2d[] intersections = supportPolygon.intersectionWith(desiredCaptureToDesiredCop);    
+            FramePoint2d[] intersections = supportPolygon.intersectionWith(desiredCaptureToDesiredCop);
             if (intersections != null)
             {
                FramePoint2d intersectionToUse;
@@ -325,7 +325,7 @@ public class CapturePointCenterOfPressureControlModule
                   if (distanceSquaredToIntersection0 <= distanceSquaredToIntersection1) intersectionToUse = intersections[0];
                   else intersectionToUse = intersections[1];
                }
-               
+
                centerOfPressureDesired.setX(intersectionToUse.getX());
                centerOfPressureDesired.setY(intersectionToUse.getY());
 
@@ -386,7 +386,7 @@ public class CapturePointCenterOfPressureControlModule
            FramePoint desiredCapturePoint, RobotSide supportLeg, ReferenceFrame referenceFrame, BipedSupportPolygons supportPolygons)    // , double percentToFarEdgeOfFoot)
    {
       singleSupportWasPreviousTick.set(true);
-      
+
       // Compute and get capture point:
 //      FramePoint currentCapturePoint = yoboticsBipedCapturePointCalculator.getCapturePointInFrame(referenceFrame);
 
@@ -611,7 +611,7 @@ public class CapturePointCenterOfPressureControlModule
       else
          return 0.0;
    }
-   
+
    public void setMaxCaptureToCoP(double maxCaptureToCoP)
    {
       this.maxCaptureToCoP.set(maxCaptureToCoP);
@@ -674,7 +674,7 @@ public class CapturePointCenterOfPressureControlModule
    {
       return centerOfPressureDesiredRightAnkleZUp;
    }
-   
+
    public YoFramePoint getCenterOfPressureDesiredAnkleZUp(RobotSide robotSide)
    {
       return centerOfPressureDesiredAnkleZUp.get(robotSide);

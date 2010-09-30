@@ -2,7 +2,6 @@ package us.ihmc.commonWalkingControlModules.bipedSupportPolygons;
 
 import us.ihmc.commonWalkingControlModules.RobotSide;
 import us.ihmc.commonWalkingControlModules.SideDependentList;
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedFootInterface;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2dAndConnectingEdges;
 import us.ihmc.utilities.math.geometry.FrameLineSegment2d;
@@ -94,7 +93,7 @@ public class BipedSupportPolygons
    public void update(BipedFootInterface leftFoot, BipedFootInterface rightFoot)
    {
       // Extract the foot polygons in use from the leftFoot and the rightFoot
-      
+
       SideDependentList<BipedFootInterface> feet = new SideDependentList<BipedFootInterface>(leftFoot, rightFoot);
 
       for (RobotSide robotSide : RobotSide.values())
@@ -104,8 +103,8 @@ public class BipedSupportPolygons
          FrameConvexPolygon2d footPolygonInAnkleZUp = footPolygonInFootFrame.changeFrameAndProjectToXYPlaneCopy(ankleZUpFrames.get(robotSide));
          FrameConvexPolygon2d footPolygonsInBodyZUp = footPolygonInAnkleZUp.changeFrameCopy(bodyZUp);
          FrameConvexPolygon2d footPolygonsInMidFeetZUp = footPolygonInAnkleZUp.changeFrameCopy(midFeetZUp);
-         
-         
+
+
          this.footPolygonsInAnkleZUp.set(robotSide, footPolygonInAnkleZUp);
          this.footPolygonsInBodyZUp.set(robotSide, footPolygonsInBodyZUp);
          this.footPolygonsInMidFeetZUp.set(robotSide, footPolygonsInMidFeetZUp);
@@ -139,15 +138,15 @@ public class BipedSupportPolygons
          RobotSide supportSide = leftFoot.isSupportingFoot() ? RobotSide.LEFT : RobotSide.RIGHT;
          supportPolygonInMidFeetZUp = footPolygonsInMidFeetZUp.get(supportSide);
 
-        
+
          connectingEdge1 = null;
          connectingEdge2 = null;
       }
-      
+
       this.footToFootLineSegmentInMidFeetZUp = new FrameLineSegment2d(sweetSpots.get(RobotSide.LEFT).changeFrameAndProjectToXYPlaneCopy(midFeetZUp),
-            sweetSpots.get(RobotSide.RIGHT).changeFrameAndProjectToXYPlaneCopy(midFeetZUp)); 
+            sweetSpots.get(RobotSide.RIGHT).changeFrameAndProjectToXYPlaneCopy(midFeetZUp));
    }
-   
+
    public String toString()
    {
       String ret = "";

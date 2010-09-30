@@ -20,7 +20,7 @@ public class LinkGraphicsRotate implements LinkGraphicsInstruction
    {
       return axis;
    }
-  
+
    public String toString()
    {
       return "\t\t\t<Rotate>"+angle+","+axis.x+","+axis.y+","+axis.z+"</Rotate>\n";

@@ -232,7 +232,7 @@ public class CartesianTrajectoryGeneratorTester
       {
          try
          {
-            Thread.sleep((long) slowDownMillis.getIntegerValue());
+            Thread.sleep(slowDownMillis.getIntegerValue());
          }
          catch (InterruptedException e)
          {

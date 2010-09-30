@@ -13,9 +13,9 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicRefere
    public class VisualizeFramesController implements RobotController
    {
       private static final long serialVersionUID = 4252284929932022778L;
-      
+
       private final YoVariableRegistry registry = new YoVariableRegistry("TestFramesController");
-      
+
       private final ArrayList<DynamicGraphicReferenceFrame> dynamicGraphicReferenceFrames = new ArrayList<DynamicGraphicReferenceFrame>();
 
       private final DynamicGraphicObjectsList dynamicGraphicObjectsList = new DynamicGraphicObjectsList("TestFramesController");
@@ -28,7 +28,7 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicRefere
             dynamicGraphicReferenceFrames.add(dynamicGraphicReferenceFrame);
             dynamicGraphicObjectsList.add(dynamicGraphicReferenceFrame);
          }
-         
+
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectsList);
       }
 
@@ -36,7 +36,7 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicRefere
       {
          updateDynamicGraphicReferenceFrames();
       }
-      
+
       public YoVariableRegistry getYoVariableRegistry()
       {
          return registry;

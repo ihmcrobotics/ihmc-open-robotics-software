@@ -10,7 +10,7 @@ import org.junit.Test;
 public class MultiplicativeDoubleGlobalParameterTest
 {
    private final double eps = 1e-10;
-   
+
    @Before
    public void setUp()
    {

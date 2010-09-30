@@ -17,17 +17,17 @@ public class LinkGraphicsAdd3DSFile implements LinkGraphicsInstruction
       this.fileName = fileName;
       this.appearance = appearence;
    }
-   
+
    public String getFileName()
    {
       return fileName;
    }
-   
+
    public AppearanceDefinition getAppearance()
    {
       return appearance;
    }
- 
+
    public String toString()
    {
 	   String ret = "\t\t\t<Add3DSFile>\n\t\t\t\t<Name>"+fileName+"</Name>\n";

@@ -89,7 +89,7 @@ public class CaptureRegionCalculator
       this.ankleZUpFrames = ankleZUpFrames;
 
       this.capturePointCalculator = capturePointCalculator;
-      this.kinematicRangeFromCoP = kinematicRangeFromCoP;
+      CaptureRegionCalculator.kinematicRangeFromCoP = kinematicRangeFromCoP;
 
       int numPoints = MAX_CAPTURE_REGION_POLYGON_POINTS - 1;
       double[][] reachableRegionPoints = new double[numPoints + 1][2];
@@ -97,7 +97,7 @@ public class CaptureRegionCalculator
 
       for (int i = 0; i < numPoints; i++)
       {
-         double angle = -0.03 * Math.PI - 0.70 * Math.PI * ((double) i) / ((double) (numPoints - 1));
+         double angle = -0.03 * Math.PI - 0.70 * Math.PI * (i) / ((numPoints - 1));
 
          double x = radius * Math.cos(angle);
          double y = radius * Math.sin(angle);
@@ -117,7 +117,7 @@ public class CaptureRegionCalculator
 
       for (int i = 0; i < numPoints; i++)
       {
-         double angle = 0.03 * Math.PI + 0.70 * Math.PI * ((double) i) / ((double) (numPoints - 1));
+         double angle = 0.03 * Math.PI + 0.70 * Math.PI * (i) / ((numPoints - 1));
 
          double x = radius * Math.cos(angle);
          double y = radius * Math.sin(angle);
@@ -263,7 +263,7 @@ public class CaptureRegionCalculator
 
    public void setKinematicRangeFromCoP(double kinematicRangeFromCoP)
    {
-      this.kinematicRangeFromCoP = kinematicRangeFromCoP;
+      CaptureRegionCalculator.kinematicRangeFromCoP = kinematicRangeFromCoP;
    }
 
    public FrameConvexPolygon2d calculateCaptureRegion(RobotSide supportLeg, FrameConvexPolygon2d supportFoot, double swingTimeRemaining)

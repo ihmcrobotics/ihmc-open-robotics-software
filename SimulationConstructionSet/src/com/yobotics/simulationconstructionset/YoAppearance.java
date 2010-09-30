@@ -260,7 +260,7 @@ public class YoAppearance
 
    public static Appearance RGBColorFrom8BitInts(int red, int green, int blue)
    {
-      return RGBColor(((float) (red)) / 255.0, ((float) (green)) / 255.0, ((float) (blue)) / 255.0);
+      return RGBColor(((red)) / 255.0, ((green)) / 255.0, ((blue)) / 255.0);
    }
 
    public static Appearance Color(Color color)

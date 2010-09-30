@@ -84,7 +84,7 @@ public class LinkGraphics
       // LinkGraphics this = new LinkGraphics();
 
       for (LinkGraphicsInstruction instruction : graphicsDefinition.getInstructions())
-      {	 
+      {
          if (instruction instanceof LinkGraphicsAdd3DSFile)
          {
             // Appearance app = new Appearance();

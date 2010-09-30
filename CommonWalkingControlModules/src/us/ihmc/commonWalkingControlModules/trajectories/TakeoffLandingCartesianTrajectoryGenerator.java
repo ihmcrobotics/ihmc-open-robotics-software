@@ -274,7 +274,7 @@ public class TakeoffLandingCartesianTrajectoryGenerator implements CartesianTraj
          desiredMaxVelocity.scale(velocityMagnitude.getDoubleValue());
       }
    }
-   
+
    private double computeVelocityMagnitude()
    {
       if (cartesianTrajectoryState.getEnumValue() == SwingState.LANDING)
@@ -340,7 +340,7 @@ public class TakeoffLandingCartesianTrajectoryGenerator implements CartesianTraj
 //      tempFrameVector.scale(0.5 * deltaT);
 //      tempFrameVector.add(currentVelocity.getFrameVectorCopy());
 //      tempFrameVector.scale(deltaT);
-      
+
       tempFrameVector.set(currentVelocity.getFrameVectorCopy());
       tempFrameVector.scale(deltaT);
       currentPosition.add(tempFrameVector);
