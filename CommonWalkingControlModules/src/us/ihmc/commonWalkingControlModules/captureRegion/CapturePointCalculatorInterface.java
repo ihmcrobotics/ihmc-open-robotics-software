@@ -11,7 +11,7 @@ public interface CapturePointCalculatorInterface
 
    public abstract FramePoint2d getCapturePoint2dInFrame(ReferenceFrame referenceFrame);
 
-   public void computePredictedCapturePoint(RobotSide supportLeg, double captureTime, FramePoint CoPInBodyZUp, FrameLineSegment2d guideLine);
+   public void computePredictedCapturePoint(RobotSide supportLeg, double captureTime, FramePoint centerOfPressure, FrameLineSegment2d guideLine);
 
    public abstract void hidePredictedCapturePoint();
 

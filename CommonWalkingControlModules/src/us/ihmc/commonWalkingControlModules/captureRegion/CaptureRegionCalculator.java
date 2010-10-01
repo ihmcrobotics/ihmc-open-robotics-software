@@ -57,7 +57,7 @@ public class CaptureRegionCalculator
 
    private final YoFramePoint[] additionalKinematicLimitPoints;
 
-   private ReferenceFrame worldFrame, bodyZUpFrame;
+   private ReferenceFrame worldFrame;
    private final SideDependentList<ReferenceFrame> ankleZUpFrames;
    private CapturePointCalculatorInterface capturePointCalculator;
 
@@ -80,12 +80,10 @@ public class CaptureRegionCalculator
 
    private GlobalTimer globalTimer;
 
-   public CaptureRegionCalculator(SideDependentList<ReferenceFrame> ankleZUpFrames, ReferenceFrame bodyZUpFrame, double midFootAnkleXOffset, double footWidth,
-                                  double kinematicRangeFromCoP, CapturePointCalculatorInterface capturePointCalculator, YoVariableRegistry yoVariableRegistry,
-                                  DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+   public CaptureRegionCalculator(SideDependentList<ReferenceFrame> ankleZUpFrames, double midFootAnkleXOffset, double footWidth, double kinematicRangeFromCoP,
+                                  CapturePointCalculatorInterface capturePointCalculator, YoVariableRegistry yoVariableRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       this.worldFrame = ReferenceFrame.getWorldFrame();
-      this.bodyZUpFrame = bodyZUpFrame;
       this.ankleZUpFrames = ankleZUpFrames;
 
       this.capturePointCalculator = capturePointCalculator;
@@ -147,10 +145,6 @@ public class CaptureRegionCalculator
 
 
       // Set up the scoring function:
-      SideDependentList<ReferenceFrame> footZUpFrames = new SideDependentList<ReferenceFrame>(ankleZUpFrames.get(RobotSide.LEFT),
-                                                           ankleZUpFrames.get(RobotSide.RIGHT));
-
-//    // set up scorer
 //    DoubleYoVariable stanceWidthForScore = new DoubleYoVariable("stanceWidthForScore", "Stance width for the scoring function.", registry);
 //    DoubleYoVariable stanceLengthForScore = new DoubleYoVariable("stanceLengthForScore", "Stance length for the scoring function.", registry);
 //    DoubleYoVariable stepAngleForScore = new DoubleYoVariable("stepAngleForScore", "Step angle for the scoring function.", registry);
@@ -287,7 +281,7 @@ public class CaptureRegionCalculator
       FramePoint2d capturePoint = capturePointCalculator.getCapturePoint2dInFrame(supportAnkleZUpFrame);
       FramePoint2d footCentroid = supportFoot.getCentroidCopy();
 
-      // 0. hmm, wierd things are happening when we predict the capture point given the cop extremes as calculated by
+      // 0. hmm, weird things are happening when we predict the capture point given the cop extremes as calculated by
       // the line of sightlines from the capture point when the capture point is close to the foot polygon. Let's try returning
       // no capture region when the center of mass is still over the support polygon
 
@@ -325,12 +319,12 @@ public class CaptureRegionCalculator
          if (i < estimatedCOPExtremes.length)
             estimatedCOPExtremes[i].set(copExtremeInWorld.getX(), copExtremeInWorld.getY(), 0.0);
 
-         FramePoint2d copExtremeInBodyZUp = extremesOfFeasibleCOP.get(i).changeFrameCopy(bodyZUpFrame);
-         FramePoint2d copExtremeInSupportAnkleZUp = copExtremeInBodyZUp.changeFrameCopy(supportAnkleZUpFrame);
-         FramePoint copExtremeInBodyZUp3d = new FramePoint(bodyZUpFrame, copExtremeInBodyZUp.getX(), copExtremeInBodyZUp.getY(), 0.0);
+         FramePoint2d copExtreme = extremesOfFeasibleCOP.get(i);
+         FramePoint2d copExtremeInSupportAnkleZUp = copExtreme.changeFrameCopy(supportAnkleZUpFrame);
+         FramePoint copExtreme3d = new FramePoint(copExtreme.getReferenceFrame(), copExtreme.getX(), copExtreme.getY(), 0.0);
 
          capturePointCalculator.computePredictedCapturePoint(supportLeg, swingTimeRemaining + SWING_TIME_TO_ADD_FOR_CAPTURING_SAFETY_FACTOR,
-                 copExtremeInBodyZUp3d, null);
+                 copExtreme3d, null);
 
          FramePoint predictedExtremeCapturePoint = capturePointCalculator.getPredictedCapturePointInFrame(supportAnkleZUpFrame);
          FramePoint2d predictedExtremeCapturePoint2d = new FramePoint2d(predictedExtremeCapturePoint.getReferenceFrame(), predictedExtremeCapturePoint.getX(),
