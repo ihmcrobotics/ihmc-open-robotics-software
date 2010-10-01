@@ -25,12 +25,11 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 public class BipedSupportPolygons
 {
    // Reference frames:
-   private final ReferenceFrame midFeetZUp, bodyZUp;
+   private final ReferenceFrame midFeetZUp;
    private final SideDependentList<ReferenceFrame> ankleZUpFrames;
 
    // Polygons:
    private final SideDependentList<FrameConvexPolygon2d> footPolygonsInAnkleZUp = new SideDependentList<FrameConvexPolygon2d>();
-   private final SideDependentList<FrameConvexPolygon2d> footPolygonsInBodyZUp = new SideDependentList<FrameConvexPolygon2d>();
    private final SideDependentList<FrameConvexPolygon2d> footPolygonsInMidFeetZUp = new SideDependentList<FrameConvexPolygon2d>();
    private FrameConvexPolygon2d supportPolygonInMidFeetZUp;
 
@@ -43,11 +42,10 @@ public class BipedSupportPolygons
    // Line segment from one sweet spot to the other:
    private FrameLineSegment2d footToFootLineSegmentInMidFeetZUp;
 
-   public BipedSupportPolygons(SideDependentList<ReferenceFrame> ankleZUpFrames, ReferenceFrame midFeetZUpFrame, ReferenceFrame bodyZUpFrame)
+   public BipedSupportPolygons(SideDependentList<ReferenceFrame> ankleZUpFrames, ReferenceFrame midFeetZUpFrame)
    {
 	   this.ankleZUpFrames = ankleZUpFrames;
 	   this.midFeetZUp = midFeetZUpFrame;
-	   this.bodyZUp = bodyZUpFrame;
    }
 
    public FrameConvexPolygon2d getSupportPolygonInMidFeetZUp()
@@ -68,11 +66,6 @@ public class BipedSupportPolygons
    public FrameConvexPolygon2d getFootPolygonInAnkleZUp(RobotSide robotSide)
    {
       return footPolygonsInAnkleZUp.get(robotSide);
-   }
-
-   public FrameConvexPolygon2d getFootPolygonInBodyZUp(RobotSide robotSide)
-   {
-      return footPolygonsInBodyZUp.get(robotSide);
    }
 
    public FrameConvexPolygon2d getFootPolygonInMidFeetZUp(RobotSide robotSide)
@@ -101,12 +94,10 @@ public class BipedSupportPolygons
          BipedFootInterface foot = feet.get(robotSide);
          FrameConvexPolygon2d footPolygonInFootFrame = foot.getFootPolygonInUse();
          FrameConvexPolygon2d footPolygonInAnkleZUp = footPolygonInFootFrame.changeFrameAndProjectToXYPlaneCopy(ankleZUpFrames.get(robotSide));
-         FrameConvexPolygon2d footPolygonsInBodyZUp = footPolygonInAnkleZUp.changeFrameCopy(bodyZUp);
          FrameConvexPolygon2d footPolygonsInMidFeetZUp = footPolygonInAnkleZUp.changeFrameCopy(midFeetZUp);
 
 
          this.footPolygonsInAnkleZUp.set(robotSide, footPolygonInAnkleZUp);
-         this.footPolygonsInBodyZUp.set(robotSide, footPolygonsInBodyZUp);
          this.footPolygonsInMidFeetZUp.set(robotSide, footPolygonsInMidFeetZUp);
          this.sweetSpots.set(robotSide, footPolygonsInAnkleZUp.get(robotSide).getCentroidCopy()); // Sweet spots are the centroids of the foot polygons.
 
