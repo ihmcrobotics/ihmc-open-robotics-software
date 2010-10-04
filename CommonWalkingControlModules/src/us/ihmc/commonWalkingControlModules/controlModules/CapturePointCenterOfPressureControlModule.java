@@ -41,6 +41,7 @@ public class CapturePointCenterOfPressureControlModule
    private final YoVariableRegistry registry = new YoVariableRegistry("CapturePointCenterOfPressureController");
 
    private final BooleanYoVariable turnOffCaptureControl = new BooleanYoVariable("turnOffCaptureControl", registry);
+
    {
       turnOffCaptureControl.set(false);
    }
@@ -101,7 +102,8 @@ public class CapturePointCenterOfPressureControlModule
    // Reference frames:
    ReferenceFrame bodyZUp, midFeetZUp, world;
 
-   public CapturePointCenterOfPressureControlModule(double controlDT, CommonWalkingReferenceFrames referenceFrames, YoVariableRegistry yoVariableRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+   public CapturePointCenterOfPressureControlModule(double controlDT, CommonWalkingReferenceFrames referenceFrames, YoVariableRegistry yoVariableRegistry,
+           DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       this.yoboticsBipedReferenceFrames = referenceFrames;
 
@@ -116,10 +118,12 @@ public class CapturePointCenterOfPressureControlModule
 
       centerOfPressureDesiredWorld = new YoFramePoint("copDesWorld", "", world, registry);
       centerOfPressureDesiredMidFeet = new YoFramePoint("copDesMidfeet", "", midFeetZUp, registry);
-      centerOfPressureDesiredLeftAnkleZUp = new YoFramePoint("copDesLaZUp", "", yoboticsBipedReferenceFrames.getAnkleZUpReferenceFrames().get(RobotSide.LEFT), registry);
-      centerOfPressureDesiredRightAnkleZUp = new YoFramePoint("copDesRaZUp", "", yoboticsBipedReferenceFrames.getAnkleZUpReferenceFrames().get(RobotSide.RIGHT), registry);
+      centerOfPressureDesiredLeftAnkleZUp = new YoFramePoint("copDesLaZUp", "", yoboticsBipedReferenceFrames.getAnkleZUpReferenceFrames().get(RobotSide.LEFT),
+              registry);
+      centerOfPressureDesiredRightAnkleZUp = new YoFramePoint("copDesRaZUp", "",
+              yoboticsBipedReferenceFrames.getAnkleZUpReferenceFrames().get(RobotSide.RIGHT), registry);
 
-//      footCenterOfPressureDesired = new YoFramePoint[] {centerOfPressureDesiredLeftAnkleZUp, centerOfPressureDesiredRightAnkleZUp};
+//    footCenterOfPressureDesired = new YoFramePoint[] {centerOfPressureDesiredLeftAnkleZUp, centerOfPressureDesiredRightAnkleZUp};
 
       centerOfPressureDesiredAnkleZUp = new SideDependentList<YoFramePoint>(centerOfPressureDesiredLeftAnkleZUp, centerOfPressureDesiredRightAnkleZUp);
 
@@ -164,8 +168,8 @@ public class CapturePointCenterOfPressureControlModule
       {
          DynamicGraphicObjectsList dynamicGraphicObjectList = new DynamicGraphicObjectsList("CapturePointController");
 
-         centerOfPressureDesiredWorldGraphicPosition = new DynamicGraphicPosition("Desired Center of Pressure", centerOfPressureDesiredWorld, 0.012, YoAppearance.Gray(),
-                 DynamicGraphicPosition.GraphicType.CROSS);
+         centerOfPressureDesiredWorldGraphicPosition = new DynamicGraphicPosition("Desired Center of Pressure", centerOfPressureDesiredWorld, 0.012,
+                 YoAppearance.Gray(), DynamicGraphicPosition.GraphicType.CROSS);
 
          dynamicGraphicObjectList.add(centerOfPressureDesiredWorldGraphicPosition);
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectList);
@@ -187,7 +191,7 @@ public class CapturePointCenterOfPressureControlModule
          centerOfPressureDesiredWorldGraphicPosition = null;
       }
 
-      if (yoVariableRegistry != null)// && (VarListsToRegister.REGISTER_CAPTURE_POINT_CENTER_OF_PRESSURE_CONTROLLER))
+      if (yoVariableRegistry != null)    // && (VarListsToRegister.REGISTER_CAPTURE_POINT_CENTER_OF_PRESSURE_CONTROLLER))
       {
          yoVariableRegistry.addChild(registry);
       }
@@ -196,13 +200,12 @@ public class CapturePointCenterOfPressureControlModule
 
 
    public void XYCoPControllerDoubleSupport(BipedSupportPolygons bipedSupportPolygons, CapturePointCalculatorInterface yoboticsBipedCapturePointCalculator,
-         FramePoint desiredCapturePoint)
- {
+           FramePoint desiredCapturePoint)
+   {
       FramePoint currentCapturePoint = yoboticsBipedCapturePointCalculator.getCapturePointInFrame(desiredCapturePoint.getReferenceFrame());
 
-      XYCoPControllerDoubleSupport(bipedSupportPolygons, currentCapturePoint,
-           desiredCapturePoint);
- }
+      XYCoPControllerDoubleSupport(bipedSupportPolygons, currentCapturePoint, desiredCapturePoint);
+   }
 
    /**
     * Finds instantaneous center of pressure to make robot move to desired x and y
@@ -212,8 +215,7 @@ public class CapturePointCenterOfPressureControlModule
     * @param processedSensors ProcessedSensors
     * @todo add stepping if outside footbase
     */
-   public void XYCoPControllerDoubleSupport(BipedSupportPolygons bipedSupportPolygons, FramePoint currentCapturePoint,
-           FramePoint desiredCapturePoint)
+   public void XYCoPControllerDoubleSupport(BipedSupportPolygons bipedSupportPolygons, FramePoint currentCapturePoint, FramePoint desiredCapturePoint)
    {
       // Hide the guideline and parallel line since not used in double support:
       guideLineWorld.setFrameLineSegment2d(null);
@@ -225,7 +227,7 @@ public class CapturePointCenterOfPressureControlModule
          throw new RuntimeException("desiredBalancePoint Not a ZUpFrame!!");
       }
 
-//      FramePoint current = yoboticsBipedCapturePointCalculator.getCapturePointInFrame(desiredCapturePoint.getReferenceFrame());
+//    FramePoint current = yoboticsBipedCapturePointCalculator.getCapturePointInFrame(desiredCapturePoint.getReferenceFrame());
 
 //    lowPassXYDot.update(processedSensors.pd_y_body_zup.val);
 
@@ -249,7 +251,7 @@ public class CapturePointCenterOfPressureControlModule
       // Control from here on is in MidFeetZUpFrame:
       if (control.getReferenceFrame() != midFeetZUp)
       {
-//         control = control.changeFrameCopy(bodyZUp);
+//       control = control.changeFrameCopy(bodyZUp);
          control = control.changeFrameCopy(midFeetZUp);
       }
 
@@ -322,8 +324,10 @@ public class CapturePointCenterOfPressureControlModule
                   double distanceSquaredToIntersection0 = centerOfPressureDesired2d.distanceSquared(intersections[0]);
                   double distanceSquaredToIntersection1 = centerOfPressureDesired2d.distanceSquared(intersections[1]);
 
-                  if (distanceSquaredToIntersection0 <= distanceSquaredToIntersection1) intersectionToUse = intersections[0];
-                  else intersectionToUse = intersections[1];
+                  if (distanceSquaredToIntersection0 <= distanceSquaredToIntersection1)
+                     intersectionToUse = intersections[0];
+                  else
+                     intersectionToUse = intersections[1];
                }
 
                centerOfPressureDesired.setX(intersectionToUse.getX());
@@ -363,8 +367,8 @@ public class CapturePointCenterOfPressureControlModule
       centerOfPressureDesiredWorld.set(centerOfPressureDesiredMidFeet.getFramePointCopy().changeFrameCopy(world));
    }
 
-   public void XYCoPControllerSingleSupport(FramePoint currentCapturePoint, FrameLineSegment2d guideLine, RobotSide supportLeg,
-           ReferenceFrame referenceFrame, BipedSupportPolygons supportPolygons)
+   public void XYCoPControllerSingleSupport(FramePoint currentCapturePoint, FrameLineSegment2d guideLine, RobotSide supportLeg, ReferenceFrame referenceFrame,
+           BipedSupportPolygons supportPolygons)
    {
       FramePoint2d sweetSpot2d = supportPolygons.getSweetSpotCopy(supportLeg);
       FramePoint sweetSpot = new FramePoint(sweetSpot2d.getReferenceFrame(), sweetSpot2d.getX(), sweetSpot2d.getY(), 0.0);
@@ -382,13 +386,13 @@ public class CapturePointCenterOfPressureControlModule
     * @param supportPolygons BipedSupportPolygons
     * @param desiredCenterOfPressure FramePoint
     */
-   public void XYCoPControllerSingleSupport(FramePoint currentCapturePoint, FrameLineSegment2d guideLine,
-           FramePoint desiredCapturePoint, RobotSide supportLeg, ReferenceFrame referenceFrame, BipedSupportPolygons supportPolygons)    // , double percentToFarEdgeOfFoot)
+   public void XYCoPControllerSingleSupport(FramePoint currentCapturePoint, FrameLineSegment2d guideLine, FramePoint desiredCapturePoint, RobotSide supportLeg,
+           ReferenceFrame referenceFrame, BipedSupportPolygons supportPolygons)    // , double percentToFarEdgeOfFoot)
    {
       singleSupportWasPreviousTick.set(true);
 
       // Compute and get capture point:
-//      FramePoint currentCapturePoint = yoboticsBipedCapturePointCalculator.getCapturePointInFrame(referenceFrame);
+//    FramePoint currentCapturePoint = yoboticsBipedCapturePointCalculator.getCapturePointInFrame(referenceFrame);
 
       // Transformation to 2d points: (should just use 2d throughout the program eventually)
       FramePoint2d currentCapturePoint2d = new FramePoint2d(currentCapturePoint.getReferenceFrame(), currentCapturePoint.getX(), currentCapturePoint.getY());
@@ -516,21 +520,21 @@ public class CapturePointCenterOfPressureControlModule
       if (turnOffCaptureControl.getBooleanValue())
       {
          centerOfPressureDesiredAnkleZUp.get(supportLeg).set(0.0, 0.0, 0.0);
-//         footCenterOfPressureDesired[supportLeg.ordinal()].setX(0.0);
-//         footCenterOfPressureDesired[supportLeg.ordinal()].setY(0.0);
-//         footCenterOfPressureDesired[supportLeg.ordinal()].setZ(0.0);
+
+//       footCenterOfPressureDesired[supportLeg.ordinal()].setX(0.0);
+//       footCenterOfPressureDesired[supportLeg.ordinal()].setY(0.0);
+//       footCenterOfPressureDesired[supportLeg.ordinal()].setZ(0.0);
       }
       else
       {
          centerOfPressureDesiredAnkleZUp.get(supportLeg).set(desiredCenterOfPressure2d.getX(), desiredCenterOfPressure2d.getY(), 0.0);
 
-//         footCenterOfPressureDesired[supportLeg.ordinal()].setX(desiredCenterOfPressure2d.getX());
-//         footCenterOfPressureDesired[supportLeg.ordinal()].setY(desiredCenterOfPressure2d.getY());
-//         footCenterOfPressureDesired[supportLeg.ordinal()].setZ(0.0);
+//       footCenterOfPressureDesired[supportLeg.ordinal()].setX(desiredCenterOfPressure2d.getX());
+//       footCenterOfPressureDesired[supportLeg.ordinal()].setY(desiredCenterOfPressure2d.getY());
+//       footCenterOfPressureDesired[supportLeg.ordinal()].setZ(0.0);
       }
 
-      centerOfPressureDesiredWorld.set(
-            centerOfPressureDesiredAnkleZUp.get(supportLeg).getFramePointCopy().changeFrameCopy(world));
+      centerOfPressureDesiredWorld.set(centerOfPressureDesiredAnkleZUp.get(supportLeg).getFramePointCopy().changeFrameCopy(world));
    }
 
 
