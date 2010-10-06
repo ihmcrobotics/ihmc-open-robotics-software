@@ -90,7 +90,7 @@ public class TakeoffLandingCartesianTrajectoryGeneratorTest
    private void runOneTest(TakeoffLandingCartesianTrajectoryGenerator generator, double groundZ, FramePoint initialPosition, FrameVector initialVelocity,
                            FramePoint finalDesiredPosition)
    {
-      generator.initialize(groundZ, initialPosition, initialVelocity, finalDesiredPosition);
+      generator.initialize(initialPosition, initialVelocity, finalDesiredPosition);
       TrajectoryToTest trajectoryToTest = generateTrajectory(generator);
 
       trajectoryToTest.verifyTrajectoryOnlyCrossesZMaxTwice(generator.getZClearance());

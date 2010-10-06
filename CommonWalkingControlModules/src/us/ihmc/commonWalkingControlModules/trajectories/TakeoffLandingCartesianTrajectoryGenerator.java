@@ -60,7 +60,6 @@ public class TakeoffLandingCartesianTrajectoryGenerator implements CartesianTraj
    private final ReferenceFrame referenceFrame;
 
    /**
-    * ctor
     * @param maxAccel maximum acceleration of instantaneous desired position
     * @param maxVel maximum velocity of instantaneous desired position
     * @param zClearance height above ground to be reached
@@ -99,7 +98,7 @@ public class TakeoffLandingCartesianTrajectoryGenerator implements CartesianTraj
    }
 
 
-   public void initialize(double groundZ, FramePoint initialPosition, FrameVector initialVelocity, FramePoint finalDesiredPosition)
+   public void initialize(FramePoint initialPosition, FrameVector initialVelocity, FramePoint finalDesiredPosition)
    {
       cartesianTrajectoryState.set(SwingState.TAKE_OFF);
 
@@ -109,15 +108,17 @@ public class TakeoffLandingCartesianTrajectoryGenerator implements CartesianTraj
 
       this.currentPosition.set(initialPosition);
       this.currentVelocity.set(initialVelocity);
-
-      this.groundZ.set(groundZ);  //+++
-      //+++finalDesiredPosition.setZ(this.groundZ.getDoubleValue());
+      
+//    this.groundZ.set(Math.max(initialPosition.getZ(), finalDesiredPosition.getZ()));
+    this.groundZ.set(finalDesiredPosition.getZ());
    }
 
    public void updateFinalDesiredPosition(FramePoint finalDesiredPosition)
    {
       this.finalDesiredPosition.set(finalDesiredPosition);
-      //+++this.finalDesiredPosition.setZ(this.groundZ.getDoubleValue());
+      this.groundZ.set(finalDesiredPosition.getZ());
+
+//      this.groundZ.set(Math.max(initialPosition.getZ(), finalDesiredPosition.getZ()));
    }
 
    public void computeNextTick(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack, double deltaT)
@@ -473,7 +474,7 @@ public class TakeoffLandingCartesianTrajectoryGenerator implements CartesianTraj
       FrameVector initialVelocity = new FrameVector(referenceFrame, 0.1, 0.1, 0.1);
       FramePoint finalDesiredPosition = new FramePoint(referenceFrame, 2.0, 2.0, 2.0);
 
-      cartesianTrajectoryGenerator.initialize(0.0, initialPosition, initialVelocity, finalDesiredPosition);
+      cartesianTrajectoryGenerator.initialize(initialPosition, initialVelocity, finalDesiredPosition);
 
       new CartesianTrajectoryGeneratorTester(cartesianTrajectoryGenerator, yoVariableRegistry, dynamicGraphicObjectsListRegistry,
               "cartesianTrajectoryGeneratorTester");
