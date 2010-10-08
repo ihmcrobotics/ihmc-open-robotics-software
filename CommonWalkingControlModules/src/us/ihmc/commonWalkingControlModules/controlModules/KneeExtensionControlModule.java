@@ -41,15 +41,28 @@ public class KneeExtensionControlModule
 
       kp_KneeExtension = new DoubleYoVariable("kp_KneeExtension", registry);
 
+      if (parentRegistry != null)
+         parentRegistry.addChild(registry);
+   }
+   
+   public void setupParametersForR2()
+   {
       loadedBentKnee.set(0.3); //0.07); //0.35); //0.7); //0.5);
       extendedKnee.set(0.0);
       bendTime.set(0.2);
       extendTime.set(0.2);
 
       kp_KneeExtension.set(500.0);
+   }
+   
+   public void setupParametersForM2V2()
+   {
+      loadedBentKnee.set(0.3); //0.07); //0.35); //0.7); //0.5);
+      extendedKnee.set(0.0);
+      bendTime.set(0.3);
+      extendTime.set(0.3);
 
-      if (parentRegistry != null)
-         parentRegistry.addChild(registry);
+      kp_KneeExtension.set(50.0);
    }
 
    public void doLoadingControl(LegTorquesInterface legTorquesToPackForStanceSide)
