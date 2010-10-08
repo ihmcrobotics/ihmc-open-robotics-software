@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.controlModules;
+package us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 
