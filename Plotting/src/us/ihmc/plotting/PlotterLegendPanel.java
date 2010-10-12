@@ -63,12 +63,14 @@ public class PlotterLegendPanel extends JPanel implements ArtifactsChangedListen
          g.setFont(f);
 
          double scale = 500;
-
          
-//         if (artifact.getID().equals("FinalDesiredSwing"))
-//         {
-//            scale = 200;
-//         }
+         
+         // TODO: Get the desired scale factor from the artifact itself.
+         
+         if (artifact.getID().equals("FinalDesiredSwing"))
+         {
+            scale = 200;
+         }
 
          artifact.drawLegend(g, artifactX, y, scale);
 
