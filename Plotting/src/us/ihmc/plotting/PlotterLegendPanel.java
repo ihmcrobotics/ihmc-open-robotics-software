@@ -27,21 +27,12 @@ public class PlotterLegendPanel extends JPanel implements ArtifactsChangedListen
     */
    private static final long serialVersionUID = -8268027977270506164L;
    private ArrayList<Artifact> artifacts = new ArrayList<Artifact>();
-   private double scale;
 
-   public PlotterLegendPanel(double scale)
+   public PlotterLegendPanel()
    {
-      this.scale = scale;
-
       super.setBackground(new Color(180, 220, 240));
-
-      setPreferredSize(new Dimension(400, 800));
    }
 
-   public void setScale(double scale)
-   {
-      this.scale = scale;
-   }
 
    public void setArtifacts(ArrayList<Artifact> artifacts)
    {
@@ -71,12 +62,13 @@ public class PlotterLegendPanel extends JPanel implements ArtifactsChangedListen
          y = y + deltaY;
          g.setFont(f);
 
-         scale = 500;
+         double scale = 500;
 
-         if (artifact.getID().equals("FinalDesiredSwing"))
-         {
-            scale = 200;
-         }
+         
+//         if (artifact.getID().equals("FinalDesiredSwing"))
+//         {
+//            scale = 200;
+//         }
 
          artifact.drawLegend(g, artifactX, y, scale);
 
@@ -98,6 +90,7 @@ public class PlotterLegendPanel extends JPanel implements ArtifactsChangedListen
          }
 
          g.drawString(newName, labelX, y);
+         setPreferredSize(new Dimension(400, y+deltaY));
       }
    }
 

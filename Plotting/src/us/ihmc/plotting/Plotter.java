@@ -905,20 +905,20 @@ public class Plotter extends JPanel
       }
    }
 
-   public PlotterLegendPanel createPlotterLegendPanel(double scale)
+   public PlotterLegendPanel createPlotterLegendPanel()
    {
-      PlotterLegendPanel ret = new PlotterLegendPanel(scale);
+      PlotterLegendPanel ret = new PlotterLegendPanel();
 
       this.addArtifactsChangedListener(ret);
 
       return ret;
    }
 
-   public JPanel createAndAttachPlotterLegendPanel(double scale)
+   public JPanel createAndAttachPlotterLegendPanel()
    {
       JPanel ret = new JPanel();
 
-      PlotterLegendPanel plotterLegendPanel = new PlotterLegendPanel(scale);
+      PlotterLegendPanel plotterLegendPanel = new PlotterLegendPanel();
 
       this.addArtifactsChangedListener(plotterLegendPanel);
 
