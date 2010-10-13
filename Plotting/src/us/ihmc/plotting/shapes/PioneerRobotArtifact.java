@@ -7,9 +7,6 @@ import us.ihmc.plotting.Pose;
 
 public class PioneerRobotArtifact extends Artifact
 {
-   /**
-    * 
-    */
    private static final long serialVersionUID = -7196775480859274435L;
    protected Pose _pose;
    protected double width = 0.4826;
@@ -120,6 +117,16 @@ public class PioneerRobotArtifact extends Artifact
 
    public void drawLegend(Graphics g, int Xcenter, int Ycenter, double scaleFactor)
    {
+   }
+   
+   public void drawHistory(Graphics g, int Xcenter, int Ycenter, double scaleFactor)
+   {
+      throw new RuntimeException("Not implemented!");
+   }
+   
+   public void takeHistorySnapshot()
+   {
+      throw new RuntimeException("Not implemented!");
    }
 
 }

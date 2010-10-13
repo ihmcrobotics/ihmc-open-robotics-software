@@ -241,4 +241,14 @@ public class PointArtifact extends Artifact implements Serializable
          printWriter.println(coordinate.x + " " + coordinate.y);
       }
    }
+   
+   public void drawHistory(Graphics g, int Xcenter, int Ycenter, double scaleFactor)
+   {
+      throw new RuntimeException("Not implemented!");
+   }
+   
+   public void takeHistorySnapshot()
+   {
+      throw new RuntimeException("Not implemented!");
+   }
 }

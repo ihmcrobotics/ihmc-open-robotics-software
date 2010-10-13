@@ -82,5 +82,15 @@ public class TextArtifact extends Artifact
 
       return cirlceCopy;
    }
+   
+   public void drawHistory(Graphics g, int Xcenter, int Ycenter, double scaleFactor)
+   {
+      throw new RuntimeException("Not implemented!");
+   }
+   
+   public void takeHistorySnapshot()
+   {
+      throw new RuntimeException("Not implemented!");
+   }
 
 }
