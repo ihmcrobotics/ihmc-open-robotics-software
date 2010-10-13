@@ -89,4 +89,14 @@ public class LineArtifact extends Artifact implements Serializable
    public void drawLegend(Graphics g, int Xcenter, int Ycenter, double scaleFactor)
    {
    }
+   
+   public void drawHistory(Graphics g, int Xcenter, int Ycenter, double scaleFactor)
+   {
+      throw new RuntimeException("Not implemented!");
+   }
+   
+   public void takeHistorySnapshot()
+   {
+      throw new RuntimeException("Not implemented!");
+   }
 }

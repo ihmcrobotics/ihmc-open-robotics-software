@@ -6,17 +6,16 @@ import java.io.Serializable;
 
 public abstract class Artifact implements Plottable, Serializable
 {
-   /**
-    * 
-    */
    private static final long serialVersionUID = -463773605470590581L;
-   protected String id;
+   protected final String id;
    protected String type;
    protected int level;
    protected Color color = Color.blue;
-   protected boolean showID = false;
    protected boolean isVisible = true;
-
+   private boolean showID = false;
+   private boolean drawHistory = false;
+   private boolean recordHistory = false;
+   
    public Artifact(String id)
    {
       this.id = id;
@@ -26,17 +25,43 @@ public abstract class Artifact implements Plottable, Serializable
     * Must provide a draw method for plotter to render artifact
     */
    public abstract void draw(Graphics g, int Xcenter, int Ycenter, double scaleFactor);
-
+   public abstract void drawHistory(Graphics g, int Xcenter, int Ycenter, double scaleFactor);
+   public abstract void takeHistorySnapshot();
    public abstract void drawLegend(Graphics g, int Xcenter, int Ycenter, double scaleFactor);
-
-   public void setID(String id)
-   {
-      this.id = id;
-   }
 
    public void setType(String type)
    {
       this.type = type;
+   }
+   
+   public void setShowID(boolean showID)
+   {
+      this.showID = showID;
+   }
+   
+   public boolean getShowID()
+   {
+      return showID;
+   }
+   
+   public void setDrawHistory(boolean drawHistory)
+   {
+      this.drawHistory = drawHistory;
+   }
+   
+   public boolean getDrawHistory()
+   {
+      return drawHistory;
+   }
+   
+   public void setRecordHistory(boolean recordHistory)
+   {
+      this.recordHistory = recordHistory;
+   }
+   
+   public boolean getRecordHistory()
+   {
+      return recordHistory;
    }
 
    public String getID()
@@ -62,11 +87,6 @@ public abstract class Artifact implements Plottable, Serializable
    public void setColor(Color color)
    {
       this.color = color;
-   }
-
-   public void setShowID(boolean value)
-   {
-      showID = value;
    }
 
    public Color getColor()

@@ -30,9 +30,6 @@ import us.ihmc.utilities.math.geometry.Line2d;
 
 public class Plotter extends JPanel
 {
-   /**
-    * 
-    */
    private static final long serialVersionUID = 3113130298799362369L;
 
    private final ArrayList<ArtifactsChangedListener> artifactsChangedListeners = new ArrayList<ArtifactsChangedListener>();
@@ -40,49 +37,49 @@ public class Plotter extends JPanel
    // show selections
    private boolean SHOW_SELECTION = false;
 
+   private boolean drawHistory = false;
+   
    private long updateDelayInMillis = 0;
    private long lastUpdate = 0;
 
    private BufferedImage backgroundImage = null;
 
-   // simpanel
    private Dimension preferredSize = new Dimension(275, 275);
    private final HashMap<String, Artifact> artifacts = new HashMap<String, Artifact>();
-   int _Xcenter;
-   int _Ycenter;
-   double _Xoffset = 0;
-   double _Yoffset = 0;
-   double _scale = 20;
-   double _scaleFactor;
-   double _origScale = -1.0;
-   double _ullon, _ullat, _lrlon, _lrlat;
-   int _origRange = 0;
-   int _orientation = Plottable.X_Y;
-   double _Xselected = 0;
-   double _Yselected = 0;
-   boolean _isRoboCentric = false;
+   
+   private int xCenter;
+   private int yCenter;
+   private double xOffset = 0.0;
+   private double yOffset = 0.0;
+   private double scale = 20.0;
+   private double scaleFactor;
+   private double _ullon, _ullat, _lrlon, _lrlat;
+   private double xSelected = 0.0;
+   private double ySelected = 0.0;
 
+   private int _orientation;
+   
    // rectangle area selection
-   double _areaX1 = 0;
-   double _areaY1 = 0;
-   double _areaX2 = 0;
-   double _areaY2 = 0;
-   double _areaX1TEMP = 0;
-   double _areaY1TEMP = 0;
+   private double _areaX1 = 0.0;
+   private double _areaY1 = 0.0;
+   private double _areaX2 = 0.0;
+   private double _areaY2 = 0.0;
+   private double _areaX1TEMP = 0.0;
+   private double _areaY1TEMP = 0.0;
 
    // drag tracking
-   protected int buttonPressed;
-   protected int dragStartX;
-   protected int dragStartY;
-   protected double xOffsetStartOfDrag;
-   protected double yOffsetStartOfDrag;
+   private  int buttonPressed;
+   private  int dragStartX;
+   private  int dragStartY;
+   private  double xOffsetStartOfDrag;
+   private  double yOffsetStartOfDrag;
 
    // double click listener
    private DoubleClickListener _listener;
 
    // polygon tracking
-   public boolean MAKING_POLYGON = false;
-   protected PolygonArtifact polygonArtifact;
+   private boolean MAKING_POLYGON = false;
+   private  PolygonArtifact polygonArtifact;
 
 
 
@@ -107,6 +104,11 @@ public class Plotter extends JPanel
       this.addMouseMotionListener(myListener);
    }
 
+   public void setDrawHistory(boolean drawHistory)
+   {
+      this.drawHistory = drawHistory;
+   }
+   
    public void paintComponent(Graphics gO)
    {
       long currentTime = System.currentTimeMillis();
@@ -116,15 +118,15 @@ public class Plotter extends JPanel
 
          // get current size and determine scaling factor
          Dimension d = this.getSize();
-         int h = (int)Math.round(d.getHeight());
-         int w = (int)Math.round(d.getWidth());
-         _Xcenter = w / 2;    // 0;//w/2;
-         _Ycenter = h / 2;    // h;//h/2;
-         _scaleFactor = h / _scale;
+         int height = (int)Math.round(d.getHeight());
+         int width = (int)Math.round(d.getWidth());
+         xCenter = width / 2;    // 0;//w/2;
+         yCenter = height / 2;    // h;//h/2;
+         scaleFactor = height / scale;
 
          // set current offset
-         _Xcenter = _Xcenter - (int)Math.round(_Xoffset * _scaleFactor);
-         _Ycenter = _Ycenter + (int)Math.round(_Yoffset * _scaleFactor);
+         xCenter = xCenter - (int)Math.round(xOffset * scaleFactor);
+         yCenter = yCenter + (int)Math.round(yOffset * scaleFactor);
 
          // paint background
          super.paintComponent(g);
@@ -138,7 +140,7 @@ public class Plotter extends JPanel
                {
                   if (artifact.getLevel() == 86)
                   {
-                     artifact.draw(g, _Xcenter, _Ycenter, _scaleFactor);
+                     artifact.draw(g, xCenter, yCenter, scaleFactor);
                   }
                }
                else
@@ -177,7 +179,7 @@ public class Plotter extends JPanel
 
             // paint grid lines
             Coordinate ulCoord = convertFromPixelsToMeters(new Coordinate(0, 0, Coordinate.PIXEL));
-            Coordinate lrCoord = convertFromPixelsToMeters(new Coordinate(w, h, Coordinate.PIXEL));
+            Coordinate lrCoord = convertFromPixelsToMeters(new Coordinate(width, height, Coordinate.PIXEL));
             double minX = ulCoord.getX();
             double maxX = lrCoord.getX();
             double diff = maxX - minX;
@@ -198,8 +200,8 @@ public class Plotter extends JPanel
                int y = (int)Math.round(coord.getY());
 
                // draw line
-               g.drawLine(x, 0, x, h);
-               g.drawLine(0, y, w, y);
+               g.drawLine(x, 0, x, height);
+               g.drawLine(0, y, width, y);
             }
          }
 
@@ -212,9 +214,37 @@ public class Plotter extends JPanel
          int y0 = (int)Math.round(coord.getY());
 
          // draw line
-         g.drawLine(x0, 0, x0, h);
-         g.drawLine(0, y0, w, y0);
+         g.drawLine(x0, 0, x0, height);
+         g.drawLine(0, y0, width, y0);
 
+      // Paint all artifacts history by level
+         // (assumes 5 levels (0-4)
+         if (drawHistory)
+         {
+            synchronized (artifacts)
+            {
+               for (int i = 0; i < 5; i++)
+               {
+                  for (Artifact artifact : artifacts.values())
+                  {
+                     // get next element
+                     // System.out.println("drawing " + a.getID());
+                     if (artifact != null)
+                     {
+                        if (artifact.getDrawHistory() && (artifact.getLevel() == i))
+                        {
+                           artifact.drawHistory(g, xCenter, yCenter, scaleFactor);    // , _orientation);
+                        }
+                     }
+                     else
+                     {
+                        System.out.println(">>> a = " + artifact);
+                     }
+                  }
+               }
+            }
+         }
+         
          // Paint all artifacts by level
          // (assumes 5 levels (0-4)
          synchronized (artifacts)
@@ -229,7 +259,7 @@ public class Plotter extends JPanel
                   {
                      if (artifact.getLevel() == i)
                      {
-                        artifact.draw(g, _Xcenter, _Ycenter, _scaleFactor);    // , _orientation);
+                        artifact.draw(g, xCenter, yCenter, scaleFactor);    // , _orientation);
                      }
                   }
                   else
@@ -245,8 +275,8 @@ public class Plotter extends JPanel
          {
             g.setColor(Color.red);
             int xSize = 8;
-            int xX = _Xcenter + ((int)Math.round(_Xselected * _scaleFactor));
-            int yX = _Ycenter - ((int)Math.round(_Yselected * _scaleFactor));
+            int xX = xCenter + ((int)Math.round(xSelected * scaleFactor));
+            int yX = yCenter - ((int)Math.round(ySelected * scaleFactor));
             g.drawLine(xX - xSize, yX - xSize, xX + xSize, yX + xSize);
             g.drawLine(xX - xSize, yX + xSize, xX + xSize, yX - xSize);
          }
@@ -255,10 +285,10 @@ public class Plotter extends JPanel
          if (SHOW_SELECTION)
          {
             g.setColor(Color.red);
-            int areaX1 = _Xcenter + ((int)Math.round(_areaX1 * _scaleFactor));
-            int areaY1 = _Ycenter - ((int)Math.round(_areaY1 * _scaleFactor));
-            int areaX2 = _Xcenter + ((int)Math.round(_areaX2 * _scaleFactor));
-            int areaY2 = _Ycenter - ((int)Math.round(_areaY2 * _scaleFactor));
+            int areaX1 = xCenter + ((int)Math.round(_areaX1 * scaleFactor));
+            int areaY1 = yCenter - ((int)Math.round(_areaY1 * scaleFactor));
+            int areaX2 = xCenter + ((int)Math.round(_areaX2 * scaleFactor));
+            int areaY2 = yCenter - ((int)Math.round(_areaY2 * scaleFactor));
             int Xmin, Xmax, Ymin, Ymax;
             if (areaX1 > areaX2)
             {
@@ -479,12 +509,12 @@ public class Plotter extends JPanel
 
    public double getSelectedX()
    {
-      return _Xselected;
+      return xSelected;
    }
 
    public double getSelectedY()
    {
-      return _Yselected;
+      return ySelected;
    }
 
    public double getAreaX1()
@@ -533,7 +563,7 @@ public class Plotter extends JPanel
 
       // _Xcenter = w/2;
       // _Ycenter = h/2;
-      _scaleFactor = h / _scale;
+      scaleFactor = h / scale;
 
       // detemine plot size
       Dimension plotD = plot.getSize();
@@ -541,8 +571,8 @@ public class Plotter extends JPanel
       int plotW = (int)Math.round(plotD.getWidth());
 
       // place plot so bottom is cenetered at location
-      int xnew = (int)Math.round((pt.x * _scaleFactor) - (plotW / 2));
-      int ynew = (int)Math.round((h - (pt.y * _scaleFactor)) - (plotH));
+      int xnew = (int)Math.round((pt.x * scaleFactor) - (plotW / 2));
+      int ynew = (int)Math.round((h - (pt.y * scaleFactor)) - (plotH));
 
       return new Point(xnew, ynew);
 
@@ -551,7 +581,7 @@ public class Plotter extends JPanel
 
    private double unConvertXCoordinate(int coordinate)
    {
-      double x = new Integer(coordinate - _Xcenter).doubleValue() / _scaleFactor;
+      double x = new Integer(coordinate - xCenter).doubleValue() / scaleFactor;
 
       // System.out.println("x=" + x);
       return x;
@@ -559,7 +589,7 @@ public class Plotter extends JPanel
 
    private double unConvertYCoordinate(int coordinate)
    {
-      double y = new Integer((_Ycenter - coordinate)).doubleValue() / _scaleFactor;
+      double y = new Integer((yCenter - coordinate)).doubleValue() / scaleFactor;
 
       // System.out.println("y=" + y);
       return y;
@@ -570,10 +600,10 @@ public class Plotter extends JPanel
       double x = coordinate.getX();
       double y = coordinate.getY();
 
-      x = new Double(_Xcenter + ((int)Math.round(x * _scaleFactor))).doubleValue();
+      x = new Double(xCenter + ((int)Math.round(x * scaleFactor))).doubleValue();
 
       // System.out.println("x(pixels)=" + x);
-      y = new Double(_Ycenter - ((int)Math.round(y * _scaleFactor))).doubleValue();
+      y = new Double(yCenter - ((int)Math.round(y * scaleFactor))).doubleValue();
 
       // System.out.println("y(pixels)=" + y);
       return new Coordinate(x, y, Coordinate.PIXEL);
@@ -584,10 +614,10 @@ public class Plotter extends JPanel
       double x = coordinate.getX();
       double y = coordinate.getY();
 
-      x = (x - new Integer(_Xcenter).doubleValue()) / _scaleFactor;
+      x = (x - new Integer(xCenter).doubleValue()) / scaleFactor;
 
       // System.out.println("x=" + x);
-      y = ((new Integer(_Ycenter).doubleValue()) - y) / _scaleFactor;
+      y = ((new Integer(yCenter).doubleValue()) - y) / scaleFactor;
 
       // System.out.println("y=" + y);
       return new Coordinate(x, y, Coordinate.METER);
@@ -595,9 +625,7 @@ public class Plotter extends JPanel
 
    public void setRangeLimit(int range, double origMapScale, double ullon, double ullat, double lrlon, double lrlat)
    {
-      _scale = range;
-      _origRange = range;
-      _origScale = origMapScale;
+      scale = range;
       _ullon = ullon;
       _ullat = ullat;
       _lrlon = lrlon;
@@ -608,13 +636,13 @@ public class Plotter extends JPanel
 
    public void setRange(double range)
    {
-      _scale = range;
+      scale = range;
       repaint();
    }
 
    public double getRange()
    {
-      return _scale;
+      return scale;
    }
 
    public void setOrientation(int orientation)
@@ -625,28 +653,22 @@ public class Plotter extends JPanel
 
    public void setXoffset(double x)
    {
-      _Xoffset = x;
+      xOffset = x;
    }
 
    public void setYoffset(double y)
    {
-      _Yoffset = y;
+      yOffset = y;
    }
 
    public double getXoffset()
    {
-      return _Xoffset;
+      return xOffset;
    }
 
    public double getYoffset()
    {
-      return _Yoffset;
-   }
-
-   public void setRoboCentric(boolean x)
-   {
-      _isRoboCentric = x;
-      repaint();
+      return yOffset;
    }
 
    public Dimension getPreferredSize()
@@ -808,16 +830,16 @@ public class Plotter extends JPanel
 
          if (buttonPressed == MouseEvent.BUTTON1)
          {
-            _Xselected = unConvertXCoordinate(e.getX());
-            _Yselected = unConvertYCoordinate(e.getY());
+            xSelected = unConvertXCoordinate(e.getX());
+            ySelected = unConvertYCoordinate(e.getY());
 
 //          _areaX1TEMP = unConvertXCoordinate(e.getX());
 //          _areaY1TEMP = unConvertYCoordinate(e.getY());
          }
          else if (buttonPressed == MouseEvent.BUTTON3)
          {
-            _Xselected = unConvertXCoordinate(e.getX());
-            _Yselected = unConvertYCoordinate(e.getY());
+            xSelected = unConvertXCoordinate(e.getX());
+            ySelected = unConvertYCoordinate(e.getY());
 
 //          dragStartX = e.getX();
 //          dragStartY = e.getY();

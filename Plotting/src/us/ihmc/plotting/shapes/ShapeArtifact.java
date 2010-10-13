@@ -11,38 +11,35 @@ import us.ihmc.plotting.Pose;
 
 public class ShapeArtifact extends Artifact
 {
-   /**
-    * 
-    */
    private static final long serialVersionUID = 2446850336045691305L;
-   private Pose _pose;
-   private double _height;
-   private double _width;
+   private Pose pose;
+   private double height;
+   private double width;
 
    public ShapeArtifact(String id, String type, double height, double width, Pose pose)
    {
       super(id);
       setType(type);
       setLevel(1);
-      _pose = pose;
-      _height = height;
-      _width = width;
+      this.pose = pose;
+      this.height = height;
+      this.width = width;
    }
-
+   
    public void setPose(Pose pose)
    {
-      _pose = pose;
+      this.pose = pose;
    }
 
    public Coordinate getCoordinate()
    {
-      return _pose;
+      return pose;
    }
 
 
    public Pose getPose()
    {
-      return _pose;
+      return pose;
    }
 
    /**
@@ -50,32 +47,32 @@ public class ShapeArtifact extends Artifact
     */
    public void draw(Graphics g, int Xcenter, int Ycenter, double scaleFactor)
    {
-      if (_pose == null)
+      if (pose == null)
       {
          System.out.println("problem...shape with null pose:" + this.getID());
 
          return;
       }
 
-      int x = Xcenter + ((int)Math.round(_pose.getX() * scaleFactor));
-      int y = Ycenter - ((int)Math.round(_pose.getY() * scaleFactor));
+      int x = Xcenter + ((int)Math.round(pose.getX() * scaleFactor));
+      int y = Ycenter - ((int)Math.round(pose.getY() * scaleFactor));
 
       g.setColor(color);
-      int w = (int) (_width * scaleFactor);
-      int h = (int) (_height * scaleFactor);
-      if (super.getType().equals("fillcircle"))
+      int w = (int) (width * scaleFactor);
+      int h = (int) (height * scaleFactor);
+      if (getType().equals("fillcircle"))
       {
          g.fillOval((x - (w / 2)), (y - (h / 2)), w, h);
       }
-      else if (super.getType().equals("circle"))
+      else if (getType().equals("circle"))
       {
          g.drawOval((x - (w / 2)), (y - (h / 2)), w, h);
       }
-      else if (super.getType().equals("fillrectangle"))
+      else if (getType().equals("fillrectangle"))
       {
          g.fillRect((x - (w / 2)), (y - (h / 2)), w, h);
       }
-      else if (super.getType().equals("rectangle"))
+      else if (getType().equals("rectangle"))
       {
          g.drawRect((x - (w / 2)), (y - (h / 2)), w, h);
       }
@@ -88,21 +85,21 @@ public class ShapeArtifact extends Artifact
       int y = Ycenter;
 
       g.setColor(color);
-      int w = (int) (_width * scaleFactor);
-      int h = (int) (_height * scaleFactor);
-      if (super.getType().equals("fillcircle"))
+      int w = (int) (width * scaleFactor);
+      int h = (int) (height * scaleFactor);
+      if (getType().equals("fillcircle"))
       {
          g.fillOval((x - (w / 2)), (y - (h / 2)), w, h);
       }
-      else if (super.getType().equals("circle"))
+      else if (getType().equals("circle"))
       {
          g.drawOval((x - (w / 2)), (y - (h / 2)), w, h);
       }
-      else if (super.getType().equals("fillrectangle"))
+      else if (getType().equals("fillrectangle"))
       {
          g.fillRect((x - (w / 2)), (y - (h / 2)), w, h);
       }
-      else if (super.getType().equals("rectangle"))
+      else if (getType().equals("rectangle"))
       {
          g.drawRect((x - (w / 2)), (y - (h / 2)), w, h);
       }
@@ -112,7 +109,7 @@ public class ShapeArtifact extends Artifact
 
    public void save(PrintWriter printWriter)
    {
-      printWriter.println(_pose.getX() + " " + _pose.getY() + " " + _width + " " + _height + " " + getType() + " " + id);
+      printWriter.println(pose.getX() + " " + pose.getY() + " " + width + " " + height + " " + getType() + " " + id);
    }
 
    public static ShapeArtifact load(BufferedReader bufferedReader)
@@ -143,10 +140,20 @@ public class ShapeArtifact extends Artifact
 
    public ShapeArtifact getCopy()
    {
-      ShapeArtifact shapeCopy = new ShapeArtifact(this.getID(), this.getType(), _height, _width, this.getPose());
+      ShapeArtifact shapeCopy = new ShapeArtifact(this.getID(), this.getType(), height, width, this.getPose());
       shapeCopy.setColor(this.getColor());
 
       return shapeCopy;
+   }
+   
+   public void drawHistory(Graphics g, int Xcenter, int Ycenter, double scaleFactor)
+   {
+      throw new RuntimeException("Not implemented!");
+   }
+   
+   public void takeHistorySnapshot()
+   {
+      throw new RuntimeException("Not implemented!");
    }
 
 }

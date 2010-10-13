@@ -124,4 +124,14 @@ public class PolygonArtifact extends Artifact
    {
       g.drawString("Polygon", xCenter, yCenter);
    }
+   
+   public void drawHistory(Graphics g, int Xcenter, int Ycenter, double scaleFactor)
+   {
+      throw new RuntimeException("Not implemented!");
+   }
+   
+   public void takeHistorySnapshot()
+   {
+      throw new RuntimeException("Not implemented!");
+   }
 }
