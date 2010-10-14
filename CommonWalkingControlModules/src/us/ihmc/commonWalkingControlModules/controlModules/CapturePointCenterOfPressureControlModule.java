@@ -5,6 +5,8 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPoly
 import us.ihmc.commonWalkingControlModules.captureRegion.CapturePointCalculatorInterface;
 import us.ihmc.utilities.math.geometry.FrameLineSegment2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
+import us.ihmc.utilities.math.geometry.FrameVector;
+import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
@@ -13,17 +15,18 @@ public interface CapturePointCenterOfPressureControlModule
 {
 
    public abstract void XYCoPControllerDoubleSupport(BipedSupportPolygons bipedSupportPolygons,
-         CapturePointCalculatorInterface yoboticsBipedCapturePointCalculator, FramePoint desiredCapturePoint);
+         CapturePointCalculatorInterface yoboticsBipedCapturePointCalculator, FramePoint desiredCapturePoint, FramePoint centerOfMassPositionInWorldFrame, FrameVector2d desiredVelocity, FrameVector currentCOMVelocity);
 
    /**
     * Finds instantaneous center of pressure to make robot move to desired x and y
-    *
+    * @param desiredVelocity 
+    * @param currentVelocity TODO
     * @param xDesiredMidFrame double
     * @param yDesiredMidframe double
     * @param processedSensors ProcessedSensors
     * @todo add stepping if outside footbase
     */
-   public abstract void XYCoPControllerDoubleSupport(BipedSupportPolygons bipedSupportPolygons, FramePoint currentCapturePoint, FramePoint desiredCapturePoint);
+   public abstract void XYCoPControllerDoubleSupport(BipedSupportPolygons bipedSupportPolygons, FramePoint currentCapturePoint, FramePoint desiredCapturePoint, FramePoint centerOfMassPositionInWorldFrame, FrameVector2d desiredVelocity, FrameVector currentVelocity);
 
    public abstract void XYCoPControllerSingleSupport(FramePoint currentCapturePoint, FrameLineSegment2d guideLine, RobotSide supportLeg,
          ReferenceFrame referenceFrame, BipedSupportPolygons supportPolygons);
