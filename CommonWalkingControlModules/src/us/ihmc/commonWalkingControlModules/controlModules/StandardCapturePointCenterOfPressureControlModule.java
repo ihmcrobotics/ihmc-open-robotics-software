@@ -202,7 +202,6 @@ public class StandardCapturePointCenterOfPressureControlModule implements Captur
    /* (non-Javadoc)
     * @see us.ihmc.commonWalkingControlModules.controlModules.CapturePointCenterOfPressureControlModule#XYCoPControllerDoubleSupport(us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons, us.ihmc.commonWalkingControlModules.captureRegion.CapturePointCalculatorInterface, us.ihmc.utilities.math.geometry.FramePoint)
     */
-   @Override
    public void XYCoPControllerDoubleSupport(BipedSupportPolygons bipedSupportPolygons, CapturePointCalculatorInterface yoboticsBipedCapturePointCalculator,
            FramePoint desiredCapturePoint)
    {
@@ -214,7 +213,6 @@ public class StandardCapturePointCenterOfPressureControlModule implements Captur
    /* (non-Javadoc)
     * @see us.ihmc.commonWalkingControlModules.controlModules.CapturePointCenterOfPressureControlModule#XYCoPControllerDoubleSupport(us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons, us.ihmc.utilities.math.geometry.FramePoint, us.ihmc.utilities.math.geometry.FramePoint)
     */
-   @Override
    public void XYCoPControllerDoubleSupport(BipedSupportPolygons bipedSupportPolygons, FramePoint currentCapturePoint, FramePoint desiredCapturePoint)
    {
       // Hide the guideline and parallel line since not used in double support:
@@ -370,7 +368,6 @@ public class StandardCapturePointCenterOfPressureControlModule implements Captur
    /* (non-Javadoc)
     * @see us.ihmc.commonWalkingControlModules.controlModules.CapturePointCenterOfPressureControlModule#XYCoPControllerSingleSupport(us.ihmc.utilities.math.geometry.FramePoint, us.ihmc.utilities.math.geometry.FrameLineSegment2d, us.ihmc.commonWalkingControlModules.RobotSide, us.ihmc.utilities.math.geometry.ReferenceFrame, us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons)
     */
-   @Override
    public void XYCoPControllerSingleSupport(FramePoint currentCapturePoint, FrameLineSegment2d guideLine, RobotSide supportLeg, ReferenceFrame referenceFrame,
            BipedSupportPolygons supportPolygons)
    {
@@ -383,7 +380,6 @@ public class StandardCapturePointCenterOfPressureControlModule implements Captur
    /* (non-Javadoc)
     * @see us.ihmc.commonWalkingControlModules.controlModules.CapturePointCenterOfPressureControlModule#XYCoPControllerSingleSupport(us.ihmc.utilities.math.geometry.FramePoint, us.ihmc.utilities.math.geometry.FrameLineSegment2d, us.ihmc.utilities.math.geometry.FramePoint, us.ihmc.commonWalkingControlModules.RobotSide, us.ihmc.utilities.math.geometry.ReferenceFrame, us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons)
     */
-   @Override
    public void XYCoPControllerSingleSupport(FramePoint currentCapturePoint, FrameLineSegment2d guideLine, FramePoint desiredCapturePoint, RobotSide supportLeg,
            ReferenceFrame referenceFrame, BipedSupportPolygons supportPolygons)    // , double percentToFarEdgeOfFoot)
    {
@@ -617,7 +613,6 @@ public class StandardCapturePointCenterOfPressureControlModule implements Captur
    /* (non-Javadoc)
     * @see us.ihmc.commonWalkingControlModules.controlModules.CapturePointCenterOfPressureControlModule#setMaxCaptureToCoP(double)
     */
-   @Override
    public void setMaxCaptureToCoP(double maxCaptureToCoP)
    {
       this.maxCaptureToCoP.set(maxCaptureToCoP);
@@ -627,7 +622,6 @@ public class StandardCapturePointCenterOfPressureControlModule implements Captur
    /* (non-Javadoc)
     * @see us.ihmc.commonWalkingControlModules.controlModules.CapturePointCenterOfPressureControlModule#setKCaptureX(double)
     */
-   @Override
    public void setKCaptureX(double kx)
    {
       K_capture_x.set(kx);
@@ -636,7 +630,6 @@ public class StandardCapturePointCenterOfPressureControlModule implements Captur
    /* (non-Javadoc)
     * @see us.ihmc.commonWalkingControlModules.controlModules.CapturePointCenterOfPressureControlModule#getKCaptureX()
     */
-   @Override
    public double getKCaptureX()
    {
       return K_capture_x.getDoubleValue();
@@ -646,7 +639,6 @@ public class StandardCapturePointCenterOfPressureControlModule implements Captur
    /* (non-Javadoc)
     * @see us.ihmc.commonWalkingControlModules.controlModules.CapturePointCenterOfPressureControlModule#setKCaptureY(double)
     */
-   @Override
    public void setKCaptureY(double ky)
    {
       K_capture_y.set(ky);
@@ -655,7 +647,6 @@ public class StandardCapturePointCenterOfPressureControlModule implements Captur
    /* (non-Javadoc)
     * @see us.ihmc.commonWalkingControlModules.controlModules.CapturePointCenterOfPressureControlModule#getKCaptureY()
     */
-   @Override
    public double getKCaptureY()
    {
       return K_capture_y.getDoubleValue();
@@ -664,7 +655,6 @@ public class StandardCapturePointCenterOfPressureControlModule implements Captur
    /* (non-Javadoc)
     * @see us.ihmc.commonWalkingControlModules.controlModules.CapturePointCenterOfPressureControlModule#getCenterOfPressureDesiredWorld()
     */
-   @Override
    public YoFramePoint getCenterOfPressureDesiredWorld()
    {
       return centerOfPressureDesiredWorld;
@@ -673,7 +663,6 @@ public class StandardCapturePointCenterOfPressureControlModule implements Captur
    /* (non-Javadoc)
     * @see us.ihmc.commonWalkingControlModules.controlModules.CapturePointCenterOfPressureControlModule#getCenterOfPressureDesiredMidFeet()
     */
-   @Override
    public YoFramePoint getCenterOfPressureDesiredMidFeet()
    {
       return centerOfPressureDesiredMidFeet;
@@ -682,7 +671,6 @@ public class StandardCapturePointCenterOfPressureControlModule implements Captur
    /* (non-Javadoc)
     * @see us.ihmc.commonWalkingControlModules.controlModules.CapturePointCenterOfPressureControlModule#getCenterOfPressureDesiredLeftAnkleZUp()
     */
-   @Override
    public YoFramePoint getCenterOfPressureDesiredLeftAnkleZUp()
    {
       return centerOfPressureDesiredLeftAnkleZUp;
@@ -691,7 +679,6 @@ public class StandardCapturePointCenterOfPressureControlModule implements Captur
    /* (non-Javadoc)
     * @see us.ihmc.commonWalkingControlModules.controlModules.CapturePointCenterOfPressureControlModule#getCenterOfPressureDesiredRightAnkleZUp()
     */
-   @Override
    public YoFramePoint getCenterOfPressureDesiredRightAnkleZUp()
    {
       return centerOfPressureDesiredRightAnkleZUp;
@@ -700,7 +687,6 @@ public class StandardCapturePointCenterOfPressureControlModule implements Captur
    /* (non-Javadoc)
     * @see us.ihmc.commonWalkingControlModules.controlModules.CapturePointCenterOfPressureControlModule#getCenterOfPressureDesiredAnkleZUp(us.ihmc.commonWalkingControlModules.RobotSide)
     */
-   @Override
    public YoFramePoint getCenterOfPressureDesiredAnkleZUp(RobotSide robotSide)
    {
       return centerOfPressureDesiredAnkleZUp.get(robotSide);
