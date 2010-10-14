@@ -135,6 +135,14 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
    
    @Override
    public void XYCoPControllerDoubleSupport(BipedSupportPolygons bipedSupportPolygons, CapturePointCalculatorInterface yoboticsBipedCapturePointCalculator,
+         FramePoint desiredCapturePoint)
+   {
+      throw new RuntimeException("Needs Center of Mass data");
+   }
+   
+   
+   @Override
+   public void XYCoPControllerDoubleSupport(BipedSupportPolygons bipedSupportPolygons, CapturePointCalculatorInterface yoboticsBipedCapturePointCalculator,
          FramePoint desiredCapturePoint, FramePoint centerOfMassPosition, FrameVector2d desiredVelocity, FrameVector currentCOMVelocity)
    {
       FramePoint currentCapturePoint = yoboticsBipedCapturePointCalculator.getCapturePointInFrame(desiredCapturePoint.getReferenceFrame());
@@ -346,5 +354,7 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
    {
       return centerOfPressureDesiredAnkleZUp.get(robotSide);
    }
+
+   
 
 }

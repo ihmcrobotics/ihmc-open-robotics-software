@@ -13,7 +13,9 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 
 public interface CapturePointCenterOfPressureControlModule
 {
-
+   public abstract void XYCoPControllerDoubleSupport(BipedSupportPolygons bipedSupportPolygons,
+         CapturePointCalculatorInterface yoboticsBipedCapturePointCalculator, FramePoint desiredCapturePoint);
+   
    public abstract void XYCoPControllerDoubleSupport(BipedSupportPolygons bipedSupportPolygons,
          CapturePointCalculatorInterface yoboticsBipedCapturePointCalculator, FramePoint desiredCapturePoint, FramePoint centerOfMassPositionInWorldFrame, FrameVector2d desiredVelocity, FrameVector currentCOMVelocity);
 

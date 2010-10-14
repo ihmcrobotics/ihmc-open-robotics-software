@@ -197,7 +197,13 @@ public class StandardCapturePointCenterOfPressureControlModule implements Captur
       }
 
    }
-
+   
+   @Override
+   public void XYCoPControllerDoubleSupport(BipedSupportPolygons bipedSupportPolygons, CapturePointCalculatorInterface yoboticsBipedCapturePointCalculator,
+         FramePoint desiredCapturePoint)
+   {
+      XYCoPControllerDoubleSupport(bipedSupportPolygons, yoboticsBipedCapturePointCalculator, desiredCapturePoint, null, null, null);
+   }
 
    /* (non-Javadoc)
     * @see us.ihmc.commonWalkingControlModules.controlModules.CapturePointCenterOfPressureControlModule#XYCoPControllerDoubleSupport(us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons, us.ihmc.commonWalkingControlModules.captureRegion.CapturePointCalculatorInterface, us.ihmc.utilities.math.geometry.FramePoint)
