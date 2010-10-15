@@ -16,6 +16,7 @@ import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
+import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoAppearance;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
@@ -24,6 +25,7 @@ import com.yobotics.simulationconstructionset.util.graphics.ArtifactList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
+import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoVariable;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameLine2d;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 
@@ -51,6 +53,11 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
    
    private DoubleYoVariable captureKp = new DoubleYoVariable("captureKp", registry);
    		
+   
+   private final DoubleYoVariable alphaDesiredCoP = new DoubleYoVariable("alphaDesiredCoP", registry);
+   private final AlphaFilteredYoVariable xDesiredCoP = new AlphaFilteredYoVariable("xDesiredCoP", registry, alphaDesiredCoP);
+   private final AlphaFilteredYoVariable yDesiredCoP = new AlphaFilteredYoVariable("yDesiredCoP", registry, alphaDesiredCoP);
+   private final BooleanYoVariable lastTickSingleSupport = new BooleanYoVariable("lastTickSingleSupport", registry);
    
    private final DynamicGraphicPosition centerOfPressureDesiredWorldGraphicPosition;
 
@@ -81,9 +88,12 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
       centerOfPressureDesiredAnkleZUp = new SideDependentList<YoFramePoint>(centerOfPressureDesiredLeftAnkleZUp, centerOfPressureDesiredRightAnkleZUp);
 
       
-      speedControlXKp.set(6.0);
+      speedControlXKp.set(5.0);
       speedControlYKp.set(0.0);
       captureKp.set(6.0);
+      
+      alphaDesiredCoP.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequency(8.84, controlDT));
+      lastTickSingleSupport.set(true);
       
       if (dynamicGraphicObjectsListRegistry != null)
       {
@@ -200,6 +210,22 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
          centerOfPressureDesired = controlLine.intersectionWith(massLine);
       }
  
+      if (lastTickSingleSupport.getBooleanValue())
+      {
+         xDesiredCoP.reset();
+         yDesiredCoP.reset();
+
+         lastTickSingleSupport.set(false);
+      }
+      
+      
+      xDesiredCoP.update(centerOfPressureDesired.getX());
+      yDesiredCoP.update(centerOfPressureDesired.getY());
+      
+      centerOfPressureDesired.setX(xDesiredCoP.getDoubleValue());
+      centerOfPressureDesired.setY(yDesiredCoP.getDoubleValue());
+
+      
       
      
      if (bipedSupportPolygons != null)
@@ -286,6 +312,7 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
    public void XYCoPControllerSingleSupport(FramePoint currentCapturePoint, FrameLineSegment2d guideLine, FramePoint desiredCapturePoint, RobotSide supportLeg,
          ReferenceFrame referenceFrame, BipedSupportPolygons supportPolygons)
    {
+      lastTickSingleSupport.set(true);
       comDirectionLine.setFrameLine2d(null);
       cpLine.setFrameLine2d(null);
       standardCapturePointCenterOfPressureControlModule.XYCoPControllerSingleSupport(currentCapturePoint, guideLine, desiredCapturePoint, supportLeg, referenceFrame, supportPolygons);
