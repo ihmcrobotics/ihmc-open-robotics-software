@@ -2,14 +2,11 @@ package us.ihmc.commonWalkingControlModules.controlModules;
 
 import java.awt.Color;
 
-import javax.media.j3d.Transform3D;
-
 import us.ihmc.commonWalkingControlModules.RobotSide;
 import us.ihmc.commonWalkingControlModules.SideDependentList;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.captureRegion.CapturePointCalculatorInterface;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
-import us.ihmc.commonWalkingControlModules.sensors.ProcessedSensorsInterface;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameLine2d;
 import us.ihmc.utilities.math.geometry.FrameLineSegment2d;
@@ -23,13 +20,11 @@ import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoAppearance;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.plotting.YoFrameLine2dArtifact;
-import com.yobotics.simulationconstructionset.plotting.YoFrameLineSegment2dArtifact;
 import com.yobotics.simulationconstructionset.util.graphics.ArtifactList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameLine2d;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFrameLineSegment2d;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 
 public class SpeedControllingCapturePointCenterOfPressureControlModule implements CapturePointCenterOfPressureControlModule
@@ -53,6 +48,8 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
    
    private DoubleYoVariable speedControlXKp = new DoubleYoVariable("speedControlXKp", registry);
    private DoubleYoVariable speedControlYKp = new DoubleYoVariable("speedControlYKp", registry);
+   
+   private DoubleYoVariable captureKp = new DoubleYoVariable("captureKp", registry);
    		
    
    private final DynamicGraphicPosition centerOfPressureDesiredWorldGraphicPosition;
@@ -85,7 +82,8 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
 
       
       speedControlXKp.set(6.0);
-      
+      speedControlYKp.set(0.0);
+      captureKp.set(6.0);
       
       if (dynamicGraphicObjectsListRegistry != null)
       {
@@ -157,7 +155,7 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
          FramePoint currentCapturePoint, FramePoint desiredCapturePoint, FramePoint centerOfMassPositionInZUpFrame, FrameVector2d desiredVelocity, FrameVector currentVelocity)
    {
      // Create Line from dCP to iCP
-      FrameLine2d controlLine = new FrameLine2d(desiredCapturePoint.toFramePoint2d(), currentCapturePoint.toFramePoint2d());
+      FrameLine2d controlLine = new FrameLine2d(currentCapturePoint.toFramePoint2d(), desiredCapturePoint.toFramePoint2d());
       cpLine.setFrameLine2d(controlLine.changeFrameCopy(world));
       
       
@@ -171,23 +169,37 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
       
       currentVelocity.changeFrame(world);
       
-      // Speed controller: Only increase speed for now
-      speedControlPosition.setX(speedControlPosition.getX() + speedControlXKp.getDoubleValue() * Math.min(0.0,currentVelocity.getX() - desiredVelocity.getX()));
-      speedControlPosition.setY(speedControlPosition.getY() + speedControlYKp.getDoubleValue() * Math.min(0.0,currentVelocity.getY() - desiredVelocity.getY()));
+
+      // Check if the direction the iCP has to be moved in is the same as the desired velocity of the CoM. If not, give preference to the iCP direction.
+      
+      FrameVector2d comDirection = desiredVelocity.changeFrameCopy(midFeetZUp);
+      comDirection.normalize();
+      FrameVector2d controlDirection = controlLine.getNormalizedFrameVector();
       
       
+      FramePoint2d centerOfPressureDesired = null;
       
+      if(Math.abs(comDirection.angle(controlDirection)) > 0.5*Math.PI)
+      {
+         double distance = desiredCapturePoint.getXYplaneDistance(currentCapturePoint);
+         centerOfPressureDesired = desiredCapturePoint.toFramePoint2d();
+         controlDirection.scale(captureKp.getDoubleValue()*distance);
+         centerOfPressureDesired.sub(controlDirection);
+      }
+      else
+      {
       
-      
-      
-      velocityT = velocityT.changeFrameCopy(midFeetZUp);
-      
-      FrameLine2d massLine = new FrameLine2d(speedControlPosition,velocityT);
-      comDirectionLine.setFrameLine2d(massLine.changeFrameCopy(world));
-      
-     FramePoint2d centerOfPressureDesired = controlLine.intersectionWith(massLine);
+         // Speed controller: Only increase speed for now
+         speedControlPosition.setX(speedControlPosition.getX() + speedControlXKp.getDoubleValue() * Math.min(0.0,currentVelocity.getX() - desiredVelocity.getX()));
+         speedControlPosition.setY(speedControlPosition.getY() + speedControlYKp.getDoubleValue() * Math.min(0.0,currentVelocity.getY() - desiredVelocity.getY()));
+         
+         velocityT = velocityT.changeFrameCopy(midFeetZUp);
+         
+         FrameLine2d massLine = new FrameLine2d(speedControlPosition,velocityT);
+         comDirectionLine.setFrameLine2d(massLine.changeFrameCopy(world));
+         centerOfPressureDesired = controlLine.intersectionWith(massLine);
+      }
  
-      //centerOfPressureDesired.sub(controlLine);
       
      
      if (bipedSupportPolygons != null)
