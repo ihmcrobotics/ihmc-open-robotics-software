@@ -19,7 +19,7 @@ import com.yobotics.simulationconstructionset.util.ground.RollingGroundProfile;
 
 public enum TerrainType
 {
-   FLAT, ROLLING_HILLS, BUMPY, ROCKY, STEP_UP, ALTERNATING_SLOPES, STEEP_UPSLOPE, MOON, LOADED, COURSE;
+   FLAT, ROLLING_HILLS, BUMPY, ROCKY, STEP_UP, ALTERNATING_SLOPES, DOWNHILL, STEEP_UPSLOPE, MOON, LOADED, COURSE;
 
    public static final double FLAT_HEIGHT = 0.0;
    
@@ -67,6 +67,16 @@ public enum TerrainType
             break;
          }
             
+         case DOWNHILL :
+         {
+            double xMin = -1.0, xMax = 12.0;
+            double yMin = -2.0, yMax = 2.0;
+            double[][] xSlopePairs = new double[][]{{1.0, -0.05}, {3.0, 0.0}, {5.0, -0.1}, {7.0, 0.0}, {9.0, -0.1}, {11.0, 0.0}};
+            groundProfile = new AlternatingSlopesGroundProfile(xSlopePairs, xMin, xMax, yMin, yMax);
+         
+            break;
+         }
+         
          case STEEP_UPSLOPE :
          {
             double xMin = -1.0, xMax = 10.0;
