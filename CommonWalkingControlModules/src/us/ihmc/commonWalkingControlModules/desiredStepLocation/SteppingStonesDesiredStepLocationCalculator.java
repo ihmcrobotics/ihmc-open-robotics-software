@@ -9,6 +9,7 @@ import us.ihmc.commonWalkingControlModules.SideDependentList;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.captureRegion.CaptureRegionCalculator;
 import us.ihmc.commonWalkingControlModules.captureRegion.SteppingStonesCaptureRegionIntersectionCalculator;
+import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
 import us.ihmc.commonWalkingControlModules.desiredStepLocation.DesiredStepLocationCalculator;
 import us.ihmc.commonWalkingControlModules.desiredStepLocation.Footstep;
 import us.ihmc.commonWalkingControlModules.desiredStepLocation.StepLocationScorer;
@@ -248,4 +249,11 @@ public class SteppingStonesDesiredStepLocationCalculator implements DesiredStepL
    }
 
    private enum CaptureRegionStepLocationSelectionMethod {NEAREST_CENTROID, NEAREST_POINT}
+
+   @Override
+   public void computeDesiredStepLocation(RobotSide swingLegSide, CouplingRegistry couplingResitry)
+   {
+      // TODO Auto-generated method stub
+
+   }
 }
