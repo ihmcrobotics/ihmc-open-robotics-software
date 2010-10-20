@@ -99,7 +99,13 @@ public class KneeExtensionControlModule
       desiredKneeAngle.set(yoMinimumJerkTrajectory.getPosition());
    }
 
-
+   public void breakKneeForDownhillSlopes(RobotSide supportSide)
+   {
+      double time = processedSensors.getTime();
+      yoMinimumJerkTrajectory.setParams(processedSensors.getKneeAngle(supportSide), 0.0, 0.0, loadedBentKnee.getDoubleValue()+0.05, 0.0,
+                                        0.0, time, time + bendTime.getDoubleValue()-0.05);
+   }
+   
    public void doTransitionIntoLoading(RobotSide supportSide)
    {
       double time = processedSensors.getTime();

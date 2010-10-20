@@ -71,7 +71,7 @@ public enum TerrainType
          {
             double xMin = -1.0, xMax = 12.0;
             double yMin = -2.0, yMax = 2.0;
-            double[][] xSlopePairs = new double[][]{{1.0, -0.05}, {3.0, 0.0}, {5.0, -0.1}, {7.0, 0.0}, {9.0, -0.1}, {11.0, 0.0}};
+            double[][] xSlopePairs = new double[][]{{1.0, -0.05}, {3.0, 0.0}, {5.0, -0.1}, {7.0, -0.0}, {9.0, -0.1}, {11.0, 0.0}};
             groundProfile = new AlternatingSlopesGroundProfile(xSlopePairs, xMin, xMax, yMin, yMax);
          
             break;
