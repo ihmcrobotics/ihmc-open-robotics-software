@@ -210,7 +210,7 @@ public class StandardCapturePointCenterOfPressureControlModule implements Captur
     */
    @Override
    public void XYCoPControllerDoubleSupport(BipedSupportPolygons bipedSupportPolygons, CapturePointCalculatorInterface yoboticsBipedCapturePointCalculator,
-           FramePoint desiredCapturePoint, FramePoint centerOfMassPositionInZUpFrame, FrameVector2d desiredVelocity, FrameVector currentCOMVelocity)
+           FramePoint desiredCapturePoint, FramePoint centerOfMassPositionInZUpFrame, FrameVector2d desiredVelocity, FrameVector2d currentCOMVelocity)
    {
       FramePoint currentCapturePoint = yoboticsBipedCapturePointCalculator.getCapturePointInFrame(desiredCapturePoint.getReferenceFrame());
 
@@ -221,7 +221,7 @@ public class StandardCapturePointCenterOfPressureControlModule implements Captur
     * @see us.ihmc.commonWalkingControlModules.controlModules.CapturePointCenterOfPressureControlModule#XYCoPControllerDoubleSupport(us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons, us.ihmc.utilities.math.geometry.FramePoint, us.ihmc.utilities.math.geometry.FramePoint)
     */
    @Override
-   public void XYCoPControllerDoubleSupport(BipedSupportPolygons bipedSupportPolygons, FramePoint currentCapturePoint, FramePoint desiredCapturePoint, FramePoint centerOfMassPositionInZUpFrame, FrameVector2d desiredVelocity, FrameVector currentVelocity)
+   public void XYCoPControllerDoubleSupport(BipedSupportPolygons bipedSupportPolygons, FramePoint currentCapturePoint, FramePoint desiredCapturePoint, FramePoint centerOfMassPositionInZUpFrame, FrameVector2d desiredVelocity, FrameVector2d currentVelocity)
    {
       // Hide the guideline and parallel line since not used in double support:
       guideLineWorld.setFrameLineSegment2d(null);
@@ -710,5 +710,14 @@ public class StandardCapturePointCenterOfPressureControlModule implements Captur
    public YoFramePoint getCenterOfPressureDesiredAnkleZUp(RobotSide robotSide)
    {
       return centerOfPressureDesiredAnkleZUp.get(robotSide);
+   }
+
+   @Override
+   public void XYCoPControllerSingleSupport(FramePoint currentCapturePoint, FrameLineSegment2d guideLine, FramePoint desiredCapturePoint, RobotSide supportLeg,
+         ReferenceFrame referenceFrame, BipedSupportPolygons supportPolygons, FramePoint centerOfMassPositionInZUpFrame, FrameVector2d desiredVelocity,
+         FrameVector2d currentVelocity)
+   {
+      XYCoPControllerSingleSupport(currentCapturePoint, guideLine, desiredCapturePoint, supportLeg, referenceFrame, supportPolygons);
+      
    }
 }
