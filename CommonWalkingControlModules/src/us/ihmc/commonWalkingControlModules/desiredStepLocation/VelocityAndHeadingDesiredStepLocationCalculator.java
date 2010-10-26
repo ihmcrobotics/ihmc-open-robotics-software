@@ -88,7 +88,7 @@ public class VelocityAndHeadingDesiredStepLocationCalculator implements DesiredS
    }
 
 
-   public Footstep getDesiredStepLocation(RobotSide supportLegSide, BipedSupportPolygons bipedSupportPolygons, FrameConvexPolygon2d captureRegion)
+   public Footstep computeCurrentDesiredStepLocation(RobotSide supportLegSide, BipedSupportPolygons bipedSupportPolygons, FrameConvexPolygon2d captureRegion)
    {
       RobotSide swingLegSide = supportLegSide.getOppositeSide();
 
@@ -97,7 +97,7 @@ public class VelocityAndHeadingDesiredStepLocationCalculator implements DesiredS
       return new Footstep(swingLegSide, footstepPosition, stepYaw.getDoubleValue());
    }
 
-   public void computeDesiredStepLocation(RobotSide swingLegSide, CouplingRegistry couplingRegistry)
+   public void initializeAtStartOfStep(RobotSide swingLegSide, CouplingRegistry couplingRegistry)
    {
       ReferenceFrame desiredHeadingFrame = desiredHeadingControlModule.getDesiredHeadingFrame();
 

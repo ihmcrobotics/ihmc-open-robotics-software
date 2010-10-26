@@ -124,7 +124,7 @@ public class SteppingStonesDesiredStepLocationCalculator implements DesiredStepL
       }
    }
 
-   public Footstep getDesiredStepLocation(RobotSide supportLeg, BipedSupportPolygons bipedSupportPolygons, FrameConvexPolygon2d captureRegion)
+   public Footstep computeCurrentDesiredStepLocation(RobotSide supportLeg, BipedSupportPolygons bipedSupportPolygons, FrameConvexPolygon2d captureRegion)
    {
       FramePoint nominalLocation = getNominalStepLocation(supportLeg);
       Point2d nominalLocation2d = new Point2d(nominalLocation.getX(), nominalLocation.getY());
@@ -251,7 +251,7 @@ public class SteppingStonesDesiredStepLocationCalculator implements DesiredStepL
    private enum CaptureRegionStepLocationSelectionMethod {NEAREST_CENTROID, NEAREST_POINT}
 
 
-   public void computeDesiredStepLocation(RobotSide swingLegSide, CouplingRegistry couplingResitry)
+   public void initializeAtStartOfStep(RobotSide swingLegSide, CouplingRegistry couplingResitry)
    {
       // TODO Auto-generated method stub
 
