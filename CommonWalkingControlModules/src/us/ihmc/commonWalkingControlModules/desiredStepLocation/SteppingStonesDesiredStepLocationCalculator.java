@@ -250,7 +250,7 @@ public class SteppingStonesDesiredStepLocationCalculator implements DesiredStepL
 
    private enum CaptureRegionStepLocationSelectionMethod {NEAREST_CENTROID, NEAREST_POINT}
 
-   @Override
+
    public void computeDesiredStepLocation(RobotSide swingLegSide, CouplingRegistry couplingResitry)
    {
       // TODO Auto-generated method stub

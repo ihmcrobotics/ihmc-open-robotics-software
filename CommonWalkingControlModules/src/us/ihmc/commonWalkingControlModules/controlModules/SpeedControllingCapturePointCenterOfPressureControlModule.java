@@ -144,7 +144,7 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
       resetCoPFilter();
    }
    
-   @Override
+ 
    public void XYCoPControllerDoubleSupport(BipedSupportPolygons bipedSupportPolygons, CapturePointCalculatorInterface yoboticsBipedCapturePointCalculator,
          FramePoint desiredCapturePoint)
    {
@@ -152,7 +152,7 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
    }
    
    
-   @Override
+ 
    public void XYCoPControllerDoubleSupport(BipedSupportPolygons bipedSupportPolygons, CapturePointCalculatorInterface yoboticsBipedCapturePointCalculator,
          FramePoint desiredCapturePoint, FramePoint centerOfMassPosition, FrameVector2d desiredVelocity, FrameVector2d currentCOMVelocity)
    {
@@ -282,7 +282,7 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
      return returnPoint;
   }
   
-   @Override
+ 
    public void XYCoPControllerDoubleSupport(BipedSupportPolygons bipedSupportPolygons, 
          FramePoint currentCapturePoint, FramePoint desiredCapturePoint, FramePoint centerOfMassPositionInZUpFrame, FrameVector2d desiredVelocity, FrameVector2d currentVelocity)
    {
@@ -412,7 +412,7 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
       
    }
 
-   @Override
+ 
    public void XYCoPControllerSingleSupport(FramePoint currentCapturePoint, FrameLineSegment2d guideLine, RobotSide supportLeg, ReferenceFrame referenceFrame,
          BipedSupportPolygons supportPolygons)
    {
@@ -422,7 +422,7 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
       XYCoPControllerSingleSupport(currentCapturePoint, guideLine, sweetSpot, supportLeg, referenceFrame, supportPolygons);
    }
 
-   @Override
+ 
    public void XYCoPControllerSingleSupport(FramePoint currentCapturePoint, FrameLineSegment2d guideLine, FramePoint desiredCapturePoint, RobotSide supportLeg,
          ReferenceFrame referenceFrame, BipedSupportPolygons supportPolygons, FramePoint centerOfMassPositionInZUpFrame, FrameVector2d desiredVelocity,
          FrameVector2d currentVelocity)
@@ -500,7 +500,7 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
       
    }
    
-   @Override
+ 
    public void XYCoPControllerSingleSupport(FramePoint currentCapturePoint, FrameLineSegment2d guideLine, FramePoint desiredCapturePoint, RobotSide supportLeg,
          ReferenceFrame referenceFrame, BipedSupportPolygons supportPolygons)
    {
@@ -508,32 +508,32 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
 
    }
 
-   @Override
+ 
    public void setMaxCaptureToCoP(double maxCaptureToCoP)
    {
       //standardCapturePointCenterOfPressureControlModule.setMaxCaptureToCoP(maxCaptureToCoP);
    }
 
-   @Override
+ 
    public void setKCaptureX(double kx)
    {
       //standardCapturePointCenterOfPressureControlModule.setKCaptureX(kx);
    }
 
-   @Override
+ 
    public double getKCaptureX()
    {
       return 0;
       //return standardCapturePointCenterOfPressureControlModule.getKCaptureY();
    }
 
-   @Override
+ 
    public void setKCaptureY(double ky)
    {
       //standardCapturePointCenterOfPressureControlModule.setKCaptureY(ky);
    }
 
-   @Override
+ 
    public double getKCaptureY()
    {
       return 0;
@@ -543,7 +543,7 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
    /* (non-Javadoc)
     * @see us.ihmc.commonWalkingControlModules.controlModules.CapturePointCenterOfPressureControlModule#getCenterOfPressureDesiredWorld()
     */
-   @Override
+ 
    public YoFramePoint getCenterOfPressureDesiredWorld()
    {
       return centerOfPressureDesiredWorld;
@@ -552,7 +552,7 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
    /* (non-Javadoc)
     * @see us.ihmc.commonWalkingControlModules.controlModules.CapturePointCenterOfPressureControlModule#getCenterOfPressureDesiredMidFeet()
     */
-   @Override
+ 
    public YoFramePoint getCenterOfPressureDesiredMidFeet()
    {
       return centerOfPressureDesiredMidFeet;
@@ -561,7 +561,7 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
    /* (non-Javadoc)
     * @see us.ihmc.commonWalkingControlModules.controlModules.CapturePointCenterOfPressureControlModule#getCenterOfPressureDesiredLeftAnkleZUp()
     */
-   @Override
+ 
    public YoFramePoint getCenterOfPressureDesiredLeftAnkleZUp()
    {
       return centerOfPressureDesiredLeftAnkleZUp;
@@ -570,7 +570,7 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
    /* (non-Javadoc)
     * @see us.ihmc.commonWalkingControlModules.controlModules.CapturePointCenterOfPressureControlModule#getCenterOfPressureDesiredRightAnkleZUp()
     */
-   @Override
+ 
    public YoFramePoint getCenterOfPressureDesiredRightAnkleZUp()
    {
       return centerOfPressureDesiredRightAnkleZUp;
@@ -579,7 +579,7 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
    /* (non-Javadoc)
     * @see us.ihmc.commonWalkingControlModules.controlModules.CapturePointCenterOfPressureControlModule#getCenterOfPressureDesiredAnkleZUp(us.ihmc.commonWalkingControlModules.RobotSide)
     */
-   @Override
+ 
    public YoFramePoint getCenterOfPressureDesiredAnkleZUp(RobotSide robotSide)
    {
       return centerOfPressureDesiredAnkleZUp.get(robotSide);
