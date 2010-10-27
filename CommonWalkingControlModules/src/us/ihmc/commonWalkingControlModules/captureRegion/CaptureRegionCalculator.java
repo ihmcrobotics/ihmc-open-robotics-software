@@ -81,7 +81,8 @@ public class CaptureRegionCalculator
    private GlobalTimer globalTimer;
 
    public CaptureRegionCalculator(SideDependentList<ReferenceFrame> ankleZUpFrames, double midFootAnkleXOffset, double footWidth, double kinematicRangeFromCoP,
-                                  CapturePointCalculatorInterface capturePointCalculator, YoVariableRegistry yoVariableRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+                                  CapturePointCalculatorInterface capturePointCalculator, YoVariableRegistry yoVariableRegistry,
+                                  DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       this.worldFrame = ReferenceFrame.getWorldFrame();
       this.ankleZUpFrames = ankleZUpFrames;
@@ -323,13 +324,15 @@ public class CaptureRegionCalculator
          FramePoint2d copExtremeInSupportAnkleZUp = copExtreme.changeFrameCopy(supportAnkleZUpFrame);
          FramePoint copExtreme3d = new FramePoint(copExtreme.getReferenceFrame(), copExtreme.getX(), copExtreme.getY(), 0.0);
 
-         capturePointCalculator.computePredictedCapturePoint(supportLeg, swingTimeRemaining + SWING_TIME_TO_ADD_FOR_CAPTURING_SAFETY_FACTOR,
-                 copExtreme3d, null);
+         capturePointCalculator.computePredictedCapturePoint(supportLeg, swingTimeRemaining + SWING_TIME_TO_ADD_FOR_CAPTURING_SAFETY_FACTOR, copExtreme3d,
+                 null);
 
          FramePoint predictedExtremeCapturePoint = capturePointCalculator.getPredictedCapturePointInFrame(supportAnkleZUpFrame);
          FramePoint2d predictedExtremeCapturePoint2d = new FramePoint2d(predictedExtremeCapturePoint.getReferenceFrame(), predictedExtremeCapturePoint.getX(),
                                                           predictedExtremeCapturePoint.getY());
-         captureRegionVertices.add(predictedExtremeCapturePoint2d);
+         
+//         captureRegionVertices.add(predictedExtremeCapturePoint2d);
+         captureRegionVertices.add(capturePoint);
 
          // update position in plotter
          if (DRAW_CAPTURE_REGION)
@@ -340,12 +343,17 @@ public class CaptureRegionCalculator
          }
 
          // 3. project from cop extremes to capture point extremes, find point at a given distance to determine kinematic limits of the capture region.
-         FrameVector2d projectedLine = new FrameVector2d(predictedExtremeCapturePoint2d);
+         
+//         FrameVector2d projectedLine = new FrameVector2d(predictedExtremeCapturePoint2d);
+         FrameVector2d projectedLine = new FrameVector2d(capturePoint);
          projectedLine.sub(copExtremeInSupportAnkleZUp);
 
          // Look at JPratt Notes February 18, 2009 for details on the following:
-         FramePoint2d kinematicExtreme = solveIntersectionOfRayAndCircle(footCentroid, predictedExtremeCapturePoint2d, projectedLine, kinematicRangeFromCoP);
+//         FramePoint2d kinematicExtreme = solveIntersectionOfRayAndCircle(footCentroid, predictedExtremeCapturePoint2d, projectedLine, kinematicRangeFromCoP);
+         FramePoint2d kinematicExtreme = solveIntersectionOfRayAndCircle(footCentroid, capturePoint, projectedLine, kinematicRangeFromCoP);
+
          if (kinematicExtreme == null)
+        	 
          {
             FrameConvexPolygon2d captureRegion = null;
 

@@ -32,7 +32,7 @@ public class VelocityAndHeadingDesiredStepLocationCalculator implements DesiredS
    private final BooleanYoVariable nextStepIsInsideCaptureRegion;
 
 // R2Parameters.HIP_PITCH_Y_OFFSET + R2Parameters.HIP_PITCH_LENGTH_Y) * 2.0;
-   private final double GOOD_STANDING_WIDTH = (0.1016 + 0.09) * 2.0;    
+   private final double GOOD_STANDING_WIDTH = (0.1016 + 0.09) * 2.0;
    private final double GOOD_WALKING_STEP_WIDTH = GOOD_STANDING_WIDTH - 0.05;
 
    private final double INSIDE_STEP_ADJUSTMENT_FOR_TURNING = 0.0;
@@ -65,7 +65,7 @@ public class VelocityAndHeadingDesiredStepLocationCalculator implements DesiredS
    public VelocityAndHeadingDesiredStepLocationCalculator(DesiredHeadingControlModule desiredHeadingControlModule,
            DesiredVelocityControlModule desiredVelocityControlModule, YoVariableRegistry parentRegistry)
    {
-      CHECK_STEP_INTO_CAPTURE_REGION = false;
+      CHECK_STEP_INTO_CAPTURE_REGION = true;
 
       this.desiredHeadingControlModule = desiredHeadingControlModule;
       this.desiredVelocityControlModule = desiredVelocityControlModule;
