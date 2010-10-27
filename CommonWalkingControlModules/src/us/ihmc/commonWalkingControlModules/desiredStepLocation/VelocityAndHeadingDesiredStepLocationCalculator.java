@@ -65,7 +65,7 @@ public class VelocityAndHeadingDesiredStepLocationCalculator implements DesiredS
    public VelocityAndHeadingDesiredStepLocationCalculator(DesiredHeadingControlModule desiredHeadingControlModule,
            DesiredVelocityControlModule desiredVelocityControlModule, YoVariableRegistry parentRegistry)
    {
-      CHECK_STEP_INTO_CAPTURE_REGION = true;
+      CHECK_STEP_INTO_CAPTURE_REGION = false;
 
       this.desiredHeadingControlModule = desiredHeadingControlModule;
       this.desiredVelocityControlModule = desiredVelocityControlModule;
