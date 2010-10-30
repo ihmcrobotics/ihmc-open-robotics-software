@@ -20,7 +20,7 @@ public class LegTorques implements LegTorquesInterface
       if (legTorques[RobotSide.RIGHT.ordinal()].getRobotSide() != RobotSide.RIGHT)
          throw new RuntimeException("LegTorquesArray sides are incorrect.");
    }
-
+   
    public LegTorques(RobotSpecificJointNames robotJointNames, RobotSide robotSide)
    {
       this.robotJointNames = robotJointNames;
