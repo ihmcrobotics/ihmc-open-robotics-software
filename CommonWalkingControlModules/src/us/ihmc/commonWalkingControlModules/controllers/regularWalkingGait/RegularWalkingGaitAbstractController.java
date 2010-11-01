@@ -128,4 +128,52 @@ public class RegularWalkingGaitAbstractController
       return controllerRegistry;
    }
    
+   
+   protected class LoadingPreSwingAState extends State
+   {
+      private final RobotSide loadingLeg;
+
+      public LoadingPreSwingAState(RegularWalkingState stateName, RobotSide loadingLeg)
+      {
+         super(stateName);
+         this.loadingLeg = loadingLeg;
+      }
+
+      public void doAction()
+      {
+         setLowerBodyTorquesToZero();
+
+         stanceSubController.doLoadingPreSwingA(lowerBodyTorques, loadingLeg, walkingStateMachine.timeInCurrentState());
+         upperBodySubController.doUpperBodyControl(upperBodyTorques);
+
+         if (stanceSubController.isDoneWithLoadingPreSwingA(loadingLeg, walkingStateMachine.timeInCurrentState()))
+         {
+            this.transitionToDefaultNextState();
+         }
+
+         setProcessedOutputsBodyTorques();
+      }
+
+      public void doTransitionIntoAction()
+      {
+         supportLegYoVariable.set(null);
+         swingLegYoVariable.set(null);
+         tookAnotherStep();
+         stanceSubController.doTransitionIntoLoadingPreSwingA(loadingLeg);
+      }
+
+      public void doTransitionOutOfAction()
+      {
+         stanceSubController.doTransitionOutOfLoadingPreSwingA(loadingLeg);
+      }
+   }
+
+   
+   private void tookAnotherStep()
+   {
+      stepsTaken.set(stepsTaken.getIntegerValue() + 1);
+      onFinalStep.set(stepsTaken.getIntegerValue() >= stepsToTake.getIntegerValue());
+   }
+
+   
 }
