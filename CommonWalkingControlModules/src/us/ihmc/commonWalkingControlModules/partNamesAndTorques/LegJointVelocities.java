@@ -1,18 +1,16 @@
 package us.ihmc.commonWalkingControlModules.partNamesAndTorques;
 
+import java.util.EnumMap;
+
 import us.ihmc.commonWalkingControlModules.RobotSide;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
 
-/**
- * Created by IntelliJ IDEA.
- * User: Administrator
- * Date: Apr 21, 2010
- * Time: 2:29:21 PM
- * To change this template use File | Settings | File Templates.
- */
+import com.mathworks.jama.Matrix;
+
 public class LegJointVelocities
 {
-   private double[] jointVelocities = new double[LegJointName.values().length];
+   private final LegJointName[] legJointNames;
+   private final EnumMap<LegJointName, Double> jointVelocities;
    private final RobotSide robotSide;
 
    public static void validateLegJointVelocitiesArray(LegJointVelocities[] legJointVelocitiesArray)
@@ -25,16 +23,13 @@ public class LegJointVelocities
          throw new RuntimeException("LegJointVelocities sides are incorrect.");
    }
 
-   public LegJointVelocities(RobotSide robotSide)
+   public LegJointVelocities(LegJointName[] legJointNames, RobotSide robotSide)
    {
-      this.robotSide = robotSide;
-      setJointVelocitiesToNaN();
-   }
+      this.legJointNames = legJointNames;
+      jointVelocities = new EnumMap<LegJointName, Double>(LegJointName.class);
 
-   private LegJointVelocities(LegJointVelocities legJointVelocities)
-   {
-      this.jointVelocities = legJointVelocities.getJointVelocitiesCopy();
-      this.robotSide = legJointVelocities.getRobotSide();
+      this.robotSide = robotSide;
+      setJointVelocitiesToNAN();
    }
 
    public RobotSide getRobotSide()
@@ -44,63 +39,55 @@ public class LegJointVelocities
 
    public double getJointVelocity(LegJointName legJointName)
    {
-      return jointVelocities[legJointName.ordinal()];
-   }
-
-
-   public double[] getJointVelocitiesCopy()
-   {
-      return jointVelocities.clone();
-   }
-
-   public LegJointVelocities getCopy()
-   {
-      return new LegJointVelocities(this);
+      return jointVelocities.get(legJointName);
    }
 
    public void setJointVelocity(LegJointName legJointName, double jointVelocity)
    {
-      jointVelocities[legJointName.ordinal()] = jointVelocity;
+      jointVelocities.put(legJointName, jointVelocity);
    }
 
    public void setLegJointVelocitiesToDoubleArray(double[] jointVelocities)
    {
-      if (jointVelocities.length != this.jointVelocities.length)
-         throw new RuntimeException("joint velocities length must match this.jointVelocities length, torques.length=" + jointVelocities.length
-                                    + ", expected length=" + this.jointVelocities.length);
+      if (jointVelocities.length != this.legJointNames.length)
+         throw new RuntimeException("joint angles length must match this.jointVelocities length, torques.length=" + jointVelocities.length
+                                    + ", expected length=" + this.legJointNames.length);
 
-      for (int i = 0; i < jointVelocities.length; i++)
+      for (int i = 0; i < legJointNames.length; i++)
       {
-         this.jointVelocities[i] = jointVelocities[i];
+         this.jointVelocities.put(legJointNames[i], jointVelocities[i]);
+      }
+   }
+
+   public void setJointVelocitiesToNAN()
+   {
+      for (LegJointName legJointName : legJointNames)
+      {
+         jointVelocities.put(legJointName, Double.NaN);
       }
    }
 
 
-   public void setJointVelocitiesToNaN()
+   public Matrix toMatrix()
    {
-      setJointVelocitiesToValue(Double.NaN);
-   }
+      int size = legJointNames.length;
+      Matrix ret = new Matrix(size, 1);
 
-   public void setJointVelocitiesToZero()
-   {
-      setJointVelocitiesToValue(0.0);
-   }
-
-   private void setJointVelocitiesToValue(double value)
-   {
-      for (int index = 0; index < jointVelocities.length; index++)
+      for (int i = 0; i < size; i++)
       {
-         jointVelocities[index] = value;
+         ret.set(i, 0, jointVelocities.get(legJointNames[i]));
       }
+
+      return ret;
    }
 
    public String toString()
    {
       String ret = "The " + robotSide.toString() + "LegJointVelocities:\n";
 
-      for (LegJointName legJointName : LegJointName.values())
+      for (LegJointName legJointName : legJointNames)
       {
-         ret += legJointName.getCamelCaseNameForMiddleOfExpression() + " = " + jointVelocities[legJointName.ordinal()] + "\n";
+         ret += legJointName.getCamelCaseNameForMiddleOfExpression() + " = " + jointVelocities.get(legJointNames) + "\n";
       }
 
       return ret;
