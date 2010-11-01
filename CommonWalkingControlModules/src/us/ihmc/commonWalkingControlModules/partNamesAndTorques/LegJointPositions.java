@@ -3,7 +3,6 @@ package us.ihmc.commonWalkingControlModules.partNamesAndTorques;
 import us.ihmc.commonWalkingControlModules.RobotSide;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
 
-
 public class LegJointPositions
 {
    private double[] jointPositions = new double[LegJointName.values().length];
@@ -44,7 +43,13 @@ public class LegJointPositions
 
    public double[] getJointPositionsCopy()
    {
-      return jointPositions.clone();
+      double[] ret = new double[jointPositions.length];
+      for (int i=0; i<jointPositions.length; i++)
+      {
+         ret[i] = jointPositions[i];
+      }
+
+      return ret;
    }
 
    public LegJointPositions getCopy()
@@ -90,4 +95,29 @@ public class LegJointPositions
       return ret;
    }
 
+   public boolean epsilonEquals(LegJointPositions legJointPositions, double epsilon)
+   {
+      if (this.robotSide != legJointPositions.robotSide)
+         return false;
+
+      for (LegJointName legJointName : LegJointName.values())
+      {
+         double thisPosition = this.getJointPosition(legJointName);
+         double thatPosition = legJointPositions.getJointPosition(legJointName);
+
+         if (Double.isNaN(thisPosition) || Double.isNaN(thatPosition))
+         {
+            if (!Double.isNaN(thisPosition))
+               return false;
+            if (!Double.isNaN(thatPosition))
+               return false;
+         }
+
+         if ((Math.abs(thisPosition - thatPosition) > epsilon))
+            return false;
+      }
+
+      return true;
+   }
+   
 }
