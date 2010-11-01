@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.partNamesAndTorques;
 
-public enum LegLinkName
+public enum R2LegLinkName
 {
    UPPER_THIGH, LOWER_THIGH, SHIN, FOOT;
 
