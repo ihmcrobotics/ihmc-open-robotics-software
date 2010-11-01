@@ -1,0 +1,210 @@
+package us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity;
+
+import java.awt.Color;
+
+import javax.media.j3d.Transform3D;
+import javax.vecmath.Matrix3d;
+
+import us.ihmc.commonWalkingControlModules.RobotSide;
+import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredHeadingControlModule;
+import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
+import us.ihmc.commonWalkingControlModules.sensors.ProcessedSensorsInterface;
+import us.ihmc.utilities.math.MathTools;
+import us.ihmc.utilities.math.geometry.FrameLineSegment2d;
+import us.ihmc.utilities.math.geometry.FramePoint;
+import us.ihmc.utilities.math.geometry.FramePoint2d;
+import us.ihmc.utilities.math.geometry.FrameVector;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
+
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.plotting.YoFrameLineSegment2dArtifact;
+import com.yobotics.simulationconstructionset.util.graphics.ArtifactList;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFrameLineSegment2d;
+
+public class SimpleDesiredHeadingControlModule implements DesiredHeadingControlModule
+{
+   private final YoVariableRegistry registry = new YoVariableRegistry("DesiredHeadingControlModule");
+   private final DoubleYoVariable desiredHeadingFinal = new DoubleYoVariable("desiredHeadingFinal",
+                                                           "Yaw of the desired heading frame with respect to the world.", registry);
+   private final DoubleYoVariable desiredHeading = new DoubleYoVariable("desiredHeading", registry);
+   private final DoubleYoVariable maxHeadingDot = new DoubleYoVariable("maxHeadingDot", "In units of rads/sec", registry);
+
+   private final DesiredHeadingFrame desiredHeadingFrame = new DesiredHeadingFrame();
+
+   private final YoFrameLineSegment2d desiredHeadingLine;
+   private final YoFrameLineSegment2d finalHeadingLine;
+
+   private final ProcessedSensorsInterface processedSensors;
+   private final CommonWalkingReferenceFrames commonWalkingReferenceFrames;
+
+   private final double controlDT;
+
+   public SimpleDesiredHeadingControlModule(double desiredHeadingfinal, ProcessedSensorsInterface processedSensors,
+           CommonWalkingReferenceFrames commonWalkingReferenceFrames, double controlDT, YoVariableRegistry parentRegistry,
+           DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+   {
+      this.processedSensors = processedSensors;
+      parentRegistry.addChild(registry);
+      this.controlDT = controlDT;
+      this.commonWalkingReferenceFrames = commonWalkingReferenceFrames;
+
+      maxHeadingDot.set(0.1);
+
+//    this.desiredHeading.set(desiredHeadingfinal);
+
+//    OR UNCOMMENT THESE TWO LINES TO HAVE THE FINAL DESIRED HEADING CORRESPONDING TO THE INITIAL ROBOT SETUP
+      this.desiredHeadingFinal.set(desiredHeadingfinal);
+      this.desiredHeading.set(this.desiredHeadingFinal.getDoubleValue());    // The final is the first one according to the initial setup of the robot
+
+
+
+      desiredHeadingLine = new YoFrameLineSegment2d("desiredHeadingLine", "", ReferenceFrame.getWorldFrame(), registry);
+      finalHeadingLine = new YoFrameLineSegment2d("finalHeadingLine", "", ReferenceFrame.getWorldFrame(), registry);
+
+      if (dynamicGraphicObjectsListRegistry != null)
+      {
+         ArtifactList artifactList = new ArtifactList("Simple Desired Heading");
+
+         {
+            YoFrameLineSegment2dArtifact yoFrameLineSegment2dArtifact = new YoFrameLineSegment2dArtifact("Desired Heading Line", desiredHeadingLine,
+                                                                           Color.MAGENTA);
+            artifactList.add(yoFrameLineSegment2dArtifact);
+         }
+
+         {
+            YoFrameLineSegment2dArtifact yoFrameLineSegment2dArtifact = new YoFrameLineSegment2dArtifact("Final Heading Line", finalHeadingLine, Color.ORANGE);
+            artifactList.add(yoFrameLineSegment2dArtifact);
+         }
+
+         dynamicGraphicObjectsListRegistry.registerArtifactList(artifactList);
+      }
+
+
+   }
+
+   public void updateDesiredHeadingFrame()
+   {
+      updateDesiredHeading();
+      updatedDesiredHeadingLine();
+      updatedFinalHeadingLine();
+      desiredHeadingFrame.update();
+   }
+
+
+
+   private void updatedDesiredHeadingLine()
+   {
+      FramePoint2d endpoint1 = processedSensors.getCenterOfMassGroundProjectionInFrame(ReferenceFrame.getWorldFrame()).toFramePoint2d();
+      FramePoint2d endpoint2 = new FramePoint2d(endpoint1);
+      double length = 1.0;
+      endpoint2.setX(endpoint2.getX() + length * Math.cos(desiredHeading.getDoubleValue()));
+      endpoint2.setY(endpoint2.getY() + length * Math.sin(desiredHeading.getDoubleValue()));
+
+      FrameLineSegment2d frameLineSegment2d = new FrameLineSegment2d(endpoint1, endpoint2);
+      desiredHeadingLine.setFrameLineSegment2d(frameLineSegment2d);
+   }
+
+   private void updatedFinalHeadingLine()
+   {
+      FramePoint2d endpoint1 = processedSensors.getCenterOfMassGroundProjectionInFrame(ReferenceFrame.getWorldFrame()).toFramePoint2d();
+      FramePoint2d endpoint2 = new FramePoint2d(endpoint1);
+      double length = 1.0;
+      endpoint2.setX(endpoint2.getX() + length * Math.cos(desiredHeadingFinal.getDoubleValue()));
+      endpoint2.setY(endpoint2.getY() + length * Math.sin(desiredHeadingFinal.getDoubleValue()));
+
+      FrameLineSegment2d frameLineSegment2d = new FrameLineSegment2d(endpoint1, endpoint2);
+      finalHeadingLine.setFrameLineSegment2d(frameLineSegment2d);
+   }
+
+   private void updateDesiredHeading()
+   {
+      double error = desiredHeadingFinal.getDoubleValue() - desiredHeading.getDoubleValue();
+      double maximumChangePerTick = maxHeadingDot.getDoubleValue() * controlDT;
+
+      double deltaHeading = MathTools.clipToMinMax(error, -maximumChangePerTick, maximumChangePerTick);
+
+      desiredHeading.set(desiredHeading.getDoubleValue() + deltaHeading);
+   }
+
+   public FrameVector getFinalHeadingTarget()
+   {
+      FrameVector finalHeading = new FrameVector(ReferenceFrame.getWorldFrame(), Math.cos(desiredHeadingFinal.getDoubleValue()),
+                                    Math.sin(desiredHeadingFinal.getDoubleValue()), 0.0);
+
+      return finalHeading;
+   }
+
+   public ReferenceFrame getDesiredHeadingFrame()
+   {
+      return desiredHeadingFrame;
+   }
+
+   private class DesiredHeadingFrame extends ReferenceFrame
+   {
+      private static final long serialVersionUID = 4657294310129415811L;
+
+      public DesiredHeadingFrame()
+      {
+         super("DesiredHeadingFrame", ReferenceFrame.getWorldFrame(), false, false, true);
+      }
+
+      public void updateTransformToParent(Transform3D transformToParent)
+      {
+         Matrix3d rotation = new Matrix3d();
+         rotation.rotZ(desiredHeading.getDoubleValue());
+
+         transformToParent.set(rotation);
+      }
+   }
+
+
+   public FrameVector getDisplacementWithRespectToFoot(RobotSide robotSide, FramePoint position)
+   {
+      ReferenceFrame footFrame = commonWalkingReferenceFrames.getAnkleZUpReferenceFrames().get(robotSide);
+
+      FramePoint footOrigin = new FramePoint(footFrame);
+
+      return getDisplacementVectorInFrame(footOrigin, position, desiredHeadingFrame);
+   }
+
+
+   private FrameVector getDisplacementVectorInFrame(FramePoint origin, FramePoint position, ReferenceFrame referenceFrameForOrientation)
+   {
+      origin = origin.changeFrameCopy(referenceFrameForOrientation);
+
+      FrameVector ret = new FrameVector(position);
+      ret = ret.changeFrameCopy(referenceFrameForOrientation);
+      ret.sub(origin);
+
+      return ret;
+   }
+
+   public FramePoint getPositionOffsetFromFoot(RobotSide robotSide, FrameVector offset)
+   {
+      offset.checkReferenceFrameMatch(desiredHeadingFrame);
+
+      ReferenceFrame footFrame = commonWalkingReferenceFrames.getAnkleZUpReferenceFrames().get(robotSide);
+
+      offset = offset.changeFrameCopy(footFrame);
+      FramePoint ret = new FramePoint(offset);
+
+      return ret;
+   }
+
+
+   public void setDesiredHeading(double desiredHeading)
+   {
+      this.desiredHeading.set(desiredHeading);
+   }
+
+   public DoubleYoVariable getDesiredHeading()
+   {
+      return desiredHeading;
+   }
+
+
+
+
+}
