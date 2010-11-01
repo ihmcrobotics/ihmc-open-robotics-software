@@ -18,4 +18,5 @@ public interface ProcessedSensorsInterface
      public abstract FrameVector getGravityInWorldFrame();
      public abstract Twist computeTwistOfPelvisWithRespectToWorld();
      public abstract Orientation getPelvisOrientationInFrame(ReferenceFrame referenceFrame);
+     public abstract FramePoint getCenterOfMassGroundProjectionInFrame(ReferenceFrame referenceFrame);
 }
