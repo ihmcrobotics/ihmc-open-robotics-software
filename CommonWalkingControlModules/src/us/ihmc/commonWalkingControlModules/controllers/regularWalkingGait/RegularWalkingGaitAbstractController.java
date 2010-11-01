@@ -1,10 +1,14 @@
 package us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait;
 
 import us.ihmc.commonWalkingControlModules.RobotSide;
+import us.ihmc.commonWalkingControlModules.outputs.ProcessedOutputsInterface;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LowerBodyTorques;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.RobotSpecificJointNames;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.UpperBodyTorques;
 
+import com.yobotics.simulationconstructionset.BooleanYoVariable;
+import com.yobotics.simulationconstructionset.IntYoVariable;
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.statemachines.State;
 
 public class RegularWalkingGaitAbstractController
@@ -18,23 +22,40 @@ public class RegularWalkingGaitAbstractController
 
    protected final LowerBodyTorques lowerBodyTorques;
    protected final UpperBodyTorques upperBodyTorques = new UpperBodyTorques();
+   protected final ProcessedOutputsInterface processedOutputs;
 
+   protected final YoVariableRegistry controllerRegistry;
+   protected final YoVariableRegistry childRegistry = new YoVariableRegistry("GoAndSuch");
+
+   protected final BooleanYoVariable go = new BooleanYoVariable("go", "Starts and stops the walking", childRegistry);
+
+   protected final BooleanYoVariable resetSteps = new BooleanYoVariable("resetSteps", childRegistry);
+   protected final IntYoVariable stepsTaken = new IntYoVariable("stepsTaken", childRegistry);
+   protected final IntYoVariable stepsToTake = new IntYoVariable("stepsToTake", childRegistry);
+   protected final BooleanYoVariable onFinalStep = new BooleanYoVariable("onFinalStep", childRegistry);   
+   
+   
    
    public RegularWalkingGaitAbstractController(
          RobotSpecificJointNames robotJointNames,
+         ProcessedOutputsInterface processedOutputs, 
          DoEveryTickSubController doEveryTickSubController,
          StanceSubController stanceSubController,
          SwingSubController swingSubController,
-         UpperBodySubController upperBodySubController
-   
+         UpperBodySubController upperBodySubController,
+         YoVariableRegistry controllerRegistry
    )
    {
       this.robotJointNames = robotJointNames;
+      this.processedOutputs = processedOutputs;      
       
       this.doEveryTickSubController = doEveryTickSubController;
       this.stanceSubController = stanceSubController;
       this.swingSubController = swingSubController;
       this.upperBodySubController = upperBodySubController;
+      
+      this.controllerRegistry = controllerRegistry;
+      controllerRegistry.addChild(childRegistry);
       
       lowerBodyTorques = new LowerBodyTorques(robotJointNames);
    }
@@ -76,6 +97,26 @@ public class RegularWalkingGaitAbstractController
          else
             throw new RuntimeException("Not implemented for " + this);
       }
+   }
+   
+   
+   
+   protected void setProcessedOutputsBodyTorques()
+   {
+      processedOutputs.setLowerBodyTorques(lowerBodyTorques);
+      processedOutputs.setUpperBodyTorques(upperBodyTorques);
+   }
+   
+
+   protected void setLowerBodyTorquesToZero()
+   {
+      lowerBodyTorques.setLowerBodyTorquesToZero();
+   }
+   
+   
+   public YoVariableRegistry getYoVariableRegistry()
+   {
+      return controllerRegistry;
    }
    
 }
