@@ -7,9 +7,12 @@ import us.ihmc.commonWalkingControlModules.partNamesAndTorques.RobotSpecificJoin
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.UpperBodyTorques;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.EnumYoVariable;
 import com.yobotics.simulationconstructionset.IntYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.statemachines.State;
+import com.yobotics.simulationconstructionset.util.statemachines.StateMachine;
 
 public class RegularWalkingGaitAbstractController
 {
@@ -34,10 +37,14 @@ public class RegularWalkingGaitAbstractController
    protected final IntYoVariable stepsToTake = new IntYoVariable("stepsToTake", childRegistry);
    protected final BooleanYoVariable onFinalStep = new BooleanYoVariable("onFinalStep", childRegistry);   
    
-   
+   protected final StateMachine walkingStateMachine;
+   protected final EnumYoVariable<RobotSide> supportLegYoVariable = new EnumYoVariable<RobotSide>("supportLeg", "Current support leg. Null if double support", childRegistry, RobotSide.class);
+   protected final EnumYoVariable<RobotSide> swingLegYoVariable = EnumYoVariable.create("swingLeg", "Current support leg. Null if double support", RobotSide.class, childRegistry);
+
    
    public RegularWalkingGaitAbstractController(
          RobotSpecificJointNames robotJointNames,
+         DoubleYoVariable time,
          ProcessedOutputsInterface processedOutputs, 
          DoEveryTickSubController doEveryTickSubController,
          StanceSubController stanceSubController,
@@ -58,6 +65,8 @@ public class RegularWalkingGaitAbstractController
       controllerRegistry.addChild(childRegistry);
       
       lowerBodyTorques = new LowerBodyTorques(robotJointNames);
+      
+      walkingStateMachine = new StateMachine("walkingState", "switchTime", RegularWalkingState.class, time, childRegistry);
    }
    
    
