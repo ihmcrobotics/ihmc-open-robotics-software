@@ -129,6 +129,54 @@ public class RegularWalkingGaitAbstractController
    }
    
    
+   
+   protected class StartWalkingDoubleSupportState extends State
+   {
+      private final RobotSide loadingLeg;
+
+      public StartWalkingDoubleSupportState(RegularWalkingState stateName, RobotSide loadingLeg)
+      {
+         super(stateName);
+         this.loadingLeg = loadingLeg;
+      }
+
+      public void doAction()
+      {
+         setLowerBodyTorquesToZero();
+
+         stanceSubController.doStartStopWalkingDoubleSupport(lowerBodyTorques, null, walkingStateMachine.timeInCurrentState());
+         upperBodySubController.doUpperBodyControl(upperBodyTorques);
+
+         if (stanceSubController.isDoneStartStopWalkingDoubleSupport(loadingLeg, walkingStateMachine.timeInCurrentState()))
+         {
+            this.transitionToDefaultNextState();
+         }
+
+         setProcessedOutputsBodyTorques();
+      }
+
+      public void doTransitionIntoAction()
+      {
+         supportLegYoVariable.set(null);
+         swingLegYoVariable.set(null);
+
+         stanceSubController.doTransitionIntoStartStopWalkingDoubleSupport(loadingLeg);
+      }
+
+      public void doTransitionOutOfAction()
+      {
+         if (resetSteps.getBooleanValue())
+         {
+            stepsTaken.set(0);
+            onFinalStep.set(false);
+
+            resetSteps.set(false);
+         }
+      }
+   }
+   
+   
+   
    protected class LoadingPreSwingAState extends State
    {
       private final RobotSide loadingLeg;
@@ -173,6 +221,263 @@ public class RegularWalkingGaitAbstractController
    {
       stepsTaken.set(stepsTaken.getIntegerValue() + 1);
       onFinalStep.set(stepsTaken.getIntegerValue() >= stepsToTake.getIntegerValue());
+   }
+   
+   
+   protected class LoadingPreSwingBState extends State
+   {
+      private final RobotSide loadingLeg;
+
+      public LoadingPreSwingBState(RegularWalkingState stateEnum, RobotSide upcomingSupportLeg)
+      {
+         super(stateEnum);
+         this.loadingLeg = upcomingSupportLeg;
+      }
+
+      public void doAction()
+      {
+         setLowerBodyTorquesToZero();
+
+         stanceSubController.doLoadingPreSwingB(lowerBodyTorques, loadingLeg, walkingStateMachine.timeInCurrentState());
+         upperBodySubController.doUpperBodyControl(upperBodyTorques);
+
+         if (stanceSubController.isDoneWithLoadingPreSwingB(loadingLeg, walkingStateMachine.timeInCurrentState()))
+         {
+            this.transitionToDefaultNextState();
+         }
+         
+         setProcessedOutputsBodyTorques();
+      }
+
+      public void doTransitionIntoAction()
+      {
+         supportLegYoVariable.set(null);
+         swingLegYoVariable.set(null);
+
+         stanceSubController.doTransitionIntoLoadingPreSwingB(loadingLeg);
+      }
+
+      public void doTransitionOutOfAction()
+      {
+         stanceSubController.doTransitionOutOfLoadingPreSwingB(loadingLeg);
+      }
+   }
+
+
+   protected class LoadingPreSwingCState extends State
+   {
+      private final RobotSide supportLeg, swingLeg;
+
+      public LoadingPreSwingCState(RegularWalkingState stateEnum, RobotSide supportLeg)
+      {
+         super(stateEnum);
+         this.supportLeg = supportLeg;
+         this.swingLeg = supportLeg.getOppositeSide();
+      }
+
+      public void doAction()
+      {
+         setLowerBodyTorquesToZero();
+
+         swingSubController.doPreSwing(lowerBodyTorques.getLegTorques(swingLeg), walkingStateMachine.timeInCurrentState());
+         stanceSubController.doLoadingPreSwingC(lowerBodyTorques.getLegTorques(supportLeg), supportLeg, walkingStateMachine.timeInCurrentState());
+         upperBodySubController.doUpperBodyControl(upperBodyTorques);
+
+         if (swingSubController.isDoneWithPreSwing(swingLeg, walkingStateMachine.timeInCurrentState()))
+         {
+            this.transitionToDefaultNextState();
+         }
+         
+         setProcessedOutputsBodyTorques();
+      }
+
+      public void doTransitionIntoAction()
+      {
+         swingLegYoVariable.set(swingLeg);
+         supportLegYoVariable.set(supportLeg);
+
+         stanceSubController.doTransitionIntoLoadingPreSwingC(supportLeg);
+         swingSubController.doTransitionIntoPreSwing(swingLeg);
+      }
+
+      public void doTransitionOutOfAction()
+      {
+         swingSubController.doTransitionOutOfPreSwing(swingLeg);
+         stanceSubController.doTransitionOutOfLoadingPreSwingC(supportLeg);
+      }
+   }
+   
+   
+   protected class EarlyStanceInitialSwingState extends State
+   {
+      private final RobotSide stanceSide, swingSide;
+
+      public EarlyStanceInitialSwingState(RegularWalkingState stateName, RobotSide stanceSide)
+      {
+         super(stateName);
+         this.stanceSide = stanceSide;
+         this.swingSide = stanceSide.getOppositeSide();
+      }
+
+      public void doAction()
+      {
+         setLowerBodyTorquesToZero();
+
+         stanceSubController.doEarlyStance(lowerBodyTorques.getLegTorques(stanceSide), walkingStateMachine.timeInCurrentState());
+         swingSubController.doInitialSwing(lowerBodyTorques.getLegTorques(swingSide), walkingStateMachine.timeInCurrentState());
+         upperBodySubController.doUpperBodyControl(upperBodyTorques);
+
+         if (swingSubController.isDoneWithInitialSwing(swingSide, walkingStateMachine.timeInCurrentState()))
+         {
+            this.transitionToDefaultNextState();
+         }
+
+         setProcessedOutputsBodyTorques();
+      }
+
+      public void doTransitionIntoAction()
+      {
+         supportLegYoVariable.set(stanceSide);
+         swingLegYoVariable.set(swingSide);
+
+         stanceSubController.doTransitionIntoEarlyStance(stanceSide);
+         swingSubController.doTransitionIntoInitialSwing(swingSide);
+      }
+
+      public void doTransitionOutOfAction()
+      {
+         stanceSubController.doTransitionOutOfEarlyStance(stanceSide);
+         swingSubController.doTransitionOutOfInitialSwing(swingSide);
+      }
+
+   }
+
+
+   protected class LateStanceMidSwingState extends State
+   {
+      private final RobotSide stanceSide, swingSide;
+
+      public LateStanceMidSwingState(RegularWalkingState stateName, RobotSide stanceSide)
+      {
+         super(stateName);
+         this.stanceSide = stanceSide;
+         this.swingSide = stanceSide.getOppositeSide();
+
+      }
+
+      public void doAction()
+      {
+         setLowerBodyTorquesToZero();
+
+         stanceSubController.doLateStance(lowerBodyTorques.getLegTorques(stanceSide), walkingStateMachine.timeInCurrentState());
+         swingSubController.doMidSwing(lowerBodyTorques.getLegTorques(swingSide), walkingStateMachine.timeInCurrentState());
+         upperBodySubController.doUpperBodyControl(upperBodyTorques);
+
+         if (swingSubController.isDoneWithMidSwing(swingSide, walkingStateMachine.timeInCurrentState()))
+         {
+            this.transitionToDefaultNextState();
+         }
+
+         setProcessedOutputsBodyTorques();
+      }
+
+      public void doTransitionIntoAction()
+      {
+         supportLegYoVariable.set(stanceSide);
+         swingLegYoVariable.set(swingSide);
+
+         stanceSubController.doTransitionIntoLateStance(stanceSide);
+         swingSubController.doTransitionIntoMidSwing(swingSide);
+      }
+
+      public void doTransitionOutOfAction()
+      {
+         stanceSubController.doTransitionOutOfLateStance(stanceSide);
+         swingSubController.doTransitionOutOfMidSwing(swingSide);
+      }
+   }
+
+
+   protected class TerminalStanceTerminalSwingState extends State
+   {
+      private final RobotSide stanceSide, swingSide;
+
+      public TerminalStanceTerminalSwingState(RegularWalkingState stateName, RobotSide stanceSide)
+      {
+         super(stateName);
+         this.stanceSide = stanceSide;
+         this.swingSide = stanceSide.getOppositeSide();
+      }
+
+      public void doAction()
+      {
+         setLowerBodyTorquesToZero();
+
+         stanceSubController.doTerminalStance(lowerBodyTorques.getLegTorques(stanceSide), walkingStateMachine.timeInCurrentState());
+         swingSubController.doTerminalSwing(lowerBodyTorques.getLegTorques(swingSide), walkingStateMachine.timeInCurrentState());
+         upperBodySubController.doUpperBodyControl(upperBodyTorques);
+
+         if (swingSubController.isDoneWithTerminalSwing(swingSide, walkingStateMachine.timeInCurrentState()))
+         {
+            this.transitionToDefaultNextState();
+         }
+
+         setProcessedOutputsBodyTorques();
+      }
+
+      public void doTransitionIntoAction()
+      {
+         supportLegYoVariable.set(stanceSide);
+         swingLegYoVariable.set(swingSide);
+
+         stanceSubController.doTransitionIntoTerminalStance(stanceSide);
+         swingSubController.doTransitionIntoTerminalSwing(swingSide);
+      }
+
+      public void doTransitionOutOfAction()
+      {
+         stanceSubController.doTransitionOutOfTerminalStance(stanceSide);
+         swingSubController.doTransitionOutOfTerminalSwing(swingSide);
+      }
+
+   }
+
+   
+   protected class StopWalkingDoubleSupportState extends State
+   {
+      private final RobotSide loadingLeg;
+
+      public StopWalkingDoubleSupportState(RegularWalkingState stateName, RobotSide loadingLeg)
+      {
+         super(stateName);
+         this.loadingLeg = loadingLeg;
+      }
+
+      public void doAction()
+      {
+         setLowerBodyTorquesToZero();
+
+         stanceSubController.doDoubleSupportStanceControl(lowerBodyTorques, loadingLeg);
+         upperBodySubController.doUpperBodyControl(upperBodyTorques);
+
+         if (stanceSubController.isDoneStartStopWalkingDoubleSupport(loadingLeg, walkingStateMachine.timeInCurrentState()))
+         {
+//          this.transitionToDefaultNextState();
+         }
+
+         setProcessedOutputsBodyTorques();
+      }
+
+      public void doTransitionIntoAction()
+      {
+         supportLegYoVariable.set(null);    // null implies Double support
+         swingLegYoVariable.set(null);    // null implies Double support
+      }
+
+      public void doTransitionOutOfAction()
+      {
+         supportLegYoVariable.set(loadingLeg);
+      }
    }
 
    
