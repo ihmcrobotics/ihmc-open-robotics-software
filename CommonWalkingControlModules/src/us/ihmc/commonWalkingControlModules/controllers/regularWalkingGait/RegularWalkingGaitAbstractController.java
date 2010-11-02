@@ -72,40 +72,40 @@ public class RegularWalkingGaitAbstractController
    
    public enum RegularWalkingState
    {
-      StartStopWalkingDoubleSupportState, UnloadRightLegToTransferIntoWalking, UnloadLeftLegToTransferIntoWalking, 
+      StartWalkingDoubleSupportState, 
+      TransferAllLoadToLeftLegForWalking, 
       LeftLoadingRightPreSwingA,LeftLoadingRightPreSwingB, LeftLoadingRightPreSwingC, 
       LeftEarlyStanceRightInitialSwing, LeftLateStanceRightMidSwing, LeftTerminalStanceRightTerminalSwing,
+      TransferAllLoadToRightLegForWalking,
       RightLoadingLeftPreSwingA, RightLoadingLeftPreSwingB, RightLoadingLeftPreSwingC, 
       RightEarlyStanceLeftInitialSwing, RightLateStanceLeftMidSwing, RightTerminalStanceLeftTerminalSwing,
-      
-      StartWalkingDoubleSupportState, TransferAllLoadToRightLegForWalking,
-      TransferAllLoadToLeftLegForWalking, stopWalkingLeftLoadingState, stopWalkingRightLoadingState
+      stopWalkingLeftLoadingState, stopWalkingRightLoadingState
       ;
 
-      public RobotSide getSupportLeg()
-      {
-         if ((this == LeftLoadingRightPreSwingC) || (this == LeftEarlyStanceRightInitialSwing) || (this == LeftLateStanceRightMidSwing)
-                 || (this == LeftTerminalStanceRightTerminalSwing))
-         {
-            return RobotSide.LEFT;
-         }
-
-         else if ((this == RightLoadingLeftPreSwingC) || (this == RightEarlyStanceLeftInitialSwing) || (this == RightLateStanceLeftMidSwing)
-                  || (this == RightTerminalStanceLeftTerminalSwing))
-         {
-            return RobotSide.RIGHT;
-         }
-
-         else if ((this == StartStopWalkingDoubleSupportState) || (this == UnloadRightLegToTransferIntoWalking) || (this == UnloadLeftLegToTransferIntoWalking)
-                  || (this == RightLoadingLeftPreSwingA) || (this == RightLoadingLeftPreSwingB) || (this == LeftLoadingRightPreSwingA)
-                  || (this == LeftLoadingRightPreSwingB))
-         {
-            return null;
-         }
-
-         else
-            throw new RuntimeException("Not implemented for " + this);
-      }
+//      public RobotSide getSupportLeg()
+//      {
+//         if ((this == LeftLoadingRightPreSwingC) || (this == LeftEarlyStanceRightInitialSwing) || (this == LeftLateStanceRightMidSwing)
+//                 || (this == LeftTerminalStanceRightTerminalSwing))
+//         {
+//            return RobotSide.LEFT;
+//         }
+//
+//         else if ((this == RightLoadingLeftPreSwingC) || (this == RightEarlyStanceLeftInitialSwing) || (this == RightLateStanceLeftMidSwing)
+//                  || (this == RightTerminalStanceLeftTerminalSwing))
+//         {
+//            return RobotSide.RIGHT;
+//         }
+//
+//         else if ((this == StartWalkingDoubleSupportState) || (this == UnloadRightLegToTransferIntoWalking) || (this == UnloadLeftLegToTransferIntoWalking)
+//                  || (this == RightLoadingLeftPreSwingA) || (this == RightLoadingLeftPreSwingB) || (this == LeftLoadingRightPreSwingA)
+//                  || (this == LeftLoadingRightPreSwingB))
+//         {
+//            return null;
+//         }
+//
+//         else
+//            throw new RuntimeException("Not implemented for " + this);
+//      }
    }
    
    
