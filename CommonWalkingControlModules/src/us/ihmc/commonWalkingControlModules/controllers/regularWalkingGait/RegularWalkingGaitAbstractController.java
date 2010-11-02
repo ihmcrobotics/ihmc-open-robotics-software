@@ -522,7 +522,9 @@ public abstract class RegularWalkingGaitAbstractController
       {
          setLowerBodyTorquesToZero();
 
-         stanceSubController.doDoubleSupportStanceControl(lowerBodyTorques, loadingLeg);
+//         stanceSubController.doDoubleSupportStanceControl(lowerBodyTorques, loadingLeg);
+         stanceSubController.doDoubleSupportStanceControl(lowerBodyTorques, null);
+
          upperBodySubController.doUpperBodyControl(upperBodyTorques);
 
          if (stanceSubController.isDoneStartStopWalkingDoubleSupport(loadingLeg, walkingStateMachine.timeInCurrentState()))
