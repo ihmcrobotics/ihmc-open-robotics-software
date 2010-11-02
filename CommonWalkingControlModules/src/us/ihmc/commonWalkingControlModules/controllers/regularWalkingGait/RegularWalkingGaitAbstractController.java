@@ -36,7 +36,8 @@ public class RegularWalkingGaitAbstractController
    protected final IntYoVariable stepsTaken = new IntYoVariable("stepsTaken", childRegistry);
    protected final IntYoVariable stepsToTake = new IntYoVariable("stepsToTake", childRegistry);
    protected final BooleanYoVariable onFinalStep = new BooleanYoVariable("onFinalStep", childRegistry);   
-   
+   protected final DoubleYoVariable recoverTime = new DoubleYoVariable("recoverTime", childRegistry);
+
    protected final StateMachine walkingStateMachine;
    protected final EnumYoVariable<RobotSide> supportLegYoVariable = new EnumYoVariable<RobotSide>("supportLeg", "Current support leg. Null if double support", childRegistry, RobotSide.class);
    protected final EnumYoVariable<RobotSide> swingLegYoVariable = EnumYoVariable.create("swingLeg", "Current support leg. Null if double support", RobotSide.class, childRegistry);
@@ -67,6 +68,12 @@ public class RegularWalkingGaitAbstractController
       lowerBodyTorques = new LowerBodyTorques(robotJointNames);
       
       walkingStateMachine = new StateMachine("walkingState", "switchTime", RegularWalkingState.class, time, childRegistry);
+   
+   
+      stepsToTake.set(16000);
+      stepsTaken.set(0);
+      onFinalStep.set(false);
+      recoverTime.set(0.5);
    }
    
    
@@ -147,10 +154,10 @@ public class RegularWalkingGaitAbstractController
          stanceSubController.doStartStopWalkingDoubleSupport(lowerBodyTorques, null, walkingStateMachine.timeInCurrentState());
          upperBodySubController.doUpperBodyControl(upperBodyTorques);
 
-         if (stanceSubController.isDoneStartStopWalkingDoubleSupport(loadingLeg, walkingStateMachine.timeInCurrentState()))
-         {
-            this.transitionToDefaultNextState();
-         }
+//         if (stanceSubController.isDoneStartStopWalkingDoubleSupport(loadingLeg, walkingStateMachine.timeInCurrentState()))
+//         {
+//            this.transitionToDefaultNextState();
+//         }
 
          setProcessedOutputsBodyTorques();
       }
