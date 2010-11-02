@@ -176,6 +176,47 @@ public class RegularWalkingGaitAbstractController
    }
    
    
+   protected class TransferAllLoadToLegForWalkingState extends State
+   {
+      private final RobotSide upcomingSupportSide;
+
+      public TransferAllLoadToLegForWalkingState(RegularWalkingState stateName, RobotSide upcomingSupportSide)
+      {
+         super(stateName);
+         this.upcomingSupportSide = upcomingSupportSide;
+      }
+
+      public void doAction()
+      {
+         setLowerBodyTorquesToZero();
+
+         stanceSubController.doUnloadLegToTransferIntoWalking(lowerBodyTorques, upcomingSupportSide, walkingStateMachine.timeInCurrentState());
+         upperBodySubController.doUpperBodyControl(upperBodyTorques);
+
+         if (stanceSubController.isDoneUnloadLegToTransferIntoWalking(upcomingSupportSide, walkingStateMachine.timeInCurrentState()))
+         {
+            this.transitionToDefaultNextState();
+         }
+
+         setProcessedOutputsBodyTorques();
+      }
+
+      public void doTransitionIntoAction()
+      {
+         supportLegYoVariable.set(null);
+         swingLegYoVariable.set(null);
+
+         stanceSubController.doTransitionIntoUnloadLegToTransferIntoWalking(upcomingSupportSide);
+      }
+
+      public void doTransitionOutOfAction()
+      {
+         supportLegYoVariable.set(upcomingSupportSide);
+         stanceSubController.doTransitionOutOfUnloadLegToTransferIntoWalking(upcomingSupportSide);
+      }
+   }
+
+   
    
    protected class LoadingPreSwingAState extends State
    {
