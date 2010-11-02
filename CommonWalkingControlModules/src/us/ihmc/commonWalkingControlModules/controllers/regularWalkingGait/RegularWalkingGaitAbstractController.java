@@ -1,5 +1,11 @@
 package us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait;
 
+import java.awt.Container;
+
+import javax.swing.BoxLayout;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+
 import us.ihmc.commonWalkingControlModules.RobotSide;
 import us.ihmc.commonWalkingControlModules.outputs.ProcessedOutputsInterface;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LowerBodyTorques;
@@ -13,6 +19,7 @@ import com.yobotics.simulationconstructionset.IntYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.statemachines.State;
 import com.yobotics.simulationconstructionset.util.statemachines.StateMachine;
+import com.yobotics.simulationconstructionset.util.statemachines.StateMachinesJPanel;
 import com.yobotics.simulationconstructionset.util.statemachines.StateTransition;
 import com.yobotics.simulationconstructionset.util.statemachines.StateTransitionCondition;
 
@@ -72,7 +79,7 @@ public abstract class RegularWalkingGaitAbstractController
       lowerBodyTorques = new LowerBodyTorques(robotJointNames);
       
       walkingStateMachine = new StateMachine("walkingState", "switchTime", RegularWalkingState.class, time, childRegistry);
-   
+      setupStateMachine();
    
       stepsToTake.set(16000);
       stepsTaken.set(0);
@@ -80,6 +87,12 @@ public abstract class RegularWalkingGaitAbstractController
       recoverTime.set(0.5);
    }
    
+   public void doControl()
+   {
+      doEveryTickSubController.doEveryControlTick(supportLegYoVariable.getEnumValue());
+      walkingStateMachine.doAction();
+      walkingStateMachine.checkTransitionConditions();
+   }
    
    public enum RegularWalkingState
    {
@@ -532,7 +545,7 @@ public abstract class RegularWalkingGaitAbstractController
       }
    }
    
-   protected void setupStateMachine()
+   private void setupStateMachine()
    {
       // Create states
       StartWalkingDoubleSupportState startWalkingDoubleSupportState = new StartWalkingDoubleSupportState(RegularWalkingState.StartWalkingDoubleSupportState,
@@ -688,5 +701,33 @@ public abstract class RegularWalkingGaitAbstractController
    public State getCurrentWalkingState()
    {
       return walkingStateMachine.getCurrentState();
+   }
+   
+   
+   public JPanel createStateMachineWindow(boolean inJFrame)
+   {
+      StateMachinesJPanel walkingStatePanel = new StateMachinesJPanel(walkingStateMachine);
+      if (inJFrame)
+      {
+         JFrame jFrame = new JFrame("Walking State Window");
+         Container contentPane = jFrame.getContentPane();
+         contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.X_AXIS));
+
+         jFrame.getContentPane().add(walkingStatePanel);
+         jFrame.pack();
+         jFrame.setSize(450, 300);
+         jFrame.setAlwaysOnTop(true);
+         jFrame.setVisible(true);
+      }
+
+      // Doing the following will cause redraw when the state changes, but not
+      // during replay or rewind:
+      walkingStateMachine.attachStateChangedListener(walkingStatePanel);
+
+      // Doing this will cause redraw every specified miliseconds:
+      // walkingStatePanel.createUpdaterThread(5000);
+
+      return walkingStatePanel;
+
    }
 }
