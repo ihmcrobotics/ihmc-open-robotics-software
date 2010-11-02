@@ -13,8 +13,10 @@ import com.yobotics.simulationconstructionset.IntYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.statemachines.State;
 import com.yobotics.simulationconstructionset.util.statemachines.StateMachine;
+import com.yobotics.simulationconstructionset.util.statemachines.StateTransition;
+import com.yobotics.simulationconstructionset.util.statemachines.StateTransitionCondition;
 
-public class RegularWalkingGaitAbstractController
+public abstract class RegularWalkingGaitAbstractController
 {
    protected final RobotSpecificJointNames robotJointNames;
 
@@ -42,8 +44,9 @@ public class RegularWalkingGaitAbstractController
    protected final EnumYoVariable<RobotSide> supportLegYoVariable = new EnumYoVariable<RobotSide>("supportLeg", "Current support leg. Null if double support", childRegistry, RobotSide.class);
    protected final EnumYoVariable<RobotSide> swingLegYoVariable = EnumYoVariable.create("swingLeg", "Current support leg. Null if double support", RobotSide.class, childRegistry);
 
+   private final String name;
    
-   public RegularWalkingGaitAbstractController(
+   public RegularWalkingGaitAbstractController(String name,
          RobotSpecificJointNames robotJointNames,
          DoubleYoVariable time,
          ProcessedOutputsInterface processedOutputs, 
@@ -54,6 +57,7 @@ public class RegularWalkingGaitAbstractController
          YoVariableRegistry controllerRegistry
    )
    {
+      this.name = name;
       this.robotJointNames = robotJointNames;
       this.processedOutputs = processedOutputs;      
       
@@ -527,6 +531,162 @@ public class RegularWalkingGaitAbstractController
          supportLegYoVariable.set(loadingLeg);
       }
    }
-
    
+   protected void setupStateMachine()
+   {
+      // Create states
+      StartWalkingDoubleSupportState startWalkingDoubleSupportState = new StartWalkingDoubleSupportState(RegularWalkingState.StartWalkingDoubleSupportState,
+            RobotSide.RIGHT);
+
+      TransferAllLoadToLegForWalkingState transferAllLoadToLeftLegForWalkingState = new TransferAllLoadToLegForWalkingState(
+            RegularWalkingState.TransferAllLoadToLeftLegForWalking, RobotSide.LEFT);
+      TransferAllLoadToLegForWalkingState transferAllLoadToRightLegForWalkingState = new TransferAllLoadToLegForWalkingState(
+            RegularWalkingState.TransferAllLoadToRightLegForWalking, RobotSide.RIGHT);
+
+      LoadingPreSwingAState leftLoadingRightPreSwingAState = new LoadingPreSwingAState(RegularWalkingState.LeftLoadingRightPreSwingA, RobotSide.LEFT);
+      LoadingPreSwingAState rightLoadingLeftPreSwingAState = new LoadingPreSwingAState(RegularWalkingState.RightLoadingLeftPreSwingA, RobotSide.RIGHT);
+
+      LoadingPreSwingBState leftLoadingRightPreSwingBState = new LoadingPreSwingBState(RegularWalkingState.LeftLoadingRightPreSwingB, RobotSide.LEFT);
+      LoadingPreSwingBState rightLoadingLeftPreSwingBState = new LoadingPreSwingBState(RegularWalkingState.RightLoadingLeftPreSwingB, RobotSide.RIGHT);
+
+      LoadingPreSwingCState leftLoadingRightPreSwingCState = new LoadingPreSwingCState(RegularWalkingState.LeftLoadingRightPreSwingC, RobotSide.LEFT);
+      LoadingPreSwingCState rightLoadingLeftPreSwingCState = new LoadingPreSwingCState(RegularWalkingState.RightLoadingLeftPreSwingC, RobotSide.RIGHT);
+
+      EarlyStanceInitialSwingState leftEarlyStanceRightInitialSwingState = new EarlyStanceInitialSwingState(
+            RegularWalkingState.LeftEarlyStanceRightInitialSwing, RobotSide.LEFT);
+      EarlyStanceInitialSwingState rightEarlyStanceLeftInitialSwingState = new EarlyStanceInitialSwingState(
+            RegularWalkingState.RightEarlyStanceLeftInitialSwing, RobotSide.RIGHT);
+
+      LateStanceMidSwingState leftLateStanceRightMidSwingState = new LateStanceMidSwingState(RegularWalkingState.LeftLateStanceRightMidSwing, RobotSide.LEFT);
+      LateStanceMidSwingState rightLateStanceLeftMidSwingState = new LateStanceMidSwingState(RegularWalkingState.RightLateStanceLeftMidSwing, RobotSide.RIGHT);
+
+      TerminalStanceTerminalSwingState leftTerminalStanceRightTerminalSwingState = new TerminalStanceTerminalSwingState(
+            RegularWalkingState.LeftTerminalStanceRightTerminalSwing, RobotSide.LEFT);
+      TerminalStanceTerminalSwingState rightTerminalStanceLeftTerminalSwingState = new TerminalStanceTerminalSwingState(
+            RegularWalkingState.RightTerminalStanceLeftTerminalSwing, RobotSide.RIGHT);
+
+      StopWalkingDoubleSupportState stopWalkingLeftLoadingState = new StopWalkingDoubleSupportState(RegularWalkingState.stopWalkingLeftLoadingState,
+            RobotSide.LEFT);
+      StopWalkingDoubleSupportState stopWalkingRightLoadingState = new StopWalkingDoubleSupportState(RegularWalkingState.stopWalkingRightLoadingState,
+            RobotSide.RIGHT);
+
+      // Begin: State transition conditions
+      StateTransitionCondition startWalkingCondition = new StateTransitionCondition()
+      {
+         public boolean checkCondition()
+         {
+            RobotSide loadingLeg = RobotSide.LEFT;
+            boolean readyToWalk = stanceSubController.isDoneStartStopWalkingDoubleSupport(loadingLeg, walkingStateMachine.timeInCurrentState());
+            return (go.getBooleanValue() && readyToWalk);
+         }
+      };
+      
+      StateTransitionCondition stopWalkingCondition = new StateTransitionCondition()
+      {
+         public boolean checkCondition()
+         {
+            if (((go.getBooleanValue() == false) || (onFinalStep.getBooleanValue())) && swingSubController.canWeStopNowSwingSubController() && stanceSubController.canWeStopNowStanceSubController())
+            {
+               return true;
+            }
+            
+            return false;
+         }
+      };
+
+      // End: State transition conditions
+
+      // Begin: create state transitions
+      StateTransition toTransferAllLoadToLeftLegForWalkingState = new StateTransition(transferAllLoadToLeftLegForWalkingState.getStateEnum(),
+            startWalkingCondition);
+      StateTransition toTransferAllLoadToRightLegForWalkingState = new StateTransition(transferAllLoadToRightLegForWalkingState.getStateEnum(),
+            startWalkingCondition);
+
+      StateTransition toStopWalkingLeftLoadingState = new StateTransition(stopWalkingLeftLoadingState.getStateEnum(), stopWalkingCondition);
+      StateTransition toStopWalkingRightLoadingState = new StateTransition(stopWalkingRightLoadingState.getStateEnum(), stopWalkingCondition);
+
+      // End: create state transitions
+
+      // Begin: Add transitions
+      // Start Walking
+      startWalkingDoubleSupportState.addStateTransition(toTransferAllLoadToLeftLegForWalkingState);
+ 
+      // Stop walking
+      leftLoadingRightPreSwingAState.addStateTransition(toStopWalkingRightLoadingState);
+      rightLoadingLeftPreSwingAState.addStateTransition(toStopWalkingLeftLoadingState);
+
+      // Restart walking
+      stopWalkingLeftLoadingState.addStateTransition(toTransferAllLoadToRightLegForWalkingState);
+      stopWalkingRightLoadingState.addStateTransition(toTransferAllLoadToLeftLegForWalkingState);
+
+      // Add default state transition last
+//      startWalkingDoubleSupportState.setDefaultNextState(transferAllLoadToRightLegForWalkingState.getStateEnum());
+      transferAllLoadToLeftLegForWalkingState.setDefaultNextState(leftLoadingRightPreSwingCState.getStateEnum());
+      transferAllLoadToRightLegForWalkingState.setDefaultNextState(rightLoadingLeftPreSwingCState.getStateEnum());
+
+      rightLoadingLeftPreSwingAState.setDefaultNextState(rightLoadingLeftPreSwingBState.getStateEnum());
+      rightLoadingLeftPreSwingBState.setDefaultNextState(rightLoadingLeftPreSwingCState.getStateEnum());
+      rightLoadingLeftPreSwingCState.setDefaultNextState(rightEarlyStanceLeftInitialSwingState.getStateEnum());
+      rightEarlyStanceLeftInitialSwingState.setDefaultNextState(rightLateStanceLeftMidSwingState.getStateEnum());
+      rightLateStanceLeftMidSwingState.setDefaultNextState(rightTerminalStanceLeftTerminalSwingState.getStateEnum());
+      rightTerminalStanceLeftTerminalSwingState.setDefaultNextState(leftLoadingRightPreSwingAState.getStateEnum());
+
+      leftLoadingRightPreSwingAState.setDefaultNextState(leftLoadingRightPreSwingBState.getStateEnum());
+      leftLoadingRightPreSwingBState.setDefaultNextState(leftLoadingRightPreSwingCState.getStateEnum());
+      leftLoadingRightPreSwingCState.setDefaultNextState(leftEarlyStanceRightInitialSwingState.getStateEnum());
+      leftEarlyStanceRightInitialSwingState.setDefaultNextState(leftLateStanceRightMidSwingState.getStateEnum());
+      leftLateStanceRightMidSwingState.setDefaultNextState(leftTerminalStanceRightTerminalSwingState.getStateEnum());
+      leftTerminalStanceRightTerminalSwingState.setDefaultNextState(rightLoadingLeftPreSwingAState.getStateEnum());
+
+      // End: Add transitions
+
+      // Begin: Add states
+      walkingStateMachine.addState(startWalkingDoubleSupportState);
+
+      walkingStateMachine.addState(transferAllLoadToLeftLegForWalkingState);
+      walkingStateMachine.addState(leftLoadingRightPreSwingAState);
+      walkingStateMachine.addState(leftLoadingRightPreSwingBState);
+      walkingStateMachine.addState(leftLoadingRightPreSwingCState);
+      walkingStateMachine.addState(leftEarlyStanceRightInitialSwingState);
+      walkingStateMachine.addState(leftLateStanceRightMidSwingState);
+      walkingStateMachine.addState(leftTerminalStanceRightTerminalSwingState);
+
+      walkingStateMachine.addState(transferAllLoadToRightLegForWalkingState);
+      walkingStateMachine.addState(rightLoadingLeftPreSwingAState);
+      walkingStateMachine.addState(rightLoadingLeftPreSwingBState);
+      walkingStateMachine.addState(rightLoadingLeftPreSwingCState);
+      walkingStateMachine.addState(rightEarlyStanceLeftInitialSwingState);
+      walkingStateMachine.addState(rightLateStanceLeftMidSwingState);
+      walkingStateMachine.addState(rightTerminalStanceLeftTerminalSwingState);
+
+      walkingStateMachine.addState(stopWalkingLeftLoadingState);
+      walkingStateMachine.addState(stopWalkingRightLoadingState);
+
+      // End: Add states
+   }
+
+   public String getName()
+   {
+      return name;
+   }
+   
+   public SwingSubController getSwingSubController()
+   {
+      return swingSubController;
+   }
+
+   public StanceSubController getStanceSubController()
+   {
+      return stanceSubController;
+   }
+
+   public UpperBodySubController getUpperBodySubController()
+   {
+      return upperBodySubController;
+   }
+
+   public State getCurrentWalkingState()
+   {
+      return walkingStateMachine.getCurrentState();
+   }
 }
