@@ -45,7 +45,6 @@ public abstract class RegularWalkingGaitAbstractController
    protected final IntYoVariable stepsTaken = new IntYoVariable("stepsTaken", childRegistry);
    protected final IntYoVariable stepsToTake = new IntYoVariable("stepsToTake", childRegistry);
    protected final BooleanYoVariable onFinalStep = new BooleanYoVariable("onFinalStep", childRegistry);   
-   protected final DoubleYoVariable recoverTime = new DoubleYoVariable("recoverTime", childRegistry);
 
    protected final StateMachine walkingStateMachine;
    protected final EnumYoVariable<RobotSide> supportLegYoVariable = new EnumYoVariable<RobotSide>("supportLeg", "Current support leg. Null if double support", childRegistry, RobotSide.class);
@@ -84,7 +83,6 @@ public abstract class RegularWalkingGaitAbstractController
       stepsToTake.set(16000);
       stepsTaken.set(0);
       onFinalStep.set(false);
-      recoverTime.set(0.5);
    }
    
    public void doControl()
