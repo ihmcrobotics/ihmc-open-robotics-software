@@ -192,8 +192,11 @@ public class CaptureRegionCalculator
 
          if (DRAW_CAPTURE_REGION && (dynamicGraphicObjectsListRegistry != null))
          {
-            DynamicGraphicPosition position = new DynamicGraphicPosition("Position", captureRegionBestCaseVertices[i], DRAWN_POINT_BASE_SIZE * ((4 + i) / 4),
-                                                 YoAppearance.Green(), DynamicGraphicPosition.GraphicType.BALL);
+            DynamicGraphicPosition position = new DynamicGraphicPosition("BestCaseVertices" + i, 
+                  captureRegionBestCaseVertices[i], 
+                  0.004,
+//                  DRAWN_POINT_BASE_SIZE * ((4.0 + ((double) i)) / 4.0),
+                  YoAppearance.Green(), DynamicGraphicPosition.GraphicType.BALL);
             dynamicGraphicObjectsList.add(position);
             artifactList.add(position.createArtifact());
          }
@@ -207,7 +210,10 @@ public class CaptureRegionCalculator
          if (DRAW_CAPTURE_REGION && (dynamicGraphicObjectsListRegistry != null))
          {
             DynamicGraphicPosition position = new DynamicGraphicPosition(pointName, captureRegionKinematicLimitVertices[i],
-                                                 DRAWN_POINT_BASE_SIZE * ((4 + i) / 4), YoAppearance.Blue(), DynamicGraphicPosition.GraphicType.BALL);
+                  0.004, 
+//                  DRAWN_POINT_BASE_SIZE * ((4 + i) / 4), 
+                  YoAppearance.Blue(), 
+                  DynamicGraphicPosition.GraphicType.BALL);
             dynamicGraphicObjectsList.add(position);
             artifactList.add(position.createArtifact());
          }
@@ -220,8 +226,11 @@ public class CaptureRegionCalculator
 
          if (DRAW_CAPTURE_REGION && (dynamicGraphicObjectsListRegistry != null))
          {
-            DynamicGraphicPosition position = new DynamicGraphicPosition(pointName, estimatedCOPExtremes[i], DRAWN_POINT_BASE_SIZE * ((4 + i) / 4),
-                                                 YoAppearance.Black(), DynamicGraphicPosition.GraphicType.BALL);
+            DynamicGraphicPosition position = new DynamicGraphicPosition(pointName, estimatedCOPExtremes[i], 
+                  0.004,
+//                  DRAWN_POINT_BASE_SIZE * ((4 + i) / 4),
+                  YoAppearance.Black(), 
+                  DynamicGraphicPosition.GraphicType.BALL);
             dynamicGraphicObjectsList.add(position);
             artifactList.add(position.createArtifact());
          }
@@ -398,7 +407,7 @@ public class CaptureRegionCalculator
       for (int i = 0; i < NUMBER_OF_POINTS_TO_APPROXIMATE_KINEMATIC_LIMITS; i++)
       {
          double alphaFromAToB = ((double) (i + 1)) / ((double) (NUMBER_OF_POINTS_TO_APPROXIMATE_KINEMATIC_LIMITS + 1));
-         FramePoint2d additionalKinematicPoint = getPointBetweenVectorsAtDistanceFromOriginCircular(directionLimits[0], directionLimits[1], alphaFromAToB,
+         FramePoint2d additionalKinematicPoint = getPointBetweenVectorsAtDistanceFromOriginCircular(directionLimits[0], directionLimits[directionLimits.length-1], alphaFromAToB,
                                                     kinematicRangeFromCoP, footCentroid);
          captureRegionVertices.add(additionalKinematicPoint);
          additionalKinematicPoint = additionalKinematicPoint.changeFrameCopy(worldFrame);
@@ -410,9 +419,9 @@ public class CaptureRegionCalculator
 
       // Intersect this with the reachableRegion:
       FrameConvexPolygon2d reachableRegion = reachableRegions.get(supportLeg);
-
       captureRegion = captureRegion.intersectionWith(reachableRegion);
 
+      
 //    if (DRAW_SCORE_ON_GROUND && (captureRegion != null))
 //    {
 //       if (currentSide != supportLeg)
