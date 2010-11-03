@@ -33,16 +33,16 @@ public class VelocityAndHeadingDesiredStepLocationCalculator implements DesiredS
    private final BooleanYoVariable nextStepIsInsideCaptureRegion;
 
 // R2Parameters.HIP_PITCH_Y_OFFSET + R2Parameters.HIP_PITCH_LENGTH_Y) * 2.0;
-   private final double GOOD_STANDING_WIDTH = (0.1016 + 0.09) * 2.0;
-   private final double GOOD_WALKING_STEP_WIDTH = GOOD_STANDING_WIDTH - 0.05;
+   private final double goodStandingWidth = (0.1016 + 0.09) * 2.0;
+   private final double goodWalkingStepWidth = goodStandingWidth - 0.05;
 
-   private final double INSIDE_STEP_ADJUSTMENT_FOR_TURNING = 0.0;
-   private final double OUTSIDE_STEP_ADJUSTMENT_FOR_TURNING = 0.0;
+   private final double insideStepAdjustmentForTurning = 0.0;
+   private final double outsideStepAdjustmentForTurning = 0.0;
 
    // R2 Foot parameters
-   private final double FOOT_FORWARD_OFFSET = 0.2;
-   private final double FOOT_BACKWARD_OFFSET = 0.04;
-   private final double FOOT_WIDTH = 0.15;
+   private final double footForwardOffset = 0.2;
+   private final double footBackwardOffset = 0.04;
+   private final double footWidth = 0.15;
 
    private final YoVariableRegistry registry = new YoVariableRegistry("VelocityControlDesiredStepLocationCalculator");
    private final DesiredHeadingControlModule desiredHeadingControlModule;
@@ -74,7 +74,7 @@ public class VelocityAndHeadingDesiredStepLocationCalculator implements DesiredS
       this.referenceFrames = referenceFrames;
 
       stepLength.set(0.0);
-      stepWidth.set(GOOD_WALKING_STEP_WIDTH);
+      stepWidth.set(goodWalkingStepWidth);
       stepHeight.set(0.0);
       stepYaw.set(0.0);
 
@@ -159,7 +159,7 @@ public class VelocityAndHeadingDesiredStepLocationCalculator implements DesiredS
 
    private void computeStepWidth(RobotSide swingLegSide, ReferenceFrame desiredHeadingFrame)
    {
-      stepWidth.set(swingLegSide.negateIfRightSide(GOOD_WALKING_STEP_WIDTH));
+      stepWidth.set(swingLegSide.negateIfRightSide(goodWalkingStepWidth));
 
       // this is where we want to adjust the width depending on "inside" or "outside" foot
       FrameVector desiredHeading = new FrameVector(desiredHeadingFrame, 1.0, 0.0, 0.0);
@@ -179,16 +179,16 @@ public class VelocityAndHeadingDesiredStepLocationCalculator implements DesiredS
       if (magCrossProductFromDesiredToFinalHeading > threshholdForStepWidthAdjustment)
       {
          if (swingLegSide == RobotSide.LEFT)
-            return INSIDE_STEP_ADJUSTMENT_FOR_TURNING;
+            return insideStepAdjustmentForTurning;
          else
-            return OUTSIDE_STEP_ADJUSTMENT_FOR_TURNING;
+            return outsideStepAdjustmentForTurning;
       }
       else if (magCrossProductFromDesiredToFinalHeading < -threshholdForStepWidthAdjustment)
       {
          if (swingLegSide == RobotSide.LEFT)
-            return -OUTSIDE_STEP_ADJUSTMENT_FOR_TURNING;
+            return -outsideStepAdjustmentForTurning;
          else
-            return -INSIDE_STEP_ADJUSTMENT_FOR_TURNING;
+            return -insideStepAdjustmentForTurning;
       }
       else
          return 0.0;
@@ -263,22 +263,22 @@ public class VelocityAndHeadingDesiredStepLocationCalculator implements DesiredS
       FramePoint2d tempNextStepOffset = new FramePoint2d(nextStep.getReferenceFrame(), 0.0, 0.0);
 
       // Front right corner
-      tempNextStepOffset.set(FOOT_FORWARD_OFFSET, -FOOT_WIDTH / 2.0);
+      tempNextStepOffset.set(footForwardOffset, -footWidth / 2.0);
       nextStepFrontRightCorner.add(tempNextStepOffset);
       nextStepFootPolygonPoints.add(nextStepFrontRightCorner);
 
       // Front left corner
-      tempNextStepOffset.set(FOOT_FORWARD_OFFSET, FOOT_WIDTH / 2.0);
+      tempNextStepOffset.set(footForwardOffset, footWidth / 2.0);
       nextStepFrontLeftCorner.add(tempNextStepOffset);
       nextStepFootPolygonPoints.add(nextStepFrontLeftCorner);
 
       // Back right corner
-      tempNextStepOffset.set(-FOOT_BACKWARD_OFFSET, -FOOT_WIDTH / 2.0);
+      tempNextStepOffset.set(-footBackwardOffset, -footWidth / 2.0);
       nextStepBackRightCorner.add(tempNextStepOffset);
       nextStepFootPolygonPoints.add(nextStepBackRightCorner);
 
       // Back left left corner
-      tempNextStepOffset.set(-FOOT_BACKWARD_OFFSET, FOOT_WIDTH / 2.0);
+      tempNextStepOffset.set(-footBackwardOffset, footWidth / 2.0);
       nextStepBackLeftCorner.add(tempNextStepOffset);
       nextStepFootPolygonPoints.add(nextStepBackLeftCorner);
 
