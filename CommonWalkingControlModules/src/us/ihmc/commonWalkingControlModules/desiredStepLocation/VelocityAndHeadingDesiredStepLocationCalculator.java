@@ -12,6 +12,7 @@ import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredHead
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredVelocityControlModule;
 import us.ihmc.commonWalkingControlModules.desiredStepLocation.DesiredStepLocationCalculator;
 import us.ihmc.commonWalkingControlModules.desiredStepLocation.Footstep;
+import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -46,6 +47,7 @@ public class VelocityAndHeadingDesiredStepLocationCalculator implements DesiredS
    private final YoVariableRegistry registry = new YoVariableRegistry("VelocityControlDesiredStepLocationCalculator");
    private final DesiredHeadingControlModule desiredHeadingControlModule;
    private final DesiredVelocityControlModule desiredVelocityControlModule;
+   private final CommonWalkingReferenceFrames referenceFrames;
 
    private final DoubleYoVariable stepLength = new DoubleYoVariable("stepLength", "User determined step length. [m]", registry);
    private final DoubleYoVariable stepWidth = new DoubleYoVariable("stepWidth", "User determined step width. [m]", registry);
@@ -63,12 +65,13 @@ public class VelocityAndHeadingDesiredStepLocationCalculator implements DesiredS
    private FramePoint footstepPosition;
 
    public VelocityAndHeadingDesiredStepLocationCalculator(DesiredHeadingControlModule desiredHeadingControlModule,
-           DesiredVelocityControlModule desiredVelocityControlModule, YoVariableRegistry parentRegistry)
+           DesiredVelocityControlModule desiredVelocityControlModule, YoVariableRegistry parentRegistry, CommonWalkingReferenceFrames referenceFrames)
    {
       CHECK_STEP_INTO_CAPTURE_REGION = false;
 
       this.desiredHeadingControlModule = desiredHeadingControlModule;
       this.desiredVelocityControlModule = desiredVelocityControlModule;
+      this.referenceFrames = referenceFrames;
 
       stepLength.set(0.0);
       stepWidth.set(GOOD_WALKING_STEP_WIDTH);
@@ -88,7 +91,7 @@ public class VelocityAndHeadingDesiredStepLocationCalculator implements DesiredS
    }
 
 
-   public Footstep computeCurrentDesiredStepLocation(RobotSide supportLegSide, BipedSupportPolygons bipedSupportPolygons, FrameConvexPolygon2d captureRegion)
+   public Footstep computeDesiredStepLocation(RobotSide supportLegSide, BipedSupportPolygons bipedSupportPolygons, FrameConvexPolygon2d captureRegion)
    {
       RobotSide swingLegSide = supportLegSide.getOppositeSide();
 
@@ -97,7 +100,7 @@ public class VelocityAndHeadingDesiredStepLocationCalculator implements DesiredS
       return new Footstep(swingLegSide, footstepPosition, stepYaw.getDoubleValue());
    }
 
-   public void initializeAtStartOfStep(RobotSide swingLegSide, CouplingRegistry couplingRegistry)
+   public void initializeAtStartOfSwing(RobotSide swingLegSide, CouplingRegistry couplingRegistry)
    {
       ReferenceFrame desiredHeadingFrame = desiredHeadingControlModule.getDesiredHeadingFrame();
 
@@ -108,7 +111,7 @@ public class VelocityAndHeadingDesiredStepLocationCalculator implements DesiredS
       adjustDesiredStepLocation(swingLegSide, couplingRegistry.getCaptureRegion());
 
       // Step Yaw
-      computeFootstepYaw(swingLegSide, desiredHeadingFrame, couplingRegistry);
+      computeFootstepYaw(swingLegSide, desiredHeadingFrame);
    }
 
    public void adjustDesiredStepLocation(RobotSide swingLegSide, FrameConvexPolygon2d captureRegion)
@@ -191,10 +194,10 @@ public class VelocityAndHeadingDesiredStepLocationCalculator implements DesiredS
          return 0.0;
    }
 
-   private void computeFootstepYaw(RobotSide swingSide, ReferenceFrame desiredHeadingFrame, CouplingRegistry couplingRegistry)
+   private void computeFootstepYaw(RobotSide swingSide, ReferenceFrame desiredHeadingFrame)
    {
       // Compute the difference between the desired Heading frame and the frame of the swing foot.
-      ReferenceFrame swingFootFrame = couplingRegistry.getReferenceFrames().getAnkleZUpReferenceFrames().get(swingSide);
+      ReferenceFrame swingFootFrame = referenceFrames.getAnkleZUpReferenceFrames().get(swingSide);
       Transform3D headingToSwingTransform = swingFootFrame.getTransformToDesiredFrame(desiredHeadingFrame);
       Matrix3d headingToSwingRotation = new Matrix3d();
       headingToSwingTransform.get(headingToSwingRotation);
@@ -242,7 +245,7 @@ public class VelocityAndHeadingDesiredStepLocationCalculator implements DesiredS
 
    private void projectDesiredStepLocationIntoCaptureRegion(FramePoint nextStep, FrameConvexPolygon2d captureRegion)
    {
-      System.out.println("project");
+      System.out.println(this.getClass().getName() + ": project");
       FramePoint2d tempNextStep = new FramePoint2d(captureRegion.orthogonalProjectionCopy(nextStep.toFramePoint2d()));
       nextStep.setX(tempNextStep.getX());
       nextStep.setY(tempNextStep.getY());
