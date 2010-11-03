@@ -32,17 +32,17 @@ public class VelocityAndHeadingDesiredStepLocationCalculator implements DesiredS
    private final BooleanYoVariable swingFootIsInsideCaptureRegion;
    private final BooleanYoVariable nextStepIsInsideCaptureRegion;
 
-// R2Parameters.HIP_PITCH_Y_OFFSET + R2Parameters.HIP_PITCH_LENGTH_Y) * 2.0;
-   private final double goodStandingWidth = (0.1016 + 0.09) * 2.0;
-   private final double goodWalkingStepWidth = goodStandingWidth - 0.05;
+   // Tunable robot-dependent parameters
+   private double goodStandingWidth;
+   private double goodWalkingStepWidth;
 
-   private final double insideStepAdjustmentForTurning = 0.0;
-   private final double outsideStepAdjustmentForTurning = 0.0;
+   private double insideStepAdjustmentForTurning;
+   private double outsideStepAdjustmentForTurning;
 
-   // R2 Foot parameters
-   private final double footForwardOffset = 0.2;
-   private final double footBackwardOffset = 0.04;
-   private final double footWidth = 0.15;
+   // Foot dimensions
+   private final double footForwardOffset;
+   private final double footBackwardOffset;
+   private final double footWidth;
 
    private final YoVariableRegistry registry = new YoVariableRegistry("VelocityControlDesiredStepLocationCalculator");
    private final DesiredHeadingControlModule desiredHeadingControlModule;
@@ -65,7 +65,8 @@ public class VelocityAndHeadingDesiredStepLocationCalculator implements DesiredS
    private FramePoint footstepPosition;
 
    public VelocityAndHeadingDesiredStepLocationCalculator(DesiredHeadingControlModule desiredHeadingControlModule,
-           DesiredVelocityControlModule desiredVelocityControlModule, YoVariableRegistry parentRegistry, CommonWalkingReferenceFrames referenceFrames)
+           DesiredVelocityControlModule desiredVelocityControlModule, YoVariableRegistry parentRegistry, CommonWalkingReferenceFrames referenceFrames, 
+           double footForwardOffset, double footBackwardOffset, double footWidth)
    {
       CHECK_STEP_INTO_CAPTURE_REGION = false;
 
@@ -86,6 +87,9 @@ public class VelocityAndHeadingDesiredStepLocationCalculator implements DesiredS
       swingFootIsInsideCaptureRegion = new BooleanYoVariable("swingFootIsInsideCaptureRegion", parentRegistry);
       nextStepIsInsideCaptureRegion = new BooleanYoVariable("nextStepIsInsideCaptureRegion", parentRegistry);
 
+      this.footForwardOffset = footForwardOffset;
+      this.footBackwardOffset = footBackwardOffset;
+      this.footWidth = footWidth;
 
       parentRegistry.addChild(registry);
    }
@@ -287,7 +291,23 @@ public class VelocityAndHeadingDesiredStepLocationCalculator implements DesiredS
       return nextStepFootPolygon;
    }
 
+   public void setUpParametersForR2()
+   {
+      goodStandingWidth = (0.1016 + 0.09) * 2.0;
+      goodWalkingStepWidth = goodStandingWidth - 0.05;
+
+      insideStepAdjustmentForTurning = 0.0;
+      outsideStepAdjustmentForTurning = 0.0;
+   }
 
 
+   public void setupParametersForM2V2()
+   {
+      goodStandingWidth = 0.25;
+      goodWalkingStepWidth = goodStandingWidth - 0.05;
+
+      insideStepAdjustmentForTurning = 0.0;
+      outsideStepAdjustmentForTurning = 0.0;
+   }
 
 }
