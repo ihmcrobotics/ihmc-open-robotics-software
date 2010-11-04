@@ -8,6 +8,7 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 public interface CapturePointCalculatorInterface
 {
+   public abstract void computeCapturePoint(RobotSide supportSide);
 
    public abstract FramePoint2d getCapturePoint2dInFrame(ReferenceFrame referenceFrame);
 
