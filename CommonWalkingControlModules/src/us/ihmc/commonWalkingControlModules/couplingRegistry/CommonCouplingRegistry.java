@@ -15,7 +15,7 @@ import us.ihmc.utilities.screwTheory.Wrench;
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 
-public class BasicCouplingRegistry implements CouplingRegistry
+public class CommonCouplingRegistry implements CouplingRegistry
 {
    private RobotSide supportLeg;
 
@@ -35,7 +35,7 @@ public class BasicCouplingRegistry implements CouplingRegistry
    private CommonWalkingReferenceFrames referenceFrames;
 
 
-   public BasicCouplingRegistry(CommonWalkingReferenceFrames referenceFrames)
+   public CommonCouplingRegistry(CommonWalkingReferenceFrames referenceFrames)
    {
       SideDependentList<ReferenceFrame> ankleZUpFrames = referenceFrames.getAnkleZUpReferenceFrames();
       ReferenceFrame midFeetZUp = referenceFrames.getMidFeetZUpFrame();
