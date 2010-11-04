@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.sensors;
 
 import us.ihmc.commonWalkingControlModules.RobotSide;
+import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.Orientation;
@@ -19,4 +20,8 @@ public interface ProcessedSensorsInterface
      public abstract Twist computeTwistOfPelvisWithRespectToWorld();
      public abstract Orientation getPelvisOrientationInFrame(ReferenceFrame referenceFrame);
      public abstract FramePoint getCenterOfMassGroundProjectionInFrame(ReferenceFrame referenceFrame);
+
+   public abstract double getLegJointVelocity(RobotSide robotSide, LegJointName legJointName);
+
+   public abstract double getLegJointPosition(RobotSide robotSide, LegJointName legJointName);
 }
