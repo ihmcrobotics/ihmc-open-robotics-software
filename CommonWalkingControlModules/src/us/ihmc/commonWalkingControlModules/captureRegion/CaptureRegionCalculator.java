@@ -333,10 +333,10 @@ public class CaptureRegionCalculator
          FramePoint2d copExtremeInSupportAnkleZUp = copExtreme.changeFrameCopy(supportAnkleZUpFrame);
          FramePoint copExtreme3d = new FramePoint(copExtreme.getReferenceFrame(), copExtreme.getX(), copExtreme.getY(), 0.0);
 
-         capturePointCalculator.computePredictedCapturePoint(supportLeg, swingTimeRemaining + SWING_TIME_TO_ADD_FOR_CAPTURING_SAFETY_FACTOR, copExtreme3d,
-                 null);
-
-         FramePoint predictedExtremeCapturePoint = capturePointCalculator.getPredictedCapturePointInFrame(supportAnkleZUpFrame);
+         FramePoint predictedExtremeCapturePoint = capturePointCalculator.computePredictedCapturePoint(supportLeg, swingTimeRemaining + SWING_TIME_TO_ADD_FOR_CAPTURING_SAFETY_FACTOR, copExtreme3d);
+         predictedExtremeCapturePoint = predictedExtremeCapturePoint.changeFrameCopy(supportAnkleZUpFrame);
+         
+//         FramePoint predictedExtremeCapturePoint = capturePointCalculator.getPredictedCapturePointInFrame(supportAnkleZUpFrame);
          FramePoint2d predictedExtremeCapturePoint2d = new FramePoint2d(predictedExtremeCapturePoint.getReferenceFrame(), predictedExtremeCapturePoint.getX(),
                                                           predictedExtremeCapturePoint.getY());
 
@@ -604,8 +604,6 @@ public class CaptureRegionCalculator
     */
    public void hideCaptureRegion()
    {
-      capturePointCalculator.hidePredictedCapturePoint();
-
       if (captureRegionGraphic != null)
       {
          this.captureRegionGraphic.setFrameConvexPolygon2d(null);
