@@ -18,7 +18,7 @@ public interface StanceSubController
 
    public abstract void doTerminalStance(LegTorques legTorquesToPackForLoadingLeg, double timeInState);
 
-   public abstract void doStartStopWalkingDoubleSupport(LowerBodyTorques lowerBodyTorquesToPack, RobotSide loadingLeg, double timeInState);
+   public abstract void doStartWalkingDoubleSupport(LowerBodyTorques lowerBodyTorquesToPack, RobotSide loadingLeg, double timeInState);
 
    public abstract void doUnloadLegToTransferIntoWalking(LowerBodyTorques lowerBodyTorquesToPack, RobotSide loadingLeg, double timeInState);
 
@@ -26,7 +26,7 @@ public interface StanceSubController
 
    public abstract boolean isDoneWithLoadingPreSwingB(RobotSide loadingLeg, double timeInState);
 
-   public abstract boolean isDoneStartStopWalkingDoubleSupport(RobotSide loadingLeg, double timeInState);
+   public abstract boolean isReadyToStartStopWalkingDoubleSupport(RobotSide loadingLeg, double timeInState);
 
    public abstract boolean isDoneUnloadLegToTransferIntoWalking(RobotSide loadingLeg, double timeInState);
 
@@ -66,6 +66,6 @@ public interface StanceSubController
 
    public abstract boolean canWeStopNowStanceSubController();
 
-   public abstract void doDoubleSupportStanceControl(LowerBodyTorques lowerBodyTorquesToPack, RobotSide loadingLeg, double timeInState);
+   public abstract void doStopWalkingDoubleSupport(LowerBodyTorques lowerBodyTorquesToPack, RobotSide loadingLeg, double timeInState);
 
 }
