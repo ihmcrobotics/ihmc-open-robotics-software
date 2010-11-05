@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.controlModules;
+package us.ihmc.commonWalkingControlModules.controlModuleInterfaces;
 
 
 import us.ihmc.commonWalkingControlModules.RobotSide;
@@ -10,11 +10,11 @@ import us.ihmc.utilities.math.geometry.FrameVector2d;
 
 public interface GuideLineCalculator
 {
-   public void update(RobotSide supportLeg, BipedSupportPolygons bipedSupportPolygons, FramePoint2d capturePointInSupportFootZUp,
+   public abstract void update(RobotSide supportLeg, BipedSupportPolygons bipedSupportPolygons, FramePoint2d capturePointInSupportFootZUp,
                       FramePoint finalDesiredSwingTarget, FrameVector2d desiredVelocityInSupportFootFrame,
                       FrameVector2d actualCenterOfMassVelocityInSupportFootFrame);
 
-   public void reset();
+   public abstract void reset();
 
-   public FrameLineSegment2d getGuideLine(RobotSide supportLeg);
+   public abstract FrameLineSegment2d getGuideLine(RobotSide supportLeg);
 }
