@@ -65,11 +65,11 @@ public class CommonStanceSubController implements StanceSubController
    private final DoubleYoVariable captureXVelocityScale = new DoubleYoVariable("captureXVelocityScale", registry);
 
    public CommonStanceSubController(CouplingRegistry couplingRegistry, CommonWalkingReferenceFrames referenceFrames,
+                                     DesiredHeadingControlModule desiredHeadingControlModule,
                                      DesiredVelocityControlModule desiredVelocityControlModule,
-                                     DesiredPelvisOrientationControlModule desiredPelvisOrientationControlModule,
-                                     BalanceSupportControlModule balanceSupportControlModule, FootOrientationControlModule footOrientationControlModule,
-                                     DesiredHeadingControlModule desiredHeadingControlModule, YoVariableRegistry parentRegistry,
-                                     KneeExtensionControlModule kneeExtensionControlModule)
+                                     DesiredPelvisOrientationControlModule desiredPelvisOrientationControlModule, BalanceSupportControlModule balanceSupportControlModule,
+                                     FootOrientationControlModule footOrientationControlModule, KneeExtensionControlModule kneeExtensionControlModule,
+                                     YoVariableRegistry parentRegistry)
    {
       this.couplingRegistry = couplingRegistry;
       this.referenceFrames = referenceFrames;
