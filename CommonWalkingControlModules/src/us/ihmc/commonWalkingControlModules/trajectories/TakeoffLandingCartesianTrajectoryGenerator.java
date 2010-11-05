@@ -21,7 +21,7 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector2d;
  * Class implements a trajectory generator that incorporates the ability to change the endpoint during trajectory execution.
  * The motion of the instantaneous desired position is bounded by acceleration and velocity limits.
  */
-public class TakeoffLandingCartesianTrajectoryGenerator implements CartesianTrajectoryGenerator, ReferenceFrameHolder
+public class TakeoffLandingCartesianTrajectoryGenerator implements CartesianTrajectoryGenerator //, ReferenceFrameHolder
 {
    private final boolean ALLOW_RETAKEOFF = false;
 
@@ -59,6 +59,13 @@ public class TakeoffLandingCartesianTrajectoryGenerator implements CartesianTraj
 
    private final ReferenceFrame referenceFrame;
 
+   public TakeoffLandingCartesianTrajectoryGenerator(double maxAccel, double maxVel, double zClearance, double takeOffSlope, double landingSlope,
+         ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry)
+   {
+      this("", maxAccel, maxVel, zClearance, takeOffSlope, landingSlope,
+            referenceFrame, parentRegistry);
+   }
+   
    /**
     * @param maxAccel maximum acceleration of instantaneous desired position
     * @param maxVel maximum velocity of instantaneous desired position
@@ -68,7 +75,7 @@ public class TakeoffLandingCartesianTrajectoryGenerator implements CartesianTraj
     * @param referenceFrame TODO
     * @param parentRegistry
     */
-   public TakeoffLandingCartesianTrajectoryGenerator(double maxAccel, double maxVel, double zClearance, double takeOffSlope, double landingSlope,
+   public TakeoffLandingCartesianTrajectoryGenerator(String suffix, double maxAccel, double maxVel, double zClearance, double takeOffSlope, double landingSlope,
            ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry)
    {
       this.maxAccel.set(maxAccel);
@@ -77,19 +84,19 @@ public class TakeoffLandingCartesianTrajectoryGenerator implements CartesianTraj
       this.takeOffSlope.set(takeOffSlope);
       this.landingSlope.set(landingSlope);
 
-      initialPosition = new YoFramePoint("initialPosition", "", referenceFrame, registry);
-      initialVelocity = new YoFrameVector("initialVelocity", "", referenceFrame, registry);
+      initialPosition = new YoFramePoint(suffix + "initialPosition", "", referenceFrame, registry);
+      initialVelocity = new YoFrameVector(suffix + "initialVelocity", "", referenceFrame, registry);
 
-      finalDesiredPosition = new YoFramePoint("finalDesiredPosition", "", referenceFrame, registry);
-      currentPosition = new YoFramePoint("currentPosition", "", referenceFrame, registry);
-      currentVelocity = new YoFrameVector("currentVelocity", "", referenceFrame, registry);
-      currentAcceleration = new YoFrameVector("currentAcceleration", "", referenceFrame, registry);
+      finalDesiredPosition = new YoFramePoint(suffix + "finalDesiredPosition", "", referenceFrame, registry);
+      currentPosition = new YoFramePoint(suffix + "currentPosition", "", referenceFrame, registry);
+      currentVelocity = new YoFrameVector(suffix + "currentVelocity", "", referenceFrame, registry);
+      currentAcceleration = new YoFrameVector(suffix + "currentAcceleration", "", referenceFrame, registry);
 
-      currentPositionToFinalPosition = new YoFrameVector("currentToFinal", "", referenceFrame, registry);
-      currentToFinal2d = new YoFrameVector2d("currentToFinal2d", "", referenceFrame, registry);
+      currentPositionToFinalPosition = new YoFrameVector(suffix + "currentToFinal", "", referenceFrame, registry);
+      currentToFinal2d = new YoFrameVector2d(suffix + "currentToFinal2d", "", referenceFrame, registry);
       tempFrameVector = new FrameVector(referenceFrame);
-      desiredMaxVelocity = new YoFrameVector("desiredMaxVelocity", "", referenceFrame, registry);
-      desiredAcceleration = new YoFrameVector("desiredAcceleration", "", referenceFrame, registry);
+      desiredMaxVelocity = new YoFrameVector(suffix + "desiredMaxVelocity", "", referenceFrame, registry);
+      desiredAcceleration = new YoFrameVector(suffix + "desiredAcceleration", "", referenceFrame, registry);
 
       this.referenceFrame = referenceFrame;
 
@@ -446,10 +453,10 @@ public class TakeoffLandingCartesianTrajectoryGenerator implements CartesianTraj
       return referenceFrame;
    }
 
-   public ReferenceFrameHolder changeFrameCopy(ReferenceFrame desiredFrame)
-   {
-      return null;
-   }
+//   public ReferenceFrameHolder changeFrameCopy(ReferenceFrame desiredFrame)
+//   {
+//      return null;
+//   }
 
    public enum SwingState {TAKE_OFF, CRUISE_STATE, LANDING, DONE;}
 
