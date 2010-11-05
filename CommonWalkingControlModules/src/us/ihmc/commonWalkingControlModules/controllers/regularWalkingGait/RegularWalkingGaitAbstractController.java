@@ -47,7 +47,7 @@ public abstract class RegularWalkingGaitAbstractController
    protected final BooleanYoVariable onFinalStep = new BooleanYoVariable("onFinalStep", childRegistry);   
 
    protected final StateMachine walkingStateMachine;
-   protected final EnumYoVariable<RobotSide> supportLegYoVariable = new EnumYoVariable<RobotSide>("supportLeg", "Current support leg. Null if double support", childRegistry, RobotSide.class);
+   protected final EnumYoVariable<RobotSide> supportLegYoVariable = new EnumYoVariable<RobotSide>("supportLegForWalkingCtrlr", "Current support leg. Null if double support", childRegistry, RobotSide.class);
    protected final EnumYoVariable<RobotSide> swingLegYoVariable = EnumYoVariable.create("swingLeg", "Current support leg. Null if double support", RobotSide.class, childRegistry);
 
    private final String name;
@@ -521,7 +521,7 @@ public abstract class RegularWalkingGaitAbstractController
          setLowerBodyTorquesToZero();
 
 //         stanceSubController.doDoubleSupportStanceControl(lowerBodyTorques, loadingLeg);
-         stanceSubController.doDoubleSupportStanceControl(lowerBodyTorques, null);
+         stanceSubController.doDoubleSupportStanceControl(lowerBodyTorques, null, walkingStateMachine.timeInCurrentState());
 
          upperBodySubController.doUpperBodyControl(upperBodyTorques);
 

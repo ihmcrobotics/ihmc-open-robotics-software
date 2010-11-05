@@ -26,7 +26,6 @@ public interface StanceSubController
 
    public abstract boolean isDoneWithLoadingPreSwingB(RobotSide loadingLeg, double timeInState);
 
-   // TODO: I think we can delete this method (pdn)
    public abstract boolean isDoneStartStopWalkingDoubleSupport(RobotSide loadingLeg, double timeInState);
 
    public abstract boolean isDoneUnloadLegToTransferIntoWalking(RobotSide loadingLeg, double timeInState);
@@ -67,6 +66,6 @@ public interface StanceSubController
 
    public abstract boolean canWeStopNowStanceSubController();
 
-   public abstract void doDoubleSupportStanceControl(LowerBodyTorques lowerBodyTorquesToPack, RobotSide loadingLeg);
+   public abstract void doDoubleSupportStanceControl(LowerBodyTorques lowerBodyTorquesToPack, RobotSide loadingLeg, double timeInState);
 
 }
