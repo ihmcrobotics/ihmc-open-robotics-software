@@ -625,12 +625,12 @@ public abstract class RegularWalkingGaitAbstractController
       startWalkingDoubleSupportState.addStateTransition(toTransferAllLoadToLeftLegForWalkingState);
  
       // Stop walking
-      leftLoadingRightPreSwingAState.addStateTransition(toStopWalkingRightLoadingState);
-      rightLoadingLeftPreSwingAState.addStateTransition(toStopWalkingLeftLoadingState);
+      leftLoadingRightPreSwingAState.addStateTransition(toStopWalkingLeftLoadingState);
+      rightLoadingLeftPreSwingAState.addStateTransition(toStopWalkingRightLoadingState);
 
       // Restart walking
-      stopWalkingLeftLoadingState.addStateTransition(toTransferAllLoadToRightLegForWalkingState);
-      stopWalkingRightLoadingState.addStateTransition(toTransferAllLoadToLeftLegForWalkingState);
+      stopWalkingLeftLoadingState.addStateTransition(toTransferAllLoadToLeftLegForWalkingState);
+      stopWalkingRightLoadingState.addStateTransition(toTransferAllLoadToRightLegForWalkingState);
 
       // Add default state transition last
 //      startWalkingDoubleSupportState.setDefaultNextState(transferAllLoadToRightLegForWalkingState.getStateEnum());
