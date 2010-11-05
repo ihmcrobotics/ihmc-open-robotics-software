@@ -166,7 +166,7 @@ public abstract class RegularWalkingGaitAbstractController
       {
          setLowerBodyTorquesToZero();
 
-         stanceSubController.doStartStopWalkingDoubleSupport(lowerBodyTorques, null, walkingStateMachine.timeInCurrentState());
+         stanceSubController.doStartWalkingDoubleSupport(lowerBodyTorques, null, walkingStateMachine.timeInCurrentState());
          upperBodySubController.doUpperBodyControl(upperBodyTorques);
 
 //         if (stanceSubController.isDoneStartStopWalkingDoubleSupport(loadingLeg, walkingStateMachine.timeInCurrentState()))
@@ -521,14 +521,14 @@ public abstract class RegularWalkingGaitAbstractController
          setLowerBodyTorquesToZero();
 
 //         stanceSubController.doDoubleSupportStanceControl(lowerBodyTorques, loadingLeg);
-         stanceSubController.doDoubleSupportStanceControl(lowerBodyTorques, null, walkingStateMachine.timeInCurrentState());
+         stanceSubController.doStopWalkingDoubleSupport(lowerBodyTorques, null, walkingStateMachine.timeInCurrentState());
 
          upperBodySubController.doUpperBodyControl(upperBodyTorques);
 
-         if (stanceSubController.isDoneStartStopWalkingDoubleSupport(loadingLeg, walkingStateMachine.timeInCurrentState()))
-         {
-//          this.transitionToDefaultNextState();
-         }
+//         if (stanceSubController.isDoneStartStopWalkingDoubleSupport(loadingLeg, walkingStateMachine.timeInCurrentState()))
+//         {
+////          this.transitionToDefaultNextState();
+//         }
 
          setProcessedOutputsBodyTorques();
       }
@@ -589,7 +589,7 @@ public abstract class RegularWalkingGaitAbstractController
          public boolean checkCondition()
          {
             RobotSide loadingLeg = RobotSide.LEFT;
-            boolean readyToWalk = stanceSubController.isDoneStartStopWalkingDoubleSupport(loadingLeg, walkingStateMachine.timeInCurrentState());
+            boolean readyToWalk = stanceSubController.isReadyToStartStopWalkingDoubleSupport(loadingLeg, walkingStateMachine.timeInCurrentState());
             return (go.getBooleanValue() && readyToWalk);
          }
       };
