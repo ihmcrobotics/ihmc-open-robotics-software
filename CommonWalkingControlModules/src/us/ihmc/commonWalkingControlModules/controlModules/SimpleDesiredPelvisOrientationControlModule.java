@@ -18,41 +18,32 @@ public class SimpleDesiredPelvisOrientationControlModule implements DesiredPelvi
 
    private final ReferenceFrame desiredHeadingFrame;
 
-   private final DoubleYoVariable twistScale;
-   private final DoubleYoVariable userDesiredPelvisPitch;
+   private final YoVariableRegistry registry = new YoVariableRegistry("SimpleDesiredPelvisOrientationControlModule");
+   private final DoubleYoVariable twistScale = new DoubleYoVariable("twistScale", registry);
+   private final DoubleYoVariable userDesiredPelvisPitch = new DoubleYoVariable("userDesiredPelvisPitch", registry);
+   private final DoubleYoVariable pelvisRollPelvisYawScale = new DoubleYoVariable("pelvisYawToRollScale", registry);
 
    private final YoFrameOrientation desiredPelvisOrientation;
 
+
    public SimpleDesiredPelvisOrientationControlModule(CommonWalkingReferenceFrames referenceFrames, DesiredHeadingControlModule desiredHeadingControlModule,
-           YoVariableRegistry registry)
+           YoVariableRegistry parentRegistry)
    {
       this.referenceFrames = referenceFrames;
 
       this.desiredHeadingFrame = desiredHeadingControlModule.getDesiredHeadingFrame();
-
       this.desiredPelvisOrientation = new YoFrameOrientation("desiredPelvis", "", desiredHeadingFrame, registry);
-
-      userDesiredPelvisPitch = new DoubleYoVariable("userDesiredPelvisPitch", registry);
-      twistScale = new DoubleYoVariable("twistScale", registry);
-
-      twistScale.set(0.3);
-
-      // 061010: changed to 0.1 to account for heavy backpack
-      userDesiredPelvisPitch.set(0.1);
+      
+      parentRegistry.addChild(registry);
    }
 
    public Orientation getDesiredPelvisOrientationSingleSupport(RobotSide robotSide)
    {
-//    return getDesiredPelvisOrientationYawAllTheWayAnkleToAnkle();
-//      return getDesiredPelvisOrientationScaledAnkleToAnkle(robotSide);
-
       return getDesiredPelvisOrientationScaledKneeToKnee(robotSide);
    }
 
    public Orientation getDesiredPelvisOrientationDoubleSupport()
    {
-//    return getDesiredPelvisOrientationScaledAnkleToAnkle(null);
-
       return getDesiredPelvisOrientationScaledKneeToKnee(null);
    }
 
@@ -72,12 +63,27 @@ public class SimpleDesiredPelvisOrientationControlModule implements DesiredPelvi
       double desiredPelvisYaw = Math.atan2(-(leftKneeOrigin.getX() - rightKneeOrigin.getX()), (leftKneeOrigin.getY() - rightKneeOrigin.getY()));
       desiredPelvisYaw = desiredPelvisYaw * twistScale.getDoubleValue();
 
-      double desiredPelvisRoll = 0.25 * desiredPelvisYaw;
+      double desiredPelvisRoll = pelvisRollPelvisYawScale.getDoubleValue() * desiredPelvisYaw;
 //      double desiredPelvisRoll = 0.0;
 
 
       desiredPelvisOrientation.setYawPitchRoll(desiredPelvisYaw, userDesiredPelvisPitch.getDoubleValue(), desiredPelvisRoll);
 
       return desiredPelvisOrientation.getFrameOrientationCopy();
+   }
+   
+   public void setParametersForR2()
+   {
+      twistScale.set(0.3);
+      userDesiredPelvisPitch.set(0.1); // 061010: changed to 0.1 to account for heavy backpack
+      pelvisRollPelvisYawScale.set(0.25);
+   }
+   
+   public void setParametersForM2V2()
+   {
+      // TODO: tune
+      twistScale.set(0.3);
+      userDesiredPelvisPitch.set(0.1);      
+      pelvisRollPelvisYawScale.set(0.25);
    }
 }
