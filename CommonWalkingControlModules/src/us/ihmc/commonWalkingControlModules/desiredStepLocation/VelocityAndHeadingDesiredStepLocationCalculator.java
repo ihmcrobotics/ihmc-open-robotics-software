@@ -95,7 +95,8 @@ public class VelocityAndHeadingDesiredStepLocationCalculator implements DesiredS
    }
 
 
-   public Footstep computeDesiredStepLocation(RobotSide supportLegSide, BipedSupportPolygons bipedSupportPolygons, FrameConvexPolygon2d captureRegion)
+   public Footstep computeDesiredStepLocation(RobotSide supportLegSide, BipedSupportPolygons bipedSupportPolygons, 
+         FrameConvexPolygon2d captureRegion, FramePoint capturePoint)
    {
       RobotSide swingLegSide = supportLegSide.getOppositeSide();
 

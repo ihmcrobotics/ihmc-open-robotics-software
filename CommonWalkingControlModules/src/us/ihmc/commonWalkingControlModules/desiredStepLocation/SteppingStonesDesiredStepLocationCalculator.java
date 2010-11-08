@@ -124,7 +124,8 @@ public class SteppingStonesDesiredStepLocationCalculator implements DesiredStepL
       }
    }
 
-   public Footstep computeDesiredStepLocation(RobotSide supportLeg, BipedSupportPolygons bipedSupportPolygons, FrameConvexPolygon2d captureRegion)
+   public Footstep computeDesiredStepLocation(RobotSide supportLeg, BipedSupportPolygons bipedSupportPolygons, 
+         FrameConvexPolygon2d captureRegion, FramePoint capturePoint)
    {
       FramePoint nominalLocation = getNominalStepLocation(supportLeg);
       Point2d nominalLocation2d = new Point2d(nominalLocation.getX(), nominalLocation.getY());
