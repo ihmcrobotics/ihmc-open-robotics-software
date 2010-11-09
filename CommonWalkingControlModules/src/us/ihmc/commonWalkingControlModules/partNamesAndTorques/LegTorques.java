@@ -60,19 +60,6 @@ public class LegTorques implements LegTorquesInterface
    }
 
 
-   public double[] getTorquesCopy()
-   {
-      double[] ret = new double[legJointNames.length];
-
-      for (int i = 0; i < legJointNames.length; i++)
-      {
-         LegJointName legJointName = legJointNames[i];
-         ret[i] = torques.get(legJointName);
-      }
-
-      return ret;
-   }
-
    public LegTorques getLegTorquesCopy()
    {
       return new LegTorques(this);
