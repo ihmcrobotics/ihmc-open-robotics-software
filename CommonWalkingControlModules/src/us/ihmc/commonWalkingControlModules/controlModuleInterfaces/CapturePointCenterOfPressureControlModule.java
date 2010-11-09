@@ -50,28 +50,34 @@ public interface CapturePointCenterOfPressureControlModule
 
    public abstract void setMaxCaptureToCoP(double maxCaptureToCoP);
 
+   
+   // FIXME: remove these four methods from the interface!!!
    /**
     *    sets k for x capture point
     *    @param kx double
     */
+   @Deprecated
    public abstract void setKCaptureX(double kx);
 
    /**
     * gets k for x capture point
     * @return double
     */
+   @Deprecated
    public abstract double getKCaptureX();
 
    /**
     * sets k for y capture point
     * @param ky double
     */
+   @Deprecated
    public abstract void setKCaptureY(double ky);
 
    /**
     * gets k for y capture point
     * @return double
     */
+   @Deprecated
    public abstract double getKCaptureY();
 
    public abstract YoFramePoint getCenterOfPressureDesiredWorld();

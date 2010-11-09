@@ -70,7 +70,7 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
 
 
    public SpeedControllingCapturePointCenterOfPressureControlModule(double controlDT, CommonWalkingReferenceFrames referenceFrames,
-           YoVariableRegistry yoVariableRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+           YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       midFeetZUp = referenceFrames.getMidFeetZUpFrame();
       world = ReferenceFrame.getWorldFrame();
@@ -135,9 +135,9 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
          centerOfPressureDesiredWorldGraphicPosition = null;
       }
 
-      if (yoVariableRegistry != null)    // && (VarListsToRegister.REGISTER_CAPTURE_POINT_CENTER_OF_PRESSURE_CONTROLLER))
+      if (parentRegistry != null)    // && (VarListsToRegister.REGISTER_CAPTURE_POINT_CENTER_OF_PRESSURE_CONTROLLER))
       {
-         yoVariableRegistry.addChild(registry);
+         parentRegistry.addChild(registry);
       }
 
       resetCoPFilter();

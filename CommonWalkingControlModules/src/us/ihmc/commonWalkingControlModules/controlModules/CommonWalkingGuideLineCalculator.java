@@ -22,7 +22,6 @@ public class CommonWalkingGuideLineCalculator implements GuideLineCalculator
    private final SideDependentList<FrameLineSegment2d> guideLines = new SideDependentList<FrameLineSegment2d>();
 
    private final SideDependentList<ReferenceFrame> footZUpFrames;
-   private final ReferenceFrame bodyZUpFrame;
 
    private final DoubleYoVariable captureForward = new DoubleYoVariable("captureForward", registry);
    private final DoubleYoVariable captureForwardOfSweet = new DoubleYoVariable("captureForwardOfSweet", registry);
@@ -40,7 +39,6 @@ public class CommonWalkingGuideLineCalculator implements GuideLineCalculator
       this.onFinalStep = onFinalStep;
       this.footLength = footLength;
       this.footBack = footBack;
-      this.bodyZUpFrame = referenceFrames.getABodyAttachedZUpFrame();
       this.footZUpFrames = referenceFrames.getAnkleZUpReferenceFrames();
       parentRegistry.addChild(registry);
 
