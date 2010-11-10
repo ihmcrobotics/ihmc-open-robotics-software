@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.armControlModules;
 
 import us.ihmc.commonWalkingControlModules.RobotSide;
-import us.ihmc.commonWalkingControlModules.armControlModules.PDArmControlModule;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.ArmJointName;
 import us.ihmc.commonWalkingControlModules.sensors.ProcessedSensorsInterface;
 

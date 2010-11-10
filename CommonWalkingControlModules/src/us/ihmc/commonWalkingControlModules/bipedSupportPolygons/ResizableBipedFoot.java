@@ -29,7 +29,7 @@ public class ResizableBipedFoot implements BipedFootInterface
    private final YoVariableRegistry registry;
 
    private final RobotSide robotSide;
-   private final ReferenceFrame footFrame, ankleZUpFrame;
+   private final ReferenceFrame footFrame;
 
    private final ArrayList<FramePoint> heelPoints, toePoints;
    private final double footLength;
@@ -125,9 +125,7 @@ public class ResizableBipedFoot implements BipedFootInterface
       // Actual construction:
       this.robotSide = robotSide;
 
-      this.footFrame = yoboticsBipedReferenceFrames.getFootReferenceFrames().get(robotSide);
-      this.ankleZUpFrame = yoboticsBipedReferenceFrames.getAnkleZUpReferenceFrames().get(robotSide);
-
+      this.footFrame = yoboticsBipedReferenceFrames.getFootFrame(robotSide);
       this.toePoints = new ArrayList<FramePoint>(clockwiseToePoints.size());
       this.heelPoints = new ArrayList<FramePoint>(clockwiseHeelPoints.size());
 
@@ -264,7 +262,7 @@ public class ResizableBipedFoot implements BipedFootInterface
          }
       }
 
-      ArrayList<FramePoint2d> projectedFootPolygonPoints = changeFrameToZUpAndProjectToXYPlane(ankleZUpFrame, footPolygonPoints);
+      ArrayList<FramePoint2d> projectedFootPolygonPoints = changeFrameToZUpAndProjectToXYPlane(footFrame, footPolygonPoints);
       FrameConvexPolygon2d ret = new FrameConvexPolygon2d(projectedFootPolygonPoints);
 
       if (VISUALIZE)
@@ -280,17 +278,12 @@ public class ResizableBipedFoot implements BipedFootInterface
       ArrayList<FramePoint> footPolygonPoints = new ArrayList<FramePoint>(toePoints);
       footPolygonPoints.addAll(heelPoints);
 
-      ArrayList<FramePoint2d> projectedFootPolygonPoints = changeFrameToZUpAndProjectToXYPlane(ankleZUpFrame, footPolygonPoints);
+      ArrayList<FramePoint2d> projectedFootPolygonPoints = changeFrameToZUpAndProjectToXYPlane(footFrame, footPolygonPoints);
       return new FrameConvexPolygon2d(projectedFootPolygonPoints);
    }
 
    private ArrayList<FramePoint2d> changeFrameToZUpAndProjectToXYPlane(ReferenceFrame zUpFrame, ArrayList<FramePoint> points)
    {
-	   if (!zUpFrame.isZupFrame())
-	   {
-		   throw new RuntimeException("Must be a ZUp frame!");
-	   }
-
 	   ArrayList<FramePoint2d> ret = new ArrayList<FramePoint2d>(points.size());
 
 	   for (int i=0; i<points.size(); i++)

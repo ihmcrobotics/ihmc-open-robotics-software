@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.partNamesAndTorques;
 
-import us.ihmc.commonWalkingControlModules.partNamesAndTorques.NeckJointName;
 
 
 public class NeckJointPositions
