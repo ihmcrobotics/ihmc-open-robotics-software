@@ -12,6 +12,7 @@ import us.ihmc.commonWalkingControlModules.partNamesAndTorques.RobotSpecificJoin
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.OpenChainJacobian;
+import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.utilities.screwTheory.Twist;
 import us.ihmc.utilities.screwTheory.Wrench;
 
@@ -134,5 +135,23 @@ public class SwingFullLegJacobian
    public RobotSide getRobotSide()
    {
       return robotSide;
+   }
+
+   public Matrix computeJointAccelerations(SpatialAccelerationVector accelerationOfFootWithRespectToBody, SpatialAccelerationVector jacobianDerivativeTerm)
+   {
+      Matrix biasedAccelerations = accelerationOfFootWithRespectToBody.toMatrix();    // unbiased at this point
+      Matrix bias = jacobianDerivativeTerm.toMatrix();
+      biasedAccelerations.minusEquals(bias);
+      Matrix ret = openChainJacobian.jacobianSolve(biasedAccelerations);
+
+      return ret;
+   }
+
+   /**
+    * For testing purposes only.
+    */
+   public Matrix getJacobian()
+   {
+      return openChainJacobian.getJacobianMatrix().copy();
    }
 }
