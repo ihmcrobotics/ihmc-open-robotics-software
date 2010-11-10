@@ -25,6 +25,16 @@ public class UpperBodyTorques
 //    this.armTorquesArray = upperBodyTorques.getArmTorquesArrayCopy();
 // }
 
+   public ArmTorques[] getArmTorques()
+   {
+      return armTorquesArray;
+   }
+   
+   public ArmTorques getArmTorques(RobotSide robotSide)
+   {
+      return armTorquesArray[robotSide.ordinal()];
+   }
+   
    public ArmTorques getArmTorquesCopy(RobotSide robotSide)
    {
       return armTorquesArray[robotSide.ordinal()].getArmTorquesCopy();
