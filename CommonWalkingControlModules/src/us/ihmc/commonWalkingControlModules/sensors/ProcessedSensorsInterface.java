@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.sensors;
 
 import us.ihmc.commonWalkingControlModules.RobotSide;
+import us.ihmc.commonWalkingControlModules.partNamesAndTorques.ArmJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -26,9 +27,12 @@ public interface ProcessedSensorsInterface
 
    public abstract FramePoint getCenterOfMassGroundProjectionInFrame(ReferenceFrame referenceFrame);
 
+   public abstract double getLegJointPosition(RobotSide robotSide, LegJointName legJointName);
    public abstract double getLegJointVelocity(RobotSide robotSide, LegJointName legJointName);
 
-   public abstract double getLegJointPosition(RobotSide robotSide, LegJointName legJointName);
+   public abstract double getArmJointPosition(RobotSide robotSide, ArmJointName legJointName);
+   public abstract double getArmJointVelocity(RobotSide robotSide, ArmJointName legJointName);
+
 
    public abstract double getTotalMass();
    
