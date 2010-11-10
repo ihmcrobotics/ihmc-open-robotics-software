@@ -61,7 +61,7 @@ public class YawPitchRollPelvisOrientationControlModule implements PelvisOrienta
 
    public FrameVector computePelvisTorque(RobotSide supportLeg, Orientation desiredPelvisOrientation)
    {
-      ReferenceFrame spineRollFrame = commonWalkingReferenceFrames.getSpineRollFrame();
+      ReferenceFrame spineRollFrame = commonWalkingReferenceFrames.getPelvisFrame();
 
       double[] desiredYawPitchRoll = getDesiredYawPitchRollInWorldFrame(desiredPelvisOrientation);
       double desiredYaw = desiredYawPitchRoll[0];
