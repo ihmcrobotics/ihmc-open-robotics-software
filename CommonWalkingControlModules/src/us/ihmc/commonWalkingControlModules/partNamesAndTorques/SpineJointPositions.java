@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.partNamesAndTorques;
 
-import us.ihmc.commonWalkingControlModules.partNamesAndTorques.SpineJointName;
 
 public class SpineJointPositions
 {

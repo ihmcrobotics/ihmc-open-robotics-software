@@ -3,7 +3,6 @@ package us.ihmc.commonWalkingControlModules.partNamesAndTorques;
 import java.util.EnumMap;
 
 import us.ihmc.commonWalkingControlModules.RobotSide;
-import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
 
 import com.mathworks.jama.Matrix;
 

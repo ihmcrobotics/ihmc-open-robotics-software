@@ -6,8 +6,6 @@ import javax.vecmath.Point2d;
 import us.ihmc.commonWalkingControlModules.RobotSide;
 import us.ihmc.commonWalkingControlModules.SideDependentList;
 import us.ihmc.commonWalkingControlModules.captureRegion.CaptureRegionCalculator;
-import us.ihmc.commonWalkingControlModules.desiredStepLocation.BasicReachableScorer;
-import us.ihmc.commonWalkingControlModules.desiredStepLocation.Footstep;
 import us.ihmc.utilities.math.geometry.BoundingBox2d;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;

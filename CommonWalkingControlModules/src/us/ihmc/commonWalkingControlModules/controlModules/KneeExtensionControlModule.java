@@ -4,9 +4,6 @@ package us.ihmc.commonWalkingControlModules.controlModules;
 import us.ihmc.commonWalkingControlModules.RobotSide;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegTorquesInterface;
 import us.ihmc.commonWalkingControlModules.sensors.ProcessedSensorsInterface;
-//import us.ihmc.projectM.R2Sim02.partNamesAndTorques.LegJointName;
-//import us.ihmc.projectM.R2Sim02.partNamesAndTorques.LegTorques;
-//import us.ihmc.projectM.R2Sim02.sensors.ProcessedSensors;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;

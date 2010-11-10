@@ -10,10 +10,6 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPoly
 import us.ihmc.commonWalkingControlModules.captureRegion.CaptureRegionCalculator;
 import us.ihmc.commonWalkingControlModules.captureRegion.SteppingStonesCaptureRegionIntersectionCalculator;
 import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
-import us.ihmc.commonWalkingControlModules.desiredStepLocation.DesiredStepLocationCalculator;
-import us.ihmc.commonWalkingControlModules.desiredStepLocation.Footstep;
-import us.ihmc.commonWalkingControlModules.desiredStepLocation.StepLocationScorer;
-import us.ihmc.commonWalkingControlModules.desiredStepLocation.WeightedDistanceScorer;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;

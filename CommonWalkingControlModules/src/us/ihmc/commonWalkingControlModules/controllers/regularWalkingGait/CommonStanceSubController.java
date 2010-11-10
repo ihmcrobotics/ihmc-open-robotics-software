@@ -8,7 +8,6 @@ import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.DesiredPelvis
 import us.ihmc.commonWalkingControlModules.controlModules.BalanceSupportControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.FootOrientationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.KneeExtensionControlModule;
-import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.StanceSubController;
 import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredHeadingControlModule;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredVelocityControlModule;
