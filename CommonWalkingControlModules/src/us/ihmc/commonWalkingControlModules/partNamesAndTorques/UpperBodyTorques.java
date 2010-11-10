@@ -52,6 +52,11 @@ public class UpperBodyTorques
       return ret;
    }
 
+   public SpineTorques getSpineTorques()
+   {
+      return spineTorques;
+   }
+   
    public SpineTorques getSpineTorquesCopy()
    {
       return spineTorques.getSpineTorquesCopy();
