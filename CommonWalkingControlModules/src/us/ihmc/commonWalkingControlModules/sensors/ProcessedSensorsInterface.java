@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.sensors;
 import us.ihmc.commonWalkingControlModules.RobotSide;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.ArmJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
+import us.ihmc.commonWalkingControlModules.partNamesAndTorques.NeckJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.SpineJointName;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -46,6 +47,9 @@ public interface ProcessedSensorsInterface
 
    public abstract double getSpineJointPosition(SpineJointName spineJointName);
    public abstract double getSpineJointVelocity(SpineJointName spineJointName);
+
+   public abstract double getNeckJointPosition(NeckJointName neckJointName);
+   public abstract double getNeckJointVelocity(NeckJointName neckJointName);
 
 
 
