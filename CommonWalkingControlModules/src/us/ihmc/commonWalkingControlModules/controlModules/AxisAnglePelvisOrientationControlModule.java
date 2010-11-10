@@ -32,7 +32,7 @@ public class AxisAnglePelvisOrientationControlModule implements PelvisOrientatio
    public AxisAnglePelvisOrientationControlModule(ProcessedSensorsInterface processedSensors, CommonWalkingReferenceFrames commonWalkingReferenceFrames, YoVariableRegistry parentRegistry)
    {
       this.processedSensors = processedSensors;
-      this.pelvisFrame = commonWalkingReferenceFrames.getSpineRollFrame();
+      this.pelvisFrame = commonWalkingReferenceFrames.getPelvisFrame();
       this.tauPelvis = new YoFrameVector("tauPelvis", "", pelvisFrame, registry);
       this.derivativeGainMatrix = new Matrix3d();
       derivativeGainMatrix.setZero();
