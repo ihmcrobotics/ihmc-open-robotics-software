@@ -31,4 +31,9 @@ public interface ProcessedSensorsInterface
    public abstract double getLegJointPosition(RobotSide robotSide, LegJointName legJointName);
 
    public abstract double getTotalMass();
+   
+   public abstract String getLegJointPositionName(RobotSide robotSide, LegJointName jointName);
+
+   public abstract String getLegJointVelocityName(RobotSide robotSide, LegJointName jointName);
+
 }
