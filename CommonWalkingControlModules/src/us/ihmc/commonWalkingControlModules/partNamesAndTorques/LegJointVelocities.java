@@ -86,7 +86,7 @@ public class LegJointVelocities
 
       for (LegJointName legJointName : legJointNames)
       {
-         ret += legJointName.getCamelCaseNameForMiddleOfExpression() + " = " + jointVelocities.get(legJointNames) + "\n";
+         ret += legJointName.getCamelCaseNameForMiddleOfExpression() + " = " + jointVelocities.get(legJointName) + "\n";
       }
 
       return ret;
