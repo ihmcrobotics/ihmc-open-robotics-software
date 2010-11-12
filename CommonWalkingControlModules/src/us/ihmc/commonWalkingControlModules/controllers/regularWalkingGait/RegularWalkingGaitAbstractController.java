@@ -7,6 +7,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import us.ihmc.commonWalkingControlModules.RobotSide;
+import us.ihmc.commonWalkingControlModules.filters.TorqueTransitionFilter;
 import us.ihmc.commonWalkingControlModules.outputs.ProcessedOutputsInterface;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LowerBodyTorques;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.RobotSpecificJointNames;
@@ -36,6 +37,8 @@ public abstract class RegularWalkingGaitAbstractController
    protected final UpperBodyTorques upperBodyTorques = new UpperBodyTorques();
    protected final ProcessedOutputsInterface processedOutputs;
 
+   private final TorqueTransitionFilter torqueTransitionFilter;
+   
    protected final YoVariableRegistry controllerRegistry;
    protected final YoVariableRegistry childRegistry = new YoVariableRegistry("GoAndSuch");
 
@@ -75,6 +78,8 @@ public abstract class RegularWalkingGaitAbstractController
       this.controllerRegistry = controllerRegistry;
       controllerRegistry.addChild(childRegistry);
       
+      torqueTransitionFilter = new TorqueTransitionFilter(robotJointNames, processedOutputs, childRegistry);
+
       lowerBodyTorques = new LowerBodyTorques(robotJointNames);
       
       walkingStateMachine = new StateMachine("walkingState", "switchTime", RegularWalkingState.class, time, childRegistry);
@@ -87,9 +92,15 @@ public abstract class RegularWalkingGaitAbstractController
    
    public void doControl()
    {
+   // Remember the torques to filter them in a bit:
+      torqueTransitionFilter.rememberPreviousTorques();
+      
       doEveryTickSubController.doEveryControlTick(supportLegYoVariable.getEnumValue());
       walkingStateMachine.doAction();
       walkingStateMachine.checkTransitionConditions();
+      
+   // Filter torques:
+      torqueTransitionFilter.updateTorques(walkingStateMachine.timeInCurrentState());
    }
    
    public enum RegularWalkingState
@@ -149,8 +160,17 @@ public abstract class RegularWalkingGaitAbstractController
    {
       return controllerRegistry;
    }
+  
    
+   public void setupParametersForR2()
+   {
+      torqueTransitionFilter.setTauFilterTime(0.05);
+   }
    
+   public void setupParametersForM2V2()
+   {
+      torqueTransitionFilter.setTauFilterTime(0.15);
+   }
    
    protected class StartWalkingDoubleSupportState extends State
    {
