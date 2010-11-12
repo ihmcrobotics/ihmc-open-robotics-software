@@ -17,6 +17,8 @@ import us.ihmc.utilities.math.MathTools;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.gui.GUISetterUpper;
+import com.yobotics.simulationconstructionset.gui.GUISetterUpperRegistry;
 
 public class LegJointPositionControlModule
 {
@@ -57,7 +59,8 @@ public class LegJointPositionControlModule
    private final ProcessedOutputsInterface processedOutputs;
 
    public LegJointPositionControlModule(RobotSpecificJointNames robotJointNames, ProcessedSensorsInterface processedSensors,
-           ProcessedOutputsInterface processedOutputs, YoVariableRegistry yoVariableParentRegistry, RobotSide robotSide, double controlDT,
+           ProcessedOutputsInterface processedOutputs, YoVariableRegistry yoVariableParentRegistry, GUISetterUpperRegistry guiSetterUpperRegistry,
+           RobotSide robotSide, double controlDT,
            boolean useDesiredVelocities)
    {
       this.legJointNames = robotJointNames.getLegJointNames();
@@ -114,6 +117,11 @@ public class LegJointPositionControlModule
       resetScalesToDefault();
 
       yoVariableParentRegistry.addChild(registry);
+      
+      if (guiSetterUpperRegistry != null)
+      {
+         guiSetterUpperRegistry.registerGUISetterUpper(createGUISetterUpper());
+      }
    }
 
    private void setDefaultGainsToNaN()
@@ -280,47 +288,54 @@ public class LegJointPositionControlModule
    }
 
 
-   public void setupGUI(SimulationConstructionSet scs)
+   private GUISetterUpper createGUISetterUpper()
    {
-      int numberOfLegJointNames = legJointNames.length;
-
-      String[][][] positionGraphGroupStrings = new String[numberOfLegJointNames][][];
-      String[][][] velocityGraphGroupStrings = new String[numberOfLegJointNames][][];
-
-      String[] entryBoxGroupStrings = new String[2 * numberOfLegJointNames];    // times two, because we want both kp and kd
-
-      for (int jointNameIndex = 0; jointNameIndex < numberOfLegJointNames; jointNameIndex++)
+      GUISetterUpper ret = new GUISetterUpper()
       {
-         LegJointName jointName = legJointNames[jointNameIndex];
-
-         // positions
-         String desiredPositionName = desiredJointPositions.get(jointName).getName();
-         String actualPositionName = processedSensors.getLegJointPositionName(robotSide, jointName);
-
-         positionGraphGroupStrings[jointNameIndex] = new String[][]
+         public void setupGUI(SimulationConstructionSet scs)
          {
-            {desiredPositionName, actualPositionName}, {"auto"}
-         };
+            int numberOfLegJointNames = legJointNames.length;
 
-         // velocities
-         String desiredVelocityName = desiredJointVelocities.get(jointName).getName();
-         String actualVelocityName = processedSensors.getLegJointVelocityName(robotSide, jointName);
+            String[][][] positionGraphGroupStrings = new String[numberOfLegJointNames][][];
+            String[][][] velocityGraphGroupStrings = new String[numberOfLegJointNames][][];
 
-         velocityGraphGroupStrings[jointNameIndex] = new String[][]
-         {
-            {desiredVelocityName, actualVelocityName}, {"auto"}
-         };
+            String[] entryBoxGroupStrings = new String[2 * numberOfLegJointNames];    // times two, because we want both kp and kd
 
-         // kp, kd
-         entryBoxGroupStrings[jointNameIndex] = kpGains.get(jointName).getName();
-         entryBoxGroupStrings[numberOfLegJointNames + jointNameIndex] = kdGains.get(jointName).getName();
-      }
+            for (int jointNameIndex = 0; jointNameIndex < numberOfLegJointNames; jointNameIndex++)
+            {
+               LegJointName jointName = legJointNames[jointNameIndex];
 
-      String sideString = "(" + robotSide.getCamelCaseNameForStartOfExpression() + ")";
-      scs.setupGraphGroup("LegJointPositionControlModule - positions " + sideString, positionGraphGroupStrings, 2);
-      scs.setupGraphGroup("LegJointPositionControlModule - velocities " + sideString, velocityGraphGroupStrings, 2);
-      scs.setupEntryBoxGroup("LegJointPositionControlModule", entryBoxGroupStrings);
-      scs.setupConfiguration("LegJointPositionControlModule", "all", "LegJointPositionControlModule - velocities", "LegJointPositionControlModule");
+               // positions
+               String desiredPositionName = desiredJointPositions.get(jointName).getName();
+               String actualPositionName = processedSensors.getLegJointPositionName(robotSide, jointName);
+
+               positionGraphGroupStrings[jointNameIndex] = new String[][]
+                                                                        {
+                     {desiredPositionName, actualPositionName}, {"auto"}
+                                                                        };
+
+               // velocities
+               String desiredVelocityName = desiredJointVelocities.get(jointName).getName();
+               String actualVelocityName = processedSensors.getLegJointVelocityName(robotSide, jointName);
+
+               velocityGraphGroupStrings[jointNameIndex] = new String[][]
+                                                                        {
+                     {desiredVelocityName, actualVelocityName}, {"auto"}
+                                                                        };
+
+               // kp, kd
+               entryBoxGroupStrings[jointNameIndex] = kpGains.get(jointName).getName();
+               entryBoxGroupStrings[numberOfLegJointNames + jointNameIndex] = kdGains.get(jointName).getName();
+            }
+
+            String sideString = "(" + robotSide.getCamelCaseNameForStartOfExpression() + ")";
+            scs.setupGraphGroup("LegJointPositionControlModule - positions " + sideString, positionGraphGroupStrings, 2);
+            scs.setupGraphGroup("LegJointPositionControlModule - velocities " + sideString, velocityGraphGroupStrings, 2);
+            scs.setupEntryBoxGroup("LegJointPositionControlModule", entryBoxGroupStrings);
+            scs.setupConfiguration("LegJointPositionControlModule", "all", "LegJointPositionControlModule - velocities", "LegJointPositionControlModule");
+         }
+      };
+      return ret;
    }
 
 }
