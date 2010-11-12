@@ -11,14 +11,14 @@ import us.ihmc.utilities.screwTheory.Twist;
 public class DesiredJointVelocityCalculator
 {
    private final ProcessedSensorsInterface processedSensors;
-   private final SwingFullLegJacobian swingLegJacobian;
+   private final SwingFullLegJacobian swingFullLegJacobian;
    private final RobotSide swingSide;
    private final ReferenceFrame swingFootFrame;
 
    public DesiredJointVelocityCalculator(ProcessedSensorsInterface processedSensors, CommonWalkingReferenceFrames referenceFrames, SwingFullLegJacobian swingLegJacobian)
    {
       this.processedSensors = processedSensors;
-      this.swingLegJacobian = swingLegJacobian;
+      this.swingFullLegJacobian = swingLegJacobian;
       this.swingSide = swingLegJacobian.getRobotSide();
 
       this.swingFootFrame = referenceFrames.getFootFrame(swingSide);
@@ -31,7 +31,7 @@ public class DesiredJointVelocityCalculator
 //      desiredTwistOfSwingFoot_World.changeFrame(bodyFrame);
 
       // compute jacobian
-      swingLegJacobian.computeJacobian();
+      swingFullLegJacobian.computeJacobian();
 
       // compute twist of world with respect to body
       Twist twistOfWorldWithRespectToBody = processedSensors.computeTwistOfPelvisWithRespectToWorld(); // twist of pelvis w.r.t. world at this point
@@ -44,12 +44,12 @@ public class DesiredJointVelocityCalculator
       twistOfSwingFootWithRespectToBody.changeFrame(swingFootFrame);
 
       // compute joint velocities
-      LegJointVelocities swingJointVelocities = swingLegJacobian.getJointVelocitiesGivenTwist(twistOfSwingFootWithRespectToBody);
+      LegJointVelocities swingJointVelocities = swingFullLegJacobian.getJointVelocitiesGivenTwist(twistOfSwingFootWithRespectToBody);
       return swingJointVelocities;
    }
 
    public double swingFullLegJacobianDeterminant()
    {
-      return swingLegJacobian.det();
+      return swingFullLegJacobian.det();
    }
 }
