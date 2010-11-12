@@ -19,6 +19,7 @@ import com.yobotics.simulationconstructionset.EnumYoVariable;
 import com.yobotics.simulationconstructionset.IntYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.statemachines.State;
+import com.yobotics.simulationconstructionset.util.statemachines.StateChangedListener;
 import com.yobotics.simulationconstructionset.util.statemachines.StateMachine;
 import com.yobotics.simulationconstructionset.util.statemachines.StateMachinesJPanel;
 import com.yobotics.simulationconstructionset.util.statemachines.StateTransition;
@@ -164,7 +165,8 @@ public abstract class RegularWalkingGaitAbstractController
    
    public void setupParametersForR2()
    {
-      torqueTransitionFilter.setTauFilterTime(0.05);
+//      torqueTransitionFilter.setTauFilterTime(0.05);
+      torqueTransitionFilter.setTauFilterTime(0.005);
    }
    
    public void setupParametersForM2V2()
@@ -721,6 +723,12 @@ public abstract class RegularWalkingGaitAbstractController
    public State getCurrentWalkingState()
    {
       return walkingStateMachine.getCurrentState();
+   }
+   
+   
+   public void attachStateChangedListener(StateChangedListener listener)
+   {
+      walkingStateMachine.attachStateChangedListener(listener);
    }
    
    

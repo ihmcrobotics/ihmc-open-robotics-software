@@ -42,7 +42,6 @@ public class TorqueTransitionFilter
          {
             String name = "prevTau" + robotSide.getCamelCaseNameForMiddleOfExpression() + legJointName.getCamelCaseNameForMiddleOfExpression();
             
-            System.out.println(name);
             DoubleYoVariable previousTorque = new DoubleYoVariable(name, "Previous Torque", registry);
 
             previousTorques.get(robotSide).put(legJointName, previousTorque);
