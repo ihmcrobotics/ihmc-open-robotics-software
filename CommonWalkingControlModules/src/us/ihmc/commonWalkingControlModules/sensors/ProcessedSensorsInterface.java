@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.sensors;
 
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
+
 import us.ihmc.commonWalkingControlModules.RobotSide;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.ArmJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
@@ -14,7 +16,8 @@ import us.ihmc.utilities.screwTheory.Twist;
 public interface ProcessedSensorsInterface
 {
    public abstract double getTime();
-
+   public abstract DoubleYoVariable getTimeYoVariable();
+   
    public abstract double getKneeAngle(RobotSide robotSide);
 
    public abstract FrameVector getCenterOfMassVelocityInFrame(ReferenceFrame referenceFrame);
