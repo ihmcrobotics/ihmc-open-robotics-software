@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.controlModules;
 
 import us.ihmc.commonWalkingControlModules.RobotSide;
 import us.ihmc.commonWalkingControlModules.SideDependentList;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedLegStrengthAndVirtualToePoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.AnkleOverRotationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.PelvisHeightControlModule;
@@ -30,18 +31,23 @@ public class BalanceSupportControlModule
    private final AnkleOverRotationControlModule ankleOverRotationControlModule;
    private final BipedSupportPolygons bipedSupportPolygons;
 
-   
+   private final SideDependentList<BipedLegStrengthAndVirtualToePoint> legStrengthsAndVirtualToePoints;
+
+
    private YoVariableRegistry registry;
    private DoubleYoVariable supportPolygonShrinkFactor = new DoubleYoVariable("supportPolygonShrinkFactor", registry);
 
 
 
-   public BalanceSupportControlModule(VelocityViaCoPControlModule velocityViaCoPControlModule, VirtualToePointAndLegStrengthCalculator virtualToePointAndLegStrengthCalculator,
-                                      PelvisHeightControlModule pelvisHeightControlModule,
-                                      PelvisOrientationControlModule pelvisOrientationControlModule, VirtualSupportActuatorControlModule virtualSupportActuatorControlModule,
-                                      KneeDamperControlModule kneeDamperControlModule, BipedSupportPolygons bipedSupportPolygons,
-                                      AnkleOverRotationControlModule ankleOverRotationControlModule, YoVariableRegistry parentRegistry)
+   public BalanceSupportControlModule(SideDependentList<BipedLegStrengthAndVirtualToePoint> legStrengthsAndVirtualToePoints,
+                                      VelocityViaCoPControlModule velocityViaCoPControlModule,
+                                      VirtualToePointAndLegStrengthCalculator virtualToePointAndLegStrengthCalculator,
+                                      PelvisHeightControlModule pelvisHeightControlModule, PelvisOrientationControlModule pelvisOrientationControlModule,
+                                      VirtualSupportActuatorControlModule virtualSupportActuatorControlModule, KneeDamperControlModule kneeDamperControlModule,
+                                      BipedSupportPolygons bipedSupportPolygons, AnkleOverRotationControlModule ankleOverRotationControlModule,
+                                      YoVariableRegistry parentRegistry)
    {
+      this.legStrengthsAndVirtualToePoints = legStrengthsAndVirtualToePoints;
       this.velocityViaCoPControlModule = velocityViaCoPControlModule;
       this.virtualToePointAndLegStrengthCalculator = virtualToePointAndLegStrengthCalculator;
       this.pelvisHeightControlModule = pelvisHeightControlModule;
@@ -106,9 +112,9 @@ public class BalanceSupportControlModule
       FramePoint2d desiredCoP = velocityViaCoPControlModule.computeDesiredCoPDoubleSupport(loadingLeg, desiredVelocity);
 
       // compute VTPs and leg strengths
-      SideDependentList<FramePoint2d> virtualToePoints = new SideDependentList<FramePoint2d>();
-      SideDependentList<Double> legStrengths = new SideDependentList<Double>();
-      virtualToePointAndLegStrengthCalculator.packVirtualToePointsAndLegStrengths(virtualToePoints, legStrengths, bipedSupportPolygons, desiredCoP);
+//    SideDependentList<FramePoint2d> virtualToePoints = new SideDependentList<FramePoint2d>();
+//    SideDependentList<Double> legStrengths = new SideDependentList<Double>();
+      virtualToePointAndLegStrengthCalculator.packVirtualToePointsAndLegStrengths(legStrengthsAndVirtualToePoints, bipedSupportPolygons, desiredCoP);
 
       // compute desired torques on the pelvis using PelvisOrientationControlModule.
       FrameVector torqueOnPelvisInPelvisFrame = pelvisOrientationControlModule.computePelvisTorque(null, desiredPelvisOrientation);
@@ -118,7 +124,7 @@ public class BalanceSupportControlModule
       double fZOnPelvisInPelvisFrame = pelvisHeightControlModule.doPelvisHeightControl(desiredPelvisHeightInWorld, null);
 
       // compute joint torques using virtual support actuators
-      virtualSupportActuatorControlModule.controlDoubleSupport(lowerBodyTorquesToPack, virtualToePoints, legStrengths, fZOnPelvisInPelvisFrame,
+      virtualSupportActuatorControlModule.controlDoubleSupport(lowerBodyTorquesToPack, legStrengthsAndVirtualToePoints, fZOnPelvisInPelvisFrame,
               torqueOnPelvisInPelvisFrame);
 
       // Add a little knee damping to prevent it from snapping:
@@ -130,7 +136,7 @@ public class BalanceSupportControlModule
    {
       return Double.NaN;
    }
-   
+
    public void setPutWeightOnToes(RobotSide robotSide)
    {
       velocityViaCoPControlModule.setPutWeightOnToes(robotSide);
