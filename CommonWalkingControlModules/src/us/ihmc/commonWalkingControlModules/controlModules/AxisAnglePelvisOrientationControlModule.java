@@ -39,6 +39,22 @@ public class AxisAnglePelvisOrientationControlModule implements PelvisOrientatio
       
       parentRegistry.addChild(registry);
    }
+   
+   public void setupParametersForR2()
+   {
+      setProportionalGain(1500.0);
+      setDerivativeGainX(200.0);
+      setDerivativeGainY(150.0);
+      setDerivativeGainZ(50.0);
+   }
+   
+   public void setupParametersForM2V2()
+   {
+      setProportionalGain(150.0);
+      setDerivativeGainX(20.0);
+      setDerivativeGainY(15.0);
+      setDerivativeGainZ(5.0);
+   }
 
    public FrameVector computePelvisTorque(RobotSide supportLeg, Orientation desiredPelvisOrientation)
    {

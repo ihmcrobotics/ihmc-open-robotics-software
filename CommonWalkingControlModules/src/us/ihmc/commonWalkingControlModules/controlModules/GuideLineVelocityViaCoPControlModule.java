@@ -195,4 +195,10 @@ public class GuideLineVelocityViaCoPControlModule implements VelocityViaCoPContr
       desiredCaptureForward.set(0.2);    // 0.15;
       desiredCaptureIn.set(0.02);
    }
+   
+   public void setUpParametersForM2V2()
+   {
+      desiredCaptureForward.set(0.2);    // 0.15;
+      desiredCaptureIn.set(0.02);
+   }
 }
