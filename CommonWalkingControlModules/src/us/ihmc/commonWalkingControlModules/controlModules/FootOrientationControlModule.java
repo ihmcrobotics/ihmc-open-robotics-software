@@ -63,6 +63,24 @@ public class FootOrientationControlModule
       pitchController.setDerivativeGain(1.0);    // 0.0);
       rollController.setDerivativeGain(1.0);    // 0.0);
    }
+   
+   public void setParametersForR2()
+   {
+      pitchController.setProportionalGain(10.0);    // 500.0); //200.0); //0.0);
+      rollController.setProportionalGain(10.0);    // 0.0);
+
+      pitchController.setDerivativeGain(1.0);    // 0.0);
+      rollController.setDerivativeGain(1.0);    // 0.0);
+   }
+   
+   public void setParametersForM2V2()
+   {
+      pitchController.setProportionalGain(10.0);    
+      rollController.setProportionalGain(10.0);   
+
+      pitchController.setDerivativeGain(1.0);   
+      rollController.setDerivativeGain(1.0);   
+   }
 
    public void initializeFootOrientationMove(double moveDuration, Orientation finalOrientation, RobotSide supportFoot)
    {
