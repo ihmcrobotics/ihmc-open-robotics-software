@@ -166,7 +166,7 @@ public class CaptureRegionCalculator
 
       DynamicGraphicObjectsList dynamicGraphicObjectsList = null;
       ArtifactList artifactList = null;
-      captureRegionGraphic = new YoFrameConvexPolygon2d("Capture Region", "", worldFrame, MAX_CAPTURE_REGION_POLYGON_POINTS, registry);
+      captureRegionGraphic = new YoFrameConvexPolygon2d("captureRegion", "", worldFrame, MAX_CAPTURE_REGION_POLYGON_POINTS, registry);
 
       if (dynamicGraphicObjectsListRegistry == null)
       {
