@@ -7,6 +7,5 @@ import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointPositions
 
 public interface LegInverseKinematicsCalculator
 {
-   public abstract void solve(LegJointPositions legJointPositionsToPack, Transform3D footToPelvis, RobotSide robotSide, double desiredHipYaw);
-
+   public abstract void solve(LegJointPositions legJointPositionsToPack, Transform3D footToPelvis, RobotSide robotSide, double desiredHipYaw) throws InverseKinematicsException;
 }
