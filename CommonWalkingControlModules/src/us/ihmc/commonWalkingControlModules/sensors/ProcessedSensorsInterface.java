@@ -11,6 +11,7 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.Orientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.utilities.screwTheory.Twist;
 
 public interface ProcessedSensorsInterface
@@ -27,6 +28,7 @@ public interface ProcessedSensorsInterface
    public abstract FrameVector getGravityInWorldFrame();
 
    public abstract Twist computeTwistOfPelvisWithRespectToWorld();
+   public abstract SpatialAccelerationVector getAccelerationOfPelvisWithRespectToWorld();
 
    public abstract Orientation getPelvisOrientationInFrame(ReferenceFrame referenceFrame);
 
