@@ -1,7 +1,5 @@
 package us.ihmc.commonWalkingControlModules.sensors;
 
-import com.yobotics.simulationconstructionset.DoubleYoVariable;
-
 import us.ihmc.commonWalkingControlModules.RobotSide;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.ArmJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
@@ -13,6 +11,8 @@ import us.ihmc.utilities.math.geometry.Orientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.utilities.screwTheory.Twist;
+
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
 
 public interface ProcessedSensorsInterface
 {
@@ -55,7 +55,4 @@ public interface ProcessedSensorsInterface
 
    public abstract double getNeckJointPosition(NeckJointName neckJointName);
    public abstract double getNeckJointVelocity(NeckJointName neckJointName);
-
-
-
 }

@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.sensors;
 
 
-public interface VirtualFootSwitchInterface
+public interface FootSwitchInterface
 {
    public abstract boolean hasFootHitGround();
 }
