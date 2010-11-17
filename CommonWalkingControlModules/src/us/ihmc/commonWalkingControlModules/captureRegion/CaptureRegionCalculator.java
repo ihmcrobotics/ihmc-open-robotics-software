@@ -178,7 +178,7 @@ public class CaptureRegionCalculator
          dynamicGraphicObjectsList = new DynamicGraphicObjectsList("CaptureRegionCalculator");
          artifactList = new ArtifactList("CaptureRegionCalculator");
 
-         DynamicGraphicYoPolygonArtifact dynamicGraphicYoPolygonArtifact = new DynamicGraphicYoPolygonArtifact("Capture Region", captureRegionGraphic,
+         DynamicGraphicYoPolygonArtifact dynamicGraphicYoPolygonArtifact = new DynamicGraphicYoPolygonArtifact("CaptureRegion", captureRegionGraphic,
                                                                               Color.LIGHT_GRAY, false);
          artifactList.add(dynamicGraphicYoPolygonArtifact);
       }
