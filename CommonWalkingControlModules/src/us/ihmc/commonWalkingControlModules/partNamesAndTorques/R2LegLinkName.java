@@ -2,12 +2,17 @@ package us.ihmc.commonWalkingControlModules.partNamesAndTorques;
 
 public enum R2LegLinkName
 {
-   UPPER_THIGH, LOWER_THIGH, SHIN, FOOT;
+   HIP_PITCH_LINK, UPPER_THIGH, LOWER_THIGH, SHIN, ANKLE_ROLL_LINK, FOOT;
 
    public String getCamelCaseNameForStartOfExpression()
    {
       switch (this)
       {
+         case HIP_PITCH_LINK :
+         {
+            return "hipPitchLink";
+         }
+         
          case UPPER_THIGH :
          {
             return "upperThigh";
@@ -21,6 +26,11 @@ public enum R2LegLinkName
          case SHIN :
          {
             return "shin";
+         }
+         
+         case ANKLE_ROLL_LINK :
+         {
+            return "ankleRollLink";
          }
 
          case FOOT :
@@ -40,6 +50,11 @@ public enum R2LegLinkName
    {
       switch (this)
       {
+         case HIP_PITCH_LINK :
+         {
+            return "HipPitchLink";
+         }
+      
          case UPPER_THIGH :
          {
             return "UpperThigh";
@@ -53,6 +68,11 @@ public enum R2LegLinkName
          case SHIN :
          {
             return "Shin";
+         }
+         
+         case ANKLE_ROLL_LINK :
+         {
+            return "AnkleRollLink";
          }
 
          case FOOT :
