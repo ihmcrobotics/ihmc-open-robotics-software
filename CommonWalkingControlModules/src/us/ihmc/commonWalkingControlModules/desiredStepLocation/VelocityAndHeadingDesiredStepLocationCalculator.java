@@ -76,9 +76,6 @@ public class VelocityAndHeadingDesiredStepLocationCalculator implements DesiredS
       stepHeight.set(0.0);
       stepYaw.set(0.0);
 
-      kpStepLength.set(0.5);
-      KpStepYaw.set(0.5);
-
       footstepPosition = new FramePoint(desiredHeadingControlModule.getDesiredHeadingFrame());
 
       swingFootIsInsideCaptureRegion = new BooleanYoVariable("swingFootIsInsideCaptureRegion", parentRegistry);
@@ -296,6 +293,9 @@ public class VelocityAndHeadingDesiredStepLocationCalculator implements DesiredS
 
       insideStepAdjustmentForTurning = 0.0;
       outsideStepAdjustmentForTurning = 0.0;
+      
+      kpStepLength.set(0.5);
+      KpStepYaw.set(0.5);
    }
 
 
@@ -306,6 +306,9 @@ public class VelocityAndHeadingDesiredStepLocationCalculator implements DesiredS
 
       insideStepAdjustmentForTurning = 0.0;
       outsideStepAdjustmentForTurning = 0.0;
+
+      kpStepLength.set(0.5);
+      KpStepYaw.set(0.5);
    }
 
 }
