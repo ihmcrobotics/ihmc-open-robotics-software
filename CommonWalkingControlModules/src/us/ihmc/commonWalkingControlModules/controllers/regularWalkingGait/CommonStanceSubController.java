@@ -52,10 +52,12 @@ public class CommonStanceSubController implements StanceSubController
    private final DoubleYoVariable toeOffFootPitch = new DoubleYoVariable("toeOffFootPitch",
                                                        "This is the desired foot pitch at the end of toe-off during stance", registry);
    private final DoubleYoVariable toeOffMoveDuration = new DoubleYoVariable("toeOffMoveDuration", "The duration of the toe-off move during stance", registry);
+   private final DoubleYoVariable timeSpentInEarlyStance = new DoubleYoVariable("timeSpentInEarlyStance", registry);
    private final DoubleYoVariable timeSpentInLateStance = new DoubleYoVariable("timeSpentInLateStance", registry);
    private final DoubleYoVariable timeSpentInTerminalStance = new DoubleYoVariable("timeSpentInTerminalStance", registry);
-
+   
    private final DoubleYoVariable doubleSupportDuration = new DoubleYoVariable("doubleSupportDuration", registry);
+   
    private final DoubleYoVariable minDoubleSupportTimeBeforeWalking = new DoubleYoVariable("minDoubleSupportTimeBeforeWalking", registry);
    private final DoubleYoVariable yCaptureToTransfer = new DoubleYoVariable("yCaptureToTransfer", registry);
    private final DoubleYoVariable minCaptureXToFinishDoubleSupport = new DoubleYoVariable("minCaptureXToFinishDoubleSupport", registry);
@@ -97,6 +99,7 @@ public class CommonStanceSubController implements StanceSubController
 
       // Here is where we want to add the torque for the kneeExtensionController
       kneeExtensionControlModule.doEarlyStanceKneeExtensionControl(legTorquesToPackForStanceSide);
+      timeSpentInEarlyStance.set(timeInState);
    }
 
    public void doLateStance(LegTorques legTorquesToPackForStanceSide, double timeInState)
@@ -245,6 +248,7 @@ public class CommonStanceSubController implements StanceSubController
 
    public void doTransitionOutOfTerminalStance(RobotSide stanceSide)
    {
+//	   doubleSupportDuration =
    }
 
    public void doTransitionOutOfUnloadLegToTransferIntoWalking(RobotSide stanceSide)
