@@ -37,21 +37,17 @@ public class SimpleDesiredVelocityControlModule implements DesiredVelocityContro
 
 
       if (VELOCITY_AND_HEADING_ARE_DEPENDENT)
-      {
+
          // Desired Velocity and Desired Heading are dependent (Desired Velocity is expressed in the desired heading frame)
          this.desiredVelocity = new YoFrameVector("desiredVelocity", "", desiredHeadingControlModule.getDesiredHeadingFrame(), yoVariableRegistry);
-         this.desiredVelocity.set(desiredVelocityNorm.getDoubleValue(), 0.0, 0.0);
-      }
+
+
       else
-      {
+
          // Desired Velocity and Desired Heading are independent
          this.desiredVelocity = new YoFrameVector("desiredVelocity", "", ReferenceFrame.getWorldFrame(), yoVariableRegistry);
-         double desiredHeading = this.desiredHeadingControlModule.getDesiredHeading().getDoubleValue();
-         this.desiredVelocity.set(desiredVelocityNorm.getDoubleValue() * Math.cos(desiredHeading),
-                                  desiredVelocityNorm.getDoubleValue() * Math.sin(desiredHeading), 0.0);
-      }
 
-
+      updateDesiredVelocity();
 
 
    }
@@ -82,10 +78,19 @@ public class SimpleDesiredVelocityControlModule implements DesiredVelocityContro
       return ret;
    }
 
-   public void setDesiredVelocity(FrameVector newDesiredVelocity)
+   public void updateDesiredVelocity()
    {
-      desiredVelocity.set(newDesiredVelocity);
-      desiredVelocityNorm.set(desiredVelocity.length());
+      if (VELOCITY_AND_HEADING_ARE_DEPENDENT)
+      {
+         this.desiredVelocity.set(desiredVelocityNorm.getDoubleValue(), 0.0, 0.0);
+      }
+      else
+      {
+         double desiredHeading = this.desiredHeadingControlModule.getDesiredHeading().getDoubleValue();
+         this.desiredVelocity.set(desiredVelocityNorm.getDoubleValue() * Math.cos(desiredHeading),
+                                  desiredVelocityNorm.getDoubleValue() * Math.sin(desiredHeading), 0.0);
+      }
+
    }
 
 }

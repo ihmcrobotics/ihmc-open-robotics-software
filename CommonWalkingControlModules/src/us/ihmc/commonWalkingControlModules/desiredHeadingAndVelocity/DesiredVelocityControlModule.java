@@ -10,5 +10,5 @@ public interface DesiredVelocityControlModule
 
    public abstract FrameVector2d getVelocityErrorInFrame(ReferenceFrame referenceFrame);
 
-   public abstract void setDesiredVelocity(FrameVector newDesiredVelocity);
+   public abstract void updateDesiredVelocity();
 }
