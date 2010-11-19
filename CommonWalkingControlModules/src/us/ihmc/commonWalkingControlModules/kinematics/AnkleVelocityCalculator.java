@@ -4,7 +4,6 @@ import javax.media.j3d.Transform3D;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.RobotSide;
-import us.ihmc.commonWalkingControlModules.kinematics.SwingFullLegJacobian;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointVelocities;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.RobotSpecificJointNames;
