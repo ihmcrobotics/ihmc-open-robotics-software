@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.sensors;
 
 import us.ihmc.commonWalkingControlModules.RobotSide;
+import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.ArmJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.NeckJointName;
@@ -55,4 +56,5 @@ public interface ProcessedSensorsInterface
 
    public abstract double getNeckJointPosition(NeckJointName neckJointName);
    public abstract double getNeckJointVelocity(NeckJointName neckJointName);
+   public abstract FullRobotModel getFullRobotModel();
 }
