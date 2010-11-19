@@ -62,7 +62,7 @@ public class VelocityAndHeadingDesiredStepLocationCalculator implements DesiredS
    private FramePoint footstepPosition;
 
    public VelocityAndHeadingDesiredStepLocationCalculator(DesiredHeadingControlModule desiredHeadingControlModule,
-           DesiredVelocityControlModule desiredVelocityControlModule, YoVariableRegistry parentRegistry, CommonWalkingReferenceFrames referenceFrames, 
+           DesiredVelocityControlModule desiredVelocityControlModule, YoVariableRegistry parentRegistry, CommonWalkingReferenceFrames referenceFrames,
            double footForwardOffset, double footBackwardOffset, double footWidth)
    {
       CHECK_STEP_INTO_CAPTURE_REGION = false;
@@ -89,8 +89,8 @@ public class VelocityAndHeadingDesiredStepLocationCalculator implements DesiredS
    }
 
 
-   public Footstep computeDesiredStepLocation(RobotSide supportLegSide, BipedSupportPolygons bipedSupportPolygons, 
-         FrameConvexPolygon2d captureRegion, FramePoint capturePoint)
+   public Footstep computeDesiredStepLocation(RobotSide supportLegSide, BipedSupportPolygons bipedSupportPolygons, FrameConvexPolygon2d captureRegion,
+           FramePoint capturePoint)
    {
       RobotSide swingLegSide = supportLegSide.getOppositeSide();
 
@@ -293,7 +293,7 @@ public class VelocityAndHeadingDesiredStepLocationCalculator implements DesiredS
 
       insideStepAdjustmentForTurning = 0.0;
       outsideStepAdjustmentForTurning = 0.0;
-      
+
       kpStepLength.set(0.5);
       KpStepYaw.set(0.5);
    }

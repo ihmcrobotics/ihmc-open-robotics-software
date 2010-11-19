@@ -14,7 +14,8 @@ public class DesiredJointVelocityCalculator
    private final RobotSide swingSide;
    private final ReferenceFrame swingFootFrame;
 
-   public DesiredJointVelocityCalculator(ProcessedSensorsInterface processedSensors, CommonWalkingReferenceFrames referenceFrames, SwingFullLegJacobian swingLegJacobian)
+   public DesiredJointVelocityCalculator(ProcessedSensorsInterface processedSensors, CommonWalkingReferenceFrames referenceFrames,
+           SwingFullLegJacobian swingLegJacobian)
    {
       this.processedSensors = processedSensors;
       this.swingFullLegJacobian = swingLegJacobian;
@@ -27,23 +28,25 @@ public class DesiredJointVelocityCalculator
    {
       // defensive copy, change frame
       desiredTwistOfSwingFootWithRespectToWorld = new Twist(desiredTwistOfSwingFootWithRespectToWorld);
-//      desiredTwistOfSwingFoot_World.changeFrame(bodyFrame);
+
+//    desiredTwistOfSwingFoot_World.changeFrame(bodyFrame);
 
       // compute jacobian
       swingFullLegJacobian.computeJacobian();
 
       // compute twist of world with respect to body
-      Twist twistOfWorldWithRespectToBody = processedSensors.computeTwistOfPelvisWithRespectToWorld(); // twist of pelvis w.r.t. world at this point
-      twistOfWorldWithRespectToBody.invert(); // twist of world w.r.t. body at this point.
+      Twist twistOfWorldWithRespectToBody = processedSensors.computeTwistOfPelvisWithRespectToWorld();    // twist of pelvis w.r.t. world at this point
+      twistOfWorldWithRespectToBody.invert();    // twist of world w.r.t. body at this point.
       twistOfWorldWithRespectToBody.changeFrame(desiredTwistOfSwingFootWithRespectToWorld.getExpressedInFrame());
 
       // compute twist of swing foot with respect to pelvis
-      Twist twistOfSwingFootWithRespectToBody = new Twist(twistOfWorldWithRespectToBody); // twist of world with respect to body at this point
-      twistOfSwingFootWithRespectToBody.add(desiredTwistOfSwingFootWithRespectToWorld); // twist of swing foot w.r.t. body at this point
+      Twist twistOfSwingFootWithRespectToBody = new Twist(twistOfWorldWithRespectToBody);    // twist of world with respect to body at this point
+      twistOfSwingFootWithRespectToBody.add(desiredTwistOfSwingFootWithRespectToWorld);    // twist of swing foot w.r.t. body at this point
       twistOfSwingFootWithRespectToBody.changeFrame(swingFootFrame);
 
       // compute joint velocities
       LegJointVelocities swingJointVelocities = swingFullLegJacobian.getJointVelocitiesGivenTwist(twistOfSwingFootWithRespectToBody);
+
       return swingJointVelocities;
    }
 

@@ -55,9 +55,11 @@ public class CommonStanceSubController implements StanceSubController
    private final DoubleYoVariable timeSpentInEarlyStance = new DoubleYoVariable("timeSpentInEarlyStance", registry);
    private final DoubleYoVariable timeSpentInLateStance = new DoubleYoVariable("timeSpentInLateStance", registry);
    private final DoubleYoVariable timeSpentInTerminalStance = new DoubleYoVariable("timeSpentInTerminalStance", registry);
-   
+
+   private final DoubleYoVariable timeSpentInLoadingPreSwingA = new DoubleYoVariable("timeSpentInLoadingPreSwingA", registry);
+   private final DoubleYoVariable timeSpentInLoadingPreSwingB = new DoubleYoVariable("timeSpentInLoadingPreSwingB", registry);
    private final DoubleYoVariable doubleSupportDuration = new DoubleYoVariable("doubleSupportDuration", registry);
-   
+
    private final DoubleYoVariable minDoubleSupportTimeBeforeWalking = new DoubleYoVariable("minDoubleSupportTimeBeforeWalking", registry);
    private final DoubleYoVariable yCaptureToTransfer = new DoubleYoVariable("yCaptureToTransfer", registry);
    private final DoubleYoVariable minCaptureXToFinishDoubleSupport = new DoubleYoVariable("minCaptureXToFinishDoubleSupport", registry);
@@ -66,11 +68,10 @@ public class CommonStanceSubController implements StanceSubController
    private final DoubleYoVariable captureXVelocityScale = new DoubleYoVariable("captureXVelocityScale", registry);
 
    public CommonStanceSubController(CouplingRegistry couplingRegistry, CommonWalkingReferenceFrames referenceFrames,
-                                     DesiredHeadingControlModule desiredHeadingControlModule,
-                                     DesiredVelocityControlModule desiredVelocityControlModule,
-                                     DesiredPelvisOrientationControlModule desiredPelvisOrientationControlModule, BalanceSupportControlModule balanceSupportControlModule,
-                                     FootOrientationControlModule footOrientationControlModule, KneeExtensionControlModule kneeExtensionControlModule,
-                                     YoVariableRegistry parentRegistry)
+                                    DesiredHeadingControlModule desiredHeadingControlModule, DesiredVelocityControlModule desiredVelocityControlModule,
+                                    DesiredPelvisOrientationControlModule desiredPelvisOrientationControlModule,
+                                    BalanceSupportControlModule balanceSupportControlModule, FootOrientationControlModule footOrientationControlModule,
+                                    KneeExtensionControlModule kneeExtensionControlModule, YoVariableRegistry parentRegistry)
    {
       this.couplingRegistry = couplingRegistry;
       this.referenceFrames = referenceFrames;
@@ -145,8 +146,7 @@ public class CommonStanceSubController implements StanceSubController
 
       kneeExtensionControlModule.doLoadingControl(lowerBodyTorquesToPack.getLegTorques(loadingLeg));
 
-      doubleSupportDuration.set(timeInState);
-
+      timeSpentInLoadingPreSwingA.set(timeInState);
    }
 
    public void doLoadingPreSwingB(LowerBodyTorques lowerBodyTorquesToPack, RobotSide loadingLeg, double timeInState)
@@ -155,6 +155,8 @@ public class CommonStanceSubController implements StanceSubController
 
       doDoubleSupportControl(lowerBodyTorquesToPack, loadingLeg);
       kneeExtensionControlModule.doLoadingControl(lowerBodyTorquesToPack.getLegTorques(loadingLeg));
+
+      timeSpentInLoadingPreSwingB.set(timeInState);
    }
 
    public void doLoadingPreSwingC(LegTorques legTorquesToPackForStanceSide, RobotSide loadingLeg, double timeInState)
@@ -192,6 +194,11 @@ public class CommonStanceSubController implements StanceSubController
    public void doTransitionIntoLoadingPreSwingA(RobotSide loadingLeg)
    {
       kneeExtensionControlModule.doTransitionIntoLoading(loadingLeg);
+
+      // Reset the timers
+      timeSpentInLoadingPreSwingA.set(0.0);
+      timeSpentInLoadingPreSwingB.set(0.0);
+      doubleSupportDuration.set(0.0);
    }
 
    public void doTransitionIntoLoadingPreSwingB(RobotSide loadingLeg)
@@ -236,6 +243,8 @@ public class CommonStanceSubController implements StanceSubController
 
    public void doTransitionOutOfLoadingPreSwingB(RobotSide loadingLeg)
    {
+      doubleSupportDuration.set(timeSpentInLoadingPreSwingA.getDoubleValue() + timeSpentInLoadingPreSwingB.getDoubleValue());
+      couplingRegistry.setDoubleSupportDuration(doubleSupportDuration);
    }
 
    public void doTransitionOutOfLoadingPreSwingC(RobotSide loadingLeg)
@@ -248,7 +257,7 @@ public class CommonStanceSubController implements StanceSubController
 
    public void doTransitionOutOfTerminalStance(RobotSide stanceSide)
    {
-//	   doubleSupportDuration =
+//    doubleSupportDuration =
    }
 
    public void doTransitionOutOfUnloadLegToTransferIntoWalking(RobotSide stanceSide)
@@ -268,7 +277,7 @@ public class CommonStanceSubController implements StanceSubController
 
    public boolean isReadyToStartStopWalkingDoubleSupport(RobotSide loadingLeg, double timeInState)
    {
-      return (timeInState > minDoubleSupportTimeBeforeWalking .getDoubleValue());
+      return (timeInState > minDoubleSupportTimeBeforeWalking.getDoubleValue());
    }
 
    public boolean isDoneUnloadLegToTransferIntoWalking(RobotSide loadingLeg, double timeInState)
@@ -301,7 +310,7 @@ public class CommonStanceSubController implements StanceSubController
       ReferenceFrame loadingLegZUpFrame = referenceFrames.getAnkleZUpFrame(loadingLeg);
 
       FramePoint2d capturePoint = couplingRegistry.getCapturePoint().toFramePoint2d().changeFrameCopy(loadingLegZUpFrame);
-      
+
       boolean capturePointPastAnkle = capturePoint.getX() > 0.0;
 
       FrameVector2d desiredVelocity = desiredVelocityControlModule.getDesiredVelocity().changeFrameCopy(loadingLegZUpFrame);
@@ -330,12 +339,13 @@ public class CommonStanceSubController implements StanceSubController
    private double getCaptureXToFinishDoubleSupport(FrameVector2d desiredVelocity, FrameVector2d velocityError)
    {
       desiredVelocity.checkReferenceFrameMatch(velocityError);
-      double ret = baseCaptureXToFinishDoubleSupport.getDoubleValue() + captureXVelocityScale.getDoubleValue() * desiredVelocity.getX() + velocityError.getX() * kVelocityDoubleSupportTransfer.getDoubleValue();
-      
+      double ret = baseCaptureXToFinishDoubleSupport.getDoubleValue() + captureXVelocityScale.getDoubleValue() * desiredVelocity.getX()
+                   + velocityError.getX() * kVelocityDoubleSupportTransfer.getDoubleValue();
+
       double min = minCaptureXToFinishDoubleSupport.getDoubleValue();
       double max = maxCaptureXToFinishDoublesupport.getDoubleValue();
-      
-      return MathTools.clipToMinMax(ret, min, max);     
+
+      return MathTools.clipToMinMax(ret, min, max);
    }
 
    public boolean isDoneWithLoadingPreSwingB(RobotSide loadingLeg, double timeInState)

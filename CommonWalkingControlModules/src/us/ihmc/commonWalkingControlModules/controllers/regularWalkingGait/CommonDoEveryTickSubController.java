@@ -23,7 +23,7 @@ public class CommonDoEveryTickSubController implements DoEveryTickSubController
    private final BipedFootInterface leftFoot;
    private final BipedFootInterface rightFoot;
    private final BipedFeetUpdater bipedFeetUpdater;
-   
+
    private final DesiredHeadingControlModule desiredHeadingControlModule;
    private final DesiredVelocityControlModule desiredVelocityControlModule;
 
@@ -33,22 +33,17 @@ public class CommonDoEveryTickSubController implements DoEveryTickSubController
    private final CaptureRegionCalculator captureRegionCalculator;
    private final CouplingRegistry couplingRegistry;
 
-   public CommonDoEveryTickSubController(CommonWalkingReferenceFrames referenceFrames, 
-         BipedFootInterface leftFoot, BipedFootInterface rightFoot,
-         BipedFeetUpdater bipedFeetUpdater, 
-         DesiredHeadingControlModule desiredHeadingControlModule,
-         DesiredVelocityControlModule desiredVelocityControlModule, 
-         DesiredStepLocationCalculator desiredStepLocationCalculator,
-         CapturePointCalculatorInterface capturePointCalculator, 
-         CaptureRegionCalculator captureRegionCalculator, 
-         CouplingRegistry couplingRegistry)
+   public CommonDoEveryTickSubController(CommonWalkingReferenceFrames referenceFrames, BipedFootInterface leftFoot, BipedFootInterface rightFoot,
+           BipedFeetUpdater bipedFeetUpdater, DesiredHeadingControlModule desiredHeadingControlModule,
+           DesiredVelocityControlModule desiredVelocityControlModule, DesiredStepLocationCalculator desiredStepLocationCalculator,
+           CapturePointCalculatorInterface capturePointCalculator, CaptureRegionCalculator captureRegionCalculator, CouplingRegistry couplingRegistry)
    {
       this.referenceFrames = referenceFrames;
 
       this.leftFoot = leftFoot;
       this.rightFoot = rightFoot;
       this.bipedFeetUpdater = bipedFeetUpdater;
-      
+
       this.desiredHeadingControlModule = desiredHeadingControlModule;
       this.desiredVelocityControlModule = desiredVelocityControlModule;
       this.desiredStepLocationCalculator = desiredStepLocationCalculator;
@@ -61,6 +56,7 @@ public class CommonDoEveryTickSubController implements DoEveryTickSubController
 
    public void doEveryControlTick(RobotSide supportLeg)
    {
+      desiredVelocityControlModule.updateDesiredVelocity();
       FrameVector2d desiredVelocity = desiredVelocityControlModule.getDesiredVelocity();
       couplingRegistry.setDesiredVelocity(desiredVelocity);
       desiredHeadingControlModule.updateDesiredHeadingFrame();
@@ -71,26 +67,27 @@ public class CommonDoEveryTickSubController implements DoEveryTickSubController
       couplingRegistry.setCapturePoint(capturePointInMidfeetZUp);
 
       boolean forceHindOnToes = false;
+
 //    boolean forceHindOnToes = couplingRegistry.getForceHindOnToes();
 
       bipedFeetUpdater.updateBipedFeet(leftFoot, rightFoot, supportLeg, capturePointInMidfeetZUp, forceHindOnToes);
-      
+
       BipedSupportPolygons bipedSupportPolygons = couplingRegistry.getBipedSupportPolygons();
       bipedSupportPolygons.update(leftFoot, rightFoot);
 
       if (supportLeg != null)
       {
          // TODO: also compute capture regions in double support
-         
+
          FrameConvexPolygon2d supportFoot = bipedSupportPolygons.getFootPolygonInAnkleZUp(supportLeg);
          FrameConvexPolygon2d captureRegion = captureRegionCalculator.calculateCaptureRegion(supportLeg, supportFoot,
                                                  couplingRegistry.getEstimatedSwingTimeRemaining());
          couplingRegistry.setCaptureRegion(captureRegion);
 
 //       ReferenceFrame desiredHeadingFrame = desiredHeadingControlModule.getDesiredHeadingFrame();
-         Footstep desiredStepLocation = desiredStepLocationCalculator.computeDesiredStepLocation(supportLeg, bipedSupportPolygons, 
-               captureRegion, couplingRegistry.getCapturePoint());
-         
+         Footstep desiredStepLocation = desiredStepLocationCalculator.computeDesiredStepLocation(supportLeg, bipedSupportPolygons, captureRegion,
+                                           couplingRegistry.getCapturePoint());
+
 //       Footstep desiredStepLocation = desiredStepLocationCalculator.getDesiredStepLocation(supportLeg.getOppositeSide(), couplingRegistry);
          couplingRegistry.setDesiredStepLocation(desiredStepLocation);
       }
@@ -102,4 +99,3 @@ public class CommonDoEveryTickSubController implements DoEveryTickSubController
       }
    }
 }
-
