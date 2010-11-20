@@ -317,7 +317,7 @@ public class InverseDynamicsCalculatorTest
       SpatialAccelerationVector jointAcceleration = new SpatialAccelerationVector(frameAfterJoint, frameBeforeJoint, frameAfterJoint,
                                                        linearAcceleration.getVector(), angularAcceleration.getVector());
 
-      sixDoFJoint.setAcceleration(jointAcceleration);
+      sixDoFJoint.setDesiredAcceleration(jointAcceleration);
    }
 
    private static ReferenceFrame createOffsetFrame(InverseDynamicsJoint currentInverseDynamicsJoint, Vector3d offset, String frameName)

@@ -14,7 +14,6 @@ import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenc
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.RevoluteJoint;
-import us.ihmc.utilities.screwTheory.SixDoFJoint;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.utilities.screwTheory.Twist;
 
@@ -26,7 +25,7 @@ public class DesiredJointAccelerationCalculator
    private final SwingFullLegJacobian swingLegJacobian;
    private final FullRobotModel fullRobotModel;
 
-   private final SixDoFJoint rootJoint;
+   private final InverseDynamicsJoint rootJoint;
    private final ReferenceFrame footFrame;
    private final ReferenceFrame pelvisFrame;
    private final ArrayList<RevoluteJoint> legJointsList;
@@ -68,7 +67,7 @@ public class DesiredJointAccelerationCalculator
    private SpatialAccelerationVector computeDesiredAccelerationOfFootWithRespectToPelvis(SpatialAccelerationVector desiredAccelerationOfFootWithRespectToElevator)
    {
       SpatialAccelerationVector accelerationOfFootWithRespectToPelvis = new SpatialAccelerationVector();
-      rootJoint.packJointAcceleration(accelerationOfFootWithRespectToPelvis);    // acceleration of imu with respect to elevator
+      rootJoint.packDesiredJointAcceleration(accelerationOfFootWithRespectToPelvis);    // acceleration of imu with respect to elevator
       accelerationOfFootWithRespectToPelvis.changeBodyFrameNoRelativeAcceleration(pelvisFrame);    // acceleration of body with respect to elevator
       accelerationOfFootWithRespectToPelvis.changeFrameNoRelativeMotion(pelvisFrame);
 
