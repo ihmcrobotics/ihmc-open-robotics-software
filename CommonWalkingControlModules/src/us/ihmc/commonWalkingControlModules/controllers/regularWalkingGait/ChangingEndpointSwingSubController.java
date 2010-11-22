@@ -134,8 +134,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
    private final YoFrameVector desiredSwingFootAccelerationInWorldFrame = new YoFrameVector("desiredSwingAcceleration", "", worldFrame, registry);
    private final YoFrameVector desiredSwingFootAngularVelocityInWorldFrame = new YoFrameVector("desiredSwingAngularVelocity", "", worldFrame, registry);
    private final YoFrameVector desiredSwingFootAngularAccelerationInWorldFrame = new YoFrameVector("desiredSwingAngularAcceleration", "", worldFrame, registry);
-   private final DynamicGraphicCoordinateSystem swingFootOrientationViz = new DynamicGraphicCoordinateSystem("Coordinate System",
-                                                                             desiredSwingFootPositionInWorldFrame, desiredFootOrientation, 0.1);
+   private DynamicGraphicCoordinateSystem swingFootOrientationViz = null;
 
    private LegJointPositions desiredLegJointPositions;
    private LegJointVelocities desiredLegJointVelocities;
@@ -183,6 +182,8 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       if (dynamicGraphicObjectsListRegistry != null)
       {
          ArtifactList artifactList = new ArtifactList("ChangingEndpoint");
+         
+         swingFootOrientationViz = new DynamicGraphicCoordinateSystem("Coordinate System", desiredSwingFootPositionInWorldFrame, desiredFootOrientation, 0.1);
 
          int numberOfBalls = 1;
          double ballSize = (numberOfBalls > 1) ? 0.005 : 0.02;
