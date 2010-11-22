@@ -21,7 +21,7 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector2d;
  * Class implements a trajectory generator that incorporates the ability to change the endpoint during trajectory execution.
  * The motion of the instantaneous desired position is bounded by acceleration and velocity limits.
  */
-public class TakeoffLandingCartesianTrajectoryGenerator implements CartesianTrajectoryGenerator //, ReferenceFrameHolder
+public class TakeoffLandingCartesianTrajectoryGenerator implements CartesianTrajectoryGenerator    // , ReferenceFrameHolder
 {
    private final boolean ALLOW_RETAKEOFF = false;
 
@@ -60,12 +60,11 @@ public class TakeoffLandingCartesianTrajectoryGenerator implements CartesianTraj
    private final ReferenceFrame referenceFrame;
 
    public TakeoffLandingCartesianTrajectoryGenerator(double maxAccel, double maxVel, double zClearance, double takeOffSlope, double landingSlope,
-         ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry)
+           ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry)
    {
-      this("", maxAccel, maxVel, zClearance, takeOffSlope, landingSlope,
-            referenceFrame, parentRegistry);
+      this("", maxAccel, maxVel, zClearance, takeOffSlope, landingSlope, referenceFrame, parentRegistry);
    }
-   
+
    /**
     * @param maxAccel maximum acceleration of instantaneous desired position
     * @param maxVel maximum velocity of instantaneous desired position
@@ -75,8 +74,8 @@ public class TakeoffLandingCartesianTrajectoryGenerator implements CartesianTraj
     * @param referenceFrame TODO
     * @param parentRegistry
     */
-   public TakeoffLandingCartesianTrajectoryGenerator(String suffix, double maxAccel, double maxVel, double zClearance, double takeOffSlope, double landingSlope,
-           ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry)
+   public TakeoffLandingCartesianTrajectoryGenerator(String suffix, double maxAccel, double maxVel, double zClearance, double takeOffSlope,
+           double landingSlope, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry)
    {
       this.maxAccel.set(maxAccel);
       this.maxVel.set(maxVel);
@@ -115,9 +114,9 @@ public class TakeoffLandingCartesianTrajectoryGenerator implements CartesianTraj
 
       this.currentPosition.set(initialPosition);
       this.currentVelocity.set(initialVelocity);
-      
+
 //    this.groundZ.set(Math.max(initialPosition.getZ(), finalDesiredPosition.getZ()));
-    this.groundZ.set(finalDesiredPosition.getZ());
+      this.groundZ.set(finalDesiredPosition.getZ());
    }
 
    public void updateFinalDesiredPosition(FramePoint finalDesiredPosition)
@@ -125,7 +124,7 @@ public class TakeoffLandingCartesianTrajectoryGenerator implements CartesianTraj
       this.finalDesiredPosition.set(finalDesiredPosition);
       this.groundZ.set(finalDesiredPosition.getZ());
 
-//      this.groundZ.set(Math.max(initialPosition.getZ(), finalDesiredPosition.getZ()));
+//    this.groundZ.set(Math.max(initialPosition.getZ(), finalDesiredPosition.getZ()));
    }
 
    public void computeNextTick(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack, double deltaT)
@@ -344,10 +343,11 @@ public class TakeoffLandingCartesianTrajectoryGenerator implements CartesianTraj
 
    private void computeCurrentPosition(double deltaT)
    {
-//      tempFrameVector.set(currentAcceleration.getFrameVectorCopy());
-//      tempFrameVector.scale(0.5 * deltaT);
-//      tempFrameVector.add(currentVelocity.getFrameVectorCopy());
-//      tempFrameVector.scale(deltaT);
+//    tempFrameVector.set(currentAcceleration.getFrameVectorCopy());
+//    tempFrameVector.scale(0.5 * deltaT);
+//    tempFrameVector.add(currentVelocity.getFrameVectorCopy());
+//    tempFrameVector.scale(deltaT);
+//    currentPosition.add(tempFrameVector);
 
       tempFrameVector.set(currentVelocity.getFrameVectorCopy());
       tempFrameVector.scale(deltaT);
@@ -453,10 +453,10 @@ public class TakeoffLandingCartesianTrajectoryGenerator implements CartesianTraj
       return referenceFrame;
    }
 
-//   public ReferenceFrameHolder changeFrameCopy(ReferenceFrame desiredFrame)
-//   {
-//      return null;
-//   }
+// public ReferenceFrameHolder changeFrameCopy(ReferenceFrame desiredFrame)
+// {
+//    return null;
+// }
 
    public enum SwingState {TAKE_OFF, CRUISE_STATE, LANDING, DONE;}
 
