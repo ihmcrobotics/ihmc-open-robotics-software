@@ -177,11 +177,4 @@ public class CommonCouplingRegistry implements CouplingRegistry
 
    }
 
- 
-   public void setEstimatedSwingTimeRemaining(DoubleYoVariable estimatedSwingTimeRemaining)
-   {
-      // TODO Auto-generated method stub
-
-   }
-
 }
