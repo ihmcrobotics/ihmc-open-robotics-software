@@ -48,7 +48,7 @@ public interface CouplingRegistry
    public abstract RobotSide getSupportLeg();
 
 
-   public void setEstimatedSwingTimeRemaining(DoubleYoVariable estimatedSwingTimeRemaining);
+   public abstract void setEstimatedSwingTimeRemaining(double estimatedSwingTimeRemaining);
 
    public abstract double getEstimatedSwingTimeRemaining();
 

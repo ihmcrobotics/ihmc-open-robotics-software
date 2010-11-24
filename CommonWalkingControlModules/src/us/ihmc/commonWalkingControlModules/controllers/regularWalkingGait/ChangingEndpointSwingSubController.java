@@ -172,7 +172,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       this.controlDT = controlDT;
 
       createVisualizers(dynamicGraphicObjectsListRegistry, parentRegistry);
-      couplingRegistry.setEstimatedSwingTimeRemaining(estimatedSwingTimeRemaining);
+      couplingRegistry.setEstimatedSwingTimeRemaining(estimatedSwingTimeRemaining.getDoubleValue());
       couplingRegistry.setSingleSupportDuration(swingDuration);
       parentRegistry.addChild(registry);
    }
@@ -205,10 +205,10 @@ public class ChangingEndpointSwingSubController implements SwingSubController
    {
       return true;
    }
-
+   
    public void doPreSwing(LegTorques legTorquesToPackForSwingLeg, double timeInState)
    {
-      estimatedSwingTimeRemaining.set(swingDuration.getDoubleValue());
+      setEstimatedSwingTimeRemaining(swingDuration.getDoubleValue());
 
       preSwingControlModule.doPreSwing(legTorquesToPackForSwingLeg, timeInState);
 
@@ -231,7 +231,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
 
    public void doTerminalSwing(LegTorques legTorquesToPackForSwingLeg, double timeInState)
    {
-      estimatedSwingTimeRemaining.set(0.0);
+      setEstimatedSwingTimeRemaining(0.0);
 
       // Continue swinging to the same place in world coordinates, not the
       // same place in body coordinates...
@@ -312,6 +312,12 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       singleSupportDuration.set(timeSpentInPreSwing.getDoubleValue() + timeSpentInInitialSwing.getDoubleValue() + timeSpentInMidSwing.getDoubleValue()
                                 + timeSpentInTerminalSwing.getDoubleValue());
       couplingRegistry.setSingleSupportDuration(singleSupportDuration);
+   }
+
+   private void setEstimatedSwingTimeRemaining(double timeRemaining)
+   {
+      this.estimatedSwingTimeRemaining.set(timeRemaining);
+      this.couplingRegistry.setEstimatedSwingTimeRemaining(timeRemaining);
    }
 
    public double getEstimatedSwingTimeRemaining()
@@ -442,7 +448,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
 
       computeSwingLegTorques(legTorquesToPackForSwingLeg);
 
-      estimatedSwingTimeRemaining.set(swingDuration.getDoubleValue() - timeInState);
+      setEstimatedSwingTimeRemaining(swingDuration.getDoubleValue() - timeInState);
    }
 
    private void computeSwingLegTorques(LegTorques legTorquesToPackForSwingLeg)

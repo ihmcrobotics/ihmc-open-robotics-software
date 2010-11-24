@@ -276,12 +276,9 @@ public class ResizableBipedFoot implements BipedFootInterface
    {
       ArrayList<FramePoint> footPolygonPoints = new ArrayList<FramePoint>(toePoints);
       footPolygonPoints.addAll(heelPoints);
-      ArrayList<FramePoint2d> projectedFootPolygonPoints = this.projectFramePointsToXYPlane(footPolygonPoints);
-
+      
+      ArrayList<FramePoint2d> projectedFootPolygonPoints = changeFrameToZUpAndProjectToXYPlane(ankleZUpFrame, footPolygonPoints);
       return new FrameConvexPolygon2d(projectedFootPolygonPoints);
-
-//      ArrayList<FramePoint2d> projectedFootPolygonPoints = changeFrameToZUpAndProjectToXYPlane(ankleZUpFrame, footPolygonPoints);
-//      return new FrameConvexPolygon2d(projectedFootPolygonPoints);
    }
 
    private ArrayList<FramePoint2d> changeFrameToZUpAndProjectToXYPlane(ReferenceFrame zUpFrame, ArrayList<FramePoint> points)
@@ -317,6 +314,11 @@ public class ResizableBipedFoot implements BipedFootInterface
    
    private ArrayList<FramePoint2d> projectFramePointsToXYPlane(ArrayList<FramePoint> points)
    {
+      if ((points.size() > 0) && (!points.get(0).getReferenceFrame().isZupFrame()))
+      {
+         throw new RuntimeException("Doing projectFramePointsToXYPlane on a non ZUp frame");
+      }
+      
       ArrayList<FramePoint2d> ret = new ArrayList<FramePoint2d>(points.size());
       for (int i=0; i<points.size(); i++)
       {
