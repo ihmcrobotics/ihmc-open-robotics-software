@@ -49,6 +49,10 @@ public class DesiredJointAccelerationCalculator
       this.legJointsList = fullRobotModel.getLegJointList(robotSide);
    }
 
+   
+   private final SpatialAccelerationVector jacobianDerivativeTerm = new SpatialAccelerationVector();
+   private final SpatialAccelerationVector accelerationOfFootWithRespectToPelvis = new SpatialAccelerationVector();
+   
    /**
     * Sets the accelerations for the RevoluteJoints in legJoints
     * Assumes that the swingLegJacobian is already updated
@@ -56,24 +60,23 @@ public class DesiredJointAccelerationCalculator
     */
    public void compute(SpatialAccelerationVector desiredAccelerationOfFootWithRespectToWorld)
    {
-      SpatialAccelerationVector accelerationOfFootWithRespectToPelvis =
-         computeDesiredAccelerationOfFootWithRespectToPelvis(desiredAccelerationOfFootWithRespectToWorld);
+      computeDesiredAccelerationOfFootWithRespectToPelvis(accelerationOfFootWithRespectToPelvis, desiredAccelerationOfFootWithRespectToWorld);
 
-      SpatialAccelerationVector jacobianDerivativeTerm = computeJacobianDerivativeTerm();
-
+      computeJacobianDerivativeTerm(jacobianDerivativeTerm);
       computeJointAccelerations(accelerationOfFootWithRespectToPelvis, jacobianDerivativeTerm);
    }
 
-   private SpatialAccelerationVector computeDesiredAccelerationOfFootWithRespectToPelvis(SpatialAccelerationVector desiredAccelerationOfFootWithRespectToElevator)
+   private final Twist twistOfPelvisWithRespectToElevator = new Twist();
+
+   private void computeDesiredAccelerationOfFootWithRespectToPelvis(SpatialAccelerationVector accelerationOfFootWithRespectToPelvis, SpatialAccelerationVector desiredAccelerationOfFootWithRespectToElevator)
    {
-      SpatialAccelerationVector accelerationOfFootWithRespectToPelvis = new SpatialAccelerationVector();
+//      SpatialAccelerationVector accelerationOfFootWithRespectToPelvis = new SpatialAccelerationVector();
       rootJoint.packDesiredJointAcceleration(accelerationOfFootWithRespectToPelvis);    // acceleration of imu with respect to elevator
       accelerationOfFootWithRespectToPelvis.changeBodyFrameNoRelativeAcceleration(pelvisFrame);    // acceleration of body with respect to elevator
       accelerationOfFootWithRespectToPelvis.changeFrameNoRelativeMotion(pelvisFrame);
 
       Twist twistOfPelvisWithRespectToFoot = computeTwistOfPelvisWithRespectToFoot();
 
-      Twist twistOfPelvisWithRespectToElevator = new Twist();
       rootJoint.packJointTwist(twistOfPelvisWithRespectToElevator);    // twist of imu with respect to elevator
       twistOfPelvisWithRespectToElevator.changeBodyFrameNoRelativeTwist(pelvisFrame);    // twist of body with respect to elevator
       twistOfPelvisWithRespectToElevator.changeFrame(pelvisFrame);
@@ -82,7 +85,7 @@ public class DesiredJointAccelerationCalculator
       accelerationOfFootWithRespectToPelvis.invert();    // acceleration of elevator with respect to body
       accelerationOfFootWithRespectToPelvis.add(desiredAccelerationOfFootWithRespectToElevator);    // acceleration of foot with respect to body
 
-      return accelerationOfFootWithRespectToPelvis;
+//      return accelerationOfFootWithRespectToPelvis;
    }
 
    private Twist computeTwistOfPelvisWithRespectToFoot()
@@ -95,15 +98,21 @@ public class DesiredJointAccelerationCalculator
       return twistOfPelvisWithRespectToFoot;
    }
 
-   private SpatialAccelerationVector computeJacobianDerivativeTerm()
+   private final SpatialAccelerationVector unitTwistDerivative = new SpatialAccelerationVector();
+   private final Twist twistOfCurrentWithRespectToFoot = new Twist(); //footFrame, footFrame, footFrame);
+   private final Twist unitJointTwist = new Twist();
+   private final Twist jointTwist = new Twist();
+   
+   private SpatialAccelerationVector computeJacobianDerivativeTerm(SpatialAccelerationVector ret)
    {
-      Twist twistOfCurrentWithRespectToFoot = new Twist(footFrame, footFrame, footFrame);
-      Twist unitJointTwist = new Twist();
-      Twist jointTwist = new Twist();
-      SpatialAccelerationVector unitTwistDerivative = new SpatialAccelerationVector();
-      SpatialAccelerationVector ret = new SpatialAccelerationVector(footFrame, footFrame, footFrame);
-      Vector3d zero = new Vector3d();
-
+//      Twist twistOfCurrentWithRespectToFoot = new Twist(footFrame, footFrame, footFrame);
+//      Twist unitJointTwist = new Twist();
+//      Twist jointTwist = new Twist();
+//      SpatialAccelerationVector ret = new SpatialAccelerationVector(footFrame, footFrame, footFrame);
+      
+      twistOfCurrentWithRespectToFoot.setToZero(footFrame, footFrame, footFrame);
+      ret.setToZero(footFrame, footFrame, footFrame);
+      
       ListIterator<RevoluteJoint> iterator = legJointsList.listIterator(legJointsList.size());
       while (iterator.hasPrevious())
       {
@@ -117,7 +126,7 @@ public class DesiredJointAccelerationCalculator
          joint.packUnitJointTwist(unitJointTwist);
          unitJointTwist.changeBaseFrameNoRelativeTwist(parentJointFrame);
 
-         unitTwistDerivative.set(unitJointTwist.getBodyFrame(), unitJointTwist.getBaseFrame(), unitJointTwist.getExpressedInFrame(), zero, zero);
+         unitTwistDerivative.setToZero(unitJointTwist.getBodyFrame(), unitJointTwist.getBaseFrame(), unitJointTwist.getExpressedInFrame());
 
          unitTwistDerivative.changeFrame(footFrame, twistOfCurrentWithRespectToFoot, unitJointTwist);    // RESULT: column of Jdot
          unitTwistDerivative.scale(joint.getQd());

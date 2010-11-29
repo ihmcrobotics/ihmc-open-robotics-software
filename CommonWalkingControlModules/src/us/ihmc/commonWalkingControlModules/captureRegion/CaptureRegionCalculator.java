@@ -270,6 +270,10 @@ public class CaptureRegionCalculator
       CaptureRegionCalculator.kinematicRangeFromCoP = kinematicRangeFromCoP;
    }
 
+   private final FramePoint2d footCentroid = new FramePoint2d(ReferenceFrame.getWorldFrame());
+   private final FramePoint2d copExtremeInSupportAnkleZUp = new FramePoint2d(ReferenceFrame.getWorldFrame());
+   private final FramePoint copExtreme3d = new FramePoint(ReferenceFrame.getWorldFrame());
+   
    public FrameConvexPolygon2d calculateCaptureRegion(RobotSide supportLeg, FrameConvexPolygon2d supportFoot, double swingTimeRemaining)
    {
       // The general idea is to predict where we think we can drive the capture point
@@ -289,7 +293,7 @@ public class CaptureRegionCalculator
 
       // first get all of the objects we will need to calculate the capture region
       FramePoint2d capturePoint = capturePointCalculator.getCapturePoint2dInFrame(supportAnkleZUpFrame);
-      FramePoint2d footCentroid = supportFoot.getCentroidCopy();
+      supportFoot.getCentroid(footCentroid);
 
       // 0. hmm, weird things are happening when we predict the capture point given the cop extremes as calculated by
       // the line of sightlines from the capture point when the capture point is close to the foot polygon. Let's try returning
@@ -330,11 +334,13 @@ public class CaptureRegionCalculator
             estimatedCOPExtremes[i].set(copExtremeInWorld.getX(), copExtremeInWorld.getY(), 0.0);
 
          FramePoint2d copExtreme = extremesOfFeasibleCOP.get(i);
-         FramePoint2d copExtremeInSupportAnkleZUp = copExtreme.changeFrameCopy(supportAnkleZUpFrame);
-         FramePoint copExtreme3d = new FramePoint(copExtreme.getReferenceFrame(), copExtreme.getX(), copExtreme.getY(), 0.0);
+         copExtremeInSupportAnkleZUp.set(copExtreme);
+         copExtremeInSupportAnkleZUp.changeFrame(supportAnkleZUpFrame);
+         
+         copExtreme3d.set(copExtreme.getReferenceFrame(), copExtreme.getX(), copExtreme.getY(), 0.0);
 
          FramePoint predictedExtremeCapturePoint = capturePointCalculator.computePredictedCapturePoint(supportLeg, swingTimeRemaining + SWING_TIME_TO_ADD_FOR_CAPTURING_SAFETY_FACTOR, copExtreme3d);
-         predictedExtremeCapturePoint = predictedExtremeCapturePoint.changeFrameCopy(supportAnkleZUpFrame);
+         predictedExtremeCapturePoint.changeFrame(supportAnkleZUpFrame);
          
 //         FramePoint predictedExtremeCapturePoint = capturePointCalculator.getPredictedCapturePointInFrame(supportAnkleZUpFrame);
          FramePoint2d predictedExtremeCapturePoint2d = new FramePoint2d(predictedExtremeCapturePoint.getReferenceFrame(), predictedExtremeCapturePoint.getX(),
