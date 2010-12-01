@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Matrix3d;
+import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.RobotSide;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
@@ -11,6 +12,8 @@ import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredHeadingControlModule;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredVelocityControlModule;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
+import us.ihmc.utilities.math.MathFunction;
+import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
@@ -30,8 +33,11 @@ public class VelocityAndHeadingDesiredStepLocationCalculator implements DesiredS
    private final BooleanYoVariable nextStepIsInsideCaptureRegion;
 
    // Tunable robot-dependent parameters
-   private double goodStandingWidth;
+   private double goodStandingStepWidth;
    private double goodWalkingStepWidth;
+
+   private double robotMaxVelocity;
+   private double robotMinVelocity;
 
    private double insideStepAdjustmentForTurning;
    private double outsideStepAdjustmentForTurning;
@@ -51,6 +57,7 @@ public class VelocityAndHeadingDesiredStepLocationCalculator implements DesiredS
    private final DoubleYoVariable stepHeight = new DoubleYoVariable("stepHeight", "User determined step height. [m]", registry);
    private final DoubleYoVariable stepYaw = new DoubleYoVariable("stepYaw", "This is the step yaw. [rad]", registry);
 
+   // Gain
    private final DoubleYoVariable kpStepLength = new DoubleYoVariable("kpStepLength", registry);
    private final DoubleYoVariable KpStepYaw = new DoubleYoVariable("KpStepYaw", registry);
 
@@ -58,6 +65,8 @@ public class VelocityAndHeadingDesiredStepLocationCalculator implements DesiredS
 
 
    private final DoubleYoVariable stepLengthForDesiredVelocity = new DoubleYoVariable("stepLengthForDesiredVelocity", registry);
+   private double stepWidthSlopeProfile;
+   private double stepWidthYInterceptProfile;
 
    private FramePoint footstepPosition;
 
@@ -72,9 +81,12 @@ public class VelocityAndHeadingDesiredStepLocationCalculator implements DesiredS
       this.referenceFrames = referenceFrames;
 
       stepLength.set(0.0);
-      stepWidth.set(goodWalkingStepWidth);
+      stepWidth.set(0.0);
       stepHeight.set(0.0);
       stepYaw.set(0.0);
+
+      stepWidthSlopeProfile = 0.0;
+      stepWidthYInterceptProfile = 0.0;
 
       footstepPosition = new FramePoint(desiredHeadingControlModule.getDesiredHeadingFrame());
 
@@ -129,7 +141,7 @@ public class VelocityAndHeadingDesiredStepLocationCalculator implements DesiredS
       computeStepLength(swingLegSide, desiredHeadingFrame, couplingRegistry);
 
       // Compute Width
-      computeStepWidth(swingLegSide, desiredHeadingFrame);
+      computeStepWidth(swingLegSide, desiredHeadingFrame, couplingRegistry);
 
       // Assign computed values to the desiredStepLocation in the stance
       FrameVector offsetFromFoot = new FrameVector(desiredHeadingFrame, stepLength.getDoubleValue(), stepWidth.getDoubleValue(), stepHeight.getDoubleValue());
@@ -156,24 +168,30 @@ public class VelocityAndHeadingDesiredStepLocationCalculator implements DesiredS
       stepLength.set(stepLength.getDoubleValue() + stepLengthError * kpStepLength.getDoubleValue());
    }
 
-   private void computeStepWidth(RobotSide swingLegSide, ReferenceFrame desiredHeadingFrame)
+   private void computeStepWidth(RobotSide swingLegSide, ReferenceFrame desiredHeadingFrame, CouplingRegistry couplingRegistry)
    {
-      stepWidth.set(swingLegSide.negateIfRightSide(goodWalkingStepWidth));
+      double tempStepWidth = stepWidthSlopeProfile * couplingRegistry.getDesiredVelocity().length() + stepWidthYInterceptProfile;
+      MathTools.clipToMinMax(tempStepWidth, goodWalkingStepWidth, goodStandingStepWidth);
+      stepWidth.set(swingLegSide.negateIfRightSide(tempStepWidth));
 
+      stepWidth.set(stepWidth.getDoubleValue() + getStepWidthAdjustmentForTurning(swingLegSide, desiredHeadingFrame));
+   }
+
+   private double getStepWidthAdjustmentForTurning(RobotSide swingLegSide, ReferenceFrame desiredHeadingFrame)
+   {
       // this is where we want to adjust the width depending on "inside" or "outside" foot
       FrameVector desiredHeading = new FrameVector(desiredHeadingFrame, 1.0, 0.0, 0.0);
       FrameVector finalHeading = desiredHeadingControlModule.getFinalHeadingTarget().changeFrameCopy(desiredHeadingFrame);
       FrameVector crossVector = new FrameVector(desiredHeading);
       crossVector.cross(desiredHeading, finalHeading);
-      double cross = crossVector.getZ();
-      headingCross.set(cross);
+      double magCrossProductFromDesiredToFinalHeading = crossVector.getZ();
+      headingCross.set(magCrossProductFromDesiredToFinalHeading);
 
-      stepWidth.set(stepWidth.getDoubleValue() + getStepWidthAdjustmentForTurning(swingLegSide, cross));
-   }
-
-   private double getStepWidthAdjustmentForTurning(RobotSide swingLegSide, double magCrossProductFromDesiredToFinalHeading)
-   {
       double threshholdForStepWidthAdjustment = 0.00;
+
+//    insideStepAdjustmentForTurning = Math.tan(magCrossProductFromDesiredToFinalHeading) * stepLength.getDoubleValue();
+//    System.out.println("magCrossProductFromDesiredToFinalHeading = " + magCrossProductFromDesiredToFinalHeading);
+//    System.out.println("insideStepAdjustmentForTurning = " + insideStepAdjustmentForTurning);
 
       if (magCrossProductFromDesiredToFinalHeading > threshholdForStepWidthAdjustment)
       {
@@ -205,7 +223,8 @@ public class VelocityAndHeadingDesiredStepLocationCalculator implements DesiredS
       double headingToSwingRotationAroundZ = RotationFunctions.getYaw(headingToSwingRotation);
 
       // Make proportional control on the step Yaw for the desired foot step.
-      stepYaw.set(KpStepYaw.getDoubleValue() * headingToSwingRotationAroundZ);
+      stepYaw.set(KpStepYaw.getDoubleValue() * -headingToSwingRotationAroundZ);
+
    }
 
 
@@ -288,8 +307,31 @@ public class VelocityAndHeadingDesiredStepLocationCalculator implements DesiredS
 
    public void setUpParametersForR2()
    {
-      goodStandingWidth = (0.1016 + 0.09) * 2.0;
-      goodWalkingStepWidth = goodStandingWidth - 0.05;
+      goodStandingStepWidth = (0.1016 + 0.09) * 2.0;
+      goodWalkingStepWidth = 0.3272;    // 0.3272 =  minimum metabolic cost @ 0.12*Leg Length(1.245) + 2*half foot width (17.78)
+
+      robotMaxVelocity = 0.60;
+      robotMinVelocity = 0.10;
+
+      computeStepWidthLinearProfile();
+
+      insideStepAdjustmentForTurning = 0.0;
+      outsideStepAdjustmentForTurning = 0.0;
+
+      kpStepLength.set(0.5);
+      KpStepYaw.set(1.0);
+   }
+
+
+   public void setupParametersForM2V2()
+   {
+      goodStandingStepWidth = 0.25;
+      goodWalkingStepWidth = goodStandingStepWidth - 0.05;
+
+      robotMaxVelocity = 0.25;
+      robotMinVelocity = 0.1;
+
+      computeStepWidthLinearProfile();
 
       insideStepAdjustmentForTurning = 0.0;
       outsideStepAdjustmentForTurning = 0.0;
@@ -298,17 +340,10 @@ public class VelocityAndHeadingDesiredStepLocationCalculator implements DesiredS
       KpStepYaw.set(0.5);
    }
 
-
-   public void setupParametersForM2V2()
+   public void computeStepWidthLinearProfile()
    {
-      goodStandingWidth = 0.25;
-      goodWalkingStepWidth = goodStandingWidth - 0.05;
-
-      insideStepAdjustmentForTurning = 0.0;
-      outsideStepAdjustmentForTurning = 0.0;
-
-      kpStepLength.set(0.5);
-      KpStepYaw.set(0.5);
+      stepWidthSlopeProfile = (goodStandingStepWidth - goodWalkingStepWidth) / (robotMinVelocity - robotMaxVelocity);
+      stepWidthYInterceptProfile = goodStandingStepWidth - stepWidthSlopeProfile * robotMinVelocity;
    }
 
 }
