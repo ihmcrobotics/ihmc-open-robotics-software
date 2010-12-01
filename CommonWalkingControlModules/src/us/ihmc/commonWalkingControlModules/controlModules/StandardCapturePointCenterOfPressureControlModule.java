@@ -350,7 +350,7 @@ public class StandardCapturePointCenterOfPressureControlModule implements Captur
             }
             else
             {
-               throw new RuntimeException("Shouldn't get here");
+//               throw new RuntimeException("Shouldn't get here"); // TODO: turn on again
             }
          }
       }
