@@ -19,7 +19,7 @@ public class YawPitchRollPelvisOrientationControlModule implements PelvisOrienta
 {
    private final ProcessedSensorsInterface processedSensors;
    private final CommonWalkingReferenceFrames commonWalkingReferenceFrames;
-   private final YoVariableRegistry registry = new YoVariableRegistry("Orientation Controller");
+   private final YoVariableRegistry registry = new YoVariableRegistry("OrientationController");
 
    private ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 

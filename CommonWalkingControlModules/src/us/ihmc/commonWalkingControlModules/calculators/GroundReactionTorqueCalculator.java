@@ -22,7 +22,7 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 
 public class GroundReactionTorqueCalculator
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry("Ground Tau");
+   private final YoVariableRegistry registry = new YoVariableRegistry("GroundTau");
 
    private final SideDependentList<YoFramePoint> groundTauStart = new SideDependentList<YoFramePoint>();
    private final SideDependentList<YoFrameVector> groundTau = new SideDependentList<YoFrameVector>();

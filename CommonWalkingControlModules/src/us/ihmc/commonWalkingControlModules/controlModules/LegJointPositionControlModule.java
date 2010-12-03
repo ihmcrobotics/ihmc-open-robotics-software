@@ -70,7 +70,7 @@ public class LegJointPositionControlModule
       this.useDesiredVelocities = useDesiredVelocities;
       this.processedOutputs = processedOutputs;
 
-      registry = new YoVariableRegistry("LegJointPositionControlModule - " + robotSide.getCamelCaseNameForStartOfExpression());
+      registry = new YoVariableRegistry("LegJointPositionControlModule_" + robotSide.getCamelCaseNameForStartOfExpression());
 
       String robotSideStartString = robotSide.getCamelCaseNameForStartOfExpression();
       String robotSideMiddleString = robotSide.getCamelCaseNameForMiddleOfExpression();
