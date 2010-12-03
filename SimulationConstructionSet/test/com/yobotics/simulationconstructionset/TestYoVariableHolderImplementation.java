@@ -30,11 +30,19 @@ public class TestYoVariableHolderImplementation extends TestCase
       super.setUp();
       yoVariableHolderImplementation = new YoVariableHolderImplementation();
 
-      YoVariableRegistry registryA = new YoVariableRegistry("robot.registryA");
-      YoVariableRegistry registryB = new YoVariableRegistry("robot.registryB");
-      YoVariableRegistry registryC = new YoVariableRegistry("robot.registryC");
-      YoVariableRegistry registryC2 = new YoVariableRegistry("robot2.registryC");
-
+      YoVariableRegistry robotRegistry = new YoVariableRegistry("robot");
+      YoVariableRegistry robot2Registry = new YoVariableRegistry("robot2");
+      
+      YoVariableRegistry registryA = new YoVariableRegistry("registryA");
+      YoVariableRegistry registryB = new YoVariableRegistry("registryB");
+      YoVariableRegistry registryC = new YoVariableRegistry("registryC");
+      robotRegistry.addChild(registryA);
+      robotRegistry.addChild(registryB);
+      robotRegistry.addChild(registryC);
+      
+      YoVariableRegistry registryC2 = new YoVariableRegistry("registryC");
+      robot2Registry.addChild(registryC2);
+      
       DoubleYoVariable variableOneA = new DoubleYoVariable("variableOne", registryA);
       DoubleYoVariable variableOneB = new DoubleYoVariable("variableOne", registryB);
       DoubleYoVariable variableOneC = new DoubleYoVariable("variableOne", registryC);
