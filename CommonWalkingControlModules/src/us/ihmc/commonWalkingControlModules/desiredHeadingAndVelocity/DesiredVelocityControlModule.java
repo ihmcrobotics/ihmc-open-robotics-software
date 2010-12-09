@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity;
 
-import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 

@@ -3,8 +3,6 @@ package us.ihmc.commonWalkingControlModules.kinematics;
 import java.util.ArrayList;
 import java.util.ListIterator;
 
-import javax.vecmath.Vector3d;
-
 import us.ihmc.commonWalkingControlModules.RobotSide;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
