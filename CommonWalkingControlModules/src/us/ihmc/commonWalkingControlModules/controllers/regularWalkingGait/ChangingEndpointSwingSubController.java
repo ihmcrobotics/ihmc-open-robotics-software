@@ -8,7 +8,6 @@ import us.ihmc.commonWalkingControlModules.RobotSide;
 import us.ihmc.commonWalkingControlModules.SideDependentList;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.PreSwingControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.LegJointPositionControlModule;
-import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.SwingSubController;
 import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredHeadingControlModule;
 import us.ihmc.commonWalkingControlModules.desiredStepLocation.DesiredStepLocationCalculator;
