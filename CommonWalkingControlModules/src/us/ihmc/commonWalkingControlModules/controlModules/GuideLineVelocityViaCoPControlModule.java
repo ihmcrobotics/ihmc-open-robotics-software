@@ -75,50 +75,41 @@ public class GuideLineVelocityViaCoPControlModule implements VelocityViaCoPContr
       }
    }
 
-   public FramePoint2d computeCapturePoint()
-   {
-      FramePoint capturePoint = couplingRegistry.getCapturePoint();
-      FramePoint2d ret = new FramePoint2d(capturePoint.getReferenceFrame(), capturePoint.getX(), capturePoint.getY());
-
-      return ret;
-   }
-
-
    public FramePoint2d computeDesiredCoPDoubleSupport(RobotSide loadingLeg, FrameVector2d desiredVelocity)
    {
       BipedSupportPolygons bipedSupportPolygons = couplingRegistry.getBipedSupportPolygons();
-
-//    FramePoint2d desiredCapturePoint = new FramePoint2d(referenceFrames.getAnkleZUpReferenceFrames().get(RobotSide.LEFT));
-      FramePoint currentCapturePoint = couplingRegistry.getCapturePoint();
 
       FramePoint desiredCapturePoint;
 
       if (loadingLeg == null)
       {
-         desiredCapturePoint = new FramePoint(referenceFrames.getMidFeetZUpFrame());
+         FramePoint2d leftSweetSpot = bipedSupportPolygons.getSweetSpotCopy(RobotSide.LEFT);
+         FramePoint2d rightSweetSpot = bipedSupportPolygons.getSweetSpotCopy(RobotSide.RIGHT);
+         rightSweetSpot.changeFrame(leftSweetSpot.getReferenceFrame());
+         FrameLineSegment2d sweetSpotToSweetSpot = new FrameLineSegment2d(leftSweetSpot, rightSweetSpot);
+         desiredCapturePoint = new FramePoint(sweetSpotToSweetSpot.midpoint().toFramePoint());
+         
+//         desiredCapturePoint = new FramePoint(referenceFrames.getMidFeetZUpFrame());
       }
       else
       {
-         // TODO: Should probably use sweet spot, but currently using a user defined parameter
-//         FramePoint2d sweetSpot = bipedSupportPolygons.getSweetSpotCopy(loadingLeg);
-//         desiredCapturePoint = new FramePoint(referenceFrames.getAnkleZUpReferenceFrames().get(loadingLeg), sweetSpot.getX(), sweetSpot.getY(), 0.0);
-
          double desiredCaptureY = loadingLeg.negateIfLeftSide(desiredCaptureIn.getDoubleValue());
          desiredCapturePoint = new FramePoint(referenceFrames.getAnkleZUpReferenceFrames().get(loadingLeg), desiredCaptureForward.getDoubleValue(), desiredCaptureY, 0.0);
       }
-
 
       this.desiredCapturePointInWorld.set(desiredCapturePoint.changeFrameCopy(ReferenceFrame.getWorldFrame()));
 
       ReferenceFrame midFeetZUpFrame = referenceFrames.getMidFeetZUpFrame();
 
 //    desiredCapturePoint = desiredCapturePoint.changeFrameCopy(currentCapturePoint.getReferenceFrame());
-      desiredCapturePoint = desiredCapturePoint.changeFrameCopy(midFeetZUpFrame);
-      currentCapturePoint = currentCapturePoint.changeFrameCopy(midFeetZUpFrame);
+      desiredCapturePoint.changeFrame(midFeetZUpFrame);
+      FramePoint currentCapturePoint = couplingRegistry.getCapturePoint().changeFrameCopy(midFeetZUpFrame);
       FramePoint centerOfMassPosition = processedSensors.getCenterOfMassPositionInFrame(midFeetZUpFrame);
       FrameVector2d currentCOMVelocity = processedSensors.getCenterOfMassVelocityInFrame(midFeetZUpFrame).toFrameVector2d();
 
-      capturePointCenterOfPressureControlModule.XYCoPControllerDoubleSupport(bipedSupportPolygons, currentCapturePoint, desiredCapturePoint,
+      desiredVelocity.setX(0.0);
+      desiredVelocity.setY(0.0);
+      capturePointCenterOfPressureControlModule.controlDoubleSupport(bipedSupportPolygons, currentCapturePoint, desiredCapturePoint,
               centerOfMassPosition, desiredVelocity, currentCOMVelocity);
       YoFramePoint desiredCenterOfPressure = capturePointCenterOfPressureControlModule.getCenterOfPressureDesiredMidFeet();
 
@@ -160,7 +151,7 @@ public class GuideLineVelocityViaCoPControlModule implements VelocityViaCoPContr
 
       FramePoint centerOfMassPosition = processedSensors.getCenterOfMassPositionInFrame(supportFootAnkleZUpFrame);
 
-      capturePointCenterOfPressureControlModule.XYCoPControllerSingleSupport(capturePointInAnkleZUp, guideLine, desiredCapturePoint, supportLeg,
+      capturePointCenterOfPressureControlModule.controlSingleSupport(capturePointInAnkleZUp, guideLine, desiredCapturePoint, supportLeg,
               supportFootAnkleZUpFrame, bipedSupportPolygons, centerOfMassPosition, desiredVelocity, actualCenterOfMassVelocityInSupportFootFrame);    // , percentToFarEdgeOfFoot); // calculates capture points
 
       YoFramePoint desiredCenterOfPressure = capturePointCenterOfPressureControlModule.getCenterOfPressureDesiredAnkleZUp(supportLeg);

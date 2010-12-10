@@ -2,7 +2,6 @@ package us.ihmc.commonWalkingControlModules.controlModuleInterfaces;
 
 import us.ihmc.commonWalkingControlModules.RobotSide;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
-import us.ihmc.commonWalkingControlModules.captureRegion.CapturePointCalculatorInterface;
 import us.ihmc.utilities.math.geometry.FrameLineSegment2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
@@ -12,25 +11,17 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 
 public interface CapturePointCenterOfPressureControlModule
 {
-   public abstract void XYCoPControllerDoubleSupport(BipedSupportPolygons bipedSupportPolygons,
-         CapturePointCalculatorInterface yoboticsBipedCapturePointCalculator, FramePoint desiredCapturePoint);
-   
-   public abstract void XYCoPControllerDoubleSupport(BipedSupportPolygons bipedSupportPolygons,
-         CapturePointCalculatorInterface yoboticsBipedCapturePointCalculator, FramePoint desiredCapturePoint, FramePoint centerOfMassPositionInZUpFrame, FrameVector2d desiredVelocity, FrameVector2d currentCOMVelocity);
-
    /**
     * Finds instantaneous center of pressure to make robot move to desired x and y
-    * @param desiredVelocity 
+    * @param desiredVelocity
     * @param currentVelocity TODO
     * @param xDesiredMidFrame double
     * @param yDesiredMidframe double
     * @param processedSensors ProcessedSensors
     * @todo add stepping if outside footbase
     */
-   public abstract void XYCoPControllerDoubleSupport(BipedSupportPolygons bipedSupportPolygons, FramePoint currentCapturePoint, FramePoint desiredCapturePoint, FramePoint centerOfMassPositionInWorldFrame, FrameVector2d desiredVelocity, FrameVector2d currentVelocity);
-
-   public abstract void XYCoPControllerSingleSupport(FramePoint currentCapturePoint, FrameLineSegment2d guideLine, RobotSide supportLeg,
-         ReferenceFrame referenceFrame, BipedSupportPolygons supportPolygons);
+   public abstract void controlDoubleSupport(BipedSupportPolygons bipedSupportPolygons, FramePoint currentCapturePoint, FramePoint desiredCapturePoint,
+           FramePoint centerOfMassPositionInWorldFrame, FrameVector2d desiredVelocity, FrameVector2d currentVelocity);
 
    /**
     * XYCoPControllerSingleSupport sets centerOfPressureDesiredWorld field
@@ -42,45 +33,12 @@ public interface CapturePointCenterOfPressureControlModule
     * @param supportPolygons BipedSupportPolygons
     * @param desiredCenterOfPressure FramePoint
     */
-   public abstract void XYCoPControllerSingleSupport(FramePoint currentCapturePoint, FrameLineSegment2d guideLine, FramePoint desiredCapturePoint,
-         RobotSide supportLeg, ReferenceFrame referenceFrame, BipedSupportPolygons supportPolygons);
-   
-   public abstract void XYCoPControllerSingleSupport(FramePoint currentCapturePoint, FrameLineSegment2d guideLine, FramePoint desiredCapturePoint,
-         RobotSide supportLeg, ReferenceFrame referenceFrame, BipedSupportPolygons supportPolygons, FramePoint centerOfMassPositionInZUpFrame, FrameVector2d desiredVelocity, FrameVector2d currentVelocity);
+   public abstract void controlSingleSupport(FramePoint currentCapturePoint, FrameLineSegment2d guideLine, FramePoint desiredCapturePoint,
+           RobotSide supportLeg, ReferenceFrame referenceFrame, BipedSupportPolygons supportPolygons);
 
-   public abstract void setMaxCaptureToCoP(double maxCaptureToCoP);
-
-   
-   // FIXME: remove these four methods from the interface!!!
-   /**
-    *    sets k for x capture point
-    *    @param kx double
-    */
-   @Deprecated
-   public abstract void setKCaptureX(double kx);
-
-   /**
-    * gets k for x capture point
-    * @return double
-    */
-   @Deprecated
-   public abstract double getKCaptureX();
-
-   /**
-    * sets k for y capture point
-    * @param ky double
-    */
-   @Deprecated
-   public abstract void setKCaptureY(double ky);
-
-   /**
-    * gets k for y capture point
-    * @return double
-    */
-   @Deprecated
-   public abstract double getKCaptureY();
-
-   public abstract YoFramePoint getCenterOfPressureDesiredWorld();
+   public abstract void controlSingleSupport(FramePoint currentCapturePoint, FrameLineSegment2d guideLine, FramePoint desiredCapturePoint,
+           RobotSide supportLeg, ReferenceFrame referenceFrame, BipedSupportPolygons supportPolygons, FramePoint centerOfMassPositionInZUpFrame,
+           FrameVector2d desiredVelocity, FrameVector2d currentVelocity);
 
    public abstract YoFramePoint getCenterOfPressureDesiredMidFeet();
 
@@ -89,5 +47,4 @@ public interface CapturePointCenterOfPressureControlModule
    public abstract YoFramePoint getCenterOfPressureDesiredRightAnkleZUp();
 
    public abstract YoFramePoint getCenterOfPressureDesiredAnkleZUp(RobotSide robotSide);
-
 }

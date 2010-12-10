@@ -21,8 +21,6 @@ public interface VelocityViaCoPControlModule
     */
    public abstract FramePoint2d computeDesiredCoPDoubleSupport(RobotSide loadingLeg, FrameVector2d desiredVelocity);
 
-   public abstract FramePoint2d computeCapturePoint();
-
    /**
     * Tells this module to put the weight on the toes since whatever is calling it wants the robot to start toeing off.
     * @param robotSide

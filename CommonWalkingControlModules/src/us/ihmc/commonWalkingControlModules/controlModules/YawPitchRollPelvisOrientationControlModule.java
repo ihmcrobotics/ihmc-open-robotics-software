@@ -55,8 +55,6 @@ public class YawPitchRollPelvisOrientationControlModule implements PelvisOrienta
       yawd = new FilteredVelocityYoVariable("pelvisOrientationYawd", "", alphaPelvisAngleDerivative, pelvisOrientationYaw, controlDT, registry);
       pitchd = new FilteredVelocityYoVariable("pelvisOrientationPitchd", "", alphaPelvisAngleDerivative, pelvisOrientationPitch, controlDT, registry);
       rolld = new FilteredVelocityYoVariable("pelvisOrientationRolld", "", alphaPelvisAngleDerivative, pelvisOrientationRoll, controlDT, registry);
-
-      setGainsForR2();
    }
 
    public FrameVector computePelvisTorque(RobotSide supportLeg, Orientation desiredPelvisOrientation)
@@ -134,7 +132,7 @@ public class YawPitchRollPelvisOrientationControlModule implements PelvisOrienta
       return desiredYawPitchRoll;
    }
 
-   private void setGainsForR2()
+   public void setGainsForR2()
    {
       yawController.setProportionalGain(1000.0); //5000.0); //50.0);    // 200.0);  800  // 1000.0);
       pitchController.setProportionalGain(800.0);    // 1000.0);
@@ -145,6 +143,19 @@ public class YawPitchRollPelvisOrientationControlModule implements PelvisOrienta
       rollController.setDerivativeGain(200.0);
 
       this.NxExtra.set(50.0);    // 100.0);
+   }
+   
+   public void setGainsForM2V2()
+   {
+      rollController.setProportionalGain(350.0);    // 400.0; //500.0;
+      pitchController.setProportionalGain(300.0);    // 250.0; //350.0; //200.0;
+      yawController.setProportionalGain(60.0);    // 15.0; //20.0; //0.0; //200.0;
+
+      rollController.setDerivativeGain(30.0);    // 20.0;
+      pitchController.setDerivativeGain(18.0);    // 15.0; //20.0;
+      yawController.setDerivativeGain(5.0);    // 0.0; //20.0;
+      
+      this.NxExtra.set(0.0);
    }
 
 }

@@ -83,7 +83,7 @@ public class SimpleDesiredPelvisOrientationControlModule implements DesiredPelvi
    {
       // TODO: tune
       twistScale.set(0.3);
-      userDesiredPelvisPitch.set(0.1);      
+      userDesiredPelvisPitch.set(0.0);      
       pelvisRollPelvisYawScale.set(0.25);
    }
 }
