@@ -5,6 +5,7 @@ import us.ihmc.commonWalkingControlModules.SideDependentList;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedLegStrengthAndVirtualToePoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.AnkleOverRotationControlModule;
+import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.HipDamperControlModule;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.PelvisHeightControlModule;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.PelvisOrientationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.VelocityViaCoPControlModule;
@@ -28,6 +29,7 @@ public class BalanceSupportControlModule
    private final PelvisOrientationControlModule pelvisOrientationControlModule;
    private final VirtualSupportActuatorControlModule virtualSupportActuatorControlModule;
    private final KneeDamperControlModule kneeDamperControlModule;
+   private final HipDamperControlModule hipDamperControlModule;
    private final AnkleOverRotationControlModule ankleOverRotationControlModule;
    private final BipedSupportPolygons bipedSupportPolygons;
 
@@ -44,8 +46,8 @@ public class BalanceSupportControlModule
                                       VirtualToePointAndLegStrengthCalculator virtualToePointAndLegStrengthCalculator,
                                       PelvisHeightControlModule pelvisHeightControlModule, PelvisOrientationControlModule pelvisOrientationControlModule,
                                       VirtualSupportActuatorControlModule virtualSupportActuatorControlModule, KneeDamperControlModule kneeDamperControlModule,
-                                      BipedSupportPolygons bipedSupportPolygons, AnkleOverRotationControlModule ankleOverRotationControlModule,
-                                      YoVariableRegistry parentRegistry)
+                                      HipDamperControlModule hipDamperControlModule, BipedSupportPolygons bipedSupportPolygons,
+                                      AnkleOverRotationControlModule ankleOverRotationControlModule, YoVariableRegistry parentRegistry)
    {
       this.legStrengthsAndVirtualToePoints = legStrengthsAndVirtualToePoints;
       this.velocityViaCoPControlModule = velocityViaCoPControlModule;
@@ -54,6 +56,7 @@ public class BalanceSupportControlModule
       this.pelvisOrientationControlModule = pelvisOrientationControlModule;
       this.virtualSupportActuatorControlModule = virtualSupportActuatorControlModule;
       this.kneeDamperControlModule = kneeDamperControlModule;
+      this.hipDamperControlModule = hipDamperControlModule;
       this.bipedSupportPolygons = bipedSupportPolygons;
       this.ankleOverRotationControlModule = ankleOverRotationControlModule;
       parentRegistry.addChild(registry);
@@ -130,6 +133,12 @@ public class BalanceSupportControlModule
       // Add a little knee damping to prevent it from snapping:
       kneeDamperControlModule.addKneeDamping(lowerBodyTorquesToPack.getLegTorques(RobotSide.LEFT));
       kneeDamperControlModule.addKneeDamping(lowerBodyTorquesToPack.getLegTorques(RobotSide.RIGHT));
+      
+      // Add some hip yaw damping on the trailing leg to prevent the leg from rotating
+      if (loadingLeg != null)
+      {
+         hipDamperControlModule.addHipDamping(lowerBodyTorquesToPack.getLegTorques(loadingLeg.getOppositeSide()));
+      }
    }
 
    private double getDesiredPelvisHeight()

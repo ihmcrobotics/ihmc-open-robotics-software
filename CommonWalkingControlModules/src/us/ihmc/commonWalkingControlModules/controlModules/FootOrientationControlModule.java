@@ -56,30 +56,24 @@ public class FootOrientationControlModule
       {
          parentRegistry.addChild(registry);
       }
-
-      pitchController.setProportionalGain(10.0);    // 500.0); //200.0); //0.0);
-      rollController.setProportionalGain(10.0);    // 0.0);
-
-      pitchController.setDerivativeGain(1.0);    // 0.0);
-      rollController.setDerivativeGain(1.0);    // 0.0);
    }
    
    public void setParametersForR2()
    {
-      pitchController.setProportionalGain(10.0);    // 500.0); //200.0); //0.0);
+      pitchController.setProportionalGain(0.0); // 10.0);    // 500.0); //200.0); //0.0);
       rollController.setProportionalGain(10.0);    // 0.0);
 
-      pitchController.setDerivativeGain(1.0);    // 0.0);
+      pitchController.setDerivativeGain(0.0); // 1.0);    // 0.0);
       rollController.setDerivativeGain(1.0);    // 0.0);
    }
    
    public void setParametersForM2V2()
    {
-      pitchController.setProportionalGain(10.0);    
-      rollController.setProportionalGain(10.0);   
+      pitchController.setProportionalGain(0.0);
+      rollController.setProportionalGain(0.0);
 
-      pitchController.setDerivativeGain(1.0);   
-      rollController.setDerivativeGain(1.0);   
+      pitchController.setDerivativeGain(0.0);
+      rollController.setDerivativeGain(0.0);
    }
 
    public void initializeFootOrientationMove(double moveDuration, Orientation finalOrientation, RobotSide supportFoot)
@@ -118,7 +112,7 @@ public class FootOrientationControlModule
                               desiredPitchVelocity);
       double rollTorque = rollController.compute(currentFootRoll.getDoubleValue(), desiredFootRoll.getDoubleValue(), currentRollVelocity, desiredRollVelocity);
 
-      // legTorquesToAddAddionalTorque.addTorque(LegJointName.ANKLE_PITCH, pitchTorque);
+      legTorquesToAddAddionalTorque.addTorque(LegJointName.ANKLE_PITCH, pitchTorque);
       legTorquesToAddAddionalTorque.addTorque(LegJointName.ANKLE_ROLL, rollTorque);
    }
    

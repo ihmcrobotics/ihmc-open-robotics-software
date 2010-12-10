@@ -5,7 +5,6 @@ import java.awt.Color;
 import us.ihmc.commonWalkingControlModules.RobotSide;
 import us.ihmc.commonWalkingControlModules.SideDependentList;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
-import us.ihmc.commonWalkingControlModules.captureRegion.CapturePointCalculatorInterface;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.CapturePointCenterOfPressureControlModule;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
@@ -66,7 +65,7 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
    private final YoFrameLineSegment2d guideLineWorld;
    private final YoFrameLine2d parallelLineWorld;
 
-   private final DoubleYoVariable K_capture_guide = new DoubleYoVariable("K_capture_guide", registry);
+   private final DoubleYoVariable kCaptureGuide = new DoubleYoVariable("K_capture_guide", registry);
 
 
 
@@ -89,12 +88,6 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
 
       centerOfPressureDesiredAnkleZUp = new SideDependentList<YoFramePoint>(centerOfPressureDesiredLeftAnkleZUp, centerOfPressureDesiredRightAnkleZUp);
 
-
-      speedControlXKp.set(3.0);
-      speedControlYKp.set(0.0);
-      captureKp.set(2.0); //6.0);
-      K_capture_guide.set(2.0);
-      minPerimeterDistance.set(0.02);
 
       alphaDesiredCoP.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequency(8.84, controlDT));
       lastTickSingleSupport.set(true);
@@ -142,23 +135,6 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
       }
 
       resetCoPFilter();
-   }
-
-
-   public void XYCoPControllerDoubleSupport(BipedSupportPolygons bipedSupportPolygons, CapturePointCalculatorInterface yoboticsBipedCapturePointCalculator,
-           FramePoint desiredCapturePoint)
-   {
-      throw new RuntimeException("Needs Center of Mass data");
-   }
-
-
-
-   public void XYCoPControllerDoubleSupport(BipedSupportPolygons bipedSupportPolygons, CapturePointCalculatorInterface yoboticsBipedCapturePointCalculator,
-           FramePoint desiredCapturePoint, FramePoint centerOfMassPosition, FrameVector2d desiredVelocity, FrameVector2d currentCOMVelocity)
-   {
-      FramePoint currentCapturePoint = yoboticsBipedCapturePointCalculator.getCapturePointInFrame(desiredCapturePoint.getReferenceFrame());
-
-      XYCoPControllerDoubleSupport(bipedSupportPolygons, currentCapturePoint, desiredCapturePoint, centerOfMassPosition, desiredVelocity, currentCOMVelocity);
    }
 
    private void setCenterOfPressureDesired(FramePoint2d centerOfPressureDesired)
@@ -284,7 +260,7 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
    }
 
 
-   public void XYCoPControllerDoubleSupport(BipedSupportPolygons bipedSupportPolygons, FramePoint currentCapturePoint, FramePoint desiredCapturePoint,
+   public void controlDoubleSupport(BipedSupportPolygons bipedSupportPolygons, FramePoint currentCapturePoint, FramePoint desiredCapturePoint,
            FramePoint centerOfMassPositionInZUpFrame, FrameVector2d desiredVelocity, FrameVector2d currentVelocity)
    {
       guideLineWorld.setFrameLineSegment2d(null);
@@ -292,9 +268,10 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
 
 
       // Check if everything is in the correct coordinate frame
-      if (!(desiredCapturePoint.getReferenceFrame().isZupFrame() && currentCapturePoint.getReferenceFrame().isZupFrame()
+      boolean everythingInZUpFrame = desiredCapturePoint.getReferenceFrame().isZupFrame() && currentCapturePoint.getReferenceFrame().isZupFrame()
             && centerOfMassPositionInZUpFrame.getReferenceFrame().isZupFrame() && desiredVelocity.getReferenceFrame().isZupFrame()
-            && currentVelocity.getReferenceFrame().isZupFrame()))
+            && currentVelocity.getReferenceFrame().isZupFrame();
+      if (!everythingInZUpFrame)
       {
          throw new RuntimeException("Everything has to be in the Z Up frame.");
       }
@@ -356,8 +333,8 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
          {
             double ratio = (minPerimeterDistance.getDoubleValue() - perimeterDistance.getDoubleValue()) / minPerimeterDistance.getDoubleValue();
 
-            desiredCapturePoint2d.setX((1 - ratio) * desiredCapturePoint2d.getX() + ratio * closestToDesiredCP.getX());
-            desiredCapturePoint2d.setY((1 - ratio) * desiredCapturePoint2d.getY() + ratio * closestToDesiredCP.getY());
+            desiredCapturePoint2d.setX((1.0 - ratio) * desiredCapturePoint2d.getX() + ratio * closestToDesiredCP.getX());
+            desiredCapturePoint2d.setY((1.0 - ratio) * desiredCapturePoint2d.getY() + ratio * closestToDesiredCP.getY());
 
          }
       }
@@ -376,9 +353,8 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
 
       FramePoint2d centerOfPressureDesired = null;
 
-      // If the scaler projection of the desired CoM direction on the desired iCP direction is negative
-      // control only the iCP position and don't do speedcontrol.
-
+      // If the scalar projection of the desired CoM direction on the desired iCP direction is negative
+      // control only the iCP position and don't do speed control.
       if (comDirection.dot(controlDirection) < 0.0 || (desiredVelocity.length() == 0.0))
       {
          double distance = desiredCapturePoint2d.distance(currentCapturePoint2d);
@@ -406,18 +382,7 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
 
    }
 
-
-   public void XYCoPControllerSingleSupport(FramePoint currentCapturePoint, FrameLineSegment2d guideLine, RobotSide supportLeg, ReferenceFrame referenceFrame,
-           BipedSupportPolygons supportPolygons)
-   {
-      FramePoint2d sweetSpot2d = supportPolygons.getSweetSpotCopy(supportLeg);
-      FramePoint sweetSpot = new FramePoint(sweetSpot2d.getReferenceFrame(), sweetSpot2d.getX(), sweetSpot2d.getY(), 0.0);
-
-      XYCoPControllerSingleSupport(currentCapturePoint, guideLine, sweetSpot, supportLeg, referenceFrame, supportPolygons);
-   }
-
-
-   public void XYCoPControllerSingleSupport(FramePoint currentCapturePoint, FrameLineSegment2d guideLine, FramePoint desiredCapturePoint, RobotSide supportLeg,
+   public void controlSingleSupport(FramePoint currentCapturePoint, FrameLineSegment2d guideLine, FramePoint desiredCapturePoint, RobotSide supportLeg,
            ReferenceFrame referenceFrame, BipedSupportPolygons supportPolygons, FramePoint centerOfMassPositionInZUpFrame, FrameVector2d desiredVelocity,
            FrameVector2d currentVelocity)
    {
@@ -465,7 +430,7 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
       FramePoint2d captureProjectedOntoGuideLine = guideLine.orthogonalProjectionCopy(currentCapturePoint2d);
 
       FrameVector2d projectedToCurrent = new FrameVector2d(captureProjectedOntoGuideLine, currentCapturePoint2d);
-      projectedToCurrent.scale(K_capture_guide.getDoubleValue());
+      projectedToCurrent.scale(kCaptureGuide.getDoubleValue());
 
       FramePoint2d shiftedPoint = new FramePoint2d(captureProjectedOntoGuideLine);
       shiftedPoint.add(projectedToCurrent);
@@ -489,98 +454,39 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
 
    }
 
-
-   public void XYCoPControllerSingleSupport(FramePoint currentCapturePoint, FrameLineSegment2d guideLine, FramePoint desiredCapturePoint, RobotSide supportLeg,
+   public void controlSingleSupport(FramePoint currentCapturePoint, FrameLineSegment2d guideLine, FramePoint desiredCapturePoint, RobotSide supportLeg,
            ReferenceFrame referenceFrame, BipedSupportPolygons supportPolygons)
    {
       throw new RuntimeException("Needs center of mass data");
 
    }
 
-
-   public void setMaxCaptureToCoP(double maxCaptureToCoP)
-   {
-      // standardCapturePointCenterOfPressureControlModule.setMaxCaptureToCoP(maxCaptureToCoP);
-   }
-
-
-   public void setKCaptureX(double kx)
-   {
-      // standardCapturePointCenterOfPressureControlModule.setKCaptureX(kx);
-   }
-
-
-   public double getKCaptureX()
-   {
-      return 0;
-
-      // return standardCapturePointCenterOfPressureControlModule.getKCaptureY();
-   }
-
-
-   public void setKCaptureY(double ky)
-   {
-      // standardCapturePointCenterOfPressureControlModule.setKCaptureY(ky);
-   }
-
-
-   public double getKCaptureY()
-   {
-      return 0;
-
-      // return standardCapturePointCenterOfPressureControlModule.getKCaptureY();
-   }
-
-   /*
-    *  (non-Javadoc)
-    * @see us.ihmc.commonWalkingControlModules.controlModules.CapturePointCenterOfPressureControlModule#getCenterOfPressureDesiredWorld()
-    */
-
-   public YoFramePoint getCenterOfPressureDesiredWorld()
-   {
-      return centerOfPressureDesiredWorld;
-   }
-
-   /*
-    *  (non-Javadoc)
-    * @see us.ihmc.commonWalkingControlModules.controlModules.CapturePointCenterOfPressureControlModule#getCenterOfPressureDesiredMidFeet()
-    */
-
    public YoFramePoint getCenterOfPressureDesiredMidFeet()
    {
       return centerOfPressureDesiredMidFeet;
    }
-
-   /*
-    *  (non-Javadoc)
-    * @see us.ihmc.commonWalkingControlModules.controlModules.CapturePointCenterOfPressureControlModule#getCenterOfPressureDesiredLeftAnkleZUp()
-    */
 
    public YoFramePoint getCenterOfPressureDesiredLeftAnkleZUp()
    {
       return centerOfPressureDesiredLeftAnkleZUp;
    }
 
-   /*
-    *  (non-Javadoc)
-    * @see us.ihmc.commonWalkingControlModules.controlModules.CapturePointCenterOfPressureControlModule#getCenterOfPressureDesiredRightAnkleZUp()
-    */
-
    public YoFramePoint getCenterOfPressureDesiredRightAnkleZUp()
    {
       return centerOfPressureDesiredRightAnkleZUp;
    }
-
-   /*
-    *  (non-Javadoc)
-    * @see us.ihmc.commonWalkingControlModules.controlModules.CapturePointCenterOfPressureControlModule#getCenterOfPressureDesiredAnkleZUp(us.ihmc.commonWalkingControlModules.RobotSide)
-    */
 
    public YoFramePoint getCenterOfPressureDesiredAnkleZUp(RobotSide robotSide)
    {
       return centerOfPressureDesiredAnkleZUp.get(robotSide);
    }
 
-
-
+   public void setParametersForR2()
+   {
+      speedControlXKp.set(3.0);
+      speedControlYKp.set(0.0);
+      captureKp.set(2.0); //6.0);
+      kCaptureGuide.set(2.0);
+      minPerimeterDistance.set(0.02);
+   }
 }

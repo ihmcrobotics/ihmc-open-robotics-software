@@ -59,7 +59,7 @@ public class KneeExtensionControlModule
       bendTime.set(0.3);
       extendTime.set(0.3);
 
-      kp_KneeExtension.set(50.0);
+      kp_KneeExtension.set(0.0); // 50.0); // TODO: debugging
    }
 
    public void doLoadingControl(LegTorquesInterface legTorquesToPackForStanceSide)

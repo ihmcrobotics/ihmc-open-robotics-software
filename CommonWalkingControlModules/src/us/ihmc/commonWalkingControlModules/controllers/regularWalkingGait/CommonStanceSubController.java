@@ -402,13 +402,12 @@ public class CommonStanceSubController implements StanceSubController
    {
       minDoubleSupportTime.set(0.05);
       minDoubleSupportTimeBeforeWalking.set(0.3);
-      captureXToFinishDoubleSupport.set(0.15);
       yCaptureToTransfer.set(0.04);    // 0.0;
-      minCaptureXToFinishDoubleSupport.set(0.03);
-      maxCaptureXToFinishDoublesupport.set(0.20);
-      baseCaptureXToFinishDoubleSupport.set(0.08);
+      minCaptureXToFinishDoubleSupport.set(0.0); // 0.03);
+      maxCaptureXToFinishDoublesupport.set(0.16); // 20);
+      baseCaptureXToFinishDoubleSupport.set(0.03); // 0.08);
       captureXVelocityScale.set(0.08);
-      kVelocityDoubleSupportTransfer.set(0.1);
+      kVelocityDoubleSupportTransfer.set(0.05); // 0.1);
       toeOffFootPitch.set(0.1);    // 0.3);
       toeOffMoveDuration.set(0.05);
    }
@@ -418,7 +417,6 @@ public class CommonStanceSubController implements StanceSubController
       // TODO: tune
       minDoubleSupportTime.set(0.05);
       minDoubleSupportTimeBeforeWalking.set(0.3);
-      captureXToFinishDoubleSupport.set(0.15);
       yCaptureToTransfer.set(0.04);    // 0.0;
       minCaptureXToFinishDoubleSupport.set(0.03);
       maxCaptureXToFinishDoublesupport.set(0.20);

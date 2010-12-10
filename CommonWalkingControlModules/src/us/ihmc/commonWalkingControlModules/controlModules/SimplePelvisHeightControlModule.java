@@ -24,7 +24,8 @@ public class SimplePelvisHeightControlModule implements PelvisHeightControlModul
    private final StanceHeightCalculator stanceHeightCalculator;
 
 
-   public SimplePelvisHeightControlModule(ProcessedSensorsInterface processedSensors, StanceHeightCalculator stanceHeightCalculator, YoVariableRegistry parentRegistry)
+   public SimplePelvisHeightControlModule(ProcessedSensorsInterface processedSensors, StanceHeightCalculator stanceHeightCalculator,
+           YoVariableRegistry parentRegistry)
    {
       this.processedSensors = processedSensors;
       this.stanceHeightCalculator = stanceHeightCalculator;
@@ -38,16 +39,10 @@ public class SimplePelvisHeightControlModule implements PelvisHeightControlModul
    {
       if (DO_STANCE_HEIGHT_CONTROL)
       {
-         if (supportLeg == null)
-         {
-            stanceHeightCalculator.getStanceHeightUsingBothFeet();
-            fZHeight.set(0.0);
-         }
-         else
-         {
-            double stanceHeight = stanceHeightCalculator.getStanceHeightUsingOneFoot(supportLeg);
-            fZHeight.set(stanceHeightPDcontroller.compute(stanceHeight, stanceHeightDes.getDoubleValue(), 0.0, 0.0));
-         }
+         boolean inDoubleSupport = supportLeg == null;
+         double stanceHeight = inDoubleSupport
+                               ? stanceHeightCalculator.getStanceHeightUsingBothFeet() : stanceHeightCalculator.getStanceHeightUsingOneFoot(supportLeg);
+         fZHeight.set(stanceHeightPDcontroller.compute(stanceHeight, stanceHeightDes.getDoubleValue(), 0.0, 0.0));
       }
       else
          fZHeight.set(0.0);
@@ -61,7 +56,7 @@ public class SimplePelvisHeightControlModule implements PelvisHeightControlModul
 
       return fZ.getDoubleValue();
    }
-   
+
    public void setParametersForR2()
    {
       stanceHeightPDcontroller.setProportionalGain(1000.0);
@@ -70,14 +65,14 @@ public class SimplePelvisHeightControlModule implements PelvisHeightControlModul
       fZExtra.set(100.0);    // 80.0;
       stanceHeightDes.set(1.03);
    }
-   
+
    public void setParametersForM2V2()
    {
       // TODO: tune
       stanceHeightPDcontroller.setProportionalGain(1000.0);
       stanceHeightPDcontroller.setDerivativeGain(10.0);
 
-      fZExtra.set(100.0);    // 80.0;
-      stanceHeightDes.set(1.03);
+      fZExtra.set(0.0);
+      stanceHeightDes.set(0.95);
    }
 }
