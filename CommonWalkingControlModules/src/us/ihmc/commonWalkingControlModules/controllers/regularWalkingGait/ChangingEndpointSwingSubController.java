@@ -388,7 +388,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       swingDuration.set(0.7);    // 0.5);    // (0.4);
       swingOrientationTime.set(0.2);    // 0.75 * swingDuration.getDoubleValue());
 
-      swingToePitchUpOnLanding.set(0.2);    // 0.4);    // (0.5);
+      swingToePitchUpOnLanding.set(0.25);    // 0.4);    // (0.5);
 
       initialSwingVelocity.set(0.2);    // 0.12;
       initialSwingAcceleration.set(0.0);

@@ -17,6 +17,7 @@ import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenc
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.BoundingBox2d;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
+import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
@@ -66,6 +67,9 @@ public class CommonStanceSubController implements StanceSubController
    private final DoubleYoVariable maxCaptureXToFinishDoublesupport = new DoubleYoVariable("maxCaptureXToFinishDoublesupport", registry);
    private final DoubleYoVariable baseCaptureXToFinishDoubleSupport = new DoubleYoVariable("baseCaptureXToFinishDoubleSupport", registry);
    private final DoubleYoVariable captureXVelocityScale = new DoubleYoVariable("captureXVelocityScale", registry);
+
+   private boolean WAIT_IN_LOADING_PRE_SWING_B;
+
 
    public CommonStanceSubController(CouplingRegistry couplingRegistry, CommonWalkingReferenceFrames referenceFrames,
                                     DesiredHeadingControlModule desiredHeadingControlModule, DesiredVelocityControlModule desiredVelocityControlModule,
@@ -350,7 +354,10 @@ public class CommonStanceSubController implements StanceSubController
 
    public boolean isDoneWithLoadingPreSwingB(RobotSide loadingLeg, double timeInState)
    {
-      return true;
+      if (WAIT_IN_LOADING_PRE_SWING_B)
+         return timeInState > 0.25;
+      else
+         return true;
    }
 
    private void doSingleSupportControl(LegTorques legTorquesToPackForStanceSide)
@@ -403,13 +410,14 @@ public class CommonStanceSubController implements StanceSubController
       minDoubleSupportTime.set(0.05);
       minDoubleSupportTimeBeforeWalking.set(0.3);
       yCaptureToTransfer.set(0.04);    // 0.0;
-      minCaptureXToFinishDoubleSupport.set(0.0); // 0.03);
-      maxCaptureXToFinishDoublesupport.set(0.16); // 20);
-      baseCaptureXToFinishDoubleSupport.set(0.03); // 0.08);
+      minCaptureXToFinishDoubleSupport.set(0.0);    // 0.03);
+      maxCaptureXToFinishDoublesupport.set(0.16);    // 20);
+      baseCaptureXToFinishDoubleSupport.set(0.03);    // 0.08);
       captureXVelocityScale.set(0.08);
-      kVelocityDoubleSupportTransfer.set(0.05); // 0.1);
+      kVelocityDoubleSupportTransfer.set(0.05);    // 0.1);
       toeOffFootPitch.set(0.1);    // 0.3);
       toeOffMoveDuration.set(0.05);
+      WAIT_IN_LOADING_PRE_SWING_B = false;
    }
 
    public void setParametersForM2V2()
@@ -425,5 +433,6 @@ public class CommonStanceSubController implements StanceSubController
       kVelocityDoubleSupportTransfer.set(0.1);
       toeOffFootPitch.set(0.1);    // 0.3);
       toeOffMoveDuration.set(0.05);
+      WAIT_IN_LOADING_PRE_SWING_B = true;
    }
 }

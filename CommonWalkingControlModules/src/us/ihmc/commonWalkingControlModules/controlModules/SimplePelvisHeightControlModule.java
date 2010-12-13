@@ -72,7 +72,7 @@ public class SimplePelvisHeightControlModule implements PelvisHeightControlModul
       stanceHeightPDcontroller.setProportionalGain(1000.0);
       stanceHeightPDcontroller.setDerivativeGain(10.0);
 
-      fZExtra.set(0.0);
+      fZExtra.set(25.0); // -10.0); // 50.0); // 0.0);
       stanceHeightDes.set(0.95);
    }
 }

@@ -41,19 +41,6 @@ public class CommonWalkingGuideLineCalculator implements GuideLineCalculator
       this.footBack = footBack;
       this.footZUpFrames = referenceFrames.getAnkleZUpReferenceFrames();
       parentRegistry.addChild(registry);
-
-      velocityGainX.set(0.2);
-      velocityGainY.set(0.05);
-   }
-
-   public void setCaptureForward(double captureForward)
-   {
-      this.captureForward.set(captureForward);
-   }
-
-   public void setCaptureForwardOfSweet(double captureForwardOfSweet)
-   {
-      this.captureForwardOfSweet.set(captureForwardOfSweet);
    }
 
    public FrameLineSegment2d getGuideLine(RobotSide side)
@@ -80,7 +67,7 @@ public class CommonWalkingGuideLineCalculator implements GuideLineCalculator
       if (finalDesiredSwingTarget == null)    // If the finalDesired isn't specified, then track where the leg is currently.
       {
          stepToLocation = new FramePoint2d(footZUpFrames.get(supportLeg.getOppositeSide()));
-         stepToLocation = stepToLocation.changeFrameCopy(footZUpFrames.get(supportLeg));
+         stepToLocation.changeFrame(footZUpFrames.get(supportLeg));
       }
       else
       {
@@ -133,4 +120,27 @@ public class CommonWalkingGuideLineCalculator implements GuideLineCalculator
       guideLines.set(supportLeg, guideLine);
    }
 
+   public void setParametersForR2()
+   {
+      velocityGainX.set(0.2);
+      velocityGainY.set(0.05);
+      captureForward.set(0.20);    // (0.08);
+      captureForwardOfSweet.set(0.03);
+   }
+   
+   public void setParametersForM2V2PushRecovery()
+   {
+      velocityGainX.set(0.2);
+      velocityGainY.set(0.05);
+      captureForward.set(0.08);    // 0.04; //0.08;
+      captureForwardOfSweet.set(0.03);
+   }
+
+   public void setParametersForM2V2Walking()
+   {
+      velocityGainX.set(0.0); // 0.2);
+      velocityGainY.set(0.05);
+      captureForward.set(0.04); // 0.08);    // 0.04; //0.08;
+      captureForwardOfSweet.set(0.0);
+   }
 }

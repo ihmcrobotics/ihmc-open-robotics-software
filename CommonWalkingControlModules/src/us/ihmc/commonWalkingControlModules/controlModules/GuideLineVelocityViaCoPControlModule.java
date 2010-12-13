@@ -41,8 +41,8 @@ public class GuideLineVelocityViaCoPControlModule implements VelocityViaCoPContr
 
 
    private final YoFramePoint desiredCapturePointInWorld = new YoFramePoint("desiredCapturePoint", "", ReferenceFrame.getWorldFrame(), registry);
-   private final DoubleYoVariable desiredCaptureForward = new DoubleYoVariable("desiredCaptureX", registry);
-   private final DoubleYoVariable desiredCaptureIn = new DoubleYoVariable("desiredCaptureY", registry);
+   private final DoubleYoVariable desiredCaptureForwardDoubleSupport = new DoubleYoVariable("desiredCaptureForwardDoubleSupport", registry);
+   private final DoubleYoVariable desiredCaptureInwardDoubleSupport = new DoubleYoVariable("desiredCaptureInwardDoubleSupport", registry);
 
 
    public GuideLineVelocityViaCoPControlModule(double controlDT, CouplingRegistry couplingRegistry, ProcessedSensorsInterface processedSensors,
@@ -93,8 +93,8 @@ public class GuideLineVelocityViaCoPControlModule implements VelocityViaCoPContr
       }
       else
       {
-         double desiredCaptureY = loadingLeg.negateIfLeftSide(desiredCaptureIn.getDoubleValue());
-         desiredCapturePoint = new FramePoint(referenceFrames.getAnkleZUpReferenceFrames().get(loadingLeg), desiredCaptureForward.getDoubleValue(), desiredCaptureY, 0.0);
+         double desiredCaptureY = loadingLeg.negateIfLeftSide(desiredCaptureInwardDoubleSupport.getDoubleValue());
+         desiredCapturePoint = new FramePoint(referenceFrames.getAnkleZUpReferenceFrames().get(loadingLeg), desiredCaptureForwardDoubleSupport.getDoubleValue(), desiredCaptureY, 0.0);
       }
 
       this.desiredCapturePointInWorld.set(desiredCapturePoint.changeFrameCopy(ReferenceFrame.getWorldFrame()));
@@ -131,7 +131,7 @@ public class GuideLineVelocityViaCoPControlModule implements VelocityViaCoPContr
 
       Footstep footstep = couplingRegistry.getDesiredStepLocation();
       FramePoint finalDesiredSwingTarget = footstep.footstepPosition;
-      finalDesiredSwingTarget = finalDesiredSwingTarget.changeFrameCopy(supportFootAnkleZUpFrame);
+//      FramePoint localFinalDesiredSwingTarget = finalDesiredSwingTarget.changeFrameCopy(supportFootAnkleZUpFrame);
 
       FramePoint capturePoint = couplingRegistry.getCapturePoint();
       FramePoint capturePointInAnkleZUp = capturePoint.changeFrameCopy(supportFootAnkleZUpFrame);
@@ -183,13 +183,13 @@ public class GuideLineVelocityViaCoPControlModule implements VelocityViaCoPContr
    
    public void setUpParametersForR2()
    {
-      desiredCaptureForward.set(0.2);    // 0.15;
-      desiredCaptureIn.set(0.02);
+      desiredCaptureForwardDoubleSupport.set(0.2);    // 0.15;
+      desiredCaptureInwardDoubleSupport.set(0.02);
    }
    
    public void setUpParametersForM2V2()
    {
-      desiredCaptureForward.set(0.2);    // 0.15;
-      desiredCaptureIn.set(0.02);
+      desiredCaptureForwardDoubleSupport.set(0.04); // equal to where the guide line ends // 0.08);
+      desiredCaptureInwardDoubleSupport.set(0.0);
    }
 }
