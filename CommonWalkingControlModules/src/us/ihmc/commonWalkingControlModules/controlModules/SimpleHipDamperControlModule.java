@@ -35,7 +35,7 @@ public class SimpleHipDamperControlModule implements HipDamperControlModule
    
    public void setParametersForM2V2()
    {
-      hipYawDamping.set(10.0);
+      hipYawDamping.set(0.0);
    }
 
 }

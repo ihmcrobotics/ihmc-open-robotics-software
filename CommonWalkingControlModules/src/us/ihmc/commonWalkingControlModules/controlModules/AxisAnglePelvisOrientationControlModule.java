@@ -50,10 +50,10 @@ public class AxisAnglePelvisOrientationControlModule implements PelvisOrientatio
    
    public void setupParametersForM2V2()
    {
-      setProportionalGain(250.0);
-      setDerivativeGainX(20.0);
-      setDerivativeGainY(15.0);
-      setDerivativeGainZ(25.0);
+      setProportionalGain(350.0);
+      setDerivativeGainX(100.0);
+      setDerivativeGainY(75.0);
+      setDerivativeGainZ(30.0);
    }
 
    public FrameVector computePelvisTorque(RobotSide supportLeg, Orientation desiredPelvisOrientation)
