@@ -116,11 +116,6 @@ public class GuideLineVelocityViaCoPControlModule implements VelocityViaCoPContr
       return new FramePoint2d(desiredCenterOfPressure.getReferenceFrame(), desiredCenterOfPressure.getX(), desiredCenterOfPressure.getY());
    }
 
-   public FramePoint2d computeDesiredCoPSingleSupport(RobotSide supportLeg)
-   {
-      return computeDesiredCoPSingleSupport(supportLeg, null);
-   }
-
    public FramePoint2d computeDesiredCoPSingleSupport(RobotSide supportLeg, FrameVector2d desiredVelocity)
    {
       desiredCapturePointInWorld.set(Double.NaN, Double.NaN, Double.NaN);
@@ -159,22 +154,10 @@ public class GuideLineVelocityViaCoPControlModule implements VelocityViaCoPContr
       return desiredCenterOfPressure.getFramePointCopy().toFramePoint2d();
    }
 
-   public FramePoint2d getDesiredCoPOffset()
-   {
-      throw new RuntimeException("Not Implemented!");
-   }
-
-   public void setDesiredCoPOffset(FramePoint2d framePoint)
-   {
-      // @todo  what is this supposed to do?
-      // throw new RuntimeException("Not Implemented!");
-   }
-
    public void setPutWeightOnToes(RobotSide robotSide)
    {
       this.putWeightOnToes.get(robotSide).set(true);
    }
-
 
    public void unSetPutWeightOnToes(RobotSide robotSide)
    {

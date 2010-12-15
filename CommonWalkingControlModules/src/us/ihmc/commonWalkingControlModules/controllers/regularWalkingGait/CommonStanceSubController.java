@@ -3,7 +3,6 @@ package us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait;
 import javax.vecmath.Point2d;
 
 import us.ihmc.commonWalkingControlModules.RobotSide;
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.DesiredPelvisOrientationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.BalanceSupportControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.FootOrientationControlModule;
@@ -17,7 +16,6 @@ import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenc
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.BoundingBox2d;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
-import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
@@ -215,22 +213,22 @@ public class CommonStanceSubController implements StanceSubController
 
    public void doTransitionIntoStartStopWalkingDoubleSupport(RobotSide stanceSide)
    {
-      balanceSupportControlModule.setDesiredCoPOffset(new FramePoint2d(ReferenceFrame.getWorldFrame()));
+//      balanceSupportControlModule.setDesiredCoPOffset(new FramePoint2d(ReferenceFrame.getWorldFrame())); // didn't do anything...
    }
 
    public void doTransitionIntoUnloadLegToTransferIntoWalking(RobotSide stanceSide)
    {
-      BipedSupportPolygons bipedSupportPolygons = couplingRegistry.getBipedSupportPolygons();
-
-      FrameConvexPolygon2d singleSupportFootPolygon = bipedSupportPolygons.getFootPolygonInAnkleZUp(stanceSide);    // processedSensors.getFootPolygons().get(stanceSide).getFrameConvexPolygon2dCopy();
-      FramePoint2d singleSupportCentroid = singleSupportFootPolygon.getCentroidCopy();
-
-      FrameConvexPolygon2d supportPolygon = bipedSupportPolygons.getSupportPolygonInMidFeetZUp();
-      FramePoint2d doubleSupportCentroid = getCenterOfBoundingBoxOfPolygon(supportPolygon).changeFrameCopy(singleSupportCentroid.getReferenceFrame());
-
-      singleSupportCentroid.sub(doubleSupportCentroid);
-
-      balanceSupportControlModule.setDesiredCoPOffset(singleSupportCentroid);
+//      BipedSupportPolygons bipedSupportPolygons = couplingRegistry.getBipedSupportPolygons();
+//
+//      FrameConvexPolygon2d singleSupportFootPolygon = bipedSupportPolygons.getFootPolygonInAnkleZUp(stanceSide);    // processedSensors.getFootPolygons().get(stanceSide).getFrameConvexPolygon2dCopy();
+//      FramePoint2d singleSupportCentroid = singleSupportFootPolygon.getCentroidCopy();
+//
+//      FrameConvexPolygon2d supportPolygon = bipedSupportPolygons.getSupportPolygonInMidFeetZUp();
+//      FramePoint2d doubleSupportCentroid = getCenterOfBoundingBoxOfPolygon(supportPolygon).changeFrameCopy(singleSupportCentroid.getReferenceFrame());
+//
+//      singleSupportCentroid.sub(doubleSupportCentroid);
+//
+//      balanceSupportControlModule.setDesiredCoPOffset(singleSupportCentroid); // didn't do anything...
    }
 
    public void doTransitionOutOfEarlyStance(RobotSide stanceSide)
