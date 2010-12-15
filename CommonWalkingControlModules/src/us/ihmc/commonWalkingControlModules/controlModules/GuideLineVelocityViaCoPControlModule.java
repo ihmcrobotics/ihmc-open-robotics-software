@@ -124,7 +124,7 @@ public class GuideLineVelocityViaCoPControlModule implements VelocityViaCoPContr
 
       BipedSupportPolygons bipedSupportPolygons = couplingRegistry.getBipedSupportPolygons();
 
-      Footstep footstep = couplingRegistry.getDesiredStepLocation();
+      Footstep footstep = couplingRegistry.getDesiredFootstep();
       FramePoint finalDesiredSwingTarget = footstep.footstepPosition;
 //      FramePoint localFinalDesiredSwingTarget = finalDesiredSwingTarget.changeFrameCopy(supportFootAnkleZUpFrame);
 

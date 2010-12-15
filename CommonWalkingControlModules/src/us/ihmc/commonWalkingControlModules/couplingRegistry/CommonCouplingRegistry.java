@@ -107,12 +107,12 @@ public class CommonCouplingRegistry implements CouplingRegistry
    }
 
 
-   public void setDesiredStepLocation(Footstep desiredStepLocation)
+   public void setDesiredFootstep(Footstep desiredStepLocation)
    {
       this.desiredStepLocation = desiredStepLocation;
    }
 
-   public Footstep getDesiredStepLocation()
+   public Footstep getDesiredFootstep()
    {
       return desiredStepLocation;
    }

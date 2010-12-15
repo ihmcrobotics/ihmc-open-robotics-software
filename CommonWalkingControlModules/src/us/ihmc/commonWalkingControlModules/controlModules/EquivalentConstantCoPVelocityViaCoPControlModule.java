@@ -80,8 +80,8 @@ public class EquivalentConstantCoPVelocityViaCoPControlModule implements Velocit
       lastTickSingleSupport.set(true);
 
       FrameConvexPolygon2d supportPolygon = couplingRegistry.getBipedSupportPolygons().getFootPolygonInAnkleZUp(supportLeg);
-      FramePoint2d desiredFinalCapturePoint = couplingRegistry.getDesiredStepLocation().footstepPosition.toFramePoint2d();
-      double finalTime = couplingRegistry.getEstimatedSwingTimeRemaining();
+      FramePoint2d desiredFinalCapturePoint = couplingRegistry.getDesiredFootstep().footstepPosition.toFramePoint2d();
+      double finalTime = couplingRegistry.getEstimatedSwingTimeRemaining() + 0.2; // FIXME: hack
       double comHeight = computeCoMHeightUsingOneFoot(supportLeg);
 
       computeDesiredCoP(supportPolygon, desiredFinalCapturePoint, finalTime, comHeight);
@@ -135,7 +135,7 @@ public class EquivalentConstantCoPVelocityViaCoPControlModule implements Velocit
 
       desiredFinalCapturePoint.changeFrame(supportPolygonFrame);
 
-      double gravity = -processedSensors.getGravityInWorldFrame().getZ();    // TODO: check sign
+      double gravity = -processedSensors.getGravityInWorldFrame().getZ();
       FramePoint2d ret;
       if (finalTime > 0.0)
          ret = computeEquivalentConstantCoP(currentCapturePoint2d, desiredFinalCapturePoint, finalTime, comHeight, gravity);
@@ -172,6 +172,9 @@ public class EquivalentConstantCoPVelocityViaCoPControlModule implements Velocit
          throw new RuntimeException("finalTime <= 0.0. finalTime = " + finalTime);
 
       double omega0 = Math.sqrt(gravity / comHeight);
+      if (Double.isNaN(omega0))
+         throw new RuntimeException("omega0 is NaN. gravity: " + gravity + ", comHeight: " + comHeight);
+      
       double exp = Math.exp(omega0 * finalTime);
 
       FramePoint2d ret = new FramePoint2d(currentCapturePoint);
@@ -226,7 +229,7 @@ public class EquivalentConstantCoPVelocityViaCoPControlModule implements Velocit
    public void setParametersForM2V2()
    {
       doubleSupportFinalTime.set(0.1);
-      alphaDesiredCoP.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(10.0, controlDT));
+      alphaDesiredCoP.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(20.0, controlDT));
    }
 
    private void resetCoPFilter()

@@ -38,9 +38,9 @@ public interface CouplingRegistry
    public abstract FramePoint getCapturePoint();
 
 
-   public abstract void setDesiredStepLocation(Footstep desiredStepLocation);
+   public abstract void setDesiredFootstep(Footstep desiredStepLocation);
 
-   public abstract Footstep getDesiredStepLocation();
+   public abstract Footstep getDesiredFootstep();
 
 
    public abstract void setSupportLeg(RobotSide supportLeg);

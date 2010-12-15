@@ -266,7 +266,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       FramePoint startPoint = new FramePoint(referenceFrames.getAnkleZUpFrame(swingSide));
       startPoint = startPoint.changeFrameCopy(referenceFrames.getAnkleZUpFrame(swingSide.getOppositeSide()));
 
-      Footstep desiredFootstep = couplingRegistry.getDesiredStepLocation();
+      Footstep desiredFootstep = couplingRegistry.getDesiredFootstep();
       FramePoint endPoint = desiredFootstep.footstepPosition;
 
       // This step yaw is the yaw of the swing foot relative to the support foot.
@@ -403,7 +403,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       maximumTerminalSwingDuration.set(0.2);    // 0.1);    // 0.25;
       terminalSwingGainRampTime.set(minimumTerminalSwingDuration.getDoubleValue() / 4.0);
 
-      passiveHipCollapseTime.set(0.1);    // 07);    // 0.06);    // 0.1);
+      passiveHipCollapseTime.set(0.07); // 0.1);    // 07);    // 0.06);    // 0.1);
 
       antiGravityPercentage.set(1.0);
 
@@ -414,7 +414,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
 
    private void doSwingAction(LegTorques legTorquesToPackForSwingLeg, double timeInState)
    {
-      Footstep desiredFootstep = couplingRegistry.getDesiredStepLocation();
+      Footstep desiredFootstep = couplingRegistry.getDesiredFootstep();
       finalDesiredSwingFootPosition.set(desiredFootstep.footstepPosition.changeFrameCopy(finalDesiredSwingFootPosition.getReferenceFrame()));
 
       ReferenceFrame cartesianTrajectoryGeneratorFrame = cartesianTrajectoryGenerator.getReferenceFrame();
