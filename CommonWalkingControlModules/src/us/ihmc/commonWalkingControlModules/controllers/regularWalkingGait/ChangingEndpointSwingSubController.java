@@ -27,7 +27,9 @@ import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.sensors.ProcessedSensorsInterface;
 import us.ihmc.commonWalkingControlModules.trajectories.CartesianTrajectoryGenerator;
 import us.ihmc.utilities.kinematics.OrientationInterpolationCalculator;
+import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
+import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.Orientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -181,7 +183,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       if (dynamicGraphicObjectsListRegistry != null)
       {
          ArtifactList artifactList = new ArtifactList("ChangingEndpoint");
-         
+
          swingFootOrientationViz = new DynamicGraphicCoordinateSystem("Coordinate System", desiredSwingFootPositionInWorldFrame, desiredFootOrientation, 0.1);
 
          int numberOfBalls = 1;
@@ -204,7 +206,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
    {
       return true;
    }
-   
+
    public void doPreSwing(LegTorques legTorquesToPackForSwingLeg, double timeInState)
    {
       setEstimatedSwingTimeRemaining(swingDuration.getDoubleValue());
@@ -340,8 +342,9 @@ public class ChangingEndpointSwingSubController implements SwingSubController
    public boolean isDoneWithMidSwing(RobotSide swingSide, double timeInState)
    {
       boolean trajectoryIsDone = cartesianTrajectoryGenerator.isDone();
+      boolean capturePointInsideFoot = isCapturePointInsideFoot(swingSide);
 
-      return trajectoryIsDone;
+      return trajectoryIsDone || capturePointInsideFoot;
    }
 
    public boolean isDoneWithTerminalSwing(RobotSide swingSide, double timeInState)
@@ -351,10 +354,10 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       boolean minimumTerminalSwingTimePassed = (timeInState > minimumTerminalSwingDuration.getDoubleValue());
       boolean maximumTerminalSwingTimePassed = (timeInState > maximumTerminalSwingDuration.getDoubleValue());
 
-      // TODO: Make a better terminal swing finished criterion.
-      return ((footOnGround && minimumTerminalSwingTimePassed) || maximumTerminalSwingTimePassed);
+      boolean capturePointInsideFoot = isCapturePointInsideFoot(swingSide);
 
-      // return (minimumTerminalSwingTimePassed);
+      return ((footOnGround && minimumTerminalSwingTimePassed) || maximumTerminalSwingTimePassed || (capturePointInsideFoot && minimumTerminalSwingTimePassed));
+
    }
 
    public void setParametersForR2()
@@ -396,7 +399,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       finalSwingVelocity.set(0.2);    // 0.12;
       finalSwingAcceleration.set(0.0);
 
-      minimumTerminalSwingDuration.set(0.03);    // 0.1);    // 0.25;
+      minimumTerminalSwingDuration.set(0.0);    // 0.1);    // 0.25;
       maximumTerminalSwingDuration.set(0.2);    // 0.1);    // 0.25;
       terminalSwingGainRampTime.set(minimumTerminalSwingDuration.getDoubleValue() / 4.0);
 
@@ -606,5 +609,15 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       Orientation startOrientation = new Orientation(swingFootFrame);
       startOrientation = startOrientation.changeFrameCopy(ReferenceFrame.getWorldFrame());
       startSwingOrientation.set(startOrientation);
+   }
+   
+   private boolean isCapturePointInsideFoot(RobotSide swingSide)
+   {
+      FrameConvexPolygon2d footPolygon = couplingRegistry.getBipedSupportPolygons().getFootPolygonInAnkleZUp(swingSide);
+      FramePoint2d capturePoint = couplingRegistry.getCapturePoint().toFramePoint2d();
+      capturePoint.changeFrame(footPolygon.getReferenceFrame());
+
+      boolean capturePointInsideFoot = footPolygon.isPointInside(capturePoint);
+      return capturePointInsideFoot;
    }
 }
