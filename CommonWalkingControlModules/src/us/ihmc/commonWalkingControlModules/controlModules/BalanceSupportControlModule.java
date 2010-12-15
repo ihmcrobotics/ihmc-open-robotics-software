@@ -156,16 +156,6 @@ public class BalanceSupportControlModule
       velocityViaCoPControlModule.unSetPutWeightOnToes(robotSide);
    }
 
-   public void setDesiredCoPOffset(FramePoint2d desiredCoPOffset)
-   {
-      velocityViaCoPControlModule.setDesiredCoPOffset(desiredCoPOffset);
-   }
-
-   public FramePoint2d getDesiredCoPOffset()
-   {
-      return velocityViaCoPControlModule.getDesiredCoPOffset();
-   }
-
    public void setParametersForR2()
    {
       supportPolygonShrinkFactor.set(0.008);

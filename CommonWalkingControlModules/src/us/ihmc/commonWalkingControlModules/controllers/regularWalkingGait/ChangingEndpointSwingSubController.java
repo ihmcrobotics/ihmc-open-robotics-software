@@ -494,7 +494,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       double jacobianDeterminant = desiredJointVelocityCalculator.swingFullLegJacobianDeterminant();
       desiredJointAccelerationCalculators.get(swingSide).compute(desiredAccelerationOfSwingFootWithRespectToWorld);
 
-      if (jacobianDeterminant < 0.02)
+      if (jacobianDeterminant < 0.025)
       {
          LegJointName[] legJointNames = fullRobotModel.getRobotSpecificJointNames().getLegJointNames();
          for (LegJointName legJointName : legJointNames)
