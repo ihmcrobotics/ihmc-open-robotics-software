@@ -89,13 +89,13 @@ public class CommonDoEveryTickSubController implements DoEveryTickSubController
                                            couplingRegistry.getCapturePoint());
 
 //       Footstep desiredStepLocation = desiredStepLocationCalculator.getDesiredStepLocation(supportLeg.getOppositeSide(), couplingRegistry);
-         couplingRegistry.setDesiredStepLocation(desiredStepLocation);
+         couplingRegistry.setDesiredFootstep(desiredStepLocation);
       }
       else
       {
          captureRegionCalculator.hideCaptureRegion();
          couplingRegistry.setCaptureRegion(null);
-         couplingRegistry.setDesiredStepLocation(null);
+         couplingRegistry.setDesiredFootstep(null);
       }
    }
 }

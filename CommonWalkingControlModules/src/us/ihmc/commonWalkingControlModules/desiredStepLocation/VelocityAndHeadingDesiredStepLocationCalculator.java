@@ -326,7 +326,7 @@ public class VelocityAndHeadingDesiredStepLocationCalculator implements DesiredS
       goodStandingStepWidth = 0.25;
       goodWalkingStepWidth = goodStandingStepWidth - 0.05;
 
-      robotMaxVelocity = 0.25;
+      robotMaxVelocity = 0.5;
       robotMinVelocity = 0.1;
 
       computeStepWidthLinearProfile();
