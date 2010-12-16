@@ -116,15 +116,6 @@ public class EquivalentConstantCoPVelocityViaCoPControlModule implements Velocit
       return desiredCenterOfPressure.getFramePoint2dCopy();
    }
 
-   public void setPutWeightOnToes(RobotSide robotSide)
-   {
-   }
-
-
-   public void unSetPutWeightOnToes(RobotSide robotSide)
-   {
-   }
-
    private void computeDesiredCoP(FrameConvexPolygon2d supportPolygon, FramePoint2d desiredFinalCapturePoint, double finalTime, double comHeight)
    {
       ReferenceFrame supportPolygonFrame = supportPolygon.getReferenceFrame();

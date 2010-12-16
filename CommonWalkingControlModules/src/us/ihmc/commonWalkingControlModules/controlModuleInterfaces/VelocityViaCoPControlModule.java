@@ -20,16 +20,4 @@ public interface VelocityViaCoPControlModule
     * @return the desired Center of Pressure. Should be inside the base of support.
     */
    public abstract FramePoint2d computeDesiredCoPDoubleSupport(RobotSide loadingLeg, FrameVector2d desiredVelocity);
-
-   /**
-    * Tells this module to put the weight on the toes since whatever is calling it wants the robot to start toeing off.
-    * @param robotSide
-    */
-   public abstract void setPutWeightOnToes(RobotSide robotSide);
-
-   /**
-    * Tells this module to stop putting the weight on the toes since whatever is calling it wants the robot to start toeing off.
-    * @param robotSide
-    */
-   public abstract void unSetPutWeightOnToes(RobotSide robotSide);
 }

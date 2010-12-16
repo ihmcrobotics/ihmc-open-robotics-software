@@ -146,16 +146,6 @@ public class BalanceSupportControlModule
       return Double.NaN;
    }
 
-   public void setPutWeightOnToes(RobotSide robotSide)
-   {
-      velocityViaCoPControlModule.setPutWeightOnToes(robotSide);
-   }
-
-   public void unSetPutWeightOnToes(RobotSide robotSide)
-   {
-      velocityViaCoPControlModule.unSetPutWeightOnToes(robotSide);
-   }
-
    public void setParametersForR2()
    {
       supportPolygonShrinkFactor.set(0.008);

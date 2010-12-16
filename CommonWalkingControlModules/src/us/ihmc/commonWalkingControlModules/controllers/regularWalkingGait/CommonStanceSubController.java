@@ -97,7 +97,6 @@ public class CommonStanceSubController implements StanceSubController
 
    public void doEarlyStance(LegTorques legTorquesToPackForStanceSide, double timeInState)
    {
-      balanceSupportControlModule.unSetPutWeightOnToes(legTorquesToPackForStanceSide.getRobotSide());
       doSingleSupportControl(legTorquesToPackForStanceSide);
 
       // Here is where we want to add the torque for the kneeExtensionController
@@ -107,9 +106,6 @@ public class CommonStanceSubController implements StanceSubController
 
    public void doLateStance(LegTorques legTorquesToPackForStanceSide, double timeInState)
    {
-      RobotSide stanceLeg = legTorquesToPackForStanceSide.getRobotSide();
-      balanceSupportControlModule.setPutWeightOnToes(stanceLeg);
-
       doSingleSupportControl(legTorquesToPackForStanceSide);
       footOrientationControlModule.addAdditionalTorqueForFootOrientationControl(legTorquesToPackForStanceSide, timeInState);
       kneeExtensionControlModule.doLateStanceKneeExtensionControl(legTorquesToPackForStanceSide);
@@ -121,8 +117,6 @@ public class CommonStanceSubController implements StanceSubController
    public void doTerminalStance(LegTorques legTorquesToPackForLoadingLeg, double timeInState)
    {
       RobotSide loadingLeg = legTorquesToPackForLoadingLeg.getRobotSide();
-      balanceSupportControlModule.setPutWeightOnToes(loadingLeg);
-
 //    doSingleSupportControl(legTorquesToPackForStanceSide);
 
       doTerminalSingleSupportControl(legTorquesToPackForLoadingLeg, timeInState);
@@ -138,8 +132,6 @@ public class CommonStanceSubController implements StanceSubController
 
    public void doLoadingPreSwingA(LowerBodyTorques lowerBodyTorquesToPack, RobotSide loadingLeg, double timeInState)
    {
-      balanceSupportControlModule.unSetPutWeightOnToes(loadingLeg);
-
       doDoubleSupportControl(lowerBodyTorquesToPack, loadingLeg);
 
       if ((timeSpentInLateStance.getDoubleValue() + timeSpentInTerminalStance.getDoubleValue()) != 0.0)
@@ -153,8 +145,6 @@ public class CommonStanceSubController implements StanceSubController
 
    public void doLoadingPreSwingB(LowerBodyTorques lowerBodyTorquesToPack, RobotSide loadingLeg, double timeInState)
    {
-      balanceSupportControlModule.unSetPutWeightOnToes(loadingLeg);
-
       doDoubleSupportControl(lowerBodyTorquesToPack, loadingLeg);
       kneeExtensionControlModule.doLoadingControl(lowerBodyTorquesToPack.getLegTorques(loadingLeg));
 
@@ -163,8 +153,6 @@ public class CommonStanceSubController implements StanceSubController
 
    public void doLoadingPreSwingC(LegTorques legTorquesToPackForStanceSide, RobotSide loadingLeg, double timeInState)
    {
-      balanceSupportControlModule.unSetPutWeightOnToes(loadingLeg);
-
       doSingleSupportControl(legTorquesToPackForStanceSide);
       kneeExtensionControlModule.doLoadingControl(legTorquesToPackForStanceSide);
    }
