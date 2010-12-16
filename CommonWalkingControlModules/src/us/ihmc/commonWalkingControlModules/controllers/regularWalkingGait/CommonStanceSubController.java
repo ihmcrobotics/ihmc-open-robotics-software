@@ -21,6 +21,7 @@ import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.Orientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.screwTheory.Wrench;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
@@ -119,7 +120,7 @@ public class CommonStanceSubController implements StanceSubController
       RobotSide loadingLeg = legTorquesToPackForLoadingLeg.getRobotSide();
 //    doSingleSupportControl(legTorquesToPackForStanceSide);
 
-      doTerminalSingleSupportControl(legTorquesToPackForLoadingLeg, timeInState);
+      doSingleSupportControl(legTorquesToPackForLoadingLeg);
 
       footOrientationControlModule.addAdditionalTorqueForFootOrientationControl(legTorquesToPackForLoadingLeg,
               timeInState + timeSpentInLateStance.getDoubleValue());
@@ -351,15 +352,8 @@ public class CommonStanceSubController implements StanceSubController
       FrameVector2d desiredVelocity = desiredVelocityControlModule.getDesiredVelocity();
       Orientation desiredPelvisOrientation =
          desiredPelvisOrientationControlModule.getDesiredPelvisOrientationSingleSupport(legTorquesToPackForStanceSide.getRobotSide());
-      balanceSupportControlModule.doSingleSupportBalance(legTorquesToPackForStanceSide, desiredVelocity, desiredPelvisOrientation);
-   }
-
-   private void doTerminalSingleSupportControl(LegTorques legTorquesToPackForStanceSide, double timeInTerminalState)
-   {
-      FrameVector2d desiredVelocity = desiredVelocityControlModule.getDesiredVelocity();
-      Orientation desiredPelvisOrientation =
-         desiredPelvisOrientationControlModule.getDesiredPelvisOrientationSingleSupport(legTorquesToPackForStanceSide.getRobotSide());
-      balanceSupportControlModule.doTerminalSingleSupportBalance(legTorquesToPackForStanceSide, desiredVelocity, desiredPelvisOrientation, timeInTerminalState);
+      Wrench upperBodyWrench = couplingRegistry.getUpperBodyWrench();
+      balanceSupportControlModule.doSingleSupportBalance(legTorquesToPackForStanceSide, desiredVelocity, desiredPelvisOrientation, upperBodyWrench);
    }
 
    private void doDoubleSupportControl(LowerBodyTorques lowerBodyTorquesToPack, RobotSide loadingLeg)

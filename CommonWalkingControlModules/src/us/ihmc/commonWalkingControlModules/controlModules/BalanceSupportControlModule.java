@@ -17,6 +17,7 @@ import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.Orientation;
+import us.ihmc.utilities.screwTheory.Wrench;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
@@ -67,8 +68,9 @@ public class BalanceSupportControlModule
     * @param supportLegTorquesToPack a LegTorques object that will be packed with the computed torques
     * @param desiredVelocity the desired CoM velocity
     * @param desiredPelvisOrientation the desired orientation of the pelvis link
+    * @param upperBodyWrench TODO
     */
-   public void doSingleSupportBalance(LegTorques supportLegTorquesToPack, FrameVector2d desiredVelocity, Orientation desiredPelvisOrientation)
+   public void doSingleSupportBalance(LegTorques supportLegTorquesToPack, FrameVector2d desiredVelocity, Orientation desiredPelvisOrientation, Wrench upperBodyWrench)
    {
       virtualToePointAndLegStrengthCalculator.hideVisualizationGraphics();
 
@@ -86,18 +88,12 @@ public class BalanceSupportControlModule
 
       // compute joint torques using virtual support actuators
       virtualSupportActuatorControlModule.controlSingleSupport(supportLegTorquesToPack, vtpInAnklePitchFrame, fZOnPelvisInPelvisFrame,
-              torqueOnPelvisInPelvisFrame);
+              torqueOnPelvisInPelvisFrame, upperBodyWrench);
 
       // Add a little knee damping to prevent it from snapping:
       kneeDamperControlModule.addKneeDamping(supportLegTorquesToPack);
 
       ankleOverRotationControlModule.adjustLegTorquesToPreventOverRotation(supportLegTorquesToPack);
-   }
-
-   public void doTerminalSingleSupportBalance(LegTorques supportLegTorquesToPack, FrameVector2d desiredVelocity, Orientation desiredPelvisOrientation,
-           double timeInState)
-   {
-      doSingleSupportBalance(supportLegTorquesToPack, desiredVelocity, desiredPelvisOrientation);
    }
 
    /**

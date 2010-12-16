@@ -147,7 +147,8 @@ public class EqConstCoPAndGuideLineCapturePointCoPControlModule implements Captu
       }
       else
       {
-         supportPolygon.orthogonalProjection(desiredCenterOfPressure);
+         FrameLine2d currentToDesired = new FrameLine2d(currentCapturePoint2d, desiredFinalCapturePoint);
+         movePointInsidePolygon(desiredCenterOfPressure, supportPolygon, currentToDesired);
          hideLines();
       }
 
@@ -260,6 +261,14 @@ public class EqConstCoPAndGuideLineCapturePointCoPControlModule implements Captu
       double ret = Math.max(estimatedSwingTimeRemaining, 0.0);
       ret += additionalSingleSupportSwingTime.getDoubleValue();
       return ret;
+   }
+   
+   public void setParametersForR2()
+   {
+      doubleSupportFinalTime.set(0.1);
+      kCaptureGuide.set(2.0);
+      additionalSingleSupportSwingTime.set(0.1);
+      alphaDesiredCoP.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(50.0, controlDT));
    }
 
    public void setParametersForM2V2()
