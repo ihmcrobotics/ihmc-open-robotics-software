@@ -34,12 +34,8 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
    private final YoVariableRegistry registry = new YoVariableRegistry("SpeedControllingCapturePointCenterOfPressureController");
 
    // Reference frames
-   private final ReferenceFrame midFeetZUp, world;
-   private final ReferenceFrame desiredHeadingFrame;
-
-   // Points
-   private final YoFrameLine2d capturePointLine;
-   private final YoFrameLine2d comDirectionLine;
+   private final ReferenceFrame world = ReferenceFrame.getWorldFrame();
+   private final ReferenceFrame midFeetZUp, desiredHeadingFrame;
 
    private DoubleYoVariable speedControlXKp = new DoubleYoVariable("speedControlXKp", registry);
    private DoubleYoVariable speedControlYKp = new DoubleYoVariable("speedControlYKp", registry);
@@ -57,8 +53,10 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
 
    private final DynamicGraphicPosition centerOfPressureDesiredWorldGraphicPosition;
 
-   private final YoFrameLineSegment2d guideLineWorld;
-   private final YoFrameLine2d parallelLineWorld;
+   private final YoFrameLine2d capturePointLine = new YoFrameLine2d("capturePointLine", "", world, registry);
+   private final YoFrameLine2d comDirectionLine = new YoFrameLine2d("comDirectionLine", "", world, registry);
+   private final YoFrameLineSegment2d guideLineWorld = new YoFrameLineSegment2d("guideLine", "", world, registry);
+   private final YoFrameLine2d parallelLineWorld = new YoFrameLine2d("parallelLine", "", world, registry);
 
    private final DoubleYoVariable kCaptureGuide = new DoubleYoVariable("kCaptureGuide", "ICP distance to guide line --> position of parallel line", registry);
 
@@ -68,17 +66,10 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
            YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, ReferenceFrame desiredHeadingFrame)
    {
       midFeetZUp = referenceFrames.getMidFeetZUpFrame();
-      world = ReferenceFrame.getWorldFrame();
       this.desiredHeadingFrame = desiredHeadingFrame;
-
-      capturePointLine = new YoFrameLine2d("capturePointLine", "", world, registry);
-      comDirectionLine = new YoFrameLine2d("comDirectionLine", "", world, registry);
 
       alphaDesiredCoP.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequency(8.84, controlDT));
       lastTickSingleSupport.set(true);
-
-      guideLineWorld = new YoFrameLineSegment2d("guideLine", "", world, registry);
-      parallelLineWorld = new YoFrameLine2d("parallelLine", "", world, registry);
 
       if (dynamicGraphicObjectsListRegistry != null)
       {

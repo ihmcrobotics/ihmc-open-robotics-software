@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
 import us.ihmc.commonWalkingControlModules.RobotSide;
+import us.ihmc.commonWalkingControlModules.calculators.EquivalentConstantCoPCalculator;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.VelocityViaCoPControlModule;
 import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
@@ -129,7 +130,7 @@ public class EquivalentConstantCoPVelocityViaCoPControlModule implements Velocit
       double gravity = -processedSensors.getGravityInWorldFrame().getZ();
       FramePoint2d ret;
       if (finalTime > 0.0)
-         ret = computeEquivalentConstantCoP(currentCapturePoint2d, desiredFinalCapturePoint, finalTime, comHeight, gravity);
+         ret = EquivalentConstantCoPCalculator.computeEquivalentConstantCoP(currentCapturePoint2d, desiredFinalCapturePoint, finalTime, comHeight, gravity);
       else
       {
          ret = desiredFinalCapturePoint;    // will stay like this only if line from current to desired ICP does not intersect support polygon
@@ -154,26 +155,6 @@ public class EquivalentConstantCoPVelocityViaCoPControlModule implements Velocit
       supportPolygon.orthogonalProjection(ret);
 
       updateYoFramePoints(desiredFinalCapturePoint, ret);
-   }
-
-   private static FramePoint2d computeEquivalentConstantCoP(FramePoint2d currentCapturePoint, FramePoint2d desiredFinalCapturePoint, double finalTime,
-           double comHeight, double gravity)
-   {
-      if (finalTime <= 0.0)
-         throw new RuntimeException("finalTime <= 0.0. finalTime = " + finalTime);
-
-      double omega0 = Math.sqrt(gravity / comHeight);
-      if (Double.isNaN(omega0))
-         throw new RuntimeException("omega0 is NaN. gravity: " + gravity + ", comHeight: " + comHeight);
-      
-      double exp = Math.exp(omega0 * finalTime);
-
-      FramePoint2d ret = new FramePoint2d(currentCapturePoint);
-      ret.scale(exp);
-      ret.sub(desiredFinalCapturePoint, ret);
-      ret.scale(1.0 / (1.0 - exp));
-
-      return ret;
    }
 
    private double computeCoMHeightUsingOneFoot(RobotSide sideToGetCoMHeightFor)
@@ -217,14 +198,14 @@ public class EquivalentConstantCoPVelocityViaCoPControlModule implements Velocit
       this.desiredFinalCapturePoint.set(desiredFinalCapturePointWorld.getX(), desiredFinalCapturePointWorld.getY(), 0.0);
    }
 
+   private void resetCoPFilter()
+   {
+      desiredCenterOfPressure.reset();
+   }
+   
    public void setParametersForM2V2()
    {
       doubleSupportFinalTime.set(0.1);
       alphaDesiredCoP.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(20.0, controlDT));
-   }
-
-   private void resetCoPFilter()
-   {
-      desiredCenterOfPressure.reset();
    }
 }
