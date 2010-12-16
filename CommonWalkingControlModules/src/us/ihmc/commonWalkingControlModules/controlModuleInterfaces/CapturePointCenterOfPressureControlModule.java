@@ -24,7 +24,7 @@ public interface CapturePointCenterOfPressureControlModule
            FramePoint centerOfMassPositionInWorldFrame, FrameVector2d desiredVelocity, FrameVector2d currentVelocity);
 
    /**
-    * XYCoPControllerSingleSupport sets centerOfPressureDesiredWorld field
+    * sets centerOfPressureDesiredWorld field
     * based on params
     *
     * @param supportLeg RobotSide
@@ -41,10 +41,6 @@ public interface CapturePointCenterOfPressureControlModule
            FrameVector2d desiredVelocity, FrameVector2d currentVelocity);
 
    public abstract YoFramePoint getCenterOfPressureDesiredMidFeet();
-
-   public abstract YoFramePoint getCenterOfPressureDesiredLeftAnkleZUp();
-
-   public abstract YoFramePoint getCenterOfPressureDesiredRightAnkleZUp();
 
    public abstract YoFramePoint getCenterOfPressureDesiredAnkleZUp(RobotSide robotSide);
 }
