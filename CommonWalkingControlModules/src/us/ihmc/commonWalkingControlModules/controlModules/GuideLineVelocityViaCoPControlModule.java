@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
 import us.ihmc.commonWalkingControlModules.RobotSide;
-import us.ihmc.commonWalkingControlModules.SideDependentList;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.CapturePointCenterOfPressureControlModule;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.GuideLineCalculator;
@@ -16,7 +15,6 @@ import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
-import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoAppearance;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
@@ -35,11 +33,6 @@ public class GuideLineVelocityViaCoPControlModule implements VelocityViaCoPContr
    private final ProcessedSensorsInterface processedSensors;
    private final CouplingRegistry couplingRegistry;
 
-   private final BooleanYoVariable putWeightOnLeftToes = new BooleanYoVariable("putWeightOnLeftToes", registry);
-   private final BooleanYoVariable putWeightOnRightToes = new BooleanYoVariable("putWeightOnRightToes", registry);
-   private final SideDependentList<BooleanYoVariable> putWeightOnToes = new SideDependentList<BooleanYoVariable>(putWeightOnLeftToes, putWeightOnRightToes);
-
-
    private final YoFramePoint desiredCapturePointInWorld = new YoFramePoint("desiredCapturePoint", "", ReferenceFrame.getWorldFrame(), registry);
    private final FramePoint desiredCenterOfPressure = new FramePoint(ReferenceFrame.getWorldFrame());
    private final DoubleYoVariable desiredCaptureForwardDoubleSupport = new DoubleYoVariable("desiredCaptureForwardDoubleSupport", registry);
@@ -56,9 +49,6 @@ public class GuideLineVelocityViaCoPControlModule implements VelocityViaCoPContr
       this.processedSensors = processedSensors;
       this.capturePointCenterOfPressureControlModule = capturePointCenterOfPressureControlModule;
       this.guideLineCalculator = guideLineCalculator;
-
-      putWeightOnToes.get(RobotSide.LEFT).set(false);
-      putWeightOnToes.get(RobotSide.RIGHT).set(false);
 
       if (parentRegistry != null)
       {
@@ -154,16 +144,6 @@ public class GuideLineVelocityViaCoPControlModule implements VelocityViaCoPContr
       return desiredCenterOfPressure.toFramePoint2d();
    }
 
-   public void setPutWeightOnToes(RobotSide robotSide)
-   {
-      this.putWeightOnToes.get(robotSide).set(true);
-   }
-
-   public void unSetPutWeightOnToes(RobotSide robotSide)
-   {
-      this.putWeightOnToes.get(robotSide).set(false);
-   }
-   
    public void setUpParametersForR2()
    {
       desiredCaptureForwardDoubleSupport.set(0.2);    // 0.15;
