@@ -323,7 +323,8 @@ public class VelocityAndHeadingDesiredStepLocationCalculator implements DesiredS
 
    public void setupParametersForM2V2()
    {
-      goodWalkingStepWidth = 0.2;
+      goodStandingStepWidth = 0.25;
+      goodWalkingStepWidth = goodStandingStepWidth - 0.05;
 
       robotMaxVelocity = 0.5;
       robotMinVelocity = 0.1;
