@@ -407,9 +407,9 @@ public abstract class RegularWalkingGaitAbstractController
       public void doAction()
       {
          setLowerBodyTorquesToZero();
-
-         stanceSubController.doEarlyStance(lowerBodyTorques.getLegTorques(stanceSide), walkingStateMachine.timeInCurrentState());
+         
          swingSubController.doInitialSwing(lowerBodyTorques.getLegTorques(swingSide), walkingStateMachine.timeInCurrentState());
+         stanceSubController.doEarlyStance(lowerBodyTorques.getLegTorques(stanceSide), walkingStateMachine.timeInCurrentState());
          upperBodySubController.doUpperBodyControl(upperBodyTorques);
 
          if (swingSubController.isDoneWithInitialSwing(swingSide, walkingStateMachine.timeInCurrentState()))
@@ -454,8 +454,8 @@ public abstract class RegularWalkingGaitAbstractController
       {
          setLowerBodyTorquesToZero();
 
-         stanceSubController.doLateStance(lowerBodyTorques.getLegTorques(stanceSide), walkingStateMachine.timeInCurrentState());
          swingSubController.doMidSwing(lowerBodyTorques.getLegTorques(swingSide), walkingStateMachine.timeInCurrentState());
+         stanceSubController.doLateStance(lowerBodyTorques.getLegTorques(stanceSide), walkingStateMachine.timeInCurrentState());
          upperBodySubController.doUpperBodyControl(upperBodyTorques);
 
          if (swingSubController.isDoneWithMidSwing(swingSide, walkingStateMachine.timeInCurrentState()))
@@ -498,8 +498,8 @@ public abstract class RegularWalkingGaitAbstractController
       {
          setLowerBodyTorquesToZero();
 
-         stanceSubController.doTerminalStance(lowerBodyTorques.getLegTorques(stanceSide), walkingStateMachine.timeInCurrentState());
          swingSubController.doTerminalSwing(lowerBodyTorques.getLegTorques(swingSide), walkingStateMachine.timeInCurrentState());
+         stanceSubController.doTerminalStance(lowerBodyTorques.getLegTorques(stanceSide), walkingStateMachine.timeInCurrentState());
          upperBodySubController.doUpperBodyControl(upperBodyTorques);
 
          if (swingSubController.isDoneWithTerminalSwing(swingSide, walkingStateMachine.timeInCurrentState()))

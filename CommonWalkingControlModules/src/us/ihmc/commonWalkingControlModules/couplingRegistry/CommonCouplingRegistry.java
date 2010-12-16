@@ -33,6 +33,8 @@ public class CommonCouplingRegistry implements CouplingRegistry
 
    private CommonWalkingReferenceFrames referenceFrames;
 
+   private Wrench upperBodyWrench;
+
 
    public CommonCouplingRegistry(CommonWalkingReferenceFrames referenceFrames)
    {
@@ -157,8 +159,7 @@ public class CommonCouplingRegistry implements CouplingRegistry
  
    public Wrench getUpperBodyWrench()
    {
-      // TODO Auto-generated method stub
-      return null;
+      return upperBodyWrench;
    }
 
 
@@ -173,8 +174,7 @@ public class CommonCouplingRegistry implements CouplingRegistry
  
    public void setUpperBodyWrench(Wrench upperBodyWrench)
    {
-      // TODO Auto-generated method stub
-
+      this.upperBodyWrench = upperBodyWrench;
    }
 
 }

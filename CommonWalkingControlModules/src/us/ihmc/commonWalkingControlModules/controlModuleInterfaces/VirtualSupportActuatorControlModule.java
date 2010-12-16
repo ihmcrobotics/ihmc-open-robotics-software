@@ -6,14 +6,16 @@ import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegTorques;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LowerBodyTorques;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
+import us.ihmc.utilities.screwTheory.Wrench;
 
 public interface VirtualSupportActuatorControlModule
 {
    /**
     * Packs a LegTorques object for the support leg side, given the vtp and the desired z-component of the force and the torques on the pelvis and the.
+    * @param upperBodyWrench TODO
     */
    public abstract void controlSingleSupport(LegTorques supportLegTorquesToPack, FramePoint2d vtpInAnklePitchFrame, double fZOnPelvisInPelvisFrame,
-           FrameVector torqueOnPelvisInPelvisFrame);
+           FrameVector torqueOnPelvisInPelvisFrame, Wrench upperBodyWrench);
 
    /**
     * Packs a LowerBodyTorques object, given the leg strengths, vtps and desired total z-component of force and torque on the pelvis.

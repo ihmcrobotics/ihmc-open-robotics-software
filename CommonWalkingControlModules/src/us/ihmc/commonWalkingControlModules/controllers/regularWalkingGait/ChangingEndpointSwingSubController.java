@@ -333,10 +333,16 @@ public class ChangingEndpointSwingSubController implements SwingSubController
 
    public boolean isDoneWithInitialSwing(RobotSide swingSide, double timeInState)
    {
+      RobotSide oppositeSide = swingSide.getOppositeSide();
+      ReferenceFrame stanceAnkleZUpFrame = referenceFrames.getAnkleZUpFrame(oppositeSide);
+      FramePoint comProjection = processedSensors.getCenterOfMassGroundProjectionInFrame(stanceAnkleZUpFrame);
+      FramePoint2d sweetSpot = couplingRegistry.getBipedSupportPolygons().getSweetSpotCopy(oppositeSide);
+      sweetSpot.changeFrame(stanceAnkleZUpFrame);
+      boolean isCoMPastSweetSpot = comProjection.getX() > sweetSpot.getX();
       boolean trajectoryIsDone = cartesianTrajectoryGenerator.isDone();
       boolean footHitEarly = footSwitches.get(swingSide).hasFootHitGround();
 
-      return trajectoryIsDone || footHitEarly;
+      return isCoMPastSweetSpot || trajectoryIsDone || footHitEarly;
    }
 
    public boolean isDoneWithMidSwing(RobotSide swingSide, double timeInState)
@@ -489,6 +495,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       {
          SpatialAccelerationVector bodyAcceleration = processedSensors.computeAccelerationOfPelvisWithRespectToWorld();    // FIXME: set to LIPM-based predicted body acceleration
          bodyAcceleration.setAngularPart(new Vector3d());    // zero desired angular acceleration
+         bodyAcceleration.setLinearPart(new Vector3d()); // zero linear acceleration as well for now
          fullRobotModel.getRootJoint().setDesiredAcceleration(bodyAcceleration);
       }
 
@@ -521,6 +528,8 @@ public class ChangingEndpointSwingSubController implements SwingSubController
 
       Wrench upperBodyWrench = new Wrench();
       fullRobotModel.getRootJoint().packWrench(upperBodyWrench);
+      upperBodyWrench.changeBodyFrameAttachedToSameBody(referenceFrames.getPelvisFrame());
+      upperBodyWrench.changeFrame(referenceFrames.getPelvisFrame());
       couplingRegistry.setUpperBodyWrench(upperBodyWrench);
 
       leaveTrailOfBalls();
