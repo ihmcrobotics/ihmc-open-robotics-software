@@ -390,14 +390,13 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
 
    }
 
-   public YoFramePoint getCenterOfPressureDesiredMidFeet()
+   public void packDesiredCenterOfPressure(FramePoint desiredCenterOfPressureToPack)
    {
-      return centerOfPressureDesiredMidFeet;
-   }
+      double x = centerOfPressureDesiredWorld.getX();
+      double y = centerOfPressureDesiredWorld.getY();
+      double z = centerOfPressureDesiredWorld.getZ();
 
-   public YoFramePoint getCenterOfPressureDesiredAnkleZUp(RobotSide robotSide)
-   {
-      return centerOfPressureDesiredAnkleZUp.get(robotSide);
+      desiredCenterOfPressureToPack.set(centerOfPressureDesiredWorld.getReferenceFrame(), x, y, z);
    }
 
    public void setParametersForR2()
