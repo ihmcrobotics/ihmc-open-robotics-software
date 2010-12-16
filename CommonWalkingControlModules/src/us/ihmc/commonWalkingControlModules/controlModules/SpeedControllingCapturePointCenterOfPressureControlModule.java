@@ -383,13 +383,6 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
 
    }
 
-   public void controlSingleSupport(FramePoint currentCapturePoint, FrameLineSegment2d guideLine, FramePoint desiredCapturePoint, RobotSide supportLeg,
-           ReferenceFrame referenceFrame, BipedSupportPolygons supportPolygons)
-   {
-      throw new RuntimeException("Needs center of mass data");
-
-   }
-
    public void packDesiredCenterOfPressure(FramePoint desiredCenterOfPressureToPack)
    {
       double x = centerOfPressureDesiredWorld.getX();
