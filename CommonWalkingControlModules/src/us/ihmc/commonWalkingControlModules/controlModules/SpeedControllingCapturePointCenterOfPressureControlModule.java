@@ -3,7 +3,6 @@ package us.ihmc.commonWalkingControlModules.controlModules;
 import java.awt.Color;
 
 import us.ihmc.commonWalkingControlModules.RobotSide;
-import us.ihmc.commonWalkingControlModules.SideDependentList;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.CapturePointCenterOfPressureControlModule;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
@@ -25,10 +24,10 @@ import com.yobotics.simulationconstructionset.util.graphics.ArtifactList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
+import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoFramePoint2d;
 import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoVariable;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameLine2d;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameLineSegment2d;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 
 public class SpeedControllingCapturePointCenterOfPressureControlModule implements CapturePointCenterOfPressureControlModule
 {
@@ -39,11 +38,6 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
    private final ReferenceFrame desiredHeadingFrame;
 
    // Points
-   private final YoFramePoint centerOfPressureDesiredWorld, centerOfPressureDesiredMidFeet, centerOfPressureDesiredLeftAnkleZUp,
-                              centerOfPressureDesiredRightAnkleZUp;
-
-   private final SideDependentList<YoFramePoint> centerOfPressureDesiredAnkleZUp;
-
    private final YoFrameLine2d capturePointLine;
    private final YoFrameLine2d comDirectionLine;
 
@@ -55,10 +49,10 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
 
    private DoubleYoVariable doubleSupportCaptureKp = new DoubleYoVariable("doubleSupportCaptureKp", registry);
 
-
    private final DoubleYoVariable alphaDesiredCoP = new DoubleYoVariable("alphaDesiredCoP", registry);
-   private final AlphaFilteredYoVariable xDesiredCoP = new AlphaFilteredYoVariable("xDesiredCoP", registry, alphaDesiredCoP);
-   private final AlphaFilteredYoVariable yDesiredCoP = new AlphaFilteredYoVariable("yDesiredCoP", registry, alphaDesiredCoP);
+   private final AlphaFilteredYoFramePoint2d desiredCenterOfPressure = AlphaFilteredYoFramePoint2d.createAlphaFilteredYoFramePoint2d("desiredCenterOfPressure", "",
+         registry, alphaDesiredCoP, ReferenceFrame.getWorldFrame());
+
    private final BooleanYoVariable lastTickSingleSupport = new BooleanYoVariable("lastTickSingleSupport", registry);
 
    private final DynamicGraphicPosition centerOfPressureDesiredWorldGraphicPosition;
@@ -80,17 +74,6 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
       capturePointLine = new YoFrameLine2d("capturePointLine", "", world, registry);
       comDirectionLine = new YoFrameLine2d("comDirectionLine", "", world, registry);
 
-      // Points
-      centerOfPressureDesiredWorld = new YoFramePoint("spdCopDesWorld", "", world, registry);
-      centerOfPressureDesiredMidFeet = new YoFramePoint("spdCopDesMidfeet", "", midFeetZUp, registry);
-      centerOfPressureDesiredLeftAnkleZUp = new YoFramePoint("spdCopDesLaZUp", "", referenceFrames.getAnkleZUpReferenceFrames().get(RobotSide.LEFT), registry);
-      centerOfPressureDesiredRightAnkleZUp = new YoFramePoint("spdCopDesRaZUp", "", referenceFrames.getAnkleZUpReferenceFrames().get(RobotSide.RIGHT),
-              registry);
-
-
-      centerOfPressureDesiredAnkleZUp = new SideDependentList<YoFramePoint>(centerOfPressureDesiredLeftAnkleZUp, centerOfPressureDesiredRightAnkleZUp);
-
-
       alphaDesiredCoP.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequency(8.84, controlDT));
       lastTickSingleSupport.set(true);
 
@@ -101,7 +84,7 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
       {
          DynamicGraphicObjectsList dynamicGraphicObjectList = new DynamicGraphicObjectsList("CapturePointController");
 
-         centerOfPressureDesiredWorldGraphicPosition = new DynamicGraphicPosition("Desired Center of Pressure", centerOfPressureDesiredWorld, 0.012,
+         centerOfPressureDesiredWorldGraphicPosition = new DynamicGraphicPosition("Desired Center of Pressure", desiredCenterOfPressure, 0.012,
                  YoAppearance.Gray(), DynamicGraphicPosition.GraphicType.CROSS);
 
          dynamicGraphicObjectList.add(centerOfPressureDesiredWorldGraphicPosition);
@@ -131,7 +114,7 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
          centerOfPressureDesiredWorldGraphicPosition = null;
       }
 
-      if (parentRegistry != null)    // && (VarListsToRegister.REGISTER_CAPTURE_POINT_CENTER_OF_PRESSURE_CONTROLLER))
+      if (parentRegistry != null)
       {
          parentRegistry.addChild(registry);
       }
@@ -139,25 +122,9 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
       resetCoPFilter();
    }
 
-   private void setCenterOfPressureDesired(FramePoint2d centerOfPressureDesired)
-   {
-      centerOfPressureDesiredMidFeet.set(new FramePoint(midFeetZUp, centerOfPressureDesired.getX(), centerOfPressureDesired.getY(), 0.0));
-      centerOfPressureDesiredWorld.set(centerOfPressureDesiredMidFeet.getFramePointCopy().changeFrameCopy(world));
-   }
-
    private void resetCoPFilter()
    {
-      xDesiredCoP.reset();
-      yDesiredCoP.reset();
-   }
-
-   private void filterCenterOfPressureDesired(FramePoint2d centerOfPressureDesired)
-   {
-      xDesiredCoP.update(centerOfPressureDesired.getX());
-      yDesiredCoP.update(centerOfPressureDesired.getY());
-
-      centerOfPressureDesired.setX(xDesiredCoP.getDoubleValue());
-      centerOfPressureDesired.setY(yDesiredCoP.getDoubleValue());
+      desiredCenterOfPressure.reset();
    }
 
    private FrameLine2d createSpeedControlLine(FrameVector2d currentVelocity, FrameVector2d desiredVelocity, FramePoint centerOfMassPosition,
@@ -177,8 +144,6 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
       FramePoint2d speedControlPosition = new FramePoint2d(centerOfMassPositionInFrame);
 
       // Speed controller: Only increase speed for now
-
-
       speedControlPosition.setX(speedControlPosition.getX()
                                 + speedControlXKp.getDoubleValue() * Math.min(0.0, currentVelocityInFrame.getX() - desiredVelocity.getX()));
       speedControlPosition.setY(speedControlPosition.getY()
@@ -258,8 +223,8 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
          {
             FrameLine2d iCPLine = new FrameLine2d(currentCapturePoint2d, farthestToDesiredCP);
             capturePointLine.setFrameLine2d(iCPLine.changeFrameCopy(world));
-            filterCenterOfPressureDesired(farthestToDesiredCP);
-            setCenterOfPressureDesired(farthestToDesiredCP);
+            farthestToDesiredCP.changeFrame(world);
+            this.desiredCenterOfPressure.update(farthestToDesiredCP);
 
             return;
          }
@@ -276,8 +241,6 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
       // Create Line from dCP to iCP
       FrameLine2d controlLine = new FrameLine2d(currentCapturePoint2d, desiredCapturePoint2d);
       capturePointLine.setFrameLine2d(controlLine.changeFrameCopy(world));
-
-
 
 
       FrameVector2d comDirection = desiredVelocity.changeFrameCopy(midFeetZUp);
@@ -302,14 +265,12 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
          centerOfPressureDesired = controlLine.intersectionWith(massLine);
       }
 
-      // Filter center of pressure for more robustness
-      filterCenterOfPressureDesired(centerOfPressureDesired);
+      centerOfPressureDesired.changeFrame(supportPolygon.getReferenceFrame());
 
       // FrameLineSegment2d desiredCaptureToDesiredCop = new FrameLineSegment2d(desiredCapturePoint2d, centerOfPressureDesired);
-      centerOfPressureDesired = movePointInsidePolygon(centerOfPressureDesired, supportPolygon, controlLine, midFeetZUp);
-
-
-      setCenterOfPressureDesired(centerOfPressureDesired);
+      centerOfPressureDesired = movePointInsidePolygon(centerOfPressureDesired, supportPolygon, controlLine);
+      centerOfPressureDesired.changeFrame(world);
+      this.desiredCenterOfPressure.update(centerOfPressureDesired);
    }
 
    public void controlSingleSupport(FramePoint currentCapturePoint, FrameLineSegment2d guideLine, FramePoint desiredCapturePoint, RobotSide supportLeg,
@@ -371,25 +332,23 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
 
       // Create speed control line
       FrameLine2d massLine = createSpeedControlLine(currentVelocity, desiredVelocity, centerOfMassPositionInZUpFrame, referenceFrame);
-      FramePoint2d centerOfPressureDesired = shiftedParallelLine.intersectionWith(massLine);
+      FramePoint2d desiredCenterOfPressure = shiftedParallelLine.intersectionWith(massLine);
 
-      centerOfPressureDesired = movePointInsidePolygon(centerOfPressureDesired, footPolygon, shiftedParallelLine, referenceFrame);
+      desiredCenterOfPressure.changeFrame(footPolygon.getReferenceFrame());
 
-      filterCenterOfPressureDesired(centerOfPressureDesired);
-
-      centerOfPressureDesiredAnkleZUp.get(supportLeg).set(centerOfPressureDesired.getX(), centerOfPressureDesired.getY(), 0.0);
-      centerOfPressureDesiredWorld.set(centerOfPressureDesiredAnkleZUp.get(supportLeg).getFramePointCopy().changeFrameCopy(world));
-
-
+      // FrameLineSegment2d desiredCaptureToDesiredCop = new FrameLineSegment2d(desiredCapturePoint2d, centerOfPressureDesired);
+      desiredCenterOfPressure = movePointInsidePolygon(desiredCenterOfPressure, footPolygon, shiftedParallelLine);
+      desiredCenterOfPressure.changeFrame(world);
+      this.desiredCenterOfPressure.update(desiredCenterOfPressure);
    }
 
    public void packDesiredCenterOfPressure(FramePoint desiredCenterOfPressureToPack)
    {
-      double x = centerOfPressureDesiredWorld.getX();
-      double y = centerOfPressureDesiredWorld.getY();
-      double z = centerOfPressureDesiredWorld.getZ();
+      double x = desiredCenterOfPressure.getX();
+      double y = desiredCenterOfPressure.getY();
+      double z = 0.0;
 
-      desiredCenterOfPressureToPack.set(centerOfPressureDesiredWorld.getReferenceFrame(), x, y, z);
+      desiredCenterOfPressureToPack.set(desiredCenterOfPressure.getReferenceFrame(), x, y, z);
    }
 
    public void setParametersForR2()
@@ -410,7 +369,7 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
       minPerimeterDistance.set(0.02);
    }
    
-   private static FramePoint2d movePointInsidePolygon(FramePoint2d point, FrameConvexPolygon2d polygon, FrameLine2d guideLine, ReferenceFrame currentFrame)
+   private static FramePoint2d movePointInsidePolygon(FramePoint2d point, FrameConvexPolygon2d polygon, FrameLine2d guideLine)
    {
       FramePoint2d returnPoint = new FramePoint2d(point);
 
@@ -418,13 +377,6 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
       if (!polygon.isPointInside(point))
       {
          // supportPolygon.orthogonalProjection(centerOfPressureDesired2d);
-
-         if (returnPoint.getReferenceFrame() != currentFrame)
-         {
-            returnPoint = returnPoint.changeFrameCopy(currentFrame);
-         }
-
-
 
          FramePoint2d[] intersections = polygon.intersectionWith(guideLine);
          if (intersections != null)
