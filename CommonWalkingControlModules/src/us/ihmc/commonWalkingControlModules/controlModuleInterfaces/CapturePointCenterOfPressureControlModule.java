@@ -33,9 +33,6 @@ public interface CapturePointCenterOfPressureControlModule
     * @param desiredCenterOfPressure FramePoint
     */
    public abstract void controlSingleSupport(FramePoint currentCapturePoint, FrameLineSegment2d guideLine, FramePoint desiredCapturePoint,
-           RobotSide supportLeg, ReferenceFrame referenceFrame, BipedSupportPolygons supportPolygons);
-
-   public abstract void controlSingleSupport(FramePoint currentCapturePoint, FrameLineSegment2d guideLine, FramePoint desiredCapturePoint,
            RobotSide supportLeg, ReferenceFrame referenceFrame, BipedSupportPolygons supportPolygons, FramePoint centerOfMassPositionInZUpFrame,
            FrameVector2d desiredVelocity, FrameVector2d currentVelocity);
 
