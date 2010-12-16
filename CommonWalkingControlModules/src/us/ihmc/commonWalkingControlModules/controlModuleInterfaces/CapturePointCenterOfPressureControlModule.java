@@ -7,7 +7,6 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
-import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 
 public interface CapturePointCenterOfPressureControlModule
 {
@@ -40,7 +39,5 @@ public interface CapturePointCenterOfPressureControlModule
            RobotSide supportLeg, ReferenceFrame referenceFrame, BipedSupportPolygons supportPolygons, FramePoint centerOfMassPositionInZUpFrame,
            FrameVector2d desiredVelocity, FrameVector2d currentVelocity);
 
-   public abstract YoFramePoint getCenterOfPressureDesiredMidFeet();
-
-   public abstract YoFramePoint getCenterOfPressureDesiredAnkleZUp(RobotSide robotSide);
+   public abstract void packDesiredCenterOfPressure(FramePoint desiredCenterOfPressureToPack);
 }
