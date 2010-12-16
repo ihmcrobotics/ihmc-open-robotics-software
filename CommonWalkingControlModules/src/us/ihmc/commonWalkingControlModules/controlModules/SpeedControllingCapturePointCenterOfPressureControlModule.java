@@ -395,16 +395,6 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
       return centerOfPressureDesiredMidFeet;
    }
 
-   public YoFramePoint getCenterOfPressureDesiredLeftAnkleZUp()
-   {
-      return centerOfPressureDesiredLeftAnkleZUp;
-   }
-
-   public YoFramePoint getCenterOfPressureDesiredRightAnkleZUp()
-   {
-      return centerOfPressureDesiredRightAnkleZUp;
-   }
-
    public YoFramePoint getCenterOfPressureDesiredAnkleZUp(RobotSide robotSide)
    {
       return centerOfPressureDesiredAnkleZUp.get(robotSide);
