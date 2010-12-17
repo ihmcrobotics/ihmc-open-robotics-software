@@ -41,7 +41,7 @@ public class EqConstCoPAndGuideLineCapturePointCoPControlModule implements Captu
 
    private final ReferenceFrame world = ReferenceFrame.getWorldFrame();
 
-   private final DoubleYoVariable doubleSupportFinalTime = new DoubleYoVariable("doubleSupportFinalTime", registry);
+   private final DoubleYoVariable minFinalTime = new DoubleYoVariable("minFinalTime", registry);
    private final DoubleYoVariable additionalSingleSupportSwingTime = new DoubleYoVariable("additionalSingleSupportSwingTime", registry);
    
    private final YoFrameLineSegment2d guideLineWorld = new YoFrameLineSegment2d("guideLine", "", world, registry);
@@ -100,7 +100,7 @@ public class EqConstCoPAndGuideLineCapturePointCoPControlModule implements Captu
       }
 
       FrameConvexPolygon2d supportPolygon = bipedSupportPolygons.getSupportPolygonInMidFeetZUp();
-      double finalTime = doubleSupportFinalTime.getDoubleValue();
+      double finalTime = minFinalTime.getDoubleValue();
       double comHeight = computeCoMHeightUsingBothFeet();
       computeDesiredCoP(supportPolygon, desiredCapturePoint.toFramePoint2d(), finalTime, comHeight, null);
    }
@@ -258,14 +258,14 @@ public class EqConstCoPAndGuideLineCapturePointCoPControlModule implements Captu
    private double computeFinalTimeSingleSupport()
    {
       double estimatedSwingTimeRemaining = couplingRegistry.getEstimatedSwingTimeRemaining();
-      double ret = Math.max(estimatedSwingTimeRemaining, 0.0);
+      double ret = Math.max(estimatedSwingTimeRemaining, minFinalTime.getDoubleValue());
       ret += additionalSingleSupportSwingTime.getDoubleValue();
       return ret;
    }
    
    public void setParametersForR2()
    {
-      doubleSupportFinalTime.set(0.1);
+      minFinalTime.set(0.1);
       kCaptureGuide.set(2.0);
       additionalSingleSupportSwingTime.set(0.1);
       alphaDesiredCoP.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(50.0, controlDT));
@@ -273,7 +273,7 @@ public class EqConstCoPAndGuideLineCapturePointCoPControlModule implements Captu
 
    public void setParametersForM2V2()
    {
-      doubleSupportFinalTime.set(0.1);
+      minFinalTime.set(0.1);
       kCaptureGuide.set(2.0);
       additionalSingleSupportSwingTime.set(0.3);
       alphaDesiredCoP.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(50.0, controlDT));
