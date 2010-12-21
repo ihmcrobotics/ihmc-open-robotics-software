@@ -33,7 +33,7 @@ public class GroundReactionTorqueCalculator
    public GroundReactionTorqueCalculator(SideDependentList<ArrayList<GroundContactPoint>> contactPointList, CommonWalkingReferenceFrames commonWalkingReferenceFrames, YoVariableRegistry parentRegistry,
            DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
-      this.contactPointList = contactPointList;
+      this.contactPointList = new SideDependentList<ArrayList<GroundContactPoint>>(contactPointList);
       this.commonWalkingReferenceFrames = commonWalkingReferenceFrames;
 
       for (RobotSide robotSide : RobotSide.values())
@@ -47,8 +47,7 @@ public class GroundReactionTorqueCalculator
          groundTau.put(robotSide, groundTauVector);
       }
 
-      if (parentRegistry != null)
-         parentRegistry.addChild(registry);
+      parentRegistry.addChild(registry);
          
       if (dynamicGraphicObjectsListRegistry != null)
          createDynamicGrapicVectors(dynamicGraphicObjectsListRegistry);
