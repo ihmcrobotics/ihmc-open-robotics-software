@@ -274,7 +274,7 @@ public class EqConstCoPAndGuideLineCapturePointCoPControlModule implements Captu
    public void setParametersForM2V2()
    {
       minFinalTime.set(0.1);
-      kCaptureGuide.set(2.0);
+      kCaptureGuide.set(4.0);
       additionalSingleSupportSwingTime.set(0.3);
       alphaDesiredCoP.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(50.0, controlDT));
    }

@@ -314,6 +314,9 @@ public class CommonStanceSubController implements StanceSubController
          capturePointIsInside = capturePoint.getY() > -yCaptureToTransfer.getDoubleValue();
       else
          capturePointIsInside = capturePoint.getY() < yCaptureToTransfer.getDoubleValue();
+      
+      if (isCapturePointOutsideBaseOfSupport())
+         return true;
 
       if (!inStateLongEnough)
          return false;
@@ -342,9 +345,20 @@ public class CommonStanceSubController implements StanceSubController
    public boolean isDoneWithLoadingPreSwingB(RobotSide loadingLeg, double timeInState)
    {
       if (WAIT_IN_LOADING_PRE_SWING_B)
-         return timeInState > 0.25;
-      else
+      {
+         boolean inStateLongEnough = timeInState > 0.2;
+         return inStateLongEnough || isCapturePointOutsideBaseOfSupport();
+      } else
          return true;
+   }
+
+   private boolean isCapturePointOutsideBaseOfSupport()
+   {
+      FrameConvexPolygon2d supportPolygon = couplingRegistry.getBipedSupportPolygons().getSupportPolygonInMidFeetZUp();
+      FramePoint2d capturePoint = couplingRegistry.getCapturePoint().toFramePoint2d();
+      capturePoint.changeFrame(supportPolygon.getReferenceFrame());
+      boolean hasCapturePointLeftBaseOfSupport = !(supportPolygon.isPointInside(capturePoint));
+      return hasCapturePointLeftBaseOfSupport;
    }
 
    private void doSingleSupportControl(LegTorques legTorquesToPackForStanceSide)

@@ -368,7 +368,7 @@ public abstract class RegularWalkingGaitAbstractController
          stanceSubController.doLoadingPreSwingC(lowerBodyTorques.getLegTorques(supportLeg), supportLeg, walkingStateMachine.timeInCurrentState());
          upperBodySubController.doUpperBodyControl(upperBodyTorques);
 
-         if (swingSubController.isDoneWithPreSwing(swingLeg, walkingStateMachine.timeInCurrentState()))
+         if (swingSubController.isDoneWithPreSwingC(swingLeg, walkingStateMachine.timeInCurrentState()))
          {
             this.transitionToDefaultNextState();
          }
