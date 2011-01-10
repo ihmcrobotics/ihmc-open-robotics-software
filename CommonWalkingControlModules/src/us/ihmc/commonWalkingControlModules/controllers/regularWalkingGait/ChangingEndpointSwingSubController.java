@@ -326,7 +326,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       return estimatedSwingTimeRemaining.getDoubleValue();
    }
 
-   public boolean isDoneWithPreSwing(RobotSide loadingLeg, double timeInState)
+   public boolean isDoneWithPreSwingC(RobotSide loadingLeg, double timeInState)
    {
       return (timeInState > passiveHipCollapseTime.getDoubleValue());
    }

@@ -152,7 +152,7 @@ public class GuideLineVelocityViaCoPControlModule implements VelocityViaCoPContr
    
    public void setUpParametersForM2V2()
    {
-      desiredCaptureForwardDoubleSupport.set(0.04); // equal to where the guide line ends // 0.08);
+      desiredCaptureForwardDoubleSupport.set(0.02); // 0.04 (equal to where the guide line ends) // 0.08);
       desiredCaptureInwardDoubleSupport.set(0.0);
    }
 }

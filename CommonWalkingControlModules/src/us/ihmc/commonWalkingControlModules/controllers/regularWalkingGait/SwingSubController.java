@@ -13,7 +13,7 @@ public interface SwingSubController
 
    public abstract void doTerminalSwing(LegTorques legTorquesToPackForSwingLeg, double timeInState);
 
-   public abstract boolean isDoneWithPreSwing(RobotSide loadingLeg, double timeInState);
+   public abstract boolean isDoneWithPreSwingC(RobotSide loadingLeg, double timeInState);
 
    public abstract boolean isDoneWithInitialSwing(RobotSide swingSide, double timeInState);
 
