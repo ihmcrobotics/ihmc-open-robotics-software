@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.ankleOverRotationControlModules;
+package us.ihmc.commonWalkingControlModules.controlModules.ankleOverRotationControlModules;
 
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.AnkleOverRotationControlModule;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegTorques;

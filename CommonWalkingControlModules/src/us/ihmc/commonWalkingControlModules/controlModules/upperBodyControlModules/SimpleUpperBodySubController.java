@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.upperBodyControlModules;
+package us.ihmc.commonWalkingControlModules.controlModules.upperBodyControlModules;
 
 import java.util.EnumMap;
 
