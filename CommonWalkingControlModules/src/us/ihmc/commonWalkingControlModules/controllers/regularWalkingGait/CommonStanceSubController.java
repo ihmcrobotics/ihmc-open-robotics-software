@@ -13,6 +13,7 @@ import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredVelo
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegTorques;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LowerBodyTorques;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
+import us.ihmc.commonWalkingControlModules.sensors.SupportLegAndLegToTrustForVelocity;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.BoundingBox2d;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
@@ -66,6 +67,8 @@ public class CommonStanceSubController implements StanceSubController
    private final DoubleYoVariable maxCaptureXToFinishDoublesupport = new DoubleYoVariable("maxCaptureXToFinishDoublesupport", registry);
    private final DoubleYoVariable baseCaptureXToFinishDoubleSupport = new DoubleYoVariable("baseCaptureXToFinishDoubleSupport", registry);
    private final DoubleYoVariable captureXVelocityScale = new DoubleYoVariable("captureXVelocityScale", registry);
+   
+   private final SupportLegAndLegToTrustForVelocity supportLegAndLegToTrustForVelocity; // FIXME: update things
 
    private boolean WAIT_IN_LOADING_PRE_SWING_B;
 
@@ -74,7 +77,7 @@ public class CommonStanceSubController implements StanceSubController
                                     DesiredHeadingControlModule desiredHeadingControlModule, DesiredVelocityControlModule desiredVelocityControlModule,
                                     DesiredPelvisOrientationControlModule desiredPelvisOrientationControlModule,
                                     BalanceSupportControlModule balanceSupportControlModule, FootOrientationControlModule footOrientationControlModule,
-                                    KneeExtensionControlModule kneeExtensionControlModule, YoVariableRegistry parentRegistry)
+                                    KneeExtensionControlModule kneeExtensionControlModule, SupportLegAndLegToTrustForVelocity supportLegAndLegToTrustForVelocity, YoVariableRegistry parentRegistry)
    {
       this.couplingRegistry = couplingRegistry;
       this.referenceFrames = referenceFrames;
@@ -84,6 +87,7 @@ public class CommonStanceSubController implements StanceSubController
       this.footOrientationControlModule = footOrientationControlModule;
       this.desiredHeadingControlModule = desiredHeadingControlModule;
       this.kneeExtensionControlModule = kneeExtensionControlModule;
+      this.supportLegAndLegToTrustForVelocity = supportLegAndLegToTrustForVelocity;
 
       doubleSupportDuration.set(0.75);    // FIXME: This is a hack but allows to compute the first desired step
       couplingRegistry.setDoubleSupportDuration(doubleSupportDuration);
@@ -184,6 +188,10 @@ public class CommonStanceSubController implements StanceSubController
 
    public void doTransitionIntoLoadingPreSwingA(RobotSide loadingLeg)
    {
+      supportLegAndLegToTrustForVelocity.legToTrustForVelocity.set(loadingLeg);
+      supportLegAndLegToTrustForVelocity.supportLeg.set(null);
+      supportLegAndLegToTrustForVelocity.legToUseForCOMOffset.set(loadingLeg);
+      
       kneeExtensionControlModule.doTransitionIntoLoading(loadingLeg);
 
       // Reset the timers
@@ -198,15 +206,25 @@ public class CommonStanceSubController implements StanceSubController
 
    public void doTransitionIntoLoadingPreSwingC(RobotSide loadingLeg)
    {
+      supportLegAndLegToTrustForVelocity.legToTrustForVelocity.set(loadingLeg);
+      supportLegAndLegToTrustForVelocity.supportLeg.set(loadingLeg);
+      supportLegAndLegToTrustForVelocity.legToUseForCOMOffset.set(loadingLeg);
    }
 
    public void doTransitionIntoStartStopWalkingDoubleSupport(RobotSide stanceSide)
    {
+      supportLegAndLegToTrustForVelocity.legToTrustForVelocity.set(null);
+      supportLegAndLegToTrustForVelocity.supportLeg.set(null);
+      supportLegAndLegToTrustForVelocity.legToUseForCOMOffset.set(null);
 //      balanceSupportControlModule.setDesiredCoPOffset(new FramePoint2d(ReferenceFrame.getWorldFrame())); // didn't do anything...
    }
 
    public void doTransitionIntoUnloadLegToTransferIntoWalking(RobotSide stanceSide)
    {
+      supportLegAndLegToTrustForVelocity.legToTrustForVelocity.set(stanceSide);
+      supportLegAndLegToTrustForVelocity.supportLeg.set(null);
+      supportLegAndLegToTrustForVelocity.legToUseForCOMOffset.set(stanceSide);
+      
 //      BipedSupportPolygons bipedSupportPolygons = couplingRegistry.getBipedSupportPolygons();
 //
 //      FrameConvexPolygon2d singleSupportFootPolygon = bipedSupportPolygons.getFootPolygonInAnkleZUp(stanceSide);    // processedSensors.getFootPolygons().get(stanceSide).getFrameConvexPolygon2dCopy();
