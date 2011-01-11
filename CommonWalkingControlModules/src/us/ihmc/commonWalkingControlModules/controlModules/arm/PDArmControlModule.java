@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.controlModules.armControlModules;
+package us.ihmc.commonWalkingControlModules.controlModules.arm;
 
 import java.util.EnumMap;
 
