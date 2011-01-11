@@ -1,7 +1,5 @@
 package us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait;
 
-import javax.vecmath.Point2d;
-
 import us.ihmc.commonWalkingControlModules.RobotSide;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.DesiredPelvisOrientationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.BalanceSupportControlModule;
@@ -15,7 +13,6 @@ import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LowerBodyTorques;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.SupportLegAndLegToTrustForVelocity;
 import us.ihmc.utilities.math.MathTools;
-import us.ihmc.utilities.math.geometry.BoundingBox2d;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -407,15 +404,15 @@ public class CommonStanceSubController implements StanceSubController
       balanceSupportControlModule.doDoubleSupportBalance(lowerBodyTorquesToPack, loadingLeg, zeroVelocity.toFrameVector2d(), desiredPelvisOrientation);
    }
 
-   private static FramePoint2d getCenterOfBoundingBoxOfPolygon(FrameConvexPolygon2d supportPolygon)
-   {
-      BoundingBox2d boundingBox = supportPolygon.getBoundingBox();
-      Point2d center = new Point2d();
-      boundingBox.getCenterPointCopy(center);
-      FramePoint2d doubleSupportCentroid = new FramePoint2d(ReferenceFrame.getWorldFrame(), center);
-
-      return doubleSupportCentroid;
-   }
+//   private static FramePoint2d getCenterOfBoundingBoxOfPolygon(FrameConvexPolygon2d supportPolygon)
+//   {
+//      BoundingBox2d boundingBox = supportPolygon.getBoundingBox();
+//      Point2d center = new Point2d();
+//      boundingBox.getCenterPointCopy(center);
+//      FramePoint2d doubleSupportCentroid = new FramePoint2d(ReferenceFrame.getWorldFrame(), center);
+//
+//      return doubleSupportCentroid;
+//   }
 
    public void setParametersForR2()
    {

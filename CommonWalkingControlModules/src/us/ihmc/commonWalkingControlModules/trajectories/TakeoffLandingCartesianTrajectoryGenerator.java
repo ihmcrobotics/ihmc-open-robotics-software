@@ -200,9 +200,12 @@ public class TakeoffLandingCartesianTrajectoryGenerator implements CartesianTraj
             double overshootThreshold = 1.05;
             boolean targetWasOvershot = currentXYDistanceFromTarget.getDoubleValue() * landingSlope.getDoubleValue()
                                         > overshootThreshold * Math.max(zClearance.getDoubleValue(), Math.abs(currentPositionToFinalPosition.getZ()));
-            if (ALLOW_RETAKEOFF && targetWasOvershot)
+            if (ALLOW_RETAKEOFF)
             {
-               cartesianTrajectoryState.set(SwingState.TAKE_OFF);
+               if (targetWasOvershot)
+               {
+                  cartesianTrajectoryState.set(SwingState.TAKE_OFF);
+               }
             }
 
             break;
