@@ -9,13 +9,13 @@ import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegTorques;
 import us.ihmc.commonWalkingControlModules.sensors.ProcessedSensorsInterface;
 
-public class SimpleHipDamperControlModule implements HipDamperControlModule
+public class SimpleHipYawDamperControlModule implements HipDamperControlModule
 {
    private final ProcessedSensorsInterface processedSensors;
    private final YoVariableRegistry registry = new YoVariableRegistry("SimpleHipDamperControlModule");
    private final DoubleYoVariable hipYawDamping = new DoubleYoVariable("hipYawDamping", registry);
 
-   public SimpleHipDamperControlModule(ProcessedSensorsInterface processedSensors, YoVariableRegistry parentRegistry)
+   public SimpleHipYawDamperControlModule(ProcessedSensorsInterface processedSensors, YoVariableRegistry parentRegistry)
    {
       this.processedSensors = processedSensors;
    }
