@@ -312,21 +312,21 @@ public class ResizableBipedFoot implements BipedFootInterface
 	   return ret;
    }
    
-   private ArrayList<FramePoint2d> projectFramePointsToXYPlane(ArrayList<FramePoint> points)
-   {
-      if ((points.size() > 0) && (!points.get(0).getReferenceFrame().isZupFrame()))
-      {
-         throw new RuntimeException("Doing projectFramePointsToXYPlane on a non ZUp frame");
-      }
-      
-      ArrayList<FramePoint2d> ret = new ArrayList<FramePoint2d>(points.size());
-      for (int i=0; i<points.size(); i++)
-      {
-         FramePoint point = points.get(i);
-         ret.add(point.toFramePoint2d());
-      }
-      return ret;
-   }
+//   private ArrayList<FramePoint2d> projectFramePointsToXYPlane(ArrayList<FramePoint> points)
+//   {
+//      if ((points.size() > 0) && (!points.get(0).getReferenceFrame().isZupFrame()))
+//      {
+//         throw new RuntimeException("Doing projectFramePointsToXYPlane on a non ZUp frame");
+//      }
+//      
+//      ArrayList<FramePoint2d> ret = new ArrayList<FramePoint2d>(points.size());
+//      for (int i=0; i<points.size(); i++)
+//      {
+//         FramePoint point = points.get(i);
+//         ret.add(point.toFramePoint2d());
+//      }
+//      return ret;
+//   }
 
    public void setIsSupportingFoot(boolean isSupportingFoot)
    {

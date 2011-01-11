@@ -113,15 +113,15 @@ public class SteppingStonesDesiredStepLocationCalculator implements DesiredStepL
          DynamicGraphicPosition adjustedStepPositionDynamicGraphicPosition = new DynamicGraphicPosition("Adjusted Step Position", adjustedStepPosition, scale,
                                                                                 YoAppearance.Yellow());
 
-         int level = 4;
          dynamicGraphicObjectsListRegistry.registerArtifact("DesiredStepLocation", adjustedStepPositionDynamicGraphicPosition.createArtifact());
 
+//       int level = 4;
 //       YoboticsBipedPlotter.registerDynamicGraphicPosition("Adjusted Step Position", adjustedStepPositionDynamicGraphicPosition, level);
       }
    }
 
-   public Footstep computeDesiredStepLocation(RobotSide supportLeg, BipedSupportPolygons bipedSupportPolygons, 
-         FrameConvexPolygon2d captureRegion, FramePoint capturePoint)
+   public Footstep computeDesiredStepLocation(RobotSide supportLeg, BipedSupportPolygons bipedSupportPolygons, FrameConvexPolygon2d captureRegion,
+           FramePoint capturePoint)
    {
       FramePoint nominalLocation = getNominalStepLocation(supportLeg);
       Point2d nominalLocation2d = new Point2d(nominalLocation.getX(), nominalLocation.getY());
