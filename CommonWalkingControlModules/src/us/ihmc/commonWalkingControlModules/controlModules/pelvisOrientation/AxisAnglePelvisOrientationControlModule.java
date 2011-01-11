@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.controlModules;
+package us.ihmc.commonWalkingControlModules.controlModules.pelvisOrientation;
 
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;

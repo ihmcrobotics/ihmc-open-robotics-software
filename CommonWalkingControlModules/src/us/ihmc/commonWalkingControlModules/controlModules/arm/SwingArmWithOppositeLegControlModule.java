@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.controlModules.armControlModules;
+package us.ihmc.commonWalkingControlModules.controlModules.arm;
 
 import us.ihmc.commonWalkingControlModules.RobotSide;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.ArmJointName;

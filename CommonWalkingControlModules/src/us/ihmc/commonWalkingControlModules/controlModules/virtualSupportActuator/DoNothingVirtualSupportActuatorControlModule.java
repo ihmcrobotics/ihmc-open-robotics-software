@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.controlModules.virtualSupportActuatorControlModules;
+package us.ihmc.commonWalkingControlModules.controlModules.virtualSupportActuator;
 
 import us.ihmc.commonWalkingControlModules.SideDependentList;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedLegStrengthAndVirtualToePoint;
