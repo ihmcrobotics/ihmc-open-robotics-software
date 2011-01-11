@@ -30,7 +30,7 @@ public class KneeDamperControlModule
 
       kneeTorque -= ffKneeToStraighten.getDoubleValue();
 
-      supportLegTorquesToPack.setTorque(LegJointName.KNEE, kneeTorque);
+      supportLegTorquesToPack.addTorque(LegJointName.KNEE, kneeTorque);
    }
    
    public void setParametersForR2()
