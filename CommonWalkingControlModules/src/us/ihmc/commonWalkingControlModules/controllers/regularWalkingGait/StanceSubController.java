@@ -26,7 +26,7 @@ public interface StanceSubController
 
    public abstract void doLoadingForSingleLegBalance(LowerBodyTorques lowerBodyTorques, RobotSide upcomingSupportSide, double timeInCurrentState);
    
-   public abstract void doSingleLegBalance(LowerBodyTorques lowerBodyTorques, RobotSide supportLeg, double timeInCurrentState);
+   public abstract void doSingleLegBalance(LegTorques legTorquesToPack, RobotSide supportLeg, double timeInCurrentState);
    
 
    public abstract boolean isDoneWithLoadingPreSwingA(RobotSide loadingLeg, double timeInState);

@@ -619,7 +619,7 @@ public abstract class RegularWalkingGaitAbstractController
          setLowerBodyTorquesToZero();
 
          swingSubController.doSwingInAir(lowerBodyTorques.getLegTorques(swingLeg), walkingStateMachine.timeInCurrentState());
-         stanceSubController.doSingleLegBalance(lowerBodyTorques, supportLeg, walkingStateMachine.timeInCurrentState());
+         stanceSubController.doSingleLegBalance(lowerBodyTorques.getLegTorques(supportLeg), supportLeg, walkingStateMachine.timeInCurrentState());
          upperBodySubController.doUpperBodyControl(upperBodyTorques);
 
          // no default next state
