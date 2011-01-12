@@ -248,6 +248,12 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       timeSpentInTerminalSwing.set(timeInState);
    }
 
+   public void doSwingInAir(LegTorques legTorques, double timeInCurrentState)
+   {
+      // TODO Auto-generated method stub
+
+   }
+
    public void doTransitionIntoPreSwing(RobotSide swingSide)
    {
       desiredStepLocationCalculator.initializeAtStartOfSwing(swingSide, couplingRegistry);
@@ -295,6 +301,12 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       legJointPositionControlModules.get(swingSide).setAnkleGainsSoft();
    }
 
+   public void doTransitionIntoSwingInAir(RobotSide swingLeg)
+   {
+      // TODO Auto-generated method stub
+
+   }
+
    public void doTransitionOutOfInitialSwing(RobotSide swingSide)
    {
       legJointPositionControlModules.get(swingSide).resetScalesToDefault();
@@ -313,6 +325,12 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       singleSupportDuration.set(timeSpentInPreSwing.getDoubleValue() + timeSpentInInitialSwing.getDoubleValue() + timeSpentInMidSwing.getDoubleValue()
                                 + timeSpentInTerminalSwing.getDoubleValue());
       couplingRegistry.setSingleSupportDuration(singleSupportDuration);
+   }
+
+   public void doTransitionOutOfSwingInAir(RobotSide swingLeg)
+   {
+      // TODO Auto-generated method stub
+
    }
 
    private void setEstimatedSwingTimeRemaining(double timeRemaining)
@@ -394,7 +412,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
 
    public void setParametersForM2V2()
    {
-      swingDuration.set(0.6); // 0.7);    // 0.5);    // (0.4);
+      swingDuration.set(0.6);    // 0.7);    // 0.5);    // (0.4);
       swingOrientationTime.set(0.2);    // 0.75 * swingDuration.getDoubleValue());
 
       swingToePitchUpOnLanding.set(0.25);    // 0.4);    // (0.5);
@@ -406,10 +424,10 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       finalSwingAcceleration.set(0.0);
 
       minimumTerminalSwingDuration.set(0.0);    // 0.1);    // 0.25;
-      maximumTerminalSwingDuration.set(0.05); // 0.2);    // 0.1);    // 0.25;
+      maximumTerminalSwingDuration.set(0.05);    // 0.2);    // 0.1);    // 0.25;
       terminalSwingGainRampTime.set(minimumTerminalSwingDuration.getDoubleValue() / 4.0);
 
-      passiveHipCollapseTime.set(0.07); // 0.1);    // 07);    // 0.06);    // 0.1);
+      passiveHipCollapseTime.set(0.07);    // 0.1);    // 07);    // 0.06);    // 0.1);
 
       antiGravityPercentage.set(1.0);
 
@@ -495,7 +513,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       {
          SpatialAccelerationVector bodyAcceleration = processedSensors.computeAccelerationOfPelvisWithRespectToWorld();    // FIXME: set to LIPM-based predicted body acceleration
          bodyAcceleration.setAngularPart(new Vector3d());    // zero desired angular acceleration
-         bodyAcceleration.setLinearPart(new Vector3d()); // zero linear acceleration as well for now
+         bodyAcceleration.setLinearPart(new Vector3d());    // zero linear acceleration as well for now
          fullRobotModel.getRootJoint().setDesiredAcceleration(bodyAcceleration);
       }
 
@@ -619,7 +637,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       startOrientation = startOrientation.changeFrameCopy(ReferenceFrame.getWorldFrame());
       startSwingOrientation.set(startOrientation);
    }
-   
+
    private boolean isCapturePointInsideFoot(RobotSide swingSide)
    {
       FrameConvexPolygon2d footPolygon = couplingRegistry.getBipedSupportPolygons().getFootPolygonInAnkleZUp(swingSide);
@@ -627,6 +645,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       capturePoint.changeFrame(footPolygon.getReferenceFrame());
 
       boolean capturePointInsideFoot = footPolygon.isPointInside(capturePoint);
+
       return capturePointInsideFoot;
    }
 }
