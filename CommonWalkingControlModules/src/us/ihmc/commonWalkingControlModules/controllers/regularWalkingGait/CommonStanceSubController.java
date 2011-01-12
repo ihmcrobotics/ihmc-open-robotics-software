@@ -274,11 +274,12 @@ public class CommonStanceSubController implements StanceSubController
    {
       doDoubleSupportControl(lowerBodyTorquesToPack, supportLeg);
    }
+   
 
-   public RobotSide getUpcomingSupportLegForStartingToWalkFromDoubleSupport()
+   public void doLoadingForSingleLegBalance(LowerBodyTorques lowerBodyTorques, RobotSide upcomingSupportSide, double timeInCurrentState)
    {
       // TODO Auto-generated method stub
-      return null;
+      
    }
 
    public boolean isReadyToStartStopWalkingDoubleSupport(RobotSide loadingLeg, double timeInState)
@@ -342,6 +343,12 @@ public class CommonStanceSubController implements StanceSubController
       if (capturePointPastAnkle && capturePointIsInside)
          return true;
 
+      return false;
+   }
+   
+   public boolean isDoneLoadingForSingleLegBalance(RobotSide upcomingSupportSide, double timeInCurrentState)
+   {
+      // TODO Auto-generated method stub
       return false;
    }
 

@@ -567,6 +567,46 @@ public abstract class RegularWalkingGaitAbstractController
       }
    }
    
+   protected class LoadingForSingleLegBalanceState extends State
+   {
+      private final RobotSide upcomingSupportSide;
+
+      public LoadingForSingleLegBalanceState(RegularWalkingState stateName, RobotSide upcomingSupportSide)
+      {
+         super(stateName);
+         this.upcomingSupportSide = upcomingSupportSide;
+      }
+
+      public void doAction()
+      {
+         setLowerBodyTorquesToZero();
+
+         stanceSubController.doLoadingForSingleLegBalance(lowerBodyTorques, upcomingSupportSide, walkingStateMachine.timeInCurrentState());
+         upperBodySubController.doUpperBodyControl(upperBodyTorques);
+
+         if (stanceSubController.isDoneLoadingForSingleLegBalance(upcomingSupportSide, walkingStateMachine.timeInCurrentState()))
+         {
+            this.transitionToDefaultNextState();
+         }
+
+         setProcessedOutputsBodyTorques();
+      }
+
+      public void doTransitionIntoAction()
+      {
+         supportLegYoVariable.set(null);
+         swingLegYoVariable.set(null);
+
+         stanceSubController.doTransitionIntoUnloadLegToTransferIntoWalking(upcomingSupportSide);
+      }
+
+      public void doTransitionOutOfAction()
+      {
+         supportLegYoVariable.set(upcomingSupportSide);
+         stanceSubController.doTransitionOutOfUnloadLegToTransferIntoWalking(upcomingSupportSide);
+      }
+   }
+   
    private void setupStateMachine()
    {
       // Create states
