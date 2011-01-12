@@ -44,7 +44,9 @@ public abstract class RegularWalkingGaitAbstractController
    protected final YoVariableRegistry childRegistry = new YoVariableRegistry("GoAndSuch");
 
    protected final BooleanYoVariable go = new BooleanYoVariable("go", "Starts and stops the walking", childRegistry);
-
+   protected final BooleanYoVariable balanceOnOneLeg = new BooleanYoVariable("balanceOnOneLeg", "Starts and stops balancing on one leg" , childRegistry);
+   protected final BooleanYoVariable swingInAir = new BooleanYoVariable("swingInAir", "Starts and stops swinging to a new position in the air" , childRegistry);
+   
    protected final BooleanYoVariable resetSteps = new BooleanYoVariable("resetSteps", childRegistry);
    protected final IntYoVariable stepsTaken = new IntYoVariable("stepsTaken", childRegistry);
    protected final IntYoVariable stepsToTake = new IntYoVariable("stepsToTake", childRegistry);
@@ -104,7 +106,7 @@ public abstract class RegularWalkingGaitAbstractController
       StartWalkingDoubleSupportState, TransferAllLoadToLeftLegForWalking, LeftLoadingRightPreSwingA, LeftLoadingRightPreSwingB, LeftLoadingRightPreSwingC,
       LeftEarlyStanceRightInitialSwing, LeftLateStanceRightMidSwing, LeftTerminalStanceRightTerminalSwing, TransferAllLoadToRightLegForWalking,
       RightLoadingLeftPreSwingA, RightLoadingLeftPreSwingB, RightLoadingLeftPreSwingC, RightEarlyStanceLeftInitialSwing, RightLateStanceLeftMidSwing,
-      RightTerminalStanceLeftTerminalSwing, stopWalkingLeftLoadingState, stopWalkingRightLoadingState
+      RightTerminalStanceLeftTerminalSwing, stopWalkingLeftLoadingState, stopWalkingRightLoadingState, leftLoadingForSingleLegBalance, rightLoadingForSingleLegBalance, leftSingleLegBalanceRightSwingInAir, rightSingleLegBalanceRightSwingInAir
       ;
 
 //    public RobotSide getSupportLeg()
@@ -679,6 +681,12 @@ public abstract class RegularWalkingGaitAbstractController
                                                                      RobotSide.LEFT);
       StopWalkingDoubleSupportState stopWalkingRightLoadingState = new StopWalkingDoubleSupportState(RegularWalkingState.stopWalkingRightLoadingState,
                                                                       RobotSide.RIGHT);
+      
+      LoadingForSingleLegBalanceState leftLoadingForSingleLegBalanceState = new LoadingForSingleLegBalanceState(RegularWalkingState.leftLoadingForSingleLegBalance, RobotSide.LEFT);
+      LoadingForSingleLegBalanceState rightLoadingForSingleLegBalanceState = new LoadingForSingleLegBalanceState(RegularWalkingState.rightLoadingForSingleLegBalance, RobotSide.RIGHT);
+      
+      SingleLegBalanceSwingInAirState leftSingleLegBalanceRightSwingInAirState = new SingleLegBalanceSwingInAirState(RegularWalkingState.leftSingleLegBalanceRightSwingInAir, RobotSide.LEFT);
+      SingleLegBalanceSwingInAirState rightSingleLegBalanceLeftSwingInAirState = new SingleLegBalanceSwingInAirState(RegularWalkingState.rightSingleLegBalanceRightSwingInAir, RobotSide.RIGHT);
 
       // Begin: State transition conditions
       StateTransitionCondition startWalkingCondition = new StateTransitionCondition()
@@ -696,13 +704,36 @@ public abstract class RegularWalkingGaitAbstractController
       {
          public boolean checkCondition()
          {
-            if (((go.getBooleanValue() == false) || (onFinalStep.getBooleanValue())) && swingSubController.canWeStopNowSwingSubController()
-                    && stanceSubController.canWeStopNowStanceSubController())
-            {
-               return true;
-            }
-
-            return false;
+            boolean commandedToStop = (!go.getBooleanValue()) || (onFinalStep.getBooleanValue());
+            boolean canWeStopNow = swingSubController.canWeStopNow()
+                                && stanceSubController.canWeStopNow();
+            return commandedToStop && canWeStopNow;
+         }
+      };
+      
+      StateTransitionCondition toSingleLegBalanceCondition = new StateTransitionCondition()
+      {
+         public boolean checkCondition()
+         {
+            return balanceOnOneLeg.getBooleanValue();
+         }
+      };
+      
+      StateTransitionCondition swingInAirAgainCondition = new StateTransitionCondition()
+      {
+         public boolean checkCondition()
+         {
+            boolean commandedToSwingAgain = swingInAir.getBooleanValue();
+            boolean endingSingleSupport = (!balanceOnOneLeg.getBooleanValue()) && (!swingSubController.isReadyForDoubleSupport());
+            return commandedToSwingAgain || endingSingleSupport;
+         }
+      };
+      
+      StateTransitionCondition returnToDoubleSupportFromSingleSupportBalanceCondition = new StateTransitionCondition()
+      {
+         public boolean checkCondition()
+         {
+            return (!balanceOnOneLeg.getBooleanValue() && swingSubController.isReadyForDoubleSupport());
          }
       };
 
@@ -716,6 +747,15 @@ public abstract class RegularWalkingGaitAbstractController
 
       StateTransition toStopWalkingLeftLoadingState = new StateTransition(stopWalkingLeftLoadingState.getStateEnum(), stopWalkingCondition);
       StateTransition toStopWalkingRightLoadingState = new StateTransition(stopWalkingRightLoadingState.getStateEnum(), stopWalkingCondition);
+      
+      StateTransition toLeftLoadingForSingleLegBalanceState = new StateTransition(leftLoadingForSingleLegBalanceState.getStateEnum(), toSingleLegBalanceCondition);
+      StateTransition toRightLoadingForSingleLegBalanceState = new StateTransition(rightLoadingForSingleLegBalanceState.getStateEnum(), toSingleLegBalanceCondition);
+      
+      StateTransition toLeftSingleLegBalanceRightSwingInAirState = new StateTransition(leftSingleLegBalanceRightSwingInAirState.getStateEnum(), swingInAirAgainCondition);
+      StateTransition toRightSingleLegBalanceLeftSwingInAirState = new StateTransition(rightSingleLegBalanceLeftSwingInAirState.getStateEnum(), swingInAirAgainCondition);
+      
+      StateTransition toStopWalkingLeftLoadingStateFromSingleLegBalance = new StateTransition(stopWalkingLeftLoadingState.getStateEnum(), returnToDoubleSupportFromSingleSupportBalanceCondition);
+      StateTransition toStopWalkingRightLoadingStateFromSingleLegBalance = new StateTransition(stopWalkingRightLoadingState.getStateEnum(), returnToDoubleSupportFromSingleSupportBalanceCondition);
 
       // End: create state transitions
 
@@ -730,11 +770,31 @@ public abstract class RegularWalkingGaitAbstractController
       // Restart walking
       stopWalkingLeftLoadingState.addStateTransition(toTransferAllLoadToLeftLegForWalkingState);
       stopWalkingRightLoadingState.addStateTransition(toTransferAllLoadToRightLegForWalkingState);
+      
+      // Go to single leg balance
+      startWalkingDoubleSupportState.addStateTransition(toLeftLoadingForSingleLegBalanceState);
+      startWalkingDoubleSupportState.addStateTransition(toRightLoadingForSingleLegBalanceState);
+      
+      // Swing again in single leg support
+      leftSingleLegBalanceRightSwingInAirState.addStateTransition(toLeftSingleLegBalanceRightSwingInAirState);
+      rightSingleLegBalanceLeftSwingInAirState.addStateTransition(toRightSingleLegBalanceLeftSwingInAirState);
+      
+      // Return to double support from single support 
+      leftSingleLegBalanceRightSwingInAirState.addStateTransition(toStopWalkingLeftLoadingStateFromSingleLegBalance);
+      rightSingleLegBalanceLeftSwingInAirState.addStateTransition(toStopWalkingRightLoadingStateFromSingleLegBalance);
 
       // Add default state transition last
 //    startWalkingDoubleSupportState.setDefaultNextState(transferAllLoadToRightLegForWalkingState.getStateEnum());
       transferAllLoadToLeftLegForWalkingState.setDefaultNextState(leftLoadingRightPreSwingCState.getStateEnum());
       transferAllLoadToRightLegForWalkingState.setDefaultNextState(rightLoadingLeftPreSwingCState.getStateEnum());
+      
+      leftLoadingRightPreSwingAState.setDefaultNextState(leftLoadingRightPreSwingBState.getStateEnum());
+      leftLoadingRightPreSwingBState.setDefaultNextState(leftLoadingRightPreSwingCState.getStateEnum());
+      leftLoadingRightPreSwingCState.setDefaultNextState(leftEarlyStanceRightInitialSwingState.getStateEnum());
+      leftEarlyStanceRightInitialSwingState.setDefaultNextState(leftLateStanceRightMidSwingState.getStateEnum());
+      leftLateStanceRightMidSwingState.setDefaultNextState(leftTerminalStanceRightTerminalSwingState.getStateEnum());
+      leftTerminalStanceRightTerminalSwingState.setDefaultNextState(rightLoadingLeftPreSwingAState.getStateEnum());
+      leftLoadingForSingleLegBalanceState.setDefaultNextState(leftSingleLegBalanceRightSwingInAirState.getStateEnum());
 
       rightLoadingLeftPreSwingAState.setDefaultNextState(rightLoadingLeftPreSwingBState.getStateEnum());
       rightLoadingLeftPreSwingBState.setDefaultNextState(rightLoadingLeftPreSwingCState.getStateEnum());
@@ -742,13 +802,7 @@ public abstract class RegularWalkingGaitAbstractController
       rightEarlyStanceLeftInitialSwingState.setDefaultNextState(rightLateStanceLeftMidSwingState.getStateEnum());
       rightLateStanceLeftMidSwingState.setDefaultNextState(rightTerminalStanceLeftTerminalSwingState.getStateEnum());
       rightTerminalStanceLeftTerminalSwingState.setDefaultNextState(leftLoadingRightPreSwingAState.getStateEnum());
-
-      leftLoadingRightPreSwingAState.setDefaultNextState(leftLoadingRightPreSwingBState.getStateEnum());
-      leftLoadingRightPreSwingBState.setDefaultNextState(leftLoadingRightPreSwingCState.getStateEnum());
-      leftLoadingRightPreSwingCState.setDefaultNextState(leftEarlyStanceRightInitialSwingState.getStateEnum());
-      leftEarlyStanceRightInitialSwingState.setDefaultNextState(leftLateStanceRightMidSwingState.getStateEnum());
-      leftLateStanceRightMidSwingState.setDefaultNextState(leftTerminalStanceRightTerminalSwingState.getStateEnum());
-      leftTerminalStanceRightTerminalSwingState.setDefaultNextState(rightLoadingLeftPreSwingAState.getStateEnum());
+      rightLoadingForSingleLegBalanceState.setDefaultNextState(rightSingleLegBalanceLeftSwingInAirState.getStateEnum());
 
       // End: Add transitions
 
@@ -762,6 +816,8 @@ public abstract class RegularWalkingGaitAbstractController
       walkingStateMachine.addState(leftEarlyStanceRightInitialSwingState);
       walkingStateMachine.addState(leftLateStanceRightMidSwingState);
       walkingStateMachine.addState(leftTerminalStanceRightTerminalSwingState);
+      walkingStateMachine.addState(leftLoadingForSingleLegBalanceState);
+      walkingStateMachine.addState(leftSingleLegBalanceRightSwingInAirState);
 
       walkingStateMachine.addState(transferAllLoadToRightLegForWalkingState);
       walkingStateMachine.addState(rightLoadingLeftPreSwingAState);
@@ -770,6 +826,8 @@ public abstract class RegularWalkingGaitAbstractController
       walkingStateMachine.addState(rightEarlyStanceLeftInitialSwingState);
       walkingStateMachine.addState(rightLateStanceLeftMidSwingState);
       walkingStateMachine.addState(rightTerminalStanceLeftTerminalSwingState);
+      walkingStateMachine.addState(rightLoadingForSingleLegBalanceState);
+      walkingStateMachine.addState(rightSingleLegBalanceLeftSwingInAirState);
 
       walkingStateMachine.addState(stopWalkingLeftLoadingState);
       walkingStateMachine.addState(stopWalkingRightLoadingState);

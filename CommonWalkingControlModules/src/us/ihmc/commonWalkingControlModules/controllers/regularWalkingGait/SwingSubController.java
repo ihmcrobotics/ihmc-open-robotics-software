@@ -47,7 +47,9 @@ public interface SwingSubController
    public abstract void doTransitionOutOfSwingInAir(RobotSide swingLeg);
 
 
-   public abstract boolean canWeStopNowSwingSubController();
+   public abstract boolean canWeStopNow();
+   
+   public abstract boolean isReadyForDoubleSupport();
 
    // TODO: this should be deprecated at some point; its only use is sharing data between stance- and swing subcontrollers;
    // this should be done through the coupling registry instead
