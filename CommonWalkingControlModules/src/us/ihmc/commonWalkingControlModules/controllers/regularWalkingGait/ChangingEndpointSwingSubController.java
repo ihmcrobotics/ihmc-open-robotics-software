@@ -202,9 +202,15 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       }
    }
 
-   public boolean canWeStopNowSwingSubController()
+   public boolean canWeStopNow()
    {
       return true;
+   }
+   
+   public boolean isReadyForDoubleSupport()
+   {
+      // TODO Auto-generated method stub
+      return false;
    }
 
    public void doPreSwing(LegTorques legTorquesToPackForSwingLeg, double timeInState)

@@ -82,5 +82,5 @@ public interface StanceSubController
    public abstract void doTransitionOutOfSingleLegBalance(RobotSide supportLeg);
 
    
-   public abstract boolean canWeStopNowStanceSubController();
+   public abstract boolean canWeStopNow();
 }

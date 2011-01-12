@@ -93,7 +93,7 @@ public class CommonStanceSubController implements StanceSubController
       parentRegistry.addChild(registry);
    }
 
-   public boolean canWeStopNowStanceSubController()
+   public boolean canWeStopNow()
    {
       return true;
    }
