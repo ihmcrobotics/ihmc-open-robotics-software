@@ -64,8 +64,8 @@ public class CommonStanceSubController implements StanceSubController
    private final DoubleYoVariable maxCaptureXToFinishDoublesupport = new DoubleYoVariable("maxCaptureXToFinishDoublesupport", registry);
    private final DoubleYoVariable baseCaptureXToFinishDoubleSupport = new DoubleYoVariable("baseCaptureXToFinishDoubleSupport", registry);
    private final DoubleYoVariable captureXVelocityScale = new DoubleYoVariable("captureXVelocityScale", registry);
-   
-   private final SupportLegAndLegToTrustForVelocity supportLegAndLegToTrustForVelocity; // FIXME: update things
+
+   private final SupportLegAndLegToTrustForVelocity supportLegAndLegToTrustForVelocity;    // FIXME: update things
 
    private boolean WAIT_IN_LOADING_PRE_SWING_B;
 
@@ -74,7 +74,8 @@ public class CommonStanceSubController implements StanceSubController
                                     DesiredHeadingControlModule desiredHeadingControlModule, DesiredVelocityControlModule desiredVelocityControlModule,
                                     DesiredPelvisOrientationControlModule desiredPelvisOrientationControlModule,
                                     BalanceSupportControlModule balanceSupportControlModule, FootOrientationControlModule footOrientationControlModule,
-                                    KneeExtensionControlModule kneeExtensionControlModule, SupportLegAndLegToTrustForVelocity supportLegAndLegToTrustForVelocity, YoVariableRegistry parentRegistry)
+                                    KneeExtensionControlModule kneeExtensionControlModule,
+                                    SupportLegAndLegToTrustForVelocity supportLegAndLegToTrustForVelocity, YoVariableRegistry parentRegistry)
    {
       this.couplingRegistry = couplingRegistry;
       this.referenceFrames = referenceFrames;
@@ -119,6 +120,7 @@ public class CommonStanceSubController implements StanceSubController
    public void doTerminalStance(LegTorques legTorquesToPackForLoadingLeg, double timeInState)
    {
       RobotSide loadingLeg = legTorquesToPackForLoadingLeg.getRobotSide();
+
 //    doSingleSupportControl(legTorquesToPackForStanceSide);
 
       doSingleSupportControl(legTorquesToPackForLoadingLeg);
@@ -188,7 +190,7 @@ public class CommonStanceSubController implements StanceSubController
       supportLegAndLegToTrustForVelocity.legToTrustForVelocity.set(loadingLeg);
       supportLegAndLegToTrustForVelocity.supportLeg.set(null);
       supportLegAndLegToTrustForVelocity.legToUseForCOMOffset.set(loadingLeg);
-      
+
       kneeExtensionControlModule.doTransitionIntoLoading(loadingLeg);
 
       // Reset the timers
@@ -213,7 +215,8 @@ public class CommonStanceSubController implements StanceSubController
       supportLegAndLegToTrustForVelocity.legToTrustForVelocity.set(null);
       supportLegAndLegToTrustForVelocity.supportLeg.set(null);
       supportLegAndLegToTrustForVelocity.legToUseForCOMOffset.set(null);
-//      balanceSupportControlModule.setDesiredCoPOffset(new FramePoint2d(ReferenceFrame.getWorldFrame())); // didn't do anything...
+
+//    balanceSupportControlModule.setDesiredCoPOffset(new FramePoint2d(ReferenceFrame.getWorldFrame())); // didn't do anything...
    }
 
    public void doTransitionIntoUnloadLegToTransferIntoWalking(RobotSide stanceSide)
@@ -221,18 +224,31 @@ public class CommonStanceSubController implements StanceSubController
       supportLegAndLegToTrustForVelocity.legToTrustForVelocity.set(stanceSide);
       supportLegAndLegToTrustForVelocity.supportLeg.set(null);
       supportLegAndLegToTrustForVelocity.legToUseForCOMOffset.set(stanceSide);
+
+//    BipedSupportPolygons bipedSupportPolygons = couplingRegistry.getBipedSupportPolygons();
+//
+//    FrameConvexPolygon2d singleSupportFootPolygon = bipedSupportPolygons.getFootPolygonInAnkleZUp(stanceSide);    // processedSensors.getFootPolygons().get(stanceSide).getFrameConvexPolygon2dCopy();
+//    FramePoint2d singleSupportCentroid = singleSupportFootPolygon.getCentroidCopy();
+//
+//    FrameConvexPolygon2d supportPolygon = bipedSupportPolygons.getSupportPolygonInMidFeetZUp();
+//    FramePoint2d doubleSupportCentroid = getCenterOfBoundingBoxOfPolygon(supportPolygon).changeFrameCopy(singleSupportCentroid.getReferenceFrame());
+//
+//    singleSupportCentroid.sub(doubleSupportCentroid);
+//
+//    balanceSupportControlModule.setDesiredCoPOffset(singleSupportCentroid); // didn't do anything...
+   }
+   
+
+   public void doTransitionIntoLoadingForSingleLegBalance(RobotSide upcomingSupportSide)
+   {
+      // TODO Auto-generated method stub
       
-//      BipedSupportPolygons bipedSupportPolygons = couplingRegistry.getBipedSupportPolygons();
-//
-//      FrameConvexPolygon2d singleSupportFootPolygon = bipedSupportPolygons.getFootPolygonInAnkleZUp(stanceSide);    // processedSensors.getFootPolygons().get(stanceSide).getFrameConvexPolygon2dCopy();
-//      FramePoint2d singleSupportCentroid = singleSupportFootPolygon.getCentroidCopy();
-//
-//      FrameConvexPolygon2d supportPolygon = bipedSupportPolygons.getSupportPolygonInMidFeetZUp();
-//      FramePoint2d doubleSupportCentroid = getCenterOfBoundingBoxOfPolygon(supportPolygon).changeFrameCopy(singleSupportCentroid.getReferenceFrame());
-//
-//      singleSupportCentroid.sub(doubleSupportCentroid);
-//
-//      balanceSupportControlModule.setDesiredCoPOffset(singleSupportCentroid); // didn't do anything...
+   }
+
+   public void doTransitionIntoSingleLegBalance(RobotSide supportLeg)
+   {
+      // TODO Auto-generated method stub
+      
    }
 
    public void doTransitionOutOfEarlyStance(RobotSide stanceSide)
@@ -263,23 +279,38 @@ public class CommonStanceSubController implements StanceSubController
 
    public void doTransitionOutOfTerminalStance(RobotSide stanceSide)
    {
-//    doubleSupportDuration =
    }
 
    public void doTransitionOutOfUnloadLegToTransferIntoWalking(RobotSide stanceSide)
    {
+   }
+   
+
+   public void doTransitionOutOfLoadingForSingleLegBalance(RobotSide upcomingSupportSide)
+   {
+      // TODO Auto-generated method stub
+   }
+
+   public void doTransitionOutOfSingleLegBalance(RobotSide supportLeg)
+   {
+      // TODO Auto-generated method stub
    }
 
    public void doUnloadLegToTransferIntoWalking(LowerBodyTorques lowerBodyTorquesToPack, RobotSide supportLeg, double timeInState)
    {
       doDoubleSupportControl(lowerBodyTorquesToPack, supportLeg);
    }
-   
 
    public void doLoadingForSingleLegBalance(LowerBodyTorques lowerBodyTorques, RobotSide upcomingSupportSide, double timeInCurrentState)
    {
       // TODO Auto-generated method stub
-      
+
+   }
+
+   public void doSingleLegBalance(LowerBodyTorques lowerBodyTorques, RobotSide supportLeg, double timeInCurrentState)
+   {
+      // TODO Auto-generated method stub
+
    }
 
    public boolean isReadyToStartStopWalkingDoubleSupport(RobotSide loadingLeg, double timeInState)
@@ -330,7 +361,7 @@ public class CommonStanceSubController implements StanceSubController
          capturePointIsInside = capturePoint.getY() > -yCaptureToTransfer.getDoubleValue();
       else
          capturePointIsInside = capturePoint.getY() < yCaptureToTransfer.getDoubleValue();
-      
+
       if (isCapturePointOutsideBaseOfSupport())
          return true;
 
@@ -345,7 +376,7 @@ public class CommonStanceSubController implements StanceSubController
 
       return false;
    }
-   
+
    public boolean isDoneLoadingForSingleLegBalance(RobotSide upcomingSupportSide, double timeInCurrentState)
    {
       // TODO Auto-generated method stub
@@ -369,8 +400,10 @@ public class CommonStanceSubController implements StanceSubController
       if (WAIT_IN_LOADING_PRE_SWING_B)
       {
          boolean inStateLongEnough = timeInState > 0.2;
+
          return inStateLongEnough || isCapturePointOutsideBaseOfSupport();
-      } else
+      }
+      else
          return true;
    }
 
@@ -380,6 +413,7 @@ public class CommonStanceSubController implements StanceSubController
       FramePoint2d capturePoint = couplingRegistry.getCapturePoint().toFramePoint2d();
       capturePoint.changeFrame(supportPolygon.getReferenceFrame());
       boolean hasCapturePointLeftBaseOfSupport = !(supportPolygon.isPointInside(capturePoint));
+
       return hasCapturePointLeftBaseOfSupport;
    }
 
@@ -411,15 +445,15 @@ public class CommonStanceSubController implements StanceSubController
       balanceSupportControlModule.doDoubleSupportBalance(lowerBodyTorquesToPack, loadingLeg, zeroVelocity.toFrameVector2d(), desiredPelvisOrientation);
    }
 
-//   private static FramePoint2d getCenterOfBoundingBoxOfPolygon(FrameConvexPolygon2d supportPolygon)
-//   {
-//      BoundingBox2d boundingBox = supportPolygon.getBoundingBox();
-//      Point2d center = new Point2d();
-//      boundingBox.getCenterPointCopy(center);
-//      FramePoint2d doubleSupportCentroid = new FramePoint2d(ReferenceFrame.getWorldFrame(), center);
+// private static FramePoint2d getCenterOfBoundingBoxOfPolygon(FrameConvexPolygon2d supportPolygon)
+// {
+//    BoundingBox2d boundingBox = supportPolygon.getBoundingBox();
+//    Point2d center = new Point2d();
+//    boundingBox.getCenterPointCopy(center);
+//    FramePoint2d doubleSupportCentroid = new FramePoint2d(ReferenceFrame.getWorldFrame(), center);
 //
-//      return doubleSupportCentroid;
-//   }
+//    return doubleSupportCentroid;
+// }
 
    public void setParametersForR2()
    {

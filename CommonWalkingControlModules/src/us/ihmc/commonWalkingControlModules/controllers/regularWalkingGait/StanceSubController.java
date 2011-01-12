@@ -25,6 +25,9 @@ public interface StanceSubController
    public abstract void doUnloadLegToTransferIntoWalking(LowerBodyTorques lowerBodyTorquesToPack, RobotSide loadingLeg, double timeInState);
 
    public abstract void doLoadingForSingleLegBalance(LowerBodyTorques lowerBodyTorques, RobotSide upcomingSupportSide, double timeInCurrentState);
+   
+   public abstract void doSingleLegBalance(LowerBodyTorques lowerBodyTorques, RobotSide supportLeg, double timeInCurrentState);
+   
 
    public abstract boolean isDoneWithLoadingPreSwingA(RobotSide loadingLeg, double timeInState);
 
@@ -35,8 +38,7 @@ public interface StanceSubController
    public abstract boolean isDoneUnloadLegToTransferIntoWalking(RobotSide loadingLeg, double timeInState);
 
    public abstract boolean isDoneLoadingForSingleLegBalance(RobotSide upcomingSupportSide, double timeInCurrentState);
-
-   public abstract boolean canWeStopNowStanceSubController();
+   
 
    public abstract void doTransitionIntoLoadingPreSwingA(RobotSide loadingLeg);
 
@@ -53,7 +55,12 @@ public interface StanceSubController
    public abstract void doTransitionIntoStartStopWalkingDoubleSupport(RobotSide stanceSide);
 
    public abstract void doTransitionIntoUnloadLegToTransferIntoWalking(RobotSide stanceSide);
+   
+   public abstract void doTransitionIntoLoadingForSingleLegBalance(RobotSide upcomingSupportSide);
+   
+   public abstract void doTransitionIntoSingleLegBalance(RobotSide supportLeg);
 
+   
    public abstract void doTransitionOutOfLoadingPreSwingA(RobotSide loadingLeg);
 
    public abstract void doTransitionOutOfLoadingPreSwingB(RobotSide loadingLeg);
@@ -69,4 +76,11 @@ public interface StanceSubController
    public abstract void doTransitionOutOfStartStopWalkingDoubleSupport(RobotSide stanceSide);
 
    public abstract void doTransitionOutOfUnloadLegToTransferIntoWalking(RobotSide stanceSide);
+
+   public abstract void doTransitionOutOfLoadingForSingleLegBalance(RobotSide upcomingSupportSide);
+   
+   public abstract void doTransitionOutOfSingleLegBalance(RobotSide supportLeg);
+
+   
+   public abstract boolean canWeStopNowStanceSubController();
 }
