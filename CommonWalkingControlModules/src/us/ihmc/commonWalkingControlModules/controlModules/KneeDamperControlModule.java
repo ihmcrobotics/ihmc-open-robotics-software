@@ -25,12 +25,10 @@ public class KneeDamperControlModule
    {
       RobotSide robotSide = supportLegTorquesToPack.getRobotSide();
 
-      double kneeTorque = supportLegTorquesToPack.getTorque(LegJointName.KNEE);
-      kneeTorque -= processedSensors.getLegJointVelocity(robotSide, LegJointName.KNEE) * bKneeDamping.getDoubleValue();
+      double qd = processedSensors.getLegJointVelocity(robotSide, LegJointName.KNEE);
+      double kneeDampingTorque = -qd * bKneeDamping.getDoubleValue() - ffKneeToStraighten.getDoubleValue();
 
-      kneeTorque -= ffKneeToStraighten.getDoubleValue();
-
-      supportLegTorquesToPack.addTorque(LegJointName.KNEE, kneeTorque);
+      supportLegTorquesToPack.addTorque(LegJointName.KNEE, kneeDampingTorque);
    }
    
    public void setParametersForR2()
