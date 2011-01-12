@@ -67,6 +67,7 @@ public class CommonStanceSubController implements StanceSubController
 
    private final SupportLegAndLegToTrustForVelocity supportLegAndLegToTrustForVelocity;    // FIXME: update things
 
+   private final double footWidth;
    private boolean WAIT_IN_LOADING_PRE_SWING_B;
 
 
@@ -75,7 +76,7 @@ public class CommonStanceSubController implements StanceSubController
                                     DesiredPelvisOrientationControlModule desiredPelvisOrientationControlModule,
                                     BalanceSupportControlModule balanceSupportControlModule, FootOrientationControlModule footOrientationControlModule,
                                     KneeExtensionControlModule kneeExtensionControlModule,
-                                    SupportLegAndLegToTrustForVelocity supportLegAndLegToTrustForVelocity, YoVariableRegistry parentRegistry)
+                                    SupportLegAndLegToTrustForVelocity supportLegAndLegToTrustForVelocity, YoVariableRegistry parentRegistry, double footWidth)
    {
       this.couplingRegistry = couplingRegistry;
       this.referenceFrames = referenceFrames;
@@ -86,6 +87,7 @@ public class CommonStanceSubController implements StanceSubController
       this.desiredHeadingControlModule = desiredHeadingControlModule;
       this.kneeExtensionControlModule = kneeExtensionControlModule;
       this.supportLegAndLegToTrustForVelocity = supportLegAndLegToTrustForVelocity;
+      this.footWidth = footWidth;
 
       doubleSupportDuration.set(0.75);    // FIXME: This is a hack but allows to compute the first desired step
       couplingRegistry.setDoubleSupportDuration(doubleSupportDuration);
@@ -100,7 +102,7 @@ public class CommonStanceSubController implements StanceSubController
 
    public void doEarlyStance(LegTorques legTorquesToPackForStanceSide, double timeInState)
    {
-      doSingleSupportControl(legTorquesToPackForStanceSide);
+      doSingleSupportControl(legTorquesToPackForStanceSide, true);
 
       // Here is where we want to add the torque for the kneeExtensionController
       kneeExtensionControlModule.doEarlyStanceKneeExtensionControl(legTorquesToPackForStanceSide);
@@ -109,7 +111,7 @@ public class CommonStanceSubController implements StanceSubController
 
    public void doLateStance(LegTorques legTorquesToPackForStanceSide, double timeInState)
    {
-      doSingleSupportControl(legTorquesToPackForStanceSide);
+      doSingleSupportControl(legTorquesToPackForStanceSide, true);
       footOrientationControlModule.addAdditionalTorqueForFootOrientationControl(legTorquesToPackForStanceSide, timeInState);
       kneeExtensionControlModule.doLateStanceKneeExtensionControl(legTorquesToPackForStanceSide);
 
@@ -123,7 +125,7 @@ public class CommonStanceSubController implements StanceSubController
 
 //    doSingleSupportControl(legTorquesToPackForStanceSide);
 
-      doSingleSupportControl(legTorquesToPackForLoadingLeg);
+      doSingleSupportControl(legTorquesToPackForLoadingLeg, true);
 
       footOrientationControlModule.addAdditionalTorqueForFootOrientationControl(legTorquesToPackForLoadingLeg,
               timeInState + timeSpentInLateStance.getDoubleValue());
@@ -157,13 +159,28 @@ public class CommonStanceSubController implements StanceSubController
 
    public void doLoadingPreSwingC(LegTorques legTorquesToPackForStanceSide, RobotSide loadingLeg, double timeInState)
    {
-      doSingleSupportControl(legTorquesToPackForStanceSide);
+      doSingleSupportControl(legTorquesToPackForStanceSide, true);
       kneeExtensionControlModule.doLoadingControl(legTorquesToPackForStanceSide);
    }
 
    public void doStartWalkingDoubleSupport(LowerBodyTorques lowerBodyTorquesToPack, RobotSide loadingLeg, double timeInState)
    {
       doDoubleSupportControl(lowerBodyTorquesToPack, loadingLeg);
+   }
+
+   public void doUnloadLegToTransferIntoWalking(LowerBodyTorques lowerBodyTorquesToPack, RobotSide supportLeg, double timeInState)
+   {
+      doDoubleSupportControl(lowerBodyTorquesToPack, supportLeg);
+   }
+
+   public void doLoadingForSingleLegBalance(LowerBodyTorques lowerBodyTorques, RobotSide upcomingSupportSide, double timeInCurrentState)
+   {
+      doDoubleSupportControl(lowerBodyTorques, upcomingSupportSide);
+   }
+
+   public void doSingleLegBalance(LegTorques legTorquesToPack, RobotSide supportLeg, double timeInCurrentState)
+   {
+      doSingleSupportControl(legTorquesToPack, false);
    }
 
    public void doTransitionIntoEarlyStance(RobotSide stanceSide)
@@ -237,18 +254,18 @@ public class CommonStanceSubController implements StanceSubController
 //
 //    balanceSupportControlModule.setDesiredCoPOffset(singleSupportCentroid); // didn't do anything...
    }
-   
+
 
    public void doTransitionIntoLoadingForSingleLegBalance(RobotSide upcomingSupportSide)
    {
       // TODO Auto-generated method stub
-      
+
    }
 
    public void doTransitionIntoSingleLegBalance(RobotSide supportLeg)
    {
       // TODO Auto-generated method stub
-      
+
    }
 
    public void doTransitionOutOfEarlyStance(RobotSide stanceSide)
@@ -284,7 +301,7 @@ public class CommonStanceSubController implements StanceSubController
    public void doTransitionOutOfUnloadLegToTransferIntoWalking(RobotSide stanceSide)
    {
    }
-   
+
 
    public void doTransitionOutOfLoadingForSingleLegBalance(RobotSide upcomingSupportSide)
    {
@@ -294,23 +311,6 @@ public class CommonStanceSubController implements StanceSubController
    public void doTransitionOutOfSingleLegBalance(RobotSide supportLeg)
    {
       // TODO Auto-generated method stub
-   }
-
-   public void doUnloadLegToTransferIntoWalking(LowerBodyTorques lowerBodyTorquesToPack, RobotSide supportLeg, double timeInState)
-   {
-      doDoubleSupportControl(lowerBodyTorquesToPack, supportLeg);
-   }
-
-   public void doLoadingForSingleLegBalance(LowerBodyTorques lowerBodyTorques, RobotSide upcomingSupportSide, double timeInCurrentState)
-   {
-      // TODO Auto-generated method stub
-
-   }
-
-   public void doSingleLegBalance(LowerBodyTorques lowerBodyTorques, RobotSide supportLeg, double timeInCurrentState)
-   {
-      // TODO Auto-generated method stub
-
    }
 
    public boolean isReadyToStartStopWalkingDoubleSupport(RobotSide loadingLeg, double timeInState)
@@ -379,8 +379,16 @@ public class CommonStanceSubController implements StanceSubController
 
    public boolean isDoneLoadingForSingleLegBalance(RobotSide upcomingSupportSide, double timeInCurrentState)
    {
-      // TODO Auto-generated method stub
-      return false;
+      FramePoint2d capturePoint = couplingRegistry.getCapturePoint().toFramePoint2d();
+      FramePoint2d sweetSpot = couplingRegistry.getBipedSupportPolygons().getSweetSpotCopy(upcomingSupportSide);
+      sweetSpot.changeFrame(capturePoint.getReferenceFrame());
+
+      double doneLoadingForSingleLegBalanceSafetyFactor = 4.0;
+      double minDistanceToSweetSpot = footWidth / doneLoadingForSingleLegBalanceSafetyFactor;
+      boolean isCapturePointCloseEnoughToSweetSpot = capturePoint.distance(sweetSpot) < minDistanceToSweetSpot;
+      boolean inStateLongEnough = timeInCurrentState > 1.0;
+
+      return isCapturePointCloseEnoughToSweetSpot && inStateLongEnough;
    }
 
    private double getCaptureXToFinishDoubleSupport(FrameVector2d desiredVelocity, FrameVector2d velocityError)
@@ -417,9 +425,9 @@ public class CommonStanceSubController implements StanceSubController
       return hasCapturePointLeftBaseOfSupport;
    }
 
-   private void doSingleSupportControl(LegTorques legTorquesToPackForStanceSide)
+   private void doSingleSupportControl(LegTorques legTorquesToPackForStanceSide, boolean walk)
    {
-      FrameVector2d desiredVelocity = desiredVelocityControlModule.getDesiredVelocity();
+      FrameVector2d desiredVelocity = walk ? desiredVelocityControlModule.getDesiredVelocity() : new FrameVector2d(ReferenceFrame.getWorldFrame());
       Orientation desiredPelvisOrientation =
          desiredPelvisOrientationControlModule.getDesiredPelvisOrientationSingleSupport(legTorquesToPackForStanceSide.getRobotSide());
       Wrench upperBodyWrench = couplingRegistry.getUpperBodyWrench();
