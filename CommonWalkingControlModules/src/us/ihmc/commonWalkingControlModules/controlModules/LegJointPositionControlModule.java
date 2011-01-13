@@ -31,7 +31,6 @@ public class LegJointPositionControlModule
    private final ProcessedSensorsInterface processedSensors;
    private final YoVariableRegistry registry;
 
-   private final DoubleYoVariable jacobianDeterminant;
    private final DoubleYoVariable desiredVelocityScale;
 
    private final EnumMap<LegJointName, DoubleYoVariable> kpGains = ContainerTools.createEnumMap(LegJointName.class);
@@ -75,7 +74,6 @@ public class LegJointPositionControlModule
       String robotSideStartString = robotSide.getCamelCaseNameForStartOfExpression();
       String robotSideMiddleString = robotSide.getCamelCaseNameForMiddleOfExpression();
 
-      jacobianDeterminant = new DoubleYoVariable(robotSideStartString + "JacobianDeterminant", registry);
       desiredVelocityScale = new DoubleYoVariable(robotSideStartString + "DesiredVelocityScale", registry);
 
       for (LegJointName legJointName : legJointNames)
@@ -192,14 +190,12 @@ public class LegJointPositionControlModule
       softScaleFactor.set(0.25);    // (0.05);
    }
 
-   public void packTorquesForLegJointsPositionControl(LegTorques legTorquesToPackForSwingLeg, LegJointPositions desiredLegJointPositions,
-           LegJointVelocities desiredLegJointVelocities, double jacobianDeterminant)
+   public void packTorquesForLegJointsPositionControl(double scaleFactorBasedOnJacobianDeterminant, LegTorques legTorquesToPackForSwingLeg, LegJointPositions desiredLegJointPositions,
+           LegJointVelocities desiredLegJointVelocities)
    {
       // RobotSide checks
       legTorquesToPackForSwingLeg.getRobotSide().checkRobotSideMatch(desiredLegJointPositions.getRobotSide());
       legTorquesToPackForSwingLeg.getRobotSide().checkRobotSideMatch(robotSide);
-
-      this.jacobianDeterminant.set(jacobianDeterminant);
 
       if (desiredLegJointVelocities == null)
       {
@@ -214,10 +210,8 @@ public class LegJointPositionControlModule
 
          double actualJointPosition = processedSensors.getLegJointPosition(robotSide, legJointName);
 
-         double minJacobianDeterminant = 0.03;
-         desiredVelocityScale.set((Math.abs(jacobianDeterminant) - minJacobianDeterminant) / minJacobianDeterminant);    // avoid singularity problem
-         desiredVelocityScale.set(MathTools.clipToMinMax(desiredVelocityScale.getDoubleValue(), 0.0, 1.0));
-
+         desiredVelocityScale.set(MathTools.clipToMinMax(scaleFactorBasedOnJacobianDeterminant, 0.0, 1.0));
+         
          double kpGain = kpGains.get(legJointName).getDoubleValue() * legGainScale.getDoubleValue();
          double kdGain = kdGains.get(legJointName).getDoubleValue() * legGainScale.getDoubleValue();    // * kdScale.getDoubleValue();
 
