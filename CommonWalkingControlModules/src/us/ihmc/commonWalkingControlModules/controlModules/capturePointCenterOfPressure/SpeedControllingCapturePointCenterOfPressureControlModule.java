@@ -46,7 +46,7 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
    private DoubleYoVariable doubleSupportCaptureKp = new DoubleYoVariable("doubleSupportCaptureKp", registry);
 
    private final DoubleYoVariable alphaDesiredCoP = new DoubleYoVariable("alphaDesiredCoP", registry);
-   private final AlphaFilteredYoFramePoint2d desiredCenterOfPressure = AlphaFilteredYoFramePoint2d.createAlphaFilteredYoFramePoint2d("desiredCenterOfPressure", "",
+   private final AlphaFilteredYoFramePoint2d filteredDesiredCenterOfPressure = AlphaFilteredYoFramePoint2d.createAlphaFilteredYoFramePoint2d("desiredCenterOfPressure", "",
          registry, alphaDesiredCoP, ReferenceFrame.getWorldFrame());
 
    private final BooleanYoVariable lastTickSingleSupport = new BooleanYoVariable("lastTickSingleSupport", registry);
@@ -75,7 +75,7 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
       {
          DynamicGraphicObjectsList dynamicGraphicObjectList = new DynamicGraphicObjectsList("CapturePointController");
 
-         centerOfPressureDesiredWorldGraphicPosition = new DynamicGraphicPosition("Desired Center of Pressure", desiredCenterOfPressure, 0.012,
+         centerOfPressureDesiredWorldGraphicPosition = new DynamicGraphicPosition("Desired Center of Pressure", filteredDesiredCenterOfPressure, 0.012,
                  YoAppearance.Gray(), DynamicGraphicPosition.GraphicType.CROSS);
 
          dynamicGraphicObjectList.add(centerOfPressureDesiredWorldGraphicPosition);
@@ -115,7 +115,7 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
 
    private void resetCoPFilter()
    {
-      desiredCenterOfPressure.reset();
+      filteredDesiredCenterOfPressure.reset();
    }
 
    private FrameLine2d createSpeedControlLine(FrameVector2d currentVelocity, FrameVector2d desiredVelocity, FramePoint centerOfMassPosition,
@@ -215,7 +215,7 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
             FrameLine2d iCPLine = new FrameLine2d(currentCapturePoint2d, farthestToDesiredCP);
             capturePointLine.setFrameLine2d(iCPLine.changeFrameCopy(world));
             farthestToDesiredCP.changeFrame(world);
-            this.desiredCenterOfPressure.update(farthestToDesiredCP);
+            this.filteredDesiredCenterOfPressure.update(farthestToDesiredCP);
 
             return;
          }
@@ -261,7 +261,7 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
       // FrameLineSegment2d desiredCaptureToDesiredCop = new FrameLineSegment2d(desiredCapturePoint2d, centerOfPressureDesired);
       centerOfPressureDesired = movePointInsidePolygon(centerOfPressureDesired, supportPolygon, controlLine);
       centerOfPressureDesired.changeFrame(world);
-      this.desiredCenterOfPressure.update(centerOfPressureDesired);
+      this.filteredDesiredCenterOfPressure.update(centerOfPressureDesired);
    }
 
    public void controlSingleSupport(FramePoint currentCapturePoint, FrameLineSegment2d guideLine, FramePoint desiredCapturePoint, RobotSide supportLeg,
@@ -292,54 +292,61 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
          throw new RuntimeException("The support polygon cannot be null.");
       }
 
-      if (guideLine == null)
-      {
-         throw new RuntimeException("Needs a guideline");
-      }
 
-      // Plot stuff
-      guideLineWorld.setFrameLineSegment2d(guideLine.changeFrameCopy(world));
-
-
-      FramePoint2d currentCapturePoint2d = currentCapturePoint.toFramePoint2d();
-
-      // Foot stuff:
       FrameConvexPolygon2d footPolygon = supportPolygons.getFootPolygonInAnkleZUp(supportLeg);
+      FramePoint2d currentCapturePoint2d = currentCapturePoint.toFramePoint2d();
+      
+      boolean stayInDoubleSupport = (desiredVelocity.lengthSquared() == 0.0);
+      FramePoint2d desiredCenterOfPressure;
+      if (stayInDoubleSupport)
+      {
+         FramePoint2d desiredCapturePoint2d = desiredCapturePoint.toFramePoint2d();
+         desiredCenterOfPressure = new FramePoint2d(desiredCapturePoint2d);
+         FrameVector2d control = new FrameVector2d(currentCapturePoint2d);
+         control.sub(desiredCapturePoint2d);
+         control.scale(doubleSupportCaptureKp.getDoubleValue());
+         desiredCenterOfPressure.add(control);
+      }
+      else
+      {
+         // Create parallel line
+         FramePoint2d captureProjectedOntoGuideLine = guideLine.orthogonalProjectionCopy(currentCapturePoint2d);
+         
+         FrameVector2d projectedToCurrent = new FrameVector2d(captureProjectedOntoGuideLine, currentCapturePoint2d);
+         projectedToCurrent.scale(kCaptureGuide.getDoubleValue());
+
+         FramePoint2d shiftedPoint = new FramePoint2d(captureProjectedOntoGuideLine);
+         shiftedPoint.add(projectedToCurrent);
+
+         FrameVector2d frameVector2d = guideLine.getVectorCopy();
+         FrameLine2d shiftedParallelLine = new FrameLine2d(shiftedPoint, frameVector2d);
 
 
-      // Create parallel line
-      FramePoint2d captureProjectedOntoGuideLine = guideLine.orthogonalProjectionCopy(currentCapturePoint2d);
+         // Create speed control line
+         FrameLine2d massLine = createSpeedControlLine(currentVelocity, desiredVelocity, centerOfMassPositionInZUpFrame, referenceFrame);
+         desiredCenterOfPressure = shiftedParallelLine.intersectionWith(massLine);
 
-      FrameVector2d projectedToCurrent = new FrameVector2d(captureProjectedOntoGuideLine, currentCapturePoint2d);
-      projectedToCurrent.scale(kCaptureGuide.getDoubleValue());
+         desiredCenterOfPressure.changeFrame(footPolygon.getReferenceFrame());
+         
+         // Plot stuff
+         guideLineWorld.setFrameLineSegment2d(guideLine.changeFrameCopy(world));      
+         parallelLineWorld.setFrameLine2d(shiftedParallelLine.changeFrameCopy(world));
+         
+         // FrameLineSegment2d desiredCaptureToDesiredCop = new FrameLineSegment2d(desiredCapturePoint2d, centerOfPressureDesired);
 
-      FramePoint2d shiftedPoint = new FramePoint2d(captureProjectedOntoGuideLine);
-      shiftedPoint.add(projectedToCurrent);
-
-      FrameVector2d frameVector2d = guideLine.getVectorCopy();
-      FrameLine2d shiftedParallelLine = new FrameLine2d(shiftedPoint, frameVector2d);
-
-      parallelLineWorld.setFrameLine2d(shiftedParallelLine.changeFrameCopy(world));
-
-      // Create speed control line
-      FrameLine2d massLine = createSpeedControlLine(currentVelocity, desiredVelocity, centerOfMassPositionInZUpFrame, referenceFrame);
-      FramePoint2d desiredCenterOfPressure = shiftedParallelLine.intersectionWith(massLine);
-
-      desiredCenterOfPressure.changeFrame(footPolygon.getReferenceFrame());
-
-      // FrameLineSegment2d desiredCaptureToDesiredCop = new FrameLineSegment2d(desiredCapturePoint2d, centerOfPressureDesired);
-      desiredCenterOfPressure = movePointInsidePolygon(desiredCenterOfPressure, footPolygon, shiftedParallelLine);
+         desiredCenterOfPressure = movePointInsidePolygon(desiredCenterOfPressure, footPolygon, shiftedParallelLine);
+      }
       desiredCenterOfPressure.changeFrame(world);
-      this.desiredCenterOfPressure.update(desiredCenterOfPressure);
+      this.filteredDesiredCenterOfPressure.update(desiredCenterOfPressure);
    }
 
    public void packDesiredCenterOfPressure(FramePoint desiredCenterOfPressureToPack)
    {
-      double x = desiredCenterOfPressure.getX();
-      double y = desiredCenterOfPressure.getY();
+      double x = filteredDesiredCenterOfPressure.getX();
+      double y = filteredDesiredCenterOfPressure.getY();
       double z = 0.0;
 
-      desiredCenterOfPressureToPack.set(desiredCenterOfPressure.getReferenceFrame(), x, y, z);
+      desiredCenterOfPressureToPack.set(filteredDesiredCenterOfPressure.getReferenceFrame(), x, y, z);
    }
 
    public void setParametersForR2()
