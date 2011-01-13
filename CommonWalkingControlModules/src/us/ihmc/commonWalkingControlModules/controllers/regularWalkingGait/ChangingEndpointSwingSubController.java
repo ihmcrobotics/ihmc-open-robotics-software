@@ -309,8 +309,6 @@ public class ChangingEndpointSwingSubController implements SwingSubController
 
    public void doTransitionIntoSwingInAir(RobotSide swingLeg)
    {
-      // TODO Auto-generated method stub
-
    }
 
    public void doTransitionOutOfInitialSwing(RobotSide swingSide)

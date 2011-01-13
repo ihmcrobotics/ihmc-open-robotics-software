@@ -86,8 +86,6 @@ public class VelocityAndHeadingDesiredStepLocationCalculator implements DesiredS
       stepWidthSlopeProfile = 0.0;
       stepWidthYInterceptProfile = 0.0;
 
-      footstepPosition = new FramePoint(desiredHeadingControlModule.getDesiredHeadingFrame());
-
       swingFootIsInsideCaptureRegion = new BooleanYoVariable("swingFootIsInsideCaptureRegion", parentRegistry);
       nextStepIsInsideCaptureRegion = new BooleanYoVariable("nextStepIsInsideCaptureRegion", parentRegistry);
 
@@ -230,33 +228,35 @@ public class VelocityAndHeadingDesiredStepLocationCalculator implements DesiredS
 
    private void checkIfStepIntersectCaptureRegion(FrameConvexPolygon2d captureRegion, FramePoint nextStep, RobotSide swingLegSide)
    {
-      if (CHECK_STEP_INTO_CAPTURE_REGION)
+      if (nextStep != null) // nextStep == null if not initialized at start of swing first, happens e.g. when balancing on one leg 
       {
-         if (captureRegion == null)
+         if (CHECK_STEP_INTO_CAPTURE_REGION)
          {
-            swingFootIsInsideCaptureRegion.set(false);
-            nextStepIsInsideCaptureRegion.set(false);
+            if (captureRegion == null)
+            {
+               swingFootIsInsideCaptureRegion.set(false);
+               nextStepIsInsideCaptureRegion.set(false);
+
+               footstepPosition = nextStep;
+            }
+
+            else
+            {
+               FrameConvexPolygon2d nextStepFootPolygon = new FrameConvexPolygon2d(buildNextStepFootPolygon(nextStep.toFramePoint2d()));
+
+               if (nextStepFootPolygon.intersectionWith(captureRegion) == null)
+               {
+                  nextStepIsInsideCaptureRegion.set(false);
+                  projectDesiredStepLocationIntoCaptureRegion(nextStep, captureRegion);
+               }
+               else
+                  nextStepIsInsideCaptureRegion.set(true);
+
+            }
 
             footstepPosition = nextStep;
-         }
-
-         else
-         {
-            FrameConvexPolygon2d nextStepFootPolygon = new FrameConvexPolygon2d(buildNextStepFootPolygon(nextStep.toFramePoint2d()));
-
-            if (nextStepFootPolygon.intersectionWith(captureRegion) == null)
-            {
-               nextStepIsInsideCaptureRegion.set(false);
-               projectDesiredStepLocationIntoCaptureRegion(nextStep, captureRegion);
-            }
-            else
-               nextStepIsInsideCaptureRegion.set(true);
-
-         }
-
-         footstepPosition = nextStep;
+         }         
       }
-
    }
 
    private void projectDesiredStepLocationIntoCaptureRegion(FramePoint nextStep, FrameConvexPolygon2d captureRegion)
