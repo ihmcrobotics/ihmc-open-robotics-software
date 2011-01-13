@@ -2,7 +2,6 @@ package us.ihmc.commonWalkingControlModules.configurations;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.EnumMap;
 import java.util.Iterator;
 
 import us.ihmc.commonWalkingControlModules.RobotSide;
@@ -73,18 +72,6 @@ public class BalanceOnOneLegConfiguration
       EvenDistributor swingYs = new EvenDistributor(swingMin[1], swingMax[1], swingXYZIterations);
       EvenDistributor swingZs = new EvenDistributor(swingMin[2], swingMax[2], swingXYZIterations);
 
-      EnumMap<DistributorType, EvenDistributor> distributors = new EnumMap<DistributorType, EvenDistributor>(DistributorType.class);
-      distributors.put(DistributorType.CAPTURE_X, captureXs);
-      distributors.put(DistributorType.CAPTURE_Y, captureYs);
-      distributors.put(DistributorType.YAW, yaws);
-      distributors.put(DistributorType.PITCH, pitches);
-      distributors.put(DistributorType.ROLL, rolls);
-      distributors.put(DistributorType.SWING_X, swingXs);
-      distributors.put(DistributorType.SWING_Y, swingYs);
-      distributors.put(DistributorType.SWING_Z, swingZs);
-
-
-
       for (Double captureX : captureXs)
       {
          for (Double captureY : captureYs)
@@ -136,13 +123,6 @@ public class BalanceOnOneLegConfiguration
       {
          System.out.println(configuration);
       }
-
-   }
-
-
-   private static enum DistributorType
-   {
-      YAW, PITCH, ROLL, CAPTURE_X, CAPTURE_Y, SWING_X, SWING_Y, SWING_Z;
    }
 
    private static class EvenDistributor implements Iterable<Double>
@@ -204,8 +184,4 @@ public class BalanceOnOneLegConfiguration
       }
 
    }
-
-
-   ;
-
 }
