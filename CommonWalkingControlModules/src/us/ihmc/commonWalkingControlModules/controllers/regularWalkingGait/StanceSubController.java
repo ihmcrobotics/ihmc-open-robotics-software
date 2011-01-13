@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait;
 
 import us.ihmc.commonWalkingControlModules.RobotSide;
+import us.ihmc.commonWalkingControlModules.configurations.BalanceOnOneLegConfiguration;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegTorques;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LowerBodyTorques;
 
@@ -58,7 +59,7 @@ public interface StanceSubController
    
    public abstract void doTransitionIntoLoadingForSingleLegBalance(RobotSide upcomingSupportSide);
    
-   public abstract void doTransitionIntoSingleLegBalance(RobotSide supportLeg);
+   public abstract void doTransitionIntoSingleLegBalance(RobotSide supportLeg, BalanceOnOneLegConfiguration currentConfiguration);
 
    
    public abstract void doTransitionOutOfLoadingPreSwingA(RobotSide loadingLeg);

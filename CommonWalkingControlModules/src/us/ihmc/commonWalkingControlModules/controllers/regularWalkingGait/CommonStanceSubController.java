@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait;
 
 import us.ihmc.commonWalkingControlModules.RobotSide;
+import us.ihmc.commonWalkingControlModules.configurations.BalanceOnOneLegConfiguration;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.DesiredPelvisOrientationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.BalanceSupportControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.FootOrientationControlModule;
@@ -262,7 +263,7 @@ public class CommonStanceSubController implements StanceSubController
 
    }
 
-   public void doTransitionIntoSingleLegBalance(RobotSide supportLeg)
+   public void doTransitionIntoSingleLegBalance(RobotSide supportLeg, BalanceOnOneLegConfiguration currentConfiguration)
    {
       // TODO Auto-generated method stub
 

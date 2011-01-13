@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait;
 
 import us.ihmc.commonWalkingControlModules.RobotSide;
+import us.ihmc.commonWalkingControlModules.configurations.BalanceOnOneLegConfiguration;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegTorques;
 
 public interface SwingSubController
@@ -35,7 +36,7 @@ public interface SwingSubController
 
    public abstract void doTransitionIntoTerminalSwing(RobotSide swingSide);
    
-   public abstract void doTransitionIntoSwingInAir(RobotSide swingLeg);
+   public abstract void doTransitionIntoSwingInAir(RobotSide swingLeg, BalanceOnOneLegConfiguration currentConfiguration);
    
 
    public abstract void doTransitionOutOfPreSwing(RobotSide swingSide);

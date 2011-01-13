@@ -6,6 +6,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.RobotSide;
 import us.ihmc.commonWalkingControlModules.SideDependentList;
+import us.ihmc.commonWalkingControlModules.configurations.BalanceOnOneLegConfiguration;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.PreSwingControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.LegJointPositionControlModule;
 import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
@@ -214,9 +215,10 @@ public class ChangingEndpointSwingSubController implements SwingSubController
    public boolean isReadyForDoubleSupport()
    {
       FramePoint swingAnkle = new FramePoint(referenceFrames.getFootFrame(swingSide));
-      swingAnkle.changeFrame(referenceFrames.getFootFrame(swingSide.getOppositeSide()));
+      swingAnkle.changeFrame(referenceFrames.getAnkleZUpFrame(swingSide.getOppositeSide()));
       double footHeight = swingAnkle.getZ();
       double maxFootHeight = 0.02;
+
       return swingInAirTrajectoryGenerator.isDone() && (footHeight < maxFootHeight);
    }
 
@@ -324,23 +326,22 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       legJointPositionControlModules.get(swingSide).setAnkleGainsSoft();
    }
 
-   public void doTransitionIntoSwingInAir(RobotSide swingLeg)
+   public void doTransitionIntoSwingInAir(RobotSide swingLeg, BalanceOnOneLegConfiguration currentConfiguration)
    {
       setEstimatedSwingTimeRemaining(0.0);
 
-      // TODO: actually swing to some *other* place
       ReferenceFrame trajectoryGeneratorReferenceFrame = swingInAirTrajectoryGenerator.getReferenceFrame();
 
       FramePoint currentPosition = new FramePoint(referenceFrames.getFootFrame(swingLeg));
       currentPosition.changeFrame(trajectoryGeneratorReferenceFrame);
-      
+
       FrameVector currentVelocity = ankleVelocityCalculators.get(swingLeg).getAnkleVelocityInWorldFrame();
       currentVelocity.changeFrame(trajectoryGeneratorReferenceFrame);
-      
-      FramePoint finalDesiredPosition = new FramePoint(currentPosition);
-      double footLiftHeight = 0.2;
-      finalDesiredPosition.setZ(finalDesiredPosition.getZ() + footLiftHeight);
-      swingInAirTrajectoryGenerator.initialize(currentPosition, currentVelocity, finalDesiredPosition );
+
+      FramePoint finalDesiredPosition = currentConfiguration.getDesiredSwingFootPosition();
+      finalDesiredPosition.changeFrame(trajectoryGeneratorReferenceFrame);
+
+      swingInAirTrajectoryGenerator.initialize(currentPosition, currentVelocity, finalDesiredPosition);
    }
 
    public void doTransitionOutOfInitialSwing(RobotSide swingSide)
@@ -418,7 +419,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
 
       return ((footOnGround && minimumTerminalSwingTimePassed) || maximumTerminalSwingTimePassed || (capturePointInsideFoot && minimumTerminalSwingTimePassed));
    }
-   
+
    public boolean isDoneWithSwingInAir()
    {
       return swingInAirTrajectoryGenerator.isDone();
