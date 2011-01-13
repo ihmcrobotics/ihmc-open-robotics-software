@@ -66,6 +66,7 @@ public abstract class RegularWalkingGaitAbstractController
                                                                        "Current support leg. Null if double support", childRegistry, RobotSide.class);
    protected final EnumYoVariable<RobotSide> swingLegYoVariable = EnumYoVariable.create("swingLeg", "Current support leg. Null if double support",
                                                                      RobotSide.class, childRegistry);
+   protected final EnumYoVariable<RobotSide> oneLegBalanceSide = new EnumYoVariable<RobotSide>("oneLegBalanceSide", childRegistry, RobotSide.class);
 
    private final String name;
 
@@ -794,11 +795,19 @@ public abstract class RegularWalkingGaitAbstractController
          }
       };
 
-      StateTransitionCondition toSingleLegBalanceCondition = new StateTransitionCondition()
+      StateTransitionCondition toLeftSingleLegBalanceCondition = new StateTransitionCondition()
       {
          public boolean checkCondition()
          {
-            return balanceOnOneLeg.getBooleanValue();
+            return balanceOnOneLeg.getBooleanValue() && (oneLegBalanceSide.getEnumValue() == RobotSide.LEFT);
+         }
+      };
+
+      StateTransitionCondition toRightSingleLegBalanceCondition = new StateTransitionCondition()
+      {
+         public boolean checkCondition()
+         {
+            return balanceOnOneLeg.getBooleanValue() && (oneLegBalanceSide.getEnumValue() == RobotSide.RIGHT);
          }
       };
 
@@ -838,9 +847,9 @@ public abstract class RegularWalkingGaitAbstractController
       StateTransition toStopWalkingRightLoadingState = new StateTransition(stopWalkingRightLoadingState.getStateEnum(), stopWalkingCondition);
 
       StateTransition toLeftLoadingForSingleLegBalanceState = new StateTransition(leftLoadingForSingleLegBalanceState.getStateEnum(),
-                                                                 toSingleLegBalanceCondition);
+                                                                 toLeftSingleLegBalanceCondition);
       StateTransition toRightLoadingForSingleLegBalanceState = new StateTransition(rightLoadingForSingleLegBalanceState.getStateEnum(),
-                                                                  toSingleLegBalanceCondition);
+                                                                  toRightSingleLegBalanceCondition);
 
       StateTransition toLeftSingleLegBalanceRightSwingInAirState = new StateTransition(leftSingleLegBalanceRightSwingInAirState.getStateEnum(),
                                                                       swingInAirAgainCondition);
