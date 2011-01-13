@@ -154,7 +154,8 @@ public class ChangingEndpointSwingSubController implements SwingSubController
            SideDependentList<DesiredJointAccelerationCalculator> desiredJointAccelerationCalculators,
            LegInverseKinematicsCalculator inverseKinematicsCalculator, SideDependentList<AnkleVelocityCalculator> ankleVelocityCalculators,
            GUISetterUpperRegistry guiSetterUpperRegistry, SideDependentList<FootSwitchInterface> footSwitches,
-           CartesianTrajectoryGenerator walkingCartesianTrajectoryGenerator, CartesianTrajectoryGenerator swingInAirCartesianTrajectoryGenerator, PreSwingControlModule preSwingControlModule, double controlDT)
+           CartesianTrajectoryGenerator walkingCartesianTrajectoryGenerator, CartesianTrajectoryGenerator swingInAirCartesianTrajectoryGenerator,
+           PreSwingControlModule preSwingControlModule, double controlDT)
    {
       this.processedSensors = processedSensors;
       this.referenceFrames = referenceFrames;
@@ -208,7 +209,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
    {
       return true;
    }
-   
+
    public boolean isReadyForDoubleSupport()
    {
       // TODO Auto-generated method stub
@@ -236,7 +237,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
    {
       computeFootPosVelAcc(walkingTrajectoryGenerator, timeInState + timeSpentInInitialSwing.getDoubleValue());
       computeSwingLegTorques(legTorquesToPackForSwingLeg);
-      setEstimatedSwingTimeRemaining(swingDuration.getDoubleValue() - timeInState); // TODO: weird, need to fix
+      setEstimatedSwingTimeRemaining(swingDuration.getDoubleValue() - timeInState);    // TODO: weird, need to fix
       timeSpentInMidSwing.set(timeInState);
    }
 
@@ -314,11 +315,20 @@ public class ChangingEndpointSwingSubController implements SwingSubController
    public void doTransitionIntoSwingInAir(RobotSide swingLeg)
    {
       setEstimatedSwingTimeRemaining(0.0);
+
       // TODO: actually swing to some *other* place
+      ReferenceFrame trajectoryGeneratorReferenceFrame = swingInAirTrajectoryGenerator.getReferenceFrame();
+
       FramePoint currentPosition = new FramePoint(referenceFrames.getFootFrame(swingLeg));
-      currentPosition.changeFrame(swingInAirTrajectoryGenerator.getReferenceFrame());
-      FrameVector initialVelocity = new FrameVector(swingInAirTrajectoryGenerator.getReferenceFrame());
-      swingInAirTrajectoryGenerator.initialize(currentPosition, initialVelocity, currentPosition);
+      currentPosition.changeFrame(trajectoryGeneratorReferenceFrame);
+      
+      FrameVector currentVelocity = ankleVelocityCalculators.get(swingLeg).getAnkleVelocityInWorldFrame();
+      currentVelocity.changeFrame(trajectoryGeneratorReferenceFrame);
+      
+      FramePoint finalDesiredPosition = new FramePoint(currentPosition);
+      double footLiftHeight = 0.2;
+      finalDesiredPosition.setZ(finalDesiredPosition.getZ() + footLiftHeight);
+      swingInAirTrajectoryGenerator.initialize(currentPosition, currentVelocity, finalDesiredPosition );
    }
 
    public void doTransitionOutOfInitialSwing(RobotSide swingSide)
@@ -456,8 +466,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       finalDesiredSwingFootPosition.set(desiredFootstep.footstepPosition.changeFrameCopy(finalDesiredSwingFootPosition.getReferenceFrame()));
 
       ReferenceFrame cartesianTrajectoryGeneratorFrame = trajectoryGenerator.getReferenceFrame();
-      trajectoryGenerator.updateFinalDesiredPosition(
-          finalDesiredSwingFootPosition.getFramePointCopy().changeFrameCopy(cartesianTrajectoryGeneratorFrame));
+      trajectoryGenerator.updateFinalDesiredPosition(finalDesiredSwingFootPosition.getFramePointCopy().changeFrameCopy(cartesianTrajectoryGeneratorFrame));
 
       // TODO: Don't generate so much junk here.
       FramePoint position = new FramePoint(cartesianTrajectoryGeneratorFrame);
