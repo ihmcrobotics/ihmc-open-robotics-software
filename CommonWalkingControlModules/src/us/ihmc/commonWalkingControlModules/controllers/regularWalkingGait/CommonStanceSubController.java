@@ -138,7 +138,7 @@ public class CommonStanceSubController implements StanceSubController
 
    public void doLoadingPreSwingA(LowerBodyTorques lowerBodyTorquesToPack, RobotSide loadingLeg, double timeInState)
    {
-      doDoubleSupportControl(lowerBodyTorquesToPack, loadingLeg);
+      doDoubleSupportControl(lowerBodyTorquesToPack, loadingLeg, true);
 
       if ((timeSpentInLateStance.getDoubleValue() + timeSpentInTerminalStance.getDoubleValue()) != 0.0)
          footOrientationControlModule.addAdditionalTorqueForFootOrientationControl(lowerBodyTorquesToPack.getLegTorques(loadingLeg.getOppositeSide()),
@@ -151,7 +151,7 @@ public class CommonStanceSubController implements StanceSubController
 
    public void doLoadingPreSwingB(LowerBodyTorques lowerBodyTorquesToPack, RobotSide loadingLeg, double timeInState)
    {
-      doDoubleSupportControl(lowerBodyTorquesToPack, loadingLeg);
+      doDoubleSupportControl(lowerBodyTorquesToPack, loadingLeg, true);
       kneeExtensionControlModule.doLoadingControl(lowerBodyTorquesToPack.getLegTorques(loadingLeg));
 
       timeSpentInLoadingPreSwingB.set(timeInState);
@@ -165,17 +165,17 @@ public class CommonStanceSubController implements StanceSubController
 
    public void doStartWalkingDoubleSupport(LowerBodyTorques lowerBodyTorquesToPack, RobotSide loadingLeg, double timeInState)
    {
-      doDoubleSupportControl(lowerBodyTorquesToPack, loadingLeg);
+      doDoubleSupportControl(lowerBodyTorquesToPack, loadingLeg, true);
    }
 
    public void doUnloadLegToTransferIntoWalking(LowerBodyTorques lowerBodyTorquesToPack, RobotSide supportLeg, double timeInState)
    {
-      doDoubleSupportControl(lowerBodyTorquesToPack, supportLeg);
+      doDoubleSupportControl(lowerBodyTorquesToPack, supportLeg, true);
    }
 
    public void doLoadingForSingleLegBalance(LowerBodyTorques lowerBodyTorques, RobotSide upcomingSupportSide, double timeInCurrentState)
    {
-      doDoubleSupportControl(lowerBodyTorques, upcomingSupportSide);
+      doDoubleSupportControl(lowerBodyTorques, upcomingSupportSide, false);
    }
 
    public void doSingleLegBalance(LegTorques legTorquesToPack, RobotSide supportLeg, double timeInCurrentState)
@@ -434,9 +434,9 @@ public class CommonStanceSubController implements StanceSubController
       balanceSupportControlModule.doSingleSupportBalance(legTorquesToPackForStanceSide, desiredVelocity, desiredPelvisOrientation, upperBodyWrench);
    }
 
-   private void doDoubleSupportControl(LowerBodyTorques lowerBodyTorquesToPack, RobotSide loadingLeg)
+   private void doDoubleSupportControl(LowerBodyTorques lowerBodyTorquesToPack, RobotSide loadingLeg, boolean walk)
    {
-      FrameVector2d desiredVelocity = desiredVelocityControlModule.getDesiredVelocity();
+      FrameVector2d desiredVelocity = walk ? desiredVelocityControlModule.getDesiredVelocity() : new FrameVector2d(ReferenceFrame.getWorldFrame());
       Orientation desiredPelvisOrientation = desiredPelvisOrientationControlModule.getDesiredPelvisOrientationDoubleSupport();
       balanceSupportControlModule.doDoubleSupportBalance(lowerBodyTorquesToPack, loadingLeg, desiredVelocity, desiredPelvisOrientation);
 

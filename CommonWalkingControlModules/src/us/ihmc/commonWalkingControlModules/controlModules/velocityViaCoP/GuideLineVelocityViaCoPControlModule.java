@@ -81,10 +81,14 @@ public class GuideLineVelocityViaCoPControlModule implements VelocityViaCoPContr
          
 //         desiredCapturePoint = new FramePoint(referenceFrames.getMidFeetZUpFrame());
       }
-      else
+      else if (desiredVelocity.lengthSquared() > 0.0)
       {
          double desiredCaptureY = loadingLeg.negateIfLeftSide(desiredCaptureInwardDoubleSupport.getDoubleValue());
          desiredCapturePoint = new FramePoint(referenceFrames.getAnkleZUpReferenceFrames().get(loadingLeg), desiredCaptureForwardDoubleSupport.getDoubleValue(), desiredCaptureY, 0.0);
+      }
+      else
+      {
+         desiredCapturePoint = bipedSupportPolygons.getSweetSpotCopy(loadingLeg).toFramePoint();
       }
 
       this.desiredCapturePointInWorld.set(desiredCapturePoint.changeFrameCopy(ReferenceFrame.getWorldFrame()));
