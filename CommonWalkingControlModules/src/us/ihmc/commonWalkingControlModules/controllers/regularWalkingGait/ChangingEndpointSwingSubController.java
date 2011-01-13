@@ -227,18 +227,23 @@ public class ChangingEndpointSwingSubController implements SwingSubController
 
    public void doInitialSwing(LegTorques legTorquesToPackForSwingLeg, double timeInState)
    {
-      computeFootPosVelAcc(walkingTrajectoryGenerator, timeInState);
-      computeSwingLegTorques(legTorquesToPackForSwingLeg);
-      setEstimatedSwingTimeRemaining(swingDuration.getDoubleValue() - timeInState);
+      doInitialAndMidSwing(legTorquesToPackForSwingLeg, timeInState);
       timeSpentInInitialSwing.set(timeInState);
    }
 
    public void doMidSwing(LegTorques legTorquesToPackForSwingLeg, double timeInState)
    {
-      computeFootPosVelAcc(walkingTrajectoryGenerator, timeInState + timeSpentInInitialSwing.getDoubleValue());
-      computeSwingLegTorques(legTorquesToPackForSwingLeg);
-      setEstimatedSwingTimeRemaining(swingDuration.getDoubleValue() - timeInState);    // TODO: weird, need to fix
+      double timeSpentSwingingUpToNow = timeInState + timeSpentInInitialSwing.getDoubleValue();
+      doInitialAndMidSwing(legTorquesToPackForSwingLeg, timeSpentSwingingUpToNow);
       timeSpentInMidSwing.set(timeInState);
+   }
+
+   private void doInitialAndMidSwing(LegTorques legTorquesToPackForSwingLeg, double timeSpentSwingingUpToNow)
+   {
+      updateFinalDesiredPosition(walkingTrajectoryGenerator);
+      computeFootPosVelAcc(walkingTrajectoryGenerator, timeSpentSwingingUpToNow);
+      computeSwingLegTorques(legTorquesToPackForSwingLeg);
+      setEstimatedSwingTimeRemaining(swingDuration.getDoubleValue() - timeSpentSwingingUpToNow);
    }
 
    public void doTerminalSwing(LegTorques legTorquesToPackForSwingLeg, double timeInState)
@@ -462,11 +467,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
 
    private void computeFootPosVelAcc(CartesianTrajectoryGenerator trajectoryGenerator, double timeInState)
    {
-      Footstep desiredFootstep = couplingRegistry.getDesiredFootstep();
-      finalDesiredSwingFootPosition.set(desiredFootstep.footstepPosition.changeFrameCopy(finalDesiredSwingFootPosition.getReferenceFrame()));
-
       ReferenceFrame cartesianTrajectoryGeneratorFrame = trajectoryGenerator.getReferenceFrame();
-      trajectoryGenerator.updateFinalDesiredPosition(finalDesiredSwingFootPosition.getFramePointCopy().changeFrameCopy(cartesianTrajectoryGeneratorFrame));
 
       // TODO: Don't generate so much junk here.
       FramePoint position = new FramePoint(cartesianTrajectoryGeneratorFrame);
@@ -494,6 +495,15 @@ public class ChangingEndpointSwingSubController implements SwingSubController
          OrientationInterpolationCalculator.computeAngularAcceleration(startSwingOrientation.getFrameOrientationCopy(),
             endSwingOrientation.getFrameOrientationCopy(), alphaDDot);
       desiredSwingFootAngularAccelerationInWorldFrame.set(desiredSwingFootAngularAcceleration);
+   }
+
+   private void updateFinalDesiredPosition(CartesianTrajectoryGenerator trajectoryGenerator)
+   {
+      Footstep desiredFootstep = couplingRegistry.getDesiredFootstep();
+      finalDesiredSwingFootPosition.set(desiredFootstep.footstepPosition.changeFrameCopy(finalDesiredSwingFootPosition.getReferenceFrame()));
+
+      ReferenceFrame cartesianTrajectoryGeneratorFrame = trajectoryGenerator.getReferenceFrame();
+      trajectoryGenerator.updateFinalDesiredPosition(finalDesiredSwingFootPosition.getFramePointCopy().changeFrameCopy(cartesianTrajectoryGeneratorFrame));
    }
 
    private void computeSwingLegTorques(LegTorques legTorquesToPackForSwingLeg)
