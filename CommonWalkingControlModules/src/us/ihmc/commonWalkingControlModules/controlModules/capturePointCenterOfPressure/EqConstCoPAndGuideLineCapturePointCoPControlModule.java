@@ -114,7 +114,13 @@ public class EqConstCoPAndGuideLineCapturePointCoPControlModule implements Captu
       FrameConvexPolygon2d supportPolygon = supportPolygons.getFootPolygonInAnkleZUp(supportLeg);
       double finalTime = computeFinalTimeSingleSupport();
       double comHeight = computeCoMHeightUsingOneFoot(supportLeg);
-      computeDesiredCoP(supportPolygon, guideLine.getSecondEndPointCopy(), finalTime, comHeight, guideLine);
+      FramePoint2d desiredFinalCapturePoint;
+      if (desiredCapturePoint != null)
+         desiredFinalCapturePoint = desiredCapturePoint.toFramePoint2d();
+      else
+         desiredFinalCapturePoint = guideLine.getSecondEndPointCopy();
+
+      computeDesiredCoP(supportPolygon, desiredFinalCapturePoint, finalTime, comHeight, guideLine);
    }
 
    public void packDesiredCenterOfPressure(FramePoint desiredCenterOfPressureToPack)

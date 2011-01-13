@@ -114,25 +114,29 @@ public class GuideLineVelocityViaCoPControlModule implements VelocityViaCoPContr
 
       BipedSupportPolygons bipedSupportPolygons = couplingRegistry.getBipedSupportPolygons();
 
-      Footstep footstep = couplingRegistry.getDesiredFootstep();
-      FramePoint finalDesiredSwingTarget = footstep.footstepPosition;
-//      FramePoint localFinalDesiredSwingTarget = finalDesiredSwingTarget.changeFrameCopy(supportFootAnkleZUpFrame);
-
       FramePoint capturePoint = couplingRegistry.getCapturePoint();
       FramePoint capturePointInAnkleZUp = capturePoint.changeFrameCopy(supportFootAnkleZUpFrame);
       FramePoint2d capturePoint2d = capturePointInAnkleZUp.toFramePoint2d();
-
-      FrameVector2d desiredVelocityInSupportFootFrame = desiredVelocity.changeFrameCopy(supportFootAnkleZUpFrame);
+      
       FrameVector2d actualCenterOfMassVelocityInSupportFootFrame = processedSensors.getCenterOfMassVelocityInFrame(supportFootAnkleZUpFrame).toFrameVector2d();
 
-
-      guideLineCalculator.update(supportLeg, bipedSupportPolygons, capturePoint2d, finalDesiredSwingTarget, desiredVelocityInSupportFootFrame,
-                                 actualCenterOfMassVelocityInSupportFootFrame);
-
-      FrameLineSegment2d guideLine = guideLineCalculator.getGuideLine(supportLeg);
-      guideLine = guideLine.changeFrameCopy(supportFootAnkleZUpFrame);
-
       FramePoint desiredCapturePoint = null;
+      FrameLineSegment2d guideLine = null;
+      if (desiredVelocity.lengthSquared() > 0.0)
+      {
+         Footstep footstep = couplingRegistry.getDesiredFootstep();
+         FramePoint finalDesiredSwingTarget = footstep.footstepPosition;    
+         FrameVector2d desiredVelocityInSupportFootFrame = desiredVelocity.changeFrameCopy(supportFootAnkleZUpFrame);
+         guideLineCalculator.update(supportLeg, bipedSupportPolygons, capturePoint2d, finalDesiredSwingTarget, desiredVelocityInSupportFootFrame,
+               actualCenterOfMassVelocityInSupportFootFrame);
+         guideLine = guideLineCalculator.getGuideLine(supportLeg);
+         guideLine.changeFrame(supportFootAnkleZUpFrame);
+      }
+      else
+      {
+         desiredCapturePoint = couplingRegistry.getBipedSupportPolygons().getSweetSpotCopy(supportLeg).toFramePoint();
+      }
+
 
       FramePoint centerOfMassPosition = processedSensors.getCenterOfMassPositionInFrame(supportFootAnkleZUpFrame);
 
