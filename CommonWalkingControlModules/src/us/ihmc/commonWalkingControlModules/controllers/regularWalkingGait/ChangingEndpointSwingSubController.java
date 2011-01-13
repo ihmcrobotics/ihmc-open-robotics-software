@@ -256,8 +256,18 @@ public class ChangingEndpointSwingSubController implements SwingSubController
 
    public void doSwingInAir(LegTorques legTorques, double timeInCurrentState)
    {
-      // TODO Auto-generated method stub
-
+      RobotSide swingSide = legTorques.getRobotSide();
+      
+      // TODO: do something better than keeping the current position.
+      desiredFootOrientation.setYawPitchRoll(0.0, 0.0, 0.0);
+      FramePoint currentSwingFootPosition = new FramePoint(referenceFrames.getFootFrame(swingSide));
+      currentSwingFootPosition.changeFrame(ReferenceFrame.getWorldFrame());
+      desiredSwingFootPositionInWorldFrame.set(currentSwingFootPosition);
+      desiredSwingFootVelocityInWorldFrame.set(0.0, 0.0, 0.0);
+      desiredSwingFootAngularVelocityInWorldFrame.set(0.0, 0.0, 0.0);
+      desiredSwingFootAccelerationInWorldFrame.set(0.0, 0.0, 0.0);
+      desiredSwingFootAngularAccelerationInWorldFrame.set(0.0, 0.0, 0.0);
+      computeSwingLegTorques(legTorques);
    }
 
    public void doTransitionIntoPreSwing(RobotSide swingSide)
