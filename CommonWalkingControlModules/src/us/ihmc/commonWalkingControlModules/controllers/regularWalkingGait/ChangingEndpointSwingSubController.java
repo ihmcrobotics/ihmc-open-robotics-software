@@ -144,6 +144,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
    private BagOfBalls bagOfBalls;
    private final double controlDT;
    private boolean useBodyAcceleration;
+   private RobotSide swingSide;
 
    public ChangingEndpointSwingSubController(ProcessedSensorsInterface processedSensors, CommonWalkingReferenceFrames referenceFrames,
            FullRobotModel fullRobotModel, CouplingRegistry couplingRegistry, DesiredStepLocationCalculator desiredStepLocationCalculator,
@@ -212,8 +213,11 @@ public class ChangingEndpointSwingSubController implements SwingSubController
 
    public boolean isReadyForDoubleSupport()
    {
-      // TODO Auto-generated method stub
-      return false;
+      FramePoint swingAnkle = new FramePoint(referenceFrames.getFootFrame(swingSide));
+      swingAnkle.changeFrame(referenceFrames.getFootFrame(swingSide.getOppositeSide()));
+      double footHeight = swingAnkle.getZ();
+      double maxFootHeight = 0.02;
+      return swingInAirTrajectoryGenerator.isDone() && (footHeight < maxFootHeight);
    }
 
    public void doPreSwing(LegTorques legTorquesToPackForSwingLeg, double timeInState)
@@ -233,6 +237,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
 
    public void doMidSwing(LegTorques legTorquesToPackForSwingLeg, double timeInState)
    {
+      this.swingSide = legTorquesToPackForSwingLeg.getRobotSide();
       double timeSpentSwingingUpToNow = timeInState + timeSpentInInitialSwing.getDoubleValue();
       doInitialAndMidSwing(legTorquesToPackForSwingLeg, timeSpentSwingingUpToNow);
       timeSpentInMidSwing.set(timeInState);
@@ -240,6 +245,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
 
    private void doInitialAndMidSwing(LegTorques legTorquesToPackForSwingLeg, double timeSpentSwingingUpToNow)
    {
+      this.swingSide = legTorquesToPackForSwingLeg.getRobotSide();
       updateFinalDesiredPosition(walkingTrajectoryGenerator);
       computeFootPosVelAcc(walkingTrajectoryGenerator, timeSpentSwingingUpToNow);
       computeSwingLegTorques(legTorquesToPackForSwingLeg);
@@ -266,6 +272,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
 
    public void doSwingInAir(LegTorques legTorques, double timeInCurrentState)
    {
+      this.swingSide = legTorques.getRobotSide();
       computeFootPosVelAcc(swingInAirTrajectoryGenerator, timeInCurrentState);
       computeSwingLegTorques(legTorques);
    }
@@ -410,7 +417,11 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       boolean capturePointInsideFoot = isCapturePointInsideFoot(swingSide);
 
       return ((footOnGround && minimumTerminalSwingTimePassed) || maximumTerminalSwingTimePassed || (capturePointInsideFoot && minimumTerminalSwingTimePassed));
-
+   }
+   
+   public boolean isDoneWithSwingInAir()
+   {
+      return swingInAirTrajectoryGenerator.isDone();
    }
 
    public void setParametersForR2()

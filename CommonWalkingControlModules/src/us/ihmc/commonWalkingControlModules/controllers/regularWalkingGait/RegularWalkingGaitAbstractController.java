@@ -723,9 +723,13 @@ public abstract class RegularWalkingGaitAbstractController
       {
          public boolean checkCondition()
          {
-            boolean commandedToSwingAgain = swingInAir.getBooleanValue();
-            boolean endingSingleSupport = (!balanceOnOneLeg.getBooleanValue()) && (!swingSubController.isReadyForDoubleSupport());
-            return commandedToSwingAgain || endingSingleSupport;
+            if (swingSubController.isDoneWithSwingInAir())
+            {
+               boolean commandedToSwingAgain = swingInAir.getBooleanValue();
+               boolean endingSingleSupport = !balanceOnOneLeg.getBooleanValue() && !swingSubController.isReadyForDoubleSupport();
+               return commandedToSwingAgain || endingSingleSupport;
+            }
+            return false;
          }
       };
       

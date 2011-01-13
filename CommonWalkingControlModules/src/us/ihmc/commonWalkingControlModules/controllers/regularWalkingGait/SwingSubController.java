@@ -24,6 +24,8 @@ public interface SwingSubController
 
    public abstract boolean isDoneWithTerminalSwing(RobotSide swingSide, double timeInState);
    
+   public abstract boolean isDoneWithSwingInAir();
+   
 
    public abstract void doTransitionIntoPreSwing(RobotSide swingSide);
 
