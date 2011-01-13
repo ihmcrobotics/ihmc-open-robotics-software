@@ -780,7 +780,7 @@ public abstract class RegularWalkingGaitAbstractController
       {
          public boolean checkCondition()
          {
-            if (swingSubController.isDoneWithSwingInAir())
+            if (swingSubController.isDoneWithSwingInAir(walkingStateMachine.timeInCurrentState()))
             {
                boolean commandedToSwingAgain = swingInAir.getBooleanValue();
                boolean endingSingleSupport = !balanceOnOneLeg.getBooleanValue() &&!swingSubController.isReadyForDoubleSupport();

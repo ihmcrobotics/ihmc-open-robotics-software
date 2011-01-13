@@ -420,9 +420,9 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       return ((footOnGround && minimumTerminalSwingTimePassed) || maximumTerminalSwingTimePassed || (capturePointInsideFoot && minimumTerminalSwingTimePassed));
    }
 
-   public boolean isDoneWithSwingInAir()
+   public boolean isDoneWithSwingInAir(double timeInState)
    {
-      return swingInAirTrajectoryGenerator.isDone();
+      return swingInAirTrajectoryGenerator.isDone() && timeInState > 2.0;
    }
 
    public void setParametersForR2()
