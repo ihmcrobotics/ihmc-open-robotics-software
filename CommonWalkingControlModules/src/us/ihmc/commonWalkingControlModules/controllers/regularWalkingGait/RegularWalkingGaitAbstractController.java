@@ -1,12 +1,14 @@
 package us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait;
 
 import java.awt.Container;
+import java.awt.ScrollPane;
 import java.util.ArrayList;
 import java.util.Collections;
 
 import javax.swing.BoxLayout;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.xml.ws.handler.MessageContext.Scope;
 
 import us.ihmc.commonWalkingControlModules.RobotSide;
 import us.ihmc.commonWalkingControlModules.configurations.BalanceOnOneLegConfiguration;
@@ -94,6 +96,8 @@ public abstract class RegularWalkingGaitAbstractController
       stepsToTake.set(16000);
       stepsTaken.set(0);
       onFinalStep.set(false);
+      createStateMachineWindow(true);
+     
    }
 
    public void doControl()
@@ -115,7 +119,7 @@ public abstract class RegularWalkingGaitAbstractController
       LeftEarlyStanceRightInitialSwing, LeftLateStanceRightMidSwing, LeftTerminalStanceRightTerminalSwing, TransferAllLoadToRightLegForWalking,
       RightLoadingLeftPreSwingA, RightLoadingLeftPreSwingB, RightLoadingLeftPreSwingC, RightEarlyStanceLeftInitialSwing, RightLateStanceLeftMidSwing,
       RightTerminalStanceLeftTerminalSwing, stopWalkingLeftLoadingState, stopWalkingRightLoadingState, leftLoadingForSingleLegBalance,
-      rightLoadingForSingleLegBalance, leftSingleLegBalanceRightSwingInAir, rightSingleLegBalanceRightSwingInAir
+      rightLoadingForSingleLegBalance, leftSingleLegBalanceRightSwingInAir, rightSingleLegBalanceRightSwingInAir, blankState
       ;
 
 //    public RobotSide getSupportLeg()
@@ -218,6 +222,28 @@ public abstract class RegularWalkingGaitAbstractController
 
             resetSteps.set(false);
          }
+      }
+   }
+
+
+   protected class BlankState extends State
+   {
+      public BlankState(RegularWalkingState stateName)
+      {
+         super(stateName);
+
+      }
+
+      public void doAction()
+      {
+      }
+
+      public void doTransitionIntoAction()
+      {
+      }
+
+      public void doTransitionOutOfAction()
+      {
       }
    }
 
@@ -822,7 +848,7 @@ public abstract class RegularWalkingGaitAbstractController
                                                                       swingInAirAgainCondition);
 
       StateTransition toStartWalkingDoubleSupportStateFromSingleLegBalance = new StateTransition(startWalkingDoubleSupportState.getStateEnum(),
-                                                                             returnToDoubleSupportFromSingleSupportBalanceCondition);
+                                                                                returnToDoubleSupportFromSingleSupportBalanceCondition);
 
       // End: create state transitions
 
@@ -874,6 +900,8 @@ public abstract class RegularWalkingGaitAbstractController
       // End: Add transitions
 
       // Begin: Add states
+      // walkingStateMachine.addState(new BlankState(RegularWalkingState.blankState));
+
       walkingStateMachine.addState(startWalkingDoubleSupportState);
 
       walkingStateMachine.addState(transferAllLoadToLeftLegForWalkingState);
@@ -943,6 +971,8 @@ public abstract class RegularWalkingGaitAbstractController
          Container contentPane = jFrame.getContentPane();
          contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.X_AXIS));
 
+         //ScrollPane pane = new ScrollPane();
+         //pane.add(walkingStatePanel);
          jFrame.getContentPane().add(walkingStatePanel);
          jFrame.pack();
          jFrame.setSize(450, 300);
