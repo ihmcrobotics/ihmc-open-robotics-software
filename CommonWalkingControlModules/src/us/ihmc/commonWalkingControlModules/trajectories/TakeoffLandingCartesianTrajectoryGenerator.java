@@ -74,7 +74,7 @@ public class TakeoffLandingCartesianTrajectoryGenerator implements CartesianTraj
     * @param referenceFrame TODO
     * @param parentRegistry
     */
-   public TakeoffLandingCartesianTrajectoryGenerator(String suffix, double maxAccel, double maxVel, double zClearance, double takeOffSlope,
+   public TakeoffLandingCartesianTrajectoryGenerator(String prefix, double maxAccel, double maxVel, double zClearance, double takeOffSlope,
            double landingSlope, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry)
    {
       this.maxAccel.set(maxAccel);
@@ -83,19 +83,19 @@ public class TakeoffLandingCartesianTrajectoryGenerator implements CartesianTraj
       this.takeOffSlope.set(takeOffSlope);
       this.landingSlope.set(landingSlope);
 
-      initialPosition = new YoFramePoint(suffix + "initialPosition", "", referenceFrame, registry);
-      initialVelocity = new YoFrameVector(suffix + "initialVelocity", "", referenceFrame, registry);
+      initialPosition = new YoFramePoint(prefix + "initialPosition", "", referenceFrame, registry);
+      initialVelocity = new YoFrameVector(prefix + "initialVelocity", "", referenceFrame, registry);
 
-      finalDesiredPosition = new YoFramePoint(suffix + "finalDesiredPosition", "", referenceFrame, registry);
-      currentPosition = new YoFramePoint(suffix + "currentPosition", "", referenceFrame, registry);
-      currentVelocity = new YoFrameVector(suffix + "currentVelocity", "", referenceFrame, registry);
-      currentAcceleration = new YoFrameVector(suffix + "currentAcceleration", "", referenceFrame, registry);
+      finalDesiredPosition = new YoFramePoint(prefix + "finalDesiredPosition", "", referenceFrame, registry);
+      currentPosition = new YoFramePoint(prefix + "currentPosition", "", referenceFrame, registry);
+      currentVelocity = new YoFrameVector(prefix + "currentVelocity", "", referenceFrame, registry);
+      currentAcceleration = new YoFrameVector(prefix + "currentAcceleration", "", referenceFrame, registry);
 
-      currentPositionToFinalPosition = new YoFrameVector(suffix + "currentToFinal", "", referenceFrame, registry);
-      currentToFinal2d = new YoFrameVector2d(suffix + "currentToFinal2d", "", referenceFrame, registry);
+      currentPositionToFinalPosition = new YoFrameVector(prefix + "currentToFinal", "", referenceFrame, registry);
+      currentToFinal2d = new YoFrameVector2d(prefix + "currentToFinal2d", "", referenceFrame, registry);
       tempFrameVector = new FrameVector(referenceFrame);
-      desiredMaxVelocity = new YoFrameVector(suffix + "desiredMaxVelocity", "", referenceFrame, registry);
-      desiredAcceleration = new YoFrameVector(suffix + "desiredAcceleration", "", referenceFrame, registry);
+      desiredMaxVelocity = new YoFrameVector(prefix + "desiredMaxVelocity", "", referenceFrame, registry);
+      desiredAcceleration = new YoFrameVector(prefix + "desiredAcceleration", "", referenceFrame, registry);
 
       this.referenceFrame = referenceFrame;
 
@@ -312,27 +312,26 @@ public class TakeoffLandingCartesianTrajectoryGenerator implements CartesianTraj
       {
          computeDesiredMaxVelocity();
 
-         computeCurrentAcceleration();
+         computeCurrentAcceleration(deltaT);
          computeCurrentVelocity(deltaT);
          computeCurrentPosition(deltaT);
       }
    }
 
-   private void computeCurrentAcceleration()
+   private void computeCurrentAcceleration(double deltaT)
    {
       desiredAcceleration.set(desiredMaxVelocity);
       desiredAcceleration.sub(currentVelocity.getFrameVectorCopy());
 
-      if (desiredAcceleration.lengthSquared() < 0.01 * maxVel.getDoubleValue() * maxVel.getDoubleValue())
-      {
-         desiredAcceleration.scale(0.0);
-      }
-      else
+      desiredAcceleration.scale(1.0/deltaT);
+      
+      double desiredAccelerationMagnitude = desiredAcceleration.length();
+      if (desiredAccelerationMagnitude > maxAccel.getDoubleValue())
       {
          desiredAcceleration.normalize();
          desiredAcceleration.scale(maxAccel.getDoubleValue());
       }
-
+      
       currentAcceleration.set(desiredAcceleration);
       currentAccelMag.set(currentAcceleration.length());
    }

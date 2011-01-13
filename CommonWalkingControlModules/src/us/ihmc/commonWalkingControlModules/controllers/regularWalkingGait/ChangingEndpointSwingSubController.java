@@ -28,6 +28,7 @@ import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.sensors.ProcessedSensorsInterface;
 import us.ihmc.commonWalkingControlModules.trajectories.CartesianTrajectoryGenerator;
 import us.ihmc.utilities.kinematics.OrientationInterpolationCalculator;
+import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
@@ -36,10 +37,12 @@ import us.ihmc.utilities.math.geometry.Orientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RotationFunctions;
 import us.ihmc.utilities.screwTheory.InverseDynamicsCalculator;
+import us.ihmc.utilities.screwTheory.RevoluteJoint;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.utilities.screwTheory.Twist;
 import us.ihmc.utilities.screwTheory.Wrench;
 
+import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoAppearance;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
@@ -86,6 +89,9 @@ public class ChangingEndpointSwingSubController implements SwingSubController
 
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
+   private final BooleanYoVariable inverseKinematicsException = new BooleanYoVariable("kinematicException", registry);
+   private final DoubleYoVariable jacobianDeterminant = new DoubleYoVariable("jacobianDeterminant", registry);
+   
    private final DoubleYoVariable passiveHipCollapseTime = new DoubleYoVariable("passiveHipCollapseTime", registry);
 
    private final DoubleYoVariable swingDuration = new DoubleYoVariable("swingDuration", "The duration of the swing movement. [s]", registry);
@@ -488,9 +494,14 @@ public class ChangingEndpointSwingSubController implements SwingSubController
 
       trajectoryGenerator.computeNextTick(position, velocity, acceleration, controlDT);
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-      desiredSwingFootPositionInWorldFrame.set(position.changeFrameCopy(worldFrame));
-      desiredSwingFootVelocityInWorldFrame.set(velocity.changeFrameCopy(worldFrame));
-      desiredSwingFootAccelerationInWorldFrame.set(acceleration.changeFrameCopy(worldFrame));
+      
+      position.changeFrame(worldFrame);
+      velocity.changeFrame(worldFrame);
+      acceleration.changeFrame(worldFrame);
+      
+      desiredSwingFootPositionInWorldFrame.set(position);
+      desiredSwingFootVelocityInWorldFrame.set(velocity);
+      desiredSwingFootAccelerationInWorldFrame.set(acceleration);
 
       // Determine foot orientation and angular velocity
       minimumJerkTrajectoryForFootOrientation.computeTrajectory(timeInState);
@@ -539,10 +550,11 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       try
       {
          inverseKinematicsCalculator.solve(desiredLegJointPositions, footToPelvis, swingSide, desiredHipYaw);
+         inverseKinematicsException.set(false);
       }
       catch (InverseKinematicsException e)
       {
-         // do nothing
+         inverseKinematicsException.set(true);         
       }
 
       // Desired velocities
@@ -560,22 +572,23 @@ public class ChangingEndpointSwingSubController implements SwingSubController
 
       // Desired acceleration
       SpatialAccelerationVector desiredAccelerationOfSwingFootWithRespectToWorld = computeDesiredSwingFootSpatialAcceleration(elevatorFrame, footFrame);
-      double jacobianDeterminant = desiredJointVelocityCalculator.swingFullLegJacobianDeterminant();
+      jacobianDeterminant.set(desiredJointVelocityCalculator.swingFullLegJacobianDeterminant());
       desiredJointAccelerationCalculators.get(swingSide).compute(desiredAccelerationOfSwingFootWithRespectToWorld);
 
-      if (jacobianDeterminant < 0.025)
+      double percentScaling = getPercentScalingBasedOnJacobianDeterminant(jacobianDeterminant.getDoubleValue());
+      
+      LegJointName[] legJointNames = fullRobotModel.getRobotSpecificJointNames().getLegJointNames();
+      for (LegJointName legJointName : legJointNames)
       {
-         LegJointName[] legJointNames = fullRobotModel.getRobotSpecificJointNames().getLegJointNames();
-         for (LegJointName legJointName : legJointNames)
-         {
-            // this is better than not using the torques from the ID calculator at all, because at least gravity and Coriolis forces are compensated for
-            fullRobotModel.getLegJoint(swingSide, legJointName).setQdd(0.0);
-         }
+         // this is better than not using the torques from the ID calculator at all, because at least gravity and Coriolis forces are compensated for
+         RevoluteJoint revoluteJoint = fullRobotModel.getLegJoint(swingSide, legJointName);
+         double qdd = revoluteJoint.getQdd();
+         revoluteJoint.setQdd(qdd * percentScaling);
       }
 
       // control
-      legJointPositionControlModules.get(swingSide).packTorquesForLegJointsPositionControl(legTorquesToPackForSwingLeg, desiredLegJointPositions,
-                                         desiredLegJointVelocities, jacobianDeterminant);
+      legJointPositionControlModules.get(swingSide).packTorquesForLegJointsPositionControl(percentScaling, legTorquesToPackForSwingLeg, desiredLegJointPositions,
+                                         desiredLegJointVelocities);
 
       inverseDynamicsCalculators.get(swingSide).compute();
 
@@ -594,6 +607,17 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       leaveTrailOfBalls();
    }
 
+   private double getPercentScalingBasedOnJacobianDeterminant(double jacobianDeterminant)
+   {
+      double determinantThresholdOne = 0.05;    // 0.025;
+      double determinantThresholdTwo = 0.02; //0.01;
+
+      double percent = (jacobianDeterminant - determinantThresholdTwo) / (determinantThresholdOne - determinantThresholdTwo);
+      percent = MathTools.clipToMinMax(percent, 0.0, 1.0);
+      
+      return percent;
+   }
+   
    private Transform3D computeDesiredTransform(ReferenceFrame pelvisFrame)
    {
       Orientation desiredFootOrientationInPelvisFrame = desiredFootOrientation.getFrameOrientationCopy();

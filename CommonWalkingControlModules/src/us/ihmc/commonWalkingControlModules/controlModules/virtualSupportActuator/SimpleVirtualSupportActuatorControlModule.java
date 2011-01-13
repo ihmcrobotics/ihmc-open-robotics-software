@@ -71,10 +71,10 @@ public class SimpleVirtualSupportActuatorControlModule implements VirtualSupport
       virtualToePoint = virtualToePoint.changeFrameCopy(ankleZUpFrames.get(robotSide));
       virtualToePoint = new FramePoint2d(anklePitchFrames.get(robotSide), virtualToePoint.getX(), virtualToePoint.getY());
       stanceFullLegJacobian.computeJacobians(virtualToePoint);
-      
+
       // add torque part of upper body wrench // TODO: think about this some more
-//    if (upperBodyWrench != null)
-//    torqueOnPelvisInPelvisFrame.add(new FrameVector(upperBodyWrench.getExpressedInFrame(), upperBodyWrench.getTorque()));
+      if (upperBodyWrench != null)
+         torqueOnPelvisInPelvisFrame.add(new FrameVector(upperBodyWrench.getExpressedInFrame(), upperBodyWrench.getTorque()));
 
       // compute a wrench in the nullspace of the VTP columns of the Jacobian
       Wrench wrenchOnPelvisInPelvisFrame = stanceFullLegJacobian.getWrenchInVTPNullSpace(fZOnPelvisInPelvisFrame, torqueOnPelvisInPelvisFrame);
