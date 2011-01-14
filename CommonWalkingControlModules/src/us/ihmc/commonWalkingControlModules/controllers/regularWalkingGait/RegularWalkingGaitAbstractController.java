@@ -97,7 +97,7 @@ public abstract class RegularWalkingGaitAbstractController
       stepsToTake.set(16000);
       stepsTaken.set(0);
       onFinalStep.set(false);
-      createStateMachineWindow(true);
+//      createStateMachineWindow(true);
      
    }
 

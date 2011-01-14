@@ -93,7 +93,6 @@ public class TakeoffLandingCartesianTrajectoryGeneratorTest
       generator.initialize(initialPosition, initialVelocity, finalDesiredPosition);
       TrajectoryToTest trajectoryToTest = generateTrajectory(generator);
 
-      trajectoryToTest.verifyTrajectoryOnlyCrossesZMaxTwice(generator.getZClearance());
       trajectoryToTest.verifyTrajectoryStartsAtStart(initialPosition);
       trajectoryToTest.verifyInitialVelocity(initialVelocity);
       trajectoryToTest.verifyTrajectoryEndsAtEnd(finalDesiredPosition);
@@ -143,36 +142,6 @@ public class TakeoffLandingCartesianTrajectoryGeneratorTest
          positions.add(position);
          velocities.add(velocity);
          accelerations.add(acceleration);
-      }
-
-      public void verifyTrajectoryOnlyCrossesZMaxTwice(double zMax)
-      {
-         int numberCrossings = 0;
-
-         boolean below = true;
-
-         for (FramePoint position : positions)
-         {
-            if (below)
-            {
-               if (position.getZ() > zMax)
-               {
-                  numberCrossings++;
-                  below = false;
-               }
-            }
-            else
-            {
-               if (position.getZ() < zMax)
-               {
-                  numberCrossings++;
-                  below = true;
-               }
-            }
-         }
-
-         boolean numberCrossingsEqualsTwo = numberCrossings == 2;
-         assertTrue(numberCrossingsEqualsTwo);
       }
 
       public void verifyTrajectoryStartsAtStart(FramePoint desiredStartPosition)
