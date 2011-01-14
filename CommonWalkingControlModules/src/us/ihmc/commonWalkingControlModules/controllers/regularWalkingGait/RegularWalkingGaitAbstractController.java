@@ -659,7 +659,7 @@ public abstract class RegularWalkingGaitAbstractController
 
          double[] defaultYawPitchRoll = {0.0, 0.0, 0.0};
          FramePoint defaultDesiredCapturePoint = new FramePoint(supportLegAnkleZUpFrame);
-         double defaultSwingFootY = supportLeg.negateIfLeftSide(0.2);
+         double defaultSwingFootY = supportLeg.negateIfLeftSide(0.25);
          double defaultKneeBendSupportLeg = 0.0;
 
          double homeSwingFootZ = 0.1;

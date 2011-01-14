@@ -255,7 +255,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
    {
       this.swingSide = legTorquesToPackForSwingLeg.getRobotSide();
       updateFinalDesiredPosition(walkingTrajectoryGenerator);
-      computeFootPosVelAcc(walkingTrajectoryGenerator, timeSpentSwingingUpToNow);
+      computeDesiredFootPosVelAcc(walkingTrajectoryGenerator, timeSpentSwingingUpToNow);
       computeSwingLegTorques(legTorquesToPackForSwingLeg);
       setEstimatedSwingTimeRemaining(swingDuration.getDoubleValue() - timeSpentSwingingUpToNow);
    }
@@ -281,7 +281,18 @@ public class ChangingEndpointSwingSubController implements SwingSubController
    public void doSwingInAir(LegTorques legTorques, double timeInCurrentState)
    {
       this.swingSide = legTorques.getRobotSide();
-      computeFootPosVelAcc(swingInAirTrajectoryGenerator, timeInCurrentState);
+      
+      FramePoint swingFootPosition = new FramePoint(referenceFrames.getFootFrame(swingSide));
+      swingFootPosition.changeFrame(referenceFrames.getAnkleZUpFrame(swingSide.getOppositeSide()));
+      double footZ = swingFootPosition.getZ();
+      
+      double minFootZ = 0.02;
+      if (footZ < minFootZ)
+         legJointPositionControlModules.get(swingSide).setAnkleGainsSoft();
+      else
+         legJointPositionControlModules.get(swingSide).resetScalesToDefault();
+      
+      computeDesiredFootPosVelAcc(swingInAirTrajectoryGenerator, timeInCurrentState);
       computeSwingLegTorques(legTorques);
    }
 
@@ -483,7 +494,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       useBodyAcceleration = true;
    }
 
-   private void computeFootPosVelAcc(CartesianTrajectoryGenerator trajectoryGenerator, double timeInState)
+   private void computeDesiredFootPosVelAcc(CartesianTrajectoryGenerator trajectoryGenerator, double timeInState)
    {
       ReferenceFrame cartesianTrajectoryGeneratorFrame = trajectoryGenerator.getReferenceFrame();
 
