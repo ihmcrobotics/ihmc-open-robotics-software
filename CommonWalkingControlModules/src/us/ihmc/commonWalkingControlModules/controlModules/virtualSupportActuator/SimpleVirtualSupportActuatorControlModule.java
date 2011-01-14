@@ -21,12 +21,14 @@ public class SimpleVirtualSupportActuatorControlModule implements VirtualSupport
    private final SideDependentList<StanceFullLegJacobian> stanceFullLegJacobians;
    private final SideDependentList<ReferenceFrame> anklePitchFrames;
    private final SideDependentList<ReferenceFrame> ankleZUpFrames;
+   private final SideDependentList<ReferenceFrame> legAttachmentPointFrames;
 
    public SimpleVirtualSupportActuatorControlModule(DoubleSupportForceDistributor doubleSupportForceDistributor, CommonWalkingReferenceFrames referenceFrames,
-           SideDependentList<StanceFullLegJacobian> stanceFullLegJacobians)
+           SideDependentList<StanceFullLegJacobian> stanceFullLegJacobians, SideDependentList<ReferenceFrame> legAttachmentPointFrames)
    {
       this.doubleSupportForceDistributor = doubleSupportForceDistributor;
       this.stanceFullLegJacobians = new SideDependentList<StanceFullLegJacobian>(stanceFullLegJacobians);
+      this.legAttachmentPointFrames = new SideDependentList<ReferenceFrame>(legAttachmentPointFrames);
       anklePitchFrames = new SideDependentList<ReferenceFrame>(referenceFrames.getFootFrame(RobotSide.LEFT),
             referenceFrames.getFootFrame(RobotSide.RIGHT));
       ankleZUpFrames = referenceFrames.getAnkleZUpReferenceFrames();
@@ -58,9 +60,10 @@ public class SimpleVirtualSupportActuatorControlModule implements VirtualSupport
    public void controlSingleSupport(LegTorques supportLegTorquesToPack, FramePoint2d virtualToePoint, double fZOnPelvisInPelvisFrame,
                                     FrameVector torqueOnPelvisInPelvisFrame, Wrench upperBodyWrench)
    {
-      RobotSide robotSide = supportLegTorquesToPack.getRobotSide();
+      RobotSide stanceSide = supportLegTorquesToPack.getRobotSide();
+      RobotSide swingSide = stanceSide.getOppositeSide();
 
-      StanceFullLegJacobian stanceFullLegJacobian = stanceFullLegJacobians.get(robotSide);
+      StanceFullLegJacobian stanceFullLegJacobian = stanceFullLegJacobians.get(stanceSide);
 
       // compute Jacobian
       // TODO: Check all this reference frame stuff and make sure the Jacobians are using the correct frames. It may be that everything only works on flat ground.
@@ -68,13 +71,18 @@ public class SimpleVirtualSupportActuatorControlModule implements VirtualSupport
       // TODO: Still not OK. DoubleSupport uses Zup frames
       // TODO: Still not OK, but at least the frame in which the VTP is given is not implied to be the AnkleZUpframe anymore.
       // anklePitchFrames.get(robotSide).checkReferenceFrameMatch(virtualToePoint.getReferenceFrame());
-      virtualToePoint = virtualToePoint.changeFrameCopy(ankleZUpFrames.get(robotSide));
-      virtualToePoint = new FramePoint2d(anklePitchFrames.get(robotSide), virtualToePoint.getX(), virtualToePoint.getY());
+      virtualToePoint = virtualToePoint.changeFrameCopy(ankleZUpFrames.get(stanceSide));
+      virtualToePoint = new FramePoint2d(anklePitchFrames.get(stanceSide), virtualToePoint.getX(), virtualToePoint.getY());
       stanceFullLegJacobian.computeJacobians(virtualToePoint);
 
       // add torque part of upper body wrench // TODO: think about this some more
       if (upperBodyWrench != null)
-         torqueOnPelvisInPelvisFrame.add(new FrameVector(upperBodyWrench.getExpressedInFrame(), upperBodyWrench.getTorque()));
+      {
+         upperBodyWrench.changeFrame(legAttachmentPointFrames.get(swingSide));
+         FrameVector torque = new FrameVector(upperBodyWrench.getExpressedInFrame(), upperBodyWrench.getTorque());
+         torque.changeFrame(torqueOnPelvisInPelvisFrame.getReferenceFrame());
+         torqueOnPelvisInPelvisFrame.add(torque);
+      }
 
       // compute a wrench in the nullspace of the VTP columns of the Jacobian
       Wrench wrenchOnPelvisInPelvisFrame = stanceFullLegJacobian.getWrenchInVTPNullSpace(fZOnPelvisInPelvisFrame, torqueOnPelvisInPelvisFrame);

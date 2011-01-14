@@ -231,8 +231,16 @@ public class ChangingEndpointSwingSubController implements SwingSubController
    public void doPreSwing(LegTorques legTorquesToPackForSwingLeg, double timeInState)
    {
       setEstimatedSwingTimeRemaining(swingDuration.getDoubleValue());
-
+      this.swingSide = legTorquesToPackForSwingLeg.getRobotSide();
       preSwingControlModule.doPreSwing(legTorquesToPackForSwingLeg, timeInState);
+      
+      fullRobotModel.getRootJoint().setDesiredAccelerationToZero();
+      for (LegJointName legJointName : legTorquesToPackForSwingLeg.getLegJointNames())
+      {
+         fullRobotModel.getLegJoint(swingSide, legJointName).setQdd(0.0);
+      }
+      inverseDynamicsCalculators.get(swingSide).compute();
+      setUpperBodyWrench();
 
       timeSpentInPreSwing.set(timeInState);
    }
@@ -245,7 +253,6 @@ public class ChangingEndpointSwingSubController implements SwingSubController
 
    public void doMidSwing(LegTorques legTorquesToPackForSwingLeg, double timeInState)
    {
-      this.swingSide = legTorquesToPackForSwingLeg.getRobotSide();
       double timeSpentSwingingUpToNow = timeInState + timeSpentInInitialSwing.getDoubleValue();
       doInitialAndMidSwing(legTorquesToPackForSwingLeg, timeSpentSwingingUpToNow);
       timeSpentInMidSwing.set(timeInState);
@@ -609,13 +616,18 @@ public class ChangingEndpointSwingSubController implements SwingSubController
          legTorquesToPackForSwingLeg.addTorque(legJointName, tauInverseDynamics);
       }
 
+      setUpperBodyWrench();
+
+      leaveTrailOfBalls();
+   }
+
+   private void setUpperBodyWrench()
+   {
       Wrench upperBodyWrench = new Wrench();
       fullRobotModel.getRootJoint().packWrench(upperBodyWrench);
       upperBodyWrench.changeBodyFrameAttachedToSameBody(referenceFrames.getPelvisFrame());
       upperBodyWrench.changeFrame(referenceFrames.getPelvisFrame());
       couplingRegistry.setUpperBodyWrench(upperBodyWrench);
-
-      leaveTrailOfBalls();
    }
 
    private double getPercentScalingBasedOnJacobianDeterminant(double jacobianDeterminant)
