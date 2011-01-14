@@ -487,7 +487,7 @@ public class CommonStanceSubController implements StanceSubController
       yCaptureToTransfer.set(0.04);    // 0.0;
       minCaptureXToFinishDoubleSupport.set(0.0);
       maxCaptureXToFinishDoublesupport.set(0.10);
-      baseCaptureXToFinishDoubleSupport.set(0.03);
+      baseCaptureXToFinishDoubleSupport.set(0.0);
       captureXVelocityScale.set(0.08);
       kVelocityDoubleSupportTransfer.set(0.1);
       toeOffFootPitch.set(0.1);    // 0.3);

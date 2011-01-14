@@ -1,14 +1,12 @@
 package us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait;
 
 import java.awt.Container;
-import java.awt.ScrollPane;
 import java.util.ArrayList;
 import java.util.Collections;
 
 import javax.swing.BoxLayout;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.xml.ws.handler.MessageContext.Scope;
 
 import us.ihmc.commonWalkingControlModules.RobotSide;
 import us.ihmc.commonWalkingControlModules.configurations.BalanceOnOneLegConfiguration;

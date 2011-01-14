@@ -620,10 +620,10 @@ public class ChangingEndpointSwingSubController implements SwingSubController
 
    private double getPercentScalingBasedOnJacobianDeterminant(double jacobianDeterminant)
    {
-      double determinantThresholdOne = 0.05;    // 0.025;
-      double determinantThresholdTwo = 0.02; //0.01;
+      double determinantThresholdOne = 0.06; // 0.05;    // 0.025;
+      double determinantThresholdTwo = 0.03; // 0.02; //0.01;
 
-      double percent = (jacobianDeterminant - determinantThresholdTwo) / (determinantThresholdOne - determinantThresholdTwo);
+      double percent = (Math.abs(jacobianDeterminant) - determinantThresholdTwo) / (determinantThresholdOne - determinantThresholdTwo);
       percent = MathTools.clipToMinMax(percent, 0.0, 1.0);
       
       return percent;
