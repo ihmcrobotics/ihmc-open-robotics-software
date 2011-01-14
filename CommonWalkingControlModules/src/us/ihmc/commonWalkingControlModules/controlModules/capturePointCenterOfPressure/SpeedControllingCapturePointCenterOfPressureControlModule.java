@@ -362,7 +362,7 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
    {
       speedControlXKp.set(0.5);
       speedControlYKp.set(0.0);
-      doubleSupportCaptureKp.set(2.0); //6.0);
+      doubleSupportCaptureKp.set(3.5); // 2.0); //6.0);
       kCaptureGuide.set(2.0);
       minPerimeterDistance.set(0.02);
    }
