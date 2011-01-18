@@ -417,11 +417,12 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       FramePoint comProjection = processedSensors.getCenterOfMassGroundProjectionInFrame(stanceAnkleZUpFrame);
       FramePoint2d sweetSpot = couplingRegistry.getBipedSupportPolygons().getSweetSpotCopy(oppositeSide);
       sweetSpot.changeFrame(stanceAnkleZUpFrame);
+      boolean inStateLongEnough = timeInState > 0.05;
       boolean isCoMPastSweetSpot = comProjection.getX() > sweetSpot.getX();
       boolean trajectoryIsDone = walkingTrajectoryGenerator.isDone();
       boolean footHitEarly = footSwitches.get(swingSide).hasFootHitGround();
 
-      return isCoMPastSweetSpot || trajectoryIsDone || footHitEarly;
+      return inStateLongEnough && (isCoMPastSweetSpot || trajectoryIsDone || footHitEarly);
    }
 
    public boolean isDoneWithMidSwing(RobotSide swingSide, double timeInState)

@@ -166,7 +166,7 @@ public class CommonStanceSubController implements StanceSubController
 
    public void doStartWalkingDoubleSupport(LowerBodyTorques lowerBodyTorquesToPack, RobotSide loadingLeg, double timeInState)
    {
-      doDoubleSupportControl(lowerBodyTorquesToPack, loadingLeg, true);
+      doDoubleSupportControl(lowerBodyTorquesToPack, loadingLeg, false);
    }
 
    public void doUnloadLegToTransferIntoWalking(LowerBodyTorques lowerBodyTorquesToPack, RobotSide supportLeg, double timeInState)
