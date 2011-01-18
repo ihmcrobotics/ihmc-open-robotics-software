@@ -50,7 +50,7 @@ public class BalanceOnOneLegConfiguration
    }
 
    public static ArrayList<BalanceOnOneLegConfiguration> generateABunch(int desiredNumberOfConfigurations, RobotSide supportSide,
-           ReferenceFrame supportFootFrame)    // int xyCapturePositions, int yawPitchRollPositions, int swingPositions)
+           ReferenceFrame supportFootZUpFrame)    // int xyCapturePositions, int yawPitchRollPositions, int swingPositions)
    {
       ArrayList<BalanceOnOneLegConfiguration> ret = new ArrayList<BalanceOnOneLegConfiguration>();
 
@@ -89,8 +89,8 @@ public class BalanceOnOneLegConfiguration
          double kneeBendSupportLeg = createRandomDoubleInRange(kneeBendSupportLegMin, kneeBendSupportLegMax, random);
 
          double[] yawPitchRoll = new double[] {yaw, pitch, roll};
-         FramePoint desiredCapturePoint = new FramePoint(supportFootFrame, captureX, captureY, 0.0);
-         FramePoint desiredSwingFootPosition = new FramePoint(supportFootFrame, swingX, swingY, swingZ);
+         FramePoint desiredCapturePoint = new FramePoint(supportFootZUpFrame, captureX, captureY, 0.0);
+         FramePoint desiredSwingFootPosition = new FramePoint(supportFootZUpFrame, swingX, swingY, swingZ);
 
          BalanceOnOneLegConfiguration configuration = new BalanceOnOneLegConfiguration(yawPitchRoll, desiredCapturePoint, desiredSwingFootPosition,
                                                          kneeBendSupportLeg);
