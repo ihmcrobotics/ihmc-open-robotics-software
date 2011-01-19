@@ -85,7 +85,7 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
 
          artifactList.add(centerOfPressureDesiredWorldGraphicPosition.createArtifact());
 
-         YoFrameLine2dArtifact cpLineArtifact = new YoFrameLine2dArtifact("cp Line", capturePointLine, Color.RED);
+         YoFrameLine2dArtifact cpLineArtifact = new YoFrameLine2dArtifact("CP Line", capturePointLine, Color.RED);
          artifactList.add(cpLineArtifact);
 
 
@@ -163,7 +163,7 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
             && currentVelocity.getReferenceFrame().isZupFrame();
       if (!everythingInZUpFrame)
       {
-         throw new RuntimeException("Everything has to be in the Z Up frame.");
+         throw new RuntimeException("Everything has to be in a Z Up frame.");
       }
 
       // Check if we have a support Polygon
@@ -190,7 +190,7 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
       perimeterDistance.set(closestEdge.distance(currentCapturePoint2d));
 
 
-      // Handle large disturbances where the iCP is (almost) out of the support polygon
+      // Handle large disturbances where the iCP is (almost) outside the support polygon
       if (!supportPolygon.isPointInside(currentCapturePoint2d) || (perimeterDistance.getDoubleValue() < minPerimeterDistance.getDoubleValue()))
       {
          FramePoint2d p1 = closestEdge.getFirstEndPointCopy();
@@ -228,40 +228,54 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
 
          }
       }
-
-      // Create Line from dCP to iCP
-      FrameLine2d controlLine = new FrameLine2d(currentCapturePoint2d, desiredCapturePoint2d);
-      capturePointLine.setFrameLine2d(controlLine.changeFrameCopy(world));
-
-
-      FrameVector2d comDirection = desiredVelocity.changeFrameCopy(midFeetZUp);
-      comDirection.normalize();
-      FrameVector2d controlDirection = controlLine.getNormalizedFrameVector();
-
-
+      
       FramePoint2d centerOfPressureDesired = null;
-
-      // If the scalar projection of the desired CoM direction on the desired iCP direction is negative
-      // control only the iCP position and don't do speed control.
-      if (comDirection.dot(controlDirection) < 0.0 || (desiredVelocity.length() == 0.0))
+      if (desiredVelocity.length() == 0.0)
       {
-         double distance = desiredCapturePoint2d.distance(currentCapturePoint2d);
-         centerOfPressureDesired = new FramePoint2d(desiredCapturePoint2d);
-         controlDirection.scale(doubleSupportCaptureKp.getDoubleValue() * distance);
-         centerOfPressureDesired.sub(controlDirection);
+         centerOfPressureDesired = doProportionalControl(currentCapturePoint2d, desiredCapturePoint2d);
+         capturePointLine.setFrameLine2d(null);
+         centerOfPressureDesired.changeFrame(supportPolygon.getReferenceFrame());
+         supportPolygon.orthogonalProjection(centerOfPressureDesired);
       }
       else
       {
-         FrameLine2d massLine = createSpeedControlLine(currentVelocity, desiredVelocity, centerOfMassPositionInZUpFrame, midFeetZUp);
-         centerOfPressureDesired = controlLine.intersectionWith(massLine);
+         // Create Line from dCP to iCP
+         FrameLine2d controlLine = new FrameLine2d(currentCapturePoint2d, desiredCapturePoint2d);
+         capturePointLine.setFrameLine2d(controlLine.changeFrameCopy(world));
+
+
+         FrameVector2d comDirection = desiredVelocity.changeFrameCopy(midFeetZUp);
+         comDirection.normalize();
+         FrameVector2d controlDirection = controlLine.getNormalizedFrameVector();
+         
+         // If the scalar projection of the desired CoM direction on the desired iCP direction is negative
+         // control only the iCP position and don't do speed control.
+         if (comDirection.dot(controlDirection) < 0.0)
+         {
+            centerOfPressureDesired = doProportionalControl(currentCapturePoint2d, desiredCapturePoint2d);
+         }
+         else
+         {
+            FrameLine2d massLine = createSpeedControlLine(currentVelocity, desiredVelocity, centerOfMassPositionInZUpFrame, midFeetZUp);
+            centerOfPressureDesired = controlLine.intersectionWith(massLine);
+         }
+         centerOfPressureDesired.changeFrame(supportPolygon.getReferenceFrame());
+         movePointInsidePolygonAlongLine(centerOfPressureDesired, supportPolygon, controlLine);
       }
 
-      centerOfPressureDesired.changeFrame(supportPolygon.getReferenceFrame());
-
-      // FrameLineSegment2d desiredCaptureToDesiredCop = new FrameLineSegment2d(desiredCapturePoint2d, centerOfPressureDesired);
-      centerOfPressureDesired = movePointInsidePolygon(centerOfPressureDesired, supportPolygon, controlLine);
       centerOfPressureDesired.changeFrame(world);
       this.filteredDesiredCenterOfPressure.update(centerOfPressureDesired);
+   }
+
+   private FramePoint2d doProportionalControl(FramePoint2d currentCapturePoint2d, FramePoint2d desiredCapturePoint2d)
+   {
+      FramePoint2d centerOfPressureDesired;
+      centerOfPressureDesired = new FramePoint2d(desiredCapturePoint2d);
+      FrameVector2d control = new FrameVector2d(currentCapturePoint2d);
+      control.sub(desiredCapturePoint2d);
+      control.scale(doubleSupportCaptureKp.getDoubleValue());
+      centerOfPressureDesired.add(control);
+      return centerOfPressureDesired;
    }
 
    public void controlSingleSupport(FramePoint currentCapturePoint, FrameLineSegment2d guideLine, FramePoint desiredCapturePoint, RobotSide supportLeg,
@@ -334,7 +348,7 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
          
          // FrameLineSegment2d desiredCaptureToDesiredCop = new FrameLineSegment2d(desiredCapturePoint2d, centerOfPressureDesired);
 
-         desiredCenterOfPressure = movePointInsidePolygon(desiredCenterOfPressure, footPolygon, shiftedParallelLine);
+         movePointInsidePolygonAlongLine(desiredCenterOfPressure, footPolygon, shiftedParallelLine);
       }
       desiredCenterOfPressure.changeFrame(world);
       this.filteredDesiredCenterOfPressure.update(desiredCenterOfPressure);
@@ -367,10 +381,8 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
       minPerimeterDistance.set(0.02);
    }
    
-   private static FramePoint2d movePointInsidePolygon(FramePoint2d point, FrameConvexPolygon2d polygon, FrameLine2d guideLine)
+   private static void movePointInsidePolygonAlongLine(FramePoint2d point, FrameConvexPolygon2d polygon, FrameLine2d guideLine)
    {
-      FramePoint2d returnPoint = new FramePoint2d(point);
-
       // If feasible CoP is not inside the convex hull of the feet, project it into it.
       if (!polygon.isPointInside(point))
       {
@@ -383,8 +395,8 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
 
             if (intersections.length == 2)
             {
-               double distanceSquaredToIntersection0 = returnPoint.distanceSquared(intersections[0]);
-               double distanceSquaredToIntersection1 = returnPoint.distanceSquared(intersections[1]);
+               double distanceSquaredToIntersection0 = point.distanceSquared(intersections[0]);
+               double distanceSquaredToIntersection1 = point.distanceSquared(intersections[1]);
 
                if (distanceSquaredToIntersection0 <= distanceSquaredToIntersection1)
                   intersectionToUse = intersections[0];
@@ -392,8 +404,8 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
                   intersectionToUse = intersections[1];
 
 
-               returnPoint.setX(intersectionToUse.getX());
-               returnPoint.setY(intersectionToUse.getY());
+               point.setX(intersectionToUse.getX());
+               point.setY(intersectionToUse.getY());
 
                // Move in a little along the line:
                FrameLineSegment2d guideLineSegment = new FrameLineSegment2d(intersections);
@@ -401,8 +413,8 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
                frameVector2d.normalize();
                frameVector2d.scale(-0.002);    // Move toward desired capture by 2 mm to prevent some jerky behavior with VTPs..
 
-               returnPoint.setX(returnPoint.getX() + frameVector2d.getX());
-               returnPoint.setY(returnPoint.getY() + frameVector2d.getY());
+               point.setX(point.getX() + frameVector2d.getX());
+               point.setY(point.getY() + frameVector2d.getY());
             }
             else
             {
@@ -411,11 +423,8 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
          }
          else
          {
-            returnPoint = polygon.getClosestVertexCopy(guideLine);
-
+            point.set(polygon.getClosestVertexCopy(guideLine));
          }
       }
-
-      return returnPoint;
    }
 }
