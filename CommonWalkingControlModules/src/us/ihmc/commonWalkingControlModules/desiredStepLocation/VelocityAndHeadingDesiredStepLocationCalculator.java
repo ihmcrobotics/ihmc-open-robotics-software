@@ -27,7 +27,6 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 public class VelocityAndHeadingDesiredStepLocationCalculator implements DesiredStepLocationCalculator
 {
    private final boolean CHECK_STEP_INTO_CAPTURE_REGION;
-   private final BooleanYoVariable swingFootIsInsideCaptureRegion;
    private final BooleanYoVariable nextStepIsInsideCaptureRegion;
 
    // Tunable robot-dependent parameters
@@ -54,6 +53,8 @@ public class VelocityAndHeadingDesiredStepLocationCalculator implements DesiredS
    private final DoubleYoVariable stepWidth = new DoubleYoVariable("stepWidth", "User determined step width. [m]", registry);
    private final DoubleYoVariable stepHeight = new DoubleYoVariable("stepHeight", "User determined step height. [m]", registry);
    private final DoubleYoVariable stepYaw = new DoubleYoVariable("stepYaw", "This is the step yaw. [rad]", registry);
+   
+   private final DoubleYoVariable previousStepLength = new DoubleYoVariable("previousStepLength", registry);
 
    // Gain
    private final DoubleYoVariable kpStepLength = new DoubleYoVariable("kpStepLength", registry);
@@ -66,7 +67,8 @@ public class VelocityAndHeadingDesiredStepLocationCalculator implements DesiredS
    private double stepWidthSlopeProfile;
    private double stepWidthYInterceptProfile;
 
-   private FramePoint footstepPosition;
+   private FramePoint initialFootstepPosition;
+   private FramePoint adjustedFootstepPosition;
 
    public VelocityAndHeadingDesiredStepLocationCalculator(DesiredHeadingControlModule desiredHeadingControlModule,
            DesiredVelocityControlModule desiredVelocityControlModule, YoVariableRegistry parentRegistry, CommonWalkingReferenceFrames referenceFrames,
@@ -82,11 +84,11 @@ public class VelocityAndHeadingDesiredStepLocationCalculator implements DesiredS
       stepWidth.set(0.0);
       stepHeight.set(0.0);
       stepYaw.set(0.0);
+      previousStepLength.set(0.0);
 
       stepWidthSlopeProfile = 0.0;
       stepWidthYInterceptProfile = 0.0;
 
-      swingFootIsInsideCaptureRegion = new BooleanYoVariable("swingFootIsInsideCaptureRegion", parentRegistry);
       nextStepIsInsideCaptureRegion = new BooleanYoVariable("nextStepIsInsideCaptureRegion", parentRegistry);
 
       this.footForwardOffset = footForwardOffset;
@@ -104,7 +106,7 @@ public class VelocityAndHeadingDesiredStepLocationCalculator implements DesiredS
 
       adjustDesiredStepLocation(swingLegSide, captureRegion);
 
-      return new Footstep(swingLegSide, footstepPosition, stepYaw.getDoubleValue());
+      return new Footstep(swingLegSide, initialFootstepPosition, stepYaw.getDoubleValue());
    }
 
    public void initializeAtStartOfSwing(RobotSide swingLegSide, CouplingRegistry couplingRegistry)
@@ -112,7 +114,7 @@ public class VelocityAndHeadingDesiredStepLocationCalculator implements DesiredS
       ReferenceFrame desiredHeadingFrame = desiredHeadingControlModule.getDesiredHeadingFrame();
 
       // Step Position
-      computeFootstepPosition(swingLegSide, desiredHeadingFrame, couplingRegistry);
+      computeInitialFootstepPosition(swingLegSide, desiredHeadingFrame, couplingRegistry);
 
       // Check if Step Position is inside the Capture Region, Otherwise project step position into the CR
       adjustDesiredStepLocation(swingLegSide, couplingRegistry.getCaptureRegion());
@@ -124,44 +126,89 @@ public class VelocityAndHeadingDesiredStepLocationCalculator implements DesiredS
    public void adjustDesiredStepLocation(RobotSide swingLegSide, FrameConvexPolygon2d captureRegion)
    {
       // Check if Step Position is inside the Capture Region, Otherwise project step position into the CR
-      checkIfStepIntersectCaptureRegion(captureRegion, footstepPosition, swingLegSide);
+      if (initialFootstepPosition != null)    // nextStep == null if not initialized at start of swing first, happens e.g. when balancing on one leg
+      {
+         if (!CHECK_STEP_INTO_CAPTURE_REGION)
+         {
+            nextStepIsInsideCaptureRegion.set(false);
+            adjustedFootstepPosition.set(initialFootstepPosition);
+
+            return;
+         }
+
+         boolean noCaptureRegion = captureRegion == null;
+         if (noCaptureRegion)
+         {
+            nextStepIsInsideCaptureRegion.set(false);
+
+            // leave adjusted as it is; not much better you can do
+         }
+         else
+         {
+            FramePoint2d nextStep2d = initialFootstepPosition.toFramePoint2d();
+            nextStep2d.changeFrame(captureRegion.getReferenceFrame());
+            FrameConvexPolygon2d nextStepFootPolygon = buildNextStepFootPolygon(nextStep2d);
+
+            if (nextStepFootPolygon.intersectionWith(captureRegion) == null)
+            {
+               nextStepIsInsideCaptureRegion.set(false);
+               System.out.println(this.getClass().getName() + ": project");
+
+               captureRegion.orthogonalProjection(nextStep2d);
+               adjustedFootstepPosition.setX(nextStep2d.getX());
+               adjustedFootstepPosition.setY(nextStep2d.getY());
+            }
+            else
+            {
+               nextStepIsInsideCaptureRegion.set(true);
+               adjustedFootstepPosition.set(initialFootstepPosition);
+            }
+         }
+      }
    }
 
-
-
-   private void computeFootstepPosition(RobotSide swingLegSide, ReferenceFrame desiredHeadingFrame, CouplingRegistry couplingRegistry)
+   private void computeInitialFootstepPosition(RobotSide swingLegSide, ReferenceFrame desiredHeadingFrame, CouplingRegistry couplingRegistry)
    {
       RobotSide stanceSide = swingLegSide.getOppositeSide();
+      
+      // Compute previuos Step Length
+      computePreviousStepLength(desiredHeadingFrame);
 
       // Compute Step Length
-      computeStepLength(swingLegSide, desiredHeadingFrame, couplingRegistry);
+      computeStepLength(swingLegSide, couplingRegistry);
 
       // Compute Width
       computeStepWidth(swingLegSide, desiredHeadingFrame, couplingRegistry);
 
-      // Assign computed values to the desiredStepLocation in the stance
+      // Assign computed values to the desiredStepLocation
       FrameVector offsetFromFoot = new FrameVector(desiredHeadingFrame, stepLength.getDoubleValue(), stepWidth.getDoubleValue(), stepHeight.getDoubleValue());
-      this.footstepPosition = desiredHeadingControlModule.getPositionOffsetFromFoot(stanceSide, offsetFromFoot);
+      ReferenceFrame stanceAnkleZUpFrame = referenceFrames.getAnkleZUpReferenceFrames().get(stanceSide);
+      offsetFromFoot.changeFrame(stanceAnkleZUpFrame);
+      this.initialFootstepPosition = new FramePoint(offsetFromFoot);
+      initialFootstepPosition.changeFrame(ReferenceFrame.getWorldFrame()); // make the initial constant in world frame, not foot frame!
+      this.adjustedFootstepPosition = new FramePoint(initialFootstepPosition);
    }
 
+   private void computePreviousStepLength(ReferenceFrame desiredHeadingFrame)
+   {
+      FramePoint leftFoot = new FramePoint(referenceFrames.getAnkleZUpFrame(RobotSide.LEFT));
+      leftFoot.changeFrame(referenceFrames.getAnkleZUpFrame(RobotSide.RIGHT));
+      FrameVector footToFoot = new FrameVector(leftFoot);
+      footToFoot.changeFrame(desiredHeadingFrame);
+      previousStepLength.set(Math.abs(footToFoot.getX()));
+   }
 
-   private void computeStepLength(RobotSide swingLegSide, ReferenceFrame desiredHeadingFrame, CouplingRegistry couplingRegistry)
+   private void computeStepLength(RobotSide swingLegSide, CouplingRegistry couplingRegistry)
    {
       double swingDuration = couplingRegistry.getSingleSupportDuration();
       double stanceDuration = couplingRegistry.getDoubleSupportDuration();
       double totalDuration = swingDuration + stanceDuration;
 
-//    FrameVector2d velocityError = desiredVelocityControlModule.getVelocityErrorInFrame(desiredHeadingFrame);
-//    FrameVector2d normalizedVelocityError = new FrameVector2d(velocityError);
-//    normalizedVelocityError.scale(desiredVelocityControlModule.getDesiredVelocity().length());
-//
-//    kpStepLength.set(normalizedVelocityError.length());
-
-      stepLengthForDesiredVelocity.set(totalDuration * desiredVelocityControlModule.getDesiredVelocity().getX());
+      stepLengthForDesiredVelocity.set(2.0 * totalDuration * desiredVelocityControlModule.getDesiredVelocity().getX());    // +++TK: added the 2.0 (draw a simplest walker to see why)
 
       double stepLengthError = stepLengthForDesiredVelocity.getDoubleValue() - stepLength.getDoubleValue();
 
-      stepLength.set(stepLength.getDoubleValue() + stepLengthError * kpStepLength.getDoubleValue());
+      stepLength.set(previousStepLength.getDoubleValue() + stepLengthError * kpStepLength.getDoubleValue());
    }
 
    private void computeStepWidth(RobotSide swingLegSide, ReferenceFrame desiredHeadingFrame, CouplingRegistry couplingRegistry)
@@ -223,51 +270,7 @@ public class VelocityAndHeadingDesiredStepLocationCalculator implements DesiredS
 
    }
 
-
-
-
-   private void checkIfStepIntersectCaptureRegion(FrameConvexPolygon2d captureRegion, FramePoint nextStep, RobotSide swingLegSide)
-   {
-      if (nextStep != null) // nextStep == null if not initialized at start of swing first, happens e.g. when balancing on one leg 
-      {
-         if (CHECK_STEP_INTO_CAPTURE_REGION)
-         {
-            if (captureRegion == null)
-            {
-               swingFootIsInsideCaptureRegion.set(false);
-               nextStepIsInsideCaptureRegion.set(false);
-
-               footstepPosition = nextStep;
-            }
-
-            else
-            {
-               FrameConvexPolygon2d nextStepFootPolygon = new FrameConvexPolygon2d(buildNextStepFootPolygon(nextStep.toFramePoint2d()));
-
-               if (nextStepFootPolygon.intersectionWith(captureRegion) == null)
-               {
-                  nextStepIsInsideCaptureRegion.set(false);
-                  projectDesiredStepLocationIntoCaptureRegion(nextStep, captureRegion);
-               }
-               else
-                  nextStepIsInsideCaptureRegion.set(true);
-
-            }
-
-            footstepPosition = nextStep;
-         }         
-      }
-   }
-
-   private void projectDesiredStepLocationIntoCaptureRegion(FramePoint nextStep, FrameConvexPolygon2d captureRegion)
-   {
-      System.out.println(this.getClass().getName() + ": project");
-      FramePoint2d tempNextStep = new FramePoint2d(captureRegion.orthogonalProjectionCopy(nextStep.toFramePoint2d()));
-      nextStep.setX(tempNextStep.getX());
-      nextStep.setY(tempNextStep.getY());
-   }
-
-   private FrameConvexPolygon2d buildNextStepFootPolygon(FramePoint2d nextStep)
+   private FrameConvexPolygon2d buildNextStepFootPolygon(FramePoint2d nextStep) // TODO: doesn't account for foot yaw
    {
       ArrayList<FramePoint2d> nextStepFootPolygonPoints = new ArrayList<FramePoint2d>(4);
 
@@ -316,7 +319,7 @@ public class VelocityAndHeadingDesiredStepLocationCalculator implements DesiredS
       insideStepAdjustmentForTurning = 0.0;
       outsideStepAdjustmentForTurning = 0.0;
 
-      kpStepLength.set(0.5);
+      kpStepLength.set(0.3);
       KpStepYaw.set(1.0);
    }
 

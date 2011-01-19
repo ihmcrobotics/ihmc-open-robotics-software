@@ -180,19 +180,6 @@ public class SimpleDesiredHeadingControlModule implements DesiredHeadingControlM
       return ret;
    }
 
-   public FramePoint getPositionOffsetFromFoot(RobotSide robotSide, FrameVector offset)
-   {
-      offset.checkReferenceFrameMatch(desiredHeadingFrame);
-
-      ReferenceFrame footFrame = commonWalkingReferenceFrames.getAnkleZUpReferenceFrames().get(robotSide);
-
-      offset = offset.changeFrameCopy(footFrame);
-      FramePoint ret = new FramePoint(offset);
-
-      return ret;
-   }
-
-
    public void setDesiredHeading(double desiredHeading)
    {
       this.desiredHeading.set(desiredHeading);
@@ -202,8 +189,4 @@ public class SimpleDesiredHeadingControlModule implements DesiredHeadingControlM
    {
       return desiredHeading;
    }
-
-
-
-
 }

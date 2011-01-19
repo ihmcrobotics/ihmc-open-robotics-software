@@ -17,8 +17,6 @@ public interface DesiredHeadingControlModule
 
    public abstract FrameVector getFinalHeadingTarget();
 
-   public abstract FramePoint getPositionOffsetFromFoot(RobotSide robotSide, FrameVector offset);
-
    public abstract void setDesiredHeading(double desiredHeading);
 
    public abstract DoubleYoVariable getDesiredHeading();

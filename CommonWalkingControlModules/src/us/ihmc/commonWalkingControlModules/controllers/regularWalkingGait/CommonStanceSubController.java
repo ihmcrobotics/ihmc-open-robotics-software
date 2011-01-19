@@ -321,24 +321,16 @@ public class CommonStanceSubController implements StanceSubController
 
    public boolean isDoneUnloadLegToTransferIntoWalking(RobotSide loadingLeg, double timeInState)
    {
-      return isDoneWithLoadingPreSwingA(loadingLeg, timeInState);
+      ReferenceFrame loadingLegZUpFrame = referenceFrames.getAnkleZUpFrame(loadingLeg);
+      FramePoint2d capturePoint = couplingRegistry.getCapturePoint().toFramePoint2d().changeFrameCopy(loadingLegZUpFrame);
 
-//    processedSensors.getReferenceFrames();
-//    FramePoint actualCop = processedSensors.getCombinedCenterOfPressureInFrame(R2ReferenceFrames.getWorldFrame());
-//
-//    FrameConvexPolygon2d supportFootPolygon = processedSensors.getFootPolygons().get(loadingLeg).getFrameConvexPolygon2dCopy();
-//    FrameConvexPolygon2d shrunkenSupportFootPolygon = FrameConvexPolygon2d.shrinkConstantDistanceInto(0.02, supportFootPolygon);
-//
-////  double comVelocityX = processedSensors.getCenterOfMassVelocityInFrame(ReferenceFrame.getWorldFrame()).getX();
-////  double comVelocityY = processedSensors.getCenterOfMassVelocityInFrame(ReferenceFrame.getWorldFrame()).getY();
-////  double comVelocityZ = processedSensors.getCenterOfMassVelocityInFrame(ReferenceFrame.getWorldFrame()).getZ();
-//
-////  double comVelocity = Math.sqrt(comVelocityX * comVelocityX + comVelocityY * comVelocityY + comVelocityZ * comVelocityZ);
-//
-//    if (shrunkenSupportFootPolygon.isPointInside(actualCop.toFramePoint2d()))
-//       return true;
-//    else
-//       return false;
+      boolean capturePointPastAnkle = capturePoint.getX() > 0.0;
+      boolean capturePointIsInside;
+      if (loadingLeg == RobotSide.LEFT)
+         capturePointIsInside = capturePoint.getY() > -yCaptureToTransfer.getDoubleValue();
+      else
+         capturePointIsInside = capturePoint.getY() < yCaptureToTransfer.getDoubleValue();
+      return (capturePointPastAnkle && capturePointIsInside);
 
    }
 
@@ -350,18 +342,10 @@ public class CommonStanceSubController implements StanceSubController
 
       FramePoint2d capturePoint = couplingRegistry.getCapturePoint().toFramePoint2d().changeFrameCopy(loadingLegZUpFrame);
 
-      boolean capturePointPastAnkle = capturePoint.getX() > 0.0;
-
       FrameVector2d desiredVelocity = desiredVelocityControlModule.getDesiredVelocity().changeFrameCopy(loadingLegZUpFrame);
       FrameVector2d velocityError = desiredVelocityControlModule.getVelocityErrorInFrame(loadingLegZUpFrame);
       captureXToFinishDoubleSupport.set(getCaptureXToFinishDoubleSupport(desiredVelocity, velocityError));
       boolean capturePointIsFarEnoughForward = capturePoint.getX() > captureXToFinishDoubleSupport.getDoubleValue();
-
-      boolean capturePointIsInside;
-      if (loadingLeg == RobotSide.LEFT)
-         capturePointIsInside = capturePoint.getY() > -yCaptureToTransfer.getDoubleValue();
-      else
-         capturePointIsInside = capturePoint.getY() < yCaptureToTransfer.getDoubleValue();
 
       if (isCapturePointOutsideBaseOfSupport())
          return true;
@@ -372,24 +356,7 @@ public class CommonStanceSubController implements StanceSubController
       if (capturePointIsFarEnoughForward)
          return true;
 
-      if (capturePointPastAnkle && capturePointIsInside)
-         return true;
-
       return false;
-   }
-
-   public boolean isDoneLoadingForSingleLegBalance(RobotSide upcomingSupportSide, double timeInCurrentState)
-   {
-      FramePoint2d capturePoint = couplingRegistry.getCapturePoint().toFramePoint2d();
-      FramePoint2d sweetSpot = couplingRegistry.getBipedSupportPolygons().getSweetSpotCopy(upcomingSupportSide);
-      sweetSpot.changeFrame(capturePoint.getReferenceFrame());
-
-      double doneLoadingForSingleLegBalanceSafetyFactor = 4.0;
-      double minDistanceToSweetSpot = footWidth / doneLoadingForSingleLegBalanceSafetyFactor;
-      boolean isCapturePointCloseEnoughToSweetSpot = capturePoint.distance(sweetSpot) < minDistanceToSweetSpot;
-      boolean inStateLongEnough = timeInCurrentState > 1.0;
-
-      return isCapturePointCloseEnoughToSweetSpot && inStateLongEnough;
    }
 
    private double getCaptureXToFinishDoubleSupport(FrameVector2d desiredVelocity, FrameVector2d velocityError)
@@ -414,6 +381,20 @@ public class CommonStanceSubController implements StanceSubController
       }
       else
          return true;
+   }
+   
+   public boolean isDoneLoadingForSingleLegBalance(RobotSide upcomingSupportSide, double timeInCurrentState)
+   {
+      FramePoint2d capturePoint = couplingRegistry.getCapturePoint().toFramePoint2d();
+      FramePoint2d sweetSpot = couplingRegistry.getBipedSupportPolygons().getSweetSpotCopy(upcomingSupportSide);
+      sweetSpot.changeFrame(capturePoint.getReferenceFrame());
+
+      double doneLoadingForSingleLegBalanceSafetyFactor = 4.0;
+      double minDistanceToSweetSpot = footWidth / doneLoadingForSingleLegBalanceSafetyFactor;
+      boolean isCapturePointCloseEnoughToSweetSpot = capturePoint.distance(sweetSpot) < minDistanceToSweetSpot;
+      boolean inStateLongEnough = timeInCurrentState > 1.0;
+
+      return isCapturePointCloseEnoughToSweetSpot && inStateLongEnough;
    }
 
    private boolean isCapturePointOutsideBaseOfSupport()
@@ -469,9 +450,9 @@ public class CommonStanceSubController implements StanceSubController
       minDoubleSupportTime.set(0.05);
       minDoubleSupportTimeBeforeWalking.set(0.3);
       yCaptureToTransfer.set(0.04);    // 0.0;
-      minCaptureXToFinishDoubleSupport.set(0.03);
+      minCaptureXToFinishDoubleSupport.set(0.05); // 0.03);
       maxCaptureXToFinishDoublesupport.set(0.20);
-      baseCaptureXToFinishDoubleSupport.set(0.03);    // 0.08);
+      baseCaptureXToFinishDoubleSupport.set(0.07); // 0.03);    // 0.08);
       captureXVelocityScale.set(0.08);
       kVelocityDoubleSupportTransfer.set(0.05);    // 0.1);
       toeOffFootPitch.set(0.1);    // 0.3);
@@ -481,15 +462,14 @@ public class CommonStanceSubController implements StanceSubController
 
    public void setParametersForM2V2()
    {
-      // TODO: tune
       minDoubleSupportTime.set(0.0);
       minDoubleSupportTimeBeforeWalking.set(0.3);
       yCaptureToTransfer.set(0.04);    // 0.0;
-      minCaptureXToFinishDoubleSupport.set(0.0);
+      minCaptureXToFinishDoubleSupport.set(-0.02);
       maxCaptureXToFinishDoublesupport.set(0.10);
-      baseCaptureXToFinishDoubleSupport.set(0.0);
-      captureXVelocityScale.set(0.08);
-      kVelocityDoubleSupportTransfer.set(0.1);
+      baseCaptureXToFinishDoubleSupport.set(-0.02);
+      captureXVelocityScale.set(0.0); // 0.08);
+      kVelocityDoubleSupportTransfer.set(0.0); // 0.1);
       toeOffFootPitch.set(0.1);    // 0.3);
       toeOffMoveDuration.set(0.05);
       WAIT_IN_LOADING_PRE_SWING_B = true;
