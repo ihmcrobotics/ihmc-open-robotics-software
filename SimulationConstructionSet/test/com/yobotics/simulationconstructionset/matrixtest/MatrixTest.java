@@ -1,10 +1,15 @@
 package com.yobotics.simulationconstructionset.matrixtest;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import java.util.Random;
+
 import org.junit.Test;
+
 import us.ihmc.utilities.math.MathTools;
-import com.mathworks.jama.*;
+
+import com.mathworks.jama.Matrix;
 
 
 public class MatrixTest
