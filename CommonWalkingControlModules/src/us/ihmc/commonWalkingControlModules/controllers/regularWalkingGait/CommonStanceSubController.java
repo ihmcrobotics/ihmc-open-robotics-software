@@ -259,8 +259,9 @@ public class CommonStanceSubController implements StanceSubController
 
    public void doTransitionIntoLoadingForSingleLegBalance(RobotSide upcomingSupportSide)
    {
-      // TODO Auto-generated method stub
-
+      supportLegAndLegToTrustForVelocity.legToTrustForVelocity.set(upcomingSupportSide);
+      supportLegAndLegToTrustForVelocity.supportLeg.set(null);
+      supportLegAndLegToTrustForVelocity.legToUseForCOMOffset.set(upcomingSupportSide);
    }
 
    public void doTransitionIntoSingleLegBalance(RobotSide supportLeg, BalanceOnOneLegConfiguration currentConfiguration)
