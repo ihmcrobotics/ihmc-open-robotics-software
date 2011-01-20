@@ -49,7 +49,7 @@ public class KneeExtensionControlModule
       bendTime.set(0.2);
       extendTime.set(0.2);
 
-      kp_KneeExtension.set(500.0);
+      kp_KneeExtension.set(200); // 500.0);
    }
    
    public void setupParametersForM2V2()

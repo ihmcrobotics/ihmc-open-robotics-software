@@ -467,7 +467,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       maximumTerminalSwingDuration.set(0.15);    // 0.15);    // 0.1); // 0.25;
       terminalSwingGainRampTime.set(minimumTerminalSwingDuration.getDoubleValue() / 4.0);
 
-      passiveHipCollapseTime.set(0.10); // 0.07);    // 0.06); // 0.1);
+      passiveHipCollapseTime.set(0.07);    // 0.06); // 0.1);
 
       antiGravityPercentage.set(1.0);
 

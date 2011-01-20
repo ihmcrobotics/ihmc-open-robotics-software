@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.calibration.virtualCoMChain;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 import javax.vecmath.Vector3d;
 
@@ -65,6 +66,7 @@ public abstract class VirtualChainExampleRobot extends Robot implements RobotRan
    {
       private static final long serialVersionUID = -387898369605560846L;
       private final PinJoint joint1, joint2, joint3;
+      private final Random random = new Random(100L);
 
       public VirtualChainExampleRobotOne()
       {
@@ -94,9 +96,9 @@ public abstract class VirtualChainExampleRobot extends Robot implements RobotRan
 
       public void moveToRandomPosition()
       {
-         joint1.setInitialState(-Math.PI + 2.0 * Math.random() * Math.PI, 0.0);
-         joint2.setInitialState(-Math.PI + 2.0 * Math.random() * Math.PI, 0.0);
-         joint3.setInitialState(-Math.PI + 2.0 * Math.random() * Math.PI, 0.0);
+         joint1.setInitialState(-Math.PI + 2.0 * random.nextDouble() * Math.PI, 0.0);
+         joint2.setInitialState(-Math.PI + 2.0 * random.nextDouble() * Math.PI, 0.0);
+         joint3.setInitialState(-Math.PI + 2.0 * random.nextDouble() * Math.PI, 0.0);
       }
    }
 
@@ -106,6 +108,7 @@ public abstract class VirtualChainExampleRobot extends Robot implements RobotRan
    {
       private static final long serialVersionUID = -634147542490794495L;
       private final ArrayList<PinJoint> pinJoints = new ArrayList<PinJoint>();
+      private final Random random = new Random(100L);
 
       public VirtualChainExampleRobotTwo()
       {
@@ -119,15 +122,15 @@ public abstract class VirtualChainExampleRobot extends Robot implements RobotRan
 
             if (i != 0)
             {
-               offset = new Vector3d(Math.random(), Math.random(), Math.random());
+               offset = new Vector3d(random.nextDouble(), random.nextDouble(), random.nextDouble());
             }
 
-            Vector3d axis = new Vector3d(Math.random(), Math.random(), Math.random());
+            Vector3d axis = new Vector3d(random.nextDouble(), random.nextDouble(), random.nextDouble());
             axis.normalize();
 
             PinJoint pinJoint = new PinJoint("joint_" + i, offset, this, axis);
             Link link = new Link("link_" + i);
-            link.setMassAndRadiiOfGyration(Math.random(), Math.random(), Math.random(), Math.random());
+            link.setMassAndRadiiOfGyration(random.nextDouble(), random.nextDouble(), random.nextDouble(), random.nextDouble());
             pinJoint.setLink(link);
 
             if (i == 0)
@@ -137,7 +140,7 @@ public abstract class VirtualChainExampleRobot extends Robot implements RobotRan
 
             else
             {
-               int jointIndex = (int) (Math.random() * (pinJoints.size() - 1));
+               int jointIndex = (int) (random.nextDouble() * (pinJoints.size() - 1));
 
                Joint parentJoint = pinJoints.get(jointIndex);
                parentJoint.addJoint(pinJoint);
@@ -152,7 +155,7 @@ public abstract class VirtualChainExampleRobot extends Robot implements RobotRan
       {
          for (PinJoint pinJoint : pinJoints)
          {
-            pinJoint.setInitialState(-Math.PI + 2.0 * Math.random() * Math.PI, 0.0);
+            pinJoint.setInitialState(-Math.PI + 2.0 * random.nextDouble() * Math.PI, 0.0);
          }
 
       }
@@ -164,6 +167,7 @@ public abstract class VirtualChainExampleRobot extends Robot implements RobotRan
       private static final long serialVersionUID = 4774793234722509693L;
       private final FloatingJoint joint1;
       private final PinJoint joint2, joint3;
+      private final Random random = new Random(100L);
 
       public VirtualChainExampleRobotThree()
       {
@@ -193,10 +197,10 @@ public abstract class VirtualChainExampleRobot extends Robot implements RobotRan
 
       public void moveToRandomPosition()
       {
-         joint1.setXYZ(Math.random(), Math.random(), Math.random());
-         joint1.setYawPitchRoll(-Math.PI + 2.0 * Math.random() * Math.PI, -Math.PI + 2.0 * Math.random() * Math.PI, -Math.PI + 2.0 * Math.random() * Math.PI);
-         joint2.setInitialState(-Math.PI + 2.0 * Math.random() * Math.PI, 0.0);
-         joint3.setInitialState(-Math.PI + 2.0 * Math.random() * Math.PI, 0.0);
+         joint1.setXYZ(random.nextDouble(), random.nextDouble(), random.nextDouble());
+         joint1.setYawPitchRoll(-Math.PI + 2.0 * random.nextDouble() * Math.PI, -Math.PI + 2.0 * random.nextDouble() * Math.PI, -Math.PI + 2.0 * random.nextDouble() * Math.PI);
+         joint2.setInitialState(-Math.PI + 2.0 * random.nextDouble() * Math.PI, 0.0);
+         joint3.setInitialState(-Math.PI + 2.0 * random.nextDouble() * Math.PI, 0.0);
       }
    }
 
@@ -206,6 +210,7 @@ public abstract class VirtualChainExampleRobot extends Robot implements RobotRan
       private static final long serialVersionUID = -6524194700402276350L;
       private final FloatingJoint floatingJoint;
       private final ArrayList<Joint> pinAndSliderJoints = new ArrayList<Joint>();
+      private final Random random = new Random(100L);
 
       public VirtualChainExampleRobotFour()
       {
@@ -213,7 +218,7 @@ public abstract class VirtualChainExampleRobot extends Robot implements RobotRan
 
          floatingJoint = new FloatingJoint("floating", new Vector3d(), this);
          Link link = new Link("floatinglink");
-         link.setMassAndRadiiOfGyration(Math.random(), Math.random(), Math.random(), Math.random());
+         link.setMassAndRadiiOfGyration(random.nextDouble(), random.nextDouble(), random.nextDouble(), random.nextDouble());
          floatingJoint.setLink(link);
          this.addRootJoint(floatingJoint);
 
@@ -221,13 +226,13 @@ public abstract class VirtualChainExampleRobot extends Robot implements RobotRan
 
          for (int i = 0; i < numberOfJoints; i++)
          {
-            Vector3d offset = new Vector3d(Math.random(), Math.random(), Math.random());
-            Vector3d axis = new Vector3d(Math.random(), Math.random(), Math.random());
+            Vector3d offset = new Vector3d(random.nextDouble(), random.nextDouble(), random.nextDouble());
+            Vector3d axis = new Vector3d(random.nextDouble(), random.nextDouble(), random.nextDouble());
             axis.normalize();
 
             Joint joint;
 
-//          if (Math.random() > 0.5)
+//          if (random.nextDouble() > 0.5)
             {
                PinJoint pinJoint = new PinJoint("pinjoint_" + i, offset, this, axis);
                joint = pinJoint;
@@ -240,14 +245,14 @@ public abstract class VirtualChainExampleRobot extends Robot implements RobotRan
 //          }
 
             link = new Link("link_" + i);
-            link.setMassAndRadiiOfGyration(Math.random(), Math.random(), Math.random(), Math.random());
+            link.setMassAndRadiiOfGyration(random.nextDouble(), random.nextDouble(), random.nextDouble(), random.nextDouble());
             joint.setLink(link);
 
             Joint parentJoint = floatingJoint;
 
-            if ((Math.random() > 0.25) && (pinAndSliderJoints.size() > 0))
+            if ((random.nextDouble() > 0.25) && (pinAndSliderJoints.size() > 0))
             {
-               int jointIndex = (int) (Math.random() * (pinAndSliderJoints.size() - 1));
+               int jointIndex = (int) (random.nextDouble() * (pinAndSliderJoints.size() - 1));
                parentJoint = pinAndSliderJoints.get(jointIndex);
             }
 
@@ -260,19 +265,19 @@ public abstract class VirtualChainExampleRobot extends Robot implements RobotRan
 
       public void moveToRandomPosition()
       {
-         floatingJoint.setXYZ(Math.random(), Math.random(), Math.random());
-         floatingJoint.setYawPitchRoll(-Math.PI + 2.0 * Math.random() * Math.PI, -Math.PI + 2.0 * Math.random() * Math.PI,
-                                       -Math.PI + 2.0 * Math.random() * Math.PI);
+         floatingJoint.setXYZ(random.nextDouble(), random.nextDouble(), random.nextDouble());
+         floatingJoint.setYawPitchRoll(-Math.PI + 2.0 * random.nextDouble() * Math.PI, -Math.PI + 2.0 * random.nextDouble() * Math.PI,
+                                       -Math.PI + 2.0 * random.nextDouble() * Math.PI);
 
          for (Joint joint : pinAndSliderJoints)
          {
             if (joint.getClass() == PinJoint.class)
             {
-               ((PinJoint) joint).setInitialState(-Math.PI + 2.0 * Math.random() * Math.PI, 0.0);
+               ((PinJoint) joint).setInitialState(-Math.PI + 2.0 * random.nextDouble() * Math.PI, 0.0);
             }
             else
             {
-               ((SliderJoint) joint).setInitialState(Math.random(), 0.0);
+               ((SliderJoint) joint).setInitialState(random.nextDouble(), 0.0);
             }
          }
 
