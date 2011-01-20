@@ -4,6 +4,7 @@ package us.ihmc.commonWalkingControlModules.calibration.virtualCoMChain;
 import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 import javax.vecmath.Point3d;
 
@@ -21,6 +22,8 @@ import com.yobotics.simulationconstructionset.Robot;
 
 public class VirtualChainBuilderTest
 {
+   private static Random random = new Random(105L);
+
    @Before
    public void setUp() throws Exception
    {
@@ -133,8 +136,8 @@ public class VirtualChainBuilderTest
          centerOfMassFramePoint.changeFrame(baseFrame);
          FramePoint2d centerOfMassProjection = centerOfMassFramePoint.toFramePoint2d();
          
-         double xCoMNoise = -comNoiseMaximum + 2.0 * comNoiseMaximum * Math.random();
-         double yCoMNoise = -comNoiseMaximum + 2.0 * comNoiseMaximum * Math.random();
+         double xCoMNoise = -comNoiseMaximum + 2.0 * comNoiseMaximum * random.nextDouble();
+         double yCoMNoise = -comNoiseMaximum + 2.0 * comNoiseMaximum * random.nextDouble();
          
          FramePoint2d noiseToCenterOfMass = new FramePoint2d(centerOfMassProjection.getReferenceFrame(), xCoMNoise, yCoMNoise);
          
