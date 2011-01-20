@@ -180,9 +180,9 @@ public class SimpleDesiredHeadingControlModule implements DesiredHeadingControlM
       return ret;
    }
 
-   public void setDesiredHeading(double desiredHeading)
+   public void setFinalDesiredHeading(double desiredHeading)
    {
-      this.desiredHeading.set(desiredHeading);
+      this.desiredHeadingFinal.set(desiredHeading);
    }
 
    public DoubleYoVariable getDesiredHeading()
