@@ -17,7 +17,7 @@ public interface DesiredHeadingControlModule
 
    public abstract FrameVector getFinalHeadingTarget();
 
-   public abstract void setDesiredHeading(double desiredHeading);
+   public abstract void setFinalDesiredHeading(double desiredHeading);
 
    public abstract DoubleYoVariable getDesiredHeading();
 }
