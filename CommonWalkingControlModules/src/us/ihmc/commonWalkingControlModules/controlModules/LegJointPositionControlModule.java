@@ -138,7 +138,7 @@ public class LegJointPositionControlModule
    {
       doDerivativeControlInThisModule = false;
 
-      kpGains.get(LegJointName.HIP_YAW).set(300.0); // 120.0);
+      kpGains.get(LegJointName.HIP_YAW).set(120.0);
       kpGains.get(LegJointName.HIP_ROLL).set(200.0);
       kpGains.get(LegJointName.HIP_PITCH).set(200.0);
       kpGains.get(LegJointName.KNEE).set(120.0);
