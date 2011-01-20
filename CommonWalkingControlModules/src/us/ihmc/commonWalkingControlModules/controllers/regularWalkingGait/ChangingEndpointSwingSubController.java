@@ -122,14 +122,16 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       new DoubleYoVariable("comXThresholdToFinishInitialSwing",
                            "How far the CoM should be in front of the support foot before transitioning out of initial swing.", registry);
 
-   private final DoubleYoVariable timeSpentInPreSwing = new DoubleYoVariable("timeSpentInPreSwing", "This is the time spend in Pre swing.", registry);
-   private final DoubleYoVariable timeSpentInInitialSwing = new DoubleYoVariable("timeSpentInInitialSwing", "This is the time spend in initial swing.",
+   private final DoubleYoVariable timeSpentInPreSwing = new DoubleYoVariable("timeSpentInPreSwing", "This is the time spent in Pre swing.", registry);
+   private final DoubleYoVariable timeSpentInInitialSwing = new DoubleYoVariable("timeSpentInInitialSwing", "This is the time spent in initial swing.",
                                                                registry);
    private final DoubleYoVariable timeSpentInMidSwing = new DoubleYoVariable("timeSpentInMidSwing", "This is the time spend in mid swing.", registry);
-   private final DoubleYoVariable timeSpentInTerminalSwing = new DoubleYoVariable("timeSpentInTerminalSwing", "This is the time spend in terminal swing.",
+   private final DoubleYoVariable timeSpentInTerminalSwing = new DoubleYoVariable("timeSpentInTerminalSwing", "This is the time spent in terminal swing.",
                                                                 registry);
-   private final DoubleYoVariable singleSupportDuration = new DoubleYoVariable("singleSupportDuration", "This is the toal time spend in single support.",
+   private final DoubleYoVariable singleSupportDuration = new DoubleYoVariable("singleSupportDuration", "This is the toal time spent in single support.",
                                                              registry);
+   
+   private final DoubleYoVariable swingFootPositionError = new DoubleYoVariable("swingFootPositionError", registry);
 
    private final YoMinimumJerkTrajectory minimumJerkTrajectoryForFootOrientation = new YoMinimumJerkTrajectory("swingFootOrientation", registry);
 
@@ -537,6 +539,10 @@ public class ChangingEndpointSwingSubController implements SwingSubController
          OrientationInterpolationCalculator.computeAngularAcceleration(startSwingOrientation.getFrameOrientationCopy(),
             endSwingOrientation.getFrameOrientationCopy(), alphaDDot);
       desiredSwingFootAngularAccelerationInWorldFrame.set(desiredSwingFootAngularAcceleration);
+
+      ReferenceFrame swingFootFrame = referenceFrames.getFootFrame(swingSide);
+      position.changeFrame(swingFootFrame);
+      swingFootPositionError.set(position.distance(new FramePoint(swingFootFrame)));
    }
 
    private void updateFinalDesiredPosition(CartesianTrajectoryGenerator trajectoryGenerator)
