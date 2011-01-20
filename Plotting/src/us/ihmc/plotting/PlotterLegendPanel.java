@@ -75,23 +75,23 @@ public class PlotterLegendPanel extends JPanel implements ArtifactsChangedListen
          artifact.drawLegend(g, artifactX, y, scale);
 
          g.setColor(Color.black);
-         String newName = "";
-         newName = artifact.getID().substring(0, 1).toUpperCase() + artifact.getID().substring(1, artifact.getID().length());
+//         String newName = "";
+//         newName = artifact.getID().substring(0, 1).toUpperCase() + artifact.getID().substring(1, artifact.getID().length());
+//
+//         for (int i = 1; i < newName.length(); i++)
+//         {
+//            int ascii = (int) newName.charAt(i);
+//            if ((ascii >= 65) && (ascii <= 90))
+//            {
+//               if (!newName.substring(i - 1, i).equals(" "))
+//               {
+//                  newName = newName.substring(0, i) + " " + newName.substring(i, newName.length());
+//                  i++;
+//               }
+//            }
+//         }
 
-         for (int i = 1; i < newName.length(); i++)
-         {
-            int ascii = (int) newName.charAt(i);
-            if ((ascii >= 65) && (ascii <= 90))
-            {
-               if (!newName.substring(i - 1, i).equals(" "))
-               {
-                  newName = newName.substring(0, i) + " " + newName.substring(i, newName.length());
-                  i++;
-               }
-            }
-         }
-
-         g.drawString(newName, labelX, y);
+         g.drawString(artifact.getID(), labelX, y);
          setPreferredSize(new Dimension(400, y+deltaY));
       }
    }

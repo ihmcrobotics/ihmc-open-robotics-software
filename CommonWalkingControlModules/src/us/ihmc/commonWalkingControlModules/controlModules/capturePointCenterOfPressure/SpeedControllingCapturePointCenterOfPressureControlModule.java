@@ -310,7 +310,8 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
       FrameConvexPolygon2d footPolygon = supportPolygons.getFootPolygonInAnkleZUp(supportLeg);
       FramePoint2d currentCapturePoint2d = currentCapturePoint.toFramePoint2d();
       
-      boolean stayInDoubleSupport = (desiredVelocity.lengthSquared() == 0.0);
+      double epsilon = 1e-9;
+      boolean stayInDoubleSupport = (desiredVelocity.lengthSquared() < epsilon);
       FramePoint2d desiredCenterOfPressure;
       if (stayInDoubleSupport)
       {
@@ -320,6 +321,7 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
          control.sub(desiredCapturePoint2d);
          control.scale(doubleSupportCaptureKp.getDoubleValue());
          desiredCenterOfPressure.add(control);
+         footPolygon.orthogonalProjection(desiredCenterOfPressure);
       }
       else
       {

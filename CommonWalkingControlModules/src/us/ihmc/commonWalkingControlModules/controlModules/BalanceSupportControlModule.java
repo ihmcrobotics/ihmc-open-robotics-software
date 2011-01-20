@@ -111,8 +111,6 @@ public class BalanceSupportControlModule
       FramePoint2d desiredCoP = velocityViaCoPControlModule.computeDesiredCoPDoubleSupport(loadingLeg, desiredVelocity);
 
       // compute VTPs and leg strengths
-//    SideDependentList<FramePoint2d> virtualToePoints = new SideDependentList<FramePoint2d>();
-//    SideDependentList<Double> legStrengths = new SideDependentList<Double>();
       virtualToePointAndLegStrengthCalculator.packVirtualToePointsAndLegStrengths(legStrengthsAndVirtualToePoints, bipedSupportPolygons, desiredCoP);
 
       // compute desired torques on the pelvis using PelvisOrientationControlModule.
