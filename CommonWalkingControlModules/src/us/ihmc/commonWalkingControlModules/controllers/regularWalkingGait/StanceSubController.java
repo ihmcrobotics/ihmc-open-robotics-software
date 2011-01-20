@@ -17,7 +17,7 @@ public interface StanceSubController
 
    public abstract void doLateStance(LegTorques legTorquesToPackForStanceSide, double timeInState);
 
-   public abstract void doTerminalStance(LegTorques legTorquesToPackForLoadingLeg, double timeInState);
+   public abstract void doTerminalStance(LegTorques legTorquesToPackForStanceSide, double timeInState);
 
    public abstract void doStartWalkingDoubleSupport(LowerBodyTorques lowerBodyTorquesToPack, RobotSide loadingLeg, double timeInState);
 

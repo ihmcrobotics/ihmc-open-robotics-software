@@ -120,18 +120,18 @@ public class CommonStanceSubController implements StanceSubController
       timeSpentInLateStance.set(timeInState);
    }
 
-   public void doTerminalStance(LegTorques legTorquesToPackForLoadingLeg, double timeInState)
+   public void doTerminalStance(LegTorques legTorquesToPackForStanceSide, double timeInState)
    {
-      RobotSide loadingLeg = legTorquesToPackForLoadingLeg.getRobotSide();
+      RobotSide supportLeg = legTorquesToPackForStanceSide.getRobotSide();
 
 //    doSingleSupportControl(legTorquesToPackForStanceSide);
 
-      doSingleSupportControl(legTorquesToPackForLoadingLeg, true);
+      doSingleSupportControl(legTorquesToPackForStanceSide, true);
 
-      footOrientationControlModule.addAdditionalTorqueForFootOrientationControl(legTorquesToPackForLoadingLeg,
+      footOrientationControlModule.addAdditionalTorqueForFootOrientationControl(legTorquesToPackForStanceSide,
               timeInState + timeSpentInLateStance.getDoubleValue());
 
-      kneeExtensionControlModule.breakKneeForDownhillSlopes(loadingLeg.getOppositeSide());
+      kneeExtensionControlModule.breakKneeForDownhillSlopes(supportLeg.getOppositeSide());
 
       timeSpentInTerminalStance.set(timeInState);
    }
