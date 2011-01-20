@@ -8,7 +8,7 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 
 public interface DesiredHeadingControlModule
-{
+{  
    public abstract void updateDesiredHeadingFrame();
 
    public abstract ReferenceFrame getDesiredHeadingFrame();
@@ -20,4 +20,6 @@ public interface DesiredHeadingControlModule
    public abstract void setFinalDesiredHeading(double desiredHeading);
 
    public abstract DoubleYoVariable getDesiredHeading();
+   
+   public abstract void resetHeading(double newHeading);
 }

@@ -189,4 +189,10 @@ public class SimpleDesiredHeadingControlModule implements DesiredHeadingControlM
    {
       return desiredHeading;
    }
+
+   public void resetHeading(double newHeading)
+   {
+      this.desiredHeading.set(newHeading);
+      this.desiredHeadingFinal.set(newHeading);
+   }
 }
