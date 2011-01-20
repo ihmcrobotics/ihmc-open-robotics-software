@@ -68,6 +68,8 @@ public abstract class RegularWalkingGaitAbstractController
 
    private final String name;
 
+   private boolean firstTick = true;
+
    public RegularWalkingGaitAbstractController(String name, RobotSpecificJointNames robotJointNames, DoubleYoVariable time,
            ProcessedOutputsInterface processedOutputs, DoEveryTickSubController doEveryTickSubController, StanceSubController stanceSubController,
            SwingSubController swingSubController, UpperBodySubController upperBodySubController, CommonWalkingReferenceFrames referenceFrames,
@@ -104,6 +106,11 @@ public abstract class RegularWalkingGaitAbstractController
       // Remember the torques to filter them in a bit:
       torqueTransitionFilter.rememberPreviousTorques();
 
+      if (firstTick)
+      {
+         doEveryTickSubController.doFirstTick();
+         firstTick = false;
+      }
       doEveryTickSubController.doEveryControlTick(supportLegYoVariable.getEnumValue());
       walkingStateMachine.doAction();
       walkingStateMachine.checkTransitionConditions();
