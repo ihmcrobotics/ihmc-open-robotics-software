@@ -14,7 +14,7 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicRefere
    {
       private static final long serialVersionUID = 4252284929932022778L;
 
-      private final YoVariableRegistry registry = new YoVariableRegistry("TestFramesController");
+      private final YoVariableRegistry registry = new YoVariableRegistry("VisualizeFramesController");
 
       private final ArrayList<DynamicGraphicReferenceFrame> dynamicGraphicReferenceFrames = new ArrayList<DynamicGraphicReferenceFrame>();
 
@@ -44,7 +44,7 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicRefere
 
       public String getName()
       {
-         return "testFramesController";
+         return "visualizeFramesController";
       }
 
       private void updateDynamicGraphicReferenceFrames()
