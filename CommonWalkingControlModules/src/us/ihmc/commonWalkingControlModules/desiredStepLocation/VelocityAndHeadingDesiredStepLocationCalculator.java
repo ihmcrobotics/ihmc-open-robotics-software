@@ -171,7 +171,7 @@ public class VelocityAndHeadingDesiredStepLocationCalculator implements DesiredS
    {
       RobotSide stanceSide = swingLegSide.getOppositeSide();
       
-      // Compute previuos Step Length
+      // Compute previous Step Length
       computePreviousStepLength(desiredHeadingFrame);
 
       // Compute Step Length
@@ -256,18 +256,12 @@ public class VelocityAndHeadingDesiredStepLocationCalculator implements DesiredS
 
    private void computeFootstepYaw(RobotSide swingSide, ReferenceFrame desiredHeadingFrame)
    {
-      // Compute the difference between the desired Heading frame and the frame of the swing foot.
-      ReferenceFrame swingFootFrame = referenceFrames.getAnkleZUpReferenceFrames().get(swingSide);
-      Transform3D headingToSwingTransform = swingFootFrame.getTransformToDesiredFrame(desiredHeadingFrame);
+      // Compute the difference between the desired Heading frame and the frame of the adjusted footstep position (yaw should be w.r.t. this frame!).
+      ReferenceFrame footstepPositionFrame = adjustedFootstepPosition.getReferenceFrame();
+      Transform3D headingToFootstepPositionTransform = desiredHeadingFrame.getTransformToDesiredFrame(footstepPositionFrame);
       Matrix3d headingToSwingRotation = new Matrix3d();
-      headingToSwingTransform.get(headingToSwingRotation);
-
-      // This can be considered as the step Yaw error.
-      double headingToSwingRotationAroundZ = RotationFunctions.getYaw(headingToSwingRotation);
-
-      // Make proportional control on the step Yaw for the desired foot step.
-      stepYaw.set(KpStepYaw.getDoubleValue() * -headingToSwingRotationAroundZ);
-
+      headingToFootstepPositionTransform.get(headingToSwingRotation);
+      stepYaw.set(RotationFunctions.getYaw(headingToSwingRotation));
    }
 
    private FrameConvexPolygon2d buildNextStepFootPolygon(FramePoint2d nextStep) // TODO: doesn't account for foot yaw

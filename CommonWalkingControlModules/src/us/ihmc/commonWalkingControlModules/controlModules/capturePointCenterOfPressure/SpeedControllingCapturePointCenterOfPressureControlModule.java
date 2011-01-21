@@ -371,7 +371,7 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
       speedControlYKp.set(0.0);
       doubleSupportCaptureKp.set(4.0); // 2.0); //6.0);
       kCaptureGuide.set(1.5); // 2.0);
-      minPerimeterDistance.set(0.02);
+      minPerimeterDistance.set(0.04); // 0.02);
    }
    
    public void setParametersForM2V2()
