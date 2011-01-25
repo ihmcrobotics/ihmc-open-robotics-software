@@ -17,14 +17,14 @@ public class DoNothingBipedFeetUpdater implements BipedFeetUpdater
    private final YoVariableRegistry registry = new YoVariableRegistry("BipedFeetUpdater");
 
    public DoNothingBipedFeetUpdater(CommonWalkingReferenceFrames referenceFrames, double footForward, double footBack,
-           YoVariableRegistry yoVariableRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+           YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       midFeetZUpFrame = referenceFrames.getMidFeetZUpFrame();
 
 
-      if (yoVariableRegistry != null)
+      if (parentRegistry != null)
       {
-         yoVariableRegistry.addChild(registry);
+         parentRegistry.addChild(registry);
       }
    }
 

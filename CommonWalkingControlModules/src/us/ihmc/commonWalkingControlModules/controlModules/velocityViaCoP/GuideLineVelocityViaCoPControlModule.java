@@ -73,13 +73,7 @@ public class GuideLineVelocityViaCoPControlModule implements VelocityViaCoPContr
 
       if (loadingLeg == null)
       {
-         FramePoint2d leftSweetSpot = bipedSupportPolygons.getSweetSpotCopy(RobotSide.LEFT);
-         FramePoint2d rightSweetSpot = bipedSupportPolygons.getSweetSpotCopy(RobotSide.RIGHT);
-         rightSweetSpot.changeFrame(leftSweetSpot.getReferenceFrame());
-         FrameLineSegment2d sweetSpotToSweetSpot = new FrameLineSegment2d(leftSweetSpot, rightSweetSpot);
-         desiredCapturePoint = new FramePoint(sweetSpotToSweetSpot.midpoint().toFramePoint());
-         
-//         desiredCapturePoint = new FramePoint(referenceFrames.getMidFeetZUpFrame());
+         desiredCapturePoint = new FramePoint(referenceFrames.getMidFeetZUpFrame());
       }
       else if (desiredVelocity.lengthSquared() > 0.0)
       {
