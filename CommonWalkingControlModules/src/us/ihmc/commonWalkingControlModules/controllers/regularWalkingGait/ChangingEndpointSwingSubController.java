@@ -319,28 +319,28 @@ public class ChangingEndpointSwingSubController implements SwingSubController
 
    public void doTransitionIntoInitialSwing(RobotSide swingSide)
    {
+      ReferenceFrame cartesianTrajectoryGeneratorFrame = walkingTrajectoryGenerator.getReferenceFrame();
+      
       // Get startPoint and endPoint relative to stance foot
       FramePoint startPoint = new FramePoint(referenceFrames.getAnkleZUpFrame(swingSide));
-      startPoint = startPoint.changeFrameCopy(referenceFrames.getAnkleZUpFrame(swingSide.getOppositeSide()));
+      startPoint.changeFrame(cartesianTrajectoryGeneratorFrame);
 
       Footstep desiredFootstep = couplingRegistry.getDesiredFootstep();
-      FramePoint endPoint = desiredFootstep.footstepPosition;
+      FramePoint endPoint = new FramePoint(desiredFootstep.footstepPosition);
+      endPoint.changeFrame(finalDesiredSwingFootPosition.getReferenceFrame());
+      finalDesiredSwingFootPosition.set(endPoint);
+      endPoint.changeFrame(cartesianTrajectoryGeneratorFrame);
+
+      FrameVector initialSwingVelocityVector = ankleVelocityCalculators.get(swingSide).getAnkleVelocityInWorldFrame();
+      initialSwingVelocityVector.changeFrame(cartesianTrajectoryGeneratorFrame);
 
       // This step yaw is the yaw of the swing foot relative to the support foot.
       double stepYaw = desiredFootstep.footstepYaw;
-
-      finalDesiredSwingFootPosition.set(endPoint.changeFrameCopy(worldFrame));
-
-      FrameVector initialSwingVelocityVector = ankleVelocityCalculators.get(swingSide).getAnkleVelocityInWorldFrame();
-
-      ReferenceFrame cartesianTrajectoryGeneratorFrame = walkingTrajectoryGenerator.getReferenceFrame();
-      walkingTrajectoryGenerator.initialize(startPoint.changeFrameCopy(cartesianTrajectoryGeneratorFrame),
-              initialSwingVelocityVector.changeFrameCopy(cartesianTrajectoryGeneratorFrame), endPoint.changeFrameCopy(cartesianTrajectoryGeneratorFrame));
+      setupSwingFootOrientationTrajectory(swingSide, stepYaw);
+      
+      walkingTrajectoryGenerator.initialize(startPoint, initialSwingVelocityVector, endPoint);
 
       legJointPositionControlModules.get(swingSide).resetScalesToDefault();
-
-      setupSwingFootOrientationTrajectory(swingSide, stepYaw);
-
    }
 
    public void doTransitionIntoMidSwing(RobotSide swingSide)

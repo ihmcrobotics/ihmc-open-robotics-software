@@ -172,11 +172,11 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
          throw new RuntimeException("The support polygon cannot be null.");
       }
 
-      if (lastTickSingleSupport.getBooleanValue())
-      {
-         resetCoPFilter();
-         lastTickSingleSupport.set(false);
-      }
+//      if (lastTickSingleSupport.getBooleanValue())
+//      {
+//         resetCoPFilter();
+//         lastTickSingleSupport.set(false);
+//      }
 
 
       FramePoint2d currentCapturePoint2d = currentCapturePoint.toFramePoint2d();
@@ -282,11 +282,11 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
            ReferenceFrame referenceFrame, BipedSupportPolygons supportPolygons, FramePoint centerOfMassPositionInZUpFrame, FrameVector2d desiredVelocity,
            FrameVector2d currentVelocity)
    {
-      if (!lastTickSingleSupport.getBooleanValue())
-      {
-         resetCoPFilter();
-         lastTickSingleSupport.set(true);
-      }
+//      if (!lastTickSingleSupport.getBooleanValue())
+//      {
+//         resetCoPFilter();
+//         lastTickSingleSupport.set(true);
+//      }
 
       // Disable double support stuff
       comDirectionLine.setFrameLine2d(null);
