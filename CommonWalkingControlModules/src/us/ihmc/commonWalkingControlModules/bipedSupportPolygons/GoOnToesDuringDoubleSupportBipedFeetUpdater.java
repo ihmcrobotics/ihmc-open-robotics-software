@@ -25,6 +25,7 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.plotting.YoFrameLine2dArtifact;
 import com.yobotics.simulationconstructionset.util.graphics.ArtifactList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import com.yobotics.simulationconstructionset.util.math.filter.GlitchFilteredBooleanYoVariable;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameLine2d;
 
 
@@ -51,6 +52,8 @@ public class GoOnToesDuringDoubleSupportBipedFeetUpdater implements BipedFeetUpd
 
    private DoubleYoVariable onToeSaturationPercent = new DoubleYoVariable("onToeSaturationPercent", registry);
 
+   private final SideDependentList<GlitchFilteredBooleanYoVariable> toeScoreHighEnoughVars = new SideDependentList<GlitchFilteredBooleanYoVariable>();
+
    private final GlobalTimer updateBipedFeeetTimer = new GlobalTimer("updateBipedFeet", registry);
 
    public GoOnToesDuringDoubleSupportBipedFeetUpdater(CommonWalkingReferenceFrames referenceFrames, double footForward, double footBack,
@@ -69,6 +72,14 @@ public class GoOnToesDuringDoubleSupportBipedFeetUpdater implements BipedFeetUpd
 
       leftFootZUpFrame = referenceFrames.getAnkleZUpReferenceFrames().get(RobotSide.LEFT);
       rightFootZUpFrame = referenceFrames.getAnkleZUpReferenceFrames().get(RobotSide.RIGHT);
+
+      for (RobotSide robotSide : RobotSide.values())
+      {
+         int windowSize = 100;
+         toeScoreHighEnoughVars.put(robotSide,
+                                    new GlitchFilteredBooleanYoVariable(robotSide.getCamelCaseNameForStartOfExpression() + "ToeScoreHighEnough", registry,
+                                       windowSize));
+      }
 
       if (VISUALIZE)
       {
@@ -238,29 +249,34 @@ public class GoOnToesDuringDoubleSupportBipedFeetUpdater implements BipedFeetUpd
       }
 
       // Make a decision:
-      for (RobotSide side : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values())
       {
-         if (forceHindOnToes && (footInRear == side))
+         if (forceHindOnToes && (footInRear == robotSide))
          {
-            feet.get(side).setFootPolygonInUse(FootPolygonEnum.ONTOES);
-            feet.get(side).setShift(0.9);
+            feet.get(robotSide).setFootPolygonInUse(FootPolygonEnum.ONTOES);
+            feet.get(robotSide).setShift(0.9);
          }
-
-         else if ((toeScores.get(side) > onToeDecisionThreshold.getDoubleValue()) && (footInRear == side))    // For now only let the trailing leg go on toes...
-         {
-            feet.get(side).setFootPolygonInUse(FootPolygonEnum.ONTOES);
-            feet.get(side).setShift(toeScores.get(side));
-         }
-
-         // Going on heels disabled due to chatter (November 10, 2008)
-         // else if (heelScores.get(side) > onHeelDecisionThreshold.val)
-         // {
-         // feet.get(side).setFootPolygonInUse(FootPolygonEnum.ONHEEL);
-         // feet.get(side).setShift(heelScores.get(side));
-         // }
          else
          {
-            feet.get(side).setFootPolygonInUse(FootPolygonEnum.FLAT);
+            GlitchFilteredBooleanYoVariable toeScoreHighEnough = toeScoreHighEnoughVars.get(robotSide);
+            toeScoreHighEnough.update(toeScores.get(robotSide) > onToeDecisionThreshold.getDoubleValue());
+
+            if (toeScoreHighEnough.getBooleanValue() && (footInRear == robotSide))    // For now only let the trailing leg go on toes...
+            {
+               feet.get(robotSide).setFootPolygonInUse(FootPolygonEnum.ONTOES);
+               feet.get(robotSide).setShift(toeScores.get(robotSide));
+            }
+
+            // Going on heels disabled due to chatter (November 10, 2008)
+            // else if (heelScores.get(side) > onHeelDecisionThreshold.val)
+            // {
+            // feet.get(side).setFootPolygonInUse(FootPolygonEnum.ONHEEL);
+            // feet.get(side).setShift(heelScores.get(side));
+            // }
+            else
+            {
+               feet.get(robotSide).setFootPolygonInUse(FootPolygonEnum.FLAT);
+            }
          }
       }
 
@@ -525,8 +541,4 @@ public class GoOnToesDuringDoubleSupportBipedFeetUpdater implements BipedFeetUpd
 
       return onHeelLines;
    }
-
-
-
-
 }
