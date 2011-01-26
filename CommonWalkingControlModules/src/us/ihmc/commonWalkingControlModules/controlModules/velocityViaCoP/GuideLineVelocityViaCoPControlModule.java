@@ -12,6 +12,7 @@ import us.ihmc.commonWalkingControlModules.sensors.ProcessedSensorsInterface;
 import us.ihmc.utilities.math.geometry.FrameLineSegment2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
+import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
@@ -37,6 +38,7 @@ public class GuideLineVelocityViaCoPControlModule implements VelocityViaCoPContr
    private final FramePoint desiredCenterOfPressure = new FramePoint(ReferenceFrame.getWorldFrame());
    private final DoubleYoVariable desiredCaptureForwardDoubleSupport = new DoubleYoVariable("desiredCaptureForwardDoubleSupport", registry);
    private final DoubleYoVariable desiredCaptureInwardDoubleSupport = new DoubleYoVariable("desiredCaptureInwardDoubleSupport", registry);
+   private final DoubleYoVariable desiredCaptureForwardNotLoading = new DoubleYoVariable("desiredCaptureForwardNotLoading", registry);
 
 
    public GuideLineVelocityViaCoPControlModule(double controlDT, CouplingRegistry couplingRegistry, ProcessedSensorsInterface processedSensors,
@@ -74,6 +76,18 @@ public class GuideLineVelocityViaCoPControlModule implements VelocityViaCoPContr
       if (loadingLeg == null)
       {
          desiredCapturePoint = new FramePoint(referenceFrames.getMidFeetZUpFrame());
+         
+         FrameVector leftForward = new FrameVector(referenceFrames.getAnkleZUpFrame(RobotSide.LEFT), 1.0, 0.0, 0.0);
+         FrameVector rightForward = new FrameVector(referenceFrames.getAnkleZUpFrame(RobotSide.RIGHT), 1.0, 0.0, 0.0);
+         
+         leftForward.changeFrame(desiredCapturePoint.getReferenceFrame());
+         rightForward.changeFrame(desiredCapturePoint.getReferenceFrame());
+         
+         FrameVector offset = leftForward;
+         offset.add(rightForward);
+         offset.normalize();
+         offset.scale(desiredCaptureForwardNotLoading.getDoubleValue());
+         desiredCapturePoint.add(offset);
       }
       else if (desiredVelocity.lengthSquared() > 0.0)
       {
@@ -95,8 +109,8 @@ public class GuideLineVelocityViaCoPControlModule implements VelocityViaCoPContr
       FramePoint centerOfMassPosition = processedSensors.getCenterOfMassPositionInFrame(midFeetZUpFrame);
       FrameVector2d currentCOMVelocity = processedSensors.getCenterOfMassVelocityInFrame(midFeetZUpFrame).toFrameVector2d();
 
-      desiredVelocity.setX(0.0);
-      desiredVelocity.setY(0.0);
+//      desiredVelocity.setX(0.0);
+//      desiredVelocity.setY(0.0);
       capturePointCenterOfPressureControlModule.controlDoubleSupport(bipedSupportPolygons, currentCapturePoint, desiredCapturePoint,
               centerOfMassPosition, desiredVelocity, currentCOMVelocity);
       capturePointCenterOfPressureControlModule.packDesiredCenterOfPressure(desiredCenterOfPressure);
@@ -148,13 +162,15 @@ public class GuideLineVelocityViaCoPControlModule implements VelocityViaCoPContr
 
    public void setUpParametersForR2()
    {
-      desiredCaptureForwardDoubleSupport.set(0.2);    // 0.15;
-      desiredCaptureInwardDoubleSupport.set(0.02);
+      desiredCaptureForwardDoubleSupport.set(0.18); // 0.2);    // 0.15;
+      desiredCaptureInwardDoubleSupport.set(0.01); // 0.02);
+      desiredCaptureForwardNotLoading.set(0.05);
    }
    
    public void setUpParametersForM2V2()
    {
       desiredCaptureForwardDoubleSupport.set(0.02); // 0.04 (equal to where the guide line ends) // 0.08);
       desiredCaptureInwardDoubleSupport.set(0.0);
+      desiredCaptureForwardNotLoading.set(0.02);
    }
 }

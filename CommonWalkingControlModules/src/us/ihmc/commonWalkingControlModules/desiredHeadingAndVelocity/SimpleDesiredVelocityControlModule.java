@@ -37,14 +37,8 @@ public class SimpleDesiredVelocityControlModule implements DesiredVelocityContro
 
 
       if (VELOCITY_AND_HEADING_ARE_DEPENDENT)
-
-         // Desired Velocity and Desired Heading are dependent (Desired Velocity is expressed in the desired heading frame)
          this.desiredVelocity = new YoFrameVector("desiredVelocity", "", desiredHeadingControlModule.getDesiredHeadingFrame(), yoVariableRegistry);
-
-
       else
-
-         // Desired Velocity and Desired Heading are independent
          this.desiredVelocity = new YoFrameVector("desiredVelocity", "", ReferenceFrame.getWorldFrame(), yoVariableRegistry);
 
       updateDesiredVelocity();
