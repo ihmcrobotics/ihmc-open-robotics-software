@@ -19,19 +19,17 @@ public class SimpleVirtualSupportActuatorControlModule implements VirtualSupport
 {
    private final DoubleSupportForceDistributor doubleSupportForceDistributor;
    private final SideDependentList<StanceFullLegJacobian> stanceFullLegJacobians;
-   private final SideDependentList<ReferenceFrame> anklePitchFrames;
-   private final SideDependentList<ReferenceFrame> ankleZUpFrames;
-   private final SideDependentList<ReferenceFrame> legAttachmentPointFrames;
+   private final SideDependentList<ReferenceFrame> footFrames;
+   private final SideDependentList<ReferenceFrame> footZUpFrames;
 
    public SimpleVirtualSupportActuatorControlModule(DoubleSupportForceDistributor doubleSupportForceDistributor, CommonWalkingReferenceFrames referenceFrames,
-           SideDependentList<StanceFullLegJacobian> stanceFullLegJacobians, SideDependentList<ReferenceFrame> legAttachmentPointFrames)
+           SideDependentList<StanceFullLegJacobian> stanceFullLegJacobians)
    {
       this.doubleSupportForceDistributor = doubleSupportForceDistributor;
       this.stanceFullLegJacobians = new SideDependentList<StanceFullLegJacobian>(stanceFullLegJacobians);
-      this.legAttachmentPointFrames = new SideDependentList<ReferenceFrame>(legAttachmentPointFrames);
-      anklePitchFrames = new SideDependentList<ReferenceFrame>(referenceFrames.getFootFrame(RobotSide.LEFT),
+      footFrames = new SideDependentList<ReferenceFrame>(referenceFrames.getFootFrame(RobotSide.LEFT),
             referenceFrames.getFootFrame(RobotSide.RIGHT));
-      ankleZUpFrames = referenceFrames.getAnkleZUpReferenceFrames();
+      footZUpFrames = referenceFrames.getAnkleZUpReferenceFrames();
    }
 
 
@@ -61,7 +59,6 @@ public class SimpleVirtualSupportActuatorControlModule implements VirtualSupport
                                     FrameVector torqueOnPelvisInPelvisFrame, Wrench upperBodyWrench)
    {
       RobotSide stanceSide = supportLegTorquesToPack.getRobotSide();
-      RobotSide swingSide = stanceSide.getOppositeSide();
 
       StanceFullLegJacobian stanceFullLegJacobian = stanceFullLegJacobians.get(stanceSide);
 
@@ -69,27 +66,15 @@ public class SimpleVirtualSupportActuatorControlModule implements VirtualSupport
       // TODO: Check all this reference frame stuff and make sure the Jacobians are using the correct frames. It may be that everything only works on flat ground.
       // TODO: Line below is BAD and we need a fix. VTPs need to be in foot frames, but we are computing them in ZUp Frames.
       // TODO: Still not OK. DoubleSupport uses Zup frames
-      // TODO: Still not OK, but at least the frame in which the VTP is given is not implied to be the AnkleZUpframe anymore.
-      // anklePitchFrames.get(robotSide).checkReferenceFrameMatch(virtualToePoint.getReferenceFrame());
-      virtualToePoint = virtualToePoint.changeFrameCopy(ankleZUpFrames.get(stanceSide));
-      virtualToePoint = new FramePoint2d(anklePitchFrames.get(stanceSide), virtualToePoint.getX(), virtualToePoint.getY());
+      virtualToePoint.changeFrame(footZUpFrames.get(stanceSide));
+      virtualToePoint = new FramePoint2d(footFrames.get(stanceSide), virtualToePoint.getX(), virtualToePoint.getY());
       stanceFullLegJacobian.computeJacobians(virtualToePoint);
-
-      // add torque part of upper body wrench // TODO: think about this some more
-      if (upperBodyWrench != null)
-      {
-         upperBodyWrench.changeFrame(legAttachmentPointFrames.get(swingSide));
-         FrameVector torque = new FrameVector(upperBodyWrench.getExpressedInFrame(), upperBodyWrench.getTorque());
-         torque.changeFrame(torqueOnPelvisInPelvisFrame.getReferenceFrame());
-         torqueOnPelvisInPelvisFrame.add(torque);
-      }
 
       // compute a wrench in the nullspace of the VTP columns of the Jacobian
       Wrench wrenchOnPelvisInPelvisFrame = stanceFullLegJacobian.getWrenchInVTPNullSpace(fZOnPelvisInPelvisFrame, torqueOnPelvisInPelvisFrame);
       
       // compute joint torques
       stanceFullLegJacobian.packLegTorques(supportLegTorquesToPack, wrenchOnPelvisInPelvisFrame);
-
    }
 }
 

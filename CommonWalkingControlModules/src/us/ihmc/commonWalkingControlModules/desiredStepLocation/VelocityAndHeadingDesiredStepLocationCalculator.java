@@ -152,7 +152,7 @@ public class VelocityAndHeadingDesiredStepLocationCalculator implements DesiredS
             if (nextStepFootPolygon.intersectionWith(captureRegion) == null)
             {
                nextStepIsInsideCaptureRegion.set(false);
-               System.out.println(this.getClass().getName() + ": project");
+//               System.out.println(this.getClass().getName() + ": project");
 
                captureRegion.orthogonalProjection(nextStep2d);
                adjustedFootstepPosition.setX(nextStep2d.getX());
