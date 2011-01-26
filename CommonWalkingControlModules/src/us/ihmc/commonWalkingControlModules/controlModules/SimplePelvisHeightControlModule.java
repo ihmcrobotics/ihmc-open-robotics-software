@@ -13,7 +13,7 @@ public class SimplePelvisHeightControlModule implements PelvisHeightControlModul
    private final boolean DO_STANCE_HEIGHT_CONTROL = false;
    private final ProcessedSensorsInterface processedSensors;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry("PelvisHeightContro");
+   private final YoVariableRegistry registry = new YoVariableRegistry("PelvisHeightControlModule");
 
    private final DoubleYoVariable fZ = new DoubleYoVariable("fZ", "Total fZ on the pelvis from the Height Controller", registry);
    private final DoubleYoVariable fZExtra = new DoubleYoVariable("fZExtra", "Extra fZ to make sure leg is straight during stance", registry);
