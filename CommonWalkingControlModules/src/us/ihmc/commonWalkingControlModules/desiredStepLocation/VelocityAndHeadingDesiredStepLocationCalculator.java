@@ -185,7 +185,7 @@ public class VelocityAndHeadingDesiredStepLocationCalculator implements DesiredS
       ReferenceFrame stanceAnkleZUpFrame = referenceFrames.getAnkleZUpReferenceFrames().get(stanceSide);
       offsetFromFoot.changeFrame(stanceAnkleZUpFrame);
       this.initialFootstepPosition = new FramePoint(offsetFromFoot);
-      initialFootstepPosition.changeFrame(ReferenceFrame.getWorldFrame()); // make the initial constant in world frame, not foot frame!
+//      initialFootstepPosition.changeFrame(ReferenceFrame.getWorldFrame()); // make the initial constant in world frame, not foot frame!
       this.adjustedFootstepPosition = new FramePoint(initialFootstepPosition);
    }
 
