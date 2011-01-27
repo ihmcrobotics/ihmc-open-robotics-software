@@ -153,8 +153,7 @@ public class VirtualChainConstructorFromARobotTest
 
       VirtualChainCenterOfMassEstimator estimator = new VirtualChainCenterOfMassEstimator(baseFrame, virtualMassParameterVectors);
 
-      FramePoint estimatedCenterOfMass = estimator.computeCenterOfMass();
-      estimatedCenterOfMass = estimatedCenterOfMass.changeFrameCopy(ReferenceFrame.getWorldFrame());
+      FramePoint estimatedCenterOfMass = estimator.getCenterOfMassInFrame(ReferenceFrame.getWorldFrame());
       totalMass = testRobot.computeCenterOfMass(centerOfMass);
 
       assertFramePointEquals(centerOfMass, estimatedCenterOfMass);
@@ -169,14 +168,13 @@ public class VirtualChainConstructorFromARobotTest
 
          virtualLink1.updateReferenceFrameFromJointAngleRecursively();
          baseFrame.update();
-         
-         estimatedCenterOfMass = estimator.computeCenterOfMass();
-         estimatedCenterOfMass = estimatedCenterOfMass.changeFrameCopy(ReferenceFrame.getWorldFrame());
+
+         estimatedCenterOfMass = estimator.getCenterOfMassInFrame(ReferenceFrame.getWorldFrame());
 
          totalMass = testRobot.computeCenterOfMass(centerOfMass);
 
-//         System.out.println("estimatedCenterOfMass = " + estimatedCenterOfMass);
-//         System.out.println("centerOfMass = " + centerOfMass);
+//       System.out.println("estimatedCenterOfMass = " + estimatedCenterOfMass);
+//       System.out.println("centerOfMass = " + centerOfMass);
 
          assertFramePointEquals(centerOfMass, estimatedCenterOfMass);
       }
@@ -205,5 +203,5 @@ public class VirtualChainConstructorFromARobotTest
       assertEquals(point3d.getZ(), framePoint.getZ(), 1e-7);
    }
 
-   
+
 }
