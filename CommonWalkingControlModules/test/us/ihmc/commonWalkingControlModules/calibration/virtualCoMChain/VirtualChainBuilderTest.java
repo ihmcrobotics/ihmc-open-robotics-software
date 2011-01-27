@@ -70,7 +70,8 @@ public class VirtualChainBuilderTest
       VirtualChainBuilderTest.testVirtualChainBuilderForARobot(numberOfDataPoints, comNoiseMaximum, exampleRobot, exampleRobot);
    }
 
-   private static void testVirtualChainBuilderForARobot(int numberOfDataPoints, double comNoiseMaximum, Robot exampleRobot, RobotRandomPositionMover randomPositionMover)
+   private static void testVirtualChainBuilderForARobot(int numberOfDataPoints, double comNoiseMaximum, Robot exampleRobot,
+           RobotRandomPositionMover randomPositionMover)
    {
       // First get exact answer and setup reference frames and such:
       VirtualChainConstructorFromARobot constructor = new VirtualChainConstructorFromARobot();
@@ -90,8 +91,7 @@ public class VirtualChainBuilderTest
       virtualLinkFromJoint.updateReferenceFrameFromJointAngleRecursively();
       baseFrame.update();
 
-      FramePoint shouldBeExactCenterOfMass = estimator.computeCenterOfMass();
-      shouldBeExactCenterOfMass = shouldBeExactCenterOfMass.changeFrameCopy(ReferenceFrame.getWorldFrame());
+      FramePoint shouldBeExactCenterOfMass = estimator.getCenterOfMassInFrame(ReferenceFrame.getWorldFrame());
 
       Point3d centerOfMass = new Point3d();
       exampleRobot.computeCenterOfMass(centerOfMass);
@@ -105,16 +105,14 @@ public class VirtualChainBuilderTest
       ArrayList<ReferenceFrame> referenceFrames = VirtualChainConstructorFromARobot.getReferenceFrames(virtualLinkFromJoint);
 
       double comErrorTolerance = comNoiseMaximum * 1.25;
-      
-      testVirtualChainBuilderForARobot(numberOfDataPoints, 
-            comNoiseMaximum, comErrorTolerance,
-            virtualLinkFromJoint, baseFrame, referenceFrames, exampleRobot, randomPositionMover);
+
+      testVirtualChainBuilderForARobot(numberOfDataPoints, comNoiseMaximum, comErrorTolerance, virtualLinkFromJoint, baseFrame, referenceFrames, exampleRobot,
+                                       randomPositionMover);
    }
 
-   public static void testVirtualChainBuilderForARobot(int numberOfDataPoints, 
-         double comNoiseMaximum, double comErrorTolerance,
-         VirtualLinkFromJoint virtualLinkFromJoint, ReferenceFrame baseFrame, ArrayList<ReferenceFrame> referenceFrames, Robot exampleRobot,
-         RobotRandomPositionMover randomPositionMover)
+   public static void testVirtualChainBuilderForARobot(int numberOfDataPoints, double comNoiseMaximum, double comErrorTolerance,
+           VirtualLinkFromJoint virtualLinkFromJoint, ReferenceFrame baseFrame, ArrayList<ReferenceFrame> referenceFrames, Robot exampleRobot,
+           RobotRandomPositionMover randomPositionMover)
    {
       // Now construct the builder
 
@@ -135,12 +133,12 @@ public class VirtualChainBuilderTest
 
          centerOfMassFramePoint.changeFrame(baseFrame);
          FramePoint2d centerOfMassProjection = centerOfMassFramePoint.toFramePoint2d();
-         
+
          double xCoMNoise = -comNoiseMaximum + 2.0 * comNoiseMaximum * random.nextDouble();
          double yCoMNoise = -comNoiseMaximum + 2.0 * comNoiseMaximum * random.nextDouble();
-         
+
          FramePoint2d noiseToCenterOfMass = new FramePoint2d(centerOfMassProjection.getReferenceFrame(), xCoMNoise, yCoMNoise);
-         
+
          centerOfMassProjection.add(noiseToCenterOfMass);
          builder.recordDataPoint(centerOfMassProjection);
 
@@ -151,46 +149,54 @@ public class VirtualChainBuilderTest
 
 
       // Now create the CoM estimator:
-      ArrayList<FrameVector> estimatedVirtualMassParameterVectors = builder.estimateVirtualMassParameterVectors();
-      VirtualChainCenterOfMassEstimator virtualChainCenterOfMassEstimator = new VirtualChainCenterOfMassEstimator(baseFrame,
-                                                                               estimatedVirtualMassParameterVectors);
-
-      System.out.println("VirtualChainCenterOfMassEstimator:\n" + virtualChainCenterOfMassEstimator);
-
-      // Now compare and make sure it is close
-
-      int numberOfTests = 100;
-
-      for (int i = 0; i < numberOfTests; i++)
+      if (builder.estimateVirtualChainParameterVectors())
       {
-         randomPositionMover.moveToRandomPosition();
-         exampleRobot.update();
-         updateReferenceFrames(virtualLinkFromJoint, baseFrame, referenceFrames);
+         ArrayList<FrameVector> estimatedVirtualChainParameterVectors = builder.getVirtualChainParameterVectors();
+         VirtualChainCenterOfMassEstimator virtualChainCenterOfMassEstimator = new VirtualChainCenterOfMassEstimator(baseFrame,
+                                                                                  estimatedVirtualChainParameterVectors);
 
-         FramePoint estimatedCenterOfMass = virtualChainCenterOfMassEstimator.computeCenterOfMass();
-         estimatedCenterOfMass.changeFrame(ReferenceFrame.getWorldFrame());
+         System.out.println("VirtualChainCenterOfMassEstimator:\n" + virtualChainCenterOfMassEstimator);
 
-         exampleRobot.computeCenterOfMass(centerOfMass);
+         // Now compare and make sure it is close
 
-//       System.out.println("centerOfMass = " + centerOfMass);
-//       System.out.println("estimatedCenterOfMass = " + estimatedCenterOfMass);
+         int numberOfTests = 100;
 
-         assertFramePointEquals(centerOfMass, estimatedCenterOfMass, comErrorTolerance);
+         for (int i = 0; i < numberOfTests; i++)
+         {
+            randomPositionMover.moveToRandomPosition();
+            exampleRobot.update();
+            updateReferenceFrames(virtualLinkFromJoint, baseFrame, referenceFrames);
+
+            FramePoint estimatedCenterOfMass = virtualChainCenterOfMassEstimator.getCenterOfMassInFrame(ReferenceFrame.getWorldFrame());
+
+            exampleRobot.computeCenterOfMass(centerOfMass);
+
+//          System.out.println("centerOfMass = " + centerOfMass);
+//          System.out.println("estimatedCenterOfMass = " + estimatedCenterOfMass);
+
+            assertFramePointEquals(centerOfMass, estimatedCenterOfMass, comErrorTolerance);
+         }
       }
+      else
+         throw new RuntimeException("Not enough data point to estimate the virtual chain");
+
+
+
+
    }
 
    private static void updateReferenceFrames(VirtualLinkFromJoint virtualLinkFromJoint, ReferenceFrame baseFrame, ArrayList<ReferenceFrame> referenceFrames)
    {
       virtualLinkFromJoint.updateReferenceFrameFromJointAngleRecursively();
       baseFrame.update();
-      
-      
-//      for (ReferenceFrame referenceFrame : referenceFrames)
-//      {
-//         referenceFrame.update();
-//      }
+
+
+//    for (ReferenceFrame referenceFrame : referenceFrames)
+//    {
+//       referenceFrame.update();
+//    }
 //
-//      baseFrame.update();
+//    baseFrame.update();
    }
 
    private static void assertFramePointEquals(Point3d point3d, FramePoint framePoint, double epsilon)
