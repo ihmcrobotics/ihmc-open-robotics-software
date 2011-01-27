@@ -90,7 +90,7 @@ public class CommonDoEveryTickSubController implements DoEveryTickSubController
 
 //       ReferenceFrame desiredHeadingFrame = desiredHeadingControlModule.getDesiredHeadingFrame();
          Footstep desiredStepLocation = desiredStepLocationCalculator.computeDesiredStepLocation(supportLeg, bipedSupportPolygons, captureRegion,
-                                           couplingRegistry.getCapturePoint());
+                                           new FramePoint(couplingRegistry.getCapturePoint()));
 
 //       Footstep desiredStepLocation = desiredStepLocationCalculator.getDesiredStepLocation(supportLeg.getOppositeSide(), couplingRegistry);
          couplingRegistry.setDesiredFootstep(desiredStepLocation);

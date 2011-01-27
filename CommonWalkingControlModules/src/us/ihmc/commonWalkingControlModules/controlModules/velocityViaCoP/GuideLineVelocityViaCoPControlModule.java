@@ -73,7 +73,8 @@ public class GuideLineVelocityViaCoPControlModule implements VelocityViaCoPContr
 
       FramePoint desiredCapturePoint;
 
-      if (loadingLeg == null)
+      boolean stayInDoubleSupport = loadingLeg == null;
+      if (stayInDoubleSupport)
       {
          desiredCapturePoint = new FramePoint(referenceFrames.getMidFeetZUpFrame());
          
