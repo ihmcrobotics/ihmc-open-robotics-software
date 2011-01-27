@@ -71,7 +71,7 @@ public class BalanceOnOneLegConfiguration
 
       for (int i = 1; i <= desiredNumberOfConfigurations; i++)
       {
-         Random random = new Random();
+         Random random = new Random(101L);
 
          double captureX = createRandomDoubleInRange(captureMinX, captureMaxX, random);
          double captureY = createRandomDoubleInRange(captureMinY, captureMaxY, random);
