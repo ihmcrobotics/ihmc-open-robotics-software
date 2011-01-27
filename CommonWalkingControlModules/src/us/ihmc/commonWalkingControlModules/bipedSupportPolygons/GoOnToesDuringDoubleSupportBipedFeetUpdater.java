@@ -54,7 +54,7 @@ public class GoOnToesDuringDoubleSupportBipedFeetUpdater implements BipedFeetUpd
 
    private final SideDependentList<GlitchFilteredBooleanYoVariable> toeScoreHighEnoughVars = new SideDependentList<GlitchFilteredBooleanYoVariable>();
 
-   private final GlobalTimer updateBipedFeeetTimer = new GlobalTimer("updateBipedFeet", registry);
+   private final GlobalTimer updateBipedFeetTimer = new GlobalTimer("updateBipedFeet", registry);
 
    public GoOnToesDuringDoubleSupportBipedFeetUpdater(CommonWalkingReferenceFrames referenceFrames, double footForward, double footBack,
            YoVariableRegistry yoVariableRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
@@ -136,7 +136,7 @@ public class GoOnToesDuringDoubleSupportBipedFeetUpdater implements BipedFeetUpd
    public void updateBipedFeet(BipedFootInterface leftFoot, BipedFootInterface rightFoot, RobotSide supportLeg, FramePoint capturePointInMidFeetZUp,
                                boolean forceHindOnToes)
    {
-      updateBipedFeeetTimer.startTimer();
+      updateBipedFeetTimer.startTimer();
 
       capturePointInMidFeetZUp.checkReferenceFrameMatch(midFeetZUpFrame);
 
@@ -176,7 +176,7 @@ public class GoOnToesDuringDoubleSupportBipedFeetUpdater implements BipedFeetUpd
          this.onHeelLines.set(RobotSide.RIGHT, null);
       }
 
-      updateBipedFeeetTimer.stopTimer();
+      updateBipedFeetTimer.stopTimer();
    }
 
 

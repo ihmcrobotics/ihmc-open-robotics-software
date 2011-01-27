@@ -419,7 +419,7 @@ public class CommonStanceSubController implements StanceSubController
 
    private void doDoubleSupportControl(LowerBodyTorques lowerBodyTorquesToPack, RobotSide loadingLeg, boolean walk)
    {
-      FrameVector2d desiredVelocity = walk ? desiredVelocityControlModule.getDesiredVelocity() : new FrameVector2d(ReferenceFrame.getWorldFrame());
+      FrameVector2d desiredVelocity = walk ? desiredVelocityControlModule.getDesiredVelocity() : new FrameVector2d(desiredVelocityControlModule.getDesiredVelocity().getReferenceFrame());
       Orientation desiredPelvisOrientation = desiredPelvisOrientationControlModule.getDesiredPelvisOrientationDoubleSupport();
       balanceSupportControlModule.doDoubleSupportBalance(lowerBodyTorquesToPack, loadingLeg, desiredVelocity, desiredPelvisOrientation);
 
