@@ -69,10 +69,10 @@ public class BalanceOnOneLegConfiguration
       double kneeBendSupportLegMin = 0.0 * Math.PI / 180;
       double kneeBendSupportLegMax = 60.0 * Math.PI / 180;
 
+      Random random = new Random(101L);
+
       for (int i = 1; i <= desiredNumberOfConfigurations; i++)
       {
-         Random random = new Random(101L);
-
          double captureX = createRandomDoubleInRange(captureMinX, captureMaxX, random);
          double captureY = createRandomDoubleInRange(captureMinY, captureMaxY, random);
 
