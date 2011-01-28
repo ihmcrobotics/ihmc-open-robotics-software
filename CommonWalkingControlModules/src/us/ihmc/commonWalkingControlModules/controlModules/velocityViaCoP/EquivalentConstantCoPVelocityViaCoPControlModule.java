@@ -121,8 +121,7 @@ public class EquivalentConstantCoPVelocityViaCoPControlModule implements Velocit
    {
       ReferenceFrame supportPolygonFrame = supportPolygon.getReferenceFrame();
 
-      FramePoint currentCapturePoint = new FramePoint(couplingRegistry.getCapturePoint());
-      currentCapturePoint.changeFrame(supportPolygonFrame);
+      FramePoint currentCapturePoint = new FramePoint(couplingRegistry.getCapturePointInFrame(supportPolygonFrame));
       FramePoint2d currentCapturePoint2d = currentCapturePoint.toFramePoint2d();
 
       desiredFinalCapturePoint.changeFrame(supportPolygonFrame);

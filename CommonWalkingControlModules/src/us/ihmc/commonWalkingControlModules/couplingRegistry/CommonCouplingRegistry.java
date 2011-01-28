@@ -23,7 +23,7 @@ public class CommonCouplingRegistry implements CouplingRegistry
    private double estimatedSwingTimeRemaining;
 
    private FrameConvexPolygon2d captureRegion;
-   private FramePoint capturePoint;
+   private FramePoint capturePoint = new FramePoint(ReferenceFrame.getWorldFrame());
 
    private FrameVector2d desiredVelocity;
 
@@ -100,12 +100,12 @@ public class CommonCouplingRegistry implements CouplingRegistry
 
    public void setCapturePoint(FramePoint capturePoint)
    {
-      this.capturePoint = capturePoint;
+      this.capturePoint.set(capturePoint);
    }
 
-   public FramePoint getCapturePoint()
+   public FramePoint getCapturePointInFrame(ReferenceFrame desiredFrame)
    {
-      return capturePoint;
+      return capturePoint.changeFrameCopy(desiredFrame);
    }
 
 
