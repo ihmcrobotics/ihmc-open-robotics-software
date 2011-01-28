@@ -6,6 +6,7 @@ import us.ihmc.commonWalkingControlModules.desiredStepLocation.Footstep;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.Wrench;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
@@ -35,7 +36,7 @@ public interface CouplingRegistry
 
    public abstract void setCapturePoint(FramePoint capturePoint);
 
-   public abstract FramePoint getCapturePoint();
+   public abstract FramePoint getCapturePointInFrame(ReferenceFrame desiredFrame);
 
 
    public abstract void setDesiredFootstep(Footstep desiredStepLocation);

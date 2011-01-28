@@ -102,7 +102,7 @@ public class EqConstCoPAndGuideLineCapturePointCoPControlModule implements Captu
       FrameConvexPolygon2d supportPolygon = bipedSupportPolygons.getSupportPolygonInMidFeetZUp();
       double finalTime = minFinalTime.getDoubleValue();
       double comHeight = computeCoMHeightUsingBothFeet();
-      computeDesiredCoP(supportPolygon, desiredCapturePoint.toFramePoint2d(), finalTime, comHeight, null);
+      computeDesiredCoP(supportPolygon, currentCapturePoint.toFramePoint2d(), desiredCapturePoint.toFramePoint2d(), finalTime, comHeight, null);
    }
 
    public void controlSingleSupport(FramePoint currentCapturePoint, FrameLineSegment2d guideLine, FramePoint desiredCapturePoint, RobotSide supportLeg,
@@ -120,7 +120,7 @@ public class EqConstCoPAndGuideLineCapturePointCoPControlModule implements Captu
       else
          desiredFinalCapturePoint = guideLine.getSecondEndPointCopy();
 
-      computeDesiredCoP(supportPolygon, desiredFinalCapturePoint, finalTime, comHeight, guideLine);
+      computeDesiredCoP(supportPolygon, currentCapturePoint.toFramePoint2d(), desiredFinalCapturePoint, finalTime, comHeight, guideLine);
    }
 
    public void packDesiredCenterOfPressure(FramePoint desiredCenterOfPressureToPack)
@@ -132,12 +132,11 @@ public class EqConstCoPAndGuideLineCapturePointCoPControlModule implements Captu
       desiredCenterOfPressureToPack.set(desiredCenterOfPressure.getReferenceFrame(), x, y, z);
    }
 
-   private void computeDesiredCoP(FrameConvexPolygon2d supportPolygon, FramePoint2d desiredFinalCapturePoint, double finalTime, double comHeight,
-                                  FrameLineSegment2d guideLine)
+   private void computeDesiredCoP(FrameConvexPolygon2d supportPolygon, FramePoint2d currentCapturePoint2d, FramePoint2d desiredFinalCapturePoint, double finalTime,
+                                  double comHeight, FrameLineSegment2d guideLine)
    {
       ReferenceFrame supportPolygonFrame = supportPolygon.getReferenceFrame();
       desiredFinalCapturePoint.changeFrame(supportPolygonFrame);
-      FramePoint2d currentCapturePoint2d = getCapturePoint2dInFrame(supportPolygonFrame);
 
       double gravity = -processedSensors.getGravityInWorldFrame().getZ();
       FramePoint2d desiredCenterOfPressure = EquivalentConstantCoPCalculator.computeEquivalentConstantCoP(currentCapturePoint2d, desiredFinalCapturePoint,
@@ -160,15 +159,6 @@ public class EqConstCoPAndGuideLineCapturePointCoPControlModule implements Captu
 
       desiredCenterOfPressure.changeFrame(this.desiredCenterOfPressure.getReferenceFrame());
       this.desiredCenterOfPressure.update(desiredCenterOfPressure.getX(), desiredCenterOfPressure.getY(), 0.0);
-   }
-
-   private FramePoint2d getCapturePoint2dInFrame(ReferenceFrame supportPolygonFrame)
-   {
-      FramePoint currentCapturePoint = new FramePoint(couplingRegistry.getCapturePoint());
-      currentCapturePoint.changeFrame(supportPolygonFrame);
-      FramePoint2d currentCapturePoint2d = currentCapturePoint.toFramePoint2d();
-
-      return currentCapturePoint2d;
    }
 
    private FrameLine2d createShiftedParallelLine(FrameLineSegment2d guideLine, FramePoint2d currentCapturePoint2d)

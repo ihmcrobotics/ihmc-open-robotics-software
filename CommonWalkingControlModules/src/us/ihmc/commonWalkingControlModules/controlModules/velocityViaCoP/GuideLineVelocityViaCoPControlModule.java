@@ -71,6 +71,27 @@ public class GuideLineVelocityViaCoPControlModule implements VelocityViaCoPContr
    {
       BipedSupportPolygons bipedSupportPolygons = couplingRegistry.getBipedSupportPolygons();
 
+      FramePoint desiredCapturePoint = computeDesiredCapturePointDoubleSupport(loadingLeg, desiredVelocity, bipedSupportPolygons);
+
+      ReferenceFrame midFeetZUpFrame = referenceFrames.getMidFeetZUpFrame();
+
+//    desiredCapturePoint = desiredCapturePoint.changeFrameCopy(currentCapturePoint.getReferenceFrame());
+      desiredCapturePoint.changeFrame(midFeetZUpFrame);
+      FramePoint currentCapturePoint = couplingRegistry.getCapturePointInFrame(midFeetZUpFrame);
+      FramePoint centerOfMassPosition = processedSensors.getCenterOfMassPositionInFrame(midFeetZUpFrame);
+      FrameVector2d currentCOMVelocity = processedSensors.getCenterOfMassVelocityInFrame(midFeetZUpFrame).toFrameVector2d();
+
+//      desiredVelocity.setX(0.0);
+//      desiredVelocity.setY(0.0);
+      capturePointCenterOfPressureControlModule.controlDoubleSupport(bipedSupportPolygons, currentCapturePoint, desiredCapturePoint,
+              centerOfMassPosition, desiredVelocity, currentCOMVelocity);
+      capturePointCenterOfPressureControlModule.packDesiredCenterOfPressure(desiredCenterOfPressure);
+
+      return new FramePoint2d(desiredCenterOfPressure.getReferenceFrame(), desiredCenterOfPressure.getX(), desiredCenterOfPressure.getY());
+   }
+
+   private FramePoint computeDesiredCapturePointDoubleSupport(RobotSide loadingLeg, FrameVector2d desiredVelocity, BipedSupportPolygons bipedSupportPolygons)
+   {
       FramePoint desiredCapturePoint;
 
       boolean stayInDoubleSupport = loadingLeg == null;
@@ -101,22 +122,7 @@ public class GuideLineVelocityViaCoPControlModule implements VelocityViaCoPContr
       }
 
       this.desiredCapturePointInWorld.set(desiredCapturePoint.changeFrameCopy(ReferenceFrame.getWorldFrame()));
-
-      ReferenceFrame midFeetZUpFrame = referenceFrames.getMidFeetZUpFrame();
-
-//    desiredCapturePoint = desiredCapturePoint.changeFrameCopy(currentCapturePoint.getReferenceFrame());
-      desiredCapturePoint.changeFrame(midFeetZUpFrame);
-      FramePoint currentCapturePoint = couplingRegistry.getCapturePoint().changeFrameCopy(midFeetZUpFrame);
-      FramePoint centerOfMassPosition = processedSensors.getCenterOfMassPositionInFrame(midFeetZUpFrame);
-      FrameVector2d currentCOMVelocity = processedSensors.getCenterOfMassVelocityInFrame(midFeetZUpFrame).toFrameVector2d();
-
-//      desiredVelocity.setX(0.0);
-//      desiredVelocity.setY(0.0);
-      capturePointCenterOfPressureControlModule.controlDoubleSupport(bipedSupportPolygons, currentCapturePoint, desiredCapturePoint,
-              centerOfMassPosition, desiredVelocity, currentCOMVelocity);
-      capturePointCenterOfPressureControlModule.packDesiredCenterOfPressure(desiredCenterOfPressure);
-
-      return new FramePoint2d(desiredCenterOfPressure.getReferenceFrame(), desiredCenterOfPressure.getX(), desiredCenterOfPressure.getY());
+      return desiredCapturePoint;
    }
 
    public FramePoint2d computeDesiredCoPSingleSupport(RobotSide supportLeg, FrameVector2d desiredVelocity)
@@ -127,8 +133,7 @@ public class GuideLineVelocityViaCoPControlModule implements VelocityViaCoPContr
 
       BipedSupportPolygons bipedSupportPolygons = couplingRegistry.getBipedSupportPolygons();
 
-      FramePoint capturePoint = couplingRegistry.getCapturePoint();
-      FramePoint capturePointInAnkleZUp = capturePoint.changeFrameCopy(supportFootAnkleZUpFrame);
+      FramePoint capturePointInAnkleZUp = couplingRegistry.getCapturePointInFrame(supportFootAnkleZUpFrame);
       FramePoint2d capturePoint2d = capturePointInAnkleZUp.toFramePoint2d();
       
       FrameVector2d actualCenterOfMassVelocityInSupportFootFrame = processedSensors.getCenterOfMassVelocityInFrame(supportFootAnkleZUpFrame).toFrameVector2d();

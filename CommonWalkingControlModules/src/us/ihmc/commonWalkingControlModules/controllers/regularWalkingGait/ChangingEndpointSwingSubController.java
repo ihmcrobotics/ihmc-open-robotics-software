@@ -736,8 +736,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
    private boolean isCapturePointInsideFoot(RobotSide swingSide)
    {
       FrameConvexPolygon2d footPolygon = couplingRegistry.getBipedSupportPolygons().getFootPolygonInAnkleZUp(swingSide);
-      FramePoint2d capturePoint = couplingRegistry.getCapturePoint().toFramePoint2d();
-      capturePoint.changeFrame(footPolygon.getReferenceFrame());
+      FramePoint2d capturePoint = couplingRegistry.getCapturePointInFrame(footPolygon.getReferenceFrame()).toFramePoint2d();
 
       boolean capturePointInsideFoot = footPolygon.isPointInside(capturePoint);
 
