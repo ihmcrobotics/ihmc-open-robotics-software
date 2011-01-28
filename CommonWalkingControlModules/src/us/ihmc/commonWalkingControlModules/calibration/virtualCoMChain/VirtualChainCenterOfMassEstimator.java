@@ -8,6 +8,8 @@ import java.io.IOException;
 
 import java.util.ArrayList;
 
+import com.yobotics.simulationconstructionset.Robot;
+
 import us.ihmc.commonWalkingControlModules.centerOfMass.CenterOfMassEstimator;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -15,17 +17,21 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 public class VirtualChainCenterOfMassEstimator implements CenterOfMassEstimator
 {
+   private final Robot robot;
    private final ReferenceFrame baseFrame;
    private ArrayList<FrameVector> virtualChainParameterVectors;
 
-   public VirtualChainCenterOfMassEstimator(ReferenceFrame baseFrame, ArrayList<FrameVector> virtualChainParameterVectors)
+
+   public VirtualChainCenterOfMassEstimator(Robot robot, ReferenceFrame baseFrame, ArrayList<FrameVector> virtualChainParameterVectors)
    {
+      this.robot = robot;
       this.baseFrame = baseFrame;
       this.virtualChainParameterVectors = virtualChainParameterVectors;
    }
 
-   public VirtualChainCenterOfMassEstimator(ReferenceFrame baseFrame, String fileName, ArrayList<ReferenceFrame> virtualChainFrames)
+   public VirtualChainCenterOfMassEstimator(Robot robot, ReferenceFrame baseFrame, String fileName, ArrayList<ReferenceFrame> virtualChainFrames)
    {
+      this.robot = robot;
       this.baseFrame = baseFrame;
       this.virtualChainParameterVectors = new ArrayList<FrameVector>();
 
@@ -93,8 +99,12 @@ public class VirtualChainCenterOfMassEstimator implements CenterOfMassEstimator
 
       ret.changeFrame(desiredFrame);
 
-      // Need to remove the ankle height because CoP is computed from the ankle torque and not from the ground reaction forces existing
-      // ret.setZ(ret.getZ() - 0.055);
+     // Need to remove the ankle height because CoP is computed from the ankle torque and not from the ground reaction forces existing
+      if (robot.getName().equals("YoboticsBipedalRobot"))
+      {
+         double ankleHeight = 0.055;
+         ret.setZ(ret.getZ() - ankleHeight);
+      }
 
       return ret;
    }
