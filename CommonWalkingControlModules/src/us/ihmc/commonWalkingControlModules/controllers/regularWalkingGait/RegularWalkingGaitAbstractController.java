@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait;
 import java.awt.Container;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Random;
 
 import javax.swing.BoxLayout;
 import javax.swing.JFrame;
@@ -680,7 +681,8 @@ public abstract class RegularWalkingGaitAbstractController
 
          int nConfigurations = 10;
          this.randomConfigurations = BalanceOnOneLegConfiguration.generateABunch(nConfigurations, supportLeg, supportLegAnkleZUpFrame);
-         Collections.shuffle(randomConfigurations);
+         Random random = new Random(108L);
+         Collections.shuffle(randomConfigurations, random);
       }
 
       public void doAction()
