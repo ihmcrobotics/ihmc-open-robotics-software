@@ -83,7 +83,7 @@ public class VirtualChainBuilderTest
       ReferenceFrame firstJointFrame = virtualMassParameterVectors.get(0).getReferenceFrame();
       ReferenceFrame baseFrame = new ZUpFrame(ReferenceFrame.getWorldFrame(), firstJointFrame, "baseFrame");
 
-      VirtualChainCenterOfMassEstimator estimator = new VirtualChainCenterOfMassEstimator(exampleRobot, baseFrame, virtualMassParameterVectors);
+      VirtualChainCenterOfMassEstimator estimator = new VirtualChainCenterOfMassEstimator(baseFrame, virtualMassParameterVectors);
 
       // Now test that the exact answer is correct:
       randomPositionMover.moveToRandomPosition();
@@ -152,7 +152,7 @@ public class VirtualChainBuilderTest
       if (builder.estimateVirtualChainParameterVectors())
       {
          ArrayList<FrameVector> estimatedVirtualChainParameterVectors = builder.getVirtualChainParameterVectors();
-         VirtualChainCenterOfMassEstimator virtualChainCenterOfMassEstimator = new VirtualChainCenterOfMassEstimator(exampleRobot, baseFrame,
+         VirtualChainCenterOfMassEstimator virtualChainCenterOfMassEstimator = new VirtualChainCenterOfMassEstimator(baseFrame,
                                                                                   estimatedVirtualChainParameterVectors);
 
          System.out.println("VirtualChainCenterOfMassEstimator:\n" + virtualChainCenterOfMassEstimator);

@@ -151,7 +151,7 @@ public class VirtualChainConstructorFromARobotTest
       ReferenceFrame baseFrame = new ZUpFrame(ReferenceFrame.getWorldFrame(), firstFrame, "baseFrame");
       baseFrame.update();
 
-      VirtualChainCenterOfMassEstimator estimator = new VirtualChainCenterOfMassEstimator(testRobot, baseFrame, virtualMassParameterVectors);
+      VirtualChainCenterOfMassEstimator estimator = new VirtualChainCenterOfMassEstimator(baseFrame, virtualMassParameterVectors);
 
       FramePoint estimatedCenterOfMass = estimator.getCenterOfMassInFrame(ReferenceFrame.getWorldFrame());
       totalMass = testRobot.computeCenterOfMass(centerOfMass);
