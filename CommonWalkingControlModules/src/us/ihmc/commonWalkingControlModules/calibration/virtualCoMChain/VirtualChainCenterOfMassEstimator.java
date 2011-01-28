@@ -94,7 +94,7 @@ public class VirtualChainCenterOfMassEstimator implements CenterOfMassEstimator
       ret.changeFrame(desiredFrame);
 
       // Need to remove the ankle height because CoP is computed from the ankle torque and not from the ground reaction forces existing
-      ret.setZ(ret.getZ() - 0.055);
+      // ret.setZ(ret.getZ() - 0.055);
 
       return ret;
    }
