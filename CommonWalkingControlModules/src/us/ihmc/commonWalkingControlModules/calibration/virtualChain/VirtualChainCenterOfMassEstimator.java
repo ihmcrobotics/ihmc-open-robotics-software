@@ -5,10 +5,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-
 import java.util.ArrayList;
-
-
 
 import us.ihmc.commonWalkingControlModules.centerOfMass.CenterOfMassEstimator;
 import us.ihmc.utilities.math.geometry.FramePoint;
