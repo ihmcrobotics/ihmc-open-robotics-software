@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.desiredPelvisOrientat
 import us.ihmc.commonWalkingControlModules.RobotSide;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.DesiredPelvisOrientationControlModule;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredHeadingControlModule;
+import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.Orientation;
@@ -50,8 +51,8 @@ public class SimpleDesiredPelvisOrientationControlModule implements DesiredPelvi
   
    private Orientation getDesiredPelvisOrientationScaledKneeToKnee(RobotSide supportLeg)
    {
-      ReferenceFrame leftKneeFrame = referenceFrames.getKneeFrame(RobotSide.LEFT);
-      ReferenceFrame rightKneeFrame = referenceFrames.getKneeFrame(RobotSide.RIGHT);
+      ReferenceFrame leftKneeFrame = referenceFrames.getLegJointFrame(RobotSide.LEFT, LegJointName.KNEE);
+      ReferenceFrame rightKneeFrame = referenceFrames.getLegJointFrame(RobotSide.RIGHT, LegJointName.KNEE);
 
       FramePoint leftKneeOrigin = new FramePoint(leftKneeFrame);
       FramePoint rightKneeOrigin = new FramePoint(rightKneeFrame);
