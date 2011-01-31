@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.calibration.virtualCoMChain;
+package us.ihmc.commonWalkingControlModules.calibration.virtualChain;
 
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;

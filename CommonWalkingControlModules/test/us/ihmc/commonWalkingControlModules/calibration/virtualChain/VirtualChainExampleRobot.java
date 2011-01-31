@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.calibration.virtualCoMChain;
+package us.ihmc.commonWalkingControlModules.calibration.virtualChain;
 
 import java.util.ArrayList;
 import java.util.Random;
