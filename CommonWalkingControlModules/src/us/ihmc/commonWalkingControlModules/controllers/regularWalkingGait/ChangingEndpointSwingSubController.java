@@ -89,7 +89,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
 
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final BooleanYoVariable inverseKinematicsException = new BooleanYoVariable("kinematicException", registry);
+   private final BooleanYoVariable inverseKinematicsExceptionHasBeenThrown = new BooleanYoVariable("kinematicException", registry);
    private final DoubleYoVariable jacobianDeterminant = new DoubleYoVariable("jacobianDeterminant", registry);
    
    private final DoubleYoVariable passiveHipCollapseTime = new DoubleYoVariable("passiveHipCollapseTime", registry);
@@ -540,18 +540,25 @@ public class ChangingEndpointSwingSubController implements SwingSubController
             endSwingOrientation.getFrameOrientationCopy(), alphaDDot);
       desiredSwingFootAngularAccelerationInWorldFrame.set(desiredSwingFootAngularAcceleration);
 
+      updateSwingfootError(position);
+   }
+   
+   private void updateSwingfootError(FramePoint desiredPosition)
+   {
       ReferenceFrame swingFootFrame = referenceFrames.getFootFrame(swingSide);
-      position.changeFrame(swingFootFrame);
-      swingFootPositionError.set(position.distance(new FramePoint(swingFootFrame)));
+      desiredPosition.changeFrame(swingFootFrame);
+      swingFootPositionError.set(desiredPosition.distance(new FramePoint(swingFootFrame)));
    }
 
    private void updateFinalDesiredPosition(CartesianTrajectoryGenerator trajectoryGenerator)
    {
       Footstep desiredFootstep = couplingRegistry.getDesiredFootstep();
-      finalDesiredSwingFootPosition.set(desiredFootstep.footstepPosition.changeFrameCopy(finalDesiredSwingFootPosition.getReferenceFrame()));
+      FramePoint finalDesiredSwingFootPosition = desiredFootstep.footstepPosition.changeFrameCopy(this.finalDesiredSwingFootPosition.getReferenceFrame());
+      this.finalDesiredSwingFootPosition.set(finalDesiredSwingFootPosition);
 
       ReferenceFrame cartesianTrajectoryGeneratorFrame = trajectoryGenerator.getReferenceFrame();
-      trajectoryGenerator.updateFinalDesiredPosition(finalDesiredSwingFootPosition.getFramePointCopy().changeFrameCopy(cartesianTrajectoryGeneratorFrame));
+      finalDesiredSwingFootPosition.changeFrame(cartesianTrajectoryGeneratorFrame);
+      trajectoryGenerator.updateFinalDesiredPosition(finalDesiredSwingFootPosition);
    }
 
    private void computeSwingLegTorques(LegTorques legTorquesToPackForSwingLeg)
@@ -575,11 +582,11 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       try
       {
          inverseKinematicsCalculator.solve(desiredLegJointPositions, footToPelvis, swingSide, desiredHipYaw);
-         inverseKinematicsException.set(false);
+         inverseKinematicsExceptionHasBeenThrown.set(false);
       }
       catch (InverseKinematicsException e)
       {
-         inverseKinematicsException.set(true);         
+         inverseKinematicsExceptionHasBeenThrown.set(true);         
       }
 
       // Desired velocities
@@ -651,7 +658,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
    private Transform3D computeDesiredTransform(ReferenceFrame pelvisFrame)
    {
       Orientation desiredFootOrientationInPelvisFrame = desiredFootOrientation.getFrameOrientationCopy();
-      desiredFootOrientationInPelvisFrame = desiredFootOrientationInPelvisFrame.changeFrameCopy(pelvisFrame);
+      desiredFootOrientationInPelvisFrame.changeFrame(pelvisFrame);
       FramePoint desiredSwingFootPositionInPelvisFrame = desiredSwingFootPositionInWorldFrame.getFramePointCopy();
       desiredSwingFootPositionInPelvisFrame.changeFrame(pelvisFrame);
       Transform3D footToPelvis = createTransform(desiredFootOrientationInPelvisFrame, desiredSwingFootPositionInPelvisFrame);
