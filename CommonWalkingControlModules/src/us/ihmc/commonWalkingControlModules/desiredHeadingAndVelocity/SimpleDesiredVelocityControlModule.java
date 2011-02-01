@@ -80,7 +80,7 @@ public class SimpleDesiredVelocityControlModule implements DesiredVelocityContro
       }
       else
       {
-         double desiredHeading = this.desiredHeadingControlModule.getDesiredHeading().getDoubleValue();
+         double desiredHeading = this.desiredHeadingControlModule.getDesiredHeading();
          this.desiredVelocity.set(desiredVelocityNorm.getDoubleValue() * Math.cos(desiredHeading),
                                   desiredVelocityNorm.getDoubleValue() * Math.sin(desiredHeading), 0.0);
       }
