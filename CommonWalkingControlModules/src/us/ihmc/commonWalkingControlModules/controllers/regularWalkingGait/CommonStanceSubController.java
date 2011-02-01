@@ -90,7 +90,7 @@ public class CommonStanceSubController implements StanceSubController
       this.supportLegAndLegToTrustForVelocity = supportLegAndLegToTrustForVelocity;
       this.footWidth = footWidth;
 
-      doubleSupportDuration.set(0.75);    // FIXME: This is a hack but allows to compute the first desired step
+      doubleSupportDuration.set(1.0);    // FIXME: This is a hack but allows to compute the first desired step
       couplingRegistry.setDoubleSupportDuration(doubleSupportDuration);
 
       parentRegistry.addChild(registry);

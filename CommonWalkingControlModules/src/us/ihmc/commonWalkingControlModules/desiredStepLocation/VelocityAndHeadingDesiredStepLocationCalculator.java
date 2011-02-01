@@ -109,11 +109,11 @@ public class VelocityAndHeadingDesiredStepLocationCalculator implements DesiredS
       adjustDesiredStepLocation(swingLegSide, captureRegion);
 
       // Foot Step Orientation
-      Orientation footstepOrientation = new Orientation(initialFootstepPosition.getReferenceFrame());
+      Orientation footstepOrientation = new Orientation(adjustedFootstepPosition.getReferenceFrame());
       footstepOrientation.setYawPitchRoll(stepYaw.getDoubleValue(), 0.0, 0.0);
 
       // Create a foot Step Pose from Position and Orientation
-      FramePose footstepPose = new FramePose(initialFootstepPosition, footstepOrientation);
+      FramePose footstepPose = new FramePose(adjustedFootstepPosition, footstepOrientation);
       Footstep ret = new Footstep(supportLegSide, footstepPose);
 
       return ret;
@@ -168,6 +168,7 @@ public class VelocityAndHeadingDesiredStepLocationCalculator implements DesiredS
                captureRegion.orthogonalProjection(nextStep2d);
                adjustedFootstepPosition.setX(nextStep2d.getX());
                adjustedFootstepPosition.setY(nextStep2d.getY());
+//               System.out.println("Step adjusted");
             }
             else
             {
@@ -216,8 +217,9 @@ public class VelocityAndHeadingDesiredStepLocationCalculator implements DesiredS
       double stanceDuration = couplingRegistry.getDoubleSupportDuration();
       double totalDuration = swingDuration + stanceDuration;
 
-      stepLengthForDesiredVelocity.set(2.0 * totalDuration * desiredVelocityControlModule.getDesiredVelocity().getX());    // +++TK: added the 2.0 (draw a simplest walker to see why)
-
+      // Do not multiply by 2, this will give you the stride length and not the step length !!!
+      stepLengthForDesiredVelocity.set(totalDuration * desiredVelocityControlModule.getDesiredVelocity().getX());    
+      
       double stepLengthError = stepLengthForDesiredVelocity.getDoubleValue() - stepLength.getDoubleValue();
 
       stepLength.set(previousStepLength.getDoubleValue() + stepLengthError * kpStepLength.getDoubleValue());
@@ -325,7 +327,7 @@ public class VelocityAndHeadingDesiredStepLocationCalculator implements DesiredS
       insideStepAdjustmentForTurning = 0.0;
       outsideStepAdjustmentForTurning = 0.0;
 
-      kpStepLength.set(0.3);
+      kpStepLength.set(0.5);
       KpStepYaw.set(1.0);
    }
 
