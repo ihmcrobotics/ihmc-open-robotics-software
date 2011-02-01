@@ -5,12 +5,9 @@ import java.awt.Color;
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Matrix3d;
 
-import us.ihmc.commonWalkingControlModules.RobotSide;
-import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.ProcessedSensorsInterface;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FrameLineSegment2d;
-import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -28,7 +25,7 @@ public class SimpleDesiredHeadingControlModule implements DesiredHeadingControlM
    private final DoubleYoVariable desiredHeadingFinal = new DoubleYoVariable("desiredHeadingFinal",
                                                            "Yaw of the desired heading frame with respect to the world.", registry);
    private final DoubleYoVariable desiredHeading = new DoubleYoVariable("desiredHeading", registry);
-   private final DoubleYoVariable maxHeadingDot = new DoubleYoVariable("maxHeadingDot", "In units of rads/sec", registry);
+   private final DoubleYoVariable maxHeadingDot = new DoubleYoVariable("maxHeadingDot", "In units of rad/sec", registry);
 
    private final DesiredHeadingFrame desiredHeadingFrame = new DesiredHeadingFrame();
 
@@ -36,28 +33,19 @@ public class SimpleDesiredHeadingControlModule implements DesiredHeadingControlM
    private final YoFrameLineSegment2d finalHeadingLine;
 
    private final ProcessedSensorsInterface processedSensors;
-   private final CommonWalkingReferenceFrames commonWalkingReferenceFrames;
-
    private final double controlDT;
 
-   public SimpleDesiredHeadingControlModule(double desiredHeadingfinal, ProcessedSensorsInterface processedSensors,
-           CommonWalkingReferenceFrames commonWalkingReferenceFrames, double controlDT, YoVariableRegistry parentRegistry,
-           DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+   public SimpleDesiredHeadingControlModule(double desiredHeadingfinal, ProcessedSensorsInterface processedSensors, double controlDT,
+           YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       this.processedSensors = processedSensors;
       parentRegistry.addChild(registry);
       this.controlDT = controlDT;
-      this.commonWalkingReferenceFrames = commonWalkingReferenceFrames;
 
       maxHeadingDot.set(0.1);
 
-//    this.desiredHeading.set(desiredHeadingfinal);
-
-//    OR UNCOMMENT THESE TWO LINES TO HAVE THE FINAL DESIRED HEADING CORRESPONDING TO THE INITIAL ROBOT SETUP
       this.desiredHeadingFinal.set(desiredHeadingfinal);
       this.desiredHeading.set(this.desiredHeadingFinal.getDoubleValue());    // The final is the first one according to the initial setup of the robot
-
-
 
       desiredHeadingLine = new YoFrameLineSegment2d("desiredHeadingLine", "", ReferenceFrame.getWorldFrame(), registry);
       finalHeadingLine = new YoFrameLineSegment2d("finalHeadingLine", "", ReferenceFrame.getWorldFrame(), registry);
@@ -79,8 +67,6 @@ public class SimpleDesiredHeadingControlModule implements DesiredHeadingControlM
 
          dynamicGraphicObjectsListRegistry.registerArtifactList(artifactList);
       }
-
-
    }
 
    public void updateDesiredHeadingFrame()
@@ -90,8 +76,6 @@ public class SimpleDesiredHeadingControlModule implements DesiredHeadingControlM
       updatedFinalHeadingLine();
       desiredHeadingFrame.update();
    }
-
-
 
    private void updatedDesiredHeadingLine()
    {
@@ -103,6 +87,35 @@ public class SimpleDesiredHeadingControlModule implements DesiredHeadingControlM
 
       FrameLineSegment2d frameLineSegment2d = new FrameLineSegment2d(endpoint1, endpoint2);
       desiredHeadingLine.setFrameLineSegment2d(frameLineSegment2d);
+   }
+
+   public FrameVector getFinalHeadingTarget()
+   {
+      FrameVector finalHeading = new FrameVector(ReferenceFrame.getWorldFrame(), Math.cos(desiredHeadingFinal.getDoubleValue()),
+                                    Math.sin(desiredHeadingFinal.getDoubleValue()), 0.0);
+
+      return finalHeading;
+   }
+
+   public ReferenceFrame getDesiredHeadingFrame()
+   {
+      return desiredHeadingFrame;
+   }
+
+   public void setFinalDesiredHeading(double desiredHeading)
+   {
+      this.desiredHeadingFinal.set(desiredHeading);
+   }
+
+   public double getDesiredHeading()
+   {
+      return desiredHeading.getDoubleValue();
+   }
+
+   public void resetHeading(double newHeading)
+   {
+      this.desiredHeading.set(newHeading);
+      this.desiredHeadingFinal.set(newHeading);
    }
 
    private void updatedFinalHeadingLine()
@@ -127,19 +140,6 @@ public class SimpleDesiredHeadingControlModule implements DesiredHeadingControlM
       desiredHeading.set(desiredHeading.getDoubleValue() + deltaHeading);
    }
 
-   public FrameVector getFinalHeadingTarget()
-   {
-      FrameVector finalHeading = new FrameVector(ReferenceFrame.getWorldFrame(), Math.cos(desiredHeadingFinal.getDoubleValue()),
-                                    Math.sin(desiredHeadingFinal.getDoubleValue()), 0.0);
-
-      return finalHeading;
-   }
-
-   public ReferenceFrame getDesiredHeadingFrame()
-   {
-      return desiredHeadingFrame;
-   }
-
    private class DesiredHeadingFrame extends ReferenceFrame
    {
       private static final long serialVersionUID = 4657294310129415811L;
@@ -156,43 +156,5 @@ public class SimpleDesiredHeadingControlModule implements DesiredHeadingControlM
 
          transformToParent.set(rotation);
       }
-   }
-
-
-   public FrameVector getDisplacementWithRespectToFoot(RobotSide robotSide, FramePoint position)
-   {
-      ReferenceFrame footFrame = commonWalkingReferenceFrames.getAnkleZUpReferenceFrames().get(robotSide);
-
-      FramePoint footOrigin = new FramePoint(footFrame);
-
-      return getDisplacementVectorInFrame(footOrigin, position, desiredHeadingFrame);
-   }
-
-
-   private FrameVector getDisplacementVectorInFrame(FramePoint origin, FramePoint position, ReferenceFrame referenceFrameForOrientation)
-   {
-      origin = origin.changeFrameCopy(referenceFrameForOrientation);
-
-      FrameVector ret = new FrameVector(position);
-      ret = ret.changeFrameCopy(referenceFrameForOrientation);
-      ret.sub(origin);
-
-      return ret;
-   }
-
-   public void setFinalDesiredHeading(double desiredHeading)
-   {
-      this.desiredHeadingFinal.set(desiredHeading);
-   }
-
-   public DoubleYoVariable getDesiredHeading()
-   {
-      return desiredHeading;
-   }
-
-   public void resetHeading(double newHeading)
-   {
-      this.desiredHeading.set(newHeading);
-      this.desiredHeadingFinal.set(newHeading);
    }
 }
