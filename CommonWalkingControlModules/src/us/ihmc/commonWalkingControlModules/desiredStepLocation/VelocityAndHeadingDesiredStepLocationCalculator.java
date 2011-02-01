@@ -15,7 +15,9 @@ import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
+import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
+import us.ihmc.utilities.math.geometry.Orientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RotationFunctions;
 
@@ -53,7 +55,7 @@ public class VelocityAndHeadingDesiredStepLocationCalculator implements DesiredS
    private final DoubleYoVariable stepWidth = new DoubleYoVariable("stepWidth", "User determined step width. [m]", registry);
    private final DoubleYoVariable stepHeight = new DoubleYoVariable("stepHeight", "User determined step height. [m]", registry);
    private final DoubleYoVariable stepYaw = new DoubleYoVariable("stepYaw", "This is the step yaw. [rad]", registry);
-   
+
    private final DoubleYoVariable previousStepLength = new DoubleYoVariable("previousStepLength", registry);
 
    // Gain
@@ -106,7 +108,15 @@ public class VelocityAndHeadingDesiredStepLocationCalculator implements DesiredS
 
       adjustDesiredStepLocation(swingLegSide, captureRegion);
 
-      return new Footstep(swingLegSide, initialFootstepPosition, stepYaw.getDoubleValue());
+      // Foot Step Orientation
+      Orientation footstepOrientation = new Orientation(initialFootstepPosition.getReferenceFrame());
+      footstepOrientation.setYawPitchRoll(stepYaw.getDoubleValue(), 0.0, 0.0);
+
+      // Create a foot Step Pose from Position and Orientation
+      FramePose footstepPose = new FramePose(initialFootstepPosition, footstepOrientation);
+      Footstep ret = new Footstep(supportLegSide, footstepPose);
+
+      return ret;
    }
 
    public void initializeAtStartOfSwing(RobotSide swingLegSide, CouplingRegistry couplingRegistry)
@@ -152,7 +162,8 @@ public class VelocityAndHeadingDesiredStepLocationCalculator implements DesiredS
             if (nextStepFootPolygon.intersectionWith(captureRegion) == null)
             {
                nextStepIsInsideCaptureRegion.set(false);
-//               System.out.println(this.getClass().getName() + ": project");
+
+//             System.out.println(this.getClass().getName() + ": project");
 
                captureRegion.orthogonalProjection(nextStep2d);
                adjustedFootstepPosition.setX(nextStep2d.getX());
@@ -170,7 +181,7 @@ public class VelocityAndHeadingDesiredStepLocationCalculator implements DesiredS
    private void computeInitialFootstepPosition(RobotSide swingLegSide, ReferenceFrame desiredHeadingFrame, CouplingRegistry couplingRegistry)
    {
       RobotSide stanceSide = swingLegSide.getOppositeSide();
-      
+
       // Compute previous Step Length
       computePreviousStepLength(desiredHeadingFrame);
 
@@ -185,7 +196,8 @@ public class VelocityAndHeadingDesiredStepLocationCalculator implements DesiredS
       ReferenceFrame stanceAnkleZUpFrame = referenceFrames.getAnkleZUpReferenceFrames().get(stanceSide);
       offsetFromFoot.changeFrame(stanceAnkleZUpFrame);
       this.initialFootstepPosition = new FramePoint(offsetFromFoot);
-//      initialFootstepPosition.changeFrame(ReferenceFrame.getWorldFrame()); // make the initial constant in world frame, not foot frame!
+
+//    initialFootstepPosition.changeFrame(ReferenceFrame.getWorldFrame()); // make the initial constant in world frame, not foot frame!
       this.adjustedFootstepPosition = new FramePoint(initialFootstepPosition);
    }
 
@@ -264,7 +276,7 @@ public class VelocityAndHeadingDesiredStepLocationCalculator implements DesiredS
       stepYaw.set(RotationFunctions.getYaw(headingToSwingRotation));
    }
 
-   private FrameConvexPolygon2d buildNextStepFootPolygon(FramePoint2d nextStep) // TODO: doesn't account for foot yaw
+   private FrameConvexPolygon2d buildNextStepFootPolygon(FramePoint2d nextStep)    // TODO: doesn't account for foot yaw
    {
       ArrayList<FramePoint2d> nextStepFootPolygonPoints = new ArrayList<FramePoint2d>(4);
 

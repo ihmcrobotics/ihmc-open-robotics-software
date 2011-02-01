@@ -14,7 +14,9 @@ import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenc
 import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
+import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
+import us.ihmc.utilities.math.geometry.Orientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
@@ -128,7 +130,17 @@ public class SteppingStonesDesiredStepLocationCalculator implements DesiredStepL
 
       if (captureRegion == null)
       {
-         return new Footstep(supportLeg.getOppositeSide(), nominalLocation, stepYaw.getDoubleValue());
+         // Foot Step Orientation
+         Orientation footstepOrientation = new Orientation(nominalLocation.getReferenceFrame());
+         footstepOrientation.setYawPitchRoll(stepYaw.getDoubleValue(), 0.0, 0.0);
+
+         // Create a foot Step Pose from Position and Orientation
+         FramePose footstepPose = new FramePose(nominalLocation, footstepOrientation);
+         Footstep ret = new Footstep(supportLeg.getOppositeSide(), footstepPose);
+
+         return ret;
+
+//       return new Footstep(supportLeg.getOppositeSide(), nominalLocation, footstepOrientation);
       }
 
       captureRegion = captureRegion.changeFrameCopy(ReferenceFrame.getWorldFrame());
@@ -163,7 +175,17 @@ public class SteppingStonesDesiredStepLocationCalculator implements DesiredStepL
       FramePoint locationToReturn = new FramePoint(nominalLocation);
       locationToReturn.add(nominalToAdjusted);
 
-      return new Footstep(supportLeg.getOppositeSide(), locationToReturn, stepYaw.getDoubleValue());
+      // Foot Step Orientation
+      Orientation footstepOrientation = new Orientation(nominalLocation.getReferenceFrame());
+      footstepOrientation.setYawPitchRoll(stepYaw.getDoubleValue(), 0.0, 0.0);
+
+      // Create a foot Step Pose from Position and Orientation
+      FramePose footstepPose = new FramePose(locationToReturn, footstepOrientation);
+      Footstep ret = new Footstep(supportLeg.getOppositeSide(), footstepPose);
+
+      return ret;
+
+//    return new Footstep(supportLeg.getOppositeSide(), locationToReturn, stepYaw.getDoubleValue());
    }
 
    public FramePoint getNominalStepLocation(RobotSide supportLeg)

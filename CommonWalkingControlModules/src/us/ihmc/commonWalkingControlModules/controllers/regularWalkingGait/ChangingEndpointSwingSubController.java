@@ -328,7 +328,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       startPoint.changeFrame(cartesianTrajectoryGeneratorFrame);
 
       Footstep desiredFootstep = couplingRegistry.getDesiredFootstep();
-      FramePoint endPoint = new FramePoint(desiredFootstep.footstepPosition);
+      FramePoint endPoint = new FramePoint(desiredFootstep.getFootstepPose().getPosition());
       endPoint.changeFrame(finalDesiredSwingFootPosition.getReferenceFrame());
       finalDesiredSwingFootPosition.set(endPoint);
       endPoint.changeFrame(cartesianTrajectoryGeneratorFrame);
@@ -337,7 +337,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       initialSwingVelocityVector.changeFrame(cartesianTrajectoryGeneratorFrame);
 
       // This step yaw is the yaw of the swing foot relative to the support foot.
-      double stepYaw = desiredFootstep.footstepYaw;
+      double stepYaw = desiredFootstep.getFootstepPose().getYaw();
       setupSwingFootOrientationTrajectory(swingSide, stepYaw);
 
       walkingTrajectoryGenerator.initialize(startPoint, initialSwingVelocityVector, endPoint);
@@ -509,7 +509,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
    private void updateFinalDesiredPosition(CartesianTrajectoryGenerator trajectoryGenerator)
    {
       Footstep desiredFootstep = couplingRegistry.getDesiredFootstep();
-      FramePoint finalDesiredSwingFootPosition = desiredFootstep.footstepPosition.changeFrameCopy(this.finalDesiredSwingFootPosition.getReferenceFrame());
+      FramePoint finalDesiredSwingFootPosition = desiredFootstep.getFootstepPose().getPosition().changeFrameCopy(this.finalDesiredSwingFootPosition.getReferenceFrame());
       this.finalDesiredSwingFootPosition.set(finalDesiredSwingFootPosition);
 
       ReferenceFrame cartesianTrajectoryGeneratorFrame = trajectoryGenerator.getReferenceFrame();
