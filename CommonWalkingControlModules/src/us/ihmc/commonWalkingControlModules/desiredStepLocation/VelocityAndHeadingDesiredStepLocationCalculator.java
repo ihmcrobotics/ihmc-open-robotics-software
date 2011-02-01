@@ -57,6 +57,7 @@ public class VelocityAndHeadingDesiredStepLocationCalculator implements DesiredS
    private final DoubleYoVariable stepYaw = new DoubleYoVariable("stepYaw", "This is the step yaw. [rad]", registry);
 
    private final DoubleYoVariable previousStepLength = new DoubleYoVariable("previousStepLength", registry);
+   private final DoubleYoVariable minimalStepLength = new DoubleYoVariable("minimalStepLength", registry);
 
    // Gain
    private final DoubleYoVariable kpStepLength = new DoubleYoVariable("kpStepLength", registry);
@@ -223,6 +224,7 @@ public class VelocityAndHeadingDesiredStepLocationCalculator implements DesiredS
       double stepLengthError = stepLengthForDesiredVelocity.getDoubleValue() - stepLength.getDoubleValue();
 
       stepLength.set(previousStepLength.getDoubleValue() + stepLengthError * kpStepLength.getDoubleValue());
+      if(stepLength.getDoubleValue() < minimalStepLength.getDoubleValue()) stepLength.set(minimalStepLength.getDoubleValue());
    }
 
    private void computeStepWidth(RobotSide swingLegSide, ReferenceFrame desiredHeadingFrame, CouplingRegistry couplingRegistry)
@@ -321,6 +323,8 @@ public class VelocityAndHeadingDesiredStepLocationCalculator implements DesiredS
 
       robotMaxVelocity = 0.60;
       robotMinVelocity = 0.10;
+      
+      minimalStepLength.set(0.4);
 
       computeStepWidthLinearProfile();
 
