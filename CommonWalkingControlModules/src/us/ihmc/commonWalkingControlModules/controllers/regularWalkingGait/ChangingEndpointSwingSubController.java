@@ -533,9 +533,9 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       velocity.changeFrame(worldFrame);
       acceleration.changeFrame(worldFrame);
 
-      desiredSwingFootPositionInWorldFrame.set(position);
-      desiredSwingFootVelocityInWorldFrame.set(velocity);
-      desiredSwingFootAccelerationInWorldFrame.set(acceleration);
+      desiredSwingFootPositionInWorldFrame.checkAndSet(position);
+      desiredSwingFootVelocityInWorldFrame.checkAndSet(velocity);
+      desiredSwingFootAccelerationInWorldFrame.checkAndSet(acceleration);
 
       // Determine foot orientation and angular velocity
       minimumJerkTrajectoryForFootOrientation.computeTrajectory(timeInState);
@@ -706,7 +706,6 @@ public class ChangingEndpointSwingSubController implements SwingSubController
    {
       if (bagOfBalls != null)
       {
-         // bagOfBalls.reset();
          bagOfBalls.setBallLoop(desiredSwingFootPositionInWorldFrame.getFramePointCopy());
       }
    }
