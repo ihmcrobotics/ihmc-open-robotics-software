@@ -111,17 +111,16 @@ public class LegTorques implements LegTorquesInterface
    public String toString()
    {
       StringBuilder builder = new StringBuilder();
-      builder.append("RobotSide: " + robotSide);
+      builder.append("RobotSide: " + robotSide + "\n");
 
       for (int i = 0; i < legJointNames.length - 1; i++)
       {
          LegJointName legJointName = legJointNames[i];
-         builder.append(legJointName + ": " + this.torques.get(legJointName) + ", ");
+         builder.append(legJointName + ": " + this.torques.get(legJointName) + "\n");
       }
 
       LegJointName legJointName = legJointNames[legJointNames.length - 1];
       builder.append(legJointName + ": " + this.torques.get(legJointName));
-
 
       return builder.toString();
    }
