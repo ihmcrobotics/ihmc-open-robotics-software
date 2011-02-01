@@ -81,8 +81,8 @@ public class EquivalentConstantCoPVelocityViaCoPControlModule implements Velocit
       lastTickSingleSupport.set(true);
 
       FrameConvexPolygon2d supportPolygon = couplingRegistry.getBipedSupportPolygons().getFootPolygonInAnkleZUp(supportLeg);
-      FramePoint2d desiredFinalCapturePoint = couplingRegistry.getDesiredFootstep().footstepPosition.toFramePoint2d();
-      double finalTime = couplingRegistry.getEstimatedSwingTimeRemaining() + 0.2; // FIXME: hack
+      FramePoint2d desiredFinalCapturePoint = couplingRegistry.getDesiredFootstep().getFootstepPose().getPosition().toFramePoint2d();
+      double finalTime = couplingRegistry.getEstimatedSwingTimeRemaining() + 0.2;    // FIXME: hack
       double comHeight = computeCoMHeightUsingOneFoot(supportLeg);
 
       computeDesiredCoP(supportPolygon, desiredFinalCapturePoint, finalTime, comHeight);
@@ -201,7 +201,7 @@ public class EquivalentConstantCoPVelocityViaCoPControlModule implements Velocit
    {
       desiredCenterOfPressure.reset();
    }
-   
+
    public void setParametersForM2V2()
    {
       doubleSupportFinalTime.set(0.1);
