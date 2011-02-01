@@ -154,4 +154,9 @@ public class SwingFullLegJacobian
    {
       return openChainJacobian.getJacobianMatrix().copy();
    }
+   
+   public String toString()
+   {
+      return openChainJacobian.toString();
+   }
 }

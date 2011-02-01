@@ -91,7 +91,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
 
    private final BooleanYoVariable inverseKinematicsExceptionHasBeenThrown = new BooleanYoVariable("kinematicException", registry);
    private final DoubleYoVariable jacobianDeterminant = new DoubleYoVariable("jacobianDeterminant", registry);
-   
+
    private final DoubleYoVariable passiveHipCollapseTime = new DoubleYoVariable("passiveHipCollapseTime", registry);
 
    private final DoubleYoVariable swingDuration = new DoubleYoVariable("swingDuration", "The duration of the swing movement. [s]", registry);
@@ -130,7 +130,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
                                                                 registry);
    private final DoubleYoVariable singleSupportDuration = new DoubleYoVariable("singleSupportDuration", "This is the toal time spent in single support.",
                                                              registry);
-   
+
    private final DoubleYoVariable swingFootPositionError = new DoubleYoVariable("swingFootPositionError", registry);
 
    private final YoMinimumJerkTrajectory minimumJerkTrajectoryForFootOrientation = new YoMinimumJerkTrajectory("swingFootOrientation", registry);
@@ -235,12 +235,14 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       setEstimatedSwingTimeRemaining(swingDuration.getDoubleValue());
       this.swingSide = legTorquesToPackForSwingLeg.getRobotSide();
       preSwingControlModule.doPreSwing(legTorquesToPackForSwingLeg, timeInState);
-      
+
       fullRobotModel.getRootJoint().setDesiredAccelerationToZero();
+
       for (LegJointName legJointName : legTorquesToPackForSwingLeg.getLegJointNames())
       {
          fullRobotModel.getLegJoint(swingSide, legJointName).setQdd(0.0);
       }
+
       inverseDynamicsCalculators.get(swingSide).compute();
       setUpperBodyWrench();
 
@@ -290,17 +292,17 @@ public class ChangingEndpointSwingSubController implements SwingSubController
    public void doSwingInAir(LegTorques legTorques, double timeInCurrentState)
    {
       this.swingSide = legTorques.getRobotSide();
-      
+
       FramePoint swingFootPosition = new FramePoint(referenceFrames.getFootFrame(swingSide));
       swingFootPosition.changeFrame(referenceFrames.getAnkleZUpFrame(swingSide.getOppositeSide()));
       double footZ = swingFootPosition.getZ();
-      
+
       double minFootZ = 0.02;
       if (footZ < minFootZ)
          legJointPositionControlModules.get(swingSide).setAnkleGainsSoft();
       else
          legJointPositionControlModules.get(swingSide).resetScalesToDefault();
-      
+
       computeDesiredFootPosVelAcc(swingInAirTrajectoryGenerator, timeInCurrentState);
       computeSwingLegTorques(legTorques);
    }
@@ -320,7 +322,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
    public void doTransitionIntoInitialSwing(RobotSide swingSide)
    {
       ReferenceFrame cartesianTrajectoryGeneratorFrame = walkingTrajectoryGenerator.getReferenceFrame();
-      
+
       // Get startPoint and endPoint relative to stance foot
       FramePoint startPoint = new FramePoint(referenceFrames.getAnkleZUpFrame(swingSide));
       startPoint.changeFrame(cartesianTrajectoryGeneratorFrame);
@@ -337,7 +339,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       // This step yaw is the yaw of the swing foot relative to the support foot.
       double stepYaw = desiredFootstep.footstepYaw;
       setupSwingFootOrientationTrajectory(swingSide, stepYaw);
-      
+
       walkingTrajectoryGenerator.initialize(startPoint, initialSwingVelocityVector, endPoint);
 
       legJointPositionControlModules.get(swingSide).resetScalesToDefault();
@@ -449,7 +451,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
 
    public boolean isDoneWithSwingInAir(double timeInState)
    {
-      return swingInAirTrajectoryGenerator.isDone() && timeInState > 2.0;
+      return swingInAirTrajectoryGenerator.isDone() && (timeInState > 2.0);
    }
 
    public void setParametersForR2()
@@ -504,6 +506,17 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       useBodyAcceleration = true;
    }
 
+   private void updateFinalDesiredPosition(CartesianTrajectoryGenerator trajectoryGenerator)
+   {
+      Footstep desiredFootstep = couplingRegistry.getDesiredFootstep();
+      FramePoint finalDesiredSwingFootPosition = desiredFootstep.footstepPosition.changeFrameCopy(this.finalDesiredSwingFootPosition.getReferenceFrame());
+      this.finalDesiredSwingFootPosition.set(finalDesiredSwingFootPosition);
+
+      ReferenceFrame cartesianTrajectoryGeneratorFrame = trajectoryGenerator.getReferenceFrame();
+      finalDesiredSwingFootPosition.changeFrame(cartesianTrajectoryGeneratorFrame);
+      trajectoryGenerator.updateFinalDesiredPosition(finalDesiredSwingFootPosition);
+   }
+
    private void computeDesiredFootPosVelAcc(CartesianTrajectoryGenerator trajectoryGenerator, double timeInState)
    {
       ReferenceFrame cartesianTrajectoryGeneratorFrame = trajectoryGenerator.getReferenceFrame();
@@ -515,11 +528,11 @@ public class ChangingEndpointSwingSubController implements SwingSubController
 
       trajectoryGenerator.computeNextTick(position, velocity, acceleration, controlDT);
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-      
+
       position.changeFrame(worldFrame);
       velocity.changeFrame(worldFrame);
       acceleration.changeFrame(worldFrame);
-      
+
       desiredSwingFootPositionInWorldFrame.set(position);
       desiredSwingFootVelocityInWorldFrame.set(velocity);
       desiredSwingFootAccelerationInWorldFrame.set(acceleration);
@@ -542,23 +555,12 @@ public class ChangingEndpointSwingSubController implements SwingSubController
 
       updateSwingfootError(position);
    }
-   
+
    private void updateSwingfootError(FramePoint desiredPosition)
    {
       ReferenceFrame swingFootFrame = referenceFrames.getFootFrame(swingSide);
       desiredPosition.changeFrame(swingFootFrame);
       swingFootPositionError.set(desiredPosition.distance(new FramePoint(swingFootFrame)));
-   }
-
-   private void updateFinalDesiredPosition(CartesianTrajectoryGenerator trajectoryGenerator)
-   {
-      Footstep desiredFootstep = couplingRegistry.getDesiredFootstep();
-      FramePoint finalDesiredSwingFootPosition = desiredFootstep.footstepPosition.changeFrameCopy(this.finalDesiredSwingFootPosition.getReferenceFrame());
-      this.finalDesiredSwingFootPosition.set(finalDesiredSwingFootPosition);
-
-      ReferenceFrame cartesianTrajectoryGeneratorFrame = trajectoryGenerator.getReferenceFrame();
-      finalDesiredSwingFootPosition.changeFrame(cartesianTrajectoryGeneratorFrame);
-      trajectoryGenerator.updateFinalDesiredPosition(finalDesiredSwingFootPosition);
    }
 
    private void computeSwingLegTorques(LegTorques legTorquesToPackForSwingLeg)
@@ -586,7 +588,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       }
       catch (InverseKinematicsException e)
       {
-         inverseKinematicsExceptionHasBeenThrown.set(true);         
+         inverseKinematicsExceptionHasBeenThrown.set(true);
       }
 
       // Desired velocities
@@ -608,7 +610,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       desiredJointAccelerationCalculators.get(swingSide).compute(desiredAccelerationOfSwingFootWithRespectToWorld);
 
       double percentScaling = getPercentScalingBasedOnJacobianDeterminant(jacobianDeterminant.getDoubleValue());
-      
+
       LegJointName[] legJointNames = fullRobotModel.getRobotSpecificJointNames().getLegJointNames();
       for (LegJointName legJointName : legJointNames)
       {
@@ -619,8 +621,8 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       }
 
       // control
-      legJointPositionControlModules.get(swingSide).packTorquesForLegJointsPositionControl(percentScaling, legTorquesToPackForSwingLeg, desiredLegJointPositions,
-                                         desiredLegJointVelocities);
+      legJointPositionControlModules.get(swingSide).packTorquesForLegJointsPositionControl(percentScaling, legTorquesToPackForSwingLeg,
+                                         desiredLegJointPositions, desiredLegJointVelocities);
 
       inverseDynamicsCalculators.get(swingSide).compute();
 
@@ -646,15 +648,15 @@ public class ChangingEndpointSwingSubController implements SwingSubController
 
    private double getPercentScalingBasedOnJacobianDeterminant(double jacobianDeterminant)
    {
-      double determinantThresholdOne = 0.06; // 0.05;    // 0.025;
-      double determinantThresholdTwo = 0.03; // 0.02; //0.01;
+      double determinantThresholdOne = 0.06;    // 0.05;    // 0.025;
+      double determinantThresholdTwo = 0.03;    // 0.02; //0.01;
 
       double percent = (Math.abs(jacobianDeterminant) - determinantThresholdTwo) / (determinantThresholdOne - determinantThresholdTwo);
       percent = MathTools.clipToMinMax(percent, 0.0, 1.0);
-      
+
       return percent;
    }
-   
+
    private Transform3D computeDesiredTransform(ReferenceFrame pelvisFrame)
    {
       Orientation desiredFootOrientationInPelvisFrame = desiredFootOrientation.getFrameOrientationCopy();
@@ -669,9 +671,9 @@ public class ChangingEndpointSwingSubController implements SwingSubController
    private Twist computeDesiredTwist(ReferenceFrame worldFrame, ReferenceFrame footFrame)
    {
       FrameVector desiredSwingFootVelocity = desiredSwingFootVelocityInWorldFrame.getFrameVectorCopy();
-      desiredSwingFootVelocity = desiredSwingFootVelocity.changeFrameCopy(footFrame);
+      desiredSwingFootVelocity.changeFrame(footFrame);
       FrameVector desiredSwingFootAngularVelocity = desiredSwingFootAngularVelocityInWorldFrame.getFrameVectorCopy();
-      desiredSwingFootAngularVelocity.changeFrameCopy(footFrame);
+      desiredSwingFootAngularVelocity.changeFrame(footFrame);
       Twist desiredTwistOfSwingFootWithRespectToStanceFoot = new Twist(footFrame, worldFrame, footFrame, desiredSwingFootVelocity.getVector(),
                                                                 desiredSwingFootAngularVelocity.getVector());
 
