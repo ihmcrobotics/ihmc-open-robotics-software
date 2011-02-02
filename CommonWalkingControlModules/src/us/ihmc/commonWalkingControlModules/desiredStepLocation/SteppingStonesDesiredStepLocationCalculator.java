@@ -70,7 +70,7 @@ public class SteppingStonesDesiredStepLocationCalculator implements DesiredStepL
 
    public SteppingStonesDesiredStepLocationCalculator(SteppingStones steppingStones, CommonWalkingReferenceFrames commonWalkingReferenceFrames,
            CaptureRegionCalculator captureRegionCalculator, YoVariableRegistry yoVariableRegistry,
-           DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, boolean registerVarList)
+           DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       percentNominalToAdjusted.set(1.0);
 
@@ -101,10 +101,7 @@ public class SteppingStonesDesiredStepLocationCalculator implements DesiredStepL
          steppingStonesCaptureRegionIntersectionCalculator = null;
       }
 
-      if ((yoVariableRegistry != null) && registerVarList)    // (VarListsToRegister.REGISTER_DESIRED_STEP_LOCATION_CALCULATOR))
-      {
-         yoVariableRegistry.addChild(registry);
-      }
+      yoVariableRegistry.addChild(registry);
 
       if (dynamicGraphicObjectsListRegistry == null)
          VISUALIZE = false;
