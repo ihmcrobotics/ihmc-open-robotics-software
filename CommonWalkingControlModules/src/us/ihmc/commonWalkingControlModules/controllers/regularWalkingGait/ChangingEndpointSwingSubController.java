@@ -337,8 +337,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       initialSwingVelocityVector.changeFrame(cartesianTrajectoryGeneratorFrame);
 
       // This step yaw is the yaw of the swing foot relative to the support foot.
-      double stepYaw = desiredFootstep.getFootstepPose().getYaw();
-      setupSwingFootOrientationTrajectory(swingSide, stepYaw);
+      setupSwingFootOrientationTrajectory(desiredFootstep);
 
       walkingTrajectoryGenerator.initialize(startPoint, initialSwingVelocityVector, endPoint);
 
@@ -710,26 +709,13 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       }
    }
 
-   private void setupSwingFootOrientationTrajectory(RobotSide swingSide, double stepYaw)
+   private void setupSwingFootOrientationTrajectory(Footstep desiredFootStep)
    {
       minimumJerkTrajectoryForFootOrientation.setParams(0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, swingOrientationTime.getDoubleValue());
 
-      initializeStartOrientationToMatchActual(swingSide);
-      initializeEndOrientation(swingSide, stepYaw);
-   }
-
-   private void initializeEndOrientation(RobotSide swingSide, double stepYaw)
-   {
-      ReferenceFrame desiredHeadingFrame = desiredHeadingControlModule.getDesiredHeadingFrame();
-      Orientation endOrientation = new Orientation(desiredHeadingFrame);
-
-      endOrientation = endOrientation.changeFrameCopy(ReferenceFrame.getWorldFrame());
-      double[] yawPitchRoll = endOrientation.getYawPitchRoll();
-      yawPitchRoll[0] += stepYaw;
-      yawPitchRoll[1] = -swingToePitchUpOnLanding.getDoubleValue();
-      yawPitchRoll[2] = 0.0;
-      endOrientation.setYawPitchRoll(yawPitchRoll);
-
+      initializeStartOrientationToMatchActual(desiredFootStep.getFootstepSide());
+      
+      Orientation endOrientation = desiredFootStep.getFootstepPose().getOrientation().changeFrameCopy(endSwingOrientation.getReferenceFrame());
       endSwingOrientation.set(endOrientation);
    }
 
