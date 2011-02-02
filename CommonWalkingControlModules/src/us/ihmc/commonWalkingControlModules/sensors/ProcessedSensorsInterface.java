@@ -18,7 +18,7 @@ import com.yobotics.simulationconstructionset.DoubleYoVariable;
 public interface ProcessedSensorsInterface
 {
    public abstract double getTime();
-   public abstract DoubleYoVariable getTimeYoVariable();
+   public abstract DoubleYoVariable getYoTime();
    
    public abstract double getKneeAngle(RobotSide robotSide);
 

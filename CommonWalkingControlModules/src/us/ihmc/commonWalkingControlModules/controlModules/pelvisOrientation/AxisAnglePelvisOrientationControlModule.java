@@ -23,7 +23,7 @@ public class AxisAnglePelvisOrientationControlModule implements PelvisOrientatio
 {   
    private final ProcessedSensorsInterface processedSensors;
    private final CouplingRegistry couplingRegistry;
-   private final YoVariableRegistry registry = new YoVariableRegistry("AngleAxisPelvisOrientationControlModule");
+   private final YoVariableRegistry registry = new YoVariableRegistry("AxisAnglePelvisOrientationControlModule");
    
    private final DoubleYoVariable proportionalGain = new DoubleYoVariable("pelvisOrientationProportionalGain", registry);
    private final DoubleYoVariable pelvisOrientationError = new DoubleYoVariable("pelvisOrientationError", registry);
