@@ -67,6 +67,10 @@ public class VelocityAndHeadingDesiredStepLocationCalculator implements DesiredS
 
 
    private final DoubleYoVariable stepLengthForDesiredVelocity = new DoubleYoVariable("stepLengthForDesiredVelocity", registry);
+   
+   private final DoubleYoVariable swingToePitchUpOnLanding = new DoubleYoVariable("swingToePitchUpOnLanding",
+         "How much to pitch up the swing toe at the end of the swing.", registry);
+   
    private double stepWidthSlopeProfile;
    private double stepWidthYInterceptProfile;
 
@@ -111,7 +115,7 @@ public class VelocityAndHeadingDesiredStepLocationCalculator implements DesiredS
 
       // Foot Step Orientation
       Orientation footstepOrientation = new Orientation(adjustedFootstepPosition.getReferenceFrame());
-      footstepOrientation.setYawPitchRoll(stepYaw.getDoubleValue(), 0.0, 0.0);
+      footstepOrientation.setYawPitchRoll(stepYaw.getDoubleValue(), -swingToePitchUpOnLanding.getDoubleValue(), 0.0);
 
       // Create a foot Step Pose from Position and Orientation
       FramePose footstepPose = new FramePose(adjustedFootstepPosition, footstepOrientation);
@@ -327,6 +331,8 @@ public class VelocityAndHeadingDesiredStepLocationCalculator implements DesiredS
       minimalStepLength.set(0.4);
 
       computeStepWidthLinearProfile();
+      
+      swingToePitchUpOnLanding.set(0.3);
 
       insideStepAdjustmentForTurning = 0.0;
       outsideStepAdjustmentForTurning = 0.0;
@@ -345,6 +351,8 @@ public class VelocityAndHeadingDesiredStepLocationCalculator implements DesiredS
       robotMinVelocity = 0.1;
 
       computeStepWidthLinearProfile();
+      
+      swingToePitchUpOnLanding.set(0.25);
 
       insideStepAdjustmentForTurning = 0.0;
       outsideStepAdjustmentForTurning = 0.0;

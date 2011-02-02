@@ -10,7 +10,6 @@ import us.ihmc.commonWalkingControlModules.configurations.BalanceOnOneLegConfigu
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.PreSwingControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.LegJointPositionControlModule;
 import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
-import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredHeadingControlModule;
 import us.ihmc.commonWalkingControlModules.desiredStepLocation.DesiredStepLocationCalculator;
 import us.ihmc.commonWalkingControlModules.desiredStepLocation.Footstep;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
@@ -46,7 +45,6 @@ import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoAppearance;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.gui.GUISetterUpperRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.ArtifactList;
 import com.yobotics.simulationconstructionset.util.graphics.BagOfBalls;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicCoordinateSystem;
@@ -67,7 +65,6 @@ public class ChangingEndpointSwingSubController implements SwingSubController
    private final CouplingRegistry couplingRegistry;
 
    private final DesiredStepLocationCalculator desiredStepLocationCalculator;
-   private final DesiredHeadingControlModule desiredHeadingControlModule;
 
    private final CartesianTrajectoryGenerator walkingTrajectoryGenerator;
    private final CartesianTrajectoryGenerator swingInAirTrajectoryGenerator;
@@ -157,13 +154,12 @@ public class ChangingEndpointSwingSubController implements SwingSubController
 
    public ChangingEndpointSwingSubController(ProcessedSensorsInterface processedSensors, CommonWalkingReferenceFrames referenceFrames,
            FullRobotModel fullRobotModel, CouplingRegistry couplingRegistry, DesiredStepLocationCalculator desiredStepLocationCalculator,
-           DesiredHeadingControlModule desiredHeadingControlModule, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
-           YoVariableRegistry parentRegistry, SideDependentList<LegJointPositionControlModule> legJointPositionControlModules,
-           SideDependentList<InverseDynamicsCalculator> inverseDynamicsCalculators,
+           DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry,
+           SideDependentList<LegJointPositionControlModule> legJointPositionControlModules, SideDependentList<InverseDynamicsCalculator> inverseDynamicsCalculators,
            SideDependentList<DesiredJointVelocityCalculator> desiredJointVelocityCalculators,
            SideDependentList<DesiredJointAccelerationCalculator> desiredJointAccelerationCalculators,
-           LegInverseKinematicsCalculator inverseKinematicsCalculator, SideDependentList<AnkleVelocityCalculator> ankleVelocityCalculators,
-           GUISetterUpperRegistry guiSetterUpperRegistry, SideDependentList<FootSwitchInterface> footSwitches,
+           LegInverseKinematicsCalculator inverseKinematicsCalculator,
+           SideDependentList<AnkleVelocityCalculator> ankleVelocityCalculators, SideDependentList<FootSwitchInterface> footSwitches,
            CartesianTrajectoryGenerator walkingCartesianTrajectoryGenerator, CartesianTrajectoryGenerator swingInAirCartesianTrajectoryGenerator,
            PreSwingControlModule preSwingControlModule, double controlDT)
    {
@@ -172,7 +168,6 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       this.fullRobotModel = fullRobotModel;
       this.couplingRegistry = couplingRegistry;
       this.desiredStepLocationCalculator = desiredStepLocationCalculator;
-      this.desiredHeadingControlModule = desiredHeadingControlModule;
       this.legJointPositionControlModules = new SideDependentList<LegJointPositionControlModule>(legJointPositionControlModules);
       this.inverseDynamicsCalculators = new SideDependentList<InverseDynamicsCalculator>(inverseDynamicsCalculators);
       this.inverseKinematicsCalculator = inverseKinematicsCalculator;
