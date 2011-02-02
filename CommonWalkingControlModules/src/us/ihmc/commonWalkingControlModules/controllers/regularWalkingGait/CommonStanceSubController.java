@@ -60,6 +60,7 @@ public class CommonStanceSubController implements StanceSubController
    private final DoubleYoVariable doubleSupportDuration = new DoubleYoVariable("doubleSupportDuration", registry);
 
    private final DoubleYoVariable minDoubleSupportTimeBeforeWalking = new DoubleYoVariable("minDoubleSupportTimeBeforeWalking", registry);
+   private final DoubleYoVariable xCaptureToTransfer = new DoubleYoVariable("xCaptureToTransfer", registry);
    private final DoubleYoVariable yCaptureToTransfer = new DoubleYoVariable("yCaptureToTransfer", registry);
    private final DoubleYoVariable minCaptureXToFinishDoubleSupport = new DoubleYoVariable("minCaptureXToFinishDoubleSupport", registry);
    private final DoubleYoVariable maxCaptureXToFinishDoublesupport = new DoubleYoVariable("maxCaptureXToFinishDoublesupport", registry);
@@ -325,13 +326,13 @@ public class CommonStanceSubController implements StanceSubController
       ReferenceFrame loadingLegZUpFrame = referenceFrames.getAnkleZUpFrame(loadingLeg);
       FramePoint2d capturePoint = couplingRegistry.getCapturePointInFrame(loadingLegZUpFrame).toFramePoint2d();
 
-      boolean capturePointPastAnkle = capturePoint.getX() > 0.0;
-      boolean capturePointIsInside;
+      boolean capturePointFarEnoughForward = capturePoint.getX() > xCaptureToTransfer.getDoubleValue();
+      boolean capturePointInside;
       if (loadingLeg == RobotSide.LEFT)
-         capturePointIsInside = capturePoint.getY() > -yCaptureToTransfer.getDoubleValue();
+         capturePointInside = capturePoint.getY() > -yCaptureToTransfer.getDoubleValue();
       else
-         capturePointIsInside = capturePoint.getY() < yCaptureToTransfer.getDoubleValue();
-      return (capturePointPastAnkle && capturePointIsInside);
+         capturePointInside = capturePoint.getY() < yCaptureToTransfer.getDoubleValue();
+      return (capturePointFarEnoughForward && capturePointInside);
 
    }
 
@@ -344,7 +345,7 @@ public class CommonStanceSubController implements StanceSubController
       FramePoint2d capturePoint = couplingRegistry.getCapturePointInFrame(loadingLegZUpFrame).toFramePoint2d();
 
       FrameVector2d desiredVelocity = desiredVelocityControlModule.getDesiredVelocity().changeFrameCopy(loadingLegZUpFrame);
-      FrameVector2d velocityError = desiredVelocityControlModule.getVelocityErrorInFrame(loadingLegZUpFrame);
+      FrameVector2d velocityError = desiredVelocityControlModule.getVelocityErrorInFrame(loadingLegZUpFrame, loadingLeg);
       captureXToFinishDoubleSupport.set(getCaptureXToFinishDoubleSupport(desiredVelocity, velocityError));
       boolean capturePointIsFarEnoughForward = capturePoint.getX() > captureXToFinishDoubleSupport.getDoubleValue();
 
@@ -448,6 +449,7 @@ public class CommonStanceSubController implements StanceSubController
    {
       minDoubleSupportTime.set(0.05);
       minDoubleSupportTimeBeforeWalking.set(0.3);
+      xCaptureToTransfer.set(0.0);
       yCaptureToTransfer.set(0.04);    // 0.0;
       minCaptureXToFinishDoubleSupport.set(0.05); // 0.03);
       maxCaptureXToFinishDoublesupport.set(0.20);
@@ -463,6 +465,7 @@ public class CommonStanceSubController implements StanceSubController
    {
       minDoubleSupportTime.set(0.0);
       minDoubleSupportTimeBeforeWalking.set(0.3);
+      xCaptureToTransfer.set(0.01);
       yCaptureToTransfer.set(0.04);    // 0.0;
       minCaptureXToFinishDoubleSupport.set(-0.02);
       maxCaptureXToFinishDoublesupport.set(0.10);

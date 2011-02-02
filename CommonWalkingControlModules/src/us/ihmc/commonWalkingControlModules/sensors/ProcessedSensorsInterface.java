@@ -22,7 +22,7 @@ public interface ProcessedSensorsInterface
    
    public abstract double getKneeAngle(RobotSide robotSide);
 
-   public abstract FrameVector getCenterOfMassVelocityInFrame(ReferenceFrame referenceFrame);
+   public abstract FrameVector getCenterOfMassVelocityInFrame(ReferenceFrame referenceFrame, RobotSide stanceSide);
 
    public abstract FramePoint getCenterOfMassPositionInFrame(ReferenceFrame referenceFrame);
 

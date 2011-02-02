@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity;
 
+import us.ihmc.commonWalkingControlModules.RobotSide;
 import us.ihmc.commonWalkingControlModules.sensors.ProcessedSensorsInterface;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
@@ -53,14 +54,14 @@ public class SimpleDesiredVelocityControlModule implements DesiredVelocityContro
 //    return new FrameVector2d(desiredHeadingControlModule.getDesiredHeadingFrame(), desiredVelocityNorm.getDoubleValue(), 0.0);
    }
 
-   public FrameVector2d getVelocityErrorInFrame(ReferenceFrame referenceFrame)
+   public FrameVector2d getVelocityErrorInFrame(ReferenceFrame referenceFrame, RobotSide legToTrustForCoMVelocity)
    {
       if (!referenceFrame.isZupFrame())
       {
          throw new RuntimeException("Must be a ZUp frame!");
       }
 
-      FrameVector centerOfMassVelocity = processedSensors.getCenterOfMassVelocityInFrame(referenceFrame);
+      FrameVector centerOfMassVelocity = processedSensors.getCenterOfMassVelocityInFrame(referenceFrame, legToTrustForCoMVelocity);
       FrameVector2d centerOfMassVelocity2d = centerOfMassVelocity.toFrameVector2d();
 
       FrameVector2d desiredCenterOfMassVelocity = getDesiredVelocity();
