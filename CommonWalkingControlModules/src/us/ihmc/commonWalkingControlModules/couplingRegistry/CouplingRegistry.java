@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.couplingRegistry;
 
 import us.ihmc.commonWalkingControlModules.RobotSide;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
-import us.ihmc.commonWalkingControlModules.desiredStepLocation.Footstep;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector2d;

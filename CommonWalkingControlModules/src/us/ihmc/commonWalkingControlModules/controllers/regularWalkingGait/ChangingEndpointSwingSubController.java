@@ -10,8 +10,8 @@ import us.ihmc.commonWalkingControlModules.configurations.BalanceOnOneLegConfigu
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.PreSwingControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.LegJointPositionControlModule;
 import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
-import us.ihmc.commonWalkingControlModules.desiredStepLocation.DesiredStepLocationCalculator;
-import us.ihmc.commonWalkingControlModules.desiredStepLocation.Footstep;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculator;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.kinematics.AnkleVelocityCalculator;
 import us.ihmc.commonWalkingControlModules.kinematics.DesiredJointAccelerationCalculator;
@@ -64,7 +64,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
    private final FullRobotModel fullRobotModel;
    private final CouplingRegistry couplingRegistry;
 
-   private final DesiredStepLocationCalculator desiredStepLocationCalculator;
+   private final DesiredFootstepCalculator desiredFootstepCalculator;
 
    private final CartesianTrajectoryGenerator walkingTrajectoryGenerator;
    private final CartesianTrajectoryGenerator swingInAirTrajectoryGenerator;
@@ -153,21 +153,21 @@ public class ChangingEndpointSwingSubController implements SwingSubController
    private RobotSide swingSide;
 
    public ChangingEndpointSwingSubController(ProcessedSensorsInterface processedSensors, CommonWalkingReferenceFrames referenceFrames,
-           FullRobotModel fullRobotModel, CouplingRegistry couplingRegistry, DesiredStepLocationCalculator desiredStepLocationCalculator,
+           FullRobotModel fullRobotModel, CouplingRegistry couplingRegistry, DesiredFootstepCalculator desiredFootstepCalculator,
            DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry,
-           SideDependentList<LegJointPositionControlModule> legJointPositionControlModules, SideDependentList<InverseDynamicsCalculator> inverseDynamicsCalculators,
+           SideDependentList<LegJointPositionControlModule> legJointPositionControlModules,
+           SideDependentList<InverseDynamicsCalculator> inverseDynamicsCalculators,
            SideDependentList<DesiredJointVelocityCalculator> desiredJointVelocityCalculators,
            SideDependentList<DesiredJointAccelerationCalculator> desiredJointAccelerationCalculators,
-           LegInverseKinematicsCalculator inverseKinematicsCalculator,
-           SideDependentList<AnkleVelocityCalculator> ankleVelocityCalculators, SideDependentList<FootSwitchInterface> footSwitches,
-           CartesianTrajectoryGenerator walkingCartesianTrajectoryGenerator, CartesianTrajectoryGenerator swingInAirCartesianTrajectoryGenerator,
-           PreSwingControlModule preSwingControlModule, double controlDT)
+           LegInverseKinematicsCalculator inverseKinematicsCalculator, SideDependentList<AnkleVelocityCalculator> ankleVelocityCalculators,
+           SideDependentList<FootSwitchInterface> footSwitches, CartesianTrajectoryGenerator walkingCartesianTrajectoryGenerator,
+           CartesianTrajectoryGenerator swingInAirCartesianTrajectoryGenerator, PreSwingControlModule preSwingControlModule, double controlDT)
    {
       this.processedSensors = processedSensors;
       this.referenceFrames = referenceFrames;
       this.fullRobotModel = fullRobotModel;
       this.couplingRegistry = couplingRegistry;
-      this.desiredStepLocationCalculator = desiredStepLocationCalculator;
+      this.desiredFootstepCalculator = desiredFootstepCalculator;
       this.legJointPositionControlModules = new SideDependentList<LegJointPositionControlModule>(legJointPositionControlModules);
       this.inverseDynamicsCalculators = new SideDependentList<InverseDynamicsCalculator>(inverseDynamicsCalculators);
       this.inverseKinematicsCalculator = inverseKinematicsCalculator;
@@ -304,7 +304,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
 
    public void doTransitionIntoPreSwing(RobotSide swingSide)
    {
-      desiredStepLocationCalculator.initializeAtStartOfSwing(swingSide, couplingRegistry);
+      desiredFootstepCalculator.initializeDesiredFootstep(swingSide);
 
       // Reset the timers
       timeSpentInPreSwing.set(0.0);
@@ -318,23 +318,28 @@ public class ChangingEndpointSwingSubController implements SwingSubController
    {
       ReferenceFrame cartesianTrajectoryGeneratorFrame = walkingTrajectoryGenerator.getReferenceFrame();
 
-      // Get startPoint and endPoint relative to stance foot
+      // Get the current position of the swing foot
       FramePoint startPoint = new FramePoint(referenceFrames.getAnkleZUpFrame(swingSide));
-      startPoint.changeFrame(cartesianTrajectoryGeneratorFrame);
 
+      // Get the desired position of the swing foot
       Footstep desiredFootstep = couplingRegistry.getDesiredFootstep();
       FramePoint endPoint = new FramePoint(desiredFootstep.getFootstepPose().getPosition());
-      endPoint.changeFrame(finalDesiredSwingFootPosition.getReferenceFrame());
-      finalDesiredSwingFootPosition.set(endPoint);
-      endPoint.changeFrame(cartesianTrajectoryGeneratorFrame);
 
+      // Get the initial velocity of the swing foot
       FrameVector initialSwingVelocityVector = ankleVelocityCalculators.get(swingSide).getAnkleVelocityInWorldFrame();
-      initialSwingVelocityVector.changeFrame(cartesianTrajectoryGeneratorFrame);
 
-      // This step yaw is the yaw of the swing foot relative to the support foot.
+      // Express everything in the same frame and initialize the trajectory generator
+      startPoint.changeFrame(cartesianTrajectoryGeneratorFrame);
+      endPoint.changeFrame(cartesianTrajectoryGeneratorFrame);
+      initialSwingVelocityVector.changeFrame(cartesianTrajectoryGeneratorFrame);
+      walkingTrajectoryGenerator.initialize(startPoint, initialSwingVelocityVector, endPoint);
+
+      // Setup the orientation trajectory
       setupSwingFootOrientationTrajectory(desiredFootstep);
 
-      walkingTrajectoryGenerator.initialize(startPoint, initialSwingVelocityVector, endPoint);
+      // Set the finalDesiredSwingPosition
+      endPoint.changeFrame(finalDesiredSwingFootPosition.getReferenceFrame());
+      finalDesiredSwingFootPosition.set(endPoint);
 
       legJointPositionControlModules.get(swingSide).resetScalesToDefault();
    }
@@ -503,7 +508,8 @@ public class ChangingEndpointSwingSubController implements SwingSubController
    private void updateFinalDesiredPosition(CartesianTrajectoryGenerator trajectoryGenerator)
    {
       Footstep desiredFootstep = couplingRegistry.getDesiredFootstep();
-      FramePoint finalDesiredSwingFootPosition = desiredFootstep.getFootstepPose().getPosition().changeFrameCopy(this.finalDesiredSwingFootPosition.getReferenceFrame());
+      FramePoint finalDesiredSwingFootPosition =
+         desiredFootstep.getFootstepPose().getPosition().changeFrameCopy(this.finalDesiredSwingFootPosition.getReferenceFrame());
       this.finalDesiredSwingFootPosition.set(finalDesiredSwingFootPosition);
 
       ReferenceFrame cartesianTrajectoryGeneratorFrame = trajectoryGenerator.getReferenceFrame();
@@ -706,12 +712,16 @@ public class ChangingEndpointSwingSubController implements SwingSubController
 
    private void setupSwingFootOrientationTrajectory(Footstep desiredFootStep)
    {
+      // Why do we have Xf = 1.0 ?
       minimumJerkTrajectoryForFootOrientation.setParams(0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, swingOrientationTime.getDoubleValue());
 
       initializeStartOrientationToMatchActual(desiredFootStep.getFootstepSide());
-      
-      Orientation endOrientation = desiredFootStep.getFootstepPose().getOrientation().changeFrameCopy(endSwingOrientation.getReferenceFrame());
-      endSwingOrientation.set(endOrientation);
+
+//    Orientation endOrientation = desiredFootStep.getFootstepPose().getOrientation().changeFrameCopy(endSwingOrientation.getReferenceFrame());
+//    endSwingOrientation.set(endOrientation);
+
+      Orientation endOrientation = desiredFootStep.getFootstepPose().getOrientation();
+      endSwingOrientation.set(endOrientation.changeFrameCopy(worldFrame));
    }
 
    private void initializeStartOrientationToMatchActual(RobotSide swingSide)

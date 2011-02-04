@@ -6,7 +6,7 @@ import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.CapturePointC
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.GuideLineCalculator;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.VelocityViaCoPControlModule;
 import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
-import us.ihmc.commonWalkingControlModules.desiredStepLocation.Footstep;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.ProcessedSensorsInterface;
 import us.ihmc.utilities.math.geometry.FrameLineSegment2d;
