@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.desiredStepLocation;
+package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
 
 import javax.vecmath.Point2d;

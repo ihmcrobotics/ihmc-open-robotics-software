@@ -7,10 +7,11 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPoly
 import us.ihmc.commonWalkingControlModules.captureRegion.CapturePointCalculatorInterface;
 import us.ihmc.commonWalkingControlModules.captureRegion.CaptureRegionCalculator;
 import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculator;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.SimpleDesiredFootstepCalculator;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredHeadingControlModule;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredVelocityControlModule;
-import us.ihmc.commonWalkingControlModules.desiredStepLocation.DesiredStepLocationCalculator;
-import us.ihmc.commonWalkingControlModules.desiredStepLocation.Footstep;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.ProcessedSensorsInterface;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
@@ -30,16 +31,16 @@ public class CommonDoEveryTickSubController implements DoEveryTickSubController
    private final DesiredHeadingControlModule desiredHeadingControlModule;
    private final DesiredVelocityControlModule desiredVelocityControlModule;
 
-   private final DesiredStepLocationCalculator desiredStepLocationCalculator;
+   private final DesiredFootstepCalculator desiredFootstepCalculator;
 
    private final CapturePointCalculatorInterface capturePointCalculator;
    private final CaptureRegionCalculator captureRegionCalculator;
-   private final CouplingRegistry couplingRegistry; 
+   private final CouplingRegistry couplingRegistry;
 
    public CommonDoEveryTickSubController(CommonWalkingReferenceFrames referenceFrames, ProcessedSensorsInterface processedSensors, BipedFootInterface leftFoot,
-           BipedFootInterface rightFoot, BipedFeetUpdater bipedFeetUpdater,
-           DesiredHeadingControlModule desiredHeadingControlModule, DesiredVelocityControlModule desiredVelocityControlModule,
-           DesiredStepLocationCalculator desiredStepLocationCalculator, CapturePointCalculatorInterface capturePointCalculator, CaptureRegionCalculator captureRegionCalculator, CouplingRegistry couplingRegistry)
+           BipedFootInterface rightFoot, BipedFeetUpdater bipedFeetUpdater, DesiredHeadingControlModule desiredHeadingControlModule,
+           DesiredVelocityControlModule desiredVelocityControlModule, DesiredFootstepCalculator desiredFootstepCalculator,
+           CapturePointCalculatorInterface capturePointCalculator, CaptureRegionCalculator captureRegionCalculator, CouplingRegistry couplingRegistry)
    {
       this.referenceFrames = referenceFrames;
       this.processedSensors = processedSensors;
@@ -50,7 +51,7 @@ public class CommonDoEveryTickSubController implements DoEveryTickSubController
 
       this.desiredHeadingControlModule = desiredHeadingControlModule;
       this.desiredVelocityControlModule = desiredVelocityControlModule;
-      this.desiredStepLocationCalculator = desiredStepLocationCalculator;
+      this.desiredFootstepCalculator = desiredFootstepCalculator;
 
       this.capturePointCalculator = capturePointCalculator;
       this.captureRegionCalculator = captureRegionCalculator;
@@ -88,12 +89,10 @@ public class CommonDoEveryTickSubController implements DoEveryTickSubController
                                                  couplingRegistry.getEstimatedSwingTimeRemaining());
          couplingRegistry.setCaptureRegion(captureRegion);
 
-//       ReferenceFrame desiredHeadingFrame = desiredHeadingControlModule.getDesiredHeadingFrame();
-         Footstep desiredStepLocation = desiredStepLocationCalculator.computeDesiredStepLocation(supportLeg, bipedSupportPolygons, captureRegion,
-                                           new FramePoint(couplingRegistry.getCapturePointInFrame(referenceFrames.getMidFeetZUpFrame())));
-
-//       Footstep desiredStepLocation = desiredStepLocationCalculator.getDesiredStepLocation(supportLeg.getOppositeSide(), couplingRegistry);
-         couplingRegistry.setDesiredFootstep(desiredStepLocation);
+         // Desired Footstep
+         desiredFootstepCalculator.updateDesiredFootstep(supportLeg);
+         Footstep desiredFootstep = desiredFootstepCalculator.getDesiredFootstep();
+         couplingRegistry.setDesiredFootstep(desiredFootstep);
       }
       else
       {
