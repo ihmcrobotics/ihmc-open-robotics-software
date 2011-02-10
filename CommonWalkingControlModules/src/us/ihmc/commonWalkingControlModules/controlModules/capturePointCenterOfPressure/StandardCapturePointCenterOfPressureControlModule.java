@@ -494,6 +494,6 @@ public class StandardCapturePointCenterOfPressureControlModule implements Captur
       alphaCaptureControl.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(8.84, controlDT));
       kCaptureX.set(4.0); // 3.0);    // 2.5;
       kCaptureY.set(4.0); // 3.0);    // 2.5;
-      kCaptureGuide.set(2.0);    // 3.0; //2.5;
+      kCaptureGuide.set(1.5); // 2.0);    // 3.0; //2.5;
    }
 }
