@@ -5,7 +5,7 @@ import javax.vecmath.Point3d;
 
 public class ViconJavaInterface
 {
-   public static native void ViconConnect(String ip);
+   public static native boolean ViconConnect(String ip);
 
    public static native void ViconClose();
 
