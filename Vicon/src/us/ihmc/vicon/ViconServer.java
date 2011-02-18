@@ -40,6 +40,7 @@ public class ViconServer extends ViconJavaInterface
 
    public Pose getPose(String modelName)
    {
+      ViconGetFrame();
       return ViconGetBodyAngleAxis(modelName);
    }
 
