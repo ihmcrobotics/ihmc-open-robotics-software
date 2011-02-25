@@ -22,6 +22,11 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
  * @author not attributable
  * @version 1.0
  */
+
+
+/*
+ * FIXME: not rewindable!
+ */
 public class BipedSupportPolygons
 {
    // Reference frames:
