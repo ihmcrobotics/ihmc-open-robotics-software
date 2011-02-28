@@ -101,6 +101,8 @@ public class TestYoVariableHolderImplementation extends TestCase
       AbstractYoVariable variable = yoVariableHolderImplementation.getVariable("robot.registryA.variableOne");
       assertEquals(variable.getName(), "variableOne");
 
+      variable = yoVariableHolderImplementation.getVariable("registryA.variableOne");
+      assertEquals(variable.getName(), "variableOne");
 
       variable = yoVariableHolderImplementation.getVariable("robot.registryA.variableOne");
       assertEquals(variable.getName(), "variableOne");
