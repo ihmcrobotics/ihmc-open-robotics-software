@@ -84,7 +84,7 @@ public class SteppingStonesDesiredFootstepCalculator implements DesiredFootstepC
       
       double defaultStepWidth = 0.22;
       stanceWidth.set(defaultStepWidth);
-      double defaultStanceLength = CaptureRegionCalculator.kinematicRangeFromCoP * 0.5;    // 0.7;//0.40;
+      double defaultStanceLength = CaptureRegionCalculator.kinematicRangeFromContactReferencePoint * 0.5;    // 0.7;//0.40;
       stanceLength.set(defaultStanceLength);
       stepAngle.set(Math.atan(stanceWidth.getDoubleValue() / stanceLength.getDoubleValue()));    // 0.4
       stepDistance.set(Math.sqrt((stanceWidth.getDoubleValue() * stanceWidth.getDoubleValue())
