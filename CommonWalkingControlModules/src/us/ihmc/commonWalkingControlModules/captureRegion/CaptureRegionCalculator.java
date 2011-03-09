@@ -64,7 +64,7 @@ public class CaptureRegionCalculator
    public static boolean DRAW_CAPTURE_REGION = true;    //
    public static final double DRAWN_POINT_BASE_SIZE = 0.004;
 
-   public static double kinematicRangeFromCoP;
+   public static double kinematicRangeFromContactReferencePoint;
    public static final int NUMBER_OF_POINTS_TO_APPROXIMATE_KINEMATIC_LIMITS = 5;    // 3; //1; //10; //
    public static final int MAX_CAPTURE_REGION_POLYGON_POINTS = 26;    // 20;    // 4 + NUMBER_OF_POINTS_TO_APPROXIMATE_KINEMATIC_LIMITS + 8;
 
@@ -80,7 +80,7 @@ public class CaptureRegionCalculator
 
    private GlobalTimer globalTimer;
 
-   public CaptureRegionCalculator(SideDependentList<ReferenceFrame> ankleZUpFrames, double midFootAnkleXOffset, double footWidth, double kinematicRangeFromCoP,
+   public CaptureRegionCalculator(SideDependentList<ReferenceFrame> ankleZUpFrames, double midFootAnkleXOffset, double footWidth, double kinematicRangeFromContactReferencePoint,
                                   CapturePointCalculatorInterface capturePointCalculator, YoVariableRegistry yoVariableRegistry,
                                   DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
@@ -88,11 +88,11 @@ public class CaptureRegionCalculator
       this.ankleZUpFrames = ankleZUpFrames;
 
       this.capturePointCalculator = capturePointCalculator;
-      CaptureRegionCalculator.kinematicRangeFromCoP = kinematicRangeFromCoP;
+      CaptureRegionCalculator.kinematicRangeFromContactReferencePoint = kinematicRangeFromContactReferencePoint;
 
       int numPoints = MAX_CAPTURE_REGION_POLYGON_POINTS - 1;
       double[][] reachableRegionPoints = new double[numPoints + 1][2];
-      double radius = kinematicRangeFromCoP;
+      double radius = kinematicRangeFromContactReferencePoint;
 
       for (int i = 0; i < numPoints; i++)
       {
@@ -267,7 +267,7 @@ public class CaptureRegionCalculator
 
    public void setKinematicRangeFromCoP(double kinematicRangeFromCoP)
    {
-      CaptureRegionCalculator.kinematicRangeFromCoP = kinematicRangeFromCoP;
+      CaptureRegionCalculator.kinematicRangeFromContactReferencePoint = kinematicRangeFromCoP;
    }
 
    private final FramePoint2d footCentroid = new FramePoint2d(ReferenceFrame.getWorldFrame());
@@ -363,7 +363,7 @@ public class CaptureRegionCalculator
          projectedLine.sub(copExtremeInSupportAnkleZUp);
 
          // Look at JPratt Notes February 18, 2009 for details on the following:
-         FramePoint2d kinematicExtreme = solveIntersectionOfRayAndCircle(footCentroid, predictedExtremeCapturePoint2d, projectedLine, kinematicRangeFromCoP);
+         FramePoint2d kinematicExtreme = solveIntersectionOfRayAndCircle(footCentroid, predictedExtremeCapturePoint2d, projectedLine, kinematicRangeFromContactReferencePoint);
 
          if (kinematicExtreme == null)
 
@@ -414,7 +414,7 @@ public class CaptureRegionCalculator
       {
          double alphaFromAToB = ((double) (i + 1)) / ((double) (NUMBER_OF_POINTS_TO_APPROXIMATE_KINEMATIC_LIMITS + 1));
          FramePoint2d additionalKinematicPoint = getPointBetweenVectorsAtDistanceFromOriginCircular(directionLimits[0], directionLimits[directionLimits.length-1], alphaFromAToB,
-                                                    kinematicRangeFromCoP, footCentroid);
+                                                    kinematicRangeFromContactReferencePoint, footCentroid);
          captureRegionVertices.add(additionalKinematicPoint);
          additionalKinematicPoint = additionalKinematicPoint.changeFrameCopy(worldFrame);
          additionalKinematicLimitPoints[i].set(additionalKinematicPoint.getX(), additionalKinematicPoint.getY(), 0.0);
