@@ -4,13 +4,16 @@ import java.util.ArrayList;
 
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Matrix3d;
+import javax.vecmath.Point2d;
 
 import us.ihmc.commonWalkingControlModules.RobotSide;
+import us.ihmc.commonWalkingControlModules.captureRegion.SteppingStonesCaptureRegionIntersectionCalculator;
 import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredHeadingControlModule;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredVelocityControlModule;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.utilities.math.MathTools;
+import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
@@ -23,11 +26,13 @@ import us.ihmc.utilities.math.geometry.RotationFunctions;
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import com.yobotics.simulationconstructionset.util.ground.steppingStones.SteppingStones;
 
 
 public class AdjustableDesiredFootstepCalculator implements DesiredFootstepCalculator
 {
-   private final boolean CHECK_STEP_INTO_CAPTURE_REGION = false;
+   private final boolean CHECK_STEP_INTO_CAPTURE_REGION = true; //false;
 
    private final YoVariableRegistry registry = new YoVariableRegistry("VelocityControlDesiredStepLocationCalculator");
 
@@ -48,6 +53,9 @@ public class AdjustableDesiredFootstepCalculator implements DesiredFootstepCalcu
    private double footBackwardOffset;
    private double footWidth;
 
+   // Stepping Stones if the world isn't flat:
+   private final SteppingStonesCaptureRegionIntersectionCalculator steppingStonesCaptureRegionIntersectionCalculator;
+   
    // Footstep parameters
    private final DoubleYoVariable stepLength = new DoubleYoVariable("stepLength", "step length. [m]", registry);
    private final DoubleYoVariable stepWidth = new DoubleYoVariable("stepWidth", "step width. [m]", registry);
@@ -84,9 +92,28 @@ public class AdjustableDesiredFootstepCalculator implements DesiredFootstepCalcu
 
    // Constructor
    public AdjustableDesiredFootstepCalculator(CouplingRegistry couplingRegistry, DesiredHeadingControlModule desiredHeadingControlModule,
-           DesiredVelocityControlModule desiredVelocityControlModule, YoVariableRegistry parentRegistry, CommonWalkingReferenceFrames referenceFrames)
+         DesiredVelocityControlModule desiredVelocityControlModule, YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, CommonWalkingReferenceFrames referenceFrames)
+   {
+      this(null, couplingRegistry, desiredHeadingControlModule,
+            desiredVelocityControlModule, parentRegistry, dynamicGraphicObjectsListRegistry, referenceFrames);
+   }
+   
+   public AdjustableDesiredFootstepCalculator(SteppingStones steppingStones, CouplingRegistry couplingRegistry, DesiredHeadingControlModule desiredHeadingControlModule,
+           DesiredVelocityControlModule desiredVelocityControlModule, YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, CommonWalkingReferenceFrames referenceFrames)
    {
 	   parentRegistry.addChild(registry);
+	   
+	   if (steppingStones != null)
+      {
+         steppingStonesCaptureRegionIntersectionCalculator = new SteppingStonesCaptureRegionIntersectionCalculator(steppingStones, registry,
+                 dynamicGraphicObjectsListRegistry);
+      }
+      else
+      {
+         steppingStonesCaptureRegionIntersectionCalculator = null;
+      }
+
+	   
       this.couplingRegistry = couplingRegistry;
       this.desiredHeadingControlModule = desiredHeadingControlModule;
       this.desiredVelocityControlModule = desiredVelocityControlModule;
@@ -247,44 +274,125 @@ public class AdjustableDesiredFootstepCalculator implements DesiredFootstepCalcu
 
    public void adjustDesiredFootstepPosition(RobotSide swingLegSide, FrameConvexPolygon2d captureRegion)
    {
+      if (desiredFootstepPosition == null) return; // if not initialized at start of swing first, happens e.g. when balancing on one leg
+
       // Check if Step Position is inside the Capture Region, Otherwise project step position into the CR
-      if (desiredFootstepPosition != null)    // nextStep == null if not initialized at start of swing first, happens e.g. when balancing on one leg
+      if (!CHECK_STEP_INTO_CAPTURE_REGION)
       {
-         if (!CHECK_STEP_INTO_CAPTURE_REGION)
-         {
-            nextStepIsInsideCaptureRegion.set(false);
+         nextStepIsInsideCaptureRegion.set(false);
 
-            return;
-         }
+         return;
+      }
 
-         boolean noCaptureRegion = captureRegion == null;
-         if (noCaptureRegion)
-         {
-            nextStepIsInsideCaptureRegion.set(false);
+      boolean noCaptureRegion = captureRegion == null;
+      if (noCaptureRegion)
+      {
+         nextStepIsInsideCaptureRegion.set(false);
+         
+         // leave adjusted as it is; not much better you can do
+         return;
+      }
+      
+      if (steppingStonesCaptureRegionIntersectionCalculator != null)
+      {
+         projectIntoSteppingStonesAndCaptureRegion(captureRegion);
+      }
+      else
+      {
+         projectIntoCaptureRegion(captureRegion);
+      }
+      
+      
+   }
+   
+   private void projectIntoCaptureRegion(FrameConvexPolygon2d captureRegion)
+   {
+      FramePoint2d nextStep2d = desiredFootstepPosition.toFramePoint2d();
+      nextStep2d.changeFrame(captureRegion.getReferenceFrame());
+      FrameConvexPolygon2d nextStepFootPolygon = buildNextStepFootPolygon(nextStep2d);
 
-            // leave adjusted as it is; not much better you can do
-         }
-         else
-         {
-            FramePoint2d nextStep2d = desiredFootstepPosition.toFramePoint2d();
-            nextStep2d.changeFrame(captureRegion.getReferenceFrame());
-            FrameConvexPolygon2d nextStepFootPolygon = buildNextStepFootPolygon(nextStep2d);
 
-            if (nextStepFootPolygon.intersectionWith(captureRegion) == null)
-            {
-               nextStepIsInsideCaptureRegion.set(false);
+      if (nextStepFootPolygon.intersectionWith(captureRegion) == null)
+      {
+         nextStepIsInsideCaptureRegion.set(false);
 
-               captureRegion.orthogonalProjection(nextStep2d);
-               desiredFootstepPosition.setX(nextStep2d.getX());
-               desiredFootstepPosition.setY(nextStep2d.getY());
-            }
-            else
-            {
-               nextStepIsInsideCaptureRegion.set(true);
-            }
-         }
+         captureRegion.orthogonalProjection(nextStep2d);
+         desiredFootstepPosition.setX(nextStep2d.getX());
+         desiredFootstepPosition.setY(nextStep2d.getY());
+      }
+      else
+      {
+         nextStepIsInsideCaptureRegion.set(true);
       }
    }
+   
+   private void projectIntoSteppingStonesAndCaptureRegion(FrameConvexPolygon2d captureRegion)
+   {
+      captureRegion = captureRegion.changeFrameCopy(ReferenceFrame.getWorldFrame());
+      ArrayList<ConvexPolygon2d> steppingStoneCaptureRegionIntersections = steppingStonesCaptureRegionIntersectionCalculator.findIntersectionsBetweenSteppingStonesAndCaptureRegion(captureRegion);
+      
+      FramePoint2d nextStep2d = desiredFootstepPosition.toFramePoint2d();
+      nextStep2d.changeFrame(captureRegion.getReferenceFrame());
+//      FrameConvexPolygon2d nextStepFootPolygon = buildNextStepFootPolygon(nextStep2d);
+
+      Point2d oldLocation = nextStep2d.getPointCopy();
+      Point2d newLocation = computeBestNearestPointToStepTo(oldLocation,  steppingStoneCaptureRegionIntersections);
+      
+      if (newLocation.distance(oldLocation) < 0.002)
+      {
+         nextStepIsInsideCaptureRegion.set(true);
+      }
+
+      else
+      {
+         nextStepIsInsideCaptureRegion.set(false);
+
+         nextStep2d.setX(newLocation.getX());
+         nextStep2d.setY(newLocation.getY());
+         
+         nextStep2d.changeFrame(desiredFootstepPosition.getReferenceFrame());
+
+         desiredFootstepPosition.setX(nextStep2d.getX());
+         desiredFootstepPosition.setY(nextStep2d.getY());
+      }
+     
+   }
+  
+   
+   private Point2d computeBestNearestPointToStepTo(Point2d nominalLocation2d, ArrayList<ConvexPolygon2d> captureRegionSteppingStonesIntersections)
+   {
+      Point2d nearestPoint = new Point2d();
+      double nearestDistanceSquared = Double.POSITIVE_INFINITY;
+      Point2d pointToTest = new Point2d();
+
+      if (captureRegionSteppingStonesIntersections != null)    // If there are no captureRegionSteppingStonesIntersections, just keep stepping where you were before for now...
+      {
+         for (ConvexPolygon2d possiblePlaceToStep : captureRegionSteppingStonesIntersections)
+         {
+            pointToTest.set(nominalLocation2d);
+            possiblePlaceToStep.orthogonalProjection(pointToTest);
+
+            double possibleDistanceSquared = nominalLocation2d.distanceSquared(pointToTest);
+
+            if (possibleDistanceSquared < nearestDistanceSquared)
+            {
+               nearestPoint.set(pointToTest);
+               nearestDistanceSquared = possibleDistanceSquared;
+            }
+         }
+
+         if (nearestDistanceSquared != Double.POSITIVE_INFINITY)    // If there are no near centroids, just keep stepping where you were before...
+         {
+            return nearestPoint;
+//            adjustedStepPosition.set(nearestPoint.x, nearestPoint.y, 0.0);
+         }
+      }
+      
+      return nominalLocation2d;
+   }
+   
+   
+   
 
    private FrameConvexPolygon2d buildNextStepFootPolygon(FramePoint2d nextStep)    // TODO: doesn't account for foot yaw
    {
@@ -317,9 +425,8 @@ public class AdjustableDesiredFootstepCalculator implements DesiredFootstepCalcu
       nextStepBackLeftCorner.add(tempNextStepOffset);
       nextStepFootPolygonPoints.add(nextStepBackLeftCorner);
 
-      FrameConvexPolygon2d nextStepFootPolygon = new FrameConvexPolygon2d(nextStepFootPolygonPoints);
-
-      return nextStepFootPolygon;
+     FrameConvexPolygon2d nextStepFootPolygon = new FrameConvexPolygon2d(nextStepFootPolygonPoints);
+     return nextStepFootPolygon;
    }
 
    public void setUpParametersForR2(double footBackwardOffset, double footForwardOffset, double footWidth)
@@ -347,7 +454,7 @@ public class AdjustableDesiredFootstepCalculator implements DesiredFootstepCalcu
       KpStepYaw.set(1.0);
    }
 
-   public void setupParametersForM2V2()
+   public void setupParametersForM2V2(double footBackwardOffset, double footForwardOffset, double footWidth)
    {
       goodStandingStepWidth = 0.25;
       goodWalkingStepWidth = goodStandingStepWidth - 0.05;
@@ -362,6 +469,10 @@ public class AdjustableDesiredFootstepCalculator implements DesiredFootstepCalcu
       insideStepAdjustmentForTurning = 0.0;
       outsideStepAdjustmentForTurning = 0.0;
 
+      this.footBackwardOffset = footBackwardOffset;
+      this.footForwardOffset = footForwardOffset;
+      this.footWidth = footWidth;
+      
       kpStepLength.set(0.5);
       KpStepYaw.set(0.5);
    }
