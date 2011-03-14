@@ -871,6 +871,7 @@ public abstract class RegularWalkingGaitAbstractController
       // Begin: Add transitions
       // Start Walking
       startWalkingDoubleSupportState.addStateTransition(toTransferAllLoadToLeftLegForWalkingState);
+//      startWalkingDoubleSupportState.addStateTransition(toTransferAllLoadToRightLegForWalkingState);
 
       // Stop walking
       leftLoadingRightPreSwingAState.addStateTransition(toStopWalkingLeftLoadingState);
