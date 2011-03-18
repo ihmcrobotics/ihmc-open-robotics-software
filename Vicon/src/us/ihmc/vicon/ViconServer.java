@@ -3,11 +3,15 @@ package us.ihmc.vicon;
 import us.ihmc.utilities.remote.ReflectiveTCPServer;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class ViconServer extends ViconJavaInterface
 {
+   private boolean DEBUG = false;
    protected ReflectiveTCPServer tcpServer;
    protected ArrayList<String> availableModels = new ArrayList<String>();
+
+   private HashMap<String, PoseListener> listeners = new HashMap<String, PoseListener>();
 
    public ViconServer(String ip) throws Exception
    {
@@ -40,8 +44,36 @@ public class ViconServer extends ViconJavaInterface
 
    public Pose getPose(String modelName)
    {
+      long startTime = System.currentTimeMillis();
       ViconGetFrame();
-      return ViconGetBodyAngleAxis(modelName);
+      Pose pose = ViconGetBodyAngleAxis(modelName);
+      long endTime = System.currentTimeMillis();
+      if(DEBUG) System.out.println("getPose took " + (endTime-startTime) + " ms");
+
+      return pose;
+   }
+
+   public void registerPoseListener(String host, Integer port, String modelName, Long updatePeriodInMillis)
+   {
+      PoseListener poseListener = new PoseListener(host, port, modelName, updatePeriodInMillis, this);
+      Thread thread = new Thread(poseListener);
+      thread.start();
+
+      listeners.put(modelName, poseListener);
+   }
+
+   public void stopListener(String modelName)
+   {
+      PoseListener poseListener = listeners.get(modelName);
+      poseListener.stopListening();
+   }
+
+   public void stopAllListeners()
+   {
+      for (PoseListener poseListener : listeners.values())
+      {
+         poseListener.stopListening();
+      }
    }
 
    public static void main(String[] args)
@@ -61,13 +93,26 @@ public class ViconServer extends ViconJavaInterface
       {
          ViconServer viconserver = new ViconServer(ip);
 
-//       ArrayList<String> availableModels = viconserver.getAvailableModels();
-//       System.out.println("available models:\n" + availableModels);
-//
-//       for (String modelName : availableModels)
+         ArrayList<String> availableModels = viconserver.getAvailableModels();
+         System.out.println("available models:\n" + availableModels);
+
+         for (String modelName : availableModels)
+         {
+            Pose pose = viconserver.getPose(modelName);
+            System.out.println("\t" + modelName + " \tat\t" + pose);
+         }
+
+         // test PoseListener
+//         viconserver.registerPoseListener(availableModels.get(0), 100);
+
+         // test update rate
+//       String modelName = availableModels.get(0);
+//       while (true)
 //       {
+//          long startTime = System.currentTimeMillis();
 //          Pose pose = viconserver.getPose(modelName);
-//          System.out.println("\t" + modelName + " \tat\t" + pose);
+//          long endTime = System.currentTimeMillis();
+//          System.out.println(modelName + ": " + pose + " in " + (endTime - startTime) + " ms");
 //       }
 
          // wait around until terminated
