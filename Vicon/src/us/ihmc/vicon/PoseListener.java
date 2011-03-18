@@ -26,7 +26,6 @@ public class PoseListener implements Runnable
       this.viconServer = viconServer;
    }
 
-   @Override
    public void run()
    {
       try
