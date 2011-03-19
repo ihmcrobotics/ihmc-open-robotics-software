@@ -45,7 +45,7 @@ public class PoseListener implements Runnable
       }
       catch (Exception e)
       {
-         e.printStackTrace();
+         System.out.println("PoseListener for " + modelName + "stopped (" + host + ":" + port + ")");
       }
    }
 

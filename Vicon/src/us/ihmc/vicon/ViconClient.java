@@ -20,7 +20,7 @@ public class ViconClient
    private String requestedModel;
    private String myIP = "10.2.36.1";
    private int myPort = 4444;
-   private long desiredUpdateRateInMillis = 50;
+   private long desiredUpdateRateInMillis = 10;
 
    public ViconClient(String ip) throws Exception
    {
@@ -60,6 +60,7 @@ public class ViconClient
 
    public Pose getPose(String modelName)
    {
+      // This is really slow (3 Hz instead of 80 Hz)
 //    Vector<Serializable> parameters = new Vector<Serializable>();
 //    parameters.add(modelName);
 //    RemoteRequest remoteRequest = new RemoteRequest("getPose", parameters);
@@ -71,6 +72,7 @@ public class ViconClient
 //    {
 //       e.printStackTrace();
 //    }
+//    return null;
 
       return mapModelToPose.get(modelName);
    }
@@ -107,25 +109,34 @@ public class ViconClient
             client = serverSocket.accept();
             ObjectInputStream _ois = new ObjectInputStream(client.getInputStream());
 
+            long startTime = System.currentTimeMillis();
+            int updateCount = 0;
             while ((client != null) &&!client.isClosed())
             {
                if (DEBUG)
                   System.out.println("waiting to read...");
-               long startTime = System.currentTimeMillis();
                Object obj = _ois.readObject();
 
                if (obj instanceof Pose)
                {
                   Pose pose = (Pose) obj;
                   mapModelToPose.put(requestedModel, pose);
-                  long endTime = System.currentTimeMillis();
+
                   if (DEBUG)
-                     System.out.println(pose + " took " + (endTime - startTime) + " ms");
+                  {
+                     updateCount++;
+                     long endTime = System.currentTimeMillis();
+                     if ((endTime - startTime) > 1000)
+                     {
+                        System.out.println("PoseListener updating at " + (int) ((double) updateCount / ((double) (endTime - startTime) / 1000.0)) + " Hz");
+                        startTime = endTime;
+                        updateCount = 0;
+                     }
+                  }
                }
                else
                {
-                  if (DEBUG)
-                     System.out.println("ViconPoseListenerThread_: received obj which is not a Pose: " + obj.getClass());
+                  System.out.println("ViconPoseListenerThread_: received obj which is not a Pose: " + obj.getClass());
                }
             }
          }
@@ -153,8 +164,10 @@ public class ViconClient
 
    public static void main(String[] args)
    {
-//    String ip = "10.4.1.100";
-      String ip = "10.2.36.1";
+      String ip = "10.4.1.100";
+
+//    String ip = "10.2.36.1";
+
       for (int i = 0; i < args.length - 1; i++)
       {
          if (args[i].equalsIgnoreCase("-ip"))
@@ -169,10 +182,22 @@ public class ViconClient
       {
          ViconClient client = new ViconClient(ip);
          ArrayList<String> availableModels = client.getAvailableModels();
+         long startTime = System.currentTimeMillis();
+         int updateCount = 0;
          while (true)
          {
-            System.out.println(client.getPose(availableModels.get(0)));
-            Thread.sleep(100);
+            Pose pose = client.getPose(availableModels.get(0));
+            updateCount++;
+            long endTime = System.currentTimeMillis();
+            if ((endTime - startTime) > 1000)
+            {
+               double dt = (endTime - startTime) / 1000.0;
+               System.out.println("rate = " + (int) (updateCount / dt) + ": " + pose);
+               startTime = endTime;
+               updateCount = 0;
+            }
+
+            Thread.sleep(10);
          }
       }
       catch (Exception ex1)
