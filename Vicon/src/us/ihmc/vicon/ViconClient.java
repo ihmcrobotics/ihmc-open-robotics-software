@@ -16,7 +16,7 @@ public class ViconClient
 {
    private boolean DEBUG = false;
    protected RemoteConnection viconServer;
-   private HashMap<String, Pose> mapModelToPose = new HashMap<String, Pose>();
+   private HashMap<String, PoseReading> mapModelToPoseReading = new HashMap<String, PoseReading>();
    private String requestedModel;
    private String myIP = "10.2.36.1";
    private int myPort = 4444;
@@ -32,7 +32,7 @@ public class ViconClient
 
       for (String modelName : availableModels)
       {
-         mapModelToPose.put(modelName, null);
+         mapModelToPoseReading.put(modelName, null);
       }
 
       ViconPoseListener poseListener = new ViconPoseListener();
@@ -74,7 +74,8 @@ public class ViconClient
 //    }
 //    return null;
 
-      return mapModelToPose.get(modelName);
+      if(mapModelToPoseReading.get(modelName) == null) return null;
+      return mapModelToPoseReading.get(modelName).getPose();
    }
 
    public void registerPoseListener(String host, Integer port, String modelName, Long updateRateInMillis)
@@ -111,27 +112,39 @@ public class ViconClient
 
             long startTime = System.currentTimeMillis();
             int updateCount = 0;
+            int nonUpdate = 0;
+            PoseReading lastPoseReading = null;
             while ((client != null) &&!client.isClosed())
             {
-               if (DEBUG)
-                  System.out.println("waiting to read...");
                Object obj = _ois.readObject();
 
-               if (obj instanceof Pose)
+               if (obj instanceof PoseReading)
                {
-                  Pose pose = (Pose) obj;
-                  mapModelToPose.put(requestedModel, pose);
+                  PoseReading poseReading = (PoseReading) obj;
+                  mapModelToPoseReading.put(requestedModel, poseReading);
 
                   if (DEBUG)
                   {
-                     updateCount++;
-                     long endTime = System.currentTimeMillis();
-                     if ((endTime - startTime) > 1000)
+                     if ((lastPoseReading != null) &&!poseReading.equals(lastPoseReading))
                      {
-                        System.out.println("PoseListener updating at " + (int) ((double) updateCount / ((double) (endTime - startTime) / 1000.0)) + " Hz");
-                        startTime = endTime;
-                        updateCount = 0;
+                        updateCount++;
+                        long endTime = System.currentTimeMillis();
+                        if ((endTime - startTime) > 500)
+                        {
+                           System.out.println("PoseListener updating at " + (int) ((double) updateCount / ((double) (endTime - startTime) / 1000.0)) + " Hz: "
+                                              + "(" + nonUpdate + ") " + poseReading);
+                           startTime = endTime;
+                           updateCount = 0;
+                           nonUpdate = 0;
+                        }
                      }
+                     else
+                     {
+                        System.out.println("***");
+                        nonUpdate++;
+                     }
+
+                     lastPoseReading = poseReading;
                   }
                }
                else
@@ -164,9 +177,9 @@ public class ViconClient
 
    public static void main(String[] args)
    {
-      String ip = "10.4.1.100";
+    String ip = "10.4.1.100";
 
-//    String ip = "10.2.36.1";
+//      String ip = "10.2.36.1";
 
       for (int i = 0; i < args.length - 1; i++)
       {
@@ -184,19 +197,24 @@ public class ViconClient
          ArrayList<String> availableModels = client.getAvailableModels();
          long startTime = System.currentTimeMillis();
          int updateCount = 0;
+         Pose lastPose = null;
+
          while (true)
          {
             Pose pose = client.getPose(availableModels.get(0));
-            updateCount++;
+            if ((lastPose != null) && (!pose.equals(lastPose)))
+               updateCount++;
+
             long endTime = System.currentTimeMillis();
-            if ((endTime - startTime) > 1000)
+            if ((endTime - startTime) > 500)
             {
                double dt = (endTime - startTime) / 1000.0;
-               System.out.println("rate = " + (int) (updateCount / dt) + ": " + pose);
+               System.out.println("getPose rate = " + (int) (updateCount / dt) + ": " + pose);
                startTime = endTime;
                updateCount = 0;
             }
 
+            lastPose = pose;
             Thread.sleep(10);
          }
       }

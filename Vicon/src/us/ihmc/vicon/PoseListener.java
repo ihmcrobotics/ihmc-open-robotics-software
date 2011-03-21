@@ -35,7 +35,8 @@ public class PoseListener implements Runnable
          while (!DONE)
          {
             Pose pose = viconServer.getPose(modelName);
-            oos.writeObject(pose);
+            PoseReading poseReading = new PoseReading(modelName, System.currentTimeMillis(), pose);
+            oos.writeObject(poseReading);
             oos.flush();
             oos.reset();
             Thread.sleep(updateRateInMillis);
@@ -45,7 +46,7 @@ public class PoseListener implements Runnable
       }
       catch (Exception e)
       {
-         System.out.println("PoseListener for " + modelName + "stopped (" + host + ":" + port + ")");
+         System.out.println("PoseListener for " + modelName + " stopped (" + host + ":" + port + ")");
       }
    }
 
