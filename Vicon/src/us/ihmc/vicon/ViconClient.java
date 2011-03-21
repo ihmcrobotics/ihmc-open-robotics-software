@@ -6,6 +6,7 @@ import us.ihmc.utilities.remote.RemoteRequest;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -18,9 +19,9 @@ public class ViconClient
    protected RemoteConnection viconServer;
    private HashMap<String, PoseReading> mapModelToPoseReading = new HashMap<String, PoseReading>();
    private String requestedModel;
-   private String myIP = "10.2.36.1";
+   private String myIP;
    private int myPort = 4444;
-   private long desiredUpdateRateInMillis = 10;
+   private long desiredUpdateRateInMillis = 300;
 
    public ViconClient(String ip) throws Exception
    {
@@ -39,8 +40,11 @@ public class ViconClient
       Thread thread = new Thread(poseListener);
       thread.start();
 
+      myIP = InetAddress.getLocalHost().getHostAddress();
+      System.out.println(myIP);
       registerPoseListener(myIP, new Integer(myPort), availableModels.get(0), new Long(desiredUpdateRateInMillis));
       System.out.println(" should be listening for " + availableModels.get(0));
+      System.out.println("***" + getPose(availableModels.get(0)));
    }
 
    public ArrayList<String> getAvailableModels()
@@ -73,9 +77,17 @@ public class ViconClient
 //       e.printStackTrace();
 //    }
 //    return null;
+      PoseReading pose;
+      synchronized (mapModelToPoseReading)
+      {
+         pose = mapModelToPoseReading.get(modelName);
+      }
 
-      if(mapModelToPoseReading.get(modelName) == null) return null;
-      return mapModelToPoseReading.get(modelName).getPose();
+      if (pose == null)
+         return null;
+
+      return pose.getPose();
+
    }
 
    public void registerPoseListener(String host, Integer port, String modelName, Long updateRateInMillis)
@@ -121,7 +133,12 @@ public class ViconClient
                if (obj instanceof PoseReading)
                {
                   PoseReading poseReading = (PoseReading) obj;
-                  mapModelToPoseReading.put(requestedModel, poseReading);
+                  synchronized (mapModelToPoseReading)
+                  {
+                     mapModelToPoseReading.put(requestedModel, poseReading);
+                  }
+
+                  // System.out.println(poseReading);
 
                   if (DEBUG)
                   {
@@ -177,9 +194,9 @@ public class ViconClient
 
    public static void main(String[] args)
    {
-    String ip = "10.4.1.100";
+      String ip = "10.4.1.100";
 
-//      String ip = "10.2.36.1";
+      // String ip = "10.2.36.1";
 
       for (int i = 0; i < args.length - 1; i++)
       {
