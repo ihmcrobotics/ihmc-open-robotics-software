@@ -47,7 +47,13 @@ public class ViconServer extends ViconJavaInterface
 
    public Pose getPose(String modelName)
    {
-      return modelPoses.get(modelName);
+      Pose pose;
+      synchronized (modelPoses)
+      {
+         pose = modelPoses.get(modelName);
+      }
+
+      return pose;
    }
 
    public void registerPoseListener(String host, Integer port, String modelName, Long updatePeriodInMillis)
@@ -106,35 +112,46 @@ public class ViconServer extends ViconJavaInterface
             ViconGetFrame();
 
             // update each model
+            boolean updated = false;
             for (String modelName : availableModels)
             {
                Pose pose = ViconGetBodyAngleAxis(modelName);
 
-               if (modelPoses.get(modelName) == null)
+               synchronized (modelPoses)
                {
-                  modelPoses.put(modelName, pose);
-               }
-               else
-               {
-                  if ((pose.xPosition != modelPoses.get(modelName).xPosition) || (pose.yPosition != modelPoses.get(modelName).yPosition))
+                  if (modelPoses.get(modelName) == null)
                   {
                      modelPoses.put(modelName, pose);
-                     updateCount++;
+                  }
+                  else
+                  {
+                     if (!pose.equals(modelPoses.get(modelName)))
+                     {
+                        modelPoses.put(modelName, pose);
+                        updated = true;
+                     }
                   }
                }
             }
 
+            if (updated)
+               updateCount++;
+
             // display update rate
-            if (!displayedUpdateRate && (System.currentTimeMillis() - startTime) > 3000)
+            long endTime = System.currentTimeMillis();
+            if (!displayedUpdateRate && (endTime - startTime) > 3000)
             {
-               System.out.println("Vicon server updating at " + (int)((double) updateCount / ((double) (System.currentTimeMillis() - startTime) / 1000.0)) + " Hz");
-               displayedUpdateRate = true;
+               System.out.println("Vicon server updating at " + (int) ((double) updateCount / ((double) (endTime - startTime) / 1000.0))
+                                  + " Hz");
+//               displayedUpdateRate = true;
+               startTime = endTime;
+               updateCount = 0;
             }
 
             // don't bother going faster than Vicon
             try
             {
-               Thread.sleep(5);
+               Thread.sleep(10);
             }
             catch (InterruptedException e)
             {
