@@ -15,13 +15,13 @@ import java.util.Vector;
 
 public class ViconClient
 {
-   private boolean DEBUG = false;
+   private boolean DEBUG = true;
    protected RemoteConnection viconServer;
    private HashMap<String, PoseReading> mapModelToPoseReading = new HashMap<String, PoseReading>();
    private String requestedModel;
    private String myIP;
    private int myPort = 4444;
-   private long desiredUpdateRateInMillis = 300;
+   private long desiredUpdateRateInMillis = 5;
 
    public ViconClient(String ip) throws Exception
    {
@@ -133,6 +133,7 @@ public class ViconClient
                if (obj instanceof PoseReading)
                {
                   PoseReading poseReading = (PoseReading) obj;
+//                  System.out.println(poseReading);
                   synchronized (mapModelToPoseReading)
                   {
                      mapModelToPoseReading.put(requestedModel, poseReading);
@@ -146,7 +147,7 @@ public class ViconClient
                      {
                         updateCount++;
                         long endTime = System.currentTimeMillis();
-                        if ((endTime - startTime) > 500)
+                        if ((endTime - startTime) > 1000)
                         {
                            System.out.println("PoseListener updating at " + (int) ((double) updateCount / ((double) (endTime - startTime) / 1000.0)) + " Hz: "
                                               + "(" + nonUpdate + ") " + poseReading);
@@ -168,6 +169,8 @@ public class ViconClient
                {
                   System.out.println("ViconPoseListenerThread_: received obj which is not a Pose: " + obj.getClass());
                }
+
+               Thread.sleep(1);
             }
          }
          catch (Exception xcp)
@@ -195,8 +198,7 @@ public class ViconClient
    public static void main(String[] args)
    {
       String ip = "10.4.1.100";
-
-      // String ip = "10.2.36.1";
+//      String ip = "10.2.36.1";
 
       for (int i = 0; i < args.length - 1; i++)
       {
@@ -212,27 +214,31 @@ public class ViconClient
       {
          ViconClient client = new ViconClient(ip);
          ArrayList<String> availableModels = client.getAvailableModels();
+         String modelName = availableModels.get(0);
          long startTime = System.currentTimeMillis();
          int updateCount = 0;
          Pose lastPose = null;
 
          while (true)
          {
-            Pose pose = client.getPose(availableModels.get(0));
+            Pose pose = client.getPose(modelName);
             if ((lastPose != null) && (!pose.equals(lastPose)))
+            {
                updateCount++;
 
-            long endTime = System.currentTimeMillis();
-            if ((endTime - startTime) > 500)
-            {
-               double dt = (endTime - startTime) / 1000.0;
-               System.out.println("getPose rate = " + (int) (updateCount / dt) + ": " + pose);
-               startTime = endTime;
-               updateCount = 0;
+               long endTime = System.currentTimeMillis();
+               if ((endTime - startTime) > 1000)
+               {
+                  double dt = (endTime - startTime) / 1000.0;
+                  System.out.println(modelName + " rate = " + (int) (updateCount / dt) + ": " + pose);
+                  startTime = endTime;
+                  updateCount = 0;
+               }
             }
 
             lastPose = pose;
-            Thread.sleep(10);
+
+            Thread.sleep(1);
          }
       }
       catch (Exception ex1)

@@ -32,15 +32,36 @@ public class PoseListener implements Runnable
       {
          Socket socket = new Socket(host, port);
          ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
+         Pose lastPose = null;
+         int updateCount = 0;
+         long startTime = System.currentTimeMillis();
+
          while (!DONE)
          {
             Pose pose = viconServer.getPose(modelName);
-            PoseReading poseReading = new PoseReading(modelName, System.currentTimeMillis(), pose);
-            oos.writeObject(poseReading);
-            oos.flush();
-            oos.reset();
+
+            if ((lastPose != null) && !pose.equals(lastPose))
+            {
+               PoseReading poseReading = new PoseReading(modelName, System.currentTimeMillis(), pose);
+               oos.writeObject(poseReading);
+               oos.flush();
+               oos.reset();
+               updateCount++;
+            }
+
+            long endTime = System.currentTimeMillis();
+            if((endTime-startTime) > 1000)
+            {
+               System.out.println("updating listener for " + modelName + " at " +(int)(updateCount /(((double)(endTime-startTime))/1000.0)) + " Hz");
+               updateCount = 0;
+               startTime = endTime;
+            }
+
+            lastPose = pose;
+
             Thread.sleep(updateRateInMillis);
          }
+
          System.out.println("PoseListener: closing socket...");
          socket.close();
       }
