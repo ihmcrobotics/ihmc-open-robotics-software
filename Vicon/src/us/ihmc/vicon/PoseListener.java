@@ -42,7 +42,7 @@ public class PoseListener implements Runnable
 
             if ((lastPose != null) && !pose.equals(lastPose))
             {
-               PoseReading poseReading = new PoseReading(modelName, System.currentTimeMillis(), pose);
+               PoseReading poseReading = new PoseReading(modelName, System.nanoTime(), pose);
                oos.writeObject(poseReading);
                oos.flush();
                oos.reset();
