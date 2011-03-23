@@ -41,7 +41,7 @@ public class ViconClient
       thread.start();
 
       myIP = InetAddress.getLocalHost().getHostAddress();
-      System.out.println(myIP);
+      System.out.println("my ip is " + myIP);
       registerPoseListener(myIP, new Integer(myPort), availableModels.get(0), new Long(desiredUpdateRateInMillis));
       System.out.println(" should be listening for " + availableModels.get(0));
       System.out.println("***" + getPose(availableModels.get(0)));
