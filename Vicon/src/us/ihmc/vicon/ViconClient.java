@@ -15,7 +15,7 @@ import java.util.Vector;
 
 public class ViconClient
 {
-   private boolean DEBUG = true;
+   private boolean DEBUG = false;
    protected RemoteConnection viconServer;
    private HashMap<String, PoseReading> mapModelToPoseReading = new HashMap<String, PoseReading>();
    private String requestedModel;
