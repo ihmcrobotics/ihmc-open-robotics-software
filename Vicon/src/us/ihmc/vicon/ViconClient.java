@@ -62,34 +62,41 @@ public class ViconClient
       return null;
    }
 
+   
+   
    public Pose getPose(String modelName)
    {
-      // This is really slow (3 Hz instead of 80 Hz)
-//    Vector<Serializable> parameters = new Vector<Serializable>();
-//    parameters.add(modelName);
-//    RemoteRequest remoteRequest = new RemoteRequest("getPose", parameters);
-//    try
-//    {
-//       return (Pose) viconServer.SendRequest(remoteRequest);
-//    }
-//    catch (Exception e)
-//    {
-//       e.printStackTrace();
-//    }
-//    return null;
-      PoseReading pose;
-      synchronized (mapModelToPoseReading)
-      {
-         pose = mapModelToPoseReading.get(modelName);
-      }
-
-      if (pose == null)
-         return null;
-
-      return pose.getPose();
-
+   
+	   return getPoseReading(modelName).getPose();
    }
 
+   public PoseReading getPoseReading(String modelName)
+   {
+	   // This is really slow (3 Hz instead of 80 Hz)
+//	    Vector<Serializable> parameters = new Vector<Serializable>();
+//	    parameters.add(modelName);
+//	    RemoteRequest remoteRequest = new RemoteRequest("getPose", parameters);
+//	    try
+//	    {
+//	       return (Pose) viconServer.SendRequest(remoteRequest);
+//	    }
+//	    catch (Exception e)
+//	    {
+//	       e.printStackTrace();
+//	    }
+//	    return null;
+	      PoseReading pose;
+	      synchronized (mapModelToPoseReading)
+	      {
+	         pose = mapModelToPoseReading.get(modelName);
+	      }
+
+	      if (pose == null)
+	         return null;
+
+	      return pose;
+   }
+   
    public void registerPoseListener(String host, Integer port, String modelName, Long updateRateInMillis)
    {
       requestedModel = modelName;
