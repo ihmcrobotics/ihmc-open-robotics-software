@@ -32,17 +32,16 @@ public class PoseListener implements Runnable
       {
          Socket socket = new Socket(host, port);
          ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
-         Pose lastPose = null;
+         PoseReading lastPoseReading = null;
          int updateCount = 0;
          long startTime = System.currentTimeMillis();
 
          while (!DONE)
          {
-            Pose pose = viconServer.getPose(modelName);
+            PoseReading poseReading = viconServer.getReading(modelName);
 
-            if ((lastPose != null) && !pose.equals(lastPose))
+            if ((lastPoseReading != null) && !poseReading.equals(lastPoseReading))
             {
-               PoseReading poseReading = new PoseReading(modelName, System.nanoTime(), pose);
                oos.writeObject(poseReading);
                oos.flush();
                oos.reset();
@@ -57,7 +56,7 @@ public class PoseListener implements Runnable
                startTime = endTime;
             }
 
-            lastPose = pose;
+            lastPoseReading = poseReading;
 
             Thread.sleep(updateRateInMillis);
          }
