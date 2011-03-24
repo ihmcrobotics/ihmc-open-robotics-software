@@ -1,7 +1,12 @@
 package us.ihmc.vicon;
 
+import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoVariable;
+import com.yobotics.simulationconstructionset.util.math.filter.FilteredVelocityYoVariable;
+import us.ihmc.utilities.math.Differentiator;
 import us.ihmc.utilities.remote.ReflectiveTCPServer;
 
+import javax.vecmath.Vector3d;
+import java.awt.image.ImageFilter;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -18,7 +23,7 @@ public class ViconServer extends ViconJavaInterface
 {
    protected ReflectiveTCPServer tcpServer;
    protected ArrayList<String> availableModels = new ArrayList<String>();
-   private HashMap<String, Pose> modelPoses = new HashMap<String, Pose>();
+   private final HashMap<String, PoseReading> modelPoses = new HashMap<String, PoseReading>();
    private HashMap<String, PoseListener> listeners = new HashMap<String, PoseListener>();
 
    private ViconReader viconReader;
@@ -48,6 +53,17 @@ public class ViconServer extends ViconJavaInterface
    public Pose getPose(String modelName)
    {
       Pose pose;
+      synchronized (modelPoses)
+      {
+         pose = modelPoses.get(modelName).getPose();
+      }
+
+      return pose;
+   }
+
+   public PoseReading getReading(String modelName)
+   {
+      PoseReading pose;
       synchronized (modelPoses)
       {
          pose = modelPoses.get(modelName);
@@ -103,13 +119,36 @@ public class ViconServer extends ViconJavaInterface
          }
 
          // reader loop
-         boolean displayedUpdateRate = false;
          long startTime = System.currentTimeMillis();
          int updateCount = 0;
+         long lastVelocityUpdate = startTime;
+         long runTime = System.currentTimeMillis();
+
+         double alpha = 0.95;
+         double velocityUpdateRate = 30;    // ms
+         FilteredVelocityYoVariable xDifferentiator = new FilteredVelocityYoVariable("xVelocity", "xVelocity", alpha, velocityUpdateRate, null);
+         FilteredVelocityYoVariable yDifferentiator = new FilteredVelocityYoVariable("yVelocity", "yVelocity", alpha, velocityUpdateRate, null);
+         FilteredVelocityYoVariable zDifferentiator = new FilteredVelocityYoVariable("zVelocity", "zVelocity", alpha, velocityUpdateRate, null);
+
+         AlphaFilteredYoVariable xVelocityFiltered = new AlphaFilteredYoVariable("xVelocityFilter", null, alpha);
+         AlphaFilteredYoVariable yVelocityFiltered = new AlphaFilteredYoVariable("yVelocityFilter", null, alpha);
+         AlphaFilteredYoVariable zVelocityFiltered = new AlphaFilteredYoVariable("zVelocityFilter", null, alpha);
+
          while (!DONE)
          {
+            // test various alphas
+//          if((System.currentTimeMillis()-runTime) > 20000)
+//          {
+//             alpha += 0.05;
+//             velocityFiltered.setAlpha(alpha);
+//             runTime = System.currentTimeMillis();
+//          }
+
             // update frame
             ViconGetFrame();
+
+            // get timestamp
+            long timestamp = System.nanoTime();
 
             // update each model
             boolean updated = false;
@@ -119,15 +158,39 @@ public class ViconServer extends ViconJavaInterface
 
                synchronized (modelPoses)
                {
-                  if (modelPoses.get(modelName) == null)
+                  PoseReading lastPoseReading = modelPoses.get(modelName);
+
+                  long currentTime = System.currentTimeMillis();
+                  if (lastPoseReading != null && (currentTime - lastVelocityUpdate) > velocityUpdateRate)
                   {
-                     modelPoses.put(modelName, pose);
+                     // compute velocity
+                     double lastTimeStamp = lastPoseReading.getTimestamp();
+                     velocityUpdateRate = (timestamp - lastTimeStamp) / 10000000.0;
+                     xDifferentiator.update(pose.xPosition);
+                     yDifferentiator.update(pose.yPosition);
+                     zDifferentiator.update(pose.zPosition);
+                     double xVelocity = xDifferentiator.getDoubleValue();
+                     double yVelocity = yDifferentiator.getDoubleValue();
+                     double zVelocity = zDifferentiator.getDoubleValue();
+                     xVelocityFiltered.update(xVelocity);
+                     yVelocityFiltered.update(yVelocity);
+                     zVelocityFiltered.update(zVelocity);
+//                     System.out.println(timestamp + ", " + pose + ", " + xVelocityFiltered.getDoubleValue() + ", " + yVelocityFiltered.getDoubleValue() + ", " + zVelocityFiltered.getDoubleValue() + ", " +alpha);
+                     lastVelocityUpdate = currentTime;
+                  }
+
+                  Vector3d velocity = new Vector3d(xVelocityFiltered.getDoubleValue(), yVelocityFiltered.getDoubleValue(), zVelocityFiltered.getDoubleValue());
+                  PoseReading poseReading = new PoseReading(modelName, timestamp, pose, velocity);
+
+                  if (lastPoseReading == null)
+                  {
+                     modelPoses.put(modelName, poseReading);
                   }
                   else
                   {
-                     if (!pose.equals(modelPoses.get(modelName)))
+                     if (!poseReading.equals(lastPoseReading))
                      {
-                        modelPoses.put(modelName, pose);
+                        modelPoses.put(modelName, poseReading);
                         updated = true;
                      }
                   }
@@ -139,11 +202,9 @@ public class ViconServer extends ViconJavaInterface
 
             // display update rate
             long endTime = System.currentTimeMillis();
-            if (!displayedUpdateRate && (endTime - startTime) > 3000)
+            if ((endTime - startTime) > 3000)
             {
-               System.out.println("Vicon server updating at " + (int) ((double) updateCount / ((double) (endTime - startTime) / 1000.0))
-                                  + " Hz");
-//               displayedUpdateRate = true;
+             System.out.println("Vicon server updating at " + (int) ((double) updateCount / ((double) (endTime - startTime) / 1000.0)) + " Hz");
                startTime = endTime;
                updateCount = 0;
             }

@@ -7,9 +7,11 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.net.InetAddress;
+import java.net.NetworkInterface;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Vector;
 
@@ -39,6 +41,14 @@ public class ViconClient
       ViconPoseListener poseListener = new ViconPoseListener();
       Thread thread = new Thread(poseListener);
       thread.start();
+
+//      System.out.println("inet: " + InetAddress.getLocalHost());
+//      Enumeration inets = NetworkInterface.getNetworkInterfaces();
+//      while (inets.hasMoreElements())
+//      {
+//         System.out.println(inets.nextElement());
+//         System.out.println("--------------------------------");
+//      }
 
       myIP = InetAddress.getLocalHost().getHostAddress();
       System.out.println("my ip is " + myIP);
@@ -76,19 +86,6 @@ public class ViconClient
 
    public PoseReading getPoseReading(String modelName)
    {
-      // This is really slow (3 Hz instead of 80 Hz)
-//    Vector<Serializable> parameters = new Vector<Serializable>();
-//    parameters.add(modelName);
-//    RemoteRequest remoteRequest = new RemoteRequest("getPose", parameters);
-//    try
-//    {
-//       return (Pose) viconServer.SendRequest(remoteRequest);
-//    }
-//    catch (Exception e)
-//    {
-//       e.printStackTrace();
-//    }
-//    return null;
       PoseReading pose;
       synchronized (mapModelToPoseReading)
       {
@@ -99,6 +96,7 @@ public class ViconClient
          return null;
 
       return pose;
+
    }
 
    public void registerPoseListener(String host, Integer port, String modelName, Long updateRateInMillis)
@@ -230,20 +228,20 @@ public class ViconClient
          String modelName = availableModels.get(0);
          long startTime = System.currentTimeMillis();
          int updateCount = 0;
-         Pose lastPose = null;
+         PoseReading lastPose = null;
 
          while (true)
          {
-            Pose pose = client.getPose(modelName);
+            PoseReading pose = client.getPoseReading(modelName);
             if ((lastPose != null) && (!pose.equals(lastPose)))
             {
                updateCount++;
 
                long endTime = System.currentTimeMillis();
-               if ((endTime - startTime) > 1000)
+               if ((endTime - startTime) > 300)
                {
                   double dt = (endTime - startTime) / 1000.0;
-                  System.out.println(modelName + " rate = " + (int) (updateCount / dt) + ": " + pose);
+                  System.out.println(modelName + " rate = " + (int) (updateCount / dt) + ": " + pose.getVelocity());
                   startTime = endTime;
                   updateCount = 0;
                }
