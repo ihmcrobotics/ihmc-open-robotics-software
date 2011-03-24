@@ -62,41 +62,45 @@ public class ViconClient
       return null;
    }
 
-   
-   
+
+
    public Pose getPose(String modelName)
    {
-   
-	   return getPoseReading(modelName).getPose();
+      PoseReading poseReading = getPoseReading(modelName);
+      if (poseReading != null)
+
+         return poseReading.getPose();
+      else
+         return null;
    }
 
    public PoseReading getPoseReading(String modelName)
    {
-	   // This is really slow (3 Hz instead of 80 Hz)
-//	    Vector<Serializable> parameters = new Vector<Serializable>();
-//	    parameters.add(modelName);
-//	    RemoteRequest remoteRequest = new RemoteRequest("getPose", parameters);
-//	    try
-//	    {
-//	       return (Pose) viconServer.SendRequest(remoteRequest);
-//	    }
-//	    catch (Exception e)
-//	    {
-//	       e.printStackTrace();
-//	    }
-//	    return null;
-	      PoseReading pose;
-	      synchronized (mapModelToPoseReading)
-	      {
-	         pose = mapModelToPoseReading.get(modelName);
-	      }
+      // This is really slow (3 Hz instead of 80 Hz)
+//    Vector<Serializable> parameters = new Vector<Serializable>();
+//    parameters.add(modelName);
+//    RemoteRequest remoteRequest = new RemoteRequest("getPose", parameters);
+//    try
+//    {
+//       return (Pose) viconServer.SendRequest(remoteRequest);
+//    }
+//    catch (Exception e)
+//    {
+//       e.printStackTrace();
+//    }
+//    return null;
+      PoseReading pose;
+      synchronized (mapModelToPoseReading)
+      {
+         pose = mapModelToPoseReading.get(modelName);
+      }
 
-	      if (pose == null)
-	         return null;
+      if (pose == null)
+         return null;
 
-	      return pose;
+      return pose;
    }
-   
+
    public void registerPoseListener(String host, Integer port, String modelName, Long updateRateInMillis)
    {
       requestedModel = modelName;
@@ -140,7 +144,8 @@ public class ViconClient
                if (obj instanceof PoseReading)
                {
                   PoseReading poseReading = (PoseReading) obj;
-//                  System.out.println(poseReading);
+
+//                System.out.println(poseReading);
                   synchronized (mapModelToPoseReading)
                   {
                      mapModelToPoseReading.put(requestedModel, poseReading);
@@ -205,7 +210,8 @@ public class ViconClient
    public static void main(String[] args)
    {
       String ip = "10.4.1.100";
-//      String ip = "10.2.36.1";
+
+//    String ip = "10.2.36.1";
 
       for (int i = 0; i < args.length - 1; i++)
       {
