@@ -250,6 +250,8 @@ public class YoAppearance
    public static Appearance RGBColor(float red, float green, float blue)
    {
       Appearance ret = new Appearance();
+      ret.setCapability(Appearance.ALLOW_MATERIAL_WRITE);
+      ret.setCapability(Appearance.ALLOW_MATERIAL_READ);
       Material mat = new Material();
       mat.setAmbientColor(red, green, blue);
 
