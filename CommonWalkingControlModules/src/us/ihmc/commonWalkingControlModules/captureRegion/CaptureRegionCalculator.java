@@ -5,6 +5,7 @@ import java.util.ArrayList;
 
 import javax.media.j3d.Transform3D;
 import javax.vecmath.AxisAngle4d;
+import javax.vecmath.Point2d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.RobotSide;
@@ -80,6 +81,15 @@ public class CaptureRegionCalculator
 
    private GlobalTimer globalTimer;
 
+   
+   private Point2d computeReachablePoint(double angle, double radius, double midFootAnkleXOffset)
+   {
+      double x = radius * Math.cos(angle) + midFootAnkleXOffset;
+      double y = radius * Math.sin(angle);
+      
+      return new Point2d(x, y);
+   }
+   
    public CaptureRegionCalculator(SideDependentList<ReferenceFrame> ankleZUpFrames, double midFootAnkleXOffset, double footWidth, double kinematicRangeFromContactReferencePoint,
                                   CapturePointCalculatorInterface capturePointCalculator, YoVariableRegistry yoVariableRegistry,
                                   DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
@@ -91,45 +101,28 @@ public class CaptureRegionCalculator
       CaptureRegionCalculator.kinematicRangeFromContactReferencePoint = kinematicRangeFromContactReferencePoint;
 
       int numPoints = MAX_CAPTURE_REGION_POLYGON_POINTS - 1;
-      double[][] reachableRegionPoints = new double[numPoints + 1][2];
+      ArrayList<Point2d> reachableRegionPoints = new ArrayList<Point2d>(numPoints + 1);
       double radius = kinematicRangeFromContactReferencePoint;
 
       for (int i = 0; i < numPoints; i++)
       {
          double angle = -0.03 * Math.PI - 0.70 * Math.PI * (i) / ((numPoints - 1));
-
-         double x = radius * Math.cos(angle);
-         double y = radius * Math.sin(angle);
-
-         reachableRegionPoints[i][0] = x + midFootAnkleXOffset;
-         reachableRegionPoints[i][1] = y;
+         reachableRegionPoints.add(computeReachablePoint(angle, radius, midFootAnkleXOffset));
       }
 
-      reachableRegionPoints[numPoints][0] = 0.0;
-
-//    reachableRegionPoints[numPoints][1] = 0.0;
-      reachableRegionPoints[numPoints][1] = -footWidth / 2.0;
-
+      reachableRegionPoints.add(new Point2d(0.0, -footWidth / 2.0));
       FrameConvexPolygon2d leftReachableRegionInSupportFootFrame = new FrameConvexPolygon2d(ankleZUpFrames.get(RobotSide.LEFT), reachableRegionPoints);
 
-      reachableRegionPoints = new double[numPoints + 1][2];
+      reachableRegionPoints = new ArrayList<Point2d>(numPoints + 1);
 
       for (int i = 0; i < numPoints; i++)
       {
          double angle = 0.03 * Math.PI + 0.70 * Math.PI * (i) / ((numPoints - 1));
 
-         double x = radius * Math.cos(angle);
-         double y = radius * Math.sin(angle);
-
-         reachableRegionPoints[i][0] = x;
-         reachableRegionPoints[i][1] = y;
+         reachableRegionPoints.add(computeReachablePoint(angle, radius, midFootAnkleXOffset));
       }
 
-      reachableRegionPoints[numPoints][0] = 0.0;
-
-//    reachableRegionPoints[numPoints][1] = 0.0;
-      reachableRegionPoints[numPoints][1] = footWidth / 2.0;
-
+      reachableRegionPoints.add(new Point2d(0.0, footWidth / 2.0));
       FrameConvexPolygon2d rightReachableRegionInSupportFootFrame = new FrameConvexPolygon2d(ankleZUpFrames.get(RobotSide.RIGHT), reachableRegionPoints);
 
       this.reachableRegions = new SideDependentList<FrameConvexPolygon2d>(leftReachableRegionInSupportFootFrame, rightReachableRegionInSupportFootFrame);
@@ -293,6 +286,8 @@ public class CaptureRegionCalculator
 
       // first get all of the objects we will need to calculate the capture region
       FramePoint2d capturePoint = capturePointCalculator.getCapturePoint2dInFrame(supportAnkleZUpFrame);
+      
+//      footCentroid.set(supportAnkleZUpFrame, 0.0, 0.0);
       supportFoot.getCentroid(footCentroid);
 
       // 0. hmm, weird things are happening when we predict the capture point given the cop extremes as calculated by
