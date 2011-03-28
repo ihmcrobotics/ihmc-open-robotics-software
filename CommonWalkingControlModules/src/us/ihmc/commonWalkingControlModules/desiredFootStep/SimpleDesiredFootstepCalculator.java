@@ -3,22 +3,22 @@
 
 package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
-import javax.media.j3d.Transform3D;
-import javax.vecmath.Matrix3d;
-
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import us.ihmc.commonWalkingControlModules.RobotSide;
+import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredHeadingControlModule;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
+import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.Orientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.math.geometry.RotationFunctions;
 
 public class SimpleDesiredFootstepCalculator implements DesiredFootstepCalculator
 {
    private final YoVariableRegistry registry = new YoVariableRegistry("SimpleFootstepCalculator");
+
+   private final DesiredHeadingControlModule desiredHeadingControlModule;
 
    private Footstep desiredFootstep;
 
@@ -32,9 +32,10 @@ public class SimpleDesiredFootstepCalculator implements DesiredFootstepCalculato
    private final DoubleYoVariable stepRoll = new DoubleYoVariable("stepRoll", registry);
 
    // Constructor
-   public SimpleDesiredFootstepCalculator(CommonWalkingReferenceFrames referenceFrames, YoVariableRegistry parentRegistry)
+   public SimpleDesiredFootstepCalculator(CommonWalkingReferenceFrames referenceFrames, DesiredHeadingControlModule desiredHeadingControlModule, YoVariableRegistry parentRegistry)
    {
       this.referenceFrames = referenceFrames;
+      this.desiredHeadingControlModule = desiredHeadingControlModule;
       parentRegistry.addChild(registry);
    }
 
@@ -54,30 +55,33 @@ public class SimpleDesiredFootstepCalculator implements DesiredFootstepCalculato
    {
       // Footstep Frame
       ReferenceFrame supportFootFrame = referenceFrames.getAnkleZUpFrame(supportLegSide);
+      ReferenceFrame headingFrame = desiredHeadingControlModule.getDesiredHeadingFrame();
 
       // Footstep Position
       FramePoint footstepPosition = new FramePoint(supportFootFrame);
-      footstepPosition.setX(footstepPosition.getX() + stepLength.getDoubleValue());
-      footstepPosition.setY(footstepPosition.getY() + supportLegSide.negateIfLeftSide(stepWidth.getDoubleValue()));
-      footstepPosition.setZ(footstepPosition.getZ() + stepHeight.getDoubleValue());
+      FrameVector footstepOffset = new FrameVector(headingFrame, stepLength.getDoubleValue(), supportLegSide.negateIfLeftSide(stepWidth.getDoubleValue()), stepHeight.getDoubleValue());
+      
+      footstepOffset.changeFrame(supportFootFrame);
+      footstepPosition.add(footstepOffset); 
 
       // Footstep Orientation
-      Orientation footstepOrientation = new Orientation(supportFootFrame);
-      updateDesiredFootStepYaw(supportFootFrame);
+      Orientation footstepOrientation = new Orientation(headingFrame); 
+      updateDesiredFootStepYaw(headingFrame);
       footstepOrientation.setYawPitchRoll(stepYaw.getDoubleValue(), stepPitch.getDoubleValue(), stepRoll.getDoubleValue());
-
+      footstepOrientation.changeFrame(supportFootFrame);
+      
       // Create a foot Step Pose from Position and Orientation
       FramePose footstepPose = new FramePose(footstepPosition, footstepOrientation);
       desiredFootstep = new Footstep(supportLegSide, footstepPose);
    }
 
-   private void updateDesiredFootStepYaw(ReferenceFrame footstepFrame)
+   private void updateDesiredFootStepYaw(ReferenceFrame headingFrame)
    {
-      // Compute the difference between the body and the footstep frames
-      Transform3D headingToFootstepPositionTransform = referenceFrames.getPelvisFrame().getTransformToDesiredFrame(footstepFrame);
-      Matrix3d headingToSwingRotation = new Matrix3d();
-      headingToFootstepPositionTransform.get(headingToSwingRotation);
-      stepYaw.set(RotationFunctions.getYaw(headingToSwingRotation));
+//      // Compute the difference between the body and the footstep frames
+//      Transform3D headingToFootstepPositionTransform = referenceFrames.getPelvisFrame().getTransformToDesiredFrame(footstepFrame);
+//      Matrix3d headingToSwingRotation = new Matrix3d();
+//      headingToFootstepPositionTransform.get(headingToSwingRotation);
+//      stepYaw.set(RotationFunctions.getYaw(headingToSwingRotation));
    }
 
    public void setupParametersForM2V2()
