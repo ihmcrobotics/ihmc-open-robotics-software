@@ -82,14 +82,6 @@ public class CaptureRegionCalculator
    private GlobalTimer globalTimer;
 
    
-   private Point2d computeReachablePoint(double angle, double radius, double midFootAnkleXOffset)
-   {
-      double x = radius * Math.cos(angle) + midFootAnkleXOffset;
-      double y = radius * Math.sin(angle);
-      
-      return new Point2d(x, y);
-   }
-   
    public CaptureRegionCalculator(SideDependentList<ReferenceFrame> ankleZUpFrames, double midFootAnkleXOffset, double footWidth, double kinematicRangeFromContactReferencePoint,
                                   CapturePointCalculatorInterface capturePointCalculator, YoVariableRegistry yoVariableRegistry,
                                   DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
@@ -257,8 +249,15 @@ public class CaptureRegionCalculator
       }
    }
 
-
-   public void setKinematicRangeFromCoP(double kinematicRangeFromCoP)
+   private Point2d computeReachablePoint(double angle, double radius, double midFootAnkleXOffset)
+   {
+      double x = radius * Math.cos(angle) + midFootAnkleXOffset;
+      double y = radius * Math.sin(angle);
+      
+      return new Point2d(x, y);
+   }
+   
+   public void setKinematicRangeFromFootCenter(double kinematicRangeFromCoP)
    {
       CaptureRegionCalculator.kinematicRangeFromContactReferencePoint = kinematicRangeFromCoP;
    }
