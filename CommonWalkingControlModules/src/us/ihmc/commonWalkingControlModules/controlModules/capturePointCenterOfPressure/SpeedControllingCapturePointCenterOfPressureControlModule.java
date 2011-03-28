@@ -153,6 +153,12 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
    public void controlDoubleSupport(BipedSupportPolygons bipedSupportPolygons, FramePoint currentCapturePoint, FramePoint desiredCapturePoint,
            FramePoint centerOfMassPositionInZUpFrame, FrameVector2d desiredVelocity, FrameVector2d currentVelocity)
    {
+      if (lastTickSingleSupport.getBooleanValue())
+      {
+         resetCoPFilter();
+         lastTickSingleSupport.set(false);
+      }
+      
       guideLineWorld.setFrameLineSegment2d(null);
       parallelLineWorld.setFrameLine2d(null);
 
@@ -171,12 +177,6 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
       {
          throw new RuntimeException("The support polygon cannot be null.");
       }
-
-//      if (lastTickSingleSupport.getBooleanValue())
-//      {
-//         resetCoPFilter();
-//         lastTickSingleSupport.set(false);
-//      }
 
 
       FramePoint2d currentCapturePoint2d = currentCapturePoint.toFramePoint2d();
@@ -239,7 +239,7 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
       }
       else
       {
-         // Create Line from dCP to iCP
+         // Create Line from desired Capture Point to instantaneous Capture Point
          FrameLine2d controlLine = new FrameLine2d(currentCapturePoint2d, desiredCapturePoint2d);
          capturePointLine.setFrameLine2d(controlLine.changeFrameCopy(world));
 
@@ -282,11 +282,11 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
            ReferenceFrame referenceFrame, BipedSupportPolygons supportPolygons, FramePoint centerOfMassPositionInZUpFrame, FrameVector2d desiredVelocity,
            FrameVector2d currentVelocity)
    {
-//      if (!lastTickSingleSupport.getBooleanValue())
-//      {
-//         resetCoPFilter();
-//         lastTickSingleSupport.set(true);
-//      }
+      if (!lastTickSingleSupport.getBooleanValue())
+      {
+         resetCoPFilter();
+         lastTickSingleSupport.set(true);
+      }
 
       // Disable double support stuff
       comDirectionLine.setFrameLine2d(null);
@@ -357,7 +357,7 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
    }
 
    public void packDesiredCenterOfPressure(FramePoint desiredCenterOfPressureToPack)
-   {
+   {      
       double x = filteredDesiredCenterOfPressure.getX();
       double y = filteredDesiredCenterOfPressure.getY();
       double z = 0.0;
