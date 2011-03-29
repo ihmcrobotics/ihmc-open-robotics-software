@@ -22,6 +22,7 @@ import us.ihmc.utilities.remote.RemoteRequest;
 public class ViconClient
 {
    private boolean DEBUG = false;
+   private static ViconClient viconSingleton;
    protected RemoteConnection viconServer;
    private HashMap<String, PoseReading> mapModelToPoseReading = new HashMap<String, PoseReading>();
    private String requestedModel;
@@ -29,7 +30,7 @@ public class ViconClient
    private int myPort = 4444;
    private long desiredUpdateRateInMillis = 5;
 
-   public ViconClient(String ip) throws Exception
+   private ViconClient(String ip) throws Exception
    {
       viconServer = new RemoteConnection();
       viconServer.connect(ip);
@@ -46,19 +47,21 @@ public class ViconClient
       Thread thread = new Thread(poseListener);
       thread.start();
 
-      // System.out.println("inet: " + InetAddress.getLocalHost());
-      // Enumeration inets = NetworkInterface.getNetworkInterfaces();
-      // while (inets.hasMoreElements())
-      // {
-      // System.out.println(inets.nextElement());
-      // System.out.println("--------------------------------");
-      // }
-
       myIP = InetAddress.getLocalHost().getHostAddress();
       System.out.println("my ip is " + myIP);
       registerPoseListener(myIP, new Integer(myPort), availableModels.get(0), new Long(desiredUpdateRateInMillis));
       System.out.println(" should be listening for " + availableModels.get(0));
       System.out.println("***" + getPose(availableModels.get(0)));
+   }
+
+   public static ViconClient getInstance() throws Exception
+   {
+      if (viconSingleton == null)
+      {
+         viconSingleton = new ViconClient("10.4.1.100");
+      }
+
+      return viconSingleton;
    }
 
    public ArrayList<String> getAvailableModels()
@@ -149,12 +152,12 @@ public class ViconClient
                   synchronized (mapModelToPoseReading)
                   {
                      mapModelToPoseReading.put(requestedModel, poseReading);
-                     Pose pose = poseReading.getPose();
-                     Transform3D transform3d = new Transform3D();
-                     transform3d.setEuler(new Vector3d(pose.xAxisRotation, pose.yAxisRotation, pose.zAxisRotation));
-                     transform3d.setTranslation(new Vector3d(pose.xPosition, pose.yPosition, pose.zPosition));
+//                     Pose pose = poseReading.getPose();
+//                     Transform3D transform3d = new Transform3D();
+//                     transform3d.setEuler(new Vector3d(pose.xAxisRotation, pose.yAxisRotation, pose.zAxisRotation));
+//                     transform3d.setTranslation(new Vector3d(pose.xPosition, pose.yPosition, pose.zPosition));
 
-                     ViconFrames.updateTransformToParent(requestedModel, transform3d);
+//                     ViconFrames.updateTransformToParent(requestedModel, transform3d);
                   }
 
                   // System.out.println(poseReading);
