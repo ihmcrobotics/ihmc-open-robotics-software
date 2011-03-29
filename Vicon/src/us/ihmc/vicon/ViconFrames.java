@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.HashMap;
 
 import javax.media.j3d.Transform3D;
+import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import com.yobotics.simulationconstructionset.Robot;
@@ -12,6 +13,7 @@ import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicReferenceFrame;
+import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 public class ViconFrames
@@ -101,40 +103,6 @@ public class ViconFrames
    {
       ReferenceFrame referenceFrame = referenceFrames.get(name);
       referenceFrame.update();
-//    name.concat("_body");
-//
-//    if (referenceFrames.containsKey(name))
-//    {
-//       // update it
-//       referenceFrames.get(name).setTransformToParent(transform3d);
-//    }
-//    else
-//    {
-//       // Create
-//       referenceFrames.put(name, new ReferenceFrame(name, worldFrame, transform3d, false, false, false)
-//       {
-//          private static final long serialVersionUID = -9160732749609839626L;
-//
-//          public void updateTransformToParent(Transform3D transformToParent)
-//          {
-//             throw new RuntimeException("do not call the update method on vicon frames");
-//          }
-//       });
-//
-//       name.concat("_camera");
-//       Transform3D cameraTransform3d = new Transform3D();
-//       cameraTransform3d.setEuler(new Vector3d(0, 0, 0));
-//       cameraTransform3d.setTranslation(new Vector3d(.195, 0, .005));
-//       cameraFrames.put(name, new ReferenceFrame(name, referenceFrames.get(name), cameraTransform3d, false, false, false)
-//       {
-//          private static final long serialVersionUID = -9160732749609839626L;
-//
-//          public void updateTransformToParent(Transform3D transformToParent)
-//          {
-//             throw new RuntimeException("do not call the update method on vicon frames");
-//          }
-//       });
-//    }
    }
 
    /**
@@ -144,18 +112,7 @@ public class ViconFrames
     */
    public static ReferenceFrame getBodyFrame(String name)
    {
-      return referenceFrames.get(name + "_body");
-   }
-
-   /**
-    * Note: The name parameter has "_body_camera" concatenated to it within this method.
-    * @param name - the name of the reference frame that will be returned
-    * @return                             private double[] yawPitchRoll = {0, 0, 0};
-    *
-    */
-   public static ReferenceFrame getCameraFrame(String name)
-   {
-      return referenceFrames.get(name + "_body_camera");
+      return referenceFrames.get(name);
    }
 
    public static Collection<ReferenceFrame> getFrames()
@@ -174,10 +131,28 @@ public class ViconFrames
       System.out.println("size " + frames.size());
 
       SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("dummy"));
-//      scs.addVarList(registry.createVarList());
       ViconFrames.getDynamicGraphicObjectsListRegistry().addDynamicGraphicsObjectListsToSimulationConstructionSet(scs);
 
       Thread scsThread = new Thread(scs);
       scsThread.start();
+
+      try
+      {
+         Thread.sleep(5000);
+         ViconClient viconClient = ViconClient.getInstance();
+         ArrayList<String> modelNames = viconClient.getAvailableModels();
+         ReferenceFrame drone = ViconFrames.getBodyFrame(modelNames.get(0));
+
+         FramePoint point = new FramePoint(drone);
+         System.out.println(point.changeFrameCopy(ViconFrames.getWorldFrame()));
+
+         point = new FramePoint(drone, new Point3d(1.0, 0.0, 0.0));
+         System.out.println(point.changeFrameCopy(ViconFrames.getWorldFrame()));
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+      }
+
    }
 }
