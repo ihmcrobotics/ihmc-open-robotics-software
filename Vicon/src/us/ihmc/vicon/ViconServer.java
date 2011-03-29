@@ -3,8 +3,12 @@ package us.ihmc.vicon;
 import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoVariable;
 import com.yobotics.simulationconstructionset.util.math.filter.FilteredVelocityYoVariable;
 import us.ihmc.utilities.math.Differentiator;
+import us.ihmc.utilities.math.MathTools;
+import us.ihmc.utilities.math.geometry.RotationFunctions;
 import us.ihmc.utilities.remote.ReflectiveTCPServer;
 
+import javax.vecmath.AxisAngle4d;
+import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 import java.awt.image.ImageFilter;
 import java.util.ArrayList;
@@ -55,7 +59,15 @@ public class ViconServer extends ViconJavaInterface
       Pose pose;
       synchronized (modelPoses)
       {
-         pose = modelPoses.get(modelName).getPose();
+         PoseReading poseReading = modelPoses.get(modelName);
+         if (poseReading == null)
+         {
+            return null;
+         }
+         else
+         {
+            pose = modelPoses.get(modelName).getPose();
+         }
       }
 
       return pose;
@@ -98,6 +110,9 @@ public class ViconServer extends ViconJavaInterface
    class ViconReader implements Runnable
    {
       private boolean DONE = false;
+      private AxisAngle4d axisAngle4d = new AxisAngle4d();
+      private Quat4d rotation = new Quat4d();
+      private double[] yawPitchRoll = {0, 0, 0};
 
       public void stopViconReader()
       {
@@ -154,14 +169,16 @@ public class ViconServer extends ViconJavaInterface
             boolean updated = false;
             for (String modelName : availableModels)
             {
-               Pose pose = ViconGetBodyAngleAxis(modelName);
+               Pose viconPose = ViconGetBodyEulerAngles(modelName);
+               Pose pose = new Pose(viconPose.xPosition / 1000.0f, viconPose.yPosition / 1000.0f, viconPose.zPosition / 1000.0f, viconPose.yAxisRotation,
+                                    viconPose.xAxisRotation, (float)MathTools.trimAngleMinusPiToPi(viconPose.zAxisRotation + (Math.PI/2.0)));
 
                synchronized (modelPoses)
                {
                   PoseReading lastPoseReading = modelPoses.get(modelName);
 
                   long currentTime = System.currentTimeMillis();
-                  if (lastPoseReading != null && (currentTime - lastVelocityUpdate) > velocityUpdateRate)
+                  if ((lastPoseReading != null) && (currentTime - lastVelocityUpdate) > velocityUpdateRate)
                   {
                      // compute velocity
                      double lastTimeStamp = lastPoseReading.getTimestamp();
@@ -175,7 +192,8 @@ public class ViconServer extends ViconJavaInterface
                      xVelocityFiltered.update(xVelocity);
                      yVelocityFiltered.update(yVelocity);
                      zVelocityFiltered.update(zVelocity);
-//                     System.out.println(timestamp + ", " + pose + ", " + xVelocityFiltered.getDoubleValue() + ", " + yVelocityFiltered.getDoubleValue() + ", " + zVelocityFiltered.getDoubleValue() + ", " +alpha);
+
+//                   System.out.println(timestamp + ", " + pose + ", " + xVelocityFiltered.getDoubleValue() + ", " + yVelocityFiltered.getDoubleValue() + ", " + zVelocityFiltered.getDoubleValue() + ", " +alpha);
                      lastVelocityUpdate = currentTime;
                   }
 
@@ -204,7 +222,7 @@ public class ViconServer extends ViconJavaInterface
             long endTime = System.currentTimeMillis();
             if ((endTime - startTime) > 3000)
             {
-             System.out.println("Vicon server updating at " + (int) ((double) updateCount / ((double) (endTime - startTime) / 1000.0)) + " Hz");
+               System.out.println("Vicon server updating at " + (int) ((double) updateCount / ((double) (endTime - startTime) / 1000.0)) + " Hz");
                startTime = endTime;
                updateCount = 0;
             }
@@ -239,12 +257,18 @@ public class ViconServer extends ViconJavaInterface
       try
       {
          ViconServer viconserver = new ViconServer(ip);
+         ArrayList<String> modelNames = viconserver.getAvailableModels();
+         while (true)
+         {
+            System.out.println(viconserver.getPose(modelNames.get(0)));
+            Thread.sleep(500);
+         }
 
          // wait around until terminated
-         synchronized (Thread.currentThread())
-         {
-            Thread.currentThread().wait();
-         }
+//       synchronized (Thread.currentThread())
+//       {
+//          Thread.currentThread().wait();
+//       }
       }
       catch (Exception e)
       {
