@@ -171,7 +171,7 @@ public class ViconServer extends ViconJavaInterface
             {
                Pose viconPose = ViconGetBodyEulerAngles(modelName);
                Pose pose = new Pose(viconPose.xPosition / 1000.0f, viconPose.yPosition / 1000.0f, viconPose.zPosition / 1000.0f, viconPose.yAxisRotation,
-                                    viconPose.xAxisRotation, (float)MathTools.trimAngleMinusPiToPi(viconPose.zAxisRotation + (Math.PI/2.0)));
+                                    -viconPose.xAxisRotation, (float)MathTools.trimAngleMinusPiToPi(viconPose.zAxisRotation + (Math.PI/2.0)));
 
                synchronized (modelPoses)
                {
@@ -257,18 +257,18 @@ public class ViconServer extends ViconJavaInterface
       try
       {
          ViconServer viconserver = new ViconServer(ip);
-         ArrayList<String> modelNames = viconserver.getAvailableModels();
-         while (true)
-         {
-            System.out.println(viconserver.getPose(modelNames.get(0)));
-            Thread.sleep(500);
-         }
+//         ArrayList<String> modelNames = viconserver.getAvailableModels();
+//         while (true)
+//         {
+//            System.out.println(viconserver.getPose(modelNames.get(0)));
+//            Thread.sleep(500);
+//         }
 
          // wait around until terminated
-//       synchronized (Thread.currentThread())
-//       {
-//          Thread.currentThread().wait();
-//       }
+       synchronized (Thread.currentThread())
+       {
+          Thread.currentThread().wait();
+       }
       }
       catch (Exception e)
       {

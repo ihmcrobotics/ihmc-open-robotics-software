@@ -152,12 +152,12 @@ public class ViconClient
                   synchronized (mapModelToPoseReading)
                   {
                      mapModelToPoseReading.put(requestedModel, poseReading);
-//                     Pose pose = poseReading.getPose();
-//                     Transform3D transform3d = new Transform3D();
-//                     transform3d.setEuler(new Vector3d(pose.xAxisRotation, pose.yAxisRotation, pose.zAxisRotation));
-//                     transform3d.setTranslation(new Vector3d(pose.xPosition, pose.yPosition, pose.zPosition));
+                     Pose pose = poseReading.getPose();
+                     Transform3D transform3d = new Transform3D();
+                     transform3d.setEuler(new Vector3d(pose.xAxisRotation, pose.yAxisRotation, pose.zAxisRotation));
+                     transform3d.setTranslation(new Vector3d(pose.xPosition, pose.yPosition, pose.zPosition));
 
-//                     ViconFrames.updateTransformToParent(requestedModel, transform3d);
+                     ViconFrames.updateTransformToParent(requestedModel, transform3d);
                   }
 
                   // System.out.println(poseReading);
@@ -254,12 +254,12 @@ public class ViconClient
          String modelName = availableModels.get(0);
          long startTime = System.currentTimeMillis();
          int updateCount = 0;
-         PoseReading lastPose = null;
+         PoseReading lastPoseReading = null;
 
          while (true)
          {
-            PoseReading pose = client.getPoseReading(modelName);
-            if ((lastPose != null) && (!pose.equals(lastPose)))
+            PoseReading poseReading = client.getPoseReading(modelName);
+            if ((lastPoseReading != null) && (!poseReading.equals(lastPoseReading)))
             {
                updateCount++;
 
@@ -267,13 +267,14 @@ public class ViconClient
                if ((endTime - startTime) > 300)
                {
                   double dt = (endTime - startTime) / 1000.0;
-                  System.out.println(modelName + " rate = " + (int) (updateCount / dt) + ": " + pose.getVelocity());
+                  System.out.println(poseReading.getPose());
+//                  System.out.println(modelName + " rate = " + (int) (updateCount / dt) + ": " + pose);
                   startTime = endTime;
                   updateCount = 0;
                }
             }
 
-            lastPose = pose;
+            lastPoseReading = poseReading;
 
             Thread.sleep(1);
          }
