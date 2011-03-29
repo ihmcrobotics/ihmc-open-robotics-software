@@ -39,6 +39,9 @@ public class ViconFrames
          ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
          referenceFrames = new HashMap<String, ReferenceFrame>();
          dynamicReferenceFrames = new HashMap<String, DynamicGraphicReferenceFrame>();
+         DynamicGraphicReferenceFrame dynamicGraphicReferenceFrame = new DynamicGraphicReferenceFrame(worldFrame, registry, 1.0);
+         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("World", dynamicGraphicReferenceFrame);
+         dynamicReferenceFrames.put("World", dynamicGraphicReferenceFrame);
          referenceFrames.put("World", worldFrame);
          viconClient = ViconClient.getInstance();
          ArrayList<String> modelNames = viconClient.getAvailableModels();
@@ -67,7 +70,7 @@ public class ViconFrames
                   dynamicReferenceFrames.get(bodyName).update();
                }
             };
-            DynamicGraphicReferenceFrame dynamicGraphicReferenceFrame = new DynamicGraphicReferenceFrame(referenceFrame, registry, 1.0);
+            dynamicGraphicReferenceFrame = new DynamicGraphicReferenceFrame(referenceFrame, registry, 1.0);
             dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(referenceFrame.getName(), dynamicGraphicReferenceFrame);
             referenceFrames.put(bodyName, referenceFrame);
             dynamicReferenceFrames.put(bodyName, dynamicGraphicReferenceFrame);
