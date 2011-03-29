@@ -7,11 +7,11 @@ import java.util.HashMap;
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Vector3d;
 
+import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicReferenceFrame;
-import sim.DroneRobot;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 public class ViconFrames
@@ -140,7 +140,8 @@ public class ViconFrames
    /**
     * Note: The name parameter has "_body_camera" concatenated to it within this method.
     * @param name - the name of the reference frame that will be returned
-    * @return
+    * @return                             private double[] yawPitchRoll = {0, 0, 0};
+
     */
    public static ReferenceFrame getCameraFrame(String name)
    {
@@ -155,7 +156,6 @@ public class ViconFrames
    public static void main(String[] args)
    {
       YoVariableRegistry registry = new YoVariableRegistry("ViconFrames");
-      DroneRobot robot = new DroneRobot("drone", true);
 
       DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
 
@@ -166,7 +166,7 @@ public class ViconFrames
          dynamicGraphicReferenceFrame.update();
       }
 
-      SimulationConstructionSet scs = new SimulationConstructionSet(robot);
+      SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("dummy"));
       scs.addVarList(registry.createVarList());
       dynamicGraphicObjectsListRegistry.addDynamicGraphicsObjectListsToSimulationConstructionSet(scs);
 
