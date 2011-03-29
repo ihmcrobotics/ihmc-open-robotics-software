@@ -19,28 +19,29 @@ public class ViconFrames
    private static ViconFrames viconFrames = new ViconFrames();
    private ViconClient viconClient;
    private static HashMap<String, ReferenceFrame> referenceFrames;
+   private static HashMap<String, DynamicGraphicReferenceFrame> dynamicReferenceFrames;
    private static Transform3D bodyToWorldTransform;
    private static Vector3d euler;
    private static Vector3d translation;
+   private static DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry;
+   private YoVariableRegistry registry;
 
    private ViconFrames()
    {
+      euler = new Vector3d();
+      translation = new Vector3d();
+      bodyToWorldTransform = new Transform3D();
+      dynamicGraphicObjectsListRegistry  = new DynamicGraphicObjectsListRegistry();
+      registry = new YoVariableRegistry("ViconFrames");
+
       try
       {
-         euler = new Vector3d();
-         translation = new Vector3d();
-         bodyToWorldTransform = new Transform3D();
          ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
          referenceFrames = new HashMap<String, ReferenceFrame>();
+         dynamicReferenceFrames = new HashMap<String, DynamicGraphicReferenceFrame>();
          referenceFrames.put("World", worldFrame);
          viconClient = ViconClient.getInstance();
          ArrayList<String> modelNames = viconClient.getAvailableModels();
-         // wait for vicon to be ready
-         while(viconClient.getPose(modelNames.get(0)) == null)
-         {
-            System.out.println("waiting...");
-            Thread.sleep(500);
-         }
 
          for (String modelName : modelNames)
          {
@@ -54,17 +55,22 @@ public class ViconFrames
                public void updateTransformToParent(Transform3D transformToParent)
                {
                   Pose pose = viconClient.getPose(bodyName);
-                  System.out.println("updating frame for " + bodyName + " at " + pose);
-//                  euler.set(Math.toRadians(pose.yAxisRotation), Math.toRadians(pose.xAxisRotation), Math.toRadians(pose.zAxisRotation));
-                  euler.set(0.0, 0.0, Math.toRadians(pose.zAxisRotation));
+                  if(pose == null)
+                  {
+                     pose = new Pose(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+                  }
+                  euler.set(pose.xAxisRotation, pose.yAxisRotation, pose.zAxisRotation);
                   bodyToWorldTransform.setEuler(euler);
-                  translation.set(pose.xPosition/1000.0, pose.yPosition/1000.0, pose.zPosition/1000.0);
+                  translation.set(pose.xPosition, pose.yPosition, pose.zPosition);
                   bodyToWorldTransform.setTranslation(translation);
                   transformToParent.set(bodyToWorldTransform);
+                  dynamicReferenceFrames.get(bodyName).update();
                }
             };
-            referenceFrame.update();
+            DynamicGraphicReferenceFrame dynamicGraphicReferenceFrame = new DynamicGraphicReferenceFrame(referenceFrame, registry, 1.0);
+            dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(referenceFrame.getName(), dynamicGraphicReferenceFrame);
             referenceFrames.put(bodyName, referenceFrame);
+            dynamicReferenceFrames.put(bodyName, dynamicGraphicReferenceFrame);
          }
       }
       catch (Exception e)
@@ -90,41 +96,42 @@ public class ViconFrames
     */
    public static void updateTransformToParent(String name, Transform3D transform3d)
    {
-      System.err.println("Who is calling this?");
-//      name.concat("_body");
+      ReferenceFrame referenceFrame = referenceFrames.get(name);
+      referenceFrame.update();
+//    name.concat("_body");
 //
-//      if (referenceFrames.containsKey(name))
-//      {
-//         // update it
-//         referenceFrames.get(name).setTransformToParent(transform3d);
-//      }
-//      else
-//      {
-//         // Create
-//         referenceFrames.put(name, new ReferenceFrame(name, worldFrame, transform3d, false, false, false)
-//         {
-//            private static final long serialVersionUID = -9160732749609839626L;
+//    if (referenceFrames.containsKey(name))
+//    {
+//       // update it
+//       referenceFrames.get(name).setTransformToParent(transform3d);
+//    }
+//    else
+//    {
+//       // Create
+//       referenceFrames.put(name, new ReferenceFrame(name, worldFrame, transform3d, false, false, false)
+//       {
+//          private static final long serialVersionUID = -9160732749609839626L;
 //
-//            public void updateTransformToParent(Transform3D transformToParent)
-//            {
-//               throw new RuntimeException("do not call the update method on vicon frames");
-//            }
-//         });
+//          public void updateTransformToParent(Transform3D transformToParent)
+//          {
+//             throw new RuntimeException("do not call the update method on vicon frames");
+//          }
+//       });
 //
-//         name.concat("_camera");
-//         Transform3D cameraTransform3d = new Transform3D();
-//         cameraTransform3d.setEuler(new Vector3d(0, 0, 0));
-//         cameraTransform3d.setTranslation(new Vector3d(.195, 0, .005));
-//         cameraFrames.put(name, new ReferenceFrame(name, referenceFrames.get(name), cameraTransform3d, false, false, false)
-//         {
-//            private static final long serialVersionUID = -9160732749609839626L;
+//       name.concat("_camera");
+//       Transform3D cameraTransform3d = new Transform3D();
+//       cameraTransform3d.setEuler(new Vector3d(0, 0, 0));
+//       cameraTransform3d.setTranslation(new Vector3d(.195, 0, .005));
+//       cameraFrames.put(name, new ReferenceFrame(name, referenceFrames.get(name), cameraTransform3d, false, false, false)
+//       {
+//          private static final long serialVersionUID = -9160732749609839626L;
 //
-//            public void updateTransformToParent(Transform3D transformToParent)
-//            {
-//               throw new RuntimeException("do not call the update method on vicon frames");
-//            }
-//         });
-//      }
+//          public void updateTransformToParent(Transform3D transformToParent)
+//          {
+//             throw new RuntimeException("do not call the update method on vicon frames");
+//          }
+//       });
+//    }
    }
 
    /**
@@ -141,7 +148,7 @@ public class ViconFrames
     * Note: The name parameter has "_body_camera" concatenated to it within this method.
     * @param name - the name of the reference frame that will be returned
     * @return                             private double[] yawPitchRoll = {0, 0, 0};
-
+    *
     */
    public static ReferenceFrame getCameraFrame(String name)
    {
@@ -153,22 +160,19 @@ public class ViconFrames
       return referenceFrames.values();
    }
 
+   public static DynamicGraphicObjectsListRegistry getDynamicGraphicObjectsListRegistry()
+   {
+      return dynamicGraphicObjectsListRegistry;
+   }
+
    public static void main(String[] args)
    {
-      YoVariableRegistry registry = new YoVariableRegistry("ViconFrames");
-
-      DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
-
-      for (ReferenceFrame referenceFrame : ViconFrames.getFrames())
-      {
-         DynamicGraphicReferenceFrame dynamicGraphicReferenceFrame = new DynamicGraphicReferenceFrame(referenceFrame, registry, 1.0);
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(referenceFrame.getName(), dynamicGraphicReferenceFrame);
-         dynamicGraphicReferenceFrame.update();
-      }
+      Collection<ReferenceFrame> frames = ViconFrames.getFrames();
+      System.out.println("size " + frames.size());
 
       SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("dummy"));
-      scs.addVarList(registry.createVarList());
-      dynamicGraphicObjectsListRegistry.addDynamicGraphicsObjectListsToSimulationConstructionSet(scs);
+//      scs.addVarList(registry.createVarList());
+      ViconFrames.getDynamicGraphicObjectsListRegistry().addDynamicGraphicsObjectListsToSimulationConstructionSet(scs);
 
       Thread scsThread = new Thread(scs);
       scsThread.start();
