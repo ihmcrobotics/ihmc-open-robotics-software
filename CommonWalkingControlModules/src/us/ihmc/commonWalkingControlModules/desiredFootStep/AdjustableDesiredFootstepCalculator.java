@@ -32,8 +32,6 @@ import com.yobotics.simulationconstructionset.util.ground.steppingStones.Steppin
 
 public class AdjustableDesiredFootstepCalculator implements DesiredFootstepCalculator
 {
-   private final boolean CHECK_STEP_INTO_CAPTURE_REGION = true; //false;
-
    private final YoVariableRegistry registry = new YoVariableRegistry("VelocityControlDesiredStepLocationCalculator");
 
    // Tunable robot-dependent parameters
@@ -56,6 +54,8 @@ public class AdjustableDesiredFootstepCalculator implements DesiredFootstepCalcu
    // Stepping Stones if the world isn't flat:
    private final SteppingStonesCaptureRegionIntersectionCalculator steppingStonesCaptureRegionIntersectionCalculator;
    
+   private final BooleanYoVariable projectIntoCaptureRegion = new BooleanYoVariable("projectIntoCaptureRegion", "Whether or not to project the step into the capture region", registry);
+
    // Footstep parameters
    private final DoubleYoVariable stepLength = new DoubleYoVariable("stepLength", "step length. [m]", registry);
    private final DoubleYoVariable stepWidth = new DoubleYoVariable("stepWidth", "step width. [m]", registry);
@@ -228,7 +228,7 @@ public class AdjustableDesiredFootstepCalculator implements DesiredFootstepCalcu
    private void computeFootstepOrientation(RobotSide swingLegSide, ReferenceFrame desiredHeadingFrame)
    {
       // Compute Step yaw
-      computeFootstepYaw(swingLegSide, desiredHeadingFrame);
+//      computeFootstepYaw(swingLegSide, desiredHeadingFrame);
 
       // Compute Step pitch
       computeFootstepPitch();
@@ -237,7 +237,9 @@ public class AdjustableDesiredFootstepCalculator implements DesiredFootstepCalcu
       computeFootstepRoll();
       
       // Create the desired footstep orientation using the parameters previously computed
-      desiredFootstepOrientation = new Orientation(desiredFootstepPosition.getReferenceFrame(), stepYaw.getDoubleValue(), stepPitch.getDoubleValue(), stepRoll.getDoubleValue());
+//      desiredFootstepOrientation = new Orientation(desiredFootstepPosition.getReferenceFrame(), stepYaw.getDoubleValue(), stepPitch.getDoubleValue(), stepRoll.getDoubleValue());
+      desiredFootstepOrientation = new Orientation(desiredHeadingFrame, stepYaw.getDoubleValue(), stepPitch.getDoubleValue(), stepRoll.getDoubleValue());
+      desiredFootstepOrientation.changeFrame(desiredFootstepPosition.getReferenceFrame());
    }
 
    private void computeFootstepYaw(RobotSide swingSide, ReferenceFrame desiredHeadingFrame)
@@ -277,7 +279,7 @@ public class AdjustableDesiredFootstepCalculator implements DesiredFootstepCalcu
       if (desiredFootstepPosition == null) return; // if not initialized at start of swing first, happens e.g. when balancing on one leg
 
       // Check if Step Position is inside the Capture Region, Otherwise project step position into the CR
-      if (!CHECK_STEP_INTO_CAPTURE_REGION)
+      if (!projectIntoCaptureRegion.getBooleanValue())
       {
          nextStepIsInsideCaptureRegion.set(false);
 
@@ -452,6 +454,8 @@ public class AdjustableDesiredFootstepCalculator implements DesiredFootstepCalcu
 
       kpStepLength.set(0.5);
       KpStepYaw.set(1.0);
+      
+      projectIntoCaptureRegion.set(true);
    }
 
    public void setupParametersForM2V2(double footBackwardOffset, double footForwardOffset, double footWidth)
@@ -475,6 +479,8 @@ public class AdjustableDesiredFootstepCalculator implements DesiredFootstepCalcu
       
       kpStepLength.set(0.5);
       KpStepYaw.set(0.5);
+      
+      projectIntoCaptureRegion.set(true);
    }
 
    public void computeStepWidthLinearProfile()
