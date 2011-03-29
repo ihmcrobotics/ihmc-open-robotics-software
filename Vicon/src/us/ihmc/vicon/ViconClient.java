@@ -4,9 +4,11 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.net.InetAddress;
+import java.net.NetworkInterface;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Vector;
 
@@ -44,13 +46,13 @@ public class ViconClient
       Thread thread = new Thread(poseListener);
       thread.start();
 
-      //      System.out.println("inet: " + InetAddress.getLocalHost());
-      //      Enumeration inets = NetworkInterface.getNetworkInterfaces();
-      //      while (inets.hasMoreElements())
-      //      {
-      //         System.out.println(inets.nextElement());
-      //         System.out.println("--------------------------------");
-      //      }
+      // System.out.println("inet: " + InetAddress.getLocalHost());
+      // Enumeration inets = NetworkInterface.getNetworkInterfaces();
+      // while (inets.hasMoreElements())
+      // {
+      // System.out.println(inets.nextElement());
+      // System.out.println("--------------------------------");
+      // }
 
       myIP = InetAddress.getLocalHost().getHostAddress();
       System.out.println("my ip is " + myIP);
@@ -65,7 +67,8 @@ public class ViconClient
       try
       {
          return (ArrayList<String>) viconServer.SendRequest(remoteRequest);
-      } catch (Exception e)
+      }
+      catch (Exception e)
       {
          e.printStackTrace();
       }
@@ -110,7 +113,8 @@ public class ViconClient
       try
       {
          viconServer.SendObject(remoteRequest);
-      } catch (Exception e)
+      }
+      catch (Exception e)
       {
          e.printStackTrace();
       }
@@ -133,7 +137,7 @@ public class ViconClient
             int updateCount = 0;
             int nonUpdate = 0;
             PoseReading lastPoseReading = null;
-            while ((client != null) && !client.isClosed())
+            while ((client != null) &&!client.isClosed())
             {
                Object obj = _ois.readObject();
 
@@ -141,7 +145,7 @@ public class ViconClient
                {
                   PoseReading poseReading = (PoseReading) obj;
 
-                  //                System.out.println(poseReading);
+                  // System.out.println(poseReading);
                   synchronized (mapModelToPoseReading)
                   {
                      mapModelToPoseReading.put(requestedModel, poseReading);
@@ -157,19 +161,20 @@ public class ViconClient
 
                   if (DEBUG)
                   {
-                     if ((lastPoseReading != null) && !poseReading.equals(lastPoseReading))
+                     if ((lastPoseReading != null) &&!poseReading.equals(lastPoseReading))
                      {
                         updateCount++;
                         long endTime = System.currentTimeMillis();
                         if ((endTime - startTime) > 1000)
                         {
                            System.out.println("PoseListener updating at " + (int) ((double) updateCount / ((double) (endTime - startTime) / 1000.0)) + " Hz: "
-                                 + "(" + nonUpdate + ") " + poseReading);
+                                              + "(" + nonUpdate + ") " + poseReading);
                            startTime = endTime;
                            updateCount = 0;
                            nonUpdate = 0;
                         }
-                     } else
+                     }
+                     else
                      {
                         System.out.println("***");
                         nonUpdate++;
@@ -177,14 +182,16 @@ public class ViconClient
 
                      lastPoseReading = poseReading;
                   }
-               } else
+               }
+               else
                {
                   System.out.println("ViconPoseListenerThread_: received obj which is not a Pose: " + obj.getClass());
                }
 
                Thread.sleep(1);
             }
-         } catch (Exception xcp)
+         }
+         catch (Exception xcp)
          {
             if (DEBUG)
                System.out.println("ViconPoseListenerThread_ done");
@@ -197,18 +204,35 @@ public class ViconClient
             serverSocket.close();
             if (DEBUG)
                System.out.println(".ViconPoseListenerThread_: ServerAccept Thread has Stopped.");
-         } catch (IOException xcp)
+         }
+         catch (IOException xcp)
          {
             xcp.printStackTrace();
          }
       }
    }
 
+
    public static void main(String[] args)
    {
+//      try
+//      {
+//         System.out.println("inet: " + InetAddress.getLocalHost());
+//         Enumeration inets = NetworkInterface.getNetworkInterfaces();
+//         while (inets.hasMoreElements())
+//         {
+//            System.out.println(inets.nextElement());
+//            System.out.println("--------------------------------");
+//         }
+//      }
+//      catch (Exception e)
+//      {
+//         e.printStackTrace();
+//      }
+
       String ip = "10.4.1.100";
 
-      //    String ip = "10.2.36.1";
+      // String ip = "10.2.36.1";
 
       for (int i = 0; i < args.length - 1; i++)
       {
@@ -250,7 +274,8 @@ public class ViconClient
 
             Thread.sleep(1);
          }
-      } catch (Exception ex1)
+      }
+      catch (Exception ex1)
       {
          ex1.printStackTrace();
       }
@@ -261,7 +286,8 @@ public class ViconClient
          try
          {
             Thread.currentThread().wait();
-         } catch (InterruptedException ex)
+         }
+         catch (InterruptedException ex)
          {
             ex.printStackTrace();
          }
