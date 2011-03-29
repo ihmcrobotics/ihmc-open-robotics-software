@@ -24,11 +24,9 @@ public class ViconClient
    private boolean DEBUG = false;
    private static ViconClient viconSingleton;
    protected RemoteConnection viconServer;
-   private HashMap<String, PoseReading> mapModelToPoseReading = new HashMap<String, PoseReading>();
-   private String requestedModel;
+   private final HashMap<String, PoseReading> mapModelToPoseReading = new HashMap<String, PoseReading>();
    private String myIP;
    private int myPort = 4444;
-   private long desiredUpdateRateInMillis = 5;
 
    private ViconClient(String ip) throws Exception
    {
@@ -49,9 +47,8 @@ public class ViconClient
 
       myIP = InetAddress.getLocalHost().getHostAddress();
       System.out.println("my ip is " + myIP);
-      registerPoseListener(myIP, new Integer(myPort), availableModels.get(0), new Long(desiredUpdateRateInMillis));
-      System.out.println(" should be listening for " + availableModels.get(0));
-      System.out.println("***" + getPose(availableModels.get(0)));
+
+      registerPoseListener(myIP, new Integer(myPort));
    }
 
    public static ViconClient getInstance() throws Exception
@@ -104,14 +101,11 @@ public class ViconClient
 
    }
 
-   public void registerPoseListener(String host, Integer port, String modelName, Long updateRateInMillis)
+   public void registerPoseListener(String host, Integer port)
    {
-      requestedModel = modelName;
       Vector<Serializable> parameters = new Vector<Serializable>();
       parameters.add(host);
       parameters.add(port);
-      parameters.add(modelName);
-      parameters.add(updateRateInMillis);
       RemoteRequest remoteRequest = new RemoteRequest("registerPoseListener", parameters);
       try
       {
@@ -148,23 +142,20 @@ public class ViconClient
                {
                   PoseReading poseReading = (PoseReading) obj;
 
-                  // System.out.println(poseReading);
                   synchronized (mapModelToPoseReading)
                   {
-                     mapModelToPoseReading.put(requestedModel, poseReading);
+                     mapModelToPoseReading.put(poseReading.getModelName(), poseReading);
                      Pose pose = poseReading.getPose();
                      Transform3D transform3d = new Transform3D();
                      transform3d.setEuler(new Vector3d(pose.xAxisRotation, pose.yAxisRotation, pose.zAxisRotation));
                      transform3d.setTranslation(new Vector3d(pose.xPosition, pose.yPosition, pose.zPosition));
 
-                     ViconFrames.updateTransformToParent(requestedModel, transform3d);
+                     ViconFrames.updateTransformToParent(poseReading.getModelName(), transform3d);
                   }
-
-                  // System.out.println(poseReading);
 
                   if (DEBUG)
                   {
-                     if ((lastPoseReading != null) &&!poseReading.equals(lastPoseReading))
+                     if ((lastPoseReading != null) && !poseReading.equals(lastPoseReading))
                      {
                         updateCount++;
                         long endTime = System.currentTimeMillis();
@@ -218,20 +209,20 @@ public class ViconClient
 
    public static void main(String[] args)
    {
-//      try
-//      {
-//         System.out.println("inet: " + InetAddress.getLocalHost());
-//         Enumeration inets = NetworkInterface.getNetworkInterfaces();
-//         while (inets.hasMoreElements())
-//         {
-//            System.out.println(inets.nextElement());
-//            System.out.println("--------------------------------");
-//         }
-//      }
-//      catch (Exception e)
-//      {
-//         e.printStackTrace();
-//      }
+//    try
+//    {
+//       System.out.println("inet: " + InetAddress.getLocalHost());
+//       Enumeration inets = NetworkInterface.getNetworkInterfaces();
+//       while (inets.hasMoreElements())
+//       {
+//          System.out.println(inets.nextElement());
+//          System.out.println("--------------------------------");
+//       }
+//    }
+//    catch (Exception e)
+//    {
+//       e.printStackTrace();
+//    }
 
       String ip = "10.4.1.100";
 
@@ -256,28 +247,29 @@ public class ViconClient
          int updateCount = 0;
          PoseReading lastPoseReading = null;
 
-         while (true)
-         {
-            PoseReading poseReading = client.getPoseReading(modelName);
-            if ((lastPoseReading != null) && (!poseReading.equals(lastPoseReading)))
-            {
-               updateCount++;
-
-               long endTime = System.currentTimeMillis();
-               if ((endTime - startTime) > 300)
-               {
-                  double dt = (endTime - startTime) / 1000.0;
-                  System.out.println(poseReading.getPose());
-//                  System.out.println(modelName + " rate = " + (int) (updateCount / dt) + ": " + pose);
-                  startTime = endTime;
-                  updateCount = 0;
-               }
-            }
-
-            lastPoseReading = poseReading;
-
-            Thread.sleep(1);
-         }
+//         while (true)
+//         {
+//            PoseReading poseReading = client.getPoseReading(modelName);
+//            if ((lastPoseReading != null) && (!poseReading.equals(lastPoseReading)))
+//            {
+//               updateCount++;
+//
+//               long endTime = System.currentTimeMillis();
+//               if ((endTime - startTime) > 300)
+//               {
+//                  double dt = (endTime - startTime) / 1000.0;
+//                  System.out.println(poseReading.getPose());
+//
+////                System.out.println(modelName + " rate = " + (int) (updateCount / dt) + ": " + pose);
+//                  startTime = endTime;
+//                  updateCount = 0;
+//               }
+//            }
+//
+//            lastPoseReading = poseReading;
+//
+//            Thread.sleep(1);
+//         }
       }
       catch (Exception ex1)
       {

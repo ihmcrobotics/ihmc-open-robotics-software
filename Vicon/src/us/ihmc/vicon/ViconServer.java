@@ -84,18 +84,19 @@ public class ViconServer extends ViconJavaInterface
       return pose;
    }
 
-   public void registerPoseListener(String host, Integer port, String modelName, Long updatePeriodInMillis)
+   public void registerPoseListener(String host, Integer port)
    {
-      PoseListener poseListener = new PoseListener(host, port, modelName, updatePeriodInMillis, this);
+      System.out.println("client connecting from " + host + ":" + port);
+      PoseListener poseListener = new PoseListener(host, port, this);
       Thread thread = new Thread(poseListener);
       thread.start();
 
-      listeners.put(modelName, poseListener);
+      listeners.put(host + ":" + port, poseListener);
    }
 
-   public void stopListener(String modelName)
+   public void stopListener(String hostColonPort)
    {
-      PoseListener poseListener = listeners.get(modelName);
+      PoseListener poseListener = listeners.get(hostColonPort);
       poseListener.stopListening();
    }
 
@@ -171,34 +172,34 @@ public class ViconServer extends ViconJavaInterface
             {
                Pose viconPose = ViconGetBodyEulerAngles(modelName);
                Pose pose = new Pose(viconPose.xPosition / 1000.0f, viconPose.yPosition / 1000.0f, viconPose.zPosition / 1000.0f, viconPose.yAxisRotation,
-                                    -viconPose.xAxisRotation, (float)MathTools.trimAngleMinusPiToPi(viconPose.zAxisRotation + (Math.PI/2.0)));
+                                    -viconPose.xAxisRotation, (float) MathTools.trimAngleMinusPiToPi(viconPose.zAxisRotation + (Math.PI / 2.0)));
 
                synchronized (modelPoses)
                {
                   PoseReading lastPoseReading = modelPoses.get(modelName);
 
-                  long currentTime = System.currentTimeMillis();
-                  if ((lastPoseReading != null) && (currentTime - lastVelocityUpdate) > velocityUpdateRate)
-                  {
-                     // compute velocity
-                     double lastTimeStamp = lastPoseReading.getTimestamp();
-                     velocityUpdateRate = (timestamp - lastTimeStamp) / 10000000.0;
-                     xDifferentiator.update(pose.xPosition);
-                     yDifferentiator.update(pose.yPosition);
-                     zDifferentiator.update(pose.zPosition);
-                     double xVelocity = xDifferentiator.getDoubleValue();
-                     double yVelocity = yDifferentiator.getDoubleValue();
-                     double zVelocity = zDifferentiator.getDoubleValue();
-                     xVelocityFiltered.update(xVelocity);
-                     yVelocityFiltered.update(yVelocity);
-                     zVelocityFiltered.update(zVelocity);
-
-//                   System.out.println(timestamp + ", " + pose + ", " + xVelocityFiltered.getDoubleValue() + ", " + yVelocityFiltered.getDoubleValue() + ", " + zVelocityFiltered.getDoubleValue() + ", " +alpha);
-                     lastVelocityUpdate = currentTime;
-                  }
-
-                  Vector3d velocity = new Vector3d(xVelocityFiltered.getDoubleValue(), yVelocityFiltered.getDoubleValue(), zVelocityFiltered.getDoubleValue());
-                  PoseReading poseReading = new PoseReading(modelName, timestamp, pose, velocity);
+//                long currentTime = System.currentTimeMillis();
+//                if ((lastPoseReading != null) && (currentTime - lastVelocityUpdate) > velocityUpdateRate)
+//                {
+//                   // compute velocity
+//                   double lastTimeStamp = lastPoseReading.getTimestamp();
+//                   velocityUpdateRate = (timestamp - lastTimeStamp) / 10000000.0;
+//                   xDifferentiator.update(pose.xPosition);
+//                   yDifferentiator.update(pose.yPosition);
+//                   zDifferentiator.update(pose.zPosition);
+//                   double xVelocity = xDifferentiator.getDoubleValue();
+//                   double yVelocity = yDifferentiator.getDoubleValue();
+//                   double zVelocity = zDifferentiator.getDoubleValue();
+//                   xVelocityFiltered.update(xVelocity);
+//                   yVelocityFiltered.update(yVelocity);
+//                   zVelocityFiltered.update(zVelocity);
+//
+//                 System.out.println(timestamp + ", " + pose + ", " + xVelocityFiltered.getDoubleValue() + ", " + yVelocityFiltered.getDoubleValue() + ", " + zVelocityFiltered.getDoubleValue() + ", " +alpha);
+//                   lastVelocityUpdate = currentTime;
+//                }
+//
+//                Vector3d velocity = new Vector3d(xVelocityFiltered.getDoubleValue(), yVelocityFiltered.getDoubleValue(), zVelocityFiltered.getDoubleValue());
+                  PoseReading poseReading = new PoseReading(modelName, timestamp, pose, new Vector3d(0.0, 0.0, 0.0));
 
                   if (lastPoseReading == null)
                   {
@@ -257,18 +258,22 @@ public class ViconServer extends ViconJavaInterface
       try
       {
          ViconServer viconserver = new ViconServer(ip);
-//         ArrayList<String> modelNames = viconserver.getAvailableModels();
-//         while (true)
-//         {
-//            System.out.println(viconserver.getPose(modelNames.get(0)));
-//            Thread.sleep(500);
-//         }
+
+//       ArrayList<String> modelNames = viconserver.getAvailableModels();
+//       while (true)
+//       {
+//          for(String modelName: modelNames)
+//          {
+//             System.out.println(modelName + ": " + viconserver.getPose(modelName));
+//          }
+//          Thread.sleep(500);
+//       }
 
          // wait around until terminated
-       synchronized (Thread.currentThread())
-       {
-          Thread.currentThread().wait();
-       }
+         synchronized (Thread.currentThread())
+         {
+            Thread.currentThread().wait();
+         }
       }
       catch (Exception e)
       {

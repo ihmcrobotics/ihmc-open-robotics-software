@@ -1,49 +1,34 @@
 package us.ihmc.vicon;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
+import us.ihmc.utilities.math.geometry.FramePoint;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
-
-import com.yobotics.simulationconstructionset.Robot;
-import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicReferenceFrame;
-import us.ihmc.utilities.math.geometry.FramePoint;
-import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 
 public class ViconFrames
 {
-   private static ViconFrames viconFrames = new ViconFrames();
-   private ViconClient viconClient;
-   private static HashMap<String, ReferenceFrame> referenceFrames;
-   private static HashMap<String, DynamicGraphicReferenceFrame> dynamicReferenceFrames;
-   private static Transform3D bodyToWorldTransform;
-   private static Vector3d euler;
-   private static Vector3d translation;
-   private static DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry;
-   private YoVariableRegistry registry;
+   protected static ViconFrames viconFrames = new ViconFrames();
+   protected ViconClient viconClient;
+   protected static HashMap<String, ReferenceFrame> referenceFrames;
+   protected static Transform3D bodyToWorldTransform;
+   protected static Vector3d euler;
+   protected static Vector3d translation;
 
-   private ViconFrames()
+   protected ViconFrames()
    {
       euler = new Vector3d();
       translation = new Vector3d();
       bodyToWorldTransform = new Transform3D();
-      dynamicGraphicObjectsListRegistry  = new DynamicGraphicObjectsListRegistry();
-      registry = new YoVariableRegistry("ViconFrames");
 
       try
       {
          ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
          referenceFrames = new HashMap<String, ReferenceFrame>();
-         dynamicReferenceFrames = new HashMap<String, DynamicGraphicReferenceFrame>();
-         DynamicGraphicReferenceFrame dynamicGraphicReferenceFrame = new DynamicGraphicReferenceFrame(worldFrame, registry, 1.0);
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("World", dynamicGraphicReferenceFrame);
-         dynamicReferenceFrames.put("World", dynamicGraphicReferenceFrame);
          referenceFrames.put("World", worldFrame);
          viconClient = ViconClient.getInstance();
          ArrayList<String> modelNames = viconClient.getAvailableModels();
@@ -60,22 +45,19 @@ public class ViconFrames
                public void updateTransformToParent(Transform3D transformToParent)
                {
                   Pose pose = viconClient.getPose(bodyName);
-                  if(pose == null)
+                  if (pose == null)
                   {
                      pose = new Pose(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
                   }
+
                   euler.set(pose.xAxisRotation, pose.yAxisRotation, pose.zAxisRotation);
                   bodyToWorldTransform.setEuler(euler);
                   translation.set(pose.xPosition, pose.yPosition, pose.zPosition);
                   bodyToWorldTransform.setTranslation(translation);
                   transformToParent.set(bodyToWorldTransform);
-                  dynamicReferenceFrames.get(bodyName).update();
                }
             };
-            dynamicGraphicReferenceFrame = new DynamicGraphicReferenceFrame(referenceFrame, registry, 1.0);
-            dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(referenceFrame.getName(), dynamicGraphicReferenceFrame);
             referenceFrames.put(bodyName, referenceFrame);
-            dynamicReferenceFrames.put(bodyName, dynamicGraphicReferenceFrame);
          }
       }
       catch (Exception e)
@@ -84,7 +66,7 @@ public class ViconFrames
       }
    }
 
-   private String replaceColonWithUnderscore(String string)
+   protected String replaceColonWithUnderscore(String string)
    {
       return string.replace(":", "_");
    }
@@ -102,7 +84,10 @@ public class ViconFrames
    public static void updateTransformToParent(String name, Transform3D transform3d)
    {
       ReferenceFrame referenceFrame = referenceFrames.get(name);
-      referenceFrame.update();
+      if (referenceFrame != null)
+      {
+         referenceFrame.update();
+      }
    }
 
    /**
@@ -120,25 +105,14 @@ public class ViconFrames
       return referenceFrames.values();
    }
 
-   public static DynamicGraphicObjectsListRegistry getDynamicGraphicObjectsListRegistry()
-   {
-      return dynamicGraphicObjectsListRegistry;
-   }
-
    public static void main(String[] args)
    {
       Collection<ReferenceFrame> frames = ViconFrames.getFrames();
       System.out.println("size " + frames.size());
 
-      SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("dummy"));
-      ViconFrames.getDynamicGraphicObjectsListRegistry().addDynamicGraphicsObjectListsToSimulationConstructionSet(scs);
-
-      Thread scsThread = new Thread(scs);
-      scsThread.start();
-
       try
       {
-         Thread.sleep(5000);
+         Thread.sleep(3000);
          ViconClient viconClient = ViconClient.getInstance();
          ArrayList<String> modelNames = viconClient.getAvailableModels();
          ReferenceFrame drone = ViconFrames.getBodyFrame(modelNames.get(0));

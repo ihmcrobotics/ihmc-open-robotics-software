@@ -1,8 +1,11 @@
 package us.ihmc.vicon;
 
+import java.awt.geom.Arc2D;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Last updated by: mjohnson
@@ -10,19 +13,16 @@ import java.net.Socket;
  */
 public class PoseListener implements Runnable
 {
-   private String modelName;
-   private long updateRateInMillis;
    private ViconServer viconServer;
    private String host;
    private int port;
    private boolean DONE = false;
+   private HashMap<String, PoseReading> lastPoseReadings = new HashMap<String, PoseReading>();
 
-   public PoseListener(String host, Integer port, String modelName, Long updateRateInMillis, ViconServer viconServer)
+   public PoseListener(String host, Integer port, ViconServer viconServer)
    {
       this.host = host;
       this.port = port;
-      this.modelName = modelName;
-      this.updateRateInMillis = updateRateInMillis;
       this.viconServer = viconServer;
    }
 
@@ -32,33 +32,31 @@ public class PoseListener implements Runnable
       {
          Socket socket = new Socket(host, port);
          ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
-         PoseReading lastPoseReading = null;
-         int updateCount = 0;
-         long startTime = System.currentTimeMillis();
 
          while (!DONE)
          {
-            PoseReading poseReading = viconServer.getReading(modelName);
-
-            if ((lastPoseReading != null) && !poseReading.equals(lastPoseReading))
+            ArrayList<String> modelNames = viconServer.getAvailableModels();
+            for (String modelName : modelNames)
             {
-               oos.writeObject(poseReading);
-               oos.flush();
-               oos.reset();
-               updateCount++;
+               PoseReading poseReading = viconServer.getReading(modelName);
+               PoseReading lastPoseReading = lastPoseReadings.get(modelName);
+               if (lastPoseReading == null)
+               {
+                  lastPoseReadings.put(modelName, poseReading);
+               }
+               else
+               {
+                  if (!poseReading.equals(lastPoseReading))
+                  {
+                     oos.writeObject(poseReading);
+                     oos.flush();
+                     oos.reset();
+                     lastPoseReadings.put(modelName, poseReading);
+                  }
+               }
             }
 
-            long endTime = System.currentTimeMillis();
-            if((endTime-startTime) > 1000)
-            {
-               System.out.println("updating listener for " + modelName + " at " +(int)(updateCount /(((double)(endTime-startTime))/1000.0)) + " Hz");
-               updateCount = 0;
-               startTime = endTime;
-            }
-
-            lastPoseReading = poseReading;
-
-            Thread.sleep(updateRateInMillis);
+            Thread.sleep(10);
          }
 
          System.out.println("PoseListener: closing socket...");
@@ -66,7 +64,7 @@ public class PoseListener implements Runnable
       }
       catch (Exception e)
       {
-         System.out.println("PoseListener for " + modelName + " stopped (" + host + ":" + port + ")");
+         System.out.println("PoseListener stopped (" + host + ":" + port + ")");
       }
    }
 
