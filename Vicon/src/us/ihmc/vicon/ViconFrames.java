@@ -29,7 +29,6 @@ public class ViconFrames
 
    protected void initialize()
    {
-      System.out.println("VF initialize");
       euler = new Vector3d();
       translation = new Vector3d();
       bodyToWorldTransform = new Transform3D();
