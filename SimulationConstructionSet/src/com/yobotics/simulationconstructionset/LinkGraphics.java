@@ -417,8 +417,7 @@ public class LinkGraphics
          else if (leaf instanceof Light)
          {
             // System.out.println("leaf is a light");
-            @SuppressWarnings("unused")
-            Light light = (Light) leaf;
+            @SuppressWarnings("unused") Light light = (Light) leaf;
          }
 
          // else System.out.println("leaf is NOT a Shape3D");
@@ -1068,6 +1067,12 @@ public class LinkGraphics
          linkGraphicsDefinition.addInstruction(new LinkGraphicsAdd3DSFile(fileName));
    }
 
+
+   public void addCoordinateSystem(double length)
+   {
+      addCoordinateSystem(length, YoAppearance.Black());
+   }
+
    /**
     * Creates a graphical representation of the x, y, and z axis of the current coordinate
     * system centered at its origin.  In the image below red, white and blue represent the
@@ -1076,7 +1081,7 @@ public class LinkGraphics
     *
     * @param length the length in meters of each axis arrow.
     */
-   public void addCoordinateSystem(double length)
+   public void addCoordinateSystem(double length, Appearance arrowAppearance)
    {
       Geometry bar = YoGeometry.Cylinder(length / 32.0, length, 15);
       Geometry arrow = YoGeometry.Cone(length / 10.0, length / 15.0, 15);
@@ -1097,9 +1102,9 @@ public class LinkGraphics
       TransformGroup transZGroup2 = translateTransformGroup(0.0, 0.0, length);
       TransformGroup transZGroup3 = translateTransformGroup(0.0, 0.0, length);
 
-      addShapeToGroup(arrow, YoAppearance.Black(), transZGroup1);
-      addShapeToGroup(arrow, YoAppearance.Black(), transZGroup2);
-      addShapeToGroup(arrow, YoAppearance.Black(), transZGroup3);
+      addShapeToGroup(arrow, arrowAppearance, transZGroup1);
+      addShapeToGroup(arrow, arrowAppearance, transZGroup2);
+      addShapeToGroup(arrow, arrowAppearance, transZGroup3);
 
       base.addChild(transZGroup1);
       xAxisGroup.addChild(transZGroup2);
@@ -1733,7 +1738,7 @@ public class LinkGraphics
 
    public void createInertiaEllipsoid(Link link, Appearance appearance)
    {
-//      LinkGraphics linkGraphics = link.getLinkGraphics();
+//    LinkGraphics linkGraphics = link.getLinkGraphics();
       this.identity();
       Vector3d comOffSet = new Vector3d();
       link.getComOffset(comOffSet);
@@ -1746,8 +1751,7 @@ public class LinkGraphics
 
       double[] ellipsoidRadii = getEllipsoidRadii(principalMomentsOfInertia, mass);
 
-      this.addEllipsoid(ellipsoidRadii[0], ellipsoidRadii[1],
-                                ellipsoidRadii[2], appearance);
+      this.addEllipsoid(ellipsoidRadii[0], ellipsoidRadii[1], ellipsoidRadii[2], appearance);
    }
 
    /**
