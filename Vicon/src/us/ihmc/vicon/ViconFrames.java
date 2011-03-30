@@ -22,8 +22,6 @@ public class ViconFrames
 
    protected ViconFrames()
    {
-      System.out.println("VF constructor");
-
       initialize();
    }
 
