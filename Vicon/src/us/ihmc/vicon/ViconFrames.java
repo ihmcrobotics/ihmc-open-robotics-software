@@ -12,7 +12,8 @@ import java.util.HashMap;
 
 public class ViconFrames
 {
-   protected static ViconFrames viconFrames = new ViconFrames();
+   protected static ViconFrames viconFramesSingleton;
+   protected static final String worldFrameName = "ViconWorld";
    protected ViconClient viconClient;
    protected static HashMap<String, ReferenceFrame> referenceFrames;
    protected static Transform3D bodyToWorldTransform;
@@ -21,15 +22,25 @@ public class ViconFrames
 
    protected ViconFrames()
    {
+      System.out.println("VF constructor");
+
+      initialize();
+   }
+
+   protected void initialize()
+   {
+      System.out.println("VF initialize");
       euler = new Vector3d();
       translation = new Vector3d();
       bodyToWorldTransform = new Transform3D();
 
       try
       {
-         ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+         ReferenceFrame viconWorldFrame = ReferenceFrame.constructAWorldFrame(worldFrameName);
          referenceFrames = new HashMap<String, ReferenceFrame>();
-         referenceFrames.put("World", worldFrame);
+         referenceFrames.put(viconWorldFrame.getName(), viconWorldFrame);
+         System.out.println("adding frame for " + viconWorldFrame.getName());
+
          viconClient = ViconClient.getInstance();
          ArrayList<String> modelNames = viconClient.getAvailableModels();
 
@@ -38,7 +49,7 @@ public class ViconFrames
             final String bodyName = modelName;
             System.out.println("adding frame for " + modelName);
             Transform3D transform3d = new Transform3D();
-            ReferenceFrame referenceFrame = new ReferenceFrame(replaceColonWithUnderscore(bodyName), worldFrame, transform3d, false, false, false)
+            ReferenceFrame referenceFrame = new ReferenceFrame(replaceColonWithUnderscore(bodyName), viconWorldFrame, transform3d, false, false, false)
             {
                private static final long serialVersionUID = -9160732749609839626L;
 
@@ -59,6 +70,8 @@ public class ViconFrames
             };
             referenceFrames.put(bodyName, referenceFrame);
          }
+
+         viconClient.attachViconFrames(this);
       }
       catch (Exception e)
       {
@@ -66,22 +79,32 @@ public class ViconFrames
       }
    }
 
+   public static ViconFrames getInstance()
+   {
+      if (viconFramesSingleton == null)
+      {
+         viconFramesSingleton = new ViconFrames();
+      }
+
+      return viconFramesSingleton;
+   }
+
+   protected ArrayList<String> getAvailableModels()
+   {
+      return viconClient.getAvailableModels();
+   }
+
    protected String replaceColonWithUnderscore(String string)
    {
       return string.replace(":", "_");
    }
 
-   public static ReferenceFrame getWorldFrame()
+   public ReferenceFrame getViconWorldFrame()
    {
-      return referenceFrames.get("World");
+      return referenceFrames.get(worldFrameName);
    }
 
-   /**
-    * Note: The name parameter has "_body" concatenated to it within this method. There is also a camera frame that is created and given the name: name+"_body_camera".
-    * @param name - the name of the reference frame that is being updated
-    * @param transform3d - the transform from the parent to the named reference frame
-    */
-   public static void updateTransformToParent(String name, Transform3D transform3d)
+   public void updateTransformToParent(String name)
    {
       ReferenceFrame referenceFrame = referenceFrames.get(name);
       if (referenceFrame != null)
@@ -90,38 +113,32 @@ public class ViconFrames
       }
    }
 
-   /**
-    * Note: The name parameter has "_body" concatenated to it within this method.
-    * @param name - the name of the reference frame that will be returned
-    * @return
-    */
-   public static ReferenceFrame getBodyFrame(String name)
+   public ReferenceFrame getBodyFrame(String name)
    {
       return referenceFrames.get(name);
    }
 
-   public static Collection<ReferenceFrame> getFrames()
+   public Collection<ReferenceFrame> getFrames()
    {
       return referenceFrames.values();
    }
 
    public static void main(String[] args)
    {
-      Collection<ReferenceFrame> frames = ViconFrames.getFrames();
-      System.out.println("size " + frames.size());
+      ViconFrames viconFrames = ViconFrames.getInstance();
 
       try
       {
          Thread.sleep(3000);
-         ViconClient viconClient = ViconClient.getInstance();
-         ArrayList<String> modelNames = viconClient.getAvailableModels();
-         ReferenceFrame drone = ViconFrames.getBodyFrame(modelNames.get(0));
+         ArrayList<String> modelNames = viconFrames.getAvailableModels();
+         ReferenceFrame drone = viconFrames.getBodyFrame(modelNames.get(0));
 
          FramePoint point = new FramePoint(drone);
-         System.out.println(point.changeFrameCopy(ViconFrames.getWorldFrame()));
+         System.out.println(point);
+         System.out.println(point.changeFrameCopy(viconFrames.getViconWorldFrame()));
 
          point = new FramePoint(drone, new Point3d(1.0, 0.0, 0.0));
-         System.out.println(point.changeFrameCopy(ViconFrames.getWorldFrame()));
+         System.out.println(point.changeFrameCopy(viconFrames.getViconWorldFrame()));
       }
       catch (Exception e)
       {
