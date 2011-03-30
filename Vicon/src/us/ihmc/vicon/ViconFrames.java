@@ -20,63 +20,56 @@ public class ViconFrames
    protected static Vector3d euler;
    protected static Vector3d translation;
 
-   protected ViconFrames()
+   protected ViconFrames() throws Exception
    {
       initialize();
    }
 
-   protected void initialize()
+   protected void initialize() throws Exception
    {
       euler = new Vector3d();
       translation = new Vector3d();
       bodyToWorldTransform = new Transform3D();
 
-      try
+      ReferenceFrame viconWorldFrame = ReferenceFrame.constructAWorldFrame(worldFrameName);
+      referenceFrames = new HashMap<String, ReferenceFrame>();
+      referenceFrames.put(viconWorldFrame.getName(), viconWorldFrame);
+      System.out.println("adding frame for " + viconWorldFrame.getName());
+
+      viconClient = ViconClient.getInstance();
+      ArrayList<String> modelNames = viconClient.getAvailableModels();
+
+      for (String modelName : modelNames)
       {
-         ReferenceFrame viconWorldFrame = ReferenceFrame.constructAWorldFrame(worldFrameName);
-         referenceFrames = new HashMap<String, ReferenceFrame>();
-         referenceFrames.put(viconWorldFrame.getName(), viconWorldFrame);
-         System.out.println("adding frame for " + viconWorldFrame.getName());
-
-         viconClient = ViconClient.getInstance();
-         ArrayList<String> modelNames = viconClient.getAvailableModels();
-
-         for (String modelName : modelNames)
+         final String bodyName = modelName;
+         System.out.println("adding frame for " + modelName);
+         Transform3D transform3d = new Transform3D();
+         ReferenceFrame referenceFrame = new ReferenceFrame(replaceColonWithUnderscore(bodyName), viconWorldFrame, transform3d, false, false, false)
          {
-            final String bodyName = modelName;
-            System.out.println("adding frame for " + modelName);
-            Transform3D transform3d = new Transform3D();
-            ReferenceFrame referenceFrame = new ReferenceFrame(replaceColonWithUnderscore(bodyName), viconWorldFrame, transform3d, false, false, false)
+            private static final long serialVersionUID = -9160732749609839626L;
+
+            public void updateTransformToParent(Transform3D transformToParent)
             {
-               private static final long serialVersionUID = -9160732749609839626L;
-
-               public void updateTransformToParent(Transform3D transformToParent)
+               Pose pose = viconClient.getPose(bodyName);
+               if (pose == null)
                {
-                  Pose pose = viconClient.getPose(bodyName);
-                  if (pose == null)
-                  {
-                     pose = new Pose(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
-                  }
-
-                  euler.set(pose.xAxisRotation, pose.yAxisRotation, pose.zAxisRotation);
-                  bodyToWorldTransform.setEuler(euler);
-                  translation.set(pose.xPosition, pose.yPosition, pose.zPosition);
-                  bodyToWorldTransform.setTranslation(translation);
-                  transformToParent.set(bodyToWorldTransform);
+                  pose = new Pose(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
                }
-            };
-            referenceFrames.put(bodyName, referenceFrame);
-         }
 
-         viconClient.attachViconFrames(this);
+               euler.set(pose.xAxisRotation, pose.yAxisRotation, pose.zAxisRotation);
+               bodyToWorldTransform.setEuler(euler);
+               translation.set(pose.xPosition, pose.yPosition, pose.zPosition);
+               bodyToWorldTransform.setTranslation(translation);
+               transformToParent.set(bodyToWorldTransform);
+            }
+         };
+         referenceFrames.put(bodyName, referenceFrame);
       }
-      catch (Exception e)
-      {
-         e.printStackTrace();
-      }
+
+      viconClient.attachViconFrames(this);
    }
 
-   public static ViconFrames getInstance()
+   public static ViconFrames getInstance() throws Exception
    {
       if (viconFramesSingleton == null)
       {
@@ -122,10 +115,9 @@ public class ViconFrames
 
    public static void main(String[] args)
    {
-      ViconFrames viconFrames = ViconFrames.getInstance();
-
       try
       {
+         ViconFrames viconFrames = ViconFrames.getInstance();
          Thread.sleep(3000);
          ArrayList<String> modelNames = viconFrames.getAvailableModels();
          ReferenceFrame drone = viconFrames.getBodyFrame(modelNames.get(0));
