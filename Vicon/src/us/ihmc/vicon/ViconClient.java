@@ -252,29 +252,29 @@ public class ViconClient
          int updateCount = 0;
          PoseReading lastPoseReading = null;
 
-//       while (true)
-//       {
-//          PoseReading poseReading = client.getPoseReading(modelName);
-//          if ((lastPoseReading != null) && (!poseReading.equals(lastPoseReading)))
-//          {
-//             updateCount++;
-//
-//             long endTime = System.currentTimeMillis();
-//             if ((endTime - startTime) > 300)
-//             {
-//                double dt = (endTime - startTime) / 1000.0;
-//                System.out.println(poseReading.getPose());
-//
-////              System.out.println(modelName + " rate = " + (int) (updateCount / dt) + ": " + pose);
-//                startTime = endTime;
-//                updateCount = 0;
-//             }
-//          }
-//
-//          lastPoseReading = poseReading;
-//
-//          Thread.sleep(1);
-//       }
+       while (true)
+       {
+          PoseReading poseReading = client.getPoseReading(modelName);
+          if ((lastPoseReading != null) && (!poseReading.equals(lastPoseReading)))
+          {
+             updateCount++;
+
+             long endTime = System.currentTimeMillis();
+             if ((endTime - startTime) > 300)
+             {
+                double dt = (endTime - startTime) / 1000.0;
+                System.out.println(poseReading.getPose());
+
+//              System.out.println(modelName + " rate = " + (int) (updateCount / dt) + ": " + pose);
+                startTime = endTime;
+                updateCount = 0;
+             }
+          }
+
+          lastPoseReading = poseReading;
+
+          Thread.sleep(1);
+       }
       }
       catch (Exception ex1)
       {
