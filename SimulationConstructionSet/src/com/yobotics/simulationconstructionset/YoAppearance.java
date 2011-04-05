@@ -386,6 +386,15 @@ public class YoAppearance
    {
       return RGBColor(0.0f, 1.0f, 1.0f);
    }
+   
+   public static Appearance Transparent()
+   {
+      Appearance ret = new Appearance();
+      TransparencyAttributes ta = new TransparencyAttributes();
+      ta.setTransparency(1.0f);
+      ret.setTransparencyAttributes(ta);
+      return ret;
+   }
 
    public static void makeTransparent(Appearance app, float transparency)
    {
