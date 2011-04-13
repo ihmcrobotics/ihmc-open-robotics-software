@@ -24,7 +24,7 @@ public class ViconClient
    private boolean DEBUG = false;
    private static ViconClient viconSingleton;
    protected RemoteConnection viconServer;
-   protected ViconFrames viconFrames;
+   protected ArrayList<ViconFrames> viconFrames = new ArrayList<ViconFrames>();
    private final HashMap<String, PoseReading> mapModelToPoseReading = new HashMap<String, PoseReading>();
    private String myIP;
    private int myPort = 4444;
@@ -104,7 +104,7 @@ public class ViconClient
 
    public void attachViconFrames(ViconFrames viconFrames)
    {
-      this.viconFrames = viconFrames;
+      this.viconFrames.add(viconFrames);
    }
 
    private void registerPoseListener(String host, Integer port)
@@ -154,7 +154,10 @@ public class ViconClient
 
                      if (viconFrames != null)
                      {
-                        viconFrames.updateTransformToParent(poseReading.getModelName());
+                        for (ViconFrames frames : viconFrames)
+                        {
+                           frames.updateTransformToParent(poseReading.getModelName());
+                        }
                      }
                   }
 
@@ -252,29 +255,29 @@ public class ViconClient
          int updateCount = 0;
          PoseReading lastPoseReading = null;
 
-       while (true)
-       {
-          PoseReading poseReading = client.getPoseReading(modelName);
-          if ((lastPoseReading != null) && (!poseReading.equals(lastPoseReading)))
-          {
-             updateCount++;
+         while (true)
+         {
+            PoseReading poseReading = client.getPoseReading(modelName);
+            if ((lastPoseReading != null) && (!poseReading.equals(lastPoseReading)))
+            {
+               updateCount++;
 
-             long endTime = System.currentTimeMillis();
-             if ((endTime - startTime) > 300)
-             {
-                double dt = (endTime - startTime) / 1000.0;
-                System.out.println(poseReading.getPose());
+               long endTime = System.currentTimeMillis();
+               if ((endTime - startTime) > 300)
+               {
+                  double dt = (endTime - startTime) / 1000.0;
+                  System.out.println(poseReading.getPose());
 
-//              System.out.println(modelName + " rate = " + (int) (updateCount / dt) + ": " + pose);
-                startTime = endTime;
-                updateCount = 0;
-             }
-          }
+//                System.out.println(modelName + " rate = " + (int) (updateCount / dt) + ": " + pose);
+                  startTime = endTime;
+                  updateCount = 0;
+               }
+            }
 
-          lastPoseReading = poseReading;
+            lastPoseReading = poseReading;
 
-          Thread.sleep(1);
-       }
+            Thread.sleep(1);
+         }
       }
       catch (Exception ex1)
       {
