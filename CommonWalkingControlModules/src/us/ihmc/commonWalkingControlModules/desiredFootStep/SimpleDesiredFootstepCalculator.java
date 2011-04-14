@@ -39,19 +39,19 @@ public class SimpleDesiredFootstepCalculator implements DesiredFootstepCalculato
       parentRegistry.addChild(registry);
    }
 
-   // Getters
-   public Footstep getDesiredFootstep()
-   {
-      return desiredFootstep;
-   }
+//   // Getters
+//   public Footstep getDesiredFootstep()
+//   {
+//      return desiredFootstep;
+//   }
 
    // Methods
    public void initializeDesiredFootstep(RobotSide supportLegSide)
    {
-      updateDesiredFootstep(supportLegSide);
+      updateAndGetDesiredFootstep(supportLegSide);
    }
 
-   public void updateDesiredFootstep(RobotSide supportLegSide)
+   public Footstep updateAndGetDesiredFootstep(RobotSide supportLegSide)
    {
       // Footstep Frame
       ReferenceFrame supportFootFrame = referenceFrames.getAnkleZUpFrame(supportLegSide);
@@ -73,6 +73,8 @@ public class SimpleDesiredFootstepCalculator implements DesiredFootstepCalculato
       // Create a foot Step Pose from Position and Orientation
       FramePose footstepPose = new FramePose(footstepPosition, footstepOrientation);
       desiredFootstep = new Footstep(supportLegSide, footstepPose);
+      
+      return desiredFootstep;
    }
 
    private void updateDesiredFootStepYaw(ReferenceFrame headingFrame)

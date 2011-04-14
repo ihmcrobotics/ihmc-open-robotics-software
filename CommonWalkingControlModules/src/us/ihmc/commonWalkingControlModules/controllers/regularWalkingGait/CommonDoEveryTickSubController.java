@@ -90,8 +90,7 @@ public class CommonDoEveryTickSubController implements DoEveryTickSubController
          couplingRegistry.setCaptureRegion(captureRegion);
 
          // Desired Footstep
-         desiredFootstepCalculator.updateDesiredFootstep(supportLeg);
-         Footstep desiredFootstep = desiredFootstepCalculator.getDesiredFootstep();
+         Footstep desiredFootstep = desiredFootstepCalculator.updateAndGetDesiredFootstep(supportLeg);
          couplingRegistry.setDesiredFootstep(desiredFootstep);
       }
       else

@@ -45,21 +45,21 @@ public class PushRecoveryDesiredFootstepCalculator implements DesiredFootstepCal
       percentTowardCentroid.set(0.75);
    }
 
-   // Getters
-   public Footstep getDesiredFootstep()
-   {
-      return desiredFootstep;
-   }
+//   // Getters
+//   public Footstep getDesiredFootstep()
+//   {
+//      return desiredFootstep;
+//   }
 
 
    // Methods
    public void initializeDesiredFootstep(RobotSide supportLegSide)
    {
-      updateDesiredFootstep(supportLegSide);
+      updateAndGetDesiredFootstep(supportLegSide);
    }
 
 
-   public void updateDesiredFootstep(RobotSide supportLegSide)
+   public Footstep updateAndGetDesiredFootstep(RobotSide supportLegSide)
    {
       ReferenceFrame supportFootFrame = referenceFrames.getAnkleZUpFrame(supportLegSide);
       FrameConvexPolygon2d captureRegion = couplingRegistry.getCaptureRegion();
@@ -98,6 +98,8 @@ public class PushRecoveryDesiredFootstepCalculator implements DesiredFootstepCal
          FramePose footstepPose = new FramePose(footstepPosition, footstepOrientation);
          desiredFootstep = new Footstep(supportLegSide, footstepPose);
       }
+      
+      return desiredFootstep;
    }
 
    private void computePushRecoveryHomePositionFootstep(RobotSide supportLegSide, ReferenceFrame supportFootFrame)

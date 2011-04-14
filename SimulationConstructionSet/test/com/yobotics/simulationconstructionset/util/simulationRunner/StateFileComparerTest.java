@@ -16,7 +16,6 @@ import org.junit.Test;
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.util.simulationRunner.StateFileComparer.VariableDifference;
 
 public class StateFileComparerTest
 {

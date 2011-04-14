@@ -7,6 +7,7 @@ import javax.vecmath.Matrix3d;
 import javax.vecmath.Point2d;
 
 import us.ihmc.commonWalkingControlModules.RobotSide;
+import us.ihmc.commonWalkingControlModules.SideDependentList;
 import us.ihmc.commonWalkingControlModules.captureRegion.SteppingStonesCaptureRegionIntersectionCalculator;
 import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredHeadingControlModule;
@@ -28,11 +29,13 @@ import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.ground.steppingStones.SteppingStones;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFrameOrientation;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 
 
 public class AdjustableDesiredFootstepCalculator implements DesiredFootstepCalculator
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry("VelocityControlDesiredStepLocationCalculator");
+   private final YoVariableRegistry registry = new YoVariableRegistry("AdjustableDesiredFootstepCalculator");
 
    // Tunable robot-dependent parameters
    private double goodStandingStepWidth;
@@ -86,9 +89,9 @@ public class AdjustableDesiredFootstepCalculator implements DesiredFootstepCalcu
 
    // Desired Footstep
    // private Footstep initialFootstep;
-   private FramePoint desiredFootstepPosition;
-   private Orientation desiredFootstepOrientation;
-   private Footstep desiredFootstep;
+   private final SideDependentList<YoFramePoint> desiredFootstepPositions; // = new YoFramePoint("desiredFootstepPosition", "", ReferenceFrame.getWorldFrame(), registry);
+   private final SideDependentList<YoFrameOrientation> desiredFootstepOrientations; // = new YoFrameOrientation("desiredFootstepOrientation", "", ReferenceFrame.getWorldFrame(), registry);
+//   private Footstep desiredFootstep; 
 
    // Constructor
    public AdjustableDesiredFootstepCalculator(CouplingRegistry couplingRegistry, DesiredHeadingControlModule desiredHeadingControlModule,
@@ -101,6 +104,16 @@ public class AdjustableDesiredFootstepCalculator implements DesiredFootstepCalcu
    public AdjustableDesiredFootstepCalculator(SteppingStones steppingStones, CouplingRegistry couplingRegistry, DesiredHeadingControlModule desiredHeadingControlModule,
            DesiredVelocityControlModule desiredVelocityControlModule, YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, CommonWalkingReferenceFrames referenceFrames)
    {
+      desiredFootstepPositions = new SideDependentList<YoFramePoint>(); // = new YoFramePoint("desiredFootstepPosition", "", ReferenceFrame.getWorldFrame(), registry);
+      desiredFootstepOrientations = new SideDependentList<YoFrameOrientation>(); 
+      
+      desiredFootstepPositions.set(RobotSide.LEFT, new YoFramePoint("leftDesiredFootstepPosition", "", referenceFrames.getAnkleZUpFrame(RobotSide.RIGHT), registry));
+      desiredFootstepPositions.set(RobotSide.RIGHT, new YoFramePoint("rightDesiredFootstepPosition", "", referenceFrames.getAnkleZUpFrame(RobotSide.LEFT), registry));
+      
+      desiredFootstepOrientations.set(RobotSide.LEFT, new YoFrameOrientation("leftDesiredFootstepOrientation", "", referenceFrames.getAnkleZUpFrame(RobotSide.RIGHT), registry));
+      desiredFootstepOrientations.set(RobotSide.RIGHT, new YoFrameOrientation("rightDesiredFootstepOrientation", "", referenceFrames.getAnkleZUpFrame(RobotSide.LEFT), registry));
+
+      
 	   parentRegistry.addChild(registry);
 	   
 	   if (steppingStones != null)
@@ -120,11 +133,11 @@ public class AdjustableDesiredFootstepCalculator implements DesiredFootstepCalcu
       this.referenceFrames = referenceFrames;     
    }
 
-   // Getters
-   public Footstep getDesiredFootstep()
-   {
-	   return desiredFootstep;
-   }
+//   // Getters
+//   public Footstep getDesiredFootstep()
+//   {
+//	   return desiredFootstep;
+//   }
 
    // Initialize the Desired Footstep
    public void initializeDesiredFootstep(RobotSide swingLegSide)
@@ -138,7 +151,7 @@ public class AdjustableDesiredFootstepCalculator implements DesiredFootstepCalcu
       computeFootstepOrientation(swingLegSide, desiredHeadingFrame);
       
       // Adjust position if required and update the desired footstep
-      updateDesiredFootstep(swingLegSide.getOppositeSide());      
+      updateAndGetDesiredFootstep(swingLegSide.getOppositeSide());      
    }
 
    private void computeDesiredFootstepPosition(RobotSide swingLegSide, ReferenceFrame desiredHeadingFrame)
@@ -156,7 +169,7 @@ public class AdjustableDesiredFootstepCalculator implements DesiredFootstepCalcu
 
       // Create the desired footstep position using the parameters previously computed
       ReferenceFrame supportLegAnkleZUpFrame = referenceFrames.getAnkleZUpReferenceFrames().get(supportLegSide);
-      desiredFootstepPosition = new FramePoint(supportLegAnkleZUpFrame, stepLength.getDoubleValue(), stepWidth.getDoubleValue(), stepHeight.getDoubleValue());
+      desiredFootstepPositions.get(swingLegSide).set(supportLegAnkleZUpFrame, stepLength.getDoubleValue(), stepWidth.getDoubleValue(), stepHeight.getDoubleValue());
       
 //      desiredFootstepPosition.changeFrame(supportLegAnkleZUpFrame);
    }
@@ -238,14 +251,16 @@ public class AdjustableDesiredFootstepCalculator implements DesiredFootstepCalcu
       
       // Create the desired footstep orientation using the parameters previously computed
 //      desiredFootstepOrientation = new Orientation(desiredFootstepPosition.getReferenceFrame(), stepYaw.getDoubleValue(), stepPitch.getDoubleValue(), stepRoll.getDoubleValue());
-      desiredFootstepOrientation = new Orientation(desiredHeadingFrame, stepYaw.getDoubleValue(), stepPitch.getDoubleValue(), stepRoll.getDoubleValue());
-      desiredFootstepOrientation.changeFrame(desiredFootstepPosition.getReferenceFrame());
+      Orientation desiredFootstepOrientation = new Orientation(desiredHeadingFrame, stepYaw.getDoubleValue(), stepPitch.getDoubleValue(), stepRoll.getDoubleValue());
+      desiredFootstepOrientation.changeFrame(desiredFootstepPositions.get(swingLegSide).getReferenceFrame());
+      
+      desiredFootstepOrientations.get(swingLegSide).set(desiredFootstepOrientation);
    }
 
    private void computeFootstepYaw(RobotSide swingSide, ReferenceFrame desiredHeadingFrame)
    {
       // Compute the difference between the desired Heading frame and the frame of the adjusted footstep position (yaw should be w.r.t. this frame!).
-      ReferenceFrame footstepPositionFrame = desiredFootstepPosition.getReferenceFrame();
+      ReferenceFrame footstepPositionFrame = desiredFootstepPositions.get(swingSide).getReferenceFrame();
       Transform3D headingToFootstepPositionTransform = desiredHeadingFrame.getTransformToDesiredFrame(footstepPositionFrame);
       Matrix3d headingToSwingRotation = new Matrix3d();
       headingToFootstepPositionTransform.get(headingToSwingRotation);
@@ -263,20 +278,21 @@ public class AdjustableDesiredFootstepCalculator implements DesiredFootstepCalcu
    }
 
 
-   public void updateDesiredFootstep(RobotSide supportLegSide)
+   public Footstep updateAndGetDesiredFootstep(RobotSide supportLegSide)
    {
       RobotSide swingLegSide = supportLegSide.getOppositeSide();
 
       adjustDesiredFootstepPosition(swingLegSide, couplingRegistry.getCaptureRegion());
       
       // Assemble Position and Orientation in the desiredFootStep
-      FramePose footstepPose = new FramePose(desiredFootstepPosition, desiredFootstepOrientation);
-      desiredFootstep = new Footstep(supportLegSide, footstepPose);
+      FramePose footstepPose = new FramePose(desiredFootstepPositions.get(swingLegSide).getFramePointCopy(), desiredFootstepOrientations.get(swingLegSide).getFrameOrientationCopy());
+      return new Footstep(supportLegSide, footstepPose);
    }
 
-   public void adjustDesiredFootstepPosition(RobotSide swingLegSide, FrameConvexPolygon2d captureRegion)
+   private void adjustDesiredFootstepPosition(RobotSide swingLegSide, FrameConvexPolygon2d captureRegion)
    {
-      if (desiredFootstepPosition == null) return; // if not initialized at start of swing first, happens e.g. when balancing on one leg
+      //TODO: Do we need the following line???
+//      if (desiredFootstepPosition == null) return; // if not initialized at start of swing first, happens e.g. when balancing on one leg
 
       // Check if Step Position is inside the Capture Region, Otherwise project step position into the CR
       if (!projectIntoCaptureRegion.getBooleanValue())
@@ -297,19 +313,19 @@ public class AdjustableDesiredFootstepCalculator implements DesiredFootstepCalcu
       
       if (steppingStonesCaptureRegionIntersectionCalculator != null)
       {
-         projectIntoSteppingStonesAndCaptureRegion(captureRegion);
+         projectIntoSteppingStonesAndCaptureRegion(swingLegSide, captureRegion);
       }
       else
       {
-         projectIntoCaptureRegion(captureRegion);
+         projectIntoCaptureRegion(swingLegSide, captureRegion);
       }
       
       
    }
    
-   private void projectIntoCaptureRegion(FrameConvexPolygon2d captureRegion)
+   private void projectIntoCaptureRegion(RobotSide swingLegSide, FrameConvexPolygon2d captureRegion)
    {
-      FramePoint2d nextStep2d = desiredFootstepPosition.toFramePoint2d();
+      FramePoint2d nextStep2d = desiredFootstepPositions.get(swingLegSide).getFramePoint2dCopy();
       nextStep2d.changeFrame(captureRegion.getReferenceFrame());
       FrameConvexPolygon2d nextStepFootPolygon = buildNextStepFootPolygon(nextStep2d);
 
@@ -319,8 +335,8 @@ public class AdjustableDesiredFootstepCalculator implements DesiredFootstepCalcu
          nextStepIsInsideCaptureRegion.set(false);
 
          captureRegion.orthogonalProjection(nextStep2d);
-         desiredFootstepPosition.setX(nextStep2d.getX());
-         desiredFootstepPosition.setY(nextStep2d.getY());
+         desiredFootstepPositions.get(swingLegSide).setX(nextStep2d.getX());
+         desiredFootstepPositions.get(swingLegSide).setY(nextStep2d.getY());
       }
       else
       {
@@ -328,12 +344,12 @@ public class AdjustableDesiredFootstepCalculator implements DesiredFootstepCalcu
       }
    }
    
-   private void projectIntoSteppingStonesAndCaptureRegion(FrameConvexPolygon2d captureRegion)
+   private void projectIntoSteppingStonesAndCaptureRegion(RobotSide swingLegSide, FrameConvexPolygon2d captureRegion)
    {
       captureRegion = captureRegion.changeFrameCopy(ReferenceFrame.getWorldFrame());
       ArrayList<ConvexPolygon2d> steppingStoneCaptureRegionIntersections = steppingStonesCaptureRegionIntersectionCalculator.findIntersectionsBetweenSteppingStonesAndCaptureRegion(captureRegion);
       
-      FramePoint2d nextStep2d = desiredFootstepPosition.toFramePoint2d();
+      FramePoint2d nextStep2d = desiredFootstepPositions.get(swingLegSide).getFramePoint2dCopy();
       nextStep2d.changeFrame(captureRegion.getReferenceFrame());
 //      FrameConvexPolygon2d nextStepFootPolygon = buildNextStepFootPolygon(nextStep2d);
 
@@ -352,10 +368,10 @@ public class AdjustableDesiredFootstepCalculator implements DesiredFootstepCalcu
          nextStep2d.setX(newLocation.getX());
          nextStep2d.setY(newLocation.getY());
          
-         nextStep2d.changeFrame(desiredFootstepPosition.getReferenceFrame());
+         nextStep2d.changeFrame(desiredFootstepPositions.get(swingLegSide).getReferenceFrame());
 
-         desiredFootstepPosition.setX(nextStep2d.getX());
-         desiredFootstepPosition.setY(nextStep2d.getY());
+         desiredFootstepPositions.get(swingLegSide).setX(nextStep2d.getX());
+         desiredFootstepPositions.get(swingLegSide).setY(nextStep2d.getY());
       }
      
    }
