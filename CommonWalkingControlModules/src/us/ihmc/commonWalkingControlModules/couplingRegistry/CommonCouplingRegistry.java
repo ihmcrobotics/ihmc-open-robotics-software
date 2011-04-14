@@ -13,15 +13,19 @@ import us.ihmc.utilities.screwTheory.Wrench;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public class CommonCouplingRegistry implements CouplingRegistry
 {
    private RobotSide supportLeg;
 
-   private DoubleYoVariable singleSupportDuration;
-   private DoubleYoVariable doubleSupportDuration;
-   private double estimatedSwingTimeRemaining;
+   private final YoVariableRegistry registry = new YoVariableRegistry("CouplingRegistry");
+   
+   private final DoubleYoVariable singleSupportDuration = new DoubleYoVariable("singleSupportDuration", registry);
+   private final DoubleYoVariable doubleSupportDuration = new DoubleYoVariable("doubleSupportDuration", registry);
+   private final DoubleYoVariable estimatedSwingTimeRemaining = new DoubleYoVariable("estimatedSwingTimeRemaining", registry);
 
+   //TODO: May need to YoVariablize the following to make things rewindable?
    private FrameConvexPolygon2d captureRegion;
    private FramePoint capturePoint = new FramePoint(ReferenceFrame.getWorldFrame());
 
@@ -36,7 +40,7 @@ public class CommonCouplingRegistry implements CouplingRegistry
    private Wrench upperBodyWrench;
 
 
-   public CommonCouplingRegistry(CommonWalkingReferenceFrames referenceFrames)
+   public CommonCouplingRegistry(CommonWalkingReferenceFrames referenceFrames, YoVariableRegistry parentRegistry)
    {
       SideDependentList<ReferenceFrame> ankleZUpFrames = referenceFrames.getAnkleZUpReferenceFrames();
       ReferenceFrame midFeetZUp = referenceFrames.getMidFeetZUpFrame();
@@ -44,6 +48,8 @@ public class CommonCouplingRegistry implements CouplingRegistry
 //    ReferenceFrame chestZUp = referenceFrames.getChestZUpFrame();
       bipedSupportPolygons = new BipedSupportPolygons(ankleZUpFrames, midFeetZUp);
       this.referenceFrames = referenceFrames;
+      
+      parentRegistry.addChild(registry);
    }
 
    public void setReferenceFrames(CommonWalkingReferenceFrames referenceFrames)
@@ -59,7 +65,7 @@ public class CommonCouplingRegistry implements CouplingRegistry
 
    public void setSingleSupportDuration(DoubleYoVariable singleSupportDuration)
    {
-      this.singleSupportDuration = singleSupportDuration;
+      this.singleSupportDuration.set(singleSupportDuration.getDoubleValue());
    }
 
    public double getSingleSupportDuration()
@@ -69,7 +75,7 @@ public class CommonCouplingRegistry implements CouplingRegistry
 
    public void setDoubleSupportDuration(DoubleYoVariable doubleSupportDuration)
    {
-      this.doubleSupportDuration = doubleSupportDuration;
+      this.doubleSupportDuration.set(doubleSupportDuration.getDoubleValue());
    }
 
    public double getDoubleSupportDuration()
@@ -131,12 +137,12 @@ public class CommonCouplingRegistry implements CouplingRegistry
 
    public void setEstimatedSwingTimeRemaining(double estimatedSwingTimeRemaining)
    {
-      this.estimatedSwingTimeRemaining = estimatedSwingTimeRemaining;
+      this.estimatedSwingTimeRemaining.set(estimatedSwingTimeRemaining);
    }
 
    public double getEstimatedSwingTimeRemaining()
    {
-      return estimatedSwingTimeRemaining;    // .getDoubleValue();
+      return estimatedSwingTimeRemaining.getDoubleValue();
    }
 
    public void setBipedSupportPolygons(BipedSupportPolygons bipedSupportPolygons)

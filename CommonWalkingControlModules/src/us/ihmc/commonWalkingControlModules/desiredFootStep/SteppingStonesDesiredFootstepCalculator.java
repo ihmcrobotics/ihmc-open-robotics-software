@@ -84,7 +84,7 @@ public class SteppingStonesDesiredFootstepCalculator implements DesiredFootstepC
       
       double defaultStepWidth = 0.22;
       stanceWidth.set(defaultStepWidth);
-      double defaultStanceLength = CaptureRegionCalculator.kinematicRangeFromContactReferencePoint * 0.5;    // 0.7;//0.40;
+      double defaultStanceLength = captureRegionCalculator.getKinematicRangeFromContactReferencePoint() * 0.5;    // 0.7;//0.40;
       stanceLength.set(defaultStanceLength);
       stepAngle.set(Math.atan(stanceWidth.getDoubleValue() / stanceLength.getDoubleValue()));    // 0.4
       stepDistance.set(Math.sqrt((stanceWidth.getDoubleValue() * stanceWidth.getDoubleValue())
@@ -128,20 +128,20 @@ public class SteppingStonesDesiredFootstepCalculator implements DesiredFootstepC
    }
 
    // Getters
-   public Footstep getDesiredFootstep()
-   {
-      return desiredFootstep;
-   }
+//   public Footstep getDesiredFootstep()
+//   {
+//      return desiredFootstep;
+//   }
 
 
    public void initializeDesiredFootstep(RobotSide supportLegSide)
    {
-      updateDesiredFootstep(supportLegSide);
+      updateAndGetDesiredFootstep(supportLegSide);
 
    }
 
 
-   public void updateDesiredFootstep(RobotSide supportLegSide)
+   public Footstep updateAndGetDesiredFootstep(RobotSide supportLegSide)
    {
       FramePoint nominalLocation = getNominalStepLocation(supportLegSide);
       Point2d nominalLocation2d = new Point2d(nominalLocation.getX(), nominalLocation.getY());
@@ -198,6 +198,8 @@ public class SteppingStonesDesiredFootstepCalculator implements DesiredFootstepC
       // Create a foot Step Pose from Position and Orientation
       FramePose footstepPose = new FramePose(locationToReturn, footstepOrientation);
       desiredFootstep = new Footstep(supportLegSide.getOppositeSide(), footstepPose);
+      
+      return desiredFootstep;
       }
 
    public FramePoint getNominalStepLocation(RobotSide supportLeg)
