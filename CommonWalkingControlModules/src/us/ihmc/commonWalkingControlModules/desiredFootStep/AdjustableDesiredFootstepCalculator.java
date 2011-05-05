@@ -459,7 +459,7 @@ public class AdjustableDesiredFootstepCalculator implements DesiredFootstepCalcu
 
       computeStepWidthLinearProfile();
 
-      stepPitch.set(-0.3);
+      stepPitch.set(-0.25);
 
       insideStepAdjustmentForTurning = 0.0;
       outsideStepAdjustmentForTurning = 0.0;

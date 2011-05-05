@@ -1,4 +1,4 @@
-#LyX 1.6.6 created this file. For more info see http://www.lyx.org/
+#LyX 1.6.7 created this file. For more info see http://www.lyx.org/
 \lyxformat 345
 \begin_document
 \begin_header
@@ -210,6 +210,10 @@ w_{i} & = & \frac{f_{z,i}}{\sum_{j}f_{z,j}}\\
 \end_inset
 
 
+\end_layout
+
+\begin_layout Standard
+Turns out to be the same as the teeter totter force distribution!
 \end_layout
 
 \end_body
