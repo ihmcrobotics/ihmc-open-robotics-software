@@ -11,9 +11,13 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.XYPlaneFrom3PointsFrame;
 
 import com.mathworks.jama.Matrix;
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public class ForceDecompositionLegStrengthCalculator implements LegStrengthCalculator
 {
+   private final YoVariableRegistry registry = new YoVariableRegistry("LegStrengthCalculator");
+
    private final ReferenceFrame midFeetZUpFrame;
 
    private final ReferenceFrame endEffectorFrame;
@@ -33,8 +37,10 @@ public class ForceDecompositionLegStrengthCalculator implements LegStrengthCalcu
    private final Matrix fBar = new Matrix(2, 1);
 
    private double epsilonInPlane = 1e-4;
+   
+   private final SideDependentList<DoubleYoVariable> legStrengths = new SideDependentList<DoubleYoVariable>();
 
-   public ForceDecompositionLegStrengthCalculator(ReferenceFrame midFeetZUpFrame, ReferenceFrame endEffectorFrame)
+   public ForceDecompositionLegStrengthCalculator(ReferenceFrame midFeetZUpFrame, ReferenceFrame endEffectorFrame, YoVariableRegistry parentRegistry)
    {
       this.midFeetZUpFrame = midFeetZUpFrame;
       this.endEffectorFrame = endEffectorFrame;
@@ -57,6 +63,12 @@ public class ForceDecompositionLegStrengthCalculator implements LegStrengthCalcu
 
       copToEndEffectorUnitVector = new FrameVector(vtpAndEndEffectorXYPlaneFrame);
       fBar3D = new FrameVector(vtpAndEndEffectorXYPlaneFrame);
+      
+      for (RobotSide robotSide : RobotSide.values())
+      {
+         legStrengths.put(robotSide, new DoubleYoVariable(robotSide.getCamelCaseNameForStartOfExpression() + "LegStrength", registry));
+      }
+      parentRegistry.addChild(registry);
    }
 
    public void packLegStrengths(SideDependentList<Double> legStrengths, SideDependentList<FramePoint2d> virtualToePoints, FramePoint2d coPDesired)
@@ -88,6 +100,10 @@ public class ForceDecompositionLegStrengthCalculator implements LegStrengthCalcu
       }
 
       doChecks(legStrengths);
+      for (RobotSide robotSide : RobotSide.values())
+      {
+         this.legStrengths.get(robotSide).set(legStrengths.get(robotSide));
+      }
    }
 
    private void doChecks(SideDependentList<Double> legStrengths)
