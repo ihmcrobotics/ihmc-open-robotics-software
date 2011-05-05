@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.bipedSupportPolygons;
 
+import java.awt.Color;
+
 import us.ihmc.commonWalkingControlModules.RobotSide;
 import us.ihmc.commonWalkingControlModules.SideDependentList;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
@@ -7,6 +9,14 @@ import us.ihmc.utilities.math.geometry.FrameConvexPolygon2dAndConnectingEdges;
 import us.ihmc.utilities.math.geometry.FrameLineSegment2d;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.plotting.DynamicGraphicYoPolygonArtifact;
+import com.yobotics.simulationconstructionset.util.graphics.ArtifactList;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFrameConvexPolygon2d;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFrameLineSegment2d;
 
 
 /**
@@ -25,10 +35,14 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 
 /*
- * FIXME: not rewindable!
+* FIXME: not rewindable!
  */
 public class BipedSupportPolygons
 {
+   private static boolean VISUALIZE = true;
+
+   private final YoVariableRegistry registry = new YoVariableRegistry("BipedSupportPolygons");
+
    // Reference frames:
    private final ReferenceFrame midFeetZUp;
    private final SideDependentList<ReferenceFrame> ankleZUpFrames;
@@ -37,6 +51,8 @@ public class BipedSupportPolygons
    private final SideDependentList<FrameConvexPolygon2d> footPolygonsInAnkleZUp = new SideDependentList<FrameConvexPolygon2d>();
    private final SideDependentList<FrameConvexPolygon2d> footPolygonsInMidFeetZUp = new SideDependentList<FrameConvexPolygon2d>();
    private FrameConvexPolygon2d supportPolygonInMidFeetZUp;
+   private final YoFrameConvexPolygon2d supportPolygonViz;
+   private final YoFrameLineSegment2d footToFootSegmentViz;
 
    // Connecting edges between the two foot polygons to create the support polygon when in double support; null in single support
    private FrameLineSegment2d connectingEdge1, connectingEdge2;
@@ -47,10 +63,25 @@ public class BipedSupportPolygons
    // Line segment from one sweet spot to the other:
    private FrameLineSegment2d footToFootLineSegmentInMidFeetZUp;
 
-   public BipedSupportPolygons(SideDependentList<ReferenceFrame> ankleZUpFrames, ReferenceFrame midFeetZUpFrame)
+   public BipedSupportPolygons(SideDependentList<ReferenceFrame> ankleZUpFrames, ReferenceFrame midFeetZUpFrame, YoVariableRegistry parentRegistry,
+                               DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
-	   this.ankleZUpFrames = ankleZUpFrames;
-	   this.midFeetZUp = midFeetZUpFrame;
+      this.ankleZUpFrames = ankleZUpFrames;
+      this.midFeetZUp = midFeetZUpFrame;
+
+      supportPolygonViz = new YoFrameConvexPolygon2d("combinedPolygon", "", ReferenceFrame.getWorldFrame(), 8, registry);
+      footToFootSegmentViz = new YoFrameLineSegment2d("footToFoot", "", ReferenceFrame.getWorldFrame(), registry);
+
+      DynamicGraphicObjectsList dynamicGraphicObjectsList = new DynamicGraphicObjectsList("VTP Calculator");
+      ArtifactList artifactList = new ArtifactList("VTP Calculator");
+
+      DynamicGraphicYoPolygonArtifact dynamicGraphicYoPolygonArtifact = new DynamicGraphicYoPolygonArtifact("Combined Polygon", supportPolygonViz, Color.pink,
+                                                                           false);
+      artifactList.add(dynamicGraphicYoPolygonArtifact);
+      dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectsList);
+      dynamicGraphicObjectsListRegistry.registerArtifactList(artifactList);
+
+      parentRegistry.addChild(registry);
    }
 
    public FrameConvexPolygon2d getSupportPolygonInMidFeetZUp()
@@ -104,7 +135,7 @@ public class BipedSupportPolygons
 
          this.footPolygonsInAnkleZUp.set(robotSide, footPolygonInAnkleZUp);
          this.footPolygonsInMidFeetZUp.set(robotSide, footPolygonsInMidFeetZUp);
-         this.sweetSpots.set(robotSide, footPolygonsInAnkleZUp.get(robotSide).getCentroidCopy()); // Sweet spots are the centroids of the foot polygons.
+         this.sweetSpots.set(robotSide, footPolygonsInAnkleZUp.get(robotSide).getCentroidCopy());    // Sweet spots are the centroids of the foot polygons.
 
       }
 
@@ -140,17 +171,23 @@ public class BipedSupportPolygons
       }
 
       this.footToFootLineSegmentInMidFeetZUp = new FrameLineSegment2d(sweetSpots.get(RobotSide.LEFT).changeFrameAndProjectToXYPlaneCopy(midFeetZUp),
-            sweetSpots.get(RobotSide.RIGHT).changeFrameAndProjectToXYPlaneCopy(midFeetZUp));
+              sweetSpots.get(RobotSide.RIGHT).changeFrameAndProjectToXYPlaneCopy(midFeetZUp));
+
+
+      if (VISUALIZE)
+      {
+         visualize();
+      }
    }
 
    public String toString()
    {
-      String ret = "";
+      return "supportPolygonInMidFeetZUp = " + supportPolygonInMidFeetZUp;
+   }
 
-      ret = ret + "supportPolygonInMidFeetZUp = " + supportPolygonInMidFeetZUp;
-
-
-      return ret;
+   private void visualize()
+   {
+      supportPolygonViz.setFrameConvexPolygon2d(supportPolygonInMidFeetZUp.changeFrameCopy(ReferenceFrame.getWorldFrame()));
+      footToFootSegmentViz.setFrameLineSegment2d(footToFootLineSegmentInMidFeetZUp.changeFrameCopy(ReferenceFrame.getWorldFrame()));
    }
 }
-

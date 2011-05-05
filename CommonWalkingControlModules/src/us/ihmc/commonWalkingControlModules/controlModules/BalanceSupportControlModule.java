@@ -2,15 +2,15 @@ package us.ihmc.commonWalkingControlModules.controlModules;
 
 import us.ihmc.commonWalkingControlModules.RobotSide;
 import us.ihmc.commonWalkingControlModules.SideDependentList;
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedLegStrengthAndVirtualToePoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.AnkleOverRotationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.HipDamperControlModule;
+import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.LegStrengthCalculator;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.PelvisHeightControlModule;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.PelvisOrientationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.VelocityViaCoPControlModule;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.VirtualSupportActuatorControlModule;
-import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.VirtualToePointAndLegStrengthCalculator;
+import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.VirtualToePointCalculator;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegTorques;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LowerBodyTorques;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
@@ -25,7 +25,8 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 public class BalanceSupportControlModule
 {
    private final VelocityViaCoPControlModule velocityViaCoPControlModule;
-   private final VirtualToePointAndLegStrengthCalculator virtualToePointAndLegStrengthCalculator;
+   private final VirtualToePointCalculator virtualToePointCalculator;
+   private final LegStrengthCalculator legStrengthCalculator;
    private final PelvisHeightControlModule pelvisHeightControlModule;
    private final PelvisOrientationControlModule pelvisOrientationControlModule;
    private final VirtualSupportActuatorControlModule virtualSupportActuatorControlModule;
@@ -34,25 +35,21 @@ public class BalanceSupportControlModule
    private final AnkleOverRotationControlModule ankleOverRotationControlModule;
    private final BipedSupportPolygons bipedSupportPolygons;
 
-   private final SideDependentList<BipedLegStrengthAndVirtualToePoint> legStrengthsAndVirtualToePoints;
-
-
+   private final SideDependentList<Double> legStrengths = new SideDependentList<Double>();
+   private final SideDependentList<FramePoint2d> virtualToePoints = new SideDependentList<FramePoint2d>();
    private YoVariableRegistry registry;
    private DoubleYoVariable supportPolygonShrinkFactor = new DoubleYoVariable("supportPolygonShrinkFactor", registry);
 
-
-
-   public BalanceSupportControlModule(SideDependentList<BipedLegStrengthAndVirtualToePoint> legStrengthsAndVirtualToePoints,
-                                      VelocityViaCoPControlModule velocityViaCoPControlModule,
-                                      VirtualToePointAndLegStrengthCalculator virtualToePointAndLegStrengthCalculator,
+   public BalanceSupportControlModule(VelocityViaCoPControlModule velocityViaCoPControlModule,
+                                      VirtualToePointCalculator virtualToePointAndLegStrengthCalculator, LegStrengthCalculator legStrengthCalculator,
                                       PelvisHeightControlModule pelvisHeightControlModule, PelvisOrientationControlModule pelvisOrientationControlModule,
                                       VirtualSupportActuatorControlModule virtualSupportActuatorControlModule, KneeDamperControlModule kneeDamperControlModule,
                                       HipDamperControlModule hipDamperControlModule, BipedSupportPolygons bipedSupportPolygons,
                                       AnkleOverRotationControlModule ankleOverRotationControlModule, YoVariableRegistry parentRegistry)
    {
-      this.legStrengthsAndVirtualToePoints = legStrengthsAndVirtualToePoints;
       this.velocityViaCoPControlModule = velocityViaCoPControlModule;
-      this.virtualToePointAndLegStrengthCalculator = virtualToePointAndLegStrengthCalculator;
+      this.virtualToePointCalculator = virtualToePointAndLegStrengthCalculator;
+      this.legStrengthCalculator = legStrengthCalculator;
       this.pelvisHeightControlModule = pelvisHeightControlModule;
       this.pelvisOrientationControlModule = pelvisOrientationControlModule;
       this.virtualSupportActuatorControlModule = virtualSupportActuatorControlModule;
@@ -60,6 +57,7 @@ public class BalanceSupportControlModule
       this.hipDamperControlModule = hipDamperControlModule;
       this.bipedSupportPolygons = bipedSupportPolygons;
       this.ankleOverRotationControlModule = ankleOverRotationControlModule;
+
       parentRegistry.addChild(registry);
    }
 
@@ -70,9 +68,10 @@ public class BalanceSupportControlModule
     * @param desiredPelvisOrientation the desired orientation of the pelvis link
     * @param upperBodyWrench TODO
     */
-   public void doSingleSupportBalance(LegTorques supportLegTorquesToPack, FrameVector2d desiredVelocity, Orientation desiredPelvisOrientation, Wrench upperBodyWrench)
+   public void doSingleSupportBalance(LegTorques supportLegTorquesToPack, FrameVector2d desiredVelocity, Orientation desiredPelvisOrientation,
+                                      Wrench upperBodyWrench)
    {
-      virtualToePointAndLegStrengthCalculator.hideVisualizationGraphics();
+      virtualToePointCalculator.hideVisualizationGraphics();
 
       RobotSide supportLeg = supportLegTorquesToPack.getRobotSide();
 
@@ -111,7 +110,8 @@ public class BalanceSupportControlModule
       FramePoint2d desiredCoP = velocityViaCoPControlModule.computeDesiredCoPDoubleSupport(loadingLeg, desiredVelocity);
 
       // compute VTPs and leg strengths
-      virtualToePointAndLegStrengthCalculator.packVirtualToePointsAndLegStrengths(legStrengthsAndVirtualToePoints, bipedSupportPolygons, desiredCoP);
+      virtualToePointCalculator.packVirtualToePoints(virtualToePoints, bipedSupportPolygons, desiredCoP);
+      legStrengthCalculator.packLegStrengths(legStrengths, virtualToePoints, desiredCoP);
 
       // compute desired torques on the pelvis using PelvisOrientationControlModule.
       FrameVector torqueOnPelvisInPelvisFrame = pelvisOrientationControlModule.computePelvisTorque(null, desiredPelvisOrientation);
@@ -121,13 +121,13 @@ public class BalanceSupportControlModule
       double fZOnPelvisInPelvisFrame = pelvisHeightControlModule.doPelvisHeightControl(desiredPelvisHeightInWorld, null);
 
       // compute joint torques using virtual support actuators
-      virtualSupportActuatorControlModule.controlDoubleSupport(lowerBodyTorquesToPack, legStrengthsAndVirtualToePoints, fZOnPelvisInPelvisFrame,
+      virtualSupportActuatorControlModule.controlDoubleSupport(lowerBodyTorquesToPack, virtualToePoints, legStrengths, fZOnPelvisInPelvisFrame,
               torqueOnPelvisInPelvisFrame);
 
       // Add a little knee damping to prevent it from snapping:
       kneeDamperControlModule.addKneeDamping(lowerBodyTorquesToPack.getLegTorques(RobotSide.LEFT));
       kneeDamperControlModule.addKneeDamping(lowerBodyTorquesToPack.getLegTorques(RobotSide.RIGHT));
-      
+
       // Add some hip yaw damping on the trailing leg to prevent the leg from rotating
       if (loadingLeg != null)
       {

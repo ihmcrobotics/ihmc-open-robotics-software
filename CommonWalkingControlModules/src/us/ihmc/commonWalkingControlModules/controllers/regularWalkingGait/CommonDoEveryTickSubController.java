@@ -36,11 +36,13 @@ public class CommonDoEveryTickSubController implements DoEveryTickSubController
    private final CapturePointCalculatorInterface capturePointCalculator;
    private final CaptureRegionCalculator captureRegionCalculator;
    private final CouplingRegistry couplingRegistry;
+   
+   private final double initialDesiredHeading;
 
    public CommonDoEveryTickSubController(CommonWalkingReferenceFrames referenceFrames, ProcessedSensorsInterface processedSensors, BipedFootInterface leftFoot,
            BipedFootInterface rightFoot, BipedFeetUpdater bipedFeetUpdater, DesiredHeadingControlModule desiredHeadingControlModule,
            DesiredVelocityControlModule desiredVelocityControlModule, DesiredFootstepCalculator desiredFootstepCalculator,
-           CapturePointCalculatorInterface capturePointCalculator, CaptureRegionCalculator captureRegionCalculator, CouplingRegistry couplingRegistry)
+           CapturePointCalculatorInterface capturePointCalculator, CaptureRegionCalculator captureRegionCalculator, CouplingRegistry couplingRegistry, double initialDesiredHeading)
    {
       this.referenceFrames = referenceFrames;
       this.processedSensors = processedSensors;
@@ -56,6 +58,7 @@ public class CommonDoEveryTickSubController implements DoEveryTickSubController
       this.capturePointCalculator = capturePointCalculator;
       this.captureRegionCalculator = captureRegionCalculator;
       this.couplingRegistry = couplingRegistry;
+      this.initialDesiredHeading = initialDesiredHeading;
    }
 
 
@@ -104,7 +107,6 @@ public class CommonDoEveryTickSubController implements DoEveryTickSubController
 
    public void doFirstTick()
    {
-      double currentHeading = processedSensors.getPelvisOrientationInFrame(ReferenceFrame.getWorldFrame()).getYawPitchRoll()[0];
-      desiredHeadingControlModule.resetHeading(currentHeading);
+      desiredHeadingControlModule.resetHeading(initialDesiredHeading);
    }
 }

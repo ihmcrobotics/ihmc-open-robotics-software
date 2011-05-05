@@ -40,14 +40,10 @@ public class CommonCouplingRegistry implements CouplingRegistry
    private Wrench upperBodyWrench;
 
 
-   public CommonCouplingRegistry(CommonWalkingReferenceFrames referenceFrames, YoVariableRegistry parentRegistry)
+   public CommonCouplingRegistry(CommonWalkingReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons, YoVariableRegistry parentRegistry)
    {
-      SideDependentList<ReferenceFrame> ankleZUpFrames = referenceFrames.getAnkleZUpReferenceFrames();
-      ReferenceFrame midFeetZUp = referenceFrames.getMidFeetZUpFrame();
-
-//    ReferenceFrame chestZUp = referenceFrames.getChestZUpFrame();
-      bipedSupportPolygons = new BipedSupportPolygons(ankleZUpFrames, midFeetZUp);
       this.referenceFrames = referenceFrames;
+      this.bipedSupportPolygons = bipedSupportPolygons;
       
       parentRegistry.addChild(registry);
    }

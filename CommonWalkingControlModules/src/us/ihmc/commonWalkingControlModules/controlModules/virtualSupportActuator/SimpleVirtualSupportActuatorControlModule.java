@@ -3,7 +3,6 @@ package us.ihmc.commonWalkingControlModules.controlModules.virtualSupportActuato
 
 import us.ihmc.commonWalkingControlModules.RobotSide;
 import us.ihmc.commonWalkingControlModules.SideDependentList;
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedLegStrengthAndVirtualToePoint;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.DoubleSupportForceDistributor;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.VirtualSupportActuatorControlModule;
 import us.ihmc.commonWalkingControlModules.kinematics.StanceFullLegJacobian;
@@ -32,21 +31,18 @@ public class SimpleVirtualSupportActuatorControlModule implements VirtualSupport
       footZUpFrames = referenceFrames.getAnkleZUpReferenceFrames();
    }
 
-
-   public void controlDoubleSupport(LowerBodyTorques lowerBodyTorquesToPack, 
-         SideDependentList<BipedLegStrengthAndVirtualToePoint> legStrengthsAndVirtualToePoints, 
-         double fZOnPelvisInPelvisFrame, FrameVector torqueOnPelvis)
+   public void controlDoubleSupport(LowerBodyTorques lowerBodyTorquesToPack, SideDependentList<FramePoint2d> virtualToePoints,
+         SideDependentList<Double> legStrengths, double fZOnPelvisInPelvisFrame, FrameVector torqueOnPelvis)
    {
       // distribute forces
       SideDependentList<Double> fZs = new SideDependentList<Double>();
       SideDependentList<FrameVector> torques = new SideDependentList<FrameVector>();
-      doubleSupportForceDistributor.packForcesAndTorques(fZs, torques, fZOnPelvisInPelvisFrame, torqueOnPelvis, legStrengthsAndVirtualToePoints);
-
+      doubleSupportForceDistributor.packForcesAndTorques(fZs, torques, fZOnPelvisInPelvisFrame, torqueOnPelvis, legStrengths);
 
       for (RobotSide robotSide : RobotSide.values())
       {
          LegTorques supportLegTorquesToPack = lowerBodyTorquesToPack.getLegTorques(robotSide);
-         FramePoint2d vtp = legStrengthsAndVirtualToePoints.get(robotSide).getVirtualToePointCopy();
+         FramePoint2d vtp = new FramePoint2d(virtualToePoints.get(robotSide));
          double fZ = fZs.get(robotSide);
          FrameVector torque = torques.get(robotSide);
 
