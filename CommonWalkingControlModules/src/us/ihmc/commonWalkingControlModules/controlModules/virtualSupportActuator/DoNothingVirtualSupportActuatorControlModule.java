@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules.virtualSupportActuator;
 
 import us.ihmc.commonWalkingControlModules.SideDependentList;
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedLegStrengthAndVirtualToePoint;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.VirtualSupportActuatorControlModule;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegTorques;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LowerBodyTorques;
@@ -17,10 +16,9 @@ public class DoNothingVirtualSupportActuatorControlModule implements VirtualSupp
       supportLegTorquesToPack.setTorquesToZero();
    }
 
-   public void controlDoubleSupport(LowerBodyTorques lowerBodyTorquesToPack, SideDependentList<BipedLegStrengthAndVirtualToePoint> legStrengthsAndVirtualToePoints,
-                                    double fZOnPelvisInPelvisFrame, FrameVector torqueOnPelvisInPelvisFrame)
+   public void controlDoubleSupport(LowerBodyTorques lowerBodyTorquesToPack, SideDependentList<FramePoint2d> virtualToePoints,
+         SideDependentList<Double> legStrengths, double fZOnPelvisInPelvisFrame, FrameVector torqueOnPelvisInPelvisFrame)
    {
-      lowerBodyTorquesToPack.setLowerBodyTorquesToZero();
+      lowerBodyTorquesToPack.setLowerBodyTorquesToZero();      
    }
-
 }

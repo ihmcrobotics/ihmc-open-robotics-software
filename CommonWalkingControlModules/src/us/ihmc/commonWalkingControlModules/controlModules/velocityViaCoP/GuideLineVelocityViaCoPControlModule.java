@@ -9,6 +9,7 @@ import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.ProcessedSensorsInterface;
+import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameLineSegment2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
@@ -22,12 +23,15 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition.GraphicType;
+import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoFramePoint2d;
+import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoVariable;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 
 public class GuideLineVelocityViaCoPControlModule implements VelocityViaCoPControlModule
 {
    private final YoVariableRegistry registry = new YoVariableRegistry("GuideLineVelocityViaCoPControlModule");
 
+   private final double controlDT;
    private final CommonWalkingReferenceFrames referenceFrames;
    private final CapturePointCenterOfPressureControlModule capturePointCenterOfPressureControlModule;
    private final GuideLineCalculator guideLineCalculator;
@@ -40,17 +44,24 @@ public class GuideLineVelocityViaCoPControlModule implements VelocityViaCoPContr
    private final DoubleYoVariable desiredCaptureInwardDoubleSupport = new DoubleYoVariable("desiredCaptureInwardDoubleSupport", registry);
    private final DoubleYoVariable desiredCaptureForwardNotLoading = new DoubleYoVariable("desiredCaptureForwardNotLoading", registry);
 
+   private final DoubleYoVariable alphaDesiredCoP = new DoubleYoVariable("alphaDesiredCoP", registry);
+   private final AlphaFilteredYoFramePoint2d filteredDesiredCoP;
+   private Boolean lastTickDoubleSupport = null;
+
 
    public GuideLineVelocityViaCoPControlModule(double controlDT, CouplingRegistry couplingRegistry, ProcessedSensorsInterface processedSensors,
            CommonWalkingReferenceFrames referenceFrames, YoVariableRegistry parentRegistry,
            DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, GuideLineCalculator guideLineCalculator,
            CapturePointCenterOfPressureControlModule capturePointCenterOfPressureControlModule)
    {
+      this.controlDT = controlDT;
       this.referenceFrames = referenceFrames;
       this.couplingRegistry = couplingRegistry;
       this.processedSensors = processedSensors;
       this.capturePointCenterOfPressureControlModule = capturePointCenterOfPressureControlModule;
       this.guideLineCalculator = guideLineCalculator;
+      this.filteredDesiredCoP = AlphaFilteredYoFramePoint2d.createAlphaFilteredYoFramePoint2d("filteredDesiredCoP", "", registry, alphaDesiredCoP,
+              referenceFrames.getMidFeetZUpFrame());
 
       if (parentRegistry != null)
       {
@@ -69,6 +80,11 @@ public class GuideLineVelocityViaCoPControlModule implements VelocityViaCoPContr
 
    public FramePoint2d computeDesiredCoPDoubleSupport(RobotSide loadingLeg, FrameVector2d desiredVelocity)
    {
+      if ((lastTickDoubleSupport == null) ||!lastTickDoubleSupport)
+      {
+         filteredDesiredCoP.reset();
+      }
+
       BipedSupportPolygons bipedSupportPolygons = couplingRegistry.getBipedSupportPolygons();
 
       FramePoint desiredCapturePoint = computeDesiredCapturePointDoubleSupport(loadingLeg, desiredVelocity, bipedSupportPolygons);
@@ -87,7 +103,14 @@ public class GuideLineVelocityViaCoPControlModule implements VelocityViaCoPContr
               desiredVelocity, currentBodyVelocity);
       capturePointCenterOfPressureControlModule.packDesiredCenterOfPressure(desiredCenterOfPressure);
 
-      return new FramePoint2d(desiredCenterOfPressure.getReferenceFrame(), desiredCenterOfPressure.getX(), desiredCenterOfPressure.getY());
+      FramePoint2d desiredCoP2d = new FramePoint2d(desiredCenterOfPressure.getReferenceFrame(), desiredCenterOfPressure.getX(), desiredCenterOfPressure.getY());
+      FrameConvexPolygon2d supportPolygon = bipedSupportPolygons.getSupportPolygonInMidFeetZUp();
+      desiredCoP2d.changeFrame(supportPolygon.getReferenceFrame());
+      supportPolygon.orthogonalProjection(desiredCoP2d);
+      desiredCoP2d.changeFrame(filteredDesiredCoP.getReferenceFrame());
+      filteredDesiredCoP.update(desiredCoP2d);
+
+      return filteredDesiredCoP.getFramePoint2dCopy();
    }
 
    private FramePoint computeDesiredCapturePointDoubleSupport(RobotSide loadingLeg, FrameVector2d desiredVelocity, BipedSupportPolygons bipedSupportPolygons)
@@ -129,6 +152,11 @@ public class GuideLineVelocityViaCoPControlModule implements VelocityViaCoPContr
 
    public FramePoint2d computeDesiredCoPSingleSupport(RobotSide supportLeg, FrameVector2d desiredVelocity)
    {
+      if ((lastTickDoubleSupport == null) || lastTickDoubleSupport)
+      {
+         filteredDesiredCoP.reset();
+      }
+
       desiredCapturePointInWorld.set(Double.NaN, Double.NaN, Double.NaN);
 
       ReferenceFrame supportFootAnkleZUpFrame = referenceFrames.getAnkleZUpReferenceFrames().get(supportLeg);
@@ -138,7 +166,8 @@ public class GuideLineVelocityViaCoPControlModule implements VelocityViaCoPContr
       FramePoint capturePointInAnkleZUp = couplingRegistry.getCapturePointInFrame(supportFootAnkleZUpFrame);
       FramePoint2d capturePoint2d = capturePointInAnkleZUp.toFramePoint2d();
 
-      FrameVector2d actualCenterOfMassVelocityInSupportFootFrame = processedSensors.getCenterOfMassVelocityInFrame(supportFootAnkleZUpFrame, supportLeg).toFrameVector2d();
+      FrameVector2d actualCenterOfMassVelocityInSupportFootFrame = processedSensors.getCenterOfMassVelocityInFrame(supportFootAnkleZUpFrame,
+                                                                      supportLeg).toFrameVector2d();
 
       FramePoint desiredCapturePoint = null;
       FrameLineSegment2d guideLine = null;
@@ -164,8 +193,11 @@ public class GuideLineVelocityViaCoPControlModule implements VelocityViaCoPContr
               supportFootAnkleZUpFrame, bipedSupportPolygons, centerOfMassPosition, desiredVelocity, actualCenterOfMassVelocityInSupportFootFrame);    // , percentToFarEdgeOfFoot); // calculates capture points
 
       capturePointCenterOfPressureControlModule.packDesiredCenterOfPressure(desiredCenterOfPressure);
+      FramePoint2d desiredCoP2d = desiredCenterOfPressure.toFramePoint2d();
+      desiredCoP2d.changeFrame(filteredDesiredCoP.getReferenceFrame());
+      filteredDesiredCoP.update(desiredCoP2d);
 
-      return desiredCenterOfPressure.toFramePoint2d();
+      return filteredDesiredCoP.getFramePoint2dCopy();
    }
 
    public void setUpParametersForR2()
@@ -173,6 +205,7 @@ public class GuideLineVelocityViaCoPControlModule implements VelocityViaCoPContr
       desiredCaptureForwardDoubleSupport.set(0.18);    // 0.2);    // 0.15;
       desiredCaptureInwardDoubleSupport.set(0.01);    // 0.02);
       desiredCaptureForwardNotLoading.set(0.05);
+      alphaDesiredCoP.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(5.0, controlDT));
    }
 
    public void setUpParametersForM2V2()
@@ -180,5 +213,6 @@ public class GuideLineVelocityViaCoPControlModule implements VelocityViaCoPContr
       desiredCaptureForwardDoubleSupport.set(0.03);    // 0.02); // 0.04 (equal to where the guide line ends) // 0.08);
       desiredCaptureInwardDoubleSupport.set(0.0);
       desiredCaptureForwardNotLoading.set(0.02);
+      alphaDesiredCoP.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(5.0, controlDT));
    }
 }
