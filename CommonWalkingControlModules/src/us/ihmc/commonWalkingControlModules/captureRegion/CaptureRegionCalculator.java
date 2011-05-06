@@ -29,7 +29,6 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameConvexPolygon2d;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint2d;
 
 
 //import us.ihmc.plotting.shapes.PointArtifact;
@@ -72,7 +71,7 @@ public class CaptureRegionCalculator
    public static final int NUMBER_OF_POINTS_TO_APPROXIMATE_KINEMATIC_LIMITS = 5;    // 3; //1; //10; //
    public static final int MAX_CAPTURE_REGION_POLYGON_POINTS = 26;    // 20;    // 4 + NUMBER_OF_POINTS_TO_APPROXIMATE_KINEMATIC_LIMITS + 8;
 
-   public static final double SWING_TIME_TO_ADD_FOR_CAPTURING_SAFETY_FACTOR = 0.05;    // 0.1; //
+   public static final double SWING_TIME_TO_ADD_FOR_CAPTURING_SAFETY_FACTOR = 0.0; // 0.05;    // 0.1; //
 
 // public static final double FINAL_CAPTURE_REGION_SAFETY_MARGIN = 0.5; //0.1; //
 
