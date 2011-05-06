@@ -182,7 +182,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
 
       createVisualizers(dynamicGraphicObjectsListRegistry, parentRegistry);
       couplingRegistry.setEstimatedSwingTimeRemaining(estimatedSwingTimeRemaining.getDoubleValue());
-      couplingRegistry.setSingleSupportDuration(swingDuration);
+      couplingRegistry.setSingleSupportDuration(swingDuration.getDoubleValue());
       parentRegistry.addChild(registry);
    }
 
@@ -388,7 +388,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
    {
       singleSupportDuration.set(timeSpentInPreSwing.getDoubleValue() + timeSpentInInitialSwing.getDoubleValue() + timeSpentInMidSwing.getDoubleValue()
                                 + timeSpentInTerminalSwing.getDoubleValue());
-      couplingRegistry.setSingleSupportDuration(singleSupportDuration);
+      couplingRegistry.setSingleSupportDuration(singleSupportDuration.getDoubleValue());
    }
 
    public void doTransitionOutOfSwingInAir(RobotSide swingLeg)

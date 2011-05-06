@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.couplingRegistry;
 
 import us.ihmc.commonWalkingControlModules.RobotSide;
-import us.ihmc.commonWalkingControlModules.SideDependentList;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
@@ -59,9 +58,9 @@ public class CommonCouplingRegistry implements CouplingRegistry
    }
 
 
-   public void setSingleSupportDuration(DoubleYoVariable singleSupportDuration)
+   public void setSingleSupportDuration(double singleSupportDuration)
    {
-      this.singleSupportDuration.set(singleSupportDuration.getDoubleValue());
+      this.singleSupportDuration.set(singleSupportDuration);
    }
 
    public double getSingleSupportDuration()
@@ -69,9 +68,9 @@ public class CommonCouplingRegistry implements CouplingRegistry
       return singleSupportDuration.getDoubleValue();
    }
 
-   public void setDoubleSupportDuration(DoubleYoVariable doubleSupportDuration)
+   public void setDoubleSupportDuration(double doubleSupportDuration)
    {
-      this.doubleSupportDuration.set(doubleSupportDuration.getDoubleValue());
+      this.doubleSupportDuration.set(doubleSupportDuration);
    }
 
    public double getDoubleSupportDuration()

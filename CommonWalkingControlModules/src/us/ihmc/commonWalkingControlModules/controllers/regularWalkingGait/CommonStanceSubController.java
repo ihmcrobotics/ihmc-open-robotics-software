@@ -92,7 +92,7 @@ public class CommonStanceSubController implements StanceSubController
       this.footWidth = footWidth;
 
       doubleSupportDuration.set(1.0);    // FIXME: This is a hack but allows to compute the first desired step
-      couplingRegistry.setDoubleSupportDuration(doubleSupportDuration);
+      couplingRegistry.setDoubleSupportDuration(doubleSupportDuration.getDoubleValue());
 
       parentRegistry.addChild(registry);
    }
@@ -286,7 +286,7 @@ public class CommonStanceSubController implements StanceSubController
    public void doTransitionOutOfLoadingPreSwingB(RobotSide loadingLeg)
    {
       doubleSupportDuration.set(timeSpentInLoadingPreSwingA.getDoubleValue() + timeSpentInLoadingPreSwingB.getDoubleValue());
-      couplingRegistry.setDoubleSupportDuration(doubleSupportDuration);
+      couplingRegistry.setDoubleSupportDuration(doubleSupportDuration.getDoubleValue());
    }
 
    public void doTransitionOutOfLoadingPreSwingC(RobotSide loadingLeg)
