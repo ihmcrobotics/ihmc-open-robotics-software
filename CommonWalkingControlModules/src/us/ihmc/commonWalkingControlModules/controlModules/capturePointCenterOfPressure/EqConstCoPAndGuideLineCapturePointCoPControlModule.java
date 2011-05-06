@@ -17,7 +17,6 @@ import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
-import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoAppearance;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
@@ -26,10 +25,9 @@ import com.yobotics.simulationconstructionset.plotting.YoFrameLineSegment2dArtif
 import com.yobotics.simulationconstructionset.util.graphics.ArtifactList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
-import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoFramePoint;
-import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoVariable;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameLine2d;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameLineSegment2d;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint2d;
 
 public class EqConstCoPAndGuideLineCapturePointCoPControlModule implements CapturePointCenterOfPressureControlModule
 {
@@ -47,24 +45,16 @@ public class EqConstCoPAndGuideLineCapturePointCoPControlModule implements Captu
    private final YoFrameLineSegment2d guideLineWorld = new YoFrameLineSegment2d("guideLine", "", world, registry);
    private final YoFrameLine2d parallelLineWorld = new YoFrameLine2d("parallelLine", "", world, registry);
 
-   private final DoubleYoVariable alphaDesiredCoP = new DoubleYoVariable("alphaDesiredCoP", registry);
-   private final AlphaFilteredYoFramePoint desiredCenterOfPressure = AlphaFilteredYoFramePoint.createAlphaFilteredYoFramePoint("desiredCenterOfPressure", "",
-                                                                        registry, alphaDesiredCoP, ReferenceFrame.getWorldFrame());
-   private final BooleanYoVariable lastTickSingleSupport = new BooleanYoVariable("lastTickSingleSupport", registry);
+   private final YoFramePoint2d desiredCenterOfPressure = new YoFramePoint2d("desiredCoP", "", world, registry);
    private final DoubleYoVariable kCaptureGuide = new DoubleYoVariable("kCaptureGuide", "ICP distance to guide line --> position of parallel line", registry);
 
-   private final double controlDT;
 
    public EqConstCoPAndGuideLineCapturePointCoPControlModule(CommonWalkingReferenceFrames referenceFrames, ProcessedSensorsInterface processedSensors,
-           CouplingRegistry couplingRegistry, double controlDT, YoVariableRegistry parentRegistry,
-           DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+           CouplingRegistry couplingRegistry, YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       this.referenceFrames = referenceFrames;
       this.processedSensors = processedSensors;
       this.couplingRegistry = couplingRegistry;
-      this.controlDT = controlDT;
-
-      this.lastTickSingleSupport.set(true);
 
       if (parentRegistry != null)
       {
@@ -93,12 +83,6 @@ public class EqConstCoPAndGuideLineCapturePointCoPControlModule implements Captu
    public void controlDoubleSupport(BipedSupportPolygons bipedSupportPolygons, FramePoint currentCapturePoint, FramePoint desiredCapturePoint,
                                     FramePoint centerOfMassPositionInWorldFrame, FrameVector2d desiredVelocity, FrameVector2d currentVelocity)
    {
-      if (lastTickSingleSupport.getBooleanValue())
-      {
-         desiredCenterOfPressure.reset();
-         lastTickSingleSupport.set(false);
-      }
-
       FrameConvexPolygon2d supportPolygon = bipedSupportPolygons.getSupportPolygonInMidFeetZUp();
       double finalTime = minFinalTime.getDoubleValue();
       double comHeight = computeCoMHeightUsingBothFeet();
@@ -109,8 +93,6 @@ public class EqConstCoPAndGuideLineCapturePointCoPControlModule implements Captu
                                     ReferenceFrame referenceFrame, BipedSupportPolygons supportPolygons, FramePoint centerOfMassPositionInZUpFrame,
                                     FrameVector2d desiredVelocity, FrameVector2d currentVelocity)
    {
-      lastTickSingleSupport.set(true);
-
       FrameConvexPolygon2d supportPolygon = supportPolygons.getFootPolygonInAnkleZUp(supportLeg);
       double finalTime = computeFinalTimeSingleSupport();
       double comHeight = computeCoMHeightUsingOneFoot(supportLeg);
@@ -158,7 +140,7 @@ public class EqConstCoPAndGuideLineCapturePointCoPControlModule implements Captu
       }
 
       desiredCenterOfPressure.changeFrame(this.desiredCenterOfPressure.getReferenceFrame());
-      this.desiredCenterOfPressure.update(desiredCenterOfPressure.getX(), desiredCenterOfPressure.getY(), 0.0);
+      this.desiredCenterOfPressure.set(desiredCenterOfPressure);
    }
 
    private FrameLine2d createShiftedParallelLine(FrameLineSegment2d guideLine, FramePoint2d currentCapturePoint2d)
@@ -264,7 +246,6 @@ public class EqConstCoPAndGuideLineCapturePointCoPControlModule implements Captu
       minFinalTime.set(0.1);
       kCaptureGuide.set(2.0);
       additionalSingleSupportSwingTime.set(0.1);
-      alphaDesiredCoP.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(50.0, controlDT));
    }
 
    public void setParametersForM2V2()
@@ -272,6 +253,5 @@ public class EqConstCoPAndGuideLineCapturePointCoPControlModule implements Captu
       minFinalTime.set(0.1);
       kCaptureGuide.set(3.0);
       additionalSingleSupportSwingTime.set(0.3);
-      alphaDesiredCoP.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(50.0, controlDT));
    }
 }
