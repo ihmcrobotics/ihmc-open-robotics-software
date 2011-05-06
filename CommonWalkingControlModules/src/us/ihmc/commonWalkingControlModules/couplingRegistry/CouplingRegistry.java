@@ -14,12 +14,12 @@ import com.yobotics.simulationconstructionset.DoubleYoVariable;
 
 public interface CouplingRegistry
 {
-   public abstract void setSingleSupportDuration(DoubleYoVariable singleSupportDuration);
+   public abstract void setSingleSupportDuration(double singleSupportDuration);
 
    public abstract double getSingleSupportDuration();
 
 
-   public abstract void setDoubleSupportDuration(DoubleYoVariable doubleSupportDuration);
+   public abstract void setDoubleSupportDuration(double doubleSupportDuration);
 
    public abstract double getDoubleSupportDuration();
 
