@@ -9,20 +9,16 @@ import us.ihmc.commonWalkingControlModules.captureRegion.CaptureRegionCalculator
 import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculator;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.SimpleDesiredFootstepCalculator;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredHeadingControlModule;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredVelocityControlModule;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
-import us.ihmc.commonWalkingControlModules.sensors.ProcessedSensorsInterface;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
-import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 public class CommonDoEveryTickSubController implements DoEveryTickSubController
 {
    private final CommonWalkingReferenceFrames referenceFrames;
-   private final ProcessedSensorsInterface processedSensors;
 
    private final BipedFootInterface leftFoot;
    private final BipedFootInterface rightFoot;
@@ -39,13 +35,12 @@ public class CommonDoEveryTickSubController implements DoEveryTickSubController
    
    private final double initialDesiredHeading;
 
-   public CommonDoEveryTickSubController(CommonWalkingReferenceFrames referenceFrames, ProcessedSensorsInterface processedSensors, BipedFootInterface leftFoot,
-           BipedFootInterface rightFoot, BipedFeetUpdater bipedFeetUpdater, DesiredHeadingControlModule desiredHeadingControlModule,
-           DesiredVelocityControlModule desiredVelocityControlModule, DesiredFootstepCalculator desiredFootstepCalculator,
-           CapturePointCalculatorInterface capturePointCalculator, CaptureRegionCalculator captureRegionCalculator, CouplingRegistry couplingRegistry, double initialDesiredHeading)
+   public CommonDoEveryTickSubController(CommonWalkingReferenceFrames referenceFrames, BipedFootInterface leftFoot, BipedFootInterface rightFoot,
+           BipedFeetUpdater bipedFeetUpdater, DesiredHeadingControlModule desiredHeadingControlModule, DesiredVelocityControlModule desiredVelocityControlModule,
+           DesiredFootstepCalculator desiredFootstepCalculator, CapturePointCalculatorInterface capturePointCalculator,
+           CaptureRegionCalculator captureRegionCalculator, CouplingRegistry couplingRegistry, double initialDesiredHeading)
    {
       this.referenceFrames = referenceFrames;
-      this.processedSensors = processedSensors;
 
       this.leftFoot = leftFoot;
       this.rightFoot = rightFoot;
