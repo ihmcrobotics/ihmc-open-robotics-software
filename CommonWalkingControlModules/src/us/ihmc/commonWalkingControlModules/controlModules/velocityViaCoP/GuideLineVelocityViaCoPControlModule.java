@@ -60,7 +60,7 @@ public class GuideLineVelocityViaCoPControlModule implements VelocityViaCoPContr
    private final AlphaFilteredYoFramePoint2d filteredDesiredCoPDoubleSupport;
    private final SideDependentList<AlphaFilteredYoFramePoint2d> filteredDesiredCoPsSingleSupport = new SideDependentList<AlphaFilteredYoFramePoint2d>();
 
-   private final YoFramePoint2d filteredDesiredCoPInWorld = new YoFramePoint2d("desiredCoPInWorld", "", world, registry);
+   private final YoFramePoint2d finalDesiredCoPInWorld = new YoFramePoint2d("desiredCoPInWorld", "", world, registry);
    private final BooleanYoVariable lastTickDoubleSupport = new BooleanYoVariable("lastTickDoubleSupport", registry);
 
    public GuideLineVelocityViaCoPControlModule(double controlDT, CouplingRegistry couplingRegistry, ProcessedSensorsInterface processedSensors,
@@ -95,7 +95,7 @@ public class GuideLineVelocityViaCoPControlModule implements VelocityViaCoPContr
          ArtifactList artifactList = new ArtifactList("VelocityViaCoPControlModule");
 
          DynamicGraphicPosition centerOfPressureDesiredWorldGraphicPosition = new DynamicGraphicPosition("Desired Center of Pressure",
-                                                                                 filteredDesiredCoPInWorld, 0.012, YoAppearance.Gray(),
+                                                                                 finalDesiredCoPInWorld, 0.012, YoAppearance.Gray(),
                                                                                  DynamicGraphicPosition.GraphicType.CROSS);
          dynamicGraphicObjectList.add(centerOfPressureDesiredWorldGraphicPosition);
          artifactList.add(centerOfPressureDesiredWorldGraphicPosition.createArtifact());
@@ -155,14 +155,13 @@ public class GuideLineVelocityViaCoPControlModule implements VelocityViaCoPContr
 
       capturePointCenterOfPressureControlModule.packDesiredCenterOfPressure(desiredCenterOfPressure);
       FramePoint2d desiredCoP2d = desiredCenterOfPressure.toFramePoint2d();
-      
-      
+
       AlphaFilteredYoFramePoint2d filteredDesiredCoPSingleSupport = filteredDesiredCoPsSingleSupport.get(supportLeg);
       desiredCoP2d.changeFrame(filteredDesiredCoPSingleSupport.getReferenceFrame());
       filteredDesiredCoPSingleSupport.update(desiredCoP2d);
       filteredDesiredCoPSingleSupport.getFramePoint2d(desiredCoP2d);
       desiredCoP2d.changeFrame(world);
-      filteredDesiredCoPInWorld.set(desiredCoP2d);
+      finalDesiredCoPInWorld.set(desiredCoP2d);
 
       return desiredCoP2d;
    }
@@ -200,17 +199,12 @@ public class GuideLineVelocityViaCoPControlModule implements VelocityViaCoPContr
       filteredDesiredCoPDoubleSupport.getFramePoint2d(desiredCoP2d);
       
       FrameConvexPolygon2d supportPolygon = bipedSupportPolygons.getSupportPolygonInMidFeetZUp();
-      if (!supportPolygon.isPointInside(desiredCoP2d))
-      {
-         filteredDesiredCoPDoubleSupport.reset();
-         desiredCoP2d.changeFrame(supportPolygon.getReferenceFrame());
-         supportPolygon.orthogonalProjection(desiredCoP2d);
-         filteredDesiredCoPDoubleSupport.update(desiredCoP2d);
-      }
-      desiredCoP2d.changeFrame(world);
-      filteredDesiredCoPInWorld.set(desiredCoP2d);
+      supportPolygon.orthogonalProjection(desiredCoP2d);
 
-      return filteredDesiredCoPDoubleSupport.getFramePoint2dCopy();
+      desiredCoP2d.changeFrame(world);
+      finalDesiredCoPInWorld.set(desiredCoP2d);
+
+      return desiredCoP2d;
    }
 
    private FramePoint computeDesiredCapturePointDoubleSupport(RobotSide loadingLeg, FrameVector2d desiredVelocity, BipedSupportPolygons bipedSupportPolygons)
@@ -253,6 +247,10 @@ public class GuideLineVelocityViaCoPControlModule implements VelocityViaCoPContr
    private void resetCoPFilter()
    {
       filteredDesiredCoPDoubleSupport.reset();
+      for (RobotSide robotSide : RobotSide.values())
+      {
+         filteredDesiredCoPsSingleSupport.get(robotSide).reset();
+      }
    }
 
    public void setUpParametersForR2()

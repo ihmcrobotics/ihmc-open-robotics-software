@@ -14,6 +14,9 @@ import com.mathworks.jama.Matrix;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
+/**
+ * This turns out to be exactly the same as TeeterTotterLegStrengthCalculator!
+ */
 public class ForceDecompositionLegStrengthCalculator implements LegStrengthCalculator
 {
    private final YoVariableRegistry registry = new YoVariableRegistry("LegStrengthCalculator");
