@@ -71,7 +71,7 @@ public class CaptureRegionCalculator
    public static final int NUMBER_OF_POINTS_TO_APPROXIMATE_KINEMATIC_LIMITS = 5;    // 3; //1; //10; //
    public static final int MAX_CAPTURE_REGION_POLYGON_POINTS = 26;    // 20;    // 4 + NUMBER_OF_POINTS_TO_APPROXIMATE_KINEMATIC_LIMITS + 8;
 
-   public static final double SWING_TIME_TO_ADD_FOR_CAPTURING_SAFETY_FACTOR = 0.0; // 0.05;    // 0.1; //
+   public static final double SWING_TIME_TO_ADD_FOR_CAPTURING_SAFETY_FACTOR = 0.001; // want this to be zero, but then rewindability tests fail due to numVertices not being the same; // 0.05;    // 0.1; //
 
 // public static final double FINAL_CAPTURE_REGION_SAFETY_MARGIN = 0.5; //0.1; //
 
@@ -257,9 +257,9 @@ public class CaptureRegionCalculator
       return new Point2d(x, y);
    }
    
-   public void setKinematicRangeFromFootCenter(double kinematicRangeFromCoP)
+   public void setKinematicRangeFromFootCenter(double kinematicRangeFromFootCenter)
    {
-      kinematicRangeFromContactReferencePoint.set(kinematicRangeFromCoP);
+      kinematicRangeFromContactReferencePoint.set(kinematicRangeFromFootCenter);
    }
    
    public double getKinematicRangeFromContactReferencePoint()
