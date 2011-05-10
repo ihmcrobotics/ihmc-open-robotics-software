@@ -21,6 +21,8 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFrameLineSegmen
 
 public class SimpleDesiredHeadingControlModule implements DesiredHeadingControlModule
 {
+   private SimpleDesiredHeadingControlModuleVisualizer simpleDesiredHeadingControlModuleVisualizer;
+   
    private final YoVariableRegistry registry = new YoVariableRegistry("DesiredHeadingControlModule");
    private final DoubleYoVariable desiredHeadingFinal = new DoubleYoVariable("desiredHeadingFinal",
                                                            "Yaw of the desired heading frame with respect to the world.", registry);
@@ -29,16 +31,11 @@ public class SimpleDesiredHeadingControlModule implements DesiredHeadingControlM
 
    private final DesiredHeadingFrame desiredHeadingFrame = new DesiredHeadingFrame();
 
-   private final YoFrameLineSegment2d desiredHeadingLine;
-   private final YoFrameLineSegment2d finalHeadingLine;
-
-   private final ProcessedSensorsInterface processedSensors;
    private final double controlDT;
-
-   public SimpleDesiredHeadingControlModule(double desiredHeadingfinal, ProcessedSensorsInterface processedSensors, double controlDT,
-           YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+   
+   public SimpleDesiredHeadingControlModule(double desiredHeadingfinal, double controlDT,
+           YoVariableRegistry parentRegistry)
    {
-      this.processedSensors = processedSensors;
       parentRegistry.addChild(registry);
       this.controlDT = controlDT;
 
@@ -46,47 +43,27 @@ public class SimpleDesiredHeadingControlModule implements DesiredHeadingControlM
 
       this.desiredHeadingFinal.set(desiredHeadingfinal);
       this.desiredHeading.set(this.desiredHeadingFinal.getDoubleValue());    // The final is the first one according to the initial setup of the robot
-
-      desiredHeadingLine = new YoFrameLineSegment2d("desiredHeadingLine", "", ReferenceFrame.getWorldFrame(), registry);
-      finalHeadingLine = new YoFrameLineSegment2d("finalHeadingLine", "", ReferenceFrame.getWorldFrame(), registry);
-
-      if (dynamicGraphicObjectsListRegistry != null)
+   }
+   
+   public void initializeVisualizer(ProcessedSensorsInterface processedSensors, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+   {
+      if (simpleDesiredHeadingControlModuleVisualizer != null)
       {
-         ArtifactList artifactList = new ArtifactList("Simple Desired Heading");
-
-         {
-            YoFrameLineSegment2dArtifact yoFrameLineSegment2dArtifact = new YoFrameLineSegment2dArtifact("Desired Heading Line", desiredHeadingLine,
-                                                                           Color.MAGENTA);
-            artifactList.add(yoFrameLineSegment2dArtifact);
-         }
-
-         {
-            YoFrameLineSegment2dArtifact yoFrameLineSegment2dArtifact = new YoFrameLineSegment2dArtifact("Final Heading Line", finalHeadingLine, Color.ORANGE);
-            artifactList.add(yoFrameLineSegment2dArtifact);
-         }
-
-         dynamicGraphicObjectsListRegistry.registerArtifactList(artifactList);
+         throw new RuntimeException("Already setupVisualizer");
       }
+      
+      simpleDesiredHeadingControlModuleVisualizer = new SimpleDesiredHeadingControlModuleVisualizer(processedSensors, registry, dynamicGraphicObjectsListRegistry);
    }
 
    public void updateDesiredHeadingFrame()
    {
       updateDesiredHeading();
-      updatedDesiredHeadingLine();
-      updatedFinalHeadingLine();
       desiredHeadingFrame.update();
-   }
 
-   private void updatedDesiredHeadingLine()
-   {
-      FramePoint2d endpoint1 = processedSensors.getCenterOfMassGroundProjectionInFrame(ReferenceFrame.getWorldFrame()).toFramePoint2d();
-      FramePoint2d endpoint2 = new FramePoint2d(endpoint1);
-      double length = 1.0;
-      endpoint2.setX(endpoint2.getX() + length * Math.cos(desiredHeading.getDoubleValue()));
-      endpoint2.setY(endpoint2.getY() + length * Math.sin(desiredHeading.getDoubleValue()));
-
-      FrameLineSegment2d frameLineSegment2d = new FrameLineSegment2d(endpoint1, endpoint2);
-      desiredHeadingLine.setFrameLineSegment2d(frameLineSegment2d);
+      if (simpleDesiredHeadingControlModuleVisualizer != null)
+      {
+         simpleDesiredHeadingControlModuleVisualizer.updateDesiredHeading(desiredHeading.getDoubleValue(), desiredHeadingFinal.getDoubleValue());
+      }
    }
 
    public FrameVector getFinalHeadingTarget()
@@ -116,18 +93,6 @@ public class SimpleDesiredHeadingControlModule implements DesiredHeadingControlM
    {
       this.desiredHeading.set(newHeading);
       this.desiredHeadingFinal.set(newHeading);
-   }
-
-   private void updatedFinalHeadingLine()
-   {
-      FramePoint2d endpoint1 = processedSensors.getCenterOfMassGroundProjectionInFrame(ReferenceFrame.getWorldFrame()).toFramePoint2d();
-      FramePoint2d endpoint2 = new FramePoint2d(endpoint1);
-      double length = 1.0;
-      endpoint2.setX(endpoint2.getX() + length * Math.cos(desiredHeadingFinal.getDoubleValue()));
-      endpoint2.setY(endpoint2.getY() + length * Math.sin(desiredHeadingFinal.getDoubleValue()));
-
-      FrameLineSegment2d frameLineSegment2d = new FrameLineSegment2d(endpoint1, endpoint2);
-      finalHeadingLine.setFrameLineSegment2d(frameLineSegment2d);
    }
 
    private void updateDesiredHeading()
