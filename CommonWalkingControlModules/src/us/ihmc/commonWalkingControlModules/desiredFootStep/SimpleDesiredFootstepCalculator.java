@@ -6,6 +6,7 @@ package us.ihmc.commonWalkingControlModules.desiredFootStep;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import us.ihmc.commonWalkingControlModules.RobotSide;
+import us.ihmc.commonWalkingControlModules.SideDependentList;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredHeadingControlModule;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -22,7 +23,7 @@ public class SimpleDesiredFootstepCalculator implements DesiredFootstepCalculato
 
    private Footstep desiredFootstep;
 
-   private final CommonWalkingReferenceFrames referenceFrames;
+   private final SideDependentList<ReferenceFrame> ankleZUpFrames;
 
    private final DoubleYoVariable stepLength = new DoubleYoVariable("stepLength", registry);
    private final DoubleYoVariable stepWidth = new DoubleYoVariable("stepWidth", registry);
@@ -32,9 +33,9 @@ public class SimpleDesiredFootstepCalculator implements DesiredFootstepCalculato
    private final DoubleYoVariable stepRoll = new DoubleYoVariable("stepRoll", registry);
 
    // Constructor
-   public SimpleDesiredFootstepCalculator(CommonWalkingReferenceFrames referenceFrames, DesiredHeadingControlModule desiredHeadingControlModule, YoVariableRegistry parentRegistry)
+   public SimpleDesiredFootstepCalculator(SideDependentList<ReferenceFrame> ankleZUpFrames, DesiredHeadingControlModule desiredHeadingControlModule, YoVariableRegistry parentRegistry)
    {
-      this.referenceFrames = referenceFrames;
+      this.ankleZUpFrames = ankleZUpFrames;
       this.desiredHeadingControlModule = desiredHeadingControlModule;
       parentRegistry.addChild(registry);
    }
@@ -54,7 +55,7 @@ public class SimpleDesiredFootstepCalculator implements DesiredFootstepCalculato
    public Footstep updateAndGetDesiredFootstep(RobotSide supportLegSide)
    {
       // Footstep Frame
-      ReferenceFrame supportFootFrame = referenceFrames.getAnkleZUpFrame(supportLegSide);
+      ReferenceFrame supportFootFrame = ankleZUpFrames.get(supportLegSide);
       ReferenceFrame headingFrame = desiredHeadingControlModule.getDesiredHeadingFrame();
 
       // Footstep Position

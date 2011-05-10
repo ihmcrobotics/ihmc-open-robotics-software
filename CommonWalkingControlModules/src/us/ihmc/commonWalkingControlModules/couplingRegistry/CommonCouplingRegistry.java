@@ -101,7 +101,7 @@ public class CommonCouplingRegistry implements CouplingRegistry
 
    public void setCapturePoint(FramePoint capturePoint)
    {
-      this.capturePoint.set(capturePoint);
+      this.capturePoint.setAndChangeFrame(capturePoint);
    }
 
    public FramePoint getCapturePointInFrame(ReferenceFrame desiredFrame)
