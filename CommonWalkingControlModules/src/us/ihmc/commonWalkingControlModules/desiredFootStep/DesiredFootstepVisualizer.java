@@ -172,8 +172,13 @@ public class DesiredFootstepVisualizer
       double desiredHeadingFinal = 0.0;
       double controlDT = 4.0;
       DesiredHeadingControlModule desiredHeadingControlModule = new SimpleDesiredHeadingControlModule(desiredHeadingFinal, controlDT, parentRegistry);
-      SimpleDesiredFootstepCalculator simpleDesiredFootstepCalculator = new SimpleDesiredFootstepCalculator(feetReferenceFrames, desiredHeadingControlModule, parentRegistry);
-      simpleDesiredFootstepCalculator.setupParametersForR2();
+      
+      
+      SimpleDesiredFootstepCalculator desiredFootstepCalculator = new SimpleDesiredFootstepCalculator(feetReferenceFrames, desiredHeadingControlModule, parentRegistry);
+//      desiredFootstepCalculator();
+      
+//      AdjustableDesiredFootstepCalculator desiredFootstepCalculator = new AdjustableDesiredFootstepCalculator(feetReferenceFrames, desiredHeadingControlModule, parentRegistry);
+//      desiredFootstepCalculator.setupParametersForR2();
       
       
       double footWidth = 0.15;
@@ -191,7 +196,7 @@ public class DesiredFootstepVisualizer
       
       DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
       
-      DesiredFootstepVisualizer visualizer = new DesiredFootstepVisualizer(simpleDesiredFootstepCalculator, feetPolygonsInFootFrame, parentRegistry, dynamicGraphicObjectsListRegistry);
+      DesiredFootstepVisualizer visualizer = new DesiredFootstepVisualizer(desiredFootstepCalculator, feetPolygonsInFootFrame, parentRegistry, dynamicGraphicObjectsListRegistry);
       
  
       SimulationConstructionSet scs = DesiredFootstepVisualizer.createSCSAndAttachVisualizer(parentRegistry, dynamicGraphicObjectsListRegistry);
