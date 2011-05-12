@@ -31,16 +31,12 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFrameLineSegmen
          {
             ArtifactList artifactList = new ArtifactList("Simple Desired Heading");
 
-            {
-               YoFrameLineSegment2dArtifact yoFrameLineSegment2dArtifact = new YoFrameLineSegment2dArtifact("Desired Heading Line", desiredHeadingLine,
-                                                                              Color.MAGENTA);
-               artifactList.add(yoFrameLineSegment2dArtifact);
-            }
+            YoFrameLineSegment2dArtifact yoFrameLineSegment2dArtifact = new YoFrameLineSegment2dArtifact("Desired Heading Line", desiredHeadingLine,
+                  Color.MAGENTA);
+            artifactList.add(yoFrameLineSegment2dArtifact);
 
-            {
-               YoFrameLineSegment2dArtifact yoFrameLineSegment2dArtifact = new YoFrameLineSegment2dArtifact("Final Heading Line", finalHeadingLine, Color.ORANGE);
-               artifactList.add(yoFrameLineSegment2dArtifact);
-            }
+            yoFrameLineSegment2dArtifact = new YoFrameLineSegment2dArtifact("Final Heading Line", finalHeadingLine, Color.ORANGE);
+            artifactList.add(yoFrameLineSegment2dArtifact);
 
             dynamicGraphicObjectsListRegistry.registerArtifactList(artifactList);
          }

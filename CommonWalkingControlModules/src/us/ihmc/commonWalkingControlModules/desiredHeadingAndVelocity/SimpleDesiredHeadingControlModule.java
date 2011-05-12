@@ -1,23 +1,17 @@
 package us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity;
 
-import java.awt.Color;
-
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Matrix3d;
 
 import us.ihmc.commonWalkingControlModules.sensors.ProcessedSensorsInterface;
 import us.ihmc.utilities.math.MathTools;
-import us.ihmc.utilities.math.geometry.FrameLineSegment2d;
-import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
+import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.plotting.YoFrameLineSegment2dArtifact;
-import com.yobotics.simulationconstructionset.util.graphics.ArtifactList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFrameLineSegment2d;
 
 public class SimpleDesiredHeadingControlModule implements DesiredHeadingControlModule
 {
@@ -66,10 +60,15 @@ public class SimpleDesiredHeadingControlModule implements DesiredHeadingControlM
       }
    }
 
-   public FrameVector getFinalHeadingTarget()
+   public double getFinalHeadingTargetAngle()
    {
-      FrameVector finalHeading = new FrameVector(ReferenceFrame.getWorldFrame(), Math.cos(desiredHeadingFinal.getDoubleValue()),
-                                    Math.sin(desiredHeadingFinal.getDoubleValue()), 0.0);
+      return desiredHeadingFinal.getDoubleValue();
+   }
+   
+   public FrameVector2d getFinalHeadingTarget()
+   {
+      FrameVector2d finalHeading = new FrameVector2d(ReferenceFrame.getWorldFrame(), Math.cos(desiredHeadingFinal.getDoubleValue()),
+                                    Math.sin(desiredHeadingFinal.getDoubleValue()));
 
       return finalHeading;
    }
@@ -79,17 +78,31 @@ public class SimpleDesiredHeadingControlModule implements DesiredHeadingControlM
       return desiredHeadingFrame;
    }
 
-   public void setFinalDesiredHeading(double desiredHeading)
+   public void setFinalHeadingTargetAngle(double finalHeadingTargetAngle)
    {
-      this.desiredHeadingFinal.set(desiredHeading);
+      this.desiredHeadingFinal.set(finalHeadingTargetAngle);
+   }
+   
+   public void setFinalHeadingTarget(FrameVector2d finalHeadingTarget)
+   {
+      finalHeadingTarget.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
+      this.desiredHeadingFinal.set(Math.atan2(finalHeadingTarget.getY(), finalHeadingTarget.getX()));
    }
 
-   public double getDesiredHeading()
+   public double getDesiredHeadingAngle()
    {
       return desiredHeading.getDoubleValue();
    }
+   
+   public FrameVector2d getDesiredHeading()
+   {
+      FrameVector2d desiredHeadingVector = new FrameVector2d(ReferenceFrame.getWorldFrame(), Math.cos(desiredHeading.getDoubleValue()),
+                                    Math.sin(desiredHeading.getDoubleValue()));
 
-   public void resetHeading(double newHeading)
+      return desiredHeadingVector;
+   }
+
+   public void resetHeadingAngle(double newHeading)
    {
       this.desiredHeading.set(newHeading);
       this.desiredHeadingFinal.set(newHeading);

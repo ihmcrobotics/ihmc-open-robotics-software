@@ -1,91 +1,65 @@
 package us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity;
 
-import us.ihmc.commonWalkingControlModules.RobotSide;
-import us.ihmc.commonWalkingControlModules.sensors.ProcessedSensorsInterface;
-import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
+import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector2d;
 
 public class SimpleDesiredVelocityControlModule implements DesiredVelocityControlModule
 {
-   private final boolean VELOCITY_AND_HEADING_ARE_DEPENDENT = true;
-
+   private final BooleanYoVariable velocityAlwaysFacesHeading;
    private final DoubleYoVariable desiredVelocityNorm;
-   private final YoFrameVector desiredVelocity;
-
-   private final ProcessedSensorsInterface processedSensors;
+   private final YoFrameVector2d desiredVelocity;
 
    private final DesiredHeadingControlModule desiredHeadingControlModule;
 
-   public SimpleDesiredVelocityControlModule(ProcessedSensorsInterface processedSensors, DesiredHeadingControlModule desiredHeadingControlModule,
-           double initialDesiredVelocity, YoVariableRegistry yoVariableRegistry)
-
-// public SimpleDesiredVelocityControlModule(ProcessedSensors processedSensors, DesiredHeadingControlModule desiredHeadingControlModule,
-//         YoFrameVector initialDesiredVelocity, YoVariableRegistry yoVariableRegistry)
+   public SimpleDesiredVelocityControlModule(DesiredHeadingControlModule desiredHeadingControlModule, double initialDesiredVelocity,
+           YoVariableRegistry yoVariableRegistry)
    {
-      this.processedSensors = processedSensors;
       this.desiredHeadingControlModule = desiredHeadingControlModule;
 
-//    this.desiredVelocity = new DoubleYoVariable("desiredVelocity", yoVariableRegistry);
-//    this.desiredVelocity.set(initialDesiredVelocity);
+      this.velocityAlwaysFacesHeading = new BooleanYoVariable("velocityAlwaysFacesHeading", yoVariableRegistry);
 
       this.desiredVelocityNorm = new DoubleYoVariable("desiredVelocityNorm", yoVariableRegistry);
       this.desiredVelocityNorm.set(initialDesiredVelocity);
 
-
-      if (VELOCITY_AND_HEADING_ARE_DEPENDENT)
-         this.desiredVelocity = new YoFrameVector("desiredVelocity", "", desiredHeadingControlModule.getDesiredHeadingFrame(), yoVariableRegistry);
-      else
-         this.desiredVelocity = new YoFrameVector("desiredVelocity", "", ReferenceFrame.getWorldFrame(), yoVariableRegistry);
+      this.desiredVelocity = new YoFrameVector2d("desiredVelocity", "", ReferenceFrame.getWorldFrame(), yoVariableRegistry);
+      velocityAlwaysFacesHeading.set(true);
 
       updateDesiredVelocity();
+   }
 
-
+   public void setDesiredVelocity(FrameVector2d newDesiredVelocity)
+   {
+      desiredVelocity.set(newDesiredVelocity);
    }
 
    public FrameVector2d getDesiredVelocity()
    {
       return new FrameVector2d(desiredVelocity.getReferenceFrame(), desiredVelocity.getX(), desiredVelocity.getY());
-
-//    return new FrameVector2d(desiredHeadingControlModule.getDesiredHeadingFrame(), desiredVelocityNorm.getDoubleValue(), 0.0);
    }
-
-   public FrameVector2d getVelocityErrorInFrame(ReferenceFrame referenceFrame, RobotSide legToTrustForCoMVelocity)
+   
+   public void setVelocityAlwaysFacesHeading(boolean velocityAlwaysFacesHeading)
    {
-      if (!referenceFrame.isZupFrame())
-      {
-         throw new RuntimeException("Must be a ZUp frame!");
-      }
-
-      FrameVector centerOfMassVelocity = processedSensors.getCenterOfMassVelocityInFrame(referenceFrame, legToTrustForCoMVelocity);
-      FrameVector2d centerOfMassVelocity2d = centerOfMassVelocity.toFrameVector2d();
-
-      FrameVector2d desiredCenterOfMassVelocity = getDesiredVelocity();
-      desiredCenterOfMassVelocity = desiredCenterOfMassVelocity.changeFrameCopy(referenceFrame);
-
-      FrameVector2d ret = new FrameVector2d(referenceFrame);
-      ret.sub(desiredCenterOfMassVelocity, centerOfMassVelocity2d);
-
-      return ret;
+      this.velocityAlwaysFacesHeading.set(velocityAlwaysFacesHeading);
+   }
+   
+   public boolean getVelocityAlwaysFacesHeading()
+   {
+      return this.velocityAlwaysFacesHeading.getBooleanValue();
    }
 
    public void updateDesiredVelocity()
    {
-      if (VELOCITY_AND_HEADING_ARE_DEPENDENT)
+      if (velocityAlwaysFacesHeading.getBooleanValue())
       {
-         this.desiredVelocity.set(desiredVelocityNorm.getDoubleValue(), 0.0, 0.0);
-      }
-      else
-      {
-         double desiredHeading = this.desiredHeadingControlModule.getDesiredHeading();
+         double desiredHeading = this.desiredHeadingControlModule.getDesiredHeadingAngle();
          this.desiredVelocity.set(desiredVelocityNorm.getDoubleValue() * Math.cos(desiredHeading),
-                                  desiredVelocityNorm.getDoubleValue() * Math.sin(desiredHeading), 0.0);
+                                  desiredVelocityNorm.getDoubleValue() * Math.sin(desiredHeading));
       }
-
    }
 
 }

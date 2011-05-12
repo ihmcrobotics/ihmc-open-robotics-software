@@ -102,6 +102,6 @@ public class CommonDoEveryTickSubController implements DoEveryTickSubController
 
    public void doFirstTick()
    {
-      desiredHeadingControlModule.resetHeading(initialDesiredHeading);
+      desiredHeadingControlModule.resetHeadingAngle(initialDesiredHeading);
    }
 }
