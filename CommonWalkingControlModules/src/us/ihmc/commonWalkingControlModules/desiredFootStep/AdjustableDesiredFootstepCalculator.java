@@ -9,6 +9,7 @@ import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
+import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.Orientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
@@ -168,11 +169,11 @@ public class AdjustableDesiredFootstepCalculator implements DesiredFootstepCalcu
    private double getStepWidthAdjustmentForTurning(RobotSide swingLegSide, ReferenceFrame desiredHeadingFrame)
    {
       // This is where we want to adjust the width depending on "inside" or "outside" foot
-      FrameVector desiredHeading = new FrameVector(desiredHeadingFrame, 1.0, 0.0, 0.0);
-      FrameVector finalHeading = desiredHeadingControlModule.getFinalHeadingTarget().changeFrameCopy(desiredHeadingFrame);
-      FrameVector crossVector = new FrameVector(desiredHeading);
-      crossVector.cross(desiredHeading, finalHeading);
-      double magCrossProductFromDesiredToFinalHeading = crossVector.getZ();
+      FrameVector2d desiredHeading = new FrameVector2d(desiredHeadingFrame, 1.0, 0.0);
+      FrameVector2d finalHeading = desiredHeadingControlModule.getFinalHeadingTarget().changeFrameCopy(desiredHeadingFrame);
+//      FrameVector2d crossVector = new FrameVector2d(desiredHeading);
+      double magCrossProductFromDesiredToFinalHeading = desiredHeading.cross(finalHeading);
+//      double magCrossProductFromDesiredToFinalHeading = crossVector.getZ();
       headingCross.set(magCrossProductFromDesiredToFinalHeading);
 
       double thresholdForStepWidthAdjustment = 0.00;

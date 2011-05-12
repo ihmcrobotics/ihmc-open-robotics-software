@@ -8,10 +8,11 @@ import javax.swing.JScrollPane;
 import us.ihmc.commonWalkingControlModules.RobotSide;
 import us.ihmc.commonWalkingControlModules.SideDependentList;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredHeadingControlModule;
+import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.HeadingAndVelocityEvaluationScript;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.SimpleDesiredHeadingControlModule;
+import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.SimpleDesiredVelocityControlModule;
 import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
-import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.Orientation;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
@@ -74,7 +75,7 @@ public class DesiredFootstepVisualizer
    
    private static SimulationConstructionSet createSCSAndAttachVisualizer(YoVariableRegistry registryToAddToRobot, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
-      Robot robot = new Robot("Robot");
+      Robot robot = new Robot("DesiredFootstepVisualizerRobot");
       robot.getRobotsYoVariableRegistry().addChild(registryToAddToRobot);
       
       SimulationConstructionSet scs = new SimulationConstructionSet(robot);
@@ -148,7 +149,6 @@ public class DesiredFootstepVisualizer
       }
    }
    
-   
    private void updateFrames()
    {
       for (RobotSide robotSide : RobotSide.values())
@@ -165,21 +165,25 @@ public class DesiredFootstepVisualizer
       PoseReferenceFrame rightFootReferenceFrame = new PoseReferenceFrame("rightFootReferenceFrame", ReferenceFrame.getWorldFrame());
       SideDependentList<PoseReferenceFrame> feetPoseReferenceFrames = new SideDependentList<PoseReferenceFrame>(leftFootReferenceFrame, rightFootReferenceFrame);
      
-      SideDependentList<ReferenceFrame> feetReferenceFrames = new SideDependentList<ReferenceFrame>(leftFootReferenceFrame, rightFootReferenceFrame);
-//      DesiredFootstepCalculatorForTesting desiredFootstepCalculator = new DesiredFootstepCalculatorForTesting(feetReferenceFrames);
+      SideDependentList<ReferenceFrame> feetReferenceFrames = new SideDependentList<ReferenceFrame>(leftFootReferenceFrame, rightFootReferenceFrame);      
       
+      leftFootReferenceFrame.update();
+      rightFootReferenceFrame.update();
       
       double desiredHeadingFinal = 0.0;
-      double controlDT = 4.0;
+      double controlDT = 0.1;
+      int ticksPerStep = 10;
+      
       DesiredHeadingControlModule desiredHeadingControlModule = new SimpleDesiredHeadingControlModule(desiredHeadingFinal, controlDT, parentRegistry);
       
+      double initialDesiredVelocity = 1.0;
+      SimpleDesiredVelocityControlModule desiredVelocityControlModule = new SimpleDesiredVelocityControlModule(desiredHeadingControlModule, initialDesiredVelocity, parentRegistry);
       
       SimpleDesiredFootstepCalculator desiredFootstepCalculator = new SimpleDesiredFootstepCalculator(feetReferenceFrames, desiredHeadingControlModule, parentRegistry);
-//      desiredFootstepCalculator();
+      desiredFootstepCalculator.setupParametersForR2();
       
-//      AdjustableDesiredFootstepCalculator desiredFootstepCalculator = new AdjustableDesiredFootstepCalculator(feetReferenceFrames, desiredHeadingControlModule, parentRegistry);
-//      desiredFootstepCalculator.setupParametersForR2();
-      
+//      HeadingAndVelocityBasedDesiredFootstepCalculator desiredFootstepCalculator = new HeadingAndVelocityBasedDesiredFootstepCalculator(feetReferenceFrames, desiredHeadingControlModule, desiredVelocityControlModule, parentRegistry);
+//      desiredFootstepCalculator.setUpParametersForR2();
       
       double footWidth = 0.15;
       double footForward = 0.25;
@@ -192,7 +196,8 @@ public class DesiredFootstepVisualizer
       ConvexPolygon2d rightFootInFootFrame = new ConvexPolygon2d(rightPointList);
       
       SideDependentList<ConvexPolygon2d> feetPolygonsInFootFrame = new SideDependentList<ConvexPolygon2d>(leftFootInFootFrame, rightFootInFootFrame);
-      
+      HeadingAndVelocityEvaluationScript headingAndVelocityEvaluationScript = new HeadingAndVelocityEvaluationScript(controlDT, desiredHeadingControlModule, desiredVelocityControlModule, parentRegistry);
+
       
       DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
       
@@ -203,15 +208,28 @@ public class DesiredFootstepVisualizer
       scs.setDT(controlDT, 1);
       
       RobotSide swingLegSide = RobotSide.LEFT;
-      int numberOfSteps = 20000;
+      int numberOfSteps = 100;
       
+      double time = scs.getTime();
+            
       for (int i=0; i<numberOfSteps; i++)
       {
-         desiredHeadingControlModule.updateDesiredHeadingFrame();
-         Footstep footstep = visualizer.takeAndVisualizeAStep(swingLegSide);
-         scs.tickAndUpdate();
+         for (int j=0; j<ticksPerStep; j++)
+         {
+            headingAndVelocityEvaluationScript.update(time);
+
+            desiredHeadingControlModule.updateDesiredHeadingFrame();
+            desiredVelocityControlModule.updateDesiredVelocity();
+            
+            scs.setTime(time);            
+//            sleep(controlDT);
+            time = time + controlDT;
+            scs.tickAndUpdate();
+
+         }
          
-         sleep(controlDT);
+         Footstep footstep = visualizer.takeAndVisualizeAStep(swingLegSide);
+         
          PoseReferenceFrame footToMoveFrame = feetPoseReferenceFrames.get(swingLegSide);
          
          FramePose poseToMoveTo = footstep.getFootstepPoseCopy();

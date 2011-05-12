@@ -9,6 +9,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.KneeExtensionControlMo
 import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredHeadingControlModule;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredVelocityControlModule;
+import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.VelocityErrorCalculator;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegTorques;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LowerBodyTorques;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
@@ -30,6 +31,7 @@ public class CommonStanceSubController implements StanceSubController
    private final CouplingRegistry couplingRegistry;
    private final CommonWalkingReferenceFrames referenceFrames;
    private final DesiredVelocityControlModule desiredVelocityControlModule;
+   private final VelocityErrorCalculator velocityErrorCalculator;
    private final DesiredPelvisOrientationControlModule desiredPelvisOrientationControlModule;
    private final BalanceSupportControlModule balanceSupportControlModule;
    private final FootOrientationControlModule footOrientationControlModule;
@@ -74,7 +76,9 @@ public class CommonStanceSubController implements StanceSubController
 
 
    public CommonStanceSubController(CouplingRegistry couplingRegistry, CommonWalkingReferenceFrames referenceFrames,
-                                    DesiredHeadingControlModule desiredHeadingControlModule, DesiredVelocityControlModule desiredVelocityControlModule,
+                                    DesiredHeadingControlModule desiredHeadingControlModule, 
+                                    DesiredVelocityControlModule desiredVelocityControlModule,
+                                    VelocityErrorCalculator velocityErrorCalculator,
                                     DesiredPelvisOrientationControlModule desiredPelvisOrientationControlModule,
                                     BalanceSupportControlModule balanceSupportControlModule, FootOrientationControlModule footOrientationControlModule,
                                     KneeExtensionControlModule kneeExtensionControlModule,
@@ -83,6 +87,7 @@ public class CommonStanceSubController implements StanceSubController
       this.couplingRegistry = couplingRegistry;
       this.referenceFrames = referenceFrames;
       this.desiredVelocityControlModule = desiredVelocityControlModule;
+      this.velocityErrorCalculator = velocityErrorCalculator;
       this.desiredPelvisOrientationControlModule = desiredPelvisOrientationControlModule;
       this.balanceSupportControlModule = balanceSupportControlModule;
       this.footOrientationControlModule = footOrientationControlModule;
@@ -345,7 +350,7 @@ public class CommonStanceSubController implements StanceSubController
       FramePoint2d capturePoint = couplingRegistry.getCapturePointInFrame(loadingLegZUpFrame).toFramePoint2d();
 
       FrameVector2d desiredVelocity = desiredVelocityControlModule.getDesiredVelocity().changeFrameCopy(loadingLegZUpFrame);
-      FrameVector2d velocityError = desiredVelocityControlModule.getVelocityErrorInFrame(loadingLegZUpFrame, loadingLeg);
+      FrameVector2d velocityError = velocityErrorCalculator.getVelocityErrorInFrame(loadingLegZUpFrame, loadingLeg);
       captureXToFinishDoubleSupport.set(getCaptureXToFinishDoubleSupport(desiredVelocity, velocityError));
       boolean capturePointIsFarEnoughForward = capturePoint.getX() > captureXToFinishDoubleSupport.getDoubleValue();
 

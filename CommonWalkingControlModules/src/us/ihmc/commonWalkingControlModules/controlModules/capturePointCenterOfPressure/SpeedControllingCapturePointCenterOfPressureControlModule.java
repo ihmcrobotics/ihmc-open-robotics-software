@@ -42,7 +42,7 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
    private final DoubleYoVariable doubleSupportCaptureKp = new DoubleYoVariable("doubleSupportCaptureKp", registry);
 
    private final YoFrameLine2d capturePointLine = new YoFrameLine2d("capturePointLine", "", world, registry);
-   private final YoFrameLine2d comDirectionLine = new YoFrameLine2d("comDirectionLine", "", world, registry);
+   private final YoFrameLine2d comSpeedControllingLine = new YoFrameLine2d("comSpeedControllingLine", "", world, registry);
    private final YoFrameLineSegment2d guideLineWorld = new YoFrameLineSegment2d("guideLine", "", world, registry);
    private final YoFrameLine2d parallelLineWorld = new YoFrameLine2d("parallelLine", "", world, registry);
    private final YoFramePoint2d desiredCoP = new YoFramePoint2d("desiredCoP", "", world, registry);
@@ -65,8 +65,8 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
          YoFrameLine2dArtifact cpLineArtifact = new YoFrameLine2dArtifact("CP Line", capturePointLine, Color.RED);
          artifactList.add(cpLineArtifact);
 
-         YoFrameLine2dArtifact comDirectionArtifact = new YoFrameLine2dArtifact("comDirectionLine", comDirectionLine, Color.BLUE);
-         artifactList.add(comDirectionArtifact);
+         YoFrameLine2dArtifact comSpeedControllingArtifact = new YoFrameLine2dArtifact("comDirectionLine", comSpeedControllingLine, Color.BLUE);
+         artifactList.add(comSpeedControllingArtifact);
 
          YoFrameLineSegment2dArtifact guideLineArtifact = new YoFrameLineSegment2dArtifact("Guide Line", guideLineWorld, Color.RED);
          artifactList.add(guideLineArtifact);
@@ -87,8 +87,13 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
    private FrameLine2d createSpeedControlLine(FrameVector2d currentVelocity, FrameVector2d desiredVelocity, FramePoint centerOfMassPosition,
            ReferenceFrame currentFrame)
    {
+      //TODO: This seems to have problems when the desired velocity and the desired heading are not alligned.
+      // Otherwise it seems to be ok when they are aligned...
+      
+      desiredVelocity = desiredVelocity.changeFrameCopy(desiredHeadingFrame);
       ReferenceFrame desiredVelocityFrame = desiredVelocity.getReferenceFrame();
       desiredVelocityFrame.checkReferenceFrameMatch(desiredHeadingFrame);
+      
       FrameVector2d currentVelocityInFrame = currentVelocity.changeFrameCopy(desiredVelocityFrame);
       FramePoint2d centerOfMassPositionInFrame = centerOfMassPosition.changeFrameCopy(desiredVelocityFrame).toFramePoint2d();
 
@@ -111,7 +116,7 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
          throw new RuntimeException("Not sure what to do when velocity is zero");
       
       FrameLine2d massLine = new FrameLine2d(speedControlPosition, velocityT);
-      comDirectionLine.setFrameLine2d(massLine.changeFrameCopy(world));
+      comSpeedControllingLine.setFrameLine2d(massLine.changeFrameCopy(world));
   
       return massLine.changeFrameCopy(currentFrame);
    }
@@ -243,7 +248,7 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
            FrameVector2d currentVelocity)
    {
       // Disable double support stuff
-      comDirectionLine.setFrameLine2d(null);
+      comSpeedControllingLine.setFrameLine2d(null);
       capturePointLine.setFrameLine2d(null);
 
       // Validate input
