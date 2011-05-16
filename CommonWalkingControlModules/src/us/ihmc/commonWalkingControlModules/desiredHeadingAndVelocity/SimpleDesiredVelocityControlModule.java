@@ -10,46 +10,29 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector2d;
 
 public class SimpleDesiredVelocityControlModule implements DesiredVelocityControlModule
 {
-   private final BooleanYoVariable velocityAlwaysFacesHeading;
-   private final DoubleYoVariable desiredVelocityNorm;
-   private final YoFrameVector2d desiredVelocity;
+   private final YoVariableRegistry registry = new YoVariableRegistry("SimpleDesiredVelocityControlModule");
+   private final BooleanYoVariable velocityAlwaysFacesHeading = new BooleanYoVariable("velocityAlwaysFacesHeading", registry);
+   private final DoubleYoVariable desiredVelocityNorm = new DoubleYoVariable("desiredVelocityNorm", registry);
+   private final YoFrameVector2d desiredVelocity = new YoFrameVector2d("desiredVelocity", "", ReferenceFrame.getWorldFrame(), registry);
 
    private final DesiredHeadingControlModule desiredHeadingControlModule;
 
    public SimpleDesiredVelocityControlModule(DesiredHeadingControlModule desiredHeadingControlModule, double initialDesiredVelocity,
-           YoVariableRegistry yoVariableRegistry)
+           YoVariableRegistry parentRegistry)
    {
       this.desiredHeadingControlModule = desiredHeadingControlModule;
 
-      this.velocityAlwaysFacesHeading = new BooleanYoVariable("velocityAlwaysFacesHeading", yoVariableRegistry);
-
-      this.desiredVelocityNorm = new DoubleYoVariable("desiredVelocityNorm", yoVariableRegistry);
-      this.desiredVelocityNorm.set(initialDesiredVelocity);
-
-      this.desiredVelocity = new YoFrameVector2d("desiredVelocity", "", ReferenceFrame.getWorldFrame(), yoVariableRegistry);
+      desiredVelocityNorm.set(initialDesiredVelocity);
       velocityAlwaysFacesHeading.set(true);
 
-      updateDesiredVelocity();
-   }
+      parentRegistry.addChild(registry);
 
-   public void setDesiredVelocity(FrameVector2d newDesiredVelocity)
-   {
-      desiredVelocity.set(newDesiredVelocity);
+      updateDesiredVelocity();
    }
 
    public FrameVector2d getDesiredVelocity()
    {
       return new FrameVector2d(desiredVelocity.getReferenceFrame(), desiredVelocity.getX(), desiredVelocity.getY());
-   }
-   
-   public void setVelocityAlwaysFacesHeading(boolean velocityAlwaysFacesHeading)
-   {
-      this.velocityAlwaysFacesHeading.set(velocityAlwaysFacesHeading);
-   }
-   
-   public boolean getVelocityAlwaysFacesHeading()
-   {
-      return this.velocityAlwaysFacesHeading.getBooleanValue();
    }
 
    public void updateDesiredVelocity()
