@@ -24,7 +24,7 @@ public class HeadingAndVelocityEvaluationScript
    private final DoubleYoVariable acceleration = new DoubleYoVariable("acceleration", registry);
    private final DoubleYoVariable maxVelocity = new DoubleYoVariable("maxVelocity", registry);
    private final DoubleYoVariable cruiseVelocity = new DoubleYoVariable("cruiseVelocity", registry);
-   private final DoubleYoVariable desiredVelocityMagnitude = new DoubleYoVariable("currentVelocity", registry);
+   private final DoubleYoVariable desiredVelocityMagnitude = new DoubleYoVariable("desiredVelocityMagnitude", registry);
 
    private final DoubleYoVariable lastSwitchTime = new DoubleYoVariable("lastSwitchTime", registry);
    private final DoubleYoVariable eventDuration = new DoubleYoVariable("eventDuration", registry);
@@ -75,6 +75,7 @@ public class HeadingAndVelocityEvaluationScript
             case STEP_IN_PLACE :
             {
                desiredHeadingControlModule.setFinalHeadingTargetAngle(previousDesiredHeadingAngle);
+               desiredVelocityDirection.set(desiredHeading);
 
                break;
             }
@@ -82,6 +83,7 @@ public class HeadingAndVelocityEvaluationScript
             case SPEED_UP_TO_MAX_STRAIGHT :
             {
                desiredHeadingControlModule.setFinalHeadingTargetAngle(previousDesiredHeadingAngle);
+               desiredVelocityDirection.set(desiredHeading);
 
                break;
             }
@@ -89,6 +91,7 @@ public class HeadingAndVelocityEvaluationScript
             case GO_TO_CRUISE_STRAIGHT :
             {
                desiredHeadingControlModule.setFinalHeadingTargetAngle(previousDesiredHeadingAngle);
+               desiredVelocityDirection.set(desiredHeading);
 
                break;
 
@@ -104,6 +107,7 @@ public class HeadingAndVelocityEvaluationScript
             case SLOW_DOWN_TO_ZERO_STRAIGHT :
             {
                desiredHeadingControlModule.setFinalHeadingTargetAngle(previousDesiredHeadingAngle);
+               desiredVelocityDirection.set(desiredHeading);
 
                break;
             }
@@ -279,7 +283,7 @@ public class HeadingAndVelocityEvaluationScript
 
       desiredVelocityMagnitude.set(newVelocity);
    }
-   
+
    private void updateDesiredVelocityUnitVector(FrameVector2d desiredVelocityDirection)
    {
       this.desiredVelocityDirection.set(desiredVelocityDirection);
