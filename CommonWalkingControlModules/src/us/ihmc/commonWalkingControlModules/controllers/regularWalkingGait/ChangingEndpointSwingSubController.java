@@ -304,7 +304,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
 
    public void doTransitionIntoPreSwing(RobotSide swingSide)
    {
-      desiredFootstepCalculator.initializeDesiredFootstep(swingSide);
+      desiredFootstepCalculator.initializeDesiredFootstep(swingSide.getOppositeSide());
 
       // Reset the timers
       timeSpentInPreSwing.set(0.0);

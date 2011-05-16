@@ -103,8 +103,9 @@ public class AdjustableDesiredFootstepCalculator implements DesiredFootstepCalcu
    }
 
 
-   public void initializeDesiredFootstep(RobotSide swingLegSide)
+   public void initializeDesiredFootstep(RobotSide supportLegSide)
    {
+      RobotSide swingLegSide = supportLegSide.getOppositeSide();
       ReferenceFrame desiredHeadingFrame = desiredHeadingControlModule.getDesiredHeadingFrame();
 
       computeDesiredFootstepPosition(swingLegSide, desiredHeadingFrame);
@@ -119,7 +120,7 @@ public class AdjustableDesiredFootstepCalculator implements DesiredFootstepCalcu
       computePreviousStepLength(desiredHeadingFrame);
 
       // Compute Step Length
-      computeStepLength(swingLegSide);
+      computeStepLength();
 
       // Compute Width
       computeStepWidth(swingLegSide, desiredHeadingFrame);
@@ -141,7 +142,7 @@ public class AdjustableDesiredFootstepCalculator implements DesiredFootstepCalcu
       previousStepLength.set(Math.abs(footToFoot.getX()));
    }
 
-   private void computeStepLength(RobotSide swingLegSide)
+   private void computeStepLength()
    {
       double swingDuration = couplingRegistry.getSingleSupportDuration();
       double stanceDuration = couplingRegistry.getDoubleSupportDuration();
