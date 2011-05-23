@@ -4,7 +4,10 @@ import us.ihmc.commonWalkingControlModules.RobotSide;
 
 public interface DoEveryTickSubController
 {
-   public void doEveryControlTick(RobotSide supportLeg);
+   public abstract void doEveryControlTick(RobotSide supportLeg);
    
-   public void doFirstTick();
+   public abstract void doFirstTick();
+   
+   public abstract void addUpdatable(Updatable updatable);
+
 }

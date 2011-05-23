@@ -5,7 +5,6 @@ import javax.vecmath.Matrix3d;
 
 import us.ihmc.commonWalkingControlModules.sensors.ProcessedSensorsInterface;
 import us.ihmc.utilities.math.MathTools;
-import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
@@ -37,6 +36,16 @@ public class SimpleDesiredHeadingControlModule implements DesiredHeadingControlM
 
       this.desiredHeadingFinal.set(desiredHeadingfinal);
       this.desiredHeading.set(this.desiredHeadingFinal.getDoubleValue());    // The final is the first one according to the initial setup of the robot
+   }
+   
+   public void setMaxHeadingDot(double maxHeadingDot)
+   {
+      this.maxHeadingDot.set(maxHeadingDot);
+   }
+   
+   public double getMaxHeadingDot()
+   {
+      return maxHeadingDot.getDoubleValue();
    }
    
    public void initializeVisualizer(ProcessedSensorsInterface processedSensors, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
