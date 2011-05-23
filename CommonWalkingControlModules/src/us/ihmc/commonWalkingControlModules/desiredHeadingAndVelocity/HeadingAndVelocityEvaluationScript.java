@@ -3,27 +3,33 @@ package us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity;
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.Updatable;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.EnumYoVariable;
+import com.yobotics.simulationconstructionset.IntYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 /*
 * TODO: wave cruise, change heading walking straight, turn while facing same direction not working properly
  */
-public class HeadingAndVelocityEvaluationScript
+public class HeadingAndVelocityEvaluationScript implements Updatable
 {
    private final YoVariableRegistry registry = new YoVariableRegistry("HeadingAndVelocityEvaluationScript");
 
-   private final EnumYoVariable<HeadingAndVelocityEvaluationEvent> event = new EnumYoVariable<HeadingAndVelocityEvaluationEvent>("event", registry,
-                                                                              HeadingAndVelocityEvaluationEvent.class);
+   private final EnumYoVariable<HeadingAndVelocityEvaluationEvent> evaluationEvent = new EnumYoVariable<HeadingAndVelocityEvaluationEvent>("evaluationEvent",
+                                                                                        registry, HeadingAndVelocityEvaluationEvent.class);
+
+
+   private final IntYoVariable evaluationEventOrderingIndex = new IntYoVariable("evaluationEventOrderingIndex", registry);
 
    private final double controlDT;
    private final DoubleYoVariable acceleration = new DoubleYoVariable("acceleration", registry);
    private final DoubleYoVariable maxVelocity = new DoubleYoVariable("maxVelocity", registry);
    private final DoubleYoVariable cruiseVelocity = new DoubleYoVariable("cruiseVelocity", registry);
+   private final DoubleYoVariable sidestepVelocity = new DoubleYoVariable("sidestepVelocity", registry);
    private final DoubleYoVariable desiredVelocityMagnitude = new DoubleYoVariable("desiredVelocityMagnitude", registry);
 
    private final DoubleYoVariable lastSwitchTime = new DoubleYoVariable("lastSwitchTime", registry);
@@ -31,10 +37,16 @@ public class HeadingAndVelocityEvaluationScript
 
    private final FrameVector2d desiredVelocityDirection = new FrameVector2d(ReferenceFrame.getWorldFrame());
 
-   private final DesiredHeadingControlModule desiredHeadingControlModule;
+   private final DoubleYoVariable initialDesiredHeadingAngle = new DoubleYoVariable("initialDesiredHeadingAngle",
+                                                                  "Temporary variable to hold the initial heading for doing s curves", registry);
+
+   private final SimpleDesiredHeadingControlModule desiredHeadingControlModule;
    private final ManualDesiredVelocityControlModule desiredVelocityControlModule;
 
-   public HeadingAndVelocityEvaluationScript(double controlDT, DesiredHeadingControlModule desiredHeadingControlModule,
+   private final HeadingAndVelocityEvaluationEvent[] eventsToCycleThrough;
+
+   
+   public HeadingAndVelocityEvaluationScript(boolean cycleThroughAllEvents, double controlDT, SimpleDesiredHeadingControlModule desiredHeadingControlModule,
            ManualDesiredVelocityControlModule desiredVelocityControlModule, YoVariableRegistry parentRegistry)
    {
       this.controlDT = controlDT;
@@ -47,15 +59,37 @@ public class HeadingAndVelocityEvaluationScript
 //    
       desiredHeadingControlModule.setFinalHeadingTargetAngle(0.0);
       desiredHeadingControlModule.resetHeadingAngle(0.0);
+      desiredHeadingControlModule.setMaxHeadingDot(0.1);
 
-      acceleration.set(0.2);
-      maxVelocity.set(1.0);
-      cruiseVelocity.set(0.5);
-      eventDuration.set(10.0);
+      acceleration.set(0.25);
+      maxVelocity.set(1.0);    // (1.5);
+      cruiseVelocity.set(0.6);    // (0.8);
+      sidestepVelocity.set(0.4);
+      eventDuration.set(evaluationEvent.getEnumValue().getMinTimeForScript());
 
       parentRegistry.addChild(registry);
+      
+      if (cycleThroughAllEvents)
+         {
+         eventsToCycleThrough = HeadingAndVelocityEvaluationEvent.getAllEventsEvaluationOrdering();
+         }
+      else
+      {
+         eventsToCycleThrough = HeadingAndVelocityEvaluationEvent.getSomeEventsEvaluationOrdering();
+
+      }
    }
 
+
+   public double getAcceleration()
+   {
+      return acceleration.getDoubleValue();
+   }
+
+   public double getMaxVelocity()
+   {
+      return maxVelocity.getDoubleValue();
+   }
 
    public void update(double time)
    {
@@ -65,13 +99,23 @@ public class HeadingAndVelocityEvaluationScript
       double previousDesiredHeadingAngle = desiredHeadingControlModule.getDesiredHeadingAngle();
 
       // State transitions:
-      if (time > lastSwitchTime.getDoubleValue() + eventDuration.getDoubleValue())
+      if (time + 1e-7 > lastSwitchTime.getDoubleValue() + eventDuration.getDoubleValue())
       {
          lastSwitchTime.set(time);
          switchEventInOrder();
 
-         switch (event.getEnumValue())
+         eventDuration.set(evaluationEvent.getEnumValue().getMinTimeForScript());
+
+         switch (evaluationEvent.getEnumValue())
          {
+            case DO_NOTHING_FOR_A_TINY_BIT :
+            {
+               desiredHeadingControlModule.setFinalHeadingTargetAngle(previousDesiredHeadingAngle);
+               desiredVelocityDirection.set(desiredHeading);
+
+               break;
+            }
+
             case STEP_IN_PLACE :
             {
                desiredHeadingControlModule.setFinalHeadingTargetAngle(previousDesiredHeadingAngle);
@@ -99,8 +143,14 @@ public class HeadingAndVelocityEvaluationScript
 
             case TURN_180_CRUISE :
             {
+               desiredHeadingControlModule.setMaxHeadingDot(0.2);
                desiredHeadingControlModule.setFinalHeadingTargetAngle(previousDesiredHeadingAngle + Math.PI);
 
+               break;
+            }
+
+            case SLOW_DOWN_TO_ZERO :
+            {
                break;
             }
 
@@ -128,9 +178,10 @@ public class HeadingAndVelocityEvaluationScript
                break;
             }
 
-            case TURN_IN_PLACE360 :
+            case TURN_IN_PLACE180 :
             {
-               desiredHeadingControlModule.setFinalHeadingTargetAngle(previousDesiredHeadingAngle - 2.0 * Math.PI);
+               desiredHeadingControlModule.setMaxHeadingDot(0.5);
+               desiredHeadingControlModule.setFinalHeadingTargetAngle(previousDesiredHeadingAngle - Math.PI);
 
                break;
             }
@@ -164,13 +215,40 @@ public class HeadingAndVelocityEvaluationScript
 
                break;
             }
+
+            case WAVE_CRUISE :
+            {
+               initialDesiredHeadingAngle.set(desiredHeadingControlModule.getDesiredHeadingAngle());
+
+               break;
+            }
+
+            case CHANGE_HEADING_WALKING_STRAIGHT :
+            {
+               initialDesiredHeadingAngle.set(desiredHeadingControlModule.getDesiredHeadingAngle());
+
+               break;
+            }
+
+            default :
+            {
+               throw new RuntimeException("Should never get here!");
+            }
          }
       }
 
 
       // In each state:
-      switch (event.getEnumValue())
+      switch (evaluationEvent.getEnumValue())
       {
+         case DO_NOTHING_FOR_A_TINY_BIT :
+         {
+            updateDesiredVelocityMagnitude(0.0);
+            updateDesiredVelocityVector();
+
+            break;
+         }
+
          case STEP_IN_PLACE :
          {
             updateDesiredVelocityMagnitude(0.0);
@@ -205,6 +283,14 @@ public class HeadingAndVelocityEvaluationScript
             break;
          }
 
+         case SLOW_DOWN_TO_ZERO :
+         {
+            updateDesiredVelocityMagnitude(0.0);
+            updateDesiredVelocityVector();
+
+            break;
+         }
+
          case SLOW_DOWN_TO_ZERO_STRAIGHT :
          {
             updateDesiredVelocityMagnitude(0.0);
@@ -215,7 +301,7 @@ public class HeadingAndVelocityEvaluationScript
 
          case SIDE_STEP_LEFT :
          {
-            updateDesiredVelocityMagnitude(cruiseVelocity.getDoubleValue());
+            updateDesiredVelocityMagnitude(sidestepVelocity.getDoubleValue());
             updateDesiredVelocityVector();
 
             break;
@@ -223,13 +309,13 @@ public class HeadingAndVelocityEvaluationScript
 
          case SIDE_STEP_RIGHT :
          {
-            updateDesiredVelocityMagnitude(cruiseVelocity.getDoubleValue());
+            updateDesiredVelocityMagnitude(sidestepVelocity.getDoubleValue());
             updateDesiredVelocityVector();
 
             break;
          }
 
-         case TURN_IN_PLACE360 :
+         case TURN_IN_PLACE180 :
          {
             updateDesiredVelocityMagnitude(0.0);
             updateDesiredVelocityUnitVector(desiredHeading);
@@ -253,7 +339,48 @@ public class HeadingAndVelocityEvaluationScript
 
             break;
          }
+
+         case WAVE_CRUISE :
+         {
+            updateDesiredVelocityMagnitude(cruiseVelocity.getDoubleValue());
+            updateDesiredVelocityUnitVector(desiredHeading);
+            updateDesiredVelocityVector();
+
+            double freq = 0.2;    // Hz
+            double amplitude = Math.PI / 4.0;
+
+            desiredHeadingControlModule.setFinalHeadingTargetAngle(initialDesiredHeadingAngle.getDoubleValue()
+                    + amplitude * Math.sin(2.0 * Math.PI * freq * (time - lastSwitchTime.getDoubleValue())));
+
+            break;
+         }
+
+         case CHANGE_HEADING_WALKING_STRAIGHT :
+         {
+            desiredHeadingControlModule.setFinalHeadingTargetAngle(previousDesiredHeadingAngle);
+
+            updateDesiredVelocityMagnitude(cruiseVelocity.getDoubleValue());
+            updateDesiredVelocityVector();
+
+            double freq = 0.1;    // Hz
+            double amplitude = Math.PI / 4.0;
+
+            desiredHeadingControlModule.setFinalHeadingTargetAngle(initialDesiredHeadingAngle.getDoubleValue()
+                    + amplitude * Math.sin(2.0 * Math.PI * freq * (time - lastSwitchTime.getDoubleValue())));
+
+            break;
+         }
+
+         default :
+         {
+            throw new RuntimeException("Should never get here!");
+         }
       }
+   }
+
+   public HeadingAndVelocityEvaluationEvent getEvaluationEvent()
+   {
+      return evaluationEvent.getEnumValue();
    }
 
    private void updateDesiredVelocityMagnitude(double finalVelocity)
@@ -299,18 +426,127 @@ public class HeadingAndVelocityEvaluationScript
 
    private void switchEventInOrder()
    {
-      HeadingAndVelocityEvaluationEvent currentEvent = event.getEnumValue();
+      evaluationEventOrderingIndex.increment();
 
-      int nextOrdinal = (currentEvent.ordinal() + 1) % HeadingAndVelocityEvaluationEvent.values().length;
+      if (evaluationEventOrderingIndex.getIntegerValue() >= eventsToCycleThrough.length)
+      {
+         evaluationEventOrderingIndex.set(0);
+      }
 
-      HeadingAndVelocityEvaluationEvent nextEvent = HeadingAndVelocityEvaluationEvent.values()[nextOrdinal];
+      HeadingAndVelocityEvaluationEvent nextEvent = eventsToCycleThrough[evaluationEventOrderingIndex.getIntegerValue()];
 
-      event.set(nextEvent);
+      evaluationEvent.set(nextEvent);
    }
 
    public enum HeadingAndVelocityEvaluationEvent
    {
-      STEP_IN_PLACE, SPEED_UP_TO_MAX_STRAIGHT, GO_TO_CRUISE_STRAIGHT, TURN_180_CRUISE, SLOW_DOWN_TO_ZERO_STRAIGHT, SIDE_STEP_LEFT, SIDE_STEP_RIGHT,
-      TURN_IN_PLACE360, DIAGONALLY_RIGHT_45, DIAGONALLY_LEFT_45, WAVE_CRUISE, CHANGE_HEADING_WALKING_STRAIGHT, TURN_WHILE_FACING_SAME_DIRECTION
+      DO_NOTHING_FOR_A_TINY_BIT, STEP_IN_PLACE, GO_TO_CRUISE_STRAIGHT, TURN_180_CRUISE, SPEED_UP_TO_MAX_STRAIGHT, SLOW_DOWN_TO_ZERO, SLOW_DOWN_TO_ZERO_STRAIGHT,
+      SIDE_STEP_LEFT, SIDE_STEP_RIGHT, TURN_IN_PLACE180, DIAGONALLY_RIGHT_45, DIAGONALLY_LEFT_45, WAVE_CRUISE, CHANGE_HEADING_WALKING_STRAIGHT;
+
+
+      public static HeadingAndVelocityEvaluationEvent[] getAllEventsEvaluationOrdering()
+      {
+         return new HeadingAndVelocityEvaluationEvent[]
+                                                      {
+               STEP_IN_PLACE, GO_TO_CRUISE_STRAIGHT, TURN_180_CRUISE, SPEED_UP_TO_MAX_STRAIGHT, SLOW_DOWN_TO_ZERO_STRAIGHT, SIDE_STEP_LEFT, SLOW_DOWN_TO_ZERO,
+               SIDE_STEP_RIGHT, SLOW_DOWN_TO_ZERO, TURN_IN_PLACE180, DIAGONALLY_RIGHT_45, SLOW_DOWN_TO_ZERO, DIAGONALLY_LEFT_45, SLOW_DOWN_TO_ZERO, WAVE_CRUISE,
+               SLOW_DOWN_TO_ZERO, TURN_IN_PLACE180, CHANGE_HEADING_WALKING_STRAIGHT, SLOW_DOWN_TO_ZERO
+                                                      };
+      }
+
+      public static HeadingAndVelocityEvaluationEvent[] getSomeEventsEvaluationOrdering()
+      {
+         return new HeadingAndVelocityEvaluationEvent[]
+                                                      {
+               //               DIAGONALLY_LEFT_45,
+               //               DIAGONALLY_RIGHT_45,
+               GO_TO_CRUISE_STRAIGHT,
+
+               //               SLOW_DOWN_TO_ZERO, SIDE_STEP_LEFT, SLOW_DOWN_TO_ZERO,
+               //          SIDE_STEP_RIGHT, SLOW_DOWN_TO_ZERO
+                                                      };
+      }
+
+      public double getMinTimeForScript()
+      {
+         switch (this)
+         {
+            case DO_NOTHING_FOR_A_TINY_BIT :
+            {
+               return 0.1;
+            }
+
+            case STEP_IN_PLACE :
+            {
+               return 5.0;
+            }
+
+            case GO_TO_CRUISE_STRAIGHT :
+            {
+               return 6.0;
+            }
+
+            case TURN_180_CRUISE :
+            {
+               return 8.0;
+            }
+
+            case SPEED_UP_TO_MAX_STRAIGHT :
+            {
+               return 4.0;
+            }
+
+            case SLOW_DOWN_TO_ZERO :
+            {
+               return 4.0;
+            }
+
+            case SLOW_DOWN_TO_ZERO_STRAIGHT :
+            {
+               return 6.0;
+            }
+
+            case SIDE_STEP_LEFT :
+            {
+               return 5.0;
+            }
+
+            case SIDE_STEP_RIGHT :
+            {
+               return 5.0;
+            }
+
+            case TURN_IN_PLACE180 :
+            {
+               return 8.0;
+            }
+
+            case DIAGONALLY_RIGHT_45 :
+            {
+               return 6.0;
+            }
+
+            case DIAGONALLY_LEFT_45 :
+            {
+               return 6.0;
+            }
+
+            case WAVE_CRUISE :
+            {
+               return 12.0;
+            }
+
+            case CHANGE_HEADING_WALKING_STRAIGHT :
+            {
+               return 12.0;
+            }
+
+            default :
+            {
+               throw new RuntimeException("Shouldn't get here");
+            }
+         }
+      }
+
    }
 }

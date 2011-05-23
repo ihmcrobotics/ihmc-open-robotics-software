@@ -18,7 +18,7 @@ public class ManualDesiredVelocityControlModule implements DesiredVelocityContro
    
    public void setDesiredVelocity(FrameVector2d newDesiredVelocity)
    {
-      desiredVelocity.set(newDesiredVelocity);
+      desiredVelocity.set(newDesiredVelocity);  
    }
 
    public FrameVector2d getDesiredVelocity()
@@ -28,6 +28,6 @@ public class ManualDesiredVelocityControlModule implements DesiredVelocityContro
 
    public void updateDesiredVelocity()
    {
-      throw new RuntimeException("Set velocity manually, don't call this method.");
+//      throw new RuntimeException("Set velocity manually, don't call this method.");
    }
 }

@@ -8,14 +8,15 @@ import javax.swing.JScrollPane;
 
 import us.ihmc.commonWalkingControlModules.RobotSide;
 import us.ihmc.commonWalkingControlModules.SideDependentList;
-import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredHeadingControlModule;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.HeadingAndVelocityEvaluationScript;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.ManualDesiredVelocityControlModule;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.SimpleDesiredHeadingControlModule;
 import us.ihmc.commonWalkingControlModules.referenceFrames.VisualizeFramesController;
 import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
+import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
+import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.ZUpFrame;
@@ -23,13 +24,18 @@ import us.ihmc.utilities.math.geometry.ZUpFrame;
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.RobotController;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
+import com.yobotics.simulationconstructionset.YoAppearance;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.plotting.DynamicGraphicYoPolygonArtifact;
 import com.yobotics.simulationconstructionset.plotting.SimulationOverheadPlotter;
 import com.yobotics.simulationconstructionset.util.graphics.ArtifactList;
+import com.yobotics.simulationconstructionset.util.graphics.BagOfBalls;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicVector;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameConvexPolygon2d;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 
 public class DesiredFootstepVisualizer
 {
@@ -134,6 +140,11 @@ public class DesiredFootstepVisualizer
 
       return desiredFootstep;
    }
+   
+   private void hideSwingLeg(RobotSide swingLegSide)
+   {
+      feetPolygonsInWorld.get(swingLegSide).hide();
+   }
 
 
    private void setFeetPolygonsInWorld()
@@ -158,9 +169,35 @@ public class DesiredFootstepVisualizer
 
    public static void main(String[] args)
    {
+      double HEADING_VIZ_Z = 0.03;
+      double VELOCITY_VIZ_Z = 0.06;
+      
       YoVariableRegistry parentRegistry = new YoVariableRegistry("parent");
 
       DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
+      
+      BagOfBalls leftBagOfBalls = new BagOfBalls(1000, 0.05, "leftBalls", YoAppearance.Red(), parentRegistry, dynamicGraphicObjectsListRegistry);
+      BagOfBalls rightBagOfBalls = new BagOfBalls(1000, 0.05, "rightBalls", YoAppearance.Blue(), parentRegistry, dynamicGraphicObjectsListRegistry);
+      SideDependentList<BagOfBalls> bagsOfBalls = new SideDependentList<BagOfBalls>(leftBagOfBalls, rightBagOfBalls);
+      
+      
+      // Visualizers for the HeadingAndVelocityEvaluationScript:
+      YoFramePoint position = new YoFramePoint("position", "", ReferenceFrame.getWorldFrame(), parentRegistry);
+      YoFrameVector velocity = new YoFrameVector("velocity", "", ReferenceFrame.getWorldFrame(), parentRegistry);
+      YoFrameVector heading = new YoFrameVector("heading", "", ReferenceFrame.getWorldFrame(), parentRegistry);
+      
+      DynamicGraphicVector velocityVector = new DynamicGraphicVector("velocity", position, velocity, YoAppearance.Yellow());
+      DynamicGraphicVector headingVector = new DynamicGraphicVector("heading", position, heading, YoAppearance.Blue());
+      
+      dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("velocityVector", velocityVector);
+      dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("headingVector", headingVector);
+      
+      BagOfBalls bagOfBalls = new BagOfBalls(1200, 0.03, YoAppearance.Red(), parentRegistry, dynamicGraphicObjectsListRegistry);
+
+      
+      
+      
+      
       ArrayList<ReferenceFrame> framesToVisualize = new ArrayList<ReferenceFrame>();
       
       SideDependentList<PoseReferenceFrame> feetPoseReferenceFrames = new SideDependentList<PoseReferenceFrame>();
@@ -187,16 +224,26 @@ public class DesiredFootstepVisualizer
 
       double desiredHeadingFinal = 0.0;
       double controlDT = 0.1;
-      int ticksPerStep = 10;
-
-      DesiredHeadingControlModule desiredHeadingControlModule = new SimpleDesiredHeadingControlModule(desiredHeadingFinal, controlDT, parentRegistry);
+      int ticksPerStep = 7;
+      int ticksPerDoubleSupport = 2;
+      
+      SimpleDesiredHeadingControlModule desiredHeadingControlModule = new SimpleDesiredHeadingControlModule(desiredHeadingFinal, controlDT, parentRegistry);
 
       ManualDesiredVelocityControlModule desiredVelocityControlModule = new ManualDesiredVelocityControlModule(parentRegistry);
 
-      HeadingAndVelocityBasedDesiredFootstepCalculator desiredFootstepCalculator = new HeadingAndVelocityBasedDesiredFootstepCalculator(ankleZUpFrames,
-                                                                                      desiredHeadingControlModule, desiredVelocityControlModule,
-                                                                                      parentRegistry);
-      desiredFootstepCalculator.setUpParametersForR2();
+//      SimpleDesiredFootstepCalculator desiredFootstepCalculator = new SimpleDesiredFootstepCalculator(ankleZUpFrames,
+//                                                                                      desiredHeadingControlModule,
+//                                                                                      parentRegistry);
+      
+      ComponentBasedDesiredFootstepCalculator desiredFootstepCalculator = new ComponentBasedDesiredFootstepCalculator(ankleZUpFrames,
+            desiredHeadingControlModule, desiredVelocityControlModule,
+            parentRegistry);
+      
+//      HeadingAndVelocityBasedDesiredFootstepCalculator desiredFootstepCalculator = new HeadingAndVelocityBasedDesiredFootstepCalculator(ankleZUpFrames,
+//            desiredHeadingControlModule, desiredVelocityControlModule,
+//            parentRegistry);
+      
+      desiredFootstepCalculator.setupParametersForR2();
 
       double footWidth = 0.15;
       double footForward = 0.25;
@@ -215,7 +262,9 @@ public class DesiredFootstepVisualizer
       ConvexPolygon2d rightFootInFootFrame = new ConvexPolygon2d(rightPointList);
 
       SideDependentList<ConvexPolygon2d> feetPolygonsInFootFrame = new SideDependentList<ConvexPolygon2d>(leftFootInFootFrame, rightFootInFootFrame);
-      HeadingAndVelocityEvaluationScript headingAndVelocityEvaluationScript = new HeadingAndVelocityEvaluationScript(controlDT, desiredHeadingControlModule,
+      
+      boolean cycleThroughAllEvents = true;
+      HeadingAndVelocityEvaluationScript headingAndVelocityEvaluationScript = new HeadingAndVelocityEvaluationScript(cycleThroughAllEvents, controlDT, desiredHeadingControlModule,
                                                                                  desiredVelocityControlModule, parentRegistry);
 
 
@@ -236,7 +285,51 @@ public class DesiredFootstepVisualizer
 
       for (int i = 0; i < numberOfSteps; i++)
       {
+         visualizer.hideSwingLeg(swingLegSide);
+         
          for (int j = 0; j < ticksPerStep; j++)
+         {
+            headingAndVelocityEvaluationScript.update(time);
+            desiredHeadingControlModule.updateDesiredHeadingFrame();
+
+            FrameVector2d desiredHeading = desiredHeadingControlModule.getDesiredHeading();
+            FrameVector2d desiredVelocity = desiredVelocityControlModule.getDesiredVelocity();
+            
+            heading.set(desiredHeading.getX(), desiredHeading.getY(), HEADING_VIZ_Z);
+            velocity.set(desiredVelocity.getX(), desiredVelocity.getY(), VELOCITY_VIZ_Z);
+            
+            position.add(desiredVelocity.getX() * controlDT, desiredVelocity.getY() * controlDT, 0.0);
+           
+            FramePoint location = new FramePoint(ReferenceFrame.getWorldFrame());
+            location.set(position.getX(), position.getY(), 0.0);
+            
+            bagOfBalls.setBall(location);
+            
+            
+            scs.setTime(time);
+            boolean doSleep = false;
+            if (doSleep)
+               sleep(controlDT);
+            time = time + controlDT;
+            scs.doControl();
+            scs.tickAndUpdate();
+
+         }
+
+         Footstep footstep = visualizer.takeAndVisualizeAStep(swingLegSide);
+
+         bagsOfBalls.get(swingLegSide).setBall(footstep.getFootstepPositionInFrame(ReferenceFrame.getWorldFrame()));
+         
+         PoseReferenceFrame footToMoveFrame = feetPoseReferenceFrames.get(swingLegSide);
+
+         FramePose poseToMoveTo = footstep.getFootstepPoseCopy();
+         poseToMoveTo.changeFrame(ReferenceFrame.getWorldFrame());
+
+         footToMoveFrame.updatePose(poseToMoveTo);
+         feetPoseReferenceFrames.get(swingLegSide).update();
+
+         
+         for (int j = 0; j < ticksPerDoubleSupport; j++)
          {
             headingAndVelocityEvaluationScript.update(time);
             desiredHeadingControlModule.updateDesiredHeadingFrame();
@@ -250,22 +343,13 @@ public class DesiredFootstepVisualizer
             scs.tickAndUpdate();
 
          }
-
-         Footstep footstep = visualizer.takeAndVisualizeAStep(swingLegSide);
-
-         PoseReferenceFrame footToMoveFrame = feetPoseReferenceFrames.get(swingLegSide);
-
-         FramePose poseToMoveTo = footstep.getFootstepPoseCopy();
-         poseToMoveTo.changeFrame(ReferenceFrame.getWorldFrame());
-
-         footToMoveFrame.updatePose(poseToMoveTo);
-         feetPoseReferenceFrames.get(swingLegSide).update();
-
+         
          swingLegSide = swingLegSide.getOppositeSide();
       }
    }
 
 
+  
    private static void sleep(double sleepSeconds)
    {
       try

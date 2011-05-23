@@ -49,7 +49,7 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
 
    private final DoubleYoVariable kCaptureGuide = new DoubleYoVariable("kCaptureGuide", "ICP distance to guide line --> position of parallel line", registry);
 
-
+   //TODO: 110523: Clean this up and make it better. ComVelocity control line is still hackish.
 
    public SpeedControllingCapturePointCenterOfPressureControlModule(double controlDT, CommonWalkingReferenceFrames referenceFrames,
            YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, ReferenceFrame desiredHeadingFrame)
@@ -62,10 +62,10 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
          DynamicGraphicObjectsList dynamicGraphicObjectList = new DynamicGraphicObjectsList("CapturePointController");
          ArtifactList artifactList = new ArtifactList("Capture Point CoP Control Module");
 
-         YoFrameLine2dArtifact cpLineArtifact = new YoFrameLine2dArtifact("CP Line", capturePointLine, Color.RED);
+         YoFrameLine2dArtifact cpLineArtifact = new YoFrameLine2dArtifact("CP Line", capturePointLine, Color.MAGENTA);
          artifactList.add(cpLineArtifact);
 
-         YoFrameLine2dArtifact comSpeedControllingArtifact = new YoFrameLine2dArtifact("comDirectionLine", comSpeedControllingLine, Color.BLUE);
+         YoFrameLine2dArtifact comSpeedControllingArtifact = new YoFrameLine2dArtifact("comSpeedControllingLine", comSpeedControllingLine, Color.BLUE);
          artifactList.add(comSpeedControllingArtifact);
 
          YoFrameLineSegment2dArtifact guideLineArtifact = new YoFrameLineSegment2dArtifact("Guide Line", guideLineWorld, Color.RED);
@@ -84,32 +84,42 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
       }
    }
 
-   private FrameLine2d createSpeedControlLine(FrameVector2d currentVelocity, FrameVector2d desiredVelocity, FramePoint centerOfMassPosition,
+   private FrameLine2d createSpeedControlLine(FrameLine2d guideLine, FrameVector2d currentVelocity, FrameVector2d desiredVelocity, FramePoint centerOfMassPosition,
            ReferenceFrame currentFrame)
    {
-      //TODO: This seems to have problems when the desired velocity and the desired heading are not alligned.
-      // Otherwise it seems to be ok when they are aligned...
+      double desiredVelocityMagnitude = desiredVelocity.length();
       
-      desiredVelocity = desiredVelocity.changeFrameCopy(desiredHeadingFrame);
-      ReferenceFrame desiredVelocityFrame = desiredVelocity.getReferenceFrame();
-      desiredVelocityFrame.checkReferenceFrameMatch(desiredHeadingFrame);
+//      desiredVelocity = desiredVelocity.changeFrameCopy(desiredHeadingFrame);
+//      ReferenceFrame desiredVelocityFrame = desiredVelocity.getReferenceFrame();
+//      desiredVelocityFrame.checkReferenceFrameMatch(desiredHeadingFrame);
       
-      FrameVector2d currentVelocityInFrame = currentVelocity.changeFrameCopy(desiredVelocityFrame);
-      FramePoint2d centerOfMassPositionInFrame = centerOfMassPosition.changeFrameCopy(desiredVelocityFrame).toFramePoint2d();
+      FrameVector2d guideLineUnitVector = guideLine.getNormalizedFrameVector();
+      
+      FrameVector2d currentVelocityInFrame = currentVelocity.changeFrameCopy(guideLineUnitVector.getReferenceFrame());
+      
+      double currentVelocityProjectedIntoGuideLine = currentVelocityInFrame.dot(guideLineUnitVector);
+      double velocityError = desiredVelocityMagnitude - currentVelocityProjectedIntoGuideLine;
+      
+      FrameVector2d controlOffset = new FrameVector2d(guideLineUnitVector);
+      controlOffset.scale(-speedControlXKp.getDoubleValue() * velocityError);
+      
+      
+      FramePoint2d centerOfMassPositionInFrame = centerOfMassPosition.changeFrameCopy(controlOffset.getReferenceFrame()).toFramePoint2d();
 
       // Project CoM on control line
-      FrameVector2d velocityT = new FrameVector2d(desiredVelocity);
-      velocityT.setX(desiredVelocity.getY());
-      velocityT.setY(desiredVelocity.getX());
+      FrameVector2d velocityT = new FrameVector2d(guideLineUnitVector.getReferenceFrame());
+      velocityT.setX(-guideLineUnitVector.getY());
+      velocityT.setY(guideLineUnitVector.getX());
 
 
       FramePoint2d speedControlPosition = new FramePoint2d(centerOfMassPositionInFrame);
-
-      // Speed controller: Only increase speed for now
-      speedControlPosition.setX(speedControlPosition.getX()
-                                + speedControlXKp.getDoubleValue() * Math.min(0.0, currentVelocityInFrame.getX() - desiredVelocity.getX()));
-      speedControlPosition.setY(speedControlPosition.getY()
-                                + speedControlYKp.getDoubleValue() * Math.min(0.0, currentVelocityInFrame.getY() - desiredVelocity.getY()));
+      speedControlPosition.add(controlOffset);
+      
+//      // Speed controller: Only increase speed for now
+//      speedControlPosition.setX(speedControlPosition.getX()
+//                                + speedControlXKp.getDoubleValue() * Math.min(0.0, currentVelocityInFrame.getX() - desiredVelocity.getX()));
+//      speedControlPosition.setY(speedControlPosition.getY()
+//                                + speedControlYKp.getDoubleValue() * Math.min(0.0, currentVelocityInFrame.getY() - desiredVelocity.getY()));
 
 
       if (velocityT.length() == 0.0)
@@ -120,6 +130,44 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
   
       return massLine.changeFrameCopy(currentFrame);
    }
+   
+   
+   private FrameLine2d createSpeedControlLineOLD(FrameVector2d currentVelocity, FrameVector2d desiredVelocity, FramePoint centerOfMassPosition,
+         ReferenceFrame currentFrame)
+ {
+    //TODO: This seems to have problems when the desired velocity and the desired heading are not alligned.
+    // Otherwise it seems to be ok when they are aligned...
+    
+    desiredVelocity = desiredVelocity.changeFrameCopy(desiredHeadingFrame);
+    ReferenceFrame desiredVelocityFrame = desiredVelocity.getReferenceFrame();
+    desiredVelocityFrame.checkReferenceFrameMatch(desiredHeadingFrame);
+    
+    FrameVector2d currentVelocityInFrame = currentVelocity.changeFrameCopy(desiredVelocityFrame);
+    FramePoint2d centerOfMassPositionInFrame = centerOfMassPosition.changeFrameCopy(desiredVelocityFrame).toFramePoint2d();
+
+    // Project CoM on control line
+    FrameVector2d velocityT = new FrameVector2d(desiredVelocity);
+    velocityT.setX(desiredVelocity.getY());
+    velocityT.setY(desiredVelocity.getX());
+
+
+    FramePoint2d speedControlPosition = new FramePoint2d(centerOfMassPositionInFrame);
+
+    // Speed controller: Only increase speed for now
+    speedControlPosition.setX(speedControlPosition.getX()
+                              + speedControlXKp.getDoubleValue() * Math.min(0.0, currentVelocityInFrame.getX() - desiredVelocity.getX()));
+    speedControlPosition.setY(speedControlPosition.getY()
+                              + speedControlYKp.getDoubleValue() * Math.min(0.0, currentVelocityInFrame.getY() - desiredVelocity.getY()));
+
+
+    if (velocityT.length() == 0.0)
+       throw new RuntimeException("Not sure what to do when velocity is zero");
+    
+    FrameLine2d massLine = new FrameLine2d(speedControlPosition, velocityT);
+    comSpeedControllingLine.setFrameLine2d(massLine.changeFrameCopy(world));
+
+    return massLine.changeFrameCopy(currentFrame);
+ }
 
    public void controlDoubleSupport(BipedSupportPolygons bipedSupportPolygons, FramePoint currentCapturePoint, FramePoint desiredCapturePoint,
            FramePoint centerOfMassPositionInZUpFrame, FrameVector2d desiredVelocity, FrameVector2d currentVelocity)
@@ -221,11 +269,17 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
          }
          else
          {
-            FrameLine2d massLine = createSpeedControlLine(currentVelocity, desiredVelocity, centerOfMassPositionInZUpFrame, midFeetZUp);
+            FrameLine2d massLine = createSpeedControlLine(controlLine, currentVelocity, desiredVelocity, centerOfMassPositionInZUpFrame, midFeetZUp);
+            
+            if (massLine == null) 
+            {
+               throw new RuntimeException("massLine == null");
+            }
+                         
             centerOfPressureDesired = controlLine.intersectionWith(massLine);
          }
          centerOfPressureDesired.changeFrame(supportPolygon.getReferenceFrame());
-         movePointInsidePolygonAlongLine(centerOfPressureDesired, supportPolygon, controlLine);
+         movePointInsidePolygonAlongLine(centerOfPressureDesired, supportPolygon, new FrameLine2d(controlLine));
       }
 
       centerOfPressureDesired.changeFrame(world);
@@ -298,7 +352,7 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
 
 
          // Create speed control line
-         FrameLine2d massLine = createSpeedControlLine(currentVelocity, desiredVelocity, centerOfMassPositionInZUpFrame, referenceFrame);
+         FrameLine2d massLine = createSpeedControlLine(new FrameLine2d(guideLine), currentVelocity, desiredVelocity, centerOfMassPositionInZUpFrame, referenceFrame);
          desiredCenterOfPressure = shiftedParallelLine.intersectionWith(massLine);
 
          desiredCenterOfPressure.changeFrame(footPolygon.getReferenceFrame());

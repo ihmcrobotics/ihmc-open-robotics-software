@@ -3,17 +3,17 @@
 
 package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
-import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import us.ihmc.commonWalkingControlModules.RobotSide;
 import us.ihmc.commonWalkingControlModules.SideDependentList;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredHeadingControlModule;
-import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.Orientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public class SimpleDesiredFootstepCalculator implements DesiredFootstepCalculator
 {
@@ -32,7 +32,6 @@ public class SimpleDesiredFootstepCalculator implements DesiredFootstepCalculato
    private final DoubleYoVariable stepPitch = new DoubleYoVariable("stepPitch", registry);
    private final DoubleYoVariable stepRoll = new DoubleYoVariable("stepRoll", registry);
 
-   // Constructor
    public SimpleDesiredFootstepCalculator(SideDependentList<ReferenceFrame> ankleZUpFrames, DesiredHeadingControlModule desiredHeadingControlModule, YoVariableRegistry parentRegistry)
    {
       this.ankleZUpFrames = ankleZUpFrames;
@@ -40,13 +39,6 @@ public class SimpleDesiredFootstepCalculator implements DesiredFootstepCalculato
       parentRegistry.addChild(registry);
    }
 
-//   // Getters
-//   public Footstep getDesiredFootstep()
-//   {
-//      return desiredFootstep;
-//   }
-
-   // Methods
    public void initializeDesiredFootstep(RobotSide supportLegSide)
    {
       updateAndGetDesiredFootstep(supportLegSide);
