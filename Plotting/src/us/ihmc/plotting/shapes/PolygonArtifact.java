@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import javax.vecmath.Point2d;
 
 import us.ihmc.plotting.Artifact;
+import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
 
 public class PolygonArtifact extends Artifact
 {
@@ -47,6 +48,14 @@ public class PolygonArtifact extends Artifact
       setPoints(points);
    }
 
+   public PolygonArtifact(String id, boolean fill, Color color, ConvexPolygon2d convexPolygon2d)
+   {
+      super(id);
+      setLevel(2);
+      FILL_POLYGON = fill;
+      this.color = color;
+      setPoints(convexPolygon2d.getClockwiseOrderedListOfPointsCopy());
+   }
 
 
    public void setPoints(ArrayList<Point2d> points)
