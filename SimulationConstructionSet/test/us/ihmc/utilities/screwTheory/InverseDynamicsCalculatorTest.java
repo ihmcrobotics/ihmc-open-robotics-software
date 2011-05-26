@@ -26,6 +26,7 @@ import com.yobotics.simulationconstructionset.LinkGraphics;
 import com.yobotics.simulationconstructionset.PinJoint;
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
+import com.yobotics.simulationconstructionset.UnreasonableAccelerationException;
 import com.yobotics.simulationconstructionset.YoAppearance;
 
 /**
@@ -38,6 +39,7 @@ public class InverseDynamicsCalculatorTest
    private static final Vector3d X = new Vector3d(1.0, 0.0, 0.0);
    private static final Vector3d Y = new Vector3d(0.0, 1.0, 0.0);
    private static final Vector3d Z = new Vector3d(0.0, 0.0, 1.0);
+   
    
    private final Random random = new Random(100L);
 
@@ -157,7 +159,7 @@ public class InverseDynamicsCalculatorTest
       inputWrench.getBodyFrame().checkReferenceFrameMatch(outputWrench.getBodyFrame());
       inputWrench.getExpressedInFrame().checkReferenceFrameMatch(outputWrench.getExpressedInFrame());
 
-      double epsilon = 1e-3;
+      double epsilon = 1e-12; //3;
       JUnitTools.assertVector3dEquals(inputWrench.getTorque(), outputWrench.getTorque(), epsilon);
       JUnitTools.assertVector3dEquals(inputWrench.getForce(), outputWrench.getForce(), epsilon);
    }
@@ -174,7 +176,7 @@ public class InverseDynamicsCalculatorTest
 
    private void assertAccelerationsEqual(HashMap<RevoluteJoint, PinJoint> jointMap)
    {
-      double epsilon = 1e-3;    // hmm, needs to be pretty high...
+      double epsilon = 1e-12; //1e-3;    // hmm, needs to be pretty high...
       for (RevoluteJoint idJoint : jointMap.keySet())
       {
          PinJoint revoluteJoint = jointMap.get(idJoint);
@@ -196,15 +198,24 @@ public class InverseDynamicsCalculatorTest
       }
    }
 
-   private void createAndStartSimulation(Robot robot)
+   private void createAndStartSimulation(Robot robot) 
    {
-      SimulationConstructionSet scs = new SimulationConstructionSet(robot, false);
-      scs.disableGUIComponents();
-      scs.setRecordDT(scs.getDT());
-      Thread simThread = new Thread(scs, "InverseDynamicsCalculatorTest sim thread");
-      simThread.start();
-      scs.simulate(1);
-      waitForSimulationToFinish(scs);
+      try
+      {
+         robot.doDynamicsButDoNotIntegrate();
+      } 
+      catch (UnreasonableAccelerationException e)
+      {
+         throw new RuntimeException(e);
+      }
+      
+//      SimulationConstructionSet scs = new SimulationConstructionSet(robot, false);
+//      scs.disableGUIComponents();
+//      scs.setRecordDT(scs.getDT());
+//      Thread simThread = new Thread(scs, "InverseDynamicsCalculatorTest sim thread");
+//      simThread.start();
+//      scs.simulate(1);
+//      waitForSimulationToFinish(scs);
    }
 
    private void createRandomChainRobotAndSetJointPositionsAndVelocities(Robot robot, HashMap<RevoluteJoint, PinJoint> jointMap, ReferenceFrame worldFrame, RigidBody elevator, Vector3d[] jointAxes, double gravity, boolean useRandomVelocity, boolean useRandomAcceleration)
