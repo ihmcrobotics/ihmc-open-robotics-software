@@ -28,6 +28,7 @@ import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.UnreasonableAccelerationException;
 import com.yobotics.simulationconstructionset.YoAppearance;
+import com.yobotics.simulationconstructionset.util.robotExplorer.RobotExplorer;
 
 /**
  * This currently needs to be here because it uses SCS classes to test the inverse dynamics calculator, and SCS isn't on the IHMCUtilities build path
@@ -87,7 +88,7 @@ public class InverseDynamicsCalculatorTest
       worldToBody.transform(externalForce);
 
       Wrench inputWrench = new Wrench(bodyFixedFrame, bodyFixedFrame, externalForce, new Vector3d());
-      createAndStartSimulation(robot);
+      doRobotDynamics(robot);
 
       copyAccelerationFromForwardToInverse(rootJoint, rootInverseDynamicsJoint);
 
@@ -112,13 +113,37 @@ public class InverseDynamicsCalculatorTest
       ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new Transform3D());
       RigidBody elevator = new RigidBody("elevator", elevatorFrame);
       Vector3d[] jointAxes = {X, Y, Z, X};
+      
       double gravity = 0.0;
       createRandomChainRobotAndSetJointPositionsAndVelocities(robot, jointMap, worldFrame, elevator, jointAxes, gravity, true, true);
-
+      
       InverseDynamicsCalculator calculator = createInverseDynamicsCalculator(elevator, gravity, worldFrame, true, true);
       calculator.compute();
       copyTorques(jointMap);
-      createAndStartSimulation(robot);
+      doRobotDynamics(robot);
+      assertAccelerationsEqual(jointMap);
+   }
+   
+   
+   @Test
+   public void testTreeWithNoGravity()
+   {
+      Robot robot = new Robot("robot");
+      ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+      HashMap<RevoluteJoint, PinJoint> jointMap = new HashMap<RevoluteJoint, PinJoint>();
+      ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new Transform3D());
+      RigidBody elevator = new RigidBody("elevator", elevatorFrame);
+      double gravity = 0.0;
+
+      int numberOfJoints = 3;
+      createRandomTreeRobotAndSetJointPositionsAndVelocities(robot, jointMap, worldFrame, elevator, numberOfJoints, gravity, true, true);
+
+      exploreAndPrintRobot(robot);
+      
+      InverseDynamicsCalculator calculator = createInverseDynamicsCalculator(elevator, gravity, worldFrame, true, true);
+      calculator.compute();
+      copyTorques(jointMap);
+      doRobotDynamics(robot);
       assertAccelerationsEqual(jointMap);
    }
    
@@ -137,10 +162,19 @@ public class InverseDynamicsCalculatorTest
       InverseDynamicsCalculator calculator = createInverseDynamicsCalculator(elevator, gravity, worldFrame, false, false);
       calculator.compute();
       copyTorques(jointMap);
-      createAndStartSimulation(robot);
+      doRobotDynamics(robot);
       assertZeroAccelerations(jointMap);
    }
 
+   
+   private void exploreAndPrintRobot(Robot robot)
+   {
+      RobotExplorer robotExplorer = new RobotExplorer(robot);
+      StringBuffer buffer = new StringBuffer();
+      robotExplorer.getRobotInformationAsStringBuffer(buffer);
+      System.out.println(buffer);
+   }
+   
    private InverseDynamicsCalculator createInverseDynamicsCalculator(RigidBody elevator, double gravity, ReferenceFrame worldFrame, boolean doVelocityTerms, boolean doAcceleration)
    {
       HashMap<RigidBody, Wrench> externalWrenches = new HashMap<RigidBody, Wrench>(); // no external wrenches
@@ -198,7 +232,7 @@ public class InverseDynamicsCalculatorTest
       }
    }
 
-   private void createAndStartSimulation(Robot robot) 
+   private void doRobotDynamics(Robot robot) 
    {
       try
       {
@@ -257,6 +291,57 @@ public class InverseDynamicsCalculatorTest
          
          jointMap.put(currentIDJoint, currentJoint);
          previousJoint = currentJoint;
+      }
+
+      elevator.updateFramesRecursively();
+   }
+   
+   
+   private void createRandomTreeRobotAndSetJointPositionsAndVelocities(Robot robot, HashMap<RevoluteJoint, PinJoint> jointMap, ReferenceFrame worldFrame, RigidBody elevator, int numberOfJoints, double gravity, boolean useRandomVelocity, boolean useRandomAcceleration)
+   {
+      robot.setGravity(gravity);     
+
+      RigidBody currentIDBody = elevator;
+      
+      ArrayList<PinJoint> potentialParentJoints = new ArrayList<PinJoint>();
+      
+      for (int i = 0; i < numberOfJoints; i++)
+      {         
+         Vector3d jointOffset = getRandomVector();
+         Vector3d jointAxis = new Vector3d(random.nextDouble(), random.nextDouble(), random.nextDouble());
+         jointAxis.normalize();
+         Matrix3d momentOfInertia = getRandomDiagonalMatrix();
+         double mass = random.nextDouble();
+         Vector3d comOffset = getRandomVector();
+         double jointPosition = random.nextDouble();
+         double jointVelocity = useRandomVelocity ? random.nextDouble() : 0.0;
+         double jointAcceleration = useRandomVelocity ? random.nextDouble() : 0.0;
+         
+         RevoluteJoint currentIDJoint = ScrewTools.addRevoluteJoint("jointID" + i, currentIDBody, jointOffset, jointAxis);
+         currentIDJoint.setQ(jointPosition);
+         currentIDJoint.setQd(jointVelocity);
+         currentIDJoint.setQdd(jointAcceleration);
+         
+         currentIDBody = ScrewTools.addRigidBody("bodyID" + i, currentIDJoint, momentOfInertia, mass, comOffset);
+         
+         PinJoint currentJoint = new PinJoint("joint" + i, jointOffset, robot, jointAxis);
+         currentJoint.setInitialState(jointPosition, jointVelocity);
+         if (potentialParentJoints.isEmpty())
+            robot.addRootJoint(currentJoint);
+         else
+         {
+            int parentIndex = random.nextInt(potentialParentJoints.size());
+            potentialParentJoints.get(parentIndex).addJoint(currentJoint);
+         }
+
+         Link currentBody = new Link("body" + i);
+         currentBody.setComOffset(comOffset);
+         currentBody.setMass(mass);
+         currentBody.setMomentOfInertia(momentOfInertia);
+         currentJoint.setLink(currentBody);
+         
+         jointMap.put(currentIDJoint, currentJoint);
+         potentialParentJoints.add(currentJoint);
       }
 
       elevator.updateFramesRecursively();
