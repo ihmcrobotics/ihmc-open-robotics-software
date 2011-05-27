@@ -36,6 +36,8 @@ import com.yobotics.simulationconstructionset.util.robotExplorer.RobotExplorer;
  */
 public class InverseDynamicsCalculatorTest
 {
+   private static final boolean EXPLORE_AND_PRINT = false;
+   
    private static final Vector3d X = new Vector3d(1.0, 0.0, 0.0);
    private static final Vector3d Y = new Vector3d(0.0, 1.0, 0.0);
    private static final Vector3d Z = new Vector3d(0.0, 0.0, 1.0);
@@ -137,8 +139,11 @@ public class InverseDynamicsCalculatorTest
       int numberOfJoints = 3;
       createRandomTreeRobotAndSetJointPositionsAndVelocities(robot, jointMap, worldFrame, elevator, numberOfJoints, gravity, true, true);
 
-      exploreAndPrintRobot(robot);
-      exploreAndPrintInverseDynamicsMechanism(elevator);
+      if (EXPLORE_AND_PRINT)
+      {
+         exploreAndPrintRobot(robot);
+         exploreAndPrintInverseDynamicsMechanism(elevator);
+      }
       
       InverseDynamicsCalculator calculator = createInverseDynamicsCalculator(elevator, gravity, worldFrame, true, true);
       calculator.compute();
@@ -157,11 +162,14 @@ public class InverseDynamicsCalculatorTest
       RigidBody elevator = new RigidBody("elevator", elevatorFrame);
       double gravity = -9.8;
 
-      int numberOfJoints = 3;
+      int numberOfJoints = 100;
       createRandomTreeRobotAndSetJointPositionsAndVelocities(robot, jointMap, worldFrame, elevator, numberOfJoints, gravity, true, true);
 
-      exploreAndPrintRobot(robot);
-      exploreAndPrintInverseDynamicsMechanism(elevator);
+      if (EXPLORE_AND_PRINT)
+      {
+         exploreAndPrintRobot(robot);
+         exploreAndPrintInverseDynamicsMechanism(elevator);
+      }
       
       InverseDynamicsCalculator calculator = createInverseDynamicsCalculator(elevator, gravity, worldFrame, true, true);
       calculator.compute();
@@ -215,13 +223,17 @@ public class InverseDynamicsCalculatorTest
       RobotExplorer robotExplorer = new RobotExplorer(robot);
       StringBuffer buffer = new StringBuffer();
       robotExplorer.getRobotInformationAsStringBuffer(buffer);
+      System.out.println("-----------------------------");
       System.out.println(buffer);
+      System.out.println("-----------------------------");
    }
    
    private void exploreAndPrintInverseDynamicsMechanism(RigidBody elevator)
    {
       InverseDynamicsMechanismExplorer idMechanismExplorer = new InverseDynamicsMechanismExplorer(elevator);
+      System.out.println("-----------------------------");
       System.out.println(idMechanismExplorer);
+      System.out.println("-----------------------------");
    }
    
    private InverseDynamicsCalculator createInverseDynamicsCalculator(RigidBody elevator, double gravity, ReferenceFrame worldFrame, boolean doVelocityTerms, boolean doAcceleration)
@@ -265,9 +277,13 @@ public class InverseDynamicsCalculatorTest
          PinJoint revoluteJoint = jointMap.get(idJoint);
 
          DoubleYoVariable qddVariable = revoluteJoint.getQDD();
+         DoubleYoVariable tauVariable = revoluteJoint.getTau();
          double qdd = qddVariable.getDoubleValue();
          double qddInverse = idJoint.getQddDesired();
+         
 //         System.out.println("qddInverse: " + qddInverse + ", qdd: " + qdd);
+//         System.out.println("tau: "  + ", tauVariable: " + tauVariable.getDoubleValue());
+         
          assertEquals(qddInverse, qdd, epsilon);
       }
    }
