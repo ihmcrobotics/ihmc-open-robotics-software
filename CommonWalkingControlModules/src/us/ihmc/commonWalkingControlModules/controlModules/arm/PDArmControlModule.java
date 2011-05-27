@@ -5,13 +5,13 @@ import java.util.EnumMap;
 import us.ihmc.commonWalkingControlModules.RobotSide;
 import us.ihmc.commonWalkingControlModules.SideDependentList;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.ArmControlModule;
-import us.ihmc.commonWalkingControlModules.controllers.PIDController;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.ArmJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.ArmTorques;
 import us.ihmc.commonWalkingControlModules.sensors.ProcessedSensorsInterface;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.PIDController;
 
 public abstract class PDArmControlModule implements ArmControlModule
 {

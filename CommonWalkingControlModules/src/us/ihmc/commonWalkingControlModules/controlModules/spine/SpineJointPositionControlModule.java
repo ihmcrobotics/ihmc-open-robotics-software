@@ -3,7 +3,6 @@ package us.ihmc.commonWalkingControlModules.controlModules.spine;
 import java.util.EnumMap;
 
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.SpineControlModule;
-import us.ihmc.commonWalkingControlModules.controllers.PIDController;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.SpineJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.SpineTorques;
 import us.ihmc.commonWalkingControlModules.sensors.ProcessedSensorsInterface;
@@ -11,6 +10,7 @@ import us.ihmc.utilities.containers.ContainerTools;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.PIDController;
 
 public class SpineJointPositionControlModule implements SpineControlModule
 {

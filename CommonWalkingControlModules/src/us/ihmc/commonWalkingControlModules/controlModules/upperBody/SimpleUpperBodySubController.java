@@ -4,7 +4,6 @@ import java.util.EnumMap;
 
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.ArmControlModule;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.SpineControlModule;
-import us.ihmc.commonWalkingControlModules.controllers.PIDController;
 import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.UpperBodySubController;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.NeckJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.NeckTorques;
@@ -14,6 +13,7 @@ import us.ihmc.utilities.containers.ContainerTools;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.PIDController;
 
 public class SimpleUpperBodySubController implements UpperBodySubController
 {

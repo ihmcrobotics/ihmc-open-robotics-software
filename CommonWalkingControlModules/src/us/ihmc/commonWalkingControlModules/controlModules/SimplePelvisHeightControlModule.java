@@ -2,11 +2,11 @@ package us.ihmc.commonWalkingControlModules.controlModules;
 
 import us.ihmc.commonWalkingControlModules.RobotSide;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.PelvisHeightControlModule;
-import us.ihmc.commonWalkingControlModules.controllers.PDController;
 import us.ihmc.commonWalkingControlModules.sensors.ProcessedSensorsInterface;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.PDController;
 import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoVariable;
 
 public class SimplePelvisHeightControlModule implements PelvisHeightControlModule
