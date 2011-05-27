@@ -3,7 +3,6 @@ package us.ihmc.commonWalkingControlModules.controlModules.spine;
 import java.util.EnumMap;
 
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.SpineControlModule;
-import us.ihmc.commonWalkingControlModules.controllers.PDController;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredHeadingControlModule;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.SpineJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.SpineTorques;
@@ -16,6 +15,7 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.PDController;
 
 public class SpineOrientationInHeadingFrameControlModule implements SpineControlModule
 {
