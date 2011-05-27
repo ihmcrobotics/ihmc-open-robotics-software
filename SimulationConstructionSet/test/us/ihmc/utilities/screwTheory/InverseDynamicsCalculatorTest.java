@@ -265,6 +265,8 @@ public class InverseDynamicsCalculatorTest
       {
          PinJoint joint = jointMap.get(idJoint);
          double tau = idJoint.getTau();
+//         System.out.println("tau = " + tau);
+         
          joint.setTau(tau);
       }
    }
