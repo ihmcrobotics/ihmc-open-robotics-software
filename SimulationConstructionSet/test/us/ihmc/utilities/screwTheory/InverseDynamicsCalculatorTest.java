@@ -25,7 +25,6 @@ import com.yobotics.simulationconstructionset.Link;
 import com.yobotics.simulationconstructionset.LinkGraphics;
 import com.yobotics.simulationconstructionset.PinJoint;
 import com.yobotics.simulationconstructionset.Robot;
-import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.UnreasonableAccelerationException;
 import com.yobotics.simulationconstructionset.YoAppearance;
 import com.yobotics.simulationconstructionset.util.robotExplorer.RobotExplorer;
@@ -139,6 +138,7 @@ public class InverseDynamicsCalculatorTest
       createRandomTreeRobotAndSetJointPositionsAndVelocities(robot, jointMap, worldFrame, elevator, numberOfJoints, gravity, true, true);
 
       exploreAndPrintRobot(robot);
+      exploreAndPrintInverseDynamicsMechanism(elevator);
       
       InverseDynamicsCalculator calculator = createInverseDynamicsCalculator(elevator, gravity, worldFrame, true, true);
       calculator.compute();
@@ -173,6 +173,12 @@ public class InverseDynamicsCalculatorTest
       StringBuffer buffer = new StringBuffer();
       robotExplorer.getRobotInformationAsStringBuffer(buffer);
       System.out.println(buffer);
+   }
+   
+   private void exploreAndPrintInverseDynamicsMechanism(RigidBody elevator)
+   {
+      InverseDynamicsMechanismExplorer idMechanismExplorer = new InverseDynamicsMechanismExplorer(elevator);
+      System.out.println(idMechanismExplorer);
    }
    
    private InverseDynamicsCalculator createInverseDynamicsCalculator(RigidBody elevator, double gravity, ReferenceFrame worldFrame, boolean doVelocityTerms, boolean doAcceleration)
@@ -218,6 +224,7 @@ public class InverseDynamicsCalculatorTest
          DoubleYoVariable qddVariable = revoluteJoint.getQDD();
          double qdd = qddVariable.getDoubleValue();
          double qddInverse = idJoint.getQdd();
+//         System.out.println("qddInverse: " + qddInverse + ", qdd: " + qdd);
          assertEquals(qddInverse, qdd, epsilon);
       }
    }
@@ -267,7 +274,7 @@ public class InverseDynamicsCalculatorTest
          Vector3d comOffset = getRandomVector();
          double jointPosition = random.nextDouble();
          double jointVelocity = useRandomVelocity ? random.nextDouble() : 0.0;
-         double jointAcceleration = useRandomVelocity ? random.nextDouble() : 0.0;
+         double jointAcceleration = useRandomAcceleration ? random.nextDouble() : 0.0;
          
          RevoluteJoint currentIDJoint = ScrewTools.addRevoluteJoint("jointID" + i, currentIDBody, jointOffset, jointAxis);
          currentIDJoint.setQ(jointPosition);
@@ -300,10 +307,10 @@ public class InverseDynamicsCalculatorTest
    private void createRandomTreeRobotAndSetJointPositionsAndVelocities(Robot robot, HashMap<RevoluteJoint, PinJoint> jointMap, ReferenceFrame worldFrame, RigidBody elevator, int numberOfJoints, double gravity, boolean useRandomVelocity, boolean useRandomAcceleration)
    {
       robot.setGravity(gravity);     
-
-      RigidBody currentIDBody = elevator;
-      
+    
       ArrayList<PinJoint> potentialParentJoints = new ArrayList<PinJoint>();
+      ArrayList<RevoluteJoint> potentialInverseDynamicsParentJoints = new ArrayList<RevoluteJoint>(); // synchronized with potentialParentJoints
+
       
       for (int i = 0; i < numberOfJoints; i++)
       {         
@@ -315,24 +322,29 @@ public class InverseDynamicsCalculatorTest
          Vector3d comOffset = getRandomVector();
          double jointPosition = random.nextDouble();
          double jointVelocity = useRandomVelocity ? random.nextDouble() : 0.0;
-         double jointAcceleration = useRandomVelocity ? random.nextDouble() : 0.0;
-         
-         RevoluteJoint currentIDJoint = ScrewTools.addRevoluteJoint("jointID" + i, currentIDBody, jointOffset, jointAxis);
-         currentIDJoint.setQ(jointPosition);
-         currentIDJoint.setQd(jointVelocity);
-         currentIDJoint.setQdd(jointAcceleration);
-         
-         currentIDBody = ScrewTools.addRigidBody("bodyID" + i, currentIDJoint, momentOfInertia, mass, comOffset);
-         
+         double jointAcceleration = useRandomAcceleration ? random.nextDouble() : 0.0;
+
          PinJoint currentJoint = new PinJoint("joint" + i, jointOffset, robot, jointAxis);
          currentJoint.setInitialState(jointPosition, jointVelocity);
+         RigidBody inverseDynamicsParentBody;
          if (potentialParentJoints.isEmpty())
+         {
             robot.addRootJoint(currentJoint);
+            inverseDynamicsParentBody = elevator;
+         }
          else
          {
             int parentIndex = random.nextInt(potentialParentJoints.size());
             potentialParentJoints.get(parentIndex).addJoint(currentJoint);
+            RevoluteJoint inverseDynamicsParentJoint = potentialInverseDynamicsParentJoints.get(parentIndex);
+            inverseDynamicsParentBody = inverseDynamicsParentJoint.getSuccessor();
          }
+
+         RevoluteJoint currentIDJoint = ScrewTools.addRevoluteJoint("jointID" + i, inverseDynamicsParentBody, jointOffset, jointAxis);
+         currentIDJoint.setQ(jointPosition);
+         currentIDJoint.setQd(jointVelocity);
+         currentIDJoint.setQdd(jointAcceleration);
+         ScrewTools.addRigidBody("bodyID" + i, currentIDJoint, momentOfInertia, mass, comOffset);
 
          Link currentBody = new Link("body" + i);
          currentBody.setComOffset(comOffset);
@@ -341,7 +353,9 @@ public class InverseDynamicsCalculatorTest
          currentJoint.setLink(currentBody);
          
          jointMap.put(currentIDJoint, currentJoint);
+         
          potentialParentJoints.add(currentJoint);
+         potentialInverseDynamicsParentJoints.add(currentIDJoint);
       }
 
       elevator.updateFramesRecursively();
@@ -438,22 +452,5 @@ public class InverseDynamicsCalculatorTest
       ret.m11 = random.nextDouble();
       ret.m22 = random.nextDouble();
       return ret;
-   }
-
-   private void waitForSimulationToFinish(SimulationConstructionSet scs)
-   {
-      while (scs.isRunning())
-      {
-         try
-         {
-            Thread.sleep(10);
-         }
-         catch (InterruptedException e)
-         {
-            e.printStackTrace();
-         }
-      }
-
-      scs = null;
    }
 }
