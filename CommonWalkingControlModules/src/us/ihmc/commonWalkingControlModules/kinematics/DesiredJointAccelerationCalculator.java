@@ -151,7 +151,7 @@ public class DesiredJointAccelerationCalculator
          LegJointName legJointName = legJointNames[i];
 
          double qdd = jointAccelerations.get(i, 0);
-         fullRobotModel.getLegJoint(swingSide, legJointName).setQdd(qdd);
+         fullRobotModel.getLegJoint(swingSide, legJointName).setQddDesired(qdd);
       }
    }
 }
