@@ -235,7 +235,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
 
       for (LegJointName legJointName : legTorquesToPackForSwingLeg.getLegJointNames())
       {
-         fullRobotModel.getLegJoint(swingSide, legJointName).setQdd(0.0);
+         fullRobotModel.getLegJoint(swingSide, legJointName).setQddDesired(0.0);
       }
 
       inverseDynamicsCalculators.get(swingSide).compute();
@@ -616,8 +616,8 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       {
          // this is better than not using the torques from the ID calculator at all, because at least gravity and Coriolis forces are compensated for
          RevoluteJoint revoluteJoint = fullRobotModel.getLegJoint(swingSide, legJointName);
-         double qdd = revoluteJoint.getQdd();
-         revoluteJoint.setQdd(qdd * percentScaling);
+         double qddDesired = revoluteJoint.getQddDesired();
+         revoluteJoint.setQddDesired(qddDesired * percentScaling);
       }
 
       // control

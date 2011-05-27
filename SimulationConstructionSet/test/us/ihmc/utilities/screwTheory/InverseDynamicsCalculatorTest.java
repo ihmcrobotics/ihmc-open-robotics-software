@@ -148,6 +148,29 @@ public class InverseDynamicsCalculatorTest
    }
    
    @Test
+   public void testTreeWithGravity()
+   {
+      Robot robot = new Robot("robot");
+      ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+      HashMap<RevoluteJoint, PinJoint> jointMap = new HashMap<RevoluteJoint, PinJoint>();
+      ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new Transform3D());
+      RigidBody elevator = new RigidBody("elevator", elevatorFrame);
+      double gravity = -9.8;
+
+      int numberOfJoints = 3;
+      createRandomTreeRobotAndSetJointPositionsAndVelocities(robot, jointMap, worldFrame, elevator, numberOfJoints, gravity, true, true);
+
+      exploreAndPrintRobot(robot);
+      exploreAndPrintInverseDynamicsMechanism(elevator);
+      
+      InverseDynamicsCalculator calculator = createInverseDynamicsCalculator(elevator, gravity, worldFrame, true, true);
+      calculator.compute();
+      copyTorques(jointMap);
+      doRobotDynamics(robot);
+      assertAccelerationsEqual(jointMap);
+   }
+   
+   @Test
    public void testGravityCompensationForChain()
    {
       Robot robot = new Robot("robot");
@@ -164,6 +187,26 @@ public class InverseDynamicsCalculatorTest
       copyTorques(jointMap);
       doRobotDynamics(robot);
       assertZeroAccelerations(jointMap);
+   }
+   
+   @Test
+   public void testChainWithGravity()
+   {
+      Robot robot = new Robot("robot");
+      ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+      HashMap<RevoluteJoint, PinJoint> jointMap = new HashMap<RevoluteJoint, PinJoint>();
+      ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new Transform3D());
+      RigidBody elevator = new RigidBody("elevator", elevatorFrame);
+      Vector3d[] jointAxes = {X, Y, Z, X};
+      
+      double gravity = -9.8;
+      createRandomChainRobotAndSetJointPositionsAndVelocities(robot, jointMap, worldFrame, elevator, jointAxes, gravity, true, true);
+      
+      InverseDynamicsCalculator calculator = createInverseDynamicsCalculator(elevator, gravity, worldFrame, true, true);
+      calculator.compute();
+      copyTorques(jointMap);
+      doRobotDynamics(robot);
+      assertAccelerationsEqual(jointMap);
    }
 
    
@@ -216,14 +259,14 @@ public class InverseDynamicsCalculatorTest
 
    private void assertAccelerationsEqual(HashMap<RevoluteJoint, PinJoint> jointMap)
    {
-      double epsilon = 1e-12; //1e-3;    // hmm, needs to be pretty high...
+      double epsilon = 1e-12;
       for (RevoluteJoint idJoint : jointMap.keySet())
       {
          PinJoint revoluteJoint = jointMap.get(idJoint);
 
          DoubleYoVariable qddVariable = revoluteJoint.getQDD();
          double qdd = qddVariable.getDoubleValue();
-         double qddInverse = idJoint.getQdd();
+         double qddInverse = idJoint.getQddDesired();
 //         System.out.println("qddInverse: " + qddInverse + ", qdd: " + qdd);
          assertEquals(qddInverse, qdd, epsilon);
       }
@@ -279,7 +322,7 @@ public class InverseDynamicsCalculatorTest
          RevoluteJoint currentIDJoint = ScrewTools.addRevoluteJoint("jointID" + i, currentIDBody, jointOffset, jointAxis);
          currentIDJoint.setQ(jointPosition);
          currentIDJoint.setQd(jointVelocity);
-         currentIDJoint.setQdd(jointAcceleration);
+         currentIDJoint.setQddDesired(jointAcceleration);
          
          currentIDBody = ScrewTools.addRigidBody("bodyID" + i, currentIDJoint, momentOfInertia, mass, comOffset);
          
@@ -343,7 +386,7 @@ public class InverseDynamicsCalculatorTest
          RevoluteJoint currentIDJoint = ScrewTools.addRevoluteJoint("jointID" + i, inverseDynamicsParentBody, jointOffset, jointAxis);
          currentIDJoint.setQ(jointPosition);
          currentIDJoint.setQd(jointVelocity);
-         currentIDJoint.setQdd(jointAcceleration);
+         currentIDJoint.setQddDesired(jointAcceleration);
          ScrewTools.addRigidBody("bodyID" + i, currentIDJoint, momentOfInertia, mass, comOffset);
 
          Link currentBody = new Link("body" + i);
