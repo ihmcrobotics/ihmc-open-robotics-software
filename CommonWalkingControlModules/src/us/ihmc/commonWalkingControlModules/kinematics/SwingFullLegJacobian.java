@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.kinematics;
 
 import java.util.ArrayList;
+import java.util.EnumMap;
 
 import javax.vecmath.Vector3d;
 
@@ -8,8 +9,6 @@ import us.ihmc.commonWalkingControlModules.RobotSide;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointVelocities;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegTorques;
-import us.ihmc.commonWalkingControlModules.partNamesAndTorques.RobotSpecificJointNames;
-import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.OpenChainJacobian;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
@@ -26,15 +25,16 @@ public class SwingFullLegJacobian
    
    /**
     * Constructs a new SwingFullLegJacobian, for the given side of the robot
+    * @param legFrames TODO
+    * @param pelvisFrame TODO
+    * @param endEffectorName TODO
     */
-   public SwingFullLegJacobian(RobotSpecificJointNames robotJointNames, RobotSide robotSide, CommonWalkingReferenceFrames frames)
+   public SwingFullLegJacobian(LegJointName[] legJointNames, RobotSide robotSide, EnumMap<LegJointName, ReferenceFrame> legFrames, ReferenceFrame pelvisFrame, LegJointName endEffectorName)
    {
-      this.legJointNames = robotJointNames.getLegJointNames();
+      this.legJointNames = legJointNames;
       this.robotSide = robotSide;
 
       // frames
-      ReferenceFrame pelvisFrame = frames.getPelvisFrame();
-
       // unit twists in body frames
       Vector3d zero = new Vector3d();
       
@@ -42,7 +42,7 @@ public class SwingFullLegJacobian
       ReferenceFrame twistBaseFrame = pelvisFrame;
       for (LegJointName legJointName : legJointNames)
       {
-         ReferenceFrame twistBodyFrame = frames.getLegJointFrame(robotSide, legJointName);
+         ReferenceFrame twistBodyFrame = legFrames.get(legJointName);
          ReferenceFrame expressedInFrame = twistBodyFrame;
          Twist twist = new Twist(twistBodyFrame, twistBaseFrame, expressedInFrame, zero, legJointName.getJointAxis());
          
@@ -52,7 +52,7 @@ public class SwingFullLegJacobian
       }
 
       // frames
-      ReferenceFrame endEffectorFrame = frames.getFootFrame(robotSide);
+      ReferenceFrame endEffectorFrame = legFrames.get(endEffectorName);
       ReferenceFrame baseFrame = pelvisFrame;
       ReferenceFrame jacobianFrame = endEffectorFrame;
 
