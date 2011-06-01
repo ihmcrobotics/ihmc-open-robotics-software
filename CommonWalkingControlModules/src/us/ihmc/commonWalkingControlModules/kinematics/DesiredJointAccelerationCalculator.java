@@ -7,7 +7,6 @@ import us.ihmc.commonWalkingControlModules.RobotSide;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointVelocities;
-import us.ihmc.commonWalkingControlModules.partNamesAndTorques.RobotSpecificJointNames;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
@@ -29,10 +28,10 @@ public class DesiredJointAccelerationCalculator
    private final ArrayList<RevoluteJoint> legJointsList;
    private final LegJointName[] legJointNames;
 
-   public DesiredJointAccelerationCalculator(RobotSpecificJointNames robotJointNames, SwingFullLegJacobian swingLegJacobian, FullRobotModel fullRobotModel,
+   public DesiredJointAccelerationCalculator(LegJointName[] legJointNames, SwingFullLegJacobian swingLegJacobian, FullRobotModel fullRobotModel,
            CommonWalkingReferenceFrames referenceFrames, RobotSide robotSide)
    {
-      this.legJointNames = robotJointNames.getLegJointNames();
+      this.legJointNames = legJointNames;
 
       swingLegJacobian.getRobotSide().checkRobotSideMatch(robotSide);
 
