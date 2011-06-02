@@ -24,7 +24,7 @@ public class DesiredJointVelocityCalculator
       this.swingFootFrame = referenceFrames.getFootFrame(swingSide);
    }
 
-   public LegJointVelocities computeDesiredJointVelocities(Twist desiredTwistOfSwingFootWithRespectToWorld)
+   public void packDesiredJointVelocities(LegJointVelocities legJointVelocitiesToPack, Twist desiredTwistOfSwingFootWithRespectToWorld)
    {
       // defensive copy, change frame
       desiredTwistOfSwingFootWithRespectToWorld = new Twist(desiredTwistOfSwingFootWithRespectToWorld);
@@ -45,9 +45,7 @@ public class DesiredJointVelocityCalculator
       twistOfSwingFootWithRespectToBody.changeFrame(swingFootFrame);
 
       // compute joint velocities
-      LegJointVelocities swingJointVelocities = swingFullLegJacobian.getJointVelocitiesGivenTwist(twistOfSwingFootWithRespectToBody);
-
-      return swingJointVelocities;
+      swingFullLegJacobian.packJointVelocitiesGivenTwist(legJointVelocitiesToPack, twistOfSwingFootWithRespectToBody);
    }
 
    public double swingFullLegJacobianDeterminant()

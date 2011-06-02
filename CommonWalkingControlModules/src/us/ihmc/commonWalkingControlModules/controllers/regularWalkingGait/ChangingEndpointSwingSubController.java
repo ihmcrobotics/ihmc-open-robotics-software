@@ -1,47 +1,27 @@
 package us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait;
 
-import javax.media.j3d.Transform3D;
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
-
 import us.ihmc.commonWalkingControlModules.RobotSide;
 import us.ihmc.commonWalkingControlModules.SideDependentList;
 import us.ihmc.commonWalkingControlModules.configurations.BalanceOnOneLegConfiguration;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.PreSwingControlModule;
-import us.ihmc.commonWalkingControlModules.controlModules.LegJointPositionControlModule;
+import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.SwingLegTorqueControlModule;
 import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculator;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
-import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.kinematics.AnkleVelocityCalculator;
-import us.ihmc.commonWalkingControlModules.kinematics.DesiredJointAccelerationCalculator;
-import us.ihmc.commonWalkingControlModules.kinematics.DesiredJointVelocityCalculator;
-import us.ihmc.commonWalkingControlModules.kinematics.InverseKinematicsException;
-import us.ihmc.commonWalkingControlModules.kinematics.LegInverseKinematicsCalculator;
-import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
-import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointPositions;
-import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointVelocities;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegTorques;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.sensors.ProcessedSensorsInterface;
 import us.ihmc.commonWalkingControlModules.trajectories.CartesianTrajectoryGenerator;
 import us.ihmc.utilities.kinematics.OrientationInterpolationCalculator;
-import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.Orientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.math.geometry.RotationFunctions;
-import us.ihmc.utilities.screwTheory.InverseDynamicsCalculator;
-import us.ihmc.utilities.screwTheory.RevoluteJoint;
-import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
-import us.ihmc.utilities.screwTheory.Twist;
-import us.ihmc.utilities.screwTheory.Wrench;
 
-import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoAppearance;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
@@ -61,7 +41,6 @@ public class ChangingEndpointSwingSubController implements SwingSubController
 {
    private final ProcessedSensorsInterface processedSensors;
    private final CommonWalkingReferenceFrames referenceFrames;
-   private final FullRobotModel fullRobotModel;
    private final CouplingRegistry couplingRegistry;
 
    private final DesiredFootstepCalculator desiredFootstepCalculator;
@@ -69,13 +48,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
    private final CartesianTrajectoryGenerator walkingTrajectoryGenerator;
    private final CartesianTrajectoryGenerator swingInAirTrajectoryGenerator;
 
-   private final SideDependentList<LegJointPositionControlModule> legJointPositionControlModules;
-   private final SideDependentList<InverseDynamicsCalculator> inverseDynamicsCalculators;
-
-   private final LegInverseKinematicsCalculator inverseKinematicsCalculator;
-
-   private final SideDependentList<DesiredJointVelocityCalculator> desiredJointVelocityCalculators;
-   private final SideDependentList<DesiredJointAccelerationCalculator> desiredJointAccelerationCalculators;
+   private final SwingLegTorqueControlModule swingLegTorqueControlModule;
 
    private final SideDependentList<AnkleVelocityCalculator> ankleVelocityCalculators;
    private final SideDependentList<FootSwitchInterface> footSwitches;
@@ -85,9 +58,6 @@ public class ChangingEndpointSwingSubController implements SwingSubController
    private final YoVariableRegistry registry = new YoVariableRegistry("SwingSubConroller");
 
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-
-   private final BooleanYoVariable inverseKinematicsExceptionHasBeenThrown = new BooleanYoVariable("kinematicException", registry);
-   private final DoubleYoVariable jacobianDeterminant = new DoubleYoVariable("jacobianDeterminant", registry);
 
    private final DoubleYoVariable passiveHipCollapseTime = new DoubleYoVariable("passiveHipCollapseTime", registry);
 
@@ -144,35 +114,22 @@ public class ChangingEndpointSwingSubController implements SwingSubController
    private final YoFrameVector desiredSwingFootAngularAccelerationInWorldFrame = new YoFrameVector("desiredSwingAngularAcceleration", "", worldFrame, registry);
    private DynamicGraphicCoordinateSystem swingFootOrientationViz = null;
 
-   private LegJointPositions desiredLegJointPositions;
-   private LegJointVelocities desiredLegJointVelocities;
-
    private BagOfBalls bagOfBalls;
    private final double controlDT;
-   private boolean useBodyAcceleration;
    private RobotSide swingSide;
 
    public ChangingEndpointSwingSubController(ProcessedSensorsInterface processedSensors, CommonWalkingReferenceFrames referenceFrames,
-           FullRobotModel fullRobotModel, CouplingRegistry couplingRegistry, DesiredFootstepCalculator desiredFootstepCalculator,
+           CouplingRegistry couplingRegistry, DesiredFootstepCalculator desiredFootstepCalculator,
            DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry,
-           SideDependentList<LegJointPositionControlModule> legJointPositionControlModules,
-           SideDependentList<InverseDynamicsCalculator> inverseDynamicsCalculators,
-           SideDependentList<DesiredJointVelocityCalculator> desiredJointVelocityCalculators,
-           SideDependentList<DesiredJointAccelerationCalculator> desiredJointAccelerationCalculators,
-           LegInverseKinematicsCalculator inverseKinematicsCalculator, SideDependentList<AnkleVelocityCalculator> ankleVelocityCalculators,
-           SideDependentList<FootSwitchInterface> footSwitches, CartesianTrajectoryGenerator walkingCartesianTrajectoryGenerator,
-           CartesianTrajectoryGenerator swingInAirCartesianTrajectoryGenerator, PreSwingControlModule preSwingControlModule, double controlDT)
+           SideDependentList<AnkleVelocityCalculator> ankleVelocityCalculators, SideDependentList<FootSwitchInterface> footSwitches,
+           CartesianTrajectoryGenerator walkingCartesianTrajectoryGenerator, CartesianTrajectoryGenerator swingInAirCartesianTrajectoryGenerator,
+           PreSwingControlModule preSwingControlModule, double controlDT, SwingLegTorqueControlModule swingLegTorqueControlModule)
    {
       this.processedSensors = processedSensors;
       this.referenceFrames = referenceFrames;
-      this.fullRobotModel = fullRobotModel;
       this.couplingRegistry = couplingRegistry;
       this.desiredFootstepCalculator = desiredFootstepCalculator;
-      this.legJointPositionControlModules = new SideDependentList<LegJointPositionControlModule>(legJointPositionControlModules);
-      this.inverseDynamicsCalculators = new SideDependentList<InverseDynamicsCalculator>(inverseDynamicsCalculators);
-      this.inverseKinematicsCalculator = inverseKinematicsCalculator;
-      this.desiredJointVelocityCalculators = new SideDependentList<DesiredJointVelocityCalculator>(desiredJointVelocityCalculators);
-      this.desiredJointAccelerationCalculators = new SideDependentList<DesiredJointAccelerationCalculator>(desiredJointAccelerationCalculators);
+      this.swingLegTorqueControlModule = swingLegTorqueControlModule;
       this.ankleVelocityCalculators = new SideDependentList<AnkleVelocityCalculator>(ankleVelocityCalculators);
       this.footSwitches = new SideDependentList<FootSwitchInterface>(footSwitches);
       this.walkingTrajectoryGenerator = walkingCartesianTrajectoryGenerator;
@@ -230,17 +187,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       setEstimatedSwingTimeRemaining(swingDuration.getDoubleValue());
       this.swingSide = legTorquesToPackForSwingLeg.getRobotSide();
       preSwingControlModule.doPreSwing(legTorquesToPackForSwingLeg, timeInState);
-
-      fullRobotModel.getRootJoint().setDesiredAccelerationToZero();
-
-      for (LegJointName legJointName : legTorquesToPackForSwingLeg.getLegJointNames())
-      {
-         fullRobotModel.getLegJoint(swingSide, legJointName).setQddDesired(0.0);
-      }
-
-      inverseDynamicsCalculators.get(swingSide).compute();
-      setUpperBodyWrench();
-
+      swingLegTorqueControlModule.computePreSwing(swingSide);
       timeSpentInPreSwing.set(timeInState);
    }
 
@@ -294,9 +241,9 @@ public class ChangingEndpointSwingSubController implements SwingSubController
 
       double minFootZ = 0.02;
       if (footZ < minFootZ)
-         legJointPositionControlModules.get(swingSide).setAnkleGainsSoft();
+         swingLegTorqueControlModule.setAnkleGainsSoft(swingSide);
       else
-         legJointPositionControlModules.get(swingSide).resetScalesToDefault();
+         swingLegTorqueControlModule.setAnkleGainsDefault(swingSide);
 
       computeDesiredFootPosVelAcc(swingInAirTrajectoryGenerator, timeInCurrentState);
       computeSwingLegTorques(legTorques);
@@ -341,7 +288,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       endPoint.changeFrame(finalDesiredSwingFootPosition.getReferenceFrame());
       finalDesiredSwingFootPosition.set(endPoint);
 
-      legJointPositionControlModules.get(swingSide).resetScalesToDefault();
+      swingLegTorqueControlModule.setAnkleGainsDefault(swingSide);
    }
 
    public void doTransitionIntoMidSwing(RobotSide swingSide)
@@ -350,7 +297,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
 
    public void doTransitionIntoTerminalSwing(RobotSide swingSide)
    {
-      legJointPositionControlModules.get(swingSide).setAnkleGainsSoft();
+      swingLegTorqueControlModule.setAnkleGainsSoft(swingSide);
    }
 
    public void doTransitionIntoSwingInAir(RobotSide swingLeg, BalanceOnOneLegConfiguration currentConfiguration)
@@ -373,7 +320,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
 
    public void doTransitionOutOfInitialSwing(RobotSide swingSide)
    {
-      legJointPositionControlModules.get(swingSide).resetScalesToDefault();
+      swingLegTorqueControlModule.setAnkleGainsDefault(swingSide);
    }
 
    public void doTransitionOutOfMidSwing(RobotSide swingSide)
@@ -475,8 +422,6 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       antiGravityPercentage.set(1.0);
 
       comXThresholdToFinishInitialSwing.set(0.15);
-
-      useBodyAcceleration = false;
    }
 
    public void setParametersForM2V2()
@@ -501,8 +446,6 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       antiGravityPercentage.set(1.0);
 
       comXThresholdToFinishInitialSwing.set(0.10);    // 15);
-
-      useBodyAcceleration = true;
    }
 
    private void updateFinalDesiredPosition(CartesianTrajectoryGenerator trajectoryGenerator)
@@ -565,141 +508,12 @@ public class ChangingEndpointSwingSubController implements SwingSubController
 
    private void computeSwingLegTorques(LegTorques legTorquesToPackForSwingLeg)
    {
-      // robotSides
-      RobotSide swingSide = legTorquesToPackForSwingLeg.getRobotSide();
-
-      // reference frames
-      ReferenceFrame pelvisFrame = referenceFrames.getPelvisFrame();
-      ReferenceFrame footFrame = referenceFrames.getFootFrame(swingSide);
-      ReferenceFrame elevatorFrame = fullRobotModel.getElevatorFrame();
-
-      // Desired positions
-      Transform3D footToPelvis = computeDesiredTransform(pelvisFrame);
-      Twist desiredTwistOfSwingFootWithRespectToWorld = computeDesiredTwist(worldFrame, footFrame);
-
-      desiredLegJointPositions = new LegJointPositions(swingSide);    // TODO: don't create every tick.
-      Matrix3d footToPelvisOrientation = new Matrix3d();
-      footToPelvis.get(footToPelvisOrientation);
-      double desiredHipYaw = RotationFunctions.getYaw(footToPelvisOrientation);    // TODO: wrong and not necessary for R2, but ok for now.
-      try
-      {
-         inverseKinematicsCalculator.solve(desiredLegJointPositions, footToPelvis, swingSide, desiredHipYaw);
-         inverseKinematicsExceptionHasBeenThrown.set(false);
-      }
-      catch (InverseKinematicsException e)
-      {
-         inverseKinematicsExceptionHasBeenThrown.set(true);
-      }
-
-      // Desired velocities
-      DesiredJointVelocityCalculator desiredJointVelocityCalculator = desiredJointVelocityCalculators.get(swingSide);
-      desiredLegJointVelocities = desiredJointVelocityCalculator.computeDesiredJointVelocities(desiredTwistOfSwingFootWithRespectToWorld);
-
-      // set body acceleration
-      if (useBodyAcceleration)
-      {
-         SpatialAccelerationVector bodyAcceleration = processedSensors.computeAccelerationOfPelvisWithRespectToWorld();    // FIXME: set to LIPM-based predicted body acceleration
-         bodyAcceleration.setAngularPart(new Vector3d());    // zero desired angular acceleration
-         bodyAcceleration.setLinearPart(new Vector3d());    // zero linear acceleration as well for now
-         fullRobotModel.getRootJoint().setDesiredAcceleration(bodyAcceleration);
-      }
-
-      // Desired acceleration
-      SpatialAccelerationVector desiredAccelerationOfSwingFootWithRespectToWorld = computeDesiredSwingFootSpatialAcceleration(elevatorFrame, footFrame);
-      jacobianDeterminant.set(desiredJointVelocityCalculator.swingFullLegJacobianDeterminant());
-      desiredJointAccelerationCalculators.get(swingSide).compute(desiredAccelerationOfSwingFootWithRespectToWorld);
-
-      double percentScaling = getPercentScalingBasedOnJacobianDeterminant(jacobianDeterminant.getDoubleValue());
-
-      LegJointName[] legJointNames = fullRobotModel.getRobotSpecificJointNames().getLegJointNames();
-      for (LegJointName legJointName : legJointNames)
-      {
-         // this is better than not using the torques from the ID calculator at all, because at least gravity and Coriolis forces are compensated for
-         RevoluteJoint revoluteJoint = fullRobotModel.getLegJoint(swingSide, legJointName);
-         double qddDesired = revoluteJoint.getQddDesired();
-         revoluteJoint.setQddDesired(qddDesired * percentScaling);
-      }
-
-      // control
-      legJointPositionControlModules.get(swingSide).packTorquesForLegJointsPositionControl(percentScaling, legTorquesToPackForSwingLeg,
-                                         desiredLegJointPositions, desiredLegJointVelocities);
-
-      inverseDynamicsCalculators.get(swingSide).compute();
-
-      for (LegJointName legJointName : legTorquesToPackForSwingLeg.getLegJointNames())
-      {
-         double tauInverseDynamics = fullRobotModel.getLegJoint(swingSide, legJointName).getTau();
-         legTorquesToPackForSwingLeg.addTorque(legJointName, tauInverseDynamics);
-      }
-
-      setUpperBodyWrench();
+      swingLegTorqueControlModule.compute(legTorquesToPackForSwingLeg, desiredSwingFootPositionInWorldFrame.getFramePointCopy(),
+              desiredFootOrientation.getFrameOrientationCopy(), desiredSwingFootVelocityInWorldFrame.getFrameVectorCopy(),
+              desiredSwingFootAngularVelocityInWorldFrame.getFrameVectorCopy(), desiredSwingFootAccelerationInWorldFrame.getFrameVectorCopy(),
+              desiredSwingFootAngularAccelerationInWorldFrame.getFrameVectorCopy());
 
       leaveTrailOfBalls();
-   }
-
-   private void setUpperBodyWrench()
-   {
-      Wrench upperBodyWrench = new Wrench();
-      fullRobotModel.getRootJoint().packWrench(upperBodyWrench);
-      upperBodyWrench.changeBodyFrameAttachedToSameBody(referenceFrames.getPelvisFrame());
-      upperBodyWrench.changeFrame(referenceFrames.getPelvisFrame());
-      couplingRegistry.setUpperBodyWrench(upperBodyWrench);
-   }
-
-   private double getPercentScalingBasedOnJacobianDeterminant(double jacobianDeterminant)
-   {
-      double determinantThresholdOne = 0.06;    // 0.05;    // 0.025;
-      double determinantThresholdTwo = 0.03;    // 0.02; //0.01;
-
-      double percent = (Math.abs(jacobianDeterminant) - determinantThresholdTwo) / (determinantThresholdOne - determinantThresholdTwo);
-      percent = MathTools.clipToMinMax(percent, 0.0, 1.0);
-
-      return percent;
-   }
-
-   private Transform3D computeDesiredTransform(ReferenceFrame pelvisFrame)
-   {
-      Orientation desiredFootOrientationInPelvisFrame = desiredFootOrientation.getFrameOrientationCopy();
-      desiredFootOrientationInPelvisFrame.changeFrame(pelvisFrame);
-      FramePoint desiredSwingFootPositionInPelvisFrame = desiredSwingFootPositionInWorldFrame.getFramePointCopy();
-      desiredSwingFootPositionInPelvisFrame.changeFrame(pelvisFrame);
-      Transform3D footToPelvis = createTransform(desiredFootOrientationInPelvisFrame, desiredSwingFootPositionInPelvisFrame);
-
-      return footToPelvis;
-   }
-
-   private Twist computeDesiredTwist(ReferenceFrame worldFrame, ReferenceFrame footFrame)
-   {
-      FrameVector desiredSwingFootVelocity = desiredSwingFootVelocityInWorldFrame.getFrameVectorCopy();
-      desiredSwingFootVelocity.changeFrame(footFrame);
-      FrameVector desiredSwingFootAngularVelocity = desiredSwingFootAngularVelocityInWorldFrame.getFrameVectorCopy();
-      desiredSwingFootAngularVelocity.changeFrame(footFrame);
-      Twist desiredTwistOfSwingFootWithRespectToStanceFoot = new Twist(footFrame, worldFrame, footFrame, desiredSwingFootVelocity.getVector(),
-                                                                desiredSwingFootAngularVelocity.getVector());
-
-      return desiredTwistOfSwingFootWithRespectToStanceFoot;
-   }
-
-   private static Transform3D createTransform(Orientation orientation, FramePoint framePoint)
-   {
-      orientation.checkReferenceFrameMatch(framePoint);
-      Matrix3d rotationMatrix = orientation.getMatrix3d();
-      Transform3D ret = new Transform3D(rotationMatrix, new Vector3d(framePoint.getPoint()), 1.0);
-
-      return ret;
-   }
-
-   private SpatialAccelerationVector computeDesiredSwingFootSpatialAcceleration(ReferenceFrame elevatorFrame, ReferenceFrame footFrame)
-   {
-      FrameVector desiredSwingFootAcceleration = desiredSwingFootAccelerationInWorldFrame.getFrameVectorCopy();
-      desiredSwingFootAcceleration = desiredSwingFootAcceleration.changeFrameCopy(footFrame);
-      FrameVector desiredSwingFootAngularAcceleration = desiredSwingFootAngularAccelerationInWorldFrame.getFrameVectorCopy();
-      desiredSwingFootAngularAcceleration = desiredSwingFootAngularAcceleration.changeFrameCopy(footFrame);
-      SpatialAccelerationVector desiredAccelerationOfSwingFootWithRespectToWorld = new SpatialAccelerationVector(footFrame, elevatorFrame, footFrame,
-                                                                                      desiredSwingFootAcceleration.getVector(),
-                                                                                      desiredSwingFootAngularAcceleration.getVector());
-
-      return desiredAccelerationOfSwingFootWithRespectToWorld;
    }
 
    private void leaveTrailOfBalls()
