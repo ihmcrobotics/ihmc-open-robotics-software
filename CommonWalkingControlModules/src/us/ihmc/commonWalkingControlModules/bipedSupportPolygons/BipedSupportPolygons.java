@@ -78,8 +78,11 @@ public class BipedSupportPolygons
       DynamicGraphicYoPolygonArtifact dynamicGraphicYoPolygonArtifact = new DynamicGraphicYoPolygonArtifact("Combined Polygon", supportPolygonViz, Color.pink,
                                                                            false);
       artifactList.add(dynamicGraphicYoPolygonArtifact);
-      dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectsList);
-      dynamicGraphicObjectsListRegistry.registerArtifactList(artifactList);
+      if (dynamicGraphicObjectsListRegistry != null)
+      {
+         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectsList);
+         dynamicGraphicObjectsListRegistry.registerArtifactList(artifactList);
+      }
 
       parentRegistry.addChild(registry);
    }
