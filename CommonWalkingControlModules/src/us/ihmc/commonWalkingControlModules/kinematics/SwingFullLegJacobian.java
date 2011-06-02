@@ -100,15 +100,24 @@ public class SwingFullLegJacobian
     */
    public LegJointVelocities getJointVelocitiesGivenTwist(Twist anklePitchTwistInAnklePitchFrame)
    {
-      Matrix jointVelocities = openChainJacobian.getJointVelocities(anklePitchTwistInAnklePitchFrame);
       LegJointVelocities ret = new LegJointVelocities(legJointNames, robotSide);
+      packJointVelocitiesGivenTwist(ret, anklePitchTwistInAnklePitchFrame);
+      return ret;
+   }
+   
+   /**
+    * Packs the joint velocities corresponding to the twist of the foot, with respect to the pelvis, expressed in ankle pitch frame
+    * @param anklePitchTwistInAnklePitchFrame
+    * @return corresponding joint velocities
+    */
+   public void packJointVelocitiesGivenTwist(LegJointVelocities legJointVelocitiesToPack, Twist anklePitchTwistInAnklePitchFrame)
+   {
+      Matrix jointVelocities = openChainJacobian.getJointVelocities(anklePitchTwistInAnklePitchFrame);
       for (int i = 0; i < legJointNames.length; i++)
       {
          LegJointName legJointName = legJointNames[i];
-         ret.setJointVelocity(legJointName, jointVelocities.get(i, 0));
+         legJointVelocitiesToPack.setJointVelocity(legJointName, jointVelocities.get(i, 0));
       }
-
-      return ret;
    }
 
    /**
