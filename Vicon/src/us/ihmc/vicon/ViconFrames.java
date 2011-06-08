@@ -89,7 +89,7 @@ public class ViconFrames
       return string.replace(":", "_");
    }
 
-   public ReferenceFrame getViconWorldFrame()
+   public synchronized ReferenceFrame getViconWorldFrame()
    {
       return referenceFrames.get(worldFrameName);
    }
@@ -103,7 +103,7 @@ public class ViconFrames
       }
    }
 
-   public ReferenceFrame getBodyFrame(String name)
+   public synchronized ReferenceFrame getBodyFrame(String name)
    {
       return referenceFrames.get(name);
    }
