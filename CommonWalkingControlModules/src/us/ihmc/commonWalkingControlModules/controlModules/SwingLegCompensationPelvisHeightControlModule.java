@@ -119,7 +119,7 @@ public class SwingLegCompensationPelvisHeightControlModule implements PelvisHeig
       stanceHeightPDcontroller.setProportionalGain(1000.0);
       stanceHeightPDcontroller.setDerivativeGain(10.0);
 
-      fZExtra.set(0.0); // 50.0);    // 0.0);
+      fZExtra.set(0.0); // 25.0); // 0.0); // 50.0);    // 0.0);
       stanceHeightDes.set(0.95);
 
       alphaFz.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(10.0, controlDT));

@@ -63,8 +63,6 @@ public abstract class RegularWalkingGaitAbstractController
    protected final StateMachine walkingStateMachine;
    protected final EnumYoVariable<RobotSide> supportLegYoVariable = new EnumYoVariable<RobotSide>("supportLegForWalkingCtrlr",
                                                                        "Current support leg. Null if double support", childRegistry, RobotSide.class);
-   protected final EnumYoVariable<RobotSide> swingLegYoVariable = EnumYoVariable.create("swingLeg", "Current support leg. Null if double support",
-                                                                     RobotSide.class, childRegistry);
    protected final EnumYoVariable<RobotSide> oneLegBalanceSide = new EnumYoVariable<RobotSide>("oneLegBalanceSide", childRegistry, RobotSide.class);
 
    private final String name;
@@ -215,7 +213,6 @@ public abstract class RegularWalkingGaitAbstractController
       public void doTransitionIntoAction()
       {
          supportLegYoVariable.set(null);
-         swingLegYoVariable.set(null);
 
          stanceSubController.doTransitionIntoStartStopWalkingDoubleSupport(loadingLeg);
       }
@@ -283,7 +280,6 @@ public abstract class RegularWalkingGaitAbstractController
       public void doTransitionIntoAction()
       {
          supportLegYoVariable.set(null);
-         swingLegYoVariable.set(null);
 
          stanceSubController.doTransitionIntoUnloadLegToTransferIntoWalking(upcomingSupportSide);
       }
@@ -325,7 +321,6 @@ public abstract class RegularWalkingGaitAbstractController
       public void doTransitionIntoAction()
       {
          supportLegYoVariable.set(null);
-         swingLegYoVariable.set(null);
          tookAnotherStep();
          stanceSubController.doTransitionIntoLoadingPreSwingA(loadingLeg);
       }
@@ -372,7 +367,6 @@ public abstract class RegularWalkingGaitAbstractController
       public void doTransitionIntoAction()
       {
          supportLegYoVariable.set(null);
-         swingLegYoVariable.set(null);
 
          stanceSubController.doTransitionIntoLoadingPreSwingB(loadingLeg);
       }
@@ -413,7 +407,6 @@ public abstract class RegularWalkingGaitAbstractController
 
       public void doTransitionIntoAction()
       {
-         swingLegYoVariable.set(swingLeg);
          supportLegYoVariable.set(supportLeg);
 
          stanceSubController.doTransitionIntoLoadingPreSwingC(supportLeg);
@@ -458,7 +451,6 @@ public abstract class RegularWalkingGaitAbstractController
       public void doTransitionIntoAction()
       {
          supportLegYoVariable.set(stanceSide);
-         swingLegYoVariable.set(swingSide);
 
          stanceSubController.doTransitionIntoEarlyStance(stanceSide);
          swingSubController.doTransitionIntoInitialSwing(swingSide);
@@ -504,7 +496,6 @@ public abstract class RegularWalkingGaitAbstractController
       public void doTransitionIntoAction()
       {
          supportLegYoVariable.set(stanceSide);
-         swingLegYoVariable.set(swingSide);
 
          stanceSubController.doTransitionIntoLateStance(stanceSide);
          swingSubController.doTransitionIntoMidSwing(swingSide);
@@ -548,7 +539,6 @@ public abstract class RegularWalkingGaitAbstractController
       public void doTransitionIntoAction()
       {
          supportLegYoVariable.set(stanceSide);
-         swingLegYoVariable.set(swingSide);
 
          stanceSubController.doTransitionIntoTerminalStance(stanceSide);
          swingSubController.doTransitionIntoTerminalSwing(swingSide);
@@ -593,7 +583,6 @@ public abstract class RegularWalkingGaitAbstractController
       public void doTransitionIntoAction()
       {
          supportLegYoVariable.set(null);    // null implies Double support
-         swingLegYoVariable.set(null);    // null implies Double support
       }
 
       public void doTransitionOutOfAction()
@@ -631,7 +620,6 @@ public abstract class RegularWalkingGaitAbstractController
       public void doTransitionIntoAction()
       {
          supportLegYoVariable.set(null);
-         swingLegYoVariable.set(null);
 
          stanceSubController.doTransitionIntoLoadingForSingleLegBalance(upcomingSupportSide);
       }
@@ -703,7 +691,6 @@ public abstract class RegularWalkingGaitAbstractController
          determineCurrentConfiguration();
 
          supportLegYoVariable.set(supportLeg);
-         swingLegYoVariable.set(supportLeg.getOppositeSide());
 
          stanceSubController.doTransitionIntoSingleLegBalance(supportLeg, currentConfiguration);
          swingSubController.doTransitionIntoSwingInAir(swingLeg, currentConfiguration);
