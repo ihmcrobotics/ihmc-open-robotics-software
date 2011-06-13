@@ -39,7 +39,7 @@ public class TestIMUKalmanFilterRobot extends Robot
 
    public TestIMUKalmanFilterRobot()
    {
-      super("TestIMU");
+      super("TestIMURobot");
 
       rootJoint = new FloatingJoint("root", new Vector3d(0.0, 0.0, 0.0), this);
 
@@ -88,7 +88,7 @@ public class TestIMUKalmanFilterRobot extends Robot
       ef_body_fy = (DoubleYoVariable)this.getVariable("ef_body_fy");
       ef_body_fz = (DoubleYoVariable)this.getVariable("ef_body_fz");
 
-      this.addYoVariableRegistry(registry);
+//      this.addYoVariableRegistry(registry);
    }
 
    public void updateYawPitchRoll()
