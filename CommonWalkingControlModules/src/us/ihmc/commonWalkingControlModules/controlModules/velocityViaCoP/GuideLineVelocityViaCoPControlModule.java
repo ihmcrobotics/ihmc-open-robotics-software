@@ -118,7 +118,6 @@ public class GuideLineVelocityViaCoPControlModule implements VelocityViaCoPContr
          lastTickDoubleSupport.set(false);
       }
 
-      desiredCapturePointInWorld.set(Double.NaN, Double.NaN, Double.NaN);
 
       ReferenceFrame supportFootAnkleZUpFrame = referenceFrames.getAnkleZUpFrame(supportLeg);
 
@@ -141,10 +140,12 @@ public class GuideLineVelocityViaCoPControlModule implements VelocityViaCoPContr
                                     actualCenterOfMassVelocityInSupportFootFrame);
          guideLine = guideLineCalculator.getGuideLine(supportLeg);
          guideLine.changeFrame(supportFootAnkleZUpFrame);
+         desiredCapturePointInWorld.setToNaN();
       }
       else
       {
          desiredCapturePoint = couplingRegistry.getBipedSupportPolygons().getSweetSpotCopy(supportLeg).toFramePoint();
+         desiredCapturePointInWorld.set(desiredCapturePoint.changeFrameCopy(world));
       }
 
 

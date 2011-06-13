@@ -150,6 +150,9 @@ public class BipedSupportPolygons
       {
          FrameConvexPolygon2dAndConnectingEdges supportPolygonAndEdgesInMidFeetZUp =
             FrameConvexPolygon2d.combineDisjointPolygons(footPolygonsInMidFeetZUp.get(RobotSide.LEFT), footPolygonsInMidFeetZUp.get(RobotSide.RIGHT));
+         
+         if (supportPolygonAndEdgesInMidFeetZUp == null)
+            System.err.println("Feet polygons overlap. Crashing!!!");
 
          // If feet are overlapping, then supportPolygonAndEdgesInMidFeetZUp = null...
          supportPolygonInMidFeetZUp = supportPolygonAndEdgesInMidFeetZUp.getFrameConvexPolygon2d();

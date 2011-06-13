@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules.swingLegTorqueControl;
 
+import java.util.Collection;
 import java.util.EnumMap;
 
 import javax.media.j3d.Transform3D;
@@ -33,9 +34,11 @@ import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.utilities.screwTheory.Twist;
 import us.ihmc.utilities.screwTheory.Wrench;
 
+import com.yobotics.simulationconstructionset.AbstractYoVariable;
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
+import com.yobotics.simulationconstructionset.VariableChangedListener;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.gui.GUISetterUpper;
 import com.yobotics.simulationconstructionset.gui.GUISetterUpperRegistry;
@@ -60,7 +63,10 @@ public class CraigPage300SwingLegTorqueControlModule implements SwingLegTorqueCo
    private final SideDependentList<EnumMap<LegJointName, DoubleYoVariable>> jointVelocityErrors = SideDependentList.createListOfEnumMaps(LegJointName.class);
    private final EnumMap<LegJointName, DoubleYoVariable> kpGains = new EnumMap<LegJointName, DoubleYoVariable>(LegJointName.class);
    private final EnumMap<LegJointName, DoubleYoVariable> kdGains = new EnumMap<LegJointName, DoubleYoVariable>(LegJointName.class);
-   
+
+   private final DoubleYoVariable masterKpGain = new DoubleYoVariable("masterKpGain", registry);
+   private final DoubleYoVariable masterKdGain = new DoubleYoVariable("masterKdGain", registry);
+
    private final DoubleYoVariable softScaleFactor = new DoubleYoVariable("softScaleFactor", registry);
    private final DoubleYoVariable ankleTorqueScale = new DoubleYoVariable("ankleTorqueScale", registry);
 
@@ -82,7 +88,8 @@ public class CraigPage300SwingLegTorqueControlModule implements SwingLegTorqueCo
            CommonWalkingReferenceFrames referenceFrames, FullRobotModel fullRobotModel, CouplingRegistry couplingRegistry,
            LegInverseKinematicsCalculator inverseKinematicsCalculator, SideDependentList<DesiredJointVelocityCalculator> desiredJointVelocityCalculators,
            SideDependentList<DesiredJointAccelerationCalculator> desiredJointAccelerationCalculators,
-           SideDependentList<InverseDynamicsCalculator> inverseDynamicsCalculators, YoVariableRegistry parentRegistry, GUISetterUpperRegistry guiSetterUpperRegistry)
+           SideDependentList<InverseDynamicsCalculator> inverseDynamicsCalculators, YoVariableRegistry parentRegistry,
+           GUISetterUpperRegistry guiSetterUpperRegistry)
    {
       this.legJointNames = legJointNames;
       this.processedSensors = processedSensors;
@@ -108,7 +115,7 @@ public class CraigPage300SwingLegTorqueControlModule implements SwingLegTorqueCo
             jointVelocityErrors.get(robotSide).put(legJointName, new DoubleYoVariable(jointName + "VelocityError", parentRegistry));
          }
       }
-      
+
       for (LegJointName legJointName : legJointNames)
       {
          String jointName = legJointName.getCamelCaseNameForMiddleOfExpression();
@@ -116,8 +123,13 @@ public class CraigPage300SwingLegTorqueControlModule implements SwingLegTorqueCo
          kdGains.put(legJointName, new DoubleYoVariable(jointName + "KdGain", parentRegistry));
       }
 
+
+      masterKpGain.addVariableChangedListener(new MasterGainVariableChangedListener(kpGains.values()));
+      masterKdGain.addVariableChangedListener(new MasterGainVariableChangedListener(kdGains.values()));
+
       parentRegistry.addChild(registry);
-      guiSetterUpperRegistry.registerGUISetterUpper(createGUISetterUpper());
+      if (guiSetterUpperRegistry != null)
+         guiSetterUpperRegistry.registerGUISetterUpper(createGUISetterUpper());
    }
 
    public void compute(LegTorques legTorquesToPackForSwingLeg, FramePoint desiredFootPosition, Orientation desiredFootOrientation,
@@ -199,10 +211,10 @@ public class CraigPage300SwingLegTorqueControlModule implements SwingLegTorqueCo
       {
          double tauInverseDynamics = fullRobotModel.getLegJoint(swingSide, legJointName).getTau();
 
-         boolean isAnAnkleJoint = legJointName == LegJointName.ANKLE_PITCH || legJointName == LegJointName.ANKLE_ROLL;
+         boolean isAnAnkleJoint = (legJointName == LegJointName.ANKLE_PITCH) || (legJointName == LegJointName.ANKLE_ROLL);
          if (isAnAnkleJoint)
             tauInverseDynamics *= ankleTorqueScale.getDoubleValue();
-         
+
          legTorquesToPackForSwingLeg.addTorque(legJointName, tauInverseDynamics);
       }
 
@@ -302,21 +314,20 @@ public class CraigPage300SwingLegTorqueControlModule implements SwingLegTorqueCo
          kpGains.get(legJointName).set(1000.0);
          kdGains.get(legJointName).set(50.0);
       }
+
       softScaleFactor.set(0.25);
    }
 
    public void setParametersForM2V2()
    {
       useBodyAcceleration = true;
-      
-      for (LegJointName legJointName : legJointNames)
-      {
-         kpGains.get(legJointName).set(600.0);
-         kdGains.get(legJointName).set(10.0);
-      }
+
+      masterKpGain.set(10.0);
+      masterKdGain.set(1.0);
+
       softScaleFactor.set(0.25);
    }
-   
+
    private GUISetterUpper createGUISetterUpper()
    {
       GUISetterUpper ret = new GUISetterUpper()
@@ -341,18 +352,18 @@ public class CraigPage300SwingLegTorqueControlModule implements SwingLegTorqueCo
                   String actualPositionName = processedSensors.getLegJointPositionName(robotSide, jointName);
 
                   positionGraphGroupStrings[jointNameIndex] = new String[][]
-                                                                           {
-                        {desiredPositionName, actualPositionName}, {"auto"}
-                                                                           };
+                  {
+                     {desiredPositionName, actualPositionName}, {"auto"}
+                  };
 
                   // velocities
                   String desiredVelocityName = desiredYoLegJointVelocities.get(robotSide).get(jointName).getName();
                   String actualVelocityName = processedSensors.getLegJointVelocityName(robotSide, jointName);
 
                   velocityGraphGroupStrings[jointNameIndex] = new String[][]
-                                                                           {
-                        {desiredVelocityName, actualVelocityName}, {"auto"}
-                                                                           };
+                  {
+                     {desiredVelocityName, actualVelocityName}, {"auto"}
+                  };
 
                   // kp, kd
                   entryBoxGroupStrings[jointNameIndex] = kpGains.get(jointName).getName();
@@ -367,7 +378,26 @@ public class CraigPage300SwingLegTorqueControlModule implements SwingLegTorqueCo
             }
          }
       };
+
       return ret;
+   }
+
+   private class MasterGainVariableChangedListener implements VariableChangedListener
+   {
+      private Collection<DoubleYoVariable> slaves;
+
+      public MasterGainVariableChangedListener(Collection<DoubleYoVariable> slaves)
+      {
+         this.slaves = slaves;
+      }
+
+      public void variableChanged(AbstractYoVariable master)
+      {
+         for (DoubleYoVariable slave : slaves)
+         {
+            slave.set(master.getValueAsDouble());
+         }
+      }
    }
 
 }

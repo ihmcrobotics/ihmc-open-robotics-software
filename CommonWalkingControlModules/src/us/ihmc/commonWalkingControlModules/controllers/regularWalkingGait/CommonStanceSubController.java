@@ -266,7 +266,7 @@ public class CommonStanceSubController implements StanceSubController
    public void doTransitionIntoLoadingForSingleLegBalance(RobotSide upcomingSupportSide)
    {
       supportLegAndLegToTrustForVelocity.legToTrustForVelocity.set(upcomingSupportSide);
-      supportLegAndLegToTrustForVelocity.supportLeg.set(null);
+      supportLegAndLegToTrustForVelocity.supportLeg.set(upcomingSupportSide);
       supportLegAndLegToTrustForVelocity.legToUseForCOMOffset.set(upcomingSupportSide);
    }
 
