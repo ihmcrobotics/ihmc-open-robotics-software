@@ -15,7 +15,6 @@ public class PolynomialFittingEncoderProcessor extends AbstractEncoderProcessor
    private final int nEncoderEvents;
    private final int fitOrder;
    private final int skipFactor;
-   private final boolean limitVelocity;
 
    private final IntYoVariable[] positions;    // ordered from oldest to newest
    private final DoubleYoVariable[] timestamps;
@@ -28,18 +27,17 @@ public class PolynomialFittingEncoderProcessor extends AbstractEncoderProcessor
    private int skipIndex = 0;
    private double timespan = Double.NaN;
 
-   public PolynomialFittingEncoderProcessor(String name, IntYoVariable rawPosition, DoubleYoVariable time, double distancePerTick, int nEncoderEvents, int fitOrder,
-           int skipFactor, boolean limitVelocity, YoVariableRegistry registry)
+   public PolynomialFittingEncoderProcessor(String name, IntYoVariable rawPosition, DoubleYoVariable time, double distancePerTick, int nEncoderEvents,
+           int fitOrder, int skipFactor, YoVariableRegistry registry)
    {
       super(name, rawPosition, time, distancePerTick, registry);
 
       if (fitOrder > nEncoderEvents - 1)
          throw new RuntimeException("Cannot fit a polynomial of order " + fitOrder + " through " + nEncoderEvents + " encoder events.");
-      
+
       this.nEncoderEvents = nEncoderEvents;
       this.fitOrder = fitOrder;
       this.skipFactor = skipFactor;
-      this.limitVelocity = limitVelocity;
 
       positions = new IntYoVariable[nEncoderEvents];
       timestamps = new DoubleYoVariable[nEncoderEvents];
@@ -167,6 +165,7 @@ public class PolynomialFittingEncoderProcessor extends AbstractEncoderProcessor
       }
 
       p = a.solve(b);
+
       // TODO: can probably make this more efficient by using the structure of the matrix a...
    }
 
@@ -205,19 +204,23 @@ public class PolynomialFittingEncoderProcessor extends AbstractEncoderProcessor
          ret = ret + coefficient * x_n;
          x_n = x_n * x;
       }
-      
-      if (limitVelocity)
-      {
-         double dt = time.getDoubleValue() - timestamps[nEncoderEvents - 1].getDoubleValue();
-         double epsilonSameTick = 1e-14;
-         if (dt > epsilonSameTick)
-         {
-            double maxAbsRate = 1.0 / (time.getDoubleValue() - timestamps[nEncoderEvents - 1].getDoubleValue());
-            if (Math.abs(ret) > maxAbsRate)
-               ret = maxAbsRate * Math.signum(ret);
-         }
-      }
+
+      ret = limitVelocity(ret);
 
       processedTickRate.set(ret);
+   }
+
+   private double limitVelocity(double velocity)
+   {
+      double dt = time.getDoubleValue() - timestamps[nEncoderEvents - 1].getDoubleValue();
+      double epsilonSameTick = 1e-14;
+      if (dt > epsilonSameTick)
+      {
+         double maxAbsRate = 1.0 / (time.getDoubleValue() - timestamps[nEncoderEvents - 1].getDoubleValue());
+         if (Math.abs(velocity) > maxAbsRate)
+            velocity = maxAbsRate * Math.signum(velocity);
+      }
+
+      return velocity;
    }
 }
