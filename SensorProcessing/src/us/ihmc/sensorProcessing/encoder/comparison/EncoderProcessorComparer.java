@@ -62,10 +62,9 @@ public class EncoderProcessorComparer
       encoderProcessors.put(new StateMachineTwoEncoderProcessor("StateMachineTwo", rawTicks, time, distancePerTick, registry), "StateMachineTwo");
       encoderProcessors.put(new NonlinearObserverEncoderProcessor("NonlinObserver", rawTicks, time, distancePerTick, registry), "NonlinObserver");
       encoderProcessors.put(new NaiveEncoderProcessor("Naive", rawTicks, time, distancePerTick, registry), "Naive");
-      encoderProcessors.put(new PolynomialFittingEncoderProcessor("PolyFit320", rawTicks, time, distancePerTick, 3, 2, 0, true, registry), "PolyFit320");
-      encoderProcessors.put(new PolynomialFittingEncoderProcessor("PolyFit532", rawTicks, time, distancePerTick, 5, 3, 2, true, registry), "PolyFit532");
-      encoderProcessors.put(new PolynomialFittingEncoderProcessor("PolyFit820", rawTicks, time, distancePerTick, 8, 2, 0, true, registry), "PolyFit820");
-      encoderProcessors.put(new PolynomialFittingEncoderProcessor("PolyFit820nolimit", rawTicks, time, distancePerTick, 8, 2, 0, false, registry), "PolyFit820nolimit");
+      encoderProcessors.put(new PolynomialFittingEncoderProcessor("PolyFit320", rawTicks, time, distancePerTick, 3, 2, 0, registry), "PolyFit320");
+      encoderProcessors.put(new PolynomialFittingEncoderProcessor("PolyFit532", rawTicks, time, distancePerTick, 5, 3, 2, registry), "PolyFit532");
+      encoderProcessors.put(new PolynomialFittingEncoderProcessor("PolyFit820", rawTicks, time, distancePerTick, 8, 2, 0, registry), "PolyFit820");
       encoderProcessors.put(new JerryEncoderProcessor("Jerry", rawTicks, time, distancePerTick, dt, registry), "Jerry");
 
 
