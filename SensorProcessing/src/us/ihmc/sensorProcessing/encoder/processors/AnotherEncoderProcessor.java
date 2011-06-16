@@ -2,6 +2,7 @@ package us.ihmc.sensorProcessing.encoder.processors;
 
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.IntYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 /**
@@ -16,86 +17,46 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
  * @author not attributable
  * @version 1.0
  */
-public class AnotherEncoderProcessor implements EncoderProcessor
+public class AnotherEncoderProcessor extends AbstractEncoderProcessor
 {
-   private final DoubleYoVariable rawPosition, time;
-   private final DoubleYoVariable processedPosition, processedRate;
-
-   private double unitDistancePerCount;
-   
    private double previousTime;
-   private double previousPosition;
+   private int previousPosition;
    private boolean previousTickUp;
 
-   public AnotherEncoderProcessor(String name, DoubleYoVariable rawPosition, DoubleYoVariable time, YoVariableRegistry registry)
+   public AnotherEncoderProcessor(String name, IntYoVariable rawPosition, DoubleYoVariable time, double distancePerTick, YoVariableRegistry registry)
    {
-      this.rawPosition = rawPosition;
-      this.time = time;
-
-      this.processedPosition = new DoubleYoVariable(name + "processedPosition", registry);
-      this.processedRate = new DoubleYoVariable(name + "processedRate", registry);
+      super(name, rawPosition, time, distancePerTick, registry);
    }
-
-   public double getQ()
-   {
-      return this.processedPosition.getDoubleValue();
-   }
-
-   public double getQd()
-   {
-      return this.processedRate.getDoubleValue();
-   }
-
 
    public void update()
    {
-//    this.processedPosition.val = rawPosition.val;
-//    this.processedRate.val =
       double time = this.time.getDoubleValue();
-      double position = this.rawPosition.getDoubleValue();
+      int position = this.rawTicks.getIntegerValue();
 
       boolean thisTickUp;
 
       if (position == previousPosition)
       {
-         this.processedRate.set((position - previousPosition) / (time - previousTime));
+         this.processedTickRate.set((position - previousPosition) / (time - previousTime));
 
          return;
       }
 
-      if (position > previousPosition)
-      {
-         thisTickUp = true;
-      }
-      else
-      {
-         thisTickUp = false;
-      }
+      thisTickUp = position > previousPosition;
 
       if (thisTickUp == previousTickUp)
       {
-         this.processedPosition.set(rawPosition.getDoubleValue());
-         this.processedRate.set((position - previousPosition) / (time - previousTime));
-
-         previousPosition = position;
-         previousTime = time;
-         previousTickUp = thisTickUp;
-
-         return;
+         this.processedTicks.set(rawTicks.getIntegerValue());
+         this.processedTickRate.set((position - previousPosition) / (time - previousTime));
       }
 
       else
       {
-         this.processedRate.set(0.0);
-
-         previousPosition = position;
-         previousTime = time;
-         previousTickUp = thisTickUp;
+         this.processedTickRate.set(0.0);
       }
-   }
-   
-   public void setUnitDistancePerCount(double unitDistancePerCount)
-   {
-      this.unitDistancePerCount = unitDistancePerCount;
+
+      previousPosition = position;
+      previousTime = time;
+      previousTickUp = thisTickUp;
    }
 }

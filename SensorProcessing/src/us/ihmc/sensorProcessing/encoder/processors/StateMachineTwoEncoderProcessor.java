@@ -17,52 +17,31 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
  * @author not attributable
  * @version 1.0
  */
-public class StateMachineTwoEncoderProcessor implements EncoderProcessor
+public class StateMachineTwoEncoderProcessor extends AbstractEncoderProcessor
 {
-   private final IntYoVariable rawPosition;
-   private final DoubleYoVariable processedPosition, processedRate;
-
    private final EnumYoVariable<EncoderState> state;
    private final DoubleYoVariable previousPosition, previousTime;
    private final DoubleYoVariable previousPositionTwoBack, previousTimeTwoBack;
 
-   private final DoubleYoVariable time;
 
-   private double unitDistancePerCount = 1.0;
-   
-   public StateMachineTwoEncoderProcessor(String name, IntYoVariable rawPosition, DoubleYoVariable time, YoVariableRegistry registry)
+   public StateMachineTwoEncoderProcessor(String name, IntYoVariable rawTicks, DoubleYoVariable time, double distancePerTick, YoVariableRegistry registry)
    {
-      this.rawPosition = rawPosition;
-      this.time = time;
+      super(name, rawTicks, time, distancePerTick, registry);
 
-      this.processedPosition = new DoubleYoVariable(name + "procPos", registry);
-      this.processedRate = new DoubleYoVariable(name + "procRate", registry);
-      this.state = EnumYoVariable.create(name + "encoderState", EncoderState.class, registry);
-
-      this.previousPosition = new DoubleYoVariable(name + "prevPos", registry);
-      this.previousTime = new DoubleYoVariable(name + "prevTime", registry);
-      this.previousPositionTwoBack = new DoubleYoVariable(name + "prevPos2", registry);
-      this.previousTimeTwoBack = new DoubleYoVariable(name + "prevTime2", registry);
+      this.state = EnumYoVariable.create(name + "EncoderState", EncoderState.class, registry);
+      this.previousPosition = new DoubleYoVariable(name + "PrevPos", registry);
+      this.previousTime = new DoubleYoVariable(name + "PrevTime", registry);
+      this.previousPositionTwoBack = new DoubleYoVariable(name + "PrevPos2", registry);
+      this.previousTimeTwoBack = new DoubleYoVariable(name + "PrevTime2", registry);
    }
-
-   public double getQ()
-   {
-      return this.processedPosition.getDoubleValue() * unitDistancePerCount;
-   }
-
-   public double getQd()
-   {
-      return this.processedRate.getDoubleValue() * unitDistancePerCount;
-   }
-
 
    public void update()
    {
-      double position = this.rawPosition.getIntegerValue();
+      double position = this.rawTicks.getIntegerValue();
       boolean positionChanged = (Math.abs(position - previousPosition.getDoubleValue()) > 1e-7);
 
       // First state transitions:
-      switch ((EncoderState) state.getEnumValue())
+      switch (state.getEnumValue())
       {
          case Start :
          {
@@ -136,7 +115,7 @@ public class StateMachineTwoEncoderProcessor implements EncoderProcessor
       }
 
       // State Actions:
-      switch ((EncoderState) state.getEnumValue())
+      switch (state.getEnumValue())
       {
          case Start :
          {
@@ -146,49 +125,49 @@ public class StateMachineTwoEncoderProcessor implements EncoderProcessor
             this.previousTimeTwoBack.set(time.getDoubleValue());
             this.previousTime.set(time.getDoubleValue());
 
-            this.processedPosition.set(position);
-            this.processedRate.set(0.0);
+            this.processedTicks.set(position);
+            this.processedTickRate.set(0.0);
 
             break;
          }
 
          case ForwardOne :
          {
-            this.processedPosition.set(position - 0.5);    // this.processedPosition.val;
-            this.processedRate.set(0.0);
+            this.processedTicks.set(position - 0.5);    // this.processedTicks.val;
+            this.processedTickRate.set(0.0);
 
             break;
          }
 
          case ForwardTwo :
          {
-            this.processedPosition.set(position - 0.5);
+            this.processedTicks.set(position - 0.5);
             double positionChange = this.previousPositionTwoBack.getDoubleValue() - position;
             double timeChange = this.previousTimeTwoBack.getDoubleValue() - this.time.getDoubleValue();
-            
-            this.processedRate.set(positionChange / timeChange); 
-            
-//          this.processedRate.val = (this.previousPositionTwoBack.val - (position - 0.5))/(this.previousTimeTwoBack.val - this.time.val);
+
+            this.processedTickRate.set(positionChange / timeChange);
+
+//          this.processedTickRate.val = (this.previousPositionTwoBack.val - (position - 0.5))/(this.previousTimeTwoBack.val - this.time.val);
             break;
          }
 
          case BackwardOne :
          {
-            this.processedPosition.set(position + 0.5);    // this.processedPosition.val;
-            this.processedRate.set(0.0);
+            this.processedTicks.set(position + 0.5);    // this.processedTicks.val;
+            this.processedTickRate.set(0.0);
 
             break;
          }
 
          case BackwardTwo :
          {
-            this.processedPosition.set(position + 0.5);
+            this.processedTicks.set(position + 0.5);
             double positionChange = this.previousPositionTwoBack.getDoubleValue() - position;
             double timeChange = this.previousTimeTwoBack.getDoubleValue() - this.time.getDoubleValue();
-            
-            this.processedRate.set(positionChange / timeChange); 
-            
-//          this.processedRate.val = (this.previousPositionTwoBack.val - (position + 0.5))/(this.previousTimeTwoBack.val - this.time.val);
+
+            this.processedTickRate.set(positionChange / timeChange);
+
+//          this.processedTickRate.val = (this.previousPositionTwoBack.val - (position + 0.5))/(this.previousTimeTwoBack.val - this.time.val);
             break;
          }
       }
@@ -203,10 +182,5 @@ public class StateMachineTwoEncoderProcessor implements EncoderProcessor
       }
    }
 
-   private enum EncoderState {Start, ForwardOne, ForwardTwo, BackwardOne, BackwardTwo;}
-   
-   public void setUnitDistancePerCount(double unitDistancePerCount)
-   {
-      this.unitDistancePerCount = unitDistancePerCount;
-   }
+   private enum EncoderState {Start, ForwardOne, ForwardTwo, BackwardOne, BackwardTwo}
 }

@@ -10,13 +10,8 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
  * @author Twan Koolen
  *
  */
-public class PolynomialFittingEncoderProcessor implements EncoderProcessor
+public class PolynomialFittingEncoderProcessor extends AbstractEncoderProcessor
 {
-   private double unitDistancePerCount = 1.0;
-   
-   private final IntYoVariable rawPosition;
-   private final DoubleYoVariable time;
-
    private final int nEncoderEvents;
    private final int fitOrder;
    private final int skipFactor;
@@ -24,8 +19,6 @@ public class PolynomialFittingEncoderProcessor implements EncoderProcessor
 
    private final IntYoVariable[] positions;    // ordered from oldest to newest
    private final DoubleYoVariable[] timestamps;
-
-   private final DoubleYoVariable processedPosition, processedRate;
 
    private final Matrix a;
    private Matrix p;
@@ -35,14 +28,14 @@ public class PolynomialFittingEncoderProcessor implements EncoderProcessor
    private int skipIndex = 0;
    private double timespan = Double.NaN;
 
-   public PolynomialFittingEncoderProcessor(String name, IntYoVariable rawPosition, DoubleYoVariable time, int nEncoderEvents, int fitOrder, int skipFactor,
-           boolean limitVelocity, YoVariableRegistry registry)
+   public PolynomialFittingEncoderProcessor(String name, IntYoVariable rawPosition, DoubleYoVariable time, double distancePerTick, int nEncoderEvents, int fitOrder,
+           int skipFactor, boolean limitVelocity, YoVariableRegistry registry)
    {
+      super(name, rawPosition, time, distancePerTick, registry);
+
       if (fitOrder > nEncoderEvents - 1)
          throw new RuntimeException("Cannot fit a polynomial of order " + fitOrder + " through " + nEncoderEvents + " encoder events.");
       
-      this.rawPosition = rawPosition;
-      this.time = time;
       this.nEncoderEvents = nEncoderEvents;
       this.fitOrder = fitOrder;
       this.skipFactor = skipFactor;
@@ -57,9 +50,6 @@ public class PolynomialFittingEncoderProcessor implements EncoderProcessor
          timestamps[i] = new DoubleYoVariable(name + "Time" + i, registry);
       }
 
-      this.processedPosition = new DoubleYoVariable(name + "procPos", registry);
-      this.processedRate = new DoubleYoVariable(name + "procRate", registry);
-
       a = new Matrix(nEncoderEvents, fitOrder + 1);
       b = new Matrix(nEncoderEvents, 1);
    }
@@ -72,19 +62,9 @@ public class PolynomialFittingEncoderProcessor implements EncoderProcessor
       computeProcessedRate();
    }
 
-   public double getQ()
-   {
-      return processedPosition.getDoubleValue() * unitDistancePerCount;
-   }
-
-   public double getQd()
-   {
-      return processedRate.getDoubleValue() * unitDistancePerCount;
-   }
-
    private void updateYoVars()
    {
-      final int currentPosition = rawPosition.getIntegerValue();
+      final int currentPosition = rawTicks.getIntegerValue();
 
       if (firstTick)
       {
@@ -117,7 +97,7 @@ public class PolynomialFittingEncoderProcessor implements EncoderProcessor
     */
    private void initializeFirstTick()
    {
-      int currentPosition = rawPosition.getIntegerValue();
+      int currentPosition = rawTicks.getIntegerValue();
       for (IntYoVariable position : positions)
       {
          position.set(currentPosition);
@@ -155,7 +135,7 @@ public class PolynomialFittingEncoderProcessor implements EncoderProcessor
 
    private void updateLatestPosition()
    {
-      positions[nEncoderEvents - 1].set(rawPosition.getIntegerValue());
+      positions[nEncoderEvents - 1].set(rawTicks.getIntegerValue());
    }
 
    private void updateLatestTimestamp()
@@ -204,11 +184,11 @@ public class PolynomialFittingEncoderProcessor implements EncoderProcessor
          x_n = x_n * x;
       }
 
-      final int rawPosition = this.rawPosition.getIntegerValue();
+      final int rawPosition = this.rawTicks.getIntegerValue();
       if (Math.abs(ret - rawPosition) > 1)
          ret = rawPosition;
 
-      processedPosition.set(ret);
+      processedTicks.set(ret);
    }
 
    private void computeProcessedRate()
@@ -238,12 +218,6 @@ public class PolynomialFittingEncoderProcessor implements EncoderProcessor
          }
       }
 
-      processedRate.set(ret);
+      processedTickRate.set(ret);
    }
-   
-   public void setUnitDistancePerCount(double unitDistancePerCount)
-   {
-      this.unitDistancePerCount = unitDistancePerCount;
-   }
-
 }

@@ -6,7 +6,7 @@ import com.yobotics.simulationconstructionset.EnumYoVariable;
 import com.yobotics.simulationconstructionset.IntYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
-public class JerryEncoderProcessor implements EncoderProcessor
+public class JerryEncoderProcessor extends AbstractEncoderProcessor
 {
    private static final double
 //   ALPHA = 0.15, BETA = 0.15, GAMMA = 0.15;
@@ -15,37 +15,23 @@ public class JerryEncoderProcessor implements EncoderProcessor
 
  ALPHA = 0.5, BETA = 0.5, GAMMA = 0.15; //0.1; //0.15;
 
-   
-   private double unitDistancePerCount = 1.0;
-   
-   private final IntYoVariable rawPosition;
-   private final IntYoVariable processedPosition;
-   private final DoubleYoVariable processedRate;
-
    private final EnumYoVariable<EncoderState> state;
 
-   private final IntYoVariable previousRawPosition, previousRawPositionTwoBack;
-
-
-   private final IntYoVariable previousProcessedPosition, previousProcessedPositionTwoBack;
+   private final IntYoVariable previousRawTicks, previousRawTicksTwoBack;
+   private final IntYoVariable previousProcessedTicks, previousProcessedTicksTwoBack;
    private final DoubleYoVariable previousTime, previousTimeTwoBack;
 
-   private final DoubleYoVariable time;
    private final double dt;
 
    private final DoubleYoVariable maxPossibleRate;
    private final DoubleYoVariable minPriorRate, maxPriorRate, averagePriorRate;
 
-   public JerryEncoderProcessor(String name, IntYoVariable rawPosition, DoubleYoVariable time, double dt, YoVariableRegistry parentRegistry)
+   public JerryEncoderProcessor(String name, IntYoVariable rawTicks, DoubleYoVariable time, double distancePerTick, double dt, YoVariableRegistry parentRegistry)
    {
-      YoVariableRegistry registry = new YoVariableRegistry(name);
+      super(name, rawTicks, time, distancePerTick, createRegistry(name));
 
-      this.rawPosition = rawPosition;
-      this.time = time;
       this.dt = dt;
 
-      this.processedPosition = new IntYoVariable(name + "procPos", registry);
-      this.processedRate = new DoubleYoVariable(name + "procRate", registry);
       this.state = EnumYoVariable.create(name + "state", EncoderState.class, registry);
 
       this.minPriorRate = new DoubleYoVariable(name + "minPriorRate", registry);
@@ -55,32 +41,20 @@ public class JerryEncoderProcessor implements EncoderProcessor
       this.maxPossibleRate = new DoubleYoVariable(name + "maxPossibleRate", registry);
       this.averagePriorRate = new DoubleYoVariable(name + "averagePriorRate", registry);
 
-      this.previousRawPositionTwoBack = new IntYoVariable(name + "prevRawPos2", registry);
-      this.previousRawPosition = new IntYoVariable(name + "prevRawPos", registry);
+      this.previousRawTicksTwoBack = new IntYoVariable(name + "prevRawPos2", registry);
+      this.previousRawTicks = new IntYoVariable(name + "prevRawPos", registry);
       this.previousTime = new DoubleYoVariable(name + "prevTime", registry);
 
-      this.previousProcessedPosition = new IntYoVariable(name + "prevPos", registry);
-      this.previousProcessedPositionTwoBack = new IntYoVariable(name + "prevPos2", registry);
+      this.previousProcessedTicks = new IntYoVariable(name + "prevPos", registry);
+      this.previousProcessedTicksTwoBack = new IntYoVariable(name + "prevPos2", registry);
       this.previousTimeTwoBack = new DoubleYoVariable(name + "prevTime2", registry);
 
       parentRegistry.addChild(registry);
    }
 
-   public double getQ()
-   {
-      return ((double) (this.processedPosition.getIntegerValue())) * unitDistancePerCount;
-   }
-
-   public double getQd()
-   {
-      return this.processedRate.getDoubleValue() * unitDistancePerCount;
-   }
-
-
-
    public void update()
    {
-      boolean positionChanged = rawPosition.getIntegerValue() != previousRawPosition.getIntegerValue();
+      boolean positionChanged = rawTicks.getIntegerValue() != previousRawTicks.getIntegerValue();
 
       if (positionChanged)
          doStateTransitions();
@@ -90,11 +64,11 @@ public class JerryEncoderProcessor implements EncoderProcessor
 
       if (positionChanged)
       {
-         int positionChangeInt = processedPosition.getIntegerValue() - previousProcessedPosition.getIntegerValue();
-         double positionChange = (double) positionChangeInt;
+         double positionChange = processedTicks.getDoubleValue() - previousProcessedTicks.getIntegerValue();
+         double positionChangeInt = (int) positionChange;
          double timeChange = time.getDoubleValue() - previousTime.getDoubleValue();
 
-//       int positionChangeInt = processedPosition.getIntegerValue() - previousProcessedPositionTwoBack.getIntegerValue();
+//       int positionChangeInt = processedTicks.getIntegerValue() - previousProcessedTicksTwoBack.getIntegerValue();
 //       double positionChange = (double) positionChangeInt;
 //       double timeChange = time.getDoubleValue() - previousTimeTwoBack.getDoubleValue();
 
@@ -159,10 +133,10 @@ public class JerryEncoderProcessor implements EncoderProcessor
 
       if (positionChanged)
       {
-         this.previousProcessedPositionTwoBack.set(this.previousProcessedPosition.getIntegerValue());
-         this.previousProcessedPosition.set(processedPosition.getIntegerValue());
-         this.previousRawPositionTwoBack.set(previousRawPosition.getIntegerValue());
-         this.previousRawPosition.set(rawPosition.getIntegerValue());
+         this.previousProcessedTicksTwoBack.set(this.previousProcessedTicks.getIntegerValue());
+         this.previousProcessedTicks.set((int) processedTicks.getDoubleValue());
+         this.previousRawTicksTwoBack.set(previousRawTicks.getIntegerValue());
+         this.previousRawTicks.set(rawTicks.getIntegerValue());
 
          this.previousTimeTwoBack.set(this.previousTime.getDoubleValue());
          this.previousTime.set(this.time.getDoubleValue());
@@ -173,50 +147,50 @@ public class JerryEncoderProcessor implements EncoderProcessor
 
    private void doStateActionsForPosition(boolean positionChanged)
    {
-      int rawPosition = this.rawPosition.getIntegerValue();
+      int rawTicks = this.rawTicks.getIntegerValue();
 
       switch ((EncoderState) state.getEnumValue())
       {
          case Start :
          {
-            this.previousProcessedPositionTwoBack.set(rawPosition);
-            this.previousProcessedPosition.set(rawPosition);
+            this.previousProcessedTicksTwoBack.set(rawTicks);
+            this.previousProcessedTicks.set(rawTicks);
 
-            this.previousRawPosition.set(rawPosition);
+            this.previousRawTicks.set(rawTicks);
 
             this.previousTimeTwoBack.set(time.getDoubleValue());
             this.previousTime.set(time.getDoubleValue());
 
-            this.processedPosition.set(rawPosition);
-            this.processedRate.set(0.0);
+            this.processedTicks.set(rawTicks);
+            this.processedTickRate.set(0.0);
 
             break;
          }
 
          case ForwardOne :
          {
-            this.processedPosition.set(rawPosition - 1);
+            this.processedTicks.set(rawTicks - 1);
 
             break;
          }
 
          case ForwardTwo :
          {
-            this.processedPosition.set(rawPosition - 1);
+            this.processedTicks.set(rawTicks - 1);
 
             break;
          }
 
          case BackwardOne :
          {
-            this.processedPosition.set(rawPosition);
+            this.processedTicks.set(rawTicks);
 
             break;
          }
 
          case BackwardTwo :
          {
-            this.processedPosition.set(rawPosition);
+            this.processedTicks.set(rawTicks);
 
             break;
          }
@@ -237,7 +211,7 @@ public class JerryEncoderProcessor implements EncoderProcessor
 
          case ForwardOne :
          {
-            this.processedRate.set(0.0);
+            this.processedTickRate.set(0.0);
 
             break;
          }
@@ -246,21 +220,21 @@ public class JerryEncoderProcessor implements EncoderProcessor
          {
 //            if (positionChanged)
             {
-               if (processedRate.getDoubleValue() < minPriorRate.getDoubleValue())
+               if (processedTickRate.getDoubleValue() < minPriorRate.getDoubleValue())
                {
-//                  this.processedRate.set(minPriorRate.getDoubleValue() + ALPHA * (averagePriorRate.getDoubleValue() - minPriorRate.getDoubleValue()));
-                  this.processedRate.set(processedRate.getDoubleValue() + ALPHA * (minPriorRate.getDoubleValue() - processedRate.getDoubleValue()));
-                  this.processedRate.set(processedRate.getDoubleValue() + GAMMA * (averagePriorRate.getDoubleValue() - processedRate.getDoubleValue()));
+//                  this.processedTickRate.set(minPriorRate.getDoubleValue() + ALPHA * (averagePriorRate.getDoubleValue() - minPriorRate.getDoubleValue()));
+                  this.processedTickRate.set(processedTickRate.getDoubleValue() + ALPHA * (minPriorRate.getDoubleValue() - processedTickRate.getDoubleValue()));
+                  this.processedTickRate.set(processedTickRate.getDoubleValue() + GAMMA * (averagePriorRate.getDoubleValue() - processedTickRate.getDoubleValue()));
                }
-               else if (processedRate.getDoubleValue() > maxPriorRate.getDoubleValue())
+               else if (processedTickRate.getDoubleValue() > maxPriorRate.getDoubleValue())
                {
-//                  this.processedRate.set(maxPriorRate.getDoubleValue() + BETA * (averagePriorRate.getDoubleValue() - maxPriorRate.getDoubleValue()));
-                  this.processedRate.set(processedRate.getDoubleValue() + BETA * (maxPriorRate.getDoubleValue() - processedRate.getDoubleValue()));
-                  this.processedRate.set(processedRate.getDoubleValue() + GAMMA * (averagePriorRate.getDoubleValue() - processedRate.getDoubleValue()));
+//                  this.processedTickRate.set(maxPriorRate.getDoubleValue() + BETA * (averagePriorRate.getDoubleValue() - maxPriorRate.getDoubleValue()));
+                  this.processedTickRate.set(processedTickRate.getDoubleValue() + BETA * (maxPriorRate.getDoubleValue() - processedTickRate.getDoubleValue()));
+                  this.processedTickRate.set(processedTickRate.getDoubleValue() + GAMMA * (averagePriorRate.getDoubleValue() - processedTickRate.getDoubleValue()));
                }
                else
                {
-                  this.processedRate.set(processedRate.getDoubleValue() + GAMMA * (averagePriorRate.getDoubleValue() - processedRate.getDoubleValue()));
+                  this.processedTickRate.set(processedTickRate.getDoubleValue() + GAMMA * (averagePriorRate.getDoubleValue() - processedTickRate.getDoubleValue()));
                }
             }
             if (!positionChanged)
@@ -268,7 +242,7 @@ public class JerryEncoderProcessor implements EncoderProcessor
                double timeChange = time.getDoubleValue() - previousTime.getDoubleValue();
                maxPossibleRate.set(1.0 / timeChange);
 
-               this.processedRate.set(Math.min(maxPossibleRate.getDoubleValue(), processedRate.getDoubleValue()));
+               this.processedTickRate.set(Math.min(maxPossibleRate.getDoubleValue(), processedTickRate.getDoubleValue()));
             }
 
             break;
@@ -276,7 +250,7 @@ public class JerryEncoderProcessor implements EncoderProcessor
 
          case BackwardOne :
          {
-            this.processedRate.set(0.0);
+            this.processedTickRate.set(0.0);
 
             break;
          }
@@ -285,21 +259,21 @@ public class JerryEncoderProcessor implements EncoderProcessor
          {
 //            if (positionChanged)
             {
-               if (processedRate.getDoubleValue() > minPriorRate.getDoubleValue())
+               if (processedTickRate.getDoubleValue() > minPriorRate.getDoubleValue())
                {
-//                  this.processedRate.set(minPriorRate.getDoubleValue() + ALPHA * (averagePriorRate.getDoubleValue() - minPriorRate.getDoubleValue()));
-                  this.processedRate.set(processedRate.getDoubleValue() + ALPHA * (minPriorRate.getDoubleValue() - processedRate.getDoubleValue()));
-                  this.processedRate.set(processedRate.getDoubleValue() + GAMMA * (averagePriorRate.getDoubleValue() - processedRate.getDoubleValue()));
+//                  this.processedTickRate.set(minPriorRate.getDoubleValue() + ALPHA * (averagePriorRate.getDoubleValue() - minPriorRate.getDoubleValue()));
+                  this.processedTickRate.set(processedTickRate.getDoubleValue() + ALPHA * (minPriorRate.getDoubleValue() - processedTickRate.getDoubleValue()));
+                  this.processedTickRate.set(processedTickRate.getDoubleValue() + GAMMA * (averagePriorRate.getDoubleValue() - processedTickRate.getDoubleValue()));
                }
-               else if (processedRate.getDoubleValue() < maxPriorRate.getDoubleValue())
+               else if (processedTickRate.getDoubleValue() < maxPriorRate.getDoubleValue())
                {
-//                  this.processedRate.set(maxPriorRate.getDoubleValue() + BETA * (averagePriorRate.getDoubleValue() - maxPriorRate.getDoubleValue()));
-                  this.processedRate.set(processedRate.getDoubleValue() + BETA * (maxPriorRate.getDoubleValue() - processedRate.getDoubleValue()));
-                  this.processedRate.set(processedRate.getDoubleValue() + GAMMA * (averagePriorRate.getDoubleValue() - processedRate.getDoubleValue()));
+//                  this.processedTickRate.set(maxPriorRate.getDoubleValue() + BETA * (averagePriorRate.getDoubleValue() - maxPriorRate.getDoubleValue()));
+                  this.processedTickRate.set(processedTickRate.getDoubleValue() + BETA * (maxPriorRate.getDoubleValue() - processedTickRate.getDoubleValue()));
+                  this.processedTickRate.set(processedTickRate.getDoubleValue() + GAMMA * (averagePriorRate.getDoubleValue() - processedTickRate.getDoubleValue()));
                }
                else
                {
-                  this.processedRate.set(processedRate.getDoubleValue() + GAMMA * (averagePriorRate.getDoubleValue() - processedRate.getDoubleValue()));
+                  this.processedTickRate.set(processedTickRate.getDoubleValue() + GAMMA * (averagePriorRate.getDoubleValue() - processedTickRate.getDoubleValue()));
                }
             } 
             if (!positionChanged)
@@ -307,7 +281,7 @@ public class JerryEncoderProcessor implements EncoderProcessor
                double timeChange = time.getDoubleValue() - previousTime.getDoubleValue();
                maxPossibleRate.set(-1.0 / timeChange);
 
-               this.processedRate.set(Math.max(maxPossibleRate.getDoubleValue(), processedRate.getDoubleValue()));
+               this.processedTickRate.set(Math.max(maxPossibleRate.getDoubleValue(), processedTickRate.getDoubleValue()));
             }
 
             break;
@@ -319,14 +293,14 @@ public class JerryEncoderProcessor implements EncoderProcessor
 
    private void doStateTransitions()
    {
-      int rawPosition = this.rawPosition.getIntegerValue();
-      int previousPosition = this.previousRawPosition.getIntegerValue();
+      int rawTicks = this.rawTicks.getIntegerValue();
+      int previousPosition = this.previousRawTicks.getIntegerValue();
 
-      boolean increasing = rawPosition > previousPosition;
-      boolean decreasing = rawPosition < previousPosition;
+      boolean increasing = rawTicks > previousPosition;
+      boolean decreasing = rawTicks < previousPosition;
 
-      boolean increasingMoreThanOne = rawPosition > previousPosition + 1;
-      boolean decreasingMoreThanOne = rawPosition < previousPosition - 1;
+      boolean increasingMoreThanOne = rawTicks > previousPosition + 1;
+      boolean decreasingMoreThanOne = rawTicks < previousPosition - 1;
 
       
       switch ((EncoderState) state.getEnumValue())
@@ -420,12 +394,11 @@ public class JerryEncoderProcessor implements EncoderProcessor
       }
 
    }
-   
-   public void setUnitDistancePerCount(double unitDistancePerCount)
-   {
-      this.unitDistancePerCount = unitDistancePerCount;
-   }
 
+   private static YoVariableRegistry createRegistry(String name)
+   {
+      return new YoVariableRegistry(name);
+   }
 
 
    private enum EncoderState {Start, ForwardOne, ForwardTwo, BackwardOne, BackwardTwo;}
