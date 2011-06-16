@@ -4,51 +4,27 @@ import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.IntYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
-public class NaiveEncoderProcessor implements EncoderProcessor
+public class NaiveEncoderProcessor extends AbstractEncoderProcessor
 {
-   private final IntYoVariable rawPosition;
-   private final DoubleYoVariable processedPosition, processedRate;
-   private final DoubleYoVariable previousPosition, previousTime;
+   private final IntYoVariable previousPosition;
+   private final DoubleYoVariable previousTime;
 
-   private final DoubleYoVariable time;
-
-   private double unitDistancePerCount = 1.0;
-
-   public NaiveEncoderProcessor(String name, IntYoVariable rawPosition, DoubleYoVariable time, YoVariableRegistry registry)
+   public NaiveEncoderProcessor(String name, IntYoVariable rawTicks, DoubleYoVariable time, double distancePerTick, YoVariableRegistry registry)
    {
-      this.rawPosition = rawPosition;
-      this.time = time;
+      super(name, rawTicks, time, distancePerTick, registry);
 
-      this.processedPosition = new DoubleYoVariable(name + "procPos", registry);
-      this.processedRate = new DoubleYoVariable(name + "procRate", registry);
-
-      this.previousPosition = new DoubleYoVariable(name + "prevPos", registry);
-      this.previousTime = new DoubleYoVariable(name + "prevTime", registry);
+      this.previousPosition = new IntYoVariable(name + "PrevPos", registry);
+      this.previousTime = new DoubleYoVariable(name + "PrevTime", registry);
    }
 
    public void update()
    {
-      processedPosition.set(rawPosition.getIntegerValue());
-      double dx = rawPosition.getIntegerValue() - previousPosition.getDoubleValue();
+      processedTicks.set(rawTicks.getIntegerValue());
+      double dx = rawTicks.getIntegerValue() - previousPosition.getIntegerValue();
       double dt = time.getDoubleValue() - previousTime.getDoubleValue();
-      processedRate.set(dx / dt);
+      processedTickRate.set(dx / dt);
 
-      previousPosition.set(rawPosition.getIntegerValue());
+      previousPosition.set(rawTicks.getIntegerValue());
       previousTime.set(time.getDoubleValue());
-   }
-
-   public double getQ()
-   {
-      return this.processedPosition.getDoubleValue() * unitDistancePerCount;
-   }
-
-   public double getQd()
-   {
-      return this.processedRate.getDoubleValue() * unitDistancePerCount;
-   }
-   
-   public void setUnitDistancePerCount(double unitDistancePerCount)
-   {
-      this.unitDistancePerCount = unitDistancePerCount;
    }
 }

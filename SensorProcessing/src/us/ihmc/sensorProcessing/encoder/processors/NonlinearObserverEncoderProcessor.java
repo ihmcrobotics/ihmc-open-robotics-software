@@ -2,40 +2,26 @@ package us.ihmc.sensorProcessing.encoder.processors;
 
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.IntYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
-/**
- * <p>Title: </p>
- *
- * <p>Description: </p>
- *
- * <p>Copyright: Copyright (c) 2007</p>
- *
- * <p>Company: </p>
- *
- * @author not attributable
- * @version 1.0
- */
-public class NonlinearObserverEncoderProcessor implements EncoderProcessor
+public class NonlinearObserverEncoderProcessor extends AbstractEncoderProcessor
 {
-   private final DoubleYoVariable rawPosition, discretePosition;
-   private final DoubleYoVariable processedPosition, processedRate, error, alpha1, alpha2;
+   private final DoubleYoVariable discretePosition;
+   private final DoubleYoVariable error, alpha1, alpha2;
 
-   private final double dt;
-   private double unitDistancePerCount;
+   private final DoubleYoVariable previousTime;
    
-   public NonlinearObserverEncoderProcessor(String name, DoubleYoVariable rawPosition, double dt, YoVariableRegistry registry)
+   public NonlinearObserverEncoderProcessor(String name, IntYoVariable rawTicks, DoubleYoVariable time, double distancePerTick, YoVariableRegistry registry)
    {
-      this.rawPosition = rawPosition;
-      this.dt = dt;
+      super(name, rawTicks, time, distancePerTick, registry);
+      this.previousTime = new DoubleYoVariable(name + "PrevTime", registry);
 
-      this.processedPosition = new DoubleYoVariable(name + "processedPosition", registry);
-      this.discretePosition = new DoubleYoVariable(name + "discretePosition", registry);
-      this.processedRate = new DoubleYoVariable(name + "processedRate", registry);
-      this.error = new DoubleYoVariable(name + "error", registry);
+      this.discretePosition = new DoubleYoVariable(name + "DiscretePosition", registry);
+      this.error = new DoubleYoVariable(name + "Error", registry);
 
-      this.alpha1 = new DoubleYoVariable(name + "alpha1", registry);
-      this.alpha2 = new DoubleYoVariable(name + "alpha2", registry);
+      this.alpha1 = new DoubleYoVariable(name + "Alpha1", registry);
+      this.alpha2 = new DoubleYoVariable(name + "Alpha2", registry);
 
       alpha1.set(0.03);
       alpha2.set(1.0);
@@ -43,27 +29,13 @@ public class NonlinearObserverEncoderProcessor implements EncoderProcessor
    
    public void update()
    {
-      discretePosition.set((int) processedPosition.getDoubleValue());
+      discretePosition.set(processedTicks.getDoubleValue());
 
-      error.set(rawPosition.getDoubleValue() - discretePosition.getDoubleValue());
+      error.set(rawTicks.getIntegerValue() - discretePosition.getDoubleValue());
 
-      processedRate.set(processedRate.getDoubleValue() + alpha2.getDoubleValue() * error.getDoubleValue());
-      processedPosition.set(processedPosition.getDoubleValue() + processedRate.getDoubleValue() * dt + alpha1.getDoubleValue() * error.getDoubleValue());
-
-   }
-
-   public double getQ()
-   {
-      return this.processedPosition.getDoubleValue() * unitDistancePerCount;
-   }
-
-   public double getQd()
-   {
-      return this.processedRate.getDoubleValue() * unitDistancePerCount;
-   }
-   
-   public void setUnitDistancePerCount(double unitDistancePerCount)
-   {
-      this.unitDistancePerCount = unitDistancePerCount;
+      processedTickRate.set(processedTickRate.getDoubleValue() + alpha2.getDoubleValue() * error.getDoubleValue());
+      double dt = time.getDoubleValue() - previousTime.getDoubleValue();
+      processedTicks.set(processedTicks.getDoubleValue() + processedTickRate.getDoubleValue() * dt + alpha1.getDoubleValue() * error.getDoubleValue());
+      previousTime.set(time.getDoubleValue());
    }
 }
