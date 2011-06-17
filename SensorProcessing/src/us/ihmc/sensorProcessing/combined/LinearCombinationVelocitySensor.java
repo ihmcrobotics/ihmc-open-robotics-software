@@ -9,7 +9,7 @@ public class LinearCombinationVelocitySensor implements ProcessedVelocitySensor
    private HashMap<ProcessedVelocitySensor, Double> sensorsAndCoefficients = new HashMap<ProcessedVelocitySensor, Double>();
    
    public LinearCombinationVelocitySensor(HashMap<ProcessedVelocitySensor, Double> sensorsAndCoefficients)
-   {
+   {      
       this.sensorsAndCoefficients.putAll(sensorsAndCoefficients);
    }
 
