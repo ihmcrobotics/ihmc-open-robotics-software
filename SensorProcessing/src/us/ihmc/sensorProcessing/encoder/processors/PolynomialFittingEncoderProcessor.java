@@ -23,7 +23,6 @@ public class PolynomialFittingEncoderProcessor extends AbstractEncoderProcessor
    private Matrix p;
    private final Matrix b;
 
-   private boolean firstTick = true;
    private int skipIndex = 0;
    private double timespan = Double.NaN;
 
@@ -51,6 +50,27 @@ public class PolynomialFittingEncoderProcessor extends AbstractEncoderProcessor
       a = new Matrix(nEncoderEvents, fitOrder + 1);
       b = new Matrix(nEncoderEvents, 1);
    }
+   
+   /**
+    * Initializes all timestamps to slightly negative but monotonically increasing values.
+    * Initializes all positions to the current raw position value.
+    */
+   public void initialize()
+   {
+      int currentPosition = rawTicks.getIntegerValue();
+      for (IntYoVariable position : positions)
+      {
+         position.set(currentPosition);
+      }
+
+      final double epsilonTimeInit = 1e-10;
+      double initTime = time.getDoubleValue() - (nEncoderEvents) * epsilonTimeInit;
+      for (DoubleYoVariable timeStamp : timestamps)
+      {
+         timeStamp.set(initTime);
+         initTime += epsilonTimeInit;
+      }
+   }
 
    public void update()
    {
@@ -63,13 +83,6 @@ public class PolynomialFittingEncoderProcessor extends AbstractEncoderProcessor
    private void updateYoVars()
    {
       final int currentPosition = rawTicks.getIntegerValue();
-
-      if (firstTick)
-      {
-         initializeFirstTick();
-
-         firstTick = false;
-      }
 
       int lastPosition = positions[nEncoderEvents - 1].getIntegerValue();
       if (currentPosition != lastPosition)
@@ -86,27 +99,6 @@ public class PolynomialFittingEncoderProcessor extends AbstractEncoderProcessor
             updateLatestTimestamp();
             skipIndex++;
          }
-      }
-   }
-
-   /**
-    * Initializes all timestamps to slightly negative but monotonically increasing values.
-    * Initializes all positions to the current raw position value.
-    */
-   private void initializeFirstTick()
-   {
-      int currentPosition = rawTicks.getIntegerValue();
-      for (IntYoVariable position : positions)
-      {
-         position.set(currentPosition);
-      }
-
-      final double epsilonTimeInit = 1e-10;
-      double initTime = time.getDoubleValue() - (nEncoderEvents) * epsilonTimeInit;
-      for (DoubleYoVariable timeStamp : timestamps)
-      {
-         timeStamp.set(initTime);
-         initTime += epsilonTimeInit;
       }
    }
 

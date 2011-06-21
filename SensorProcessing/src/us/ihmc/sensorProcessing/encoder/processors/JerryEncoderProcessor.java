@@ -51,6 +51,11 @@ public class JerryEncoderProcessor extends AbstractEncoderProcessor
 
       parentRegistry.addChild(registry);
    }
+   
+   public void initialize()
+   {
+      // empty
+   }
 
    public void update()
    {

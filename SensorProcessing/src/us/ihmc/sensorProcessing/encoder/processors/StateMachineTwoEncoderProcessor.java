@@ -34,6 +34,11 @@ public class StateMachineTwoEncoderProcessor extends AbstractEncoderProcessor
       this.previousPositionTwoBack = new DoubleYoVariable(name + "PrevPos2", registry);
       this.previousTimeTwoBack = new DoubleYoVariable(name + "PrevTime2", registry);
    }
+   
+   public void initialize()
+   {
+      // empty
+   }
 
    public void update()
    {

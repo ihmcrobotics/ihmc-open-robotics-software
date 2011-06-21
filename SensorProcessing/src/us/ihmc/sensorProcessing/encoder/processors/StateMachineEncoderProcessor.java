@@ -31,6 +31,11 @@ public class StateMachineEncoderProcessor extends AbstractEncoderProcessor
       this.previousPosition = new DoubleYoVariable(name + "PrevPos", registry);
       this.previousTime = new DoubleYoVariable(name + "PrevTime", registry);
    }
+   
+   public void initialize()
+   {
+      // empty
+   }
 
    public void update()
    {

@@ -23,6 +23,11 @@ public class StateMachineSimpleEncoderProcessor extends AbstractEncoderProcessor
       this.changeInPosition = new IntYoVariable(name + "ChangeInPos",  registry);
       this.changeInTime = new DoubleYoVariable(name + "ChangeInTime", registry);
    }
+   
+   public void initialize()
+   {
+      // empty
+   }
 
    public void update()
    {
