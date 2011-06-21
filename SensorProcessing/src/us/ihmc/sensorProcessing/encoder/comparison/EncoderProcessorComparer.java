@@ -89,12 +89,16 @@ public class EncoderProcessorComparer
       time.set(0.0);
 
       double lastActualPosition = 0.0;
-
       for (EncoderProcessorEvaluationTrajectory jointTrajectory : jointTrajectories)
       {
-//       time.set(0.0);
          timeStart = time.getDoubleValue();
          jointTrajectory.update(time.getDoubleValue());
+
+         for (EncoderProcessor encoderProcessor : encoderProcessors.keySet())
+         {
+            encoderProcessor.initialize();
+         }
+
          double deltaPosition = lastActualPosition - jointTrajectory.getPosition();
 
          while (time.getDoubleValue() < maxTime + timeStart)
@@ -117,11 +121,11 @@ public class EncoderProcessorComparer
             }
 
             dataBuffer.tickAndUpdate();
-            
+
             int numJointUpdatesPerEncoderEvent = 20;
-            for (int k=0; k<numJointUpdatesPerEncoderEvent; k++)
+            for (int k = 0; k < numJointUpdatesPerEncoderEvent; k++)
             {
-               time.add(dt/((double) numJointUpdatesPerEncoderEvent));
+               time.add(dt / ((double) numJointUpdatesPerEncoderEvent));
                jointTrajectory.update(time.getDoubleValue());
             }
          }
@@ -133,7 +137,7 @@ public class EncoderProcessorComparer
    public static void main(String[] args)
    {
       double maxTime = 2.0;
-      double dt = 2.4e-3; //7.2e-3; //2.0e-3;    // 7.2e-3;    // 7.2e-3;    // 1e-5;
+      double dt = 2.4e-3;    // 7.2e-3; //2.0e-3;    // 7.2e-3;    // 7.2e-3;    // 1e-5;
 
       // Do everything in meters.
       double encoderCountsPerMeter = 2000.0 / 2.54 * 100.0;    // 100.0;    // 78740.1575;    // 100.0 // (2000 counts / inch) * (1.0 inches / 2.54 cm) * (100.0 cm / 1.0 m)
@@ -150,17 +154,19 @@ public class EncoderProcessorComparer
       EncoderProcessorEvaluationTrajectory dipDownTrajectory = new DipDownButDontReverseEncoderProcessorEvaluationTrajectory(6.0, 0.02, 0.0);
 
       EncoderProcessorEvaluationTrajectory sawtoothTrajectory = new SawtoothEncoderProcessorEvaluationTrajectory(0.267, 0.2);
-      
+
       EncoderProcessorEvaluationTrajectory bangBangTrajectory = new BangBangEncoderProcessorEvaluationTrajectory(200.0, 0.03, 0.025);
       EncoderProcessorEvaluationTrajectory bangBangTrajectory2 = new BangBangEncoderProcessorEvaluationTrajectory(50.0, 0.06, 0.03);
 
-      EncoderProcessorEvaluationTrajectory multipleSinusoidTrajectory = new MultipleSinusoidEncoderProcessorEvaluationTrajectory(
-            new double[] {0.25 * 2.0 * Math.PI, 1.3 * 2.0 * Math.PI, 6.0 * 2.0 * Math.PI, 12.0 * 2.0 * Math.PI, 100.0 * 2.0 * Math.PI}, 
-            new double[] {0.1, 0.02, 0.005, 0.0001, 0.0001},
-            new double[] {0.0, 0.5, 0.7, 1.1, 1.4});
+      EncoderProcessorEvaluationTrajectory multipleSinusoidTrajectory = new MultipleSinusoidEncoderProcessorEvaluationTrajectory(new double[] {
+                                                                           0.25 * 2.0 * Math.PI,
+              1.3 * 2.0 * Math.PI, 6.0 * 2.0 * Math.PI, 12.0 * 2.0 * Math.PI, 100.0 * 2.0 * Math.PI}, new double[] {0.1, 0.02, 0.005, 0.0001, 0.0001},
+                 new double[] {0.0,
+                               0.5, 0.7, 1.1, 1.4});
 
 
-      EncoderProcessorEvaluationTrajectory multipleSinusoidTrajectory2 = new MultipleSinusoidEncoderProcessorEvaluationTrajectory(new double[] {0.25 * 2.0 * Math.PI,
+      EncoderProcessorEvaluationTrajectory multipleSinusoidTrajectory2 = new MultipleSinusoidEncoderProcessorEvaluationTrajectory(new double[] {
+                                                                            0.25 * 2.0 * Math.PI,
               1.3 * 2.0 * Math.PI}, new double[] {0.1, 0.02}, new double[] {0.0, 0.5});
 
       EncoderProcessorEvaluationTrajectory decayingTrajectory = new DecayingEncoderProcessorEvaluationTrajectory(1.0, 0.2, 0.0, 1.0);

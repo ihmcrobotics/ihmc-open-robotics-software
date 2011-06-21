@@ -59,4 +59,9 @@ public class AnotherEncoderProcessor extends AbstractEncoderProcessor
       previousTime = time;
       previousTickUp = thisTickUp;
    }
+
+   public void initialize()
+   {
+      // empty
+   }
 }

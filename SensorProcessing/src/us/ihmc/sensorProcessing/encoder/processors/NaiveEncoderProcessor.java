@@ -16,6 +16,12 @@ public class NaiveEncoderProcessor extends AbstractEncoderProcessor
       this.previousPosition = new IntYoVariable(name + "PrevPos", registry);
       this.previousTime = new DoubleYoVariable(name + "PrevTime", registry);
    }
+   
+   public void initialize()
+   {
+      previousPosition.set(rawTicks.getIntegerValue());
+      previousTime.set(Double.NEGATIVE_INFINITY);
+   }
 
    public void update()
    {

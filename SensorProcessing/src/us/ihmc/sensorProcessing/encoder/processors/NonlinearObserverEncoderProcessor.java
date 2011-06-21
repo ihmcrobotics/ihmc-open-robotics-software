@@ -27,6 +27,11 @@ public class NonlinearObserverEncoderProcessor extends AbstractEncoderProcessor
       alpha2.set(1.0);
    }
    
+   public void initialize()
+   {
+      // empty
+   }
+   
    public void update()
    {
       discretePosition.set(processedTicks.getDoubleValue());

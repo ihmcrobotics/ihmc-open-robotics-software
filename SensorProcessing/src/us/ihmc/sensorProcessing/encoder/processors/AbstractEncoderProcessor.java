@@ -34,6 +34,7 @@ public abstract class AbstractEncoderProcessor implements EncoderProcessor
    {
       return processedTickRate.getDoubleValue() * distancePerTick;
    }
-
+   
+   public abstract void initialize();
    public abstract void update();
 }
