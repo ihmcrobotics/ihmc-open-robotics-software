@@ -14,6 +14,8 @@ import com.mathworks.jama.Matrix;
 
 public class MatrixTest
 {
+   private static final boolean VERBOSE = false;
+   
    int rowDimension = 40;
    int columnDimension = 30;
 
@@ -37,7 +39,7 @@ public class MatrixTest
 
       // Matrix * Matrix inverted * Matrix should be equal to Matrix
       matrixMultiplicationResult = matrix.times(matrixInverted).times(matrix);    // with jama
-      displayMatrix(matrixMultiplicationResult, "matrixMultiplicationResult");
+      if (VERBOSE) displayMatrix(matrixMultiplicationResult, "matrixMultiplicationResult");
 
       boolean numberAreCloseEnough = false;
 
