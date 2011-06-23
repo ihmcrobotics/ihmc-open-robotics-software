@@ -113,6 +113,10 @@ public class ComponentBasedDesiredFootstepCalculator implements DesiredFootstepC
       
    }
 
+   public void setupParametersForM2V2()
+   {
+      setupParametersForR2();
+   }
 
    public void setupParametersForR2()
    {

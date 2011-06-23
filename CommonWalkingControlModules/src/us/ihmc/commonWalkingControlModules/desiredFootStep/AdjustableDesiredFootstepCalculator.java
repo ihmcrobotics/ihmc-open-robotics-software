@@ -261,7 +261,7 @@ public class AdjustableDesiredFootstepCalculator implements DesiredFootstepCalcu
    }
 
   
-   public void setUpParametersForR2()
+   public void setupParametersForR2()
    {
       goodStandingStepWidth = (0.1016 + 0.09) * 2.0;
       goodWalkingStepWidth = 0.35;    // 0.3272;    // 0.3272 =  minimum metabolic cost @ 0.12*Leg Length(1.245) + 2*half foot width (17.78)
