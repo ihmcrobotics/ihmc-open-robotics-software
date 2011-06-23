@@ -283,6 +283,14 @@ public class SteppingStonesDesiredFootstepCalculator implements DesiredFootstepC
 
    private enum CaptureRegionStepLocationSelectionMethod {NEAREST_CENTROID, NEAREST_POINT}
 
+   public void setupParametersForM2V2()
+   {      
+   }
+
+   public void setupParametersForR2()
+   {      
+   }
+
 
 
 

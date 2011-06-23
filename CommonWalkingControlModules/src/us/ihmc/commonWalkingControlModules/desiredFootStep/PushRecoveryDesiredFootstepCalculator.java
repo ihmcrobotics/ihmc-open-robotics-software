@@ -118,4 +118,12 @@ public class PushRecoveryDesiredFootstepCalculator implements DesiredFootstepCal
       FramePose footstepPose = new FramePose(footstepPosition, footstepOrientation);
       desiredFootstep = new Footstep(supportLegSide, footstepPose);
    }
+
+   public void setupParametersForM2V2()
+   {      
+   }
+
+   public void setupParametersForR2()
+   {      
+   }
 }
