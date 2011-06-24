@@ -2,7 +2,7 @@ package us.ihmc.sensorProcessing.encoder.processors;
 
 import us.ihmc.sensorProcessing.ProcessedPositionSensor;
 import us.ihmc.sensorProcessing.ProcessedVelocitySensor;
-import us.ihmc.sensorProcessing.SensorProcessor;
+import us.ihmc.utilities.sensors.SensorProcessor;
 
 /**
  * An EncoderProcessor should be constructed with the objects required to know the encoder raw state so that
