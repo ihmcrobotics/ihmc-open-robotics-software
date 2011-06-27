@@ -9,11 +9,12 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 public class JerryEncoderProcessor extends AbstractEncoderProcessor
 {
    private static final double
-//   ALPHA = 0.15, BETA = 0.15, GAMMA = 0.15;
-//   ALPHA = 0.3, BETA = 0.3, GAMMA = 0.3; //0.1; //0.15;
-//   ALPHA = 1.0, BETA = 1.0, GAMMA = 1.0; //0.1; //0.15;
 
- ALPHA = 0.5, BETA = 0.5, GAMMA = 0.15; //0.1; //0.15;
+//    ALPHA = 0.15, BETA = 0.15, GAMMA = 0.15;
+//    ALPHA = 0.3, BETA = 0.3, GAMMA = 0.3; //0.1; //0.15;
+//    ALPHA = 1.0, BETA = 1.0, GAMMA = 1.0; //0.1; //0.15;
+
+      ALPHA = 0.5, BETA = 0.5, GAMMA = 0.15;    // 0.1; //0.15;
 
    private final EnumYoVariable<EncoderState> state;
 
@@ -26,9 +27,9 @@ public class JerryEncoderProcessor extends AbstractEncoderProcessor
    private final DoubleYoVariable maxPossibleRate;
    private final DoubleYoVariable minPriorRate, maxPriorRate, averagePriorRate;
 
-   public JerryEncoderProcessor(String name, IntYoVariable rawTicks, DoubleYoVariable time, double distancePerTick, double dt, YoVariableRegistry parentRegistry)
+   public JerryEncoderProcessor(String name, IntYoVariable rawTicks, DoubleYoVariable time, double distancePerTick, double dt, YoVariableRegistry registry)
    {
-      super(name, rawTicks, time, distancePerTick, createRegistry(name));
+      super(name, rawTicks, time, distancePerTick, registry);
 
       this.dt = dt;
 
@@ -48,10 +49,8 @@ public class JerryEncoderProcessor extends AbstractEncoderProcessor
       this.previousProcessedTicks = new IntYoVariable(name + "prevPos", registry);
       this.previousProcessedTicksTwoBack = new IntYoVariable(name + "prevPos2", registry);
       this.previousTimeTwoBack = new DoubleYoVariable(name + "prevTime2", registry);
-
-      parentRegistry.addChild(registry);
    }
-   
+
    public void initialize()
    {
       // empty
@@ -79,8 +78,8 @@ public class JerryEncoderProcessor extends AbstractEncoderProcessor
 
          if (positionChangeInt >= 2)
          {
-            timeChange = dt; // If there were multiple time ticks and multiple position ticks, then can assume only one time tick!
-            
+            timeChange = dt;    // If there were multiple time ticks and multiple position ticks, then can assume only one time tick!
+
             minPriorRate.set((positionChange - 1.0) / timeChange);
             maxPriorRate.set((positionChange + 1.0) / timeChange);
             averagePriorRate.set(positionChange / timeChange);
@@ -88,13 +87,13 @@ public class JerryEncoderProcessor extends AbstractEncoderProcessor
 
          else if (positionChangeInt <= -2)
          {
-            timeChange = dt; // If there were multiple time ticks and multiple position ticks, then can assume only one time tick!
+            timeChange = dt;    // If there were multiple time ticks and multiple position ticks, then can assume only one time tick!
 
             minPriorRate.set((positionChange + 1.0) / timeChange);
             maxPriorRate.set((positionChange - 1.0) / timeChange);
             averagePriorRate.set(positionChange / timeChange);
          }
-         
+
          else if (timeChange > 1.5 * dt)
          {
             minPriorRate.set(positionChange / (timeChange + dt));
@@ -109,27 +108,28 @@ public class JerryEncoderProcessor extends AbstractEncoderProcessor
             maxPriorRate.set((positionChange + 1.0) / timeChange);
             averagePriorRate.set(positionChange / timeChange);
          }
-         
+
          else if (positionChangeInt == -1)
          {
             minPriorRate.set(positionChange / (timeChange + dt));
             maxPriorRate.set((positionChange - 1.0) / timeChange);
             averagePriorRate.set(positionChange / timeChange);
          }
-         
+
          else if (positionChangeInt == 0)
          {
             maxPriorRate.set((positionChange + 1.0) / timeChange);
             minPriorRate.set((positionChange - 1.0) / timeChange);
             averagePriorRate.set(positionChange / timeChange);
          }
-         
+
          else
          {
             System.err.println("Should never get here!");
             System.err.println("positionChangeInt = " + positionChangeInt);
             System.err.println("timeChange = " + timeChange);
-//            throw new RuntimeException("Should never get here!");
+
+//          throw new RuntimeException("Should never get here!");
          }
 
       }
@@ -223,25 +223,29 @@ public class JerryEncoderProcessor extends AbstractEncoderProcessor
 
          case ForwardTwo :
          {
-//            if (positionChanged)
+//          if (positionChanged)
             {
                if (processedTickRate.getDoubleValue() < minPriorRate.getDoubleValue())
                {
-//                  this.processedTickRate.set(minPriorRate.getDoubleValue() + ALPHA * (averagePriorRate.getDoubleValue() - minPriorRate.getDoubleValue()));
+//                this.processedTickRate.set(minPriorRate.getDoubleValue() + ALPHA * (averagePriorRate.getDoubleValue() - minPriorRate.getDoubleValue()));
                   this.processedTickRate.set(processedTickRate.getDoubleValue() + ALPHA * (minPriorRate.getDoubleValue() - processedTickRate.getDoubleValue()));
-                  this.processedTickRate.set(processedTickRate.getDoubleValue() + GAMMA * (averagePriorRate.getDoubleValue() - processedTickRate.getDoubleValue()));
+                  this.processedTickRate.set(processedTickRate.getDoubleValue()
+                                             + GAMMA * (averagePriorRate.getDoubleValue() - processedTickRate.getDoubleValue()));
                }
                else if (processedTickRate.getDoubleValue() > maxPriorRate.getDoubleValue())
                {
-//                  this.processedTickRate.set(maxPriorRate.getDoubleValue() + BETA * (averagePriorRate.getDoubleValue() - maxPriorRate.getDoubleValue()));
+//                this.processedTickRate.set(maxPriorRate.getDoubleValue() + BETA * (averagePriorRate.getDoubleValue() - maxPriorRate.getDoubleValue()));
                   this.processedTickRate.set(processedTickRate.getDoubleValue() + BETA * (maxPriorRate.getDoubleValue() - processedTickRate.getDoubleValue()));
-                  this.processedTickRate.set(processedTickRate.getDoubleValue() + GAMMA * (averagePriorRate.getDoubleValue() - processedTickRate.getDoubleValue()));
+                  this.processedTickRate.set(processedTickRate.getDoubleValue()
+                                             + GAMMA * (averagePriorRate.getDoubleValue() - processedTickRate.getDoubleValue()));
                }
                else
                {
-                  this.processedTickRate.set(processedTickRate.getDoubleValue() + GAMMA * (averagePriorRate.getDoubleValue() - processedTickRate.getDoubleValue()));
+                  this.processedTickRate.set(processedTickRate.getDoubleValue()
+                                             + GAMMA * (averagePriorRate.getDoubleValue() - processedTickRate.getDoubleValue()));
                }
             }
+
             if (!positionChanged)
             {
                double timeChange = time.getDoubleValue() - previousTime.getDoubleValue();
@@ -262,25 +266,29 @@ public class JerryEncoderProcessor extends AbstractEncoderProcessor
 
          case BackwardTwo :
          {
-//            if (positionChanged)
+//          if (positionChanged)
             {
                if (processedTickRate.getDoubleValue() > minPriorRate.getDoubleValue())
                {
-//                  this.processedTickRate.set(minPriorRate.getDoubleValue() + ALPHA * (averagePriorRate.getDoubleValue() - minPriorRate.getDoubleValue()));
+//                this.processedTickRate.set(minPriorRate.getDoubleValue() + ALPHA * (averagePriorRate.getDoubleValue() - minPriorRate.getDoubleValue()));
                   this.processedTickRate.set(processedTickRate.getDoubleValue() + ALPHA * (minPriorRate.getDoubleValue() - processedTickRate.getDoubleValue()));
-                  this.processedTickRate.set(processedTickRate.getDoubleValue() + GAMMA * (averagePriorRate.getDoubleValue() - processedTickRate.getDoubleValue()));
+                  this.processedTickRate.set(processedTickRate.getDoubleValue()
+                                             + GAMMA * (averagePriorRate.getDoubleValue() - processedTickRate.getDoubleValue()));
                }
                else if (processedTickRate.getDoubleValue() < maxPriorRate.getDoubleValue())
                {
-//                  this.processedTickRate.set(maxPriorRate.getDoubleValue() + BETA * (averagePriorRate.getDoubleValue() - maxPriorRate.getDoubleValue()));
+//                this.processedTickRate.set(maxPriorRate.getDoubleValue() + BETA * (averagePriorRate.getDoubleValue() - maxPriorRate.getDoubleValue()));
                   this.processedTickRate.set(processedTickRate.getDoubleValue() + BETA * (maxPriorRate.getDoubleValue() - processedTickRate.getDoubleValue()));
-                  this.processedTickRate.set(processedTickRate.getDoubleValue() + GAMMA * (averagePriorRate.getDoubleValue() - processedTickRate.getDoubleValue()));
+                  this.processedTickRate.set(processedTickRate.getDoubleValue()
+                                             + GAMMA * (averagePriorRate.getDoubleValue() - processedTickRate.getDoubleValue()));
                }
                else
                {
-                  this.processedTickRate.set(processedTickRate.getDoubleValue() + GAMMA * (averagePriorRate.getDoubleValue() - processedTickRate.getDoubleValue()));
+                  this.processedTickRate.set(processedTickRate.getDoubleValue()
+                                             + GAMMA * (averagePriorRate.getDoubleValue() - processedTickRate.getDoubleValue()));
                }
-            } 
+            }
+
             if (!positionChanged)
             {
                double timeChange = time.getDoubleValue() - previousTime.getDoubleValue();
@@ -307,7 +315,7 @@ public class JerryEncoderProcessor extends AbstractEncoderProcessor
       boolean increasingMoreThanOne = rawTicks > previousPosition + 1;
       boolean decreasingMoreThanOne = rawTicks < previousPosition - 1;
 
-      
+
       switch ((EncoderState) state.getEnumValue())
       {
          case Start :
@@ -392,19 +400,12 @@ public class JerryEncoderProcessor extends AbstractEncoderProcessor
             {
                state.set(EncoderState.ForwardOne);
             }
-            
+
 
             break;
          }
       }
-
    }
-
-   private static YoVariableRegistry createRegistry(String name)
-   {
-      return new YoVariableRegistry(name);
-   }
-
 
    private enum EncoderState {Start, ForwardOne, ForwardTwo, BackwardOne, BackwardTwo;}
 
