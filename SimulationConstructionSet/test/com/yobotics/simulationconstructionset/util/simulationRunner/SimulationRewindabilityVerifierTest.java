@@ -19,6 +19,7 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 public class SimulationRewindabilityVerifierTest
 {
    private static final boolean SHOW_GUI = false;
+   private static final boolean VERBOSE = false;
    private final double DT = 0.01;
 
 
@@ -73,9 +74,11 @@ public class SimulationRewindabilityVerifierTest
       
       ArrayList<VariableDifference> variableDifferences = verifier.checkRewindabilityWithSimpleMethod(numTests, maxDifferenceAllowed);
       
-      System.out.println("\ntestEasilyDetectableNonRewindableSimulation differences:");
-      System.out.println(VariableDifference.allVariableDifferencesToString(variableDifferences));
-      
+      if (VERBOSE)
+      {
+         System.out.println("\ntestEasilyDetectableNonRewindableSimulation differences:");
+         System.out.println(VariableDifference.allVariableDifferencesToString(variableDifferences));
+      }
       assertEquals(2, variableDifferences.size());
       
       destroySimulation(scs1);
@@ -99,9 +102,12 @@ public class SimulationRewindabilityVerifierTest
       
       ArrayList<VariableDifference> variableDifferences = verifier.checkRewindabilityWithSimpleMethod(numTests, maxDifferenceAllowed);
       
-      System.out.println("\ntestDifficultToDetectNonRewindableSimulation differences with simple method:");
-      System.out.println(VariableDifference.allVariableDifferencesToString(variableDifferences));
-      
+      if (VERBOSE)
+      {
+         System.out.println("\ntestDifficultToDetectNonRewindableSimulation differences with simple method:");
+         System.out.println(VariableDifference.allVariableDifferencesToString(variableDifferences));
+      }
+
       assertTrue(variableDifferences.isEmpty()); // Make sure the test is hard enough that the simple method doesn't catch it.
 
       // Then reconstruct and try again:
@@ -111,9 +117,12 @@ public class SimulationRewindabilityVerifierTest
 
       variableDifferences = verifier.checkRewindabilityWithRigorousMethod(numTests, numTicksAhead, maxDifferenceAllowed);
 
-      System.out.println("\ntestDifficultToDetectNonRewindableSimulation differences with complex method:");
-      System.out.println(VariableDifference.allVariableDifferencesToString(variableDifferences));
-      
+      if (VERBOSE)
+      {
+         System.out.println("\ntestDifficultToDetectNonRewindableSimulation differences with complex method:");
+         System.out.println(VariableDifference.allVariableDifferencesToString(variableDifferences));
+      }
+
       assertEquals(2, variableDifferences.size());
       
       destroySimulation(scs1);

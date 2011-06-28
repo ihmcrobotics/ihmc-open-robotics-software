@@ -26,16 +26,20 @@ public class MatrixTest
    @Test
    public void testInvert()
    {
-      System.out.println("");
-      System.out.println("Matrix Inversion test");
+      if (VERBOSE)
+      {
+         System.out.println("");
+         System.out.println("Matrix Inversion test");
+      }
+
       fillMatrix(rowDimension, rowDimension);
-      displayMatrix(matrix, "matrix");
+      if (VERBOSE) displayMatrix(matrix, "matrix");
 
       Matrix matrixMultiplicationResult = new Matrix(rowDimension, rowDimension);
 
       // Invert Matrix
       matrixInverted = matrix.inverse();    // with jama
-      displayMatrix(matrixInverted, "matrixInverted");
+      if (VERBOSE) displayMatrix(matrixInverted, "matrixInverted");
 
       // Matrix * Matrix inverted * Matrix should be equal to Matrix
       matrixMultiplicationResult = matrix.times(matrixInverted).times(matrix);    // with jama
@@ -64,20 +68,24 @@ public class MatrixTest
    @Test
    public void testPseudoInvert()
    {
-      System.out.println("");
-      System.out.println("Matrix Pseudo Inversion test");
+      if (VERBOSE)
+      {
+         System.out.println("");
+         System.out.println("Matrix Pseudo Inversion test");
+      }
+      
       fillMatrix(rowDimension, columnDimension);
-      displayMatrix(matrix, "matrix");
+      if (VERBOSE) displayMatrix(matrix, "matrix");
 
       Matrix matrixMultiplicationResult = new Matrix(rowDimension, columnDimension);
 
       // Invert Matrix
       matrixInverted = MathTools.pseudoinverse(matrix);
-      displayMatrix(matrixInverted, "matrixInverted");
+      if (VERBOSE) displayMatrix(matrixInverted, "matrixInverted");
 
       // Matrix * Matrix inverted * Matrix should be equal to Matrix
       matrixMultiplicationResult = matrix.times(matrixInverted).times(matrix);    // with jama
-      displayMatrix(matrixMultiplicationResult, "matrixMultiplicationResult");
+      if (VERBOSE) displayMatrix(matrixMultiplicationResult, "matrixMultiplicationResult");
 
       boolean numberAreCloseEnough = false;
 
@@ -98,7 +106,7 @@ public class MatrixTest
       assertTrue("Matrix Inversion works well", true);
    }
 
-   public void fillMatrix(int row, int column)
+   private void fillMatrix(int row, int column)
    {
       matrix = new Matrix(row, column);
       matrixInverted = new Matrix(column, row);
@@ -112,7 +120,7 @@ public class MatrixTest
       }
    }
 
-   public void displayMatrix(Matrix matrix, String matrixName)
+   private void displayMatrix(Matrix matrix, String matrixName)
    {
       System.out.println("");
       System.out.println(matrixName);

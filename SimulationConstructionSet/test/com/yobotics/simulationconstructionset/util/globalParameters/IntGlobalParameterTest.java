@@ -9,6 +9,7 @@ import org.junit.Test;
 
 public class IntGlobalParameterTest
 {
+   private static final boolean VERBOSE = false;
    private final int DEFAULT_VALUE = 11;
 
    @Before
@@ -26,7 +27,8 @@ public class IntGlobalParameterTest
    @Test
    public void testGetValue()
    {
-      SystemOutGlobalParameterChangedListener systemOutGlobalParameterChangedListener = new SystemOutGlobalParameterChangedListener();
+      SystemOutGlobalParameterChangedListener systemOutGlobalParameterChangedListener = null;
+      if (VERBOSE) systemOutGlobalParameterChangedListener = new SystemOutGlobalParameterChangedListener();
 
       IntGlobalParameter intGlobalParameter = new IntGlobalParameter("testParameter", "test description", DEFAULT_VALUE,
                                                  systemOutGlobalParameterChangedListener);
@@ -36,7 +38,8 @@ public class IntGlobalParameterTest
    @Test
    public void testSetValue()
    {
-      SystemOutGlobalParameterChangedListener systemOutGlobalParameterChangedListener = new SystemOutGlobalParameterChangedListener();
+      SystemOutGlobalParameterChangedListener systemOutGlobalParameterChangedListener = null;
+      if (VERBOSE) systemOutGlobalParameterChangedListener = new SystemOutGlobalParameterChangedListener();
 
 
       IntGlobalParameter intGlobalParameter = new IntGlobalParameter("testParameter", "test description", DEFAULT_VALUE,

@@ -10,6 +10,8 @@ import org.junit.Test;
 
 public class AndBooleanGlobalParameterTest
 {
+   private static final boolean VERBOSE = false;
+   
    @Before
    public void setUp()
    {
@@ -25,7 +27,8 @@ public class AndBooleanGlobalParameterTest
    @Test
    public void testSetThrowsException()
    {
-      SystemOutGlobalParameterChangedListener systemOutGlobalParameterChangedListener = new SystemOutGlobalParameterChangedListener();
+      SystemOutGlobalParameterChangedListener systemOutGlobalParameterChangedListener = null;
+      if (VERBOSE) systemOutGlobalParameterChangedListener = new SystemOutGlobalParameterChangedListener();
 
       boolean valueA = true;
       boolean valueB = false;
@@ -52,7 +55,8 @@ public class AndBooleanGlobalParameterTest
    @Test
    public void testAndBooleanGlobalParameter()
    {
-      SystemOutGlobalParameterChangedListener systemOutGlobalParameterChangedListener = new SystemOutGlobalParameterChangedListener();
+      SystemOutGlobalParameterChangedListener systemOutGlobalParameterChangedListener = null;
+      if (VERBOSE) systemOutGlobalParameterChangedListener = new SystemOutGlobalParameterChangedListener();
 
       boolean valueA = true;
       boolean valueB = false;
@@ -74,7 +78,8 @@ public class AndBooleanGlobalParameterTest
    @Test
    public void testAndBooleanGlobalParameterUpdate()
    {
-      SystemOutGlobalParameterChangedListener systemOutGlobalParameterChangedListener = new SystemOutGlobalParameterChangedListener();
+      SystemOutGlobalParameterChangedListener systemOutGlobalParameterChangedListener = null;
+      if (VERBOSE) systemOutGlobalParameterChangedListener = new SystemOutGlobalParameterChangedListener();
 
 
       boolean valueA = true;
