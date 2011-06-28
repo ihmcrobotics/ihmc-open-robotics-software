@@ -9,6 +9,8 @@ import org.junit.Test;
 
 public class OrBooleanGlobalParameterTest
 {
+   private static final boolean VERBOSE = false;
+
    @Before
    public void setUp()
    {
@@ -24,7 +26,8 @@ public class OrBooleanGlobalParameterTest
    @Test
    public void testSetThrowsException()
    {
-      SystemOutGlobalParameterChangedListener systemOutGlobalParameterChangedListener = new SystemOutGlobalParameterChangedListener();
+      SystemOutGlobalParameterChangedListener systemOutGlobalParameterChangedListener = null;
+      if (VERBOSE) systemOutGlobalParameterChangedListener = new SystemOutGlobalParameterChangedListener();
 
       boolean valueA = true;
       boolean valueB = false;
@@ -51,7 +54,8 @@ public class OrBooleanGlobalParameterTest
    @Test
    public void testAndBooleanGlobalParameter()
    {
-      SystemOutGlobalParameterChangedListener systemOutGlobalParameterChangedListener = new SystemOutGlobalParameterChangedListener();
+      SystemOutGlobalParameterChangedListener systemOutGlobalParameterChangedListener = null;
+      if (VERBOSE) systemOutGlobalParameterChangedListener = new SystemOutGlobalParameterChangedListener();
 
       boolean valueA = true;
       boolean valueB = false;
@@ -73,7 +77,8 @@ public class OrBooleanGlobalParameterTest
    @Test
    public void testAndBooleanGlobalParameterUpdate()
    {
-      SystemOutGlobalParameterChangedListener systemOutGlobalParameterChangedListener = new SystemOutGlobalParameterChangedListener();
+      SystemOutGlobalParameterChangedListener systemOutGlobalParameterChangedListener = null;
+      if (VERBOSE) systemOutGlobalParameterChangedListener = new SystemOutGlobalParameterChangedListener();
 
 
       boolean valueA = true;

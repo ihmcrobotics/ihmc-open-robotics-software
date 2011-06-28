@@ -9,6 +9,7 @@ import org.junit.Test;
 
 public class MultiplicativeDoubleGlobalParameterTest
 {
+   private static final boolean VERBOSE = false;
    private final double eps = 1e-10;
 
    @Before
@@ -26,7 +27,8 @@ public class MultiplicativeDoubleGlobalParameterTest
    @Test
    public void testSetThrowsException()
    {
-      SystemOutGlobalParameterChangedListener systemOutGlobalParameterChangedListener = new SystemOutGlobalParameterChangedListener();
+      SystemOutGlobalParameterChangedListener systemOutGlobalParameterChangedListener = null;
+      if (VERBOSE) systemOutGlobalParameterChangedListener = new SystemOutGlobalParameterChangedListener();
 
       double valueA = 4.67;
       double valueB = -765.7654;
@@ -54,7 +56,8 @@ public class MultiplicativeDoubleGlobalParameterTest
    @Test
    public void testMultiplicativeDoubleGlobalParameter()
    {
-      SystemOutGlobalParameterChangedListener systemOutGlobalParameterChangedListener = new SystemOutGlobalParameterChangedListener();
+      SystemOutGlobalParameterChangedListener systemOutGlobalParameterChangedListener = null;
+      if (VERBOSE) systemOutGlobalParameterChangedListener = new SystemOutGlobalParameterChangedListener();
 
       double valueA = 4.67;
       double valueB = -765.7654;
@@ -77,7 +80,8 @@ public class MultiplicativeDoubleGlobalParameterTest
    @Test
    public void testMultiplicativeDoubleGlobalParameterUpdate()
    {
-      SystemOutGlobalParameterChangedListener systemOutGlobalParameterChangedListener = new SystemOutGlobalParameterChangedListener();
+      SystemOutGlobalParameterChangedListener systemOutGlobalParameterChangedListener = null;
+      if (VERBOSE) systemOutGlobalParameterChangedListener = new SystemOutGlobalParameterChangedListener();
 
 
       double valueA = 4.67;

@@ -8,6 +8,7 @@ import org.junit.Test;
 
 public class DoubleGlobalParameterTest    // extends TestCase
 {
+   private static final boolean VERBOSE = false;
    private final double DEFAULT_VALUE = 11.99;
    private final double eps = 1e-10;
 
@@ -26,7 +27,8 @@ public class DoubleGlobalParameterTest    // extends TestCase
    @Test
    public void testGetValue()
    {
-      SystemOutGlobalParameterChangedListener systemOutGlobalParameterChangedListener = new SystemOutGlobalParameterChangedListener();
+      SystemOutGlobalParameterChangedListener systemOutGlobalParameterChangedListener = null;
+      if (VERBOSE) systemOutGlobalParameterChangedListener = new SystemOutGlobalParameterChangedListener();
 
       DoubleGlobalParameter doubleGlobalParameter = new DoubleGlobalParameter("testParameter", "test description", DEFAULT_VALUE,
                                                        systemOutGlobalParameterChangedListener);
@@ -36,7 +38,8 @@ public class DoubleGlobalParameterTest    // extends TestCase
    @Test
    public void testSetValue()
    {
-      SystemOutGlobalParameterChangedListener systemOutGlobalParameterChangedListener = new SystemOutGlobalParameterChangedListener();
+      SystemOutGlobalParameterChangedListener systemOutGlobalParameterChangedListener = null;
+      if (VERBOSE) systemOutGlobalParameterChangedListener = new SystemOutGlobalParameterChangedListener();
 
 
       DoubleGlobalParameter doubleGlobalParameter = new DoubleGlobalParameter("testParameter", "test description", DEFAULT_VALUE,

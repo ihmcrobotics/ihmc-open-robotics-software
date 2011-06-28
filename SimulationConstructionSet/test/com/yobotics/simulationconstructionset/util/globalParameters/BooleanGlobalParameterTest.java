@@ -11,6 +11,7 @@ import org.junit.Test;
 
 public class BooleanGlobalParameterTest
 {
+   private static final boolean VERBOSE = false;
    private final boolean DEFAULT_VALUE = true;
 
    @Before
@@ -28,7 +29,8 @@ public class BooleanGlobalParameterTest
    @Test
    public void testGetValue()
    {
-      SystemOutGlobalParameterChangedListener systemOutGlobalParameterChangedListener = new SystemOutGlobalParameterChangedListener();
+      SystemOutGlobalParameterChangedListener systemOutGlobalParameterChangedListener = null;
+      if (VERBOSE) systemOutGlobalParameterChangedListener = new SystemOutGlobalParameterChangedListener();
 
       BooleanGlobalParameter booleanGlobalParameter = new BooleanGlobalParameter("testParameter", "test description", DEFAULT_VALUE,
                                                          systemOutGlobalParameterChangedListener);
@@ -38,7 +40,8 @@ public class BooleanGlobalParameterTest
    @Test
    public void testSetValue()
    {
-      SystemOutGlobalParameterChangedListener systemOutGlobalParameterChangedListener = new SystemOutGlobalParameterChangedListener();
+      SystemOutGlobalParameterChangedListener systemOutGlobalParameterChangedListener = null;
+      if (VERBOSE) systemOutGlobalParameterChangedListener = new SystemOutGlobalParameterChangedListener();
 
 
       BooleanGlobalParameter booleanGlobalParameter = new BooleanGlobalParameter("testParameter", "test description", DEFAULT_VALUE,
