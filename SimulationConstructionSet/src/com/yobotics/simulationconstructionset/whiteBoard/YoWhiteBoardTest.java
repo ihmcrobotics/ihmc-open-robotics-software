@@ -18,6 +18,8 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public class YoWhiteBoardTest
 {
+   private static final boolean VERBOSE = true;
+
    @Test
    public void testNothing()
    {
@@ -39,8 +41,10 @@ public class YoWhiteBoardTest
       leftWhiteBoard.attachYoWhiteBoardListener(leftWhiteBoardListener);
       rightWhiteBoard.attachYoWhiteBoardListener(rightWhiteBoardListener);
 
-      int numberOfTests = 1000;
+      int numberOfTests = 100000;
 
+      long startTime = System.currentTimeMillis();
+      
       for (int i = 0; i < numberOfTests; i++)
       {
          changeWrittenVariablesRandomly(leftWhiteBoard);
@@ -57,14 +61,7 @@ public class YoWhiteBoardTest
 
          while (!leftWhiteBoardListener.isNewDataReady() ||!rightWhiteBoardListener.isNewDataReady())
          {
-            try
-            {
-               Thread.sleep(1);
-            }
-            catch (InterruptedException e)
-            {
-            }
-
+            Thread.yield();
          }
 
          leftWhiteBoard.readData();
@@ -72,6 +69,16 @@ public class YoWhiteBoardTest
 
          verifyWhiteBoardsHaveSameData(leftWhiteBoard, rightWhiteBoard);
       }
+      
+      long endTime = System.currentTimeMillis();
+      
+      double duration = (endTime - startTime) * 0.001;
+      
+      if (VERBOSE) System.out.println("Ran " + numberOfTests + " tests in " + duration + " + seconds");
+      double timePerTest = duration / ((double) numberOfTests);
+      if (VERBOSE) System.out.println("Time per test = " + timePerTest);
+
+      
    }
 
    private void verifyWhiteBoardsHaveSameData(YoWhiteBoard leftWhiteBoard, YoWhiteBoard rightWhiteBoard)
