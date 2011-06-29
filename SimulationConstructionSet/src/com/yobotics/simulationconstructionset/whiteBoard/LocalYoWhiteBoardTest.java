@@ -16,7 +16,8 @@ public class LocalYoWhiteBoardTest extends YoWhiteBoardTest
       leftWhiteBoard.setMyBrotherWhiteBoard(rightWhiteBoard);
       rightWhiteBoard.setMyBrotherWhiteBoard(leftWhiteBoard);
 
-      doATest(leftWhiteBoard, rightWhiteBoard);
+      int numberOfTests = 10000;
+      doATest(leftWhiteBoard, rightWhiteBoard, numberOfTests);
    }
 
 }
