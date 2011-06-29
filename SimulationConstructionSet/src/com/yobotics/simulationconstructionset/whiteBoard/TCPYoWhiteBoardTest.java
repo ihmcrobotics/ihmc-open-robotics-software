@@ -16,7 +16,8 @@ public class TCPYoWhiteBoardTest extends YoWhiteBoardTest
       TCPYoWhiteBoard leftWhiteBoard = new TCPYoWhiteBoard(port);
       TCPYoWhiteBoard rightWhiteBoard = new TCPYoWhiteBoard(IPAddress, port);
 
-      doATest(leftWhiteBoard, rightWhiteBoard);
+      int numberOfTests = 1000;
+      doATest(leftWhiteBoard, rightWhiteBoard, numberOfTests);
    }
    
 }
