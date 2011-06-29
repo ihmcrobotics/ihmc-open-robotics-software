@@ -300,7 +300,7 @@ public class YoWhiteBoardTest
       {
          int registryIndex = random.nextInt(registryList.size());
          YoVariableRegistry registry = registryList.get(registryIndex);
-
+         
          int variableType = random.nextInt(3);
 
          String name = namePrefix + i;
@@ -351,64 +351,11 @@ public class YoWhiteBoardTest
          YoVariableRegistry parentRegistry = ret.get(registryIndex);
          
          parentRegistry.addChild(registry);
+         ret.add(registry);
       }
       
       return ret;
    }
 
-   private void createTwelveVariablesAndAddToWhiteBoard(YoWhiteBoard whiteBoard, boolean readOddWriteEven)
-   {
-      YoVariableRegistry rootRegistry = new YoVariableRegistry("root");
-      YoVariableRegistry registryOne = new YoVariableRegistry("one");
-      YoVariableRegistry registryTwo = new YoVariableRegistry("two");
-      YoVariableRegistry registryThree = new YoVariableRegistry("three");
-
-      rootRegistry.addChild(registryOne);
-      rootRegistry.addChild(registryTwo);
-      registryTwo.addChild(registryThree);
-
-      DoubleYoVariable variableOne = new DoubleYoVariable("variableOne", rootRegistry);
-      DoubleYoVariable variableTwo = new DoubleYoVariable("variableTwo", rootRegistry);
-      BooleanYoVariable variableThree = new BooleanYoVariable("variableThree", rootRegistry);
-
-      DoubleYoVariable variableFour = new DoubleYoVariable("variableFour", registryOne);
-      IntYoVariable variableFive = new IntYoVariable("variableFive", registryOne);
-      BooleanYoVariable variableSix = new BooleanYoVariable("variableSix", registryOne);
-
-      DoubleYoVariable variableSeven = new DoubleYoVariable("variableSeven", registryTwo);
-      DoubleYoVariable variableEight = new DoubleYoVariable("variableEight", registryTwo);
-      BooleanYoVariable variableNine = new BooleanYoVariable("variableNine", registryTwo);
-
-      DoubleYoVariable variableTen = new DoubleYoVariable("variableTen", registryThree);
-      DoubleYoVariable variableEleven = new DoubleYoVariable("variableEleven", registryThree);
-      BooleanYoVariable variableTwelve = new BooleanYoVariable("variableTwelve", registryThree);
-
-      ArrayList<AbstractYoVariable> oddVariables = new ArrayList<AbstractYoVariable>();
-      oddVariables.add(variableOne);
-      oddVariables.add(variableThree);
-      oddVariables.add(variableFive);
-      oddVariables.add(variableSeven);
-      oddVariables.add(variableNine);
-      oddVariables.add(variableEleven);
-
-      ArrayList<AbstractYoVariable> evenVariables = new ArrayList<AbstractYoVariable>();
-      evenVariables.add(variableTwo);
-      evenVariables.add(variableFour);
-      evenVariables.add(variableSix);
-      evenVariables.add(variableEight);
-      evenVariables.add(variableTen);
-      evenVariables.add(variableTwelve);
-
-      if (readOddWriteEven)
-      {
-         whiteBoard.setVariablesToWrite(evenVariables);
-         whiteBoard.setVariablesToRead(oddVariables);
-      }
-      else
-      {
-         whiteBoard.setVariablesToWrite(oddVariables);
-         whiteBoard.setVariablesToRead(evenVariables);
-      }
-   }
-
+  
 }
