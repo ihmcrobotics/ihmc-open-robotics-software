@@ -15,7 +15,6 @@ import com.yobotics.simulationconstructionset.AbstractYoVariable;
 import com.yobotics.simulationconstructionset.AbstractYoVariable.Type;
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.EnumYoVariable;
 import com.yobotics.simulationconstructionset.IntYoVariable;
 import com.yobotics.simulationconstructionset.NameSpace;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
