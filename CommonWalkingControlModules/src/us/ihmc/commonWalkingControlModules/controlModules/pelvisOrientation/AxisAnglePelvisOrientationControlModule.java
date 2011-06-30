@@ -102,7 +102,7 @@ public class AxisAnglePelvisOrientationControlModule implements PelvisOrientatio
 
    private FrameVector computeDerivativeTerm()
    {
-      Twist twistOfPelvisWithRespectToWorld = processedSensors.computeTwistOfPelvisWithRespectToWorld();
+      Twist twistOfPelvisWithRespectToWorld = processedSensors.getTwistOfPelvisWithRespectToWorld();
       twistOfPelvisWithRespectToWorld.changeFrame(pelvisFrame);
       FrameVector derivativeTerm = new FrameVector(twistOfPelvisWithRespectToWorld.getExpressedInFrame(), twistOfPelvisWithRespectToWorld.getAngularPartCopy());
       derivativeGainMatrix.transform(derivativeTerm.getVector());

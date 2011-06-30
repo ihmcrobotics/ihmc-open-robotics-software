@@ -35,7 +35,7 @@ public class DesiredJointVelocityCalculator
       swingFullLegJacobian.computeJacobian();
 
       // compute twist of world with respect to body
-      Twist twistOfWorldWithRespectToBody = processedSensors.computeTwistOfPelvisWithRespectToWorld();    // twist of pelvis w.r.t. world at this point
+      Twist twistOfWorldWithRespectToBody = processedSensors.getTwistOfPelvisWithRespectToWorld();    // twist of pelvis w.r.t. world at this point
       twistOfWorldWithRespectToBody.invert();    // twist of world w.r.t. body at this point.
       twistOfWorldWithRespectToBody.changeFrame(desiredTwistOfSwingFootWithRespectToWorld.getExpressedInFrame());
 

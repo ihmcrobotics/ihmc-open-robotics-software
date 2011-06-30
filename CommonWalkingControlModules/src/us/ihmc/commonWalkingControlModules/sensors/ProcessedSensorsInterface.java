@@ -28,8 +28,8 @@ public interface ProcessedSensorsInterface
 
    public abstract FrameVector getGravityInWorldFrame();
 
-   public abstract Twist computeTwistOfPelvisWithRespectToWorld();
-   public abstract SpatialAccelerationVector computeAccelerationOfPelvisWithRespectToWorld();
+   public abstract Twist getTwistOfPelvisWithRespectToWorld();
+   public abstract SpatialAccelerationVector getAccelerationOfPelvisWithRespectToWorld();
 
    public abstract Orientation getPelvisOrientationInFrame(ReferenceFrame referenceFrame);
 
