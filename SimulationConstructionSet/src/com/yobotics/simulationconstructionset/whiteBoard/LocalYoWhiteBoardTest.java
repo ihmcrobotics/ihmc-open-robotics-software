@@ -18,5 +18,4 @@ public class LocalYoWhiteBoardTest extends YoWhiteBoardTest
       int numberOfTests = 10000;
       doATest(leftWhiteBoard, rightWhiteBoard, numberOfTests);
    }
-
 }

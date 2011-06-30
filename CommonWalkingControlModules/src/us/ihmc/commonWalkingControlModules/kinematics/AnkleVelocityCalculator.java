@@ -35,7 +35,7 @@ public class AnkleVelocityCalculator
       LegJointVelocities legJointVelocities = getLegJointVelocities();
       Twist twistOfFootWithRespectToBody = swingLegJacobian.getTwistOfFootWithRespectToPelvisInFootFrame(legJointVelocities);
 
-      Twist twistOfFootWithRespectToWorld = processedSensors.computeTwistOfPelvisWithRespectToWorld();    // twist of pelvis w.r.t. world at this point
+      Twist twistOfFootWithRespectToWorld = processedSensors.getTwistOfPelvisWithRespectToWorld();    // twist of pelvis w.r.t. world at this point
       final ReferenceFrame footFrame = twistOfFootWithRespectToBody.getExpressedInFrame();
       twistOfFootWithRespectToWorld.changeFrame(footFrame);
       twistOfFootWithRespectToWorld.add(twistOfFootWithRespectToBody);    // twist of foot w.r.t. world at this point

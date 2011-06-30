@@ -168,7 +168,7 @@ public class CraigPage300SwingLegTorqueControlModule implements SwingLegTorqueCo
       // set body acceleration
       if (useBodyAcceleration)
       {
-         SpatialAccelerationVector bodyAcceleration = processedSensors.computeAccelerationOfPelvisWithRespectToWorld();    // FIXME: set to LIPM-based predicted body acceleration
+         SpatialAccelerationVector bodyAcceleration = processedSensors.getAccelerationOfPelvisWithRespectToWorld();    // FIXME: set to LIPM-based predicted body acceleration
          bodyAcceleration.setAngularPart(new Vector3d());    // zero desired angular acceleration
          bodyAcceleration.setLinearPart(new Vector3d());    // zero linear acceleration as well for now
          fullRobotModel.getRootJoint().setDesiredAcceleration(bodyAcceleration);
