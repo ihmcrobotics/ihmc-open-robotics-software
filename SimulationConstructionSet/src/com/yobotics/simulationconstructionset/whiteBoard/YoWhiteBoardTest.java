@@ -37,12 +37,12 @@ public class YoWhiteBoardTest
       whiteBoard.readData();
    }
 
-   protected void doATest(YoWhiteBoard leftWhiteBoard, YoWhiteBoard rightWhiteBoard, int numberOfTests) throws IOException
+   protected void doATest(YoWhiteBoard leftWhiteBoard, YoWhiteBoard rightWhiteBoard, int numberOfTests, int numberVariablesToReadOneWriteTwo, int numberVariablesToWriteOneReadTwo) throws IOException
    {
 //    createTwelveVariablesAndAddToWhiteBoard(leftWhiteBoard, true);
 //    createTwelveVariablesAndAddToWhiteBoard(rightWhiteBoard, false);
 
-      createRandomRegistriesAndVariables(leftWhiteBoard, rightWhiteBoard, 20, 1000, 2000);
+      createRandomRegistriesAndVariables(leftWhiteBoard, rightWhiteBoard, 20, numberVariablesToReadOneWriteTwo, numberVariablesToWriteOneReadTwo);
 
       leftWhiteBoard.connect();
       rightWhiteBoard.connect();
@@ -96,6 +96,11 @@ public class YoWhiteBoardTest
 
          verifyYoVariablesHaveSameValues(leftVariablesToWrite, rightVariablesToRead);
          verifyYoVariablesHaveSameValues(leftVariablesToRead, rightVariablesToWrite);
+         
+         if (VERBOSE)
+         {
+            System.out.println("YoVariables had same data!");
+         }
       }
 
       long endTime = System.currentTimeMillis();

@@ -23,6 +23,6 @@ public class TCPYoWhiteBoardTest extends YoWhiteBoardTest
       rightWhiteBoardThread.start();
 
       int numberOfTests = 1000;
-      doATest(leftWhiteBoard, rightWhiteBoard, numberOfTests);
+      doATest(leftWhiteBoard, rightWhiteBoard, numberOfTests, 1000, 2000);
    }
 }
