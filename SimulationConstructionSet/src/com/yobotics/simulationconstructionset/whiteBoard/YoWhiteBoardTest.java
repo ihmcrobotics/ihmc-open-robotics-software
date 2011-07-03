@@ -133,6 +133,9 @@ public class YoWhiteBoardTest
       double timePerTest = duration / ((double) numberOfTests);
       if (VERBOSE)
          System.out.println("Time per test = " + timePerTest);
+      
+      leftWhiteBoard.close();
+      rightWhiteBoard.close();
 
 
    }
@@ -188,6 +191,10 @@ public class YoWhiteBoardTest
       public boolean isConnected()
       {
          return false;
+      }
+
+      public void whiteBoardSpecificClose() throws IOException
+      {         
       }
    }
 
