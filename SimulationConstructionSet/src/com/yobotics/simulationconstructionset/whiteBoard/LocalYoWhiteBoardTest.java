@@ -6,7 +6,7 @@ import java.io.IOException;
 import org.junit.Test;
 
 public class LocalYoWhiteBoardTest extends YoWhiteBoardTest
-{  
+{
    @Test
    public void testLocalYoWhiteBoard() throws IOException
    {
