@@ -15,7 +15,7 @@ public class UDPYoWhiteBoardTest extends YoWhiteBoardTest
       int leftReceiveRightSendPort = 8654;
 
       boolean throwOutStalePackets = false;
-      
+
       UDPYoWhiteBoard leftWhiteBoard = new UDPYoWhiteBoard(true, IPAddress, leftSendRightReceivePort, leftReceiveRightSendPort, throwOutStalePackets);
       UDPYoWhiteBoard rightWhiteBoard = new UDPYoWhiteBoard(false, IPAddress, leftReceiveRightSendPort, leftSendRightReceivePort, throwOutStalePackets);
 
@@ -23,15 +23,15 @@ public class UDPYoWhiteBoardTest extends YoWhiteBoardTest
       Thread rightWhiteBoardThread = new Thread(rightWhiteBoard);
 
       leftWhiteBoardThread.start();
-      
+
       try
       {
          Thread.sleep(2000);
-      } 
-      catch (InterruptedException e)
-      {        
       }
-      
+      catch (InterruptedException e)
+      {
+      }
+
       rightWhiteBoardThread.start();
 
       int numberOfTests = 1000;
