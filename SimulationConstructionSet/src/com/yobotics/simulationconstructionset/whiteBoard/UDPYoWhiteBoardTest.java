@@ -35,7 +35,7 @@ public class UDPYoWhiteBoardTest extends YoWhiteBoardTest
       rightWhiteBoardThread.start();
 
       int numberOfTests = 1000;
-      doATest(leftWhiteBoard, rightWhiteBoard, numberOfTests, 100, 200);
+      doATest(leftWhiteBoard, rightWhiteBoard, numberOfTests, 50, 50);
    }
 
 
