@@ -23,7 +23,7 @@ public class YoWhiteBoardTest
 {
    private static final boolean VERBOSE = false;
 
-   @Test(expected = RuntimeException.class)
+   @Test (expected = RuntimeException.class)
    public void testWriteNotConnected() throws IOException
    {
       YoWhiteBoard whiteBoard = new DoNothingWhiteBoard();
@@ -39,9 +39,6 @@ public class YoWhiteBoardTest
 
    protected void doATest(YoWhiteBoard leftWhiteBoard, YoWhiteBoard rightWhiteBoard, int numberOfTests, int numberVariablesToReadOneWriteTwo, int numberVariablesToWriteOneReadTwo) throws IOException
    {
-//    createTwelveVariablesAndAddToWhiteBoard(leftWhiteBoard, true);
-//    createTwelveVariablesAndAddToWhiteBoard(rightWhiteBoard, false);
-
       createRandomRegistriesAndVariables(leftWhiteBoard, rightWhiteBoard, 20, numberVariablesToReadOneWriteTwo, numberVariablesToWriteOneReadTwo);
 
       leftWhiteBoard.connect();
@@ -81,6 +78,30 @@ public class YoWhiteBoardTest
          leftWhiteBoardListener.reset();
          rightWhiteBoardListener.reset();
 
+         while (!leftWhiteBoard.isConnected())
+         {
+            if (VERBOSE) System.out.println("Waiting for left white board to connect.");
+            try
+            {
+               Thread.sleep(1000);
+            } 
+            catch (InterruptedException e)
+            {
+            }
+         }
+         
+         while (!rightWhiteBoard.isConnected())
+         {
+            if (VERBOSE) System.out.println("Waiting for right white board to connect.");
+            try
+            {
+               Thread.sleep(1000);
+            } 
+            catch (InterruptedException e)
+            {
+            }
+         }
+         
          leftWhiteBoard.writeData();
          rightWhiteBoard.writeData();
 
@@ -113,28 +134,6 @@ public class YoWhiteBoardTest
       if (VERBOSE)
          System.out.println("Time per test = " + timePerTest);
 
-
-   }
-
-   private void verifyWhiteBoardsHaveSameData(YoWhiteBoard leftWhiteBoard, YoWhiteBoard rightWhiteBoard)
-   {
-      ArrayList<AbstractYoVariable> leftVariablesToWrite = new ArrayList<AbstractYoVariable>();
-      ArrayList<AbstractYoVariable> leftVariablesToRead = new ArrayList<AbstractYoVariable>();
-
-      ArrayList<AbstractYoVariable> rightVariablesToWrite = new ArrayList<AbstractYoVariable>();
-      ArrayList<AbstractYoVariable> rightVariablesToRead = new ArrayList<AbstractYoVariable>();
-
-
-      leftWhiteBoard.getAllVariablesToWrite(leftVariablesToWrite);
-      leftWhiteBoard.getAllVariablesToRead(leftVariablesToRead);
-
-      rightWhiteBoard.getAllVariablesToWrite(rightVariablesToWrite);
-      rightWhiteBoard.getAllVariablesToRead(rightVariablesToRead);
-
-
-
-      verifyYoVariablesAreEqual(leftVariablesToWrite, rightVariablesToRead);
-      verifyYoVariablesAreEqual(leftVariablesToRead, rightVariablesToWrite);
 
    }
 
@@ -184,6 +183,11 @@ public class YoWhiteBoardTest
 
       public void whiteBoardSpecificConnect() throws IOException
       {
+      }
+
+      public boolean isConnected()
+      {
+         return false;
       }
    }
 
