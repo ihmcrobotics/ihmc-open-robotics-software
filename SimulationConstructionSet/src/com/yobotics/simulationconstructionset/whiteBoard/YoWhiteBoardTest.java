@@ -37,7 +37,7 @@ public class YoWhiteBoardTest
       whiteBoard.readData();
    }
 
-   protected void doATest(YoWhiteBoard leftWhiteBoard, YoWhiteBoard rightWhiteBoard, int numberOfTests, int numberVariablesToReadOneWriteTwo, int numberVariablesToWriteOneReadTwo) throws IOException
+   protected void doASynchronizedWriteThenReadTest(YoWhiteBoard leftWhiteBoard, YoWhiteBoard rightWhiteBoard, int numberOfTests, int numberVariablesToReadOneWriteTwo, int numberVariablesToWriteOneReadTwo) throws IOException
    {
       createRandomRegistriesAndVariables(leftWhiteBoard, rightWhiteBoard, 20, numberVariablesToReadOneWriteTwo, numberVariablesToWriteOneReadTwo);
 
@@ -67,6 +67,8 @@ public class YoWhiteBoardTest
       verifyYoVariablesAreEqual(leftVariablesToWrite, rightVariablesToRead);
       verifyYoVariablesAreEqual(leftVariablesToRead, rightVariablesToWrite);
 
+      waitForWhiteBoardsToConnect(leftWhiteBoard, rightWhiteBoard);
+
       for (int i = 0; i < numberOfTests; i++)
       {
          changeWrittenVariablesRandomly(leftWhiteBoard);
@@ -77,30 +79,6 @@ public class YoWhiteBoardTest
 
          leftWhiteBoardListener.reset();
          rightWhiteBoardListener.reset();
-
-         while (!leftWhiteBoard.isConnected())
-         {
-            if (VERBOSE) System.out.println("Waiting for left white board to connect.");
-            try
-            {
-               Thread.sleep(1000);
-            } 
-            catch (InterruptedException e)
-            {
-            }
-         }
-         
-         while (!rightWhiteBoard.isConnected())
-         {
-            if (VERBOSE) System.out.println("Waiting for right white board to connect.");
-            try
-            {
-               Thread.sleep(1000);
-            } 
-            catch (InterruptedException e)
-            {
-            }
-         }
          
          leftWhiteBoard.writeData();
          rightWhiteBoard.writeData();
@@ -110,31 +88,18 @@ public class YoWhiteBoardTest
             Thread.yield();
          }
          
-         assertTrue(leftWhiteBoard.isNewDataAvailable());
-         assertTrue(rightWhiteBoard.isNewDataAvailable());
-         
          assertEquals(1, leftWhiteBoard.getNumberOfNewDataSinceLastRead());
          assertEquals(1, rightWhiteBoard.getNumberOfNewDataSinceLastRead());
-
+         
+         verifyThatWhiteBoardsHaveNewDataAvailable(leftWhiteBoard, rightWhiteBoard);
+         
          leftWhiteBoard.readData();
          rightWhiteBoard.readData();
 
+         verifyThatWhiteBoardsDoNotHaveNewDataAvailable(leftWhiteBoard, rightWhiteBoard);
          
-         assertFalse(leftWhiteBoard.isNewDataAvailable());
-         assertFalse(rightWhiteBoard.isNewDataAvailable());
-         
-         assertEquals(0, leftWhiteBoard.getNumberOfNewDataSinceLastRead());
-         assertEquals(0, rightWhiteBoard.getNumberOfNewDataSinceLastRead());
-         
-//       verifyWhiteBoardsHaveSameData(leftWhiteBoard, rightWhiteBoard);
-
          verifyYoVariablesHaveSameValues(leftVariablesToWrite, rightVariablesToRead);
          verifyYoVariablesHaveSameValues(leftVariablesToRead, rightVariablesToWrite);
-         
-         if (VERBOSE)
-         {
-            System.out.println("YoVariables had same data!");
-         }
       }
 
       long endTime = System.currentTimeMillis();
@@ -149,8 +114,144 @@ public class YoWhiteBoardTest
       
       leftWhiteBoard.close();
       rightWhiteBoard.close();
+   }
+   
+   
+   protected void doAnAsynchronousTest(YoWhiteBoard leftWhiteBoard, YoWhiteBoard rightWhiteBoard, int numberOfTests, int numberVariablesToReadOneWriteTwo, int numberVariablesToWriteOneReadTwo) throws IOException
+   {
+      createRandomRegistriesAndVariables(leftWhiteBoard, rightWhiteBoard, 20, numberVariablesToReadOneWriteTwo, numberVariablesToWriteOneReadTwo);
 
+      leftWhiteBoard.connect();
+      rightWhiteBoard.connect();
+      
+      long startTime = System.currentTimeMillis();
 
+      ArrayList<AbstractYoVariable> leftVariablesToWrite = new ArrayList<AbstractYoVariable>();
+      ArrayList<AbstractYoVariable> leftVariablesToRead = new ArrayList<AbstractYoVariable>();
+
+      ArrayList<AbstractYoVariable> rightVariablesToWrite = new ArrayList<AbstractYoVariable>();
+      ArrayList<AbstractYoVariable> rightVariablesToRead = new ArrayList<AbstractYoVariable>();
+
+      leftWhiteBoard.getAllVariablesToWrite(leftVariablesToWrite);
+      leftWhiteBoard.getAllVariablesToRead(leftVariablesToRead);
+
+      rightWhiteBoard.getAllVariablesToWrite(rightVariablesToWrite);
+      rightWhiteBoard.getAllVariablesToRead(rightVariablesToRead);
+
+      verifyYoVariablesAreEqual(leftVariablesToWrite, rightVariablesToRead);
+      verifyYoVariablesAreEqual(leftVariablesToRead, rightVariablesToWrite);
+
+      waitForWhiteBoardsToConnect(leftWhiteBoard, rightWhiteBoard);
+
+      Random random = new Random(1234);
+      
+      for (int i = 0; i < numberOfTests; i++)
+      {
+         int numberOfLeftWrites = 1 + random.nextInt(19);
+         for (int j=0; j<numberOfLeftWrites; j++)
+         {
+            changeWrittenVariablesRandomly(leftWhiteBoard);
+            leftWhiteBoard.writeData();
+         }
+         
+         int numberOfRightWrites = 1 + random.nextInt(19);
+         for (int j=0; j<numberOfRightWrites; j++)
+         {
+            changeWrittenVariablesRandomly(rightWhiteBoard);
+            rightWhiteBoard.writeData();
+         }
+         
+         while(rightWhiteBoard.getNumberOfNewDataSinceLastRead() < numberOfLeftWrites)
+         {
+            Thread.yield();
+         }
+         
+         
+         while(leftWhiteBoard.getNumberOfNewDataSinceLastRead() < numberOfRightWrites)
+         {
+            Thread.yield();
+         }
+         sleep(2);
+         assertEquals(numberOfLeftWrites, rightWhiteBoard.getNumberOfNewDataSinceLastRead());
+         assertEquals(numberOfRightWrites, leftWhiteBoard.getNumberOfNewDataSinceLastRead());
+         
+         verifyThatWhiteBoardsHaveNewDataAvailable(leftWhiteBoard, rightWhiteBoard);
+
+         leftWhiteBoard.readData();
+         rightWhiteBoard.readData();
+
+         verifyThatWhiteBoardsDoNotHaveNewDataAvailable(leftWhiteBoard, rightWhiteBoard);
+         
+         verifyYoVariablesHaveSameValues(leftVariablesToWrite, rightVariablesToRead);
+         verifyYoVariablesHaveSameValues(leftVariablesToRead, rightVariablesToWrite);
+      }
+
+      long endTime = System.currentTimeMillis();
+
+      double duration = (endTime - startTime) * 0.001;
+
+      if (VERBOSE)
+         System.out.println("Ran " + numberOfTests + " tests in " + duration + " + seconds");
+      double timePerTest = duration / ((double) numberOfTests);
+      if (VERBOSE)
+         System.out.println("Time per test = " + timePerTest);
+      
+      leftWhiteBoard.close();
+      rightWhiteBoard.close();
+   }
+   
+   private void sleep(long sleepMillis)
+   {
+      try
+      {
+         Thread.sleep(sleepMillis);
+      } 
+      catch (InterruptedException e)
+      {
+      }
+      
+   }
+
+   private void verifyThatWhiteBoardsDoNotHaveNewDataAvailable(YoWhiteBoard leftWhiteBoard, YoWhiteBoard rightWhiteBoard)
+   {
+      assertFalse(leftWhiteBoard.isNewDataAvailable());
+      assertFalse(rightWhiteBoard.isNewDataAvailable());
+      
+      assertEquals(0, leftWhiteBoard.getNumberOfNewDataSinceLastRead());
+      assertEquals(0, rightWhiteBoard.getNumberOfNewDataSinceLastRead());
+   }
+
+   private void verifyThatWhiteBoardsHaveNewDataAvailable(YoWhiteBoard leftWhiteBoard, YoWhiteBoard rightWhiteBoard)
+   {
+      assertTrue(leftWhiteBoard.isNewDataAvailable());
+      assertTrue(rightWhiteBoard.isNewDataAvailable());
+   }
+
+   private void waitForWhiteBoardsToConnect(YoWhiteBoard leftWhiteBoard, YoWhiteBoard rightWhiteBoard)
+   {
+      while (!leftWhiteBoard.isConnected())
+      {
+         if (VERBOSE) System.out.println("Waiting for left white board to connect.");
+         try
+         {
+            Thread.sleep(1000);
+         } 
+         catch (InterruptedException e)
+         {
+         }
+      }
+      
+      while (!rightWhiteBoard.isConnected())
+      {
+         if (VERBOSE) System.out.println("Waiting for right white board to connect.");
+         try
+         {
+            Thread.sleep(1000);
+         } 
+         catch (InterruptedException e)
+         {
+         }
+      }
    }
 
    private void verifyYoVariablesAreEqual(ArrayList<AbstractYoVariable> variablesOne, ArrayList<AbstractYoVariable> variablesTwo)
