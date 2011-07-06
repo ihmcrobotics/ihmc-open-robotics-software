@@ -109,10 +109,23 @@ public class YoWhiteBoardTest
          {
             Thread.yield();
          }
+         
+         assertTrue(leftWhiteBoard.isNewDataAvailable());
+         assertTrue(rightWhiteBoard.isNewDataAvailable());
+         
+         assertEquals(1, leftWhiteBoard.getNumberOfNewDataSinceLastRead());
+         assertEquals(1, rightWhiteBoard.getNumberOfNewDataSinceLastRead());
 
          leftWhiteBoard.readData();
          rightWhiteBoard.readData();
 
+         
+         assertFalse(leftWhiteBoard.isNewDataAvailable());
+         assertFalse(rightWhiteBoard.isNewDataAvailable());
+         
+         assertEquals(0, leftWhiteBoard.getNumberOfNewDataSinceLastRead());
+         assertEquals(0, rightWhiteBoard.getNumberOfNewDataSinceLastRead());
+         
 //       verifyWhiteBoardsHaveSameData(leftWhiteBoard, rightWhiteBoard);
 
          verifyYoVariablesHaveSameValues(leftVariablesToWrite, rightVariablesToRead);
