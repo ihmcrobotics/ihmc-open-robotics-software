@@ -2,7 +2,7 @@ package us.ihmc.sensorProcessing.encoder.processors;
 
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.IntYoVariable;
+import com.yobotics.simulationconstructionset.IntegerYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public class NonlinearObserverEncoderProcessor extends AbstractEncoderProcessor
@@ -12,7 +12,7 @@ public class NonlinearObserverEncoderProcessor extends AbstractEncoderProcessor
 
    private final DoubleYoVariable previousTime;
    
-   public NonlinearObserverEncoderProcessor(String name, IntYoVariable rawTicks, DoubleYoVariable time, double distancePerTick, YoVariableRegistry registry)
+   public NonlinearObserverEncoderProcessor(String name, IntegerYoVariable rawTicks, DoubleYoVariable time, double distancePerTick, YoVariableRegistry registry)
    {
       super(name, rawTicks, time, distancePerTick, registry);
       this.previousTime = new DoubleYoVariable(name + "PrevTime", registry);

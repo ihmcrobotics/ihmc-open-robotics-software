@@ -34,7 +34,7 @@ import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.utilities.screwTheory.Twist;
 import us.ihmc.utilities.screwTheory.Wrench;
 
-import com.yobotics.simulationconstructionset.AbstractYoVariable;
+import com.yobotics.simulationconstructionset.YoVariable;
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
@@ -391,7 +391,7 @@ public class CraigPage300SwingLegTorqueControlModule implements SwingLegTorqueCo
          this.slaves = slaves;
       }
 
-      public void variableChanged(AbstractYoVariable master)
+      public void variableChanged(YoVariable master)
       {
          for (DoubleYoVariable slave : slaves)
          {

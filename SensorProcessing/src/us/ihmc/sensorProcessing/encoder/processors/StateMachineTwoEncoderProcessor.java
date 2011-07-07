@@ -2,7 +2,7 @@ package us.ihmc.sensorProcessing.encoder.processors;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.EnumYoVariable;
-import com.yobotics.simulationconstructionset.IntYoVariable;
+import com.yobotics.simulationconstructionset.IntegerYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 /**
@@ -24,7 +24,7 @@ public class StateMachineTwoEncoderProcessor extends AbstractEncoderProcessor
    private final DoubleYoVariable previousPositionTwoBack, previousTimeTwoBack;
 
 
-   public StateMachineTwoEncoderProcessor(String name, IntYoVariable rawTicks, DoubleYoVariable time, double distancePerTick, YoVariableRegistry registry)
+   public StateMachineTwoEncoderProcessor(String name, IntegerYoVariable rawTicks, DoubleYoVariable time, double distancePerTick, YoVariableRegistry registry)
    {
       super(name, rawTicks, time, distancePerTick, registry);
 

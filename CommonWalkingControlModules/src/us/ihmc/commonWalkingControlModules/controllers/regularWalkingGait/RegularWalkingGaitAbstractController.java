@@ -23,7 +23,7 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.EnumYoVariable;
-import com.yobotics.simulationconstructionset.IntYoVariable;
+import com.yobotics.simulationconstructionset.IntegerYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.statemachines.State;
 import com.yobotics.simulationconstructionset.util.statemachines.StateChangedListener;
@@ -56,8 +56,8 @@ public abstract class RegularWalkingGaitAbstractController
    protected final BooleanYoVariable swingInAir = new BooleanYoVariable("swingInAir", "Starts and stops swinging to a new position in the air", childRegistry);
 
    protected final BooleanYoVariable resetSteps = new BooleanYoVariable("resetSteps", childRegistry);
-   protected final IntYoVariable stepsTaken = new IntYoVariable("stepsTaken", childRegistry);
-   protected final IntYoVariable stepsToTake = new IntYoVariable("stepsToTake", childRegistry);
+   protected final IntegerYoVariable stepsTaken = new IntegerYoVariable("stepsTaken", childRegistry);
+   protected final IntegerYoVariable stepsToTake = new IntegerYoVariable("stepsToTake", childRegistry);
    protected final BooleanYoVariable onFinalStep = new BooleanYoVariable("onFinalStep", childRegistry);
 
    protected final StateMachine walkingStateMachine;

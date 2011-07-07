@@ -11,10 +11,10 @@ import java.util.Random;
 
 import org.junit.Test;
 
-import com.yobotics.simulationconstructionset.AbstractYoVariable;
+import com.yobotics.simulationconstructionset.YoVariable;
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.IntYoVariable;
+import com.yobotics.simulationconstructionset.IntegerYoVariable;
 import com.yobotics.simulationconstructionset.NameSpace;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.YoVariableType;
@@ -52,11 +52,11 @@ public class YoWhiteBoardTest
 
       long startTime = System.currentTimeMillis();
 
-      ArrayList<AbstractYoVariable> leftVariablesToWrite = new ArrayList<AbstractYoVariable>();
-      ArrayList<AbstractYoVariable> leftVariablesToRead = new ArrayList<AbstractYoVariable>();
+      ArrayList<YoVariable> leftVariablesToWrite = new ArrayList<YoVariable>();
+      ArrayList<YoVariable> leftVariablesToRead = new ArrayList<YoVariable>();
 
-      ArrayList<AbstractYoVariable> rightVariablesToWrite = new ArrayList<AbstractYoVariable>();
-      ArrayList<AbstractYoVariable> rightVariablesToRead = new ArrayList<AbstractYoVariable>();
+      ArrayList<YoVariable> rightVariablesToWrite = new ArrayList<YoVariable>();
+      ArrayList<YoVariable> rightVariablesToRead = new ArrayList<YoVariable>();
 
       leftWhiteBoard.getAllVariablesToWrite(leftVariablesToWrite);
       leftWhiteBoard.getAllVariablesToRead(leftVariablesToRead);
@@ -126,11 +126,11 @@ public class YoWhiteBoardTest
       
       long startTime = System.currentTimeMillis();
 
-      ArrayList<AbstractYoVariable> leftVariablesToWrite = new ArrayList<AbstractYoVariable>();
-      ArrayList<AbstractYoVariable> leftVariablesToRead = new ArrayList<AbstractYoVariable>();
+      ArrayList<YoVariable> leftVariablesToWrite = new ArrayList<YoVariable>();
+      ArrayList<YoVariable> leftVariablesToRead = new ArrayList<YoVariable>();
 
-      ArrayList<AbstractYoVariable> rightVariablesToWrite = new ArrayList<AbstractYoVariable>();
-      ArrayList<AbstractYoVariable> rightVariablesToRead = new ArrayList<AbstractYoVariable>();
+      ArrayList<YoVariable> rightVariablesToWrite = new ArrayList<YoVariable>();
+      ArrayList<YoVariable> rightVariablesToRead = new ArrayList<YoVariable>();
 
       leftWhiteBoard.getAllVariablesToWrite(leftVariablesToWrite);
       leftWhiteBoard.getAllVariablesToRead(leftVariablesToRead);
@@ -254,7 +254,7 @@ public class YoWhiteBoardTest
       }
    }
 
-   private void verifyYoVariablesAreEqual(ArrayList<AbstractYoVariable> variablesOne, ArrayList<AbstractYoVariable> variablesTwo)
+   private void verifyYoVariablesAreEqual(ArrayList<YoVariable> variablesOne, ArrayList<YoVariable> variablesTwo)
    {
       assertEquals(variablesOne.size(), variablesTwo.size());
 
@@ -266,7 +266,7 @@ public class YoWhiteBoardTest
    }
 
 
-   private void verifyYoVariablesHaveSameValues(ArrayList<AbstractYoVariable> variablesOne, ArrayList<AbstractYoVariable> variablesTwo)
+   private void verifyYoVariablesHaveSameValues(ArrayList<YoVariable> variablesOne, ArrayList<YoVariable> variablesTwo)
    {
       assertEquals(variablesOne.size(), variablesTwo.size());
 
@@ -277,7 +277,7 @@ public class YoWhiteBoardTest
 
    }
 
-   private void verifyYoVariablesAreEqual(AbstractYoVariable variableOne, AbstractYoVariable variableTwo)
+   private void verifyYoVariablesAreEqual(YoVariable variableOne, YoVariable variableTwo)
    {
       assertTrue(variableOne.getYoVariableType() == variableTwo.getYoVariableType());
       assertTrue(variableOne.getFullNameWithNameSpace().equals(variableTwo.getFullNameWithNameSpace()));
@@ -285,7 +285,7 @@ public class YoWhiteBoardTest
       assertEquals(variableOne.getValueAsDouble(), variableTwo.getValueAsDouble(), 1e-7);
    }
 
-   private void verifyYoVariablesHaveSameValues(AbstractYoVariable variableOne, AbstractYoVariable variableTwo)
+   private void verifyYoVariablesHaveSameValues(YoVariable variableOne, YoVariable variableTwo)
    {
       assertEquals(variableOne.getValueAsDouble(), variableTwo.getValueAsDouble(), 1e-7);
    }
@@ -347,10 +347,10 @@ public class YoWhiteBoardTest
 
    private void changeWrittenVariablesRandomly(YoWhiteBoard leftWhiteBoard)
    {
-      ArrayList<AbstractYoVariable> variablesToWrite = new ArrayList<AbstractYoVariable>();
+      ArrayList<YoVariable> variablesToWrite = new ArrayList<YoVariable>();
       leftWhiteBoard.getAllVariablesToWrite(variablesToWrite);
 
-      for (AbstractYoVariable variable : variablesToWrite)
+      for (YoVariable variable : variablesToWrite)
       {
          variable.setValueFromDouble(2.0 * Math.random());
       }
@@ -359,14 +359,14 @@ public class YoWhiteBoardTest
 
    private void createVariableCopyFromReadToWrite(YoWhiteBoard boardToCopyFrom, YoWhiteBoard boardToCopyTo)
    {
-      ArrayList<AbstractYoVariable> allVariableToRead = new ArrayList<AbstractYoVariable>();
-      ArrayList<AbstractYoVariable> allVariableToWrite = new ArrayList<AbstractYoVariable>();
+      ArrayList<YoVariable> allVariableToRead = new ArrayList<YoVariable>();
+      ArrayList<YoVariable> allVariableToWrite = new ArrayList<YoVariable>();
       boardToCopyFrom.getAllVariablesToRead(allVariableToRead);
       boardToCopyFrom.getAllVariablesToWrite(allVariableToWrite);
 
 
-      ArrayList<AbstractYoVariable> copyVariablesToWrite = new ArrayList<AbstractYoVariable>();
-      ArrayList<AbstractYoVariable> copyVariablesToRead = new ArrayList<AbstractYoVariable>();
+      ArrayList<YoVariable> copyVariablesToWrite = new ArrayList<YoVariable>();
+      ArrayList<YoVariable> copyVariablesToRead = new ArrayList<YoVariable>();
 
 
       createVariableCopies(allVariableToRead, copyVariablesToWrite);
@@ -378,11 +378,11 @@ public class YoWhiteBoardTest
    }
 
 
-   private void createVariableCopies(ArrayList<AbstractYoVariable> variablesToCopy, ArrayList<AbstractYoVariable> variablesToCopyTo)
+   private void createVariableCopies(ArrayList<YoVariable> variablesToCopy, ArrayList<YoVariable> variablesToCopyTo)
    {
       YoVariableRegistry rootRegistry = new YoVariableRegistry("root");
 
-      for (AbstractYoVariable variable : variablesToCopy)
+      for (YoVariable variable : variablesToCopy)
       {
          String name = variable.getName();
          NameSpace nameSpace = variable.getNameSpace();
@@ -401,7 +401,7 @@ public class YoWhiteBoardTest
 
             case INTEGER :
             {
-               variablesToCopyTo.add(new IntYoVariable(name, registry));
+               variablesToCopyTo.add(new IntegerYoVariable(name, registry));
 
                break;
             }
@@ -449,10 +449,10 @@ public class YoWhiteBoardTest
       whiteBoard.setVariablesToWrite(generateRandomVariables(random, "writeVariable", numberVariablesToRead, registryList));
    }
 
-   private ArrayList<AbstractYoVariable> generateRandomVariables(Random random, String namePrefix, int numberOfVariables,
+   private ArrayList<YoVariable> generateRandomVariables(Random random, String namePrefix, int numberOfVariables,
            ArrayList<YoVariableRegistry> registryList)
    {
-      ArrayList<AbstractYoVariable> variables = new ArrayList<AbstractYoVariable>();
+      ArrayList<YoVariable> variables = new ArrayList<YoVariable>();
 
       for (int i = 0; i < numberOfVariables; i++)
       {
@@ -474,7 +474,7 @@ public class YoWhiteBoardTest
 
             case 1 :
             {
-               variables.add(new IntYoVariable(name, registry));
+               variables.add(new IntegerYoVariable(name, registry));
 
                break;
             }

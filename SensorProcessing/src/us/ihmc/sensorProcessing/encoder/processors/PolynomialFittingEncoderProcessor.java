@@ -2,7 +2,7 @@ package us.ihmc.sensorProcessing.encoder.processors;
 
 import com.mathworks.jama.Matrix;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.IntYoVariable;
+import com.yobotics.simulationconstructionset.IntegerYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 /**
@@ -16,7 +16,7 @@ public class PolynomialFittingEncoderProcessor extends AbstractEncoderProcessor
    private final int fitOrder;
    private final int skipFactor;
 
-   private final IntYoVariable[] positions;    // ordered from oldest to newest
+   private final IntegerYoVariable[] positions;    // ordered from oldest to newest
    private final DoubleYoVariable[] timestamps;
 
    private final Matrix a;
@@ -26,7 +26,7 @@ public class PolynomialFittingEncoderProcessor extends AbstractEncoderProcessor
    private int skipIndex = 0;
    private double timespan = Double.NaN;
 
-   public PolynomialFittingEncoderProcessor(String name, IntYoVariable rawPosition, DoubleYoVariable time, double distancePerTick, int nEncoderEvents,
+   public PolynomialFittingEncoderProcessor(String name, IntegerYoVariable rawPosition, DoubleYoVariable time, double distancePerTick, int nEncoderEvents,
            int fitOrder, int skipFactor, YoVariableRegistry registry)
    {
       super(name, rawPosition, time, distancePerTick, registry);
@@ -38,12 +38,12 @@ public class PolynomialFittingEncoderProcessor extends AbstractEncoderProcessor
       this.fitOrder = fitOrder;
       this.skipFactor = skipFactor;
 
-      positions = new IntYoVariable[nEncoderEvents];
+      positions = new IntegerYoVariable[nEncoderEvents];
       timestamps = new DoubleYoVariable[nEncoderEvents];
 
       for (int i = 0; i < nEncoderEvents; i++)
       {
-         positions[i] = new IntYoVariable(name + "Pos" + i, registry);
+         positions[i] = new IntegerYoVariable(name + "Pos" + i, registry);
          timestamps[i] = new DoubleYoVariable(name + "Time" + i, registry);
       }
 
@@ -58,7 +58,7 @@ public class PolynomialFittingEncoderProcessor extends AbstractEncoderProcessor
    public void initialize()
    {
       int currentPosition = rawTicks.getIntegerValue();
-      for (IntYoVariable position : positions)
+      for (IntegerYoVariable position : positions)
       {
          position.set(currentPosition);
       }
