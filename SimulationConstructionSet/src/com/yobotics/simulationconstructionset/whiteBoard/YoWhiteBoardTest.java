@@ -12,12 +12,12 @@ import java.util.Random;
 import org.junit.Test;
 
 import com.yobotics.simulationconstructionset.AbstractYoVariable;
-import com.yobotics.simulationconstructionset.AbstractYoVariable.Type;
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.IntYoVariable;
 import com.yobotics.simulationconstructionset.NameSpace;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.YoVariableType;
 
 public class YoWhiteBoardTest
 {
@@ -387,7 +387,7 @@ public class YoWhiteBoardTest
          String name = variable.getName();
          NameSpace nameSpace = variable.getNameSpace();
 
-         Type yoVariableType = variable.getYoVariableType();
+         YoVariableType yoVariableType = variable.getYoVariableType();
          YoVariableRegistry registry = rootRegistry.getOrCreateAndAddRegistry(nameSpace);
 
          switch (yoVariableType)
@@ -399,7 +399,7 @@ public class YoWhiteBoardTest
                break;
             }
 
-            case INT :
+            case INTEGER :
             {
                variablesToCopyTo.add(new IntYoVariable(name, registry));
 
