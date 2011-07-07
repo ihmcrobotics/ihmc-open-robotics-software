@@ -15,7 +15,7 @@ import us.ihmc.sensorProcessing.encoder.processors.StateMachineTwoEncoderProcess
 
 import com.yobotics.simulationconstructionset.DataBuffer;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.IntYoVariable;
+import com.yobotics.simulationconstructionset.IntegerYoVariable;
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
@@ -26,7 +26,7 @@ public class EncoderProcessorComparer
    private final HashMap<EncoderProcessor, String> encoderProcessors = new HashMap<EncoderProcessor, String>();
    private final HashMap<EncoderProcessor, DoubleYoVariable> processedPositions = new HashMap<EncoderProcessor, DoubleYoVariable>();
    private final HashMap<EncoderProcessor, DoubleYoVariable> processedRates = new HashMap<EncoderProcessor, DoubleYoVariable>();
-   private final IntYoVariable rawTicks;
+   private final IntegerYoVariable rawTicks;
    private final DoubleYoVariable rawPosition;
    private final DoubleYoVariable time;
    private final DoubleYoVariable actualPosition;
@@ -44,7 +44,7 @@ public class EncoderProcessorComparer
    {
       Robot nullRobot = new Robot("nullRobot");
       registry = nullRobot.getRobotsYoVariableRegistry();
-      rawTicks = new IntYoVariable("rawTicks", registry);
+      rawTicks = new IntegerYoVariable("rawTicks", registry);
       rawPosition = new DoubleYoVariable("rawPosition", registry);
       time = nullRobot.getYoTime();
       actualPosition = new DoubleYoVariable("actualPosition", registry);

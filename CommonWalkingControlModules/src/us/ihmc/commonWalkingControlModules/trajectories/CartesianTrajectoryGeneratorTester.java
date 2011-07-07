@@ -9,7 +9,7 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.IntYoVariable;
+import com.yobotics.simulationconstructionset.IntegerYoVariable;
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.RobotController;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
@@ -155,10 +155,10 @@ public class CartesianTrajectoryGeneratorTester
 
       private final DoubleYoVariable resetEvery = new DoubleYoVariable("resetEvery", registry);
       private final DoubleYoVariable lastResetTime = new DoubleYoVariable("lastResetTime", registry);
-      private final IntYoVariable testPointIndex = new IntYoVariable("testPointIndex", registry);
+      private final IntegerYoVariable testPointIndex = new IntegerYoVariable("testPointIndex", registry);
 
       private final BooleanYoVariable allowEndPointShift = new BooleanYoVariable("allowEndPointShift", registry);
-      private final IntYoVariable slowDownMillis = new IntYoVariable("slowDownMillis", registry);
+      private final IntegerYoVariable slowDownMillis = new IntegerYoVariable("slowDownMillis", registry);
 
 
       private final BooleanYoVariable reset = new BooleanYoVariable("reset", registry);

@@ -61,7 +61,7 @@ public class DataFileWriterTest
       DoubleYoVariable variableFour = new DoubleYoVariable("variableFour", registryOne);
       DoubleYoVariable variableFive = new DoubleYoVariable("variableFive", registryTwo);
       BooleanYoVariable variableSix = new BooleanYoVariable("variableSix", rootRegistry);
-      IntYoVariable variableSeven = new IntYoVariable("variableSeven", registryThree);
+      IntegerYoVariable variableSeven = new IntegerYoVariable("variableSeven", registryThree);
 
       dataBuffer.addVariable(variableOne);
       dataBuffer.addVariable(variableTwo);
@@ -86,7 +86,7 @@ public class DataFileWriterTest
       
       Robot robot = new Robot("testRobot");
 
-      ArrayList<AbstractYoVariable> allVariables = rootRegistry.getAllVariablesIncludingDescendants();
+      ArrayList<YoVariable> allVariables = rootRegistry.getAllVariablesIncludingDescendants();
 
       boolean binary = false;
       boolean compress = false;
@@ -110,7 +110,7 @@ public class DataFileWriterTest
       
    }
    
-   private void testDataWriteReadIsTheSame(DataBuffer dataBuffer, ArrayList<AbstractYoVariable> allVariables, 
+   private void testDataWriteReadIsTheSame(DataBuffer dataBuffer, ArrayList<YoVariable> allVariables, 
          boolean binary, boolean compress, boolean spreadsheetFormatted, Robot robot) throws IOException
    {
       String filename = "testFile.data";

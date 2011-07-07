@@ -1,15 +1,15 @@
 package us.ihmc.sensorProcessing.encoder.processors;
 
-import com.yobotics.simulationconstructionset.AbstractYoVariable;
+import com.yobotics.simulationconstructionset.YoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.IntYoVariable;
+import com.yobotics.simulationconstructionset.IntegerYoVariable;
 import com.yobotics.simulationconstructionset.VariableChangedListener;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public abstract class AbstractEncoderProcessor implements EncoderProcessor
 {
    protected final YoVariableRegistry registry;
-   protected final IntYoVariable rawTicks;
+   protected final IntegerYoVariable rawTicks;
    protected final DoubleYoVariable time;
 
    protected final DoubleYoVariable processedTicks;
@@ -18,7 +18,7 @@ public abstract class AbstractEncoderProcessor implements EncoderProcessor
    private final DoubleYoVariable processedPosition;
    private final DoubleYoVariable processedVelocity;
 
-   public AbstractEncoderProcessor(String name, IntYoVariable rawTicks, DoubleYoVariable time, double distancePerTick, YoVariableRegistry registry)
+   public AbstractEncoderProcessor(String name, IntegerYoVariable rawTicks, DoubleYoVariable time, double distancePerTick, YoVariableRegistry registry)
    {
       this.registry = registry;
       this.rawTicks = rawTicks;
@@ -48,16 +48,16 @@ public abstract class AbstractEncoderProcessor implements EncoderProcessor
 
    private static final class MultiplicationVariableChangedListener implements VariableChangedListener
    {
-      private final AbstractYoVariable output;
+      private final YoVariable output;
       private final double multiplicationFactor;
 
-      public MultiplicationVariableChangedListener(AbstractYoVariable output, double multiplicationFactor)
+      public MultiplicationVariableChangedListener(YoVariable output, double multiplicationFactor)
       {
          this.output = output;
          this.multiplicationFactor = multiplicationFactor;
       }
 
-      public void variableChanged(AbstractYoVariable variable)
+      public void variableChanged(YoVariable variable)
       {
          output.setValueFromDouble(variable.getValueAsDouble() * multiplicationFactor);
       }

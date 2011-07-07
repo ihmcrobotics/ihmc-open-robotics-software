@@ -9,7 +9,7 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.EnumYoVariable;
-import com.yobotics.simulationconstructionset.IntYoVariable;
+import com.yobotics.simulationconstructionset.IntegerYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 /*
@@ -23,7 +23,7 @@ public class HeadingAndVelocityEvaluationScript implements Updatable
                                                                                         registry, HeadingAndVelocityEvaluationEvent.class);
 
 
-   private final IntYoVariable evaluationEventOrderingIndex = new IntYoVariable("evaluationEventOrderingIndex", registry);
+   private final IntegerYoVariable evaluationEventOrderingIndex = new IntegerYoVariable("evaluationEventOrderingIndex", registry);
 
    private final double controlDT;
    private final DoubleYoVariable acceleration = new DoubleYoVariable("acceleration", registry);

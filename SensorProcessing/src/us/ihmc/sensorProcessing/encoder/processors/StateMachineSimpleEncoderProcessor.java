@@ -1,26 +1,26 @@
 package us.ihmc.sensorProcessing.encoder.processors;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.IntYoVariable;
+import com.yobotics.simulationconstructionset.IntegerYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public class StateMachineSimpleEncoderProcessor extends AbstractEncoderProcessor
 {
    private final DoubleYoVariable changeInTime;
-   private final IntYoVariable changeInPosition;
+   private final IntegerYoVariable changeInPosition;
 
-   private final IntYoVariable previousPosition;
+   private final IntegerYoVariable previousPosition;
    private final DoubleYoVariable previousTime;
 
    private boolean hasBeenCalled = false;
    
-   public StateMachineSimpleEncoderProcessor(String name, IntYoVariable rawTicks, DoubleYoVariable time, double distancePerTick, YoVariableRegistry registry)
+   public StateMachineSimpleEncoderProcessor(String name, IntegerYoVariable rawTicks, DoubleYoVariable time, double distancePerTick, YoVariableRegistry registry)
    {
       super(name, rawTicks, time, distancePerTick, registry);
 
-      this.previousPosition = new IntYoVariable(name + "PrevPos", registry);
+      this.previousPosition = new IntegerYoVariable(name + "PrevPos", registry);
       this.previousTime = new DoubleYoVariable(name + "PrevTime", registry);
-      this.changeInPosition = new IntYoVariable(name + "ChangeInPos",  registry);
+      this.changeInPosition = new IntegerYoVariable(name + "ChangeInPos",  registry);
       this.changeInTime = new DoubleYoVariable(name + "ChangeInTime", registry);
    }
    

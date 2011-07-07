@@ -2,7 +2,7 @@ package us.ihmc.sensorProcessing.encoder.processors;
 
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.IntYoVariable;
+import com.yobotics.simulationconstructionset.IntegerYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 /**
@@ -23,7 +23,7 @@ public class AnotherEncoderProcessor extends AbstractEncoderProcessor
    private int previousPosition;
    private boolean previousTickUp;
 
-   public AnotherEncoderProcessor(String name, IntYoVariable rawPosition, DoubleYoVariable time, double distancePerTick, YoVariableRegistry registry)
+   public AnotherEncoderProcessor(String name, IntegerYoVariable rawPosition, DoubleYoVariable time, double distancePerTick, YoVariableRegistry registry)
    {
       super(name, rawPosition, time, distancePerTick, registry);
    }
