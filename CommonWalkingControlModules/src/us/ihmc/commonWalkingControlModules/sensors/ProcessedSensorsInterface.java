@@ -1,11 +1,11 @@
 package us.ihmc.commonWalkingControlModules.sensors;
 
-import us.ihmc.commonWalkingControlModules.RobotSide;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.ArmJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.NeckJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.SpineJointName;
+import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.Orientation;

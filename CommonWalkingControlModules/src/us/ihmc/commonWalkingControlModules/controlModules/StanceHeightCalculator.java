@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
-import us.ihmc.commonWalkingControlModules.RobotSide;
-import us.ihmc.commonWalkingControlModules.SideDependentList;
+import us.ihmc.robotSide.RobotSide;
+import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;

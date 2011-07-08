@@ -2,11 +2,11 @@ package us.ihmc.commonWalkingControlModules.filters;
 
 import java.util.EnumMap;
 
-import us.ihmc.commonWalkingControlModules.RobotSide;
-import us.ihmc.commonWalkingControlModules.SideDependentList;
 import us.ihmc.commonWalkingControlModules.outputs.ProcessedOutputsInterface;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.RobotSpecificJointNames;
+import us.ihmc.robotSide.RobotSide;
+import us.ihmc.robotSide.SideDependentList;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;

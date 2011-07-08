@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.sensors;
 
-import us.ihmc.commonWalkingControlModules.RobotSide;
+import us.ihmc.robotSide.RobotSide;
 
 import com.yobotics.simulationconstructionset.EnumYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;

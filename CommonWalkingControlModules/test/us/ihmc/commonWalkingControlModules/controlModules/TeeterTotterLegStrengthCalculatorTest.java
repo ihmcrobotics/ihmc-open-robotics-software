@@ -6,9 +6,9 @@ import org.junit.Test;
 
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
-import us.ihmc.commonWalkingControlModules.RobotSide;
-import us.ihmc.commonWalkingControlModules.SideDependentList;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.LegStrengthCalculator;
+import us.ihmc.robotSide.RobotSide;
+import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 

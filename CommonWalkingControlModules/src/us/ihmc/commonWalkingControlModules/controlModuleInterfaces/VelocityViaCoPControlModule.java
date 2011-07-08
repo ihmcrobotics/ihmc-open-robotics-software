@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModuleInterfaces;
 
-import us.ihmc.commonWalkingControlModules.RobotSide;
+import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 

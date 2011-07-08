@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModuleInterfaces;
 
-import us.ihmc.commonWalkingControlModules.RobotSide;
+import us.ihmc.robotSide.RobotSide;
 
 
 public interface PelvisHeightControlModule

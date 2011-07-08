@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
 
-import us.ihmc.commonWalkingControlModules.RobotSide;
+import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.ArrayTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;

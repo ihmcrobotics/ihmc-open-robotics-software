@@ -1,7 +1,5 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
-import us.ihmc.commonWalkingControlModules.RobotSide;
-import us.ihmc.commonWalkingControlModules.SideDependentList;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.AnkleOverRotationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.HipDamperControlModule;
@@ -13,6 +11,8 @@ import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.VirtualSuppor
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.VirtualToePointCalculator;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegTorques;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LowerBodyTorques;
+import us.ihmc.robotSide.RobotSide;
+import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.FrameVector2d;

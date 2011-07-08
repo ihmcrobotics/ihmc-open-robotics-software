@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controlModuleInterfaces;
 
-import us.ihmc.commonWalkingControlModules.SideDependentList;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
+import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 
 public interface VirtualToePointCalculator

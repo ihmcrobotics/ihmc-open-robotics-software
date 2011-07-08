@@ -6,8 +6,8 @@ import java.util.ArrayList;
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 
-import us.ihmc.commonWalkingControlModules.RobotSide;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
+import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.ConvexHullCalculator2d;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;

@@ -4,11 +4,11 @@ import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Quat4d;
 
-import us.ihmc.commonWalkingControlModules.RobotSide;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.PelvisOrientationControlModule;
 import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.ProcessedSensorsInterface;
+import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.Orientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;

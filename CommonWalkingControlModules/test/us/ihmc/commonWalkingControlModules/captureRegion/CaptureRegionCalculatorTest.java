@@ -15,8 +15,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.commonWalkingControlModules.RobotSide;
-import us.ihmc.commonWalkingControlModules.SideDependentList;
+import us.ihmc.robotSide.RobotSide;
+import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;

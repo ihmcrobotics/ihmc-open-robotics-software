@@ -5,12 +5,12 @@ import java.util.ArrayList;
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.commonWalkingControlModules.RobotSide;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointVelocities;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegTorques;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.RobotSpecificJointNames;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
+import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;

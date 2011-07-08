@@ -1,9 +1,9 @@
 package us.ihmc.commonWalkingControlModules.outputs;
 
-import us.ihmc.commonWalkingControlModules.RobotSide;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LowerBodyTorques;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.UpperBodyTorques;
+import us.ihmc.robotSide.RobotSide;
 
 public interface ProcessedOutputsInterface
 {

@@ -1,9 +1,9 @@
 package us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait;
 
-import us.ihmc.commonWalkingControlModules.RobotSide;
 import us.ihmc.commonWalkingControlModules.configurations.BalanceOnOneLegConfiguration;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegTorques;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LowerBodyTorques;
+import us.ihmc.robotSide.RobotSide;
 
 public interface StanceSubController
 {

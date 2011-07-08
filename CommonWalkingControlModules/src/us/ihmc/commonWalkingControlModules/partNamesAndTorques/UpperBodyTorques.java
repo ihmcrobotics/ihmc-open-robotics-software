@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.partNamesAndTorques;
 
-import us.ihmc.commonWalkingControlModules.RobotSide;
+import us.ihmc.robotSide.RobotSide;
 
 public class UpperBodyTorques
 {

@@ -1,11 +1,11 @@
 package us.ihmc.commonWalkingControlModules.controlModules.velocityViaCoP;
 
-import us.ihmc.commonWalkingControlModules.RobotSide;
 import us.ihmc.commonWalkingControlModules.calculators.EquivalentConstantCoPCalculator;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.VelocityViaCoPControlModule;
 import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.ProcessedSensorsInterface;
+import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameLine2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
