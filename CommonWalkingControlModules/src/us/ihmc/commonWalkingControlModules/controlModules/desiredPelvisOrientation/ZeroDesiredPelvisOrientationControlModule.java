@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controlModules.desiredPelvisOrientation;
 
-import us.ihmc.commonWalkingControlModules.RobotSide;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.DesiredPelvisOrientationControlModule;
+import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.Orientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
