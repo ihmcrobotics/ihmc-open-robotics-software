@@ -11,10 +11,10 @@ import org.junit.Test;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.Robot;
-import com.yobotics.simulationconstructionset.RobotController;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.UnreasonableAccelerationException;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.robotController.RobotController;
 
 public class SimulationRewindabilityVerifierTest
 {

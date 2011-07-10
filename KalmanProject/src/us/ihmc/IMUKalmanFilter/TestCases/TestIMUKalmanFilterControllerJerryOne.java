@@ -10,8 +10,8 @@ import us.ihmc.IMUKalmanFilter.QuaternionTools;
 
 import com.mathworks.jama.Matrix;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.RobotController;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.robotController.RobotController;
 
 public class TestIMUKalmanFilterControllerJerryOne implements RobotController
 {
