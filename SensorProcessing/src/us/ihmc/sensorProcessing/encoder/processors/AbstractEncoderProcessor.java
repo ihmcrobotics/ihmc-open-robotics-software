@@ -18,8 +18,12 @@ public abstract class AbstractEncoderProcessor implements EncoderProcessor
    private final DoubleYoVariable processedPosition;
    private final DoubleYoVariable processedVelocity;
 
+   private final String name;
+   
    public AbstractEncoderProcessor(String name, IntegerYoVariable rawTicks, DoubleYoVariable time, double distancePerTick, YoVariableRegistry registry)
    {
+      this.name = name;
+      
       this.registry = registry;
       this.rawTicks = rawTicks;
       this.time = time;
@@ -61,5 +65,20 @@ public abstract class AbstractEncoderProcessor implements EncoderProcessor
       {
          output.setValueFromDouble(variable.getValueAsDouble() * multiplicationFactor);
       }
+   }
+   
+   public YoVariableRegistry getYoVariableRegistry()
+   {
+      return null;
+   }
+
+   public String getName()
+   {
+      return name;
+   }
+
+   public String getDescription()
+   {
+      return name;
    }
 }
