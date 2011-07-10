@@ -32,4 +32,19 @@ public class EncoderResolutionReducer implements SensorProcessor
    {
       return rawTicksOut;
    }
+
+   public YoVariableRegistry getYoVariableRegistry()
+   {
+      return null;
+   }
+
+   public String getName()
+   {
+      return "EncoderResolutionReducer";
+   }
+
+   public String getDescription()
+   {
+      return "EncoderResolutionReducer";
+   }
 }
