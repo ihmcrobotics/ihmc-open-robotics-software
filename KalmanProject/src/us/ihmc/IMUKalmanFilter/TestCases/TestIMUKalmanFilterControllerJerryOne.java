@@ -584,4 +584,13 @@ public class TestIMUKalmanFilterControllerJerryOne implements RobotController
    {
       return name;
    }
+   
+   public void initialize()
+   {      
+   }
+
+   public String getDescription()
+   {
+      return getName();
+   }
 }
