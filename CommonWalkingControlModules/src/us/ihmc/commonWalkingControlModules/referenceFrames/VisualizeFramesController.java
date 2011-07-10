@@ -46,6 +46,15 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicRefere
       {
          return "visualizeFramesController";
       }
+      
+      public void initialize()
+      {      
+      }
+
+      public String getDescription()
+      {
+         return getName();
+      }
 
       private void updateDynamicGraphicReferenceFrames()
       {

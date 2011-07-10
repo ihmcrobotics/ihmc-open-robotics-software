@@ -938,6 +938,15 @@ public abstract class RegularWalkingGaitAbstractController
    {
       return name;
    }
+   
+   public void initialize()
+   {      
+   }
+
+   public String getDescription()
+   {
+      return getName();
+   }
 
    public SwingSubController getSwingSubController()
    {

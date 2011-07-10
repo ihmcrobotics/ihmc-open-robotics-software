@@ -298,15 +298,15 @@ public class CartesianTrajectoryGeneratorTester
       {
          return name;
       }
+      
+      public void initialize()
+      {      
+      }
 
+      public String getDescription()
+      {
+         return getName();
+      }
 
    }
-
-
-   public String getName()
-   {
-      return name;
-   }
-
-
 }

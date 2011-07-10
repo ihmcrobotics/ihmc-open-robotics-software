@@ -212,6 +212,15 @@ public class SimulationRewindabilityVerifierTest
         return "Test";
       }
       
+      public void initialize()
+      {      
+      }
+
+      public String getDescription()
+      {
+         return getName();
+      }
+      
    }
    
    
