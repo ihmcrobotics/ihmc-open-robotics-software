@@ -23,7 +23,7 @@ public class TCPYoWhiteBoardTest extends YoWhiteBoardTest
       rightWhiteBoardThread.start();
 
       int numberOfTests = 1000;
-      doASynchronizedWriteThenReadTest(leftWhiteBoard, rightWhiteBoard, numberOfTests, 1000, 2000);
+      doASynchronizedWriteThenReadTest(leftWhiteBoard, rightWhiteBoard, numberOfTests, 1001, 2001);
    }
    
    

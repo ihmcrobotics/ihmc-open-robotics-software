@@ -37,7 +37,8 @@ public class YoWhiteBoardTest
       whiteBoard.readData();
    }
 
-   protected void doASynchronizedWriteThenReadTest(YoWhiteBoard leftWhiteBoard, YoWhiteBoard rightWhiteBoard, int numberOfTests, int numberVariablesToReadOneWriteTwo, int numberVariablesToWriteOneReadTwo) throws IOException
+   protected void doASynchronizedWriteThenReadTest(YoWhiteBoard leftWhiteBoard, YoWhiteBoard rightWhiteBoard, int numberOfTests, 
+         int numberVariablesToReadOneWriteTwo, int numberVariablesToWriteOneReadTwo) throws IOException
    {
       createRandomRegistriesAndVariables(leftWhiteBoard, rightWhiteBoard, 20, numberVariablesToReadOneWriteTwo, numberVariablesToWriteOneReadTwo);
 
@@ -66,7 +67,7 @@ public class YoWhiteBoardTest
 
       verifyYoVariablesAreEqual(leftVariablesToWrite, rightVariablesToRead);
       verifyYoVariablesAreEqual(leftVariablesToRead, rightVariablesToWrite);
-
+      
       waitForWhiteBoardsToConnect(leftWhiteBoard, rightWhiteBoard);
 
       for (int i = 0; i < numberOfTests; i++)
@@ -434,7 +435,7 @@ public class YoWhiteBoardTest
 
    private void createRandomRegistriesAndVariables(YoWhiteBoard whiteBoardOne, YoWhiteBoard whiteBoardTwo, int numberOfRegistries,
            int numberVariablesToReadOneWriteTwo, int numberVariablesToWriteOneReadTwo)
-   {
+   {  
       createRandomRegistriesAndVariables(whiteBoardOne, numberOfRegistries, numberVariablesToReadOneWriteTwo, numberVariablesToWriteOneReadTwo);
       createVariableCopyFromReadToWrite(whiteBoardOne, whiteBoardTwo);
    }
@@ -446,7 +447,7 @@ public class YoWhiteBoardTest
       ArrayList<YoVariableRegistry> registryList = generateRandomRegistries(random, numberOfRegistries);
 
       whiteBoard.setVariablesToRead(generateRandomVariables(random, "readVariable", numberVariablesToRead, registryList));
-      whiteBoard.setVariablesToWrite(generateRandomVariables(random, "writeVariable", numberVariablesToRead, registryList));
+      whiteBoard.setVariablesToWrite(generateRandomVariables(random, "writeVariable", numberVariablesToWrite, registryList));
    }
 
    private ArrayList<YoVariable> generateRandomVariables(Random random, String namePrefix, int numberOfVariables,
