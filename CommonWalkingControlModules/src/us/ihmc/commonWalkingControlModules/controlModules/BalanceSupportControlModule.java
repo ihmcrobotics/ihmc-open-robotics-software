@@ -19,7 +19,6 @@ import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.Orientation;
 import us.ihmc.utilities.screwTheory.Wrench;
 
-import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public class BalanceSupportControlModule
@@ -37,8 +36,7 @@ public class BalanceSupportControlModule
 
    private final SideDependentList<Double> legStrengths = new SideDependentList<Double>();
    private final SideDependentList<FramePoint2d> virtualToePoints = new SideDependentList<FramePoint2d>();
-   private YoVariableRegistry registry;
-   private DoubleYoVariable supportPolygonShrinkFactor = new DoubleYoVariable("supportPolygonShrinkFactor", registry);
+   private final YoVariableRegistry registry = new YoVariableRegistry("BalanceSupportControlModule");
 
    public BalanceSupportControlModule(VelocityViaCoPControlModule velocityViaCoPControlModule,
                                       VirtualToePointCalculator virtualToePointAndLegStrengthCalculator, LegStrengthCalculator legStrengthCalculator,
@@ -138,10 +136,5 @@ public class BalanceSupportControlModule
    private double getDesiredPelvisHeight()
    {
       return Double.NaN;
-   }
-
-   public void setParametersForR2()
-   {
-      supportPolygonShrinkFactor.set(0.008);
    }
 }
