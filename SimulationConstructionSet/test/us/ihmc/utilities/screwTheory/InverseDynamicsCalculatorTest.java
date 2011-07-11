@@ -311,13 +311,13 @@ public class InverseDynamicsCalculatorTest
          throw new RuntimeException(e);
       }
       
-//      SimulationConstructionSet mav.scs = new SimulationConstructionSet(robot, false);
-//      mav.scs.disableGUIComponents();
-//      mav.scs.setRecordDT(mav.scs.getDT());
-//      Thread simThread = new Thread(mav.scs, "InverseDynamicsCalculatorTest sim thread");
+//      SimulationConstructionSet mav.mav.scs = new SimulationConstructionSet(robot, false);
+//      mav.mav.scs.disableGUIComponents();
+//      mav.mav.scs.setRecordDT(mav.mav.scs.getDT());
+//      Thread simThread = new Thread(mav.mav.scs, "InverseDynamicsCalculatorTest sim thread");
 //      simThread.start();
-//      mav.scs.simulate(1);
-//      waitForSimulationToFinish(mav.scs);
+//      mav.mav.scs.simulate(1);
+//      waitForSimulationToFinish(mav.mav.scs);
    }
 
    private void createRandomChainRobotAndSetJointPositionsAndVelocities(Robot robot, HashMap<RevoluteJoint, PinJoint> jointMap, ReferenceFrame worldFrame, RigidBody elevator, Vector3d[] jointAxes, double gravity, boolean useRandomVelocity, boolean useRandomAcceleration)
