@@ -836,8 +836,8 @@ public class LinkGraphics
    public void addVRMLFile(URL fileURL, Appearance app)
    {
       // Use with new xj3d stuff
-      // int flag = org.web3d.mav.j3d.loaders.VRML97Loader.LOAD_ALL; flag &= ~org.web3d.mav.j3d.loaders.VRML97Loader.LOAD_BEHAVIOR_NODES; // Static Loads only
-      // org.web3d.mav.j3d.loaders.VRML97Loader loader = new org.web3d.mav.j3d.loaders.VRML97Loader(flag);
+      // int flag = org.web3d.mav.mav.j3d.loaders.VRML97Loader.LOAD_ALL; flag &= ~org.web3d.mav.mav.j3d.loaders.VRML97Loader.LOAD_BEHAVIOR_NODES; // Static Loads only
+      // org.web3d.mav.mav.j3d.loaders.VRML97Loader loader = new org.web3d.mav.mav.j3d.loaders.VRML97Loader(flag);
 
       com.sun.j3d.loaders.vrml97.VrmlLoader loader = new com.sun.j3d.loaders.vrml97.VrmlLoader();    // Use with old x3d.jar
 
@@ -883,8 +883,8 @@ public class LinkGraphics
    public void addVRMLFile(String fileName, Appearance app)
    {
       // Use with new xj3d stuff
-      // int flag = org.web3d.mav.j3d.loaders.VRML97Loader.LOAD_ALL; flag &= ~org.web3d.mav.j3d.loaders.VRML97Loader.LOAD_BEHAVIOR_NODES; // Static Loads only
-      // org.web3d.mav.j3d.loaders.VRML97Loader loader = new org.web3d.mav.j3d.loaders.VRML97Loader(flag);
+      // int flag = org.web3d.mav.mav.j3d.loaders.VRML97Loader.LOAD_ALL; flag &= ~org.web3d.mav.mav.j3d.loaders.VRML97Loader.LOAD_BEHAVIOR_NODES; // Static Loads only
+      // org.web3d.mav.mav.j3d.loaders.VRML97Loader loader = new org.web3d.mav.mav.j3d.loaders.VRML97Loader(flag);
 
       com.sun.j3d.loaders.vrml97.VrmlLoader loader = new com.sun.j3d.loaders.vrml97.VrmlLoader();    // Use with old x3d.jar
 
@@ -995,7 +995,7 @@ public class LinkGraphics
     * System.out.println(URLBase);
     * loader.setURLBase(URLBase);
     *
-    * com.sun.mav.j3d.loaders.Scene scene = null;
+    * com.sun.mav.mav.j3d.loaders.Scene scene = null;
     *
     * try{scene = loader.load(fileURL);}
     * catch(FileNotFoundException e){System.err.println("File Not Found in add3DSFile: " + fileURL + "  " + e);return;}
