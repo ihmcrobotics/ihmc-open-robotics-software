@@ -85,7 +85,7 @@ public class CommonTerrain
       if (groundProfile != null)
       {
          BranchGroup branchGroup = new BranchGroup();
-         TexturedGround texturedGround = new TexturedGround(groundProfile, 300, 300, YoAppearance.Green(), new Transform3D());
+         TexturedGround texturedGround = new TexturedGround(groundProfile, 300, 300, YoAppearance.DarkGreen(), new Transform3D());
          branchGroup.addChild(texturedGround.getBranchGroup());
 
          return branchGroup;
