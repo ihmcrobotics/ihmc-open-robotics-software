@@ -8,6 +8,8 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public class JerryEncoderProcessor extends AbstractEncoderProcessor
 {
+   private static final long serialVersionUID = -5078584224740376130L;
+
    private static final double
 
 //    ALPHA = 0.15, BETA = 0.15, GAMMA = 0.15;
