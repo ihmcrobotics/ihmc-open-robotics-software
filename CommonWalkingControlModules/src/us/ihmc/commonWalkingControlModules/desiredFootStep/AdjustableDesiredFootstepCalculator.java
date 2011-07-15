@@ -264,7 +264,7 @@ public class AdjustableDesiredFootstepCalculator implements DesiredFootstepCalcu
    public void setupParametersForR2()
    {
       goodStandingStepWidth = (0.1016 + 0.09) * 2.0;
-      goodWalkingStepWidth = 0.35;    // 0.3272;    // 0.3272 =  minimum metabolic cost @ 0.12*Leg Length(1.245) + 2*half foot width (17.78)
+      goodWalkingStepWidth = 0.2; // 0.35;    // 0.3272;    // 0.3272 =  minimum metabolic cost @ 0.12*Leg Length(1.245) + 2*half foot width (17.78)
 
       robotMaxVelocity = 0.60;
       robotMinVelocity = 0.10;
