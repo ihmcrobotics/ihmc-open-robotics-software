@@ -279,10 +279,10 @@ public class InverseDynamicsCalculatorTest
          PinJoint revoluteJoint = jointMap.get(idJoint);
 
          DoubleYoVariable qddVariable = revoluteJoint.getQDD();
-         DoubleYoVariable tauVariable = revoluteJoint.getTau();
          double qdd = qddVariable.getDoubleValue();
          double qddInverse = idJoint.getQddDesired();
-         
+
+//         DoubleYoVariable tauVariable = revoluteJoint.getTau();
 //         System.out.println("qddInverse: " + qddInverse + ", qdd: " + qdd);
 //         System.out.println("tau: "  + ", tauVariable: " + tauVariable.getDoubleValue());
          
