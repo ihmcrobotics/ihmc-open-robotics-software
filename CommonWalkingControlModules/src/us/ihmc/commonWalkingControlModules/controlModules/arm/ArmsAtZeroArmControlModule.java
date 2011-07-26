@@ -6,9 +6,9 @@ import us.ihmc.robotSide.RobotSide;
 
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
-public class FrozenArmControlModule extends PDArmControlModule
+public class ArmsAtZeroArmControlModule extends PDArmControlModule
 {
-   public FrozenArmControlModule(ProcessedSensorsInterface processedSensors, double controlDT, YoVariableRegistry parentRegistry)
+   public ArmsAtZeroArmControlModule(ProcessedSensorsInterface processedSensors, double controlDT, YoVariableRegistry parentRegistry)
    {
       super(processedSensors, controlDT, parentRegistry);
    }
