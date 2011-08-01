@@ -16,7 +16,7 @@ import com.yobotics.simulationconstructionset.util.PIDController;
 public abstract class PDArmControlModule implements ArmControlModule
 {
    protected final ProcessedSensorsInterface processedSensors;
-   protected final YoVariableRegistry registry = new YoVariableRegistry("FrozenArmControlModule");
+   protected final YoVariableRegistry registry = new YoVariableRegistry("PDControlModule");
    protected final SideDependentList<EnumMap<ArmJointName, PIDController>> armControllers = SideDependentList.createListOfEnumMaps(ArmJointName.class);
 //   private final SideDependentList<ArmTorques> armTorquesList = new SideDependentList<ArmTorques>();
 

@@ -14,6 +14,7 @@ import javax.vecmath.Vector3d;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.test.JUnitTools;
@@ -328,11 +329,11 @@ public class InverseDynamicsCalculatorTest
       PinJoint previousJoint = null;
       for (int i = 0; i < jointAxes.length; i++)
       {         
-         Vector3d jointOffset = getRandomVector();
+         Vector3d jointOffset = RandomTools.getRandomVector(random);
          Vector3d jointAxis = jointAxes[i];
-         Matrix3d momentOfInertia = getRandomDiagonalMatrix();
+         Matrix3d momentOfInertia = RandomTools.getRandomDiagonalMatrix3d(random);
          double mass = random.nextDouble();
-         Vector3d comOffset = getRandomVector();
+         Vector3d comOffset = RandomTools.getRandomVector(random);
          double jointPosition = random.nextDouble();
          double jointVelocity = useRandomVelocity ? random.nextDouble() : 0.0;
          double jointAcceleration = useRandomAcceleration ? random.nextDouble() : 0.0;
@@ -375,12 +376,12 @@ public class InverseDynamicsCalculatorTest
       
       for (int i = 0; i < numberOfJoints; i++)
       {         
-         Vector3d jointOffset = getRandomVector();
+         Vector3d jointOffset = RandomTools.getRandomVector(random);
          Vector3d jointAxis = new Vector3d(random.nextDouble(), random.nextDouble(), random.nextDouble());
          jointAxis.normalize();
-         Matrix3d momentOfInertia = getRandomDiagonalMatrix();
+         Matrix3d momentOfInertia = RandomTools.getRandomDiagonalMatrix3d(random);
          double mass = random.nextDouble();
-         Vector3d comOffset = getRandomVector();
+         Vector3d comOffset = RandomTools.getRandomVector(random);
          double jointPosition = random.nextDouble();
          double jointVelocity = useRandomVelocity ? random.nextDouble() : 0.0;
          double jointAcceleration = useRandomAcceleration ? random.nextDouble() : 0.0;
@@ -499,19 +500,5 @@ public class InverseDynamicsCalculatorTest
       ReferenceFrame beforeJointFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(frameName, parentFrame, transformToParent);
 
       return beforeJointFrame;
-   }
-   
-   private Vector3d getRandomVector()
-   {
-      return new Vector3d(random.nextDouble(), random.nextDouble(), random.nextDouble());
-   }
-
-   private Matrix3d getRandomDiagonalMatrix()
-   {
-      Matrix3d ret = new Matrix3d();
-      ret.m00 = random.nextDouble();
-      ret.m11 = random.nextDouble();
-      ret.m22 = random.nextDouble();
-      return ret;
    }
 }
