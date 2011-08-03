@@ -97,7 +97,7 @@ public class SwingLegCompensationPelvisHeightControlModule implements PelvisHeig
       {
          upperBodyWrench.set(couplingRegistry.getUpperBodyWrench());
          upperBodyWrench.changeFrame(referenceFrames.getPelvisFrame());
-         fZSwingLegCompensation.set(upperBodyWrench.getForce().getZ());
+         fZSwingLegCompensation.set(upperBodyWrench.getLinearPartCopy().getZ());
       }
       else
          fZSwingLegCompensation.set(0.0);

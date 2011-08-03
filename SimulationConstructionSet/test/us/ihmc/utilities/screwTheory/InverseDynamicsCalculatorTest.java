@@ -256,8 +256,8 @@ public class InverseDynamicsCalculatorTest
       inputWrench.getExpressedInFrame().checkReferenceFrameMatch(outputWrench.getExpressedInFrame());
 
       double epsilon = 1e-12; //3;
-      JUnitTools.assertVector3dEquals(inputWrench.getTorque(), outputWrench.getTorque(), epsilon);
-      JUnitTools.assertVector3dEquals(inputWrench.getForce(), outputWrench.getForce(), epsilon);
+      JUnitTools.assertVector3dEquals(inputWrench.getAngularPartCopy(), outputWrench.getAngularPartCopy(), epsilon);
+      JUnitTools.assertVector3dEquals(inputWrench.getLinearPartCopy(), outputWrench.getLinearPartCopy(), epsilon);
    }
    
    private void copyTorques(HashMap<RevoluteJoint, PinJoint> jointMap)
@@ -448,7 +448,7 @@ public class InverseDynamicsCalculatorTest
       link.getMomentOfInertia(momentOfInertia);
       ReferenceFrame nextFrame = createOffsetFrame(currentInverseDynamicsJoint, comOffset, bodyName);
       nextFrame.update();
-      GeneralizedInertia inertia = new GeneralizedInertia(nextFrame, momentOfInertia, link.getMass());
+      RigidBodyInertia inertia = new RigidBodyInertia(nextFrame, momentOfInertia, link.getMass());
       RigidBody rigidBody = new RigidBody(bodyName, inertia, currentInverseDynamicsJoint);
 
       return rigidBody;
