@@ -112,7 +112,7 @@ public class SwingFullLegJacobian
     */
    public void packJointVelocitiesGivenTwist(LegJointVelocities legJointVelocitiesToPack, Twist anklePitchTwistInAnklePitchFrame)
    {
-      Matrix jointVelocities = openChainJacobian.getJointVelocities(anklePitchTwistInAnklePitchFrame);
+      Matrix jointVelocities = openChainJacobian.computeJointVelocities(anklePitchTwistInAnklePitchFrame);
       for (int i = 0; i < legJointNames.length; i++)
       {
          LegJointName legJointName = legJointNames[i];
@@ -132,7 +132,7 @@ public class SwingFullLegJacobian
       }
 
       // the actual computation
-      Matrix jointTorques = openChainJacobian.getJointTorques(wrenchOnFootInFootFrame);
+      Matrix jointTorques = openChainJacobian.computeJointTorques(wrenchOnFootInFootFrame);
 
       for (int i = 0; i < legJointNames.length; i++)
       {
@@ -151,7 +151,7 @@ public class SwingFullLegJacobian
       Matrix biasedAccelerations = accelerationOfFootWithRespectToBody.toMatrix();    // unbiased at this point
       Matrix bias = jacobianDerivativeTerm.toMatrix();
       biasedAccelerations.minusEquals(bias);
-      Matrix ret = openChainJacobian.jacobianSolve(biasedAccelerations);
+      Matrix ret = openChainJacobian.solve(biasedAccelerations);
 
       return ret;
    }

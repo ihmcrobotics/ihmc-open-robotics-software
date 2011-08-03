@@ -117,7 +117,7 @@ public class AxisAnglePelvisOrientationControlModule implements PelvisOrientatio
       {
          upperBodyWrench.set(couplingRegistry.getUpperBodyWrench());
          upperBodyWrench.changeFrame(pelvisFrame);
-         return new FrameVector(upperBodyWrench.getExpressedInFrame(), upperBodyWrench.getTorque());
+         return new FrameVector(upperBodyWrench.getExpressedInFrame(), upperBodyWrench.getAngularPartCopy());
       }
       else
       {

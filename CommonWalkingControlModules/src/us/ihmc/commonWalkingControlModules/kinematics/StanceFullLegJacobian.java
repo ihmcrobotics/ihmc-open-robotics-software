@@ -206,8 +206,8 @@ public class StanceFullLegJacobian
       }
 
       // the actual computation
-      Matrix jointTorques = legJacobian.getJointTorques(wrenchOnPelvisInPelvisFrame);
-      Matrix vtpTorques = vtpJacobian.getJointTorques(wrenchOnPelvisInPelvisFrame);
+      Matrix jointTorques = legJacobian.computeJointTorques(wrenchOnPelvisInPelvisFrame);
+      Matrix vtpTorques = vtpJacobian.computeJointTorques(wrenchOnPelvisInPelvisFrame);
       
       for (int i = 0; i < legJointNames.length; i++)
       {
