@@ -14,7 +14,7 @@ import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.OpenChainJacobian;
+import us.ihmc.utilities.screwTheory.GeometricJacobian;
 import us.ihmc.utilities.screwTheory.Twist;
 import us.ihmc.utilities.screwTheory.Wrench;
 
@@ -30,8 +30,8 @@ public class StanceFullLegJacobian
    private final VTPXFrame vtpXFrame;
    private final VTPYFrame vtpYFrame;
 
-   private final OpenChainJacobian legJacobian;
-   private final OpenChainJacobian vtpJacobian;
+   private final GeometricJacobian legJacobian;
+   private final GeometricJacobian vtpJacobian;
 
    /**
     * Constructs a new StanceFullLegJacobian, for the given side of the robot
@@ -75,7 +75,7 @@ public class StanceFullLegJacobian
       ReferenceFrame jacobianFrame = pelvisFrame;
 
       // create openChainJacobian
-      legJacobian = new OpenChainJacobian(legTwists, legEndEffectorFrame, legJacobianBaseFrame, jacobianFrame);
+      legJacobian = new GeometricJacobian(legTwists, legEndEffectorFrame, legJacobianBaseFrame, jacobianFrame);
 
 
       // Build vtpJacobian
@@ -99,7 +99,7 @@ public class StanceFullLegJacobian
       ReferenceFrame vtpJacobianBaseFrame = vtpYFrame;
 
       // create openChainJacobian
-      vtpJacobian = new OpenChainJacobian(vtpTwists, vtpEndEffectorFrame, vtpJacobianBaseFrame, jacobianFrame);
+      vtpJacobian = new GeometricJacobian(vtpTwists, vtpEndEffectorFrame, vtpJacobianBaseFrame, jacobianFrame);
 
    }
 

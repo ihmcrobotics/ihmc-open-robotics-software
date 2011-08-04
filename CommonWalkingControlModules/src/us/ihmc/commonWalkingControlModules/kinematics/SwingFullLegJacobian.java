@@ -10,7 +10,7 @@ import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointVelocitie
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegTorques;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.OpenChainJacobian;
+import us.ihmc.utilities.screwTheory.GeometricJacobian;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.utilities.screwTheory.Twist;
 import us.ihmc.utilities.screwTheory.Wrench;
@@ -20,7 +20,7 @@ import com.mathworks.jama.Matrix;
 public class SwingFullLegJacobian
 {
    private final RobotSide robotSide;
-   private final OpenChainJacobian openChainJacobian;
+   private final GeometricJacobian openChainJacobian;
    private final LegJointName[] legJointNames;
    
    /**
@@ -57,7 +57,7 @@ public class SwingFullLegJacobian
       ReferenceFrame jacobianFrame = endEffectorFrame;
 
       // create Jacobian
-      openChainJacobian = new OpenChainJacobian(legTwists, endEffectorFrame, baseFrame, jacobianFrame);
+      openChainJacobian = new GeometricJacobian(legTwists, endEffectorFrame, baseFrame, jacobianFrame);
 
    }
 
