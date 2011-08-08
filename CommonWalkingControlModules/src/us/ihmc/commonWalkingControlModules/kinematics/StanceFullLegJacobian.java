@@ -162,32 +162,35 @@ public class StanceFullLegJacobian
    {
       /*
        * tauVTP = JVTPTranspose * FxyzNxyz
-       *                                              [ Fx ]
-       *                                              [ Fy ]
-       *                                               ----
-       * [ tauVTPx ] = [ J11 J21 | J31 J41 J51 J61] * [ Fz ] = [ 0 ]
-       * [ tauVTPy ]   [ J12 J22 | J32 J42 J52 J62]   [ Nx ]   [ 0 ]
-       *                    A             B           [ Ny ]
-       *                                              [ Nz ]
-       * A * Fxy + B * FzNxyz = 0
-       * Fxy = -A^(-1) * B * FzNxyz
+       *                                                [ Nx ]
+       *                                                [ Ny ]
+       * [ tauVTPx ] = [ J11 J21 J31 | J41 J51 | J61] * [ Nz ]
+       * [ tauVTPy ]   [ J12 J22 J32 | J42 J52 | J62]    ----  = [ 0 ]
+       *                      B1          A       B2    [ Fx ]   [ 0 ]
+       *                                                [ Fy ]
+       *                                                 ----
+       *                                                [ Fz ]
+       * A * Fxy + [B1 B2] * NxyzFz = 0
+       * Fxy = -A^(-1) * [B1 B2] * FzNxyz
        */
       torqueOnPelvis = torqueOnPelvis.changeFrameCopy(pelvisFrame);
 
       Matrix vtpJacobianMatrix = vtpJacobian.getJacobianMatrix();
 
-      Matrix A = vtpJacobianMatrix.getMatrix(0, 1, 0, 1).transpose();
+      int[] columns = {0, 1};
+      int[] aRows = {3, 4};
+      Matrix A = vtpJacobianMatrix.getMatrix(aRows, columns).transpose();
 
-      Matrix B = vtpJacobianMatrix.getMatrix(2, 5, 0, 1).transpose();
+      int[] bRows = {0, 1, 2, 5};
+      Matrix B = vtpJacobianMatrix.getMatrix(bRows, columns).transpose();
 
-      Matrix FzNxyz = new Matrix(4, 1);
-      FzNxyz.set(0, 0, fZOnPelvisInPelvisFrame);
-      FzNxyz.set(1, 0, torqueOnPelvis.getX());
-      FzNxyz.set(2, 0, torqueOnPelvis.getY());
-      FzNxyz.set(3, 0, torqueOnPelvis.getZ());
+      Matrix nxyzFZ = new Matrix(4, 1);
+      nxyzFZ.set(0, 0, torqueOnPelvis.getX());
+      nxyzFZ.set(1, 0, torqueOnPelvis.getY());
+      nxyzFZ.set(2, 0, torqueOnPelvis.getZ());
+      nxyzFZ.set(3, 0, fZOnPelvisInPelvisFrame);
 
-
-      Matrix Fxy = (A.solve(B.times(FzNxyz))).times(-1.0);    //
+      Matrix Fxy = (A.solve(B.times(nxyzFZ))).times(-1.0);
 
       Vector3d forceOnPelvisInPelvisFrame = new Vector3d(Fxy.get(0, 0), Fxy.get(1, 0), fZOnPelvisInPelvisFrame);
 
