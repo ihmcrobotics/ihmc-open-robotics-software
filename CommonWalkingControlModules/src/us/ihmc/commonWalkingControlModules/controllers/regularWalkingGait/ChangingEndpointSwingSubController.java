@@ -378,9 +378,9 @@ public class ChangingEndpointSwingSubController implements SwingSubController
    public boolean isDoneWithMidSwing(RobotSide swingSide, double timeInState)
    {
       boolean trajectoryIsDone = walkingTrajectoryGenerator.isDone();
-      boolean capturePointInsideFoot = isCapturePointInsideFoot(swingSide);
+//      boolean capturePointInsideFoot = isCapturePointInsideFoot(swingSide);
 
-      return trajectoryIsDone || capturePointInsideFoot;
+      return trajectoryIsDone; //  || capturePointInsideFoot;
    }
 
    public boolean isDoneWithTerminalSwing(RobotSide swingSide, double timeInState)
