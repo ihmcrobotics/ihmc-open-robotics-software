@@ -405,7 +405,7 @@ public class CommonStanceSubController implements StanceSubController
    {
       if (waitInLoadingPreswingB)
       {
-         boolean inStateLongEnough = timeInState > 0.2;
+         boolean inStateLongEnough = timeInState > 0.1;
 
          return inStateLongEnough || isCapturePointOutsideBaseOfSupport();
       }
