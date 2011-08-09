@@ -102,7 +102,7 @@ public class ComponentBasedDesiredFootstepCalculator implements DesiredFootstepC
       
       if (desiredFootstepAdjustor != null)
       {
-//         return desiredFootstepAdjustor.adjustDesiredFootstep(footstep);
+         return desiredFootstepAdjustor.adjustDesiredFootstep(footstep);
       }
       
       return footstep;
