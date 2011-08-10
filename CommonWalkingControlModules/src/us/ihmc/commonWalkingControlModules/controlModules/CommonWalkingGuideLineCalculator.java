@@ -122,10 +122,10 @@ public class CommonWalkingGuideLineCalculator implements GuideLineCalculator
 
    public void setParametersForR2()
    {
-      velocityGainX.set(0.2);
+      velocityGainX.set(0.25);
       velocityGainY.set(0.05);
-      captureForward.set(0.20);    // (0.08);
-      captureForwardOfSweet.set(0.03);
+      captureForward.set(0.10); // 20);    // (0.08);
+      captureForwardOfSweet.set(0.0); // 0.03);
    }
    
    public void setParametersForM2V2PushRecovery()
