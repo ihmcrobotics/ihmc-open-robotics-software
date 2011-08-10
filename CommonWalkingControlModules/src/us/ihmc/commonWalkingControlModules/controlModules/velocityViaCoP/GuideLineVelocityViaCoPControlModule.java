@@ -50,7 +50,7 @@ public class GuideLineVelocityViaCoPControlModule implements VelocityViaCoPContr
    private final FramePoint desiredCenterOfPressure = new FramePoint(world);
    private final DoubleYoVariable desiredCaptureForwardDoubleSupport = new DoubleYoVariable("desiredCaptureForwardDoubleSupport", registry);
    private final DoubleYoVariable desiredCaptureInwardDoubleSupport = new DoubleYoVariable("desiredCaptureInwardDoubleSupport", registry);
-   private final DoubleYoVariable desiredCaptureForwardNotLoading = new DoubleYoVariable("desiredCaptureForwardNotLoading", registry);
+   private final DoubleYoVariable desiredCaptureForwardStayInDoubleSupport = new DoubleYoVariable("desiredCaptureForwardNotLoading", registry);
 
    private final DoubleYoVariable alphaDesiredCoP = new DoubleYoVariable("alphaDesiredCoP", registry);
 
@@ -226,7 +226,7 @@ public class GuideLineVelocityViaCoPControlModule implements VelocityViaCoPContr
          FrameVector offset = leftForward;
          offset.add(rightForward);
          offset.normalize();
-         offset.scale(desiredCaptureForwardNotLoading.getDoubleValue());
+         offset.scale(desiredCaptureForwardStayInDoubleSupport.getDoubleValue());
          desiredCapturePoint.add(offset);
       }
       else if (desiredVelocity.lengthSquared() > 0.0)
@@ -258,7 +258,7 @@ public class GuideLineVelocityViaCoPControlModule implements VelocityViaCoPContr
    {
       desiredCaptureForwardDoubleSupport.set(0.12); // 0.18);    // 0.2);    // 0.15;
       desiredCaptureInwardDoubleSupport.set(0.01);    // 0.02);
-      desiredCaptureForwardNotLoading.set(0.05);
+      desiredCaptureForwardStayInDoubleSupport.set(0.05);
       alphaDesiredCoP.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(8.84, controlDT));
    }
 
@@ -266,7 +266,7 @@ public class GuideLineVelocityViaCoPControlModule implements VelocityViaCoPContr
    {
       desiredCaptureForwardDoubleSupport.set(0.03);    // 0.02); // 0.04 (equal to where the guide line ends) // 0.08);
       desiredCaptureInwardDoubleSupport.set(0.0);
-      desiredCaptureForwardNotLoading.set(0.02);
+      desiredCaptureForwardStayInDoubleSupport.set(0.02);
       alphaDesiredCoP.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(8.84, controlDT));
    }
 }

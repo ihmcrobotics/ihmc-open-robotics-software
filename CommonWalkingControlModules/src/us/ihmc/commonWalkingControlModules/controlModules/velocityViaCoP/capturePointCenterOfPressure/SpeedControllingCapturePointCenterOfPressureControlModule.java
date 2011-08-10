@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.controlModules.capturePointCenterOfPressure;
+package us.ihmc.commonWalkingControlModules.controlModules.velocityViaCoP.capturePointCenterOfPressure;
 
 import java.awt.Color;
 
