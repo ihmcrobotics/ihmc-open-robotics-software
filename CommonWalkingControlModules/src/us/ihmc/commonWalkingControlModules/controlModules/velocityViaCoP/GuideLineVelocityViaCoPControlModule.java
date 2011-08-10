@@ -256,7 +256,7 @@ public class GuideLineVelocityViaCoPControlModule implements VelocityViaCoPContr
 
    public void setUpParametersForR2()
    {
-      desiredCaptureForwardDoubleSupport.set(0.18);    // 0.2);    // 0.15;
+      desiredCaptureForwardDoubleSupport.set(0.12); // 0.18);    // 0.2);    // 0.15;
       desiredCaptureInwardDoubleSupport.set(0.01);    // 0.02);
       desiredCaptureForwardNotLoading.set(0.05);
       alphaDesiredCoP.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(8.84, controlDT));
