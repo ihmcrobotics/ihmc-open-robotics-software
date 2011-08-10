@@ -314,8 +314,8 @@ public class CraigPage300SwingLegTorqueControlModule implements SwingLegTorqueCo
          kpGains.get(legJointName).set(1000.0);
          kdGains.get(legJointName).set(50.0);
       }
-
-      softScaleFactor.set(0.25);
+      
+      softScaleFactor.set(0.1);
    }
 
    public void setParametersForM2V2()
