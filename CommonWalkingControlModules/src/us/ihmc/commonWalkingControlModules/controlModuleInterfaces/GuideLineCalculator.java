@@ -10,9 +10,8 @@ import us.ihmc.utilities.math.geometry.FrameVector2d;
 
 public interface GuideLineCalculator
 {
-   public abstract void update(RobotSide supportLeg, BipedSupportPolygons bipedSupportPolygons, FramePoint2d capturePointInSupportFootZUp,
-                      FramePoint finalDesiredSwingTarget, FrameVector2d desiredVelocityInSupportFootFrame,
-                      FrameVector2d actualCenterOfMassVelocityInSupportFootFrame);
+   public abstract void update(RobotSide supportLeg, BipedSupportPolygons bipedSupportPolygons, FramePoint2d capturePoint,
+                      FramePoint finalDesiredSwingTarget, FrameVector2d desiredVelocity);
 
    public abstract void reset();
 

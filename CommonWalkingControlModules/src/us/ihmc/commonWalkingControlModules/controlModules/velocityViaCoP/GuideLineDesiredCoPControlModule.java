@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.velocityViaCoP;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.CapturePointCenterOfPressureControlModule;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.GuideLineCalculator;
-import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.VelocityViaCoPControlModule;
+import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.DesiredCoPControlModule;
 import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
@@ -33,7 +33,7 @@ import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoVa
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint2d;
 
-public class GuideLineVelocityViaCoPControlModule implements VelocityViaCoPControlModule
+public class GuideLineDesiredCoPControlModule implements DesiredCoPControlModule
 {
    private final YoVariableRegistry registry = new YoVariableRegistry("GuideLineVelocityViaCoPControlModule");
 
@@ -63,7 +63,7 @@ public class GuideLineVelocityViaCoPControlModule implements VelocityViaCoPContr
    private final YoFramePoint2d finalDesiredCoPInWorld = new YoFramePoint2d("desiredCoPInWorld", "", world, registry);
    private final BooleanYoVariable lastTickDoubleSupport = new BooleanYoVariable("lastTickDoubleSupport", registry);
 
-   public GuideLineVelocityViaCoPControlModule(double controlDT, CouplingRegistry couplingRegistry, ProcessedSensorsInterface processedSensors,
+   public GuideLineDesiredCoPControlModule(double controlDT, CouplingRegistry couplingRegistry, ProcessedSensorsInterface processedSensors,
            CommonWalkingReferenceFrames referenceFrames, YoVariableRegistry parentRegistry,
            DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, GuideLineCalculator guideLineCalculator,
            CapturePointCenterOfPressureControlModule capturePointCenterOfPressureControlModule)
@@ -136,8 +136,7 @@ public class GuideLineVelocityViaCoPControlModule implements VelocityViaCoPContr
          Footstep footstep = couplingRegistry.getDesiredFootstep();
          FramePoint finalDesiredSwingTarget = footstep.getFootstepPose().getPosition();
          FrameVector2d desiredVelocityInSupportFootFrame = desiredVelocity.changeFrameCopy(supportFootAnkleZUpFrame);
-         guideLineCalculator.update(supportLeg, bipedSupportPolygons, capturePoint2d, finalDesiredSwingTarget, desiredVelocityInSupportFootFrame,
-                                    actualCenterOfMassVelocityInSupportFootFrame);
+         guideLineCalculator.update(supportLeg, bipedSupportPolygons, capturePoint2d, finalDesiredSwingTarget, desiredVelocityInSupportFootFrame);
          guideLine = guideLineCalculator.getGuideLine(supportLeg);
          guideLine.changeFrame(supportFootAnkleZUpFrame);
          desiredCapturePointInWorld.setToNaN();
@@ -151,8 +150,8 @@ public class GuideLineVelocityViaCoPControlModule implements VelocityViaCoPContr
 
       FramePoint centerOfMassPosition = processedSensors.getCenterOfMassPositionInFrame(supportFootAnkleZUpFrame);
 
-      capturePointCenterOfPressureControlModule.controlSingleSupport(capturePointInAnkleZUp, guideLine, desiredCapturePoint, supportLeg,
-              supportFootAnkleZUpFrame, bipedSupportPolygons, centerOfMassPosition, desiredVelocity, actualCenterOfMassVelocityInSupportFootFrame);    // , percentToFarEdgeOfFoot); // calculates capture points
+      capturePointCenterOfPressureControlModule.controlSingleSupport(supportLeg, bipedSupportPolygons, capturePointInAnkleZUp, desiredVelocity,
+              guideLine, desiredCapturePoint, centerOfMassPosition, actualCenterOfMassVelocityInSupportFootFrame);    // , percentToFarEdgeOfFoot); // calculates capture points
 
       capturePointCenterOfPressureControlModule.packDesiredCenterOfPressure(desiredCenterOfPressure);
       FramePoint2d desiredCoP2d = desiredCenterOfPressure.toFramePoint2d();

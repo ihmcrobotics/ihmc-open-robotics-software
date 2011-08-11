@@ -4,7 +4,7 @@ import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 
-public interface VelocityViaCoPControlModule
+public interface DesiredCoPControlModule
 {
    /**
     * Computes the desired CoP when the robot is in single support.

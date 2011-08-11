@@ -1,12 +1,12 @@
 package us.ihmc.commonWalkingControlModules.controlModules.velocityViaCoP;
 
-import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.VelocityViaCoPControlModule;
+import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.DesiredCoPControlModule;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 
-public class DoNothingVelocityViaCoPControlModule implements VelocityViaCoPControlModule
+public class DoNothingVelocityViaCoPControlModule implements DesiredCoPControlModule
 {
    private final CommonWalkingReferenceFrames referenceFrames;
 

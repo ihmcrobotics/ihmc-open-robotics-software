@@ -128,7 +128,7 @@ public class ComponentBasedDesiredFootstepCalculator implements DesiredFootstepC
       sidestepMaxWidth.set(0.4);
       sidestepMinWidth.set(0.15);
       
-      minStepWidth.set(0.2);
+      minStepWidth.set(0.25);
       maxStepWidth.set(0.5);
    }
 

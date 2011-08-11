@@ -314,7 +314,7 @@ public class StandardCapturePointCenterOfPressureControlModule implements Captur
    }
 
    public void controlSingleSupport(FramePoint currentCapturePoint, FrameLineSegment2d guideLine, FramePoint desiredCapturePoint, RobotSide supportLeg,
-           ReferenceFrame referenceFrame, BipedSupportPolygons supportPolygons)    // , double percentToFarEdgeOfFoot)
+           BipedSupportPolygons supportPolygons)    // , double percentToFarEdgeOfFoot)
    {
       singleSupportWasPreviousTick.set(true);
 
@@ -349,7 +349,7 @@ public class StandardCapturePointCenterOfPressureControlModule implements Captur
          error.sub(desiredCapturePoint2d);
 
          // Calculate desired center of pressure:
-         desiredCenterOfPressure2d = new FramePoint2d(referenceFrame);
+         desiredCenterOfPressure2d = new FramePoint2d(error.getReferenceFrame());
          desiredCenterOfPressure2d.setX(kCaptureX.getDoubleValue() * error.getX());
          desiredCenterOfPressure2d.setY(kCaptureY.getDoubleValue() * error.getY());
          desiredCenterOfPressure2d.add(supportPolygons.getSweetSpotCopy(supportLeg));
@@ -480,11 +480,10 @@ public class StandardCapturePointCenterOfPressureControlModule implements Captur
    }
 
  
-   public void controlSingleSupport(FramePoint currentCapturePoint, FrameLineSegment2d guideLine, FramePoint desiredCapturePoint, RobotSide supportLeg,
-         ReferenceFrame referenceFrame, BipedSupportPolygons supportPolygons, FramePoint centerOfMassPositionInZUpFrame, FrameVector2d desiredVelocity,
-         FrameVector2d currentVelocity)
+   public void controlSingleSupport(RobotSide supportLeg, BipedSupportPolygons supportPolygons, FramePoint currentCapturePoint, FrameVector2d desiredVelocity,
+         FrameLineSegment2d guideLine, FramePoint desiredCapturePoint, FramePoint centerOfMassPositionInZUpFrame, FrameVector2d currentVelocity)
    {
-      controlSingleSupport(currentCapturePoint, guideLine, desiredCapturePoint, supportLeg, referenceFrame, supportPolygons);
+      controlSingleSupport(currentCapturePoint, guideLine, desiredCapturePoint, supportLeg, supportPolygons);
       
    }
    
