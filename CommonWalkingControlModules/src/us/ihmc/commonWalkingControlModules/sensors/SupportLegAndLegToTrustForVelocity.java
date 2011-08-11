@@ -6,7 +6,7 @@ import com.yobotics.simulationconstructionset.EnumYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 
-public class SupportLegAndLegToTrustForVelocity
+public class SupportLegAndLegToTrustForVelocity implements LegToTrustForVelocityReadOnly, LegToTrustForVelocityWriteOnly
 {
    private final YoVariableRegistry registry = new YoVariableRegistry("SupportLegAndLegToTrustForVelocity");
 

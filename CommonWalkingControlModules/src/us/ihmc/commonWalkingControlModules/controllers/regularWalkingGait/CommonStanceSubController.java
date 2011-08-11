@@ -11,7 +11,7 @@ import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredVelo
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegTorques;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LowerBodyTorques;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
-import us.ihmc.commonWalkingControlModules.sensors.SupportLegAndLegToTrustForVelocity;
+import us.ihmc.commonWalkingControlModules.sensors.LegToTrustForVelocityWriteOnly;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameLineSegment2d;
@@ -59,7 +59,7 @@ public class CommonStanceSubController implements StanceSubController
    private final DoubleYoVariable xCaptureToTransfer = new DoubleYoVariable("xCaptureToTransfer", registry);
    private final DoubleYoVariable yCaptureToTransfer = new DoubleYoVariable("yCaptureToTransfer", registry);
 
-   private final SupportLegAndLegToTrustForVelocity supportLegAndLegToTrustForVelocity;    // FIXME: update things
+   private final LegToTrustForVelocityWriteOnly supportLegAndLegToTrustForVelocity;    // FIXME: update things
 
    private final double footWidth;
    private boolean waitInLoadingPreswingB;
@@ -70,7 +70,7 @@ public class CommonStanceSubController implements StanceSubController
                                     DesiredPelvisOrientationControlModule desiredPelvisOrientationControlModule,
                                     BalanceSupportControlModule balanceSupportControlModule,
                                     FootOrientationControlModule footOrientationControlModule, KneeExtensionControlModule kneeExtensionControlModule,
-                                    SupportLegAndLegToTrustForVelocity supportLegAndLegToTrustForVelocity,
+                                    LegToTrustForVelocityWriteOnly supportLegAndLegToTrustForVelocity,
                                     YoVariableRegistry parentRegistry, double footWidth)
    {
       this.couplingRegistry = couplingRegistry;
