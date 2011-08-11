@@ -199,9 +199,9 @@ public class CommonStanceSubController implements StanceSubController
 
    public void doTransitionIntoLoadingPreSwingA(RobotSide loadingLeg)
    {
-      supportLegAndLegToTrustForVelocity.legToTrustForVelocity.set(loadingLeg);
-      supportLegAndLegToTrustForVelocity.supportLeg.set(null);
-      supportLegAndLegToTrustForVelocity.legToUseForCOMOffset.set(loadingLeg);
+      supportLegAndLegToTrustForVelocity.setLegToTrustForVelocity(loadingLeg);
+      supportLegAndLegToTrustForVelocity.setSupportLeg(null);
+      supportLegAndLegToTrustForVelocity.setLegToUseForCOMOffset(loadingLeg);
 
       kneeExtensionControlModule.doTransitionIntoLoading(loadingLeg);
 
@@ -217,25 +217,25 @@ public class CommonStanceSubController implements StanceSubController
 
    public void doTransitionIntoLoadingPreSwingC(RobotSide loadingLeg)
    {
-      supportLegAndLegToTrustForVelocity.legToTrustForVelocity.set(loadingLeg);
-      supportLegAndLegToTrustForVelocity.supportLeg.set(loadingLeg);
-      supportLegAndLegToTrustForVelocity.legToUseForCOMOffset.set(loadingLeg);
+      supportLegAndLegToTrustForVelocity.setLegToTrustForVelocity(loadingLeg);
+      supportLegAndLegToTrustForVelocity.setSupportLeg(loadingLeg);
+      supportLegAndLegToTrustForVelocity.setLegToUseForCOMOffset(loadingLeg);
    }
 
    public void doTransitionIntoStartStopWalkingDoubleSupport(RobotSide stanceSide)
    {
-      supportLegAndLegToTrustForVelocity.legToTrustForVelocity.set(null);
-      supportLegAndLegToTrustForVelocity.supportLeg.set(null);
-      supportLegAndLegToTrustForVelocity.legToUseForCOMOffset.set(null);
+      supportLegAndLegToTrustForVelocity.setLegToTrustForVelocity(null);
+      supportLegAndLegToTrustForVelocity.setSupportLeg(null);
+      supportLegAndLegToTrustForVelocity.setLegToUseForCOMOffset(null);
 
 //    balanceSupportControlModule.setDesiredCoPOffset(new FramePoint2d(ReferenceFrame.getWorldFrame())); // didn't do anything...
    }
 
    public void doTransitionIntoUnloadLegToTransferIntoWalking(RobotSide stanceSide)
    {
-      supportLegAndLegToTrustForVelocity.legToTrustForVelocity.set(stanceSide);
-      supportLegAndLegToTrustForVelocity.supportLeg.set(null);
-      supportLegAndLegToTrustForVelocity.legToUseForCOMOffset.set(stanceSide);
+      supportLegAndLegToTrustForVelocity.setLegToTrustForVelocity(stanceSide);
+      supportLegAndLegToTrustForVelocity.setSupportLeg(null);
+      supportLegAndLegToTrustForVelocity.setLegToUseForCOMOffset(stanceSide);
 
 //    BipedSupportPolygons bipedSupportPolygons = couplingRegistry.getBipedSupportPolygons();
 //
@@ -253,9 +253,9 @@ public class CommonStanceSubController implements StanceSubController
 
    public void doTransitionIntoLoadingForSingleLegBalance(RobotSide upcomingSupportSide)
    {
-      supportLegAndLegToTrustForVelocity.legToTrustForVelocity.set(upcomingSupportSide);
-      supportLegAndLegToTrustForVelocity.supportLeg.set(upcomingSupportSide);
-      supportLegAndLegToTrustForVelocity.legToUseForCOMOffset.set(upcomingSupportSide);
+      supportLegAndLegToTrustForVelocity.setLegToTrustForVelocity(upcomingSupportSide);
+      supportLegAndLegToTrustForVelocity.setSupportLeg(upcomingSupportSide);
+      supportLegAndLegToTrustForVelocity.setLegToUseForCOMOffset(upcomingSupportSide);
    }
 
    public void doTransitionIntoSingleLegBalance(RobotSide supportLeg, BalanceOnOneLegConfiguration currentConfiguration)
