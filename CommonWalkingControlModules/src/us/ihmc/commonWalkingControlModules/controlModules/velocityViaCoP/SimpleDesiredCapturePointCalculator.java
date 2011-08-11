@@ -75,15 +75,15 @@ public class SimpleDesiredCapturePointCalculator implements DesiredCapturePointC
    public void setUpParametersForR2()
    {
       desiredCaptureForwardStayInDoubleSupport.set(0.05);
-      desiredCaptureKxx.set(0.1);    // TODO: tune
-      desiredCaptureKxy.set(0.05);    // TODO: tune
+      desiredCaptureKxx.set(0.18);
+      desiredCaptureKxy.set(0.05);
    }
 
    public void setUpParametersForM2V2()
    {
       desiredCaptureForwardStayInDoubleSupport.set(0.02);
       desiredCaptureKxx.set(0.1);    // TODO: tune
-      desiredCaptureKxy.set(1.0);    // TODO: tune
+      desiredCaptureKxy.set(0.05);    // TODO: tune
    }
 
    private static boolean stayInDoubleSupport(RobotSide loadingLeg)
