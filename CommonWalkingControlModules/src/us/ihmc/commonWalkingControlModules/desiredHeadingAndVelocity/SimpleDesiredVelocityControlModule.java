@@ -11,7 +11,7 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector2d;
 public class SimpleDesiredVelocityControlModule implements DesiredVelocityControlModule
 {
    private final YoVariableRegistry registry = new YoVariableRegistry("SimpleDesiredVelocityControlModule");
-   private final BooleanYoVariable velocityAlwaysFacesHeading = new BooleanYoVariable("velocityAlwaysFacesHeading", registry);
+   private final BooleanYoVariable desiredVelocityAlwaysFacesHeading = new BooleanYoVariable("desiredVelocityAlwaysFacesHeading", registry);
    private final DoubleYoVariable desiredVelocityNorm = new DoubleYoVariable("desiredVelocityNorm", registry);
    private final YoFrameVector2d desiredVelocity = new YoFrameVector2d("desiredVelocity", "", ReferenceFrame.getWorldFrame(), registry);
 
@@ -23,7 +23,7 @@ public class SimpleDesiredVelocityControlModule implements DesiredVelocityContro
       this.desiredHeadingControlModule = desiredHeadingControlModule;
 
       desiredVelocityNorm.set(initialDesiredVelocity);
-      velocityAlwaysFacesHeading.set(true);
+      desiredVelocityAlwaysFacesHeading.set(true);
 
       parentRegistry.addChild(registry);
 
@@ -37,7 +37,7 @@ public class SimpleDesiredVelocityControlModule implements DesiredVelocityContro
 
    public void updateDesiredVelocity()
    {
-      if (velocityAlwaysFacesHeading.getBooleanValue())
+      if (desiredVelocityAlwaysFacesHeading.getBooleanValue())
       {
          double desiredHeading = this.desiredHeadingControlModule.getDesiredHeadingAngle();
          this.desiredVelocity.set(desiredVelocityNorm.getDoubleValue() * Math.cos(desiredHeading),
