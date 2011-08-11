@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controlModules.velocityViaCoP;
 
 import us.ihmc.commonWalkingControlModules.calculators.EquivalentConstantCoPCalculator;
-import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.VelocityViaCoPControlModule;
+import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.DesiredCoPControlModule;
 import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.ProcessedSensorsInterface;
@@ -25,7 +25,7 @@ import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoFr
 import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoVariable;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 
-public class EquivalentConstantCoPVelocityViaCoPControlModule implements VelocityViaCoPControlModule
+public class EquivalentConstantCoPDesiredCoPControlModule implements DesiredCoPControlModule
 {
    private final YoVariableRegistry registry = new YoVariableRegistry("EquivalentConstantCoPVelocityViaCoPControlModule");
 
@@ -45,7 +45,7 @@ public class EquivalentConstantCoPVelocityViaCoPControlModule implements Velocit
    private final double controlDT;
 
 
-   public EquivalentConstantCoPVelocityViaCoPControlModule(CommonWalkingReferenceFrames referenceFrames, ProcessedSensorsInterface processedSensors,
+   public EquivalentConstantCoPDesiredCoPControlModule(CommonWalkingReferenceFrames referenceFrames, ProcessedSensorsInterface processedSensors,
            CouplingRegistry couplingRegistry, double controlDT, YoVariableRegistry parentRegistry,
            DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {

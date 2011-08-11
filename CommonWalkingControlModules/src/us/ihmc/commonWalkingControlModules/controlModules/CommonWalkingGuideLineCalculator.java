@@ -54,8 +54,7 @@ public class CommonWalkingGuideLineCalculator implements GuideLineCalculator
    }
 
    public void update(RobotSide supportLeg, BipedSupportPolygons bipedSupportPolygons, FramePoint2d capturePointInSupportFootZUp,
-                      FramePoint finalDesiredSwingTarget, FrameVector2d desiredVelocityInSupportFootFrame,
-                      FrameVector2d actualCenterOfMassVelocityInSupportFootFrame)
+                      FramePoint finalDesiredSwingTarget, FrameVector2d desiredVelocityInSupportFootFrame)
    {
       FramePoint2d supportFootSweetSpot = bipedSupportPolygons.getSweetSpotCopy(supportLeg);
 
@@ -76,20 +75,22 @@ public class CommonWalkingGuideLineCalculator implements GuideLineCalculator
 
       if ((onFinalStep == null) ||!onFinalStep.getBooleanValue())
       {
-         boolean USE_VELOCITY_OFFSET = false;
-         if (USE_VELOCITY_OFFSET && (desiredVelocityInSupportFootFrame != null))
-         {
-            FrameVector2d velocityError = new FrameVector2d(desiredVelocityInSupportFootFrame);
-            velocityError.sub(actualCenterOfMassVelocityInSupportFootFrame);
-            FrameVector2d velocityErrorControlAction = new FrameVector2d(desiredVelocityInSupportFootFrame.getReferenceFrame(),
-                                                          -velocityError.getX() * velocityGainX.getDoubleValue(),
-                                                          -velocityError.getY() * velocityGainY.getDoubleValue());
-            stepToLocation.setX(stepToLocation.getX() + captureForward.getDoubleValue() + velocityErrorControlAction.getX());
-         }
-         else
-         {
-            stepToLocation.setX(stepToLocation.getX() + captureForward.getDoubleValue());
-         }
+//         boolean USE_VELOCITY_OFFSET = false;
+//         if (USE_VELOCITY_OFFSET && (desiredVelocityInSupportFootFrame != null))
+//         {
+//            FrameVector2d velocityError = new FrameVector2d(desiredVelocityInSupportFootFrame);
+//            velocityError.sub(actualCenterOfMassVelocityInSupportFootFrame);
+//            FrameVector2d velocityErrorControlAction = new FrameVector2d(desiredVelocityInSupportFootFrame.getReferenceFrame(),
+//                                                          -velocityError.getX() * velocityGainX.getDoubleValue(),
+//                                                          -velocityError.getY() * velocityGainY.getDoubleValue());
+//            stepToLocation.setX(stepToLocation.getX() + captureForward.getDoubleValue() + velocityErrorControlAction.getX());
+//         }
+//         else
+//         {
+//            stepToLocation.setX(stepToLocation.getX() + captureForward.getDoubleValue());
+//         }
+
+       stepToLocation.setX(stepToLocation.getX() + captureForward.getDoubleValue());
       }
 
       else

@@ -89,9 +89,9 @@ public class EqConstCoPAndGuideLineCapturePointCoPControlModule implements Captu
       computeDesiredCoP(supportPolygon, currentCapturePoint.toFramePoint2d(), desiredCapturePoint.toFramePoint2d(), finalTime, comHeight, null);
    }
 
-   public void controlSingleSupport(FramePoint currentCapturePoint, FrameLineSegment2d guideLine, FramePoint desiredCapturePoint, RobotSide supportLeg,
-                                    ReferenceFrame referenceFrame, BipedSupportPolygons supportPolygons, FramePoint centerOfMassPositionInZUpFrame,
-                                    FrameVector2d desiredVelocity, FrameVector2d currentVelocity)
+   public void controlSingleSupport(RobotSide supportLeg, BipedSupportPolygons supportPolygons, FramePoint currentCapturePoint, FrameVector2d desiredVelocity,
+                                    FrameLineSegment2d guideLine, FramePoint desiredCapturePoint, FramePoint centerOfMassPositionInZUpFrame,
+                                    FrameVector2d currentVelocity)
    {
       FrameConvexPolygon2d supportPolygon = supportPolygons.getFootPolygonInAnkleZUp(supportLeg);
       double finalTime = computeFinalTimeSingleSupport();

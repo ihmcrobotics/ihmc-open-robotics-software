@@ -6,7 +6,7 @@ import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.HipDamperCont
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.LegStrengthCalculator;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.PelvisHeightControlModule;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.PelvisOrientationControlModule;
-import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.VelocityViaCoPControlModule;
+import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.DesiredCoPControlModule;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.VirtualSupportActuatorControlModule;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.VirtualToePointCalculator;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegTorques;
@@ -23,7 +23,7 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public class BalanceSupportControlModule
 {
-   private final VelocityViaCoPControlModule velocityViaCoPControlModule;
+   private final DesiredCoPControlModule velocityViaCoPControlModule;
    private final VirtualToePointCalculator virtualToePointCalculator;
    private final LegStrengthCalculator legStrengthCalculator;
    private final PelvisHeightControlModule pelvisHeightControlModule;
@@ -38,7 +38,7 @@ public class BalanceSupportControlModule
    private final SideDependentList<FramePoint2d> virtualToePoints = new SideDependentList<FramePoint2d>();
    private final YoVariableRegistry registry = new YoVariableRegistry("BalanceSupportControlModule");
 
-   public BalanceSupportControlModule(VelocityViaCoPControlModule velocityViaCoPControlModule,
+   public BalanceSupportControlModule(DesiredCoPControlModule velocityViaCoPControlModule,
                                       VirtualToePointCalculator virtualToePointAndLegStrengthCalculator, LegStrengthCalculator legStrengthCalculator,
                                       PelvisHeightControlModule pelvisHeightControlModule, PelvisOrientationControlModule pelvisOrientationControlModule,
                                       VirtualSupportActuatorControlModule virtualSupportActuatorControlModule, KneeDamperControlModule kneeDamperControlModule,
