@@ -8,13 +8,11 @@ import us.ihmc.commonWalkingControlModules.controlModules.KneeExtensionControlMo
 import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredHeadingControlModule;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredVelocityControlModule;
-import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.VelocityErrorCalculator;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegTorques;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LowerBodyTorques;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.SupportLegAndLegToTrustForVelocity;
 import us.ihmc.robotSide.RobotSide;
-import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameLineSegment2d;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
@@ -32,7 +30,6 @@ public class CommonStanceSubController implements StanceSubController
    private final CouplingRegistry couplingRegistry;
    private final CommonWalkingReferenceFrames referenceFrames;
    private final DesiredVelocityControlModule desiredVelocityControlModule;
-   private final VelocityErrorCalculator velocityErrorCalculator;
    private final DesiredPelvisOrientationControlModule desiredPelvisOrientationControlModule;
    private final BalanceSupportControlModule balanceSupportControlModule;
    private final FootOrientationControlModule footOrientationControlModule;
@@ -42,10 +39,6 @@ public class CommonStanceSubController implements StanceSubController
    private final YoVariableRegistry registry = new YoVariableRegistry("StanceSubController");
 
    private final DoubleYoVariable minDoubleSupportTime = new DoubleYoVariable("minDoubleSupportTime", "Time to stay in double support.", registry);
-   private final DoubleYoVariable captureXToFinishDoubleSupport =
-      new DoubleYoVariable("captureXToFinishDoubleSupport",
-                           "Finish double support once the capture point x value is greater than this value in front of your upcoming support ankle.",
-                           registry);
 
    private final DoubleYoVariable kVelocityDoubleSupportTransfer =
       new DoubleYoVariable("kVelocityDoubleSupportTransfer", "Gain from velocity error to amount of capture point motion to extend double support phase.",
@@ -65,10 +58,6 @@ public class CommonStanceSubController implements StanceSubController
    private final DoubleYoVariable minDoubleSupportTimeBeforeWalking = new DoubleYoVariable("minDoubleSupportTimeBeforeWalking", registry);
    private final DoubleYoVariable xCaptureToTransfer = new DoubleYoVariable("xCaptureToTransfer", registry);
    private final DoubleYoVariable yCaptureToTransfer = new DoubleYoVariable("yCaptureToTransfer", registry);
-   private final DoubleYoVariable minCaptureXToFinishDoubleSupport = new DoubleYoVariable("minCaptureXToFinishDoubleSupport", registry);
-   private final DoubleYoVariable maxCaptureXToFinishDoublesupport = new DoubleYoVariable("maxCaptureXToFinishDoublesupport", registry);
-   private final DoubleYoVariable baseCaptureXToFinishDoubleSupport = new DoubleYoVariable("baseCaptureXToFinishDoubleSupport", registry);
-   private final DoubleYoVariable captureXVelocityScale = new DoubleYoVariable("captureXVelocityScale", registry);
 
    private final SupportLegAndLegToTrustForVelocity supportLegAndLegToTrustForVelocity;    // FIXME: update things
 
@@ -78,16 +67,15 @@ public class CommonStanceSubController implements StanceSubController
 
    public CommonStanceSubController(CouplingRegistry couplingRegistry, CommonWalkingReferenceFrames referenceFrames,
                                     DesiredHeadingControlModule desiredHeadingControlModule, DesiredVelocityControlModule desiredVelocityControlModule,
-                                    VelocityErrorCalculator velocityErrorCalculator,
                                     DesiredPelvisOrientationControlModule desiredPelvisOrientationControlModule,
-                                    BalanceSupportControlModule balanceSupportControlModule, FootOrientationControlModule footOrientationControlModule,
-                                    KneeExtensionControlModule kneeExtensionControlModule,
-                                    SupportLegAndLegToTrustForVelocity supportLegAndLegToTrustForVelocity, YoVariableRegistry parentRegistry, double footWidth)
+                                    BalanceSupportControlModule balanceSupportControlModule,
+                                    FootOrientationControlModule footOrientationControlModule, KneeExtensionControlModule kneeExtensionControlModule,
+                                    SupportLegAndLegToTrustForVelocity supportLegAndLegToTrustForVelocity,
+                                    YoVariableRegistry parentRegistry, double footWidth)
    {
       this.couplingRegistry = couplingRegistry;
       this.referenceFrames = referenceFrames;
       this.desiredVelocityControlModule = desiredVelocityControlModule;
-      this.velocityErrorCalculator = velocityErrorCalculator;
       this.desiredPelvisOrientationControlModule = desiredPelvisOrientationControlModule;
       this.balanceSupportControlModule = balanceSupportControlModule;
       this.footOrientationControlModule = footOrientationControlModule;
@@ -328,49 +316,33 @@ public class CommonStanceSubController implements StanceSubController
 
    public boolean isDoneUnloadLegToTransferIntoWalking(RobotSide loadingLeg, double timeInState)
    {
-      ReferenceFrame loadingLegZUpFrame = referenceFrames.getAnkleZUpFrame(loadingLeg);
-      FramePoint2d capturePoint = couplingRegistry.getCapturePointInFrame(loadingLegZUpFrame).toFramePoint2d();
+//      ReferenceFrame loadingLegZUpFrame = referenceFrames.getAnkleZUpFrame(loadingLeg);
+//      FramePoint2d capturePoint = couplingRegistry.getCapturePointInFrame(loadingLegZUpFrame).toFramePoint2d();
+//
+//      boolean capturePointFarEnoughForward = capturePoint.getX() > xCaptureToTransfer.getDoubleValue();
+//      boolean capturePointInside;
+//      if (loadingLeg == RobotSide.LEFT)
+//         capturePointInside = capturePoint.getY() > -yCaptureToTransfer.getDoubleValue();
+//      else
+//         capturePointInside = capturePoint.getY() < yCaptureToTransfer.getDoubleValue();
+//
+//      return (capturePointFarEnoughForward && capturePointInside);
 
-      boolean capturePointFarEnoughForward = capturePoint.getX() > xCaptureToTransfer.getDoubleValue();
-      boolean capturePointInside;
-      if (loadingLeg == RobotSide.LEFT)
-         capturePointInside = capturePoint.getY() > -yCaptureToTransfer.getDoubleValue();
-      else
-         capturePointInside = capturePoint.getY() < yCaptureToTransfer.getDoubleValue();
-
-      return (capturePointFarEnoughForward && capturePointInside);
-
+      return isOverPercentageTowardDesired(loadingLeg, 0.9);
    }
 
    public boolean isDoneWithLoadingPreSwingA(RobotSide loadingLeg, double timeInState)
    {
-//    boolean inStateLongEnough = (timeInState > minDoubleSupportTime.getDoubleValue());
-//
-//    ReferenceFrame loadingLegZUpFrame = referenceFrames.getAnkleZUpFrame(loadingLeg);
-//
-//    FramePoint2d capturePoint = couplingRegistry.getCapturePointInFrame(loadingLegZUpFrame).toFramePoint2d();
-//
-//    FrameVector2d desiredVelocity = desiredVelocityControlModule.getDesiredVelocity().changeFrameCopy(loadingLegZUpFrame);
-//    FrameVector2d velocityError = velocityErrorCalculator.getVelocityErrorInFrame(loadingLegZUpFrame, loadingLeg);
-//    captureXToFinishDoubleSupport.set(getCaptureXToFinishDoubleSupport(desiredVelocity, velocityError));
-//    boolean capturePointIsFarEnoughForward = capturePoint.getX() > captureXToFinishDoubleSupport.getDoubleValue();
-//
-//    if (isCapturePointOutsideBaseOfSupport())
-//       return true;
-//
-//    if (!inStateLongEnough)
-//       return false;
-//
-//    if (capturePointIsFarEnoughForward)
-//       return true;
-//
-//    return false;
-
-
       boolean inStateLongEnough = (timeInState > minDoubleSupportTime.getDoubleValue());
       if (!inStateLongEnough)
          return false;
 
+      double minPercentageTowardsDesired = 0.9;
+      return isOverPercentageTowardDesired(loadingLeg, minPercentageTowardsDesired);
+   }
+
+   private boolean isOverPercentageTowardDesired(RobotSide loadingLeg, double minPercentageTowardsDesired)
+   {
       ReferenceFrame loadingLegZUpFrame = referenceFrames.getAnkleZUpFrame(loadingLeg);
       FramePoint2d capturePoint = couplingRegistry.getCapturePointInFrame(loadingLegZUpFrame).toFramePoint2d();
 
@@ -386,19 +358,7 @@ public class CommonStanceSubController implements StanceSubController
 //    double distanceFromLineSegment = projectedCapturePoint.distance(capturePoint);
       double percentageAlongLineSegment = footToFoot.percentageAlongLineSegment(capturePoint);
 
-      return percentageAlongLineSegment > 0.9;
-   }
-
-   private double getCaptureXToFinishDoubleSupport(FrameVector2d desiredVelocity, FrameVector2d velocityError)
-   {
-      desiredVelocity.checkReferenceFrameMatch(velocityError);
-      double ret = baseCaptureXToFinishDoubleSupport.getDoubleValue() + captureXVelocityScale.getDoubleValue() * desiredVelocity.getX()
-                   + velocityError.getX() * kVelocityDoubleSupportTransfer.getDoubleValue();
-
-      double min = minCaptureXToFinishDoubleSupport.getDoubleValue();
-      double max = maxCaptureXToFinishDoublesupport.getDoubleValue();
-
-      return MathTools.clipToMinMax(ret, min, max);
+      return percentageAlongLineSegment > minPercentageTowardsDesired;
    }
 
    public boolean isDoneWithLoadingPreSwingB(RobotSide loadingLeg, double timeInState)
@@ -433,14 +393,6 @@ public class CommonStanceSubController implements StanceSubController
       boolean hasCapturePointLeftBaseOfSupport = !(supportPolygon.isPointInside(capturePoint));
 
       return hasCapturePointLeftBaseOfSupport;
-   }
-
-   private boolean isCapturePointInsideFootPolygon(RobotSide loadingLeg)
-   {
-      FrameConvexPolygon2d footPolygonInAnkleZUp = couplingRegistry.getBipedSupportPolygons().getFootPolygonInAnkleZUp(loadingLeg);
-      FramePoint2d capturePoint = couplingRegistry.getCapturePointInFrame(footPolygonInAnkleZUp.getReferenceFrame()).toFramePoint2d();
-
-      return footPolygonInAnkleZUp.isPointInside(capturePoint);
    }
 
    private void doSingleSupportControl(LegTorques legTorquesToPackForStanceSide, boolean walk)
@@ -489,10 +441,6 @@ public class CommonStanceSubController implements StanceSubController
       minDoubleSupportTimeBeforeWalking.set(0.3);
       xCaptureToTransfer.set(0.0);
       yCaptureToTransfer.set(0.04);    // 0.0;
-      minCaptureXToFinishDoubleSupport.set(0.05);    // 0.03);
-      maxCaptureXToFinishDoublesupport.set(0.20);
-      baseCaptureXToFinishDoubleSupport.set(0.07);    // 0.03);    // 0.08);
-      captureXVelocityScale.set(0.08);
       kVelocityDoubleSupportTransfer.set(0.05);    // 0.1);
       toeOffFootPitch.set(0.1);    // 0.3);
       toeOffMoveDuration.set(0.05);
@@ -505,10 +453,6 @@ public class CommonStanceSubController implements StanceSubController
       minDoubleSupportTimeBeforeWalking.set(0.3);
       xCaptureToTransfer.set(0.01);
       yCaptureToTransfer.set(0.04);    // 0.0;
-      minCaptureXToFinishDoubleSupport.set(-0.02);
-      maxCaptureXToFinishDoublesupport.set(0.10);
-      baseCaptureXToFinishDoubleSupport.set(-0.02);
-      captureXVelocityScale.set(0.0);    // 0.08);
       kVelocityDoubleSupportTransfer.set(0.0);    // 0.1);
       toeOffFootPitch.set(0.1);    // 0.3);
       toeOffMoveDuration.set(0.05);
