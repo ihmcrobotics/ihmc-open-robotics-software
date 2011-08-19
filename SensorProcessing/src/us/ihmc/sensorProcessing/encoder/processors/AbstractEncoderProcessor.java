@@ -8,6 +8,7 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public abstract class AbstractEncoderProcessor implements EncoderProcessor
 {
+   private static final long serialVersionUID = -8613336281664328952L;
    protected final YoVariableRegistry registry;
    protected final IntegerYoVariable rawTicks;
    protected final DoubleYoVariable time;

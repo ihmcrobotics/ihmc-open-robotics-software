@@ -28,8 +28,8 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
 // public final double[][] Quat = new double[4][1]; // Estimated orientation in quaternions.
 // public final double[][] bias = new double[3][1]; // Rate gyro bias offset estimates. The Kalman filter adapts to these.
 
-   public final DoubleYoVariable[] Quat = new DoubleYoVariable[4];    // Estimated orientation in quaternions.
-   public final DoubleYoVariable[] bias = new DoubleYoVariable[3];    // Rate gyro bias offset estimates. The Kalman filter adapts to these.
+   private final DoubleYoVariable[] Quat = new DoubleYoVariable[4];    // Estimated orientation in quaternions.
+   private final DoubleYoVariable[] bias = new DoubleYoVariable[3];    // Rate gyro bias offset estimates. The Kalman filter adapts to these.
 
    /*
     * Covariance matrix and covariance matrix derivative are updated
@@ -39,8 +39,8 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
 
 // public final double[][] P = new double[N][N]; // Covariance matrix
 
-   public final DoubleYoVariable[][] P = new DoubleYoVariable[N][N];    // Covariance matrix
-   public final DoubleYoVariable[][] KCopy = new DoubleYoVariable[N][4];
+   private final DoubleYoVariable[][] P = new DoubleYoVariable[N][N];    // Covariance matrix
+   private final DoubleYoVariable[][] KCopy = new DoubleYoVariable[N][4];
 
    private double[][] Pdot = new double[N][N];
 
@@ -250,6 +250,9 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
          mag += s * s;
       }
 
+      if (mag < 1e-12)
+         throw new RuntimeException("mag < 1e-12");
+      
       Mmul(M, 1.0 / Math.sqrt(mag), M);
    }
 

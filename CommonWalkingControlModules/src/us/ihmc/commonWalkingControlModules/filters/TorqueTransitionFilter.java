@@ -19,7 +19,7 @@ public class TorqueTransitionFilter
    private final DoubleYoVariable tauFilterTime = new DoubleYoVariable("tauFilterTime", registry);
    private final DoubleYoVariable alphaTauFilter = new DoubleYoVariable("alphaTauFilter", registry);
 
-   private final SideDependentList<EnumMap<LegJointName, DoubleYoVariable>> previousTorques = new SideDependentList<EnumMap<LegJointName, DoubleYoVariable>>();
+   private final SideDependentList<EnumMap<LegJointName, DoubleYoVariable>> previousTorques = SideDependentList.createListOfEnumMaps(LegJointName.class);
 
    private final RobotSpecificJointNames robotJointNames;
    private final LegJointName[] legJointNames;
@@ -32,9 +32,6 @@ public class TorqueTransitionFilter
       this.legJointNames = robotJointNames.getLegJointNames();
 
       this.processedOutputs = processedOutputs;
-
-      previousTorques.set(RobotSide.LEFT, new EnumMap<LegJointName, DoubleYoVariable>(LegJointName.class));
-      previousTorques.set(RobotSide.RIGHT, new EnumMap<LegJointName, DoubleYoVariable>(LegJointName.class));
 
       for (RobotSide robotSide : RobotSide.values())
       {
