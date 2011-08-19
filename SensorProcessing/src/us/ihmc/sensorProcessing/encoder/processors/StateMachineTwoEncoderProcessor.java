@@ -37,7 +37,7 @@ public class StateMachineTwoEncoderProcessor extends AbstractEncoderProcessor
    
    public void initialize()
    {
-      update(); //HELPME;
+      update();
    }
 
    public void update()
