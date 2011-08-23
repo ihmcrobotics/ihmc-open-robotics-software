@@ -52,7 +52,7 @@ public class BalanceOnOneLegConfiguration
    public static ArrayList<BalanceOnOneLegConfiguration> generateABunch(int desiredNumberOfConfigurations, RobotSide supportSide,
            ReferenceFrame supportFootZUpFrame)    // int xyCapturePositions, int yawPitchRollPositions, int swingPositions)
    {
-      ArrayList<BalanceOnOneLegConfiguration> ret = new ArrayList<BalanceOnOneLegConfiguration>();
+      ArrayList<BalanceOnOneLegConfiguration> ret = new ArrayList<BalanceOnOneLegConfiguration>(desiredNumberOfConfigurations);
 
       double captureMinX = 0.02;
       double captureMaxX = 0.06;
