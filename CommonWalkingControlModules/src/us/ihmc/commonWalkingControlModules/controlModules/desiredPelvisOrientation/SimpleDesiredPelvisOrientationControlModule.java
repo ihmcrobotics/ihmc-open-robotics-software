@@ -82,9 +82,8 @@ public class SimpleDesiredPelvisOrientationControlModule implements DesiredPelvi
    
    public void setParametersForM2V2()
    {
-      // TODO: tune
-      twistScale.set(0.3);
+      twistScale.set(0.2);
       userDesiredPelvisPitch.set(0.0);      
-      pelvisRollPelvisYawScale.set(0.25);
+      pelvisRollPelvisYawScale.set(0.2);
    }
 }
