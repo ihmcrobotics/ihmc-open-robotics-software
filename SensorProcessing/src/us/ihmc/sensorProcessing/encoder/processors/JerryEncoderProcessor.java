@@ -55,7 +55,7 @@ public class JerryEncoderProcessor extends AbstractEncoderProcessor
 
    public void initialize()
    {
-      // empty
+      update();
    }
 
    public void update()
