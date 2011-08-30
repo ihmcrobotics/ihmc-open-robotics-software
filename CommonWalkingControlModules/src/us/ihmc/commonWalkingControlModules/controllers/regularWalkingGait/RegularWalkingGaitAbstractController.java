@@ -115,6 +115,7 @@ public abstract class RegularWalkingGaitAbstractController
       walkingStateMachine.checkTransitionConditions();
 
       // Filter torques:
+      processedOutputs.incrementProcessedOutputsWhiteBoardIndex();
       torqueTransitionFilter.updateTorques(walkingStateMachine.timeInCurrentState());
    }
 

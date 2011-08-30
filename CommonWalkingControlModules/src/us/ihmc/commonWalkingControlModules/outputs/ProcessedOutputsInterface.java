@@ -18,5 +18,6 @@ public interface ProcessedOutputsInterface
 
    public abstract void setDamping(RobotSide robotSide, LegJointName jointName, double damping);
    public abstract void setDesiredJointVelocity(RobotSide robotSide, LegJointName jointName, double desiredJointVelocity);
+   public abstract void incrementProcessedOutputsWhiteBoardIndex();
 
 }
