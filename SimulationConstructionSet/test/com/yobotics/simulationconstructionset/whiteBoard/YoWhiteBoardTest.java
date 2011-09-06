@@ -303,11 +303,6 @@ public class YoWhiteBoardTest
       {
       }
 
-      public boolean isConnected()
-      {
-         return false;
-      }
-
       public void whiteBoardSpecificClose() throws IOException
       {         
       }
