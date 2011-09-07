@@ -17,6 +17,7 @@ public class KneeExtensionControlModule
    private final DoubleYoVariable extraKneeTorque;
    private final DoubleYoVariable desiredKneeAngle;
    private final DoubleYoVariable kp_KneeExtension;
+   private final DoubleYoVariable kp_KneeBending;
    private final DoubleYoVariable loadedBentKnee, extendedKnee;
    private final DoubleYoVariable bendTime;
    private final DoubleYoVariable extendTime;
@@ -37,6 +38,7 @@ public class KneeExtensionControlModule
       extendTime = new DoubleYoVariable("extendTime", registry);
 
       kp_KneeExtension = new DoubleYoVariable("kp_KneeExtension", registry);
+      kp_KneeBending = new DoubleYoVariable("kp_KneeBending", registry);
 
       if (parentRegistry != null)
          parentRegistry.addChild(registry);
@@ -44,7 +46,7 @@ public class KneeExtensionControlModule
    
    public void setupParametersForR2()
    {
-      loadedBentKnee.set(0.3); //0.07); //0.35); //0.7); //0.5);
+      loadedBentKnee.set(0.3); //0.3); //0.07); //0.35); //0.7); //0.5);
       extendedKnee.set(0.0);
       bendTime.set(0.2);
       extendTime.set(0.2);
@@ -56,10 +58,11 @@ public class KneeExtensionControlModule
    {
       loadedBentKnee.set(0.3); //0.07); //0.35); //0.7); //0.5);
       extendedKnee.set(0.0);
-      bendTime.set(0.3);
+      bendTime.set(0.01); //0.03);
       extendTime.set(0.3);
 
       kp_KneeExtension.set(25.0); //50.0);
+      kp_KneeBending.set(75.0); //25.0);
    }
 
    public void doLoadingControl(LegTorquesInterface legTorquesToPackForStanceSide)
@@ -140,7 +143,7 @@ public class KneeExtensionControlModule
 
       if (kneeAngleError > 0.0)
       {
-         extraKneeTorque.set(kneeAngleError * kp_KneeExtension.getDoubleValue());
+         extraKneeTorque.set(kneeAngleError * kp_KneeBending.getDoubleValue());
          legTorquesToPackForStanceSide.addKneeTorque(extraKneeTorque.getDoubleValue());
       }
    }
