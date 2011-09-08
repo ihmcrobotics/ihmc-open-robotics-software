@@ -16,7 +16,7 @@ public class IndexOrderCheckerTest
    public void setUp()
    {
       YoVariableRegistry registry = new YoVariableRegistry("testRegistry");
-      indexOrderChecker = new IndexOrderChecker("test", registry);
+      indexOrderChecker = new IndexOrderChecker("test", registry, 1);
    }
    
    @Test
@@ -61,6 +61,7 @@ public class IndexOrderCheckerTest
       assertEquals(0, indexOrderChecker.getMissedIndices());
       indexOrderChecker.update(3);
       assertEquals(1, indexOrderChecker.getMissedIndices());
-
+      indexOrderChecker.update(8);
+      assertEquals(5, indexOrderChecker.getMissedIndices());
    }
 }
