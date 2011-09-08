@@ -11,11 +11,11 @@ import java.util.Random;
 
 import org.junit.Test;
 
-import com.yobotics.simulationconstructionset.YoVariable;
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.IntegerYoVariable;
 import com.yobotics.simulationconstructionset.NameSpace;
+import com.yobotics.simulationconstructionset.YoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.YoVariableType;
 
@@ -23,7 +23,7 @@ public class YoWhiteBoardTest
 {
    private static final boolean VERBOSE = false;
 
-   @Test (expected = RuntimeException.class)
+   @Test(expected = RuntimeException.class)
    public void testWriteNotConnected() throws IOException
    {
       YoWhiteBoard whiteBoard = new DoNothingWhiteBoard();
@@ -37,8 +37,9 @@ public class YoWhiteBoardTest
       whiteBoard.readData();
    }
 
-   protected void doASynchronizedWriteThenReadTest(YoWhiteBoard leftWhiteBoard, YoWhiteBoard rightWhiteBoard, int numberOfTests, 
-         int numberVariablesToReadOneWriteTwo, int numberVariablesToWriteOneReadTwo) throws IOException
+   protected void doASynchronizedWriteThenReadTest(YoWhiteBoard leftWhiteBoard, YoWhiteBoard rightWhiteBoard, int numberOfTests,
+           int numberVariablesToReadOneWriteTwo, int numberVariablesToWriteOneReadTwo)
+           throws IOException
    {
       createRandomRegistriesAndVariables(leftWhiteBoard, rightWhiteBoard, 20, numberVariablesToReadOneWriteTwo, numberVariablesToWriteOneReadTwo);
 
@@ -67,7 +68,7 @@ public class YoWhiteBoardTest
 
       verifyYoVariablesAreEqual(leftVariablesToWrite, rightVariablesToRead);
       verifyYoVariablesAreEqual(leftVariablesToRead, rightVariablesToWrite);
-      
+
       waitForWhiteBoardsToConnect(leftWhiteBoard, rightWhiteBoard);
 
       for (int i = 0; i < numberOfTests; i++)
@@ -80,7 +81,7 @@ public class YoWhiteBoardTest
 
          leftWhiteBoardListener.reset();
          rightWhiteBoardListener.reset();
-         
+
          leftWhiteBoard.writeData();
          rightWhiteBoard.writeData();
 
@@ -88,17 +89,17 @@ public class YoWhiteBoardTest
          {
             Thread.yield();
          }
-         
+
          assertEquals(1, leftWhiteBoard.getNumberOfNewDataSinceLastRead());
          assertEquals(1, rightWhiteBoard.getNumberOfNewDataSinceLastRead());
-         
+
          verifyThatWhiteBoardsHaveNewDataAvailable(leftWhiteBoard, rightWhiteBoard);
-         
+
          leftWhiteBoard.readData();
          rightWhiteBoard.readData();
 
          verifyThatWhiteBoardsDoNotHaveNewDataAvailable(leftWhiteBoard, rightWhiteBoard);
-         
+
          verifyYoVariablesHaveSameValues(leftVariablesToWrite, rightVariablesToRead);
          verifyYoVariablesHaveSameValues(leftVariablesToRead, rightVariablesToWrite);
       }
@@ -112,19 +113,21 @@ public class YoWhiteBoardTest
       double timePerTest = duration / ((double) numberOfTests);
       if (VERBOSE)
          System.out.println("Time per test = " + timePerTest);
-      
+
       leftWhiteBoard.close();
       rightWhiteBoard.close();
    }
-   
-   
-   protected void doAnAsynchronousTest(YoWhiteBoard leftWhiteBoard, YoWhiteBoard rightWhiteBoard, int numberOfTests, int numberVariablesToReadOneWriteTwo, int numberVariablesToWriteOneReadTwo) throws IOException
+
+
+   protected void doAnAsynchronousTest(YoWhiteBoard leftWhiteBoard, YoWhiteBoard rightWhiteBoard, int numberOfTests, int numberVariablesToReadOneWriteTwo,
+           int numberVariablesToWriteOneReadTwo)
+           throws IOException
    {
       createRandomRegistriesAndVariables(leftWhiteBoard, rightWhiteBoard, 20, numberVariablesToReadOneWriteTwo, numberVariablesToWriteOneReadTwo);
 
       leftWhiteBoard.connect();
       rightWhiteBoard.connect();
-      
+
       long startTime = System.currentTimeMillis();
 
       ArrayList<YoVariable> leftVariablesToWrite = new ArrayList<YoVariable>();
@@ -145,44 +148,45 @@ public class YoWhiteBoardTest
       waitForWhiteBoardsToConnect(leftWhiteBoard, rightWhiteBoard);
 
       Random random = new Random(1234);
-      
+
       for (int i = 0; i < numberOfTests; i++)
       {
          int numberOfLeftWrites = 1 + random.nextInt(19);
-         for (int j=0; j<numberOfLeftWrites; j++)
+         for (int j = 0; j < numberOfLeftWrites; j++)
          {
             changeWrittenVariablesRandomly(leftWhiteBoard);
             leftWhiteBoard.writeData();
          }
-         
+
          int numberOfRightWrites = 1 + random.nextInt(19);
-         for (int j=0; j<numberOfRightWrites; j++)
+         for (int j = 0; j < numberOfRightWrites; j++)
          {
             changeWrittenVariablesRandomly(rightWhiteBoard);
             rightWhiteBoard.writeData();
          }
-         
-         while(rightWhiteBoard.getNumberOfNewDataSinceLastRead() < numberOfLeftWrites)
+
+         while (rightWhiteBoard.getNumberOfNewDataSinceLastRead() < numberOfLeftWrites)
          {
             Thread.yield();
          }
-         
-         
-         while(leftWhiteBoard.getNumberOfNewDataSinceLastRead() < numberOfRightWrites)
+
+
+         while (leftWhiteBoard.getNumberOfNewDataSinceLastRead() < numberOfRightWrites)
          {
             Thread.yield();
          }
+
          sleep(2);
          assertEquals(numberOfLeftWrites, rightWhiteBoard.getNumberOfNewDataSinceLastRead());
          assertEquals(numberOfRightWrites, leftWhiteBoard.getNumberOfNewDataSinceLastRead());
-         
+
          verifyThatWhiteBoardsHaveNewDataAvailable(leftWhiteBoard, rightWhiteBoard);
 
          leftWhiteBoard.readData();
          rightWhiteBoard.readData();
 
          verifyThatWhiteBoardsDoNotHaveNewDataAvailable(leftWhiteBoard, rightWhiteBoard);
-         
+
          verifyYoVariablesHaveSameValues(leftVariablesToWrite, rightVariablesToRead);
          verifyYoVariablesHaveSameValues(leftVariablesToRead, rightVariablesToWrite);
       }
@@ -196,28 +200,28 @@ public class YoWhiteBoardTest
       double timePerTest = duration / ((double) numberOfTests);
       if (VERBOSE)
          System.out.println("Time per test = " + timePerTest);
-      
+
       leftWhiteBoard.close();
       rightWhiteBoard.close();
    }
-   
+
    private void sleep(long sleepMillis)
    {
       try
       {
          Thread.sleep(sleepMillis);
-      } 
+      }
       catch (InterruptedException e)
       {
       }
-      
+
    }
 
    private void verifyThatWhiteBoardsDoNotHaveNewDataAvailable(YoWhiteBoard leftWhiteBoard, YoWhiteBoard rightWhiteBoard)
    {
       assertFalse(leftWhiteBoard.isNewDataAvailable());
       assertFalse(rightWhiteBoard.isNewDataAvailable());
-      
+
       assertEquals(0, leftWhiteBoard.getNumberOfNewDataSinceLastRead());
       assertEquals(0, rightWhiteBoard.getNumberOfNewDataSinceLastRead());
    }
@@ -232,23 +236,27 @@ public class YoWhiteBoardTest
    {
       while (!leftWhiteBoard.isConnected())
       {
-         if (VERBOSE) System.out.println("Waiting for left white board to connect.");
+         if (VERBOSE)
+            System.out.println("Waiting for left white board to connect.");
+
          try
          {
             Thread.sleep(1000);
-         } 
+         }
          catch (InterruptedException e)
          {
          }
       }
-      
+
       while (!rightWhiteBoard.isConnected())
       {
-         if (VERBOSE) System.out.println("Waiting for right white board to connect.");
+         if (VERBOSE)
+            System.out.println("Waiting for right white board to connect.");
+
          try
          {
             Thread.sleep(1000);
-         } 
+         }
          catch (InterruptedException e)
          {
          }
@@ -294,7 +302,7 @@ public class YoWhiteBoardTest
    private final class DoNothingWhiteBoard extends YoWhiteBoard
    {
       public void whiteBoardSpecificWriteData(double[] doubleVariablesToWriteBuffer, int[] intVariablesToWriteBuffer, boolean[] booleanVariablesToWriteBuffer,
-              int[] enumVariablesToWriteBuffer)
+              int[] enumVariablesToWriteBuffer, int writeIndex)
               throws IOException
       {
       }
@@ -304,8 +312,10 @@ public class YoWhiteBoardTest
       }
 
       public void whiteBoardSpecificClose() throws IOException
-      {         
+      {
       }
+
+
    }
 
 
@@ -430,7 +440,7 @@ public class YoWhiteBoardTest
 
    private void createRandomRegistriesAndVariables(YoWhiteBoard whiteBoardOne, YoWhiteBoard whiteBoardTwo, int numberOfRegistries,
            int numberVariablesToReadOneWriteTwo, int numberVariablesToWriteOneReadTwo)
-   {  
+   {
       createRandomRegistriesAndVariables(whiteBoardOne, numberOfRegistries, numberVariablesToReadOneWriteTwo, numberVariablesToWriteOneReadTwo);
       createVariableCopyFromReadToWrite(whiteBoardOne, whiteBoardTwo);
    }
@@ -445,8 +455,7 @@ public class YoWhiteBoardTest
       whiteBoard.setVariablesToWrite(generateRandomVariables(random, "writeVariable", numberVariablesToWrite, registryList));
    }
 
-   private ArrayList<YoVariable> generateRandomVariables(Random random, String namePrefix, int numberOfVariables,
-           ArrayList<YoVariableRegistry> registryList)
+   private ArrayList<YoVariable> generateRandomVariables(Random random, String namePrefix, int numberOfVariables, ArrayList<YoVariableRegistry> registryList)
    {
       ArrayList<YoVariable> variables = new ArrayList<YoVariable>();
 
