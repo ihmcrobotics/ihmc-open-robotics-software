@@ -56,7 +56,7 @@ public class ViconClient
    {
       if (viconSingleton == null)
       {
-         viconSingleton = new ViconClient("10.4.1.100");
+         viconSingleton = new ViconClient("vicon");
       }
 
       return viconSingleton;
