@@ -1,14 +1,16 @@
 package us.ihmc.vicon;
 
-import us.ihmc.utilities.math.geometry.FramePoint;
-import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
+
+import us.ihmc.utilities.math.geometry.FramePoint;
+import us.ihmc.utilities.math.geometry.FramePose;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 public class ViconFrames
 {
@@ -63,6 +65,7 @@ public class ViconFrames
                transformToParent.set(bodyToWorldTransform);
             }
          };
+         
          referenceFrames.put(bodyName, referenceFrame);
       }
 
@@ -79,7 +82,7 @@ public class ViconFrames
       return viconFramesSingleton;
    }
 
-   protected ArrayList<String> getAvailableModels()
+   public ArrayList<String> getAvailableModels()
    {
       return viconClient.getAvailableModels();
    }
@@ -113,6 +116,11 @@ public class ViconFrames
       return referenceFrames.values();
    }
 
+   public boolean isConnected()
+   {
+      return viconClient.isConnected();
+   }
+
    public static void main(String[] args)
    {
       try
@@ -120,16 +128,17 @@ public class ViconFrames
          ViconFrames viconFrames = ViconFrames.getInstance();
          Thread.sleep(3000);
          ArrayList<String> modelNames = viconFrames.getAvailableModels();
-         ReferenceFrame drone = viconFrames.getBodyFrame(modelNames.get(0));
 
-         FramePoint point = new FramePoint(drone);
-         System.out.println(point);
-         System.out.println(point.changeFrameCopy(viconFrames.getViconWorldFrame()));
+         while (true)
+         {
+            ReferenceFrame drone = viconFrames.getBodyFrame(modelNames.get(0));
 
-         point = new FramePoint(drone, new Point3d(1.0, 0.0, 0.0));
-         System.out.println(point.changeFrameCopy(viconFrames.getViconWorldFrame()));
-      }
-      catch (Exception e)
+            FramePose point = new FramePose(drone);
+
+            System.out.println(point.changeFrameCopy(viconFrames.getViconWorldFrame()));
+         }
+
+      } catch (Exception e)
       {
          e.printStackTrace();
       }
