@@ -112,7 +112,7 @@ public class ViconJavaInterface
 
       @SuppressWarnings("unused")
       long start = System.currentTimeMillis();
-      int count = 0;
+//      int count = 0;
       String name = ViconGetBodyName(0);
       while (true)
       {
@@ -120,7 +120,7 @@ public class ViconJavaInterface
          ViconGetFrame();
          Pose pose = ViconGetBodyAngleAxis(name);
          long endTime = System.currentTimeMillis();
-         count++;
+//         count++;
          System.out.println(name + ": " + pose + " in " + (endTime-startTime) + " ms");
 
 //       if(count >= 20)

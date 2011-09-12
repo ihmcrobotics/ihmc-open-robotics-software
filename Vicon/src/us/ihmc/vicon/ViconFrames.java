@@ -5,10 +5,8 @@ import java.util.Collection;
 import java.util.HashMap;
 
 import javax.media.j3d.Transform3D;
-import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
@@ -18,6 +16,7 @@ public class ViconFrames
    protected static final String worldFrameName = "ViconWorld";
    protected ViconClient viconClient;
    protected static HashMap<String, ReferenceFrame> referenceFrames;
+   protected static boolean dataValid;
    protected static Transform3D bodyToWorldTransform;
    protected static Vector3d euler;
    protected static Vector3d translation;
@@ -58,6 +57,7 @@ public class ViconFrames
                   pose = new Pose(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
                }
 
+               dataValid = pose.dataValid;
                euler.set(pose.xAxisRotation, pose.yAxisRotation, pose.zAxisRotation);
                bodyToWorldTransform.setEuler(euler);
                translation.set(pose.xPosition, pose.yPosition, pose.zPosition);
@@ -104,6 +104,11 @@ public class ViconFrames
       {
          referenceFrame.update();
       }
+   }
+   
+   public synchronized boolean isDataValid()
+   {
+      return dataValid;
    }
 
    public synchronized ReferenceFrame getBodyFrame(String name)

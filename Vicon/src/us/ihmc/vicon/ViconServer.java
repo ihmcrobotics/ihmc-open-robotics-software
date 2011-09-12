@@ -1,11 +1,7 @@
 package us.ihmc.vicon;
 
-import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.remote.ReflectiveTCPServer;
 
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -106,10 +102,7 @@ public class ViconServer extends ViconJavaInterface
    class ViconReader implements Runnable
    {
       private boolean DONE = false;
-      private AxisAngle4d axisAngle4d = new AxisAngle4d();
-      private Quat4d rotation = new Quat4d();
-      private double[] yawPitchRoll = {0, 0, 0};
-
+      
       public void stopViconReader()
       {
          this.DONE = true;
@@ -146,8 +139,11 @@ public class ViconServer extends ViconJavaInterface
             for (String modelName : availableModels)
             {
                Pose viconPose = ViconGetBodyEulerAngles(modelName);
-               Pose pose = new Pose(viconPose.xPosition / 1000.0f, viconPose.yPosition / 1000.0f, viconPose.zPosition / 1000.0f, viconPose.yAxisRotation,
-                                    -viconPose.xAxisRotation, (float) MathTools.trimAngleMinusPiToPi(viconPose.zAxisRotation + (Math.PI / 2.0)));
+//               Pose pose = new Pose(viconPose.xPosition / 1000.0f, viconPose.yPosition / 1000.0f, viconPose.zPosition / 1000.0f, viconPose.yAxisRotation,
+//                                    -viconPose.xAxisRotation, (float) MathTools.trimAngleMinusPiToPi(viconPose.zAxisRotation + (Math.PI / 2.0)));
+               
+               Pose pose = new Pose(viconPose.xPosition / 1000.0f, viconPose.yPosition / 1000.0f, viconPose.zPosition / 1000.0f, 
+                     viconPose.xAxisRotation, viconPose.yAxisRotation, viconPose.zAxisRotation);
 
                synchronized (modelPoses)
                {
@@ -160,7 +156,12 @@ public class ViconServer extends ViconJavaInterface
                   }
                   else
                   {
-                     if (!poseReading.equals(lastPoseReading))
+                     if (pose.equals(lastPoseReading.getPose()))
+                     {
+                        pose.invalidate();  
+                     }
+                     
+                     if(!poseReading.equals(lastPoseReading))
                      {
                         modelPoses.put(modelName, poseReading);
                         updated = true;
@@ -197,7 +198,7 @@ public class ViconServer extends ViconJavaInterface
 
    public static void main(String[] args)
    {
-      String ip = "10.4.1.100";
+      String ip = "192.168.0.3";
       for (int i = 0; i < args.length - 1; i++)
       {
          if (args[i].equalsIgnoreCase("-ip"))
@@ -210,17 +211,8 @@ public class ViconServer extends ViconJavaInterface
 
       try
       {
-         ViconServer viconserver = new ViconServer(ip);
+         new ViconServer(ip);
 
-//       ArrayList<String> modelNames = viconserver.getAvailableModels();
-//       while (true)
-//       {
-//          for(String modelName: modelNames)
-//          {
-//             System.out.println(modelName + ": " + viconserver.getPose(modelName));
-//          }
-//          Thread.sleep(500);
-//       }
 
          // wait around until terminated
          synchronized (Thread.currentThread())
