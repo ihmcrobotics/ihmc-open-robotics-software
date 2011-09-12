@@ -1,7 +1,5 @@
 package us.ihmc.vicon;
 
-import java.awt.geom.Arc2D;
-import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.ArrayList;

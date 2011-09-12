@@ -4,18 +4,13 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.net.InetAddress;
-import java.net.NetworkInterface;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Vector;
 
-import javax.media.j3d.Transform3D;
-import javax.vecmath.Vector3d;
-
-import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.remote.RemoteConnection;
 import us.ihmc.utilities.remote.RemoteRequest;
 
@@ -193,6 +188,11 @@ public class ViconClient
                Thread.sleep(1);
             }
          }
+         catch (SocketException e)
+         {
+            System.err.println("Lost connection to Vicon.");
+            viconServer.close();
+         }
          catch (Exception xcp)
          {
             if (DEBUG)
@@ -266,9 +266,8 @@ public class ViconClient
                if ((endTime - startTime) > 300)
                {
                   double dt = (endTime - startTime) / 1000.0;
-                  System.out.println(poseReading.getPose());
 
-//                System.out.println(modelName + " rate = " + (int) (updateCount / dt) + ": " + pose);
+                  System.out.println(modelName + " rate = " + (int) (updateCount / dt) + ": " + poseReading.getPose());
                   startTime = endTime;
                   updateCount = 0;
                }
