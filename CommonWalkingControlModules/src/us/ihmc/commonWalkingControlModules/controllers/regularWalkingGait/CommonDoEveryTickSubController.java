@@ -18,6 +18,7 @@ import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 public class CommonDoEveryTickSubController implements DoEveryTickSubController
 {
@@ -38,7 +39,7 @@ public class CommonDoEveryTickSubController implements DoEveryTickSubController
    
    private ArrayList<Updatable> updatables;
    
-   private final double initialDesiredHeading;
+   private double initialDesiredHeading;
    private final ProcessedSensorsInterface processedSensors;
    
    public CommonDoEveryTickSubController(ProcessedSensorsInterface processedSensors,
@@ -129,9 +130,15 @@ public class CommonDoEveryTickSubController implements DoEveryTickSubController
       }
    }
 
-
    public void doFirstTick()
    {
+      // FIXME: can't do this in initialize(), since we need ProcessedSensors to be updated already
+      if (Double.isNaN(initialDesiredHeading))
+      {
+         System.out.println("Resetting desired heading to current heading.");
+         initialDesiredHeading = processedSensors.getPelvisOrientationInFrame(ReferenceFrame.getWorldFrame()).getYawPitchRoll()[0];
+      }
+      System.out.println("Resetting desired heading to " + initialDesiredHeading);
       desiredHeadingControlModule.resetHeadingAngle(initialDesiredHeading);
    }
 }
