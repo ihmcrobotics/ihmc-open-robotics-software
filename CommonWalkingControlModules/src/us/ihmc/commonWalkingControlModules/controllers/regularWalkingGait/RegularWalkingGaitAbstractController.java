@@ -25,6 +25,7 @@ import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.EnumYoVariable;
 import com.yobotics.simulationconstructionset.IntegerYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.robotController.RobotController;
 import com.yobotics.simulationconstructionset.util.statemachines.State;
 import com.yobotics.simulationconstructionset.util.statemachines.StateChangedListener;
 import com.yobotics.simulationconstructionset.util.statemachines.StateMachine;
@@ -32,8 +33,10 @@ import com.yobotics.simulationconstructionset.util.statemachines.StateMachinesJP
 import com.yobotics.simulationconstructionset.util.statemachines.StateTransition;
 import com.yobotics.simulationconstructionset.util.statemachines.StateTransitionCondition;
 
-public abstract class RegularWalkingGaitAbstractController
+public abstract class RegularWalkingGaitAbstractController implements RobotController
 {
+   private static final long serialVersionUID = 4878248771959357905L;
+
    protected final RobotSpecificJointNames robotJointNames;
 
    protected final DoEveryTickSubController doEveryTickSubController;
@@ -67,7 +70,7 @@ public abstract class RegularWalkingGaitAbstractController
 
    private final String name;
 
-   private boolean firstTick = true;
+   private boolean isOnFirstTick = true;
 
    public RegularWalkingGaitAbstractController(String name, RobotSpecificJointNames robotJointNames, DoubleYoVariable time,
            ProcessedOutputsInterface processedOutputs, DoEveryTickSubController doEveryTickSubController, StanceSubController stanceSubController,
@@ -99,16 +102,20 @@ public abstract class RegularWalkingGaitAbstractController
 //      createStateMachineWindow(true);
      
    }
+   
+   public void initialize()
+   {
+   }
 
    public void doControl()
    {
       // Remember the torques to filter them in a bit:
       torqueTransitionFilter.rememberPreviousTorques();
 
-      if (firstTick)
+      if (isOnFirstTick)
       {
          doEveryTickSubController.doFirstTick();
-         firstTick = false;
+         isOnFirstTick = false;
       }
       doEveryTickSubController.doEveryControlTick(supportLegYoVariable.getEnumValue());
       walkingStateMachine.doAction();
@@ -938,10 +945,6 @@ public abstract class RegularWalkingGaitAbstractController
    public String getName()
    {
       return name;
-   }
-   
-   public void initialize()
-   {      
    }
 
    public String getDescription()
