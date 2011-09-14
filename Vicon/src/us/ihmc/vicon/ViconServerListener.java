@@ -6,18 +6,18 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
- * Last updated by: mjohnson
- * On: 3/17/11 4:48 PM
+ * Last updated by: jsmith
+ * On: 13/08/2011
  */
-public class PoseListener implements Runnable
+public class ViconServerListener implements Runnable
 {
    private ViconServer viconServer;
    private String host;
    private int port;
    private boolean DONE = false;
-   private HashMap<String, PoseReading> lastPoseReadings = new HashMap<String, PoseReading>();
+   private HashMap<String, ViconModelReading> lastPoseReadings = new HashMap<String, ViconModelReading>();
 
-   public PoseListener(String host, Integer port, ViconServer viconServer)
+   public ViconServerListener(String host, Integer port, ViconServer viconServer)
    {
       this.host = host;
       this.port = port;
@@ -36,8 +36,8 @@ public class PoseListener implements Runnable
             ArrayList<String> modelNames = viconServer.getAvailableModels();
             for (String modelName : modelNames)
             {
-               PoseReading poseReading = viconServer.getReading(modelName);
-               PoseReading lastPoseReading = lastPoseReadings.get(modelName);
+               ViconModelReading poseReading = viconServer.getReading(modelName);
+               ViconModelReading lastPoseReading = lastPoseReadings.get(modelName);
                if (lastPoseReading == null)
                {
                   lastPoseReadings.put(modelName, poseReading);

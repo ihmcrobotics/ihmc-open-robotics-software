@@ -25,9 +25,9 @@ public class ViconJavaInterface
 
    public static native String ViconGetBodyName(int id);
 
-   public static native Pose ViconGetBodyAngleAxis(String bodyName);
-
-   public static native Pose ViconGetBodyEulerAngles(String bodyName);
+//   public static native Pose ViconGetBodyAngleAxis(String bodyName);
+//
+//   public static native Pose ViconGetBodyEulerAngles(String bodyName);
 
    public static native QuaternionPose ViconGetBodyQuaternion(String bodyName);
 
@@ -37,16 +37,16 @@ public class ViconJavaInterface
 
    public static native int ViconGetNumLocalBodies();
 
-   public static native Pose ViconGetLocalBodyAngleAxis(String bodyName);
-
-   public static native Pose ViconGetLocalBodyEulerAngles(String bodyName);
-
-   public Pose getPose(String bodyName)
-   {
-      ViconGetFrame();
-
-      return ViconGetBodyAngleAxis(bodyName);
-   }
+//   public static native Pose ViconGetLocalBodyAngleAxis(String bodyName);
+//
+//   public static native Pose ViconGetLocalBodyEulerAngles(String bodyName);
+//
+//   public Pose getPose(String bodyName)
+//   {
+//      ViconGetFrame();
+//
+//      return ViconGetBodyAngleAxis(bodyName);
+//   }
 
    public void test()
    {
@@ -118,7 +118,7 @@ public class ViconJavaInterface
       {
          long startTime = System.currentTimeMillis();
          ViconGetFrame();
-         Pose pose = ViconGetBodyAngleAxis(name);
+         QuaternionPose pose = ViconGetBodyQuaternion(name);
          long endTime = System.currentTimeMillis();
 //         count++;
          System.out.println(name + ": " + pose + " in " + (endTime-startTime) + " ms");

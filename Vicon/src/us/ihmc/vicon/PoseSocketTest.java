@@ -16,7 +16,7 @@ public class PoseSocketTest
       {
          Socket socket = new Socket("10.2.36.1", 4444);
 
-         Pose pose = new Pose(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+         QuaternionPose pose = new QuaternionPose();
 
          for (int i = 0; i < 10; i++)
          {

@@ -18,11 +18,11 @@ public class ViconServer extends ViconJavaInterface
 {
    protected ReflectiveTCPServer tcpServer;
    protected ArrayList<String> availableModels = new ArrayList<String>();
-   private final HashMap<String, PoseReading> modelPoses = new HashMap<String, PoseReading>();
-   private HashMap<String, PoseListener> listeners = new HashMap<String, PoseListener>();
+   private final HashMap<String, ViconModelReading> modelReadings = new HashMap<String, ViconModelReading>();
+   private HashMap<String, ViconServerListener> listeners = new HashMap<String, ViconServerListener>();
 
    private ViconReader viconReader;
-
+   
    public ViconServer(String ip) throws Exception
    {
       if (!ViconConnect(ip))
@@ -44,32 +44,32 @@ public class ViconServer extends ViconJavaInterface
    {
       return availableModels;
    }
-
-   public Pose getPose(String modelName)
+   
+   public QuaternionPose getQuaternionPose(String modelName)
    {
-      Pose pose;
-      synchronized (modelPoses)
+      QuaternionPose pose;
+      synchronized (modelReadings)
       {
-         PoseReading poseReading = modelPoses.get(modelName);
+         ViconModelReading poseReading = modelReadings.get(modelName);
          if (poseReading == null)
          {
             return null;
          }
          else
          {
-            pose = modelPoses.get(modelName).getPose();
+            pose = modelReadings.get(modelName).getQuaternionPose();
          }
       }
 
       return pose;
    }
 
-   public PoseReading getReading(String modelName)
+   public ViconModelReading getReading(String modelName)
    {
-      PoseReading pose;
-      synchronized (modelPoses)
+      ViconModelReading pose;
+      synchronized (modelReadings)
       {
-         pose = modelPoses.get(modelName);
+         pose = modelReadings.get(modelName);
       }
 
       return pose;
@@ -78,7 +78,7 @@ public class ViconServer extends ViconJavaInterface
    public void registerPoseListener(String host, Integer port)
    {
       System.out.println("client connecting from " + host + ":" + port);
-      PoseListener poseListener = new PoseListener(host, port, this);
+      ViconServerListener poseListener = new ViconServerListener(host, port, this);
       Thread thread = new Thread(poseListener);
       thread.start();
 
@@ -87,13 +87,13 @@ public class ViconServer extends ViconJavaInterface
 
    public void stopListener(String hostColonPort)
    {
-      PoseListener poseListener = listeners.get(hostColonPort);
+      ViconServerListener poseListener = listeners.get(hostColonPort);
       poseListener.stopListening();
    }
 
    public void stopAllListeners()
    {
-      for (PoseListener poseListener : listeners.values())
+      for (ViconServerListener poseListener : listeners.values())
       {
          poseListener.stopListening();
       }
@@ -138,32 +138,31 @@ public class ViconServer extends ViconJavaInterface
             boolean updated = false;
             for (String modelName : availableModels)
             {
-               Pose viconPose = ViconGetBodyEulerAngles(modelName);
-//               Pose pose = new Pose(viconPose.xPosition / 1000.0f, viconPose.yPosition / 1000.0f, viconPose.zPosition / 1000.0f, viconPose.yAxisRotation,
-//                                    -viconPose.xAxisRotation, (float) MathTools.trimAngleMinusPiToPi(viconPose.zAxisRotation + (Math.PI / 2.0)));
+               QuaternionPose viconPose = ViconGetBodyQuaternion(modelName);
                
-               Pose pose = new Pose(viconPose.xPosition / 1000.0f, viconPose.yPosition / 1000.0f, viconPose.zPosition / 1000.0f, 
-                     viconPose.xAxisRotation, viconPose.yAxisRotation, viconPose.zAxisRotation);
+               QuaternionPose pose = new QuaternionPose(viconPose);
+               pose.scaleTranslation(0.001f);
 
-               synchronized (modelPoses)
+               synchronized (modelReadings)
                {
-                  PoseReading lastPoseReading = modelPoses.get(modelName);
-                  PoseReading poseReading = new PoseReading(modelName, timestamp, pose);
+                  ViconModelReading lastViconReading = modelReadings.get(modelName);
+                  ViconModelReading viconReading = new ViconModelReading(modelName, timestamp, pose);
+                  
 
-                  if (lastPoseReading == null)
+                  if (lastViconReading == null)
                   {
-                     modelPoses.put(modelName, poseReading);
+                     modelReadings.put(modelName, viconReading);
                   }
                   else
                   {
-                     if (pose.equals(lastPoseReading.getPose()))
+                     if (pose.equals(lastViconReading.getQuaternionPose()))
                      {
                         pose.invalidate();  
                      }
                      
-                     if(!poseReading.equals(lastPoseReading))
+                     if(!viconReading.equals(lastViconReading))
                      {
-                        modelPoses.put(modelName, poseReading);
+                        modelReadings.put(modelName, viconReading);
                         updated = true;
                      }
                   }
@@ -199,6 +198,7 @@ public class ViconServer extends ViconJavaInterface
    public static void main(String[] args)
    {
       String ip = "192.168.0.3";
+      
       for (int i = 0; i < args.length - 1; i++)
       {
          if (args[i].equalsIgnoreCase("-ip"))

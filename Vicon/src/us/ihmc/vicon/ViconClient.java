@@ -20,7 +20,7 @@ public class ViconClient
    private static ViconClient viconSingleton;
    protected RemoteConnection viconServer;
    protected ArrayList<ViconFrames> viconFrames = new ArrayList<ViconFrames>();
-   private final HashMap<String, PoseReading> mapModelToPoseReading = new HashMap<String, PoseReading>();
+   private final HashMap<String, ViconModelReading> mapModelToPoseReading = new HashMap<String, ViconModelReading>();
    private String myIP;
    private int myPort = 4444;
 
@@ -57,12 +57,31 @@ public class ViconClient
       return viconSingleton;
    }
 
+   @SuppressWarnings("unchecked")   
    public ArrayList<String> getAvailableModels()
    {
       RemoteRequest remoteRequest = new RemoteRequest("getAvailableModels", null);
       try
       {
-         return (ArrayList<String>) viconServer.SendRequest(remoteRequest);
+         Object result = viconServer.SendRequest(remoteRequest);
+         
+         /*
+          * Check if result is an ArrayList<String>
+          * 
+          * Compiler doesn't get this, so suppress warning about unchecked types
+          * 
+          */
+         if(result instanceof ArrayList)
+         {
+            if(((ArrayList<?>) result).size() > 0)
+            {
+               if(((ArrayList<?>) result).get(0) instanceof String)
+               {
+                  return (ArrayList<String>) result;
+               }
+            }
+         }
+         System.err.println("Vicon result is not of type ArrayList<String>");
       }
       catch (Exception e)
       {
@@ -72,19 +91,19 @@ public class ViconClient
       return null;
    }
 
-   public Pose getPose(String modelName)
+   public QuaternionPose getQuaternionPose(String modelName)
    {
-      PoseReading poseReading = getPoseReading(modelName);
+      ViconModelReading poseReading = getPoseReading(modelName);
       if (poseReading != null)
 
-         return poseReading.getPose();
+         return poseReading.getQuaternionPose();
       else
          return null;
    }
 
-   public PoseReading getPoseReading(String modelName)
+   public ViconModelReading getPoseReading(String modelName)
    {
-      PoseReading pose;
+      ViconModelReading pose;
       synchronized (mapModelToPoseReading)
       {
          pose = mapModelToPoseReading.get(modelName);
@@ -134,14 +153,14 @@ public class ViconClient
             long startTime = System.currentTimeMillis();
             int updateCount = 0;
             int nonUpdate = 0;
-            PoseReading lastPoseReading = null;
+            ViconModelReading lastPoseReading = null;
             while ((client != null) &&!client.isClosed())
             {
                Object obj = _ois.readObject();
 
-               if (obj instanceof PoseReading)
+               if (obj instanceof ViconModelReading)
                {
-                  PoseReading poseReading = (PoseReading) obj;
+                  ViconModelReading poseReading = (ViconModelReading) obj;
 
                   synchronized (mapModelToPoseReading)
                   {
@@ -253,11 +272,11 @@ public class ViconClient
          String modelName = availableModels.get(0);
          long startTime = System.currentTimeMillis();
          int updateCount = 0;
-         PoseReading lastPoseReading = null;
+         ViconModelReading lastPoseReading = null;
 
          while (true)
          {
-            PoseReading poseReading = client.getPoseReading(modelName);
+            ViconModelReading poseReading = client.getPoseReading(modelName);
             if ((lastPoseReading != null) && (!poseReading.equals(lastPoseReading)))
             {
                updateCount++;
@@ -267,7 +286,7 @@ public class ViconClient
                {
                   double dt = (endTime - startTime) / 1000.0;
 
-                  System.out.println(modelName + " rate = " + (int) (updateCount / dt) + ": " + poseReading.getPose());
+                  System.out.println(modelName + " rate = " + (int) (updateCount / dt) + ": " + poseReading.getQuaternionPose());
                   startTime = endTime;
                   updateCount = 0;
                }
