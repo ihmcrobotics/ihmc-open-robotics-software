@@ -90,6 +90,11 @@ public class ViconClient
 
       return null;
    }
+   
+   public long getModelReadingTimeStamp(String modelName)
+   {
+      return getPoseReading(modelName).getTimestamp();
+   }
 
    public QuaternionPose getQuaternionPose(String modelName)
    {
