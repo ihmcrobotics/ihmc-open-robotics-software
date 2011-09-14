@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.HashMap;
 
 import javax.media.j3d.Transform3D;
+import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.utilities.math.geometry.FramePose;
@@ -18,7 +19,7 @@ public class ViconFrames
    protected static HashMap<String, ReferenceFrame> referenceFrames;
    protected static boolean dataValid;
    protected static Transform3D bodyToWorldTransform;
-   protected static Vector3d euler;
+   protected static Quat4d quaternion;
    protected static Vector3d translation;
 
    protected ViconFrames() throws Exception
@@ -28,7 +29,7 @@ public class ViconFrames
 
    protected void initialize() throws Exception
    {
-      euler = new Vector3d();
+      quaternion = new Quat4d();
       translation = new Vector3d();
       bodyToWorldTransform = new Transform3D();
 
@@ -51,15 +52,15 @@ public class ViconFrames
 
             public void updateTransformToParent(Transform3D transformToParent)
             {
-               Pose pose = viconClient.getPose(bodyName);
+               QuaternionPose pose = viconClient.getQuaternionPose(bodyName);
                if (pose == null)
                {
-                  pose = new Pose(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+                  pose = new QuaternionPose();
                }
 
                dataValid = pose.dataValid;
-               euler.set(pose.xAxisRotation, pose.yAxisRotation, pose.zAxisRotation);
-               bodyToWorldTransform.setEuler(euler);
+               quaternion.set(pose.qx, pose.qy, pose.qz, pose.qw);
+               bodyToWorldTransform.set(quaternion);
                translation.set(pose.xPosition, pose.yPosition, pose.zPosition);
                bodyToWorldTransform.setTranslation(translation);
                transformToParent.set(bodyToWorldTransform);
