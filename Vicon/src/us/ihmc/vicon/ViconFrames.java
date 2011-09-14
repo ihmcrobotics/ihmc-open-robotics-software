@@ -5,9 +5,6 @@ import java.util.Collection;
 import java.util.HashMap;
 
 import javax.media.j3d.Transform3D;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
@@ -16,11 +13,8 @@ public class ViconFrames
    protected static ViconFrames viconFramesSingleton;
    protected static final String worldFrameName = "ViconWorld";
    protected ViconClient viconClient;
-   protected static HashMap<String, ReferenceFrame> referenceFrames;
-   protected static boolean dataValid;
-   protected static Transform3D bodyToWorldTransform;
-   protected static Quat4d quaternion;
-   protected static Vector3d translation;
+   protected static HashMap<String, ViconReferenceFrame> referenceFrames;
+   protected static ReferenceFrame viconWorldFrame;
 
    protected ViconFrames() throws Exception
    {
@@ -29,14 +23,9 @@ public class ViconFrames
 
    protected void initialize() throws Exception
    {
-      quaternion = new Quat4d();
-      translation = new Vector3d();
-      bodyToWorldTransform = new Transform3D();
 
-      ReferenceFrame viconWorldFrame = ReferenceFrame.constructAWorldFrame(worldFrameName);
-      referenceFrames = new HashMap<String, ReferenceFrame>();
-      referenceFrames.put(viconWorldFrame.getName(), viconWorldFrame);
-      System.out.println("adding frame for " + viconWorldFrame.getName());
+      viconWorldFrame = ReferenceFrame.constructAWorldFrame(worldFrameName);
+      referenceFrames = new HashMap<String, ViconReferenceFrame>();
 
       viconClient = ViconClient.getInstance();
       ArrayList<String> modelNames = viconClient.getAvailableModels();
@@ -46,27 +35,7 @@ public class ViconFrames
          final String bodyName = modelName;
          System.out.println("adding frame for " + modelName);
          Transform3D transform3d = new Transform3D();
-         ReferenceFrame referenceFrame = new ReferenceFrame(replaceColonWithUnderscore(bodyName), viconWorldFrame, transform3d, false, false, false)
-         {
-            private static final long serialVersionUID = -9160732749609839626L;
-
-            public void updateTransformToParent(Transform3D transformToParent)
-            {
-               QuaternionPose pose = viconClient.getQuaternionPose(bodyName);
-               if (pose == null)
-               {
-                  pose = new QuaternionPose();
-               }
-
-               dataValid = pose.dataValid;
-               quaternion.set(pose.qx, pose.qy, pose.qz, pose.qw);
-               bodyToWorldTransform.set(quaternion);
-               translation.set(pose.xPosition, pose.yPosition, pose.zPosition);
-               bodyToWorldTransform.setTranslation(translation);
-               transformToParent.set(bodyToWorldTransform);
-            }
-         };
-         
+         ViconReferenceFrame referenceFrame = new ViconReferenceFrame(modelName, viconWorldFrame, transform3d, viconClient);         
          referenceFrames.put(bodyName, referenceFrame);
       }
 
@@ -95,7 +64,7 @@ public class ViconFrames
 
    public synchronized ReferenceFrame getViconWorldFrame()
    {
-      return referenceFrames.get(worldFrameName);
+      return viconWorldFrame;
    }
 
    public void updateTransformToParent(String name)
@@ -107,9 +76,9 @@ public class ViconFrames
       }
    }
    
-   public synchronized boolean isDataValid()
+   public boolean isDataValid(String name)
    {
-      return dataValid;
+      return referenceFrames.get(name).isDataValid();
    }
 
    public synchronized ReferenceFrame getBodyFrame(String name)
@@ -117,7 +86,7 @@ public class ViconFrames
       return referenceFrames.get(name);
    }
 
-   public Collection<ReferenceFrame> getFrames()
+   public Collection<ViconReferenceFrame> getFrames()
    {
       return referenceFrames.values();
    }
@@ -149,5 +118,10 @@ public class ViconFrames
          e.printStackTrace();
       }
 
+   }
+
+   public long getTimeStamp(String name)
+   {
+      return referenceFrames.get(name).getLastUpdateTimeStamp();
    }
 }
