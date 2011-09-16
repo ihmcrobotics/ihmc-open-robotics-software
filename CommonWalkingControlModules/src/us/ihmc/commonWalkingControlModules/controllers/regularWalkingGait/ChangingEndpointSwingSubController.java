@@ -46,7 +46,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
    private final DesiredFootstepCalculator desiredFootstepCalculator;
 
    private final CartesianTrajectoryGenerator walkingTrajectoryGenerator;
-   private final CartesianTrajectoryGenerator swingInAirTrajectoryGenerator;
+   private final SideDependentList<CartesianTrajectoryGenerator> swingInAirTrajectoryGenerator;
 
    private final SwingLegTorqueControlModule swingLegTorqueControlModule;
 
@@ -122,7 +122,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
            CouplingRegistry couplingRegistry, DesiredFootstepCalculator desiredFootstepCalculator,
            DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry,
            SideDependentList<AnkleVelocityCalculator> ankleVelocityCalculators, SideDependentList<FootSwitchInterface> footSwitches,
-           CartesianTrajectoryGenerator walkingCartesianTrajectoryGenerator, CartesianTrajectoryGenerator swingInAirCartesianTrajectoryGenerator,
+           CartesianTrajectoryGenerator walkingCartesianTrajectoryGenerator, SideDependentList<CartesianTrajectoryGenerator> swingInAirCartesianTrajectoryGenerator,
            PreSwingControlModule preSwingControlModule, double controlDT, SwingLegTorqueControlModule swingLegTorqueControlModule)
    {
       this.processedSensors = processedSensors;
@@ -179,7 +179,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       double footHeight = swingAnkle.getZ();
       double maxFootHeight = 0.02;
 
-      return swingInAirTrajectoryGenerator.isDone() && (footHeight < maxFootHeight);
+      return swingInAirTrajectoryGenerator.get(swingSide).isDone() && (footHeight < maxFootHeight);
    }
 
    public void doPreSwing(LegTorques legTorquesToPackForSwingLeg, double timeInState)
@@ -245,7 +245,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       else
          swingLegTorqueControlModule.setAnkleGainsDefault(swingSide);
 
-      computeDesiredFootPosVelAcc(swingInAirTrajectoryGenerator, timeInCurrentState);
+      computeDesiredFootPosVelAcc(swingInAirTrajectoryGenerator.get(swingSide), timeInCurrentState);
       computeSwingLegTorques(legTorques);
    }
 
@@ -304,18 +304,13 @@ public class ChangingEndpointSwingSubController implements SwingSubController
    {
       setEstimatedSwingTimeRemaining(0.0);
 
-      ReferenceFrame trajectoryGeneratorReferenceFrame = swingInAirTrajectoryGenerator.getReferenceFrame();
-
       FramePoint currentPosition = new FramePoint(referenceFrames.getFootFrame(swingLeg));
-      currentPosition.changeFrame(trajectoryGeneratorReferenceFrame);
 
       FrameVector currentVelocity = ankleVelocityCalculators.get(swingLeg).getAnkleVelocityInWorldFrame();
-      currentVelocity.changeFrame(trajectoryGeneratorReferenceFrame);
 
       FramePoint finalDesiredPosition = currentConfiguration.getDesiredSwingFootPosition();
-      finalDesiredPosition.changeFrame(trajectoryGeneratorReferenceFrame);
 
-      swingInAirTrajectoryGenerator.initialize(currentPosition, currentVelocity, finalDesiredPosition);
+      swingInAirTrajectoryGenerator.get(swingLeg).initialize(currentPosition, currentVelocity, finalDesiredPosition);
    }
 
    public void doTransitionOutOfInitialSwing(RobotSide swingSide)
@@ -397,7 +392,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
 
    public boolean isDoneWithSwingInAir(double timeInState)
    {
-      return swingInAirTrajectoryGenerator.isDone() && (timeInState > 2.0);
+      return swingInAirTrajectoryGenerator.get(RobotSide.LEFT).isDone() && swingInAirTrajectoryGenerator.get(RobotSide.RIGHT).isDone() && (timeInState > 2.0);
    }
 
    public void setParametersForR2()
