@@ -57,5 +57,4 @@ public interface ProcessedSensorsInterface
    public abstract double getNeckJointPosition(NeckJointName neckJointName);
    public abstract double getNeckJointVelocity(NeckJointName neckJointName);
    public abstract FullRobotModel getFullRobotModel();
-   public abstract FrameVector getIMUAngularVelocity();
 }
