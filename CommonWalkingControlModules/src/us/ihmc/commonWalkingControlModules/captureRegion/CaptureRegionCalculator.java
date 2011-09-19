@@ -286,6 +286,7 @@ public class CaptureRegionCalculator
       // return the reachable region.
 
       globalTimer.startTimer();
+      swingTimeRemaining = MathTools.clipToMinMax(swingTimeRemaining, 0.0, Double.POSITIVE_INFINITY);
       ReferenceFrame supportAnkleZUpFrame = ankleZUpFrames.get(supportLeg);
 
       // first get all of the objects we will need to calculate the capture region
