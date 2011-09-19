@@ -554,7 +554,9 @@ public class ChangingEndpointSwingSubController implements SwingSubController
 //    endSwingOrientation.set(endOrientation);
 
       Orientation endOrientation = desiredFootStep.getFootstepPose().getOrientation();
-      endSwingOrientations.get(desiredFootStep.getFootstepSide()).set(endOrientation);
+      RobotSide swingFootSide = desiredFootStep.getFootstepSide();
+      ReferenceFrame oppositeAnkleZUpFrame = referenceFrames.getAnkleZUpFrame(swingFootSide.getOppositeSide());
+      endSwingOrientations.get(swingFootSide).set(endOrientation.changeFrameCopy(oppositeAnkleZUpFrame));
    }
 
    private void initializeStartOrientationToMatchActual(RobotSide swingSide)
