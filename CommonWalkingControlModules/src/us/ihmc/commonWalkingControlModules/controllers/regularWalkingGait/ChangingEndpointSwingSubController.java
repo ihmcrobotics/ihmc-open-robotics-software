@@ -102,9 +102,10 @@ public class ChangingEndpointSwingSubController implements SwingSubController
 
    private final YoMinimumJerkTrajectory minimumJerkTrajectoryForFootOrientation = new YoMinimumJerkTrajectory("swingFootOrientation", registry);
 
-   private final YoFrameOrientation startSwingOrientation = new YoFrameOrientation("startSwing", "", worldFrame, registry);
-   private final YoFrameOrientation endSwingOrientation = new YoFrameOrientation("endSwing", "", worldFrame, registry);
-   private final YoFrameOrientation desiredFootOrientation = new YoFrameOrientation("desiredSwing", "", worldFrame, registry);
+   private final YoFrameOrientation desiredFootOrientationInWorldFrame = new YoFrameOrientation("desiredFootOrientationInWorld", "", worldFrame, registry);
+   private final SideDependentList<YoFrameOrientation> startSwingOrientations = new SideDependentList<YoFrameOrientation>();
+   private final SideDependentList<YoFrameOrientation> endSwingOrientations = new SideDependentList<YoFrameOrientation>();
+   private final SideDependentList<YoFrameOrientation> desiredFootOrientations = new SideDependentList<YoFrameOrientation>();
 
    private final YoFramePoint finalDesiredSwingFootPosition = new YoFramePoint("finalDesiredSwing", "", worldFrame, registry);
    private final YoFramePoint desiredSwingFootPositionInWorldFrame = new YoFramePoint("desiredSwing", "", worldFrame, registry);
@@ -137,6 +138,17 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       this.preSwingControlModule = preSwingControlModule;
       this.controlDT = controlDT;
       
+      for(RobotSide side : RobotSide.values())
+      {
+         ReferenceFrame orientationReferenceFrame = referenceFrames.getAnkleZUpFrame(side.getOppositeSide());
+         YoFrameOrientation startSwingOrientation = new YoFrameOrientation(side.getCamelCaseNameForStartOfExpression() + "startSwing", "", orientationReferenceFrame, registry);
+         YoFrameOrientation endSwingOrientation = new YoFrameOrientation(side.getCamelCaseNameForStartOfExpression() + "endSwing", "", orientationReferenceFrame, registry);
+         YoFrameOrientation desiredFootOrientation = new YoFrameOrientation(side.getCamelCaseNameForStartOfExpression() + "desiredSwing", "", orientationReferenceFrame, registry);
+         startSwingOrientations.set(side, startSwingOrientation);
+         endSwingOrientations.set(side, endSwingOrientation);
+         desiredFootOrientations.set(side, desiredFootOrientation);
+      }
+      
       createVisualizers(dynamicGraphicObjectsListRegistry, parentRegistry);
       couplingRegistry.setEstimatedSwingTimeRemaining(estimatedSwingTimeRemaining.getDoubleValue());
       couplingRegistry.setSingleSupportDuration(swingDuration.getDoubleValue());
@@ -149,7 +161,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       {
          ArtifactList artifactList = new ArtifactList("ChangingEndpoint");
 
-         swingFootOrientationViz = new DynamicGraphicCoordinateSystem("Coordinate System", desiredSwingFootPositionInWorldFrame, desiredFootOrientation, 0.1);
+         swingFootOrientationViz = new DynamicGraphicCoordinateSystem("Coordinate System", desiredSwingFootPositionInWorldFrame, desiredFootOrientationInWorldFrame, 0.1);
 
          int numberOfBalls = 1;
          double ballSize = (numberOfBalls > 1) ? 0.005 : 0.02;
@@ -208,7 +220,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
    {
       this.swingSide = legTorquesToPackForSwingLeg.getRobotSide();
       updateFinalDesiredPosition(walkingTrajectoryGenerator);
-      computeDesiredFootPosVelAcc(walkingTrajectoryGenerator, timeSpentSwingingUpToNow);
+      computeDesiredFootPosVelAcc(swingSide, walkingTrajectoryGenerator, timeSpentSwingingUpToNow);
       computeSwingLegTorques(legTorquesToPackForSwingLeg);
       setEstimatedSwingTimeRemaining(swingDuration.getDoubleValue() - timeSpentSwingingUpToNow);
    }
@@ -245,7 +257,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       else
          swingLegTorqueControlModule.setAnkleGainsDefault(swingSide);
 
-      computeDesiredFootPosVelAcc(swingInAirTrajectoryGenerator.get(swingSide), timeInCurrentState);
+      computeDesiredFootPosVelAcc(swingSide, swingInAirTrajectoryGenerator.get(swingSide), timeInCurrentState);
       computeSwingLegTorques(legTorques);
    }
 
@@ -455,7 +467,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       trajectoryGenerator.updateFinalDesiredPosition(finalDesiredSwingFootPosition);
    }
 
-   private void computeDesiredFootPosVelAcc(CartesianTrajectoryGenerator trajectoryGenerator, double timeInState)
+   private void computeDesiredFootPosVelAcc(RobotSide swingSide, CartesianTrajectoryGenerator trajectoryGenerator, double timeInState)
    {
       ReferenceFrame cartesianTrajectoryGeneratorFrame = trajectoryGenerator.getReferenceFrame();
 
@@ -475,20 +487,32 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       desiredSwingFootVelocityInWorldFrame.set(velocity);
       desiredSwingFootAccelerationInWorldFrame.set(acceleration);
 
+      
+      
       // Determine foot orientation and angular velocity
       minimumJerkTrajectoryForFootOrientation.computeTrajectory(timeInState);
       double orientationInterpolationAlpha = minimumJerkTrajectoryForFootOrientation.getPosition();
+      YoFrameOrientation endSwingOrientation = endSwingOrientations.get(swingSide);
+      YoFrameOrientation desiredFootOrientation = desiredFootOrientations.get(swingSide);
+      YoFrameOrientation startSwingOrientation = startSwingOrientations.get(swingSide);
       desiredFootOrientation.interpolate(startSwingOrientation, endSwingOrientation, orientationInterpolationAlpha);
 
+      // Visualisation
+      Orientation desiredFootOrientationToViz = desiredFootOrientation.getFrameOrientationCopy();
+      desiredFootOrientationToViz.changeFrame(worldFrame);
+      desiredFootOrientationInWorldFrame.set(desiredFootOrientationToViz);
+      
       double alphaDot = minimumJerkTrajectoryForFootOrientation.getVelocity();
       FrameVector desiredSwingFootAngularVelocity = OrientationInterpolationCalculator.computeAngularVelocity(startSwingOrientation.getFrameOrientationCopy(),
                                                        endSwingOrientation.getFrameOrientationCopy(), alphaDot);
+      desiredSwingFootAngularVelocity.changeFrame(worldFrame);
       desiredSwingFootAngularVelocityInWorldFrame.set(desiredSwingFootAngularVelocity);
 
       double alphaDDot = minimumJerkTrajectoryForFootOrientation.getAcceleration();
       FrameVector desiredSwingFootAngularAcceleration =
          OrientationInterpolationCalculator.computeAngularAcceleration(startSwingOrientation.getFrameOrientationCopy(),
             endSwingOrientation.getFrameOrientationCopy(), alphaDDot);
+      desiredSwingFootAngularAcceleration.changeFrame(worldFrame);
       desiredSwingFootAngularAccelerationInWorldFrame.set(desiredSwingFootAngularAcceleration);
 
       updateSwingfootError(position);
@@ -504,7 +528,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
    private void computeSwingLegTorques(LegTorques legTorquesToPackForSwingLeg)
    {
       swingLegTorqueControlModule.compute(legTorquesToPackForSwingLeg, desiredSwingFootPositionInWorldFrame.getFramePointCopy(),
-              desiredFootOrientation.getFrameOrientationCopy(), desiredSwingFootVelocityInWorldFrame.getFrameVectorCopy(),
+              desiredFootOrientations.get(legTorquesToPackForSwingLeg.getRobotSide()).getFrameOrientationCopy(), desiredSwingFootVelocityInWorldFrame.getFrameVectorCopy(),
               desiredSwingFootAngularVelocityInWorldFrame.getFrameVectorCopy(), desiredSwingFootAccelerationInWorldFrame.getFrameVectorCopy(),
               desiredSwingFootAngularAccelerationInWorldFrame.getFrameVectorCopy());
 
@@ -530,15 +554,15 @@ public class ChangingEndpointSwingSubController implements SwingSubController
 //    endSwingOrientation.set(endOrientation);
 
       Orientation endOrientation = desiredFootStep.getFootstepPose().getOrientation();
-      endSwingOrientation.set(endOrientation.changeFrameCopy(worldFrame));
+      endSwingOrientations.get(desiredFootStep.getFootstepSide()).set(endOrientation);
    }
 
    private void initializeStartOrientationToMatchActual(RobotSide swingSide)
    {
       ReferenceFrame swingFootFrame = referenceFrames.getFootFrame(swingSide);
       Orientation startOrientation = new Orientation(swingFootFrame);
-      startOrientation = startOrientation.changeFrameCopy(ReferenceFrame.getWorldFrame());
-      startSwingOrientation.set(startOrientation);
+      startOrientation = startOrientation.changeFrameCopy(referenceFrames.getAnkleZUpFrame(swingSide.getOppositeSide()));
+      startSwingOrientations.get(swingSide).set(startOrientation);
    }
 
    private boolean isCapturePointInsideFoot(RobotSide swingSide)
