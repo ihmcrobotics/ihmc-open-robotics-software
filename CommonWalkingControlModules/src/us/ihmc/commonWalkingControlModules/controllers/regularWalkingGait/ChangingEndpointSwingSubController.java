@@ -108,7 +108,6 @@ public class ChangingEndpointSwingSubController implements SwingSubController
 
    private final YoFramePoint finalDesiredSwingFootPosition = new YoFramePoint("finalDesiredSwing", "", worldFrame, registry);
    private final YoFramePoint desiredSwingFootPositionInWorldFrame = new YoFramePoint("desiredSwing", "", worldFrame, registry);
-   private final YoFramePoint desiredSwingFootPositionInAnkle;
    private final YoFrameVector desiredSwingFootVelocityInWorldFrame = new YoFrameVector("desiredSwingVelocity", "", worldFrame, registry);
    private final YoFrameVector desiredSwingFootAccelerationInWorldFrame = new YoFrameVector("desiredSwingAcceleration", "", worldFrame, registry);
    private final YoFrameVector desiredSwingFootAngularVelocityInWorldFrame = new YoFrameVector("desiredSwingAngularVelocity", "", worldFrame, registry);
@@ -138,8 +137,6 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       this.preSwingControlModule = preSwingControlModule;
       this.controlDT = controlDT;
       
-      desiredSwingFootPositionInAnkle = new YoFramePoint("desiredSwingInAnkleFrame", "", referenceFrames.getAnkleZUpFrame(RobotSide.LEFT), registry);
-
       createVisualizers(dynamicGraphicObjectsListRegistry, parentRegistry);
       couplingRegistry.setEstimatedSwingTimeRemaining(estimatedSwingTimeRemaining.getDoubleValue());
       couplingRegistry.setSingleSupportDuration(swingDuration.getDoubleValue());
@@ -470,8 +467,6 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       trajectoryGenerator.computeNextTick(position, velocity, acceleration, controlDT);
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-      desiredSwingFootPositionInAnkle.set(position);
-      
       position.changeFrame(worldFrame);
       velocity.changeFrame(worldFrame);
       acceleration.changeFrame(worldFrame);
