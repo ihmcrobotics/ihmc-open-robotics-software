@@ -16,27 +16,31 @@ import us.ihmc.utilities.screwTheory.Twist;
 import us.ihmc.utilities.screwTheory.Wrench;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.VariableChangedListener;
+import com.yobotics.simulationconstructionset.YoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 
 public class AxisAnglePelvisOrientationControlModule implements PelvisOrientationControlModule
-{   
+{
    private final ProcessedSensorsInterface processedSensors;
    private final CouplingRegistry couplingRegistry;
    private final YoVariableRegistry registry = new YoVariableRegistry("AxisAnglePelvisOrientationControlModule");
-   
+
    private final DoubleYoVariable proportionalGain = new DoubleYoVariable("pelvisOrientationProportionalGain", registry);
    private final DoubleYoVariable pelvisOrientationError = new DoubleYoVariable("pelvisOrientationError", registry);
+   private final DoubleYoVariable[] derivativeGains = new DoubleYoVariable[3];
    private final YoFrameVector tauPelvis;
-   
+
    private final ReferenceFrame pelvisFrame;
    private final Matrix3d derivativeGainMatrix;
-   
+
    private final boolean useFeedforward;
-   
+
    private final Wrench upperBodyWrench = new Wrench();
 
-   public AxisAnglePelvisOrientationControlModule(ProcessedSensorsInterface processedSensors, CommonWalkingReferenceFrames referenceFrames, CouplingRegistry couplingRegistry, YoVariableRegistry parentRegistry, boolean useFeedforward)
+   public AxisAnglePelvisOrientationControlModule(ProcessedSensorsInterface processedSensors, CommonWalkingReferenceFrames referenceFrames,
+         CouplingRegistry couplingRegistry, YoVariableRegistry parentRegistry, boolean useFeedforward)
    {
       this.processedSensors = processedSensors;
       this.pelvisFrame = referenceFrames.getPelvisFrame();
@@ -45,10 +49,20 @@ public class AxisAnglePelvisOrientationControlModule implements PelvisOrientatio
       this.derivativeGainMatrix = new Matrix3d();
       this.derivativeGainMatrix.setZero();
       this.useFeedforward = useFeedforward;
-      
+
+      String baseDerivativeGainName = "pelvisOrientationDerivativeGain";
+      derivativeGains[0] = new DoubleYoVariable(baseDerivativeGainName + "x", parentRegistry);
+      derivativeGains[1] = new DoubleYoVariable(baseDerivativeGainName + "y", parentRegistry);
+      derivativeGains[2] = new DoubleYoVariable(baseDerivativeGainName + "z", parentRegistry);
+
+      for (int i = 0; i < derivativeGains.length; i++)
+      {
+         derivativeGains[i].addVariableChangedListener(createDerivativeGainVariableUpdater(i));
+      }
+
       parentRegistry.addChild(registry);
    }
-   
+
    public void setupParametersForR2()
    {
       setProportionalGain(1500.0);
@@ -56,7 +70,7 @@ public class AxisAnglePelvisOrientationControlModule implements PelvisOrientatio
       setDerivativeGainY(150.0);
       setDerivativeGainZ(50.0);
    }
-   
+
    public void setupParametersForM2V2()
    {
       setProportionalGain(250.0);
@@ -68,18 +82,18 @@ public class AxisAnglePelvisOrientationControlModule implements PelvisOrientatio
    public FrameVector computePelvisTorque(RobotSide supportLeg, Orientation desiredPelvisOrientation)
    {
       FrameVector ret = computeProportionalTerm(desiredPelvisOrientation);
-      
+
       FrameVector derivativeTerm = computeDerivativeTerm();
       ret.add(derivativeTerm);
-      
+
       if (useFeedforward)
       {
          FrameVector feedForwardTerm = computeFeedForwardTerm();
          ret.add(feedForwardTerm);
       }
-      
+
       tauPelvis.set(ret);
-      
+
       return ret;
    }
 
@@ -89,14 +103,14 @@ public class AxisAnglePelvisOrientationControlModule implements PelvisOrientatio
       Quat4d desiredPelvisQuaternion = desiredPelvisOrientation.getQuaternion();
       AxisAngle4d desiredPelvisAngleAxis = new AxisAngle4d();
       desiredPelvisAngleAxis.set(desiredPelvisQuaternion);
-      
+
       pelvisOrientationError.set(desiredPelvisAngleAxis.getAngle());
 
       FrameVector proportionalTerm = new FrameVector(desiredPelvisOrientation.getReferenceFrame());
       proportionalTerm.set(desiredPelvisAngleAxis.getX(), desiredPelvisAngleAxis.getY(), desiredPelvisAngleAxis.getZ());
       proportionalTerm.scale(desiredPelvisAngleAxis.getAngle());
       proportionalTerm.scale(proportionalGain.getDoubleValue());
-      
+
       return proportionalTerm;
    }
 
@@ -107,10 +121,10 @@ public class AxisAnglePelvisOrientationControlModule implements PelvisOrientatio
       FrameVector derivativeTerm = new FrameVector(twistOfPelvisWithRespectToWorld.getExpressedInFrame(), twistOfPelvisWithRespectToWorld.getAngularPartCopy());
       derivativeGainMatrix.transform(derivativeTerm.getVector());
       derivativeTerm.scale(-1.0);
-      
+
       return derivativeTerm;
    }
-   
+
    private FrameVector computeFeedForwardTerm()
    {
       if (couplingRegistry.getUpperBodyWrench() != null)
@@ -118,13 +132,12 @@ public class AxisAnglePelvisOrientationControlModule implements PelvisOrientatio
          upperBodyWrench.set(couplingRegistry.getUpperBodyWrench());
          upperBodyWrench.changeFrame(pelvisFrame);
          return new FrameVector(upperBodyWrench.getExpressedInFrame(), upperBodyWrench.getAngularPartCopy());
-      }
-      else
+      } else
       {
          return new FrameVector(pelvisFrame);
       }
    }
-   
+
    public void setProportionalGain(double proportionalGain)
    {
       this.proportionalGain.set(proportionalGain);
@@ -137,19 +150,30 @@ public class AxisAnglePelvisOrientationControlModule implements PelvisOrientatio
          derivativeGainMatrix.setElement(i, i, derivativeGain);
       }
    }
-   
+
    public void setDerivativeGainX(double derivativeGainX)
    {
-      derivativeGainMatrix.setElement(0, 0, derivativeGainX);
+      derivativeGains[0].set(derivativeGainX);
    }
-   
+
    public void setDerivativeGainY(double derivativeGainY)
    {
-      derivativeGainMatrix.setElement(1, 1, derivativeGainY);
+      derivativeGains[1].set(derivativeGainY);
    }
-   
+
    public void setDerivativeGainZ(double derivativeGainZ)
    {
-      derivativeGainMatrix.setElement(2, 2, derivativeGainZ);
+      derivativeGains[2].set(derivativeGainZ);
+   }
+
+   private VariableChangedListener createDerivativeGainVariableUpdater(final int i)
+   {
+      return new VariableChangedListener()
+      {
+         public void variableChanged(YoVariable v)
+         {
+            derivativeGainMatrix.setElement(i, i, v.getValueAsDouble());
+         }
+      };
    }
 }
