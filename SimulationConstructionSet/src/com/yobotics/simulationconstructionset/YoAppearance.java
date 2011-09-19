@@ -326,6 +326,13 @@ public class YoAppearance
    {
       return RGBColor(0.0f, 0.0f, 0.3f);
    }
+   
+
+   public static Appearance Brown()
+   {
+      return RGBColorFrom8BitInts(165, 42, 42);
+   }
+
 
    public static Appearance Green()
    {
