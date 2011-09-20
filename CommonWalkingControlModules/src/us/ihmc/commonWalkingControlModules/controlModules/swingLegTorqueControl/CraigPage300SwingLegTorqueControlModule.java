@@ -45,7 +45,7 @@ import com.yobotics.simulationconstructionset.gui.GUISetterUpperRegistry;
 
 public class CraigPage300SwingLegTorqueControlModule implements SwingLegTorqueControlModule
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry("PDPlusIDSwingLegTorqueControlModule");
+   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final LegJointName[] legJointNames;
 
    private final ProcessedSensorsInterface processedSensors;
@@ -81,6 +81,7 @@ public class CraigPage300SwingLegTorqueControlModule implements SwingLegTorqueCo
 
    private final BooleanYoVariable inverseKinematicsExceptionHasBeenThrown = new BooleanYoVariable("kinematicException", registry);
    private final DoubleYoVariable jacobianDeterminant = new DoubleYoVariable("jacobianDeterminant", registry);
+   private final DoubleYoVariable inverseDynamicsPercentScaling = new DoubleYoVariable("inverseDynamicsPercentScaling", registry);
    private boolean useBodyAcceleration;
 
 
@@ -180,14 +181,13 @@ public class CraigPage300SwingLegTorqueControlModule implements SwingLegTorqueCo
       jacobianDeterminant.set(desiredJointVelocityCalculator.swingFullLegJacobianDeterminant());
       desiredJointAccelerationCalculators.get(swingSide).compute(desiredAccelerationOfSwingFootWithRespectToWorld);
 
-      double percentScaling = getPercentScalingBasedOnJacobianDeterminant(jacobianDeterminant.getDoubleValue());
+      inverseDynamicsPercentScaling.set(getPercentScalingBasedOnJacobianDeterminant(jacobianDeterminant.getDoubleValue()));
 
       LegJointName[] legJointNames = fullRobotModel.getRobotSpecificJointNames().getLegJointNames();
       for (LegJointName legJointName : legJointNames)
       {
          RevoluteJoint revoluteJoint = fullRobotModel.getLegJoint(swingSide, legJointName);
          double qddDesired = revoluteJoint.getQddDesired();
-         revoluteJoint.setQddDesired(qddDesired * percentScaling);
 
          double desiredJointPosition = desiredLegJointPositions.get(swingSide).getJointPosition(legJointName);
          desiredYoLegJointPositions.get(swingSide).get(legJointName).set(desiredJointPosition);
@@ -201,7 +201,11 @@ public class CraigPage300SwingLegTorqueControlModule implements SwingLegTorqueCo
 
          double kpGain = kpGains.get(legJointName).getDoubleValue();
          double kdGain = kdGains.get(legJointName).getDoubleValue();
-         fullRobotModel.getLegJoint(swingSide, legJointName).setQddDesired(positionError * kpGain + velocityError * kdGain + qddDesired);
+         double qddDesiredWithPD = positionError * kpGain + velocityError * kdGain + qddDesired;
+         
+         qddDesiredWithPD *= inverseDynamicsPercentScaling.getDoubleValue();
+
+         revoluteJoint.setQddDesired(qddDesiredWithPD);
       }
 
       // control
@@ -320,12 +324,12 @@ public class CraigPage300SwingLegTorqueControlModule implements SwingLegTorqueCo
 
    public void setParametersForM2V2()
    {
-      useBodyAcceleration = true;
+      useBodyAcceleration = false;
 
-      masterKpGain.set(10.0);
-      masterKdGain.set(1.0);
+      masterKpGain.set(50.0);
+      masterKdGain.set(10.0);
 
-      softScaleFactor.set(0.25);
+      softScaleFactor.set(0.1); // 0.25);
    }
 
    private GUISetterUpper createGUISetterUpper()
