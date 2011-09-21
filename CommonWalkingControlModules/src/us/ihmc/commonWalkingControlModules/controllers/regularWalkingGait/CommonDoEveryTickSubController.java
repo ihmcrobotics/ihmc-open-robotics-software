@@ -43,10 +43,15 @@ public class CommonDoEveryTickSubController implements DoEveryTickSubController
    private final ProcessedSensorsInterface processedSensors;
    
    public CommonDoEveryTickSubController(ProcessedSensorsInterface processedSensors,
-         CommonWalkingReferenceFrames referenceFrames, BipedFootInterface leftFoot, BipedFootInterface rightFoot,
-           BipedFeetUpdater bipedFeetUpdater, DesiredHeadingControlModule desiredHeadingControlModule, DesiredVelocityControlModule desiredVelocityControlModule,
-           DesiredFootstepCalculator desiredFootstepCalculator, CapturePointCalculatorInterface capturePointCalculator,
-           CaptureRegionCalculator captureRegionCalculator, CouplingRegistry couplingRegistry, double initialDesiredHeading)
+         CommonWalkingReferenceFrames referenceFrames, 
+         BipedFootInterface leftFoot, BipedFootInterface rightFoot,
+           BipedFeetUpdater bipedFeetUpdater, 
+           DesiredHeadingControlModule desiredHeadingControlModule, 
+           DesiredVelocityControlModule desiredVelocityControlModule,
+           DesiredFootstepCalculator desiredFootstepCalculator, 
+           CapturePointCalculatorInterface capturePointCalculator,
+           CaptureRegionCalculator captureRegionCalculator, 
+           CouplingRegistry couplingRegistry, double initialDesiredHeading)
    {
       this.processedSensors = processedSensors;
       this.referenceFrames = referenceFrames;
@@ -100,10 +105,7 @@ public class CommonDoEveryTickSubController implements DoEveryTickSubController
       FramePoint capturePointInMidfeetZUp = capturePointCalculator.getCapturePointInFrame(referenceFrames.getMidFeetZUpFrame());
       couplingRegistry.setCapturePoint(capturePointInMidfeetZUp);
 
-      boolean forceHindOnToes = false;
-
-//    boolean forceHindOnToes = couplingRegistry.getForceHindOnToes();
-
+      boolean forceHindOnToes = couplingRegistry.getForceHindOnToes();
       bipedFeetUpdater.updateBipedFeet(leftFoot, rightFoot, supportLeg, capturePointInMidfeetZUp, forceHindOnToes);
 
       BipedSupportPolygons bipedSupportPolygons = couplingRegistry.getBipedSupportPolygons();
