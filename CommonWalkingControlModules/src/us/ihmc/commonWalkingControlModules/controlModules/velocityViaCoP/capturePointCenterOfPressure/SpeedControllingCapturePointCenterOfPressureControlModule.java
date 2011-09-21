@@ -224,10 +224,20 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
          }
 
          if (!supportPolygon.isPointInside(currentCapturePoint2d))
-         {
+         {           
+            // take the farthest vertex and move it inside a little:
+            FrameVector2d delta = new FrameVector2d(farthestToDesiredCP);
+            delta.sub(supportPolygon.getCentroidCopy());
+            delta.scale(1e-4);
+            farthestToDesiredCP.sub(delta);
+
             FrameLine2d iCPLine = new FrameLine2d(currentCapturePoint2d, farthestToDesiredCP);
             capturePointLine.setFrameLine2d(iCPLine.changeFrameCopy(world));
             farthestToDesiredCP.changeFrame(world);
+            
+            if (!supportPolygon.isPointInside(farthestToDesiredCP.changeFrameCopy(midFeetZUp))) // better than doing this before, because the changeFrameCopy might move it slightly outside the support polygon
+               throw new RuntimeException("!supportPolygon.isPointInside(farthestToDesiredCP)");
+
             this.desiredCoP.set(farthestToDesiredCP);
 
             return;
@@ -281,6 +291,9 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
          centerOfPressureDesired.changeFrame(supportPolygon.getReferenceFrame());
          GeometryTools.movePointInsidePolygonAlongLine(centerOfPressureDesired, supportPolygon, new FrameLine2d(controlLine));
       }
+      
+      if (!supportPolygon.isPointInside(centerOfPressureDesired))
+         throw new RuntimeException("!supportPolygon.isPointInside(centerOfPressureDesired)");
 
       centerOfPressureDesired.changeFrame(world);
       this.desiredCoP.set(centerOfPressureDesired);
