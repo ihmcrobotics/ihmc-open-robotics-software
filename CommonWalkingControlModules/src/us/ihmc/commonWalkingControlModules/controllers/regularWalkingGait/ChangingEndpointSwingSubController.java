@@ -576,4 +576,8 @@ public class ChangingEndpointSwingSubController implements SwingSubController
 
       return capturePointInsideFoot;
    }
+
+   public void initialize()
+   {      
+   }
 }

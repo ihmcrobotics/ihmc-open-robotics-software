@@ -8,6 +8,5 @@ public interface DoEveryTickSubController
 
    public abstract void addUpdatable(Updatable updatable);
 
-   public abstract void doFirstTick();
-
+   public abstract void initialize();
 }

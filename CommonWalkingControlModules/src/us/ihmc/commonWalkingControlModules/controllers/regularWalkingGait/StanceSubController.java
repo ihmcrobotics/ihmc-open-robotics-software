@@ -84,4 +84,6 @@ public interface StanceSubController
 
    
    public abstract boolean canWeStopNow();
+
+   public abstract void initialize();
 }

@@ -57,4 +57,6 @@ public interface SwingSubController
    // TODO: this should be deprecated at some point; its only use is sharing data between stance- and swing subcontrollers;
    // this should be done through the coupling registry instead
    public abstract double getEstimatedSwingTimeRemaining();
+
+   public abstract void initialize();
 }

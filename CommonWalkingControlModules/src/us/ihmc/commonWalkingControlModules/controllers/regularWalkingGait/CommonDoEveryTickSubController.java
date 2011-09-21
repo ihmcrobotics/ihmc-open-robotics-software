@@ -132,9 +132,8 @@ public class CommonDoEveryTickSubController implements DoEveryTickSubController
       }
    }
 
-   public void doFirstTick()
+   public void initialize()
    {
-      // FIXME: can't do this in initialize(), since we need ProcessedSensors to be updated already
       if (Double.isNaN(initialDesiredHeading))
       {
          System.out.println("Resetting desired heading to current heading.");
