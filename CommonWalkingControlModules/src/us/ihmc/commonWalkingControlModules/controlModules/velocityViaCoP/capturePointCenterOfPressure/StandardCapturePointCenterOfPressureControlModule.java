@@ -250,8 +250,7 @@ public class StandardCapturePointCenterOfPressureControlModule implements Captur
                desiredCapturePoint = desiredCapturePoint.changeFrameCopy(midFeetZUp);
             }
 
-            FramePoint2d desiredCapturePoint2d = new FramePoint2d(desiredCapturePoint.getReferenceFrame(), desiredCapturePoint.getX(),
-                                                    desiredCapturePoint.getY());
+            FramePoint2d desiredCapturePoint2d = desiredCapturePoint.toFramePoint2d();
             FrameLineSegment2d desiredCaptureToDesiredCop = new FrameLineSegment2d(desiredCapturePoint2d, centerOfPressureDesired2d);
 
             // John Carff fixed this on 090625. Make sure his fix didn't break this line!!!
@@ -289,7 +288,7 @@ public class StandardCapturePointCenterOfPressureControlModule implements Captur
             }
             else
             {
-//               throw new RuntimeException("Shouldn't get here"); // TODO: turn on again
+               throw new RuntimeException("Shouldn't get here. Means that both the desired capture point and the CoP are outside the support polygon!");
             }
          }
       }
