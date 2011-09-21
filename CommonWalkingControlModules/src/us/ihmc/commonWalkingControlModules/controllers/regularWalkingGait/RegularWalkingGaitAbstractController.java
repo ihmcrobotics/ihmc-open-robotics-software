@@ -70,8 +70,6 @@ public abstract class RegularWalkingGaitAbstractController implements RobotContr
 
    private final String name;
 
-   private boolean isOnFirstTick = true;
-
    public RegularWalkingGaitAbstractController(String name, RobotSpecificJointNames robotJointNames, DoubleYoVariable time,
            ProcessedOutputsInterface processedOutputs, DoEveryTickSubController doEveryTickSubController, StanceSubController stanceSubController,
            SwingSubController swingSubController, UpperBodySubController upperBodySubController, CommonWalkingReferenceFrames referenceFrames,
@@ -105,18 +103,15 @@ public abstract class RegularWalkingGaitAbstractController implements RobotContr
    
    public void initialize()
    {
+      doEveryTickSubController.initialize();
+      swingSubController.initialize();
+      stanceSubController.initialize();
    }
 
    public void doControl()
    {
       // Remember the torques to filter them in a bit:
       torqueTransitionFilter.rememberPreviousTorques();
-
-      if (isOnFirstTick)
-      {
-         doEveryTickSubController.doFirstTick();
-         isOnFirstTick = false;
-      }
       doEveryTickSubController.doEveryControlTick(supportLegYoVariable.getEnumValue());
       walkingStateMachine.doAction();
       walkingStateMachine.checkTransitionConditions();

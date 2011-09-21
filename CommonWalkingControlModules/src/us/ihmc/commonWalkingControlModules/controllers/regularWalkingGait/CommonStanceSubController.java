@@ -458,4 +458,8 @@ public class CommonStanceSubController implements StanceSubController
       toeOffMoveDuration.set(0.05);
       waitInLoadingPreswingB = true;
    }
+
+   public void initialize()
+   {      
+   }
 }
