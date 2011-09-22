@@ -118,9 +118,11 @@ public class BalanceSupportControlModule
       double desiredPelvisHeightInWorld = getDesiredPelvisHeight();
       double fZOnPelvisInPelvisFrame = pelvisHeightControlModule.doPelvisHeightControl(desiredPelvisHeightInWorld, null);
 
+      double deltaNx = 0.0; //TODO: Rethink the deltaNx stuff and see what it should be...
+      
       // compute joint torques using virtual support actuators
       virtualSupportActuatorControlModule.controlDoubleSupport(lowerBodyTorquesToPack, virtualToePoints, legStrengths, fZOnPelvisInPelvisFrame,
-              torqueOnPelvisInPelvisFrame);
+              torqueOnPelvisInPelvisFrame, deltaNx);
 
       // Add a little knee damping to prevent it from snapping:
       kneeDamperControlModule.addKneeDamping(lowerBodyTorquesToPack.getLegTorques(RobotSide.LEFT));

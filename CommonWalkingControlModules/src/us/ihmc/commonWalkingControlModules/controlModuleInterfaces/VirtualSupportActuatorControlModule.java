@@ -21,5 +21,5 @@ public interface VirtualSupportActuatorControlModule
     */
    public abstract void controlDoubleSupport(LowerBodyTorques lowerBodyTorquesToPack,
            SideDependentList<FramePoint2d> virtualToePoints, SideDependentList<Double> legStrengths, double fZOnPelvisInPelvisFrame,
-           FrameVector torqueOnPelvis);
+           FrameVector torqueOnPelvis, double deltaNx);
 }

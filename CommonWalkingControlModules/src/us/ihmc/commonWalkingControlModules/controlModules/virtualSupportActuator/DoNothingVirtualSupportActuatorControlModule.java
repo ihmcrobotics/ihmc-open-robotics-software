@@ -17,7 +17,7 @@ public class DoNothingVirtualSupportActuatorControlModule implements VirtualSupp
    }
 
    public void controlDoubleSupport(LowerBodyTorques lowerBodyTorquesToPack, SideDependentList<FramePoint2d> virtualToePoints,
-         SideDependentList<Double> legStrengths, double fZOnPelvisInPelvisFrame, FrameVector torqueOnPelvisInPelvisFrame)
+         SideDependentList<Double> legStrengths, double fZOnPelvisInPelvisFrame, FrameVector torqueOnPelvisInPelvisFrame, double deltaNx)
    {
       lowerBodyTorquesToPack.setLowerBodyTorquesToZero();      
    }

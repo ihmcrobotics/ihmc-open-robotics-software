@@ -32,8 +32,10 @@ public class SimpleVirtualSupportActuatorControlModule implements VirtualSupport
    }
 
    public void controlDoubleSupport(LowerBodyTorques lowerBodyTorquesToPack, SideDependentList<FramePoint2d> virtualToePoints,
-         SideDependentList<Double> legStrengths, double fZOnPelvisInPelvisFrame, FrameVector torqueOnPelvis)
+         SideDependentList<Double> legStrengths, double fZOnPelvisInPelvisFrame, FrameVector torqueOnPelvis, double deltaNx)
    {
+      // TODO: Rethink deltaNx and figure out what it should do...
+      
       // distribute forces
       SideDependentList<Double> fZs = new SideDependentList<Double>();
       SideDependentList<FrameVector> torques = new SideDependentList<FrameVector>();
