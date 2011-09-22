@@ -177,9 +177,12 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
 
 
       // Check if everything is in the correct coordinate frame
-      boolean everythingInZUpFrame = desiredCapturePoint.getReferenceFrame().isZupFrame() && currentCapturePoint.getReferenceFrame().isZupFrame()
-            && centerOfMassPositionInZUpFrame.getReferenceFrame().isZupFrame() && desiredVelocity.getReferenceFrame().isZupFrame()
-            && currentVelocity.getReferenceFrame().isZupFrame();
+      boolean everythingInZUpFrame = desiredCapturePoint.getReferenceFrame().isZupFrame() && currentCapturePoint.getReferenceFrame().isZupFrame();
+      
+      if (centerOfMassPositionInZUpFrame != null && !centerOfMassPositionInZUpFrame.getReferenceFrame().isZupFrame()) everythingInZUpFrame = false;
+      if (desiredVelocity != null && !desiredVelocity.getReferenceFrame().isZupFrame()) everythingInZUpFrame = false;
+      if (currentVelocity != null && !currentVelocity.getReferenceFrame().isZupFrame()) everythingInZUpFrame = false;
+      
       if (!everythingInZUpFrame)
       {
          throw new RuntimeException("Everything has to be in a Z Up frame.");
@@ -253,7 +256,7 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
       }
       
       FramePoint2d centerOfPressureDesired = null;
-      if (desiredVelocity.length() == 0.0)
+      if ((desiredVelocity == null) || (desiredVelocity.length() == 0.0))
       {
          centerOfPressureDesired = doProportionalControl(currentCapturePoint2d, desiredCapturePoint2d);
          capturePointLine.setFrameLine2d(null);
