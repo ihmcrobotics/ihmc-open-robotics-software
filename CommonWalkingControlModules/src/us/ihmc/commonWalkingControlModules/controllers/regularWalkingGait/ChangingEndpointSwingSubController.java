@@ -314,6 +314,8 @@ public class ChangingEndpointSwingSubController implements SwingSubController
 
    public void doTransitionIntoSwingInAir(RobotSide swingLeg, BalanceOnOneLegConfiguration currentConfiguration)
    {
+      
+      minimumJerkTrajectoryForFootOrientation.setParams(0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, swingOrientationTime.getDoubleValue());
       setEstimatedSwingTimeRemaining(0.0);
 
       FramePoint currentPosition = new FramePoint(referenceFrames.getFootFrame(swingLeg));

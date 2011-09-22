@@ -98,10 +98,10 @@ public class SwingFullLegJacobian
     * @param anklePitchTwistInAnklePitchFrame
     * @return corresponding joint velocities
     */
-   public LegJointVelocities getJointVelocitiesGivenTwist(Twist anklePitchTwistInAnklePitchFrame)
+   public LegJointVelocities getJointVelocitiesGivenTwist(Twist anklePitchTwistInAnklePitchFrame, double alpha)
    {
       LegJointVelocities ret = new LegJointVelocities(legJointNames, robotSide);
-      packJointVelocitiesGivenTwist(ret, anklePitchTwistInAnklePitchFrame);
+      packJointVelocitiesGivenTwist(ret, anklePitchTwistInAnklePitchFrame, alpha);
       return ret;
    }
    
@@ -110,9 +110,9 @@ public class SwingFullLegJacobian
     * @param anklePitchTwistInAnklePitchFrame
     * @return corresponding joint velocities
     */
-   public void packJointVelocitiesGivenTwist(LegJointVelocities legJointVelocitiesToPack, Twist anklePitchTwistInAnklePitchFrame)
+   public void packJointVelocitiesGivenTwist(LegJointVelocities legJointVelocitiesToPack, Twist anklePitchTwistInAnklePitchFrame, double alpha)
    {
-      Matrix jointVelocities = openChainJacobian.computeJointVelocities(anklePitchTwistInAnklePitchFrame);
+      Matrix jointVelocities = openChainJacobian.computeJointVelocities(anklePitchTwistInAnklePitchFrame, alpha);
       for (int i = 0; i < legJointNames.length; i++)
       {
          LegJointName legJointName = legJointNames[i];
@@ -146,12 +146,12 @@ public class SwingFullLegJacobian
       return robotSide;
    }
 
-   public Matrix computeJointAccelerations(SpatialAccelerationVector accelerationOfFootWithRespectToBody, SpatialAccelerationVector jacobianDerivativeTerm)
+   public Matrix computeJointAccelerations(SpatialAccelerationVector accelerationOfFootWithRespectToBody, SpatialAccelerationVector jacobianDerivativeTerm, double alpha)
    {
       Matrix biasedAccelerations = accelerationOfFootWithRespectToBody.toMatrix();    // unbiased at this point
       Matrix bias = jacobianDerivativeTerm.toMatrix();
       biasedAccelerations.minusEquals(bias);
-      Matrix ret = openChainJacobian.solve(biasedAccelerations);
+      Matrix ret = openChainJacobian.solveUsingDampedLeastSquares(biasedAccelerations, alpha);
 
       return ret;
    }

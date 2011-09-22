@@ -24,14 +24,12 @@ import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenc
 import us.ihmc.commonWalkingControlModules.sensors.ProcessedSensorsInterface;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
-import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.Orientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RotationFunctions;
 import us.ihmc.utilities.screwTheory.InverseDynamicsCalculator;
-import us.ihmc.utilities.screwTheory.RevoluteJoint;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.utilities.screwTheory.Twist;
 import us.ihmc.utilities.screwTheory.Wrench;
@@ -60,6 +58,7 @@ public class PDPlusIDSwingLegTorqueControlModule implements SwingLegTorqueContro
    
    private final BooleanYoVariable inverseKinematicsExceptionHasBeenThrown = new BooleanYoVariable("kinematicException", registry);
    private final DoubleYoVariable jacobianDeterminant = new DoubleYoVariable("jacobianDeterminant", registry);
+   private final DoubleYoVariable dampedLeastSquaresAlpha = new DoubleYoVariable("dampedLeastSquaresAlpha", registry);
    private boolean useBodyAcceleration;
 
    
@@ -86,6 +85,7 @@ public class PDPlusIDSwingLegTorqueControlModule implements SwingLegTorqueContro
          this.desiredLegJointPositions.put(robotSide, new LegJointPositions(robotSide));
          this.desiredLegJointVelocities.put(robotSide, new LegJointVelocities(legJointNames, robotSide));
       }
+      dampedLeastSquaresAlpha.set(0.07);
       
       parentRegistry.addChild(registry);
    }
@@ -119,7 +119,7 @@ public class PDPlusIDSwingLegTorqueControlModule implements SwingLegTorqueContro
 
       // Desired velocities
       DesiredJointVelocityCalculator desiredJointVelocityCalculator = desiredJointVelocityCalculators.get(swingSide);
-      desiredJointVelocityCalculator.packDesiredJointVelocities(desiredLegJointVelocities.get(swingSide), desiredTwistOfSwingFootWithRespectToWorld);
+      desiredJointVelocityCalculator.packDesiredJointVelocities(desiredLegJointVelocities.get(swingSide), desiredTwistOfSwingFootWithRespectToWorld, dampedLeastSquaresAlpha.getDoubleValue());
 
       // set body acceleration
       if (useBodyAcceleration)
@@ -133,18 +133,18 @@ public class PDPlusIDSwingLegTorqueControlModule implements SwingLegTorqueContro
       // Desired acceleration
       SpatialAccelerationVector desiredAccelerationOfSwingFootWithRespectToWorld = computeDesiredSwingFootSpatialAcceleration(elevatorFrame, footFrame, desiredFootAcceleration, desiredFootAngularAcceleration);
       jacobianDeterminant.set(desiredJointVelocityCalculator.swingFullLegJacobianDeterminant());
-      desiredJointAccelerationCalculators.get(swingSide).compute(desiredAccelerationOfSwingFootWithRespectToWorld);
+      desiredJointAccelerationCalculators.get(swingSide).compute(desiredAccelerationOfSwingFootWithRespectToWorld, dampedLeastSquaresAlpha.getDoubleValue());
 
-      double percentScaling = getPercentScalingBasedOnJacobianDeterminant(jacobianDeterminant.getDoubleValue());
+      double percentScaling = 1.0; //getPercentScalingBasedOnJacobianDeterminant(jacobianDeterminant.getDoubleValue());
 
-      LegJointName[] legJointNames = fullRobotModel.getRobotSpecificJointNames().getLegJointNames();
-      for (LegJointName legJointName : legJointNames)
-      {
-         // this is better than not using the torques from the ID calculator at all, because at least gravity and Coriolis forces are compensated for
-         RevoluteJoint revoluteJoint = fullRobotModel.getLegJoint(swingSide, legJointName);
-         double qddDesired = revoluteJoint.getQddDesired();
-         revoluteJoint.setQddDesired(qddDesired * percentScaling);
-      }
+//      LegJointName[] legJointNames = fullRobotModel.getRobotSpecificJointNames().getLegJointNames();
+//      for (LegJointName legJointName : legJointNames)
+//      {
+//         // this is better than not using the torques from the ID calculator at all, because at least gravity and Coriolis forces are compensated for
+//         RevoluteJoint revoluteJoint = fullRobotModel.getLegJoint(swingSide, legJointName);
+//         double qddDesired = revoluteJoint.getQddDesired();
+//         revoluteJoint.setQddDesired(qddDesired * percentScaling);
+//      }
 
       // control
       legJointPositionControlModules.get(swingSide).packTorquesForLegJointsPositionControl(percentScaling, legTorquesToPackForSwingLeg,
@@ -223,16 +223,16 @@ public class PDPlusIDSwingLegTorqueControlModule implements SwingLegTorqueContro
       return ret;
    }
    
-   private double getPercentScalingBasedOnJacobianDeterminant(double jacobianDeterminant)
-   {
-      double determinantThresholdOne = 0.06;    // 0.05;    // 0.025;
-      double determinantThresholdTwo = 0.03;    // 0.02; //0.01;
-
-      double percent = (Math.abs(jacobianDeterminant) - determinantThresholdTwo) / (determinantThresholdOne - determinantThresholdTwo);
-      percent = MathTools.clipToMinMax(percent, 0.0, 1.0);
-
-      return percent;
-   }
+//   private double getPercentScalingBasedOnJacobianDeterminant(double jacobianDeterminant)
+//   {
+//      double determinantThresholdOne = 0.06;    // 0.05;    // 0.025;
+//      double determinantThresholdTwo = 0.03;    // 0.02; //0.01;
+//
+//      double percent = (Math.abs(jacobianDeterminant) - determinantThresholdTwo) / (determinantThresholdOne - determinantThresholdTwo);
+//      percent = MathTools.clipToMinMax(percent, 0.0, 1.0);
+//
+//      return percent;
+//   }
    
    private void setUpperBodyWrench()
    {

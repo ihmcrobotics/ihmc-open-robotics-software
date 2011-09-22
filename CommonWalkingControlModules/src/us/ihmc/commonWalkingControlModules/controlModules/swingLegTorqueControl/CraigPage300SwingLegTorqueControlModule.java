@@ -22,7 +22,6 @@ import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenc
 import us.ihmc.commonWalkingControlModules.sensors.ProcessedSensorsInterface;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
-import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.Orientation;
@@ -69,6 +68,8 @@ public class CraigPage300SwingLegTorqueControlModule implements SwingLegTorqueCo
 
    private final DoubleYoVariable softScaleFactor = new DoubleYoVariable("softScaleFactor", registry);
    private final DoubleYoVariable ankleTorqueScale = new DoubleYoVariable("ankleTorqueScale", registry);
+   
+   private final DoubleYoVariable dampedLeastSquaresAlpha = new DoubleYoVariable("dampedLeastSquaresAlpha", registry);
 
    private final SideDependentList<LegJointPositions> desiredLegJointPositions = new SideDependentList<LegJointPositions>();
    private final SideDependentList<LegJointVelocities> desiredLegJointVelocities = new SideDependentList<LegJointVelocities>();
@@ -80,8 +81,8 @@ public class CraigPage300SwingLegTorqueControlModule implements SwingLegTorqueCo
    private final SideDependentList<InverseDynamicsCalculator> inverseDynamicsCalculators;
 
    private final BooleanYoVariable inverseKinematicsExceptionHasBeenThrown = new BooleanYoVariable("kinematicException", registry);
-   private final DoubleYoVariable jacobianDeterminant = new DoubleYoVariable("jacobianDeterminant", registry);
-   private final DoubleYoVariable inverseDynamicsPercentScaling = new DoubleYoVariable("inverseDynamicsPercentScaling", registry);
+//   private final DoubleYoVariable jacobianDeterminant = new DoubleYoVariable("jacobianDeterminant", registry);
+//   private final DoubleYoVariable inverseDynamicsPercentScaling = new DoubleYoVariable("inverseDynamicsPercentScaling", registry);
    private boolean useBodyAcceleration;
 
 
@@ -164,7 +165,7 @@ public class CraigPage300SwingLegTorqueControlModule implements SwingLegTorqueCo
 
       // Desired velocities
       DesiredJointVelocityCalculator desiredJointVelocityCalculator = desiredJointVelocityCalculators.get(swingSide);
-      desiredJointVelocityCalculator.packDesiredJointVelocities(desiredLegJointVelocities.get(swingSide), desiredTwistOfSwingFootWithRespectToWorld);
+      desiredJointVelocityCalculator.packDesiredJointVelocities(desiredLegJointVelocities.get(swingSide), desiredTwistOfSwingFootWithRespectToWorld, dampedLeastSquaresAlpha.getDoubleValue());
 
       // set body acceleration
       if (useBodyAcceleration)
@@ -178,10 +179,10 @@ public class CraigPage300SwingLegTorqueControlModule implements SwingLegTorqueCo
       // Desired acceleration
       SpatialAccelerationVector desiredAccelerationOfSwingFootWithRespectToWorld = computeDesiredSwingFootSpatialAcceleration(elevatorFrame, footFrame,
                                                                                       desiredFootAcceleration, desiredFootAngularAcceleration);
-      jacobianDeterminant.set(desiredJointVelocityCalculator.swingFullLegJacobianDeterminant());
-      desiredJointAccelerationCalculators.get(swingSide).compute(desiredAccelerationOfSwingFootWithRespectToWorld);
+//      jacobianDeterminant.set(desiredJointVelocityCalculator.swingFullLegJacobianDeterminant());
+      desiredJointAccelerationCalculators.get(swingSide).compute(desiredAccelerationOfSwingFootWithRespectToWorld, dampedLeastSquaresAlpha.getDoubleValue());
 
-      inverseDynamicsPercentScaling.set(getPercentScalingBasedOnJacobianDeterminant(jacobianDeterminant.getDoubleValue()));
+//      inverseDynamicsPercentScaling.set(getPercentScalingBasedOnJacobianDeterminant(jacobianDeterminant.getDoubleValue()));
 
       LegJointName[] legJointNames = fullRobotModel.getRobotSpecificJointNames().getLegJointNames();
       for (LegJointName legJointName : legJointNames)
@@ -203,7 +204,7 @@ public class CraigPage300SwingLegTorqueControlModule implements SwingLegTorqueCo
          double kdGain = kdGains.get(legJointName).getDoubleValue();
          double qddDesiredWithPD = positionError * kpGain + velocityError * kdGain + qddDesired;
          
-         qddDesiredWithPD *= inverseDynamicsPercentScaling.getDoubleValue();
+//         qddDesiredWithPD *= inverseDynamicsPercentScaling.getDoubleValue();
 
          revoluteJoint.setQddDesired(qddDesiredWithPD);
       }
@@ -289,16 +290,16 @@ public class CraigPage300SwingLegTorqueControlModule implements SwingLegTorqueCo
       return ret;
    }
 
-   private double getPercentScalingBasedOnJacobianDeterminant(double jacobianDeterminant)
-   {
-      double determinantThresholdOne = 0.06;    // 0.05;    // 0.025;
-      double determinantThresholdTwo = 0.03;    // 0.02; //0.01;
-
-      double percent = (Math.abs(jacobianDeterminant) - determinantThresholdTwo) / (determinantThresholdOne - determinantThresholdTwo);
-      percent = MathTools.clipToMinMax(percent, 0.0, 1.0);
-
-      return percent;
-   }
+//   private double getPercentScalingBasedOnJacobianDeterminant(double jacobianDeterminant)
+//   {
+//      double determinantThresholdOne = 0.06;    // 0.05;    // 0.025;
+//      double determinantThresholdTwo = 0.03;    // 0.02; //0.01;
+//
+//      double percent = (Math.abs(jacobianDeterminant) - determinantThresholdTwo) / (determinantThresholdOne - determinantThresholdTwo);
+//      percent = MathTools.clipToMinMax(percent, 0.0, 1.0);
+//
+//      return percent;
+//   }
 
    private void setUpperBodyWrench()
    {
