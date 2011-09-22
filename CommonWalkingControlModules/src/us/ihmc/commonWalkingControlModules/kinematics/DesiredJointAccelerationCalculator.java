@@ -55,12 +55,12 @@ public class DesiredJointAccelerationCalculator
     * Assumes that the swingLegJacobian is already updated
     * Assumes that the rootJoint's acceleration has already been set
     */
-   public void compute(SpatialAccelerationVector desiredAccelerationOfFootWithRespectToWorld)
+   public void compute(SpatialAccelerationVector desiredAccelerationOfFootWithRespectToWorld, double alpha)
    {
       computeDesiredAccelerationOfFootWithRespectToPelvis(accelerationOfFootWithRespectToPelvis, desiredAccelerationOfFootWithRespectToWorld);
 
       computeJacobianDerivativeTerm(jacobianDerivativeTerm);
-      computeJointAccelerations(accelerationOfFootWithRespectToPelvis, jacobianDerivativeTerm);
+      computeJointAccelerations(accelerationOfFootWithRespectToPelvis, jacobianDerivativeTerm, alpha);
    }
 
    private final Twist twistOfPelvisWithRespectToElevator = new Twist();
@@ -140,9 +140,9 @@ public class DesiredJointAccelerationCalculator
       return ret;
    }
 
-   private void computeJointAccelerations(SpatialAccelerationVector accelerationOfFootWithRespectToPelvis, SpatialAccelerationVector jacobianDerivativeTerm)
+   private void computeJointAccelerations(SpatialAccelerationVector accelerationOfFootWithRespectToPelvis, SpatialAccelerationVector jacobianDerivativeTerm, double alpha)
    {
-      Matrix jointAccelerations = swingLegJacobian.computeJointAccelerations(accelerationOfFootWithRespectToPelvis, jacobianDerivativeTerm);
+      Matrix jointAccelerations = swingLegJacobian.computeJointAccelerations(accelerationOfFootWithRespectToPelvis, jacobianDerivativeTerm, alpha);
 
 
       for (int i = 0; i < legJointNames.length; i++)
