@@ -21,21 +21,20 @@ public class ExampleOptimizationProblemOneTest
       double stepChange = 0.01;
       int numberOfEvaluations = 500;
       SimpleRandomGradientDecentParameterOptimizer optimizer = new SimpleRandomGradientDecentParameterOptimizer(stepChange, numberOfEvaluations);
-      double[] result = optimizer.optimize(optimizationProblem);
+      listOfParametersToOptimize = optimizer.optimize(optimizationProblem);
       
-      double optimalX = xParameterToOptimize.getValueGivenZeroToOne(result[0]);
+      double optimalX = xParameterToOptimize.getCurrentValue();
       
       assertEquals(10.0, optimalX, 0.02);
    }
    
    private class SimpleXSquaredCostFunction implements CostFunction
    {
-      public double evaluate(ListOfParametersToOptimize listOfParameters, double[] zerosToOne)
+      public double evaluate(ListOfParametersToOptimize listOfParameters)
       {
            DoubleParameterToOptimize xToOptimize = (DoubleParameterToOptimize) listOfParameters.get(0);
-           double zeroToOne = zerosToOne[0];
            
-           double x = xToOptimize.getValueGivenZeroToOne(zeroToOne);
+           double x = xToOptimize.getCurrentValue();
            
 //           System.out.println("evaluate: x = " + x);
            return (x-10.0) * (x-10.0);
@@ -63,10 +62,8 @@ public class ExampleOptimizationProblemOneTest
       double stepChange = 0.01;
       int numberOfEvaluations = 2000;
       SimpleRandomGradientDecentParameterOptimizer optimizer = new SimpleRandomGradientDecentParameterOptimizer(stepChange, numberOfEvaluations);
-      double[] result = optimizer.optimize(optimizationProblem);
-      
-      listOfParametersToOptimize.setCurrentValuesGivenZeroToOnes(result);
-      
+      listOfParametersToOptimize = optimizer.optimize(optimizationProblem);
+            
       double optimalX = xParameterToOptimize.getCurrentValue();
       boolean optimalBoolean = booleanParameterToOptimize.getCurrentValue();
       int optimalInteger = integerParameterToOptimize.getCurrentValue();
@@ -85,10 +82,8 @@ public class ExampleOptimizationProblemOneTest
    
    private class SimpleThreeParameterCostFunction implements CostFunction
    {
-      public double evaluate(ListOfParametersToOptimize listOfParameters, double[] zeroToOnes)
-      {
-         listOfParameters.setCurrentValuesGivenZeroToOnes(zeroToOnes);
-         
+      public double evaluate(ListOfParametersToOptimize listOfParameters)
+      {         
          DoubleParameterToOptimize xToOptimize = (DoubleParameterToOptimize) listOfParameters.get(0);
          BooleanParameterToOptimize booleanToOptimize = (BooleanParameterToOptimize) listOfParameters.get(1);
          IntegerParameterToOptimize integerToOptimize = (IntegerParameterToOptimize) listOfParameters.get(2);
@@ -129,10 +124,8 @@ public class ExampleOptimizationProblemOneTest
 
       CostFunction sampleCostFunction = new CostFunction()
       {
-         public double evaluate(ListOfParametersToOptimize listOfParameters, double[] zeroToOnes)
+         public double evaluate(ListOfParametersToOptimize listOfParameters)
          {
-            listOfParameters.setCurrentValuesGivenZeroToOnes(zeroToOnes);
-
             double candidateX = xParameterToOptimize.getCurrentValue();
             boolean candidateBoolean = booleanParameterToOptimize.getCurrentValue();
             int candidateInteger = integerParameterToOptimize.getCurrentValue();
@@ -156,10 +149,8 @@ public class ExampleOptimizationProblemOneTest
       double stepChange = 0.01;
       int numberOfEvaluations = 2000;
       SimpleRandomGradientDecentParameterOptimizer optimizer = new SimpleRandomGradientDecentParameterOptimizer(stepChange, numberOfEvaluations);
-      double[] result = optimizer.optimize(optimizationProblem);
-      
-      listOfParametersToOptimize.setCurrentValuesGivenZeroToOnes(result);
-      
+      listOfParametersToOptimize = optimizer.optimize(optimizationProblem);
+            
       double optimalX = xParameterToOptimize.getCurrentValue();
       boolean optimalBoolean = booleanParameterToOptimize.getCurrentValue();
       int optimalInteger = integerParameterToOptimize.getCurrentValue();

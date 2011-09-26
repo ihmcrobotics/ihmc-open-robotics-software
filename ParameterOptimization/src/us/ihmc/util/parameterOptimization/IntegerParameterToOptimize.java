@@ -30,4 +30,16 @@ public class IntegerParameterToOptimize implements ParameterToOptimize
    {
       return currentValue;
    }
+   
+   public void setCurrentValue(ParameterToOptimize parameterToOptimize)
+   {
+      setCurrentValue(((IntegerParameterToOptimize) parameterToOptimize).getCurrentValue());
+   }
+   
+   public void setCurrentValue(int newValue)
+   {
+      this.currentValue = newValue;
+   }
+   
+   
 }

@@ -17,5 +17,11 @@ public class BooleanYoVariableParameterToOptimize extends BooleanParameterToOpti
       super.setCurrentValueGivenZeroToOne(zeroToOne);
       yoVariable.set(this.getCurrentValue());
    }
+   
+   public void setCurrentValue(boolean newValue)
+   {
+      super.setCurrentValue(newValue);
+      yoVariable.set(newValue);
+   }
 
 }

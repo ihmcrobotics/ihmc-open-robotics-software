@@ -17,5 +17,11 @@ public class DoubleYoVariableParameterToOptimize extends DoubleParameterToOptimi
       super.setCurrentValueGivenZeroToOne(zeroToOne);
       yoVariable.set(this.getCurrentValue());
    }
+   
+   public void setCurrentValue(double newValue)
+   {
+      super.setCurrentValue(newValue);
+      yoVariable.set(newValue);
+   }
 
 }

@@ -24,4 +24,14 @@ public class BooleanParameterToOptimize implements ParameterToOptimize
    {
       return currentValue;
    }
+
+   public void setCurrentValue(ParameterToOptimize parameterToOptimize)
+   {
+      setCurrentValue(((BooleanParameterToOptimize) parameterToOptimize).getCurrentValue());
+   }
+   
+   public void setCurrentValue(boolean currentValue)
+   {
+      this.currentValue = currentValue;
+   }
 }

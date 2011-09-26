@@ -14,17 +14,17 @@ public class SimpleRandomGradientDecentParameterOptimizer implements ParameterOp
       this.numberOfEvaluations = numberOfEvaluations;
    }
    
-   public double[] optimize(OptimizationProblem optimizationProblem)
+   public ListOfParametersToOptimize optimize(OptimizationProblem optimizationProblem)
    {
       CostFunction costFunction = optimizationProblem.getCostFunction();
       ListOfParametersToOptimize listOfParametersToOptimize = optimizationProblem.getListOfParametersToOptimize();
       int numberOfParameters = listOfParametersToOptimize.getNumberOfParameters();
       
-      double[] zerosToOne = new double[numberOfParameters];
+      double[] zeroToOnes = new double[numberOfParameters];
       
-      for (int i=0; i<zerosToOne.length; i++)
+      for (int i=0; i<zeroToOnes.length; i++)
       {
-         zerosToOne[i] = random.nextDouble();
+         zeroToOnes[i] = random.nextDouble();
       }
       
       double bestCost = Double.POSITIVE_INFINITY;
@@ -33,16 +33,18 @@ public class SimpleRandomGradientDecentParameterOptimizer implements ParameterOp
       {
          int parameterToChangeIndex = random.nextInt(numberOfParameters);
 //         ParameterToOptimize parameterToChange = listOfParametersToOptimize.get(parameterToChangeIndex);
-         double currentValue = zerosToOne[parameterToChangeIndex];
+         double currentValue = zeroToOnes[parameterToChangeIndex];
          double change = (1.0 - 2.0 * random.nextDouble()) * stepChange;
          double newValue = currentValue + change;
          
          if (newValue < 0.0) newValue = 0.0;
          if (newValue > 1.0) newValue = 1.0;
          
-         zerosToOne[parameterToChangeIndex] = newValue;
+         zeroToOnes[parameterToChangeIndex] = newValue;
          
-         double cost = costFunction.evaluate(listOfParametersToOptimize, zerosToOne);
+         listOfParametersToOptimize.setCurrentValuesGivenZeroToOnes(zeroToOnes);
+
+         double cost = costFunction.evaluate(listOfParametersToOptimize);
 //         System.out.println("Parameter optimizer: cost = " + cost + ", bestCost = " + bestCost);
          
          if (cost < bestCost)
@@ -51,11 +53,12 @@ public class SimpleRandomGradientDecentParameterOptimizer implements ParameterOp
          }
          else
          {
-            zerosToOne[parameterToChangeIndex] = currentValue;
+            zeroToOnes[parameterToChangeIndex] = currentValue;
          }
       }
       
-      return zerosToOne;
+      listOfParametersToOptimize.setCurrentValuesGivenZeroToOnes(zeroToOnes);
+      return listOfParametersToOptimize;
    }
 
    public void attachListener()
