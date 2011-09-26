@@ -30,4 +30,15 @@ public class DoubleParameterToOptimize implements ParameterToOptimize
    {
       return currentValue;
    }
+
+   public void setCurrentValue(ParameterToOptimize parameterToOptimize)
+   {
+      double newValue = ((DoubleParameterToOptimize) parameterToOptimize).getCurrentValue();
+      setCurrentValue(newValue);
+   }
+   
+   public void setCurrentValue(double newValue)
+   {
+      this.currentValue = newValue;
+   }
 }

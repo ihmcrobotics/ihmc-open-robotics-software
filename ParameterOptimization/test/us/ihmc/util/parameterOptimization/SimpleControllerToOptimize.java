@@ -13,14 +13,20 @@ public class SimpleControllerToOptimize implements RobotController
    private final DoubleYoVariable parameterOne = new DoubleYoVariable("parameterOne", registry);
    private final DoubleYoVariable costFunction = new DoubleYoVariable("costFunction", registry);
    
-   public ListOfParametersToOptimize getListOfParametersToOptimizeForTrialOne()
+   private final ListOfParametersToOptimize listOfParametersToOptimize;
+   
+   public SimpleControllerToOptimize()
    {
-      ListOfParametersToOptimize ret = new ListOfParametersToOptimize();
+      listOfParametersToOptimize = new ListOfParametersToOptimize();
       
       DoubleYoVariableParameterToOptimize parameterOneToOptimize = new DoubleYoVariableParameterToOptimize(-10.0, 10.0, parameterOne);
-      ret.addParameterToOptimize(parameterOneToOptimize);
-      
-      return ret;
+      listOfParametersToOptimize.addParameterToOptimize(parameterOneToOptimize); 
+   }
+   
+   
+   public ListOfParametersToOptimize getListOfParametersToOptimizeForTrialOne()
+   {
+      return listOfParametersToOptimize;
    }
    
    public void initialize()
@@ -44,18 +50,27 @@ public class SimpleControllerToOptimize implements RobotController
 
    public void doControl()
    {
-      System.out.println("SimpleControllerToOptimize: doControl");
       costFunction.set((2.0 - parameterOne.getDoubleValue()) * (2.0 - parameterOne.getDoubleValue()));
-      System.out.println("SimpleControllerToOptimize: doControl. costFunction = " + costFunction.getDoubleValue());
-
    }
    
    public double getCost()
    {
       double ret = costFunction.getDoubleValue();
-      System.out.println("SimpleControllerToOptimize: getCost(): " + ret);
 
       return ret;
+   }
+
+   public void setCurrentValues(ListOfParametersToOptimize listOfParameters)
+   {
+      this.listOfParametersToOptimize.setCurrentValues(listOfParameters);      
+   }
+
+
+   public void printParameters(ListOfParametersToOptimize listOfParametersToOptimize)
+   {
+      DoubleYoVariableParameterToOptimize parameter = (DoubleYoVariableParameterToOptimize) listOfParametersToOptimize.get(0);
+      System.out.println("parameter = " + parameter.getCurrentValue());
+      System.out.println("parameterOne = " + parameterOne.getDoubleValue());
    }
 
 }

@@ -37,4 +37,18 @@ public class ListOfParametersToOptimize
          parameterToOptimize.setCurrentValueGivenZeroToOne(zeroToOnes[i]);
       }
    }
+
+   public void setCurrentValues(ListOfParametersToOptimize listOfParameters)
+   {
+      if (this.parametersToOptimize.size() != listOfParameters.parametersToOptimize.size())
+      {
+         throw new RuntimeException("List lengths are different!");
+      }
+      
+      for (int i=0; i<parametersToOptimize.size(); i++)
+      {
+         parametersToOptimize.get(i).setCurrentValue(listOfParameters.parametersToOptimize.get(i));
+      }
+      
+   }
 }

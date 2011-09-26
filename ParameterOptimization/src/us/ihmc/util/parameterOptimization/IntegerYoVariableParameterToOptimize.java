@@ -17,5 +17,11 @@ public class IntegerYoVariableParameterToOptimize extends IntegerParameterToOpti
       super.setCurrentValueGivenZeroToOne(zeroToOne);
       yoVariable.set(this.getCurrentValue());
    }
+   
+   public void setCurrentValue(int newValue)
+   {
+      super.setCurrentValue(newValue);
+      yoVariable.set(newValue);
+   }
 
 }
