@@ -6,9 +6,9 @@ public class IntegerYoVariableParameterToOptimize extends IntegerParameterToOpti
 {
    private final IntegerYoVariable yoVariable;
    
-   public IntegerYoVariableParameterToOptimize(int min, int max, IntegerYoVariable yoVariable)
+   public IntegerYoVariableParameterToOptimize(int min, int max, IntegerYoVariable yoVariable, ListOfParametersToOptimize listOfParametersToOptimize)
    {
-      super(min, max);
+      super(yoVariable.getName(), min, max, listOfParametersToOptimize);
       this.yoVariable = yoVariable;
    }
    

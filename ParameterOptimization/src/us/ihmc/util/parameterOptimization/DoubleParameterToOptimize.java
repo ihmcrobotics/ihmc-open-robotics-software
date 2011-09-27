@@ -1,14 +1,35 @@
 package us.ihmc.util.parameterOptimization;
 
-public class DoubleParameterToOptimize implements ParameterToOptimize
+public class DoubleParameterToOptimize extends ParameterToOptimize
 {
    private final double min, max;
+   private final int bitsOfResolution;
+   
    private double currentValue;
    
-   public DoubleParameterToOptimize(double min, double max)
+   public DoubleParameterToOptimize(String name, double min, double max, ListOfParametersToOptimize listOfParametersToOptimize)
    {
+      this(name, min, max, 16, listOfParametersToOptimize);
+   }
+   
+   public DoubleParameterToOptimize(String name, double min, double max, int bitsOfResolution, ListOfParametersToOptimize listOfParametersToOptimize)
+   {
+      super(name); 
+      
       this.min = min; 
       this.max = max;
+      
+      if (bitsOfResolution < 1) 
+         throw new RuntimeException("bitsOfResolution < 1");
+      
+      this.bitsOfResolution = bitsOfResolution;
+      
+      listOfParametersToOptimize.addParameterToOptimize(this);
+   }
+   
+   public int getBitsOfResolution()
+   {
+      return bitsOfResolution;
    }
    
    public double getValueGivenZeroToOne(double zeroToOne)

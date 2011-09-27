@@ -1,8 +1,22 @@
 package us.ihmc.util.parameterOptimization;
 
-public interface ParameterToOptimize
+public abstract class ParameterToOptimize
 {
+   private final String name;
+   
+   public ParameterToOptimize(String name)
+   {
+      this.name = name;
+   }
+   
+   public String getName()
+   {
+      return name;
+   }
+   
    public abstract ParameterToOptimizeType getType();
    public abstract void setCurrentValueGivenZeroToOne(double zeroToOne);
    public abstract void setCurrentValue(ParameterToOptimize parameterToOptimize);
+   public abstract int getBitsOfResolution();
+
 }

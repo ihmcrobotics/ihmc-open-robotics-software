@@ -3,22 +3,29 @@ package us.ihmc.util.parameterOptimization;
 
 public class OptimizationProblem
 {
-   private final ListOfParametersToOptimize listOfParametersToOptimize;
-   private final CostFunction costFunction;
+   private final IndividualToEvaluate seedIndividual;
+   private final boolean maximize;
+   private final double cutoffFitness;
    
-   public OptimizationProblem(ListOfParametersToOptimize listOfParametersToOptimize, CostFunction costFunction)
+   public OptimizationProblem(IndividualToEvaluate seedIndividual, boolean maximize, double cutoffFitness)
    {
-      this.listOfParametersToOptimize = listOfParametersToOptimize;
-      this.costFunction = costFunction;
+      this.seedIndividual = seedIndividual;
+      this.maximize = maximize;
+      this.cutoffFitness = cutoffFitness;
    }
    
-   public ListOfParametersToOptimize getListOfParametersToOptimize()
+   public IndividualToEvaluate getSeedIndividualToEvaluate()
    {
-      return listOfParametersToOptimize;
+      return seedIndividual;
    }
    
-   public CostFunction getCostFunction()
+   public boolean getMaximize()
    {
-      return costFunction;
+      return maximize;
+   }
+   
+   public double getCutoffFitness()
+   {
+      return cutoffFitness;
    }
 }
