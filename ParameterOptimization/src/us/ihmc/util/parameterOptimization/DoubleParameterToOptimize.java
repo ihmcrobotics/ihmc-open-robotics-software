@@ -62,4 +62,9 @@ public class DoubleParameterToOptimize extends ParameterToOptimize
    {
       this.currentValue = newValue;
    }
+   
+   public String toString()
+   {
+      return this.getName() + ": " + currentValue + ", [" + min + ", " + max + "], (" + bitsOfResolution + ")";
+   }
 }

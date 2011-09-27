@@ -45,4 +45,9 @@ public class BooleanParameterToOptimize extends ParameterToOptimize
    {
       this.currentValue = currentValue;
    }
+   
+   public String toString()
+   {
+      return this.getName() + ": " + currentValue;
+   }
 }

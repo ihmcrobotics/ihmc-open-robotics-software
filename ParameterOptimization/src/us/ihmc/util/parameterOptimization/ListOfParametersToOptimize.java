@@ -26,6 +26,19 @@ public class ListOfParametersToOptimize
       return parametersToOptimize.size();
    }
    
+   public String[] getNames()
+   {
+      int numberOfParameters = parametersToOptimize.size();
+      String[] ret = new String[numberOfParameters];
+      
+      for(int i=0; i<numberOfParameters; i++)
+      {
+        ret[i] = parametersToOptimize.get(i).getName();
+      }
+      
+      return ret;
+   }
+   
    public int[] getBitsOfResolution()
    {
       int[] bitsOfResolution = new int[this.getNumberOfParameters()];
@@ -63,6 +76,19 @@ public class ListOfParametersToOptimize
          parametersToOptimize.get(i).setCurrentValue(listOfParameters.parametersToOptimize.get(i));
       }
       
+   }
+   
+   public String toString()
+   {
+      StringBuilder builder = new StringBuilder();
+      
+      for(int i=0; i<parametersToOptimize.size(); i++)
+      {
+         ParameterToOptimize parameterToOptimize = parametersToOptimize.get(i);
+         builder.append(parameterToOptimize.toString() + "\n");        
+      }
+      
+      return builder.toString();
    }
 
 }
