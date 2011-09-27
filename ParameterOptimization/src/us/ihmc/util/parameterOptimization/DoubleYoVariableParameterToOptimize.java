@@ -6,9 +6,9 @@ public class DoubleYoVariableParameterToOptimize extends DoubleParameterToOptimi
 {
    private final DoubleYoVariable yoVariable;
    
-   public DoubleYoVariableParameterToOptimize(double min, double max, DoubleYoVariable yoVariable)
+   public DoubleYoVariableParameterToOptimize(double min, double max, DoubleYoVariable yoVariable, ListOfParametersToOptimize listOfParametersToOptimize)
    {
-      super(min, max);
+      super(yoVariable.getName(), min, max, listOfParametersToOptimize);
       this.yoVariable = yoVariable;
    }
    

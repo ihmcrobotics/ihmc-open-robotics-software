@@ -6,9 +6,9 @@ public class BooleanYoVariableParameterToOptimize extends BooleanParameterToOpti
 {
    private final BooleanYoVariable yoVariable;
    
-   public BooleanYoVariableParameterToOptimize(BooleanYoVariable yoVariable)
+   public BooleanYoVariableParameterToOptimize(BooleanYoVariable yoVariable, ListOfParametersToOptimize listOfParametersToOptimize)
    {
-      super();
+      super(yoVariable.getName(), listOfParametersToOptimize);
       this.yoVariable = yoVariable;
    }
    

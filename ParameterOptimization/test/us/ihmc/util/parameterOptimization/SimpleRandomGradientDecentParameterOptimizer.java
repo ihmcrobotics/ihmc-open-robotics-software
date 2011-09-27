@@ -14,11 +14,11 @@ public class SimpleRandomGradientDecentParameterOptimizer implements ParameterOp
       this.numberOfEvaluations = numberOfEvaluations;
    }
    
-   public ListOfParametersToOptimize optimize(OptimizationProblem optimizationProblem)
+   public IndividualToEvaluate optimize(OptimizationProblem optimizationProblem)
    {
-      CostFunction costFunction = optimizationProblem.getCostFunction();
-      ListOfParametersToOptimize listOfParametersToOptimize = optimizationProblem.getListOfParametersToOptimize();
-      int numberOfParameters = listOfParametersToOptimize.getNumberOfParameters();
+      IndividualToEvaluate seedIndividual = optimizationProblem.getSeedIndividualToEvaluate();
+      ListOfParametersToOptimize seedParametersToOptimize = seedIndividual.getListOfParametersToOptimize();
+      int numberOfParameters = seedParametersToOptimize.getNumberOfParameters();
       
       double[] zeroToOnes = new double[numberOfParameters];
       
@@ -28,6 +28,7 @@ public class SimpleRandomGradientDecentParameterOptimizer implements ParameterOp
       }
       
       double bestCost = Double.POSITIVE_INFINITY;
+      IndividualToEvaluate bestIndividual = null;
       
       for (int i=0; i<numberOfEvaluations; i++)
       {
@@ -42,14 +43,30 @@ public class SimpleRandomGradientDecentParameterOptimizer implements ParameterOp
          
          zeroToOnes[parameterToChangeIndex] = newValue;
          
+         IndividualToEvaluate testIndividual = seedIndividual.createNewIndividual();
+         ListOfParametersToOptimize listOfParametersToOptimize = testIndividual.getListOfParametersToOptimize();
          listOfParametersToOptimize.setCurrentValuesGivenZeroToOnes(zeroToOnes);
 
-         double cost = costFunction.evaluate(listOfParametersToOptimize);
+         testIndividual.startEvaluation();
+         while(!testIndividual.isEvaluationDone())
+         {
+            try
+            {
+               Thread.sleep(100);
+            } 
+            catch (InterruptedException e)
+            {
+            }
+         }
+         double cost = testIndividual.getFitness();
+         
+//         double cost = costFunction.evaluate(listOfParametersToOptimize);
 //         System.out.println("Parameter optimizer: cost = " + cost + ", bestCost = " + bestCost);
          
          if (cost < bestCost)
          {
             bestCost = cost;
+            bestIndividual = testIndividual;
          }
          else
          {
@@ -57,8 +74,7 @@ public class SimpleRandomGradientDecentParameterOptimizer implements ParameterOp
          }
       }
       
-      listOfParametersToOptimize.setCurrentValuesGivenZeroToOnes(zeroToOnes);
-      return listOfParametersToOptimize;
+      return bestIndividual;
    }
 
    public void attachListener()

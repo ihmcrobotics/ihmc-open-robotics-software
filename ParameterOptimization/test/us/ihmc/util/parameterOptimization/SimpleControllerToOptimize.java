@@ -19,8 +19,7 @@ public class SimpleControllerToOptimize implements RobotController
    {
       listOfParametersToOptimize = new ListOfParametersToOptimize();
       
-      DoubleYoVariableParameterToOptimize parameterOneToOptimize = new DoubleYoVariableParameterToOptimize(-10.0, 10.0, parameterOne);
-      listOfParametersToOptimize.addParameterToOptimize(parameterOneToOptimize); 
+      DoubleYoVariableParameterToOptimize parameterOneToOptimize = new DoubleYoVariableParameterToOptimize(-10.0, 10.0, parameterOne, listOfParametersToOptimize);
    }
    
    
@@ -71,6 +70,15 @@ public class SimpleControllerToOptimize implements RobotController
       DoubleYoVariableParameterToOptimize parameter = (DoubleYoVariableParameterToOptimize) listOfParametersToOptimize.get(0);
       System.out.println("parameter = " + parameter.getCurrentValue());
       System.out.println("parameterOne = " + parameterOne.getDoubleValue());
+   }
+
+
+   public boolean verifyParametersCloseToOptimal()
+   {
+      DoubleYoVariableParameterToOptimize parameter = (DoubleYoVariableParameterToOptimize) listOfParametersToOptimize.get(0);
+      if (Math.abs(parameter.getCurrentValue() - 2.0) < 0.01) return true;
+      
+      return false;
    }
 
 }

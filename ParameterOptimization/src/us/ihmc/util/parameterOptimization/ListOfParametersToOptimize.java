@@ -26,6 +26,19 @@ public class ListOfParametersToOptimize
       return parametersToOptimize.size();
    }
    
+   public int[] getBitsOfResolution()
+   {
+      int[] bitsOfResolution = new int[this.getNumberOfParameters()];
+
+      for (int i=0; i<this.getNumberOfParameters(); i++)
+      {
+         ParameterToOptimize parameterToOptimize = this.get(i);
+         bitsOfResolution[i] =  parameterToOptimize.getBitsOfResolution(); 
+      }
+
+      return bitsOfResolution;
+   }
+   
    public void setCurrentValuesGivenZeroToOnes(double[] zeroToOnes)
    {
       if (zeroToOnes.length != parametersToOptimize.size())
@@ -51,4 +64,5 @@ public class ListOfParametersToOptimize
       }
       
    }
+
 }

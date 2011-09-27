@@ -1,14 +1,26 @@
 package us.ihmc.util.parameterOptimization;
 
-public class IntegerParameterToOptimize implements ParameterToOptimize
+public class IntegerParameterToOptimize extends ParameterToOptimize
 {
    private final int min, max;
+   private final int bitsOfResolution;
    private int currentValue;
    
-   public IntegerParameterToOptimize(int min, int max)
+   public IntegerParameterToOptimize(String name, int min, int max, ListOfParametersToOptimize listOfParametersToOptimize)
    {
+      super(name);
+      
       this.min = min;
       this.max = max;
+      
+      this.bitsOfResolution = Math.max(1, (int) (Math.ceil(Math.log(1.0 + Math.abs(max - min)) / Math.log(2.0))));
+      
+      listOfParametersToOptimize.addParameterToOptimize(this);
+   }
+   
+   public int getBitsOfResolution()
+   {
+      return bitsOfResolution;
    }
    
    public int getValueGivenZeroToOne(double zeroToOne)

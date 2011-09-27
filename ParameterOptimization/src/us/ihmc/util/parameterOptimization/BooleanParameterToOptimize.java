@@ -1,9 +1,20 @@
 package us.ihmc.util.parameterOptimization;
 
 
-public class BooleanParameterToOptimize implements ParameterToOptimize
+public class BooleanParameterToOptimize extends ParameterToOptimize
 {   
    private boolean currentValue;
+   
+   public BooleanParameterToOptimize(String name, ListOfParametersToOptimize listOfParametersToOptimize)
+   {
+      super(name);
+      listOfParametersToOptimize.addParameterToOptimize(this);
+   }
+   
+   public int getBitsOfResolution()
+   {
+      return 1;
+   }
    
    public boolean getValueGivenZeroToOne(double zeroToOne)
    {

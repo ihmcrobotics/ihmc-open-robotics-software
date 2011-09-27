@@ -2,6 +2,8 @@ package us.ihmc.util.parameterOptimization;
 
 import static org.junit.Assert.assertEquals;
 
+import javax.swing.text.DefaultEditorKit.CutAction;
+
 import org.junit.Test;
 
 public class ExampleOptimizationProblemOneTest
@@ -10,60 +12,91 @@ public class ExampleOptimizationProblemOneTest
    @Test
    public void testSimpleXSquaredOptimization()
    {
-      SimpleXSquaredCostFunction sampleCostFunction = new SimpleXSquaredCostFunction();
-      ListOfParametersToOptimize listOfParametersToOptimize = new ListOfParametersToOptimize();
+      SimpleXSquaredCostFunction sampleCostFunction = new SimpleXSquaredCostFunction();      
+      boolean maximize = false;
+      double cutoffFitness = Double.NEGATIVE_INFINITY;
       
-      DoubleParameterToOptimize xParameterToOptimize = new DoubleParameterToOptimize(0.0, 100.0);
-      listOfParametersToOptimize.addParameterToOptimize(xParameterToOptimize);
-      
-      OptimizationProblem optimizationProblem = new OptimizationProblem(listOfParametersToOptimize, sampleCostFunction);
+      OptimizationProblem optimizationProblem = new OptimizationProblem(sampleCostFunction, maximize, cutoffFitness);
       
       double stepChange = 0.01;
       int numberOfEvaluations = 500;
       SimpleRandomGradientDecentParameterOptimizer optimizer = new SimpleRandomGradientDecentParameterOptimizer(stepChange, numberOfEvaluations);
-      listOfParametersToOptimize = optimizer.optimize(optimizationProblem);
+      IndividualToEvaluate optimalIndividualToEvaluate = optimizer.optimize(optimizationProblem);
       
-      double optimalX = xParameterToOptimize.getCurrentValue();
+      ListOfParametersToOptimize optimalListOfParametersToOptimize = optimalIndividualToEvaluate.getListOfParametersToOptimize();
+      DoubleParameterToOptimize optimalXParameter = (DoubleParameterToOptimize) optimalListOfParametersToOptimize.get(0);
+      double optimalX = optimalXParameter.getCurrentValue();
       
       assertEquals(10.0, optimalX, 0.02);
    }
    
-   private class SimpleXSquaredCostFunction implements CostFunction
+   private class SimpleXSquaredCostFunction extends IndividualToEvaluate
    {
-      public double evaluate(ListOfParametersToOptimize listOfParameters)
+      private double cost;
+      private boolean isEvaluationDone = false;
+      
+      private final DoubleParameterToOptimize xToOptimize;
+      private final ListOfParametersToOptimize listOfParametersToOptimize;
+      
+      public SimpleXSquaredCostFunction()
       {
-           DoubleParameterToOptimize xToOptimize = (DoubleParameterToOptimize) listOfParameters.get(0);
-           
-           double x = xToOptimize.getCurrentValue();
-           
-//           System.out.println("evaluate: x = " + x);
-           return (x-10.0) * (x-10.0);
+         listOfParametersToOptimize = new ListOfParametersToOptimize();
+         xToOptimize = new DoubleParameterToOptimize("x", 0.0, 100.0, listOfParametersToOptimize);
+      }
+      
+      public ListOfParametersToOptimize getListOfParametersToOptimize()
+      {
+         return listOfParametersToOptimize;
+      }
+      
+      public void startEvaluation()
+      {
+         isEvaluationDone = false;
+         
+         
+         double x = xToOptimize.getCurrentValue();
+         
+//         System.out.println("evaluate: x = " + x);
+         cost = (x-10.0) * (x-10.0);
+         isEvaluationDone = true;
+      }
+
+      public boolean isEvaluationDone()
+      {
+         return isEvaluationDone;
+      }
+
+      public double computeFitness()
+      {
+         return cost;
+      }
+
+      public IndividualToEvaluate createNewIndividual()
+      {
+         return new SimpleXSquaredCostFunction();
       }
    }
    
    
    @Test
    public void testSimpleThreeParameterCostFunction()
-   {
+   {      
       SimpleThreeParameterCostFunction sampleCostFunction = new SimpleThreeParameterCostFunction();
-      ListOfParametersToOptimize listOfParametersToOptimize = new ListOfParametersToOptimize();
       
-      DoubleParameterToOptimize xParameterToOptimize = new DoubleParameterToOptimize(0.0, 100.0);
-      listOfParametersToOptimize.addParameterToOptimize(xParameterToOptimize);
-      
-      BooleanParameterToOptimize booleanParameterToOptimize = new BooleanParameterToOptimize();
-      listOfParametersToOptimize.addParameterToOptimize(booleanParameterToOptimize);
-      
-      IntegerParameterToOptimize integerParameterToOptimize = new IntegerParameterToOptimize(-250, 250);
-      listOfParametersToOptimize.addParameterToOptimize(integerParameterToOptimize);
-
-      OptimizationProblem optimizationProblem = new OptimizationProblem(listOfParametersToOptimize, sampleCostFunction);
+      boolean maximize = false;
+      double cutoffFitness = Double.NEGATIVE_INFINITY;
+      OptimizationProblem optimizationProblem = new OptimizationProblem(sampleCostFunction, maximize, cutoffFitness);
       
       double stepChange = 0.01;
       int numberOfEvaluations = 2000;
       SimpleRandomGradientDecentParameterOptimizer optimizer = new SimpleRandomGradientDecentParameterOptimizer(stepChange, numberOfEvaluations);
-      listOfParametersToOptimize = optimizer.optimize(optimizationProblem);
+      SimpleThreeParameterCostFunction optimalIndividual = (SimpleThreeParameterCostFunction) optimizer.optimize(optimizationProblem);
             
+      ListOfParametersToOptimize listOfParametersToOptimize = optimalIndividual.getListOfParametersToOptimize();
+      DoubleParameterToOptimize xParameterToOptimize = (DoubleParameterToOptimize) listOfParametersToOptimize.get(0);
+      BooleanParameterToOptimize booleanParameterToOptimize = (BooleanParameterToOptimize) listOfParametersToOptimize.get(1);
+      IntegerParameterToOptimize integerParameterToOptimize = (IntegerParameterToOptimize) listOfParametersToOptimize.get(2);
+      
       double optimalX = xParameterToOptimize.getCurrentValue();
       boolean optimalBoolean = booleanParameterToOptimize.getCurrentValue();
       int optimalInteger = integerParameterToOptimize.getCurrentValue();
@@ -80,14 +113,34 @@ public class ExampleOptimizationProblemOneTest
       }
    }
    
-   private class SimpleThreeParameterCostFunction implements CostFunction
+   private class SimpleThreeParameterCostFunction extends IndividualToEvaluate
    {
-      public double evaluate(ListOfParametersToOptimize listOfParameters)
-      {         
-         DoubleParameterToOptimize xToOptimize = (DoubleParameterToOptimize) listOfParameters.get(0);
-         BooleanParameterToOptimize booleanToOptimize = (BooleanParameterToOptimize) listOfParameters.get(1);
-         IntegerParameterToOptimize integerToOptimize = (IntegerParameterToOptimize) listOfParameters.get(2);
+      private double cost;
+      private boolean isEvaluationDone = false;
+      
+      private final ListOfParametersToOptimize listOfParametersToOptimize;
+      
+      private final DoubleParameterToOptimize xToOptimize;
+      private final BooleanParameterToOptimize booleanToOptimize;
+      private final IntegerParameterToOptimize integerToOptimize;
+      
+     
+      public SimpleThreeParameterCostFunction()
+      {
+         listOfParametersToOptimize = new ListOfParametersToOptimize();
+         
+         xToOptimize = new DoubleParameterToOptimize("x", 0.0, 100.0, listOfParametersToOptimize);
+         booleanToOptimize = new BooleanParameterToOptimize("boolean", listOfParametersToOptimize);
+         integerToOptimize = new IntegerParameterToOptimize("integer", -250, 250, listOfParametersToOptimize);
+      }
+      
+      public IndividualToEvaluate createNewIndividual()
+      {
+         return new SimpleThreeParameterCostFunction();
+      }
 
+      public void startEvaluation()
+      {
          double candidateX = xToOptimize.getCurrentValue();
          boolean candidateBoolean = booleanToOptimize.getCurrentValue();
          int candidateInteger = integerToOptimize.getCurrentValue();
@@ -96,74 +149,29 @@ public class ExampleOptimizationProblemOneTest
          
          if (candidateBoolean)
          {
-            return candidateInteger + (10.0 - candidateX) * (10.0 - candidateX);
+            cost = candidateInteger + (10.0 - candidateX) * (10.0 - candidateX);
          }
          else
          {
-            return -candidateInteger + (10.0 - candidateX) * (10.0 - candidateX);
+            cost = -candidateInteger + (10.0 - candidateX) * (10.0 - candidateX);
          }
-
+         
+         isEvaluationDone = true;
       }
-   }
-   
-   
-   
-   @Test
-   public void testEmbeddedCostFunction()
-   {
-      ListOfParametersToOptimize listOfParametersToOptimize = new ListOfParametersToOptimize();
 
-      final DoubleParameterToOptimize xParameterToOptimize = new DoubleParameterToOptimize(0.0, 100.0);
-      listOfParametersToOptimize.addParameterToOptimize(xParameterToOptimize);
-
-      final BooleanParameterToOptimize booleanParameterToOptimize = new BooleanParameterToOptimize();
-      listOfParametersToOptimize.addParameterToOptimize(booleanParameterToOptimize);
-
-      final IntegerParameterToOptimize integerParameterToOptimize = new IntegerParameterToOptimize(-250, 250);
-      listOfParametersToOptimize.addParameterToOptimize(integerParameterToOptimize);
-
-      CostFunction sampleCostFunction = new CostFunction()
+      public boolean isEvaluationDone()
       {
-         public double evaluate(ListOfParametersToOptimize listOfParameters)
-         {
-            double candidateX = xParameterToOptimize.getCurrentValue();
-            boolean candidateBoolean = booleanParameterToOptimize.getCurrentValue();
-            int candidateInteger = integerParameterToOptimize.getCurrentValue();
-
-            // System.out.println("evaluate: candidateX = " + candidateX + ", candidateBoolean = " + candidateBoolean + ", candidateInteger = " + candidateInteger);
-
-            if (candidateBoolean)
-            {
-               return candidateInteger + (10.0 - candidateX) * (10.0 - candidateX);
-            }
-            else
-            {
-               return -candidateInteger + (10.0 - candidateX) * (10.0 - candidateX);
-            }
-         }
-
-      };
-      
-      OptimizationProblem optimizationProblem = new OptimizationProblem(listOfParametersToOptimize, sampleCostFunction);
-      
-      double stepChange = 0.01;
-      int numberOfEvaluations = 2000;
-      SimpleRandomGradientDecentParameterOptimizer optimizer = new SimpleRandomGradientDecentParameterOptimizer(stepChange, numberOfEvaluations);
-      listOfParametersToOptimize = optimizer.optimize(optimizationProblem);
-            
-      double optimalX = xParameterToOptimize.getCurrentValue();
-      boolean optimalBoolean = booleanParameterToOptimize.getCurrentValue();
-      int optimalInteger = integerParameterToOptimize.getCurrentValue();
-      
-      assertEquals(10.0, optimalX, 0.02);
-      
-      if (optimalBoolean)
-      {
-         assertEquals(-250.0, optimalInteger, 2.0);
+         return isEvaluationDone;
       }
-      else
+
+      public double computeFitness()
       {
-         assertEquals(250.0, optimalInteger, 2.0);
+         return cost;
+      }
+
+      public ListOfParametersToOptimize getListOfParametersToOptimize()
+      {
+         return listOfParametersToOptimize;
       }
    }
  
