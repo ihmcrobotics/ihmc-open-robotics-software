@@ -1,8 +1,11 @@
-package us.ihmc.util.parameterOptimization;
+package us.ihmc.utilities.parameterOptimization;
 
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
+
+import us.ihmc.utilities.parameterOptimization.IntegerParameterToOptimize;
+import us.ihmc.utilities.parameterOptimization.ListOfParametersToOptimize;
 
 public class IntegerParameterToOptimizeTest
 {

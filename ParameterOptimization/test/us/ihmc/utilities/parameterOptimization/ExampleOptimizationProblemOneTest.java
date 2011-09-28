@@ -1,10 +1,17 @@
-package us.ihmc.util.parameterOptimization;
+package us.ihmc.utilities.parameterOptimization;
 
 import static org.junit.Assert.assertEquals;
 
 import javax.swing.text.DefaultEditorKit.CutAction;
 
 import org.junit.Test;
+
+import us.ihmc.utilities.parameterOptimization.BooleanParameterToOptimize;
+import us.ihmc.utilities.parameterOptimization.DoubleParameterToOptimize;
+import us.ihmc.utilities.parameterOptimization.IndividualToEvaluate;
+import us.ihmc.utilities.parameterOptimization.IntegerParameterToOptimize;
+import us.ihmc.utilities.parameterOptimization.ListOfParametersToOptimize;
+import us.ihmc.utilities.parameterOptimization.OptimizationProblem;
 
 public class ExampleOptimizationProblemOneTest
 {

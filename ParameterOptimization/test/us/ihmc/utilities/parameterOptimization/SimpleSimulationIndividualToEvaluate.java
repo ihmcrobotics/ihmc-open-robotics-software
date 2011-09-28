@@ -1,4 +1,7 @@
-package us.ihmc.util.parameterOptimization;
+package us.ihmc.utilities.parameterOptimization;
+
+import us.ihmc.utilities.parameterOptimization.IndividualToEvaluate;
+import us.ihmc.utilities.parameterOptimization.ListOfParametersToOptimize;
 
 import com.yobotics.simulationconstructionset.Simulation;
 import com.yobotics.simulationconstructionset.UnreasonableAccelerationException;

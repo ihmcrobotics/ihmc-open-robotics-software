@@ -1,4 +1,4 @@
-package us.ihmc.util.parameterOptimization;
+package us.ihmc.utilities.parameterOptimization;
 
 public abstract class IndividualToEvaluate
 {   
