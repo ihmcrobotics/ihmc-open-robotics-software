@@ -23,7 +23,7 @@ public class ExampleOptimizationProblemOneTest
       SimpleRandomGradientDecentParameterOptimizer optimizer = new SimpleRandomGradientDecentParameterOptimizer(stepChange, numberOfEvaluations);
       IndividualToEvaluate optimalIndividualToEvaluate = optimizer.optimize(optimizationProblem);
       
-      ListOfParametersToOptimize optimalListOfParametersToOptimize = optimalIndividualToEvaluate.getListOfParametersToOptimize();
+      ListOfParametersToOptimize optimalListOfParametersToOptimize = optimalIndividualToEvaluate.getAllParametersToOptimize();
       DoubleParameterToOptimize optimalXParameter = (DoubleParameterToOptimize) optimalListOfParametersToOptimize.get(0);
       double optimalX = optimalXParameter.getCurrentValue();
       
@@ -44,7 +44,12 @@ public class ExampleOptimizationProblemOneTest
          xToOptimize = new DoubleParameterToOptimize("x", 0.0, 100.0, listOfParametersToOptimize);
       }
       
-      public ListOfParametersToOptimize getListOfParametersToOptimize()
+      public ListOfParametersToOptimize getStructuralParametersToOptimize()
+      {
+         return null;
+      }
+      
+      public ListOfParametersToOptimize getControlParametersToOptimize()
       {
          return listOfParametersToOptimize;
       }
@@ -92,7 +97,7 @@ public class ExampleOptimizationProblemOneTest
       SimpleRandomGradientDecentParameterOptimizer optimizer = new SimpleRandomGradientDecentParameterOptimizer(stepChange, numberOfEvaluations);
       SimpleThreeParameterCostFunction optimalIndividual = (SimpleThreeParameterCostFunction) optimizer.optimize(optimizationProblem);
             
-      ListOfParametersToOptimize listOfParametersToOptimize = optimalIndividual.getListOfParametersToOptimize();
+      ListOfParametersToOptimize listOfParametersToOptimize = optimalIndividual.getAllParametersToOptimize();
       DoubleParameterToOptimize xParameterToOptimize = (DoubleParameterToOptimize) listOfParametersToOptimize.get(0);
       BooleanParameterToOptimize booleanParameterToOptimize = (BooleanParameterToOptimize) listOfParametersToOptimize.get(1);
       IntegerParameterToOptimize integerParameterToOptimize = (IntegerParameterToOptimize) listOfParametersToOptimize.get(2);
@@ -169,7 +174,12 @@ public class ExampleOptimizationProblemOneTest
          return cost;
       }
 
-      public ListOfParametersToOptimize getListOfParametersToOptimize()
+      public ListOfParametersToOptimize getStructuralParametersToOptimize()
+      {
+         return null;
+      }
+      
+      public ListOfParametersToOptimize getControlParametersToOptimize()
       {
          return listOfParametersToOptimize;
       }

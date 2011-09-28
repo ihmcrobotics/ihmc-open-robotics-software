@@ -11,11 +11,24 @@ public class ListOfParametersToOptimize
       
    }
    
+   public ListOfParametersToOptimize(ListOfParametersToOptimize parametersOne, ListOfParametersToOptimize parametersTwo)
+   {
+      this();
+      
+      this.addParametersToOptimize(parametersOne.parametersToOptimize);
+      this.addParametersToOptimize(parametersTwo.parametersToOptimize); 
+   }
+   
    public void addParameterToOptimize(ParameterToOptimize parameterToOptimize)
    {
       this.parametersToOptimize.add(parameterToOptimize);
    }
-
+   
+   public void addParametersToOptimize(ArrayList<ParameterToOptimize> parametersToOptimize)
+   {
+      this.parametersToOptimize.addAll(parametersToOptimize);
+   }
+   
    public ParameterToOptimize get(int i)
    {
       return parametersToOptimize.get(i);
@@ -89,6 +102,17 @@ public class ListOfParametersToOptimize
       }
       
       return builder.toString();
+   }
+
+   public double[] getValuesAsDoubles()
+   {
+      double[] ret = new double[this.getNumberOfParameters()];
+      for (int i=0; i<this.getNumberOfParameters(); i++)
+      {
+         ret[i] = this.get(i).getCurrentValueAsADouble();
+      }
+
+      return ret;
    }
 
 }

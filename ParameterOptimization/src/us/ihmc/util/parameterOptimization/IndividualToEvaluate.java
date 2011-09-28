@@ -8,7 +8,8 @@ public abstract class IndividualToEvaluate
    
    public abstract IndividualToEvaluate createNewIndividual();
    
-   public abstract ListOfParametersToOptimize getListOfParametersToOptimize();
+   public abstract ListOfParametersToOptimize getControlParametersToOptimize();
+   public abstract ListOfParametersToOptimize getStructuralParametersToOptimize();
    
    public abstract void startEvaluation();
 
@@ -24,6 +25,25 @@ public abstract class IndividualToEvaluate
    public void setName(String name)
    {
       this.name = name;
+   }
+   
+   public ListOfParametersToOptimize getAllParametersToOptimize()
+   {
+      ListOfParametersToOptimize structuralParameters = getStructuralParametersToOptimize();
+      ListOfParametersToOptimize controlParameters = getControlParametersToOptimize();
+      
+      if (structuralParameters == null)
+      {
+         return controlParameters;
+      }
+      else if (controlParameters == null)
+      {
+         return structuralParameters;
+      }
+      else
+      {
+         return new ListOfParametersToOptimize(structuralParameters, controlParameters);
+      }
    }
    
    public synchronized double getFitness()

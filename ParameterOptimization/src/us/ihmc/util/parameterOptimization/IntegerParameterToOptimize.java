@@ -57,6 +57,11 @@ public class IntegerParameterToOptimize extends ParameterToOptimize
    {
       return this.getName() + ": " + currentValue + ", [" + min + ", " + max + "], (" + bitsOfResolution + ")";
    }
+
+   public double getCurrentValueAsADouble()
+   {
+      return (double) getCurrentValue();
+   }
    
    
 }

@@ -17,7 +17,7 @@ public class SimpleRandomGradientDecentParameterOptimizer implements ParameterOp
    public IndividualToEvaluate optimize(OptimizationProblem optimizationProblem)
    {
       IndividualToEvaluate seedIndividual = optimizationProblem.getSeedIndividualToEvaluate();
-      ListOfParametersToOptimize seedParametersToOptimize = seedIndividual.getListOfParametersToOptimize();
+      ListOfParametersToOptimize seedParametersToOptimize = seedIndividual.getAllParametersToOptimize();
       int numberOfParameters = seedParametersToOptimize.getNumberOfParameters();
       
       double[] zeroToOnes = new double[numberOfParameters];
@@ -44,7 +44,7 @@ public class SimpleRandomGradientDecentParameterOptimizer implements ParameterOp
          zeroToOnes[parameterToChangeIndex] = newValue;
          
          IndividualToEvaluate testIndividual = seedIndividual.createNewIndividual();
-         ListOfParametersToOptimize listOfParametersToOptimize = testIndividual.getListOfParametersToOptimize();
+         ListOfParametersToOptimize listOfParametersToOptimize = testIndividual.getAllParametersToOptimize();
          listOfParametersToOptimize.setCurrentValuesGivenZeroToOnes(zeroToOnes);
 
          testIndividual.startEvaluation();

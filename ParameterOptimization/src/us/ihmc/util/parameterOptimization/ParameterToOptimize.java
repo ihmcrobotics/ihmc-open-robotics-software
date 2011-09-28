@@ -19,4 +19,5 @@ public abstract class ParameterToOptimize
    public abstract void setCurrentValue(ParameterToOptimize parameterToOptimize);
    public abstract int getBitsOfResolution();
 
+   public abstract double getCurrentValueAsADouble();
 }
