@@ -1,8 +1,12 @@
-package us.ihmc.util.parameterOptimization;
+package us.ihmc.utilities.parameterOptimization;
 
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
+
+import us.ihmc.utilities.parameterOptimization.IndividualToEvaluate;
+import us.ihmc.utilities.parameterOptimization.ListOfParametersToOptimize;
+import us.ihmc.utilities.parameterOptimization.OptimizationProblem;
 
 public class SimpleSimulationTest
 {

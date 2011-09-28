@@ -1,4 +1,7 @@
-package us.ihmc.util.parameterOptimization;
+package us.ihmc.utilities.parameterOptimization;
+
+import us.ihmc.utilities.parameterOptimization.DoubleYoVariableParameterToOptimize;
+import us.ihmc.utilities.parameterOptimization.ListOfParametersToOptimize;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
