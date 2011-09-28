@@ -50,4 +50,10 @@ public class BooleanParameterToOptimize extends ParameterToOptimize
    {
       return this.getName() + ": " + currentValue;
    }
+
+   public double getCurrentValueAsADouble()
+   {
+      if (currentValue) return 1.0;
+      else return 0.0;
+   }
 }

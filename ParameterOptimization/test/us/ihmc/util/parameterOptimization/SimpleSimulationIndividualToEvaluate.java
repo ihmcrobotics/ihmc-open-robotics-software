@@ -64,7 +64,12 @@ public class SimpleSimulationIndividualToEvaluate extends IndividualToEvaluate
       return cost;
    }
 
-   public ListOfParametersToOptimize getListOfParametersToOptimize()
+   public ListOfParametersToOptimize getStructuralParametersToOptimize()
+   {
+      return null;
+   }
+   
+   public ListOfParametersToOptimize getControlParametersToOptimize()
    {
       return listOfParametersToOptimize;
    }

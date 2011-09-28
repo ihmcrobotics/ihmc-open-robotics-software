@@ -25,7 +25,7 @@ public class SimpleSimulationTest
       OptimizationProblem optimizationProblem = new OptimizationProblem(costFunction, maximize, cutoffFitness);
 
       IndividualToEvaluate optimalIndividualToEvaluate = optimizer.optimize(optimizationProblem);
-      ListOfParametersToOptimize optimalListOfParametersToOptimize = optimalIndividualToEvaluate.getListOfParametersToOptimize();
+      ListOfParametersToOptimize optimalListOfParametersToOptimize = optimalIndividualToEvaluate.getAllParametersToOptimize();
 
       controller.setCurrentValues(optimalListOfParametersToOptimize);
       controller.printParameters(optimalListOfParametersToOptimize);
