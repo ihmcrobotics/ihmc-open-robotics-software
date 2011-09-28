@@ -9,7 +9,7 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 
-public class BodyPositionEstimatorThroughStanceLeg
+public class BodyPositionEstimatorThroughStanceLeg implements BodyPositionEstimator
 {
    private final String name;
    private final YoVariableRegistry registry;
@@ -29,7 +29,7 @@ public class BodyPositionEstimatorThroughStanceLeg
    }
    
    private final FrameVector tempBodyPositionVector = new FrameVector(world);
-   public void computeBodyPosition()
+   public void estimateBodyPosition()
    {
       bodyPosition.setToZero(referenceFrames.getIMUFrame());
       bodyPosition.changeFrame(referenceFrames.getAnkleZUpFrame(robotSide));
