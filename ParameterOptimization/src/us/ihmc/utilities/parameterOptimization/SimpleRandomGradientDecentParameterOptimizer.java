@@ -125,5 +125,9 @@ public class SimpleRandomGradientDecentParameterOptimizer implements ParameterOp
       
       evaluatedIndividualListeners.add(listener);
    }
+
+   public void createGUI()
+   {
+   }
    
 }
