@@ -43,6 +43,11 @@ public class Genotype
 
       DNA = new int[totalDNALength];
    }
+   
+   public int[] getBitsPerGene()
+   {
+      return bitsPerGene;
+   }
 
    public void setRandomGenes()
    {
@@ -156,7 +161,7 @@ public class Genotype
       return DNA;
    }
 
-   public int getNumBits()
+   public int getTotalNumberOfBits()
    {
       return (DNA.length);
    }
@@ -205,7 +210,7 @@ public class Genotype
       int[] g1DNA = getBits();
       int[] g2DNA = g.getBits();
 
-      int numBits = getNumBits();
+      int numBits = getTotalNumberOfBits();
 
       int splitBit = (int) (Math.random() * (numBits - 1));
       int splitBit2 = (int) (Math.random() * (numBits - 1));

@@ -1,4 +1,4 @@
-package us.ihmc.utilities.parameterOptimization.geneticAlgorithm.testing;
+package us.ihmc.utilities.parameterOptimization.geneticAlgorithm;
 
 import us.ihmc.utilities.parameterOptimization.IndividualToEvaluate;
 import us.ihmc.utilities.parameterOptimization.IntegerParameterToOptimize;
@@ -19,7 +19,7 @@ import us.ihmc.utilities.parameterOptimization.ListOfParametersToOptimize;
  * @version 1.0
  */
 
-public class ExampleIndivdualToEvaluateOne extends IndividualToEvaluate
+public class ExampleIndividualToEvaluateOne extends IndividualToEvaluate
 {
    private final ListOfParametersToOptimize listOfParametersToOptimize;
    
@@ -28,7 +28,7 @@ public class ExampleIndivdualToEvaluateOne extends IndividualToEvaluate
    private char[] testString = new char[stringToMatch.length()];
    
    
-   public ExampleIndivdualToEvaluateOne()
+   public ExampleIndividualToEvaluateOne()
    {
       listOfParametersToOptimize = new ListOfParametersToOptimize();
 
@@ -52,7 +52,7 @@ public class ExampleIndivdualToEvaluateOne extends IndividualToEvaluate
    
    public IndividualToEvaluate createNewIndividual()
    {
-      return new ExampleIndivdualToEvaluateOne();
+      return new ExampleIndividualToEvaluateOne();
    }
 
    public void startEvaluation()

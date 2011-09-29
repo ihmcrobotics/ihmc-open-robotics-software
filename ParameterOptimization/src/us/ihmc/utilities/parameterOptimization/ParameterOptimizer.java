@@ -4,6 +4,6 @@ public interface ParameterOptimizer
 {
 
    public abstract IndividualToEvaluate optimize(OptimizationProblem optimizationProblem);
-   public abstract void attachListener();
+   public abstract void attachEvaluatedIndividualListener(EvaluatedIndividualListener listener);
    
 }

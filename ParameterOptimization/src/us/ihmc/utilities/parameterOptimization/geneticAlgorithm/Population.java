@@ -1,14 +1,10 @@
 package us.ihmc.utilities.parameterOptimization.geneticAlgorithm;
 
-import java.io.BufferedReader;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.StringTokenizer;
+import java.util.Comparator;
 
+import us.ihmc.utilities.parameterOptimization.EvaluatedIndividualListener;
 import us.ihmc.utilities.parameterOptimization.IndividualToEvaluate;
 
 /**
@@ -28,19 +24,25 @@ import us.ihmc.utilities.parameterOptimization.IndividualToEvaluate;
 
 public class Population
 {
+   private ArrayList<EvaluatedIndividualListener> evaluatedIndividualListeners;
+
    private final GeneticAlgorithmIndividualToEvaluate[] generation;
    private final String popName;
    private final int popNumber;
 
+   private final Comparator<GeneticAlgorithmIndividualToEvaluate> comparator;
+   
    private boolean allIndividualsEvaluated = false;
 
    private int probabilities[];
    private int totalIndividualsProgessionSum;
 
-   public Population(int numIndividuals, GeneticAlgorithmIndividualToEvaluate ind, String name, int popNumber)
+   public Population(int numIndividuals, GeneticAlgorithmIndividualToEvaluate ind, Comparator<GeneticAlgorithmIndividualToEvaluate> comparator, String name, int popNumber)
    {
       this.popName = name;
       this.popNumber = popNumber;
+      this.comparator = comparator;
+      
       generation = new GeneticAlgorithmIndividualToEvaluate[numIndividuals];
 
       for (int i = 0; i < numIndividuals; i++)
@@ -52,10 +54,11 @@ public class Population
       computeProbabilities();
    }
 
-   private Population(ArrayList<GeneticAlgorithmIndividualToEvaluate> individuals, String name, int popNumber)
+   private Population(ArrayList<GeneticAlgorithmIndividualToEvaluate> individuals, Comparator<GeneticAlgorithmIndividualToEvaluate> comparator, String name, int popNumber)
    {
       this.popName = name;
       this.popNumber = popNumber;
+      this.comparator = comparator;
       generation = new GeneticAlgorithmIndividualToEvaluate[individuals.size()];
 
       for (int i = 0; i < individuals.size(); i++)
@@ -69,10 +72,12 @@ public class Population
       // evaluateAllIndividuals();
    }
 
-   private Population(int numberOfIndividuals, String name, int popNumber)
+   private Population(int numberOfIndividuals, Comparator<GeneticAlgorithmIndividualToEvaluate> comparator, String name, int popNumber)
    {
       this.popName = name;
       this.popNumber = popNumber;
+      this.comparator = comparator;
+      
       generation = new GeneticAlgorithmIndividualToEvaluate[numberOfIndividuals];
 
       computeProbabilities();
@@ -120,20 +125,24 @@ public class Population
             {
             }
          }
+         
+         
+         notifyEvaluatedIndividualListeners(generation[i].getIndividualToEvaluate());  
       }
 
       allIndividualsEvaluated = true;
    }
+   
 
    public int getNumberOfIndividuals()
    {
       return generation.length;
    }
-
+   
    public void evaluateAndSortByFitness()
    {
       evaluateAllIndividuals();
-      Arrays.sort(generation);
+      Arrays.sort(generation, this.comparator);
    }
 
    public GeneticAlgorithmIndividualToEvaluate[] getAllIndividuals()
@@ -148,7 +157,7 @@ public class Population
 
    public Population breed(double crossoverRate, double mutationRate)
    {
-      Population retPop = new Population(generation.length, this.popName, this.popNumber + 1);
+      Population retPop = new Population(generation.length, this.comparator, this.popName, this.popNumber + 1);
 
       GeneticAlgorithmIndividualToEvaluate parent1, parent2;
       GeneticAlgorithmIndividualToEvaluate[] children = new GeneticAlgorithmIndividualToEvaluate[2];
@@ -377,4 +386,22 @@ public class Population
 //         return null;
 //      }
 //   }
+   
+   private void notifyEvaluatedIndividualListeners(IndividualToEvaluate individual)
+   {
+      if (evaluatedIndividualListeners == null) return;
+      
+      for (EvaluatedIndividualListener listener : evaluatedIndividualListeners)
+      {
+         listener.evaluatedIndividual(individual);
+      }
+   }
+   
+   public void attachEvaluatedIndividualListener(EvaluatedIndividualListener listener)
+   {
+      if (evaluatedIndividualListeners == null) evaluatedIndividualListeners = new ArrayList<EvaluatedIndividualListener>();
+      
+      evaluatedIndividualListeners.add(listener);
+   }
+   
 }

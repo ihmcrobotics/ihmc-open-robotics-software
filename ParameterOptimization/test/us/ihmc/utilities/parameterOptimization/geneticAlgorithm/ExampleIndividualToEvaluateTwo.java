@@ -1,4 +1,4 @@
-package us.ihmc.utilities.parameterOptimization.geneticAlgorithm.testing;
+package us.ihmc.utilities.parameterOptimization.geneticAlgorithm;
 
 import us.ihmc.utilities.parameterOptimization.DoubleParameterToOptimize;
 import us.ihmc.utilities.parameterOptimization.IndividualToEvaluate;
@@ -63,12 +63,6 @@ public class ExampleIndividualToEvaluateTwo extends IndividualToEvaluate
 
    public double computeFitness()
    {
-//      double[] phenotype = getGenotype().getDoublePhenotype();
-//
-//      x = phenotype[0] * 2.0;
-//      y = phenotype[1] * 2.0;
-//      z = phenotype[2] * 2.0;
-
       double x = xToOptimize.getCurrentValue();
       double y = yToOptimize.getCurrentValue();
       double z = zToOptimize.getCurrentValue();

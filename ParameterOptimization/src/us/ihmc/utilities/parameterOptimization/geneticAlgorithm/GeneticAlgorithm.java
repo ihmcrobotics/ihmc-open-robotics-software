@@ -4,7 +4,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Comparator;
 
+import us.ihmc.utilities.parameterOptimization.EvaluatedIndividualListener;
 import us.ihmc.utilities.parameterOptimization.IndividualToEvaluate;
 import us.ihmc.utilities.parameterOptimization.OptimizationProblem;
 import us.ihmc.utilities.parameterOptimization.ParameterOptimizer;
@@ -27,27 +29,40 @@ import us.ihmc.utilities.parameterOptimization.geneticAlgorithm.gui.GeneticAlgor
 
 public class GeneticAlgorithm implements ParameterOptimizer
 {
-   private ArrayList<Population> populations = new ArrayList<Population>();
-   private String name;
+   private ArrayList<EvaluatedIndividualListener> evaluatedIndividualListeners;
+   
+   private final ArrayList<Population> populations = new ArrayList<Population>();
+   private final String name;
    private double crossoverRate, mutationRate;
-   private int populationSize;
-   private ArrayList<GeneticAlgorithmChangedListener> listeners = new ArrayList<GeneticAlgorithmChangedListener>();
+   private final int populationSize;
+   private final ArrayList<GeneticAlgorithmChangedListener> listeners = new ArrayList<GeneticAlgorithmChangedListener>();
 
-   public GeneticAlgorithm(IndividualToEvaluate individual, int populationSize, double crossoverRate, double mutationRate, String name)
+   public GeneticAlgorithm(int populationSize, double crossoverRate, double mutationRate, String name)
    {
       // crossoverRate is the probability that two parents will produce children, as opposed to enter next population themselves.
-      // mutation rate is the probability for each bit to be flipped.
-
-      
-      GeneticAlgorithmIndividualToEvaluate geneticAlgorithmIndividualToEvaluate = new GeneticAlgorithmIndividualToEvaluate(individual);
+      // mutation rate is the probability for each bit to be flipped.      
       
       this.populationSize = populationSize;
       this.crossoverRate = crossoverRate;
       this.mutationRate = mutationRate;
 
       this.name = name;
+   }
+   
+   public GeneticAlgorithm(IndividualToEvaluate seedIndividual, Comparator<GeneticAlgorithmIndividualToEvaluate> comparator,
+         int populationSize, double crossoverRate, double mutationRate, String name)
+   {
+      this.populationSize = populationSize;
+      this.crossoverRate = crossoverRate;
+      this.mutationRate = mutationRate;
 
-      Population population = new Population(populationSize, geneticAlgorithmIndividualToEvaluate, name, 0);
+      this.name = name;
+
+      GeneticAlgorithmIndividualToEvaluate geneticAlgorithmIndividualToEvaluate = new GeneticAlgorithmIndividualToEvaluate(seedIndividual);
+
+      Population population = new Population(populationSize, geneticAlgorithmIndividualToEvaluate, comparator, name, 0);
+      populations.add(population);
+      
       populations.add(population);
    }
 
@@ -103,10 +118,11 @@ public class GeneticAlgorithm implements ParameterOptimizer
       finalPopulation.save(filename + finalPopulation.getPopulationNumber());
    }
 
-   public void evolveToFitness(double fitnessCutoff)
+   public void evolveToFitness(double fitnessCutoff, int maximumNumberOfIndividualsToEvaluate)
    {
       double peakFitness = getFittestIndividual().getFitness();
-      while (peakFitness < fitnessCutoff)
+      
+      while ((peakFitness < fitnessCutoff) && (this.getNumberOfIndividuals() < maximumNumberOfIndividualsToEvaluate))
       {
          evolveOneGeneration();
 
@@ -124,15 +140,15 @@ public class GeneticAlgorithm implements ParameterOptimizer
       return pop.getFittestIndividual();
    }
 
-   public void setCrossoverRate(double xorate)
+   public void setCrossoverRate(double crossoverRate)
    {
-      crossoverRate = xorate;
+      this.crossoverRate = crossoverRate;
       notifyGeneticAlgorithmChangedListeners();
    }
 
-   public void setMutationRate(double mrate)
+   public void setMutationRate(double mutationRate)
    {
-      mutationRate = mrate;
+      this.mutationRate = mutationRate;
       notifyGeneticAlgorithmChangedListeners();
    }
 
@@ -154,6 +170,11 @@ public class GeneticAlgorithm implements ParameterOptimizer
    public int getNumberOfPopulations()
    {
       return populations.size();
+   }
+   
+   public int getNumberOfIndividuals()
+   {
+      return getPopulationSize() * getNumberOfPopulations();
    }
 
    public Population getPopulation(int index)
@@ -239,25 +260,44 @@ public class GeneticAlgorithm implements ParameterOptimizer
 
    public IndividualToEvaluate optimize(OptimizationProblem optimizationProblem)
    {
-//      IndividualToEvaluate seedIndividualToEvaluate = optimizationProblem.getSeedIndividualToEvaluate();
+      // The population holds the seed individuals and the comparator. If there is one already, then just evolve that.
+      // If not, then need to create one based on the optimization problem:
+      if (this.populations.isEmpty())
+      {
+         IndividualToEvaluate seedIndividualToEvaluate = optimizationProblem.getSeedIndividualToEvaluate();
+         
+         boolean maximize = optimizationProblem.getMaximize();
+         
+         Comparator<GeneticAlgorithmIndividualToEvaluate> comparator;
+         if (maximize)
+         {
+            comparator = new MaximizationIndividualComparator();
+         }
+         else
+         {
+            comparator = new MinimizationIndividualComparator();
+         }
+         
+         GeneticAlgorithmIndividualToEvaluate geneticAlgorithmIndividualToEvaluate = new GeneticAlgorithmIndividualToEvaluate(seedIndividualToEvaluate);
+         
+         Population population = new Population(populationSize, geneticAlgorithmIndividualToEvaluate, comparator, name, 0);
+         
+         this.populations.add(population);
+      }
       
-      this.evolveToFitness(optimizationProblem.getCutoffFitness());
+      
+      this.evolveToFitness(optimizationProblem.getCutoffFitness(), optimizationProblem.getMaximumNumberOfIndividualsToEvaluate());
       
       GeneticAlgorithmIndividualToEvaluate fittestIndividual = getFittestIndividual();
       return fittestIndividual.getIndividualToEvaluate();
    }
-
-   public void attachListener()
+   
+   public void attachEvaluatedIndividualListener(EvaluatedIndividualListener listener)
    {
-      throw new RuntimeException("Not implemented yet!");      
+      if (evaluatedIndividualListeners == null) evaluatedIndividualListeners = new ArrayList<EvaluatedIndividualListener>();
+      
+      evaluatedIndividualListeners.add(listener);
    }
-
-   /*
-    * public String toString()
-    *  {
-    * return "";
-    *  }
-    */
 
 
 }
