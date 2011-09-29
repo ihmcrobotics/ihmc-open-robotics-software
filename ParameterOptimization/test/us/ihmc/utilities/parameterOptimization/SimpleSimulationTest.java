@@ -20,13 +20,14 @@ public class SimpleSimulationTest
       SimpleSimulationIndividualToEvaluate costFunction = new SimpleSimulationIndividualToEvaluate();
 
       double stepChange = 0.01;
-      int numberOfEvaluations = 1000;
 
-      SimpleRandomGradientDecentParameterOptimizer optimizer = new SimpleRandomGradientDecentParameterOptimizer(stepChange, numberOfEvaluations);
+      SimpleRandomGradientDecentParameterOptimizer optimizer = new SimpleRandomGradientDecentParameterOptimizer(stepChange);
 
       boolean maximize = false;
       double cutoffFitness = Double.NEGATIVE_INFINITY;
-      OptimizationProblem optimizationProblem = new OptimizationProblem(costFunction, maximize, cutoffFitness);
+      int maximumNumberOfIndividualsToEvaluate = 1000;
+
+      OptimizationProblem optimizationProblem = new OptimizationProblem(costFunction, maximize, cutoffFitness, maximumNumberOfIndividualsToEvaluate);
 
       IndividualToEvaluate optimalIndividualToEvaluate = optimizer.optimize(optimizationProblem);
       ListOfParametersToOptimize optimalListOfParametersToOptimize = optimalIndividualToEvaluate.getAllParametersToOptimize();

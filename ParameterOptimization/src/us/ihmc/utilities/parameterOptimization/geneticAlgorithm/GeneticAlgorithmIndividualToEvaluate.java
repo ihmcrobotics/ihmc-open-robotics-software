@@ -18,7 +18,7 @@ import us.ihmc.utilities.parameterOptimization.ListOfParametersToOptimize;
  * @version 1.0
  */
 
-public class GeneticAlgorithmIndividualToEvaluate implements Comparable<GeneticAlgorithmIndividualToEvaluate>
+public class GeneticAlgorithmIndividualToEvaluate
 {
    private final IndividualToEvaluate individualToEvaluate;
    
@@ -34,18 +34,6 @@ public class GeneticAlgorithmIndividualToEvaluate implements Comparable<GeneticA
       return individualToEvaluate;
    }
    
-//   public abstract GeneticAlgorithmIndividualToEvaluate createNewIndividual();
-
-//   public abstract GeneticAlgorithmIndividualToEvaluate readIn(BufferedReader bufferedReader) throws java.io.IOException;
-//
-//   public abstract int[] getBitsPerGene();
-//
-//   public abstract void writeOut(PrintWriter printWriter);
-
-//   public GeneticAlgorithmIndividualToEvaluate()
-//   {
-//      // genes = new Genotype(bitsPerGene);
-//   }
    
    public String getName()
    {
@@ -65,6 +53,17 @@ public class GeneticAlgorithmIndividualToEvaluate implements Comparable<GeneticA
    public void startEvaluation()
    {
       individualToEvaluate.startEvaluation();
+   }
+   
+   public double getFitness()
+   {
+      return individualToEvaluate.getFitness();
+   }
+   
+   
+   public String toString()
+   {
+      return individualToEvaluate.toString();
    }
 
    public Genotype getGenotype()
@@ -97,23 +96,6 @@ public class GeneticAlgorithmIndividualToEvaluate implements Comparable<GeneticA
       return children;
    } 
    
-   public double getFitness()
-   {
-      return individualToEvaluate.getFitness();
-   }
-   
-   public int compareTo(GeneticAlgorithmIndividualToEvaluate ind)
-   {
-      double fit1 = this.individualToEvaluate.getFitness();
-      double fit2 = ind.individualToEvaluate.getFitness();
-
-      if (fit1 > fit2)
-         return -1;
-      else if (fit1 < fit2)
-         return 1;
-      else
-         return 0;
-   }
 
    public static GeneticAlgorithmIndividualToEvaluate makeRandomIndividual(IndividualToEvaluate individualToCopyFrom)
    {
@@ -150,11 +132,6 @@ public class GeneticAlgorithmIndividualToEvaluate implements Comparable<GeneticA
    public GeneticAlgorithmIndividualToEvaluate makeNewIndividual()
    {
       return makeRandomIndividual(this.individualToEvaluate);
-   }
-   
-   public String toString()
-   {
-      return individualToEvaluate.toString();
    }
 
 }

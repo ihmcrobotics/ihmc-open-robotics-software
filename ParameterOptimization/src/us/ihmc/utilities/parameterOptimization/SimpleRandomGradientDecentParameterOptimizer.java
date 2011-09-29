@@ -1,5 +1,6 @@
 package us.ihmc.utilities.parameterOptimization;
 
+import java.util.ArrayList;
 import java.util.Random;
 
 import us.ihmc.utilities.parameterOptimization.IndividualToEvaluate;
@@ -9,18 +10,21 @@ import us.ihmc.utilities.parameterOptimization.ParameterOptimizer;
 
 public class SimpleRandomGradientDecentParameterOptimizer implements ParameterOptimizer
 {
+   private ArrayList<EvaluatedIndividualListener> evaluatedIndividualListeners;
+
    private final double stepChange;
    private final Random random = new Random();
-   private final int numberOfEvaluations;
-
-   public SimpleRandomGradientDecentParameterOptimizer(double stepChange, int numberOfEvaluations)
+   
+   public SimpleRandomGradientDecentParameterOptimizer(double stepChange)
    {
       this.stepChange = stepChange;
-      this.numberOfEvaluations = numberOfEvaluations;
    }
    
    public IndividualToEvaluate optimize(OptimizationProblem optimizationProblem)
    {
+      boolean maximize = optimizationProblem.getMaximize();
+      double cutoffFitness = optimizationProblem.getCutoffFitness();
+      
       IndividualToEvaluate seedIndividual = optimizationProblem.getSeedIndividualToEvaluate();
       ListOfParametersToOptimize seedParametersToOptimize = seedIndividual.getAllParametersToOptimize();
       int numberOfParameters = seedParametersToOptimize.getNumberOfParameters();
@@ -32,10 +36,14 @@ public class SimpleRandomGradientDecentParameterOptimizer implements ParameterOp
          zeroToOnes[i] = random.nextDouble();
       }
       
-      double bestCost = Double.POSITIVE_INFINITY;
-      IndividualToEvaluate bestIndividual = null;
+      double bestCost;
+      if (maximize) bestCost = Double.NEGATIVE_INFINITY;
+      else bestCost = Double.POSITIVE_INFINITY;
       
-      for (int i=0; i<numberOfEvaluations; i++)
+      IndividualToEvaluate bestIndividual = null;
+      int maximumNumberOfEvaluations = optimizationProblem.getMaximumNumberOfIndividualsToEvaluate();
+      
+      for (int i=0; i<maximumNumberOfEvaluations; i++)
       {
          int parameterToChangeIndex = random.nextInt(numberOfParameters);
 //         ParameterToOptimize parameterToChange = listOfParametersToOptimize.get(parameterToChangeIndex);
@@ -64,11 +72,14 @@ public class SimpleRandomGradientDecentParameterOptimizer implements ParameterOp
             }
          }
          double cost = testIndividual.getFitness();
+         notifyEvaluatedIndividualListeners(testIndividual);
          
 //         double cost = costFunction.evaluate(listOfParametersToOptimize);
 //         System.out.println("Parameter optimizer: cost = " + cost + ", bestCost = " + bestCost);
          
-         if (cost < bestCost)
+         boolean improvement = isAnImprovement(cost, bestCost, maximize);
+         
+         if (improvement)
          {
             bestCost = cost;
             bestIndividual = testIndividual;
@@ -77,14 +88,42 @@ public class SimpleRandomGradientDecentParameterOptimizer implements ParameterOp
          {
             zeroToOnes[parameterToChangeIndex] = currentValue;
          }
+
+         boolean cutoffFitnessReached = isAnImprovement(bestCost, cutoffFitness, maximize);
+         if (cutoffFitnessReached) return bestIndividual;
       }
       
       return bestIndividual;
    }
 
-   public void attachListener()
+   private boolean isAnImprovement(double newCost, double oldCost, boolean maximize)
    {
+      if (maximize)
+      {
+         return newCost > oldCost;
+      }
+      else
+      {
+         return newCost < oldCost;
+      }
+   }
+
+   
+   private void notifyEvaluatedIndividualListeners(IndividualToEvaluate individual)
+   {
+      if (evaluatedIndividualListeners == null) return;
       
+      for (EvaluatedIndividualListener listener : evaluatedIndividualListeners)
+      {
+         listener.evaluatedIndividual(individual);
+      }
+   }
+   
+   public void attachEvaluatedIndividualListener(EvaluatedIndividualListener listener)
+   {
+      if (evaluatedIndividualListeners == null) evaluatedIndividualListeners = new ArrayList<EvaluatedIndividualListener>();
+      
+      evaluatedIndividualListeners.add(listener);
    }
    
 }

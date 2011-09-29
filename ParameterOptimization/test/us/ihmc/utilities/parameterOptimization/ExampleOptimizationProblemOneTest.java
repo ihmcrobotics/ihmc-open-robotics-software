@@ -23,11 +23,11 @@ public class ExampleOptimizationProblemOneTest
       boolean maximize = false;
       double cutoffFitness = Double.NEGATIVE_INFINITY;
       
-      OptimizationProblem optimizationProblem = new OptimizationProblem(sampleCostFunction, maximize, cutoffFitness);
+      int maximumNumberOfIndividualsToEvaluate = 500;
+      OptimizationProblem optimizationProblem = new OptimizationProblem(sampleCostFunction, maximize, cutoffFitness, maximumNumberOfIndividualsToEvaluate);
       
       double stepChange = 0.01;
-      int numberOfEvaluations = 500;
-      SimpleRandomGradientDecentParameterOptimizer optimizer = new SimpleRandomGradientDecentParameterOptimizer(stepChange, numberOfEvaluations);
+      SimpleRandomGradientDecentParameterOptimizer optimizer = new SimpleRandomGradientDecentParameterOptimizer(stepChange);
       IndividualToEvaluate optimalIndividualToEvaluate = optimizer.optimize(optimizationProblem);
       
       ListOfParametersToOptimize optimalListOfParametersToOptimize = optimalIndividualToEvaluate.getAllParametersToOptimize();
@@ -97,11 +97,11 @@ public class ExampleOptimizationProblemOneTest
       
       boolean maximize = false;
       double cutoffFitness = Double.NEGATIVE_INFINITY;
-      OptimizationProblem optimizationProblem = new OptimizationProblem(sampleCostFunction, maximize, cutoffFitness);
+      int maximumNumberOfIndividualsToEvaluate = 2000;
+      OptimizationProblem optimizationProblem = new OptimizationProblem(sampleCostFunction, maximize, cutoffFitness, maximumNumberOfIndividualsToEvaluate);
       
       double stepChange = 0.01;
-      int numberOfEvaluations = 2000;
-      SimpleRandomGradientDecentParameterOptimizer optimizer = new SimpleRandomGradientDecentParameterOptimizer(stepChange, numberOfEvaluations);
+      SimpleRandomGradientDecentParameterOptimizer optimizer = new SimpleRandomGradientDecentParameterOptimizer(stepChange);
       SimpleThreeParameterCostFunction optimalIndividual = (SimpleThreeParameterCostFunction) optimizer.optimize(optimizationProblem);
             
       ListOfParametersToOptimize listOfParametersToOptimize = optimalIndividual.getAllParametersToOptimize();
