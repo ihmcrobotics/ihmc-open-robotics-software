@@ -1,10 +1,16 @@
 package us.ihmc.commonWalkingControlModules.kinematics;
 
+import javax.vecmath.Tuple3d;
+
 import us.ihmc.utilities.math.geometry.FramePoint;
 
 public interface BodyPositionEstimator
 {
    public abstract void packBodyPosition(FramePoint bodyPositionToPack);
+   
+   public abstract void packCovariance(Tuple3d covarianceToPack);
 
    public abstract void estimateBodyPosition();
+   
+   public abstract void configureAfterEstimation();
 }
