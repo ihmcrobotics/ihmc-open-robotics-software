@@ -24,8 +24,9 @@ public class BodyPositionEstimatorThroughStanceLeg implements BodyPositionEstima
    private final YoFramePoint anklePositionFix;
    private final FramePoint bodyPosition = new FramePoint(world);
    private final DoubleYoVariable defaultCovariance;
+   private final double ankleHeight;
 
-   public BodyPositionEstimatorThroughStanceLeg(RobotSide robotSide, LegToTrustForVelocityReadOnly legToTrustForVelocity, CommonWalkingReferenceFrames referenceFrames, double defaultCovariance, YoVariableRegistry parentRegistry)
+   public BodyPositionEstimatorThroughStanceLeg(RobotSide robotSide, LegToTrustForVelocityReadOnly legToTrustForVelocity, CommonWalkingReferenceFrames referenceFrames, double defaultCovariance, double ankleHeight, YoVariableRegistry parentRegistry)
    {
       this.name = robotSide + getClass().getSimpleName();
       this.registry = new YoVariableRegistry(name);
@@ -33,8 +34,9 @@ public class BodyPositionEstimatorThroughStanceLeg implements BodyPositionEstima
       this.referenceFrames = referenceFrames;
       this.legToTrustForVelocity = legToTrustForVelocity;
       this.anklePositionFix = new YoFramePoint("anklePositionFix", "", world, registry);
-      this.defaultCovariance = new DoubleYoVariable("defaultCovariance", registry);
+      this.defaultCovariance = new DoubleYoVariable(robotSide.getCamelCaseNameForStartOfExpression() + "PositionThroughStanceLegCovariance", registry);
       this.defaultCovariance.set(defaultCovariance);
+      this.ankleHeight = ankleHeight;
       parentRegistry.addChild(registry);
    }
    
@@ -59,6 +61,7 @@ public class BodyPositionEstimatorThroughStanceLeg implements BodyPositionEstima
    {
       FramePoint ankle = new FramePoint(referenceFrames.getAnkleZUpFrame(robotSide));
       ankle.changeFrame(world);
+      ankle.setZ(ankleHeight);
       anklePositionFix.set(ankle);
    }
 

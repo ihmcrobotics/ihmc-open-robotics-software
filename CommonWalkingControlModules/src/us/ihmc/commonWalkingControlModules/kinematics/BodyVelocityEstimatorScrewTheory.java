@@ -38,7 +38,7 @@ public class BodyVelocityEstimatorScrewTheory implements BodyVelocityEstimator
       this.foot = foot;
       this.footZUpFrame = footZUpFrame;
       this.imuJoint = imuJoint;
-      this.defaultCovariance = new DoubleYoVariable("defaultCovariance", registry);
+      this.defaultCovariance = new DoubleYoVariable(robotSide.getCamelCaseNameForStartOfExpression() + "VelocityScrewTheoryCovariance", registry);
       this.defaultCovariance.set(defaultCovariance);
    }
 
