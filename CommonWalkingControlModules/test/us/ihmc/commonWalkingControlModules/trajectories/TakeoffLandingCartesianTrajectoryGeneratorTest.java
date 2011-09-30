@@ -5,6 +5,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
+import java.util.EnumMap;
 
 import org.junit.Test;
 
@@ -13,6 +14,7 @@ import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.math.geometry.Direction;
 
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
@@ -185,9 +187,9 @@ public class TakeoffLandingCartesianTrajectoryGeneratorTest
             FrameVector numericallyDifferentiatedVelocity = numericallyDifferentiatedVelocities.get(i);
             FrameVector velocityFromTrajectory = velocities.get(i);
 
-            for (int j = 0; j < 3; j++)
+            for (Direction direction : Direction.values())
             {
-               assertEquals(numericallyDifferentiatedVelocity.get(j), velocityFromTrajectory.get(j), epsilon);
+               assertEquals(numericallyDifferentiatedVelocity.get(direction), velocityFromTrajectory.get(direction), epsilon);
             }
          }
       }
@@ -206,9 +208,9 @@ public class TakeoffLandingCartesianTrajectoryGeneratorTest
             FrameVector numericallyDifferentiatedAcceleration = numericallyDifferentiatedAccelerations.get(i);
             FrameVector accelerationFromTrajectory = accelerations.get(i);
 
-            for (int j = 0; j < 3; j++)
+            for (Direction direction : Direction.values())
             {
-               if (!MathTools.epsilonEquals(numericallyDifferentiatedAcceleration.get(j), accelerationFromTrajectory.get(j), epsilon))
+               if (!MathTools.epsilonEquals(numericallyDifferentiatedAcceleration.get(direction), accelerationFromTrajectory.get(direction), epsilon))
                {
                   incorrectAccelerations++;
 
@@ -227,19 +229,23 @@ public class TakeoffLandingCartesianTrajectoryGeneratorTest
       {
          ReferenceFrame referenceFrame = points.get(0).getReferenceFrame();
 
-         Differentiator[] differentiators = {new Differentiator(deltaT), new Differentiator(deltaT), new Differentiator(deltaT)};
+         EnumMap<Direction, Differentiator> differentiators = new EnumMap<Direction, Differentiator>(Direction.class);
+         for (Direction direction : Direction.values())
+         {
+            differentiators.put(direction, new Differentiator(deltaT));
+         }
 
          ArrayList<FrameVector> ret = new ArrayList<FrameVector>();
          int size = points.size();
          for (int i = 0; i < size; i++)
          {
             FramePoint position = points.get(i);
-            for (int j = 0; j < 3; j++)
+            for (Direction direction : Direction.values())
             {
-               differentiators[j].update(position.get(j));
+               differentiators.get(direction).update(position.get(direction));
             }
 
-            FrameVector derivative = new FrameVector(referenceFrame, differentiators[0].val(), differentiators[1].val(), differentiators[2].val());
+            FrameVector derivative = new FrameVector(referenceFrame, differentiators.get(Direction.X).val(), differentiators.get(Direction.Y).val(), differentiators.get(Direction.Z).val());
             ret.add(derivative);
          }
 
@@ -250,19 +256,23 @@ public class TakeoffLandingCartesianTrajectoryGeneratorTest
       {
          ReferenceFrame referenceFrame = vectors.get(0).getReferenceFrame();
 
-         Differentiator[] differentiators = {new Differentiator(deltaT), new Differentiator(deltaT), new Differentiator(deltaT)};
+         EnumMap<Direction, Differentiator> differentiators = new EnumMap<Direction, Differentiator>(Direction.class);
+         for (Direction direction : Direction.values())
+         {
+            differentiators.put(direction, new Differentiator(deltaT));
+         }
 
          ArrayList<FrameVector> ret = new ArrayList<FrameVector>();
          int size = vectors.size();
          for (int i = 0; i < size; i++)
          {
             FrameVector vector = vectors.get(i);
-            for (int j = 0; j < 3; j++)
+            for (Direction direction : Direction.values())
             {
-               differentiators[j].update(vector.get(j));
+               differentiators.get(direction).update(vector.get(direction));
             }
 
-            FrameVector derivative = new FrameVector(referenceFrame, differentiators[0].val(), differentiators[1].val(), differentiators[2].val());
+            FrameVector derivative = new FrameVector(referenceFrame, differentiators.get(Direction.X).val(), differentiators.get(Direction.Y).val(), differentiators.get(Direction.Z).val());
             ret.add(derivative);
          }
 

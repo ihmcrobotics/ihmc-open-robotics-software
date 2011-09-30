@@ -39,9 +39,9 @@ public class YoKalmanFilterTest
    {
       random = new Random(1776L);
       parentRegistry = new YoVariableRegistry("testRegistry");
-      int nStates = 8;
-      int nInputs = 5;
-      int nMeasurements = 3;
+      nStates = 8;
+      nInputs = 5;
+      nMeasurements = 3;
       createRandomParameters(nStates, nInputs, nMeasurements);
    }
 
@@ -74,7 +74,7 @@ public class YoKalmanFilterTest
       try
       {
          yoKalmanFilter = new YoKalmanFilter("yo", nStates, nInputs, nMeasurements, parentRegistry);
-         yoKalmanFilter.setCheckPositiveDefiniteness(true);
+         yoKalmanFilter.setDoChecks(true);
          Q = RandomMatrices.createSymmPosDef(nStates, random);
          yoKalmanFilter.setProcessNoiseCovariance(Q);
          Q = RandomMatrices.createRandom(nStates, nStates, random);
@@ -94,7 +94,7 @@ public class YoKalmanFilterTest
       try
       {
          yoKalmanFilter = new YoKalmanFilter("yo", nStates, nInputs, nMeasurements, parentRegistry);
-         yoKalmanFilter.setCheckPositiveDefiniteness(true);
+         yoKalmanFilter.setDoChecks(true);
          R = RandomMatrices.createSymmPosDef(nMeasurements, random);
          yoKalmanFilter.setMeasurementNoiseCovariance(R);
          R = RandomMatrices.createRandom(nMeasurements, nMeasurements, random);
@@ -203,11 +203,18 @@ public class YoKalmanFilterTest
       kalmanFilter.configure(F, G, H);
       kalmanFilter.setProcessNoiseCovariance(Q);
       kalmanFilter.setMeasurementNoiseCovariance(R);
+      kalmanFilter.setState(x, P);
+      
       kalmanFilter.predict(u);
-      DenseMatrix64F stateBeforeUpdate = new DenseMatrix64F(kalmanFilter.getState());     
+      DenseMatrix64F stateBeforeUpdate = new DenseMatrix64F(kalmanFilter.getState());
+      DenseMatrix64F covarianceBeforeUpdate = new DenseMatrix64F(kalmanFilter.getCovariance());
+      
       kalmanFilter.update(y);
       DenseMatrix64F stateAfterUpdate = new DenseMatrix64F(kalmanFilter.getState());
+      DenseMatrix64F covarianceAfterUpdate = new DenseMatrix64F(kalmanFilter.getCovariance());
+      
       EjmlUnitTests.assertEquals(stateBeforeUpdate, stateAfterUpdate, 1e-8);
+      EjmlUnitTests.assertEquals(covarianceBeforeUpdate, covarianceAfterUpdate, 1e-8);
    }
 
    private void createRandomParameters(int nStates, int nInputs, int nMeasurements)

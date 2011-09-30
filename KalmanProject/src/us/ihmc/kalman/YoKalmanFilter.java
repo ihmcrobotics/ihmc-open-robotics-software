@@ -53,7 +53,7 @@ public class YoKalmanFilter implements KalmanFilter
    private final DoubleYoVariable[] yoX;
    private final DoubleYoVariable[] yoP;
    
-   private boolean checkPositiveDefiniteness = false;
+   private boolean doChecks = false;
 
    public YoKalmanFilter(String name, int nStates, int nInputs, int nMeasurements, YoVariableRegistry parentRegistry)
    {
@@ -98,6 +98,13 @@ public class YoKalmanFilter implements KalmanFilter
 
    public void configure(DenseMatrix64F F, DenseMatrix64F G, DenseMatrix64F H)
    {
+      if (doChecks)
+      {
+         checkSize(F, this.F);
+         checkSize(G, this.G);
+         checkSize(H, this.H);
+      }
+      
       storeInYoVariables(F, yoF);
       storeInYoVariables(G, yoG);
       storeInYoVariables(H, yoH);
@@ -105,16 +112,22 @@ public class YoKalmanFilter implements KalmanFilter
 
    public void setProcessNoiseCovariance(DenseMatrix64F Q)
    {
-      if (checkPositiveDefiniteness)
+      if (doChecks)
+      {
+         checkSize(Q, this.Q);
          checkPositiveDefinite(Q);
+      }
 
       storeInYoVariablesSymmetric(Q, yoQ);
    }
 
    public void setMeasurementNoiseCovariance(DenseMatrix64F R)    // not checking for positive definiteness
    {
-      if (checkPositiveDefiniteness)
+      if (doChecks)
+      {
+         checkSize(R, this.R);
          checkPositiveDefinite(R);
+      }
 
       storeInYoVariablesSymmetric(R, yoR);
    }
@@ -199,9 +212,9 @@ public class YoKalmanFilter implements KalmanFilter
       return P;
    }
 
-   public void setCheckPositiveDefiniteness(boolean checkPositiveDefiniteness)
+   public void setDoChecks(boolean doChecks)
    {
-      this.checkPositiveDefiniteness = checkPositiveDefiniteness;
+      this.doChecks = doChecks;
    }
 
    private void populateYoVariables(int nStates, int nMeasurements)
@@ -325,5 +338,16 @@ public class YoKalmanFilter implements KalmanFilter
    {
       if (!MatrixFeatures.isPositiveSemidefinite(m))
          throw new RuntimeException("Matrix is not positive semidefinite: " + m);
+   }
+   
+   private static void checkSize(DenseMatrix64F m1, DenseMatrix64F m2)
+   {
+      boolean nRowsNotEqual = m1.getNumRows() != m2.getNumRows();
+      boolean nColsNotEqual = m1.getNumCols() != m2.getNumCols();
+
+      if (nRowsNotEqual || nColsNotEqual)
+      {
+         throw new RuntimeException("Matrix sizes not equal: " + m1 + "\n\n" + m2);
+      }
    }
 }
