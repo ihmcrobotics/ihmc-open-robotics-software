@@ -168,19 +168,28 @@ public class YoKalmanFilterTest
       {
          for (KalmanFilter kalmanFilter : kalmanFilters)
          {
-            kalmanFilter.predict(us[i + 1]);
-            kalmanFilter.update(ys[i + 1]);
+            int j = i + 1;
+            kalmanFilter.configure(Fs[j], Gs[j], Hs[j]);
+            kalmanFilter.setProcessNoiseCovariance(Qs[j]);
+            kalmanFilter.setMeasurementNoiseCovariance(Rs[j]);
+            kalmanFilter.predict(us[j]);
+            kalmanFilter.update(ys[j]);
          }
          dataBuffer.tickAndUpdate();
       }
       dataBuffer.goToInPoint();
+      KalmanFilter kalmanFilter = kalmanFilters[0];
       for (int i = 0; i < nTicks; i++)
       {
-         kalmanFilters[0].predict(us[i + 1]);
-         kalmanFilters[0].update(ys[i + 1]);
+         int j = i + 1;
+         kalmanFilter.configure(Fs[j], Gs[j], Hs[j]);
+         kalmanFilter.setProcessNoiseCovariance(Qs[j]);
+         kalmanFilter.setMeasurementNoiseCovariance(Rs[j]);
+         kalmanFilter.predict(us[j]);
+         kalmanFilter.update(ys[j]);
       }
 
-      EjmlUnitTests.assertEquals(kalmanFilters[0].getState(), kalmanFilters[1].getState(), 1e-8);
-      EjmlUnitTests.assertEquals(kalmanFilters[0].getCovariance(), kalmanFilters[1].getCovariance(), 1e-8);
+      EjmlUnitTests.assertEquals(kalmanFilter.getState(), kalmanFilters[1].getState(), 1e-8);
+      EjmlUnitTests.assertEquals(kalmanFilter.getCovariance(), kalmanFilters[1].getCovariance(), 1e-8);
    }
 }
