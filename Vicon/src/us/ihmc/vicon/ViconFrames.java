@@ -23,7 +23,6 @@ public class ViconFrames
 
    protected void initialize() throws Exception
    {
-
       viconWorldFrame = ReferenceFrame.constructAWorldFrame(worldFrameName);
       referenceFrames = new HashMap<String, ViconReferenceFrame>();
 
@@ -35,7 +34,7 @@ public class ViconFrames
          final String bodyName = modelName;
          System.out.println("adding frame for " + modelName);
          Transform3D transform3d = new Transform3D();
-         ViconReferenceFrame referenceFrame = new ViconReferenceFrame(modelName, viconWorldFrame, transform3d, viconClient);         
+         ViconReferenceFrame referenceFrame = new ViconReferenceFrame(modelName, viconWorldFrame, transform3d, viconClient);
          referenceFrames.put(bodyName, referenceFrame);
       }
 
@@ -65,6 +64,7 @@ public class ViconFrames
    public synchronized ReferenceFrame getViconWorldFrame()
    {
       return viconWorldFrame;
+
    }
 
    public void updateTransformToParent(String name)
@@ -74,14 +74,15 @@ public class ViconFrames
       {
          referenceFrame.update();
       }
+
    }
-   
+
    public boolean isDataValid(String name)
    {
       return referenceFrames.get(name).isDataValid();
    }
 
-   public synchronized ReferenceFrame getBodyFrame(String name)
+   public synchronized ViconReferenceFrame getBodyFrame(String name)
    {
       return referenceFrames.get(name);
    }
@@ -106,14 +107,16 @@ public class ViconFrames
 
          while (true)
          {
-            ReferenceFrame drone = viconFrames.getBodyFrame(modelNames.get(0));
+            ViconReferenceFrame drone = viconFrames.getBodyFrame(modelNames.get(0));
 
             FramePose point = new FramePose(drone);
 
+            System.out.println(drone.isDataValid());
             System.out.println(point.changeFrameCopy(viconFrames.getViconWorldFrame()));
          }
 
-      } catch (Exception e)
+      }
+      catch (Exception e)
       {
          e.printStackTrace();
       }
