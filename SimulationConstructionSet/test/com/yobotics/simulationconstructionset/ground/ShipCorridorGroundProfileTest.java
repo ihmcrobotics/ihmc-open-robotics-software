@@ -11,7 +11,7 @@ public class ShipCorridorGroundProfileTest
 {
    private GroundProfile groundProfile;
    private final double epsilon = 1e-6;
-   private final boolean debug = true;
+   private final boolean debug = false;
   
    public ShipCorridorGroundProfileTest()
    {
