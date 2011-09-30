@@ -4,12 +4,11 @@ import static org.junit.Assert.fail;
 
 import java.util.Random;
 
-import org.junit.Before;
-import org.junit.Test;
-
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.EjmlUnitTests;
 import org.ejml.ops.RandomMatrices;
+import org.junit.Before;
+import org.junit.Test;
 
 import com.yobotics.simulationconstructionset.DataBuffer;
 import com.yobotics.simulationconstructionset.DataBuffer.RepeatDataBufferEntryException;
@@ -19,10 +18,10 @@ public class YoKalmanFilterTest
 {
    private Random random;
    private YoVariableRegistry parentRegistry;
-   
-   private final int nStates = 8;
-   private final int nInputs = 5;
-   private final int nMeasurements = 3;
+
+   private int nStates;
+   private int nInputs;
+   private int nMeasurements;
 
    private DenseMatrix64F F;
    private DenseMatrix64F G;
@@ -33,24 +32,19 @@ public class YoKalmanFilterTest
    private DenseMatrix64F P;
    private DenseMatrix64F u;
    private DenseMatrix64F y;
-   
-   
+
+
    @Before
    public void setUp()
    {
       random = new Random(1776L);
       parentRegistry = new YoVariableRegistry("testRegistry");
-      
-      F = RandomMatrices.createRandom(nStates, nStates, random);
-      G = RandomMatrices.createRandom(nStates, nInputs, random);
-      H = RandomMatrices.createRandom(nMeasurements, nStates, random);
-      Q = RandomMatrices.createSymmPosDef(nStates, random);
-      R = RandomMatrices.createSymmPosDef(nMeasurements, random);
-      x = RandomMatrices.createRandom(nStates, 1, random);
-      P = RandomMatrices.createSymmPosDef(nStates, random);
-      u = RandomMatrices.createRandom(nInputs, 1, random);
-      y = RandomMatrices.createRandom(nMeasurements, 1, random);
+      int nStates = 8;
+      int nInputs = 5;
+      int nMeasurements = 3;
+      createRandomParameters(nStates, nInputs, nMeasurements);
    }
+
 
    @Test
    public void testCompareToSimple()
@@ -73,7 +67,7 @@ public class YoKalmanFilterTest
       EjmlUnitTests.assertEquals(kalmanFilters[0].getCovariance(), kalmanFilters[1].getCovariance(), 1e-8);
    }
 
-   @Test(expected=RuntimeException.class)
+   @Test(expected = RuntimeException.class)
    public void testNotProcessCovarianceSymmetricPositiveDefinite1()
    {
       YoKalmanFilter yoKalmanFilter = null;
@@ -92,8 +86,8 @@ public class YoKalmanFilterTest
 
       yoKalmanFilter.setProcessNoiseCovariance(Q);
    }
-   
-   @Test(expected=RuntimeException.class)
+
+   @Test(expected = RuntimeException.class)
    public void testMeasurementCovarianceNotSymmetricPositiveDefinite1()
    {
       YoKalmanFilter yoKalmanFilter = null;
@@ -113,13 +107,13 @@ public class YoKalmanFilterTest
       yoKalmanFilter.setMeasurementNoiseCovariance(R);
    }
 
-   @Test(expected=ArrayIndexOutOfBoundsException.class)
+   @Test(expected = ArrayIndexOutOfBoundsException.class)
    public void testWrongSize()
    {
       YoKalmanFilter yoKalmanFilter = new YoKalmanFilter("yo", nStates, nInputs, nMeasurements, parentRegistry);
       yoKalmanFilter.setProcessNoiseCovariance(new DenseMatrix64F(nStates + 1, nStates + 1));
    }
-   
+
    @Test
    public void testRewindability() throws RepeatDataBufferEntryException
    {
@@ -133,7 +127,7 @@ public class YoKalmanFilterTest
       DenseMatrix64F[] Ps = new DenseMatrix64F[nTicks + 1];
       DenseMatrix64F[] us = new DenseMatrix64F[nTicks + 1];
       DenseMatrix64F[] ys = new DenseMatrix64F[nTicks + 1];
-      
+
       for (int i = 0; i < nTicks + 1; i++)
       {
          Fs[i] = RandomMatrices.createRandom(nStates, nStates, random);
@@ -161,9 +155,10 @@ public class YoKalmanFilterTest
          kalmanFilter.setMeasurementNoiseCovariance(Rs[0]);
          kalmanFilter.setState(xs[0], Ps[0]);
       }
+
       dataBuffer.tickAndUpdate();
       dataBuffer.setInPoint();
-      
+
       for (int i = 0; i < nTicks; i++)
       {
          for (KalmanFilter kalmanFilter : kalmanFilters)
@@ -175,8 +170,10 @@ public class YoKalmanFilterTest
             kalmanFilter.predict(us[j]);
             kalmanFilter.update(ys[j]);
          }
+
          dataBuffer.tickAndUpdate();
       }
+
       dataBuffer.goToInPoint();
       KalmanFilter kalmanFilter = kalmanFilters[0];
       for (int i = 0; i < nTicks; i++)
@@ -191,5 +188,38 @@ public class YoKalmanFilterTest
 
       EjmlUnitTests.assertEquals(kalmanFilter.getState(), kalmanFilters[1].getState(), 1e-8);
       EjmlUnitTests.assertEquals(kalmanFilter.getCovariance(), kalmanFilters[1].getCovariance(), 1e-8);
+   }
+
+   @Test
+   public void testInfiniteMeasurementNoise()
+   {
+      nStates = 5;
+      nInputs = 1;
+      nMeasurements = 1;
+      createRandomParameters(nStates, nInputs, nMeasurements);
+      YoKalmanFilter kalmanFilter = new YoKalmanFilter("yo", nStates, nInputs, nMeasurements, parentRegistry);
+      R.set(0, Double.POSITIVE_INFINITY);
+
+      kalmanFilter.configure(F, G, H);
+      kalmanFilter.setProcessNoiseCovariance(Q);
+      kalmanFilter.setMeasurementNoiseCovariance(R);
+      kalmanFilter.predict(u);
+      DenseMatrix64F stateBeforeUpdate = new DenseMatrix64F(kalmanFilter.getState());     
+      kalmanFilter.update(y);
+      DenseMatrix64F stateAfterUpdate = new DenseMatrix64F(kalmanFilter.getState());
+      EjmlUnitTests.assertEquals(stateBeforeUpdate, stateAfterUpdate, 1e-8);
+   }
+
+   private void createRandomParameters(int nStates, int nInputs, int nMeasurements)
+   {
+      F = RandomMatrices.createRandom(nStates, nStates, random);
+      G = RandomMatrices.createRandom(nStates, nInputs, random);
+      H = RandomMatrices.createRandom(nMeasurements, nStates, random);
+      Q = RandomMatrices.createSymmPosDef(nStates, random);
+      R = RandomMatrices.createSymmPosDef(nMeasurements, random);
+      x = RandomMatrices.createRandom(nStates, 1, random);
+      P = RandomMatrices.createSymmPosDef(nStates, random);
+      u = RandomMatrices.createRandom(nInputs, 1, random);
+      y = RandomMatrices.createRandom(nMeasurements, 1, random);
    }
 }

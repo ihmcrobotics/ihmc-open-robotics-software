@@ -159,6 +159,7 @@ public class YoKalmanFilter implements KalmanFilter
       MatrixVectorMult.mult(H, x, z);
       sub(y, z, z);
 
+      // TODO: should probably only recalculate gain matrix when necessary:
       // S = H P H' + R
       MatrixMatrixMult.mult_small(H, P, c);
       MatrixMatrixMult.multTransB(c, H, S);
