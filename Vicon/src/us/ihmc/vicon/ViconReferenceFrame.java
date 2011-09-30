@@ -13,7 +13,7 @@ public class ViconReferenceFrame extends ReferenceFrame
    private final String bodyName;
    private boolean dataValid = false;
    private long lastUpdateTimeStamp = 0;
-   
+
    private final Quat4d bodyToWorldQuaternion = new Quat4d();
    private final Vector3d bodyToWorldTranslation = new Vector3d();
    private final Transform3D bodyToWorldTransform = new Transform3D();
@@ -43,11 +43,11 @@ public class ViconReferenceFrame extends ReferenceFrame
       setLastUpdateTimeStamp(viconClient.getModelReadingTimeStamp(bodyName));
    }
 
-   private synchronized void setDataValid(boolean dataValid)
+   protected synchronized void setDataValid(boolean dataValid)
    {
-      this.dataValid = dataValid;      
+      this.dataValid = dataValid;
    }
-   
+
    public synchronized boolean isDataValid()
    {
       return dataValid;

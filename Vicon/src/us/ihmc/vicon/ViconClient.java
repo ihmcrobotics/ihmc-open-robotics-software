@@ -57,30 +57,41 @@ public class ViconClient
       return viconSingleton;
    }
 
-   @SuppressWarnings("unchecked")   
+   public static ViconClient getInstance(String ip) throws Exception
+   {
+      if (viconSingleton == null)
+      {
+         viconSingleton = new ViconClient(ip);
+      }
+
+      return viconSingleton;
+   }
+
+   @SuppressWarnings("unchecked")
    public ArrayList<String> getAvailableModels()
    {
       RemoteRequest remoteRequest = new RemoteRequest("getAvailableModels", null);
       try
       {
          Object result = viconServer.SendRequest(remoteRequest);
-         
+
          /*
           * Check if result is an ArrayList<String>
-          * 
+          *
           * Compiler doesn't get this, so suppress warning about unchecked types
-          * 
+          *
           */
-         if(result instanceof ArrayList)
+         if (result instanceof ArrayList)
          {
-            if(((ArrayList<?>) result).size() > 0)
+            if (((ArrayList<?>) result).size() > 0)
             {
-               if(((ArrayList<?>) result).get(0) instanceof String)
+               if (((ArrayList<?>) result).get(0) instanceof String)
                {
                   return (ArrayList<String>) result;
                }
             }
          }
+
          System.err.println("Vicon result is not of type ArrayList<String>");
       }
       catch (Exception e)
@@ -90,7 +101,7 @@ public class ViconClient
 
       return null;
    }
-   
+
    public long getModelReadingTimeStamp(String modelName)
    {
       return getPoseReading(modelName).getTimestamp();
