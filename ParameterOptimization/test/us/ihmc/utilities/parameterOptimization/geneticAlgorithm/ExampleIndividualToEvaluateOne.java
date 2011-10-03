@@ -34,7 +34,8 @@ public class ExampleIndividualToEvaluateOne extends IndividualToEvaluate
 
       for (int i=0; i<stringToMatch.length(); i++)
       {
-         new IntegerParameterToOptimize("letter_"+i, 32, 125, listOfParametersToOptimize);
+         IntegerParameterToOptimize integerParameterToOptimize = new IntegerParameterToOptimize("letter_"+i, 32, 125, listOfParametersToOptimize);
+         integerParameterToOptimize.setCurrentValue(67);
       }
    }
    

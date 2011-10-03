@@ -36,5 +36,49 @@ public class IntegerParameterToOptimizeTest
 
       assertEquals(expectedNumberOfBits, integerParameterToOptimize.getBitsOfResolution());
    }
+   
+   @Test
+   public void testZeroToOneConversions()
+   {
+      testZeroToOneConversion(0, 100);
+      testZeroToOneConversion(-100, 1000);
+      testZeroToOneConversion(1, 1);
+      testZeroToOneConversion(100, -100);
+      
+   }
+   
+   private void testZeroToOneConversion(int min, int max)
+   {
+      String name = "test";
+
+      ListOfParametersToOptimize listOfParametersToOptimize = new ListOfParametersToOptimize();
+      IntegerParameterToOptimize integerParameterToOptimize = new IntegerParameterToOptimize(name, min, max, listOfParametersToOptimize);
+
+      integerParameterToOptimize.setCurrentValueGivenZeroToOne(0.0);
+      int value = integerParameterToOptimize.getCurrentValue();
+      assertEquals(min, value);
+      
+      integerParameterToOptimize.setCurrentValueGivenZeroToOne(1.0);
+      value = integerParameterToOptimize.getCurrentValue();
+      assertEquals(max, value);
+      
+
+      
+      for (double zeroToOne = 0.0; zeroToOne<1.0; zeroToOne = zeroToOne + 0.001)
+      {
+         integerParameterToOptimize.setCurrentValueGivenZeroToOne(zeroToOne);
+         int integerValue = integerParameterToOptimize.getCurrentValue();
+         
+         double zeroToOneAgain = integerParameterToOptimize.getCurrentValueFromZeroToOne();
+         integerParameterToOptimize.setCurrentValueGivenZeroToOne(zeroToOneAgain);
+         int integerValueAgain = integerParameterToOptimize.getCurrentValue();
+
+         double zeroToOneYetAgain = integerParameterToOptimize.getCurrentValueFromZeroToOne();
+
+         assertEquals(zeroToOneAgain, zeroToOneYetAgain, 1e-7);
+         assertEquals(integerValue, integerValueAgain);
+      }      
+
+   }
 
 }

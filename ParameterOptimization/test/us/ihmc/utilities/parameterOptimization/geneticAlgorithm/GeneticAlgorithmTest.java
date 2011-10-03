@@ -2,6 +2,8 @@ package us.ihmc.utilities.parameterOptimization.geneticAlgorithm;
 
 import static org.junit.Assert.assertTrue;
 
+import java.util.Random;
+
 import org.junit.Test;
 
 import us.ihmc.utilities.parameterOptimization.IndividualToEvaluate;
@@ -19,8 +21,13 @@ public class GeneticAlgorithmTest
       double mutationRate = 0.01;
       String name = "GeneticAlgorithmTestOne";
       
-      GeneticAlgorithm geneticAlgorithm = new GeneticAlgorithm(populationSize, crossoverRate, mutationRate, name);
-            
+      Random random = new Random(1776L);
+      
+      PopulationParameters populationParameters = new PopulationParameters(name, random, populationSize);
+      populationParameters.setNumberOfSeedIndividualsToCopyIntoFirstPopulation(populationSize/2);
+      
+      GeneticAlgorithm geneticAlgorithm = new GeneticAlgorithm(populationParameters, crossoverRate, mutationRate);
+      
       if (SHOW_GUI) geneticAlgorithm.createGUI();
 
       IndividualToEvaluate seedIndividual = new ExampleIndividualToEvaluateOne();
@@ -32,13 +39,14 @@ public class GeneticAlgorithmTest
       IndividualToEvaluate optimalIndividual = geneticAlgorithm.optimize(optimizationProblem);
    
       double fitness = optimalIndividual.getFitness();
-      assertTrue(fitness >= cutoffFitness);
       
       if (SHOW_GUI)
       {
          sleepForever();
       }
       
+      assertTrue(fitness >= cutoffFitness);
+
    }
    
    
@@ -49,8 +57,11 @@ public class GeneticAlgorithmTest
       double crossoverRate = 0.6;
       double mutationRate = 0.02;
       String name = "GeneticAlgorithmTestTwo";
+      Random random = new Random(1984L);
       
-      GeneticAlgorithm geneticAlgorithm = new GeneticAlgorithm(populationSize, crossoverRate, mutationRate, name);
+      PopulationParameters populationParameters = new PopulationParameters(name, random, populationSize);
+      
+      GeneticAlgorithm geneticAlgorithm = new GeneticAlgorithm(populationParameters, crossoverRate, mutationRate);
             
       if (SHOW_GUI) geneticAlgorithm.createGUI();
 

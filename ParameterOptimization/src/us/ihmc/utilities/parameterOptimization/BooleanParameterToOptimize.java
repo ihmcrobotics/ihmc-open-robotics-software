@@ -31,6 +31,11 @@ public class BooleanParameterToOptimize extends ParameterToOptimize
       currentValue = getValueGivenZeroToOne(zeroToOne);
    }
    
+   public double getCurrentValueFromZeroToOne()
+   {
+      return getCurrentValueAsADouble();
+   }
+   
    public boolean getCurrentValue()
    {
       return currentValue;

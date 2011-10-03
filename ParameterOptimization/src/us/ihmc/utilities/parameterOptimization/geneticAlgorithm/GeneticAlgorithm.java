@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Random;
 
 import us.ihmc.utilities.parameterOptimization.EvaluatedIndividualListener;
 import us.ihmc.utilities.parameterOptimization.IndividualToEvaluate;
@@ -32,62 +33,60 @@ public class GeneticAlgorithm implements ParameterOptimizer
    private ArrayList<EvaluatedIndividualListener> evaluatedIndividualListeners;
    
    private final ArrayList<Population> populations = new ArrayList<Population>();
-   private final String name;
    private double crossoverRate, mutationRate;
-   private final int populationSize;
+   
+   private PopulationParameters populationParameters;
+   
    private final ArrayList<GeneticAlgorithmChangedListener> listeners = new ArrayList<GeneticAlgorithmChangedListener>();
 
-   public GeneticAlgorithm(int populationSize, double crossoverRate, double mutationRate, String name)
-   {
-      // crossoverRate is the probability that two parents will produce children, as opposed to enter next population themselves.
-      // mutation rate is the probability for each bit to be flipped.      
-      
-      this.populationSize = populationSize;
-      this.crossoverRate = crossoverRate;
-      this.mutationRate = mutationRate;
-
-      this.name = name;
-   }
+//   public GeneticAlgorithm(Random random, int populationSize, double crossoverRate, double mutationRate, String name)
+//   {
+//      // crossoverRate is the probability that two parents will produce children, as opposed to enter next population themselves.
+//      // mutation rate is the probability for each bit to be flipped.      
+//      
+//      this.populationSize = populationSize;
+//      this.random = random;
+//      
+//      this.crossoverRate = crossoverRate;
+//      this.mutationRate = mutationRate;
+//
+//      this.name = name;
+//   }
    
-   public GeneticAlgorithm(IndividualToEvaluate seedIndividual, Comparator<GeneticAlgorithmIndividualToEvaluate> comparator,
-         int populationSize, double crossoverRate, double mutationRate, String name)
+   public GeneticAlgorithm(PopulationParameters populationParameters, double crossoverRate, double mutationRate)
    {
-      this.populationSize = populationSize;
+      this.populationParameters = populationParameters;
+      
       this.crossoverRate = crossoverRate;
       this.mutationRate = mutationRate;
-
-      this.name = name;
-
-      GeneticAlgorithmIndividualToEvaluate geneticAlgorithmIndividualToEvaluate = new GeneticAlgorithmIndividualToEvaluate(seedIndividual);
-
-      Population population = new Population(populationSize, geneticAlgorithmIndividualToEvaluate, comparator, name, 0);
-      populations.add(population);
       
-      populations.add(population);
+      if (populationParameters.getSeedIndividualToEvaluate() != null)
+      {
+         Population population = new Population(populationParameters, 0);
+         populations.add(population);
+      }
    }
 
-   public GeneticAlgorithm(Population population, double crossoverRate, double mutationRate, String name)
+   public GeneticAlgorithm(Random random, Population population, double crossoverRate, double mutationRate, String name)
    {
       // crossoverRate is the probability that two parents will produce children, as opposed to enter next population themselves.
       // mutation rate is the probability for each bit to be flipped.
-
-      this.populationSize = population.getNumberOfIndividuals();
+      this.populationParameters = new PopulationParameters(name, random, population.getNumberOfIndividuals());
+      
       this.crossoverRate = crossoverRate;
       this.mutationRate = mutationRate;
-
-      this.name = name;
-
+      
       populations.add(population);
    }
 
    public String getName()
    {
-      return name;
+      return populationParameters.getName();
    }
-
+   
    public void createGUI()
    {
-      GeneticAlgorithmGUI gui = new GeneticAlgorithmGUI(this);
+      new GeneticAlgorithmGUI(this);
    }
 
    public void evolve(int generations)
@@ -164,7 +163,7 @@ public class GeneticAlgorithm implements ParameterOptimizer
 
    public int getPopulationSize()
    {
-      return populationSize;
+      return populationParameters.getPopulationSize();
    }
 
    public int getNumberOfPopulations()
@@ -264,6 +263,8 @@ public class GeneticAlgorithm implements ParameterOptimizer
       // If not, then need to create one based on the optimization problem:
       if (this.populations.isEmpty())
       {
+         System.out.println("Populations empty. Creating new one");
+         
          IndividualToEvaluate seedIndividualToEvaluate = optimizationProblem.getSeedIndividualToEvaluate();
          
          boolean maximize = optimizationProblem.getMaximize();
@@ -277,11 +278,12 @@ public class GeneticAlgorithm implements ParameterOptimizer
          {
             comparator = new MinimizationIndividualComparator();
          }
+                  
+         populationParameters.setComparator(comparator);
+         populationParameters.setSeedIndividualToEvaluate(seedIndividualToEvaluate);
          
-         GeneticAlgorithmIndividualToEvaluate geneticAlgorithmIndividualToEvaluate = new GeneticAlgorithmIndividualToEvaluate(seedIndividualToEvaluate);
-         
-         Population population = new Population(populationSize, geneticAlgorithmIndividualToEvaluate, comparator, name, 0);
-         
+         Population population = new Population(populationParameters, 0);
+                  
          this.populations.add(population);
       }
       

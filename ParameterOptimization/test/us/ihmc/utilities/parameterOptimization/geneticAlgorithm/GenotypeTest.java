@@ -2,6 +2,8 @@ package us.ihmc.utilities.parameterOptimization.geneticAlgorithm;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.Random;
+
 import org.junit.Test;
 
 public class GenotypeTest
@@ -9,6 +11,8 @@ public class GenotypeTest
    @Test
    public void testGenotype()
    {
+      Random random = new Random(1776L);
+      
       int[] bitsPerGene = new int[] { 4, 6, 8 };
       int nBits = 0;
 
@@ -51,7 +55,7 @@ public class GenotypeTest
       assertEquals(18, test2.getTotalNumberOfBits());
       
       // Make some children and make sure they are similar to their parents:
-      Genotype[] children = test.crossover(test2, 0.002);
+      Genotype[] children = test.crossover(random, test2, 0.002);
 
       assertEquals(3, children[0].getNumberOfGenes());
       assertEquals(3, children[1].getNumberOfGenes());
@@ -141,13 +145,15 @@ public class GenotypeTest
    @Test 
    public void testPhenotypeReconstruction()
    {
+      Random random = new Random(1984L);
+      
       int numberOfTests = 1000;
 
       for (int i=0; i<numberOfTests; i++)
       {
          Genotype genotype = new Genotype(new int[]{16, 16});
 
-         genotype.setRandomGenes();
+         genotype.setRandomGenes(random);
 
          double[] phenotype = genotype.getDoublePhenotype();
 

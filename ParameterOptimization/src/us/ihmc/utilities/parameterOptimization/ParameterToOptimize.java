@@ -16,8 +16,10 @@ public abstract class ParameterToOptimize
    
    public abstract ParameterToOptimizeType getType();
    public abstract void setCurrentValueGivenZeroToOne(double zeroToOne);
+   public abstract double getCurrentValueFromZeroToOne();
+
    public abstract void setCurrentValue(ParameterToOptimize parameterToOptimize);
    public abstract int getBitsOfResolution();
 
-   public abstract double getCurrentValueAsADouble();
+   public abstract double getCurrentValueAsADouble();         
 }
