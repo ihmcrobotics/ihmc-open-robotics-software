@@ -105,7 +105,6 @@ public class GeneticAlgorithmIndividualToEvaluate
    public static GeneticAlgorithmIndividualToEvaluate makeRandomIndividual(Random random, IndividualToEvaluate individualToCopyFrom)
    {
       IndividualToEvaluate individualToEvaluate = individualToCopyFrom.createNewIndividual();
-      
       ListOfParametersToOptimize listOfParametersToOptimize = individualToEvaluate.getAllParametersToOptimize();
       
       Genotype genotype = new Genotype(listOfParametersToOptimize.getBitsOfResolution());
@@ -119,29 +118,49 @@ public class GeneticAlgorithmIndividualToEvaluate
       return ret;
    }
    
-   public static GeneticAlgorithmIndividualToEvaluate makeNewIndividual(GeneticAlgorithmIndividualToEvaluate individualToCopyFrom)
+   private static GeneticAlgorithmIndividualToEvaluate makeNewIndividualAndPossiblyMutate(Random random, GeneticAlgorithmIndividualToEvaluate individualToCopyFrom, boolean mutate, double mutationRateForCopiedIndividuals)
    {
       IndividualToEvaluate individualToEvaluate = individualToCopyFrom.getIndividualToEvaluate().createNewIndividual();
-     
-      GeneticAlgorithmIndividualToEvaluate ret = new GeneticAlgorithmIndividualToEvaluate(individualToEvaluate);
+      ListOfParametersToOptimize listOfParametersToOptimize = individualToEvaluate.getAllParametersToOptimize();
       
       Genotype genotypeToCopy = individualToCopyFrom.genotype;
       if (genotypeToCopy == null)
       {
-         ListOfParametersToOptimize listOfParametersToOptimize = individualToEvaluate.getAllParametersToOptimize();
          genotypeToCopy = new Genotype(listOfParametersToOptimize.getBitsOfResolution());
          genotypeToCopy.setDoublePhenotype(listOfParametersToOptimize.getCurrentValuesAsZeroToOnes());
       }
       
-      ret.setGenotype(new Genotype(genotypeToCopy));
+      Genotype newGenotype = new Genotype(genotypeToCopy);
+      if (mutate) newGenotype.mutate(random, mutationRateForCopiedIndividuals);
+      
+      double[] doublePhenotype = newGenotype.getDoublePhenotype();
+      listOfParametersToOptimize.setCurrentValuesGivenZeroToOnes(doublePhenotype);
+      
+      GeneticAlgorithmIndividualToEvaluate ret = new GeneticAlgorithmIndividualToEvaluate(individualToEvaluate);
+      ret.setGenotype(newGenotype);
 
       return ret;
+   }
+   
+   public static GeneticAlgorithmIndividualToEvaluate makeNewIndividualAndMutate(Random random, GeneticAlgorithmIndividualToEvaluate individualToCopyFrom, double mutationRateForCopiedIndividuals)
+   {
+      return makeNewIndividualAndPossiblyMutate(random, individualToCopyFrom, true, mutationRateForCopiedIndividuals);
+   }
+   
+   public static GeneticAlgorithmIndividualToEvaluate makeNewIndividual(GeneticAlgorithmIndividualToEvaluate individualToCopyFrom)
+   {
+      return makeNewIndividualAndPossiblyMutate(null, individualToCopyFrom, false, 0.0);
    }
    
    
    public GeneticAlgorithmIndividualToEvaluate makeRandomIndividual(Random random)
    {
       return makeRandomIndividual(random, this.individualToEvaluate);
+   }
+   
+   public GeneticAlgorithmIndividualToEvaluate makeCopyOfIndividualAndMutate(Random random, double mutationRateForCopiedIndividuals)
+   {
+      return makeNewIndividualAndMutate(random, this, mutationRateForCopiedIndividuals);
    }
    
    public GeneticAlgorithmIndividualToEvaluate makeCopyOfIndividual()

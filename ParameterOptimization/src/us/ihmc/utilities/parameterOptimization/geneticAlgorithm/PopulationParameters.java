@@ -14,7 +14,9 @@ public class PopulationParameters
 
    private Comparator<GeneticAlgorithmIndividualToEvaluate> comparator;
    private IndividualToEvaluate seedIndividualToEvaluate;
+   
    private int numberOfSeedIndividualsToCopyIntoFirstPopulation = 0;
+   private double mutationRateForCopiedIndividuals = 0.0;
    
    public PopulationParameters(String name, Random random, int populationSize)
    {
@@ -57,10 +59,16 @@ public class PopulationParameters
    {
       return numberOfSeedIndividualsToCopyIntoFirstPopulation;
    }
+   
+   public double getMutationRateForCopiedIndividuals()
+   {
+      return mutationRateForCopiedIndividuals;
+   }
 
-   public void setNumberOfSeedIndividualsToCopyIntoFirstPopulation(int numberOfSeedIndividualsToCopyIntoFirstPopulation)
+   public void setSeedIndividualsToCopyIntoFirstPopulation(int numberOfSeedIndividualsToCopyIntoFirstPopulation, double mutationRate)
    {
       this.numberOfSeedIndividualsToCopyIntoFirstPopulation = numberOfSeedIndividualsToCopyIntoFirstPopulation;
+      this.mutationRateForCopiedIndividuals = mutationRate;
    }
 
    public Random getRandom()
