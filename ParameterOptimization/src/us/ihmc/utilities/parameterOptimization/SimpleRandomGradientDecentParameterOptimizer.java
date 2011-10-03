@@ -13,10 +13,11 @@ public class SimpleRandomGradientDecentParameterOptimizer implements ParameterOp
    private ArrayList<EvaluatedIndividualListener> evaluatedIndividualListeners;
 
    private final double stepChange;
-   private final Random random = new Random();
+   private final Random random;
    
-   public SimpleRandomGradientDecentParameterOptimizer(double stepChange)
+   public SimpleRandomGradientDecentParameterOptimizer(Random random, double stepChange)
    {
+      this.random = random;
       this.stepChange = stepChange;
    }
    
