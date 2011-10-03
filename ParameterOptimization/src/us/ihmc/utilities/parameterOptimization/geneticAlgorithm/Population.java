@@ -63,8 +63,9 @@ public class Population
       for (int i = 0; i < numIndividuals; i++)
       {
          if (i<numberOfSeedInvidualsToCopy)
-         {            
-            generation[i] = geneticAlgorithmIndividualToEvaluate.makeCopyOfIndividual();
+         {          
+            double mutationRateForCopiedIndividuals = populationParameters.getMutationRateForCopiedIndividuals();
+            generation[i] = geneticAlgorithmIndividualToEvaluate.makeCopyOfIndividualAndMutate(random, mutationRateForCopiedIndividuals);
          }
          else
          {

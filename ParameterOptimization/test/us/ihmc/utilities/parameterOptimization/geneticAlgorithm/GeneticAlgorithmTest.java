@@ -24,7 +24,7 @@ public class GeneticAlgorithmTest
       Random random = new Random(1776L);
       
       PopulationParameters populationParameters = new PopulationParameters(name, random, populationSize);
-      populationParameters.setNumberOfSeedIndividualsToCopyIntoFirstPopulation(populationSize/2);
+      populationParameters.setSeedIndividualsToCopyIntoFirstPopulation(populationSize/2, 0.01);
       
       GeneticAlgorithm geneticAlgorithm = new GeneticAlgorithm(populationParameters, crossoverRate, mutationRate);
       
