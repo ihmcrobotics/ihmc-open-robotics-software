@@ -68,18 +68,7 @@ public class BodyPositionEstimatorThroughStanceLeg implements BodyPositionEstima
    public void packCovariance(Tuple3d covarianceToPack)
    {
       // TODO: also use angular velocity of foot with respect to ground. Create FootAngularVelocityCalculator; do only once
-      RobotSide legToTrustForVelocity = this.legToTrustForVelocity.getLegToTrustForVelocity();
-      double covariance;
-      if (legToTrustForVelocity == null)
-      {
-         covariance = defaultCovariance.getDoubleValue();
-      }
-      else
-      {
-         boolean trustingLegForVelocity = legToTrustForVelocity == robotSide;
-         covariance = trustingLegForVelocity ? defaultCovariance.getDoubleValue() : Double.POSITIVE_INFINITY;
-      }
-
+      double covariance = this.legToTrustForVelocity.isLegTrustedForVelocity(robotSide) ? defaultCovariance.getDoubleValue() : Double.POSITIVE_INFINITY;
       covarianceToPack.set(covariance, covariance, covariance);
    }
 

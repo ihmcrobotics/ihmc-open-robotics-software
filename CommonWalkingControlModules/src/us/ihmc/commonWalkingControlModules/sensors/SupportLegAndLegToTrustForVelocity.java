@@ -1,7 +1,9 @@
 package us.ihmc.commonWalkingControlModules.sensors;
 
 import us.ihmc.robotSide.RobotSide;
+import us.ihmc.robotSide.SideDependentList;
 
+import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.EnumYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
@@ -10,42 +12,50 @@ public class SupportLegAndLegToTrustForVelocity implements LegToTrustForVelocity
 {
    private final YoVariableRegistry registry = new YoVariableRegistry("SupportLegAndLegToTrustForVelocity");
 
-   private final EnumYoVariable<RobotSide> legToTrustForVelocity = EnumYoVariable.create("legToTrustForVelocity", RobotSide.class, registry);
+   private final SideDependentList<BooleanYoVariable> legsToTrustForVelocity = new SideDependentList<BooleanYoVariable>();
    private final EnumYoVariable<RobotSide> supportLeg = EnumYoVariable.create("supportLeg", RobotSide.class, registry);
    private final EnumYoVariable<RobotSide> legToUseForCOMOffset = EnumYoVariable.create("legToUseForCOMOffset", RobotSide.class, registry);
 
-   public SupportLegAndLegToTrustForVelocity(YoVariableRegistry yoVariableRegistry)
+   public SupportLegAndLegToTrustForVelocity(YoVariableRegistry parentRegistry)
    {
-      yoVariableRegistry.addChild(registry);
+      for (RobotSide robotSide : RobotSide.values())
+      {
+         legsToTrustForVelocity.put(robotSide, new BooleanYoVariable("trust" + robotSide.getCamelCaseNameForMiddleOfExpression() + "LegForVelocity", registry));
+      }
+
+      parentRegistry.addChild(registry);
    }
-   
-   public RobotSide getLegToTrustForVelocity()
+
+   public boolean isLegTrustedForVelocity(RobotSide robotSide)
    {
-      return legToTrustForVelocity.getEnumValue();
+      return legsToTrustForVelocity.get(robotSide).getBooleanValue();
    }
-   
+
    public RobotSide getSupportLeg()
    {
       return supportLeg.getEnumValue();
    }
-   
+
    public RobotSide getLegToUseForCOMOffset()
    {
       return legToUseForCOMOffset.getEnumValue();
    }
 
-   public void setLegToTrustForVelocity(RobotSide robotSide)
+   public void setLegToTrustForVelocity(RobotSide robotSide, boolean trust)
    {
-      legToTrustForVelocity.set(robotSide);      
+      legsToTrustForVelocity.get(robotSide).set(trust);
    }
-   
+
    public void setSupportLeg(RobotSide robotSide)
    {
-      supportLeg.set(robotSide);      
+      supportLeg.set(robotSide);
    }
-   
+
    public void setLegToUseForCOMOffset(RobotSide robotSide)
    {
-      legToUseForCOMOffset.set(robotSide);      
+      legToUseForCOMOffset.set(robotSide);
    }
+
+
+
 }
