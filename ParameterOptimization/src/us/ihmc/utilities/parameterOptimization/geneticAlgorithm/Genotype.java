@@ -1,5 +1,7 @@
 package us.ihmc.utilities.parameterOptimization.geneticAlgorithm;
 
+import java.util.Random;
+
 /**
  * <p>Title: Genetic Algorithm Library </p>
  *
@@ -24,6 +26,16 @@ public class Genotype
    private int DNA[];
    private int bitsPerGene[];
 
+   public Genotype(Genotype genotypeToCopy)
+   {
+      this(genotypeToCopy.bitsPerGene);
+      
+      for (int i=0; i<DNA.length; i++)
+      {
+         this.DNA[i] = genotypeToCopy.DNA[i]; 
+      }
+   }
+   
    public Genotype(int[] bitsPerGene)
    {
       int totalDNALength = 0;
@@ -49,7 +61,7 @@ public class Genotype
       return bitsPerGene;
    }
 
-   public void setRandomGenes()
+   public void setRandomGenes(Random random)
    {
       int totalDNALength = 0;
 
@@ -60,7 +72,7 @@ public class Genotype
 
       for (int i = 0; i < totalDNALength; i++)
       {
-         double x = Math.random();
+         double x = random.nextDouble();
 
          if (x >= 0.5)
             DNA[i] = 1;
@@ -179,12 +191,11 @@ public class Genotype
       }
    }
 
-   public void mutate(double rate)
+   public void mutate(Random random, double rate)
    {
-      // Random myRandom = new Random();
       for (int i = 0; i < DNA.length; i++)
       {
-         double x = Math.random();    // nextDouble();
+         double x = random.nextDouble();    
          if (x < rate)
          {
             if (DNA[i] == 1)
@@ -195,7 +206,7 @@ public class Genotype
       }
    }
 
-   public Genotype[] crossover(Genotype g, double mutrate)
+   public Genotype[] crossover(Random random, Genotype g, double mutrate)
    {
       Genotype ret[] = new Genotype[2];
       ret[0] = new Genotype(bitsPerGene);
@@ -212,8 +223,8 @@ public class Genotype
 
       int numBits = getTotalNumberOfBits();
 
-      int splitBit = (int) (Math.random() * (numBits - 1));
-      int splitBit2 = (int) (Math.random() * (numBits - 1));
+      int splitBit = (int) (random.nextDouble() * (numBits - 1));
+      int splitBit2 = (int) (random.nextDouble() * (numBits - 1));
 
       boolean outsideSplit = false;
       if (splitBit2 < splitBit)
@@ -254,8 +265,8 @@ public class Genotype
          ret[1].DNA = child2DNA;
       }
 
-      ret[0].mutate(mutrate);
-      ret[1].mutate(mutrate);
+      ret[0].mutate(random, mutrate);
+      ret[1].mutate(random, mutrate);
 
       return ret;
    }

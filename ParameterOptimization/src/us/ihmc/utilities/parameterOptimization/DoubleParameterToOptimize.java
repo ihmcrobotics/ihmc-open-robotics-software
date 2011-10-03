@@ -36,6 +36,13 @@ public class DoubleParameterToOptimize extends ParameterToOptimize
    {
       return min + zeroToOne * (max - min);
    }
+   
+   public double getZeroToOneGivenValue(double value)
+   {
+      if (max == min) return 0.0;
+      
+      return (value - min)/(max - min);
+   }
 
    public ParameterToOptimizeType getType()
    {
@@ -45,6 +52,11 @@ public class DoubleParameterToOptimize extends ParameterToOptimize
    public void setCurrentValueGivenZeroToOne(double zeroToOne)
    {
       currentValue = getValueGivenZeroToOne(zeroToOne);
+   }
+   
+   public double getCurrentValueFromZeroToOne()
+   {
+      return getZeroToOneGivenValue(currentValue);
    }
    
    public double getCurrentValue()

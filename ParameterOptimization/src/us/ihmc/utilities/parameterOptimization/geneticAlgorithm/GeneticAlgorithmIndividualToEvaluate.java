@@ -1,5 +1,7 @@
 package us.ihmc.utilities.parameterOptimization.geneticAlgorithm;
 
+import java.util.Random;
+
 import us.ihmc.utilities.parameterOptimization.IndividualToEvaluate;
 import us.ihmc.utilities.parameterOptimization.ListOfParametersToOptimize;
 
@@ -80,15 +82,18 @@ public class GeneticAlgorithmIndividualToEvaluate
       listOfParametersToOptimize.setCurrentValuesGivenZeroToOnes(phenotype);
    }
 
-   public static GeneticAlgorithmIndividualToEvaluate[] mate(GeneticAlgorithmIndividualToEvaluate parent1, GeneticAlgorithmIndividualToEvaluate parent2, double mutate_rate)
+   public static GeneticAlgorithmIndividualToEvaluate[] mate(Random random, GeneticAlgorithmIndividualToEvaluate parent1, GeneticAlgorithmIndividualToEvaluate parent2, double mutate_rate)
    {
       GeneticAlgorithmIndividualToEvaluate children[] = new GeneticAlgorithmIndividualToEvaluate[2];
 
-      children[0] = parent1.makeNewIndividual();
-      children[1] = parent1.makeNewIndividual();
+      children[0] = parent1.makeCopyOfIndividual();
+      children[1] = parent1.makeCopyOfIndividual();
 
       Genotype genotypeForTwoChildren[] = new Genotype[2];
-      genotypeForTwoChildren = parent1.getGenotype().crossover(parent2.getGenotype(), mutate_rate);
+      Genotype genotype1 = parent1.getGenotype();
+      Genotype genotype2 = parent2.getGenotype();
+      
+      genotypeForTwoChildren = genotype1.crossover(random, genotype2, mutate_rate);
 
       children[0].setGenotype(genotypeForTwoChildren[0]);
       children[1].setGenotype(genotypeForTwoChildren[1]);
@@ -97,14 +102,14 @@ public class GeneticAlgorithmIndividualToEvaluate
    } 
    
 
-   public static GeneticAlgorithmIndividualToEvaluate makeRandomIndividual(IndividualToEvaluate individualToCopyFrom)
+   public static GeneticAlgorithmIndividualToEvaluate makeRandomIndividual(Random random, IndividualToEvaluate individualToCopyFrom)
    {
       IndividualToEvaluate individualToEvaluate = individualToCopyFrom.createNewIndividual();
       
       ListOfParametersToOptimize listOfParametersToOptimize = individualToEvaluate.getAllParametersToOptimize();
       
       Genotype genotype = new Genotype(listOfParametersToOptimize.getBitsOfResolution());
-      genotype.setRandomGenes();
+      genotype.setRandomGenes(random);
       double[] doublePhenotype = genotype.getDoublePhenotype();
       listOfParametersToOptimize.setCurrentValuesGivenZeroToOnes(doublePhenotype);
       
@@ -114,24 +119,36 @@ public class GeneticAlgorithmIndividualToEvaluate
       return ret;
    }
    
-   public static GeneticAlgorithmIndividualToEvaluate makeNewIndividual(IndividualToEvaluate individualToCopyFrom)
+   public static GeneticAlgorithmIndividualToEvaluate makeNewIndividual(GeneticAlgorithmIndividualToEvaluate individualToCopyFrom)
    {
-      IndividualToEvaluate individualToEvaluate = individualToCopyFrom.createNewIndividual();
+      IndividualToEvaluate individualToEvaluate = individualToCopyFrom.getIndividualToEvaluate().createNewIndividual();
      
       GeneticAlgorithmIndividualToEvaluate ret = new GeneticAlgorithmIndividualToEvaluate(individualToEvaluate);
       
+      Genotype genotypeToCopy = individualToCopyFrom.genotype;
+      if (genotypeToCopy == null)
+      {
+         ListOfParametersToOptimize listOfParametersToOptimize = individualToEvaluate.getAllParametersToOptimize();
+         genotypeToCopy = new Genotype(listOfParametersToOptimize.getBitsOfResolution());
+         genotypeToCopy.setDoublePhenotype(listOfParametersToOptimize.getCurrentValuesAsZeroToOnes());
+      }
+      
+      ret.setGenotype(new Genotype(genotypeToCopy));
+
       return ret;
    }
    
    
-   public GeneticAlgorithmIndividualToEvaluate makeRandomIndividual()
+   public GeneticAlgorithmIndividualToEvaluate makeRandomIndividual(Random random)
    {
-      return makeRandomIndividual(this.individualToEvaluate);
+      return makeRandomIndividual(random, this.individualToEvaluate);
    }
    
-   public GeneticAlgorithmIndividualToEvaluate makeNewIndividual()
+   public GeneticAlgorithmIndividualToEvaluate makeCopyOfIndividual()
    {
-      return makeRandomIndividual(this.individualToEvaluate);
+      return makeNewIndividual(this);
    }
+
+   
 
 }

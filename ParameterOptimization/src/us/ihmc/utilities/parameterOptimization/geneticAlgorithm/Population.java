@@ -3,6 +3,7 @@ package us.ihmc.utilities.parameterOptimization.geneticAlgorithm;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Random;
 
 import us.ihmc.utilities.parameterOptimization.EvaluatedIndividualListener;
 import us.ihmc.utilities.parameterOptimization.IndividualToEvaluate;
@@ -26,6 +27,8 @@ public class Population
 {
    private ArrayList<EvaluatedIndividualListener> evaluatedIndividualListeners;
 
+   private final Random random;
+   
    private final GeneticAlgorithmIndividualToEvaluate[] generation;
    private final String popName;
    private final int popNumber;
@@ -37,8 +40,20 @@ public class Population
    private int probabilities[];
    private int totalIndividualsProgessionSum;
 
-   public Population(int numIndividuals, GeneticAlgorithmIndividualToEvaluate ind, Comparator<GeneticAlgorithmIndividualToEvaluate> comparator, String name, int popNumber)
+   public Population(PopulationParameters populationParameters, int popNumber)
    {
+      this.random = populationParameters.getRandom();
+      int numIndividuals = populationParameters.getPopulationSize();
+      IndividualToEvaluate individualToEvaluate = populationParameters.getSeedIndividualToEvaluate();
+      int numberOfSeedInvidualsToCopy = populationParameters.getNumberOfSeedIndividualsToCopyIntoFirstPopulation();
+      System.out.println("numberOfSeedInvidualsToCopy = " + numberOfSeedInvidualsToCopy);
+      
+      GeneticAlgorithmIndividualToEvaluate geneticAlgorithmIndividualToEvaluate = new GeneticAlgorithmIndividualToEvaluate(individualToEvaluate);
+      
+      Comparator<GeneticAlgorithmIndividualToEvaluate> comparator = populationParameters.getComparator();
+      String name = populationParameters.getName();
+      
+      
       this.popName = name;
       this.popNumber = popNumber;
       this.comparator = comparator;
@@ -47,33 +62,59 @@ public class Population
 
       for (int i = 0; i < numIndividuals; i++)
       {
-         generation[i] = ind.makeRandomIndividual();
+         if (i<numberOfSeedInvidualsToCopy)
+         {            
+            generation[i] = geneticAlgorithmIndividualToEvaluate.makeCopyOfIndividual();
+         }
+         else
+         {
+            generation[i] = geneticAlgorithmIndividualToEvaluate.makeRandomIndividual(random);
+         }
          generation[i].setName(this.getName() + "_" + this.getPopulationNumber() + "_" + i);
       }
 
       computeProbabilities();
+      
    }
+//   public Population(int numIndividuals, GeneticAlgorithmIndividualToEvaluate individualToEvaluate, Comparator<GeneticAlgorithmIndividualToEvaluate> comparator, String name, int popNumber)
+//   {
+//      this.popName = name;
+//      this.popNumber = popNumber;
+//      this.comparator = comparator;
+//      
+//      generation = new GeneticAlgorithmIndividualToEvaluate[numIndividuals];
+//
+//      for (int i = 0; i < numIndividuals; i++)
+//      {
+//         generation[i] = individualToEvaluate.makeRandomIndividual();
+//         generation[i].setName(this.getName() + "_" + this.getPopulationNumber() + "_" + i);
+//      }
+//
+//      computeProbabilities();
+//   }
 
-   private Population(ArrayList<GeneticAlgorithmIndividualToEvaluate> individuals, Comparator<GeneticAlgorithmIndividualToEvaluate> comparator, String name, int popNumber)
+//   private Population(ArrayList<GeneticAlgorithmIndividualToEvaluate> individuals, Comparator<GeneticAlgorithmIndividualToEvaluate> comparator, String name, int popNumber)
+//   {
+//      this.popName = name;
+//      this.popNumber = popNumber;
+//      this.comparator = comparator;
+//      generation = new GeneticAlgorithmIndividualToEvaluate[individuals.size()];
+//
+//      for (int i = 0; i < individuals.size(); i++)
+//      {
+//         GeneticAlgorithmIndividualToEvaluate individual = (GeneticAlgorithmIndividualToEvaluate) individuals.get(i);
+//         generation[i] = individual;
+//      }
+//
+//      computeProbabilities();
+//
+//      // evaluateAllIndividuals();
+//   }
+
+   private Population(Random random, int numberOfIndividuals, Comparator<GeneticAlgorithmIndividualToEvaluate> comparator, String name, int popNumber)
    {
-      this.popName = name;
-      this.popNumber = popNumber;
-      this.comparator = comparator;
-      generation = new GeneticAlgorithmIndividualToEvaluate[individuals.size()];
-
-      for (int i = 0; i < individuals.size(); i++)
-      {
-         GeneticAlgorithmIndividualToEvaluate individual = (GeneticAlgorithmIndividualToEvaluate) individuals.get(i);
-         generation[i] = individual;
-      }
-
-      computeProbabilities();
-
-      // evaluateAllIndividuals();
-   }
-
-   private Population(int numberOfIndividuals, Comparator<GeneticAlgorithmIndividualToEvaluate> comparator, String name, int popNumber)
-   {
+      this.random = random;
+      
       this.popName = name;
       this.popNumber = popNumber;
       this.comparator = comparator;
@@ -157,7 +198,7 @@ public class Population
 
    public Population breed(double crossoverRate, double mutationRate)
    {
-      Population retPop = new Population(generation.length, this.comparator, this.popName, this.popNumber + 1);
+      Population retPop = new Population(this.random, generation.length, this.comparator, this.popName, this.popNumber + 1);
 
       GeneticAlgorithmIndividualToEvaluate parent1, parent2;
       GeneticAlgorithmIndividualToEvaluate[] children = new GeneticAlgorithmIndividualToEvaluate[2];
@@ -173,7 +214,7 @@ public class Population
 
          if (crossoverRate > Math.random())
          {
-            children = GeneticAlgorithmIndividualToEvaluate.mate(parent1, parent2, mutationRate);
+            children = GeneticAlgorithmIndividualToEvaluate.mate(random, parent1, parent2, mutationRate);
 
             children[0].setName(this.popName + "_" + (this.popNumber + 1) + "_" + i * 2);
             children[1].setName(this.popName + "_" + (this.popNumber + 1) + "_" + (i * 2 + 1));

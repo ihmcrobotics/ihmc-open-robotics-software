@@ -76,6 +76,19 @@ public class ListOfParametersToOptimize
          parameterToOptimize.setCurrentValueGivenZeroToOne(zeroToOnes[i]);
       }
    }
+   
+   public double[] getCurrentValuesAsZeroToOnes()
+   {
+      double[] ret = new double[parametersToOptimize.size()];
+      
+      for (int i=0; i<parametersToOptimize.size(); i++)
+      {
+         ParameterToOptimize parameterToOptimize = parametersToOptimize.get(i);
+         ret[i] = parameterToOptimize.getCurrentValueFromZeroToOne();
+      }
+      
+      return ret;
+   }
 
    public void setCurrentValues(ListOfParametersToOptimize listOfParameters)
    {

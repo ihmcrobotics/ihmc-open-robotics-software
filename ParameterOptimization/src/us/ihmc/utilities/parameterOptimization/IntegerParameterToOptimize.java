@@ -27,6 +27,13 @@ public class IntegerParameterToOptimize extends ParameterToOptimize
    {
       return (int) (Math.round(((double) min) + zeroToOne * ((double) (max - min))));
    }
+   
+   public double getZeroToOneGivenValue(int value)
+   {
+      if (max == min) return 0.0;
+      
+      return ((double) (value - min))/((double) (max - min));
+   }
 
    public ParameterToOptimizeType getType()
    {
@@ -36,6 +43,11 @@ public class IntegerParameterToOptimize extends ParameterToOptimize
    public void setCurrentValueGivenZeroToOne(double zeroToOne)
    {
       currentValue = getValueGivenZeroToOne(zeroToOne);
+   }
+   
+   public double getCurrentValueFromZeroToOne()
+   {
+      return getZeroToOneGivenValue(currentValue);
    }
    
    public int getCurrentValue()
@@ -62,6 +74,5 @@ public class IntegerParameterToOptimize extends ParameterToOptimize
    {
       return (double) getCurrentValue();
    }
-   
    
 }
