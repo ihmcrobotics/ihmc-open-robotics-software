@@ -2,16 +2,9 @@ package us.ihmc.utilities.parameterOptimization;
 
 import static org.junit.Assert.assertEquals;
 
-import javax.swing.text.DefaultEditorKit.CutAction;
+import java.util.Random;
 
 import org.junit.Test;
-
-import us.ihmc.utilities.parameterOptimization.BooleanParameterToOptimize;
-import us.ihmc.utilities.parameterOptimization.DoubleParameterToOptimize;
-import us.ihmc.utilities.parameterOptimization.IndividualToEvaluate;
-import us.ihmc.utilities.parameterOptimization.IntegerParameterToOptimize;
-import us.ihmc.utilities.parameterOptimization.ListOfParametersToOptimize;
-import us.ihmc.utilities.parameterOptimization.OptimizationProblem;
 
 public class ExampleOptimizationProblemOneTest
 {
@@ -27,7 +20,9 @@ public class ExampleOptimizationProblemOneTest
       OptimizationProblem optimizationProblem = new OptimizationProblem(sampleCostFunction, maximize, cutoffFitness, maximumNumberOfIndividualsToEvaluate);
       
       double stepChange = 0.01;
-      SimpleRandomGradientDecentParameterOptimizer optimizer = new SimpleRandomGradientDecentParameterOptimizer(stepChange);
+      Random random = new Random(1776L);
+      
+      SimpleRandomGradientDecentParameterOptimizer optimizer = new SimpleRandomGradientDecentParameterOptimizer(random, stepChange);
       IndividualToEvaluate optimalIndividualToEvaluate = optimizer.optimize(optimizationProblem);
       
       ListOfParametersToOptimize optimalListOfParametersToOptimize = optimalIndividualToEvaluate.getAllParametersToOptimize();
@@ -101,7 +96,9 @@ public class ExampleOptimizationProblemOneTest
       OptimizationProblem optimizationProblem = new OptimizationProblem(sampleCostFunction, maximize, cutoffFitness, maximumNumberOfIndividualsToEvaluate);
       
       double stepChange = 0.01;
-      SimpleRandomGradientDecentParameterOptimizer optimizer = new SimpleRandomGradientDecentParameterOptimizer(stepChange);
+      Random random = new Random(1776L);
+
+      SimpleRandomGradientDecentParameterOptimizer optimizer = new SimpleRandomGradientDecentParameterOptimizer(random, stepChange);
       SimpleThreeParameterCostFunction optimalIndividual = (SimpleThreeParameterCostFunction) optimizer.optimize(optimizationProblem);
             
       ListOfParametersToOptimize listOfParametersToOptimize = optimalIndividual.getAllParametersToOptimize();

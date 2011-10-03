@@ -2,6 +2,8 @@ package us.ihmc.utilities.parameterOptimization;
 
 import static org.junit.Assert.assertTrue;
 
+import java.util.Random;
+
 import org.junit.Test;
 
 import us.ihmc.utilities.parameterOptimization.IndividualToEvaluate;
@@ -11,7 +13,7 @@ import us.ihmc.utilities.parameterOptimization.OptimizationProblem;
 public class SimpleSimulationTest
 {
    @Test
-   public void test()
+   public void testSimpleSimulation()
    {
       SimpleRobotToOptimize robot = new SimpleRobotToOptimize();
       SimpleControllerToOptimize controller = new SimpleControllerToOptimize();
@@ -20,8 +22,9 @@ public class SimpleSimulationTest
       SimpleSimulationIndividualToEvaluate costFunction = new SimpleSimulationIndividualToEvaluate();
 
       double stepChange = 0.01;
+      Random random = new Random(1984L);
 
-      SimpleRandomGradientDecentParameterOptimizer optimizer = new SimpleRandomGradientDecentParameterOptimizer(stepChange);
+      SimpleRandomGradientDecentParameterOptimizer optimizer = new SimpleRandomGradientDecentParameterOptimizer(random, stepChange);
 
       boolean maximize = false;
       double cutoffFitness = Double.NEGATIVE_INFINITY;
