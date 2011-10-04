@@ -52,7 +52,7 @@ public class YoKalmanFilter implements KalmanFilter
    private final DoubleYoVariable[] yoR;
    private final DoubleYoVariable[] yoX;
    private final DoubleYoVariable[] yoP;
-   
+
    private boolean doChecks = false;
 
    public YoKalmanFilter(String name, int nStates, int nInputs, int nMeasurements, YoVariableRegistry parentRegistry)
@@ -104,7 +104,7 @@ public class YoKalmanFilter implements KalmanFilter
          checkSize(G, this.G);
          checkSize(H, this.H);
       }
-      
+
       storeInYoVariables(F, yoF);
       storeInYoVariables(G, yoG);
       storeInYoVariables(H, yoH);
@@ -140,6 +140,12 @@ public class YoKalmanFilter implements KalmanFilter
 
    public void predict(DenseMatrix64F u)
    {
+      if (doChecks)
+      {
+         if (MatrixFeatures.hasNaN(u))
+            throw new RuntimeException("u contains NaN: " + u);
+      }
+
       getFromYoVariables(F, yoF);
       getFromYoVariables(G, yoG);
       getFromYoVariablesSymmetric(Q, yoQ);
@@ -163,6 +169,12 @@ public class YoKalmanFilter implements KalmanFilter
 
    public void update(DenseMatrix64F y)
    {
+      if (doChecks)
+      {
+         if (MatrixFeatures.hasNaN(y))
+            throw new RuntimeException("y contains NaN: " + y);
+      }
+
       getFromYoVariables(H, yoH);
       getFromYoVariablesSymmetric(R, yoR);
       getFromYoVariables(x, yoX);
@@ -333,13 +345,13 @@ public class YoKalmanFilter implements KalmanFilter
    {
       return size * (size + 1) / 2;
    }
-   
+
    private static void checkPositiveDefinite(DenseMatrix64F m)
    {
       if (!MatrixFeatures.isPositiveSemidefinite(m))
          throw new RuntimeException("Matrix is not positive semidefinite: " + m);
    }
-   
+
    private static void checkSize(DenseMatrix64F m1, DenseMatrix64F m2)
    {
       boolean nRowsNotEqual = m1.getNumRows() != m2.getNumRows();
