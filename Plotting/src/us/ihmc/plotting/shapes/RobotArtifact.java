@@ -3,12 +3,13 @@ package us.ihmc.plotting.shapes;
 import java.awt.Graphics;
 
 import us.ihmc.plotting.Artifact;
+import us.ihmc.plotting.Coordinate;
 import us.ihmc.plotting.Pose;
 
 public class RobotArtifact extends Artifact
 {
    private static final long serialVersionUID = 874940514060462114L;
-   protected Pose _pose;
+   protected Pose _pose = new Pose(0.0, 0.0, 0.0, Coordinate.METER);
 
    public RobotArtifact(String id)
    {
