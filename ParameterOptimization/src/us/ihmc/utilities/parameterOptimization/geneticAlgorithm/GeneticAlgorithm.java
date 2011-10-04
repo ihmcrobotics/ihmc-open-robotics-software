@@ -117,11 +117,13 @@ public class GeneticAlgorithm implements ParameterOptimizer
       finalPopulation.save(filename + finalPopulation.getPopulationNumber());
    }
 
-   public void evolveToFitness(double fitnessCutoff, int maximumNumberOfIndividualsToEvaluate)
+   public void evolveToFitness(boolean maximize, double fitnessCutoff, int maximumNumberOfIndividualsToEvaluate)
    {
       double peakFitness = getFittestIndividual().getFitness();
       
-      while ((peakFitness < fitnessCutoff) && (this.getNumberOfIndividuals() < maximumNumberOfIndividualsToEvaluate))
+      
+      while (((maximize && (peakFitness < fitnessCutoff)) || (!maximize && (peakFitness > fitnessCutoff))) && 
+            (this.getNumberOfIndividuals() < maximumNumberOfIndividualsToEvaluate))
       {
          evolveOneGeneration();
 
@@ -288,7 +290,9 @@ public class GeneticAlgorithm implements ParameterOptimizer
       }
       
       
-      this.evolveToFitness(optimizationProblem.getCutoffFitness(), optimizationProblem.getMaximumNumberOfIndividualsToEvaluate());
+      boolean maximize = optimizationProblem.getMaximize();
+      
+      this.evolveToFitness(maximize, optimizationProblem.getCutoffFitness(), optimizationProblem.getMaximumNumberOfIndividualsToEvaluate());
       
       GeneticAlgorithmIndividualToEvaluate fittestIndividual = getFittestIndividual();
       return fittestIndividual.getIndividualToEvaluate();

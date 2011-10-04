@@ -2,8 +2,6 @@ package us.ihmc.utilities.parameterOptimization.geneticAlgorithm;
 
 import java.util.Comparator;
 
-import us.ihmc.utilities.parameterOptimization.IndividualToEvaluate;
-
 public class MinimizationIndividualComparator implements Comparator<GeneticAlgorithmIndividualToEvaluate>
 {
 
@@ -12,9 +10,9 @@ public class MinimizationIndividualComparator implements Comparator<GeneticAlgor
       double fitnessOne = individualOne.getFitness();
       double fitnessTwo = individualTwo.getFitness();
 
-      if (fitnessOne > fitnessTwo)
+      if (fitnessOne < fitnessTwo)
          return -1;
-      else if (fitnessOne < fitnessTwo)
+      else if (fitnessOne > fitnessTwo)
          return 1;
       else
          return 0;
