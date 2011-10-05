@@ -1,14 +1,10 @@
 package us.ihmc.plotting.shapes;
 
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-
-import javax.vecmath.Point2d;
-
 import us.ihmc.plotting.Artifact;
 import us.ihmc.plotting.Pose;
+
+import javax.vecmath.Point2d;
+import java.awt.*;
 
 public class DroneArtifact extends Artifact
 {
@@ -36,40 +32,10 @@ public class DroneArtifact extends Artifact
 
    public String describe()
    {
-      return this.getID() + " : " + this.getType() + " " + this._pose.getX() + "," + this._pose.getY() + "," + this._pose.getZ() + "," + this._pose.getYaw()
+      return this.getID() + " : " + this.getType() + "X-Y-Z (" + this._pose.getX() + "," + this._pose.getY() + "," + this._pose.getZ() + ")  YAW-PITCH-ROLL(" + this._pose.getYaw()
              + "," + this._pose.getPitch() + "," + this._pose.getRoll();
    }
 
-   /**
-    * Must provide a draw method for plotter to render artifact
-    */
-
-   // public void draw(Graphics g, int Xcenter, int Ycenter, double
-   // scaleFactor)
-   // {
-   // int x = Xcenter + (new Double(_pose.getX() * scaleFactor).intValue());
-   // int y = Ycenter - (new Double(_pose.getY() * scaleFactor).intValue());
-   //
-   // // if(orientation == Plottable.X_Z){
-   // // x = Xcenter + (new Double(_pose.getX()* scaleFactor).intValue());
-   // // y = Ycenter - (new Double(_pose.getZ()* scaleFactor).intValue());
-   // // }
-   // // else if(orientation == Plottable.Y_Z){
-   // // x = Xcenter + (new Double(_pose.getY()* scaleFactor).intValue());
-   // // y = Ycenter - (new Double(_pose.getZ()* scaleFactor).intValue());
-   // // }
-   //
-   // int w1 = 16;
-   // double w2 = 16.0;
-   // int w12 = 8;
-   // double hdg = Math.toRadians(_pose.getYaw());
-   // int xHDG = x + new Double(Math.sin(hdg) * w2).intValue();
-   // int yHDG = y - new Double(Math.cos(hdg) * w2).intValue();
-   //
-   // g.setColor(color);
-   // g.drawOval((x - w12), (y - w12), w1, w1);
-   // g.drawLine(x, y, xHDG, yHDG);
-   // }
    public void draw(Graphics g, int Xcenter, int Ycenter, double scaleFactor)
    {
       if (_pose != null)
@@ -81,7 +47,7 @@ public class DroneArtifact extends Artifact
          int w = (int) ((this.width * scaleFactor) / 2.0);
          int l = (int) ((this.length * scaleFactor) / 2.0);
 
-         _pose.getYaw();
+         double yaw = -_pose.getYaw() + 90.0;
 
          int xc1, yc1, xc2, yc2, xc3, yc3, xc4, yc4;
 
@@ -99,20 +65,17 @@ public class DroneArtifact extends Artifact
 
          int rxc1, ryc1, rxc2, ryc2, rxc3, ryc3, rxc4, ryc4;
 
-         rxc1 = (int) (x + (Math.cos(Math.toRadians(_pose.getYaw())) * (xc1 - x) - Math.sin(Math.toRadians(_pose.getYaw())) * (yc1 - y)));
-         ryc1 = (int) (y + (Math.sin(Math.toRadians(_pose.getYaw())) * (xc1 - x) + Math.cos(Math.toRadians(_pose.getYaw())) * (yc1 - y)));
+         rxc1 = (int) (x + (Math.cos(Math.toRadians(yaw)) * (xc1 - x) - Math.sin(Math.toRadians(yaw)) * (yc1 - y)));
+         ryc1 = (int) (y + (Math.sin(Math.toRadians(yaw)) * (xc1 - x) + Math.cos(Math.toRadians(yaw)) * (yc1 - y)));
 
-         rxc2 = (int) (x + (Math.cos(Math.toRadians(_pose.getYaw())) * (xc2 - x) - Math.sin(Math.toRadians(_pose.getYaw())) * (yc2 - y)));
-         ryc2 = (int) (y + (Math.sin(Math.toRadians(_pose.getYaw())) * (xc2 - x) + Math.cos(Math.toRadians(_pose.getYaw())) * (yc2 - y)));
+         rxc2 = (int) (x + (Math.cos(Math.toRadians(yaw)) * (xc2 - x) - Math.sin(Math.toRadians(yaw)) * (yc2 - y)));
+         ryc2 = (int) (y + (Math.sin(Math.toRadians(yaw)) * (xc2 - x) + Math.cos(Math.toRadians(yaw)) * (yc2 - y)));
 
-         rxc3 = (int) (x + (Math.cos(Math.toRadians(_pose.getYaw())) * (xc3 - x) - Math.sin(Math.toRadians(_pose.getYaw())) * (yc3 - y)));
-         ryc3 = (int) (y + (Math.sin(Math.toRadians(_pose.getYaw())) * (xc3 - x) + Math.cos(Math.toRadians(_pose.getYaw())) * (yc3 - y)));
+         rxc3 = (int) (x + (Math.cos(Math.toRadians(yaw)) * (xc3 - x) - Math.sin(Math.toRadians(yaw)) * (yc3 - y)));
+         ryc3 = (int) (y + (Math.sin(Math.toRadians(yaw)) * (xc3 - x) + Math.cos(Math.toRadians(yaw)) * (yc3 - y)));
 
-         rxc4 = (int) (x + (Math.cos(Math.toRadians(_pose.getYaw())) * (xc4 - x) - Math.sin(Math.toRadians(_pose.getYaw())) * (yc4 - y)));
-         ryc4 = (int) (y + (Math.sin(Math.toRadians(_pose.getYaw())) * (xc4 - x) + Math.cos(Math.toRadians(_pose.getYaw())) * (yc4 - y)));
-
-         int[] pointsX = {rxc1, rxc2, rxc3, rxc4};
-         int[] pointsY = {ryc1, ryc2, ryc3, ryc4};
+         rxc4 = (int) (x + (Math.cos(Math.toRadians(yaw)) * (xc4 - x) - Math.sin(Math.toRadians(yaw)) * (yc4 - y)));
+         ryc4 = (int) (y + (Math.sin(Math.toRadians(yaw)) * (xc4 - x) + Math.cos(Math.toRadians(yaw)) * (yc4 - y)));
 
          Graphics2D g2d = (Graphics2D) g;
 
@@ -122,14 +85,11 @@ public class DroneArtifact extends Artifact
          Point2d point2 = new Point2d(rxc2, ryc2);
          int radius = new Double(point.distance(point2)).intValue();
 
-         // g2d.fillPolygon(pointsX, pointsY, 4);
-
          g2d.setColor(Color.red);
          g2d.drawOval(rxc1 - radius / 2, ryc1 - radius / 2, radius, radius);
          g2d.drawOval(rxc2 - radius / 2, ryc2 - radius / 2, radius, radius);
          g2d.drawOval(rxc3 - radius / 2, ryc3 - radius / 2, radius, radius);
          g2d.drawOval(rxc4 - radius / 2, ryc4 - radius / 2, radius, radius);
-
 
          int midxFront = (rxc1 + rxc2) / 2;
          int midyFront = (ryc1 + ryc2) / 2;
@@ -139,27 +99,14 @@ public class DroneArtifact extends Artifact
          int midxleft = (rxc1 + rxc4) / 2;
          int midyleft = (ryc1 + ryc4) / 2;
 
-
          g2d.setColor(Color.green);
          g2d.setStroke(new BasicStroke(3));
 
          g2d.drawLine(midxFront, midyFront, midxright, midyright);
          g2d.drawLine(midxFront, midyFront, midxleft, midyleft);
          g2d.drawLine(midxright, midyright, midxleft, midyleft);
-
       }
-
-      // g2d.drawOval(x - radius / 2, y - radius / 2, radius, radius);
-
-      // g2d.drawOval(midxMid - radius / 2, midyMid - radius / 2, radius, radius);
-
-
-
-
-      // g.fillRoundRect(x - (w / 2), y - (l / 2), w, l, 1, 1);
-
    }
-
 
 
    public void drawLegend(Graphics g, int Xcenter, int Ycenter, double scaleFactor)
