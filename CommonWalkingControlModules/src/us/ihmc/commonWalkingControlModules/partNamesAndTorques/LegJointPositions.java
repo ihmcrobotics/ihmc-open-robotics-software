@@ -118,5 +118,17 @@ public class LegJointPositions
 
       return true;
    }
+
+   public void set(LegJointPositions legJointPositions)
+   {
+      
+      if(this.robotSide != legJointPositions.robotSide)
+         throw new RuntimeException("Wrong side!");
+      
+      for (LegJointName legJointName : LegJointName.values())
+      {
+         setJointPosition(legJointName, legJointPositions.getJointPosition(legJointName));
+      }
+   }
    
 }

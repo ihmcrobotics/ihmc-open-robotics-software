@@ -91,4 +91,16 @@ public class LegJointVelocities
 
       return ret;
    }
+
+   public void set(LegJointVelocities legJointVelocities)
+   {
+      if(this.robotSide != legJointVelocities.robotSide)
+         throw new RuntimeException("Wrong side!");
+      
+      for (LegJointName legJointName : legJointNames)
+      {
+         setJointVelocity(legJointName, legJointVelocities.getJointVelocity(legJointName));
+      }
+      
+   }
 }
