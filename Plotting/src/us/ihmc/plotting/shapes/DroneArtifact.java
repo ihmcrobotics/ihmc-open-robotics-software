@@ -72,79 +72,82 @@ public class DroneArtifact extends Artifact
    // }
    public void draw(Graphics g, int Xcenter, int Ycenter, double scaleFactor)
    {
-      int x = Xcenter + ((int) Math.round(_pose.getX() * scaleFactor));
-      int y = Ycenter - ((int) Math.round(_pose.getY() * scaleFactor));
+      if (_pose != null)
+      {
+         int x = Xcenter + ((int) Math.round(_pose.getX() * scaleFactor));
+         int y = Ycenter - ((int) Math.round(_pose.getY() * scaleFactor));
 
-      g.setColor(color);
-      int w = (int) ((this.width * scaleFactor) / 2.0);
-      int l = (int) ((this.length * scaleFactor) / 2.0);
+         g.setColor(color);
+         int w = (int) ((this.width * scaleFactor) / 2.0);
+         int l = (int) ((this.length * scaleFactor) / 2.0);
 
-      _pose.getYaw();
+         _pose.getYaw();
 
-      int xc1, yc1, xc2, yc2, xc3, yc3, xc4, yc4;
+         int xc1, yc1, xc2, yc2, xc3, yc3, xc4, yc4;
 
-      xc1 = x - (w / 2);
-      yc1 = y - (l / 2);
+         xc1 = x - (w / 2);
+         yc1 = y - (l / 2);
 
-      xc2 = x + (w / 2);
-      yc2 = y - (l / 2);
+         xc2 = x + (w / 2);
+         yc2 = y - (l / 2);
 
-      xc3 = x + (w / 2);
-      yc3 = y + (l / 2);
+         xc3 = x + (w / 2);
+         yc3 = y + (l / 2);
 
-      xc4 = x - (w / 2);
-      yc4 = y + (l / 2);
+         xc4 = x - (w / 2);
+         yc4 = y + (l / 2);
 
-      int rxc1, ryc1, rxc2, ryc2, rxc3, ryc3, rxc4, ryc4;
+         int rxc1, ryc1, rxc2, ryc2, rxc3, ryc3, rxc4, ryc4;
 
-      rxc1 = (int) (x + (Math.cos(Math.toRadians(_pose.getYaw())) * (xc1 - x) - Math.sin(Math.toRadians(_pose.getYaw())) * (yc1 - y)));
-      ryc1 = (int) (y + (Math.sin(Math.toRadians(_pose.getYaw())) * (xc1 - x) + Math.cos(Math.toRadians(_pose.getYaw())) * (yc1 - y)));
+         rxc1 = (int) (x + (Math.cos(Math.toRadians(_pose.getYaw())) * (xc1 - x) - Math.sin(Math.toRadians(_pose.getYaw())) * (yc1 - y)));
+         ryc1 = (int) (y + (Math.sin(Math.toRadians(_pose.getYaw())) * (xc1 - x) + Math.cos(Math.toRadians(_pose.getYaw())) * (yc1 - y)));
 
-      rxc2 = (int) (x + (Math.cos(Math.toRadians(_pose.getYaw())) * (xc2 - x) - Math.sin(Math.toRadians(_pose.getYaw())) * (yc2 - y)));
-      ryc2 = (int) (y + (Math.sin(Math.toRadians(_pose.getYaw())) * (xc2 - x) + Math.cos(Math.toRadians(_pose.getYaw())) * (yc2 - y)));
+         rxc2 = (int) (x + (Math.cos(Math.toRadians(_pose.getYaw())) * (xc2 - x) - Math.sin(Math.toRadians(_pose.getYaw())) * (yc2 - y)));
+         ryc2 = (int) (y + (Math.sin(Math.toRadians(_pose.getYaw())) * (xc2 - x) + Math.cos(Math.toRadians(_pose.getYaw())) * (yc2 - y)));
 
-      rxc3 = (int) (x + (Math.cos(Math.toRadians(_pose.getYaw())) * (xc3 - x) - Math.sin(Math.toRadians(_pose.getYaw())) * (yc3 - y)));
-      ryc3 = (int) (y + (Math.sin(Math.toRadians(_pose.getYaw())) * (xc3 - x) + Math.cos(Math.toRadians(_pose.getYaw())) * (yc3 - y)));
+         rxc3 = (int) (x + (Math.cos(Math.toRadians(_pose.getYaw())) * (xc3 - x) - Math.sin(Math.toRadians(_pose.getYaw())) * (yc3 - y)));
+         ryc3 = (int) (y + (Math.sin(Math.toRadians(_pose.getYaw())) * (xc3 - x) + Math.cos(Math.toRadians(_pose.getYaw())) * (yc3 - y)));
 
-      rxc4 = (int) (x + (Math.cos(Math.toRadians(_pose.getYaw())) * (xc4 - x) - Math.sin(Math.toRadians(_pose.getYaw())) * (yc4 - y)));
-      ryc4 = (int) (y + (Math.sin(Math.toRadians(_pose.getYaw())) * (xc4 - x) + Math.cos(Math.toRadians(_pose.getYaw())) * (yc4 - y)));
+         rxc4 = (int) (x + (Math.cos(Math.toRadians(_pose.getYaw())) * (xc4 - x) - Math.sin(Math.toRadians(_pose.getYaw())) * (yc4 - y)));
+         ryc4 = (int) (y + (Math.sin(Math.toRadians(_pose.getYaw())) * (xc4 - x) + Math.cos(Math.toRadians(_pose.getYaw())) * (yc4 - y)));
 
-      int[] pointsX = {rxc1, rxc2, rxc3, rxc4};
-      int[] pointsY = {ryc1, ryc2, ryc3, ryc4};
+         int[] pointsX = {rxc1, rxc2, rxc3, rxc4};
+         int[] pointsY = {ryc1, ryc2, ryc3, ryc4};
 
-      Graphics2D g2d = (Graphics2D) g;
+         Graphics2D g2d = (Graphics2D) g;
 
-      g2d.setStroke(new BasicStroke(3));
+         g2d.setStroke(new BasicStroke(3));
 
-      Point2d point = new Point2d(rxc1, ryc1);
-      Point2d point2 = new Point2d(rxc2, ryc2);
-      int radius = new Double(point.distance(point2)).intValue();
+         Point2d point = new Point2d(rxc1, ryc1);
+         Point2d point2 = new Point2d(rxc2, ryc2);
+         int radius = new Double(point.distance(point2)).intValue();
 
-      // g2d.fillPolygon(pointsX, pointsY, 4);
+         // g2d.fillPolygon(pointsX, pointsY, 4);
 
-      g2d.setColor(Color.red);
-      g2d.drawOval(rxc1 - radius / 2, ryc1 - radius / 2, radius, radius);
-      g2d.drawOval(rxc2 - radius / 2, ryc2 - radius / 2, radius, radius);
-      g2d.drawOval(rxc3 - radius / 2, ryc3 - radius / 2, radius, radius);
-      g2d.drawOval(rxc4 - radius / 2, ryc4 - radius / 2, radius, radius);
-
-
-      int midxFront = (rxc1 + rxc2) / 2;
-      int midyFront = (ryc1 + ryc2) / 2;
-
-      int midxright = (rxc2 + rxc3) / 2;
-      int midyright = (ryc2 + ryc3) / 2;
-      int midxleft = (rxc1 + rxc4) / 2;
-      int midyleft = (ryc1 + ryc4) / 2;
+         g2d.setColor(Color.red);
+         g2d.drawOval(rxc1 - radius / 2, ryc1 - radius / 2, radius, radius);
+         g2d.drawOval(rxc2 - radius / 2, ryc2 - radius / 2, radius, radius);
+         g2d.drawOval(rxc3 - radius / 2, ryc3 - radius / 2, radius, radius);
+         g2d.drawOval(rxc4 - radius / 2, ryc4 - radius / 2, radius, radius);
 
 
-      g2d.setColor(Color.green);
-      g2d.setStroke(new BasicStroke(3));
+         int midxFront = (rxc1 + rxc2) / 2;
+         int midyFront = (ryc1 + ryc2) / 2;
 
-      g2d.drawLine(midxFront, midyFront, midxright, midyright);
-      g2d.drawLine(midxFront, midyFront, midxleft, midyleft);
-      g2d.drawLine(midxright, midyright, midxleft, midyleft);
+         int midxright = (rxc2 + rxc3) / 2;
+         int midyright = (ryc2 + ryc3) / 2;
+         int midxleft = (rxc1 + rxc4) / 2;
+         int midyleft = (ryc1 + ryc4) / 2;
 
+
+         g2d.setColor(Color.green);
+         g2d.setStroke(new BasicStroke(3));
+
+         g2d.drawLine(midxFront, midyFront, midxright, midyright);
+         g2d.drawLine(midxFront, midyFront, midxleft, midyleft);
+         g2d.drawLine(midxright, midyright, midxleft, midyleft);
+
+      }
 
       // g2d.drawOval(x - radius / 2, y - radius / 2, radius, radius);
 
