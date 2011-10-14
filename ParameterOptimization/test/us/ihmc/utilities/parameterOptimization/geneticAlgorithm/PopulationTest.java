@@ -85,6 +85,7 @@ public class PopulationTest
          assertTrue(maximumFitness >= minimumFitness);
       }
       
+//      System.out.println(bestFitness);
       assertTrue("bestFitness = " + bestFitness, bestFitness > 13.0);
    }
 
