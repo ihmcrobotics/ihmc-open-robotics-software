@@ -213,7 +213,7 @@ public class Population
          parent1 = selectRandomParent();
          parent2 = selectRandomParent();
 
-         if (crossoverRate > Math.random())
+         if (crossoverRate > random.nextDouble())
          {
             children = GeneticAlgorithmIndividualToEvaluate.mate(random, parent1, parent2, mutationRate);
 
@@ -260,7 +260,7 @@ public class Population
 
    private GeneticAlgorithmIndividualToEvaluate selectRandomParent()
    {
-      int randomIndex = (int) (Math.random() * (totalIndividualsProgessionSum)) + 1;
+      int randomIndex = (int) (random.nextDouble() * (totalIndividualsProgessionSum)) + 1;
 
       // System.out.println("ran: " + ran); System.out.flush();
 
