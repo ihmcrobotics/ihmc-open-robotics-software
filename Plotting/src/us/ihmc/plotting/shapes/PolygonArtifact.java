@@ -12,7 +12,7 @@ import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
 public class PolygonArtifact extends Artifact
 {
    /**
-    * 
+    *
     */
    private static final long serialVersionUID = -1874963815283452026L;
    private ArrayList<Point2d> points = new ArrayList<Point2d>();
@@ -101,18 +101,21 @@ public class PolygonArtifact extends Artifact
 
       if (nPoints == 1)
       {
-         int x = Xcenter + (int)Math.round(points.get(0).x * scaleFactor);
-         int y = Ycenter - (int)Math.round(points.get(0).y * scaleFactor);
+         int x = Xcenter + (int) Math.round(points.get(0).x * scaleFactor);
+         int y = Ycenter - (int) Math.round(points.get(0).y * scaleFactor);
          g.fillOval(x, y, 4, 4);
       }
       else
       {
          for (int i = 0; i < nPoints; i++)
          {
-            int x = Xcenter + (int)Math.round(points.get(i).x * scaleFactor);
-            int y = Ycenter - (int)Math.round(points.get(i).y * scaleFactor);
-            xPoints[i] = x;
-            yPoints[i] = y;
+            if (points.get(i) != null)
+            {
+               int x = Xcenter + (int) Math.round(points.get(i).x * scaleFactor);
+               int y = Ycenter - (int) Math.round(points.get(i).y * scaleFactor);
+               xPoints[i] = x;
+               yPoints[i] = y;
+            }
          }
 
          g.setColor(color);
@@ -133,12 +136,12 @@ public class PolygonArtifact extends Artifact
    {
       g.drawString("Polygon", xCenter, yCenter);
    }
-   
+
    public void drawHistory(Graphics g, int Xcenter, int Ycenter, double scaleFactor)
    {
       throw new RuntimeException("Not implemented!");
    }
-   
+
    public void takeHistorySnapshot()
    {
       throw new RuntimeException("Not implemented!");
