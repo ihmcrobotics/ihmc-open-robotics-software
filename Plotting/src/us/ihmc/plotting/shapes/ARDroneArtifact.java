@@ -9,7 +9,7 @@ import javax.vecmath.Point2d;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 
-public class NewDroneArtifact extends Artifact
+public class ARDroneArtifact extends Artifact
 {
    private static final long serialVersionUID = -7196775480859274435L;
    protected Pose _pose;
@@ -20,7 +20,7 @@ public class NewDroneArtifact extends Artifact
    protected double length = propellerOffset * 4;
 
 
-   public NewDroneArtifact(String id)
+   public ARDroneArtifact(String id)
    {
       super(id);
       setType("robot");
