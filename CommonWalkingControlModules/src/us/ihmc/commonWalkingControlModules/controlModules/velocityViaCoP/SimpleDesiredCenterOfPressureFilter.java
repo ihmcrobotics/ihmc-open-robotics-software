@@ -51,28 +51,74 @@ public class SimpleDesiredCenterOfPressureFilter implements DesiredCenterOfPress
    }
 
 
-
    public FramePoint2d filter(FramePoint2d desiredCenterOfPressure, RobotSide supportLeg)
    {
-      if (supportLegPreviousTick.getEnumValue() != supportLeg)
-      {
-         resetCoPFilters();
-         supportLegPreviousTick.set(supportLeg);
-      }
+      FramePoint2d ret;
 
-      AlphaFilteredYoFramePoint2d filteredDesiredCoP;
-      FrameConvexPolygon2d supportPolygon;
       if (supportLeg == null)
       {
-         filteredDesiredCoP = filteredDesiredCoPDoubleSupport;
-         supportPolygon = couplingRegistry.getBipedSupportPolygons().getSupportPolygonInMidFeetZUp();
+         ret = filterDoubleSupport(desiredCenterOfPressure);
       }
       else
       {
-         filteredDesiredCoP = filteredDesiredCoPsSingleSupport.get(supportLeg);
-         supportPolygon = couplingRegistry.getBipedSupportPolygons().getFootPolygonInAnkleZUp(supportLeg);
+         ret = filterSingleSupport(desiredCenterOfPressure, supportLeg);
       }
 
+      supportLegPreviousTick.set(supportLeg);
+
+      return ret;
+   }
+
+
+   private FramePoint2d filterSingleSupport(FramePoint2d desiredCenterOfPressure, RobotSide supportLeg)
+   {
+      RobotSide previousSupportLeg = supportLegPreviousTick.getEnumValue();
+      if (previousSupportLeg != supportLeg)
+      {
+         // Only reset the filters when going to single support.
+         resetCoPFilters();
+      }
+
+      AlphaFilteredYoFramePoint2d filteredDesiredCoP = filteredDesiredCoPsSingleSupport.get(supportLeg);
+      FrameConvexPolygon2d supportPolygon = couplingRegistry.getBipedSupportPolygons().getFootPolygonInAnkleZUp(supportLeg);
+
+      return filterAndProject(desiredCenterOfPressure, filteredDesiredCoP, supportPolygon);
+   }
+   
+
+   private FramePoint2d filterDoubleSupport(FramePoint2d desiredCenterOfPressure)
+   {
+      RobotSide previousSupportLeg = supportLegPreviousTick.getEnumValue();
+      if (previousSupportLeg != null)
+      {
+         // Don't reset the filters if going to double support. Instead, start the double support phase with the Desired CoP where it was for the single support phase:
+
+         AlphaFilteredYoFramePoint2d singleSupportDesiredCoP = filteredDesiredCoPsSingleSupport.get(previousSupportLeg);
+         FramePoint2d singleSupportDesiredCoPFramePoint2d = singleSupportDesiredCoP.getFramePoint2dCopy();
+         singleSupportDesiredCoPFramePoint2d.changeFrame(filteredDesiredCoPDoubleSupport.getReferenceFrame());
+
+         filteredDesiredCoPDoubleSupport.reset();
+         filteredDesiredCoPDoubleSupport.update(singleSupportDesiredCoPFramePoint2d);
+      }
+
+      AlphaFilteredYoFramePoint2d filteredDesiredCoP = filteredDesiredCoPDoubleSupport;
+      FrameConvexPolygon2d supportPolygon = couplingRegistry.getBipedSupportPolygons().getSupportPolygonInMidFeetZUp();
+
+      
+      // test:
+//      FramePoint2d midFeet = new FramePoint2d(filteredDesiredCoPDoubleSupport.getReferenceFrame());
+//      supportPolygon.orthogonalProjection(midFeet);
+//      return midFeet;
+
+//    return filterAndProject(midFeet, filteredDesiredCoP, supportPolygon);
+
+      
+      
+      return filterAndProject(desiredCenterOfPressure, filteredDesiredCoP, supportPolygon);
+   }
+   
+   private FramePoint2d filterAndProject(FramePoint2d desiredCenterOfPressure, AlphaFilteredYoFramePoint2d filteredDesiredCoP, FrameConvexPolygon2d supportPolygon)
+   {
       desiredCenterOfPressure.changeFrame(filteredDesiredCoP.getReferenceFrame());
       filteredDesiredCoP.update(desiredCenterOfPressure);
       filteredDesiredCoP.getFramePoint2d(returnedFilteredDesiredCoP);
