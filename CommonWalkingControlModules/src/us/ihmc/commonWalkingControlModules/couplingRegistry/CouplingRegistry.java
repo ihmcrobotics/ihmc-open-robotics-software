@@ -5,6 +5,7 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
+import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.Wrench;
@@ -43,5 +44,12 @@ public interface CouplingRegistry
 
    public abstract void setUpperBodyWrench(Wrench upperBodyWrench);
    public abstract Wrench getUpperBodyWrench();
+   
+   // TODO: Calculate and set desired CoP in doEveryTick controller
+   // The stance sub controller calculates the desired CoP now, and is executed after
+   // the swing controller. The swing sub controller might use the desired CoP to estimate the
+   // body position at the end of the swing phase. So now, it is using data that is one tick old.
+   public abstract void setDesiredCoP(FramePoint2d desiredCoP);
+   public abstract FramePoint2d getDesiredCoP();
 
 }
