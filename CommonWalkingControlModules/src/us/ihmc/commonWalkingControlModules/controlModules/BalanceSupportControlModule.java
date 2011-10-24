@@ -9,6 +9,7 @@ import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.PelvisOrienta
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.DesiredCoPControlModule;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.VirtualSupportActuatorControlModule;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.VirtualToePointCalculator;
+import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegTorques;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LowerBodyTorques;
 import us.ihmc.robotSide.RobotSide;
@@ -34,6 +35,8 @@ public class BalanceSupportControlModule
    private final AnkleOverRotationControlModule ankleOverRotationControlModule;
    private final BipedSupportPolygons bipedSupportPolygons;
 
+   private final CouplingRegistry couplingRegistry;
+   
    private final SideDependentList<Double> legStrengths = new SideDependentList<Double>();
    private final SideDependentList<FramePoint2d> virtualToePoints = new SideDependentList<FramePoint2d>();
    private final YoVariableRegistry registry = new YoVariableRegistry("BalanceSupportControlModule");
@@ -43,7 +46,7 @@ public class BalanceSupportControlModule
                                       PelvisHeightControlModule pelvisHeightControlModule, PelvisOrientationControlModule pelvisOrientationControlModule,
                                       VirtualSupportActuatorControlModule virtualSupportActuatorControlModule, KneeDamperControlModule kneeDamperControlModule,
                                       HipDamperControlModule hipDamperControlModule, BipedSupportPolygons bipedSupportPolygons,
-                                      AnkleOverRotationControlModule ankleOverRotationControlModule, YoVariableRegistry parentRegistry)
+                                      AnkleOverRotationControlModule ankleOverRotationControlModule, CouplingRegistry couplingRegistry, YoVariableRegistry parentRegistry)
    {
       this.velocityViaCoPControlModule = velocityViaCoPControlModule;
       this.virtualToePointCalculator = virtualToePointAndLegStrengthCalculator;
@@ -55,6 +58,7 @@ public class BalanceSupportControlModule
       this.hipDamperControlModule = hipDamperControlModule;
       this.bipedSupportPolygons = bipedSupportPolygons;
       this.ankleOverRotationControlModule = ankleOverRotationControlModule;
+      this.couplingRegistry = couplingRegistry;
 
       parentRegistry.addChild(registry);
    }
@@ -75,7 +79,9 @@ public class BalanceSupportControlModule
 
       // compute desired CoP (=VTP) using velocityViaCoPControlModule. Should be inside the foot polygon already at this point.
       FramePoint2d vtpInAnklePitchFrame = velocityViaCoPControlModule.computeDesiredCoPSingleSupport(supportLeg, desiredVelocity);
-
+      couplingRegistry.setDesiredCoP(vtpInAnklePitchFrame);
+      
+      
       // compute desired torques on the pelvis using PelvisOrientationControlModule.
       FrameVector torqueOnPelvisInPelvisFrame = pelvisOrientationControlModule.computePelvisTorque(supportLeg, desiredPelvisOrientation);
 
@@ -106,6 +112,7 @@ public class BalanceSupportControlModule
 
       // compute desired CoP
       FramePoint2d desiredCoP = velocityViaCoPControlModule.computeDesiredCoPDoubleSupport(loadingLeg, desiredVelocity);
+      couplingRegistry.setDesiredCoP(desiredCoP);
 
       // compute VTPs and leg strengths
       virtualToePointCalculator.packVirtualToePoints(virtualToePoints, bipedSupportPolygons, desiredCoP);

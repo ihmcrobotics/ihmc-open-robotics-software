@@ -17,6 +17,7 @@ import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculator;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
+import us.ihmc.commonWalkingControlModules.kinematics.BodyPositionInTimeEstimator;
 import us.ihmc.commonWalkingControlModules.kinematics.LegInverseKinematicsCalculator;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointAccelerations;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
@@ -45,6 +46,7 @@ public class JointSpaceSwingSubController implements SwingSubController
    private final YoVariableRegistry registry;
    private final FullRobotModel fullRobotModel;
    private final CommonWalkingReferenceFrames referenceFrames;
+   private final BodyPositionInTimeEstimator bodyPositionInTimeEstimator;
    private final JointSpaceTrajectoryGenerator jointSpaceTrajectoryGenerator;
    private final CouplingRegistry couplingRegistry;
    private final ProcessedSensorsInterface processedSensors;
@@ -107,8 +109,10 @@ public class JointSpaceSwingSubController implements SwingSubController
       this.torqueControlModule = swingLegTorqueControlModule;
       this.preSwingControlModule = preSwingControlModule;
 
-      jointSpaceTrajectoryGenerator = new JointSpaceTrajectoryGenerator("jointSpaceTrajectory", 2, referenceFrames, inverseKinematicsCalculator, processedSensors, controlDT,
-            dynamicGraphicObjectsListRegistry, registry);
+      
+      bodyPositionInTimeEstimator = new BodyPositionInTimeEstimator(processedSensors, referenceFrames, couplingRegistry, registry);
+      jointSpaceTrajectoryGenerator = new JointSpaceTrajectoryGenerator("jointSpaceTrajectory", 1, referenceFrames, inverseKinematicsCalculator, processedSensors, controlDT,
+            dynamicGraphicObjectsListRegistry, bodyPositionInTimeEstimator, registry);
 
       timeSpentInPreSwing = new DoubleYoVariable("timeSpentInPreSwing", "This is the time spent in Pre swing.", registry);
       timeSpentInInitialSwing = new DoubleYoVariable("timeSpentInInitialSwing", "This is the time spent in initial swing.", registry);
@@ -155,11 +159,11 @@ public class JointSpaceSwingSubController implements SwingSubController
 
    private void setParameters()
    {
-      swingDuration.set(0.7);
+      swingDuration.set(0.55);
       passiveHipCollapseTime.set(0.07);
       minimumTerminalSwingDuration.set(0.0);
       maximumTerminalSwingDuration.set(0.05);
-      numberOfViaPointsDuringWalk.set(2);
+      numberOfViaPointsDuringWalk.set(1);
       setEstimatedSwingTimeRemaining(swingDuration.getDoubleValue());
    }
 

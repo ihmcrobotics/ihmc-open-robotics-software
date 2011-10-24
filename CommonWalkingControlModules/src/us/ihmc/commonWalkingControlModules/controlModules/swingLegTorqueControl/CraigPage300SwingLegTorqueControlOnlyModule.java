@@ -221,8 +221,8 @@ public class CraigPage300SwingLegTorqueControlOnlyModule implements SwingLegTorq
    {
       useBodyAcceleration = true;
 
-      masterKpGain.set(50.0);
-      masterKdGain.set(10.0);
+      masterKpGain.set(70.0);
+      masterKdGain.set(1.0);
       
 
       softScaleFactor.set(0.1); // 0.25);

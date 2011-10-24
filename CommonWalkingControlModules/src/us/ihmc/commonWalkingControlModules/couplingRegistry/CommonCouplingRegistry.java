@@ -6,6 +6,7 @@ import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenc
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
+import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.Wrench;
@@ -13,6 +14,7 @@ import us.ihmc.utilities.screwTheory.Wrench;
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint2d;
 
 public class CommonCouplingRegistry implements CouplingRegistry
 {
@@ -28,6 +30,8 @@ public class CommonCouplingRegistry implements CouplingRegistry
    //TODO: May need to YoVariablize the following to make things rewindable?
    private FrameConvexPolygon2d captureRegion;
    private FramePoint capturePoint = new FramePoint(ReferenceFrame.getWorldFrame());
+   
+   private YoFramePoint2d desiredCoP = new YoFramePoint2d("desiredCenterOfPressure", "", ReferenceFrame.getWorldFrame(), registry);
 
    private FrameVector2d desiredVelocity;
 
@@ -169,6 +173,16 @@ public class CommonCouplingRegistry implements CouplingRegistry
    public Wrench getUpperBodyWrench()
    {
       return upperBodyWrench;
+   }
+
+   public void setDesiredCoP(FramePoint2d desiredCoP)
+   {
+      this.desiredCoP.set(desiredCoP);
+   }
+
+   public FramePoint2d getDesiredCoP()
+   {
+      return desiredCoP.getFramePoint2dCopy();
    }
 
 }

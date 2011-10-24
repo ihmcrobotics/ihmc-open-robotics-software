@@ -50,6 +50,8 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
 
    private final DoubleYoVariable kCaptureGuide = new DoubleYoVariable("kCaptureGuide", "ICP distance to guide line --> position of parallel line", registry);
 
+   private DoubleYoVariable resizeFootPolygonBy = new DoubleYoVariable("resizeFootPolygonBy", registry);
+
    //TODO: 110523: Clean this up and make it better. ComVelocity control line is still hackish.
 
    public SpeedControllingCapturePointCenterOfPressureControlModule(double controlDT, CommonWalkingReferenceFrames referenceFrames,
@@ -335,7 +337,9 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
       }
 
 
-      FrameConvexPolygon2d footPolygon = supportPolygons.getFootPolygonInAnkleZUp(supportLeg);
+      FrameConvexPolygon2d footPolygon = FrameConvexPolygon2d.shrinkConstantDistanceInto(resizeFootPolygonBy .getDoubleValue(), supportPolygons.getFootPolygonInAnkleZUp(supportLeg));
+      
+      
       FramePoint2d currentCapturePoint2d = currentCapturePoint.toFramePoint2d();
       
       double epsilon = 1e-9;
@@ -410,5 +414,6 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
       doubleSupportCaptureKp.set(3.5); // 2.0); //6.0);
       kCaptureGuide.set(2.0);
       minPerimeterDistance.set(0.02);
+      resizeFootPolygonBy.set(0.0);
    }
 }
