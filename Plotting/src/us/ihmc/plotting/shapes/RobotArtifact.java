@@ -10,6 +10,7 @@ public class RobotArtifact extends Artifact
 {
    private static final long serialVersionUID = 874940514060462114L;
    protected Pose _pose = new Pose(0.0, 0.0, 0.0, Coordinate.METER);
+   protected double width = 16.0;
 
    public RobotArtifact(String id)
    {
@@ -34,6 +35,17 @@ public class RobotArtifact extends Artifact
              + "," + this._pose.getPitch() + "," + this._pose.getRoll();
    }
 
+   public void setWidth(double width)
+   {
+      this.width = width;
+   }
+
+   public double getWidth()
+   {
+      return width;
+   }
+
+
    /**
     * Must provide a draw method for plotter to render artifact
     */
@@ -51,12 +63,11 @@ public class RobotArtifact extends Artifact
 //            y = Ycenter - (new Double(_pose.getZ()* scaleFactor).intValue());
 //    }
 
-      int w1 = 16;
-      double w2 = 16.0;
-      int w12 = 8;
+      int w1 = Double.valueOf(width).intValue();
+      int w12 = Double.valueOf(width / 2.0).intValue();
       double hdg = Math.toRadians(_pose.getYaw());
-      int xHDG = x + (int)Math.round(Math.sin(hdg) * w2);
-      int yHDG = y - (int)Math.round(Math.cos(hdg) * w2);
+      int xHDG = x + (int)Math.round(Math.sin(hdg) * width);
+      int yHDG = y - (int)Math.round(Math.cos(hdg) * width);
 
       g.setColor(color);
       g.drawOval((x - w12), (y - w12), w1, w1);
