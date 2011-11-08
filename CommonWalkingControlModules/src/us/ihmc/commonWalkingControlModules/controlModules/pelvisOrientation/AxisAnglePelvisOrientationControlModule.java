@@ -27,9 +27,10 @@ public class AxisAnglePelvisOrientationControlModule implements PelvisOrientatio
    private final CouplingRegistry couplingRegistry;
    private final YoVariableRegistry registry = new YoVariableRegistry("AxisAnglePelvisOrientationControlModule");
 
-   private final DoubleYoVariable proportionalGain = new DoubleYoVariable("pelvisOrientationProportionalGain", registry);
    private final DoubleYoVariable pelvisOrientationError = new DoubleYoVariable("pelvisOrientationError", registry);
-   private final DoubleYoVariable[] derivativeGains = new DoubleYoVariable[3];
+   //TODO: Implement quaternion based pelvis orientation controller similar to DLR implementation.
+   private final DoubleYoVariable[] proportionalGains = new DoubleYoVariable[3], derivativeGains = new DoubleYoVariable[3];
+   
    private final YoFrameVector tauPelvis;
 
    private final ReferenceFrame pelvisFrame;
@@ -50,6 +51,11 @@ public class AxisAnglePelvisOrientationControlModule implements PelvisOrientatio
       this.derivativeGainMatrix.setZero();
       this.useFeedforward = useFeedforward;
 
+      String baseProportionalGainName = "pelvisOrientationProportionalGain";
+      proportionalGains[0] = new DoubleYoVariable(baseProportionalGainName + "x", parentRegistry);
+      proportionalGains[1] = new DoubleYoVariable(baseProportionalGainName + "y", parentRegistry);
+      proportionalGains[2] = new DoubleYoVariable(baseProportionalGainName + "z", parentRegistry);
+      
       String baseDerivativeGainName = "pelvisOrientationDerivativeGain";
       derivativeGains[0] = new DoubleYoVariable(baseDerivativeGainName + "x", parentRegistry);
       derivativeGains[1] = new DoubleYoVariable(baseDerivativeGainName + "y", parentRegistry);
@@ -65,7 +71,8 @@ public class AxisAnglePelvisOrientationControlModule implements PelvisOrientatio
 
    public void setupParametersForR2()
    {
-      setProportionalGain(1500.0);
+      setProportionalGains(1500.0, 1500.0, 1500.0);
+      
       setDerivativeGainX(200.0);
       setDerivativeGainY(150.0);
       setDerivativeGainZ(50.0);
@@ -73,7 +80,8 @@ public class AxisAnglePelvisOrientationControlModule implements PelvisOrientatio
 
    public void setupParametersForM2V2()
    {
-      setProportionalGain(250.0);
+      setProportionalGains(250.0, 250.0, 150.0);
+      
       setDerivativeGainX(30.0); // 80.0);
       setDerivativeGainY(18.0); // 75.0);
       setDerivativeGainZ(5.0); // 30.0);
@@ -109,7 +117,12 @@ public class AxisAnglePelvisOrientationControlModule implements PelvisOrientatio
       FrameVector proportionalTerm = new FrameVector(desiredPelvisOrientation.getReferenceFrame());
       proportionalTerm.set(desiredPelvisAngleAxis.getX(), desiredPelvisAngleAxis.getY(), desiredPelvisAngleAxis.getZ());
       proportionalTerm.scale(desiredPelvisAngleAxis.getAngle());
-      proportionalTerm.scale(proportionalGain.getDoubleValue());
+      
+      proportionalTerm.setX(proportionalTerm.getX() * proportionalGains[0].getDoubleValue());
+      proportionalTerm.setY(proportionalTerm.getY() * proportionalGains[1].getDoubleValue());
+      proportionalTerm.setZ(proportionalTerm.getZ() * proportionalGains[2].getDoubleValue());
+      
+//      proportionalTerm.scale(proportionalGain.getDoubleValue());
 
       return proportionalTerm;
    }
@@ -137,10 +150,12 @@ public class AxisAnglePelvisOrientationControlModule implements PelvisOrientatio
          return new FrameVector(pelvisFrame);
       }
    }
-
-   public void setProportionalGain(double proportionalGain)
+   
+   public void setProportionalGains(double proportionalGainX, double proportionalGainY, double proportionalGainZ)
    {
-      this.proportionalGain.set(proportionalGain);
+      this.proportionalGains[0].set(proportionalGainX);
+      this.proportionalGains[1].set(proportionalGainY);
+      this.proportionalGains[2].set(proportionalGainZ);
    }
 
    public void setDerivativeGain(double derivativeGain)
