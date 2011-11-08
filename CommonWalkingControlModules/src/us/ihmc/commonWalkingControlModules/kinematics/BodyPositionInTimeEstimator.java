@@ -38,8 +38,8 @@ public class BodyPositionInTimeEstimator
       
       
       // TODO: Get rid of this as soon as we have a good body velocity estimation
-      wxToYDotCoupling.set(0.36);    // - 23.0 * INCHES_TO_METERS);
-      wyToXDotCoupling.set(0.36);    // - 23.0 * INCHES_TO_METERS);
+      wxToYDotCoupling.set(0.3); //+++JEP 111108: Changed from 0.36 to 0.3, which really reduced the shakies on the real robot.
+      wyToXDotCoupling.set(0.3); 
    }
    
    
