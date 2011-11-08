@@ -258,12 +258,20 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
       }
       
       FramePoint2d centerOfPressureDesired = null;
+      
+      
+      FrameConvexPolygon2d somewhatSmallerPolygon = FrameConvexPolygon2d.shrinkConstantDistanceInto(0.004, supportPolygon);
+      
       if ((desiredVelocity == null) || (desiredVelocity.length() == 0.0))
       {
          centerOfPressureDesired = doProportionalControl(currentCapturePoint2d, desiredCapturePoint2d);
          capturePointLine.setFrameLine2d(null);
          centerOfPressureDesired.changeFrame(supportPolygon.getReferenceFrame());
-         supportPolygon.orthogonalProjection(centerOfPressureDesired);
+         
+         somewhatSmallerPolygon.orthogonalProjection(centerOfPressureDesired);
+         
+         
+         
       }
       else
       {
@@ -414,6 +422,6 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
       doubleSupportCaptureKp.set(3.5); // 2.0); //6.0);
       kCaptureGuide.set(2.0);
       minPerimeterDistance.set(0.02);
-      resizeFootPolygonBy.set(0.0);
+      resizeFootPolygonBy.set(0.01);
    }
 }
