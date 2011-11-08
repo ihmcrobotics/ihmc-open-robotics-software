@@ -41,6 +41,7 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
    private final DoubleYoVariable minPerimeterDistance = new DoubleYoVariable("minSupportPolygonPerimeterDistance", registry);
 
    private final DoubleYoVariable doubleSupportCaptureKp = new DoubleYoVariable("doubleSupportCaptureKp", registry);
+   private final DoubleYoVariable singleSupportCaptureKp = new DoubleYoVariable("singleSupportCaptureKp", registry);
 
    private final YoFrameLine2d capturePointLine = new YoFrameLine2d("capturePointLine", "", world, registry);
    private final YoFrameLine2d comSpeedControllingLine = new YoFrameLine2d("comSpeedControllingLine", "", world, registry);
@@ -359,7 +360,7 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
          desiredCenterOfPressure = new FramePoint2d(desiredCapturePoint2d);
          FrameVector2d control = new FrameVector2d(currentCapturePoint2d);
          control.sub(desiredCapturePoint2d);
-         control.scale(doubleSupportCaptureKp.getDoubleValue());
+         control.scale(singleSupportCaptureKp.getDoubleValue());
          desiredCenterOfPressure.add(control);
          footPolygon.orthogonalProjection(desiredCenterOfPressure);
       }
@@ -411,6 +412,7 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
       speedControlXKp.set(3.0);
       speedControlYKp.set(0.0);
       doubleSupportCaptureKp.set(4.0); // 2.0); //6.0);
+      singleSupportCaptureKp.set(2.5); 
       kCaptureGuide.set(1.5); // 2.0);
       minPerimeterDistance.set(0.04); // 0.02);
    }
@@ -419,7 +421,8 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
    {
       speedControlXKp.set(0.5);
       speedControlYKp.set(0.0);
-      doubleSupportCaptureKp.set(3.5); // 2.0); //6.0);
+      doubleSupportCaptureKp.set(3.5); 
+      singleSupportCaptureKp.set(2.5); 
       kCaptureGuide.set(2.0);
       minPerimeterDistance.set(0.02);
       resizeFootPolygonBy.set(0.01);
