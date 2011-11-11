@@ -126,8 +126,7 @@ public class GuideLineDesiredCoPControlModule implements DesiredCoPControlModule
       FramePoint capturePointInAnkleZUp = couplingRegistry.getCapturePointInFrame(supportFootAnkleZUpFrame);
       FramePoint2d capturePoint2d = capturePointInAnkleZUp.toFramePoint2d();
 
-      FrameVector2d actualCenterOfMassVelocityInSupportFootFrame = processedSensors.getCenterOfMassVelocityInFrame(supportFootAnkleZUpFrame,
-                                                                      supportLeg).toFrameVector2d();
+      FrameVector2d actualCenterOfMassVelocityInSupportFootFrame = processedSensors.getCenterOfMassVelocityInFrame(supportFootAnkleZUpFrame).toFrameVector2d();
 
       FramePoint desiredCapturePoint = null;
       FrameLineSegment2d guideLine = null;
@@ -184,7 +183,7 @@ public class GuideLineDesiredCoPControlModule implements DesiredCoPControlModule
       desiredCapturePoint.changeFrame(midFeetZUpFrame);
       FramePoint currentCapturePoint = couplingRegistry.getCapturePointInFrame(midFeetZUpFrame);
       FramePoint centerOfMassPosition = processedSensors.getCenterOfMassPositionInFrame(midFeetZUpFrame);
-      FrameVector2d currentBodyVelocity = processedSensors.getCenterOfMassVelocityInFrame(midFeetZUpFrame, null).toFrameVector2d();
+      FrameVector2d currentBodyVelocity = processedSensors.getCenterOfMassVelocityInFrame(midFeetZUpFrame).toFrameVector2d();
 
 //    desiredVelocity.setX(0.0);
 //    desiredVelocity.setY(0.0);

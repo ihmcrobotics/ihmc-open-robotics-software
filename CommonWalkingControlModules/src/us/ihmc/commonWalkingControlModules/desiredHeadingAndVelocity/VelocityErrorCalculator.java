@@ -25,7 +25,7 @@ public class VelocityErrorCalculator
          throw new RuntimeException("Must be a ZUp frame!");
       }
 
-      FrameVector centerOfMassVelocity = processedSensors.getCenterOfMassVelocityInFrame(referenceFrame, legToTrustForCoMVelocity);
+      FrameVector centerOfMassVelocity = processedSensors.getCenterOfMassVelocityInFrame(referenceFrame);
       FrameVector2d centerOfMassVelocity2d = centerOfMassVelocity.toFrameVector2d();
 
       FrameVector2d desiredCenterOfMassVelocity = desiredVelocityControlModule.getDesiredVelocity();

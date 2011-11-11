@@ -116,6 +116,8 @@ public class KneeExtensionControlModule
    public void doTransitionIntoStance(RobotSide supportSide)
    {
       double time = processedSensors.getTime();
+      
+      //TODO: Don't extend the knee if it'll tip you over backward...
       yoMinimumJerkTrajectory.setParams(processedSensors.getKneeAngle(supportSide), 0.0, 0.0, extendedKnee.getDoubleValue(), 0.0,
                                         0.0, time, time + extendTime.getDoubleValue());
    }

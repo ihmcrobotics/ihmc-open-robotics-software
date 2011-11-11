@@ -122,6 +122,11 @@ public class CommonDoEveryTickSubController implements DoEveryTickSubController
 
          // Desired Footstep
          Footstep desiredFootstep = desiredFootstepCalculator.updateAndGetDesiredFootstep(supportLeg);
+         RobotSide swingLeg = supportLeg.getOppositeSide();
+         if (desiredFootstep.getFootstepSide() != swingLeg)
+         {
+            throw new RuntimeException("desiredFootstep.getFootstepSide() != swingLeg");
+         }
          couplingRegistry.setDesiredFootstep(desiredFootstep);
       }
       else

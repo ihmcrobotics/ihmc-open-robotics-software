@@ -18,6 +18,7 @@ import us.ihmc.utilities.kinematics.OrientationInterpolationCalculator;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
+import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.Orientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -103,6 +104,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
    private final YoMinimumJerkTrajectory minimumJerkTrajectoryForFootOrientation = new YoMinimumJerkTrajectory("swingFootOrientation", registry);
 
    private final YoFrameOrientation desiredFootOrientationInWorldFrame = new YoFrameOrientation("desiredFootOrientationInWorld", "", worldFrame, registry);
+   private final YoFrameOrientation finalDesiredFootOrientationInWorldFrame = new YoFrameOrientation("finalDesiredFootOrientationInWorld", "", worldFrame, registry);
    private final SideDependentList<YoFrameOrientation> startSwingOrientations = new SideDependentList<YoFrameOrientation>();
    private final SideDependentList<YoFrameOrientation> endSwingOrientations = new SideDependentList<YoFrameOrientation>();
    private final SideDependentList<YoFrameOrientation> desiredFootOrientations = new SideDependentList<YoFrameOrientation>();
@@ -113,7 +115,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
    private final YoFrameVector desiredSwingFootAccelerationInWorldFrame = new YoFrameVector("desiredSwingAcceleration", "", worldFrame, registry);
    private final YoFrameVector desiredSwingFootAngularVelocityInWorldFrame = new YoFrameVector("desiredSwingAngularVelocity", "", worldFrame, registry);
    private final YoFrameVector desiredSwingFootAngularAccelerationInWorldFrame = new YoFrameVector("desiredSwingAngularAcceleration", "", worldFrame, registry);
-   private DynamicGraphicCoordinateSystem swingFootOrientationViz = null;
+   private DynamicGraphicCoordinateSystem swingFootOrientationViz = null, finalDesiredSwingOrientationViz = null;
 
    private BagOfBalls bagOfBalls;
    private final double controlDT;
@@ -162,6 +164,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
          ArtifactList artifactList = new ArtifactList("ChangingEndpoint");
 
          swingFootOrientationViz = new DynamicGraphicCoordinateSystem("Coordinate System", desiredSwingFootPositionInWorldFrame, desiredFootOrientationInWorldFrame, 0.1);
+         finalDesiredSwingOrientationViz = new DynamicGraphicCoordinateSystem("Final Desired Orientation", finalDesiredSwingFootPosition, finalDesiredFootOrientationInWorldFrame, 0.1);
 
          int numberOfBalls = 1;
          double ballSize = (numberOfBalls > 1) ? 0.005 : 0.02;
@@ -172,7 +175,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
                                                           YoAppearance.Black(), GraphicType.BALL_WITH_CROSS);
 
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjects("R2Sim02SwingSubController", new DynamicGraphicObject[] {swingFootOrientationViz,
-                 finalDesiredSwingViz});
+                 finalDesiredSwingViz, finalDesiredSwingOrientationViz});
 
          artifactList.add(finalDesiredSwingViz.createArtifact());
          dynamicGraphicObjectsListRegistry.registerArtifactList(artifactList);
@@ -299,7 +302,9 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       // Set the finalDesiredSwingPosition
       endPoint.changeFrame(finalDesiredSwingFootPosition.getReferenceFrame());
       finalDesiredSwingFootPosition.set(endPoint);
-
+      
+      this.finalDesiredFootOrientationInWorldFrame.set(desiredFootstep.getFootstepOrientationInFrame(worldFrame));
+      
       swingLegTorqueControlModule.setAnkleGainsDefault(swingSide);
    }
 
@@ -460,10 +465,14 @@ public class ChangingEndpointSwingSubController implements SwingSubController
    private void updateFinalDesiredPosition(CartesianTrajectoryGenerator trajectoryGenerator)
    {
       Footstep desiredFootstep = couplingRegistry.getDesiredFootstep();
+      
+      FramePose desiredFootstepPose = desiredFootstep.getFootstepPose();
       FramePoint finalDesiredSwingFootPosition =
-         desiredFootstep.getFootstepPose().getPosition().changeFrameCopy(this.finalDesiredSwingFootPosition.getReferenceFrame());
+         desiredFootstepPose.getPosition().changeFrameCopy(this.finalDesiredSwingFootPosition.getReferenceFrame());
       this.finalDesiredSwingFootPosition.set(finalDesiredSwingFootPosition);
-
+      
+      this.finalDesiredFootOrientationInWorldFrame.set(desiredFootstep.getFootstepOrientationInFrame(worldFrame));
+      
       ReferenceFrame cartesianTrajectoryGeneratorFrame = trajectoryGenerator.getReferenceFrame();
       finalDesiredSwingFootPosition.changeFrame(cartesianTrajectoryGeneratorFrame);
       trajectoryGenerator.updateFinalDesiredPosition(finalDesiredSwingFootPosition);
@@ -557,8 +566,8 @@ public class ChangingEndpointSwingSubController implements SwingSubController
 
       Orientation endOrientation = desiredFootStep.getFootstepPose().getOrientation();
       RobotSide swingFootSide = desiredFootStep.getFootstepSide();
-      ReferenceFrame oppositeAnkleZUpFrame = referenceFrames.getAnkleZUpFrame(swingFootSide.getOppositeSide());
-      endSwingOrientations.get(swingFootSide).set(endOrientation.changeFrameCopy(oppositeAnkleZUpFrame));
+      ReferenceFrame supportFootAnkleZUpFrame = referenceFrames.getAnkleZUpFrame(swingFootSide.getOppositeSide());
+      endSwingOrientations.get(swingFootSide).set(endOrientation.changeFrameCopy(supportFootAnkleZUpFrame));
    }
 
    private void initializeStartOrientationToMatchActual(RobotSide swingSide)
