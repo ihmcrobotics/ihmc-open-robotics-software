@@ -21,8 +21,6 @@ public class SimpleDesiredFootstepCalculator implements DesiredFootstepCalculato
 
    private final DesiredHeadingControlModule desiredHeadingControlModule;
 
-   private Footstep desiredFootstep;
-
    private final SideDependentList<ReferenceFrame> ankleZUpFrames;
 
    private final DoubleYoVariable stepLength = new DoubleYoVariable("stepLength", registry);
@@ -46,37 +44,28 @@ public class SimpleDesiredFootstepCalculator implements DesiredFootstepCalculato
 
    public Footstep updateAndGetDesiredFootstep(RobotSide supportLegSide)
    {
+      RobotSide swingLegSide = supportLegSide.getOppositeSide();
+
       // Footstep Frame
-      ReferenceFrame supportFootFrame = ankleZUpFrames.get(supportLegSide);
-      ReferenceFrame headingFrame = desiredHeadingControlModule.getDesiredHeadingFrame();
+      ReferenceFrame supportAnkleZUpFrame = ankleZUpFrames.get(supportLegSide);
+      ReferenceFrame desiredHeadingFrame = desiredHeadingControlModule.getDesiredHeadingFrame();
 
       // Footstep Position
-      FramePoint footstepPosition = new FramePoint(supportFootFrame);
-      FrameVector footstepOffset = new FrameVector(headingFrame, stepLength.getDoubleValue(), supportLegSide.negateIfLeftSide(stepWidth.getDoubleValue()), stepHeight.getDoubleValue());
+      FramePoint footstepPosition = new FramePoint(supportAnkleZUpFrame);
+      FrameVector footstepOffset = new FrameVector(desiredHeadingFrame, stepLength.getDoubleValue(), supportLegSide.negateIfLeftSide(stepWidth.getDoubleValue()), stepHeight.getDoubleValue());
       
-      footstepOffset.changeFrame(supportFootFrame);
+      footstepOffset.changeFrame(supportAnkleZUpFrame);
       footstepPosition.add(footstepOffset); 
 
       // Footstep Orientation
-      Orientation footstepOrientation = new Orientation(headingFrame); 
-      updateDesiredFootStepYaw(headingFrame);
-      footstepOrientation.setYawPitchRoll(stepYaw.getDoubleValue(), stepPitch.getDoubleValue(), stepRoll.getDoubleValue());
-      footstepOrientation.changeFrame(supportFootFrame);
+      Orientation footstepOrientation = new Orientation(desiredHeadingFrame); 
+      footstepOrientation.changeFrame(supportAnkleZUpFrame);
       
       // Create a foot Step Pose from Position and Orientation
       FramePose footstepPose = new FramePose(footstepPosition, footstepOrientation);
-      desiredFootstep = new Footstep(supportLegSide, footstepPose);
+      Footstep desiredFootstep = new Footstep(swingLegSide, footstepPose);
       
       return desiredFootstep;
-   }
-
-   private void updateDesiredFootStepYaw(ReferenceFrame headingFrame)
-   {
-//      // Compute the difference between the body and the footstep frames
-//      Transform3D headingToFootstepPositionTransform = referenceFrames.getPelvisFrame().getTransformToDesiredFrame(footstepFrame);
-//      Matrix3d headingToSwingRotation = new Matrix3d();
-//      headingToFootstepPositionTransform.get(headingToSwingRotation);
-//      stepYaw.set(RotationFunctions.getYaw(headingToSwingRotation));
    }
 
    public void setupParametersForM2V2()

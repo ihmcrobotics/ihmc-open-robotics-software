@@ -96,7 +96,7 @@ public class PushRecoveryDesiredFootstepCalculator implements DesiredFootstepCal
 
          // Create a foot Step Pose from Position and Orientation
          FramePose footstepPose = new FramePose(footstepPosition, footstepOrientation);
-         desiredFootstep = new Footstep(supportLegSide, footstepPose);
+         desiredFootstep = new Footstep(supportLegSide.getOppositeSide(), footstepPose);
       }
       
       return desiredFootstep;

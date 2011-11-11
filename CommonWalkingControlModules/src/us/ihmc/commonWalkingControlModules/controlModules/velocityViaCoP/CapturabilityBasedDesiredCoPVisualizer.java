@@ -32,17 +32,20 @@ public class CapturabilityBasedDesiredCoPVisualizer
       DynamicGraphicObjectsList dynamicGraphicObjectList = new DynamicGraphicObjectsList("CapturabilityBasedDesiredCoPVisualizer");
       ArtifactList artifactList = new ArtifactList("CapturabilityBasedDesiredCoPVisualizer");
 
-      addDesiredCoP(dynamicGraphicObjectList, artifactList);
-      addDesiredCapturePointViz(dynamicGraphicObjectList, artifactList);
-      addGuideLineViz(artifactList);
-      
-      dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectList);
-      dynamicGraphicObjectsListRegistry.registerArtifactList(artifactList);
+      if (dynamicGraphicObjectsListRegistry != null)
+      {
+         addDesiredCoPViz(dynamicGraphicObjectList, artifactList);
+         addDesiredCapturePointViz(dynamicGraphicObjectList, artifactList);
+         addGuideLineViz(artifactList);
 
+         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectList);
+         dynamicGraphicObjectsListRegistry.registerArtifactList(artifactList);
+      }
+      
       parentRegistry.addChild(registry);
    }
 
-   private void addDesiredCoP(DynamicGraphicObjectsList dynamicGraphicObjectList, ArtifactList artifactList)
+   private void addDesiredCoPViz(DynamicGraphicObjectsList dynamicGraphicObjectList, ArtifactList artifactList)
    {
       DynamicGraphicPosition desiredCoPViz = desiredCoP.createDynamicGraphicPosition("Desired Center of Pressure", 0.012, YoAppearance.Gray(),
                                                 DynamicGraphicPosition.GraphicType.CROSS);

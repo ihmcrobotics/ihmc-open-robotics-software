@@ -277,9 +277,12 @@ public class JointSpaceSwingSubController implements SwingSubController
       boolean minimumTerminalSwingTimePassed = (timeInState > minimumTerminalSwingDuration.getDoubleValue());
       boolean maximumTerminalSwingTimePassed = (timeInState > maximumTerminalSwingDuration.getDoubleValue());
 
-      boolean capturePointInsideFoot = isCapturePointInsideFoot(swingSide);
+      boolean capturePointInsideSwingFoot = isCapturePointInsideFoot(swingSide);
+      boolean capturePointInsideSupportFoot = isCapturePointInsideFoot(swingSide.getOppositeSide());
 
-      return ((footOnGround && minimumTerminalSwingTimePassed) || maximumTerminalSwingTimePassed || (capturePointInsideFoot && minimumTerminalSwingTimePassed));
+      if (capturePointInsideSupportFoot) return false; // Don't go in double support if ICP is still in support foot.
+//      return ((footOnGround && minimumTerminalSwingTimePassed) || maximumTerminalSwingTimePassed || (capturePointInsideFoot && minimumTerminalSwingTimePassed));
+      return (maximumTerminalSwingTimePassed);
    }
 
    public boolean isDoneWithSwingInAir(double timeInState)

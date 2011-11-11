@@ -246,7 +246,7 @@ public class AdjustableDesiredFootstepCalculator implements DesiredFootstepCalcu
       FramePose footstepPose = new FramePose(desiredFootstepPositions.get(swingLegSide).getFramePointCopy(),
                                   desiredFootstepOrientations.get(swingLegSide).getFrameOrientationCopy());
 
-      Footstep baseFootstep = new Footstep(supportLegSide, footstepPose);
+      Footstep baseFootstep = new Footstep(supportLegSide.getOppositeSide(), footstepPose);
       
       if (desiredFootstepAdjustor == null) return baseFootstep;
       
