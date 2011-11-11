@@ -89,8 +89,8 @@ public class SpeedControllingDesiredCoPCalculator implements DesiredCapturePoint
          dynamicGraphicObjectList.add(actualVelocityDynamicGraphicVector);
          dynamicGraphicObjectList.add(desiredVelocityDynamicGraphicVector);
          
-         artifactList.add(actualVelocityDynamicGraphicVector.createArtifact());
-         artifactList.add(desiredVelocityDynamicGraphicVector.createArtifact());
+//         artifactList.add(actualVelocityDynamicGraphicVector.createArtifact());
+//         artifactList.add(desiredVelocityDynamicGraphicVector.createArtifact());
          
          
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectList);
