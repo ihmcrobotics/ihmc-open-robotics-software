@@ -39,7 +39,7 @@ public class YoKalmanFilter implements KalmanFilter
 
    // these are predeclared for efficiency reasons
    private final DenseMatrix64F a, b;
-   private final DenseMatrix64F z, S, S_inv, c, d;
+   private final DenseMatrix64F r, S, S_inv, c, d;
    private final DenseMatrix64F K;
 
    private final LinearSolver<DenseMatrix64F> solver;
@@ -66,7 +66,7 @@ public class YoKalmanFilter implements KalmanFilter
 
       a = new DenseMatrix64F(nStates, 1);
       b = new DenseMatrix64F(nStates, nStates);
-      z = new DenseMatrix64F(nMeasurements, 1);
+      r = new DenseMatrix64F(nMeasurements, 1);
       S = new DenseMatrix64F(nMeasurements, nMeasurements);
       S_inv = new DenseMatrix64F(nMeasurements, nMeasurements);
       c = new DenseMatrix64F(nMeasurements, nStates);
@@ -180,11 +180,10 @@ public class YoKalmanFilter implements KalmanFilter
       getFromYoVariables(x, yoX);
       getFromYoVariablesSymmetric(P, yoP);
 
-      // z = y - H x
-      MatrixVectorMult.mult(H, x, z);
-      sub(y, z, z);
+      // r = y - H x
+      MatrixVectorMult.mult(H, x, r);
+      sub(y, r, r);
 
-      // TODO: should probably only recalculate gain matrix when necessary:
       // S = H P H' + R
       MatrixMatrixMult.mult_small(H, P, c);
       MatrixMatrixMult.multTransB(c, H, S);
@@ -197,11 +196,11 @@ public class YoKalmanFilter implements KalmanFilter
       MatrixMatrixMult.multTransA_small(H, S_inv, d);
       MatrixMatrixMult.mult_small(P, d, K);
 
-      // x = x + Kz
-      MatrixVectorMult.mult(K, z, a);
+      // x = x + Kr
+      MatrixVectorMult.mult(K, r, a);
       addEquals(x, a);
 
-      // P = (I-kH)P = P - (KH)P = P-K(HP)
+      // P = (I-KH)P = P - (KH)P = P-K(HP)
       MatrixMatrixMult.mult_small(H, P, c);
       MatrixMatrixMult.mult_small(K, c, b);
       subEquals(P, b);
