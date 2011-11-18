@@ -50,7 +50,7 @@ public class SimulationConstructionSetSetupTest
 
       MainFrame mainFrame = new MainFrame(helloUniverse, 256, 256);
 
-      sleep(2000);
+      sleep(60000);
 
       while (WAIT_FOR_HUMAN_TO_PUSH_BUTTON && !buttonWasPushed[0])
       {
