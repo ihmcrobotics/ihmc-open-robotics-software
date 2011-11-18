@@ -958,25 +958,28 @@ public class LinkGraphics
     */
    public void add3DSFile(URL fileURL, Appearance app)
    {
+      if (fileURL == null) 
+      {
+         System.err.println("fileURL == null in add3DSFile");
+         return;
+      }
+      
       String fileName = fileURL.getFile();
 
       // System.out.println("File name: " + fileName + " " + fileName.length());
 
-      if (!fileName.equals(""))
+      if ((fileName == null) || (fileName.equals("")))
       {
-         add3DSFile(fileName, app);
-
+         System.out.println("Null File Name in add3DSFile");
          return;
       }
 
-      else
-         System.out.println("Null File Name in add3DSFile");
+      add3DSFile(fileName, app);
 
-
-      if (app != null)
-         linkGraphicsDefinition.addInstruction(new LinkGraphicsAdd3DSFile(fileURL.getPath(), new AppearanceDefinition(getColor(app))));
-      else
-         linkGraphicsDefinition.addInstruction(new LinkGraphicsAdd3DSFile(fileURL.getPath()));
+//      if (app != null)
+//         linkGraphicsDefinition.addInstruction(new LinkGraphicsAdd3DSFile(fileURL.getPath(), new AppearanceDefinition(getColor(app))));
+//      else
+//         linkGraphicsDefinition.addInstruction(new LinkGraphicsAdd3DSFile(fileURL.getPath()));
    }
 
    /*
