@@ -20,8 +20,8 @@ public abstract class PDArmControlModule implements ArmControlModule
    protected final SideDependentList<EnumMap<ArmJointName, PIDController>> armControllers = SideDependentList.createListOfEnumMaps(ArmJointName.class);
 //   private final SideDependentList<ArmTorques> armTorquesList = new SideDependentList<ArmTorques>();
 
-   protected final SideDependentList<EnumMap<ArmJointName, DoubleYoVariable>> desiredArmPositions = SideDependentList.createListOfEnumMaps(ArmJointName.class);
-   protected final SideDependentList<EnumMap<ArmJointName, DoubleYoVariable>> desiredArmVelocities = SideDependentList.createListOfEnumMaps(ArmJointName.class);
+   protected final SideDependentList<EnumMap<ArmJointName, DoubleYoVariable>> desiredArmJointPositions = SideDependentList.createListOfEnumMaps(ArmJointName.class);
+   protected final SideDependentList<EnumMap<ArmJointName, DoubleYoVariable>> desiredArmJointVelocities = SideDependentList.createListOfEnumMaps(ArmJointName.class);
 
    private final double controlDT;
    
@@ -52,8 +52,8 @@ public abstract class PDArmControlModule implements ArmControlModule
          for (ArmJointName armJointName : ArmJointName.values())
          {
             PIDController pidController = armController.get(armJointName);
-            double desiredPosition = desiredArmPositions.get(robotSide).get(armJointName).getDoubleValue();
-            double desiredVelocity = desiredArmVelocities.get(robotSide).get(armJointName).getDoubleValue();
+            double desiredPosition = desiredArmJointPositions.get(robotSide).get(armJointName).getDoubleValue();
+            double desiredVelocity = desiredArmJointVelocities.get(robotSide).get(armJointName).getDoubleValue();
             double torque = pidController.compute(processedSensors.getArmJointPosition(robotSide, armJointName), desiredPosition,
                   processedSensors.getArmJointVelocity(robotSide, armJointName), desiredVelocity, controlDT);
             armTorques.setTorque(armJointName, torque);
@@ -70,10 +70,10 @@ public abstract class PDArmControlModule implements ArmControlModule
             String name = "desired" + robotSide.getCamelCaseNameForMiddleOfExpression() + armJointName.getCamelCaseNameForMiddleOfExpression();
 
             DoubleYoVariable positionVariable = new DoubleYoVariable(name + "Position", registry);
-            desiredArmPositions.get(robotSide).put(armJointName, positionVariable);
+            desiredArmJointPositions.get(robotSide).put(armJointName, positionVariable);
 
             DoubleYoVariable velocityVariable = new DoubleYoVariable(name + "Velocity", registry);
-            desiredArmVelocities.get(robotSide).put(armJointName, velocityVariable);
+            desiredArmJointVelocities.get(robotSide).put(armJointName, velocityVariable);
          }
       }
    }

@@ -35,11 +35,11 @@ public class SwingArmWithOppositeFootControlModule extends PDArmControlModule
       {
          for (ArmJointName armJointName : armJointNames)
          {
-            desiredArmPositions.get(robotSide).get(armJointName).set(0.0);
-            desiredArmVelocities.get(robotSide).get(armJointName).set(0.0);
+            desiredArmJointPositions.get(robotSide).get(armJointName).set(0.0);
+            desiredArmJointVelocities.get(robotSide).get(armJointName).set(0.0);
          }
          
-         desiredArmPositions.get(robotSide).get(ArmJointName.ELBOW).set(-0.3); // bend elbow a little
+         desiredArmJointPositions.get(robotSide).get(ArmJointName.ELBOW).set(-0.3); // bend elbow a little
          
          final RobotSide oppositeSide = robotSide.getOppositeSide();
          final ReferenceFrame oppositeFootFrame = referenceFrames.getFootFrame(oppositeSide);
@@ -49,7 +49,7 @@ public class SwingArmWithOppositeFootControlModule extends PDArmControlModule
          double handX = oppositeFootPosition.getX();
          final double sine = MathTools.clipToMinMax(handX / armLength, -1.0, 1.0);
          double qShoulderPitch = -swingMultiplier * Math.asin(sine);
-         desiredArmPositions.get(robotSide).get(ArmJointName.SHOULDER_PITCH).set(qShoulderPitch);
+         desiredArmJointPositions.get(robotSide).get(ArmJointName.SHOULDER_PITCH).set(qShoulderPitch);
       }
    }
 

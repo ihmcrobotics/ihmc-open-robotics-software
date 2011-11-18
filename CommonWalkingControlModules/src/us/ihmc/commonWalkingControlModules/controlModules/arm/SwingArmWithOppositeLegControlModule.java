@@ -38,8 +38,8 @@ public class SwingArmWithOppositeLegControlModule extends PDArmControlModule
                desiredVelocity = hipPitchVelocity * armLegCoupling.getDoubleValue();
             }
 
-            desiredArmPositions.get(robotSide).get(armJointName).set(desiredPosition);
-            desiredArmVelocities.get(robotSide).get(armJointName).set(desiredVelocity);
+            desiredArmJointPositions.get(robotSide).get(armJointName).set(desiredPosition);
+            desiredArmJointVelocities.get(robotSide).get(armJointName).set(desiredVelocity);
          }
       }
    }
