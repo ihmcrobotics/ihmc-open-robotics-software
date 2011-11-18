@@ -17,6 +17,7 @@ import javax.swing.JButton;
 import javax.swing.JWindow;
 import javax.vecmath.Point3d;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sun.j3d.utils.applet.MainFrame;
@@ -59,7 +60,7 @@ public class SimulationConstructionSetSetupTest
       mainFrame.dispose();
    }
 
-   @Test
+   @Ignore
    public void testSplashScreen()
    {
       SplashPanel splashPanel = new SplashPanel();
@@ -69,7 +70,7 @@ public class SimulationConstructionSetSetupTest
       window.dispose();
    }
 
-   @Test
+   @Ignore
    public void testSimulationConstructionSet()
    {
       SimulationConstructionSet scs = new SimulationConstructionSet();
