@@ -60,7 +60,7 @@ public class SimulationConstructionSetSetupTest
       mainFrame.dispose();
    }
 
-   @Ignore
+   @Test
    public void testSplashScreen()
    {
       SplashPanel splashPanel = new SplashPanel();
