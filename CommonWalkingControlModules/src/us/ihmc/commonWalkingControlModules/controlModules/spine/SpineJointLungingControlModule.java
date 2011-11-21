@@ -18,9 +18,11 @@ import us.ihmc.commonWalkingControlModules.partNamesAndTorques.SpineTorques;
 import us.ihmc.commonWalkingControlModules.sensors.ProcessedSensorsInterface;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.containers.ContainerTools;
+import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
+import us.ihmc.utilities.screwTheory.RevoluteJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.utilities.screwTheory.Wrench;
@@ -43,13 +45,17 @@ public class SpineJointLungingControlModule implements SpineLungingControlModule
    private final double controlDT;
    
    private InverseDynamicsCalculator spineJointIDCalc;
+   private RigidBody pelvisRigidBody;
+   private ArrayList<RevoluteJoint> spineRevoluteJointList;
    
-//   private Vector3d desiredSpineTorqueVector;
+   private FrameVector desiredTorqueBetweenPelvisAndChest;
    private SpineTorques spineTorques = new SpineTorques();
  
-   public SpineJointLungingControlModule(ProcessedSensorsInterface processedSensors, InverseDynamicsCalculator spineJointIDCalc, double controlDT, YoVariableRegistry parentRegistry)
+   public SpineJointLungingControlModule(ProcessedSensorsInterface processedSensors, double controlDT, YoVariableRegistry parentRegistry, InverseDynamicsCalculator spineJointIDCalc, RigidBody pelvisRigidBody, ArrayList<RevoluteJoint> spineRevoluteJointList)
    {
       this.spineJointIDCalc = spineJointIDCalc;
+      this.pelvisRigidBody = pelvisRigidBody;
+      this.spineRevoluteJointList = spineRevoluteJointList;
       this.processedSensors = processedSensors;
       this.controlDT = controlDT;
       
@@ -65,16 +71,6 @@ public class SpineJointLungingControlModule implements SpineLungingControlModule
 
    public void doSpineControl(SpineTorques spineTorquesToPack)
    {
-      spineTorquesToPack.setTorquesToZero();
-      
-//      spineJointIDCalc.setExternalWrench(rigidBody, externalWrench)
-      
-      
-      
-      //TODO: Set Spine Pitch,Roll,Yaw torques to create desiredSpineTorqueVector here 
-      // (could use inverse dynamics with virtual external wrench that mirrors desiredSpineTorqueVector)
-      
-      // control
       for (SpineJointName spineJointName : SpineJointName.values())
       {
          PIDController pidController = spineControllers.get(spineJointName);
@@ -86,7 +82,7 @@ public class SpineJointLungingControlModule implements SpineLungingControlModule
          double actualVelocity = processedSensors.getSpineJointVelocity(spineJointName); //actualAngleVelocities.get(spineJointName).getDoubleValue();
 
          double torque = pidController.compute(actualPosition, desiredPosition, actualVelocity, desiredVelocity, controlDT);
-         spineTorquesToPack.setTorque(spineJointName, torque);
+         spineTorques.setTorque(spineJointName, torque);
       }
    }
 
@@ -139,7 +135,8 @@ public class SpineJointLungingControlModule implements SpineLungingControlModule
       spineControllers.get(SpineJointName.SPINE_PITCH).setDerivativeGain(200.0);
       spineControllers.get(SpineJointName.SPINE_ROLL).setDerivativeGain(200.0);
    }
-
+   
+   @Override
    public void doMaintainDesiredChestOrientation()
    {
       // TODO replace with ID control
@@ -157,11 +154,34 @@ public class SpineJointLungingControlModule implements SpineLungingControlModule
          spineTorques.setTorque(spineJointName, torque);
       }      
    }
+   
+   public void setWrenchBetweenChestAndPelvis(Wrench wrench, SpineTorques spineTorquesToPack)
+   {
+      spineTorquesToPack.setTorquesToZero();
+      
+      Vector3d virtualForce = new Vector3d(0.0, 0.0, 0.0);
+      FrameVector virtualTorque = new FrameVector(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 0.0);
+      virtualTorque.changeFrame(pelvisRigidBody.getBodyFixedFrame());
+      
+      Wrench virtualWrenchOnPelvis = new Wrench(pelvisRigidBody.getBodyFixedFrame(), pelvisRigidBody.getBodyFixedFrame(), virtualForce, virtualTorque.getVectorCopy());
+      spineJointIDCalc.setExternalWrench(pelvisRigidBody, virtualWrenchOnPelvis);
+      spineJointIDCalc.compute();
+      
+      for (SpineJointName spineJointName : SpineJointName.values())
+      {
+         
+         double actualPosition = processedSensors.getSpineJointPosition(spineJointName); // actualAngles.get(spineJointName).getDoubleValue();
+         double actualVelocity = processedSensors.getSpineJointVelocity(spineJointName); //actualAngleVelocities.get(spineJointName).getDoubleValue();
+         
+         RevoluteJoint spineRevoluteJoint = spineRevoluteJointList.get(spineJointName.ordinal());
+         spineRevoluteJoint.setQddDesired( -10.0*(0.0 - actualPosition) - 1.0*(0.0 - actualVelocity) );
+         spineTorquesToPack.setTorque(spineJointName, spineRevoluteJoint.getTau());
+      }
+   }
 
    public void getSpineTorques(SpineTorques spineTorquesToPack)
    {
       spineTorquesToPack.setTorques(this.spineTorques.getTorquesCopy());
    }
-
 }
 
