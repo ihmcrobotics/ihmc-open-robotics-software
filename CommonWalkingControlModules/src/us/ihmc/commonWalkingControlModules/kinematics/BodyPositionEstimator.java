@@ -11,6 +11,4 @@ public interface BodyPositionEstimator
    public abstract void packCovariance(Tuple3d covarianceToPack);
 
    public abstract void estimateBodyPosition();
-   
-   public abstract void configureAfterEstimation();
 }

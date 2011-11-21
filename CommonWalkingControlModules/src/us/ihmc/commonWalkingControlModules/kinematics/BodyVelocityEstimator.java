@@ -11,6 +11,4 @@ public interface BodyVelocityEstimator
    public abstract void packCovariance(Tuple3d covarianceToPack);
 
    public abstract void estimateBodyVelocity();
-   
-   public abstract void configureAfterEstimation();
 }
