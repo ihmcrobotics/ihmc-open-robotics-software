@@ -136,7 +136,6 @@ public class SpineJointLungingControlModule implements SpineLungingControlModule
       spineControllers.get(SpineJointName.SPINE_ROLL).setDerivativeGain(200.0);
    }
    
-   @Override
    public void doMaintainDesiredChestOrientation()
    {
       // TODO replace with ID control
