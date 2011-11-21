@@ -9,7 +9,7 @@ public interface SpineLungingControlModule extends SpineControlModule
    
    public abstract void getSpineTorques(SpineTorques spineTorquesToPack);
    
-   public abstract void setWrenchBetweenChestAndPelvis(Wrench wrench, SpineTorques spineTorquesToPack);
+   public abstract void setWrenchOnChest(Wrench wrench);
 
 }
 
