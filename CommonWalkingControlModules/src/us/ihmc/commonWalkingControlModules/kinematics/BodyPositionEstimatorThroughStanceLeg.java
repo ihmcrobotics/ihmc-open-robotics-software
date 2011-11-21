@@ -22,8 +22,9 @@ public class BodyPositionEstimatorThroughStanceLeg implements BodyPositionEstima
    private final CommonWalkingReferenceFrames referenceFrames;
    private final LegToTrustForVelocityReadOnly legToTrustForVelocity;
    private final YoFramePoint anklePositionFix;
-   private final FramePoint bodyPosition = new FramePoint(world);
+   private final YoFramePoint bodyPositionThroughStanceLeg;
    private final DoubleYoVariable defaultCovariance;
+   private final DoubleYoVariable currentCovariance;
    private final double ankleHeight;
 
    public BodyPositionEstimatorThroughStanceLeg(RobotSide robotSide, LegToTrustForVelocityReadOnly legToTrustForVelocity, CommonWalkingReferenceFrames referenceFrames, double defaultCovariance, double ankleHeight, YoVariableRegistry parentRegistry)
@@ -34,27 +35,29 @@ public class BodyPositionEstimatorThroughStanceLeg implements BodyPositionEstima
       this.referenceFrames = referenceFrames;
       this.legToTrustForVelocity = legToTrustForVelocity;
       this.anklePositionFix = new YoFramePoint("anklePositionFix", "", world, registry);
-      this.defaultCovariance = new DoubleYoVariable(robotSide.getCamelCaseNameForStartOfExpression() + "PositionThroughStanceLegCovariance", registry);
+      this.bodyPositionThroughStanceLeg = new YoFramePoint("bodyPositionThrough" + robotSide.getCamelCaseNameForMiddleOfExpression() + "StanceLeg", "", world, parentRegistry);
+      this.defaultCovariance = new DoubleYoVariable("bodyPositionThrough" + robotSide.getCamelCaseNameForMiddleOfExpression() + "StanceLegDefaultCovariance", registry);
+      this.currentCovariance = new DoubleYoVariable(robotSide.getCamelCaseNameForStartOfExpression() + "PositionThroughStanceLegCurrentCovariance", registry);
       this.defaultCovariance.set(defaultCovariance);
       this.ankleHeight = ankleHeight;
       parentRegistry.addChild(registry);
    }
    
+   private final FramePoint tempBodyPosition = new FramePoint(world);
    private final FrameVector tempBodyPositionVector = new FrameVector(world);
    public void estimateBodyPosition()
    {
-      bodyPosition.setToZero(referenceFrames.getIMUFrame());
-      bodyPosition.changeFrame(referenceFrames.getAnkleZUpFrame(robotSide));
-      tempBodyPositionVector.setAndChangeFrame(bodyPosition);
+      tempBodyPosition.setToZero(referenceFrames.getIMUFrame());
+      tempBodyPosition.changeFrame(referenceFrames.getAnkleZUpFrame(robotSide));
+      tempBodyPositionVector.setAndChangeFrame(tempBodyPosition);
       tempBodyPositionVector.changeFrame(world);
-      bodyPosition.setToZero(world);
-      anklePositionFix.getFramePoint(bodyPosition);
-      bodyPosition.add(tempBodyPositionVector);
+      bodyPositionThroughStanceLeg.set(anklePositionFix);
+      bodyPositionThroughStanceLeg.add(tempBodyPositionVector);
    }
    
    public void packBodyPosition(FramePoint bodyPositionToPack)
    {
-      bodyPositionToPack.set(bodyPosition);
+      bodyPositionThroughStanceLeg.getFramePoint(bodyPositionToPack);
    }
    
    private void fixAnklePositionInWorld()
@@ -69,11 +72,9 @@ public class BodyPositionEstimatorThroughStanceLeg implements BodyPositionEstima
    {
       // TODO: also use angular velocity of foot with respect to ground. Create FootAngularVelocityCalculator; do only once
       double covariance = this.legToTrustForVelocity.isLegTrustedForVelocity(robotSide) ? defaultCovariance.getDoubleValue() : Double.POSITIVE_INFINITY;
+      if (covariance != currentCovariance.getDoubleValue())
+         fixAnklePositionInWorld();
+      currentCovariance.set(covariance);
       covarianceToPack.set(covariance, covariance, covariance);
-   }
-
-   public void configureAfterEstimation()
-   {
-      fixAnklePositionInWorld();
    }
 }

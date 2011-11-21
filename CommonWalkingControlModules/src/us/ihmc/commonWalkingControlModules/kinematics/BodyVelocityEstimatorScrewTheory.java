@@ -101,8 +101,4 @@ public class BodyVelocityEstimatorScrewTheory implements BodyVelocityEstimator
       double covariance = this.legToTrustForVelocity.isLegTrustedForVelocity(robotSide) ? defaultCovariance.getDoubleValue() : Double.POSITIVE_INFINITY;
       covarianceToPack.set(covariance, covariance, covariance);
    }
-
-   public void configureAfterEstimation()
-   {      
-   }
 }
