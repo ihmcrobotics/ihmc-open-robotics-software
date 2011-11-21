@@ -53,6 +53,11 @@ public class BodyPositionEstimatorThroughStanceLeg implements BodyPositionEstima
       tempBodyPositionVector.changeFrame(world);
       bodyPositionThroughStanceLeg.set(anklePositionFix);
       bodyPositionThroughStanceLeg.add(tempBodyPositionVector);
+      
+      double covariance = this.legToTrustForVelocity.isLegTrustedForVelocity(robotSide) ? defaultCovariance.getDoubleValue() : Double.POSITIVE_INFINITY;
+      if (covariance != currentCovariance.getDoubleValue())
+         fixAnklePositionInWorld();
+      currentCovariance.set(covariance);
    }
    
    public void packBodyPosition(FramePoint bodyPositionToPack)
@@ -70,11 +75,6 @@ public class BodyPositionEstimatorThroughStanceLeg implements BodyPositionEstima
 
    public void packCovariance(Tuple3d covarianceToPack)
    {
-      // TODO: also use angular velocity of foot with respect to ground. Create FootAngularVelocityCalculator; do only once
-      double covariance = this.legToTrustForVelocity.isLegTrustedForVelocity(robotSide) ? defaultCovariance.getDoubleValue() : Double.POSITIVE_INFINITY;
-      if (covariance != currentCovariance.getDoubleValue())
-         fixAnklePositionInWorld();
-      currentCovariance.set(covariance);
-      covarianceToPack.set(covariance, covariance, covariance);
+      covarianceToPack.set(currentCovariance.getDoubleValue(), currentCovariance.getDoubleValue(), currentCovariance.getDoubleValue());
    }
 }
