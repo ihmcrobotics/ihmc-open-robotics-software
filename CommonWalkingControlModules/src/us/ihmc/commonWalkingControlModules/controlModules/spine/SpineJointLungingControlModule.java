@@ -154,9 +154,9 @@ public class SpineJointLungingControlModule implements SpineLungingControlModule
       }      
    }
    
-   public void setWrenchBetweenChestAndPelvis(Wrench wrench, SpineTorques spineTorquesToPack)
+   public void setWrenchOnChest(Wrench wrench)
    {
-      spineTorquesToPack.setTorquesToZero();
+      spineTorques.setTorquesToZero();
       
       Vector3d virtualForce = new Vector3d(0.0, 0.0, 0.0);
       FrameVector virtualTorque = new FrameVector(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 0.0);
@@ -174,7 +174,7 @@ public class SpineJointLungingControlModule implements SpineLungingControlModule
          
          RevoluteJoint spineRevoluteJoint = spineRevoluteJointList.get(spineJointName.ordinal());
          spineRevoluteJoint.setQddDesired( -10.0*(0.0 - actualPosition) - 1.0*(0.0 - actualVelocity) );
-         spineTorquesToPack.setTorque(spineJointName, spineRevoluteJoint.getTau());
+         spineTorques.setTorque(spineJointName, spineRevoluteJoint.getTau());
       }
    }
 
