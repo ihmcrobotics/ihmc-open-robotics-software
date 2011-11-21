@@ -9,6 +9,7 @@ import java.util.ListIterator;
 import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.SpineLungingControlModule;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.SpineControlModule;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.R2SpineLinkName;
@@ -28,7 +29,7 @@ import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.PIDController;
 
-public class SpineJointLungingControlModule implements SpineControlModule
+public class SpineJointLungingControlModule implements SpineLungingControlModule
 {
    private final YoVariableRegistry registry = new YoVariableRegistry("SpineJointLungingControlModule");
 
@@ -43,7 +44,8 @@ public class SpineJointLungingControlModule implements SpineControlModule
    
    private InverseDynamicsCalculator spineJointIDCalc;
    
-   private Vector3d desiredSpineTorqueVector;
+//   private Vector3d desiredSpineTorqueVector;
+   private SpineTorques spineTorques = new SpineTorques();
  
    public SpineJointLungingControlModule(ProcessedSensorsInterface processedSensors, InverseDynamicsCalculator spineJointIDCalc, double controlDT, YoVariableRegistry parentRegistry)
    {
@@ -137,9 +139,31 @@ public class SpineJointLungingControlModule implements SpineControlModule
       spineControllers.get(SpineJointName.SPINE_PITCH).setDerivativeGain(200.0);
       spineControllers.get(SpineJointName.SPINE_ROLL).setDerivativeGain(200.0);
    }
-   
 
-   
-   
+   @Override
+   public void doMaintainDesiredChestOrientation()
+   {
+      // TODO replace with ID control
+      for (SpineJointName spineJointName : SpineJointName.values())
+      {
+         PIDController pidController = spineControllers.get(spineJointName);
+         
+         double desiredPosition = desiredAngles.get(spineJointName).getDoubleValue();
+         double desiredVelocity = 0.0;
+
+         double actualPosition = processedSensors.getSpineJointPosition(spineJointName); // actualAngles.get(spineJointName).getDoubleValue();
+         double actualVelocity = processedSensors.getSpineJointVelocity(spineJointName); //actualAngleVelocities.get(spineJointName).getDoubleValue();
+
+         double torque = pidController.compute(actualPosition, desiredPosition, actualVelocity, desiredVelocity, controlDT);
+         spineTorques.setTorque(spineJointName, torque);
+      }      
+   }
+
+   @Override
+   public void getSpineTorques(SpineTorques spineTorquesToPack)
+   {
+      spineTorquesToPack.setTorques(this.spineTorques.getTorquesCopy());
+   }
+
 }
 
