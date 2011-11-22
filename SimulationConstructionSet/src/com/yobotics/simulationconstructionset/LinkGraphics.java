@@ -25,6 +25,8 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Point3f;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.utilities.InertiaTools;
+
 import com.mnstarfire.loaders3d.Loader3DS;
 import com.sun.j3d.utils.picking.PickTool;
 import com.yobotics.simulationconstructionset.robotdefinition.AppearanceDefinition;
@@ -1750,33 +1752,14 @@ public class LinkGraphics
       link.getMomentOfInertia(momentOfInertia);
       double mass = link.getMass();
 
-      double[] principalMomentsOfInertia = {momentOfInertia.m00, momentOfInertia.m11, momentOfInertia.m22};
+      Vector3d principalMomentsOfInertia = new Vector3d(momentOfInertia.m00, momentOfInertia.m11, momentOfInertia.m22);
 
-      double[] ellipsoidRadii = getEllipsoidRadii(principalMomentsOfInertia, mass);
+      Vector3d ellipsoidRadii = InertiaTools.getInertiaEllipsoidRadii(principalMomentsOfInertia, mass);
 
-      this.addEllipsoid(ellipsoidRadii[0], ellipsoidRadii[1], ellipsoidRadii[2], appearance);
+      this.addEllipsoid(ellipsoidRadii.x, ellipsoidRadii.y, ellipsoidRadii.z, appearance);
    }
 
-   /**
-    * Returns the radii of an ellipsoid given the inertia parameters, assuming a uniform mass distribution.
-    * @param principalMomentsOfInertia principal moments of inertia {Ixx, Iyy, Izz}
-    * @param mass mass of the link
-    * @return the three radii of the inertia ellipsoid
-    */
-   private double[] getEllipsoidRadii(double[] principalMomentsOfInertia, double mass)
-   {
-      double Ixx = principalMomentsOfInertia[0];
-      double Iyy = principalMomentsOfInertia[1];
-      double Izz = principalMomentsOfInertia[2];
-
-//    http://en.wikipedia.org/wiki/Ellipsoid#Mass_properties
-      double[] ret = new double[3];
-      ret[0] = Math.sqrt(5.0 / 2.0 * (Iyy + Izz - Ixx) / mass);
-      ret[1] = Math.sqrt(5.0 / 2.0 * (Izz + Ixx - Iyy) / mass);
-      ret[2] = Math.sqrt(5.0 / 2.0 * (Ixx + Iyy - Izz) / mass);
-
-      return ret;
-   }
+   
 
    /*
     * public String getName()
