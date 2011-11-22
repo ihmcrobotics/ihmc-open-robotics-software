@@ -34,6 +34,8 @@ import com.yobotics.simulationconstructionset.util.PIDController;
 public class SpineJointLungingControlModule implements SpineLungingControlModule
 {
    private final YoVariableRegistry registry = new YoVariableRegistry("SpineJointLungingControlModule");
+   
+   public ArrayList<DoubleYoVariable> spinePitchErrorList = new ArrayList<DoubleYoVariable>();
 
    private final EnumMap<SpineJointName, DoubleYoVariable> desiredAngles = ContainerTools.createEnumMap(SpineJointName.class);
    private final EnumMap<SpineJointName, PIDController> spineControllers = ContainerTools.createEnumMap(SpineJointName.class);
@@ -44,6 +46,7 @@ public class SpineJointLungingControlModule implements SpineLungingControlModule
    private final ProcessedSensorsInterface processedSensors;
    private final double controlDT;
    
+   private final EnumMap<SpineJointName, PIDController> spineJointIDQddControllers = ContainerTools.createEnumMap(SpineJointName.class);
    private InverseDynamicsCalculator spineJointIDCalc;
    private RigidBody pelvisRigidBody;
    private ArrayList<RevoluteJoint> spineRevoluteJointList;
@@ -64,6 +67,13 @@ public class SpineJointLungingControlModule implements SpineLungingControlModule
       populateControllers();
       setDesireds();
       setGains();
+      
+      for (SpineJointName spineJointName : SpineJointName.values())
+      {
+         spinePitchErrorList.add(new DoubleYoVariable(spineJointName + "Error", registry));
+      }
+      
+      
       parentRegistry.addChild(registry);
 
 //      actualAngles = processedSensors.getYoSpineJointPositions();
@@ -115,6 +125,7 @@ public class SpineJointLungingControlModule implements SpineLungingControlModule
       for (SpineJointName spineJointName : SpineJointName.values())
       {
          spineControllers.put(spineJointName, new PIDController(spineJointName.getCamelCaseNameForStartOfExpression(), registry));
+         spineJointIDQddControllers.put(spineJointName, new PIDController(spineJointName.getCamelCaseNameForStartOfExpression() + "qddDesired", registry));
       }
    }
 
@@ -136,6 +147,16 @@ public class SpineJointLungingControlModule implements SpineLungingControlModule
       spineControllers.get(SpineJointName.SPINE_YAW).setDerivativeGain(200.0);
       spineControllers.get(SpineJointName.SPINE_PITCH).setDerivativeGain(200.0);
       spineControllers.get(SpineJointName.SPINE_ROLL).setDerivativeGain(200.0);
+      
+      
+      spineJointIDQddControllers.get(SpineJointName.SPINE_YAW).setProportionalGain(3000.0);
+      spineJointIDQddControllers.get(SpineJointName.SPINE_PITCH).setProportionalGain(700.0);
+      spineJointIDQddControllers.get(SpineJointName.SPINE_ROLL).setProportionalGain(10000.0);
+
+      spineJointIDQddControllers.get(SpineJointName.SPINE_YAW).setDerivativeGain(200.0);
+      spineJointIDQddControllers.get(SpineJointName.SPINE_PITCH).setDerivativeGain(100.0);
+      spineJointIDQddControllers.get(SpineJointName.SPINE_ROLL).setDerivativeGain(1000.0);
+      
    }
    
    public void doMaintainDesiredChestOrientation()
@@ -152,12 +173,16 @@ public class SpineJointLungingControlModule implements SpineLungingControlModule
       
       for (SpineJointName spineJointName : SpineJointName.values())
       {
-         
          double actualPosition = processedSensors.getSpineJointPosition(spineJointName); // actualAngles.get(spineJointName).getDoubleValue();
          double actualVelocity = processedSensors.getSpineJointVelocity(spineJointName); //actualAngleVelocities.get(spineJointName).getDoubleValue();
          
          RevoluteJoint spineRevoluteJoint = spineRevoluteJointList.get(spineJointName.ordinal());
-         spineRevoluteJoint.setQddDesired( -10.0*(0.0 - actualPosition) - 1.0*(0.0 - actualVelocity) );
+         
+         spinePitchErrorList.get(spineJointName.ordinal()).set(0.0 - actualPosition);
+         double qddDesired = spineJointIDQddControllers.get(spineJointName).compute(actualPosition, 0.0, actualVelocity, 0.0, controlDT);
+         spineRevoluteJoint.setQddDesired( qddDesired );
+
+//         spineRevoluteJoint.setQddDesired( 1000.0*(0.0 - actualPosition) + 100.0*(0.0 - actualVelocity) );
          spineTorques.setTorque(spineJointName, spineRevoluteJoint.getTau());
       } 
    }
