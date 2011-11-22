@@ -4,27 +4,28 @@ import static org.junit.Assert.assertTrue;
 
 import java.awt.Frame;
 
-import javax.swing.JFrame;
-
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class SimulationConstructionSetMemoryReclaimationTest
 {
-   @Ignore
+   @Test
    public void testMemoryReclaimationForSCSWithoutARobot()
    {
-      int usedMemoryMB = testOneAndReturnUsedMemoryMB(false, 5);
+      int usedMemoryMBAtStart = printMemoryUsageAndReturnUsedMemoryInMB();
+      int usedMemoryMBAtEnd = testOneAndReturnUsedMemoryMB(false, 5);
       
-      assertTrue(usedMemoryMB < 50);
-
+      int usedMemoryMB = usedMemoryMBAtEnd - usedMemoryMBAtStart;
+      
+      assertTrue(usedMemoryMB < 20);
    }
 
-   @Ignore
+   @Test
    public void testMemoryReclaimationForSCSWithARobot()
    {
-      int usedMemoryMB = testOneAndReturnUsedMemoryMB(true, 1);
+      int usedMemoryMBAtStart = printMemoryUsageAndReturnUsedMemoryInMB();
+      int usedMemoryMBAtEnd = testOneAndReturnUsedMemoryMB(true, 1);
       
+      int usedMemoryMB = usedMemoryMBAtEnd - usedMemoryMBAtStart;
       
       Frame[] frames = Frame.getFrames();
       if (frames != null)
@@ -32,30 +33,27 @@ public class SimulationConstructionSetMemoryReclaimationTest
          System.out.println("Number of Frames is still " + frames.length);
          for (Frame frame : frames)
          {
-            System.out.println(frame.getName() + ": " + frame);
+            System.out.println(frame.getTitle() + ": " + frame);
             
-            JFrame jFrame = (JFrame) frame;
-            jFrame.getRootPane().removeAll();
-            jFrame.setVisible(false);
-            jFrame.dispose();
+//            frame.setVisible(false);
+//            frame.dispose();
          }
       }
       
       frames = null;
       
-//      assertTrue(usedMemoryMB < 50);
+      assertTrue(usedMemoryMB < 30);
    }
    
-   @Ignore
-   public void sleepForever()
-   {
-      sleep(3000000);
-   }
+//   @Test
+//   public void sleepForever()
+//   {
+//      sleep(3000000);
+//   }
 
    private int testOneAndReturnUsedMemoryMB(boolean useARobot, int numberOfTests)
    {
-      Runtime runtime = Runtime.getRuntime();
-      printMemoryUsageAndReturnUsedMemoryInMB(runtime);
+      printMemoryUsageAndReturnUsedMemoryInMB();
 
       for (int i = 0; i < numberOfTests; i++)
       {
@@ -65,8 +63,7 @@ public class SimulationConstructionSetMemoryReclaimationTest
 
          scs.closeAndDispose();
 
-         System.gc();
-         printMemoryUsageAndReturnUsedMemoryInMB(runtime);
+         printMemoryUsageAndReturnUsedMemoryInMB();
 
       }
 
@@ -74,7 +71,7 @@ public class SimulationConstructionSetMemoryReclaimationTest
 
       System.out.println("Created and disposed of " + numberOfTests + " SCSs. Should be garbage collected now...");
       sleep(2000);
-      int usedMemoryMB = printMemoryUsageAndReturnUsedMemoryInMB(runtime);
+      int usedMemoryMB = printMemoryUsageAndReturnUsedMemoryInMB();
       return usedMemoryMB;
    }
 
@@ -104,7 +101,7 @@ public class SimulationConstructionSetMemoryReclaimationTest
       Thread thread = new Thread(scs);
       thread.start();
       
-      while(!scs.isSimulationThreadUpAndRunning())
+      while(useARobot && !scs.isSimulationThreadUpAndRunning())
       {
          sleep(100);
       }
@@ -112,8 +109,13 @@ public class SimulationConstructionSetMemoryReclaimationTest
       return scs;
    }
 
-   private int printMemoryUsageAndReturnUsedMemoryInMB(Runtime runtime)
+   private int printMemoryUsageAndReturnUsedMemoryInMB()
    {
+      Runtime runtime = Runtime.getRuntime();
+
+      System.gc();
+      sleep(100);
+      
       long freeMemory = runtime.freeMemory();
       long totalMemory = runtime.totalMemory();
       long usedMemory = totalMemory - freeMemory;
