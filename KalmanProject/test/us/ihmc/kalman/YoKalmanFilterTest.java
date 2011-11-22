@@ -216,6 +216,48 @@ public class YoKalmanFilterTest
       EjmlUnitTests.assertEquals(stateBeforeUpdate, stateAfterUpdate, 1e-8);
       EjmlUnitTests.assertEquals(covarianceBeforeUpdate, covarianceAfterUpdate, 1e-8);
    }
+   
+   @Test
+   public void testTwoUpdatesVersusOne()
+   {
+      nStates = 8;
+      nInputs = 1;
+      nMeasurements = 5;
+      createRandomParameters(nStates, nInputs, nMeasurements);
+      R = RandomMatrices.createDiagonal(nMeasurements, 0.0, 1.0, random);
+
+      YoKalmanFilter yoKalmanFilter0 = new YoKalmanFilter("yo0", nStates, nInputs, nMeasurements, parentRegistry);
+      YoKalmanFilter yoKalmanFilter1 = new YoKalmanFilter("yo1", nStates, nInputs, nMeasurements, parentRegistry);
+      KalmanFilter[] kalmanFilters = {yoKalmanFilter0, yoKalmanFilter1};
+
+      for (KalmanFilter kalmanFilter : kalmanFilters)
+      {
+         kalmanFilter.configure(F, G, H);
+         kalmanFilter.setProcessNoiseCovariance(Q);
+         kalmanFilter.setMeasurementNoiseCovariance(R);
+         kalmanFilter.setState(x, P);
+         kalmanFilter.predict(u);
+      }
+      
+      yoKalmanFilter0.update(y);
+
+      for (int i = 0; i < nMeasurements; i++)
+      {
+         DenseMatrix64F RPrime = new DenseMatrix64F(R);
+         for (int j = 0; j < nMeasurements; j++)
+         {
+            if (i != j)
+            {
+               RPrime.set(j, j, Double.POSITIVE_INFINITY);
+            }
+         }
+         yoKalmanFilter1.setMeasurementNoiseCovariance(RPrime);
+         yoKalmanFilter1.update(y);
+      }
+
+      EjmlUnitTests.assertEquals(kalmanFilters[0].getState(), kalmanFilters[1].getState(), 1e-8);
+      EjmlUnitTests.assertEquals(kalmanFilters[0].getCovariance(), kalmanFilters[1].getCovariance(), 1e-8);
+   }
 
    private void createRandomParameters(int nStates, int nInputs, int nMeasurements)
    {
