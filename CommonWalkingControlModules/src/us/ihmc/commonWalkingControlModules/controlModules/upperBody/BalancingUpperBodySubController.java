@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.upperBody;
 
 import java.util.EnumMap;
 
+import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.ArmControlModule;
@@ -12,11 +13,19 @@ import us.ihmc.commonWalkingControlModules.partNamesAndTorques.NeckJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.NeckTorques;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.UpperBodyTorques;
 import us.ihmc.commonWalkingControlModules.sensors.ProcessedSensorsInterface;
+import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.containers.ContainerTools;
+import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
+import us.ihmc.utilities.math.geometry.FramePoint;
+import us.ihmc.utilities.math.geometry.FramePoint2d;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.screwTheory.RigidBody;
+import us.ihmc.utilities.screwTheory.Wrench;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.PIDController;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector2d;
 import com.yobotics.simulationconstructionset.util.statemachines.State;
 import com.yobotics.simulationconstructionset.util.statemachines.StateMachine;
 import com.yobotics.simulationconstructionset.util.statemachines.StateTransition;
@@ -40,14 +49,26 @@ public class BalancingUpperBodySubController implements UpperBodySubController
    private final StateMachine stateMachine;
    private final String name = "BalancingUpperBodySubController";
 
-   public BalancingUpperBodySubController(CouplingRegistry couplingRegistry, ProcessedSensorsInterface processedSensors, double controlDT,
-         ArmControlModule armControlModule, SpineLungingControlModule spineControlModule, YoVariableRegistry parentRegistry)
+   private final YoFrameVector2d lungeDirection = new YoFrameVector2d("lungeDirection", "", ReferenceFrame.getWorldFrame(), registry);
+   public Wrench wrenchOnChest;
+   private final RigidBody chest;
+   private final double maxHipTorque;
+   private final double robotMass;
+   private final double gravity;
+
+   public BalancingUpperBodySubController(CouplingRegistry couplingRegistry, ProcessedSensorsInterface processedSensors, double controlDT, RigidBody chest,
+         double maxHipTorque, double robotMass, double gravity, ArmControlModule armControlModule, SpineLungingControlModule spineControlModule,
+         YoVariableRegistry parentRegistry)
    {
       this.couplingRegistry = couplingRegistry;
       this.processedSensors = processedSensors;
       this.controlDT = controlDT;
       this.armControlModule = armControlModule;
       this.spineControlModule = spineControlModule;
+      this.chest = chest;
+      this.maxHipTorque = maxHipTorque;
+      this.robotMass = robotMass;
+      this.gravity = gravity;
       this.stateMachine = new StateMachine(name + "State", name + "SwitchTime", BalancingUpperBodySubControllerState.class, processedSensors.getYoTime(),
             registry);
 
@@ -65,10 +86,10 @@ public class BalancingUpperBodySubController implements UpperBodySubController
    {
       stateMachine.doAction();
       stateMachine.checkTransitionConditions();
-      
+
       armControlModule.doArmControl(upperBodyTorquesToPack.getArmTorques());
       this.doNeckControl();
-      
+
       // set torques
       upperBodyTorquesToPack.setNeckTorques(neckTorques);
       spineControlModule.getSpineTorques(upperBodyTorquesToPack.getSpineTorques());
@@ -83,19 +104,19 @@ public class BalancingUpperBodySubController implements UpperBodySubController
       StateTransitionCondition isICPOutsideLungeRadius = new IsICPOutsideLungeRadiusCondition();
       StateTransitionCondition doWeNeedToDecelerate = new DoWeNeedToSlowDownDecelerate();
       StateTransitionCondition isBodyAngularVelocityZero = new IsBodyAngularVelocityZeroCondition(1e-2);
-      
+
       StateTransition toICPRecoverAccelerate = new StateTransition(icpRecoverAccelerateState.getStateEnum(), isICPOutsideLungeRadius);
       StateTransition toICPRecoverDecelerate = new StateTransition(icpRecoverDecelerateState.getStateEnum(), doWeNeedToDecelerate);
       StateTransition toBase = new StateTransition(base.getStateEnum(), isBodyAngularVelocityZero); //TODO now going back to base
-      
+
       base.addStateTransition(toICPRecoverAccelerate);
       icpRecoverAccelerateState.addStateTransition(toICPRecoverDecelerate);
       icpRecoverDecelerateState.addStateTransition(toBase); //TODO now going back to base
-      
+
       stateMachine.addState(base);
       stateMachine.addState(icpRecoverAccelerateState);
       stateMachine.addState(icpRecoverDecelerateState);
-      
+
       stateMachine.setCurrentState(base.getStateEnum());
    }
 
@@ -111,24 +132,54 @@ public class BalancingUpperBodySubController implements UpperBodySubController
          super(BalancingUpperBodySubControllerState.BASE);
       }
 
-      @Override
       public void doAction()
       {
          spineControlModule.doMaintainDesiredChestOrientation();
       }
    }
 
-   private class ICPRecoverAccelerateState extends NoTransitionActionsState
+   private class ICPRecoverAccelerateState extends State
    {
+      Vector2d hipControl;
+      
       public ICPRecoverAccelerateState()
       {
          super(BalancingUpperBodySubControllerState.ICP_REC_ACC);
       }
 
-      @Override
       public void doAction()
       {
-         // TODO Auto-generated method stub
+         System.out.println(hipControl.toString());
+         
+         spineControlModule.setWrenchOnChest(wrenchOnChest);
+         spineControlModule.doMaintainDesiredChestOrientation();
+      }
+
+      public void doTransitionIntoAction()
+      {
+         setLungeDirectionBasedOnIcp();
+         hipControl = new Vector2d(lungeDirection.getFrameVector2dCopy().getVector());
+         hipControl.scale(getCMPDistanceForTorque(maxHipTorque));
+         
+//         hipControl
+         
+//         ReferenceFrame expressedInFrame = ReferenceFrame.getWorldFrame();
+         ReferenceFrame expressedInFrame = chest.getBodyFixedFrame();
+         wrenchOnChest = new Wrench(chest.getBodyFixedFrame(), expressedInFrame);
+      }
+
+      public void doTransitionOutOfAction()
+      {
+         setWrenchOnChestToZero();
+         spineControlModule.setWrenchOnChest(wrenchOnChest);
+      }
+
+      private void setLungeDirectionBasedOnIcp()
+      {
+         ReferenceFrame bodyFrame = processedSensors.getFullRobotModel().getPelvis().getBodyFixedFrame();
+         FramePoint capturePoint = couplingRegistry.getCapturePointInFrame(bodyFrame);
+         lungeDirection.set(capturePoint.getX(), capturePoint.getY());
+         lungeDirection.normalize();
       }
    }
 
@@ -139,7 +190,6 @@ public class BalancingUpperBodySubController implements UpperBodySubController
          super(BalancingUpperBodySubControllerState.ICP_REC_DEC);
       }
 
-      @Override
       public void doAction()
       {
          // TODO Auto-generated method stub
@@ -150,8 +200,8 @@ public class BalancingUpperBodySubController implements UpperBodySubController
    {
       public boolean checkCondition()
       {
-         //TODO implement
-         return false;
+         return !isCapturePointInsideSupportPolygon();
+         // can be altered to lunge radius if needed.
       }
    }
 
@@ -203,6 +253,19 @@ public class BalancingUpperBodySubController implements UpperBodySubController
       }
    }
 
+   public boolean isCapturePointInsideSupportPolygon()
+   {
+      FrameConvexPolygon2d supportPolygon = couplingRegistry.getBipedSupportPolygons().getSupportPolygonInMidFeetZUp();
+      FramePoint2d capturePoint = couplingRegistry.getCapturePointInFrame(supportPolygon.getReferenceFrame()).toFramePoint2d();
+
+      return supportPolygon.isPointInside(capturePoint);
+   }
+
+   public double getCMPDistanceForTorque(double hipTorque)
+   {
+      return hipTorque / (robotMass * gravity);      
+   }
+
    private void doNeckControl()
    {
       for (NeckJointName neckJointName : NeckJointName.values())
@@ -249,6 +312,13 @@ public class BalancingUpperBodySubController implements UpperBodySubController
       neckControllers.get(NeckJointName.UPPER_NECK_PITCH).setDerivativeGain(5.0);
    }
 
+   private void setWrenchOnChestToZero()
+   {
+      Vector3d zeroVector = new Vector3d();
+      wrenchOnChest.setAngularPart(zeroVector);
+      wrenchOnChest.setLinearPart(zeroVector);
+   }
+
    public abstract class NoTransitionActionsState extends State
    {
       public NoTransitionActionsState(Enum<?> stateEnum)
@@ -256,12 +326,10 @@ public class BalancingUpperBodySubController implements UpperBodySubController
          super(stateEnum);
       }
 
-      @Override
       public void doTransitionIntoAction()
       {
       }
 
-      @Override
       public void doTransitionOutOfAction()
       {
       }
