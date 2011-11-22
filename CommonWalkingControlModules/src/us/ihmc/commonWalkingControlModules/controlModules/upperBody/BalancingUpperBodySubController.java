@@ -22,7 +22,9 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.Wrench;
 
+import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.EnumYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.PIDController;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector2d;
@@ -52,9 +54,14 @@ public class BalancingUpperBodySubController implements UpperBodySubController
    private final YoFrameVector2d lungeDirection = new YoFrameVector2d("lungeDirection", "", ReferenceFrame.getWorldFrame(), registry);
    public Wrench wrenchOnChest;
    private final RigidBody chest;
-   private final double maxHipTorque;
    private final double robotMass;
    private final double gravity;
+   
+   private final DoubleYoVariable maxAngle = new DoubleYoVariable("maxAngle", registry);
+   private final DoubleYoVariable maxHipTorque = new DoubleYoVariable("maxHipTorque", registry);
+   
+   private final BooleanYoVariable forceControllerIntoState = new BooleanYoVariable("force" + name + "IntoState", registry);
+   private final EnumYoVariable<BalancingUpperBodySubControllerState> forcedControllerState = new EnumYoVariable<BalancingUpperBodySubControllerState>("forced" + name + "State", registry, BalancingUpperBodySubControllerState.class);
 
    public BalancingUpperBodySubController(CouplingRegistry couplingRegistry, ProcessedSensorsInterface processedSensors, double controlDT, RigidBody chest,
          double maxHipTorque, double robotMass, double gravity, ArmControlModule armControlModule, SpineLungingControlModule spineControlModule,
@@ -66,7 +73,7 @@ public class BalancingUpperBodySubController implements UpperBodySubController
       this.armControlModule = armControlModule;
       this.spineControlModule = spineControlModule;
       this.chest = chest;
-      this.maxHipTorque = maxHipTorque;
+      this.maxHipTorque.set(maxHipTorque);
       this.robotMass = robotMass;
       this.gravity = gravity;
       this.stateMachine = new StateMachine(name + "State", name + "SwitchTime", BalancingUpperBodySubControllerState.class, processedSensors.getYoTime(),
@@ -78,14 +85,23 @@ public class BalancingUpperBodySubController implements UpperBodySubController
       parentRegistry.addChild(registry);
 
       setGains();
-
+      setParameters();
+      displayWarningsForBooleans();
+      
       setUpStateMachine();
    }
 
    public void doUpperBodyControl(UpperBodyTorques upperBodyTorquesToPack)
    {
       stateMachine.doAction();
-      stateMachine.checkTransitionConditions();
+      if (!forceControllerIntoState.getBooleanValue())
+      {
+         stateMachine.checkTransitionConditions();
+      }
+      else
+      {
+         stateMachine.setCurrentState(forcedControllerState.getEnumValue());
+      }
 
       armControlModule.doArmControl(upperBodyTorquesToPack.getArmTorques());
       this.doNeckControl();
@@ -117,7 +133,15 @@ public class BalancingUpperBodySubController implements UpperBodySubController
       stateMachine.addState(icpRecoverAccelerateState);
       stateMachine.addState(icpRecoverDecelerateState);
 
-      stateMachine.setCurrentState(base.getStateEnum());
+      if (forceControllerIntoState.getBooleanValue())
+      {
+         stateMachine.setCurrentState(forcedControllerState.getEnumValue());
+      }
+      else
+      {
+         stateMachine.setCurrentState(base.getStateEnum());         
+      }
+
    }
 
    private enum BalancingUpperBodySubControllerState
@@ -159,7 +183,7 @@ public class BalancingUpperBodySubController implements UpperBodySubController
       {
          setLungeDirectionBasedOnIcp();
          hipControl = new Vector2d(lungeDirection.getFrameVector2dCopy().getVector());
-         hipControl.scale(getCMPDistanceForTorque(maxHipTorque));
+         hipControl.scale(getCMPDistanceForTorque(maxHipTorque.getDoubleValue()));
          
 //         hipControl
          
@@ -333,6 +357,20 @@ public class BalancingUpperBodySubController implements UpperBodySubController
       public void doTransitionOutOfAction()
       {
       }
+   }
+   
+   private void setParameters()
+   {
+      maxAngle.set(Math.PI / 2.0);
+      forcedControllerState.set(BalancingUpperBodySubControllerState.ICP_REC_ACC);
+   }
+   
+   private void displayWarningsForBooleans()
+   {
+      if (forceControllerIntoState.getBooleanValue())
+      {
+         System.out.println("Warning! Controller " + this.name + " is forced to remain in the " + forcedControllerState.toString() + " state!");
+      }      
    }
 
 }
