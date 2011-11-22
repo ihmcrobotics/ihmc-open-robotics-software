@@ -16,7 +16,7 @@ public class SimulationConstructionSetMemoryReclaimationTest
       
       int usedMemoryMB = usedMemoryMBAtEnd - usedMemoryMBAtStart;
       
-      assertTrue(usedMemoryMB < 20);
+      assertTrue("usedMemoryMB = " + usedMemoryMB, usedMemoryMB < 50);
    }
 
    @Test
@@ -42,7 +42,7 @@ public class SimulationConstructionSetMemoryReclaimationTest
       
       frames = null;
       
-      assertTrue(usedMemoryMB < 30);
+      assertTrue("usedMemoryMB = " + usedMemoryMB, usedMemoryMB < 50);
    }
    
 //   @Test
