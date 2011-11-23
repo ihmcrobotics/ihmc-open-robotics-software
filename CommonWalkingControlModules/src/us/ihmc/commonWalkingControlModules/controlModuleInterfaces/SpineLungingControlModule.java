@@ -9,7 +9,10 @@ public interface SpineLungingControlModule extends SpineControlModule
    
    public abstract void getSpineTorques(SpineTorques spineTorquesToPack);
    
-   public abstract void setWrenchOnChest(Wrench wrench);
+   public abstract void setWrench(Wrench wrench);
+   
+   public abstract void setRollPitchGainsToZero();
 
+   public abstract void setGains();
 }
 
