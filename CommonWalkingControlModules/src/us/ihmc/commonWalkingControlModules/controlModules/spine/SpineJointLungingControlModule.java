@@ -142,7 +142,7 @@ public class SpineJointLungingControlModule implements SpineLungingControlModule
       desiredAngles.get(SpineJointName.SPINE_PITCH).set(0.0);
    }
 
-   private void setGains()
+   public void setGains()
    {
       spineControllers.get(SpineJointName.SPINE_YAW).setProportionalGain(3000.0);
       spineControllers.get(SpineJointName.SPINE_PITCH).setProportionalGain(3000.0);
@@ -167,34 +167,58 @@ public class SpineJointLungingControlModule implements SpineLungingControlModule
    {
       spineTorques.setTorquesToZero();
       
+      setDesiredAccelerationOnSpineJoints();
+      
       spineJointIDCalc.compute();
       
+      setSpineTorquesFromSpineJoints();
+   }
+
+   public void setRollPitchGainsToZero()
+   {
+      for (SpineJointName spineJoint : SpineJointName.values())
+      {
+         spineJointIDQddControllers.get(spineJoint).setProportionalGain(0.0);
+         spineJointIDQddControllers.get(spineJoint).setDerivativeGain(0.0);
+      }
+   }
+   
+   public void setWrench(Wrench wrenchOnPelvis)
+   {
+      spineJointIDCalc.setExternalWrench(pelvisRigidBody, wrenchOnPelvis);
+   }
+
+   public void getSpineTorques(SpineTorques spineTorquesToPack)
+   {
+      spineTorquesToPack.setTorques(this.spineTorques.getTorquesCopy());
+   }
+   
+   private void setDesiredAccelerationOnSpineJoints()
+   {
       for (SpineJointName spineJointName : SpineJointName.values())
       {
+         RevoluteJoint spineRevoluteJoint = spineRevoluteJointList.get(spineJointName.ordinal());
+         
          double actualPosition = processedSensors.getSpineJointPosition(spineJointName);
          double actualVelocity = processedSensors.getSpineJointVelocity(spineJointName);
          
          double desiredPosition = desiredAngles.get(spineJointName).getDoubleValue();
          double desiredVelocity = 0.0;
          
-         RevoluteJoint spineRevoluteJoint = spineRevoluteJointList.get(spineJointName.ordinal());
-         
          spinePitchErrorList.get(spineJointName.ordinal()).set(0.0 - actualPosition);
          double qddDesired = spineJointIDQddControllers.get(spineJointName).compute(actualPosition, desiredPosition, actualVelocity, desiredVelocity, controlDT);
          spineRevoluteJoint.setQddDesired(qddDesired);
-
-         spineTorques.setTorque(spineJointName, spineRevoluteJoint.getTau());
-      } 
-   }
-   
-   public void setWrenchOnChest(Wrench wrench)
-   {
-      spineJointIDCalc.setExternalWrench(chest, wrench);
+      }
    }
 
-   public void getSpineTorques(SpineTorques spineTorquesToPack)
+
+   private void setSpineTorquesFromSpineJoints()
    {
-      spineTorquesToPack.setTorques(this.spineTorques.getTorquesCopy());
+      for (SpineJointName spineJointName : SpineJointName.values())
+      {
+         RevoluteJoint spineRevoluteJoint = spineRevoluteJointList.get(spineJointName.ordinal());
+         spineTorques.setTorque(spineJointName, spineRevoluteJoint.getTau());   
+      }
    }
 }
 
