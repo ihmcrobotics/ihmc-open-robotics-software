@@ -48,18 +48,11 @@ public class SimulationRewindabilityVerifierTest
       ArrayList<VariableDifference> variableDifferences = verifier.checkRewindabilityWithSimpleMethod(numTests, maxDifferenceAllowed);
       assertTrue(variableDifferences.isEmpty());
       
-      destroySimulation(scs1);
-      destroySimulation(scs2);
+      scs1.closeAndDispose();
+      scs2.closeAndDispose();
    }
    
-   private void destroySimulation(SimulationConstructionSet scs)
-   {
-      scs.stop();
-      scs.stopSimulationThread();
-      scs.notifyExitActionListeners();
-   }
-   
-   
+  
    @Test
    public void testEasilyDetectableNonRewindableSimulation() throws UnreasonableAccelerationException
    {
@@ -81,8 +74,8 @@ public class SimulationRewindabilityVerifierTest
       }
       assertEquals(2, variableDifferences.size());
       
-      destroySimulation(scs1);
-      destroySimulation(scs2);
+      scs1.closeAndDispose();
+      scs2.closeAndDispose();
    }
    
    
@@ -125,8 +118,8 @@ public class SimulationRewindabilityVerifierTest
 
       assertEquals(2, variableDifferences.size());
       
-      destroySimulation(scs1);
-      destroySimulation(scs2);
+      scs1.closeAndDispose();
+      scs2.closeAndDispose();
    }
    
    private SimulationConstructionSet constructRewindableSimulationConstructionSet()
