@@ -11,6 +11,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.SpineLungingControlModule;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.SpineControlModule;
+import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.R2SpineLinkName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.SpineJointName;
@@ -102,15 +103,18 @@ public class SpineJointLungingControlModule implements SpineLungingControlModule
       }
    }
 
-   private void setHipTorqueFromDeltaCMP(Vector2d deltaCMP, SpineTorques spineTorquesToPack)
+   /**
+    * Sets the pitch and roll spine torques corresponding to the desired deltaCMP 
+    * @param deltaCMP: The normalized vector from the desired ICP to the current ICP (in the x-y plane), scaled by the CMP radius corresponding to the maximum hip torque
+    * @param spineTorquesToPack: The spine pitch and roll torques corresponding to a 90 degree rotation of deltaCMP about the z-axis
+    */
+   public void setPitchRollSpineTorquesFromDeltaCMP(Vector2d deltaCMP, SpineTorques spineTorquesToPack)
    {
-//      double mass = LIPMWithReactionMassParameters.getMass();
-//      double gravity = LIPMWithReactionMassParameters.getGravity();
-//      hipTorqueVector.setY(mass * gravity * deltaCMP.getX());
-//      hipTorqueVector.setX(mass * gravity * -deltaCMP.getY());
-      
-      spineTorquesToPack.setTorque(SpineJointName.SPINE_PITCH, deltaCMP.getX());
-      spineTorquesToPack.setTorque(SpineJointName.SPINE_ROLL, -deltaCMP.getY());
+      double mass = processedSensors.getTotalMass();
+      double gravity = processedSensors.getGravityInWorldFrame().length();
+
+      spineTorquesToPack.setTorque(SpineJointName.SPINE_PITCH, mass * gravity * deltaCMP.getX());
+      spineTorquesToPack.setTorque(SpineJointName.SPINE_ROLL, mass * gravity * -deltaCMP.getY());
    }
    
 
