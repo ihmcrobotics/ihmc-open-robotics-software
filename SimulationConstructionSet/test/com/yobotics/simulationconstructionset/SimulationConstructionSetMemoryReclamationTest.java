@@ -6,21 +6,10 @@ import java.awt.Frame;
 
 import org.junit.Test;
 
-public class SimulationConstructionSetMemoryReclaimationTest
+public class SimulationConstructionSetMemoryReclamationTest
 {
    @Test
-   public void testMemoryReclaimationForSCSWithoutARobot()
-   {
-      int usedMemoryMBAtStart = printMemoryUsageAndReturnUsedMemoryInMB();
-      int usedMemoryMBAtEnd = testOneAndReturnUsedMemoryMB(false, 5);
-      
-      int usedMemoryMB = usedMemoryMBAtEnd - usedMemoryMBAtStart;
-      
-      assertTrue("usedMemoryMB = " + usedMemoryMB, usedMemoryMB < 50);
-   }
-
-   @Test
-   public void testMemoryReclaimationForSCSWithARobot()
+   public void testMemoryReclamationForSCSWithARobot()
    {
       int usedMemoryMBAtStart = printMemoryUsageAndReturnUsedMemoryInMB();
       int usedMemoryMBAtEnd = testOneAndReturnUsedMemoryMB(true, 1);
@@ -41,6 +30,18 @@ public class SimulationConstructionSetMemoryReclaimationTest
       }
       
       frames = null;
+      
+      assertTrue("usedMemoryMB = " + usedMemoryMB, usedMemoryMB < 50);
+   }
+   
+   
+   @Test
+   public void testMemoryReclamationForSCSWithoutARobot()
+   {
+      int usedMemoryMBAtStart = printMemoryUsageAndReturnUsedMemoryInMB();
+      int usedMemoryMBAtEnd = testOneAndReturnUsedMemoryMB(false, 2);
+      
+      int usedMemoryMB = usedMemoryMBAtEnd - usedMemoryMBAtStart;
       
       assertTrue("usedMemoryMB = " + usedMemoryMB, usedMemoryMB < 50);
    }
