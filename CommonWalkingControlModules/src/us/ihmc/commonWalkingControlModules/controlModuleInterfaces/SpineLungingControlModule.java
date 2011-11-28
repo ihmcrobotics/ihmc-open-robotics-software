@@ -1,6 +1,9 @@
 package us.ihmc.commonWalkingControlModules.controlModuleInterfaces;
 
 import java.util.ArrayList;
+
+import javax.vecmath.Vector2d;
+
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.SpineJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.SpineTorques;
 import us.ihmc.utilities.screwTheory.Wrench;
@@ -16,5 +19,7 @@ public interface SpineLungingControlModule extends SpineControlModule
    public abstract void setGainsToZero(ArrayList<SpineJointName> spineJointsWithZeroGain);
 
    public abstract void setGains();
+   
+   public void scaleGainsBasedOnLungeAxis(Vector2d lungeAxis);
 }
 
