@@ -64,24 +64,25 @@ public class BodyPositionEstimatorThroughStanceLeg implements BodyPositionEstima
    private final FrameVector tempBodyPositionVector = new FrameVector(world);
    public void estimateBodyPosition()
    {     
+      double covariance;
+      if (this.legToTrustForVelocity.isLegTrustedForVelocity(robotSide) && isFootStationary())
+         covariance = defaultCovariance.getDoubleValue();
+      else
+         covariance = Double.POSITIVE_INFINITY;
+      
+      double epsilon = 1e-9;
+      if (covariance < (currentCovariance.getDoubleValue() - epsilon))
+         fixAnklePositionInWorld();
+      currentCovariance.set(covariance);
+      
       tempBodyPosition.setToZero(referenceFrames.getIMUFrame());
       tempBodyPosition.changeFrame(referenceFrames.getAnkleZUpFrame(robotSide));
       tempBodyPositionVector.setAndChangeFrame(tempBodyPosition);
       tempBodyPositionVector.changeFrame(world);
       bodyPositionThroughStanceLeg.set(anklePositionFix);
       bodyPositionThroughStanceLeg.add(tempBodyPositionVector);
-
-      double covariance;
-      if (this.legToTrustForVelocity.isLegTrustedForVelocity(robotSide) && isFootStationary())
-         covariance = defaultCovariance.getDoubleValue();
-      else
-         covariance = Double.POSITIVE_INFINITY;
-
-      if (covariance < currentCovariance.getDoubleValue())
-         fixAnklePositionInWorld();
-      currentCovariance.set(covariance);
    }
-   
+
    public void packBodyPosition(FramePoint bodyPositionToPack)
    {
       bodyPositionThroughStanceLeg.getFramePoint(bodyPositionToPack);
