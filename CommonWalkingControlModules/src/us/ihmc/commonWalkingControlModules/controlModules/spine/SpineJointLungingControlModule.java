@@ -67,25 +67,17 @@ public class SpineJointLungingControlModule implements SpineLungingControlModule
       this.processedSensors = processedSensors;
       this.controlDT = controlDT;
       this.chest = chest;
+      parentRegistry.addChild(registry);
       
       populateYoVariables();
       populateControllers();
       setDesireds();
       setGains();
-      
-      for (SpineJointName spineJointName : SpineJointName.values())
-      {
-         spinePitchErrorList.add(new DoubleYoVariable(spineJointName + "Error", registry));
-      }
-      
-      
-      parentRegistry.addChild(registry);
-
-//      actualAngles = processedSensors.getYoSpineJointPositions();
-//      actualAngleVelocities = processedSensors.getYoSpineJointVelocities();
    }
    
-
+   /**
+    * Old. Do not use.
+    */
    public void doSpineControl(SpineTorques spineTorquesToPack)
    {
       for (SpineJointName spineJointName : SpineJointName.values())
@@ -108,13 +100,15 @@ public class SpineJointLungingControlModule implements SpineLungingControlModule
     * @param deltaCMP: The normalized vector from the desired ICP to the current ICP (in the x-y plane), scaled by the CMP radius corresponding to the maximum hip torque
     * @param spineTorquesToPack: The spine pitch and roll torques corresponding to a 90 degree rotation of deltaCMP about the z-axis
     */
-   public void setPitchRollSpineTorquesFromDeltaCMP(Vector2d deltaCMP, SpineTorques spineTorquesToPack)
+   public void setPitchRollSpineTorquesFromDeltaCMP(Vector2d deltaCMP)
    {
       double mass = processedSensors.getTotalMass();
-      double gravity = processedSensors.getGravityInWorldFrame().length();
+      double gravity = processedSensors.getGravityInWorldFrame().getZ();
 
-      spineTorquesToPack.setTorque(SpineJointName.SPINE_PITCH, mass * gravity * deltaCMP.getX());
-      spineTorquesToPack.setTorque(SpineJointName.SPINE_ROLL, mass * gravity * -deltaCMP.getY());
+//      this.spineTorques.setTorque(SpineJointName.SPINE_PITCH, mass * gravity * deltaCMP.getX());
+//      this.spineTorques.setTorque(SpineJointName.SPINE_ROLL, mass * gravity * - deltaCMP.getY());
+      this.spineTorques.setTorque(SpineJointName.SPINE_ROLL, mass * gravity * - deltaCMP.getX());
+      this.spineTorques.setTorque(SpineJointName.SPINE_PITCH, mass * gravity * - deltaCMP.getY());
    }
    
 
@@ -125,6 +119,8 @@ public class SpineJointLungingControlModule implements SpineLungingControlModule
          String name = "desired" + spineJointName.getCamelCaseNameForMiddleOfExpression();
          DoubleYoVariable variable = new DoubleYoVariable(name, registry);
          desiredAngles.put(spineJointName, variable);
+         
+         spinePitchErrorList.add(new DoubleYoVariable(spineJointName + "Error", registry));
       }
    }
 
@@ -132,8 +128,8 @@ public class SpineJointLungingControlModule implements SpineLungingControlModule
    {
       for (SpineJointName spineJointName : SpineJointName.values())
       {
-         spineControllers.put(spineJointName, new PIDController(spineJointName.getCamelCaseNameForStartOfExpression(), registry));
-         spineJointIDQddControllers.put(spineJointName, new PIDController(spineJointName.getCamelCaseNameForStartOfExpression() + "qddDesired", registry));
+         spineControllers.put(spineJointName, new PIDController(spineJointName.getCamelCaseNameForStartOfExpression() + "ctrl", registry));
+         spineJointIDQddControllers.put(spineJointName, new PIDController(spineJointName.getCamelCaseNameForStartOfExpression() + "qddDesired" + "ctrl", registry));            
       }
    }
 
@@ -177,13 +173,14 @@ public class SpineJointLungingControlModule implements SpineLungingControlModule
       
       setSpineTorquesFromSpineJoints();
    }
-
-   public void setRollPitchGainsToZero()
+   
+   public void setGainsToZero(ArrayList<SpineJointName> spineJointsWithZeroGain)
    {
-      for (SpineJointName spineJoint : SpineJointName.values())
+      for (int index = 0; index < spineJointsWithZeroGain.size(); index ++)
       {
-         spineJointIDQddControllers.get(spineJoint).setProportionalGain(0.0);
-         spineJointIDQddControllers.get(spineJoint).setDerivativeGain(0.0);
+         SpineJointName spineJointName = spineJointsWithZeroGain.get(index);
+         spineJointIDQddControllers.get(spineJointName).setProportionalGain(0.0);
+         spineJointIDQddControllers.get(spineJointName).setDerivativeGain(0.0);
       }
    }
    
