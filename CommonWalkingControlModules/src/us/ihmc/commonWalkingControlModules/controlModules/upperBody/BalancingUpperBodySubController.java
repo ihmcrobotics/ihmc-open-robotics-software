@@ -11,14 +11,15 @@ import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.UpperB
 import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.NeckJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.NeckTorques;
-import us.ihmc.commonWalkingControlModules.partNamesAndTorques.SpineJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.UpperBodyTorques;
 import us.ihmc.commonWalkingControlModules.sensors.ProcessedSensorsInterface;
 import us.ihmc.utilities.containers.ContainerTools;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
+import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.RigidBody;
+import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.utilities.screwTheory.Wrench;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
@@ -71,6 +72,9 @@ public class BalancingUpperBodySubController implements UpperBodySubController
    private final YoFramePoint centerOfMassPosition = new YoFramePoint("comGraphic", "", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector lungeAxisGraphic = new YoFrameVector("lungeAxisGraphic", "", ReferenceFrame.getWorldFrame(), registry);
 
+   private final DoubleYoVariable chestAngularVelocity = new DoubleYoVariable("chestAngularVelocity", registry);
+   private final DoubleYoVariable chestAngularAcceleration = new DoubleYoVariable("chestAngularAcceleration", registry);
+   
    private final BooleanYoVariable forceControllerIntoState = new BooleanYoVariable("force" + name + "IntoState", registry);
    private final EnumYoVariable<BalancingUpperBodySubControllerState> forcedControllerState = new EnumYoVariable<BalancingUpperBodySubControllerState>("forced"
          + name + "State", registry, BalancingUpperBodySubControllerState.class);
@@ -145,7 +149,7 @@ public class BalancingUpperBodySubController implements UpperBodySubController
       State icpRecoverDecelerateState = new ICPRecoverDecelerateState();
 
       StateTransitionCondition isICPOutsideLungeRadius = new IsICPOutsideLungeRadiusCondition();
-      StateTransitionCondition doWeNeedToDecelerate = new DoWeNeedToSlowDownDecelerate();
+      StateTransitionCondition doWeNeedToDecelerate = new DoWeNeedToDecelerate();
       StateTransitionCondition isBodyAngularVelocityZero = new IsBodyAngularVelocityZeroCondition(1e-2);
 
       StateTransition toICPRecoverAccelerate = new StateTransition(icpRecoverAccelerateState.getStateEnum(), isICPOutsideLungeRadius);
@@ -283,11 +287,9 @@ public class BalancingUpperBodySubController implements UpperBodySubController
       }
    }
 
-   private class DoWeNeedToSlowDownDecelerate implements StateTransitionCondition
+   private class DoWeNeedToDecelerate implements StateTransitionCondition
    {
-      private double angularVelocity;
-      private double angularAcceleration;
-
+     
       public boolean checkCondition()
       {
          updateAngularVelocityAndAcceleration();
@@ -299,7 +301,14 @@ public class BalancingUpperBodySubController implements UpperBodySubController
 
       private void updateAngularVelocityAndAcceleration()
       {
-         //TODO implement
+         // TODO check if this is okay.
+         FrameVector chestAngularVelocityVector = processedSensors.getChestAngularVelocityInChestFrame();
+         chestAngularVelocityVector.changeFrame(ReferenceFrame.getWorldFrame());
+         chestAngularVelocity.set(chestAngularVelocityVector.length());
+         
+         // TODO fix this bullshit.
+         SpatialAccelerationVector chestAccelerationVector = processedSensors.getAccelerationOfPelvisWithRespectToWorld();
+         chestAngularAcceleration.set(chestAccelerationVector.getAngularPartCopy().length());
       }
 
       private boolean doWeNeedToSlowDownBecauseOfAngleLimit()
