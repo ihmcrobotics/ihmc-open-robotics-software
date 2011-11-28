@@ -193,6 +193,31 @@ public class SpineJointLungingControlModule implements SpineLungingControlModule
    {
       spineTorquesToPack.setTorques(this.spineTorques.getTorquesCopy());
    }
+
+   public void scaleGainsBasedOnLungeAxis(Vector2d lungeAxis)
+   {
+      lungeAxis.absolute();
+      lungeAxis.normalize();
+
+      // x
+      double scaleFactor = lungeAxis.getX(); 
+      SpineJointName spineJointName = SpineJointName.SPINE_PITCH;
+      scalePDGainsForIDController(scaleFactor, spineJointName);
+
+      // y
+      scaleFactor = lungeAxis.getY(); 
+      spineJointName = SpineJointName.SPINE_ROLL;
+      scalePDGainsForIDController(scaleFactor, spineJointName);
+   }
+
+   private void scalePDGainsForIDController(double scaleFactor, SpineJointName spineJointName)
+   {
+      double proportionalGain = spineJointIDQddControllers.get(spineJointName).getProportionalGain();
+      spineJointIDQddControllers.get(spineJointName).setProportionalGain(proportionalGain * scaleFactor);
+      
+      double derivativeGain = spineJointIDQddControllers.get(spineJointName).getDerivativeGain();
+      spineJointIDQddControllers.get(spineJointName).setDerivativeGain(derivativeGain * scaleFactor);
+   }
    
    private void setDesiredAccelerationOnSpineJoints()
    {

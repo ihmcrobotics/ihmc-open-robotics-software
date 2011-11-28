@@ -202,26 +202,20 @@ public class BalancingUpperBodySubController implements UpperBodySubController
 
       public void doAction()
       {
-         // Wrench works best since this minimizes the unwanted rotations of the upperbody
+         // Wrench works best since this minimizes the unwanted rotations (yaw) of the upper body
 
+//         wrenchOnPelvis = new Wrench(pelvisFrame, ReferenceFrame.getWorldFrame(), wrenchOnPelvisLinearPart, wrenchOnPelvisAngularPart);
+//         wrenchOnPelvis.changeFrame(pelvisFrame);
+         
+         
          wrenchOnPelvis = new Wrench(pelvisFrame, pelvisFrame, wrenchOnPelvisLinearPart, wrenchOnPelvisAngularPart);
-
+         
          storeWrenchCopyAsYoVariable(wrenchOnPelvis);
 
          spineControlModule.setWrench(wrenchOnPelvis);
          spineControlModule.doMaintainDesiredChestOrientation();
 
-         // based on LIPM implementation
-         //         Vector2d hipControl = new Vector2d(lungeAxis.getFrameVector2dCopy().getVector());
-         //         hipControl.normalize();
-         //         hipControl.scale(maxHipTorque.getDoubleValue() / (robotMass * gravity));
-         //         spineControlModule.setPitchRollSpineTorquesFromDeltaCMP(hipControl);
       }
-
-      //      public double getCMPDistance(double hipTorque)
-      //      {
-      //         return hipTorque / (robotMass * gravity);      
-      //      }
 
       private void storeWrenchCopyAsYoVariable(Wrench wrench)
       {
@@ -232,18 +226,19 @@ public class BalancingUpperBodySubController implements UpperBodySubController
       public void doTransitionIntoAction()
       {
          setLungeDirectionBasedOnIcp();
+         // scaling
+         spineControlModule.scaleGainsBasedOnLungeAxis(lungeAxis.getFrameVector2dCopy().getVector());
 
-         ArrayList<SpineJointName> spineJointsWithZeroGain = new ArrayList<SpineJointName>();
-         spineJointsWithZeroGain.add(SpineJointName.SPINE_ROLL);
-         spineJointsWithZeroGain.add(SpineJointName.SPINE_PITCH);
-
+         // setting to zero
+//         ArrayList<SpineJointName> spineJointsWithZeroGain = new ArrayList<SpineJointName>();
+//         spineJointsWithZeroGain.add(SpineJointName.SPINE_ROLL);
+//         spineJointsWithZeroGain.add(SpineJointName.SPINE_PITCH);
+//         spineControlModule.setGainsToZero(spineJointsWithZeroGain);
+         
          pelvisFrame = pelvis.getBodyFixedFrame();
 
          wrenchOnPelvisAngularPart = new Vector3d(lungeAxis.getX(), lungeAxis.getY(), 0.0);
-         //         wrenchOnPelvisAngularPart = new Vector3d( - lungeDirection.getY(), 0.0, 0.0);//lungeDirection.getX(), 0.0);
          wrenchOnPelvisAngularPart.scale(maxHipTorque.getDoubleValue());
-         //         wrenchOnPelvisAngularPart.negate();
-
          wrenchOnPelvisLinearPart = new Vector3d();
 
       }
@@ -251,6 +246,7 @@ public class BalancingUpperBodySubController implements UpperBodySubController
       public void doTransitionOutOfAction()
       {
          setWrenchOnChestToZero(wrenchOnPelvis);
+         storeWrenchCopyAsYoVariable(wrenchOnPelvis);
          spineControlModule.setWrench(wrenchOnPelvis);
          spineControlModule.setGains(); // may not be needed
       }
