@@ -72,7 +72,7 @@ public class BalancingUpperBodySubController implements UpperBodySubController
    private final double robotMass;
    private final double gravity;
 
-   private final DoubleYoVariable stopLungingICPPosition = new DoubleYoVariable("stopLungingRadius", registry);
+   private final DoubleYoVariable stopLungingICPRadius = new DoubleYoVariable("stopLungingRadius", registry);
    private final DoubleYoVariable maxAngle = new DoubleYoVariable("maxAngle", registry);
    private final DoubleYoVariable maxHipTorque = new DoubleYoVariable("maxHipTorque", registry);
 
@@ -344,15 +344,13 @@ public class BalancingUpperBodySubController implements UpperBodySubController
       {
          ReferenceFrame midFeetZUpFrame = referenceFrames.getMidFeetZUpFrame();
          
-         //Compute Current Location of CMP based on the applied spine and lower-body torques
+         //Compute Current Location of CMP based on the ground reaction forces
          FramePoint2d cmpCurrent = processedSensors.getCentroidalMomentPivotInFrame(midFeetZUpFrame).toFramePoint2d();
-//         FramePoint2d cmpCurrent = new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.0, 0.0);  //TODO: Need to compute/get actual CMP
          
-         //Compute the time required to bring the upper-body rotation to zero, in response to a constant torque (MaxHipTorque) for an assumed Moment of Inertia (Projected about lunge axis)
+         //Compute the elapsed time required to bring the chest rotation to zero, given the current angular velocity and angular acceleration of the chest.
          double elapsedTimeToStop = chestAngularVelocity.getDoubleValue() / chestAngularAcceleration.getDoubleValue();
          
-         //Predict where the ICP will wind be at t = timeCurrent + elapsedTimeToStop, in response to a constant CMP location.
-         //(i.e., where will the ICP be located after the time for which it takes to slow down the upper-body?)
+         //Predict where the ICP will be at the time the chest comes to rest, in response to the current CMP location (WHICH IS ASSUMED TO BE CONSTANT IN THE PREDICITION).
          double gravity = processedSensors.getGravityInWorldFrame().length();
          double CoMHeight = processedSensors.getCenterOfMassPositionInFrame(ReferenceFrame.getWorldFrame()).getZ();
          double omega0 = Math.sqrt( gravity / CoMHeight );  // Natural Frequency of LIPM
@@ -360,21 +358,29 @@ public class BalancingUpperBodySubController implements UpperBodySubController
          //Predict ICP location: icp(timeCurrent + elapsedTimeToStop) = cmp(timeCurrent) + [ icp(timeCurrent) - cmp(timeCurrent) ] * exp(omega0 * elapsedTimeToStop)
          double deltaTPrime = omega0 * elapsedTimeToStop;
          
-         //Get Current ICP Location
+         //Current ICP Location
          FramePoint2d icpCurrent = couplingRegistry.getCapturePointInFrame(midFeetZUpFrame).toFramePoint2d();
-         FramePoint2d icpAfterElapsedTimeToStop = icpCurrent;
-         icpAfterElapsedTimeToStop.sub(cmpCurrent);
-         icpAfterElapsedTimeToStop.scale(Math.exp(deltaTPrime));
-         icpAfterElapsedTimeToStop.add(cmpCurrent);
          
-         Vector2d vectorFromDesiredToPredictedICPAfterElapsedTimeToStop = new Vector2d(icpAfterElapsedTimeToStop.getX(), icpAfterElapsedTimeToStop.getY()); //TODO: The desired ICP is not necessarily at (0,0)!
+         //Desired ICP Location (Centered Between Feet)
+         FramePoint2d icpDesired = new FramePoint2d(midFeetZUpFrame, 0.0, 0.0);
          
+         //Predicted ICP Location at timeToStop if we decelerate now
+         FramePoint2d icpPredictedAtTimeToStop = icpCurrent;
+         icpPredictedAtTimeToStop.sub(cmpCurrent);
+         icpPredictedAtTimeToStop.scale(Math.exp(deltaTPrime));
+         icpPredictedAtTimeToStop.add(cmpCurrent);
+         
+         //Vector from desired to predicted ICP (if this is zero, then we should start to decelerate now)
+         FrameVector2d vectorFromDesiredToPredictedICP = new FrameVector2d(icpDesired, icpPredictedAtTimeToStop);
+
          //Get unit vector along initial lunge direction (LungeAxis is already normalized)
          FrameVector2d initialICPDirection = new FrameVector2d(lungeAxis.getFrameVector2dCopy());
-         
-         // Transition to IcpRecoverDecelerate when the component of predicted ICP along the initial lunge direction crosses zero
-         // Use an inequality check to eliminate the need for an epsilon
-         boolean ret = vectorFromDesiredToPredictedICPAfterElapsedTimeToStop.dot(initialICPDirection.getVectorCopy()) < stopLungingICPPosition.getDoubleValue();
+
+//         double lengthOfVectorFromDesiredToPredictedICPProjectedAlongInitialICPDirection = vectorFromDesiredToPredictedICP.dot(initialICPDirection);
+//         
+//         // Transition to IcpRecoverDecelerate when the component of predicted ICP along the initial lunge direction crosses zero
+//         // Use an inequality check to eliminate the need for an epsilon
+//         boolean ret =  lengthOfVectorFromDesiredToPredictedICPProjectedAlongInitialICPDirection < stopLungingICPRadius.getDoubleValue();
          
 //         return ret;
            return false;
@@ -476,7 +482,7 @@ public class BalancingUpperBodySubController implements UpperBodySubController
 
    private void setParameters()
    {
-      stopLungingICPPosition.set(0.0);
+      stopLungingICPRadius.set(0.0);
       maxAngle.set(Math.PI / 2.0);
       forcedControllerState.set(BalancingUpperBodySubControllerState.ICP_REC_ACC);
    }
