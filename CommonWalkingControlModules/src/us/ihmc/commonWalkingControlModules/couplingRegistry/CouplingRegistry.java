@@ -52,4 +52,7 @@ public interface CouplingRegistry
    public abstract void setDesiredCoP(FramePoint2d desiredCoP);
    public abstract FramePoint2d getDesiredCoP();
 
+   public abstract void setIsLunging(boolean isLunging);
+   public abstract boolean getIsLunging();
+   
 }
