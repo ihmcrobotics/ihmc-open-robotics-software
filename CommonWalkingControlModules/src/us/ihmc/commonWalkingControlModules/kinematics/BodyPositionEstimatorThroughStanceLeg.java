@@ -109,6 +109,7 @@ public class BodyPositionEstimatorThroughStanceLeg implements BodyPositionEstima
    private void resetAnklePositionInWorld()
    {
       filteredAnklePositionFix.reset();
+      filteredAnklePositionFix.update();
    }
 
    public void packCovariance(Tuple3d covarianceToPack)
