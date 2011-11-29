@@ -6,7 +6,6 @@ import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenc
 import us.ihmc.commonWalkingControlModules.sensors.LegToTrustForVelocityReadOnly;
 import us.ihmc.commonWalkingControlModules.sensors.ProcessedSensorsInterface;
 import us.ihmc.robotSide.RobotSide;
-import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -14,6 +13,8 @@ import us.ihmc.utilities.screwTheory.Twist;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoFramePoint;
+import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoVariable;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 
 public class BodyPositionEstimatorThroughStanceLeg implements BodyPositionEstimator
@@ -26,6 +27,8 @@ public class BodyPositionEstimatorThroughStanceLeg implements BodyPositionEstima
    private final LegToTrustForVelocityReadOnly legToTrustForVelocity;
    private final FootTwistCalculator footTwistCalculator;
    private final YoFramePoint anklePositionFix;
+   private final DoubleYoVariable alphaAnklePositionFix;
+   private final AlphaFilteredYoFramePoint filteredAnklePositionFix;
    private final YoFramePoint bodyPositionThroughStanceLeg;
    private final DoubleYoVariable defaultCovariance;
    private final DoubleYoVariable currentCovariance;
@@ -35,7 +38,7 @@ public class BodyPositionEstimatorThroughStanceLeg implements BodyPositionEstima
    private final DoubleYoVariable footLinearVelocityMagnitude;
    private final double ankleHeight;
 
-   public BodyPositionEstimatorThroughStanceLeg(RobotSide robotSide, ProcessedSensorsInterface processedSensors, LegToTrustForVelocityReadOnly legToTrustForVelocity, CommonWalkingReferenceFrames referenceFrames, double defaultCovariance, double ankleHeight, double footSlippingAngularVelocityLimit, double footSlippingLinearVelocityLimit, YoVariableRegistry parentRegistry)
+   public BodyPositionEstimatorThroughStanceLeg(RobotSide robotSide, ProcessedSensorsInterface processedSensors, LegToTrustForVelocityReadOnly legToTrustForVelocity, CommonWalkingReferenceFrames referenceFrames, double defaultCovariance, double ankleHeight, double footSlippingAngularVelocityLimit, double footSlippingLinearVelocityLimit, double anklePositionFixBreakFrequencyHertz, double controlDT, YoVariableRegistry parentRegistry)
    {
       this.name = robotSide + getClass().getSimpleName();
       this.registry = new YoVariableRegistry(name);
@@ -44,6 +47,8 @@ public class BodyPositionEstimatorThroughStanceLeg implements BodyPositionEstima
       this.legToTrustForVelocity = legToTrustForVelocity;
       this.footTwistCalculator = new FootTwistCalculator(robotSide, processedSensors);
       this.anklePositionFix = new YoFramePoint("anklePositionFix", "", world, registry);
+      this.alphaAnklePositionFix = new DoubleYoVariable("alphaPositionFix", registry);
+      this.filteredAnklePositionFix = AlphaFilteredYoFramePoint.createAlphaFilteredYoFramePoint("filteredAnklePositionFix", "", registry, alphaAnklePositionFix, anklePositionFix);
       this.bodyPositionThroughStanceLeg = new YoFramePoint("bodyPositionThrough" + robotSide.getCamelCaseNameForMiddleOfExpression() + "StanceLeg", "", world, registry);
       this.defaultCovariance = new DoubleYoVariable("bodyPositionThrough" + robotSide.getCamelCaseNameForMiddleOfExpression() + "StanceLegDefaultCovariance", registry);
       this.currentCovariance = new DoubleYoVariable(robotSide.getCamelCaseNameForStartOfExpression() + "PositionThroughStanceLegCurrentCovariance", registry);
@@ -51,6 +56,7 @@ public class BodyPositionEstimatorThroughStanceLeg implements BodyPositionEstima
       this.footSlippingLinearVelocityLimit = new DoubleYoVariable("footSlippingLinearVelocityLimit", registry);
       this.footAngularVelocityMagnitude = new DoubleYoVariable(robotSide.getCamelCaseNameForStartOfExpression() + "FootAngularVelocityMagnitude", registry);
       this.footLinearVelocityMagnitude = new DoubleYoVariable(robotSide.getCamelCaseNameForStartOfExpression() + "FootLinearVelocityMagnitude", registry);
+      alphaAnklePositionFix.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequency(anklePositionFixBreakFrequencyHertz, controlDT));
       
       this.defaultCovariance.set(defaultCovariance);
       this.footSlippingAngularVelocityLimit.set(footSlippingAngularVelocityLimit);
@@ -66,20 +72,23 @@ public class BodyPositionEstimatorThroughStanceLeg implements BodyPositionEstima
    {     
       double covariance;
       if (this.legToTrustForVelocity.isLegTrustedForVelocity(robotSide) && isFootStationary())
+      {
+         updateAnklePositionInWorld();
          covariance = defaultCovariance.getDoubleValue();
+      }
       else
          covariance = Double.POSITIVE_INFINITY;
       
       double epsilon = 1e-9;
       if (covariance < (currentCovariance.getDoubleValue() - epsilon))
-         fixAnklePositionInWorld();
+         resetAnklePositionInWorld();
       currentCovariance.set(covariance);
       
       tempBodyPosition.setToZero(referenceFrames.getIMUFrame());
       tempBodyPosition.changeFrame(referenceFrames.getAnkleZUpFrame(robotSide));
       tempBodyPositionVector.setAndChangeFrame(tempBodyPosition);
       tempBodyPositionVector.changeFrame(world);
-      bodyPositionThroughStanceLeg.set(anklePositionFix);
+      bodyPositionThroughStanceLeg.set(filteredAnklePositionFix);
       bodyPositionThroughStanceLeg.add(tempBodyPositionVector);
    }
 
@@ -88,12 +97,18 @@ public class BodyPositionEstimatorThroughStanceLeg implements BodyPositionEstima
       bodyPositionThroughStanceLeg.getFramePoint(bodyPositionToPack);
    }
    
-   private void fixAnklePositionInWorld()
+   private void updateAnklePositionInWorld()
    {
       FramePoint ankle = new FramePoint(referenceFrames.getAnkleZUpFrame(robotSide));
       ankle.changeFrame(world);
       ankle.setZ(ankleHeight);
       anklePositionFix.set(ankle);
+      filteredAnklePositionFix.update();
+   }
+   
+   private void resetAnklePositionInWorld()
+   {
+      filteredAnklePositionFix.reset();
    }
 
    public void packCovariance(Tuple3d covarianceToPack)
