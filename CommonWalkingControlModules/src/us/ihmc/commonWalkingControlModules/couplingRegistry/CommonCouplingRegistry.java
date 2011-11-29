@@ -42,6 +42,8 @@ public class CommonCouplingRegistry implements CouplingRegistry
    private CommonWalkingReferenceFrames referenceFrames;
 
    private Wrench upperBodyWrench;
+   
+   private boolean isLunging;
 
 
    public CommonCouplingRegistry(CommonWalkingReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons, YoVariableRegistry parentRegistry)
@@ -183,6 +185,16 @@ public class CommonCouplingRegistry implements CouplingRegistry
    public FramePoint2d getDesiredCoP()
    {
       return desiredCoP.getFramePoint2dCopy();
+   }
+   
+   public void setIsLunging(boolean isLunging)
+   {
+      this.isLunging = isLunging;
+   }
+   
+   public boolean getIsLunging()
+   {
+      return this.isLunging;
    }
 
 }
