@@ -256,8 +256,8 @@ public class InverseDynamicsCalculatorTest
       inputWrench.getExpressedInFrame().checkReferenceFrameMatch(outputWrench.getExpressedInFrame());
 
       double epsilon = 1e-12; //3;
-      JUnitTools.assertVector3dEquals(inputWrench.getAngularPartCopy(), outputWrench.getAngularPartCopy(), epsilon);
-      JUnitTools.assertVector3dEquals(inputWrench.getLinearPartCopy(), outputWrench.getLinearPartCopy(), epsilon);
+      JUnitTools.assertTuple3dEquals(inputWrench.getAngularPartCopy(), outputWrench.getAngularPartCopy(), epsilon);
+      JUnitTools.assertTuple3dEquals(inputWrench.getLinearPartCopy(), outputWrench.getLinearPartCopy(), epsilon);
    }
    
    private void copyTorques(HashMap<RevoluteJoint, PinJoint> jointMap)

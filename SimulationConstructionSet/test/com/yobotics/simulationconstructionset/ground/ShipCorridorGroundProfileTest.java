@@ -76,7 +76,7 @@ public class ShipCorridorGroundProfileTest
                System.out.println("\n\n");
             }
   
-            JUnitTools.assertVector3dEquals(numericalSurfaceNormal, surfaceNormalFromGroundProfile, epsilon);
+            JUnitTools.assertTuple3dEquals(numericalSurfaceNormal, surfaceNormalFromGroundProfile, epsilon);
          }
 
       }
