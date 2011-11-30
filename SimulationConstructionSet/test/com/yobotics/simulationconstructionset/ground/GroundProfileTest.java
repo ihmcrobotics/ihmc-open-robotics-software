@@ -34,7 +34,7 @@ public abstract class GroundProfileTest
 
          Vector3d surfaceNormalFromGroundProfile = new Vector3d();
          groundProfile.surfaceNormalAt(x, y, z, surfaceNormalFromGroundProfile);
-         JUnitTools.assertVector3dEquals(numericalSurfaceNormal, surfaceNormalFromGroundProfile, epsilon);
+         JUnitTools.assertTuple3dEquals(numericalSurfaceNormal, surfaceNormalFromGroundProfile, epsilon);
       }
    }
 }
