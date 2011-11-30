@@ -2,8 +2,6 @@ package us.ihmc.commonWalkingControlModules.controlModules.velocityViaCoP;
 
 import java.awt.Color;
 
-import javax.vecmath.Point2d;
-
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.DesiredCapturePointToDesiredCoPControlModule;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.GuideLineToDesiredCoPControlModule;
@@ -45,8 +43,8 @@ public class SpeedControllingDesiredCoPCalculator implements DesiredCapturePoint
 
    private final DoubleYoVariable doubleSupportCaptureKp = new DoubleYoVariable("doubleSupportCaptureKp", registry);
    private final DoubleYoVariable singleSupportCaptureKp = new DoubleYoVariable("singleSupportCaptureKp", registry);
-   private final DoubleYoVariable perimeterDistance = new DoubleYoVariable("supportPolygonPerimeterDistance", registry);
-   private final DoubleYoVariable minPerimeterDistance = new DoubleYoVariable("minSupportPolygonPerimeterDistance", registry);
+//   private final DoubleYoVariable perimeterDistance = new DoubleYoVariable("supportPolygonPerimeterDistance", registry);
+//   private final DoubleYoVariable minPerimeterDistance = new DoubleYoVariable("minSupportPolygonPerimeterDistance", registry);
    private final DoubleYoVariable kCaptureGuide = new DoubleYoVariable("kCaptureGuide", "ICP distance to guide line --> position of parallel line", registry);
    private final DoubleYoVariable speedControlXKp = new DoubleYoVariable("speedControlXKp", registry);
    private final DoubleYoVariable velocityError = new DoubleYoVariable("velocityError", registry);
@@ -156,32 +154,32 @@ public class SpeedControllingDesiredCoPCalculator implements DesiredCapturePoint
       desiredCapturePoint.changeFrame(capturePoint.getReferenceFrame());
       
       FrameConvexPolygon2d supportPolygon = bipedSupportPolygons.getSupportPolygonInMidFeetZUp();
-      FrameLineSegment2d closestEdge = supportPolygon.getClosestEdge(capturePoint);
-      perimeterDistance.set(closestEdge.distance(capturePoint));
+//      FrameLineSegment2d closestEdge = supportPolygon.getClosestEdge(capturePoint);
+//      perimeterDistance.set(closestEdge.distance(capturePoint));
+//
+//      // Handle large disturbances where the iCP is outside the support polygon
+//      if (!supportPolygon.isPointInside(capturePoint))
+//      {
+//         FramePoint2d farthestToDesiredCP = determineFarthestPoint(desiredCapturePoint, closestEdge);
+//         FrameLine2d iCPLine = new FrameLine2d(capturePoint, farthestToDesiredCP);
+//         speedControlLineWorld.setFrameLine2d(iCPLine.changeFrameCopy(world));
+//         farthestToDesiredCP.changeFrame(world);
+//
+//         return farthestToDesiredCP;
+//
+//         // TODO: don't like this. The desired that's being passed in is wrong, we shouldn't change anything here.
+//      }
 
-      // Handle large disturbances where the iCP is outside the support polygon
-      if (!supportPolygon.isPointInside(capturePoint))
-      {
-         FramePoint2d farthestToDesiredCP = determineFarthestPoint(desiredCapturePoint, closestEdge);
-         FrameLine2d iCPLine = new FrameLine2d(capturePoint, farthestToDesiredCP);
-         speedControlLineWorld.setFrameLine2d(iCPLine.changeFrameCopy(world));
-         farthestToDesiredCP.changeFrame(world);
-
-         return farthestToDesiredCP;
-
-         // TODO: don't like this. The desired that's being passed in is wrong, we shouldn't change anything here.
-      }
-
-      // Handle large disturbances where the iCP is almost outside the support polygon
-      if (perimeterDistance.getDoubleValue() < minPerimeterDistance.getDoubleValue())
-      {
-         FramePoint2d closestToDesiredCP = determineClosestVertex(desiredCapturePoint, closestEdge);
-         double ratio = (minPerimeterDistance.getDoubleValue() - perimeterDistance.getDoubleValue()) / minPerimeterDistance.getDoubleValue();
-         desiredCapturePoint.setX((1.0 - ratio) * desiredCapturePoint.getX() + ratio * closestToDesiredCP.getX());
-         desiredCapturePoint.setY((1.0 - ratio) * desiredCapturePoint.getY() + ratio * closestToDesiredCP.getY());
-
-         // TODO: don't like this. The desired that's being passed in is wrong, we shouldn't change anything here.
-      }
+//      // Handle large disturbances where the iCP is almost outside the support polygon
+//      if (perimeterDistance.getDoubleValue() < minPerimeterDistance.getDoubleValue())
+//      {
+//         FramePoint2d closestToDesiredCP = determineClosestVertex(desiredCapturePoint, closestEdge);
+//         double ratio = (minPerimeterDistance.getDoubleValue() - perimeterDistance.getDoubleValue()) / minPerimeterDistance.getDoubleValue();
+//         desiredCapturePoint.setX((1.0 - ratio) * desiredCapturePoint.getX() + ratio * closestToDesiredCP.getX());
+//         desiredCapturePoint.setY((1.0 - ratio) * desiredCapturePoint.getY() + ratio * closestToDesiredCP.getY());
+//
+//         // TODO: don't like this. The desired that's being passed in is wrong, we shouldn't change anything here.
+//      }
 
       FramePoint2d centerOfPressureDesired = null;
       
@@ -223,45 +221,45 @@ public class SpeedControllingDesiredCoPCalculator implements DesiredCapturePoint
       return centerOfPressureDesired;
    }
 
-   private FramePoint2d determineFarthestPoint(FramePoint2d testPoint, FrameLineSegment2d lineSegment)
-   {
-      testPoint.checkReferenceFrameMatch(lineSegment);
-
-      Point2d[] endPoints = lineSegment.getLineSegment2d().getEndpoints();
-      double farthestDistance = Double.NEGATIVE_INFINITY;
-      int farthestIndex = -1;
-      for (int i = 0; i < endPoints.length; i++)
-      {
-         double distance = endPoints[i].distance(testPoint.getPoint());
-         if (distance > farthestDistance)
-         {
-            farthestDistance = distance;
-            farthestIndex = i;
-         }
-      }
-
-      return new FramePoint2d(testPoint.getReferenceFrame(), endPoints[farthestIndex]);
-   }
-
-   private FramePoint2d determineClosestVertex(FramePoint2d testPoint, FrameLineSegment2d lineSegment)
-   {
-      testPoint.checkReferenceFrameMatch(lineSegment);
-
-      Point2d[] endPoints = lineSegment.getLineSegment2d().getEndpoints();
-      double closestDistance = Double.POSITIVE_INFINITY;
-      int closestIndex = -1;
-      for (int i = 0; i < endPoints.length; i++)
-      {
-         double distance = endPoints[i].distance(testPoint.getPoint());
-         if (distance < closestDistance)
-         {
-            closestDistance = distance;
-            closestIndex = i;
-         }
-      }
-
-      return new FramePoint2d(testPoint.getReferenceFrame(), endPoints[closestIndex]);
-   }
+//   private FramePoint2d determineFarthestPoint(FramePoint2d testPoint, FrameLineSegment2d lineSegment)
+//   {
+//      testPoint.checkReferenceFrameMatch(lineSegment);
+//
+//      Point2d[] endPoints = lineSegment.getLineSegment2d().getEndpoints();
+//      double farthestDistance = Double.NEGATIVE_INFINITY;
+//      int farthestIndex = -1;
+//      for (int i = 0; i < endPoints.length; i++)
+//      {
+//         double distance = endPoints[i].distance(testPoint.getPoint());
+//         if (distance > farthestDistance)
+//         {
+//            farthestDistance = distance;
+//            farthestIndex = i;
+//         }
+//      }
+//
+//      return new FramePoint2d(testPoint.getReferenceFrame(), endPoints[farthestIndex]);
+//   }
+//
+//   private FramePoint2d determineClosestVertex(FramePoint2d testPoint, FrameLineSegment2d lineSegment)
+//   {
+//      testPoint.checkReferenceFrameMatch(lineSegment);
+//
+//      Point2d[] endPoints = lineSegment.getLineSegment2d().getEndpoints();
+//      double closestDistance = Double.POSITIVE_INFINITY;
+//      int closestIndex = -1;
+//      for (int i = 0; i < endPoints.length; i++)
+//      {
+//         double distance = endPoints[i].distance(testPoint.getPoint());
+//         if (distance < closestDistance)
+//         {
+//            closestDistance = distance;
+//            closestIndex = i;
+//         }
+//      }
+//
+//      return new FramePoint2d(testPoint.getReferenceFrame(), endPoints[closestIndex]);
+//   }
 
    private FrameLine2d createSpeedControlLine(FrameLine2d guideLine, FrameVector2d desiredVelocity)
    {
@@ -342,7 +340,7 @@ public class SpeedControllingDesiredCoPCalculator implements DesiredCapturePoint
       doubleSupportCaptureKp.set(4.0);    // 2.0); //6.0);
       singleSupportCaptureKp.set(4.0);
       kCaptureGuide.set(1.5);    // 2.0);
-      minPerimeterDistance.set(0.04);    // 0.02);
+//      minPerimeterDistance.set(0.04);    // 0.02);
    }
 
    public void setParametersForM2V2()
@@ -351,6 +349,6 @@ public class SpeedControllingDesiredCoPCalculator implements DesiredCapturePoint
       doubleSupportCaptureKp.set(3.5);    // 2.0); //6.0);
       singleSupportCaptureKp.set(2.5);
       kCaptureGuide.set(2.0);
-      minPerimeterDistance.set(0.02);
+//      minPerimeterDistance.set(0.02);
    }
 }
