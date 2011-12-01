@@ -96,7 +96,7 @@ public class AxisAnglePelvisOrientationControlModule implements PelvisOrientatio
 
       if (useFeedforward)
       {
-         FrameVector feedForwardTerm = computeFeedForwardTerm();
+         FrameVector feedForwardTerm = computeFeedForwardTerm(supportLeg);
          ret.add(feedForwardTerm);
       }
 
@@ -138,9 +138,9 @@ public class AxisAnglePelvisOrientationControlModule implements PelvisOrientatio
       return derivativeTerm;
    }
 
-   private FrameVector computeFeedForwardTerm()
+   private FrameVector computeFeedForwardTerm(RobotSide supportLeg)
    {
-      if (couplingRegistry.getUpperBodyWrench() != null)
+      if (supportLeg != null && couplingRegistry.getUpperBodyWrench() != null)
       {
          upperBodyWrench.set(couplingRegistry.getUpperBodyWrench());
          upperBodyWrench.changeFrame(pelvisFrame);

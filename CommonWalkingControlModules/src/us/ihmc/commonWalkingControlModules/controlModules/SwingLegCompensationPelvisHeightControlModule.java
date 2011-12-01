@@ -84,7 +84,7 @@ public class SwingLegCompensationPelvisHeightControlModule implements PelvisHeig
 
    private void doStanceLegCompensation(RobotSide supportLeg)
    {
-      boolean useTotalMass = couplingRegistry.getUpperBodyWrench() == null;
+      boolean useTotalMass = supportLeg == null || couplingRegistry.getUpperBodyWrench() == null;
       double massToCompensate = useTotalMass ? totalMass : legMass;
       double gravityZ = processedSensors.getGravityInWorldFrame().getZ();
       fZStanceLegCompensation.set(-gravityZ * massToCompensate);
@@ -92,7 +92,7 @@ public class SwingLegCompensationPelvisHeightControlModule implements PelvisHeig
    
    private void doSwingLegCompensation(RobotSide supportLeg)
    {
-      boolean doSwingLegCompensation = couplingRegistry.getUpperBodyWrench() != null;
+      boolean doSwingLegCompensation = supportLeg != null && couplingRegistry.getUpperBodyWrench() != null;
       if (doSwingLegCompensation)
       {
          upperBodyWrench.set(couplingRegistry.getUpperBodyWrench());

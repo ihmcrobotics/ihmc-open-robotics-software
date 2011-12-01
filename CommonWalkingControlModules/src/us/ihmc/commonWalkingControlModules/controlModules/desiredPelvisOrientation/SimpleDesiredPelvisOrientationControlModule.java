@@ -9,6 +9,7 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.Orientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
+import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameOrientation;
@@ -25,6 +26,7 @@ public class SimpleDesiredPelvisOrientationControlModule implements DesiredPelvi
    private final DoubleYoVariable pelvisRollPelvisYawScale = new DoubleYoVariable("pelvisYawToRollScale", registry);
 
    private final YoFrameOrientation desiredPelvisOrientation;
+   private final BooleanYoVariable usingExternallySpecifiedOrientation = new BooleanYoVariable("usingExternallySpecifiedOrientation", registry);
 
 
    public SimpleDesiredPelvisOrientationControlModule(CommonWalkingReferenceFrames referenceFrames, DesiredHeadingControlModule desiredHeadingControlModule,
@@ -40,16 +42,20 @@ public class SimpleDesiredPelvisOrientationControlModule implements DesiredPelvi
 
    public Orientation getDesiredPelvisOrientationSingleSupport(RobotSide robotSide)
    {
-      return getDesiredPelvisOrientationScaledKneeToKnee(robotSide);
+      if (!usingExternallySpecifiedOrientation.getBooleanValue())
+         setDesiredPelvisOrientationScaledKneeToKnee(robotSide);
+      return desiredPelvisOrientation.getFrameOrientationCopy();
    }
 
    public Orientation getDesiredPelvisOrientationDoubleSupport()
    {
-      return getDesiredPelvisOrientationScaledKneeToKnee(null);
+      if (!usingExternallySpecifiedOrientation.getBooleanValue())
+         setDesiredPelvisOrientationScaledKneeToKnee(null);
+      return desiredPelvisOrientation.getFrameOrientationCopy();
    }
 
   
-   private Orientation getDesiredPelvisOrientationScaledKneeToKnee(RobotSide supportLeg)
+   private void setDesiredPelvisOrientationScaledKneeToKnee(RobotSide supportLeg)
    {
       ReferenceFrame leftKneeFrame = referenceFrames.getLegJointFrame(RobotSide.LEFT, LegJointName.KNEE);
       ReferenceFrame rightKneeFrame = referenceFrames.getLegJointFrame(RobotSide.RIGHT, LegJointName.KNEE);
@@ -69,8 +75,6 @@ public class SimpleDesiredPelvisOrientationControlModule implements DesiredPelvi
 
 
       desiredPelvisOrientation.setYawPitchRoll(desiredPelvisYaw, userDesiredPelvisPitch.getDoubleValue(), desiredPelvisRoll);
-
-      return desiredPelvisOrientation.getFrameOrientationCopy();
    }
    
    public void setParametersForR2()
@@ -85,5 +89,16 @@ public class SimpleDesiredPelvisOrientationControlModule implements DesiredPelvi
       twistScale.set(0.2);
       userDesiredPelvisPitch.set(0.0);      
       pelvisRollPelvisYawScale.set(0.2);
+   }
+
+   public void setDesiredPelvisOrientation(Orientation orientation)
+   {
+      if (orientation != null)
+      {
+         this.desiredPelvisOrientation.set(orientation);
+         this.usingExternallySpecifiedOrientation.set(true);
+      }
+      else
+         this.usingExternallySpecifiedOrientation.set(false);
    }
 }

@@ -269,8 +269,7 @@ public class CommonStanceSubController implements StanceSubController
 
    public void doTransitionIntoSingleLegBalance(RobotSide supportLeg, BalanceOnOneLegConfiguration currentConfiguration)
    {
-      // TODO Auto-generated method stub
-
+      desiredPelvisOrientationControlModule.setDesiredPelvisOrientation(new Orientation(desiredHeadingControlModule.getDesiredHeadingFrame(), currentConfiguration.getYawPitchRoll()));
    }
 
    public void doTransitionOutOfEarlyStance(RobotSide stanceSide)
@@ -315,7 +314,7 @@ public class CommonStanceSubController implements StanceSubController
 
    public void doTransitionOutOfSingleLegBalance(RobotSide supportLeg)
    {
-      // TODO Auto-generated method stub
+      desiredPelvisOrientationControlModule.setDesiredPelvisOrientation(null);
    }
 
    public boolean isReadyToStartStopWalkingDoubleSupport(RobotSide loadingLeg, double timeInState)
