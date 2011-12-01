@@ -36,7 +36,8 @@ import com.yobotics.simulationconstructionset.util.statemachines.StateTransition
 public abstract class RegularWalkingGaitAbstractController implements RobotController
 {
    private static final long serialVersionUID = 4878248771959357905L;
-
+   public static boolean DO_FORWARD_BACKWARD_SWING_ON_ONE_LEG = false;
+   
    protected final RobotSpecificJointNames robotJointNames;
 
    protected final DoEveryTickSubController doEveryTickSubController;
@@ -640,7 +641,7 @@ public abstract class RegularWalkingGaitAbstractController implements RobotContr
       private final RobotSide supportLeg;
       private final RobotSide swingLeg;
       private final BalanceOnOneLegConfiguration homeConfiguration;
-      private final ArrayList<BalanceOnOneLegConfiguration> randomConfigurations;
+      private final ArrayList<BalanceOnOneLegConfiguration> balanceOnOneLegConfigurations;
       private final BalanceOnOneLegConfiguration backToDoubleSupportConfiguration;
       private BalanceOnOneLegConfiguration currentConfiguration;
       private int randomConfigurationIndex = 0;
@@ -670,10 +671,17 @@ public abstract class RegularWalkingGaitAbstractController implements RobotContr
          this.backToDoubleSupportConfiguration = new BalanceOnOneLegConfiguration(defaultYawPitchRoll, defaultDesiredCapturePoint,
                  backToDoubleSupportDesiredSwingFootPosition, defaultKneeBendSupportLeg);
 
-         int nConfigurations = 10;
-         this.randomConfigurations = BalanceOnOneLegConfiguration.generateABunch(nConfigurations, supportLeg, supportLegAnkleZUpFrame);
-         Random random = new Random(108L);
-         Collections.shuffle(randomConfigurations, random);
+         if (DO_FORWARD_BACKWARD_SWING_ON_ONE_LEG)
+         {
+            this.balanceOnOneLegConfigurations = BalanceOnOneLegConfiguration.generateForwardBackward(supportLeg, supportLegAnkleZUpFrame);
+         }
+         else
+         {
+            int nConfigurations = 10;
+            this.balanceOnOneLegConfigurations = BalanceOnOneLegConfiguration.generateABunch(nConfigurations, supportLeg, supportLegAnkleZUpFrame);
+            Random random = new Random(108L);
+            Collections.shuffle(balanceOnOneLegConfigurations, random);
+         }
       }
 
       public void doAction()
@@ -713,9 +721,9 @@ public abstract class RegularWalkingGaitAbstractController implements RobotContr
             currentConfiguration = homeConfiguration;
          else
          {
-            currentConfiguration = randomConfigurations.get(randomConfigurationIndex);
+            currentConfiguration = balanceOnOneLegConfigurations.get(randomConfigurationIndex);
             randomConfigurationIndex++;
-            randomConfigurationIndex %= randomConfigurations.size();
+            randomConfigurationIndex %= balanceOnOneLegConfigurations.size();
          }
       }
    }

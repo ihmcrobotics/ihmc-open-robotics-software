@@ -47,7 +47,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
    private final DesiredFootstepCalculator desiredFootstepCalculator;
 
    private final CartesianTrajectoryGenerator walkingTrajectoryGenerator;
-   private final SideDependentList<CartesianTrajectoryGenerator> swingInAirTrajectoryGenerator;
+   private final SideDependentList<CartesianTrajectoryGenerator> swingInAirTrajectoryGenerators;
 
    private final SwingLegTorqueControlModule swingLegTorqueControlModule;
 
@@ -125,7 +125,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
            CouplingRegistry couplingRegistry, DesiredFootstepCalculator desiredFootstepCalculator,
            DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry,
            SideDependentList<AnkleVelocityCalculator> ankleVelocityCalculators, SideDependentList<FootSwitchInterface> footSwitches,
-           CartesianTrajectoryGenerator walkingCartesianTrajectoryGenerator, SideDependentList<CartesianTrajectoryGenerator> swingInAirCartesianTrajectoryGenerator,
+           CartesianTrajectoryGenerator walkingCartesianTrajectoryGenerator, SideDependentList<CartesianTrajectoryGenerator> swingInAirCartesianTrajectoryGenerators,
            PreSwingControlModule preSwingControlModule, double controlDT, SwingLegTorqueControlModule swingLegTorqueControlModule)
    {
       this.processedSensors = processedSensors;
@@ -136,7 +136,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       this.ankleVelocityCalculators = new SideDependentList<AnkleVelocityCalculator>(ankleVelocityCalculators);
       this.footSwitches = new SideDependentList<FootSwitchInterface>(footSwitches);
       this.walkingTrajectoryGenerator = walkingCartesianTrajectoryGenerator;
-      this.swingInAirTrajectoryGenerator = swingInAirCartesianTrajectoryGenerator;
+      this.swingInAirTrajectoryGenerators = swingInAirCartesianTrajectoryGenerators;
       this.preSwingControlModule = preSwingControlModule;
       this.controlDT = controlDT;
       
@@ -194,7 +194,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       double footHeight = swingAnkle.getZ();
       double maxFootHeight = 0.02;
 
-      return swingInAirTrajectoryGenerator.get(swingSide).isDone() && (footHeight < maxFootHeight);
+      return swingInAirTrajectoryGenerators.get(swingSide).isDone() && (footHeight < maxFootHeight);
    }
 
    public void doPreSwing(LegTorques legTorquesToPackForSwingLeg, double timeInState)
@@ -260,7 +260,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       else
          swingLegTorqueControlModule.setAnkleGainsDefault(swingSide);
 
-      computeDesiredFootPosVelAcc(swingSide, swingInAirTrajectoryGenerator.get(swingSide), timeInCurrentState);
+      computeDesiredFootPosVelAcc(swingSide, swingInAirTrajectoryGenerators.get(swingSide), timeInCurrentState);
       computeSwingLegTorques(legTorques);
    }
 
@@ -329,7 +329,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
 
       FramePoint finalDesiredPosition = currentConfiguration.getDesiredSwingFootPosition();
 
-      swingInAirTrajectoryGenerator.get(swingLeg).initialize(currentPosition, currentVelocity, finalDesiredPosition);
+      swingInAirTrajectoryGenerators.get(swingLeg).initialize(currentPosition, currentVelocity, finalDesiredPosition);
    }
 
    public void doTransitionOutOfInitialSwing(RobotSide swingSide)
@@ -411,7 +411,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
 
    public boolean isDoneWithSwingInAir(RobotSide swingSide, double timeInState)
    {
-      return swingInAirTrajectoryGenerator.get(swingSide).isDone() && (timeInState > 2.0);
+      return swingInAirTrajectoryGenerators.get(swingSide).isDone() && (timeInState > 2.0);
    }
 
    public void setParametersForR2()
@@ -555,8 +555,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
    }
 
    private void setupSwingFootOrientationTrajectory(Footstep desiredFootStep)
-   {
-      // Why do we have Xf = 1.0 ?
+   { 
       minimumJerkTrajectoryForFootOrientation.setParams(0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, swingOrientationTime.getDoubleValue());
 
       initializeStartOrientationToMatchActual(desiredFootStep.getFootstepSide());

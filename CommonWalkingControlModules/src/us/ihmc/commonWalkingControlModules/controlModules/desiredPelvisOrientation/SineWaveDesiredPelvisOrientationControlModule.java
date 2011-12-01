@@ -74,4 +74,8 @@ public class SineWaveDesiredPelvisOrientationControlModule implements DesiredPel
       rollFreq.set(0.5);
    }
 
+   public void setDesiredPelvisOrientation(Orientation orientation)
+   {
+      // empty
+   }
 }

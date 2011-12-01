@@ -112,7 +112,7 @@ Conditions:
 \end_layout
 
 \begin_layout Standard
-Solution for trajectory coefficients
+Trajectory coefficients:
 \end_layout
 
 \begin_layout Standard
@@ -123,6 +123,31 @@ Solution for trajectory coefficients
 \mathbf{r}_{*} & = & \mathbf{c}_{2}q_{*}^{2}+\left(\mathbf{r}_{1}-\mathbf{r}_{0}-\mathbf{c}_{2}\right)q_{*}+\mathbf{r}_{0}\\
  & = & \mathbf{c}_{2}\left(q_{*}^{2}-q_{*}\right)+\left(\mathbf{r}_{1}-\mathbf{r}_{0}\right)q_{*}+\mathbf{r}_{0}\\
 \mathbf{c}_{2} & = & \frac{\mathbf{r}_{*}-\mathbf{r}_{0}-\left(\mathbf{r}_{1}-\mathbf{r}_{0}\right)q_{*}}{q_{*}^{2}-q_{*}}
+\end{eqnarray*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Velocity:
+\begin_inset Formula 
+\[
+\frac{d\mathbf{r}}{dt}=\frac{d\mathbf{r}}{dq}\frac{dq}{dt}=\left(2\mathbf{c}_{2}q+\mathbf{c}_{1}\right)\frac{df}{dt}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Acceleration:
+\begin_inset Formula 
+\begin{eqnarray*}
+\frac{d^{2}\mathbf{r}}{dt^{2}} & = & \frac{\partial}{\partial t}\left(\frac{d\mathbf{r}}{dt}\right)+\frac{\partial}{\partial q}\left(\frac{d\mathbf{r}}{dt}\right)\frac{dq}{dt}\\
+ & = & \left(2\mathbf{c}_{2}q+\mathbf{c}_{1}\right)\frac{d^{2}f}{dt^{2}}+2\mathbf{c}_{2}\left(\frac{df}{dt}\right)^{2}
 \end{eqnarray*}
 
 \end_inset

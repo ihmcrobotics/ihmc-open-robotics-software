@@ -23,4 +23,9 @@ public class ZeroDesiredPelvisOrientationControlModule implements DesiredPelvisO
    {
       return new Orientation(desiredHeadingFrame);
    }
+
+   public void setDesiredPelvisOrientation(Orientation orientation)
+   {
+      // empty
+   }
 }

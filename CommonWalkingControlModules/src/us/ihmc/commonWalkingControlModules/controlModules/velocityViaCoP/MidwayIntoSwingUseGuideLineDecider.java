@@ -8,7 +8,7 @@ public class MidwayIntoSwingUseGuideLineDecider implements UseGuideLineDecider
    public boolean useGuideLine(SingleSupportCondition singleSupportCondition, double timeInState)
    {
       if (singleSupportCondition == SingleSupportCondition.Loading) return false;
-      if ((singleSupportCondition == SingleSupportCondition.EarlyStance) && (timeInState < 0.2))
+      if ((singleSupportCondition == SingleSupportCondition.EarlyStance) && (timeInState < 0.4))
       {
          return false;
       }

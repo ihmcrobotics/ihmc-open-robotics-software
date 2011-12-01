@@ -8,4 +8,6 @@ public interface DesiredPelvisOrientationControlModule
    public abstract Orientation getDesiredPelvisOrientationSingleSupport(RobotSide robotSide);
 
    public abstract Orientation getDesiredPelvisOrientationDoubleSupport();
+
+   public abstract void setDesiredPelvisOrientation(Orientation orientation);
 }

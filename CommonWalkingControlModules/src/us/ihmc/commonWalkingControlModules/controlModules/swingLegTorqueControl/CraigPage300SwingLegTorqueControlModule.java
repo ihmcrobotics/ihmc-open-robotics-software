@@ -327,10 +327,26 @@ public class CraigPage300SwingLegTorqueControlModule implements SwingLegTorqueCo
    {
       useBodyAcceleration = false;
 
-      masterKpGain.set(50.0);
-      masterKdGain.set(10.0);
+      kpGains.get(LegJointName.HIP_YAW).set(500.0);
+      kdGains.get(LegJointName.HIP_YAW).set(20.0);
+      
+      kpGains.get(LegJointName.HIP_ROLL).set(200.0);
+      kdGains.get(LegJointName.HIP_ROLL).set(20.0);
+      
+      kpGains.get(LegJointName.HIP_PITCH).set(200.0);
+      kdGains.get(LegJointName.HIP_PITCH).set(20.0);
+      
+      kpGains.get(LegJointName.KNEE).set(200.0);
+      kdGains.get(LegJointName.KNEE).set(20.0);
+      
+      kpGains.get(LegJointName.ANKLE_PITCH).set(1000.0);
+      kdGains.get(LegJointName.ANKLE_PITCH).set(20.0);
 
+      kpGains.get(LegJointName.ANKLE_ROLL).set(1000.0);
+      kdGains.get(LegJointName.ANKLE_ROLL).set(20.0);
+      
       softScaleFactor.set(0.1); // 0.25);
+      dampedLeastSquaresAlpha.set(0.05);
    }
 
    private GUISetterUpper createGUISetterUpper()
