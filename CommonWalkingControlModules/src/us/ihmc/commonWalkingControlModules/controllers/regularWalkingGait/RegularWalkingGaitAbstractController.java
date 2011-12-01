@@ -812,7 +812,7 @@ public abstract class RegularWalkingGaitAbstractController implements RobotContr
       {
          public boolean checkCondition()
          {
-            if (swingSubController.isDoneWithSwingInAir(walkingStateMachine.timeInCurrentState()))
+            if (swingSubController.isDoneWithSwingInAir(oneLegBalanceSide.getEnumValue().getOppositeSide(), walkingStateMachine.timeInCurrentState()))
             {
                boolean commandedToSwingAgain = swingInAir.getBooleanValue();
                boolean endingSingleSupport = !balanceOnOneLeg.getBooleanValue() &&!swingSubController.isReadyForDoubleSupport();

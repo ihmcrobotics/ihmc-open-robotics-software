@@ -285,7 +285,7 @@ public class JointSpaceSwingSubController implements SwingSubController
       return (maximumTerminalSwingTimePassed);
    }
 
-   public boolean isDoneWithSwingInAir(double timeInState)
+   public boolean isDoneWithSwingInAir(RobotSide swingSide, double timeInState)
    {
       return jointSpaceTrajectoryGenerator.isDoneWithSwing(timeInState) && timeInState > 2.0;
    }
