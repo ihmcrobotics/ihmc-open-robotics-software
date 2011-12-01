@@ -6,6 +6,7 @@ import javax.vecmath.Point2d;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.DesiredCapturePointCalculator;
+import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.SingleSupportCondition;
 import us.ihmc.commonWalkingControlModules.sensors.ProcessedSensorsInterface;
 import us.ihmc.plotting.Artifact;
 import us.ihmc.robotSide.RobotSide;
@@ -65,7 +66,7 @@ public class TrajectoryDesiredCapturePointCalculator implements DesiredCapturePo
    }
   
    
-   public FramePoint2d computeDesiredCapturePointSingleSupport(RobotSide supportLeg, BipedSupportPolygons bipedSupportPolygons, FramePoint2d capturePoint)
+   public FramePoint2d computeDesiredCapturePointSingleSupport(RobotSide supportLeg, BipedSupportPolygons bipedSupportPolygons, FramePoint2d capturePoint, SingleSupportCondition singleSupportCondition)
    {
       hideCaptureLineAndSwitchLine();
       

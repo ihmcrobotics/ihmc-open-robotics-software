@@ -2,13 +2,14 @@ package us.ihmc.commonWalkingControlModules.controlModules;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.AnkleOverRotationControlModule;
+import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.DesiredCoPControlModule;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.HipDamperControlModule;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.LegStrengthCalculator;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.PelvisHeightControlModule;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.PelvisOrientationControlModule;
-import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.DesiredCoPControlModule;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.VirtualSupportActuatorControlModule;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.VirtualToePointCalculator;
+import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.SingleSupportCondition;
 import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegTorques;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LowerBodyTorques;
@@ -71,14 +72,14 @@ public class BalanceSupportControlModule
     * @param upperBodyWrench TODO
     */
    public void doSingleSupportBalance(LegTorques supportLegTorquesToPack, FrameVector2d desiredVelocity, Orientation desiredPelvisOrientation,
-                                      Wrench upperBodyWrench)
+                                      Wrench upperBodyWrench, SingleSupportCondition singleSupportCondition, double timeInState)
    {
       virtualToePointCalculator.hideVisualizationGraphics();
 
       RobotSide supportLeg = supportLegTorquesToPack.getRobotSide();
 
       // compute desired CoP (=VTP) using velocityViaCoPControlModule. Should be inside the foot polygon already at this point.
-      FramePoint2d vtpInAnklePitchFrame = velocityViaCoPControlModule.computeDesiredCoPSingleSupport(supportLeg, desiredVelocity);
+      FramePoint2d vtpInAnklePitchFrame = velocityViaCoPControlModule.computeDesiredCoPSingleSupport(supportLeg, desiredVelocity, singleSupportCondition, timeInState);
       couplingRegistry.setDesiredCoP(vtpInAnklePitchFrame);
       
       

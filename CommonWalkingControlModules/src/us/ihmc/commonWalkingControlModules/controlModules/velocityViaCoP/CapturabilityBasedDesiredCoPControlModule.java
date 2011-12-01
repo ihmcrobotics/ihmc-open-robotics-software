@@ -7,6 +7,7 @@ import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.DesiredCenter
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.DesiredCoPControlModule;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.GuideLineCalculator;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.GuideLineToDesiredCoPControlModule;
+import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.SingleSupportCondition;
 import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.robotSide.RobotSide;
@@ -18,6 +19,7 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 public class CapturabilityBasedDesiredCoPControlModule implements DesiredCoPControlModule
 {
+   private final UseGuideLineDecider guideLineOrCapturePointSingleSupportDecider;
    private final DesiredCapturePointCalculator desiredCapturePointCalculator;
    private final DesiredCapturePointToDesiredCoPControlModule desiredCapturePointToDesiredCoPControlModule;
    private final GuideLineCalculator guideLineCalculator;
@@ -28,11 +30,13 @@ public class CapturabilityBasedDesiredCoPControlModule implements DesiredCoPCont
    private final CouplingRegistry couplingRegistry;
    private final CommonWalkingReferenceFrames referenceFrames;
 
-   public CapturabilityBasedDesiredCoPControlModule(DesiredCapturePointCalculator desiredCapturePointCalculator,
+   public CapturabilityBasedDesiredCoPControlModule(UseGuideLineDecider guideLineOrCapturePointSingleSupportDecider,
+         DesiredCapturePointCalculator desiredCapturePointCalculator,
            DesiredCapturePointToDesiredCoPControlModule desiredCapturePointToDesiredCoPControlModule, GuideLineCalculator guideLineCalculator,
            GuideLineToDesiredCoPControlModule guideLineToDesiredCoPControlModule, DesiredCenterOfPressureFilter desiredCenterOfPressureFilter,
            CapturabilityBasedDesiredCoPVisualizer visualizer, CouplingRegistry couplingRegistry, CommonWalkingReferenceFrames referenceFrames)
    {
+      this.guideLineOrCapturePointSingleSupportDecider = guideLineOrCapturePointSingleSupportDecider;
       this.desiredCapturePointCalculator = desiredCapturePointCalculator;
       this.desiredCapturePointToDesiredCoPControlModule = desiredCapturePointToDesiredCoPControlModule;
       this.guideLineCalculator = guideLineCalculator;
@@ -43,7 +47,7 @@ public class CapturabilityBasedDesiredCoPControlModule implements DesiredCoPCont
       this.referenceFrames = referenceFrames;
    }
 
-   public FramePoint2d computeDesiredCoPSingleSupport(RobotSide supportLeg, FrameVector2d desiredVelocity)
+   public FramePoint2d computeDesiredCoPSingleSupport(RobotSide supportLeg, FrameVector2d desiredVelocity, SingleSupportCondition singleSupportCondition, double timeInState)
    {
       BipedSupportPolygons bipedSupportPolygons = couplingRegistry.getBipedSupportPolygons();
       ReferenceFrame ankleZUpFrame = referenceFrames.getAnkleZUpFrame(supportLeg);
@@ -51,10 +55,12 @@ public class CapturabilityBasedDesiredCoPControlModule implements DesiredCoPCont
       FramePoint finalDesiredSwingTarget = couplingRegistry.getDesiredFootstep().getFootstepPositionInFrame(ankleZUpFrame);
       FramePoint2d ret = new FramePoint2d(ankleZUpFrame);
       
-      if (desiredVelocityZero(desiredVelocity))
+//      if (desiredVelocityZero(desiredVelocity) || (singleSupportCondition == SingleSupportCondition.StopWalking))
+         if (desiredVelocityZero(desiredVelocity) || (singleSupportCondition == SingleSupportCondition.StopWalking) || 
+               !guideLineOrCapturePointSingleSupportDecider.useGuideLine(singleSupportCondition, timeInState))
       {
          FramePoint2d desiredCapturePoint = desiredCapturePointCalculator.computeDesiredCapturePointSingleSupport(supportLeg, bipedSupportPolygons,
-                                               capturePoint);
+                                               capturePoint, singleSupportCondition);
          visualizer.setDesiredCapturePoint(desiredCapturePoint);
          ret = desiredCapturePointToDesiredCoPControlModule.computeDesiredCoPSingleSupport(supportLeg, bipedSupportPolygons, capturePoint, desiredVelocity, desiredCapturePoint);
       }

@@ -2,8 +2,9 @@ package us.ihmc.commonWalkingControlModules.controlModules.velocityViaCoP;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.CapturePointCenterOfPressureControlModule;
-import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.GuideLineCalculator;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.DesiredCoPControlModule;
+import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.GuideLineCalculator;
+import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.SingleSupportCondition;
 import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
@@ -110,7 +111,7 @@ public class GuideLineDesiredCoPControlModule implements DesiredCoPControlModule
       }
    }
 
-   public FramePoint2d computeDesiredCoPSingleSupport(RobotSide supportLeg, FrameVector2d desiredVelocity)
+   public FramePoint2d computeDesiredCoPSingleSupport(RobotSide supportLeg, FrameVector2d desiredVelocity, SingleSupportCondition singleSupportCondition, double timeInState)
    {
       if (lastTickDoubleSupport.getBooleanValue())
       {

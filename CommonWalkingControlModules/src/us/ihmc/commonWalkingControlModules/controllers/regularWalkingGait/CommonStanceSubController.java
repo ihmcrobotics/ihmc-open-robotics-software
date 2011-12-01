@@ -97,7 +97,7 @@ public class CommonStanceSubController implements StanceSubController
 
    public void doEarlyStance(LegTorques legTorquesToPackForStanceSide, double timeInState)
    {
-      doSingleSupportControl(legTorquesToPackForStanceSide, true);
+      doSingleSupportControl(legTorquesToPackForStanceSide, SingleSupportCondition.EarlyStance, timeInState);
 
       // Here is where we want to add the torque for the kneeExtensionController
       kneeExtensionControlModule.doEarlyStanceKneeExtensionControl(legTorquesToPackForStanceSide);
@@ -106,7 +106,7 @@ public class CommonStanceSubController implements StanceSubController
 
    public void doLateStance(LegTorques legTorquesToPackForStanceSide, double timeInState)
    {
-      doSingleSupportControl(legTorquesToPackForStanceSide, true);
+      doSingleSupportControl(legTorquesToPackForStanceSide, SingleSupportCondition.LateStance, timeInState);
       footOrientationControlModule.addAdditionalTorqueForFootOrientationControl(legTorquesToPackForStanceSide, timeInState);
       kneeExtensionControlModule.doLateStanceKneeExtensionControl(legTorquesToPackForStanceSide);
 
@@ -120,7 +120,7 @@ public class CommonStanceSubController implements StanceSubController
 
 //    doSingleSupportControl(legTorquesToPackForStanceSide);
 
-      doSingleSupportControl(legTorquesToPackForStanceSide, true);
+      doSingleSupportControl(legTorquesToPackForStanceSide, SingleSupportCondition.TerminalStance, timeInState);
 
       footOrientationControlModule.addAdditionalTorqueForFootOrientationControl(legTorquesToPackForStanceSide,
               timeInState + timeSpentInLateStance.getDoubleValue());
@@ -154,7 +154,7 @@ public class CommonStanceSubController implements StanceSubController
 
    public void doLoadingPreSwingC(LegTorques legTorquesToPackForStanceSide, RobotSide loadingLeg, double timeInState)
    {
-      doSingleSupportControl(legTorquesToPackForStanceSide, true);
+      doSingleSupportControl(legTorquesToPackForStanceSide, SingleSupportCondition.Loading, timeInState);
       kneeExtensionControlModule.doLoadingControl(legTorquesToPackForStanceSide);
    }
 
@@ -175,7 +175,7 @@ public class CommonStanceSubController implements StanceSubController
 
    public void doSingleLegBalance(LegTorques legTorquesToPack, RobotSide supportLeg, double timeInCurrentState)
    {
-      doSingleSupportControl(legTorquesToPack, false);
+      doSingleSupportControl(legTorquesToPack, SingleSupportCondition.StopWalking, timeInCurrentState);
    }
 
    public void doTransitionIntoEarlyStance(RobotSide stanceSide)
@@ -404,13 +404,23 @@ public class CommonStanceSubController implements StanceSubController
       return hasCapturePointLeftBaseOfSupport;
    }
 
-   private void doSingleSupportControl(LegTorques legTorquesToPackForStanceSide, boolean walk)
+   private void doSingleSupportControl(LegTorques legTorquesToPackForStanceSide, SingleSupportCondition singleSupportCondition, double timeInState)
    {
-      FrameVector2d desiredVelocity = walk ? desiredVelocityControlModule.getDesiredVelocity() : new FrameVector2d(ReferenceFrame.getWorldFrame());
+      FrameVector2d desiredVelocity;
+      
+      if (singleSupportCondition == SingleSupportCondition.StopWalking)
+      {
+         desiredVelocity = new FrameVector2d(ReferenceFrame.getWorldFrame());
+      }
+      else
+      {
+         desiredVelocity = desiredVelocityControlModule.getDesiredVelocity();
+      }
+
       Orientation desiredPelvisOrientation =
          desiredPelvisOrientationControlModule.getDesiredPelvisOrientationSingleSupport(legTorquesToPackForStanceSide.getRobotSide());
       Wrench upperBodyWrench = couplingRegistry.getUpperBodyWrench();
-      balanceSupportControlModule.doSingleSupportBalance(legTorquesToPackForStanceSide, desiredVelocity, desiredPelvisOrientation, upperBodyWrench);
+      balanceSupportControlModule.doSingleSupportBalance(legTorquesToPackForStanceSide, desiredVelocity, desiredPelvisOrientation, upperBodyWrench, singleSupportCondition, timeInState);
    }
 
    private void doDoubleSupportControl(LowerBodyTorques lowerBodyTorquesToPack, RobotSide loadingLeg, boolean walk)
