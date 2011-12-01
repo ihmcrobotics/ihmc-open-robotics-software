@@ -409,9 +409,9 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       return ((footOnGround && minimumTerminalSwingTimePassed) || maximumTerminalSwingTimePassed || (capturePointInsideFoot && minimumTerminalSwingTimePassed));
    }
 
-   public boolean isDoneWithSwingInAir(double timeInState)
+   public boolean isDoneWithSwingInAir(RobotSide swingSide, double timeInState)
    {
-      return swingInAirTrajectoryGenerator.get(RobotSide.LEFT).isDone() && swingInAirTrajectoryGenerator.get(RobotSide.RIGHT).isDone() && (timeInState > 2.0);
+      return swingInAirTrajectoryGenerator.get(swingSide).isDone() && (timeInState > 2.0);
    }
 
    public void setParametersForR2()
