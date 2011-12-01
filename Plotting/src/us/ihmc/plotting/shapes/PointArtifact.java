@@ -15,7 +15,7 @@ import us.ihmc.plotting.Coordinate;
 public class PointArtifact extends Artifact implements Serializable
 {
    /**
-    * 
+    *
     */
    private static final long serialVersionUID = -1676323503716482842L;
    private Vector<Point2d> _sonarHistory = new Vector<Point2d>();
@@ -23,6 +23,7 @@ public class PointArtifact extends Artifact implements Serializable
    private Color historyColor = Color.blue;
    int _medianFilterSize = 20;
    int _meanFilterSize = 999;
+    private int size = 6;
 
    @SuppressWarnings("unused")
    private long _startTime;
@@ -58,6 +59,11 @@ public class PointArtifact extends Artifact implements Serializable
       {
          _sonarHistory.removeElementAt(0);
       }
+   }
+
+   public void setSize(int size)
+   {
+       this.size = size;
    }
 
    public void setCoordinate(Coordinate coordinate)
@@ -173,12 +179,12 @@ public class PointArtifact extends Artifact implements Serializable
          if (i == (_sonarHistory.size() - 1))
          {
             g.setColor(color);
-            g.fillOval(x, y, 6, 6);
+            g.fillOval(x, y, size, size);
          }
          else
          {
             g.setColor(historyColor);
-            g.fillOval(x, y, 4, 4);
+            g.fillOval(x, y, (int)(size*0.7), (int)(size*0.7));
          }
 
 
@@ -241,12 +247,12 @@ public class PointArtifact extends Artifact implements Serializable
          printWriter.println(coordinate.x + " " + coordinate.y);
       }
    }
-   
+
    public void drawHistory(Graphics g, int Xcenter, int Ycenter, double scaleFactor)
    {
       throw new RuntimeException("Not implemented!");
    }
-   
+
    public void takeHistorySnapshot()
    {
       throw new RuntimeException("Not implemented!");
