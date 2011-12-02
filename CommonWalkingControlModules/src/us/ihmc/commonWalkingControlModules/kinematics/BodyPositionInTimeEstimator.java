@@ -7,6 +7,7 @@ import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.ProcessedSensorsInterface;
 import us.ihmc.robotSide.RobotSide;
+import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FramePose;
@@ -43,7 +44,7 @@ public class BodyPositionInTimeEstimator
    }
    
    
-   public FramePose getPelvisPoseInTime(double t, RobotSide swingFoot)
+   public Pair<FramePose, FrameVector> getPelvisPoseAndPositionInTime(double t, RobotSide swingFoot)
    {
       FramePoint2d currentCoPPosition = couplingRegistry.getDesiredCoP();
       //FramePoint currentCoPPosition = new FramePoint(referenceFrames.getAnkleZUpFrame(swingFoot));
@@ -82,8 +83,15 @@ public class BodyPositionInTimeEstimator
       FramePose pelvisPoseInTime = new FramePose(pelvisFrame);
       pelvisPoseInTime.setPosition(bodyPosition);
       
-      return pelvisPoseInTime;
+      
+      FrameVector pelvisVelocityInTime = new FrameVector(worldFrame, xCoMInTime[1], yCoMInTime[1], 0.0);
+      pelvisVelocityInTime.changeFrame(pelvisFrame);
+      
+      
+      return new Pair<FramePose, FrameVector>(pelvisPoseInTime, pelvisVelocityInTime);
+      
    }
+   
 
    
    private FrameVector getBodyVelocity()

@@ -8,6 +8,7 @@ import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.kinematics.BodyPositionInTimeEstimator;
+import us.ihmc.commonWalkingControlModules.kinematics.DesiredJointVelocityCalculator;
 import us.ihmc.commonWalkingControlModules.kinematics.InverseKinematicsException;
 import us.ihmc.commonWalkingControlModules.kinematics.LegInverseKinematicsCalculator;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointAccelerations;
@@ -18,11 +19,15 @@ import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenc
 import us.ihmc.commonWalkingControlModules.sensors.ProcessedSensorsInterface;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
+import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
+import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.Orientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.screwTheory.Twist;
 
+import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.EnumYoVariable;
 import com.yobotics.simulationconstructionset.IntegerYoVariable;
@@ -34,8 +39,10 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition.GraphicType;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicVector;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameOrientation;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 import com.yobotics.simulationconstructionset.util.splines.QuinticSplineInterpolator;
 
 public class JointSpaceTrajectoryGenerator
@@ -54,6 +61,8 @@ public class JointSpaceTrajectoryGenerator
    private final DoubleYoVariable[] heightOfViaPoints;
 
    private final LegInverseKinematicsCalculator inverseKinematicsCalculator;
+   private final SideDependentList<DesiredJointVelocityCalculator> desiredJointVelocityCalculators;
+
 
    private final CommonWalkingReferenceFrames referenceFrames;
    private final Orientation intermediateOrientation;
@@ -93,9 +102,14 @@ public class JointSpaceTrajectoryGenerator
    private final BodyPositionInTimeEstimator bodyPositionInTimeEstimator;
    
    private BagOfBalls bagOfBalls;
+   private final YoFramePoint estimatedBodyPositionAtEndOfStep;
+   private final YoFrameVector estimatedBodyVelocityAtEndOfStep;
+   private final DoubleYoVariable ikAlpha;
+   private final BooleanYoVariable useEstimatedJointVelocitiesAtEndOfStep;
+   
 
    public JointSpaceTrajectoryGenerator(String name, int maximumNumberOfViaPoints, CommonWalkingReferenceFrames referenceFrames,
-         LegInverseKinematicsCalculator inverseKinematicsCalculator, ProcessedSensorsInterface processedSensors, double controlDT, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
+         LegInverseKinematicsCalculator inverseKinematicsCalculator, SideDependentList<DesiredJointVelocityCalculator> desiredJointVelocityCalculators, ProcessedSensorsInterface processedSensors, double controlDT, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
          BodyPositionInTimeEstimator bodyPositionInTimeEstimator, YoVariableRegistry parentRegistry)
    {
       registry = new YoVariableRegistry(name);
@@ -103,6 +117,7 @@ public class JointSpaceTrajectoryGenerator
       this.numberOfViaPoints = new IntegerYoVariable("numberOfViaPoints", registry);
       this.referenceFrames = referenceFrames;
       this.bodyPositionInTimeEstimator = bodyPositionInTimeEstimator;
+      this.desiredJointVelocityCalculators = desiredJointVelocityCalculators;
       
       hipYawSpline = new QuinticSplineInterpolator("hipYawSpline", 2, 1, registry);
       jointSplines = new QuinticSplineInterpolator[maximumNumberOfViaPoints + 1];
@@ -137,6 +152,10 @@ public class JointSpaceTrajectoryGenerator
       }
 
       desiredFinalLocationInWorldFrame = new YoFramePoint("desiredFinalSwing", "", ReferenceFrame.getWorldFrame(), registry);
+      estimatedBodyPositionAtEndOfStep = new YoFramePoint("estimatedBodyPositionAtEndOfStep", "", ReferenceFrame.getWorldFrame(), registry);
+      estimatedBodyVelocityAtEndOfStep = new YoFrameVector("estimatedBodyVelocityAtEndOfStep", "", ReferenceFrame.getWorldFrame(), registry);
+      
+      ikAlpha = new DoubleYoVariable("ikAlpha", registry);
 
       this.inverseKinematicsCalculator = inverseKinematicsCalculator;
       intermediateOrientation = new Orientation(referenceFrames.getPelvisFrame());
@@ -174,11 +193,15 @@ public class JointSpaceTrajectoryGenerator
       averageFootVelocity = new DoubleYoVariable("averageFootVelocity", registry);
       distancePerViaPoint = new DoubleYoVariable("distancePerViaPoint", registry);
       numberOfIKErrors = new IntegerYoVariable("numberOfIKErrors", registry);
+      useEstimatedJointVelocitiesAtEndOfStep = new BooleanYoVariable("useEstimatedJointVelocitiesAtEndOfStep", registry);
 
       timeToTakeForLanding.set(0.1);
       timeToTakeForTakeOff.set(0.1);
       averageFootVelocity.set(1.0);
       distancePerViaPoint.set(0.15);
+      useEstimatedJointVelocitiesAtEndOfStep.set(true);
+      
+      ikAlpha.set(0.07);
 
       
       parentRegistry.addChild(registry);
@@ -196,9 +219,12 @@ public class JointSpaceTrajectoryGenerator
          
          DynamicGraphicPosition finalDesiredViz = desiredFinalLocationInWorldFrame.createDynamicGraphicPosition("Final Desired Swing", 0.04,
                YoAppearance.Purple(), GraphicType.BALL);
+         
+         DynamicGraphicVector estimatedBodyVelocity = new DynamicGraphicVector("estimated body velocity", estimatedBodyPositionAtEndOfStep, estimatedBodyVelocityAtEndOfStep, YoAppearance.Purple());
 
          artifactList.add(finalDesiredViz.createArtifact());
          dynamicGraphicObjects.add(finalDesiredViz);
+         dynamicGraphicObjects.add(estimatedBodyVelocity);
 
          if (maximumNumberOfViaPoints > 0)
          {
@@ -386,16 +412,32 @@ public class JointSpaceTrajectoryGenerator
       {
          computePointOnSpline(swingSide.getEnumValue(), viaPoints[i].getFramePointCopy(), i + 1, tOfViaPoints[i], timeInSwing, yIn);
       }
-      computePointOnSpline(swingSide.getEnumValue(), finalPositionInPelvisFrame.getFramePointCopy(), numberOfViaPoints.getIntegerValue() + 1,
+      FrameVector upperBodyVelocityAtEndOfStep = computePointOnSpline(swingSide.getEnumValue(), finalPositionInPelvisFrame.getFramePointCopy(), numberOfViaPoints.getIntegerValue() + 1,
             swingDuration.getDoubleValue(), timeInSwing, yIn);
 
       QuinticSplineInterpolator currentInterpolator = jointSplines[numberOfViaPoints.getIntegerValue()];
       currentInterpolator.initialize(t);
+      
+      LegJointVelocities legJointVelocities = new LegJointVelocities(legJointNames, swingSide.getEnumValue());
+      
+      ReferenceFrame footFrame = referenceFrames.getFootFrame(swingSide.getEnumValue());
+      Twist twistOfFootWithRespectToPelvis = new Twist(footFrame, ReferenceFrame.getWorldFrame(), footFrame);
+      upperBodyVelocityAtEndOfStep.changeFrame(ReferenceFrame.getWorldFrame());
+      twistOfFootWithRespectToPelvis.setAngularPart(upperBodyVelocityAtEndOfStep.getVector());
+      
+
+      
+      desiredJointVelocityCalculators.get(swingSide.getEnumValue()).packDesiredJointVelocities(legJointVelocities, twistOfFootWithRespectToPelvis, ikAlpha.getDoubleValue());
+      
 
       for (int j = 1; j < legJointNames.length; j++)
       {
+         if(!useEstimatedJointVelocitiesAtEndOfStep.getBooleanValue())
+         {
+            legJointVelocities.setJointVelocity(legJointNames[j], 0.0);
+         }
          yIn[j - 1][0] = initialJointAngles.get(legJointNames[j]).getDoubleValue();
-         currentInterpolator.determineCoefficients(j - 1, yIn[j - 1], initialJointVelocities.get(legJointNames[j]).getDoubleValue(), 0.0,
+         currentInterpolator.determineCoefficients(j - 1, yIn[j - 1], initialJointVelocities.get(legJointNames[j]).getDoubleValue(), legJointVelocities.getJointVelocity(legJointNames[j]),
                initialJointAccelerations.get(legJointNames[j]).getDoubleValue(), 0.0);
       }
 
@@ -458,9 +500,17 @@ public class JointSpaceTrajectoryGenerator
       
       if (bagOfBalls != null)
       {
-         FramePose bodyFrameInTime = bodyPositionInTimeEstimator.getPelvisPoseInTime(swingDuration.getDoubleValue() - timeInSwing, swingSide);
+         Pair<FramePose, FrameVector> poseAndVelocity = bodyPositionInTimeEstimator.getPelvisPoseAndPositionInTime(swingDuration.getDoubleValue() - timeInSwing, swingSide);
+         FramePose bodyFrameInTime = poseAndVelocity.first();
+         FrameVector bodyVelocityInTime = poseAndVelocity.second();
+         bodyVelocityInTime.changeFrame(ReferenceFrame.getWorldFrame());
+         
          FramePoint bodyPoint = bodyFrameInTime.getPositionInFrame(ReferenceFrame.getWorldFrame());
          bagOfBalls.setBallLoop(bodyPoint);
+         
+         estimatedBodyPositionAtEndOfStep.set(bodyPoint);
+         estimatedBodyVelocityAtEndOfStep.set(bodyVelocityInTime);
+         
 
       }
 
@@ -479,7 +529,7 @@ public class JointSpaceTrajectoryGenerator
       }
    }
 
-   private void computePointOnSpline(RobotSide swingSide, FramePoint point, int i, double tOfPoint, double currentTimeInSwing, double[][] yIn)
+   private FrameVector computePointOnSpline(RobotSide swingSide, FramePoint point, int i, double tOfPoint, double currentTimeInSwing, double[][] yIn)
    {
       double[][] yawResult = new double[1][1];
       hipYawSpline.compute(tOfPoint, 0, yawResult);
@@ -489,7 +539,8 @@ public class JointSpaceTrajectoryGenerator
       
       Transform3D footToPelvis = computeDesiredTransform(referenceFrames.getPelvisFrame(), viaPointInPelvisFrame, intermediateOrientation);
 
-      FramePose pelvisPoseInTime = bodyPositionInTimeEstimator.getPelvisPoseInTime(tOfPoint - currentTimeInSwing, swingSide);
+      Pair<FramePose, FrameVector> bodyAndVelocityInTime = bodyPositionInTimeEstimator.getPelvisPoseAndPositionInTime(tOfPoint - currentTimeInSwing, swingSide);
+      FramePose pelvisPoseInTime = bodyAndVelocityInTime.first();
       Transform3D pelvisTransformInTime = new Transform3D();
       pelvisPoseInTime.getTransform3D(pelvisTransformInTime);
       pelvisTransformInTime.invert();
@@ -509,6 +560,8 @@ public class JointSpaceTrajectoryGenerator
       {
          yIn[j - 1][i] = intermediatePositions.get(swingSide).getJointPosition(legJointNames[j]);
       }
+      
+      return bodyAndVelocityInTime.second();
 
    }
 
