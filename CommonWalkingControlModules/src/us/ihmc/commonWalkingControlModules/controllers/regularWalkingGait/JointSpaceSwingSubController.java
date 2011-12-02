@@ -113,7 +113,7 @@ public class JointSpaceSwingSubController implements SwingSubController
       
       bodyPositionInTimeEstimator = new BodyPositionInTimeEstimator(processedSensors, referenceFrames, couplingRegistry, registry);
 
-      jointSpaceTrajectoryGenerator = new JointSpaceTrajectoryGenerator("jointSpaceTrajectory", 1, referenceFrames, inverseKinematicsCalculator, desiredJointVelocityCalculators, processedSensors, controlDT,
+      jointSpaceTrajectoryGenerator = new JointSpaceTrajectoryGenerator("jointSpaceTrajectory", 2, referenceFrames, inverseKinematicsCalculator, desiredJointVelocityCalculators, processedSensors, controlDT,
             dynamicGraphicObjectsListRegistry, bodyPositionInTimeEstimator, registry);
 
       timeSpentInPreSwing = new DoubleYoVariable("timeSpentInPreSwing", "This is the time spent in Pre swing.", registry);
@@ -165,7 +165,7 @@ public class JointSpaceSwingSubController implements SwingSubController
       passiveHipCollapseTime.set(0.07);
       minimumTerminalSwingDuration.set(0.0);
       maximumTerminalSwingDuration.set(0.05);
-      numberOfViaPointsDuringWalk.set(1);
+      numberOfViaPointsDuringWalk.set(2);
       setEstimatedSwingTimeRemaining(swingDuration.getDoubleValue());
    }
 
