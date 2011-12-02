@@ -66,7 +66,7 @@ public class TrajectoryDesiredCapturePointCalculator implements DesiredCapturePo
    }
   
    
-   public FramePoint2d computeDesiredCapturePointSingleSupport(RobotSide supportLeg, BipedSupportPolygons bipedSupportPolygons, FramePoint2d capturePoint, SingleSupportCondition singleSupportCondition)
+   public FramePoint2d computeDesiredCapturePointSingleSupport(RobotSide supportLeg, BipedSupportPolygons bipedSupportPolygons, FrameVector2d desiredVelocity, SingleSupportCondition singleSupportCondition)
    {
       hideCaptureLineAndSwitchLine();
       

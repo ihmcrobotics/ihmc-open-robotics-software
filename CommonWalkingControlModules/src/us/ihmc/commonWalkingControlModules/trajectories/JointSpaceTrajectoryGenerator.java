@@ -247,6 +247,8 @@ public class JointSpaceTrajectoryGenerator
          LegJointAccelerations currentJointAccelerations, FramePoint desiredFinalPosition, Orientation desiredOrientationIn, double swingDuration,
          int viaPointsToUse)
    {
+      if (viaPointsToUse > maximumNumberOfViaPoints)
+         throw new RuntimeException("viaPointsToUse > maximumNumberOfViaPoints");
 
       this.swingSide.set(swingSide);
       this.swingDuration.set(swingDuration);

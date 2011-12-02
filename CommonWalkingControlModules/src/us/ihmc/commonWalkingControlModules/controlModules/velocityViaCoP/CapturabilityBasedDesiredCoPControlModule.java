@@ -32,9 +32,9 @@ public class CapturabilityBasedDesiredCoPControlModule implements DesiredCoPCont
 
    public CapturabilityBasedDesiredCoPControlModule(UseGuideLineDecider guideLineOrCapturePointSingleSupportDecider,
          DesiredCapturePointCalculator desiredCapturePointCalculator,
-           DesiredCapturePointToDesiredCoPControlModule desiredCapturePointToDesiredCoPControlModule, GuideLineCalculator guideLineCalculator,
-           GuideLineToDesiredCoPControlModule guideLineToDesiredCoPControlModule, DesiredCenterOfPressureFilter desiredCenterOfPressureFilter,
-           CapturabilityBasedDesiredCoPVisualizer visualizer, CouplingRegistry couplingRegistry, CommonWalkingReferenceFrames referenceFrames)
+         DesiredCapturePointToDesiredCoPControlModule desiredCapturePointToDesiredCoPControlModule, GuideLineCalculator guideLineCalculator,
+         GuideLineToDesiredCoPControlModule guideLineToDesiredCoPControlModule, DesiredCenterOfPressureFilter desiredCenterOfPressureFilter,
+         CapturabilityBasedDesiredCoPVisualizer visualizer, CouplingRegistry couplingRegistry, CommonWalkingReferenceFrames referenceFrames)
    {
       this.guideLineOrCapturePointSingleSupportDecider = guideLineOrCapturePointSingleSupportDecider;
       this.desiredCapturePointCalculator = desiredCapturePointCalculator;
@@ -47,29 +47,28 @@ public class CapturabilityBasedDesiredCoPControlModule implements DesiredCoPCont
       this.referenceFrames = referenceFrames;
    }
 
-   public FramePoint2d computeDesiredCoPSingleSupport(RobotSide supportLeg, FrameVector2d desiredVelocity, SingleSupportCondition singleSupportCondition, double timeInState)
+   public FramePoint2d computeDesiredCoPSingleSupport(RobotSide supportLeg, FrameVector2d desiredVelocity, SingleSupportCondition singleSupportCondition,
+         double timeInState)
    {
       BipedSupportPolygons bipedSupportPolygons = couplingRegistry.getBipedSupportPolygons();
       ReferenceFrame ankleZUpFrame = referenceFrames.getAnkleZUpFrame(supportLeg);
       FramePoint2d capturePoint = couplingRegistry.getCapturePointInFrame(ankleZUpFrame).toFramePoint2d();
       FramePoint finalDesiredSwingTarget = couplingRegistry.getDesiredFootstep().getFootstepPositionInFrame(ankleZUpFrame);
       FramePoint2d ret = new FramePoint2d(ankleZUpFrame);
-      
-//      if (desiredVelocityZero(desiredVelocity) || (singleSupportCondition == SingleSupportCondition.StopWalking))
-         if (desiredVelocityZero(desiredVelocity) || (singleSupportCondition == SingleSupportCondition.StopWalking) || 
-               !guideLineOrCapturePointSingleSupportDecider.useGuideLine(singleSupportCondition, timeInState))
-      {
-         FramePoint2d desiredCapturePoint = desiredCapturePointCalculator.computeDesiredCapturePointSingleSupport(supportLeg, bipedSupportPolygons,
-                                               capturePoint, singleSupportCondition);
-         visualizer.setDesiredCapturePoint(desiredCapturePoint);
-         ret = desiredCapturePointToDesiredCoPControlModule.computeDesiredCoPSingleSupport(supportLeg, bipedSupportPolygons, capturePoint, desiredVelocity, desiredCapturePoint);
-      }
-      else
+
+      if (guideLineOrCapturePointSingleSupportDecider.useGuideLine(singleSupportCondition, timeInState, desiredVelocity))
       {
          guideLineCalculator.update(supportLeg, bipedSupportPolygons, capturePoint, finalDesiredSwingTarget, desiredVelocity);
          FrameLineSegment2d guideLine = guideLineCalculator.getGuideLine(supportLeg);
          visualizer.setGuideLine(guideLine);
          ret = guideLineToDesiredCoPControlModule.computeDesiredCoPSingleSupport(supportLeg, bipedSupportPolygons, capturePoint, desiredVelocity, guideLine);
+      } else
+      {
+         FramePoint2d desiredCapturePoint = desiredCapturePointCalculator.computeDesiredCapturePointSingleSupport(supportLeg, bipedSupportPolygons,
+               desiredVelocity, singleSupportCondition);
+         visualizer.setDesiredCapturePoint(desiredCapturePoint);
+         ret = desiredCapturePointToDesiredCoPControlModule.computeDesiredCoPSingleSupport(supportLeg, bipedSupportPolygons, capturePoint, desiredVelocity,
+               desiredCapturePoint);
       }
 
       ret = desiredCenterOfPressureFilter.filter(ret, supportLeg);
@@ -86,17 +85,13 @@ public class CapturabilityBasedDesiredCoPControlModule implements DesiredCoPCont
       FramePoint2d ret = new FramePoint2d(midFeetZUpFrame);
 
       FramePoint2d desiredCapturePoint = desiredCapturePointCalculator.computeDesiredCapturePointDoubleSupport(loadingLeg, bipedSupportPolygons,
-                                            desiredVelocity);
+            desiredVelocity);
       visualizer.setDesiredCapturePoint(desiredCapturePoint);
-      ret = desiredCapturePointToDesiredCoPControlModule.computeDesiredCoPDoubleSupport(bipedSupportPolygons, capturePoint, desiredVelocity, desiredCapturePoint);
+      ret = desiredCapturePointToDesiredCoPControlModule.computeDesiredCoPDoubleSupport(bipedSupportPolygons, capturePoint, desiredVelocity,
+            desiredCapturePoint);
       ret = desiredCenterOfPressureFilter.filter(ret, null);
       visualizer.setDesiredCoP(ret);
 
       return ret;
-   }
-
-   private static boolean desiredVelocityZero(FrameVector2d desiredVelocity)
-   {
-      return desiredVelocity.lengthSquared() == 0.0;
    }
 }
