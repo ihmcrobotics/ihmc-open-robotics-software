@@ -112,6 +112,7 @@ public class JointSpaceSwingSubController implements SwingSubController
 
       
       bodyPositionInTimeEstimator = new BodyPositionInTimeEstimator(processedSensors, referenceFrames, couplingRegistry, registry);
+
       jointSpaceTrajectoryGenerator = new JointSpaceTrajectoryGenerator("jointSpaceTrajectory", 1, referenceFrames, inverseKinematicsCalculator, desiredJointVelocityCalculators, processedSensors, controlDT,
             dynamicGraphicObjectsListRegistry, bodyPositionInTimeEstimator, registry);
 
@@ -119,7 +120,7 @@ public class JointSpaceSwingSubController implements SwingSubController
       timeSpentInInitialSwing = new DoubleYoVariable("timeSpentInInitialSwing", "This is the time spent in initial swing.", registry);
       timeSpentInMidSwing = new DoubleYoVariable("timeSpentInMidSwing", "This is the time spend in mid swing.", registry);
       timeSpentInTerminalSwing = new DoubleYoVariable("timeSpentInTerminalSwing", "This is the time spent in terminal swing.", registry);
-      singleSupportDuration = new DoubleYoVariable("singleSupportDuration", "This is the toal time spent in single support.", registry);
+      singleSupportDuration = new DoubleYoVariable("singleSupportDuration", "This is the total time spent in single support.", registry);
 
       for (RobotSide side : RobotSide.values())
       {

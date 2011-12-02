@@ -31,18 +31,39 @@ public class SimpleDesiredCapturePointCalculator implements DesiredCapturePointC
       parentRegistry.addChild(registry);
    }
 
-   public FramePoint2d computeDesiredCapturePointSingleSupport(RobotSide supportLeg, BipedSupportPolygons bipedSupportPolygons, FramePoint2d capturePoint, SingleSupportCondition singleSupportCondition)
-   {
-      return couplingRegistry.getBipedSupportPolygons().getSweetSpotCopy(supportLeg);
+   public FramePoint2d computeDesiredCapturePointSingleSupport(RobotSide supportLeg, BipedSupportPolygons bipedSupportPolygons, FrameVector2d desiredVelocity, SingleSupportCondition singleSupportCondition)
+   { 
+//      return couplingRegistry.getBipedSupportPolygons().getSweetSpotCopy(supportLeg);      
+      double kxx, kxy;
+
+//      if (singleSupportCondition == SingleSupportCondition.Loading)
+//      {
+//         kxx = 0.0;
+//         kxy = 0.0;
+//      }
+//      else
+//      {
+//         kxx = desiredCaptureKxx.getDoubleValue();
+//         kxy = supportLeg.negateIfLeftSide(desiredCaptureKxy.getDoubleValue());
+//      }
+      kxx = desiredCaptureKxx.getDoubleValue();
+      kxy = supportLeg.negateIfLeftSide(desiredCaptureKxy.getDoubleValue());
+
+      FramePoint2d desiredCapturePoint = couplingRegistry.getBipedSupportPolygons().getSweetSpotCopy(supportLeg);
+      ReferenceFrame ankleZUpFrame = referenceFrames.getAnkleZUpFrame(supportLeg);
+      desiredCapturePoint.changeFrame(ankleZUpFrame);
+      desiredVelocity = desiredVelocity.changeFrameCopy(ankleZUpFrame);
+
+      desiredCapturePoint.setX(desiredCapturePoint.getX() + kxx * desiredVelocity.getX());
+      desiredCapturePoint.setY(desiredCapturePoint.getY() + kxy * Math.abs(desiredVelocity.getX()));
+      return desiredCapturePoint;
    }
 
    public FramePoint2d computeDesiredCapturePointDoubleSupport(RobotSide loadingLeg, BipedSupportPolygons bipedSupportPolygons, FrameVector2d desiredVelocity)
    {
-      FramePoint2d desiredCapturePoint;
-
       if (stayInDoubleSupport(loadingLeg))
       {
-         desiredCapturePoint = new FramePoint2d(referenceFrames.getMidFeetZUpFrame());
+         FramePoint2d desiredCapturePoint = new FramePoint2d(referenceFrames.getMidFeetZUpFrame());
 
          FrameVector2d leftForward = new FrameVector2d(referenceFrames.getAnkleZUpFrame(RobotSide.LEFT), 1.0, 0.0);
          FrameVector2d rightForward = new FrameVector2d(referenceFrames.getAnkleZUpFrame(RobotSide.RIGHT), 1.0, 0.0);
@@ -55,22 +76,12 @@ public class SimpleDesiredCapturePointCalculator implements DesiredCapturePointC
          offset.normalize();
          offset.scale(desiredCaptureForwardStayInDoubleSupport.getDoubleValue());
          desiredCapturePoint.add(offset);
+         return desiredCapturePoint;
       }
       else
       {
-         double kxx = desiredCaptureKxx.getDoubleValue();
-         double kxy = loadingLeg.negateIfLeftSide(desiredCaptureKxy.getDoubleValue());
-
-         desiredCapturePoint = couplingRegistry.getBipedSupportPolygons().getSweetSpotCopy(loadingLeg);
-         ReferenceFrame ankleZUpFrame = referenceFrames.getAnkleZUpFrame(loadingLeg);
-         desiredCapturePoint.changeFrame(ankleZUpFrame);
-         desiredVelocity = desiredVelocity.changeFrameCopy(ankleZUpFrame);
-
-         desiredCapturePoint.setX(desiredCapturePoint.getX() + kxx * desiredVelocity.getX());
-         desiredCapturePoint.setY(desiredCapturePoint.getY() + kxy * Math.abs(desiredVelocity.getX()));
+         return computeDesiredCapturePointSingleSupport(loadingLeg, bipedSupportPolygons, desiredVelocity, SingleSupportCondition.Loading);
       }
-
-      return desiredCapturePoint;
    }
 
    public void setUpParametersForR2()
@@ -83,8 +94,8 @@ public class SimpleDesiredCapturePointCalculator implements DesiredCapturePointC
    public void setUpParametersForM2V2()
    {
       desiredCaptureForwardStayInDoubleSupport.set(0.02);
-      desiredCaptureKxx.set(0.0); //0.1);    // TODO: tune
-      desiredCaptureKxy.set(0.0); //0.05);    // TODO: tune
+      desiredCaptureKxx.set(0.06);
+      desiredCaptureKxy.set(0.01);
    }
    
    private static boolean stayInDoubleSupport(RobotSide loadingLeg)
