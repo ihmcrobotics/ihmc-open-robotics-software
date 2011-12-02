@@ -456,9 +456,13 @@ public class JointSpaceTrajectoryGenerator
    private void updateVisualizers(RobotSide swingSide, FramePoint desiredFinalPosition, double timeInSwing)
    {
       
-      FramePose bodyFrameInTime = bodyPositionInTimeEstimator.getPelvisPoseInTime(swingDuration.getDoubleValue() - timeInSwing, swingSide);
-      FramePoint bodyPoint = bodyFrameInTime.getPositionInFrame(ReferenceFrame.getWorldFrame());
-      bagOfBalls.setBallLoop(bodyPoint);
+      if (bagOfBalls != null)
+      {
+         FramePose bodyFrameInTime = bodyPositionInTimeEstimator.getPelvisPoseInTime(swingDuration.getDoubleValue() - timeInSwing, swingSide);
+         FramePoint bodyPoint = bodyFrameInTime.getPositionInFrame(ReferenceFrame.getWorldFrame());
+         bagOfBalls.setBallLoop(bodyPoint);
+
+      }
 
       FramePoint framePointInWorld = new FramePoint(desiredFinalPosition);
       framePointInWorld.changeFrame(ReferenceFrame.getWorldFrame());
@@ -473,7 +477,6 @@ public class JointSpaceTrajectoryGenerator
             viaPointsInWorldFrame[i].set(framePointInWorld);
          }
       }
-
    }
 
    private void computePointOnSpline(RobotSide swingSide, FramePoint point, int i, double tOfPoint, double currentTimeInSwing, double[][] yIn)
