@@ -294,8 +294,12 @@ public class CommonStanceSubController implements StanceSubController
    {
    }
 
-   public void doTransitionOutOfStartStopWalkingDoubleSupport(RobotSide stanceSide)
+   public void doTransitionOutOfStartStopWalkingDoubleSupport(RobotSide loadingLeg)
    {
+      supportLegAndLegToTrustForVelocity.setLegToTrustForVelocity(loadingLeg, true);
+      supportLegAndLegToTrustForVelocity.setLegToTrustForVelocity(loadingLeg.getOppositeSide(), false);
+      supportLegAndLegToTrustForVelocity.setSupportLeg(loadingLeg);
+      supportLegAndLegToTrustForVelocity.setLegToUseForCOMOffset(loadingLeg);
    }
 
    public void doTransitionOutOfTerminalStance(RobotSide stanceSide)

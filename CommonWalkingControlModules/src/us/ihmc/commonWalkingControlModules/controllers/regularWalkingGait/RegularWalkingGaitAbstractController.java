@@ -587,11 +587,13 @@ public abstract class RegularWalkingGaitAbstractController implements RobotContr
       public void doTransitionIntoAction()
       {
          supportLegYoVariable.set(null);    // null implies Double support
+         stanceSubController.doTransitionIntoStartStopWalkingDoubleSupport(loadingLeg);
       }
 
       public void doTransitionOutOfAction()
       {
          supportLegYoVariable.set(loadingLeg);
+         stanceSubController.doTransitionOutOfStartStopWalkingDoubleSupport(loadingLeg);
       }
    }
 
