@@ -5,13 +5,15 @@ import java.io.IOException;
 
 import org.junit.Test;
 
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
+
 public class LocalYoWhiteBoardTest extends YoWhiteBoardTest
 {
    @Test
    public void testLocalYoWhiteBoardOne() throws IOException
    {
-      LocalYoWhiteBoard leftWhiteBoard = new LocalYoWhiteBoard();
-      LocalYoWhiteBoard rightWhiteBoard = new LocalYoWhiteBoard();
+      LocalYoWhiteBoard leftWhiteBoard = new LocalYoWhiteBoard("left", new YoVariableRegistry("leftRegistry"));
+      LocalYoWhiteBoard rightWhiteBoard = new LocalYoWhiteBoard("right", new YoVariableRegistry("rightRegistry"));
 
       leftWhiteBoard.setMyBrotherWhiteBoard(rightWhiteBoard);
 
@@ -22,8 +24,8 @@ public class LocalYoWhiteBoardTest extends YoWhiteBoardTest
    @Test
    public void testLocalYoWhiteBoardTwo() throws IOException
    {
-      LocalYoWhiteBoard leftWhiteBoard = new LocalYoWhiteBoard();
-      LocalYoWhiteBoard rightWhiteBoard = new LocalYoWhiteBoard();
+      LocalYoWhiteBoard leftWhiteBoard = new LocalYoWhiteBoard("left", new YoVariableRegistry("leftRegistry"));
+      LocalYoWhiteBoard rightWhiteBoard = new LocalYoWhiteBoard("right", new YoVariableRegistry("rightRegistry"));
 
       leftWhiteBoard.setMyBrotherWhiteBoard(rightWhiteBoard);
 

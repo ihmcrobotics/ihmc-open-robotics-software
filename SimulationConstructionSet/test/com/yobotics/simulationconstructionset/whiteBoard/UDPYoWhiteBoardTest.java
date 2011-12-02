@@ -16,8 +16,8 @@ public class UDPYoWhiteBoardTest extends YoWhiteBoardTest
 
       boolean throwOutStalePackets = false;
 
-      UDPYoWhiteBoard leftWhiteBoard = new UDPYoWhiteBoard(true, IPAddress, leftSendRightReceivePort, leftReceiveRightSendPort, throwOutStalePackets);
-      UDPYoWhiteBoard rightWhiteBoard = new UDPYoWhiteBoard(false, IPAddress, leftReceiveRightSendPort, leftSendRightReceivePort, throwOutStalePackets);
+      UDPYoWhiteBoard leftWhiteBoard = new UDPYoWhiteBoard("leftTest", true, IPAddress, leftSendRightReceivePort, leftReceiveRightSendPort, throwOutStalePackets);
+      UDPYoWhiteBoard rightWhiteBoard = new UDPYoWhiteBoard("rightTest", false, IPAddress, leftReceiveRightSendPort, leftSendRightReceivePort, throwOutStalePackets);
 
       Thread leftWhiteBoardThread = new Thread(leftWhiteBoard);
       Thread rightWhiteBoardThread = new Thread(rightWhiteBoard);
@@ -48,8 +48,8 @@ public class UDPYoWhiteBoardTest extends YoWhiteBoardTest
 
       boolean throwOutStalePackets = false;
 
-      UDPYoWhiteBoard leftWhiteBoard = new UDPYoWhiteBoard(true, IPAddress, leftSendRightReceivePort, leftReceiveRightSendPort, throwOutStalePackets);
-      UDPYoWhiteBoard rightWhiteBoard = new UDPYoWhiteBoard(false, IPAddress, leftReceiveRightSendPort, leftSendRightReceivePort, throwOutStalePackets);
+      UDPYoWhiteBoard leftWhiteBoard = new UDPYoWhiteBoard("leftTest", true, IPAddress, leftSendRightReceivePort, leftReceiveRightSendPort, throwOutStalePackets);
+      UDPYoWhiteBoard rightWhiteBoard = new UDPYoWhiteBoard("rightTest", false, IPAddress, leftReceiveRightSendPort, leftSendRightReceivePort, throwOutStalePackets);
 
       Thread leftWhiteBoardThread = new Thread(leftWhiteBoard);
       Thread rightWhiteBoardThread = new Thread(rightWhiteBoard);

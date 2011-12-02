@@ -13,8 +13,8 @@ public class TCPYoWhiteBoardTest extends YoWhiteBoardTest
       String IPAddress = "localHost";
       int port = 8456;
 
-      TCPYoWhiteBoard leftWhiteBoard = new TCPYoWhiteBoard(port);
-      TCPYoWhiteBoard rightWhiteBoard = new TCPYoWhiteBoard(IPAddress, port);
+      TCPYoWhiteBoard leftWhiteBoard = new TCPYoWhiteBoard("leftTest", port);
+      TCPYoWhiteBoard rightWhiteBoard = new TCPYoWhiteBoard("rightTest", IPAddress, port);
 
       Thread leftWhiteBoardThread = new Thread(leftWhiteBoard);
       Thread rightWhiteBoardThread = new Thread(rightWhiteBoard);
@@ -33,8 +33,8 @@ public class TCPYoWhiteBoardTest extends YoWhiteBoardTest
       String IPAddress = "localHost";
       int port = 8456;
 
-      TCPYoWhiteBoard leftWhiteBoard = new TCPYoWhiteBoard(port);
-      TCPYoWhiteBoard rightWhiteBoard = new TCPYoWhiteBoard(IPAddress, port);
+      TCPYoWhiteBoard leftWhiteBoard = new TCPYoWhiteBoard("leftTest", port);
+      TCPYoWhiteBoard rightWhiteBoard = new TCPYoWhiteBoard("rightTest", IPAddress, port);
 
       Thread leftWhiteBoardThread = new Thread(leftWhiteBoard);
       Thread rightWhiteBoardThread = new Thread(rightWhiteBoard);
