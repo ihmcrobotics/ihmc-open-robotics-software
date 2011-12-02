@@ -301,6 +301,11 @@ public class YoWhiteBoardTest
 
    private final class DoNothingWhiteBoard extends YoWhiteBoard
    {
+      public DoNothingWhiteBoard()
+      {
+         super("DoNothing", new YoVariableRegistry("DoNothingWhiteBoard"));
+      }
+      
       public void whiteBoardSpecificWriteData(double[] doubleVariablesToWriteBuffer, int[] intVariablesToWriteBuffer, boolean[] booleanVariablesToWriteBuffer,
               int[] enumVariablesToWriteBuffer, int writeIndex)
               throws IOException
