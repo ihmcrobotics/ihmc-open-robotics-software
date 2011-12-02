@@ -25,6 +25,7 @@ import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenc
 import us.ihmc.commonWalkingControlModules.sensors.ProcessedSensorsInterface;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
+import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
@@ -203,7 +204,8 @@ public class OptimalSwingSubController implements SwingSubController
       
       Transform3D footToPelvis = computeDesiredTransform(referenceFrames.getPelvisFrame(), desiredPosition, desiredOrientation);
 
-      FramePose pelvisPoseInTime = bodyPositionInTimeEstimator.getPelvisPoseInTime(swingTimeRemaining, swingSide);
+      Pair<FramePose, FrameVector> bodyAndVelocityInTime = bodyPositionInTimeEstimator.getPelvisPoseAndPositionInTime(swingTimeRemaining, swingSide);
+      FramePose pelvisPoseInTime = bodyAndVelocityInTime.first();
       Transform3D pelvisTransformInTime = new Transform3D();
       pelvisPoseInTime.getTransform3D(pelvisTransformInTime);
       pelvisTransformInTime.invert();

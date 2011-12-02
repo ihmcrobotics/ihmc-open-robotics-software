@@ -18,6 +18,7 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalcul
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.kinematics.BodyPositionInTimeEstimator;
+import us.ihmc.commonWalkingControlModules.kinematics.DesiredJointVelocityCalculator;
 import us.ihmc.commonWalkingControlModules.kinematics.LegInverseKinematicsCalculator;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointAccelerations;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
@@ -94,7 +95,7 @@ public class JointSpaceSwingSubController implements SwingSubController
 
    public JointSpaceSwingSubController(String name, ProcessedSensorsInterface processedSensors, FullRobotModel fullRobotModel,
          SideDependentList<FootSwitchInterface> footSwitches, CommonWalkingReferenceFrames referenceFrames,
-         DesiredFootstepCalculator desiredFootstepCalculator, CouplingRegistry couplingRegistry, LegInverseKinematicsCalculator inverseKinematicsCalculator,
+         DesiredFootstepCalculator desiredFootstepCalculator, CouplingRegistry couplingRegistry, LegInverseKinematicsCalculator inverseKinematicsCalculator, SideDependentList<DesiredJointVelocityCalculator> desiredJointVelocityCalculators,
          SwingLegTorqueControlOnlyModule swingLegTorqueControlModule, PreSwingControlModule preSwingControlModule, double controlDT,
          DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
    {
@@ -111,7 +112,7 @@ public class JointSpaceSwingSubController implements SwingSubController
 
       
       bodyPositionInTimeEstimator = new BodyPositionInTimeEstimator(processedSensors, referenceFrames, couplingRegistry, registry);
-      jointSpaceTrajectoryGenerator = new JointSpaceTrajectoryGenerator("jointSpaceTrajectory", 1, referenceFrames, inverseKinematicsCalculator, processedSensors, controlDT,
+      jointSpaceTrajectoryGenerator = new JointSpaceTrajectoryGenerator("jointSpaceTrajectory", 1, referenceFrames, inverseKinematicsCalculator, desiredJointVelocityCalculators, processedSensors, controlDT,
             dynamicGraphicObjectsListRegistry, bodyPositionInTimeEstimator, registry);
 
       timeSpentInPreSwing = new DoubleYoVariable("timeSpentInPreSwing", "This is the time spent in Pre swing.", registry);
