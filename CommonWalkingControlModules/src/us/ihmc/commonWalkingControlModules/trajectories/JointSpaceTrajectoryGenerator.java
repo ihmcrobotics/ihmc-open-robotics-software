@@ -245,7 +245,7 @@ public class JointSpaceTrajectoryGenerator
 
    public void initialize(RobotSide swingSide, LegJointPositions currentJointPositions, LegJointVelocities currentJointVelocities,
          LegJointAccelerations currentJointAccelerations, FramePoint desiredFinalPosition, Orientation desiredOrientationIn, double swingDuration,
-         int viaPointsToUse)
+         int viaPointsToUse, boolean useBodyPositionEstimation)
    {
       if (viaPointsToUse > maximumNumberOfViaPoints)
          throw new RuntimeException("viaPointsToUse > maximumNumberOfViaPoints");
@@ -276,11 +276,11 @@ public class JointSpaceTrajectoryGenerator
       }
       startTime.set(0.0);
 
-      calculateSplines(0.0);
+      calculateSplines(0.0, useBodyPositionEstimation);
 
    }
 
-   private void calculateNewEndPoint(FramePoint desiredPositionIn, Orientation desiredOrientationIn, double timeInSwing)
+   private void calculateNewEndPoint(FramePoint desiredPositionIn, Orientation desiredOrientationIn, double timeInSwing, boolean useBodyPositionEstimation)
    {
       desiredPositionIn.checkReferenceFrameMatch(referenceFrames.getPelvisFrame());
 
@@ -298,7 +298,7 @@ public class JointSpaceTrajectoryGenerator
 
       if (numberOfViaPoints.getIntegerValue() == 0)
       {
-         initialize(swingSide, positions, velocities, accelerations, desiredPositionIn, desiredOrientationIn, swingDuration.getDoubleValue(), 0);
+         initialize(swingSide, positions, velocities, accelerations, desiredPositionIn, desiredOrientationIn, swingDuration.getDoubleValue(), 0, useBodyPositionEstimation);
          startTime.set(timeInSwing);
          return;
       }
@@ -341,12 +341,12 @@ public class JointSpaceTrajectoryGenerator
 
       double timeRemaining = swingDuration.getDoubleValue() - (timeInSwing - startTime.getDoubleValue());
       int viaPointsLeft = (int)(timeRemaining/timePerPoint);
-      initialize(swingSide, positions, velocities, accelerations, desiredPositionIn, desiredOrientationIn, timeRemaining, viaPointsLeft);
+      initialize(swingSide, positions, velocities, accelerations, desiredPositionIn, desiredOrientationIn, timeRemaining, viaPointsLeft, useBodyPositionEstimation);
       startTime.set(timeInSwing);
 
    }
 
-   public void updateEndPoint(FramePoint desiredPositionIn, Orientation desiredOrientationIn, double timeInSwing)
+   public void updateEndPoint(FramePoint desiredPositionIn, Orientation desiredOrientationIn, double timeInSwing, boolean useBodyPositionEstimation)
    {
       FramePoint desiredPosition = new FramePoint(desiredPositionIn);
       desiredPosition.changeFrame(referenceFrames.getPelvisFrame());
@@ -356,16 +356,16 @@ public class JointSpaceTrajectoryGenerator
       if (finalPositionInPelvisFrame.distance(desiredPosition) > 2e-2)
       {
          System.err.println("Calculating new endpoint, distance from previous target is " + finalPositionInPelvisFrame.distance(desiredPosition));
-         calculateNewEndPoint(desiredPosition, desiredOrientation, timeInSwing);
+         calculateNewEndPoint(desiredPosition, desiredOrientation, timeInSwing, useBodyPositionEstimation);
       }
 
       finalPositionInPelvisFrame.set(desiredPosition);
       finalOrientationInPelvisFrame.set(desiredOrientation);
 
-      calculateSplines(timeInSwing - startTime.getDoubleValue());
+      calculateSplines(timeInSwing - startTime.getDoubleValue(), useBodyPositionEstimation);
    }
 
-   private void calculateSplines(double timeInSwing)
+   private void calculateSplines(double timeInSwing, boolean useBodyPositionEstimation)
    {
       double[] t = new double[numberOfViaPoints.getIntegerValue() + 2];
       t[0] = 0.0;
@@ -415,10 +415,10 @@ public class JointSpaceTrajectoryGenerator
 
       for (int i = 0; i < numberOfViaPoints.getIntegerValue(); i++)
       {
-         computePointOnSpline(swingSide.getEnumValue(), viaPoints[i].getFramePointCopy(), 0.0, 0.0, i + 1, tOfViaPoints[i], timeInSwing, yIn);
+         computePointOnSpline(swingSide.getEnumValue(), viaPoints[i].getFramePointCopy(), 0.0, 0.0, i + 1, tOfViaPoints[i], timeInSwing, yIn, useBodyPositionEstimation);
       }
       FrameVector upperBodyVelocityAtEndOfStep = computePointOnSpline(swingSide.getEnumValue(), finalPositionInPelvisFrame.getFramePointCopy(), finalPitch, finalRoll,
-            numberOfViaPoints.getIntegerValue() + 1, swingDuration.getDoubleValue(), timeInSwing, yIn);
+            numberOfViaPoints.getIntegerValue() + 1, swingDuration.getDoubleValue(), timeInSwing, yIn, useBodyPositionEstimation);
 
       QuinticSplineInterpolator currentInterpolator = jointSplines[numberOfViaPoints.getIntegerValue()];
       currentInterpolator.initialize(t);
@@ -534,7 +534,7 @@ public class JointSpaceTrajectoryGenerator
       }
    }
 
-   private FrameVector computePointOnSpline(RobotSide swingSide, FramePoint point, double pitch, double roll, int i, double tOfPoint, double currentTimeInSwing, double[][] yIn)
+   private FrameVector computePointOnSpline(RobotSide swingSide, FramePoint point, double pitch, double roll, int i, double tOfPoint, double currentTimeInSwing, double[][] yIn, boolean useBodyPositionEstimation)
    {
       double[][] yawResult = new double[1][1];
       hipYawSpline.compute(tOfPoint, 0, yawResult);
@@ -544,14 +544,22 @@ public class JointSpaceTrajectoryGenerator
       
       Transform3D footToPelvis = computeDesiredTransform(referenceFrames.getPelvisFrame(), viaPointInPelvisFrame, intermediateOrientation);
 
-      Pair<FramePose, FrameVector> bodyAndVelocityInTime = bodyPositionInTimeEstimator.getPelvisPoseAndPositionInTime(tOfPoint - currentTimeInSwing, swingSide);
-      FramePose pelvisPoseInTime = bodyAndVelocityInTime.first();
-      Transform3D pelvisTransformInTime = new Transform3D();
-      pelvisPoseInTime.getTransform3D(pelvisTransformInTime);
-      pelvisTransformInTime.invert();
-      
-      footToPelvis.mul(pelvisTransformInTime, footToPelvis);
-      
+      FrameVector ret;
+      if (useBodyPositionEstimation)
+      {
+         Pair<FramePose, FrameVector> bodyAndVelocityInTime = bodyPositionInTimeEstimator.getPelvisPoseAndPositionInTime(tOfPoint - currentTimeInSwing, swingSide);
+         FramePose pelvisPoseInTime = bodyAndVelocityInTime.first();
+         Transform3D pelvisTransformInTime = new Transform3D();
+         pelvisPoseInTime.getTransform3D(pelvisTransformInTime);
+         pelvisTransformInTime.invert();
+         footToPelvis.mul(pelvisTransformInTime, footToPelvis);
+
+         ret = bodyAndVelocityInTime.second();
+      }
+      else
+      {
+         ret = new FrameVector(referenceFrames.getPelvisFrame());
+      }
       
       try
       {
@@ -565,9 +573,8 @@ public class JointSpaceTrajectoryGenerator
       {
          yIn[j - 1][i] = intermediatePositions.get(swingSide).getJointPosition(legJointNames[j]);
       }
-      
-      return bodyAndVelocityInTime.second();
 
+      return ret;
    }
 
    private Transform3D computeDesiredTransform(ReferenceFrame pelvisFrame, FramePoint desiredFootPosition, Orientation desiredFootOrientation)
