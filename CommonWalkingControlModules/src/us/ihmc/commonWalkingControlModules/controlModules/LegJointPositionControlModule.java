@@ -152,7 +152,7 @@ public class LegJointPositionControlModule
       kdGains.get(LegJointName.ANKLE_ROLL).set(1.0);
       kdGains.get(LegJointName.ANKLE_PITCH).set(1.0);
 
-      softScaleFactor.set(0.25);
+      softScaleFactor.set(0.1); // 0.25);
    }
 
    public void setDefaultGainsForR2()

@@ -306,6 +306,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       this.finalDesiredFootOrientationInWorldFrame.set(desiredFootstep.getFootstepOrientationInFrame(worldFrame));
       
       swingLegTorqueControlModule.setAnkleGainsDefault(swingSide);
+      footSwitches.get(swingSide).reset();
    }
 
    public void doTransitionIntoMidSwing(RobotSide swingSide)
