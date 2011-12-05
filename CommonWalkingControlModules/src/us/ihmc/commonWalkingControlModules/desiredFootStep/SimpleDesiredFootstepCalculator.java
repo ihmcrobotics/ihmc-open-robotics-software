@@ -71,7 +71,7 @@ public class SimpleDesiredFootstepCalculator implements DesiredFootstepCalculato
    public void setupParametersForM2V2()
    {
       stepLength.set(0.32);
-      stepWidth.set(0.2);
+      stepWidth.set(0.22);
       stepHeight.set(0.0);
       stepYaw.set(0.0);
       stepPitch.set(-0.25);
