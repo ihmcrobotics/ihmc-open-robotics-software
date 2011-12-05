@@ -94,7 +94,7 @@ public class SimpleDesiredCapturePointCalculator implements DesiredCapturePointC
    public void setUpParametersForM2V2()
    {
       desiredCaptureForwardStayInDoubleSupport.set(0.02);
-      desiredCaptureKxx.set(0.06);
+      desiredCaptureKxx.set(0.03);
       desiredCaptureKxy.set(0.01);
    }
    
