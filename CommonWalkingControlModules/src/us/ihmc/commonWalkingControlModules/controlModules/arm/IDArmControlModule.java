@@ -44,16 +44,18 @@ public abstract class IDArmControlModule implements ArmControlModule
       populateYoVariables();
       populateQddReferenceControllers();
       setGains();
+      setDesiredJointPositionsAndVelocities();
       parentRegistry.addChild(registry);
    }
 
-   protected abstract void computeDesireds();
+   protected abstract void setDesiredJointPositionsAndVelocities();
+   
+//   protected abstract void computeDesireds();
 
    protected abstract void setGains();
 
    public void doArmControl(ArmTorques[] armTorquesToPack)
    {
-      computeDesireds();
 
       for (RobotSide robotSide : RobotSide.values())
       {

@@ -19,7 +19,7 @@ public class ArmsSidewaysUsingIDArmControlModule extends IDArmControlModule
       super(processedSensors, controlDT, parentRegistry, armsIDCalculator, armJointArrayLists);
    }
 
-   protected void computeDesireds()
+   protected void setDesiredJointPositionsAndVelocities()
    {
       for (RobotSide robotSide : RobotSide.values())
       {
