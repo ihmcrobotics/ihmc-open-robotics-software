@@ -135,6 +135,8 @@ public class CommonDoEveryTickSubController implements DoEveryTickSubController
          couplingRegistry.setCaptureRegion(null);
          couplingRegistry.setDesiredFootstep(null);
       }
+      
+      couplingRegistry.setSupportLeg(supportLeg);
    }
 
    public void initialize()
