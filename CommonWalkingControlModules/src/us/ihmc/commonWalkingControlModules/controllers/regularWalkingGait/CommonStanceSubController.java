@@ -349,7 +349,7 @@ public class CommonStanceSubController implements StanceSubController
       if (!inStateLongEnough)
          return false;
 
-      double minPercentageTowardsDesired = 0.9;
+      double minPercentageTowardsDesired = 0.95;
       return isOverPercentageTowardDesired(loadingLeg, minPercentageTowardsDesired);
    }
 

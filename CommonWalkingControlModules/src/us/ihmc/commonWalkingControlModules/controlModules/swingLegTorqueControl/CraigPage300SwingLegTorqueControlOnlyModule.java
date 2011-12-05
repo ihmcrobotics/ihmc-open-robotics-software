@@ -172,7 +172,7 @@ public class CraigPage300SwingLegTorqueControlOnlyModule implements SwingLegTorq
 
 //        legTorquesToPackForSwingLeg.addTorque(legJointName, tauInverseDynamics);
          
-         if(legJointName != LegJointName.HIP_YAW)
+         if(legJointName != LegJointName.HIP_YAW && !isAnAnkleJoint)
          {
             legTorquesToPackForSwingLeg.setTorque(legJointName, tauInverseDynamics);
          }
@@ -221,8 +221,8 @@ public class CraigPage300SwingLegTorqueControlOnlyModule implements SwingLegTorq
    {
       useBodyAcceleration = true;
 
-      masterKpGain.set(70.0);
-      masterKdGain.set(1.0);
+      masterKpGain.set(150.0);
+      masterKdGain.set(2.0);
       
 
       softScaleFactor.set(0.1); // 0.25);

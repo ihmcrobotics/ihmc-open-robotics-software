@@ -267,7 +267,7 @@ public class JointSpaceTrajectoryGenerator
 
       finalPositionInPelvisFrame.set(desiredPosition);
       finalOrientationInPelvisFrame.set(desiredOrientation);
-
+      
       for (LegJointName jointName : legJointNames)
       {
          initialJointAngles.get(jointName).set(currentJointPositions.getJointPosition(jointName));
@@ -397,7 +397,10 @@ public class JointSpaceTrajectoryGenerator
       t[numberOfViaPoints.getIntegerValue() + 1] = swingDuration.getDoubleValue();
 
       double initialYaw = initialJointAngles.get(LegJointName.HIP_YAW).getDoubleValue();
-      double finalYaw = finalOrientationInPelvisFrame.getYawPitchRoll()[0];
+      double[] finalOrientation = finalOrientationInPelvisFrame.getYawPitchRoll(); 
+      double finalYaw = finalOrientation[0];
+      double finalPitch = finalOrientation[1];
+      double finalRoll = finalOrientation[2];
 
       double yawIn[] = new double[] { initialYaw, finalYaw };
       double tYaw[] = new double[] { t[0], swingDuration.getDoubleValue() };
@@ -412,10 +415,10 @@ public class JointSpaceTrajectoryGenerator
 
       for (int i = 0; i < numberOfViaPoints.getIntegerValue(); i++)
       {
-         computePointOnSpline(swingSide.getEnumValue(), viaPoints[i].getFramePointCopy(), i + 1, tOfViaPoints[i], timeInSwing, yIn);
+         computePointOnSpline(swingSide.getEnumValue(), viaPoints[i].getFramePointCopy(), 0.0, 0.0, i + 1, tOfViaPoints[i], timeInSwing, yIn);
       }
-      FrameVector upperBodyVelocityAtEndOfStep = computePointOnSpline(swingSide.getEnumValue(), finalPositionInPelvisFrame.getFramePointCopy(), numberOfViaPoints.getIntegerValue() + 1,
-            swingDuration.getDoubleValue(), timeInSwing, yIn);
+      FrameVector upperBodyVelocityAtEndOfStep = computePointOnSpline(swingSide.getEnumValue(), finalPositionInPelvisFrame.getFramePointCopy(), finalPitch, finalRoll,
+            numberOfViaPoints.getIntegerValue() + 1, swingDuration.getDoubleValue(), timeInSwing, yIn);
 
       QuinticSplineInterpolator currentInterpolator = jointSplines[numberOfViaPoints.getIntegerValue()];
       currentInterpolator.initialize(t);
@@ -531,11 +534,11 @@ public class JointSpaceTrajectoryGenerator
       }
    }
 
-   private FrameVector computePointOnSpline(RobotSide swingSide, FramePoint point, int i, double tOfPoint, double currentTimeInSwing, double[][] yIn)
+   private FrameVector computePointOnSpline(RobotSide swingSide, FramePoint point, double pitch, double roll, int i, double tOfPoint, double currentTimeInSwing, double[][] yIn)
    {
       double[][] yawResult = new double[1][1];
       hipYawSpline.compute(tOfPoint, 0, yawResult);
-      intermediateOrientation.setYawPitchRoll(yawResult[0][0], 0.0, 0.0);
+      intermediateOrientation.setYawPitchRoll(yawResult[0][0], pitch, roll);
 
       viaPointInPelvisFrame.setAndChangeFrame(point);
       

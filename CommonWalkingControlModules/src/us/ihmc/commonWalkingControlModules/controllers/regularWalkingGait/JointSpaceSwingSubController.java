@@ -165,7 +165,7 @@ public class JointSpaceSwingSubController implements SwingSubController
       passiveHipCollapseTime.set(0.07);
       minimumTerminalSwingDuration.set(0.0);
       maximumTerminalSwingDuration.set(0.05);
-      numberOfViaPointsDuringWalk.set(2);
+      numberOfViaPointsDuringWalk.set(2); // 2);
       setEstimatedSwingTimeRemaining(swingDuration.getDoubleValue());
    }
 
@@ -262,13 +262,14 @@ public class JointSpaceSwingSubController implements SwingSubController
       boolean inStateLongEnough = timeInState > 0.05;
       boolean isCoMPastSweetSpot = comProjection.getX() > sweetSpot.getX();
       boolean trajectoryIsDone = jointSpaceTrajectoryGenerator.isDoneWithSwing(timeInState);
-      boolean footHitEarly = footSwitches.get(swingSide).hasFootHitGround();
+//      boolean footHitEarly = footSwitches.get(swingSide).hasFootHitGround();
 
-      return inStateLongEnough && (isCoMPastSweetSpot || trajectoryIsDone || footHitEarly);
+      return inStateLongEnough && (isCoMPastSweetSpot || trajectoryIsDone); //  || footHitEarly);
    }
 
    public boolean isDoneWithMidSwing(RobotSide swingSide, double timeInState)
    {
+//      footSwitches.get(swingSide).hasFootHitGround(); // to update the maximum value
       return jointSpaceTrajectoryGenerator.isDoneWithSwing(timeSpentInInitialSwing.getDoubleValue() + timeInState);
    }
 
@@ -284,7 +285,9 @@ public class JointSpaceSwingSubController implements SwingSubController
 
       if (capturePointInsideSupportFoot) return false; // Don't go in double support if ICP is still in support foot.
 //      return ((footOnGround && minimumTerminalSwingTimePassed) || maximumTerminalSwingTimePassed || (capturePointInsideFoot && minimumTerminalSwingTimePassed));
-      return (maximumTerminalSwingTimePassed);
+//      return (maximumTerminalSwingTimePassed);
+//      return (footOnGround && minimumTerminalSwingTimePassed) || maximumTerminalSwingTimePassed;
+      return (footOnGround && minimumTerminalSwingTimePassed);
    }
 
    public boolean isDoneWithSwingInAir(RobotSide swingSide, double timeInState)
@@ -324,6 +327,7 @@ public class JointSpaceSwingSubController implements SwingSubController
 
       jointSpaceTrajectoryGenerator.initialize(swingLeg, jointPositions.get(swingLeg), jointVelocities.get(swingLeg), jointAccelerations.get(swingLeg),
             endPoint, endOrientation, swingDuration.getDoubleValue(), numberOfViaPointsDuringWalk.getIntegerValue());
+      footSwitches.get(swingLeg).reset();
    }
 
    public void doTransitionIntoMidSwing(RobotSide swingSide)

@@ -59,6 +59,7 @@ public class SimpleDesiredFootstepCalculator implements DesiredFootstepCalculato
 
       // Footstep Orientation
       Orientation footstepOrientation = new Orientation(desiredHeadingFrame); 
+      footstepOrientation.setYawPitchRoll(stepYaw.getDoubleValue(), stepPitch.getDoubleValue(), stepRoll.getDoubleValue());
       footstepOrientation.changeFrame(supportAnkleZUpFrame);
       
       // Create a foot Step Pose from Position and Orientation
@@ -74,7 +75,7 @@ public class SimpleDesiredFootstepCalculator implements DesiredFootstepCalculato
       stepWidth.set(0.22);
       stepHeight.set(0.0);
       stepYaw.set(0.0);
-      stepPitch.set(-0.25);
+      stepPitch.set(-0.35);
       stepRoll.set(0.0);
    }
 
