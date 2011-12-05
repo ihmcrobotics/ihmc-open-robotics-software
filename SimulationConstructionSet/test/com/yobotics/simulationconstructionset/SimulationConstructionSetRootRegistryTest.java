@@ -11,7 +11,7 @@ import com.yobotics.simulationconstructionset.gui.VarPanel;
 
 public class SimulationConstructionSetRootRegistryTest
 {
-   private static final boolean SHOW_GUI = true;
+   private static final boolean SHOW_GUI = false;
    
    @Test
    public void testRootRegistryNothingFancy()
