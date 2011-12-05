@@ -26,6 +26,7 @@ public class CommonCouplingRegistry implements CouplingRegistry
    private final DoubleYoVariable doubleSupportDuration = new DoubleYoVariable("doubleSupportDuration", registry);
    private final DoubleYoVariable estimatedSwingTimeRemaining = new DoubleYoVariable("estimatedSwingTimeRemaining", registry);
    private final BooleanYoVariable forceHindOnToes = new BooleanYoVariable("forceHindOnToes", registry);
+   private BooleanYoVariable isLunging = new BooleanYoVariable("isLunging", registry);
 
    //TODO: May need to YoVariablize the following to make things rewindable?
    private FrameConvexPolygon2d captureRegion;
@@ -43,7 +44,7 @@ public class CommonCouplingRegistry implements CouplingRegistry
 
    private Wrench upperBodyWrench;
    
-   private boolean isLunging;
+
 
 
    public CommonCouplingRegistry(CommonWalkingReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons, YoVariableRegistry parentRegistry)
@@ -189,12 +190,12 @@ public class CommonCouplingRegistry implements CouplingRegistry
    
    public void setIsLunging(boolean isLunging)
    {
-      this.isLunging = isLunging;
+      this.isLunging.set(isLunging);
    }
    
    public boolean getIsLunging()
    {
-      return this.isLunging;
+      return this.isLunging.getBooleanValue();
    }
 
 }
