@@ -11,7 +11,7 @@ import com.yobotics.simulationconstructionset.gui.VarPanel;
 
 public class SimulationConstructionSetRootRegistryTest
 {
-   private static final boolean SHOW_GUI = false;
+   private static final boolean SHOW_GUI = true;
    
    @Test
    public void testRootRegistryNothingFancy()
@@ -42,7 +42,7 @@ public class SimulationConstructionSetRootRegistryTest
          VarPanel visibleVarPanel = combinedVarPanel.getVisibleVarPanel();
         
          assertTrue(visibleVarPanel != null);
-         assertTrue(variableOne == visibleVarPanel.getVarList().getVariable("variableOne"));
+         assertTrue(variableOne == visibleVarPanel.getYoVariable("variableOne"));
       }
       
       scs.closeAndDispose();
@@ -107,19 +107,19 @@ public class SimulationConstructionSetRootRegistryTest
 
          combinedVarPanel.setVisibleVarPanel("root.RobotsRootRegistry.RegistryBeforeConstructionOne");
          VarPanel visibleVarPanel = combinedVarPanel.getVisibleVarPanel();
-         assertTrue(variableBeforeConstructionOne == visibleVarPanel.getVarList().getVariable("variableBeforeConstructionOne"));
-         assertTrue(variableAfterConstructionZero == visibleVarPanel.getVarList().getVariable("variableAfterConstructionZero"));
+         assertTrue(variableBeforeConstructionOne == visibleVarPanel.getYoVariable("variableBeforeConstructionOne"));
+         assertTrue(variableAfterConstructionZero == visibleVarPanel.getYoVariable("variableAfterConstructionZero"));
 
          combinedVarPanel.setVisibleVarPanel("root.RobotsRootRegistry.RegistryAfterConstructionOne");
          visibleVarPanel = combinedVarPanel.getVisibleVarPanel();
-         assertTrue(variableAfterConstructionOne == visibleVarPanel.getVarList().getVariable("variableAfterConstructionOne"));
-         assertTrue(variableAfterConstructionTwo == visibleVarPanel.getVarList().getVariable("variableAfterConstructionTwo"));
-         assertTrue(variableAfterThreadZero == visibleVarPanel.getVarList().getVariable("variableAfterThreadZero"));
+         assertTrue(variableAfterConstructionOne == visibleVarPanel.getYoVariable("variableAfterConstructionOne"));
+         assertTrue(variableAfterConstructionTwo == visibleVarPanel.getYoVariable("variableAfterConstructionTwo"));
+         assertTrue(variableAfterThreadZero == visibleVarPanel.getYoVariable("variableAfterThreadZero"));
 
          combinedVarPanel.setVisibleVarPanel("root.RobotsRootRegistry.RegistryAfterThreadOne");
          visibleVarPanel = combinedVarPanel.getVisibleVarPanel();
-         assertTrue(variableAfterThreadOne == visibleVarPanel.getVarList().getVariable("variableAfterThreadOne"));
-         assertTrue(variableAfterThreadTwo == visibleVarPanel.getVarList().getVariable("variableAfterThreadTwo"));
+         assertTrue(variableAfterThreadOne == visibleVarPanel.getYoVariable("variableAfterThreadOne"));
+         assertTrue(variableAfterThreadTwo == visibleVarPanel.getYoVariable("variableAfterThreadTwo"));
       }
       
       scs.closeAndDispose();
