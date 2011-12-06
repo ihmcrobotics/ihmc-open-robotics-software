@@ -29,23 +29,21 @@ public class CommonWalkingGuideLineCalculator implements GuideLineCalculator
    private final DoubleYoVariable velocityGainX = new DoubleYoVariable("velocityGainX", registry);
    private final DoubleYoVariable velocityGainY = new DoubleYoVariable("velocityGainY", registry);
 
-   private final BooleanYoVariable onFinalStep;
 
    private final double footLength, footBack;
 
    public CommonWalkingGuideLineCalculator(CommonWalkingReferenceFrames referenceFrames, double footLength, double footBack, BooleanYoVariable onFinalStep,
            YoVariableRegistry parentRegistry)
    {
-      this.onFinalStep = onFinalStep;
       this.footLength = footLength;
       this.footBack = footBack;
       this.footZUpFrames = referenceFrames.getAnkleZUpReferenceFrames();
       parentRegistry.addChild(registry);
    }
 
-   public FrameLineSegment2d getGuideLine(RobotSide side)
+   public FrameLineSegment2d getGuideLine(RobotSide supportLeg)
    {
-      return guideLines.get(side);
+      return guideLines.get(supportLeg);
    }
 
    public void reset()
@@ -54,69 +52,19 @@ public class CommonWalkingGuideLineCalculator implements GuideLineCalculator
    }
 
    public void update(RobotSide supportLeg, BipedSupportPolygons bipedSupportPolygons, FramePoint2d capturePointInSupportFootZUp,
-                      FramePoint finalDesiredSwingTarget, FrameVector2d desiredVelocityInSupportFootFrame)
+                      FramePoint finalDesiredSwingTarget, FrameVector2d desiredVelocity)
    {
+      if (finalDesiredSwingTarget == null)
+         throw new RuntimeException("finalDesiredSwingTarget == null");
+      
       FramePoint2d supportFootSweetSpot = bipedSupportPolygons.getSweetSpotCopy(supportLeg);
+      supportFootSweetSpot.changeFrame(footZUpFrames.get(supportLeg));
+      supportFootSweetSpot.setX(supportFootSweetSpot.getX() + captureForwardOfSweet.getDoubleValue());
 
-      if ((onFinalStep == null) ||!onFinalStep.getBooleanValue())
-         supportFootSweetSpot.setX(supportFootSweetSpot.getX() + captureForwardOfSweet.getDoubleValue());
-
-      FramePoint2d stepToLocation;
-
-      if (finalDesiredSwingTarget == null)    // If the finalDesired isn't specified, then track where the leg is currently.
-      {
-         stepToLocation = new FramePoint2d(footZUpFrames.get(supportLeg.getOppositeSide()));
-         stepToLocation.changeFrame(footZUpFrames.get(supportLeg));
-      }
-      else
-      {
-         stepToLocation = new FramePoint2d(finalDesiredSwingTarget.getReferenceFrame(), finalDesiredSwingTarget.getX(), finalDesiredSwingTarget.getY());
-      }
-
-      if ((onFinalStep == null) ||!onFinalStep.getBooleanValue())
-      {
-//         boolean USE_VELOCITY_OFFSET = false;
-//         if (USE_VELOCITY_OFFSET && (desiredVelocityInSupportFootFrame != null))
-//         {
-//            FrameVector2d velocityError = new FrameVector2d(desiredVelocityInSupportFootFrame);
-//            velocityError.sub(actualCenterOfMassVelocityInSupportFootFrame);
-//            FrameVector2d velocityErrorControlAction = new FrameVector2d(desiredVelocityInSupportFootFrame.getReferenceFrame(),
-//                                                          -velocityError.getX() * velocityGainX.getDoubleValue(),
-//                                                          -velocityError.getY() * velocityGainY.getDoubleValue());
-//            stepToLocation.setX(stepToLocation.getX() + captureForward.getDoubleValue() + velocityErrorControlAction.getX());
-//         }
-//         else
-//         {
-//            stepToLocation.setX(stepToLocation.getX() + captureForward.getDoubleValue());
-//         }
-
-       stepToLocation.setX(stepToLocation.getX() + captureForward.getDoubleValue());
-      }
-
-      else
-      {
-         // On final step, guide line goes from support foot sweet spot to other foot centroid.
-         stepToLocation.setX(stepToLocation.getX() + footLength / 2.0 - footBack);
-      }
-
-//    if  (supportLeg == RobotSide.LEFT)
-//    {
-//       stepToLocation = new FramePoint2d(supportFootSweetSpot.getReferenceFrame(), stepForward.val, -stepInside.val);
-//       pointOnLine2d = new FramePoint2d(supportFootSweetSpot.getReferenceFrame(), stepForward.val + captureForward.val, -stepInside.val);
-//    }
-//    else
-//    {
-//       stepToLocation = new FramePoint2d(supportFootSweetSpot.getReferenceFrame(), stepForward.val, stepInside.val);
-//       pointOnLine2d = new FramePoint2d(supportFootSweetSpot.getReferenceFrame(), stepForward.val + captureForward.val, stepInside.val); // 0.08 is because stepForward is where the ankle will land...
-//    }
-
-//    FrameVector2d forward = new FrameVector2d(supportFootSweetSpot.getReferenceFrame(), 1.0, 0.0);
-//    FrameLine2d guideLine = new FrameLine2d(supportFootSweetSpot, forward);
-
-//    stepToLocations.set(supportLeg, stepToLocation);
-
-
-      FrameLineSegment2d guideLine = new FrameLineSegment2d(supportFootSweetSpot, stepToLocation.changeFrameCopy(supportFootSweetSpot.getReferenceFrame()));
+      FramePoint2d stepToLocation = finalDesiredSwingTarget.toFramePoint2d();
+      stepToLocation.changeFrame(footZUpFrames.get(supportLeg));
+      stepToLocation.setX(stepToLocation.getX() + captureForward.getDoubleValue());
+      FrameLineSegment2d guideLine = new FrameLineSegment2d(supportFootSweetSpot, stepToLocation);
 
       guideLines.set(supportLeg, guideLine);
    }
@@ -131,9 +79,9 @@ public class CommonWalkingGuideLineCalculator implements GuideLineCalculator
    
    public void setParametersForM2V2PushRecovery()
    {
-      velocityGainX.set(0.2);
-      velocityGainY.set(0.05);
-      captureForward.set(0.08);    // 0.04; //0.08;
+      velocityGainX.set(0.0);
+      velocityGainY.set(0.0);
+      captureForward.set(0.0); // 0.08);    // 0.04; //0.08;
       captureForwardOfSweet.set(0.03);
    }
 

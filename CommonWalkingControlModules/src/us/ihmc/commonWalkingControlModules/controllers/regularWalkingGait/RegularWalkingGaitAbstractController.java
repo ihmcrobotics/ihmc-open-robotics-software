@@ -31,6 +31,7 @@ import com.yobotics.simulationconstructionset.util.statemachines.StateChangedLis
 import com.yobotics.simulationconstructionset.util.statemachines.StateMachine;
 import com.yobotics.simulationconstructionset.util.statemachines.StateMachinesJPanel;
 import com.yobotics.simulationconstructionset.util.statemachines.StateTransition;
+import com.yobotics.simulationconstructionset.util.statemachines.StateTransitionAction;
 import com.yobotics.simulationconstructionset.util.statemachines.StateTransitionCondition;
 
 public abstract class RegularWalkingGaitAbstractController implements RobotController
@@ -57,6 +58,7 @@ public abstract class RegularWalkingGaitAbstractController implements RobotContr
 
    protected final BooleanYoVariable go = new BooleanYoVariable("go", "Starts and stops the walking", childRegistry);
    protected final BooleanYoVariable balanceOnOneLeg = new BooleanYoVariable("balanceOnOneLeg", "Starts and stops balancing on one leg", childRegistry);
+   protected final BooleanYoVariable backToDoubleSupport = new BooleanYoVariable("backToDoubleSupport", childRegistry);
    protected final BooleanYoVariable swingInAir = new BooleanYoVariable("swingInAir", "Starts and stops swinging to a new position in the air", childRegistry);
 
    protected final BooleanYoVariable resetSteps = new BooleanYoVariable("resetSteps", childRegistry);
@@ -217,7 +219,7 @@ public abstract class RegularWalkingGaitAbstractController implements RobotContr
       public void doTransitionIntoAction()
       {
          supportLegYoVariable.set(null);
-
+         backToDoubleSupport.set(false);
          stanceSubController.doTransitionIntoStartStopWalkingDoubleSupport(loadingLeg);
       }
 
@@ -717,7 +719,7 @@ public abstract class RegularWalkingGaitAbstractController implements RobotContr
 
       private void determineCurrentConfiguration()
       {
-         if (!balanceOnOneLeg.getBooleanValue())
+         if (backToDoubleSupport.getBooleanValue())
             currentConfiguration = backToDoubleSupportConfiguration;
          else if (!swingInAir.getBooleanValue())
             currentConfiguration = homeConfiguration;
@@ -825,7 +827,7 @@ public abstract class RegularWalkingGaitAbstractController implements RobotContr
             if (swingSubController.isDoneWithSwingInAir(oneLegBalanceSide.getEnumValue().getOppositeSide(), walkingStateMachine.timeInCurrentState()))
             {
                boolean commandedToSwingAgain = swingInAir.getBooleanValue();
-               boolean endingSingleSupport = !balanceOnOneLeg.getBooleanValue() &&!swingSubController.isReadyForDoubleSupport();
+               boolean endingSingleSupport = backToDoubleSupport.getBooleanValue() &&!swingSubController.isReadyForDoubleSupport();
 
                return commandedToSwingAgain || endingSingleSupport;
             }
@@ -838,11 +840,38 @@ public abstract class RegularWalkingGaitAbstractController implements RobotContr
       {
          public boolean checkCondition()
          {
-            return (!balanceOnOneLeg.getBooleanValue() && swingSubController.isReadyForDoubleSupport());
+            return (backToDoubleSupport.getBooleanValue() && swingSubController.isReadyForDoubleSupport());
+         }
+      };
+      
+      StateTransitionCondition toLeftEarlyStanceRightInitialSwingFromSwingInAirCondition = new StateTransitionCondition()
+      {
+         public boolean checkCondition()
+         {
+            return stanceSubController.needToTakeAStep(RobotSide.LEFT);
+         }
+      };
+      
+      StateTransitionCondition toRightEarlyStanceLeftInitialSwingFromSwingInAirCondition = new StateTransitionCondition()
+      {
+         public boolean checkCondition()
+         {
+            return stanceSubController.needToTakeAStep(RobotSide.RIGHT);
          }
       };
 
       // End: State transition conditions
+      
+      // Begin: create state transition actions
+      StateTransitionAction switchBalanceSideAction = new StateTransitionAction()
+      {
+         
+         public void doTransitionAction()
+         {
+            oneLegBalanceSide.set(oneLegBalanceSide.getEnumValue().getOppositeSide());
+         }
+      };
+      // End: create state transition actions
 
       // Begin: create state transitions
       StateTransition toTransferAllLoadToLeftLegForWalkingState = new StateTransition(transferAllLoadToLeftLegForWalkingState.getStateEnum(),
@@ -865,6 +894,9 @@ public abstract class RegularWalkingGaitAbstractController implements RobotContr
 
       StateTransition toStartWalkingDoubleSupportStateFromSingleLegBalance = new StateTransition(startWalkingDoubleSupportState.getStateEnum(),
                                                                                 returnToDoubleSupportFromSingleSupportBalanceCondition);
+      
+      StateTransition toLeftEarlyStanceRightInitialSwingFromSwingInAir = new StateTransition(leftEarlyStanceRightInitialSwingState.getStateEnum(), toLeftEarlyStanceRightInitialSwingFromSwingInAirCondition, switchBalanceSideAction);
+      StateTransition toRightEarlyStanceLeftInitialSwingFromSwingInAir = new StateTransition(rightEarlyStanceLeftInitialSwingState.getStateEnum(), toRightEarlyStanceLeftInitialSwingFromSwingInAirCondition, switchBalanceSideAction);
 
       // End: create state transitions
 
@@ -884,6 +916,10 @@ public abstract class RegularWalkingGaitAbstractController implements RobotContr
       // Go to single leg balance
       startWalkingDoubleSupportState.addStateTransition(toLeftLoadingForSingleLegBalanceState);
       startWalkingDoubleSupportState.addStateTransition(toRightLoadingForSingleLegBalanceState);
+      stopWalkingLeftLoadingState.addStateTransition(toLeftLoadingForSingleLegBalanceState);
+      stopWalkingLeftLoadingState.addStateTransition(toRightLoadingForSingleLegBalanceState);
+      stopWalkingRightLoadingState.addStateTransition(toLeftLoadingForSingleLegBalanceState);
+      stopWalkingRightLoadingState.addStateTransition(toRightLoadingForSingleLegBalanceState);
 
       // Swing again in single leg support
       leftSingleLegBalanceRightSwingInAirState.addStateTransition(toLeftSingleLegBalanceRightSwingInAirState);
@@ -892,6 +928,10 @@ public abstract class RegularWalkingGaitAbstractController implements RobotContr
       // Return to double support from single support
       leftSingleLegBalanceRightSwingInAirState.addStateTransition(toStartWalkingDoubleSupportStateFromSingleLegBalance);
       rightSingleLegBalanceLeftSwingInAirState.addStateTransition(toStartWalkingDoubleSupportStateFromSingleLegBalance);
+      
+      // Go to initial swing from swing in air (for push recovery)
+      leftSingleLegBalanceRightSwingInAirState.addStateTransition(toLeftEarlyStanceRightInitialSwingFromSwingInAir);
+      rightSingleLegBalanceLeftSwingInAirState.addStateTransition(toRightEarlyStanceLeftInitialSwingFromSwingInAir);
 
       // Add default state transition last
 //    startWalkingDoubleSupportState.setDefaultNextState(transferAllLoadToRightLegForWalkingState.getStateEnum());
