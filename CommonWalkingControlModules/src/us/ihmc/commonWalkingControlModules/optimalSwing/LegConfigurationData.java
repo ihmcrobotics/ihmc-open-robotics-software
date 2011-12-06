@@ -6,6 +6,8 @@ import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
 
+import org.jfree.util.ArrayUtilities;
+
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.Orientation;
@@ -23,12 +25,16 @@ public class LegConfigurationData
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
    
-   private final List<LegJointName> jointNames;
+   
+   private final List<LegJointName> jointsToInterpolate;
+   private final List<LegJointName> jointsToOptimize;
+   private final List<LegJointName> allJoints;
    
    private final EnumYoVariable<RobotSide> robotSide = new EnumYoVariable<RobotSide>("robotSide", registry, RobotSide.class);
    private final BooleanYoVariable currentlyInSwing = new BooleanYoVariable("currentlyInSwing", registry);
    private final DoubleYoVariable swingTimeRemaining = new DoubleYoVariable("swingTimeRemaining", registry);
    
+   private final DoubleYoVariable hipRollHeight = new DoubleYoVariable("hipRollHeight", registry);
    
    private final EnumMap<LegJointName, DoubleYoVariable> currentJointAngles = new EnumMap<LegJointName, DoubleYoVariable>(LegJointName.class);
    private final EnumMap<LegJointName, DoubleYoVariable> currentJointVelocities = new EnumMap<LegJointName, DoubleYoVariable>(LegJointName.class);
@@ -40,11 +46,18 @@ public class LegConfigurationData
    
    private final ArrayList<YoVariable> allVariables;
 
-   public LegConfigurationData(LegJointName[] jointNames, YoVariableRegistry parentRegistry)
+   public LegConfigurationData(LegJointName[] jointsToInterpolate, LegJointName[] jointsToOptimize, YoVariableRegistry parentRegistry)
    {
-      this.jointNames = Collections.unmodifiableList(Arrays.asList(jointNames));
+      this.jointsToInterpolate = Collections.unmodifiableList(Arrays.asList(jointsToInterpolate));
+      this.jointsToOptimize = Collections.unmodifiableList(Arrays.asList(jointsToOptimize));
       
-      for(LegJointName jointName : jointNames)
+      ArrayList<LegJointName> allJointNames = new ArrayList<LegJointName>();
+      allJointNames.addAll(Arrays.asList(jointsToInterpolate));
+      allJointNames.addAll(Arrays.asList(jointsToOptimize));
+      this.allJoints = Collections.unmodifiableList(allJointNames);
+      
+      
+      for(LegJointName jointName : allJointNames)
       {
          currentJointAngles.put(jointName, new DoubleYoVariable("current"+jointName.getCamelCaseNameForMiddleOfExpression()+"Angle", registry));
          currentJointVelocities.put(jointName, new DoubleYoVariable("current"+jointName.getCamelCaseNameForMiddleOfExpression()+"Velocity", registry));
@@ -136,19 +149,39 @@ public class LegConfigurationData
       finalDesiredJointVelocities.get(jointName).set(value);
    }
    
-   public List<LegJointName> getJointNames()
+   public List<LegJointName> getJointsToOptimize()
    {
-      return jointNames;
+      return jointsToOptimize;
    }
    
-   public int getNumberOfJoints()
+   public List<LegJointName> getJointsToInterpolate()
    {
-      return jointNames.size();
+      return jointsToInterpolate;
    }
    
-   public LegJointName getJointName(int index)
+   public List<LegJointName> getAllJoints()
    {
-      return jointNames.get(index);
+      return allJoints;
+   }
+   
+   public int getNumberOfJointsToOptimize()
+   {
+      return jointsToOptimize.size();
+   }
+   
+   public int getNumberOfJointsToInterpolate()
+   {
+      return jointsToInterpolate.size();
+   }
+   
+   public LegJointName getJointToOptimize(int index)
+   {
+      return jointsToOptimize.get(index);
+   }
+   
+   public LegJointName getJointToInterpolate(int index)
+   {
+      return jointsToInterpolate.get(index);
    }
    
    public ArrayList<YoVariable> getAllVariables()
@@ -164,6 +197,16 @@ public class LegConfigurationData
    public void setUpperBodyOrientationInWorld(Orientation orientation)
    {
       this.upperBodyOrientationInWorld.set(orientation);
+   }
+
+   public double getHipRollHeight()
+   {
+      return hipRollHeight.getDoubleValue();
+   }
+   
+   public void setHipRollHeight(double value)
+   {
+      hipRollHeight.set(value);
    }
 
 }

@@ -22,7 +22,9 @@ public class LegTorqueData
    private final List<LegJointName> jointNames;
 
    
-   private final EnumMap<LegJointName, DoubleYoVariable> desiredJointTorques = new EnumMap<LegJointName, DoubleYoVariable>(LegJointName.class);
+   private final EnumMap<LegJointName, DoubleYoVariable> desiredJointPositions = new EnumMap<LegJointName, DoubleYoVariable>(LegJointName.class);
+   private final EnumMap<LegJointName, DoubleYoVariable> desiredJointVelocities = new EnumMap<LegJointName, DoubleYoVariable>(LegJointName.class);
+   private final EnumMap<LegJointName, DoubleYoVariable> desiredJointAccelerations = new EnumMap<LegJointName, DoubleYoVariable>(LegJointName.class);
    
    private final EnumYoVariable<RobotSide> robotSide = new EnumYoVariable<RobotSide>("robotSide", registry, RobotSide.class);
 
@@ -36,7 +38,9 @@ public class LegTorqueData
       
       for(LegJointName jointName : jointNames)
       {
-         desiredJointTorques.put(jointName, new DoubleYoVariable("desired"+jointName.getCamelCaseNameForMiddleOfExpression()+"Torque", registry));
+         desiredJointPositions.put(jointName, new DoubleYoVariable("desired"+jointName.getCamelCaseNameForMiddleOfExpression()+"Positon", registry));
+         desiredJointVelocities.put(jointName, new DoubleYoVariable("desired"+jointName.getCamelCaseNameForMiddleOfExpression()+"Velocity", registry));
+         desiredJointAccelerations.put(jointName, new DoubleYoVariable("desired"+jointName.getCamelCaseNameForMiddleOfExpression()+"Acceleration", registry));
       }
       
       if(parentRegistry != null)
@@ -58,16 +62,35 @@ public class LegTorqueData
       this.robotSide.set(robotSide);
    }
    
-   public double getDesiredJointTorque(LegJointName jointName)
+   public double getDesiredJointPosition(LegJointName jointName)
    {
-      return desiredJointTorques.get(jointName).getDoubleValue();
+      return desiredJointPositions.get(jointName).getDoubleValue();
    }
    
-   public void setDesiredJointTorque(LegJointName jointName, double value)
+   public void setDesiredJointPosition(LegJointName jointName, double value)
    {
-      desiredJointTorques.get(jointName).set(value);
+      desiredJointPositions.get(jointName).set(value);
    }
    
+   public double getDesiredJointVelocity(LegJointName jointName)
+   {
+      return desiredJointVelocities.get(jointName).getDoubleValue();
+   }
+
+   public void setDesiredJointVelocity(LegJointName jointName, double value)
+   {
+      desiredJointVelocities.get(jointName).set(value);
+   }
+   
+   public double getDesiredJointAcceleration(LegJointName jointName)
+   {
+      return desiredJointAccelerations.get(jointName).getDoubleValue();
+   }
+   
+   public void setDesiredJointAcceleration(LegJointName jointName, double value)
+   {
+      desiredJointAccelerations.get(jointName).set(value);
+   }
 
    public List<LegJointName> getJointNames()
    {
