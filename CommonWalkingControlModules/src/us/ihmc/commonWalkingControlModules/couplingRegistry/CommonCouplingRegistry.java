@@ -191,13 +191,16 @@ public class CommonCouplingRegistry implements CouplingRegistry
    public void setLungeAxis(FrameVector2d lungeAxis)
    {
       this.lungeAxis.set(lungeAxis);
-      this.lungeAxis.normalize();
+      if (lungeAxis.length() != 0.0)
+      {
+         this.lungeAxis.normalize();
+      }
    }
    
    // returns null if not lunging
    public FrameVector2d getLungeAxisInFrame(ReferenceFrame expressedInFrame)
    {
-      if (lungeAxis.getX() == 0.0 && lungeAxis.getY() == 0.0)
+      if (lungeAxis.length() == 0.0)
       {
          return null;
       }
