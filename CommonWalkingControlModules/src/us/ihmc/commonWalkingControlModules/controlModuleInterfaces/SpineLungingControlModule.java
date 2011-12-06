@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.controlModuleInterfaces;
 import java.util.ArrayList;
 
 import javax.vecmath.Vector2d;
+import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.SpineJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.SpineTorques;
@@ -21,5 +22,7 @@ public interface SpineLungingControlModule extends SpineControlModule
    public abstract void setGains();
    
    public void scaleGainsBasedOnLungeAxis(Vector2d lungeAxis);
+
+   public abstract void setHipXYTorque(Vector3d desiredLungingTorqeicpRecoverDecelerateState);
 }
 

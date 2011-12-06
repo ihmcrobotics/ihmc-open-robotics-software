@@ -269,5 +269,15 @@ public class SpineJointLungingControlModule implements SpineLungingControlModule
          spineTorques.setTorque(spineJointName, spineRevoluteJoint.getTau());   
       }
    }
+
+   @Override
+   public void setHipXYTorque(Vector3d desiredTorqueVector)
+   {
+      spineTorques.setTorque(SpineJointName.SPINE_PITCH, desiredTorqueVector.getY());
+      spineTorques.setTorque(SpineJointName.SPINE_ROLL, desiredTorqueVector.getX());
+      spineTorques.setTorque(SpineJointName.SPINE_YAW, desiredTorqueVector.getZ());
+
+      
+   }
 }
 
