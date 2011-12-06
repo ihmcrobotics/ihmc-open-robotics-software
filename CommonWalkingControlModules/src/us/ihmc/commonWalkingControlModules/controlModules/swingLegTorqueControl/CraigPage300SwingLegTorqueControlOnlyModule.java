@@ -161,7 +161,19 @@ public class CraigPage300SwingLegTorqueControlOnlyModule implements SwingLegTorq
       // control
       inverseDynamicsCalculators.get(swingSide).compute();
 
+      
+      
+      /*
+       * The legJointPositionControlModule does damping of all joints by setting desired velocity and damping in the low level controller. The higher loop rate allows higher values for damping. 
+       * 
+       * The torques for Hip Pitch/Roll and the Knee get overwritten by values from the CraigPage300 controller, but the damping (speed control) is still applied
+       * by the low level side!
+       *  
+       */
       legJointPositionControlModules.get(swingSide).packTorquesForLegJointsPositionControl(1.0, legTorquesToPackForSwingLeg, jointPositions, jointVelocities);
+      
+      
+      
       for (LegJointName legJointName : legTorquesToPackForSwingLeg.getLegJointNames())
       {
          double tauInverseDynamics = fullRobotModel.getLegJoint(swingSide, legJointName).getTau();
@@ -220,12 +232,26 @@ public class CraigPage300SwingLegTorqueControlOnlyModule implements SwingLegTorq
    public void setParametersForM2V2()
    {
       useBodyAcceleration = true;
-
+      
+      for(RobotSide side : RobotSide.values())
+      {
+         legJointPositionControlModules.get(side).setDefaultGainsForM2V2();
+      }
       masterKpGain.set(150.0);
       masterKdGain.set(2.0);
       
 
       softScaleFactor.set(0.1); // 0.25);
+   }
+   
+   public void setParametersForOptimalSwing()
+   {
+      for(RobotSide side : RobotSide.values())
+      {
+         legJointPositionControlModules.get(side).setGainsForOptimalSwing();
+      }
+      masterKpGain.set(0.0);
+      masterKdGain.set(0.0);
    }
 
    private GUISetterUpper createGUISetterUpper()
