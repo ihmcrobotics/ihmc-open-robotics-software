@@ -58,6 +58,7 @@ public class CommonStanceSubController implements StanceSubController
    private final DoubleYoVariable minDoubleSupportTimeBeforeWalking = new DoubleYoVariable("minDoubleSupportTimeBeforeWalking", registry);
    private final DoubleYoVariable xCaptureToTransfer = new DoubleYoVariable("xCaptureToTransfer", registry);
    private final DoubleYoVariable yCaptureToTransfer = new DoubleYoVariable("yCaptureToTransfer", registry);
+   private final DoubleYoVariable minPercentageTowardsDesired = new DoubleYoVariable("minPercentageTowardsDesired", registry);
 
    private final LegToTrustForVelocityWriteOnly supportLegAndLegToTrustForVelocity;    // FIXME: update things
 
@@ -352,8 +353,7 @@ public class CommonStanceSubController implements StanceSubController
       if (!inStateLongEnough)
          return false;
 
-      double minPercentageTowardsDesired = 0.95;
-      return isOverPercentageTowardDesired(loadingLeg, minPercentageTowardsDesired);
+      return isOverPercentageTowardDesired(loadingLeg, minPercentageTowardsDesired.getDoubleValue());
    }
 
    private boolean isOverPercentageTowardDesired(RobotSide loadingLeg, double minPercentageTowardsDesired)
@@ -470,6 +470,7 @@ public class CommonStanceSubController implements StanceSubController
       toeOffFootPitch.set(0.1);    // 0.3);
       toeOffMoveDuration.set(0.05);
       waitInLoadingPreswingB = false;
+      minPercentageTowardsDesired.set(0.9);
    }
 
    public void setParametersForM2V2()
@@ -482,6 +483,7 @@ public class CommonStanceSubController implements StanceSubController
       toeOffFootPitch.set(0.1);    // 0.3);
       toeOffMoveDuration.set(0.05);
       waitInLoadingPreswingB = true;
+      minPercentageTowardsDesired.set(0.95);
    }
 
    public void initialize()
