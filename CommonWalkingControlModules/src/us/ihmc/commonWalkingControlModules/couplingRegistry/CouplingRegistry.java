@@ -51,8 +51,8 @@ public interface CouplingRegistry
    // body position at the end of the swing phase. So now, it is using data that is one tick old.
    public abstract void setDesiredCoP(FramePoint2d desiredCoP);
    public abstract FramePoint2d getDesiredCoP();
-
-   public abstract void setIsLunging(boolean isLunging);
-   public abstract boolean getIsLunging();
    
+   public abstract void setLungeAxis(FrameVector2d lungeAxis);
+   // returns null if not lunging
+   public abstract FrameVector2d getLungeAxisInFrame(ReferenceFrame expressedInFrame);
 }
