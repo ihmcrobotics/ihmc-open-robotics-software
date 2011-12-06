@@ -270,7 +270,6 @@ public class SpineJointLungingControlModule implements SpineLungingControlModule
       }
    }
 
-   @Override
    public void setHipXYTorque(Vector3d desiredTorqueVector)
    {
       spineTorques.setTorque(SpineJointName.SPINE_PITCH, desiredTorqueVector.getY());
