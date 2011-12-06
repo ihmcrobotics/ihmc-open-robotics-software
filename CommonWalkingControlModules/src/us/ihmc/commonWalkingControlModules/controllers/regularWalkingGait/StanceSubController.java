@@ -86,4 +86,6 @@ public interface StanceSubController
    public abstract boolean canWeStopNow();
 
    public abstract void initialize();
+
+   public abstract boolean needToTakeAStep(RobotSide supportLeg);
 }

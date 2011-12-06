@@ -80,8 +80,6 @@ public class JointSpaceSwingSubController implements SwingSubController
 
    private final DoubleYoVariable passiveHipCollapseTime;
 
-   private final DoubleYoVariable estimatedSwingTimeRemaining;
-
    private final IntegerYoVariable numberOfViaPointsDuringWalk;
 
    private final BooleanYoVariable canGoToDoubleSupportFromLastTickState;
@@ -140,10 +138,6 @@ public class JointSpaceSwingSubController implements SwingSubController
          legJointSetpointsdd.put(jointName, new DoubleYoVariable("qdd_" + jointName.getShortUnderBarName() + "_setpoint", registry));
       }
 
-      parentRegistry.addChild(registry);
-
-      estimatedSwingTimeRemaining = new DoubleYoVariable("estimatedSwingTimeRemaining", registry);
-
       passiveHipCollapseTime = new DoubleYoVariable("passiveHipCollapseTime", registry);
       minimumTerminalSwingDuration = new DoubleYoVariable("minimumTerminalSwingDuration", "The minimum duration of terminal swing state. [s]", registry);
 
@@ -156,16 +150,26 @@ public class JointSpaceSwingSubController implements SwingSubController
       positionErrorAtEndOfStepX = new DoubleYoVariable("positionErrorAtEndOfStepX", registry);
       positionErrorAtEndOfStepY = new DoubleYoVariable("positionErrorAtEndOfStepY", registry);
 
-      setParameters();
+      parentRegistry.addChild(registry);
    }
 
-   private void setParameters()
+   public void setParametersForM2V2Walking()
    {
       swingDuration.set(0.55);
       passiveHipCollapseTime.set(0.07);
       minimumTerminalSwingDuration.set(0.0);
       maximumTerminalSwingDuration.set(0.05);
-      numberOfViaPointsDuringWalk.set(2); // 2);
+      numberOfViaPointsDuringWalk.set(2);
+      setEstimatedSwingTimeRemaining(swingDuration.getDoubleValue());
+   }
+   
+   public void setParametersForM2V2PushRecovery()
+   {
+      swingDuration.set(0.25);
+      passiveHipCollapseTime.set(0.07);
+      minimumTerminalSwingDuration.set(0.0);
+      maximumTerminalSwingDuration.set(0.05);
+      numberOfViaPointsDuringWalk.set(0);
       setEstimatedSwingTimeRemaining(swingDuration.getDoubleValue());
    }
 
@@ -397,6 +401,10 @@ public class JointSpaceSwingSubController implements SwingSubController
 
    public void doTransitionOutOfSwingInAir(RobotSide swingLeg)
    {
+      RobotSide supportLeg = swingLeg.getOppositeSide();
+      desiredFootstepCalculator.initializeDesiredFootstep(supportLeg);
+      // TODO: sort of nasty, but otherwise the swing trajectory won't be initialized correctly in doTransitionIntoInitialSwing:
+      couplingRegistry.setDesiredFootstep(desiredFootstepCalculator.updateAndGetDesiredFootstep(swingLeg.getOppositeSide()));
    }
 
    public boolean canWeStopNow()
@@ -417,12 +425,11 @@ public class JointSpaceSwingSubController implements SwingSubController
 
    public double getEstimatedSwingTimeRemaining()
    {
-      return estimatedSwingTimeRemaining.getDoubleValue();
+      return couplingRegistry.getEstimatedSwingTimeRemaining();
    }
 
    private void setEstimatedSwingTimeRemaining(double timeRemaining)
    {
-      estimatedSwingTimeRemaining.set(timeRemaining);
       couplingRegistry.setEstimatedSwingTimeRemaining(timeRemaining);
    }
 
