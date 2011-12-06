@@ -16,6 +16,7 @@ import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.R2SpineLinkName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.SpineJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.SpineTorques;
+import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.ProcessedSensorsInterface;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.containers.ContainerTools;
@@ -56,9 +57,14 @@ public class SpineJointLungingControlModule implements SpineLungingControlModule
    private SpineTorques spineTorques = new SpineTorques();
 
    private final RigidBody chest;
+
+   private Wrench externalWrench;
+
+   private final CommonWalkingReferenceFrames referenceFrames;
  
    public SpineJointLungingControlModule(ProcessedSensorsInterface processedSensors, double controlDT, YoVariableRegistry parentRegistry,
-         InverseDynamicsCalculator spineJointIDCalc, RigidBody chest, ArrayList<RevoluteJoint> spineRevoluteJointList)
+         InverseDynamicsCalculator spineJointIDCalc, RigidBody chest, ArrayList<RevoluteJoint> spineRevoluteJointList,
+         CommonWalkingReferenceFrames referenceFrames)
    {
       this.spineJointIDCalc = spineJointIDCalc;
 //      this.pelvisRigidBody = pelvisRigidBody;
@@ -67,14 +73,22 @@ public class SpineJointLungingControlModule implements SpineLungingControlModule
       this.processedSensors = processedSensors;
       this.controlDT = controlDT;
       this.chest = chest;
+      this.referenceFrames = referenceFrames;
       parentRegistry.addChild(registry);
       
       populateYoVariables();
       populateControllers();
+      initializeVariables();
       setDesireds();
       setGains();
    }
    
+   private void initializeVariables()
+   {
+      ReferenceFrame pelvisFrame = pelvisRigidBody.getBodyFixedFrame();
+      externalWrench = new Wrench(pelvisFrame, pelvisFrame);
+   }
+
    /**
     * Old. Do not use.
     */
@@ -174,6 +188,13 @@ public class SpineJointLungingControlModule implements SpineLungingControlModule
       setSpineTorquesFromSpineJoints();
    }
    
+   public void getWrenchByUpperBody(Wrench upperBodyWrenchToPack)
+   {
+      processedSensors.getFullRobotModel().getRootJoint().packWrench(upperBodyWrenchToPack);
+      upperBodyWrenchToPack.changeBodyFrameAttachedToSameBody(referenceFrames.getPelvisFrame());
+      upperBodyWrenchToPack.changeFrame(referenceFrames.getPelvisFrame());
+   }
+   
    public void setGainsToZero(ArrayList<SpineJointName> spineJointsWithZeroGain)
    {
       for (int index = 0; index < spineJointsWithZeroGain.size(); index ++)
@@ -186,7 +207,9 @@ public class SpineJointLungingControlModule implements SpineLungingControlModule
    
    public void setWrench(Wrench wrenchOnPelvis)
    {
-      spineJointIDCalc.setExternalWrench(pelvisRigidBody, wrenchOnPelvis);
+      // to prevent wrong frame stuff
+      externalWrench.setAngularPart(wrenchOnPelvis.getAngularPartCopy());
+      spineJointIDCalc.setExternalWrench(pelvisRigidBody, externalWrench);
    }
 
    public void getSpineTorques(SpineTorques spineTorquesToPack)

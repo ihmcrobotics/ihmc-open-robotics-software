@@ -15,6 +15,7 @@ import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint2d;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector2d;
 
 public class CommonCouplingRegistry implements CouplingRegistry
 {
@@ -26,7 +27,6 @@ public class CommonCouplingRegistry implements CouplingRegistry
    private final DoubleYoVariable doubleSupportDuration = new DoubleYoVariable("doubleSupportDuration", registry);
    private final DoubleYoVariable estimatedSwingTimeRemaining = new DoubleYoVariable("estimatedSwingTimeRemaining", registry);
    private final BooleanYoVariable forceHindOnToes = new BooleanYoVariable("forceHindOnToes", registry);
-   private BooleanYoVariable isLunging = new BooleanYoVariable("isLunging", registry);
 
    //TODO: May need to YoVariablize the following to make things rewindable?
    private FrameConvexPolygon2d captureRegion;
@@ -44,7 +44,7 @@ public class CommonCouplingRegistry implements CouplingRegistry
 
    private Wrench upperBodyWrench;
    
-
+   private YoFrameVector2d lungeAxis = new YoFrameVector2d("lungeAxis", "", ReferenceFrame.getWorldFrame(), registry);
 
 
    public CommonCouplingRegistry(CommonWalkingReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons, YoVariableRegistry parentRegistry)
@@ -188,14 +188,25 @@ public class CommonCouplingRegistry implements CouplingRegistry
       return desiredCoP.getFramePoint2dCopy();
    }
    
-   public void setIsLunging(boolean isLunging)
+   public void setLungeAxis(FrameVector2d lungeAxis)
    {
-      this.isLunging.set(isLunging);
+      this.lungeAxis.set(lungeAxis);
+      this.lungeAxis.normalize();
    }
    
-   public boolean getIsLunging()
+   // returns null if not lunging
+   public FrameVector2d getLungeAxisInFrame(ReferenceFrame expressedInFrame)
    {
-      return this.isLunging.getBooleanValue();
+      if (lungeAxis.getX() == 0.0 && lungeAxis.getY() == 0.0)
+      {
+         return null;
+      }
+      else
+      {
+         FrameVector2d ret = lungeAxis.getFrameVector2dCopy();
+         ret.changeFrame(expressedInFrame);
+         return ret;
+      }
    }
 
 }
