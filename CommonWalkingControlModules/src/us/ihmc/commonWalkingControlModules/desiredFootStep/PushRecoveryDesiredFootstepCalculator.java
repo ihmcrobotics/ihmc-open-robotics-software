@@ -66,21 +66,9 @@ public class PushRecoveryDesiredFootstepCalculator implements DesiredFootstepCal
 
    private void computeInitialDesiredFootstep(RobotSide supportLegSide)
    {
-//      ReferenceFrame supportFootFrame = referenceFrames.getAnkleZUpFrame(supportLegSide);
-//      FramePoint capturePoint = couplingRegistry.getCapturePointInFrame(supportFootFrame);
-//      FramePoint sweetSpot = couplingRegistry.getBipedSupportPolygons().getSweetSpotCopy(supportLegSide).toFramePoint();
-//      sweetSpot.changeFrame(supportFootFrame);
-//
-//      FrameVector offsetFromSweetSpot = new FrameVector(capturePoint);
-//      offsetFromSweetSpot.sub(sweetSpot);
-//      offsetFromSweetSpot.normalize();
-//      offsetFromSweetSpot.scale(stepDistance.getDoubleValue());
-//      FramePoint footstepPosition = new FramePoint(sweetSpot);
-//      footstepPosition.add(offsetFromSweetSpot);
-//      footstepPosition.setZ(0.0);
-
       if (couplingRegistry.getCaptureRegion() == null)
       {
+         // ICP probably went outside the foot on the wrong side; no capture region. Can't handle this currently.
          System.out.println("supportLegForWalkingCtrlr: " + couplingRegistry.getSupportLeg());
          throw new RuntimeException("capture region is null! supportLegForWalkingCtrlr: " + couplingRegistry.getSupportLeg());
       }
