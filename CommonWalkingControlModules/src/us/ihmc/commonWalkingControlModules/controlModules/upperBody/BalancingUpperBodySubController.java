@@ -141,10 +141,10 @@ public class BalancingUpperBodySubController implements UpperBodySubController
       DynamicGraphicVector lungeAxisVisual = new DynamicGraphicVector("lungeAxisVisual", centerOfMassPosition, lungeAxisGraphic, 1.0, YoAppearance.DarkRed());
       dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(name, lungeAxisVisual);
       
-      DynamicGraphicPosition icpPredictedVisual = new DynamicGraphicPosition("icpPredictedVisual", predictedICPAtTimeToStopVisualizer, 0.1, YoAppearance.Purple());
+      DynamicGraphicPosition icpPredictedVisual = new DynamicGraphicPosition("icpPredictedVisual", predictedICPAtTimeToStopVisualizer, 0.05, YoAppearance.Purple());
       dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(name, icpPredictedVisual);
 
-      DynamicGraphicPosition midFeetPoint = new DynamicGraphicPosition("midFeetPoint", this.desiredICPVisualizer, 0.1, YoAppearance.Blue());
+      DynamicGraphicPosition midFeetPoint = new DynamicGraphicPosition("midFeetPoint", this.desiredICPVisualizer, 0.05, YoAppearance.Blue());
       dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(name, midFeetPoint);
 
    }
@@ -269,7 +269,6 @@ public class BalancingUpperBodySubController implements UpperBodySubController
       public void doTransitionIntoAction()
       {
          timeOfStateStart.put((BalancingUpperBodySubControllerState)this.getStateEnum(), processedSensors.getTime());
-         couplingRegistry.setLungeAxis(new FrameVector2d(ReferenceFrame.getWorldFrame()));
       }
 
       public void doTransitionOutOfAction()
