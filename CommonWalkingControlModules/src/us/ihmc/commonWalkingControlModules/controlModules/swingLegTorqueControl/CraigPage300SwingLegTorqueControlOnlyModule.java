@@ -85,18 +85,18 @@ public class CraigPage300SwingLegTorqueControlOnlyModule implements SwingLegTorq
          for (LegJointName legJointName : legJointNames)
          {
             String jointName = robotSide.getCamelCaseNameForStartOfExpression() + legJointName.getCamelCaseNameForMiddleOfExpression();
-            desiredYoLegJointPositions.get(robotSide).put(legJointName, new DoubleYoVariable(jointName + "DesiredPosition", parentRegistry));
-            desiredYoLegJointVelocities.get(robotSide).put(legJointName, new DoubleYoVariable(jointName + "DesiredVelocity", parentRegistry));
-            jointPositionErrors.get(robotSide).put(legJointName, new DoubleYoVariable(jointName + "PositionError", parentRegistry));
-            jointVelocityErrors.get(robotSide).put(legJointName, new DoubleYoVariable(jointName + "VelocityError", parentRegistry));
+            desiredYoLegJointPositions.get(robotSide).put(legJointName, new DoubleYoVariable(jointName + "DesiredPosition", registry));
+            desiredYoLegJointVelocities.get(robotSide).put(legJointName, new DoubleYoVariable(jointName + "DesiredVelocity", registry));
+            jointPositionErrors.get(robotSide).put(legJointName, new DoubleYoVariable(jointName + "PositionError", registry));
+            jointVelocityErrors.get(robotSide).put(legJointName, new DoubleYoVariable(jointName + "VelocityError", registry));
          }
       }
 
       for (LegJointName legJointName : legJointNames)
       {
          String jointName = legJointName.getCamelCaseNameForMiddleOfExpression();
-         kpGains.put(legJointName, new DoubleYoVariable(jointName + "KpGain", parentRegistry));
-         kdGains.put(legJointName, new DoubleYoVariable(jointName + "KdGain", parentRegistry));
+         kpGains.put(legJointName, new DoubleYoVariable(jointName + "KpGain", registry));
+         kdGains.put(legJointName, new DoubleYoVariable(jointName + "KdGain", registry));
       }
 
 
@@ -232,11 +232,7 @@ public class CraigPage300SwingLegTorqueControlOnlyModule implements SwingLegTorq
    public void setParametersForM2V2()
    {
       useBodyAcceleration = true;
-      
-      for(RobotSide side : RobotSide.values())
-      {
-         legJointPositionControlModules.get(side).setDefaultGainsForM2V2();
-      }
+
       masterKpGain.set(150.0);
       masterKdGain.set(2.0);
       
