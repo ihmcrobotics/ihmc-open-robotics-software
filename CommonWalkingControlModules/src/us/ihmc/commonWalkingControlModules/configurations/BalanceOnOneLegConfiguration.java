@@ -50,7 +50,7 @@ public class BalanceOnOneLegConfiguration
    }
 
    public static ArrayList<BalanceOnOneLegConfiguration> generateABunch(int desiredNumberOfConfigurations, RobotSide supportSide,
-         ReferenceFrame supportFootZUpFrame) // int xyCapturePositions, int yawPitchRollPositions, int swingPositions)
+         ReferenceFrame supportFootZUpFrame, boolean randomOrientation) // int xyCapturePositions, int yawPitchRollPositions, int swingPositions)
    {
       ArrayList<BalanceOnOneLegConfiguration> ret = new ArrayList<BalanceOnOneLegConfiguration>(desiredNumberOfConfigurations);
 
@@ -60,8 +60,18 @@ public class BalanceOnOneLegConfiguration
       double captureMinY = -0.01;
       double captureMaxY = 0.01;
 
-      double[] yawPitchRollMin = new double[] { -0.1, -0.1, -0.1 };
-      double[] yawPitchRollMax = new double[] { 0.1, 0.1, 0.1 };
+      double[] yawPitchRollMin;
+      double[] yawPitchRollMax;
+      if (randomOrientation)
+      {
+         yawPitchRollMin = new double[] {-0.1, -0.1, -0.1};
+         yawPitchRollMax = new double[] {0.1, 0.1, 0.1};
+      }
+      else
+      {
+         yawPitchRollMin = new double[] {0.0, 0.0, 0.0};
+         yawPitchRollMax = new double[] {0.0, 0.0, 0.0};
+      }
 
       double[] swingMin = new double[] { -0.2, 0.2, 0.10 };
       double[] swingMax = new double[] { 0.2, 0.4, 0.30 };
@@ -146,7 +156,7 @@ public class BalanceOnOneLegConfiguration
       RobotSide supportSide = RobotSide.LEFT;
       ReferenceFrame supportFootFrame = ReferenceFrame.getWorldFrame();
 
-      ArrayList<BalanceOnOneLegConfiguration> configurations = generateABunch(100000, supportSide, supportFootFrame);
+      ArrayList<BalanceOnOneLegConfiguration> configurations = generateABunch(100000, supportSide, supportFootFrame, true);
 
       for (BalanceOnOneLegConfiguration configuration : configurations)
       {

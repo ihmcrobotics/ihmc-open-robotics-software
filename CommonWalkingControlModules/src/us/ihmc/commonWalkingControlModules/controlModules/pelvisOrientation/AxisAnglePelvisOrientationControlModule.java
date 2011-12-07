@@ -28,10 +28,10 @@ public class AxisAnglePelvisOrientationControlModule implements PelvisOrientatio
    private final YoVariableRegistry registry = new YoVariableRegistry("AxisAnglePelvisOrientationControlModule");
 
    private final DoubleYoVariable pelvisOrientationError = new DoubleYoVariable("pelvisOrientationError", registry);
-   //TODO: Implement quaternion based pelvis orientation controller similar to DLR implementation.
    private final DoubleYoVariable[] proportionalGains = new DoubleYoVariable[3], derivativeGains = new DoubleYoVariable[3];
    
    private final YoFrameVector tauPelvis;
+   private final YoFrameVector tauSwingLegCompensation;
 
    private final ReferenceFrame pelvisFrame;
    private final Matrix3d derivativeGainMatrix;
@@ -47,6 +47,7 @@ public class AxisAnglePelvisOrientationControlModule implements PelvisOrientatio
       this.pelvisFrame = referenceFrames.getPelvisFrame();
       this.couplingRegistry = couplingRegistry;
       this.tauPelvis = new YoFrameVector("tauPelvis", "", pelvisFrame, registry);
+      this.tauSwingLegCompensation = new YoFrameVector("tauSwingLegCompensation", "", pelvisFrame, registry);
       this.derivativeGainMatrix = new Matrix3d();
       this.derivativeGainMatrix.setZero();
       this.useFeedforward = useFeedforward;
@@ -81,6 +82,7 @@ public class AxisAnglePelvisOrientationControlModule implements PelvisOrientatio
    public void setupParametersForM2V2()
    {
       setProportionalGains(250.0, 250.0, 150.0);
+//      setProportionalGains(150.0, 100.0, 100.0); // TODO: test using these lower gains again
       
       setDerivativeGainX(30.0); // 80.0);
       setDerivativeGainY(18.0); // 75.0);
@@ -140,15 +142,18 @@ public class AxisAnglePelvisOrientationControlModule implements PelvisOrientatio
 
    private FrameVector computeFeedForwardTerm(RobotSide supportLeg)
    {
+      FrameVector ret;
       if (supportLeg != null && couplingRegistry.getUpperBodyWrench() != null)
       {
          upperBodyWrench.set(couplingRegistry.getUpperBodyWrench());
          upperBodyWrench.changeFrame(pelvisFrame);
-         return new FrameVector(upperBodyWrench.getExpressedInFrame(), upperBodyWrench.getAngularPartCopy());
+         ret = new FrameVector(upperBodyWrench.getExpressedInFrame(), upperBodyWrench.getAngularPartCopy());
       } else
       {
-         return new FrameVector(pelvisFrame);
+         ret = new FrameVector(pelvisFrame);
       }
+      tauSwingLegCompensation.set(ret);
+      return ret;
    }
    
    public void setProportionalGains(double proportionalGainX, double proportionalGainY, double proportionalGainZ)

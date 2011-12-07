@@ -682,7 +682,7 @@ public abstract class RegularWalkingGaitAbstractController implements RobotContr
          else
          {
             int nConfigurations = 10;
-            this.balanceOnOneLegConfigurations = BalanceOnOneLegConfiguration.generateABunch(nConfigurations, supportLeg, supportLegAnkleZUpFrame);
+            this.balanceOnOneLegConfigurations = BalanceOnOneLegConfiguration.generateABunch(nConfigurations, supportLeg, supportLegAnkleZUpFrame, false);
             Random random = new Random(108L);
             Collections.shuffle(balanceOnOneLegConfigurations, random);
          }
