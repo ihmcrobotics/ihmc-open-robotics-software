@@ -34,15 +34,15 @@ public class ArmsSidewaysUsingIDArmControlModule extends IDArmControlModule
       double gainScaling = 1.0;
       for (RobotSide robotSide : RobotSide.values())
       {
-         armQddReferenceControllers.get(robotSide).get(ArmJointName.SHOULDER_PITCH).setProportionalGain(gainScaling * 100.0);
-         armQddReferenceControllers.get(robotSide).get(ArmJointName.SHOULDER_ROLL).setProportionalGain(gainScaling * 200.0);
-         armQddReferenceControllers.get(robotSide).get(ArmJointName.SHOULDER_YAW).setProportionalGain(gainScaling * 100.0);
-         armQddReferenceControllers.get(robotSide).get(ArmJointName.ELBOW).setProportionalGain(gainScaling * 100.0);
+         armDesiredQddControllers.get(robotSide).get(ArmJointName.SHOULDER_PITCH).setProportionalGain(gainScaling * 100.0);
+         armDesiredQddControllers.get(robotSide).get(ArmJointName.SHOULDER_ROLL).setProportionalGain(gainScaling * 200.0);
+         armDesiredQddControllers.get(robotSide).get(ArmJointName.SHOULDER_YAW).setProportionalGain(gainScaling * 100.0);
+         armDesiredQddControllers.get(robotSide).get(ArmJointName.ELBOW).setProportionalGain(gainScaling * 100.0);
 
-         armQddReferenceControllers.get(robotSide).get(ArmJointName.SHOULDER_PITCH).setDerivativeGain(gainScaling * 10.0);
-         armQddReferenceControllers.get(robotSide).get(ArmJointName.SHOULDER_ROLL).setDerivativeGain(gainScaling * 20.0);
-         armQddReferenceControllers.get(robotSide).get(ArmJointName.SHOULDER_YAW).setDerivativeGain(gainScaling * 10.0);
-         armQddReferenceControllers.get(robotSide).get(ArmJointName.ELBOW).setDerivativeGain(gainScaling * 10.0);
+         armDesiredQddControllers.get(robotSide).get(ArmJointName.SHOULDER_PITCH).setDerivativeGain(gainScaling * 10.0);
+         armDesiredQddControllers.get(robotSide).get(ArmJointName.SHOULDER_ROLL).setDerivativeGain(gainScaling * 20.0);
+         armDesiredQddControllers.get(robotSide).get(ArmJointName.SHOULDER_YAW).setDerivativeGain(gainScaling * 10.0);
+         armDesiredQddControllers.get(robotSide).get(ArmJointName.ELBOW).setDerivativeGain(gainScaling * 10.0);
       }
    }
 }
