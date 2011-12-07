@@ -23,7 +23,6 @@ import com.yobotics.simulationconstructionset.util.PIDController;
 public class LegJointPositionControlModule
 {
    private final boolean useDesiredVelocities;
-   private boolean doDerivativeControlInThisModule = true;
 
    private final RobotSide robotSide;
    private final LegJointName[] legJointNames;
@@ -146,8 +145,6 @@ public class LegJointPositionControlModule
 
    public void setDefaultGainsForM2V2()
    {
-      doDerivativeControlInThisModule = true;
-
       kpGains.get(LegJointName.HIP_YAW).set(120.0);
       kpGains.get(LegJointName.HIP_ROLL).set(200.0);
       kpGains.get(LegJointName.HIP_PITCH).set(200.0);
@@ -184,8 +181,6 @@ public class LegJointPositionControlModule
 
    public void setDefaultGainsForR2()
    {
-      doDerivativeControlInThisModule = true;
-
       // kpGains.get(LegJointName.HIP_YAW).val = 5000.0;    // 1000.0;
       // kpGains.get(LegJointName.HIP_ROLL).val = 5000.0;    // 1000.0;
       // kpGains.get(LegJointName.HIP_PITCH).val = 5000.0;    // 1000.0;

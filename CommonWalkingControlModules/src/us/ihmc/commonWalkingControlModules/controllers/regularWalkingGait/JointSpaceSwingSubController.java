@@ -165,7 +165,7 @@ public class JointSpaceSwingSubController implements SwingSubController
    
    public void setParametersForM2V2PushRecovery()
    {
-      swingDuration.set(0.25);
+      swingDuration.set(0.35);
       passiveHipCollapseTime.set(0.07);
       minimumTerminalSwingDuration.set(0.0);
       maximumTerminalSwingDuration.set(0.05);

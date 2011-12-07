@@ -52,14 +52,14 @@ public class AxisAnglePelvisOrientationControlModule implements PelvisOrientatio
       this.useFeedforward = useFeedforward;
 
       String baseProportionalGainName = "pelvisOrientationProportionalGain";
-      proportionalGains[0] = new DoubleYoVariable(baseProportionalGainName + "x", parentRegistry);
-      proportionalGains[1] = new DoubleYoVariable(baseProportionalGainName + "y", parentRegistry);
-      proportionalGains[2] = new DoubleYoVariable(baseProportionalGainName + "z", parentRegistry);
+      proportionalGains[0] = new DoubleYoVariable(baseProportionalGainName + "x", registry);
+      proportionalGains[1] = new DoubleYoVariable(baseProportionalGainName + "y", registry);
+      proportionalGains[2] = new DoubleYoVariable(baseProportionalGainName + "z", registry);
       
       String baseDerivativeGainName = "pelvisOrientationDerivativeGain";
-      derivativeGains[0] = new DoubleYoVariable(baseDerivativeGainName + "x", parentRegistry);
-      derivativeGains[1] = new DoubleYoVariable(baseDerivativeGainName + "y", parentRegistry);
-      derivativeGains[2] = new DoubleYoVariable(baseDerivativeGainName + "z", parentRegistry);
+      derivativeGains[0] = new DoubleYoVariable(baseDerivativeGainName + "x", registry);
+      derivativeGains[1] = new DoubleYoVariable(baseDerivativeGainName + "y", registry);
+      derivativeGains[2] = new DoubleYoVariable(baseDerivativeGainName + "z", registry);
 
       for (int i = 0; i < derivativeGains.length; i++)
       {
