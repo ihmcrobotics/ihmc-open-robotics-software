@@ -9,6 +9,7 @@ import java.util.List;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
 import us.ihmc.robotSide.RobotSide;
 
+import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.EnumYoVariable;
 import com.yobotics.simulationconstructionset.YoVariable;
@@ -30,6 +31,7 @@ public class LegTorqueData
 
 
    private final ArrayList<YoVariable> allVariables;
+   private BooleanYoVariable dataValid = new BooleanYoVariable("dataValid", registry);
 
    public LegTorqueData(LegJointName[] jointNames, YoVariableRegistry parentRegistry)
    {
@@ -100,6 +102,16 @@ public class LegTorqueData
    public ArrayList<YoVariable> getAllVariables()
    {
       return allVariables;
+   }
+
+   public void setDataValid(boolean dataValid)
+   {
+      this.dataValid.set(dataValid);
+   }
+
+   public boolean isDataValid()
+   {
+      return dataValid.getBooleanValue();
    }
    
 }

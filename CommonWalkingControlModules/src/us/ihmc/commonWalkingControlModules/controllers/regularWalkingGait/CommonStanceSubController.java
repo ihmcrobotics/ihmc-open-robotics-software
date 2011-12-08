@@ -485,6 +485,11 @@ public class CommonStanceSubController implements StanceSubController
       waitInLoadingPreswingB = true;
       minPercentageTowardsDesired.set(0.95);
    }
+   
+   public void setParametersForOptimalSwingController()
+   {
+      kneeExtensionControlModule.setupParametersForOptimalSwingController();
+   }
 
    public void initialize()
    {      
