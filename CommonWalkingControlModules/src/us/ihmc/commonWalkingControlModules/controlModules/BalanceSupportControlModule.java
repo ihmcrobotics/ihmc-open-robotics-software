@@ -19,6 +19,7 @@ import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.Orientation;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.Wrench;
 
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
@@ -126,6 +127,12 @@ public class BalanceSupportControlModule
       double desiredPelvisHeightInWorld = getDesiredPelvisHeight();
       double fZOnPelvisInPelvisFrame = pelvisHeightControlModule.doPelvisHeightControl(desiredPelvisHeightInWorld, null);
 
+      // TODO think of a smarter way to not let the robot toe off while lunging sideways. 
+      if (couplingRegistry.getLungeAxisInFrame(ReferenceFrame.getWorldFrame()) != null)
+      {
+         fZOnPelvisInPelvisFrame *= 0.5;
+      }
+      
       double deltaNx = 0.0; //TODO: Rethink the deltaNx stuff and see what it should be...
       
       // compute joint torques using virtual support actuators
