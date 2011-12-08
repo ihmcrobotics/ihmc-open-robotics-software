@@ -114,12 +114,15 @@ public class SwingLegCompensationPelvisHeightControlModule implements PelvisHeig
       alphaFz.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(2.0, controlDT));
    }
 
-   public void setParametersForM2V2()
+   public void setParametersForM2V2(boolean runningOnRealRobot)
    {
       stanceHeightPDcontroller.setProportionalGain(1000.0);
       stanceHeightPDcontroller.setDerivativeGain(10.0);
-
-      fZExtra.set(0.0); // 25.0); // 0.0); // 50.0);    // 0.0);
+      
+      if (runningOnRealRobot)
+         fZExtra.set(0.0); // TODO 25.0);
+      else
+         fZExtra.set(0.0); // 25.0); // 0.0); // 50.0);    // 0.0);
       stanceHeightDes.set(0.95);
 
       alphaFz.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(10.0, controlDT));
