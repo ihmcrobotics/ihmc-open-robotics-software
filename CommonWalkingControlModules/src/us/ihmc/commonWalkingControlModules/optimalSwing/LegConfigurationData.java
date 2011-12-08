@@ -32,7 +32,10 @@ public class LegConfigurationData
    
    private final EnumYoVariable<RobotSide> robotSide = new EnumYoVariable<RobotSide>("robotSide", registry, RobotSide.class);
    private final BooleanYoVariable currentlyInSwing = new BooleanYoVariable("currentlyInSwing", registry);
+   
+   private final DoubleYoVariable timeInSwing = new DoubleYoVariable("timeInSwing", registry);
    private final DoubleYoVariable swingTimeRemaining = new DoubleYoVariable("swingTimeRemaining", registry);
+   
    
    private final DoubleYoVariable hipRollHeight = new DoubleYoVariable("hipRollHeight", registry);
    
@@ -208,5 +211,15 @@ public class LegConfigurationData
    {
       hipRollHeight.set(value);
    }
+   
+   public double getTimeInSwing()
+   {
+      return timeInSwing.getDoubleValue();
+   }
 
+   
+   public void setTimeInSwing(double time)
+   {
+      timeInSwing.set(time);
+   }
 }
