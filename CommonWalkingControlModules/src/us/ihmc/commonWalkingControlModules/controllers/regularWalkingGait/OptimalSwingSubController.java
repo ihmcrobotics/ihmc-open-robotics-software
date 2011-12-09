@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait;
 
+import java.util.EnumMap;
+
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
@@ -43,6 +45,7 @@ import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.IntegerYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoVariable;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameOrientation;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 
@@ -101,6 +104,8 @@ public class OptimalSwingSubController implements SwingSubController
    
    private final DoubleYoVariable ikAlpha = new DoubleYoVariable("ikAlpha", registry);
    
+   private final EnumMap<LegJointName, AlphaFilteredYoVariable> filteredJointTorques = new EnumMap<LegJointName, AlphaFilteredYoVariable>(LegJointName.class);
+   
    private final SideDependentList<FootSwitchInterface> footSwitches;
 
    public OptimalSwingSubController(ProcessedSensorsInterface processedSensors, CommonWalkingReferenceFrames referenceFrames,
@@ -108,7 +113,7 @@ public class OptimalSwingSubController implements SwingSubController
          SideDependentList<DesiredJointVelocityCalculator> desiredJointVelocityCalculators, LegInverseKinematicsCalculator inverseKinematicsCalculator,
          PreSwingControlModule preSwingControlModule, LegConfigurationData legConfigurationData, LegTorqueData legTorqueData,
          SwingLegTorqueControlOnlyModule swingLegTorqueControlModule, SideDependentList<LegJointPositionControlModule> legJointPositionControlModules,
-         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
+         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, double controlDT, YoVariableRegistry parentRegistry)
    {
       this.referenceFrames = referenceFrames;
       this.desiredFootstepCalculator = desiredFootstepCalculator;
@@ -137,11 +142,24 @@ public class OptimalSwingSubController implements SwingSubController
          desiredJointVelocities.put(side, new LegJointVelocities(legJointNames, side));
       }
 
+      for(LegJointName jointName : legConfigurationData.getAllJoints())
+      {
+         filteredJointTorques.put(jointName, new AlphaFilteredYoVariable("alhpaFiltered"+jointName.getCamelCaseNameForMiddleOfExpression()+"Torque", registry, AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(15.0, controlDT)));
+      }
+      
       parentRegistry.addChild(registry);
 
       setParameters();
    }
 
+   
+   private void resetFilters()
+   {
+      for(LegJointName jointName : legConfigurationData.getAllJoints())
+      {
+         filteredJointTorques.get(jointName).reset();
+      }
+   }
    private void setParameters()
    {
       swingDuration.set(0.65);
@@ -344,6 +362,17 @@ public class OptimalSwingSubController implements SwingSubController
          // TODO: Get rid of these HACKS
          ((CraigPage300SwingLegTorqueControlOnlyModule) torqueControlModule).setParametersForOptimalSwing();
          torqueControlModule.compute(legTorques, legJointPositions, legJointVelocities, legJointAccelerations);
+         
+         
+         
+         
+         
+      }
+      
+      for(LegJointName jointName : legConfigurationData.getAllJoints())
+      {
+         filteredJointTorques.get(jointName).update(legTorques.getTorque(jointName));
+         legTorques.setTorque(jointName, filteredJointTorques.get(jointName).getDoubleValue());
       }
 
    }
@@ -460,6 +489,7 @@ public class OptimalSwingSubController implements SwingSubController
       legConfigurationData.setRobotSide(swingLeg);
       
       footSwitches.get(swingLeg).reset();
+      resetFilters();
 
    }
 
@@ -479,6 +509,8 @@ public class OptimalSwingSubController implements SwingSubController
       FramePoint point = currentConfiguration.getDesiredSwingFootPosition();
       desiredPositions.get(swingLeg).set(point);
       desiredOrientations.get(swingLeg).setYawPitchRoll(0.0, 0.0, 0.0);
+      
+      resetFilters();
 
    }
 
