@@ -68,9 +68,6 @@ public class BalancingUpperBodySubController implements UpperBodySubController
    private final StateMachine stateMachine;
    private final String name = "BalancingUpperBodySubController";
 
-//   private final YoFrameVector2d lungeAxis = new YoFrameVector2d("lungeAxis", "", ReferenceFrame.getWorldFrame(), registry);
-   private final FrameVector2d lungeAxis = new FrameVector2d(ReferenceFrame.getWorldFrame());
-
    //   public Wrench wrenchOnChest;
    private final RigidBody chest;
    private final RigidBody pelvis;
@@ -331,10 +328,12 @@ public class BalancingUpperBodySubController implements UpperBodySubController
             if (USE_CONSTANT_TORQUE_AROUND_LUNGEAXIS)
             {
                spineControlModule.doConstantTorqueAroundLungeAxis(couplingRegistry.getLungeAxisInFrame(ReferenceFrame.getWorldFrame()), maxHipTorque.getDoubleValue());
+               spineControlModule.doMaintainDesiredChestOrientation();
             }
             else if (USE_CMP_CONTROL)
             {
                spineControlModule.doCoPToCMPDistanceControl(desiredCMP.getFramePoint2dCopy());
+               spineControlModule.doMaintainDesiredChestOrientation();
             }
 
          }
@@ -353,7 +352,7 @@ public class BalancingUpperBodySubController implements UpperBodySubController
          if (USE_SCALING_INSTEAD_OF_SETTING_TO_ZERO)
          {
             // scaling
-            spineControlModule.scaleGainsBasedOnLungeAxis(lungeAxis.getVectorCopy());
+            spineControlModule.scaleGainsBasedOnLungeAxis(couplingRegistry.getLungeAxisInFrame(ReferenceFrame.getWorldFrame()).getVectorCopy());
          }
          else
          {
@@ -380,10 +379,13 @@ public class BalancingUpperBodySubController implements UpperBodySubController
       {
          if (USE_INVERSE_DYNAMICS_FOR_LUNGING)
          {
-            setWrenchOnChestToZero(wrenchOnPelvis);
-            storeWrenchCopyAsYoVariable(wrenchOnPelvis);
-            spineControlModule.setWrench(wrenchOnPelvis);
-            spineControlModule.setGains(); // may not be needed
+            if (USE_CONSTANT_WRENCH_AROUND_LUNGEAXIS)
+            {
+               setWrenchOnChestToZero(wrenchOnPelvis);
+               storeWrenchCopyAsYoVariable(wrenchOnPelvis);
+               spineControlModule.setWrench(wrenchOnPelvis);
+               spineControlModule.setGains(); // may not be needed               
+            }
          }
       }
    }
@@ -574,21 +576,21 @@ public class BalancingUpperBodySubController implements UpperBodySubController
    
    private void flipVisualizedLungeAxisGraphic()
    {
-      Vector2d temp = lungeAxis.getVectorCopy();
+      Vector2d temp = couplingRegistry.getLungeAxisInFrame(ReferenceFrame.getWorldFrame()).getVectorCopy();
       temp.negate();
       lungeAxisGraphic.setX(temp.getX()); lungeAxisGraphic.setY(temp.getY());
    }
    
    private void setLungeAxisInWorldFrame(double newX, double newY)
    {
-      lungeAxis.set(newX, newY);
-      if (lungeAxis.length() != 0.0)
+      FrameVector2d tempLungeAxis = new FrameVector2d(ReferenceFrame.getWorldFrame(), newX, newY);
+      if (tempLungeAxis.length() != 0.0)
       {
-         this.lungeAxis.normalize();
+         tempLungeAxis.normalize();
       }
 
-      lungeAxisGraphic.setX(lungeAxis.getX()); lungeAxisGraphic.setY(lungeAxis.getY());
-      couplingRegistry.setLungeAxis(new FrameVector2d(lungeAxis.getReferenceFrame(), lungeAxis.getX(), lungeAxis.getY()));
+      lungeAxisGraphic.set(tempLungeAxis.getX(), tempLungeAxis.getY(), 0.0);
+      couplingRegistry.setLungeAxis(tempLungeAxis);
    }
 
    private class IsICPOutsideLungeRadiusCondition implements StateTransitionCondition
@@ -756,10 +758,11 @@ public class BalancingUpperBodySubController implements UpperBodySubController
 
       public boolean checkCondition()
       {
-         FrameVector2d spineXYAngularVelocity = new FrameVector2d(lungeAxis.getReferenceFrame());
+         ReferenceFrame lungeAxisExpressedInFrame = ReferenceFrame.getWorldFrame();
+         FrameVector2d spineXYAngularVelocity = new FrameVector2d(lungeAxisExpressedInFrame);
          spineXYAngularVelocity.set(processedSensors.getSpineJointVelocity(SpineJointName.SPINE_ROLL), processedSensors.getSpineJointVelocity(SpineJointName.SPINE_PITCH));
          
-         double angularVelocityProjectedAlongLungeAxis = Math.abs(spineXYAngularVelocity.dot(lungeAxis));
+         double angularVelocityProjectedAlongLungeAxis = Math.abs(spineXYAngularVelocity.dot(couplingRegistry.getLungeAxisInFrame(lungeAxisExpressedInFrame)));
          
 //         System.out.println("Projected Spine Angular Velocity: " + angularVelocityProjectedAlongLungeAxis);
          
@@ -874,6 +877,7 @@ public class BalancingUpperBodySubController implements UpperBodySubController
    private FrameVector2d getUnitVectorNormalToLungeAxis(ReferenceFrame desiredFrame)
    {
       // Lunge axis and ICP direction are just orthogonal in the x-y plane
+      FrameVector2d lungeAxis = couplingRegistry.getLungeAxisInFrame(ReferenceFrame.getWorldFrame());
       FrameVector2d icpDirection = new FrameVector2d(lungeAxis.getReferenceFrame(), lungeAxis.getY(), -lungeAxis.getX());
       icpDirection.changeFrame(desiredFrame);
       icpDirection.normalize();
@@ -888,6 +892,7 @@ public class BalancingUpperBodySubController implements UpperBodySubController
    private Vector3d desiredLungingTorqueDuring(BalancingUpperBodySubControllerState state)
    {
       Vector3d lungingTorque  = new Vector3d();  //TODO: In which frame is torque expressed?
+      FrameVector2d lungeAxis = couplingRegistry.getLungeAxisInFrame(ReferenceFrame.getWorldFrame());
       lungingTorque.set(lungeAxis.getX(), lungeAxis.getY(), 0.0);
       switch (state)
       {
@@ -925,7 +930,8 @@ public class BalancingUpperBodySubController implements UpperBodySubController
    private FramePoint2d desiredCoPduring(BalancingUpperBodySubControllerState state, ReferenceFrame referenceFrame)
    {
       FramePoint2d desiredCoP = new FramePoint2d(referenceFrame);
-
+      FrameVector2d lungeAxis = couplingRegistry.getLungeAxisInFrame(ReferenceFrame.getWorldFrame());
+      
       FrameVector2d vectorFromMidFeetToCoP = new FrameVector2d(lungeAxis.getReferenceFrame(), lungeAxis.getX(), lungeAxis.getY());
       vectorFromMidFeetToCoP.normalize();
       vectorFromMidFeetToCoP.scale(bosRadiusAlongLungeAxis.getDoubleValue());
@@ -968,6 +974,7 @@ public class BalancingUpperBodySubController implements UpperBodySubController
     */
    private FramePoint2d getInitialIcpDirection(ReferenceFrame expressedInFrame)
    {
+      FrameVector2d lungeAxis = couplingRegistry.getLungeAxisInFrame(ReferenceFrame.getWorldFrame());
       FramePoint2d icpDirection = new FramePoint2d(lungeAxis.getReferenceFrame(), lungeAxis.getY(), -lungeAxis.getX());  // Lunge axis and ICP direction are just orthogonal in the x-y plane
       icpDirection.changeFrame(expressedInFrame);
       return icpDirection;
