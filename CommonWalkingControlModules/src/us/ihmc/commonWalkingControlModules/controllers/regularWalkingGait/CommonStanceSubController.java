@@ -22,6 +22,7 @@ import us.ihmc.utilities.math.geometry.Orientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.Wrench;
 
+import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
@@ -61,6 +62,8 @@ public class CommonStanceSubController implements StanceSubController
    private final DoubleYoVariable minPercentageTowardsDesired = new DoubleYoVariable("minPercentageTowardsDesired", registry);
 
    private final LegToTrustForVelocityWriteOnly supportLegAndLegToTrustForVelocity;    // FIXME: update things
+   
+   private final BooleanYoVariable doPushRecovery = new BooleanYoVariable("doPushRecovery", registry);
 
    private final double footWidth;
    private boolean waitInLoadingPreswingB;
@@ -473,7 +476,7 @@ public class CommonStanceSubController implements StanceSubController
       minPercentageTowardsDesired.set(0.9);
    }
 
-   public void setParametersForM2V2()
+   private void setParametersForM2V2()
    {
       minDoubleSupportTime.set(0.0);
       minDoubleSupportTimeBeforeWalking.set(0.3);
@@ -484,6 +487,18 @@ public class CommonStanceSubController implements StanceSubController
       toeOffMoveDuration.set(0.05);
       waitInLoadingPreswingB = true;
       minPercentageTowardsDesired.set(0.95);
+   }
+   
+   public void setParametersForM2V2PushRecovery()
+   {
+      setParametersForM2V2();
+      doPushRecovery.set(true);      
+   }
+
+   public void setParametersForM2V2Walking()
+   {
+      setParametersForM2V2();
+      doPushRecovery.set(false);
    }
    
    public void setParametersForOptimalSwingController()
@@ -497,10 +512,15 @@ public class CommonStanceSubController implements StanceSubController
 
    public boolean needToTakeAStep(RobotSide supportLeg)
    {
-      double epsilon = 1e-2;
+      if (doPushRecovery.getBooleanValue())
+      {
+         double epsilon = 1e-2;
 
-      FrameConvexPolygon2d supportPolygon = couplingRegistry.getBipedSupportPolygons().getSupportPolygonInMidFeetZUp();
-      FramePoint2d capturePoint = couplingRegistry.getCapturePointInFrame(supportPolygon.getReferenceFrame()).toFramePoint2d();
-      return supportPolygon.distance(capturePoint) > epsilon;
+         FrameConvexPolygon2d supportPolygon = couplingRegistry.getBipedSupportPolygons().getSupportPolygonInMidFeetZUp();
+         FramePoint2d capturePoint = couplingRegistry.getCapturePointInFrame(supportPolygon.getReferenceFrame()).toFramePoint2d();
+         return supportPolygon.distance(capturePoint) > epsilon;  
+      }
+      else
+         return false;
    }
 }
