@@ -34,6 +34,7 @@ import us.ihmc.utilities.screwTheory.Wrench;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.PIDController;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 
 public class SpineJointLungingControlModule implements SpineLungingControlModule
 {
@@ -43,7 +44,12 @@ public class SpineJointLungingControlModule implements SpineLungingControlModule
 
    private final EnumMap<SpineJointName, DoubleYoVariable> desiredAngles = ContainerTools.createEnumMap(SpineJointName.class);
    private final EnumMap<SpineJointName, PIDController> spineControllers = ContainerTools.createEnumMap(SpineJointName.class);
+   private final PIDController spineTorqueController = new PIDController("spingeTorqueCtr", registry);
+   
+   private final YoFrameVector wrenchOnPelvisAngular = new YoFrameVector("wrenchOnPelvisAngular", "", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector wrenchOnPelvisLinear = new YoFrameVector("wrenchOnPelvislinear", "", ReferenceFrame.getWorldFrame(), registry);
 
+   private final YoFrameVector additionalWrenchAngularPart = new YoFrameVector("additionalWrenchAngularPart", "", ReferenceFrame.getWorldFrame(), registry);
 //   private final EnumMap<SpineJointName, DoubleYoVariable> actualAngles;
 //   private final EnumMap<SpineJointName, DoubleYoVariable> actualAngleVelocities;
 
@@ -177,6 +183,7 @@ public class SpineJointLungingControlModule implements SpineLungingControlModule
       spineJointIDQddControllers.get(SpineJointName.SPINE_PITCH).setDerivativeGain(100.0);
       spineJointIDQddControllers.get(SpineJointName.SPINE_ROLL).setDerivativeGain(1000.0);
       
+      spineTorqueController.setProportionalGain(1.0);
    }
    
    public void doMaintainDesiredChestOrientation()
@@ -212,6 +219,9 @@ public class SpineJointLungingControlModule implements SpineLungingControlModule
       // to prevent wrong frame stuff
       externalWrench.setAngularPart(wrenchOnPelvis.getAngularPartCopy());
       spineJointIDCalc.setExternalWrench(pelvisRigidBody, externalWrench);
+      
+      this.wrenchOnPelvisAngular.set(externalWrench.getAngularPartCopy());
+      this.wrenchOnPelvisLinear.set(externalWrench.getLinearPartCopy());
    }
 
    public void getSpineTorques(SpineTorques spineTorquesToPack)
@@ -286,9 +296,41 @@ public class SpineJointLungingControlModule implements SpineLungingControlModule
       throw new RuntimeException("to implement");
    }
    
+   
+   /**
+    * only works well for lunging over x or y axis
+    */
    public void doConstantTorqueAroundLungeAxis(FrameVector2d lungeAxis, double constantTorque)
    {
-      throw new RuntimeException("to implement");
+      Vector3d wrenchAngularPart = new Vector3d(lungeAxis.getX(), lungeAxis.getY(), 0.0);
+      wrenchAngularPart.scale(constantTorque);
+      
+      Wrench wrench = new Wrench(externalWrench);
+      wrench.setLinearPart(new Vector3d());
+      wrench.setAngularPart(wrenchAngularPart);
+      this.setWrench(wrench);
+      this.doMaintainDesiredChestOrientation();
+
+      Vector3d desiredTorque = new Vector3d(wrenchAngularPart);
+      desiredTorque.negate();
+
+      Vector3d currentTorque = new Vector3d(spineTorques.getTorque(SpineJointName.SPINE_ROLL), spineTorques.getTorque(SpineJointName.SPINE_PITCH), spineTorques.getTorque(SpineJointName.SPINE_YAW));
+      double angularAdditionX = - spineTorqueController.compute(currentTorque.getX(), desiredTorque.getX(), 0.0, 0.0, controlDT);
+      double angularAdditionY = - spineTorqueController.compute(currentTorque.getY(), desiredTorque.getY(), 0.0, 0.0, controlDT);
+
+      //      sideways = > +
+      //      backwards = > -
+
+      if (lungeAxis.getX() < lungeAxis.getY())
+      {
+         angularAdditionY = - angularAdditionY;
+      }
+
+      additionalWrenchAngularPart.set(angularAdditionX, angularAdditionY, 0.0);
+
+      wrenchAngularPart.add( additionalWrenchAngularPart.getFrameVectorCopy().getVector());
+      wrench.setAngularPart(wrenchAngularPart);
+      this.setWrench(wrench);
+      this.doMaintainDesiredChestOrientation();
    }
 }
-
