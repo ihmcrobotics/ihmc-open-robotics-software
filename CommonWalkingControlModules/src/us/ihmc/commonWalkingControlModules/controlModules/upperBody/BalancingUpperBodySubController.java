@@ -98,7 +98,7 @@ public class BalancingUpperBodySubController implements UpperBodySubController
    private final DoubleYoVariable chestAngularAcceleration = new DoubleYoVariable("chestAngularAcceleration", registry);
    
    private final DoubleYoVariable kTimeToSlowSlowDown = new DoubleYoVariable("kTimeToSlowDown", registry);
-   private YoFramePoint2d lungeDesiredCoP;
+   private YoFramePoint2d desiredCMP;
    
    private EnumMap<BalancingUpperBodySubControllerState, Double> timeOfStateStart = new EnumMap<BalancingUpperBodySubController.BalancingUpperBodySubControllerState, Double>(BalancingUpperBodySubControllerState.class);
    private EnumMap<BalancingUpperBodySubControllerState, Double> chestAngleOnStateStart = new EnumMap<BalancingUpperBodySubController.BalancingUpperBodySubControllerState, Double>(BalancingUpperBodySubControllerState.class);
@@ -296,6 +296,9 @@ public class BalancingUpperBodySubController implements UpperBodySubController
 
    private class ICPRecoverAccelerateState extends State
    {
+      private static final boolean USE_CONSTANT_WRENCH_AROUND_LUNGEAXIS = true;
+      private static final boolean USE_CONSTANT_TORQUE_AROUND_LUNGEAXIS = false;
+      private static final boolean USE_CMP_CONTROL = false;
       Wrench wrenchOnPelvis;
       ReferenceFrame pelvisFrame;
       Vector3d wrenchOnPelvisLinearPart;
@@ -306,6 +309,43 @@ public class BalancingUpperBodySubController implements UpperBodySubController
          super(BalancingUpperBodySubControllerState.ICP_REC_ACC);
       }
 
+      public void doAction()
+      {
+         // Wrench works best since this minimizes the unwanted rotations (yaw) of the upper body
+
+//         wrenchOnPelvis = new Wrench(pelvisFrame, ReferenceFrame.getWorldFrame(), wrenchOnPelvisLinearPart, wrenchOnPelvisAngularPart);
+//         wrenchOnPelvis.changeFrame(pelvisFrame);
+         
+         if (USE_INVERSE_DYNAMICS_FOR_LUNGING)
+         {
+            if (USE_CONSTANT_WRENCH_AROUND_LUNGEAXIS)
+            {
+               wrenchOnPelvis = new Wrench(pelvisFrame, pelvisFrame, wrenchOnPelvisLinearPart, wrenchOnPelvisAngularPart);
+               
+               storeWrenchCopyAsYoVariable(wrenchOnPelvis);
+
+               spineControlModule.setWrench(wrenchOnPelvis);
+               spineControlModule.doMaintainDesiredChestOrientation();
+            }
+            
+            if (USE_CONSTANT_TORQUE_AROUND_LUNGEAXIS)
+            {
+               spineControlModule.doConstantTorqueAroundLungeAxis(couplingRegistry.getLungeAxisInFrame(ReferenceFrame.getWorldFrame()), maxHipTorque.getDoubleValue());
+            }
+            else if (USE_CMP_CONTROL)
+            {
+               spineControlModule.doCoPToCMPDistanceControl(desiredCMP.getFramePoint2dCopy());
+            }
+
+         }
+         else
+         {
+            Vector3d hipTorque = desiredLungingTorqueDuring(BalancingUpperBodySubControllerState.ICP_REC_ACC);
+            hipTorque.negate();
+            spineControlModule.setHipXYTorque(hipTorque);
+         }
+      }
+
       public void doTransitionIntoAction()
       {
          setLungeAxisBasedOnIcp();
@@ -313,7 +353,7 @@ public class BalancingUpperBodySubController implements UpperBodySubController
          if (USE_SCALING_INSTEAD_OF_SETTING_TO_ZERO)
          {
             // scaling
-            spineControlModule.scaleGainsBasedOnLungeAxis(lungeAxis.getVectorCopy());            
+            spineControlModule.scaleGainsBasedOnLungeAxis(lungeAxis.getVectorCopy());
          }
          else
          {
@@ -329,31 +369,12 @@ public class BalancingUpperBodySubController implements UpperBodySubController
 
          timeOfStateStart.put((BalancingUpperBodySubControllerState)this.getStateEnum(), processedSensors.getTime());
          chestAngleOnStateStart.put((BalancingUpperBodySubControllerState)this.getStateEnum(), getChestAngleToWorld());
-      }
-      
-      public void doAction()
-      {
-         // Wrench works best since this minimizes the unwanted rotations (yaw) of the upper body
-
-//         wrenchOnPelvis = new Wrench(pelvisFrame, ReferenceFrame.getWorldFrame(), wrenchOnPelvisLinearPart, wrenchOnPelvisAngularPart);
-//         wrenchOnPelvis.changeFrame(pelvisFrame);
          
-         if (USE_INVERSE_DYNAMICS_FOR_LUNGING)
+         if (USE_CMP_CONTROL)
          {
-            wrenchOnPelvis = new Wrench(pelvisFrame, pelvisFrame, wrenchOnPelvisLinearPart, wrenchOnPelvisAngularPart);
-            
-            storeWrenchCopyAsYoVariable(wrenchOnPelvis);
-
-            spineControlModule.setWrench(wrenchOnPelvis);
-            spineControlModule.doMaintainDesiredChestOrientation();
+            desiredCMP.set(getInitialIcpDirection(ReferenceFrame.getWorldFrame()));
          }
-         else
-         {
-            Vector3d hipTorque = desiredLungingTorqueDuring(BalancingUpperBodySubControllerState.ICP_REC_ACC);
-            hipTorque.negate();
-            spineControlModule.setHipXYTorque(hipTorque);
-         }
-      }
+       }
 
       public void doTransitionOutOfAction()
       {
@@ -380,17 +401,6 @@ public class BalancingUpperBodySubController implements UpperBodySubController
          super(BalancingUpperBodySubControllerState.ICP_REC_DEC);
       }
 
-      public void doTransitionIntoAction()
-      {
-         timeOfStateStart.put((BalancingUpperBodySubControllerState)this.getStateEnum(), processedSensors.getTime());
-
-         flipVisualizedLungeAxisGraphic();
-
-         pelvisFrame = pelvis.getBodyFixedFrame();
-         this.wrenchOnPelvisAngularPart = desiredLungingTorqueDuring(BalancingUpperBodySubControllerState.ICP_REC_DEC);
-         this.wrenchOnPelvisLinearPart = new Vector3d();
-      }
-      
       public void doAction()
       {
          if (USE_INVERSE_DYNAMICS_FOR_LUNGING)
@@ -408,6 +418,17 @@ public class BalancingUpperBodySubController implements UpperBodySubController
             hipTorque.negate();
             spineControlModule.setHipXYTorque(hipTorque);
          }
+      }
+
+      public void doTransitionIntoAction()
+      {
+         timeOfStateStart.put((BalancingUpperBodySubControllerState)this.getStateEnum(), processedSensors.getTime());
+
+         flipVisualizedLungeAxisGraphic();
+
+         pelvisFrame = pelvis.getBodyFixedFrame();
+         this.wrenchOnPelvisAngularPart = desiredLungingTorqueDuring(BalancingUpperBodySubControllerState.ICP_REC_DEC);
+         this.wrenchOnPelvisLinearPart = new Vector3d();
       }
       
       public void doTransitionOutOfAction()
@@ -441,15 +462,6 @@ public class BalancingUpperBodySubController implements UpperBodySubController
          super(BalancingUpperBodySubControllerState.ORIENT_REC_ACC);
       }
 
-      public void doTransitionIntoAction()
-      {
-         timeOfStateStart.put((BalancingUpperBodySubControllerState)this.getStateEnum(), processedSensors.getTime());
-
-         pelvisFrame = pelvis.getBodyFixedFrame();
-         this.wrenchOnPelvisAngularPart = desiredLungingTorqueDuring(BalancingUpperBodySubControllerState.ORIENT_REC_ACC);
-         this.wrenchOnPelvisLinearPart = new Vector3d();
-      }
-      
       public void doAction()
       {
          if (USE_INVERSE_DYNAMICS_FOR_LUNGING)
@@ -468,6 +480,15 @@ public class BalancingUpperBodySubController implements UpperBodySubController
             spineControlModule.setHipXYTorque(hipTorque);
          }
          
+      }
+
+      public void doTransitionIntoAction()
+      {
+         timeOfStateStart.put((BalancingUpperBodySubControllerState)this.getStateEnum(), processedSensors.getTime());
+
+         pelvisFrame = pelvis.getBodyFixedFrame();
+         this.wrenchOnPelvisAngularPart = desiredLungingTorqueDuring(BalancingUpperBodySubControllerState.ORIENT_REC_ACC);
+         this.wrenchOnPelvisLinearPart = new Vector3d();
       }
 
       public void doTransitionOutOfAction()
@@ -494,17 +515,6 @@ public class BalancingUpperBodySubController implements UpperBodySubController
          super(BalancingUpperBodySubControllerState.ORIENT_REC_DEC);
       }
 
-      public void doTransitionIntoAction()
-      {
-         timeOfStateStart.put((BalancingUpperBodySubControllerState)this.getStateEnum(), processedSensors.getTime());
-
-         flipVisualizedLungeAxisGraphic();
-         
-         pelvisFrame = pelvis.getBodyFixedFrame();
-         this.wrenchOnPelvisAngularPart = desiredLungingTorqueDuring(BalancingUpperBodySubControllerState.ORIENT_REC_DEC);
-         this.wrenchOnPelvisLinearPart = new Vector3d();
-      }
-      
       public void doAction()
       {
          if (USE_INVERSE_DYNAMICS_FOR_LUNGING)
@@ -522,9 +532,19 @@ public class BalancingUpperBodySubController implements UpperBodySubController
             hipTorque.negate();
             spineControlModule.setHipXYTorque(hipTorque);
          }
-         
       }
 
+      public void doTransitionIntoAction()
+      {
+         timeOfStateStart.put((BalancingUpperBodySubControllerState)this.getStateEnum(), processedSensors.getTime());
+
+         flipVisualizedLungeAxisGraphic();
+         
+         pelvisFrame = pelvis.getBodyFixedFrame();
+         this.wrenchOnPelvisAngularPart = desiredLungingTorqueDuring(BalancingUpperBodySubControllerState.ORIENT_REC_DEC);
+         this.wrenchOnPelvisLinearPart = new Vector3d();
+      }
+      
       public void doTransitionOutOfAction()
       {
          if (USE_INVERSE_DYNAMICS_FOR_LUNGING)
@@ -793,8 +813,8 @@ public class BalancingUpperBodySubController implements UpperBodySubController
       icpDesiredLunging.set(new FramePoint2d(referenceFrames.getMidFeetZUpFrame()).changeFrameCopy(ReferenceFrame.getWorldFrame()));
       desiredICPVisualizer.set(icpDesiredLunging);
       
-      lungeDesiredCoP = new YoFramePoint2d("lungeDesiredCoP", "", referenceFrames.getMidFeetZUpFrame(), registry);
-      bosRadiusAlongLungeAxis.set(0.0);  //TODO: This should be more representative of the actual base of support, which varies depending on single/double support and stance width in double support 
+      desiredCMP = new YoFramePoint2d("desiredCMP", "", ReferenceFrame.getWorldFrame(), registry);
+      bosRadiusAlongLungeAxis.set(0.0);  //TODO: This should be more representative of the actual base of support, which varies depending on single/double support and stance width in double support
    }
 
    private void populateControllers()

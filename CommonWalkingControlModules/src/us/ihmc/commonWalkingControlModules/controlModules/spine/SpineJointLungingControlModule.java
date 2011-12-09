@@ -20,7 +20,9 @@ import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenc
 import us.ihmc.commonWalkingControlModules.sensors.ProcessedSensorsInterface;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.containers.ContainerTools;
+import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
+import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
@@ -277,6 +279,16 @@ public class SpineJointLungingControlModule implements SpineLungingControlModule
       spineTorques.setTorque(SpineJointName.SPINE_YAW, desiredTorqueVector.getZ());
 
       
+   }
+   
+   public void doCoPToCMPDistanceControl(FramePoint2d desiredCMP)
+   {
+      throw new RuntimeException("to implement");
+   }
+   
+   public void doConstantTorqueAroundLungeAxis(FrameVector2d lungeAxis, double constantTorque)
+   {
+      throw new RuntimeException("to implement");
    }
 }
 
