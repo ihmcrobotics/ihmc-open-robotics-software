@@ -203,7 +203,7 @@ public class CommonStanceSubController implements StanceSubController
 
    public void doTransitionIntoLoadingPreSwingA(RobotSide loadingLeg)
    {
-      supportLegAndLegToTrustForVelocity.setLegToTrustForVelocity(loadingLeg, true); // true);
+      supportLegAndLegToTrustForVelocity.setLegToTrustForVelocity(loadingLeg, true);
       supportLegAndLegToTrustForVelocity.setLegToTrustForVelocity(loadingLeg.getOppositeSide(), false);
       supportLegAndLegToTrustForVelocity.setSupportLeg(null);
       supportLegAndLegToTrustForVelocity.setLegToUseForCOMOffset(loadingLeg);

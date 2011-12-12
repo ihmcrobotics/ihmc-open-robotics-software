@@ -120,7 +120,7 @@ public class SwingLegCompensationPelvisHeightControlModule implements PelvisHeig
       stanceHeightPDcontroller.setDerivativeGain(10.0);
       
       if (runningOnRealRobot)
-         fZExtra.set(0.0);
+         fZExtra.set(25.0);
       else
          fZExtra.set(0.0); // 25.0); // 0.0); // 50.0);    // 0.0);
       stanceHeightDes.set(0.95);

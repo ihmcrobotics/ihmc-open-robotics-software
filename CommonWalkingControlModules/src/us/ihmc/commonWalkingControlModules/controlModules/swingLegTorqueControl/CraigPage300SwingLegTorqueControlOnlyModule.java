@@ -132,6 +132,8 @@ public class CraigPage300SwingLegTorqueControlOnlyModule implements SwingLegTorq
       desiredLegJointPositions.get(swingSide).set(jointPositions);
       desiredLegJointVelocities.get(swingSide).set(jointVelocities);
       
+      inverseDynamicsCalculators.get(swingSide).compute();
+      setUpperBodyWrench();
 
       LegJointName[] legJointNames = fullRobotModel.getRobotSpecificJointNames().getLegJointNames();
       for (LegJointName legJointName : legJointNames)
@@ -189,11 +191,6 @@ public class CraigPage300SwingLegTorqueControlOnlyModule implements SwingLegTorq
             legTorquesToPackForSwingLeg.setTorque(legJointName, tauInverseDynamics);
          }
       }
-      
-      
-      
-
-      setUpperBodyWrench();
    }
 
    public void setAnkleGainsSoft(RobotSide swingSide)
@@ -236,7 +233,7 @@ public class CraigPage300SwingLegTorqueControlOnlyModule implements SwingLegTorq
 //      masterKpGain.set(150.0);
 //      masterKdGain.set(2.0); TODO
 
-      masterKpGain.set(150.0);
+      masterKpGain.set(50.0); // 150.0);
       masterKdGain.set(2.0);
 
       softScaleFactor.set(0.1); // 0.25);
