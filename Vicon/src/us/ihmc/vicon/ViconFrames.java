@@ -79,7 +79,10 @@ public class ViconFrames
 
    public boolean isDataValid(String name)
    {
-      return referenceFrames.get(name).isDataValid();
+      if (referenceFrames.get(name) != null)
+         return referenceFrames.get(name).isDataValid();
+
+      return false;
    }
 
    public synchronized ViconReferenceFrame getBodyFrame(String name)
