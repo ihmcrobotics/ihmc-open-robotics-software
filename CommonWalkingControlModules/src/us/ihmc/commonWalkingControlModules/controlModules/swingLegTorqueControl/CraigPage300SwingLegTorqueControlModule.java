@@ -184,6 +184,11 @@ public class CraigPage300SwingLegTorqueControlModule implements SwingLegTorqueCo
 
 //      inverseDynamicsPercentScaling.set(getPercentScalingBasedOnJacobianDeterminant(jacobianDeterminant.getDoubleValue()));
 
+      // Compute ID once to find upper body wrench (including PD terms in this computation will cause bad vibrations)
+      inverseDynamicsCalculators.get(swingSide).compute();
+      setUpperBodyWrench();
+
+      // Compute ID once more, now with augmented accelerations to compensate for position and velocity errors.
       LegJointName[] legJointNames = fullRobotModel.getRobotSpecificJointNames().getLegJointNames();
       for (LegJointName legJointName : legJointNames)
       {
@@ -204,14 +209,11 @@ public class CraigPage300SwingLegTorqueControlModule implements SwingLegTorqueCo
          double kdGain = kdGains.get(legJointName).getDoubleValue();
          double qddDesiredWithPD = positionError * kpGain + velocityError * kdGain + qddDesired;
          
-//         qddDesiredWithPD *= inverseDynamicsPercentScaling.getDoubleValue();
-
          revoluteJoint.setQddDesired(qddDesiredWithPD);
       }
-
-      // control
       inverseDynamicsCalculators.get(swingSide).compute();
 
+      // Set joint torques
       for (LegJointName legJointName : legTorquesToPackForSwingLeg.getLegJointNames())
       {
          double tauInverseDynamics = fullRobotModel.getLegJoint(swingSide, legJointName).getTau();
@@ -223,7 +225,6 @@ public class CraigPage300SwingLegTorqueControlModule implements SwingLegTorqueCo
          legTorquesToPackForSwingLeg.addTorque(legJointName, tauInverseDynamics);
       }
 
-      setUpperBodyWrench();
    }
 
    public void computePreSwing(RobotSide swingSide)
@@ -327,23 +328,26 @@ public class CraigPage300SwingLegTorqueControlModule implements SwingLegTorqueCo
    {
       useBodyAcceleration = false;
 
-      kpGains.get(LegJointName.HIP_YAW).set(500.0);
-      kdGains.get(LegJointName.HIP_YAW).set(20.0);
+//      kpGains.get(LegJointName.HIP_YAW).set(500.0);
+//      kdGains.get(LegJointName.HIP_YAW).set(20.0);
+//      
+//      kpGains.get(LegJointName.HIP_ROLL).set(200.0);
+//      kdGains.get(LegJointName.HIP_ROLL).set(20.0);
+//      
+//      kpGains.get(LegJointName.HIP_PITCH).set(200.0);
+//      kdGains.get(LegJointName.HIP_PITCH).set(20.0);
+//      
+//      kpGains.get(LegJointName.KNEE).set(200.0);
+//      kdGains.get(LegJointName.KNEE).set(20.0);
+//      
+//      kpGains.get(LegJointName.ANKLE_PITCH).set(1000.0);
+//      kdGains.get(LegJointName.ANKLE_PITCH).set(20.0);
+//
+//      kpGains.get(LegJointName.ANKLE_ROLL).set(1000.0);
+//      kdGains.get(LegJointName.ANKLE_ROLL).set(20.0);
       
-      kpGains.get(LegJointName.HIP_ROLL).set(200.0);
-      kdGains.get(LegJointName.HIP_ROLL).set(20.0);
-      
-      kpGains.get(LegJointName.HIP_PITCH).set(200.0);
-      kdGains.get(LegJointName.HIP_PITCH).set(20.0);
-      
-      kpGains.get(LegJointName.KNEE).set(200.0);
-      kdGains.get(LegJointName.KNEE).set(20.0);
-      
-      kpGains.get(LegJointName.ANKLE_PITCH).set(1000.0);
-      kdGains.get(LegJointName.ANKLE_PITCH).set(20.0);
-
-      kpGains.get(LegJointName.ANKLE_ROLL).set(1000.0);
-      kdGains.get(LegJointName.ANKLE_ROLL).set(20.0);
+      masterKpGain.set(50.0);
+      masterKdGain.set(2.0);
       
       softScaleFactor.set(0.1); // 0.25);
       dampedLeastSquaresAlpha.set(0.05);

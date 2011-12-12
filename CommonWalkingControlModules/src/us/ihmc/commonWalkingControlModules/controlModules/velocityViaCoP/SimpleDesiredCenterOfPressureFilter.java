@@ -26,6 +26,7 @@ public class SimpleDesiredCenterOfPressureFilter implements DesiredCenterOfPress
    private final AlphaFilteredYoFramePoint2d filteredDesiredCoPDoubleSupport;
    private final SideDependentList<AlphaFilteredYoFramePoint2d> filteredDesiredCoPsSingleSupport = new SideDependentList<AlphaFilteredYoFramePoint2d>();
 
+   private final DoubleYoVariable desiredCoPBreakFrequencyHertz = new DoubleYoVariable("desiredCoPBreakFrequencyHertz", registry);
    private final DoubleYoVariable alphaDesiredCoP = new DoubleYoVariable("alphaDesiredCoP", registry);
    private final EnumYoVariable<RobotSide> supportLegPreviousTick = EnumYoVariable.create("supportLegPreviousTick", RobotSide.class, registry);
    private final CouplingRegistry couplingRegistry;
@@ -53,6 +54,7 @@ public class SimpleDesiredCenterOfPressureFilter implements DesiredCenterOfPress
 
    public FramePoint2d filter(FramePoint2d desiredCenterOfPressure, RobotSide supportLeg)
    {
+      alphaDesiredCoP.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequency(desiredCoPBreakFrequencyHertz.getDoubleValue(), controlDT));
       FramePoint2d ret;
 
       if (supportLeg == null)
@@ -139,11 +141,11 @@ public class SimpleDesiredCenterOfPressureFilter implements DesiredCenterOfPress
 
    public void setParametersForR2()
    {
-      alphaDesiredCoP.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(8.84, controlDT));      
+      desiredCoPBreakFrequencyHertz.set(8.84);      
    }
    
    public void setParametersForM2V2()
    {
-      alphaDesiredCoP.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(8.84, controlDT));      
+      desiredCoPBreakFrequencyHertz.set(8.84);      
    }
 }
