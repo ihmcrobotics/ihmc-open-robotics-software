@@ -196,18 +196,18 @@ public class JointSpaceSwingSubController implements SwingSubController
    public void doInitialSwing(LegTorques legTorquesToPackForSwingLeg, double timeInState)
    {
 //      updateFinalDesiredPosition(legTorquesToPackForSwingLeg.getRobotSide());
-      doSwing(legTorquesToPackForSwingLeg, timeInState, true);
+      doSwing(legTorquesToPackForSwingLeg, timeInState, true, true);
       timeSpentInInitialSwing.set(timeInState);
    }
 
    public void doMidSwing(LegTorques legTorquesToPackForSwingLeg, double timeInState)
    {
 //      updateFinalDesiredPosition(legTorquesToPackForSwingLeg.getRobotSide());
-      doSwing(legTorquesToPackForSwingLeg, timeSpentInInitialSwing.getDoubleValue() + timeInState, true);
+      doSwing(legTorquesToPackForSwingLeg, timeSpentInInitialSwing.getDoubleValue() + timeInState, true, true);
       timeSpentInMidSwing.set(timeInState);
    }
 
-   private void doSwing(LegTorques legTorques, double timeInSwing, boolean useBodyPositionEstimation)
+   private void doSwing(LegTorques legTorques, double timeInSwing, boolean useBodyPositionEstimation, boolean updateEndPoint)
    {
       RobotSide swingLeg = legTorques.getRobotSide();
 
@@ -218,7 +218,10 @@ public class JointSpaceSwingSubController implements SwingSubController
       LegJointVelocities legJointVelocities = jointVelocities.get(swingLeg);
       LegJointAccelerations legJointAccelerations = jointAccelerations.get(swingLeg);
 
-      jointSpaceTrajectoryGenerator.updateEndPoint(desiredPosition, desiredOrientation, timeInSwing, useBodyPositionEstimation);
+      if(updateEndPoint)
+      {
+         jointSpaceTrajectoryGenerator.updateEndPoint(desiredPosition, desiredOrientation, timeInSwing, useBodyPositionEstimation);
+      }
       jointSpaceTrajectoryGenerator.compute(legJointPositions, legJointVelocities, legJointAccelerations, timeInSwing);
 
       torqueControlModule.compute(legTorques, legJointPositions, legJointVelocities, legJointAccelerations);
@@ -238,7 +241,7 @@ public class JointSpaceSwingSubController implements SwingSubController
    {
       setEstimatedSwingTimeRemaining(0.0);
 
-      doSwing(legTorquesToPackForSwingLeg, jointSpaceTrajectoryGenerator.getSwingEndTime(), true);
+      doSwing(legTorquesToPackForSwingLeg, jointSpaceTrajectoryGenerator.getSwingEndTime(), true, true);
 
       timeSpentInTerminalSwing.set(timeInState);
       
@@ -247,7 +250,10 @@ public class JointSpaceSwingSubController implements SwingSubController
 
    public void doSwingInAir(LegTorques legTorques, double timeInState)
    {
-      doSwing(legTorques, timeInState, false);
+      
+      boolean updateEndPoint = timeInState < swingDuration.getDoubleValue();
+      
+      doSwing(legTorques, timeInState, false, updateEndPoint);
       canGoToDoubleSupportFromLastTickState.set(true);
    }
 

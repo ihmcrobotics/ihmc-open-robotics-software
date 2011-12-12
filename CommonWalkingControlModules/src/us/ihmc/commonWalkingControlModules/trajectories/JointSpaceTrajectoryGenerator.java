@@ -423,27 +423,29 @@ public class JointSpaceTrajectoryGenerator
       QuinticSplineInterpolator currentInterpolator = jointSplines[numberOfViaPoints.getIntegerValue()];
       currentInterpolator.initialize(t);
       
+      
       LegJointVelocities legJointVelocities = new LegJointVelocities(legJointNames, swingSide.getEnumValue());
       
-      ReferenceFrame footFrame = referenceFrames.getFootFrame(swingSide.getEnumValue());
-      Twist twistOfFootWithRespectToPelvis = new Twist(footFrame, ReferenceFrame.getWorldFrame(), footFrame);
-      upperBodyVelocityAtEndOfStep.changeFrame(ReferenceFrame.getWorldFrame());
-      twistOfFootWithRespectToPelvis.setAngularPart(upperBodyVelocityAtEndOfStep.getVector());
-      
-
-      
-      desiredJointVelocityCalculators.get(swingSide.getEnumValue()).packDesiredJointVelocities(legJointVelocities, twistOfFootWithRespectToPelvis, ikAlpha.getDoubleValue());
-      
+      if(useBodyPositionEstimation)
+      {
+         ReferenceFrame footFrame = referenceFrames.getFootFrame(swingSide.getEnumValue());
+         Twist twistOfFootWithRespectToPelvis = new Twist(footFrame, ReferenceFrame.getWorldFrame(), footFrame);
+         upperBodyVelocityAtEndOfStep.changeFrame(ReferenceFrame.getWorldFrame());
+         twistOfFootWithRespectToPelvis.setAngularPart(upperBodyVelocityAtEndOfStep.getVector());
+     
+         desiredJointVelocityCalculators.get(swingSide.getEnumValue()).packDesiredJointVelocities(legJointVelocities, twistOfFootWithRespectToPelvis, ikAlpha.getDoubleValue());
+      }
 
       for (int j = 1; j < legJointNames.length; j++)
       {
-         if(!useEstimatedJointVelocitiesAtEndOfStep.getBooleanValue())
+         if(!useEstimatedJointVelocitiesAtEndOfStep.getBooleanValue() || !useBodyPositionEstimation)
          {
             legJointVelocities.setJointVelocity(legJointNames[j], 0.0);
          }
          yIn[j - 1][0] = initialJointAngles.get(legJointNames[j]).getDoubleValue();
          currentInterpolator.determineCoefficients(j - 1, yIn[j - 1], initialJointVelocities.get(legJointNames[j]).getDoubleValue(), legJointVelocities.getJointVelocity(legJointNames[j]),
                initialJointAccelerations.get(legJointNames[j]).getDoubleValue(), 0.0);
+         
       }
 
    }
