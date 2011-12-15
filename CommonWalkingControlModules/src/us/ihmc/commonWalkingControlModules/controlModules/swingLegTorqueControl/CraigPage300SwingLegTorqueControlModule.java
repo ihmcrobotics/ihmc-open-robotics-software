@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.controlModules.swingLegTorqueControl;
 
-import java.util.Collection;
 import java.util.EnumMap;
 
 import javax.media.j3d.Transform3D;
@@ -33,11 +32,10 @@ import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.utilities.screwTheory.Twist;
 import us.ihmc.utilities.screwTheory.Wrench;
 
-import com.yobotics.simulationconstructionset.YoVariable;
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.MasterVariableChangedListener;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.VariableChangedListener;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.gui.GUISetterUpper;
 import com.yobotics.simulationconstructionset.gui.GUISetterUpperRegistry;
@@ -126,8 +124,8 @@ public class CraigPage300SwingLegTorqueControlModule implements SwingLegTorqueCo
       }
 
 
-      masterKpGain.addVariableChangedListener(new MasterGainVariableChangedListener(kpGains.values()));
-      masterKdGain.addVariableChangedListener(new MasterGainVariableChangedListener(kdGains.values()));
+      masterKpGain.addVariableChangedListener(new MasterVariableChangedListener(kpGains.values()));
+      masterKdGain.addVariableChangedListener(new MasterVariableChangedListener(kdGains.values()));
 
       parentRegistry.addChild(registry);
       if (guiSetterUpperRegistry != null)
@@ -405,24 +403,6 @@ public class CraigPage300SwingLegTorqueControlModule implements SwingLegTorqueCo
       };
 
       return ret;
-   }
-
-   private class MasterGainVariableChangedListener implements VariableChangedListener
-   {
-      private Collection<DoubleYoVariable> slaves;
-
-      public MasterGainVariableChangedListener(Collection<DoubleYoVariable> slaves)
-      {
-         this.slaves = slaves;
-      }
-
-      public void variableChanged(YoVariable master)
-      {
-         for (DoubleYoVariable slave : slaves)
-         {
-            slave.set(master.getValueAsDouble());
-         }
-      }
    }
 
 }
