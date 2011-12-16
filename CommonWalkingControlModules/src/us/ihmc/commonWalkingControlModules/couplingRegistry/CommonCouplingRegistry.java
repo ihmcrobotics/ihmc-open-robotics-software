@@ -45,6 +45,7 @@ public class CommonCouplingRegistry implements CouplingRegistry
    private Wrench upperBodyWrench;
    
    private YoFrameVector2d lungeAxis = new YoFrameVector2d("lungeAxis", "", ReferenceFrame.getWorldFrame(), registry);
+   private YoFramePoint2d desiredCMP = new YoFramePoint2d("desiredCMP", "", ReferenceFrame.getWorldFrame(), registry);
 
 
    public CommonCouplingRegistry(CommonWalkingReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons, YoVariableRegistry parentRegistry)
@@ -210,6 +211,16 @@ public class CommonCouplingRegistry implements CouplingRegistry
          ret.changeFrame(expressedInFrame);
          return ret;
       }
+   }
+
+   public void setDesiredCMP(FramePoint2d desiredCMP)
+   {  
+      this.desiredCMP.set(desiredCMP.changeFrameCopy(ReferenceFrame.getWorldFrame()));
+   }
+
+   public FramePoint2d getDesiredCMP()
+   {
+      return this.desiredCMP.getFramePoint2dCopy();
    }
 
 }

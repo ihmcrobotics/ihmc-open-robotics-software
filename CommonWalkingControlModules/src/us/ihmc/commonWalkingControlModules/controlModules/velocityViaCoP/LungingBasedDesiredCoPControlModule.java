@@ -18,7 +18,7 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 public class LungingBasedDesiredCoPControlModule implements DesiredCoPControlModule
 {
    private final DesiredCenterOfPressureFilter desiredCenterOfPressureFilter;
-   private final CapturabilityBasedDesiredCoPVisualizer visualizer;
+   private final LungingBasedDesiredCoPCMPVisualizer visualizer;
 
    private final CouplingRegistry couplingRegistry;
    private final CommonWalkingReferenceFrames referenceFrames;
@@ -27,7 +27,7 @@ public class LungingBasedDesiredCoPControlModule implements DesiredCoPControlMod
 
    public LungingBasedDesiredCoPControlModule(DesiredCapturePointCalculator desiredCapturePointCalculator,
          DesiredCapturePointToDesiredCoPControlModule desiredCapturePointToDesiredCoPControlModule,
-         DesiredCenterOfPressureFilter desiredCenterOfPressureFilter, CapturabilityBasedDesiredCoPVisualizer visualizer, CouplingRegistry couplingRegistry,
+         DesiredCenterOfPressureFilter desiredCenterOfPressureFilter, LungingBasedDesiredCoPCMPVisualizer visualizer, CouplingRegistry couplingRegistry,
          CommonWalkingReferenceFrames referenceFrames)
    {
       this.desiredCenterOfPressureFilter = desiredCenterOfPressureFilter;
@@ -76,6 +76,8 @@ public class LungingBasedDesiredCoPControlModule implements DesiredCoPControlMod
       
       desiredCoP = desiredCenterOfPressureFilter.filter(desiredCoP, null);
       visualizer.setDesiredCoP(desiredCoP);
+
+      visualizer.setDesiredCMP(couplingRegistry.getDesiredCMP()); //TODO this method should only do CoP
 
       return desiredCoP;
    }
