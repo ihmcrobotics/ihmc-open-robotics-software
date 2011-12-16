@@ -2,39 +2,34 @@ package us.ihmc.commonWalkingControlModules.controlModules.spine;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.List;
-import java.util.ListIterator;
 
+
+import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.SpineLungingControlModule;
-import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.SpineControlModule;
-import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
-import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
-import us.ihmc.commonWalkingControlModules.partNamesAndTorques.R2SpineLinkName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.SpineJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.SpineTorques;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.ProcessedSensorsInterface;
-import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.containers.ContainerTools;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
+import us.ihmc.utilities.math.geometry.Line2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.InverseDynamicsCalculator;
-import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.RevoluteJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
-import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.utilities.screwTheory.Wrench;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.PIDController;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint2d;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector2d;
 
 public class SpineJointLungingControlModule implements SpineLungingControlModule
 {
@@ -44,7 +39,11 @@ public class SpineJointLungingControlModule implements SpineLungingControlModule
 
    private final EnumMap<SpineJointName, DoubleYoVariable> desiredAngles = ContainerTools.createEnumMap(SpineJointName.class);
    private final EnumMap<SpineJointName, PIDController> spineControllers = ContainerTools.createEnumMap(SpineJointName.class);
-   private final PIDController spineTorqueController = new PIDController("spingeTorqueCtr", registry);
+   private final PIDController spineTorqueController = new PIDController("spingeTorqueCtrl", registry);
+   private final PIDController spineCmpWrenchControllerX = new PIDController("spineCmPWrenchXCtrl", registry);
+   private final PIDController spineCmpWrenchControllerY = new PIDController("spineCmPWrenchYCtrl", registry);
+   
+   private final ArrayList<PIDController> spineCmpWrenchControllers = new ArrayList<PIDController>();
    
    private final YoFrameVector wrenchOnPelvisAngular = new YoFrameVector("wrenchOnPelvisAngular", "", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector wrenchOnPelvisLinear = new YoFrameVector("wrenchOnPelvislinear", "", ReferenceFrame.getWorldFrame(), registry);
@@ -52,6 +51,9 @@ public class SpineJointLungingControlModule implements SpineLungingControlModule
    private final YoFrameVector additionalWrenchAngularPart = new YoFrameVector("additionalWrenchAngularPart", "", ReferenceFrame.getWorldFrame(), registry);
 //   private final EnumMap<SpineJointName, DoubleYoVariable> actualAngles;
 //   private final EnumMap<SpineJointName, DoubleYoVariable> actualAngleVelocities;
+   private YoFramePoint2d desiredCMP;
+   private YoFrameVector2d cmpError;
+   private YoFrameVector2d cmpWrenchFeedback;
 
    private final ProcessedSensorsInterface processedSensors;
    private final double controlDT;
@@ -144,6 +146,9 @@ public class SpineJointLungingControlModule implements SpineLungingControlModule
          
          spinePitchErrorList.add(new DoubleYoVariable(spineJointName + "Error", registry));
       }
+      
+      this.cmpError = new YoFrameVector2d("cmpError", "", referenceFrames.getMidFeetZUpFrame(), registry);
+      this.cmpWrenchFeedback = new YoFrameVector2d("cmpWrenchFeedBack", "", referenceFrames.getMidFeetZUpFrame(), registry); // frame does not matter
    }
 
    private void populateControllers()
@@ -153,6 +158,8 @@ public class SpineJointLungingControlModule implements SpineLungingControlModule
          spineControllers.put(spineJointName, new PIDController(spineJointName.getCamelCaseNameForStartOfExpression() + "ctrl", registry));
          spineJointIDQddControllers.put(spineJointName, new PIDController(spineJointName.getCamelCaseNameForStartOfExpression() + "qddDesired" + "ctrl", registry));            
       }
+      spineCmpWrenchControllers.add(spineCmpWrenchControllerX);
+      spineCmpWrenchControllers.add(spineCmpWrenchControllerY);
    }
 
    private void setDesireds()
@@ -184,6 +191,13 @@ public class SpineJointLungingControlModule implements SpineLungingControlModule
       spineJointIDQddControllers.get(SpineJointName.SPINE_ROLL).setDerivativeGain(1000.0);
       
       spineTorqueController.setProportionalGain(1.0);
+      
+      for (int index = 0; index < spineCmpWrenchControllers.size(); index ++)
+      {
+         spineCmpWrenchControllers.get(index).setProportionalGain(10.0);
+         spineCmpWrenchControllers.get(index).setDerivativeGain(1.0);
+      }
+
    }
    
    public void doMaintainDesiredChestOrientation()
@@ -218,6 +232,12 @@ public class SpineJointLungingControlModule implements SpineLungingControlModule
    {
       // to prevent wrong frame stuff
       externalWrench.setAngularPart(wrenchOnPelvis.getAngularPartCopy());
+      
+      setExternalWrench();
+   }
+
+   private void setExternalWrench()
+   {
       spineJointIDCalc.setExternalWrench(pelvisRigidBody, externalWrench);
       
       this.wrenchOnPelvisAngular.set(externalWrench.getAngularPartCopy());
@@ -287,13 +307,53 @@ public class SpineJointLungingControlModule implements SpineLungingControlModule
       spineTorques.setTorque(SpineJointName.SPINE_PITCH, desiredTorqueVector.getY());
       spineTorques.setTorque(SpineJointName.SPINE_ROLL, desiredTorqueVector.getX());
       spineTorques.setTorque(SpineJointName.SPINE_YAW, desiredTorqueVector.getZ());
-
-      
    }
    
-   public void doCoPToCMPDistanceControl(FramePoint2d desiredCMP)
+   public void doCMPControl(FramePoint2d desiredCMP, FrameVector2d lungeAxis)
    {
-      throw new RuntimeException("to implement");
+      // frame in which everything is expressed
+      ReferenceFrame expressedInFrame = referenceFrames.getMidFeetZUpFrame();
+      // check if input is in this frame
+      desiredCMP.checkReferenceFrameMatch(expressedInFrame);
+
+      // storage
+      FramePoint2d currentCMP = this.processedSensors.getCentroidalMomentPivotInFrame(expressedInFrame).toFramePoint2d();
+
+      // error
+      this.cmpError.set(desiredCMP);
+      this.cmpError.sub(currentCMP);
+
+//      cmpWrenchFeedback.setX(this.spineCmpWrenchController.compute(currentCmpDistance.getDoubleValue(), desiredCmpDistance.getDoubleValue(), 0.0, 0.0, controlDT));
+      cmpWrenchFeedback.setX( this.spineCmpWrenchControllers.get(0).compute(currentCMP.getX(), desiredCMP.getX(), 0.0, 0.0, controlDT));
+      cmpWrenchFeedback.setY( this.spineCmpWrenchControllers.get(1).compute(currentCMP.getY(), desiredCMP.getY(), 0.0, 0.0, controlDT));
+      
+//    setting torque      
+//    *********************
+      // 100 for x is too big
+      Vector3d extraTorque = new Vector3d( 100.0 * cmpWrenchFeedback.getY(), - 100.0 * cmpWrenchFeedback.getX(), 0.0);
+//      Vector3d extraTorque = new Vector3d( - 100.0 * lungeAxis.getY() * cmpWrenchFeedback.getY(), 100.0 * lungeAxis.getX() * cmpWrenchFeedback.getX(), 0.0);
+      // adjust extra torque based on lunge axis (now scales with same magnitude along different axes)
+      
+      Vector3d lungingTorque  = new Vector3d();
+      lungeAxis.changeFrame(ReferenceFrame.getWorldFrame());
+      lungingTorque.set(lungeAxis.getX(), lungeAxis.getY(), 0.0);
+      lungingTorque.scale( - 150.0);
+      lungingTorque.add(extraTorque);
+      this.setHipXYTorque(lungingTorque);
+//    *********************
+      
+      
+//      setting wrench
+//      *********************
+//      Vector3d wrenchAngularPart = new Vector3d(lungeAxis.getX(), lungeAxis.getY(), 0.0);
+//      wrenchAngularPart.scale(150.0);
+//      externalWrench.setLinearPart(new Vector3d());
+//      externalWrench.setAngularPart(wrenchAngularPart);
+//      this.externalWrench.scale( 1.0 - cmpWrenchFeedback.getX());
+//
+//      this.setExternalWrench();
+//      this.doMaintainDesiredChestOrientation();
+//      *********************
    }
    
    
