@@ -10,9 +10,12 @@ public interface SwingLegTorqueControlOnlyModule
 {
    public abstract void compute(LegTorques legTorquesToPackForSwingLeg, LegJointPositions jointPositions, LegJointVelocities jointVelocities, LegJointAccelerations jointAccelerations);
    
-   public abstract void computePreSwing(RobotSide swingSide);
+   public abstract void computePreSwing(LegTorques legTorquesToPackForSwingLeg);
    
    public abstract void setAnkleGainsSoft(RobotSide swingSide);
 
    public abstract void setAnkleGainsDefault(RobotSide swingSide);
+   
+//   public abstract void setDampingToZero(RobotSide swingSide);
+
 }

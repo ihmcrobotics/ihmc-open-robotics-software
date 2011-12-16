@@ -22,7 +22,9 @@ import us.ihmc.utilities.math.geometry.Orientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.Wrench;
 
+import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.trajectory.YoMinimumJerkTrajectory;
 
 public class BalanceSupportControlModule
 {
@@ -42,6 +44,7 @@ public class BalanceSupportControlModule
    private final SideDependentList<Double> legStrengths = new SideDependentList<Double>();
    private final SideDependentList<FramePoint2d> virtualToePoints = new SideDependentList<FramePoint2d>();
    private final YoVariableRegistry registry = new YoVariableRegistry("BalanceSupportControlModule");
+   
 
    public BalanceSupportControlModule(DesiredCoPControlModule velocityViaCoPControlModule,
                                       VirtualToePointCalculator virtualToePointAndLegStrengthCalculator, LegStrengthCalculator legStrengthCalculator,
@@ -62,6 +65,8 @@ public class BalanceSupportControlModule
       this.ankleOverRotationControlModule = ankleOverRotationControlModule;
       this.couplingRegistry = couplingRegistry;
 
+      
+      
       parentRegistry.addChild(registry);
    }
 

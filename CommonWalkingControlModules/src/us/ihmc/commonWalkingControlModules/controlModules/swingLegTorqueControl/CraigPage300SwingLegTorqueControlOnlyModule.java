@@ -211,6 +211,7 @@ public class CraigPage300SwingLegTorqueControlOnlyModule implements SwingLegTorq
       upperBodyWrench.changeBodyFrameAttachedToSameBody(referenceFrames.getPelvisFrame());
       upperBodyWrench.changeFrame(referenceFrames.getPelvisFrame());
       couplingRegistry.setUpperBodyWrench(upperBodyWrench);
+      
    }
 
    public void setParametersForR2()
@@ -230,18 +231,18 @@ public class CraigPage300SwingLegTorqueControlOnlyModule implements SwingLegTorq
    {
       useBodyAcceleration = true;
 
+//      masterKpGain.set(150.0);
+//      masterKdGain.set(2.0); TODO
+
       masterKpGain.set(150.0);
-      masterKdGain.set(2.0);
+      masterKdGain.set(3.0);
 
       softScaleFactor.set(0.1); // 0.25);
    }
    
    public void setParametersForOptimalSwing()
    {
-      for(RobotSide side : RobotSide.values())
-      {
-         legJointPositionControlModules.get(side).setGainsForOptimalSwing();
-      }
+
       masterKpGain.set(0.0);
       masterKdGain.set(0.0);
    }
@@ -318,8 +319,9 @@ public class CraigPage300SwingLegTorqueControlOnlyModule implements SwingLegTorq
       }
    }
 
-   public void computePreSwing(RobotSide swingSide)
+   public void computePreSwing(LegTorques legTorquesToPack)
    {
+      RobotSide swingSide = legTorquesToPack.getRobotSide();
       fullRobotModel.getRootJoint().setDesiredAccelerationToZero();
 
       for (LegJointName legJointName : legJointNames)
@@ -329,6 +331,15 @@ public class CraigPage300SwingLegTorqueControlOnlyModule implements SwingLegTorq
 
       inverseDynamicsCalculators.get(swingSide).compute();
       setUpperBodyWrench();
+      
+      for (LegJointName legJointName : legJointNames)
+      {
+         legTorquesToPack.setTorque(legJointName, fullRobotModel.getLegJoint(swingSide, legJointName).getTau());
+      }
    }
 
+//   public void setDampingToZero(RobotSide swingSide)
+//   {
+//      legJointPositionControlModules.get(swingSide).disableJointDamping();
+//   }
 }

@@ -13,11 +13,11 @@ public interface ProcessedOutputsInterface
    public abstract void setDesiredLegJointTorque(RobotSide robotSide, LegJointName jointName, double desiredTorque);
    public abstract double getDesiredLegJointTorque(RobotSide robotSide, LegJointName jointName);
 
-   public abstract void resetAllDesiredJointVelocities();
+//   public abstract void resetAllDesiredJointVelocities();
    public abstract void setAllDesiredTorquesToZero();
 
-   public abstract void setDamping(RobotSide robotSide, LegJointName jointName, double damping);
-   public abstract void setDesiredJointVelocity(RobotSide robotSide, LegJointName jointName, double desiredJointVelocity);
+//   public abstract void setDamping(RobotSide robotSide, LegJointName jointName, double damping);
+//   public abstract void setDesiredJointVelocity(RobotSide robotSide, LegJointName jointName, double desiredJointVelocity);
    public abstract void incrementProcessedOutputsWhiteBoardIndex();
 
 }

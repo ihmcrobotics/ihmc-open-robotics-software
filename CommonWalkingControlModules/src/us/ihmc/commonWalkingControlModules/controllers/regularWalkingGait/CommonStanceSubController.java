@@ -500,11 +500,6 @@ public class CommonStanceSubController implements StanceSubController
       setParametersForM2V2();
       doPushRecovery.set(false);
    }
-   
-   public void setParametersForOptimalSwingController()
-   {
-      kneeExtensionControlModule.setupParametersForOptimalSwingController();
-   }
 
    public void initialize()
    {      

@@ -18,6 +18,7 @@ public class SimpleHipYawDamperControlModule implements HipDamperControlModule
    public SimpleHipYawDamperControlModule(ProcessedSensorsInterface processedSensors, YoVariableRegistry parentRegistry)
    {
       this.processedSensors = processedSensors;
+      parentRegistry.addChild(registry);
    }
 
    public void addHipDamping(LegTorques legTorques)
@@ -35,7 +36,7 @@ public class SimpleHipYawDamperControlModule implements HipDamperControlModule
    
    public void setParametersForM2V2()
    {
-      hipYawDamping.set(0.0);
+      hipYawDamping.set(5.0);
    }
 
 }

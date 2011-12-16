@@ -10,7 +10,6 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import us.ihmc.commonWalkingControlModules.configurations.BalanceOnOneLegConfiguration;
-import us.ihmc.commonWalkingControlModules.filters.TorqueTransitionFilter;
 import us.ihmc.commonWalkingControlModules.outputs.ProcessedOutputsInterface;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LowerBodyTorques;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.RobotSpecificJointNames;
@@ -51,7 +50,7 @@ public abstract class RegularWalkingGaitAbstractController implements RobotContr
    protected final UpperBodyTorques upperBodyTorques = new UpperBodyTorques();
    protected final ProcessedOutputsInterface processedOutputs;
 
-   private final TorqueTransitionFilter torqueTransitionFilter;
+//   private final TorqueTransitionFilter torqueTransitionFilter;
 
    protected final YoVariableRegistry controllerRegistry;
    protected final YoVariableRegistry childRegistry = new YoVariableRegistry("GoAndSuch");
@@ -66,6 +65,8 @@ public abstract class RegularWalkingGaitAbstractController implements RobotContr
    protected final IntegerYoVariable stepsToTake = new IntegerYoVariable("stepsToTake", childRegistry);
    protected final BooleanYoVariable onFinalStep = new BooleanYoVariable("onFinalStep", childRegistry);
 
+//   protected boolean doTorqueTransitionFilterInThisModule;
+   
    protected final StateMachine walkingStateMachine;
    protected final EnumYoVariable<RobotSide> supportLegYoVariable = new EnumYoVariable<RobotSide>("supportLegForWalkingCtrlr",
                                                                        "Current support leg. Null if double support", childRegistry, RobotSide.class);
@@ -90,7 +91,7 @@ public abstract class RegularWalkingGaitAbstractController implements RobotContr
       this.controllerRegistry = controllerRegistry;
       controllerRegistry.addChild(childRegistry);
 
-      torqueTransitionFilter = new TorqueTransitionFilter(robotJointNames, processedOutputs, childRegistry);
+//      torqueTransitionFilter = new TorqueTransitionFilter(robotJointNames, processedOutputs, childRegistry);
 
       lowerBodyTorques = new LowerBodyTorques(robotJointNames);
 
@@ -113,15 +114,23 @@ public abstract class RegularWalkingGaitAbstractController implements RobotContr
 
    public void doControl()
    {
-      // Remember the torques to filter them in a bit:
-      torqueTransitionFilter.rememberPreviousTorques();
+//      // Remember the torques to filter them in a bit:
+//      if(doTorqueTransitionFilterInThisModule)
+//      {
+//         torqueTransitionFilter.rememberPreviousTorques();
+//      }
+      
       doEveryTickSubController.doEveryControlTick(supportLegYoVariable.getEnumValue());
       walkingStateMachine.doAction();
       walkingStateMachine.checkTransitionConditions();
 
       // Filter torques:
       processedOutputs.incrementProcessedOutputsWhiteBoardIndex();
-      torqueTransitionFilter.updateTorques(walkingStateMachine.timeInCurrentState());
+      
+//      if(doTorqueTransitionFilterInThisModule)
+//      {
+//         torqueTransitionFilter.updateTorques(walkingStateMachine.timeInCurrentState());
+//      }
    }
 
    public enum RegularWalkingState
@@ -130,7 +139,7 @@ public abstract class RegularWalkingGaitAbstractController implements RobotContr
       LeftEarlyStanceRightInitialSwing, LeftLateStanceRightMidSwing, LeftTerminalStanceRightTerminalSwing, TransferAllLoadToRightLegForWalking,
       RightLoadingLeftPreSwingA, RightLoadingLeftPreSwingB, RightLoadingLeftPreSwingC, RightEarlyStanceLeftInitialSwing, RightLateStanceLeftMidSwing,
       RightTerminalStanceLeftTerminalSwing, stopWalkingLeftLoadingState, stopWalkingRightLoadingState, leftLoadingForSingleLegBalance,
-      rightLoadingForSingleLegBalance, leftSingleLegBalanceRightSwingInAir, rightSingleLegBalanceRightSwingInAir, blankState
+      rightLoadingForSingleLegBalance, leftSingleLegBalanceRightPreSwingInAir, rightSingleLegBalanceRightPreSwingInAir, leftSingleLegBalanceRightSwingInAir, rightSingleLegBalanceRightSwingInAir, blankState
       ;
 
 //    public RobotSide getSupportLeg()
@@ -182,13 +191,17 @@ public abstract class RegularWalkingGaitAbstractController implements RobotContr
 
    public void setupParametersForR2()
    {
-//    torqueTransitionFilter.setTauFilterTime(0.05);
-      torqueTransitionFilter.setTauFilterTime(0.005);
+      
+//      doTorqueTransitionFilterInThisModule = true;
+////    torqueTransitionFilter.setTauFilterTime(0.05);
+//      torqueTransitionFilter.setTauFilterTime(0.005);
    }
 
    public void setupParametersForM2V2()
    {
-      torqueTransitionFilter.setTauFilterTime(0.15);
+//      doTorqueTransitionFilterInThisModule = false;
+      
+//      torqueTransitionFilter.setTauFilterTime(0.15);
    }
 
    protected class StartWalkingDoubleSupportState extends State
@@ -639,6 +652,63 @@ public abstract class RegularWalkingGaitAbstractController implements RobotContr
       }
    }
 
+   protected class SingleLegBalancePreSwingInAirState extends State
+   {
+      private final RobotSide supportLeg;
+      private final RobotSide swingLeg;
+      private BalanceOnOneLegConfiguration currentConfiguration;
+
+
+      public SingleLegBalancePreSwingInAirState(RegularWalkingState stateName, RobotSide supportLeg)
+      {
+         super(stateName);
+
+         this.supportLeg = supportLeg;
+         this.swingLeg = supportLeg.getOppositeSide();
+         ReferenceFrame supportLegAnkleZUpFrame = referenceFrames.getAnkleZUpFrame(supportLeg);
+
+         FramePoint defaultDesiredCapturePoint = new FramePoint(supportLegAnkleZUpFrame);
+         
+         double defaultKneeBendSupportLeg = 0.0;
+
+         this.currentConfiguration = new BalanceOnOneLegConfiguration(new double[3], defaultDesiredCapturePoint, new FramePoint(supportLegAnkleZUpFrame),
+               defaultKneeBendSupportLeg);
+      }
+
+      public void doAction()
+      {
+         setLowerBodyTorquesToZero();
+
+         swingSubController.doPreSwingInAir(lowerBodyTorques.getLegTorques(swingLeg), walkingStateMachine.timeInCurrentState());
+         stanceSubController.doSingleLegBalance(lowerBodyTorques.getLegTorques(supportLeg), supportLeg, walkingStateMachine.timeInCurrentState());
+         upperBodySubController.doUpperBodyControl(upperBodyTorques);
+
+         if (swingSubController.isDoneWithPreSwingInAir(swingLeg, walkingStateMachine.timeInCurrentState()))
+         {
+            this.transitionToDefaultNextState();
+         }
+
+
+         setProcessedOutputsBodyTorques();
+      }
+
+      public void doTransitionIntoAction()
+      {
+
+         supportLegYoVariable.set(supportLeg);
+
+         stanceSubController.doTransitionIntoSingleLegBalance(supportLeg, currentConfiguration);
+         swingSubController.doTransitionIntoPreSwingInAir(swingLeg);
+      }
+
+      public void doTransitionOutOfAction()
+      {
+         stanceSubController.doTransitionOutOfSingleLegBalance(supportLeg);
+         swingSubController.doTransitionOutOfPreSwingInAir(swingLeg);
+      }
+
+   }
+
 
    protected class SingleLegBalanceSwingInAirState extends State
    {
@@ -776,6 +846,11 @@ public abstract class RegularWalkingGaitAbstractController implements RobotContr
       LoadingForSingleLegBalanceState rightLoadingForSingleLegBalanceState =
          new LoadingForSingleLegBalanceState(RegularWalkingState.rightLoadingForSingleLegBalance, RobotSide.RIGHT);
 
+      SingleLegBalancePreSwingInAirState leftSingleLegBalanceRightPreSwingInAirState =
+            new SingleLegBalancePreSwingInAirState(RegularWalkingState.leftSingleLegBalanceRightPreSwingInAir, RobotSide.LEFT);
+         SingleLegBalancePreSwingInAirState rightSingleLegBalanceLeftPreSwingInAirState =
+            new SingleLegBalancePreSwingInAirState(RegularWalkingState.rightSingleLegBalanceRightPreSwingInAir, RobotSide.RIGHT);
+      
       SingleLegBalanceSwingInAirState leftSingleLegBalanceRightSwingInAirState =
          new SingleLegBalanceSwingInAirState(RegularWalkingState.leftSingleLegBalanceRightSwingInAir, RobotSide.LEFT);
       SingleLegBalanceSwingInAirState rightSingleLegBalanceLeftSwingInAirState =
@@ -944,7 +1019,8 @@ public abstract class RegularWalkingGaitAbstractController implements RobotContr
       leftEarlyStanceRightInitialSwingState.setDefaultNextState(leftLateStanceRightMidSwingState.getStateEnum());
       leftLateStanceRightMidSwingState.setDefaultNextState(leftTerminalStanceRightTerminalSwingState.getStateEnum());
       leftTerminalStanceRightTerminalSwingState.setDefaultNextState(rightLoadingLeftPreSwingAState.getStateEnum());
-      leftLoadingForSingleLegBalanceState.setDefaultNextState(leftSingleLegBalanceRightSwingInAirState.getStateEnum());
+      leftLoadingForSingleLegBalanceState.setDefaultNextState(leftSingleLegBalanceRightPreSwingInAirState.getStateEnum());
+      leftSingleLegBalanceRightPreSwingInAirState.setDefaultNextState(leftSingleLegBalanceRightSwingInAirState.getStateEnum());
 
       rightLoadingLeftPreSwingAState.setDefaultNextState(rightLoadingLeftPreSwingBState.getStateEnum());
       rightLoadingLeftPreSwingBState.setDefaultNextState(rightLoadingLeftPreSwingCState.getStateEnum());
@@ -952,7 +1028,8 @@ public abstract class RegularWalkingGaitAbstractController implements RobotContr
       rightEarlyStanceLeftInitialSwingState.setDefaultNextState(rightLateStanceLeftMidSwingState.getStateEnum());
       rightLateStanceLeftMidSwingState.setDefaultNextState(rightTerminalStanceLeftTerminalSwingState.getStateEnum());
       rightTerminalStanceLeftTerminalSwingState.setDefaultNextState(leftLoadingRightPreSwingAState.getStateEnum());
-      rightLoadingForSingleLegBalanceState.setDefaultNextState(rightSingleLegBalanceLeftSwingInAirState.getStateEnum());
+      rightLoadingForSingleLegBalanceState.setDefaultNextState(rightSingleLegBalanceLeftPreSwingInAirState.getStateEnum());
+      rightSingleLegBalanceLeftPreSwingInAirState.setDefaultNextState(rightSingleLegBalanceLeftSwingInAirState.getStateEnum());
 
       // End: Add transitions
 
@@ -969,6 +1046,7 @@ public abstract class RegularWalkingGaitAbstractController implements RobotContr
       walkingStateMachine.addState(leftLateStanceRightMidSwingState);
       walkingStateMachine.addState(leftTerminalStanceRightTerminalSwingState);
       walkingStateMachine.addState(leftLoadingForSingleLegBalanceState);
+      walkingStateMachine.addState(leftSingleLegBalanceRightPreSwingInAirState);
       walkingStateMachine.addState(leftSingleLegBalanceRightSwingInAirState);
 
       walkingStateMachine.addState(transferAllLoadToRightLegForWalkingState);
@@ -979,6 +1057,7 @@ public abstract class RegularWalkingGaitAbstractController implements RobotContr
       walkingStateMachine.addState(rightLateStanceLeftMidSwingState);
       walkingStateMachine.addState(rightTerminalStanceLeftTerminalSwingState);
       walkingStateMachine.addState(rightLoadingForSingleLegBalanceState);
+      walkingStateMachine.addState(rightSingleLegBalanceLeftPreSwingInAirState);
       walkingStateMachine.addState(rightSingleLegBalanceLeftSwingInAirState);
 
       walkingStateMachine.addState(stopWalkingLeftLoadingState);

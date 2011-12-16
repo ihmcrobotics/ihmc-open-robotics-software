@@ -2,8 +2,6 @@ package us.ihmc.commonWalkingControlModules.controlModules.swingLegTorqueControl
 
 import javax.vecmath.Vector3d;
 
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
-
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.SwingLegTorqueControlOnlyModule;
 import us.ihmc.commonWalkingControlModules.controlModules.LegJointPositionControlModule;
 import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
@@ -21,6 +19,8 @@ import us.ihmc.utilities.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.utilities.screwTheory.RevoluteJoint;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.utilities.screwTheory.Wrench;
+
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public class PDPlusIDSwingLegTorqueControlOnlyModule implements SwingLegTorqueControlOnlyModule
 {
@@ -109,8 +109,9 @@ public class PDPlusIDSwingLegTorqueControlOnlyModule implements SwingLegTorqueCo
       setUpperBodyWrench();      
    }
    
-   public void computePreSwing(RobotSide swingSide)
+   public void computePreSwing(LegTorques legTorquesToPack)
    {
+      RobotSide swingSide = legTorquesToPack.getRobotSide();
       fullRobotModel.getRootJoint().setDesiredAccelerationToZero();
 
       for (LegJointName legJointName : legJointNames)
@@ -151,4 +152,9 @@ public class PDPlusIDSwingLegTorqueControlOnlyModule implements SwingLegTorqueCo
    {
       useBodyAcceleration = false;
    }
+
+//   public void setDampingToZero(RobotSide swingSide)
+//   {
+//      legJointPositionControlModules.get(swingSide).disableJointDamping();      
+//   }
 }

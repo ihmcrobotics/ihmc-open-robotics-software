@@ -39,7 +39,7 @@ public class KneeDamperControlModule
    
    public void setParametersForM2V2()
    {
-      bKneeDamping.set(0.0); 
+      bKneeDamping.set(6.0); 
       ffKneeToStraighten.set(0.0);    // 10.0);
    }
 }

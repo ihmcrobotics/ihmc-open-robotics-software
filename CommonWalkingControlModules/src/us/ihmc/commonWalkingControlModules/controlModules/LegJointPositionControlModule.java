@@ -48,7 +48,7 @@ public class LegJointPositionControlModule
    private static final String desiredPositionPrefix = "desiredJointPos";
    private static final String desiredVelocityPrefix = "desiredJointVel";
 
-   private final EnumMap<LegJointName, Boolean> doDerivativeControlInThisModuleForJoint = new EnumMap<LegJointName, Boolean>(LegJointName.class);
+//   private final EnumMap<LegJointName, Boolean> doDerivativeControlInThisModuleForJoint = new EnumMap<LegJointName, Boolean>(LegJointName.class);
    
    private final DoubleYoVariable softScaleFactor;
 
@@ -56,27 +56,24 @@ public class LegJointPositionControlModule
 
    private final double controlDT;
 
-   private final ProcessedOutputsInterface processedOutputs;
 
    public LegJointPositionControlModule(RobotSpecificJointNames robotJointNames, ProcessedSensorsInterface processedSensors,
          ProcessedOutputsInterface processedOutputs, YoVariableRegistry yoVariableParentRegistry, GUISetterUpperRegistry guiSetterUpperRegistry,
          RobotSide robotSide, double controlDT,
          boolean useDesiredVelocities)
  {
-      this(robotJointNames.getLegJointNames(), processedSensors, processedOutputs, yoVariableParentRegistry, guiSetterUpperRegistry, robotSide, controlDT, useDesiredVelocities);
+      this(robotJointNames.getLegJointNames(), processedSensors, yoVariableParentRegistry, guiSetterUpperRegistry, robotSide, controlDT, useDesiredVelocities);
  }
    
    public LegJointPositionControlModule(LegJointName[] robotJointNames, ProcessedSensorsInterface processedSensors,
-           ProcessedOutputsInterface processedOutputs, YoVariableRegistry yoVariableParentRegistry, GUISetterUpperRegistry guiSetterUpperRegistry,
-           RobotSide robotSide, double controlDT,
-           boolean useDesiredVelocities)
+           YoVariableRegistry yoVariableParentRegistry, GUISetterUpperRegistry guiSetterUpperRegistry, RobotSide robotSide,
+           double controlDT, boolean useDesiredVelocities)
    {
       this.legJointNames = robotJointNames;
       this.robotSide = robotSide;
       this.processedSensors = processedSensors;
       this.controlDT = controlDT;
       this.useDesiredVelocities = useDesiredVelocities;
-      this.processedOutputs = processedOutputs;
 
       registry = new YoVariableRegistry("LegJointPositionControlModule_" + robotSide.getCamelCaseNameForStartOfExpression());
 
@@ -159,24 +156,14 @@ public class LegJointPositionControlModule
       kdGains.get(LegJointName.ANKLE_ROLL).set(1.0);
       kdGains.get(LegJointName.ANKLE_PITCH).set(1.0);
       
-      doDerivativeControlInThisModuleForJoint.put(LegJointName.HIP_YAW, false);
-      doDerivativeControlInThisModuleForJoint.put(LegJointName.HIP_ROLL, false);
-      doDerivativeControlInThisModuleForJoint.put(LegJointName.HIP_PITCH, false);
-      doDerivativeControlInThisModuleForJoint.put(LegJointName.KNEE, false);
-      doDerivativeControlInThisModuleForJoint.put(LegJointName.ANKLE_ROLL, false);
-      doDerivativeControlInThisModuleForJoint.put(LegJointName.ANKLE_PITCH, false);
+//      doDerivativeControlInThisModuleForJoint.put(LegJointName.HIP_YAW, true);
+//      doDerivativeControlInThisModuleForJoint.put(LegJointName.HIP_ROLL, true);
+//      doDerivativeControlInThisModuleForJoint.put(LegJointName.HIP_PITCH, true);
+//      doDerivativeControlInThisModuleForJoint.put(LegJointName.KNEE, true);
+//      doDerivativeControlInThisModuleForJoint.put(LegJointName.ANKLE_ROLL, true);
+//      doDerivativeControlInThisModuleForJoint.put(LegJointName.ANKLE_PITCH, true);
 
       softScaleFactor.set(0.1); // 0.25);
-   }
-   
-   public void setGainsForOptimalSwing()
-   {
-      doDerivativeControlInThisModuleForJoint.put(LegJointName.HIP_YAW, false);
-      doDerivativeControlInThisModuleForJoint.put(LegJointName.HIP_ROLL, true);
-      doDerivativeControlInThisModuleForJoint.put(LegJointName.HIP_PITCH, true);
-      doDerivativeControlInThisModuleForJoint.put(LegJointName.KNEE, true);
-      doDerivativeControlInThisModuleForJoint.put(LegJointName.ANKLE_ROLL, false);
-      doDerivativeControlInThisModuleForJoint.put(LegJointName.ANKLE_PITCH, false);
    }
 
    public void setDefaultGainsForR2()
@@ -209,12 +196,12 @@ public class LegJointPositionControlModule
       kdGains.get(LegJointName.ANKLE_ROLL).set(1.0);    // 3.0); // 10.0;    // 2.0;
       kdGains.get(LegJointName.ANKLE_PITCH).set(3.0);    // 20.0;    // 2.0;//5.0;
 
-      doDerivativeControlInThisModuleForJoint.put(LegJointName.HIP_YAW, true);
-      doDerivativeControlInThisModuleForJoint.put(LegJointName.HIP_ROLL, true);
-      doDerivativeControlInThisModuleForJoint.put(LegJointName.HIP_PITCH, true);
-      doDerivativeControlInThisModuleForJoint.put(LegJointName.KNEE, true);
-      doDerivativeControlInThisModuleForJoint.put(LegJointName.ANKLE_ROLL, true);
-      doDerivativeControlInThisModuleForJoint.put(LegJointName.ANKLE_PITCH, true);
+//      doDerivativeControlInThisModuleForJoint.put(LegJointName.HIP_YAW, true);
+//      doDerivativeControlInThisModuleForJoint.put(LegJointName.HIP_ROLL, true);
+//      doDerivativeControlInThisModuleForJoint.put(LegJointName.HIP_PITCH, true);
+//      doDerivativeControlInThisModuleForJoint.put(LegJointName.KNEE, true);
+//      doDerivativeControlInThisModuleForJoint.put(LegJointName.ANKLE_ROLL, true);
+//      doDerivativeControlInThisModuleForJoint.put(LegJointName.ANKLE_PITCH, true);
       
       softScaleFactor.set(0.25);    // (0.05);
    }
@@ -248,8 +235,8 @@ public class LegJointPositionControlModule
          controllers.get(legJointName).setDerivativeGain(kdGain);
 
          double torque;
-         if (doDerivativeControlInThisModuleForJoint.get(legJointName))
-         {
+//         if (doDerivativeControlInThisModuleForJoint.get(legJointName))
+//         {
             double desiredJointVelocity = useDesiredVelocities
                                           ? desiredJointVelocities.get(legJointName).getDoubleValue() * desiredVelocityScale.getDoubleValue() : 0.0;
 
@@ -258,20 +245,21 @@ public class LegJointPositionControlModule
             torque = controllers.get(legJointName).compute(actualJointPosition, desiredJointPositions.get(legJointName).getDoubleValue(), actualJointVelocity,
                                      desiredJointVelocity, controlDT);
 
-         }
-         else
-         {
-            processedOutputs.setDamping(robotSide, legJointName, kdGains.get(legJointName).getDoubleValue());
-            double desiredJointVelocity = useDesiredVelocities
-                                          ? desiredJointVelocities.get(legJointName).getDoubleValue() * desiredVelocityScale.getDoubleValue() : 0.0;
-            processedOutputs.setDesiredJointVelocity(robotSide, legJointName, desiredJointVelocity);
-
-            // double torque = controllers.get(legJointName).compute(actualJointPosition, desiredJointPositions.get(legJointName).getDoubleValue(), actualJointVelocity,
-            // desiredJointVelocity, controlDT); // if this were called in the low level loop
-
-            torque = controllers.get(legJointName).compute(actualJointPosition, desiredJointPositions.get(legJointName).getDoubleValue(), 0.0, 0.0, controlDT);    // don't do derivative stuff here; that's for the low level loop
-
-         }
+//         }
+//         else
+//         {
+//            processedOutputs.setDamping(robotSide, legJointName, kdGains.get(legJointName).getDoubleValue());
+//            double desiredJointVelocity = useDesiredVelocities
+//                                          ? desiredJointVelocities.get(legJointName).getDoubleValue() * desiredVelocityScale.getDoubleValue() : 0.0;
+//            processedOutputs.setDesiredJointVelocity(robotSide, legJointName, desiredJointVelocity);
+//
+//            // double torque = controllers.get(legJointName).compute(actualJointPosition, desiredJointPositions.get(legJointName).getDoubleValue(), actualJointVelocity,
+//            // desiredJointVelocity, controlDT); // if this were called in the low level loop
+//
+//            torque = controllers.get(legJointName).compute(actualJointPosition, desiredJointPositions.get(legJointName).getDoubleValue(), 0.0, 0.0, controlDT);    // don't do derivative stuff here; that's for the low level loop
+//            
+//
+//         }
 
          legTorquesToPackForSwingLeg.setTorque(legJointName, torque);
       }
@@ -310,7 +298,15 @@ public class LegJointPositionControlModule
       ankleTorqueScale.set(1.0);
    }
 
+//   public void disableJointDamping()
+//   {
+//      for (LegJointName legJointName : legJointNames)
+//      {
+//         processedOutputs.setDamping(robotSide, legJointName, 0.0);
+//      }
+//   }
 
+   
    private GUISetterUpper createGUISetterUpper()
    {
       GUISetterUpper ret = new GUISetterUpper()
