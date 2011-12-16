@@ -23,7 +23,7 @@ public class ArmsSidewaysUsingIDArmControlModule extends IDArmControlModule
    {
       for (RobotSide robotSide : RobotSide.values())
       {
-         desiredArmJointPositions.get(robotSide).get(ArmJointName.SHOULDER_ROLL).set(robotSide.negateIfRightSide(Math.PI / 2.5));
+         desiredArmJointPositions.get(robotSide).get(ArmJointName.SHOULDER_ROLL).set(robotSide.negateIfRightSide(Math.PI / 2.0));
          desiredArmJointPositions.get(robotSide).get(ArmJointName.SHOULDER_YAW).set(robotSide.negateIfRightSide(0.7));
       }
    }
