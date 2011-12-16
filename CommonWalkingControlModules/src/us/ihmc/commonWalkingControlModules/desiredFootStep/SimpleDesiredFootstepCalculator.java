@@ -52,15 +52,17 @@ public class SimpleDesiredFootstepCalculator implements DesiredFootstepCalculato
 
       // Footstep Position
       FramePoint footstepPosition = new FramePoint(supportAnkleZUpFrame);
-      FrameVector footstepOffset = new FrameVector(desiredHeadingFrame, stepLength.getDoubleValue(), supportLegSide.negateIfLeftSide(stepWidth.getDoubleValue()), stepHeight.getDoubleValue());
+//      FrameVector footstepOffset = new FrameVector(desiredHeadingFrame, stepLength.getDoubleValue(), supportLegSide.negateIfLeftSide(stepWidth.getDoubleValue()), stepHeight.getDoubleValue());
+      FrameVector footstepOffset = new FrameVector(supportAnkleZUpFrame, stepLength.getDoubleValue(), supportLegSide.negateIfLeftSide(stepWidth.getDoubleValue()), stepHeight.getDoubleValue());
       
       footstepOffset.changeFrame(supportAnkleZUpFrame);
       footstepPosition.add(footstepOffset); 
+      footstepPosition.changeFrame(desiredHeadingFrame);
 
       // Footstep Orientation
       Orientation footstepOrientation = new Orientation(desiredHeadingFrame); 
       footstepOrientation.setYawPitchRoll(stepYaw.getDoubleValue(), stepPitch.getDoubleValue(), stepRoll.getDoubleValue());
-      footstepOrientation.changeFrame(supportAnkleZUpFrame);
+//      footstepOrientation.changeFrame(supportAnkleZUpFrame);
       
       // Create a foot Step Pose from Position and Orientation
       FramePose footstepPose = new FramePose(footstepPosition, footstepOrientation);

@@ -8,12 +8,16 @@ import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
+import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.Wrench;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicReferenceFrame;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint2d;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector2d;
 
@@ -26,6 +30,8 @@ public class CommonCouplingRegistry implements CouplingRegistry
    private final DoubleYoVariable singleSupportDuration = new DoubleYoVariable("singleSupportDuration", registry);
    private final DoubleYoVariable doubleSupportDuration = new DoubleYoVariable("doubleSupportDuration", registry);
    private final DoubleYoVariable estimatedSwingTimeRemaining = new DoubleYoVariable("estimatedSwingTimeRemaining", registry);
+   private final DoubleYoVariable estimatedDoubleSupportTimeRemaining = new DoubleYoVariable("estimatedDoubleSupportTimeRemaining", registry);
+
    private final BooleanYoVariable forceHindOnToes = new BooleanYoVariable("forceHindOnToes", registry);
 
    //TODO: May need to YoVariablize the following to make things rewindable?
@@ -36,7 +42,7 @@ public class CommonCouplingRegistry implements CouplingRegistry
 
    private FrameVector2d desiredVelocity;
 
-   private Footstep desiredStepLocation;
+   private Footstep desiredFootstep;
 
    private BipedSupportPolygons bipedSupportPolygons;
 
@@ -47,13 +53,21 @@ public class CommonCouplingRegistry implements CouplingRegistry
    private YoFrameVector2d lungeAxis = new YoFrameVector2d("lungeAxis", "", ReferenceFrame.getWorldFrame(), registry);
    private YoFramePoint2d desiredCMP = new YoFramePoint2d("desiredCMP", "", ReferenceFrame.getWorldFrame(), registry);
 
+   private final PoseReferenceFrame footstepFrame = new PoseReferenceFrame("footstepFrame", ReferenceFrame.getWorldFrame());
+   private final DynamicGraphicReferenceFrame footstepFrameGraphic = new DynamicGraphicReferenceFrame(footstepFrame, registry, 0.1);
 
-   public CommonCouplingRegistry(CommonWalkingReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons, YoVariableRegistry parentRegistry)
+   public CommonCouplingRegistry(CommonWalkingReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons, YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       this.referenceFrames = referenceFrames;
       this.bipedSupportPolygons = bipedSupportPolygons;
       
       parentRegistry.addChild(registry);
+      if (dynamicGraphicObjectsListRegistry != null)
+      {
+         DynamicGraphicObjectsList dynamicGraphicObjectsList = new DynamicGraphicObjectsList(getClass().getSimpleName());
+         dynamicGraphicObjectsList.add(footstepFrameGraphic);
+         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectsList);
+      }
    }
 
    public void setReferenceFrames(CommonWalkingReferenceFrames referenceFrames)
@@ -119,14 +133,25 @@ public class CommonCouplingRegistry implements CouplingRegistry
    }
 
 
-   public void setDesiredFootstep(Footstep desiredStepLocation)
+   public void setDesiredFootstep(Footstep desiredFootstep)
    {
-      this.desiredStepLocation = desiredStepLocation;
+      this.desiredFootstep = desiredFootstep;
+      if (desiredFootstep != null)
+      {
+         footstepFrame.updatePose(desiredFootstep.getFootstepPose().changeFrameCopy(footstepFrame.getParent()));
+         footstepFrame.update();
+         footstepFrameGraphic.showGraphicObject();
+         footstepFrameGraphic.update();
+      }
+      else
+      {
+         footstepFrameGraphic.hideGraphicObject();
+      }
    }
 
    public Footstep getDesiredFootstep()
    {
-      return desiredStepLocation;
+      return desiredFootstep;
    }
 
    public void setSupportLeg(RobotSide supportLeg)
@@ -147,6 +172,16 @@ public class CommonCouplingRegistry implements CouplingRegistry
    public double getEstimatedSwingTimeRemaining()
    {
       return estimatedSwingTimeRemaining.getDoubleValue();
+   }
+   
+   public void setEstimatedDoubleSupportTimeRemaining(double estimatedDoubleSupportTimeRemaining)
+   {
+      this.estimatedDoubleSupportTimeRemaining.set(estimatedDoubleSupportTimeRemaining);
+   }
+   
+   public double getEstimatedDoubleSupportTimeRemaining()
+   {
+      return estimatedDoubleSupportTimeRemaining.getDoubleValue();
    }
 
    public void setBipedSupportPolygons(BipedSupportPolygons bipedSupportPolygons)
