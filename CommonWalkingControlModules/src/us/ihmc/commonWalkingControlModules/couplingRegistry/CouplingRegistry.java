@@ -55,6 +55,8 @@ public interface CouplingRegistry
    public abstract void setLungeAxis(FrameVector2d lungeAxis);
    // returns null if not lunging
    public abstract FrameVector2d getLungeAxisInFrame(ReferenceFrame expressedInFrame);
+   public abstract double getEstimatedDoubleSupportTimeRemaining();
+   public abstract void setEstimatedDoubleSupportTimeRemaining(double estimatedDoubleSupportTimeRemaining);
    
    public abstract void setDesiredCMP(FramePoint2d desiredCMP);
    public abstract FramePoint2d getDesiredCMP();

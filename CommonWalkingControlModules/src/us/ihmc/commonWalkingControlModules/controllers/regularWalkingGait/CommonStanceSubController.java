@@ -12,7 +12,9 @@ import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegTorques;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LowerBodyTorques;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.LegToTrustForVelocityWriteOnly;
+import us.ihmc.commonWalkingControlModules.sensors.ProcessedSensorsInterface;
 import us.ihmc.robotSide.RobotSide;
+import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameLineSegment2d;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
@@ -28,6 +30,7 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public class CommonStanceSubController implements StanceSubController
 {
+   private final ProcessedSensorsInterface processedSensors;
    private final CouplingRegistry couplingRegistry;
    private final CommonWalkingReferenceFrames referenceFrames;
    private final DesiredVelocityControlModule desiredVelocityControlModule;
@@ -48,13 +51,7 @@ public class CommonStanceSubController implements StanceSubController
    private final DoubleYoVariable toeOffFootPitch = new DoubleYoVariable("toeOffFootPitch",
                                                        "This is the desired foot pitch at the end of toe-off during stance", registry);
    private final DoubleYoVariable toeOffMoveDuration = new DoubleYoVariable("toeOffMoveDuration", "The duration of the toe-off move during stance", registry);
-   private final DoubleYoVariable timeSpentInEarlyStance = new DoubleYoVariable("timeSpentInEarlyStance", registry);
-   private final DoubleYoVariable timeSpentInLateStance = new DoubleYoVariable("timeSpentInLateStance", registry);
-   private final DoubleYoVariable timeSpentInTerminalStance = new DoubleYoVariable("timeSpentInTerminalStance", registry);
-
-   private final DoubleYoVariable timeSpentInLoadingPreSwingA = new DoubleYoVariable("timeSpentInLoadingPreSwingA", registry);
-   private final DoubleYoVariable timeSpentInLoadingPreSwingB = new DoubleYoVariable("timeSpentInLoadingPreSwingB", registry);
-   private final DoubleYoVariable doubleSupportDuration = new DoubleYoVariable("doubleSupportDuration", registry);
+   private final DoubleYoVariable loadingPreSwingAEntryTime = new DoubleYoVariable("doubleSupportStartTime", registry);
 
    private final DoubleYoVariable minDoubleSupportTimeBeforeWalking = new DoubleYoVariable("minDoubleSupportTimeBeforeWalking", registry);
    private final DoubleYoVariable xCaptureToTransfer = new DoubleYoVariable("xCaptureToTransfer", registry);
@@ -69,14 +66,15 @@ public class CommonStanceSubController implements StanceSubController
    private boolean waitInLoadingPreswingB;
 
 
-   public CommonStanceSubController(CouplingRegistry couplingRegistry, CommonWalkingReferenceFrames referenceFrames,
-                                    DesiredHeadingControlModule desiredHeadingControlModule, DesiredVelocityControlModule desiredVelocityControlModule,
+   public CommonStanceSubController(ProcessedSensorsInterface processedSensors, CouplingRegistry couplingRegistry,
+                                    CommonWalkingReferenceFrames referenceFrames, DesiredHeadingControlModule desiredHeadingControlModule,
+                                    DesiredVelocityControlModule desiredVelocityControlModule,
                                     DesiredPelvisOrientationControlModule desiredPelvisOrientationControlModule,
-                                    BalanceSupportControlModule balanceSupportControlModule,
-                                    FootOrientationControlModule footOrientationControlModule, KneeExtensionControlModule kneeExtensionControlModule,
-                                    LegToTrustForVelocityWriteOnly supportLegAndLegToTrustForVelocity,
-                                    YoVariableRegistry parentRegistry, double footWidth)
+                                    BalanceSupportControlModule balanceSupportControlModule, FootOrientationControlModule footOrientationControlModule,
+                                    KneeExtensionControlModule kneeExtensionControlModule,
+                                    LegToTrustForVelocityWriteOnly supportLegAndLegToTrustForVelocity, YoVariableRegistry parentRegistry, double footWidth)
    {
+      this.processedSensors = processedSensors;
       this.couplingRegistry = couplingRegistry;
       this.referenceFrames = referenceFrames;
       this.desiredVelocityControlModule = desiredVelocityControlModule;
@@ -88,8 +86,7 @@ public class CommonStanceSubController implements StanceSubController
       this.supportLegAndLegToTrustForVelocity = supportLegAndLegToTrustForVelocity;
       this.footWidth = footWidth;
 
-      doubleSupportDuration.set(1.0);    // FIXME: This is a hack but allows to compute the first desired step
-      couplingRegistry.setDoubleSupportDuration(doubleSupportDuration.getDoubleValue());
+      couplingRegistry.setDoubleSupportDuration(0.5); // TODO: set based on something smarter
 
       parentRegistry.addChild(registry);
    }
@@ -105,7 +102,7 @@ public class CommonStanceSubController implements StanceSubController
 
       // Here is where we want to add the torque for the kneeExtensionController
       kneeExtensionControlModule.doEarlyStanceKneeExtensionControl(legTorquesToPackForStanceSide);
-      timeSpentInEarlyStance.set(timeInState);
+      setEstimatedDoubleSupportTimeRemaining(legTorquesToPackForStanceSide.getRobotSide(), true);
    }
 
    public void doLateStance(LegTorques legTorquesToPackForStanceSide, double timeInState)
@@ -113,25 +110,20 @@ public class CommonStanceSubController implements StanceSubController
       doSingleSupportControl(legTorquesToPackForStanceSide, SingleSupportCondition.LateStance, timeInState);
       footOrientationControlModule.addAdditionalTorqueForFootOrientationControl(legTorquesToPackForStanceSide, timeInState);
       kneeExtensionControlModule.doLateStanceKneeExtensionControl(legTorquesToPackForStanceSide);
-
-
-      timeSpentInLateStance.set(timeInState);
+      setEstimatedDoubleSupportTimeRemaining(legTorquesToPackForStanceSide.getRobotSide(), true);
    }
 
    public void doTerminalStance(LegTorques legTorquesToPackForStanceSide, double timeInState)
    {
       RobotSide supportLeg = legTorquesToPackForStanceSide.getRobotSide();
 
-//    doSingleSupportControl(legTorquesToPackForStanceSide);
-
       doSingleSupportControl(legTorquesToPackForStanceSide, SingleSupportCondition.TerminalStance, timeInState);
 
-      footOrientationControlModule.addAdditionalTorqueForFootOrientationControl(legTorquesToPackForStanceSide,
-              timeInState + timeSpentInLateStance.getDoubleValue());
+//      footOrientationControlModule.addAdditionalTorqueForFootOrientationControl(legTorquesToPackForStanceSide,
+//              timeInState + timeSpentInLateStance.getDoubleValue());
 
       kneeExtensionControlModule.breakKneeForDownhillSlopes(supportLeg.getOppositeSide());
-
-      timeSpentInTerminalStance.set(timeInState);
+      setEstimatedDoubleSupportTimeRemaining(legTorquesToPackForStanceSide.getRobotSide(), true);
    }
 
 
@@ -139,47 +131,51 @@ public class CommonStanceSubController implements StanceSubController
    {
       doDoubleSupportControl(lowerBodyTorquesToPack, loadingLeg, true);
 
-      if ((timeSpentInLateStance.getDoubleValue() + timeSpentInTerminalStance.getDoubleValue()) != 0.0)
-         footOrientationControlModule.addAdditionalTorqueForFootOrientationControl(lowerBodyTorquesToPack.getLegTorques(loadingLeg.getOppositeSide()),
-                 timeInState + timeSpentInLateStance.getDoubleValue() + timeSpentInTerminalStance.getDoubleValue());
+//      if ((timeSpentInLateStance.getDoubleValue() + timeSpentInTerminalStance.getDoubleValue()) != 0.0)
+//         footOrientationControlModule.addAdditionalTorqueForFootOrientationControl(lowerBodyTorquesToPack.getLegTorques(loadingLeg.getOppositeSide()),
+//                 timeInState + timeSpentInLateStance.getDoubleValue() + timeSpentInTerminalStance.getDoubleValue());
 
       kneeExtensionControlModule.doLoadingControl(lowerBodyTorquesToPack.getLegTorques(loadingLeg));
-
-      timeSpentInLoadingPreSwingA.set(timeInState);
+      setEstimatedDoubleSupportTimeRemaining(null, true);
    }
 
    public void doLoadingPreSwingB(LowerBodyTorques lowerBodyTorquesToPack, RobotSide loadingLeg, double timeInState)
    {
       doDoubleSupportControl(lowerBodyTorquesToPack, loadingLeg, true);
       kneeExtensionControlModule.doLoadingControl(lowerBodyTorquesToPack.getLegTorques(loadingLeg));
-
-      timeSpentInLoadingPreSwingB.set(timeInState);
+      setEstimatedDoubleSupportTimeRemaining(null, true);
    }
 
    public void doLoadingPreSwingC(LegTorques legTorquesToPackForStanceSide, RobotSide loadingLeg, double timeInState)
    {
       doSingleSupportControl(legTorquesToPackForStanceSide, SingleSupportCondition.Loading, timeInState);
       kneeExtensionControlModule.doLoadingControl(legTorquesToPackForStanceSide);
+      setEstimatedDoubleSupportTimeRemaining(null, true);
    }
 
    public void doStartWalkingDoubleSupport(LowerBodyTorques lowerBodyTorquesToPack, RobotSide loadingLeg, double timeInState)
    {
       doDoubleSupportControl(lowerBodyTorquesToPack, loadingLeg, false);
+      couplingRegistry.setEstimatedDoubleSupportTimeRemaining(Double.POSITIVE_INFINITY);
+      setEstimatedDoubleSupportTimeRemaining(null, false);
    }
 
    public void doUnloadLegToTransferIntoWalking(LowerBodyTorques lowerBodyTorquesToPack, RobotSide supportLeg, double timeInState)
    {
       doDoubleSupportControl(lowerBodyTorquesToPack, supportLeg, true);
+      // TODO: set estimated double support time remaining
    }
 
    public void doLoadingForSingleLegBalance(LowerBodyTorques lowerBodyTorques, RobotSide upcomingSupportSide, double timeInCurrentState)
    {
       doDoubleSupportControl(lowerBodyTorques, upcomingSupportSide, false);
+      // TODO: set estimated double support time remaining
    }
 
    public void doSingleLegBalance(LegTorques legTorquesToPack, RobotSide supportLeg, double timeInCurrentState)
    {
       doSingleSupportControl(legTorquesToPack, SingleSupportCondition.StopWalking, timeInCurrentState);
+      couplingRegistry.setEstimatedSwingTimeRemaining(0.0);
    }
 
    public void doTransitionIntoEarlyStance(RobotSide stanceSide)
@@ -192,13 +188,10 @@ public class CommonStanceSubController implements StanceSubController
       ReferenceFrame desiredHeadingFrame = desiredHeadingControlModule.getDesiredHeadingFrame();
       Orientation finalOrientation = new Orientation(desiredHeadingFrame, 0.0, toeOffFootPitch.getDoubleValue(), 0.0);
       footOrientationControlModule.initializeFootOrientationMove(toeOffMoveDuration.getDoubleValue(), finalOrientation, stanceSide);
-
-      timeSpentInLateStance.set(0.0);
    }
 
    public void doTransitionIntoTerminalStance(RobotSide stanceSide)
    {
-      timeSpentInTerminalStance.set(0.0);
    }
 
    public void doTransitionIntoLoadingPreSwingA(RobotSide loadingLeg)
@@ -209,11 +202,7 @@ public class CommonStanceSubController implements StanceSubController
       supportLegAndLegToTrustForVelocity.setLegToUseForCOMOffset(loadingLeg);
 
       kneeExtensionControlModule.doTransitionIntoLoading(loadingLeg);
-
-      // Reset the timers
-      timeSpentInLoadingPreSwingA.set(0.0);
-      timeSpentInLoadingPreSwingB.set(0.0);
-      doubleSupportDuration.set(0.0);
+      loadingPreSwingAEntryTime.set(processedSensors.getTime());
    }
 
    public void doTransitionIntoLoadingPreSwingB(RobotSide loadingLeg)
@@ -293,8 +282,6 @@ public class CommonStanceSubController implements StanceSubController
 
    public void doTransitionOutOfLoadingPreSwingB(RobotSide loadingLeg)
    {
-      doubleSupportDuration.set(timeSpentInLoadingPreSwingA.getDoubleValue() + timeSpentInLoadingPreSwingB.getDoubleValue());
-      couplingRegistry.setDoubleSupportDuration(doubleSupportDuration.getDoubleValue());
    }
 
    public void doTransitionOutOfLoadingPreSwingC(RobotSide loadingLeg)
@@ -517,5 +504,25 @@ public class CommonStanceSubController implements StanceSubController
       }
       else
          return false;
+   }
+
+   private void setEstimatedDoubleSupportTimeRemaining(RobotSide supportLeg, boolean walking)
+   {
+      if (supportLeg == null)
+      {
+         if (walking)
+         {
+            double timeSpentInDoubleSupport = processedSensors.getTime() - loadingPreSwingAEntryTime.getDoubleValue();
+            double estimatedDoubleSupportTimeRemaining = couplingRegistry.getDoubleSupportDuration() - timeSpentInDoubleSupport;
+            estimatedDoubleSupportTimeRemaining = MathTools.clipToMinMax(estimatedDoubleSupportTimeRemaining, 0.0, Double.POSITIVE_INFINITY);
+            couplingRegistry.setEstimatedDoubleSupportTimeRemaining(estimatedDoubleSupportTimeRemaining);            
+         }
+         else
+            couplingRegistry.setEstimatedDoubleSupportTimeRemaining(Double.POSITIVE_INFINITY);
+      }
+      else
+      {
+         couplingRegistry.setEstimatedDoubleSupportTimeRemaining(0.0);
+      }
    }
 }
