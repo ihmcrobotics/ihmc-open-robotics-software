@@ -27,7 +27,7 @@ public interface SpineLungingControlModule extends SpineControlModule
 
    public abstract void setHipXYTorque(Vector3d desiredLungingTorqeicpRecoverDecelerateState);
    
-   public abstract void doCoPToCMPDistanceControl(FramePoint2d desiredCMP);
+   public abstract void doCMPControl(FramePoint2d desiredCMP, FrameVector2d lungeAxis);
    
    public abstract void doConstantTorqueAroundLungeAxis(FrameVector2d lungeAxis, double constantTorque);
 }

@@ -102,7 +102,7 @@ public class BalancingUpperBodySubController implements UpperBodySubController
    private final DoubleYoVariable chestAngularAcceleration = new DoubleYoVariable("chestAngularAcceleration", registry);
    
    private final DoubleYoVariable kTimeToSlowSlowDown = new DoubleYoVariable("kTimeToSlowDown", registry);
-   private YoFramePoint2d desiredCMP;
+   private final DoubleYoVariable kCMP = new DoubleYoVariable("kCMP", registry);
    
    private EnumMap<BalancingUpperBodySubControllerState, Double> timeOfStateStart = new EnumMap<BalancingUpperBodySubController.BalancingUpperBodySubControllerState, Double>(BalancingUpperBodySubControllerState.class);
    private EnumMap<BalancingUpperBodySubControllerState, Double> minimumElapsedTimeInState = new EnumMap<BalancingUpperBodySubControllerState, Double>(BalancingUpperBodySubControllerState.class);
@@ -221,7 +221,7 @@ public class BalancingUpperBodySubController implements UpperBodySubController
          stateMachine.setCurrentState(base.getStateEnum());
       }
       
-      minimumElapsedTimeInState.put(BalancingUpperBodySubControllerState.BASE, 1000.0*controlDT);
+      minimumElapsedTimeInState.put(BalancingUpperBodySubControllerState.BASE, 10.0*controlDT);
       minimumElapsedTimeInState.put(BalancingUpperBodySubControllerState.ICP_REC_ACC, 10.0*controlDT);
       minimumElapsedTimeInState.put(BalancingUpperBodySubControllerState.ICP_REC_DEC, 10.0*controlDT);
       minimumElapsedTimeInState.put(BalancingUpperBodySubControllerState.ORIENT_REC_ACC, 10.0*controlDT);
@@ -296,8 +296,6 @@ public class BalancingUpperBodySubController implements UpperBodySubController
          {
             if (USE_CONSTANT_WRENCH_AROUND_LUNGEAXIS)
             {
-               wrenchOnPelvis = new Wrench(pelvisFrame, pelvisFrame, wrenchOnPelvisLinearPart, wrenchOnPelvisAngularPart);
-               
                storeWrenchCopyAsYoVariable(wrenchOnPelvis);
 
                spineControlModule.setWrench(wrenchOnPelvis);
@@ -311,8 +309,10 @@ public class BalancingUpperBodySubController implements UpperBodySubController
             }
             else if (USE_CMP_CONTROL)
             {
-               spineControlModule.doCoPToCMPDistanceControl(desiredCMP.getFramePoint2dCopy());
-               spineControlModule.doMaintainDesiredChestOrientation();
+               FramePoint2d desiredCMP = getInitialIcpDirection(referenceFrames.getMidFeetZUpFrame());
+               desiredCMP.scale( kCMP.getDoubleValue());
+               couplingRegistry.setDesiredCMP(desiredCMP);
+               spineControlModule.doCMPControl(desiredCMP, couplingRegistry.getLungeAxisInFrame(ReferenceFrame.getWorldFrame()));
             }
 
          }
@@ -332,6 +332,11 @@ public class BalancingUpperBodySubController implements UpperBodySubController
          
          if (USE_INVERSE_DYNAMICS_FOR_LUNGING)
          {
+            pelvisFrame = referenceFrames.getPelvisFrame();//pelvis.getBodyFixedFrame();
+            this.wrenchOnPelvisAngularPart = desiredLungingTorqueDuring(BalancingUpperBodySubControllerState.ICP_REC_ACC);
+            this.wrenchOnPelvisLinearPart = new Vector3d();            
+            wrenchOnPelvis = new Wrench(pelvisFrame, pelvisFrame, wrenchOnPelvisLinearPart, wrenchOnPelvisAngularPart);
+            
             if (USE_SCALING_INSTEAD_OF_SETTING_TO_ZERO)
             {
                // scaling
@@ -345,14 +350,12 @@ public class BalancingUpperBodySubController implements UpperBodySubController
                spineJointsWithZeroGain.add(SpineJointName.SPINE_PITCH);
                spineControlModule.setGainsToZero(spineJointsWithZeroGain);            
             }
-            pelvisFrame = referenceFrames.getPelvisFrame();//pelvis.getBodyFixedFrame();
-            this.wrenchOnPelvisAngularPart = desiredLungingTorqueDuring(BalancingUpperBodySubControllerState.ICP_REC_ACC);
-            this.wrenchOnPelvisLinearPart = new Vector3d();
-
+            
             if (USE_CMP_CONTROL)
             {
-               desiredCMP.set(getInitialIcpDirection(ReferenceFrame.getWorldFrame()));
+               spineControlModule.setWrench(wrenchOnPelvis);
             }
+
          }
        }
 
@@ -366,6 +369,10 @@ public class BalancingUpperBodySubController implements UpperBodySubController
                storeWrenchCopyAsYoVariable(wrenchOnPelvis);
                spineControlModule.setWrench(wrenchOnPelvis);
                spineControlModule.setGains(); // may not be needed               
+            }
+            if (USE_CMP_CONTROL)
+            {
+               couplingRegistry.setDesiredCMP(new FramePoint2d(ReferenceFrame.getWorldFrame()));
             }
          }
       }
@@ -831,13 +838,6 @@ public class BalancingUpperBodySubController implements UpperBodySubController
 
          desiredNeckPositions.put(neckJointName, variable);
       }
-      
-      icpDesiredLunging.set(new FramePoint2d(referenceFrames.getMidFeetZUpFrame()).changeFrameCopy(ReferenceFrame.getWorldFrame()));
-      desiredICPVisualizer.set(icpDesiredLunging);
-      
-      desiredCMP = new YoFramePoint2d("desiredCMP", "", ReferenceFrame.getWorldFrame(), registry);
-      bosRadiusPerpToLungeAxis.set(0.0);  //TODO: This should be more representative of the actual base of support, which varies depending on single/double support and stance width in double support
-
    }
 
    private void populateControllers()
@@ -907,6 +907,12 @@ public class BalancingUpperBodySubController implements UpperBodySubController
       forcedControllerState.set(BalancingUpperBodySubControllerState.ICP_REC_ACC);
       setLungeAxisInWorldFrame(0.0, 0.0);
       predictedCMPscaling.set(0.05);
+      
+      icpDesiredLunging.set(new FramePoint2d(referenceFrames.getMidFeetZUpFrame()).changeFrameCopy(ReferenceFrame.getWorldFrame()));
+      desiredICPVisualizer.set(icpDesiredLunging);
+      bosRadiusPerpToLungeAxis.set(0.0);  //TODO: This should be more representative of the actual base of support, which varies depending on single/double support and stance width in double support
+      
+      kCMP.set(0.25);
    }
 
 
