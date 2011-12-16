@@ -13,6 +13,8 @@ public interface SwingSubController
    public abstract void doMidSwing(LegTorques legTorquesToPackForSwingLeg, double timeInState);
 
    public abstract void doTerminalSwing(LegTorques legTorquesToPackForSwingLeg, double timeInState);
+ 
+   public abstract void doPreSwingInAir(LegTorques legTorques, double timeInState);
    
    public abstract void doSwingInAir(LegTorques legTorques, double timeInCurrentState);
 
@@ -25,6 +27,8 @@ public interface SwingSubController
 
    public abstract boolean isDoneWithTerminalSwing(RobotSide swingSide, double timeInState);
    
+   public abstract boolean isDoneWithPreSwingInAir(RobotSide swingSide, double timeInState);
+   
    public abstract boolean isDoneWithSwingInAir(RobotSide swingSide, double timeInState);
    
 
@@ -36,6 +40,8 @@ public interface SwingSubController
 
    public abstract void doTransitionIntoTerminalSwing(RobotSide swingSide);
    
+   public abstract void doTransitionIntoPreSwingInAir(RobotSide swingSide);
+   
    public abstract void doTransitionIntoSwingInAir(RobotSide swingLeg, BalanceOnOneLegConfiguration currentConfiguration);
    
 
@@ -46,6 +52,8 @@ public interface SwingSubController
    public abstract void doTransitionOutOfMidSwing(RobotSide swingSide);
 
    public abstract void doTransitionOutOfTerminalSwing(RobotSide swingSide);
+   
+   public abstract void doTransitionOutOfPreSwingInAir(RobotSide swingLeg);
    
    public abstract void doTransitionOutOfSwingInAir(RobotSide swingLeg);
 

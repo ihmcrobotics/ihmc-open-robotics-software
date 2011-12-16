@@ -150,11 +150,6 @@ public class KneeExtensionControlModule
       }
    }
 
-   public void setupParametersForOptimalSwingController()
-   {
-      kp_KneeExtension.set(0.0);
-      kp_KneeBending.set(25.0);
-   }
 
 
 

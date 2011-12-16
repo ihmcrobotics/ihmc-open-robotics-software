@@ -591,4 +591,21 @@ public class ChangingEndpointSwingSubController implements SwingSubController
    public void initialize()
    {      
    }
+
+   public void doPreSwingInAir(LegTorques legTorques, double timeInState)
+   {  
+   }
+
+   public void doTransitionIntoPreSwingInAir(RobotSide swingSide)
+   {  
+   }
+
+   public void doTransitionOutOfPreSwingInAir(RobotSide swingLeg)
+   {
+   }
+
+   public boolean isDoneWithPreSwingInAir(RobotSide swingSide, double timeInState)
+   {
+      return true;
+   }
 }

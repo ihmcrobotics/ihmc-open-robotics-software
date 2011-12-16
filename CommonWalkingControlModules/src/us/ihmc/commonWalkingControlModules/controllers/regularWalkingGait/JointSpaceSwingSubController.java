@@ -1,14 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait;
 
-import java.util.HashMap;
-
-import com.yobotics.simulationconstructionset.BooleanYoVariable;
-import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.IntegerYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFrameOrientation;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
+import java.util.EnumMap;
 
 import us.ihmc.commonWalkingControlModules.configurations.BalanceOnOneLegConfiguration;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.PreSwingControlModule;
@@ -20,6 +12,7 @@ import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.kinematics.BodyPositionInTimeEstimator;
 import us.ihmc.commonWalkingControlModules.kinematics.DesiredJointVelocityCalculator;
 import us.ihmc.commonWalkingControlModules.kinematics.LegInverseKinematicsCalculator;
+import us.ihmc.commonWalkingControlModules.outputs.ProcessedOutputsInterface;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointAccelerations;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointPositions;
@@ -39,6 +32,15 @@ import us.ihmc.utilities.math.geometry.Orientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.RevoluteJoint;
 
+import com.yobotics.simulationconstructionset.BooleanYoVariable;
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.IntegerYoVariable;
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFrameOrientation;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
+import com.yobotics.simulationconstructionset.util.trajectory.YoMinimumJerkTrajectory;
+
 public class JointSpaceSwingSubController implements SwingSubController
 {
    private static final LegJointName[] legJointNames = new LegJointName[] { LegJointName.HIP_YAW, LegJointName.HIP_PITCH, LegJointName.HIP_ROLL,
@@ -54,10 +56,12 @@ public class JointSpaceSwingSubController implements SwingSubController
    private final SideDependentList<FootSwitchInterface> footSwitches;
    private final DesiredFootstepCalculator desiredFootstepCalculator;
 
-   private final PreSwingControlModule preSwingControlModule;
 
    private final DoubleYoVariable swingDuration;
 
+   private final EnumMap<LegJointName, DoubleYoVariable> legTorquesAtBeginningOfStep = new EnumMap<LegJointName, DoubleYoVariable>(LegJointName.class);
+   private final YoMinimumJerkTrajectory gravityCompensationTrajectory;
+   
    private final SideDependentList<LegJointPositions> jointPositions = new SideDependentList<LegJointPositions>();
    private final SideDependentList<LegJointVelocities> jointVelocities = new SideDependentList<LegJointVelocities>();
    private final SideDependentList<LegJointAccelerations> jointAccelerations = new SideDependentList<LegJointAccelerations>();
@@ -65,9 +69,9 @@ public class JointSpaceSwingSubController implements SwingSubController
    private final SideDependentList<YoFramePoint> desiredPositions = new SideDependentList<YoFramePoint>();
    private final SideDependentList<YoFrameOrientation> desiredOrientations = new SideDependentList<YoFrameOrientation>();
 
-   private final HashMap<LegJointName, DoubleYoVariable> legJointSetpoints = new HashMap<LegJointName, DoubleYoVariable>();
-   private final HashMap<LegJointName, DoubleYoVariable> legJointSetpointsd = new HashMap<LegJointName, DoubleYoVariable>();
-   private final HashMap<LegJointName, DoubleYoVariable> legJointSetpointsdd = new HashMap<LegJointName, DoubleYoVariable>();
+   private final EnumMap<LegJointName, DoubleYoVariable> legJointSetpoints = new EnumMap<LegJointName, DoubleYoVariable>(LegJointName.class);
+   private final EnumMap<LegJointName, DoubleYoVariable> legJointSetpointsd = new EnumMap<LegJointName, DoubleYoVariable>(LegJointName.class);
+   private final EnumMap<LegJointName, DoubleYoVariable> legJointSetpointsdd = new EnumMap<LegJointName, DoubleYoVariable>(LegJointName.class);
 
    private final DoubleYoVariable timeSpentInPreSwing;
    private final DoubleYoVariable timeSpentInInitialSwing;
@@ -78,7 +82,7 @@ public class JointSpaceSwingSubController implements SwingSubController
    private final DoubleYoVariable minimumTerminalSwingDuration;
    private final DoubleYoVariable maximumTerminalSwingDuration;
 
-   private final DoubleYoVariable passiveHipCollapseTime;
+   private final DoubleYoVariable compensateGravityForSwingLegTime;
 
    private final IntegerYoVariable numberOfViaPointsDuringWalk;
 
@@ -91,10 +95,12 @@ public class JointSpaceSwingSubController implements SwingSubController
    
    private final SwingLegTorqueControlOnlyModule torqueControlModule;
 
-   public JointSpaceSwingSubController(String name, ProcessedSensorsInterface processedSensors, FullRobotModel fullRobotModel,
+   private final ProcessedOutputsInterface processedOutputs;
+
+   public JointSpaceSwingSubController(String name, ProcessedSensorsInterface processedSensors, ProcessedOutputsInterface processedOutputs, FullRobotModel fullRobotModel,
          SideDependentList<FootSwitchInterface> footSwitches, CommonWalkingReferenceFrames referenceFrames,
          DesiredFootstepCalculator desiredFootstepCalculator, CouplingRegistry couplingRegistry, LegInverseKinematicsCalculator inverseKinematicsCalculator, SideDependentList<DesiredJointVelocityCalculator> desiredJointVelocityCalculators,
-         SwingLegTorqueControlOnlyModule swingLegTorqueControlModule, PreSwingControlModule preSwingControlModule, double controlDT,
+         SwingLegTorqueControlOnlyModule swingLegTorqueControlModule, double controlDT,
          DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
    {
       registry = new YoVariableRegistry(name);
@@ -106,7 +112,9 @@ public class JointSpaceSwingSubController implements SwingSubController
       this.footSwitches = new SideDependentList<FootSwitchInterface>(footSwitches);
       this.fullRobotModel = fullRobotModel;
       this.torqueControlModule = swingLegTorqueControlModule;
-      this.preSwingControlModule = preSwingControlModule;
+      this.processedOutputs = processedOutputs;
+      
+      this.gravityCompensationTrajectory = new YoMinimumJerkTrajectory("gravityCompensationTrajectory", registry);
 
       
       bodyPositionInTimeEstimator = new BodyPositionInTimeEstimator(processedSensors, referenceFrames, couplingRegistry, registry);
@@ -133,12 +141,14 @@ public class JointSpaceSwingSubController implements SwingSubController
 
       for (LegJointName jointName : legJointNames)
       {
+         legTorquesAtBeginningOfStep.put(jointName, new DoubleYoVariable(jointName.getCamelCaseNameForStartOfExpression() + "TorqueAtBeginningOfStep", registry));
+         
          legJointSetpoints.put(jointName, new DoubleYoVariable("q_" + jointName.getShortUnderBarName() + "_setpoint", registry));
          legJointSetpointsd.put(jointName, new DoubleYoVariable("qd_" + jointName.getShortUnderBarName() + "_setpoint", registry));
          legJointSetpointsdd.put(jointName, new DoubleYoVariable("qdd_" + jointName.getShortUnderBarName() + "_setpoint", registry));
       }
 
-      passiveHipCollapseTime = new DoubleYoVariable("passiveHipCollapseTime", registry);
+      compensateGravityForSwingLegTime = new DoubleYoVariable("compensateGravityForSwingLegTime", registry);
       minimumTerminalSwingDuration = new DoubleYoVariable("minimumTerminalSwingDuration", "The minimum duration of terminal swing state. [s]", registry);
 
       maximumTerminalSwingDuration = new DoubleYoVariable("maximumTerminalSwingDuration", "The maximum duration of terminal swing state. [s]", registry);
@@ -155,8 +165,8 @@ public class JointSpaceSwingSubController implements SwingSubController
 
    public void setParametersForM2V2Walking()
    {
-      swingDuration.set(0.55);
-      passiveHipCollapseTime.set(0.07);
+      swingDuration.set(0.65);
+      compensateGravityForSwingLegTime.set(0.02);
       minimumTerminalSwingDuration.set(0.0);
       maximumTerminalSwingDuration.set(0.05);
       numberOfViaPointsDuringWalk.set(2);
@@ -166,18 +176,39 @@ public class JointSpaceSwingSubController implements SwingSubController
    public void setParametersForM2V2PushRecovery()
    {
       swingDuration.set(0.35);
-      passiveHipCollapseTime.set(0.07);
+      compensateGravityForSwingLegTime.set(0.02);
       minimumTerminalSwingDuration.set(0.0);
       maximumTerminalSwingDuration.set(0.05);
       numberOfViaPointsDuringWalk.set(0);
       setEstimatedSwingTimeRemaining(swingDuration.getDoubleValue());
    }
+   
 
    public void doPreSwing(LegTorques legTorquesToPackForSwingLeg, double timeInState)
    {
       setEstimatedSwingTimeRemaining(swingDuration.getDoubleValue());
-      preSwingControlModule.doPreSwing(legTorquesToPackForSwingLeg, timeInState);
-      torqueControlModule.computePreSwing(legTorquesToPackForSwingLeg.getRobotSide());
+      
+      gravityCompensationTrajectory.computeTrajectory(timeInState);
+      double factor = gravityCompensationTrajectory.getPosition();
+      
+      
+      torqueControlModule.computePreSwing(legTorquesToPackForSwingLeg);
+      
+      for(LegJointName legJointName : legJointNames)
+      {
+         double newTau = legTorquesToPackForSwingLeg.getTorque(legJointName);
+         double oldTau = legTorquesAtBeginningOfStep.get(legJointName).getDoubleValue();
+         
+         double tau = (1.0 - factor) * oldTau + factor * newTau;
+         
+         legTorquesToPackForSwingLeg.setTorque(legJointName, tau);
+         
+      }
+      
+      couplingRegistry.getUpperBodyWrench().scale(factor);
+      
+      
+      
       timeSpentInPreSwing.set(timeInState);
    }
 
@@ -229,6 +260,8 @@ public class JointSpaceSwingSubController implements SwingSubController
          legJointSetpointsd.get(jointName).set(legJointVelocities.getJointVelocity(jointName));
          legJointSetpointsdd.get(jointName).set(legJointAccelerations.getJointAcceleration(jointName));
       }
+      
+      
 
       setEstimatedSwingTimeRemaining(jointSpaceTrajectoryGenerator.getEstimatedTimeRemaining(timeInSwing));
 
@@ -254,7 +287,7 @@ public class JointSpaceSwingSubController implements SwingSubController
 
    public boolean isDoneWithPreSwingC(RobotSide loadingLeg, double timeInState)
    {
-      return (timeInState > passiveHipCollapseTime.getDoubleValue());
+      return (timeInState > compensateGravityForSwingLegTime.getDoubleValue());
    }
 
    public boolean isDoneWithInitialSwing(RobotSide swingSide, double timeInState)
@@ -312,27 +345,32 @@ public class JointSpaceSwingSubController implements SwingSubController
       singleSupportDuration.set(0.0);
       canGoToDoubleSupportFromLastTickState.set(false);
 
+      for(LegJointName jointName : legJointNames)
+      {
+         legTorquesAtBeginningOfStep.get(jointName).set(processedOutputs.getDesiredLegJointTorque(swingSide, jointName));
+      }
+      gravityCompensationTrajectory.setParams(0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, compensateGravityForSwingLegTime.getDoubleValue());
    }
 
-   public void doTransitionIntoInitialSwing(RobotSide swingLeg)
+   public void doTransitionIntoInitialSwing(RobotSide swingSide)
    {
       Footstep desiredFootstep = couplingRegistry.getDesiredFootstep();
-
-      initializeToCurrentJointValues(swingLeg);
+      
+      initializeToCurrentJointValues(swingSide);
       FramePose desiredFootstepPose = desiredFootstep.getFootstepPose();
-
+      
       FramePoint endPoint = new FramePoint(desiredFootstepPose.getPosition());
-      endPoint.changeFrame(desiredPositions.get(swingLeg).getReferenceFrame());
+      endPoint.changeFrame(desiredPositions.get(swingSide).getReferenceFrame());
       Orientation endOrientation = new Orientation(desiredFootstepPose.getOrientation());
-      endOrientation.changeFrame(desiredOrientations.get(swingLeg).getReferenceFrame());
-
+      endOrientation.changeFrame(desiredOrientations.get(swingSide).getReferenceFrame());
+      
       // Setup the orientation trajectory
-      desiredPositions.get(swingLeg).set(endPoint);
-      desiredOrientations.get(swingLeg).set(endOrientation);
-
-      jointSpaceTrajectoryGenerator.initialize(swingLeg, jointPositions.get(swingLeg), jointVelocities.get(swingLeg), jointAccelerations.get(swingLeg),
+      desiredPositions.get(swingSide).set(endPoint);
+      desiredOrientations.get(swingSide).set(endOrientation);
+      
+      jointSpaceTrajectoryGenerator.initialize(swingSide, jointPositions.get(swingSide), jointVelocities.get(swingSide), jointAccelerations.get(swingSide),
             endPoint, endOrientation, swingDuration.getDoubleValue(), numberOfViaPointsDuringWalk.getIntegerValue(), true);
-      footSwitches.get(swingLeg).reset();
+      footSwitches.get(swingSide).reset();
    }
 
    public void doTransitionIntoMidSwing(RobotSide swingSide)
@@ -395,9 +433,17 @@ public class JointSpaceSwingSubController implements SwingSubController
       positionErrorAtEndOfStepY.set(currentPosition.getY());
       
       
-      singleSupportDuration.set(timeSpentInPreSwing.getDoubleValue() + timeSpentInInitialSwing.getDoubleValue() + timeSpentInMidSwing.getDoubleValue()
-            + timeSpentInTerminalSwing.getDoubleValue());
+      singleSupportDuration.set(timeSpentinSwing());
       couplingRegistry.setSingleSupportDuration(singleSupportDuration.getDoubleValue());
+      
+//      torqueControlModule.setDampingToZero(swingSide);
+      
+   }
+
+   private double timeSpentinSwing()
+   {
+      return timeSpentInPreSwing.getDoubleValue() + timeSpentInInitialSwing.getDoubleValue() + timeSpentInMidSwing.getDoubleValue()
+            + timeSpentInTerminalSwing.getDoubleValue();
    }
 
    public void doTransitionOutOfSwingInAir(RobotSide swingLeg)
@@ -448,6 +494,26 @@ public class JointSpaceSwingSubController implements SwingSubController
    {
       // TODO Auto-generated method stub
 
+   }
+
+   public void doPreSwingInAir(LegTorques legTorques, double timeInState)
+   {
+      doPreSwing(legTorques, timeInState);
+   }
+
+   public boolean isDoneWithPreSwingInAir(RobotSide swingSide, double timeInState)
+   {
+      return isDoneWithPreSwingC(swingSide, timeInState);
+   }
+
+   public void doTransitionIntoPreSwingInAir(RobotSide swingSide)
+   {
+      doTransitionIntoPreSwing(swingSide);
+   }
+
+   public void doTransitionOutOfPreSwingInAir(RobotSide swingLeg)
+   {
+      doTransitionOutOfPreSwing(swingLeg);
    }
 
 }
