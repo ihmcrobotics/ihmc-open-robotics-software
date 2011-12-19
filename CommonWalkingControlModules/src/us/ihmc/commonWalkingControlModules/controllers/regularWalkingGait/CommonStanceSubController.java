@@ -52,11 +52,9 @@ public class CommonStanceSubController implements StanceSubController
    private final DoubleYoVariable loadingPreSwingAEntryTime = new DoubleYoVariable("doubleSupportStartTime", registry);
 
    private final DoubleYoVariable minDoubleSupportTimeBeforeWalking = new DoubleYoVariable("minDoubleSupportTimeBeforeWalking", registry);
-   private final DoubleYoVariable xCaptureToTransfer = new DoubleYoVariable("xCaptureToTransfer", registry);
-   private final DoubleYoVariable yCaptureToTransfer = new DoubleYoVariable("yCaptureToTransfer", registry);
    private final DoubleYoVariable minPercentageTowardsDesired = new DoubleYoVariable("minPercentageTowardsDesired", registry);
 
-   private final LegToTrustForVelocityWriteOnly supportLegAndLegToTrustForVelocity;    // FIXME: update things
+   private final LegToTrustForVelocityWriteOnly supportLegAndLegToTrustForVelocity;
    
    private final BooleanYoVariable doPushRecovery = new BooleanYoVariable("doPushRecovery", registry);
 
@@ -437,8 +435,6 @@ public class CommonStanceSubController implements StanceSubController
    public void setParametersForR2()
    {
       minDoubleSupportTimeBeforeWalking.set(0.3);
-      xCaptureToTransfer.set(0.0);
-      yCaptureToTransfer.set(0.04);    // 0.0;
       kVelocityDoubleSupportTransfer.set(0.05);    // 0.1);
       toeOffFootPitch.set(0.1);    // 0.3);
       toeOffMoveDuration.set(0.05);
@@ -448,8 +444,6 @@ public class CommonStanceSubController implements StanceSubController
    private void setParametersForM2V2()
    {
       minDoubleSupportTimeBeforeWalking.set(0.3);
-      xCaptureToTransfer.set(0.01);
-      yCaptureToTransfer.set(0.04);    // 0.0;
       kVelocityDoubleSupportTransfer.set(0.0);    // 0.1);
       toeOffFootPitch.set(0.1);    // 0.3);
       toeOffMoveDuration.set(0.05);
