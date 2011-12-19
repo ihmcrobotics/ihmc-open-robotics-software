@@ -380,6 +380,7 @@ public class JointSpaceSwingSubController implements SwingSubController
    {
       initializeToCurrentJointValues(swingLeg);
       FramePoint point = currentConfiguration.getDesiredSwingFootPosition();
+      point.changeFrame(desiredPositions.get(swingLeg).getReferenceFrame());
       desiredPositions.get(swingLeg).set(point);
       desiredOrientations.get(swingLeg).setYawPitchRoll(0.0, 0.0, 0.0);
 
