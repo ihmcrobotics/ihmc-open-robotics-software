@@ -42,10 +42,6 @@ public class CommonStanceSubController implements StanceSubController
 
    private final YoVariableRegistry registry = new YoVariableRegistry("StanceSubController");
 
-   private final DoubleYoVariable kVelocityDoubleSupportTransfer =
-      new DoubleYoVariable("kVelocityDoubleSupportTransfer", "Gain from velocity error to amount of capture point motion to extend double support phase.",
-                           registry);
-
    private final DoubleYoVariable toeOffFootPitch = new DoubleYoVariable("toeOffFootPitch",
                                                        "This is the desired foot pitch at the end of toe-off during stance", registry);
    private final DoubleYoVariable toeOffMoveDuration = new DoubleYoVariable("toeOffMoveDuration", "The duration of the toe-off move during stance", registry);
@@ -435,7 +431,6 @@ public class CommonStanceSubController implements StanceSubController
    public void setParametersForR2()
    {
       minDoubleSupportTimeBeforeWalking.set(0.3);
-      kVelocityDoubleSupportTransfer.set(0.05);    // 0.1);
       toeOffFootPitch.set(0.1);    // 0.3);
       toeOffMoveDuration.set(0.05);
       minPercentageTowardsDesired.set(0.9);
@@ -444,7 +439,6 @@ public class CommonStanceSubController implements StanceSubController
    private void setParametersForM2V2()
    {
       minDoubleSupportTimeBeforeWalking.set(0.3);
-      kVelocityDoubleSupportTransfer.set(0.0);    // 0.1);
       toeOffFootPitch.set(0.1);    // 0.3);
       toeOffMoveDuration.set(0.05);
       minPercentageTowardsDesired.set(0.95);
