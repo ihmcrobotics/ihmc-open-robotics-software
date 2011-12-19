@@ -62,6 +62,6 @@ public class DoubleAndSingleSupportDurationUpdater
    private void setParameters()
    {
       doubleSupportFraction.set(0.4);
-      stepInPlaceCycleDuration.set(1.0);
+      stepInPlaceCycleDuration.set(1.1);
    }
 }
