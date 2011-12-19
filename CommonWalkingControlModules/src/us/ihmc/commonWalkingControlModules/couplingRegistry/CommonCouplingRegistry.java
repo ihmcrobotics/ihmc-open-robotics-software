@@ -54,7 +54,7 @@ public class CommonCouplingRegistry implements CouplingRegistry
    private YoFramePoint2d desiredCMP = new YoFramePoint2d("desiredCMP", "", ReferenceFrame.getWorldFrame(), registry);
 
    private final PoseReferenceFrame footstepFrame = new PoseReferenceFrame("footstepFrame", ReferenceFrame.getWorldFrame());
-   private final DynamicGraphicReferenceFrame footstepFrameGraphic = new DynamicGraphicReferenceFrame(footstepFrame, registry, 0.1);
+   private final DynamicGraphicReferenceFrame footstepFrameGraphic;
 
    public CommonCouplingRegistry(CommonWalkingReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons, YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
@@ -64,9 +64,15 @@ public class CommonCouplingRegistry implements CouplingRegistry
       parentRegistry.addChild(registry);
       if (dynamicGraphicObjectsListRegistry != null)
       {
+         footstepFrameGraphic = new DynamicGraphicReferenceFrame(footstepFrame, registry, 0.1);
          DynamicGraphicObjectsList dynamicGraphicObjectsList = new DynamicGraphicObjectsList(getClass().getSimpleName());
          dynamicGraphicObjectsList.add(footstepFrameGraphic);
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectsList);
+
+      }
+      else
+      {
+         footstepFrameGraphic = null;
       }
    }
 
@@ -140,12 +146,18 @@ public class CommonCouplingRegistry implements CouplingRegistry
       {
          footstepFrame.updatePose(desiredFootstep.getFootstepPose().changeFrameCopy(footstepFrame.getParent()));
          footstepFrame.update();
-         footstepFrameGraphic.showGraphicObject();
-         footstepFrameGraphic.update();
+         if(footstepFrameGraphic != null)
+         {
+            footstepFrameGraphic.showGraphicObject();
+            footstepFrameGraphic.update();
+         }
       }
       else
       {
-         footstepFrameGraphic.hideGraphicObject();
+         if(footstepFrameGraphic != null)
+         {
+            footstepFrameGraphic.hideGraphicObject();
+         }
       }
    }
 

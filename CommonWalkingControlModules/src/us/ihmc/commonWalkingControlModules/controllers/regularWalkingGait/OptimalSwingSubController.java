@@ -186,7 +186,7 @@ public class OptimalSwingSubController implements SwingSubController
       setEstimatedSwingTimeRemaining(swingDuration.getDoubleValue());
       ikAlpha.set(0.07);
       
-      jointVelocityBreakFrequency.set(5.0);
+      jointVelocityBreakFrequency.set(2.0);
    }
 
 
