@@ -7,6 +7,7 @@ import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.SwingLegTorqu
 import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculator;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
+import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredHeadingControlModule;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.kinematics.BodyPositionInTimeEstimator;
 import us.ihmc.commonWalkingControlModules.kinematics.DesiredJointVelocityCalculator;
@@ -96,7 +97,7 @@ public class JointSpaceSwingSubController implements SwingSubController
    public JointSpaceSwingSubController(String name, ProcessedSensorsInterface processedSensors, ProcessedOutputsInterface processedOutputs, FullRobotModel fullRobotModel,
          SideDependentList<FootSwitchInterface> footSwitches, CommonWalkingReferenceFrames referenceFrames,
          DesiredFootstepCalculator desiredFootstepCalculator, CouplingRegistry couplingRegistry, LegInverseKinematicsCalculator inverseKinematicsCalculator, SideDependentList<DesiredJointVelocityCalculator> desiredJointVelocityCalculators,
-         SwingLegTorqueControlOnlyModule swingLegTorqueControlModule, double controlDT,
+         SwingLegTorqueControlOnlyModule swingLegTorqueControlModule, DesiredHeadingControlModule desiredHeadingControlModule, double controlDT,
          DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
    {
       registry = new YoVariableRegistry(name);
@@ -128,7 +129,7 @@ public class JointSpaceSwingSubController implements SwingSubController
          jointVelocities.set(side, new LegJointVelocities(legJointNames, side));
          jointAccelerations.set(side, new LegJointAccelerations(legJointNames, side));
 
-         ReferenceFrame groundFrame = referenceFrames.getAnkleZUpFrame(side.getOppositeSide());
+         ReferenceFrame groundFrame = desiredHeadingControlModule.getDesiredHeadingFrame();//referenceFrames.getAnkleZUpFrame(side.getOppositeSide());
          desiredPositions.set(side, new YoFramePoint("finalDesiredPosition", side.getCamelCaseNameForMiddleOfExpression(), groundFrame, registry));
          desiredOrientations.set(side, new YoFrameOrientation("finalDesiredOrientation", side.getCamelCaseNameForMiddleOfExpression(), groundFrame, registry));
       }
@@ -418,8 +419,8 @@ public class JointSpaceSwingSubController implements SwingSubController
    public void doTransitionOutOfTerminalSwing(RobotSide swingSide)
    {
       FramePoint currentPosition = new FramePoint(referenceFrames.getAnkleZUpFrame(swingSide));
-      currentPosition.changeFrame(referenceFrames.getAnkleZUpFrame(swingSide.getOppositeSide()));
       FramePoint desiredPosition = desiredPositions.get(swingSide).getFramePointCopy();
+      currentPosition.changeFrame(desiredPosition.getReferenceFrame());
       positionErrorAtEndOfStepNorm.set(desiredPosition.distance(currentPosition));
       currentPosition.sub(desiredPosition);
       positionErrorAtEndOfStepX.set(currentPosition.getX());
