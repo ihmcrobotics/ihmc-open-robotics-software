@@ -91,11 +91,6 @@ public class JointSpaceTrajectoryGenerator
    private final EnumYoVariable<RobotSide> swingSide;
 
    private final DoubleYoVariable startTime;
-
-   private final DoubleYoVariable timeToTakeForLanding;
-   private final DoubleYoVariable timeToTakeForTakeOff;
-   private final DoubleYoVariable averageFootVelocity;
-   private final DoubleYoVariable distancePerViaPoint;
    
    private final IntegerYoVariable numberOfIKErrors;
    
@@ -188,17 +183,9 @@ public class JointSpaceTrajectoryGenerator
       swingSide = new EnumYoVariable<RobotSide>("swingSide", registry, RobotSide.class);
       startTime = new DoubleYoVariable("startTime", registry);
 
-      timeToTakeForLanding = new DoubleYoVariable("timeToTakeForLanding", registry);
-      timeToTakeForTakeOff = new DoubleYoVariable("timeToTakeForTakeOff", registry);
-      averageFootVelocity = new DoubleYoVariable("averageFootVelocity", registry);
-      distancePerViaPoint = new DoubleYoVariable("distancePerViaPoint", registry);
       numberOfIKErrors = new IntegerYoVariable("numberOfIKErrors", registry);
       useEstimatedJointVelocitiesAtEndOfStep = new BooleanYoVariable("useEstimatedJointVelocitiesAtEndOfStep", registry);
 
-      timeToTakeForLanding.set(0.1);
-      timeToTakeForTakeOff.set(0.1);
-      averageFootVelocity.set(1.0);
-      distancePerViaPoint.set(0.15);
       useEstimatedJointVelocitiesAtEndOfStep.set(true);
       
       ikAlpha.set(0.07);
