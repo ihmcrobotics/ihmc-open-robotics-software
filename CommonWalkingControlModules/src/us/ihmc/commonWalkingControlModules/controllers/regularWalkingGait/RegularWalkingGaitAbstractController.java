@@ -902,7 +902,7 @@ public abstract class RegularWalkingGaitAbstractController implements RobotContr
             if (swingSubController.isDoneWithSwingInAir(oneLegBalanceSide.getEnumValue().getOppositeSide(), walkingStateMachine.timeInCurrentState()))
             {
                boolean commandedToSwingAgain = swingInAir.getBooleanValue();
-               boolean endingSingleSupport = backToDoubleSupport.getBooleanValue() &&!swingSubController.isReadyForDoubleSupport();
+               boolean endingSingleSupport = backToDoubleSupport.getBooleanValue() &&!swingSubController.isReadyForDoubleSupport(supportLegYoVariable.getEnumValue().getOppositeSide());
 
                return commandedToSwingAgain || endingSingleSupport;
             }
@@ -915,10 +915,10 @@ public abstract class RegularWalkingGaitAbstractController implements RobotContr
       {
          public boolean checkCondition()
          {
-            return (backToDoubleSupport.getBooleanValue() && swingSubController.isReadyForDoubleSupport());
+            return (backToDoubleSupport.getBooleanValue() && swingSubController.isReadyForDoubleSupport(supportLegYoVariable.getEnumValue().getOppositeSide()));
          }
       };
-      
+
       StateTransitionCondition toLeftEarlyStanceRightInitialSwingFromSwingInAirCondition = new StateTransitionCondition()
       {
          public boolean checkCondition()

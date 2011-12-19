@@ -60,7 +60,7 @@ public interface SwingSubController
 
    public abstract boolean canWeStopNow();
    
-   public abstract boolean isReadyForDoubleSupport();
+   public abstract boolean isReadyForDoubleSupport(RobotSide swingLeg);
 
    // TODO: this should be deprecated at some point; its only use is sharing data between stance- and swing subcontrollers;
    // this should be done through the coupling registry instead

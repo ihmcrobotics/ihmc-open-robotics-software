@@ -612,11 +612,11 @@ public class OptimalSwingSubController implements SwingSubController
       return true;
    }
 
-   public boolean isReadyForDoubleSupport()
+   public boolean isReadyForDoubleSupport(RobotSide swingLeg)
    {
-      FramePoint swingAnkle = new FramePoint(referenceFrames.getAnkleZUpFrame(RobotSide.LEFT));
-      swingAnkle.changeFrame(referenceFrames.getAnkleZUpFrame(RobotSide.RIGHT));
-      double deltaFootHeight = Math.abs(swingAnkle.getZ());
+      FramePoint swingAnkle = new FramePoint(referenceFrames.getAnkleZUpFrame(swingLeg));
+      swingAnkle.changeFrame(referenceFrames.getAnkleZUpFrame(swingLeg.getOppositeSide()));
+      double deltaFootHeight = swingAnkle.getZ();
       double maxFootHeight = 0.02;
 
       return canGoToDoubleSupportFromLastTickState.getBooleanValue() && (deltaFootHeight < maxFootHeight);
