@@ -46,8 +46,8 @@ public class BodyPositionInTimeEstimator
    
    public Pair<FramePose, FrameVector> getPelvisPoseAndPositionInTime(double t, RobotSide swingFoot)
    {
-//      FramePoint2d currentCoPPosition = couplingRegistry.getDesiredCoP();
-      FramePoint2d currentCoPPosition = couplingRegistry.getBipedSupportPolygons().getSweetSpotCopy(swingFoot.getOppositeSide());
+      FramePoint2d currentCoPPosition = couplingRegistry.getDesiredCoP();
+//      FramePoint2d currentCoPPosition = couplingRegistry.getBipedSupportPolygons().getSweetSpotCopy(swingFoot.getOppositeSide());
       //FramePoint currentCoPPosition = new FramePoint(referenceFrames.getAnkleZUpFrame(swingFoot));
       currentCoPPosition.changeFrame(worldFrame);
       FramePoint currentCoMPosition = processedSensors.getCenterOfMassPositionInFrame(worldFrame);
