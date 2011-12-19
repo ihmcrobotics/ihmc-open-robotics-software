@@ -62,7 +62,6 @@ public class ChangingEndpointSwingSubController implements SwingSubController
 
    private final DoubleYoVariable passiveHipCollapseTime = new DoubleYoVariable("passiveHipCollapseTime", registry);
 
-   private final DoubleYoVariable swingDuration = new DoubleYoVariable("swingDuration", "The duration of the swing movement. [s]", registry);
    private final DoubleYoVariable swingOrientationTime = new DoubleYoVariable("swingOrientationTime",
                                                             "The duration of the foot orientation part of the swing.", registry);
 
@@ -96,8 +95,6 @@ public class ChangingEndpointSwingSubController implements SwingSubController
    private final DoubleYoVariable timeSpentInMidSwing = new DoubleYoVariable("timeSpentInMidSwing", "This is the time spend in mid swing.", registry);
    private final DoubleYoVariable timeSpentInTerminalSwing = new DoubleYoVariable("timeSpentInTerminalSwing", "This is the time spent in terminal swing.",
                                                                 registry);
-   private final DoubleYoVariable singleSupportDuration = new DoubleYoVariable("singleSupportDuration", "This is the toal time spent in single support.",
-                                                             registry);
 
    private final DoubleYoVariable swingFootPositionError = new DoubleYoVariable("swingFootPositionError", registry);
 
@@ -153,7 +150,6 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       
       createVisualizers(dynamicGraphicObjectsListRegistry, parentRegistry);
       couplingRegistry.setEstimatedSwingTimeRemaining(estimatedSwingTimeRemaining.getDoubleValue());
-      couplingRegistry.setSingleSupportDuration(swingDuration.getDoubleValue());
       parentRegistry.addChild(registry);
    }
 
@@ -199,7 +195,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
 
    public void doPreSwing(LegTorques legTorquesToPackForSwingLeg, double timeInState)
    {
-      setEstimatedSwingTimeRemaining(swingDuration.getDoubleValue());
+      setEstimatedSwingTimeRemaining(couplingRegistry.getSingleSupportDuration());
       this.swingSide = legTorquesToPackForSwingLeg.getRobotSide();
       preSwingControlModule.doPreSwing(legTorquesToPackForSwingLeg, timeInState);
       swingLegTorqueControlModule.computePreSwing(swingSide);
@@ -225,7 +221,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       updateFinalDesiredPosition(walkingTrajectoryGenerator);
       computeDesiredFootPosVelAcc(swingSide, walkingTrajectoryGenerator, timeSpentSwingingUpToNow);
       computeSwingLegTorques(legTorquesToPackForSwingLeg);
-      setEstimatedSwingTimeRemaining(swingDuration.getDoubleValue() - timeSpentSwingingUpToNow);
+      setEstimatedSwingTimeRemaining(couplingRegistry.getSingleSupportDuration() - timeSpentSwingingUpToNow);
    }
 
    public void doTerminalSwing(LegTorques legTorquesToPackForSwingLeg, double timeInState)
@@ -273,7 +269,6 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       timeSpentInInitialSwing.set(0.0);
       timeSpentInMidSwing.set(0.0);
       timeSpentInTerminalSwing.set(0.0);
-      singleSupportDuration.set(0.0);
    }
 
    public void doTransitionIntoInitialSwing(RobotSide swingSide)
@@ -348,9 +343,6 @@ public class ChangingEndpointSwingSubController implements SwingSubController
 
    public void doTransitionOutOfTerminalSwing(RobotSide swingSide)
    {
-      singleSupportDuration.set(timeSpentInPreSwing.getDoubleValue() + timeSpentInInitialSwing.getDoubleValue() + timeSpentInMidSwing.getDoubleValue()
-                                + timeSpentInTerminalSwing.getDoubleValue());
-      couplingRegistry.setSingleSupportDuration(singleSupportDuration.getDoubleValue());
    }
 
    public void doTransitionOutOfSwingInAir(RobotSide swingLeg)
@@ -417,7 +409,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
 
    public void setParametersForR2()
    {
-      swingDuration.set(0.4);    // (0.4);
+//      swingDuration.set(0.4);    // (0.4);
       swingOrientationTime.set(0.2);    // 0.75 * swingDuration.getDoubleValue());
 
       swingToePitchUpOnLanding.set(0.25);    // 0.4); // (0.5);
@@ -441,7 +433,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
 
    public void setParametersForM2V2()
    {
-      swingDuration.set(0.6);    // 0.7);    // 0.5);    // (0.4);
+//      swingDuration.set(0.6);    // 0.7);    // 0.5);    // (0.4);
       swingOrientationTime.set(0.2);    // 0.75 * swingDuration.getDoubleValue());
 
       swingToePitchUpOnLanding.set(0.25);    // 0.4);    // (0.5);

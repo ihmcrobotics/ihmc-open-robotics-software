@@ -86,8 +86,6 @@ public class CommonStanceSubController implements StanceSubController
       this.supportLegAndLegToTrustForVelocity = supportLegAndLegToTrustForVelocity;
       this.footWidth = footWidth;
 
-      couplingRegistry.setDoubleSupportDuration(0.5); // TODO: set based on something smarter
-
       parentRegistry.addChild(registry);
    }
 
