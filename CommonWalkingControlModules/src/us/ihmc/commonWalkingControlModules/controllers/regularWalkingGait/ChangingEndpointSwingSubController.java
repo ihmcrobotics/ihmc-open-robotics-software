@@ -182,15 +182,15 @@ public class ChangingEndpointSwingSubController implements SwingSubController
    {
       return true;
    }
-
-   public boolean isReadyForDoubleSupport()
+   
+   public boolean isReadyForDoubleSupport(RobotSide swingLeg)
    {
-      FramePoint swingAnkle = new FramePoint(referenceFrames.getFootFrame(swingSide));
-      swingAnkle.changeFrame(referenceFrames.getAnkleZUpFrame(swingSide.getOppositeSide()));
-      double footHeight = swingAnkle.getZ();
+      FramePoint swingAnkle = new FramePoint(referenceFrames.getAnkleZUpFrame(swingLeg));
+      swingAnkle.changeFrame(referenceFrames.getAnkleZUpFrame(swingLeg.getOppositeSide()));
+      double deltaFootHeight = swingAnkle.getZ();
       double maxFootHeight = 0.02;
 
-      return swingInAirTrajectoryGenerators.get(swingSide).isDone() && (footHeight < maxFootHeight);
+      return swingInAirTrajectoryGenerators.get(swingSide).isDone() && (deltaFootHeight < maxFootHeight);
    }
 
    public void doPreSwing(LegTorques legTorquesToPackForSwingLeg, double timeInState)

@@ -42,8 +42,6 @@ public class CommonStanceSubController implements StanceSubController
 
    private final YoVariableRegistry registry = new YoVariableRegistry("StanceSubController");
 
-   private final DoubleYoVariable minDoubleSupportTime = new DoubleYoVariable("minDoubleSupportTime", "Time to stay in double support.", registry);
-
    private final DoubleYoVariable kVelocityDoubleSupportTransfer =
       new DoubleYoVariable("kVelocityDoubleSupportTransfer", "Gain from velocity error to amount of capture point motion to extend double support phase.",
                            registry);
@@ -337,10 +335,6 @@ public class CommonStanceSubController implements StanceSubController
 
    public boolean isDoneWithLoadingPreSwingA(RobotSide loadingLeg, double timeInState)
    {
-      boolean inStateLongEnough = (timeInState > minDoubleSupportTime.getDoubleValue());
-      if (!inStateLongEnough)
-         return false;
-
       return isOverPercentageTowardDesired(loadingLeg, minPercentageTowardsDesired.getDoubleValue());
    }
 
@@ -450,7 +444,6 @@ public class CommonStanceSubController implements StanceSubController
 
    public void setParametersForR2()
    {
-      minDoubleSupportTime.set(0.05);
       minDoubleSupportTimeBeforeWalking.set(0.3);
       xCaptureToTransfer.set(0.0);
       yCaptureToTransfer.set(0.04);    // 0.0;
@@ -463,7 +456,6 @@ public class CommonStanceSubController implements StanceSubController
 
    private void setParametersForM2V2()
    {
-      minDoubleSupportTime.set(0.0);
       minDoubleSupportTimeBeforeWalking.set(0.3);
       xCaptureToTransfer.set(0.01);
       yCaptureToTransfer.set(0.04);    // 0.0;
