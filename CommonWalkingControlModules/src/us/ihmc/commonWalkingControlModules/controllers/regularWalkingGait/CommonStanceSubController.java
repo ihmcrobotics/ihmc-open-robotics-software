@@ -61,8 +61,6 @@ public class CommonStanceSubController implements StanceSubController
    private final BooleanYoVariable doPushRecovery = new BooleanYoVariable("doPushRecovery", registry);
 
    private final double footWidth;
-   private boolean waitInLoadingPreswingB;
-
 
    public CommonStanceSubController(ProcessedSensorsInterface processedSensors, CouplingRegistry couplingRegistry,
                                     CommonWalkingReferenceFrames referenceFrames, DesiredHeadingControlModule desiredHeadingControlModule,
@@ -360,14 +358,7 @@ public class CommonStanceSubController implements StanceSubController
 
    public boolean isDoneWithLoadingPreSwingB(RobotSide loadingLeg, double timeInState)
    {
-      if (waitInLoadingPreswingB)
-      {
-         boolean inStateLongEnough = timeInState > 0.1;
-
-         return inStateLongEnough || isCapturePointOutsideBaseOfSupport();
-      }
-      else
-         return true;
+      return true;
    }
 
    public boolean isDoneLoadingForSingleLegBalance(RobotSide upcomingSupportSide, double timeInCurrentState)
@@ -383,6 +374,7 @@ public class CommonStanceSubController implements StanceSubController
       return isCapturePointCloseEnoughToSweetSpot && inStateLongEnough;
    }
 
+   @SuppressWarnings("unused")
    private boolean isCapturePointOutsideBaseOfSupport()
    {
       FrameConvexPolygon2d supportPolygon = couplingRegistry.getBipedSupportPolygons().getSupportPolygonInMidFeetZUp();
@@ -450,7 +442,6 @@ public class CommonStanceSubController implements StanceSubController
       kVelocityDoubleSupportTransfer.set(0.05);    // 0.1);
       toeOffFootPitch.set(0.1);    // 0.3);
       toeOffMoveDuration.set(0.05);
-      waitInLoadingPreswingB = false;
       minPercentageTowardsDesired.set(0.9);
    }
 
@@ -462,7 +453,6 @@ public class CommonStanceSubController implements StanceSubController
       kVelocityDoubleSupportTransfer.set(0.0);    // 0.1);
       toeOffFootPitch.set(0.1);    // 0.3);
       toeOffMoveDuration.set(0.05);
-      waitInLoadingPreswingB = true;
       minPercentageTowardsDesired.set(0.95);
    }
    
