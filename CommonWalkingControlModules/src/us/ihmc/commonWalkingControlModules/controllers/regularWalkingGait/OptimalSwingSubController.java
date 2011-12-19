@@ -38,7 +38,6 @@ import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.Orientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.RevoluteJoint;
 import us.ihmc.utilities.screwTheory.Twist;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
@@ -88,7 +87,6 @@ public class OptimalSwingSubController implements SwingSubController
    private final DoubleYoVariable timeSpentInInitialSwing = new DoubleYoVariable("timeSpentInInitialSwing", "This is the time spent in initial swing.", registry);
    private final DoubleYoVariable timeSpentInMidSwing = new DoubleYoVariable("timeSpentInMidSwing", "This is the time spend in mid swing.", registry);
    private final DoubleYoVariable timeSpentInTerminalSwing = new DoubleYoVariable("timeSpentInTerminalSwing", "This is the time spent in terminal swing.", registry);
-   private final DoubleYoVariable singleSupportDuration = new DoubleYoVariable("singleSupportDuration", "This is the toal time spent in single support.", registry);
 
    private final DoubleYoVariable minimumTerminalSwingDuration = new DoubleYoVariable("minimumTerminalSwingDuration", "The minimum duration of terminal swing state. [s]", registry);
    private final DoubleYoVariable maximumTerminalSwingDuration = new DoubleYoVariable("maximumTerminalSwingDuration", "The maximum duration of terminal swing state. [s]", registry);
@@ -522,7 +520,6 @@ public class OptimalSwingSubController implements SwingSubController
       timeSpentInInitialSwing.set(0.0);
       timeSpentInMidSwing.set(0.0);
       timeSpentInTerminalSwing.set(0.0);
-      singleSupportDuration.set(0.0);
       canGoToDoubleSupportFromLastTickState.set(false);
       for(LegJointName jointName : legJointNames)
       {
@@ -590,11 +587,6 @@ public class OptimalSwingSubController implements SwingSubController
    public void doTransitionOutOfTerminalSwing(RobotSide swingSide)
    {
       updatePositionError(swingSide);
-      
-      
-      singleSupportDuration.set(timeSpentInPreSwing.getDoubleValue() + timeSpentInInitialSwing.getDoubleValue() + timeSpentInMidSwing.getDoubleValue()
-            + timeSpentInTerminalSwing.getDoubleValue());
-      couplingRegistry.setSingleSupportDuration(singleSupportDuration.getDoubleValue());
       legConfigurationData.setcurrentlyInSwing(false);
    }
 

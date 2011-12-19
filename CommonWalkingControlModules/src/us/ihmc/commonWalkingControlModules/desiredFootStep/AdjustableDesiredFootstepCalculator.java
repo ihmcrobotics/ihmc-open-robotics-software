@@ -144,7 +144,7 @@ public class AdjustableDesiredFootstepCalculator implements DesiredFootstepCalcu
 
    private void computeStepLength()
    {
-      double swingDuration = couplingRegistry.getSingleSupportDuration();
+      double swingDuration = couplingRegistry.getSingleSupportDuration(); // EVIL: single support duration should be computed based on desired velocity and step length, not the other way around
       double stanceDuration = couplingRegistry.getDoubleSupportDuration();
       double totalDuration = swingDuration + stanceDuration;
 

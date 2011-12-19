@@ -7,6 +7,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedFootInterfa
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.captureRegion.CapturePointCalculatorInterface;
 import us.ihmc.commonWalkingControlModules.captureRegion.CaptureRegionCalculator;
+import us.ihmc.commonWalkingControlModules.controlModules.DoubleAndSingleSupportDurationUpdater;
 import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculator;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
@@ -30,9 +31,9 @@ public class CommonDoEveryTickSubController implements DoEveryTickSubController
 
    private final DesiredHeadingControlModule desiredHeadingControlModule;
    private final DesiredVelocityControlModule desiredVelocityControlModule;
-
    private final DesiredFootstepCalculator desiredFootstepCalculator;
-
+   private final DoubleAndSingleSupportDurationUpdater doubleAndSingleSupportDurationUpdater;
+   
    private final CapturePointCalculatorInterface capturePointCalculator;
    private final CaptureRegionCalculator captureRegionCalculator;
    private final CouplingRegistry couplingRegistry;
@@ -49,6 +50,7 @@ public class CommonDoEveryTickSubController implements DoEveryTickSubController
            DesiredHeadingControlModule desiredHeadingControlModule, 
            DesiredVelocityControlModule desiredVelocityControlModule,
            DesiredFootstepCalculator desiredFootstepCalculator, 
+           DoubleAndSingleSupportDurationUpdater doubleAndSingleSupportDurationUpdater,
            CapturePointCalculatorInterface capturePointCalculator,
            CaptureRegionCalculator captureRegionCalculator, 
            CouplingRegistry couplingRegistry, double initialDesiredHeading)
@@ -63,6 +65,7 @@ public class CommonDoEveryTickSubController implements DoEveryTickSubController
       this.desiredHeadingControlModule = desiredHeadingControlModule;
       this.desiredVelocityControlModule = desiredVelocityControlModule;
       this.desiredFootstepCalculator = desiredFootstepCalculator;
+      this.doubleAndSingleSupportDurationUpdater = doubleAndSingleSupportDurationUpdater;
 
       this.capturePointCalculator = capturePointCalculator;
       this.captureRegionCalculator = captureRegionCalculator;
@@ -119,7 +122,7 @@ public class CommonDoEveryTickSubController implements DoEveryTickSubController
          FrameConvexPolygon2d captureRegion = captureRegionCalculator.calculateCaptureRegion(supportLeg, supportFoot,
                                                  couplingRegistry.getEstimatedSwingTimeRemaining());
          couplingRegistry.setCaptureRegion(captureRegion);
-
+         
          // Desired Footstep
          Footstep desiredFootstep = desiredFootstepCalculator.updateAndGetDesiredFootstep(supportLeg);
          RobotSide swingLeg = supportLeg.getOppositeSide();
@@ -128,6 +131,10 @@ public class CommonDoEveryTickSubController implements DoEveryTickSubController
             throw new RuntimeException("desiredFootstep.getFootstepSide() != swingLeg");
          }
          couplingRegistry.setDesiredFootstep(desiredFootstep);
+         
+         doubleAndSingleSupportDurationUpdater.update(desiredFootstep, supportLeg, desiredVelocity);
+         couplingRegistry.setDoubleSupportDuration(doubleAndSingleSupportDurationUpdater.getDoubleSupportDuration());
+         couplingRegistry.setSingleSupportDuration(doubleAndSingleSupportDurationUpdater.getSingleSupportDuration());
       }
       else
       {
