@@ -54,7 +54,7 @@ public class JointSpaceTrajectoryGenerator
    private final YoFramePoint[] viaPoints;
    private final YoFramePoint[] viaPointsInWorldFrame;
 
-   private final GroundTrajectoryGenerator groundTractory;
+   private final GroundTrajectoryGenerator groundTrajectory;
    private final int maximumNumberOfViaPoints;
    private final IntegerYoVariable numberOfViaPoints;
 
@@ -124,7 +124,7 @@ public class JointSpaceTrajectoryGenerator
       if (maximumNumberOfViaPoints > 0)
       {
          viaPointsInWorldFrame = new YoFramePoint[maximumNumberOfViaPoints];
-         groundTractory = new StraightLineGroundTrajectoryGenerator("groundTrajectory", referenceFrames, registry);
+         groundTrajectory = new StraightLineGroundTrajectoryGenerator("groundTrajectory", referenceFrames, registry);
          heightOfViaPoints = new DoubleYoVariable[maximumNumberOfViaPoints];
 
          viaPoints = new YoFramePoint[maximumNumberOfViaPoints];
@@ -140,7 +140,7 @@ public class JointSpaceTrajectoryGenerator
          }
       } else
       {
-         groundTractory = null;
+         groundTrajectory = null;
          viaPoints = null;
          viaPointsInWorldFrame = null;
          heightOfViaPoints = null;
@@ -374,7 +374,7 @@ public class JointSpaceTrajectoryGenerator
             t[i + 1] = tOfViaPoints[i];
          }
 
-         groundTractory.getViaPoints(viaPoints, swingSide.getEnumValue(), t[0], initialPositionInAnkleZUpFrame.get(swingSide.getEnumValue()).getFramePointCopy(),
+         groundTrajectory.getViaPoints(viaPoints, swingSide.getEnumValue(), t[0], initialPositionInAnkleZUpFrame.get(swingSide.getEnumValue()).getFramePointCopy(),
                swingDuration.getDoubleValue(), finalPositionInPelvisFrame.getFramePointCopy(), tOfViaPoints, heightOfViaPointsDouble);
       } else
       {

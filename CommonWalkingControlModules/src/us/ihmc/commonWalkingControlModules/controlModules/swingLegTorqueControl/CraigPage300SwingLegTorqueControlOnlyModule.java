@@ -132,9 +132,13 @@ public class CraigPage300SwingLegTorqueControlOnlyModule implements SwingLegTorq
       desiredLegJointPositions.get(swingSide).set(jointPositions);
       desiredLegJointVelocities.get(swingSide).set(jointVelocities);
       
+      // Compute ID once to find upper body wrench (including accelerations or PD terms in this computation will cause bad vibrations)
+      for (LegJointName legJointName : legJointNames)
+         fullRobotModel.getLegJoint(swingSide, legJointName).setQddDesired(0.0);
       inverseDynamicsCalculators.get(swingSide).compute();
       setUpperBodyWrench();
 
+      // Compute ID once more, now with augmented accelerations to compensate for position and velocity errors.
       LegJointName[] legJointNames = fullRobotModel.getRobotSpecificJointNames().getLegJointNames();
       for (LegJointName legJointName : legJointNames)
       {
@@ -155,8 +159,6 @@ public class CraigPage300SwingLegTorqueControlOnlyModule implements SwingLegTorq
          double kdGain = kdGains.get(legJointName).getDoubleValue();
          double qddDesiredWithPD = positionError * kpGain + velocityError * kdGain + qddDesired;
          
-//         qddDesiredWithPD *= inverseDynamicsPercentScaling.getDoubleValue();
-
          revoluteJoint.setQddDesired(qddDesiredWithPD);
       }
 
@@ -191,6 +193,7 @@ public class CraigPage300SwingLegTorqueControlOnlyModule implements SwingLegTorq
             legTorquesToPackForSwingLeg.setTorque(legJointName, tauInverseDynamics);
          }
       }
+      setUpperBodyWrench();
    }
 
    public void setAnkleGainsSoft(RobotSide swingSide)

@@ -48,8 +48,6 @@ public class LegJointPositionControlModule
    private static final String desiredPositionPrefix = "desiredJointPos";
    private static final String desiredVelocityPrefix = "desiredJointVel";
 
-//   private final EnumMap<LegJointName, Boolean> doDerivativeControlInThisModuleForJoint = new EnumMap<LegJointName, Boolean>(LegJointName.class);
-   
    private final DoubleYoVariable softScaleFactor;
 
    private final EnumMap<LegJointName, PIDController> controllers = ContainerTools.createEnumMap(LegJointName.class);
@@ -155,13 +153,6 @@ public class LegJointPositionControlModule
       kdGains.get(LegJointName.KNEE).set(6.0);
       kdGains.get(LegJointName.ANKLE_ROLL).set(1.0);
       kdGains.get(LegJointName.ANKLE_PITCH).set(1.0);
-      
-//      doDerivativeControlInThisModuleForJoint.put(LegJointName.HIP_YAW, true);
-//      doDerivativeControlInThisModuleForJoint.put(LegJointName.HIP_ROLL, true);
-//      doDerivativeControlInThisModuleForJoint.put(LegJointName.HIP_PITCH, true);
-//      doDerivativeControlInThisModuleForJoint.put(LegJointName.KNEE, true);
-//      doDerivativeControlInThisModuleForJoint.put(LegJointName.ANKLE_ROLL, true);
-//      doDerivativeControlInThisModuleForJoint.put(LegJointName.ANKLE_PITCH, true);
 
       softScaleFactor.set(0.1); // 0.25);
    }
@@ -195,13 +186,6 @@ public class LegJointPositionControlModule
       kdGains.get(LegJointName.KNEE).set(50.0);    // 100.0;    // 100.0;
       kdGains.get(LegJointName.ANKLE_ROLL).set(1.0);    // 3.0); // 10.0;    // 2.0;
       kdGains.get(LegJointName.ANKLE_PITCH).set(3.0);    // 20.0;    // 2.0;//5.0;
-
-//      doDerivativeControlInThisModuleForJoint.put(LegJointName.HIP_YAW, true);
-//      doDerivativeControlInThisModuleForJoint.put(LegJointName.HIP_ROLL, true);
-//      doDerivativeControlInThisModuleForJoint.put(LegJointName.HIP_PITCH, true);
-//      doDerivativeControlInThisModuleForJoint.put(LegJointName.KNEE, true);
-//      doDerivativeControlInThisModuleForJoint.put(LegJointName.ANKLE_ROLL, true);
-//      doDerivativeControlInThisModuleForJoint.put(LegJointName.ANKLE_PITCH, true);
       
       softScaleFactor.set(0.25);    // (0.05);
    }
