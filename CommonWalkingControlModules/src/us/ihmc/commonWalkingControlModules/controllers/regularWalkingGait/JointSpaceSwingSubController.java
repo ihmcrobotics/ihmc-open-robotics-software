@@ -244,7 +244,7 @@ public class JointSpaceSwingSubController implements SwingSubController
       LegJointVelocities legJointVelocities = jointVelocities.get(swingLeg);
       LegJointAccelerations legJointAccelerations = jointAccelerations.get(swingLeg);
 
-      jointSpaceTrajectoryGenerator.updateEndPoint(desiredPosition, desiredOrientation, timeInSwing, useBodyPositionEstimation);
+      jointSpaceTrajectoryGenerator.updateEndPoint(desiredPosition, desiredOrientation, timeInSwing, false); // useBodyPositionEstimation); TODO: use again once body position estimation is fixed
       jointSpaceTrajectoryGenerator.compute(legJointPositions, legJointVelocities, legJointAccelerations, timeInSwing);
 
       torqueControlModule.compute(legTorques, legJointPositions, legJointVelocities, legJointAccelerations);
