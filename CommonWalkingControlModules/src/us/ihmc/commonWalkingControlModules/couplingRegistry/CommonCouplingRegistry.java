@@ -53,6 +53,8 @@ public class CommonCouplingRegistry implements CouplingRegistry
    private YoFrameVector2d lungeAxis = new YoFrameVector2d("lungeAxis", "", ReferenceFrame.getWorldFrame(), registry);
    private YoFramePoint2d desiredCMP = new YoFramePoint2d("desiredCMP", "", ReferenceFrame.getWorldFrame(), registry);
 
+   private FramePoint2d desiredICP = new FramePoint2d(ReferenceFrame.getWorldFrame());
+
    private final PoseReferenceFrame footstepFrame = new PoseReferenceFrame("footstepFrame", ReferenceFrame.getWorldFrame());
    private final DynamicGraphicReferenceFrame footstepFrameGraphic;
 
@@ -269,5 +271,17 @@ public class CommonCouplingRegistry implements CouplingRegistry
    {
       return this.desiredCMP.getFramePoint2dCopy();
    }
+   
+   
+   public void setDesiredCapturePoint(FramePoint2d desiredCapturePoint)
+   {
+      this.desiredICP.set(desiredCapturePoint.getReferenceFrame(), desiredCapturePoint.getX(), desiredCapturePoint.getY());
+   }
+
+   public FramePoint2d getDesiredCapturePointInFrame(ReferenceFrame desiredFrame)
+   {
+      return desiredICP.changeFrameCopy(desiredFrame);
+   }
+
 
 }

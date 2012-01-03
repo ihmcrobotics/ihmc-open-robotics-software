@@ -56,6 +56,7 @@ public class SimpleDesiredCapturePointCalculator implements DesiredCapturePointC
 
       desiredCapturePoint.setX(desiredCapturePoint.getX() + kxx * desiredVelocity.getX());
       desiredCapturePoint.setY(desiredCapturePoint.getY() + kxy * Math.abs(desiredVelocity.getX()));
+      couplingRegistry.setDesiredCapturePoint(desiredCapturePoint);
       return desiredCapturePoint;
    }
 
@@ -76,6 +77,7 @@ public class SimpleDesiredCapturePointCalculator implements DesiredCapturePointC
          offset.normalize();
          offset.scale(desiredCaptureForwardStayInDoubleSupport.getDoubleValue());
          desiredCapturePoint.add(offset);
+         couplingRegistry.setDesiredCapturePoint(desiredCapturePoint);
          return desiredCapturePoint;
       }
       else
