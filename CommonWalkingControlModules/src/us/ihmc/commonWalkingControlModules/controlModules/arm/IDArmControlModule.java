@@ -51,7 +51,7 @@ public abstract class IDArmControlModule implements ArmControlModule
 
    public void doArmControl(ArmTorques[] armTorquesToPack)
    {
-      mirrorDesiredPositionRightBasedOnLeft();
+//      mirrorDesiredPositionRightBasedOnLeft();
       
       setDesiredQdd();
 
