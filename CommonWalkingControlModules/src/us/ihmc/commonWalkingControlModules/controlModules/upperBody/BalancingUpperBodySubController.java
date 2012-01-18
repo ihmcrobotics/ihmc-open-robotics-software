@@ -2,6 +2,8 @@ package us.ihmc.commonWalkingControlModules.controlModules.upperBody;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
+import java.util.Iterator;
+import java.util.List;
 
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;
@@ -11,17 +13,26 @@ import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.ArmControlModule;
+import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.ArmReferenceForPDControlModule;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.SpineLungingControlModule;
+import us.ihmc.commonWalkingControlModules.controlModules.arm.ArmsSidewaysArmControlModule;
 import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.UpperBodySubController;
 import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
+import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
+import us.ihmc.commonWalkingControlModules.partNamesAndTorques.ArmJointName;
+import us.ihmc.commonWalkingControlModules.partNamesAndTorques.ArmTorques;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.NeckJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.NeckTorques;
+import us.ihmc.commonWalkingControlModules.partNamesAndTorques.RobotSpecificJointNames;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.SpineJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.SpineTorques;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.UpperBodyTorques;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.ProcessedSensorsInterface;
+import us.ihmc.robotSide.RobotSide;
+import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.containers.ContainerTools;
+import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameLine2d;
 import us.ihmc.utilities.math.geometry.FrameLineSegment2d;
@@ -31,10 +42,20 @@ import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.Orientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.screwTheory.CompositeRigidBodyInertia;
+import us.ihmc.utilities.screwTheory.CompositeRigidBodyMassMatrixCalculator;
+import us.ihmc.utilities.screwTheory.CompositeRigidBodyMassMatrixCalculatorTest;
+import us.ihmc.utilities.screwTheory.GeneralizedRigidBodyInertia;
+import us.ihmc.utilities.screwTheory.GeometricJacobian;
+import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
+import us.ihmc.utilities.screwTheory.RevoluteJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
+import us.ihmc.utilities.screwTheory.RigidBodyInertia;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
+import us.ihmc.utilities.screwTheory.Twist;
 import us.ihmc.utilities.screwTheory.Wrench;
 
+import com.mathworks.jama.Matrix;
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.EnumYoVariable;
@@ -55,7 +76,13 @@ import com.yobotics.simulationconstructionset.util.statemachines.StateTransition
 
 public class BalancingUpperBodySubController implements UpperBodySubController
 {
-   public static final boolean USE_SCALING_INSTEAD_OF_SETTING_TO_ZERO = true;
+   private final boolean USE_ARMS_FOR_LUNGING = false;
+   
+   private final boolean LATCH_LUNGE_AXIS_TO_PITCH_OR_ROLL = false;
+   private final boolean USE_INVERSE_DYNAMICS_FOR_LUNGING = false;
+   public static final boolean SCALE_PITCH_ROLL_FEEDBACK_GAINS_PROPORTIONAL_TO_LUNGE_AXIS_PITCH_ROLL_COMPONENTS = false;  //Otherwise just set feedback to zero when lunging
+   
+
    private final CouplingRegistry couplingRegistry;
    private final ProcessedSensorsInterface processedSensors;
    private final CommonWalkingReferenceFrames referenceFrames;
@@ -73,47 +100,66 @@ public class BalancingUpperBodySubController implements UpperBodySubController
    private final StateMachine stateMachine;
    private final String name = "BalancingUpperBodySubController";
 
-   //   public Wrench wrenchOnChest;
    private final RigidBody chest;
    private final RigidBody pelvis;
+   private final ReferenceFrame pelvisFrame;
    private final double robotMass;
    private final double gravity;
-      
-   private final YoFramePoint2d icpDesiredLunging = new YoFramePoint2d("icpDesiredLunging", "", ReferenceFrame.getWorldFrame(), registry);
+   
+   private ArrayList<InverseDynamicsJoint> allIDJointsAboveChest;
+   private InverseDynamicsJoint spineRollIDjoint;
+   private InverseDynamicsJoint spineYawIDjoint;
+   private InverseDynamicsJoint spinePitchIDjoint;
+   private CompositeRigidBodyInertia upperBodyMoI;
+   private double upperBodyMoIProjectedOntoLungeAxis = 0.0;
 
-   private final DoubleYoVariable maxChestAngle = new DoubleYoVariable("maxChestAngle", registry);
-   private final DoubleYoVariable startLungingICPScaling = new DoubleYoVariable("startLungingScaling", registry);
+   private final DoubleYoVariable maxChestAngleMagnitude = new DoubleYoVariable("maxChestAngle", registry);
+   private final DoubleYoVariable startLungingICPRadius = new DoubleYoVariable("startLungingRadius", registry);
    private final DoubleYoVariable stopLungingICPRadius = new DoubleYoVariable("stopLungingRadius", registry);
    private final DoubleYoVariable maxHipTorque = new DoubleYoVariable("maxHipTorque", registry);
-   private DoubleYoVariable bosRadiusPerpToLungeAxis = new DoubleYoVariable("bosRadius", registry);
-   private DoubleYoVariable predictedCMPscaling = new DoubleYoVariable("predictedICPscaling", registry);
+   private final DoubleYoVariable bosRadiusPerpToLungeAxis = new DoubleYoVariable("bosRadius", registry);
+   private final DoubleYoVariable predictedCMPscaling = new DoubleYoVariable("predictedCMPscaling", registry);
 
-   private final YoFrameVector wrenchOnPelvisLinear = new YoFrameVector("wrenchOnPelvisByUpperBodyLinear", "", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFrameVector wrenchOnPelvisAngular = new YoFrameVector("wrenchOnPelvisByUpperBodyAngular", "", ReferenceFrame.getWorldFrame(), registry);
+   
+   private Wrench desiredWrenchOnPelvis;
 
    private final YoFramePoint centerOfMassPosition = new YoFramePoint("comGraphic", "", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector lungeAxisGraphic = new YoFrameVector("lungeAxisGraphic", "", ReferenceFrame.getWorldFrame(), registry);
    
-   private final YoFramePoint2d desiredICPVisualizer = new YoFramePoint2d("midFeetPoint", "", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFramePoint2d predictedICPAtTimeToStopVisualizer = new YoFramePoint2d("icpPredicted", "", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint2d icpDesiredLunging = new YoFramePoint2d("icpDesiredLunging", "", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint2d icpActual = new YoFramePoint2d("icpActual", "", ReferenceFrame.getWorldFrame(), registry);
 
-   private final DoubleYoVariable chestAngle = new DoubleYoVariable("chestAngle", registry);
-   private final DoubleYoVariable chestAngularVelocity = new DoubleYoVariable("chestAngularVelocity", registry);
-   private final DoubleYoVariable chestAngularAcceleration = new DoubleYoVariable("chestAngularAcceleration", registry);
+   private final YoFramePoint2d desiredCMP = new YoFramePoint2d("desiredCMP", "", ReferenceFrame.getWorldFrame(), registry);
    
+   private final DoubleYoVariable chestAngle = new DoubleYoVariable("chestAngle", registry);
+   private final DoubleYoVariable chestAngularVelocityMagnitude = new DoubleYoVariable("chestAngularVelocity", registry);
+   
+   private final DoubleYoVariable predictedTimeToDecelerateChest = new DoubleYoVariable("predictedTimeToDecelerateChest", registry);
+   private final DoubleYoVariable actualTimeToAccelerateChest = new DoubleYoVariable("actualTimeToAccelerateChest", registry);
+   private final DoubleYoVariable actualTimeToDecelerateChest = new DoubleYoVariable("actualTimeToDecelerateChest", registry);
+   
+   private final YoFramePoint2d actualICPAtChestStop = new YoFramePoint2d("actualICPAtChestStop", "", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint2d predictedICPAtChestStop = new YoFramePoint2d("predictedICPAtChestStop", "", ReferenceFrame.getWorldFrame(), registry);
+
+   private final YoFramePoint2d lungeAxisPerpIntersectionWithBoS = new YoFramePoint2d("lungeAxisBoSIntersection", "", ReferenceFrame.getWorldFrame(), registry);
+
    private final DoubleYoVariable kTimeToSlowSlowDown = new DoubleYoVariable("kTimeToSlowDown", registry);
    private final DoubleYoVariable kCMP = new DoubleYoVariable("kCMP", registry);
+   
+   private SpineTorques spineTorqueAtExitBaseState = new SpineTorques();
+   private Vector2d spineTorqueComponentAlongLungeAxisPerp = new Vector2d();
    
    private EnumMap<BalancingUpperBodySubControllerState, Double> timeOfStateStart = new EnumMap<BalancingUpperBodySubController.BalancingUpperBodySubControllerState, Double>(BalancingUpperBodySubControllerState.class);
    private EnumMap<BalancingUpperBodySubControllerState, Double> minimumElapsedTimeInState = new EnumMap<BalancingUpperBodySubControllerState, Double>(BalancingUpperBodySubControllerState.class);
    private EnumMap<BalancingUpperBodySubControllerState, Double> chestAngleOnStateStart = new EnumMap<BalancingUpperBodySubController.BalancingUpperBodySubControllerState, Double>(BalancingUpperBodySubControllerState.class);
+   private EnumMap<BalancingUpperBodySubControllerState, Double> chestAngularVelMagnitudeAboutLungeAxisOnStateStart = new EnumMap<BalancingUpperBodySubController.BalancingUpperBodySubControllerState, Double>(BalancingUpperBodySubControllerState.class);
+   
+   private EnumMap<BalancingUpperBodySubControllerState, Double> desiredSpineLungingTorqueMagnitudes = new EnumMap<BalancingUpperBodySubControllerState, Double>(BalancingUpperBodySubControllerState.class);
+   private EnumMap<BalancingUpperBodySubControllerState, Double> desiredArmLungingTorqueScaling = new EnumMap<BalancingUpperBodySubControllerState, Double>(BalancingUpperBodySubControllerState.class);
    
    private final BooleanYoVariable forceControllerIntoState = new BooleanYoVariable("force" + name + "IntoState", registry);
    private final EnumYoVariable<BalancingUpperBodySubControllerState> forcedControllerState = new EnumYoVariable<BalancingUpperBodySubControllerState>("forced"
          + name + "State", registry, BalancingUpperBodySubControllerState.class);
-   
-   
-   private final boolean USE_INVERSE_DYNAMICS_FOR_LUNGING = false;
    
 
    public BalancingUpperBodySubController(CouplingRegistry couplingRegistry, ProcessedSensorsInterface processedSensors,
@@ -132,8 +178,13 @@ public class BalancingUpperBodySubController implements UpperBodySubController
       this.robotMass = processedSensors.getTotalMass();
       this.gravity = processedSensors.getGravityInWorldFrame().getZ();
       this.pelvis = processedSensors.getFullRobotModel().getPelvis();
+      this.pelvisFrame = pelvis.getBodyFixedFrame();
+      this.upperBodyMoI = new CompositeRigidBodyInertia();
       this.stateMachine = new StateMachine(name + "State", name + "SwitchTime", BalancingUpperBodySubControllerState.class, processedSensors.getYoTime(),
             registry);
+      this.desiredWrenchOnPelvis = new Wrench(pelvisFrame, pelvisFrame);
+
+      populateAllIDjointsAboveChest();
 
       populateDynamicsGraphicObjects(dynamicGraphicObjectsListRegistry);
       populateYoVariables();
@@ -144,12 +195,24 @@ public class BalancingUpperBodySubController implements UpperBodySubController
       setGains();
       setParameters();
       displayWarningsForBooleans();
-
-      setUpStateMachine();
+      
+      if (USE_ARMS_FOR_LUNGING)
+      {
+         setUpStateMachineSimpleWithArmsLunging();
+      }
+      else
+      {
+         setUpStateMachineSimple();
+//         setUpStateMachineBalanceBeam();
+      }
+      
    }
 
    public void doUpperBodyControl(UpperBodyTorques upperBodyTorquesToPack)
 {
+      updateVariables();
+      updateDynamicsGraphicObjects();
+      
       stateMachine.doAction();
       if (!forceControllerIntoState.getBooleanValue())
       {
@@ -158,17 +221,19 @@ public class BalancingUpperBodySubController implements UpperBodySubController
       {
          stateMachine.setCurrentState(forcedControllerState.getEnumValue());
       }
+ 
+      if (USE_ARMS_FOR_LUNGING)
+      {
+         setArmTorquesDirectlyForLunging(upperBodyTorquesToPack);
+      }
+      else
+      {
+         armControlModule.doArmControl(upperBodyTorquesToPack.getArmTorques());
+      }
 
-      armControlModule.doArmControl(upperBodyTorquesToPack.getArmTorques());
       this.doNeckControl();
-
-      updateDynamicsGraphicObjects();
-      updateVariables();
-      
-      wrenchTest();
-      
-      // set torques
       upperBodyTorquesToPack.setNeckTorques(neckTorques);
+
       spineControlModule.getSpineTorques(upperBodyTorquesToPack.getSpineTorques());
       
       if (currentStateElapsedTime() < 0.0)  //TODO: This prevents problems when rewinding, but is inefficient.
@@ -178,34 +243,66 @@ public class BalancingUpperBodySubController implements UpperBodySubController
       
    }
    
-   private void setUpStateMachine()
+   private void setUpStateMachineSimple()
    {
       State base = new BaseState();
       State icpRecoverAccelerateState = new ICPRecoverAccelerateState();
-      State icpRecoverDecelerateState = new ICPRecoverDecelerateState();
-      State orientationRecoverAccelerateState = new OrientationRecoverAccelerateState();
-      State orientationRecoverDecelerateState = new OrientationRecoverDecelerateState();
+      State icpRecoverDecelerateState = new ICPRecoverDecelerateSpineState();
 
-      StateTransitionCondition isICPOutsideLungeRadius = new IsICPOutsideScaledICPRadiusCondition();
+      StateTransitionCondition isICPOutsideLungeRadius = new DoWeNeedToStartLungingCondition();
       StateTransitionCondition doWeNeedToDecelerate = new DoWeNeedToDecelerate();
-      StateTransitionCondition isBodyAngularVelocityZeroISH = new HasBodyAngularVelocityCrossedZeroCondition(1e-2);
-      StateTransitionCondition doWeNeedToDecelerateAgain = new DoWeNeedToDecelerateAgainCondition();
-      StateTransitionCondition isChestUpright = new isChestFrameAlignedWithGravityCondition();
+      StateTransitionCondition isBodyAngularVelocityZero = new HasChestAngularVelocityCrossedZeroCondition();
       
-
       StateTransition toICPRecoverAccelerate = new StateTransition(icpRecoverAccelerateState.getStateEnum(), isICPOutsideLungeRadius);
       StateTransition toICPRecoverDecelerate = new StateTransition(icpRecoverDecelerateState.getStateEnum(), doWeNeedToDecelerate);
-      StateTransition toOrientationRecoverAccelerate = new StateTransition(orientationRecoverAccelerateState.getStateEnum(), isBodyAngularVelocityZeroISH);
-      StateTransition toOrientationRecoverDecelerate = new StateTransition(orientationRecoverDecelerateState.getStateEnum(), doWeNeedToDecelerateAgain);
-      StateTransition toBase = new StateTransition(base.getStateEnum(), isBodyAngularVelocityZeroISH);   //TODO: This should be based on angular position, not velocity
-//      StateTransition toBase = new StateTransition(base.getStateEnum(), isChestUpright);   //TODO: This should be based on angular position, not velocity
+      StateTransition toBase = new StateTransition(base.getStateEnum(), isBodyAngularVelocityZero);
 
       base.addStateTransition(toICPRecoverAccelerate);
       icpRecoverAccelerateState.addStateTransition(toICPRecoverDecelerate);
       icpRecoverDecelerateState.addStateTransition(toBase);   //TODO now going back to base
-//      icpRecoverDecelerateState.addStateTransition(toOrientationRecoverAccelerate);
-//      orientationRecoverAccelerateState.addStateTransition(toOrientationRecoverDecelerate);
-//      orientationRecoverDecelerateState.addStateTransition(toBase);
+
+      stateMachine.addState(base);
+      stateMachine.addState(icpRecoverAccelerateState);
+      stateMachine.addState(icpRecoverDecelerateState);
+
+      if (forceControllerIntoState.getBooleanValue())
+      {
+         stateMachine.setCurrentState(forcedControllerState.getEnumValue());
+      } else
+      {
+         stateMachine.setCurrentState(base.getStateEnum());
+      }
+      
+      minimumElapsedTimeInState.put(BalancingUpperBodySubControllerState.BASE, 100.0*controlDT);
+      minimumElapsedTimeInState.put(BalancingUpperBodySubControllerState.ICP_REC_ACC, 10.0*controlDT);
+      minimumElapsedTimeInState.put(BalancingUpperBodySubControllerState.ICP_REC_DEC, 10.0*controlDT);
+   }
+   
+   private void setUpStateMachineBalanceBeam()
+   {
+      State base = new BaseState();
+      State icpRecoverAccelerateState = new ICPRecoverAccelerateState();
+      State icpRecoverDecelerateState = new ICPRecoverDecelerateSpineState();
+      State orientationRecoverAccelerateState = new OrientationRecoverAccelerateState();
+      State orientationRecoverDecelerateState = new OrientationRecoverDecelerateState();
+
+      StateTransitionCondition isICPOutsideLungeRadius = new DoWeNeedToStartLungingCondition();
+      StateTransitionCondition doWeNeedToDecelerate = new DoWeNeedToDecelerate();
+      StateTransitionCondition isBodyAngularVelocityZero = new HasChestAngularVelocityCrossedZeroCondition();
+      StateTransitionCondition doWeNeedToDecelerateAgain = new DoWeNeedToDecelerateAgainCondition();
+      StateTransitionCondition isChestUpright = new isChestFrameAlignedWithGravityCondition();
+      
+      StateTransition toICPRecoverAccelerate = new StateTransition(icpRecoverAccelerateState.getStateEnum(), isICPOutsideLungeRadius);
+      StateTransition toICPRecoverDecelerate = new StateTransition(icpRecoverDecelerateState.getStateEnum(), doWeNeedToDecelerate);
+      StateTransition toOrientationRecoverAccelerate = new StateTransition(orientationRecoverAccelerateState.getStateEnum(), isBodyAngularVelocityZero);
+      StateTransition toOrientationRecoverDecelerate = new StateTransition(orientationRecoverDecelerateState.getStateEnum(), doWeNeedToDecelerateAgain);
+      StateTransition toBase = new StateTransition(base.getStateEnum(), isChestUpright);
+
+      base.addStateTransition(toICPRecoverAccelerate);
+      icpRecoverAccelerateState.addStateTransition(toICPRecoverDecelerate);
+      icpRecoverDecelerateState.addStateTransition(toOrientationRecoverAccelerate);
+      orientationRecoverAccelerateState.addStateTransition(toOrientationRecoverDecelerate);
+      orientationRecoverDecelerateState.addStateTransition(toBase);
 
       stateMachine.addState(base);
       stateMachine.addState(icpRecoverAccelerateState);
@@ -224,19 +321,63 @@ public class BalancingUpperBodySubController implements UpperBodySubController
       minimumElapsedTimeInState.put(BalancingUpperBodySubControllerState.BASE, 10.0*controlDT);
       minimumElapsedTimeInState.put(BalancingUpperBodySubControllerState.ICP_REC_ACC, 10.0*controlDT);
       minimumElapsedTimeInState.put(BalancingUpperBodySubControllerState.ICP_REC_DEC, 10.0*controlDT);
-      minimumElapsedTimeInState.put(BalancingUpperBodySubControllerState.ORIENT_REC_ACC, 10.0*controlDT);
-      minimumElapsedTimeInState.put(BalancingUpperBodySubControllerState.ORIENT_REC_DEC, 10.0*controlDT);
+      minimumElapsedTimeInState.put(BalancingUpperBodySubControllerState.OR_REC_ACC, 1000.0*controlDT);
+      minimumElapsedTimeInState.put(BalancingUpperBodySubControllerState.OR_REC_DEC, 10.0*controlDT);
+   }
+   
 
+   private void setUpStateMachineSimpleWithArmsLunging()
+   {
+      State base = new BaseState();
+      State icpRecoverAccelerateState = new ICPRecoverAccelerateState();
+      State icpRecoverDecelerateSpineState = new ICPRecoverDecelerateSpineState();
+      State icpRecoverDecelerateArmsState = new ICPRecoverDecelerateArmsState();
+
+      StateTransitionCondition isICPOutsideLungeRadius = new DoWeNeedToStartLungingCondition();
+      StateTransitionCondition doWeNeedToDecelerate = new DoWeNeedToDecelerate();
+      StateTransitionCondition isBodyAngularVelocityZero = new HasChestAngularVelocityCrossedZeroCondition();
+      StateTransitionCondition isArmAngularVelocityZero = new HasArmAngularVelocityCrossedZeroCondition();
+      
+      StateTransition toICPRecoverAccelerate = new StateTransition(icpRecoverAccelerateState.getStateEnum(), isICPOutsideLungeRadius);
+      StateTransition toICPRecoverDecelerateSpine = new StateTransition(icpRecoverDecelerateSpineState.getStateEnum(), doWeNeedToDecelerate);
+      StateTransition toICPRecoverDecelerateArms = new StateTransition(icpRecoverDecelerateArmsState.getStateEnum(), isBodyAngularVelocityZero);
+      StateTransition toBase = new StateTransition(base.getStateEnum(), isArmAngularVelocityZero);   //TODO: This should be based on angular position, not velocity
+
+      base.addStateTransition(toICPRecoverAccelerate);
+      icpRecoverAccelerateState.addStateTransition(toICPRecoverDecelerateSpine);
+      icpRecoverDecelerateSpineState.addStateTransition(toICPRecoverDecelerateArms);
+      icpRecoverDecelerateArmsState.addStateTransition(toBase);
+            
+      stateMachine.addState(base);
+      stateMachine.addState(icpRecoverAccelerateState);
+      stateMachine.addState(icpRecoverDecelerateSpineState);
+      stateMachine.addState(icpRecoverDecelerateArmsState);
+
+      if (forceControllerIntoState.getBooleanValue())
+      {
+         stateMachine.setCurrentState(forcedControllerState.getEnumValue());
+      } else
+      {
+         stateMachine.setCurrentState(base.getStateEnum());
+      }
+      
+      minimumElapsedTimeInState.put(BalancingUpperBodySubControllerState.BASE, 1000.0*controlDT);
+      minimumElapsedTimeInState.put(BalancingUpperBodySubControllerState.ICP_REC_ACC, 5.0*controlDT);
+      minimumElapsedTimeInState.put(BalancingUpperBodySubControllerState.ICP_REC_DEC, 5.0*controlDT);
+      minimumElapsedTimeInState.put(BalancingUpperBodySubControllerState.ICP_REC_DEC2, 5.0*controlDT);
 
    }
 
    private enum BalancingUpperBodySubControllerState
    {
-      BASE, ICP_REC_ACC, ICP_REC_DEC, ORIENT_REC_ACC, ORIENT_REC_DEC;
+      BASE, ICP_REC_ACC, ICP_REC_DEC, ICP_REC_DEC2, OR_REC_ACC, OR_REC_DEC;
    }
 
+   
    private class BaseState extends State
    {
+      private BalancingUpperBodySubControllerState currentState = BalancingUpperBodySubControllerState.BASE;
+
       public BaseState()
       {
          super(BalancingUpperBodySubControllerState.BASE);
@@ -244,14 +385,15 @@ public class BalancingUpperBodySubController implements UpperBodySubController
 
       public void doTransitionIntoAction()
       {
+         timeOfStateStart.put(BalancingUpperBodySubControllerState.BASE, processedSensors.getTime());
+         chestAngleOnStateStart.put(currentState, getChestAngleToWorld());
          setLungeAxisInWorldFrame(0.0, 0.0);
-         timeOfStateStart.put((BalancingUpperBodySubControllerState)this.getStateEnum(), processedSensors.getTime());
       }
       
       public void doAction()
       {
-         spineControlModule.doMaintainDesiredChestOrientation();
-         
+         spineControlModule.doSpineControlUsingIDwithPDfeedback();
+
 //         UpperBodyTorques upperBodyTorquesToPack = new UpperBodyTorques();
 //         spineControlModule.doSpineControl(upperBodyTorquesToPack.getSpineTorques());
 
@@ -260,25 +402,20 @@ public class BalancingUpperBodySubController implements UpperBodySubController
       public void doTransitionOutOfAction()
       {
          System.out.println("Exit Base State");
-         // TODO Auto-generated method stub
+         SpineTorques torques = new SpineTorques();
+         spineControlModule.getSpineTorques(torques);
+         for (SpineJointName spineJointName : SpineJointName.values())
+         {
+            spineTorqueAtExitBaseState.setTorque(spineJointName, torques.getTorque(spineJointName));
+         }
       }
    }
    
-   private void storeWrenchCopyAsYoVariable(Wrench wrench)
-   {
-      wrenchOnPelvisAngular.set(wrench.getAngularPartCopy());
-      wrenchOnPelvisLinear.set(wrench.getLinearPartCopy());
-   }
 
    private class ICPRecoverAccelerateState extends State
    {
-      private static final boolean USE_CONSTANT_WRENCH_AROUND_LUNGEAXIS = true;
-      private static final boolean USE_CONSTANT_TORQUE_AROUND_LUNGEAXIS = false;
-      private static final boolean USE_CMP_CONTROL = false;
-      Wrench wrenchOnPelvis;
-      ReferenceFrame pelvisFrame;
-      Vector3d wrenchOnPelvisLinearPart;
-      Vector3d wrenchOnPelvisAngularPart;
+      private BalancingUpperBodySubControllerState currentState = BalancingUpperBodySubControllerState.ICP_REC_ACC;
+     
 
       public ICPRecoverAccelerateState()
       {
@@ -287,106 +424,80 @@ public class BalancingUpperBodySubController implements UpperBodySubController
 
       public void doAction()
       {
-         // Wrench works best since this minimizes the unwanted rotations (yaw) of the upper body
-
-//         wrenchOnPelvis = new Wrench(pelvisFrame, ReferenceFrame.getWorldFrame(), wrenchOnPelvisLinearPart, wrenchOnPelvisAngularPart);
-//         wrenchOnPelvis.changeFrame(pelvisFrame);
-         
          if (USE_INVERSE_DYNAMICS_FOR_LUNGING)
          {
-            if (USE_CONSTANT_WRENCH_AROUND_LUNGEAXIS)
-            {
-               storeWrenchCopyAsYoVariable(wrenchOnPelvis);
-
-               spineControlModule.setWrench(wrenchOnPelvis);
-               spineControlModule.doMaintainDesiredChestOrientation();
-            }
-            
-            if (USE_CONSTANT_TORQUE_AROUND_LUNGEAXIS)
-            {
-               spineControlModule.doConstantTorqueAroundLungeAxis(couplingRegistry.getLungeAxisInFrame(ReferenceFrame.getWorldFrame()), maxHipTorque.getDoubleValue());
-               spineControlModule.doMaintainDesiredChestOrientation();
-            }
-            else if (USE_CMP_CONTROL)
-            {
-               FramePoint2d desiredCMP = getInitialIcpDirection(referenceFrames.getMidFeetZUpFrame());
-               desiredCMP.scale( kCMP.getDoubleValue());
-               couplingRegistry.setDesiredCMP(desiredCMP);
-               spineControlModule.doCMPControl(desiredCMP, couplingRegistry.getLungeAxisInFrame(ReferenceFrame.getWorldFrame()));
-            }
-
+            lungeWithSpineUsingID();
          }
          else
          {
-            Vector3d hipTorque = desiredLungingTorqueDuring(BalancingUpperBodySubControllerState.ICP_REC_ACC);
-            hipTorque.negate();
-            spineControlModule.setHipXYTorque(hipTorque);
+            lungeWithSpineUsingFixedPitchRollTorque();
          }
       }
 
       public void doTransitionIntoAction()
       {
-         setLungeAxisBasedOnIcp();
-         timeOfStateStart.put((BalancingUpperBodySubControllerState)this.getStateEnum(), processedSensors.getTime());
-         chestAngleOnStateStart.put((BalancingUpperBodySubControllerState)this.getStateEnum(), getChestAngleToWorld());
+         timeOfStateStart.put(currentState, processedSensors.getTime());
+         setLungeAxisInCouplingRegistryBasedOnIcp();
+         chestAngleOnStateStart.put(currentState, getChestAngleToWorld());
+         setChestAngularVelocityMagnitudeAlongLungeAxisOnStateStart(currentState);
          
+         setDesiredWrenchOnPelvisAccordingToCurrentState(currentState);
+                  
          if (USE_INVERSE_DYNAMICS_FOR_LUNGING)
          {
-            pelvisFrame = referenceFrames.getPelvisFrame();//pelvis.getBodyFixedFrame();
-            this.wrenchOnPelvisAngularPart = desiredLungingTorqueDuring(BalancingUpperBodySubControllerState.ICP_REC_ACC);
-            this.wrenchOnPelvisLinearPart = new Vector3d();            
-            wrenchOnPelvis = new Wrench(pelvisFrame, pelvisFrame, wrenchOnPelvisLinearPart, wrenchOnPelvisAngularPart);
-            
-            if (USE_SCALING_INSTEAD_OF_SETTING_TO_ZERO)
+            if (SCALE_PITCH_ROLL_FEEDBACK_GAINS_PROPORTIONAL_TO_LUNGE_AXIS_PITCH_ROLL_COMPONENTS)
             {
-               // scaling
                spineControlModule.scaleGainsBasedOnLungeAxis(couplingRegistry.getLungeAxisInFrame(ReferenceFrame.getWorldFrame()).getVectorCopy());
             }
             else
             {
-               // setting to zero
-               ArrayList<SpineJointName> spineJointsWithZeroGain = new ArrayList<SpineJointName>();
-               spineJointsWithZeroGain.add(SpineJointName.SPINE_ROLL);
-               spineJointsWithZeroGain.add(SpineJointName.SPINE_PITCH);
-               spineControlModule.setGainsToZero(spineJointsWithZeroGain);            
+               spineControlModule.scaleGainsToZero();            
             }
-            
-            if (USE_CMP_CONTROL)
-            {
-               spineControlModule.setWrench(wrenchOnPelvis);
-            }
-
          }
        }
 
       public void doTransitionOutOfAction()
       {
-         if (USE_INVERSE_DYNAMICS_FOR_LUNGING)
-         {
-            if (USE_CONSTANT_WRENCH_AROUND_LUNGEAXIS)
-            {
-               setWrenchOnChestToZero(wrenchOnPelvis);
-               storeWrenchCopyAsYoVariable(wrenchOnPelvis);
-               spineControlModule.setWrench(wrenchOnPelvis);
-               spineControlModule.setGains(); // may not be needed               
-            }
-            if (USE_CMP_CONTROL)
-            {
-               couplingRegistry.setDesiredCMP(new FramePoint2d(ReferenceFrame.getWorldFrame()));
-            }
-         }
+         actualTimeToAccelerateChest.set(currentStateElapsedTime());
+         setDesiredWrenchOnPelvisToZero();
+         
+//         if (USE_INVERSE_DYNAMICS_FOR_LUNGING)
+//         {
+//            if (USE_CONSTANT_WRENCH_AROUND_LUNGEAXIS)
+//            {
+//               spineControlModule.setGains(); // may not be needed               
+//            }
+//            if (USE_CMP_CONTROL)
+//            {
+//               couplingRegistry.setDesiredCMP(new FramePoint2d(ReferenceFrame.getWorldFrame()));
+//            }
+//         }
       }
    }
    
-
-   private class ICPRecoverDecelerateState extends State
+   private void setDesiredWrenchOnPelvisAccordingToCurrentState(BalancingUpperBodySubControllerState currentState)
    {
-      Wrench wrenchOnPelvis;
-      ReferenceFrame pelvisFrame;
-      Vector3d wrenchOnPelvisLinearPart;
-      Vector3d wrenchOnPelvisAngularPart;
+      desiredWrenchOnPelvis.setAngularPart(desiredLungingTorqueDuring(currentState, desiredWrenchOnPelvis.getExpressedInFrame()).getVectorCopy());
+      spineControlModule.setWrench(desiredWrenchOnPelvis);
+   }
+   
+   private void setDesiredWrenchOnPelvisToZero()
+   {
+      Vector3d zeroVector = new Vector3d();
+      desiredWrenchOnPelvis.setAngularPart(zeroVector);
+      desiredWrenchOnPelvis.setLinearPart(zeroVector);
       
-      public ICPRecoverDecelerateState()
+      spineControlModule.setWrench(desiredWrenchOnPelvis);
+   }
+
+   
+
+   private class ICPRecoverDecelerateSpineState extends State
+   {
+      private BalancingUpperBodySubControllerState currentState = BalancingUpperBodySubControllerState.ICP_REC_DEC;
+      
+      
+      public ICPRecoverDecelerateSpineState()
       {
          super(BalancingUpperBodySubControllerState.ICP_REC_DEC);
       }
@@ -395,172 +506,218 @@ public class BalancingUpperBodySubController implements UpperBodySubController
       {
          if (USE_INVERSE_DYNAMICS_FOR_LUNGING)
          {
-            wrenchOnPelvis = new Wrench(pelvisFrame, pelvisFrame, wrenchOnPelvisLinearPart, wrenchOnPelvisAngularPart);
-            
-            storeWrenchCopyAsYoVariable(wrenchOnPelvis);
-
-            spineControlModule.setWrench(wrenchOnPelvis);
-            spineControlModule.doMaintainDesiredChestOrientation(); 
+            lungeWithSpineUsingID();
          }
          else
          {
-            Vector3d hipTorque = desiredLungingTorqueDuring(BalancingUpperBodySubControllerState.ICP_REC_DEC);
-            hipTorque.negate();
-            spineControlModule.setHipXYTorque(hipTorque);
+            lungeWithSpineUsingFixedPitchRollTorque();
          }
       }
 
       public void doTransitionIntoAction()
       {
-         timeOfStateStart.put((BalancingUpperBodySubControllerState)this.getStateEnum(), processedSensors.getTime());
-
+         timeOfStateStart.put(currentState, processedSensors.getTime());
+         setChestAngularVelocityMagnitudeAlongLungeAxisOnStateStart(currentState);
          flipVisualizedLungeAxisGraphic();
 
-         pelvisFrame = pelvis.getBodyFixedFrame();
-         this.wrenchOnPelvisAngularPart = desiredLungingTorqueDuring(BalancingUpperBodySubControllerState.ICP_REC_DEC);
-         this.wrenchOnPelvisLinearPart = new Vector3d();
+         setDesiredWrenchOnPelvisAccordingToCurrentState(currentState);
       }
       
       public void doTransitionOutOfAction()
       {
+         actualTimeToDecelerateChest.set(currentStateElapsedTime());
+         actualICPAtChestStop.set(couplingRegistry.getCapturePointInFrame(ReferenceFrame.getWorldFrame()).toFramePoint2d());
+         
+         setDesiredWrenchOnPelvisToZero();
+         
+         System.out.println("Predicted Time to Stop Chest: " + predictedTimeToStopChestDuring(currentState));
+         System.out.println("Actual Time to Stop Chest: " + actualTimeToDecelerateChest.getDoubleValue());
+         
          if (USE_INVERSE_DYNAMICS_FOR_LUNGING)
          {
-            setWrenchOnChestToZero(wrenchOnPelvis);
-            storeWrenchCopyAsYoVariable(wrenchOnPelvis);
-            spineControlModule.setWrench(wrenchOnPelvis);
             spineControlModule.setGains(); // may not be needed
          }
       }
-      
-      private void storeWrenchCopyAsYoVariable(Wrench wrench)
+   }
+   
+   private class ICPRecoverDecelerateArmsState extends State
+   {
+
+      public ICPRecoverDecelerateArmsState()
       {
-         wrenchOnPelvisAngular.set(wrench.getAngularPartCopy());
-         wrenchOnPelvisLinear.set(wrench.getLinearPartCopy());
+         super(BalancingUpperBodySubControllerState.ICP_REC_DEC2);
+      }
+
+      @Override
+      public void doAction()
+      {
+         spineControlModule.doSpineControlUsingIDwithPDfeedback();         
+      }
+
+      @Override
+      public void doTransitionIntoAction()
+      {
+         timeOfStateStart.put(BalancingUpperBodySubControllerState.ICP_REC_DEC2, processedSensors.getTime());         
+      }
+
+      @Override
+      public void doTransitionOutOfAction()
+      {
          
       }
+      
    }
    
    private class OrientationRecoverAccelerateState extends State
    {
-      Wrench wrenchOnPelvis;
-      ReferenceFrame pelvisFrame;
-      Vector3d wrenchOnPelvisLinearPart;
-      Vector3d wrenchOnPelvisAngularPart;
+      BalancingUpperBodySubControllerState currentState = BalancingUpperBodySubControllerState.OR_REC_ACC;
+
       
       public OrientationRecoverAccelerateState()
       {
-         super(BalancingUpperBodySubControllerState.ORIENT_REC_ACC);
+         super(BalancingUpperBodySubControllerState.OR_REC_ACC);
       }
 
       public void doAction()
       {
          if (USE_INVERSE_DYNAMICS_FOR_LUNGING)
          {
-            wrenchOnPelvis = new Wrench(pelvisFrame, pelvisFrame, wrenchOnPelvisLinearPart, wrenchOnPelvisAngularPart);
-            
-            storeWrenchCopyAsYoVariable(wrenchOnPelvis);
-
-            spineControlModule.setWrench(wrenchOnPelvis);
-            spineControlModule.doMaintainDesiredChestOrientation(); 
+            spineControlModule.setWrench(desiredWrenchOnPelvis);
+            spineControlModule.doSpineControlUsingIDwithPDfeedback(); 
          }
          else
          {
-            Vector3d hipTorque = desiredLungingTorqueDuring(BalancingUpperBodySubControllerState.ORIENT_REC_ACC);
-            hipTorque.negate();
-            spineControlModule.setHipXYTorque(hipTorque);
+            lungeWithSpineUsingFixedPitchRollTorque();
          }
-         
       }
 
       public void doTransitionIntoAction()
       {
-         timeOfStateStart.put((BalancingUpperBodySubControllerState)this.getStateEnum(), processedSensors.getTime());
+         timeOfStateStart.put(currentState, processedSensors.getTime());
 
-         pelvisFrame = pelvis.getBodyFixedFrame();
-         this.wrenchOnPelvisAngularPart = desiredLungingTorqueDuring(BalancingUpperBodySubControllerState.ORIENT_REC_ACC);
-         this.wrenchOnPelvisLinearPart = new Vector3d();
+         flipVisualizedLungeAxisGraphic();
+         
+         FrameVector2d vectorFromMidZFeetUpTodesiredCoP = new FrameVector2d(desiredCoPduring(currentState, referenceFrames.getMidFeetZUpFrame()));
+         
+         FrameVector bosLimitedLungingTorque = desiredLungingTorqueDuring(currentState, pelvisFrame);
+         bosLimitedLungingTorque.normalize();
+         bosLimitedLungingTorque.scale(vectorFromMidZFeetUpTodesiredCoP.length()*robotMass*gravity);
+      
+//         wrenchOnPelvis.setAngularPart(bosLimitedLungingTorque.getVectorCopy());
+         desiredWrenchOnPelvis.setAngularPart(desiredLungingTorqueDuring(currentState, pelvisFrame).getVectorCopy());
+
       }
-
+      
       public void doTransitionOutOfAction()
       {
+         setDesiredWrenchOnPelvisToZero();
+         
          if (USE_INVERSE_DYNAMICS_FOR_LUNGING)
          {
-            setWrenchOnChestToZero(wrenchOnPelvis);
-            storeWrenchCopyAsYoVariable(wrenchOnPelvis);
-            spineControlModule.setWrench(wrenchOnPelvis);
             spineControlModule.setGains(); // may not be needed
-         }         
+         }
       }
    }
    
    private class OrientationRecoverDecelerateState extends State
    {
-      Wrench wrenchOnPelvis;
-      ReferenceFrame pelvisFrame;
-      Vector3d wrenchOnPelvisLinearPart;
-      Vector3d wrenchOnPelvisAngularPart;
+      ReferenceFrame pelvisFrame = pelvis.getBodyFixedFrame();
+      Wrench wrenchOnPelvis = new Wrench(pelvisFrame, pelvisFrame);
       
       public OrientationRecoverDecelerateState()
       {
-         super(BalancingUpperBodySubControllerState.ORIENT_REC_DEC);
+         super(BalancingUpperBodySubControllerState.OR_REC_DEC);
       }
 
       public void doAction()
       {
          if (USE_INVERSE_DYNAMICS_FOR_LUNGING)
          {
-            wrenchOnPelvis = new Wrench(pelvisFrame, pelvisFrame, wrenchOnPelvisLinearPart, wrenchOnPelvisAngularPart);
-            
-            storeWrenchCopyAsYoVariable(wrenchOnPelvis);
 
             spineControlModule.setWrench(wrenchOnPelvis);
-            spineControlModule.doMaintainDesiredChestOrientation(); 
+            spineControlModule.doSpineControlUsingIDwithPDfeedback(); 
          }
          else
          {
-            Vector3d hipTorque = desiredLungingTorqueDuring(BalancingUpperBodySubControllerState.ORIENT_REC_DEC);
-            hipTorque.negate();
-            spineControlModule.setHipXYTorque(hipTorque);
+            lungeWithSpineUsingFixedPitchRollTorque();
          }
       }
 
       public void doTransitionIntoAction()
       {
-         timeOfStateStart.put((BalancingUpperBodySubControllerState)this.getStateEnum(), processedSensors.getTime());
+         timeOfStateStart.put(BalancingUpperBodySubControllerState.OR_REC_DEC, processedSensors.getTime());
 
          flipVisualizedLungeAxisGraphic();
-         
-         pelvisFrame = pelvis.getBodyFixedFrame();
-         this.wrenchOnPelvisAngularPart = desiredLungingTorqueDuring(BalancingUpperBodySubControllerState.ORIENT_REC_DEC);
-         this.wrenchOnPelvisLinearPart = new Vector3d();
+
+         wrenchOnPelvis.setAngularPart(desiredLungingTorqueDuring(BalancingUpperBodySubControllerState.OR_REC_DEC, wrenchOnPelvis.getExpressedInFrame()).getVector());
+
       }
       
       public void doTransitionOutOfAction()
       {
+         setDesiredWrenchOnPelvisToZero();
          if (USE_INVERSE_DYNAMICS_FOR_LUNGING)
          {
-            setWrenchOnChestToZero(wrenchOnPelvis);
-            storeWrenchCopyAsYoVariable(wrenchOnPelvis);
-            spineControlModule.setWrench(wrenchOnPelvis);
             spineControlModule.setGains(); // may not be needed
-         }         
+         }
       }
    }
    
-   private void setLungeAxisBasedOnIcp()
+   
+   
+   private void setLungeAxisInCouplingRegistryBasedOnIcp()
    {
-      // TODO taking the capturePoint in the world frame will not work if the robot walks
-      FramePoint2d capturePointInBodyAttachedZUP = new FramePoint2d(ReferenceFrame.getWorldFrame());
-      capturePointInBodyAttachedZUP.set(couplingRegistry.getCapturePointInFrame(ReferenceFrame.getWorldFrame()).toFramePoint2d());
-
-      setLungeAxisInWorldFrame(-capturePointInBodyAttachedZUP.getY(), capturePointInBodyAttachedZUP.getX());
+      //TODO: When walking, the lunge axis should ONLY contain components in directions in which the robot IS allowed to take a corrective step.  For example, when walking on a balance beam, the robot should only lunge about x-axis
+      ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       
-//      lungeAxis.set(-capturePointInBodyAttachedZUP.getY(), capturePointInBodyAttachedZUP.getX());
-//      lungeAxis.normalize();
-//      lungeAxisGraphic.setXY(lungeAxis.getVectorCopy());
-//      couplingRegistry.setLungeAxis(lungeAxis.getFrameVector2dCopy());
+      FramePoint2d capturePointInWorldFrame = new FramePoint2d(worldFrame);
+      capturePointInWorldFrame.set(couplingRegistry.getCapturePointInFrame(capturePointInWorldFrame.getReferenceFrame()).toFramePoint2d());
+      
+      FrameVector2d vectorFromDesiredToActualICP = new FrameVector2d(ReferenceFrame.getWorldFrame());
+      vectorFromDesiredToActualICP.sub(capturePointInWorldFrame, couplingRegistry.getDesiredCapturePointInFrame(capturePointInWorldFrame.getReferenceFrame()));
+      
+      setLungeAxisInWorldFrame(-vectorFromDesiredToActualICP.getY(), vectorFromDesiredToActualICP.getX());
+//      setLungeAxisInWorldFrame(-capturePointInWorldFrame.getY(), capturePointInWorldFrame.getX());
+      
+      setSpineTorqueComponentAlongLungeAxisPerp();
+      
    }
    
+   
+   private void setLungeAxisInWorldFrame(double newX, double newY)
+   {
+      FrameVector2d tempLungeAxis = new FrameVector2d(ReferenceFrame.getWorldFrame(), newX, newY);
+
+      if (tempLungeAxis.length() != 0.0)
+      {
+         tempLungeAxis.normalize();
+         if (LATCH_LUNGE_AXIS_TO_PITCH_OR_ROLL)
+         {
+            tempLungeAxis.set(Math.round(tempLungeAxis.getX()),Math.round(tempLungeAxis.getY()));
+         }
+      }
+
+      lungeAxisGraphic.set(tempLungeAxis.getX(), tempLungeAxis.getY(), 0.0);
+      couplingRegistry.setLungeAxis(tempLungeAxis);
+      
+      setTotalUpperBodyMomentOfInertiaProjectedAlongLungeAxis();
+            
+//      FramePoint2d desiredCoP = maximumCoPdisplacementRelativeToAnkle();
+
+   }
+   
+   
+   private void setSpineTorqueComponentAlongLungeAxisPerp()
+   {      
+      ReferenceFrame pelvisFrame = referenceFrames.getPelvisFrame();
+      Vector2d lungeAxis = couplingRegistry.getLungeAxisInFrame(pelvisFrame).getVectorCopy(); lungeAxis.normalize();
+      Vector2d lungeAxisPerp = new Vector2d(-lungeAxis.getY(), lungeAxis.getX());
+   
+      Vector2d spineXYTorqueAtExitBaseStateVector = new Vector2d(spineTorqueAtExitBaseState.getTorque(SpineJointName.SPINE_ROLL), spineTorqueAtExitBaseState.getTorque(SpineJointName.SPINE_PITCH));
+   
+      spineTorqueComponentAlongLungeAxisPerp.set(lungeAxisPerp.getX(), lungeAxisPerp.getY());
+      spineTorqueComponentAlongLungeAxisPerp.scale(spineXYTorqueAtExitBaseStateVector.dot(lungeAxisPerp));
+   }
    
    private void flipVisualizedLungeAxisGraphic()
    {
@@ -569,37 +726,24 @@ public class BalancingUpperBodySubController implements UpperBodySubController
       lungeAxisGraphic.setX(temp.getX()); lungeAxisGraphic.setY(temp.getY());
    }
    
-   private void setLungeAxisInWorldFrame(double newX, double newY)
-   {
-      FrameVector2d tempLungeAxis = new FrameVector2d(ReferenceFrame.getWorldFrame(), newX, newY);
-      if (tempLungeAxis.length() != 0.0)
-      {
-         tempLungeAxis.normalize();
-      }
 
-      lungeAxisGraphic.set(tempLungeAxis.getX(), tempLungeAxis.getY(), 0.0);
-      couplingRegistry.setLungeAxis(tempLungeAxis);
-            
-//      FramePoint2d desiredCoP = maximumCoPdisplacementRelativeToAnkle();
-
-   }
    
-   private FramePoint2d getDesiredCoPOrthogonalToLungeAxis(ReferenceFrame expressedInFrame, FrameVector2d lungeAxis)   
+   private FramePoint2d getIntersectionOfLungeAxisNormalWithSupportPolygon(ReferenceFrame desiredFrame)
    {
-      FramePoint2d desiredCoP = new FramePoint2d(lungeAxis.getReferenceFrame(), lungeAxis.getY(), -lungeAxis.getX());
-      desiredCoP.changeFrame(expressedInFrame);
-      return desiredCoP;
-   }
-   
-   private FramePoint2d maximumCoPdisplacementRelativeToAnkle()
-   {
-      FrameVector2d lungeAxis = couplingRegistry.getLungeAxisInFrame(ReferenceFrame.getWorldFrame());
+      ReferenceFrame midZFeetUpFrame = referenceFrames.getMidFeetZUpFrame();
+      FrameVector2d lungeAxisInMidZFeetUp = couplingRegistry.getLungeAxisInFrame(midZFeetUpFrame);
+      
+      FramePoint2d desiredCoP = new FramePoint2d(lungeAxisInMidZFeetUp.getReferenceFrame(), lungeAxisInMidZFeetUp.getY(), -lungeAxisInMidZFeetUp.getX());
+      
       FrameConvexPolygon2d supportPolygonInMidFeetZUp = couplingRegistry.getBipedSupportPolygons().getSupportPolygonInMidFeetZUp();
+      
       FrameLineSegment2d segmentFromPolygonCentroidToDesiredCoP = 
-         new FrameLineSegment2d(supportPolygonInMidFeetZUp.getCentroidCopy(), getDesiredCoPOrthogonalToLungeAxis(referenceFrames.getMidFeetZUpFrame(), lungeAxis));
+         new FrameLineSegment2d(supportPolygonInMidFeetZUp.getCentroidCopy(), desiredCoP);
       
       FramePoint2d[] intersectionPoints = segmentFromPolygonCentroidToDesiredCoP.intersectionWith(supportPolygonInMidFeetZUp);
       FramePoint2d ret = intersectionPoints[0];
+      
+      ret.changeFrame(desiredFrame);
       
       // no intersections
       if (ret == null)
@@ -609,12 +753,49 @@ public class BalancingUpperBodySubController implements UpperBodySubController
 
       return ret;
    }
+   
+   private void lungeWithSpineUsingFixedPitchRollTorque()
+   {
+      Vector2d hipTorque = new Vector2d(desiredWrenchOnPelvis.getAngularPartCopy().getX(), desiredWrenchOnPelvis.getAngularPartCopy().getY());
+      hipTorque.negate();
+      hipTorque.add(spineTorqueComponentAlongLungeAxisPerp);
+      spineControlModule.setSpinePitchRollTorque(hipTorque);
+   }
+   
+   private void lungeWithSpineUsingID()
+   {
+      boolean USE_CONSTANT_WRENCH_AROUND_LUNGEAXIS = true;
+      boolean USE_CONSTANT_TORQUE_AROUND_LUNGEAXIS = false;
+      boolean USE_CMP_CONTROL = false;
 
-   private class IsICPOutsideScaledICPRadiusCondition implements StateTransitionCondition
+      if (USE_CONSTANT_WRENCH_AROUND_LUNGEAXIS)
+      {
+         spineControlModule.doSpineControlUsingIDwithPDfeedback();
+      }
+      
+      if (USE_CONSTANT_TORQUE_AROUND_LUNGEAXIS)
+      {
+         spineControlModule.doConstantTorqueAroundLungeAxis(couplingRegistry.getLungeAxisInFrame(ReferenceFrame.getWorldFrame()), maxHipTorque.getDoubleValue());
+         spineControlModule.doSpineControlUsingIDwithPDfeedback();
+      }
+      else if (USE_CMP_CONTROL)
+      {
+         FramePoint2d desiredCMP = getLungeAxisPerpUnitVector(referenceFrames.getMidFeetZUpFrame());
+         desiredCMP.scale( kCMP.getDoubleValue());
+         couplingRegistry.setDesiredCMP(desiredCMP);
+         
+         spineControlModule.doCMPControl(desiredCMP, couplingRegistry.getLungeAxisInFrame(ReferenceFrame.getWorldFrame()));
+      }
+   }
+   
+   private class DoWeNeedToStartLungingCondition implements StateTransitionCondition
    {
       public boolean checkCondition()
       {         
-         return !isCapturePointInsideSupportPolygon() && currentStateElapsedTime() > minimumElapsedTimeInState.get((BalancingUpperBodySubControllerState) stateMachine.getCurrentStateEnum());
+//         FrameVector2d vectorFromActualToDesiredICP = new FrameVector2d(icpActual.getFramePoint2dCopy(), icpDesired.getFramePoint2dCopy());
+//         return vectorFromActualToDesiredICP.length() > startLungingICPRadius.getDoubleValue();
+         
+         return !isCapturePointInsideSupportPolygon() && isElapsedTimeInCurrentStateAboveMinimumThreshold();
       }
    }
    
@@ -624,38 +805,29 @@ public class BalancingUpperBodySubController implements UpperBodySubController
       
       return deltaTimeInState;
    }
+   
+   private boolean isElapsedTimeInCurrentStateAboveMinimumThreshold()
+   {
+      boolean minimumElapsedTimeInCurrentState = currentStateElapsedTime() > minimumElapsedTimeInState.get((BalancingUpperBodySubControllerState) stateMachine.getCurrentStateEnum());
+      return minimumElapsedTimeInCurrentState;
+   }
 
    private class DoWeNeedToDecelerate implements StateTransitionCondition
    {
       public boolean checkCondition()
       {
-         updateAngularVelocityAndAcceleration();
-         boolean doWeNeedToSlowDownBecauseOfAngleLimit = doWeNeedToSlowDownBecauseOfAngleLimit();
-         boolean willICPEndUpInsideStopLungingRadius = willICPEndUpFarEnoughBack();
-         
+         BalancingUpperBodySubControllerState currentState = (BalancingUpperBodySubControllerState) stateMachine.getCurrentStateEnum();
+//         boolean doWeNeedToSlowDownBecauseOfAngleLimit = predictedDistanceToStopChestDuring(currentState) < maxChestAngleMagnitude.getDoubleValue();  //TODO: FIX THIS
+         boolean doWeNeedToSlowDownBecauseOfAngleLimit = false;
+         boolean willICPEndUpInsideStopLungingRadius = willICPEndUpFarEnoughBack();     
          if (doWeNeedToSlowDownBecauseOfAngleLimit) System.out.println("Transition to slow down due to Angle Limit.");
          if (willICPEndUpInsideStopLungingRadius) System.out.println("Transition to slow down due favorable predicted ICP location after slow down.");
-
-         return (doWeNeedToSlowDownBecauseOfAngleLimit || willICPEndUpInsideStopLungingRadius) && currentStateElapsedTime() > minimumElapsedTimeInState.get((BalancingUpperBodySubControllerState) stateMachine.getCurrentStateEnum());
-//         return false;
-      }
-
-      private void updateAngularVelocityAndAcceleration()
-      {
-         // TODO fix this bullshit.
-         SpatialAccelerationVector chestAccelerationVector = processedSensors.getAccelerationOfPelvisWithRespectToWorld();
-         chestAngularAcceleration.set(chestAccelerationVector.getAngularPartCopy().length());
-      }
-
-      private boolean doWeNeedToSlowDownBecauseOfAngleLimit()
-      {
-         double deltaTimeInState = currentStateElapsedTime();
-         double deltaChestAngleInState = chestAngle.getDoubleValue() - 0.0;
          
-         double averageChestVelocityInState = deltaChestAngleInState / deltaTimeInState;
+         boolean ret = (doWeNeedToSlowDownBecauseOfAngleLimit || willICPEndUpInsideStopLungingRadius) && isElapsedTimeInCurrentStateAboveMinimumThreshold();
          
-         return (maxChestAngle.getDoubleValue() <= chestAngle.getDoubleValue() + deltaTimeInState * averageChestVelocityInState * kTimeToSlowSlowDown.getDoubleValue());  
+         return ret;
       }
+
 
       /**
        * Predict where the ICP will be located when the chest comes to rest if we begin to decelerate the chest now.
@@ -669,54 +841,234 @@ public class BalancingUpperBodySubController implements UpperBodySubController
          BalancingUpperBodySubControllerState currentState = BalancingUpperBodySubControllerState.ICP_REC_DEC;
          ReferenceFrame midFeetZUpFrame = referenceFrames.getMidFeetZUpFrame();
          
-         Vector3d predictedSpineTorque = desiredLungingTorqueDuring(currentState);
-
-         FramePoint2d deltaCMPDueToSpineTorque = new FramePoint2d(midFeetZUpFrame, deltaCMPDueToSpineTorque(predictedSpineTorque).getX(), deltaCMPDueToSpineTorque(predictedSpineTorque).getY()); //TODO: Should just express everything in FrameVectors to begin with
-
-         FramePoint2d predictedCMP = desiredCoPduring(currentState, midFeetZUpFrame);
-         predictedCMP.add(deltaCMPDueToSpineTorque);
-         
-         predictedCMP.scale(predictedCMPscaling.getDoubleValue());  
+         FramePoint2d predictedCMP = cmpDueToDesiredCOPandDesiredHipTorque(currentState, midFeetZUpFrame);
 
          FramePoint2d icpCurrent = couplingRegistry.getCapturePointInFrame(midFeetZUpFrame).toFramePoint2d();
          
          FramePoint2d predictedICPWhenChestStops = new FramePoint2d(midFeetZUpFrame);
-         predictedICPWhenChestStops = predictedICPWhenChestStopsIfWeSlowDownNow(icpCurrent, predictedCMP, predictedTimeToStopChestDuring(currentState));
-         predictedICPAtTimeToStopVisualizer.set(predictedICPWhenChestStops.changeFrameCopy(ReferenceFrame.getWorldFrame()));
          
+         predictedICPWhenChestStops = predictedICPWhenChestStopsIfWeSlowDownNow(icpCurrent, predictedCMP, predictedTimeToStopChestDuring(currentState));
+         predictedICPAtChestStop.set(predictedICPWhenChestStops.changeFrameCopy(ReferenceFrame.getWorldFrame()));
+
          FrameVector2d vectorFromDesiredToPredictedICP = new FrameVector2d(icpDesiredLunging.getFramePoint2dCopy().changeFrameCopy(midFeetZUpFrame), predictedICPWhenChestStops);
-       
-         //Predicted ICP after decelerate will be at the desired location
+
          return vectorFromDesiredToPredictedICP.dot(getUnitVectorNormalToLungeAxis(midFeetZUpFrame)) < stopLungingICPRadius.getDoubleValue();
       }
    }
    
-   private double predictedChestAccelerationDuring(BalancingUpperBodySubControllerState state)
+   
+   private void setChestAngularVelocityMagnitudeAlongLungeAxisOnStateStart(BalancingUpperBodySubControllerState currentState)
    {
-      //    double projectedMOI = 1.0;
-//          double torque = desiredLungingTorqueDuring(state).length();
-      //    double predictedChestAngularDecel = torque / projectedMOI;
+      if (currentStateElapsedTime() > 0.0) throw new RuntimeException("Can only set this value at the transition into a state.");
+      ReferenceFrame chestFrame = chest.getBodyFixedFrame();
+      FrameVector2d chestAngularVelocityInChest = new FrameVector2d(chestFrame, processedSensors.getChestAngularVelocityInChestFrame().getX(), processedSensors.getChestAngularVelocityInChestFrame().getY());
+      chestAngularVelMagnitudeAboutLungeAxisOnStateStart.put(currentState, chestAngularVelocityInChest.dot(couplingRegistry.getLungeAxisInFrame(chestAngularVelocityInChest.getReferenceFrame())));
+   }
+   
+   private double getCurrentChestAngularVelMagnitudeAboutLungeAxis()
+   {
+      ReferenceFrame chestFrame = chest.getBodyFixedFrame();
+      FrameVector2d chestAngularVelocityInChest = new FrameVector2d(chestFrame, processedSensors.getChestAngularVelocityInChestFrame().getX(), processedSensors.getChestAngularVelocityInChestFrame().getY());
+      return  chestAngularVelocityInChest.dot(couplingRegistry.getLungeAxisInFrame(chestAngularVelocityInChest.getReferenceFrame()));
+   }
+   
+   
+   private double averageObservedUpperBodyAngularAccelerationAboutLungeAxisDuring(BalancingUpperBodySubControllerState state)
+   {
+      double deltaT = currentStateElapsedTime();
+      double deltaV = 0.0;
+      if (chestAngularVelMagnitudeAboutLungeAxisOnStateStart.get(state) != null)
+      {
+         deltaV = getCurrentChestAngularVelMagnitudeAboutLungeAxis() - chestAngularVelMagnitudeAboutLungeAxisOnStateStart.get(state);
+      }
 
-      double predictedChestAngularDecel = 10.0 * Math.signum(chestAngularVelocity.getDoubleValue()); //TODO: This should be computed using: predictedChestAngularDecel = torque / projectedMOI
+      double averageAcceleration = deltaV / deltaT;
+      return  averageAcceleration;
+   }
+    
+
+   private ArrayList<InverseDynamicsJoint> populateAllIDjointsAboveChest()
+   {
+      this.spineRollIDjoint = pelvis.getParentJoint();
+      this.spineYawIDjoint = this.spineRollIDjoint.getPredecessor().getParentJoint();
+      this.spinePitchIDjoint = this.spineYawIDjoint.getPredecessor().getParentJoint();
+      
+      checkSpineIDJointNames();
+      
+      ArrayList<InverseDynamicsJoint> allJoints = new ArrayList<InverseDynamicsJoint>();
+      List<InverseDynamicsJoint> jointsToIgnore = new ArrayList<InverseDynamicsJoint>();
+      ArrayList<RigidBody> morgue = new ArrayList<RigidBody>();
+
+      morgue.add(chest);
+      
+      jointsToIgnore.add(this.spinePitchIDjoint);
+      
+
+      while (!morgue.isEmpty())
+      {
+         RigidBody currentBody = morgue.get(0);
+
+         if (currentBody.hasChildrenJoints())
+         {
+            List<InverseDynamicsJoint> childrenJoints = currentBody.getChildrenJoints();
+            for (InverseDynamicsJoint joint : childrenJoints)
+            {
+               if (!jointsToIgnore.contains(joint))
+               {
+                  RigidBody successor = joint.getSuccessor();
+                  if (successor != null)
+                  {
+                     allJoints.add(joint);
+                     morgue.add(successor);
+                  }
+               }
+            }
+         }
+
+         morgue.remove(currentBody);
+      }
+      
+      this.allIDJointsAboveChest = allJoints;
+      
+      computeTotalUpperBodyMomentOfInertia();
+      
+      return allJoints;
+   }
+   
+
+   private void computeTotalUpperBodyMomentOfInertia()
+   {  
+      CompositeRigidBodyInertia totalCompositeRigidBodyInertia = new CompositeRigidBodyInertia(chest.getBodyFixedFrame(), chest.getInertia().getMassMomentOfInertiaPartCopy(), chest.getInertia().getMass());
+      
+      for(InverseDynamicsJoint childJoint : allIDJointsAboveChest)
+      {
+         RigidBody rigidBody = childJoint.getSuccessor();
+         CompositeRigidBodyInertia inertia = new CompositeRigidBodyInertia(rigidBody.getBodyFixedFrame(), rigidBody.getInertia().getMassMomentOfInertiaPartCopy(), rigidBody.getInertia().getMass());
+         
+         inertia.changeFrame(totalCompositeRigidBodyInertia.getExpressedInFrame());
+         totalCompositeRigidBodyInertia.add(inertia);
+      }
+      
+      setTotalUpperBodyCompositeRigidBodyInertia(totalCompositeRigidBodyInertia);
+   }
+
+   private CompositeRigidBodyInertia getTotalUpperBodyCompositeRigidBodyInertiaCopy(ReferenceFrame expressedInFrame)
+   {
+      CompositeRigidBodyInertia MoI = new CompositeRigidBodyInertia();
+      MoI.set(this.upperBodyMoI);
+      
+      MoI.changeFrame(expressedInFrame);
+      
+      return MoI;
+   }
+
+   
+   private void setTotalUpperBodyMomentOfInertiaProjectedAlongLungeAxis()
+   {
+//      computeTotalUpperBodyMomentOfInertia();   //TODO: May be necessary to re-compute, depending on whether the arms affected the total MoI by changing orientation
+      
+      FrameVector2d lungeAxis = couplingRegistry.getLungeAxisInFrame(pelvisFrame);
+      double projectedMOI;
+      if (lungeAxis != null)
+      {
+         double moiFeltBySpinePitch = getTotalUpperBodyCompositeRigidBodyInertiaCopy(spinePitchIDjoint.getFrameAfterJoint()).getMassMomentOfInertiaPartCopy().m11;
+         double moiFeltBySpineRoll = getTotalUpperBodyCompositeRigidBodyInertiaCopy(spineRollIDjoint.getFrameBeforeJoint()).getMassMomentOfInertiaPartCopy().m00;
+         
+         System.out.println("moiFeltBySpinePitch:" + moiFeltBySpinePitch);
+         
+         double pitchComponentSquared = lungeAxis.getY()*lungeAxis.getY();
+         double rollComponentSquared = lungeAxis.getX()*lungeAxis.getX();
+         projectedMOI =  moiFeltBySpinePitch * pitchComponentSquared +  moiFeltBySpineRoll * rollComponentSquared;
+      }
+      else
+      {
+         projectedMOI = 0.0;
+      }
+
+      
+      upperBodyMoIProjectedOntoLungeAxis = projectedMOI;
+   }
+   
+   private double predictedChestAccelerationDuring(BalancingUpperBodySubControllerState predictedState)
+   {
+      if (upperBodyMoIProjectedOntoLungeAxis == 0.0 )
+      {
+         setTotalUpperBodyMomentOfInertiaProjectedAlongLungeAxis();
+      }
+      
+      double tauPitch = computeTorqueAppliedToJointByTotalUpperBodyCoM(spinePitchIDjoint);
+      System.out.println("Tau Pitch: " + tauPitch);
+      
+      double tauRoll = computeTorqueAppliedToJointByTotalUpperBodyCoM(spineRollIDjoint);
+      System.out.println("Tau Roll: " + tauRoll);
+      
+      double predictedChestAngularDecel = desiredSpineLungingTorqueMagnitudes.get(predictedState) / upperBodyMoIProjectedOntoLungeAxis;
+      
       return predictedChestAngularDecel;
    }
    
-   private double predictedTimeToStopChestDuring(BalancingUpperBodySubControllerState state)
+   private double computeTorqueAppliedToJointByTotalUpperBodyCoM(InverseDynamicsJoint jointName)
    {
-      //Compute the elapsed time required to bring the chest rotation to zero, if we start to decelerate NOW.
-      //Assume that chest undergoes a constant angular acceleration = maxHipTorque / projectedMomentOfInertia <- this is computed in updateAngularVelocityAndAcceleration
-      double predictedTimeToStopChest = chestAngularVelocity.getDoubleValue() / predictedChestAccelerationDuring(state);
+      ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+      
+      FrameVector forceVectorDueToGravity = new FrameVector(worldFrame, 0.0, 0.0, gravity * upperBodyMoI.getMass());
+      FrameVector vectorFromJointOriginToUpperBodyCoM = new FrameVector(worldFrame);
+      
+      FramePoint jointOrigin = new FramePoint(jointName.getFrameBeforeJoint());
+      jointOrigin.changeFrame(worldFrame);
+      
+      FramePoint upperBodyCoM = upperBodyMoI.getCenterOfMassOffset();
+      upperBodyCoM.changeFrame(worldFrame);
+      vectorFromJointOriginToUpperBodyCoM.sub(upperBodyCoM, jointOrigin);
+      
+      FrameVector torqueVectorDueToGravity = new FrameVector(worldFrame);
+      torqueVectorDueToGravity.cross(vectorFromJointOriginToUpperBodyCoM, forceVectorDueToGravity);
+      
+      double torqueAppliedToJoint = torqueVectorDueToGravity.dot(getIDRevoluteJointAxis(jointName, worldFrame));
 
-      if (predictedTimeToStopChest <= 0.0 ) throw new RuntimeException("predictedTimeToStopChest must be greater than 0!");
+      return torqueAppliedToJoint;
+   }
+
+   private FrameVector getIDRevoluteJointAxis(InverseDynamicsJoint jointName, ReferenceFrame expressedInFrame)
+   {
+      Twist twistToPack = new Twist(); 
+      jointName.packJointTwist(twistToPack);
+      Vector3d axis = twistToPack.getAngularPartCopy();
+      axis.normalize();
+      FrameVector jointAxis = new FrameVector(jointName.getFrameAfterJoint(), axis); //shouldn't matter whether using getFrameBeforeJoint() or getFrameAfterJoint()
+      jointAxis.changeFrame(expressedInFrame);
+      return jointAxis;
+   }
+
+   private double predictedTimeToStopChestDuring(BalancingUpperBodySubControllerState predictedState)
+   {
+      double predictedTimeToStopChest = Math.abs(chestAngularVelocityMagnitude.getDoubleValue() / predictedChestAccelerationDuring(predictedState));
+
+      predictedTimeToDecelerateChest.set(predictedTimeToStopChest);
       return predictedTimeToStopChest;
    }
-   
+      
    private double predictedDistanceToStopChestDuring(BalancingUpperBodySubControllerState state)
    {
       double deltaT = predictedTimeToStopChestDuring(state);
-      double stopDistance = chestAngularVelocity.getDoubleValue() * deltaT - 0.5 * predictedChestAccelerationDuring(state) * deltaT * deltaT;
+      double predictedStopDistance = chestAngularVelocityMagnitude.getDoubleValue() * deltaT - 0.5 * predictedChestAccelerationDuring(state) * deltaT * deltaT;
       
-      return stopDistance;
+      return predictedStopDistance;
+   }
+   
+   private FramePoint2d cmpDueToDesiredCOPandDesiredHipTorque(BalancingUpperBodySubControllerState stateToReferenceForDesireds, ReferenceFrame referenceFrame)
+   {
+      Vector3d desiredSpineTorque = desiredLungingTorqueDuring(stateToReferenceForDesireds, referenceFrame).getVectorCopy();
+      
+      //TODO: Should just express everything in FrameVectors to begin with
+      FramePoint2d deltaCMPDueToSpineTorque = 
+         new FramePoint2d(referenceFrame, deltaCMPDueToSpineTorque(desiredSpineTorque).getX(), deltaCMPDueToSpineTorque(desiredSpineTorque).getY()); 
+
+      FramePoint2d predictedCMP = desiredCoPduring(stateToReferenceForDesireds, referenceFrame);
+      predictedCMP.add(deltaCMPDueToSpineTorque);
+      
+      predictedCMP.scale(predictedCMPscaling.getDoubleValue());  //Tune the desired overshoot for which to transition to chest deceleration
+      return predictedCMP;
    }
    
    private FramePoint2d predictedICPWhenChestStopsIfWeSlowDownNow(FramePoint2d icpCurrent, FramePoint2d cmpDuringChestDecelerate, double elapsedTimeToStop)
@@ -750,7 +1102,7 @@ public class BalancingUpperBodySubController implements UpperBodySubController
       return deltaCMP;
    }
    
-   private Vector3d SpineTorqueForDesiredDeltaCMP (Vector2d deltaCMP, ReferenceFrame referenceFrame)
+   private Vector3d computeSpineTorqueForDesiredDeltaCMP (Vector2d deltaCMP, ReferenceFrame referenceFrame)
    {
       double mass = this.robotMass;
       double gravity = this.gravity;
@@ -761,13 +1113,11 @@ public class BalancingUpperBodySubController implements UpperBodySubController
       return netSpineTorque;
    }
 
-   private class HasBodyAngularVelocityCrossedZeroCondition implements StateTransitionCondition
+   private class HasChestAngularVelocityCrossedZeroCondition implements StateTransitionCondition
    {
-      private final double epsilon;
 
-      public HasBodyAngularVelocityCrossedZeroCondition(double epsilon)
+      public HasChestAngularVelocityCrossedZeroCondition()
       {
-         this.epsilon = epsilon;
       }
 
       public boolean checkCondition()
@@ -776,13 +1126,54 @@ public class BalancingUpperBodySubController implements UpperBodySubController
          FrameVector2d spineXYAngularVelocity = new FrameVector2d(lungeAxisExpressedInFrame);
          spineXYAngularVelocity.set(processedSensors.getSpineJointVelocity(SpineJointName.SPINE_ROLL), processedSensors.getSpineJointVelocity(SpineJointName.SPINE_PITCH));
          
-         double angularVelocityProjectedAlongLungeAxis = Math.abs(spineXYAngularVelocity.dot(couplingRegistry.getLungeAxisInFrame(lungeAxisExpressedInFrame)));
+         double angularVelocityProjectedAlongLungeAxis = spineXYAngularVelocity.dot(couplingRegistry.getLungeAxisInFrame(lungeAxisExpressedInFrame));
          
 //         System.out.println("Projected Spine Angular Velocity: " + angularVelocityProjectedAlongLungeAxis);
          
-         boolean ret = angularVelocityProjectedAlongLungeAxis < epsilon &&  currentStateElapsedTime() > minimumElapsedTimeInState.get((BalancingUpperBodySubControllerState) stateMachine.getCurrentStateEnum());
+         boolean ret = angularVelocityProjectedAlongLungeAxis > 0.0 &&  isElapsedTimeInCurrentStateAboveMinimumThreshold();
          return ret;
       }
+   }
+   
+   /**
+    * Arm angular velocity projected onto the lunge axis unit vector should be near zero magnitude
+    * @return
+    */
+   private class HasArmAngularVelocityCrossedZeroCondition implements StateTransitionCondition
+   {
+      
+      public HasArmAngularVelocityCrossedZeroCondition()
+      {
+      }
+      
+      public boolean checkCondition()
+      {
+         BalancingUpperBodySubControllerState currentState = (BalancingUpperBodySubControllerState) stateMachine.getCurrentStateEnum();
+         double pitchAngularVelocity = 0.0;
+         for (RobotSide robotSide : RobotSide.values())
+         {
+            pitchAngularVelocity =+ processedSensors.getArmJointVelocity(robotSide, ArmJointName.SHOULDER_PITCH);
+         }
+         
+         double LungeAxisPitchComponent = couplingRegistry.getLungeAxisInFrame(ReferenceFrame.getWorldFrame()).getY();
+         
+         boolean ret;
+         
+         if (desiredArmLungingTorqueScaling.get(currentState) < 0.0)
+         {
+            ret = true; // Return true if shoulder torque is in fact increasing the shoulder velocity, (for the case when arm joints swing in opposite direction of hip joint)
+         }
+         else
+         {
+            ret = pitchAngularVelocity > LungeAxisPitchComponent;
+         }
+         if (ret)
+         {
+            System.out.println("Arm Angular Velocity Zero");
+         }
+         
+         return ret && isElapsedTimeInCurrentStateAboveMinimumThreshold(); 
+      }  
    }
    
    private class DoWeNeedToDecelerateAgainCondition implements StateTransitionCondition
@@ -790,7 +1181,7 @@ public class BalancingUpperBodySubController implements UpperBodySubController
       public boolean checkCondition()
       {
          //TODO: This only works about the pitch axis!
-         return processedSensors.getSpineJointPosition(SpineJointName.SPINE_PITCH) - predictedDistanceToStopChestDuring(BalancingUpperBodySubControllerState.ORIENT_REC_ACC) <= 0.0
+         return processedSensors.getSpineJointPosition(SpineJointName.SPINE_PITCH) - predictedDistanceToStopChestDuring(BalancingUpperBodySubControllerState.OR_REC_ACC) <= 0.0
          && currentStateElapsedTime() > minimumElapsedTimeInState.get((BalancingUpperBodySubControllerState) stateMachine.getCurrentStateEnum());
       }
    }
@@ -799,16 +1190,16 @@ public class BalancingUpperBodySubController implements UpperBodySubController
    {
       public boolean checkCondition()
       {
-         return chestAngle.getDoubleValue() < 1e-1;
+         return chestAngle.getDoubleValue() < 1e-1 && isElapsedTimeInCurrentStateAboveMinimumThreshold();
       }
    }
 
+  
+   
    public boolean isCapturePointInsideSupportPolygon()
    {
       FrameConvexPolygon2d supportPolygon = couplingRegistry.getBipedSupportPolygons().getSupportPolygonInMidFeetZUp();
       FramePoint2d capturePoint = couplingRegistry.getCapturePointInFrame(supportPolygon.getReferenceFrame()).toFramePoint2d();
-
-      capturePoint.scale(startLungingICPScaling.getDoubleValue());
       
       return supportPolygon.isPointInside(capturePoint);
    }
@@ -852,67 +1243,162 @@ public class BalancingUpperBodySubController implements UpperBodySubController
    {
       DynamicGraphicVector lungeAxisVisual = new DynamicGraphicVector("lungeAxisVisual", centerOfMassPosition, lungeAxisGraphic, 1.0, YoAppearance.DarkRed());
       dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(name, lungeAxisVisual);
-      
-      DynamicGraphicPosition icpPredictedVisual = new DynamicGraphicPosition("icpPredictedVisual", predictedICPAtTimeToStopVisualizer, 0.05, YoAppearance.Purple());
-      dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(name, icpPredictedVisual);
    
-      DynamicGraphicPosition midFeetPoint = new DynamicGraphicPosition("midFeetPoint", this.desiredICPVisualizer, 0.05, YoAppearance.Blue());
-      dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(name, midFeetPoint);
+      DynamicGraphicPosition icpDesiredVisual = new DynamicGraphicPosition("icpDesiredVisual", icpDesiredLunging, 0.05, YoAppearance.Yellow());
+      dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(name, icpDesiredVisual);
+      
+      DynamicGraphicPosition icpActualVisual = new DynamicGraphicPosition("icpActualVisual", icpActual, 0.05, YoAppearance.Blue());
+      dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(name, icpActualVisual);
+      
+      DynamicGraphicPosition icpPredictedVisual = new DynamicGraphicPosition("icpPredictedVisual", predictedICPAtChestStop, 0.05, YoAppearance.Purple());
+      dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(name, icpPredictedVisual);
+      
+      DynamicGraphicPosition lungeAxisPerpIntersectionWithBoSVisual = new DynamicGraphicPosition("lungeAxisPerpIntersectionWithBoSVisual", lungeAxisPerpIntersectionWithBoS, 0.02, YoAppearance.Pink());
+      dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(name, lungeAxisPerpIntersectionWithBoSVisual);
    
    }
-
-
-   private void wrenchTest()
-      {
-   //      Wrench upperBodyWrench = new Wrench();
-   //      spineControlModule.getWrenchByUpperBody(upperBodyWrench);
-   //      upperBodyWrench.scale(-1.0);
-   //      couplingRegistry.setUpperBodyWrench(upperBodyWrench);
-   //      
-   //      storeWrenchCopyAsYoVariable(upperBodyWrench);
-   //      
-   ////      Wrench upperBodyWrench = couplingRegistry.getUpperBodyWrench();
-   //      if (upperBodyWrench != null)
-   //      {
-   //         System.out.println(upperBodyWrench.toString());   
-   //      }
-      }
 
 
    private void updateVariables()
    {
       chestAngle.set(getChestAngleToWorld());
       
-      // TODO check if this is okay.
       FrameVector chestAngularVelocityVector = processedSensors.getChestAngularVelocityInChestFrame();
       chestAngularVelocityVector.changeFrame(ReferenceFrame.getWorldFrame());
-      chestAngularVelocity.set(chestAngularVelocityVector.length());
+      chestAngularVelocityMagnitude.set(chestAngularVelocityVector.length());
+      
+      FramePoint2d icpDesiredFromCouplingRegistry = couplingRegistry.getDesiredCapturePointInFrame(ReferenceFrame.getWorldFrame());
+      setIcpDesired(icpDesiredFromCouplingRegistry.getX(), icpDesiredFromCouplingRegistry.getY());
+      
+      FramePoint icpActualFromCouplingRegistry = couplingRegistry.getCapturePointInFrame(ReferenceFrame.getWorldFrame());
+      icpActual.set(icpActualFromCouplingRegistry.getX(), icpActualFromCouplingRegistry.getY());    
    }
 
 
    private void updateDynamicsGraphicObjects()
    {
       centerOfMassPosition.set(processedSensors.getCenterOfMassPositionInFrame(ReferenceFrame.getWorldFrame()));
+      
+      ReferenceFrame referenceFrame = ReferenceFrame.getWorldFrame();
+      if (couplingRegistry.getLungeAxisInFrame(referenceFrame) != null) lungeAxisPerpIntersectionWithBoS.set(getIntersectionOfLungeAxisNormalWithSupportPolygon(referenceFrame));
+      
    }
 
 
    private void setParameters()
    {
-      maxChestAngle.set(Math.PI);
-      kTimeToSlowSlowDown.set(1.4);
-      // forcing controller into state
-      forceControllerIntoState.set(false);
-      startLungingICPScaling.set(1.0);
+      maxChestAngleMagnitude.set(Math.PI);
+      startLungingICPRadius.set(0.25);
       stopLungingICPRadius.set(0.0);
-      forcedControllerState.set(BalancingUpperBodySubControllerState.ICP_REC_ACC);
+      kTimeToSlowSlowDown.set(1.4);
+      
+
+      forceControllerIntoState.set(false);
+      forcedControllerState.set(BalancingUpperBodySubControllerState.BASE);
+
+
       setLungeAxisInWorldFrame(0.0, 0.0);
-      predictedCMPscaling.set(0.05);
       
+      
+      if (USE_ARMS_FOR_LUNGING)
+      {
+//         setShoulderLungingParameters0();
+         setShoulderLungingParameters1();  // positive arm torque
+//         setShoulderLungingParameters2();
+//         setShoulderLungingParameters3();  // negative arm torque
+      
+      }
+      else
+      {
+         predictedCMPscaling.set(0.05);
+         
+         desiredSpineLungingTorqueMagnitudes.put(BalancingUpperBodySubControllerState.BASE, 0.0);
+         desiredSpineLungingTorqueMagnitudes.put(BalancingUpperBodySubControllerState.ICP_REC_ACC, 1.0*maxHipTorque.getDoubleValue());
+         desiredSpineLungingTorqueMagnitudes.put(BalancingUpperBodySubControllerState.ICP_REC_DEC, -1.5*maxHipTorque.getDoubleValue());
+         desiredSpineLungingTorqueMagnitudes.put(BalancingUpperBodySubControllerState.OR_REC_ACC, -0.8*maxHipTorque.getDoubleValue());
+         desiredSpineLungingTorqueMagnitudes.put(BalancingUpperBodySubControllerState.OR_REC_DEC, 0.85*maxHipTorque.getDoubleValue());
+      }
+      
+      // Use default values for now
       icpDesiredLunging.set(new FramePoint2d(referenceFrames.getMidFeetZUpFrame()).changeFrameCopy(ReferenceFrame.getWorldFrame()));
-      desiredICPVisualizer.set(icpDesiredLunging);
-      bosRadiusPerpToLungeAxis.set(0.0);  //TODO: This should be more representative of the actual base of support, which varies depending on single/double support and stance width in double support
+      bosRadiusPerpToLungeAxis.set(0.0);
       
+      // Proportional feedback gain to track desired CMP (used when USE_CMP_CONTROL = true)
       kCMP.set(0.25);
+   }
+      
+   private void setShoulderLungingParameters0()
+   {
+      predictedCMPscaling.set(0.75);
+
+      desiredSpineLungingTorqueMagnitudes.put(BalancingUpperBodySubControllerState.BASE, 0.0);
+      desiredSpineLungingTorqueMagnitudes.put(BalancingUpperBodySubControllerState.ICP_REC_ACC, 1.0*maxHipTorque.getDoubleValue());
+      desiredSpineLungingTorqueMagnitudes.put(BalancingUpperBodySubControllerState.ICP_REC_DEC, -1.5*maxHipTorque.getDoubleValue());
+      desiredSpineLungingTorqueMagnitudes.put(BalancingUpperBodySubControllerState.ICP_REC_DEC2, -1.5*maxHipTorque.getDoubleValue());
+      desiredSpineLungingTorqueMagnitudes.put(BalancingUpperBodySubControllerState.OR_REC_ACC, -0.5*maxHipTorque.getDoubleValue());
+      desiredSpineLungingTorqueMagnitudes.put(BalancingUpperBodySubControllerState.OR_REC_DEC, 0.85*maxHipTorque.getDoubleValue());
+
+      //////////////////////    LUNGE WITH SHOULDER TORQUE   /////////////////////////////////////////////
+      desiredArmLungingTorqueScaling.put(BalancingUpperBodySubControllerState.BASE, 0.0);  //Not Used
+      desiredArmLungingTorqueScaling.put(BalancingUpperBodySubControllerState.ICP_REC_ACC, 0.5);  //[0.5] or [0.2]
+      desiredArmLungingTorqueScaling.put(BalancingUpperBodySubControllerState.ICP_REC_DEC, 0.1); //[-0.1]
+      desiredArmLungingTorqueScaling.put(BalancingUpperBodySubControllerState.ICP_REC_DEC2, desiredArmLungingTorqueScaling.get(BalancingUpperBodySubControllerState.ICP_REC_DEC)); //[0.1]
+   }
+      
+   private void setShoulderLungingParameters1()
+   //Positive hip and shoulder torque   
+   {
+      predictedCMPscaling.set(1.00);
+      
+      desiredSpineLungingTorqueMagnitudes.put(BalancingUpperBodySubControllerState.BASE, 0.0);
+      desiredSpineLungingTorqueMagnitudes.put(BalancingUpperBodySubControllerState.ICP_REC_ACC, 1.0*maxHipTorque.getDoubleValue());
+      desiredSpineLungingTorqueMagnitudes.put(BalancingUpperBodySubControllerState.ICP_REC_DEC, -1.5*maxHipTorque.getDoubleValue());
+      desiredSpineLungingTorqueMagnitudes.put(BalancingUpperBodySubControllerState.ICP_REC_DEC2, -1.5*maxHipTorque.getDoubleValue());
+      desiredSpineLungingTorqueMagnitudes.put(BalancingUpperBodySubControllerState.OR_REC_ACC, -0.5*maxHipTorque.getDoubleValue());
+      desiredSpineLungingTorqueMagnitudes.put(BalancingUpperBodySubControllerState.OR_REC_DEC, 0.85*maxHipTorque.getDoubleValue());
+
+      //////////////////////    LUNGE WITH SHOULDER TORQUE   /////////////////////////////////////////////
+      desiredArmLungingTorqueScaling.put(BalancingUpperBodySubControllerState.BASE, 0.0);  //Not Used
+      desiredArmLungingTorqueScaling.put(BalancingUpperBodySubControllerState.ICP_REC_ACC, 1.35);  //[0.5] or [0.2]
+      desiredArmLungingTorqueScaling.put(BalancingUpperBodySubControllerState.ICP_REC_DEC, 0.25*0.1); //[-0.1]
+      desiredArmLungingTorqueScaling.put(BalancingUpperBodySubControllerState.ICP_REC_DEC2, desiredArmLungingTorqueScaling.get(BalancingUpperBodySubControllerState.ICP_REC_DEC)); //[0.1]
+   }
+   
+   private void setShoulderLungingParameters2()
+   //Positive hip torque negative shoulder torque
+   {
+      predictedCMPscaling.set(1.00);
+      
+      desiredSpineLungingTorqueMagnitudes.put(BalancingUpperBodySubControllerState.BASE, 0.0);
+      desiredSpineLungingTorqueMagnitudes.put(BalancingUpperBodySubControllerState.ICP_REC_ACC, 1.0*maxHipTorque.getDoubleValue());
+      desiredSpineLungingTorqueMagnitudes.put(BalancingUpperBodySubControllerState.ICP_REC_DEC, -1.5*maxHipTorque.getDoubleValue());
+      desiredSpineLungingTorqueMagnitudes.put(BalancingUpperBodySubControllerState.ICP_REC_DEC2, -1.5*maxHipTorque.getDoubleValue());
+      desiredSpineLungingTorqueMagnitudes.put(BalancingUpperBodySubControllerState.OR_REC_ACC, -0.5*maxHipTorque.getDoubleValue());
+      desiredSpineLungingTorqueMagnitudes.put(BalancingUpperBodySubControllerState.OR_REC_DEC, 0.85*maxHipTorque.getDoubleValue());
+
+      //////////////////////    LUNGE WITH SHOULDER TORQUE   /////////////////////////////////////////////
+      desiredArmLungingTorqueScaling.put(BalancingUpperBodySubControllerState.BASE, 0.0);  //Not Used
+      desiredArmLungingTorqueScaling.put(BalancingUpperBodySubControllerState.ICP_REC_ACC, 1.35);
+      desiredArmLungingTorqueScaling.put(BalancingUpperBodySubControllerState.ICP_REC_DEC, 0.1); 
+      desiredArmLungingTorqueScaling.put(BalancingUpperBodySubControllerState.ICP_REC_DEC2, desiredArmLungingTorqueScaling.get(BalancingUpperBodySubControllerState.ICP_REC_DEC)); //[0.1]
+   }
+   
+   private void setShoulderLungingParameters3()
+   {
+      predictedCMPscaling.set(0.05);
+
+      desiredSpineLungingTorqueMagnitudes.put(BalancingUpperBodySubControllerState.BASE, 0.0);
+      desiredSpineLungingTorqueMagnitudes.put(BalancingUpperBodySubControllerState.ICP_REC_ACC, 1.0*maxHipTorque.getDoubleValue());
+      desiredSpineLungingTorqueMagnitudes.put(BalancingUpperBodySubControllerState.ICP_REC_DEC, -1.5*maxHipTorque.getDoubleValue());
+      desiredSpineLungingTorqueMagnitudes.put(BalancingUpperBodySubControllerState.ICP_REC_DEC2, -1.5*maxHipTorque.getDoubleValue());
+      desiredSpineLungingTorqueMagnitudes.put(BalancingUpperBodySubControllerState.OR_REC_ACC, -0.5*maxHipTorque.getDoubleValue());
+      desiredSpineLungingTorqueMagnitudes.put(BalancingUpperBodySubControllerState.OR_REC_DEC, 0.85*maxHipTorque.getDoubleValue());
+
+      //////////////////////    LUNGE WITH SHOULDER TORQUE   /////////////////////////////////////////////
+      desiredArmLungingTorqueScaling.put(BalancingUpperBodySubControllerState.BASE, 0.0);  //Not Used
+      desiredArmLungingTorqueScaling.put(BalancingUpperBodySubControllerState.ICP_REC_ACC, -0.1);
+      desiredArmLungingTorqueScaling.put(BalancingUpperBodySubControllerState.ICP_REC_DEC, -0.1);
+      desiredArmLungingTorqueScaling.put(BalancingUpperBodySubControllerState.ICP_REC_DEC2, desiredArmLungingTorqueScaling.get(BalancingUpperBodySubControllerState.ICP_REC_DEC)); //[0.1]
    }
 
 
@@ -927,17 +1413,10 @@ public class BalancingUpperBodySubController implements UpperBodySubController
       neckControllers.get(NeckJointName.UPPER_NECK_PITCH).setDerivativeGain(5.0);
    }
 
-   private void setWrenchOnChestToZero(Wrench wrench)
-   {
-      Vector3d zeroVector = new Vector3d();
-      wrench.setAngularPart(zeroVector);
-      wrench.setLinearPart(zeroVector);
-   }
 
-   private void setIcpDesiredLunging(double newX, double newY)  //TODO: THIS SHOULD BE SET AS THE CENTER OF THE BOS WHEN NOT WALKING
+   private void setIcpDesired(double newX, double newY)
    {
       icpDesiredLunging.set(newX, newY);
-      desiredICPVisualizer.set(icpDesiredLunging);
    }
 
    public abstract class NoTransitionActionsState extends State
@@ -966,7 +1445,7 @@ public class BalancingUpperBodySubController implements UpperBodySubController
       return icpDirection;
    }
    
- private double getChestAngleToWorld()
+   private double getChestAngleToWorld()
    {
       Quat4d chestToWorld = processedSensors.getChestOrientationInFrame(ReferenceFrame.getWorldFrame()).getQuaternion();
       AxisAngle4d chestToWorldAxisAngle = new AxisAngle4d();
@@ -977,62 +1456,30 @@ public class BalancingUpperBodySubController implements UpperBodySubController
    }
 
 
-   /**
-    * The initial ICP direction is set in the DoTransitionIntoAction() method of the IcpRecoverAccelerateState
-    * @param IcpDirectionToPack
-    */
-   private FramePoint2d getInitialIcpDirection(ReferenceFrame expressedInFrame)
+   private FramePoint2d getLungeAxisPerpUnitVector(ReferenceFrame expressedInFrame)
    {
       FrameVector2d lungeAxis = couplingRegistry.getLungeAxisInFrame(ReferenceFrame.getWorldFrame());
-      FramePoint2d icpDirection = new FramePoint2d(lungeAxis.getReferenceFrame(), lungeAxis.getY(), -lungeAxis.getX());  // Lunge axis and ICP direction are just orthogonal in the x-y plane
-      icpDirection.changeFrame(expressedInFrame);
-      return icpDirection;
+      FramePoint2d lungeAxisPerp = new FramePoint2d(lungeAxis.getReferenceFrame(), lungeAxis.getY(), -lungeAxis.getX());  // Lunge axis and ICP direction are just orthogonal in the x-y plane
+      lungeAxisPerp.changeFrame(expressedInFrame);
+      return lungeAxisPerp;
    }
 
 
-/**
- * The desired *constant* spine torque to apply during the corresponding BalancingUpperBodySubControllerState, based on the current lungeAxis and maxHipTorque.
- * This method may be used in order to predict future IcP locations, and should therefore also be referenced by the actual state, in order to ensure consistency.
- * @param wrenchAngularPartToPack
- */
-   private Vector3d desiredLungingTorqueDuring(BalancingUpperBodySubControllerState state)
+   private FrameVector desiredLungingTorqueDuring(BalancingUpperBodySubControllerState state, ReferenceFrame referenceFrame)
    {
-      Vector3d lungingTorque  = new Vector3d();  //TODO: In which frame is torque expressed?
-      FrameVector2d lungeAxis = couplingRegistry.getLungeAxisInFrame(ReferenceFrame.getWorldFrame());
-      lungingTorque.set(lungeAxis.getX(), lungeAxis.getY(), 0.0);
-      switch (state)
+      FrameVector lungingTorque  = new FrameVector(referenceFrame);
+      FrameVector2d lungeAxis = couplingRegistry.getLungeAxisInFrame(referenceFrame);
+      if (lungeAxis != null)
       {
-      case BASE:
-         lungingTorque.scale(0.0);
-         break;
-      case ICP_REC_ACC:
-         lungingTorque.scale(1.0*maxHipTorque.getDoubleValue());
-         break;
-      case ICP_REC_DEC:
-         lungingTorque.scale(-1.5*maxHipTorque.getDoubleValue());
-         break;
-      case ORIENT_REC_ACC:
-//         FramePoint2d desiredCoP = desiredCoPduring(BalancingUpperBodySubControllerState.ORIENT_REC_ACC, referenceFrames.getMidFeetZUpFrame());
-//         SpineTorqueForDesiredDeltaCMP(desiredCoP, referenceFrames.getMidFeetZUpFrame());
-//         lungingTorque.scale();
-         
-         lungingTorque.scale(-0.8*maxHipTorque.getDoubleValue());
-         break;
-      case ORIENT_REC_DEC:
-         lungingTorque.scale(0.85*maxHipTorque.getDoubleValue());
-
-      default:
-         break;
+         lungingTorque.set(lungeAxis.getX(), lungeAxis.getY(), 0.0);
       }
+
+      lungingTorque.scale( desiredSpineLungingTorqueMagnitudes.get(state) );
 
       return lungingTorque;
    }
    
    
-   /**
-    * The desired *constant* CoP location during each BalancingUpperBodySubControllerState.
-    * This method may be used in order to predict future IcP locations, and should therefore also be referenced by the actual state, in order to ensure consistency.
-    */
    private FramePoint2d desiredCoPduring(BalancingUpperBodySubControllerState state, ReferenceFrame referenceFrame)
    {
       FramePoint2d desiredCoP = new FramePoint2d(referenceFrame);
@@ -1054,10 +1501,10 @@ public class BalancingUpperBodySubController implements UpperBodySubController
       case ICP_REC_DEC:
          desiredCoP.set(vectorFromMidFeetToCoP);
          break;
-      case ORIENT_REC_ACC:
-         desiredCoP.set(vectorFromMidFeetToCoP);
+      case OR_REC_ACC:
+          desiredCoP.set(getIntersectionOfLungeAxisNormalWithSupportPolygon(referenceFrame));
          break;
-      case ORIENT_REC_DEC:
+      case OR_REC_DEC:
          desiredCoP.set(vectorFromMidFeetToCoP);
 
       default:
@@ -1067,6 +1514,53 @@ public class BalancingUpperBodySubController implements UpperBodySubController
       return desiredCoP;
    }
    
+   private void setArmTorquesDirectlyForLunging(UpperBodyTorques upperBodyTorquesToPack)
+   {
+      BalancingUpperBodySubControllerState currentState = (BalancingUpperBodySubControllerState) stateMachine.getCurrentStateEnum();
+      
+      armControlModule.doArmControl(upperBodyTorquesToPack.getArmTorques());
+      ArmTorques[] armTorques = upperBodyTorquesToPack.getArmTorques();
+      
+      if (stateMachine.isCurrentState(BalancingUpperBodySubControllerState.BASE))
+      {
+         for (RobotSide robotSide : RobotSide.values())
+         {
+            for (ArmJointName armJointName : ArmJointName.values())
+            {
+               // Scale PD torques in order to minimize arm acceleration when returning back to base state
+               armTorques[robotSide.ordinal()].setTorque(armJointName, 0.5*armTorques[robotSide.ordinal()].getTorque(armJointName));  //[0.2]
+            }
+         }
+      }
+      else
+      {
+         for (RobotSide robotSide : RobotSide.values())
+         {
+            armTorques[robotSide.ordinal()].setTorque(ArmJointName.SHOULDER_PITCH, desiredArmLungingTorqueScaling.get(currentState)*desiredLungingTorqueDuring(currentState,chest.getBodyFixedFrame()).getY());
+         }
+      }
+   }
+   
+   private void setTotalUpperBodyCompositeRigidBodyInertia(CompositeRigidBodyInertia totalCompositeRigidBodyInertia)
+   {
+      upperBodyMoI.set(totalCompositeRigidBodyInertia);
+   }
+   
+   private void checkSpineIDJointNames()
+   {
+      if (!spinePitchIDjoint.getName().equalsIgnoreCase("spinePitch"))
+      {
+         throw new RuntimeException("Name of Inverse dynamics joint, " + spinePitchIDjoint.getName() + ", does not match expected name.");
+      }
+      if (!spineRollIDjoint.getName().equalsIgnoreCase("spineRoll"))
+      {
+         throw new RuntimeException("Name of Inverse dynamics joint, " + spineRollIDjoint.getName() + ", does not match expected name.");
+      }
+      if (!spineYawIDjoint.getName().equalsIgnoreCase("spineYaw"))
+      {
+         throw new RuntimeException("Name of Inverse dynamics joint, " + spineYawIDjoint.getName() + ", does not match expected name.");
+      }
+   }
    
    private void displayWarningsForBooleans()
    {
@@ -1075,5 +1569,6 @@ public class BalancingUpperBodySubController implements UpperBodySubController
          System.out.println("Warning! Controller " + this.name + " is forced to remain in the " + forcedControllerState.toString() + " state!");
       }
    }
+
 
 }
