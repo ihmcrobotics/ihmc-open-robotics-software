@@ -9,6 +9,8 @@ import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.SpineLungingControlModule;
+import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
+import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.SpineJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.SpineTorques;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
@@ -18,6 +20,7 @@ import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.Line2d;
+import us.ihmc.utilities.math.geometry.Orientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.utilities.screwTheory.RevoluteJoint;
@@ -99,9 +102,7 @@ public class SpineJointLungingControlModule implements SpineLungingControlModule
       externalWrench = new Wrench(pelvisFrame, pelvisFrame);
    }
 
-   /**
-    * Old. Do not use.
-    */
+
    public void doSpineControl(SpineTorques spineTorquesToPack)
    {
       for (SpineJointName spineJointName : SpineJointName.values())
@@ -118,6 +119,27 @@ public class SpineJointLungingControlModule implements SpineLungingControlModule
          spineTorques.setTorque(spineJointName, torque);
       }
    }
+   
+   public void doSpineControlUsingIDwithPDfeedback()
+   {
+      spineTorques.setTorquesToZero();
+      
+//      setDesiredAccelerationOnSpineJointsToZero();
+      setDesiredAccelerationOnSpineJointsUsingPDcontrol();
+      
+//      ReferenceFrame pelvisFrame = pelvisRigidBody.getBodyFixedFrame();
+//      Wrench wrenchByLowerBody = new Wrench(pelvisFrame,pelvisFrame, new Vector3d(0.0, 0.0, 0.0), new Vector3d());
+//      spineJointIDCalc.setExternalWrench(pelvisRigidBody, wrenchByLowerBody);
+            
+      spineJointIDCalc.compute();
+      
+      for (SpineJointName spineJointName : SpineJointName.values())
+      {
+//         spineTorquesToPack.setTorque(spineJointName, spineRevoluteJointList.get(spineJointName.ordinal()).getTau());
+         spineTorques.setTorque(spineJointName, spineRevoluteJointList.get(spineJointName.ordinal()).getTau());
+      }
+   }
+   
 
    /**
     * Sets the pitch and roll spine torques corresponding to the desired deltaCMP 
@@ -164,11 +186,9 @@ public class SpineJointLungingControlModule implements SpineLungingControlModule
 
    private void setDesireds()
    {
-      /*
-       * 100610 pdn: I tried setting this to 0.1 immediately and the robot fell
-       * I could start off with it 0.05 and once it got walking, change it to 0.1
-       */
       desiredAngles.get(SpineJointName.SPINE_PITCH).set(0.0);
+      desiredAngles.get(SpineJointName.SPINE_ROLL).set(0.0);
+      desiredAngles.get(SpineJointName.SPINE_YAW).set(0.0);
    }
 
    public void setGains()
@@ -200,29 +220,11 @@ public class SpineJointLungingControlModule implements SpineLungingControlModule
 
    }
    
-   public void doMaintainDesiredChestOrientation()
-   {
-      spineTorques.setTorquesToZero();
-      
-      setDesiredAccelerationOnSpineJoints();
-      
-      spineJointIDCalc.compute();
-      
-      setSpineTorquesFromSpineJoints();
-   }
    
-   public void getWrenchByUpperBody(Wrench upperBodyWrenchToPack)
+   public void scaleGainsToZero()
    {
-      processedSensors.getFullRobotModel().getRootJoint().packWrench(upperBodyWrenchToPack);
-      upperBodyWrenchToPack.changeBodyFrameAttachedToSameBody(referenceFrames.getPelvisFrame());
-      upperBodyWrenchToPack.changeFrame(referenceFrames.getPelvisFrame());
-   }
-   
-   public void setGainsToZero(ArrayList<SpineJointName> spineJointsWithZeroGain)
-   {
-      for (int index = 0; index < spineJointsWithZeroGain.size(); index ++)
+      for (SpineJointName spineJointName : SpineJointName.values())
       {
-         SpineJointName spineJointName = spineJointsWithZeroGain.get(index);
          spineJointIDQddControllers.get(spineJointName).setProportionalGain(0.0);
          spineJointIDQddControllers.get(spineJointName).setDerivativeGain(0.0);
       }
@@ -274,7 +276,8 @@ public class SpineJointLungingControlModule implements SpineLungingControlModule
       spineJointIDQddControllers.get(spineJointName).setDerivativeGain(derivativeGain * scaleFactor);
    }
    
-   private void setDesiredAccelerationOnSpineJoints()
+   
+   private void setDesiredAccelerationOnSpineJointsUsingPDcontrol()
    {
       for (SpineJointName spineJointName : SpineJointName.values())
       {
@@ -291,22 +294,117 @@ public class SpineJointLungingControlModule implements SpineLungingControlModule
          spineRevoluteJoint.setQddDesired(qddDesired);
       }
    }
-
-
-   private void setSpineTorquesFromSpineJoints()
+   
+   private void setDesiredAccelerationOnSpineJointsToZero()
    {
       for (SpineJointName spineJointName : SpineJointName.values())
       {
          RevoluteJoint spineRevoluteJoint = spineRevoluteJointList.get(spineJointName.ordinal());
-         spineTorques.setTorque(spineJointName, spineRevoluteJoint.getTau());   
+         spineRevoluteJoint.setQddDesired(0.0);
       }
    }
 
-   public void setHipXYTorque(Vector3d desiredTorqueVector)
+
+   public void setSpinePitchRollTorque(Vector2d desiredTorqueVector)
    {
-      spineTorques.setTorque(SpineJointName.SPINE_PITCH, desiredTorqueVector.getY());
-      spineTorques.setTorque(SpineJointName.SPINE_ROLL, desiredTorqueVector.getX());
-      spineTorques.setTorque(SpineJointName.SPINE_YAW, desiredTorqueVector.getZ());
+      boolean SUPERIMPOSE_INVERSE_DYNAMICS = false;
+      boolean USE_LUNGING_PERP_FEEDBACK = false;
+      
+//      Set Torque about lunge axis and superimpose PD control projected normal to lunge axis
+      if (SUPERIMPOSE_INVERSE_DYNAMICS)
+      {
+         SpineTorques spineTorqueFromID = new SpineTorques();
+            
+         setDesiredAccelerationOnSpineJointsToZero();         
+         spineJointIDCalc.compute();
+         
+         for (SpineJointName spineJointName : SpineJointName.values())
+         {
+            spineTorqueFromID.setTorque(spineJointName, spineRevoluteJointList.get(spineJointName.ordinal()).getTau());
+         }
+         
+         spineTorques.setTorque(SpineJointName.SPINE_PITCH, spineTorqueFromID.getTorque(SpineJointName.SPINE_PITCH) + desiredTorqueVector.getY());
+         spineTorques.setTorque(SpineJointName.SPINE_ROLL, spineTorqueFromID.getTorque(SpineJointName.SPINE_ROLL) + desiredTorqueVector.getX());
+         spineTorques.setTorque(SpineJointName.SPINE_YAW, spineTorqueFromID.getTorque(SpineJointName.SPINE_YAW) );
+      }
+      else
+      {
+         if (USE_LUNGING_PERP_FEEDBACK)
+         {
+            spineTorques.setTorquesToZero();
+            SpineTorques spineTorquesPDControl = new SpineTorques();
+            computeSpineTorquePDControl(spineTorquesPDControl);
+
+            Vector2d desiredPitchRollUnitVector = new Vector2d();
+            desiredPitchRollUnitVector.set(-desiredTorqueVector.getY(), -desiredTorqueVector.getX());
+            desiredPitchRollUnitVector.normalize();
+            
+            Orientation chestOrientationInPelvisFrame =  processedSensors.getChestOrientationInFrame(referenceFrames.getPelvisFrame());
+            double[] chestYawPitchRoll = chestOrientationInPelvisFrame.getYawPitchRoll();
+            double actualChestPitch = chestYawPitchRoll[1];
+            double actualChestRoll = chestYawPitchRoll[2];
+            
+            double desiredChestPitch = 0.0;
+            double desiredChestRoll = 0.0;
+            
+            //Require that chestPitchRoll vector is aligned with lungeAxisPerpUnitVector
+            if (desiredPitchRollUnitVector.getY() != 0.0 )
+            {
+               double desiredPitchRollOrientationRatio = desiredPitchRollUnitVector.getX() / desiredPitchRollUnitVector.getY();
+               desiredChestPitch = actualChestRoll * desiredPitchRollOrientationRatio;
+            }
+            else
+            {
+               desiredChestPitch = actualChestPitch;
+               desiredChestRoll = 0.0;
+            }
+            
+            if (desiredPitchRollUnitVector.getX() != 0.0 )
+            {
+               double desiredRollPitchOrientationRatio = desiredPitchRollUnitVector.getY() / desiredPitchRollUnitVector.getX();
+               desiredChestRoll = actualChestPitch * desiredRollPitchOrientationRatio;
+            }
+            else
+            {
+               desiredChestPitch = 0.0;
+               desiredChestRoll = actualChestRoll;
+            }
+            
+            double Kp = 100.0;
+            
+            spineTorques.setTorque(SpineJointName.SPINE_PITCH, desiredTorqueVector.getY() + Kp*(actualChestPitch-desiredChestPitch) );
+            spineTorques.setTorque(SpineJointName.SPINE_ROLL, desiredTorqueVector.getX() + Kp*(actualChestRoll-desiredChestRoll) );
+            spineTorques.setTorque(SpineJointName.SPINE_YAW,  spineTorquesPDControl.getTorque(SpineJointName.SPINE_YAW));
+            
+            System.out.println("Pitch Error:" + (actualChestPitch-desiredChestPitch));
+         }
+         else
+         {
+            SpineTorques spineTorquesPDControl = new SpineTorques();
+            computeSpineTorquePDControl(spineTorquesPDControl);
+
+            spineTorques.setTorque(SpineJointName.SPINE_PITCH, desiredTorqueVector.getY());
+            spineTorques.setTorque(SpineJointName.SPINE_ROLL, desiredTorqueVector.getX() );
+            spineTorques.setTorque(SpineJointName.SPINE_YAW,  spineTorquesPDControl.getTorque(SpineJointName.SPINE_YAW));
+         }
+      }
+   }
+   
+   private void computeSpineTorquePDControl(SpineTorques spineTorquesToPack)
+   {
+      for (SpineJointName spineJointName : SpineJointName.values())
+      {
+         PIDController pidController = spineControllers.get(spineJointName);
+         
+         double desiredPosition = desiredAngles.get(spineJointName).getDoubleValue();
+         double desiredVelocity = 0.0;
+
+         double actualPosition = processedSensors.getSpineJointPosition(spineJointName); // actualAngles.get(spineJointName).getDoubleValue();
+         double actualVelocity = processedSensors.getSpineJointVelocity(spineJointName); //actualAngleVelocities.get(spineJointName).getDoubleValue();
+
+         double torqueValue = pidController.compute(actualPosition, desiredPosition, actualVelocity, desiredVelocity, controlDT);
+         spineTorquesToPack.setTorque(spineJointName, torqueValue);
+      }
    }
    
    public void doCMPControl(FramePoint2d desiredCMP, FrameVector2d lungeAxis)
@@ -330,16 +428,16 @@ public class SpineJointLungingControlModule implements SpineLungingControlModule
 //    setting torque      
 //    *********************
       // 100 for x is too big
-      Vector3d extraTorque = new Vector3d( 100.0 * cmpWrenchFeedback.getY(), - 100.0 * cmpWrenchFeedback.getX(), 0.0);
+      Vector2d extraTorque = new Vector2d( 100.0 * cmpWrenchFeedback.getY(), - 100.0 * cmpWrenchFeedback.getX());
 //      Vector3d extraTorque = new Vector3d( - 100.0 * lungeAxis.getY() * cmpWrenchFeedback.getY(), 100.0 * lungeAxis.getX() * cmpWrenchFeedback.getX(), 0.0);
       // adjust extra torque based on lunge axis (now scales with same magnitude along different axes)
       
-      Vector3d lungingTorque  = new Vector3d();
+      Vector2d lungingTorque  = new Vector2d();
       lungeAxis.changeFrame(ReferenceFrame.getWorldFrame());
-      lungingTorque.set(lungeAxis.getX(), lungeAxis.getY(), 0.0);
+      lungingTorque.set(lungeAxis.getX(), lungeAxis.getY());
       lungingTorque.scale( - 150.0);
       lungingTorque.add(extraTorque);
-      this.setHipXYTorque(lungingTorque);
+      this.setSpinePitchRollTorque(lungingTorque);
 //    *********************
       
       
@@ -369,7 +467,7 @@ public class SpineJointLungingControlModule implements SpineLungingControlModule
       wrench.setLinearPart(new Vector3d());
       wrench.setAngularPart(wrenchAngularPart);
       this.setWrench(wrench);
-      this.doMaintainDesiredChestOrientation();
+      this.doSpineControlUsingIDwithPDfeedback();
 
       Vector3d desiredTorque = new Vector3d(wrenchAngularPart);
       desiredTorque.negate();
@@ -391,6 +489,8 @@ public class SpineJointLungingControlModule implements SpineLungingControlModule
       wrenchAngularPart.add( additionalWrenchAngularPart.getFrameVectorCopy().getVector());
       wrench.setAngularPart(wrenchAngularPart);
       this.setWrench(wrench);
-      this.doMaintainDesiredChestOrientation();
+      this.doSpineControlUsingIDwithPDfeedback();
    }
+
+
 }
