@@ -13,19 +13,19 @@ import us.ihmc.utilities.screwTheory.Wrench;
 
 public interface SpineLungingControlModule extends SpineControlModule
 {
-   public abstract void doMaintainDesiredChestOrientation();
-   
+   public abstract void doSpineControlUsingIDwithPDfeedback();
+      
    public abstract void getSpineTorques(SpineTorques spineTorquesToPack);
-   
+      
    public abstract void setWrench(Wrench wrench);
-   
-   public abstract void setGainsToZero(ArrayList<SpineJointName> spineJointsWithZeroGain);
 
    public abstract void setGains();
    
    public abstract void scaleGainsBasedOnLungeAxis(Vector2d lungeAxis);
+   
+   public abstract void scaleGainsToZero();
 
-   public abstract void setHipXYTorque(Vector3d desiredLungingTorqeicpRecoverDecelerateState);
+   public abstract void setSpinePitchRollTorque(Vector2d torqueVectorInPelvis);
    
    public abstract void doCMPControl(FramePoint2d desiredCMP, FrameVector2d lungeAxis);
    
