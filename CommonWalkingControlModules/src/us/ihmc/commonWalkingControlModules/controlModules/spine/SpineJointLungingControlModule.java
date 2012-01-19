@@ -124,18 +124,18 @@ public class SpineJointLungingControlModule implements SpineLungingControlModule
    {
       spineTorques.setTorquesToZero();
       
-//      setDesiredAccelerationOnSpineJointsToZero();
-      setDesiredAccelerationOnSpineJointsUsingPDcontrol();
+      setDesiredAccelerationOnSpineJointsToZero();
+//      setDesiredAccelerationOnSpineJointsUsingPDcontrol();
       
 //      ReferenceFrame pelvisFrame = pelvisRigidBody.getBodyFixedFrame();
 //      Wrench wrenchByLowerBody = new Wrench(pelvisFrame,pelvisFrame, new Vector3d(0.0, 0.0, 0.0), new Vector3d());
 //      spineJointIDCalc.setExternalWrench(pelvisRigidBody, wrenchByLowerBody);
+      
             
       spineJointIDCalc.compute();
       
       for (SpineJointName spineJointName : SpineJointName.values())
       {
-//         spineTorquesToPack.setTorque(spineJointName, spineRevoluteJointList.get(spineJointName.ordinal()).getTau());
          spineTorques.setTorque(spineJointName, spineRevoluteJointList.get(spineJointName.ordinal()).getTau());
       }
    }
@@ -151,8 +151,6 @@ public class SpineJointLungingControlModule implements SpineLungingControlModule
       double mass = processedSensors.getTotalMass();
       double gravity = processedSensors.getGravityInWorldFrame().getZ();
 
-//      this.spineTorques.setTorque(SpineJointName.SPINE_PITCH, mass * gravity * deltaCMP.getX());
-//      this.spineTorques.setTorque(SpineJointName.SPINE_ROLL, mass * gravity * - deltaCMP.getY());
       this.spineTorques.setTorque(SpineJointName.SPINE_ROLL, mass * gravity * - deltaCMP.getX());
       this.spineTorques.setTorque(SpineJointName.SPINE_PITCH, mass * gravity * - deltaCMP.getY());
    }
@@ -305,7 +303,7 @@ public class SpineJointLungingControlModule implements SpineLungingControlModule
    }
 
 
-   public void setSpinePitchRollTorque(Vector2d desiredTorqueVector)
+   public void setSpineXYTorque(Vector2d desiredTorqueVector)
    {
       boolean SUPERIMPOSE_INVERSE_DYNAMICS = false;
       boolean USE_LUNGING_PERP_FEEDBACK = false;
@@ -437,7 +435,7 @@ public class SpineJointLungingControlModule implements SpineLungingControlModule
       lungingTorque.set(lungeAxis.getX(), lungeAxis.getY());
       lungingTorque.scale( - 150.0);
       lungingTorque.add(extraTorque);
-      this.setSpinePitchRollTorque(lungingTorque);
+      this.setSpineXYTorque(lungingTorque);
 //    *********************
       
       
