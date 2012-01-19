@@ -2,55 +2,41 @@ package us.ihmc.commonWalkingControlModules.controlModules.upperBody;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
-import java.util.Iterator;
 import java.util.List;
 
+import javax.media.j3d.Transform3D;
 import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Matrix3d;
 import javax.vecmath.Quat4d;
-import javax.vecmath.Tuple4d;
 import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.ArmControlModule;
-import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.ArmReferenceForPDControlModule;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.SpineLungingControlModule;
-import us.ihmc.commonWalkingControlModules.controlModules.arm.ArmsSidewaysArmControlModule;
 import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.UpperBodySubController;
 import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
-import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.ArmJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.ArmTorques;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.NeckJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.NeckTorques;
-import us.ihmc.commonWalkingControlModules.partNamesAndTorques.RobotSpecificJointNames;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.SpineJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.SpineTorques;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.UpperBodyTorques;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.ProcessedSensorsInterface;
 import us.ihmc.robotSide.RobotSide;
-import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.containers.ContainerTools;
-import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
-import us.ihmc.utilities.math.geometry.FrameLine2d;
 import us.ihmc.utilities.math.geometry.FrameLineSegment2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
-import us.ihmc.utilities.math.geometry.Orientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.screwTheory.CenterOfMassAccelerationCalculator;
 import us.ihmc.utilities.screwTheory.CompositeRigidBodyInertia;
-import us.ihmc.utilities.screwTheory.CompositeRigidBodyMassMatrixCalculator;
-import us.ihmc.utilities.screwTheory.CompositeRigidBodyMassMatrixCalculatorTest;
-import us.ihmc.utilities.screwTheory.GeneralizedRigidBodyInertia;
 import us.ihmc.utilities.screwTheory.GeometricJacobian;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
-import us.ihmc.utilities.screwTheory.RevoluteJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
-import us.ihmc.utilities.screwTheory.RigidBodyInertia;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.utilities.screwTheory.Twist;
 import us.ihmc.utilities.screwTheory.Wrench;
@@ -68,7 +54,6 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicVector
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint2d;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector2d;
 import com.yobotics.simulationconstructionset.util.statemachines.State;
 import com.yobotics.simulationconstructionset.util.statemachines.StateMachine;
 import com.yobotics.simulationconstructionset.util.statemachines.StateTransition;
@@ -80,6 +65,7 @@ public class BalancingUpperBodySubController implements UpperBodySubController
    
    private final boolean LATCH_LUNGE_AXIS_TO_PITCH_OR_ROLL = false;
    private final boolean USE_INVERSE_DYNAMICS_FOR_LUNGING = false;
+   private final boolean ADD_SPINE_TORQUE_COMPONENT_ALONG_LUNGE_AXIS_PERP = false;   //Otherwise add spine torque for static equilibrium
    public static final boolean SCALE_PITCH_ROLL_FEEDBACK_GAINS_PROPORTIONAL_TO_LUNGE_AXIS_PITCH_ROLL_COMPONENTS = false;  //Otherwise just set feedback to zero when lunging
    
 
@@ -122,8 +108,11 @@ public class BalancingUpperBodySubController implements UpperBodySubController
 
    
    private Wrench desiredWrenchOnPelvis;
+   private Wrench actualWrenchOnPelvis;
 
-   private final YoFramePoint centerOfMassPosition = new YoFramePoint("comGraphic", "", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint robotCoMPosition = new YoFramePoint("comGraphic", "", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint chestCoMPosition = new YoFramePoint("chestCoMGraphic", "", ReferenceFrame.getWorldFrame(), registry);
+   
    private final YoFrameVector lungeAxisGraphic = new YoFrameVector("lungeAxisGraphic", "", ReferenceFrame.getWorldFrame(), registry);
    
    private final YoFramePoint2d icpDesiredLunging = new YoFramePoint2d("icpDesiredLunging", "", ReferenceFrame.getWorldFrame(), registry);
@@ -131,6 +120,7 @@ public class BalancingUpperBodySubController implements UpperBodySubController
 
    private final YoFramePoint2d desiredCMP = new YoFramePoint2d("desiredCMP", "", ReferenceFrame.getWorldFrame(), registry);
    
+
    private final DoubleYoVariable chestAngle = new DoubleYoVariable("chestAngle", registry);
    private final DoubleYoVariable chestAngularVelocityMagnitude = new DoubleYoVariable("chestAngularVelocity", registry);
    
@@ -236,6 +226,8 @@ public class BalancingUpperBodySubController implements UpperBodySubController
 
       spineControlModule.getSpineTorques(upperBodyTorquesToPack.getSpineTorques());
       
+      setActualWrenchExertedOnPelvis(upperBodyTorquesToPack);
+      
       if (currentStateElapsedTime() < 0.0)  //TODO: This prevents problems when rewinding, but is inefficient.
       {
          timeOfStateStart.put((BalancingUpperBodySubControllerState) stateMachine.getCurrentStateEnum(), processedSensors.getTime());
@@ -289,7 +281,7 @@ public class BalancingUpperBodySubController implements UpperBodySubController
       StateTransitionCondition isICPOutsideLungeRadius = new DoWeNeedToStartLungingCondition();
       StateTransitionCondition doWeNeedToDecelerate = new DoWeNeedToDecelerate();
       StateTransitionCondition isBodyAngularVelocityZero = new HasChestAngularVelocityCrossedZeroCondition();
-      StateTransitionCondition doWeNeedToDecelerateAgain = new DoWeNeedToDecelerateAgainCondition();
+      StateTransitionCondition doWeNeedToDecelerateAgain = new DecelerateNowToStopUpperBodyAtUprightCondition();
       StateTransitionCondition isChestUpright = new isChestFrameAlignedWithGravityCondition();
       
       StateTransition toICPRecoverAccelerate = new StateTransition(icpRecoverAccelerateState.getStateEnum(), isICPOutsideLungeRadius);
@@ -758,8 +750,16 @@ public class BalancingUpperBodySubController implements UpperBodySubController
    {
       Vector2d hipTorque = new Vector2d(desiredWrenchOnPelvis.getAngularPartCopy().getX(), desiredWrenchOnPelvis.getAngularPartCopy().getY());
       hipTorque.negate();
-      hipTorque.add(spineTorqueComponentAlongLungeAxisPerp);
-      spineControlModule.setSpinePitchRollTorque(hipTorque);
+      if( ADD_SPINE_TORQUE_COMPONENT_ALONG_LUNGE_AXIS_PERP )
+      {
+         hipTorque.add(spineTorqueComponentAlongLungeAxisPerp);
+      }
+      else
+      {
+         Vector2d deltaHipTorque = new Vector2d(computeTorqueAppliedToJointByTotalUpperBodyCoM(spineRollIDjoint), computeTorqueAppliedToJointByTotalUpperBodyCoM(spinePitchIDjoint));
+         hipTorque.add(deltaHipTorque);
+      }
+      spineControlModule.setSpineXYTorque(hipTorque);
    }
    
    private void lungeWithSpineUsingID()
@@ -817,8 +817,15 @@ public class BalancingUpperBodySubController implements UpperBodySubController
       public boolean checkCondition()
       {
          BalancingUpperBodySubControllerState currentState = (BalancingUpperBodySubControllerState) stateMachine.getCurrentStateEnum();
-//         boolean doWeNeedToSlowDownBecauseOfAngleLimit = predictedDistanceToStopChestDuring(currentState) < maxChestAngleMagnitude.getDoubleValue();  //TODO: FIX THIS
+         
+         
+         computeAngularDisplacementOfChestAboutLungeAxis();
+//         boolean doWeNeedToSlowDownBecauseOfAngleLimit = predictedDistanceToStopChestDuring(currentState) < ( getAngularDisplacementOfChestAboutLungeAxis() + maxChestAngleMagnitude.getDoubleValue());  //TODO: FIX THIS
          boolean doWeNeedToSlowDownBecauseOfAngleLimit = false;
+         
+         
+         
+         
          boolean willICPEndUpInsideStopLungingRadius = willICPEndUpFarEnoughBack();     
          if (doWeNeedToSlowDownBecauseOfAngleLimit) System.out.println("Transition to slow down due to Angle Limit.");
          if (willICPEndUpInsideStopLungingRadius) System.out.println("Transition to slow down due favorable predicted ICP location after slow down.");
@@ -997,10 +1004,10 @@ public class BalancingUpperBodySubController implements UpperBodySubController
       }
       
       double tauPitch = computeTorqueAppliedToJointByTotalUpperBodyCoM(spinePitchIDjoint);
-      System.out.println("Tau Pitch: " + tauPitch);
+//      System.out.println("Tau Pitch: " + tauPitch);
       
       double tauRoll = computeTorqueAppliedToJointByTotalUpperBodyCoM(spineRollIDjoint);
-      System.out.println("Tau Roll: " + tauRoll);
+//      System.out.println("Tau Roll: " + tauRoll);
       
       double predictedChestAngularDecel = desiredSpineLungingTorqueMagnitudes.get(predictedState) / upperBodyMoIProjectedOntoLungeAxis;
       
@@ -1031,8 +1038,22 @@ public class BalancingUpperBodySubController implements UpperBodySubController
 
    private FrameVector getIDRevoluteJointAxis(InverseDynamicsJoint jointName, ReferenceFrame expressedInFrame)
    {
-      Twist twistToPack = new Twist(); 
-      jointName.packJointTwist(twistToPack);
+//      Twist twistToPack = new Twist(); 
+//      jointName.packJointTwist(twistToPack);
+      
+      Matrix jointVelocity = new Matrix(1, 1);
+      jointVelocity.set(0, 0, 1.0);
+      
+//      jointName.packVelocityMatrix(jointVelocity);
+//      for (int i=0; i<jointVelocity.getRowDimension(); i++)
+//      {
+//         jointVelocity.set(i, 0, Math.abs(jointVelocity.get(i, 0)) );
+//      }
+
+      GeometricJacobian jointJacobian = jointName.getMotionSubspace();
+      Twist twistToPack = jointJacobian.getTwist(jointVelocity);
+      
+      
       Vector3d axis = twistToPack.getAngularPartCopy();
       axis.normalize();
       FrameVector jointAxis = new FrameVector(jointName.getFrameAfterJoint(), axis); //shouldn't matter whether using getFrameBeforeJoint() or getFrameAfterJoint()
@@ -1055,6 +1076,7 @@ public class BalancingUpperBodySubController implements UpperBodySubController
       
       return predictedStopDistance;
    }
+   
    
    private FramePoint2d cmpDueToDesiredCOPandDesiredHipTorque(BalancingUpperBodySubControllerState stateToReferenceForDesireds, ReferenceFrame referenceFrame)
    {
@@ -1135,10 +1157,7 @@ public class BalancingUpperBodySubController implements UpperBodySubController
       }
    }
    
-   /**
-    * Arm angular velocity projected onto the lunge axis unit vector should be near zero magnitude
-    * @return
-    */
+
    private class HasArmAngularVelocityCrossedZeroCondition implements StateTransitionCondition
    {
       
@@ -1176,12 +1195,37 @@ public class BalancingUpperBodySubController implements UpperBodySubController
       }  
    }
    
-   private class DoWeNeedToDecelerateAgainCondition implements StateTransitionCondition
+
+   private double computeAngularDisplacementOfChestAboutLungeAxis()
+   {
+      ReferenceFrame expressedInFrame = ReferenceFrame.getWorldFrame();
+      FrameVector2d lungeAxis = couplingRegistry.getLungeAxisInFrame(expressedInFrame);
+      
+      double scaledAngle = 0.0;
+      if (lungeAxis != null)
+      {
+         Transform3D chestTransformToWorld = chest.getBodyFixedFrame().getTransformToDesiredFrame(expressedInFrame);
+         Quat4d chestToWorldQuat = new Quat4d();
+         chestTransformToWorld.get(chestToWorldQuat);
+         AxisAngle4d chestToWorldAxisAndAngle = new AxisAngle4d();
+         chestToWorldAxisAndAngle.set(chestToWorldQuat);
+         
+         FrameVector2d axis = new FrameVector2d(expressedInFrame, chestToWorldAxisAndAngle.getX(), chestToWorldAxisAndAngle.getY());
+         double angle = chestToWorldAxisAndAngle.angle;
+         
+         scaledAngle = angle * axis.dot(lungeAxis);
+      }
+
+      return scaledAngle;
+   }
+   
+   private class DecelerateNowToStopUpperBodyAtUprightCondition implements StateTransitionCondition
    {
       public boolean checkCondition()
       {
-         //TODO: This only works about the pitch axis!
-         return processedSensors.getSpineJointPosition(SpineJointName.SPINE_PITCH) - predictedDistanceToStopChestDuring(BalancingUpperBodySubControllerState.OR_REC_ACC) <= 0.0
+//         double angularDisplacementAboutLungeAxis = processedSensors.getSpineJointPosition(SpineJointName.SPINE_PITCH);         //TODO: This only works about the pitch axis!
+         double angularDisplacmentAboutLungeAxis = computeAngularDisplacementOfChestAboutLungeAxis();
+         return angularDisplacmentAboutLungeAxis - predictedDistanceToStopChestDuring(BalancingUpperBodySubControllerState.OR_REC_ACC) <= 0.0
          && currentStateElapsedTime() > minimumElapsedTimeInState.get((BalancingUpperBodySubControllerState) stateMachine.getCurrentStateEnum());
       }
    }
@@ -1241,7 +1285,7 @@ public class BalancingUpperBodySubController implements UpperBodySubController
 
    private void populateDynamicsGraphicObjects(DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
-      DynamicGraphicVector lungeAxisVisual = new DynamicGraphicVector("lungeAxisVisual", centerOfMassPosition, lungeAxisGraphic, 1.0, YoAppearance.DarkRed());
+      DynamicGraphicVector lungeAxisVisual = new DynamicGraphicVector("lungeAxisVisual", robotCoMPosition, lungeAxisGraphic, 1.0, YoAppearance.DarkRed());
       dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(name, lungeAxisVisual);
    
       DynamicGraphicPosition icpDesiredVisual = new DynamicGraphicPosition("icpDesiredVisual", icpDesiredLunging, 0.05, YoAppearance.Yellow());
@@ -1256,6 +1300,9 @@ public class BalancingUpperBodySubController implements UpperBodySubController
       DynamicGraphicPosition lungeAxisPerpIntersectionWithBoSVisual = new DynamicGraphicPosition("lungeAxisPerpIntersectionWithBoSVisual", lungeAxisPerpIntersectionWithBoS, 0.02, YoAppearance.Pink());
       dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(name, lungeAxisPerpIntersectionWithBoSVisual);
    
+      DynamicGraphicVector chestAxisAngleVisual = new DynamicGraphicVector("chestAxisVisual", chestCoMPosition, lungeAxisGraphic, 2.0, YoAppearance.DarkRed());
+      dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(name, chestAxisAngleVisual);
+
    }
 
 
@@ -1277,7 +1324,12 @@ public class BalancingUpperBodySubController implements UpperBodySubController
 
    private void updateDynamicsGraphicObjects()
    {
-      centerOfMassPosition.set(processedSensors.getCenterOfMassPositionInFrame(ReferenceFrame.getWorldFrame()));
+      robotCoMPosition.set(processedSensors.getCenterOfMassPositionInFrame(ReferenceFrame.getWorldFrame()));
+      
+      FramePoint chestCoM = chestCoMPosition.getFramePointCopy();
+      this.chest.packCoMOffset(chestCoM);
+      chestCoM.changeFrame(chestCoMPosition.getReferenceFrame());
+      chestCoMPosition.set(chestCoM);
       
       ReferenceFrame referenceFrame = ReferenceFrame.getWorldFrame();
       if (couplingRegistry.getLungeAxisInFrame(referenceFrame) != null) lungeAxisPerpIntersectionWithBoS.set(getIntersectionOfLungeAxisNormalWithSupportPolygon(referenceFrame));
@@ -1293,7 +1345,7 @@ public class BalancingUpperBodySubController implements UpperBodySubController
       kTimeToSlowSlowDown.set(1.4);
       
 
-      forceControllerIntoState.set(false);
+      forceControllerIntoState.set(true);
       forcedControllerState.set(BalancingUpperBodySubControllerState.BASE);
 
 
@@ -1540,6 +1592,56 @@ public class BalancingUpperBodySubController implements UpperBodySubController
          }
       }
    }
+   
+   private void setActualWrenchExertedOnPelvis(UpperBodyTorques upperBodyTorques)
+   {
+      Wrench totalUpperBodyWrench = new Wrench(this.desiredWrenchOnPelvis);  //Angular Part
+      double upperBodyTotalMass = this.upperBodyMoI.getMass();
+//      FramePoint lungeJointOrigin = new FramePoint(spinePitchIDjoint.getFrameBeforeJoint());
+//      double upperBodyCoMoffsetFromSpinePitch = this.upperBodyMoI.getCenterOfMassOffset().distance(lungeJointOrigin);
+      
+      RigidBody elevator = processedSensors.getFullRobotModel().getElevator();
+      ReferenceFrame elevatorFrame = elevator.getBodyFixedFrame();
+      CenterOfMassAccelerationCalculator comAccelerationCalculator = new CenterOfMassAccelerationCalculator(elevator, new SpatialAccelerationVector(elevatorFrame, elevatorFrame, elevatorFrame));
+      
+      FrameVector comAcceleration = new FrameVector(ReferenceFrame.getWorldFrame());
+      comAccelerationCalculator.packCoMAcceleration(comAcceleration);
+
+      comAcceleration.scale(upperBodyTotalMass);
+      comAcceleration.changeFrame(totalUpperBodyWrench.getExpressedInFrame());
+      
+      totalUpperBodyWrench.setLinearPart(comAcceleration.getVectorCopy());
+
+      couplingRegistry.setActualUpperBodyLungingWrench(totalUpperBodyWrench);
+   }
+
+   private FrameVector computeAngularAccelerationAcrossSpineJoints()
+   {
+//      spinePitchIDjoint.packJointAcceleration(totalPelvisAccelRelativeToChest);
+      FrameVector totalAngularAccelerationAcrossJoints = new FrameVector(pelvisFrame);
+      
+      SpatialAccelerationVector spinePitchAccelToPack = new SpatialAccelerationVector();
+      spinePitchIDjoint.packJointAcceleration(spinePitchAccelToPack);
+      FrameVector spinePitchAngularAccel = new FrameVector(spinePitchAccelToPack.getExpressedInFrame(), spinePitchAccelToPack.getAngularPartCopy());
+      spinePitchAngularAccel.changeFrame(pelvisFrame);
+      
+      SpatialAccelerationVector spineYawAccelToPack = new SpatialAccelerationVector();
+      spineYawIDjoint.packJointAcceleration(spineYawAccelToPack);
+      FrameVector spineYawAngularAccel = new FrameVector(spineYawAccelToPack.getExpressedInFrame(), spineYawAccelToPack.getAngularPartCopy()); 
+      spineYawAngularAccel.changeFrame(pelvisFrame);
+      
+      SpatialAccelerationVector spineRollAccelToPack = new SpatialAccelerationVector();
+      spineRollIDjoint.packJointAcceleration(spineRollAccelToPack);
+      FrameVector spineRollAngularAccel = new FrameVector(spineRollAccelToPack.getExpressedInFrame(), spineRollAccelToPack.getAngularPartCopy());
+      spineRollAngularAccel.changeFrame(pelvisFrame);
+      
+      totalAngularAccelerationAcrossJoints.add(spinePitchAngularAccel);
+      totalAngularAccelerationAcrossJoints.add(spineYawAngularAccel);
+      totalAngularAccelerationAcrossJoints.add(spineRollAngularAccel);
+
+      return totalAngularAccelerationAcrossJoints;
+   }
+   
    
    private void setTotalUpperBodyCompositeRigidBodyInertia(CompositeRigidBodyInertia totalCompositeRigidBodyInertia)
    {
