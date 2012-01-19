@@ -25,7 +25,7 @@ public interface SpineLungingControlModule extends SpineControlModule
    
    public abstract void scaleGainsToZero();
 
-   public abstract void setSpinePitchRollTorque(Vector2d torqueVectorInPelvis);
+   public abstract void setSpineXYTorque(Vector2d torqueVectorInPelvis);
    
    public abstract void doCMPControl(FramePoint2d desiredCMP, FrameVector2d lungeAxis);
    
