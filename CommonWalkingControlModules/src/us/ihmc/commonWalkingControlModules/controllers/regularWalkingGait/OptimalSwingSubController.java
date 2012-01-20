@@ -209,7 +209,7 @@ public class OptimalSwingSubController implements SwingSubController
          
       }
       
-      couplingRegistry.getUpperBodyWrench().scale(factor);
+      couplingRegistry.getDesiredUpperBodyWrench().scale(factor);
       
       
       

@@ -140,7 +140,7 @@ public class PDPlusIDSwingLegTorqueControlOnlyModule implements SwingLegTorqueCo
       fullRobotModel.getRootJoint().packWrench(upperBodyWrench);
       upperBodyWrench.changeBodyFrameAttachedToSameBody(referenceFrames.getPelvisFrame());
       upperBodyWrench.changeFrame(referenceFrames.getPelvisFrame());
-      couplingRegistry.setUpperBodyWrench(upperBodyWrench);
+      couplingRegistry.setDesiredUpperBodyWrench(upperBodyWrench);
    }
    
    public void setParametersForR2()

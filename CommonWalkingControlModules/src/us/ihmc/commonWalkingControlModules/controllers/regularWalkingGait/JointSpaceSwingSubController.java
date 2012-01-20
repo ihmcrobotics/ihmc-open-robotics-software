@@ -200,7 +200,7 @@ public class JointSpaceSwingSubController implements SwingSubController
          
       }
       
-      couplingRegistry.getUpperBodyWrench().scale(factor);
+      couplingRegistry.getDesiredUpperBodyWrench().scale(factor);
       
       
       

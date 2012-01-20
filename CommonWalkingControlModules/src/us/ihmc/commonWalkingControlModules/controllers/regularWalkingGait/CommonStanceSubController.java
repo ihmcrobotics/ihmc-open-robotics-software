@@ -397,7 +397,7 @@ public class CommonStanceSubController implements StanceSubController
 
       Orientation desiredPelvisOrientation =
          desiredPelvisOrientationControlModule.getDesiredPelvisOrientationSingleSupport(legTorquesToPackForStanceSide.getRobotSide());
-      Wrench upperBodyWrench = couplingRegistry.getUpperBodyWrench();
+      Wrench upperBodyWrench = couplingRegistry.getDesiredUpperBodyWrench();
       balanceSupportControlModule.doSingleSupportBalance(legTorquesToPackForStanceSide, desiredVelocity, desiredPelvisOrientation, upperBodyWrench, singleSupportCondition, timeInState);
    }
 
