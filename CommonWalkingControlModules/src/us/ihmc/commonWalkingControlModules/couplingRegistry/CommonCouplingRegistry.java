@@ -48,7 +48,9 @@ public class CommonCouplingRegistry implements CouplingRegistry
 
    private CommonWalkingReferenceFrames referenceFrames;
 
-   private Wrench upperBodyWrench;
+   private Wrench desiredUpperBodyWrench;
+ 
+   private Wrench actualUpperBodyWrench;
    
    private YoFrameVector2d lungeAxis = new YoFrameVector2d("lungeAxis", "", ReferenceFrame.getWorldFrame(), registry);
    private YoFramePoint2d desiredCMP = new YoFramePoint2d("desiredCMP", "", ReferenceFrame.getWorldFrame(), registry);
@@ -218,14 +220,24 @@ public class CommonCouplingRegistry implements CouplingRegistry
       return forceHindOnToes.getBooleanValue();
    }
 
-   public void setUpperBodyWrench(Wrench upperBodyWrench)
+   public void setDesiredUpperBodyWrench(Wrench upperBodyWrench)
    {
-      this.upperBodyWrench = upperBodyWrench;
+      this.desiredUpperBodyWrench = upperBodyWrench;
    }
    
-   public Wrench getUpperBodyWrench()
+   public Wrench getDesiredUpperBodyWrench()
    {
-      return upperBodyWrench;
+      return desiredUpperBodyWrench;
+   }
+   
+   public void setActualUpperBodyLungingWrench(Wrench wrenchOnPelvis)
+   {
+      this.actualUpperBodyWrench = wrenchOnPelvis;
+   }
+   
+   public Wrench getActualUpperBodyLungingWrench()
+   {
+      return actualUpperBodyWrench;
    }
 
    public void setDesiredCoP(FramePoint2d desiredCoP)
@@ -282,6 +294,5 @@ public class CommonCouplingRegistry implements CouplingRegistry
    {
       return desiredICP.changeFrameCopy(desiredFrame);
    }
-
 
 }
