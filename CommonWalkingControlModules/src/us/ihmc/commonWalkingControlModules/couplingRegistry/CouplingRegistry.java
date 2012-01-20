@@ -42,8 +42,11 @@ public interface CouplingRegistry
    public abstract void setForceHindOnToes(boolean forceHindOnToes);
    public abstract boolean getForceHindOnToes();
 
-   public abstract void setUpperBodyWrench(Wrench upperBodyWrench);
-   public abstract Wrench getUpperBodyWrench();
+   public abstract void setDesiredUpperBodyWrench(Wrench upperBodyWrench);
+   public abstract Wrench getDesiredUpperBodyWrench();
+   
+   public abstract void setActualUpperBodyLungingWrench(Wrench wrenchOnPelvis);
+   public abstract Wrench getActualUpperBodyLungingWrench();
    
    // TODO: Calculate and set desired CoP in doEveryTick controller
    // The stance sub controller calculates the desired CoP now, and is executed after
@@ -61,6 +64,6 @@ public interface CouplingRegistry
    public abstract void setDesiredCMP(FramePoint2d desiredCMP);
    public abstract FramePoint2d getDesiredCMP();
    
-   public void setDesiredCapturePoint(FramePoint2d desiredCapturePoint);
+   public abstract void setDesiredCapturePoint(FramePoint2d desiredCapturePoint);
    public FramePoint2d getDesiredCapturePointInFrame(ReferenceFrame desiredFrame);
 }
