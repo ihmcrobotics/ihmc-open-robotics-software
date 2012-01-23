@@ -81,7 +81,7 @@ public class AxisAnglePelvisOrientationControlModule implements PelvisOrientatio
 
    public void setupParametersForM2V2()
    {
-      setProportionalGains(500.0, 500.0, 150.0);
+      setProportionalGains(500.0, 250.0, 150.0);
 //      setProportionalGains(250.0, 250.0, 150.0);
 //      setProportionalGains(150.0, 100.0, 100.0); // TODO: test using these lower gains again
       

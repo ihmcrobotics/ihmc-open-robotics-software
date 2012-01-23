@@ -130,7 +130,7 @@ public class JointSpaceTrajectoryGenerator
             viaPointsInWorldFrame[i] = new YoFramePoint("viaPointInWorldFrame", "[" + i + "]", ReferenceFrame.getWorldFrame(), registry);
 
             heightOfViaPoints[i] = new DoubleYoVariable("swingHeight[" + i + "]", registry);
-            heightOfViaPoints[i].set(0.03);
+            heightOfViaPoints[i].set(0.05);
          }
       } else
       {

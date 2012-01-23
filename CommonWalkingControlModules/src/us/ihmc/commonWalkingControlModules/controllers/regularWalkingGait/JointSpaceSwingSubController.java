@@ -165,7 +165,7 @@ public class JointSpaceSwingSubController implements SwingSubController
       compensateGravityForSwingLegTime.set(0.02);
       minimumTerminalSwingDuration.set(0.0);
       maximumTerminalSwingDuration.set(0.05);
-      numberOfViaPointsDuringWalk.set(2);
+      numberOfViaPointsDuringWalk.set(1);
 //      setEstimatedSwingTimeRemaining(swingDuration.getDoubleValue());
    }
    
