@@ -4,6 +4,7 @@ import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.DesiredPelvis
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.ProcessedSensorsInterface;
 import us.ihmc.robotSide.RobotSide;
+import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.Orientation;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
@@ -77,5 +78,10 @@ public class SineWaveDesiredPelvisOrientationControlModule implements DesiredPel
    public void setDesiredPelvisOrientation(Orientation orientation)
    {
       // empty
+   }
+
+   public Orientation getEstimatedOrientationAtEndOfStep(RobotSide robotSide, FramePoint desiredFootLocation)
+   {
+      return new Orientation(referenceFrames.getMidFeetZUpFrame());
    }
 }

@@ -65,5 +65,5 @@ public interface CouplingRegistry
    public abstract FramePoint2d getDesiredCMP();
    
    public abstract void setDesiredCapturePoint(FramePoint2d desiredCapturePoint);
-   public FramePoint2d getDesiredCapturePointInFrame(ReferenceFrame desiredFrame);
+   public abstract FramePoint2d getDesiredCapturePointInFrame(ReferenceFrame desiredFrame);
 }

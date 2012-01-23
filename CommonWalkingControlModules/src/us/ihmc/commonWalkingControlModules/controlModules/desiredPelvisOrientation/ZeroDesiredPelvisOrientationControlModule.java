@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.desiredPelvisOrientat
 
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.DesiredPelvisOrientationControlModule;
 import us.ihmc.robotSide.RobotSide;
+import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.Orientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
@@ -27,5 +28,10 @@ public class ZeroDesiredPelvisOrientationControlModule implements DesiredPelvisO
    public void setDesiredPelvisOrientation(Orientation orientation)
    {
       // empty
+   }
+
+   public Orientation getEstimatedOrientationAtEndOfStep(RobotSide robotSide, FramePoint desiredFootLocation)
+   {
+      return new Orientation(desiredHeadingFrame);
    }
 }
