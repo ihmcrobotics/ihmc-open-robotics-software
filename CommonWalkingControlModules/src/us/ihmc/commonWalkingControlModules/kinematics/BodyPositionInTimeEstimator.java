@@ -1,9 +1,8 @@
 package us.ihmc.commonWalkingControlModules.kinematics;
 
-import javax.vecmath.Vector3d;
-
 import us.ihmc.CapturePointCalculator.LinearInvertedPendulumCapturePointCalculator;
 import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
+import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredHeadingControlModule;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.ProcessedSensorsInterface;
 import us.ihmc.robotSide.RobotSide;
@@ -21,49 +20,46 @@ public class BodyPositionInTimeEstimator
 {
    private final ProcessedSensorsInterface processedSensors;
    private final ReferenceFrame pelvisFrame;
-   private final ReferenceFrame worldFrame;
-   private final ReferenceFrame bodyZUpFrame;
+   private final ReferenceFrame desiredHeadingFrame;
    private final CouplingRegistry couplingRegistry;
    
    private final YoVariableRegistry registry = new YoVariableRegistry("BodyPositionInTimeEstimator");
-   private final DoubleYoVariable wxToYDotCoupling = new DoubleYoVariable("wxToYDotCoupling", registry);
-   private final DoubleYoVariable wyToXDotCoupling = new DoubleYoVariable("wyToXDotCoupling", registry);
-   public BodyPositionInTimeEstimator(ProcessedSensorsInterface processedSensors, CommonWalkingReferenceFrames referenceFrames, CouplingRegistry couplingRegistry, YoVariableRegistry parentRegistry)
+   private final DoubleYoVariable currentCoMHeight = new DoubleYoVariable("currentCoMHeight", registry);
+   
+   public BodyPositionInTimeEstimator(ProcessedSensorsInterface processedSensors, CommonWalkingReferenceFrames referenceFrames,
+         DesiredHeadingControlModule desiredHeadingControlModule,
+         CouplingRegistry couplingRegistry, YoVariableRegistry parentRegistry)
    {
       this.processedSensors = processedSensors;
       this.pelvisFrame = referenceFrames.getPelvisFrame();
-      this.worldFrame = ReferenceFrame.getWorldFrame();
+      this.desiredHeadingFrame = desiredHeadingControlModule.getDesiredHeadingFrame();
       this.couplingRegistry = couplingRegistry;
-      this.bodyZUpFrame = referenceFrames.getABodyAttachedZUpFrame();
+      referenceFrames.getABodyAttachedZUpFrame();
+      
+      referenceFrames.getFootReferenceFrames();
+      referenceFrames.getAnkleZUpReferenceFrames();
       parentRegistry.addChild(registry);
       
-      
-      // TODO: Get rid of this as soon as we have a good body velocity estimation
-      wxToYDotCoupling.set(0.3); //+++JEP 111108: Changed from 0.36 to 0.3, which really reduced the shakies on the real robot.
-      wyToXDotCoupling.set(0.3); 
    }
    
    
-   public Pair<FramePose, FrameVector> getPelvisPoseAndPositionInTime(double t, RobotSide swingFoot)
+   public Pair<FramePose, FrameVector> getPelvisPoseAndVelocityInTime(double t, RobotSide swingFoot)
    {
       FramePoint2d currentCoPPosition = couplingRegistry.getDesiredCoP();
-//      FramePoint2d currentCoPPosition = couplingRegistry.getBipedSupportPolygons().getSweetSpotCopy(swingFoot.getOppositeSide());
-      //FramePoint currentCoPPosition = new FramePoint(referenceFrames.getAnkleZUpFrame(swingFoot));
-      currentCoPPosition.changeFrame(worldFrame);
-      FramePoint currentCoMPosition = processedSensors.getCenterOfMassPositionInFrame(worldFrame);
-      FrameVector currentCoMVelocity = getBodyVelocity();
-//      currentCoMVelocity.setX(0.4);
-//      currentCoMVelocity.setY(0.0);
-//      currentCoMVelocity.setZ(0.0);
-      currentCoMVelocity.changeFrame(worldFrame);
+      currentCoPPosition.changeFrame(desiredHeadingFrame);
+      FramePoint currentCoMPosition = processedSensors.getCenterOfMassPositionInFrame(desiredHeadingFrame);
+      FrameVector currentCoMVelocity = processedSensors.getCenterOfMassVelocityInFrame(desiredHeadingFrame);
+      currentCoMVelocity.changeFrame(desiredHeadingFrame);
       
       FramePoint bodyPosition = new FramePoint(pelvisFrame);
-      bodyPosition.changeFrame(worldFrame);
+      bodyPosition.changeFrame(desiredHeadingFrame);
       
       
       // LIPM Model in time
+      FramePoint currentCoMPositionInStanceFoot = currentCoMPosition.changeFrameCopy(ReferenceFrame.getWorldFrame());
+      double comHeight = currentCoMPositionInStanceFoot.getZ();
+      currentCoMHeight.set(comHeight);
       
-      double comHeight = 0.94;
       double gravity = Math.abs(processedSensors.getGravityInWorldFrame().getZ());
       
       double[] xCoMInTime = LinearInvertedPendulumCapturePointCalculator.calculatePredictedCoMState(
@@ -74,43 +70,19 @@ public class BodyPositionInTimeEstimator
                            gravity, comHeight, 0.0, t);
       
       double xDeltaInTime = xCoMInTime[0] - currentCoMPosition.getX();
-      double yDeltaInTime = yCoMInTime[0] - currentCoMPosition.getY();
-      
       bodyPosition.setX(bodyPosition.getX() + xDeltaInTime);
-      bodyPosition.setY(bodyPosition.getY() + yDeltaInTime);
+      bodyPosition.setY(bodyPosition.getY());
       bodyPosition.changeFrame(pelvisFrame);
-      
       
       FramePose pelvisPoseInTime = new FramePose(pelvisFrame);
       pelvisPoseInTime.setPosition(bodyPosition);
       
       
-      FrameVector pelvisVelocityInTime = new FrameVector(worldFrame, xCoMInTime[1], yCoMInTime[1], 0.0);
+      FrameVector pelvisVelocityInTime = new FrameVector(desiredHeadingFrame, xCoMInTime[1], yCoMInTime[1], 0.0);
       pelvisVelocityInTime.changeFrame(pelvisFrame);
       
       
       return new Pair<FramePose, FrameVector>(pelvisPoseInTime, pelvisVelocityInTime);
       
-   }
-   
-
-   
-   private FrameVector getBodyVelocity()
-   {
-
-         FrameVector pdBodyZUp = processedSensors.getBodyVelocity();
-         pdBodyZUp.changeFrame(bodyZUpFrame);
-         
-
-         Vector3d angularPartCopy = processedSensors.getTwistOfPelvisWithRespectToWorld().getAngularPartCopy();
-         double pd_wy = angularPartCopy.getY();
-         double pd_wx = angularPartCopy.getX();
-         
-         pdBodyZUp.setX(pdBodyZUp.getX() - wyToXDotCoupling.getDoubleValue() * pd_wy);
-         pdBodyZUp.setY(pdBodyZUp.getY() + wxToYDotCoupling.getDoubleValue() * pd_wx);
-         
-         return pdBodyZUp;
-         
-    
    }
 }

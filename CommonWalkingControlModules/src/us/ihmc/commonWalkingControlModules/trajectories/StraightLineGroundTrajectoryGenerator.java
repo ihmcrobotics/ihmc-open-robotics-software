@@ -7,6 +7,7 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 
@@ -20,6 +21,10 @@ public class StraightLineGroundTrajectoryGenerator implements GroundTrajectoryGe
    
    private final FramePoint startPoint;
    private final FramePoint endPoint;
+   
+   
+   private final DoubleYoVariable absoluteYOffsetForViaPoints; 
+   
    public StraightLineGroundTrajectoryGenerator(String name, CommonWalkingReferenceFrames referenceFrames, YoVariableRegistry parentRegistry)
    {
       registry = new YoVariableRegistry(name);      
@@ -28,7 +33,11 @@ public class StraightLineGroundTrajectoryGenerator implements GroundTrajectoryGe
       startPoint = new FramePoint(ReferenceFrame.getWorldFrame());
       endPoint = new FramePoint(ReferenceFrame.getWorldFrame());
       new FrameVector(ReferenceFrame.getWorldFrame());
+      
       parentRegistry.addChild(registry);
+      
+      absoluteYOffsetForViaPoints = new DoubleYoVariable("absoluteYOffsetForViaPoints", registry);
+      absoluteYOffsetForViaPoints.set(0.02);
    }
 
    public void getViaPoints(YoFramePoint[] viaPointsToPack, RobotSide swingSide, double tStart, FramePoint startPointIn, double tEnd, FramePoint endPointIn, double[] tOfViaPoints, double heightOfViaPoints[])
@@ -53,9 +62,13 @@ public class StraightLineGroundTrajectoryGenerator implements GroundTrajectoryGe
       {
          FramePoint viaPoint = new FramePoint(groundPlaneFrame);
          
+         double yOffset = 0.0;
+         
+         yOffset = swingSide.negateIfRightSide(absoluteYOffsetForViaPoints.getDoubleValue());
+         
          
          viaPoint.set(startPoint.getX() + tScale*(tOfViaPoints[i]-tStart)*deltaX, 
-                      startPoint.getY() + tScale*(tOfViaPoints[i]-tStart)*deltaY, 
+                      startPoint.getY() + tScale*(tOfViaPoints[i]-tStart)*deltaY + yOffset, 
                       heightOfViaPoints[i]);
          
          viaPoint.changeFrame(viaPointsToPack[i].getReferenceFrame());

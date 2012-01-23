@@ -28,7 +28,6 @@ public class SimpleDesiredPelvisOrientationControlModule implements DesiredPelvi
    private final YoFrameOrientation desiredPelvisOrientation;
    private final BooleanYoVariable usingExternallySpecifiedOrientation = new BooleanYoVariable("usingExternallySpecifiedOrientation", registry);
 
-
    public SimpleDesiredPelvisOrientationControlModule(CommonWalkingReferenceFrames referenceFrames, DesiredHeadingControlModule desiredHeadingControlModule,
            YoVariableRegistry parentRegistry)
    {
@@ -54,7 +53,6 @@ public class SimpleDesiredPelvisOrientationControlModule implements DesiredPelvi
       return desiredPelvisOrientation.getFrameOrientationCopy();
    }
 
-  
    private void setDesiredPelvisOrientationScaledKneeToKnee(RobotSide supportLeg)
    {
       ReferenceFrame leftKneeFrame = referenceFrames.getLegJointFrame(RobotSide.LEFT, LegJointName.KNEE);
@@ -67,14 +65,26 @@ public class SimpleDesiredPelvisOrientationControlModule implements DesiredPelvi
       rightKneeOrigin = rightKneeOrigin.changeFrameCopy(desiredHeadingFrame);
 
       // Robot pelvis yaw is oriented at 90 deg about z axis from atan2 function's 0 orientation
-      double desiredPelvisYaw = Math.atan2(-(leftKneeOrigin.getX() - rightKneeOrigin.getX()), (leftKneeOrigin.getY() - rightKneeOrigin.getY()));
-      desiredPelvisYaw = desiredPelvisYaw * twistScale.getDoubleValue();
+      double desiredPelvisYaw = getDesiredPelvisYaw(leftKneeOrigin, rightKneeOrigin);
 
-      double desiredPelvisRoll = pelvisRollPelvisYawScale.getDoubleValue() * desiredPelvisYaw;
+      double desiredPelvisRoll = getDesiredPelvisRoll(desiredPelvisYaw);
 //      double desiredPelvisRoll = 0.0;
 
 
       desiredPelvisOrientation.setYawPitchRoll(desiredPelvisYaw, userDesiredPelvisPitch.getDoubleValue(), desiredPelvisRoll);
+   }
+
+   private double getDesiredPelvisRoll(double desiredPelvisYaw)
+   {
+      double desiredPelvisRoll = pelvisRollPelvisYawScale.getDoubleValue() * desiredPelvisYaw;
+      return desiredPelvisRoll;
+   }
+
+   private double getDesiredPelvisYaw(FramePoint leftPoint, FramePoint rightPoint)
+   {
+      double desiredPelvisYaw = Math.atan2(-(leftPoint.getX() - rightPoint.getX()), (leftPoint.getY() - rightPoint.getY()));
+      desiredPelvisYaw = desiredPelvisYaw * twistScale.getDoubleValue();
+      return desiredPelvisYaw;
    }
    
    public void setParametersForR2()
@@ -100,5 +110,32 @@ public class SimpleDesiredPelvisOrientationControlModule implements DesiredPelvi
       }
       else
          this.usingExternallySpecifiedOrientation.set(false);
+   }
+
+   public Orientation getEstimatedOrientationAtEndOfStep(RobotSide stanceSide, FramePoint desiredFootLocation)
+   {
+      ReferenceFrame referenceFrame = desiredFootLocation.getReferenceFrame();
+      FramePoint desiredFootPosition = desiredFootLocation;
+      FramePoint stanceFoot = new FramePoint(referenceFrames.getAnkleZUpFrame(stanceSide));
+      
+      stanceFoot.changeFrame(referenceFrame);
+      
+      
+      double desiredPelvisYaw;
+      
+      if(stanceSide == RobotSide.RIGHT)
+      {
+         desiredPelvisYaw = getDesiredPelvisYaw(desiredFootPosition, stanceFoot);
+      }
+      else
+      {
+         desiredPelvisYaw = getDesiredPelvisYaw(stanceFoot, desiredFootPosition);
+      }
+      
+      double desiredPelvisRoll = getDesiredPelvisRoll(desiredPelvisYaw);
+      
+      return new Orientation(referenceFrame, desiredPelvisYaw, userDesiredPelvisPitch.getDoubleValue(), desiredPelvisRoll);
+      
+      
    }
 }

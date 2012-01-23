@@ -13,6 +13,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.swingLegTorqueControl.
 import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculator;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
+import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredHeadingControlModule;
 import us.ihmc.commonWalkingControlModules.kinematics.BodyPositionInTimeEstimator;
 import us.ihmc.commonWalkingControlModules.kinematics.DesiredJointVelocityCalculator;
 import us.ihmc.commonWalkingControlModules.kinematics.InverseKinematicsException;
@@ -115,12 +116,13 @@ public class OptimalSwingSubController implements SwingSubController
 
 
 
-   public OptimalSwingSubController(ProcessedSensorsInterface processedSensors, ProcessedOutputsInterface processedOutputs, CommonWalkingReferenceFrames referenceFrames,
-         DesiredFootstepCalculator desiredFootstepCalculator, SideDependentList<FootSwitchInterface> footSwitches, CouplingRegistry couplingRegistry,
+   public OptimalSwingSubController(ProcessedSensorsInterface processedSensors, ProcessedOutputsInterface processedOutputs,
+         CommonWalkingReferenceFrames referenceFrames, DesiredFootstepCalculator desiredFootstepCalculator,
+         SideDependentList<FootSwitchInterface> footSwitches, CouplingRegistry couplingRegistry,
          SideDependentList<DesiredJointVelocityCalculator> desiredJointVelocityCalculators, LegInverseKinematicsCalculator inverseKinematicsCalculator,
          LegConfigurationData legConfigurationData, LegTorqueData legTorqueData, SwingLegTorqueControlOnlyModule swingLegTorqueControlModule,
-         SideDependentList<LegJointPositionControlModule> legJointPositionControlModules, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
-         double controlDT, YoVariableRegistry parentRegistry)
+         DesiredHeadingControlModule desiredHeadingControlModule, SideDependentList<LegJointPositionControlModule> legJointPositionControlModules,
+         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, double controlDT, YoVariableRegistry parentRegistry)
    {
       this.referenceFrames = referenceFrames;
       this.desiredFootstepCalculator = desiredFootstepCalculator;
@@ -137,7 +139,7 @@ public class OptimalSwingSubController implements SwingSubController
       
       this.footSwitches = footSwitches;
 
-      bodyPositionInTimeEstimator = new BodyPositionInTimeEstimator(processedSensors, referenceFrames, couplingRegistry, registry);
+      bodyPositionInTimeEstimator = new BodyPositionInTimeEstimator(processedSensors, referenceFrames, desiredHeadingControlModule, couplingRegistry, registry);
 
       for (RobotSide side : RobotSide.values())
       {
@@ -273,7 +275,7 @@ public class OptimalSwingSubController implements SwingSubController
       
       if(useUpperBodyPositionAndVelocityEstimation)
       {
-         Pair<FramePose, FrameVector> bodyPositionAndVelocityInTime = bodyPositionInTimeEstimator.getPelvisPoseAndPositionInTime(swingTimeRemaining, swingSide);
+         Pair<FramePose, FrameVector> bodyPositionAndVelocityInTime = bodyPositionInTimeEstimator.getPelvisPoseAndVelocityInTime(swingTimeRemaining, swingSide);
          FramePose pelvisPoseInTime = bodyPositionAndVelocityInTime.first();
          Transform3D pelvisTransformInTime = new Transform3D();
          pelvisPoseInTime.getTransform3D(pelvisTransformInTime);
