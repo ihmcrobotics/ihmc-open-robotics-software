@@ -70,8 +70,9 @@ public class BodyPositionInTimeEstimator
                            gravity, comHeight, 0.0, t);
       
       double xDeltaInTime = xCoMInTime[0] - currentCoMPosition.getX();
+//      double yDeltaInTime = yCoMInTime[0] - currentCoMPosition.getY();
       bodyPosition.setX(bodyPosition.getX() + xDeltaInTime);
-      bodyPosition.setY(bodyPosition.getY());
+//      bodyPosition.setY(bodyPosition.getY() + yDeltaInTime);
       bodyPosition.changeFrame(pelvisFrame);
       
       FramePose pelvisPoseInTime = new FramePose(pelvisFrame);

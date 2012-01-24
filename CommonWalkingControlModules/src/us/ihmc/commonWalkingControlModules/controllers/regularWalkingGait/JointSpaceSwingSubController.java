@@ -3,7 +3,6 @@ package us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait;
 import java.util.EnumMap;
 
 import us.ihmc.commonWalkingControlModules.configurations.BalanceOnOneLegConfiguration;
-import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.DesiredPelvisOrientationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.SwingLegTorqueControlOnlyModule;
 import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculator;
@@ -98,8 +97,8 @@ public class JointSpaceSwingSubController implements SwingSubController
    public JointSpaceSwingSubController(String name, ProcessedSensorsInterface processedSensors, ProcessedOutputsInterface processedOutputs, FullRobotModel fullRobotModel,
          SideDependentList<FootSwitchInterface> footSwitches, CommonWalkingReferenceFrames referenceFrames,
          DesiredFootstepCalculator desiredFootstepCalculator, CouplingRegistry couplingRegistry, LegInverseKinematicsCalculator inverseKinematicsCalculator,
-         SwingLegTorqueControlOnlyModule swingLegTorqueControlModule, SwingLegAnglesAtEndOfStepEstimator swingLegAnglesAtEndOfStepEstimator, DesiredHeadingControlModule desiredHeadingControlModule,  DesiredPelvisOrientationControlModule desiredPelvisOrientationControlModule, double controlDT,
-         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
+         SwingLegTorqueControlOnlyModule swingLegTorqueControlModule, SwingLegAnglesAtEndOfStepEstimator swingLegAnglesAtEndOfStepEstimator, DesiredHeadingControlModule desiredHeadingControlModule,  double controlDT, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
+         YoVariableRegistry parentRegistry)
    {
       registry = new YoVariableRegistry(name);
       this.referenceFrames = referenceFrames;
@@ -117,7 +116,7 @@ public class JointSpaceSwingSubController implements SwingSubController
       bodyPositionInTimeEstimator = new BodyPositionInTimeEstimator(processedSensors, referenceFrames, desiredHeadingControlModule, couplingRegistry, registry);
 
       jointSpaceTrajectoryGenerator = new JointSpaceTrajectoryGenerator("jointSpaceTrajectory", 2, referenceFrames, inverseKinematicsCalculator, processedSensors, controlDT,
-            dynamicGraphicObjectsListRegistry, bodyPositionInTimeEstimator, swingLegAnglesAtEndOfStepEstimator, desiredPelvisOrientationControlModule, registry);
+            dynamicGraphicObjectsListRegistry, bodyPositionInTimeEstimator, swingLegAnglesAtEndOfStepEstimator, registry);
 
       timeSpentInPreSwing = new DoubleYoVariable("timeSpentInPreSwing", "This is the time spent in Pre swing.", registry);
       timeSpentInInitialSwing = new DoubleYoVariable("timeSpentInInitialSwing", "This is the time spent in initial swing.", registry);
@@ -208,17 +207,17 @@ public class JointSpaceSwingSubController implements SwingSubController
       timeSpentInPreSwing.set(timeInState);
    }
 
-   private void updateFinalDesiredPosition(RobotSide swingLeg)
-   {
-      FramePose desiredFootstepPose = couplingRegistry.getDesiredFootstep().getFootstepPose();
-
-      FramePoint desiredSwingFootPosition = desiredFootstepPose.getPosition().changeFrameCopy(desiredPositions.get(swingLeg).getReferenceFrame());
-      Orientation desiredSwingFootOrientation = desiredFootstepPose.getOrientation().changeFrameCopy(desiredOrientations.get(swingLeg).getReferenceFrame());
-
-      desiredPositions.get(swingLeg).set(desiredSwingFootPosition);
-      desiredOrientations.get(swingLeg).set(desiredSwingFootOrientation);
-
-   }
+//   private void updateFinalDesiredPosition(RobotSide swingLeg)
+//   {
+//      FramePose desiredFootstepPose = couplingRegistry.getDesiredFootstep().getFootstepPose();
+//
+//      FramePoint desiredSwingFootPosition = desiredFootstepPose.getPosition().changeFrameCopy(desiredPositions.get(swingLeg).getReferenceFrame());
+//      Orientation desiredSwingFootOrientation = desiredFootstepPose.getOrientation().changeFrameCopy(desiredOrientations.get(swingLeg).getReferenceFrame());
+//
+//      desiredPositions.get(swingLeg).set(desiredSwingFootPosition);
+//      desiredOrientations.get(swingLeg).set(desiredSwingFootOrientation);
+//
+//   }
 
    public void doInitialSwing(LegTorques legTorquesToPackForSwingLeg, double timeInState)
    {
@@ -312,9 +311,9 @@ public class JointSpaceSwingSubController implements SwingSubController
       boolean footOnGround = footSwitches.get(swingSide).hasFootHitGround();
 
       boolean minimumTerminalSwingTimePassed = (timeInState > minimumTerminalSwingDuration.getDoubleValue());
-      boolean maximumTerminalSwingTimePassed = (timeInState > maximumTerminalSwingDuration.getDoubleValue());
-
-      boolean capturePointInsideSwingFoot = isCapturePointInsideFoot(swingSide);
+//      boolean maximumTerminalSwingTimePassed = (timeInState > maximumTerminalSwingDuration.getDoubleValue());
+//
+//      boolean capturePointInsideSwingFoot = isCapturePointInsideFoot(swingSide);
       boolean capturePointInsideSupportFoot = isCapturePointInsideFoot(swingSide.getOppositeSide());
 
       if (capturePointInsideSupportFoot) return false; // Don't go in double support if ICP is still in support foot.

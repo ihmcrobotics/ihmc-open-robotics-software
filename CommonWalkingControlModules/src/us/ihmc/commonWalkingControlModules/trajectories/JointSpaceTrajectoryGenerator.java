@@ -3,7 +3,6 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.DesiredPelvisOrientationControlModule;
 import us.ihmc.commonWalkingControlModules.kinematics.BodyPositionInTimeEstimator;
 import us.ihmc.commonWalkingControlModules.kinematics.LegInverseKinematicsCalculator;
 import us.ihmc.commonWalkingControlModules.kinematics.SwingLegAnglesAtEndOfStepEstimator;
@@ -99,7 +98,7 @@ public class JointSpaceTrajectoryGenerator
 
    public JointSpaceTrajectoryGenerator(String name, int maximumNumberOfViaPoints, CommonWalkingReferenceFrames referenceFrames,
          LegInverseKinematicsCalculator inverseKinematicsCalculator, ProcessedSensorsInterface processedSensors, double controlDT, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
-         BodyPositionInTimeEstimator bodyPositionInTimeEstimator, SwingLegAnglesAtEndOfStepEstimator swingLegAnglesAtEndOfStepEstimator, DesiredPelvisOrientationControlModule desiredPelvisOrientationControlModule, YoVariableRegistry parentRegistry)
+         BodyPositionInTimeEstimator bodyPositionInTimeEstimator, SwingLegAnglesAtEndOfStepEstimator swingLegAnglesAtEndOfStepEstimator, YoVariableRegistry parentRegistry)
    {
       registry = new YoVariableRegistry(name);
       this.maximumNumberOfViaPoints = maximumNumberOfViaPoints;
