@@ -327,11 +327,11 @@ public class CommonStanceSubController implements StanceSubController
 
    public boolean isDoneWithLoadingPreSwingA(RobotSide loadingLeg, double timeInState)
    {
-      FrameConvexPolygon2d loadingFootPolygon = couplingRegistry.getBipedSupportPolygons().getFootPolygonInAnkleZUp(loadingLeg);
-      FramePoint2d desiredCoP = couplingRegistry.getDesiredCoP();
-      desiredCoP.changeFrame(loadingFootPolygon.getReferenceFrame());
-      return loadingFootPolygon.isPointInside(desiredCoP);
-//      return isOverPercentageTowardDesired(loadingLeg, minPercentageTowardsDesired.getDoubleValue());
+//      FrameConvexPolygon2d loadingFootPolygon = couplingRegistry.getBipedSupportPolygons().getFootPolygonInAnkleZUp(loadingLeg);
+//      FramePoint2d desiredCoP = couplingRegistry.getDesiredCoP();
+//      desiredCoP.changeFrame(loadingFootPolygon.getReferenceFrame());
+//      return loadingFootPolygon.isPointInside(desiredCoP);
+      return isOverPercentageTowardDesired(loadingLeg, minPercentageTowardsDesired.getDoubleValue());
    }
 
    private boolean isOverPercentageTowardDesired(RobotSide loadingLeg, double minPercentageTowardsDesired)
