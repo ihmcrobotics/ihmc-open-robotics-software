@@ -2,10 +2,6 @@ package us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait;
 
 import java.util.EnumMap;
 
-import javax.media.j3d.Transform3D;
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
-
 import us.ihmc.commonWalkingControlModules.configurations.BalanceOnOneLegConfiguration;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.SwingLegTorqueControlOnlyModule;
 import us.ihmc.commonWalkingControlModules.controlModules.LegJointPositionControlModule;
@@ -16,8 +12,8 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredHeadingControlModule;
 import us.ihmc.commonWalkingControlModules.kinematics.BodyPositionInTimeEstimator;
 import us.ihmc.commonWalkingControlModules.kinematics.DesiredJointVelocityCalculator;
-import us.ihmc.commonWalkingControlModules.kinematics.InverseKinematicsException;
 import us.ihmc.commonWalkingControlModules.kinematics.LegInverseKinematicsCalculator;
+import us.ihmc.commonWalkingControlModules.kinematics.SwingLegAnglesAtEndOfStepEstimator;
 import us.ihmc.commonWalkingControlModules.optimalSwing.LegConfigurationData;
 import us.ihmc.commonWalkingControlModules.optimalSwing.LegTorqueData;
 import us.ihmc.commonWalkingControlModules.outputs.ProcessedOutputsInterface;
@@ -31,15 +27,12 @@ import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.sensors.ProcessedSensorsInterface;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
-import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FramePose;
-import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.Orientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.Twist;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
@@ -114,6 +107,8 @@ public class OptimalSwingSubController implements SwingSubController
    
    private final SideDependentList<FootSwitchInterface> footSwitches;
 
+   private final SwingLegAnglesAtEndOfStepEstimator swingLegAnglesAtEndOfStepEstimator;
+
 
 
    public OptimalSwingSubController(ProcessedSensorsInterface processedSensors, ProcessedOutputsInterface processedOutputs,
@@ -122,7 +117,7 @@ public class OptimalSwingSubController implements SwingSubController
          SideDependentList<DesiredJointVelocityCalculator> desiredJointVelocityCalculators, LegInverseKinematicsCalculator inverseKinematicsCalculator,
          LegConfigurationData legConfigurationData, LegTorqueData legTorqueData, SwingLegTorqueControlOnlyModule swingLegTorqueControlModule,
          DesiredHeadingControlModule desiredHeadingControlModule, SideDependentList<LegJointPositionControlModule> legJointPositionControlModules,
-         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, double controlDT, YoVariableRegistry parentRegistry)
+         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, SwingLegAnglesAtEndOfStepEstimator swingLegAnglesAtEndOfStepEstimator, double controlDT, YoVariableRegistry parentRegistry)
    {
       this.referenceFrames = referenceFrames;
       this.desiredFootstepCalculator = desiredFootstepCalculator;
@@ -133,6 +128,7 @@ public class OptimalSwingSubController implements SwingSubController
       this.torqueControlModule = swingLegTorqueControlModule;
       this.controlDT = controlDT;
       this.desiredJointVelocityCalculators = desiredJointVelocityCalculators;
+      this.swingLegAnglesAtEndOfStepEstimator = swingLegAnglesAtEndOfStepEstimator;
 
       this.legConfigurationData = legConfigurationData;
       this.legTorqueData = legTorqueData;
@@ -244,73 +240,21 @@ public class OptimalSwingSubController implements SwingSubController
       timeSpentInMidSwing.set(timeInState);
    }
    
-   private Transform3D computeDesiredTransform(ReferenceFrame pelvisFrame, FramePoint desiredFootPosition, Orientation desiredFootOrientation)
-   {
-      desiredFootOrientation.changeFrame(pelvisFrame);
-      desiredFootPosition.changeFrame(pelvisFrame);
-      Transform3D footToPelvis = createTransform(desiredFootOrientation, desiredFootPosition);
-
-      return footToPelvis;
-   }
-
-   private static Transform3D createTransform(Orientation orientation, FramePoint framePoint)
-   {
-      orientation.checkReferenceFrameMatch(framePoint);
-      Matrix3d rotationMatrix = orientation.getMatrix3d();
-      Transform3D ret = new Transform3D(rotationMatrix, new Vector3d(framePoint.getPoint()), 1.0);
-
-      return ret;
-   }
-   
    private void computeDesiredAnglesAtEndOfSwing(RobotSide swingSide, double swingTimeRemaining, boolean useUpperBodyPositionAndVelocityEstimation)
    {
       
       FramePoint desiredPosition = desiredPositions.get(swingSide).getFramePointCopy();
+      ReferenceFrame pelvisFrame = referenceFrames.getPelvisFrame();
+      desiredPosition.changeFrame(pelvisFrame);
       Orientation desiredOrientation = desiredOrientations.get(swingSide).getFrameOrientationCopy();
+      desiredOrientation.changeFrame(pelvisFrame);
+      
+      double desiredYaw = desiredOrientation.getYawPitchRoll()[0]; 
+            
+      swingLegAnglesAtEndOfStepEstimator.getEstimatedJointAnglesAtEndOfStep(desiredJointAngles.get(swingSide), desiredJointVelocities.get(swingSide), swingSide,
+            desiredPosition, desiredOrientation, desiredYaw, swingTimeRemaining, useUpperBodyPositionAndVelocityEstimation);
       
       
-      
-      Transform3D footToPelvis = computeDesiredTransform(referenceFrames.getPelvisFrame(), desiredPosition, desiredOrientation);
-
-      
-      if(useUpperBodyPositionAndVelocityEstimation)
-      {
-         Pair<FramePose, FrameVector> bodyPositionAndVelocityInTime = bodyPositionInTimeEstimator.getPelvisPoseAndVelocityInTime(swingTimeRemaining, swingSide);
-         FramePose pelvisPoseInTime = bodyPositionAndVelocityInTime.first();
-         Transform3D pelvisTransformInTime = new Transform3D();
-         pelvisPoseInTime.getTransform3D(pelvisTransformInTime);
-         pelvisTransformInTime.invert();
-         
-         footToPelvis.mul(pelvisTransformInTime, footToPelvis);
-         
-         FrameVector upperBodyVelocityAtEndOfStep = bodyPositionAndVelocityInTime.second();
-         ReferenceFrame footFrame = referenceFrames.getFootFrame(swingSide);
-         Twist twistOfFootWithRespectToPelvis = new Twist(footFrame, ReferenceFrame.getWorldFrame(), footFrame);
-         upperBodyVelocityAtEndOfStep.changeFrame(ReferenceFrame.getWorldFrame());
-         twistOfFootWithRespectToPelvis.setAngularPart(upperBodyVelocityAtEndOfStep.getVector());
-         
-         
-         desiredJointVelocityCalculators.get(swingSide).packDesiredJointVelocities(desiredJointVelocities.get(swingSide), twistOfFootWithRespectToPelvis, ikAlpha.getDoubleValue());
-      }
-      else
-      {
-         desiredJointVelocities.get(swingSide).setLegJointVelocitiesToDoubleArray(new double[legConfigurationData.getAllJoints().size()]);
-         
-      }
-      
-      
-      try
-      {
-         inverseKinematicsCalculator.solve(desiredJointAngles.get(swingSide), footToPelvis, swingSide, desiredOrientation.getYawPitchRoll()[0]);
-      } catch (InverseKinematicsException e)
-      {
-         numberOfInverseKinematicsErrors.increment();
-      }
-      
-      
-
-      
-
       
    }
 
