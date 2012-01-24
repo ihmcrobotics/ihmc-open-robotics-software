@@ -14,6 +14,7 @@ import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.utilities.screwTheory.Twist;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.processedSensors.ProcessedIMUSensorsReadOnly;
 
 public interface ProcessedSensorsInterface
 {

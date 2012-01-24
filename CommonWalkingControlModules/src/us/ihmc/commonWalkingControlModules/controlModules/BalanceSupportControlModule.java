@@ -22,9 +22,7 @@ import us.ihmc.utilities.math.geometry.Orientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.Wrench;
 
-import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.util.trajectory.YoMinimumJerkTrajectory;
 
 public class BalanceSupportControlModule
 {
@@ -94,7 +92,8 @@ public class BalanceSupportControlModule
 
       // compute desired z-component of force on the body using PelvisHeightController
       double desiredPelvisHeightInWorld = getDesiredPelvisHeight();
-      double fZOnPelvisInPelvisFrame = pelvisHeightControlModule.doPelvisHeightControl(desiredPelvisHeightInWorld, supportLeg);
+      double fZOnPelvisInWorldFrame = pelvisHeightControlModule.doPelvisHeightControl(desiredPelvisHeightInWorld, supportLeg);
+      double fZOnPelvisInPelvisFrame = convertFromWorldToPelvis(fZOnPelvisInWorldFrame, torqueOnPelvisInPelvisFrame.getReferenceFrame());
 
       // compute joint torques using virtual support actuators
       virtualSupportActuatorControlModule.controlSingleSupport(supportLegTorquesToPack, vtpInAnklePitchFrame, fZOnPelvisInPelvisFrame,
@@ -158,5 +157,13 @@ public class BalanceSupportControlModule
    private double getDesiredPelvisHeight()
    {
       return Double.NaN;
+   }
+   
+   private double convertFromWorldToPelvis(double fZOnPelvisInWorldFrame, ReferenceFrame pelvisFrame)
+   {
+//      FrameVector fZ = new FrameVector(ReferenceFrame.getWorldFrame(), 0.0, 0.0, fZOnPelvisInWorldFrame);
+//      fZ.changeFrame(pelvisFrame);
+//      return fZ.getZ();
+      return fZOnPelvisInWorldFrame;
    }
 }
