@@ -6,10 +6,12 @@ import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
 
-import org.jfree.util.ArrayUtilities;
+import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
 import us.ihmc.robotSide.RobotSide;
+import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.Orientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
@@ -19,6 +21,7 @@ import com.yobotics.simulationconstructionset.EnumYoVariable;
 import com.yobotics.simulationconstructionset.YoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameOrientation;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 
 public class LegConfigurationData
 {
@@ -45,6 +48,7 @@ public class LegConfigurationData
    private final EnumMap<LegJointName, DoubleYoVariable> finalDesiredJointAngles = new EnumMap<LegJointName, DoubleYoVariable>(LegJointName.class);
    private final EnumMap<LegJointName, DoubleYoVariable> finalDesiredJointVelocities = new EnumMap<LegJointName, DoubleYoVariable>(LegJointName.class);
    
+   private final YoFramePoint upperBodyPositionInWorld = new YoFramePoint("upperBodyPosition", "InWorld", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameOrientation upperBodyOrientationInWorld = new YoFrameOrientation("upperBodyOrientation", "InWorld", ReferenceFrame.getWorldFrame(), registry);
    
    private final ArrayList<YoVariable> allVariables;
@@ -221,5 +225,16 @@ public class LegConfigurationData
    public void setTimeInSwing(double time)
    {
       timeInSwing.set(time);
+   }
+
+   public FramePoint getUpperBodyPositionInWorld()
+   {
+      return upperBodyPositionInWorld.getFramePointCopy();
+   }
+
+   public void setUpperBodyPositionInWorld(Vector3d upperBodyPositionInWorld)
+   {
+      Point3d upperBodyPostion = new Point3d(upperBodyPositionInWorld);
+      this.upperBodyPositionInWorld.set(upperBodyPostion);
    }
 }
