@@ -5,14 +5,10 @@ import static org.junit.Assert.assertEquals;
 import javax.media.j3d.Transform3D;
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;
-import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
-
-import com.yobotics.simulationconstructionset.rawSensors.RawIMUSensorsInterface;
 
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -23,6 +19,8 @@ import us.ihmc.utilities.screwTheory.SixDoFJoint;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.utilities.screwTheory.Twist;
 import us.ihmc.utilities.screwTheory.TwistAndAccelerationCalculator;
+
+import com.yobotics.simulationconstructionset.rawSensors.RawIMUSensorsInterface;
 
 public class SimulatedIMURawSensorReaderTest
 {
@@ -54,6 +52,7 @@ public class SimulatedIMURawSensorReaderTest
 
    private final Transform3D transformIMUToJoint = new Transform3D();
    private final Transform3D transformJointToIMU = new Transform3D();
+   private ReferenceFrame imuFrame;
 
    public static final double GRAVITY = (2.0 * Math.random() - 1) * 15.0; // random gravity between -15 and +15 m/s^2
    public static final int IMU_INDEX = (int) (10.0 * Math.random()); // random imu index between 0 and 10
@@ -67,7 +66,9 @@ public class SimulatedIMURawSensorReaderTest
       transformIMUToJoint.setTranslation(jointToIMUOffset.getVectorCopy()); 
       transformJointToIMU.invert(transformIMUToJoint);
       
-      simulatedIMURawSensorReader = new SimulatedIMURawSensorReader(rawSensors, IMU_INDEX, rigidBody, transformIMUToJoint)
+      imuFrame = fullRobotModel.createOffsetFrame(fullRobotModel.getBodyLink().getParentJoint(), transformIMUToJoint, "imuFrame");
+      
+      simulatedIMURawSensorReader = new SimulatedIMURawSensorReader(rawSensors, IMU_INDEX, rigidBody, imuFrame)
       {
          private static final long serialVersionUID = 6119697219409662317L;
 
@@ -427,6 +428,13 @@ public class SimulatedIMURawSensorReaderTest
          ReferenceFrame parentFrame = previousJoint.getFrameAfterJoint();
          Transform3D transformToParent = new Transform3D();
          transformToParent.set(offset);
+         ReferenceFrame beforeJointFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(frameName, parentFrame, transformToParent);
+         return beforeJointFrame;
+      }
+      
+      private ReferenceFrame createOffsetFrame(InverseDynamicsJoint previousJoint, Transform3D transformToParent, String frameName)
+      {
+         ReferenceFrame parentFrame = previousJoint.getFrameAfterJoint();
          ReferenceFrame beforeJointFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(frameName, parentFrame, transformToParent);
          return beforeJointFrame;
       }
