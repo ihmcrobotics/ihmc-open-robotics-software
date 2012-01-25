@@ -2,6 +2,9 @@ package us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait;
 
 import java.util.EnumMap;
 
+import javax.vecmath.Quat4d;
+import javax.vecmath.Vector3d;
+
 import us.ihmc.commonWalkingControlModules.configurations.BalanceOnOneLegConfiguration;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.SwingLegTorqueControlOnlyModule;
 import us.ihmc.commonWalkingControlModules.controlModules.LegJointPositionControlModule;
@@ -33,6 +36,7 @@ import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.Orientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.screwTheory.SixDoFJoint;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
@@ -271,9 +275,16 @@ public class OptimalSwingSubController implements SwingSubController
       legConfigurationData.setcurrentlyInSwing(true);
       setEstimatedSwingTimeRemaining(swingTimeRemaining);
       
+      SixDoFJoint rootJoint = processedSensors.getFullRobotModel().getRootJoint();
       
-      Orientation upperBodyOrientation = processedSensors.getPelvisOrientationInFrame(ReferenceFrame.getWorldFrame());
-      legConfigurationData.setUpperBodyOrientationInWorld(upperBodyOrientation);
+      Quat4d rotation = new Quat4d();
+      Vector3d translation = new Vector3d();
+      rootJoint.packRotation(rotation);
+      rootJoint.packTranslation(translation);
+      Orientation orientation = new Orientation(ReferenceFrame.getWorldFrame(), rotation);
+      
+      legConfigurationData.setUpperBodyPositionInWorld(translation);
+      legConfigurationData.setUpperBodyOrientationInWorld(orientation);
       
       
       FramePoint hipRollFramePoint = new FramePoint(referenceFrames.getLegJointFrames(robotSide).get(LegJointName.HIP_ROLL));
