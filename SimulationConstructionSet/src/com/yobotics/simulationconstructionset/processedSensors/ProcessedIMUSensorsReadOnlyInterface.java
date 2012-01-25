@@ -18,5 +18,5 @@ public interface ProcessedIMUSensorsReadOnlyInterface
 
    public abstract FrameVector getAngularVelocity(int imuIndex);
    
-   public abstract FrameVector getAngularAcceleration();
+   public abstract FrameVector getAngularAcceleration(int imuIndex);
 }
