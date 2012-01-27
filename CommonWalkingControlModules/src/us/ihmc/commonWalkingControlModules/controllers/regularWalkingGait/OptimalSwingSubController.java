@@ -2,9 +2,6 @@ package us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait;
 
 import java.util.EnumMap;
 
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
 import us.ihmc.commonWalkingControlModules.configurations.BalanceOnOneLegConfiguration;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.SwingLegTorqueControlOnlyModule;
 import us.ihmc.commonWalkingControlModules.controlModules.LegJointPositionControlModule;
@@ -14,11 +11,10 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalcul
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredHeadingControlModule;
 import us.ihmc.commonWalkingControlModules.kinematics.BodyPositionInTimeEstimator;
-import us.ihmc.commonWalkingControlModules.kinematics.DesiredJointVelocityCalculator;
 import us.ihmc.commonWalkingControlModules.kinematics.LegInverseKinematicsCalculator;
 import us.ihmc.commonWalkingControlModules.kinematics.SwingLegAnglesAtEndOfStepEstimator;
-import us.ihmc.commonWalkingControlModules.optimalSwing.LegConfigurationData;
 import us.ihmc.commonWalkingControlModules.optimalSwing.LegTorqueData;
+import us.ihmc.commonWalkingControlModules.optimalSwing.SwingParameters;
 import us.ihmc.commonWalkingControlModules.outputs.ProcessedOutputsInterface;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointAccelerations;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
@@ -36,16 +32,16 @@ import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.Orientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.SixDoFJoint;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.IntegerYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.PDController;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoVariable;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameOrientation;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
+import com.yobotics.simulationconstructionset.util.splines.QuinticSplineInterpolator;
 import com.yobotics.simulationconstructionset.util.trajectory.YoMinimumJerkTrajectory;
 
 public class OptimalSwingSubController implements SwingSubController
@@ -56,15 +52,12 @@ public class OptimalSwingSubController implements SwingSubController
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
    private final CommonWalkingReferenceFrames referenceFrames;
-   private final BodyPositionInTimeEstimator bodyPositionInTimeEstimator;
    private final CouplingRegistry couplingRegistry;
-   private final LegInverseKinematicsCalculator inverseKinematicsCalculator;
    private final ProcessedSensorsInterface processedSensors;
    private final ProcessedOutputsInterface processedOutputs;
    private final DesiredFootstepCalculator desiredFootstepCalculator;
-   private final double controlDT;
    
-   private final LegConfigurationData legConfigurationData;
+   private final SwingParameters swingParameters;
    private final LegTorqueData legTorqueData;
 
    private final EnumMap<LegJointName, DoubleYoVariable> legTorquesAtBeginningOfStep = new EnumMap<LegJointName, DoubleYoVariable>(LegJointName.class);
@@ -79,8 +72,6 @@ public class OptimalSwingSubController implements SwingSubController
    private final SideDependentList<LegJointPositions> desiredJointAngles = new SideDependentList<LegJointPositions>();
    private final SideDependentList<LegJointVelocities> desiredJointVelocities = new SideDependentList<LegJointVelocities>();
    
-   private final IntegerYoVariable numberOfInverseKinematicsErrors = new IntegerYoVariable("numberOfInverseKinematicsErrors", registry);
-
    private final DoubleYoVariable timeSpentInPreSwing = new DoubleYoVariable("timeSpentInPreSwing", "This is the time spent in Pre swing.", registry);
    private final DoubleYoVariable timeSpentInInitialSwing = new DoubleYoVariable("timeSpentInInitialSwing", "This is the time spent in initial swing.", registry);
    private final DoubleYoVariable timeSpentInMidSwing = new DoubleYoVariable("timeSpentInMidSwing", "This is the time spend in mid swing.", registry);
@@ -100,7 +91,11 @@ public class OptimalSwingSubController implements SwingSubController
    private final DoubleYoVariable positionErrorAtEndOfStepX = new DoubleYoVariable("positionErrorAtEndOfStepX", registry);
    private final DoubleYoVariable positionErrorAtEndOfStepY = new DoubleYoVariable("positionErrorAtEndOfStepY", registry);
    private final SwingLegTorqueControlOnlyModule torqueControlModule;
-   private final  SideDependentList<DesiredJointVelocityCalculator> desiredJointVelocityCalculators;
+
+   
+   private final DoubleYoVariable initialHipYawAngle = new DoubleYoVariable("intialHipYawAngle", registry);
+   private final QuinticSplineInterpolator hipYawPositionInterpolator = new QuinticSplineInterpolator("hipYawInterpolator", 2, 1, registry);
+   private final PDController hipYawAngleController = new PDController("HipYawAngleController", registry);
    
    private final DoubleYoVariable ikAlpha = new DoubleYoVariable("ikAlpha", registry);
    
@@ -113,33 +108,31 @@ public class OptimalSwingSubController implements SwingSubController
 
    private final SwingLegAnglesAtEndOfStepEstimator swingLegAnglesAtEndOfStepEstimator;
 
+   private final ReferenceFrame desiredHeadingFrame;
+
 
 
    public OptimalSwingSubController(ProcessedSensorsInterface processedSensors, ProcessedOutputsInterface processedOutputs,
          CommonWalkingReferenceFrames referenceFrames, DesiredFootstepCalculator desiredFootstepCalculator,
-         SideDependentList<FootSwitchInterface> footSwitches, CouplingRegistry couplingRegistry,
-         SideDependentList<DesiredJointVelocityCalculator> desiredJointVelocityCalculators, LegInverseKinematicsCalculator inverseKinematicsCalculator,
-         LegConfigurationData legConfigurationData, LegTorqueData legTorqueData, SwingLegTorqueControlOnlyModule swingLegTorqueControlModule,
+         SideDependentList<FootSwitchInterface> footSwitches, CouplingRegistry couplingRegistry, 
+         SwingParameters swingParameters, LegTorqueData legTorqueData, SwingLegTorqueControlOnlyModule swingLegTorqueControlModule,
          DesiredHeadingControlModule desiredHeadingControlModule, SideDependentList<LegJointPositionControlModule> legJointPositionControlModules,
          DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, SwingLegAnglesAtEndOfStepEstimator swingLegAnglesAtEndOfStepEstimator, double controlDT, YoVariableRegistry parentRegistry)
    {
       this.referenceFrames = referenceFrames;
       this.desiredFootstepCalculator = desiredFootstepCalculator;
       this.couplingRegistry = couplingRegistry;
-      this.inverseKinematicsCalculator = inverseKinematicsCalculator;
       this.processedSensors = processedSensors;
       this.processedOutputs = processedOutputs;
       this.torqueControlModule = swingLegTorqueControlModule;
-      this.controlDT = controlDT;
-      this.desiredJointVelocityCalculators = desiredJointVelocityCalculators;
       this.swingLegAnglesAtEndOfStepEstimator = swingLegAnglesAtEndOfStepEstimator;
+      this.desiredHeadingFrame = desiredHeadingControlModule.getDesiredHeadingFrame();
 
-      this.legConfigurationData = legConfigurationData;
+      this.swingParameters = swingParameters;
       this.legTorqueData = legTorqueData;
       
       this.footSwitches = footSwitches;
 
-      bodyPositionInTimeEstimator = new BodyPositionInTimeEstimator(processedSensors, referenceFrames, desiredHeadingControlModule, couplingRegistry, registry);
 
       for (RobotSide side : RobotSide.values())
       {
@@ -153,7 +146,7 @@ public class OptimalSwingSubController implements SwingSubController
          
       }
 
-      for(LegJointName jointName : legConfigurationData.getAllJoints())
+      for(LegJointName jointName : legJointNames)
       {
          legTorquesAtBeginningOfStep.put(jointName, new DoubleYoVariable(jointName.getCamelCaseNameForStartOfExpression() + "TorqueAtBeginningOfStep", registry));
 
@@ -171,7 +164,7 @@ public class OptimalSwingSubController implements SwingSubController
    
    private void resetFilters()
    {
-      for(LegJointName jointName : legConfigurationData.getAllJoints())
+      for(LegJointName jointName : legJointNames)
       {
 //         filteredJointTorques.get(jointName).reset();
          filteredJointVelocities.get(jointName).reset();
@@ -187,6 +180,9 @@ public class OptimalSwingSubController implements SwingSubController
       ikAlpha.set(0.07);
       
       jointVelocityBreakFrequency.set(2.0);
+      
+      hipYawAngleController.setProportionalGain(120.0);
+      hipYawAngleController.setDerivativeGain(2.0);
    }
 
 
@@ -261,6 +257,16 @@ public class OptimalSwingSubController implements SwingSubController
       
       
    }
+   
+   public void doTransitionIntoSwing(RobotSide swingLeg)
+   {
+     
+      swingParameters.setRobotSide(swingLeg);
+      Orientation currentFootOrientation = new Orientation(referenceFrames.getAnkleZUpFrame(swingLeg));
+      currentFootOrientation.changeFrame(desiredHeadingFrame);
+      
+      initialHipYawAngle.set(currentFootOrientation.getYawPitchRoll()[0]);
+   }
 
    private void doSwing(LegTorques legTorques, double timeInSwing, boolean useUpperBodyPositionAndVelocityEstimation)
    {
@@ -270,27 +276,9 @@ public class OptimalSwingSubController implements SwingSubController
       if(swingTimeRemaining < 0.0)
          swingTimeRemaining = 0.0;
       
-      legConfigurationData.setSwingTimeRemaining(swingTimeRemaining);
-      legConfigurationData.setTimeInSwing(timeInSwing);
-      legConfigurationData.setcurrentlyInSwing(true);
+      swingParameters.setSwingTimeRemaining(swingTimeRemaining);
+      swingParameters.setCurrentlyInSwing(true);
       setEstimatedSwingTimeRemaining(swingTimeRemaining);
-      
-      SixDoFJoint rootJoint = processedSensors.getFullRobotModel().getRootJoint();
-      
-      Quat4d rotation = new Quat4d();
-      Vector3d translation = new Vector3d();
-      rootJoint.packRotation(rotation);
-      rootJoint.packTranslation(translation);
-      Orientation orientation = new Orientation(ReferenceFrame.getWorldFrame(), rotation);
-      
-      legConfigurationData.setUpperBodyPositionInWorld(translation);
-      legConfigurationData.setUpperBodyOrientationInWorld(orientation);
-      
-      
-      FramePoint hipRollFramePoint = new FramePoint(referenceFrames.getLegJointFrames(robotSide).get(LegJointName.HIP_ROLL));
-      hipRollFramePoint.changeFrame(referenceFrames.getAnkleZUpFrame(robotSide.getOppositeSide()));
-      
-      legConfigurationData.setHipRollHeight(hipRollFramePoint.getZ());
       
       
       computeDesiredAnglesAtEndOfSwing(robotSide, swingTimeRemaining, useUpperBodyPositionAndVelocityEstimation);
@@ -300,51 +288,16 @@ public class OptimalSwingSubController implements SwingSubController
       LegJointVelocities finalDesiredLegJointVelocities = desiredJointVelocities.get(robotSide);
       
       
-      // Do stupid stuff for hip yaw
+      // Control hip yaw angle in desiredHeadingFrame
       
       
-      Orientation currentFootOrientation = new Orientation(referenceFrames.getAnkleZUpFrame(robotSide));
-      ReferenceFrame groundPlaneFrame = desiredOrientations.get(robotSide).getReferenceFrame();
-      currentFootOrientation.changeFrame(groundPlaneFrame);
       
       
-      double initialYaw = currentFootOrientation.getYawPitchRoll()[0];
       
-      Orientation desiredFootOrientation = desiredOrientations.get(robotSide).getFrameOrientationCopy();
-      desiredFootOrientation.changeFrame(groundPlaneFrame);
-      
-      double finalYaw = desiredFootOrientation.getYawPitchRoll()[0];
-      
-      legConfigurationData.setCurrentJointAngle(LegJointName.HIP_YAW, initialYaw);
-      legConfigurationData.setFinalDesiredJointAngle(LegJointName.HIP_YAW, finalYaw);
-      
-      
-      for(LegJointName jointName : legConfigurationData.getAllJoints())
+      for(LegJointName jointName : legJointNames)
       {
-         if(jointName == LegJointName.HIP_YAW)
-         {
-            continue;
-         }
-        
-         
-         legConfigurationData.setCurrentJointAngle(jointName, processedSensors.getLegJointPosition(robotSide, jointName));
-         legConfigurationData.setFinalDesiredJointAngle(jointName, finalDesiredLegJointPositions.getJointPosition(jointName));
-        
-         filteredJointVelocities.get(jointName).setAlpha(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(jointVelocityBreakFrequency.getDoubleValue(), controlDT));
-         filteredJointVelocities.get(jointName).update(processedSensors.getLegJointVelocity(robotSide, jointName));
-         legConfigurationData.setCurrentJointVelocity(jointName, filteredJointVelocities.get(jointName).getDoubleValue());
-      }
-      
-      for(LegJointName jointName : legConfigurationData.getJointsToOptimize())
-      {
-         if(useUpperBodyPositionAndVelocityEstimation)
-         {
-            legConfigurationData.setFinalDesiredJointVelocity(jointName, finalDesiredLegJointVelocities.getJointVelocity(jointName));
-         }
-         else
-         {
-            legConfigurationData.setFinalDesiredJointVelocity(jointName, 0.0);
-         }
+         swingParameters.setDesiredJointPosition(robotSide, jointName, finalDesiredLegJointPositions.getJointPosition(jointName));
+         swingParameters.setDesiredJointVelocity(robotSide, jointName, finalDesiredLegJointVelocities.getJointVelocity(jointName));
       }
       
       if(legTorqueData.isDataValid())
@@ -362,50 +315,73 @@ public class OptimalSwingSubController implements SwingSubController
             legJointVelocities.setJointVelocity(jointName, legTorqueData.getDesiredJointVelocity(jointName));
             legJointAccelerations.setJointAcceleration(jointName, legTorqueData.getDesiredJointAcceleration(jointName));
          }
-   
-         Orientation footOrientation = new Orientation(groundPlaneFrame, legJointPositions.getJointPosition(LegJointName.HIP_YAW), 0.0, 0.0);
-         footOrientation.changeFrame(referenceFrames.getPelvisFrame());
-         
-         legJointPositions.setJointPosition(LegJointName.HIP_YAW, footOrientation.getYawPitchRoll()[0]);
-         
+//   
+//         Orientation footOrientation = new Orientation(groundPlaneFrame, legJointPositions.getJointPosition(LegJointName.HIP_YAW), 0.0, 0.0);
+//         footOrientation.changeFrame(referenceFrames.getPelvisFrame());
+//         
+//         legJointPositions.setJointPosition(LegJointName.HIP_YAW, footOrientation.getYawPitchRoll()[0]);
+//         
          // Use craig300 for now, change to only ID
          // TODO: Get rid of these HACKS
          ((CraigPage300SwingLegTorqueControlOnlyModule) torqueControlModule).setParametersForOptimalSwing();
          torqueControlModule.compute(legTorques, legJointPositions, legJointVelocities, legJointAccelerations);
          
-         
 
-         
-         
       }
       
-//      for(LegJointName jointName : legConfigurationData.getAllJoints())
-//      {
-//         filteredJointTorques.get(jointName).update(legTorques.getTorque(jointName));
-//         legTorques.setTorque(jointName, filteredJointTorques.get(jointName).getDoubleValue());
-//      }
+      /*
+       * Hip yaw control is really bad, so control it with a PD controller
+       */
+      
+      Orientation desiredFootOrientation = desiredOrientations.get(robotSide).getFrameOrientationCopy();
+      desiredFootOrientation.changeFrame(desiredHeadingFrame);
+      double finalFootYaw = desiredFootOrientation.getYawPitchRoll()[0];
+      
+      double t[] = { 0, swingDuration.getDoubleValue() };
+      double yIn[] = { initialHipYawAngle.getDoubleValue(), finalFootYaw };
+      
+      hipYawPositionInterpolator.initialize(t);
+      hipYawPositionInterpolator.determineCoefficients(0, yIn, 0.0, 0.0, 0.0, 0.0);
+      
+      double[][] hipYawResult = new double[1][2];
+      hipYawPositionInterpolator.compute(timeInSwing, 1, hipYawResult);
+      
+      
+      
+      Orientation hipYawOrientation = new Orientation(desiredHeadingFrame, hipYawResult[0][0], 0.0, 0.0);
+      hipYawOrientation.changeFrame(referenceFrames.getPelvisFrame());
+      double desiredHipYawAngle = hipYawOrientation.getYawPitchRoll()[0];
+      
+      double desiredHipYawVelocity = 0.0;
+      
+      double hipYawTorque = hipYawAngleController.compute(processedSensors.getLegJointPosition(robotSide, LegJointName.HIP_YAW), desiredHipYawAngle,
+            processedSensors.getLegJointVelocity(robotSide, LegJointName.HIP_YAW), desiredHipYawVelocity);
+      
+      legTorques.setTorque(LegJointName.HIP_YAW, hipYawTorque);
+      
+      
 
    }
    
-   private void holdPosition(LegTorques legTorques)
-   {
-      RobotSide robotSide = legTorques.getRobotSide();
-      computeDesiredAnglesAtEndOfSwing(robotSide, 0.0, false);
-      
-      LegJointPositions legJointPositions = desiredJointAngles.get(robotSide);
-      LegJointVelocities legJointVelocities = desiredJointVelocities.get(robotSide);
-      LegJointAccelerations legJointAccelerations = new LegJointAccelerations(legJointNames, robotSide);
-      
-      for(LegJointName jointName : legJointNames)
-      {
-//         legJointVelocities.setJointVelocity(jointName, 0.0);
-         legJointAccelerations.setJointAcceleration(jointName, 0.0);
-      }
-      // TODO: Get rid of these hacks
-      ((CraigPage300SwingLegTorqueControlOnlyModule) torqueControlModule).setParametersForM2V2();
-      torqueControlModule.compute(legTorques, legJointPositions, legJointVelocities, legJointAccelerations);
-
-   }
+//   private void holdPosition(LegTorques legTorques)
+//   {
+//      RobotSide robotSide = legTorques.getRobotSide();
+//      computeDesiredAnglesAtEndOfSwing(robotSide, 0.0, false);
+//      
+//      LegJointPositions legJointPositions = desiredJointAngles.get(robotSide);
+//      LegJointVelocities legJointVelocities = desiredJointVelocities.get(robotSide);
+//      LegJointAccelerations legJointAccelerations = new LegJointAccelerations(legJointNames, robotSide);
+//      
+//      for(LegJointName jointName : legJointNames)
+//      {
+////         legJointVelocities.setJointVelocity(jointName, 0.0);
+//         legJointAccelerations.setJointAcceleration(jointName, 0.0);
+//      }
+//      // TODO: Get rid of these hacks
+//      ((CraigPage300SwingLegTorqueControlOnlyModule) torqueControlModule).setParametersForM2V2();
+//      torqueControlModule.compute(legTorques, legJointPositions, legJointVelocities, legJointAccelerations);
+//
+//   }
 
    public void doTerminalSwing(LegTorques legTorquesToPackForSwingLeg, double timeInState)
    {
@@ -485,6 +461,8 @@ public class OptimalSwingSubController implements SwingSubController
       gravityCompensationTrajectory.setParams(0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, compensateGravityForSwingLegTime.getDoubleValue());
 
    }
+   
+
 
    public void doTransitionIntoInitialSwing(RobotSide swingLeg)
    {
@@ -500,10 +478,11 @@ public class OptimalSwingSubController implements SwingSubController
       // Setup the orientation trajectory
       desiredPositions.get(swingLeg).set(endPoint);
       desiredOrientations.get(swingLeg).set(endOrientation);
-      legConfigurationData.setRobotSide(swingLeg);
       
       footSwitches.get(swingLeg).reset();
       resetFilters();
+      
+      doTransitionIntoSwing(swingLeg);
 
    }
 
@@ -518,7 +497,6 @@ public class OptimalSwingSubController implements SwingSubController
    public void doTransitionIntoSwingInAir(RobotSide swingLeg, BalanceOnOneLegConfiguration currentConfiguration)
    {
       
-      legConfigurationData.setRobotSide(swingLeg);
       
       FramePoint point = currentConfiguration.getDesiredSwingFootPosition();
       desiredPositions.get(swingLeg).set(point);
@@ -526,6 +504,7 @@ public class OptimalSwingSubController implements SwingSubController
       
       resetFilters();
 
+      doTransitionIntoSwing(swingLeg);
    }
 
 
@@ -544,7 +523,7 @@ public class OptimalSwingSubController implements SwingSubController
    public void doTransitionOutOfTerminalSwing(RobotSide swingSide)
    {
       updatePositionError(swingSide);
-      legConfigurationData.setcurrentlyInSwing(false);
+      swingParameters.setCurrentlyInSwing(false);
    }
 
    private void updatePositionError(RobotSide swingSide)
@@ -561,7 +540,7 @@ public class OptimalSwingSubController implements SwingSubController
    public void doTransitionOutOfSwingInAir(RobotSide swingLeg)
    {
       updatePositionError(swingLeg);
-      legConfigurationData.setcurrentlyInSwing(false);
+      swingParameters.setCurrentlyInSwing(false);
    }
 
    public boolean canWeStopNow()
