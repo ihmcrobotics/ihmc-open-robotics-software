@@ -22,16 +22,14 @@ public class LegTorqueData
 
    private final List<LegJointName> jointNames;
 
-   
    private final EnumMap<LegJointName, DoubleYoVariable> desiredJointPositions = new EnumMap<LegJointName, DoubleYoVariable>(LegJointName.class);
    private final EnumMap<LegJointName, DoubleYoVariable> desiredJointVelocities = new EnumMap<LegJointName, DoubleYoVariable>(LegJointName.class);
    private final EnumMap<LegJointName, DoubleYoVariable> desiredJointAccelerations = new EnumMap<LegJointName, DoubleYoVariable>(LegJointName.class);
    
    private final EnumYoVariable<RobotSide> robotSide = new EnumYoVariable<RobotSide>("robotSide", registry, RobotSide.class);
 
-
    private final ArrayList<YoVariable> allVariables;
-   private BooleanYoVariable dataValid = new BooleanYoVariable("dataValid", registry);
+   private final BooleanYoVariable dataValid = new BooleanYoVariable("dataValid", registry);
 
    public LegTorqueData(LegJointName[] jointNames, YoVariableRegistry parentRegistry)
    {
