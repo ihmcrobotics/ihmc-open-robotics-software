@@ -136,7 +136,8 @@ public class SpineJointLungingControlModule implements SpineLungingControlModule
       
       for (SpineJointName spineJointName : SpineJointName.values())
       {
-         spineTorques.setTorque(spineJointName, spineRevoluteJointList.get(spineJointName.ordinal()).getTau());
+         double torque = spineRevoluteJointList.get(spineJointName.ordinal()).getTau();
+         spineTorques.setTorque(spineJointName, torque);
       }
    }
    

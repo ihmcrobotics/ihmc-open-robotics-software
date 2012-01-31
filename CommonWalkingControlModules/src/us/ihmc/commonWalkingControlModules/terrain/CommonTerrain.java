@@ -288,16 +288,16 @@ public class CommonTerrain
 
    private static final SteppingStones generateRectangularBeamBalance(ConvexPolygon2d footPolygon)
    {
-      double startXPosition = 7.5;    // 0.65; //0.55; //-0.1;
-      double startYPosition = -0.72;    // -0.68;//-0.745; //-0.9; //-0.75;
-      double xDimension = 14.0;
-      double yDimension = 0.16;    // 0.14; //0.16; //0.18;
-      double spacingInX = -0.2;    // 0.0; //0.1;
-      double spacingInYSmall = 0.05;    // -0.15;
-      double spacingInYLarge = 0.1;
-      double baseZ = -0.1;
-      double height = 0.0;
-      int numRows = 4;
+      double startXPosition = 0.0;    //7.5 // 0.65; //0.55; //-0.1;
+      double startYPosition = 0.0;    //0.0 //-0.72 // -0.68;//-0.745; //-0.9; //-0.75;
+      double xDimension = 15.0;     //14.0
+      double yDimension = 0.5;    //0.16 // 0.14; //0.16; //0.18;
+      double spacingInX = -0.2;    //-0.2 // 0.0; //0.1;
+      double spacingInYSmall = 0.05;    //0.05 // -0.15;
+      double spacingInYLarge = 0.1;    //0.1
+      double baseZ = -0.1;     //-0.1
+      double height = 0.0;     //0.0
+      int numRows = 1; // 4
       int numColumns = 1;    // 20;
 
       SteppingStones steppingStones = SteppingStones.generateRectangularBeamBalance(startXPosition, startYPosition, xDimension, yDimension, spacingInX,
