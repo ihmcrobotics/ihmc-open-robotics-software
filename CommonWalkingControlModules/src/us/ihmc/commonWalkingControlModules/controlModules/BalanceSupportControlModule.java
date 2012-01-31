@@ -129,6 +129,17 @@ public class BalanceSupportControlModule
       // compute desired z-component of force on the body using PelvisHeightController
       double desiredPelvisHeightInWorld = getDesiredPelvisHeight();
       double fZOnPelvisInPelvisFrame = pelvisHeightControlModule.doPelvisHeightControl(desiredPelvisHeightInWorld, null);
+      
+      Wrench wrenchDueToUpperBodyLunging = couplingRegistry.getActualUpperBodyLungingWrench();
+      
+      if (wrenchDueToUpperBodyLunging != null)
+      {
+         FrameVector wrenchDueToUpperBodyDynamicsLinearPart = new FrameVector(wrenchDueToUpperBodyLunging.getExpressedInFrame(), wrenchDueToUpperBodyLunging.getLinearPartCopy());
+         wrenchDueToUpperBodyDynamicsLinearPart.changeFrame(ReferenceFrame.getWorldFrame());
+         double fZupperBodyOffset = wrenchDueToUpperBodyDynamicsLinearPart.getZ();
+//         System.out.println("fZupperBodyOffset: " + fZupperBodyOffset);
+         fZOnPelvisInPelvisFrame += fZupperBodyOffset;
+      }
 
       // TODO think of a smarter way to not let the robot toe off while lunging sideways. 
       if (couplingRegistry.getLungeAxisInFrame(ReferenceFrame.getWorldFrame()) != null)
