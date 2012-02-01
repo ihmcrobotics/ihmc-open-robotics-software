@@ -9,11 +9,11 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 public class SimpleDoubleSupportForceDistributor implements DoubleSupportForceDistributor
 {
-   private final ReferenceFrame spineRollFrame;
+   private final ReferenceFrame pelvisFrame;
 
    public SimpleDoubleSupportForceDistributor(CommonWalkingReferenceFrames referenceFrames)
    {
-      this.spineRollFrame = referenceFrames.getPelvisFrame();
+      this.pelvisFrame = referenceFrames.getPelvisFrame();
    }
 
    public void packForcesAndTorques(SideDependentList<Double> zForcesInPelvisFrameToPack, SideDependentList<FrameVector> torquesOnPelvis,
@@ -26,7 +26,7 @@ public class SimpleDoubleSupportForceDistributor implements DoubleSupportForceDi
 
          zForcesInPelvisFrameToPack.put(robotSide, zForceInPelvisFrameTotal * legStrength);
 
-         FrameVector torque = torqueOnPelvisTotal.changeFrameCopy(spineRollFrame);
+         FrameVector torque = torqueOnPelvisTotal.changeFrameCopy(pelvisFrame);
          torque.scale(legStrength);
 
          torquesOnPelvis.set(robotSide, torque);
