@@ -68,19 +68,19 @@ public class DesiredJointAccelerationCalculator
    private void computeDesiredAccelerationOfFootWithRespectToPelvis(SpatialAccelerationVector accelerationOfFootWithRespectToPelvis, SpatialAccelerationVector desiredAccelerationOfFootWithRespectToElevator)
    {
 //      SpatialAccelerationVector accelerationOfFootWithRespectToPelvis = new SpatialAccelerationVector();
-      rootJoint.packDesiredJointAcceleration(accelerationOfFootWithRespectToPelvis);    // acceleration of imu with respect to elevator
-      accelerationOfFootWithRespectToPelvis.changeBodyFrameNoRelativeAcceleration(pelvisFrame);    // acceleration of body with respect to elevator
+      rootJoint.packDesiredJointAcceleration(accelerationOfFootWithRespectToPelvis);    // acceleration of pelvis after joint frame with respect to elevator
+      accelerationOfFootWithRespectToPelvis.changeBodyFrameNoRelativeAcceleration(pelvisFrame);    // acceleration of pelvis body with respect to elevator
       accelerationOfFootWithRespectToPelvis.changeFrameNoRelativeMotion(pelvisFrame);
 
       Twist twistOfPelvisWithRespectToFoot = computeTwistOfPelvisWithRespectToFoot();
 
-      rootJoint.packJointTwist(twistOfPelvisWithRespectToElevator);    // twist of imu with respect to elevator
-      twistOfPelvisWithRespectToElevator.changeBodyFrameNoRelativeTwist(pelvisFrame);    // twist of body with respect to elevator
+      rootJoint.packJointTwist(twistOfPelvisWithRespectToElevator);    // twist of pelvis after joint frame with respect to elevator
+      twistOfPelvisWithRespectToElevator.changeBodyFrameNoRelativeTwist(pelvisFrame);    // twist of pelvis body with respect to elevator
       twistOfPelvisWithRespectToElevator.changeFrame(pelvisFrame);
 
       accelerationOfFootWithRespectToPelvis.changeFrame(footFrame, twistOfPelvisWithRespectToFoot, twistOfPelvisWithRespectToElevator);
-      accelerationOfFootWithRespectToPelvis.invert();    // acceleration of elevator with respect to body
-      accelerationOfFootWithRespectToPelvis.add(desiredAccelerationOfFootWithRespectToElevator);    // acceleration of foot with respect to body
+      accelerationOfFootWithRespectToPelvis.invert();    // acceleration of elevator with respect to pelvis body
+      accelerationOfFootWithRespectToPelvis.add(desiredAccelerationOfFootWithRespectToElevator);    // acceleration of foot with respect to pelvis body
 
 //      return accelerationOfFootWithRespectToPelvis;
    }
