@@ -57,7 +57,7 @@ public class SimulatedIMURawSensorReaderTest
    public static final double GRAVITY = (2.0 * Math.random() - 1) * 15.0; // random gravity between -15 and +15 m/s^2
    public static final int IMU_INDEX = (int) (10.0 * Math.random()); // random imu index between 0 and 10
    
-   SimulatedIMURawSensorReader simulatedIMURawSensorReader;
+   private SimulatedIMURawSensorReader simulatedIMURawSensorReader;
    
    @Before
    public void setUp() throws Exception
@@ -142,7 +142,7 @@ public class SimulatedIMURawSensorReaderTest
       }
    }
 
-   void generateAppliedOrientation()
+   private void generateAppliedOrientation()
    {
       randomBodyAxisAngle.set(2.0*(Math.random()-0.5), 2.0*(Math.random()-0.5), 2.0*(Math.random()-0.5), Math.random()*2.0*Math.PI);
       //randomBodyAxisAngle.set(0.0, 0.0, 0.0, 0.0); // for debugging
@@ -150,7 +150,7 @@ public class SimulatedIMURawSensorReaderTest
       randomTransformBodyToWorld.set(randomBodyAxisAngle);
    }
    
-   void generateAppliedVelocity()
+   private void generateAppliedVelocity()
    {
       randomLinearVelocity.set(bodyFrame, Math.random()-0.5, Math.random()-0.5, Math.random()-0.5);
       randomLinearVelocity.scale(10);
@@ -161,7 +161,7 @@ public class SimulatedIMURawSensorReaderTest
       //randomAngularVelocity.set(0.0, 0.0, 1.0);  // for debugging
    }
    
-   void generateAppliedAcceleration()
+   private void generateAppliedAcceleration()
    {
       randomLinearAcceleration.set(bodyFrame, Math.random()-0.5, Math.random()-0.5, Math.random()-0.5);
       randomLinearAcceleration.scale(40);
@@ -172,7 +172,7 @@ public class SimulatedIMURawSensorReaderTest
       //randomAngularAcceleration.set(0.0, 0.0, 0.0); // for debugging
    }
    
-   void generateExpectedOrientation()
+   private void generateExpectedOrientation()
    {
       Matrix3d randomTransformBodyToWorldMatrix = new Matrix3d();
       Matrix3d transformIMUToJointMatrix = new Matrix3d();
@@ -182,13 +182,13 @@ public class SimulatedIMURawSensorReaderTest
       expectedIMUOrientation.mul(randomTransformBodyToWorldMatrix, transformIMUToJointMatrix);
    }
    
-   void generateExpectedAngularVelocity()
+   private void generateExpectedAngularVelocity()
    {
       expectedAngularVelocityInIMUFrame.set(randomAngularVelocity.getVectorCopy()); // in joint/body frame
       transformJointToIMU.transform(expectedAngularVelocityInIMUFrame);
    }
    
-   void generateExpectedLinearAcceleration()
+   private void generateExpectedLinearAcceleration()
    {
       FrameVector centerAppliedAccelerationPart = new FrameVector(randomLinearAcceleration);
       
@@ -215,14 +215,14 @@ public class SimulatedIMURawSensorReaderTest
       transformJointToIMU.transform(expectedLinearAccelerationOfIMUInIMUFrame);
    }
    
-   void assertEqualsVector(Vector3d expected, Vector3d actual, double delta)
+   private static void assertEqualsVector(Vector3d expected, Vector3d actual, double delta)
    {
       assertEquals(expected.getX(), actual.getX(), delta);
       assertEquals(expected.getY(), actual.getY(), delta);
       assertEquals(expected.getZ(), actual.getZ(), delta);
    }
    
-   private void assertEqualsRotationMatrix(Matrix3d expected, Matrix3d actual, double delta)
+   private static void assertEqualsRotationMatrix(Matrix3d expected, Matrix3d actual, double delta)
    {
       Matrix3d differenceMatrix = new Matrix3d();
       differenceMatrix.mulTransposeLeft(expected, actual);
@@ -235,31 +235,31 @@ public class SimulatedIMURawSensorReaderTest
       assertEquals(0.0, differenceAngle, delta);
    }
 
-   class RawSensors implements RawIMUSensorsInterface
+   private static class RawSensors implements RawIMUSensorsInterface
    {
-      private Double r_imu_m00 = 0.0;
-      private Double r_imu_m01 = 0.0;
-      private Double r_imu_m02 = 0.0;
+      private double r_imu_m00 = 0.0;
+      private double r_imu_m01 = 0.0;
+      private double r_imu_m02 = 0.0;
 
-      private Double r_imu_m10 = 0.0;
-      private Double r_imu_m11 = 0.0;
-      private Double r_imu_m12 = 0.0;
+      private double r_imu_m10 = 0.0;
+      private double r_imu_m11 = 0.0;
+      private double r_imu_m12 = 0.0;
 
-      private Double r_imu_m20 = 0.0;
-      private Double r_imu_m21 = 0.0;
-      private Double r_imu_m22 = 0.0;
+      private double r_imu_m20 = 0.0;
+      private double r_imu_m21 = 0.0;
+      private double r_imu_m22 = 0.0;
 
-      private Double r_imu_accel_x = 0.0;
-      private Double r_imu_accel_y = 0.0;
-      private Double r_imu_accel_z = 0.0;
+      private double r_imu_accel_x = 0.0;
+      private double r_imu_accel_y = 0.0;
+      private double r_imu_accel_z = 0.0;
 
-      private Double r_imu_gyro_x = 0.0;
-      private Double r_imu_gyro_y = 0.0;
-      private Double r_imu_gyro_z = 0.0;  
+      private double r_imu_gyro_x = 0.0;
+      private double r_imu_gyro_y = 0.0;
+      private double r_imu_gyro_z = 0.0;  
 
-      private Double r_imu_compass_x = 0.0;
-      private Double r_imu_compass_y = 0.0;
-      private Double r_imu_compass_z = 0.0;  
+      private double r_imu_compass_x = 0.0;
+      private double r_imu_compass_y = 0.0;
+      private double r_imu_compass_z = 0.0;  
 
       public void setOrientation(Matrix3d orientation, int imuIndex)
       {      
@@ -328,7 +328,7 @@ public class SimulatedIMURawSensorReaderTest
       }
    }
 
-   class FullRobotModel
+   private static class FullRobotModel
    {
       private final RigidBody elevator;
       private final RigidBody body;
