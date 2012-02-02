@@ -18,7 +18,6 @@ import us.ihmc.utilities.screwTheory.RigidBodyInertia;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.utilities.screwTheory.Twist;
-import us.ihmc.utilities.screwTheory.TwistAndAccelerationCalculator;
 
 import com.yobotics.simulationconstructionset.rawSensors.RawIMUSensorsInterface;
 
@@ -68,50 +67,11 @@ public class SimulatedIMURawSensorReaderTest
       
       imuFrame = fullRobotModel.createOffsetFrame(fullRobotModel.getBodyLink().getParentJoint(), transformIMUToJoint, "imuFrame");
       
-      simulatedIMURawSensorReader = new SimulatedIMURawSensorReader(rawSensors, IMU_INDEX, rigidBody, imuFrame)
-      {
-         private static final long serialVersionUID = 6119697219409662317L;
-
-         @Override
-         protected void simulateIMU()
-         {
-            // Perfect IMU here for test
-            m00.set(perf_m00.getDoubleValue());
-            m01.set(perf_m01.getDoubleValue());
-            m02.set(perf_m02.getDoubleValue());
-            
-            m10.set(perf_m10.getDoubleValue());
-            m11.set(perf_m11.getDoubleValue());
-            m12.set(perf_m12.getDoubleValue());
-            
-            m20.set(perf_m20.getDoubleValue());
-            m21.set(perf_m21.getDoubleValue());
-            m22.set(perf_m22.getDoubleValue());
-            
-            accel_x.set(perf_accel_x.getDoubleValue());
-            accel_y.set(perf_accel_y.getDoubleValue());
-            accel_z.set(perf_accel_z.getDoubleValue());
-            
-            gyro_x.set(perf_gyro_x.getDoubleValue());
-            gyro_y.set(perf_gyro_y.getDoubleValue());
-            gyro_z.set(perf_gyro_z.getDoubleValue());
-            
-            compass_x.set(perf_compass_x.getDoubleValue());
-            compass_y.set(perf_compass_y.getDoubleValue());
-            compass_z.set(perf_compass_z.getDoubleValue());
-         }
-         
-         @Override
-         protected TwistAndAccelerationCalculator createTwistAndAccelerationCalculator()
-         {
-            RigidBody rootBody = fullRobotModel.getElevator();
-            ReferenceFrame rootBodyFrame = fullRobotModel.getElevatorFrame();
-            Vector3d linearAcceleration = new Vector3d(0.0, 0.0, GRAVITY);
-            Vector3d angularAcceleration = new Vector3d();
-            SpatialAccelerationVector rootAcceleration = new SpatialAccelerationVector(rootBodyFrame, worldFrame, rootBodyFrame, linearAcceleration, angularAcceleration);
-            return new TwistAndAccelerationCalculator(worldFrame, rootBody, rootAcceleration, true, true, false);
-         }
-      };
+      Vector3d linearAcceleration = new Vector3d(0.0, 0.0, GRAVITY);
+      Vector3d angularAcceleration = new Vector3d();
+      ReferenceFrame rootBodyFrame = fullRobotModel.getElevatorFrame();
+      SpatialAccelerationVector rootAcceleration = new SpatialAccelerationVector(rootBodyFrame, ReferenceFrame.getWorldFrame(), rootBodyFrame, linearAcceleration, angularAcceleration);
+      simulatedIMURawSensorReader = new PerfectSimulatedIMURawSensorReader(rawSensors, IMU_INDEX, rigidBody, imuFrame, fullRobotModel.getElevator(), rootAcceleration);
       
       simulatedIMURawSensorReader.initialize();
    }
