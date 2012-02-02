@@ -19,7 +19,7 @@ import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimu
 
 
 
-public class SimulatedIMURawSensorReaderTest2
+public class SimulatedIMURawSensorReader2Test
 {
    private Random random;
    
@@ -32,7 +32,7 @@ public class SimulatedIMURawSensorReaderTest2
    @Test
    public void test() throws SimulationExceededMaximumTimeException, UnreasonableAccelerationException
    {
-      TestRobot robot = new TestRobot();
+      SingleRigidBodyRobot robot = new SingleRigidBodyRobot();
       robot.setPosition(RandomTools.getRandomVector(random));
       robot.setYawPitchRoll(random.nextDouble(), random.nextDouble(), random.nextDouble());
       robot.setAngularVelocity(RandomTools.getRandomVector(random));

@@ -41,7 +41,7 @@ public class FullRobotModel
       body = ScrewTools.addRigidBody("body", rootJoint, momentOfInertia, 1.0, new Vector3d(0.0, 0.0, 0.0));
    }
 
-   public void update(TestRobot robot)
+   public void update(SingleRigidBodyRobot robot)
    {
       // Update Body Pose
       Transform3D transformToWorld = new Transform3D();

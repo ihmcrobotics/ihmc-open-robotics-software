@@ -11,15 +11,9 @@ import com.yobotics.simulationconstructionset.FloatingJoint;
 import com.yobotics.simulationconstructionset.Link;
 import com.yobotics.simulationconstructionset.LinkGraphics;
 import com.yobotics.simulationconstructionset.Robot;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 
 
-/** 
- * This class DoublePendulumRobot is a public class that extends Robot. The class Robot is
- * included in the Simulation Construction Set and has built in graphics, dynamics, etc.
- * Extending the class is an easy way to make a new type of robot, in this case a DoublePendulumRobot.
- */
-public class TestRobot extends Robot
+public class SingleRigidBodyRobot extends Robot
 {
    private static final long serialVersionUID = -7671864179791904256L;
 	
@@ -34,7 +28,7 @@ public class TestRobot extends Robot
    private final ExternalForcePoint forcePoint;
 
    
-   public TestRobot()
+   public SingleRigidBodyRobot()
    {
       super("DoublePendulum"); // create and instance of Robot
       
