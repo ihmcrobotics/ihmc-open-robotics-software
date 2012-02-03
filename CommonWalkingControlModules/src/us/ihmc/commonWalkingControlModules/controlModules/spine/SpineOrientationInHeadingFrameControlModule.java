@@ -64,9 +64,9 @@ public class SpineOrientationInHeadingFrameControlModule implements SpineControl
       // get velocities
       if (JUST_DAMP_JOINT_VELOCITIES_DIRECTLY)
       {
-         actualAngleVelocities.get(YawPitchOrRoll.YAW).set(-processedSensors.getSpineJointVelocity(SpineJointName.SPINE_YAW));
-         actualAngleVelocities.get(YawPitchOrRoll.PITCH).set(-processedSensors.getSpineJointVelocity(SpineJointName.SPINE_PITCH));
-         actualAngleVelocities.get(YawPitchOrRoll.ROLL).set(-processedSensors.getSpineJointVelocity(SpineJointName.SPINE_ROLL));
+         actualAngleVelocities.get(YawPitchOrRoll.YAW).set(processedSensors.getSpineJointVelocity(SpineJointName.SPINE_YAW));
+         actualAngleVelocities.get(YawPitchOrRoll.PITCH).set(processedSensors.getSpineJointVelocity(SpineJointName.SPINE_PITCH));
+         actualAngleVelocities.get(YawPitchOrRoll.ROLL).set(processedSensors.getSpineJointVelocity(SpineJointName.SPINE_ROLL));
       }
 
       else
@@ -110,11 +110,7 @@ public class SpineOrientationInHeadingFrameControlModule implements SpineControl
 
          double torque = pdController.computeForAngles(actualPosition, desiredPosition, actualVelocity, desiredVelocity);
 
-         /*
-          * Now use the negative of this torque, since the we've built the robot from the chest down:
-          * e.g.: a positive spine pitch joint velocity causes a negative pitch angle rate for the orientation of the chest w.r.t. world
-          */
-         spineTorquesToPack.setTorque(spineJointName, -torque);
+         spineTorquesToPack.setTorque(spineJointName, torque);
       }
    }
 
