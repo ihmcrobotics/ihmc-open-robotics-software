@@ -101,14 +101,16 @@ public class OptimalSwingSubController implements SwingSubController
    
 //   private final EnumMap<LegJointName, AlphaFilteredYoVariable> filteredJointTorques = new EnumMap<LegJointName, AlphaFilteredYoVariable>(LegJointName.class);
    
-   private final DoubleYoVariable jointVelocityBreakFrequency = new DoubleYoVariable("jointVelocityBreakFrequency", registry);
-   private final EnumMap<LegJointName, AlphaFilteredYoVariable> filteredJointVelocities = new EnumMap<LegJointName, AlphaFilteredYoVariable>(LegJointName.class);
+   private final DoubleYoVariable desiredAccelerationBreakFrequency = new DoubleYoVariable("desiredAccelerationBreakFrequency", registry);
+   private final EnumMap<LegJointName, AlphaFilteredYoVariable> filteredDesiredJointAccelerations = new EnumMap<LegJointName, AlphaFilteredYoVariable>(LegJointName.class);
    
    private final SideDependentList<FootSwitchInterface> footSwitches;
 
    private final SwingLegAnglesAtEndOfStepEstimator swingLegAnglesAtEndOfStepEstimator;
 
    private final ReferenceFrame desiredHeadingFrame;
+
+   private final double controlDT;
 
 
 
@@ -127,6 +129,7 @@ public class OptimalSwingSubController implements SwingSubController
       this.torqueControlModule = swingLegTorqueControlModule;
       this.swingLegAnglesAtEndOfStepEstimator = swingLegAnglesAtEndOfStepEstimator;
       this.desiredHeadingFrame = desiredHeadingControlModule.getDesiredHeadingFrame();
+      this.controlDT = controlDT;
 
       this.swingParameters = swingParameters;
       this.legTorqueData = legTorqueData;
@@ -149,11 +152,8 @@ public class OptimalSwingSubController implements SwingSubController
       for(LegJointName jointName : legJointNames)
       {
          legTorquesAtBeginningOfStep.put(jointName, new DoubleYoVariable(jointName.getCamelCaseNameForStartOfExpression() + "TorqueAtBeginningOfStep", registry));
-
          
-//         filteredJointTorques.put(jointName, new AlphaFilteredYoVariable("alhpaFiltered"+jointName.getCamelCaseNameForMiddleOfExpression()+"Torque", registry, AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(15.0, controlDT)));
-         
-         filteredJointVelocities.put(jointName, new AlphaFilteredYoVariable("alhpaFiltered"+jointName.getCamelCaseNameForMiddleOfExpression()+"JointVelocity", registry, AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(jointVelocityBreakFrequency.getDoubleValue(), controlDT)));
+         filteredDesiredJointAccelerations.put(jointName, new AlphaFilteredYoVariable("alhpaFiltered"+jointName.getCamelCaseNameForMiddleOfExpression()+"DesiredJointAcceleration", registry, AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(desiredAccelerationBreakFrequency.getDoubleValue(), controlDT)));
       }
       
       parentRegistry.addChild(registry);
@@ -167,7 +167,7 @@ public class OptimalSwingSubController implements SwingSubController
       for(LegJointName jointName : legJointNames)
       {
 //         filteredJointTorques.get(jointName).reset();
-         filteredJointVelocities.get(jointName).reset();
+         filteredDesiredJointAccelerations.get(jointName).reset();
       }
    }
    private void setParameters()
@@ -179,7 +179,7 @@ public class OptimalSwingSubController implements SwingSubController
       setEstimatedSwingTimeRemaining(swingDuration.getDoubleValue());
       ikAlpha.set(0.07);
       
-      jointVelocityBreakFrequency.set(2.0);
+      desiredAccelerationBreakFrequency.set(5.0);
       
       hipYawAngleController.setProportionalGain(120.0);
       hipYawAngleController.setDerivativeGain(2.0);
@@ -313,7 +313,11 @@ public class OptimalSwingSubController implements SwingSubController
          {
             legJointPositions.setJointPosition(jointName, legTorqueData.getDesiredJointPosition(jointName));
             legJointVelocities.setJointVelocity(jointName, legTorqueData.getDesiredJointVelocity(jointName));
-            legJointAccelerations.setJointAcceleration(jointName, legTorqueData.getDesiredJointAcceleration(jointName));
+            
+            filteredDesiredJointAccelerations.get(jointName).setAlpha(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(desiredAccelerationBreakFrequency.getDoubleValue(), controlDT));
+            filteredDesiredJointAccelerations.get(jointName).update(legTorqueData.getDesiredJointAcceleration(jointName));
+            
+            legJointAccelerations.setJointAcceleration(jointName,  filteredDesiredJointAccelerations.get(jointName).getDoubleValue());
          }
 //   
 //         Orientation footOrientation = new Orientation(groundPlaneFrame, legJointPositions.getJointPosition(LegJointName.HIP_YAW), 0.0, 0.0);
