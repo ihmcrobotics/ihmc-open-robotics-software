@@ -51,6 +51,8 @@ public class SimulatedIMURawSensorReader2Test
       SimulatedIMURawSensorReader simulatedIMURawSensorReader = new PerfectSimulatedIMURawSensorReader(rawSensors, imuIndex, rigidBody, imuFrame, rootBody, rootAcceleration);
       PerfectIMUSensorProcessor imuSensorProcessor = new PerfectIMUSensorProcessor(rawSensors, processedSensors);
 
+      simulatedIMURawSensorReader.initialize();
+      imuSensorProcessor.initialize();
       robot.doDynamicsButDoNotIntegrate();
       fullRobotModel.update(robot);
       simulatedIMURawSensorReader.read();
