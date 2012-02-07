@@ -66,7 +66,7 @@ public class InverseDynamicsCalculatorTest
 
       SixDoFJoint rootInverseDynamicsJoint = new SixDoFJoint("root", world, worldFrame);
 
-      Link link = createRandomLink("link", true);
+      Link link = createRandomLink("link", false);
       rootJoint.setLink(link);
       Vector3d comOffset = new Vector3d();
       link.getComOffset(comOffset);
