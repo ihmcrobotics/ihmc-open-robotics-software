@@ -23,7 +23,6 @@ public class RobotTest
    private static final double COORDINATE_SYSTEM_LENGTH = 0.3;
    private static final boolean SHOW_GUI = false;
 
-   // FIXME: main assertion commented out!
    @Test
    public void testSwitchingRootJoint() throws InterruptedException, UnreasonableAccelerationException, SimulationExceededMaximumTimeException
    {
@@ -121,7 +120,7 @@ public class RobotTest
       BlockingSimulationRunner simulationRunner = new BlockingSimulationRunner(scs, 50.0);
       simulationRunner.simulateAndBlock(simulateTime);
 
-//      sleepIfShowingGUI();
+      sleepIfShowingGUI();
       double epsilonAfter = 1e-4;
       JUnitTools.assertTuple3dEquals(computeCoM(robot1), computeCoM(robot2), epsilonAfter);
       JUnitTools.assertTuple3dEquals(computeLinearMomentum(robot1), computeLinearMomentum(robot2), epsilonAfter);
