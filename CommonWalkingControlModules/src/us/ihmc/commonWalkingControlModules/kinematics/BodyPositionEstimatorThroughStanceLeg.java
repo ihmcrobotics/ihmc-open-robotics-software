@@ -2,9 +2,7 @@ package us.ihmc.commonWalkingControlModules.kinematics;
 
 import javax.vecmath.Tuple3d;
 
-import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.LegToTrustForVelocityReadOnly;
-import us.ihmc.commonWalkingControlModules.sensors.ProcessedSensorsInterface;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -23,7 +21,8 @@ public class BodyPositionEstimatorThroughStanceLeg implements BodyPositionEstima
    private final YoVariableRegistry registry;
    private final ReferenceFrame world = ReferenceFrame.getWorldFrame();
    private final RobotSide robotSide;
-   private final CommonWalkingReferenceFrames referenceFrames;
+   private final ReferenceFrame bodyFrame;
+   private final ReferenceFrame ankleZUpFrame;
    private final LegToTrustForVelocityReadOnly legToTrustForVelocity;
    private final FootTwistCalculator footTwistCalculator;
    private final YoFramePoint anklePositionFix;
@@ -38,14 +37,15 @@ public class BodyPositionEstimatorThroughStanceLeg implements BodyPositionEstima
    private final DoubleYoVariable footLinearVelocityMagnitude;
    private final double ankleHeight;
 
-   public BodyPositionEstimatorThroughStanceLeg(RobotSide robotSide, ProcessedSensorsInterface processedSensors, LegToTrustForVelocityReadOnly legToTrustForVelocity, CommonWalkingReferenceFrames referenceFrames, double defaultCovariance, double ankleHeight, double footSlippingAngularVelocityLimit, double footSlippingLinearVelocityLimit, double anklePositionFixBreakFrequencyHertz, double controlDT, YoVariableRegistry parentRegistry)
+   public BodyPositionEstimatorThroughStanceLeg(RobotSide robotSide, FootTwistCalculator footTwistCalculator, LegToTrustForVelocityReadOnly legToTrustForVelocity, ReferenceFrame bodyFrame, ReferenceFrame ankleZUpFrame, double defaultCovariance, double ankleHeight, double footSlippingAngularVelocityLimit, double footSlippingLinearVelocityLimit, double anklePositionFixBreakFrequencyHertz, double controlDT, YoVariableRegistry parentRegistry)
    {
       this.name = robotSide + getClass().getSimpleName();
       this.registry = new YoVariableRegistry(name);
       this.robotSide = robotSide;
-      this.referenceFrames = referenceFrames;
+      this.bodyFrame = bodyFrame;
+      this.ankleZUpFrame = ankleZUpFrame;
       this.legToTrustForVelocity = legToTrustForVelocity;
-      this.footTwistCalculator = new FootTwistCalculator(robotSide, processedSensors);
+      this.footTwistCalculator = footTwistCalculator;
       this.anklePositionFix = new YoFramePoint("anklePositionFix", "", world, registry);
       this.alphaAnklePositionFix = new DoubleYoVariable("alphaPositionFix", registry);
       this.filteredAnklePositionFix = AlphaFilteredYoFramePoint.createAlphaFilteredYoFramePoint("filteredAnklePositionFix", "", registry, alphaAnklePositionFix, anklePositionFix);
@@ -84,8 +84,8 @@ public class BodyPositionEstimatorThroughStanceLeg implements BodyPositionEstima
          resetAnklePositionInWorld();
       currentCovariance.set(covariance);
       
-      tempBodyPosition.setToZero(referenceFrames.getIMUFrame());
-      tempBodyPosition.changeFrame(referenceFrames.getAnkleZUpFrame(robotSide));
+      tempBodyPosition.setToZero(bodyFrame);
+      tempBodyPosition.changeFrame(ankleZUpFrame);
       tempBodyPositionVector.setAndChangeFrame(tempBodyPosition);
       tempBodyPositionVector.changeFrame(world);
       bodyPositionThroughStanceLeg.set(filteredAnklePositionFix);
@@ -99,7 +99,7 @@ public class BodyPositionEstimatorThroughStanceLeg implements BodyPositionEstima
    
    private void updateAnklePositionInWorld()
    {
-      FramePoint ankle = new FramePoint(referenceFrames.getAnkleZUpFrame(robotSide));
+      FramePoint ankle = new FramePoint(ankleZUpFrame);
       ankle.changeFrame(world);
       ankle.setZ(ankleHeight);
       anklePositionFix.set(ankle);
@@ -121,6 +121,11 @@ public class BodyPositionEstimatorThroughStanceLeg implements BodyPositionEstima
    private final FrameVector tempLinearPart = new FrameVector(ReferenceFrame.getWorldFrame());
    private boolean isFootStationary()
    {
+      if (footTwistCalculator == null)
+      {
+         return true;
+      }
+      
       Twist footTwist = footTwistCalculator.computeFootTwist();
       footTwist.packAngularPart(tempAngularPart);
       footTwist.packBodyOriginLinearPartInBaseFrame(tempLinearPart);
