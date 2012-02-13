@@ -163,6 +163,7 @@ public class BodyPositionAndVelocityEstimatorKalman implements BodyPositionAndVe
 
    private void updateInputs()
    {
+      // TODO: IMU is not always at body root joint, make this more general for arbitrary IMU position
       FrameVector bodyAcceleration = processedIMUSensors.getAcceleration(bodyIMUIndex);
       bodyAcceleration.checkReferenceFrameMatch(world);
 
