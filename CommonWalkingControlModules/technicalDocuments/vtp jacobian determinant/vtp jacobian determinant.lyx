@@ -83,7 +83,6 @@ Re_{x} & Re_{y}
 
 \begin_layout Standard
 
-
 \end_layout
 
 \begin_layout Standard
@@ -211,20 +210,6 @@ r_{21} & r_{22}
 \end_inset
 
 so that
-\begin_inset Formula 
-\[
-\det\left(J_{vtp,2\times2}\right)=\det\left(\begin{array}{cc}
-0 & -p_{z}\\
-p_{z} & 0
-\end{array}\right)\det\left(\begin{array}{cc}
-r_{11} & r_{12}\\
-r_{21} & r_{22}
-\end{array}\right)
-\]
-
-\end_inset
-
-
 \end_layout
 
 \begin_layout Standard
@@ -289,11 +274,11 @@ r_{11}r_{22}-r_{12}r_{21} & = & c\alpha c\beta s\alpha s\beta s\gamma+c^{2}\alph
 
 \end_inset
 
-which shows that the other way to have the determinant be zero is when
+which shows that the other way to have the determinant be zero is when 
 \begin_inset Formula $\cos\beta$
 \end_inset
 
- or
+ or 
 \begin_inset Formula $\cos\gamma$
 \end_inset
 
