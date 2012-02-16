@@ -22,6 +22,7 @@ import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.processedSensors.ProcessedBodyPositionSensorsWriteOnlyInterface;
 import com.yobotics.simulationconstructionset.processedSensors.ProcessedIMUSensorsReadOnlyInterface;
+import com.yobotics.simulationconstructionset.processedSensors.ProcessedTimeSensorsReadOnlyInterface;
 import com.yobotics.simulationconstructionset.robotController.SensorProcessor;
 
 public class BodyPositionAndVelocityEstimatorKalman implements BodyPositionAndVelocityEstimator
@@ -33,6 +34,7 @@ public class BodyPositionAndVelocityEstimatorKalman implements BodyPositionAndVe
 
    private final ProcessedIMUSensorsReadOnlyInterface processedIMUSensors;
    private final ProcessedBodyPositionSensorsWriteOnlyInterface processedBodyPositionSensors;
+   private final ProcessedTimeSensorsReadOnlyInterface processedTimeSensorsReadOnlyInterface;
    private final SensorProcessor bodyReferenceFrameUpdater;
 
    private final HashMap<BodyPositionEstimator, Integer> bodyPositionEstimatorIndices = new HashMap<BodyPositionEstimator, Integer>();
@@ -60,18 +62,21 @@ public class BodyPositionAndVelocityEstimatorKalman implements BodyPositionAndVe
    private int nMeasurements;
    
    private final int bodyIMUIndex;
+   private final boolean configureEveryTick;
 
    public BodyPositionAndVelocityEstimatorKalman(ProcessedIMUSensorsReadOnlyInterface processedIMUSensors,
-           ProcessedBodyPositionSensorsWriteOnlyInterface processedBodyPositionSensors, double controlDT, FramePoint initialPositionIfNotUsingVicon,
+           ProcessedBodyPositionSensorsWriteOnlyInterface processedBodyPositionSensors, ProcessedTimeSensorsReadOnlyInterface processedTimeSensorsReadOnlyInterface, double controlDT, FramePoint initialPositionIfNotUsingVicon,
            SensorProcessor bodyReferenceFrameUpdater, List<BodyPositionEstimator> bodyPositionEstimators, List<BodyVelocityEstimator> bodyVelocityEstimators,
-           BodyPositionEstimator bodyPositionEstimatorVicon, YoVariableRegistry estimatorRegistry, int bodyIMUIndex)
+           BodyPositionEstimator bodyPositionEstimatorVicon, YoVariableRegistry estimatorRegistry, int bodyIMUIndex, boolean configureEveryTick)
    {
       initialPositionIfNotUsingVicon.checkReferenceFrameMatch(world);
       this.processedIMUSensors = processedIMUSensors;
       this.processedBodyPositionSensors = processedBodyPositionSensors;
+      this.processedTimeSensorsReadOnlyInterface = processedTimeSensorsReadOnlyInterface;
       this.initialPositionIfNotUsingVicon = new FramePoint(initialPositionIfNotUsingVicon);
       this.bodyReferenceFrameUpdater = bodyReferenceFrameUpdater;
       this.bodyIMUIndex = bodyIMUIndex;
+      this.configureEveryTick = configureEveryTick;
 
       int index = 0;
       for (BodyPositionEstimator bodyPositionEstimator : bodyPositionEstimators)
@@ -149,6 +154,11 @@ public class BodyPositionAndVelocityEstimatorKalman implements BodyPositionAndVe
 
    public void update()
    {
+      if (configureEveryTick) // For non real-time systems necessary
+      {
+         updateAllKalmanFilterConfigurations(processedTimeSensorsReadOnlyInterface.getDT());
+      }
+      
       updateInputs();
       updateMeasurements();
       setProcessNoiseCovariance();
@@ -277,32 +287,45 @@ public class BodyPositionAndVelocityEstimatorKalman implements BodyPositionAndVe
    {
       for (Direction direction : Direction.values())
       {
-         DenseMatrix64F stateTransitionMatrix = new DenseMatrix64F(nStates, nStates);
-         stateTransitionMatrix.set(positionIndex, positionIndex, 1.0);
-         stateTransitionMatrix.set(positionIndex, velocityIndex, controlDT);
-         stateTransitionMatrix.set(velocityIndex, positionIndex, 0.0);
-         stateTransitionMatrix.set(velocityIndex, velocityIndex, 1.0);
-
-         DenseMatrix64F inputMatrix = new DenseMatrix64F(nStates, nInputs);
-         inputMatrix.set(positionIndex, 0, 0.0);
-         inputMatrix.set(velocityIndex, 0, controlDT);
-
-         DenseMatrix64F outputMatrix = new DenseMatrix64F(nMeasurements, nStates);
-         for (BodyPositionEstimator bodyPositionEstimator : bodyPositionEstimatorIndices.keySet())
-         {
-            int i = bodyPositionEstimatorIndices.get(bodyPositionEstimator);
-            outputMatrix.set(i, positionIndex, 1.0);
-         }
-
-         for (BodyVelocityEstimator bodyVelocityEstimator : bodyVelocityEstimatorIndices.keySet())
-         {
-            int i = bodyVelocityEstimatorIndices.get(bodyVelocityEstimator);
-            outputMatrix.set(i, velocityIndex, 1.0);
-         }
-
          YoKalmanFilter kalmanFilter = new YoKalmanFilter("kalman" + direction, nStates, nInputs, nMeasurements, registry);
-         kalmanFilter.configure(stateTransitionMatrix, inputMatrix, outputMatrix);
+         updateKalmanFilterConfiguration(kalmanFilter, controlDT);
          kalmanFilters.put(direction, kalmanFilter);
+      }
+   }
+   
+   private void updateKalmanFilterConfiguration(KalmanFilter kalmanFilterToConfigure, double controlDT)
+   {
+      DenseMatrix64F stateTransitionMatrix = new DenseMatrix64F(nStates, nStates);
+      stateTransitionMatrix.set(positionIndex, positionIndex, 1.0);
+      stateTransitionMatrix.set(positionIndex, velocityIndex, controlDT);
+      stateTransitionMatrix.set(velocityIndex, positionIndex, 0.0);
+      stateTransitionMatrix.set(velocityIndex, velocityIndex, 1.0);
+
+      DenseMatrix64F inputMatrix = new DenseMatrix64F(nStates, nInputs);
+      inputMatrix.set(positionIndex, 0, 0.0);
+      inputMatrix.set(velocityIndex, 0, controlDT);
+
+      DenseMatrix64F outputMatrix = new DenseMatrix64F(nMeasurements, nStates);
+      for (BodyPositionEstimator bodyPositionEstimator : bodyPositionEstimatorIndices.keySet())
+      {
+         int i = bodyPositionEstimatorIndices.get(bodyPositionEstimator);
+         outputMatrix.set(i, positionIndex, 1.0);
+      }
+
+      for (BodyVelocityEstimator bodyVelocityEstimator : bodyVelocityEstimatorIndices.keySet())
+      {
+         int i = bodyVelocityEstimatorIndices.get(bodyVelocityEstimator);
+         outputMatrix.set(i, velocityIndex, 1.0);
+      }
+      
+      kalmanFilterToConfigure.configure(stateTransitionMatrix, inputMatrix, outputMatrix);
+   }
+   
+   private void updateAllKalmanFilterConfigurations(double controlDT)
+   {
+      for (Direction direction : Direction.values())
+      {
+         updateKalmanFilterConfiguration(kalmanFilters.get(direction), controlDT);
       }
    }
 
