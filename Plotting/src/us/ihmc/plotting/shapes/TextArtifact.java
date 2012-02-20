@@ -1,6 +1,6 @@
 package us.ihmc.plotting.shapes;
 
-import java.awt.Graphics;
+import java.awt.*;
 import java.io.PrintWriter;
 
 import us.ihmc.plotting.Artifact;
@@ -14,6 +14,7 @@ public class TextArtifact extends Artifact
    private double x1;
    private double y1;
    private String text;
+   private Font font = Font.getFont(Font.SANS_SERIF);
 
    public TextArtifact(String id, String text, double x1, double y1)
    {
@@ -41,6 +42,11 @@ public class TextArtifact extends Artifact
       return y1;
    }
 
+   public void setFontSize(int size)
+   {
+      font = new Font(Font.SANS_SERIF, Font.PLAIN, size);
+   }
+
    /**
     * Must provide a draw method for plotter to render artifact
     */
@@ -51,6 +57,7 @@ public class TextArtifact extends Artifact
 
 
       g.setColor(color);
+      g.setFont(font);
 
       g.drawString(text, x1, y1);
 
@@ -63,6 +70,7 @@ public class TextArtifact extends Artifact
 
 
       g.setColor(color);
+      g.setFont(font);
 
       g.drawString(text, x1, y1);
 
