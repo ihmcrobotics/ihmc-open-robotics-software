@@ -65,9 +65,9 @@ public class BodyPositionInTimeEstimator
       double[] xCoMInTime = LinearInvertedPendulumCapturePointCalculator.calculatePredictedCoMState(
                            currentCoMPosition.getX(), currentCoPPosition.getX(), currentCoMVelocity.getX(), 
                            gravity, comHeight, 0.0, t);
-      double[] yCoMInTime = LinearInvertedPendulumCapturePointCalculator.calculatePredictedCoMState(
-                           currentCoMPosition.getY(), currentCoPPosition.getY(), currentCoMVelocity.getY(), 
-                           gravity, comHeight, 0.0, t);
+//      double[] yCoMInTime = LinearInvertedPendulumCapturePointCalculator.calculatePredictedCoMState(
+//                           currentCoMPosition.getY(), currentCoPPosition.getY(), currentCoMVelocity.getY(), 
+//                           gravity, comHeight, 0.0, t);
       
       double xDeltaInTime = xCoMInTime[0] - currentCoMPosition.getX();
 //      double yDeltaInTime = yCoMInTime[0] - currentCoMPosition.getY();
@@ -79,7 +79,7 @@ public class BodyPositionInTimeEstimator
       pelvisPoseInTime.setPosition(bodyPosition);
       
       
-      FrameVector pelvisVelocityInTime = new FrameVector(desiredHeadingFrame, xCoMInTime[1], yCoMInTime[1], 0.0);
+      FrameVector pelvisVelocityInTime = new FrameVector(desiredHeadingFrame, xCoMInTime[1], currentCoMVelocity.getY(), 0.0);
       pelvisVelocityInTime.changeFrame(pelvisFrame);
       
       

@@ -17,7 +17,7 @@ import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.utilities.screwTheory.Twist;
 
 @Visualize
-public class FullRobotModel
+public class SimulatedSensorsTestFullRobotModel
 {
    private final RigidBody elevator;
    private final RigidBody body;
@@ -25,7 +25,7 @@ public class FullRobotModel
    private final SixDoFJoint rootJoint;
    private final ReferenceFrame worldFrame;
 
-   public FullRobotModel()
+   public SimulatedSensorsTestFullRobotModel()
    {
       worldFrame = ReferenceFrame.getWorldFrame();
       ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new Transform3D());

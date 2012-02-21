@@ -30,6 +30,7 @@ public class LegTorqueData
 
    private final ArrayList<YoVariable> allVariables;
    private final BooleanYoVariable dataValid = new BooleanYoVariable("dataValid", registry);
+   private final DoubleYoVariable timeTakenForSwingOptimization = new DoubleYoVariable("timeTakenForSwingOptimization", registry);
 
    public LegTorqueData(LegJointName[] jointNames, YoVariableRegistry parentRegistry)
    {
@@ -50,6 +51,15 @@ public class LegTorqueData
       
       allVariables = registry.getAllVariablesIncludingDescendants();
 
+   }
+   public void setTimeTakenForSwingOptimization(double timeTaken)
+   {
+      timeTakenForSwingOptimization.set(timeTaken);
+   }
+   
+   public double getTimeTakenForSwingOptimization()
+   {
+      return timeTakenForSwingOptimization.getDoubleValue();
    }
    
    public RobotSide getRobotSide()

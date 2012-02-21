@@ -196,6 +196,51 @@ public class StanceFullLegJacobian
 
       return new Wrench(pelvisFrame, pelvisFrame, forceOnPelvisInPelvisFrame, torqueOnPelvis.getVectorCopy());
    }
+   
+   /**
+    * Computes the desired wrench on the pelvis, expressed in the pelvis frame, such that there are no torques at the vtp.
+    * @param forceOnPelvis desired force vector on pelvis
+    * @param nZOnPelvisInPelvisFrame desired torque around the z-axis, expressed in PelvisFrame
+    * @return a wrench that requires no torque about the vtp, but still has the required nZ and forces.
+    */
+   public Wrench getWrenchInVTPNullSpace(FrameVector forceOnPelvis, double nZOnPelvisInPelvisFrame)
+   {
+      /*
+       * tauVTP = JVTPTranspose * FxyzNxyz
+       *                                              [ Nx ]
+       *                                              [ Ny ]
+       *                                               ----
+       * [ tauVTPx ] = [ J11 J21 | J31 J41 J51 J61] * [ Nz ]
+       * [ tauVTPy ]   [ J12 J22 | J32 J42 J52 J62]   [ Fx ]   = [ 0 ]
+       *                      A           B           [ Fy ]     [ 0 ]
+       *                                              [ Fz ]
+       *                                              
+       * A * Fxy + B * NzFxyz = 0
+       * Fxy = -A^(-1) * B * NzFxyz
+       */
+      forceOnPelvis.checkReferenceFrameMatch(pelvisFrame);
+
+      Matrix vtpJacobianMatrix = vtpJacobian.getJacobianMatrix();
+
+      int[] columns = {0, 1};
+      int[] aRows = {0, 1};
+      Matrix A = vtpJacobianMatrix.getMatrix(aRows, columns).transpose();
+
+      int[] bRows = {2, 3, 4, 5};
+      Matrix B = vtpJacobianMatrix.getMatrix(bRows, columns).transpose();
+
+      Matrix NzFxyz = new Matrix(4, 1);
+      NzFxyz.set(0, 0, nZOnPelvisInPelvisFrame);
+      NzFxyz.set(1, 0, forceOnPelvis.getX());
+      NzFxyz.set(2, 0, forceOnPelvis.getY());
+      NzFxyz.set(3, 0, forceOnPelvis.getZ());
+
+      Matrix Nxy = (A.solve(B.times(NzFxyz))).times(-1.0);
+
+      Vector3d torqueOnPelvisInPelvisFrame = new Vector3d(Nxy.get(0, 0), Nxy.get(1,0), nZOnPelvisInPelvisFrame);
+
+      return new Wrench(pelvisFrame, pelvisFrame, forceOnPelvis.getVector(), torqueOnPelvisInPelvisFrame);
+   }
 
    /**
     * Packs a LegTorques object with the torques corresponding to the given wrench on the pelvis.

@@ -39,7 +39,7 @@ public class SimulatedIMURawSensorReader2Test
       robot.setLinearVelocity(RandomTools.getRandomVector(random));
       robot.setExternalForce(RandomTools.getRandomVector(random));
       
-      FullRobotModel fullRobotModel = new FullRobotModel();
+      SimulatedSensorsTestFullRobotModel fullRobotModel = new SimulatedSensorsTestFullRobotModel();
       YoVariableRegistry registry = new YoVariableRegistry("test");
       RawSensors rawSensors = new RawSensors(registry);
       ReferenceFrame imuFrame = fullRobotModel.getRootJoint().getFrameAfterJoint();
