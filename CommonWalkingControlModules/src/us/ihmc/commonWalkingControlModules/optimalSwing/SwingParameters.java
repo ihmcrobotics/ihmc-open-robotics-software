@@ -83,24 +83,22 @@ public class SwingParameters
       return desiredJointPositionsAtEndOfStep.get(robotSide).get(jointName).getDoubleValue();
    }
    
-   public LegJointPositions getDesiredJointPositions(RobotSide robotSide)
+   public void getDesiredJointPositions(LegJointPositions legJointPositionsToPack)
    {
-      LegJointPositions ret = new LegJointPositions(robotSide);
+      RobotSide robotSide = legJointPositionsToPack.getRobotSide();
       for(LegJointName jointName : legJointNames)
       {
-         ret.setJointPosition(jointName, desiredJointPositionsAtEndOfStep.get(robotSide).get(jointName).getDoubleValue());
+         legJointPositionsToPack.setJointPosition(jointName, desiredJointPositionsAtEndOfStep.get(robotSide).get(jointName).getDoubleValue());
       }
-      return ret;
    }
    
-   public LegJointVelocities getDesiredJointVelocities(RobotSide robotSide)
+   public void getDesiredJointVelocities(LegJointVelocities legJointVelocitiesToPack)
    {
-      LegJointVelocities ret = new LegJointVelocities(legJointNames, robotSide);
+      RobotSide robotSide = legJointVelocitiesToPack.getRobotSide();
       for(LegJointName jointName : legJointNames)
       {
-         ret.setJointVelocity(jointName, desiredJointVelocitiesAtEndOfStep.get(robotSide).get(jointName).getDoubleValue());
+         legJointVelocitiesToPack.setJointVelocity(jointName, desiredJointVelocitiesAtEndOfStep.get(robotSide).get(jointName).getDoubleValue());
       }
-      return ret;
    }
    
    

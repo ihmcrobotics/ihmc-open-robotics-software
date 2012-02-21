@@ -44,6 +44,9 @@ public abstract class RegularWalkingGaitAbstractController implements RobotContr
    protected final StanceSubController stanceSubController;
    protected final SwingSubController swingSubController;
    protected final UpperBodySubController upperBodySubController;
+   
+   protected final LongStepPushOffController longStepPushOffController;
+   
    protected final CommonWalkingReferenceFrames referenceFrames;
 
    protected final LowerBodyTorques lowerBodyTorques;
@@ -59,6 +62,7 @@ public abstract class RegularWalkingGaitAbstractController implements RobotContr
    protected final BooleanYoVariable balanceOnOneLeg = new BooleanYoVariable("balanceOnOneLeg", "Starts and stops balancing on one leg", childRegistry);
    protected final BooleanYoVariable backToDoubleSupport = new BooleanYoVariable("backToDoubleSupport", childRegistry);
    protected final BooleanYoVariable swingInAir = new BooleanYoVariable("swingInAir", "Starts and stops swinging to a new position in the air", childRegistry);
+   protected final BooleanYoVariable doLongStepPushOff = new BooleanYoVariable("doLongStepPushOff", childRegistry);
 
    protected final BooleanYoVariable resetSteps = new BooleanYoVariable("resetSteps", childRegistry);
    protected final IntegerYoVariable stepsTaken = new IntegerYoVariable("stepsTaken", childRegistry);
@@ -76,7 +80,7 @@ public abstract class RegularWalkingGaitAbstractController implements RobotContr
 
    public RegularWalkingGaitAbstractController(String name, RobotSpecificJointNames robotJointNames, DoubleYoVariable time,
            ProcessedOutputsInterface processedOutputs, DoEveryTickSubController doEveryTickSubController, StanceSubController stanceSubController,
-           SwingSubController swingSubController, UpperBodySubController upperBodySubController, CommonWalkingReferenceFrames referenceFrames,
+           SwingSubController swingSubController, UpperBodySubController upperBodySubController, LongStepPushOffController longStepPushOffController, CommonWalkingReferenceFrames referenceFrames,
            YoVariableRegistry controllerRegistry)
    {
       this.name = name;
@@ -87,6 +91,7 @@ public abstract class RegularWalkingGaitAbstractController implements RobotContr
       this.stanceSubController = stanceSubController;
       this.swingSubController = swingSubController;
       this.upperBodySubController = upperBodySubController;
+      this.longStepPushOffController = longStepPushOffController;
       this.referenceFrames = referenceFrames;
       this.controllerRegistry = controllerRegistry;
       controllerRegistry.addChild(childRegistry);
@@ -139,7 +144,9 @@ public abstract class RegularWalkingGaitAbstractController implements RobotContr
       LeftEarlyStanceRightInitialSwing, LeftLateStanceRightMidSwing, LeftTerminalStanceRightTerminalSwing, TransferAllLoadToRightLegForWalking,
       RightLoadingLeftPreSwingA, RightLoadingLeftPreSwingB, RightLoadingLeftPreSwingC, RightEarlyStanceLeftInitialSwing, RightLateStanceLeftMidSwing,
       RightTerminalStanceLeftTerminalSwing, stopWalkingLeftLoadingState, stopWalkingRightLoadingState, leftLoadingForSingleLegBalance,
-      rightLoadingForSingleLegBalance, leftSingleLegBalanceRightPreSwingInAir, rightSingleLegBalanceRightPreSwingInAir, leftSingleLegBalanceRightSwingInAir, rightSingleLegBalanceRightSwingInAir, blankState
+      rightLoadingForSingleLegBalance, leftSingleLegBalanceRightPreSwingInAir, rightSingleLegBalanceRightPreSwingInAir, leftSingleLegBalanceRightSwingInAir, rightSingleLegBalanceRightSwingInAir, 
+      rightSingleLegBalanceLeftPushOffLongSteps, leftSingleLegBalanceRightPushOffLongSteps,
+      blankState
       ;
 
 //    public RobotSide getSupportLeg()
@@ -802,6 +809,60 @@ public abstract class RegularWalkingGaitAbstractController implements RobotContr
       }
    }
 
+   
+   protected class SingleLegBalanceLongStepPushOffState extends State
+   {
+
+      private final RobotSide supportLeg;
+      private final RobotSide swingLeg;
+      private BalanceOnOneLegConfiguration configuration;
+
+      public SingleLegBalanceLongStepPushOffState(RegularWalkingState stateName, RobotSide supportLeg)
+      {
+         super(stateName);
+
+         this.supportLeg = supportLeg;
+         this.swingLeg = supportLeg.getOppositeSide();
+
+         ReferenceFrame supportLegAnkleZUpFrame = referenceFrames.getAnkleZUpFrame(supportLeg);
+
+         double[] defaultYawPitchRoll = {0.0, 0.0, 0.0};
+         FramePoint defaultDesiredCapturePoint = new FramePoint(supportLegAnkleZUpFrame);
+         double defaultKneeBendSupportLeg = 0.0;
+         FramePoint dummySwingFootPosition = new FramePoint(supportLegAnkleZUpFrame);
+
+         configuration = new BalanceOnOneLegConfiguration(defaultYawPitchRoll, defaultDesiredCapturePoint, dummySwingFootPosition, defaultKneeBendSupportLeg);
+      }
+
+      public void doAction()
+      {
+         setLowerBodyTorquesToZero();
+
+         longStepPushOffController.doLongStepPushOff(lowerBodyTorques.getLegTorques(swingLeg), walkingStateMachine.timeInCurrentState());
+         stanceSubController.doSingleLegBalance(lowerBodyTorques.getLegTorques(supportLeg), supportLeg, walkingStateMachine.timeInCurrentState());
+         upperBodySubController.doUpperBodyControl(upperBodyTorques);
+
+         // no default next state
+
+         setProcessedOutputsBodyTorques();
+      }
+
+      public void doTransitionIntoAction()
+      {
+
+         supportLegYoVariable.set(supportLeg);
+
+         stanceSubController.doTransitionIntoSingleLegBalance(supportLeg, configuration);
+         longStepPushOffController.doTransitionIntoLongStepPushOff(swingLeg, configuration);
+      }
+
+      public void doTransitionOutOfAction()
+      {
+         stanceSubController.doTransitionOutOfSingleLegBalance(supportLeg);
+         longStepPushOffController.doTransitionOutOfLongStepPushOff(swingLeg);
+      }
+
+   }
 
    private void setupStateMachine()
    {
@@ -855,6 +916,12 @@ public abstract class RegularWalkingGaitAbstractController implements RobotContr
          new SingleLegBalanceSwingInAirState(RegularWalkingState.leftSingleLegBalanceRightSwingInAir, RobotSide.LEFT);
       SingleLegBalanceSwingInAirState rightSingleLegBalanceLeftSwingInAirState =
          new SingleLegBalanceSwingInAirState(RegularWalkingState.rightSingleLegBalanceRightSwingInAir, RobotSide.RIGHT);
+      
+      
+      SingleLegBalanceLongStepPushOffState leftSingleLegBalanceLongStepPushOffState = 
+            new SingleLegBalanceLongStepPushOffState(RegularWalkingState.leftSingleLegBalanceRightPushOffLongSteps, RobotSide.LEFT);
+      SingleLegBalanceLongStepPushOffState rightSingleLegBalanceLongStepPushOffState =
+            new SingleLegBalanceLongStepPushOffState(RegularWalkingState.rightSingleLegBalanceLeftPushOffLongSteps, RobotSide.RIGHT);
 
       // Begin: State transition conditions
       StateTransitionCondition startWalkingCondition = new StateTransitionCondition()
@@ -934,6 +1001,24 @@ public abstract class RegularWalkingGaitAbstractController implements RobotContr
             return stanceSubController.needToTakeAStep(RobotSide.RIGHT);
          }
       };
+      
+      StateTransitionCondition toLeftBalanceRightPushOffForLongStepsCondition = new StateTransitionCondition()
+      {
+         
+         public boolean checkCondition()
+         {
+            return doLongStepPushOff.getBooleanValue() && oneLegBalanceSide.getEnumValue() == RobotSide.LEFT;
+         }
+      };
+      
+      StateTransitionCondition toRightBalanceLeftPushOffForLongStepsCondition = new StateTransitionCondition()
+      {
+         
+         public boolean checkCondition()
+         {
+            return doLongStepPushOff.getBooleanValue() && oneLegBalanceSide.getEnumValue() == RobotSide.RIGHT;
+         }
+      };
 
       // End: State transition conditions
       
@@ -972,6 +1057,9 @@ public abstract class RegularWalkingGaitAbstractController implements RobotContr
       
       StateTransition toLeftEarlyStanceRightInitialSwingFromSwingInAir = new StateTransition(leftEarlyStanceRightInitialSwingState.getStateEnum(), toLeftEarlyStanceRightInitialSwingFromSwingInAirCondition, switchBalanceSideAction);
       StateTransition toRightEarlyStanceLeftInitialSwingFromSwingInAir = new StateTransition(rightEarlyStanceLeftInitialSwingState.getStateEnum(), toRightEarlyStanceLeftInitialSwingFromSwingInAirCondition, switchBalanceSideAction);
+      
+      StateTransition toLeftBalanceRightPushOffForLongSteps = new StateTransition(leftSingleLegBalanceLongStepPushOffState.getStateEnum(), toLeftBalanceRightPushOffForLongStepsCondition);
+      StateTransition toRightBalanceLeftPushOffForLongSteps = new StateTransition(rightSingleLegBalanceLongStepPushOffState.getStateEnum(), toRightBalanceLeftPushOffForLongStepsCondition);
 
       // End: create state transitions
 
@@ -1008,6 +1096,19 @@ public abstract class RegularWalkingGaitAbstractController implements RobotContr
       leftSingleLegBalanceRightSwingInAirState.addStateTransition(toLeftEarlyStanceRightInitialSwingFromSwingInAir);
       rightSingleLegBalanceLeftSwingInAirState.addStateTransition(toRightEarlyStanceLeftInitialSwingFromSwingInAir);
 
+      
+      // Go to push off for long steps state
+      startWalkingDoubleSupportState.addStateTransition(toLeftBalanceRightPushOffForLongSteps);
+      startWalkingDoubleSupportState.addStateTransition(toRightBalanceLeftPushOffForLongSteps);
+      stopWalkingLeftLoadingState.addStateTransition(toLeftBalanceRightPushOffForLongSteps);
+      stopWalkingLeftLoadingState.addStateTransition(toRightBalanceLeftPushOffForLongSteps);
+      stopWalkingRightLoadingState.addStateTransition(toLeftBalanceRightPushOffForLongSteps);
+      stopWalkingRightLoadingState.addStateTransition(toRightBalanceLeftPushOffForLongSteps);
+      rightLoadingLeftPreSwingAState.addStateTransition(toLeftBalanceRightPushOffForLongSteps);
+      rightLoadingLeftPreSwingAState.addStateTransition(toRightBalanceLeftPushOffForLongSteps);
+
+      
+      
       // Add default state transition last
 //    startWalkingDoubleSupportState.setDefaultNextState(transferAllLoadToRightLegForWalkingState.getStateEnum());
       transferAllLoadToLeftLegForWalkingState.setDefaultNextState(leftLoadingRightPreSwingCState.getStateEnum());
@@ -1030,6 +1131,8 @@ public abstract class RegularWalkingGaitAbstractController implements RobotContr
       rightTerminalStanceLeftTerminalSwingState.setDefaultNextState(leftLoadingRightPreSwingAState.getStateEnum());
       rightLoadingForSingleLegBalanceState.setDefaultNextState(rightSingleLegBalanceLeftPreSwingInAirState.getStateEnum());
       rightSingleLegBalanceLeftPreSwingInAirState.setDefaultNextState(rightSingleLegBalanceLeftSwingInAirState.getStateEnum());
+      
+      
 
       // End: Add transitions
 
@@ -1062,6 +1165,9 @@ public abstract class RegularWalkingGaitAbstractController implements RobotContr
 
       walkingStateMachine.addState(stopWalkingLeftLoadingState);
       walkingStateMachine.addState(stopWalkingRightLoadingState);
+      
+      walkingStateMachine.addState(leftSingleLegBalanceLongStepPushOffState);
+      walkingStateMachine.addState(rightSingleLegBalanceLongStepPushOffState);
 
       // End: Add states
    }

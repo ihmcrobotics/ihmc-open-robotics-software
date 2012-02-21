@@ -1,7 +1,5 @@
 package us.ihmc.commonWalkingControlModules.partNamesAndTorques;
 
-import java.util.EnumMap;
-
 import us.ihmc.robotSide.RobotSide;
 
 import com.mathworks.jama.Matrix;
@@ -9,7 +7,13 @@ import com.mathworks.jama.Matrix;
 public class LegJointVelocities
 {
    private final LegJointName[] legJointNames;
-   private final EnumMap<LegJointName, Double> jointVelocities;
+   
+   /* 
+    * Converting from Double to double and visa-versa creates new objects and is slow 
+    */
+   
+//   private final EnumMap<LegJointName, Double> jointVelocities;
+   private final double[] jointVelocities = new double[LegJointName.values().length];
    private final RobotSide robotSide;
 
    public static void validateLegJointVelocitiesArray(LegJointVelocities[] legJointVelocitiesArray)
@@ -25,7 +29,7 @@ public class LegJointVelocities
    public LegJointVelocities(LegJointName[] legJointNames, RobotSide robotSide)
    {
       this.legJointNames = legJointNames;
-      jointVelocities = new EnumMap<LegJointName, Double>(LegJointName.class);
+//      jointVelocities = new EnumMap<LegJointName, Double>(LegJointName.class);
 
       this.robotSide = robotSide;
       setJointVelocitiesToNAN();
@@ -38,12 +42,14 @@ public class LegJointVelocities
 
    public double getJointVelocity(LegJointName legJointName)
    {
-      return jointVelocities.get(legJointName);
+//      return jointVelocities.get(legJointName);
+      return jointVelocities[legJointName.ordinal()];
    }
 
    public void setJointVelocity(LegJointName legJointName, double jointVelocity)
    {
-      jointVelocities.put(legJointName, jointVelocity);
+//      jointVelocities.put(legJointName, jointVelocity);
+      jointVelocities[legJointName.ordinal()] = jointVelocity;
    }
 
    public void setLegJointVelocitiesToDoubleArray(double[] jointVelocities)
@@ -54,7 +60,8 @@ public class LegJointVelocities
 
       for (int i = 0; i < legJointNames.length; i++)
       {
-         this.jointVelocities.put(legJointNames[i], jointVelocities[i]);
+//         this.jointVelocities.put(legJointNames[i], jointVelocities[i]);
+         setJointVelocity(legJointNames[i], jointVelocities[i]);
       }
    }
 
@@ -62,7 +69,8 @@ public class LegJointVelocities
    {
       for (LegJointName legJointName : legJointNames)
       {
-         jointVelocities.put(legJointName, Double.NaN);
+//         jointVelocities.put(legJointName, Double.NaN);
+         setJointVelocity(legJointName, Double.NaN);
       }
    }
 
@@ -74,7 +82,7 @@ public class LegJointVelocities
 
       for (int i = 0; i < size; i++)
       {
-         ret.set(i, 0, jointVelocities.get(legJointNames[i]));
+         ret.set(i, 0, getJointVelocity(legJointNames[i])); //jointVelocities.get(legJointNames[i]));
       }
 
       return ret;
@@ -86,7 +94,7 @@ public class LegJointVelocities
 
       for (LegJointName legJointName : legJointNames)
       {
-         ret += legJointName.getCamelCaseNameForMiddleOfExpression() + " = " + jointVelocities.get(legJointName) + "\n";
+         ret += legJointName.getCamelCaseNameForMiddleOfExpression() + " = " + getJointVelocity(legJointName) + "\n";
       }
 
       return ret;
