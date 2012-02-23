@@ -110,7 +110,7 @@ public class MatrixTest
    {
       matrix = new Matrix(row, column);
       matrixInverted = new Matrix(column, row);
-      Random generator = new Random();
+      Random generator = new Random(4876L);
       for (int i = 0; i < matrix.getRowDimension(); i++)
       {
          for (int j = 0; j < matrix.getColumnDimension(); j++)
