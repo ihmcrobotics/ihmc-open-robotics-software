@@ -28,7 +28,8 @@ public class VirtualLinkFromFloatingJoint extends VirtualLinkFromJoint
       FloatingJoint floatingJoint = (FloatingJoint) joint;
 
       floatingJoint.getTransformFromWorld(rotation, translation);
-      referenceFrame.set(rotation, translation);
+      referenceFrame.setRotation(rotation);
+      referenceFrame.setTranslation(translation);
       referenceFrame.update();
    }
 }
