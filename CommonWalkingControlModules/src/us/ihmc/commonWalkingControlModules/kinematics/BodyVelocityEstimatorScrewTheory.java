@@ -6,8 +6,9 @@ import us.ihmc.commonWalkingControlModules.sensors.LegToTrustForVelocityReadOnly
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.screwTheory.AbstractInverseDynamicsJoint;
+import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
-import us.ihmc.utilities.screwTheory.SixDoFJoint;
 import us.ihmc.utilities.screwTheory.Twist;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
@@ -20,7 +21,7 @@ public class BodyVelocityEstimatorScrewTheory implements BodyVelocityEstimator
    private final LegToTrustForVelocityReadOnly legToTrustForVelocity;
    private final ReferenceFrame footZUpFrame;
    private final RigidBody foot;
-   private final SixDoFJoint imuJoint;
+   private final InverseDynamicsJoint imuJoint;
    private final Twist bodyTwist = new Twist();
    private final FrameVector bodyLinearVelocity = new FrameVector(ReferenceFrame.getWorldFrame());
    private final FrameVector tempLinearPart = new FrameVector(ReferenceFrame.getWorldFrame());
@@ -28,7 +29,7 @@ public class BodyVelocityEstimatorScrewTheory implements BodyVelocityEstimator
    private final RobotSide robotSide;
    private final DoubleYoVariable defaultCovariance;
 
-   public BodyVelocityEstimatorScrewTheory(RigidBody foot, ReferenceFrame footZUpFrame, SixDoFJoint imuJoint, RobotSide robotSide,
+   public BodyVelocityEstimatorScrewTheory(RigidBody foot, ReferenceFrame footZUpFrame, InverseDynamicsJoint imuJoint, RobotSide robotSide,
            LegToTrustForVelocityReadOnly legToTrustForVelocity, double defaultCovariance)
    {
       this.name = robotSide + getClass().getSimpleName();
