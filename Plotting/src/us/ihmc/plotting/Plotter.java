@@ -81,8 +81,9 @@ public class Plotter extends JPanel
    private boolean MAKING_POLYGON = false;
    private  PolygonArtifact polygonArtifact;
 
-
-
+   private boolean overrideAutomaticInterval = false;
+   private double manualOverideInterval = 1.0;
+   
    public Plotter()
    {
       // Initialize class variables
@@ -176,6 +177,11 @@ public class Plotter extends JPanel
             {
                interval = 0.1;
             }
+            
+            if (overrideAutomaticInterval)
+            {
+               interval = manualOverideInterval;
+            }
 
             // paint grid lines
             Coordinate ulCoord = convertFromPixelsToMeters(new Coordinate(0, 0, Coordinate.PIXEL));
@@ -184,15 +190,30 @@ public class Plotter extends JPanel
             double maxX = lrCoord.getX();
             double diff = maxX - minX;
             int count = (int)Math.round(Math.ceil(diff / interval));
+            
+            
+            int countOffset = (int) Math.floor(minX/interval);
+            double minXforPlotting = countOffset * interval;
+            
             for (int i = 0; i < count; i++)
             {
-               double distance = Math.floor(minX) + (i * interval);
-               if (distance / interval % 10 == 0)
+//               double distance = Math.floor(minX) + (i * interval);
+               double distance = minXforPlotting + (i * interval);
+
+//               if (distance / interval % 10 == 0)
+//                  g.setColor(new Color(180, 190, 210));
+//               else if (distance / interval % 5 == 0)
+//                  g.setColor(new Color(180, 210, 230));
+//               else
+//                  g.setColor(new Color(180, 230, 250));
+               
+               //The above code is wrong. Rewriting
+               if ((i + countOffset) % 10 == 0)
                   g.setColor(new Color(180, 190, 210));
-               else if (distance / interval % 5 == 0)
+               else if ((i + countOffset) % 5 == 0)
                   g.setColor(new Color(180, 210, 230));
                else
-                  g.setColor(new Color(180, 230, 250));
+                  g.setColor(new Color(230, 240, 250));
 
                // get pixel from meter for positive
                Coordinate coord = convertFromMetersToPixels(new Coordinate(distance, distance, Coordinate.METER));
@@ -350,6 +371,17 @@ public class Plotter extends JPanel
          backgroundImage = bgi;
          repaint();
       }
+   }
+   
+   public void setManualGidInterval(double intervalInMeters)
+   {
+      this.manualOverideInterval = intervalInMeters;
+      this.overrideAutomaticInterval = true;
+   }
+   
+   public void disableManualGridIntervalOverride()
+   {
+      this.overrideAutomaticInterval = false;
    }
 
    public void updateArtifacts(Vector<Artifact> artifacts)
