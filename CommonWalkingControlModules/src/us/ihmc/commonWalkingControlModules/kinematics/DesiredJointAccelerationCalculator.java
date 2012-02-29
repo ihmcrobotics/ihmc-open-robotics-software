@@ -1,8 +1,5 @@
 package us.ihmc.commonWalkingControlModules.kinematics;
 
-import java.util.ArrayList;
-import java.util.ListIterator;
-
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointVelocities;
@@ -13,8 +10,6 @@ import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.utilities.screwTheory.Twist;
 
-import com.mathworks.jama.Matrix;
-
 public class DesiredJointAccelerationCalculator
 {
    private final RobotSide swingSide;
@@ -24,13 +19,13 @@ public class DesiredJointAccelerationCalculator
    private final InverseDynamicsJoint rootJoint;
    private final ReferenceFrame footFrame;
    private final ReferenceFrame pelvisFrame;
-   private final ArrayList<InverseDynamicsJoint> legJointsList;
-   private final LegJointName[] legJointNames;
+   private final SpatialAccelerationVector accelerationOfFootWithRespectToPelvis = new SpatialAccelerationVector();
+
+   private final us.ihmc.utilities.screwTheory.DesiredJointAccelerationCalculator desiredJointAccelerationCalculator;
 
    public DesiredJointAccelerationCalculator(LegJointName[] legJointNames, SwingFullLegJacobian swingLegJacobian, FullRobotModel fullRobotModel,
            CommonWalkingReferenceFrames referenceFrames, RobotSide robotSide)
    {
-      this.legJointNames = legJointNames;
 
       swingLegJacobian.getRobotSide().checkRobotSideMatch(robotSide);
 
@@ -42,13 +37,9 @@ public class DesiredJointAccelerationCalculator
       this.rootJoint = fullRobotModel.getRootJoint();
       this.footFrame = referenceFrames.getFootFrame(robotSide);
       this.pelvisFrame = referenceFrames.getPelvisFrame();
-      this.legJointsList = new ArrayList<InverseDynamicsJoint>(fullRobotModel.getLegJointList(robotSide));
+      this.desiredJointAccelerationCalculator = new us.ihmc.utilities.screwTheory.DesiredJointAccelerationCalculator(fullRobotModel.getPelvis(), fullRobotModel.getFoot(swingSide), swingLegJacobian.getGeometricJacobian());
    }
 
-   
-   private final SpatialAccelerationVector jacobianDerivativeTerm = new SpatialAccelerationVector();
-   private final SpatialAccelerationVector accelerationOfFootWithRespectToPelvis = new SpatialAccelerationVector();
-   
    /**
     * Sets the accelerations for the RevoluteJoints in legJoints
     * Assumes that the swingLegJacobian is already updated
@@ -57,9 +48,7 @@ public class DesiredJointAccelerationCalculator
    public void compute(SpatialAccelerationVector desiredAccelerationOfFootWithRespectToWorld, double alpha)
    {
       computeDesiredAccelerationOfFootWithRespectToPelvis(accelerationOfFootWithRespectToPelvis, desiredAccelerationOfFootWithRespectToWorld);
-
-      computeJacobianDerivativeTerm(jacobianDerivativeTerm);
-      computeJointAccelerations(accelerationOfFootWithRespectToPelvis, jacobianDerivativeTerm, alpha);
+      desiredJointAccelerationCalculator.compute(accelerationOfFootWithRespectToPelvis, alpha);
    }
 
    private final Twist twistOfPelvisWithRespectToElevator = new Twist();
@@ -92,57 +81,5 @@ public class DesiredJointAccelerationCalculator
       twistOfPelvisWithRespectToFoot.changeFrame(pelvisFrame);
 
       return twistOfPelvisWithRespectToFoot;
-   }
-
-   private final SpatialAccelerationVector zeroAcceleration = new SpatialAccelerationVector();
-   private final Twist twistOfCurrentWithRespectToFoot = new Twist(); //footFrame, footFrame, footFrame);
-   private final Twist unitJointTwist = new Twist();
-   private final Twist jointTwist = new Twist();
-   
-   private SpatialAccelerationVector computeJacobianDerivativeTerm(SpatialAccelerationVector ret)
-   {
-      twistOfCurrentWithRespectToFoot.setToZero(footFrame, footFrame, footFrame);
-      ret.setToZero(footFrame, footFrame, footFrame);
-      
-      ListIterator<InverseDynamicsJoint> iterator = legJointsList.listIterator(legJointsList.size());
-      while (iterator.hasPrevious())
-      {
-         // scale twistOfCurrentWithRespectToFoot by qd
-         // add to ret
-
-         InverseDynamicsJoint joint = iterator.previous();
-         InverseDynamicsJoint parentJoint = joint.getPredecessor().getParentJoint();
-         ReferenceFrame parentJointFrame = parentJoint.getFrameAfterJoint();
-
-         joint.packJointTwist(unitJointTwist);
-         unitJointTwist.changeBaseFrameNoRelativeTwist(parentJointFrame);
-
-         zeroAcceleration.setToZero(unitJointTwist.getBodyFrame(), unitJointTwist.getBaseFrame(), unitJointTwist.getExpressedInFrame());
-         zeroAcceleration.changeFrame(footFrame, twistOfCurrentWithRespectToFoot, unitJointTwist);    // RESULT: column of Jdot
-         zeroAcceleration.add(ret);
-         ret.set(zeroAcceleration);
-
-         joint.packJointTwist(jointTwist);
-         jointTwist.changeBaseFrameNoRelativeTwist(parentJointFrame);
-         jointTwist.invert();
-         twistOfCurrentWithRespectToFoot.add(jointTwist);
-         twistOfCurrentWithRespectToFoot.changeFrame(parentJointFrame);
-      }
-
-      return ret;
-   }
-
-   private void computeJointAccelerations(SpatialAccelerationVector accelerationOfFootWithRespectToPelvis, SpatialAccelerationVector jacobianDerivativeTerm, double alpha)
-   {
-      Matrix jointAccelerations = swingLegJacobian.computeJointAccelerations(accelerationOfFootWithRespectToPelvis, jacobianDerivativeTerm, alpha);
-
-
-      for (int i = 0; i < legJointNames.length; i++)
-      {
-         LegJointName legJointName = legJointNames[i];
-
-         double qdd = jointAccelerations.get(i, 0);
-         fullRobotModel.getLegJoint(swingSide, legJointName).setQddDesired(qdd);
-      }
    }
 }
