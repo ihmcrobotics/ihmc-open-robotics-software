@@ -168,4 +168,9 @@ public class SwingFullLegJacobian
    {
       return openChainJacobian.toString();
    }
+
+   public GeometricJacobian getGeometricJacobian()
+   {
+      return openChainJacobian;
+   }
 }

@@ -75,9 +75,9 @@ public class SpineOrientationInHeadingFrameControlModule implements SpineControl
       spineJacobian.compute();
       Matrix spineJointTorques = spineJacobian.computeJointTorques(chestWrench);
       // FIXME: magic numbers for indices: 
-      spineTorquesToPack.setTorque(SpineJointName.SPINE_PITCH, spineJointTorques.get(0, 0));
+      spineTorquesToPack.setTorque(SpineJointName.SPINE_PITCH, spineJointTorques.get(2, 0));
       spineTorquesToPack.setTorque(SpineJointName.SPINE_YAW, spineJointTorques.get(1, 0));
-      spineTorquesToPack.setTorque(SpineJointName.SPINE_ROLL, spineJointTorques.get(2, 0));
+      spineTorquesToPack.setTorque(SpineJointName.SPINE_ROLL, spineJointTorques.get(0, 0));
    }
 
    private void setGains()
