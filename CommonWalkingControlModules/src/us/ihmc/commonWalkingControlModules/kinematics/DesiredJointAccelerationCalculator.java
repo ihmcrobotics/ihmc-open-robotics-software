@@ -10,7 +10,6 @@ import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenc
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
-import us.ihmc.utilities.screwTheory.RevoluteJoint;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.utilities.screwTheory.Twist;
 
@@ -25,7 +24,7 @@ public class DesiredJointAccelerationCalculator
    private final InverseDynamicsJoint rootJoint;
    private final ReferenceFrame footFrame;
    private final ReferenceFrame pelvisFrame;
-   private final ArrayList<RevoluteJoint> legJointsList;
+   private final ArrayList<InverseDynamicsJoint> legJointsList;
    private final LegJointName[] legJointNames;
 
    public DesiredJointAccelerationCalculator(LegJointName[] legJointNames, SwingFullLegJacobian swingLegJacobian, FullRobotModel fullRobotModel,
@@ -43,7 +42,7 @@ public class DesiredJointAccelerationCalculator
       this.rootJoint = fullRobotModel.getRootJoint();
       this.footFrame = referenceFrames.getFootFrame(robotSide);
       this.pelvisFrame = referenceFrames.getPelvisFrame();
-      this.legJointsList = fullRobotModel.getLegJointList(robotSide);
+      this.legJointsList = new ArrayList<InverseDynamicsJoint>(fullRobotModel.getLegJointList(robotSide));
    }
 
    
@@ -95,40 +94,33 @@ public class DesiredJointAccelerationCalculator
       return twistOfPelvisWithRespectToFoot;
    }
 
-   private final SpatialAccelerationVector unitTwistDerivative = new SpatialAccelerationVector();
+   private final SpatialAccelerationVector zeroAcceleration = new SpatialAccelerationVector();
    private final Twist twistOfCurrentWithRespectToFoot = new Twist(); //footFrame, footFrame, footFrame);
    private final Twist unitJointTwist = new Twist();
    private final Twist jointTwist = new Twist();
    
    private SpatialAccelerationVector computeJacobianDerivativeTerm(SpatialAccelerationVector ret)
    {
-//      Twist twistOfCurrentWithRespectToFoot = new Twist(footFrame, footFrame, footFrame);
-//      Twist unitJointTwist = new Twist();
-//      Twist jointTwist = new Twist();
-//      SpatialAccelerationVector ret = new SpatialAccelerationVector(footFrame, footFrame, footFrame);
-      
       twistOfCurrentWithRespectToFoot.setToZero(footFrame, footFrame, footFrame);
       ret.setToZero(footFrame, footFrame, footFrame);
       
-      ListIterator<RevoluteJoint> iterator = legJointsList.listIterator(legJointsList.size());
+      ListIterator<InverseDynamicsJoint> iterator = legJointsList.listIterator(legJointsList.size());
       while (iterator.hasPrevious())
       {
          // scale twistOfCurrentWithRespectToFoot by qd
          // add to ret
 
-         RevoluteJoint joint = iterator.previous();
+         InverseDynamicsJoint joint = iterator.previous();
          InverseDynamicsJoint parentJoint = joint.getPredecessor().getParentJoint();
          ReferenceFrame parentJointFrame = parentJoint.getFrameAfterJoint();
 
-         joint.packUnitJointTwist(unitJointTwist);
+         joint.packJointTwist(unitJointTwist);
          unitJointTwist.changeBaseFrameNoRelativeTwist(parentJointFrame);
 
-         unitTwistDerivative.setToZero(unitJointTwist.getBodyFrame(), unitJointTwist.getBaseFrame(), unitJointTwist.getExpressedInFrame());
-
-         unitTwistDerivative.changeFrame(footFrame, twistOfCurrentWithRespectToFoot, unitJointTwist);    // RESULT: column of Jdot
-         unitTwistDerivative.scale(joint.getQd());
-         unitTwistDerivative.add(ret);
-         ret.set(unitTwistDerivative);    // kind of sucks, but ok
+         zeroAcceleration.setToZero(unitJointTwist.getBodyFrame(), unitJointTwist.getBaseFrame(), unitJointTwist.getExpressedInFrame());
+         zeroAcceleration.changeFrame(footFrame, twistOfCurrentWithRespectToFoot, unitJointTwist);    // RESULT: column of Jdot
+         zeroAcceleration.add(ret);
+         ret.set(zeroAcceleration);
 
          joint.packJointTwist(jointTwist);
          jointTwist.changeBaseFrameNoRelativeTwist(parentJointFrame);
