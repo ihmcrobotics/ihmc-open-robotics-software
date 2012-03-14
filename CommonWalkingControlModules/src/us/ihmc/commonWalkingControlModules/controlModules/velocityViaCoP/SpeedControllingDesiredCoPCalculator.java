@@ -184,7 +184,7 @@ public class SpeedControllingDesiredCoPCalculator implements DesiredCapturePoint
       FramePoint2d centerOfPressureDesired = null;
       
       // Create Line from desired Capture Point to instantaneous Capture Point
-      FrameLine2d controlLine = new FrameLine2d(capturePoint, desiredCapturePoint);;
+      FrameLine2d controlLine = new FrameLine2d(capturePoint, desiredCapturePoint);
       if (desiredVelocityLength.getDoubleValue() < 1e-7)
       {
          centerOfPressureDesired = doProportionalControl(capturePoint, desiredCapturePoint, doubleSupportCaptureKp.getDoubleValue());
