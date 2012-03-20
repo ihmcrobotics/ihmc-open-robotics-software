@@ -375,6 +375,10 @@ public class CommonTerrain
             groundProfile = new StepUpGroundProfile(registry);
             break;
             
+         case STAIR:
+            groundProfile = new StairGroundProfile(registry);
+            break;
+            
          case ALTERNATING_SLOPES :
          {
             double xMin = -1.0, xMax = 12.0;

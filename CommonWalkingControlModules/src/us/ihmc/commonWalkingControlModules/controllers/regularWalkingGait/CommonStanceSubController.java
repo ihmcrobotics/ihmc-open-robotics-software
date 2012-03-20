@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait;
 
-import us.ihmc.commonWalkingControlModules.configurations.BalanceOnOneLegConfiguration;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.DesiredPelvisOrientationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.BalanceSupportControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.FootOrientationControlModule;
@@ -248,12 +247,12 @@ public class CommonStanceSubController implements StanceSubController
       supportLegAndLegToTrustForVelocity.setLegToUseForCOMOffset(upcomingSupportSide);
    }
 
-   public void doTransitionIntoSingleLegBalance(RobotSide supportLeg, BalanceOnOneLegConfiguration currentConfiguration)
+   public void doTransitionIntoSingleLegBalance(RobotSide supportLeg, double[] desiredYawPitchRoll)
    {
       FrameVector2d finalHeadingTarget = new FrameVector2d(referenceFrames.getAnkleZUpFrame(supportLeg), 1.0, 0.0);
       finalHeadingTarget.changeFrame(ReferenceFrame.getWorldFrame());
       desiredHeadingControlModule.setFinalHeadingTarget(finalHeadingTarget);
-      desiredPelvisOrientationControlModule.setDesiredPelvisOrientation(new Orientation(desiredHeadingControlModule.getDesiredHeadingFrame(), currentConfiguration.getYawPitchRoll()));
+      desiredPelvisOrientationControlModule.setDesiredPelvisOrientation(new Orientation(desiredHeadingControlModule.getDesiredHeadingFrame(), desiredYawPitchRoll));
    }
 
    public void doTransitionOutOfEarlyStance(RobotSide stanceSide)

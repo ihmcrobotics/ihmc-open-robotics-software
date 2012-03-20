@@ -84,6 +84,14 @@ public class BalanceSupportControlModule
 
       // compute desired CoP (=VTP) using velocityViaCoPControlModule. Should be inside the foot polygon already at this point.
       FramePoint2d vtpInAnklePitchFrame = velocityViaCoPControlModule.computeDesiredCoPSingleSupport(supportLeg, desiredVelocity, singleSupportCondition, timeInState);
+      
+      doSingleSupportCoPControl(supportLegTorquesToPack, vtpInAnklePitchFrame, upperBodyWrench, desiredPelvisOrientation);
+   }
+   
+   public void doSingleSupportCoPControl(LegTorques supportLegTorquesToPack, FramePoint2d vtpInAnklePitchFrame, Wrench upperBodyWrench, Orientation desiredPelvisOrientation)
+   {
+      RobotSide supportLeg = supportLegTorquesToPack.getRobotSide();
+      
       couplingRegistry.setDesiredCoP(vtpInAnklePitchFrame);
       
       
@@ -93,6 +101,13 @@ public class BalanceSupportControlModule
       // compute desired z-component of force on the body using PelvisHeightController
       double desiredPelvisHeightInWorld = getDesiredPelvisHeight();
       double fZOnPelvisInPelvisFrame = pelvisHeightControlModule.doPelvisHeightControl(desiredPelvisHeightInWorld, supportLeg);
+      
+      
+      //TODO: CLEANUP
+      fZOnPelvisInPelvisFrame -= couplingRegistry.getFzExertedBySwingLeg();
+      
+      if(fZOnPelvisInPelvisFrame < 0.0)
+         fZOnPelvisInPelvisFrame = 0.0;
 
       // compute joint torques using virtual support actuators
       virtualSupportActuatorControlModule.controlSingleSupport(supportLegTorquesToPack, vtpInAnklePitchFrame, fZOnPelvisInPelvisFrame,
@@ -113,11 +128,17 @@ public class BalanceSupportControlModule
    public void doDoubleSupportBalance(LowerBodyTorques lowerBodyTorquesToPack, RobotSide loadingLeg, FrameVector2d desiredVelocity,
                                       Orientation desiredPelvisOrientation)
    {
-      ankleOverRotationControlModule.resetForNextStep();
-
       // compute desired CoP
       FramePoint2d desiredCoP = velocityViaCoPControlModule.computeDesiredCoPDoubleSupport(loadingLeg, desiredVelocity);
+      doDoubleSupportCoPControl(lowerBodyTorquesToPack, loadingLeg, desiredCoP, desiredPelvisOrientation);
+   }
+   
+   public void doDoubleSupportCoPControl(LowerBodyTorques lowerBodyTorquesToPack, RobotSide loadingLeg, FramePoint2d desiredCoP,
+                                      Orientation desiredPelvisOrientation)
+   {
       couplingRegistry.setDesiredCoP(desiredCoP);
+      ankleOverRotationControlModule.resetForNextStep();
+
 
       // compute VTPs and leg strengths
       virtualToePointCalculator.packVirtualToePoints(virtualToePoints, bipedSupportPolygons, desiredCoP);

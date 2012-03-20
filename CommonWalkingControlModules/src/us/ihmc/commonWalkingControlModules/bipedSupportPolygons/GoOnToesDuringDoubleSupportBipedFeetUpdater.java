@@ -19,6 +19,7 @@ import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.Line2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
+import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.plotting.YoFrameLine2dArtifact;
@@ -55,6 +56,8 @@ public class GoOnToesDuringDoubleSupportBipedFeetUpdater implements BipedFeetUpd
    private final SideDependentList<GlitchFilteredBooleanYoVariable> toeScoreHighEnoughVars = new SideDependentList<GlitchFilteredBooleanYoVariable>();
 
    private final GlobalTimer updateBipedFeetTimer = new GlobalTimer("updateBipedFeet", registry);
+   
+   private final BooleanYoVariable doPolygonResizeInDoubleSupport = new BooleanYoVariable("doPolygonResizeInDoubleSupport", registry);
 
    public GoOnToesDuringDoubleSupportBipedFeetUpdater(CommonWalkingReferenceFrames referenceFrames, double footForward, double footBack,
            YoVariableRegistry yoVariableRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
@@ -127,6 +130,8 @@ public class GoOnToesDuringDoubleSupportBipedFeetUpdater implements BipedFeetUpd
          yoVariableRegistry.addChild(registry);
       }
 
+      
+      doPolygonResizeInDoubleSupport.set(true);
 //    if (VarListsToRegister.REGISTER_BIPED_FEET_UPDATER)
 //    {
 //       yoVariableRegistry.addChild(registry);
@@ -144,12 +149,20 @@ public class GoOnToesDuringDoubleSupportBipedFeetUpdater implements BipedFeetUpd
       {
          leftFoot.setIsSupportingFoot(true);
          rightFoot.setIsSupportingFoot(true);
-
-         computeOnToesAndOnHeelsLines(leftFoot, rightFoot);
-
-         FramePoint2d capturePointInMidFeetZUp2d = new FramePoint2d(capturePointInMidFeetZUp.getReferenceFrame(), capturePointInMidFeetZUp.getX(),
-                                                      capturePointInMidFeetZUp.getY());
-         decideWhichFootPolygonsToUse(leftFoot, rightFoot, capturePointInMidFeetZUp2d, forceHindOnToes);    // , supportPolygons);
+         
+         if(doPolygonResizeInDoubleSupport.getBooleanValue() == false)  
+         {
+            leftFoot.setFootPolygonInUse(FootPolygonEnum.FLAT);
+            rightFoot.setFootPolygonInUse(FootPolygonEnum.FLAT);
+         }
+         else 
+         {
+            computeOnToesAndOnHeelsLines(leftFoot, rightFoot);
+   
+            FramePoint2d capturePointInMidFeetZUp2d = new FramePoint2d(capturePointInMidFeetZUp.getReferenceFrame(), capturePointInMidFeetZUp.getX(),
+                                                         capturePointInMidFeetZUp.getY());
+            decideWhichFootPolygonsToUse(leftFoot, rightFoot, capturePointInMidFeetZUp2d, forceHindOnToes);    // , supportPolygons);
+         }
       }
 
       else    // If in single support, then select the right supporting foot, set both Polygons to flat, and there are no heel/toe lines.
@@ -540,5 +553,10 @@ public class GoOnToesDuringDoubleSupportBipedFeetUpdater implements BipedFeetUpd
       }
 
       return onHeelLines;
+   }
+
+   public void setResizePolygonInDoubleSupport(boolean doResize)
+   {
+      doPolygonResizeInDoubleSupport.set(doResize);
    }
 }
