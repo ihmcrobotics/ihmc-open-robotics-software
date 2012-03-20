@@ -138,7 +138,7 @@ public class InverseDynamicsCalculatorTest
       double gravity = 0.0;
 
       int numberOfJoints = 3;
-      createRandomTreeRobotAndSetJointPositionsAndVelocities(robot, jointMap, worldFrame, elevator, numberOfJoints, gravity, true, true);
+      createRandomTreeRobotAndSetJointPositionsAndVelocities(robot, jointMap, worldFrame, elevator, numberOfJoints, gravity, true, true, random);
 
       if (EXPLORE_AND_PRINT)
       {
@@ -164,7 +164,7 @@ public class InverseDynamicsCalculatorTest
       double gravity = -9.8;
 
       int numberOfJoints = 100;
-      createRandomTreeRobotAndSetJointPositionsAndVelocities(robot, jointMap, worldFrame, elevator, numberOfJoints, gravity, true, true);
+      createRandomTreeRobotAndSetJointPositionsAndVelocities(robot, jointMap, worldFrame, elevator, numberOfJoints, gravity, true, true, random);
 
       if (EXPLORE_AND_PRINT)
       {
@@ -260,7 +260,7 @@ public class InverseDynamicsCalculatorTest
       JUnitTools.assertTuple3dEquals(inputWrench.getLinearPartCopy(), outputWrench.getLinearPartCopy(), epsilon);
    }
    
-   private void copyTorques(HashMap<RevoluteJoint, PinJoint> jointMap)
+   private static void copyTorques(HashMap<RevoluteJoint, PinJoint> jointMap)
    {
       for (RevoluteJoint idJoint : jointMap.keySet())
       {
@@ -366,7 +366,7 @@ public class InverseDynamicsCalculatorTest
    }
    
    
-   private void createRandomTreeRobotAndSetJointPositionsAndVelocities(Robot robot, HashMap<RevoluteJoint, PinJoint> jointMap, ReferenceFrame worldFrame, RigidBody elevator, int numberOfJoints, double gravity, boolean useRandomVelocity, boolean useRandomAcceleration)
+   public static void createRandomTreeRobotAndSetJointPositionsAndVelocities(Robot robot, HashMap<RevoluteJoint, PinJoint> jointMap, ReferenceFrame worldFrame, RigidBody elevator, int numberOfJoints, double gravity, boolean useRandomVelocity, boolean useRandomAcceleration, Random random)
    {
       robot.setGravity(gravity);     
     
