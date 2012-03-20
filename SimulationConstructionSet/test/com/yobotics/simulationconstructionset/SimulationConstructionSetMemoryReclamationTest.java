@@ -4,11 +4,12 @@ import static org.junit.Assert.assertTrue;
 
 import java.awt.Frame;
 
-import org.junit.Test;
+import org.junit.Ignore;
 
 public class SimulationConstructionSetMemoryReclamationTest
 {
-   @Test
+//   @Test
+   @Ignore
    public void testMemoryReclamationForSCSWithARobot()
    {
       int usedMemoryMBAtStart = printMemoryUsageAndReturnUsedMemoryInMB();
@@ -35,7 +36,8 @@ public class SimulationConstructionSetMemoryReclamationTest
    }
    
    
-   @Test
+//   @Test
+   @Ignore
    public void testMemoryReclamationForSCSWithoutARobot()
    {
       int usedMemoryMBAtStart = printMemoryUsageAndReturnUsedMemoryInMB();
