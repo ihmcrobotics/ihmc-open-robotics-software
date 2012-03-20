@@ -1078,6 +1078,12 @@ public class LinkGraphics
       addCoordinateSystem(length, YoAppearance.Black());
    }
 
+   
+   public void addCoordinateSystem(double length, Appearance arrowAppearance)
+   {
+      addCoordinateSystem(length, YoAppearance.Red(), YoAppearance.White(), YoAppearance.Blue(), arrowAppearance);
+
+   }
    /**
     * Creates a graphical representation of the x, y, and z axis of the current coordinate
     * system centered at its origin.  In the image below red, white and blue represent the
@@ -1086,7 +1092,7 @@ public class LinkGraphics
     *
     * @param length the length in meters of each axis arrow.
     */
-   public void addCoordinateSystem(double length, Appearance arrowAppearance)
+   public void addCoordinateSystem(double length, Appearance xAxisAppearance, Appearance yAxisAppearance, Appearance zAxisAppearance, Appearance arrowAppearance)
    {
       Geometry bar = YoGeometry.Cylinder(length / 32.0, length, 15);
       Geometry arrow = YoGeometry.Cone(length / 10.0, length / 15.0, 15);
@@ -1096,9 +1102,9 @@ public class LinkGraphics
       TransformGroup yAxisGroup = rotateTransformGroup(-Math.PI / 2.0, Link.X);
       TransformGroup xAxisGroup = rotateTransformGroup(Math.PI / 2.0, Link.Y);
 
-      addShapeToGroup(bar, YoAppearance.Red(), xAxisGroup);
-      addShapeToGroup(bar, YoAppearance.White(), yAxisGroup);
-      addShapeToGroup(bar, YoAppearance.Blue(), base);
+      addShapeToGroup(bar, xAxisAppearance, xAxisGroup);
+      addShapeToGroup(bar, yAxisAppearance, yAxisGroup);
+      addShapeToGroup(bar, zAxisAppearance, base);
 
       base.addChild(xAxisGroup);
       base.addChild(yAxisGroup);

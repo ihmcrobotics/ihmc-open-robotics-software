@@ -59,6 +59,8 @@ public class CommonCouplingRegistry implements CouplingRegistry
 
    private final PoseReferenceFrame footstepFrame = new PoseReferenceFrame("footstepFrame", ReferenceFrame.getWorldFrame());
    private final DynamicGraphicReferenceFrame footstepFrameGraphic;
+   
+   private final DoubleYoVariable fzExertedBySwingLeg = new DoubleYoVariable("fzExertedBySwingLeg", registry);
 
    public CommonCouplingRegistry(CommonWalkingReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons, YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
@@ -293,6 +295,16 @@ public class CommonCouplingRegistry implements CouplingRegistry
    public FramePoint2d getDesiredCapturePointInFrame(ReferenceFrame desiredFrame)
    {
       return desiredICP.changeFrameCopy(desiredFrame);
+   }
+
+   public void setFzExertedBySwingLeg(double value)
+   {
+      fzExertedBySwingLeg.set(value);
+   }
+
+   public double getFzExertedBySwingLeg()
+   {
+      return fzExertedBySwingLeg.getDoubleValue();
    }
 
 }

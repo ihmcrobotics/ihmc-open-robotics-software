@@ -20,5 +20,7 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 public interface BipedFeetUpdater
 {
    public void updateBipedFeet(BipedFootInterface leftFoot, BipedFootInterface rightFoot, RobotSide supportLeg, FramePoint capturePoint, boolean forceHindOnToes);
+   
+   public void setResizePolygonInDoubleSupport(boolean doResize);
 }
 

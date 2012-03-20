@@ -57,4 +57,8 @@ public class DoNothingBipedFeetUpdater implements BipedFeetUpdater
          rightFoot.setFootPolygonInUse(FootPolygonEnum.FLAT);
       }
    }
+
+   public void setResizePolygonInDoubleSupport(boolean doResize)
+   {
+   }
 }
