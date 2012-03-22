@@ -3,7 +3,6 @@ package us.ihmc.commonWalkingControlModules.kinematics;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointVelocities;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.ProcessedSensorsInterface;
-import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.Twist;
 
@@ -11,7 +10,6 @@ public class DesiredJointVelocityCalculator
 {
    private final ProcessedSensorsInterface processedSensors;
    private final SwingFullLegJacobian swingFullLegJacobian;
-   private final RobotSide swingSide;
    private final ReferenceFrame swingFootFrame;
 
    public DesiredJointVelocityCalculator(ProcessedSensorsInterface processedSensors, CommonWalkingReferenceFrames referenceFrames,
@@ -19,9 +17,8 @@ public class DesiredJointVelocityCalculator
    {
       this.processedSensors = processedSensors;
       this.swingFullLegJacobian = swingLegJacobian;
-      this.swingSide = swingLegJacobian.getRobotSide();
 
-      this.swingFootFrame = referenceFrames.getFootFrame(swingSide);
+      this.swingFootFrame = swingLegJacobian.getGeometricJacobian().getEndEffectorFrame();
    }
 
    public void packDesiredJointVelocities(LegJointVelocities legJointVelocitiesToPack, Twist desiredTwistOfSwingFootWithRespectToWorld, double alpha)

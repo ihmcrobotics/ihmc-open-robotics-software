@@ -111,4 +111,9 @@ public class LegJointVelocities
       }
       
    }
+
+   public LegJointName[] getLegJointNames()
+   {
+      return legJointNames;
+   }
 }

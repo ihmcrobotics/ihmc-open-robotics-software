@@ -1,16 +1,14 @@
 package us.ihmc.commonWalkingControlModules.kinematics;
 
-import java.util.ArrayList;
-import java.util.EnumMap;
-
-import javax.vecmath.Vector3d;
-
+import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointVelocities;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegTorques;
 import us.ihmc.robotSide.RobotSide;
-import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.GeometricJacobian;
+import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
+import us.ihmc.utilities.screwTheory.RigidBody;
+import us.ihmc.utilities.screwTheory.ScrewTools;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.utilities.screwTheory.Twist;
 import us.ihmc.utilities.screwTheory.Wrench;
@@ -21,44 +19,16 @@ public class SwingFullLegJacobian
 {
    private final RobotSide robotSide;
    private final GeometricJacobian openChainJacobian;
-   private final LegJointName[] legJointNames;
    
    /**
     * Constructs a new SwingFullLegJacobian, for the given side of the robot
-    * @param legFrames TODO
-    * @param pelvisFrame TODO
-    * @param endEffectorName TODO
     */
-   public SwingFullLegJacobian(LegJointName[] legJointNames, RobotSide robotSide, EnumMap<LegJointName, ReferenceFrame> legFrames, ReferenceFrame pelvisFrame, LegJointName endEffectorName)
+   public SwingFullLegJacobian(RobotSide robotSide, FullRobotModel fullRobotModel)
    {
-      this.legJointNames = legJointNames;
       this.robotSide = robotSide;
-
-      // frames
-      // unit twists in body frames
-      Vector3d zero = new Vector3d();
-      
-      ArrayList<Twist> legTwists = new ArrayList<Twist>();
-      ReferenceFrame twistBaseFrame = pelvisFrame;
-      for (LegJointName legJointName : legJointNames)
-      {
-         ReferenceFrame twistBodyFrame = legFrames.get(legJointName);
-         ReferenceFrame expressedInFrame = twistBodyFrame;
-         Twist twist = new Twist(twistBodyFrame, twistBaseFrame, expressedInFrame, zero, legJointName.getJointAxis());
-         
-         legTwists.add(twist);
-         
-         twistBaseFrame = twistBodyFrame; // for next iteration
-      }
-
-      // frames
-      ReferenceFrame endEffectorFrame = legFrames.get(endEffectorName);
-      ReferenceFrame baseFrame = pelvisFrame;
-      ReferenceFrame jacobianFrame = endEffectorFrame;
-
-      // create Jacobian
-      openChainJacobian = new GeometricJacobian(legTwists, endEffectorFrame, baseFrame, jacobianFrame);
-
+      RigidBody pelvis = fullRobotModel.getPelvis();
+      RigidBody foot = fullRobotModel.getFoot(robotSide);
+      openChainJacobian = new GeometricJacobian(pelvis, foot, foot.getBodyFixedFrame());
    }
 
    /**
@@ -83,26 +53,8 @@ public class SwingFullLegJacobian
     */
    public Twist getTwistOfFootWithRespectToPelvisInFootFrame(LegJointVelocities jointVelocities)
    {
-      Matrix jointVelocitiesVector = new Matrix(legJointNames.length, 1);
-      for (int i = 0; i < legJointNames.length; i++)
-      {
-         LegJointName legJointName = legJointNames[i];
-         jointVelocitiesVector.set(i, 0, jointVelocities.getJointVelocity(legJointName));
-      }
-
+      Matrix jointVelocitiesVector = jointVelocities.toMatrix();
       return openChainJacobian.getTwist(jointVelocitiesVector);
-   }
-
-   /**
-    * Returns the joint velocities corresponding to the twist of the foot, with respect to the pelvis, expressed in ankle pitch frame
-    * @param anklePitchTwistInAnklePitchFrame
-    * @return corresponding joint velocities
-    */
-   public LegJointVelocities getJointVelocitiesGivenTwist(Twist anklePitchTwistInAnklePitchFrame, double alpha)
-   {
-      LegJointVelocities ret = new LegJointVelocities(legJointNames, robotSide);
-      packJointVelocitiesGivenTwist(ret, anklePitchTwistInAnklePitchFrame, alpha);
-      return ret;
    }
    
    /**
@@ -113,10 +65,10 @@ public class SwingFullLegJacobian
    public void packJointVelocitiesGivenTwist(LegJointVelocities legJointVelocitiesToPack, Twist anklePitchTwistInAnklePitchFrame, double alpha)
    {
       Matrix jointVelocities = openChainJacobian.computeJointVelocities(anklePitchTwistInAnklePitchFrame, alpha);
-      for (int i = 0; i < legJointNames.length; i++)
+      int i = 0;
+      for (LegJointName legJointName : legJointVelocitiesToPack.getLegJointNames())
       {
-         LegJointName legJointName = legJointNames[i];
-         legJointVelocitiesToPack.setJointVelocity(legJointName, jointVelocities.get(i, 0));
+         legJointVelocitiesToPack.setJointVelocity(legJointName, jointVelocities.get(i++, 0));
       }
    }
 
@@ -134,10 +86,10 @@ public class SwingFullLegJacobian
       // the actual computation
       Matrix jointTorques = openChainJacobian.computeJointTorques(wrenchOnFootInFootFrame);
 
-      for (int i = 0; i < legJointNames.length; i++)
+      int i = 0;
+      for (LegJointName legJointName : legTorquesToPack.getLegJointNames())
       {
-         LegJointName legJointName = legJointNames[i];
-         legTorquesToPack.setTorque(legJointName, jointTorques.get(i, 0));
+         legTorquesToPack.setTorque(legJointName, jointTorques.get(i++, 0));
       }
    }
 
