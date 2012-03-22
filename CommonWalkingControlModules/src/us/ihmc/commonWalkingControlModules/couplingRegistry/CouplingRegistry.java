@@ -36,7 +36,6 @@ public interface CouplingRegistry
    public abstract void setEstimatedSwingTimeRemaining(double estimatedSwingTimeRemaining);
    public abstract double getEstimatedSwingTimeRemaining();
 
-   public abstract void setBipedSupportPolygons(BipedSupportPolygons bipedSupportPolygons);
    public abstract BipedSupportPolygons getBipedSupportPolygons();
 
    public abstract void setForceHindOnToes(boolean forceHindOnToes);

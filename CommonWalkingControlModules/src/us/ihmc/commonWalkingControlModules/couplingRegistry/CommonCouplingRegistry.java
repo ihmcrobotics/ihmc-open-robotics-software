@@ -202,11 +202,6 @@ public class CommonCouplingRegistry implements CouplingRegistry
       return estimatedDoubleSupportTimeRemaining.getDoubleValue();
    }
 
-   public void setBipedSupportPolygons(BipedSupportPolygons bipedSupportPolygons)
-   {
-      this.bipedSupportPolygons = bipedSupportPolygons;
-   }
-
    public BipedSupportPolygons getBipedSupportPolygons()
    {
       return bipedSupportPolygons;
