@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules.velocityViaCoP;
 
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.DesiredCenterOfPressureFilter;
 import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
@@ -29,13 +30,13 @@ public class SimpleDesiredCenterOfPressureFilter implements DesiredCenterOfPress
    private final DoubleYoVariable desiredCoPBreakFrequencyHertz = new DoubleYoVariable("desiredCoPBreakFrequencyHertz", registry);
    private final DoubleYoVariable alphaDesiredCoP = new DoubleYoVariable("alphaDesiredCoP", registry);
    private final EnumYoVariable<RobotSide> supportLegPreviousTick = EnumYoVariable.create("supportLegPreviousTick", RobotSide.class, registry);
-   private final CouplingRegistry couplingRegistry;
+   private final BipedSupportPolygons bipedSupportPolygons;
    private final double controlDT;
    private final FramePoint2d returnedFilteredDesiredCoP = new FramePoint2d(ReferenceFrame.getWorldFrame());
 
-   public SimpleDesiredCenterOfPressureFilter(CouplingRegistry couplingRegistry, CommonWalkingReferenceFrames referenceFrames, double controlDT, YoVariableRegistry parentRegistry)
+   public SimpleDesiredCenterOfPressureFilter(BipedSupportPolygons bipedSupportPolygons, CommonWalkingReferenceFrames referenceFrames, double controlDT, YoVariableRegistry parentRegistry)
    {
-      this.couplingRegistry = couplingRegistry;
+      this.bipedSupportPolygons = bipedSupportPolygons;
       this.controlDT = controlDT;
       filteredDesiredCoPDoubleSupport = AlphaFilteredYoFramePoint2d.createAlphaFilteredYoFramePoint2d("filteredDesCoPDoubleSupport", "", registry,
               alphaDesiredCoP, referenceFrames.getMidFeetZUpFrame());
@@ -82,7 +83,7 @@ public class SimpleDesiredCenterOfPressureFilter implements DesiredCenterOfPress
       }
 
       AlphaFilteredYoFramePoint2d filteredDesiredCoP = filteredDesiredCoPsSingleSupport.get(supportLeg);
-      FrameConvexPolygon2d supportPolygon = couplingRegistry.getBipedSupportPolygons().getFootPolygonInAnkleZUp(supportLeg);
+      FrameConvexPolygon2d supportPolygon = bipedSupportPolygons.getFootPolygonInAnkleZUp(supportLeg);
 
       return filterAndProject(desiredCenterOfPressure, filteredDesiredCoP, supportPolygon);
    }
@@ -104,7 +105,7 @@ public class SimpleDesiredCenterOfPressureFilter implements DesiredCenterOfPress
       }
 
       AlphaFilteredYoFramePoint2d filteredDesiredCoP = filteredDesiredCoPDoubleSupport;
-      FrameConvexPolygon2d supportPolygon = couplingRegistry.getBipedSupportPolygons().getSupportPolygonInMidFeetZUp();
+      FrameConvexPolygon2d supportPolygon = bipedSupportPolygons.getSupportPolygonInMidFeetZUp();
 
       
       // test:
