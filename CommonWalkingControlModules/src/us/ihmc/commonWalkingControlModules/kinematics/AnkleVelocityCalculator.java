@@ -39,6 +39,7 @@ public class AnkleVelocityCalculator
       final ReferenceFrame footFrame = twistOfFootWithRespectToBody.getExpressedInFrame();
       twistOfFootWithRespectToWorld.changeFrame(footFrame);
       twistOfFootWithRespectToWorld.add(twistOfFootWithRespectToBody);    // twist of foot w.r.t. world at this point
+      twistOfFootWithRespectToWorld.changeFrame(processedSensors.getFullRobotModel().getFoot(robotSide).getParentJoint().getFrameAfterJoint());
 
       Vector3d linearVelocity = twistOfFootWithRespectToWorld.getLinearPartCopy();    // linear velocity of ankle origin w.r.t. world, in foot frame
       final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();

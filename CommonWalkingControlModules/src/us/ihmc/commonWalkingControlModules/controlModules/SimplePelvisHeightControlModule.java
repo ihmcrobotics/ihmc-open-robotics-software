@@ -39,14 +39,15 @@ public class SimplePelvisHeightControlModule implements PelvisHeightControlModul
 
    }
 
-   public double doPelvisHeightControl(double desiredPelvisHeightInWorld, RobotSide supportLeg)
+   public double doPelvisHeightControl(double desiredStanceHeightInWorld, RobotSide supportLeg)
    {
       if (DO_STANCE_HEIGHT_CONTROL)
       {
          boolean inDoubleSupport = supportLeg == null;
          double stanceHeight = inDoubleSupport
                                ? stanceHeightCalculator.getStanceHeightUsingBothFeet() : stanceHeightCalculator.getStanceHeightUsingOneFoot(supportLeg);
-         fZHeight.set(stanceHeightPDcontroller.compute(stanceHeight, stanceHeightDes.getDoubleValue(), 0.0, 0.0));
+         stanceHeightDes.set(desiredStanceHeightInWorld);
+         fZHeight.set(stanceHeightPDcontroller.compute(stanceHeight, desiredStanceHeightInWorld, 0.0, 0.0));
       }
       else
          fZHeight.set(0.0);

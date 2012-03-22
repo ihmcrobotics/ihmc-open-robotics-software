@@ -35,9 +35,9 @@ public class DesiredJointAccelerationCalculator
       this.fullRobotModel = fullRobotModel;
 
       this.rootJoint = fullRobotModel.getRootJoint();
-      this.footFrame = referenceFrames.getFootFrame(robotSide);
-      this.pelvisFrame = referenceFrames.getPelvisFrame();
-      this.desiredJointAccelerationCalculator = new us.ihmc.utilities.screwTheory.DesiredJointAccelerationCalculator(fullRobotModel.getPelvis(), fullRobotModel.getFoot(swingSide), swingLegJacobian.getGeometricJacobian(), false);
+      this.footFrame = fullRobotModel.getFoot(swingSide).getBodyFixedFrame();
+      this.pelvisFrame = fullRobotModel.getPelvis().getBodyFixedFrame();
+      this.desiredJointAccelerationCalculator = new us.ihmc.utilities.screwTheory.DesiredJointAccelerationCalculator(fullRobotModel.getPelvis(), fullRobotModel.getFoot(swingSide), swingLegJacobian.getGeometricJacobian());
    }
 
    /**

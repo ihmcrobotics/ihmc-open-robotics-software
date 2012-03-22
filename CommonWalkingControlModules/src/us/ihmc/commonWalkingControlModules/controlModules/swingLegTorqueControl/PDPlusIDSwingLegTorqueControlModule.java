@@ -98,11 +98,14 @@ public class PDPlusIDSwingLegTorqueControlModule implements SwingLegTorqueContro
       // reference frames
       ReferenceFrame pelvisFrame = referenceFrames.getPelvisFrame();
       ReferenceFrame footFrame = referenceFrames.getFootFrame(swingSide);
+      ReferenceFrame footCoMFrame = fullRobotModel.getFoot(swingSide).getBodyFixedFrame();
       ReferenceFrame elevatorFrame = fullRobotModel.getElevatorFrame();
 
       // Desired positions
       Transform3D footToPelvis = computeDesiredTransform(pelvisFrame, desiredFootPosition, desiredFootOrientation);
       Twist desiredTwistOfSwingFootWithRespectToWorld = computeDesiredTwist(worldFrame, footFrame, desiredFootVelocity, desiredFootAngularVelocity);
+      desiredTwistOfSwingFootWithRespectToWorld.changeFrame(footCoMFrame);
+      desiredTwistOfSwingFootWithRespectToWorld.changeBodyFrameNoRelativeTwist(footCoMFrame);
 
       Matrix3d footToPelvisOrientation = new Matrix3d();
       footToPelvis.get(footToPelvisOrientation);
@@ -132,6 +135,8 @@ public class PDPlusIDSwingLegTorqueControlModule implements SwingLegTorqueContro
 
       // Desired acceleration
       SpatialAccelerationVector desiredAccelerationOfSwingFootWithRespectToWorld = computeDesiredSwingFootSpatialAcceleration(elevatorFrame, footFrame, desiredFootAcceleration, desiredFootAngularAcceleration);
+      desiredAccelerationOfSwingFootWithRespectToWorld.changeFrameNoRelativeMotion(footCoMFrame);
+      desiredAccelerationOfSwingFootWithRespectToWorld.changeBodyFrameNoRelativeAcceleration(footCoMFrame);
       jacobianDeterminant.set(desiredJointVelocityCalculator.swingFullLegJacobianDeterminant());
       desiredJointAccelerationCalculators.get(swingSide).compute(desiredAccelerationOfSwingFootWithRespectToWorld, dampedLeastSquaresAlpha.getDoubleValue());
 
