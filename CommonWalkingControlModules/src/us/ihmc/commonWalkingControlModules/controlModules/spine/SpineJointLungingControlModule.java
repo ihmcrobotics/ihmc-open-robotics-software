@@ -3,14 +3,10 @@ package us.ihmc.commonWalkingControlModules.controlModules.spine;
 import java.util.ArrayList;
 import java.util.EnumMap;
 
-
-import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.SpineLungingControlModule;
-import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
-import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.SpineJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.SpineTorques;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
@@ -19,7 +15,6 @@ import us.ihmc.utilities.containers.ContainerTools;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
-import us.ihmc.utilities.math.geometry.Line2d;
 import us.ihmc.utilities.math.geometry.Orientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.InverseDynamicsCalculator;
@@ -124,8 +119,8 @@ public class SpineJointLungingControlModule implements SpineLungingControlModule
    {
       spineTorques.setTorquesToZero();
       
-      setDesiredAccelerationOnSpineJointsToZero();
-//      setDesiredAccelerationOnSpineJointsUsingPDcontrol();
+//      setDesiredAccelerationOnSpineJointsToZero();
+      setDesiredAccelerationOnSpineJointsUsingPDcontrol();
       
 //      ReferenceFrame pelvisFrame = pelvisRigidBody.getBodyFixedFrame();
 //      Wrench wrenchByLowerBody = new Wrench(pelvisFrame,pelvisFrame, new Vector3d(0.0, 0.0, 0.0), new Vector3d());
