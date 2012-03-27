@@ -21,8 +21,8 @@ public class ArmsSidewaysArmControlModule extends PDArmControlModule
          desiredArmJointPositions.get(robotSide).get(ArmJointName.SHOULDER_YAW).set(robotSide.negateIfRightSide(0.7));
       }
       
-      RobotSide robotSide = RobotSide.LEFT;
-      desiredArmJointPositions.get(robotSide).get(ArmJointName.SHOULDER_ROLL).set(robotSide.negateIfRightSide(0.0));
+//      RobotSide robotSide = RobotSide.LEFT;
+//      desiredArmJointPositions.get(robotSide).get(ArmJointName.SHOULDER_ROLL).set(robotSide.negateIfRightSide(0.0));
 
    }
 
