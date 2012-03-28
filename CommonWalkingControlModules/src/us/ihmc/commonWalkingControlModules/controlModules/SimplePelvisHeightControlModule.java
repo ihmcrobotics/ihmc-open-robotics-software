@@ -11,7 +11,7 @@ import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoVa
 
 public class SimplePelvisHeightControlModule implements PelvisHeightControlModule
 {
-   private final boolean DO_STANCE_HEIGHT_CONTROL = false;
+   private final boolean doStanceHeightControl;
    private final ProcessedSensorsInterface processedSensors;
 
    private final YoVariableRegistry registry = new YoVariableRegistry("PelvisHeightControlModule");
@@ -28,12 +28,13 @@ public class SimplePelvisHeightControlModule implements PelvisHeightControlModul
 
 
    public SimplePelvisHeightControlModule(ProcessedSensorsInterface processedSensors, StanceHeightCalculator stanceHeightCalculator,
-           YoVariableRegistry parentRegistry, double dt)
+           YoVariableRegistry parentRegistry, double dt, boolean doStanceHeightControl)
    {
       this.processedSensors = processedSensors;
       this.stanceHeightCalculator = stanceHeightCalculator;
       this.stanceHeightPDcontroller = new PDController("stanceHeight", registry);
       this.controlDT = dt;
+      this.doStanceHeightControl = doStanceHeightControl;
 
       parentRegistry.addChild(registry);
 
@@ -41,7 +42,7 @@ public class SimplePelvisHeightControlModule implements PelvisHeightControlModul
 
    public double doPelvisHeightControl(double desiredStanceHeightInWorld, RobotSide supportLeg)
    {
-      if (DO_STANCE_HEIGHT_CONTROL)
+      if (doStanceHeightControl)
       {
          boolean inDoubleSupport = supportLeg == null;
          double stanceHeight = inDoubleSupport
@@ -69,6 +70,13 @@ public class SimplePelvisHeightControlModule implements PelvisHeightControlModul
 
       fZExtra.set(100.0);    // 80.0;
       stanceHeightDes.set(1.03);
+   }
+   
+   public void setParametersForR2InverseDynamics()
+   {
+      fZExtra.set(0.0);
+      stanceHeightPDcontroller.setProportionalGain(1000.0);
+      stanceHeightPDcontroller.setDerivativeGain(200.0);
    }
 
    public void setParametersForM2V2()
