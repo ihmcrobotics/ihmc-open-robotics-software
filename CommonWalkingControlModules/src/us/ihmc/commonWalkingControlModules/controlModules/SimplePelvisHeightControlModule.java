@@ -75,8 +75,8 @@ public class SimplePelvisHeightControlModule implements PelvisHeightControlModul
    public void setParametersForR2InverseDynamics()
    {
       fZExtra.set(0.0);
-      stanceHeightPDcontroller.setProportionalGain(1000.0);
-      stanceHeightPDcontroller.setDerivativeGain(200.0);
+      stanceHeightPDcontroller.setProportionalGain(5000.0);
+      stanceHeightPDcontroller.setDerivativeGain(1000.0);
    }
 
    public void setParametersForM2V2()
