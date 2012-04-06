@@ -179,7 +179,7 @@ public class OptimalSwingSubController implements SwingSubController
       setEstimatedSwingTimeRemaining(swingDuration.getDoubleValue());
       ikAlpha.set(0.07);
       
-      desiredAccelerationBreakFrequency.set(5.0);
+      desiredAccelerationBreakFrequency.set(10.0);
       
       hipYawAngleController.setProportionalGain(120.0);
       hipYawAngleController.setDerivativeGain(2.0);
