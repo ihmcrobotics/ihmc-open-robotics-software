@@ -79,7 +79,7 @@ public class BodyPositionInTimeEstimator
       pelvisPoseInTime.setPosition(bodyPosition);
       
       
-      FrameVector pelvisVelocityInTime = new FrameVector(desiredHeadingFrame, xCoMInTime[1], 0.0, 0.0);
+      FrameVector pelvisVelocityInTime = new FrameVector(desiredHeadingFrame, xCoMInTime[1], currentCoMVelocity.getY(), 0.0);
       pelvisVelocityInTime.changeFrame(pelvisFrame);
       
       
