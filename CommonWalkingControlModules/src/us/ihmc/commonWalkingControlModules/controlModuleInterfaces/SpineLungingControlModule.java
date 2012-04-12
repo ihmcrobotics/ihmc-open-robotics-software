@@ -1,34 +1,37 @@
 package us.ihmc.commonWalkingControlModules.controlModuleInterfaces;
 
-import java.util.ArrayList;
-
-import javax.vecmath.Vector2d;
-import javax.vecmath.Vector3d;
-
-import us.ihmc.commonWalkingControlModules.partNamesAndTorques.SpineJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.SpineTorques;
-import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
+import us.ihmc.utilities.screwTheory.CompositeRigidBodyInertia;
 import us.ihmc.utilities.screwTheory.Wrench;
 
 public interface SpineLungingControlModule extends SpineControlModule
 {
-   public abstract void doSpineControlUsingIDwithPDfeedback();
-      
+	public abstract void setSpineTorquesForZeroQdd();
+	
+	public abstract void setSpineTorquesForDeltaCmp();
+	
+	public abstract void setSpineTorquesForDeltaCmpUsingID();
+	
+	public abstract void setSpineTorquesForGravityCancel();
+	
+   public abstract void setDesiredDeltaCmp(FrameVector2d deltaCmp);
+   
    public abstract void getSpineTorques(SpineTorques spineTorquesToPack);
-      
-   public abstract void setWrench(Wrench wrench);
-
-   public abstract void setGains();
    
-   public abstract void scaleGainsBasedOnLungeAxis(Vector2d lungeAxis);
+   public abstract CompositeRigidBodyInertia getTotalUpperBodyMoI();
    
-   public abstract void scaleGainsToZero();
-
-   public abstract void setSpineXYTorque(Vector2d torqueVectorInPelvis);
+   public abstract void computeTotalUpperBodyMoIProjectedAbout(FrameVector2d projectionAxis);
    
-   public abstract void doCMPControl(FramePoint2d desiredCMP, FrameVector2d lungeAxis);
+   public abstract void computeTotalWrenchExertedOnPelvis(Wrench totalUpperBodyWrench);
    
-   public abstract void doConstantTorqueAroundLungeAxis(FrameVector2d lungeAxis, double constantTorque);
+   public abstract double getTotalUpperBodyMoIProjected();
+   
+   public abstract void updateTotalUpperBodyMoI();
+   
+   public abstract FrameVector2d computeTorqueVectorForDeltaCMP(FrameVector2d deltaCMP, boolean returnActuatorTorqueContributionOnly);
+ 
+   public abstract double computeMaxCmpDisplacement();
+   
 }
 
