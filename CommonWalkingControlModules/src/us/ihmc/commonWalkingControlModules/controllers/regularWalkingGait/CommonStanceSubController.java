@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait;
 
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedFeetUpdater;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.DesiredPelvisOrientationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.BalanceSupportControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.FootOrientationControlModule;
@@ -50,6 +51,7 @@ public class CommonStanceSubController implements StanceSubController
    private final DoubleYoVariable minPercentageTowardsDesired = new DoubleYoVariable("minPercentageTowardsDesired", registry);
 
    private final LegToTrustForVelocityWriteOnly supportLegAndLegToTrustForVelocity;
+   private final BipedFeetUpdater bipedFeetUpdater;
    
    private final BooleanYoVariable doPushRecovery = new BooleanYoVariable("doPushRecovery", registry);
 
@@ -61,7 +63,7 @@ public class CommonStanceSubController implements StanceSubController
                                     DesiredPelvisOrientationControlModule desiredPelvisOrientationControlModule,
                                     BalanceSupportControlModule balanceSupportControlModule, FootOrientationControlModule footOrientationControlModule,
                                     KneeExtensionControlModule kneeExtensionControlModule,
-                                    LegToTrustForVelocityWriteOnly supportLegAndLegToTrustForVelocity, YoVariableRegistry parentRegistry, double footWidth)
+                                    LegToTrustForVelocityWriteOnly supportLegAndLegToTrustForVelocity, BipedFeetUpdater bipedFeetUpdater, YoVariableRegistry parentRegistry, double footWidth)
    {
       this.processedSensors = processedSensors;
       this.couplingRegistry = couplingRegistry;
@@ -73,6 +75,7 @@ public class CommonStanceSubController implements StanceSubController
       this.desiredHeadingControlModule = desiredHeadingControlModule;
       this.kneeExtensionControlModule = kneeExtensionControlModule;
       this.supportLegAndLegToTrustForVelocity = supportLegAndLegToTrustForVelocity;
+      this.bipedFeetUpdater = bipedFeetUpdater;
       this.footWidth = footWidth;
 
       parentRegistry.addChild(registry);
@@ -144,6 +147,8 @@ public class CommonStanceSubController implements StanceSubController
    {
       doDoubleSupportControl(lowerBodyTorquesToPack, loadingLeg, false);
       couplingRegistry.setEstimatedDoubleSupportTimeRemaining(Double.POSITIVE_INFINITY);
+      
+      bipedFeetUpdater.setResizePolygonInDoubleSupport(false);
       setEstimatedDoubleSupportTimeRemaining(null, false);
    }
 
@@ -190,12 +195,18 @@ public class CommonStanceSubController implements StanceSubController
 
       kneeExtensionControlModule.doTransitionIntoLoading(loadingLeg);
       loadingPreSwingAEntryTime.set(processedSensors.getTime());
+      
+      
+      bipedFeetUpdater.setResizePolygonInDoubleSupport(true);
    }
 
    public void doTransitionIntoLoadingPreSwingB(RobotSide loadingLeg)
    {
       supportLegAndLegToTrustForVelocity.setLegToTrustForVelocity(loadingLeg, true);
       supportLegAndLegToTrustForVelocity.setLegToTrustForVelocity(loadingLeg.getOppositeSide(), false);
+      
+      bipedFeetUpdater.setResizePolygonInDoubleSupport(true);
+
    }
 
    public void doTransitionIntoLoadingPreSwingC(RobotSide loadingLeg)
@@ -265,10 +276,12 @@ public class CommonStanceSubController implements StanceSubController
 
    public void doTransitionOutOfLoadingPreSwingA(RobotSide loadingLeg)
    {
+      bipedFeetUpdater.setResizePolygonInDoubleSupport(false);
    }
 
    public void doTransitionOutOfLoadingPreSwingB(RobotSide loadingLeg)
    {
+      bipedFeetUpdater.setResizePolygonInDoubleSupport(false);
    }
 
    public void doTransitionOutOfLoadingPreSwingC(RobotSide loadingLeg)
