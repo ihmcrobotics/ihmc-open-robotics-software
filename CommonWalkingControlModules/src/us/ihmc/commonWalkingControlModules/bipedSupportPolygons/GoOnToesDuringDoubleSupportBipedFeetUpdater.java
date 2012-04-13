@@ -131,7 +131,7 @@ public class GoOnToesDuringDoubleSupportBipedFeetUpdater implements BipedFeetUpd
       }
 
       
-      doPolygonResizeInDoubleSupport.set(true);
+      doPolygonResizeInDoubleSupport.set(false);
 //    if (VarListsToRegister.REGISTER_BIPED_FEET_UPDATER)
 //    {
 //       yoVariableRegistry.addChild(registry);
