@@ -174,8 +174,8 @@ public class PointArtifact extends Artifact implements Serializable
       {
          // paint points
          coordinate = _sonarHistory.elementAt(i);
-         int x = Xcenter + ((int)Math.round(coordinate.x * scaleFactor));
-         int y = Ycenter - ((int)Math.round(coordinate.y * scaleFactor));
+         int x = Xcenter + ((int)Math.round(coordinate.x * scaleFactor) - (size / 2));
+         int y = Ycenter - ((int)Math.round(coordinate.y * scaleFactor)) - (size / 2);
          if (i == (_sonarHistory.size() - 1))
          {
             g.setColor(color);
