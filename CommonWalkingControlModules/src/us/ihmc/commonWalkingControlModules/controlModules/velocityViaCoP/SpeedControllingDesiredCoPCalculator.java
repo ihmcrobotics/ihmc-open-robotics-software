@@ -343,6 +343,14 @@ public class SpeedControllingDesiredCoPCalculator implements DesiredCapturePoint
 //      minPerimeterDistance.set(0.04);    // 0.02);
    }
 
+   public void setParametersForR2InverseDynamics()
+   {
+      speedControlXKp.set(3.0);
+      doubleSupportCaptureKp.set(1.5);
+      singleSupportCaptureKp.set(2.0);
+      kCaptureGuide.set(1.5);
+   }
+   
    public void setParametersForM2V2()
    {
       speedControlXKp.set(0.5);
