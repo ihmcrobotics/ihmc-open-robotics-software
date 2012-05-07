@@ -76,14 +76,14 @@ public class SimplePelvisHeightControlModule implements PelvisHeightControlModul
    {
       fZExtra.set(0.0);
       stanceHeightPDcontroller.setProportionalGain(5000.0);
-      stanceHeightPDcontroller.setDerivativeGain(1000.0);
+//      stanceHeightPDcontroller.setDerivativeGain(1000.0); // FIXME: doesn't do anything, since the actual CoM velocity is set to zero.
    }
 
    public void setParametersForM2V2()
    {
       // TODO: tune
       stanceHeightPDcontroller.setProportionalGain(1000.0);
-      stanceHeightPDcontroller.setDerivativeGain(10.0);
+//      stanceHeightPDcontroller.setDerivativeGain(10.0); // FIXME: doesn't do anything, since the actual CoM velocity is set to zero.
 
       fZExtra.set(50.0);    // 0.0);
       stanceHeightDes.set(0.95);
