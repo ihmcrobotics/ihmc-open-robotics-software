@@ -27,7 +27,8 @@ public class EquivalentConstantCoPControlModule implements DesiredCapturePointTo
    private final ProcessedSensorsInterface processedSensors;
    private final CouplingRegistry couplingRegistry;
 
-   private final DoubleYoVariable doubleSupportFinalTime = new DoubleYoVariable("doubleSupportFinalTime", registry);
+   private final DoubleYoVariable minimumEqConstTimespanDoubleSupport = new DoubleYoVariable("minimumEqConstTimespanDoubleSupport", registry);
+   private final DoubleYoVariable minimumEqConstTimespanSingleSupport = new DoubleYoVariable("minimumEqConstTimespanSingleSupport", registry);
    private final DoubleYoVariable guideLineParameter = new DoubleYoVariable("guideLinePercentage", registry);
    private final DoubleYoVariable guideLineKp = new DoubleYoVariable("guideLineKp", registry);
 
@@ -46,7 +47,7 @@ public class EquivalentConstantCoPControlModule implements DesiredCapturePointTo
          FrameVector2d desiredVelocity, FramePoint2d desiredCapturePoint)
    {
       FrameConvexPolygon2d supportPolygon = couplingRegistry.getBipedSupportPolygons().getFootPolygonInAnkleZUp(supportLeg);
-      double finalTime = doubleSupportFinalTime.getDoubleValue();
+      double finalTime = minimumEqConstTimespanSingleSupport.getDoubleValue();
       double comHeight = computeCoMHeightUsingOneFoot(supportLeg);
       return computeDesiredCoP(supportPolygon, desiredCapturePoint, finalTime, comHeight);
    }
@@ -60,7 +61,7 @@ public class EquivalentConstantCoPControlModule implements DesiredCapturePointTo
       double estimatedDoubleSupportTimeRemaining = couplingRegistry.getEstimatedDoubleSupportTimeRemaining();
       double finalTime;
       if (Double.isInfinite(estimatedDoubleSupportTimeRemaining))
-         finalTime = doubleSupportFinalTime.getDoubleValue();
+         finalTime = minimumEqConstTimespanDoubleSupport.getDoubleValue();
       else
          finalTime = Math.max(estimatedDoubleSupportTimeRemaining, 50e-3);
       double comHeight = computeCoMHeightUsingBothFeet();
@@ -149,7 +150,8 @@ public class EquivalentConstantCoPControlModule implements DesiredCapturePointTo
 
    public void setParametersForM2V2()
    {
-      doubleSupportFinalTime.set(0.1);
+      minimumEqConstTimespanDoubleSupport.set(0.13);
+      minimumEqConstTimespanSingleSupport.set(0.2);
       guideLineParameter.set(0.4);
       guideLineKp.set(2.0);
    }
