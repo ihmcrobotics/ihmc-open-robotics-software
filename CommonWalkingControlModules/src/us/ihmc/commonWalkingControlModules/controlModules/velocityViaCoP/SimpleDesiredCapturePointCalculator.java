@@ -15,6 +15,7 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.EnumYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public class SimpleDesiredCapturePointCalculator implements DesiredCapturePointCalculator
@@ -23,6 +24,13 @@ public class SimpleDesiredCapturePointCalculator implements DesiredCapturePointC
    private final CouplingRegistry couplingRegistry;
    private final CommonWalkingReferenceFrames referenceFrames;
    private final double controlDT;
+   
+   enum MotionType
+   {
+      OffsetSupportPolygon, Circle
+   }
+   
+   private final EnumYoVariable<MotionType> motionType = new EnumYoVariable<SimpleDesiredCapturePointCalculator.MotionType>("iCPMotionType", registry, MotionType.class);
    
    private final DoubleYoVariable desiredCaptureForwardStayInDoubleSupport = new DoubleYoVariable("desiredCaptureForwardNotLoading", registry);
    private final DoubleYoVariable desiredCaptureKxx = new DoubleYoVariable("desiredCaptureKxx", registry);
@@ -45,6 +53,8 @@ public class SimpleDesiredCapturePointCalculator implements DesiredCapturePointC
       icpMotionSpeed.set(10.0);
       icpMotionDistanceToOuterEdge.set(0.05);
       icpCurrentPositionOnMotionPolygon.set(0.0);
+      
+      motionType.set(MotionType.Circle);
    }
 
    public FramePoint2d computeDesiredCapturePointSingleSupport(RobotSide supportLeg, BipedSupportPolygons bipedSupportPolygons, FrameVector2d desiredVelocity, SingleSupportCondition singleSupportCondition)
@@ -80,51 +90,70 @@ public class SimpleDesiredCapturePointCalculator implements DesiredCapturePointC
    {
       
       FrameConvexPolygon2d supportPolygon = couplingRegistry.getBipedSupportPolygons().getSupportPolygonInMidFeetZUp();
-      FrameConvexPolygon2d motionPolygon = FrameConvexPolygon2d.shrinkConstantDistanceInto(icpMotionDistanceToOuterEdge.getDoubleValue(), supportPolygon);
-      
-      if(motionPolygon== null)
-      {
-         // Shrunken to the smallest possible polygon, the desired CP becomes the center of the polygon.
-         return supportPolygon.getCentroidCopy();
-      }
-      ArrayList<FramePoint2d> pointsOnPolygon = motionPolygon.getClockwiseOrderedListOfFramePoints();
-      
-      double numberOfPoints = pointsOnPolygon.size();
-
-      
-      double totalLength = 0;
-      for(int i = 0; i < numberOfPoints; i++)
-      {
-         int nextPoint = i >= (numberOfPoints - 1) ? 0 : i + 1;
-         totalLength += pointsOnPolygon.get(i).distance(pointsOnPolygon.get(nextPoint));
-      }
-      
       icpCurrentPositionOnMotionPolygon.add(icpMotionSpeed.getDoubleValue() * controlDT);
-      double distanceInPolygon = (icpCurrentPositionOnMotionPolygon.getDoubleValue() % 100) * 0.01 * totalLength;
       
       
-      double lengthPassed = 0;
-      for(int i = 0; i < numberOfPoints; i++)
+      switch(motionType.getEnumValue())
       {
-         int nextPoint = i >= (numberOfPoints - 1) ? 0 : i + 1;
-         double distance = pointsOnPolygon.get(i).distance(pointsOnPolygon.get(nextPoint));
-         if((lengthPassed + distance) > distanceInPolygon)
-         {
-            FrameVector2d edge = new FrameVector2d(pointsOnPolygon.get(i), pointsOnPolygon.get(nextPoint));
-            edge.normalize();
-            edge.scale(distanceInPolygon - lengthPassed);
-            
-            FramePoint2d desiredCapturePoint = new FramePoint2d(pointsOnPolygon.get(i));
-            desiredCapturePoint.add(edge);
-            
-            return desiredCapturePoint;
-            
-         }
+      case Circle:
+      {
+         FramePoint2d desiredCapturePoint = supportPolygon.getCentroidCopy();
          
-         lengthPassed += distance;
+         double t = (icpCurrentPositionOnMotionPolygon.getDoubleValue() / 100.0) * 2 * Math.PI;
+         double x = Math.cos(t) * icpMotionDistanceToOuterEdge.getDoubleValue();
+         double y = Math.sin(t) * icpMotionDistanceToOuterEdge.getDoubleValue();
+         
+         FrameVector2d circleVector = new FrameVector2d(desiredCapturePoint.getReferenceFrame(), x, y);
+         desiredCapturePoint.add(circleVector);
+         return desiredCapturePoint;
+         
       }
-      
-      
+      case OffsetSupportPolygon:
+      {
+         FrameConvexPolygon2d motionPolygon = FrameConvexPolygon2d.shrinkConstantDistanceInto(icpMotionDistanceToOuterEdge.getDoubleValue(), supportPolygon);
+
+         if (motionPolygon == null)
+         {
+            // Shrunken to the smallest possible polygon, the desired CP becomes the center of the polygon.
+            return supportPolygon.getCentroidCopy();
+         }
+         ArrayList<FramePoint2d> pointsOnPolygon = motionPolygon.getClockwiseOrderedListOfFramePoints();
+
+         double numberOfPoints = pointsOnPolygon.size();
+
+         double totalLength = 0;
+         for (int i = 0; i < numberOfPoints; i++)
+         {
+            int nextPoint = i >= (numberOfPoints - 1) ? 0 : i + 1;
+            totalLength += pointsOnPolygon.get(i).distance(pointsOnPolygon.get(nextPoint));
+         }
+
+         
+         double distanceInPolygon = (icpCurrentPositionOnMotionPolygon.getDoubleValue() % 100) * 0.01 * totalLength;
+
+         double lengthPassed = 0;
+         for (int i = 0; i < numberOfPoints; i++)
+         {
+            int nextPoint = i >= (numberOfPoints - 1) ? 0 : i + 1;
+            double distance = pointsOnPolygon.get(i).distance(pointsOnPolygon.get(nextPoint));
+            if ((lengthPassed + distance) > distanceInPolygon)
+            {
+               FrameVector2d edge = new FrameVector2d(pointsOnPolygon.get(i), pointsOnPolygon.get(nextPoint));
+               edge.normalize();
+               edge.scale(distanceInPolygon - lengthPassed);
+
+               FramePoint2d desiredCapturePoint = new FramePoint2d(pointsOnPolygon.get(i));
+               desiredCapturePoint.add(edge);
+
+               return desiredCapturePoint;
+
+            }
+
+            lengthPassed += distance;
+         }
+
+      }
+      }
       throw new RuntimeException("Should not get here.");
    }
 
