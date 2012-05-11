@@ -230,6 +230,7 @@ public class CommonStanceSubController implements StanceSubController
       supportLegAndLegToTrustForVelocity.setSupportLeg(null);
       supportLegAndLegToTrustForVelocity.setLegToUseForCOMOffset(null);
 
+      couplingRegistry.setEstimatedDoubleSupportTimeRemaining(Double.POSITIVE_INFINITY);
 //    balanceSupportControlModule.setDesiredCoPOffset(new FramePoint2d(ReferenceFrame.getWorldFrame())); // didn't do anything...
    }
 
