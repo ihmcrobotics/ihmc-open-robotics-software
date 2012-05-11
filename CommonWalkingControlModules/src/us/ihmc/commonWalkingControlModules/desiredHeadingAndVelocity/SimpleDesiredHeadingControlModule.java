@@ -95,7 +95,7 @@ public class SimpleDesiredHeadingControlModule implements DesiredHeadingControlM
    public void setFinalHeadingTarget(FrameVector2d finalHeadingTarget)
    {
       finalHeadingTarget.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
-      this.desiredHeadingFinal.set(Math.atan2(finalHeadingTarget.getY(), finalHeadingTarget.getX()));
+      setFinalHeadingTargetAngle(Math.atan2(finalHeadingTarget.getY(), finalHeadingTarget.getX()));
    }
 
    public double getDesiredHeadingAngle()

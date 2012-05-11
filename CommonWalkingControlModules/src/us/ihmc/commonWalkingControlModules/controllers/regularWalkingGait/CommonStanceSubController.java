@@ -166,6 +166,10 @@ public class CommonStanceSubController implements StanceSubController
 
    public void doSingleLegBalance(LegTorques legTorquesToPack, RobotSide supportLeg, double timeInCurrentState)
    {
+      FrameVector2d finalHeadingTarget = new FrameVector2d(referenceFrames.getAnkleZUpFrame(supportLeg), 1.0, 0.0);
+      finalHeadingTarget.changeFrame(ReferenceFrame.getWorldFrame());
+      desiredHeadingControlModule.setFinalHeadingTarget(finalHeadingTarget);
+
       doSingleSupportControl(legTorquesToPack, SingleSupportCondition.StopWalking, timeInCurrentState);
       couplingRegistry.setEstimatedSwingTimeRemaining(0.0);
    }
@@ -260,9 +264,6 @@ public class CommonStanceSubController implements StanceSubController
 
    public void doTransitionIntoSingleLegBalance(RobotSide supportLeg, double[] desiredYawPitchRoll)
    {
-      FrameVector2d finalHeadingTarget = new FrameVector2d(referenceFrames.getAnkleZUpFrame(supportLeg), 1.0, 0.0);
-      finalHeadingTarget.changeFrame(ReferenceFrame.getWorldFrame());
-      desiredHeadingControlModule.setFinalHeadingTarget(finalHeadingTarget);
       desiredPelvisOrientationControlModule.setDesiredPelvisOrientation(new Orientation(desiredHeadingControlModule.getDesiredHeadingFrame(), desiredYawPitchRoll));
    }
 
