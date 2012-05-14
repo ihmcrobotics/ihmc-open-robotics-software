@@ -336,7 +336,7 @@ public class BalancingUpperBodySubController implements UpperBodySubController
 		{
 			timeOfStateStart.put(currentState, processedSensors.getTime());
 
-			setLungeAxisNormalToCurrentVectorFromIcpDesiredToIcpActual();
+			setLungeAxisNormalToVectorFromIcpDesiredToIcpActual();
 
 			chestAngleOnStateStart.put(currentState, chestAngle.getDoubleValue());
 			setChestAngularVelocityAboutLungeAxisOnStateStart(currentState);
@@ -451,7 +451,7 @@ public class BalancingUpperBodySubController implements UpperBodySubController
 		}
 	}
 
-	private void setLungeAxisNormalToCurrentVectorFromIcpDesiredToIcpActual()
+	private void setLungeAxisNormalToVectorFromIcpDesiredToIcpActual()
 	{
 		setLungeAxisInWorldFrame( -icpDesiredToicpActualVector.getY(), icpDesiredToicpActualVector.getX());  // just rotate 90 degrees about z-axis
 	}
@@ -498,7 +498,7 @@ public class BalancingUpperBodySubController implements UpperBodySubController
 	private double computeBosRadius(BalancingUpperBodySubControllerState state) 
 	{
 		FramePoint2d nominalCoP = getNominalCoP();
-		FramePoint2d maxCoP = computeMaxCopDuring(state);
+		FramePoint2d maxCoP = computeMaxCop(state);
 
 		double deltaX = maxCoP.getX() - nominalCoP.getX();
 		double deltaY = maxCoP.getY() - nominalCoP.getY();
@@ -508,19 +508,19 @@ public class BalancingUpperBodySubController implements UpperBodySubController
 	}
 	
 
-	private FramePoint2d computeIntersectionBetweenLineSegmentAndSupportPolygon(FramePoint2d insidePoint, FramePoint2d outsidePoint)
+	private FramePoint2d computeIntersectionWithSupportPolygon(FramePoint2d insidePolygonPoint, FramePoint2d outsidePolygonPoint)
 	{
 		FrameConvexPolygon2d supportPolygon = couplingRegistry.getBipedSupportPolygons().getSupportPolygonInMidFeetZUp();
-		FrameLineSegment2d segmentFromPolygonCentroidToDesiredCoP = new FrameLineSegment2d(insidePoint, outsidePoint);
+		FrameLineSegment2d lineSegment = new FrameLineSegment2d(insidePolygonPoint, outsidePolygonPoint);
 
-		FramePoint2d[] intersectionPoints = segmentFromPolygonCentroidToDesiredCoP.intersectionWith(supportPolygon);
+		FramePoint2d[] intersectionPoints = lineSegment.intersectionWith(supportPolygon);
 		FramePoint2d ret = intersectionPoints[0];
 
 		// no intersections
 		if (ret == null)
 		{
-			System.out.println("Could not find any intersection with BoS Polygon!");
-			ret = outsidePoint;
+			System.out.println("Could not find any intersection with BoS Polygon in " + this.name + "!  Returning outsidePolygonPoint.");
+			ret = outsidePolygonPoint;
 		}
 
 		return ret;
@@ -663,7 +663,7 @@ public class BalancingUpperBodySubController implements UpperBodySubController
 
 	private double predictedChestAccelerationDuring(BalancingUpperBodySubControllerState predictedState)
 	{
-		FrameVector2d deltaCMP = computeDeltaCmpDuring(predictedState, worldFrame, false);
+		FrameVector2d deltaCMP = computeDesiredDeltaCmp(predictedState, worldFrame, false);
 		FrameVector2d predictedSpineTorqueVector = spineControlModule.computeTorqueVectorForDeltaCMP(deltaCMP, false);
 
 		double upperBodyMoIProjected = spineControlModule.getTotalUpperBodyMoIProjected();
@@ -693,7 +693,7 @@ public class BalancingUpperBodySubController implements UpperBodySubController
 
 	private FramePoint2d computeExpectedCmpDuring(BalancingUpperBodySubControllerState state, ReferenceFrame desiredFrame)
 	{
-		FramePoint2d expectedCmp = computeMaxCopDuring(state);
+		FramePoint2d expectedCmp = computeMaxCop(state);
 		expectedCmp.changeFrame(desiredFrame);
 		
 		boolean clipTorqueToKeepCmpInsideBoS;
@@ -706,7 +706,7 @@ public class BalancingUpperBodySubController implements UpperBodySubController
 			clipTorqueToKeepCmpInsideBoS = false;
 		}
 		
-		expectedCmp.add(computeDeltaCmpDuring(state, desiredFrame, clipTorqueToKeepCmpInsideBoS));
+		expectedCmp.add(computeDesiredDeltaCmp(state, desiredFrame, clipTorqueToKeepCmpInsideBoS));
 
 		expectedCmp.scale(predictedCMPscaling.getDoubleValue());  //Tune the desired overshoot for which to transition to chest deceleration
 		return expectedCmp;
@@ -871,7 +871,7 @@ public class BalancingUpperBodySubController implements UpperBodySubController
 		chestCoMPosition.set(chestCoM);
 
 		ReferenceFrame referenceFrame = ReferenceFrame.getWorldFrame();
-		if (couplingRegistry.getLungeAxisInFrame(referenceFrame) != null) maxCopYo.set(computeMaxCopDuring((BalancingUpperBodySubControllerState) stateMachine.getCurrentStateEnum()));
+		if (couplingRegistry.getLungeAxisInFrame(referenceFrame) != null) maxCopYo.set(computeMaxCop((BalancingUpperBodySubControllerState) stateMachine.getCurrentStateEnum()));
 
 	}
 
@@ -964,6 +964,7 @@ public class BalancingUpperBodySubController implements UpperBodySubController
 		// Lunge axis and ICP direction are just orthogonal in the x-y plane
 		FrameVector2d lungeAxis = couplingRegistry.getLungeAxisInFrame(worldFrame);
 		FrameVector2d icpDirection = new FrameVector2d(lungeAxis.getReferenceFrame(), lungeAxis.getY(), -lungeAxis.getX());
+		
 		icpDirection.changeFrame(desiredFrame);
 		icpDirection.normalize();
 		return icpDirection;
@@ -973,14 +974,14 @@ public class BalancingUpperBodySubController implements UpperBodySubController
 	private void setCmpInSpineControlModule(BalancingUpperBodySubControllerState currentState, boolean clipTorqueToKeepCmpInsideBoS)
 	{
 
-		FrameVector2d deltaCmp = computeDeltaCmpDuring(currentState, pelvisFrame, clipTorqueToKeepCmpInsideBoS);
+		FrameVector2d deltaCmp = computeDesiredDeltaCmp(currentState, pelvisFrame, clipTorqueToKeepCmpInsideBoS);
 
 		spineControlModule.setDesiredDeltaCmp(deltaCmp);  
 	}
 
 
 
-	private FrameVector2d computeDeltaCmpDuring(BalancingUpperBodySubControllerState state, ReferenceFrame desiredFrame, boolean clipTorqueToKeepCmpInsideBoS)
+	private FrameVector2d computeDesiredDeltaCmp(BalancingUpperBodySubControllerState state, ReferenceFrame desiredFrame, boolean clipTorqueToKeepCmpInsideBoS)
 	{
 		FrameVector2d deltaCmp = getNewUnitVectorNormalToLungeAxis(desiredFrame);
 		deltaCmp.scale(desiredSpineCmpDirection.get(state));
@@ -1001,7 +1002,7 @@ public class BalancingUpperBodySubController implements UpperBodySubController
 	
 
 
-	private FrameVector2d computeDesiredDeltaCoPDuring(BalancingUpperBodySubControllerState state, ReferenceFrame desiredFrame, boolean clipToSupportPolygon) 
+	private FrameVector2d computeDesiredDeltaCop(BalancingUpperBodySubControllerState state, ReferenceFrame desiredFrame, boolean clipToSupportPolygon) 
 	{
 		FrameVector2d deltaCoP = getNewUnitVectorNormalToLungeAxis(desiredFrame);
 		
@@ -1020,20 +1021,20 @@ public class BalancingUpperBodySubController implements UpperBodySubController
 		return deltaCoP;
 	}
 
-	private FramePoint2d computeDesiredCoPduring(BalancingUpperBodySubControllerState state, ReferenceFrame desiredFrame, boolean clipToSupportPolygon)
+	private FramePoint2d computeDesiredCop(BalancingUpperBodySubControllerState state, ReferenceFrame desiredFrame, boolean clipToSupportPolygon)
 	{
 		FramePoint2d desiredCoP = getNominalCoP().changeFrameCopy(desiredFrame);
-		desiredCoP.add(computeDesiredDeltaCoPDuring(state, desiredFrame, clipToSupportPolygon));
+		desiredCoP.add(computeDesiredDeltaCop(state, desiredFrame, clipToSupportPolygon));
 
 		return desiredCoP;
 	}
 	
-	private FramePoint2d computeMaxCopDuring(BalancingUpperBodySubControllerState state)
+	private FramePoint2d computeMaxCop(BalancingUpperBodySubControllerState state)
 	{
 		FramePoint2d nominalCoP = getNominalCoP();
-		FramePoint2d desiredCoP = computeDesiredCoPduring(state, nominalCoP.getReferenceFrame(), false);
+		FramePoint2d desiredCoP = computeDesiredCop(state, nominalCoP.getReferenceFrame(), false);
 		
-		FramePoint2d maxCoP = computeIntersectionBetweenLineSegmentAndSupportPolygon(nominalCoP, desiredCoP);
+		FramePoint2d maxCoP = computeIntersectionWithSupportPolygon(nominalCoP, desiredCoP);
 	
 		return maxCoP;
 	}
