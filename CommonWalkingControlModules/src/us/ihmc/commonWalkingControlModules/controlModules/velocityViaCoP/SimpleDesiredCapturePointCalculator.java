@@ -9,6 +9,7 @@ import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
+import us.ihmc.utilities.math.geometry.FrameLineSegment2d;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -99,6 +100,16 @@ public class SimpleDesiredCapturePointCalculator implements DesiredCapturePointC
       case CIRCLE:
       {
          FramePoint2d desiredCapturePoint = supportPolygon.getCentroidCopy();
+         FrameLineSegment2d connectingEdge = couplingRegistry.getBipedSupportPolygons().getConnectingEdge1();
+         connectingEdge.changeFrame(desiredCapturePoint.getReferenceFrame());
+         double toConnectingEdge = connectingEdge.distance(desiredCapturePoint);
+         
+         FramePoint2d sweetSpotA = couplingRegistry.getBipedSupportPolygons().getSweetSpotCopy(RobotSide.LEFT);
+         FramePoint2d sweetSpotB = couplingRegistry.getBipedSupportPolygons().getSweetSpotCopy(RobotSide.RIGHT);
+         sweetSpotB.changeFrame(sweetSpotA.getReferenceFrame());
+         double footToFoot = sweetSpotA.distance(sweetSpotB);
+         
+         icpMotionXYScaling.set(footToFoot/(2.0*toConnectingEdge));
          
          double t = (icpCurrentPositionOnMotionPolygon.getDoubleValue() / 100.0) * 2 * Math.PI;
          double x = Math.cos(t) * icpMotionDistanceToOuterEdge.getDoubleValue();
