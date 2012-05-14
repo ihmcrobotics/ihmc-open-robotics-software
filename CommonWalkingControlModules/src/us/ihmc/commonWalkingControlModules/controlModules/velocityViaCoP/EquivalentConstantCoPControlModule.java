@@ -153,6 +153,6 @@ public class EquivalentConstantCoPControlModule implements DesiredCapturePointTo
       minimumEqConstTimespanDoubleSupport.set(0.13);
       minimumEqConstTimespanSingleSupport.set(0.2);
       guideLineParameter.set(0.4);
-      guideLineKp.set(2.0);
+      guideLineKp.set(3.0);
    }
 }

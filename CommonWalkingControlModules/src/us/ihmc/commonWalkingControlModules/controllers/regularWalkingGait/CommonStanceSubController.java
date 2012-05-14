@@ -343,8 +343,14 @@ public class CommonStanceSubController implements StanceSubController
    {
       FrameConvexPolygon2d loadingFootPolygon = couplingRegistry.getBipedSupportPolygons().getFootPolygonInAnkleZUp(loadingLeg);
       FramePoint2d desiredCoP = couplingRegistry.getDesiredCoP();
-      desiredCoP.changeFrame(loadingFootPolygon.getReferenceFrame());
-      return loadingFootPolygon.isPointInside(desiredCoP);
+      desiredCoP.changeFrame(loadingFootPolygon.getReferenceFrame());      
+      boolean copInsideLoadingFootPolygon = loadingFootPolygon.isPointInside(desiredCoP);
+
+      FrameConvexPolygon2d supportPolygon = couplingRegistry.getBipedSupportPolygons().getSupportPolygonInMidFeetZUp();
+      FramePoint2d capturePoint = couplingRegistry.getCapturePointInFrame(supportPolygon.getReferenceFrame()).toFramePoint2d();
+      boolean icpOutsideSupportPolygon = !supportPolygon.isPointInside(capturePoint);
+
+      return copInsideLoadingFootPolygon || icpOutsideSupportPolygon;
 //      return isOverPercentageTowardDesired(loadingLeg, minPercentageTowardsDesired.getDoubleValue());
    }
 
