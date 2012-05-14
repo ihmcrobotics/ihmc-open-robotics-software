@@ -240,6 +240,8 @@ public class CommonStanceSubController implements StanceSubController
       supportLegAndLegToTrustForVelocity.setLegToTrustForVelocity(stanceSide.getOppositeSide(), false);
       supportLegAndLegToTrustForVelocity.setSupportLeg(null);
       supportLegAndLegToTrustForVelocity.setLegToUseForCOMOffset(stanceSide);
+      
+      bipedFeetUpdater.setResizePolygonInDoubleSupport(true);
 
 //    BipedSupportPolygons bipedSupportPolygons = couplingRegistry.getBipedSupportPolygons();
 //
@@ -304,6 +306,7 @@ public class CommonStanceSubController implements StanceSubController
 
    public void doTransitionOutOfUnloadLegToTransferIntoWalking(RobotSide stanceSide)
    {
+      bipedFeetUpdater.setResizePolygonInDoubleSupport(false);
    }
 
 
