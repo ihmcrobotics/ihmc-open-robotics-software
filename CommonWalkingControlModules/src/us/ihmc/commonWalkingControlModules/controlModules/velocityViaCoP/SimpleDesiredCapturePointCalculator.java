@@ -27,7 +27,7 @@ public class SimpleDesiredCapturePointCalculator implements DesiredCapturePointC
    
    enum MotionType
    {
-      OffsetSupportPolygon, Circle
+      OFFSET_SUPPORT_POLYGON, CIRCLE
    }
    
    private final EnumYoVariable<MotionType> motionType = new EnumYoVariable<SimpleDesiredCapturePointCalculator.MotionType>("iCPMotionType", registry, MotionType.class);
@@ -39,6 +39,7 @@ public class SimpleDesiredCapturePointCalculator implements DesiredCapturePointC
    private final BooleanYoVariable doICPMotion = new BooleanYoVariable("doICPEdgeTraceMotion", registry);
    private final DoubleYoVariable icpMotionSpeed = new DoubleYoVariable("icpMotionSpeed", registry);
    private final DoubleYoVariable icpMotionDistanceToOuterEdge = new DoubleYoVariable("icpMotionDistanceToOuterEdge", registry);
+   private final DoubleYoVariable icpMotionXYScaling = new DoubleYoVariable("icpMotionXYScaling", registry);
    
    private final DoubleYoVariable icpCurrentPositionOnMotionPolygon = new DoubleYoVariable("icpCurrentPositionOnMotionPolygon", registry);
 
@@ -53,8 +54,8 @@ public class SimpleDesiredCapturePointCalculator implements DesiredCapturePointC
       icpMotionSpeed.set(10.0);
       icpMotionDistanceToOuterEdge.set(0.05);
       icpCurrentPositionOnMotionPolygon.set(0.0);
-      
-      motionType.set(MotionType.Circle);
+      icpMotionXYScaling.set(1.5);
+      motionType.set(MotionType.CIRCLE);
    }
 
    public FramePoint2d computeDesiredCapturePointSingleSupport(RobotSide supportLeg, BipedSupportPolygons bipedSupportPolygons, FrameVector2d desiredVelocity, SingleSupportCondition singleSupportCondition)
@@ -95,20 +96,20 @@ public class SimpleDesiredCapturePointCalculator implements DesiredCapturePointC
       
       switch(motionType.getEnumValue())
       {
-      case Circle:
+      case CIRCLE:
       {
          FramePoint2d desiredCapturePoint = supportPolygon.getCentroidCopy();
          
          double t = (icpCurrentPositionOnMotionPolygon.getDoubleValue() / 100.0) * 2 * Math.PI;
          double x = Math.cos(t) * icpMotionDistanceToOuterEdge.getDoubleValue();
-         double y = Math.sin(t) * icpMotionDistanceToOuterEdge.getDoubleValue();
+         double y = Math.sin(t) * icpMotionDistanceToOuterEdge.getDoubleValue() * icpMotionXYScaling.getDoubleValue();
          
          FrameVector2d circleVector = new FrameVector2d(desiredCapturePoint.getReferenceFrame(), x, y);
          desiredCapturePoint.add(circleVector);
          return desiredCapturePoint;
          
       }
-      case OffsetSupportPolygon:
+      case OFFSET_SUPPORT_POLYGON:
       {
          FrameConvexPolygon2d motionPolygon = FrameConvexPolygon2d.shrinkConstantDistanceInto(icpMotionDistanceToOuterEdge.getDoubleValue(), supportPolygon);
 
