@@ -60,5 +60,5 @@ public interface ProcessedSensorsInterface
    public abstract FrameVector getCenterOfMassVelocityInFrame(ReferenceFrame referenceFrame);
    
    public abstract FramePoint getCentroidalMomentPivotInFrame(ReferenceFrame referenceFrame);
-
+   public abstract FrameVector getAngularMomentumInFrame(ReferenceFrame midFeetZUp);
 }

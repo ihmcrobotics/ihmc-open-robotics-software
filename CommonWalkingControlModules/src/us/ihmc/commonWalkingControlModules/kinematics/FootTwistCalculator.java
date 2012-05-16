@@ -1,7 +1,5 @@
 package us.ihmc.commonWalkingControlModules.kinematics;
 
-import java.util.ArrayList;
-
 import us.ihmc.commonWalkingControlModules.sensors.ProcessedSensorsInterface;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -12,7 +10,7 @@ import us.ihmc.utilities.screwTheory.Twist;
 public class FootTwistCalculator
 {
    private final ProcessedSensorsInterface processedSensors;
-   private final ArrayList<RevoluteJoint> legJointList;
+   private final RevoluteJoint[] legJointList;
    private final Twist tempTwist = new Twist();
    private final RigidBody pelvis;
    private final ReferenceFrame footFrame;
@@ -22,7 +20,7 @@ public class FootTwistCalculator
       this.processedSensors = processedSensors;
       this.legJointList = processedSensors.getFullRobotModel().getLegJointList(robotSide);
       this.pelvis = processedSensors.getFullRobotModel().getPelvis();
-      this.footFrame = legJointList.get(legJointList.size() - 1).getFrameAfterJoint();
+      this.footFrame = legJointList[legJointList.length - 1].getFrameAfterJoint();
    }
 
    public Twist computeFootTwist()

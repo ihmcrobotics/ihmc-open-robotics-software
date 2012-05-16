@@ -78,7 +78,7 @@ public class TorqueTransitionFilter
       {
          for (LegJointName legJointName : robotJointNames.getLegJointNames())
          {
-            processedOutputs.setDesiredLegJointTorque(robotSide, legJointName,
+            processedOutputs.setLegJointTau(robotSide, legJointName,
                     alphaTauFilter.getDoubleValue() * previousTorques.get(robotSide).get(legJointName).getDoubleValue()
                     + (1.0 - alphaTauFilter.getDoubleValue()) * processedOutputs.getDesiredLegJointTorque(robotSide, legJointName));
          }
