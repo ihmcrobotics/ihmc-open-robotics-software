@@ -57,14 +57,14 @@ public class InverseDynamicsCalculatorTest
       Robot robot = new Robot("robot");
       robot.setGravity(0.0);
 
-      ReferenceFrame inertialFrame = ReferenceFrame.constructAWorldFrame("inertial");
-      ReferenceFrame worldFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("world", inertialFrame, new Transform3D());
-      RigidBody world = new RigidBody("world", worldFrame);
+      ReferenceFrame inertialFrame = ReferenceFrame.getWorldFrame();
+      ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", inertialFrame, new Transform3D());
+      RigidBody elevator = new RigidBody("elevator", elevatorFrame);
 
       FloatingJoint rootJoint = new FloatingJoint("root", new Vector3d(), robot);
       robot.addRootJoint(rootJoint);
 
-      SixDoFJoint rootInverseDynamicsJoint = new SixDoFJoint("root", world, worldFrame);
+      SixDoFJoint rootInverseDynamicsJoint = new SixDoFJoint("root", elevator, elevatorFrame);
 
       Link link = createRandomLink("link", false);
       rootJoint.setLink(link);
@@ -75,7 +75,7 @@ public class InverseDynamicsCalculatorTest
 
       setRandomPosition(rootJoint, rootInverseDynamicsJoint);
 
-      world.updateFramesRecursively();
+      elevator.updateFramesRecursively();
 
       ReferenceFrame bodyFixedFrame = body.getBodyFixedFrame();
       ExternalForcePoint externalForcePoint = new ExternalForcePoint("rootExternalForcePoint", comOffset, robot);
@@ -86,7 +86,7 @@ public class InverseDynamicsCalculatorTest
 
       Vector3d externalForce = new Vector3d();
       externalForcePoint.getForce(externalForce); // in world frame
-      Transform3D worldToBody = worldFrame.getTransformToDesiredFrame(bodyFixedFrame);
+      Transform3D worldToBody = elevatorFrame.getTransformToDesiredFrame(bodyFixedFrame);
       worldToBody.transform(externalForce);
 
       Wrench inputWrench = new Wrench(bodyFixedFrame, bodyFixedFrame, externalForce, new Vector3d());
@@ -94,11 +94,10 @@ public class InverseDynamicsCalculatorTest
 
       copyAccelerationFromForwardToInverse(rootJoint, rootInverseDynamicsJoint);
 
-      HashMap<RigidBody, Wrench> externalWrenches = new HashMap<RigidBody, Wrench>(); // no external wrenches
-      SpatialAccelerationVector rootAcceleration = new SpatialAccelerationVector(world.getBodyFixedFrame(), inertialFrame, world.getBodyFixedFrame());
-      ArrayList<InverseDynamicsJoint> jointsToIgnore = new ArrayList<InverseDynamicsJoint>();
-      InverseDynamicsCalculator calculator = new InverseDynamicsCalculator(inertialFrame, world, rootAcceleration, externalWrenches, jointsToIgnore, true, true);
-      calculator.compute();
+      TwistCalculator twistCalculator = new TwistCalculator(inertialFrame, elevator);
+      InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, 0.0);
+      twistCalculator.compute();
+      inverseDynamicsCalculator.compute();
 
       Wrench outputWrench = new Wrench(null, null);
       rootInverseDynamicsJoint.packWrench(outputWrench);
@@ -119,8 +118,7 @@ public class InverseDynamicsCalculatorTest
       double gravity = 0.0;
       createRandomChainRobotAndSetJointPositionsAndVelocities(robot, jointMap, worldFrame, elevator, jointAxes, gravity, true, true);
       
-      InverseDynamicsCalculator calculator = createInverseDynamicsCalculator(elevator, gravity, worldFrame, true, true);
-      calculator.compute();
+      InverseDynamicsCalculator calculator = createInverseDynamicsCalculatorAndCompute(elevator, gravity, worldFrame, true, true);
       copyTorques(jointMap);
       doRobotDynamics(robot);
       assertAccelerationsEqual(jointMap);
@@ -146,8 +144,7 @@ public class InverseDynamicsCalculatorTest
          exploreAndPrintInverseDynamicsMechanism(elevator);
       }
       
-      InverseDynamicsCalculator calculator = createInverseDynamicsCalculator(elevator, gravity, worldFrame, true, true);
-      calculator.compute();
+      InverseDynamicsCalculator calculator = createInverseDynamicsCalculatorAndCompute(elevator, gravity, worldFrame, true, true);
       copyTorques(jointMap);
       doRobotDynamics(robot);
       assertAccelerationsEqual(jointMap);
@@ -172,8 +169,7 @@ public class InverseDynamicsCalculatorTest
          exploreAndPrintInverseDynamicsMechanism(elevator);
       }
       
-      InverseDynamicsCalculator calculator = createInverseDynamicsCalculator(elevator, gravity, worldFrame, true, true);
-      calculator.compute();
+      InverseDynamicsCalculator calculator = createInverseDynamicsCalculatorAndCompute(elevator, gravity, worldFrame, true, true);
       copyTorques(jointMap);
       doRobotDynamics(robot);
       assertAccelerationsEqual(jointMap);
@@ -191,8 +187,7 @@ public class InverseDynamicsCalculatorTest
       double gravity = -9.8;
       createRandomChainRobotAndSetJointPositionsAndVelocities(robot, jointMap, worldFrame, elevator, jointAxes, gravity, false, false);
       
-      InverseDynamicsCalculator calculator = createInverseDynamicsCalculator(elevator, gravity, worldFrame, false, false);
-      calculator.compute();
+      InverseDynamicsCalculator calculator = createInverseDynamicsCalculatorAndCompute(elevator, gravity, worldFrame, false, false);
       copyTorques(jointMap);
       doRobotDynamics(robot);
       assertZeroAccelerations(jointMap);
@@ -211,8 +206,7 @@ public class InverseDynamicsCalculatorTest
       double gravity = -9.8;
       createRandomChainRobotAndSetJointPositionsAndVelocities(robot, jointMap, worldFrame, elevator, jointAxes, gravity, true, true);
       
-      InverseDynamicsCalculator calculator = createInverseDynamicsCalculator(elevator, gravity, worldFrame, true, true);
-      calculator.compute();
+      InverseDynamicsCalculator calculator = createInverseDynamicsCalculatorAndCompute(elevator, gravity, worldFrame, true, true);
       copyTorques(jointMap);
       doRobotDynamics(robot);
       assertAccelerationsEqual(jointMap);
@@ -237,17 +231,13 @@ public class InverseDynamicsCalculatorTest
       System.out.println("-----------------------------");
    }
    
-   private InverseDynamicsCalculator createInverseDynamicsCalculator(RigidBody elevator, double gravity, ReferenceFrame worldFrame, boolean doVelocityTerms, boolean doAcceleration)
+   private InverseDynamicsCalculator createInverseDynamicsCalculatorAndCompute(RigidBody elevator, double gravity, ReferenceFrame worldFrame, boolean doVelocityTerms, boolean doAcceleration)
    {
-      HashMap<RigidBody, Wrench> externalWrenches = new HashMap<RigidBody, Wrench>(); // no external wrenches
-      ReferenceFrame rootBodyFrame = elevator.getBodyFixedFrame();
-      Vector3d linearAcceleration = new Vector3d(0.0, 0.0, -gravity);
-      Vector3d angularAcceleration = new Vector3d();
-      SpatialAccelerationVector rootAcceleration = new SpatialAccelerationVector(rootBodyFrame, worldFrame, rootBodyFrame, linearAcceleration,
-                                                      angularAcceleration);
-      ArrayList<InverseDynamicsJoint> jointsToIgnore = new ArrayList<InverseDynamicsJoint>();
-      InverseDynamicsCalculator calculator = new InverseDynamicsCalculator(worldFrame, elevator, rootAcceleration, externalWrenches, jointsToIgnore, doVelocityTerms, doAcceleration);
-      return calculator;
+      TwistCalculator twistCalculator = new TwistCalculator(worldFrame, elevator);
+      InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, -gravity);
+      twistCalculator.compute();
+      inverseDynamicsCalculator.compute();
+      return inverseDynamicsCalculator;
    }
    
    private void compareWrenches(Wrench inputWrench, Wrench outputWrench)
