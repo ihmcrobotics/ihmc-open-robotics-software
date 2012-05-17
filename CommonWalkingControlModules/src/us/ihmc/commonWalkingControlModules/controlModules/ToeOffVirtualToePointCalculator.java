@@ -45,6 +45,8 @@ public class ToeOffVirtualToePointCalculator implements VirtualToePointCalculato
    private final YoFrameConvexPolygon2d vtpConvexPolygon = new YoFrameConvexPolygon2d("vtpConvexPolygon", "", worldFrame, 6, registry);
 
    private final DoubleYoVariable minICPToEdgeY = new DoubleYoVariable("minICPToEdgeY", registry);
+   
+   private final DoubleYoVariable pullBackSupportLine = new DoubleYoVariable("pullBackSupportLine", registry);
 
    private final ReferenceFrame midFeetZUpFrame;
 
@@ -120,8 +122,8 @@ public class ToeOffVirtualToePointCalculator implements VirtualToePointCalculato
 
       // Create new support polygon
       FrameConvexPolygon2d footPolygonInMidFeetZUp = bipedSupportPolygons.getFootPolygonInMidFeetZUp(upcomingSupportLeg);
-
       FramePoint[] toePointsForFeet = toePoints.get(upcomingSwingLeg);
+
 
       // Choose toe points to use
       FramePoint upcomingSupportFootPosition = footPoints.get(upcomingSupportLeg).changeFrameCopy(toePointsForFeet[0].getReferenceFrame());
@@ -137,9 +139,16 @@ public class ToeOffVirtualToePointCalculator implements VirtualToePointCalculato
 
       FramePoint insideToe = toePointsForFeet[0].changeFrameCopy(midFeetZUpFrame);
       FramePoint outsideToe = toePointsForFeet[1].changeFrameCopy(midFeetZUpFrame);
+      FrameVector adjustment = new FrameVector(referenceFrames.getFootFrame(upcomingSwingLeg), -1.0, 0.0, 0.0);
+      adjustment.changeFrame(midFeetZUpFrame);
+      adjustment.scale(pullBackSupportLine.getDoubleValue());
+      insideToe.add(adjustment);
+      outsideToe.add(adjustment);
 
       FramePoint2d insideToe2d = insideToe.toFramePoint2d();
       FramePoint2d outsideToe2d = outsideToe.toFramePoint2d();
+      
+      
 
       // Check if iCP is in support polygon
       FramePoint2d icp = couplingRegistry.getCapturePointInFrame(midFeetZUpFrame).toFramePoint2d();
@@ -159,7 +168,7 @@ public class ToeOffVirtualToePointCalculator implements VirtualToePointCalculato
       {
          FrameVector direction = new FrameVector(referenceFrames.getFootFrame(upcomingSwingLeg), -1.0, 0.0, 0.0);
          direction.changeFrame(midFeetZUpFrame);
-         direction.scale((1.0 - position * 2.0) * footLength);
+         direction.scale((1.0 - position * 2.0) * (footLength - pullBackSupportLine.getDoubleValue()));
          insideToe2d.add(direction.toFrameVector2d());
          outsideToe2d.add(direction.toFrameVector2d());
       }
