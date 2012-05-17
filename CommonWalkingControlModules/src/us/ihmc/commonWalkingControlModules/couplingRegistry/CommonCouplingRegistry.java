@@ -14,6 +14,7 @@ import us.ihmc.utilities.screwTheory.Wrench;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.EnumYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
@@ -60,7 +61,8 @@ public class CommonCouplingRegistry implements CouplingRegistry
    private final PoseReferenceFrame footstepFrame = new PoseReferenceFrame("footstepFrame", ReferenceFrame.getWorldFrame());
    private final DynamicGraphicReferenceFrame footstepFrameGraphic;
    
-   private final DoubleYoVariable fzExertedBySwingLeg = new DoubleYoVariable("fzExertedBySwingLeg", registry);
+  
+   private EnumYoVariable<RobotSide> upcomingSupportLeg = new EnumYoVariable<RobotSide>("upcomingSupportLeg", registry, RobotSide.class);
 
    public CommonCouplingRegistry(CommonWalkingReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons, YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
@@ -292,14 +294,15 @@ public class CommonCouplingRegistry implements CouplingRegistry
       return desiredICP.changeFrameCopy(desiredFrame);
    }
 
-   public void setFzExertedBySwingLeg(double value)
-   {
-      fzExertedBySwingLeg.set(value);
-   }
 
-   public double getFzExertedBySwingLeg()
+   public void setUpcomingSupportLeg(RobotSide upcomingSupportLeg)
    {
-      return fzExertedBySwingLeg.getDoubleValue();
+      this.upcomingSupportLeg.set(upcomingSupportLeg);
+   }
+   
+   public RobotSide getUpcomingSupportLeg()
+   {
+      return upcomingSupportLeg.getEnumValue();
    }
 
 }

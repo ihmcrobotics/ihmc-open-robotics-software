@@ -4,6 +4,7 @@ import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.DoubleSupport
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
+import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
@@ -18,7 +19,7 @@ public class SimpleDoubleSupportForceDistributor implements DoubleSupportForceDi
 
    public void packForcesAndTorques(SideDependentList<Double> zForcesInPelvisFrameToPack, SideDependentList<FrameVector> torquesOnPelvis,
                                     double zForceInPelvisFrameTotal, FrameVector torqueOnPelvisTotal,
-                                    SideDependentList<Double> legStrengths)
+                                    SideDependentList<Double> legStrengths, SideDependentList<FramePoint2d> virtualToePoints)
    {
       for (RobotSide robotSide : RobotSide.values())
       {
