@@ -116,9 +116,9 @@ public class InverseDynamicsCalculatorTest
       Vector3d[] jointAxes = {X, Y, Z, X};
       
       double gravity = 0.0;
-      createRandomChainRobotAndSetJointPositionsAndVelocities(robot, jointMap, worldFrame, elevator, jointAxes, gravity, true, true);
+      createRandomChainRobotAndSetJointPositionsAndVelocities(robot, jointMap, worldFrame, elevator, jointAxes, gravity, true, true, random);
       
-      InverseDynamicsCalculator calculator = createInverseDynamicsCalculatorAndCompute(elevator, gravity, worldFrame, true, true);
+      createInverseDynamicsCalculatorAndCompute(elevator, gravity, worldFrame, true, true);
       copyTorques(jointMap);
       doRobotDynamics(robot);
       assertAccelerationsEqual(jointMap);
@@ -144,7 +144,7 @@ public class InverseDynamicsCalculatorTest
          exploreAndPrintInverseDynamicsMechanism(elevator);
       }
       
-      InverseDynamicsCalculator calculator = createInverseDynamicsCalculatorAndCompute(elevator, gravity, worldFrame, true, true);
+      createInverseDynamicsCalculatorAndCompute(elevator, gravity, worldFrame, true, true);
       copyTorques(jointMap);
       doRobotDynamics(robot);
       assertAccelerationsEqual(jointMap);
@@ -169,7 +169,7 @@ public class InverseDynamicsCalculatorTest
          exploreAndPrintInverseDynamicsMechanism(elevator);
       }
       
-      InverseDynamicsCalculator calculator = createInverseDynamicsCalculatorAndCompute(elevator, gravity, worldFrame, true, true);
+      createInverseDynamicsCalculatorAndCompute(elevator, gravity, worldFrame, true, true);
       copyTorques(jointMap);
       doRobotDynamics(robot);
       assertAccelerationsEqual(jointMap);
@@ -185,9 +185,9 @@ public class InverseDynamicsCalculatorTest
       RigidBody elevator = new RigidBody("elevator", elevatorFrame);
       Vector3d[] jointAxes = {X, Y, Z, X};
       double gravity = -9.8;
-      createRandomChainRobotAndSetJointPositionsAndVelocities(robot, jointMap, worldFrame, elevator, jointAxes, gravity, false, false);
+      createRandomChainRobotAndSetJointPositionsAndVelocities(robot, jointMap, worldFrame, elevator, jointAxes, gravity, false, false, random);
       
-      InverseDynamicsCalculator calculator = createInverseDynamicsCalculatorAndCompute(elevator, gravity, worldFrame, false, false);
+      createInverseDynamicsCalculatorAndCompute(elevator, gravity, worldFrame, false, false);
       copyTorques(jointMap);
       doRobotDynamics(robot);
       assertZeroAccelerations(jointMap);
@@ -204,9 +204,9 @@ public class InverseDynamicsCalculatorTest
       Vector3d[] jointAxes = {X, Y, Z, X};
       
       double gravity = -9.8;
-      createRandomChainRobotAndSetJointPositionsAndVelocities(robot, jointMap, worldFrame, elevator, jointAxes, gravity, true, true);
+      createRandomChainRobotAndSetJointPositionsAndVelocities(robot, jointMap, worldFrame, elevator, jointAxes, gravity, true, true, random);
       
-      InverseDynamicsCalculator calculator = createInverseDynamicsCalculatorAndCompute(elevator, gravity, worldFrame, true, true);
+      createInverseDynamicsCalculatorAndCompute(elevator, gravity, worldFrame, true, true);
       copyTorques(jointMap);
       doRobotDynamics(robot);
       assertAccelerationsEqual(jointMap);
@@ -311,7 +311,7 @@ public class InverseDynamicsCalculatorTest
 //      waitForSimulationToFinish(scs);
    }
 
-   private void createRandomChainRobotAndSetJointPositionsAndVelocities(Robot robot, HashMap<RevoluteJoint, PinJoint> jointMap, ReferenceFrame worldFrame, RigidBody elevator, Vector3d[] jointAxes, double gravity, boolean useRandomVelocity, boolean useRandomAcceleration)
+   private static void createRandomChainRobotAndSetJointPositionsAndVelocities(Robot robot, HashMap<RevoluteJoint, PinJoint> jointMap, ReferenceFrame worldFrame, RigidBody elevator, Vector3d[] jointAxes, double gravity, boolean useRandomVelocity, boolean useRandomAcceleration, Random random)
    {
       robot.setGravity(gravity);     
 
