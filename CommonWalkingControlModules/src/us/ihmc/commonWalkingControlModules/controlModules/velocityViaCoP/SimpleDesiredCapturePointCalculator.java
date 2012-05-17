@@ -10,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenc
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameLineSegment2d;
+import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -25,12 +26,14 @@ public class SimpleDesiredCapturePointCalculator implements DesiredCapturePointC
    private final CouplingRegistry couplingRegistry;
    private final CommonWalkingReferenceFrames referenceFrames;
    private final double controlDT;
+   private final double footForward;
    
    enum MotionType
    {
-      OFFSET_SUPPORT_POLYGON, CIRCLE
+      OFFSET_SUPPORT_POLYGON, CIRCLE, LINE
    }
-   
+   public static boolean USEUPCOMINGSWINGTOEASSWEETSPOT = false; //TODO: Get rid of this hack
+
    private final EnumYoVariable<MotionType> motionType = new EnumYoVariable<SimpleDesiredCapturePointCalculator.MotionType>("iCPMotionType", registry, MotionType.class);
    
    private final DoubleYoVariable desiredCaptureForwardStayInDoubleSupport = new DoubleYoVariable("desiredCaptureForwardNotLoading", registry);
@@ -44,19 +47,20 @@ public class SimpleDesiredCapturePointCalculator implements DesiredCapturePointC
    
    private final DoubleYoVariable icpCurrentPositionOnMotionPolygon = new DoubleYoVariable("icpCurrentPositionOnMotionPolygon", registry);
 
-   public SimpleDesiredCapturePointCalculator(CouplingRegistry couplingRegistry, CommonWalkingReferenceFrames referenceFrames, double controlDT,
+   public SimpleDesiredCapturePointCalculator(CouplingRegistry couplingRegistry, CommonWalkingReferenceFrames referenceFrames, double footForward, double controlDT,
            YoVariableRegistry parentRegistry)
    {
       this.couplingRegistry = couplingRegistry;
       this.referenceFrames = referenceFrames;
       this.controlDT = controlDT;
+      this.footForward = footForward * 0.7;
       parentRegistry.addChild(registry);
       
       icpMotionSpeed.set(10.0);
       icpMotionDistanceToOuterEdge.set(0.05);
-      icpCurrentPositionOnMotionPolygon.set(0.0);
+      icpCurrentPositionOnMotionPolygon.set(25.0);
       icpMotionXYScaling.set(1.5);
-      motionType.set(MotionType.CIRCLE);
+      motionType.set(MotionType.LINE);
    }
 
    public FramePoint2d computeDesiredCapturePointSingleSupport(RobotSide supportLeg, BipedSupportPolygons bipedSupportPolygons, FrameVector2d desiredVelocity, SingleSupportCondition singleSupportCondition)
@@ -88,24 +92,74 @@ public class SimpleDesiredCapturePointCalculator implements DesiredCapturePointC
       return desiredCapturePoint;
    }
    
+   private boolean useToePoint()
+   {
+      RobotSide upcomingSupportLeg = couplingRegistry.getUpcomingSupportLeg();
+      RobotSide upcomingSwingLeg = upcomingSupportLeg.getOppositeSide();
+      
+      FramePoint upcomingSupportPoint = new FramePoint(referenceFrames.getAnkleZUpFrame(upcomingSupportLeg));
+      upcomingSupportPoint.changeFrame(referenceFrames.getAnkleZUpFrame(upcomingSwingLeg));
+      
+      return upcomingSupportPoint.getX() > footForward && USEUPCOMINGSWINGTOEASSWEETSPOT; 
+   }
+   
    private FramePoint2d computeCapturePointMotion()
    {
       
-      FrameConvexPolygon2d supportPolygon = couplingRegistry.getBipedSupportPolygons().getSupportPolygonInMidFeetZUp();
+      BipedSupportPolygons bipedSupportPolygons = couplingRegistry.getBipedSupportPolygons();
+      FrameConvexPolygon2d supportPolygon = bipedSupportPolygons.getSupportPolygonInMidFeetZUp();
       icpCurrentPositionOnMotionPolygon.add(icpMotionSpeed.getDoubleValue() * controlDT);
       
       
       switch(motionType.getEnumValue())
       {
+      case LINE:
+      {
+         RobotSide upcomingSupportLeg = couplingRegistry.getUpcomingSupportLeg();
+         RobotSide upcomingSwingLeg = upcomingSupportLeg.getOppositeSide();
+         
+         FramePoint2d pointA = bipedSupportPolygons.getSweetSpotCopy(upcomingSwingLeg);
+         FramePoint2d pointB = bipedSupportPolygons.getSweetSpotCopy(upcomingSupportLeg);
+         
+         if(useToePoint())
+         {
+            pointA.setX(pointA.getX() + footForward);
+         }
+         
+         
+         
+         pointA.changeFrame(referenceFrames.getMidFeetZUpFrame());
+         pointB.changeFrame(referenceFrames.getMidFeetZUpFrame());
+         
+         double percentage = icpCurrentPositionOnMotionPolygon.getDoubleValue() % 100;
+         FrameVector2d direction;
+         if(percentage < 50.0)
+         {
+            direction = new FrameVector2d(pointA, pointB);
+            direction.scale((percentage/50.0) * 0.8 + 0.1);
+            pointA.add(direction);
+            return pointA;
+         }
+         else
+         {
+            direction = new FrameVector2d(pointB, pointA);
+            direction.scale(((percentage - 50.0)/50.0) * 0.8 + 0.1);
+            pointB.add(direction);
+            return pointB;
+         }
+         
+         
+      }
+      
       case CIRCLE:
       {
          FramePoint2d desiredCapturePoint = supportPolygon.getCentroidCopy();
-         FrameLineSegment2d connectingEdge = couplingRegistry.getBipedSupportPolygons().getConnectingEdge1();
+         FrameLineSegment2d connectingEdge = bipedSupportPolygons.getConnectingEdge1();
          connectingEdge.changeFrame(desiredCapturePoint.getReferenceFrame());
          double toConnectingEdge = connectingEdge.distance(desiredCapturePoint);
          
-         FramePoint2d sweetSpotA = couplingRegistry.getBipedSupportPolygons().getSweetSpotCopy(RobotSide.LEFT);
-         FramePoint2d sweetSpotB = couplingRegistry.getBipedSupportPolygons().getSweetSpotCopy(RobotSide.RIGHT);
+         FramePoint2d sweetSpotA = bipedSupportPolygons.getSweetSpotCopy(RobotSide.LEFT);
+         FramePoint2d sweetSpotB = bipedSupportPolygons.getSweetSpotCopy(RobotSide.RIGHT);
          sweetSpotB.changeFrame(sweetSpotA.getReferenceFrame());
          double footToFoot = sweetSpotA.distance(sweetSpotB);
          
@@ -178,19 +232,42 @@ public class SimpleDesiredCapturePointCalculator implements DesiredCapturePointC
             return computeCapturePointMotion();
          } else
          {
-            FramePoint2d desiredCapturePoint = new FramePoint2d(referenceFrames.getMidFeetZUpFrame());
-
-            FrameVector2d leftForward = new FrameVector2d(referenceFrames.getAnkleZUpFrame(RobotSide.LEFT), 1.0, 0.0);
-            FrameVector2d rightForward = new FrameVector2d(referenceFrames.getAnkleZUpFrame(RobotSide.RIGHT), 1.0, 0.0);
-
-            leftForward.changeFrame(desiredCapturePoint.getReferenceFrame());
-            rightForward.changeFrame(desiredCapturePoint.getReferenceFrame());
-
-            FrameVector2d offset = leftForward;
-            offset.add(rightForward);
-            offset.normalize();
-            offset.scale(desiredCaptureForwardStayInDoubleSupport.getDoubleValue());
-            desiredCapturePoint.add(offset);
+            FramePoint2d desiredCapturePoint;
+            if(useToePoint())
+            {
+               RobotSide upcomingSupportLeg = couplingRegistry.getUpcomingSupportLeg();
+               RobotSide upcomingSwingLeg = upcomingSupportLeg.getOppositeSide();
+               
+               FramePoint2d pointA = bipedSupportPolygons.getSweetSpotCopy(upcomingSwingLeg);
+               FramePoint2d pointB = bipedSupportPolygons.getSweetSpotCopy(upcomingSupportLeg);
+               
+               if(useToePoint())
+               {
+                  pointA.setX(pointA.getX() + footForward);
+               }
+               pointA.changeFrame(referenceFrames.getMidFeetZUpFrame());
+               pointB.changeFrame(referenceFrames.getMidFeetZUpFrame());
+               
+               FrameLineSegment2d pointToPoint = new FrameLineSegment2d(pointA, pointB);
+               desiredCapturePoint = pointToPoint.pointBetweenEndPointsGivenParameter(0.5);
+               
+            }
+            else
+            {
+               desiredCapturePoint = new FramePoint2d(referenceFrames.getMidFeetZUpFrame());
+   
+               FrameVector2d leftForward = new FrameVector2d(referenceFrames.getAnkleZUpFrame(RobotSide.LEFT), 1.0, 0.0);
+               FrameVector2d rightForward = new FrameVector2d(referenceFrames.getAnkleZUpFrame(RobotSide.RIGHT), 1.0, 0.0);
+   
+               leftForward.changeFrame(desiredCapturePoint.getReferenceFrame());
+               rightForward.changeFrame(desiredCapturePoint.getReferenceFrame());
+   
+               FrameVector2d offset = leftForward;
+               offset.add(rightForward);
+               offset.normalize();
+               offset.scale(desiredCaptureForwardStayInDoubleSupport.getDoubleValue());
+               desiredCapturePoint.add(offset);
+            }
             couplingRegistry.setDesiredCapturePoint(desiredCapturePoint);
             return desiredCapturePoint;
          }

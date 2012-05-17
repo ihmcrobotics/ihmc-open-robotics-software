@@ -200,6 +200,7 @@ public class CommonStanceSubController implements StanceSubController
       kneeExtensionControlModule.doTransitionIntoLoading(loadingLeg);
       loadingPreSwingAEntryTime.set(processedSensors.getTime());
       
+      couplingRegistry.setUpcomingSupportLeg(loadingLeg);
       
       bipedFeetUpdater.setResizePolygonInDoubleSupport(true);
    }
@@ -228,6 +229,7 @@ public class CommonStanceSubController implements StanceSubController
          supportLegAndLegToTrustForVelocity.setLegToTrustForVelocity(robotSide, true);
       }
       supportLegAndLegToTrustForVelocity.setSupportLeg(null);
+      couplingRegistry.setUpcomingSupportLeg(stanceSide);
       supportLegAndLegToTrustForVelocity.setLegToUseForCOMOffset(null);
 
       couplingRegistry.setEstimatedDoubleSupportTimeRemaining(Double.POSITIVE_INFINITY);

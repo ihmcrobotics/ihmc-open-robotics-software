@@ -8,6 +8,7 @@ import us.ihmc.utilities.math.geometry.FrameVector2d;
 
 public interface DesiredCapturePointCalculator
 {
+   
    public abstract FramePoint2d computeDesiredCapturePointSingleSupport(RobotSide supportLeg, BipedSupportPolygons bipedSupportPolygons, FrameVector2d desiredVelocity, SingleSupportCondition singleSupportCondition);
 
    public abstract FramePoint2d computeDesiredCapturePointDoubleSupport(RobotSide loadingLeg, BipedSupportPolygons bipedSupportPolygons, FrameVector2d desiredVelocity);

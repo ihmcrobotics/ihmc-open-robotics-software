@@ -66,6 +66,6 @@ public interface CouplingRegistry
    public abstract void setDesiredCapturePoint(FramePoint2d desiredCapturePoint);
    public abstract FramePoint2d getDesiredCapturePointInFrame(ReferenceFrame desiredFrame);
    
-   public abstract void setFzExertedBySwingLeg(double value);
-   public abstract double getFzExertedBySwingLeg();
+   public abstract void setUpcomingSupportLeg(RobotSide upcomingSupportLeg);
+   public abstract RobotSide getUpcomingSupportLeg();
 }
