@@ -84,4 +84,8 @@ public class SineWaveDesiredPelvisOrientationControlModule implements DesiredPel
    {
       return new Orientation(referenceFrames.getMidFeetZUpFrame());
    }
+
+   public void useTwistScale(boolean useTwistScale)
+   {
+   }
 }

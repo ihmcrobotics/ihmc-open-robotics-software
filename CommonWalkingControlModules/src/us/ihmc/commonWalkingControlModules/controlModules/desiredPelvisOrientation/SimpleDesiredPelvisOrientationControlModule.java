@@ -12,6 +12,7 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoVariable;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameOrientation;
 
 public class SimpleDesiredPelvisOrientationControlModule implements DesiredPelvisOrientationControlModule
@@ -22,19 +23,24 @@ public class SimpleDesiredPelvisOrientationControlModule implements DesiredPelvi
 
    private final YoVariableRegistry registry = new YoVariableRegistry("SimpleDesiredPelvisOrientationControlModule");
    private final DoubleYoVariable twistScale = new DoubleYoVariable("twistScale", registry);
+   private final AlphaFilteredYoVariable alphaFilteredTwistScale;
    private final DoubleYoVariable userDesiredPelvisPitch = new DoubleYoVariable("userDesiredPelvisPitch", registry);
    private final DoubleYoVariable pelvisRollPelvisYawScale = new DoubleYoVariable("pelvisYawToRollScale", registry);
 
    private final YoFrameOrientation desiredPelvisOrientation;
    private final BooleanYoVariable usingExternallySpecifiedOrientation = new BooleanYoVariable("usingExternallySpecifiedOrientation", registry);
+   
+   private final BooleanYoVariable useTwistScale = new BooleanYoVariable("useTwistScale", registry);
 
-   public SimpleDesiredPelvisOrientationControlModule(CommonWalkingReferenceFrames referenceFrames, DesiredHeadingControlModule desiredHeadingControlModule,
+   public SimpleDesiredPelvisOrientationControlModule(CommonWalkingReferenceFrames referenceFrames, DesiredHeadingControlModule desiredHeadingControlModule, double controlDT,
            YoVariableRegistry parentRegistry)
    {
       this.referenceFrames = referenceFrames;
 
       this.desiredHeadingFrame = desiredHeadingControlModule.getDesiredHeadingFrame();
       this.desiredPelvisOrientation = new YoFrameOrientation("desiredPelvis", "", desiredHeadingFrame, registry);
+      this.alphaFilteredTwistScale = new AlphaFilteredYoVariable("alphaFitleredTwistScale", registry, AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(1.0, controlDT));
+      useTwistScale.set(true);
       
       parentRegistry.addChild(registry);
    }
@@ -82,9 +88,13 @@ public class SimpleDesiredPelvisOrientationControlModule implements DesiredPelvi
 
    private double getDesiredPelvisYaw(FramePoint leftPoint, FramePoint rightPoint)
    {
+      double currentTwistScale = useTwistScale.getBooleanValue() ? twistScale.getDoubleValue() : 0.0;
+      alphaFilteredTwistScale.update(currentTwistScale);
+      
       double desiredPelvisYaw = Math.atan2(-(leftPoint.getX() - rightPoint.getX()), (leftPoint.getY() - rightPoint.getY()));
-      desiredPelvisYaw = desiredPelvisYaw * twistScale.getDoubleValue();
+      desiredPelvisYaw = desiredPelvisYaw * alphaFilteredTwistScale.getDoubleValue();
       return desiredPelvisYaw;
+      
    }
    
    public void setParametersForR2()
@@ -137,5 +147,10 @@ public class SimpleDesiredPelvisOrientationControlModule implements DesiredPelvi
       return new Orientation(referenceFrame, desiredPelvisYaw, userDesiredPelvisPitch.getDoubleValue(), desiredPelvisRoll);
       
       
+   }
+
+   public void useTwistScale(boolean useTwistScale)
+   {
+      this.useTwistScale.set(useTwistScale);
    }
 }

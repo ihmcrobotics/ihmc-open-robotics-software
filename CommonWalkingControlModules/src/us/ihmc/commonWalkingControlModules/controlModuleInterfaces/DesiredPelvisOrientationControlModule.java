@@ -13,4 +13,6 @@ public interface DesiredPelvisOrientationControlModule
    public abstract void setDesiredPelvisOrientation(Orientation orientation);
    
    public abstract Orientation getEstimatedOrientationAtEndOfStep(RobotSide stanceSide, FramePoint desiredFootLocation);
+   
+   public abstract void useTwistScale(boolean useTwistScale);
 }

@@ -247,6 +247,8 @@ public abstract class RegularWalkingGaitAbstractController implements RobotContr
 
             resetSteps.set(false);
          }
+         
+         stanceSubController.doTransitionOutOfStartStopWalkingDoubleSupport(loadingLeg);
       }
    }
 

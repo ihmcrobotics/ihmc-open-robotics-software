@@ -43,7 +43,11 @@ public class SimpleDesiredCapturePointCalculator implements DesiredCapturePointC
    private final BooleanYoVariable doICPMotion = new BooleanYoVariable("doICPEdgeTraceMotion", registry);
    private final DoubleYoVariable icpMotionSpeed = new DoubleYoVariable("icpMotionSpeed", registry);
    private final DoubleYoVariable icpMotionDistanceToOuterEdge = new DoubleYoVariable("icpMotionDistanceToOuterEdge", registry);
+   private final DoubleYoVariable icpMotionDistanceToOuterEdgeBackFootScaling = new DoubleYoVariable("icpMotionDistanceToOuterEdgeBackFootScaling", registry);
+   
    private final DoubleYoVariable icpMotionXYScaling = new DoubleYoVariable("icpMotionXYScaling", registry);
+   
+   
    
    private final DoubleYoVariable icpCurrentPositionOnMotionPolygon = new DoubleYoVariable("icpCurrentPositionOnMotionPolygon", registry);
 
@@ -56,11 +60,12 @@ public class SimpleDesiredCapturePointCalculator implements DesiredCapturePointC
       this.footForward = footForward * 0.7;
       parentRegistry.addChild(registry);
       
-      icpMotionSpeed.set(10.0);
-      icpMotionDistanceToOuterEdge.set(0.05);
+      icpMotionSpeed.set(20.0);
       icpCurrentPositionOnMotionPolygon.set(25.0);
       icpMotionXYScaling.set(1.5);
       motionType.set(MotionType.LINE);
+      icpMotionDistanceToOuterEdge.set(0.1); // 0.05
+      icpMotionDistanceToOuterEdgeBackFootScaling.set(0.5);
    }
 
    public FramePoint2d computeDesiredCapturePointSingleSupport(RobotSide supportLeg, BipedSupportPolygons bipedSupportPolygons, FrameVector2d desiredVelocity, SingleSupportCondition singleSupportCondition)
@@ -125,25 +130,36 @@ public class SimpleDesiredCapturePointCalculator implements DesiredCapturePointC
          {
             pointA.setX(pointA.getX() + footForward);
          }
-         
-         
-         
          pointA.changeFrame(referenceFrames.getMidFeetZUpFrame());
          pointB.changeFrame(referenceFrames.getMidFeetZUpFrame());
          
+         FrameVector2d AtoB = new FrameVector2d(pointA, pointB);
+         AtoB.normalize();
+         AtoB.scale(icpMotionDistanceToOuterEdge.getDoubleValue() * icpMotionDistanceToOuterEdgeBackFootScaling.getDoubleValue());
+         
+         FrameVector2d BtoA = new FrameVector2d(pointB, pointA);
+         BtoA.normalize();
+         BtoA.scale(icpMotionDistanceToOuterEdge.getDoubleValue());
+         
+         pointA.add(AtoB);
+         pointB.add(BtoA);
+         
+         
          double percentage = icpCurrentPositionOnMotionPolygon.getDoubleValue() % 100;
          FrameVector2d direction;
+         
+         
          if(percentage < 50.0)
          {
             direction = new FrameVector2d(pointA, pointB);
-            direction.scale((percentage/50.0) * 0.8 + 0.1);
+            direction.scale(percentage/50.0);
             pointA.add(direction);
             return pointA;
          }
          else
          {
             direction = new FrameVector2d(pointB, pointA);
-            direction.scale(((percentage - 50.0)/50.0) * 0.8 + 0.1);
+            direction.scale((percentage - 50.0)/50.0);
             pointB.add(direction);
             return pointB;
          }
