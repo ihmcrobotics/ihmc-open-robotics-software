@@ -233,6 +233,8 @@ public class CommonStanceSubController implements StanceSubController
       supportLegAndLegToTrustForVelocity.setLegToUseForCOMOffset(null);
 
       couplingRegistry.setEstimatedDoubleSupportTimeRemaining(Double.POSITIVE_INFINITY);
+      
+      desiredPelvisOrientationControlModule.useTwistScale(false);
 //    balanceSupportControlModule.setDesiredCoPOffset(new FramePoint2d(ReferenceFrame.getWorldFrame())); // didn't do anything...
    }
 
@@ -300,6 +302,8 @@ public class CommonStanceSubController implements StanceSubController
       supportLegAndLegToTrustForVelocity.setLegToTrustForVelocity(loadingLeg.getOppositeSide(), false);
       supportLegAndLegToTrustForVelocity.setSupportLeg(loadingLeg);
       supportLegAndLegToTrustForVelocity.setLegToUseForCOMOffset(loadingLeg);
+      
+      desiredPelvisOrientationControlModule.useTwistScale(true);
    }
 
    public void doTransitionOutOfTerminalStance(RobotSide stanceSide)
