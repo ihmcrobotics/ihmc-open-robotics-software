@@ -32,6 +32,16 @@ public class TextArtifact extends Artifact
 
    }
 
+   public String getText()
+   {
+      return text;
+   }
+
+   public void setText(String text)
+   {
+      this.text = text;
+   }
+
    public double getX()
    {
       return x1;
