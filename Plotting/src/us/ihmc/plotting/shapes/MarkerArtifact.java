@@ -51,7 +51,7 @@ public class MarkerArtifact extends Artifact
    /**
     * Must provide a draw method for plotter to render artifact
     */
-   public void draw(Graphics g, int Xcenter, int Ycenter, double scaleFactor)
+   public void draw(Graphics g, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
    {
       // find scaled location
       int x = Xcenter + ((int)Math.round(location.getX() * scaleFactor));

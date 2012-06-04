@@ -48,7 +48,7 @@ public class CircleArtifact extends Artifact
    /**
     * Must provide a draw method for plotter to render artifact
     */
-   public void draw(Graphics g, int Xcenter, int Ycenter, double scaleFactor)
+   public void draw(Graphics g, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
    {
       int x = Xcenter + ((int)Math.round(this.x * scaleFactor));
       int y = Ycenter - ((int)Math.round(this.y * scaleFactor));

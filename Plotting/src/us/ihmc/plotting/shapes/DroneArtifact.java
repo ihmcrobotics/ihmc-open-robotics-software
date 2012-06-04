@@ -36,7 +36,7 @@ public class DroneArtifact extends Artifact
              + "," + this._pose.getPitch() + "," + this._pose.getRoll();
    }
 
-   public void draw(Graphics g, int Xcenter, int Ycenter, double scaleFactor)
+   public void draw(Graphics g, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
    {
       if (_pose != null)
       {

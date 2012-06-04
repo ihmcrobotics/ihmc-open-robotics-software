@@ -8,7 +8,7 @@ public interface Plottable
    public static int X_Z = 1;
    public static int Y_Z = 2;
 
-   public void draw(Graphics g, int Xcenter, int Ycenter, double scaleFactor);
+   public void draw(Graphics g, int Xcenter, int Ycenter, double headingOffset, double scaleFactor);
 
    public String getID();
 

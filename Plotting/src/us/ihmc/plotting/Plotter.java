@@ -125,6 +125,8 @@ public class Plotter extends JPanel
          yCenter = height / 2;    // h;//h/2;
          scaleFactor = height / scale;
 
+         double headingOffset = 0.0;
+
          // set current offset
          xCenter = xCenter - (int)Math.round(xOffset * scaleFactor);
          yCenter = yCenter + (int)Math.round(yOffset * scaleFactor);
@@ -141,7 +143,7 @@ public class Plotter extends JPanel
                {
                   if (artifact.getLevel() == 86)
                   {
-                     artifact.draw(g, xCenter, yCenter, scaleFactor);
+                     artifact.draw(g, xCenter, yCenter, headingOffset, scaleFactor);
                   }
                }
                else
@@ -280,7 +282,7 @@ public class Plotter extends JPanel
                   {
                      if (artifact.getLevel() == i)
                      {
-                        artifact.draw(g, xCenter, yCenter, scaleFactor);    // , _orientation);
+                        artifact.draw(g, xCenter, yCenter, headingOffset, scaleFactor);    // , _orientation);
                      }
                   }
                   else
