@@ -39,6 +39,7 @@ public class PlotterPanel extends JPanel
    protected Plotter plotter;
    protected JTextArea eventTA;
    protected boolean plotMovement = false;
+   protected boolean robotCentric = false;
 
    protected JRadioButtonMenuItem gpsRB;
    protected JButton recenterBtn;
@@ -59,6 +60,16 @@ public class PlotterPanel extends JPanel
       gridBagConstraints.weightx = 1;
       gridBagConstraints.weighty = 1;
       this.add(plotter, gridBagConstraints);
+   }
+
+   public boolean isRobotCentric()
+   {
+      return robotCentric;
+   }
+
+   public void setRobotCentric(boolean robotCentric)
+   {
+      this.robotCentric = robotCentric;
    }
 
    public Plotter getPlotter()
@@ -154,6 +165,26 @@ public class PlotterPanel extends JPanel
          }
       });
       menu.add(cbMenuItem);
+
+
+      // a group of check box menu items
+      cbMenuItem = new JCheckBoxMenuItem("robot centric");
+      cbMenuItem.addItemListener(new ItemListener()
+      {
+         public void itemStateChanged(ItemEvent ie)
+         {
+            if (ie.getStateChange() == ItemEvent.SELECTED)
+            {
+               robotCentric = true;
+            }
+            else
+            {
+               robotCentric = false;
+            }
+         }
+      });
+      menu.add(cbMenuItem);
+
       menu.addSeparator();
       menu.add(new JLabel("Reference"));
 
