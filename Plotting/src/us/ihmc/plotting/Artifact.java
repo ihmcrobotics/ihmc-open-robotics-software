@@ -24,7 +24,7 @@ public abstract class Artifact implements Plottable, Serializable
    /**
     * Must provide a draw method for plotter to render artifact
     */
-   public abstract void draw(Graphics g, int Xcenter, int Ycenter, double scaleFactor);
+   public abstract void draw(Graphics g, int Xcenter, int Ycenter, double headingOffset, double scaleFactor);
    public abstract void drawHistory(Graphics g, int Xcenter, int Ycenter, double scaleFactor);
    public abstract void takeHistorySnapshot();
    public abstract void drawLegend(Graphics g, int Xcenter, int Ycenter, double scaleFactor);

@@ -65,7 +65,7 @@ public class PioneerRobotArtifact extends Artifact
    // g.drawOval((x - w12), (y - w12), w1, w1);
    // g.drawLine(x, y, xHDG, yHDG);
    // }
-   public void draw(Graphics g, int Xcenter, int Ycenter, double scaleFactor)
+   public void draw(Graphics g, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
    {
       int x = Xcenter + ((int)Math.round(_pose.getX() * scaleFactor));
       int y = Ycenter - ((int)Math.round(_pose.getY() * scaleFactor));
