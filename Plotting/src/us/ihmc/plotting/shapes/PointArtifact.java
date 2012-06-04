@@ -23,7 +23,7 @@ public class PointArtifact extends Artifact implements Serializable
    private Color historyColor = Color.blue;
    int _medianFilterSize = 20;
    int _meanFilterSize = 999;
-    private int size = 6;
+    private int size = 10;
 
    @SuppressWarnings("unused")
    private long _startTime;
@@ -162,7 +162,7 @@ public class PointArtifact extends Artifact implements Serializable
    /**
     * Must provide a draw method for plotter to render artifact
     */
-   public void draw(Graphics g, int Xcenter, int Ycenter, double scaleFactor)
+   public void draw(Graphics g, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
    {
       Vector<Double> xMedianFliter = new Vector<Double>();
       Vector<Double> yMedianFliter = new Vector<Double>();
