@@ -9,7 +9,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.SwingLegTorqueControlModule;
 import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
-import us.ihmc.commonWalkingControlModules.kinematics.DesiredJointAccelerationCalculator;
+import us.ihmc.commonWalkingControlModules.kinematics.DesiredJointAccelerationCalculatorInWorldFrame;
 import us.ihmc.commonWalkingControlModules.kinematics.DesiredJointVelocityCalculator;
 import us.ihmc.commonWalkingControlModules.kinematics.InverseKinematicsException;
 import us.ihmc.commonWalkingControlModules.kinematics.LegInverseKinematicsCalculator;
@@ -74,7 +74,7 @@ public class CraigPage300SwingLegTorqueControlModule implements SwingLegTorqueCo
 
    private final LegInverseKinematicsCalculator inverseKinematicsCalculator;
    private final SideDependentList<DesiredJointVelocityCalculator> desiredJointVelocityCalculators;
-   private final SideDependentList<DesiredJointAccelerationCalculator> desiredJointAccelerationCalculators;
+   private final SideDependentList<DesiredJointAccelerationCalculatorInWorldFrame> desiredJointAccelerationCalculators;
 
    private final SideDependentList<InverseDynamicsCalculator> inverseDynamicsCalculators;
 
@@ -87,7 +87,7 @@ public class CraigPage300SwingLegTorqueControlModule implements SwingLegTorqueCo
    public CraigPage300SwingLegTorqueControlModule(LegJointName[] legJointNames, ProcessedSensorsInterface processedSensors,
            CommonWalkingReferenceFrames referenceFrames, FullRobotModel fullRobotModel, CouplingRegistry couplingRegistry,
            LegInverseKinematicsCalculator inverseKinematicsCalculator, SideDependentList<DesiredJointVelocityCalculator> desiredJointVelocityCalculators,
-           SideDependentList<DesiredJointAccelerationCalculator> desiredJointAccelerationCalculators,
+           SideDependentList<DesiredJointAccelerationCalculatorInWorldFrame> desiredJointAccelerationCalculators,
            SideDependentList<InverseDynamicsCalculator> inverseDynamicsCalculators, YoVariableRegistry parentRegistry,
            GUISetterUpperRegistry guiSetterUpperRegistry)
    {

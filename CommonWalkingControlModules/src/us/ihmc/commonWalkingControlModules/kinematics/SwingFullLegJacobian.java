@@ -18,7 +18,7 @@ import com.mathworks.jama.Matrix;
 public class SwingFullLegJacobian
 {
    private final RobotSide robotSide;
-   private final GeometricJacobian openChainJacobian;
+   private final GeometricJacobian geometricJacobian;
    
    /**
     * Constructs a new SwingFullLegJacobian, for the given side of the robot
@@ -28,7 +28,7 @@ public class SwingFullLegJacobian
       this.robotSide = robotSide;
       RigidBody pelvis = fullRobotModel.getPelvis();
       RigidBody foot = fullRobotModel.getFoot(robotSide);
-      openChainJacobian = new GeometricJacobian(pelvis, foot, foot.getBodyFixedFrame());
+      geometricJacobian = new GeometricJacobian(pelvis, foot, foot.getBodyFixedFrame());
    }
 
    /**
@@ -36,7 +36,7 @@ public class SwingFullLegJacobian
     */
    public void computeJacobian()
    {
-      openChainJacobian.compute();
+      geometricJacobian.compute();
    }
 
    /**
@@ -44,7 +44,7 @@ public class SwingFullLegJacobian
     */
    public double det()
    {
-      return openChainJacobian.det();
+      return geometricJacobian.det();
    }
 
    /**
@@ -54,7 +54,7 @@ public class SwingFullLegJacobian
    public Twist getTwistOfFootWithRespectToPelvisInFootFrame(LegJointVelocities jointVelocities)
    {
       Matrix jointVelocitiesVector = jointVelocities.toMatrix();
-      return openChainJacobian.getTwist(jointVelocitiesVector);
+      return geometricJacobian.getTwist(jointVelocitiesVector);
    }
    
    /**
@@ -64,7 +64,7 @@ public class SwingFullLegJacobian
     */
    public void packJointVelocitiesGivenTwist(LegJointVelocities legJointVelocitiesToPack, Twist anklePitchTwistInAnklePitchFrame, double alpha)
    {
-      Matrix jointVelocities = openChainJacobian.computeJointVelocities(anklePitchTwistInAnklePitchFrame, alpha);
+      Matrix jointVelocities = geometricJacobian.computeJointVelocities(anklePitchTwistInAnklePitchFrame, alpha);
       int i = 0;
       for (LegJointName legJointName : legJointVelocitiesToPack.getLegJointNames())
       {
@@ -84,7 +84,7 @@ public class SwingFullLegJacobian
       }
 
       // the actual computation
-      Matrix jointTorques = openChainJacobian.computeJointTorques(wrenchOnFootInFootFrame);
+      Matrix jointTorques = geometricJacobian.computeJointTorques(wrenchOnFootInFootFrame);
 
       int i = 0;
       for (LegJointName legJointName : legTorquesToPack.getLegJointNames())
@@ -103,7 +103,7 @@ public class SwingFullLegJacobian
       Matrix biasedAccelerations = accelerationOfFootWithRespectToBody.toMatrix();    // unbiased at this point
       Matrix bias = jacobianDerivativeTerm.toMatrix();
       biasedAccelerations.minusEquals(bias);
-      Matrix ret = openChainJacobian.solveUsingDampedLeastSquares(biasedAccelerations, alpha);
+      Matrix ret = geometricJacobian.solveUsingDampedLeastSquares(biasedAccelerations, alpha);
 
       return ret;
    }
@@ -113,16 +113,16 @@ public class SwingFullLegJacobian
     */
    public Matrix getJacobian()
    {
-      return openChainJacobian.getJacobianMatrix().copy();
+      return geometricJacobian.getJacobianMatrix().copy();
    }
    
    public String toString()
    {
-      return openChainJacobian.toString();
+      return geometricJacobian.toString();
    }
 
    public GeometricJacobian getGeometricJacobian()
    {
-      return openChainJacobian;
+      return geometricJacobian;
    }
 }

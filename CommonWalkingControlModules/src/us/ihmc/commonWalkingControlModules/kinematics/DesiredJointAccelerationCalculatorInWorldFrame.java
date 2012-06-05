@@ -6,11 +6,12 @@ import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointVelocitie
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.screwTheory.DesiredJointAccelerationCalculator;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.utilities.screwTheory.Twist;
 
-public class DesiredJointAccelerationCalculator
+public class DesiredJointAccelerationCalculatorInWorldFrame
 {
    private final RobotSide swingSide;
    private final SwingFullLegJacobian swingLegJacobian;
@@ -21,9 +22,9 @@ public class DesiredJointAccelerationCalculator
    private final ReferenceFrame pelvisFrame;
    private final SpatialAccelerationVector accelerationOfFootWithRespectToPelvis = new SpatialAccelerationVector();
 
-   private final us.ihmc.utilities.screwTheory.DesiredJointAccelerationCalculator desiredJointAccelerationCalculator;
+   private final DesiredJointAccelerationCalculator desiredJointAccelerationCalculator;
 
-   public DesiredJointAccelerationCalculator(LegJointName[] legJointNames, SwingFullLegJacobian swingLegJacobian, FullRobotModel fullRobotModel,
+   public DesiredJointAccelerationCalculatorInWorldFrame(LegJointName[] legJointNames, SwingFullLegJacobian swingLegJacobian, FullRobotModel fullRobotModel,
            CommonWalkingReferenceFrames referenceFrames, RobotSide robotSide)
    {
 
@@ -37,7 +38,7 @@ public class DesiredJointAccelerationCalculator
       this.rootJoint = fullRobotModel.getRootJoint();
       this.footFrame = fullRobotModel.getFoot(swingSide).getBodyFixedFrame();
       this.pelvisFrame = fullRobotModel.getPelvis().getBodyFixedFrame();
-      this.desiredJointAccelerationCalculator = new us.ihmc.utilities.screwTheory.DesiredJointAccelerationCalculator(fullRobotModel.getPelvis(), fullRobotModel.getFoot(swingSide), swingLegJacobian.getGeometricJacobian());
+      this.desiredJointAccelerationCalculator = new DesiredJointAccelerationCalculator(fullRobotModel.getPelvis(), fullRobotModel.getFoot(swingSide), swingLegJacobian.getGeometricJacobian());
    }
 
    /**

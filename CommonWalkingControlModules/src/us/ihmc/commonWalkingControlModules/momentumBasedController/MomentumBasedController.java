@@ -30,12 +30,14 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
+import us.ihmc.utilities.math.geometry.Orientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.utilities.screwTheory.RevoluteJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.utilities.screwTheory.TotalMassCalculator;
+import us.ihmc.utilities.screwTheory.Twist;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 import us.ihmc.utilities.screwTheory.Wrench;
 
@@ -119,15 +121,15 @@ public class MomentumBasedController implements RobotController
       RigidBody elevator = fullRobotModel.getElevator();
       this.inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, -processedSensors.getGravityInWorldFrame().getZ());
       ReferenceFrame elevatorFrame = fullRobotModel.getElevatorFrame();
-      
+
       for (RobotSide robotSide : RobotSide.values())
       {
          RigidBody foot = fullRobotModel.getFoot(robotSide);
          ReferenceFrame footFrame = foot.getBodyFixedFrame();
          AxisAngleOrientationController footOrientationController = new AxisAngleOrientationController(robotSide.getCamelCaseNameForStartOfExpression()
                                                                        + "Foot", footFrame, registry);
-         footOrientationController.setProportionalGains(0.0, 0.0, 0.0);
-         footOrientationController.setDerivativeGains(0.0, 0.0, 0.0);
+//         footOrientationController.setProportionalGains(100.0, 100.0, 100.0);
+//         footOrientationController.setDerivativeGains(20.0, 20.0, 20.0);
          footOrientationControllers.put(robotSide, footOrientationController);
          desiredFootAccelerationsInWorld.put(robotSide, new SpatialAccelerationVector(footFrame, elevatorFrame, footFrame));
       }
@@ -177,7 +179,7 @@ public class MomentumBasedController implements RobotController
       zetaUpperBody.set(1.0);
       supportLeg.set(null);
 
-      desiredCoMHeight.set(1.25);
+      desiredCoMHeight.set(1.2);
    }
 
    public void initialize()
@@ -215,47 +217,50 @@ public class MomentumBasedController implements RobotController
    {
       bipedFeetUpdater.updateBipedFeet(leftFoot, rightFoot, supportLeg.getEnumValue(), capturePointCalculator.getCapturePointInFrame(midFeetZUp), false);
       bipedSupportPolygons.update(leftFoot, rightFoot);
-
    }
 
    private void doMomentumBasedControl()
    {
+      // TODO: calculate CMP first, need to make sure that CoP is inside BoS, CMP may be outside
       FramePoint2d desiredCoP = determineDesiredCoP();
-      FrameVector desiredDeltaCMP = determineDesiredDeltaCMP();
+      FrameVector2d desiredDeltaCMP = determineDesiredDeltaCMP();
       FramePoint2d desiredCMP = new FramePoint2d(desiredCoP);
-      FrameVector2d desiredDeltaCMP2d = desiredDeltaCMP.toFrameVector2d();
-      desiredCMP.add(desiredDeltaCMP2d);
-
-      desiredDeltaCMP2d.changeFrame(this.desiredDeltaCMP.getReferenceFrame());
-      this.desiredDeltaCMP.set(desiredDeltaCMP2d);
+      desiredCMP.add(desiredDeltaCMP);
+      
+      desiredDeltaCMP.changeFrame(this.desiredDeltaCMP.getReferenceFrame());
+      this.desiredDeltaCMP.set(desiredDeltaCMP);
 
       SideDependentList<FramePoint2d> virtualToePoints = new SideDependentList<FramePoint2d>();
       SideDependentList<Double> legStrengths = new SideDependentList<Double>();
       RobotSide supportLeg = this.supportLeg.getEnumValue();
+      ReferenceFrame frame;
       if (supportLeg == null)
       {
+         frame = midFeetZUp;
          virtualToePointCalculator.packVirtualToePoints(virtualToePoints, bipedSupportPolygons, desiredCoP);
          legStrengthCalculator.packLegStrengths(legStrengths, virtualToePoints, desiredCoP);
       }
       else
       {
+         frame = referenceFrames.getAnkleZUpFrame(supportLeg);
          virtualToePoints.put(supportLeg, desiredCoP);
          legStrengths.put(supportLeg, 1.0);
 
-         virtualToePoints.put(supportLeg.getOppositeSide(), new FramePoint2d(midFeetZUp));
+         virtualToePoints.put(supportLeg.getOppositeSide(), new FramePoint2d(frame));
          legStrengths.put(supportLeg.getOppositeSide(), 0.0);
       }
 
-      double fZ = centerOfMassHeightControlModule.doCenterOfMassHeightControl(desiredCoMHeight.getDoubleValue(), null);
+      double fZ = centerOfMassHeightControlModule.doCenterOfMassHeightControl(desiredCoMHeight.getDoubleValue(), supportLeg);
       FrameVector totalgroundReactionMoment = determineGroundReactionMoment();
       Wrench totalGroundReactionWrench = new Wrench(centerOfMassFrame, centerOfMassFrame);
 
       for (RobotSide robotSide : RobotSide.values())
       {
          FramePoint groundReactionForceTerminalPoint = new FramePoint(centerOfMassFrame);
-         groundReactionForceTerminalPoint.changeFrame(midFeetZUp);
-         desiredDeltaCMP.changeFrame(midFeetZUp);
-         groundReactionForceTerminalPoint.sub(desiredDeltaCMP);
+         groundReactionForceTerminalPoint.changeFrame(frame);
+         desiredDeltaCMP.changeFrame(frame);
+         groundReactionForceTerminalPoint.setX(groundReactionForceTerminalPoint.getX() - desiredDeltaCMP.getX());
+         groundReactionForceTerminalPoint.setY(groundReactionForceTerminalPoint.getY() - desiredDeltaCMP.getY());
          FrameVector groundReactionForce = new FrameVector(groundReactionForceTerminalPoint);
          FramePoint virtualToePoint = virtualToePoints.get(robotSide).toFramePoint();
          groundReactionForce.sub(virtualToePoint);
@@ -266,9 +271,9 @@ public class MomentumBasedController implements RobotController
 
          RigidBody foot = fullRobotModel.getFoot(robotSide);
          ReferenceFrame footCoMFrame = foot.getBodyFixedFrame();
-         FrameVector torque = new FrameVector(midFeetZUp);
+         FrameVector torque = new FrameVector(frame);
          torque.cross(virtualToePoint, groundReactionForce);
-         Wrench groundReactionWrench = new Wrench(footCoMFrame, midFeetZUp, groundReactionForce.getVector(), torque.getVector());
+         Wrench groundReactionWrench = new Wrench(footCoMFrame, frame, groundReactionForce.getVector(), torque.getVector());
          groundReactionWrench.addAngularPart(groundReactionMoment.getVector());
          groundReactionWrench.changeFrame(footCoMFrame);
          inverseDynamicsCalculator.setExternalWrench(foot, groundReactionWrench);
@@ -289,53 +294,71 @@ public class MomentumBasedController implements RobotController
       doPDControl(kUpperBody, dUpperBody, fullRobotModel.getNeckJointList());
 
       FrameVector desiredAngularCentroidalMomentumRate = new FrameVector(totalGroundReactionWrench.getExpressedInFrame(),
-            totalGroundReactionWrench.getAngularPartCopy());
+                                                            totalGroundReactionWrench.getAngularPartCopy());
       FrameVector desiredLinearCentroidalMomentumRate = new FrameVector(totalGroundReactionWrench.getExpressedInFrame(),
-            totalGroundReactionWrench.getLinearPartCopy());
+                                                           totalGroundReactionWrench.getLinearPartCopy());
       desiredLinearCentroidalMomentumRate.setZ(desiredLinearCentroidalMomentumRate.getZ() + processedSensors.getGravityInWorldFrame().getZ() * totalMass);
+
+      computeDesiredFootAccelerations();
 
       optimizer.solveForPelvisJointAcceleration(desiredAngularCentroidalMomentumRate, desiredLinearCentroidalMomentumRate, desiredFootAccelerationsInWorld);
    }
 
    private FramePoint2d determineDesiredCoP()
    {
-      capturePointCalculator.computeCapturePoint(null);
-
-      FramePoint2d capturePoint = capturePointCalculator.getCapturePoint2dInFrame(midFeetZUp);
-
-      FramePoint2d desiredCapturePoint = new FramePoint2d(midFeetZUp, 0.04, 0.0);
+//    FramePoint2d desiredCapturePoint = new FramePoint2d(midFeetZUp, 0.04, 0.0);
 //    FramePoint2d desiredCapturePoint = bipedSupportPolygons.getSupportPolygonInMidFeetZUp().getCentroidCopy();
-//    FramePoint2d desiredCapturePoint = bipedSupportPolygons.getSweetSpotCopy(RobotSide.RIGHT);
+      FramePoint2d desiredCapturePoint = bipedSupportPolygons.getSweetSpotCopy(RobotSide.RIGHT);
 
-      desiredCapturePoint.changeFrame(midFeetZUp);
-      FramePoint2d desiredCoP = desiredCapturePointToDesiredCoPControlModule.computeDesiredCoPDoubleSupport(bipedSupportPolygons, capturePoint,
-                                   new FrameVector2d(midFeetZUp), desiredCapturePoint);
-      FramePoint2d filteredDesiredCoP = desiredCenterOfPressureFilter.filter(desiredCoP, null);
+      RobotSide supportLeg = this.supportLeg.getEnumValue();
+      capturePointCalculator.computeCapturePoint(supportLeg);
+
+      ReferenceFrame frame = supportLeg == null ? midFeetZUp : referenceFrames.getAnkleZUpFrame(supportLeg);
+      FrameVector2d desiredVelocity = new FrameVector2d(frame);
+      desiredCapturePoint.changeFrame(frame);
+      FramePoint2d capturePoint = capturePointCalculator.getCapturePoint2dInFrame(frame);
+
+      FramePoint2d desiredCoP;
+      if (supportLeg == null)
+      {
+         desiredCoP = desiredCapturePointToDesiredCoPControlModule.computeDesiredCoPDoubleSupport(bipedSupportPolygons, capturePoint, desiredVelocity,
+                 desiredCapturePoint);
+      }
+      else
+      {
+         desiredCoP = desiredCapturePointToDesiredCoPControlModule.computeDesiredCoPSingleSupport(supportLeg, bipedSupportPolygons,
+                 capturePoint, desiredVelocity, desiredCapturePoint);
+      }
+
+      FramePoint2d filteredDesiredCoP = desiredCenterOfPressureFilter.filter(desiredCoP, supportLeg);
 
       return filteredDesiredCoP;
    }
 
-   private FrameVector determineDesiredDeltaCMP()
+   private FrameVector2d determineDesiredDeltaCMP()
    {
-      FrameVector zUnitVector = new FrameVector(midFeetZUp, 0.0, 0.0, 1.0);
-      FrameVector angularMomentum = processedSensors.getAngularMomentumInFrame(midFeetZUp);
-      FrameVector desiredDeltaCMP = new FrameVector(midFeetZUp);
+      RobotSide supportLeg = this.supportLeg.getEnumValue();
+      ReferenceFrame frame = supportLeg == null ? midFeetZUp : referenceFrames.getAnkleZUpFrame(supportLeg);
+
+      FrameVector zUnitVector = new FrameVector(frame, 0.0, 0.0, 1.0);
+      FrameVector angularMomentum = processedSensors.getAngularMomentumInFrame(frame);
+      FrameVector desiredDeltaCMP = new FrameVector(frame);
       desiredDeltaCMP.cross(angularMomentum, zUnitVector);
       desiredDeltaCMP.scale(-kAngularMomentumXY.getDoubleValue());
 
-      Transform3D pelvisToMidFeetZUp = fullRobotModel.getPelvis().getBodyFixedFrame().getTransformToDesiredFrame(midFeetZUp);
+      Transform3D pelvisToMidFeetZUp = fullRobotModel.getPelvis().getBodyFixedFrame().getTransformToDesiredFrame(frame);
       Matrix3d pelvisToMidFeetZUpRotation = new Matrix3d();
       pelvisToMidFeetZUp.get(pelvisToMidFeetZUpRotation);
       AxisAngle4d pelvisToCenterOfMassAxisAngle = new AxisAngle4d();
       pelvisToCenterOfMassAxisAngle.set(pelvisToMidFeetZUpRotation);
-      FrameVector proportionalPart = new FrameVector(midFeetZUp, pelvisToCenterOfMassAxisAngle.getX(), pelvisToCenterOfMassAxisAngle.getY(),
+      FrameVector proportionalPart = new FrameVector(frame, pelvisToCenterOfMassAxisAngle.getX(), pelvisToCenterOfMassAxisAngle.getY(),
                                         pelvisToCenterOfMassAxisAngle.getZ());
       proportionalPart.scale(pelvisToCenterOfMassAxisAngle.getAngle());
       proportionalPart.cross(proportionalPart, zUnitVector);
       proportionalPart.scale(-kPelvisAxisAngle.getDoubleValue());
       desiredDeltaCMP.add(proportionalPart);
 
-      return desiredDeltaCMP;
+      return desiredDeltaCMP.toFrameVector2d();
    }
 
    private FrameVector determineGroundReactionMoment()
@@ -360,56 +383,71 @@ public class MomentumBasedController implements RobotController
       desiredPelvisForce.set(pelvisJointWrench.getLinearPartCopy());
       desiredPelvisTorque.set(pelvisJointWrench.getAngularPartCopy());
    }
-   
-//   private void bla()
-//   {
-//      RobotSide supportSide = supportLeg.getEnumValue();
-//      if ((supportSide == null) || (supportSide == robotSide))
-//      {
-//         accelerationOfPelvisWithRespectToFoot.
-//      }
-//      else
-//      {
-//         ReferenceFrame swingAnkleZUp = referenceFrames.getAnkleZUpFrame(robotSide);
-//         Twist twistOfFootWithRespectToElevator = new Twist();
-//         twistCalculator.packTwistOfBody(twistOfFootWithRespectToElevator, fullRobotModel.getFoot(robotSide));
-//
-//         double kSwingFootPosition = 0.0;
-//         double bSwingFootPosition = 0.1;
-//         FramePoint desiredPosition = new FramePoint(referenceFrames.getAnkleZUpFrame(supportSide), 0.0, supportSide.negateIfLeftSide(0.38), 0.01);
-//         desiredPosition.changeFrame(swingAnkleZUp);
-//         FrameVector swingFootPositionError = new FrameVector(desiredPosition);
-//         swingFootPositionError.changeFrame(worldFrame);
-//         swingFootPositionErrorInWorld.set(swingFootPositionError);
-//         FrameVector currentVelocity = twistOfFootWithRespectToElevator.getBodyOriginLinearVelocityInBaseFrame();
-//         FrameVector velocityTerm = new FrameVector(currentVelocity.getReferenceFrame());    // desired velocity at this point
-//         velocityTerm.sub(currentVelocity);    // velocity error at this point
-//         velocityTerm.changeFrame(swingAnkleZUp);
-//         velocityTerm.scale(bSwingFootPosition);    // velocity term
-//
-//         FrameVector linearAcceleration = new FrameVector(desiredPosition);
-//         linearAcceleration.scale(kSwingFootPosition);
-//         linearAcceleration.add(velocityTerm);
-//
-//         FrameVector angularAcceleration = new FrameVector(referenceFrames.getAnkleZUpFrame(robotSide));
-//         Orientation desiredOrientation = new Orientation(referenceFrames.getAnkleZUpFrame(supportSide), 0.0, 0.0, 0.0);
-//         FrameVector desiredAngularVelocity = new FrameVector(referenceFrames.getAnkleZUpFrame(robotSide));    // TODO
-//         FrameVector currentAngularVelocity = new FrameVector(referenceFrames.getAnkleZUpFrame(robotSide));    // TODO
-//         footOrientationControllers.get(robotSide).compute(angularAcceleration, desiredOrientation, desiredAngularVelocity, currentAngularVelocity);
-//
-//         accelerationOfPelvisWithRespectToFoot = new SpatialAccelerationVector(footFrame, elevatorFrame, footFrame);
-//         twistOfFootWithRespectToElevator.changeBaseFrameNoRelativeTwist(elevatorFrame);
-//         accelerationOfPelvisWithRespectToFoot.setBasedOnOriginAcceleration(angularAcceleration, linearAcceleration, twistOfFootWithRespectToElevator);
-//
-//         Twist twistOfFootWithRespectToPelvis = new Twist();
-//         twistCalculator.packTwistOfBody(twistOfFootWithRespectToPelvis, fullRobotModel.getPelvis());
-//         twistOfFootWithRespectToPelvis.changeBaseFrameNoRelativeTwist(elevatorFrame);
-//         twistOfFootWithRespectToPelvis.invert();
-//         twistOfFootWithRespectToPelvis.changeFrame(footFrame);
-//         twistOfFootWithRespectToPelvis.add(twistOfFootWithRespectToElevator);
-//         accelerationOfPelvisWithRespectToFoot.changeFrame(pelvisFrame, twistOfFootWithRespectToPelvis, twistOfFootWithRespectToElevator);
-//      }
-//   }
+
+   private void computeDesiredFootAccelerations()
+   {
+      for (RobotSide robotSide : RobotSide.values())
+      {
+         RigidBody foot = fullRobotModel.getFoot(robotSide);
+         ReferenceFrame footFrame = foot.getBodyFixedFrame();
+         ReferenceFrame elevatorFrame = fullRobotModel.getElevatorFrame();
+
+         RobotSide supportSide = supportLeg.getEnumValue();
+         if ((supportSide == null) || (supportSide == robotSide))
+         {
+            desiredFootAccelerationsInWorld.get(robotSide).setToZero(footFrame, elevatorFrame, footFrame);
+         }
+         else
+         {
+            ReferenceFrame supportAnkleZUpFrame = referenceFrames.getAnkleZUpFrame(supportSide);
+            Twist twistOfFootWithRespectToElevator = new Twist();
+            twistCalculator.packTwistOfBody(twistOfFootWithRespectToElevator, fullRobotModel.getFoot(robotSide));
+
+            double kSwingFootPosition = 100.0;
+            double bSwingFootPosition = 20.0;
+            FramePoint desiredPosition = new FramePoint(supportAnkleZUpFrame, 0.08, supportSide.negateIfLeftSide(0.38), 0.03);
+            desiredPosition.changeFrame(footFrame);
+            FrameVector swingFootPositionError = new FrameVector(desiredPosition);
+            swingFootPositionError.changeFrame(worldFrame);
+            swingFootPositionErrorInWorld.set(swingFootPositionError);
+            FrameVector linearAcceleration = new FrameVector(swingFootPositionError);
+            linearAcceleration.scale(kSwingFootPosition);
+
+            FrameVector currentVelocity = twistOfFootWithRespectToElevator.getBodyOriginLinearVelocityInBaseFrame();
+            FrameVector velocityTerm = new FrameVector(currentVelocity.getReferenceFrame());    // desired velocity at this point
+            velocityTerm.sub(currentVelocity);    // velocity error at this point
+            velocityTerm.changeFrame(worldFrame);
+            velocityTerm.scale(bSwingFootPosition);    // velocity term
+
+            linearAcceleration.add(velocityTerm);
+
+
+
+//          FrameVector linearAcceleration = new FrameVector(worldFrame, 0.0, 0.0, -1.0);
+
+            linearAcceleration.changeFrame(footFrame);
+            linearAcceleration.scale(-1.0);
+
+            FrameVector angularAcceleration = new FrameVector(footFrame);
+            Orientation desiredOrientation = new Orientation(supportAnkleZUpFrame, 0.0, 0.0, 0.0);
+            FrameVector desiredAngularVelocity = new FrameVector(footFrame);    // TODO
+            FrameVector currentAngularVelocity = new FrameVector(footFrame);    // TODO
+            footOrientationControllers.get(robotSide).compute(angularAcceleration, desiredOrientation, desiredAngularVelocity, currentAngularVelocity);
+            angularAcceleration.scale(-1.0);
+
+//          desiredFootAccelerationsInWorld.get(robotSide).setToZero(footFrame, elevatorFrame, footFrame);
+            twistOfFootWithRespectToElevator.changeBaseFrameNoRelativeTwist(elevatorFrame);
+            twistOfFootWithRespectToElevator.setToZero();
+            desiredFootAccelerationsInWorld.get(robotSide).setBasedOnOriginAcceleration(angularAcceleration, linearAcceleration,
+                    twistOfFootWithRespectToElevator);
+
+//          desiredFootAccelerationsInWorld.get(robotSide).setAngularPart(angularAcceleration.getVector());
+//          desiredFootAccelerationsInWorld.get(robotSide).setLinearPart(linearAcceleration.getVector());
+
+//          desiredFootAccelerationsInWorld.get(robotSide).set(footFrame, elevatorFrame, footFrame, new Vector3d(0.0, 0.0, -0.1), new Vector3d());
+         }
+      }
+   }
 
    private static void doPDControl(double k, double d, RevoluteJoint[] joints)
    {
