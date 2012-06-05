@@ -18,8 +18,8 @@ public class LineArtifact extends Artifact implements Serializable
     * 
     */
    private static final long serialVersionUID = -4292453853922762342L;
-   private Point2d point1;
-   private Point2d point2;
+   private Point2d point1 = new Point2d();
+   private Point2d point2 = new Point2d(0.01, 0.01);
    private int lineThickness = 1;
 
    public LineArtifact(String id)
