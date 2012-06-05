@@ -128,8 +128,8 @@ public class MomentumBasedController implements RobotController
          ReferenceFrame footFrame = foot.getBodyFixedFrame();
          AxisAngleOrientationController footOrientationController = new AxisAngleOrientationController(robotSide.getCamelCaseNameForStartOfExpression()
                                                                        + "Foot", footFrame, registry);
-//         footOrientationController.setProportionalGains(100.0, 100.0, 100.0);
-//         footOrientationController.setDerivativeGains(20.0, 20.0, 20.0);
+         footOrientationController.setProportionalGains(100.0, 100.0, 100.0);
+         footOrientationController.setDerivativeGains(20.0, 20.0, 20.0);
          footOrientationControllers.put(robotSide, footOrientationController);
          desiredFootAccelerationsInWorld.put(robotSide, new SpatialAccelerationVector(footFrame, elevatorFrame, footFrame));
       }
@@ -418,33 +418,19 @@ public class MomentumBasedController implements RobotController
             velocityTerm.sub(currentVelocity);    // velocity error at this point
             velocityTerm.changeFrame(worldFrame);
             velocityTerm.scale(bSwingFootPosition);    // velocity term
-
             linearAcceleration.add(velocityTerm);
-
-
-
-//          FrameVector linearAcceleration = new FrameVector(worldFrame, 0.0, 0.0, -1.0);
-
-            linearAcceleration.changeFrame(footFrame);
-            linearAcceleration.scale(-1.0);
 
             FrameVector angularAcceleration = new FrameVector(footFrame);
             Orientation desiredOrientation = new Orientation(supportAnkleZUpFrame, 0.0, 0.0, 0.0);
             FrameVector desiredAngularVelocity = new FrameVector(footFrame);    // TODO
             FrameVector currentAngularVelocity = new FrameVector(footFrame);    // TODO
             footOrientationControllers.get(robotSide).compute(angularAcceleration, desiredOrientation, desiredAngularVelocity, currentAngularVelocity);
-            angularAcceleration.scale(-1.0);
 
-//          desiredFootAccelerationsInWorld.get(robotSide).setToZero(footFrame, elevatorFrame, footFrame);
+            desiredFootAccelerationsInWorld.get(robotSide).setToZero(footFrame, elevatorFrame, footFrame);
             twistOfFootWithRespectToElevator.changeBaseFrameNoRelativeTwist(elevatorFrame);
             twistOfFootWithRespectToElevator.setToZero();
             desiredFootAccelerationsInWorld.get(robotSide).setBasedOnOriginAcceleration(angularAcceleration, linearAcceleration,
                     twistOfFootWithRespectToElevator);
-
-//          desiredFootAccelerationsInWorld.get(robotSide).setAngularPart(angularAcceleration.getVector());
-//          desiredFootAccelerationsInWorld.get(robotSide).setLinearPart(linearAcceleration.getVector());
-
-//          desiredFootAccelerationsInWorld.get(robotSide).set(footFrame, elevatorFrame, footFrame, new Vector3d(0.0, 0.0, -0.1), new Vector3d());
          }
       }
    }

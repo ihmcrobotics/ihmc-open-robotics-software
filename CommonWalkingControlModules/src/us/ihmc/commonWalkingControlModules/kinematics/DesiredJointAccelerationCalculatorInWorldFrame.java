@@ -56,7 +56,6 @@ public class DesiredJointAccelerationCalculatorInWorldFrame
 
    private void computeDesiredAccelerationOfFootWithRespectToPelvis(SpatialAccelerationVector accelerationOfFootWithRespectToPelvis, SpatialAccelerationVector desiredAccelerationOfFootWithRespectToElevator)
    {
-//      SpatialAccelerationVector accelerationOfFootWithRespectToPelvis = new SpatialAccelerationVector();
       rootJoint.packDesiredJointAcceleration(accelerationOfFootWithRespectToPelvis);    // acceleration of pelvis after joint frame with respect to elevator
       accelerationOfFootWithRespectToPelvis.changeBodyFrameNoRelativeAcceleration(pelvisFrame);    // acceleration of pelvis body with respect to elevator
       accelerationOfFootWithRespectToPelvis.changeFrameNoRelativeMotion(pelvisFrame);
@@ -70,8 +69,6 @@ public class DesiredJointAccelerationCalculatorInWorldFrame
       accelerationOfFootWithRespectToPelvis.changeFrame(footFrame, twistOfPelvisWithRespectToFoot, twistOfPelvisWithRespectToElevator);
       accelerationOfFootWithRespectToPelvis.invert();    // acceleration of elevator with respect to pelvis body
       accelerationOfFootWithRespectToPelvis.add(desiredAccelerationOfFootWithRespectToElevator);    // acceleration of foot with respect to pelvis body
-
-//      return accelerationOfFootWithRespectToPelvis;
    }
 
    private Twist computeTwistOfPelvisWithRespectToFoot()
