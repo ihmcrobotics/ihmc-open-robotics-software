@@ -56,7 +56,7 @@ public class SteppingStonesArtifact extends Artifact
       graphics.drawString("Stepping Stones", Xcenter, Ycenter);
    }
 
-   public void draw(Graphics graphics, int Xcenter, int Ycenter, double scaleFactor)
+   public void draw(Graphics graphics, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
    {
       graphics.setColor(color);
       if (stroke != null)
