@@ -43,7 +43,6 @@ import us.ihmc.utilities.screwTheory.Wrench;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.EnumYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.robotController.RobotController;
 import com.yobotics.simulationconstructionset.util.AxisAngleOrientationController;
@@ -77,6 +76,7 @@ public class MomentumBasedController implements RobotController
    private final ReferenceFrame midFeetZUp;
    private final double totalMass;
 
+   private final MomentumBasedControllerStateMachine stateMachine;
    private final MomentumBasedPelvisAccelerationOptimizer optimizer;
 
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -84,7 +84,6 @@ public class MomentumBasedController implements RobotController
    private final CommonWalkingReferenceFrames referenceFrames;
    private final TwistCalculator twistCalculator;
 
-   private final EnumYoVariable<RobotSide> supportLeg = EnumYoVariable.create("supportLeg", RobotSide.class, registry);
    private final SideDependentList<AxisAngleOrientationController> footOrientationControllers = new SideDependentList<AxisAngleOrientationController>();
    private final SideDependentList<SpatialAccelerationVector> desiredFootAccelerationsInWorld = new SideDependentList<SpatialAccelerationVector>();
    private final YoFrameVector swingFootPositionErrorInWorld = new YoFrameVector("swingFootPositionErrorInWorld", "", worldFrame, registry);
@@ -165,6 +164,7 @@ public class MomentumBasedController implements RobotController
       this.totalMass = TotalMassCalculator.computeSubTreeMass(elevator);
       orientationControlModule.setupParametersForR2();
 
+      stateMachine = new MomentumBasedControllerStateMachine(referenceFrames, processedSensors.getYoTime(), registry);
       optimizer = new MomentumBasedPelvisAccelerationOptimizer(fullRobotModel, twistCalculator, referenceFrames.getCenterOfMassFrame(), registry, controlDT);
 
       this.desiredPelvisLinearAcceleration = new YoFrameVector("desiredPelvisLinearAcceleration", "", referenceFrames.getPelvisFrame(), registry);
@@ -177,7 +177,6 @@ public class MomentumBasedController implements RobotController
       kAngularMomentumZ.set(10.0);
       kUpperBody.set(100.0);
       zetaUpperBody.set(1.0);
-      supportLeg.set(null);
 
       desiredCoMHeight.set(1.2);
    }
@@ -215,7 +214,7 @@ public class MomentumBasedController implements RobotController
 
    private void updateStuff()
    {
-      bipedFeetUpdater.updateBipedFeet(leftFoot, rightFoot, supportLeg.getEnumValue(), capturePointCalculator.getCapturePointInFrame(midFeetZUp), false);
+      bipedFeetUpdater.updateBipedFeet(leftFoot, rightFoot, stateMachine.getSupportLeg(), capturePointCalculator.getCapturePointInFrame(midFeetZUp), false);
       bipedSupportPolygons.update(leftFoot, rightFoot);
    }
 
@@ -232,7 +231,7 @@ public class MomentumBasedController implements RobotController
 
       SideDependentList<FramePoint2d> virtualToePoints = new SideDependentList<FramePoint2d>();
       SideDependentList<Double> legStrengths = new SideDependentList<Double>();
-      RobotSide supportLeg = this.supportLeg.getEnumValue();
+      RobotSide supportLeg = stateMachine.getSupportLeg();
       ReferenceFrame frame;
       if (supportLeg == null)
       {
@@ -310,7 +309,7 @@ public class MomentumBasedController implements RobotController
 //    FramePoint2d desiredCapturePoint = bipedSupportPolygons.getSupportPolygonInMidFeetZUp().getCentroidCopy();
       FramePoint2d desiredCapturePoint = bipedSupportPolygons.getSweetSpotCopy(RobotSide.RIGHT);
 
-      RobotSide supportLeg = this.supportLeg.getEnumValue();
+      RobotSide supportLeg = stateMachine.getSupportLeg();
       capturePointCalculator.computeCapturePoint(supportLeg);
 
       ReferenceFrame frame = supportLeg == null ? midFeetZUp : referenceFrames.getAnkleZUpFrame(supportLeg);
@@ -337,7 +336,7 @@ public class MomentumBasedController implements RobotController
 
    private FrameVector2d determineDesiredDeltaCMP()
    {
-      RobotSide supportLeg = this.supportLeg.getEnumValue();
+      RobotSide supportLeg = stateMachine.getSupportLeg();
       ReferenceFrame frame = supportLeg == null ? midFeetZUp : referenceFrames.getAnkleZUpFrame(supportLeg);
 
       FrameVector zUnitVector = new FrameVector(frame, 0.0, 0.0, 1.0);
@@ -392,7 +391,7 @@ public class MomentumBasedController implements RobotController
          ReferenceFrame footFrame = foot.getBodyFixedFrame();
          ReferenceFrame elevatorFrame = fullRobotModel.getElevatorFrame();
 
-         RobotSide supportSide = supportLeg.getEnumValue();
+         RobotSide supportSide = stateMachine.getSupportLeg();
          if ((supportSide == null) || (supportSide == robotSide))
          {
             desiredFootAccelerationsInWorld.get(robotSide).setToZero(footFrame, elevatorFrame, footFrame);
@@ -405,7 +404,8 @@ public class MomentumBasedController implements RobotController
 
             double kSwingFootPosition = 100.0;
             double bSwingFootPosition = 20.0;
-            FramePoint desiredPosition = new FramePoint(supportAnkleZUpFrame, 0.08, supportSide.negateIfLeftSide(0.38), 0.03);
+            FramePoint desiredPosition = new FramePoint(supportAnkleZUpFrame);
+            stateMachine.packDesiredSwingFootPosition(desiredPosition);
             desiredPosition.changeFrame(footFrame);
             FrameVector swingFootPositionError = new FrameVector(desiredPosition);
             swingFootPositionError.changeFrame(worldFrame);
