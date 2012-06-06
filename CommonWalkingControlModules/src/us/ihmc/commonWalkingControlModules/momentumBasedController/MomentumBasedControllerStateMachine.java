@@ -51,6 +51,7 @@ public class MomentumBasedControllerStateMachine extends StateMachine
 
    private final YoFramePoint2d desiredICP;
    private final EnumYoVariable<RobotSide> supportLeg = EnumYoVariable.create("supportLeg", RobotSide.class, registry);
+   private final EnumYoVariable<RobotSide> upcomingSupportLeg = EnumYoVariable.create("upcomingSupportLeg", RobotSide.class, registry);
    private final SideDependentList<YoFramePoint> desiredSwingFootPositions = new SideDependentList<YoFramePoint>();
    private final SideDependentList<YoFrameVector> desiredSwingFootVelocities = new SideDependentList<YoFrameVector>();
    private final SideDependentList<YoFrameVector> desiredSwingFootAccelerations = new SideDependentList<YoFrameVector>();
@@ -73,10 +74,11 @@ public class MomentumBasedControllerStateMachine extends StateMachine
       this.bipedSupportPolygons = bipedSupportPolygons;
       this.controlDT = controlDT;
 
-      desiredICP = new YoFramePoint2d("desiredICP", "", referenceFrames.getMidFeetZUpFrame(), registry);
+      desiredICP = new YoFramePoint2d("desiredICP", "", ReferenceFrame.getWorldFrame(), registry);
 
       double stepTime = 1.0;
-      double groundClearance = 0.1;
+      double groundClearance = 0.2;
+      desiredCoMHeight.set(1.2);
 
       for (RobotSide robotSide : RobotSide.values())
       {
@@ -99,6 +101,7 @@ public class MomentumBasedControllerStateMachine extends StateMachine
       }
 
       this.capturePoint = new FramePoint2d(ReferenceFrame.getWorldFrame());
+      upcomingSupportLeg.set(RobotSide.LEFT);
 
       setUpStateMachine();
       parentRegistry.addChild(registry);
@@ -118,8 +121,7 @@ public class MomentumBasedControllerStateMachine extends StateMachine
       for (RobotSide robotSide : RobotSide.values())
       {
          State transferState = new TransferState(robotSide);
-         StateTransition toSingleSupport = new StateTransition(singleSupportStateEnums.get(robotSide.getOppositeSide()),
-                                              new DoneWithTransferCondition(robotSide));
+         StateTransition toSingleSupport = new StateTransition(singleSupportStateEnums.get(robotSide), new DoneWithTransferCondition(robotSide));
          transferState.addStateTransition(toSingleSupport);
          addState(transferState);
 
@@ -182,80 +184,12 @@ public class MomentumBasedControllerStateMachine extends StateMachine
          FramePoint2d desiredCapturePoint = bipedSupportPolygons.getSupportPolygonInMidFeetZUp().getCentroidCopy();
          desiredCapturePoint.changeFrame(desiredICP.getReferenceFrame());
          desiredICP.set(desiredCapturePoint);
-         desiredCoMHeight.set(1.2);
       }
 
       @Override
       public void doTransitionIntoAction()
       {
          supportLeg.set(null);
-      }
-
-      @Override
-      public void doTransitionOutOfAction()
-      {
-         // TODO Auto-generated method stub
-
-      }
-   }
-
-
-   private class SingleSupportState extends State
-   {
-      private final RobotSide swingSide;
-      private final ReferenceFrame swingAnkleZUpFrame;
-      private final ReferenceFrame supportAnkleZUpFrame;
-
-      private final FramePoint positionToPack;
-      private final FrameVector velocityToPack;
-      private final FrameVector accelerationToPack;
-
-      public SingleSupportState(RobotSide robotSide)
-      {
-         super(singleSupportStateEnums.get(robotSide));
-         this.swingSide = robotSide;
-         swingAnkleZUpFrame = referenceFrames.getAnkleZUpFrame(swingSide);
-         supportAnkleZUpFrame = referenceFrames.getAnkleZUpFrame(swingSide.getOppositeSide());
-         this.positionToPack = new FramePoint(supportAnkleZUpFrame);
-         this.velocityToPack = new FrameVector(supportAnkleZUpFrame);
-         this.accelerationToPack = new FrameVector(supportAnkleZUpFrame);
-      }
-
-      @Override
-      public void doAction()
-      {
-//       desiredSwingFootPositions.get(swingSide).set(0.0, swingSide.negateIfRightSide(0.38), 0.03);
-         CartesianTrajectoryGenerator cartesianTrajectoryGenerator = cartesianTrajectoryGenerators.get(swingSide);
-         if (!cartesianTrajectoryGenerator.isDone())
-         {
-            cartesianTrajectoryGenerator.computeNextTick(positionToPack, velocityToPack, accelerationToPack, controlDT);
-            desiredSwingFootPositions.get(swingSide).set(positionToPack);
-            desiredSwingFootVelocities.get(swingSide).set(velocityToPack);
-            desiredSwingFootAccelerations.get(swingSide).set(accelerationToPack);
-         }
-      }
-
-      @Override
-      public void doTransitionIntoAction()
-      {
-         supportLeg.set(swingSide.getOppositeSide());
-
-         FramePoint initialPosition = new FramePoint(swingAnkleZUpFrame);
-         initialPosition.changeFrame(supportAnkleZUpFrame);
-
-         FrameVector initialVelocity = new FrameVector(supportAnkleZUpFrame);
-         Twist footTwist = new Twist();
-         twistCalculator.packTwistOfBody(footTwist, fullRobotModel.getFoot(swingSide));
-         footTwist.changeFrame(swingAnkleZUpFrame);
-         footTwist.packLinearPart(initialVelocity);
-         initialVelocity.changeFrame(supportAnkleZUpFrame);
-
-         FramePoint finalDesiredPosition = new FramePoint(supportAnkleZUpFrame);
-         finalDesiredPosition.setX(finalDesiredPosition.getX() + 0.2);
-         finalDesiredPosition.setY(swingSide.negateIfRightSide(0.38));
-         finalDesiredPosition.setZ(-3e-3);
-
-         cartesianTrajectoryGenerators.get(swingSide).initialize(initialPosition, initialVelocity, finalDesiredPosition);
       }
 
       @Override
@@ -288,8 +222,76 @@ public class MomentumBasedControllerStateMachine extends StateMachine
       @Override
       public void doTransitionIntoAction()
       {
-         // TODO Auto-generated method stub
+      }
 
+      @Override
+      public void doTransitionOutOfAction()
+      {
+         upcomingSupportLeg.set(upcomingSupportLeg.getEnumValue().getOppositeSide());
+      }
+   }
+
+
+   private class SingleSupportState extends State
+   {
+      private final RobotSide swingSide;
+      private final ReferenceFrame swingAnkleZUpFrame;
+      private final ReferenceFrame supportAnkleZUpFrame;
+
+      private final FramePoint positionToPack;
+      private final FrameVector velocityToPack;
+      private final FrameVector accelerationToPack;
+
+      public SingleSupportState(RobotSide robotSide)
+      {
+         super(singleSupportStateEnums.get(robotSide));
+         this.swingSide = robotSide.getOppositeSide();
+         swingAnkleZUpFrame = referenceFrames.getAnkleZUpFrame(swingSide);
+         supportAnkleZUpFrame = referenceFrames.getAnkleZUpFrame(swingSide.getOppositeSide());
+         this.positionToPack = new FramePoint(supportAnkleZUpFrame);
+         this.velocityToPack = new FrameVector(supportAnkleZUpFrame);
+         this.accelerationToPack = new FrameVector(supportAnkleZUpFrame);
+      }
+
+      @Override
+      public void doAction()
+      {
+         FramePoint2d desiredCapturePoint = bipedSupportPolygons.getSweetSpotCopy(swingSide.getOppositeSide());
+         desiredCapturePoint.changeFrame(desiredICP.getReferenceFrame());
+         desiredICP.set(desiredCapturePoint);
+         
+//       desiredSwingFootPositions.get(swingSide).set(0.0, swingSide.negateIfRightSide(0.38), 0.03);
+         CartesianTrajectoryGenerator cartesianTrajectoryGenerator = cartesianTrajectoryGenerators.get(swingSide);
+         if (!cartesianTrajectoryGenerator.isDone())
+         {
+            cartesianTrajectoryGenerator.computeNextTick(positionToPack, velocityToPack, accelerationToPack, controlDT);
+            desiredSwingFootPositions.get(swingSide).set(positionToPack);
+            desiredSwingFootVelocities.get(swingSide).set(velocityToPack);
+            desiredSwingFootAccelerations.get(swingSide).set(accelerationToPack);
+         }
+      }
+
+      @Override
+      public void doTransitionIntoAction()
+      {
+         supportLeg.set(swingSide.getOppositeSide());
+
+         FramePoint initialPosition = new FramePoint(swingAnkleZUpFrame);
+         initialPosition.changeFrame(supportAnkleZUpFrame);
+
+         FrameVector initialVelocity = new FrameVector(supportAnkleZUpFrame);
+         Twist footTwist = new Twist();
+         twistCalculator.packTwistOfBody(footTwist, fullRobotModel.getFoot(swingSide));
+         footTwist.changeFrame(swingAnkleZUpFrame);
+         footTwist.packLinearPart(initialVelocity);
+         initialVelocity.changeFrame(supportAnkleZUpFrame);
+
+         FramePoint finalDesiredPosition = new FramePoint(supportAnkleZUpFrame);
+         finalDesiredPosition.setX(finalDesiredPosition.getX() + 0.2);
+         finalDesiredPosition.setY(swingSide.negateIfRightSide(0.3));
+         finalDesiredPosition.setZ(-3e-3);
+
+         cartesianTrajectoryGenerators.get(swingSide).initialize(initialPosition, initialVelocity, finalDesiredPosition);
       }
 
       @Override
@@ -312,7 +314,7 @@ public class MomentumBasedControllerStateMachine extends StateMachine
 
       public boolean checkCondition()
       {
-         return (robotSide == RobotSide.LEFT) && (timeInCurrentState() > 1.0);    // FIXME
+         return (robotSide == upcomingSupportLeg.getEnumValue()) && (timeInCurrentState() > 1.0);    // FIXME
       }
    }
 
@@ -342,6 +344,7 @@ public class MomentumBasedControllerStateMachine extends StateMachine
       public boolean checkCondition()
       {
          RobotSide swingSide = supportLeg.getEnumValue().getOppositeSide();
+
          return cartesianTrajectoryGenerators.get(swingSide).isDone();
       }
    }
