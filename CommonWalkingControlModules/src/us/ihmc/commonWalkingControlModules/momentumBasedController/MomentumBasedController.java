@@ -10,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.GoOnToesDuringDo
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ResizableBipedFoot;
 import us.ihmc.commonWalkingControlModules.captureRegion.CapturePointCalculatorInterface;
 import us.ihmc.commonWalkingControlModules.captureRegion.CommonCapturePointCalculator;
+import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.DesiredCapturePointToDesiredCoPControlModule;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.LegStrengthCalculator;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.VirtualToePointCalculator;
 import us.ihmc.commonWalkingControlModules.controlModules.CenterOfMassHeightControlModule;
@@ -63,7 +64,7 @@ public class MomentumBasedController implements RobotController
    private final BipedSupportPolygons bipedSupportPolygons;
    private final CapturePointCalculatorInterface capturePointCalculator;
    private final VirtualToePointCalculator virtualToePointCalculator;
-   private final SpeedControllingDesiredCoPCalculator desiredCapturePointToDesiredCoPControlModule;
+   private final DesiredCapturePointToDesiredCoPControlModule desiredCapturePointToDesiredCoPControlModule;
    private final SimpleDesiredCenterOfPressureFilter desiredCenterOfPressureFilter;
    private final CenterOfMassHeightControlModule centerOfMassHeightControlModule;
    private final LegStrengthCalculator legStrengthCalculator;
@@ -152,9 +153,10 @@ public class MomentumBasedController implements RobotController
 //      this.virtualToePointCalculator = new GeometricVirtualToePointCalculator(referenceFrames, registry, dynamicGraphicObjectsListRegistry);
 
 
-      this.desiredCapturePointToDesiredCoPControlModule = new SpeedControllingDesiredCoPCalculator(processedSensors, referenceFrames, registry,
+      SpeedControllingDesiredCoPCalculator desiredCapturePointToDesiredCoPControlModule = new SpeedControllingDesiredCoPCalculator(processedSensors, referenceFrames, registry,
               dynamicGraphicObjectsListRegistry);
       desiredCapturePointToDesiredCoPControlModule.setParametersForR2InverseDynamics();
+      this.desiredCapturePointToDesiredCoPControlModule = desiredCapturePointToDesiredCoPControlModule;
       desiredCenterOfPressureFilter = new SimpleDesiredCenterOfPressureFilter(bipedSupportPolygons, referenceFrames, controlDT, registry);
       desiredCenterOfPressureFilter.setParametersForR2();
       this.legStrengthCalculator = new TeeterTotterLegStrengthCalculator(registry);
@@ -315,6 +317,10 @@ public class MomentumBasedController implements RobotController
       ReferenceFrame frame = supportLeg == null ? midFeetZUp : referenceFrames.getAnkleZUpFrame(supportLeg);
       FramePoint2d desiredCapturePoint = new FramePoint2d(frame);
       stateMachine.packDesiredICP(desiredCapturePoint);
+      
+      FrameVector2d desiredCapturePointVelocity = new FrameVector2d(frame);
+      stateMachine.packDesiredICPVelocity(desiredCapturePointVelocity);
+      
       FrameVector2d desiredVelocity = new FrameVector2d(frame);
       desiredCapturePoint.changeFrame(frame);
       FramePoint2d capturePoint = capturePointCalculator.getCapturePoint2dInFrame(frame);
@@ -323,12 +329,12 @@ public class MomentumBasedController implements RobotController
       if (supportLeg == null)
       {
          desiredCoP = desiredCapturePointToDesiredCoPControlModule.computeDesiredCoPDoubleSupport(bipedSupportPolygons, capturePoint, desiredVelocity,
-                 desiredCapturePoint);
+                 desiredCapturePoint, desiredCapturePointVelocity);
       }
       else
       {
          desiredCoP = desiredCapturePointToDesiredCoPControlModule.computeDesiredCoPSingleSupport(supportLeg, bipedSupportPolygons,
-                 capturePoint, desiredVelocity, desiredCapturePoint);
+                 capturePoint, desiredVelocity, desiredCapturePoint, desiredCapturePointVelocity);
       }
 
       FramePoint2d filteredDesiredCoP = desiredCenterOfPressureFilter.filter(desiredCoP, supportLeg);

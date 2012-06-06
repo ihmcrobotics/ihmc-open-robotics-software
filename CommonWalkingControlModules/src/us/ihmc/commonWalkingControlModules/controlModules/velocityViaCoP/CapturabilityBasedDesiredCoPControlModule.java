@@ -68,7 +68,7 @@ public class CapturabilityBasedDesiredCoPControlModule implements DesiredCoPCont
                desiredVelocity, singleSupportCondition);
          visualizer.setDesiredCapturePoint(desiredCapturePoint);
          ret = desiredCapturePointToDesiredCoPControlModule.computeDesiredCoPSingleSupport(supportLeg, bipedSupportPolygons, capturePoint, desiredVelocity,
-               desiredCapturePoint);
+               desiredCapturePoint, new FrameVector2d(desiredCapturePoint.getReferenceFrame()));
       }
 
       ret = desiredCenterOfPressureFilter.filter(ret, supportLeg);
@@ -88,7 +88,7 @@ public class CapturabilityBasedDesiredCoPControlModule implements DesiredCoPCont
             desiredVelocity);
       visualizer.setDesiredCapturePoint(desiredCapturePoint);
       ret = desiredCapturePointToDesiredCoPControlModule.computeDesiredCoPDoubleSupport(bipedSupportPolygons, capturePoint, desiredVelocity,
-            desiredCapturePoint);
+            desiredCapturePoint, new FrameVector2d(desiredCapturePoint.getReferenceFrame()));
       ret = desiredCenterOfPressureFilter.filter(ret, null);
       visualizer.setDesiredCoP(ret);
 

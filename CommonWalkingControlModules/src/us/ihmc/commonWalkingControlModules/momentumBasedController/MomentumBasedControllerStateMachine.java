@@ -11,6 +11,7 @@ import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
+import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.Twist;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
@@ -21,6 +22,7 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint2d;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector2d;
 import com.yobotics.simulationconstructionset.util.statemachines.State;
 import com.yobotics.simulationconstructionset.util.statemachines.StateMachine;
 import com.yobotics.simulationconstructionset.util.statemachines.StateTransition;
@@ -50,6 +52,7 @@ public class MomentumBasedControllerStateMachine extends StateMachine
 
 
    private final YoFramePoint2d desiredICP;
+   private final YoFrameVector2d desiredICPVelocity;
    private final EnumYoVariable<RobotSide> supportLeg = EnumYoVariable.create("supportLeg", RobotSide.class, registry);
    private final EnumYoVariable<RobotSide> upcomingSupportLeg = EnumYoVariable.create("upcomingSupportLeg", RobotSide.class, registry);
    private final SideDependentList<YoFramePoint> desiredSwingFootPositions = new SideDependentList<YoFramePoint>();
@@ -75,6 +78,7 @@ public class MomentumBasedControllerStateMachine extends StateMachine
       this.controlDT = controlDT;
 
       desiredICP = new YoFramePoint2d("desiredICP", "", ReferenceFrame.getWorldFrame(), registry);
+      desiredICPVelocity = new YoFrameVector2d("desiredICPVelocity", "", ReferenceFrame.getWorldFrame(), registry);
 
       double stepTime = 1.0;
       double groundClearance = 0.2;
@@ -137,6 +141,11 @@ public class MomentumBasedControllerStateMachine extends StateMachine
    public void packDesiredICP(FramePoint2d desiredICPToPack)
    {
       desiredICP.getFramePoint2d(desiredICPToPack);
+   }
+
+   public void packDesiredICPVelocity(FrameVector2d desiredICPVelocityToPack)
+   {
+      desiredICPVelocity.getFrameVector2d(desiredICPVelocityToPack);
    }
 
    public RobotSide getSupportLeg()

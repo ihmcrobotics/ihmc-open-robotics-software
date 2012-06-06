@@ -64,7 +64,7 @@ public class LungingBasedDesiredCoPControlModule implements DesiredCoPControlMod
                desiredVelocity);
          visualizer.setDesiredCapturePoint(desiredCapturePoint);
          desiredCoP = desiredCapturePointToDesiredCoPControlModule.computeDesiredCoPDoubleSupport(bipedSupportPolygons, capturePoint, desiredVelocity,
-               desiredCapturePoint);
+               desiredCapturePoint, new FrameVector2d(desiredCapturePoint.getReferenceFrame()));
       }
       else
       {
