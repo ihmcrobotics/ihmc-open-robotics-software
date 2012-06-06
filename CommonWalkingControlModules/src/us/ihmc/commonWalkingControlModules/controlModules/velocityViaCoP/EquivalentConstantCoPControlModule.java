@@ -44,7 +44,7 @@ public class EquivalentConstantCoPControlModule implements DesiredCapturePointTo
    
    // using desired capture point
    public FramePoint2d computeDesiredCoPSingleSupport(RobotSide supportLeg, BipedSupportPolygons bipedSupportPolygons, FramePoint2d capturePoint,
-         FrameVector2d desiredVelocity, FramePoint2d desiredCapturePoint)
+         FrameVector2d desiredVelocity, FramePoint2d desiredCapturePoint, FrameVector2d desiredCapturePointVelocity)
    {
       FrameConvexPolygon2d supportPolygon = couplingRegistry.getBipedSupportPolygons().getFootPolygonInAnkleZUp(supportLeg);
       double finalTime = minimumEqConstTimespanSingleSupport.getDoubleValue();
@@ -54,7 +54,7 @@ public class EquivalentConstantCoPControlModule implements DesiredCapturePointTo
 
    // using desired capture point
    public FramePoint2d computeDesiredCoPDoubleSupport(BipedSupportPolygons bipedSupportPolygons, FramePoint2d capturePoint, FrameVector2d desiredVelocity,
-         FramePoint2d desiredCapturePoint)
+         FramePoint2d desiredCapturePoint, FrameVector2d desiredCapturePointVelocity)
    {
       FrameConvexPolygon2d supportPolygon = couplingRegistry.getBipedSupportPolygons().getSupportPolygonInMidFeetZUp();
 

@@ -15,10 +15,11 @@ public interface DesiredCapturePointToDesiredCoPControlModule
     * @param capturePoint
     * @param desiredVelocity
     * @param desiredCapturePoint
+    * @param desiredCapturePointVelocity 
     */
    public abstract FramePoint2d computeDesiredCoPSingleSupport(RobotSide supportLeg, BipedSupportPolygons bipedSupportPolygons, FramePoint2d capturePoint,
-           FrameVector2d desiredVelocity, FramePoint2d desiredCapturePoint);
+           FrameVector2d desiredVelocity, FramePoint2d desiredCapturePoint, FrameVector2d desiredCapturePointVelocity);
 
    public abstract FramePoint2d computeDesiredCoPDoubleSupport(BipedSupportPolygons bipedSupportPolygons, FramePoint2d capturePoint,
-           FrameVector2d desiredVelocity, FramePoint2d desiredCapturePoint);
+           FrameVector2d desiredVelocity, FramePoint2d desiredCapturePoint, FrameVector2d desiredCapturePointVelocity);
 }
