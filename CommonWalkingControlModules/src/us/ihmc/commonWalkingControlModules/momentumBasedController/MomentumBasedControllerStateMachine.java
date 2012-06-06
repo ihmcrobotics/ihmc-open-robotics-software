@@ -6,6 +6,7 @@ import us.ihmc.commonWalkingControlModules.trajectories.CartesianTrajectoryGener
 import us.ihmc.commonWalkingControlModules.trajectories.ParabolicCartesianTrajectoryGenerator;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
+import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -45,6 +46,8 @@ public class MomentumBasedControllerStateMachine extends StateMachine
    private final EnumYoVariable<RobotSide> supportLeg = EnumYoVariable.create("supportLeg", RobotSide.class, registry);
    private final SideDependentList<YoFramePoint> desiredSwingFootPositions = new SideDependentList<YoFramePoint>();
    private final SideDependentList<YoFrameVector> desiredSwingFootVelocities = new SideDependentList<YoFrameVector>();
+   private final FramePoint2d capturePoint;
+   private final SideDependentList<Double> previousLegStrengths = new SideDependentList<Double>();
 
    // TODO: add desired swing foot orientation and angular velocity
 
@@ -74,7 +77,7 @@ public class MomentumBasedControllerStateMachine extends StateMachine
                                               supportAnkleZUpFrame, stepTime, groundClearance, registry));
       }
 
-      supportLeg.set(null);    // TODO: remove
+      this.capturePoint = new FramePoint2d(ReferenceFrame.getWorldFrame());
 
       setUpStateMachine();
       parentRegistry.addChild(registry);
@@ -94,7 +97,7 @@ public class MomentumBasedControllerStateMachine extends StateMachine
       for (RobotSide robotSide : RobotSide.values())
       {
          State transferState = new TransferState(robotSide);
-         StateTransition toSingleSupport = new StateTransition(singleSupportStateEnums.get(robotSide.getOppositeSide()), new DoneWithTransferCondition());
+         StateTransition toSingleSupport = new StateTransition(singleSupportStateEnums.get(robotSide.getOppositeSide()), new DoneWithTransferCondition(robotSide));
          transferState.addStateTransition(toSingleSupport);
          addState(transferState);
 
@@ -141,15 +144,15 @@ public class MomentumBasedControllerStateMachine extends StateMachine
       @Override
       public void doAction()
       {
-         // TODO Auto-generated method stub
-
+         FramePoint2d desiredCapturePoint = bipedSupportPolygons.getSupportPolygonInMidFeetZUp().getCentroidCopy();
+         desiredCapturePoint.changeFrame(desiredICP.getReferenceFrame());
+         desiredICP.set(desiredCapturePoint);
       }
 
       @Override
       public void doTransitionIntoAction()
       {
-         // TODO Auto-generated method stub
-
+         supportLeg.set(null);
       }
 
       @Override
@@ -244,9 +247,19 @@ public class MomentumBasedControllerStateMachine extends StateMachine
 
    public class DoneWithTransferCondition implements StateTransitionCondition
    {
+      private final RobotSide robotSide;
+
+      public DoneWithTransferCondition(RobotSide robotSide)
+      {
+         this.robotSide = robotSide;
+      }
+      
       public boolean checkCondition()
       {
-         return timeInCurrentState() > 2.0;
+         FrameConvexPolygon2d footPolygon = bipedSupportPolygons.getFootPolygonInAnkleZUp(robotSide);
+         boolean capturePointInsideFootPolygon = footPolygon.isPointInside(capturePoint.changeFrameCopy(footPolygon.getReferenceFrame()));
+         boolean legStrengthHighEnough = previousLegStrengths.get(robotSide) > 0.9;
+         return capturePointInsideFootPolygon && legStrengthHighEnough;
       }
    }
 
@@ -257,6 +270,20 @@ public class MomentumBasedControllerStateMachine extends StateMachine
       {
          // TODO Auto-generated method stub
          return false;
+      }
+   }
+
+
+   public void setCapturePoint(FramePoint2d capturePoint)
+   {
+      this.capturePoint.set(capturePoint);
+   }
+
+   public void setPreviousLegStrengths(SideDependentList<Double> legStrengths)
+   {
+      for (RobotSide robotSide : RobotSide.values())
+      {
+         previousLegStrengths.put(robotSide, legStrengths.get(robotSide));         
       }
    }
 }
