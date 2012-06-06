@@ -205,6 +205,9 @@ public class MomentumBasedController implements RobotController
 
    public void doControl()
    {
+      stateMachine.checkTransitionConditionsThoroughly();
+      stateMachine.doAction();
+      
       updateStuff();
       doMomentumBasedControl();
       inverseDynamicsCalculator.compute();
@@ -216,6 +219,7 @@ public class MomentumBasedController implements RobotController
    {
       bipedFeetUpdater.updateBipedFeet(leftFoot, rightFoot, stateMachine.getSupportLeg(), capturePointCalculator.getCapturePointInFrame(midFeetZUp), false);
       bipedSupportPolygons.update(leftFoot, rightFoot);
+      capturePointCalculator.computeCapturePoint(stateMachine.getSupportLeg());
    }
 
    private void doMomentumBasedControl()
@@ -310,8 +314,6 @@ public class MomentumBasedController implements RobotController
       FramePoint2d desiredCapturePoint = bipedSupportPolygons.getSweetSpotCopy(RobotSide.RIGHT);
 
       RobotSide supportLeg = stateMachine.getSupportLeg();
-      capturePointCalculator.computeCapturePoint(supportLeg);
-
       ReferenceFrame frame = supportLeg == null ? midFeetZUp : referenceFrames.getAnkleZUpFrame(supportLeg);
       FrameVector2d desiredVelocity = new FrameVector2d(frame);
       desiredCapturePoint.changeFrame(frame);
