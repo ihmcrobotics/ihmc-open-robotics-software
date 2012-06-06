@@ -47,6 +47,7 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.robotController.RobotController;
 import com.yobotics.simulationconstructionset.util.AxisAngleOrientationController;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint2d;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector2d;
 
@@ -104,7 +105,10 @@ public class MomentumBasedController implements RobotController
    private final DoubleYoVariable kAngularMomentumZ = new DoubleYoVariable("kAngularMomentumZ", registry);
 
    private final YoFrameVector2d desiredDeltaCMP = new YoFrameVector2d("desiredDeltaCMP", "", worldFrame, registry);
+   private final YoFramePoint2d desiredCoP = new YoFramePoint2d("desiredCoP", "", worldFrame, registry);
    private final SideDependentList<HashMap<FramePoint, BooleanYoVariable>> contactMap = SideDependentList.createListOfHashMaps();
+   private final SideDependentList<Double> legStrengths = new SideDependentList<Double>();
+
 
    public MomentumBasedController(ProcessedSensorsInterface processedSensors, ProcessedOutputsInterface processedOutputs,
                                   CommonWalkingReferenceFrames referenceFrames, TwistCalculator twistCalculator, double controlDT,
@@ -205,27 +209,26 @@ public class MomentumBasedController implements RobotController
 
    public void doControl()
    {
+      capturePointCalculator.computeCapturePoint(stateMachine.getSupportLeg());
+      bipedFeetUpdater.updateBipedFeet(leftFoot, rightFoot, stateMachine.getSupportLeg(), capturePointCalculator.getCapturePointInFrame(midFeetZUp), false);
+      bipedSupportPolygons.update(leftFoot, rightFoot);
+
+      stateMachine.setCapturePoint(capturePointCalculator.getCapturePoint2dInFrame(midFeetZUp));
+      stateMachine.setPreviousLegStrengths(legStrengths);
       stateMachine.checkTransitionConditionsThoroughly();
       stateMachine.doAction();
-      
-      updateStuff();
+
       doMomentumBasedControl();
       inverseDynamicsCalculator.compute();
       fullRobotModel.setTorques(processedOutputs);
       updateYoVariables();
    }
 
-   private void updateStuff()
-   {
-      bipedFeetUpdater.updateBipedFeet(leftFoot, rightFoot, stateMachine.getSupportLeg(), capturePointCalculator.getCapturePointInFrame(midFeetZUp), false);
-      bipedSupportPolygons.update(leftFoot, rightFoot);
-      capturePointCalculator.computeCapturePoint(stateMachine.getSupportLeg());
-   }
-
    private void doMomentumBasedControl()
    {
       // TODO: calculate CMP first, need to make sure that CoP is inside BoS, CMP may be outside
       FramePoint2d desiredCoP = determineDesiredCoP();
+      this.desiredCoP.set(desiredCoP.changeFrameCopy(this.desiredCoP.getReferenceFrame()));
       FrameVector2d desiredDeltaCMP = determineDesiredDeltaCMP();
       FramePoint2d desiredCMP = new FramePoint2d(desiredCoP);
       desiredCMP.add(desiredDeltaCMP);
@@ -234,7 +237,6 @@ public class MomentumBasedController implements RobotController
       this.desiredDeltaCMP.set(desiredDeltaCMP);
 
       SideDependentList<FramePoint2d> virtualToePoints = new SideDependentList<FramePoint2d>();
-      SideDependentList<Double> legStrengths = new SideDependentList<Double>();
       RobotSide supportLeg = stateMachine.getSupportLeg();
       ReferenceFrame frame;
       if (supportLeg == null)
