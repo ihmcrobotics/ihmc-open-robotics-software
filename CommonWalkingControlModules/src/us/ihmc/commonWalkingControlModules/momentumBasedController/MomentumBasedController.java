@@ -164,7 +164,7 @@ public class MomentumBasedController implements RobotController
       this.totalMass = TotalMassCalculator.computeSubTreeMass(elevator);
       orientationControlModule.setupParametersForR2();
 
-      stateMachine = new MomentumBasedControllerStateMachine(referenceFrames, processedSensors.getYoTime(), registry);
+      stateMachine = new MomentumBasedControllerStateMachine(referenceFrames, bipedSupportPolygons, processedSensors.getYoTime(), registry);
       optimizer = new MomentumBasedPelvisAccelerationOptimizer(fullRobotModel, twistCalculator, referenceFrames.getCenterOfMassFrame(), registry, controlDT);
 
       this.desiredPelvisLinearAcceleration = new YoFrameVector("desiredPelvisLinearAcceleration", "", referenceFrames.getPelvisFrame(), registry);
@@ -309,12 +309,10 @@ public class MomentumBasedController implements RobotController
 
    private FramePoint2d determineDesiredCoP()
    {
-//    FramePoint2d desiredCapturePoint = new FramePoint2d(midFeetZUp, 0.04, 0.0);
-//    FramePoint2d desiredCapturePoint = bipedSupportPolygons.getSupportPolygonInMidFeetZUp().getCentroidCopy();
-      FramePoint2d desiredCapturePoint = bipedSupportPolygons.getSweetSpotCopy(RobotSide.RIGHT);
-
       RobotSide supportLeg = stateMachine.getSupportLeg();
       ReferenceFrame frame = supportLeg == null ? midFeetZUp : referenceFrames.getAnkleZUpFrame(supportLeg);
+      FramePoint2d desiredCapturePoint = new FramePoint2d(frame);
+      stateMachine.packDesiredICP(desiredCapturePoint);
       FrameVector2d desiredVelocity = new FrameVector2d(frame);
       desiredCapturePoint.changeFrame(frame);
       FramePoint2d capturePoint = capturePointCalculator.getCapturePoint2dInFrame(frame);
