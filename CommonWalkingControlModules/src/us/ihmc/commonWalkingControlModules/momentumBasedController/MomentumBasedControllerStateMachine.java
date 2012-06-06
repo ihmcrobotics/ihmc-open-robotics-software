@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController;
 
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.trajectories.CartesianTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.ParabolicCartesianTrajectoryGenerator;
@@ -23,7 +24,7 @@ import com.yobotics.simulationconstructionset.util.statemachines.StateTransition
 
 public class MomentumBasedControllerStateMachine extends StateMachine
 {
-   private static enum MomentumBasedControllerState {LEFT_SUPPORT, RIGHT_SUPPORT, TRANSFER_TO_LEFT, TRANSFER_TO_RIGHT, DOUBLE_SUPPORT}
+   private static enum MomentumBasedControllerState {LEFT_SUPPORT, RIGHT_SUPPORT, TRANSFER_TO_LEFT_SUPPORT, TRANSFER_TO_RIGHT_SUPPORT, DOUBLE_SUPPORT}
 
    private static final String name = "momentumSM";
    private static final YoVariableRegistry registry = new YoVariableRegistry(name);
@@ -33,9 +34,10 @@ public class MomentumBasedControllerStateMachine extends StateMachine
                             MomentumBasedControllerState.RIGHT_SUPPORT);
 
    private final SideDependentList<MomentumBasedControllerState> transferStateEnums =
-      new SideDependentList<MomentumBasedControllerStateMachine.MomentumBasedControllerState>(MomentumBasedControllerState.TRANSFER_TO_LEFT,
-                            MomentumBasedControllerState.TRANSFER_TO_RIGHT);
+      new SideDependentList<MomentumBasedControllerStateMachine.MomentumBasedControllerState>(MomentumBasedControllerState.TRANSFER_TO_LEFT_SUPPORT,
+                            MomentumBasedControllerState.TRANSFER_TO_RIGHT_SUPPORT);
 
+   private final BipedSupportPolygons bipedSupportPolygons;
    private final SideDependentList<CartesianTrajectoryGenerator> cartesianTrajectoryGenerators = new SideDependentList<CartesianTrajectoryGenerator>();
 
 
@@ -43,11 +45,14 @@ public class MomentumBasedControllerStateMachine extends StateMachine
    private final EnumYoVariable<RobotSide> supportLeg = EnumYoVariable.create("supportLeg", RobotSide.class, registry);
    private final SideDependentList<YoFramePoint> desiredSwingFootPositions = new SideDependentList<YoFramePoint>();
    private final SideDependentList<YoFrameVector> desiredSwingFootVelocities = new SideDependentList<YoFrameVector>();
+
    // TODO: add desired swing foot orientation and angular velocity
 
-   public MomentumBasedControllerStateMachine(CommonWalkingReferenceFrames referenceFrames, DoubleYoVariable t, YoVariableRegistry parentRegistry)
+   public MomentumBasedControllerStateMachine(CommonWalkingReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons, DoubleYoVariable t,
+           YoVariableRegistry parentRegistry)
    {
-      super(name, name + "SwitchTime", MomentumBasedControllerState.class, t, registry);
+      super(name + "State", name + "SwitchTime", MomentumBasedControllerState.class, t, registry);
+      this.bipedSupportPolygons = bipedSupportPolygons;
       desiredICP = new YoFramePoint2d("desiredICP", "", referenceFrames.getMidFeetZUpFrame(), registry);
 
       double stepTime = 1.0;
@@ -67,8 +72,6 @@ public class MomentumBasedControllerStateMachine extends StateMachine
          cartesianTrajectoryGenerators.put(robotSide,
                                            new ParabolicCartesianTrajectoryGenerator(robotSide.getCamelCaseNameForStartOfExpression() + "CartesianTrajectory",
                                               supportAnkleZUpFrame, stepTime, groundClearance, registry));
-
-         desiredSwingFootPosition.set(0.0, robotSide.negateIfRightSide(0.38), 0.03);    // TODO: remove
       }
 
       supportLeg.set(null);    // TODO: remove
@@ -91,7 +94,7 @@ public class MomentumBasedControllerStateMachine extends StateMachine
       for (RobotSide robotSide : RobotSide.values())
       {
          State transferState = new TransferState(robotSide);
-         StateTransition toSingleSupport = new StateTransition(singleSupportStateEnums.get(robotSide), new DoneWithTransferCondition());
+         StateTransition toSingleSupport = new StateTransition(singleSupportStateEnums.get(robotSide.getOppositeSide()), new DoneWithTransferCondition());
          transferState.addStateTransition(toSingleSupport);
          addState(transferState);
 
@@ -100,6 +103,8 @@ public class MomentumBasedControllerStateMachine extends StateMachine
          singleSupportState.addStateTransition(toDoubleSupport);
          addState(singleSupportState);
       }
+
+      setCurrentState(doubleSupportState.getStateEnum());
    }
 
    public void packDesiredICP(FramePoint2d desiredICPToPack)
@@ -158,26 +163,24 @@ public class MomentumBasedControllerStateMachine extends StateMachine
 
    private class SingleSupportState extends State
    {
-      private final RobotSide robotSide;
+      private final RobotSide swingSide;
 
       public SingleSupportState(RobotSide robotSide)
       {
          super(singleSupportStateEnums.get(robotSide));
-         this.robotSide = robotSide;
+         this.swingSide = robotSide;
       }
 
       @Override
       public void doAction()
       {
-         // TODO Auto-generated method stub
-
+         desiredSwingFootPositions.get(swingSide).set(0.0, swingSide.negateIfRightSide(0.38), 0.03);
       }
 
       @Override
       public void doTransitionIntoAction()
       {
-         // TODO Auto-generated method stub
-
+         supportLeg.set(swingSide.getOppositeSide());
       }
 
       @Override
@@ -202,8 +205,9 @@ public class MomentumBasedControllerStateMachine extends StateMachine
       @Override
       public void doAction()
       {
-         // TODO Auto-generated method stub
-
+         FramePoint2d desiredCapturePoint = bipedSupportPolygons.getSweetSpotCopy(robotSide);
+         desiredCapturePoint.changeFrame(desiredICP.getReferenceFrame());
+         desiredICP.set(desiredCapturePoint);
       }
 
       @Override
@@ -233,8 +237,7 @@ public class MomentumBasedControllerStateMachine extends StateMachine
 
       public boolean checkCondition()
       {
-         // TODO Auto-generated method stub
-         return false;
+         return robotSide == RobotSide.LEFT && timeInCurrentState() > 1.0; // FIXME
       }
    }
 
@@ -243,8 +246,7 @@ public class MomentumBasedControllerStateMachine extends StateMachine
    {
       public boolean checkCondition()
       {
-         // TODO Auto-generated method stub
-         return false;
+         return timeInCurrentState() > 2.0;
       }
    }
 
