@@ -18,6 +18,8 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint2d;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 import com.yobotics.simulationconstructionset.util.statemachines.State;
 import com.yobotics.simulationconstructionset.util.statemachines.StateMachine;
+import com.yobotics.simulationconstructionset.util.statemachines.StateTransition;
+import com.yobotics.simulationconstructionset.util.statemachines.StateTransitionCondition;
 
 public class MomentumBasedControllerStateMachine extends StateMachine
 {
@@ -41,6 +43,7 @@ public class MomentumBasedControllerStateMachine extends StateMachine
    private final EnumYoVariable<RobotSide> supportLeg = EnumYoVariable.create("supportLeg", RobotSide.class, registry);
    private final SideDependentList<YoFramePoint> desiredSwingFootPositions = new SideDependentList<YoFramePoint>();
    private final SideDependentList<YoFrameVector> desiredSwingFootVelocities = new SideDependentList<YoFrameVector>();
+   // TODO: add desired swing foot orientation and angular velocity
 
    public MomentumBasedControllerStateMachine(CommonWalkingReferenceFrames referenceFrames, DoubleYoVariable t, YoVariableRegistry parentRegistry)
    {
@@ -76,6 +79,27 @@ public class MomentumBasedControllerStateMachine extends StateMachine
 
    private void setUpStateMachine()
    {
+      State doubleSupportState = new DoubleSupportState();
+      for (RobotSide robotSide : RobotSide.values())
+      {
+         StateTransition toTransfer = new StateTransition(transferStateEnums.get(robotSide), new DoneWithDoubleSupportCondition(robotSide));
+         doubleSupportState.addStateTransition(toTransfer);
+      }
+
+      addState(doubleSupportState);
+
+      for (RobotSide robotSide : RobotSide.values())
+      {
+         State transferState = new TransferState(robotSide);
+         StateTransition toSingleSupport = new StateTransition(singleSupportStateEnums.get(robotSide), new DoneWithTransferCondition());
+         transferState.addStateTransition(toSingleSupport);
+         addState(transferState);
+
+         State singleSupportState = new SingleSupportState(robotSide);
+         StateTransition toDoubleSupport = new StateTransition(MomentumBasedControllerState.DOUBLE_SUPPORT, new DoneWithSingleSupportCondition());
+         singleSupportState.addStateTransition(toDoubleSupport);
+         addState(singleSupportState);
+      }
    }
 
    public void packDesiredICP(FramePoint2d desiredICPToPack)
@@ -194,6 +218,43 @@ public class MomentumBasedControllerStateMachine extends StateMachine
       {
          // TODO Auto-generated method stub
 
+      }
+   }
+
+
+   public class DoneWithDoubleSupportCondition implements StateTransitionCondition
+   {
+      private final RobotSide robotSide;
+
+      public DoneWithDoubleSupportCondition(RobotSide robotSide)
+      {
+         this.robotSide = robotSide;
+      }
+
+      public boolean checkCondition()
+      {
+         // TODO Auto-generated method stub
+         return false;
+      }
+   }
+
+
+   public class DoneWithTransferCondition implements StateTransitionCondition
+   {
+      public boolean checkCondition()
+      {
+         // TODO Auto-generated method stub
+         return false;
+      }
+   }
+
+
+   public class DoneWithSingleSupportCondition implements StateTransitionCondition
+   {
+      public boolean checkCondition()
+      {
+         // TODO Auto-generated method stub
+         return false;
       }
    }
 }
