@@ -1,7 +1,5 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController;
 
-import java.util.HashMap;
-
 import javax.media.j3d.Transform3D;
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;
@@ -41,7 +39,6 @@ import us.ihmc.utilities.screwTheory.Twist;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 import us.ihmc.utilities.screwTheory.Wrench;
 
-import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.robotController.RobotController;
@@ -105,7 +102,6 @@ public class MomentumBasedController implements RobotController
    // TODO: move to separate class that takes care of determining desired GRFs 
    private final YoFrameVector2d desiredDeltaCMP = new YoFrameVector2d("desiredDeltaCMP", "", worldFrame, registry);
    private final YoFramePoint2d desiredCoP = new YoFramePoint2d("desiredCoP", "", worldFrame, registry);
-   private final SideDependentList<HashMap<FramePoint, BooleanYoVariable>> contactMap = SideDependentList.createListOfHashMaps();
    private final SideDependentList<Double> legStrengths = new SideDependentList<Double>();
 
 
@@ -129,8 +125,8 @@ public class MomentumBasedController implements RobotController
          ReferenceFrame footFrame = referenceFrames.getFootFrame(robotSide);
          AxisAngleOrientationController footOrientationController = new AxisAngleOrientationController(robotSide.getCamelCaseNameForStartOfExpression()
                                                                        + "Foot", footFrame, registry);
-         footOrientationController.setProportionalGains(100.0, 100.0, 100.0);
-         footOrientationController.setDerivativeGains(20.0, 20.0, 20.0);
+         footOrientationController.setProportionalGains(500.0, 500.0, 500.0);
+         footOrientationController.setDerivativeGains(80.0, 80.0, 80.0);
          footOrientationControllers.put(robotSide, footOrientationController);
          desiredFootAccelerationsInWorld.put(robotSide, new SpatialAccelerationVector(footFrame, elevatorFrame, footFrame));
       }
