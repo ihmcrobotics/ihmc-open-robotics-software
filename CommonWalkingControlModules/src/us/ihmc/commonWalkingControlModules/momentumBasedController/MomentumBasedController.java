@@ -140,8 +140,8 @@ public class MomentumBasedController implements RobotController
       midFeetZUp = referenceFrames.getMidFeetZUpFrame();
       this.bipedSupportPolygons = new BipedSupportPolygons(ankleZUpFrames, midFeetZUp, registry, dynamicGraphicObjectsListRegistry);
 
-      double preventRotationFactorLength = 0.9;    // 0.8;    // 0.9; // 1.0;
-      double preventRotationFactorWidth = 0.8;    // 0.7;    // 0.9;
+      double preventRotationFactorLength = 1.0;    // 0.8;    // 0.9; // 1.0;
+      double preventRotationFactorWidth = 1.0;    // 0.7;    // 0.9;
 
 
       rightFoot = ResizableBipedFoot.createRectangularRightFoot(preventRotationFactorLength, preventRotationFactorWidth, footForward, footBack, footWidth,
@@ -423,7 +423,8 @@ public class MomentumBasedController implements RobotController
             FrameVector angularAcceleration = new FrameVector(footFrame);
             Orientation desiredOrientation = new Orientation(supportAnkleZUpFrame, 0.0, 0.0, 0.0);
             FrameVector desiredAngularVelocity = new FrameVector(footFrame);    // TODO
-            FrameVector currentAngularVelocity = new FrameVector(footFrame);    // TODO
+            FrameVector currentAngularVelocity = new FrameVector(twistOfFootWithRespectToElevator.getExpressedInFrame(), twistOfFootWithRespectToElevator.getAngularPartCopy());
+            currentAngularVelocity.changeFrame(footFrame);
             footOrientationControllers.get(robotSide).compute(angularAcceleration, desiredOrientation, desiredAngularVelocity, currentAngularVelocity);
 
             desiredFootAccelerationsInWorld.get(robotSide).setToZero(footFrame, elevatorFrame, footFrame);
