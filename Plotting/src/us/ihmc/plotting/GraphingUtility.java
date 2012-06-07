@@ -57,7 +57,7 @@ public class GraphingUtility
       final NumberAxis rangeAxis = (NumberAxis) plot.getRangeAxis();
       rangeAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
 
-      ((NumberAxis) plot.getDomainAxis()).setAutoRange(false);
+//      plot.getRangeAxis().setRange(90.0, 100.0);
 
       ChartPanel chartPanel = new ChartPanel(chart);
       chartPanel.setPreferredSize(new java.awt.Dimension(800, 600));
