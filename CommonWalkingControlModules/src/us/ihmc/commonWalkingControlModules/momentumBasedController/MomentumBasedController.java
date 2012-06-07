@@ -17,6 +17,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.CenterOfMassHeightCont
 import us.ihmc.commonWalkingControlModules.controlModules.NewGeometricVirtualToePointCalculator;
 import us.ihmc.commonWalkingControlModules.controlModules.TeeterTotterLegStrengthCalculator;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvisOrientation.AxisAnglePelvisOrientationControlModule;
+import us.ihmc.commonWalkingControlModules.controlModules.velocityViaCoP.CapturabilityBasedDesiredCoPVisualizer;
 import us.ihmc.commonWalkingControlModules.controlModules.velocityViaCoP.SimpleDesiredCenterOfPressureFilter;
 import us.ihmc.commonWalkingControlModules.controlModules.velocityViaCoP.SpeedControllingDesiredCoPCalculator;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
@@ -104,6 +105,9 @@ public class MomentumBasedController implements RobotController
    private final YoFrameVector2d desiredDeltaCMP = new YoFrameVector2d("desiredDeltaCMP", "", worldFrame, registry);
    private final YoFramePoint2d desiredCoP = new YoFramePoint2d("desiredCoP", "", worldFrame, registry);
    private final SideDependentList<Double> legStrengths = new SideDependentList<Double>();
+   
+   private final CapturabilityBasedDesiredCoPVisualizer visualizer;
+
 
 
    public MomentumBasedController(ProcessedSensorsInterface processedSensors, ProcessedOutputsInterface processedOutputs,
@@ -116,6 +120,7 @@ public class MomentumBasedController implements RobotController
       this.referenceFrames = referenceFrames;
       this.twistCalculator = twistCalculator;
       this.processedOutputs = processedOutputs;
+      this.visualizer = new CapturabilityBasedDesiredCoPVisualizer(registry, dynamicGraphicObjectsListRegistry);
 
       RigidBody elevator = fullRobotModel.getElevator();
       this.inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, -processedSensors.getGravityInWorldFrame().getZ());
@@ -147,8 +152,10 @@ public class MomentumBasedController implements RobotController
               footHeight, referenceFrames, processedSensors.getYoTime(), registry, dynamicGraphicObjectsListRegistry);
       leftFoot = rightFoot.createLeftFootAsMirrorImage(referenceFrames, processedSensors.getYoTime(), registry, dynamicGraphicObjectsListRegistry);
       bipedFeetUpdater = new GoOnToesDuringDoubleSupportBipedFeetUpdater(referenceFrames, footForward, footBack, registry, dynamicGraphicObjectsListRegistry);
-
       this.capturePointCalculator = new CommonCapturePointCalculator(processedSensors, referenceFrames, registry, dynamicGraphicObjectsListRegistry);
+      bipedFeetUpdater.updateBipedFeet(leftFoot, rightFoot, null, capturePointCalculator.getCapturePointInFrame(midFeetZUp), false);
+      bipedSupportPolygons.update(leftFoot, rightFoot);
+
       this.virtualToePointCalculator = new NewGeometricVirtualToePointCalculator(referenceFrames, registry, dynamicGraphicObjectsListRegistry);
 //      this.virtualToePointCalculator = new GeometricVirtualToePointCalculator(referenceFrames, registry, dynamicGraphicObjectsListRegistry);
 
@@ -185,7 +192,6 @@ public class MomentumBasedController implements RobotController
    public void initialize()
    {
       optimizer.initialize();
-
       doControl();
    }
 
@@ -209,12 +215,23 @@ public class MomentumBasedController implements RobotController
       capturePointCalculator.computeCapturePoint(stateMachine.getSupportLeg());
       bipedFeetUpdater.updateBipedFeet(leftFoot, rightFoot, stateMachine.getSupportLeg(), capturePointCalculator.getCapturePointInFrame(midFeetZUp), false);
       bipedSupportPolygons.update(leftFoot, rightFoot);
+      
+      ReferenceFrame frame;
+      if (stateMachine.getSupportLeg() == null)
+         frame = referenceFrames.getMidFeetZUpFrame();
+      else
+         frame = referenceFrames.getAnkleZUpFrame(stateMachine.getSupportLeg());
+
+      double gravity = -processedSensors.getGravityInWorldFrame().getZ();
+      double comHeight = processedSensors.getCenterOfMassPositionInFrame(frame).getZ();
 
       stateMachine.setCapturePoint(capturePointCalculator.getCapturePoint2dInFrame(midFeetZUp));
       stateMachine.setPreviousLegStrengths(legStrengths);
+      stateMachine.setGravity(gravity);
+      stateMachine.setCoMHeight(comHeight);
       stateMachine.checkTransitionConditionsThoroughly();
       stateMachine.doAction();
-
+      
       // FIXME: sucks having to do this twice
       capturePointCalculator.computeCapturePoint(stateMachine.getSupportLeg());
       bipedFeetUpdater.updateBipedFeet(leftFoot, rightFoot, stateMachine.getSupportLeg(), capturePointCalculator.getCapturePointInFrame(midFeetZUp), false);
@@ -339,6 +356,9 @@ public class MomentumBasedController implements RobotController
 
       FramePoint2d filteredDesiredCoP = desiredCenterOfPressureFilter.filter(desiredCoP, supportLeg);
 
+      visualizer.setDesiredCapturePoint(desiredCapturePoint);
+      visualizer.setDesiredCoP(filteredDesiredCoP);
+      
       return filteredDesiredCoP;
    }
 
