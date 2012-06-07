@@ -320,6 +320,7 @@ public class SpeedControllingDesiredCoPCalculator implements DesiredCapturePoint
 
    private FramePoint2d doProportionalControl(FramePoint2d capturePoint, FramePoint2d desiredCapturePoint, FrameVector2d desiredCapturePointVelocity, double captureKp)
    {
+      desiredCapturePointVelocity.changeFrame(desiredCapturePoint.getReferenceFrame());
       FramePoint2d desiredCenterOfPressure = new FramePoint2d(capturePoint);
       
       // feed forward part
