@@ -15,6 +15,9 @@ public class MaximumICPVelocityCalculator
       FrameLine2d lineOfICPMotion = new FrameLine2d(icp, direction);
       FramePoint2d[] intersections = supportPolygon.intersectionWith(lineOfICPMotion);
       
+      if (intersections == null)
+         return 0.0;
+      
       FramePoint2d intersectionToUse = null;
       double minParameterAlongLine = Double.POSITIVE_INFINITY;
       for (FramePoint2d intersection : intersections)
