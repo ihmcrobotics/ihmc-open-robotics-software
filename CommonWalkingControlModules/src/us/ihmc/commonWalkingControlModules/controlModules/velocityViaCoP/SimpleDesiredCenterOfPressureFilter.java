@@ -2,7 +2,6 @@ package us.ihmc.commonWalkingControlModules.controlModules.velocityViaCoP;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.DesiredCenterOfPressureFilter;
-import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
@@ -124,7 +123,8 @@ public class SimpleDesiredCenterOfPressureFilter implements DesiredCenterOfPress
    {
       desiredCenterOfPressure.changeFrame(filteredDesiredCoP.getReferenceFrame());
       filteredDesiredCoP.update(desiredCenterOfPressure);
-      filteredDesiredCoP.getFramePoint2d(returnedFilteredDesiredCoP);
+      filteredDesiredCoP.getFramePoint2dAndChangeFrame(returnedFilteredDesiredCoP);
+      returnedFilteredDesiredCoP.changeFrame(supportPolygon.getReferenceFrame());
       supportPolygon.orthogonalProjection(returnedFilteredDesiredCoP);
 
       return returnedFilteredDesiredCoP;
