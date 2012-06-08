@@ -3,6 +3,11 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.calculators.EquivalentConstantCoPCalculator;
 import us.ihmc.commonWalkingControlModules.calculators.MaximumICPVelocityCalculator;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculator;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.SimpleDesiredFootstepCalculator;
+import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredHeadingControlModule;
+import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.SimpleDesiredHeadingControlModule;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.trajectories.CartesianTrajectoryGenerator;
@@ -54,6 +59,8 @@ public class MomentumBasedControllerStateMachine extends StateMachine
    private final BipedSupportPolygons bipedSupportPolygons;
    private final SideDependentList<CartesianTrajectoryGenerator> cartesianTrajectoryGenerators = new SideDependentList<CartesianTrajectoryGenerator>();
    private final double controlDT;
+   private final DesiredHeadingControlModule desiredHeadingControlModule;
+   private final DesiredFootstepCalculator desiredFootstepCalculator;
 
 
    private final YoFramePoint2d desiredICP;
@@ -68,11 +75,9 @@ public class MomentumBasedControllerStateMachine extends StateMachine
 
    private final FramePoint2d capturePoint;
    private final SideDependentList<Double> previousLegStrengths = new SideDependentList<Double>();
-   private final DoubleYoVariable stepLength = new DoubleYoVariable("stepLength", registry);
-   private final DoubleYoVariable stepWidth = new DoubleYoVariable("stepWidth", registry);
    private final double doubleSupportTime = 0.5;
    private final double stepTime = 1.0;
-   
+
    private final DoubleYoVariable singleSupportICPGlideScaleFactor = new DoubleYoVariable("singleSupportICPGlideScaleFactor", registry);
 
    private double comHeight;
@@ -90,14 +95,17 @@ public class MomentumBasedControllerStateMachine extends StateMachine
       this.twistCalculator = twistCalculator;
       this.bipedSupportPolygons = bipedSupportPolygons;
       this.controlDT = controlDT;
+      this.desiredHeadingControlModule = new SimpleDesiredHeadingControlModule(0.0, controlDT, registry);
+      SimpleDesiredFootstepCalculator simpleDesiredFootstepCalculator = new SimpleDesiredFootstepCalculator(referenceFrames.getAnkleZUpReferenceFrames(),
+                                                                           desiredHeadingControlModule, parentRegistry);    // TODO: pass in
+      simpleDesiredFootstepCalculator.setupParametersForR2InverseDynamics();
+      this.desiredFootstepCalculator = simpleDesiredFootstepCalculator;
 
       desiredICP = new YoFramePoint2d("desiredICP", "", ReferenceFrame.getWorldFrame(), registry);
       desiredICPVelocity = new YoFrameVector2d("desiredICPVelocity", "", ReferenceFrame.getWorldFrame(), registry);
 
       double groundClearance = 0.2;
       desiredCoMHeight.set(1.2);
-      stepLength.set(0.3);
-      stepWidth.set(0.25);
       singleSupportICPGlideScaleFactor.set(1.0);
       FramePoint2d finalDesiredICPForDoubleSupportStance = getFinalDesiredICPForDoubleSupportStance();
       finalDesiredICPForDoubleSupportStance.changeFrame(desiredICP.getReferenceFrame());
@@ -210,10 +218,10 @@ public class MomentumBasedControllerStateMachine extends StateMachine
 
       public DoubleSupportState(RobotSide transferToSide)
       {
-         super(transferToSide == null ? MomentumBasedControllerState.DOUBLE_SUPPORT : transferStateEnums.get(transferToSide));
+         super((transferToSide == null) ? MomentumBasedControllerState.DOUBLE_SUPPORT : transferStateEnums.get(transferToSide));
          this.transferToSide = transferToSide;
-         String prefix = transferToSide == null ? "doubleSupport" : transferToSide.getCamelCaseNameForStartOfExpression() + "Transfer";
-         ReferenceFrame referenceFrame = transferToSide == null ? referenceFrames.getMidFeetZUpFrame() : referenceFrames.getAnkleZUpFrame(transferToSide);
+         String prefix = (transferToSide == null) ? "doubleSupport" : transferToSide.getCamelCaseNameForStartOfExpression() + "Transfer";
+         ReferenceFrame referenceFrame = (transferToSide == null) ? referenceFrames.getMidFeetZUpFrame() : referenceFrames.getAnkleZUpFrame(transferToSide);
          initialDesiredICP = new YoFramePoint2d(prefix + "InitialDesiredICP", "", referenceFrame, registry);
       }
 
@@ -221,7 +229,7 @@ public class MomentumBasedControllerStateMachine extends StateMachine
       public void doAction()
       {
          FramePoint2d finalDesiredICP;
-         
+
          if (transferToSide == null)
             finalDesiredICP = getFinalDesiredICPForDoubleSupportStance();
          else
@@ -233,6 +241,7 @@ public class MomentumBasedControllerStateMachine extends StateMachine
 
          double epsilon = desiredICPVelocityMagnitude * controlDT;
          finalDesiredICP.changeFrame(desiredICP.getReferenceFrame());
+
          if (desiredICP.distance(finalDesiredICP) > epsilon)
             linearlyMoveDesiredICP(desiredICPVelocityMagnitude, finalDesiredICP);
          else
@@ -287,8 +296,10 @@ public class MomentumBasedControllerStateMachine extends StateMachine
          this.velocityToPack = new FrameVector(supportAnkleZUpFrame);
          this.accelerationToPack = new FrameVector(supportAnkleZUpFrame);
 
-         initialDesiredICP = new YoFramePoint2d(robotSide.getCamelCaseNameForStartOfExpression() + "SwingInitialDesiredICP", "", referenceFrames.getAnkleZUpFrame(robotSide), registry);
-         finalDesiredICP = new YoFramePoint2d(robotSide.getCamelCaseNameForStartOfExpression() + "SwingFinalDesiredICP", "", referenceFrames.getAnkleZUpFrame(robotSide), registry);
+         initialDesiredICP = new YoFramePoint2d(robotSide.getCamelCaseNameForStartOfExpression() + "SwingInitialDesiredICP", "",
+                 referenceFrames.getAnkleZUpFrame(robotSide), registry);
+         finalDesiredICP = new YoFramePoint2d(robotSide.getCamelCaseNameForStartOfExpression() + "SwingFinalDesiredICP", "",
+                 referenceFrames.getAnkleZUpFrame(robotSide), registry);
       }
 
       @Override
@@ -302,7 +313,7 @@ public class MomentumBasedControllerStateMachine extends StateMachine
             desiredSwingFootVelocities.get(swingSide).set(velocityToPack);
             desiredSwingFootAccelerations.get(swingSide).set(accelerationToPack);
          }
-         
+
          double omega0 = Math.sqrt(gravity / comHeight);
 
          double expT = Math.exp(omega0 * timeInCurrentState());
@@ -312,7 +323,7 @@ public class MomentumBasedControllerStateMachine extends StateMachine
 
          FrameVector2d initialToFinal = new FrameVector2d(finalDesiredICP.getFramePoint2dCopy());
          initialToFinal.sub(initialDesiredICP.getFramePoint2dCopy());
-         
+
          FrameVector2d offset = new FrameVector2d(initialToFinal);
          offset.scale(parameter);
          FramePoint2d desiredICPLocal = initialDesiredICP.getFramePoint2dCopy();
@@ -341,9 +352,9 @@ public class MomentumBasedControllerStateMachine extends StateMachine
          footTwist.packLinearPart(initialVelocity);
          initialVelocity.changeFrame(supportAnkleZUpFrame);
 
-         FramePoint finalDesiredStepLocation = new FramePoint(supportAnkleZUpFrame);
-         finalDesiredStepLocation.setX(finalDesiredStepLocation.getX() + stepLength.getDoubleValue());
-         finalDesiredStepLocation.setY(swingSide.negateIfRightSide(stepWidth.getDoubleValue()));
+         desiredFootstepCalculator.initializeDesiredFootstep(swingSide.getOppositeSide());
+         Footstep desiredFootstep = desiredFootstepCalculator.updateAndGetDesiredFootstep(swingSide.getOppositeSide());
+         FramePoint finalDesiredStepLocation = desiredFootstep.getFootstepPositionInFrame(supportAnkleZUpFrame);
 
          cartesianTrajectoryGenerators.get(swingSide).initialize(initialPosition, initialVelocity, finalDesiredStepLocation);
 
@@ -351,11 +362,11 @@ public class MomentumBasedControllerStateMachine extends StateMachine
          FramePoint2d desiredICPLocal = desiredICP.getFramePoint2dCopy();
          desiredICPLocal.changeFrame(finalDesiredStepLocation.getReferenceFrame());
          initialDesiredICP.set(desiredICPLocal);
-         
+
          FramePoint2d finalDesiredStepLocation2d = finalDesiredStepLocation.toFramePoint2d();
          finalDesiredStepLocation2d.changeFrame(supportAnkleZUpFrame);
          FrameVector2d stepOffset = new FrameVector2d(finalDesiredStepLocation2d);
-         FrameVector2d finalDesiredICPOffset = new FrameVector2d(getFinalDesiredICPForWalking(swingSide)); // TODO: do something about expected orientation of swing foot
+         FrameVector2d finalDesiredICPOffset = new FrameVector2d(getFinalDesiredICPForWalking(swingSide));    // TODO: do something about expected orientation of swing foot
          finalDesiredICPOffset.changeFrame(supportAnkleZUpFrame);
          finalDesiredICPOffset.add(stepOffset);
          finalDesiredICPOffset.sub(desiredICPLocal);
@@ -370,9 +381,11 @@ public class MomentumBasedControllerStateMachine extends StateMachine
          if (!desiredICPLocal.epsilonEquals(finalDesiredICP, 0.0))
          {
             FrameLine2d line = new FrameLine2d(desiredICPLocal, finalDesiredICP);
-            GeometryTools.movePointInsidePolygonAlongLine(equivalentConstantCoP, bipedSupportPolygons.getFootPolygonInAnkleZUp(supportLeg.getEnumValue()), line);
-            finalDesiredICP = EquivalentConstantCoPCalculator.computePredictedICP(desiredICPLocal, equivalentConstantCoP, stepTime, comHeight, gravity);            
+            GeometryTools.movePointInsidePolygonAlongLine(equivalentConstantCoP, bipedSupportPolygons.getFootPolygonInAnkleZUp(supportLeg.getEnumValue()),
+                    line);
+            finalDesiredICP = EquivalentConstantCoPCalculator.computePredictedICP(desiredICPLocal, equivalentConstantCoP, stepTime, comHeight, gravity);
          }
+
          this.finalDesiredICP.set(finalDesiredICP);
       }
 
@@ -475,12 +488,12 @@ public class MomentumBasedControllerStateMachine extends StateMachine
       desiredICPDisplacement.scale(controlDT);
       desiredICP.add(desiredICPDisplacement);
    }
-   
+
    private FramePoint2d getFinalDesiredICPForDoubleSupportStance()
    {
       return bipedSupportPolygons.getSupportPolygonInMidFeetZUp().getCentroidCopy();
    }
-   
+
    private FramePoint2d getFinalDesiredICPForWalking(RobotSide supportSide)
    {
       return bipedSupportPolygons.getSweetSpotCopy(supportSide);
