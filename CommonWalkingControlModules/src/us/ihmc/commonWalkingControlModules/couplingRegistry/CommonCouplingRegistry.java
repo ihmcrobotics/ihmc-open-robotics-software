@@ -241,6 +241,7 @@ public class CommonCouplingRegistry implements CouplingRegistry
 
    public void setDesiredCoP(FramePoint2d desiredCoP)
    {
+      desiredCoP.changeFrame(this.desiredCoP.getReferenceFrame());
       this.desiredCoP.set(desiredCoP);
    }
 
