@@ -143,9 +143,8 @@ public class MomentumBasedController implements RobotController
       midFeetZUp = referenceFrames.getMidFeetZUpFrame();
       this.bipedSupportPolygons = new BipedSupportPolygons(ankleZUpFrames, midFeetZUp, registry, dynamicGraphicObjectsListRegistry);
 
-      // TODO: make these 1.0
-      double preventRotationFactorLength = 0.8;    // 0.9; // 1.0;
-      double preventRotationFactorWidth = 0.7;    // 0.9;
+      double preventRotationFactorLength = 1.0;    // 0.9; // 1.0;
+      double preventRotationFactorWidth = 1.0;    // 0.9;
 
 
       rightFoot = ResizableBipedFoot.createRectangularRightFoot(preventRotationFactorLength, preventRotationFactorWidth, footForward, footBack, footWidth,
