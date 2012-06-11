@@ -76,7 +76,8 @@ public class MomentumBasedControllerStateMachine extends StateMachine
    private final FramePoint2d capturePoint;
    private final SideDependentList<Double> previousLegStrengths = new SideDependentList<Double>();
    private final double doubleSupportTime = 0.5;
-   private final double stepTime = 1.0;
+   private final double initialStepTime = 1.0;
+   private final double initialGroundClearance = 0.2;
 
    private final DoubleYoVariable singleSupportICPGlideScaleFactor = new DoubleYoVariable("singleSupportICPGlideScaleFactor", registry);
 
@@ -104,7 +105,6 @@ public class MomentumBasedControllerStateMachine extends StateMachine
       desiredICP = new YoFramePoint2d("desiredICP", "", ReferenceFrame.getWorldFrame(), registry);
       desiredICPVelocity = new YoFrameVector2d("desiredICPVelocity", "", ReferenceFrame.getWorldFrame(), registry);
 
-      double groundClearance = 0.2;
       desiredCoMHeight.set(1.2);
       singleSupportICPGlideScaleFactor.set(1.0);
       FramePoint2d finalDesiredICPForDoubleSupportStance = getFinalDesiredICPForDoubleSupportStance();
@@ -128,7 +128,7 @@ public class MomentumBasedControllerStateMachine extends StateMachine
 
          cartesianTrajectoryGenerators.put(robotSide,
                                            new ParabolicCartesianTrajectoryGenerator(robotSide.getCamelCaseNameForStartOfExpression() + "CartesianTrajectory",
-                                              supportAnkleZUpFrame, stepTime, groundClearance, registry));
+                                              supportAnkleZUpFrame, initialStepTime, initialGroundClearance, registry));
       }
 
       this.capturePoint = new FramePoint2d(ReferenceFrame.getWorldFrame());
@@ -317,7 +317,7 @@ public class MomentumBasedControllerStateMachine extends StateMachine
          double omega0 = Math.sqrt(gravity / comHeight);
 
          double expT = Math.exp(omega0 * timeInCurrentState());
-         double expTf = Math.exp(omega0 * stepTime);
+         double expTf = Math.exp(omega0 * initialStepTime);
          double parameter = (expT - 1.0) / (expTf - 1.0);
          double parameterd = omega0 * expT / (expTf - 1.0);
 
@@ -376,14 +376,14 @@ public class MomentumBasedControllerStateMachine extends StateMachine
          finalDesiredICP.add(finalDesiredICPOffset);
 
          // make sure it is feasible:
-         FramePoint2d equivalentConstantCoP = EquivalentConstantCoPCalculator.computeEquivalentConstantCoP(desiredICPLocal, finalDesiredICP, stepTime,
+         FramePoint2d equivalentConstantCoP = EquivalentConstantCoPCalculator.computeEquivalentConstantCoP(desiredICPLocal, finalDesiredICP, initialStepTime,
                                                  comHeight, gravity);
          if (!desiredICPLocal.epsilonEquals(finalDesiredICP, 0.0))
          {
             FrameLine2d line = new FrameLine2d(desiredICPLocal, finalDesiredICP);
             GeometryTools.movePointInsidePolygonAlongLine(equivalentConstantCoP, bipedSupportPolygons.getFootPolygonInAnkleZUp(supportLeg.getEnumValue()),
                     line);
-            finalDesiredICP = EquivalentConstantCoPCalculator.computePredictedICP(desiredICPLocal, equivalentConstantCoP, stepTime, comHeight, gravity);
+            finalDesiredICP = EquivalentConstantCoPCalculator.computePredictedICP(desiredICPLocal, equivalentConstantCoP, initialStepTime, comHeight, gravity);
          }
 
          this.finalDesiredICP.set(finalDesiredICP);
