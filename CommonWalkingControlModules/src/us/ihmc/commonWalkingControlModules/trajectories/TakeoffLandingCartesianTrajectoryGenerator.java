@@ -489,4 +489,9 @@ public class TakeoffLandingCartesianTrajectoryGenerator implements CartesianTraj
               "cartesianTrajectoryGeneratorTester");
    }
 
+   public double getFinalTime()
+   {
+      throw new RuntimeException("Final time not known until we get there...");
+   }
+
 }

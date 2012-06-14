@@ -168,12 +168,12 @@ public class MomentumBasedController implements RobotController
       this.legStrengthCalculator = new TeeterTotterLegStrengthCalculator(registry);
 
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
-      this.centerOfMassHeightControlModule = new CenterOfMassHeightControlModule(processedSensors, referenceFrames, footHeight, registry);
+      this.centerOfMassHeightControlModule = new CenterOfMassHeightControlModule(processedSensors, registry);
       centerOfMassHeightControlModule.setParametersForR2InverseDynamics();
       this.totalMass = TotalMassCalculator.computeSubTreeMass(elevator);
       orientationControlModule.setupParametersForR2();
 
-      stateMachine = new MomentumBasedControllerStateMachine(fullRobotModel, referenceFrames, twistCalculator, bipedSupportPolygons, processedSensors.getYoTime(), controlDT, registry);
+      stateMachine = new MomentumBasedControllerStateMachine(fullRobotModel, referenceFrames, twistCalculator, bipedSupportPolygons, processedSensors, processedSensors.getYoTime(), controlDT, footHeight, registry);
       optimizer = new MomentumBasedPelvisAccelerationOptimizer(fullRobotModel, twistCalculator, referenceFrames.getCenterOfMassFrame(), registry, controlDT);
 
       this.desiredPelvisLinearAcceleration = new YoFrameVector("desiredPelvisLinearAcceleration", "", referenceFrames.getPelvisFrame(), registry);
@@ -273,7 +273,7 @@ public class MomentumBasedController implements RobotController
          legStrengths.put(supportLeg.getOppositeSide(), 0.0);
       }
 
-      double fZ = centerOfMassHeightControlModule.doCenterOfMassHeightControl(stateMachine.getDesiredCoMHeight(), supportLeg);
+      double fZ = centerOfMassHeightControlModule.doCenterOfMassHeightControl(stateMachine.getDesiredCoMHeight(), stateMachine.getDesiredCoMHeightVelocity(), stateMachine.getDesiredCoMHeightAcceleration(), supportLeg);
       FrameVector totalgroundReactionMoment = determineGroundReactionMoment();
       Wrench totalGroundReactionWrench = new Wrench(centerOfMassFrame, centerOfMassFrame);
 
