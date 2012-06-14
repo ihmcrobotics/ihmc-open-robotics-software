@@ -84,7 +84,7 @@ public class OrbitalEnergyCalculator
       spline.setDirectly(a);
    }
 
-   public static void computeCubicCoefficientsCubicGivenDzdxf(QuarticSpline spline, double orbitalEnergyDesired, double g, double x0, double xd0, double xf,
+   public static void computeCubicCoefficientsGivenDzdxf(QuarticSpline spline, double orbitalEnergyDesired, double g, double x0, double xd0, double xf,
            double z0, double dzdx0, double dzdxf)
    {
       double a0 =
