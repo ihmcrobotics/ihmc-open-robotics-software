@@ -54,7 +54,7 @@ public class StraightUpThenParabolicCartesianTrajectoryGeneratorTest
          double zMax = finalDesiredPosition.getZ() + groundClearance;
          double minZDifference = Double.POSITIVE_INFINITY;
 
-         double dt = parabolicTime / 1000.0;
+         double dt = parabolicTime / 2000.0;
          while (!trajectoryGenerator.isDone())
          {
             trajectoryGenerator.computeNextTick(positionToPack, velocityToPack, accelerationToPack, dt);
