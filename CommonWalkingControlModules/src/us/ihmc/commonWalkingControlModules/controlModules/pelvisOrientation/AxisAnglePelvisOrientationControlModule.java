@@ -75,7 +75,7 @@ public class AxisAnglePelvisOrientationControlModule implements PelvisOrientatio
      
 
       FrameVector ret = new FrameVector(bodyFrame);
-      axisAngleOrientationController.compute(ret, desiredPelvisOrientation, desiredPelvisAngularVelocity, pelvisAngularVelocity);
+      axisAngleOrientationController.compute(ret, desiredPelvisOrientation, desiredPelvisAngularVelocity, pelvisAngularVelocity, new FrameVector(bodyFrame));
 
       if (useFeedforward)
       {

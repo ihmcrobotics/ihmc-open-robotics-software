@@ -9,6 +9,7 @@ import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
+import com.yobotics.simulationconstructionset.util.trajectory.PolynomialSpline;
 import com.yobotics.simulationconstructionset.util.trajectory.YoMinimumJerkTrajectory;
 import com.yobotics.simulationconstructionset.util.trajectory.YoParabolicTrajectoryGenerator;
 
@@ -16,7 +17,7 @@ public class StraightUpThenParabolicCartesianTrajectoryGenerator implements Cart
 {
    private final String namePostFix = getClass().getSimpleName();
    private final YoVariableRegistry registry;
-   private final YoMinimumJerkTrajectory straightUpParameterTrajectory;
+   private final PolynomialSpline straightUpParameterTrajectory;
    private final YoMinimumJerkTrajectory parabolicParameterTrajectory;
    private final YoParabolicTrajectoryGenerator parabolicTrajectoryGenerator;
    private final DoubleYoVariable groundClearance;
@@ -33,7 +34,7 @@ public class StraightUpThenParabolicCartesianTrajectoryGenerator implements Cart
    {
       this.registry = new YoVariableRegistry(namePrefix + namePostFix);
 
-      this.straightUpParameterTrajectory = new YoMinimumJerkTrajectory(namePrefix + "StraightUp", registry);
+      this.straightUpParameterTrajectory = new PolynomialSpline(namePrefix + "StraightUp", 6, registry);
       this.parabolicParameterTrajectory = new YoMinimumJerkTrajectory(namePrefix + "Parabolic", registry);
       this.parabolicTrajectoryGenerator = new YoParabolicTrajectoryGenerator(namePrefix, referenceFrame, registry);
       this.groundClearance = new DoubleYoVariable("groundClearance", registry);
@@ -64,19 +65,28 @@ public class StraightUpThenParabolicCartesianTrajectoryGenerator implements Cart
       
       straightUpTime.set(straightUpVector.getZ() / straightUpAverageVelocity.getDoubleValue());
       
-      double dPositiondParabolicParameterInitial = computeDPositionDParabolicParameterInitial(straightUpPosition, finalDesiredPosition);
+      double dPositiondParabolicParameter = computeDPositionDParabolicParameterInitial(straightUpPosition, finalDesiredPosition);
+      FrameVector parabolaInitialVelocity = new FrameVector(initialPosition.getReferenceFrame(), 0.0, 0.0, dPositiondParabolicParameter);
+      parabolicTrajectoryGenerator.initialize(straightUpPosition, parabolaInitialVelocity, finalDesiredPosition);
 
       timeIntoStep.set(0.0);
 
-      double dStraightUpParameterdTime = 1.0;
+//      straightUpParameterTrajectory.setCubic(0, straightUpTime.getDoubleValue(), 0.0, 0.0, 1.0, straightUpParameterDot);
+//      straightUpParameterTrajectory.setQuadratic(0, straightUpTime.getDoubleValue(), 0.0, 1.0, 1.0);
+      double zdf = 3.0; // TODO: do something smart here
+      straightUpParameterTrajectory.setQuintic(0.0, straightUpTime.getDoubleValue(), 0.0, 0.0, 0.0, 1.0, zdf, 0.0);
+      straightUpParameterTrajectory.compute(straightUpTime.getDoubleValue());
+      double straightUpParameterDot = straightUpParameterTrajectory.getVelocity();
+      double straightUpParameterDDot = straightUpParameterTrajectory.getAcceleration();
+
       double dPositiondStraightUpParameter = straightUpVector.getZ();
-      straightUpParameterTrajectory.setParams(0.0, 0.0, 0.0, 1.0, dStraightUpParameterdTime, 0.0, 0.0, straightUpTime.getDoubleValue());
+      FrameVector parabolicAcceleration = new FrameVector(initialPosition.getReferenceFrame());
+      parabolicTrajectoryGenerator.packAcceleration(parabolicAcceleration);
+      double parabolicParameterDot = dPositiondStraightUpParameter / dPositiondParabolicParameter * straightUpParameterDot;
+      double parabolicParameterDDot = (dPositiondStraightUpParameter * straightUpParameterDDot - parabolicAcceleration.getZ() * MathTools.square(parabolicParameterDot)) / dPositiondParabolicParameter;
+      parabolicParameterTrajectory.setParams(0.0, parabolicParameterDot, parabolicParameterDDot, 1.0, 1.0, 0.0, straightUpTime.getDoubleValue(), straightUpTime.getDoubleValue() + parabolicTime.getDoubleValue());
 
-      double dParabolicParameterdTime = dPositiondStraightUpParameter * dStraightUpParameterdTime / dPositiondParabolicParameterInitial;
-      parabolicParameterTrajectory.setParams(0.0, dParabolicParameterdTime, 0.0, 1.0, 0.0, 0.0, straightUpTime.getDoubleValue(), straightUpTime.getDoubleValue() + parabolicTime.getDoubleValue());
 
-      FrameVector parabolaInitialVelocity = new FrameVector(initialPosition.getReferenceFrame(), 0.0, 0.0, dPositiondParabolicParameterInitial);
-      parabolicTrajectoryGenerator.initialize(straightUpPosition, parabolaInitialVelocity, finalDesiredPosition);
    }
 
    private double computeDPositionDParabolicParameterInitial(FramePoint initialPosition, FramePoint finalDesiredPosition)
@@ -97,9 +107,9 @@ public class StraightUpThenParabolicCartesianTrajectoryGenerator implements Cart
       if (timeIntoStep.getDoubleValue() > totalTime)
          timeIntoStep.set(totalTime);
 
-      if (timeIntoStep.getDoubleValue() < straightUpParameterTrajectory.getFinalTime())
+      if (timeIntoStep.getDoubleValue() < straightUpTime.getDoubleValue())
       {
-         straightUpParameterTrajectory.computeTrajectory(timeIntoStep.getDoubleValue());
+         straightUpParameterTrajectory.compute(timeIntoStep.getDoubleValue());
          double parameter = straightUpParameterTrajectory.getPosition();
          double parameterd = straightUpParameterTrajectory.getVelocity();
          double parameterdd = straightUpParameterTrajectory.getAcceleration();
@@ -122,7 +132,20 @@ public class StraightUpThenParabolicCartesianTrajectoryGenerator implements Cart
          double parameter = parabolicParameterTrajectory.getPosition();
          double parameterd = parabolicParameterTrajectory.getVelocity();
          double parameterdd = parabolicParameterTrajectory.getAcceleration();
-         parameter = MathTools.clipToMinMax(parameter, 0.0, 1.0);
+         
+         if (parameter < 0.0)
+         {
+            parameter = 0.0;
+            parameterd = 0.0;
+            parameterdd = 0.0;
+         }
+         
+         if (parameter > 1.0)
+         {
+            parameter = 1.0;
+            parameterd = 0.0;
+            parameterdd = 0.0;
+         }
 
          parabolicTrajectoryGenerator.packPosition(positionToPack, parameter);
 
