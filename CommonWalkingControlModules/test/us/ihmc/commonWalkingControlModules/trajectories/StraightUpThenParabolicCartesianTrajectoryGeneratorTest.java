@@ -77,7 +77,7 @@ public class StraightUpThenParabolicCartesianTrajectoryGeneratorTest
       final double dt = 1e-3;
       final DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
 
-      double straightUpAverageVelocity = 0.3;
+      double straightUpAverageVelocity = 0.2;
       double parabolicTime = 1.5;
       double groundClearance = 0.2;
       TrajectoryEvaluatorController robotController = new TrajectoryEvaluatorController(straightUpAverageVelocity, parabolicTime, groundClearance, dt, dynamicGraphicObjectsListRegistry);

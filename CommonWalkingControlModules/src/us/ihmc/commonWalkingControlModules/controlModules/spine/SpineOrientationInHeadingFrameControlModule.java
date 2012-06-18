@@ -67,7 +67,7 @@ public class SpineOrientationInHeadingFrameControlModule implements SpineControl
       chestAngularVelocity.set(processedSensors.getChestAngularVelocityInChestFrame());
       
       FrameVector chestTorque = new FrameVector(bodyFrame);
-      axisAngleOrientationController.compute(chestTorque, desiredChestOrientation, desiredChestAngularVelocity, chestAngularVelocity);
+      axisAngleOrientationController.compute(chestTorque, desiredChestOrientation, desiredChestAngularVelocity, chestAngularVelocity, new FrameVector(bodyFrame));
       
       tauChest.set(chestTorque);
       chestWrench.setAngularPart(chestTorque.getVector());
