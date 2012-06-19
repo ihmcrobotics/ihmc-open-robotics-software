@@ -6,25 +6,17 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 
 public interface BipedFootInterface
 {
-   public abstract FootPolygonEnum getFootPolygonInUseEnum();
-
    public abstract RobotSide getRobotSide();
 
-   public abstract FrameConvexPolygon2d getFootPolygonInUse();
+   public abstract FrameConvexPolygon2d getFootPolygonInUseInAnkleZUp();
 
-   public abstract FrameConvexPolygon2d getFlatFootPolygon();
+   public abstract FrameConvexPolygon2d getFlatFootPolygonInAnkleZUp();
+   
+   public abstract FrameConvexPolygon2d getFootPolygonInSoleFrame();
 
    public abstract void setIsSupportingFoot(boolean isSupportingFoot);
 
    public abstract boolean isSupportingFoot();
-
-   public abstract FramePoint getInsideToeFramePointCopy();
-
-   public abstract FramePoint getOutsideToeFramePointCopy();
-
-   public abstract FramePoint getInsideHeelFramePointCopy();
-
-   public abstract FramePoint getOutsideHeelFramePointCopy();
 
    public abstract FramePoint[] getToePointsCopy();
 
