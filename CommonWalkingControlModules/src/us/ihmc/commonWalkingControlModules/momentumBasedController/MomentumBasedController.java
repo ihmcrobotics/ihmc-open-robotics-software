@@ -5,9 +5,11 @@ import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedFeetUpdater;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedFootInterface;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.FootPolygonVisualizer;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.GoOnToesDuringDoubleSupportBipedFeetUpdater;
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ResizableBipedFoot;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.SimpleBipedFoot;
 import us.ihmc.commonWalkingControlModules.captureRegion.CapturePointCalculatorInterface;
 import us.ihmc.commonWalkingControlModules.captureRegion.CommonCapturePointCalculator;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.DesiredCapturePointToDesiredCoPControlModule;
@@ -72,8 +74,7 @@ public class MomentumBasedController implements RobotController
    private final CenterOfMassHeightControlModule centerOfMassHeightControlModule;
    private final LegStrengthCalculator legStrengthCalculator;
 
-   private final ResizableBipedFoot rightFoot;
-   private final ResizableBipedFoot leftFoot;
+   private final SideDependentList<BipedFootInterface> bipedFeet = new SideDependentList<BipedFootInterface>();
    private final BipedFeetUpdater bipedFeetUpdater;
    private final ReferenceFrame midFeetZUp;
    private final double totalMass;
@@ -109,6 +110,7 @@ public class MomentumBasedController implements RobotController
    private final SideDependentList<Double> legStrengths = new SideDependentList<Double>();
 
    private final CapturabilityBasedDesiredCoPVisualizer visualizer;
+   private final FootPolygonVisualizer footPolygonVisualizer;
 
 
 
@@ -145,15 +147,16 @@ public class MomentumBasedController implements RobotController
       midFeetZUp = referenceFrames.getMidFeetZUpFrame();
       this.bipedSupportPolygons = new BipedSupportPolygons(ankleZUpFrames, midFeetZUp, registry, dynamicGraphicObjectsListRegistry);
 
-      double preventRotationFactorLength = 1.0;    // 0.9; // 1.0;
-      double preventRotationFactorWidth = 1.0;    // 0.9;
-
-
-      rightFoot = ResizableBipedFoot.createRectangularRightFoot(preventRotationFactorLength, preventRotationFactorWidth, footForward, footBack, footWidth,
-              footHeight, referenceFrames, processedSensors.getYoTime(), registry, dynamicGraphicObjectsListRegistry);
-      leftFoot = rightFoot.createLeftFootAsMirrorImage(referenceFrames, processedSensors.getYoTime(), registry, dynamicGraphicObjectsListRegistry);
+      for (RobotSide robotSide : RobotSide.values())
+      {        
+         bipedFeet.put(robotSide, new SimpleBipedFoot(referenceFrames, robotSide, footForward, footBack, footWidth / 2.0, footWidth / 2.0, registry));
+      }
+      footPolygonVisualizer = new FootPolygonVisualizer(bipedFeet, dynamicGraphicObjectsListRegistry, registry);
+      
       bipedFeetUpdater = new GoOnToesDuringDoubleSupportBipedFeetUpdater(referenceFrames, footForward, footBack, registry, dynamicGraphicObjectsListRegistry);
       this.capturePointCalculator = new CommonCapturePointCalculator(processedSensors, referenceFrames, registry, dynamicGraphicObjectsListRegistry);
+      BipedFootInterface leftFoot = bipedFeet.get(RobotSide.LEFT);
+      BipedFootInterface rightFoot = bipedFeet.get(RobotSide.RIGHT);
       bipedFeetUpdater.updateBipedFeet(leftFoot, rightFoot, null, capturePointCalculator.getCapturePointInFrame(midFeetZUp), false);
       bipedSupportPolygons.update(leftFoot, rightFoot);
 
@@ -216,8 +219,11 @@ public class MomentumBasedController implements RobotController
    public void doControl()
    {
       capturePointCalculator.computeCapturePoint(stateMachine.getSupportLeg());
-      bipedFeetUpdater.updateBipedFeet(leftFoot, rightFoot, stateMachine.getSupportLeg(), capturePointCalculator.getCapturePointInFrame(midFeetZUp), false);
+      BipedFootInterface leftFoot = bipedFeet.get(RobotSide.LEFT);
+      BipedFootInterface rightFoot = bipedFeet.get(RobotSide.RIGHT);
+      bipedFeetUpdater.updateBipedFeet(leftFoot , rightFoot, stateMachine.getSupportLeg(), capturePointCalculator.getCapturePointInFrame(midFeetZUp), false);
       bipedSupportPolygons.update(leftFoot, rightFoot);
+      footPolygonVisualizer.update();
 
       ReferenceFrame frame;
       if (stateMachine.getSupportLeg() == null)

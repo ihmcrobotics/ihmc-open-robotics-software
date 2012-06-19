@@ -131,7 +131,7 @@ public class BipedSupportPolygons
       for (RobotSide robotSide : RobotSide.values())
       {
          BipedFootInterface foot = feet.get(robotSide);
-         FrameConvexPolygon2d footPolygonInFootFrame = foot.getFootPolygonInUse();
+         FrameConvexPolygon2d footPolygonInFootFrame = foot.getFootPolygonInUseInAnkleZUp();
          FrameConvexPolygon2d footPolygonInAnkleZUp = footPolygonInFootFrame.changeFrameAndProjectToXYPlaneCopy(ankleZUpFrames.get(robotSide));
          FrameConvexPolygon2d footPolygonsInMidFeetZUp = footPolygonInAnkleZUp.changeFrameCopy(midFeetZUp);
 

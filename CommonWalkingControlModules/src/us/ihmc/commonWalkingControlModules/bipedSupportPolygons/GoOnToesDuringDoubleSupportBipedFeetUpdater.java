@@ -304,7 +304,7 @@ public class GoOnToesDuringDoubleSupportBipedFeetUpdater implements BipedFeetUpd
 
             for (RobotSide side : RobotSide.values())
             {
-               decisionPlotter.addPolygon(feet.get(side).getFlatFootPolygon().changeFrameCopy(worldFrame), colors.get(side));
+               decisionPlotter.addPolygon(feet.get(side).getFlatFootPolygonInAnkleZUp().changeFrameCopy(worldFrame), colors.get(side));
                decisionPlotter.addFrameLine2d(onToesLines.get(side).changeFrameCopy(worldFrame), colors.get(side));
                decisionPlotter.addFrameLine2d(onHeelLines.get(side).changeFrameCopy(worldFrame), colors.get(side));
             }
@@ -353,8 +353,8 @@ public class GoOnToesDuringDoubleSupportBipedFeetUpdater implements BipedFeetUpd
 
       // Extract the foot polygons in use from the leftFoot and the rightFoot
 //    SideDependentList<FrameConvexPolygon2d> footPolygonsInAnkleZUp = new SideDependentList<FrameConvexPolygon2d> (leftFoot.getFootPolygonInUse(), rightFoot.getFootPolygonInUse());
-      SideDependentList<FrameConvexPolygon2d> footPolygonsInAnkleZUp = new SideDependentList<FrameConvexPolygon2d>(leftFoot.getFlatFootPolygon(),
-                                                                          rightFoot.getFlatFootPolygon());
+      SideDependentList<FrameConvexPolygon2d> footPolygonsInAnkleZUp = new SideDependentList<FrameConvexPolygon2d>(leftFoot.getFlatFootPolygonInAnkleZUp(),
+                                                                          rightFoot.getFlatFootPolygonInAnkleZUp());
 
       // Change the foot polygons to midFeetZUp frame
       FrameConvexPolygon2d leftPolygon = footPolygonsInAnkleZUp.get(RobotSide.LEFT).changeFrameAndProjectToXYPlaneCopy(midFeetZUpFrame);
