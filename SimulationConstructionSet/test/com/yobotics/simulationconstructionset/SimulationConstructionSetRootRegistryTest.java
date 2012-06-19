@@ -23,6 +23,7 @@ public class SimulationConstructionSetRootRegistryTest
       DoubleYoVariable variableOne = new DoubleYoVariable("variableOne", registryOne);
       
       SimulationConstructionSet scs = new SimulationConstructionSet(robot, SHOW_GUI);
+      sleep(1000);
       scs.startOnAThread();
       
       YoVariableRegistry rootRegistry = scs.getRootRegistry();
@@ -36,6 +37,7 @@ public class SimulationConstructionSetRootRegistryTest
          StandardSimulationGUI standardSimulationGUI = scs.getStandardSimulationGUI();
          CombinedVarPanel combinedVarPanel = standardSimulationGUI.getCombinedVarPanel();
 
+         // This also fails when the Search Panel doesn't come up...
          sleep(2000);  //+++JEP: Not sure why need this sleep, but it fails if we don't...
 
          combinedVarPanel.setVisibleVarPanel("root.RobotsRootRegistry.RegistryOne");
@@ -48,14 +50,64 @@ public class SimulationConstructionSetRootRegistryTest
       scs.closeAndDispose();
    }
    
-   @Ignore //JEP: Not passing yet, but working on it...
+   @Test 
+   public void testVarGroups()
+   {
+      Robot robot = new Robot("testVarGroups");
+      
+      YoVariableRegistry registryOne = new YoVariableRegistry("registryOne");
+      YoVariableRegistry registryTwo = new YoVariableRegistry("registryTwo");
+
+      DoubleYoVariable variableOneA = new DoubleYoVariable("variableOneA", registryOne);
+      DoubleYoVariable variableOneB = new DoubleYoVariable("variableOneB", registryOne);
+      
+      DoubleYoVariable variableTwoA = new DoubleYoVariable("variableTwoA", registryTwo);
+      DoubleYoVariable variableTwoB = new DoubleYoVariable("variableTwoB", registryTwo);
+      
+      robot.getRobotsYoVariableRegistry().addChild(registryOne);
+      robot.getRobotsYoVariableRegistry().addChild(registryTwo);
+      
+      SimulationConstructionSet scs = new SimulationConstructionSet(robot, SHOW_GUI);
+      scs.setupVarGroup("VarGroupToTest", new String[]{"variableOneA", "variableTwoB"});
+      
+      scs.startOnAThread();
+
+      if (SHOW_GUI)
+      {
+         StandardSimulationGUI standardSimulationGUI = scs.getStandardSimulationGUI();
+         CombinedVarPanel combinedVarPanel = standardSimulationGUI.getCombinedVarPanel();
+
+         sleep(2000);  //+++JEP: Not sure why need this sleep, but it fails if we don't...
+         // This also fails when the Search Panel doesn't come up...
+         
+         standardSimulationGUI.selectVarGroup("VarGroupToTest");
+         VarPanel visibleVarPanel = combinedVarPanel.getVisibleVarPanel();
+         assertTrue(visibleVarPanel.getName().equals("VarGroupToTest"));
+         assertTrue(variableOneA == visibleVarPanel.getYoVariable("variableOneA"));
+         assertTrue(variableTwoB == visibleVarPanel.getYoVariable("variableTwoB"));
+         assertTrue(null == visibleVarPanel.getYoVariable("variableOneB"));
+         assertTrue(null == visibleVarPanel.getYoVariable("variableTwoA"));
+         
+//         sleepForever();
+      }
+      
+      scs.closeAndDispose();
+   }
+   
+   
+   
+   @Test
    public void testRootRegistryAddYoVariablesAfterConstruction()
    {
-      Robot robot = new Robot("RobotsRootRegistry");
+      Robot robot = new Robot("TestAfterConstruction");
       
       YoVariableRegistry registryBeforeConstructionOne = new YoVariableRegistry("RegistryBeforeConstructionOne");
       robot.getRobotsYoVariableRegistry().addChild(registryBeforeConstructionOne);
       DoubleYoVariable variableBeforeConstructionOne = new DoubleYoVariable("variableBeforeConstructionOne", registryBeforeConstructionOne);
+      
+      YoVariableRegistry registryBeforeConstructionOneOne = new YoVariableRegistry("RegistryBeforeConstructionOneOne");
+      registryBeforeConstructionOne.addChild(registryBeforeConstructionOneOne);
+      DoubleYoVariable variableBeforeConstructionOneOne = new DoubleYoVariable("variableBeforeConstructionOneOne", registryBeforeConstructionOneOne);
       
       SimulationConstructionSet scs = new SimulationConstructionSet(robot, SHOW_GUI);
       
@@ -101,30 +153,53 @@ public class SimulationConstructionSetRootRegistryTest
       if (SHOW_GUI)
       {
          StandardSimulationGUI standardSimulationGUI = scs.getStandardSimulationGUI();
-         CombinedVarPanel combinedVarPanel = standardSimulationGUI.getCombinedVarPanel();
-
+  
          sleep(2000);  //+++JEP: Not sure why need this sleep, but it fails if we don't...
 
-         combinedVarPanel.setVisibleVarPanel("root.RobotsRootRegistry.RegistryBeforeConstructionOne");
+         CombinedVarPanel combinedVarPanel = standardSimulationGUI.getCombinedVarPanel();
+         combinedVarPanel.setVisibleVarPanel("root.TestAfterConstruction.RegistryBeforeConstructionOne");
+//         sleep(2000);
+         
          VarPanel visibleVarPanel = combinedVarPanel.getVisibleVarPanel();
+         System.out.println("visibleVarPanel = " + visibleVarPanel.getName());
+         assertTrue(visibleVarPanel.getName().equals("RegistryBeforeConstructionOne"));
          assertTrue(variableBeforeConstructionOne == visibleVarPanel.getYoVariable("variableBeforeConstructionOne"));
          assertTrue(variableAfterConstructionZero == visibleVarPanel.getYoVariable("variableAfterConstructionZero"));
 
-         combinedVarPanel.setVisibleVarPanel("root.RobotsRootRegistry.RegistryAfterConstructionOne");
+         combinedVarPanel.setVisibleVarPanel("root.TestAfterConstruction.RegistryBeforeConstructionOne.RegistryBeforeConstructionOneOne");
          visibleVarPanel = combinedVarPanel.getVisibleVarPanel();
+         assertTrue(visibleVarPanel.getName().equals("RegistryBeforeConstructionOneOne"));
+         assertTrue(variableBeforeConstructionOneOne == visibleVarPanel.getYoVariable("variableBeforeConstructionOneOne"));
+         
+         combinedVarPanel.setVisibleVarPanel("root.RegistryAfterConstructionOne");         
+         visibleVarPanel = combinedVarPanel.getVisibleVarPanel();
+         assertTrue(visibleVarPanel.getName().equals("RegistryAfterConstructionOne"));
+
          assertTrue(variableAfterConstructionOne == visibleVarPanel.getYoVariable("variableAfterConstructionOne"));
          assertTrue(variableAfterConstructionTwo == visibleVarPanel.getYoVariable("variableAfterConstructionTwo"));
          assertTrue(variableAfterThreadZero == visibleVarPanel.getYoVariable("variableAfterThreadZero"));
 
-         combinedVarPanel.setVisibleVarPanel("root.RobotsRootRegistry.RegistryAfterThreadOne");
+         combinedVarPanel.setVisibleVarPanel("root.RegistryAfterConstructionOne.RegistryAfterThreadOne");
          visibleVarPanel = combinedVarPanel.getVisibleVarPanel();
+         assertTrue(visibleVarPanel.getName().equals("RegistryAfterThreadOne"));
+
          assertTrue(variableAfterThreadOne == visibleVarPanel.getYoVariable("variableAfterThreadOne"));
          assertTrue(variableAfterThreadTwo == visibleVarPanel.getYoVariable("variableAfterThreadTwo"));
+         
+         sleepForever();
       }
       
       scs.closeAndDispose();
    }
 
+   private static void sleepForever()
+   {
+      while(true)
+      {
+         sleep(10000);
+      }
+   }
+   
    private static void sleep(long sleepMillis)
    {
       try
