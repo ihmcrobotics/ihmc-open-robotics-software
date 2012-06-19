@@ -26,6 +26,8 @@ import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenc
 import us.ihmc.commonWalkingControlModules.sensors.ProcessedSensorsInterface;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
+import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
+import us.ihmc.utilities.math.geometry.FrameLineSegment2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -325,7 +327,7 @@ public class MomentumBasedController implements RobotController
                                                            totalGroundReactionWrench.getLinearPartCopy());
       desiredLinearCentroidalMomentumRate.setZ(desiredLinearCentroidalMomentumRate.getZ() + processedSensors.getGravityInWorldFrame().getZ() * totalMass);
 
-      computeDesiredFootAccelerations();
+      computeDesiredFootAccelerations(virtualToePoints);
 
       optimizer.solveForPelvisJointAcceleration(desiredAngularCentroidalMomentumRate, desiredLinearCentroidalMomentumRate, desiredFootAccelerationsInWorld);
    }
@@ -413,7 +415,7 @@ public class MomentumBasedController implements RobotController
       desiredPelvisTorque.set(pelvisJointWrench.getAngularPartCopy());
    }
 
-   private void computeDesiredFootAccelerations()
+   private void computeDesiredFootAccelerations(SideDependentList<FramePoint2d> virtualToePoints)
    {
       for (RobotSide robotSide : RobotSide.values())
       {
@@ -421,45 +423,71 @@ public class MomentumBasedController implements RobotController
          ReferenceFrame swingFootCoMFrame = fullRobotModel.getFoot(robotSide).getBodyFixedFrame();
 
          RobotSide supportSide = stateMachine.getSupportLeg();
-         if ((supportSide == null) || (supportSide == robotSide))
+         if (supportSide == null)
          {
             desiredFootAccelerationsInWorld.get(robotSide).setToZero(swingFootCoMFrame, elevatorFrame, swingFootCoMFrame);
          }
+         else if (supportSide == robotSide)
+         {
+            if (isVirtualToePointOnEdgeOfFootPolygon(virtualToePoints, robotSide))
+            {
+               doFootPositionControl(robotSide, elevatorFrame, swingFootCoMFrame);               
+            }
+            else
+            {
+               desiredFootAccelerationsInWorld.get(robotSide).setToZero(swingFootCoMFrame, elevatorFrame, swingFootCoMFrame);
+            }
+         }
          else
          {
-            ReferenceFrame swingFootFrame = referenceFrames.getFootFrame(robotSide);
-            Twist twistOfFootWithRespectToElevator = new Twist();
-            twistCalculator.packTwistOfBody(twistOfFootWithRespectToElevator, fullRobotModel.getFoot(robotSide));
-            twistOfFootWithRespectToElevator.changeBodyFrameNoRelativeTwist(swingFootFrame);
-
-            FrameVector linearAcceleration = computeFootLinearAcceleration(robotSide, twistOfFootWithRespectToElevator);
-            FrameVector angularAcceleration = computeFootAngularAcceleration(robotSide, twistOfFootWithRespectToElevator);
-
-            desiredFootAccelerationsInWorld.get(robotSide).setToZero(swingFootFrame, elevatorFrame, swingFootFrame);
-            twistOfFootWithRespectToElevator.changeBaseFrameNoRelativeTwist(elevatorFrame);
-            twistOfFootWithRespectToElevator.changeBodyFrameNoRelativeTwist(swingFootFrame);
-            desiredFootAccelerationsInWorld.get(robotSide).setBasedOnOriginAcceleration(angularAcceleration, linearAcceleration,
-                    twistOfFootWithRespectToElevator);
-            desiredFootAccelerationsInWorld.get(robotSide).changeBodyFrameNoRelativeAcceleration(swingFootCoMFrame);
-            desiredFootAccelerationsInWorld.get(robotSide).changeFrameNoRelativeMotion(swingFootCoMFrame);
+            doFootPositionControl(robotSide, elevatorFrame, swingFootCoMFrame);
          }
       }
    }
 
-   private FrameVector computeFootLinearAcceleration(RobotSide swingSide, Twist twistOfFootWithRespectToElevator)
+   private boolean isVirtualToePointOnEdgeOfFootPolygon(SideDependentList<FramePoint2d> virtualToePoints, RobotSide robotSide)
    {
-      ReferenceFrame swingFootFrame = referenceFrames.getFootFrame(swingSide);
-      ReferenceFrame supportAnkleZUpFrame = referenceFrames.getAnkleZUpFrame(swingSide.getOppositeSide());
+      FramePoint2d virtualToePoint = virtualToePoints.get(robotSide);
+      FrameConvexPolygon2d footPolygon = bipedSupportPolygons.getFootPolygonInAnkleZUp(robotSide);
+      FrameLineSegment2d closestEdge = footPolygon.getClosestEdge(virtualToePoint);
+      double epsilon = 1e-9;
+      boolean ret = closestEdge.distance(virtualToePoint) < epsilon;
+      return ret;
+   }
+
+   private void doFootPositionControl(RobotSide robotSide, ReferenceFrame elevatorFrame, ReferenceFrame swingFootCoMFrame)
+   {
+      ReferenceFrame footFrame = referenceFrames.getFootFrame(robotSide);
+      Twist twistOfFootWithRespectToElevator = new Twist();
+      twistCalculator.packTwistOfBody(twistOfFootWithRespectToElevator, fullRobotModel.getFoot(robotSide));
+      twistOfFootWithRespectToElevator.changeBodyFrameNoRelativeTwist(footFrame);
+
+      FrameVector linearAcceleration = computeDesiredFootLinearAcceleration(robotSide, twistOfFootWithRespectToElevator);
+      FrameVector angularAcceleration = computeDesiredFootAngularAcceleration(robotSide, twistOfFootWithRespectToElevator);
+
+      desiredFootAccelerationsInWorld.get(robotSide).setToZero(footFrame, elevatorFrame, footFrame);
+      twistOfFootWithRespectToElevator.changeBaseFrameNoRelativeTwist(elevatorFrame);
+      twistOfFootWithRespectToElevator.changeBodyFrameNoRelativeTwist(footFrame);
+      desiredFootAccelerationsInWorld.get(robotSide).setBasedOnOriginAcceleration(angularAcceleration, linearAcceleration,
+              twistOfFootWithRespectToElevator);
+      desiredFootAccelerationsInWorld.get(robotSide).changeBodyFrameNoRelativeAcceleration(swingFootCoMFrame);
+      desiredFootAccelerationsInWorld.get(robotSide).changeFrameNoRelativeMotion(swingFootCoMFrame);
+   }
+
+   private FrameVector computeDesiredFootLinearAcceleration(RobotSide robotSide, Twist twistOfFootWithRespectToElevator)
+   {
+      ReferenceFrame swingFootFrame = referenceFrames.getFootFrame(robotSide);
+      ReferenceFrame supportAnkleZUpFrame = referenceFrames.getAnkleZUpFrame(robotSide.getOppositeSide());
 
       double kSwingFootPosition = 100.0;
       double bSwingFootPosition = 20.0;
 
       FrameVector linearAcceleration = new FrameVector(supportAnkleZUpFrame);
-      stateMachine.packDesiredSwingFootAcceleration(linearAcceleration);
+      stateMachine.packDesiredFootAcceleration(linearAcceleration, robotSide);
       linearAcceleration.changeFrame(worldFrame);
 
       FramePoint desiredPosition = new FramePoint(supportAnkleZUpFrame);
-      stateMachine.packDesiredSwingFootPosition(desiredPosition);
+      stateMachine.packDesiredFootPosition(desiredPosition, robotSide);
       desiredPosition.changeFrame(swingFootFrame);    // position error at this point
       FrameVector swingFootPositionError = new FrameVector(desiredPosition);
       swingFootPositionError.changeFrame(worldFrame);
@@ -469,7 +497,7 @@ public class MomentumBasedController implements RobotController
       linearAcceleration.add(positionTerm);
 
       FrameVector desiredVelocity = new FrameVector(supportAnkleZUpFrame);
-      stateMachine.packDesiredSwingFootVelocity(desiredVelocity);
+      stateMachine.packDesiredFootVelocity(desiredVelocity, robotSide);
       desiredVelocity.changeFrame(linearAcceleration.getReferenceFrame());
       FrameVector currentVelocity = twistOfFootWithRespectToElevator.getBodyOriginLinearVelocityInBaseFrame();
       currentVelocity.changeFrame(desiredVelocity.getReferenceFrame());
@@ -481,7 +509,7 @@ public class MomentumBasedController implements RobotController
       return linearAcceleration;
    }
 
-   private FrameVector computeFootAngularAcceleration(RobotSide swingSide, Twist twistOfFootWithRespectToElevator)
+   private FrameVector computeDesiredFootAngularAcceleration(RobotSide swingSide, Twist twistOfFootWithRespectToElevator)
    {
       ReferenceFrame swingFootFrame = referenceFrames.getFootFrame(swingSide);
       ReferenceFrame supportAnkleZUpFrame = referenceFrames.getAnkleZUpFrame(swingSide.getOppositeSide());

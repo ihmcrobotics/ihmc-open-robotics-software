@@ -209,26 +209,19 @@ public class MomentumBasedControllerStateMachine extends StateMachine
       return supportLeg.getEnumValue();
    }
 
-   public void packDesiredSwingFootPosition(FramePoint desiredSwingFootPositionToPack)
+   public void packDesiredFootPosition(FramePoint desiredSwingFootPositionToPack, RobotSide robotSide)
    {
-      if (supportLeg.getEnumValue() == null)
-         throw new RuntimeException("In double support.");
-      desiredSwingFootPositions.get(supportLeg.getEnumValue().getOppositeSide()).getFramePointAndChangeFrameOfPackedPoint(desiredSwingFootPositionToPack);
+      desiredSwingFootPositions.get(robotSide).getFramePointAndChangeFrameOfPackedPoint(desiredSwingFootPositionToPack);
    }
 
-   public void packDesiredSwingFootVelocity(FrameVector desiredSwingFootVelocityToPack)
+   public void packDesiredFootVelocity(FrameVector desiredSwingFootVelocityToPack, RobotSide robotSide)
    {
-      if (supportLeg.getEnumValue() == null)
-         throw new RuntimeException("In double support.");
-      desiredSwingFootVelocities.get(supportLeg.getEnumValue().getOppositeSide()).getFrameVectorAndChangeFrameOfPackedVector(desiredSwingFootVelocityToPack);
+      desiredSwingFootVelocities.get(robotSide).getFrameVectorAndChangeFrameOfPackedVector(desiredSwingFootVelocityToPack);
    }
 
-   public void packDesiredSwingFootAcceleration(FrameVector desiredSwingFootAccelerationToPack)
+   public void packDesiredFootAcceleration(FrameVector desiredSwingFootAccelerationToPack, RobotSide robotSide)
    {
-      if (supportLeg.getEnumValue() == null)
-         throw new RuntimeException("In double support.");
-      desiredSwingFootAccelerations.get(supportLeg.getEnumValue().getOppositeSide()).getFrameVectorAndChangeFrameOfPackedVector(
-          desiredSwingFootAccelerationToPack);
+      desiredSwingFootAccelerations.get(robotSide).getFrameVectorAndChangeFrameOfPackedVector(desiredSwingFootAccelerationToPack);
    }
 
    public void packDesiredFootOrientation(Orientation desiredFootOrientationToPack, RobotSide robotSide)
