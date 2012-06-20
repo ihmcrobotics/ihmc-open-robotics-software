@@ -28,13 +28,11 @@ import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenc
 import us.ihmc.commonWalkingControlModules.sensors.ProcessedSensorsInterface;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
-import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
-import us.ihmc.utilities.math.geometry.FrameLineSegment2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
+import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
-import us.ihmc.utilities.math.geometry.Orientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.utilities.screwTheory.RevoluteJoint;
@@ -48,7 +46,6 @@ import us.ihmc.utilities.screwTheory.Wrench;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.robotController.RobotController;
-import com.yobotics.simulationconstructionset.util.AxisAngleOrientationController;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint2d;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
@@ -87,10 +84,9 @@ public class MomentumBasedController implements RobotController
    private final CommonWalkingReferenceFrames referenceFrames;
    private final TwistCalculator twistCalculator;
 
-   private final SideDependentList<AxisAngleOrientationController> footOrientationControllers = new SideDependentList<AxisAngleOrientationController>();
    private final SideDependentList<SpatialAccelerationVector> desiredFootAccelerationsInWorld = new SideDependentList<SpatialAccelerationVector>();
    private final YoFrameVector swingFootPositionErrorInWorld = new YoFrameVector("swingFootPositionErrorInWorld", "", worldFrame, registry);
-
+   private final SideDependentList<FootSpatialAccelerationControlModule> footSpatialAccelerationControlModules = new SideDependentList<FootSpatialAccelerationControlModule>();
 
    private final YoFrameVector desiredPelvisLinearAcceleration;
    private final YoFrameVector desiredPelvisAngularAcceleration;
@@ -128,17 +124,18 @@ public class MomentumBasedController implements RobotController
 
       RigidBody elevator = fullRobotModel.getElevator();
       this.inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, -processedSensors.getGravityInWorldFrame().getZ());
-      ReferenceFrame elevatorFrame = fullRobotModel.getElevatorFrame();
+      for (RobotSide robotSide : RobotSide.values())
+      {        
+         bipedFeet.put(robotSide, new SimpleBipedFoot(referenceFrames, robotSide, footForward, footBack, footWidth / 2.0, footWidth / 2.0, registry));
+      }
+      footPolygonVisualizer = new FootPolygonVisualizer(bipedFeet, dynamicGraphicObjectsListRegistry, registry);
 
+      ReferenceFrame elevatorFrame = fullRobotModel.getElevatorFrame();
       for (RobotSide robotSide : RobotSide.values())
       {
          ReferenceFrame footFrame = referenceFrames.getFootFrame(robotSide);
-         AxisAngleOrientationController footOrientationController = new AxisAngleOrientationController(robotSide.getCamelCaseNameForStartOfExpression()
-                                                                       + "Foot", footFrame, registry);
-         footOrientationController.setProportionalGains(500.0, 500.0, 500.0);
-         footOrientationController.setDerivativeGains(80.0, 80.0, 80.0);
-         footOrientationControllers.put(robotSide, footOrientationController);
          desiredFootAccelerationsInWorld.put(robotSide, new SpatialAccelerationVector(footFrame, elevatorFrame, footFrame));
+         footSpatialAccelerationControlModules.put(robotSide, new FootSpatialAccelerationControlModule(referenceFrames, twistCalculator, bipedFeet.get(robotSide), fullRobotModel));
       }
 
       this.orientationControlModule = new AxisAnglePelvisOrientationControlModule(processedSensors, referenceFrames, null, registry, false);
@@ -147,12 +144,7 @@ public class MomentumBasedController implements RobotController
       midFeetZUp = referenceFrames.getMidFeetZUpFrame();
       this.bipedSupportPolygons = new BipedSupportPolygons(ankleZUpFrames, midFeetZUp, registry, dynamicGraphicObjectsListRegistry);
 
-      for (RobotSide robotSide : RobotSide.values())
-      {        
-         bipedFeet.put(robotSide, new SimpleBipedFoot(referenceFrames, robotSide, footForward, footBack, footWidth / 2.0, footWidth / 2.0, registry));
-      }
-      footPolygonVisualizer = new FootPolygonVisualizer(bipedFeet, dynamicGraphicObjectsListRegistry, registry);
-      
+
       bipedFeetUpdater = new GoOnToesDuringDoubleSupportBipedFeetUpdater(referenceFrames, footForward, footBack, registry, dynamicGraphicObjectsListRegistry);
       this.capturePointCalculator = new CommonCapturePointCalculator(processedSensors, referenceFrames, registry, dynamicGraphicObjectsListRegistry);
       BipedFootInterface leftFoot = bipedFeet.get(RobotSide.LEFT);
@@ -161,9 +153,6 @@ public class MomentumBasedController implements RobotController
       bipedSupportPolygons.update(leftFoot, rightFoot);
 
       this.virtualToePointCalculator = new NewGeometricVirtualToePointCalculator(referenceFrames, registry, dynamicGraphicObjectsListRegistry);
-
-//    this.virtualToePointCalculator = new GeometricVirtualToePointCalculator(referenceFrames, registry, dynamicGraphicObjectsListRegistry);
-
 
       SpeedControllingDesiredCoPCalculator desiredCapturePointToDesiredCoPControlModule = new SpeedControllingDesiredCoPCalculator(processedSensors,
                                                                                              referenceFrames, registry, dynamicGraphicObjectsListRegistry);
@@ -333,7 +322,16 @@ public class MomentumBasedController implements RobotController
                                                            totalGroundReactionWrench.getLinearPartCopy());
       desiredLinearCentroidalMomentumRate.setZ(desiredLinearCentroidalMomentumRate.getZ() + processedSensors.getGravityInWorldFrame().getZ() * totalMass);
 
-      computeDesiredFootAccelerations(virtualToePoints);
+      
+      for (RobotSide robotSide : RobotSide.values())
+      {
+         FramePose desiredFootPose = stateMachine.getDesiredFootPose(robotSide);
+         Twist desiredFootTwist = stateMachine.getDesiredFootTwist(robotSide);
+         SpatialAccelerationVector feedForwardFootSpatialAcceleration = stateMachine.getDesiredFootAcceleration(robotSide);
+         boolean isSwingFoot = stateMachine.isSwingFoot(robotSide);
+         footSpatialAccelerationControlModules.get(robotSide).compute(virtualToePoints.get(robotSide), desiredFootPose, desiredFootTwist, feedForwardFootSpatialAcceleration, isSwingFoot);
+         footSpatialAccelerationControlModules.get(robotSide).packFootAcceleration(desiredFootAccelerationsInWorld.get(robotSide));
+      }
 
       optimizer.solveForPelvisJointAcceleration(desiredAngularCentroidalMomentumRate, desiredLinearCentroidalMomentumRate, desiredFootAccelerationsInWorld);
    }
@@ -419,124 +417,6 @@ public class MomentumBasedController implements RobotController
       pelvisJointWrench.changeFrame(centerOfMassFrame);
       desiredPelvisForce.set(pelvisJointWrench.getLinearPartCopy());
       desiredPelvisTorque.set(pelvisJointWrench.getAngularPartCopy());
-   }
-
-   private void computeDesiredFootAccelerations(SideDependentList<FramePoint2d> virtualToePoints)
-   {
-      for (RobotSide robotSide : RobotSide.values())
-      {
-         ReferenceFrame elevatorFrame = fullRobotModel.getElevatorFrame();
-         ReferenceFrame swingFootCoMFrame = fullRobotModel.getFoot(robotSide).getBodyFixedFrame();
-
-         RobotSide supportSide = stateMachine.getSupportLeg();
-         if (supportSide == null)
-         {
-            desiredFootAccelerationsInWorld.get(robotSide).setToZero(swingFootCoMFrame, elevatorFrame, swingFootCoMFrame);
-         }
-         else if (supportSide == robotSide)
-         {
-            if (isVirtualToePointOnEdgeOfFootPolygon(virtualToePoints, robotSide))
-            {
-               doFootPositionControl(robotSide, elevatorFrame, swingFootCoMFrame);               
-            }
-            else
-            {
-               desiredFootAccelerationsInWorld.get(robotSide).setToZero(swingFootCoMFrame, elevatorFrame, swingFootCoMFrame);
-            }
-         }
-         else
-         {
-            doFootPositionControl(robotSide, elevatorFrame, swingFootCoMFrame);
-         }
-      }
-   }
-
-   private boolean isVirtualToePointOnEdgeOfFootPolygon(SideDependentList<FramePoint2d> virtualToePoints, RobotSide robotSide)
-   {
-      FramePoint2d virtualToePoint = virtualToePoints.get(robotSide);
-      FrameConvexPolygon2d footPolygon = bipedSupportPolygons.getFootPolygonInAnkleZUp(robotSide);
-      FrameLineSegment2d closestEdge = footPolygon.getClosestEdge(virtualToePoint);
-      double epsilon = 1e-9;
-      boolean ret = closestEdge.distance(virtualToePoint) < epsilon;
-      return ret;
-   }
-
-   private void doFootPositionControl(RobotSide robotSide, ReferenceFrame elevatorFrame, ReferenceFrame swingFootCoMFrame)
-   {
-      ReferenceFrame footFrame = referenceFrames.getFootFrame(robotSide);
-      Twist twistOfFootWithRespectToElevator = new Twist();
-      twistCalculator.packTwistOfBody(twistOfFootWithRespectToElevator, fullRobotModel.getFoot(robotSide));
-      twistOfFootWithRespectToElevator.changeBodyFrameNoRelativeTwist(footFrame);
-
-      FrameVector linearAcceleration = computeDesiredFootLinearAcceleration(robotSide, twistOfFootWithRespectToElevator);
-      FrameVector angularAcceleration = computeDesiredFootAngularAcceleration(robotSide, twistOfFootWithRespectToElevator);
-
-      desiredFootAccelerationsInWorld.get(robotSide).setToZero(footFrame, elevatorFrame, footFrame);
-      twistOfFootWithRespectToElevator.changeBaseFrameNoRelativeTwist(elevatorFrame);
-      twistOfFootWithRespectToElevator.changeBodyFrameNoRelativeTwist(footFrame);
-      desiredFootAccelerationsInWorld.get(robotSide).setBasedOnOriginAcceleration(angularAcceleration, linearAcceleration,
-              twistOfFootWithRespectToElevator);
-      desiredFootAccelerationsInWorld.get(robotSide).changeBodyFrameNoRelativeAcceleration(swingFootCoMFrame);
-      desiredFootAccelerationsInWorld.get(robotSide).changeFrameNoRelativeMotion(swingFootCoMFrame);
-   }
-
-   private FrameVector computeDesiredFootLinearAcceleration(RobotSide robotSide, Twist twistOfFootWithRespectToElevator)
-   {
-      ReferenceFrame swingFootFrame = referenceFrames.getFootFrame(robotSide);
-      ReferenceFrame supportAnkleZUpFrame = referenceFrames.getAnkleZUpFrame(robotSide.getOppositeSide());
-
-      double kSwingFootPosition = 100.0;
-      double bSwingFootPosition = 20.0;
-
-      FrameVector linearAcceleration = new FrameVector(supportAnkleZUpFrame);
-      stateMachine.packDesiredFootAcceleration(linearAcceleration, robotSide);
-      linearAcceleration.changeFrame(worldFrame);
-
-      FramePoint desiredPosition = new FramePoint(supportAnkleZUpFrame);
-      stateMachine.packDesiredFootPosition(desiredPosition, robotSide);
-      desiredPosition.changeFrame(swingFootFrame);    // position error at this point
-      FrameVector swingFootPositionError = new FrameVector(desiredPosition);
-      swingFootPositionError.changeFrame(worldFrame);
-      swingFootPositionErrorInWorld.set(swingFootPositionError);
-      FrameVector positionTerm = new FrameVector(swingFootPositionError);
-      positionTerm.scale(kSwingFootPosition);
-      linearAcceleration.add(positionTerm);
-
-      FrameVector desiredVelocity = new FrameVector(supportAnkleZUpFrame);
-      stateMachine.packDesiredFootVelocity(desiredVelocity, robotSide);
-      desiredVelocity.changeFrame(linearAcceleration.getReferenceFrame());
-      FrameVector currentVelocity = twistOfFootWithRespectToElevator.getBodyOriginLinearVelocityInBaseFrame();
-      currentVelocity.changeFrame(desiredVelocity.getReferenceFrame());
-      FrameVector velocityTerm = new FrameVector(desiredVelocity);    // desired velocity at this point
-      velocityTerm.sub(currentVelocity);    // velocity error at this point
-      velocityTerm.scale(bSwingFootPosition);    // velocity term
-      linearAcceleration.add(velocityTerm);
-
-      return linearAcceleration;
-   }
-
-   private FrameVector computeDesiredFootAngularAcceleration(RobotSide swingSide, Twist twistOfFootWithRespectToElevator)
-   {
-      ReferenceFrame swingFootFrame = referenceFrames.getFootFrame(swingSide);
-      ReferenceFrame supportAnkleZUpFrame = referenceFrames.getAnkleZUpFrame(swingSide.getOppositeSide());
-
-      Orientation desiredOrientation = new Orientation(supportAnkleZUpFrame);
-      FrameVector desiredAngularVelocity = new FrameVector(swingFootFrame);
-      FrameVector desiredAngularAccelerationFeedForward = new FrameVector(swingFootFrame);
-
-      stateMachine.packDesiredFootOrientation(desiredOrientation, swingSide);
-      stateMachine.packDesiredFootAngularVelocity(desiredAngularVelocity, swingSide);
-      stateMachine.packDesiredFootAngularAcceleration(desiredAngularAccelerationFeedForward, swingSide);
-
-      FrameVector currentAngularVelocity = new FrameVector(twistOfFootWithRespectToElevator.getExpressedInFrame(),
-                                              twistOfFootWithRespectToElevator.getAngularPartCopy());
-      currentAngularVelocity.changeFrame(swingFootFrame);
-
-      FrameVector angularAcceleration = new FrameVector(swingFootFrame);
-      footOrientationControllers.get(swingSide).compute(angularAcceleration, desiredOrientation, desiredAngularVelocity, currentAngularVelocity,
-                                     desiredAngularAccelerationFeedForward);
-
-      return angularAcceleration;
    }
 
    private static void doPDControl(double k, double d, RevoluteJoint[] joints)
