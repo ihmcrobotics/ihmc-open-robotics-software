@@ -52,8 +52,8 @@ public class ResizableBipedFoot implements BipedFootInterface
 
    // Constructor:
    public ResizableBipedFoot(CommonWalkingReferenceFrames referenceFrames, RobotSide robotSide, ArrayList<Point3d> clockwiseToePoints,
-                             ArrayList<Point3d> clockwiseHeelPoints, double maxToePointsBack, double maxHeelPointsForward, DoubleYoVariable time,
-                             YoVariableRegistry yoVariableRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+                             ArrayList<Point3d> clockwiseHeelPoints, double maxToePointsBack, double maxHeelPointsForward, YoVariableRegistry yoVariableRegistry,
+                             DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       registry = new YoVariableRegistry(robotSide + "BipedFoot");
 
@@ -348,14 +348,14 @@ public class ResizableBipedFoot implements BipedFootInterface
    {
       double PREVENT_ROTATION_FACTOR = 0.75;    // 0.8;//0.8;
 
-      return createRectangularRightFoot(PREVENT_ROTATION_FACTOR, PREVENT_ROTATION_FACTOR, footForward, footBack, footWidth, footHeight, referenceFrames, time,
-                                        yoVariableRegistry, dynamicGraphicObjectsListRegistry);
+      return createRectangularRightFoot(PREVENT_ROTATION_FACTOR, PREVENT_ROTATION_FACTOR, footForward, footBack, footWidth, footHeight, referenceFrames, yoVariableRegistry,
+                                        dynamicGraphicObjectsListRegistry);
    }
 
    // Foot creators:
    public static ResizableBipedFoot createRectangularRightFoot(double preventRotationFactorLength, double preventRotationFactorWidth, double footForward,
-           double footBack, double footWidth, double footHeight, CommonWalkingReferenceFrames referenceFrames, DoubleYoVariable time,
-           YoVariableRegistry yoVariableRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+           double footBack, double footWidth, double footHeight, CommonWalkingReferenceFrames referenceFrames, YoVariableRegistry yoVariableRegistry,
+           DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       Point3d frontLeft = new Point3d(preventRotationFactorLength * footForward, preventRotationFactorWidth * footWidth / 2.0, -footHeight);
       Point3d frontRight = new Point3d(preventRotationFactorLength * footForward, -preventRotationFactorWidth * footWidth / 2.0, -footHeight);
@@ -375,12 +375,11 @@ public class ResizableBipedFoot implements BipedFootInterface
       heelPoints.add(hindLeft);
       double maxHeelPointsForward = 0.8;
 
-      return new ResizableBipedFoot(referenceFrames, RobotSide.RIGHT, toePoints, heelPoints, maxToePointsBack, maxHeelPointsForward, time, yoVariableRegistry,
-                                    dynamicGraphicObjectsListRegistry);
+      return new ResizableBipedFoot(referenceFrames, RobotSide.RIGHT, toePoints, heelPoints, maxToePointsBack, maxHeelPointsForward, yoVariableRegistry, dynamicGraphicObjectsListRegistry);
    }
 
-   public ResizableBipedFoot createLeftFootAsMirrorImage(CommonWalkingReferenceFrames referenceFrames, DoubleYoVariable time,
-           YoVariableRegistry yoVariableRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+   public ResizableBipedFoot createLeftFootAsMirrorImage(CommonWalkingReferenceFrames referenceFrames, YoVariableRegistry yoVariableRegistry,
+           DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       if (this.getRobotSide() != RobotSide.RIGHT)
          throw new RuntimeException("Implicit parameter is not a right foot!");
@@ -399,8 +398,8 @@ public class ResizableBipedFoot implements BipedFootInterface
          mirrorHeelPoints.add(new Point3d(heelPoints.get(i).getX(), -heelPoints.get(i).getY(), heelPoints.get(i).getZ()));
       }
 
-      return new ResizableBipedFoot(referenceFrames, RobotSide.LEFT, mirrorToePoints, mirrorHeelPoints, this.maxToePointsBack, this.maxHeelPointsForward, time,
-                                    yoVariableRegistry, dynamicGraphicObjectsListRegistry);
+      return new ResizableBipedFoot(referenceFrames, RobotSide.LEFT, mirrorToePoints, mirrorHeelPoints, this.maxToePointsBack, this.maxHeelPointsForward, yoVariableRegistry,
+                                    dynamicGraphicObjectsListRegistry);
    }
 
    private static FramePoint minXMaxYPointCopy(ArrayList<FramePoint> pointList)
