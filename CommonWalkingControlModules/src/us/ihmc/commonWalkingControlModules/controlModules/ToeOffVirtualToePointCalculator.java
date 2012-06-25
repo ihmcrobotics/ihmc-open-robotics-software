@@ -114,10 +114,9 @@ public class ToeOffVirtualToePointCalculator implements VirtualToePointCalculato
       parentRegistry.addChild(registry);
    }
 
-   public void packVirtualToePoints(SideDependentList<FramePoint2d> virtualToePoints, BipedSupportPolygons bipedSupportPolygons, FramePoint2d copDesired)
+   public void packVirtualToePoints(SideDependentList<FramePoint2d> virtualToePoints, BipedSupportPolygons bipedSupportPolygons, FramePoint2d copDesired, RobotSide upcomingSupportLeg)
    {
       // Find trailing leg
-      RobotSide upcomingSupportLeg = couplingRegistry.getUpcomingSupportLeg();
       RobotSide upcomingSwingLeg = upcomingSupportLeg.getOppositeSide();
 
       // Create new support polygon
@@ -133,7 +132,7 @@ public class ToeOffVirtualToePointCalculator implements VirtualToePointCalculato
             .getX());
       if (useAlternateToePoints)
       {
-         geometricVirtualToePointCalculator.packVirtualToePoints(virtualToePoints, bipedSupportPolygons, copDesired);
+         geometricVirtualToePointCalculator.packVirtualToePoints(virtualToePoints, bipedSupportPolygons, copDesired, upcomingSupportLeg);
          return;
       }
 

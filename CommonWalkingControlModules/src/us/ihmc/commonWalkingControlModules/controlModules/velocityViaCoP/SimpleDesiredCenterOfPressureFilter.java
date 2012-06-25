@@ -9,6 +9,7 @@ import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
+import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.EnumYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
@@ -32,6 +33,7 @@ public class SimpleDesiredCenterOfPressureFilter implements DesiredCenterOfPress
    private final BipedSupportPolygons bipedSupportPolygons;
    private final double controlDT;
    private final FramePoint2d returnedFilteredDesiredCoP = new FramePoint2d(ReferenceFrame.getWorldFrame());
+   private final BooleanYoVariable resetCoPFiltersWhenGoingToDoubleSupport = new BooleanYoVariable("resetCoPFiltersWhenGoingToDoubleSupport", registry);
 
    public SimpleDesiredCenterOfPressureFilter(BipedSupportPolygons bipedSupportPolygons, CommonWalkingReferenceFrames referenceFrames, double controlDT, YoVariableRegistry parentRegistry)
    {
@@ -93,14 +95,17 @@ public class SimpleDesiredCenterOfPressureFilter implements DesiredCenterOfPress
       RobotSide previousSupportLeg = supportLegPreviousTick.getEnumValue();
       if (previousSupportLeg != null)
       {
-         // Don't reset the filters if going to double support. Instead, start the double support phase with the Desired CoP where it was for the single support phase:
+         if (resetCoPFiltersWhenGoingToDoubleSupport.getBooleanValue())
+            resetCoPFilters();
+         else
+         {
+            AlphaFilteredYoFramePoint2d singleSupportDesiredCoP = filteredDesiredCoPsSingleSupport.get(previousSupportLeg);
+            FramePoint2d singleSupportDesiredCoPFramePoint2d = singleSupportDesiredCoP.getFramePoint2dCopy();
+            singleSupportDesiredCoPFramePoint2d.changeFrame(filteredDesiredCoPDoubleSupport.getReferenceFrame());
 
-         AlphaFilteredYoFramePoint2d singleSupportDesiredCoP = filteredDesiredCoPsSingleSupport.get(previousSupportLeg);
-         FramePoint2d singleSupportDesiredCoPFramePoint2d = singleSupportDesiredCoP.getFramePoint2dCopy();
-         singleSupportDesiredCoPFramePoint2d.changeFrame(filteredDesiredCoPDoubleSupport.getReferenceFrame());
-
-         filteredDesiredCoPDoubleSupport.reset();
-         filteredDesiredCoPDoubleSupport.update(singleSupportDesiredCoPFramePoint2d);
+            filteredDesiredCoPDoubleSupport.reset();
+            filteredDesiredCoPDoubleSupport.update(singleSupportDesiredCoPFramePoint2d);
+         }
       }
 
       AlphaFilteredYoFramePoint2d filteredDesiredCoP = filteredDesiredCoPDoubleSupport;
@@ -142,11 +147,19 @@ public class SimpleDesiredCenterOfPressureFilter implements DesiredCenterOfPress
 
    public void setParametersForR2()
    {
-      desiredCoPBreakFrequencyHertz.set(8.84);      
+      desiredCoPBreakFrequencyHertz.set(8.84);   
+      resetCoPFiltersWhenGoingToDoubleSupport.set(false);
    }
    
    public void setParametersForM2V2()
    {
-      desiredCoPBreakFrequencyHertz.set(8.84);      
+      desiredCoPBreakFrequencyHertz.set(8.84);
+      resetCoPFiltersWhenGoingToDoubleSupport.set(false);
+   }
+   
+   public void setParametersForR2InverseDynamics()
+   {
+      desiredCoPBreakFrequencyHertz.set(8.84);   
+      resetCoPFiltersWhenGoingToDoubleSupport.set(true);
    }
 }

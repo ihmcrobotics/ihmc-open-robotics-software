@@ -100,7 +100,7 @@ public class GeometricVirtualToePointCalculator implements VirtualToePointCalcul
     * @param copDesired FramePoint2d
     */
    public void packVirtualToePoints(SideDependentList<FramePoint2d> virtualToePoints,
-         BipedSupportPolygons bipedSupportPolygons, FramePoint2d copDesired)
+         BipedSupportPolygons bipedSupportPolygons, FramePoint2d copDesired, RobotSide upcomingSupportLeg)
    {
       globalTimer.startTimer();
 

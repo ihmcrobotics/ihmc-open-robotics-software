@@ -25,6 +25,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.velocityViaCoP.SpeedCo
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.outputs.ProcessedOutputsInterface;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
+import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.sensors.ProcessedSensorsInterface;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
@@ -82,7 +83,6 @@ public class MomentumBasedController implements RobotController
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final FullRobotModel fullRobotModel;
    private final CommonWalkingReferenceFrames referenceFrames;
-   private final TwistCalculator twistCalculator;
 
    private final SideDependentList<SpatialAccelerationVector> desiredFootAccelerationsInWorld = new SideDependentList<SpatialAccelerationVector>();
    private final YoFrameVector swingFootPositionErrorInWorld = new YoFrameVector("swingFootPositionErrorInWorld", "", worldFrame, registry);
@@ -113,12 +113,11 @@ public class MomentumBasedController implements RobotController
    public MomentumBasedController(ProcessedSensorsInterface processedSensors, ProcessedOutputsInterface processedOutputs,
                                   CommonWalkingReferenceFrames referenceFrames, TwistCalculator twistCalculator, double controlDT,
                                   DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, double footForward, double footBack, double footWidth,
-                                  double footHeight)
+                                  double footHeight, SideDependentList<FootSwitchInterface> footSwitches)
    {
       this.processedSensors = processedSensors;
       this.fullRobotModel = processedSensors.getFullRobotModel();
       this.referenceFrames = referenceFrames;
-      this.twistCalculator = twistCalculator;
       this.processedOutputs = processedOutputs;
       this.visualizer = new CapturabilityBasedDesiredCoPVisualizer(registry, dynamicGraphicObjectsListRegistry);
 
@@ -130,6 +129,11 @@ public class MomentumBasedController implements RobotController
       }
       footPolygonVisualizer = new FootPolygonVisualizer(bipedFeet, dynamicGraphicObjectsListRegistry, registry);
 
+//      ResizableBipedFoot resizableRightFoot = ResizableBipedFoot.createRectangularRightFoot(1.0, 0.95, footForward, footBack, footWidth, footHeight, referenceFrames, registry, dynamicGraphicObjectsListRegistry);
+//      bipedFeet.put(RobotSide.RIGHT, resizableRightFoot);
+//      bipedFeet.put(RobotSide.LEFT, resizableRightFoot.createLeftFootAsMirrorImage(referenceFrames, registry, dynamicGraphicObjectsListRegistry));
+//      footPolygonVisualizer = null;
+      
       ReferenceFrame elevatorFrame = fullRobotModel.getElevatorFrame();
       for (RobotSide robotSide : RobotSide.values())
       {
@@ -152,14 +156,15 @@ public class MomentumBasedController implements RobotController
       bipedFeetUpdater.updateBipedFeet(leftFoot, rightFoot, null, capturePointCalculator.getCapturePointInFrame(midFeetZUp), false);
       bipedSupportPolygons.update(leftFoot, rightFoot);
 
-      this.virtualToePointCalculator = new NewGeometricVirtualToePointCalculator(referenceFrames, registry, dynamicGraphicObjectsListRegistry);
+      double maximumLegStrengthWhenTransferringAway = 0.95;
+      this.virtualToePointCalculator = new NewGeometricVirtualToePointCalculator(referenceFrames, registry, dynamicGraphicObjectsListRegistry, maximumLegStrengthWhenTransferringAway);
 
       SpeedControllingDesiredCoPCalculator desiredCapturePointToDesiredCoPControlModule = new SpeedControllingDesiredCoPCalculator(processedSensors,
                                                                                              referenceFrames, registry, dynamicGraphicObjectsListRegistry);
       desiredCapturePointToDesiredCoPControlModule.setParametersForR2InverseDynamics();
       this.desiredCapturePointToDesiredCoPControlModule = desiredCapturePointToDesiredCoPControlModule;
       desiredCenterOfPressureFilter = new SimpleDesiredCenterOfPressureFilter(bipedSupportPolygons, referenceFrames, controlDT, registry);
-      desiredCenterOfPressureFilter.setParametersForR2();
+      desiredCenterOfPressureFilter.setParametersForR2InverseDynamics();
       this.legStrengthCalculator = new TeeterTotterLegStrengthCalculator(registry);
 
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
@@ -168,7 +173,7 @@ public class MomentumBasedController implements RobotController
       this.totalMass = TotalMassCalculator.computeSubTreeMass(elevator);
       orientationControlModule.setupParametersForR2();
 
-      stateMachine = new MomentumBasedControllerStateMachine(fullRobotModel, referenceFrames, twistCalculator, bipedSupportPolygons, processedSensors,
+      stateMachine = new MomentumBasedControllerStateMachine(fullRobotModel, referenceFrames, twistCalculator, bipedSupportPolygons, footSwitches, processedSensors,
               processedSensors.getYoTime(), controlDT, footHeight, registry);
       optimizer = new MomentumBasedPelvisAccelerationOptimizer(fullRobotModel, twistCalculator, referenceFrames.getCenterOfMassFrame(), registry, controlDT);
 
@@ -212,7 +217,8 @@ public class MomentumBasedController implements RobotController
       BipedFootInterface rightFoot = bipedFeet.get(RobotSide.RIGHT);
       bipedFeetUpdater.updateBipedFeet(leftFoot , rightFoot, stateMachine.getSupportLeg(), capturePointCalculator.getCapturePointInFrame(midFeetZUp), false);
       bipedSupportPolygons.update(leftFoot, rightFoot);
-      footPolygonVisualizer.update();
+      if (footPolygonVisualizer != null)
+         footPolygonVisualizer.update();
 
       ReferenceFrame frame;
       if (stateMachine.getSupportLeg() == null)
@@ -220,12 +226,10 @@ public class MomentumBasedController implements RobotController
       else
          frame = referenceFrames.getAnkleZUpFrame(stateMachine.getSupportLeg());
 
-      double gravity = -processedSensors.getGravityInWorldFrame().getZ();
       double comHeight = processedSensors.getCenterOfMassPositionInFrame(frame).getZ();
 
       stateMachine.setCapturePoint(capturePointCalculator.getCapturePoint2dInFrame(midFeetZUp));
-      stateMachine.setPreviousLegStrengths(legStrengths);
-      stateMachine.setGravity(gravity);
+      stateMachine.setPreviousCoP(desiredCoP.getFramePoint2dCopy());
       stateMachine.setCoMHeight(comHeight);
       stateMachine.checkTransitionConditionsThoroughly();
       stateMachine.doAction();
@@ -259,18 +263,15 @@ public class MomentumBasedController implements RobotController
       if (supportLeg == null)
       {
          frame = midFeetZUp;
-         virtualToePointCalculator.packVirtualToePoints(virtualToePoints, bipedSupportPolygons, desiredCoP);
-         legStrengthCalculator.packLegStrengths(legStrengths, virtualToePoints, desiredCoP);
+         virtualToePointCalculator.packVirtualToePoints(virtualToePoints, bipedSupportPolygons, desiredCoP, stateMachine.getUpcomingSupportLeg());
       }
       else
       {
          frame = referenceFrames.getAnkleZUpFrame(supportLeg);
          virtualToePoints.put(supportLeg, desiredCoP);
-         legStrengths.put(supportLeg, 1.0);
-
          virtualToePoints.put(supportLeg.getOppositeSide(), new FramePoint2d(frame));
-         legStrengths.put(supportLeg.getOppositeSide(), 0.0);
       }
+      legStrengthCalculator.packLegStrengths(legStrengths, virtualToePoints, desiredCoP);
 
       double fZ = centerOfMassHeightControlModule.doCenterOfMassHeightControl(stateMachine.getDesiredCoMHeight(), stateMachine.getDesiredCoMHeightVelocity(),
                      stateMachine.getDesiredCoMHeightAcceleration(), supportLeg);
