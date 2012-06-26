@@ -120,7 +120,7 @@ public class BalanceSupportControlModule
       couplingRegistry.setDesiredCoP(desiredCoP);
 
       // compute VTPs and leg strengths
-      virtualToePointCalculator.packVirtualToePoints(virtualToePoints, bipedSupportPolygons, desiredCoP, loadingLeg);
+      virtualToePointCalculator.packVirtualToePoints(virtualToePoints, bipedSupportPolygons, desiredCoP, couplingRegistry.getUpcomingSupportLeg());
       legStrengthCalculator.packLegStrengths(legStrengths, virtualToePoints, desiredCoP);
 
       // compute desired torques on the pelvis using PelvisOrientationControlModule.
