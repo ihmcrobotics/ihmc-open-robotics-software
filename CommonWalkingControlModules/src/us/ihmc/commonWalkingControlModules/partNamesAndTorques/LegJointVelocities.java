@@ -4,8 +4,6 @@ import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.robotSide.RobotSide;
 
-import com.mathworks.jama.Matrix;
-
 public class LegJointVelocities
 {
    private final LegJointName[] legJointNames;
@@ -74,21 +72,6 @@ public class LegJointVelocities
 //         jointVelocities.put(legJointName, Double.NaN);
          setJointVelocity(legJointName, Double.NaN);
       }
-   }
-
-
-   @Deprecated
-   public Matrix toMatrix()
-   {
-      int size = legJointNames.length;
-      Matrix ret = new Matrix(size, 1);
-
-      for (int i = 0; i < size; i++)
-      {
-         ret.set(i, 0, getJointVelocity(legJointNames[i])); //jointVelocities.get(legJointNames[i]));
-      }
-
-      return ret;
    }
    
    public DenseMatrix64F toDenseMatrix()
