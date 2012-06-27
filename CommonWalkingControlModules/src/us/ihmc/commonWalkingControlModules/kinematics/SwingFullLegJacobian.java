@@ -99,8 +99,8 @@ public class SwingFullLegJacobian
 
    public DenseMatrix64F computeJointAccelerations(SpatialAccelerationVector accelerationOfFootWithRespectToBody, SpatialAccelerationVector jacobianDerivativeTerm, double alpha)
    {
-      DenseMatrix64F biasedAccelerations = accelerationOfFootWithRespectToBody.toDenseMatrix();    // unbiased at this point
-      DenseMatrix64F bias = jacobianDerivativeTerm.toDenseMatrix();
+      DenseMatrix64F biasedAccelerations = accelerationOfFootWithRespectToBody.toMatrix();    // unbiased at this point
+      DenseMatrix64F bias = jacobianDerivativeTerm.toMatrix();
       CommonOps.subEquals(biasedAccelerations, bias);
       DenseMatrix64F ret = geometricJacobian.solveUsingDampedLeastSquares(biasedAccelerations, alpha);
 

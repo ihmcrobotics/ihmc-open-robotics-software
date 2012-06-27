@@ -8,15 +8,16 @@ import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
+import org.ejml.data.DenseMatrix64F;
 import org.junit.Test;
 
 import us.ihmc.utilities.RandomTools;
+import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.geometry.CenterOfMassReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RotationFunctions;
 import us.ihmc.utilities.test.JUnitTools;
 
-import com.mathworks.jama.Matrix;
 import com.yobotics.simulationconstructionset.FloatingJoint;
 import com.yobotics.simulationconstructionset.Link;
 import com.yobotics.simulationconstructionset.PinJoint;
@@ -38,14 +39,13 @@ public class CentroidalMomentumMatrixTest
 
       int numberOfJoints = 3;
       InverseDynamicsCalculatorTest.createRandomTreeRobotAndSetJointPositionsAndVelocities(robot, jointMap, worldFrame, elevator, numberOfJoints, gravity,
-              true, true, random);
+            true, true, random);
       robot.updateVelocities();
 
       CenterOfMassReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("com", worldFrame, elevator);
       centerOfMassFrame.update();
       CentroidalMomentumMatrix centroidalMomentumMatrix = new CentroidalMomentumMatrix(elevator, centerOfMassFrame);
       centroidalMomentumMatrix.compute();
-
 
       Momentum comMomentum = computeCoMMomentum(elevator, centerOfMassFrame, centroidalMomentumMatrix);
 
@@ -58,7 +58,6 @@ public class CentroidalMomentumMatrixTest
       JUnitTools.assertTuple3dEquals(angularMomentum, comMomentum.getAngularPart(), 1e-12);
    }
 
-
    @Test
    public void testFloatingBody()
    {
@@ -67,7 +66,7 @@ public class CentroidalMomentumMatrixTest
       double mass = random.nextDouble();
       Matrix3d momentOfInertia = RandomTools.getRandomDiagonalMatrix3d(random);
       Vector3d comOffset = RandomTools.getRandomVector(random);
-      
+
       Robot robot = new Robot("robot");
       FloatingJoint rootJoint = new FloatingJoint("rootJoint", new Vector3d(), robot);
       Link link = new Link("link");
@@ -85,7 +84,7 @@ public class CentroidalMomentumMatrixTest
 
       CenterOfMassReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("com", worldFrame, elevator);
       CentroidalMomentumMatrix centroidalMomentumMatrix = new CentroidalMomentumMatrix(elevator, centerOfMassFrame);
-      
+
       int nTests = 10;
       for (int i = 0; i < nTests; i++)
       {
@@ -96,7 +95,7 @@ public class CentroidalMomentumMatrixTest
          Vector3d linearVelocityInWorld = new Vector3d(linearVelocityInBody);
          rotation.transform(linearVelocityInWorld);
          Vector3d angularVelocity = RandomTools.getRandomVector(random);
-         
+
          rootJoint.setPosition(position);
          rootJoint.setRotation(rotation);
          rootJoint.setVelocity(linearVelocityInWorld);
@@ -128,11 +127,13 @@ public class CentroidalMomentumMatrixTest
 
    public static Momentum computeCoMMomentum(RigidBody elevator, ReferenceFrame centerOfMassFrame, CentroidalMomentumMatrix centroidalMomentumMatrix)
    {
-      Matrix mat = centroidalMomentumMatrix.getMatrix();
+      DenseMatrix64F mat = centroidalMomentumMatrix.getMatrix();
       InverseDynamicsJoint[] jointList = ScrewTools.computeJointsInOrder(elevator);
-      Matrix jointVelocities = new Matrix(ScrewTools.computeDegreesOfFreedom(jointList), 1);
+      DenseMatrix64F jointVelocities = new DenseMatrix64F(ScrewTools.computeDegreesOfFreedom(jointList), 1);
       ScrewTools.packJointVelocitiesMatrix(jointList, jointVelocities);
-      Matrix comMomentumMatrix = mat.times(jointVelocities);
+
+      DenseMatrix64F comMomentumMatrix = MatrixTools.mult(mat, jointVelocities);
+
       Momentum comMomentum = new Momentum(centerOfMassFrame, comMomentumMatrix);
 
       return comMomentum;

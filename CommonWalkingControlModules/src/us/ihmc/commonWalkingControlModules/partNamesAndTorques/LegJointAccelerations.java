@@ -2,17 +2,16 @@ package us.ihmc.commonWalkingControlModules.partNamesAndTorques;
 
 import us.ihmc.robotSide.RobotSide;
 
-import com.mathworks.jama.Matrix;
-
 public class LegJointAccelerations
 {
    private final LegJointName[] legJointNames;
-   
-   /* 
-    * Converting from Double to double and visa-versa creates new objects and is slow 
+
+   /*
+    * Converting from Double to double and visa-versa creates new objects and is
+    * slow
     */
-   
-//   private final EnumMap<LegJointName, Double> jointAccelerations;
+
+   //   private final EnumMap<LegJointName, Double> jointAccelerations;
    private final double[] jointAccelerations = new double[LegJointName.values().length];
    private final RobotSide robotSide;
 
@@ -29,7 +28,7 @@ public class LegJointAccelerations
    public LegJointAccelerations(LegJointName[] legJointNames, RobotSide robotSide)
    {
       this.legJointNames = legJointNames;
-//      jointAccelerations = new EnumMap<LegJointName, Double>(LegJointName.class);
+      //      jointAccelerations = new EnumMap<LegJointName, Double>(LegJointName.class);
 
       this.robotSide = robotSide;
       setJointAccelerationsToNAN();
@@ -42,13 +41,13 @@ public class LegJointAccelerations
 
    public double getJointAcceleration(LegJointName legJointName)
    {
-//      return jointAccelerations.get(legJointName);
+      //      return jointAccelerations.get(legJointName);
       return jointAccelerations[legJointName.ordinal()];
    }
 
    public void setJointAcceleration(LegJointName legJointName, double jointAcceleration)
    {
-//      jointAccelerations.put(legJointName, jointAcceleration);
+      //      jointAccelerations.put(legJointName, jointAcceleration);
       jointAccelerations[legJointName.ordinal()] = jointAcceleration;
    }
 
@@ -56,11 +55,11 @@ public class LegJointAccelerations
    {
       if (jointAccelerations.length != this.legJointNames.length)
          throw new RuntimeException("joint angles length must match this.jointAccelerations length, torques.length=" + jointAccelerations.length
-                                    + ", expected length=" + this.legJointNames.length);
+               + ", expected length=" + this.legJointNames.length);
 
       for (int i = 0; i < legJointNames.length; i++)
       {
-//         this.jointAccelerations.put(legJointNames[i], jointAccelerations[i]);
+         //         this.jointAccelerations.put(legJointNames[i], jointAccelerations[i]);
          setJointAcceleration(legJointNames[i], jointAccelerations[i]);
       }
    }
@@ -69,23 +68,9 @@ public class LegJointAccelerations
    {
       for (LegJointName legJointName : legJointNames)
       {
-//         jointAccelerations.put(legJointName, Double.NaN);
+         //         jointAccelerations.put(legJointName, Double.NaN);
          setJointAcceleration(legJointName, Double.NaN);
       }
-   }
-
-
-   public Matrix toMatrix()
-   {
-      int size = legJointNames.length;
-      Matrix ret = new Matrix(size, 1);
-
-      for (int i = 0; i < size; i++)
-      {
-         ret.set(i, 0, getJointAcceleration(legJointNames[i]));//jointAccelerations.get(legJointNames[i]));
-      }
-
-      return ret;
    }
 
    public String toString()
@@ -102,9 +87,9 @@ public class LegJointAccelerations
 
    public void set(LegJointAccelerations legJointAccelerations)
    {
-      if(this.robotSide != legJointAccelerations.robotSide)
+      if (this.robotSide != legJointAccelerations.robotSide)
          throw new RuntimeException("Wrong side!");
-      
+
       for (LegJointName legJointName : legJointNames)
       {
          setJointAcceleration(legJointName, legJointAccelerations.getJointAcceleration(legJointName));
