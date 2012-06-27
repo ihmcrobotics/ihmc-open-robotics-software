@@ -1763,6 +1763,9 @@ public class LinkGraphics
       Vector3d ellipsoidRadii = InertiaTools.getInertiaEllipsoidRadii(principalMomentsOfInertia, mass);
 
       this.addEllipsoid(ellipsoidRadii.x, ellipsoidRadii.y, ellipsoidRadii.z, appearance);
+      
+      comOffSet.scale(-1.0);
+      this.translate(comOffSet); // translate back
    }
 
    

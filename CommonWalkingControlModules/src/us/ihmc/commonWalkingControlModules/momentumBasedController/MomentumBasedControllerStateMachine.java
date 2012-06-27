@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController;
 
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedFootInterface;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.calculators.MaximumICPVelocityCalculator;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.BoxDesiredFootstepCalculator;
@@ -31,6 +32,7 @@ import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.utilities.screwTheory.Twist;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 
+import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.EnumYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
@@ -41,6 +43,7 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector2d;
 import com.yobotics.simulationconstructionset.util.statemachines.State;
 import com.yobotics.simulationconstructionset.util.statemachines.StateMachine;
 import com.yobotics.simulationconstructionset.util.statemachines.StateTransition;
+import com.yobotics.simulationconstructionset.util.statemachines.StateTransitionAction;
 import com.yobotics.simulationconstructionset.util.statemachines.StateTransitionCondition;
 
 public class MomentumBasedControllerStateMachine extends StateMachine
@@ -61,6 +64,7 @@ public class MomentumBasedControllerStateMachine extends StateMachine
    private final FullRobotModel fullRobotModel;
    private final CommonWalkingReferenceFrames referenceFrames;
    private final TwistCalculator twistCalculator;
+   private final SideDependentList<BipedFootInterface> bipedFeet;
    private final BipedSupportPolygons bipedSupportPolygons;
    private final SideDependentList<CartesianTrajectoryGenerator> cartesianTrajectoryGenerators = new SideDependentList<CartesianTrajectoryGenerator>();
    private final double controlDT;
@@ -98,18 +102,20 @@ public class MomentumBasedControllerStateMachine extends StateMachine
    private final double initialGroundClearance = 0.1;    // 0.15 for stairs
 
    private final DoubleYoVariable singleSupportICPGlideScaleFactor = new DoubleYoVariable("singleSupportICPGlideScaleFactor", registry);
+   private final BooleanYoVariable walk = new BooleanYoVariable("walk", registry);
 
    private double comHeight;
    private double gravity;
 
    public MomentumBasedControllerStateMachine(FullRobotModel fullRobotModel, CommonWalkingReferenceFrames referenceFrames, TwistCalculator twistCalculator,
-           BipedSupportPolygons bipedSupportPolygons, SideDependentList<FootSwitchInterface> footSwitches, ProcessedSensorsInterface processedSensors,
-           DoubleYoVariable t, double controlDT, double footHeight, YoVariableRegistry parentRegistry)
+           SideDependentList<BipedFootInterface> bipedFeet, BipedSupportPolygons bipedSupportPolygons, SideDependentList<FootSwitchInterface> footSwitches,
+           ProcessedSensorsInterface processedSensors, DoubleYoVariable t, double controlDT, double footHeight, YoVariableRegistry parentRegistry)
    {
       super(name + "State", name + "SwitchTime", MomentumBasedControllerState.class, t, registry);
       this.fullRobotModel = fullRobotModel;
       this.referenceFrames = referenceFrames;
       this.twistCalculator = twistCalculator;
+      this.bipedFeet = bipedFeet;
       this.bipedSupportPolygons = bipedSupportPolygons;
       this.controlDT = controlDT;
       this.desiredHeadingControlModule = new SimpleDesiredHeadingControlModule(0.0, controlDT, registry);
@@ -121,10 +127,10 @@ public class MomentumBasedControllerStateMachine extends StateMachine
          icpTrajectoryGenerators.put(supportSide, new ConstantCoPInstantaneousCapturePointTrajectory(supportSide, bipedSupportPolygons, gravity, controlDT));
       }
 
-//    SimpleDesiredFootstepCalculator simpleDesiredFootstepCalculator = new SimpleDesiredFootstepCalculator(referenceFrames.getAnkleZUpReferenceFrames(),
-//                                                                         desiredHeadingControlModule, registry);    // TODO: pass in
-//    simpleDesiredFootstepCalculator.setupParametersForR2InverseDynamics();
-//    this.desiredFootstepCalculator = simpleDesiredFootstepCalculator;
+//      SimpleDesiredFootstepCalculator simpleDesiredFootstepCalculator = new SimpleDesiredFootstepCalculator(referenceFrames.getAnkleZUpReferenceFrames(),
+//            desiredHeadingControlModule, registry);    // TODO: pass in
+//            simpleDesiredFootstepCalculator.setupParametersForR2InverseDynamics();
+//            this.desiredFootstepCalculator = simpleDesiredFootstepCalculator;
 
       BoxDesiredFootstepCalculator boxDesiredFootstepCalculator = new BoxDesiredFootstepCalculator(referenceFrames.getAnkleZUpReferenceFrames(),
                                                                      desiredHeadingControlModule, registry);
@@ -179,8 +185,8 @@ public class MomentumBasedControllerStateMachine extends StateMachine
 
       this.capturePoint = new FramePoint2d(ReferenceFrame.getWorldFrame());
       this.previousCoP = new FramePoint2d(ReferenceFrame.getWorldFrame());
-      upcomingSupportLeg.set(RobotSide.LEFT);
       upcomingSupportLeg.set(RobotSide.RIGHT);
+      walk.set(true);
 
       setUpStateMachine();
       parentRegistry.addChild(registry);
@@ -201,13 +207,15 @@ public class MomentumBasedControllerStateMachine extends StateMachine
       for (RobotSide robotSide : RobotSide.values())
       {
          State transferState = new DoubleSupportState(robotSide);
+         StateTransition toDoubleSupport = new StateTransition(doubleSupportState.getStateEnum(), new StopWalkingCondition(), new ResetICPTrajectoryAction());
+         transferState.addStateTransition(toDoubleSupport);
          StateTransition toSingleSupport = new StateTransition(singleSupportStateEnums.get(robotSide), new DoneWithTransferCondition(robotSide));
          transferState.addStateTransition(toSingleSupport);
          addState(transferState);
 
          State singleSupportState = new SingleSupportState(robotSide);
-         StateTransition toDoubleSupport = new StateTransition(transferStateEnums.get(robotSide.getOppositeSide()), new DoneWithSingleSupportCondition());
-         singleSupportState.addStateTransition(toDoubleSupport);
+         StateTransition toTransfer = new StateTransition(transferStateEnums.get(robotSide.getOppositeSide()), new DoneWithSingleSupportCondition());
+         singleSupportState.addStateTransition(toTransfer);
          addState(singleSupportState);
       }
 
@@ -360,7 +368,7 @@ public class MomentumBasedControllerStateMachine extends StateMachine
       @Override
       public void doTransitionIntoAction()
       {
-         supportLeg.set(null);
+         setSupportLeg(null);
 
          for (RobotSide robotSide : RobotSide.values())
          {
@@ -435,7 +443,7 @@ public class MomentumBasedControllerStateMachine extends StateMachine
       public void doTransitionIntoAction()
       {
          RobotSide supportSide = swingSide.getOppositeSide();
-         supportLeg.set(supportSide);
+         setSupportLeg(supportSide);
 
          setDesiredFootPosVelAccForSupportSide(supportSide);
 
@@ -482,7 +490,10 @@ public class MomentumBasedControllerStateMachine extends StateMachine
 
       public boolean checkCondition()
       {
-         return (robotSide == upcomingSupportLeg.getEnumValue()) && (timeInCurrentState() > doubleSupportTime);
+         boolean doubleSupportTimeHasPassed = timeInCurrentState() > doubleSupportTime;
+         boolean transferringToThisRobotSide = robotSide == upcomingSupportLeg.getEnumValue();
+
+         return walk.getBooleanValue() && transferringToThisRobotSide && doubleSupportTimeHasPassed;
       }
    }
 
@@ -521,19 +532,32 @@ public class MomentumBasedControllerStateMachine extends StateMachine
    }
 
 
+   public class StopWalkingCondition implements StateTransitionCondition
+   {
+      public boolean checkCondition()
+      {
+         return !walk.getBooleanValue();
+      }
+   }
+
+
+   public class ResetICPTrajectoryAction implements StateTransitionAction
+   {
+      public void doTransitionAction()
+      {
+         for (RobotSide robotSide : RobotSide.values())
+         {
+            icpTrajectoryGenerators.get(robotSide).reset();
+         }
+      }
+   }
+
+
    public void setCapturePoint(FramePoint2d capturePoint)
    {
       capturePoint.changeFrame(this.capturePoint.getReferenceFrame());
       this.capturePoint.set(capturePoint);
    }
-
-// public void setPreviousLegStrengths(SideDependentList<Double> legStrengths)
-// {
-//    for (RobotSide robotSide : RobotSide.values())
-//    {
-//       previousLegStrengths.put(robotSide, legStrengths.get(robotSide));
-//    }
-// }
 
    public void setPreviousCoP(FramePoint2d previousCoP)
    {
@@ -626,9 +650,20 @@ public class MomentumBasedControllerStateMachine extends StateMachine
 
    public boolean isSwingFoot(RobotSide robotSide)
    {
-      if (supportLeg.getEnumValue() == null)
+      if (getSupportLeg() == null)
          return false;
       else
-         return supportLeg.getEnumValue().getOppositeSide() == robotSide;
+         return getSupportLeg().getOppositeSide() == robotSide;
+   }
+
+   private void setSupportLeg(RobotSide supportLeg)
+   {
+      this.supportLeg.set(supportLeg);
+      for (RobotSide robotSide : RobotSide.values())
+      {
+         boolean isSupportingFoot = supportLeg == robotSide || supportLeg == null;
+         bipedFeet.get(robotSide).setIsSupportingFoot(isSupportingFoot);
+      }
+      bipedSupportPolygons.update(bipedFeet.get(RobotSide.LEFT), bipedFeet.get(RobotSide.RIGHT));
    }
 }
