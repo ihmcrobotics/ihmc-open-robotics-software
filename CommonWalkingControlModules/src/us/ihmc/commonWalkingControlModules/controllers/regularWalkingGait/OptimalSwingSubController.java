@@ -10,8 +10,7 @@ import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculator;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredHeadingControlModule;
-import us.ihmc.commonWalkingControlModules.kinematics.BodyPositionInTimeEstimator;
-import us.ihmc.commonWalkingControlModules.kinematics.LegInverseKinematicsCalculator;
+import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.kinematics.SwingLegAnglesAtEndOfStepEstimator;
 import us.ihmc.commonWalkingControlModules.optimalSwing.LegTorqueData;
 import us.ihmc.commonWalkingControlModules.optimalSwing.SwingParameters;
@@ -96,6 +95,8 @@ public class OptimalSwingSubController implements SwingSubController
    private final DoubleYoVariable initialHipYawAngle = new DoubleYoVariable("intialHipYawAngle", registry);
    private final QuinticSplineInterpolator hipYawPositionInterpolator = new QuinticSplineInterpolator("hipYawInterpolator", 2, 1, registry);
    private final PDController hipYawAngleController = new PDController("HipYawAngleController", registry);
+   private final PDController ankleRollController = new PDController("AnkleRollController", registry);
+   private final PDController anklePitchController = new PDController("AnklePitchController", registry);
    
    private final DoubleYoVariable ikAlpha = new DoubleYoVariable("ikAlpha", registry);
    
@@ -111,11 +112,12 @@ public class OptimalSwingSubController implements SwingSubController
    private final ReferenceFrame desiredHeadingFrame;
 
    private final double controlDT;
+   
 
 
 
    public OptimalSwingSubController(ProcessedSensorsInterface processedSensors, ProcessedOutputsInterface processedOutputs,
-         CommonWalkingReferenceFrames referenceFrames, DesiredFootstepCalculator desiredFootstepCalculator,
+         CommonWalkingReferenceFrames referenceFrames, FullRobotModel fullRobotModel, DesiredFootstepCalculator desiredFootstepCalculator,
          SideDependentList<FootSwitchInterface> footSwitches, CouplingRegistry couplingRegistry, 
          SwingParameters swingParameters, LegTorqueData legTorqueData, SwingLegTorqueControlOnlyModule swingLegTorqueControlModule,
          DesiredHeadingControlModule desiredHeadingControlModule, SideDependentList<LegJointPositionControlModule> legJointPositionControlModules,
@@ -179,10 +181,16 @@ public class OptimalSwingSubController implements SwingSubController
       setEstimatedSwingTimeRemaining(swingDuration.getDoubleValue());
       ikAlpha.set(0.07);
       
-      desiredAccelerationBreakFrequency.set(10.0);
+      desiredAccelerationBreakFrequency.set(25.0);
       
       hipYawAngleController.setProportionalGain(120.0);
       hipYawAngleController.setDerivativeGain(2.0);
+      
+      anklePitchController.setProportionalGain(40.0);
+      anklePitchController.setDerivativeGain(2.0);
+      
+      ankleRollController.setProportionalGain(40.0);
+      ankleRollController.setDerivativeGain(2.0);
    }
 
 
@@ -286,7 +294,20 @@ public class OptimalSwingSubController implements SwingSubController
       
       LegJointPositions finalDesiredLegJointPositions = desiredJointAngles.get(robotSide);
       LegJointVelocities finalDesiredLegJointVelocities = desiredJointVelocities.get(robotSide);
+//      FramePoint desiredStepLocation = desiredPositions.get(robotSide).getFramePointCopy();
+//      desiredStepLocation.changeFrame(referenceFrames.getLegJointFrame(robotSide, LegJointName.HIP_YAW));
+//      swingParameters.setDesiredStepLocationInHipYawFrame(desiredStepLocation.getPoint());
       
+//      FramePoint currentFootLocation = new FramePoint(referenceFrames.getAnkleZUpFrame(robotSide));
+//      currentFootLocation.changeFrame(referenceFrames.getLegJointFrame(robotSide, LegJointName.HIP_YAW));
+//      swingParameters.setcurrentFootLocation(currentFootLocation.getPoint());
+      
+      
+      
+//      FramePoint hip = new FramePoint(referenceFrames.getLegJointFrame(robotSide, LegJointName.HIP_YAW));
+//      hip.changeFrame(referenceFrames.getAnkleZUpFrame(robotSide));
+//      
+//      swingParameters.setHipHeight(hip.getZ());
       
       // Control hip yaw angle in desiredHeadingFrame
       
@@ -299,6 +320,7 @@ public class OptimalSwingSubController implements SwingSubController
          swingParameters.setDesiredJointPosition(robotSide, jointName, finalDesiredLegJointPositions.getJointPosition(jointName));
          swingParameters.setDesiredJointVelocity(robotSide, jointName, finalDesiredLegJointVelocities.getJointVelocity(jointName));
       }
+      
       
       if(legTorqueData.isDataValid())
       {
@@ -317,7 +339,7 @@ public class OptimalSwingSubController implements SwingSubController
             filteredDesiredJointAccelerations.get(jointName).setAlpha(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(desiredAccelerationBreakFrequency.getDoubleValue(), controlDT));
             filteredDesiredJointAccelerations.get(jointName).update(legTorqueData.getDesiredJointAcceleration(jointName));
             
-            legJointAccelerations.setJointAcceleration(jointName,  filteredDesiredJointAccelerations.get(jointName).getDoubleValue());
+            legJointAccelerations.setJointAcceleration(jointName,  legTorqueData.getDesiredJointAcceleration(jointName)); //filteredDesiredJointAccelerations.get(jointName).getDoubleValue());
          }
 //   
 //         Orientation footOrientation = new Orientation(groundPlaneFrame, legJointPositions.getJointPosition(LegJointName.HIP_YAW), 0.0, 0.0);
@@ -362,6 +384,23 @@ public class OptimalSwingSubController implements SwingSubController
             processedSensors.getLegJointVelocity(robotSide, LegJointName.HIP_YAW), desiredHipYawVelocity);
       
       legTorques.setTorque(LegJointName.HIP_YAW, hipYawTorque);
+      
+      
+      /*
+       * HACK: Control ankle orientation
+       */
+      
+      ReferenceFrame beforeAnklePitchFrame = referenceFrames.getLegJointFrame(robotSide, LegJointName.KNEE);
+      
+      Orientation flatFootOrientation = new Orientation(referenceFrames.getAnkleZUpFrame(robotSide));
+      flatFootOrientation.changeFrame(beforeAnklePitchFrame);
+      double[] yawPitchRoll = flatFootOrientation.getYawPitchRoll();
+    
+      double anklePitchTorque = anklePitchController.computeForAngles(processedSensors.getLegJointPosition(robotSide, LegJointName.ANKLE_PITCH), yawPitchRoll[1], processedSensors.getLegJointVelocity(robotSide, LegJointName.ANKLE_PITCH), 0.0);
+      double ankleRollTorque = ankleRollController.computeForAngles(processedSensors.getLegJointPosition(robotSide, LegJointName.ANKLE_ROLL), yawPitchRoll[2], processedSensors.getLegJointVelocity(robotSide, LegJointName.ANKLE_ROLL), 0.0);
+      
+      legTorques.setTorque(LegJointName.ANKLE_PITCH, anklePitchTorque);
+      legTorques.setTorque(LegJointName.ANKLE_ROLL, ankleRollTorque);
       
       
 
@@ -422,7 +461,7 @@ public class OptimalSwingSubController implements SwingSubController
       boolean inStateLongEnough = timeInState > 0.05;
       boolean isCoMPastSweetSpot = comProjection.getX() > sweetSpot.getX();
 
-      return inStateLongEnough && isCoMPastSweetSpot;
+      return inStateLongEnough || isCoMPastSweetSpot;
    }
 
    public boolean isDoneWithMidSwing(RobotSide swingSide, double timeInState)
@@ -439,7 +478,7 @@ public class OptimalSwingSubController implements SwingSubController
 
       if (capturePointInsideSupportFoot) return false; // Don't go in double support if ICP is still in support foot.
       
-      return (footOnGround && minimumTerminalSwingTimePassed);
+      return (footOnGround && minimumTerminalSwingTimePassed && true);
 
    }
 

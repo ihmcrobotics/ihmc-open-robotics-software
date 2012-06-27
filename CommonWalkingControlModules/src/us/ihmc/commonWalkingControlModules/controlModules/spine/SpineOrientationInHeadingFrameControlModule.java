@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controlModules.spine;
 
+import org.ejml.data.DenseMatrix64F;
+
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.SpineControlModule;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredHeadingControlModule;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.SpineJointName;
@@ -11,7 +13,6 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.GeometricJacobian;
 import us.ihmc.utilities.screwTheory.Wrench;
 
-import com.mathworks.jama.Matrix;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.AxisAngleOrientationController;
@@ -73,7 +74,7 @@ public class SpineOrientationInHeadingFrameControlModule implements SpineControl
       chestWrench.setAngularPart(chestTorque.getVector());
 
       spineJacobian.compute();
-      Matrix spineJointTorques = spineJacobian.computeJointTorques(chestWrench);
+      DenseMatrix64F spineJointTorques = spineJacobian.computeJointTorques(chestWrench);
       // FIXME: magic numbers for indices: 
       spineTorquesToPack.setTorque(SpineJointName.SPINE_PITCH, spineJointTorques.get(2, 0));
       spineTorquesToPack.setTorque(SpineJointName.SPINE_YAW, spineJointTorques.get(1, 0));

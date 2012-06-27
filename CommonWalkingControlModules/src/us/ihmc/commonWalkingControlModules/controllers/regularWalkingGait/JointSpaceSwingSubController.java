@@ -91,6 +91,8 @@ public class JointSpaceSwingSubController implements SwingSubController
    
    
    private final SwingLegTorqueControlOnlyModule torqueControlModule;
+   
+   private final BooleanYoVariable useBodyPositionEstimation;
 
    private final ProcessedOutputsInterface processedOutputs;
 
@@ -155,9 +157,18 @@ public class JointSpaceSwingSubController implements SwingSubController
       positionErrorAtEndOfStepX = new DoubleYoVariable("positionErrorAtEndOfStepX", registry);
       positionErrorAtEndOfStepY = new DoubleYoVariable("positionErrorAtEndOfStepY", registry);
 
+      
+      useBodyPositionEstimation = new BooleanYoVariable("useBodyPositionEstimation", registry);
+      useBodyPositionEstimation.set(true);
+      
       parentRegistry.addChild(registry);
    }
 
+   public void setUseBodyPositionEstimation(boolean val)
+   {
+      useBodyPositionEstimation.set(val);
+   }
+   
    public void setParametersForM2V2Walking()
    {
 //      swingDuration.set(0.65);
@@ -236,7 +247,8 @@ public class JointSpaceSwingSubController implements SwingSubController
    private void doSwing(LegTorques legTorques, double timeInSwing, boolean useBodyPositionEstimation)
    {
       RobotSide swingLeg = legTorques.getRobotSide();
-
+      useBodyPositionEstimation = useBodyPositionEstimation & this.useBodyPositionEstimation.getBooleanValue();
+      updateDesiredPositions(swingLeg);
       FramePoint desiredPosition = desiredPositions.get(swingLeg).getFramePointCopy();
       Orientation desiredOrientation = desiredOrientations.get(swingLeg).getFrameOrientationCopy();
 
@@ -346,11 +358,10 @@ public class JointSpaceSwingSubController implements SwingSubController
       gravityCompensationTrajectory.setParams(0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, compensateGravityForSwingLegTime.getDoubleValue());
    }
 
-   public void doTransitionIntoInitialSwing(RobotSide swingSide)
+   
+   private void updateDesiredPositions(RobotSide swingSide)
    {
       Footstep desiredFootstep = couplingRegistry.getDesiredFootstep();
-      
-      initializeToCurrentJointValues(swingSide);
       FramePose desiredFootstepPose = desiredFootstep.getFootstepPose();
       
       FramePoint endPoint = new FramePoint(desiredFootstepPose.getPosition());
@@ -362,8 +373,14 @@ public class JointSpaceSwingSubController implements SwingSubController
       desiredPositions.get(swingSide).set(endPoint);
       desiredOrientations.get(swingSide).set(endOrientation);
       
+   }
+   public void doTransitionIntoInitialSwing(RobotSide swingSide)
+   {
+      
+      initializeToCurrentJointValues(swingSide);
+      updateDesiredPositions(swingSide);
       jointSpaceTrajectoryGenerator.initialize(swingSide, jointPositions.get(swingSide), jointVelocities.get(swingSide), jointAccelerations.get(swingSide),
-            endPoint, endOrientation, couplingRegistry.getSingleSupportDuration(), numberOfViaPointsDuringWalk.getIntegerValue(), true);
+            desiredPositions.get(swingSide).getFramePointCopy(), desiredOrientations.get(swingSide).getFrameOrientationCopy(), couplingRegistry.getSingleSupportDuration(), numberOfViaPointsDuringWalk.getIntegerValue(), true);
       footSwitches.get(swingSide).reset();
    }
 

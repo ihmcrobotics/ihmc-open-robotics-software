@@ -43,7 +43,7 @@ public class DoubleAndSingleSupportDurationUpdater
       }
       else
       {
-         cycleDuration = bodyDisplacement / desiredVelocityMagnitude;
+         cycleDuration = Math.abs(bodyDisplacement / desiredVelocityMagnitude);
       }
       doubleSupportDuration.set(doubleSupportFraction.getDoubleValue() * cycleDuration);
       singleSupportDuration.set((1.0 - doubleSupportFraction.getDoubleValue()) * cycleDuration);

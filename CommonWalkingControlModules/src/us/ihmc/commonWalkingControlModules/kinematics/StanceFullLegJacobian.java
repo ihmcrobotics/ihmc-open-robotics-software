@@ -5,12 +5,15 @@ import java.util.ArrayList;
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Vector3d;
 
+import org.ejml.data.DenseMatrix64F;
+
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointVelocities;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegTorques;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.RobotSpecificJointNames;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.robotSide.RobotSide;
+import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -142,7 +145,7 @@ public class StanceFullLegJacobian
     */
    public Twist getTwistOfPelvisWithRespectToFootInPelvisFrame(LegJointVelocities jointVelocities)
    {
-      Matrix jointVelocitiesVector = new Matrix(legJointNames.length, 1);
+      DenseMatrix64F jointVelocitiesVector = new DenseMatrix64F(legJointNames.length, 1);
       for (int i = 0; i < legJointNames.length; i++)
       {
          LegJointName legJointName = legJointNames[i];
@@ -175,7 +178,8 @@ public class StanceFullLegJacobian
        */
       torqueOnPelvis = torqueOnPelvis.changeFrameCopy(pelvisFrame);
 
-      Matrix vtpJacobianMatrix = vtpJacobian.getJacobianMatrix();
+      Matrix vtpJacobianMatrix = new Matrix(6, vtpJacobian.getNumberOfColumns());
+      MatrixTools.convertEJMLToJama(vtpJacobian.getJacobianMatrix(), vtpJacobianMatrix);
 
       int[] columns = {0, 1};
       int[] aRows = {3, 4};
@@ -220,7 +224,8 @@ public class StanceFullLegJacobian
        */
       forceOnPelvis.checkReferenceFrameMatch(pelvisFrame);
 
-      Matrix vtpJacobianMatrix = vtpJacobian.getJacobianMatrix();
+      Matrix vtpJacobianMatrix = new Matrix(6, vtpJacobian.getNumberOfColumns());
+      MatrixTools.convertEJMLToJama(vtpJacobian.getJacobianMatrix(), vtpJacobianMatrix);
 
       int[] columns = {0, 1};
       int[] aRows = {0, 1};
@@ -254,8 +259,8 @@ public class StanceFullLegJacobian
       }
 
       // the actual computation
-      Matrix jointTorques = legJacobian.computeJointTorques(wrenchOnPelvisInPelvisFrame);
-      Matrix vtpTorques = vtpJacobian.computeJointTorques(wrenchOnPelvisInPelvisFrame);
+      DenseMatrix64F jointTorques = legJacobian.computeJointTorques(wrenchOnPelvisInPelvisFrame);
+      DenseMatrix64F vtpTorques = vtpJacobian.computeJointTorques(wrenchOnPelvisInPelvisFrame);
       
       for (int i = 0; i < legJointNames.length; i++)
       {
