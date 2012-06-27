@@ -39,7 +39,7 @@ public class ConstantCoPInstantaneousCapturePointTrajectory
       moveTime = new DoubleYoVariable("icpTrajectoryMoveTime", registry);
       currentTime = new DoubleYoVariable("icpTrajectoryCurrentTime", registry);
 
-      currentTime.set(Double.POSITIVE_INFINITY);
+      reset();
    }
 
    public void initialize(FramePoint2d initialDesiredICP, FramePoint2d finalDesiredICP, double moveTime, double comHeight)
@@ -101,5 +101,10 @@ public class ConstantCoPInstantaneousCapturePointTrajectory
    public double getMoveTime()
    {
       return moveTime.getDoubleValue();
+   }
+
+   public void reset()
+   {
+      currentTime.set(Double.POSITIVE_INFINITY);
    }
 }
