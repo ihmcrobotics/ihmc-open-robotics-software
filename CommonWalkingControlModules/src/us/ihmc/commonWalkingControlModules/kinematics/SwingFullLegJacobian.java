@@ -1,19 +1,18 @@
 package us.ihmc.commonWalkingControlModules.kinematics;
 
+import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
+
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointVelocities;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegTorques;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.screwTheory.GeometricJacobian;
-import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
-import us.ihmc.utilities.screwTheory.ScrewTools;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.utilities.screwTheory.Twist;
 import us.ihmc.utilities.screwTheory.Wrench;
-
-import com.mathworks.jama.Matrix;
 
 public class SwingFullLegJacobian
 {
@@ -53,7 +52,7 @@ public class SwingFullLegJacobian
     */
    public Twist getTwistOfFootWithRespectToPelvisInFootFrame(LegJointVelocities jointVelocities)
    {
-      Matrix jointVelocitiesVector = jointVelocities.toMatrix();
+      DenseMatrix64F jointVelocitiesVector = jointVelocities.toDenseMatrix();
       return geometricJacobian.getTwist(jointVelocitiesVector);
    }
    
@@ -64,7 +63,7 @@ public class SwingFullLegJacobian
     */
    public void packJointVelocitiesGivenTwist(LegJointVelocities legJointVelocitiesToPack, Twist anklePitchTwistInAnklePitchFrame, double alpha)
    {
-      Matrix jointVelocities = geometricJacobian.computeJointVelocities(anklePitchTwistInAnklePitchFrame, alpha);
+      DenseMatrix64F jointVelocities = geometricJacobian.computeJointVelocities(anklePitchTwistInAnklePitchFrame, alpha);
       int i = 0;
       for (LegJointName legJointName : legJointVelocitiesToPack.getLegJointNames())
       {
@@ -84,7 +83,7 @@ public class SwingFullLegJacobian
       }
 
       // the actual computation
-      Matrix jointTorques = geometricJacobian.computeJointTorques(wrenchOnFootInFootFrame);
+      DenseMatrix64F jointTorques = geometricJacobian.computeJointTorques(wrenchOnFootInFootFrame);
 
       int i = 0;
       for (LegJointName legJointName : legTorquesToPack.getLegJointNames())
@@ -98,12 +97,12 @@ public class SwingFullLegJacobian
       return robotSide;
    }
 
-   public Matrix computeJointAccelerations(SpatialAccelerationVector accelerationOfFootWithRespectToBody, SpatialAccelerationVector jacobianDerivativeTerm, double alpha)
+   public DenseMatrix64F computeJointAccelerations(SpatialAccelerationVector accelerationOfFootWithRespectToBody, SpatialAccelerationVector jacobianDerivativeTerm, double alpha)
    {
-      Matrix biasedAccelerations = accelerationOfFootWithRespectToBody.toMatrix();    // unbiased at this point
-      Matrix bias = jacobianDerivativeTerm.toMatrix();
-      biasedAccelerations.minusEquals(bias);
-      Matrix ret = geometricJacobian.solveUsingDampedLeastSquares(biasedAccelerations, alpha);
+      DenseMatrix64F biasedAccelerations = accelerationOfFootWithRespectToBody.toDenseMatrix();    // unbiased at this point
+      DenseMatrix64F bias = jacobianDerivativeTerm.toDenseMatrix();
+      CommonOps.subEquals(biasedAccelerations, bias);
+      DenseMatrix64F ret = geometricJacobian.solveUsingDampedLeastSquares(biasedAccelerations, alpha);
 
       return ret;
    }
@@ -111,7 +110,7 @@ public class SwingFullLegJacobian
    /**
     * For testing purposes only.
     */
-   public Matrix getJacobian()
+   public DenseMatrix64F getJacobian()
    {
       return geometricJacobian.getJacobianMatrix().copy();
    }

@@ -114,6 +114,10 @@ public class ChangingEndpointSwingSubController implements SwingSubController
    private final YoFrameVector desiredSwingFootAngularAccelerationInWorldFrame = new YoFrameVector("desiredSwingAngularAcceleration", "", worldFrame, registry);
    private DynamicGraphicCoordinateSystem swingFootOrientationViz = null, finalDesiredSwingOrientationViz = null;
 
+   
+   private final DoubleYoVariable positionErrorAtEndOfStepNorm = new DoubleYoVariable("positionErrorAtEndOfStepNorm", registry);
+   private final DoubleYoVariable positionErrorAtEndOfStepX = new DoubleYoVariable("positionErrorAtEndOfStepX", registry);
+   private final DoubleYoVariable positionErrorAtEndOfStepY = new DoubleYoVariable("positionErrorAtEndOfStepY", registry);
    private BagOfBalls bagOfBalls;
    private final double controlDT;
    private RobotSide swingSide;
@@ -343,11 +347,12 @@ public class ChangingEndpointSwingSubController implements SwingSubController
 
    public void doTransitionOutOfTerminalSwing(RobotSide swingSide)
    {
+      updatePositionError(swingSide);
    }
 
    public void doTransitionOutOfSwingInAir(RobotSide swingLeg)
    {
-      // TODO Auto-generated method stub
+      updatePositionError(swingSide);
 
    }
 
@@ -452,7 +457,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
 
       antiGravityPercentage.set(1.0);
 
-      comXThresholdToFinishInitialSwing.set(0.10);    // 15);
+      comXThresholdToFinishInitialSwing.set(0.1);    // 15);
    }
 
    private void updateFinalDesiredPosition(CartesianTrajectoryGenerator trajectoryGenerator)
@@ -580,6 +585,17 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       return capturePointInsideFoot;
    }
 
+   private void updatePositionError(RobotSide swingSide)
+   {
+      FramePoint currentPosition = new FramePoint(referenceFrames.getAnkleZUpFrame(swingSide));
+      currentPosition.changeFrame(referenceFrames.getAnkleZUpFrame(swingSide.getOppositeSide()));
+      FramePoint desiredPosition = finalDesiredSwingFootPosition.getFramePointCopy().changeFrameCopy(referenceFrames.getAnkleZUpFrame(swingSide.getOppositeSide()));
+      positionErrorAtEndOfStepNorm.set(desiredPosition.distance(currentPosition));
+      currentPosition.sub(desiredPosition);
+      positionErrorAtEndOfStepX.set(currentPosition.getX());
+      positionErrorAtEndOfStepY.set(currentPosition.getY());
+   }
+   
    public void initialize()
    {      
    }
