@@ -7,7 +7,6 @@ import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
-import org.jfree.data.RangeType;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
@@ -57,7 +56,48 @@ public class GraphingUtility
       final NumberAxis rangeAxis = (NumberAxis) plot.getRangeAxis();
       rangeAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
 
-//      plot.getRangeAxis().setRange(90.0, 100.0);
+      //      plot.getRangeAxis().setRange(90.0, 100.0);
+
+      ChartPanel chartPanel = new ChartPanel(chart);
+      chartPanel.setPreferredSize(new java.awt.Dimension(800, 600));
+      return chartPanel;
+   }
+
+   public static ChartPanel createGraph(String title, String xAxisLabel, String yAxisLabel, XYDataset dataset, double minRange, double maxRange)
+   {
+      // create the chart
+      final JFreeChart chart = ChartFactory.createXYLineChart(title,   // chart title
+              xAxisLabel,                                              // x axis label
+              yAxisLabel,                                              // y axis label
+              dataset,                                                 // data
+              PlotOrientation.VERTICAL, true,                          // include legend
+              true,                                                    // tooltips
+              false                                                    // urls
+      );
+
+      // NOW DO SOME OPTIONAL CUSTOMISATION OF THE CHART...
+      chart.setBackgroundPaint(Color.white);
+
+      //        final StandardLegend legend = (StandardLegend) chart.getLegend();
+      //      legend.setDisplaySeriesShapes(true);
+
+      // get a reference to the plot for further customisation...
+      final XYPlot plot = chart.getXYPlot();
+      plot.setBackgroundPaint(Color.white);
+      //    plot.setAxisOffset(new Spacer(Spacer.ABSOLUTE, 5.0, 5.0, 5.0, 5.0));
+      plot.setDomainGridlinePaint(Color.lightGray);
+      plot.setRangeGridlinePaint(Color.lightGray);
+
+      final XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer();
+      //        renderer.setSeriesLinesVisible(0, false);
+      //        renderer.setSeriesShapesVisible(1, false);
+      plot.setRenderer(renderer);
+
+      // change the auto tick unit selection to integer units only...
+      final NumberAxis rangeAxis = (NumberAxis) plot.getRangeAxis();
+      rangeAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
+
+      plot.getRangeAxis().setRange(minRange, maxRange);
 
       ChartPanel chartPanel = new ChartPanel(chart);
       chartPanel.setPreferredSize(new java.awt.Dimension(800, 600));
@@ -66,7 +106,16 @@ public class GraphingUtility
 
    public static void displayGraph(String title, String xAxisLabel, String yAxisLabel, XYDataset dataset)
    {
-      ChartPanel chartPanel = createGraph(title, xAxisLabel,yAxisLabel, dataset);
+      ChartPanel chartPanel = createGraph(title, xAxisLabel, yAxisLabel, dataset);
+      JFrame jFrame = new JFrame("Test Graph");
+      jFrame.getContentPane().add(chartPanel);
+      jFrame.pack();
+      jFrame.setVisible(true);
+   }
+
+   public static void displayGraph(String title, String xAxisLabel, String yAxisLabel, XYDataset dataset, double minRange, double maxRange)
+   {
+      ChartPanel chartPanel = createGraph(title, xAxisLabel, yAxisLabel, dataset, minRange, maxRange);
       JFrame jFrame = new JFrame("Test Graph");
       jFrame.getContentPane().add(chartPanel);
       jFrame.pack();
