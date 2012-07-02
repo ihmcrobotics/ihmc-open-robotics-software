@@ -6,6 +6,7 @@ import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointVelocitie
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.screwTheory.DampedLeastSquaresJacobianSolver;
 import us.ihmc.utilities.screwTheory.DesiredJointAccelerationCalculator;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
@@ -21,6 +22,7 @@ public class DesiredJointAccelerationCalculatorInWorldFrame
    private final ReferenceFrame footFrame;
    private final ReferenceFrame pelvisFrame;
    private final SpatialAccelerationVector accelerationOfFootWithRespectToPelvis = new SpatialAccelerationVector();
+   private final DampedLeastSquaresJacobianSolver jacobianSolver;
 
    private final DesiredJointAccelerationCalculator desiredJointAccelerationCalculator;
 
@@ -38,7 +40,8 @@ public class DesiredJointAccelerationCalculatorInWorldFrame
       this.rootJoint = fullRobotModel.getRootJoint();
       this.footFrame = fullRobotModel.getFoot(swingSide).getBodyFixedFrame();
       this.pelvisFrame = fullRobotModel.getPelvis().getBodyFixedFrame();
-      this.desiredJointAccelerationCalculator = new DesiredJointAccelerationCalculator(fullRobotModel.getPelvis(), fullRobotModel.getFoot(swingSide), swingLegJacobian.getGeometricJacobian());
+      this.jacobianSolver = new DampedLeastSquaresJacobianSolver(swingLegJacobian.getGeometricJacobian().getNumberOfColumns());
+      this.desiredJointAccelerationCalculator = new DesiredJointAccelerationCalculator(fullRobotModel.getPelvis(), fullRobotModel.getFoot(swingSide), swingLegJacobian.getGeometricJacobian(), jacobianSolver);
    }
 
    /**
@@ -49,7 +52,8 @@ public class DesiredJointAccelerationCalculatorInWorldFrame
    public void compute(SpatialAccelerationVector desiredAccelerationOfFootWithRespectToWorld, double alpha)
    {
       computeDesiredAccelerationOfFootWithRespectToPelvis(accelerationOfFootWithRespectToPelvis, desiredAccelerationOfFootWithRespectToWorld);
-      desiredJointAccelerationCalculator.compute(accelerationOfFootWithRespectToPelvis, alpha);
+      jacobianSolver.setAlpha(alpha);
+      desiredJointAccelerationCalculator.compute(accelerationOfFootWithRespectToPelvis);
    }
 
    private final Twist twistOfPelvisWithRespectToElevator = new Twist();
