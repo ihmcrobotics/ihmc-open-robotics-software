@@ -6,7 +6,6 @@ import org.ejml.alg.dense.decomposition.SingularValueDecomposition;
 import org.ejml.alg.dense.linsol.svd.SolvePseudoInverseSvd;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
-import org.ejml.ops.NormOps;
 import org.ejml.ops.SingularOps;
 
 import us.ihmc.utilities.screwTheory.JacobianSolver;
@@ -37,8 +36,9 @@ public class SingularityRobustJacobianSolver implements JacobianSolver
    private final DenseMatrix64F taskJointAcceleration;
    private final DenseMatrix64F projectedUnachievableTaskAcceleration;
    private final DenseMatrix64F nullspaceJointAcceleration;
+   private final int nullspaceSign;
 
-   public SingularityRobustJacobianSolver(String namePrefix, int matrixSize)
+   public SingularityRobustJacobianSolver(String namePrefix, int matrixSize, int nullspaceSign, YoVariableRegistry parentRegistry)
    {
       this.matrixSize = matrixSize;
       this.registry = new YoVariableRegistry(namePrefix + "JacobianSolver");
@@ -48,6 +48,7 @@ public class SingularityRobustJacobianSolver implements JacobianSolver
       this.svd = DecompositionFactory.svd(matrixSize, matrixSize);
       this.u = new DenseMatrix64F(matrixSize, matrixSize);
       this.degenerateRank = matrixSize - 1;
+      this.nullspaceSign = nullspaceSign;
 
       columnSpace = new DenseMatrix64F(matrixSize, degenerateRank);
       nullspace = new DenseMatrix64F(matrixSize, matrixSize - degenerateRank);
@@ -60,29 +61,33 @@ public class SingularityRobustJacobianSolver implements JacobianSolver
       taskJointAcceleration = new DenseMatrix64F(matrixSize, 1);
       projectedUnachievableTaskAcceleration = new DenseMatrix64F(matrixSize - degenerateRank, 1);
       nullspaceJointAcceleration = new DenseMatrix64F(matrixSize, 1);
+      
+      parentRegistry.addChild(registry);
    }
 
    public void solve(DenseMatrix64F solutionToPack, DenseMatrix64F jacobianMatrix, DenseMatrix64F vector)
    {
       double determinant = CommonOps.det(jacobianMatrix);
       double switchingDeterminant = this.switchingDeterminant.getDoubleValue();
-      double nullspaceMultiplier = nullspaceGain.getDoubleValue() * (switchingDeterminant - determinant);
+      double nullspaceMultiplier = nullspaceSign * nullspaceGain.getDoubleValue() * (switchingDeterminant - determinant) / switchingDeterminant;
 
       if (Math.abs(determinant) > switchingDeterminant)
       {
-         double previousDeterminant = jacobianDeterminant.getDoubleValue();
-         if (Math.abs(previousDeterminant) <= switchingDeterminant)
-         {
-            computeDegenerate(solutionToPack, jacobianMatrix, vector, nullspaceMultiplier);
+         CommonOps.solve(jacobianMatrix, vector, solutionToPack);
 
-            // TODO:
-            // reset trajectory generator acc to current desired acc
-            // reset trajectory generator pos, vel to have no component along singular direction
-         }
-         else
-         {
-            CommonOps.solve(jacobianMatrix, vector, solutionToPack);
-         }
+//         double previousDeterminant = jacobianDeterminant.getDoubleValue();
+//         if (Math.abs(previousDeterminant) <= switchingDeterminant)
+//         {
+//            computeDegenerate(solutionToPack, jacobianMatrix, vector, nullspaceMultiplier);
+//
+//            // TODO:
+//            // reset trajectory generator acc to current desired acc
+//            // reset trajectory generator pos, vel to have no component along singular direction
+//         }
+//         else
+//         {
+//            CommonOps.solve(jacobianMatrix, vector, solutionToPack);
+//         }
       }
       else
       {
@@ -116,9 +121,10 @@ public class SingularityRobustJacobianSolver implements JacobianSolver
       CommonOps.extract(v, 0, matrixSize, 0, degenerateRank, vStar, 0, 0);
       CommonOps.extract(u, 0, matrixSize, degenerateRank, matrixSize, uStar, 0, 0);
 
-      DenseMatrix64F augmentedTaskJointAcceleration = computeAugmentedTaskJointAccelerations(jacobian, taskAcceleration, sigma, columnSpace, nullspace, vStar);
-      DenseMatrix64F nullspaceJointAcceleration = computeNullspaceJointAccelerations(taskAcceleration, nullspaceMultiplier, nullspace, uStar);
-      CommonOps.add(augmentedTaskJointAcceleration, nullspaceJointAcceleration, jointAccelerations);
+      DenseMatrix64F augmentedTaskJointAccelerations = computeAugmentedTaskJointAccelerations(jacobian, taskAcceleration, sigma, columnSpace, nullspace, vStar);
+      DenseMatrix64F nullspaceJointAccelerations = computeNullspaceJointAccelerations(taskAcceleration, nullspaceMultiplier, nullspace, uStar);
+      CommonOps.add(augmentedTaskJointAccelerations, nullspaceJointAccelerations, jointAccelerations);
+//      jointAccelerations.set(nullspaceJointAccelerations);
    }
 
    private DenseMatrix64F computeAugmentedTaskJointAccelerations(DenseMatrix64F jacobian, DenseMatrix64F taskAcceleration, DenseMatrix64F sigma,
@@ -137,8 +143,11 @@ public class SingularityRobustJacobianSolver implements JacobianSolver
       CommonOps.scale(-1.0, iMinusNNT);
       addDiagonal(iMinusNNT, 1.0);
 
+      SingularValueDecomposition<DenseMatrix64F> svd = DecompositionFactory.svd(iMinusNNT.getNumRows(), iMinusNNT.getNumCols());
+      svd.decompose(iMinusNNT);
+      
       double oldEps = UtilEjml.EPS;
-      UtilEjml.EPS = 0.5;    // this is OK because singular values should be either 0 or 1 anyway; f numerical issues
+      UtilEjml.EPS = 0.5 / iMinusNNT.getNumCols();    // this is OK because singular values should be either 0 or 1 anyway; helps avoid numerical issues
       iMinusNNTSolver.setA(iMinusNNT);
       iMinusNNTSolver.solve(vStarTaskAcceleration, taskJointAcceleration);
       UtilEjml.EPS = oldEps;
@@ -151,11 +160,7 @@ public class SingularityRobustJacobianSolver implements JacobianSolver
    {
       CommonOps.multTransA(uStar, taskAcceleration, projectedUnachievableTaskAcceleration);
 
-      CommonOps.mult(nullspace, projectedUnachievableTaskAcceleration, nullspaceJointAcceleration);
-      double norm = NormOps.normP2(nullspaceJointAcceleration);
-      double normEpsilon = 1e-3;
-      if (norm > normEpsilon)
-         CommonOps.scale(1.0 / norm, nullspaceJointAcceleration);
+      nullspaceJointAcceleration.set(nullspace);
       CommonOps.scale(nullspaceMultiplier, nullspaceJointAcceleration);
 
       return nullspaceJointAcceleration;

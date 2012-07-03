@@ -99,7 +99,7 @@ public class MomentumBasedControllerStateMachine extends StateMachine
    private final double doubleSupportTime = 0.9;
    private final double straightUpAverageVelocity = 3.5;
    private final double parabolicTime = 0.75;
-   private final double initialGroundClearance = 0.2; // 0.15;
+   private final double initialGroundClearance = 0.1; // 0.15;
 
    private final DoubleYoVariable singleSupportICPGlideScaleFactor = new DoubleYoVariable("singleSupportICPGlideScaleFactor", registry);
    private final BooleanYoVariable walk = new BooleanYoVariable("walk", registry);

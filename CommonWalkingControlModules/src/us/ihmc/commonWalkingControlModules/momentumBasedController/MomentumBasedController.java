@@ -45,9 +45,12 @@ import us.ihmc.utilities.screwTheory.TwistCalculator;
 import us.ihmc.utilities.screwTheory.Wrench;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.YoAppearance;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.robotController.RobotController;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint2d;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector2d;
@@ -86,6 +89,7 @@ public class MomentumBasedController implements RobotController
 
    private final SideDependentList<SpatialAccelerationVector> desiredFootAccelerationsInWorld = new SideDependentList<SpatialAccelerationVector>();
    private final YoFrameVector swingFootPositionErrorInWorld = new YoFrameVector("swingFootPositionErrorInWorld", "", worldFrame, registry);
+   private final YoFramePoint desiredSwingFootPositionInWorld = new YoFramePoint("desiredSwingFootPositionInWorld", "", worldFrame, registry);
    private final SideDependentList<FootSpatialAccelerationControlModule> footSpatialAccelerationControlModules =
       new SideDependentList<FootSpatialAccelerationControlModule>();
 
@@ -181,6 +185,9 @@ public class MomentumBasedController implements RobotController
       this.desiredPelvisAngularAcceleration = new YoFrameVector("desiredPelvisAngularAcceleration", "", referenceFrames.getPelvisFrame(), registry);
       this.desiredPelvisForce = new YoFrameVector("desiredPelvisForce", "", centerOfMassFrame, registry);
       this.desiredPelvisTorque = new YoFrameVector("desiredPelvisTorque", "", centerOfMassFrame, registry);
+      
+      DynamicGraphicPosition desiredSwingFootPosition = new DynamicGraphicPosition("desiredSwingFoot", desiredSwingFootPositionInWorld, 0.03, YoAppearance.Orange());
+      dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(name, desiredSwingFootPosition);
 
       kAngularMomentumXY.set(3e-2);
       kPelvisAxisAngle.set(5e-1);
@@ -328,6 +335,8 @@ public class MomentumBasedController implements RobotController
          footSpatialAccelerationControlModules.get(robotSide).compute(virtualToePoints.get(robotSide), desiredFootPose, desiredFootTwist,
                  feedForwardFootSpatialAcceleration, isSwingFoot);
          footSpatialAccelerationControlModules.get(robotSide).packFootAcceleration(desiredFootAccelerationsInWorld.get(robotSide));
+         swingFootPositionErrorInWorld.set(footSpatialAccelerationControlModules.get(robotSide).getSwingFootPositionErrorInWorld());
+         desiredSwingFootPositionInWorld.set(desiredFootPose.getPositionInFrame(worldFrame));
       }
 
       optimizer.setDesiredFootAccelerationsInWorld(desiredFootAccelerationsInWorld);
