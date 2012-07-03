@@ -19,12 +19,17 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import com.yobotics.simulationconstructionset.DataBuffer.RepeatDataBufferEntryException;
 
 public class DataFileWriterTest
 {
+   @Rule
+   public ExpectedException expectedException = ExpectedException.none();
+   
    @BeforeClass
    public static void setUpBeforeClass() throws Exception
    {
@@ -178,9 +183,11 @@ public class DataFileWriterTest
       assertTrue(testInteger == integerReadBack);
    }
 
-   @Test(expected=EOFException.class)
+   @Test
    public void testFileReadAndWriteWithDataOutputStreamAndBufferedReader() throws FileNotFoundException, IOException
    {
+      expectedException.expect(EOFException.class);
+      
       Random rng = new Random();
       String testString = "This string tests readLine";
       double testDouble = rng.nextDouble();
@@ -201,7 +208,7 @@ public class DataFileWriterTest
 
       inputStream.close();
       bufferedReader.close();
-
+      
 //      System.out.println(lineReadBack);
 //      System.out.println(testString);
 
