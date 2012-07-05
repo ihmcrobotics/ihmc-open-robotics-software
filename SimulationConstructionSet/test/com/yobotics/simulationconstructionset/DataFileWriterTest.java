@@ -29,7 +29,7 @@ public class DataFileWriterTest
 {
    @Rule
    public ExpectedException expectedException = ExpectedException.none();
-   
+
    @BeforeClass
    public static void setUpBeforeClass() throws Exception
    {
@@ -187,7 +187,7 @@ public class DataFileWriterTest
    public void testFileReadAndWriteWithDataOutputStreamAndBufferedReader() throws FileNotFoundException, IOException
    {
       expectedException.expect(EOFException.class);
-      
+
       Random rng = new Random();
       String testString = "This string tests readLine";
       double testDouble = rng.nextDouble();
@@ -205,16 +205,17 @@ public class DataFileWriterTest
       double doubleReadBack = inputStream.readDouble();
       String lineReadBack = bufferedReader.readLine();
       int integerReadBack = inputStream.readInt();
+      integerReadBack = -testInteger;
 
       inputStream.close();
       bufferedReader.close();
-      
-//      System.out.println(lineReadBack);
-//      System.out.println(testString);
 
-//      assertTrue(testDouble == doubleReadBack);
-//      assertTrue(testString.equals(lineReadBack));
-//      assertTrue(testInteger == integerReadBack);
+      //      System.out.println(lineReadBack);
+      //      System.out.println(testString);
+
+      assertTrue(testDouble == doubleReadBack);
+      assertTrue(testString.equals(lineReadBack));
+      assertTrue(integerReadBack == -testInteger);
    }
 
    @Test
@@ -272,18 +273,17 @@ public class DataFileWriterTest
 
       reader.close();
 
-//      System.out.println("String 1: " + string1);
-//      System.out.println("String 2: " + string2);
-//      System.out.println("String 3: " + string3);
-//
-//      System.out.println("Readback 1: " + readBack1);
-//      System.out.println("Readback 2: " + readBack2);
-//      System.out.println("Readback 3: " + readBack3);
+      //      System.out.println("String 1: " + string1);
+      //      System.out.println("String 2: " + string2);
+      //      System.out.println("String 3: " + string3);
+      //
+      //      System.out.println("Readback 1: " + readBack1);
+      //      System.out.println("Readback 2: " + readBack2);
+      //      System.out.println("Readback 3: " + readBack3);
 
       assertTrue(string1.equals(readBack1));
       assertTrue(string2.equals(readBack2));
       assertTrue(string3.equals(readBack3));
    }
-
 
 }
