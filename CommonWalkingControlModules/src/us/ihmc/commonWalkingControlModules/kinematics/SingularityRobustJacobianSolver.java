@@ -9,6 +9,7 @@ import org.ejml.ops.CommonOps;
 import org.ejml.ops.SingularOps;
 
 import us.ihmc.utilities.CheckTools;
+import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.screwTheory.JacobianSolver;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
@@ -121,27 +122,34 @@ public class SingularityRobustJacobianSolver implements JacobianSolver
       svd.decompose(jacobian);
       SingularOps.nullSpace(svd, nullspace);
       
-      DenseMatrix64F augmentedTaskJointAccelerations = computeAugmentedTaskJointAccelerations(jacobian, taskAcceleration, nullspace);
+      DenseMatrix64F augmentedTaskJointAccelerations = computeAugmentedTaskJointAccelerations(jacobian, taskAcceleration, nullspace, nullspaceMultiplier != 0.0);
       DenseMatrix64F nullspaceJointAccelerations = computeNullspaceJointAccelerations(nullspaceMultiplier, jacobian, nullspace);
 
       CommonOps.add(augmentedTaskJointAccelerations, nullspaceJointAccelerations, jointAccelerations);
    }
    
-   private DenseMatrix64F computeAugmentedTaskJointAccelerations(DenseMatrix64F jacobian, DenseMatrix64F taskAcceleration, DenseMatrix64F nullspace)
+   private DenseMatrix64F computeAugmentedTaskJointAccelerations(DenseMatrix64F jacobian, DenseMatrix64F taskAcceleration, DenseMatrix64F nullspace, boolean removeNullspaceComponent)
    {
 //      dampedLeastSquaresJacobianSolver.solve(taskJointAcceleration, jacobian, taskAcceleration);
       dampedLeastSquaresJacobianSolver.solve(vStarTaskAcceleration, jacobian, taskAcceleration);
       
-      CommonOps.multOuter(nullspace, iMinusNNT);
-      CommonOps.scale(-1.0, iMinusNNT);
-      addDiagonal(iMinusNNT, 1.0);
+      if (removeNullspaceComponent)
+      {
+         CommonOps.multOuter(nullspace, iMinusNNT);
+         CommonOps.scale(-1.0, iMinusNNT);
+         MatrixTools.addDiagonal(iMinusNNT, 1.0);
 
-      double oldEps = UtilEjml.EPS;
-      UtilEjml.EPS = 0.5;    // this is OK because singular values should be either 0 or 1 anyway, since columns of nullspace are orthonormal; fixes numerical issues
-      iMinusNNTSolver.setA(iMinusNNT);
-      iMinusNNTSolver.solve(vStarTaskAcceleration, taskJointAcceleration);
-      UtilEjml.EPS = oldEps;
-      
+         double oldEps = UtilEjml.EPS;
+         UtilEjml.EPS = 0.5;    // this is OK because singular values should be either 0 or 1 anyway, since columns of nullspace are orthonormal; fixes numerical issues
+         iMinusNNTSolver.setA(iMinusNNT);
+         iMinusNNTSolver.solve(vStarTaskAcceleration, taskJointAcceleration);
+         UtilEjml.EPS = oldEps;         
+      }
+      else
+      {
+         taskJointAcceleration.set(vStarTaskAcceleration);
+      }
+
       return taskJointAcceleration;
    }
 
@@ -152,14 +160,5 @@ public class SingularityRobustJacobianSolver implements JacobianSolver
       CommonOps.scale(nullspaceMultiplier * sign, nullspaceJointAcceleration);
 
       return nullspaceJointAcceleration;
-   }
-   
-   private void addDiagonal(DenseMatrix64F mat, double s)
-   {
-      int n = Math.max(mat.getNumRows(), mat.getNumCols());
-      for (int i = 0; i < n; i++)
-      {
-         mat.add(i, i, s);
-      }
    }
 }

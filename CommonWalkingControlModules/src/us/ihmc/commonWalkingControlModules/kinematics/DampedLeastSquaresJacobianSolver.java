@@ -8,14 +8,15 @@ import org.ejml.ops.CommonOps;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
+import us.ihmc.utilities.math.MathTools;
+import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.screwTheory.JacobianSolver;
 
 public class DampedLeastSquaresJacobianSolver implements JacobianSolver
 {
    private final YoVariableRegistry registry;
-   private final DenseMatrix64F jacobianTransposeTimesVector;
-   private final DenseMatrix64F alphaMatrix;
-   private final DenseMatrix64F longTerm;
+   private final DenseMatrix64F tempVector;
+   private final DenseMatrix64F tempMatrix;
    private final LinearSolver<DenseMatrix64F> dampedLeastSquaresSolver;
    private final DoubleYoVariable alpha;
 
@@ -24,9 +25,8 @@ public class DampedLeastSquaresJacobianSolver implements JacobianSolver
       this.registry = new YoVariableRegistry(namePrefix);
       this.alpha = new DoubleYoVariable(namePrefix + "alpha", registry);
       
-      this.jacobianTransposeTimesVector = new DenseMatrix64F(matrixSize, 1);
-      this.alphaMatrix = new DenseMatrix64F(matrixSize, matrixSize);
-      this.longTerm = new DenseMatrix64F(matrixSize, matrixSize);
+      this.tempVector = new DenseMatrix64F(matrixSize, 1);
+      this.tempMatrix = new DenseMatrix64F(matrixSize, matrixSize);
       this.dampedLeastSquaresSolver = LinearSolverFactory.linear(matrixSize);
       parentRegistry.addChild(registry);
    }
@@ -36,20 +36,13 @@ public class DampedLeastSquaresJacobianSolver implements JacobianSolver
       this.alpha.set(alpha);
    }
 
-   public void solve(DenseMatrix64F solutionToPack, DenseMatrix64F jacobianMatrix, DenseMatrix64F vector)
-   {
-      CommonOps.multTransA(jacobianMatrix, vector, jacobianTransposeTimesVector);
+   public void solve(DenseMatrix64F solutionToPack, DenseMatrix64F jacobianMatrix, DenseMatrix64F taskSpaceVector)
+   { 
+      CommonOps.multTransA(jacobianMatrix, taskSpaceVector, tempVector);
+      CommonOps.multTransA(jacobianMatrix, jacobianMatrix, tempMatrix);
+      MatrixTools.addDiagonal(tempMatrix, MathTools.square(alpha.getDoubleValue()));
+      dampedLeastSquaresSolver.setA(tempMatrix);
 
-      CommonOps.setIdentity(alphaMatrix);
-      CommonOps.scale(alpha.getDoubleValue() * alpha.getDoubleValue(), alphaMatrix);
-
-      // TODO: use CommonOps.multInner(jacobian, jTransposeJ)
-      CommonOps.multTransA(jacobianMatrix, jacobianMatrix, longTerm);
-      CommonOps.addEquals(longTerm, alphaMatrix);
-
-      dampedLeastSquaresSolver.setA(longTerm);
-      
-      dampedLeastSquaresSolver.solve(jacobianTransposeTimesVector, solutionToPack);
+      dampedLeastSquaresSolver.solve(tempVector, solutionToPack);
    }
-
 }
