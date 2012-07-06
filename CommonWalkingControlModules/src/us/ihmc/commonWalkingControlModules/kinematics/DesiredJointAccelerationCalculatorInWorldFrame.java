@@ -1,12 +1,13 @@
 package us.ihmc.commonWalkingControlModules.kinematics;
 
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
+
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointVelocities;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.DampedLeastSquaresJacobianSolver;
 import us.ihmc.utilities.screwTheory.DesiredJointAccelerationCalculator;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
@@ -14,6 +15,7 @@ import us.ihmc.utilities.screwTheory.Twist;
 
 public class DesiredJointAccelerationCalculatorInWorldFrame
 {
+   private final YoVariableRegistry registry;
    private final RobotSide swingSide;
    private final SwingFullLegJacobian swingLegJacobian;
    private final FullRobotModel fullRobotModel;
@@ -27,9 +29,9 @@ public class DesiredJointAccelerationCalculatorInWorldFrame
    private final DesiredJointAccelerationCalculator desiredJointAccelerationCalculator;
 
    public DesiredJointAccelerationCalculatorInWorldFrame(LegJointName[] legJointNames, SwingFullLegJacobian swingLegJacobian, FullRobotModel fullRobotModel,
-           CommonWalkingReferenceFrames referenceFrames, RobotSide robotSide)
+           CommonWalkingReferenceFrames referenceFrames, RobotSide robotSide, YoVariableRegistry parentRegistry)
    {
-
+      this.registry = new YoVariableRegistry(robotSide.getCamelCaseNameForStartOfExpression() + getClass().getSimpleName());
       swingLegJacobian.getRobotSide().checkRobotSideMatch(robotSide);
 
       this.swingSide = swingLegJacobian.getRobotSide();
@@ -40,8 +42,9 @@ public class DesiredJointAccelerationCalculatorInWorldFrame
       this.rootJoint = fullRobotModel.getRootJoint();
       this.footFrame = fullRobotModel.getFoot(swingSide).getBodyFixedFrame();
       this.pelvisFrame = fullRobotModel.getPelvis().getBodyFixedFrame();
-      this.jacobianSolver = new DampedLeastSquaresJacobianSolver(swingLegJacobian.getGeometricJacobian().getNumberOfColumns());
+      this.jacobianSolver = new DampedLeastSquaresJacobianSolver(swingSide.getCamelCaseNameForMiddleOfExpression() + "JacobianSolver", swingLegJacobian.getGeometricJacobian().getNumberOfColumns(), registry);
       this.desiredJointAccelerationCalculator = new DesiredJointAccelerationCalculator(fullRobotModel.getPelvis(), fullRobotModel.getFoot(swingSide), swingLegJacobian.getGeometricJacobian(), jacobianSolver);
+      parentRegistry.addChild(registry);
    }
 
    /**

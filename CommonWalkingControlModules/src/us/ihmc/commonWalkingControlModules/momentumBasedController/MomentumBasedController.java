@@ -328,6 +328,9 @@ public class MomentumBasedController implements RobotController
 
       for (RobotSide robotSide : RobotSide.values())
       {
+         if (supportLeg != null && optimizer.leavingSingularRegion(robotSide))
+            stateMachine.recomputeTrajectory(robotSide);
+         
          FramePose desiredFootPose = stateMachine.getDesiredFootPose(robotSide);
          Twist desiredFootTwist = stateMachine.getDesiredFootTwist(robotSide);
          SpatialAccelerationVector feedForwardFootSpatialAcceleration = stateMachine.getDesiredFootAcceleration(robotSide);
@@ -340,6 +343,10 @@ public class MomentumBasedController implements RobotController
       }
 
       optimizer.setDesiredFootAccelerationsInWorld(desiredFootAccelerationsInWorld);
+      for (RobotSide robotSide : RobotSide.values())
+      {
+         optimizer.setNullspaceMultiplier(robotSide, stateMachine.getNullspaceMultiplier(robotSide));
+      }
       optimizer.solveForRootJointAcceleration(desiredAngularCentroidalMomentumRate, desiredLinearCentroidalMomentumRate);
    }
 

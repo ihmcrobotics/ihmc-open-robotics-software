@@ -8,90 +8,99 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.SingularOps;
 
+import us.ihmc.utilities.CheckTools;
 import us.ihmc.utilities.screwTheory.JacobianSolver;
 
+import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public class SingularityRobustJacobianSolver implements JacobianSolver
 {
    private final YoVariableRegistry registry;
+   private final DampedLeastSquaresJacobianSolver dampedLeastSquaresJacobianSolver;
    private final DoubleYoVariable switchingDeterminant;
    private final DoubleYoVariable jacobianDeterminant;
-   private final DoubleYoVariable nullspaceGain;
+   private final DoubleYoVariable nullspaceMultiplier;
+   private final BooleanYoVariable leavingSingularRegion;
    private final SingularValueDecomposition<DenseMatrix64F> svd;
-   private final DenseMatrix64F u;
    private final int degenerateRank;
-   private final int matrixSize;
-   private final DenseMatrix64F columnSpace;
    private final DenseMatrix64F nullspace;
-   private final DenseMatrix64F vStar;
-   private final DenseMatrix64F uStar;
 
-   private final DenseMatrix64F projectedAcceleration;
+   private final DenseMatrix64F taskJointAcceleration;
+   private final DenseMatrix64F nullspaceJointAcceleration;
+   private final int indexToUseForSign;
+   private final int sign;
+   
    private final DenseMatrix64F vStarTaskAcceleration;
-
    private final DenseMatrix64F iMinusNNT;
    private final SolvePseudoInverseSvd iMinusNNTSolver;
-   private final DenseMatrix64F taskJointAcceleration;
-   private final DenseMatrix64F projectedUnachievableTaskAcceleration;
-   private final DenseMatrix64F nullspaceJointAcceleration;
-   private final int nullspaceSign;
 
-   public SingularityRobustJacobianSolver(String namePrefix, int matrixSize, int nullspaceSign, YoVariableRegistry parentRegistry)
+   public SingularityRobustJacobianSolver(String namePrefix, int matrixSize, int indexToUseForSign, int sign, YoVariableRegistry parentRegistry)
    {
-      this.matrixSize = matrixSize;
+      CheckTools.checkRange(matrixSize, 1, Integer.MAX_VALUE);
+      CheckTools.checkRange(indexToUseForSign, 0, matrixSize - 1);
+      CheckTools.checkRange(sign, -1, 1);
+      if (sign == 0)
+         throw new RuntimeException("sign == 0");
+      
       this.registry = new YoVariableRegistry(namePrefix + "JacobianSolver");
+      this.dampedLeastSquaresJacobianSolver = new DampedLeastSquaresJacobianSolver(namePrefix + "DampedLS", matrixSize, registry);
       this.switchingDeterminant = new DoubleYoVariable("switchingDeterminant", registry);
       this.jacobianDeterminant = new DoubleYoVariable("jacobianDeterminant", registry);
-      this.nullspaceGain = new DoubleYoVariable("nullspaceGain", registry);
-      this.svd = DecompositionFactory.svd(matrixSize, matrixSize);
-      this.u = new DenseMatrix64F(matrixSize, matrixSize);
+      this.nullspaceMultiplier = new DoubleYoVariable("nullspaceMultiplier", registry);
+      this.leavingSingularRegion = new BooleanYoVariable("leavingSingularRegion", registry);
+      this.svd = DecompositionFactory.svd(matrixSize, matrixSize, false, true, false);
       this.degenerateRank = matrixSize - 1;
-      this.nullspaceSign = nullspaceSign;
-
-      columnSpace = new DenseMatrix64F(matrixSize, degenerateRank);
-      nullspace = new DenseMatrix64F(matrixSize, matrixSize - degenerateRank);
-      vStar = new DenseMatrix64F(matrixSize, degenerateRank);
-      uStar = new DenseMatrix64F(matrixSize, matrixSize - degenerateRank);
-      projectedAcceleration = new DenseMatrix64F(degenerateRank, 1);
+      this.indexToUseForSign = indexToUseForSign;
+      this.sign = sign;
+      
       vStarTaskAcceleration = new DenseMatrix64F(matrixSize, 1);
       iMinusNNT = new DenseMatrix64F(matrixSize, matrixSize);
       iMinusNNTSolver = new SolvePseudoInverseSvd(matrixSize, matrixSize);
+
+      nullspace = new DenseMatrix64F(matrixSize, matrixSize - degenerateRank);
       taskJointAcceleration = new DenseMatrix64F(matrixSize, 1);
-      projectedUnachievableTaskAcceleration = new DenseMatrix64F(matrixSize - degenerateRank, 1);
       nullspaceJointAcceleration = new DenseMatrix64F(matrixSize, 1);
       
       parentRegistry.addChild(registry);
+   }
+   
+   public void setNullspaceMultiplier(double nullspaceMultiplier)
+   {
+      this.nullspaceMultiplier.set(nullspaceMultiplier);
+   }
+   
+   public boolean leavingSingularRegion()
+   {
+      return leavingSingularRegion.getBooleanValue();
+   }
+
+   public boolean inSingularRegion()
+   {
+      return Math.abs(jacobianDeterminant.getDoubleValue()) < switchingDeterminant.getDoubleValue();
    }
 
    public void solve(DenseMatrix64F solutionToPack, DenseMatrix64F jacobianMatrix, DenseMatrix64F vector)
    {
       double determinant = CommonOps.det(jacobianMatrix);
       double switchingDeterminant = this.switchingDeterminant.getDoubleValue();
-      double nullspaceMultiplier = nullspaceSign * nullspaceGain.getDoubleValue() * (switchingDeterminant - determinant) / switchingDeterminant;
-
+      leavingSingularRegion.set(false);
       if (Math.abs(determinant) > switchingDeterminant)
       {
-         CommonOps.solve(jacobianMatrix, vector, solutionToPack);
-
-//         double previousDeterminant = jacobianDeterminant.getDoubleValue();
-//         if (Math.abs(previousDeterminant) <= switchingDeterminant)
-//         {
-//            computeDegenerate(solutionToPack, jacobianMatrix, vector, nullspaceMultiplier);
-//
-//            // TODO:
-//            // reset trajectory generator acc to current desired acc
-//            // reset trajectory generator pos, vel to have no component along singular direction
-//         }
-//         else
-//         {
-//            CommonOps.solve(jacobianMatrix, vector, solutionToPack);
-//         }
+         if (Math.abs(jacobianDeterminant.getDoubleValue()) <= switchingDeterminant)
+         {
+            leavingSingularRegion.set(true);
+            computeDegenerate(solutionToPack, jacobianMatrix, vector, nullspaceMultiplier.getDoubleValue());
+         }
+         else
+         {            
+            dampedLeastSquaresJacobianSolver.solve(solutionToPack, jacobianMatrix, vector);
+         }
       }
       else
       {
-         computeDegenerate(solutionToPack, jacobianMatrix, vector, nullspaceMultiplier);
+         computeDegenerate(solutionToPack, jacobianMatrix, vector, nullspaceMultiplier.getDoubleValue());
       }
 
       jacobianDeterminant.set(determinant);
@@ -102,70 +111,49 @@ public class SingularityRobustJacobianSolver implements JacobianSolver
       this.switchingDeterminant.set(switchingDeterminant);
    }
 
-   public void setNullspaceGain(double nullspaceGain)
+   public void setAlpha(double alpha)
    {
-      this.nullspaceGain.set(nullspaceGain);
+      dampedLeastSquaresJacobianSolver.setAlpha(alpha);
    }
    
    private void computeDegenerate(DenseMatrix64F jointAccelerations, DenseMatrix64F jacobian, DenseMatrix64F taskAcceleration, double nullspaceMultiplier)
    {
       svd.decompose(jacobian);
-      DenseMatrix64F uTranspose = svd.getU(true);
-      DenseMatrix64F sigma = svd.getW(null);
-      DenseMatrix64F v = svd.getV(false);
-      CommonOps.transpose(uTranspose, u);
-      SingularOps.descendingOrder(u, false, sigma, v, false);
+      SingularOps.nullSpace(svd, nullspace);
+      
+      DenseMatrix64F augmentedTaskJointAccelerations = computeAugmentedTaskJointAccelerations(jacobian, taskAcceleration, nullspace);
+      DenseMatrix64F nullspaceJointAccelerations = computeNullspaceJointAccelerations(nullspaceMultiplier, jacobian, nullspace);
 
-      CommonOps.extract(u, 0, matrixSize, 0, degenerateRank, columnSpace, 0, 0);
-      CommonOps.extract(v, 0, matrixSize, degenerateRank, matrixSize, nullspace, 0, 0);
-      CommonOps.extract(v, 0, matrixSize, 0, degenerateRank, vStar, 0, 0);
-      CommonOps.extract(u, 0, matrixSize, degenerateRank, matrixSize, uStar, 0, 0);
-
-      DenseMatrix64F augmentedTaskJointAccelerations = computeAugmentedTaskJointAccelerations(jacobian, taskAcceleration, sigma, columnSpace, nullspace, vStar);
-      DenseMatrix64F nullspaceJointAccelerations = computeNullspaceJointAccelerations(taskAcceleration, nullspaceMultiplier, nullspace, uStar);
       CommonOps.add(augmentedTaskJointAccelerations, nullspaceJointAccelerations, jointAccelerations);
-//      jointAccelerations.set(nullspaceJointAccelerations);
    }
-
-   private DenseMatrix64F computeAugmentedTaskJointAccelerations(DenseMatrix64F jacobian, DenseMatrix64F taskAcceleration, DenseMatrix64F sigma,
-           DenseMatrix64F columnSpace, DenseMatrix64F nullspace, DenseMatrix64F vStar)
+   
+   private DenseMatrix64F computeAugmentedTaskJointAccelerations(DenseMatrix64F jacobian, DenseMatrix64F taskAcceleration, DenseMatrix64F nullspace)
    {
-      CommonOps.multTransA(columnSpace, taskAcceleration, projectedAcceleration);
-
-      for (int i = 0; i < degenerateRank; i++)
-      {
-         projectedAcceleration.times(i, 1.0 / sigma.get(i, i));
-      }
-
-      CommonOps.mult(vStar, projectedAcceleration, vStarTaskAcceleration);
-
+//      dampedLeastSquaresJacobianSolver.solve(taskJointAcceleration, jacobian, taskAcceleration);
+      dampedLeastSquaresJacobianSolver.solve(vStarTaskAcceleration, jacobian, taskAcceleration);
+      
       CommonOps.multOuter(nullspace, iMinusNNT);
       CommonOps.scale(-1.0, iMinusNNT);
       addDiagonal(iMinusNNT, 1.0);
 
-      SingularValueDecomposition<DenseMatrix64F> svd = DecompositionFactory.svd(iMinusNNT.getNumRows(), iMinusNNT.getNumCols());
-      svd.decompose(iMinusNNT);
-      
       double oldEps = UtilEjml.EPS;
-      UtilEjml.EPS = 0.5 / iMinusNNT.getNumCols();    // this is OK because singular values should be either 0 or 1 anyway; helps avoid numerical issues
+      UtilEjml.EPS = 0.5;    // this is OK because singular values should be either 0 or 1 anyway, since columns of nullspace are orthonormal; fixes numerical issues
       iMinusNNTSolver.setA(iMinusNNT);
       iMinusNNTSolver.solve(vStarTaskAcceleration, taskJointAcceleration);
       UtilEjml.EPS = oldEps;
-
+      
       return taskJointAcceleration;
    }
 
-   private DenseMatrix64F computeNullspaceJointAccelerations(DenseMatrix64F taskAcceleration, double nullspaceMultiplier, DenseMatrix64F nullspace,
-           DenseMatrix64F uStar)
+   private DenseMatrix64F computeNullspaceJointAccelerations(double nullspaceMultiplier, DenseMatrix64F jacobian, DenseMatrix64F nullspace)
    {
-      CommonOps.multTransA(uStar, taskAcceleration, projectedUnachievableTaskAcceleration);
-
       nullspaceJointAcceleration.set(nullspace);
-      CommonOps.scale(nullspaceMultiplier, nullspaceJointAcceleration);
+      double sign = this.sign * Math.signum(nullspace.get(indexToUseForSign, 0));
+      CommonOps.scale(nullspaceMultiplier * sign, nullspaceJointAcceleration);
 
       return nullspaceJointAcceleration;
    }
-
+   
    private void addDiagonal(DenseMatrix64F mat, double s)
    {
       int n = Math.max(mat.getNumRows(), mat.getNumCols());
