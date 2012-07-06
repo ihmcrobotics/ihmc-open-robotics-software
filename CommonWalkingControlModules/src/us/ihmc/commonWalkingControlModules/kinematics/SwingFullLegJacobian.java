@@ -3,12 +3,13 @@ package us.ihmc.commonWalkingControlModules.kinematics;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
+
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointVelocities;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegTorques;
 import us.ihmc.robotSide.RobotSide;
-import us.ihmc.utilities.screwTheory.DampedLeastSquaresJacobianSolver;
 import us.ihmc.utilities.screwTheory.GeometricJacobian;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
@@ -17,6 +18,7 @@ import us.ihmc.utilities.screwTheory.Wrench;
 
 public class SwingFullLegJacobian
 {
+   private final YoVariableRegistry registry;
    private final RobotSide robotSide;
    private final GeometricJacobian geometricJacobian;
    private final DenseMatrix64F jointVelocitiesVector;
@@ -24,15 +26,18 @@ public class SwingFullLegJacobian
 
    /**
     * Constructs a new SwingFullLegJacobian, for the given side of the robot
+    * @param parentRegistry TODO
     */
-   public SwingFullLegJacobian(RobotSide robotSide, FullRobotModel fullRobotModel)
+   public SwingFullLegJacobian(RobotSide robotSide, FullRobotModel fullRobotModel, YoVariableRegistry parentRegistry)
    {
+      registry = new YoVariableRegistry(robotSide + getClass().getSimpleName());
       this.robotSide = robotSide;
       RigidBody pelvis = fullRobotModel.getPelvis();
       RigidBody foot = fullRobotModel.getFoot(robotSide);
       geometricJacobian = new GeometricJacobian(pelvis, foot, foot.getBodyFixedFrame());
       jointVelocitiesVector = new DenseMatrix64F(geometricJacobian.getNumberOfColumns(), 1);
-      jacobianSolver = new DampedLeastSquaresJacobianSolver(geometricJacobian.getNumberOfColumns());
+      jacobianSolver = new DampedLeastSquaresJacobianSolver(robotSide.getCamelCaseNameForStartOfExpression() + "JacobianSolver", geometricJacobian.getNumberOfColumns(), registry);
+      parentRegistry.addChild(registry);
    }
 
    /**
