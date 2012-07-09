@@ -45,4 +45,15 @@ public class DampedLeastSquaresJacobianSolver implements JacobianSolver
 
       dampedLeastSquaresSolver.solve(tempVector, solutionToPack);
    }
+
+   public void inverseSolve(DenseMatrix64F taskSpaceVectorToPack, DenseMatrix64F jacobianMatrix,
+         DenseMatrix64F jointSpaceVector)
+   {
+      CommonOps.transpose(jacobianMatrix, tempMatrix);
+      dampedLeastSquaresSolver.setA(tempMatrix);
+      dampedLeastSquaresSolver.solve(jointSpaceVector, taskSpaceVectorToPack);
+      CommonOps.scale(MathTools.square(alpha.getDoubleValue()), taskSpaceVectorToPack);
+      CommonOps.mult(jacobianMatrix, jointSpaceVector, tempVector);
+      CommonOps.addEquals(taskSpaceVectorToPack, tempVector);
+   }
 }
