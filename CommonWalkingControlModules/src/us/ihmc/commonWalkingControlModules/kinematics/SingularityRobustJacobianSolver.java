@@ -32,7 +32,7 @@ public class SingularityRobustJacobianSolver implements JacobianSolver
    private final DenseMatrix64F nullspaceJointAcceleration;
    private final int indexToUseForSign;
    private final int sign;
-   
+
    private final DenseMatrix64F vStarTaskAcceleration;
    private final DenseMatrix64F iMinusNNT;
    private final SolvePseudoInverseSvd iMinusNNTSolver;
@@ -44,7 +44,7 @@ public class SingularityRobustJacobianSolver implements JacobianSolver
       CheckTools.checkRange(sign, -1, 1);
       if (sign == 0)
          throw new RuntimeException("sign == 0");
-      
+
       this.registry = new YoVariableRegistry(namePrefix + "JacobianSolver");
       this.dampedLeastSquaresJacobianSolver = new DampedLeastSquaresJacobianSolver(namePrefix + "DampedLS", matrixSize, registry);
       this.switchingDeterminant = new DoubleYoVariable("switchingDeterminant", registry);
@@ -55,7 +55,7 @@ public class SingularityRobustJacobianSolver implements JacobianSolver
       this.degenerateRank = matrixSize - 1;
       this.indexToUseForSign = indexToUseForSign;
       this.sign = sign;
-      
+
       vStarTaskAcceleration = new DenseMatrix64F(matrixSize, 1);
       iMinusNNT = new DenseMatrix64F(matrixSize, matrixSize);
       iMinusNNTSolver = new SolvePseudoInverseSvd(matrixSize, matrixSize);
@@ -63,15 +63,15 @@ public class SingularityRobustJacobianSolver implements JacobianSolver
       nullspace = new DenseMatrix64F(matrixSize, matrixSize - degenerateRank);
       taskJointAcceleration = new DenseMatrix64F(matrixSize, 1);
       nullspaceJointAcceleration = new DenseMatrix64F(matrixSize, 1);
-      
+
       parentRegistry.addChild(registry);
    }
-   
+
    public void setNullspaceMultiplier(double nullspaceMultiplier)
    {
       this.nullspaceMultiplier.set(nullspaceMultiplier);
    }
-   
+
    public boolean leavingSingularRegion()
    {
       return leavingSingularRegion.getBooleanValue();
@@ -82,11 +82,17 @@ public class SingularityRobustJacobianSolver implements JacobianSolver
       return Math.abs(jacobianDeterminant.getDoubleValue()) < switchingDeterminant.getDoubleValue();
    }
 
+   public void inverseSolveNonDegenerate(DenseMatrix64F taskSpaceVectorToPack, DenseMatrix64F jacobianMatrix, DenseMatrix64F jointSpaceVector)
+   {
+      dampedLeastSquaresJacobianSolver.inverseSolve(taskSpaceVectorToPack, jacobianMatrix, jointSpaceVector);
+   }
+
    public void solve(DenseMatrix64F solutionToPack, DenseMatrix64F jacobianMatrix, DenseMatrix64F vector)
    {
       double determinant = CommonOps.det(jacobianMatrix);
       double switchingDeterminant = this.switchingDeterminant.getDoubleValue();
       leavingSingularRegion.set(false);
+
       if (Math.abs(determinant) > switchingDeterminant)
       {
          if (Math.abs(jacobianDeterminant.getDoubleValue()) <= switchingDeterminant)
@@ -95,7 +101,7 @@ public class SingularityRobustJacobianSolver implements JacobianSolver
             computeDegenerate(solutionToPack, jacobianMatrix, vector, nullspaceMultiplier.getDoubleValue());
          }
          else
-         {            
+         {
             dampedLeastSquaresJacobianSolver.solve(solutionToPack, jacobianMatrix, vector);
          }
       }
@@ -106,7 +112,7 @@ public class SingularityRobustJacobianSolver implements JacobianSolver
 
       jacobianDeterminant.set(determinant);
    }
-   
+
    public void setSwitchingDeterminant(double switchingDeterminant)
    {
       this.switchingDeterminant.set(switchingDeterminant);
@@ -116,23 +122,25 @@ public class SingularityRobustJacobianSolver implements JacobianSolver
    {
       dampedLeastSquaresJacobianSolver.setAlpha(alpha);
    }
-   
+
    private void computeDegenerate(DenseMatrix64F jointAccelerations, DenseMatrix64F jacobian, DenseMatrix64F taskAcceleration, double nullspaceMultiplier)
    {
       svd.decompose(jacobian);
       SingularOps.nullSpace(svd, nullspace);
-      
-      DenseMatrix64F augmentedTaskJointAccelerations = computeAugmentedTaskJointAccelerations(jacobian, taskAcceleration, nullspace, nullspaceMultiplier != 0.0);
+
+      DenseMatrix64F augmentedTaskJointAccelerations = computeAugmentedTaskJointAccelerations(jacobian, taskAcceleration, nullspace,
+                                                          nullspaceMultiplier != 0.0);
       DenseMatrix64F nullspaceJointAccelerations = computeNullspaceJointAccelerations(nullspaceMultiplier, jacobian, nullspace);
 
       CommonOps.add(augmentedTaskJointAccelerations, nullspaceJointAccelerations, jointAccelerations);
    }
-   
-   private DenseMatrix64F computeAugmentedTaskJointAccelerations(DenseMatrix64F jacobian, DenseMatrix64F taskAcceleration, DenseMatrix64F nullspace, boolean removeNullspaceComponent)
+
+   private DenseMatrix64F computeAugmentedTaskJointAccelerations(DenseMatrix64F jacobian, DenseMatrix64F taskAcceleration, DenseMatrix64F nullspace,
+           boolean removeNullspaceComponent)
    {
-//      dampedLeastSquaresJacobianSolver.solve(taskJointAcceleration, jacobian, taskAcceleration);
+//    dampedLeastSquaresJacobianSolver.solve(taskJointAcceleration, jacobian, taskAcceleration);
       dampedLeastSquaresJacobianSolver.solve(vStarTaskAcceleration, jacobian, taskAcceleration);
-      
+
       if (removeNullspaceComponent)
       {
          CommonOps.multOuter(nullspace, iMinusNNT);
@@ -143,7 +151,7 @@ public class SingularityRobustJacobianSolver implements JacobianSolver
          UtilEjml.EPS = 0.5;    // this is OK because singular values should be either 0 or 1 anyway, since columns of nullspace are orthonormal; fixes numerical issues
          iMinusNNTSolver.setA(iMinusNNT);
          iMinusNNTSolver.solve(vStarTaskAcceleration, taskJointAcceleration);
-         UtilEjml.EPS = oldEps;         
+         UtilEjml.EPS = oldEps;
       }
       else
       {
