@@ -204,7 +204,7 @@ public class CartesianTrajectoryGeneratorTester
          finalDesiredPosition.set(originalFinalDesiredPosition);
          finalDesiredPosition.add(endPointShift);
 
-         cartesianTrajectoryGenerator.initialize(this.startingTestPoint, startingTestVelocity, this.testPointsToCycleThrough.get(0));
+         cartesianTrajectoryGenerator.initialize(this.startingTestPoint, startingTestVelocity, null, this.testPointsToCycleThrough.get(0), null);
 
          bagOfBalls = BagOfBalls.createPatrioticBag(500, 0.006, "tester", registry, dynamicGraphicObjectsListRegistry);
 
@@ -250,7 +250,7 @@ public class CartesianTrajectoryGeneratorTester
             originalFinalDesiredPosition.set(testPointsToCycleThrough.get(testPointIndex.getIntegerValue() % testPointsToCycleThrough.size()));
             finalDesiredPosition.set(originalFinalDesiredPosition);
 
-            cartesianTrajectoryGenerator.initialize(startingTestPoint, startingTestVelocity, finalDesiredPosition.getFramePointCopy());
+            cartesianTrajectoryGenerator.initialize(startingTestPoint, startingTestVelocity, null, finalDesiredPosition.getFramePointCopy(), null);
 
 //          cartesianTrajectoryGenerator.updateFinalDesiredPosition(finalDesiredPosition.getFramePointCopy());
 

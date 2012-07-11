@@ -104,7 +104,7 @@ public class TakeoffLandingCartesianTrajectoryGenerator implements CartesianTraj
    }
 
 
-   public void initialize(FramePoint initialPosition, FrameVector initialVelocity, FramePoint finalDesiredPosition)
+   public void initialize(FramePoint initialPosition, FrameVector initialVelocity, FrameVector initialAcceleration, FramePoint finalDesiredPosition, FrameVector finalDesiredVelocity)
    {
       cartesianTrajectoryState.set(SwingState.TAKE_OFF);
 
@@ -483,7 +483,7 @@ public class TakeoffLandingCartesianTrajectoryGenerator implements CartesianTraj
       FrameVector initialVelocity = new FrameVector(referenceFrame, 0.1, 0.1, 0.1);
       FramePoint finalDesiredPosition = new FramePoint(referenceFrame, 2.0, 2.0, 2.0);
 
-      cartesianTrajectoryGenerator.initialize(initialPosition, initialVelocity, finalDesiredPosition);
+      cartesianTrajectoryGenerator.initialize(initialPosition, initialVelocity, null, finalDesiredPosition, null);
 
       new CartesianTrajectoryGeneratorTester(cartesianTrajectoryGenerator, yoVariableRegistry, dynamicGraphicObjectsListRegistry,
               "cartesianTrajectoryGeneratorTester");

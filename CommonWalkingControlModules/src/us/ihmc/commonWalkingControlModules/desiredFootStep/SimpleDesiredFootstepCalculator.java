@@ -93,9 +93,9 @@ public class SimpleDesiredFootstepCalculator implements DesiredFootstepCalculato
    public void setupParametersForR2InverseDynamics()
    {
       // stairs:
-      stepLength.set(0.325);
+      stepLength.set(0.315);
 //      stepLength.set(0.21);
-      stepWidth.set(0.3);
+      stepWidth.set(0.2);
       stepHeight.set(0.25);
       stepYaw.set(0.0);
       stepPitch.set(0.0);

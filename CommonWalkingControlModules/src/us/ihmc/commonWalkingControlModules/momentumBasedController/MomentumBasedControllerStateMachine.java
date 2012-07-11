@@ -15,8 +15,8 @@ import us.ihmc.commonWalkingControlModules.sensors.ProcessedSensorsInterface;
 import us.ihmc.commonWalkingControlModules.trajectories.CartesianTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.CenterOfMassHeightTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantCoPInstantaneousCapturePointTrajectory;
+import us.ihmc.commonWalkingControlModules.trajectories.FifthOrderWaypointCartesianTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.LinearCenterOfMassHeightTrajectoryGenerator;
-import us.ihmc.commonWalkingControlModules.trajectories.ParabolicCartesianTrajectoryGenerator;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.MathTools;
@@ -61,6 +61,7 @@ public class MomentumBasedControllerStateMachine extends StateMachine
       new SideDependentList<MomentumBasedControllerStateMachine.MomentumBasedControllerState>(MomentumBasedControllerState.TRANSFER_TO_LEFT_SUPPORT,
                             MomentumBasedControllerState.TRANSFER_TO_RIGHT_SUPPORT);
 
+   private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final FullRobotModel fullRobotModel;
    private final CommonWalkingReferenceFrames referenceFrames;
    private final TwistCalculator twistCalculator;
@@ -97,17 +98,17 @@ public class MomentumBasedControllerStateMachine extends StateMachine
 
    private final FramePoint2d capturePoint;
    private final FramePoint2d previousCoP;
-   private final double doubleSupportTime = 0.9;
-   private final double straightUpAverageVelocity = 3.5;
-   private final double parabolicTime = 0.75;
-   private final double initialGroundClearance = 0.1; // 0.15;
+   private final double doubleSupportTime = 0.6;
+   private final double stepTime = 1.0; // 0.75;
+   private final double waypointHeight = 0.0; // 0.15;
 
    private final DoubleYoVariable singleSupportICPGlideScaleFactor = new DoubleYoVariable("singleSupportICPGlideScaleFactor", registry);
    private final BooleanYoVariable walk = new BooleanYoVariable("walk", registry);
 
    private double comHeight;
    private double gravity;
-   private final  double swingNullspaceMultiplier = 20.0;
+   private final  double swingNullspaceMultiplier = 100.0;
+   private final SideDependentList<BooleanYoVariable> trajectoryInitialized = new SideDependentList<BooleanYoVariable>();
 
    public MomentumBasedControllerStateMachine(FullRobotModel fullRobotModel, CommonWalkingReferenceFrames referenceFrames, TwistCalculator twistCalculator,
            SideDependentList<BipedFootInterface> bipedFeet, BipedSupportPolygons bipedSupportPolygons, SideDependentList<FootSwitchInterface> footSwitches,
@@ -157,25 +158,28 @@ public class MomentumBasedControllerStateMachine extends StateMachine
       {
          ReferenceFrame supportAnkleZUpFrame = referenceFrames.getAnkleZUpFrame(robotSide.getOppositeSide());
          YoFramePoint desiredSwingFootPosition = new YoFramePoint("desired" + robotSide.getCamelCaseNameForMiddleOfExpression() + "SwingFootPosition", "",
-                                                    supportAnkleZUpFrame, registry);
+                                                    worldFrame, registry);
          desiredFootPositions.put(robotSide, desiredSwingFootPosition);
 
          YoFrameVector desiredSwingFootVelocity = new YoFrameVector("desired" + robotSide.getCamelCaseNameForMiddleOfExpression() + "SwingFootVelocity", "",
-                                                     supportAnkleZUpFrame, registry);
+               worldFrame, registry);
          desiredFootVelocities.put(robotSide, desiredSwingFootVelocity);
 
          YoFrameVector desiredSwingFootAcceleration = new YoFrameVector("desired" + robotSide.getCamelCaseNameForMiddleOfExpression()
-                                                         + "SwingFootAcceleration", "", supportAnkleZUpFrame, registry);
+                                                         + "SwingFootAcceleration", "", worldFrame, registry);
          desiredFootAccelerations.put(robotSide, desiredSwingFootAcceleration);
 
+         cartesianTrajectoryGenerators.put(robotSide,
+               new FifthOrderWaypointCartesianTrajectoryGenerator(robotSide.getCamelCaseNameForStartOfExpression(), supportAnkleZUpFrame, stepTime, waypointHeight, registry));
+         
 //         cartesianTrajectoryGenerators.put(robotSide,
 //                                           new StraightUpThenParabolicCartesianTrajectoryGenerator(robotSide.getCamelCaseNameForStartOfExpression()
 //                                              + "CartesianTrajectory", supportAnkleZUpFrame, straightUpAverageVelocity, parabolicTime, initialGroundClearance,
 //                                                 registry));
 
-          cartesianTrajectoryGenerators.put(robotSide,
-          new ParabolicCartesianTrajectoryGenerator(robotSide.getCamelCaseNameForStartOfExpression() + "CartesianTrajectory",
-          supportAnkleZUpFrame, parabolicTime, initialGroundClearance, registry));
+//          cartesianTrajectoryGenerators.put(robotSide,
+//          new ParabolicCartesianTrajectoryGenerator(robotSide.getCamelCaseNameForStartOfExpression() + "CartesianTrajectory",
+//          supportAnkleZUpFrame, parabolicTime, initialGroundClearance, registry));
 
          desiredFootOrientations.put(robotSide, new Orientation(ReferenceFrame.getWorldFrame()));
          desiredFootAngularVelocities.put(robotSide,
@@ -190,6 +194,11 @@ public class MomentumBasedControllerStateMachine extends StateMachine
       this.previousCoP = new FramePoint2d(ReferenceFrame.getWorldFrame());
       upcomingSupportLeg.set(RobotSide.LEFT);
       walk.set(true);
+      
+      for (RobotSide robotSide : RobotSide.values())
+      {
+         trajectoryInitialized.put(robotSide, new BooleanYoVariable(robotSide.getCamelCaseNameForStartOfExpression() + "TrajectoryInitialized", registry));
+      }
 
       setUpStateMachine();
       parentRegistry.addChild(registry);
@@ -429,20 +438,32 @@ public class MomentumBasedControllerStateMachine extends StateMachine
          evaluateCoMHeightTrajectory();
 
          CartesianTrajectoryGenerator cartesianTrajectoryGenerator = cartesianTrajectoryGenerators.get(swingSide);
-         if (!cartesianTrajectoryGenerator.isDone())
+         if (!cartesianTrajectoryGenerator.isDone() && trajectoryInitialized.get(swingSide).getBooleanValue())
          {
             cartesianTrajectoryGenerator.computeNextTick(positionToPack, velocityToPack, accelerationToPack, controlDT);
-            desiredFootPositions.get(swingSide).set(positionToPack);
-            desiredFootVelocities.get(swingSide).set(velocityToPack);
-            desiredFootAccelerations.get(swingSide).set(accelerationToPack);
+            FramePoint2d desiredICPLocal = new FramePoint2d(desiredICP.getReferenceFrame());
+            FrameVector2d desiredICPVelocityLocal = new FrameVector2d(desiredICPVelocity.getReferenceFrame());
+            RobotSide supportSide = swingSide.getOppositeSide();
+            icpTrajectoryGenerators.get(supportSide).pack(desiredICPLocal, desiredICPVelocityLocal, comHeight);
+            desiredICP.set(desiredICPLocal);
+            desiredICPVelocity.set(desiredICPVelocityLocal);
          }
+         else
+         {
+            positionToPack.setToZero(referenceFrames.getFootFrame(swingSide));
+            velocityToPack.setToZero(referenceFrames.getFootFrame(swingSide));
+            accelerationToPack.setToZero(referenceFrames.getFootFrame(swingSide));
 
-         FramePoint2d desiredICPLocal = new FramePoint2d(desiredICP.getReferenceFrame());
-         FrameVector2d desiredICPVelocityLocal = new FrameVector2d(desiredICPVelocity.getReferenceFrame());
-         RobotSide supportSide = swingSide.getOppositeSide();
-         icpTrajectoryGenerators.get(supportSide).pack(desiredICPLocal, desiredICPVelocityLocal, comHeight);
-         desiredICP.set(desiredICPLocal);
-         desiredICPVelocity.set(desiredICPVelocityLocal);
+            // don't change desiredICP
+            desiredICPVelocity.set(0.0, 0.0);
+         }
+         positionToPack.changeFrame(desiredFootPositions.get(swingSide).getReferenceFrame());
+         velocityToPack.changeFrame(desiredFootVelocities.get(swingSide).getReferenceFrame());
+         accelerationToPack.changeFrame(desiredFootAccelerations.get(swingSide).getReferenceFrame());
+
+         desiredFootPositions.get(swingSide).set(positionToPack);
+         desiredFootVelocities.get(swingSide).set(velocityToPack);
+         desiredFootAccelerations.get(swingSide).set(accelerationToPack);
 
          desiredFootOrientations.get(swingSide).setYawPitchRoll(0.0, 0.0, 0.0);    // TODO
          desiredFootAngularVelocities.get(swingSide).set(0.0, 0.0, 0.0);
@@ -457,18 +478,10 @@ public class MomentumBasedControllerStateMachine extends StateMachine
 
          setDesiredFootPosVelAccForSupportSide(supportSide);
 
-         desiredFootstepCalculator.initializeDesiredFootstep(supportSide);
-         Footstep desiredFootstep = desiredFootstepCalculator.updateAndGetDesiredFootstep(supportSide);
-         FramePoint finalDesiredStepLocation = desiredFootstep.getFootstepPositionInFrame(supportAnkleZUpFrame);
-         
-         recomputeTrajectory(swingSide); // TODO: don't do this here.
-         FramePoint2d finalDesiredICP = getSingleSupportFinalDesiredICPForWalking(finalDesiredStepLocation, swingSide);
-         icpTrajectoryGenerators.get(supportSide).initialize(desiredICP.getFramePoint2dCopy(), finalDesiredICP, cartesianTrajectoryGenerators.get(swingSide).getFinalTime(), // TODO: nasty
-                                     comHeight);
-
          centerOfMassHeightTrajectoryGenerator.initialize(upcomingSupportLeg.getEnumValue());
          nullspaceMultipliers.get(swingSide).set(swingNullspaceMultiplier);
          nullspaceMultipliers.get(supportSide).set(0.0);
+         trajectoryInitialized.get(swingSide).set(false);
       }
 
       @Override
@@ -525,9 +538,9 @@ public class MomentumBasedControllerStateMachine extends StateMachine
          RobotSide swingSide = supportLeg.getEnumValue().getOppositeSide();
          double minimumSwingFraction = 0.5;
          double minimumSwingTime = cartesianTrajectoryGenerators.get(swingSide).getFinalTime() * minimumSwingFraction;
-         boolean footHitGroundEarly = (timeInCurrentState() > minimumSwingTime) && footSwitches.get(swingSide).hasFootHitGround();
+         boolean footHitGround = (timeInCurrentState() > minimumSwingTime) && footSwitches.get(swingSide).hasFootHitGround();
 
-         return cartesianTrajectoryGenerators.get(swingSide).isDone() || footHitGroundEarly;
+         return trajectoryInitialized.get(swingSide).getBooleanValue() && (cartesianTrajectoryGenerators.get(swingSide).isDone() || footHitGround);
       }
    }
 
@@ -650,10 +663,11 @@ public class MomentumBasedControllerStateMachine extends StateMachine
 
    public boolean isSwingFoot(RobotSide robotSide)
    {
-      if (getSupportLeg() == null)
+      RobotSide supportLeg = getSupportLeg();
+      if (supportLeg == null)
          return false;
       else
-         return getSupportLeg().getOppositeSide() == robotSide;
+         return supportLeg.getOppositeSide() == robotSide;
    }
 
    private void setSupportLeg(RobotSide supportLeg)
@@ -669,7 +683,7 @@ public class MomentumBasedControllerStateMachine extends StateMachine
       bipedSupportPolygons.update(bipedFeet.get(RobotSide.LEFT), bipedFeet.get(RobotSide.RIGHT));
    }
 
-   public void recomputeTrajectory(RobotSide swingSide)
+   public void initializeTrajectory(RobotSide swingSide)
    {
       RobotSide supportSide = swingSide.getOppositeSide();
       ReferenceFrame swingAnkleZUpFrame = referenceFrames.getAnkleZUpFrame(swingSide);
@@ -683,12 +697,23 @@ public class MomentumBasedControllerStateMachine extends StateMachine
       footTwist.changeFrame(swingAnkleZUpFrame);
       footTwist.packLinearPart(initialVelocity);
       initialVelocity.changeFrame(supportAnkleZUpFrame);
+      
+      FrameVector initialAcceleration = new FrameVector(supportAnkleZUpFrame); // TODO
 
       desiredFootstepCalculator.initializeDesiredFootstep(supportSide);
       Footstep desiredFootstep = desiredFootstepCalculator.updateAndGetDesiredFootstep(supportSide);
       FramePoint finalDesiredStepLocation = desiredFootstep.getFootstepPositionInFrame(supportAnkleZUpFrame);
 
+      FrameVector finalDesiredVelocity = new FrameVector(supportAnkleZUpFrame);
+
       CartesianTrajectoryGenerator cartesianTrajectoryGenerator = cartesianTrajectoryGenerators.get(swingSide);
-      cartesianTrajectoryGenerator.initialize(initialPosition, initialVelocity, finalDesiredStepLocation);      
+      cartesianTrajectoryGenerator.initialize(initialPosition, initialVelocity, initialAcceleration, finalDesiredStepLocation, finalDesiredVelocity);
+     
+      FramePoint2d finalDesiredICP = getSingleSupportFinalDesiredICPForWalking(finalDesiredStepLocation, swingSide);
+      icpTrajectoryGenerators.get(supportSide).initialize(desiredICP.getFramePoint2dCopy(), finalDesiredICP, cartesianTrajectoryGenerators.get(swingSide).getFinalTime(), // TODO: nasty
+                                  comHeight);
+      
+      nullspaceMultipliers.get(swingSide).set(0.0);
+      trajectoryInitialized.get(swingSide).set(true);
    }
 }
