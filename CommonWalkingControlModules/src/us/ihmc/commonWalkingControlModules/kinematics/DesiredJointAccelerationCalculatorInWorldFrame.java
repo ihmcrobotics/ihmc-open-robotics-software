@@ -56,6 +56,7 @@ public class DesiredJointAccelerationCalculatorInWorldFrame
    {
       computeDesiredAccelerationOfFootWithRespectToPelvis(accelerationOfFootWithRespectToPelvis, desiredAccelerationOfFootWithRespectToWorld);
       jacobianSolver.setAlpha(alpha);
+      jacobianSolver.setJacobian(swingLegJacobian.getJacobian());
       desiredJointAccelerationCalculator.compute(accelerationOfFootWithRespectToPelvis);
    }
 

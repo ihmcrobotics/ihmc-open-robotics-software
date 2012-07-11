@@ -293,7 +293,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       startPoint.changeFrame(cartesianTrajectoryGeneratorFrame);
       endPoint.changeFrame(cartesianTrajectoryGeneratorFrame);
       initialSwingVelocityVector.changeFrame(cartesianTrajectoryGeneratorFrame);
-      walkingTrajectoryGenerator.initialize(startPoint, initialSwingVelocityVector, endPoint);
+      walkingTrajectoryGenerator.initialize(startPoint, initialSwingVelocityVector, null, endPoint, null);
 
       // Setup the orientation trajectory
       setupSwingFootOrientationTrajectory(desiredFootstep);
@@ -329,7 +329,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
 
       FramePoint finalDesiredPosition = currentConfiguration.getDesiredSwingFootPosition();
 
-      swingInAirTrajectoryGenerators.get(swingLeg).initialize(currentPosition, currentVelocity, finalDesiredPosition);
+      swingInAirTrajectoryGenerators.get(swingLeg).initialize(currentPosition, currentVelocity, null, finalDesiredPosition, null);
    }
 
    public void doTransitionOutOfInitialSwing(RobotSide swingSide)

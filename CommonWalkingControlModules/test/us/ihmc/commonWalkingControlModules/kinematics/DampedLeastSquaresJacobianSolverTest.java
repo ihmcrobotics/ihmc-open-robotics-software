@@ -30,13 +30,11 @@ public class DampedLeastSquaresJacobianSolverTest
       DampedLeastSquaresJacobianSolver solver = new DampedLeastSquaresJacobianSolver("testSolver", matrixSize, parentRegistry);
       solver.setAlpha(1.0);
       DenseMatrix64F jointVelocities = new DenseMatrix64F(matrixSize, 1);
-      solver.solve(jointVelocities, jacobianMatrix, taskVelocity);
+      solver.setJacobian(jacobianMatrix);
+      solver.solve(jointVelocities, taskVelocity);
 
-      DenseMatrix64F jointAccelerations = new DenseMatrix64F(matrixSize, 1);
-      
       DenseMatrix64F taskVelocityBack = new DenseMatrix64F(matrixSize, 1);
-      DenseMatrix64F taskAccelerationBack = new DenseMatrix64F(matrixSize, 1);
-      solver.inverseSolve(taskVelocityBack, jacobianMatrix, jointVelocities);
+      solver.inverseSolve(taskVelocityBack, jointVelocities);
       
       double delta = 1e-9;
       JUnitTools.assertMatrixEquals(taskVelocity, taskVelocityBack, delta);

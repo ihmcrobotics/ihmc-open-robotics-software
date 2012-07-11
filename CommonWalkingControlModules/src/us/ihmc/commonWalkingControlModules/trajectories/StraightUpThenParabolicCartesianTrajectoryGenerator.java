@@ -54,7 +54,7 @@ public class StraightUpThenParabolicCartesianTrajectoryGenerator implements Cart
       this.groundClearance.set(groundClearance);
    }
 
-   public void initialize(FramePoint initialPosition, FrameVector initialVelocity, FramePoint finalDesiredPosition)
+   public void initialize(FramePoint initialPosition, FrameVector initialVelocity, FrameVector initialAcceleration, FramePoint finalDesiredPosition, FrameVector finalDesiredVelocity)
    {
       initialPosition.checkReferenceFrameMatch(finalDesiredPosition);
       this.initialPosition.set(initialPosition);
@@ -117,13 +117,13 @@ public class StraightUpThenParabolicCartesianTrajectoryGenerator implements Cart
 
          straightUpVector.getFrameVectorAndChangeFrameOfPackedVector(tempVector);
          tempVector.scale(parameter);
-         initialPosition.getFramePoint(positionToPack);
+         initialPosition.getFramePointAndChangeFrameOfPackedPoint(positionToPack);
          positionToPack.add(tempVector);
 
-         straightUpVector.getFrameVector(velocityToPack);
+         straightUpVector.getFrameVectorAndChangeFrameOfPackedVector(velocityToPack);
          velocityToPack.scale(parameterd);
 
-         straightUpVector.getFrameVector(accelerationToPack);
+         straightUpVector.getFrameVectorAndChangeFrameOfPackedVector(accelerationToPack);
          accelerationToPack.scale(parameterdd);
       }
       else
@@ -150,7 +150,7 @@ public class StraightUpThenParabolicCartesianTrajectoryGenerator implements Cart
          parabolicTrajectoryGenerator.packPosition(positionToPack, parameter);
 
          parabolicTrajectoryGenerator.packVelocity(tempVector, parameter);
-         velocityToPack.set(tempVector);
+         velocityToPack.setAndChangeFrame(tempVector);
          velocityToPack.scale(parameterd);
 
          parabolicTrajectoryGenerator.packAcceleration(accelerationToPack);

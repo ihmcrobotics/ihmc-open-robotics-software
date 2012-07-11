@@ -49,7 +49,7 @@ public class StraightUpThenParabolicCartesianTrajectoryGeneratorTest
          FramePoint finalDesiredPosition = new FramePoint(initialPosition);
          finalDesiredPosition.add(new FrameVector(referenceFrame, random.nextDouble(), random.nextDouble(), random.nextDouble()));
 
-         trajectoryGenerator.initialize(initialPosition, initialVelocity, finalDesiredPosition);
+         trajectoryGenerator.initialize(initialPosition, initialVelocity, null, finalDesiredPosition, null);
 
          double zMax = finalDesiredPosition.getZ() + groundClearance;
          double minZDifference = Double.POSITIVE_INFINITY;
@@ -72,92 +72,4 @@ public class StraightUpThenParabolicCartesianTrajectoryGeneratorTest
       }
    }
 
-   public static void main(String[] args)
-   {
-      final double dt = 1e-3;
-      final DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
-
-      double straightUpAverageVelocity = 0.2;
-      double parabolicTime = 1.5;
-      double groundClearance = 0.2;
-      TrajectoryEvaluatorController robotController = new TrajectoryEvaluatorController(straightUpAverageVelocity, parabolicTime, groundClearance, dt, dynamicGraphicObjectsListRegistry);
-
-      robotController.initialize();
-
-      Robot robot = new Robot("robot");
-      robot.setController(robotController);
-
-      SimulationConstructionSet scs = new SimulationConstructionSet(robot);
-      scs.setDT(dt, 1);
-
-      dynamicGraphicObjectsListRegistry.addDynamicGraphicsObjectListsToSimulationConstructionSet(scs);
-      Thread thread = new Thread(scs);
-      thread.start();
-      scs.simulate(robotController.getTrajectoryTime());
-   }
-
-   private static final class TrajectoryEvaluatorController implements RobotController
-   {
-      private final double dt;
-      private static final long serialVersionUID = 1L;
-      private final String name = "test";
-      private final YoVariableRegistry registry = new YoVariableRegistry(name);
-      private final ReferenceFrame referenceFrame = ReferenceFrame.getWorldFrame();
-      private final StraightUpThenParabolicCartesianTrajectoryGenerator trajectoryGenerator;
-      private final FramePoint initialPosition = new FramePoint(referenceFrame, 0.0, 0.0, 0.0);
-      private final FrameVector initialVelocity = new FrameVector(referenceFrame);
-      private final FramePoint finalDesiredPosition = new FramePoint(referenceFrame, 0.3, 0.1, 0.25);
-      private final FramePoint positionToPack = new FramePoint(referenceFrame);
-      private final FrameVector velocityToPack = new FrameVector(referenceFrame);
-      private final FrameVector accelerationToPack = new FrameVector(referenceFrame);
-
-      private final YoFramePoint position = new YoFramePoint("position", "", referenceFrame, registry);
-      private final YoFrameVector velocity = new YoFrameVector("velocity", "", referenceFrame, registry);
-      private final YoFrameVector acceleration = new YoFrameVector("acceleration", "", referenceFrame, registry);
-
-      private final BagOfBalls bagOfBalls;
-
-      private TrajectoryEvaluatorController(double straightUpTime, double stepTime, double groundClearance, double dt,
-              DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
-      {
-         this.dt = dt;
-         trajectoryGenerator = new StraightUpThenParabolicCartesianTrajectoryGenerator("test", referenceFrame, straightUpTime, stepTime, groundClearance,
-                 registry);
-         trajectoryGenerator.initialize(initialPosition, initialVelocity, finalDesiredPosition);
-         bagOfBalls = new BagOfBalls((int) (getTrajectoryTime() / dt), registry, dynamicGraphicObjectsListRegistry);
-      }
-
-      public double getTrajectoryTime()
-      {
-         return trajectoryGenerator.getFinalTime();
-      }
-
-      public void initialize()
-      {
-      }
-
-      public YoVariableRegistry getYoVariableRegistry()
-      {
-         return registry;
-      }
-
-      public String getName()
-      {
-         return name;
-      }
-
-      public String getDescription()
-      {
-         return getName();
-      }
-
-      public void doControl()
-      {
-         trajectoryGenerator.computeNextTick(positionToPack, velocityToPack, accelerationToPack, dt);
-         position.set(positionToPack);
-         velocity.set(velocityToPack);
-         acceleration.set(accelerationToPack);
-         bagOfBalls.setBallLoop(positionToPack);
-      }
-   }
 }

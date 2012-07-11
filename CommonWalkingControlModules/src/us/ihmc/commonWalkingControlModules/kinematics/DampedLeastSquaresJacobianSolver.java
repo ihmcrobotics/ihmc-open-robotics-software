@@ -19,6 +19,7 @@ public class DampedLeastSquaresJacobianSolver implements JacobianSolver
    private final DenseMatrix64F tempMatrix;
    private final LinearSolver<DenseMatrix64F> dampedLeastSquaresSolver;
    private final DoubleYoVariable alpha;
+   private final DenseMatrix64F jacobianMatrix;
 
    public DampedLeastSquaresJacobianSolver(String namePrefix, int matrixSize, YoVariableRegistry parentRegistry)
    {
@@ -27,6 +28,7 @@ public class DampedLeastSquaresJacobianSolver implements JacobianSolver
       
       this.tempVector = new DenseMatrix64F(matrixSize, 1);
       this.tempMatrix = new DenseMatrix64F(matrixSize, matrixSize);
+      this.jacobianMatrix = new DenseMatrix64F(matrixSize, matrixSize);
       this.dampedLeastSquaresSolver = LinearSolverFactory.linear(matrixSize);
       parentRegistry.addChild(registry);
    }
@@ -36,7 +38,7 @@ public class DampedLeastSquaresJacobianSolver implements JacobianSolver
       this.alpha.set(alpha);
    }
 
-   public void solve(DenseMatrix64F solutionToPack, DenseMatrix64F jacobianMatrix, DenseMatrix64F taskSpaceVector)
+   public void solve(DenseMatrix64F solutionToPack, DenseMatrix64F taskSpaceVector)
    { 
       CommonOps.multTransA(jacobianMatrix, taskSpaceVector, tempVector);
       CommonOps.multTransA(jacobianMatrix, jacobianMatrix, tempMatrix);
@@ -46,8 +48,7 @@ public class DampedLeastSquaresJacobianSolver implements JacobianSolver
       dampedLeastSquaresSolver.solve(tempVector, solutionToPack);
    }
 
-   public void inverseSolve(DenseMatrix64F taskSpaceVectorToPack, DenseMatrix64F jacobianMatrix,
-         DenseMatrix64F jointSpaceVector)
+   public void inverseSolve(DenseMatrix64F taskSpaceVectorToPack, DenseMatrix64F jointSpaceVector)
    {
       CommonOps.transpose(jacobianMatrix, tempMatrix);
       dampedLeastSquaresSolver.setA(tempMatrix);
@@ -55,5 +56,15 @@ public class DampedLeastSquaresJacobianSolver implements JacobianSolver
       CommonOps.scale(MathTools.square(alpha.getDoubleValue()), taskSpaceVectorToPack);
       CommonOps.mult(jacobianMatrix, jointSpaceVector, tempVector);
       CommonOps.addEquals(taskSpaceVectorToPack, tempVector);
+   }
+
+   public void setJacobian(DenseMatrix64F jacobianMatrix)
+   {
+      this.jacobianMatrix.set(jacobianMatrix);
+   }
+   
+   protected DenseMatrix64F getJacobianMatrix()
+   {
+      return jacobianMatrix;
    }
 }

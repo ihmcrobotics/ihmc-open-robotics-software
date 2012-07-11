@@ -74,7 +74,8 @@ public class SwingFullLegJacobian
    public void packJointVelocitiesGivenTwist(LegJointVelocities legJointVelocitiesToPack, Twist anklePitchTwistInAnklePitchFrame, double alpha)
    {
       jacobianSolver.setAlpha(alpha);
-      jacobianSolver.solve(jointVelocitiesVector, geometricJacobian.getJacobianMatrix(), anklePitchTwistInAnklePitchFrame.toMatrix());
+      jacobianSolver.setJacobian(geometricJacobian.getJacobianMatrix());
+      jacobianSolver.solve(jointVelocitiesVector, anklePitchTwistInAnklePitchFrame.toMatrix());
       int i = 0;
       for (LegJointName legJointName : legJointVelocitiesToPack.getLegJointNames())
       {
@@ -116,7 +117,8 @@ public class SwingFullLegJacobian
       
       DenseMatrix64F ret = new DenseMatrix64F(geometricJacobian.getNumberOfColumns());
       jacobianSolver.setAlpha(alpha);
-      jacobianSolver.solve(ret, geometricJacobian.getJacobianMatrix(), biasedAccelerations);
+      jacobianSolver.setJacobian(geometricJacobian.getJacobianMatrix());
+      jacobianSolver.solve(ret, biasedAccelerations);
       
       return ret;
    }

@@ -92,7 +92,7 @@ public class TakeoffLandingCartesianTrajectoryGeneratorTest
    private void runOneTest(TakeoffLandingCartesianTrajectoryGenerator generator, double groundZ, FramePoint initialPosition, FrameVector initialVelocity,
                            FramePoint finalDesiredPosition)
    {
-      generator.initialize(initialPosition, initialVelocity, finalDesiredPosition);
+      generator.initialize(initialPosition, initialVelocity, null, finalDesiredPosition, null);
       TrajectoryToTest trajectoryToTest = generateTrajectory(generator);
 
       trajectoryToTest.verifyTrajectoryStartsAtStart(initialPosition);

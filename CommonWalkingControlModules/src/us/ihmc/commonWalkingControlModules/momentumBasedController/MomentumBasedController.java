@@ -89,7 +89,7 @@ public class MomentumBasedController implements RobotController
 
    private final SideDependentList<SpatialAccelerationVector> desiredFootAccelerationsInWorld = new SideDependentList<SpatialAccelerationVector>();
    private final YoFrameVector swingFootPositionErrorInWorld = new YoFrameVector("swingFootPositionErrorInWorld", "", worldFrame, registry);
-   private final YoFramePoint desiredSwingFootPositionInWorld = new YoFramePoint("desiredSwingFootPositionInWorld", "", worldFrame, registry);
+   private final SideDependentList<YoFramePoint> desiredFootPositionsInWorld = new SideDependentList<YoFramePoint>();
    private final SideDependentList<FootSpatialAccelerationControlModule> footSpatialAccelerationControlModules =
       new SideDependentList<FootSpatialAccelerationControlModule>();
 
@@ -186,8 +186,14 @@ public class MomentumBasedController implements RobotController
       this.desiredPelvisForce = new YoFrameVector("desiredPelvisForce", "", centerOfMassFrame, registry);
       this.desiredPelvisTorque = new YoFrameVector("desiredPelvisTorque", "", centerOfMassFrame, registry);
       
-      DynamicGraphicPosition desiredSwingFootPosition = new DynamicGraphicPosition("desiredSwingFoot", desiredSwingFootPositionInWorld, 0.03, YoAppearance.Orange());
-      dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(name, desiredSwingFootPosition);
+      for (RobotSide robotSide : RobotSide.values())
+      {
+         String swingfootPositionName = "desired" + robotSide.getCamelCaseNameForMiddleOfExpression() + "SwingFootPositionInWorld";
+         YoFramePoint desiredSwingFootPosition = new YoFramePoint(swingfootPositionName, "", worldFrame, registry);
+         desiredFootPositionsInWorld.put(robotSide, desiredSwingFootPosition);
+         DynamicGraphicPosition desiredSwingFootPositionViz = new DynamicGraphicPosition(swingfootPositionName, desiredSwingFootPosition, 0.03, YoAppearance.Orange());
+         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(name, desiredSwingFootPositionViz);
+      }
 
       kAngularMomentumXY.set(3e-2);
       kPelvisAxisAngle.set(5e-1);
@@ -329,7 +335,7 @@ public class MomentumBasedController implements RobotController
       for (RobotSide robotSide : RobotSide.values())
       {
          if (supportLeg != null && optimizer.leavingSingularRegion(robotSide))
-            stateMachine.recomputeTrajectory(robotSide);
+            stateMachine.initializeTrajectory(robotSide);
          
          FramePose desiredFootPose = stateMachine.getDesiredFootPose(robotSide);
          Twist desiredFootTwist = stateMachine.getDesiredFootTwist(robotSide);
@@ -339,7 +345,7 @@ public class MomentumBasedController implements RobotController
                  feedForwardFootSpatialAcceleration, isSwingFoot);
          footSpatialAccelerationControlModules.get(robotSide).packFootAcceleration(desiredFootAccelerationsInWorld.get(robotSide));
          swingFootPositionErrorInWorld.set(footSpatialAccelerationControlModules.get(robotSide).getSwingFootPositionErrorInWorld());
-         desiredSwingFootPositionInWorld.set(desiredFootPose.getPositionInFrame(worldFrame));
+         desiredFootPositionsInWorld.get(robotSide).set(desiredFootPose.getPositionInFrame(worldFrame));
       }
 
       optimizer.setDesiredFootAccelerationsInWorld(desiredFootAccelerationsInWorld);
