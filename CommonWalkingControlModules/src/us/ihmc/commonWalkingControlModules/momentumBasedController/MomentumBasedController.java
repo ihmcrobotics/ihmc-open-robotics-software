@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController;
 
+import java.util.HashMap;
+
 import javax.media.j3d.Transform3D;
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;
@@ -36,8 +38,10 @@ import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.InverseDynamicsCalculator;
+import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.RevoluteJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
+import us.ihmc.utilities.screwTheory.ScrewTools;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.utilities.screwTheory.TotalMassCalculator;
 import us.ihmc.utilities.screwTheory.Twist;
@@ -104,6 +108,7 @@ public class MomentumBasedController implements RobotController
    private final DoubleYoVariable kUpperBody = new DoubleYoVariable("kUpperBody", registry);
    private final DoubleYoVariable zetaUpperBody = new DoubleYoVariable("zetaUpperBody", registry);
    private final DoubleYoVariable kAngularMomentumZ = new DoubleYoVariable("kAngularMomentumZ", registry);
+   private final HashMap<RevoluteJoint, DoubleYoVariable> desiredAccelerationYoVariables = new HashMap<RevoluteJoint, DoubleYoVariable>();
 
    // TODO: move to separate class that takes care of determining desired GRFs
    private final YoFrameVector2d desiredDeltaCMP = new YoFrameVector2d("desiredDeltaCMP", "", worldFrame, registry);
@@ -193,6 +198,15 @@ public class MomentumBasedController implements RobotController
          desiredFootPositionsInWorld.put(robotSide, desiredSwingFootPosition);
          DynamicGraphicPosition desiredSwingFootPositionViz = new DynamicGraphicPosition(swingfootPositionName, desiredSwingFootPosition, 0.03, YoAppearance.Orange());
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(name, desiredSwingFootPositionViz);
+      }
+      
+      InverseDynamicsJoint[] joints = ScrewTools.computeJointsInOrder(elevator);
+      for (InverseDynamicsJoint joint : joints)
+      {
+         if (joint instanceof RevoluteJoint)
+         {
+            desiredAccelerationYoVariables.put((RevoluteJoint) joint, new DoubleYoVariable(joint.getName() + "qdd_d", registry));
+         }
       }
 
       kAngularMomentumXY.set(3e-2);
@@ -437,6 +451,9 @@ public class MomentumBasedController implements RobotController
       pelvisJointWrench.changeFrame(centerOfMassFrame);
       desiredPelvisForce.set(pelvisJointWrench.getLinearPartCopy());
       desiredPelvisTorque.set(pelvisJointWrench.getAngularPartCopy());
+      
+      for (RevoluteJoint joint : desiredAccelerationYoVariables.keySet())
+         desiredAccelerationYoVariables.get(joint).set(joint.getQddDesired());
    }
 
    private static void doPDControl(double k, double d, RevoluteJoint[] joints)
