@@ -21,6 +21,7 @@ public class SuspendedRobotDesiredFootStepCalculator implements DesiredFootstepC
 
    private final SideDependentList<ReferenceFrame> ankleZUpFrames;
 
+   private final DoubleYoVariable currentStepLength = new DoubleYoVariable("currentStepLength", registry);
    private final DoubleYoVariable stepLength = new DoubleYoVariable("stepLength", registry);
    private final DoubleYoVariable stepWidth = new DoubleYoVariable("stepWidth", registry);
    private final DoubleYoVariable stepHeight = new DoubleYoVariable("stepHeight", registry);
@@ -36,9 +37,9 @@ public class SuspendedRobotDesiredFootStepCalculator implements DesiredFootstepC
       this.desiredHeadingControlModule = desiredHeadingControlModule;
       parentRegistry.addChild(registry);
       
-      stepLength.set(0.0);//.32);
+      stepLength.set(0.25);
       stepWidth.set(0.22);
-      stepHeight.set(0.05);
+      stepHeight.set(0.0);
       stepYaw.set(0.0);
       stepPitch.set(0.0);
       stepRoll.set(0.0);
@@ -53,10 +54,10 @@ public class SuspendedRobotDesiredFootStepCalculator implements DesiredFootstepC
       switch(state.getIntegerValue())
       {
       case 0:
-         stepLength.set(0.32);
+         currentStepLength.set(-stepLength.getDoubleValue());
          break;
       case 1:
-         stepLength.set(-0.32);
+         currentStepLength.set(stepLength.getDoubleValue());
          break;
       }
       
@@ -77,7 +78,7 @@ public class SuspendedRobotDesiredFootStepCalculator implements DesiredFootstepC
 
       // Footstep Position
       FramePoint footstepPosition = new FramePoint(supportAnkleZUpFrame);
-      FrameVector footstepOffset = new FrameVector(desiredHeadingFrame, stepLength.getDoubleValue(), supportLegSide.negateIfLeftSide(stepWidth.getDoubleValue()), stepHeight.getDoubleValue());
+      FrameVector footstepOffset = new FrameVector(desiredHeadingFrame, currentStepLength.getDoubleValue(), supportLegSide.negateIfLeftSide(stepWidth.getDoubleValue()), stepHeight.getDoubleValue());
       
       footstepPosition.changeFrame(desiredHeadingFrame);
 //      footstepOffset.changeFrame(supportAnkleZUpFrame);
