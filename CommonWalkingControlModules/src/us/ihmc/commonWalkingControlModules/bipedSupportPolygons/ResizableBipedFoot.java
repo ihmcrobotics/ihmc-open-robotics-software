@@ -519,4 +519,9 @@ public class ResizableBipedFoot implements BipedFootInterface
    {
       throw new RuntimeException("not implemented");
    }
+
+   public void setFootPolygon(FrameConvexPolygon2d footPolygon)
+   {
+      // empty
+   }
 }

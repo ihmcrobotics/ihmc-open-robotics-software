@@ -35,7 +35,7 @@ public abstract class MomentumOptimizer implements Lmdif_fcn
    private final double tol = 1e-9;
    private final int[] info = new int[2];
 
-   private final double controlDT;
+   protected final double controlDT;
 
    private final CentroidalMomentumMatrix centroidalMomentumMatrix;
    private final DenseMatrix64F centroidalMomentumMatrixDerivative;

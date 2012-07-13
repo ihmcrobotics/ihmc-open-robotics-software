@@ -6,11 +6,15 @@ import javax.media.j3d.Transform3D;
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;
 
+import org.ejml.data.DenseMatrix64F;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedFeetUpdater;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedFootInterface;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactBasedBipedFoot;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.FootPolygonVisualizer;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.GoOnToesDuringDoubleSupportBipedFeetUpdater;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactBasedBipedFeetUpdater;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.SimpleBipedFoot;
 import us.ihmc.commonWalkingControlModules.captureRegion.CapturePointCalculatorInterface;
 import us.ihmc.commonWalkingControlModules.captureRegion.CommonCapturePointCalculator;
@@ -31,12 +35,14 @@ import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.sensors.ProcessedSensorsInterface;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
+import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.math.geometry.RotationFunctions;
 import us.ihmc.utilities.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.RevoluteJoint;
@@ -134,9 +140,13 @@ public class MomentumBasedController implements RobotController
       RigidBody elevator = fullRobotModel.getElevator();
       this.inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, -processedSensors.getGravityInWorldFrame().getZ());
 
+//      bipedFeetUpdater = new GoOnToesDuringDoubleSupportBipedFeetUpdater(referenceFrames, footForward, footBack, registry, dynamicGraphicObjectsListRegistry);
+      ContactBasedBipedFeetUpdater bipedFeetUpdater = new ContactBasedBipedFeetUpdater(processedSensors, referenceFrames);
+      this.bipedFeetUpdater = bipedFeetUpdater;
       for (RobotSide robotSide : RobotSide.values())
       {
-         bipedFeet.put(robotSide, new SimpleBipedFoot(referenceFrames, robotSide, footForward, footBack, footWidth / 2.0, footWidth / 2.0, registry));
+//         bipedFeet.put(robotSide, new SimpleBipedFoot(referenceFrames, robotSide, footForward, footBack, footWidth / 2.0, footWidth / 2.0, registry));
+         bipedFeet.put(robotSide, new ContactBasedBipedFoot(referenceFrames, robotSide, new FrameConvexPolygon2d(processedSensors.getFootPointsInContact(robotSide, true)), registry));
       }
 
       footPolygonVisualizer = new FootPolygonVisualizer(bipedFeet, dynamicGraphicObjectsListRegistry, registry);
@@ -157,7 +167,6 @@ public class MomentumBasedController implements RobotController
       this.bipedSupportPolygons = new BipedSupportPolygons(ankleZUpFrames, midFeetZUp, registry, dynamicGraphicObjectsListRegistry);
 
 
-      bipedFeetUpdater = new GoOnToesDuringDoubleSupportBipedFeetUpdater(referenceFrames, footForward, footBack, registry, dynamicGraphicObjectsListRegistry);
       this.capturePointCalculator = new CommonCapturePointCalculator(processedSensors, referenceFrames, registry, dynamicGraphicObjectsListRegistry);
       BipedFootInterface leftFoot = bipedFeet.get(RobotSide.LEFT);
       BipedFootInterface rightFoot = bipedFeet.get(RobotSide.RIGHT);
@@ -336,8 +345,10 @@ public class MomentumBasedController implements RobotController
          doPDControl(kUpperBody, dUpperBody, fullRobotModel.getArmJointList(robotSide));
       }
 
-      doPDControl(kUpperBody, dUpperBody, fullRobotModel.getSpineJointList());
       doPDControl(kUpperBody, dUpperBody, fullRobotModel.getNeckJointList());
+//      doChestOrientationControl();
+      doPDControl(kUpperBody, dUpperBody, fullRobotModel.getSpineJointList());
+      
 
       FrameVector desiredAngularCentroidalMomentumRate = new FrameVector(totalGroundReactionWrench.getExpressedInFrame(),
                                                             totalGroundReactionWrench.getAngularPartCopy());
@@ -348,8 +359,13 @@ public class MomentumBasedController implements RobotController
 
       for (RobotSide robotSide : RobotSide.values())
       {
-         if (supportLeg != null && optimizer.leavingSingularRegion(robotSide))
-            stateMachine.initializeTrajectory(robotSide);
+//         if (supportLeg != null && optimizer.leavingSingularRegion(robotSide))
+         if (supportLeg != null && !optimizer.inSingularRegion(robotSide) && !stateMachine.trajectoryInitialized(robotSide))
+         {
+            SpatialAccelerationVector taskSpaceAcceleration = new SpatialAccelerationVector(); 
+            optimizer.computeMatchingNondegenerateTaskSpaceAcceleration(robotSide, taskSpaceAcceleration);
+            stateMachine.initializeTrajectory(robotSide, taskSpaceAcceleration);
+         }
          
          FramePose desiredFootPose = stateMachine.getDesiredFootPose(robotSide);
          Twist desiredFootTwist = stateMachine.getDesiredFootTwist(robotSide);
@@ -369,6 +385,20 @@ public class MomentumBasedController implements RobotController
       }
       optimizer.solveForRootJointAcceleration(desiredAngularCentroidalMomentumRate, desiredLinearCentroidalMomentumRate);
    }
+
+//   private void doChestOrientationControl()
+//   {
+//      // FIXME: Complete hack.
+//      RevoluteJoint[] spineJoints = fullRobotModel.getSpineJointList();
+//      Transform3D chestToPelvis = spineJoints[0].getFrameAfterJoint().getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());
+//      double[] yawPitchRoll = new double[3];
+//      RotationFunctions.getYawPitchRoll(yawPitchRoll, chestToPelvis);
+//      double k = 100.0;
+//      double b = 40.0;
+//      spineJoints[0].setQddDesired(-k * yawPitchRoll[1] - b * spineJoints[0].getQd());
+//      spineJoints[1].setQddDesired(-k * yawPitchRoll[0] - b * spineJoints[1].getQd());
+//      spineJoints[2].setQddDesired(-k * yawPitchRoll[2] - b * spineJoints[2].getQd());
+//   }
 
    private FramePoint2d determineDesiredCoP()
    {
@@ -434,7 +464,11 @@ public class MomentumBasedController implements RobotController
    {
       FrameVector ret = new FrameVector(midFeetZUp);
       FrameVector angularMomentum = processedSensors.getAngularMomentumInFrame(midFeetZUp);
-      ret.setZ(-kAngularMomentumZ.getDoubleValue() * angularMomentum.getZ());
+      Matrix3d pelvisToWorld = new Matrix3d();
+      fullRobotModel.getPelvis().getBodyFixedFrame().getTransformToDesiredFrame(ReferenceFrame.getWorldFrame()).get(pelvisToWorld);
+      double pelvisYaw = RotationFunctions.getYaw(pelvisToWorld);
+      double kPelvis = 10.0;
+      ret.setZ(-kAngularMomentumZ.getDoubleValue() * angularMomentum.getZ() - kPelvis * pelvisYaw);
 
       return ret;
    }
