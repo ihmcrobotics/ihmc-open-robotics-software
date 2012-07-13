@@ -20,6 +20,7 @@ public class SwingParameters
    private final YoVariableRegistry registry = new YoVariableRegistry("SwingParameters");
    private final BooleanYoVariable currentlyInSwing = new BooleanYoVariable("currentlyInSwing", registry);
    private final EnumYoVariable<RobotSide> robotSide = new EnumYoVariable<RobotSide>("robotSide", registry, RobotSide.class);
+   private final DoubleYoVariable totalSwingTime = new DoubleYoVariable("totalSwingTime", registry);
    private final DoubleYoVariable swingTimeRemaining = new DoubleYoVariable("swingTimeRemaining", registry);
    private final SideDependentList<EnumMap<LegJointName, DoubleYoVariable>> desiredJointPositionsAtEndOfStep = new SideDependentList<EnumMap<LegJointName, DoubleYoVariable>>();
    private final SideDependentList<EnumMap<LegJointName, DoubleYoVariable>> desiredJointVelocitiesAtEndOfStep = new SideDependentList<EnumMap<LegJointName, DoubleYoVariable>>();
@@ -144,6 +145,16 @@ public class SwingParameters
    public boolean isCurrentlyInSwing()
    {
       return currentlyInSwing.getBooleanValue();
+   }
+   
+   public void setTotalSwingTime(double value)
+   {
+      totalSwingTime.set(value);
+   }
+   
+   public double getTotalSwingTime()
+   {
+      return totalSwingTime.getDoubleValue();
    }
 
    //   public void setDesiredStepLocationInHipYawFrame(Point3d point)
