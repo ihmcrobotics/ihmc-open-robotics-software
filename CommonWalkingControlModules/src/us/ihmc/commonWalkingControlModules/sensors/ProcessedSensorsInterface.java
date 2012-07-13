@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.sensors;
 
+import java.util.ArrayList;
+
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.ArmJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
@@ -7,6 +9,7 @@ import us.ihmc.commonWalkingControlModules.partNamesAndTorques.NeckJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.SpineJointName;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.FramePoint;
+import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.Orientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -61,4 +64,6 @@ public interface ProcessedSensorsInterface
    
    public abstract FramePoint getCentroidalMomentPivotInFrame(ReferenceFrame referenceFrame);
    public abstract FrameVector getAngularMomentumInFrame(ReferenceFrame midFeetZUp);
+   
+   public abstract ArrayList<FramePoint2d> getFootPointsInContact(RobotSide robotSide, boolean forceUseAllPoints);
 }

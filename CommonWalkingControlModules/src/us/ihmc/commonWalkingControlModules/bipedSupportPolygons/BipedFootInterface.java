@@ -13,6 +13,8 @@ public interface BipedFootInterface
    public abstract FrameConvexPolygon2d getFlatFootPolygonInAnkleZUp();
    
    public abstract FrameConvexPolygon2d getFootPolygonInSoleFrame();
+   
+   public abstract void setFootPolygon(FrameConvexPolygon2d footPolygon);
 
    public abstract void setIsSupportingFoot(boolean isSupportingFoot);
 
