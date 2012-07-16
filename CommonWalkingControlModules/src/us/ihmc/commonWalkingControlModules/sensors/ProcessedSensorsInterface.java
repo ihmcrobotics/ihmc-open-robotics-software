@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.sensors;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.ArmJointName;
@@ -65,5 +66,5 @@ public interface ProcessedSensorsInterface
    public abstract FramePoint getCentroidalMomentPivotInFrame(ReferenceFrame referenceFrame);
    public abstract FrameVector getAngularMomentumInFrame(ReferenceFrame midFeetZUp);
    
-   public abstract ArrayList<FramePoint2d> getFootPointsInContact(RobotSide robotSide, boolean forceUseAllPoints);
+   public abstract HashMap<FramePoint2d, Boolean> getContactMap(RobotSide robotSide);
 }

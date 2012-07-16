@@ -10,6 +10,7 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.graphics.BagOfBalls;
 import com.yobotics.simulationconstructionset.util.trajectory.PolynomialSpline;
 
 public class FifthOrderWaypointCartesianTrajectoryGenerator implements CartesianTrajectoryGenerator
@@ -25,7 +26,7 @@ public class FifthOrderWaypointCartesianTrajectoryGenerator implements Cartesian
 
    private final ReferenceFrame referenceFrame;
    private final FrameVector tempVector = new FrameVector(ReferenceFrame.getWorldFrame());
-
+   
    public FifthOrderWaypointCartesianTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, double totalTime, double groundClearance,
          YoVariableRegistry parentRegistry)
    {
@@ -33,9 +34,9 @@ public class FifthOrderWaypointCartesianTrajectoryGenerator implements Cartesian
 
       for (Direction direction : Direction.values())
       {
-         spaceSplines.put(direction, new PolynomialSpline(namePrefix + direction, 6, registry));
+         spaceSplines.put(direction, new PolynomialSpline(namePrefix + direction, 5, registry));
       }
-      timeSpline = new PolynomialSpline(namePrefix + "Time", 6, registry);
+      timeSpline = new PolynomialSpline(namePrefix + "Time", 4, registry);
 
       this.waypointHeight = new DoubleYoVariable("waypointHeight", registry);
       this.totalTime = new DoubleYoVariable("stepTime", registry);
@@ -59,8 +60,8 @@ public class FifthOrderWaypointCartesianTrajectoryGenerator implements Cartesian
       finalDesiredVelocity.checkReferenceFrameMatch(referenceFrame);
 
       FramePoint intermediatePosition = new FramePoint(initialPosition);
-      //      intermediatePosition.add(finalDesiredPosition);
-      //      intermediatePosition.scale(0.5);
+//      intermediatePosition.add(finalDesiredPosition);
+//      intermediatePosition.scale(0.5);
       intermediatePosition.setZ(Math.max(initialPosition.getZ(), finalDesiredPosition.getZ()) + waypointHeight.getDoubleValue());
 
       timeIntoStep.set(0.0);
@@ -75,16 +76,15 @@ public class FifthOrderWaypointCartesianTrajectoryGenerator implements Cartesian
       for (Direction direction : Direction.values())
       {
          double t0 = 0.0;
-         double tIntermediate = 0.5; // TODO
+         double tIntermediate = 0.2; // TODO
          double tFinal = 1.0;
          double z0 = initialPosition.get(direction);
          double zd0 = initialDirection.get(direction);
-         double zdd0 = initialDirectionChange.get(direction);
          double zIntermediate = intermediatePosition.get(direction);
          double zf = finalDesiredPosition.get(direction);
          double zdf = finalDirection.get(direction);
          PolynomialSpline spaceSpline = spaceSplines.get(direction);
-         spaceSpline.setQuinticUsingWayPoint(t0, tIntermediate, tFinal, z0, zd0, zdd0, zIntermediate, zf, zdf);
+         spaceSpline.setQuarticUsingWayPoint(t0, tIntermediate, tFinal, z0, zd0, zIntermediate, zf, zdf);
       }
 
       double initialParameterd;
@@ -93,19 +93,19 @@ public class FifthOrderWaypointCartesianTrajectoryGenerator implements Cartesian
       else
          initialParameterd = initialVelocity.length() / initialDirection.length();
 
-      double initialParameterdd;
-      if (initialDirection.length() == 0.0)
-         initialParameterdd = 0.0;
-      else
-         initialParameterdd = (initialAcceleration.length() - initialDirectionChange.length() * MathTools.square(initialParameterd))
-               / initialDirection.length();
+//      double initialParameterdd;
+//      if (initialDirection.length() == 0.0)
+//         initialParameterdd = 0.0;
+//      else
+//         initialParameterdd = (initialAcceleration.length() - initialDirectionChange.length() * MathTools.square(initialParameterd))
+//               / initialDirection.length();
 
       double finalParameterd;
       if (finalDesiredVelocity.length() == 0.0)
          finalParameterd = 0.0;
       else
          finalParameterd = finalDesiredVelocity.length() / finalDirection.length();
-      timeSpline.setQuintic(0.0, totalTime.getDoubleValue(), 0.0, initialParameterd, initialParameterdd, 1.0, finalParameterd, 0.0);
+      timeSpline.setCubic(0.0, totalTime.getDoubleValue(), 0.0, initialParameterd, 1.0, finalParameterd);
    }
 
    public void computeNextTick(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack, double deltaT)

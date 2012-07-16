@@ -37,6 +37,8 @@ import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.EnumYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.graphics.BagOfBalls;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint2d;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
@@ -102,19 +104,22 @@ public class MomentumBasedControllerStateMachine extends StateMachine
    private final FramePoint2d previousCoP;
    private final double doubleSupportTime = 0.6;
    private final double stepTime = 0.65;
-   private final double waypointHeight = 0.0; // 0.15;
+   private final double waypointHeight = 0.05; // 0.15;
 
    private final DoubleYoVariable singleSupportICPGlideScaleFactor = new DoubleYoVariable("singleSupportICPGlideScaleFactor", registry);
    private final BooleanYoVariable walk = new BooleanYoVariable("walk", registry);
+   private final BooleanYoVariable liftUpHeels = new BooleanYoVariable("liftUpHeels", registry);
 
    private double comHeight;
    private final double gravity;
    private final  double swingNullspaceMultiplier = 100.0; // needs to be pretty high to fight the limit stops...
    private final SideDependentList<BooleanYoVariable> trajectoryInitialized = new SideDependentList<BooleanYoVariable>();
+   
+   private final BagOfBalls bagOfBalls;
 
    public MomentumBasedControllerStateMachine(FullRobotModel fullRobotModel, CommonWalkingReferenceFrames referenceFrames, TwistCalculator twistCalculator,
            SideDependentList<BipedFootInterface> bipedFeet, BipedSupportPolygons bipedSupportPolygons, SideDependentList<FootSwitchInterface> footSwitches,
-           ProcessedSensorsInterface processedSensors, DoubleYoVariable t, double controlDT, double footHeight, YoVariableRegistry parentRegistry)
+           ProcessedSensorsInterface processedSensors, DoubleYoVariable t, double controlDT, double footHeight, YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       super(name + "State", name + "SwitchTime", MomentumBasedControllerState.class, t, registry);
       this.fullRobotModel = fullRobotModel;
@@ -130,7 +135,7 @@ public class MomentumBasedControllerStateMachine extends StateMachine
 
       for (RobotSide supportSide : RobotSide.values())
       {
-         icpTrajectoryGenerators.put(supportSide, new ConstantCoPInstantaneousCapturePointTrajectory(supportSide, bipedSupportPolygons, gravity, controlDT));
+         icpTrajectoryGenerators.put(supportSide, new ConstantCoPInstantaneousCapturePointTrajectory(supportSide, bipedSupportPolygons, gravity, controlDT, registry));
       }
 
 //      SimpleDesiredFootstepCalculator simpleDesiredFootstepCalculator = new SimpleDesiredFootstepCalculator(referenceFrames.getAnkleZUpReferenceFrames(),
@@ -198,13 +203,15 @@ public class MomentumBasedControllerStateMachine extends StateMachine
 
       this.capturePoint = new FramePoint2d(ReferenceFrame.getWorldFrame());
       this.previousCoP = new FramePoint2d(ReferenceFrame.getWorldFrame());
-      walk.set(true);
+//      walk.set(true);
       
       for (RobotSide robotSide : RobotSide.values())
       {
          trajectoryInitialized.put(robotSide, new BooleanYoVariable(robotSide.getCamelCaseNameForStartOfExpression() + "TrajectoryInitialized", registry));
       }
 
+      bagOfBalls = new BagOfBalls(100, registry, dynamicGraphicObjectsListRegistry);
+      
       setUpStateMachine();
       parentRegistry.addChild(registry);
    }
@@ -408,6 +415,11 @@ public class MomentumBasedControllerStateMachine extends StateMachine
          {
             nullspaceMultipliers.get(robotSide).set(0.0);            
          }
+         
+         if (transferToSide != null)
+         {
+            icpTrajectoryGenerators.get(transferToSide.getOppositeSide()).changeSideToUseForReferenceFrame(transferToSide);
+         }
       }
 
       @Override
@@ -426,6 +438,8 @@ public class MomentumBasedControllerStateMachine extends StateMachine
       private final FramePoint positionToPack;
       private final FrameVector velocityToPack;
       private final FrameVector accelerationToPack;
+      
+      private int counter = 0;
 
       public SingleSupportState(RobotSide robotSide)
       {
@@ -473,6 +487,14 @@ public class MomentumBasedControllerStateMachine extends StateMachine
          desiredFootOrientations.get(swingSide).setYawPitchRoll(0.0, 0.0, 0.0);    // TODO
          desiredFootAngularVelocities.get(swingSide).set(0.0, 0.0, 0.0);
          desiredFootAngularAccelerations.get(swingSide).set(0.0, 0.0, 0.0);
+         
+         counter++;
+         if (counter >= 100)
+         {
+            positionToPack.changeFrame(worldFrame);
+            bagOfBalls.setBallLoop(positionToPack);
+            counter = 0;
+         }
       }
 
       @Override
