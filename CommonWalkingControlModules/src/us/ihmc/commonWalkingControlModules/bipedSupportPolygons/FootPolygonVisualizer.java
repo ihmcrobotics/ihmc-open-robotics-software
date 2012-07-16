@@ -26,7 +26,7 @@ public class FootPolygonVisualizer
 
       for (RobotSide robotSide : RobotSide.values())
       {
-         YoFrameConvexPolygon2d yoFootPolygon = new YoFrameConvexPolygon2d(robotSide + "foot", "", ReferenceFrame.getWorldFrame(), 4, registry);
+         YoFrameConvexPolygon2d yoFootPolygon = new YoFrameConvexPolygon2d(robotSide + "foot", "", ReferenceFrame.getWorldFrame(), 30, registry);
          yoFootPolygons.put(robotSide, yoFootPolygon);
          Color color = colors.get(robotSide);
 

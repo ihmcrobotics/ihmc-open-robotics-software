@@ -69,7 +69,7 @@ public class BipedSupportPolygons
       this.ankleZUpFrames = ankleZUpFrames;
       this.midFeetZUp = midFeetZUpFrame;
 
-      supportPolygonViz = new YoFrameConvexPolygon2d("combinedPolygon", "", ReferenceFrame.getWorldFrame(), 8, registry);
+      supportPolygonViz = new YoFrameConvexPolygon2d("combinedPolygon", "", ReferenceFrame.getWorldFrame(), 30, registry);
       footToFootSegmentViz = new YoFrameLineSegment2d("footToFoot", "", ReferenceFrame.getWorldFrame(), registry);
 
       DynamicGraphicObjectsList dynamicGraphicObjectsList = new DynamicGraphicObjectsList("VTP Calculator");
@@ -78,6 +78,7 @@ public class BipedSupportPolygons
       DynamicGraphicYoPolygonArtifact dynamicGraphicYoPolygonArtifact = new DynamicGraphicYoPolygonArtifact("Combined Polygon", supportPolygonViz, Color.pink,
                                                                            false);
       artifactList.add(dynamicGraphicYoPolygonArtifact);
+
       if (dynamicGraphicObjectsListRegistry != null)
       {
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectsList);
@@ -148,9 +149,16 @@ public class BipedSupportPolygons
       boolean inDoubleSupport = rightFoot.isSupportingFoot() && leftFoot.isSupportingFoot();
       if (inDoubleSupport)
       {
+//       ArrayList<FramePoint2d> allPoints = new ArrayList<FramePoint2d>();
+//       for (RobotSide robotSide : RobotSide.values())
+//       {
+//          allPoints.addAll(footPolygonsInMidFeetZUp.get(robotSide).getClockwiseOrderedListOfFramePoints());
+//       }
+//       supportPolygonInMidFeetZUp = new FrameConvexPolygon2d(allPoints);
+
          FrameConvexPolygon2dAndConnectingEdges supportPolygonAndEdgesInMidFeetZUp =
             FrameConvexPolygon2d.combineDisjointPolygons(footPolygonsInMidFeetZUp.get(RobotSide.LEFT), footPolygonsInMidFeetZUp.get(RobotSide.RIGHT));
-         
+
          if (supportPolygonAndEdgesInMidFeetZUp == null)
             System.err.println("Feet polygons overlap. Crashing!!!");
 
