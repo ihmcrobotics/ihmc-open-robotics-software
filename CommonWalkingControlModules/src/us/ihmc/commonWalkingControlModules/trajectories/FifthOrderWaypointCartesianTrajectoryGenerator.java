@@ -10,7 +10,6 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.BagOfBalls;
 import com.yobotics.simulationconstructionset.util.trajectory.PolynomialSpline;
 
 public class FifthOrderWaypointCartesianTrajectoryGenerator implements CartesianTrajectoryGenerator
@@ -76,7 +75,7 @@ public class FifthOrderWaypointCartesianTrajectoryGenerator implements Cartesian
       for (Direction direction : Direction.values())
       {
          double t0 = 0.0;
-         double tIntermediate = 0.2; // TODO
+         double tIntermediate = 0.5; // TODO
          double tFinal = 1.0;
          double z0 = initialPosition.get(direction);
          double zd0 = initialDirection.get(direction);

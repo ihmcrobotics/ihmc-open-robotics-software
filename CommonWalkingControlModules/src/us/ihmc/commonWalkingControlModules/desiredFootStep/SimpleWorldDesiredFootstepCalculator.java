@@ -107,20 +107,20 @@ public class SimpleWorldDesiredFootstepCalculator implements DesiredFootstepCalc
    public void setupParametersForR2InverseDynamics()
    {
       // stairs:
-//      stepLength.set(0.3);
-////      stepLength.set(0.21);
-//      stepWidth.set(0.2);
-//      stepHeight.set(0.25);
-//      stepYaw.set(0.0);
-//      stepPitch.set(0.0);
-//      stepRoll.set(0.0);
-      
-      // flat ground
-      stepLength.set(0.35);
+      stepLength.set(0.3);
+//      stepLength.set(0.21);
       stepWidth.set(0.2);
-      stepHeight.set(0.0);
+      stepHeight.set(0.25);
       stepYaw.set(0.0);
       stepPitch.set(0.0);
       stepRoll.set(0.0);
+      
+      // flat ground
+//      stepLength.set(0.35);
+//      stepWidth.set(0.2);
+//      stepHeight.set(0.0);
+//      stepYaw.set(0.0);
+//      stepPitch.set(0.0);
+//      stepRoll.set(0.0);
    }
 }
