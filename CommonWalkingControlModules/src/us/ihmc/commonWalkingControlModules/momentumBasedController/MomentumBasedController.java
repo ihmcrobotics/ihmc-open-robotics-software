@@ -169,7 +169,7 @@ public class MomentumBasedController implements RobotController
       bipedFeetUpdater.updateBipedFeet(leftFoot, rightFoot, null, capturePointCalculator.getCapturePointInFrame(midFeetZUp), false);
       bipedSupportPolygons.update(leftFoot, rightFoot);
 
-      double maximumLegStrengthWhenTransferringAway = 0.95;
+      double maximumLegStrengthWhenTransferringAway = 0.9;
       this.virtualToePointCalculator = new NewGeometricVirtualToePointCalculator(referenceFrames, registry, dynamicGraphicObjectsListRegistry,
               maximumLegStrengthWhenTransferringAway);
 
@@ -465,7 +465,7 @@ public class MomentumBasedController implements RobotController
       Matrix3d pelvisToWorld = new Matrix3d();
       fullRobotModel.getPelvis().getBodyFixedFrame().getTransformToDesiredFrame(ReferenceFrame.getWorldFrame()).get(pelvisToWorld);
       double pelvisYaw = RotationFunctions.getYaw(pelvisToWorld);
-      double kPelvis = 10.0;
+      double kPelvis = 0.0;
       ret.setZ(-kAngularMomentumZ.getDoubleValue() * angularMomentum.getZ() - kPelvis * pelvisYaw);
 
       return ret;
