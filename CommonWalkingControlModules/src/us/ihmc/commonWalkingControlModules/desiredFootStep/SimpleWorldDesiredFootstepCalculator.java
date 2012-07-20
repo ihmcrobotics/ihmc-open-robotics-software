@@ -31,11 +31,13 @@ public class SimpleWorldDesiredFootstepCalculator implements DesiredFootstepCalc
    private final DoubleYoVariable stepPitch = new DoubleYoVariable("stepPitch", registry);
    private final DoubleYoVariable stepRoll = new DoubleYoVariable("stepRoll", registry);
    private final YoFramePoint previousFootstepPosition = new YoFramePoint("previousFootstep", ReferenceFrame.getWorldFrame(), registry);
+   private final double ankleHeight;
 
-   public SimpleWorldDesiredFootstepCalculator(SideDependentList<ReferenceFrame> ankleZUpFrames, DesiredHeadingControlModule desiredHeadingControlModule, YoVariableRegistry parentRegistry)
+   public SimpleWorldDesiredFootstepCalculator(SideDependentList<ReferenceFrame> ankleZUpFrames, DesiredHeadingControlModule desiredHeadingControlModule, YoVariableRegistry parentRegistry, double ankleHeight)
    {
       this.ankleZUpFrames = ankleZUpFrames;
       this.desiredHeadingControlModule = desiredHeadingControlModule;
+      this.ankleHeight = ankleHeight;
       previousFootstepPosition.setToNaN();
       parentRegistry.addChild(registry);
    }
@@ -47,6 +49,7 @@ public class SimpleWorldDesiredFootstepCalculator implements DesiredFootstepCalc
          FramePoint supportAnklePosition = new FramePoint(ankleZUpFrames.get(supportLegSide));
          supportAnklePosition.changeFrame(previousFootstepPosition.getReferenceFrame());
          previousFootstepPosition.set(supportAnklePosition);
+         previousFootstepPosition.setZ(stepHeight.getDoubleValue() + ankleHeight + 0.01); // TODO: Darpa hack
       }
       else
       {

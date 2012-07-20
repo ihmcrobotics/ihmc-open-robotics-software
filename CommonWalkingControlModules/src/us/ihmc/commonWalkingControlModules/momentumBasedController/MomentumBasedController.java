@@ -138,9 +138,10 @@ public class MomentumBasedController implements RobotController
       bipedFeetUpdater = new GoOnToesDuringDoubleSupportBipedFeetUpdater(referenceFrames, footForward, footBack, registry, dynamicGraphicObjectsListRegistry);
 //      ContactBasedBipedFeetUpdater bipedFeetUpdater = new ContactBasedBipedFeetUpdater(processedSensors, referenceFrames);
 //      this.bipedFeetUpdater = bipedFeetUpdater;
+      double footRotationPreventionFactor = 1.0; // 0.95;
       for (RobotSide robotSide : RobotSide.values())
       {
-         bipedFeet.put(robotSide, new SimpleBipedFoot(referenceFrames, robotSide, footForward, footBack, footWidth / 2.0, footWidth / 2.0, registry));
+         bipedFeet.put(robotSide, new SimpleBipedFoot(referenceFrames, robotSide, footRotationPreventionFactor * footForward, footRotationPreventionFactor * footBack, footRotationPreventionFactor * footWidth / 2.0, footRotationPreventionFactor * footWidth / 2.0, registry));
 //         HashMap<FramePoint2d, Boolean> contactMap = processedSensors.getContactMap(robotSide);
 //         bipedFeet.put(robotSide, new ContactBasedBipedFoot(referenceFrames, robotSide, new FrameConvexPolygon2d(contactMap.keySet()), registry));
       }
@@ -215,7 +216,7 @@ public class MomentumBasedController implements RobotController
       }
 
       kAngularMomentumXY.set(3e-2);
-      kPelvisAxisAngle.set(5e-1);
+      kPelvisAxisAngle.set(1.0);
       kAngularMomentumZ.set(10.0);
       kUpperBody.set(100.0);
       zetaUpperBody.set(1.0);
@@ -355,7 +356,7 @@ public class MomentumBasedController implements RobotController
 
       for (RobotSide robotSide : RobotSide.values())
       {
-//         if (supportLeg != null && optimizer.leavingSingularRegion(robotSide))
+//         if (supportLeg == robotSide.getOppositeSide() && optimizer.leavingSingularRegion(robotSide) && fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE).getQ() < 0.4 || (!optimizer.inSingularRegion(robotSide)) && !stateMachine.trajectoryInitialized(robotSide)) // TODO: knee angle hack
          if (supportLeg == robotSide.getOppositeSide() && !optimizer.inSingularRegion(robotSide) && !stateMachine.trajectoryInitialized(robotSide))
          {
             SpatialAccelerationVector taskSpaceAcceleration = new SpatialAccelerationVector(); 
@@ -449,7 +450,7 @@ public class MomentumBasedController implements RobotController
       AxisAngle4d pelvisToCenterOfMassAxisAngle = new AxisAngle4d();
       pelvisToCenterOfMassAxisAngle.set(pelvisToMidFeetZUpRotation);
       FrameVector proportionalPart = new FrameVector(frame, pelvisToCenterOfMassAxisAngle.getX(), pelvisToCenterOfMassAxisAngle.getY(),
-                                        pelvisToCenterOfMassAxisAngle.getZ());
+                                        0.0);
       proportionalPart.scale(pelvisToCenterOfMassAxisAngle.getAngle());
       proportionalPart.cross(proportionalPart, zUnitVector);
       proportionalPart.scale(-kPelvisAxisAngle.getDoubleValue());
