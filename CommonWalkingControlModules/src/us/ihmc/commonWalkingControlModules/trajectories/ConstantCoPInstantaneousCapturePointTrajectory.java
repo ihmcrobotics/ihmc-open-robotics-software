@@ -60,11 +60,10 @@ public class ConstantCoPInstantaneousCapturePointTrajectory
       finalDesiredICP.changeFrame(this.finalDesiredICP.get(supportSide).getReferenceFrame());
 
       this.initialDesiredICP.get(supportSide).set(initialDesiredICP);
-      this.moveTime.set(moveTime);
+      this.finalDesiredICP.get(supportSide).set(finalDesiredICP);
       currentTime.set(0.0);
 
-      // make sure it is feasible:
-      // TODO: adjust move time, not final desired ICP
+      // make sure it is feasible by adjusting move time
       FramePoint2d equivalentConstantCoP = EquivalentConstantCoPCalculator.computeEquivalentConstantCoP(initialDesiredICP, finalDesiredICP, moveTime,
                                               comHeight, gravity);
       if (!initialDesiredICP.epsilonEquals(finalDesiredICP, 0.0))
@@ -76,10 +75,9 @@ public class ConstantCoPInstantaneousCapturePointTrajectory
          equivalentConstantCoP.changeFrame(footPolygonInAnkleZUp.getReferenceFrame());
          GeometryTools.movePointInsidePolygonAlongLine(equivalentConstantCoP, footPolygonInAnkleZUp, line);
          equivalentConstantCoP.changeFrame(initialDesiredICP.getReferenceFrame());
-         finalDesiredICP = EquivalentConstantCoPCalculator.computePredictedICP(initialDesiredICP, equivalentConstantCoP, moveTime, comHeight, gravity);
+         moveTime = EquivalentConstantCoPCalculator.computeMoveTime(initialDesiredICP, finalDesiredICP, equivalentConstantCoP, comHeight, gravity);
       }
-
-      this.finalDesiredICP.get(supportSide).set(finalDesiredICP);
+      this.moveTime.set(moveTime);
    }
 
    public void pack(FramePoint2d desiredPosition, FrameVector2d desiredVelocity, double comHeight)

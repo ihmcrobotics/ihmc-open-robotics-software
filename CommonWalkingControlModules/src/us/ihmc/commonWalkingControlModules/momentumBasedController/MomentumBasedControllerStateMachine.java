@@ -103,9 +103,9 @@ public class MomentumBasedControllerStateMachine extends StateMachine
 
    private final FramePoint2d capturePoint;
    private final FramePoint2d previousCoP;
-   private final double doubleSupportTime = 0.6;
-   private final double stepTime = 0.75;
-   private final double waypointHeight = 0.05; // 0.15;
+   private final double doubleSupportTime = 0.3; // 0.6
+   private final double stepTime = 0.55;
+   private final double waypointHeight = -0.02; // 0.05; // 0.15;
 
    private final DoubleYoVariable singleSupportICPGlideScaleFactor = new DoubleYoVariable("singleSupportICPGlideScaleFactor", registry);
    private final BooleanYoVariable walk = new BooleanYoVariable("walk", registry);
@@ -144,7 +144,7 @@ public class MomentumBasedControllerStateMachine extends StateMachine
 //      SimpleDesiredFootstepCalculator simpleDesiredFootstepCalculator = new SimpleDesiredFootstepCalculator(referenceFrames.getAnkleZUpReferenceFrames(),
 //            desiredHeadingControlModule, registry); // TODO: pass in
 
-      SimpleWorldDesiredFootstepCalculator simpleDesiredFootstepCalculator = new SimpleWorldDesiredFootstepCalculator(referenceFrames.getAnkleZUpReferenceFrames(), desiredHeadingControlModule, registry);
+      SimpleWorldDesiredFootstepCalculator simpleDesiredFootstepCalculator = new SimpleWorldDesiredFootstepCalculator(referenceFrames.getAnkleZUpReferenceFrames(), desiredHeadingControlModule, registry, footHeight);
       simpleDesiredFootstepCalculator.setupParametersForR2InverseDynamics();
       this.desiredFootstepCalculator = simpleDesiredFootstepCalculator;
       upcomingSupportLeg.set(RobotSide.LEFT);

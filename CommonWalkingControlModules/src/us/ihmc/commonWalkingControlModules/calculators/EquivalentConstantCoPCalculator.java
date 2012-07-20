@@ -51,4 +51,13 @@ public class EquivalentConstantCoPCalculator
       return Math.sqrt(gravity / comHeight);
    }
 
+   public static double computeMoveTime(FramePoint2d initialDesiredICP, FramePoint2d finalDesiredICP, FramePoint2d equivalentConstantCoP, double comHeight,
+         double gravity)
+   {
+      double omega0 = computeOmega0(comHeight, gravity);
+      double exp = finalDesiredICP.distance(equivalentConstantCoP) / initialDesiredICP.distance(equivalentConstantCoP);
+      double ret = Math.log(exp) / omega0;
+      return ret;
+   }
+
 }

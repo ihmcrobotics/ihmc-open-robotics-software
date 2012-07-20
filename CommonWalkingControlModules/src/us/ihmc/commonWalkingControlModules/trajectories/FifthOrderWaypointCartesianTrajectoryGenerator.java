@@ -75,7 +75,7 @@ public class FifthOrderWaypointCartesianTrajectoryGenerator implements Cartesian
       for (Direction direction : Direction.values())
       {
          double t0 = 0.0;
-         double tIntermediate = 0.5; // TODO
+         double tIntermediate = 0.4; // TODO
          double tFinal = 1.0;
          double z0 = initialPosition.get(direction);
          double zd0 = initialDirection.get(direction);
