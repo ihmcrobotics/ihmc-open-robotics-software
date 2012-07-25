@@ -205,7 +205,7 @@ public class MomentumBasedControllerStateMachine extends StateMachine
          
          trajectoryInitialized.put(robotSide, new BooleanYoVariable(robotSide.getCamelCaseNameForStartOfExpression() + "TrajectoryInitialized", registry));
 
-         fixedAxisOfRotationControlModules.put(robotSide, new FixedAxisOfRotationControlModule(referenceFrames.getFootFrame(robotSide), fullRobotModel.getElevatorFrame()));         
+         fixedAxisOfRotationControlModules.put(robotSide, new FixedAxisOfRotationControlModule(robotSide.getCamelCaseNameForStartOfExpression() + "FootOrientation", referenceFrames.getFootFrame(robotSide), fullRobotModel.getElevatorFrame()));         
       }
 
       this.capturePoint = new FramePoint2d(ReferenceFrame.getWorldFrame());
