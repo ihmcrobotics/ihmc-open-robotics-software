@@ -43,8 +43,10 @@ public class CommonCapturePointCalculator implements CapturePointCalculatorInter
 
    private final DoubleYoVariable pointsCollinearAngle = new DoubleYoVariable("pointsCollinearAngle", registry);
 
-   public CommonCapturePointCalculator(ProcessedSensorsInterface processedSensors, CommonWalkingReferenceFrames referenceFrames, YoVariableRegistry yoVariableRegistry,
-           DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+   private final boolean useWorldFrame;
+
+   public CommonCapturePointCalculator(ProcessedSensorsInterface processedSensors, CommonWalkingReferenceFrames referenceFrames, boolean useWorldFrame,
+           YoVariableRegistry yoVariableRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       this.processedSensors = processedSensors;
 
@@ -52,6 +54,7 @@ public class CommonCapturePointCalculator implements CapturePointCalculatorInter
       this.midFeetZUpFrame = referenceFrames.getMidFeetZUpFrame();
 
       ankleZUpFrames = referenceFrames.getAnkleZUpReferenceFrames();
+      this.useWorldFrame = useWorldFrame;
 
       ReferenceFrame[] referenceFramesForCapturePoint = {ReferenceFrame.getWorldFrame(), referenceFrames.getPelvisZUpFrame(),
             referenceFrames.getMidFeetZUpFrame(), referenceFrames.getAnkleZUpFrame(RobotSide.LEFT), referenceFrames.getAnkleZUpFrame(RobotSide.RIGHT)};
@@ -163,19 +166,24 @@ public class CommonCapturePointCalculator implements CapturePointCalculatorInter
    
    private ReferenceFrame getFrameToComputeCapturePointIn(RobotSide supportLeg)
    {
-      boolean doubleSupport = (supportLeg == null);
-
-      ReferenceFrame capturePointFrame;
-      if (doubleSupport)
-      {
-         capturePointFrame = midFeetZUpFrame;
-      }
+      if (useWorldFrame)
+         return ReferenceFrame.getWorldFrame();
       else
       {
-         capturePointFrame = ankleZUpFrames.get(supportLeg);
+         boolean doubleSupport = (supportLeg == null);
+         
+         ReferenceFrame capturePointFrame;
+         if (doubleSupport)
+         {
+            capturePointFrame = midFeetZUpFrame;
+         }
+         else
+         {
+            capturePointFrame = ankleZUpFrames.get(supportLeg);
+         }
+         
+         return capturePointFrame;         
       }
-
-      return capturePointFrame;
    }
 
    private void checkCoPCapturePredictedColinear(FramePoint CoPInBodyZUp, FramePoint captureInBodyZUp, FramePoint predictedCaptureInBodyZUp)

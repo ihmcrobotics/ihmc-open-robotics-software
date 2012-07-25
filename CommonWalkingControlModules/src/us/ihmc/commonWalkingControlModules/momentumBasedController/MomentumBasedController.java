@@ -179,7 +179,7 @@ public class MomentumBasedController implements RobotController
       this.bipedSupportPolygons = new BipedSupportPolygons(ankleZUpFrames, midFeetZUp, registry, dynamicGraphicObjectsListRegistry);
 
 
-      this.capturePointCalculator = new CommonCapturePointCalculator(processedSensors, referenceFrames, registry, dynamicGraphicObjectsListRegistry);
+      this.capturePointCalculator = new CommonCapturePointCalculator(processedSensors, referenceFrames, true, registry, dynamicGraphicObjectsListRegistry);
 
       bipedFeetUpdater.updateBipedFeet(leftFoot, rightFoot, null, capturePointCalculator.getCapturePointInFrame(midFeetZUp), false);
       bipedSupportPolygons.update(leftFoot, rightFoot);
@@ -260,7 +260,7 @@ public class MomentumBasedController implements RobotController
 
    public void doControl()
    {
-      capturePointCalculator.computeCapturePoint(stateMachine.getSupportLeg());
+      capturePointCalculator.computeCapturePoint(stateMachine.getPlantedLeg());
       BipedFootInterface leftFoot = bipedFeet.get(RobotSide.LEFT);
       BipedFootInterface rightFoot = bipedFeet.get(RobotSide.RIGHT);
       bipedFeetUpdater.updateBipedFeet(leftFoot, rightFoot, stateMachine.getSupportLeg(), capturePointCalculator.getCapturePointInFrame(midFeetZUp), false);
@@ -483,7 +483,7 @@ public class MomentumBasedController implements RobotController
       Matrix3d pelvisToWorld = new Matrix3d();
       fullRobotModel.getPelvis().getBodyFixedFrame().getTransformToDesiredFrame(ReferenceFrame.getWorldFrame()).get(pelvisToWorld);
       double pelvisYaw = RotationFunctions.getYaw(pelvisToWorld);
-      double kPelvis = 0.0;
+      double kPelvis = 1.0; // was 0.0 for M3 movie
       ret.setZ(-kAngularMomentumZ.getDoubleValue() * angularMomentum.getZ() - kPelvis * pelvisYaw);
 
       return ret;
