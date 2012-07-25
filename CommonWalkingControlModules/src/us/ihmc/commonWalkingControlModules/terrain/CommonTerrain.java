@@ -366,7 +366,7 @@ public class CommonTerrain
 
          case ROCKY :
 
-            groundProfile = new RandomRockyGroundProfile(50);
+            groundProfile = new RandomRockyGroundProfile(10);
 
             break;
 
