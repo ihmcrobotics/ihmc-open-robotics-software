@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedFeetUpdater;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedFootInterface;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.FootPolygonVisualizer;
 import us.ihmc.commonWalkingControlModules.captureRegion.CapturePointCalculatorInterface;
 import us.ihmc.commonWalkingControlModules.captureRegion.CaptureRegionCalculator;
 import us.ihmc.commonWalkingControlModules.controlModules.DoubleAndSingleSupportDurationUpdater;
@@ -28,6 +29,7 @@ public class CommonDoEveryTickSubController implements DoEveryTickSubController
    private final BipedFootInterface leftFoot;
    private final BipedFootInterface rightFoot;
    private final BipedFeetUpdater bipedFeetUpdater;
+   private final FootPolygonVisualizer footPolygonVisualizer;
 
    private final DesiredHeadingControlModule desiredHeadingControlModule;
    private final DesiredVelocityControlModule desiredVelocityControlModule;
@@ -42,12 +44,13 @@ public class CommonDoEveryTickSubController implements DoEveryTickSubController
    
    private double initialDesiredHeading;
    private final ProcessedSensorsInterface processedSensors;
+
    
    public CommonDoEveryTickSubController(ProcessedSensorsInterface processedSensors,
          CommonWalkingReferenceFrames referenceFrames, 
          BipedFootInterface leftFoot, BipedFootInterface rightFoot,
            BipedFeetUpdater bipedFeetUpdater, 
-           DesiredHeadingControlModule desiredHeadingControlModule, 
+           FootPolygonVisualizer footPolygonVisualizer, DesiredHeadingControlModule desiredHeadingControlModule, 
            DesiredVelocityControlModule desiredVelocityControlModule,
            DesiredFootstepCalculator desiredFootstepCalculator, 
            DoubleAndSingleSupportDurationUpdater doubleAndSingleSupportDurationUpdater,
@@ -61,6 +64,7 @@ public class CommonDoEveryTickSubController implements DoEveryTickSubController
       this.leftFoot = leftFoot;
       this.rightFoot = rightFoot;
       this.bipedFeetUpdater = bipedFeetUpdater;
+      this.footPolygonVisualizer = footPolygonVisualizer;
 
       this.desiredHeadingControlModule = desiredHeadingControlModule;
       this.desiredVelocityControlModule = desiredVelocityControlModule;
@@ -113,6 +117,7 @@ public class CommonDoEveryTickSubController implements DoEveryTickSubController
 
       BipedSupportPolygons bipedSupportPolygons = couplingRegistry.getBipedSupportPolygons();
       bipedSupportPolygons.update(leftFoot, rightFoot);
+      footPolygonVisualizer.update();
 
       if (supportLeg != null)
       {
