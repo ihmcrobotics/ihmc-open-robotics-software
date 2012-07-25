@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedFootInterface;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.FootPolygonEnum;
 import us.ihmc.commonWalkingControlModules.calculators.MaximumICPVelocityCalculator;
 import us.ihmc.commonWalkingControlModules.controlModules.FixedAxisOfRotationControlModule;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculator;
@@ -216,7 +217,7 @@ public class MomentumBasedControllerStateMachine extends StateMachine
       setUpStateMachine();
       parentRegistry.addChild(registry);
 
-      walk.set(true);
+//      walk.set(true);
    }
 
    private void setUpStateMachine()
@@ -353,6 +354,17 @@ public class MomentumBasedControllerStateMachine extends StateMachine
       public void doAction()
       {
          evaluateCoMHeightTrajectory();
+         
+         BipedFootInterface bipedFoot = bipedFeet.get(upcomingSupportLeg.getEnumValue().getOppositeSide());
+         if (liftUpHeels.getBooleanValue())
+         {
+            bipedFoot.setFootPolygonInUse(FootPolygonEnum.ONTOES);
+            bipedFoot.setShift(1.0);
+         }
+         else
+         {
+            bipedFoot.setFootPolygonInUse(FootPolygonEnum.FLAT);
+         }
 
          if ((transferToSide != null) &&!icpTrajectoryGenerators.get(transferToSide.getOppositeSide()).isDone())
          {
@@ -637,7 +649,8 @@ public class MomentumBasedControllerStateMachine extends StateMachine
 
    private FramePoint2d getDoubleSupportFinalDesiredICPForDoubleSupportStance()
    {
-      return bipedSupportPolygons.getSupportPolygonInMidFeetZUp().getCentroidCopy();
+//      return bipedSupportPolygons.getSupportPolygonInMidFeetZUp().getCentroidCopy();
+      return new FramePoint2d(referenceFrames.getMidFeetZUpFrame(), 0.15, 0.0);
    }
 
    private FramePoint2d getDoubleSupportFinalDesiredICPForWalking(RobotSide supportSide)
