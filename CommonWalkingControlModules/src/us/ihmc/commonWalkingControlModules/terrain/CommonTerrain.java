@@ -33,36 +33,37 @@ public class CommonTerrain
 {
    private SteppingStones steppingStones;
    private GroundProfile groundProfile;
-   
+
    public CommonTerrain(TerrainType terrainType, YoVariableRegistry registry)
    {
       setUpTerrain(terrainType, registry);
       this.steppingStones = null;
    }
-   
-   public CommonTerrain(ConvexPolygon2d footPolygon, SteppingStonePattern steppingStonePattern, boolean useSteppingStonesGroundModel, YoVariableRegistry registry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+
+   public CommonTerrain(ConvexPolygon2d footPolygon, SteppingStonePattern steppingStonePattern, boolean useSteppingStonesGroundModel,
+                        YoVariableRegistry registry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       setUpSteppingStones(footPolygon, steppingStonePattern, useSteppingStonesGroundModel, registry);
-      
+
       if (dynamicGraphicObjectsListRegistry != null)
       {
          System.out.println("Registering Stepping Stones Artifact");
 
          SteppingStonesArtifact steppingStonesArtifact = new SteppingStonesArtifact("SteppingStones", steppingStones, Color.magenta, Color.GREEN);
          dynamicGraphicObjectsListRegistry.registerArtifact("Stepping Stones", steppingStonesArtifact);
-      }   
+      }
    }
-   
+
    public GroundProfile getGroundProfile()
    {
       return groundProfile;
    }
-   
+
    public SteppingStones getSteppingStones()
    {
       return steppingStones;
    }
-   
+
    public BranchGroup createBranchGroup(boolean drawGroundBelow)
    {
       if (steppingStones != null)
@@ -90,21 +91,18 @@ public class CommonTerrain
 
          return branchGroup;
       }
-      
+
       throw new RuntimeException("Both steppingStones and groundProfile are null!");
-      
+
    }
-   
-   
+
+
    public static final double FLAT_HEIGHT = 0.0;
-   
-   private void setUpSteppingStones(ConvexPolygon2d footPolygon, 
-         SteppingStonePattern steppingStonePattern,
-         boolean useSteppingStonesGroundModel,
-         YoVariableRegistry registry)
+
+   private void setUpSteppingStones(ConvexPolygon2d footPolygon, SteppingStonePattern steppingStonePattern, boolean useSteppingStonesGroundModel,
+                                    YoVariableRegistry registry)
    {
-      
-      switch (steppingStonePattern)   
+      switch (steppingStonePattern)
       {
          case WHOLE_WORLD :
          {
@@ -155,7 +153,7 @@ public class CommonTerrain
             throw new RuntimeException("Shouldn't get here!");
          }
       }
-      
+
       if (useSteppingStonesGroundModel)
       {
          System.out.println("Using a stepping stone ground model");
@@ -168,17 +166,17 @@ public class CommonTerrain
       }
 
    }
-   
-   
+
+
    private static final SteppingStones generateGroupsOfThreeSteppingStones(ConvexPolygon2d footPolygon)
    {
       double startXPosition = 0.45;    // 0.65; //0.55; //-0.1;
-      double startYPosition = -0.4; //-0.6;    // -0.9; //-0.75;
+      double startYPosition = -0.4;    // -0.6;    // -0.9; //-0.75;
       double radius = 0.2;    // 0.25;
       int numSides = 6;
       double baseZ = -0.1;
       double height = 0.0;
-      int numStones = 30; //60;
+      int numStones = 30;    // 60;
       double xBetweenStoneGroups = 0.15;    // 0.2; //0.25;
 
       // Please don't change these
@@ -194,13 +192,13 @@ public class CommonTerrain
          numStones = 60;
          xBetweenStoneGroups = 0.15;
       }
-      
+
       boolean R2_TEST = true;
       if (R2_TEST)
       {
          startXPosition = 0.25;
          startYPosition = -0.2;
-         radius = 0.3; //0.25;
+         radius = 0.3;    // 0.25;
          numSides = 6;
          baseZ = -0.1;
          height = 0.0;
@@ -288,16 +286,16 @@ public class CommonTerrain
 
    private static final SteppingStones generateRectangularBeamBalance(ConvexPolygon2d footPolygon)
    {
-      double startXPosition = 0.0;    //7.5 // 0.65; //0.55; //-0.1;
-      double startYPosition = 0.0;    //0.0 //-0.72 // -0.68;//-0.745; //-0.9; //-0.75;
-      double xDimension = 15.0;     //14.0
-      double yDimension = 0.5;    //0.16 // 0.14; //0.16; //0.18;
-      double spacingInX = -0.2;    //-0.2 // 0.0; //0.1;
-      double spacingInYSmall = 0.05;    //0.05 // -0.15;
-      double spacingInYLarge = 0.1;    //0.1
-      double baseZ = -0.1;     //-0.1
-      double height = 0.0;     //0.0
-      int numRows = 1; // 4
+      double startXPosition = 0.0;    // 7.5 // 0.65; //0.55; //-0.1;
+      double startYPosition = 0.0;    // 0.0 //-0.72 // -0.68;//-0.745; //-0.9; //-0.75;
+      double xDimension = 15.0;    // 14.0
+      double yDimension = 0.5;    // 0.16 // 0.14; //0.16; //0.18;
+      double spacingInX = -0.2;    // -0.2 // 0.0; //0.1;
+      double spacingInYSmall = 0.05;    // 0.05 // -0.15;
+      double spacingInYLarge = 0.1;    // 0.1
+      double baseZ = -0.1;    // -0.1
+      double height = 0.0;    // 0.0
+      int numRows = 1;    // 4
       int numColumns = 1;    // 20;
 
       SteppingStones steppingStones = SteppingStones.generateRectangularBeamBalance(startXPosition, startYPosition, xDimension, yDimension, spacingInX,
@@ -367,47 +365,60 @@ public class CommonTerrain
             break;
 
          case ROCKY :
-            groundProfile = new RandomRockyGroundProfile(10);
+
+            groundProfile = new RandomRockyGroundProfile(50);
 
             break;
 
          case STEP_UP :
             groundProfile = new StepUpGroundProfile(registry);
+
             break;
-            
-         case STAIR:
+
+         case STAIR :
             groundProfile = new StairGroundProfile(registry);
+
             break;
-            
+
          case ALTERNATING_SLOPES :
          {
             double xMin = -1.0, xMax = 12.0;
             double yMin = -2.0, yMax = 2.0;
-            double[][] xSlopePairs = new double[][]{{1.0, 0.05}, {3.0, 0.0}, {5.0, 0.1}, {7.0, 0.0}, {9.0, 0.1}, {11.0, 0.0}};
+            double[][] xSlopePairs = new double[][]
+            {
+               {1.0, 0.05}, {3.0, 0.0}, {5.0, 0.1}, {7.0, 0.0}, {9.0, 0.1}, {11.0, 0.0}
+            };
             groundProfile = new AlternatingSlopesGroundProfile(xSlopePairs, xMin, xMax, yMin, yMax);
-         
+
             break;
          }
-            
+
          case DOWNHILL :
          {
             double xMin = -1.0, xMax = 12.0;
             double yMin = -2.0, yMax = 2.0;
-            double[][] xSlopePairs = new double[][]{{1.0, -0.05}, {3.0, 0.0}, {5.0, -0.1}, {7.0, -0.0}, {9.0, -0.1}, {11.0, 0.0}};
+            double[][] xSlopePairs = new double[][]
+            {
+               {1.0, -0.05}, {3.0, 0.0}, {5.0, -0.1}, {7.0, -0.0}, {9.0, -0.1}, {11.0, 0.0}
+            };
             groundProfile = new AlternatingSlopesGroundProfile(xSlopePairs, xMin, xMax, yMin, yMax);
-         
+
             break;
          }
-         
+
          case STEEP_UPSLOPE :
          {
             double xMin = -1.0, xMax = 10.0;
             double yMin = -2.0, yMax = 2.0;
-            double[][] xSlopePairs = new double[][]{{1.0, 0.2}, {6.0, 0.0}, {10.0, 0.0}};
+            double[][] xSlopePairs = new double[][]
+            {
+               {1.0, 0.2}, {6.0, 0.0}, {10.0, 0.0}
+            };
             groundProfile = new AlternatingSlopesGroundProfile(xSlopePairs, xMin, xMax, yMin, yMax);
+
             break;
          }
-         
+
          case COURSE :
             groundProfile = new ObstacleCourse();
 
@@ -447,6 +458,6 @@ public class CommonTerrain
       return groundProfile;
    }
 
-   
-   
+
+
 }
