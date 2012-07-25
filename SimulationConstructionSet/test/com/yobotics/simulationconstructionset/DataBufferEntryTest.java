@@ -10,8 +10,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import quicktime.app.actions.NextImageAction;
-
 public class DataBufferEntryTest
 {
 
