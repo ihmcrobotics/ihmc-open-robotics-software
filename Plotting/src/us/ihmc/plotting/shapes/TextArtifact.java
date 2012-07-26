@@ -15,6 +15,8 @@ public class TextArtifact extends Artifact
    private double y1;
    private String text;
    private Font font = Font.getFont(Font.SANS_SERIF);
+   private int xPixelOffset = 0;
+   private int yPixelOffset = 0;
 
    public TextArtifact(String id, String text, double x1, double y1)
    {
@@ -29,7 +31,22 @@ public class TextArtifact extends Artifact
    {
       this.x1 = x1;
       this.y1 = y1;
+   }
 
+   public void setPixelOffset(int pixelOffset)
+   {
+      this.xPixelOffset = pixelOffset;
+      this.yPixelOffset = pixelOffset;
+   }
+
+   public void setxPixelOffset(int xPixelOffset)
+   {
+      this.xPixelOffset = xPixelOffset;
+   }
+
+   public void setyPixelOffset(int yPixelOffset)
+   {
+      this.yPixelOffset = yPixelOffset;
    }
 
    public String getText()
@@ -62,8 +79,8 @@ public class TextArtifact extends Artifact
     */
    public void draw(Graphics g, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
    {
-      int x1 = Xcenter + ((int)Math.round(this.x1 * scaleFactor));
-      int y1 = Ycenter - ((int)Math.round(this.y1 * scaleFactor));
+      int x1 = Xcenter + xPixelOffset +((int)Math.round(this.x1 * scaleFactor));
+      int y1 = Ycenter - yPixelOffset - ((int)Math.round(this.y1 * scaleFactor));
 
 
       g.setColor(color);
