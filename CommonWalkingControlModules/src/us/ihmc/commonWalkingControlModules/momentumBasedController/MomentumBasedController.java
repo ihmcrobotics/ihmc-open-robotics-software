@@ -109,6 +109,7 @@ public class MomentumBasedController implements RobotController
    private final DoubleYoVariable kUpperBody = new DoubleYoVariable("kUpperBody", registry);
    private final DoubleYoVariable zetaUpperBody = new DoubleYoVariable("zetaUpperBody", registry);
    private final DoubleYoVariable kAngularMomentumZ = new DoubleYoVariable("kAngularMomentumZ", registry);
+   private final DoubleYoVariable kPelvisZ = new DoubleYoVariable("kPelvisZ", registry);
    private final HashMap<RevoluteJoint, DoubleYoVariable> desiredAccelerationYoVariables = new HashMap<RevoluteJoint, DoubleYoVariable>();
 
    // TODO: move to separate class that takes care of determining desired GRFs
@@ -231,8 +232,9 @@ public class MomentumBasedController implements RobotController
       }
 
       kAngularMomentumXY.set(3e-2);
-      kPelvisAxisAngle.set(1.0);
-      kAngularMomentumZ.set(10.0);
+      kPelvisAxisAngle.set(1.0); // was 1.0 for M3 video
+      kAngularMomentumZ.set(50.0); // 10.0);
+      kPelvisZ.set(100.0); // was 0.0 for M3 movie
       kUpperBody.set(100.0);
       zetaUpperBody.set(1.0);
    }
@@ -334,7 +336,10 @@ public class MomentumBasedController implements RobotController
          groundReactionForce.scale(legStrengths.get(robotSide) * fZ / groundReactionForce.getZ());
 
          FrameVector groundReactionMoment = new FrameVector(totalgroundReactionMoment);
+         
+         // TODO: base on contact situation.
          groundReactionMoment.scale(legStrengths.get(robotSide));
+//         groundReactionMoment.scale(robotSide == RobotSide.LEFT ? 1.0 : 0.0);
 
          RigidBody foot = fullRobotModel.getFoot(robotSide);
          ReferenceFrame footCoMFrame = foot.getBodyFixedFrame();
@@ -483,8 +488,7 @@ public class MomentumBasedController implements RobotController
       Matrix3d pelvisToWorld = new Matrix3d();
       fullRobotModel.getPelvis().getBodyFixedFrame().getTransformToDesiredFrame(ReferenceFrame.getWorldFrame()).get(pelvisToWorld);
       double pelvisYaw = RotationFunctions.getYaw(pelvisToWorld);
-      double kPelvis = 1.0; // was 0.0 for M3 movie
-      ret.setZ(-kAngularMomentumZ.getDoubleValue() * angularMomentum.getZ() - kPelvis * pelvisYaw);
+      ret.setZ(-kAngularMomentumZ.getDoubleValue() * angularMomentum.getZ() - kPelvisZ.getDoubleValue() * pelvisYaw);
 
       return ret;
    }

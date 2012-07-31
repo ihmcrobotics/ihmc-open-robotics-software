@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.sensors;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;

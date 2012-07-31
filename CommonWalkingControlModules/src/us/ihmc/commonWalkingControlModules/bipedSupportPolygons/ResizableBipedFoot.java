@@ -24,7 +24,7 @@ public class ResizableBipedFoot implements BipedFootInterface
    private final YoVariableRegistry registry;
 
    private final RobotSide robotSide;
-   private final ReferenceFrame footFrame, ankleZUpFrame;
+   private final ReferenceFrame footFrame, ankleZUpFrame, soleFrame;
 
    private final ArrayList<FramePoint> heelPoints, toePoints;
    private final double footLength;
@@ -91,6 +91,7 @@ public class ResizableBipedFoot implements BipedFootInterface
 
       this.footFrame = referenceFrames.getFootFrame(robotSide);
       this.ankleZUpFrame = referenceFrames.getAnkleZUpFrame(robotSide);
+      this.soleFrame = referenceFrames.getSoleFrame(robotSide);
       this.toePoints = new ArrayList<FramePoint>(clockwiseToePoints.size());
       this.heelPoints = new ArrayList<FramePoint>(clockwiseHeelPoints.size());
 
@@ -162,19 +163,30 @@ public class ResizableBipedFoot implements BipedFootInterface
 
    public FrameConvexPolygon2d getFootPolygonInUseInAnkleZUp()
    {
+      FootPolygonEnum footPolygonEnum = footPolygonInUseEnum.getEnumValue();
+
+      ArrayList<FramePoint> footPolygonPoints = computeFootPolygonPoints(footPolygonEnum);
+
+      ArrayList<FramePoint2d> projectedFootPolygonPoints = changeFrameToZUpAndProjectToXYPlane(ankleZUpFrame, footPolygonPoints);
+      FrameConvexPolygon2d ret = new FrameConvexPolygon2d(projectedFootPolygonPoints);
+
+      return ret;
+   }
+
+   private ArrayList<FramePoint> computeFootPolygonPoints(FootPolygonEnum footPolygonEnum)
+   {
       if ((shift.getDoubleValue() < 0.0) || (shift.getDoubleValue() > 1.0))
          throw new RuntimeException("shift < 0.0 || shift > 1.0");
 
       // TODO: Don't create this list every tick. Instead create it once at the beginning.
       ArrayList<FramePoint> footPolygonPoints = new ArrayList<FramePoint>(toePoints.size() + heelPoints.size());
-
-      switch (footPolygonInUseEnum.getEnumValue())
+      switch (footPolygonEnum)
       {
          case FLAT :
          {
-            FrameConvexPolygon2d ret = getFlatFootPolygonInAnkleZUp();
-
-            return ret;
+            footPolygonPoints.addAll(toePoints);
+            footPolygonPoints.addAll(heelPoints);
+            break;
          }
 
          case ONHEEL :
@@ -219,18 +231,12 @@ public class ResizableBipedFoot implements BipedFootInterface
             throw new RuntimeException("Unrecognized foot polygon");
          }
       }
-
-      ArrayList<FramePoint2d> projectedFootPolygonPoints = changeFrameToZUpAndProjectToXYPlane(ankleZUpFrame, footPolygonPoints);
-      FrameConvexPolygon2d ret = new FrameConvexPolygon2d(projectedFootPolygonPoints);
-
-      return ret;
+      return footPolygonPoints;
    }
 
    public FrameConvexPolygon2d getFlatFootPolygonInAnkleZUp()
    {
-      ArrayList<FramePoint> footPolygonPoints = new ArrayList<FramePoint>(toePoints);
-      footPolygonPoints.addAll(heelPoints);
-
+      ArrayList<FramePoint> footPolygonPoints = computeFootPolygonPoints(FootPolygonEnum.FLAT);
       ArrayList<FramePoint2d> projectedFootPolygonPoints = changeFrameToZUpAndProjectToXYPlane(ankleZUpFrame, footPolygonPoints);
 
       return new FrameConvexPolygon2d(projectedFootPolygonPoints);
@@ -238,10 +244,10 @@ public class ResizableBipedFoot implements BipedFootInterface
 
    private ArrayList<FramePoint2d> changeFrameToZUpAndProjectToXYPlane(ReferenceFrame zUpFrame, ArrayList<FramePoint> points)
    {
-      if (!zUpFrame.isZupFrame())
-      {
-         throw new RuntimeException("Must be a ZUp frame!");
-      }
+//      if (!zUpFrame.isZupFrame())
+//      {
+//         throw new RuntimeException("Must be a ZUp frame!");
+//      }
 
       ArrayList<FramePoint2d> ret = new ArrayList<FramePoint2d>(points.size());
 
@@ -476,7 +482,14 @@ public class ResizableBipedFoot implements BipedFootInterface
 
    public FrameConvexPolygon2d getFootPolygonInSoleFrame()
    {
-      throw new RuntimeException("not implemented");
+      FootPolygonEnum footPolygonEnum = footPolygonInUseEnum.getEnumValue();
+
+      ArrayList<FramePoint> footPolygonPoints = computeFootPolygonPoints(footPolygonEnum);
+
+      ArrayList<FramePoint2d> projectedFootPolygonPoints = changeFrameToZUpAndProjectToXYPlane(soleFrame, footPolygonPoints);
+      FrameConvexPolygon2d ret = new FrameConvexPolygon2d(projectedFootPolygonPoints);
+
+      return ret;
    }
 
    public void setFootPolygon(FrameConvexPolygon2d footPolygon)
