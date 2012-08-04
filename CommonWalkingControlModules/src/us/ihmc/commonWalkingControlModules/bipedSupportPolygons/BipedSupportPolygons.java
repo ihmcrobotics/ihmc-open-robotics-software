@@ -112,6 +112,11 @@ public class BipedSupportPolygons
    {
       return footPolygonsInMidFeetZUp.get(robotSide);
    }
+   
+   public SideDependentList<FrameConvexPolygon2d> getFootPolygonsInMidFeetZUp()
+   {
+      return footPolygonsInMidFeetZUp;
+   }
 
    public FrameLineSegment2d getFootToFootLineSegmentInMidFeetZUp()
    {
