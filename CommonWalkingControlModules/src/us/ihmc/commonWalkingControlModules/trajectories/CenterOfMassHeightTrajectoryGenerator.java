@@ -5,7 +5,7 @@ import us.ihmc.robotSide.RobotSide;
 
 public interface CenterOfMassHeightTrajectoryGenerator
 {
-   public abstract void initialize(RobotSide supportLeg);
+   public abstract void initialize(RobotSide upcomingSupportLeg);
 
    public abstract void compute();
 
