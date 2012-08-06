@@ -362,8 +362,7 @@ public class ResizableBipedFoot implements BipedFootInterface
          mirrorHeelPoints.add(new Point3d(heelPoints.get(i).getX(), -heelPoints.get(i).getY(), heelPoints.get(i).getZ()));
       }
 
-      double narrowWidthOnToesPercentage = 0.8;
-      return new ResizableBipedFoot(referenceFrames, RobotSide.LEFT, mirrorToePoints, mirrorHeelPoints, this.maxToePointsBack, this.maxHeelPointsForward, narrowWidthOnToesPercentage, yoVariableRegistry,
+      return new ResizableBipedFoot(referenceFrames, RobotSide.LEFT, mirrorToePoints, mirrorHeelPoints, this.maxToePointsBack, this.maxHeelPointsForward, this.narrowWidthOnToesPercentage, yoVariableRegistry,
                                     dynamicGraphicObjectsListRegistry);
    }
 
