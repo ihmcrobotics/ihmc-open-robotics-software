@@ -6,10 +6,8 @@ import javax.media.j3d.Transform3D;
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;
 
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedFeetUpdater;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedFootInterface;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.DoNothingBipedFeetUpdater;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.FootPolygonVisualizer;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ResizableBipedFoot;
 import us.ihmc.commonWalkingControlModules.captureRegion.CapturePointCalculatorInterface;
@@ -31,6 +29,7 @@ import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.sensors.ProcessedSensorsInterface;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
+import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FramePose;
@@ -82,7 +81,6 @@ public class MomentumBasedController implements RobotController
    private final LegStrengthCalculator legStrengthCalculator;
 
    private final SideDependentList<BipedFootInterface> bipedFeet = new SideDependentList<BipedFootInterface>();
-   private final BipedFeetUpdater bipedFeetUpdater;
    private final ReferenceFrame midFeetZUp;
    private final double totalMass;
 
@@ -136,10 +134,6 @@ public class MomentumBasedController implements RobotController
 
       RigidBody elevator = fullRobotModel.getElevator();
       this.inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, -processedSensors.getGravityInWorldFrame().getZ());
-
-//      bipedFeetUpdater = new GoOnToesDuringDoubleSupportBipedFeetUpdater(referenceFrames, footForward, footBack, registry, dynamicGraphicObjectsListRegistry);
-      bipedFeetUpdater = new DoNothingBipedFeetUpdater(referenceFrames, footForward, footBack, registry, dynamicGraphicObjectsListRegistry);
-
       
 //    ContactBasedBipedFeetUpdater bipedFeetUpdater = new ContactBasedBipedFeetUpdater(processedSensors, referenceFrames);
 //    this.bipedFeetUpdater = bipedFeetUpdater;
@@ -171,7 +165,7 @@ public class MomentumBasedController implements RobotController
          ReferenceFrame footFrame = referenceFrames.getFootFrame(robotSide);
          desiredFootAccelerationsInWorld.put(robotSide, new SpatialAccelerationVector(footFrame, elevatorFrame, footFrame));
          footSpatialAccelerationControlModules.put(robotSide,
-                 new FootSpatialAccelerationControlModule(referenceFrames, twistCalculator, bipedFeet.get(robotSide), fullRobotModel));
+                 new FootSpatialAccelerationControlModule(referenceFrames, twistCalculator, bipedFeet.get(robotSide), fullRobotModel, registry));
       }
 
       this.orientationControlModule = new AxisAnglePelvisOrientationControlModule(processedSensors, referenceFrames, null, registry, false);
@@ -183,7 +177,10 @@ public class MomentumBasedController implements RobotController
 
       this.capturePointCalculator = new CommonCapturePointCalculator(processedSensors, referenceFrames, true, registry, dynamicGraphicObjectsListRegistry);
 
-      bipedFeetUpdater.updateBipedFeet(leftFoot, rightFoot, null, capturePointCalculator.getCapturePointInFrame(midFeetZUp), false);
+      for (RobotSide robotSide : RobotSide.values())
+      {
+         bipedFeet.get(robotSide).setIsSupportingFoot(true);
+      }
       bipedSupportPolygons.update(leftFoot, rightFoot);
 
       double maximumLegStrengthWhenTransferringAway = 0.9;
@@ -264,9 +261,13 @@ public class MomentumBasedController implements RobotController
    public void doControl()
    {
       capturePointCalculator.computeCapturePoint(stateMachine.getPlantedLeg());
+      for (RobotSide robotSide : RobotSide.values())
+      {
+         bipedFeet.get(robotSide).setIsSupportingFoot(!stateMachine.isSwingFoot(robotSide));
+      }
       BipedFootInterface leftFoot = bipedFeet.get(RobotSide.LEFT);
       BipedFootInterface rightFoot = bipedFeet.get(RobotSide.RIGHT);
-      bipedFeetUpdater.updateBipedFeet(leftFoot, rightFoot, stateMachine.getSupportLeg(), capturePointCalculator.getCapturePointInFrame(midFeetZUp), false);
+      
       bipedSupportPolygons.update(leftFoot, rightFoot);
       footPolygonVisualizer.update();
 
@@ -297,6 +298,9 @@ public class MomentumBasedController implements RobotController
       FrameVector2d desiredDeltaCMP = determineDesiredDeltaCMP();
       FramePoint2d desiredCMP = new FramePoint2d(desiredCoP);
       desiredCMP.add(desiredDeltaCMP);
+      
+      if (!bipedSupportPolygons.getSupportPolygonInMidFeetZUp().isPointInside(desiredCoP.changeFrameCopy(midFeetZUp)))
+         throw new RuntimeException("desired CoP outside support polygon");
 
       desiredDeltaCMP.changeFrame(this.desiredDeltaCMP.getReferenceFrame());
       this.desiredDeltaCMP.set(desiredDeltaCMP);
@@ -311,6 +315,10 @@ public class MomentumBasedController implements RobotController
       }
       else
       {
+         FrameConvexPolygon2d footPolygonInAnkleZUp = bipedSupportPolygons.getFootPolygonInAnkleZUp(supportLeg);
+         if (!footPolygonInAnkleZUp.isPointInside(desiredCoP.changeFrameCopy(footPolygonInAnkleZUp.getReferenceFrame())))
+            throw new RuntimeException("desired CoP outside foot polygon");
+         
          frame = worldFrame; // referenceFrames.getAnkleZUpFrame(supportLeg);
          virtualToePoints.put(supportLeg, desiredCoP);
          virtualToePoints.put(supportLeg.getOppositeSide(), new FramePoint2d(frame));
@@ -396,7 +404,10 @@ public class MomentumBasedController implements RobotController
          footSpatialAccelerationControlModules.get(robotSide).compute(virtualToePoints.get(robotSide), desiredFootPose, desiredFootTwist,
                  feedForwardFootSpatialAcceleration, isSwingFoot);
          footSpatialAccelerationControlModules.get(robotSide).packFootAcceleration(desiredFootAccelerationsInWorld.get(robotSide));
-         swingFootPositionErrorInWorld.set(footSpatialAccelerationControlModules.get(robotSide).getSwingFootPositionErrorInWorld());
+
+         if (isSwingFoot)
+            swingFootPositionErrorInWorld.set(footSpatialAccelerationControlModules.get(robotSide).getSwingFootPositionErrorInWorld());
+
          desiredFootPositionsInWorld.get(robotSide).set(desiredFootPose.getPositionInFrame(worldFrame));
       }
 

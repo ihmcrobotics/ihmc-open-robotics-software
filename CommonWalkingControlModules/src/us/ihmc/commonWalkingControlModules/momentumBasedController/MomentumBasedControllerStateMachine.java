@@ -41,6 +41,7 @@ import com.yobotics.simulationconstructionset.EnumYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.BagOfBalls;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFrameOrientation;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint2d;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
@@ -95,7 +96,7 @@ public class MomentumBasedControllerStateMachine extends StateMachine
    private final SideDependentList<YoFrameVector> desiredFootVelocities = new SideDependentList<YoFrameVector>();
    private final SideDependentList<YoFrameVector> desiredFootAccelerations = new SideDependentList<YoFrameVector>();
 
-   private final SideDependentList<Orientation> desiredFootOrientations = new SideDependentList<Orientation>();
+   private final SideDependentList<YoFrameOrientation> desiredFootOrientations = new SideDependentList<YoFrameOrientation>();
    private final SideDependentList<YoFrameVector> desiredFootAngularVelocities = new SideDependentList<YoFrameVector>();
    private final SideDependentList<YoFrameVector> desiredFootAngularAccelerations = new SideDependentList<YoFrameVector>();
    private final SideDependentList<DoubleYoVariable> nullspaceMultipliers = new SideDependentList<DoubleYoVariable>();
@@ -106,13 +107,14 @@ public class MomentumBasedControllerStateMachine extends StateMachine
 
    private final CapturePointCalculatorInterface capturePointCalculator;
    private final FramePoint2d previousCoP;
-   private final double doubleSupportTime = 0.6;    // 0.3
+   private final double doubleSupportTime = 0.9; // 0.6;    // 0.3
    private final double stepTime = 0.75; // 0.55;
    private final double waypointHeight = 0.07; // -0.02;    // 0.05; // 0.15;
 
    private final DoubleYoVariable singleSupportICPGlideScaleFactor = new DoubleYoVariable("singleSupportICPGlideScaleFactor", registry);
    private final BooleanYoVariable walk = new BooleanYoVariable("walk", registry);
    private final BooleanYoVariable liftUpHeels = new BooleanYoVariable("liftUpHeels", registry);
+   private final DoubleYoVariable heelsUpFootPitch = new DoubleYoVariable("heelsUpFootPitch", registry);
 
    private double comHeight;
    private final double gravity;
@@ -175,7 +177,7 @@ public class MomentumBasedControllerStateMachine extends StateMachine
       desiredICP = new YoFramePoint2d("desiredICP", "", ReferenceFrame.getWorldFrame(), registry);
       desiredICPVelocity = new YoFrameVector2d("desiredICPVelocity", "", ReferenceFrame.getWorldFrame(), registry);
 
-      singleSupportICPGlideScaleFactor.set(1.0);
+      singleSupportICPGlideScaleFactor.set(0.8); // 1.0);
       FramePoint2d finalDesiredICPForDoubleSupportStance = getDoubleSupportFinalDesiredICPForDoubleSupportStance();
       finalDesiredICPForDoubleSupportStance.changeFrame(desiredICP.getReferenceFrame());
 
@@ -206,7 +208,7 @@ public class MomentumBasedControllerStateMachine extends StateMachine
 //        new ParabolicCartesianTrajectoryGenerator(robotSide.getCamelCaseNameForStartOfExpression() + "CartesianTrajectory",
 //        worldFrame, stepTime, 0.15, registry));
 
-         desiredFootOrientations.put(robotSide, new Orientation(ReferenceFrame.getWorldFrame()));
+         desiredFootOrientations.put(robotSide, new YoFrameOrientation("desired" + robotSide.getCamelCaseNameForStartOfExpression() + "FootOrientation", "", ReferenceFrame.getWorldFrame(), registry));
          desiredFootAngularVelocities.put(robotSide,
                                           new YoFrameVector("desired" + robotSide.getCamelCaseNameForStartOfExpression() + "FootOmega",
                                              ReferenceFrame.getWorldFrame(), registry));
@@ -229,7 +231,8 @@ public class MomentumBasedControllerStateMachine extends StateMachine
       parentRegistry.addChild(registry);
 
 //    walk.set(true);
-//      liftUpHeels.set(true);
+      liftUpHeels.set(true);
+      heelsUpFootPitch.set(0.2);
    }
 
    private void setUpStateMachine()
@@ -294,7 +297,8 @@ public class MomentumBasedControllerStateMachine extends StateMachine
       FramePoint footPosition = desiredFootPositions.get(robotSide).getFramePointCopy();
       footPosition.changeFrame(footFrame);
 
-      Orientation footOrientation = desiredFootOrientations.get(robotSide).changeFrameCopy(footFrame);
+      Orientation footOrientation = desiredFootOrientations.get(robotSide).getFrameOrientationCopy();
+      footOrientation.changeFrame(footFrame);
 
       FramePose ret = new FramePose(footPosition, footOrientation);
 
@@ -390,34 +394,33 @@ public class MomentumBasedControllerStateMachine extends StateMachine
 //               double q = amplitude * (1.0 - Math.cos(omega * t)) + offset;
 //               double qd = amplitude * omega * Math.sin(omega * t);
 //               double qdd = amplitude * omega * omega * Math.cos(omega * t);
+//
+//               double q = 0.2; // 2;
+//               double qd = 0.0;
+//               double qdd = 0.0;
+//
+//               fixedAxisOfRotationControlModules.get(robotSide).compute(q, qd, qdd);
+//
+//               FramePose desiredPose = new FramePose(worldFrame);
+//               Twist desiredTwist = new Twist();
+//               SpatialAccelerationVector feedForward = new SpatialAccelerationVector();
+//
+//               fixedAxisOfRotationControlModules.get(robotSide).pack(desiredPose, desiredTwist, feedForward);
+//               
+//               desiredFootPositions.get(robotSide).set(desiredPose.getPositionInFrame(desiredFootPositions.get(robotSide).getReferenceFrame()));
+//               desiredFootVelocities.get(robotSide).set(desiredTwist.getBodyOriginLinearVelocityInBaseFrame());
+//               desiredFootAccelerations.get(robotSide).set(0.0, 0.0, 0.0); // TODO
+//
+//               desiredFootOrientations.get(robotSide).set(desiredPose.getOrientation());
+//               desiredFootAngularVelocities.get(robotSide).set(desiredTwist.getAngularVelocityInBaseFrame());
+//               desiredFootAngularAccelerations.get(robotSide).set(0.0, 0.0, 0.0); // TODO
 
-               double q = 0.1; // 2;
-               double qd = 0.0;
-               double qdd = 0.0;
-
-               fixedAxisOfRotationControlModules.get(robotSide).compute(q, qd, qdd);
-
-               FramePose desiredPose = new FramePose(worldFrame);
-               Twist desiredTwist = new Twist();
-               SpatialAccelerationVector feedForward = new SpatialAccelerationVector();
-
-               fixedAxisOfRotationControlModules.get(robotSide).pack(desiredPose, desiredTwist, feedForward);
-               
-               desiredFootPositions.get(robotSide).set(desiredPose.getPositionInFrame(desiredFootPositions.get(robotSide).getReferenceFrame()));
-               desiredFootVelocities.get(robotSide).set(desiredTwist.getBodyOriginLinearVelocityInBaseFrame());
-               desiredFootAccelerations.get(robotSide).set(0.0, 0.0, 0.0); // TODO
-
-               desiredFootOrientations.get(robotSide).set(desiredPose.getOrientation());
-               desiredFootAngularVelocities.get(robotSide).set(desiredTwist.getAngularVelocityInBaseFrame());
-               desiredFootAngularAccelerations.get(robotSide).set(0.0, 0.0, 0.0); // TODO
-//               FrameVector angularAcceleration = new FrameVector(feedForward.getExpressedInFrame(), feedForward.getAngularPartCopy());
-//               angularAcceleration.changeFrame(desiredFootAngularAccelerations.get(robotSide).getReferenceFrame()); 
-//               desiredFootAngularAccelerations.get(robotSide).set(angularAcceleration); // not sure about this...
+               setDesiredFootPosVelAccForSupportSide(robotSide, heelsUpFootPitch.getDoubleValue());
             }
             else
             {
                bipedFoot.setFootPolygonInUse(FootPolygonEnum.FLAT);
-               setDesiredFootPosVelAccForSupportSide(robotSide);
+               setDesiredFootPosVelAccForSupportSide(robotSide, 0.0);
             }
          }
          
@@ -477,12 +480,12 @@ public class MomentumBasedControllerStateMachine extends StateMachine
          setSupportLeg(null);
          transferICPTrajectoryDone.set(false);
 
-         for (RobotSide robotSide : RobotSide.values())
-         {
-            FrameVector axisOfRotation = new FrameVector(referenceFrames.getFootFrame(robotSide), 0.0, 1.0, 0.0);
-            FramePoint offset = bipedFeet.get(robotSide).getToePointsCopy()[0];
-            fixedAxisOfRotationControlModules.get(robotSide).initialize(axisOfRotation, offset);
-         }
+//         for (RobotSide robotSide : RobotSide.values())
+//         {
+//            FrameVector axisOfRotation = new FrameVector(referenceFrames.getFootFrame(robotSide), 0.0, 1.0, 0.0);
+//            FramePoint offset = bipedFeet.get(robotSide).getToePointsCopy()[0];
+//            fixedAxisOfRotationControlModules.get(robotSide).initialize(axisOfRotation, offset);
+//         }
 
          if (transferToSide == null)
          {
@@ -508,10 +511,10 @@ public class MomentumBasedControllerStateMachine extends StateMachine
             nullspaceMultipliers.get(robotSide).set(0.0);
          }
 
-         if (transferToSide != null)
-         {
-            icpTrajectoryGenerators.get(transferToSide.getOppositeSide()).changeSideToUseForReferenceFrame(transferToSide);
-         }
+//         if (transferToSide != null)
+//         {
+//            icpTrajectoryGenerators.get(transferToSide.getOppositeSide()).changeSideToUseForReferenceFrame(transferToSide);
+//         }
       }
 
       @Override
@@ -549,7 +552,7 @@ public class MomentumBasedControllerStateMachine extends StateMachine
          evaluateCoMHeightTrajectory();
 
          RobotSide supportSide = swingSide.getOppositeSide();
-         setDesiredFootPosVelAccForSupportSide(supportSide);
+//         setDesiredFootPosVelAccForSupportSide(supportSide);
 
          CartesianTrajectoryGenerator cartesianTrajectoryGenerator = cartesianTrajectoryGenerators.get(swingSide);
          if (!cartesianTrajectoryGenerator.isDone() && trajectoryInitialized.get(swingSide).getBooleanValue())
@@ -603,6 +606,8 @@ public class MomentumBasedControllerStateMachine extends StateMachine
          nullspaceMultipliers.get(swingSide).set(swingNullspaceMultiplier);
          nullspaceMultipliers.get(supportSide).set(0.0);
          trajectoryInitialized.get(swingSide).set(false);
+
+         setDesiredFootPosVelAccForSupportSide(supportSide, heelsUpFootPitch.getDoubleValue());
       }
 
       @Override
@@ -744,8 +749,8 @@ public class MomentumBasedControllerStateMachine extends StateMachine
    private FramePoint2d getDoubleSupportFinalDesiredICPForWalking(RobotSide supportSide)
    {
       FramePoint2d ret = bipedFeet.get(supportSide).getFootPolygonInUseInAnkleZUp().getCentroidCopy();
-      double extraX = 0.01;
-      double extraY = supportSide.negateIfLeftSide(0.03);
+      double extraX = 0.005;
+      double extraY = supportSide.negateIfLeftSide(0.01);
       FrameVector2d offset = new FrameVector2d(desiredHeadingControlModule.getDesiredHeadingFrame(), extraX, extraY);
       offset.changeFrame(ret.getReferenceFrame());
       ret.add(offset);
@@ -786,7 +791,7 @@ public class MomentumBasedControllerStateMachine extends StateMachine
       desiredCoMHeightAcceleration.set(centerOfMassHeightTrajectoryGenerator.getDesiredCenterOfMassHeightAcceleration());
    }
 
-   private void setDesiredFootPosVelAccForSupportSide(RobotSide supportSide)
+   private void setDesiredFootPosVelAccForSupportSide(RobotSide supportSide, double footPitch)
    {
       FramePoint desiredFootPosition = new FramePoint(referenceFrames.getFootFrame(supportSide));
       desiredFootPosition.changeFrame(desiredFootPositions.get(supportSide).getReferenceFrame());
@@ -794,7 +799,7 @@ public class MomentumBasedControllerStateMachine extends StateMachine
       desiredFootVelocities.get(supportSide).set(0.0, 0.0, 0.0);
       desiredFootAccelerations.get(supportSide).set(0.0, 0.0, 0.0);
 
-      desiredFootOrientations.get(supportSide).setYawPitchRoll(0.0, 0.0, 0.0);
+      desiredFootOrientations.get(supportSide).setYawPitchRoll(0.0, footPitch, 0.0);
       desiredFootAngularVelocities.get(supportSide).set(0.0, 0.0, 0.0);
       desiredFootAngularAccelerations.get(supportSide).set(0.0, 0.0, 0.0);
    }
@@ -805,7 +810,7 @@ public class MomentumBasedControllerStateMachine extends StateMachine
       if (supportLeg == null)
          return false;
       else
-         return supportLeg.getOppositeSide() == robotSide;
+         return robotSide != supportLeg;
    }
 
    private void setSupportLeg(RobotSide supportLeg)
