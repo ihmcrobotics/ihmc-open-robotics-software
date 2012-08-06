@@ -36,6 +36,7 @@ import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
+import us.ihmc.utilities.math.geometry.GeometryTools;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RotationFunctions;
 import us.ihmc.utilities.screwTheory.InverseDynamicsCalculator;
@@ -109,7 +110,7 @@ public class MomentumBasedController implements RobotController
    private final DoubleYoVariable kUpperBody = new DoubleYoVariable("kUpperBody", registry);
    private final DoubleYoVariable zetaUpperBody = new DoubleYoVariable("zetaUpperBody", registry);
    private final DoubleYoVariable kAngularMomentumZ = new DoubleYoVariable("kAngularMomentumZ", registry);
-   private final DoubleYoVariable kPelvisZ = new DoubleYoVariable("kPelvisZ", registry);
+   private final DoubleYoVariable kPelvisYaw = new DoubleYoVariable("kPelvisZ", registry);
    private final HashMap<RevoluteJoint, DoubleYoVariable> desiredAccelerationYoVariables = new HashMap<RevoluteJoint, DoubleYoVariable>();
 
    // TODO: move to separate class that takes care of determining desired GRFs
@@ -204,7 +205,7 @@ public class MomentumBasedController implements RobotController
       orientationControlModule.setupParametersForR2();
 
       stateMachine = new MomentumBasedControllerStateMachine(fullRobotModel, referenceFrames, twistCalculator, bipedFeet, bipedSupportPolygons, footSwitches,
-              processedSensors, processedSensors.getYoTime(), controlDT, footHeight, registry, dynamicGraphicObjectsListRegistry);
+              processedSensors, capturePointCalculator, processedSensors.getYoTime(), controlDT, footHeight, registry, dynamicGraphicObjectsListRegistry);
       optimizer = new BipedMomentumOptimizer(fullRobotModel, referenceFrames.getCenterOfMassFrame(), controlDT, twistCalculator, registry);
 
       this.desiredPelvisLinearAcceleration = new YoFrameVector("desiredPelvisLinearAcceleration", "", referenceFrames.getPelvisFrame(), registry);
@@ -233,8 +234,8 @@ public class MomentumBasedController implements RobotController
 
       kAngularMomentumXY.set(3e-2);
       kPelvisAxisAngle.set(1.0); // was 1.0 for M3 video
-      kAngularMomentumZ.set(50.0); // 10.0);
-      kPelvisZ.set(100.0); // was 0.0 for M3 movie
+      kAngularMomentumZ.set(10.0); // 50.0); // 10.0);
+      kPelvisYaw.set(20.0); // 100.0); // was 0.0 for M3 movie
       kUpperBody.set(100.0);
       zetaUpperBody.set(1.0);
    }
@@ -277,7 +278,6 @@ public class MomentumBasedController implements RobotController
 
       double comHeight = processedSensors.getCenterOfMassPositionInFrame(frame).getZ();
 
-      stateMachine.setCapturePoint(capturePointCalculator.getCapturePoint2dInFrame(midFeetZUp));
       stateMachine.setPreviousCoP(desiredCoP.getFramePoint2dCopy());
       stateMachine.setCoMHeight(comHeight);
       stateMachine.checkTransitionConditionsThoroughly();
@@ -306,12 +306,12 @@ public class MomentumBasedController implements RobotController
       ReferenceFrame frame;
       if (supportLeg == null)
       {
-         frame = midFeetZUp;
+         frame = worldFrame; // midFeetZUp;
          virtualToePointCalculator.packVirtualToePoints(virtualToePoints, bipedSupportPolygons, desiredCoP, stateMachine.getUpcomingSupportLeg());
       }
       else
       {
-         frame = referenceFrames.getAnkleZUpFrame(supportLeg);
+         frame = worldFrame; // referenceFrames.getAnkleZUpFrame(supportLeg);
          virtualToePoints.put(supportLeg, desiredCoP);
          virtualToePoints.put(supportLeg.getOppositeSide(), new FramePoint2d(frame));
       }
@@ -332,6 +332,10 @@ public class MomentumBasedController implements RobotController
          groundReactionForceTerminalPoint.setY(groundReactionForceTerminalPoint.getY() - desiredDeltaCMP.getY());
          FrameVector groundReactionForce = new FrameVector(groundReactionForceTerminalPoint);
          FramePoint virtualToePoint = virtualToePoints.get(robotSide).toFramePoint();
+         
+         virtualToePoint = projectPointOntoSole(robotSide, virtualToePoint);
+         
+         virtualToePoint.changeFrame(frame);
          groundReactionForce.sub(virtualToePoint);
          groundReactionForce.scale(legStrengths.get(robotSide) * fZ / groundReactionForce.getZ());
 
@@ -397,13 +401,26 @@ public class MomentumBasedController implements RobotController
       }
 
       optimizer.setDesiredFootAccelerationsInWorld(desiredFootAccelerationsInWorld);
-
+      
       for (RobotSide robotSide : RobotSide.values())
       {
          optimizer.setNullspaceMultiplier(robotSide, stateMachine.getNullspaceMultiplier(robotSide));
       }
 
       optimizer.solveForRootJointAcceleration(desiredAngularCentroidalMomentumRate, desiredLinearCentroidalMomentumRate);
+   }
+   
+   private FramePoint projectPointOntoSole(RobotSide robotSide, FramePoint virtualToePoint)
+   {
+      ReferenceFrame soleFrame = referenceFrames.getSoleFrame(robotSide);
+      FramePoint pointOnPlane = new FramePoint(soleFrame);
+      FrameVector planeNormal = new FrameVector(soleFrame, 0.0, 0.0, 1.0);
+      FramePoint lineStart = virtualToePoint.changeFrameCopy(soleFrame);
+      FramePoint lineEnd = new FramePoint(virtualToePoint); // start at VTP
+      lineEnd.setZ(lineEnd.getZ() - 1.0); // down an arbitrary amount in the frame in which the VTP is expressed
+      lineEnd.changeFrame(soleFrame); // then change frame to sole frame
+
+      return GeometryTools.getIntersectionBetweenLineAndPlane(pointOnPlane, planeNormal, lineStart, lineEnd);
    }
 
 // private void doChestOrientationControl()
@@ -488,7 +505,7 @@ public class MomentumBasedController implements RobotController
       Matrix3d pelvisToWorld = new Matrix3d();
       fullRobotModel.getPelvis().getBodyFixedFrame().getTransformToDesiredFrame(ReferenceFrame.getWorldFrame()).get(pelvisToWorld);
       double pelvisYaw = RotationFunctions.getYaw(pelvisToWorld);
-      ret.setZ(-kAngularMomentumZ.getDoubleValue() * angularMomentum.getZ() - kPelvisZ.getDoubleValue() * pelvisYaw);
+      ret.setZ(-kAngularMomentumZ.getDoubleValue() * angularMomentum.getZ() - kPelvisYaw.getDoubleValue() * pelvisYaw);
 
       return ret;
    }
