@@ -59,8 +59,8 @@ public class FifthOrderWaypointCartesianTrajectoryGenerator implements Cartesian
       finalDesiredVelocity.checkReferenceFrameMatch(referenceFrame);
 
       FramePoint intermediatePosition = new FramePoint(initialPosition);
-//      intermediatePosition.add(finalDesiredPosition);
-//      intermediatePosition.scale(0.5);
+      intermediatePosition.add(finalDesiredPosition);
+      intermediatePosition.scale(0.5);
       intermediatePosition.setZ(Math.max(initialPosition.getZ(), finalDesiredPosition.getZ()) + waypointHeight.getDoubleValue());
 
       timeIntoStep.set(0.0);

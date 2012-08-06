@@ -3,7 +3,6 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.calculators.EquivalentConstantCoPCalculator;
 import us.ihmc.robotSide.RobotSide;
-import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameLine2d;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
@@ -12,7 +11,6 @@ import us.ihmc.utilities.math.geometry.GeometryTools;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.EnumYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint2d;
 
@@ -23,9 +21,8 @@ public class ConstantCoPInstantaneousCapturePointTrajectory
    private final BipedSupportPolygons bipedSupportPolygons;
    private final double gravity;
    private final double deltaT;
-   private final SideDependentList<YoFramePoint2d> initialDesiredICP = new SideDependentList<YoFramePoint2d>();
-   private final SideDependentList<YoFramePoint2d> finalDesiredICP = new SideDependentList<YoFramePoint2d>();
-   private final EnumYoVariable<RobotSide> sideToUseForReferenceFrame;
+   private final YoFramePoint2d initialDesiredICP;
+   private final YoFramePoint2d finalDesiredICP;
    private final DoubleYoVariable moveTime;
    private final DoubleYoVariable currentTime;
 
@@ -37,15 +34,10 @@ public class ConstantCoPInstantaneousCapturePointTrajectory
       this.deltaT = deltaT;
       this.registry = new YoVariableRegistry(supportSide.getCamelCaseNameForStartOfExpression() + getClass().getSimpleName());
 
-      for (RobotSide robotSide : RobotSide.values())
-      {
-         ReferenceFrame referenceFrame = bipedSupportPolygons.getFootPolygonInAnkleZUp(robotSide).getReferenceFrame();
-         initialDesiredICP.put(robotSide, new YoFramePoint2d(robotSide + "initialDesiredICP", "", referenceFrame, registry));
-         finalDesiredICP.put(robotSide, new YoFramePoint2d(robotSide + "finalDesiredICP", "", referenceFrame, registry));
+      ReferenceFrame referenceFrame = ReferenceFrame.getWorldFrame();
+      initialDesiredICP =  new YoFramePoint2d("initialDesiredICP", "", referenceFrame, registry);
+      finalDesiredICP = new YoFramePoint2d("finalDesiredICP", "", referenceFrame, registry);
 
-      }
-
-      sideToUseForReferenceFrame = EnumYoVariable.create("sideToUseForReferenceFrame", RobotSide.class, registry);
       moveTime = new DoubleYoVariable("icpTrajectoryMoveTime", registry);
       currentTime = new DoubleYoVariable("icpTrajectoryCurrentTime", registry);
 
@@ -55,12 +47,11 @@ public class ConstantCoPInstantaneousCapturePointTrajectory
 
    public void initialize(FramePoint2d initialDesiredICP, FramePoint2d finalDesiredICP, double moveTime, double comHeight)
    {
-      sideToUseForReferenceFrame.set(supportSide);
-      initialDesiredICP.changeFrame(this.initialDesiredICP.get(supportSide).getReferenceFrame());
-      finalDesiredICP.changeFrame(this.finalDesiredICP.get(supportSide).getReferenceFrame());
+      initialDesiredICP.changeFrame(this.initialDesiredICP.getReferenceFrame());
+      finalDesiredICP.changeFrame(this.finalDesiredICP.getReferenceFrame());
 
-      this.initialDesiredICP.get(supportSide).set(initialDesiredICP);
-      this.finalDesiredICP.get(supportSide).set(finalDesiredICP);
+      this.initialDesiredICP.set(initialDesiredICP);
+      this.finalDesiredICP.set(finalDesiredICP);
       currentTime.set(0.0);
 
       // make sure it is feasible by adjusting move time
@@ -82,7 +73,6 @@ public class ConstantCoPInstantaneousCapturePointTrajectory
 
    public void pack(FramePoint2d desiredPosition, FrameVector2d desiredVelocity, double comHeight)
    {
-      RobotSide sideToUseForReferenceFrame = this.sideToUseForReferenceFrame.getEnumValue();
       double currentTime = isDone() ? moveTime.getDoubleValue() : this.currentTime.getDoubleValue();
 
       double omega0 = Math.sqrt(gravity / comHeight);
@@ -91,12 +81,12 @@ public class ConstantCoPInstantaneousCapturePointTrajectory
       double parameter = (expT - 1.0) / (expTf - 1.0);
       double parameterd = omega0 * expT / (expTf - 1.0);
 
-      FrameVector2d initialToFinal = new FrameVector2d(finalDesiredICP.get(sideToUseForReferenceFrame).getFramePoint2dCopy());
-      initialToFinal.sub(initialDesiredICP.get(sideToUseForReferenceFrame).getFramePoint2dCopy());
+      FrameVector2d initialToFinal = new FrameVector2d(finalDesiredICP.getFramePoint2dCopy());
+      initialToFinal.sub(initialDesiredICP.getFramePoint2dCopy());
 
       FrameVector2d offset = new FrameVector2d(initialToFinal);
       offset.scale(parameter);
-      FramePoint2d desiredICPLocal = initialDesiredICP.get(sideToUseForReferenceFrame).getFramePoint2dCopy();
+      FramePoint2d desiredICPLocal = initialDesiredICP.getFramePoint2dCopy();
       desiredICPLocal.add(offset);
       desiredICPLocal.changeFrame(desiredPosition.getReferenceFrame());
       desiredPosition.set(desiredICPLocal);
@@ -122,18 +112,5 @@ public class ConstantCoPInstantaneousCapturePointTrajectory
    public void reset()
    {
       currentTime.set(Double.POSITIVE_INFINITY);
-   }
-
-   public void changeSideToUseForReferenceFrame(RobotSide robotSide)
-   {
-      FramePoint2d initialDesiredICPLocal = initialDesiredICP.get(robotSide.getOppositeSide()).getFramePoint2dCopy();
-      initialDesiredICPLocal.changeFrame(initialDesiredICP.get(robotSide).getReferenceFrame());
-      initialDesiredICP.get(robotSide).set(initialDesiredICPLocal);
-
-      FramePoint2d finalDesiredICPLocal = finalDesiredICP.get(robotSide.getOppositeSide()).getFramePoint2dCopy();
-      finalDesiredICPLocal.changeFrame(finalDesiredICP.get(robotSide).getReferenceFrame());
-      finalDesiredICP.get(robotSide).set(finalDesiredICPLocal);
-
-      this.sideToUseForReferenceFrame.set(robotSide);
    }
 }

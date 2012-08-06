@@ -357,8 +357,8 @@ public class SpeedControllingDesiredCoPCalculator implements DesiredCapturePoint
    public void setParametersForR2InverseDynamics()
    {
       speedControlXKp.set(3.0);
-      doubleSupportCaptureKp.set(3.0); // 0.5); // 0.5);
-      singleSupportCaptureKp.set(3.0); // 0.5);
+      doubleSupportCaptureKp.set(0.5); // 0.5); // 0.5);
+      singleSupportCaptureKp.set(0.5); // 0.5);
       kCaptureGuide.set(1.5);
    }
    
