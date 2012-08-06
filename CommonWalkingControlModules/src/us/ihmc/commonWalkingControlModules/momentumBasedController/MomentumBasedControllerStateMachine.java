@@ -23,6 +23,7 @@ import us.ihmc.commonWalkingControlModules.trajectories.LinearFootstepCalculator
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.MathTools;
+import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FramePose;
@@ -107,7 +108,7 @@ public class MomentumBasedControllerStateMachine extends StateMachine
 
    private final CapturePointCalculatorInterface capturePointCalculator;
    private final FramePoint2d previousCoP;
-   private final double doubleSupportTime = 0.9; // 0.6;    // 0.3
+   private final double doubleSupportTime = 0.6; // 0.6;    // 0.3
    private final double stepTime = 0.75; // 0.55;
    private final double waypointHeight = 0.07; // -0.02;    // 0.05; // 0.15;
 
@@ -649,20 +650,20 @@ public class MomentumBasedControllerStateMachine extends StateMachine
       public boolean checkCondition()
       {
       // FIXME: terrible condition
-//         FrameConvexPolygon2d footPolygon = bipedFeet.get(robotSide).getFootPolygonInUseInAnkleZUp();
+         FrameConvexPolygon2d footPolygon = bipedFeet.get(robotSide).getFootPolygonInUseInAnkleZUp();
 //         boolean capturePointInsideFootPolygon = footPolygon.isPointInside(capturePoint.changeFrameCopy(footPolygon.getReferenceFrame()));
 //         boolean copInsideFootPolygon = footPolygon.isPointInside(previousCoP.changeFrameCopy(footPolygon.getReferenceFrame()));
 //
-//         capturePointCalculator.computeCapturePoint(getSupportLeg());
-//         FramePoint2d capturePointLocal = capturePointCalculator.getCapturePoint2dInFrame(footPolygon.getReferenceFrame());
-//         boolean inFrontOfFoot = true;
-//         for (FramePoint2d point : footPolygon.getClockwiseOrderedListOfFramePoints())
-//         {
-//            if (point.getX() > capturePointLocal.getX())
-//               inFrontOfFoot = false;
-//         }
+         capturePointCalculator.computeCapturePoint(getSupportLeg());
+         FramePoint2d capturePointLocal = capturePointCalculator.getCapturePoint2dInFrame(footPolygon.getReferenceFrame());
+         boolean inFrontOfFoot = true;
+         for (FramePoint2d point : footPolygon.getClockwiseOrderedListOfFramePoints())
+         {
+            if (point.getX() > capturePointLocal.getX())
+               inFrontOfFoot = false;
+         }
          
-         return transferICPTrajectoryDone.getBooleanValue() || !footSwitches.get(robotSide.getOppositeSide()).hasFootHitGround();
+         return (transferICPTrajectoryDone.getBooleanValue() || !footSwitches.get(robotSide.getOppositeSide()).hasFootHitGround()) && inFrontOfFoot;
       }
    }
 
