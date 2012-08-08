@@ -12,6 +12,7 @@ import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
+import us.ihmc.utilities.math.geometry.FrameConvexPolygon2dAndConnectingEdges;
 import us.ihmc.utilities.math.geometry.FrameLine2d;
 import us.ihmc.utilities.math.geometry.FrameLineSegment2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -381,6 +382,20 @@ public class ToeOffVirtualToePointCalculator implements VirtualToePointCalculato
       {
          virtualToePointsWorld.get(robotSide).setToNaN();
       }
+   }
+
+   public void setupForDebugViz(boolean debugViz, boolean removeDebugVizEachTime)
+   {
+      System.err.println("Not implemented!");
+      
+   }
+
+   public void packVirtualToePoints(SideDependentList<FramePoint2d> originalVirtualToePoints, FramePoint2d copDesired,
+         FrameConvexPolygon2dAndConnectingEdges supportPolygonAndEdges, RobotSide upcomingSupportSide)
+   {
+      throw new RuntimeException("Not implemented!");
+
+      
    }
 
 }
