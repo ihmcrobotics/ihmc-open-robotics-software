@@ -3,12 +3,16 @@ package us.ihmc.commonWalkingControlModules.controlModules;
 import java.awt.Color;
 import java.util.ArrayList;
 
+import javax.vecmath.Point2d;
+import javax.vecmath.Vector2d;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.VirtualToePointCalculator;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
+import us.ihmc.utilities.math.geometry.FrameConvexPolygon2dAndConnectingEdges;
 import us.ihmc.utilities.math.geometry.FrameGeometry2dPlotter;
 import us.ihmc.utilities.math.geometry.FrameGeometryTestFrame;
 import us.ihmc.utilities.math.geometry.FrameLine2d;
@@ -16,8 +20,11 @@ import us.ihmc.utilities.math.geometry.FrameLineSegment2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
+import us.ihmc.utilities.math.geometry.Line2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
+import com.yobotics.simulationconstructionset.BooleanYoVariable;
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoAppearance;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.time.GlobalTimer;
@@ -27,21 +34,29 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 
-
 public class GeometricVirtualToePointCalculator implements VirtualToePointCalculator
 {
    private static final boolean VISUALIZE = true;
-   protected boolean DEBUG_VIZ = false;
-   
+   private boolean DEBUG_VIZ = false;
+   private boolean removeDebugVizEachTime = true;
+
    private final GlobalTimer globalTimer;
-   private final YoVariableRegistry registry = new YoVariableRegistry("VTPCalculator");
+   protected final YoVariableRegistry registry = new YoVariableRegistry("VTPCalculator");
+   
+   private final BooleanYoVariable useLogisticFunction = new BooleanYoVariable("useLogisticFunction", registry);
+   private final BooleanYoVariable stickToCoPIfInsideFoot = new BooleanYoVariable("stickToCoPIfInsideFoot", registry);
+   
+   private final DoubleYoVariable vtpInsideFootMorphPercent = new DoubleYoVariable("vtpInsideFootMorphPercent", registry);
+   private final DoubleYoVariable vtpApproachingFootDistance = new DoubleYoVariable("vtpApproachingFootDistance", registry);
+   
+   private final DoubleYoVariable vtpMorphPercent = new DoubleYoVariable("vtpMorphPercent", registry);
 
    private final SideDependentList<YoFramePoint> virtualToePointsWorld = new SideDependentList<YoFramePoint>();
 
-   private SideDependentList<ReferenceFrame> individualFootFramesForReturn;
-   private ReferenceFrame commonZUpFrame, world;
-   
-   private final FrameGeometry2dPlotter plotter;
+   protected SideDependentList<ReferenceFrame> individualFootFramesForReturn;
+   protected ReferenceFrame commonZUpFrame, world;
+
+   private FrameGeometry2dPlotter plotter;
 
    public GeometricVirtualToePointCalculator(CommonWalkingReferenceFrames referenceFrames, YoVariableRegistry parentRegistry,
          DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
@@ -49,12 +64,11 @@ public class GeometricVirtualToePointCalculator implements VirtualToePointCalcul
       this(parentRegistry, dynamicGraphicObjectsListRegistry);
       this.setFramesToComputeIn(referenceFrames);
    }
-   
-   public GeometricVirtualToePointCalculator(YoVariableRegistry parentRegistry,
-         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+
+   public GeometricVirtualToePointCalculator(YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       for (RobotSide robotSide : RobotSide.values())
-      {         
+      {
          YoFramePoint virtualToePointWorld = new YoFramePoint(robotSide + "VTP", "", ReferenceFrame.getWorldFrame(), registry);
          virtualToePointsWorld.put(robotSide, virtualToePointWorld);
       }
@@ -63,7 +77,7 @@ public class GeometricVirtualToePointCalculator implements VirtualToePointCalcul
       {
          DynamicGraphicObjectsList dynamicGraphicObjectsList = new DynamicGraphicObjectsList("VTP Calculator");
          ArtifactList artifactList = new ArtifactList("VTP Calculator");
-         
+
          for (RobotSide robotSide : RobotSide.values())
          {
             final YoFramePoint virtualToePointWorld = virtualToePointsWorld.get(robotSide);
@@ -72,7 +86,7 @@ public class GeometricVirtualToePointCalculator implements VirtualToePointCalcul
             dynamicGraphicObjectsList.add(virtualToePointViz);
             artifactList.add(virtualToePointViz.createArtifact());
          }
-         
+
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectsList);
          dynamicGraphicObjectsListRegistry.registerArtifactList(artifactList);
       }
@@ -84,12 +98,50 @@ public class GeometricVirtualToePointCalculator implements VirtualToePointCalcul
          parentRegistry.addChild(registry);
       }
 
+      setDefaultParameters();
+   }
+
+   public void setDefaultParameters()
+   {
+      setNewR2Parameters();
+      
+      boolean stickToCoPIfInsideFoot = false;
+      boolean useLogisticFunction = false;
+      double vtpInsideFootMorphPercent = 0.2; 
+      double vtpApproachingFootDistance = 0.10;
+      
+      setParameters(stickToCoPIfInsideFoot, useLogisticFunction, vtpInsideFootMorphPercent, vtpApproachingFootDistance);
+   }
+   
+   public void setNewR2Parameters()
+   {
+      boolean stickToCoPIfInsideFoot = true;
+      boolean useLogisticFunction = true;
+      double vtpInsideFootMorphPercent = 0.0; 
+      double vtpApproachingFootDistance = 0.10;
+      
+      setParameters(stickToCoPIfInsideFoot, useLogisticFunction, vtpInsideFootMorphPercent, vtpApproachingFootDistance);
+   }
+
+   public void setParameters(boolean stickToCoPIfInsideFoot, boolean useLogisticFunction, double vtpInsideFootMorphPercent, double vtpApproachingFootDistance)
+   {
+      this.stickToCoPIfInsideFoot.set(stickToCoPIfInsideFoot);
+      this.useLogisticFunction.set(useLogisticFunction);
+      this.vtpInsideFootMorphPercent.set(vtpInsideFootMorphPercent);
+      this.vtpApproachingFootDistance.set(vtpApproachingFootDistance);
+   }
+
+   public synchronized void setupForDebugViz(boolean debugViz, boolean removeDebugVizEachTime)
+   {
+      this.DEBUG_VIZ = debugViz;
+      this.removeDebugVizEachTime = removeDebugVizEachTime;
+
       if (DEBUG_VIZ)
       {
          FrameGeometryTestFrame frame = new FrameGeometryTestFrame(-0.5, 0.5, -0.5, 0.5);
          plotter = frame.getFrameGeometry2dPlotter();
-      }
-      else
+         plotter.setDrawPointsLarge();
+      } else
       {
          plotter = null;
       }
@@ -99,14 +151,14 @@ public class GeometricVirtualToePointCalculator implements VirtualToePointCalcul
    {
       setFramesToComputeIn(referenceFrames.getMidFeetZUpFrame(), referenceFrames.getAnkleZUpReferenceFrames());
    }
-   
+
    public void setAllFramesToComputeInToWorld()
    {
       this.world = ReferenceFrame.getWorldFrame();
       this.commonZUpFrame = ReferenceFrame.getWorldFrame();
       this.individualFootFramesForReturn = new SideDependentList<ReferenceFrame>(ReferenceFrame.getWorldFrame(), ReferenceFrame.getWorldFrame());
    }
-   
+
    public void setFramesToComputeIn(ReferenceFrame commonZUpFrame, SideDependentList<ReferenceFrame> individualFootFramesForReturn)
    {
       this.world = ReferenceFrame.getWorldFrame();
@@ -114,22 +166,62 @@ public class GeometricVirtualToePointCalculator implements VirtualToePointCalcul
       this.individualFootFramesForReturn = individualFootFramesForReturn;
    }
 
+   public static FramePoint2d projectCoPIntoPolygonAndMoveItOffConnectingEdge(FramePoint2d copDesired,
+         FrameConvexPolygon2dAndConnectingEdges supportPolygonAndEdges, double distanceOffEdge)
+   {
+      FrameConvexPolygon2d supportPolygon = supportPolygonAndEdges.getFrameConvexPolygon2d();
+      FrameLineSegment2d connectingEdge1 = supportPolygonAndEdges.getConnectingEdge1();
+      FrameLineSegment2d connectingEdge2 = supportPolygonAndEdges.getConnectingEdge2();
+      
+      return projectCoPIntoPolygonAndMoveItOffConnectingEdge(copDesired, supportPolygon,
+            connectingEdge1, connectingEdge2, distanceOffEdge);
+   }
 
-   public void packVirtualToePoints(SideDependentList<FramePoint2d> virtualToePoints,
-         BipedSupportPolygons bipedSupportPolygons, FramePoint2d copDesired, RobotSide upcomingSupportLeg)
+   public static FramePoint2d projectCoPIntoPolygonAndMoveItOffConnectingEdge(FramePoint2d copDesired, FrameConvexPolygon2d supportPolygonInMidFeetZUp,
+         FrameLineSegment2d connectingEdge1, FrameLineSegment2d connectingEdge2, double distanceOffEdge)
+   {
+      copDesired = supportPolygonInMidFeetZUp.orthogonalProjectionCopy(copDesired);
+
+      FrameLineSegment2d shiftedEdge1 = connectingEdge1.shiftToRightCopy(distanceOffEdge);
+      FrameLineSegment2d shiftedEdge2 = connectingEdge2.shiftToRightCopy(distanceOffEdge);
+
+      FramePoint2d ret = copDesired;
+
+      if (shiftedEdge1.isPointOnLeftSideOfLineSegment(copDesired))
+      {
+         ret = shiftedEdge1.orthogonalProjectionCopy(ret);
+      } else if (shiftedEdge2.isPointOnLeftSideOfLineSegment(ret))
+      {
+         ret = shiftedEdge2.orthogonalProjectionCopy(ret);
+      }
+
+      return ret;
+   }
+
+   public void packVirtualToePoints(SideDependentList<FramePoint2d> virtualToePoints, BipedSupportPolygons bipedSupportPolygons, FramePoint2d copDesired,
+         RobotSide upcomingSupportSide)
    {
       SideDependentList<FrameConvexPolygon2d> footPolygonsInMidFeetZUp = bipedSupportPolygons.getFootPolygonsInMidFeetZUp();
       FrameConvexPolygon2d supportPolygonInMidFeetZUp = bipedSupportPolygons.getSupportPolygonInMidFeetZUp();
       FrameLineSegment2d connectingEdge1 = bipedSupportPolygons.getConnectingEdge1();
       FrameLineSegment2d connectingEdge2 = bipedSupportPolygons.getConnectingEdge2();
-      
-      packVirtualToePoints(virtualToePoints, copDesired, footPolygonsInMidFeetZUp, supportPolygonInMidFeetZUp, connectingEdge1, connectingEdge2);
+
+      packVirtualToePoints(virtualToePoints, copDesired, footPolygonsInMidFeetZUp, supportPolygonInMidFeetZUp, connectingEdge1, connectingEdge2,
+            upcomingSupportSide);
    }
-   
-   
-   public void packVirtualToePoints(SideDependentList<FramePoint2d> virtualToePoints,
-        FramePoint2d copDesired, SideDependentList<FrameConvexPolygon2d> footPolygonsInMidFeetZUp, FrameConvexPolygon2d supportPolygonInMidFeetZUp,
-        FrameLineSegment2d connectingEdge1, FrameLineSegment2d connectingEdge2)
+
+   public void packVirtualToePoints(SideDependentList<FramePoint2d> virtualToePoints, FramePoint2d copDesired,
+         FrameConvexPolygon2dAndConnectingEdges supportPolygonAndEdges, RobotSide upcomingSupportSide)
+   {
+      SideDependentList<FrameConvexPolygon2d> footPolygons = new SideDependentList<FrameConvexPolygon2d>(supportPolygonAndEdges.getOriginalPolygon1(),
+            supportPolygonAndEdges.getOriginalPolygon2());
+      packVirtualToePoints(virtualToePoints, copDesired, footPolygons, supportPolygonAndEdges.getFrameConvexPolygon2d(),
+            supportPolygonAndEdges.getConnectingEdge1(), supportPolygonAndEdges.getConnectingEdge2(), upcomingSupportSide);
+   }
+
+   public void packVirtualToePoints(SideDependentList<FramePoint2d> virtualToePoints, FramePoint2d copDesired,
+         SideDependentList<FrameConvexPolygon2d> footPolygonsInMidFeetZUp, FrameConvexPolygon2d supportPolygonInMidFeetZUp, FrameLineSegment2d connectingEdge1,
+         FrameLineSegment2d connectingEdge2, RobotSide upcomingSupportSide)
    {
       globalTimer.startTimer();
 
@@ -137,9 +229,10 @@ public class GeometricVirtualToePointCalculator implements VirtualToePointCalcul
       {
          throw new RuntimeException("Need to set up frames first with a call to setFramesToComputeIn()");
       }
-      
+
       copDesired.changeFrame(commonZUpFrame);
-      calculateForDoubleSupport(virtualToePoints, copDesired, footPolygonsInMidFeetZUp, supportPolygonInMidFeetZUp, connectingEdge1, connectingEdge2);
+      calculateForDoubleSupport(virtualToePoints, copDesired, footPolygonsInMidFeetZUp, supportPolygonInMidFeetZUp, connectingEdge1, connectingEdge2,
+            upcomingSupportSide);
 
       // Visualizer stuff:
       if (VISUALIZE)
@@ -154,43 +247,22 @@ public class GeometricVirtualToePointCalculator implements VirtualToePointCalcul
       }
 
       globalTimer.stopTimer();
-      
+
    }
 
-   /**
-    * calculateForDoubleSupport
-    * Sets the VTPs and legStrengths for double support
-    *
-    * @param coPDesiredInZUp FramePoint2d desired CoP given in any ZUp frame
-    */
-   private void calculateForDoubleSupport(SideDependentList<FramePoint2d> virtualToePoints,
-         FramePoint2d coPDesiredInZUp, SideDependentList<FrameConvexPolygon2d> footPolygonsInMidFeetZUp, FrameConvexPolygon2d supportPolygonInMidFeetZUp,
-         FrameLineSegment2d connectingEdge1, FrameLineSegment2d connectingEdge2)
+   protected void calculateForDoubleSupport(SideDependentList<FramePoint2d> virtualToePoints, FramePoint2d coPDesiredInZUp,
+         SideDependentList<FrameConvexPolygon2d> footPolygonsInMidFeetZUp, FrameConvexPolygon2d supportPolygonInMidFeetZUp, FrameLineSegment2d connectingEdge1,
+         FrameLineSegment2d connectingEdge2, RobotSide upcomingSupportSide)
    {
-      // 0. Checks:
-      coPDesiredInZUp.checkReferenceFrameMatch(commonZUpFrame);
-      if (!supportPolygonInMidFeetZUp.isPointInside(coPDesiredInZUp))
-      {
-         throw new RuntimeException("Desired CoP needs to be inside support polygon.");
-      }
-      
-      if (DEBUG_VIZ)
-      {
-         plotter.removeAll();
-         plotter.addFramePoint2d(coPDesiredInZUp);
+      checkReferenceFrameAndPlotInputs(coPDesiredInZUp, footPolygonsInMidFeetZUp, supportPolygonInMidFeetZUp, connectingEdge1, connectingEdge2);
 
-         for (RobotSide robotSide : RobotSide.values())
-         {
-            plotter.addPolygon(footPolygonsInMidFeetZUp.get(robotSide));
-         }
-      }
-
-      // Compute a line that passes through the feasibleCoPDesiredInMidFeetZUp to use for the intersection computation.
-      FrameLine2d lineToUseForIntersections = computeLineToUseForIntersectionsUsingConnectingEdgeMorph(connectingEdge1, connectingEdge2, coPDesiredInZUp);
+      //      MorphMethod morphMethod = MorphMethod.ORIGINAL;
+      MorphMethod morphMethod = MorphMethod.INTERSECTION;
+      FrameLine2d lineToUseForIntersections = determineLineToUseForIntersection(coPDesiredInZUp, connectingEdge1, connectingEdge2, morphMethod);
 
       for (RobotSide robotSide : RobotSide.values())
       {
-         // 4. Find the line segments that have the intersection points of the most constraining lines and the foot polygons as their endpoints:
+         // 4. Find the line segments that have the intersection points of the lineToUseForIntersections and the foot polygons as their end points:
          final FrameConvexPolygon2d footPolygon = footPolygonsInMidFeetZUp.get(robotSide);
          FramePoint2d[] intersections = lineToUseForIntersections.intersectionWith(footPolygon);
 
@@ -212,22 +284,26 @@ public class GeometricVirtualToePointCalculator implements VirtualToePointCalcul
             // Check to make sure close:
             if (lineToUseForIntersections.distance(vtp) > epsilonVTP)
             {
-               throw new RuntimeException("bisector.distance(vtp) > " + epsilonVTP + ". lineToUseForIntersections = " + lineToUseForIntersections
-                     + ", vtp = " + vtp + "\nDistance = "
-                     + lineToUseForIntersections.distance(vtp));
+               throw new RuntimeException("bisector.distance(vtp) > " + epsilonVTP + ". lineToUseForIntersections = " + lineToUseForIntersections + ", vtp = "
+                     + vtp + "\nDistance = " + lineToUseForIntersections.distance(vtp));
             }
-         }
+         } 
          else
          {
             if (intersections.length == 1)
                vtp = new FramePoint2d(intersections[0]);
             else if (intersections.length == 2)
             {
-               vtp = new FramePoint2d(intersections[0]);
-               vtp.add(intersections[1]);
-               vtp.scale(0.5);
-            }
-            else
+               if (stickToCoPIfInsideFoot.getBooleanValue() && (robotSide == upcomingSupportSide) && footPolygon.isPointInside(coPDesiredInZUp))
+               {
+                  vtp = new FramePoint2d(coPDesiredInZUp);
+               }
+               else
+               {
+               computeVTPMorphPercent(coPDesiredInZUp, upcomingSupportSide, robotSide, intersections);
+               vtp = FramePoint2d.morph(intersections[0], intersections[1], vtpMorphPercent.getDoubleValue());
+               }
+            } else
             {
                throw new RuntimeException("Should never get here.");
             }
@@ -236,10 +312,7 @@ public class GeometricVirtualToePointCalculator implements VirtualToePointCalcul
          virtualToePoints.put(robotSide, vtp);
       }
 
-
       FrameLineSegment2d vtpToVTPLineSegment = new FrameLineSegment2d(virtualToePoints.get(RobotSide.LEFT), virtualToePoints.get(RobotSide.RIGHT));
-      if (DEBUG_VIZ)
-         plotter.addFrameLineSegment2d(vtpToVTPLineSegment, Color.orange);
 
       // 6. If the CoP is not on the VTPToVTPLineSegment, adjust the VTPs
       final double epsilonCoPBetweenVTPs = 1.0e-3;
@@ -250,8 +323,8 @@ public class GeometricVirtualToePointCalculator implements VirtualToePointCalcul
          if (sideThatCoPIsIn != null)
          {
             virtualToePoints.get(sideThatCoPIsIn).set(coPDesiredInZUp);
-         }
-         else // cop is not inside either foot
+         } else
+         // cop is not inside either foot
          {
             RobotSide sideThatCoPIsClosestTo = determineWhatSideCoPIsClosestTo(footPolygonsInMidFeetZUp, coPDesiredInZUp);
             FramePoint2d vtpToChange = virtualToePoints.get(sideThatCoPIsClosestTo);
@@ -260,21 +333,141 @@ public class GeometricVirtualToePointCalculator implements VirtualToePointCalcul
          }
       }
 
-      if (DEBUG_VIZ)
-      {
-         for (RobotSide robotSide : RobotSide.values())
-         {
-            plotter.addFramePoint2d(virtualToePoints.get(robotSide));
-         }
-      }
-      
+      plotOutputs(virtualToePoints);
+
       for (RobotSide robotSide : RobotSide.values())
       {
          virtualToePoints.get(robotSide).changeFrame(individualFootFramesForReturn.get(robotSide));
       }
    }
 
-//   private RobotSide determineWhatSideCoPIsIn(BipedSupportPolygons bipedSupportPolygons, FramePoint2d feasibleCoPDesired)
+   private void computeVTPMorphPercent(FramePoint2d coPDesiredInZUp, RobotSide upcomingSupportSide, RobotSide robotSide, FramePoint2d[] intersections)
+   {
+      if (useLogisticFunction.getBooleanValue())
+      {
+         computeVTPMorphPercentLogistic(coPDesiredInZUp, upcomingSupportSide, robotSide, intersections);
+      }
+      else
+      {
+         computeVTPMorphPercentLinear(coPDesiredInZUp, upcomingSupportSide, robotSide, intersections);
+      }
+   }
+   
+   private void computeVTPMorphPercentLinear(FramePoint2d coPDesiredInZUp, RobotSide upcomingSupportSide, RobotSide robotSide, FramePoint2d[] intersections)
+   {
+      vtpMorphPercent.set(0.5);
+      if (robotSide == upcomingSupportSide)
+      {
+         double distanceToIntersection = intersections[0].distance(coPDesiredInZUp);
+         if (distanceToIntersection < vtpApproachingFootDistance.getDoubleValue())
+         {
+            double percentNearIntersection = (1.0 - (distanceToIntersection / vtpApproachingFootDistance.getDoubleValue()));
+            vtpMorphPercent.set(0.5 - (0.5 - vtpInsideFootMorphPercent.getDoubleValue()) * percentNearIntersection);
+            
+            if (vtpMorphPercent.getDoubleValue() > 0.5)
+               vtpMorphPercent.set(0.5);
+            if (vtpMorphPercent.getDoubleValue() < vtpInsideFootMorphPercent.getDoubleValue())
+               vtpMorphPercent.set(vtpInsideFootMorphPercent.getDoubleValue());
+         }
+      }
+   }
+   
+   private void computeVTPMorphPercentLogistic(FramePoint2d coPDesiredInZUp, RobotSide upcomingSupportSide, RobotSide robotSide, FramePoint2d[] intersections)
+   {
+      vtpMorphPercent.set(0.5);
+      if (robotSide == upcomingSupportSide)
+      {
+         double distanceToIntersection = intersections[0].distance(coPDesiredInZUp);
+         if (distanceToIntersection < vtpApproachingFootDistance.getDoubleValue())
+         {
+            double fraction = distanceToIntersection/vtpApproachingFootDistance.getDoubleValue();
+            double growthRate = 5.0;    // looked OK on a Matlab plot
+//            double zeroToOne = 1.0 - (2.0 * (1.0 / (1.0 + Math.exp(-growthRate * fraction)) - 0.5));
+            double zeroToOne = 2.0 - (2.0 / (1.0 + Math.exp(-growthRate * fraction)));
+             
+            vtpMorphPercent.set(0.5 - (0.5 - vtpInsideFootMorphPercent.getDoubleValue()) * zeroToOne);
+
+            if (vtpMorphPercent.getDoubleValue() > 0.5)
+               vtpMorphPercent.set(0.5);
+            if (vtpMorphPercent.getDoubleValue() < vtpInsideFootMorphPercent.getDoubleValue())
+               vtpMorphPercent.set(vtpInsideFootMorphPercent.getDoubleValue());
+         }
+      }
+   }
+
+   protected void plotOutputs(SideDependentList<FramePoint2d> virtualToePoints)
+   {
+      FrameLineSegment2d vtpToVTPLineSegment;
+      if (DEBUG_VIZ)
+      {
+         vtpToVTPLineSegment = new FrameLineSegment2d(virtualToePoints.get(RobotSide.LEFT), virtualToePoints.get(RobotSide.RIGHT));
+         plotter.addFrameLineSegment2d(vtpToVTPLineSegment, Color.orange);
+
+         for (RobotSide robotSide : RobotSide.values())
+         {
+            plotter.addFramePoint2d(virtualToePoints.get(robotSide), Color.CYAN);
+         }
+
+         plotter.repaint();
+      }
+   }
+
+   protected FrameLine2d determineLineToUseForIntersection(FramePoint2d coPDesiredInZUp, FrameLineSegment2d connectingEdge1,
+         FrameLineSegment2d connectingEdge2, MorphMethod morphMethod)
+   {
+      // Compute a line that passes through the coPDesiredInZUp to use for the intersection computation.
+
+      FrameLine2d lineToUseForIntersections;
+      switch (morphMethod)
+      {
+      case ORIGINAL:
+      {
+         lineToUseForIntersections = computeLineToUseForIntersectionsUsingConnectingEdgeMorph(connectingEdge1, connectingEdge2, coPDesiredInZUp);
+         break;
+      }
+      case INTERSECTION:
+      {
+         lineToUseForIntersections = computeLineToUseForIntersectionsUsingProjectionMorph(connectingEdge1, connectingEdge2, coPDesiredInZUp);
+         break;
+      }
+      case PROJECTION:
+      {
+         lineToUseForIntersections = computeLineToUseForIntersectionsUsingIntersection(connectingEdge1, connectingEdge2, coPDesiredInZUp);
+         break;
+      }
+      default:
+      {
+         throw new RuntimeException("Shouldn't get here");
+      }
+      }
+      return lineToUseForIntersections;
+   }
+
+   protected void checkReferenceFrameAndPlotInputs(FramePoint2d coPDesiredInZUp, SideDependentList<FrameConvexPolygon2d> footPolygonsInMidFeetZUp,
+         FrameConvexPolygon2d supportPolygonInMidFeetZUp, FrameLineSegment2d connectingEdge1, FrameLineSegment2d connectingEdge2)
+   {
+      coPDesiredInZUp.checkReferenceFrameMatch(commonZUpFrame);
+      if (!supportPolygonInMidFeetZUp.isPointInside(coPDesiredInZUp))
+      {
+         throw new RuntimeException("Desired CoP needs to be inside support polygon.");
+      }
+
+      if (DEBUG_VIZ)
+      {
+         if (removeDebugVizEachTime)
+            plotter.removeAllObjectsToDraw();
+         plotter.addFramePoint2d(coPDesiredInZUp, Color.MAGENTA);
+
+         for (RobotSide robotSide : RobotSide.values())
+         {
+            plotter.addPolygon(footPolygonsInMidFeetZUp.get(robotSide));
+         }
+
+         plotter.addFrameLineSegment2d(connectingEdge1, Color.BLUE);
+         plotter.addFrameLineSegment2d(connectingEdge2, Color.YELLOW);
+      }
+   }
+
    private RobotSide determineWhatSideCoPIsIn(SideDependentList<FrameConvexPolygon2d> footPolygonsInMidFeetZUp, FramePoint2d feasibleCoPDesired)
    {
       RobotSide ret = null;
@@ -290,7 +483,7 @@ public class GeometricVirtualToePointCalculator implements VirtualToePointCalcul
       }
       return ret;
    }
-   
+
    private RobotSide determineWhatSideCoPIsClosestTo(SideDependentList<FrameConvexPolygon2d> footPolygonsInMidFeetZUp, FramePoint2d feasibleCoPDesired)
    {
       RobotSide ret = null;
@@ -307,19 +500,15 @@ public class GeometricVirtualToePointCalculator implements VirtualToePointCalcul
       return ret;
    }
 
-   private FrameLine2d computeLineToUseForIntersectionsUsingConnectingEdgeMorph(FrameLineSegment2d connectingEdge1, FrameLineSegment2d connectingEdge2,
+   protected FrameLine2d computeLineToUseForIntersectionsUsingConnectingEdgeMorph(FrameLineSegment2d connectingEdge1, FrameLineSegment2d connectingEdge2,
          FramePoint2d feasibleCoPDesiredInMidFeetZUp)
    {
-      if (DEBUG_VIZ)
-      {
-         plotter.addFrameLineSegment2d(connectingEdge1, Color.BLUE);
-         plotter.addFrameLineSegment2d(connectingEdge2, Color.YELLOW);
-      }
+      connectingEdge1.checkReferenceFrameMatch(feasibleCoPDesiredInMidFeetZUp);
+      connectingEdge2.checkReferenceFrameMatch(feasibleCoPDesiredInMidFeetZUp);
 
       // Solve for intersecting line.
-      FramePoint2d[] edge1Points = connectingEdge1.getEndFramepointsCopy();
-      FramePoint2d[] edge2Points = connectingEdge2.getEndFramepointsCopy();
-
+      FramePoint2d[] edge1Points = connectingEdge1.getEndFramePointsCopy();
+      FramePoint2d[] edge2Points = connectingEdge2.getEndFramePointsCopy();
 
       FramePoint2d P1 = edge1Points[0];
       FramePoint2d P2 = edge2Points[1];
@@ -348,7 +537,6 @@ public class GeometricVirtualToePointCalculator implements VirtualToePointCalcul
       double A = Q.getX() * R.getY() - Q.getY() * R.getX();
       double B = R.getX() * S.getY() - R.getY() * S.getX() - V1.getX() * Q.getY() + Q.getX() * V1.getY();
       double C = V1.getX() * S.getY() - V1.getY() * S.getX();
-
 
       double alpha;
       if (Math.abs(A) < 1e-7)
@@ -381,6 +569,56 @@ public class GeometricVirtualToePointCalculator implements VirtualToePointCalcul
       return ret;
    }
 
+   protected FrameLine2d computeLineToUseForIntersectionsUsingProjectionMorph(FrameLineSegment2d connectingEdge1, FrameLineSegment2d connectingEdge2,
+         FramePoint2d feasibleCoPDesiredInMidFeetZUp)
+   {
+      connectingEdge1.checkReferenceFrameMatch(feasibleCoPDesiredInMidFeetZUp);
+      connectingEdge2.checkReferenceFrameMatch(feasibleCoPDesiredInMidFeetZUp);
+
+      Line2d connectingLine1 = new Line2d(connectingEdge1.getLineSegment2d().getEndpoints()[0], connectingEdge1.getLineSegment2d().getEndpoints()[1]);
+      Line2d connectingLine2 = new Line2d(connectingEdge2.getLineSegment2d().getEndpoints()[1], connectingEdge2.getLineSegment2d().getEndpoints()[0]);
+      Point2d copPoint2d = feasibleCoPDesiredInMidFeetZUp.getPoint();
+
+      double distance1 = connectingLine1.distance(copPoint2d);
+      double distance2 = connectingLine2.distance(copPoint2d);
+      double distanceSum = distance1 + distance2;
+
+      double alpha = distance2 / distanceSum;
+
+      Vector2d vector = connectingLine1.getNormalizedVectorCopy();
+      Vector2d vector2 = connectingLine2.getNormalizedVectorCopy();
+
+      vector.scale(alpha);
+      vector2.scale(1.0 - alpha);
+      vector.add(vector2);
+      return new FrameLine2d(feasibleCoPDesiredInMidFeetZUp.getReferenceFrame(), copPoint2d, vector);
+   }
+
+   protected FrameLine2d computeLineToUseForIntersectionsUsingIntersection(FrameLineSegment2d connectingEdge1, FrameLineSegment2d connectingEdge2,
+         FramePoint2d feasibleCoPDesiredInMidFeetZUp)
+   {
+      FramePoint2d[] edge1Points = connectingEdge1.getEndFramePointsCopy();
+      FramePoint2d[] edge2Points = connectingEdge2.getEndFramePointsCopy();
+
+      FrameVector2d V1 = new FrameVector2d(edge1Points[1]);
+      V1.sub(edge1Points[0]);
+      V1.normalize();
+
+      FrameVector2d V2 = new FrameVector2d(edge2Points[0]);
+      V2.sub(edge2Points[1]);
+      V2.normalize();
+
+      FrameLineSegment2d edge = new FrameLineSegment2d(edge1Points[0], edge2Points[1]);
+      double parameter = edge.percentageAlongLineSegment(feasibleCoPDesiredInMidFeetZUp);
+
+      V1.scale(1.0 - parameter);
+      V2.scale(parameter);
+
+      FrameVector2d vector = new FrameVector2d(V1);
+      vector.add(V2);
+      return new FrameLine2d(feasibleCoPDesiredInMidFeetZUp, vector);
+   }
+
    /**
     * mostConstrainingLines
     * Finds the 'medians' (sort of) of the lines passed in.
@@ -397,18 +635,15 @@ public class GeometricVirtualToePointCalculator implements VirtualToePointCalcul
       FrameVector2d rightFootLeft = linesOfSightRight[0].getNormalizedFrameVector();
       FrameVector2d rightFootRight = linesOfSightRight[1].getNormalizedFrameVector();
 
-
       if ((rightFootLeft.cross(leftFootLeft) < 0.0) && (rightFootRight.cross(leftFootLeft) > 0.0))
       {
-         return new FrameLine2d[] {linesOfSightLeft[1].negateDirectionCopy(), new FrameLine2d(linesOfSightRight[0])};
-      }
-      else if ((rightFootLeft.cross(leftFootRight) < 0.0) && (rightFootRight.cross(leftFootRight) > 0.0))
+         return new FrameLine2d[] { linesOfSightLeft[1].negateDirectionCopy(), new FrameLine2d(linesOfSightRight[0]) };
+      } else if ((rightFootLeft.cross(leftFootRight) < 0.0) && (rightFootRight.cross(leftFootRight) > 0.0))
       {
-         return new FrameLine2d[] {linesOfSightLeft[0].negateDirectionCopy(), new FrameLine2d(linesOfSightRight[1])};
+         return new FrameLine2d[] { linesOfSightLeft[0].negateDirectionCopy(), new FrameLine2d(linesOfSightRight[1]) };
       }
 
       // Lines of sight are on opposite directions. Invert two and find two inner ones...
-
 
       ArrayList<FrameLine2d> candidates = new ArrayList<FrameLine2d>(4);
       candidates.add(linesOfSightLeft[0].negateDirectionCopy());
@@ -459,12 +694,16 @@ public class GeometricVirtualToePointCalculator implements VirtualToePointCalcul
       return mostConstrainingLines;
    }
 
-
    public void hideVisualizationGraphics()
    {
       for (RobotSide robotSide : RobotSide.values())
       {
          virtualToePointsWorld.get(robotSide).setToNaN();
       }
+   }
+
+   protected enum MorphMethod
+   {
+      ORIGINAL, PROJECTION, INTERSECTION
    }
 }

@@ -186,7 +186,10 @@ public class MomentumBasedController implements RobotController
       double maximumLegStrengthWhenTransferringAway = 0.9;
       this.virtualToePointCalculator = new NewGeometricVirtualToePointCalculator(referenceFrames, registry, dynamicGraphicObjectsListRegistry,
               maximumLegStrengthWhenTransferringAway);
-
+      
+//      this.virtualToePointCalculator = new GeometricVirtualToePointCalculator(referenceFrames, registry, dynamicGraphicObjectsListRegistry);
+//      virtualToePointCalculator.setNewR2Parameters();
+      
       SpeedControllingDesiredCoPCalculator desiredCapturePointToDesiredCoPControlModule = new SpeedControllingDesiredCoPCalculator(processedSensors,
                                                                                              referenceFrames, registry, dynamicGraphicObjectsListRegistry);
       desiredCapturePointToDesiredCoPControlModule.setParametersForR2InverseDynamics();
