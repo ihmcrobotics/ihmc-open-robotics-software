@@ -16,7 +16,7 @@ import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.DesiredCaptur
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.LegStrengthCalculator;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.VirtualToePointCalculator;
 import us.ihmc.commonWalkingControlModules.controlModules.CenterOfMassHeightControlModule;
-import us.ihmc.commonWalkingControlModules.controlModules.NewGeometricVirtualToePointCalculator;
+import us.ihmc.commonWalkingControlModules.controlModules.GeometricVirtualToePointCalculator;
 import us.ihmc.commonWalkingControlModules.controlModules.TeeterTotterLegStrengthCalculator;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvisOrientation.AxisAnglePelvisOrientationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.velocityViaCoP.CapturabilityBasedDesiredCoPVisualizer;
@@ -74,7 +74,7 @@ public class MomentumBasedController implements RobotController
    private final AxisAnglePelvisOrientationControlModule orientationControlModule;
    private final BipedSupportPolygons bipedSupportPolygons;
    private final CapturePointCalculatorInterface capturePointCalculator;
-   private final VirtualToePointCalculator virtualToePointCalculator;
+   private final GeometricVirtualToePointCalculator virtualToePointCalculator;
    private final DesiredCapturePointToDesiredCoPControlModule desiredCapturePointToDesiredCoPControlModule;
    private final SimpleDesiredCenterOfPressureFilter desiredCenterOfPressureFilter;
    private final CenterOfMassHeightControlModule centerOfMassHeightControlModule;
@@ -181,14 +181,10 @@ public class MomentumBasedController implements RobotController
       {
          bipedFeet.get(robotSide).setIsSupportingFoot(true);
       }
-      bipedSupportPolygons.update(leftFoot, rightFoot);
-
-      double maximumLegStrengthWhenTransferringAway = 0.9;
-      this.virtualToePointCalculator = new NewGeometricVirtualToePointCalculator(referenceFrames, registry, dynamicGraphicObjectsListRegistry,
-              maximumLegStrengthWhenTransferringAway);
+      bipedSupportPolygons.update(leftFoot, rightFoot);     
       
-//      this.virtualToePointCalculator = new GeometricVirtualToePointCalculator(referenceFrames, registry, dynamicGraphicObjectsListRegistry);
-//      virtualToePointCalculator.setNewR2Parameters();
+      this.virtualToePointCalculator = new GeometricVirtualToePointCalculator(referenceFrames, registry, dynamicGraphicObjectsListRegistry);
+      virtualToePointCalculator.setNewR2Parameters();
       
       SpeedControllingDesiredCoPCalculator desiredCapturePointToDesiredCoPControlModule = new SpeedControllingDesiredCoPCalculator(processedSensors,
                                                                                              referenceFrames, registry, dynamicGraphicObjectsListRegistry);
