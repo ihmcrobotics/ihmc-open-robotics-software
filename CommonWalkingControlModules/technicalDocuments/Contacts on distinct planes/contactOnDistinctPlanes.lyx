@@ -138,17 +138,6 @@ m\ddot{r}=f_{1}+f_{2}+mg\label{eq:eom}
 
 \end_inset
 
-with the constraint
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula 
-\begin{equation}
-\ddot{z}=0\label{eq:constraint}
-\end{equation}
-
-\end_inset
-
 
 \end_layout
 
@@ -270,18 +259,11 @@ Both natural frequency and pseudo-CoP are dependent on the force magnitudes.
 \end_layout
 
 \begin_layout Standard
-To satisfy the constraint 
-\begin_inset CommandInset ref
-LatexCommand eqref
-reference "eq:constraint"
-
-\end_inset
-
-, the forces must satisfy
+We require that the forces satisfy
 \begin_inset Formula 
 \begin{align*}
-f_{1z}+f_{2z} & =mg_{z}\\
-k_{1}\left(z-z_{1}\right)+k_{2}\left(z-z_{2}\right) & =mg_{z}
+f_{1z}+f_{2z} & =f_{z}\\
+k_{1}\left(z-z_{1}\right)+k_{2}\left(z-z_{2}\right) & =f_{z}
 \end{align*}
 
 \end_inset
@@ -292,7 +274,7 @@ so that
 \begin_layout Standard
 \begin_inset Formula 
 \[
-k_{2}=\frac{mg_{z}-k_{1}\left(z-z_{1}\right)}{z-z_{2}}
+k_{2}=\frac{f_{z}-k_{1}\left(z-z_{1}\right)}{z-z_{2}}
 \]
 
 \end_inset
@@ -310,8 +292,8 @@ Furthermore, we have
 Pr_{pcop} & =x_{pcop}\\
  & =\lambda_{1}x_{1}+\lambda_{2}x_{2}\\
  & =\frac{k_{1}x_{1}+k_{2}x_{2}}{k_{1}+k_{2}}\\
- & =\frac{k_{1}x_{1}+\frac{mg_{z}-k_{1}\left(z-z_{1}\right)}{z-z_{2}}x_{2}}{k_{1}+\frac{mg_{z}-k_{1}\left(z-z_{1}\right)}{z-z_{2}}}\\
- & \frac{k_{1}\left[\left(z-z_{2}\right)x_{1}-\left(z-z_{1}\right)x_{2}\right]+mg_{z}x_{2}}{k_{1}\left(z_{1}-z_{2}\right)+mg_{z}}
+ & =\frac{k_{1}x_{1}+\frac{f_{z}-k_{1}\left(z-z_{1}\right)}{z-z_{2}}x_{2}}{k_{1}+\frac{f_{z}-k_{1}\left(z-z_{1}\right)}{z-z_{2}}}\\
+ & \frac{k_{1}\left[\left(z-z_{2}\right)x_{1}-\left(z-z_{1}\right)x_{2}\right]+f_{z}x_{2}}{k_{1}\left(z_{1}-z_{2}\right)+f_{z}}
 \end{align*}
 
 \end_inset
@@ -326,7 +308,7 @@ which can be solved for
 \begin_layout Standard
 \begin_inset Formula 
 \[
-\left[k_{1}\left(z_{1}-z_{2}\right)+mg_{z}\right]x_{pcop}=k_{1}\left[\left(z-z_{2}\right)x_{1}-\left(z-z_{1}\right)x_{2}\right]+mg_{z}x_{2}
+\left[k_{1}\left(z_{1}-z_{2}\right)+f_{z}\right]x_{pcop}=k_{1}\left[\left(z-z_{2}\right)x_{1}-\left(z-z_{1}\right)x_{2}\right]+f_{z}x_{2}
 \]
 
 \end_inset
@@ -334,7 +316,7 @@ which can be solved for
 
 \begin_inset Formula 
 \[
-k_{1}\left[\left(z_{1}-z_{2}\right)x_{pcop}-\left(z-z_{2}\right)x_{1}+\left(z-z_{1}\right)x_{2}\right]=mg_{z}\left(x_{2}-x_{pcop}\right)
+k_{1}\left[\left(z_{1}-z_{2}\right)x_{pcop}-\left(z-z_{2}\right)x_{1}+\left(z-z_{1}\right)x_{2}\right]=f_{z}\left(x_{2}-x_{pcop}\right)
 \]
 
 \end_inset
@@ -342,7 +324,7 @@ k_{1}\left[\left(z_{1}-z_{2}\right)x_{pcop}-\left(z-z_{2}\right)x_{1}+\left(z-z_
 
 \begin_inset Formula 
 \[
-k_{1}=\frac{mg_{z}(x_{2}-x_{pcop})}{\left(z_{1}-z_{2}\right)x_{pcop}+\left(z-z_{1}\right)x_{2}-\left(z-z_{2}\right)x_{1}}
+k_{1}=\frac{f_{z}\left(x_{2}-x_{pcop}\right)}{\left(z_{1}-z_{2}\right)x_{pcop}+\left(z-z_{1}\right)x_{2}-\left(z-z_{2}\right)x_{1}}
 \]
 
 \end_inset
@@ -350,7 +332,7 @@ k_{1}=\frac{mg_{z}(x_{2}-x_{pcop})}{\left(z_{1}-z_{2}\right)x_{pcop}+\left(z-z_{
 which results in
 \begin_inset Formula 
 \[
-k_{2}=\frac{mg_{z}\left(x_{pcop}-x_{1}\right)}{\left(z_{1}-z_{2}\right)x_{pcop}+\left(z-z_{1}\right)x_{2}-\left(z-z_{2}\right)x_{1}}
+k_{2}=\frac{f_{z}\left(x_{pcop}-x_{1}\right)}{\left(z_{1}-z_{2}\right)x_{pcop}+\left(z-z_{1}\right)x_{2}-\left(z-z_{2}\right)x_{1}}
 \]
 
 \end_inset
@@ -361,7 +343,7 @@ k_{2}=\frac{mg_{z}\left(x_{pcop}-x_{1}\right)}{\left(z_{1}-z_{2}\right)x_{pcop}+
 \begin_layout Standard
 \begin_inset Formula 
 \begin{align}
-\omega_{0}^{2}=\frac{k_{1}+k_{2}}{m} & =\frac{g_{z}\left(x_{2}-x_{1}\right)}{\left(z_{1}-z_{2}\right)x_{pcop}+\left(z-z_{1}\right)x_{2}-\left(z-z_{2}\right)x_{1}}\label{eq:omega0Squared}
+\omega_{0}^{2}=\frac{k_{1}+k_{2}}{m} & =\frac{f_{z}\left(x_{2}-x_{1}\right)}{m\left[\left(z_{1}-z_{2}\right)x_{pcop}+\left(z-z_{1}\right)x_{2}-\left(z-z_{2}\right)x_{1}\right]}\label{eq:omega0Squared}
 \end{align}
 
 \end_inset

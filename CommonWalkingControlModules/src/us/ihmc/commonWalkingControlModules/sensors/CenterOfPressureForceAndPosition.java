@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.sensors;
 
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Point3d;
+import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -15,20 +16,20 @@ public class CenterOfPressureForceAndPosition implements ReferenceFrameHolder
 {
    private ReferenceFrame referenceFrame;
    private final Point3d centerOfPressure;
-   private final Vector3d totalZForce;
+   private final Vector3d totalForce;
 
-   public CenterOfPressureForceAndPosition(ReferenceFrame referenceFrame, Point3d centerOfPressure, Vector3d totalZForce)
+   public CenterOfPressureForceAndPosition(ReferenceFrame referenceFrame, Tuple3d centerOfPressure, Vector3d totalZForce)
    {
       this.referenceFrame = referenceFrame;
       this.centerOfPressure = new Point3d(centerOfPressure);
-      this.totalZForce = new Vector3d(totalZForce);
+      this.totalForce = new Vector3d(totalZForce);
    }
 
    public CenterOfPressureForceAndPosition(CenterOfPressureForceAndPosition other)
    {
       this.referenceFrame = other.referenceFrame;
       this.centerOfPressure = new Point3d(other.centerOfPressure);
-      this.totalZForce = new Vector3d(other.totalZForce);
+      this.totalForce = new Vector3d(other.totalForce);
    }
 
    public static CenterOfPressureForceAndPosition combine(CenterOfPressureForceAndPosition centerOfPressureOne,
@@ -39,22 +40,22 @@ public class CenterOfPressureForceAndPosition implements ReferenceFrameHolder
       Point3d centerOfPressure = new Point3d();
       Vector3d totalForce = new Vector3d();
 
-      if (isAValidForcePosition(centerOfPressureOne.centerOfPressure) && (isAValidForceVector(centerOfPressureOne.totalZForce)))
+      if (isAValidForcePosition(centerOfPressureOne.centerOfPressure) && (isAValidForceVector(centerOfPressureOne.totalForce)))
       {
          Point3d scaledCenterOfPressure = new Point3d(centerOfPressureOne.centerOfPressure);
-         scaledCenterOfPressure.scale(centerOfPressureOne.totalZForce.getZ());
+         scaledCenterOfPressure.scale(centerOfPressureOne.totalForce.getZ());
          centerOfPressure.add(scaledCenterOfPressure);
 
-         totalForce.add(centerOfPressureOne.totalZForce);
+         totalForce.add(centerOfPressureOne.totalForce);
       }
 
-      if (isAValidForcePosition(centerOfPressureTwo.centerOfPressure) && (isAValidForceVector(centerOfPressureTwo.totalZForce)))
+      if (isAValidForcePosition(centerOfPressureTwo.centerOfPressure) && (isAValidForceVector(centerOfPressureTwo.totalForce)))
       {
          Point3d scaledCenterOfPressure = new Point3d(centerOfPressureTwo.centerOfPressure);
-         scaledCenterOfPressure.scale(centerOfPressureTwo.totalZForce.getZ());
+         scaledCenterOfPressure.scale(centerOfPressureTwo.totalForce.getZ());
          centerOfPressure.add(scaledCenterOfPressure);
 
-         totalForce.add(centerOfPressureTwo.totalZForce);
+         totalForce.add(centerOfPressureTwo.totalForce);
       }
 
       centerOfPressure.scale(1.0 / totalForce.getZ());
@@ -69,7 +70,7 @@ public class CenterOfPressureForceAndPosition implements ReferenceFrameHolder
    {
       Transform3D toDesired = referenceFrame.getTransformToDesiredFrame(desiredFrame);
       toDesired.transform(centerOfPressure);
-      toDesired.transform(totalZForce);
+      toDesired.transform(totalForce);
       this.referenceFrame = desiredFrame;
    }
 
@@ -101,9 +102,9 @@ public class CenterOfPressureForceAndPosition implements ReferenceFrameHolder
       return new Point3d(centerOfPressure);
    }
 
-   public Vector3d getTotalZForce()
+   public Vector3d getTotalForce()
    {
-      return new Vector3d(totalZForce);
+      return new Vector3d(totalForce);
    }
 
    private static boolean isAValidForceVector(Vector3d vector3d)

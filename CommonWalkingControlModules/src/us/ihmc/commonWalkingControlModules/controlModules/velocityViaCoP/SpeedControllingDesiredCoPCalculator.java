@@ -58,6 +58,7 @@ public class SpeedControllingDesiredCoPCalculator implements DesiredCapturePoint
    private final YoFrameVector actualVelocityInWorld = new YoFrameVector("actualVelocityInWorld", "", world, registry);
    
    private final YoFramePoint2d desiredCoPBeforeProjection = new YoFramePoint2d("desiredCoPBeforeProjection", "", world, registry);
+   private final DoubleYoVariable omega0 = new DoubleYoVariable("omega0", registry);
    
    public SpeedControllingDesiredCoPCalculator(ProcessedSensorsInterface processedSensors, CommonWalkingReferenceFrames referenceFrames,
            YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
@@ -94,6 +95,7 @@ public class SpeedControllingDesiredCoPCalculator implements DesiredCapturePoint
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectList);
          dynamicGraphicObjectsListRegistry.registerArtifactList(artifactList);
       }
+      omega0.set(Double.POSITIVE_INFINITY);
    }
 
    // compute desired CoP in single support using desired capture point
@@ -182,42 +184,51 @@ public class SpeedControllingDesiredCoPCalculator implements DesiredCapturePoint
 //         // TODO: don't like this. The desired that's being passed in is wrong, we shouldn't change anything here.
 //      }
 
-      FramePoint2d centerOfPressureDesired = null;
+      FramePoint2d centerOfPressureDesired;
       
       // Create Line from desired Capture Point to instantaneous Capture Point
-      FrameLine2d controlLine = new FrameLine2d(capturePoint, desiredCapturePoint);
-      if (desiredVelocityLength.getDoubleValue() < 1e-7)
+      if (capturePoint.distance(desiredCapturePoint) > 1e-9)
       {
-         centerOfPressureDesired = doProportionalControl(capturePoint, desiredCapturePoint, desiredCapturePointVelocity, doubleSupportCaptureKp.getDoubleValue());
-         hideControlLine();
-         centerOfPressureDesired.changeFrame(supportPolygon.getReferenceFrame());
-         
-         desiredCoPBeforeProjection.set(centerOfPressureDesired.changeFrameCopy(world));
-      }
-      else
-      {
-         speedControlLineWorld.setFrameLine2d(controlLine.changeFrameCopy(world));
+         FrameLine2d controlLine = new FrameLine2d(capturePoint, desiredCapturePoint);
 
-         ReferenceFrame midFeetZUpFrame = referenceFrames.getMidFeetZUpFrame();
-         FrameVector2d comDirection = desiredVelocity.changeFrameCopy(midFeetZUpFrame);
-         comDirection.normalize();
-         FrameVector2d controlDirection = controlLine.getNormalizedFrameVector();
-
-         // If the scalar projection of the desired CoM direction on the desired iCP direction is negative
-         // control only the iCP position and don't do speed control.
-         if (comDirection.dot(controlDirection) < 0.0)
+         if (desiredVelocityLength.getDoubleValue() < 1e-7)
          {
             centerOfPressureDesired = doProportionalControl(capturePoint, desiredCapturePoint, desiredCapturePointVelocity, doubleSupportCaptureKp.getDoubleValue());
+            hideControlLine();
+            centerOfPressureDesired.changeFrame(supportPolygon.getReferenceFrame());
+            
+            desiredCoPBeforeProjection.set(centerOfPressureDesired.changeFrameCopy(world));
          }
          else
          {
-            FrameLine2d massLine = createSpeedControlLine(controlLine, desiredVelocity);
-            centerOfPressureDesired = controlLine.intersectionWith(massLine);
-         }
+            speedControlLineWorld.setFrameLine2d(controlLine.changeFrameCopy(world));
 
-         centerOfPressureDesired.changeFrame(supportPolygon.getReferenceFrame());
+            ReferenceFrame midFeetZUpFrame = referenceFrames.getMidFeetZUpFrame();
+            FrameVector2d comDirection = desiredVelocity.changeFrameCopy(midFeetZUpFrame);
+            comDirection.normalize();
+            FrameVector2d controlDirection = controlLine.getNormalizedFrameVector();
+
+            // If the scalar projection of the desired CoM direction on the desired iCP direction is negative
+            // control only the iCP position and don't do speed control.
+            if (comDirection.dot(controlDirection) < 0.0)
+            {
+               centerOfPressureDesired = doProportionalControl(capturePoint, desiredCapturePoint, desiredCapturePointVelocity, doubleSupportCaptureKp.getDoubleValue());
+            }
+            else
+            {
+               FrameLine2d massLine = createSpeedControlLine(controlLine, desiredVelocity);
+               centerOfPressureDesired = controlLine.intersectionWith(massLine);
+            }
+
+            centerOfPressureDesired.changeFrame(supportPolygon.getReferenceFrame());
+         }
+         GeometryTools.movePointInsidePolygonAlongLine(centerOfPressureDesired, supportPolygon, new FrameLine2d(controlLine));
       }
-      GeometryTools.movePointInsidePolygonAlongLine(centerOfPressureDesired, supportPolygon, new FrameLine2d(controlLine));
+      else
+      {
+         centerOfPressureDesired = new FramePoint2d(desiredCapturePoint);
+      }
+
 
       return centerOfPressureDesired;
    }
@@ -261,6 +272,11 @@ public class SpeedControllingDesiredCoPCalculator implements DesiredCapturePoint
 //
 //      return new FramePoint2d(testPoint.getReferenceFrame(), endPoints[closestIndex]);
 //   }
+   
+   public void setOmega0(double omega0)
+   {
+      this.omega0.set(omega0);
+   }
 
    private FrameLine2d createSpeedControlLine(FrameLine2d guideLine, FrameVector2d desiredVelocity)
    {
@@ -324,11 +340,8 @@ public class SpeedControllingDesiredCoPCalculator implements DesiredCapturePoint
       FramePoint2d desiredCenterOfPressure = new FramePoint2d(capturePoint);
       
       // feed forward part
-      double gravity = -processedSensors.getGravityInWorldFrame().getZ();
-      double comHeight = processedSensors.getCenterOfMassPositionInFrame(capturePoint.getReferenceFrame()).getZ();
-      double omega0 = Math.sqrt(gravity / comHeight);
       tempControl.setAndChangeFrame(desiredCapturePointVelocity);
-      tempControl.scale(1.0 / omega0);
+      tempControl.scale(1.0 / omega0.getDoubleValue());
       desiredCenterOfPressure.sub(tempControl);
       
       // feedback part
@@ -357,8 +370,8 @@ public class SpeedControllingDesiredCoPCalculator implements DesiredCapturePoint
    public void setParametersForR2InverseDynamics()
    {
       speedControlXKp.set(3.0);
-      doubleSupportCaptureKp.set(0.5); // 0.5); // 0.5);
-      singleSupportCaptureKp.set(0.5); // 0.5);
+      doubleSupportCaptureKp.set(0.5); // 0.5
+      singleSupportCaptureKp.set(0.5); // 1.0 // 0.5
       kCaptureGuide.set(1.5);
    }
    

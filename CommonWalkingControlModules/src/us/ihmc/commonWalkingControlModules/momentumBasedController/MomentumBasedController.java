@@ -12,11 +12,10 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.FootPolygonVisua
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ResizableBipedFoot;
 import us.ihmc.commonWalkingControlModules.captureRegion.CapturePointCalculatorInterface;
 import us.ihmc.commonWalkingControlModules.captureRegion.CommonCapturePointCalculator;
-import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.DesiredCapturePointToDesiredCoPControlModule;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.LegStrengthCalculator;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.VirtualToePointCalculator;
 import us.ihmc.commonWalkingControlModules.controlModules.CenterOfMassHeightControlModule;
-import us.ihmc.commonWalkingControlModules.controlModules.GeometricVirtualToePointCalculator;
+import us.ihmc.commonWalkingControlModules.controlModules.NewGeometricVirtualToePointCalculator;
 import us.ihmc.commonWalkingControlModules.controlModules.TeeterTotterLegStrengthCalculator;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvisOrientation.AxisAnglePelvisOrientationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.velocityViaCoP.CapturabilityBasedDesiredCoPVisualizer;
@@ -74,8 +73,8 @@ public class MomentumBasedController implements RobotController
    private final AxisAnglePelvisOrientationControlModule orientationControlModule;
    private final BipedSupportPolygons bipedSupportPolygons;
    private final CapturePointCalculatorInterface capturePointCalculator;
-   private final GeometricVirtualToePointCalculator virtualToePointCalculator;
-   private final DesiredCapturePointToDesiredCoPControlModule desiredCapturePointToDesiredCoPControlModule;
+   private final VirtualToePointCalculator virtualToePointCalculator;
+   private final SpeedControllingDesiredCoPCalculator desiredCapturePointToDesiredCoPControlModule;
    private final SimpleDesiredCenterOfPressureFilter desiredCenterOfPressureFilter;
    private final CenterOfMassHeightControlModule centerOfMassHeightControlModule;
    private final LegStrengthCalculator legStrengthCalculator;
@@ -114,7 +113,7 @@ public class MomentumBasedController implements RobotController
    // TODO: move to separate class that takes care of determining desired GRFs
    private final YoFrameVector2d desiredDeltaCMP = new YoFrameVector2d("desiredDeltaCMP", "", worldFrame, registry);
    private final YoFramePoint2d desiredCoP = new YoFramePoint2d("desiredCoP", "", worldFrame, registry);
-   private final SideDependentList<Double> legStrengths = new SideDependentList<Double>();
+   private final SideDependentList<Double> lambdas = new SideDependentList<Double>();
 
    private final CapturabilityBasedDesiredCoPVisualizer visualizer;
    private final FootPolygonVisualizer footPolygonVisualizer;
@@ -183,8 +182,7 @@ public class MomentumBasedController implements RobotController
       }
       bipedSupportPolygons.update(leftFoot, rightFoot);     
       
-      this.virtualToePointCalculator = new GeometricVirtualToePointCalculator(referenceFrames, registry, dynamicGraphicObjectsListRegistry);
-      virtualToePointCalculator.setNewR2Parameters();
+      virtualToePointCalculator = new NewGeometricVirtualToePointCalculator(referenceFrames, registry, dynamicGraphicObjectsListRegistry, 0.95);
       
       SpeedControllingDesiredCoPCalculator desiredCapturePointToDesiredCoPControlModule = new SpeedControllingDesiredCoPCalculator(processedSensors,
                                                                                              referenceFrames, registry, dynamicGraphicObjectsListRegistry);
@@ -231,7 +229,7 @@ public class MomentumBasedController implements RobotController
       kAngularMomentumXY.set(3e-2);
       kPelvisAxisAngle.set(1.0); // was 1.0 for M3 video
       kAngularMomentumZ.set(10.0); // 50.0); // 10.0);
-      kPelvisYaw.set(20.0); // 100.0); // was 0.0 for M3 movie
+      kPelvisYaw.set(0.0); // 100.0); // was 0.0 for M3 movie
       kUpperBody.set(100.0);
       zetaUpperBody.set(1.0);
    }
@@ -309,7 +307,7 @@ public class MomentumBasedController implements RobotController
       ReferenceFrame frame;
       if (supportLeg == null)
       {
-         frame = worldFrame; // midFeetZUp;
+         frame = worldFrame;
          virtualToePointCalculator.packVirtualToePoints(virtualToePoints, bipedSupportPolygons, desiredCoP, stateMachine.getUpcomingSupportLeg());
       }
       else
@@ -318,15 +316,51 @@ public class MomentumBasedController implements RobotController
          if (!footPolygonInAnkleZUp.isPointInside(desiredCoP.changeFrameCopy(footPolygonInAnkleZUp.getReferenceFrame())))
             throw new RuntimeException("desired CoP outside foot polygon");
          
-         frame = worldFrame; // referenceFrames.getAnkleZUpFrame(supportLeg);
+         frame = worldFrame;
          virtualToePoints.put(supportLeg, desiredCoP);
          virtualToePoints.put(supportLeg.getOppositeSide(), new FramePoint2d(frame));
       }
 
-      legStrengthCalculator.packLegStrengths(legStrengths, virtualToePoints, desiredCoP);
+      legStrengthCalculator.packLegStrengths(lambdas, virtualToePoints, desiredCoP);
+      
+
+      SideDependentList<FramePoint> virtualToePointsOnSole = new SideDependentList<FramePoint>();
+      for (RobotSide robotSide : RobotSide.values())
+      {
+         FramePoint virtualToePoint = virtualToePoints.get(robotSide).toFramePoint();
+         virtualToePoint = projectPointOntoSole(robotSide, virtualToePoint);
+         virtualToePoint.changeFrame(worldFrame);
+         virtualToePointsOnSole.put(robotSide, virtualToePoint);
+      }
+      
+      FramePoint com = processedSensors.getCenterOfMassPositionInFrame(worldFrame);
+      FramePoint r1 = virtualToePointsOnSole.get(RobotSide.LEFT);
+      double x1 = r1.getX();
+      double z1 = r1.getZ();
+
+      FramePoint r2 = virtualToePointsOnSole.get(RobotSide.RIGHT);
+      double x2 = r2.getX();
+      double z2 = r2.getZ();
+
+      double z = com.getZ();
 
       double fZ = centerOfMassHeightControlModule.doCenterOfMassHeightControl(stateMachine.getDesiredCoMHeight(), stateMachine.getDesiredCoMHeightVelocity(),
-                     stateMachine.getDesiredCoMHeightAcceleration(), supportLeg);
+            stateMachine.getDesiredCoMHeightAcceleration(), supportLeg);
+
+      
+      double omega0Squared = (fZ*(x1 - x2))/
+            (totalMass*(x1*(z - lambdas.get(RobotSide.LEFT)*z1 + (-1 + lambdas.get(RobotSide.LEFT))*z2) + 
+                x2*(-z + z1 - lambdas.get(RobotSide.RIGHT)*z1 + lambdas.get(RobotSide.RIGHT)*z2)));
+
+      desiredCapturePointToDesiredCoPControlModule.setOmega0(Math.sqrt(omega0Squared)); // TODO: hackish
+      double k1PlusK2 = omega0Squared * totalMass;
+      SideDependentList<Double> ks = new SideDependentList<Double>();
+      for (RobotSide robotSide : RobotSide.values())
+      {
+         ks.put(robotSide, lambdas.get(robotSide) * k1PlusK2);
+      }
+
+
       FrameVector totalgroundReactionMoment = determineGroundReactionMoment();
       Wrench totalGroundReactionWrench = new Wrench(centerOfMassFrame, centerOfMassFrame);
 
@@ -338,18 +372,16 @@ public class MomentumBasedController implements RobotController
          groundReactionForceTerminalPoint.setX(groundReactionForceTerminalPoint.getX() - desiredDeltaCMP.getX());
          groundReactionForceTerminalPoint.setY(groundReactionForceTerminalPoint.getY() - desiredDeltaCMP.getY());
          FrameVector groundReactionForce = new FrameVector(groundReactionForceTerminalPoint);
-         FramePoint virtualToePoint = virtualToePoints.get(robotSide).toFramePoint();
-         
-         virtualToePoint = projectPointOntoSole(robotSide, virtualToePoint);
-         
+
+         FramePoint virtualToePoint = virtualToePointsOnSole.get(robotSide);
          virtualToePoint.changeFrame(frame);
          groundReactionForce.sub(virtualToePoint);
-         groundReactionForce.scale(legStrengths.get(robotSide) * fZ / groundReactionForce.getZ());
+         groundReactionForce.scale(ks.get(robotSide));
 
          FrameVector groundReactionMoment = new FrameVector(totalgroundReactionMoment);
          
          // TODO: base on contact situation.
-         groundReactionMoment.scale(legStrengths.get(robotSide));
+         groundReactionMoment.scale(lambdas.get(robotSide));
 //         groundReactionMoment.scale(robotSide == RobotSide.LEFT ? 1.0 : 0.0);
 
          RigidBody foot = fullRobotModel.getFoot(robotSide);
@@ -388,8 +420,8 @@ public class MomentumBasedController implements RobotController
 
       for (RobotSide robotSide : RobotSide.values())
       {
-//       if (supportLeg == robotSide.getOppositeSide() && optimizer.leavingSingularRegion(robotSide) && fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE).getQ() < 0.4 || (!optimizer.inSingularRegion(robotSide)) && !stateMachine.trajectoryInitialized(robotSide)) // TODO: knee angle hack
-         if ((supportLeg == robotSide.getOppositeSide()) &&!optimizer.inSingularRegion(robotSide) &&!stateMachine.trajectoryInitialized(robotSide))
+//         if (supportLeg == robotSide.getOppositeSide() && optimizer.leavingSingularRegion(robotSide) && fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE).getQ() < 0.4 || (!optimizer.inSingularRegion(robotSide)) && !stateMachine.trajectoryInitialized(robotSide)) // TODO: knee angle hack
+         if ((supportLeg == robotSide.getOppositeSide()) && !optimizer.inSingularRegion(robotSide) && !stateMachine.trajectoryInitialized(robotSide))
          {
             SpatialAccelerationVector taskSpaceAcceleration = new SpatialAccelerationVector();
             optimizer.computeMatchingNondegenerateTaskSpaceAcceleration(robotSide, taskSpaceAcceleration);

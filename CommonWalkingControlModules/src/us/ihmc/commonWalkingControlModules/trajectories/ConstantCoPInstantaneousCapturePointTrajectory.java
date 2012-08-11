@@ -2,7 +2,6 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.calculators.EquivalentConstantCoPCalculator;
-import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameLine2d;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
@@ -17,7 +16,6 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint2d;
 public class ConstantCoPInstantaneousCapturePointTrajectory
 {
    private final YoVariableRegistry registry;
-   private final RobotSide supportSide;
    private final BipedSupportPolygons bipedSupportPolygons;
    private final double gravity;
    private final double deltaT;
@@ -25,14 +23,14 @@ public class ConstantCoPInstantaneousCapturePointTrajectory
    private final YoFramePoint2d finalDesiredICP;
    private final DoubleYoVariable moveTime;
    private final DoubleYoVariable currentTime;
+   private final double amountToBeInside;
 
-   public ConstantCoPInstantaneousCapturePointTrajectory(RobotSide supportSide, BipedSupportPolygons bipedSupportPolygons, double gravity, double deltaT, YoVariableRegistry parentRegistry)
+   public ConstantCoPInstantaneousCapturePointTrajectory(BipedSupportPolygons bipedSupportPolygons, double gravity, double deltaT, double amountToBeInside, YoVariableRegistry parentRegistry)
    {
-      this.supportSide = supportSide;
       this.bipedSupportPolygons = bipedSupportPolygons;
       this.gravity = gravity;
       this.deltaT = deltaT;
-      this.registry = new YoVariableRegistry(supportSide.getCamelCaseNameForStartOfExpression() + getClass().getSimpleName());
+      this.registry = new YoVariableRegistry(getClass().getSimpleName());
 
       ReferenceFrame referenceFrame = ReferenceFrame.getWorldFrame();
       initialDesiredICP =  new YoFramePoint2d("initialDesiredICP", "", referenceFrame, registry);
@@ -40,6 +38,7 @@ public class ConstantCoPInstantaneousCapturePointTrajectory
 
       moveTime = new DoubleYoVariable("icpTrajectoryMoveTime", registry);
       currentTime = new DoubleYoVariable("icpTrajectoryCurrentTime", registry);
+      this.amountToBeInside = amountToBeInside;
 
       parentRegistry.addChild(registry);
       reset();
@@ -59,12 +58,12 @@ public class ConstantCoPInstantaneousCapturePointTrajectory
                                               comHeight, gravity);
       if (!initialDesiredICP.epsilonEquals(finalDesiredICP, 0.0))
       {
-         FrameConvexPolygon2d footPolygonInAnkleZUp = bipedSupportPolygons.getFootPolygonInAnkleZUp(supportSide);
+         FrameConvexPolygon2d supportPolygon = bipedSupportPolygons.getSupportPolygonInMidFeetZUp(); // bipedSupportPolygons.getFootPolygonInAnkleZUp(supportSide);
 
          FrameLine2d line = new FrameLine2d(initialDesiredICP, finalDesiredICP);
-         line.changeFrame(footPolygonInAnkleZUp.getReferenceFrame());
-         equivalentConstantCoP.changeFrame(footPolygonInAnkleZUp.getReferenceFrame());
-         GeometryTools.movePointInsidePolygonAlongLine(equivalentConstantCoP, footPolygonInAnkleZUp, line);
+         line.changeFrame(supportPolygon.getReferenceFrame());
+         equivalentConstantCoP.changeFrame(supportPolygon.getReferenceFrame());
+         GeometryTools.movePointInsidePolygonAlongLine(equivalentConstantCoP, supportPolygon, line, amountToBeInside);
          equivalentConstantCoP.changeFrame(initialDesiredICP.getReferenceFrame());
          moveTime = EquivalentConstantCoPCalculator.computeMoveTime(initialDesiredICP, finalDesiredICP, equivalentConstantCoP, comHeight, gravity);
       }
@@ -91,10 +90,17 @@ public class ConstantCoPInstantaneousCapturePointTrajectory
       desiredICPLocal.changeFrame(desiredPosition.getReferenceFrame());
       desiredPosition.set(desiredICPLocal);
 
-      FrameVector2d desiredICPVelocityLocal = new FrameVector2d(initialToFinal);
-      desiredICPVelocityLocal.scale(parameterd);
-      desiredICPVelocityLocal.changeFrame(desiredVelocity.getReferenceFrame());
-      desiredVelocity.set(desiredICPVelocityLocal);
+      if (isDone())
+      {
+         desiredVelocity.set(0.0, 0.0);
+      }
+      else
+      {
+         FrameVector2d desiredICPVelocityLocal = new FrameVector2d(initialToFinal);
+         desiredICPVelocityLocal.scale(parameterd);
+         desiredICPVelocityLocal.changeFrame(desiredVelocity.getReferenceFrame());
+         desiredVelocity.set(desiredICPVelocityLocal);
+      }
 
       this.currentTime.add(deltaT);
    }
