@@ -49,7 +49,7 @@ public class SimpleWorldDesiredFootstepCalculator implements DesiredFootstepCalc
          FramePoint supportAnklePosition = new FramePoint(ankleZUpFrames.get(supportLegSide));
          supportAnklePosition.changeFrame(previousFootstepPosition.getReferenceFrame());
          previousFootstepPosition.set(supportAnklePosition);
-         previousFootstepPosition.setZ(stepHeight.getDoubleValue() + ankleHeight); // + 0.01 DARPA M3 MEETING HACK
+//         previousFootstepPosition.setZ(stepHeight.getDoubleValue() + ankleHeight); // + 0.01 DARPA M3 MEETING HACK
       }
       else
       {
@@ -110,19 +110,19 @@ public class SimpleWorldDesiredFootstepCalculator implements DesiredFootstepCalc
    public void setupParametersForR2InverseDynamics()
    {
       // stairs:
-//      stepLength.set(0.3); // 0.2
-//      stepWidth.set(0.2);
-//      stepHeight.set(0.25);
-//      stepYaw.set(0.0);
-//      stepPitch.set(0.0);
-//      stepRoll.set(0.0);
-      
-      // flat ground
-      stepLength.set(0.35);
+      stepLength.set(0.3); // 0.2
       stepWidth.set(0.2);
-      stepHeight.set(0.0);
+      stepHeight.set(0.25);
       stepYaw.set(0.0);
       stepPitch.set(0.0);
       stepRoll.set(0.0);
+      
+      // flat ground
+//      stepLength.set(0.35);
+//      stepWidth.set(0.2);
+//      stepHeight.set(0.0);
+//      stepYaw.set(0.0);
+//      stepPitch.set(0.0);
+//      stepRoll.set(0.0);
    }
 }
