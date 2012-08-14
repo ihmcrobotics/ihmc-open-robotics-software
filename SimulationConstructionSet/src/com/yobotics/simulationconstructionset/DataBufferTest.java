@@ -1,0 +1,368 @@
+package com.yobotics.simulationconstructionset;
+
+import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
+
+import java.util.ArrayList;
+import java.util.Collections;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import com.yobotics.simulationconstructionset.DataBuffer.RepeatDataBufferEntryException;
+import com.yobotics.simulationconstructionset.gui.config.VarGroupList;
+
+public class DataBufferTest
+{
+
+   private enum EnumYoVariableTestEnums
+   {
+      ONE, TWO;
+   }
+
+   private EnumYoVariable<EnumYoVariableTestEnums> enumYoVariable;
+   DoubleYoVariable doubleYoVariable;
+   BooleanYoVariable booleanYoVariable;
+   IntegerYoVariable integerYoVariable;
+   YoVariableRegistry registry;
+   int testInitialBufferSize = 4;
+   DataBuffer dataBuffer = new DataBuffer(testInitialBufferSize);
+
+   public DataBufferTest()
+   {
+
+   }
+
+   @Before
+   public void setUp()
+   {
+      registry = new YoVariableRegistry("testRegistry");
+      doubleYoVariable = new DoubleYoVariable("doubleYoVariable", registry);
+      booleanYoVariable = new BooleanYoVariable("booleanYoVariable", registry);
+      integerYoVariable = new IntegerYoVariable("integerYoVariable", registry);
+      enumYoVariable = new EnumYoVariable<DataBufferTest.EnumYoVariableTestEnums>("enumYoVariable", registry, EnumYoVariableTestEnums.class);
+   }
+
+   @After
+   public void tearDown()
+   {
+      doubleYoVariable = null;
+      registry = null;
+   }
+
+
+   
+   @Test
+   public void testGetBufferSize()
+   {
+      int testBufferSize = dataBuffer.getBufferSize();
+      int expectedBufferSize = 4;
+      assertTrue(expectedBufferSize == testBufferSize);
+   }
+   
+   @Test
+   public void testGetMaxBufferSize()
+   {
+      int expectedMaxBufferSize = 16384;
+      int testMaxBufferSize = dataBuffer.getMaxBufferSize();
+      assertTrue(expectedMaxBufferSize == testMaxBufferSize);
+   }
+   
+   @Test
+   public void testGetAndSetWrapBuffer()
+   {
+      dataBuffer.setWrapBuffer(false);
+      boolean testBoolean = dataBuffer.getWrapBuffer();
+      assertFalse(testBoolean);
+      dataBuffer.setWrapBuffer(true);
+      testBoolean = dataBuffer.getWrapBuffer();
+      assertTrue(testBoolean); 
+   }
+   
+   @Test
+   public void testAddAndGetEntry()
+   {
+      DataBufferEntry doubleDataBufferEntryTest = new DataBufferEntry(doubleYoVariable, 100);
+      DataBufferEntry booleanDataBufferEntryTest = new DataBufferEntry(booleanYoVariable, 100);
+      DataBufferEntry integerDataBufferEntryTest = new DataBufferEntry(integerYoVariable, 100);
+      DataBufferEntry enumDataBufferEntryTest = new DataBufferEntry(enumYoVariable, 100);
+      dataBuffer.addEntry(doubleDataBufferEntryTest);
+      dataBuffer.addEntry(booleanDataBufferEntryTest);
+      dataBuffer.addEntry(integerDataBufferEntryTest);
+      dataBuffer.addEntry(enumDataBufferEntryTest);
+      
+      DataBufferEntry testEntryReceivedViaString = dataBuffer.getEntry("doubleYoVariable");
+      DataBufferEntry testEntryReceivedViaVariableName = dataBuffer.getEntry(doubleYoVariable);
+      assertEquals(doubleDataBufferEntryTest, testEntryReceivedViaString);
+      assertEquals(doubleDataBufferEntryTest, testEntryReceivedViaVariableName);
+      
+      testEntryReceivedViaString = dataBuffer.getEntry("booleanYoVariable");
+      testEntryReceivedViaVariableName = dataBuffer.getEntry(booleanYoVariable);
+      assertEquals(booleanDataBufferEntryTest, testEntryReceivedViaString);
+      assertEquals(booleanDataBufferEntryTest, testEntryReceivedViaVariableName);
+      
+      testEntryReceivedViaString = dataBuffer.getEntry("integerYoVariable");
+      testEntryReceivedViaVariableName = dataBuffer.getEntry(integerYoVariable);
+      assertEquals(integerDataBufferEntryTest, testEntryReceivedViaString);
+      assertEquals(integerDataBufferEntryTest, testEntryReceivedViaVariableName);
+      
+      testEntryReceivedViaString = dataBuffer.getEntry("enumYoVariable");
+      testEntryReceivedViaVariableName = dataBuffer.getEntry(enumYoVariable);
+      assertEquals(enumDataBufferEntryTest, testEntryReceivedViaString);
+      assertEquals(enumDataBufferEntryTest, testEntryReceivedViaVariableName);
+
+   }
+   
+   
+   
+   @Test
+   public void testAddNewEntry() throws RepeatDataBufferEntryException
+   {
+      dataBuffer.addNewEntry(doubleYoVariable, 100);
+      dataBuffer.addNewEntry(booleanYoVariable, 100);
+      dataBuffer.addNewEntry(integerYoVariable, 100);
+      dataBuffer.addNewEntry(enumYoVariable, 100);
+      
+      DataBufferEntry doubleDataBufferEntryTest = new DataBufferEntry(doubleYoVariable, 100);
+      DataBufferEntry booleanDataBufferEntryTest = new DataBufferEntry(booleanYoVariable, 100);
+      DataBufferEntry integerDataBufferEntryTest = new DataBufferEntry(integerYoVariable, 100);
+      DataBufferEntry enumDataBufferEntryTest = new DataBufferEntry(enumYoVariable, 100);
+      
+      assertTrue(doubleDataBufferEntryTest.getVariable() == dataBuffer.getEntry(doubleYoVariable).getVariable());
+      assertTrue(booleanDataBufferEntryTest.getVariable() == dataBuffer.getEntry(booleanYoVariable).getVariable());
+      assertTrue(integerDataBufferEntryTest.getVariable() == dataBuffer.getEntry(integerYoVariable).getVariable());
+      assertTrue(enumDataBufferEntryTest.getVariable() == dataBuffer.getEntry(enumYoVariable).getVariable());    
+   }
+   
+   
+   @Test
+   public void testAddVariable() throws RepeatDataBufferEntryException
+   {
+      dataBuffer.addVariable(doubleYoVariable);
+      dataBuffer.addVariable(booleanYoVariable);
+      dataBuffer.addVariable(integerYoVariable);
+      dataBuffer.addVariable(enumYoVariable);
+      
+      assertTrue(doubleYoVariable == dataBuffer.getEntry(doubleYoVariable).getVariable());
+      assertTrue(booleanYoVariable == dataBuffer.getEntry(booleanYoVariable).getVariable());
+      assertTrue(integerYoVariable == dataBuffer.getEntry(integerYoVariable).getVariable());
+      assertTrue(enumYoVariable == dataBuffer.getEntry(enumYoVariable).getVariable());
+
+   }
+   
+   @Test
+   public void testAddVariableWithArrayList() throws RepeatDataBufferEntryException
+   {
+      ArrayList<YoVariable> arrayListToBeAdded = new ArrayList<YoVariable>();
+      arrayListToBeAdded.add(doubleYoVariable);
+      arrayListToBeAdded.add(booleanYoVariable);
+      arrayListToBeAdded.add(integerYoVariable);
+      arrayListToBeAdded.add(enumYoVariable);
+      
+      dataBuffer.addVariables(arrayListToBeAdded);
+      
+      assertTrue(doubleYoVariable == dataBuffer.getEntry(doubleYoVariable).getVariable());
+      assertTrue(booleanYoVariable == dataBuffer.getEntry(booleanYoVariable).getVariable());
+      assertTrue(integerYoVariable == dataBuffer.getEntry(integerYoVariable).getVariable());
+      assertTrue(enumYoVariable == dataBuffer.getEntry(enumYoVariable).getVariable());
+      
+   }
+   
+   //add dataBuffer listener?
+   
+   @Test
+   public void testGetVariablesThatContain() throws RepeatDataBufferEntryException
+   {
+      DoubleYoVariable yoVariable123456789 = new DoubleYoVariable("123456789", registry);
+      DoubleYoVariable yoVariable12345678 = new DoubleYoVariable("12345678", registry);
+      DoubleYoVariable yoVariable1234567 = new DoubleYoVariable("1234567", registry);
+      DoubleYoVariable yoVariable123456 = new DoubleYoVariable("123456", registry);
+      DoubleYoVariable yoVariable12345 = new DoubleYoVariable("12345", registry);
+      DoubleYoVariable yoVariable1234 = new DoubleYoVariable("1234", registry);
+      DoubleYoVariable yoVariable123 = new DoubleYoVariable("123", registry);
+      DoubleYoVariable yoVariable12 = new DoubleYoVariable("12", registry);
+      DoubleYoVariable yoVariable1 = new DoubleYoVariable("1", registry);
+      
+      ArrayList<YoVariable> currentlyMatched = new ArrayList<YoVariable>();
+      
+      currentlyMatched.add(yoVariable123456789);
+      currentlyMatched.add(yoVariable12345678);
+      currentlyMatched.add(yoVariable1234567);
+      currentlyMatched.add(yoVariable123456);
+      currentlyMatched.add(yoVariable12345);
+      currentlyMatched.add(yoVariable1234);
+      currentlyMatched.add(yoVariable123);
+      currentlyMatched.add(yoVariable12);
+      currentlyMatched.add(yoVariable1);
+
+      
+      assertTrue(1 == dataBuffer.getVariablesThatContain("123456789", true, currentlyMatched).size());
+      assertTrue(2 == dataBuffer.getVariablesThatContain("12345678", true, currentlyMatched).size());
+      assertTrue(3 == dataBuffer.getVariablesThatContain("1234567", true, currentlyMatched).size());
+      assertTrue(4 == dataBuffer.getVariablesThatContain("123456", true, currentlyMatched).size());
+      assertTrue(5 == dataBuffer.getVariablesThatContain("12345", true, currentlyMatched).size());
+      assertTrue(6 == dataBuffer.getVariablesThatContain("1234", true, currentlyMatched).size());
+      assertTrue(7 == dataBuffer.getVariablesThatContain("123", true, currentlyMatched).size());
+      assertTrue(8 == dataBuffer.getVariablesThatContain("12", true, currentlyMatched).size());
+      assertTrue(9 == dataBuffer.getVariablesThatContain("1", true, currentlyMatched).size());
+      assertTrue(null == dataBuffer.getVariablesThatContain("1234567890", true, currentlyMatched));
+      assertTrue(null == dataBuffer.getVariablesThatContain("987654321", true, currentlyMatched));
+      
+   }
+   
+   @Test
+   public void testGetVariablesThatStartWith() throws RepeatDataBufferEntryException
+   {
+      
+      DoubleYoVariable yoVariable1 = new DoubleYoVariable("doy", registry);
+      DoubleYoVariable yoVariable2= new DoubleYoVariable("Dog", registry);
+      DoubleYoVariable yoVariable3 = new DoubleYoVariable("bar", registry);
+      
+      dataBuffer.addVariable(doubleYoVariable);
+      dataBuffer.addVariable(booleanYoVariable);
+      dataBuffer.addVariable(integerYoVariable);
+      dataBuffer.addVariable(enumYoVariable);
+      dataBuffer.addVariable(yoVariable1);
+      dataBuffer.addVariable(yoVariable2);
+      dataBuffer.addVariable(yoVariable3);
+      
+      assertTrue(3 == dataBuffer.getVariablesThatStartWith("d", false).size());
+      assertTrue(2 == dataBuffer.getVariablesThatStartWith("d").size());
+      assertTrue(2 == dataBuffer.getVariablesThatStartWith("b").size());
+      
+      
+   }
+   
+   @Test
+   public void testGetEntries() throws RepeatDataBufferEntryException
+   {
+      ArrayList<DataBufferEntry> expectedDataEntries = new ArrayList<DataBufferEntry>();
+      DataBufferEntry doubleDataBufferEntryTest = new DataBufferEntry(doubleYoVariable, 100);
+      DataBufferEntry booleanDataBufferEntryTest = new DataBufferEntry(booleanYoVariable, 100);
+      DataBufferEntry integerDataBufferEntryTest = new DataBufferEntry(integerYoVariable, 100);
+      DataBufferEntry enumDataBufferEntryTest = new DataBufferEntry(enumYoVariable, 100);
+      
+      dataBuffer.addEntry(doubleDataBufferEntryTest);
+      dataBuffer.addEntry(booleanDataBufferEntryTest);
+      dataBuffer.addEntry(integerDataBufferEntryTest);
+      dataBuffer.addEntry(enumDataBufferEntryTest);
+      
+      expectedDataEntries.add(doubleDataBufferEntryTest);
+      expectedDataEntries.add(booleanDataBufferEntryTest);
+      expectedDataEntries.add(integerDataBufferEntryTest);
+      expectedDataEntries.add(enumDataBufferEntryTest);
+      
+      assertEquals(expectedDataEntries, dataBuffer.getEntries());
+   }
+   
+   @Test
+   public void testGetVariables() throws RepeatDataBufferEntryException
+   {
+      dataBuffer.addNewEntry(doubleYoVariable, 100);
+      dataBuffer.addNewEntry(booleanYoVariable, 100);
+      dataBuffer.addNewEntry(integerYoVariable, 100);
+      dataBuffer.addNewEntry(enumYoVariable, 100);
+      
+      ArrayList<YoVariable> expectedArrayOfVariables = new ArrayList<YoVariable>();
+      expectedArrayOfVariables.add(doubleYoVariable);
+      expectedArrayOfVariables.add(booleanYoVariable);
+      expectedArrayOfVariables.add(integerYoVariable);
+      expectedArrayOfVariables.add(enumYoVariable);
+      
+      ArrayList<YoVariable> actualArrayOfVariables = dataBuffer.getAllVariables();
+      
+      for(int i = 0; i < actualArrayOfVariables.size(); i++)
+      {
+         assertTrue(expectedArrayOfVariables.contains(actualArrayOfVariables.get(i)));
+      }
+ 
+   }
+   
+   
+   //testGetVars(String [], String[])
+   
+   //testGetVarsFromGroup(String varGroupName, VarGroupList varGroupList)
+   
+   //setMaxBufferSize
+   
+   
+//   @Test
+//   public void testResetDataBuffer() throws RepeatDataBufferEntryException
+//   {
+//      dataBuffer.addNewEntry(doubleYoVariable, 100);
+//      dataBuffer.addNewEntry(booleanYoVariable, 100);
+//      dataBuffer.addNewEntry(integerYoVariable, 100);
+//      dataBuffer.addNewEntry(enumYoVariable, 100);
+//      
+//      dataBuffer.resetDataBuffer();
+//      
+//      int dataBufferSize = dataBuffer.getBufferSize();
+//      System.out.println(dataBufferSize);
+//      assertTrue(0 == dataBufferSize);
+//
+//   }
+   
+   
+//   @Test
+//   public void testClearAll() throws RepeatDataBufferEntryException
+//   {
+//      
+//       dataBuffer.addNewEntry(doubleYoVariable, 100);
+//       dataBuffer.addNewEntry(booleanYoVariable, 100);
+//       dataBuffer.addNewEntry(integerYoVariable, 100);
+//       dataBuffer.addNewEntry(enumYoVariable, 100);
+//       
+//       dataBuffer.clearAll(100);
+//       
+//       int dataBufferSize = dataBuffer.getBufferSize();
+//       System.out.println(dataBufferSize);
+//       assertTrue(0 == dataBufferSize);
+//      
+//   }
+  
+   //doesn't work?
+   @Test
+   public void testChangeBufferSize()
+   {
+      double randomNumber = 20*Math.random();
+      
+      int randomBufferSize = (int)randomNumber;
+      
+      dataBuffer.changeBufferSize(2);
+      System.out.println(randomBufferSize + " " + dataBuffer.getBufferSize()); 
+      assertTrue(3 == dataBuffer.getBufferSize());
+
+   }
+   
+   //doesn't work?
+   @Test
+   public void testEnlargeBufferSize()
+   {
+      double randomNumber = 20*Math.random() + 5;
+      
+      int randomBufferSize = (int)randomNumber;
+      
+      dataBuffer.changeBufferSize(randomBufferSize);
+      System.out.println(randomBufferSize + " " + dataBuffer.getBufferSize()); 
+      assertTrue(randomBufferSize == dataBuffer.getBufferSize());
+
+   }
+   
+//   @Test
+//   public void testCopyValuesThrough()
+//   {
+//      
+//   }
+   
+//   @Test
+//   public void testGetInAndOutLength()
+//   {
+//      System.out.println(dataBuffer.getBufferInOutLength());
+//   }
+   
+   //@Test
+  // public void 
+   
+   
+}
