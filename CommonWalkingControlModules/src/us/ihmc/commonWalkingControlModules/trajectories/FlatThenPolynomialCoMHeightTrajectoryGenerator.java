@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import javax.media.j3d.Transform3D;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedFootInterface;
+import us.ihmc.commonWalkingControlModules.calculators.OrbitalEnergyCalculator;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculator;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
@@ -15,6 +16,7 @@ import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FramePose;
+import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
@@ -41,6 +43,9 @@ public class FlatThenPolynomialCoMHeightTrajectoryGenerator implements CenterOfM
    private final DoubleYoVariable desiredComHeight = new DoubleYoVariable("desiredComHeight", registry);
    private final DoubleYoVariable desiredComHeightSlope = new DoubleYoVariable("desiredComHeightSlope", registry);
    private final DoubleYoVariable desiredComHeightSecondDerivative = new DoubleYoVariable("desiredComHeightSecondDerivative", registry);
+   
+   private final PolynomialSpline splineForComputingOrbitalEnergy = new PolynomialSpline("splineForComputingOrbitalEnergy", 4, registry);
+   private final DoubleYoVariable orbitalEnergy = new DoubleYoVariable("orbitalEnergy", registry);
 
    public FlatThenPolynomialCoMHeightTrajectoryGenerator(ProcessedSensorsInterface processedSensors, DesiredFootstepCalculator desiredFootstepCalculator,
          ReferenceFrame desiredHeadingFrame, SideDependentList<BipedFootInterface> bipedFeet, CommonWalkingReferenceFrames referenceFrames, YoVariableRegistry parentRegistry)
@@ -51,7 +56,7 @@ public class FlatThenPolynomialCoMHeightTrajectoryGenerator implements CenterOfM
       this.bipedFeet = bipedFeet;
       this.referenceFrames = referenceFrames;
 
-      nominalHeightAboveGround.set(1.36);
+      nominalHeightAboveGround.set(1.31);
       parentRegistry.addChild(registry);
    }
 
@@ -85,8 +90,15 @@ public class FlatThenPolynomialCoMHeightTrajectoryGenerator implements CenterOfM
 
 //         singleSupportSpline.setQuintic(x0, xf, z0, dzdx0, d2zdx20, zf, dzdxf, d2zdx2f);
          singleSupportSpline.setCubic(x0, xf, z0, dzdx0, zf, dzdxf);
+
          minXForSpline.set(x0);
          maxXForSpline.set(xf);
+
+         // FIXME:
+         double xcop = findMaxXOfGroundContactPoints(supportLeg);
+         double zCoP = findMinZOfGroundContactPoints(supportLeg);
+         splineForComputingOrbitalEnergy.setCubic(x0 - xcop, xf - xcop, z0 - zCoP, dzdx0, zf - zCoP, dzdxf);
+
       }
    }
 
@@ -99,6 +111,20 @@ public class FlatThenPolynomialCoMHeightTrajectoryGenerator implements CenterOfM
       desiredComHeight.set(getDesiredCenterOfMassHeight());
       desiredComHeightSlope.set(getDesiredCenterOfMassHeightSlope());
       desiredComHeightSecondDerivative.set(getDesiredCenterOfMassHeightSecondDerivative());
+      
+      double xcop = findMaxXOfGroundContactPoints(RobotSide.LEFT); // FIXME
+      splineForComputingOrbitalEnergy.compute(x - xcop);
+      FrameVector comd = processedSensors.getCenterOfMassVelocityInFrame(referenceFrame);
+      double xd = comd.getX();
+      double g = -processedSensors.getGravityInWorldFrame().getZ();
+      if (MathTools.isInsideBounds(com.getX(), minXForSpline.getDoubleValue(), maxXForSpline.getDoubleValue()))
+      {
+         orbitalEnergy.set(OrbitalEnergyCalculator.computeOrbitalEnergy(splineForComputingOrbitalEnergy, g, x - xcop, xd));
+      }
+      else
+      {
+         orbitalEnergy.set(Double.NaN);         
+      }
    }
 
    public double getDesiredCenterOfMassHeight()
