@@ -114,7 +114,7 @@ public class MomentumBasedControllerStateMachine extends StateMachine
    private final BooleanYoVariable liftUpHeels = new BooleanYoVariable("liftUpHeels", registry);
    private final DoubleYoVariable heelsUpFootPitch = new DoubleYoVariable("heelsUpFootPitch", registry);
 
-   private double comHeight;
+   private double omega0;
    private final double gravity;
    private final double swingNullspaceMultiplier = 500.0;    // needs to be pretty high to fight the limit stops...
    private final SideDependentList<BooleanYoVariable> trajectoryInitialized = new SideDependentList<BooleanYoVariable>();
@@ -401,7 +401,7 @@ public class MomentumBasedControllerStateMachine extends StateMachine
          {
             FramePoint2d desiredICPLocal = new FramePoint2d(desiredICP.getReferenceFrame());
             FrameVector2d desiredICPVelocityLocal = new FrameVector2d(desiredICPVelocity.getReferenceFrame());
-            icpTrajectoryGenerator.pack(desiredICPLocal, desiredICPVelocityLocal, comHeight);
+            icpTrajectoryGenerator.pack(desiredICPLocal, desiredICPVelocityLocal, omega0);
             desiredICP.set(desiredICPLocal);
             desiredICPVelocity.set(desiredICPVelocityLocal);
          }
@@ -415,7 +415,7 @@ public class MomentumBasedControllerStateMachine extends StateMachine
                finalDesiredICP = getDoubleSupportFinalDesiredICPForWalking(transferToSide);
             finalDesiredICP.changeFrame(desiredICP.getReferenceFrame());
             desiredICP.set(capturePoint);    // set initial desired equal to actual; prevents error buildup
-            icpTrajectoryGenerator.initialize(desiredICP.getFramePoint2dCopy(), finalDesiredICP, doubleSupportTime, comHeight);
+            icpTrajectoryGenerator.initialize(desiredICP.getFramePoint2dCopy(), finalDesiredICP, doubleSupportTime, omega0);
             icpTrajectoryHasBeenInitialized.set(true);
          }
       }
@@ -509,7 +509,7 @@ public class MomentumBasedControllerStateMachine extends StateMachine
             cartesianTrajectoryGenerator.computeNextTick(positionToPack, velocityToPack, accelerationToPack, controlDT);
             FramePoint2d desiredICPLocal = new FramePoint2d(desiredICP.getReferenceFrame());
             FrameVector2d desiredICPVelocityLocal = new FrameVector2d(desiredICPVelocity.getReferenceFrame());
-            icpTrajectoryGenerator.pack(desiredICPLocal, desiredICPVelocityLocal, comHeight);
+            icpTrajectoryGenerator.pack(desiredICPLocal, desiredICPVelocityLocal, omega0);
             desiredICP.set(desiredICPLocal);
             desiredICPVelocity.set(desiredICPVelocityLocal);
          }
@@ -672,9 +672,9 @@ public class MomentumBasedControllerStateMachine extends StateMachine
       this.capturePoint.set(capturePoint);
    }
 
-   public void setCoMHeight(double comHeight)
+   public void setOmega0(double omega0)
    {
-      this.comHeight = comHeight;
+      this.omega0 = omega0;
    }
 
    private FramePoint2d getDoubleSupportFinalDesiredICPForDoubleSupportStance()
@@ -699,7 +699,7 @@ public class MomentumBasedControllerStateMachine extends StateMachine
    private FramePoint2d getDoubleSupportFinalDesiredICPForWalking(RobotSide supportSide)
    {
       FramePoint2d ret = bipedFeet.get(supportSide).getFootPolygonInUseInAnkleZUp().getCentroidCopy();
-      double extraX = 0.04;
+      double extraX = 0.02;
       double extraY = supportSide.negateIfLeftSide(0.02);
       FrameVector2d offset = new FrameVector2d(desiredHeadingControlModule.getDesiredHeadingFrame(), extraX, extraY);
       offset.changeFrame(ret.getReferenceFrame());
@@ -735,15 +735,19 @@ public class MomentumBasedControllerStateMachine extends StateMachine
 
       double z = centerOfMassHeightTrajectoryGenerator.getDesiredCenterOfMassHeight();
       double dzdx = centerOfMassHeightTrajectoryGenerator.getDesiredCenterOfMassHeightSlope();
-      double d2zdx2 = 0.0; // centerOfMassHeightTrajectoryGenerator.getDesiredCenterOfMassHeightSecondDerivative();
+      double d2zdx2 = 0.0;    // centerOfMassHeightTrajectoryGenerator.getDesiredCenterOfMassHeightSecondDerivative();
 
-      double dxdt = processedSensors.getCenterOfMassVelocityInFrame(desiredHeadingControlModule.getDesiredHeadingFrame()).getX();
-      double d2xdt2 = 0.0;    // FIXME: set based on LIPM prediction
+      double xd = processedSensors.getCenterOfMassVelocityInFrame(desiredHeadingControlModule.getDesiredHeadingFrame()).getX();
+      double xdd = 0.0;    // FIXME: set based on LIPM prediction
 
       desiredCoMHeight.set(z);
-      desiredCoMHeightVelocity.set(dzdx * dxdt);
-      desiredCoMHeightAcceleration.set(d2zdx2 * dxdt + dzdx * d2xdt2);
+      desiredCoMHeightVelocity.set(dzdx * xd);
+      desiredCoMHeightAcceleration.set(d2zdx2 * xd + dzdx * xdd);
    }
+
+//   private double computePredictedCoMAcceleration()
+//   {
+//   }
 
    private void setDesiredFootPosVelAccForSupportSide(RobotSide supportSide, double footPitch)
    {
@@ -835,8 +839,7 @@ public class MomentumBasedControllerStateMachine extends StateMachine
 
       FramePoint2d finalDesiredICP = getSingleSupportFinalDesiredICPForWalking(finalDesiredStepLocation, swingSide);
       desiredICP.set(capturePoint);    // set initial desired equal to actual; prevents error buildup
-      icpTrajectoryGenerator.initialize(desiredICP.getFramePoint2dCopy(), finalDesiredICP, cartesianTrajectoryGenerators.get(swingSide).getFinalTime(),
-                                        comHeight);
+      icpTrajectoryGenerator.initialize(desiredICP.getFramePoint2dCopy(), finalDesiredICP, cartesianTrajectoryGenerators.get(swingSide).getFinalTime(), omega0);
 
       nullspaceMultipliers.get(swingSide).set(0.0);
       trajectoryInitialized.get(swingSide).set(true);

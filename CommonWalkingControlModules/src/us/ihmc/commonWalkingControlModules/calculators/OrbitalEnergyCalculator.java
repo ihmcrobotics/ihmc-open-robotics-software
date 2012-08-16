@@ -18,6 +18,11 @@ public class OrbitalEnergyCalculator
       return eOrbit;
    }
 
+   public static double computeOrbitalEnergyConstantHeight(double z, double g, double x, double xd)
+   {
+      return 0.5 * MathTools.square(xd) - g / (2.0 * z) * MathTools.square(xd);
+   }
+   
    private static double computeIntegralTerm(PolynomialSpline spline, double x)
    {
       double integral = 0.0;

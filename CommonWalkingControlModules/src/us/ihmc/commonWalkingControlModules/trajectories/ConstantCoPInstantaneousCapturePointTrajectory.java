@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.calculators.EquivalentConstantCoPCalculator;
+import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameLine2d;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
@@ -44,7 +45,7 @@ public class ConstantCoPInstantaneousCapturePointTrajectory
       reset();
    }
 
-   public void initialize(FramePoint2d initialDesiredICP, FramePoint2d finalDesiredICP, double moveTime, double comHeight)
+   public void initialize(FramePoint2d initialDesiredICP, FramePoint2d finalDesiredICP, double moveTime, double omega0)
    {
       initialDesiredICP.changeFrame(this.initialDesiredICP.getReferenceFrame());
       finalDesiredICP.changeFrame(this.finalDesiredICP.getReferenceFrame());
@@ -54,6 +55,7 @@ public class ConstantCoPInstantaneousCapturePointTrajectory
       currentTime.set(0.0);
 
       // make sure it is feasible by adjusting move time
+      double comHeight = gravity / MathTools.square(omega0);
       FramePoint2d equivalentConstantCoP = EquivalentConstantCoPCalculator.computeEquivalentConstantCoP(initialDesiredICP, finalDesiredICP, moveTime,
                                               comHeight, gravity);
       if (!initialDesiredICP.epsilonEquals(finalDesiredICP, 0.0))
@@ -70,11 +72,10 @@ public class ConstantCoPInstantaneousCapturePointTrajectory
       this.moveTime.set(moveTime);
    }
 
-   public void pack(FramePoint2d desiredPosition, FrameVector2d desiredVelocity, double comHeight)
+   public void pack(FramePoint2d desiredPosition, FrameVector2d desiredVelocity, double omega0)
    {
       double currentTime = isDone() ? moveTime.getDoubleValue() : this.currentTime.getDoubleValue();
 
-      double omega0 = Math.sqrt(gravity / comHeight);
       double expT = Math.exp(omega0 * currentTime);
       double expTf = Math.exp(omega0 * moveTime.getDoubleValue());
       double parameter = (expT - 1.0) / (expTf - 1.0);

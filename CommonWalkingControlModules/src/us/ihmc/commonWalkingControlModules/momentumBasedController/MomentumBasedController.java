@@ -280,17 +280,9 @@ public class MomentumBasedController implements RobotController
       bipedSupportPolygons.update(leftFoot, rightFoot);
       footPolygonVisualizer.update();
 
-      ReferenceFrame frame;
-      if (stateMachine.getSupportLeg() == null)
-         frame = referenceFrames.getMidFeetZUpFrame();
-      else
-         frame = referenceFrames.getAnkleZUpFrame(stateMachine.getSupportLeg());
-
-      double comHeight = processedSensors.getCenterOfMassPositionInFrame(frame).getZ();
-
       stateMachine.setPreviousCoP(desiredCoP.getFramePoint2dCopy());
       stateMachine.setCapturePoint(capturePoint);
-      stateMachine.setCoMHeight(comHeight);
+      stateMachine.setOmega0(omega0.getDoubleValue());
       stateMachine.checkTransitionConditionsThoroughly();
       stateMachine.doAction();
 
@@ -383,6 +375,9 @@ public class MomentumBasedController implements RobotController
                                 * (x1 * (z - lambdas.get(RobotSide.LEFT) * z1 + (-1 + lambdas.get(RobotSide.LEFT)) * z2)
                                    + x2 * (-z + z1 - lambdas.get(RobotSide.RIGHT) * z1 + lambdas.get(RobotSide.RIGHT) * z2)));
 
+      if (omega0Squared <= 0.0)
+         throw new RuntimeException("omega0Squared <= 0.0. omega0Squared = " + omega0Squared);
+      
       double omega0 = Math.sqrt(omega0Squared);
       this.omega0.set(omega0);
       desiredCapturePointToDesiredCoPControlModule.setOmega0(omega0);    // TODO: hackish
@@ -452,7 +447,12 @@ public class MomentumBasedController implements RobotController
       for (RobotSide robotSide : RobotSide.values())
       {
 //         if ((supportLeg == robotSide.getOppositeSide()) &&!optimizer.inSingularRegion(robotSide) &&!stateMachine.trajectoryInitialized(robotSide))
-         if (supportLeg == robotSide.getOppositeSide() && optimizer.leavingSingularRegion(robotSide) && fullRobotModel.getLegJoint(robotSide, LegJointName.HIP_PITCH).getQ() < 0.0 || (!optimizer.inSingularRegion(robotSide)) && !stateMachine.trajectoryInitialized(robotSide)) // TODO: knee angle hack
+         boolean isSwingLeg = supportLeg == robotSide.getOppositeSide();
+         double maxKneeAngle = 0.4;
+         boolean leavingKneeLockRegion = optimizer.leavingSingularRegion(robotSide) && fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE).getQ() < maxKneeAngle; // TODO: hack
+         boolean trajectoryInitialized = stateMachine.trajectoryInitialized(robotSide);
+         boolean inSingularRegion = optimizer.inSingularRegion(robotSide);
+         if (isSwingLeg && (leavingKneeLockRegion || (!inSingularRegion && !trajectoryInitialized)))
          {
             SpatialAccelerationVector taskSpaceAcceleration = new SpatialAccelerationVector();
             optimizer.computeMatchingNondegenerateTaskSpaceAcceleration(robotSide, taskSpaceAcceleration);
