@@ -21,6 +21,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.velocityViaCoP.SimpleD
 import us.ihmc.commonWalkingControlModules.controlModules.velocityViaCoP.SpeedControllingDesiredCoPCalculator;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.outputs.ProcessedOutputsInterface;
+import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.sensors.ProcessedSensorsInterface;
@@ -233,7 +234,7 @@ public class MomentumBasedController implements RobotController
       }
 
       kAngularMomentumXY.set(3e-2);
-      kPelvisAxisAngle.set(1.0);    // was 1.0 for M3 video
+      kPelvisAxisAngle.set(1.0); // 1.0);    // was 1.0 for M3 video
       kAngularMomentumZ.set(10.0);    // 50.0); // 10.0);
       kPelvisYaw.set(0.0);    // 100.0); // was 0.0 for M3 movie
       kUpperBody.set(100.0);
@@ -450,8 +451,8 @@ public class MomentumBasedController implements RobotController
 
       for (RobotSide robotSide : RobotSide.values())
       {
-//       if (supportLeg == robotSide.getOppositeSide() && optimizer.leavingSingularRegion(robotSide) && fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE).getQ() < 0.4 || (!optimizer.inSingularRegion(robotSide)) && !stateMachine.trajectoryInitialized(robotSide)) // TODO: knee angle hack
-         if ((supportLeg == robotSide.getOppositeSide()) &&!optimizer.inSingularRegion(robotSide) &&!stateMachine.trajectoryInitialized(robotSide))
+//         if ((supportLeg == robotSide.getOppositeSide()) &&!optimizer.inSingularRegion(robotSide) &&!stateMachine.trajectoryInitialized(robotSide))
+         if (supportLeg == robotSide.getOppositeSide() && optimizer.leavingSingularRegion(robotSide) && fullRobotModel.getLegJoint(robotSide, LegJointName.HIP_PITCH).getQ() < 0.0 || (!optimizer.inSingularRegion(robotSide)) && !stateMachine.trajectoryInitialized(robotSide)) // TODO: knee angle hack
          {
             SpatialAccelerationVector taskSpaceAcceleration = new SpatialAccelerationVector();
             optimizer.computeMatchingNondegenerateTaskSpaceAcceleration(robotSide, taskSpaceAcceleration);
