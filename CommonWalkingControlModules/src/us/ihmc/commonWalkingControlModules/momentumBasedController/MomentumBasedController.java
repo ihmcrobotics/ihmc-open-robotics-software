@@ -53,6 +53,7 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.robotController.RobotController;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition.GraphicType;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint2d;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
@@ -116,6 +117,7 @@ public class MomentumBasedController implements RobotController
    private final CapturabilityBasedDesiredCoPVisualizer visualizer;
    private final FootPolygonVisualizer footPolygonVisualizer;
    private final DoubleYoVariable omega0 = new DoubleYoVariable("omega0", registry);
+   private final YoFramePoint capturePoint = new YoFramePoint("capturePoint", worldFrame, registry);
 
 
 
@@ -217,6 +219,10 @@ public class MomentumBasedController implements RobotController
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(name, desiredSwingFootPositionViz);
       }
 
+      DynamicGraphicPosition capturePointViz = capturePoint .createDynamicGraphicPosition("Capture Point", 0.01, YoAppearance.Blue(), GraphicType.ROTATED_CROSS);
+      dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("Capture Point", capturePointViz);
+      dynamicGraphicObjectsListRegistry.registerArtifact("Capture Point", capturePointViz.createArtifact());
+
       InverseDynamicsJoint[] joints = ScrewTools.computeJointsInOrder(elevator);
       for (InverseDynamicsJoint joint : joints)
       {
@@ -232,7 +238,7 @@ public class MomentumBasedController implements RobotController
       kPelvisYaw.set(0.0);    // 100.0); // was 0.0 for M3 movie
       kUpperBody.set(100.0);
       zetaUpperBody.set(1.0);
-      omega0.set(3.0); // just to initialize, will be reset every tick. TODO: integrate ICP control law and omega0 calculation
+      omega0.set(3.0);    // just to initialize, will be reset every tick. TODO: integrate ICP control law and omega0 calculation
    }
 
    public void initialize()
@@ -261,7 +267,7 @@ public class MomentumBasedController implements RobotController
    public void doControl()
    {
       FramePoint2d capturePoint = computeCapturePoint();
-      visualizer.setCapturePoint(capturePoint);
+
       for (RobotSide robotSide : RobotSide.values())
       {
          bipedFeet.get(robotSide).setIsSupportingFoot(!stateMachine.isSwingFoot(robotSide));
@@ -290,7 +296,7 @@ public class MomentumBasedController implements RobotController
       doMomentumBasedControl(capturePoint);
       inverseDynamicsCalculator.compute();
       fullRobotModel.setTorques(processedOutputs);
-      updateYoVariables();
+      updateYoVariables(capturePoint);
    }
 
    private FramePoint2d computeCapturePoint()
@@ -299,6 +305,7 @@ public class MomentumBasedController implements RobotController
       FrameVector2d velocityPart = processedSensors.getCenterOfMassVelocityInFrame(worldFrame).toFrameVector2d();
       velocityPart.scale(1.0 / omega0.getDoubleValue());
       ret.add(velocityPart);
+
       return ret;
    }
 
@@ -348,18 +355,19 @@ public class MomentumBasedController implements RobotController
          virtualToePointsOnSole.put(robotSide, virtualToePoint);
       }
 
-      FrameLine2d vtpToVTPLine = new FrameLine2d(virtualToePointsOnSole.get(RobotSide.LEFT).toFramePoint2d(), virtualToePointsOnSole.get(RobotSide.RIGHT).toFramePoint2d());
+      FrameLine2d vtpToVTPLine = new FrameLine2d(virtualToePointsOnSole.get(RobotSide.LEFT).toFramePoint2d(),
+                                    virtualToePointsOnSole.get(RobotSide.RIGHT).toFramePoint2d());
 
       FramePoint com = processedSensors.getCenterOfMassPositionInFrame(worldFrame);
       FramePoint r1 = virtualToePointsOnSole.get(RobotSide.LEFT);
       FramePoint2d r12d = r1.toFramePoint2d();
-      vtpToVTPLine.orthogonalProjection(r12d); // not sure if necessary.
+      vtpToVTPLine.orthogonalProjection(r12d);    // not sure if necessary.
       double x1 = vtpToVTPLine.getParameterGivenPointEpsilon(r12d, 1e-12);
       double z1 = r1.getZ();
 
       FramePoint r2 = virtualToePointsOnSole.get(RobotSide.RIGHT);
       FramePoint2d r22d = r2.toFramePoint2d();
-      vtpToVTPLine.orthogonalProjection(r22d); // not sure if necessary.
+      vtpToVTPLine.orthogonalProjection(r22d);    // not sure if necessary.
       double x2 = vtpToVTPLine.getParameterGivenPointEpsilon(r22d, 1e-12);
       double z2 = r2.getZ();
 
@@ -574,7 +582,7 @@ public class MomentumBasedController implements RobotController
       return ret;
    }
 
-   private void updateYoVariables()
+   private void updateYoVariables(FramePoint2d capturePoint2d)
    {
       SpatialAccelerationVector pelvisAcceleration = new SpatialAccelerationVector();
       fullRobotModel.getRootJoint().packDesiredJointAcceleration(pelvisAcceleration);
@@ -591,6 +599,10 @@ public class MomentumBasedController implements RobotController
       {
          desiredAccelerationYoVariables.get(joint).set(joint.getQddDesired());
       }
+
+      FramePoint capturePoint = capturePoint2d.toFramePoint();
+      capturePoint.changeFrame(worldFrame);
+      this.capturePoint.set(capturePoint);
    }
 
    private static void doPDControl(double k, double d, RevoluteJoint[] joints)
