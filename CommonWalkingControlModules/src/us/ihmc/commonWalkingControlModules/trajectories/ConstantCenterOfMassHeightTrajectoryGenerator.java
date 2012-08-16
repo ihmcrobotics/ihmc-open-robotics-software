@@ -16,7 +16,7 @@ public class ConstantCenterOfMassHeightTrajectoryGenerator implements CenterOfMa
       desiredCenterOfMassHeight.set(1.15);
    }
 
-   public void initialize(RobotSide upcomingSupportLeg)
+   public void initialize(RobotSide supportLeg, RobotSide upcomingSupportLeg)
    {
       // empty
    }
@@ -31,12 +31,12 @@ public class ConstantCenterOfMassHeightTrajectoryGenerator implements CenterOfMa
       return desiredCenterOfMassHeight.getDoubleValue();
    }
 
-   public double getDesiredCenterOfMassHeightVelocity()
+   public double getDesiredCenterOfMassHeightSlope()
    {
       return 0.0;
    }
 
-   public double getDesiredCenterOfMassHeightAcceleration()
+   public double getDesiredCenterOfMassHeightSecondDerivative()
    {
       return 0.0;
    }
