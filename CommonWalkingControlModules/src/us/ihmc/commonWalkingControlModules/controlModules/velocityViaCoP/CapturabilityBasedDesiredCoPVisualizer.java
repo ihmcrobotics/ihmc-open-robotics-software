@@ -25,7 +25,6 @@ public class CapturabilityBasedDesiredCoPVisualizer
 
    private final YoFramePoint desiredCoP = new YoFramePoint("desiredCoP", "", world, registry);
    private final YoFramePoint desiredCapturePoint = new YoFramePoint("desiredCapturePoint", "", world, registry);
-   private final YoFramePoint capturePoint = new YoFramePoint("capturePoint", "", world, registry);
    private final YoFrameLineSegment2d guideLine = new YoFrameLineSegment2d("guideLine", "", world, registry);
 
    public CapturabilityBasedDesiredCoPVisualizer(YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
@@ -37,15 +36,12 @@ public class CapturabilityBasedDesiredCoPVisualizer
       {
          addDesiredCoPViz(dynamicGraphicObjectList, artifactList);
          addDesiredCapturePointViz(dynamicGraphicObjectList, artifactList);
-         addCapturePointViz(dynamicGraphicObjectList, artifactList);
          addGuideLineViz(artifactList);
 
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectList);
          dynamicGraphicObjectsListRegistry.registerArtifactList(artifactList);
       }
 
-      capturePoint.setToNaN();
-      
       parentRegistry.addChild(registry);
    }
 
@@ -65,14 +61,6 @@ public class CapturabilityBasedDesiredCoPVisualizer
       artifactList.add(desiredCapturePointViz.createArtifact());
    }
 
-   private void addCapturePointViz(DynamicGraphicObjectsList dynamicGraphicObjectList, ArtifactList artifactList)
-   {
-      DynamicGraphicPosition capturePointViz = capturePoint.createDynamicGraphicPosition("Capture Point", 0.01, YoAppearance.Blue(),
-                                                         GraphicType.ROTATED_CROSS);
-      dynamicGraphicObjectList.add(capturePointViz);
-      artifactList.add(capturePointViz.createArtifact());
-   }
-   
    private void addGuideLineViz(ArtifactList artifactList)
    {
       YoFrameLineSegment2dArtifact guideLineArtifact = new YoFrameLineSegment2dArtifact("Guide Line", guideLine, Color.RED);
@@ -94,13 +82,6 @@ public class CapturabilityBasedDesiredCoPVisualizer
       hideGuideLine();
    }
 
-   public void setCapturePoint(FramePoint2d capturePoint2d)
-   {
-      FramePoint capturePoint = capturePoint2d.toFramePoint();
-      capturePoint.changeFrame(world);
-      this.capturePoint.set(capturePoint);
-   }
-   
    public void setGuideLine(FrameLineSegment2d guideLine)
    {
       this.guideLine.setFrameLineSegment2d(guideLine.changeFrameCopy(world));
