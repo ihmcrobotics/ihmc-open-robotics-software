@@ -29,6 +29,7 @@ import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameLine2d;
+import us.ihmc.utilities.math.geometry.FrameLineSegment2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FramePose;
@@ -523,6 +524,7 @@ public class MomentumBasedController implements RobotController
 
       FrameVector2d desiredVelocity = new FrameVector2d(frame);
       desiredCapturePoint.changeFrame(frame);
+      desiredCapturePointVelocity.changeFrame(frame);
 
       FramePoint2d desiredCoP;
       if (supportLeg == null)
@@ -530,10 +532,16 @@ public class MomentumBasedController implements RobotController
          desiredCoP = desiredCapturePointToDesiredCoPControlModule.computeDesiredCoPDoubleSupport(bipedSupportPolygons, capturePoint, desiredVelocity,
                  desiredCapturePoint, desiredCapturePointVelocity);
       }
+      else if (desiredCapturePointVelocity.length() > 0.0)
+      {
+         FrameLine2d guideLine = new FrameLine2d(desiredCapturePoint, desiredCapturePointVelocity);
+         FrameLineSegment2d guideLineSegment = new FrameLineSegment2d(guideLine.getFramePointCopy(), guideLine.getFramePoint2dGivenParameter(1.0)); // TODO: replace FrameLineSegment2d by FrameLineSegment in interface.
+         desiredCoP = desiredCapturePointToDesiredCoPControlModule.computeDesiredCoPSingleSupport(supportLeg, bipedSupportPolygons, capturePoint, desiredVelocity, guideLineSegment);
+         visualizer.setGuideLine(guideLineSegment);
+      }
       else
       {
-         desiredCoP = desiredCapturePointToDesiredCoPControlModule.computeDesiredCoPSingleSupport(supportLeg, bipedSupportPolygons, capturePoint,
-                 desiredVelocity, desiredCapturePoint, desiredCapturePointVelocity);
+         desiredCoP = desiredCapturePointToDesiredCoPControlModule.computeDesiredCoPSingleSupport(supportLeg, bipedSupportPolygons, capturePoint, desiredVelocity, desiredCapturePoint, desiredCapturePointVelocity);
       }
 
       FramePoint2d filteredDesiredCoP = desiredCenterOfPressureFilter.filter(desiredCoP, supportLeg);
