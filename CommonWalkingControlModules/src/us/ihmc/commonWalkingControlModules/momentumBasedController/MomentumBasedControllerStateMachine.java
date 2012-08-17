@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController;
 
+import javax.media.j3d.Transform3D;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedFootInterface;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.FootPolygonEnum;
@@ -20,6 +22,8 @@ import us.ihmc.commonWalkingControlModules.trajectories.FifthOrderWaypointCartes
 import us.ihmc.commonWalkingControlModules.trajectories.FlatThenPolynomialCoMHeightTrajectoryGenerator;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
+import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
+import us.ihmc.utilities.math.geometry.FrameLineSegment2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FramePose;
@@ -176,7 +180,7 @@ public class MomentumBasedControllerStateMachine extends StateMachine
       desiredICP = new YoFramePoint2d("desiredICP", "", ReferenceFrame.getWorldFrame(), registry);
       desiredICPVelocity = new YoFrameVector2d("desiredICPVelocity", "", ReferenceFrame.getWorldFrame(), registry);
 
-      singleSupportICPGlideScaleFactor.set(0.8);    // 1.0);
+      singleSupportICPGlideScaleFactor.set(0.8);
       FramePoint2d finalDesiredICPForDoubleSupportStance = getDoubleSupportFinalDesiredICPForDoubleSupportStance();
       finalDesiredICPForDoubleSupportStance.changeFrame(desiredICP.getReferenceFrame());
 
@@ -410,11 +414,16 @@ public class MomentumBasedControllerStateMachine extends StateMachine
             FramePoint2d finalDesiredICP;
 
             if (transferToSide == null)
+            {
+               desiredICP.set(capturePoint);
                finalDesiredICP = getDoubleSupportFinalDesiredICPForDoubleSupportStance();
+            }
             else
-               finalDesiredICP = getDoubleSupportFinalDesiredICPForWalking(transferToSide);
+            {
+               Footstep currentFootstep = new Footstep(transferToSide, new FramePose(referenceFrames.getFootFrame(transferToSide)));
+               finalDesiredICP = getDoubleSupportFinalDesiredICPForWalking(currentFootstep, bipedFeet.get(transferToSide).getFootPolygonInSoleFrame());
+            }
             finalDesiredICP.changeFrame(desiredICP.getReferenceFrame());
-            desiredICP.set(capturePoint);    // set initial desired equal to actual; prevents error buildup
             icpTrajectoryGenerator.initialize(desiredICP.getFramePoint2dCopy(), finalDesiredICP, doubleSupportTime, omega0);
             icpTrajectoryHasBeenInitialized.set(true);
          }
@@ -696,11 +705,26 @@ public class MomentumBasedControllerStateMachine extends StateMachine
       return ret;
    }
 
-   private FramePoint2d getDoubleSupportFinalDesiredICPForWalking(RobotSide supportSide)
+   private FramePoint2d getDoubleSupportFinalDesiredICPForWalking(Footstep footstep, FrameConvexPolygon2d footPolygonInSoleFrame)
    {
-      FramePoint2d ret = bipedFeet.get(supportSide).getFootPolygonInUseInAnkleZUp().getCentroidCopy();
+      RobotSide robotSide = footstep.getFootstepSide();
+      if (footPolygonInSoleFrame.getReferenceFrame() != referenceFrames.getSoleFrame(robotSide))
+      {
+         throw new RuntimeException("not in sole frame");
+      }
+      footstep.changeFrame(desiredHeadingControlModule.getDesiredHeadingFrame());
+
+      Transform3D footstepTransform = new Transform3D();
+      footstep.getFootstepPose().getTransform3D(footstepTransform);
+
+      FramePoint2d centroid2d = footPolygonInSoleFrame.getCentroidCopy();
+      FramePoint centroid = centroid2d.toFramePoint();
+      centroid.changeFrame(referenceFrames.getFootFrame(robotSide));
+      centroid.changeFrameUsingTransform(desiredHeadingControlModule.getDesiredHeadingFrame(), footstepTransform);
+      FramePoint2d ret = centroid.toFramePoint2d();
+
       double extraX = 0.02;
-      double extraY = supportSide.negateIfLeftSide(0.02);
+      double extraY = 0.0;
       FrameVector2d offset = new FrameVector2d(desiredHeadingControlModule.getDesiredHeadingFrame(), extraX, extraY);
       offset.changeFrame(ret.getReferenceFrame());
       ret.add(offset);
@@ -708,25 +732,18 @@ public class MomentumBasedControllerStateMachine extends StateMachine
       return ret;
    }
 
-   private FramePoint2d getSingleSupportFinalDesiredICPForWalking(FramePoint finalDesiredStepLocation, RobotSide swingSide)
+   private FramePoint2d getSingleSupportFinalDesiredICPForWalking(Footstep desiredFootstep, RobotSide swingSide)
    {
-      ReferenceFrame referenceFrame = desiredHeadingControlModule.getDesiredHeadingFrame();    // referenceFrames.getAnkleZUpFrame(swingSide.getOppositeSide());
-      FramePoint2d desiredICPLocal = desiredICP.getFramePoint2dCopy();
-      desiredICPLocal.changeFrame(referenceFrame);
+      ReferenceFrame referenceFrame = ReferenceFrame.getWorldFrame();
+      FramePoint2d initialDesiredICP = desiredICP.getFramePoint2dCopy();
+      initialDesiredICP.changeFrame(referenceFrame);
 
-      FramePoint2d finalDesiredStepLocation2d = finalDesiredStepLocation.toFramePoint2d();
-      finalDesiredStepLocation2d.changeFrame(referenceFrame);
-      FrameVector2d stepOffset = new FrameVector2d(finalDesiredStepLocation2d);
-      FrameVector2d finalDesiredICPOffset = new FrameVector2d(getDoubleSupportFinalDesiredICPForWalking(swingSide));    // TODO: do something about expected orientation of swing foot
-      finalDesiredICPOffset.changeFrame(referenceFrame);
-      finalDesiredICPOffset.add(stepOffset);
-      finalDesiredICPOffset.sub(desiredICPLocal);
-
-      finalDesiredICPOffset.scale(singleSupportICPGlideScaleFactor.getDoubleValue());
-      FramePoint2d finalDesiredICP = new FramePoint2d(desiredICPLocal);
-      finalDesiredICP.add(finalDesiredICPOffset);
-
-      return finalDesiredICP;
+      // TODO: think about setting the shift factor here
+      FramePoint2d finalDesiredICP = getDoubleSupportFinalDesiredICPForWalking(desiredFootstep, bipedFeet.get(swingSide).getFootPolygonInSoleFrame()); // yes, swing side
+      finalDesiredICP.changeFrame(referenceFrame);
+      
+      FrameLineSegment2d initialToFinal = new FrameLineSegment2d(initialDesiredICP, finalDesiredICP);
+      return initialToFinal.pointBetweenEndPointsGivenParameter(singleSupportICPGlideScaleFactor.getDoubleValue());
    }
 
    private void evaluateCoMHeightTrajectory()
@@ -837,8 +854,8 @@ public class MomentumBasedControllerStateMachine extends StateMachine
 
       desiredFootOrientations.get(swingSide).set(desiredFootstep.getFootstepOrientationInFrame(desiredFootOrientations.get(swingSide).getReferenceFrame()));
 
-      FramePoint2d finalDesiredICP = getSingleSupportFinalDesiredICPForWalking(finalDesiredStepLocation, swingSide);
-      desiredICP.set(capturePoint);    // set initial desired equal to actual; prevents error buildup
+//      desiredICP.set(capturePoint);    // set initial desired equal to actual; prevents error buildup
+      FramePoint2d finalDesiredICP = getSingleSupportFinalDesiredICPForWalking(desiredFootstep, swingSide);
       icpTrajectoryGenerator.initialize(desiredICP.getFramePoint2dCopy(), finalDesiredICP, cartesianTrajectoryGenerators.get(swingSide).getFinalTime(), omega0);
 
       nullspaceMultipliers.get(swingSide).set(0.0);
