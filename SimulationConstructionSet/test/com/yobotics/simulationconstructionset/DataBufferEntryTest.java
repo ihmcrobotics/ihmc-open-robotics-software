@@ -293,6 +293,34 @@ public class DataBufferEntryTest
       dataBufferEntry.tickAndUpdate(2);
       assertEquals(0, dataBufferEntry.getMin(), 0);
    }
+
+   @Test
+   public void testMinMaxWithNaN()
+   {
+      for (int i = 0; i < 100; i++)
+      {
+         doubleYoVariable.set(Double.NaN);
+         dataBufferEntry.tickAndUpdate(i);         
+      }
+      assertEquals(0.0, dataBufferEntry.getMin(), 0.0);
+      assertEquals(0.0, dataBufferEntry.getMax(), 0.0);
+   }
+
+   @Test
+   public void testMinMaxWithNaN2()
+   {
+      for (int i = 0; i < 100; i++)
+      {
+         if (i == 50)
+            doubleYoVariable.set(Double.NaN);
+         else
+            doubleYoVariable.set(rng.nextDouble());
+         dataBufferEntry.tickAndUpdate(i);
+      }
+      assertFalse(Double.isNaN(dataBufferEntry.getMin()));
+      assertFalse(Double.isNaN(dataBufferEntry.getMax()));
+      assertTrue(dataBufferEntry.getMin() <= dataBufferEntry.getMax());
+   }
    
    @Test
    public void testResetMinMaxChanged()
