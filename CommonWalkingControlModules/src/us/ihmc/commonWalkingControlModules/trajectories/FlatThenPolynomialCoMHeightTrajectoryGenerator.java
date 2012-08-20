@@ -56,7 +56,7 @@ public class FlatThenPolynomialCoMHeightTrajectoryGenerator implements CenterOfM
       this.bipedFeet = bipedFeet;
       this.referenceFrames = referenceFrames;
 
-      nominalHeightAboveGround.set(1.31);
+      nominalHeightAboveGround.set(1.35);
       parentRegistry.addChild(registry);
    }
 
@@ -134,12 +134,18 @@ public class FlatThenPolynomialCoMHeightTrajectoryGenerator implements CenterOfM
 
    public double getDesiredCenterOfMassHeightSlope()
    {
-      return singleSupportSpline.getVelocity();
+      FramePoint com = processedSensors.getCenterOfMassPositionInFrame(referenceFrame);
+      if (MathTools.isInsideBounds(com.getX(), minXForSpline.getDoubleValue(), maxXForSpline.getDoubleValue()))
+         return singleSupportSpline.getVelocity();
+      else return 0.0;
    }
 
    public double getDesiredCenterOfMassHeightSecondDerivative()
    {
-      return singleSupportSpline.getAcceleration();
+      FramePoint com = processedSensors.getCenterOfMassPositionInFrame(referenceFrame);
+      if (MathTools.isInsideBounds(com.getX(), minXForSpline.getDoubleValue(), maxXForSpline.getDoubleValue()))
+         return singleSupportSpline.getAcceleration();
+      else return 0.0;
    }
 
    private double computeXf(RobotSide supportLeg, Footstep footstep)
@@ -147,30 +153,6 @@ public class FlatThenPolynomialCoMHeightTrajectoryGenerator implements CenterOfM
       double supportFootMaxX = findMaxXOfGroundContactPoints(supportLeg);
       double swingFootMaxX = findMaxXOfGroundContactPoints(footstep);
       return (supportFootMaxX + swingFootMaxX) / 2.0;
-   }
-   
-   private double findMinZOfGroundContactPoints(Footstep footstep)
-   {
-      RobotSide robotSide = footstep.getFootstepSide();
-      FramePose footstepPose = footstep.getFootstepPose();
-      Transform3D desiredFootToDesiredHeading = new Transform3D();
-      footstepPose.getTransform3D(desiredFootToDesiredHeading);
-
-      ArrayList<FramePoint2d> footPoints = bipedFeet.get(robotSide).getFootPolygonInSoleFrame().getClockwiseOrderedListOfFramePoints();
-      double minZ = Double.POSITIVE_INFINITY;
-      FramePoint tempFramePoint = new FramePoint(ReferenceFrame.getWorldFrame());
-      for (FramePoint2d footPoint : footPoints)
-      {
-         tempFramePoint.setToZero(footPoint.getReferenceFrame());
-         tempFramePoint.setXY(footPoint);
-         tempFramePoint.changeFrame(referenceFrames.getFootFrame(robotSide));
-
-         tempFramePoint.changeFrameUsingTransform(referenceFrame, desiredFootToDesiredHeading);
-         if (tempFramePoint.getZ() < minZ)
-            minZ = tempFramePoint.getZ();
-      }
-
-      return minZ;
    }
 
    private double findMinZOfGroundContactPoints(RobotSide robotSide)
