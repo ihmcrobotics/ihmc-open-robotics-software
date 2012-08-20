@@ -10,7 +10,6 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalcul
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.SimpleWorldDesiredFootstepCalculator;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredHeadingControlModule;
-import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.SimpleDesiredHeadingControlModule;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
@@ -22,7 +21,6 @@ import us.ihmc.commonWalkingControlModules.trajectories.FifthOrderWaypointCartes
 import us.ihmc.commonWalkingControlModules.trajectories.FlatThenPolynomialCoMHeightTrajectoryGenerator;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
-import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameLineSegment2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -103,10 +101,6 @@ public class MomentumBasedControllerStateMachine extends StateMachine
    private final SideDependentList<YoFrameVector> desiredFootAngularAccelerations = new SideDependentList<YoFrameVector>();
    private final SideDependentList<DoubleYoVariable> nullspaceMultipliers = new SideDependentList<DoubleYoVariable>();
 
-   private final DoubleYoVariable desiredCoMHeight = new DoubleYoVariable("desiredCoMHeight", registry);
-   private final DoubleYoVariable desiredCoMHeightVelocity = new DoubleYoVariable("desiredCoMHeightVelocity", registry);
-   private final DoubleYoVariable desiredCoMHeightAcceleration = new DoubleYoVariable("desiredCoMHeightAcceleration", registry);
-
    private final FramePoint2d previousCoP;
    private final FramePoint2d capturePoint;
 
@@ -132,8 +126,7 @@ public class MomentumBasedControllerStateMachine extends StateMachine
 
    public MomentumBasedControllerStateMachine(FullRobotModel fullRobotModel, CommonWalkingReferenceFrames referenceFrames, TwistCalculator twistCalculator,
            SideDependentList<BipedFootInterface> bipedFeet, BipedSupportPolygons bipedSupportPolygons, SideDependentList<FootSwitchInterface> footSwitches,
-           ProcessedSensorsInterface processedSensors, DoubleYoVariable t, double controlDT, double footHeight, YoVariableRegistry parentRegistry,
-           DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+           ProcessedSensorsInterface processedSensors, DoubleYoVariable t, double controlDT, DesiredHeadingControlModule desiredHeadingControlModule, YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       super(name + "State", name + "SwitchTime", MomentumBasedControllerState.class, t, registry);
       this.fullRobotModel = fullRobotModel;
@@ -143,7 +136,7 @@ public class MomentumBasedControllerStateMachine extends StateMachine
       this.bipedFeet = bipedFeet;
       this.bipedSupportPolygons = bipedSupportPolygons;
       this.controlDT = controlDT;
-      this.desiredHeadingControlModule = new SimpleDesiredHeadingControlModule(0.0, controlDT, registry);
+      this.desiredHeadingControlModule = desiredHeadingControlModule;
       this.footSwitches = footSwitches;
       this.gravity = -processedSensors.getGravityInWorldFrame().getZ();
       this.spatialAccelerationCalculator = new SpatialAccelerationCalculator(fullRobotModel.getElevator(), twistCalculator, gravity, true);
@@ -341,17 +334,17 @@ public class MomentumBasedControllerStateMachine extends StateMachine
 
    public double getDesiredCoMHeight()
    {
-      return desiredCoMHeight.getDoubleValue();
+      return centerOfMassHeightTrajectoryGenerator.getDesiredCenterOfMassHeight();
    }
 
-   public double getDesiredCoMHeightVelocity()
+   public double getDesiredCoMHeightSlope()
    {
-      return desiredCoMHeightVelocity.getDoubleValue();
+      return centerOfMassHeightTrajectoryGenerator.getDesiredCenterOfMassHeightSlope();
    }
 
-   public double getDesiredCoMHeightAcceleration()
+   public double getDesiredCoMHeightSecondDerivative()
    {
-      return desiredCoMHeightAcceleration.getDoubleValue();
+      return centerOfMassHeightTrajectoryGenerator.getDesiredCenterOfMassHeightSecondDerivative();
    }
 
    public void initialize()
@@ -375,7 +368,7 @@ public class MomentumBasedControllerStateMachine extends StateMachine
       @Override
       public void doAction()
       {
-         evaluateCoMHeightTrajectory();
+         centerOfMassHeightTrajectoryGenerator.compute();
 
          for (RobotSide robotSide : RobotSide.values())
          {
@@ -510,7 +503,7 @@ public class MomentumBasedControllerStateMachine extends StateMachine
       @Override
       public void doAction()
       {
-         evaluateCoMHeightTrajectory();
+         centerOfMassHeightTrajectoryGenerator.compute();
 
          CartesianTrajectoryGenerator cartesianTrajectoryGenerator = cartesianTrajectoryGenerators.get(swingSide);
          if (!cartesianTrajectoryGenerator.isDone() && trajectoryInitialized.get(swingSide).getBooleanValue())
@@ -744,26 +737,6 @@ public class MomentumBasedControllerStateMachine extends StateMachine
       
       FrameLineSegment2d initialToFinal = new FrameLineSegment2d(initialDesiredICP, finalDesiredICP);
       return initialToFinal.pointBetweenEndPointsGivenParameter(singleSupportICPGlideScaleFactor.getDoubleValue());
-   }
-
-   private void evaluateCoMHeightTrajectory()
-   {
-      centerOfMassHeightTrajectoryGenerator.compute();
-
-      double z = centerOfMassHeightTrajectoryGenerator.getDesiredCenterOfMassHeight();
-      double dzdx = centerOfMassHeightTrajectoryGenerator.getDesiredCenterOfMassHeightSlope();
-      double d2zdx2 = centerOfMassHeightTrajectoryGenerator.getDesiredCenterOfMassHeightSecondDerivative();
-
-      ReferenceFrame desiredHeadingFrame = desiredHeadingControlModule.getDesiredHeadingFrame();
-      FramePoint com = processedSensors.getCenterOfMassPositionInFrame(desiredHeadingFrame);
-      FrameVector comd = processedSensors.getCenterOfMassVelocityInFrame(desiredHeadingFrame);
-      FramePoint2d previousCoP = this.previousCoP.changeFrameCopy(desiredHeadingFrame);
-      double xd = comd.getX();
-      double xdd = MathTools.square(omega0) * (com.getX() - previousCoP.getX()); // TODO: use current instead of previous, move out of this class.
-
-      desiredCoMHeight.set(z);
-      desiredCoMHeightVelocity.set(dzdx * xd);
-      desiredCoMHeightAcceleration.set(d2zdx2 * MathTools.square(xd) + dzdx * xdd);
    }
 
    private void setDesiredFootPosVelAccForSupportSide(RobotSide supportSide, double footPitch)
