@@ -110,6 +110,9 @@ public class MomentumBasedController implements RobotController
    private final DoubleYoVariable kAngularMomentumZ = new DoubleYoVariable("kAngularMomentumZ", registry);
    private final DoubleYoVariable kPelvisYaw = new DoubleYoVariable("kPelvisZ", registry);
    private final HashMap<RevoluteJoint, DoubleYoVariable> desiredAccelerationYoVariables = new HashMap<RevoluteJoint, DoubleYoVariable>();
+   
+   private final DoubleYoVariable desiredPelvisPitch = new DoubleYoVariable("desiredPelvisPitch", registry);
+   private final DoubleYoVariable desiredPelvisRoll = new DoubleYoVariable("desiredPelvisRoll", registry);
 
    // TODO: move to separate class that takes care of determining desired GRFs
    private final YoFrameVector2d desiredDeltaCMP = new YoFrameVector2d("desiredDeltaCMP", "", worldFrame, registry);
@@ -241,6 +244,7 @@ public class MomentumBasedController implements RobotController
       kUpperBody.set(100.0);
       zetaUpperBody.set(1.0);
       omega0.set(3.0);    // just to initialize, will be reset every tick. TODO: integrate ICP control law and omega0 calculation
+      desiredPelvisPitch.set(0.6);
    }
 
    public void initialize()
@@ -310,6 +314,7 @@ public class MomentumBasedController implements RobotController
       this.desiredCoP.set(desiredCoP.changeFrameCopy(this.desiredCoP.getReferenceFrame()));
       FrameVector2d desiredDeltaCMP = determineDesiredDeltaCMP();
       FramePoint2d desiredCMP = new FramePoint2d(desiredCoP);
+      desiredDeltaCMP.changeFrame(desiredCMP.getReferenceFrame());
       desiredCMP.add(desiredDeltaCMP);
 
       if (!bipedSupportPolygons.getSupportPolygonInMidFeetZUp().isPointInside(desiredCoP.changeFrameCopy(midFeetZUp)))
@@ -437,7 +442,6 @@ public class MomentumBasedController implements RobotController
 //    doChestOrientationControl();
       doPDControl(kUpperBody, dUpperBody, fullRobotModel.getSpineJointList());
 
-
       FrameVector desiredAngularCentroidalMomentumRate = new FrameVector(totalGroundReactionWrench.getExpressedInFrame(),
                                                             totalGroundReactionWrench.getAngularPartCopy());
       FrameVector desiredLinearCentroidalMomentumRate = new FrameVector(totalGroundReactionWrench.getExpressedInFrame(),
@@ -546,8 +550,6 @@ public class MomentumBasedController implements RobotController
 
       FramePoint2d filteredDesiredCoP = desiredCenterOfPressureFilter.filter(desiredCoP, supportLeg);
 
-//    FramePoint2d filteredDesiredCoP = desiredCoP;
-
       visualizer.setDesiredCapturePoint(desiredCapturePoint);
       visualizer.setDesiredCoP(filteredDesiredCoP);
 
@@ -556,8 +558,7 @@ public class MomentumBasedController implements RobotController
 
    private FrameVector2d determineDesiredDeltaCMP()
    {
-      RobotSide supportLeg = stateMachine.getSupportLeg();
-      ReferenceFrame frame = (supportLeg == null) ? midFeetZUp : referenceFrames.getAnkleZUpFrame(supportLeg);
+      ReferenceFrame frame = ReferenceFrame.getWorldFrame();
 
       FrameVector zUnitVector = new FrameVector(frame, 0.0, 0.0, 1.0);
       FrameVector angularMomentum = processedSensors.getAngularMomentumInFrame(frame);
@@ -565,11 +566,16 @@ public class MomentumBasedController implements RobotController
       desiredDeltaCMP.cross(angularMomentum, zUnitVector);
       desiredDeltaCMP.scale(-kAngularMomentumXY.getDoubleValue());
 
-      Transform3D pelvisToMidFeetZUp = fullRobotModel.getPelvis().getBodyFixedFrame().getTransformToDesiredFrame(frame);
-      Matrix3d pelvisToMidFeetZUpRotation = new Matrix3d();
-      pelvisToMidFeetZUp.get(pelvisToMidFeetZUpRotation);
+      Transform3D pelvisToWorld = fullRobotModel.getPelvis().getBodyFixedFrame().getTransformToDesiredFrame(frame);
+      Matrix3d pelvisToDesiredPelvis = new Matrix3d();
+      pelvisToWorld.get(pelvisToDesiredPelvis);
+      
+      Matrix3d desiredPelvisToWorldRotation = new Matrix3d();
+      RotationFunctions.setYawPitchRoll(desiredPelvisToWorldRotation, 0.0, desiredPelvisPitch.getDoubleValue(), desiredPelvisRoll.getDoubleValue());
+      pelvisToDesiredPelvis.mulTransposeLeft(desiredPelvisToWorldRotation, pelvisToDesiredPelvis);
+      
       AxisAngle4d pelvisToCenterOfMassAxisAngle = new AxisAngle4d();
-      pelvisToCenterOfMassAxisAngle.set(pelvisToMidFeetZUpRotation);
+      pelvisToCenterOfMassAxisAngle.set(pelvisToDesiredPelvis);
       FrameVector proportionalPart = new FrameVector(frame, pelvisToCenterOfMassAxisAngle.getX(), pelvisToCenterOfMassAxisAngle.getY(), 0.0);
       proportionalPart.scale(pelvisToCenterOfMassAxisAngle.getAngle());
       proportionalPart.cross(proportionalPart, zUnitVector);
@@ -618,12 +624,12 @@ public class MomentumBasedController implements RobotController
    {
       for (RevoluteJoint joint : joints)
       {
-         joint.setQddDesired(computeDesiredAcceleration(k, d, joint));
+         joint.setQddDesired(computeDesiredAcceleration(k, d, 0.0, 0.0, joint));
       }
    }
 
-   private static double computeDesiredAcceleration(double k, double d, RevoluteJoint joint)
+   private static double computeDesiredAcceleration(double k, double d, double qDesired, double qdDesired, RevoluteJoint joint)
    {
-      return -k * joint.getQ() - d * joint.getQd();
+      return k * (qDesired - joint.getQ()) + d * (qdDesired - joint.getQd());
    }
 }

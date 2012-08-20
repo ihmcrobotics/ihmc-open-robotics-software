@@ -24,9 +24,8 @@ public class ConstantCoPInstantaneousCapturePointTrajectory
    private final YoFramePoint2d finalDesiredICP;
    private final DoubleYoVariable moveTime;
    private final DoubleYoVariable currentTime;
-   private final double amountToBeInside;
 
-   public ConstantCoPInstantaneousCapturePointTrajectory(BipedSupportPolygons bipedSupportPolygons, double gravity, double deltaT, double amountToBeInside, YoVariableRegistry parentRegistry)
+   public ConstantCoPInstantaneousCapturePointTrajectory(BipedSupportPolygons bipedSupportPolygons, double gravity, double deltaT, YoVariableRegistry parentRegistry)
    {
       this.bipedSupportPolygons = bipedSupportPolygons;
       this.gravity = gravity;
@@ -39,13 +38,12 @@ public class ConstantCoPInstantaneousCapturePointTrajectory
 
       moveTime = new DoubleYoVariable("icpTrajectoryMoveTime", registry);
       currentTime = new DoubleYoVariable("icpTrajectoryCurrentTime", registry);
-      this.amountToBeInside = amountToBeInside;
 
       parentRegistry.addChild(registry);
       reset();
    }
 
-   public void initialize(FramePoint2d initialDesiredICP, FramePoint2d finalDesiredICP, double moveTime, double omega0)
+   public void initialize(FramePoint2d initialDesiredICP, FramePoint2d finalDesiredICP, double moveTime, double omega0, double amountToBeInside)
    {
       initialDesiredICP.changeFrame(this.initialDesiredICP.getReferenceFrame());
       finalDesiredICP.changeFrame(this.finalDesiredICP.getReferenceFrame());
