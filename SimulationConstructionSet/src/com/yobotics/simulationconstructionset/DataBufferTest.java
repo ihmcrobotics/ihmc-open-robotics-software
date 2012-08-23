@@ -15,7 +15,8 @@ import com.yobotics.simulationconstructionset.gui.config.VarGroupList;
 
 public class DataBufferTest
 {
-
+   private final int testBufferSize = 100;
+   
    private enum EnumYoVariableTestEnums
    {
       ONE, TWO;
@@ -26,8 +27,7 @@ public class DataBufferTest
    BooleanYoVariable booleanYoVariable;
    IntegerYoVariable integerYoVariable;
    YoVariableRegistry registry;
-   int testInitialBufferSize = 4;
-   DataBuffer dataBuffer = new DataBuffer(testInitialBufferSize);
+   DataBuffer dataBuffer = new DataBuffer(testBufferSize);
 
    public DataBufferTest()
    {
@@ -57,7 +57,7 @@ public class DataBufferTest
    public void testGetBufferSize()
    {
       int testBufferSize = dataBuffer.getBufferSize();
-      int expectedBufferSize = 4;
+      int expectedBufferSize = testBufferSize;
       assertTrue(expectedBufferSize == testBufferSize);
    }
    
@@ -83,10 +83,10 @@ public class DataBufferTest
    @Test
    public void testAddAndGetEntry()
    {
-      DataBufferEntry doubleDataBufferEntryTest = new DataBufferEntry(doubleYoVariable, 100);
-      DataBufferEntry booleanDataBufferEntryTest = new DataBufferEntry(booleanYoVariable, 100);
-      DataBufferEntry integerDataBufferEntryTest = new DataBufferEntry(integerYoVariable, 100);
-      DataBufferEntry enumDataBufferEntryTest = new DataBufferEntry(enumYoVariable, 100);
+      DataBufferEntry doubleDataBufferEntryTest = new DataBufferEntry(doubleYoVariable, testBufferSize);
+      DataBufferEntry booleanDataBufferEntryTest = new DataBufferEntry(booleanYoVariable, testBufferSize);
+      DataBufferEntry integerDataBufferEntryTest = new DataBufferEntry(integerYoVariable, testBufferSize);
+      DataBufferEntry enumDataBufferEntryTest = new DataBufferEntry(enumYoVariable, testBufferSize);
       dataBuffer.addEntry(doubleDataBufferEntryTest);
       dataBuffer.addEntry(booleanDataBufferEntryTest);
       dataBuffer.addEntry(integerDataBufferEntryTest);
@@ -119,15 +119,15 @@ public class DataBufferTest
    @Test
    public void testAddNewEntry() throws RepeatDataBufferEntryException
    {
-      dataBuffer.addNewEntry(doubleYoVariable, 100);
-      dataBuffer.addNewEntry(booleanYoVariable, 100);
-      dataBuffer.addNewEntry(integerYoVariable, 100);
-      dataBuffer.addNewEntry(enumYoVariable, 100);
+      dataBuffer.addNewEntry(doubleYoVariable, testBufferSize);
+      dataBuffer.addNewEntry(booleanYoVariable, testBufferSize);
+      dataBuffer.addNewEntry(integerYoVariable, testBufferSize);
+      dataBuffer.addNewEntry(enumYoVariable, testBufferSize);
       
-      DataBufferEntry doubleDataBufferEntryTest = new DataBufferEntry(doubleYoVariable, 100);
-      DataBufferEntry booleanDataBufferEntryTest = new DataBufferEntry(booleanYoVariable, 100);
-      DataBufferEntry integerDataBufferEntryTest = new DataBufferEntry(integerYoVariable, 100);
-      DataBufferEntry enumDataBufferEntryTest = new DataBufferEntry(enumYoVariable, 100);
+      DataBufferEntry doubleDataBufferEntryTest = new DataBufferEntry(doubleYoVariable, testBufferSize);
+      DataBufferEntry booleanDataBufferEntryTest = new DataBufferEntry(booleanYoVariable, testBufferSize);
+      DataBufferEntry integerDataBufferEntryTest = new DataBufferEntry(integerYoVariable, testBufferSize);
+      DataBufferEntry enumDataBufferEntryTest = new DataBufferEntry(enumYoVariable, testBufferSize);
       
       assertTrue(doubleDataBufferEntryTest.getVariable() == dataBuffer.getEntry(doubleYoVariable).getVariable());
       assertTrue(booleanDataBufferEntryTest.getVariable() == dataBuffer.getEntry(booleanYoVariable).getVariable());
@@ -238,10 +238,10 @@ public class DataBufferTest
    public void testGetEntries() throws RepeatDataBufferEntryException
    {
       ArrayList<DataBufferEntry> expectedDataEntries = new ArrayList<DataBufferEntry>();
-      DataBufferEntry doubleDataBufferEntryTest = new DataBufferEntry(doubleYoVariable, 100);
-      DataBufferEntry booleanDataBufferEntryTest = new DataBufferEntry(booleanYoVariable, 100);
-      DataBufferEntry integerDataBufferEntryTest = new DataBufferEntry(integerYoVariable, 100);
-      DataBufferEntry enumDataBufferEntryTest = new DataBufferEntry(enumYoVariable, 100);
+      DataBufferEntry doubleDataBufferEntryTest = new DataBufferEntry(doubleYoVariable, testBufferSize);
+      DataBufferEntry booleanDataBufferEntryTest = new DataBufferEntry(booleanYoVariable, testBufferSize);
+      DataBufferEntry integerDataBufferEntryTest = new DataBufferEntry(integerYoVariable, testBufferSize);
+      DataBufferEntry enumDataBufferEntryTest = new DataBufferEntry(enumYoVariable, testBufferSize);
       
       dataBuffer.addEntry(doubleDataBufferEntryTest);
       dataBuffer.addEntry(booleanDataBufferEntryTest);
@@ -259,10 +259,10 @@ public class DataBufferTest
    @Test
    public void testGetVariables() throws RepeatDataBufferEntryException
    {
-      dataBuffer.addNewEntry(doubleYoVariable, 100);
-      dataBuffer.addNewEntry(booleanYoVariable, 100);
-      dataBuffer.addNewEntry(integerYoVariable, 100);
-      dataBuffer.addNewEntry(enumYoVariable, 100);
+      dataBuffer.addNewEntry(doubleYoVariable, testBufferSize);
+      dataBuffer.addNewEntry(booleanYoVariable, testBufferSize);
+      dataBuffer.addNewEntry(integerYoVariable, testBufferSize);
+      dataBuffer.addNewEntry(enumYoVariable, testBufferSize);
       
       ArrayList<YoVariable> expectedArrayOfVariables = new ArrayList<YoVariable>();
       expectedArrayOfVariables.add(doubleYoVariable);
@@ -290,10 +290,10 @@ public class DataBufferTest
 //   @Test
 //   public void testResetDataBuffer() throws RepeatDataBufferEntryException
 //   {
-//      dataBuffer.addNewEntry(doubleYoVariable, 100);
-//      dataBuffer.addNewEntry(booleanYoVariable, 100);
-//      dataBuffer.addNewEntry(integerYoVariable, 100);
-//      dataBuffer.addNewEntry(enumYoVariable, 100);
+//      dataBuffer.addNewEntry(doubleYoVariable, testBufferSize);
+//      dataBuffer.addNewEntry(booleanYoVariable, testBufferSize);
+//      dataBuffer.addNewEntry(integerYoVariable, testBufferSize);
+//      dataBuffer.addNewEntry(enumYoVariable, testBufferSize);
 //      
 //      dataBuffer.resetDataBuffer();
 //      
@@ -308,12 +308,12 @@ public class DataBufferTest
 //   public void testClearAll() throws RepeatDataBufferEntryException
 //   {
 //      
-//       dataBuffer.addNewEntry(doubleYoVariable, 100);
-//       dataBuffer.addNewEntry(booleanYoVariable, 100);
-//       dataBuffer.addNewEntry(integerYoVariable, 100);
-//       dataBuffer.addNewEntry(enumYoVariable, 100);
+//       dataBuffer.addNewEntry(doubleYoVariable, testBufferSize);
+//       dataBuffer.addNewEntry(booleanYoVariable, testBufferSize);
+//       dataBuffer.addNewEntry(integerYoVariable, testBufferSize);
+//       dataBuffer.addNewEntry(enumYoVariable, testBufferSize);
 //       
-//       dataBuffer.clearAll(100);
+//       dataBuffer.clearAll(testBufferSize);
 //       
 //       int dataBufferSize = dataBuffer.getBufferSize();
 //       System.out.println(dataBufferSize);
@@ -321,32 +321,56 @@ public class DataBufferTest
 //      
 //   }
   
-   //doesn't work?
+   
+   
    @Test
-   public void testChangeBufferSize()
+   public void testEmptyBufferIncreaseBufferSize()
    {
-      double randomNumber = 20*Math.random();
-      
-      int randomBufferSize = (int)randomNumber;
-      
-      dataBuffer.changeBufferSize(2);
-      System.out.println(randomBufferSize + " " + dataBuffer.getBufferSize()); 
-      assertTrue(3 == dataBuffer.getBufferSize());
-
+      int originalBufferSize = dataBuffer.getBufferSize();
+      int newBufferSize = originalBufferSize * 2;
+            
+      dataBuffer.changeBufferSize(newBufferSize);
+      System.out.println(newBufferSize + " " + dataBuffer.getBufferSize()); 
+      assertEquals(newBufferSize, dataBuffer.getBufferSize());
    }
    
-   //doesn't work?
+   @Test
+   public void testEmptyBufferDecreaseBufferSize()
+   {
+      int originalBufferSize = dataBuffer.getBufferSize();
+      int newBufferSize = originalBufferSize/2;
+            
+      dataBuffer.changeBufferSize(newBufferSize);
+      System.out.println(newBufferSize + " " + dataBuffer.getBufferSize()); 
+      assertEquals(newBufferSize, dataBuffer.getBufferSize());
+   }
+   
    @Test
    public void testEnlargeBufferSize()
    {
-      double randomNumber = 20*Math.random() + 5;
+      DataBufferEntry doubleDataBufferEntryTest = new DataBufferEntry(doubleYoVariable, testBufferSize);
+      dataBuffer.addEntry(doubleDataBufferEntryTest);
       
-      int randomBufferSize = (int)randomNumber;
+      int originalBufferSize = dataBuffer.getBufferSize();
+      int newBufferSize = originalBufferSize * 2;
+            
+      dataBuffer.changeBufferSize(newBufferSize);
+      System.out.println(newBufferSize + " " + dataBuffer.getBufferSize()); 
+      assertEquals(newBufferSize, dataBuffer.getBufferSize());
+   }
+   
+   @Test
+   public void testDecreaseBufferSize()
+   {
+      DataBufferEntry doubleDataBufferEntryTest = new DataBufferEntry(doubleYoVariable, testBufferSize);
+      dataBuffer.addEntry(doubleDataBufferEntryTest);
       
-      dataBuffer.changeBufferSize(randomBufferSize);
-      System.out.println(randomBufferSize + " " + dataBuffer.getBufferSize()); 
-      assertTrue(randomBufferSize == dataBuffer.getBufferSize());
-
+      int originalBufferSize = dataBuffer.getBufferSize();
+      int newBufferSize = originalBufferSize/2;
+            
+      dataBuffer.changeBufferSize(newBufferSize);
+      System.out.println(newBufferSize + " " + dataBuffer.getBufferSize()); 
+      assertEquals(newBufferSize, dataBuffer.getBufferSize());
    }
    
 //   @Test
