@@ -1,21 +1,28 @@
 package com.yobotics.simulationconstructionset.scripts;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.io.BufferedReader;
 import java.io.StringReader;
+import java.util.Random;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.EnumYoVariable;
+import com.yobotics.simulationconstructionset.IntegerYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public class TimeScriptTest
 {
    private YoVariableRegistry rootRegistry, registryOne, registryTwo;
-   private DoubleYoVariable variableOne, variableTwo, variableThree;
+   private DoubleYoVariable doubleVariable;
+   private BooleanYoVariable booleanVariable;
+   private IntegerYoVariable integerVariable;
+   private EnumYoVariable<TimeScriptTestEnums> enumVariable;
    
    @Before
    public void setUp() throws Exception
@@ -27,10 +34,15 @@ public class TimeScriptTest
       rootRegistry.addChild(registryOne);
       registryOne.addChild(registryTwo);
 
-      variableOne = new DoubleYoVariable("variableOne", rootRegistry);
-      variableTwo = new DoubleYoVariable("variableTwo", registryOne);
-      variableThree = new DoubleYoVariable("variableThree", registryTwo);
-     
+      doubleVariable = new DoubleYoVariable("doubleVariable", rootRegistry);
+      booleanVariable = new BooleanYoVariable("booleanVariable", registryOne);
+      integerVariable = new IntegerYoVariable("integerVariable", registryTwo);
+      enumVariable = new EnumYoVariable<TimeScriptTestEnums>("enumVariable", registryTwo, TimeScriptTestEnums.class);
+   }
+   
+   private enum TimeScriptTestEnums
+   {
+      V0, V1, V2;
    }
 
    @After
@@ -40,9 +52,10 @@ public class TimeScriptTest
       registryOne = null;
       registryTwo = null;
       
-      variableOne = null;
-      variableTwo = null;
-      variableThree = null;
+      doubleVariable = null;
+      booleanVariable = null;
+      integerVariable = null;
+      enumVariable = null;
    }
 
    @Test
@@ -73,24 +86,24 @@ public class TimeScriptTest
       double epsilon = 1e-7;
       
       double initialValue = 99.9;
-      variableOne.set(initialValue);
+      doubleVariable.set(initialValue);
       
       TimeScriptEntry timeScriptEntryOne = new TimeScriptEntry(timeOne);
-      timeScriptEntryOne.addVarValue(variableOne, valueOne);
+      timeScriptEntryOne.addVarValue(doubleVariable, valueOne);
       timeScript.addEntry(timeScriptEntryOne);
       
-      TimeScriptEntry timeScriptEntryTwo = new TimeScriptEntry(timeTwo);
-      timeScriptEntryTwo.addVarValue(variableOne, valueTwo);
-      timeScript.addEntry(timeScriptEntryTwo);
-      
       TimeScriptEntry timeScriptEntryThree = new TimeScriptEntry(timeThree);
-      timeScriptEntryThree.addVarValue(variableOne, valueThree);
+      timeScriptEntryThree.addVarValue(doubleVariable, valueThree);
       timeScript.addEntry(timeScriptEntryThree);
+      
+      TimeScriptEntry timeScriptEntryTwo = new TimeScriptEntry(timeTwo);
+      timeScriptEntryTwo.addVarValue(doubleVariable, valueTwo);
+      timeScript.addEntry(timeScriptEntryTwo);
       
       double time = 0.0;
       timeScript.doScript(time);
       
-      assertEquals(initialValue, variableOne.getDoubleValue(), epsilon);
+      assertEquals(initialValue, doubleVariable.getDoubleValue(), epsilon);
       
       for (time=0.0; time<10.0; time=time+0.001)
       {
@@ -98,19 +111,19 @@ public class TimeScriptTest
          
          if (time < timeOne)
          {
-            assertEquals(initialValue, variableOne.getDoubleValue(), epsilon);
+            assertEquals(initialValue, doubleVariable.getDoubleValue(), epsilon);
          }
          else if (time < timeTwo)
          {
-            assertEquals(valueOne, variableOne.getDoubleValue(), epsilon);
+            assertEquals(valueOne, doubleVariable.getDoubleValue(), epsilon);
          }
          else if (time < timeThree)
          {
-            assertEquals(valueTwo, variableOne.getDoubleValue(), epsilon);
+            assertEquals(valueTwo, doubleVariable.getDoubleValue(), epsilon);
          }
          else
          {
-            assertEquals(valueThree, variableOne.getDoubleValue(), epsilon);
+            assertEquals(valueThree, doubleVariable.getDoubleValue(), epsilon);
          }
       }
    }
@@ -119,17 +132,25 @@ public class TimeScriptTest
    @Test
    public void testSaveAndLoad()
    {
-      String[] variableNames = new String[]{"variableOne", "variableTwo", "variableThree"};
+      Random random = new Random(1776L);
       
-      double[] times = new double[]{1.0, 2.1, 5.77};
-      double[][] values = new double[times.length][variableNames.length];
+      String doubleVariableName = "doubleVariable";
+      String booleanVariableName = "booleanVariable";
+      String integerVariableName = "integerVariable";
+      String enumVariableName = "enumVariable";
+      
+      double[] times = new double[]{1.0, 2.1, 5.77, 12.44, 17.90993};
+      double[] doubleValues = new double[times.length];
+      boolean[] booleanValues = new boolean[times.length];
+      int[] integerValues = new int[times.length];
+      TimeScriptTestEnums[] enumValues = new TimeScriptTestEnums[times.length];
       
       for (int i=0; i<times.length; i++)
       {
-         for (int j=0; j<values[0].length; j++)
-         {
-            values[i][j] = 100.0 * Math.random() - 50.0;
-         }
+            doubleValues[i] = 100.0 * random.nextDouble() - 50.0;
+            booleanValues[i] = random.nextBoolean();
+            integerValues[i] = random.nextInt();
+            enumValues[i] = TimeScriptTestEnums.values()[random.nextInt(TimeScriptTestEnums.values().length)];
       }
       
       TimeScript timeScript = new TimeScript(rootRegistry);
@@ -141,24 +162,25 @@ public class TimeScriptTest
          pseudoFile = pseudoFile + "t = " + times[i] + ":\n";
          pseudoFile = pseudoFile + "/* This is a comment!! */\n";
 
-         for (int j=0; j<values[0].length; j++)
-         {
-            pseudoFile = pseudoFile + variableNames[j] + " = " + values[i][j] + ";\n";
-            pseudoFile = pseudoFile + "// This is a comment!! \n";
-         }
+         pseudoFile = pseudoFile + doubleVariableName + " = " + doubleValues[i] + ";\n";
+         pseudoFile = pseudoFile + "// This is a comment!! \n";
+         pseudoFile = pseudoFile + booleanVariableName + " = " + booleanValues[i] + ";\n";
+         pseudoFile = pseudoFile + "// This is a comment!! \n";
+         pseudoFile = pseudoFile + integerVariableName + " = " + integerValues[i] + ";\n";
+         pseudoFile = pseudoFile + "// This is a comment!! \n";
+         pseudoFile = pseudoFile + enumVariableName + " = " + enumValues[i] + ";\n";
       }
       
 //      System.out.println(pseudoFile);
       
       StringReader reader = new StringReader(pseudoFile);
-      
       BufferedReader in = new BufferedReader(reader);
       
       timeScript.readTimeScript(rootRegistry, in);
       
       int timeIndex = -1;
       
-      for (double time=0.0; time<10.0; time=time+0.001)
+      for (double time=0.0; time<times[times.length-1] + 1.0; time=time+0.01)
       {
          timeScript.doScript(time);
          
@@ -169,12 +191,10 @@ public class TimeScriptTest
          
          if (timeIndex >= 0)
          {
-            for (int variableIndex=0; variableIndex<values[0].length; variableIndex++)
-            {
-               DoubleYoVariable yoVariable = (DoubleYoVariable) rootRegistry.getVariable(variableNames[variableIndex]);
-               
-               assertEquals(values[timeIndex][variableIndex], yoVariable.getDoubleValue(), 1e-7);
-            }
+            assertEquals(doubleValues[timeIndex], doubleVariable.getDoubleValue(), 1e-7);
+            assertEquals(booleanValues[timeIndex], booleanVariable.getBooleanValue());
+            assertEquals(integerValues[timeIndex], integerVariable.getIntegerValue());
+            assertEquals(enumValues[timeIndex], enumVariable.getEnumValue());   
          }
       }
       
