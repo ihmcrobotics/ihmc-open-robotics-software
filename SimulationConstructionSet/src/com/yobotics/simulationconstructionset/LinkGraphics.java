@@ -26,6 +26,7 @@ import javax.vecmath.Point3f;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.utilities.InertiaTools;
+import us.ihmc.utilities.math.geometry.GeometryGenerator;
 
 import com.mnstarfire.loaders3d.Loader3DS;
 import com.sun.j3d.utils.picking.PickTool;
@@ -740,7 +741,7 @@ public class LinkGraphics
    /**
     * Adds the given geometry with the specified appearance to the origin
     * of the current coordinate system.  The {@link YoAppearance YoAppearance}
-    * and {@link YoGeometry YoGeometry} classes provide a number of basic appearances
+    * and {@link GeometryGenerator GeometryGenerator} classes provide a number of basic appearances
     * and shapes respectively.  For more detailed information see the Java3d API.
     *
     * @param geometry Geometry of the new shape.
@@ -1094,8 +1095,8 @@ public class LinkGraphics
     */
    public void addCoordinateSystem(double length, Appearance xAxisAppearance, Appearance yAxisAppearance, Appearance zAxisAppearance, Appearance arrowAppearance)
    {
-      Geometry bar = YoGeometry.Cylinder(length / 32.0, length, 15);
-      Geometry arrow = YoGeometry.Cone(length / 10.0, length / 15.0, 15);
+      Geometry bar = GeometryGenerator.Cylinder(length / 32.0, length, 15);
+      Geometry arrow = GeometryGenerator.Cone(length / 10.0, length / 15.0, 15);
 
       BranchGroup base = new BranchGroup();
 
@@ -1166,7 +1167,7 @@ public class LinkGraphics
     */
    public void addCube(double lx, double ly, double lz, Appearance cubeApp)
    {
-      Geometry cubeGeom = YoGeometry.Cube(lx, ly, lz);
+      Geometry cubeGeom = GeometryGenerator.Cube(lx, ly, lz);
       addShape(cubeGeom, cubeApp);
 
 
@@ -1221,7 +1222,7 @@ public class LinkGraphics
     */
    public void addWedge(double lx, double ly, double lz, Appearance wedgeApp)
    {
-      Geometry wedgeGeom = YoGeometry.Wedge(lx, ly, lz);
+      Geometry wedgeGeom = GeometryGenerator.Wedge(lx, ly, lz);
       addShape(wedgeGeom, wedgeApp);
       if (wedgeApp != null)
          linkGraphicsDefinition.addInstruction(new LinkGraphicsAddWedge(lx, ly, lz, new AppearanceDefinition(getColor(wedgeApp))));
@@ -1265,7 +1266,7 @@ public class LinkGraphics
     */
    public void addSphere(double radius, Appearance sphereApp)
    {
-      Geometry sphereGeom = YoGeometry.Sphere(radius, 15, 15);
+      Geometry sphereGeom = GeometryGenerator.Sphere(radius, 15, 15);
       addShape(sphereGeom, sphereApp);
       if (sphereApp != null)
          linkGraphicsDefinition.addInstruction(new LinkGraphicsAddSphere(radius, new AppearanceDefinition(getColor(sphereApp))));
@@ -1313,7 +1314,7 @@ public class LinkGraphics
     */
    public void addEllipsoid(double xRad, double yRad, double zRad, Appearance ellipsoidApp)
    {
-      Geometry ellipsoidGeom = YoGeometry.Ellipsoid(xRad, yRad, zRad, 15, 15);
+      Geometry ellipsoidGeom = GeometryGenerator.Ellipsoid(xRad, yRad, zRad, 15, 15);
       addShape(ellipsoidGeom, ellipsoidApp);
       if (ellipsoidApp != null)
          linkGraphicsDefinition.addInstruction(new LinkGraphicsAddEllipsoid(xRad, yRad, zRad, new AppearanceDefinition(getColor(ellipsoidApp))));
@@ -1359,7 +1360,7 @@ public class LinkGraphics
     */
    public void addCylinder(double height, double radius, Appearance cylApp)
    {
-      Geometry cylGeom = YoGeometry.Cylinder(radius, height, 15);
+      Geometry cylGeom = GeometryGenerator.Cylinder(radius, height, 15);
       addShape(cylGeom, cylApp);
       if (cylApp != null)
          linkGraphicsDefinition.addInstruction(new LinkGraphicsAddCylinder(height, radius, new AppearanceDefinition(getColor(cylApp))));
@@ -1405,7 +1406,7 @@ public class LinkGraphics
     */
    public void addCone(double height, double radius, Appearance coneApp)
    {
-      Geometry coneGeom = YoGeometry.Cone(height, radius, 15);
+      Geometry coneGeom = GeometryGenerator.Cone(height, radius, 15);
       addShape(coneGeom, coneApp);
       if (coneApp != null)
          linkGraphicsDefinition.addInstruction(new LinkGraphicsAddCone(height, radius, new AppearanceDefinition(getColor(coneApp))));
@@ -1463,7 +1464,7 @@ public class LinkGraphics
     */
    public void addGenTruncatedCone(double height, double bx, double by, double tx, double ty, Appearance coneApp)
    {
-      Geometry genTruncatedConeGeom = YoGeometry.GenTruncatedCone(height, bx, by, tx, ty, 15);
+      Geometry genTruncatedConeGeom = GeometryGenerator.GenTruncatedCone(height, bx, by, tx, ty, 15);
       addShape(genTruncatedConeGeom, coneApp);
       if (coneApp != null)
          linkGraphicsDefinition.addInstruction(new LinkGraphicsAddTruncatedCone(height, bx, by, tx, ty, new AppearanceDefinition(getColor(coneApp))));
@@ -1515,7 +1516,7 @@ public class LinkGraphics
     */
    public void addHemiEllipsoid(double xRad, double yRad, double zRad, Appearance hEApp)
    {
-      Geometry hEGeom = YoGeometry.HemiEllipsoid(xRad, yRad, zRad, 16, 16);
+      Geometry hEGeom = GeometryGenerator.HemiEllipsoid(xRad, yRad, zRad, 16, 16);
       addShape(hEGeom, hEApp);
       if (hEApp != null)
          linkGraphicsDefinition.addInstruction(new LinkGraphicsAddHemiEllipsoid(xRad, yRad, zRad, new AppearanceDefinition(getColor(hEApp))));
@@ -1580,9 +1581,9 @@ public class LinkGraphics
    public void addArcTorus(double startAngle, double endAngle, double majorRadius, double minorRadius, Appearance arcTorusApp)
    {
       // System.out.println("start: " + startAngle + ", end: " + endAngle + ", MR: " + majorRadius + ", mr: " + minorRadius);
-      Geometry arcTorusGeom = YoGeometry.ArcTorus(startAngle, endAngle, majorRadius, minorRadius, 15);
+      Geometry arcTorusGeom = GeometryGenerator.ArcTorus(startAngle, endAngle, majorRadius, minorRadius, 15);
 
-      // Geometry arcTorusGeom = YoGeometry.Sphere(0.2f,15,15);
+      // Geometry arcTorusGeom = GeometryGenerator.Sphere(0.2f,15,15);
       addShape(arcTorusGeom, arcTorusApp);
       if (arcTorusApp != null)
          linkGraphicsDefinition.addInstruction(new LinkGraphicsAddArcTorus(startAngle, endAngle, majorRadius, minorRadius,
@@ -1639,7 +1640,7 @@ public class LinkGraphics
     */
    public void addPyramidCube(double lx, double ly, double lz, double lh, Appearance cubeApp)
    {
-      Geometry cubeGeom = YoGeometry.PyramidCube(lx, ly, lz, lh);
+      Geometry cubeGeom = GeometryGenerator.PyramidCube(lx, ly, lz, lh);
       addShape(cubeGeom, cubeApp);
       if (cubeApp != null)
          linkGraphicsDefinition.addInstruction(new LinkGraphicsAddPyramidCube(lx, ly, lz, lh, new AppearanceDefinition(getColor(cubeApp))));
@@ -1673,7 +1674,7 @@ public class LinkGraphics
     */
    public void addPolygon(Point3f[] polygonPoints, Appearance appearance)
    {
-      Geometry geometry = YoGeometry.Polygon(polygonPoints);
+      Geometry geometry = GeometryGenerator.Polygon(polygonPoints);
       addShape(geometry, appearance);
       if (appearance != null)
          linkGraphicsDefinition.addInstruction(new LinkGraphicsAddPolygonFloat(polygonPoints, new AppearanceDefinition(getColor(appearance))));
@@ -1698,7 +1699,7 @@ public class LinkGraphics
       // polyAttributes.setCullFace(PolygonAttributes.CULL_BACK);
       appearance.setPolygonAttributes(polyAttributes);
 
-      Geometry geometry = YoGeometry.Polygon(polygonPoints);
+      Geometry geometry = GeometryGenerator.Polygon(polygonPoints);
       addShape(geometry, appearance);
       if (appearance != null)
          linkGraphicsDefinition.addInstruction(new LinkGraphicsAddPolygonDouble(polygonPoints, new AppearanceDefinition(getColor(appearance))));
@@ -1738,7 +1739,7 @@ public class LinkGraphics
       // polyAttributes.setCullFace(PolygonAttributes.CULL_BACK);
       appearance.setPolygonAttributes(polyAttributes);
 
-      Geometry geometry = YoGeometry.Polygon(polygonPoints);
+      Geometry geometry = GeometryGenerator.Polygon(polygonPoints);
       addShape(geometry, appearance);
       if (appearance != null)
          linkGraphicsDefinition.addInstruction(new LinkGraphicsAddPolygonDouble(polygonPoints, new AppearanceDefinition(getColor(appearance))));
