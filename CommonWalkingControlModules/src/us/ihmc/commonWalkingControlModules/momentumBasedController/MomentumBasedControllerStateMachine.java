@@ -840,7 +840,7 @@ public class MomentumBasedControllerStateMachine extends StateMachine
 
       desiredFootOrientations.get(swingSide).set(desiredFootstep.getFootstepOrientationInFrame(desiredFootOrientations.get(swingSide).getReferenceFrame()));
 
-//      desiredICP.set(capturePoint); // TODO: is this what we want?
+      desiredICP.set(capturePoint); // TODO: is this what we want?
       FramePoint2d finalDesiredICP = getSingleSupportFinalDesiredICPForWalking(desiredFootstep, swingSide);
       icpTrajectoryGenerator.initialize(desiredICP.getFramePoint2dCopy(), finalDesiredICP, cartesianTrajectoryGenerators.get(swingSide).getFinalTime(), omega0, amountToBeInsideSingleSupport.getDoubleValue());
 
