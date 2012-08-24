@@ -2,18 +2,18 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController;
 
 import java.util.HashMap;
 
-import javax.media.j3d.Transform3D;
-import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedFootInterface;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.FootPolygonVisualizer;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ResizableBipedFoot;
+import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.DesiredCoPAndCMPControlModule;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.LegStrengthCalculator;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.VirtualToePointCalculator;
 import us.ihmc.commonWalkingControlModules.controlModules.CenterOfMassHeightControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.NewGeometricVirtualToePointCalculator;
+import us.ihmc.commonWalkingControlModules.controlModules.SimpleDesiredCoPAndCMPControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.TeeterTotterLegStrengthCalculator;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvisOrientation.AxisAnglePelvisOrientationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.velocityViaCoP.CapturabilityBasedDesiredCoPVisualizer;
@@ -32,7 +32,6 @@ import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameLine2d;
-import us.ihmc.utilities.math.geometry.FrameLineSegment2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FramePose;
@@ -60,9 +59,7 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition.GraphicType;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint2d;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector2d;
 
 public class MomentumBasedController implements RobotController
 {
@@ -78,8 +75,6 @@ public class MomentumBasedController implements RobotController
    private final AxisAnglePelvisOrientationControlModule orientationControlModule;
    private final BipedSupportPolygons bipedSupportPolygons;
    private final VirtualToePointCalculator virtualToePointCalculator;
-   private final SpeedControllingDesiredCoPCalculator desiredCapturePointToDesiredCoPControlModule;
-   private final SimpleDesiredCenterOfPressureFilter desiredCenterOfPressureFilter;
    private final CenterOfMassHeightControlModule centerOfMassHeightControlModule;
    private final LegStrengthCalculator legStrengthCalculator;
 
@@ -100,6 +95,8 @@ public class MomentumBasedController implements RobotController
    private final SideDependentList<FootSpatialAccelerationControlModule> footSpatialAccelerationControlModules =
       new SideDependentList<FootSpatialAccelerationControlModule>();
    private final DesiredHeadingControlModule desiredHeadingControlModule;
+   private final DesiredCoPAndCMPControlModule desiredCoPAndCMPControlModule;
+   private final SpeedControllingDesiredCoPCalculator desiredCapturePointToDesiredCoPControlModule; // TODO: get rid of this.
 
    private final YoFrameVector desiredPelvisLinearAcceleration;
    private final YoFrameVector desiredPelvisAngularAcceleration;
@@ -107,8 +104,6 @@ public class MomentumBasedController implements RobotController
    private final YoFrameVector desiredPelvisTorque;
    private final ReferenceFrame centerOfMassFrame;
 
-   private final DoubleYoVariable kAngularMomentumXY = new DoubleYoVariable("kAngularMomentumXY", registry);
-   private final DoubleYoVariable kPelvisAxisAngle = new DoubleYoVariable("kPelvisAxisAngle", registry);
    private final DoubleYoVariable kUpperBody = new DoubleYoVariable("kUpperBody", registry);
    private final DoubleYoVariable zetaUpperBody = new DoubleYoVariable("zetaUpperBody", registry);
    private final DoubleYoVariable kAngularMomentumZ = new DoubleYoVariable("kAngularMomentumZ", registry);
@@ -118,12 +113,8 @@ public class MomentumBasedController implements RobotController
    private final DoubleYoVariable desiredPelvisPitch = new DoubleYoVariable("desiredPelvisPitch", registry);
    private final DoubleYoVariable desiredPelvisRoll = new DoubleYoVariable("desiredPelvisRoll", registry);
 
-   // TODO: move to separate class that takes care of determining desired GRFs
-   private final YoFrameVector2d desiredDeltaCMP = new YoFrameVector2d("desiredDeltaCMP", "", worldFrame, registry);
-   private final YoFramePoint2d desiredCoP = new YoFramePoint2d("desiredCoP", "", worldFrame, registry);
    private final SideDependentList<Double> lambdas = new SideDependentList<Double>();
 
-   private final CapturabilityBasedDesiredCoPVisualizer visualizer;
    private final FootPolygonVisualizer footPolygonVisualizer;
    private final DoubleYoVariable omega0 = new DoubleYoVariable("omega0", registry);
    private final YoFramePoint capturePoint = new YoFramePoint("capturePoint", worldFrame, registry);
@@ -139,7 +130,6 @@ public class MomentumBasedController implements RobotController
       this.fullRobotModel = processedSensors.getFullRobotModel();
       this.referenceFrames = referenceFrames;
       this.processedOutputs = processedOutputs;
-      this.visualizer = new CapturabilityBasedDesiredCoPVisualizer(registry, dynamicGraphicObjectsListRegistry);
 
       RigidBody elevator = fullRobotModel.getElevator();
       this.inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, -processedSensors.getGravityInWorldFrame().getZ());
@@ -181,7 +171,8 @@ public class MomentumBasedController implements RobotController
 
       this.desiredHeadingControlModule = new SimpleDesiredHeadingControlModule(0.0, controlDT, registry);
       this.orientationControlModule = new AxisAnglePelvisOrientationControlModule(processedSensors, referenceFrames, null, registry, false);
-
+      
+      
       SideDependentList<ReferenceFrame> ankleZUpFrames = referenceFrames.getAnkleZUpReferenceFrames();
       midFeetZUp = referenceFrames.getMidFeetZUpFrame();
       this.bipedSupportPolygons = new BipedSupportPolygons(ankleZUpFrames, midFeetZUp, registry, dynamicGraphicObjectsListRegistry);
@@ -193,15 +184,19 @@ public class MomentumBasedController implements RobotController
       }
 
       bipedSupportPolygons.update(leftFoot, rightFoot);
+      
+      this.desiredCapturePointToDesiredCoPControlModule = new SpeedControllingDesiredCoPCalculator(processedSensors,
+            referenceFrames, registry, dynamicGraphicObjectsListRegistry);
+      desiredCapturePointToDesiredCoPControlModule.setParametersForR2InverseDynamics();
+      SimpleDesiredCenterOfPressureFilter desiredCenterOfPressureFilter = new SimpleDesiredCenterOfPressureFilter(bipedSupportPolygons, referenceFrames, controlDT, registry);
+      desiredCenterOfPressureFilter.setParametersForR2InverseDynamics();
+      
+      CapturabilityBasedDesiredCoPVisualizer visualizer = new CapturabilityBasedDesiredCoPVisualizer(registry, dynamicGraphicObjectsListRegistry);
+      this.desiredCoPAndCMPControlModule = new SimpleDesiredCoPAndCMPControlModule(desiredCapturePointToDesiredCoPControlModule,
+            desiredCapturePointToDesiredCoPControlModule, desiredCenterOfPressureFilter, visualizer, bipedSupportPolygons, processedSensors, referenceFrames, registry).setGains(3e-2, 1.0);
 
       virtualToePointCalculator = new NewGeometricVirtualToePointCalculator(referenceFrames, registry, dynamicGraphicObjectsListRegistry, 0.95);
 
-      SpeedControllingDesiredCoPCalculator desiredCapturePointToDesiredCoPControlModule = new SpeedControllingDesiredCoPCalculator(processedSensors,
-                                                                                             referenceFrames, registry, dynamicGraphicObjectsListRegistry);
-      desiredCapturePointToDesiredCoPControlModule.setParametersForR2InverseDynamics();
-      this.desiredCapturePointToDesiredCoPControlModule = desiredCapturePointToDesiredCoPControlModule;
-      desiredCenterOfPressureFilter = new SimpleDesiredCenterOfPressureFilter(bipedSupportPolygons, referenceFrames, controlDT, registry);
-      desiredCenterOfPressureFilter.setParametersForR2InverseDynamics();
       this.legStrengthCalculator = new TeeterTotterLegStrengthCalculator(registry);
 
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
@@ -242,8 +237,6 @@ public class MomentumBasedController implements RobotController
          }
       }
 
-      kAngularMomentumXY.set(3e-2);
-      kPelvisAxisAngle.set(1.0);    // 1.0);    // was 1.0 for M3 video
       kAngularMomentumZ.set(10.0);    // 50.0); // 10.0);
       kPelvisYaw.set(0.0);    // 100.0); // was 0.0 for M3 movie
       kUpperBody.set(100.0);
@@ -256,6 +249,7 @@ public class MomentumBasedController implements RobotController
    {
       optimizer.initialize();
       stateMachine.setCapturePoint(computeCapturePoint());
+      stateMachine.setOmega0(omega0.getDoubleValue());
       stateMachine.initialize();
       doControl();
    }
@@ -290,7 +284,6 @@ public class MomentumBasedController implements RobotController
       bipedSupportPolygons.update(leftFoot, rightFoot);
       footPolygonVisualizer.update();
 
-      stateMachine.setPreviousCoP(desiredCoP.getFramePoint2dCopy());
       stateMachine.setCapturePoint(capturePoint);
       stateMachine.setOmega0(omega0.getDoubleValue());
       stateMachine.checkTransitionConditionsThoroughly();
@@ -314,52 +307,44 @@ public class MomentumBasedController implements RobotController
 
    private void doMomentumBasedControl(FramePoint2d capturePoint)
    {
-      // TODO: calculate CMP first, need to make sure that CoP is inside BoS, CMP may be outside
-      FramePoint2d desiredCoP = determineDesiredCoP(capturePoint);
-      this.desiredCoP.set(desiredCoP.changeFrameCopy(this.desiredCoP.getReferenceFrame()));
-      FrameVector2d desiredDeltaCMP = determineDesiredDeltaCMP();
-      FramePoint2d desiredCMP = new FramePoint2d(desiredCoP);
-      desiredDeltaCMP.changeFrame(desiredCMP.getReferenceFrame());
-      desiredCMP.add(desiredDeltaCMP);
-
-      if (!bipedSupportPolygons.getSupportPolygonInMidFeetZUp().isPointInside(desiredCoP.changeFrameCopy(midFeetZUp)))
-         throw new RuntimeException("desired CoP outside support polygon");
-
-      desiredDeltaCMP.changeFrame(this.desiredDeltaCMP.getReferenceFrame());
-      this.desiredDeltaCMP.set(desiredDeltaCMP);
-
+      ReferenceFrame frame = worldFrame;
       RobotSide supportLeg = stateMachine.getSupportLeg();
+      FramePoint2d desiredCapturePoint = new FramePoint2d(worldFrame); 
+      stateMachine.packDesiredICP(desiredCapturePoint);
+      FrameVector2d desiredCapturePointVelocity = new FrameVector2d(worldFrame);
+      stateMachine.packDesiredICPVelocity(desiredCapturePointVelocity);
+      desiredCoPAndCMPControlModule.compute(capturePoint, supportLeg, desiredCapturePoint, desiredCapturePointVelocity, desiredPelvisRoll.getDoubleValue(), desiredPelvisPitch.getDoubleValue());
+      FramePoint2d desiredCoP = new FramePoint2d(worldFrame);
+      desiredCoPAndCMPControlModule.packCoP(desiredCoP);
+      FramePoint2d desiredCMP = new FramePoint2d(worldFrame);
+      desiredCoPAndCMPControlModule.packCMP(desiredCMP);
+      stateMachine.setPreviousCoP(desiredCoP);
+      
+      desiredCoP.changeFrame(frame);
+      desiredCMP.changeFrame(frame);
+      
+      FrameVector2d desiredDeltaCMP = new FrameVector2d(desiredCMP);
+      desiredDeltaCMP.sub(desiredCoP);
 
-      double dzdxDesired = stateMachine.getDesiredCoMHeightSlope();
-      double d2zdx2Desired = stateMachine.getDesiredCoMHeightSecondDerivative();
-      ReferenceFrame desiredHeadingFrame = desiredHeadingControlModule.getDesiredHeadingFrame();
-      FramePoint com = processedSensors.getCenterOfMassPositionInFrame(desiredHeadingFrame);
-      FrameVector comd = processedSensors.getCenterOfMassVelocityInFrame(desiredHeadingFrame);
-      double xd = comd.getX();
-      double copX = desiredCoP.changeFrameCopy(desiredHeadingFrame).getX();
-      double xdd = MathTools.square(omega0.getDoubleValue()) * (com.getX() - copX);    // TODO: use current omega0 instead of previous
+      fixDesiredCoPNumericalRoundoff(desiredCoP, bipedSupportPolygons.getSupportPolygonInMidFeetZUp());
+      desiredCoP.changeFrame(frame);
 
-      double zDesired = stateMachine.getDesiredCoMHeight();
-      double zdDesired = dzdxDesired * xd;
-      double zddDesired = d2zdx2Desired * MathTools.square(xd) + dzdxDesired * xdd;
+      FramePoint com = processedSensors.getCenterOfMassPositionInFrame(desiredHeadingControlModule.getDesiredHeadingFrame());
 
-      double fZ = centerOfMassHeightControlModule.doCenterOfMassHeightControl(zDesired, zdDesired, zddDesired, supportLeg);
+      double fZ = computeFz(supportLeg, desiredCoP, com);
 
 
       SideDependentList<FramePoint2d> virtualToePoints = new SideDependentList<FramePoint2d>();
-      ReferenceFrame frame;
       if (supportLeg == null)
       {
-         frame = worldFrame;
          virtualToePointCalculator.packVirtualToePoints(virtualToePoints, bipedSupportPolygons, desiredCoP, stateMachine.getUpcomingSupportLeg());
       }
       else
       {
          FrameConvexPolygon2d footPolygonInAnkleZUp = bipedSupportPolygons.getFootPolygonInAnkleZUp(supportLeg);
-         if (!footPolygonInAnkleZUp.isPointInside(desiredCoP.changeFrameCopy(footPolygonInAnkleZUp.getReferenceFrame())))
-            throw new RuntimeException("desired CoP outside foot polygon");
+         fixDesiredCoPNumericalRoundoff(desiredCoP, footPolygonInAnkleZUp);
+         desiredCoP.changeFrame(frame);
 
-         frame = worldFrame;
          virtualToePoints.put(supportLeg, desiredCoP);
          virtualToePoints.put(supportLeg.getOppositeSide(), new FramePoint2d(frame));
       }
@@ -505,6 +490,35 @@ public class MomentumBasedController implements RobotController
       optimizer.solveForRootJointAcceleration(desiredAngularCentroidalMomentumRate, desiredLinearCentroidalMomentumRate);
    }
 
+   private void fixDesiredCoPNumericalRoundoff(FramePoint2d desiredCoP, FrameConvexPolygon2d polygon)
+   {
+      double epsilon = 1e-10;
+      desiredCoP.changeFrame(polygon.getReferenceFrame());
+      FramePoint2d originalDesiredCoP = new FramePoint2d(desiredCoP);
+      polygon.orthogonalProjection(desiredCoP);
+      double distance = originalDesiredCoP.distance(desiredCoP);
+      if (distance > epsilon)
+         throw new RuntimeException("desired CoP outside polygon by " + distance);
+   }
+
+   private double computeFz(RobotSide supportLeg, FramePoint2d desiredCoP, FramePoint com)
+   {
+      double dzdxDesired = stateMachine.getDesiredCoMHeightSlope();
+      double d2zdx2Desired = stateMachine.getDesiredCoMHeightSecondDerivative();
+      ReferenceFrame desiredHeadingFrame = desiredHeadingControlModule.getDesiredHeadingFrame();
+      FrameVector comd = processedSensors.getCenterOfMassVelocityInFrame(desiredHeadingFrame);
+      double xd = comd.getX();
+      double copX = desiredCoP.changeFrameCopy(desiredHeadingFrame).getX();
+      double xdd = MathTools.square(omega0.getDoubleValue()) * (com.getX() - copX);    // TODO: use current omega0 instead of previous
+
+      double zDesired = stateMachine.getDesiredCoMHeight();
+      double zdDesired = dzdxDesired * xd;
+      double zddDesired = d2zdx2Desired * MathTools.square(xd) + dzdxDesired * xdd;
+
+      double fZ = centerOfMassHeightControlModule.doCenterOfMassHeightControl(zDesired, zdDesired, zddDesired, supportLeg);
+      return fZ;
+   }
+
    private FramePoint projectPointOntoSole(RobotSide robotSide, FramePoint virtualToePoint)
    {
       ReferenceFrame soleFrame = referenceFrames.getSoleFrame(robotSide);
@@ -532,77 +546,7 @@ public class MomentumBasedController implements RobotController
 //    spineJoints[2].setQddDesired(-k * yawPitchRoll[2] - b * spineJoints[2].getQd());
 // }
 
-   private FramePoint2d determineDesiredCoP(FramePoint2d capturePoint)
-   {
-      RobotSide supportLeg = stateMachine.getSupportLeg();
-      ReferenceFrame frame = (supportLeg == null) ? midFeetZUp : referenceFrames.getAnkleZUpFrame(supportLeg);
-      FramePoint2d desiredCapturePoint = new FramePoint2d(frame);
-      capturePoint.changeFrame(frame);
-      stateMachine.packDesiredICP(desiredCapturePoint);
 
-      FrameVector2d desiredCapturePointVelocity = new FrameVector2d(frame);
-      stateMachine.packDesiredICPVelocity(desiredCapturePointVelocity);
-
-      FrameVector2d desiredVelocity = new FrameVector2d(frame);
-      desiredCapturePoint.changeFrame(frame);
-      desiredCapturePointVelocity.changeFrame(frame);
-
-      FramePoint2d desiredCoP;
-      if (supportLeg == null)
-      {
-         desiredCoP = desiredCapturePointToDesiredCoPControlModule.computeDesiredCoPDoubleSupport(bipedSupportPolygons, capturePoint, desiredVelocity,
-                 desiredCapturePoint, desiredCapturePointVelocity);
-      }
-      else if (desiredCapturePointVelocity.length() > 0.0)
-      {
-         FrameLine2d guideLine = new FrameLine2d(desiredCapturePoint, desiredCapturePointVelocity);
-         FrameLineSegment2d guideLineSegment = new FrameLineSegment2d(guideLine.getFramePointCopy(), guideLine.getFramePoint2dGivenParameter(1.0));    // TODO: replace FrameLineSegment2d by FrameLineSegment in interface.
-         desiredCoP = desiredCapturePointToDesiredCoPControlModule.computeDesiredCoPSingleSupport(supportLeg, bipedSupportPolygons, capturePoint,
-                 desiredVelocity, guideLineSegment);
-         visualizer.setGuideLine(guideLineSegment);
-      }
-      else
-      {
-         desiredCoP = desiredCapturePointToDesiredCoPControlModule.computeDesiredCoPSingleSupport(supportLeg, bipedSupportPolygons, capturePoint,
-                 desiredVelocity, desiredCapturePoint, desiredCapturePointVelocity);
-      }
-
-      FramePoint2d filteredDesiredCoP = desiredCenterOfPressureFilter.filter(desiredCoP, supportLeg);
-
-      visualizer.setDesiredCapturePoint(desiredCapturePoint);
-      visualizer.setDesiredCoP(filteredDesiredCoP);
-
-      return filteredDesiredCoP;
-   }
-
-   private FrameVector2d determineDesiredDeltaCMP()
-   {
-      ReferenceFrame frame = ReferenceFrame.getWorldFrame();
-
-      FrameVector zUnitVector = new FrameVector(frame, 0.0, 0.0, 1.0);
-      FrameVector angularMomentum = processedSensors.getAngularMomentumInFrame(frame);
-      FrameVector desiredDeltaCMP = new FrameVector(frame);
-      desiredDeltaCMP.cross(angularMomentum, zUnitVector);
-      desiredDeltaCMP.scale(-kAngularMomentumXY.getDoubleValue());
-
-      Transform3D pelvisToWorld = fullRobotModel.getPelvis().getBodyFixedFrame().getTransformToDesiredFrame(frame);
-      Matrix3d pelvisToDesiredPelvis = new Matrix3d();
-      pelvisToWorld.get(pelvisToDesiredPelvis);
-
-      Matrix3d desiredPelvisToWorldRotation = new Matrix3d();
-      RotationFunctions.setYawPitchRoll(desiredPelvisToWorldRotation, 0.0, desiredPelvisPitch.getDoubleValue(), desiredPelvisRoll.getDoubleValue());
-      pelvisToDesiredPelvis.mulTransposeLeft(desiredPelvisToWorldRotation, pelvisToDesiredPelvis);
-
-      AxisAngle4d pelvisToCenterOfMassAxisAngle = new AxisAngle4d();
-      pelvisToCenterOfMassAxisAngle.set(pelvisToDesiredPelvis);
-      FrameVector proportionalPart = new FrameVector(frame, pelvisToCenterOfMassAxisAngle.getX(), pelvisToCenterOfMassAxisAngle.getY(), 0.0);
-      proportionalPart.scale(pelvisToCenterOfMassAxisAngle.getAngle());
-      proportionalPart.cross(proportionalPart, zUnitVector);
-      proportionalPart.scale(-kPelvisAxisAngle.getDoubleValue());
-      desiredDeltaCMP.add(proportionalPart);
-
-      return desiredDeltaCMP.toFrameVector2d();
-   }
 
    private FrameVector determineGroundReactionMoment()
    {
