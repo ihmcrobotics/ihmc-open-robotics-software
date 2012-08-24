@@ -13,7 +13,8 @@ import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.LegStrengthCa
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.VirtualToePointCalculator;
 import us.ihmc.commonWalkingControlModules.controlModules.CenterOfMassHeightControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.NewGeometricVirtualToePointCalculator;
-import us.ihmc.commonWalkingControlModules.controlModules.SimpleDesiredCoPAndCMPControlModule;
+import us.ihmc.commonWalkingControlModules.controlModules.SacrificeDeltaCMPDesiredCoPAndCMPControlModule;
+import us.ihmc.commonWalkingControlModules.controlModules.SacrificeCMPCoPAndCMPControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.TeeterTotterLegStrengthCalculator;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvisOrientation.AxisAnglePelvisOrientationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.velocityViaCoP.CapturabilityBasedDesiredCoPVisualizer;
@@ -96,7 +97,6 @@ public class MomentumBasedController implements RobotController
       new SideDependentList<FootSpatialAccelerationControlModule>();
    private final DesiredHeadingControlModule desiredHeadingControlModule;
    private final DesiredCoPAndCMPControlModule desiredCoPAndCMPControlModule;
-   private final SpeedControllingDesiredCoPCalculator desiredCapturePointToDesiredCoPControlModule; // TODO: get rid of this.
 
    private final YoFrameVector desiredPelvisLinearAcceleration;
    private final YoFrameVector desiredPelvisAngularAcceleration;
@@ -185,15 +185,17 @@ public class MomentumBasedController implements RobotController
 
       bipedSupportPolygons.update(leftFoot, rightFoot);
       
-      this.desiredCapturePointToDesiredCoPControlModule = new SpeedControllingDesiredCoPCalculator(processedSensors,
+      SpeedControllingDesiredCoPCalculator desiredCapturePointToDesiredCoPControlModule = new SpeedControllingDesiredCoPCalculator(processedSensors,
             referenceFrames, registry, dynamicGraphicObjectsListRegistry);
       desiredCapturePointToDesiredCoPControlModule.setParametersForR2InverseDynamics();
       SimpleDesiredCenterOfPressureFilter desiredCenterOfPressureFilter = new SimpleDesiredCenterOfPressureFilter(bipedSupportPolygons, referenceFrames, controlDT, registry);
       desiredCenterOfPressureFilter.setParametersForR2InverseDynamics();
       
       CapturabilityBasedDesiredCoPVisualizer visualizer = new CapturabilityBasedDesiredCoPVisualizer(registry, dynamicGraphicObjectsListRegistry);
-      this.desiredCoPAndCMPControlModule = new SimpleDesiredCoPAndCMPControlModule(desiredCapturePointToDesiredCoPControlModule,
+      this.desiredCoPAndCMPControlModule = new SacrificeDeltaCMPDesiredCoPAndCMPControlModule(desiredCapturePointToDesiredCoPControlModule,
             desiredCapturePointToDesiredCoPControlModule, desiredCenterOfPressureFilter, visualizer, bipedSupportPolygons, processedSensors, referenceFrames, registry).setGains(3e-2, 1.0);
+//      this.desiredCoPAndCMPControlModule = new SacrificeCMPCoPAndCMPControlModule(desiredCapturePointToDesiredCoPControlModule,
+//            desiredCapturePointToDesiredCoPControlModule, desiredCenterOfPressureFilter, visualizer, bipedSupportPolygons, processedSensors, referenceFrames, registry).setGains(3e-2, 1.0);
 
       virtualToePointCalculator = new NewGeometricVirtualToePointCalculator(referenceFrames, registry, dynamicGraphicObjectsListRegistry, 0.95);
 
@@ -313,7 +315,7 @@ public class MomentumBasedController implements RobotController
       stateMachine.packDesiredICP(desiredCapturePoint);
       FrameVector2d desiredCapturePointVelocity = new FrameVector2d(worldFrame);
       stateMachine.packDesiredICPVelocity(desiredCapturePointVelocity);
-      desiredCoPAndCMPControlModule.compute(capturePoint, supportLeg, desiredCapturePoint, desiredCapturePointVelocity, desiredPelvisRoll.getDoubleValue(), desiredPelvisPitch.getDoubleValue());
+      desiredCoPAndCMPControlModule.compute(capturePoint, supportLeg, desiredCapturePoint, desiredCapturePointVelocity, desiredPelvisRoll.getDoubleValue(), desiredPelvisPitch.getDoubleValue(), omega0.getDoubleValue());
       FramePoint2d desiredCoP = new FramePoint2d(worldFrame);
       desiredCoPAndCMPControlModule.packCoP(desiredCoP);
       FramePoint2d desiredCMP = new FramePoint2d(worldFrame);
@@ -387,7 +389,6 @@ public class MomentumBasedController implements RobotController
 
       double omega0 = Math.sqrt(omega0Squared);
       this.omega0.set(omega0);
-      desiredCapturePointToDesiredCoPControlModule.setOmega0(omega0);    // TODO: hackish
       double k1PlusK2 = omega0Squared * totalMass;
       SideDependentList<Double> ks = new SideDependentList<Double>();
       for (RobotSide robotSide : RobotSide.values())
