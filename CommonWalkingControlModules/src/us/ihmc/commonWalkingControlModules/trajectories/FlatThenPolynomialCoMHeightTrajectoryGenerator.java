@@ -26,28 +26,36 @@ import com.yobotics.simulationconstructionset.util.trajectory.PolynomialSpline;
 
 public class FlatThenPolynomialCoMHeightTrajectoryGenerator implements CenterOfMassHeightTrajectoryGenerator
 {
-   private final String name = getClass().getSimpleName();
-   private final YoVariableRegistry registry = new YoVariableRegistry(name);
+   private final YoVariableRegistry registry;
    private final ProcessedSensorsInterface processedSensors;
    private final DesiredFootstepCalculator desiredFootstepCalculator;
    private final ReferenceFrame referenceFrame;
    private final SideDependentList<BipedFootInterface> bipedFeet;
    private final CommonWalkingReferenceFrames referenceFrames;
-   
-   private final PolynomialSpline singleSupportSpline = new PolynomialSpline("comHeightSpline", 4, registry);
-   private final DoubleYoVariable minXForSpline = new DoubleYoVariable("minXForSpline", registry);
-   private final DoubleYoVariable maxXForSpline = new DoubleYoVariable("maxXForSpline", registry);
-   private final DoubleYoVariable nominalHeightAboveGround = new DoubleYoVariable("nominalHeightAboveGround", registry);
-   private final BooleanYoVariable hasBeenInitialized = new BooleanYoVariable("hasBeenInitialized", registry);
 
-   private final DoubleYoVariable desiredComHeight = new DoubleYoVariable("desiredComHeight", registry);
-   private final DoubleYoVariable desiredComHeightSlope = new DoubleYoVariable("desiredComHeightSlope", registry);
-   private final DoubleYoVariable desiredComHeightSecondDerivative = new DoubleYoVariable("desiredComHeightSecondDerivative", registry);
-   
-   private final PolynomialSpline splineForComputingOrbitalEnergy = new PolynomialSpline("splineForComputingOrbitalEnergy", 4, registry);
-   private final DoubleYoVariable orbitalEnergy = new DoubleYoVariable("orbitalEnergy", registry);
+   private static final int numberOfCoefficients = 6;
 
-   public FlatThenPolynomialCoMHeightTrajectoryGenerator(ProcessedSensorsInterface processedSensors, DesiredFootstepCalculator desiredFootstepCalculator,
+   private final PolynomialSpline heightSplineInFootFrame;
+   private final DoubleYoVariable footX;
+   private final DoubleYoVariable footZ;
+   
+   private final DoubleYoVariable minXForSpline;
+   private final DoubleYoVariable maxXForSpline;
+
+   private final DoubleYoVariable initialHeightAboveGround;
+   private final DoubleYoVariable nominalHeightAboveGround;
+   private final BooleanYoVariable hasBeenInitialized;
+
+   private final DoubleYoVariable desiredComHeightInWorld;
+   private final DoubleYoVariable desiredComHeightSlope;
+   private final DoubleYoVariable desiredComHeightSecondDerivative;
+   
+   private final DoubleYoVariable orbitalEnergy;
+   
+   private final PolynomialSpline testHeightSplineInFootFrame;
+   private final DoubleYoVariable deltaZ;
+
+   public FlatThenPolynomialCoMHeightTrajectoryGenerator(String namePrefix, ProcessedSensorsInterface processedSensors, DesiredFootstepCalculator desiredFootstepCalculator,
          ReferenceFrame desiredHeadingFrame, SideDependentList<BipedFootInterface> bipedFeet, CommonWalkingReferenceFrames referenceFrames, YoVariableRegistry parentRegistry)
    {
       this.processedSensors = processedSensors;
@@ -56,98 +64,140 @@ public class FlatThenPolynomialCoMHeightTrajectoryGenerator implements CenterOfM
       this.bipedFeet = bipedFeet;
       this.referenceFrames = referenceFrames;
 
+      this.registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
+      
+      heightSplineInFootFrame = new PolynomialSpline("heightSplineInFootFrame", numberOfCoefficients, registry);
+      footX = new DoubleYoVariable("footX", registry);
+      footZ = new DoubleYoVariable("footZ", registry);
+      
+      minXForSpline = new DoubleYoVariable("minXForSpline", registry);
+      maxXForSpline = new DoubleYoVariable("maxXForSpline", registry);
+      
+      initialHeightAboveGround = new DoubleYoVariable("initialHeightAboveGround", registry);
+      nominalHeightAboveGround = new DoubleYoVariable("nominalHeightAboveGround", registry);
+      hasBeenInitialized = new BooleanYoVariable("hasBeenInitialized", registry);
+
+      desiredComHeightInWorld = new DoubleYoVariable("desiredComHeightInWorld", registry);
+      desiredComHeightSlope = new DoubleYoVariable("desiredComHeightSlope", registry);
+      desiredComHeightSecondDerivative = new DoubleYoVariable("desiredComHeightSecondDerivative", registry);
+      
+      orbitalEnergy = new DoubleYoVariable("orbitalEnergy", registry);
+      
+      testHeightSplineInFootFrame = new PolynomialSpline("testHeightSplineInFootFrame", numberOfCoefficients, registry);
+      deltaZ = new DoubleYoVariable("deltaZ", registry);
+      
       nominalHeightAboveGround.set(1.35);
+      initialHeightAboveGround.set(1.28);
       parentRegistry.addChild(registry);
    }
 
    public void initialize(RobotSide supportLeg, RobotSide upcomingSupportLeg)
    {
-      // initialize both the single support and double support trajectory on transition into single support:
       if (supportLeg == null)
       {
          if (!hasBeenInitialized.getBooleanValue())
          {
-            double minZ = Math.min(findMinZOfGroundContactPoints(RobotSide.LEFT), findMinZOfGroundContactPoints(RobotSide.RIGHT));
-            double z = minZ + nominalHeightAboveGround.getDoubleValue();
-            singleSupportSpline.setConstant(z);    // will be overwritten later, but this fixes issues when initialize is called twice in double support
+            footZ.set(Math.min(findMinZOfGroundContactPoints(RobotSide.LEFT), findMinZOfGroundContactPoints(RobotSide.RIGHT)));
+            heightSplineInFootFrame.setConstant(initialHeightAboveGround.getDoubleValue());
             hasBeenInitialized.set(true);
          }
+         // else just keep everything the same
       }
       else
       {
          compute();
-         FramePoint com = processedSensors.getCenterOfMassPositionInFrame(referenceFrame);
-         double x0 = com.getX();
-         double z0 = getDesiredCenterOfMassHeight();
-         double dzdx0 = getDesiredCenterOfMassHeightSlope();
-//         double d2zdx20 = getDesiredCenterOfMassHeightSecondDerivative();
-
-         Footstep footstep = desiredFootstepCalculator.updateAndGetDesiredFootstep(supportLeg);
-         double xf = computeXf(supportLeg, footstep);
-         double zf = findMinZOfGroundContactPoints(supportLeg) + nominalHeightAboveGround.getDoubleValue();
-         double dzdxf = 0.0;
-//         double d2zdx2f = 0.0;
-
-//         singleSupportSpline.setQuintic(x0, xf, z0, dzdx0, d2zdx20, zf, dzdxf, d2zdx2f);
-         singleSupportSpline.setCubic(x0, xf, z0, dzdx0, zf, dzdxf);
-
-         minXForSpline.set(x0);
-         maxXForSpline.set(xf);
-
-         // FIXME:
-         double xcop = findMaxXOfGroundContactPoints(supportLeg);
-         double zCoP = findMinZOfGroundContactPoints(supportLeg);
-         splineForComputingOrbitalEnergy.setCubic(x0 - xcop, xf - xcop, z0 - zCoP, dzdx0, zf - zCoP, dzdxf);
-
+         footX.set(findMaxXOfGroundContactPoints(supportLeg));
+         footZ.set(findMinZOfGroundContactPoints(supportLeg));
+         
+         double[] x = initializeSpline(supportLeg, heightSplineInFootFrame, footX.getDoubleValue(), footZ.getDoubleValue());
+         minXForSpline.set(x[0]);
+         maxXForSpline.set(x[1]);
       }
+   }
+
+   /**
+    * initializes a spline based on the current information
+    * @param supportLeg 
+    * @param spline
+    * @return the minimum and maximum abscissa for which the spline is valid
+    */
+   private double[] initializeSpline(RobotSide supportLeg, PolynomialSpline spline, double offsetX, double offsetZ)
+   {
+      FramePoint com = processedSensors.getCenterOfMassPositionInFrame(referenceFrame);
+      double x0 = com.getX() - offsetX;
+      double z0 = getDesiredCenterOfMassHeight() - offsetZ;
+      double dzdx0 = getDesiredCenterOfMassHeightSlope();
+      double d2zdx20 = 0.0;
+
+      Footstep footstep = desiredFootstepCalculator.updateAndGetDesiredFootstep(supportLeg);
+      double xf = computeXf(supportLeg, footstep) - offsetX;
+      double zf = findMinZOfGroundContactPoints(supportLeg) + nominalHeightAboveGround.getDoubleValue() - offsetZ;
+      double dzdxf = 0.0;
+      double d2zdx2f = 0.0;
+      
+      if (spline == heightSplineInFootFrame)
+         deltaZ.set(zf - z0);
+
+      spline.setQuintic(x0, xf, z0, dzdx0, d2zdx20, zf, dzdxf, d2zdx2f);
+//      spline.setCubic(x0, xf, z0, dzdx0, zf, dzdxf);
+
+      return new double[]{x0, xf};
    }
 
    public void compute()
    {
       FramePoint com = processedSensors.getCenterOfMassPositionInFrame(referenceFrame);
-      double x = MathTools.clipToMinMax(com.getX(), minXForSpline.getDoubleValue(), maxXForSpline.getDoubleValue());
-      singleSupportSpline.compute(x);
+      double x = com.getX() - footX.getDoubleValue();
+      heightSplineInFootFrame.compute(MathTools.clipToMinMax(x, minXForSpline.getDoubleValue(), maxXForSpline.getDoubleValue()));
 
-      desiredComHeight.set(getDesiredCenterOfMassHeight());
-      desiredComHeightSlope.set(getDesiredCenterOfMassHeightSlope());
-      desiredComHeightSecondDerivative.set(getDesiredCenterOfMassHeightSecondDerivative());
-      
-      double xcop = findMaxXOfGroundContactPoints(RobotSide.LEFT); // FIXME
-      splineForComputingOrbitalEnergy.compute(x - xcop);
-      FrameVector comd = processedSensors.getCenterOfMassVelocityInFrame(referenceFrame);
-      double xd = comd.getX();
-      double g = -processedSensors.getGravityInWorldFrame().getZ();
-      if (MathTools.isInsideBounds(com.getX(), minXForSpline.getDoubleValue(), maxXForSpline.getDoubleValue()))
+      desiredComHeightInWorld.set(heightSplineInFootFrame.getPosition() + footZ.getDoubleValue());
+      if (MathTools.isInsideBounds(x, minXForSpline.getDoubleValue(), maxXForSpline.getDoubleValue()))
       {
-         orbitalEnergy.set(OrbitalEnergyCalculator.computeOrbitalEnergy(splineForComputingOrbitalEnergy, g, x - xcop, xd));
+         desiredComHeightSlope.set(heightSplineInFootFrame.getVelocity());
+         desiredComHeightSecondDerivative.set(heightSplineInFootFrame.getAcceleration());
+         orbitalEnergy.set(computeOrbitalEnergy(heightSplineInFootFrame, x));
       }
       else
       {
-         orbitalEnergy.set(Double.NaN);         
+         desiredComHeightSlope.set(0.0);
+         desiredComHeightSecondDerivative.set(0.0);
+         orbitalEnergy.set(Double.NaN);
       }
    }
 
    public double getDesiredCenterOfMassHeight()
    {
-      return singleSupportSpline.getPosition();
+      return desiredComHeightInWorld.getDoubleValue();
    }
 
    public double getDesiredCenterOfMassHeightSlope()
    {
-      FramePoint com = processedSensors.getCenterOfMassPositionInFrame(referenceFrame);
-      if (MathTools.isInsideBounds(com.getX(), minXForSpline.getDoubleValue(), maxXForSpline.getDoubleValue()))
-         return singleSupportSpline.getVelocity();
-      else return 0.0;
+      return desiredComHeightSlope.getDoubleValue();
    }
 
    public double getDesiredCenterOfMassHeightSecondDerivative()
    {
-      FramePoint com = processedSensors.getCenterOfMassPositionInFrame(referenceFrame);
-      if (MathTools.isInsideBounds(com.getX(), minXForSpline.getDoubleValue(), maxXForSpline.getDoubleValue()))
-         return singleSupportSpline.getAcceleration();
-      else return 0.0;
+      return desiredComHeightSecondDerivative.getDoubleValue();
    }
 
+   public double computeOrbitalEnergyIfInitializedNow(RobotSide upcomingSupportLeg)
+   {
+      double footX = findMaxXOfGroundContactPoints(upcomingSupportLeg);
+      double footZ = findMinZOfGroundContactPoints(upcomingSupportLeg);
+      initializeSpline(upcomingSupportLeg, testHeightSplineInFootFrame, footX, footZ);
+      FramePoint com = processedSensors.getCenterOfMassPositionInFrame(referenceFrame);
+      double x = com.getX() - footX;
+      return computeOrbitalEnergy(testHeightSplineInFootFrame, x);
+   }
+   
+   private double computeOrbitalEnergy(PolynomialSpline spline, double x)
+   {
+      FrameVector comd = processedSensors.getCenterOfMassVelocityInFrame(referenceFrame);
+      double xd = comd.getX();
+      double g = -processedSensors.getGravityInWorldFrame().getZ();
+      return OrbitalEnergyCalculator.computeOrbitalEnergy(spline, g, x, xd);
+   }
+   
    private double computeXf(RobotSide supportLeg, Footstep footstep)
    {
       double supportFootMaxX = findMaxXOfGroundContactPoints(supportLeg);

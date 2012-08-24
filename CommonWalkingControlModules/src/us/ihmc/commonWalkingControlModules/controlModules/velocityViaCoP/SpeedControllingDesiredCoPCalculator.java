@@ -107,6 +107,8 @@ public class SpeedControllingDesiredCoPCalculator implements DesiredCapturePoint
       FrameConvexPolygon2d footPolygon = bipedSupportPolygons.getFootPolygonInAnkleZUp(supportLeg);
       FramePoint2d desiredCenterOfPressure = doProportionalControl(capturePoint, desiredCapturePoint, desiredCapturePointVelocity, singleSupportCaptureKp.getDoubleValue());
       FrameLine2d controlLine = new FrameLine2d(desiredCenterOfPressure, desiredCapturePoint);
+      desiredCenterOfPressure.changeFrame(footPolygon.getReferenceFrame());
+      controlLine.changeFrame(footPolygon.getReferenceFrame());
       GeometryTools.movePointInsidePolygonAlongLine(desiredCenterOfPressure, footPolygon, controlLine);
 
       return desiredCenterOfPressure;
@@ -139,6 +141,7 @@ public class SpeedControllingDesiredCoPCalculator implements DesiredCapturePoint
       FramePoint2d desiredCenterOfPressure = shiftedParallelLine.intersectionWith(massLine);
 
       desiredCenterOfPressure.changeFrame(footPolygon.getReferenceFrame());
+      shiftedParallelLine.changeFrame(footPolygon.getReferenceFrame());
 
       GeometryTools.movePointInsidePolygonAlongLine(desiredCenterOfPressure, footPolygon, shiftedParallelLine);
       
@@ -222,7 +225,7 @@ public class SpeedControllingDesiredCoPCalculator implements DesiredCapturePoint
 
             centerOfPressureDesired.changeFrame(supportPolygon.getReferenceFrame());
          }
-         GeometryTools.movePointInsidePolygonAlongLine(centerOfPressureDesired, supportPolygon, new FrameLine2d(controlLine));
+         GeometryTools.movePointInsidePolygonAlongLine(centerOfPressureDesired, supportPolygon, controlLine.changeFrameCopy(supportPolygon.getReferenceFrame()));
       }
       else
       {
