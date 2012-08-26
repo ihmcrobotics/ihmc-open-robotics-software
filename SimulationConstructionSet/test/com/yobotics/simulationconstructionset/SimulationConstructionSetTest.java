@@ -8,6 +8,7 @@ import javax.vecmath.Vector3d;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.utilities.keyboardAndMouse.GhostMousePlayback;
@@ -25,7 +26,7 @@ public class SimulationConstructionSetTest
    {
    }
    
-   @Test
+   @Ignore
    public void testOne() throws AWTException
    {
       SimpleRobot simpleRobot = new SimpleRobot();
@@ -43,13 +44,31 @@ public class SimulationConstructionSetTest
 //      sleepForever();
    }
    
+   @Test
+   public void testTwo() throws AWTException
+   {
+      SimpleRobot simpleRobot = new SimpleRobot();
+      
+      SimulationConstructionSet scs = new SimulationConstructionSet(simpleRobot);
+      scs.setFrameMaximized();
+      scs.startOnAThread();
+      
+      java.awt.Robot guiRobot = new java.awt.Robot();
+      
+      guiRobot.delay(2000);
+      GhostMousePlayback playback = new GhostMousePlayback();      
+      playback.load("testFiles/SimulationConstructionSetGUITest/testSCSGUIOne.rms");
+      playback.load("testFiles/SimulationConstructionSetGUITest/testSCSGUITwo.rms");
+      playback.load("testFiles/SimulationConstructionSetGUITest/testSCSGUIThree.rms");
+      playback.playback(2.0);
+      
+//      sleepForever();
+   }
+   
   
    private void performActionsRecordedUsingGhostMouse() throws AWTException
    {
-      GhostMousePlayback playback = new GhostMousePlayback();
-      
-//      playback.addPlaybackEvent("{Delay 0.28}");
-      
+      GhostMousePlayback playback = new GhostMousePlayback();      
       
       playback.addPlaybackEvent("{Delay 0.49}");
       playback.addPlaybackEvent("{Move (1117,964)}");
