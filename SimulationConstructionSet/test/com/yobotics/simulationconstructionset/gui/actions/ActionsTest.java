@@ -1,5 +1,6 @@
 package com.yobotics.simulationconstructionset.gui.actions;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
@@ -11,8 +12,24 @@ import com.yobotics.simulationconstructionset.commands.CreateNewViewportWindowCo
 import com.yobotics.simulationconstructionset.commands.CropBufferCommandExecutor;
 import com.yobotics.simulationconstructionset.commands.GotoInPointCommandExecutor;
 import com.yobotics.simulationconstructionset.commands.GotoOutPointCommandExecutor;
+import com.yobotics.simulationconstructionset.commands.NextCameraKeyCommandExecutor;
+import com.yobotics.simulationconstructionset.commands.PackBufferCommandExecutor;
+import com.yobotics.simulationconstructionset.commands.PlayCommandExecutor;
+import com.yobotics.simulationconstructionset.commands.PreviousCameraKeyCommandExecutor;
+import com.yobotics.simulationconstructionset.commands.RemoveCameraKeyCommandExecutor;
+import com.yobotics.simulationconstructionset.commands.SetInPointCommandExecutor;
+import com.yobotics.simulationconstructionset.commands.SetOutPointCommandExecutor;
+import com.yobotics.simulationconstructionset.commands.SimulateCommandExecutor;
+import com.yobotics.simulationconstructionset.commands.StepBackwardCommandExecutor;
+import com.yobotics.simulationconstructionset.commands.StepForwardCommandExecutor;
+import com.yobotics.simulationconstructionset.commands.StopCommandExecutor;
+import com.yobotics.simulationconstructionset.commands.ToggleCameraKeyModeCommandExecutor;
+import com.yobotics.simulationconstructionset.commands.ToggleKeyPointModeCommandExecutor;
+import com.yobotics.simulationconstructionset.commands.ToggleKeyPointModeCommandListener;
 import com.yobotics.simulationconstructionset.commands.ViewportSelectorCommandExecutor;
 import com.yobotics.simulationconstructionset.commands.ViewportSelectorCommandListener;
+import com.yobotics.simulationconstructionset.commands.ZoomInCommandExecutor;
+import com.yobotics.simulationconstructionset.commands.ZoomOutCommandExecutor;
 import com.yobotics.simulationconstructionset.gui.ViewportWindow;
 import com.yobotics.simulationconstructionset.gui.actions.dialogActions.AboutAction;
 import com.yobotics.simulationconstructionset.gui.dialogConstructors.AboutDialogConstructor;
@@ -245,215 +262,321 @@ public class ActionsTest
       assertTrue(executorCalled[1]);
    }
 
-//   @Test
-//   public void testGenericAction()
-//   {
-//      final boolean[] executorCalled = new boolean[] {false};
-//
-//      GenericCommandExecutor executor = new GenericCommandExecutor()
-//      {
-//         public void generic()
-//         {
-//            executorCalled[0] = true;
-//         }
-//      };
-//
-//      GenericAction action = new GenericAction(executor);
-//      action.actionPerformed(null);
-//
-//      assertTrue(executorCalled[0]);
-//   }
-//
-//   @Test
-//   public void testGenericAction()
-//   {
-//      final boolean[] executorCalled = new boolean[] {false};
-//
-//      GenericCommandExecutor executor = new GenericCommandExecutor()
-//      {
-//         public void generic()
-//         {
-//            executorCalled[0] = true;
-//         }
-//      };
-//
-//      GenericAction action = new GenericAction(executor);
-//      action.actionPerformed(null);
-//
-//      assertTrue(executorCalled[0]);
-//   }
-//
-//   @Test
-//   public void testGenericAction()
-//   {
-//      final boolean[] executorCalled = new boolean[] {false};
-//
-//      GenericCommandExecutor executor = new GenericCommandExecutor()
-//      {
-//         public void generic()
-//         {
-//            executorCalled[0] = true;
-//         }
-//      };
-//
-//      GenericAction action = new GenericAction(executor);
-//      action.actionPerformed(null);
-//
-//      assertTrue(executorCalled[0]);
-//   }
-//
-//   @Test
-//   public void testGenericAction()
-//   {
-//      final boolean[] executorCalled = new boolean[] {false};
-//
-//      GenericCommandExecutor executor = new GenericCommandExecutor()
-//      {
-//         public void generic()
-//         {
-//            executorCalled[0] = true;
-//         }
-//      };
-//
-//      GenericAction action = new GenericAction(executor);
-//      action.actionPerformed(null);
-//
-//      assertTrue(executorCalled[0]);
-//   }
-//
-//   @Test
-//   public void testGenericAction()
-//   {
-//      final boolean[] executorCalled = new boolean[] {false};
-//
-//      GenericCommandExecutor executor = new GenericCommandExecutor()
-//      {
-//         public void generic()
-//         {
-//            executorCalled[0] = true;
-//         }
-//      };
-//
-//      GenericAction action = new GenericAction(executor);
-//      action.actionPerformed(null);
-//
-//      assertTrue(executorCalled[0]);
-//   }
-//
-//   @Test
-//   public void testGenericAction()
-//   {
-//      final boolean[] executorCalled = new boolean[] {false};
-//
-//      GenericCommandExecutor executor = new GenericCommandExecutor()
-//      {
-//         public void generic()
-//         {
-//            executorCalled[0] = true;
-//         }
-//      };
-//
-//      GenericAction action = new GenericAction(executor);
-//      action.actionPerformed(null);
-//
-//      assertTrue(executorCalled[0]);
-//   }
-//
-//   @Test
-//   public void testGenericAction()
-//   {
-//      final boolean[] executorCalled = new boolean[] {false};
-//
-//      GenericCommandExecutor executor = new GenericCommandExecutor()
-//      {
-//         public void generic()
-//         {
-//            executorCalled[0] = true;
-//         }
-//      };
-//
-//      GenericAction action = new GenericAction(executor);
-//      action.actionPerformed(null);
-//
-//      assertTrue(executorCalled[0]);
-//   }
-//
-//   @Test
-//   public void testGenericAction()
-//   {
-//      final boolean[] executorCalled = new boolean[] {false};
-//
-//      GenericCommandExecutor executor = new GenericCommandExecutor()
-//      {
-//         public void generic()
-//         {
-//            executorCalled[0] = true;
-//         }
-//      };
-//
-//      GenericAction action = new GenericAction(executor);
-//      action.actionPerformed(null);
-//
-//      assertTrue(executorCalled[0]);
-//   }
-//
-//   @Test
-//   public void testGenericAction()
-//   {
-//      final boolean[] executorCalled = new boolean[] {false};
-//
-//      GenericCommandExecutor executor = new GenericCommandExecutor()
-//      {
-//         public void generic()
-//         {
-//            executorCalled[0] = true;
-//         }
-//      };
-//
-//      GenericAction action = new GenericAction(executor);
-//      action.actionPerformed(null);
-//
-//      assertTrue(executorCalled[0]);
-//   }
-//
-//   @Test
-//   public void testGenericAction()
-//   {
-//      final boolean[] executorCalled = new boolean[] {false};
-//
-//      GenericCommandExecutor executor = new GenericCommandExecutor()
-//      {
-//         public void generic()
-//         {
-//            executorCalled[0] = true;
-//         }
-//      };
-//
-//      GenericAction action = new GenericAction(executor);
-//      action.actionPerformed(null);
-//
-//      assertTrue(executorCalled[0]);
-//   }
-//
-//   @Test
-//   public void testGenericAction()
-//   {
-//      final boolean[] executorCalled = new boolean[] {false};
-//
-//      GenericCommandExecutor executor = new GenericCommandExecutor()
-//      {
-//         public void generic()
-//         {
-//            executorCalled[0] = true;
-//         }
-//      };
-//
-//      GenericAction action = new GenericAction(executor);
-//      action.actionPerformed(null);
-//
-//      assertTrue(executorCalled[0]);
-//   }
-//
+   @Test
+   public void testNextCameraKeyAction()
+   {
+      final boolean[] executorCalled = new boolean[] {false};
 
+      NextCameraKeyCommandExecutor executor = new NextCameraKeyCommandExecutor()
+      {
+         public void nextCameraKey()
+         {
+            executorCalled[0] = true;
+         }
+      };
+
+      NextCameraKeyAction action = new NextCameraKeyAction(executor);
+      action.actionPerformed(null);
+
+      assertTrue(executorCalled[0]);
+   }
+
+   @Test
+   public void testPackBufferAction()
+   {
+      final boolean[] executorCalled = new boolean[] {false};
+
+      PackBufferCommandExecutor executor = new PackBufferCommandExecutor()
+      {
+         public void packBuffer()
+         {
+            executorCalled[0] = true;
+         }
+      };
+
+      PackBufferAction action = new PackBufferAction(executor);
+      action.actionPerformed(null);
+
+      assertTrue(executorCalled[0]);
+   }
+
+   @Test
+   public void testPlayAction()
+   {
+      final boolean[] executorCalled = new boolean[] {false};
+
+      PlayCommandExecutor executor = new PlayCommandExecutor()
+      {
+         public void play()
+         {
+            executorCalled[0] = true;
+         }
+      };
+
+      PlayAction action = new PlayAction(executor);
+      action.actionPerformed(null);
+
+      assertTrue(executorCalled[0]);
+   }
+
+   @Test
+   public void testPreviousCameraKeyAction()
+   {
+      final boolean[] executorCalled = new boolean[] {false};
+
+      PreviousCameraKeyCommandExecutor executor = new PreviousCameraKeyCommandExecutor()
+      {
+         public void previousCameraKey()
+         {
+            executorCalled[0] = true;
+         }
+      };
+
+      PreviousCameraKeyAction action = new PreviousCameraKeyAction(executor);
+      action.actionPerformed(null);
+
+      assertTrue(executorCalled[0]);
+   }
+
+   @Test
+   public void testRemoveCameraKeyAction()
+   {
+      final boolean[] executorCalled = new boolean[] {false};
+
+      RemoveCameraKeyCommandExecutor executor = new RemoveCameraKeyCommandExecutor()
+      {
+         public void removeCameraKey()
+         {
+            executorCalled[0] = true;
+         }
+      };
+
+      RemoveCameraKeyAction action = new RemoveCameraKeyAction(executor);
+      action.actionPerformed(null);
+
+      assertTrue(executorCalled[0]);
+   }
+
+   @Test
+   public void testSetInPointAction()
+   {
+      final boolean[] executorCalled = new boolean[] {false};
+
+      SetInPointCommandExecutor executor = new SetInPointCommandExecutor()
+      {
+         public void setInPoint()
+         {
+            executorCalled[0] = true;
+         }
+      };
+
+      SetInPointAction action = new SetInPointAction(executor);
+      action.actionPerformed(null);
+
+      assertTrue(executorCalled[0]);
+   }
+
+   @Test
+   public void testSetOutPointAction()
+   {
+      final boolean[] executorCalled = new boolean[] {false};
+
+      SetOutPointCommandExecutor executor = new SetOutPointCommandExecutor()
+      {
+         public void setOutPoint()
+         {
+            executorCalled[0] = true;
+         }
+      };
+
+      SetOutPointAction action = new SetOutPointAction(executor);
+      action.actionPerformed(null);
+
+      assertTrue(executorCalled[0]);
+   }
+
+   @Test
+   public void testSimulateAction()
+   {
+      final boolean[] executorCalled = new boolean[] {false};
+
+      SimulateCommandExecutor executor = new SimulateCommandExecutor()
+      {
+         public void simulate()
+         {
+            executorCalled[0] = true;
+         }
+      };
+
+      SimulateAction action = new SimulateAction(executor);
+      action.actionPerformed(null);
+
+      assertTrue(executorCalled[0]);
+   }
+
+   @Test
+   public void testStepBackwardAction()
+   {
+      final boolean[] executorCalled = new boolean[] {false};
+
+      StepBackwardCommandExecutor executor = new StepBackwardCommandExecutor()
+      {
+         public void stepBackward()
+         {
+            executorCalled[0] = true;
+         }
+      };
+
+      StepBackwardAction action = new StepBackwardAction(executor);
+      action.actionPerformed(null);
+
+      assertTrue(executorCalled[0]);
+   }
+
+   @Test
+   public void testStepForwardAction()
+   {
+      final boolean[] executorCalled = new boolean[] {false};
+
+      StepForwardCommandExecutor executor = new StepForwardCommandExecutor()
+      {
+         public void stepForward()
+         {
+            executorCalled[0] = true;
+         }
+      };
+
+      StepForwardAction action = new StepForwardAction(executor);
+      action.actionPerformed(null);
+
+      assertTrue(executorCalled[0]);
+   }
+
+ @Test
+ public void testStopAction()
+ {
+    final boolean[] executorCalled = new boolean[] {false};
+
+    StopCommandExecutor executor = new StopCommandExecutor()
+    {
+       public void stop()
+       {
+          executorCalled[0] = true;
+       }
+    };
+
+    StopAction action = new StopAction(executor);
+    action.actionPerformed(null);
+
+    assertTrue(executorCalled[0]);
+ }
+
+ @Test
+ public void testToggleCameraKeyModeAction()
+ {
+    final boolean[] executorCalled = new boolean[] {false};
+
+    ToggleCameraKeyModeCommandExecutor executor = new ToggleCameraKeyModeCommandExecutor()
+    {
+       public void toggleCameraKeyMode()
+       {
+          executorCalled[0] = true;
+       }
+    };
+
+    ToggleCameraKeyModeAction action = new ToggleCameraKeyModeAction(executor);
+    action.actionPerformed(null);
+
+    assertTrue(executorCalled[0]);
+ }
+   
+ @Test
+ public void testToggleKeyPointModeAction()
+ {
+    final boolean[] executorCalled = new boolean[] {false, false, false};
+    final boolean[] isKeyPointModeToggled = new boolean[] {false};
+
+    ToggleKeyPointModeCommandExecutor executor = new ToggleKeyPointModeCommandExecutor()
+    {
+       public void toggleKeyPointMode()
+       {
+          if (!isKeyPointModeToggled[0])
+          {
+             if (executorCalled[1]) throw new RuntimeException("Not working in order!");
+             executorCalled[0] = true;
+          }
+          else
+          {
+             if (!executorCalled[0]) throw new RuntimeException("Not working in order!");
+             executorCalled[1] = true;
+          }
+          
+          isKeyPointModeToggled[0] = !isKeyPointModeToggled[0];
+       }
+
+      public boolean isKeyPointModeToggled()
+      {
+         return isKeyPointModeToggled[0];
+      }
+
+      public void registerToggleKeyPointModeCommandListener(ToggleKeyPointModeCommandListener commandListener)
+      {
+         executorCalled[2] = true;
+      }
+    };
+
+    ToggleKeyPointModeAction action = new ToggleKeyPointModeAction(executor);
+    assertTrue(executorCalled[2]);
+
+    assertFalse(executor.isKeyPointModeToggled());
+    
+    action.actionPerformed(null);
+    assertTrue(executorCalled[0]);
+    assertTrue(executor.isKeyPointModeToggled());
+
+    action.actionPerformed(null);
+    assertTrue(executorCalled[1]);
+    assertFalse(executor.isKeyPointModeToggled());
+
+ }
+   
+ @Test
+ public void testZoomInAction()
+ {
+    final boolean[] executorCalled = new boolean[] {false};
+
+    ZoomInCommandExecutor executor = new ZoomInCommandExecutor()
+    {
+       public void zoomIn()
+       {
+          executorCalled[0] = true;
+       }
+    };
+
+    ZoomInAction action = new ZoomInAction(executor);
+    action.actionPerformed(null);
+
+    assertTrue(executorCalled[0]);
+ }
+   
+ @Test
+ public void testZoomOutAction()
+ {
+    final boolean[] executorCalled = new boolean[] {false};
+
+    ZoomOutCommandExecutor executor = new ZoomOutCommandExecutor()
+    {
+       public void zoomOut()
+       {
+          executorCalled[0] = true;
+       }
+    };
+
+    ZoomOutAction action = new ZoomOutAction(executor);
+    action.actionPerformed(null);
+
+    assertTrue(executorCalled[0]);
+ }
+ 
 
 }
