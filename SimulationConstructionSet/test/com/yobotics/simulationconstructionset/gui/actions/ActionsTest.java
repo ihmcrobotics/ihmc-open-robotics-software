@@ -4,9 +4,10 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import com.yobotics.simulationconstructionset.commands.AboutCommandExecutor;
 import com.yobotics.simulationconstructionset.commands.AddCameraKeyCommandExecutor;
 import com.yobotics.simulationconstructionset.commands.SimulateCommandExecutor;
+import com.yobotics.simulationconstructionset.gui.actions.dialogActions.AboutAction;
+import com.yobotics.simulationconstructionset.gui.dialogConstructors.AboutDialogConstructor;
 
 public class ActionsTest
 {
@@ -15,9 +16,9 @@ public class ActionsTest
    {
       final boolean[] executorCalled = new boolean[] {false};
 
-      AboutCommandExecutor executor = new AboutCommandExecutor()
+      AboutDialogConstructor executor = new AboutDialogConstructor()
       {
-         public void showAbout()
+         public void constructAboutDialog()
          {
             executorCalled[0] = true;
          }
@@ -36,7 +37,7 @@ public class ActionsTest
 
       AddCameraKeyCommandExecutor executor = new AddCameraKeyCommandExecutor()
       {
-         public void addCameraKeyPoint()
+         public void addCameraKey()
          {
             executorCalled[0] = true;
          }
