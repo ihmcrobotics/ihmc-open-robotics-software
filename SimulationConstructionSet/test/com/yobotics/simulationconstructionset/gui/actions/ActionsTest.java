@@ -28,8 +28,7 @@ import com.yobotics.simulationconstructionset.commands.ToggleKeyPointModeCommand
 import com.yobotics.simulationconstructionset.commands.ToggleKeyPointModeCommandListener;
 import com.yobotics.simulationconstructionset.commands.ViewportSelectorCommandExecutor;
 import com.yobotics.simulationconstructionset.commands.ViewportSelectorCommandListener;
-import com.yobotics.simulationconstructionset.commands.ZoomInCommandExecutor;
-import com.yobotics.simulationconstructionset.commands.ZoomOutCommandExecutor;
+import com.yobotics.simulationconstructionset.commands.ZoomGraphCommandExecutor;
 import com.yobotics.simulationconstructionset.gui.ViewportWindow;
 import com.yobotics.simulationconstructionset.gui.actions.dialogActions.AboutAction;
 import com.yobotics.simulationconstructionset.gui.dialogConstructors.AboutDialogConstructor;
@@ -545,12 +544,17 @@ public class ActionsTest
  {
     final boolean[] executorCalled = new boolean[] {false};
 
-    ZoomInCommandExecutor executor = new ZoomInCommandExecutor()
+    ZoomGraphCommandExecutor executor = new ZoomGraphCommandExecutor()
     {
        public void zoomIn()
        {
           executorCalled[0] = true;
        }
+
+      public void zoomOut()
+      {
+         throw new RuntimeException();
+      }
     };
 
     ZoomInAction action = new ZoomInAction(executor);
@@ -564,12 +568,17 @@ public class ActionsTest
  {
     final boolean[] executorCalled = new boolean[] {false};
 
-    ZoomOutCommandExecutor executor = new ZoomOutCommandExecutor()
+    ZoomGraphCommandExecutor executor = new ZoomGraphCommandExecutor()
     {
        public void zoomOut()
        {
           executorCalled[0] = true;
        }
+
+      public void zoomIn()
+      {
+         throw new RuntimeException();         
+      }
     };
 
     ZoomOutAction action = new ZoomOutAction(executor);
