@@ -41,7 +41,7 @@ public class DataBufferEntryTest
    {
       double tempDouble = (double) rng.nextInt(20000) / (double) rng.nextInt(30);
       doubleYoVariable.set(tempDouble);
-      assertEquals(tempDouble, dataBufferEntry.getVal(), 0);
+      assertEquals(tempDouble, dataBufferEntry.getVariableValueAsADouble(), 0);
    }
 
    @Test
