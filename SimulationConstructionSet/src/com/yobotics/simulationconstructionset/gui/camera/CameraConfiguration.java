@@ -1,4 +1,4 @@
-package com.yobotics.simulationconstructionset;
+package com.yobotics.simulationconstructionset.gui.camera;
 
 
 
