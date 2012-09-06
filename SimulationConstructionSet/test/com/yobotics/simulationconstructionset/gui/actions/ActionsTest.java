@@ -405,6 +405,11 @@ public class ActionsTest
          {
             executorCalled[0] = true;
          }
+         
+         public boolean isSimulating()
+         {
+            return false;
+         }
       };
 
       SimulateAction action = new SimulateAction(executor);
