@@ -174,7 +174,7 @@ public class YoKalmanFilterTest
          dataBuffer.tickAndUpdate();
       }
 
-      dataBuffer.goToInPoint();
+      dataBuffer.gotoInPoint();
       KalmanFilter kalmanFilter = kalmanFilters[0];
       for (int i = 0; i < nTicks; i++)
       {
