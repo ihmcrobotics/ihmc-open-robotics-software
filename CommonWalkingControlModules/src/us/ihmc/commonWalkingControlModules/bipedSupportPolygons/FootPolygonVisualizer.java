@@ -24,15 +24,18 @@ public class FootPolygonVisualizer
    {
       this.bipedFeet = bipedFeet;
 
-      for (RobotSide robotSide : RobotSide.values())
-      {
-         YoFrameConvexPolygon2d yoFootPolygon = new YoFrameConvexPolygon2d(robotSide + "foot", "", ReferenceFrame.getWorldFrame(), 30, registry);
-         yoFootPolygons.put(robotSide, yoFootPolygon);
-         Color color = colors.get(robotSide);
-
-         DynamicGraphicYoPolygonArtifact dynamicGraphicYoPolygonArtifact = new DynamicGraphicYoPolygonArtifact(robotSide + " Foot", yoFootPolygon,
-                                                                              color, false);
-         dynamicGraphicObjectsListRegistry.registerArtifact(robotSide + " Foot", dynamicGraphicYoPolygonArtifact);
+      if (dynamicGraphicObjectsListRegistry != null)
+      {    	  
+    	  for (RobotSide robotSide : RobotSide.values())
+    	  {
+    		  YoFrameConvexPolygon2d yoFootPolygon = new YoFrameConvexPolygon2d(robotSide + "foot", "", ReferenceFrame.getWorldFrame(), 30, registry);
+    		  yoFootPolygons.put(robotSide, yoFootPolygon);
+    		  Color color = colors.get(robotSide);
+    		  
+    		  DynamicGraphicYoPolygonArtifact dynamicGraphicYoPolygonArtifact = new DynamicGraphicYoPolygonArtifact(robotSide + " Foot", yoFootPolygon,
+    				  color, false);
+    		  dynamicGraphicObjectsListRegistry.registerArtifact(robotSide + " Foot", dynamicGraphicYoPolygonArtifact);
+    	  }
       }
 
 
@@ -44,8 +47,11 @@ public class FootPolygonVisualizer
       for (RobotSide robotSide : RobotSide.values())
       {
          YoFrameConvexPolygon2d yoFootPolygon = yoFootPolygons.get(robotSide);
-         BipedFootInterface bipedFoot = bipedFeet.get(robotSide);
-         yoFootPolygon.setFrameConvexPolygon2d(bipedFoot.getFootPolygonInUseInAnkleZUp().changeFrameAndProjectToXYPlaneCopy(ReferenceFrame.getWorldFrame()));
+         if (yoFootPolygon != null)
+         {
+        	 BipedFootInterface bipedFoot = bipedFeet.get(robotSide);
+        	 yoFootPolygon.setFrameConvexPolygon2d(bipedFoot.getFootPolygonInUseInAnkleZUp().changeFrameAndProjectToXYPlaneCopy(ReferenceFrame.getWorldFrame()));        	 
+         }
       }
    }
 }
