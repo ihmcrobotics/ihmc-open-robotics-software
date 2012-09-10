@@ -1,13 +1,12 @@
 package us.ihmc.plotting.shapes;
 
-import java.awt.Color;
-import java.awt.Graphics;
-import java.util.ArrayList;
+import us.ihmc.plotting.Artifact;
+import us.ihmc.utilities.math.geometry.BoundingBox2d;
+import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
 
 import javax.vecmath.Point2d;
-
-import us.ihmc.plotting.Artifact;
-import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
+import java.awt.*;
+import java.util.ArrayList;
 
 public class PolygonArtifact extends Artifact
 {
@@ -55,6 +54,26 @@ public class PolygonArtifact extends Artifact
       FILL_POLYGON = fill;
       this.color = color;
       setPoints(convexPolygon2d.getClockwiseOrderedListOfPointsCopy());
+   }
+
+   public PolygonArtifact(String id, boolean fill, Color color, BoundingBox2d boundingBox2d)
+   {
+      super(id);
+      setLevel(2);
+      FILL_POLYGON = fill;
+      this.color = color;
+      Point2d minPoint = new Point2d();
+      boundingBox2d.getMinPoint(minPoint);
+      Point2d maxPoint = new Point2d();
+      boundingBox2d.getMaxPoint(maxPoint);
+      Point2d leftUpper = new Point2d(minPoint.getX(), maxPoint.getY());
+      Point2d rightLower = new Point2d(maxPoint.getX(), minPoint.getY());
+      ArrayList<Point2d> points = new ArrayList<Point2d>();
+      points.add(minPoint);
+      points.add(leftUpper);
+      points.add(maxPoint);
+      points.add(rightLower);
+      setPoints(points);
    }
 
 
