@@ -37,6 +37,7 @@ import us.ihmc.utilities.screwTheory.TwistCalculator;
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.EnumYoVariable;
+import com.yobotics.simulationconstructionset.YoAppearance;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.BagOfBalls;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
@@ -110,14 +111,17 @@ public class MomentumBasedControllerStateMachine extends StateMachine
    private final DoubleYoVariable singleSupportICPGlideScaleFactor = new DoubleYoVariable("singleSupportICPGlideScaleFactor", registry);
    private final BooleanYoVariable walk = new BooleanYoVariable("walk", registry);
    private final BooleanYoVariable liftUpHeels = new BooleanYoVariable("liftUpHeels", registry);
-   private final DoubleYoVariable heelsUpFootPitch = new DoubleYoVariable("heelsUpFootPitch", registry);
+   private final DoubleYoVariable trailingFootPitch = new DoubleYoVariable("trailingFootPitch", registry);
+   private final DoubleYoVariable leadingFootPitch = new DoubleYoVariable("leadingFootPitch", registry);
 
    private double omega0;
    private final double gravity;
    private final double swingNullspaceMultiplier = 500.0;    // needs to be pretty high to fight the limit stops...
    private final SideDependentList<BooleanYoVariable> trajectoryInitialized = new SideDependentList<BooleanYoVariable>();
 
-   private final BagOfBalls bagOfBalls;
+   private final BagOfBalls footTrajectoryBagOfBalls;
+   private final BagOfBalls comTrajectoryBagOfBalls;
+   private int comTrajectoryCounter = 0;
 
    private final SideDependentList<FixedAxisOfRotationControlModule> fixedAxisOfRotationControlModules =
       new SideDependentList<FixedAxisOfRotationControlModule>();
@@ -175,7 +179,7 @@ public class MomentumBasedControllerStateMachine extends StateMachine
       desiredICP = new YoFramePoint2d("desiredICP", "", ReferenceFrame.getWorldFrame(), registry);
       desiredICPVelocity = new YoFrameVector2d("desiredICPVelocity", "", ReferenceFrame.getWorldFrame(), registry);
 
-      singleSupportICPGlideScaleFactor.set(0.8);
+      singleSupportICPGlideScaleFactor.set(0.9);
       FramePoint2d finalDesiredICPForDoubleSupportStance = getDoubleSupportFinalDesiredICPForDoubleSupportStance();
       finalDesiredICPForDoubleSupportStance.changeFrame(desiredICP.getReferenceFrame());
 
@@ -217,14 +221,16 @@ public class MomentumBasedControllerStateMachine extends StateMachine
       this.previousCoP = new FramePoint2d(ReferenceFrame.getWorldFrame());
       this.capturePoint = new FramePoint2d(ReferenceFrame.getWorldFrame());
 
-      bagOfBalls = new BagOfBalls(100, registry, dynamicGraphicObjectsListRegistry);
+      footTrajectoryBagOfBalls = new BagOfBalls(100, registry, dynamicGraphicObjectsListRegistry);
+      comTrajectoryBagOfBalls = new BagOfBalls(500, 0.01, "comBagOfBalls", YoAppearance.Black(), registry, dynamicGraphicObjectsListRegistry);
 
       setUpStateMachine();
       parentRegistry.addChild(registry);
 
       walk.set(false);
       liftUpHeels.set(true);
-      heelsUpFootPitch.set(0.05);
+      trailingFootPitch.set(0.05);
+      leadingFootPitch.set(0.8);
       minOrbitalEnergyForSingleSupport.set(0.007);
       amountToBeInsideSingleSupport.set(0.0);
       amountToBeInsideDoubleSupport.set(0.05);
@@ -360,20 +366,17 @@ public class MomentumBasedControllerStateMachine extends StateMachine
    private class DoubleSupportState extends State
    {
       private final RobotSide transferToSide;
-//      private final BooleanYoVariable icpTrajectoryHasBeenInitialized;
 
       public DoubleSupportState(RobotSide transferToSide)
       {
          super((transferToSide == null) ? MomentumBasedControllerState.DOUBLE_SUPPORT : transferStateEnums.get(transferToSide));
          this.transferToSide = transferToSide;
-         String prefix = (transferToSide == null) ? "doubleSupport" : transferToSide.getCamelCaseNameForStartOfExpression() + "Transfer";
-//         icpTrajectoryHasBeenInitialized = new BooleanYoVariable(prefix + "ICPTrajectoryHasBeenInitialized", registry);
       }
 
       @Override
       public void doAction()
       {
-         centerOfMassHeightTrajectoryGenerator.compute();
+         evaluateCoMTrajectory();
 
          for (RobotSide robotSide : RobotSide.values())
          {
@@ -384,7 +387,7 @@ public class MomentumBasedControllerStateMachine extends StateMachine
                bipedFoot.setFootPolygonInUse(FootPolygonEnum.ONTOES);
                bipedFoot.setShift(1.0);
 
-               double footPitch = (robotSide == getUpcomingSupportLeg().getOppositeSide()) ? 0.8 : heelsUpFootPitch.getDoubleValue();
+               double footPitch = (robotSide == getUpcomingSupportLeg().getOppositeSide()) ? leadingFootPitch.getDoubleValue() : trailingFootPitch.getDoubleValue();
                setDesiredFootPosVelAccForSupportSide(robotSide, footPitch);
             }
             else
@@ -412,33 +415,6 @@ public class MomentumBasedControllerStateMachine extends StateMachine
             desiredICP.set(desiredICPLocal);
             desiredICPVelocity.set(desiredICPVelocityLocal);
          }
-
-//         if (!icpTrajectoryGenerator.isDone() || icpTrajectoryHasBeenInitialized.getBooleanValue())
-//         {
-//            FramePoint2d desiredICPLocal = new FramePoint2d(desiredICP.getReferenceFrame());
-//            FrameVector2d desiredICPVelocityLocal = new FrameVector2d(desiredICPVelocity.getReferenceFrame());
-//            icpTrajectoryGenerator.pack(desiredICPLocal, desiredICPVelocityLocal, omega0);
-//            desiredICP.set(desiredICPLocal);
-//            desiredICPVelocity.set(desiredICPVelocityLocal);
-//         }
-//         else
-//         {
-//            FramePoint2d finalDesiredICP;
-//
-//            desiredICP.set(capturePoint);
-//            if (transferToSide == null)
-//            {
-//               finalDesiredICP = getDoubleSupportFinalDesiredICPForDoubleSupportStance();
-//            }
-//            else
-//            {
-//               Footstep currentFootstep = new Footstep(transferToSide, new FramePose(referenceFrames.getFootFrame(transferToSide)));
-//               finalDesiredICP = getDoubleSupportFinalDesiredICPForWalking(currentFootstep, bipedFeet.get(transferToSide).getFootPolygonInSoleFrame());
-//            }
-//            finalDesiredICP.changeFrame(desiredICP.getReferenceFrame());
-//            icpTrajectoryGenerator.initialize(desiredICP.getFramePoint2dCopy(), finalDesiredICP, doubleSupportTime, omega0, 0.03);
-//            icpTrajectoryHasBeenInitialized.set(true);
-//         }
       }
 
       @Override
@@ -455,22 +431,7 @@ public class MomentumBasedControllerStateMachine extends StateMachine
          }
 
          setSupportLeg(null);
-//         transferICPTrajectoryDone.set(false);
 
-//       for (RobotSide robotSide : RobotSide.values())
-//       {
-//          FrameVector axisOfRotation = new FrameVector(referenceFrames.getFootFrame(robotSide), 0.0, 1.0, 0.0);
-//          FramePoint offset = bipedFeet.get(robotSide).getToePointsCopy()[0];
-//          fixedAxisOfRotationControlModules.get(robotSide).initialize(axisOfRotation, offset);
-//       }
-
-//         if (transferToSide == null)
-//         {
-//            desiredICP.set(capturePoint);
-//         }
-
-//         icpTrajectoryHasBeenInitialized.set(false);
-         
          FramePoint2d finalDesiredICP;
 
          desiredICP.set(capturePoint);
@@ -498,11 +459,6 @@ public class MomentumBasedControllerStateMachine extends StateMachine
          {
             nullspaceMultipliers.get(robotSide).set(0.0);
          }
-
-//       if (transferToSide != null)
-//       {
-//          icpTrajectoryGenerators.get(transferToSide.getOppositeSide()).changeSideToUseForReferenceFrame(transferToSide);
-//       }
       }
 
       @Override
@@ -537,7 +493,7 @@ public class MomentumBasedControllerStateMachine extends StateMachine
       @Override
       public void doAction()
       {
-         centerOfMassHeightTrajectoryGenerator.compute();
+         evaluateCoMTrajectory();
 
          CartesianTrajectoryGenerator cartesianTrajectoryGenerator = cartesianTrajectoryGenerators.get(swingSide);
          if (!cartesianTrajectoryGenerator.isDone() && trajectoryInitialized.get(swingSide).getBooleanValue())
@@ -576,7 +532,7 @@ public class MomentumBasedControllerStateMachine extends StateMachine
          if (counter >= 100)
          {
             positionToPack.changeFrame(worldFrame);
-            bagOfBalls.setBallLoop(positionToPack);
+            footTrajectoryBagOfBalls.setBallLoop(positionToPack);
             counter = 0;
          }
       }
@@ -594,7 +550,7 @@ public class MomentumBasedControllerStateMachine extends StateMachine
 
          desiredFootOrientations.get(swingSide).setYawPitchRoll(0.0, 0.0, 0.0);
 
-         setDesiredFootPosVelAccForSupportSide(supportSide, heelsUpFootPitch.getDoubleValue());
+         setDesiredFootPosVelAccForSupportSide(supportSide, trailingFootPitch.getDoubleValue()); // FIXME: make it a smooth trajectory
       }
 
       @Override
@@ -638,7 +594,7 @@ public class MomentumBasedControllerStateMachine extends StateMachine
          double orbitalEnergy = centerOfMassHeightTrajectoryGenerator.computeOrbitalEnergyIfInitializedNow(getUpcomingSupportLeg());
         
 //         return transferICPTrajectoryDone.getBooleanValue() && orbitalEnergy > minOrbitalEnergy;
-         return orbitalEnergy > minOrbitalEnergyForSingleSupport .getDoubleValue();
+         return orbitalEnergy > minOrbitalEnergyForSingleSupport.getDoubleValue();
       }
    }
 
@@ -855,5 +811,19 @@ public class MomentumBasedControllerStateMachine extends StateMachine
    public boolean trajectoryInitialized(RobotSide robotSide)
    {
       return trajectoryInitialized.get(robotSide).getBooleanValue();
+   }
+   
+   private void evaluateCoMTrajectory()
+   {
+      centerOfMassHeightTrajectoryGenerator.compute();
+      comTrajectoryCounter++;
+      if (comTrajectoryCounter >= 500)
+      {
+         FramePoint desiredCoM = processedSensors.getCenterOfMassPositionInFrame(worldFrame);
+         desiredCoM.setY(0.0);
+         desiredCoM.setZ(centerOfMassHeightTrajectoryGenerator.getDesiredCenterOfMassHeight());
+         comTrajectoryBagOfBalls.setBallLoop(desiredCoM);
+         comTrajectoryCounter = 0;
+      }
    }
 }
