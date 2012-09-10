@@ -1,0 +1,403 @@
+#LyX 2.0 created this file. For more info see http://www.lyx.org/
+\lyxformat 413
+\begin_document
+\begin_header
+\textclass article
+\begin_preamble
+\DeclareMathOperator{\Ad}{Ad}
+\DeclareMathOperator{\ad}{ad}
+\end_preamble
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman lmodern
+\font_sans lmss
+\font_typewriter lmtt
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_amsmath 2
+\use_esint 1
+\use_mhchem 1
+\use_mathdots 1
+\cite_engine basic
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\use_refstyle 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+LIPM dynamics with two contact points
+\end_layout
+
+\begin_layout Author
+Twan Koolen
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement h
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename model copy.pdf
+	scale 80
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+model
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:model"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The equations of motion of the model shown in Fig.
+ 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:model"
+
+\end_inset
+
+ are
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+m\ddot{\mathbf{r}}=\mathbf{f}_{0}+\mathbf{f}_{1}+m\mathbf{g}\label{eq:eom}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Define the projection matrix 
+\begin_inset Formula $\mathbf{P}=\left(\begin{array}{ccc}
+1 & 0 & 0\\
+0 & 1 & 0
+\end{array}\right)$
+\end_inset
+
+.
+ We then have
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\mathbf{P}\ddot{\mathbf{r}}=\left(\begin{array}{c}
+\ddot{x}\\
+\ddot{y}
+\end{array}\right),\quad\mathbf{P}\mathbf{g}=0
+\]
+
+\end_inset
+
+so that
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\left(\begin{array}{c}
+\ddot{x}\\
+\ddot{y}
+\end{array}\right)=\mathbf{P}\left[\frac{1}{m}\left(\mathbf{f}_{0}+\mathbf{f}_{1}\right)+\mathbf{g}\right]=\frac{1}{m}\mathbf{P}\left(\mathbf{f}_{0}+\mathbf{f}_{1}\right)\label{eq:projected-dynamics}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We will define the forces as
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\mathbf{f}_{i}=c_{i}\frac{\mathbf{r}-\Delta\mathbf{r}_{\text{CMP}}-\mathbf{r}_{\text{CoP},i}}{\left\Vert \mathbf{r}-\mathbf{r}_{i}\right\Vert }=k_{i}\left(\mathbf{r}-\Delta\mathbf{r}_{\text{CMP}}-\mathbf{r}_{\text{CoP},i}\right)
+\]
+
+\end_inset
+
+with 
+\begin_inset Formula $\Delta z_{CMP}=0$
+\end_inset
+
+.
+ This results in
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\mathbf{f}_{0}+\mathbf{f}_{1} & =\left(k_{0}+k_{1}\right)\left(\mathbf{r}-\Delta\mathbf{r}_{\text{CMP}}\right)-\left(k_{0}\mathbf{r}_{\text{CoP},0}+k_{1}\mathbf{r}_{\text{CoP},1}\right)
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Plugging this into 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:projected-dynamics"
+
+\end_inset
+
+, we get
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\left(\begin{array}{c}
+\ddot{x}\\
+\ddot{y}
+\end{array}\right) & =\frac{k_{0}+k_{1}}{m}\mathbf{P}\left(\mathbf{r}-\Delta\mathbf{r}_{\text{CMP}}-\frac{k_{0}\mathbf{r}_{\text{CoP},0}+k_{1}\mathbf{r}_{\text{CoP},1}}{k_{0}+k_{1}}\right)\\
+ & =\frac{k_{1}+k_{2}}{m}\mathbf{P}\left(\mathbf{r}-\Delta\mathbf{r}_{\text{CMP}}-\left(\lambda_{0}\mathbf{r}_{\text{CoP},0}+\lambda_{1}\mathbf{r}_{\text{CoP},1}\right)\right)\\
+ & =\omega_{0}^{2}\mathbf{P}\left(\mathbf{r}-\mathbf{r}_{\text{PCoP}}-\Delta\mathbf{r}_{\text{CMP}}\right)
+\end{align*}
+
+\end_inset
+
+with
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\omega_{0}^{2}=\frac{k_{0}+k_{1}}{m}
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\lambda_{i}=\frac{k_{i}}{k_{0}+k_{1}}
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\mathbf{r}_{\text{PCoP}}=\lambda_{0}\mathbf{r}_{\text{CoP},0}+\lambda_{1}\mathbf{r}_{\text{CoP},1}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Both natural frequency and pseudo-CoP are dependent on the force magnitudes.
+ The pseudo-CoP is a linear combination of the individual CoPs.
+ Height of the pseudo-CoP does not matter for the dynamics and is hence
+ arbitrary.
+\end_layout
+
+\begin_layout Standard
+We require that the forces satisfy
+\begin_inset Formula 
+\begin{align*}
+f_{0z}+f_{1z} & =f_{z}\\
+k_{0}\left(z-z_{\text{CoP},0}\right)+k_{1}\left(z-z_{\text{CoP},1}\right) & =f_{z}
+\end{align*}
+
+\end_inset
+
+since the 
+\begin_inset Formula $z$
+\end_inset
+
+-component of 
+\begin_inset Formula $\Delta\mathbf{r}_{\text{CMP}}$
+\end_inset
+
+ is zero.
+ This results in
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+k_{1}=\frac{f_{z}-k_{0}\left(z-z_{\text{CoP},0}\right)}{z-z_{\text{CoP},1}}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Furthermore, we have
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\left(\begin{array}{c}
+x_{\text{PCoP}}\\
+y_{\text{PCoP}}
+\end{array}\right) & =\mathbf{P}\mathbf{r}_{\text{PCoP}}\\
+ & =\frac{k_{0}\mathbf{P}\mathbf{r}_{\text{CoP},0}+k_{1}\mathbf{P}\mathbf{r}_{\text{CoP},1}}{k_{0}+k_{1}}\\
+ & =\frac{k_{0}\mathbf{P}\mathbf{r}_{\text{CoP},0}+\frac{f_{z}-k_{0}\left(z-z_{\text{CoP},0}\right)}{z-z_{\text{CoP},1}}\mathbf{P}\mathbf{r}_{\text{CoP},1}}{k_{0}+\frac{f_{z}-k_{0}\left(z-z_{\text{CoP},0}\right)}{z-z_{\text{CoP},1}}}\\
+ & \frac{k_{0}\left[\left(z-z_{2}\right)x_{1}-\left(z-z_{1}\right)x_{2}\right]+f_{z}\mathbf{P}\mathbf{r}_{\text{CoP},1}}{k_{1}\left(z_{1}-z_{2}\right)+f_{z}}
+\end{align*}
+
+\end_inset
+
+which can be solved for 
+\begin_inset Formula $k_{1}$
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\left[k_{1}\left(z_{1}-z_{2}\right)+f_{z}\right]x_{pcop}=k_{1}\left[\left(z-z_{2}\right)x_{1}-\left(z-z_{1}\right)x_{2}\right]+f_{z}x_{2}
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+k_{1}\left[\left(z_{1}-z_{2}\right)x_{pcop}-\left(z-z_{2}\right)x_{1}+\left(z-z_{1}\right)x_{2}\right]=f_{z}\left(x_{2}-x_{pcop}\right)
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+k_{1}=\frac{f_{z}\left(x_{2}-x_{pcop}\right)}{\left(z_{1}-z_{2}\right)x_{pcop}+\left(z-z_{1}\right)x_{2}-\left(z-z_{2}\right)x_{1}}
+\]
+
+\end_inset
+
+which results in
+\begin_inset Formula 
+\[
+k_{2}=\frac{f_{z}\left(x_{pcop}-x_{1}\right)}{\left(z_{1}-z_{2}\right)x_{pcop}+\left(z-z_{1}\right)x_{2}-\left(z-z_{2}\right)x_{1}}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align}
+\omega_{0}^{2}=\frac{k_{1}+k_{2}}{m} & =\frac{f_{z}\left(x_{2}-x_{1}\right)}{m\left[\left(z_{1}-z_{2}\right)x_{pcop}+\left(z-z_{1}\right)x_{2}-\left(z-z_{2}\right)x_{1}\right]}\label{eq:omega0Squared}
+\end{align}
+
+\end_inset
+
+and
+\begin_inset Formula 
+\begin{align*}
+\lambda_{1} & =\frac{k_{1}}{k_{1}+k_{2}}=\frac{x_{2}-x_{pcop}}{x_{2}-x_{1}}\\
+\lambda_{2} & =\frac{k_{2}}{k_{1}+k_{2}}=\frac{x_{pcop}-x_{1}}{x_{2}-x_{1}}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Add in CoP control:
+\begin_inset Formula 
+\begin{align*}
+x_{pcop} & =x_{ic,des}-\frac{1}{\omega_{0}}\dot{x}_{ic,des}+k_{ic}\left(x+\frac{\dot{x}}{\omega_{0}}-x_{ic,des}\right)\\
+ & =\left(1-k_{ic}\right)x_{ic,des}+k_{ic}x+\frac{1}{\omega_{0}}\left(k_{ic}\dot{x}-\dot{x}_{ic,des}\right)
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document
