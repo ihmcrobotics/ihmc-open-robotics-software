@@ -273,10 +273,6 @@ k_{1}\left(z-z_{1}\right)+k_{2}\left(z-z_{2}\right) & =f_{z}
 
 \end_inset
 
-
-\end_layout
-
-\begin_layout Standard
 since the 
 \begin_inset Formula $z$
 \end_inset
@@ -307,7 +303,7 @@ Furthermore, we have
 \begin_layout Standard
 \begin_inset Formula 
 \begin{align*}
-Pr_{pcop} & =x_{pcop}\\
+x_{pcop} & =Pr_{pcop}\\
  & =\lambda_{1}x_{1}+\lambda_{2}x_{2}\\
  & =\frac{k_{1}x_{1}+k_{2}x_{2}}{k_{1}+k_{2}}\\
  & =\frac{k_{1}x_{1}+\frac{f_{z}-k_{1}\left(z-z_{1}\right)}{z-z_{2}}x_{2}}{k_{1}+\frac{f_{z}-k_{1}\left(z-z_{1}\right)}{z-z_{2}}}\\
