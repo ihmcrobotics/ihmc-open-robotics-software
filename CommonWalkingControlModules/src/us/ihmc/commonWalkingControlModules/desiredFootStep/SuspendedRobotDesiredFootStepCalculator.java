@@ -37,7 +37,7 @@ public class SuspendedRobotDesiredFootStepCalculator implements DesiredFootstepC
       this.desiredHeadingControlModule = desiredHeadingControlModule;
       parentRegistry.addChild(registry);
       
-      stepLength.set(0.25);
+      stepLength.set(0.20);
       stepWidth.set(0.22);
       stepHeight.set(0.0);
       stepYaw.set(0.0);
@@ -54,10 +54,10 @@ public class SuspendedRobotDesiredFootStepCalculator implements DesiredFootstepC
       switch(state.getIntegerValue())
       {
       case 0:
-         currentStepLength.set(-stepLength.getDoubleValue());
+         currentStepLength.set(stepLength.getDoubleValue());
          break;
       case 1:
-         currentStepLength.set(stepLength.getDoubleValue());
+         currentStepLength.set(-stepLength.getDoubleValue());
          break;
       }
       

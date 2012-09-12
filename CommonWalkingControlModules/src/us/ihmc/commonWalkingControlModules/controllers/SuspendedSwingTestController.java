@@ -36,6 +36,10 @@ public class SuspendedSwingTestController implements RobotController
    protected final BooleanYoVariable go = new BooleanYoVariable("go", "Starts and stops the walking", childRegistry);
 
    protected final StateMachine walkingStateMachine;
+   private final DoubleYoVariable timeInSwing = new DoubleYoVariable("timeInSwing", childRegistry);
+   private final DoubleYoVariable timeInPreSwing = new DoubleYoVariable("timeInPreSwing", childRegistry);
+   private final DoubleYoVariable timeInInitialSwing = new DoubleYoVariable("timeInInitialSwing", childRegistry);
+   private final DoubleYoVariable timeInMidSwing = new DoubleYoVariable("timeInMidSwing", childRegistry);
 
    //   protected final EnumYoVariable<RobotSide> legToTest = new EnumYoVariable<RobotSide>("legToTest", childRegistry, RobotSide.class);
 
@@ -136,6 +140,8 @@ public class SuspendedSwingTestController implements RobotController
             this.transitionToDefaultNextState();
          }
 
+         timeInPreSwing.set(walkingStateMachine.timeInCurrentState());
+         timeInSwing.set(timeInPreSwing.getDoubleValue());
          setProcessedOutputsBodyTorques();
       }
 
@@ -170,7 +176,8 @@ public class SuspendedSwingTestController implements RobotController
          {
             this.transitionToDefaultNextState();
          }
-
+         timeInInitialSwing.set(walkingStateMachine.timeInCurrentState());
+         timeInSwing.set(timeInPreSwing.getDoubleValue() + timeInInitialSwing.getDoubleValue());
          setProcessedOutputsBodyTorques();
       }
 
@@ -208,7 +215,9 @@ public class SuspendedSwingTestController implements RobotController
          {
             this.transitionToDefaultNextState();
          }
-
+         
+         timeInMidSwing.set(walkingStateMachine.timeInCurrentState());
+         timeInSwing.set(timeInPreSwing.getDoubleValue() + timeInInitialSwing.getDoubleValue() + timeInMidSwing.getDoubleValue());
          setProcessedOutputsBodyTorques();
       }
 
@@ -243,7 +252,8 @@ public class SuspendedSwingTestController implements RobotController
 //         {
 //            this.transitionToDefaultNextState();
 //         }
-         if(walkingStateMachine.timeInCurrentState() > 1.0)
+         timeInSwing.set(timeInPreSwing.getDoubleValue() + timeInInitialSwing.getDoubleValue() + timeInMidSwing.getDoubleValue() + walkingStateMachine.timeInCurrentState());
+         if(timeInSwing.getDoubleValue() > 0.7)
          {
             this.transitionToDefaultNextState();
          }

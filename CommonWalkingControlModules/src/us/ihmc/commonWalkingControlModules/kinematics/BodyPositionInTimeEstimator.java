@@ -89,7 +89,7 @@ public class BodyPositionInTimeEstimator
       double xDeltaInTime = xCoMInTime[0] - currentCoMPosition.getX();
       double yDeltaInTime = yCoMInTime[0] - currentCoMPosition.getY();
       bodyPosition.setX(bodyPosition.getX() + xDeltaInTime);
-//      bodyPosition.setY(bodyPosition.getY() + yDeltaInTime);
+      bodyPosition.setY(bodyPosition.getY() + yDeltaInTime);
       estimatedUpperBodyPosition.set(bodyPosition);
       bodyPosition.changeFrame(pelvisFrame);
       
@@ -98,7 +98,7 @@ public class BodyPositionInTimeEstimator
       
       
       
-      FrameVector pelvisVelocityInTime = new FrameVector(desiredHeadingFrame, currentCoMVelocity.getX(), 0.0, 0.0);
+      FrameVector pelvisVelocityInTime = new FrameVector(desiredHeadingFrame, currentCoMVelocity.getX(), currentCoMVelocity.getY(), 0.0);
       estimatedUpperBodyVelocity.set(pelvisVelocityInTime);
       pelvisVelocityInTime.changeFrame(pelvisFrame);
       

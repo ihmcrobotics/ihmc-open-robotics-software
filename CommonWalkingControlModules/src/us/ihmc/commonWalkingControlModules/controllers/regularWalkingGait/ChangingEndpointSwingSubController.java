@@ -118,6 +118,10 @@ public class ChangingEndpointSwingSubController implements SwingSubController
    private final DoubleYoVariable positionErrorAtEndOfStepNorm = new DoubleYoVariable("positionErrorAtEndOfStepNorm", registry);
    private final DoubleYoVariable positionErrorAtEndOfStepX = new DoubleYoVariable("positionErrorAtEndOfStepX", registry);
    private final DoubleYoVariable positionErrorAtEndOfStepY = new DoubleYoVariable("positionErrorAtEndOfStepY", registry);
+   
+   private final YoFrameVector positionInSupportLegAnkleZUp = new YoFrameVector("positionInSupportLegAnkleZUp", ReferenceFrame.getWorldFrame(), registry);
+
+   
    private BagOfBalls bagOfBalls;
    private final double controlDT;
    private RobotSide swingSide;
@@ -196,6 +200,18 @@ public class ChangingEndpointSwingSubController implements SwingSubController
 
       return swingInAirTrajectoryGenerators.get(swingSide).isDone() && (deltaFootHeight < maxFootHeight);
    }
+   
+   
+   private void updateGroundClearance(RobotSide robotSide)
+   {
+      FramePoint swingFootPoint = new FramePoint(referenceFrames.getAnkleZUpFrame(robotSide));
+      swingFootPoint.changeFrame(referenceFrames.getAnkleZUpFrame(robotSide.getOppositeSide()));
+      
+//      FrameVector swingFootVector = new FrameVector(swingFootPoint);
+//      swingFootVector.changeFrame(ReferenceFrame.getWorldFrame());
+      
+      positionInSupportLegAnkleZUp.set(swingFootPoint.getVectorCopy());
+   }
 
    public void doPreSwing(LegTorques legTorquesToPackForSwingLeg, double timeInState)
    {
@@ -204,6 +220,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       preSwingControlModule.doPreSwing(legTorquesToPackForSwingLeg, timeInState);
       swingLegTorqueControlModule.computePreSwing(swingSide);
       timeSpentInPreSwing.set(timeInState);
+      updateGroundClearance(swingSide);
    }
 
    public void doInitialSwing(LegTorques legTorquesToPackForSwingLeg, double timeInState)
@@ -226,6 +243,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       computeDesiredFootPosVelAcc(swingSide, walkingTrajectoryGenerator, timeSpentSwingingUpToNow);
       computeSwingLegTorques(legTorquesToPackForSwingLeg);
       setEstimatedSwingTimeRemaining(couplingRegistry.getSingleSupportDuration() - timeSpentSwingingUpToNow);
+      updateGroundClearance(swingSide);
    }
 
    public void doTerminalSwing(LegTorques legTorquesToPackForSwingLeg, double timeInState)
@@ -243,6 +261,8 @@ public class ChangingEndpointSwingSubController implements SwingSubController
 
       computeSwingLegTorques(legTorquesToPackForSwingLeg);
 
+      updateGroundClearance(legTorquesToPackForSwingLeg.getRobotSide());
+      
       timeSpentInTerminalSwing.set(timeInState);
    }
 
@@ -352,6 +372,10 @@ public class ChangingEndpointSwingSubController implements SwingSubController
 
    public void doTransitionOutOfSwingInAir(RobotSide swingLeg)
    {
+      RobotSide supportLeg = swingLeg.getOppositeSide();
+      desiredFootstepCalculator.initializeDesiredFootstep(supportLeg);
+      // TODO: sort of nasty, but otherwise the swing trajectory won't be initialized correctly in doTransitionIntoInitialSwing:
+      couplingRegistry.setDesiredFootstep(desiredFootstepCalculator.updateAndGetDesiredFootstep(swingLeg.getOppositeSide()));
       updatePositionError(swingSide);
 
    }
