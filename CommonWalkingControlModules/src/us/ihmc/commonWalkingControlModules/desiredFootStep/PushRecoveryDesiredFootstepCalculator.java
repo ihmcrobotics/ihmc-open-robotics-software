@@ -69,8 +69,9 @@ public class PushRecoveryDesiredFootstepCalculator implements DesiredFootstepCal
       if (couplingRegistry.getCaptureRegion() == null)
       {
          // ICP probably went outside the foot on the wrong side; no capture region. Can't handle this currently.
-         System.out.println("supportLegForWalkingCtrlr: " + couplingRegistry.getSupportLeg());
-         throw new RuntimeException("capture region is null! supportLegForWalkingCtrlr: " + couplingRegistry.getSupportLeg());
+//         System.out.println("supportLegForWalkingCtrlr: " + couplingRegistry.getSupportLeg());
+//         throw new RuntimeException("capture region is null! supportLegForWalkingCtrlr: " + couplingRegistry.getSupportLeg());
+         return;
       }
       
       ReferenceFrame supportFootFrame = referenceFrames.getAnkleZUpFrame(supportLegSide);

@@ -39,6 +39,7 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameOrientation;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 import com.yobotics.simulationconstructionset.util.trajectory.YoMinimumJerkTrajectory;
 
 public class JointSpaceSwingSubController implements SwingSubController
@@ -95,6 +96,8 @@ public class JointSpaceSwingSubController implements SwingSubController
    private final BooleanYoVariable useBodyPositionEstimation;
 
    private final ProcessedOutputsInterface processedOutputs;
+   
+   private final YoFrameVector positionInSupportLegAnkleZUp;
 
    public JointSpaceSwingSubController(String name, ProcessedSensorsInterface processedSensors, ProcessedOutputsInterface processedOutputs, FullRobotModel fullRobotModel,
          SideDependentList<FootSwitchInterface> footSwitches, CommonWalkingReferenceFrames referenceFrames,
@@ -131,9 +134,8 @@ public class JointSpaceSwingSubController implements SwingSubController
          jointVelocities.set(side, new LegJointVelocities(legJointNames, side));
          jointAccelerations.set(side, new LegJointAccelerations(legJointNames, side));
 
-         ReferenceFrame groundFrame = desiredHeadingControlModule.getDesiredHeadingFrame();//referenceFrames.getAnkleZUpFrame(side.getOppositeSide());
-         desiredPositions.set(side, new YoFramePoint("finalDesiredPosition", side.getCamelCaseNameForMiddleOfExpression(), groundFrame, registry));
-         desiredOrientations.set(side, new YoFrameOrientation("finalDesiredOrientation", side.getCamelCaseNameForMiddleOfExpression(), groundFrame, registry));
+         desiredPositions.set(side, new YoFramePoint("finalDesiredPosition", side.getCamelCaseNameForMiddleOfExpression(), ReferenceFrame.getWorldFrame(), registry));
+         desiredOrientations.set(side, new YoFrameOrientation("finalDesiredOrientation", side.getCamelCaseNameForMiddleOfExpression(), ReferenceFrame.getWorldFrame(), registry));
       }
 
       for (LegJointName jointName : legJointNames)
@@ -160,6 +162,8 @@ public class JointSpaceSwingSubController implements SwingSubController
       
       useBodyPositionEstimation = new BooleanYoVariable("useBodyPositionEstimation", registry);
       useBodyPositionEstimation.set(true);
+      
+      positionInSupportLegAnkleZUp = new YoFrameVector("positionInSupportLegAnkleZUp", ReferenceFrame.getWorldFrame(), registry);
       
       parentRegistry.addChild(registry);
    }
@@ -213,6 +217,7 @@ public class JointSpaceSwingSubController implements SwingSubController
       
       couplingRegistry.getDesiredUpperBodyWrench().scale(factor);
       
+      updateGroundClearance(legTorquesToPackForSwingLeg.getRobotSide());
       
       
       timeSpentInPreSwing.set(timeInState);
@@ -233,6 +238,8 @@ public class JointSpaceSwingSubController implements SwingSubController
    public void doInitialSwing(LegTorques legTorquesToPackForSwingLeg, double timeInState)
    {
 //      updateFinalDesiredPosition(legTorquesToPackForSwingLeg.getRobotSide());
+      updateDesiredPositions(legTorquesToPackForSwingLeg.getRobotSide());
+
       doSwing(legTorquesToPackForSwingLeg, timeInState, true);
       timeSpentInInitialSwing.set(timeInState);
    }
@@ -240,15 +247,29 @@ public class JointSpaceSwingSubController implements SwingSubController
    public void doMidSwing(LegTorques legTorquesToPackForSwingLeg, double timeInState)
    {
 //      updateFinalDesiredPosition(legTorquesToPackForSwingLeg.getRobotSide());
+      updateDesiredPositions(legTorquesToPackForSwingLeg.getRobotSide());
+
       doSwing(legTorquesToPackForSwingLeg, timeSpentInInitialSwing.getDoubleValue() + timeInState, true);
       timeSpentInMidSwing.set(timeInState);
    }
-
+   
+   private void updateGroundClearance(RobotSide robotSide)
+   {
+      FramePoint swingFootPoint = new FramePoint(referenceFrames.getAnkleZUpFrame(robotSide));
+      swingFootPoint.changeFrame(referenceFrames.getAnkleZUpFrame(robotSide.getOppositeSide()));
+      
+//      FrameVector swingFootVector = new FrameVector(swingFootPoint);
+//      swingFootVector.changeFrame(ReferenceFrame.getWorldFrame());
+      
+      positionInSupportLegAnkleZUp.set(swingFootPoint.getVectorCopy());
+   }
+   
    private void doSwing(LegTorques legTorques, double timeInSwing, boolean useBodyPositionEstimation)
    {
       RobotSide swingLeg = legTorques.getRobotSide();
+      updateGroundClearance(swingLeg);
       useBodyPositionEstimation = useBodyPositionEstimation & this.useBodyPositionEstimation.getBooleanValue();
-      updateDesiredPositions(swingLeg);
+      
       FramePoint desiredPosition = desiredPositions.get(swingLeg).getFramePointCopy();
       Orientation desiredOrientation = desiredOrientations.get(swingLeg).getFrameOrientationCopy();
 
@@ -256,6 +277,7 @@ public class JointSpaceSwingSubController implements SwingSubController
       LegJointVelocities legJointVelocities = jointVelocities.get(swingLeg);
       LegJointAccelerations legJointAccelerations = jointAccelerations.get(swingLeg);
 
+      
       jointSpaceTrajectoryGenerator.updateEndPoint(desiredPosition, desiredOrientation, timeInSwing, useBodyPositionEstimation);
       jointSpaceTrajectoryGenerator.compute(legJointPositions, legJointVelocities, legJointAccelerations, timeInSwing);
 
@@ -277,7 +299,7 @@ public class JointSpaceSwingSubController implements SwingSubController
    public void doTerminalSwing(LegTorques legTorquesToPackForSwingLeg, double timeInState)
    {
       setEstimatedSwingTimeRemaining(0.0);
-
+      updateDesiredPositions(legTorquesToPackForSwingLeg.getRobotSide());
       doSwing(legTorquesToPackForSwingLeg, jointSpaceTrajectoryGenerator.getSwingEndTime(), true);
 
       timeSpentInTerminalSwing.set(timeInState);

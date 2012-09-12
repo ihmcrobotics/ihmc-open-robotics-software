@@ -72,6 +72,11 @@ public abstract class RegularWalkingGaitAbstractController implements RobotContr
    protected final EnumYoVariable<RobotSide> supportLegYoVariable = new EnumYoVariable<RobotSide>("supportLegForWalkingCtrlr",
                                                                        "Current support leg. Null if double support", childRegistry, RobotSide.class);
    protected final EnumYoVariable<RobotSide> oneLegBalanceSide = new EnumYoVariable<RobotSide>("oneLegBalanceSide", childRegistry, RobotSide.class);
+   
+   private final DoubleYoVariable timeInSwing = new DoubleYoVariable("timeInSwing", childRegistry);
+   private final DoubleYoVariable timeInPreSwing = new DoubleYoVariable("timeInPreSwing", childRegistry);
+   private final DoubleYoVariable timeInInitialSwing = new DoubleYoVariable("timeInInitialSwing", childRegistry);
+   private final DoubleYoVariable timeInMidSwing = new DoubleYoVariable("timeInMidSwing", childRegistry);
 
    private final String name;
 
@@ -383,6 +388,7 @@ public abstract class RegularWalkingGaitAbstractController implements RobotContr
          {
             this.transitionToDefaultNextState();
          }
+         
 
          setProcessedOutputsBodyTorques();
       }
@@ -419,6 +425,9 @@ public abstract class RegularWalkingGaitAbstractController implements RobotContr
          swingSubController.doPreSwing(lowerBodyTorques.getLegTorques(swingLeg), walkingStateMachine.timeInCurrentState());
          stanceSubController.doLoadingPreSwingC(lowerBodyTorques.getLegTorques(supportLeg), supportLeg, walkingStateMachine.timeInCurrentState());
          upperBodySubController.doUpperBodyControl(upperBodyTorques);
+         
+         timeInPreSwing.set(walkingStateMachine.timeInCurrentState());
+         timeInSwing.set(timeInPreSwing.getDoubleValue());
 
          if (swingSubController.isDoneWithPreSwingC(swingLeg, walkingStateMachine.timeInCurrentState()))
          {
@@ -462,11 +471,15 @@ public abstract class RegularWalkingGaitAbstractController implements RobotContr
          swingSubController.doInitialSwing(lowerBodyTorques.getLegTorques(swingSide), walkingStateMachine.timeInCurrentState());
          stanceSubController.doEarlyStance(lowerBodyTorques.getLegTorques(stanceSide), walkingStateMachine.timeInCurrentState());
          upperBodySubController.doUpperBodyControl(upperBodyTorques);
+         
+         timeInInitialSwing.set(walkingStateMachine.timeInCurrentState());
+         timeInSwing.set(timeInPreSwing.getDoubleValue() + timeInInitialSwing.getDoubleValue());
 
          if (swingSubController.isDoneWithInitialSwing(swingSide, walkingStateMachine.timeInCurrentState()))
          {
             this.transitionToDefaultNextState();
          }
+         
 
          setProcessedOutputsBodyTorques();
       }
@@ -507,11 +520,15 @@ public abstract class RegularWalkingGaitAbstractController implements RobotContr
          swingSubController.doMidSwing(lowerBodyTorques.getLegTorques(swingSide), walkingStateMachine.timeInCurrentState());
          stanceSubController.doLateStance(lowerBodyTorques.getLegTorques(stanceSide), walkingStateMachine.timeInCurrentState());
          upperBodySubController.doUpperBodyControl(upperBodyTorques);
+         
+         timeInMidSwing.set(walkingStateMachine.timeInCurrentState());
+         timeInSwing.set(timeInPreSwing.getDoubleValue() + timeInInitialSwing.getDoubleValue() + timeInMidSwing.getDoubleValue());
 
          if (swingSubController.isDoneWithMidSwing(swingSide, walkingStateMachine.timeInCurrentState()))
          {
             this.transitionToDefaultNextState();
          }
+         
 
          setProcessedOutputsBodyTorques();
       }
@@ -551,10 +568,15 @@ public abstract class RegularWalkingGaitAbstractController implements RobotContr
          stanceSubController.doTerminalStance(lowerBodyTorques.getLegTorques(stanceSide), walkingStateMachine.timeInCurrentState());
          upperBodySubController.doUpperBodyControl(upperBodyTorques);
 
+         
+         timeInSwing.set(timeInPreSwing.getDoubleValue() + timeInInitialSwing.getDoubleValue() + timeInMidSwing.getDoubleValue() + walkingStateMachine.timeInCurrentState());
+         
          if (swingSubController.isDoneWithTerminalSwing(swingSide, walkingStateMachine.timeInCurrentState()))
          {
             this.transitionToDefaultNextState();
          }
+         
+         
 
          setProcessedOutputsBodyTorques();
       }
