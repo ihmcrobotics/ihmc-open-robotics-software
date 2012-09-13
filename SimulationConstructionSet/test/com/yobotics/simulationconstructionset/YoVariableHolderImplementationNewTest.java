@@ -9,7 +9,6 @@ import java.io.PrintStream;
 import java.rmi.registry.Registry;
 import java.util.ArrayList;
 
-import odeToJava.modules.RootFinder;
 
 import org.jfree.ui.tabbedui.RootEditor;
 import org.junit.After;
