@@ -151,7 +151,7 @@ public class FlatThenPolynomialCoMHeightTrajectoryGenerator implements CenterOfM
       heightSplineInFootFrame.compute(MathTools.clipToMinMax(x, minXForSpline.getDoubleValue(), maxXForSpline.getDoubleValue()));
 
       desiredComHeightInWorld.set(heightSplineInFootFrame.getPosition() + footZ.getDoubleValue());
-      if (MathTools.isInsideBounds(x, minXForSpline.getDoubleValue(), maxXForSpline.getDoubleValue()))
+      if (MathTools.isInsideBoundsExclusive(x, minXForSpline.getDoubleValue(), maxXForSpline.getDoubleValue()))
       {
          desiredComHeightSlope.set(heightSplineInFootFrame.getVelocity());
          desiredComHeightSecondDerivative.set(heightSplineInFootFrame.getAcceleration());
