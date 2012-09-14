@@ -14,10 +14,10 @@ import org.junit.Test;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.VirtualToePointCalculator;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
-import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2dAndConnectingEdges;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
+import us.ihmc.utilities.math.geometry.GeometryTools;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
@@ -520,7 +520,7 @@ public class GeometricVirtualToePointCalculatorTest
       FramePoint2d leftVirtualToePoint = actualVirtualToePoints.get(RobotSide.LEFT);
       FramePoint2d rightVirtualToePoint = actualVirtualToePoints.get(RobotSide.RIGHT);
 
-      boolean inOrderColinear = MathTools.arePointsInOrderAndColinear(leftVirtualToePoint.getPoint(), copDesired.getPoint(), rightVirtualToePoint.getPoint(),
+      boolean inOrderColinear = GeometryTools.arePointsInOrderAndColinear(leftVirtualToePoint.getPoint(), copDesired.getPoint(), rightVirtualToePoint.getPoint(),
             epsilon);
 
       assertTrue(inOrderColinear);

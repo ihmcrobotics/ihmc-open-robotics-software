@@ -7,7 +7,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import us.ihmc.utilities.math.MathTools;
+import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -68,7 +68,7 @@ public class VirtualChainBuilder
 
       if ((double) numberOfPostureRecorded > (double) 3.0 / 2.0 * virtualChainDegreesOfFreedom)
       {
-         Matrix pseudoInverse = MathTools.pseudoinverse(AMatrix);
+         Matrix pseudoInverse = MatrixTools.pseudoinverse(AMatrix);
          Matrix solution = pseudoInverse.times(yMatrix);
 
          Matrix errorMatrix = AMatrix.times(solution).minus(yMatrix);

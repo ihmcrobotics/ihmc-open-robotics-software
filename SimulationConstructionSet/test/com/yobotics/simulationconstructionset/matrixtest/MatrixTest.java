@@ -7,7 +7,7 @@ import java.util.Random;
 
 import org.junit.Test;
 
-import us.ihmc.utilities.math.MathTools;
+import us.ihmc.utilities.math.MatrixTools;
 
 import com.mathworks.jama.Matrix;
 
@@ -80,7 +80,7 @@ public class MatrixTest
       Matrix matrixMultiplicationResult = new Matrix(rowDimension, columnDimension);
 
       // Invert Matrix
-      matrixInverted = MathTools.pseudoinverse(matrix);
+      matrixInverted = MatrixTools.pseudoinverse(matrix);
       if (VERBOSE) displayMatrix(matrixInverted, "matrixInverted");
 
       // Matrix * Matrix inverted * Matrix should be equal to Matrix
