@@ -10,7 +10,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.HeadingAndVelocityEvaluationScript.HeadingAndVelocityEvaluationEvent;
-import us.ihmc.utilities.math.MathTools;
+import us.ihmc.utilities.math.geometry.AngleTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -92,7 +92,7 @@ public class HeadingAndVelocityEvaluationScriptTest
          desiredHeadings.add(desiredHeading);
          desiredVelocities.add(desiredVelocity);
          
-         double angleError = MathTools.computeAngleDifferenceMinusPiToPi(desiredHeadingAngle, Math.atan2(desiredHeading.getY(), desiredHeading.getX()));
+         double angleError = AngleTools.computeAngleDifferenceMinusPiToPi(desiredHeadingAngle, Math.atan2(desiredHeading.getY(), desiredHeading.getX()));
          assertTrue(Math.abs(angleError) < 1e-7);
          
          heading.set(desiredHeading.getX(), desiredHeading.getY(), HEADING_VIZ_Z);
