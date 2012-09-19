@@ -221,8 +221,8 @@ public class MomentumBasedControllerStateMachine extends StateMachine
       this.previousCoP = new FramePoint2d(ReferenceFrame.getWorldFrame());
       this.capturePoint = new FramePoint2d(ReferenceFrame.getWorldFrame());
 
-      footTrajectoryBagOfBalls = new BagOfBalls(100, registry, dynamicGraphicObjectsListRegistry);
-      comTrajectoryBagOfBalls = new BagOfBalls(500, 0.01, "comBagOfBalls", YoAppearance.Black(), registry, dynamicGraphicObjectsListRegistry);
+      footTrajectoryBagOfBalls = new BagOfBalls(100, 0.01, "footBagOfBalls", YoAppearance.Black(), registry, dynamicGraphicObjectsListRegistry);
+      comTrajectoryBagOfBalls = new BagOfBalls(500, 0.01, "comBagOfBalls", YoAppearance.Red(), registry, dynamicGraphicObjectsListRegistry);
 
       setUpStateMachine();
       parentRegistry.addChild(registry);
