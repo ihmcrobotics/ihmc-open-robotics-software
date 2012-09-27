@@ -52,7 +52,7 @@ import com.yobotics.simulationconstructionset.util.statemachines.StateTransition
 import com.yobotics.simulationconstructionset.util.statemachines.StateTransitionAction;
 import com.yobotics.simulationconstructionset.util.statemachines.StateTransitionCondition;
 
-public class MomentumBasedControllerStateMachine extends StateMachine
+public class MomentumBasedControllerStateMachine extends StateMachine implements HighLevelHumanoidController
 {
    private static enum MomentumBasedControllerState {LEFT_SUPPORT, RIGHT_SUPPORT, TRANSFER_TO_LEFT_SUPPORT, TRANSFER_TO_RIGHT_SUPPORT, DOUBLE_SUPPORT}
 
@@ -88,7 +88,6 @@ public class MomentumBasedControllerStateMachine extends StateMachine
    private final YoFrameVector2d desiredICPVelocity;
 
    private final EnumYoVariable<RobotSide> supportLeg = EnumYoVariable.create("supportLeg", RobotSide.class, registry);
-   private final EnumYoVariable<RobotSide> plantedLeg = EnumYoVariable.create("plantedLeg", RobotSide.class, registry);
 
    private final EnumYoVariable<RobotSide> upcomingSupportLeg = EnumYoVariable.create("upcomingSupportLeg", RobotSide.class, registry);
 
@@ -280,11 +279,6 @@ public class MomentumBasedControllerStateMachine extends StateMachine
    public RobotSide getSupportLeg()
    {
       return supportLeg.getEnumValue();
-   }
-
-   public RobotSide getPlantedLeg()
-   {
-      return plantedLeg.getEnumValue();
    }
 
    public RobotSide getUpcomingSupportLeg()
@@ -721,15 +715,6 @@ public class MomentumBasedControllerStateMachine extends StateMachine
       desiredFootAngularAccelerations.get(supportSide).set(0.0, 0.0, 0.0);
    }
 
-   public boolean isSwingFoot(RobotSide robotSide)
-   {
-      RobotSide supportLeg = getSupportLeg();
-      if (supportLeg == null)
-         return false;
-      else
-         return robotSide != supportLeg;
-   }
-
    private void setSupportLeg(RobotSide supportLeg)
    {
       this.supportLeg.set(supportLeg);
@@ -825,5 +810,11 @@ public class MomentumBasedControllerStateMachine extends StateMachine
          comTrajectoryBagOfBalls.setBallLoop(desiredCoM);
          comTrajectoryCounter = 0;
       }
+   }
+   
+   public void doControl()
+   {
+      checkTransitionConditionsThoroughly();
+      doAction();
    }
 }

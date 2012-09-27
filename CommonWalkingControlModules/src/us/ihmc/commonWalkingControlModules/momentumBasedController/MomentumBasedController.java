@@ -14,7 +14,6 @@ import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.VirtualToePoi
 import us.ihmc.commonWalkingControlModules.controlModules.CenterOfMassHeightControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.NewGeometricVirtualToePointCalculator;
 import us.ihmc.commonWalkingControlModules.controlModules.SacrificeDeltaCMPDesiredCoPAndCMPControlModule;
-import us.ihmc.commonWalkingControlModules.controlModules.SacrificeCMPCoPAndCMPControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.TeeterTotterLegStrengthCalculator;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvisOrientation.AxisAnglePelvisOrientationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.velocityViaCoP.CapturabilityBasedDesiredCoPVisualizer;
@@ -83,7 +82,7 @@ public class MomentumBasedController implements RobotController
    private final ReferenceFrame midFeetZUp;
    private final double totalMass;
 
-   private final MomentumBasedControllerStateMachine stateMachine;
+   private final HighLevelHumanoidController highLevelHumanoidController;
    private final BipedMomentumOptimizer optimizer;
 
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -207,7 +206,7 @@ public class MomentumBasedController implements RobotController
       this.totalMass = TotalMassCalculator.computeSubTreeMass(elevator);
       orientationControlModule.setupParametersForR2();
 
-      stateMachine = new MomentumBasedControllerStateMachine(fullRobotModel, referenceFrames, twistCalculator, bipedFeet, bipedSupportPolygons, footSwitches,
+      highLevelHumanoidController = new MomentumBasedControllerStateMachine(fullRobotModel, referenceFrames, twistCalculator, bipedFeet, bipedSupportPolygons, footSwitches,
               processedSensors, processedSensors.getYoTime(), controlDT, desiredHeadingControlModule, registry, dynamicGraphicObjectsListRegistry);
       optimizer = new BipedMomentumOptimizer(fullRobotModel, referenceFrames.getCenterOfMassFrame(), controlDT, twistCalculator, registry);
 
@@ -250,9 +249,9 @@ public class MomentumBasedController implements RobotController
    public void initialize()
    {
       optimizer.initialize();
-      stateMachine.setCapturePoint(computeCapturePoint());
-      stateMachine.setOmega0(omega0.getDoubleValue());
-      stateMachine.initialize();
+      highLevelHumanoidController.setCapturePoint(computeCapturePoint());
+      highLevelHumanoidController.setOmega0(omega0.getDoubleValue());
+      highLevelHumanoidController.initialize();
       doControl();
    }
 
@@ -277,7 +276,7 @@ public class MomentumBasedController implements RobotController
 
       for (RobotSide robotSide : RobotSide.values())
       {
-         bipedFeet.get(robotSide).setIsSupportingFoot(!stateMachine.isSwingFoot(robotSide));
+         bipedFeet.get(robotSide).setIsSupportingFoot(!isSwingFoot(robotSide));
       }
 
       BipedFootInterface leftFoot = bipedFeet.get(RobotSide.LEFT);
@@ -286,10 +285,9 @@ public class MomentumBasedController implements RobotController
       bipedSupportPolygons.update(leftFoot, rightFoot);
       footPolygonVisualizer.update();
 
-      stateMachine.setCapturePoint(capturePoint);
-      stateMachine.setOmega0(omega0.getDoubleValue());
-      stateMachine.checkTransitionConditionsThoroughly();
-      stateMachine.doAction();
+      highLevelHumanoidController.setCapturePoint(capturePoint);
+      highLevelHumanoidController.setOmega0(omega0.getDoubleValue());
+      highLevelHumanoidController.doControl();
 
       doMomentumBasedControl(capturePoint);
       inverseDynamicsCalculator.compute();
@@ -310,17 +308,17 @@ public class MomentumBasedController implements RobotController
    private void doMomentumBasedControl(FramePoint2d capturePoint)
    {
       ReferenceFrame frame = worldFrame;
-      RobotSide supportLeg = stateMachine.getSupportLeg();
+      RobotSide supportLeg = highLevelHumanoidController.getSupportLeg();
       FramePoint2d desiredCapturePoint = new FramePoint2d(worldFrame); 
-      stateMachine.packDesiredICP(desiredCapturePoint);
+      highLevelHumanoidController.packDesiredICP(desiredCapturePoint);
       FrameVector2d desiredCapturePointVelocity = new FrameVector2d(worldFrame);
-      stateMachine.packDesiredICPVelocity(desiredCapturePointVelocity);
+      highLevelHumanoidController.packDesiredICPVelocity(desiredCapturePointVelocity);
       desiredCoPAndCMPControlModule.compute(capturePoint, supportLeg, desiredCapturePoint, desiredCapturePointVelocity, desiredPelvisRoll.getDoubleValue(), desiredPelvisPitch.getDoubleValue(), omega0.getDoubleValue());
       FramePoint2d desiredCoP = new FramePoint2d(worldFrame);
       desiredCoPAndCMPControlModule.packCoP(desiredCoP);
       FramePoint2d desiredCMP = new FramePoint2d(worldFrame);
       desiredCoPAndCMPControlModule.packCMP(desiredCMP);
-      stateMachine.setPreviousCoP(desiredCoP);
+      highLevelHumanoidController.setPreviousCoP(desiredCoP);
       
       desiredCoP.changeFrame(frame);
       desiredCMP.changeFrame(frame);
@@ -339,7 +337,7 @@ public class MomentumBasedController implements RobotController
       SideDependentList<FramePoint2d> virtualToePoints = new SideDependentList<FramePoint2d>();
       if (supportLeg == null)
       {
-         virtualToePointCalculator.packVirtualToePoints(virtualToePoints, bipedSupportPolygons, desiredCoP, stateMachine.getUpcomingSupportLeg());
+         virtualToePointCalculator.packVirtualToePoints(virtualToePoints, bipedSupportPolygons, desiredCoP, highLevelHumanoidController.getUpcomingSupportLeg());
       }
       else
       {
@@ -458,19 +456,19 @@ public class MomentumBasedController implements RobotController
          double maxKneeAngle = 0.4;
          boolean leavingKneeLockRegion = optimizer.leavingSingularRegion(robotSide)
                                          && (fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE).getQ() < maxKneeAngle);    // TODO: hack
-         boolean trajectoryInitialized = stateMachine.trajectoryInitialized(robotSide);
+         boolean trajectoryInitialized = highLevelHumanoidController.trajectoryInitialized(robotSide);
          boolean inSingularRegion = optimizer.inSingularRegion(robotSide);
          if (isSwingLeg && (leavingKneeLockRegion || (!inSingularRegion &&!trajectoryInitialized)))
          {
             SpatialAccelerationVector taskSpaceAcceleration = new SpatialAccelerationVector();
             optimizer.computeMatchingNondegenerateTaskSpaceAcceleration(robotSide, taskSpaceAcceleration);
-            stateMachine.initializeTrajectory(robotSide, taskSpaceAcceleration);
+            highLevelHumanoidController.initializeTrajectory(robotSide, taskSpaceAcceleration);
          }
 
-         FramePose desiredFootPose = stateMachine.getDesiredFootPose(robotSide);
-         Twist desiredFootTwist = stateMachine.getDesiredFootTwist(robotSide);
-         SpatialAccelerationVector feedForwardFootSpatialAcceleration = stateMachine.getDesiredFootAcceleration(robotSide);
-         boolean isSwingFoot = stateMachine.isSwingFoot(robotSide);
+         FramePose desiredFootPose = highLevelHumanoidController.getDesiredFootPose(robotSide);
+         Twist desiredFootTwist = highLevelHumanoidController.getDesiredFootTwist(robotSide);
+         SpatialAccelerationVector feedForwardFootSpatialAcceleration = highLevelHumanoidController.getDesiredFootAcceleration(robotSide);
+         boolean isSwingFoot = isSwingFoot(robotSide);
          footSpatialAccelerationControlModules.get(robotSide).compute(virtualToePoints.get(robotSide), desiredFootPose, desiredFootTwist,
                  feedForwardFootSpatialAcceleration, isSwingFoot);
          footSpatialAccelerationControlModules.get(robotSide).packFootAcceleration(desiredFootAccelerationsInWorld.get(robotSide));
@@ -485,7 +483,7 @@ public class MomentumBasedController implements RobotController
 
       for (RobotSide robotSide : RobotSide.values())
       {
-         optimizer.setNullspaceMultiplier(robotSide, stateMachine.getNullspaceMultiplier(robotSide));
+         optimizer.setNullspaceMultiplier(robotSide, highLevelHumanoidController.getNullspaceMultiplier(robotSide));
       }
 
       optimizer.solveForRootJointAcceleration(desiredAngularCentroidalMomentumRate, desiredLinearCentroidalMomentumRate);
@@ -504,15 +502,15 @@ public class MomentumBasedController implements RobotController
 
    private double computeFz(RobotSide supportLeg, FramePoint2d desiredCoP, FramePoint com)
    {
-      double dzdxDesired = stateMachine.getDesiredCoMHeightSlope();
-      double d2zdx2Desired = stateMachine.getDesiredCoMHeightSecondDerivative();
+      double dzdxDesired = highLevelHumanoidController.getDesiredCoMHeightSlope();
+      double d2zdx2Desired = highLevelHumanoidController.getDesiredCoMHeightSecondDerivative();
       ReferenceFrame desiredHeadingFrame = desiredHeadingControlModule.getDesiredHeadingFrame();
       FrameVector comd = processedSensors.getCenterOfMassVelocityInFrame(desiredHeadingFrame);
       double xd = comd.getX();
       double copX = desiredCoP.changeFrameCopy(desiredHeadingFrame).getX();
       double xdd = MathTools.square(omega0.getDoubleValue()) * (com.getX() - copX);    // TODO: use current omega0 instead of previous
 
-      double zDesired = stateMachine.getDesiredCoMHeight();
+      double zDesired = highLevelHumanoidController.getDesiredCoMHeight();
       double zdDesired = dzdxDesired * xd;
       double zddDesired = d2zdx2Desired * MathTools.square(xd) + dzdxDesired * xdd;
 
@@ -595,5 +593,14 @@ public class MomentumBasedController implements RobotController
    private static double computeDesiredAcceleration(double k, double d, double qDesired, double qdDesired, RevoluteJoint joint)
    {
       return k * (qDesired - joint.getQ()) + d * (qdDesired - joint.getQd());
+   }
+   
+   private boolean isSwingFoot(RobotSide robotSide)
+   {
+      RobotSide supportLeg = highLevelHumanoidController.getSupportLeg();
+      if (supportLeg == null)
+         return false;
+      else
+         return robotSide != supportLeg;       
    }
 }
