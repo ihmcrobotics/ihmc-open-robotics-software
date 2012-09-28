@@ -22,6 +22,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.velocityViaCoP.SpeedCo
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredHeadingControlModule;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.SimpleDesiredHeadingControlModule;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.BipedMomentumOptimizer.LimbName;
 import us.ihmc.commonWalkingControlModules.outputs.ProcessedOutputsInterface;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
@@ -451,17 +452,17 @@ public class MomentumBasedController implements RobotController
 
       for (RobotSide robotSide : RobotSide.values())
       {
-//       if ((supportLeg == robotSide.getOppositeSide()) &&!optimizer.inSingularRegion(robotSide) &&!stateMachine.trajectoryInitialized(robotSide))
          boolean isSwingLeg = supportLeg == robotSide.getOppositeSide();
          double maxKneeAngle = 0.4;
-         boolean leavingKneeLockRegion = optimizer.leavingSingularRegion(robotSide)
+         boolean leavingKneeLockRegion = optimizer.leavingSingularRegion(robotSide, LimbName.LEG)
                                          && (fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE).getQ() < maxKneeAngle);    // TODO: hack
          boolean trajectoryInitialized = highLevelHumanoidController.trajectoryInitialized(robotSide);
-         boolean inSingularRegion = optimizer.inSingularRegion(robotSide);
+         boolean inSingularRegion = optimizer.inSingularRegion(robotSide, LimbName.LEG);
+//       if ((supportLeg == robotSide.getOppositeSide()) &&!optimizer.inSingularRegion(robotSide) &&!stateMachine.trajectoryInitialized(robotSide))
          if (isSwingLeg && (leavingKneeLockRegion || (!inSingularRegion &&!trajectoryInitialized)))
          {
             SpatialAccelerationVector taskSpaceAcceleration = new SpatialAccelerationVector();
-            optimizer.computeMatchingNondegenerateTaskSpaceAcceleration(robotSide, taskSpaceAcceleration);
+            optimizer.computeMatchingNondegenerateTaskSpaceAcceleration(robotSide, LimbName.LEG, taskSpaceAcceleration);
             highLevelHumanoidController.initializeTrajectory(robotSide, taskSpaceAcceleration);
          }
 
@@ -477,13 +478,13 @@ public class MomentumBasedController implements RobotController
             swingFootPositionErrorInWorld.set(footSpatialAccelerationControlModules.get(robotSide).getSwingFootPositionErrorInWorld());
 
          desiredFootPositionsInWorld.get(robotSide).set(desiredFootPose.getPositionInFrame(worldFrame));
+         optimizer.setDesiredEndEffectorAccelerationInWorld(robotSide, LimbName.LEG, desiredFootAccelerationsInWorld.get(robotSide));
       }
 
-      optimizer.setDesiredFootAccelerationsInWorld(desiredFootAccelerationsInWorld);
 
       for (RobotSide robotSide : RobotSide.values())
       {
-         optimizer.setNullspaceMultiplier(robotSide, highLevelHumanoidController.getNullspaceMultiplier(robotSide));
+         optimizer.setNullspaceMultiplier(robotSide, LimbName.LEG, highLevelHumanoidController.getNullspaceMultiplier(robotSide));
       }
 
       optimizer.solveForRootJointAcceleration(desiredAngularCentroidalMomentumRate, desiredLinearCentroidalMomentumRate);
