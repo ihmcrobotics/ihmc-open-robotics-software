@@ -331,6 +331,16 @@ public class LinkGraphics
       linkGraphicsDefinition = new LinkGraphicsDefinition();
    }
 
+   public void setSharedGroup(SharedGroup group)
+   {
+      // this.linkBG = new BranchGroup();
+      this.sharedGroup = group;
+
+      sharedGroup.setCapability(BranchGroup.ALLOW_DETACH);
+
+      this.numShapes = 0;
+      this.lastGroup = this.sharedGroup;
+   }
 
    public LinkGraphicsDefinition getLinkGraphicsDefinition()
    {
@@ -747,7 +757,7 @@ public class LinkGraphics
     * @param geometry Geometry of the new shape.
     * @param appearance Appearance of the new shape.
     */
-   public void addShape(Geometry geometry, Appearance appearance)
+   public Shape3D addShape(Geometry geometry, Appearance appearance)
    {
       Shape3D linkShape = new Shape3D();
 
@@ -755,6 +765,11 @@ public class LinkGraphics
       linkShape.setGeometry(geometry);
 
       addShape(linkShape);
+
+      linkShape.setCapability(Shape3D.ALLOW_APPEARANCE_WRITE);
+      linkShape.setCapability(Shape3D.ALLOW_APPEARANCE_OVERRIDE_WRITE);
+
+      return linkShape;
 
       // linkGraphicsDefinition.addInstruction();
    }
@@ -961,12 +976,13 @@ public class LinkGraphics
     */
    public void add3DSFile(URL fileURL, Appearance app)
    {
-      if (fileURL == null) 
+      if (fileURL == null)
       {
          System.err.println("fileURL == null in add3DSFile");
+
          return;
       }
-      
+
       String fileName = fileURL.getFile();
 
       // System.out.println("File name: " + fileName + " " + fileName.length());
@@ -974,15 +990,16 @@ public class LinkGraphics
       if ((fileName == null) || (fileName.equals("")))
       {
          System.out.println("Null File Name in add3DSFile");
+
          return;
       }
 
       add3DSFile(fileName, app);
 
-//      if (app != null)
-//         linkGraphicsDefinition.addInstruction(new LinkGraphicsAdd3DSFile(fileURL.getPath(), new AppearanceDefinition(getColor(app))));
-//      else
-//         linkGraphicsDefinition.addInstruction(new LinkGraphicsAdd3DSFile(fileURL.getPath()));
+//    if (app != null)
+//       linkGraphicsDefinition.addInstruction(new LinkGraphicsAdd3DSFile(fileURL.getPath(), new AppearanceDefinition(getColor(app))));
+//    else
+//       linkGraphicsDefinition.addInstruction(new LinkGraphicsAdd3DSFile(fileURL.getPath()));
    }
 
    /*
@@ -1079,12 +1096,13 @@ public class LinkGraphics
       addCoordinateSystem(length, YoAppearance.Black());
    }
 
-   
+
    public void addCoordinateSystem(double length, Appearance arrowAppearance)
    {
       addCoordinateSystem(length, YoAppearance.Red(), YoAppearance.White(), YoAppearance.Blue(), arrowAppearance);
 
    }
+
    /**
     * Creates a graphical representation of the x, y, and z axis of the current coordinate
     * system centered at its origin.  In the image below red, white and blue represent the
@@ -1093,7 +1111,8 @@ public class LinkGraphics
     *
     * @param length the length in meters of each axis arrow.
     */
-   public void addCoordinateSystem(double length, Appearance xAxisAppearance, Appearance yAxisAppearance, Appearance zAxisAppearance, Appearance arrowAppearance)
+   public void addCoordinateSystem(double length, Appearance xAxisAppearance, Appearance yAxisAppearance, Appearance zAxisAppearance,
+                                   Appearance arrowAppearance)
    {
       Geometry bar = GeometryGenerator.Cylinder(length / 32.0, length, 15);
       Geometry arrow = GeometryGenerator.Cone(length / 10.0, length / 15.0, 15);
@@ -1656,9 +1675,9 @@ public class LinkGraphics
     *
     * @param polygonPoint Point3f array containing the desired points.
     */
-   public void addPolygon(Point3f[] polygonPoint)
+   public Shape3D addPolygon(Point3f[] polygonPoint)
    {
-      addPolygon(polygonPoint, YoAppearance.Black());
+      return addPolygon(polygonPoint, YoAppearance.Black());
 
       // linkGraphicsDefinition.addInstruction(new LinkGraphicsAddPolygonFloat(polygonPoint));
    }
@@ -1672,14 +1691,16 @@ public class LinkGraphics
     * @param polygonPoints Point3f array containing the desired points.
     * @param appearance Appearance to be used with the new polygon.  See {@link YoAppearance YoAppearance} for implementations.
     */
-   public void addPolygon(Point3f[] polygonPoints, Appearance appearance)
+   public Shape3D addPolygon(Point3f[] polygonPoints, Appearance appearance)
    {
       Geometry geometry = GeometryGenerator.Polygon(polygonPoints);
-      addShape(geometry, appearance);
+      Shape3D shape = addShape(geometry, appearance);
       if (appearance != null)
          linkGraphicsDefinition.addInstruction(new LinkGraphicsAddPolygonFloat(polygonPoints, new AppearanceDefinition(getColor(appearance))));
       else
          linkGraphicsDefinition.addInstruction(new LinkGraphicsAddPolygonFloat(polygonPoints));
+
+      return shape;
    }
 
    /**
@@ -1715,9 +1736,9 @@ public class LinkGraphics
     *
     * @param polygonPoint Array containing Point3d's to be used when generating the shape.
     */
-   public void addPolygon(Point3d[] polygonPoint)
+   public Shape3D addPolygon(Point3d[] polygonPoint)
    {
-      addPolygon(polygonPoint, YoAppearance.Black());
+      return addPolygon(polygonPoint, YoAppearance.Black());
 
       // linkGraphicsDefinition.addInstruction(new LinkGraphicsAddPolygonDouble(polygonPoint));
    }
@@ -1731,7 +1752,7 @@ public class LinkGraphics
     * @param polygonPoints Array containing the points
     * @param appearance Appearance to be used with the new polygon.  See {@link YoAppearance YoAppearance} for implementations.
     */
-   public void addPolygon(Point3d[] polygonPoints, Appearance appearance)
+   public Shape3D addPolygon(Point3d[] polygonPoints, Appearance appearance)
    {
       PolygonAttributes polyAttributes = new PolygonAttributes();
       polyAttributes.setCullFace(PolygonAttributes.CULL_NONE);
@@ -1740,11 +1761,13 @@ public class LinkGraphics
       appearance.setPolygonAttributes(polyAttributes);
 
       Geometry geometry = GeometryGenerator.Polygon(polygonPoints);
-      addShape(geometry, appearance);
+      Shape3D shape = addShape(geometry, appearance);
       if (appearance != null)
          linkGraphicsDefinition.addInstruction(new LinkGraphicsAddPolygonDouble(polygonPoints, new AppearanceDefinition(getColor(appearance))));
       else
          linkGraphicsDefinition.addInstruction(new LinkGraphicsAddPolygonDouble(polygonPoints));
+
+      return shape;
    }
 
 
@@ -1764,12 +1787,12 @@ public class LinkGraphics
       Vector3d ellipsoidRadii = InertiaTools.getInertiaEllipsoidRadii(principalMomentsOfInertia, mass);
 
       this.addEllipsoid(ellipsoidRadii.x, ellipsoidRadii.y, ellipsoidRadii.z, appearance);
-      
+
       comOffSet.scale(-1.0);
-      this.translate(comOffSet); // translate back
+      this.translate(comOffSet);    // translate back
    }
 
-   
+
 
    /*
     * public String getName()
