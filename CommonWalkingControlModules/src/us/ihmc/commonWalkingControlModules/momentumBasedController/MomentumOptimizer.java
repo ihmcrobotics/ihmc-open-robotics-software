@@ -25,8 +25,8 @@ public abstract class MomentumOptimizer implements Lmdif_fcn
    private final DenseMatrix64F jointVelocitiesMatrix;
    private final DenseMatrix64F jointAccelerationsMatrix;
    private final DenseMatrix64F centroidalMomentumErrorMatrix = new DenseMatrix64F(Momentum.SIZE, 1);
-   private final DenseMatrix64F aQdd;
-   private final DenseMatrix64F adQd;
+   private final DenseMatrix64F avdot;
+   private final DenseMatrix64F adotv;
 
    private final int m;
    private final int n;
@@ -70,8 +70,8 @@ public abstract class MomentumOptimizer implements Lmdif_fcn
       this.centroidalMomentumMatrixDerivative = new DenseMatrix64F(centroidalMomentumMatrix.getMatrix().getNumRows(), centroidalMomentumMatrix.getMatrix()
             .getNumCols());
 
-      this.aQdd = new DenseMatrix64F(centroidalMomentumMatrix.getMatrix().getNumRows(), jointAccelerationsMatrix.getNumCols());
-      this.adQd = new DenseMatrix64F(centroidalMomentumMatrixDerivative.getNumRows(), jointVelocitiesMatrix.getNumCols());
+      this.avdot = new DenseMatrix64F(centroidalMomentumMatrix.getMatrix().getNumRows(), jointAccelerationsMatrix.getNumCols());
+      this.adotv = new DenseMatrix64F(centroidalMomentumMatrixDerivative.getNumRows(), jointVelocitiesMatrix.getNumCols());
 
       this.desiredLinearCentroidalMomentumRate = new YoFrameVector("desiredLinearCentroidalMomentumRate", "", centerOfMassFrame, registry);
       this.desiredAngularCentroidalMomentumRate = new YoFrameVector("desiredAngularCentroidalMomentumRate", "", centerOfMassFrame, registry);
@@ -118,11 +118,11 @@ public abstract class MomentumOptimizer implements Lmdif_fcn
       centroidalMomentumErrorMatrix.set(4, 0, desiredLinearCentroidalMomentumRate.getY());
       centroidalMomentumErrorMatrix.set(5, 0, desiredLinearCentroidalMomentumRate.getZ());
 
-      CommonOps.mult(centroidalMomentumMatrix.getMatrix(), jointAccelerationsMatrix, aQdd);
-      CommonOps.mult(centroidalMomentumMatrixDerivative, jointVelocitiesMatrix, adQd);
+      CommonOps.mult(centroidalMomentumMatrix.getMatrix(), jointAccelerationsMatrix, avdot);
+      CommonOps.mult(centroidalMomentumMatrixDerivative, jointVelocitiesMatrix, adotv);
       
-      CommonOps.subEquals(centroidalMomentumErrorMatrix, aQdd);
-      CommonOps.subEquals(centroidalMomentumErrorMatrix, adQd);
+      CommonOps.subEquals(centroidalMomentumErrorMatrix, avdot);
+      CommonOps.subEquals(centroidalMomentumErrorMatrix, adotv);
       
 
       angularCentroidalMomentumRateError.set(centroidalMomentumErrorMatrix.get(0, 0), centroidalMomentumErrorMatrix.get(1, 0),
