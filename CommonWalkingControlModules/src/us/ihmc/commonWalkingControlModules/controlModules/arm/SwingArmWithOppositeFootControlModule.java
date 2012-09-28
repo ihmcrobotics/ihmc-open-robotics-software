@@ -56,16 +56,20 @@ public class SwingArmWithOppositeFootControlModule extends PDArmControlModule
    protected void setGains()
    {
       for (RobotSide robotSide : RobotSide.values())
-      {
+      {         
          armControllers.get(robotSide).get(ArmJointName.SHOULDER_PITCH).setProportionalGain(200.0);
          armControllers.get(robotSide).get(ArmJointName.SHOULDER_ROLL).setProportionalGain(100.0);
          armControllers.get(robotSide).get(ArmJointName.SHOULDER_YAW).setProportionalGain(100.0);
          armControllers.get(robotSide).get(ArmJointName.ELBOW).setProportionalGain(100.0);
+         armControllers.get(robotSide).get(ArmJointName.WRIST_ROLL).setProportionalGain(100.0);
+         armControllers.get(robotSide).get(ArmJointName.WRIST_PITCH).setProportionalGain(100.0);
 
          armControllers.get(robotSide).get(ArmJointName.SHOULDER_PITCH).setDerivativeGain(2.0);
          armControllers.get(robotSide).get(ArmJointName.SHOULDER_ROLL).setDerivativeGain(10.0);
          armControllers.get(robotSide).get(ArmJointName.SHOULDER_YAW).setDerivativeGain(10.0);
          armControllers.get(robotSide).get(ArmJointName.ELBOW).setDerivativeGain(10.0);
+         armControllers.get(robotSide).get(ArmJointName.WRIST_ROLL).setDerivativeGain(10.0);
+         armControllers.get(robotSide).get(ArmJointName.WRIST_PITCH).setDerivativeGain(10.0);
       }      
    }
 }
