@@ -144,9 +144,14 @@ public class MomentumBasedController implements RobotController
          footSpatialAccelerationControlModules.put(robotSide,
                  new FootSpatialAccelerationControlModule(robotSide.getCamelCaseNameForStartOfExpression() + "Foot", referenceFrames, twistCalculator,
                     bipedFeet.get(robotSide), fullRobotModel, registry));
+         RigidBodySpatialAccelerationControlModule handSpatialAccelerationControlModule = new RigidBodySpatialAccelerationControlModule(robotSide.getCamelCaseNameForStartOfExpression() + "Hand", elevatorFrame, twistCalculator,
+              fullRobotModel.getEndEffector(robotSide, LimbName.ARM), fullRobotModel.getEndEffectorFrame(robotSide, LimbName.ARM));
          handSpatialAccelerationControlModules.put(robotSide,
-                 new RigidBodySpatialAccelerationControlModule(robotSide.getCamelCaseNameForStartOfExpression() + "Hand", elevatorFrame, twistCalculator,
-                    fullRobotModel.getEndEffector(robotSide, LimbName.ARM), fullRobotModel.getEndEffectorFrame(robotSide, LimbName.ARM)));
+                 handSpatialAccelerationControlModule);
+         handSpatialAccelerationControlModule.setPositionProportionalGains(100.0, 100.0, 100.0);
+         handSpatialAccelerationControlModule.setPositionDerivativeGains(20.0, 20.0, 20.0);
+         handSpatialAccelerationControlModule.setOrientationProportionalGains(500.0, 500.0, 500.0);
+         handSpatialAccelerationControlModule.setOrientationDerivativeGains(80.0, 80.0, 80.0);
 
          for (LimbName limbName : LimbName.values())
          {
@@ -461,6 +466,7 @@ public class MomentumBasedController implements RobotController
             SpatialAccelerationVector feedForwardEndEffectorSpatialAcceleration = highLevelHumanoidController.getDesiredEndEffectorAcceleration(robotSide,
                                                                                      limbName);
 
+            SpatialAccelerationVector desiredEndEffectorAccelerationInWorld = desiredEndEffectorAccelerationsInWorld.get(robotSide).get(limbName);
             switch (limbName)
             {
                case LEG :
@@ -469,7 +475,7 @@ public class MomentumBasedController implements RobotController
                   FootSpatialAccelerationControlModule footSpatialAccelerationControlModule = footSpatialAccelerationControlModules.get(robotSide);
                   footSpatialAccelerationControlModule.compute(virtualToePoints.get(robotSide), desiredEndEffectorPose,
                           desiredEndEffectorTwist, feedForwardEndEffectorSpatialAcceleration, isConstrained);
-                  footSpatialAccelerationControlModule.packAcceleration(desiredEndEffectorAccelerationsInWorld.get(robotSide).get(limbName));
+                  footSpatialAccelerationControlModule.packAcceleration(desiredEndEffectorAccelerationInWorld);
 
                   if (!isConstrained)
                      swingFootPositionErrorInWorld.set(footSpatialAccelerationControlModule.getPositionErrorInWorld());
@@ -483,7 +489,7 @@ public class MomentumBasedController implements RobotController
                {
                   RigidBodySpatialAccelerationControlModule rigidBodySpatialAccelerationControlModule = handSpatialAccelerationControlModules.get(robotSide);
                   rigidBodySpatialAccelerationControlModule.doPositionControl(desiredEndEffectorPose, desiredEndEffectorTwist, feedForwardEndEffectorSpatialAcceleration);
-                  rigidBodySpatialAccelerationControlModule.packAcceleration(desiredEndEffectorAccelerationsInWorld.get(robotSide).get(limbName));
+                  rigidBodySpatialAccelerationControlModule.packAcceleration(desiredEndEffectorAccelerationInWorld);
                   break;
                }
 
@@ -491,7 +497,8 @@ public class MomentumBasedController implements RobotController
                   throw new RuntimeException("Limb not found.");
             }
 
-            optimizer.setDesiredEndEffectorAccelerationInWorld(robotSide, limbName, desiredEndEffectorAccelerationsInWorld.get(robotSide).get(limbName));
+            optimizer.setControlMode(robotSide, limbName, highLevelHumanoidController.getControlMode(robotSide, limbName));
+            optimizer.setDesiredEndEffectorAccelerationInWorld(robotSide, limbName, desiredEndEffectorAccelerationInWorld);
             optimizer.setNullspaceMultiplier(robotSide, limbName, highLevelHumanoidController.getNullspaceMultiplier(robotSide, limbName));
          }
       }

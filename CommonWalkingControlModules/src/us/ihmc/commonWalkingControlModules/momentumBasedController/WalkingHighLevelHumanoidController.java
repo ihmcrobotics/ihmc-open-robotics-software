@@ -138,6 +138,12 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       amountToBeInsideSingleSupport.set(0.0);
       amountToBeInsideDoubleSupport.set(0.05);
       desiredPelvisPitch.set(0.6);
+
+      for (RobotSide robotSide : RobotSide.values())
+      {
+         controlModes.get(robotSide).get(LimbName.LEG).set(ControlMode.CARTESIAN_SPACE);
+         controlModes.get(robotSide).get(LimbName.ARM).set(ControlMode.JOINT_SPACE);
+      }
    }
 
    private void setUpStateMachine()
