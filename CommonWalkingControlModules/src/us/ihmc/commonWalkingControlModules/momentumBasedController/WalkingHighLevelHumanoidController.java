@@ -55,10 +55,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       new SideDependentList<WalkingHighLevelHumanoidController.WalkingState>(WalkingState.TRANSFER_TO_LEFT_SUPPORT,
                             WalkingState.TRANSFER_TO_RIGHT_SUPPORT);
 
-   private final FramePoint2d previousCoP;
-   private final FramePoint2d capturePoint;
-   private double omega0;
-
    private final double doubleSupportTime = 0.2;    // 0.6;    // 0.3
    private final double stepTime = 0.45; // 0.5; // 0.55;    // 0.55;
    private final double waypointHeight = -0.13;    // 0.05; // 0.15;
@@ -85,9 +81,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    public WalkingHighLevelHumanoidController(FullRobotModel fullRobotModel, CommonWalkingReferenceFrames referenceFrames, TwistCalculator twistCalculator,
            SideDependentList<BipedFootInterface> bipedFeet, BipedSupportPolygons bipedSupportPolygons, SideDependentList<FootSwitchInterface> footSwitches,
-           ProcessedSensorsInterface processedSensors, DoubleYoVariable t, double controlDT, DesiredHeadingControlModule desiredHeadingControlModule, YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+           ProcessedSensorsInterface processedSensors, DoubleYoVariable t, double controlDT, DesiredHeadingControlModule desiredHeadingControlModule, YoVariableRegistry registry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
-      super(fullRobotModel, referenceFrames, processedSensors, twistCalculator, bipedFeet, bipedSupportPolygons, controlDT, desiredHeadingControlModule, footSwitches, "walking");
+      super(fullRobotModel, referenceFrames, processedSensors, twistCalculator, bipedFeet, bipedSupportPolygons, controlDT, desiredHeadingControlModule, footSwitches, registry);
       SimpleWorldDesiredFootstepCalculator simpleDesiredFootstepCalculator = new SimpleWorldDesiredFootstepCalculator(bipedFeet, referenceFrames,
             desiredHeadingControlModule, registry);
       
@@ -112,8 +108,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             desiredHeadingControlModule.getDesiredHeadingFrame(), bipedFeet, referenceFrames, registry);
       this.centerOfMassHeightTrajectoryGenerator = flatThenPolynomialCoMHeightTrajectoryGenerator;
 
-      
-      this.stateMachine = new StateMachine(name + "State", name + "SwitchTime", WalkingState.class, t, registry);
+      String namePrefix = "walking";
+      this.stateMachine = new StateMachine(namePrefix + "State", namePrefix + "SwitchTime", WalkingState.class, t, registry);
       upcomingSupportLeg.set(RobotSide.LEFT);
 
 
@@ -129,14 +125,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          trajectoryInitialized.put(robotSide, new BooleanYoVariable(robotSide.getCamelCaseNameForStartOfExpression() + "TrajectoryInitialized", registry));         
       }
 
-      this.previousCoP = new FramePoint2d(ReferenceFrame.getWorldFrame());
-      this.capturePoint = new FramePoint2d(ReferenceFrame.getWorldFrame());
-
       footTrajectoryBagOfBalls = new BagOfBalls(100, 0.01, "footBagOfBalls", YoAppearance.Black(), registry, dynamicGraphicObjectsListRegistry);
       comTrajectoryBagOfBalls = new BagOfBalls(500, 0.01, "comBagOfBalls", YoAppearance.Red(), registry, dynamicGraphicObjectsListRegistry);
 
       setUpStateMachine();
-      parentRegistry.addChild(registry);
 
       walk.set(false);
       liftUpHeels.set(true);

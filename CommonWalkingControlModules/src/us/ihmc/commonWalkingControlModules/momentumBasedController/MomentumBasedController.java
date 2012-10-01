@@ -79,7 +79,7 @@ public class MomentumBasedController implements RobotController
    private final CenterOfMassHeightControlModule centerOfMassHeightControlModule;
    private final LegStrengthCalculator legStrengthCalculator;
 
-   private final SideDependentList<BipedFootInterface> bipedFeet = new SideDependentList<BipedFootInterface>();
+   private final SideDependentList<BipedFootInterface> bipedFeet;
    private final ReferenceFrame midFeetZUp;
    private final double totalMass;
 
@@ -124,7 +124,7 @@ public class MomentumBasedController implements RobotController
    public MomentumBasedController(ProcessedSensorsInterface processedSensors, ProcessedOutputsInterface processedOutputs,
                                   CommonWalkingReferenceFrames referenceFrames, TwistCalculator twistCalculator, double controlDT,
                                   DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, double footForward, double footBack, double footWidth,
-                                  double footHeight, SideDependentList<FootSwitchInterface> footSwitches)
+                                  double footHeight, SideDependentList<FootSwitchInterface> footSwitches, SideDependentList<BipedFootInterface> bipedFeet, BipedSupportPolygons bipedSupportPolygons, DesiredHeadingControlModule desiredHeadingControlModule, HighLevelHumanoidController highLevelHumanoidController)
    {
       this.processedSensors = processedSensors;
       this.fullRobotModel = processedSensors.getFullRobotModel();
@@ -134,30 +134,8 @@ public class MomentumBasedController implements RobotController
       RigidBody elevator = fullRobotModel.getElevator();
       this.inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, -processedSensors.getGravityInWorldFrame().getZ());
 
-//    ContactBasedBipedFeetUpdater bipedFeetUpdater = new ContactBasedBipedFeetUpdater(processedSensors, referenceFrames);
-//    this.bipedFeetUpdater = bipedFeetUpdater;
-      double footRotationPreventionFactor = 1.0;    // 0.95;
-
-//    for (RobotSide robotSide : RobotSide.values())
-      {
-//       bipedFeet.put(robotSide, new SimpleBipedFoot(referenceFrames, robotSide, footRotationPreventionFactor * footForward, footRotationPreventionFactor * footBack, footRotationPreventionFactor * footWidth / 2.0, footRotationPreventionFactor * footWidth / 2.0, registry));
-//       HashMap<FramePoint2d, Boolean> contactMap = processedSensors.getContactMap(robotSide);
-//       bipedFeet.put(robotSide, new ContactBasedBipedFoot(referenceFrames, robotSide, new FrameConvexPolygon2d(contactMap.keySet()), registry));
-      }
-
-//    BipedFootInterface leftFoot = bipedFeet.get(RobotSide.LEFT);
-//    BipedFootInterface rightFoot = bipedFeet.get(RobotSide.RIGHT);
-
-      double narrowWidthOnToesPercentage = 1.0;
-      double maxToePointsBack = 0.999;
-      double maxHeelPointsForward = 0.999;
-      ResizableBipedFoot rightFoot = ResizableBipedFoot.createRectangularRightFoot(footRotationPreventionFactor, footRotationPreventionFactor, footForward,
-                                        footBack, footWidth, footHeight, narrowWidthOnToesPercentage, maxToePointsBack, maxHeelPointsForward, referenceFrames,
-                                        registry, dynamicGraphicObjectsListRegistry);
-      ResizableBipedFoot leftFoot = rightFoot.createLeftFootAsMirrorImage(referenceFrames, registry, dynamicGraphicObjectsListRegistry);
-      bipedFeet.put(RobotSide.RIGHT, rightFoot);
-      bipedFeet.put(RobotSide.LEFT, leftFoot);
-
+      this.bipedFeet = bipedFeet;
+      this.bipedSupportPolygons = bipedSupportPolygons;
       footPolygonVisualizer = new FootPolygonVisualizer(bipedFeet, dynamicGraphicObjectsListRegistry, registry);
 
       ReferenceFrame elevatorFrame = fullRobotModel.getElevatorFrame();
@@ -169,21 +147,16 @@ public class MomentumBasedController implements RobotController
                  new FootSpatialAccelerationControlModule(referenceFrames, twistCalculator, bipedFeet.get(robotSide), fullRobotModel, registry));
       }
 
-      this.desiredHeadingControlModule = new SimpleDesiredHeadingControlModule(0.0, controlDT, registry);
+      this.desiredHeadingControlModule = desiredHeadingControlModule;
       this.orientationControlModule = new AxisAnglePelvisOrientationControlModule(processedSensors, referenceFrames, null, registry, false);
-      
-      
-      SideDependentList<ReferenceFrame> ankleZUpFrames = referenceFrames.getAnkleZUpReferenceFrames();
       midFeetZUp = referenceFrames.getMidFeetZUpFrame();
-      this.bipedSupportPolygons = new BipedSupportPolygons(ankleZUpFrames, midFeetZUp, registry, dynamicGraphicObjectsListRegistry);
-
 
       for (RobotSide robotSide : RobotSide.values())
       {
          bipedFeet.get(robotSide).setIsSupportingFoot(true);
       }
 
-      bipedSupportPolygons.update(leftFoot, rightFoot);
+      bipedSupportPolygons.update(bipedFeet.get(RobotSide.LEFT), bipedFeet.get(RobotSide.RIGHT));
       
       SpeedControllingDesiredCoPCalculator desiredCapturePointToDesiredCoPControlModule = new SpeedControllingDesiredCoPCalculator(processedSensors,
             referenceFrames, registry, dynamicGraphicObjectsListRegistry);
@@ -207,8 +180,7 @@ public class MomentumBasedController implements RobotController
       this.totalMass = TotalMassCalculator.computeSubTreeMass(elevator);
       orientationControlModule.setupParametersForR2();
 
-      highLevelHumanoidController = new WalkingHighLevelHumanoidController(fullRobotModel, referenceFrames, twistCalculator, bipedFeet, bipedSupportPolygons, footSwitches,
-              processedSensors, processedSensors.getYoTime(), controlDT, desiredHeadingControlModule, registry, dynamicGraphicObjectsListRegistry);
+      this.highLevelHumanoidController = highLevelHumanoidController;
       optimizer = new BipedMomentumOptimizer(fullRobotModel, referenceFrames.getCenterOfMassFrame(), controlDT, twistCalculator, registry);
 
       this.desiredPelvisLinearAcceleration = new YoFrameVector("desiredPelvisLinearAcceleration", "", referenceFrames.getPelvisFrame(), registry);
@@ -244,7 +216,7 @@ public class MomentumBasedController implements RobotController
       kUpperBody.set(100.0);
       zetaUpperBody.set(1.0);
       omega0.set(3.0);    // just to initialize, will be reset every tick. TODO: integrate ICP control law, fz calculation and omega0 calculation
-      desiredPelvisPitch.set(0.6);
+      desiredPelvisPitch.set(0.6); // TODO: extract
    }
 
    public void initialize()
