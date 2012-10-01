@@ -52,20 +52,22 @@ import com.yobotics.simulationconstructionset.util.statemachines.StateTransition
 import com.yobotics.simulationconstructionset.util.statemachines.StateTransitionAction;
 import com.yobotics.simulationconstructionset.util.statemachines.StateTransitionCondition;
 
-public class MomentumBasedControllerStateMachine extends StateMachine implements HighLevelHumanoidController
+public class WalkingHighLevelHumanoidController implements HighLevelHumanoidController
 {
-   private static enum MomentumBasedControllerState {LEFT_SUPPORT, RIGHT_SUPPORT, TRANSFER_TO_LEFT_SUPPORT, TRANSFER_TO_RIGHT_SUPPORT, DOUBLE_SUPPORT}
+   private static enum WalkingState {LEFT_SUPPORT, RIGHT_SUPPORT, TRANSFER_TO_LEFT_SUPPORT, TRANSFER_TO_RIGHT_SUPPORT, DOUBLE_SUPPORT}
 
    private static final String name = "momentumSM";
    private static final YoVariableRegistry registry = new YoVariableRegistry(name);
+   
+   private final StateMachine stateMachine;
 
-   private final SideDependentList<MomentumBasedControllerState> singleSupportStateEnums =
-      new SideDependentList<MomentumBasedControllerStateMachine.MomentumBasedControllerState>(MomentumBasedControllerState.LEFT_SUPPORT,
-                            MomentumBasedControllerState.RIGHT_SUPPORT);
+   private final SideDependentList<WalkingState> singleSupportStateEnums =
+      new SideDependentList<WalkingHighLevelHumanoidController.WalkingState>(WalkingState.LEFT_SUPPORT,
+                            WalkingState.RIGHT_SUPPORT);
 
-   private final SideDependentList<MomentumBasedControllerState> transferStateEnums =
-      new SideDependentList<MomentumBasedControllerStateMachine.MomentumBasedControllerState>(MomentumBasedControllerState.TRANSFER_TO_LEFT_SUPPORT,
-                            MomentumBasedControllerState.TRANSFER_TO_RIGHT_SUPPORT);
+   private final SideDependentList<WalkingState> transferStateEnums =
+      new SideDependentList<WalkingHighLevelHumanoidController.WalkingState>(WalkingState.TRANSFER_TO_LEFT_SUPPORT,
+                            WalkingState.TRANSFER_TO_RIGHT_SUPPORT);
 
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final FullRobotModel fullRobotModel;
@@ -129,11 +131,11 @@ public class MomentumBasedControllerStateMachine extends StateMachine implements
    private final DoubleYoVariable amountToBeInsideSingleSupport = new DoubleYoVariable("amountToBeInsideSingleSupport", registry);
    private final DoubleYoVariable amountToBeInsideDoubleSupport = new DoubleYoVariable("amountToBeInsideDoubleSupport", registry);
 
-   public MomentumBasedControllerStateMachine(FullRobotModel fullRobotModel, CommonWalkingReferenceFrames referenceFrames, TwistCalculator twistCalculator,
+   public WalkingHighLevelHumanoidController(FullRobotModel fullRobotModel, CommonWalkingReferenceFrames referenceFrames, TwistCalculator twistCalculator,
            SideDependentList<BipedFootInterface> bipedFeet, BipedSupportPolygons bipedSupportPolygons, SideDependentList<FootSwitchInterface> footSwitches,
            ProcessedSensorsInterface processedSensors, DoubleYoVariable t, double controlDT, DesiredHeadingControlModule desiredHeadingControlModule, YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
-      super(name + "State", name + "SwitchTime", MomentumBasedControllerState.class, t, registry);
+      this.stateMachine = new StateMachine(name + "State", name + "SwitchTime", WalkingState.class, t, registry);
       this.fullRobotModel = fullRobotModel;
       this.referenceFrames = referenceFrames;
       this.processedSensors = processedSensors;
@@ -239,7 +241,7 @@ public class MomentumBasedControllerStateMachine extends StateMachine implements
    {
       DoubleSupportState doubleSupportState = new DoubleSupportState(null);
 
-      addState(doubleSupportState);
+      stateMachine.addState(doubleSupportState);
 
       for (RobotSide robotSide : RobotSide.values())
       {
@@ -248,14 +250,14 @@ public class MomentumBasedControllerStateMachine extends StateMachine implements
          transferState.addStateTransition(toDoubleSupport);
          StateTransition toSingleSupport = new StateTransition(singleSupportStateEnums.get(robotSide), new DoneWithTransferCondition(robotSide));
          transferState.addStateTransition(toSingleSupport);
-         addState(transferState);
+         stateMachine.addState(transferState);
 
          State singleSupportState = new SingleSupportState(robotSide);
          StateTransition toDoubleSupport2 = new StateTransition(doubleSupportState.getStateEnum(), new StopWalkingCondition(), new ResetICPTrajectoryAction());
          singleSupportState.addStateTransition(toDoubleSupport2);
          StateTransition toTransfer = new StateTransition(transferStateEnums.get(robotSide.getOppositeSide()), new DoneWithSingleSupportCondition());
          singleSupportState.addStateTransition(toTransfer);
-         addState(singleSupportState);
+         stateMachine.addState(singleSupportState);
       }
 
       for (RobotSide robotSide : RobotSide.values())
@@ -354,7 +356,7 @@ public class MomentumBasedControllerStateMachine extends StateMachine implements
 
    public void initialize()
    {
-      setCurrentState(MomentumBasedControllerState.DOUBLE_SUPPORT);
+      stateMachine.setCurrentState(WalkingState.DOUBLE_SUPPORT);
    }
 
    private class DoubleSupportState extends State
@@ -363,7 +365,7 @@ public class MomentumBasedControllerStateMachine extends StateMachine implements
 
       public DoubleSupportState(RobotSide transferToSide)
       {
-         super((transferToSide == null) ? MomentumBasedControllerState.DOUBLE_SUPPORT : transferStateEnums.get(transferToSide));
+         super((transferToSide == null) ? WalkingState.DOUBLE_SUPPORT : transferStateEnums.get(transferToSide));
          this.transferToSide = transferToSide;
       }
 
@@ -566,7 +568,7 @@ public class MomentumBasedControllerStateMachine extends StateMachine implements
 
       public boolean checkCondition()
       {
-         boolean doubleSupportTimeHasPassed = timeInCurrentState() > doubleSupportTime;
+         boolean doubleSupportTimeHasPassed = stateMachine.timeInCurrentState() > doubleSupportTime;
          boolean transferringToThisRobotSide = robotSide == upcomingSupportLeg.getEnumValue();
 
          return walk.getBooleanValue() && transferringToThisRobotSide && doubleSupportTimeHasPassed;
@@ -600,7 +602,7 @@ public class MomentumBasedControllerStateMachine extends StateMachine implements
          RobotSide swingSide = supportLeg.getEnumValue().getOppositeSide();
          double minimumSwingFraction = 0.5;
          double minimumSwingTime = cartesianTrajectoryGenerators.get(swingSide).getFinalTime() * minimumSwingFraction;
-         boolean footHitGround = (timeInCurrentState() > minimumSwingTime) && footSwitches.get(swingSide).hasFootHitGround();
+         boolean footHitGround = (stateMachine.timeInCurrentState() > minimumSwingTime) && footSwitches.get(swingSide).hasFootHitGround();
 
          return trajectoryInitialized.get(swingSide).getBooleanValue() && (cartesianTrajectoryGenerators.get(swingSide).isDone() || footHitGround);
       }
@@ -790,7 +792,7 @@ public class MomentumBasedControllerStateMachine extends StateMachine implements
 
       // TODO: orientation stuff
 
-      doAction();    // computes trajectory and stores results in YoFrameVectors and Points.
+      stateMachine.doAction();    // computes trajectory and stores results in YoFrameVectors and Points.
    }
 
    public boolean trajectoryInitialized(RobotSide robotSide)
@@ -814,7 +816,7 @@ public class MomentumBasedControllerStateMachine extends StateMachine implements
    
    public void doControl()
    {
-      checkTransitionConditionsThoroughly();
-      doAction();
+      stateMachine.checkTransitionConditionsThoroughly();
+      stateMachine.doAction();
    }
 }
