@@ -137,6 +137,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       minOrbitalEnergyForSingleSupport.set(0.007);
       amountToBeInsideSingleSupport.set(0.0);
       amountToBeInsideDoubleSupport.set(0.05);
+      desiredPelvisPitch.set(0.6);
    }
 
    private void setUpStateMachine()
