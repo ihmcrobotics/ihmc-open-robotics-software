@@ -7,7 +7,6 @@ import javax.vecmath.Matrix3d;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedFootInterface;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.FootPolygonVisualizer;
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ResizableBipedFoot;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.DesiredCoPAndCMPControlModule;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.LegStrengthCalculator;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.VirtualToePointCalculator;
@@ -20,7 +19,6 @@ import us.ihmc.commonWalkingControlModules.controlModules.velocityViaCoP.Captura
 import us.ihmc.commonWalkingControlModules.controlModules.velocityViaCoP.SimpleDesiredCenterOfPressureFilter;
 import us.ihmc.commonWalkingControlModules.controlModules.velocityViaCoP.SpeedControllingDesiredCoPCalculator;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredHeadingControlModule;
-import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.SimpleDesiredHeadingControlModule;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.BipedMomentumOptimizer.LimbName;
 import us.ihmc.commonWalkingControlModules.outputs.ProcessedOutputsInterface;
@@ -109,9 +107,6 @@ public class MomentumBasedController implements RobotController
    private final DoubleYoVariable kAngularMomentumZ = new DoubleYoVariable("kAngularMomentumZ", registry);
    private final DoubleYoVariable kPelvisYaw = new DoubleYoVariable("kPelvisYaw", registry);
    private final HashMap<RevoluteJoint, DoubleYoVariable> desiredAccelerationYoVariables = new HashMap<RevoluteJoint, DoubleYoVariable>();
-
-   private final DoubleYoVariable desiredPelvisPitch = new DoubleYoVariable("desiredPelvisPitch", registry);
-   private final DoubleYoVariable desiredPelvisRoll = new DoubleYoVariable("desiredPelvisRoll", registry);
 
    private final SideDependentList<Double> lambdas = new SideDependentList<Double>();
 
@@ -216,7 +211,6 @@ public class MomentumBasedController implements RobotController
       kUpperBody.set(100.0);
       zetaUpperBody.set(1.0);
       omega0.set(3.0);    // just to initialize, will be reset every tick. TODO: integrate ICP control law, fz calculation and omega0 calculation
-      desiredPelvisPitch.set(0.6); // TODO: extract
    }
 
    public void initialize()
@@ -286,7 +280,9 @@ public class MomentumBasedController implements RobotController
       highLevelHumanoidController.packDesiredICP(desiredCapturePoint);
       FrameVector2d desiredCapturePointVelocity = new FrameVector2d(worldFrame);
       highLevelHumanoidController.packDesiredICPVelocity(desiredCapturePointVelocity);
-      desiredCoPAndCMPControlModule.compute(capturePoint, supportLeg, desiredCapturePoint, desiredCapturePointVelocity, desiredPelvisRoll.getDoubleValue(), desiredPelvisPitch.getDoubleValue(), omega0.getDoubleValue());
+      double desiredPelvisRoll = highLevelHumanoidController.getDesiredPelvisRoll();
+      double desiredPelvisPitch = highLevelHumanoidController.getDesiredPelvisPitch();
+      desiredCoPAndCMPControlModule.compute(capturePoint, supportLeg, desiredCapturePoint, desiredCapturePointVelocity, desiredPelvisRoll, desiredPelvisPitch, omega0.getDoubleValue());
       FramePoint2d desiredCoP = new FramePoint2d(worldFrame);
       desiredCoPAndCMPControlModule.packCoP(desiredCoP);
       FramePoint2d desiredCMP = new FramePoint2d(worldFrame);
