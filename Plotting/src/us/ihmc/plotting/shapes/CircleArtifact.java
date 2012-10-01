@@ -34,6 +34,11 @@ public class CircleArtifact extends Artifact
       this.y = y;
    }
 
+   public void setDiameter(double diameter)
+   {
+      this.diameter = diameter;
+   }
+
    public double getX()
    {
       return x;
