@@ -207,7 +207,7 @@ public class MomentumBasedController implements RobotController
       this.totalMass = TotalMassCalculator.computeSubTreeMass(elevator);
       orientationControlModule.setupParametersForR2();
 
-      highLevelHumanoidController = new MomentumBasedControllerStateMachine(fullRobotModel, referenceFrames, twistCalculator, bipedFeet, bipedSupportPolygons, footSwitches,
+      highLevelHumanoidController = new WalkingHighLevelHumanoidController(fullRobotModel, referenceFrames, twistCalculator, bipedFeet, bipedSupportPolygons, footSwitches,
               processedSensors, processedSensors.getYoTime(), controlDT, desiredHeadingControlModule, registry, dynamicGraphicObjectsListRegistry);
       optimizer = new BipedMomentumOptimizer(fullRobotModel, referenceFrames.getCenterOfMassFrame(), controlDT, twistCalculator, registry);
 
