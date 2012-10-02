@@ -22,7 +22,7 @@ public class RigidBodySpatialAccelerationControlModule
    protected final ReferenceFrame endEffectorFrame;
 
    public RigidBodySpatialAccelerationControlModule(String namePrefix, ReferenceFrame elevatorFrame, TwistCalculator twistCalculator, RigidBody endEffector,
-           ReferenceFrame endEffectorFrame)
+           ReferenceFrame endEffectorFrame, YoVariableRegistry parentRegistry)
    {
       this.registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
       this.elevatorFrame = elevatorFrame;
@@ -31,6 +31,7 @@ public class RigidBodySpatialAccelerationControlModule
       this.endEffectorFrame = endEffectorFrame;
       this.se3pdController = new SE3PDController(namePrefix, endEffectorFrame, registry);
       this.acceleration = new SpatialAccelerationVector(endEffectorFrame, elevatorFrame, endEffectorFrame);
+      parentRegistry.addChild(registry);
    }
 
    public void packAcceleration(SpatialAccelerationVector accelerationToPack)
