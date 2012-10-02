@@ -143,7 +143,7 @@ public class MomentumBasedController implements RobotController
                     bipedFeet.get(robotSide), fullRobotModel, registry));
          RigidBodySpatialAccelerationControlModule handSpatialAccelerationControlModule =
             new RigidBodySpatialAccelerationControlModule(robotSide.getCamelCaseNameForStartOfExpression() + "Hand", elevatorFrame, twistCalculator,
-               fullRobotModel.getEndEffector(robotSide, LimbName.ARM), fullRobotModel.getEndEffectorFrame(robotSide, LimbName.ARM));
+               fullRobotModel.getEndEffector(robotSide, LimbName.ARM), fullRobotModel.getEndEffectorFrame(robotSide, LimbName.ARM), registry);
          handSpatialAccelerationControlModules.put(robotSide, handSpatialAccelerationControlModule);
          handSpatialAccelerationControlModule.setPositionProportionalGains(100.0, 100.0, 100.0);
          handSpatialAccelerationControlModule.setPositionDerivativeGains(20.0, 20.0, 20.0);
