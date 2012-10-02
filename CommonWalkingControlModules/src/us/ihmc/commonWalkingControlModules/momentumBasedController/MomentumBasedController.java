@@ -144,10 +144,10 @@ public class MomentumBasedController implements RobotController
          footSpatialAccelerationControlModules.put(robotSide,
                  new FootSpatialAccelerationControlModule(robotSide.getCamelCaseNameForStartOfExpression() + "Foot", referenceFrames, twistCalculator,
                     bipedFeet.get(robotSide), fullRobotModel, registry));
-         RigidBodySpatialAccelerationControlModule handSpatialAccelerationControlModule = new RigidBodySpatialAccelerationControlModule(robotSide.getCamelCaseNameForStartOfExpression() + "Hand", elevatorFrame, twistCalculator,
-              fullRobotModel.getEndEffector(robotSide, LimbName.ARM), fullRobotModel.getEndEffectorFrame(robotSide, LimbName.ARM));
-         handSpatialAccelerationControlModules.put(robotSide,
-                 handSpatialAccelerationControlModule);
+         RigidBodySpatialAccelerationControlModule handSpatialAccelerationControlModule =
+            new RigidBodySpatialAccelerationControlModule(robotSide.getCamelCaseNameForStartOfExpression() + "Hand", elevatorFrame, twistCalculator,
+               fullRobotModel.getEndEffector(robotSide, LimbName.ARM), fullRobotModel.getEndEffectorFrame(robotSide, LimbName.ARM));
+         handSpatialAccelerationControlModules.put(robotSide, handSpatialAccelerationControlModule);
          handSpatialAccelerationControlModule.setPositionProportionalGains(100.0, 100.0, 100.0);
          handSpatialAccelerationControlModule.setPositionDerivativeGains(20.0, 20.0, 20.0);
          handSpatialAccelerationControlModule.setOrientationProportionalGains(500.0, 500.0, 500.0);
@@ -473,8 +473,8 @@ public class MomentumBasedController implements RobotController
                {
                   boolean isConstrained = isFootConstrained(robotSide);
                   FootSpatialAccelerationControlModule footSpatialAccelerationControlModule = footSpatialAccelerationControlModules.get(robotSide);
-                  footSpatialAccelerationControlModule.compute(virtualToePoints.get(robotSide), desiredEndEffectorPose,
-                          desiredEndEffectorTwist, feedForwardEndEffectorSpatialAcceleration, isConstrained);
+                  footSpatialAccelerationControlModule.compute(virtualToePoints.get(robotSide), desiredEndEffectorPose, desiredEndEffectorTwist,
+                          feedForwardEndEffectorSpatialAcceleration, isConstrained);
                   footSpatialAccelerationControlModule.packAcceleration(desiredEndEffectorAccelerationInWorld);
 
                   if (!isConstrained)
@@ -488,8 +488,10 @@ public class MomentumBasedController implements RobotController
                case ARM :
                {
                   RigidBodySpatialAccelerationControlModule rigidBodySpatialAccelerationControlModule = handSpatialAccelerationControlModules.get(robotSide);
-                  rigidBodySpatialAccelerationControlModule.doPositionControl(desiredEndEffectorPose, desiredEndEffectorTwist, feedForwardEndEffectorSpatialAcceleration);
+                  rigidBodySpatialAccelerationControlModule.doPositionControl(desiredEndEffectorPose, desiredEndEffectorTwist,
+                          feedForwardEndEffectorSpatialAcceleration);
                   rigidBodySpatialAccelerationControlModule.packAcceleration(desiredEndEffectorAccelerationInWorld);
+
                   break;
                }
 

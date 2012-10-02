@@ -49,8 +49,7 @@ public abstract class MomentumOptimizer implements Lmdif_fcn
    private final InverseDynamicsJoint[] jointsInOrder;
 
 
-   public MomentumOptimizer(RigidBody elevator, ReferenceFrame centerOfMassFrame, double controlDT,
-           YoVariableRegistry parentRegistry)
+   public MomentumOptimizer(RigidBody elevator, ReferenceFrame centerOfMassFrame, double controlDT, YoVariableRegistry parentRegistry)
    {
       this.jointsInOrder = ScrewTools.computeJointsInOrder(elevator);
       int nDegreesOfFreedom = ScrewTools.computeDegreesOfFreedom(jointsInOrder);
@@ -65,10 +64,10 @@ public abstract class MomentumOptimizer implements Lmdif_fcn
       this.controlDT = controlDT;
 
       this.centroidalMomentumMatrix = new CentroidalMomentumMatrix(elevator, centerOfMassFrame);
-      this.previousCentroidalMomentumMatrix = new DenseMatrix64F(centroidalMomentumMatrix.getMatrix().getNumRows(), centroidalMomentumMatrix.getMatrix()
-            .getNumCols());
-      this.centroidalMomentumMatrixDerivative = new DenseMatrix64F(centroidalMomentumMatrix.getMatrix().getNumRows(), centroidalMomentumMatrix.getMatrix()
-            .getNumCols());
+      this.previousCentroidalMomentumMatrix = new DenseMatrix64F(centroidalMomentumMatrix.getMatrix().getNumRows(),
+              centroidalMomentumMatrix.getMatrix().getNumCols());
+      this.centroidalMomentumMatrixDerivative = new DenseMatrix64F(centroidalMomentumMatrix.getMatrix().getNumRows(),
+              centroidalMomentumMatrix.getMatrix().getNumCols());
 
       this.avdot = new DenseMatrix64F(centroidalMomentumMatrix.getMatrix().getNumRows(), jointAccelerationsMatrix.getNumCols());
       this.adotv = new DenseMatrix64F(centroidalMomentumMatrixDerivative.getNumRows(), jointVelocitiesMatrix.getNumCols());
@@ -120,15 +119,15 @@ public abstract class MomentumOptimizer implements Lmdif_fcn
 
       CommonOps.mult(centroidalMomentumMatrix.getMatrix(), jointAccelerationsMatrix, avdot);
       CommonOps.mult(centroidalMomentumMatrixDerivative, jointVelocitiesMatrix, adotv);
-      
+
       CommonOps.subEquals(centroidalMomentumErrorMatrix, avdot);
       CommonOps.subEquals(centroidalMomentumErrorMatrix, adotv);
-      
+
 
       angularCentroidalMomentumRateError.set(centroidalMomentumErrorMatrix.get(0, 0), centroidalMomentumErrorMatrix.get(1, 0),
-            centroidalMomentumErrorMatrix.get(2, 0));
+              centroidalMomentumErrorMatrix.get(2, 0));
       linearCentroidalMomentumRateError.set(centroidalMomentumErrorMatrix.get(3, 0), centroidalMomentumErrorMatrix.get(4, 0),
-            centroidalMomentumErrorMatrix.get(5, 0));
+              centroidalMomentumErrorMatrix.get(5, 0));
 
       int index = 1;
       for (int i = 0; i < centroidalMomentumErrorMatrix.getNumRows(); i++)
@@ -138,6 +137,6 @@ public abstract class MomentumOptimizer implements Lmdif_fcn
    }
 
    protected abstract void updateBeforeSolving();
-   
+
    protected abstract void updateAtStartOfFcn(double[] x);
 }

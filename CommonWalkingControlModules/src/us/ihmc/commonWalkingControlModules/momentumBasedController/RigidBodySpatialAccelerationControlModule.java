@@ -21,7 +21,8 @@ public class RigidBodySpatialAccelerationControlModule
    protected final RigidBody endEffector;
    protected final ReferenceFrame endEffectorFrame;
 
-   public RigidBodySpatialAccelerationControlModule(String namePrefix, ReferenceFrame elevatorFrame, TwistCalculator twistCalculator, RigidBody endEffector, ReferenceFrame endEffectorFrame)
+   public RigidBodySpatialAccelerationControlModule(String namePrefix, ReferenceFrame elevatorFrame, TwistCalculator twistCalculator, RigidBody endEffector,
+           ReferenceFrame endEffectorFrame)
    {
       this.registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
       this.elevatorFrame = elevatorFrame;
@@ -42,17 +43,19 @@ public class RigidBodySpatialAccelerationControlModule
       FrameVector ret = new FrameVector(endEffectorFrame);
       se3pdController.getPositionController().packPositionError(ret);
       ret.changeFrame(ReferenceFrame.getWorldFrame());
+
       return ret;
    }
 
-   public void doPositionControl(FramePose desiredEndEffectorPose, Twist desiredEndEffectorTwist, SpatialAccelerationVector feedForwardEndEffectorSpatialAcceleration)
+   public void doPositionControl(FramePose desiredEndEffectorPose, Twist desiredEndEffectorTwist,
+                                 SpatialAccelerationVector feedForwardEndEffectorSpatialAcceleration)
    {
       Twist currentTwist = new Twist();
       twistCalculator.packTwistOfBody(currentTwist, endEffector);
       currentTwist.changeBodyFrameNoRelativeTwist(endEffectorFrame);
       currentTwist.changeFrame(endEffectorFrame);
       currentTwist.changeBaseFrameNoRelativeTwist(elevatorFrame);
-      
+
       se3pdController.compute(acceleration, desiredEndEffectorPose, desiredEndEffectorTwist, feedForwardEndEffectorSpatialAcceleration, currentTwist);
    }
 
@@ -60,17 +63,17 @@ public class RigidBodySpatialAccelerationControlModule
    {
       se3pdController.getPositionController().setProportionalGains(kx, ky, kz);
    }
-   
+
    public void setPositionDerivativeGains(double bx, double by, double bz)
    {
       se3pdController.getPositionController().setDerivativeGains(bx, by, bz);
    }
-   
+
    public void setOrientationProportionalGains(double kx, double ky, double kz)
    {
       se3pdController.getOrientationController().setProportionalGains(kx, ky, kz);
    }
-   
+
    public void setOrientationDerivativeGains(double bx, double by, double bz)
    {
       se3pdController.getOrientationController().setDerivativeGains(bx, by, bz);
