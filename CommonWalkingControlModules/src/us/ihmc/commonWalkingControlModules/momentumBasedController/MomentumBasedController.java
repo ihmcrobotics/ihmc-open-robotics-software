@@ -24,7 +24,6 @@ import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.outputs.ProcessedOutputsInterface;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
-import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.sensors.ProcessedSensorsInterface;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
@@ -121,9 +120,7 @@ public class MomentumBasedController implements RobotController
 
    public MomentumBasedController(ProcessedSensorsInterface processedSensors, ProcessedOutputsInterface processedOutputs,
                                   CommonWalkingReferenceFrames referenceFrames, TwistCalculator twistCalculator, double controlDT,
-                                  DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, double footForward, double footBack, double footWidth,
-                                  double footHeight, SideDependentList<FootSwitchInterface> footSwitches, SideDependentList<BipedFootInterface> bipedFeet,
-                                  BipedSupportPolygons bipedSupportPolygons, DesiredHeadingControlModule desiredHeadingControlModule,
+                                  DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, SideDependentList<BipedFootInterface> bipedFeet, BipedSupportPolygons bipedSupportPolygons, DesiredHeadingControlModule desiredHeadingControlModule,
                                   HighLevelHumanoidController highLevelHumanoidController)
    {
       this.processedSensors = processedSensors;
