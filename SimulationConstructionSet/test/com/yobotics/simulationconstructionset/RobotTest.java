@@ -79,7 +79,7 @@ public class RobotTest
       Transform3D pin1ToWorld = new Transform3D();
       pin1.getTransformToWorld(pin1ToWorld);
       root2.setRotationAndTranslation(pin1ToWorld);
-      root2.setXYZ(root2.getQx().getDoubleValue(), root2.getQy().getDoubleValue(), root2.getQz().getDoubleValue());
+      root2.setPosition(root2.getQx().getDoubleValue(), root2.getQy().getDoubleValue(), root2.getQz().getDoubleValue());
       robot2.update();
 
       robot1.updateVelocities();

@@ -197,7 +197,7 @@ public abstract class VirtualChainExampleRobot extends Robot implements RobotRan
 
       public void moveToRandomPosition()
       {
-         joint1.setXYZ(random.nextDouble(), random.nextDouble(), random.nextDouble());
+         joint1.setPosition(random.nextDouble(), random.nextDouble(), random.nextDouble());
          joint1.setYawPitchRoll(-Math.PI + 2.0 * random.nextDouble() * Math.PI, -Math.PI + 2.0 * random.nextDouble() * Math.PI, -Math.PI + 2.0 * random.nextDouble() * Math.PI);
          joint2.setInitialState(-Math.PI + 2.0 * random.nextDouble() * Math.PI, 0.0);
          joint3.setInitialState(-Math.PI + 2.0 * random.nextDouble() * Math.PI, 0.0);
@@ -265,7 +265,7 @@ public abstract class VirtualChainExampleRobot extends Robot implements RobotRan
 
       public void moveToRandomPosition()
       {
-         floatingJoint.setXYZ(random.nextDouble(), random.nextDouble(), random.nextDouble());
+         floatingJoint.setPosition(random.nextDouble(), random.nextDouble(), random.nextDouble());
          floatingJoint.setYawPitchRoll(-Math.PI + 2.0 * random.nextDouble() * Math.PI, -Math.PI + 2.0 * random.nextDouble() * Math.PI,
                                        -Math.PI + 2.0 * random.nextDouble() * Math.PI);
 
