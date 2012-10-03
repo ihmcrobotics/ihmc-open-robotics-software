@@ -344,6 +344,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          desiredEndEffectorPositions.get(swingSide).get(LimbName.LEG).set(positionToPack);
          desiredEndEffectorVelocities.get(swingSide).get(LimbName.LEG).set(velocityToPack);
          desiredEndEffectorAccelerations.get(swingSide).get(LimbName.LEG).set(accelerationToPack);
+         
+         calculateDesiredEndEffectorPoseFromDesiredPositions();
+         calculateDesiredEndEffectorTwistFromDesiredPositions();
+         calculateDesiredEndEffectorSpatialAccelerationFromDesiredAccelerations();
 
 //       desiredFootOrientations.get(swingSide).setYawPitchRoll(0.0, 0.0, 0.0);
 //       desiredFootAngularVelocities.get(swingSide).set(0.0, 0.0, 0.0);
@@ -536,6 +540,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       desiredEndEffectorOrientations.get(supportSide).get(LimbName.LEG).setYawPitchRoll(0.0, footPitch, 0.0);
       desiredEndEffectorAngularVelocities.get(supportSide).get(LimbName.LEG).set(0.0, 0.0, 0.0);
       desiredEndEffectorAngularAccelerations.get(supportSide).get(LimbName.LEG).set(0.0, 0.0, 0.0);
+      
+      calculateDesiredEndEffectorPoseFromDesiredPositions();
+      calculateDesiredEndEffectorTwistFromDesiredPositions();
+      calculateDesiredEndEffectorSpatialAccelerationFromDesiredAccelerations();
    }
 
    private void setSupportLeg(RobotSide supportLeg)
