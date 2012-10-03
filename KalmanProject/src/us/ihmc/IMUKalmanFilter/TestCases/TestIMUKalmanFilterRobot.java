@@ -103,7 +103,7 @@ public class TestIMUKalmanFilterRobot extends Robot
 
    public void setXYZ(double x, double y, double z, double xDot, double yDot, double zDot)
    {
-      rootJoint.setXYZ(x, y, z, xDot, yDot, zDot);
+      rootJoint.setPositionAndVelocity(x, y, z, xDot, yDot, zDot);
    }
 
    public void setYawPitchRoll(double yaw, double pitch, double roll, double qd_wx, double qd_wy, double qd_wz)
