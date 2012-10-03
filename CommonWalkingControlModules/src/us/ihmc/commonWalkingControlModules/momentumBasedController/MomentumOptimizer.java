@@ -14,7 +14,9 @@ import us.ihmc.utilities.screwTheory.Momentum;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTools;
 
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.MatrixYoVariableConversionTools;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 
 public abstract class MomentumOptimizer implements Lmdif_fcn
@@ -40,6 +42,7 @@ public abstract class MomentumOptimizer implements Lmdif_fcn
    private final CentroidalMomentumMatrix centroidalMomentumMatrix;
    private final DenseMatrix64F centroidalMomentumMatrixDerivative;
    private final DenseMatrix64F previousCentroidalMomentumMatrix;
+   private final DoubleYoVariable[][] yoPreviousCentroidalMomentumMatrix; // to make numerical differentiation rewindable
 
    private final YoFrameVector desiredLinearCentroidalMomentumRate;
    private final YoFrameVector desiredAngularCentroidalMomentumRate;
@@ -78,6 +81,9 @@ public abstract class MomentumOptimizer implements Lmdif_fcn
       linearCentroidalMomentumRateError = new YoFrameVector("linearCentroidalMomentumRateError", "", centerOfMassFrame, registry);
       angularCentroidalMomentumRateError = new YoFrameVector("angularCentroidalMomentumRateError", "", centerOfMassFrame, registry);
 
+      yoPreviousCentroidalMomentumMatrix = new DoubleYoVariable[previousCentroidalMomentumMatrix.getNumRows()][previousCentroidalMomentumMatrix.getNumCols()];
+      MatrixYoVariableConversionTools.populateYoVariables(yoPreviousCentroidalMomentumMatrix, "previousCMMatrix", registry);
+      
       parentRegistry.addChild(registry);
    }
 
@@ -85,6 +91,7 @@ public abstract class MomentumOptimizer implements Lmdif_fcn
    {
       centroidalMomentumMatrix.compute();
       previousCentroidalMomentumMatrix.set(centroidalMomentumMatrix.getMatrix());
+      MatrixYoVariableConversionTools.storeInYoVariables(previousCentroidalMomentumMatrix, yoPreviousCentroidalMomentumMatrix);
    }
 
    public void solveForRootJointAcceleration(FrameVector desiredAngularCentroidalMomentumRate, FrameVector desiredLinearCentroidalMomentumRate)
@@ -94,8 +101,10 @@ public abstract class MomentumOptimizer implements Lmdif_fcn
 
       ScrewTools.packJointVelocitiesMatrix(jointsInOrder, jointVelocitiesMatrix);
       centroidalMomentumMatrix.compute();
+      MatrixYoVariableConversionTools.getFromYoVariables(previousCentroidalMomentumMatrix, yoPreviousCentroidalMomentumMatrix);
       MatrixTools.numericallyDifferentiate(centroidalMomentumMatrixDerivative, previousCentroidalMomentumMatrix, centroidalMomentumMatrix.getMatrix(),
               controlDT);
+      MatrixYoVariableConversionTools.storeInYoVariables(previousCentroidalMomentumMatrix, yoPreviousCentroidalMomentumMatrix);
 
       updateBeforeSolving();
 

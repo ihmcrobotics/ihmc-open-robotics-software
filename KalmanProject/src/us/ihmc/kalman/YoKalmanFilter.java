@@ -1,5 +1,12 @@
 package us.ihmc.kalman;
 
+import static com.yobotics.simulationconstructionset.util.MatrixYoVariableConversionTools.checkPositiveDefinite;
+import static com.yobotics.simulationconstructionset.util.MatrixYoVariableConversionTools.checkSize;
+import static com.yobotics.simulationconstructionset.util.MatrixYoVariableConversionTools.getFromYoVariables;
+import static com.yobotics.simulationconstructionset.util.MatrixYoVariableConversionTools.getFromYoVariablesSymmetric;
+import static com.yobotics.simulationconstructionset.util.MatrixYoVariableConversionTools.getNumberOfElementsForSymmetricMatrix;
+import static com.yobotics.simulationconstructionset.util.MatrixYoVariableConversionTools.storeInYoVariables;
+import static com.yobotics.simulationconstructionset.util.MatrixYoVariableConversionTools.storeInYoVariablesSymmetric;
 import static org.ejml.ops.CommonOps.addEquals;
 import static org.ejml.ops.CommonOps.sub;
 import static org.ejml.ops.CommonOps.subEquals;
@@ -13,6 +20,7 @@ import org.ejml.ops.MatrixFeatures;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.MatrixYoVariableConversionTools;
 
 
 /**
@@ -230,135 +238,12 @@ public class YoKalmanFilter implements KalmanFilter
 
    private void populateYoVariables(int nStates, int nMeasurements)
    {
-      populateYoVariables(yoF, "F");
-      populateYoVariables(yoG, "G");
-      populateYoVariables(yoH, "H");
-      populateYoVariablesSymmetric(yoQ, "Q", nStates);
-      populateYoVariablesSymmetric(yoR, "R", nMeasurements);
-      populateYoVariables(yoX, "x");
-      populateYoVariablesSymmetric(yoP, "P", nStates);
-   }
-
-   private void populateYoVariables(DoubleYoVariable[][] yoVariableArray, String prefix)
-   {
-      for (int i = 0; i < yoVariableArray.length; i++)
-      {
-         for (int j = 0; j < yoVariableArray[0].length; j++)
-         {
-            yoVariableArray[i][j] = new DoubleYoVariable(prefix + Integer.toString(i) + Integer.toString(j), registry);
-         }
-      }
-   }
-
-   private void populateYoVariablesSymmetric(DoubleYoVariable[] yoVariableArray, String prefix, int size)
-   {
-      int n = 0;
-      for (int i = 0; i < size; i++)
-      {
-         for (int j = i; j < size; j++)
-         {
-            yoVariableArray[n] = new DoubleYoVariable(prefix + Integer.toString(i) + Integer.toString(j), registry);
-            n++;
-         }
-      }
-   }
-
-   private void populateYoVariables(DoubleYoVariable[] yoVariableArray, String prefix)
-   {
-      for (int i = 0; i < yoVariableArray.length; i++)
-      {
-         yoVariableArray[i] = new DoubleYoVariable(prefix + Integer.toString(i), registry);
-      }
-   }
-
-   private void storeInYoVariables(DenseMatrix64F m, DoubleYoVariable[][] yoM)
-   {
-      for (int i = 0; i < m.getNumRows(); i++)
-      {
-         for (int j = 0; j < m.getNumCols(); j++)
-         {
-            yoM[i][j].set(m.get(i, j));
-         }
-      }
-   }
-
-   private void storeInYoVariablesSymmetric(DenseMatrix64F m, DoubleYoVariable[] yoM)
-   {
-      int size = m.getNumRows();
-
-      int n = 0;
-      for (int i = 0; i < size; i++)
-      {
-         for (int j = i; j < size; j++)
-         {
-            yoM[n].set(m.get(i, j));
-            n++;
-         }
-      }
-   }
-
-   private void storeInYoVariables(DenseMatrix64F v, DoubleYoVariable[] yoV)
-   {
-      for (int i = 0; i < v.getNumRows(); i++)
-      {
-         yoV[i].set(v.get(i));
-      }
-   }
-
-   private void getFromYoVariables(DenseMatrix64F m, DoubleYoVariable[][] yoM)
-   {
-      for (int i = 0; i < m.getNumRows(); i++)
-      {
-         for (int j = 0; j < m.getNumCols(); j++)
-         {
-            m.set(i, j, yoM[i][j].getDoubleValue());
-         }
-      }
-   }
-
-   private void getFromYoVariablesSymmetric(DenseMatrix64F m, DoubleYoVariable[] yoM)
-   {
-      int size = m.getNumRows();
-
-      int n = 0;
-      for (int i = 0; i < size; i++)
-      {
-         for (int j = i; j < size; j++)
-         {
-            m.set(i, j, yoM[n].getDoubleValue());
-            m.set(j, i, yoM[n].getDoubleValue());
-            n++;
-         }
-      }
-   }
-
-   private void getFromYoVariables(DenseMatrix64F m, DoubleYoVariable[] yoM)
-   {
-      for (int i = 0; i < m.getNumRows(); i++)
-      {
-         m.set(i, 0, yoM[i].getDoubleValue());
-      }
-   }
-
-   private static int getNumberOfElementsForSymmetricMatrix(int size)
-   {
-      return size * (size + 1) / 2;
-   }
-
-   private static void checkPositiveDefinite(DenseMatrix64F m)
-   {
-      if (!MatrixFeatures.isPositiveSemidefinite(m))
-         throw new RuntimeException("Matrix is not positive semidefinite: " + m);
-   }
-
-   private static void checkSize(DenseMatrix64F m1, DenseMatrix64F m2)
-   {
-      boolean nRowsNotEqual = m1.getNumRows() != m2.getNumRows();
-      boolean nColsNotEqual = m1.getNumCols() != m2.getNumCols();
-
-      if (nRowsNotEqual || nColsNotEqual)
-      {
-         throw new RuntimeException("Matrix sizes not equal: " + m1 + "\n\n" + m2);
-      }
+      MatrixYoVariableConversionTools.populateYoVariables(yoF, "F", registry);
+      MatrixYoVariableConversionTools.populateYoVariables(yoG, "G", registry);
+      MatrixYoVariableConversionTools.populateYoVariables(yoH, "H", registry);
+      MatrixYoVariableConversionTools.populateYoVariablesSymmetric(yoQ, "Q", nStates, registry);
+      MatrixYoVariableConversionTools.populateYoVariablesSymmetric(yoR, "R", nMeasurements, registry);
+      MatrixYoVariableConversionTools.populateYoVariables(yoX, "x", registry);
+      MatrixYoVariableConversionTools.populateYoVariablesSymmetric(yoP, "P", nStates, registry);
    }
 }
