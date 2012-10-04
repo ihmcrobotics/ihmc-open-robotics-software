@@ -6,7 +6,7 @@ import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegTorques;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.ProcessedSensorsInterface;
 import us.ihmc.robotSide.RobotSide;
-import us.ihmc.utilities.math.geometry.Orientation;
+import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
@@ -38,7 +38,7 @@ public class FootOrientationControlModule
    private final YoFrameOrientation initialOrientation;
    private final YoFrameOrientation finalOrientation;
 
-   private final Orientation desiredFootOrientation;
+   private final FrameOrientation desiredFootOrientation;
 
 
    public FootOrientationControlModule(ProcessedSensorsInterface processedSensors, CommonWalkingReferenceFrames referenceFrames,
@@ -48,7 +48,7 @@ public class FootOrientationControlModule
       this.processedSensors = processedSensors;
       this.referenceFrames = referenceFrames;
       this.desiredHeadingFrame = desiredHeadingControlModule.getDesiredHeadingFrame();
-      desiredFootOrientation = new Orientation(desiredHeadingFrame);
+      desiredFootOrientation = new FrameOrientation(desiredHeadingFrame);
       initialOrientation = new YoFrameOrientation("footInitialOrientation", "", desiredHeadingFrame, registry);
       finalOrientation = new YoFrameOrientation("footFinalOrientation", "", desiredHeadingFrame, registry);
 
@@ -76,7 +76,7 @@ public class FootOrientationControlModule
       rollController.setDerivativeGain(0.0);
    }
 
-   public void initializeFootOrientationMove(double moveDuration, Orientation finalOrientation, RobotSide supportFoot)
+   public void initializeFootOrientationMove(double moveDuration, FrameOrientation finalOrientation, RobotSide supportFoot)
    {
       minimumJerkTrajectory.setParams(0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, moveDuration);
       this.finalOrientation.set(finalOrientation);
@@ -90,7 +90,7 @@ public class FootOrientationControlModule
 
       RobotSide supportLeg = legTorquesToAddAddionalTorque.getRobotSide();
 
-      Orientation currentFootOrientation = getFootOrientationInFrame(desiredHeadingFrame, supportLeg);
+      FrameOrientation currentFootOrientation = getFootOrientationInFrame(desiredHeadingFrame, supportLeg);
 
       desiredFootOrientation.interpolate(initialOrientation.getFrameOrientationCopy(), finalOrientation.getFrameOrientationCopy(), alpha);
 
@@ -116,10 +116,10 @@ public class FootOrientationControlModule
       legTorquesToAddAddionalTorque.addTorque(LegJointName.ANKLE_ROLL, rollTorque);
    }
    
-   private Orientation getFootOrientationInFrame(ReferenceFrame referenceFrame, RobotSide supportFoot)
+   private FrameOrientation getFootOrientationInFrame(ReferenceFrame referenceFrame, RobotSide supportFoot)
    {
       ReferenceFrame supportFootFrame = referenceFrames.getFootFrame(supportFoot);
-      Orientation orientation = new Orientation(referenceFrame, supportFootFrame.getTransformToDesiredFrame(referenceFrame));
+      FrameOrientation orientation = new FrameOrientation(referenceFrame, supportFootFrame.getTransformToDesiredFrame(referenceFrame));
       return orientation;
    }
 }

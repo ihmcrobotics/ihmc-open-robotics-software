@@ -23,7 +23,7 @@ import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
-import us.ihmc.utilities.math.geometry.Orientation;
+import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RotationFunctions;
 import us.ihmc.utilities.screwTheory.InverseDynamicsCalculator;
@@ -132,7 +132,7 @@ public class CraigPage300SwingLegTorqueControlModule implements SwingLegTorqueCo
          guiSetterUpperRegistry.registerGUISetterUpper(createGUISetterUpper());
    }
 
-   public void compute(LegTorques legTorquesToPackForSwingLeg, FramePoint desiredFootPosition, Orientation desiredFootOrientation,
+   public void compute(LegTorques legTorquesToPackForSwingLeg, FramePoint desiredFootPosition, FrameOrientation desiredFootOrientation,
                        FrameVector desiredFootVelocity, FrameVector desiredFootAngularVelocity, FrameVector desiredFootAcceleration,
                        FrameVector desiredFootAngularAcceleration)
    {
@@ -253,7 +253,7 @@ public class CraigPage300SwingLegTorqueControlModule implements SwingLegTorqueCo
       ankleTorqueScale.set(1.0);
    }
 
-   private Transform3D computeDesiredTransform(ReferenceFrame pelvisFrame, FramePoint desiredFootPosition, Orientation desiredFootOrientation)
+   private Transform3D computeDesiredTransform(ReferenceFrame pelvisFrame, FramePoint desiredFootPosition, FrameOrientation desiredFootOrientation)
    {
       desiredFootOrientation.changeFrame(pelvisFrame);
       desiredFootPosition.changeFrame(pelvisFrame);
@@ -285,7 +285,7 @@ public class CraigPage300SwingLegTorqueControlModule implements SwingLegTorqueCo
       return desiredAccelerationOfSwingFootWithRespectToWorld;
    }
 
-   private static Transform3D createTransform(Orientation orientation, FramePoint framePoint)
+   private static Transform3D createTransform(FrameOrientation orientation, FramePoint framePoint)
    {
       orientation.checkReferenceFrameMatch(framePoint);
       Matrix3d rotationMatrix = orientation.getMatrix3d();

@@ -10,7 +10,7 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
-import us.ihmc.utilities.math.geometry.Orientation;
+import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
@@ -210,7 +210,7 @@ public class AdjustableDesiredFootstepCalculator implements DesiredFootstepCalcu
 
       // Create the desired footstep orientation using the parameters previously computed
 //    desiredFootstepOrientation = new Orientation(desiredFootstepPosition.getReferenceFrame(), stepYaw.getDoubleValue(), stepPitch.getDoubleValue(), stepRoll.getDoubleValue());
-      Orientation desiredFootstepOrientation = new Orientation(desiredHeadingFrame, stepYaw.getDoubleValue(), stepPitch.getDoubleValue(),
+      FrameOrientation desiredFootstepOrientation = new FrameOrientation(desiredHeadingFrame, stepYaw.getDoubleValue(), stepPitch.getDoubleValue(),
                                                   stepRoll.getDoubleValue());
       desiredFootstepOrientation.changeFrame(desiredFootstepPositions.get(swingLegSide).getReferenceFrame());
 

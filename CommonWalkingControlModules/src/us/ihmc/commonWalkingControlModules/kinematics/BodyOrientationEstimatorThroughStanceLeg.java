@@ -5,7 +5,7 @@ import javax.vecmath.Matrix3d;
 
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.robotSide.RobotSide;
-import us.ihmc.utilities.math.geometry.Orientation;
+import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RotationFunctions;
 
@@ -32,7 +32,7 @@ public class BodyOrientationEstimatorThroughStanceLeg implements SensorProcessor
       this.orientation =  new YoFrameOrientation(robotSide + "bodyOrientationThroughStanceLeg", "", worldFrame, registry);
    }
 
-   public void packBodyOrientation(Orientation bodyOrientationToPack)
+   public void packBodyOrientation(FrameOrientation bodyOrientationToPack)
    {
       bodyOrientationToPack.setIncludingFrame(orientation.getFrameOrientationCopy());  
    }

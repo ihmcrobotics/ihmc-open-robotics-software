@@ -24,7 +24,7 @@ import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
-import us.ihmc.utilities.math.geometry.Orientation;
+import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.utilities.screwTheory.Twist;
@@ -557,7 +557,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       FramePoint desiredEndEffectorPosition = new FramePoint(referenceFrames.getFootFrame(supportSide));
       desiredEndEffectorPosition.changeFrame(worldFrame);
 
-      Orientation desiredEndEffectorOrientation = new Orientation(worldFrame, 0.0, footPitch, 0.0);
+      FrameOrientation desiredEndEffectorOrientation = new FrameOrientation(worldFrame, 0.0, footPitch, 0.0);
 
       FrameVector desiredLinearVelocity = new FrameVector(worldFrame);
       FrameVector desiredAngularVelocity = new FrameVector(worldFrame);

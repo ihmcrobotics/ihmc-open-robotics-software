@@ -20,7 +20,7 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
-import us.ihmc.utilities.math.geometry.Orientation;
+import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
@@ -531,7 +531,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       desiredFootOrientation.interpolate(startSwingOrientation, endSwingOrientation, orientationInterpolationAlpha);
 
       // Visualisation
-      Orientation desiredFootOrientationToViz = desiredFootOrientation.getFrameOrientationCopy();
+      FrameOrientation desiredFootOrientationToViz = desiredFootOrientation.getFrameOrientationCopy();
       desiredFootOrientationToViz.changeFrame(worldFrame);
       desiredFootOrientationInWorldFrame.set(desiredFootOrientationToViz);
       
@@ -585,7 +585,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
 //    Orientation endOrientation = desiredFootStep.getFootstepPose().getOrientation().changeFrameCopy(endSwingOrientation.getReferenceFrame());
 //    endSwingOrientation.set(endOrientation);
 
-      Orientation endOrientation = desiredFootStep.getFootstepPose().getOrientation();
+      FrameOrientation endOrientation = desiredFootStep.getFootstepPose().getOrientation();
       RobotSide swingFootSide = desiredFootStep.getFootstepSide();
       ReferenceFrame supportFootAnkleZUpFrame = referenceFrames.getAnkleZUpFrame(swingFootSide.getOppositeSide());
       endSwingOrientations.get(swingFootSide).set(endOrientation.changeFrameCopy(supportFootAnkleZUpFrame));
@@ -594,7 +594,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
    private void initializeStartOrientationToMatchActual(RobotSide swingSide)
    {
       ReferenceFrame swingFootFrame = referenceFrames.getFootFrame(swingSide);
-      Orientation startOrientation = new Orientation(swingFootFrame);
+      FrameOrientation startOrientation = new FrameOrientation(swingFootFrame);
       startOrientation = startOrientation.changeFrameCopy(referenceFrames.getAnkleZUpFrame(swingSide.getOppositeSide()));
       startSwingOrientations.get(swingSide).set(startOrientation);
    }

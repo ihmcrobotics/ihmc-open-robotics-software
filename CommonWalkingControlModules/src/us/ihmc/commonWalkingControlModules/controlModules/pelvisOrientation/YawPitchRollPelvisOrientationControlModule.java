@@ -6,7 +6,7 @@ import us.ihmc.commonWalkingControlModules.sensors.ProcessedSensorsInterface;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FrameVector;
-import us.ihmc.utilities.math.geometry.Orientation;
+import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
@@ -57,7 +57,7 @@ public class YawPitchRollPelvisOrientationControlModule implements PelvisOrienta
       rolld = new FilteredVelocityYoVariable("pelvisOrientationRolld", "", alphaPelvisAngleDerivative, pelvisOrientationRoll, controlDT, registry);
    }
 
-   public FrameVector computePelvisTorque(RobotSide supportLeg, Orientation desiredPelvisOrientation)
+   public FrameVector computePelvisTorque(RobotSide supportLeg, FrameOrientation desiredPelvisOrientation)
    {
       ReferenceFrame spineRollFrame = commonWalkingReferenceFrames.getPelvisFrame();
 
@@ -118,13 +118,13 @@ public class YawPitchRollPelvisOrientationControlModule implements PelvisOrienta
 
    private double[] getActualYawPitchRollInWorldFrame()
    {
-      Orientation pelvisOrientation = processedSensors.getPelvisOrientationInFrame(worldFrame);
+      FrameOrientation pelvisOrientation = processedSensors.getPelvisOrientationInFrame(worldFrame);
       double[] yawPitchRoll = pelvisOrientation.getYawPitchRoll();
 
       return yawPitchRoll;
    }
 
-   private double[] getDesiredYawPitchRollInWorldFrame(Orientation desiredPelvisOrientation)
+   private double[] getDesiredYawPitchRollInWorldFrame(FrameOrientation desiredPelvisOrientation)
    {
       desiredPelvisOrientation = desiredPelvisOrientation.changeFrameCopy(worldFrame);
       double[] desiredYawPitchRoll = desiredPelvisOrientation.getYawPitchRoll();

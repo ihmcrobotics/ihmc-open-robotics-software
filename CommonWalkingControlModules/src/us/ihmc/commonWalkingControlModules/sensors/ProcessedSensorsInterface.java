@@ -11,7 +11,7 @@ import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
-import us.ihmc.utilities.math.geometry.Orientation;
+import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.utilities.screwTheory.Twist;
@@ -32,7 +32,7 @@ public interface ProcessedSensorsInterface
    public abstract Twist getTwistOfPelvisWithRespectToWorld();
    public abstract SpatialAccelerationVector getAccelerationOfPelvisWithRespectToWorld();
 
-   public abstract Orientation getPelvisOrientationInFrame(ReferenceFrame referenceFrame);
+   public abstract FrameOrientation getPelvisOrientationInFrame(ReferenceFrame referenceFrame);
 
    public abstract FramePoint getCenterOfMassGroundProjectionInFrame(ReferenceFrame referenceFrame);
 
@@ -49,7 +49,7 @@ public interface ProcessedSensorsInterface
 
    public abstract String getLegJointVelocityName(RobotSide robotSide, LegJointName jointName);
 
-   public abstract Orientation getChestOrientationInFrame(ReferenceFrame desiredHeadingFrame);
+   public abstract FrameOrientation getChestOrientationInFrame(ReferenceFrame desiredHeadingFrame);
    public abstract FrameVector getChestAngularVelocityInChestFrame();
 
    public abstract double getSpineJointPosition(SpineJointName spineJointName);

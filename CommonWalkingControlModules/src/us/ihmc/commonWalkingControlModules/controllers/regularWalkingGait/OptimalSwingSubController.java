@@ -30,7 +30,7 @@ import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FramePose;
-import us.ihmc.utilities.math.geometry.Orientation;
+import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
@@ -273,7 +273,7 @@ public class OptimalSwingSubController implements SwingSubController
       FramePose desiredFootstepPose = couplingRegistry.getDesiredFootstep().getFootstepPose();
 
       FramePoint desiredSwingFootPosition = desiredFootstepPose.getPosition().changeFrameCopy(desiredPositions.get(swingLeg).getReferenceFrame());
-      Orientation desiredSwingFootOrientation = desiredFootstepPose.getOrientation().changeFrameCopy(desiredOrientations.get(swingLeg).getReferenceFrame());
+      FrameOrientation desiredSwingFootOrientation = desiredFootstepPose.getOrientation().changeFrameCopy(desiredOrientations.get(swingLeg).getReferenceFrame());
 
       desiredPositions.get(swingLeg).set(desiredSwingFootPosition);
       desiredOrientations.get(swingLeg).set(desiredSwingFootOrientation);
@@ -303,7 +303,7 @@ public class OptimalSwingSubController implements SwingSubController
       FramePoint desiredPosition = desiredPositions.get(swingSide).getFramePointCopy();
       ReferenceFrame pelvisFrame = referenceFrames.getPelvisFrame();
       desiredPosition.changeFrame(pelvisFrame);
-      Orientation desiredOrientation = desiredOrientations.get(swingSide).getFrameOrientationCopy();
+      FrameOrientation desiredOrientation = desiredOrientations.get(swingSide).getFrameOrientationCopy();
       desiredOrientation.changeFrame(pelvisFrame);
 
       double desiredYaw = desiredOrientation.getYawPitchRoll()[0];
@@ -317,7 +317,7 @@ public class OptimalSwingSubController implements SwingSubController
    {
 
       swingParameters.setRobotSide(swingLeg);
-      Orientation currentFootOrientation = new Orientation(referenceFrames.getAnkleZUpFrame(swingLeg));
+      FrameOrientation currentFootOrientation = new FrameOrientation(referenceFrames.getAnkleZUpFrame(swingLeg));
       currentFootOrientation.changeFrame(desiredHeadingFrame);
 
       initialHipYawAngle.set(currentFootOrientation.getYawPitchRoll()[0]);
@@ -408,7 +408,7 @@ public class OptimalSwingSubController implements SwingSubController
        * Hip yaw control is really bad, so control it with a PD controller
        */
 
-      Orientation desiredFootOrientation = desiredOrientations.get(robotSide).getFrameOrientationCopy();
+      FrameOrientation desiredFootOrientation = desiredOrientations.get(robotSide).getFrameOrientationCopy();
       desiredFootOrientation.changeFrame(desiredHeadingFrame);
       double[] finalFootYawPitchRoll = desiredFootOrientation.getYawPitchRoll();
       double finalFootYaw = finalFootYawPitchRoll[0];
@@ -424,7 +424,7 @@ public class OptimalSwingSubController implements SwingSubController
       positionInterpolator.compute(timeInSwing, 1, positionResult);
 
       double desiredHipYawOrientationAngle = (finalFootYaw - initialHipYawAngle.getDoubleValue()) * positionResult[0][0] + initialHipYawAngle.getDoubleValue();
-      Orientation hipYawOrientation = new Orientation(desiredHeadingFrame, desiredHipYawOrientationAngle, 0.0, 0.0);
+      FrameOrientation hipYawOrientation = new FrameOrientation(desiredHeadingFrame, desiredHipYawOrientationAngle, 0.0, 0.0);
       hipYawOrientation.changeFrame(referenceFrames.getPelvisFrame());
       double desiredHipYawAngle = hipYawOrientation.getYawPitchRoll()[0];
 
@@ -441,7 +441,7 @@ public class OptimalSwingSubController implements SwingSubController
 
       ReferenceFrame beforeAnklePitchFrame = referenceFrames.getLegJointFrame(robotSide, LegJointName.KNEE);
 
-      Orientation currentDesiredFootOrientation = new Orientation(desiredHeadingFrame);
+      FrameOrientation currentDesiredFootOrientation = new FrameOrientation(desiredHeadingFrame);
       double desiredHipPitchAngle = (finalFootYawPitchRoll[1] - initialAnkleOrientation.getPitch().getDoubleValue()) * positionResult[0][0]
             + initialAnkleOrientation.getPitch().getDoubleValue();
       double desiredHipRollAngle = (finalFootYawPitchRoll[2] - initialAnkleOrientation.getRoll().getDoubleValue()) * positionResult[0][0] 
@@ -568,7 +568,7 @@ public class OptimalSwingSubController implements SwingSubController
 
       FramePoint endPoint = new FramePoint(desiredFootstepPose.getPosition());
       endPoint.changeFrame(desiredPositions.get(swingLeg).getReferenceFrame());
-      Orientation endOrientation = new Orientation(desiredFootstepPose.getOrientation());
+      FrameOrientation endOrientation = new FrameOrientation(desiredFootstepPose.getOrientation());
       endOrientation.changeFrame(desiredOrientations.get(swingLeg).getReferenceFrame());
 
       // Setup the orientation trajectory

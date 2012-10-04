@@ -12,7 +12,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.FramePoint;
-import us.ihmc.utilities.math.geometry.Orientation;
+import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
@@ -196,12 +196,12 @@ public class LegConfigurationData
       return allVariables;
    }
 
-   public Orientation getUpperBodyOrientationInWorld()
+   public FrameOrientation getUpperBodyOrientationInWorld()
    {
       return upperBodyOrientationInWorld.getFrameOrientationCopy();
    }
    
-   public void setUpperBodyOrientationInWorld(Orientation orientation)
+   public void setUpperBodyOrientationInWorld(FrameOrientation orientation)
    {
       this.upperBodyOrientationInWorld.set(orientation);
    }

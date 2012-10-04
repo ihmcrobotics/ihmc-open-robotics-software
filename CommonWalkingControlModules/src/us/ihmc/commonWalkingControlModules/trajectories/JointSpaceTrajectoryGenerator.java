@@ -18,7 +18,7 @@ import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
-import us.ihmc.utilities.math.geometry.Orientation;
+import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
@@ -55,7 +55,7 @@ public class JointSpaceTrajectoryGenerator
    private final DoubleYoVariable[] heightOfViaPoints;
 
    private final CommonWalkingReferenceFrames referenceFrames;
-   private final Orientation intermediateOrientation;
+   private final FrameOrientation intermediateOrientation;
    private final SideDependentList<LegJointPositions> intermediatePositions;
 
    private final SwingLegAnglesAtEndOfStepEstimator swingLegAnglesAtEndOfStepEstimator;
@@ -145,7 +145,7 @@ public class JointSpaceTrajectoryGenerator
       
       ikAlpha = new DoubleYoVariable("ikAlpha", registry);
 
-      intermediateOrientation = new Orientation(referenceFrames.getPelvisFrame());
+      intermediateOrientation = new FrameOrientation(referenceFrames.getPelvisFrame());
       intermediatePositions = new SideDependentList<LegJointPositions>();
       for (RobotSide side : RobotSide.values())
       {
@@ -224,7 +224,7 @@ public class JointSpaceTrajectoryGenerator
    }
 
    public void initialize(RobotSide swingSide, LegJointPositions currentJointPositions, LegJointVelocities currentJointVelocities,
-         LegJointAccelerations currentJointAccelerations, FramePoint desiredFinalPosition, Orientation desiredOrientationIn, double swingDuration,
+         LegJointAccelerations currentJointAccelerations, FramePoint desiredFinalPosition, FrameOrientation desiredOrientationIn, double swingDuration,
          int viaPointsToUse, boolean useBodyPositionEstimation)
    {
       if (viaPointsToUse > maximumNumberOfViaPoints)
@@ -242,7 +242,7 @@ public class JointSpaceTrajectoryGenerator
 
       FramePoint desiredPosition = new FramePoint(desiredFinalPosition);
       desiredPosition.changeFrame(referenceFrames.getPelvisFrame());
-      Orientation desiredOrientation = new Orientation(desiredOrientationIn);
+      FrameOrientation desiredOrientation = new FrameOrientation(desiredOrientationIn);
       desiredOrientation.changeFrame(referenceFrames.getPelvisFrame());
 
       finalPositionInPelvisFrame.set(desiredPosition);
@@ -260,7 +260,7 @@ public class JointSpaceTrajectoryGenerator
 
    }
 
-   private void calculateNewEndPoint(FramePoint desiredPositionIn, Orientation desiredOrientationIn, double timeInSwing, boolean useBodyPositionEstimation)
+   private void calculateNewEndPoint(FramePoint desiredPositionIn, FrameOrientation desiredOrientationIn, double timeInSwing, boolean useBodyPositionEstimation)
    {
       desiredPositionIn.checkReferenceFrameMatch(referenceFrames.getPelvisFrame());
 
@@ -326,11 +326,11 @@ public class JointSpaceTrajectoryGenerator
 
    }
 
-   public void updateEndPoint(FramePoint desiredPositionIn, Orientation desiredOrientationIn, double timeInSwing, boolean useBodyPositionEstimation)
+   public void updateEndPoint(FramePoint desiredPositionIn, FrameOrientation desiredOrientationIn, double timeInSwing, boolean useBodyPositionEstimation)
    {
       FramePoint desiredPosition = new FramePoint(desiredPositionIn);
       desiredPosition.changeFrame(referenceFrames.getPelvisFrame());
-      Orientation desiredOrientation = new Orientation(desiredOrientationIn);
+      FrameOrientation desiredOrientation = new FrameOrientation(desiredOrientationIn);
       desiredOrientation.changeFrame(referenceFrames.getPelvisFrame());
 
       if (finalPositionInPelvisFrame.distance(desiredPosition) > 2e-2)
