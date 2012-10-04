@@ -24,6 +24,7 @@ import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
+import us.ihmc.utilities.math.geometry.Orientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.utilities.screwTheory.Twist;
@@ -35,6 +36,7 @@ import com.yobotics.simulationconstructionset.YoAppearance;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.BagOfBalls;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFrameOrientation;
 import com.yobotics.simulationconstructionset.util.statemachines.State;
 import com.yobotics.simulationconstructionset.util.statemachines.StateMachine;
 import com.yobotics.simulationconstructionset.util.statemachines.StateTransition;
@@ -76,6 +78,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final DoubleYoVariable amountToBeInsideDoubleSupport = new DoubleYoVariable("amountToBeInsideDoubleSupport", registry);
 
    private final FlatThenPolynomialCoMHeightTrajectoryGenerator flatThenPolynomialCoMHeightTrajectoryGenerator;    // TODO: kind of ugly, need this because one of the methods we use here is not in the CenterOfMassHeightTrajectoryGenerator interface
+
+   private final YoFrameOrientation desiredSwingFootOrientation = new YoFrameOrientation("desiredSwingFootOrientation", worldFrame, registry);
 
    public WalkingHighLevelHumanoidController(FullRobotModel fullRobotModel, CommonWalkingReferenceFrames referenceFrames, TwistCalculator twistCalculator,
            SideDependentList<BipedFootInterface> bipedFeet, BipedSupportPolygons bipedSupportPolygons, SideDependentList<FootSwitchInterface> footSwitches,
@@ -180,6 +184,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    {
       stateMachine.setCurrentState(WalkingState.DOUBLE_SUPPORT);
    }
+   
 
    private class DoubleSupportState extends State
    {
@@ -300,6 +305,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       private final FrameVector velocityToPack;
       private final FrameVector accelerationToPack;
 
+      private final FrameVector angularVelocityToPack;
+      private final FrameVector angularAccelerationToPack;
+      
       private int counter = 0;
 
       public SingleSupportState(RobotSide robotSide)
@@ -310,6 +318,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          this.positionToPack = new FramePoint(supportAnkleZUpFrame);
          this.velocityToPack = new FrameVector(supportAnkleZUpFrame);
          this.accelerationToPack = new FrameVector(supportAnkleZUpFrame);
+         
+         this.angularVelocityToPack = new FrameVector(worldFrame);
+         this.angularAccelerationToPack = new FrameVector(worldFrame);
+         
       }
 
       @Override
@@ -337,21 +349,15 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             desiredICPVelocity.set(0.0, 0.0);
          }
 
-         positionToPack.changeFrame(desiredEndEffectorPositions.get(swingSide).get(LimbName.LEG).getReferenceFrame());
-         velocityToPack.changeFrame(desiredEndEffectorVelocities.get(swingSide).get(LimbName.LEG).getReferenceFrame());
-         accelerationToPack.changeFrame(desiredEndEffectorAccelerations.get(swingSide).get(LimbName.LEG).getReferenceFrame());
-
-         desiredEndEffectorPositions.get(swingSide).get(LimbName.LEG).set(positionToPack);
-         desiredEndEffectorVelocities.get(swingSide).get(LimbName.LEG).set(velocityToPack);
-         desiredEndEffectorAccelerations.get(swingSide).get(LimbName.LEG).set(accelerationToPack);
+         positionToPack.changeFrame(worldFrame);
+         velocityToPack.changeFrame(worldFrame);
+         accelerationToPack.changeFrame(worldFrame);
          
-         calculateDesiredEndEffectorPoseFromDesiredPositions();
-         calculateDesiredEndEffectorTwistFromDesiredPositions();
-         calculateDesiredEndEffectorSpatialAccelerationFromDesiredAccelerations();
 
-//       desiredFootOrientations.get(swingSide).setYawPitchRoll(0.0, 0.0, 0.0);
-//       desiredFootAngularVelocities.get(swingSide).set(0.0, 0.0, 0.0);
-//       desiredFootAngularAccelerations.get(swingSide).set(0.0, 0.0, 0.0);
+         calculateDesiredEndEffectorPoseFromDesiredPositions(swingSide, LimbName.LEG, positionToPack, desiredSwingFootOrientation.getFrameOrientationCopy());
+         calculateDesiredEndEffectorTwistFromDesiredVelocities(swingSide, LimbName.LEG, velocityToPack, angularVelocityToPack);
+         calculateDesiredEndEffectorSpatialAccelerationFromDesiredAccelerations(swingSide, LimbName.LEG, accelerationToPack, angularAccelerationToPack);
+
 
          counter++;
 
@@ -373,8 +379,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          limbNullspaceMultipliers.get(swingSide).get(LimbName.LEG).set(swingNullspaceMultiplier);
          limbNullspaceMultipliers.get(supportSide).get(LimbName.LEG).set(0.0);
          trajectoryInitialized.get(swingSide).set(false);
-
-         desiredEndEffectorOrientations.get(swingSide).get(LimbName.LEG).setYawPitchRoll(0.0, 0.0, 0.0);
+         
+         desiredSwingFootOrientation.setYawPitchRoll(0.0, 0.0, 0.0);
 
          setDesiredFootPosVelAccForSupportSide(supportSide, trailingFootPitch.getDoubleValue());    // FIXME: make it a smooth trajectory
       }
@@ -531,19 +537,20 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    private void setDesiredFootPosVelAccForSupportSide(RobotSide supportSide, double footPitch)
    {
-      FramePoint desiredFootPosition = new FramePoint(referenceFrames.getFootFrame(supportSide));
-      desiredFootPosition.changeFrame(desiredEndEffectorPositions.get(supportSide).get(LimbName.LEG).getReferenceFrame());
-      desiredEndEffectorPositions.get(supportSide).get(LimbName.LEG).set(desiredFootPosition);
-      desiredEndEffectorVelocities.get(supportSide).get(LimbName.LEG).set(0.0, 0.0, 0.0);
-      desiredEndEffectorAccelerations.get(supportSide).get(LimbName.LEG).set(0.0, 0.0, 0.0);
-
-      desiredEndEffectorOrientations.get(supportSide).get(LimbName.LEG).setYawPitchRoll(0.0, footPitch, 0.0);
-      desiredEndEffectorAngularVelocities.get(supportSide).get(LimbName.LEG).set(0.0, 0.0, 0.0);
-      desiredEndEffectorAngularAccelerations.get(supportSide).get(LimbName.LEG).set(0.0, 0.0, 0.0);
+      FramePoint desiredEndEffectorPosition = new FramePoint(referenceFrames.getFootFrame(supportSide));
+      desiredEndEffectorPosition.changeFrame(worldFrame);
+   
+      Orientation desiredEndEffectorOrientation = new Orientation(worldFrame, 0.0, footPitch, 0.0);
       
-      calculateDesiredEndEffectorPoseFromDesiredPositions();
-      calculateDesiredEndEffectorTwistFromDesiredPositions();
-      calculateDesiredEndEffectorSpatialAccelerationFromDesiredAccelerations();
+      FrameVector desiredLinearVelocity = new FrameVector(worldFrame);
+      FrameVector desiredAngularVelocity = new FrameVector(worldFrame);
+      
+      FrameVector desiredLinearAcceleration = new FrameVector(worldFrame);
+      FrameVector desiredAngularAcceleration = new FrameVector(worldFrame);
+      
+      calculateDesiredEndEffectorPoseFromDesiredPositions(supportSide, LimbName.LEG, desiredEndEffectorPosition, desiredEndEffectorOrientation);
+      calculateDesiredEndEffectorTwistFromDesiredVelocities(supportSide, LimbName.LEG, desiredLinearVelocity, desiredAngularVelocity);
+      calculateDesiredEndEffectorSpatialAccelerationFromDesiredAccelerations(supportSide, LimbName.LEG, desiredLinearAcceleration, desiredAngularAcceleration);
    }
 
    private void setSupportLeg(RobotSide supportLeg)
@@ -609,9 +616,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       CartesianTrajectoryGenerator cartesianTrajectoryGenerator = footCartesianTrajectoryGenerators.get(swingSide);
       cartesianTrajectoryGenerator.initialize(initialPosition, initialVelocity, initialAcceleration, finalDesiredStepLocation, finalDesiredVelocity);
-
-      desiredEndEffectorOrientations.get(swingSide).get(LimbName.LEG).set(
-          desiredFootstep.getFootstepOrientationInFrame(desiredEndEffectorOrientations.get(swingSide).get(LimbName.LEG).getReferenceFrame()));
+      
+      desiredSwingFootOrientation.set(desiredFootstep.getFootstepOrientationInFrame(worldFrame));
 
       desiredICP.set(capturePoint);    // TODO: is this what we want?
       FramePoint2d finalDesiredICP = getSingleSupportFinalDesiredICPForWalking(desiredFootstep, swingSide);
