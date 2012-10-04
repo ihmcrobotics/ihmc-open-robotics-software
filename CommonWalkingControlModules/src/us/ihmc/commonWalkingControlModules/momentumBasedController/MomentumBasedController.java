@@ -21,6 +21,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.velocityViaCoP.SimpleD
 import us.ihmc.commonWalkingControlModules.controlModules.velocityViaCoP.SpeedControllingDesiredCoPCalculator;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredHeadingControlModule;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
+import us.ihmc.commonWalkingControlModules.kinematics.SpatialAccelerationProjector;
 import us.ihmc.commonWalkingControlModules.outputs.ProcessedOutputsInterface;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
@@ -30,9 +31,9 @@ import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameLine2d;
+import us.ihmc.utilities.math.geometry.FrameLineSegment2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
-import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.GeometryTools;
@@ -45,10 +46,10 @@ import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTools;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.utilities.screwTheory.TotalMassCalculator;
-import us.ihmc.utilities.screwTheory.Twist;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 import us.ihmc.utilities.screwTheory.Wrench;
 
+import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoAppearance;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
@@ -89,12 +90,11 @@ public class MomentumBasedController implements RobotController
 
    private final SideDependentList<EnumMap<LimbName, SpatialAccelerationVector>> desiredEndEffectorAccelerationsInWorld =
       SideDependentList.createListOfEnumMaps(LimbName.class);
-   private final YoFrameVector swingFootPositionErrorInWorld = new YoFrameVector("swingFootPositionErrorInWorld", "", worldFrame, registry);
+   private final SideDependentList<EndEffectorPoseTwistAndSpatialAccelerationCalculator> footPoseTwistAndSpatialAccelerationCalculators = new SideDependentList<EndEffectorPoseTwistAndSpatialAccelerationCalculator>();
+   private final SideDependentList<SpatialAccelerationProjector> spatialAccelerationProjectors = new SideDependentList<SpatialAccelerationProjector>();
+   private final SideDependentList<BooleanYoVariable> isCoPOnEdge = new SideDependentList<BooleanYoVariable>();
    private final SideDependentList<YoFramePoint> desiredFootPositionsInWorld = new SideDependentList<YoFramePoint>();
-   private final SideDependentList<FootSpatialAccelerationControlModule> footSpatialAccelerationControlModules =
-      new SideDependentList<FootSpatialAccelerationControlModule>();
-   private final SideDependentList<RigidBodySpatialAccelerationControlModule> handSpatialAccelerationControlModules =
-      new SideDependentList<RigidBodySpatialAccelerationControlModule>();
+   
    private final DesiredHeadingControlModule desiredHeadingControlModule;
    private final DesiredCoPAndCMPControlModule desiredCoPAndCMPControlModule;
 
@@ -138,24 +138,18 @@ public class MomentumBasedController implements RobotController
       ReferenceFrame elevatorFrame = fullRobotModel.getElevatorFrame();
       for (RobotSide robotSide : RobotSide.values())
       {
-         footSpatialAccelerationControlModules.put(robotSide,
-                 new FootSpatialAccelerationControlModule(robotSide.getCamelCaseNameForStartOfExpression() + "Foot", referenceFrames, twistCalculator,
-                    bipedFeet.get(robotSide), fullRobotModel, registry));
-         RigidBodySpatialAccelerationControlModule handSpatialAccelerationControlModule =
-            new RigidBodySpatialAccelerationControlModule(robotSide.getCamelCaseNameForStartOfExpression() + "Hand", elevatorFrame, twistCalculator,
-               fullRobotModel.getEndEffector(robotSide, LimbName.ARM), fullRobotModel.getEndEffectorFrame(robotSide, LimbName.ARM), registry);
-         handSpatialAccelerationControlModules.put(robotSide, handSpatialAccelerationControlModule);
-         handSpatialAccelerationControlModule.setPositionProportionalGains(100.0, 100.0, 100.0);
-         handSpatialAccelerationControlModule.setPositionDerivativeGains(20.0, 20.0, 20.0);
-         handSpatialAccelerationControlModule.setOrientationProportionalGains(500.0, 500.0, 500.0);
-         handSpatialAccelerationControlModule.setOrientationDerivativeGains(80.0, 80.0, 80.0);
-
          for (LimbName limbName : LimbName.values())
          {
             ReferenceFrame endEffectorFrame = fullRobotModel.getEndEffectorFrame(robotSide, limbName);
             desiredEndEffectorAccelerationsInWorld.get(robotSide).put(limbName,
                     new SpatialAccelerationVector(endEffectorFrame, elevatorFrame, endEffectorFrame));
          }
+
+         spatialAccelerationProjectors.put(robotSide, new SpatialAccelerationProjector(robotSide.getCamelCaseNameForStartOfExpression() + "FootSpatialAccelerationProjector", registry));
+         isCoPOnEdge.put(robotSide, new BooleanYoVariable("is" + robotSide.getCamelCaseNameForMiddleOfExpression() + "CoPOnEdge", registry));
+         
+         EndEffectorPoseTwistAndSpatialAccelerationCalculator feetPoseTwistAndSpatialAccelerationCalculator = new EndEffectorPoseTwistAndSpatialAccelerationCalculator(robotSide, LimbName.LEG, fullRobotModel, twistCalculator);
+         footPoseTwistAndSpatialAccelerationCalculators.put(robotSide, feetPoseTwistAndSpatialAccelerationCalculator);
       }
 
       this.desiredHeadingControlModule = desiredHeadingControlModule;
@@ -206,7 +200,7 @@ public class MomentumBasedController implements RobotController
       {
          String swingfootPositionName = "desired" + robotSide.getCamelCaseNameForMiddleOfExpression() + "SwingFootPositionInWorld";
          YoFramePoint desiredSwingFootPosition = new YoFramePoint(swingfootPositionName, "", worldFrame, registry);
-         desiredFootPositionsInWorld.put(robotSide, desiredSwingFootPosition);
+         desiredFootPositionsInWorld.put(robotSide, desiredSwingFootPosition); // TODO: why is this here?
          DynamicGraphicPosition desiredSwingFootPositionViz = new DynamicGraphicPosition(swingfootPositionName, desiredSwingFootPosition, 0.03,
                                                                  YoAppearance.Orange());
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(name, desiredSwingFootPositionViz);
@@ -458,44 +452,42 @@ public class MomentumBasedController implements RobotController
 
          for (LimbName limbName : LimbName.values())
          {
-            FramePose desiredEndEffectorPose = highLevelHumanoidController.getDesiredEndEffectorPose(robotSide, limbName);
-            Twist desiredEndEffectorTwist = highLevelHumanoidController.getDesiredEndEffectorTwist(robotSide, limbName);
-            SpatialAccelerationVector feedForwardEndEffectorSpatialAcceleration = highLevelHumanoidController.getDesiredEndEffectorAcceleration(robotSide,
-                                                                                     limbName);
+            
+            
 
             SpatialAccelerationVector desiredEndEffectorAccelerationInWorld = desiredEndEffectorAccelerationsInWorld.get(robotSide).get(limbName);
-            switch (limbName)
+            desiredEndEffectorAccelerationInWorld.set(highLevelHumanoidController.getCommandedEndEffectorAcceleration(robotSide, limbName));
+            
+            if (limbName == LimbName.LEG)
             {
-               case LEG :
+               BipedFootInterface bipedFoot = bipedFeet.get(robotSide);
+               FrameConvexPolygon2d footPolygon = bipedFoot.getFootPolygonInSoleFrame();
+               FramePoint footCoPOnSole = virtualToePointsOnSole.get(robotSide);
+               footCoPOnSole.changeFrame(footPolygon.getReferenceFrame());
+               FramePoint2d footCoPOnSole2d = footCoPOnSole.toFramePoint2d();
+               FrameLineSegment2d closestEdge = footPolygon.getClosestEdge(footCoPOnSole2d);
+               double epsilonPointOnEdge = 1e-3;
+               boolean isCoPOnEdge = closestEdge.distance(footCoPOnSole2d) < epsilonPointOnEdge ;
+               this.isCoPOnEdge.get(robotSide).set(isCoPOnEdge);
+
+               boolean isConstrained = isFootConstrained(robotSide);
+
+               if (isConstrained)
                {
-                  boolean isConstrained = isFootConstrained(robotSide);
-                  FootSpatialAccelerationControlModule footSpatialAccelerationControlModule = footSpatialAccelerationControlModules.get(robotSide);
-                  footSpatialAccelerationControlModule.compute(virtualToePoints.get(robotSide), desiredEndEffectorPose, desiredEndEffectorTwist,
-                          feedForwardEndEffectorSpatialAcceleration, isConstrained);
-                  footSpatialAccelerationControlModule.packAcceleration(desiredEndEffectorAccelerationInWorld);
-
-                  if (!isConstrained)
-                     swingFootPositionErrorInWorld.set(footSpatialAccelerationControlModule.getPositionErrorInWorld());
-
-                  desiredFootPositionsInWorld.get(robotSide).set(desiredEndEffectorPose.getPositionInFrame(worldFrame));
-
-                  break;
+                  if (isCoPOnEdge)
+                  {
+                     spatialAccelerationProjectors.get(robotSide).projectAcceleration(desiredEndEffectorAccelerationInWorld, closestEdge);
+                  }
+                  else
+                  {
+                     // use zero angular acceleration and zero linear acceleration of origin
+                     desiredEndEffectorAccelerationInWorld.set(footPoseTwistAndSpatialAccelerationCalculators.get(robotSide)
+                           .calculateDesiredEndEffectorSpatialAccelerationFromDesiredAccelerations(new FrameVector(worldFrame), new FrameVector(worldFrame)));
+                  }
+                  
                }
-
-               case ARM :
-               {
-                  RigidBodySpatialAccelerationControlModule rigidBodySpatialAccelerationControlModule = handSpatialAccelerationControlModules.get(robotSide);
-                  rigidBodySpatialAccelerationControlModule.doPositionControl(desiredEndEffectorPose, desiredEndEffectorTwist,
-                          feedForwardEndEffectorSpatialAcceleration);
-                  rigidBodySpatialAccelerationControlModule.packAcceleration(desiredEndEffectorAccelerationInWorld);
-
-                  break;
-               }
-
-               default :
-                  throw new RuntimeException("Limb not found.");
             }
-
+            
             optimizer.setControlMode(robotSide, limbName, highLevelHumanoidController.getControlMode(robotSide, limbName));
             optimizer.setDesiredEndEffectorAccelerationInWorld(robotSide, limbName, desiredEndEffectorAccelerationInWorld);
             optimizer.setNullspaceMultiplier(robotSide, limbName, highLevelHumanoidController.getNullspaceMultiplier(robotSide, limbName));
