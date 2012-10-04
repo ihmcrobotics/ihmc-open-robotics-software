@@ -45,19 +45,22 @@ import com.yobotics.simulationconstructionset.util.statemachines.StateTransition
 
 public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoidController
 {
-   private static enum WalkingState {LEFT_SUPPORT, RIGHT_SUPPORT, TRANSFER_TO_LEFT_SUPPORT, TRANSFER_TO_RIGHT_SUPPORT, DOUBLE_SUPPORT}
+   private static enum WalkingState
+   {
+      LEFT_SUPPORT, RIGHT_SUPPORT, TRANSFER_TO_LEFT_SUPPORT, TRANSFER_TO_RIGHT_SUPPORT, DOUBLE_SUPPORT
+   }
 
    private final StateMachine stateMachine;
 
-   private final SideDependentList<WalkingState> singleSupportStateEnums =
-      new SideDependentList<WalkingHighLevelHumanoidController.WalkingState>(WalkingState.LEFT_SUPPORT, WalkingState.RIGHT_SUPPORT);
+   private final SideDependentList<WalkingState> singleSupportStateEnums = new SideDependentList<WalkingHighLevelHumanoidController.WalkingState>(
+         WalkingState.LEFT_SUPPORT, WalkingState.RIGHT_SUPPORT);
 
-   private final SideDependentList<WalkingState> transferStateEnums =
-      new SideDependentList<WalkingHighLevelHumanoidController.WalkingState>(WalkingState.TRANSFER_TO_LEFT_SUPPORT, WalkingState.TRANSFER_TO_RIGHT_SUPPORT);
+   private final SideDependentList<WalkingState> transferStateEnums = new SideDependentList<WalkingHighLevelHumanoidController.WalkingState>(
+         WalkingState.TRANSFER_TO_LEFT_SUPPORT, WalkingState.TRANSFER_TO_RIGHT_SUPPORT);
 
-   private final double doubleSupportTime = 0.2;    // 0.6;    // 0.3
-   private final double stepTime = 0.45;    // 0.5; // 0.55;    // 0.55;
-   private final double waypointHeight = -0.13;    // 0.05; // 0.15;
+   private final double doubleSupportTime = 0.2; // 0.6;    // 0.3
+   private final double stepTime = 0.45; // 0.5; // 0.55;    // 0.55;
+   private final double waypointHeight = -0.13; // 0.05; // 0.15;
 
    private final DoubleYoVariable singleSupportICPGlideScaleFactor = new DoubleYoVariable("singleSupportICPGlideScaleFactor", registry);
    private final BooleanYoVariable walk = new BooleanYoVariable("walk", registry);
@@ -65,20 +68,19 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final DoubleYoVariable trailingFootPitch = new DoubleYoVariable("trailingFootPitch", registry);
    private final DoubleYoVariable leadingFootPitch = new DoubleYoVariable("leadingFootPitch", registry);
 
-   private final double swingNullspaceMultiplier = 500.0;    // needs to be pretty high to fight the limit stops...
+   private final double swingNullspaceMultiplier = 500.0; // needs to be pretty high to fight the limit stops...
    private final SideDependentList<BooleanYoVariable> trajectoryInitialized = new SideDependentList<BooleanYoVariable>();
 
    private final BagOfBalls footTrajectoryBagOfBalls;
    private final BagOfBalls comTrajectoryBagOfBalls;
    private int comTrajectoryCounter = 0;
 
-      
-// private final BooleanYoVariable transferICPTrajectoryDone = new BooleanYoVariable("transferICPTrajectoryDone", registry);
+   // private final BooleanYoVariable transferICPTrajectoryDone = new BooleanYoVariable("transferICPTrajectoryDone", registry);
    private final DoubleYoVariable minOrbitalEnergyForSingleSupport = new DoubleYoVariable("minOrbitalEnergyForSingleSupport", registry);
    private final DoubleYoVariable amountToBeInsideSingleSupport = new DoubleYoVariable("amountToBeInsideSingleSupport", registry);
    private final DoubleYoVariable amountToBeInsideDoubleSupport = new DoubleYoVariable("amountToBeInsideDoubleSupport", registry);
 
-   private final FlatThenPolynomialCoMHeightTrajectoryGenerator flatThenPolynomialCoMHeightTrajectoryGenerator;    // TODO: kind of ugly, need this because one of the methods we use here is not in the CenterOfMassHeightTrajectoryGenerator interface
+   private final FlatThenPolynomialCoMHeightTrajectoryGenerator flatThenPolynomialCoMHeightTrajectoryGenerator; // TODO: kind of ugly, need this because one of the methods we use here is not in the CenterOfMassHeightTrajectoryGenerator interface
 
    private final YoFrameOrientation desiredSwingFootOrientation = new YoFrameOrientation("desiredSwingFootOrientation", worldFrame, registry);
 
@@ -86,24 +88,23 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final SideDependentList<RigidBodySpatialAccelerationControlModule> footSpatialAccelerationControlModules = new SideDependentList<RigidBodySpatialAccelerationControlModule>();
 
    public WalkingHighLevelHumanoidController(FullRobotModel fullRobotModel, CommonWalkingReferenceFrames referenceFrames, TwistCalculator twistCalculator,
-           SideDependentList<BipedFootInterface> bipedFeet, BipedSupportPolygons bipedSupportPolygons, SideDependentList<FootSwitchInterface> footSwitches,
-           ProcessedSensorsInterface processedSensors, DoubleYoVariable t, double controlDT, DesiredHeadingControlModule desiredHeadingControlModule,
-           YoVariableRegistry registry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+         SideDependentList<BipedFootInterface> bipedFeet, BipedSupportPolygons bipedSupportPolygons, SideDependentList<FootSwitchInterface> footSwitches,
+         ProcessedSensorsInterface processedSensors, DoubleYoVariable t, double controlDT, DesiredHeadingControlModule desiredHeadingControlModule,
+         YoVariableRegistry registry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       super(fullRobotModel, referenceFrames, processedSensors, twistCalculator, bipedFeet, bipedSupportPolygons, controlDT, desiredHeadingControlModule,
             footSwitches, registry);
       SimpleWorldDesiredFootstepCalculator simpleDesiredFootstepCalculator = new SimpleWorldDesiredFootstepCalculator(bipedFeet, referenceFrames,
-                                                                                desiredHeadingControlModule, registry);
+            desiredHeadingControlModule, registry);
 
-//    SimpleDesiredFootstepCalculator simpleDesiredFootstepCalculator = new SimpleDesiredFootstepCalculator(referenceFrames.getAnkleZUpReferenceFrames(),
-//    desiredHeadingControlModule, registry); // TODO: pass in
-//    BoxDesiredFootstepCalculator boxDesiredFootstepCalculator = new BoxDesiredFootstepCalculator(referenceFrames.getAnkleZUpReferenceFrames(),
-//          desiredHeadingControlModule, registry);
-//    boxDesiredFootstepCalculator.setupParametersForR2();
-//    this.desiredFootstepCalculator = boxDesiredFootstepCalculator;
+      //    SimpleDesiredFootstepCalculator simpleDesiredFootstepCalculator = new SimpleDesiredFootstepCalculator(referenceFrames.getAnkleZUpReferenceFrames(),
+      //    desiredHeadingControlModule, registry); // TODO: pass in
+      //    BoxDesiredFootstepCalculator boxDesiredFootstepCalculator = new BoxDesiredFootstepCalculator(referenceFrames.getAnkleZUpReferenceFrames(),
+      //          desiredHeadingControlModule, registry);
+      //    boxDesiredFootstepCalculator.setupParametersForR2();
+      //    this.desiredFootstepCalculator = boxDesiredFootstepCalculator;
       simpleDesiredFootstepCalculator.setupParametersForR2InverseDynamics();
       this.desiredFootstepCalculator = simpleDesiredFootstepCalculator;
-
 
       // this.centerOfMassHeightTrajectoryGenerator = new OrbitalEnergyCubicTrajectoryGenerator(processedSensors, referenceFrames,
       // desiredHeadingControlModule.getDesiredHeadingFrame(), footHeight, parentRegistry);
@@ -113,13 +114,12 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       // this.centerOfMassHeightTrajectoryGenerator = new ConstantCenterOfMassHeightTrajectoryGenerator(registry);
       this.flatThenPolynomialCoMHeightTrajectoryGenerator = new FlatThenPolynomialCoMHeightTrajectoryGenerator("", processedSensors,
-              simpleDesiredFootstepCalculator, desiredHeadingControlModule.getDesiredHeadingFrame(), bipedFeet, referenceFrames, registry);
+            simpleDesiredFootstepCalculator, desiredHeadingControlModule.getDesiredHeadingFrame(), bipedFeet, referenceFrames, registry);
       this.centerOfMassHeightTrajectoryGenerator = flatThenPolynomialCoMHeightTrajectoryGenerator;
 
       String namePrefix = "walking";
       this.stateMachine = new StateMachine(namePrefix + "State", namePrefix + "SwitchTime", WalkingState.class, t, registry);
       upcomingSupportLeg.set(RobotSide.LEFT);
-
 
       singleSupportICPGlideScaleFactor.set(0.9);
       FramePoint2d finalDesiredICPForDoubleSupportStance = getDoubleSupportFinalDesiredICPForDoubleSupportStance();
@@ -127,18 +127,18 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       for (RobotSide robotSide : RobotSide.values())
       {
-         footCartesianTrajectoryGenerators.put(robotSide,
-                 new FifthOrderWaypointCartesianTrajectoryGenerator(robotSide.getCamelCaseNameForStartOfExpression(), worldFrame, stepTime, waypointHeight,
-                    registry));
+         footCartesianTrajectoryGenerators.put(robotSide, new FifthOrderWaypointCartesianTrajectoryGenerator(robotSide.getCamelCaseNameForStartOfExpression(),
+               worldFrame, stepTime, waypointHeight, registry));
          trajectoryInitialized.put(robotSide, new BooleanYoVariable(robotSide.getCamelCaseNameForStartOfExpression() + "TrajectoryInitialized", registry));
-         EndEffectorPoseTwistAndSpatialAccelerationCalculator feetPoseTwistAndSpatialAccelerationCalculator = new EndEffectorPoseTwistAndSpatialAccelerationCalculator(robotSide, LimbName.LEG, fullRobotModel, twistCalculator);
+         EndEffectorPoseTwistAndSpatialAccelerationCalculator feetPoseTwistAndSpatialAccelerationCalculator = new EndEffectorPoseTwistAndSpatialAccelerationCalculator(
+               robotSide, LimbName.LEG, fullRobotModel, twistCalculator);
          footPoseTwistAndSpatialAccelerationCalculators.put(robotSide, feetPoseTwistAndSpatialAccelerationCalculator);
-         
+
          String controlModuleNamePrefix = robotSide.getCamelCaseNameForStartOfExpression() + "Leg";
          RigidBodySpatialAccelerationControlModule rigidBodySpatialAccelerationControlModule = new RigidBodySpatialAccelerationControlModule(
-               controlModuleNamePrefix, elevatorFrame, twistCalculator,
-               fullRobotModel.getEndEffector(robotSide, LimbName.LEG), fullRobotModel.getEndEffectorFrame(robotSide, LimbName.LEG), registry);
-         
+               controlModuleNamePrefix, elevatorFrame, twistCalculator, fullRobotModel.getEndEffector(robotSide, LimbName.LEG),
+               fullRobotModel.getEndEffectorFrame(robotSide, LimbName.LEG), registry);
+
          footSpatialAccelerationControlModules.put(robotSide, rigidBodySpatialAccelerationControlModule);
       }
 
@@ -197,7 +197,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    {
       stateMachine.setCurrentState(WalkingState.DOUBLE_SUPPORT);
    }
-   
 
    private class DoubleSupportState extends State
    {
@@ -223,8 +222,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
                bipedFoot.setFootPolygonInUse(FootPolygonEnum.ONTOES);
                bipedFoot.setShift(1.0);
 
-               double footPitch = (robotSide == getUpcomingSupportLeg().getOppositeSide())
-                                  ? leadingFootPitch.getDoubleValue() : trailingFootPitch.getDoubleValue();
+               double footPitch = (robotSide == getUpcomingSupportLeg().getOppositeSide()) ? leadingFootPitch.getDoubleValue() : trailingFootPitch
+                     .getDoubleValue();
                controlDesiredFootPosVelAccForSupportSide(robotSide, footPitch);
             }
             else
@@ -234,10 +233,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             }
          }
 
-//       if ((transferToSide != null) && icpTrajectoryGenerator.isDone() && icpTrajectoryHasBeenInitialized.getBooleanValue())
-//       {
-//          transferICPTrajectoryDone.set(true);
-//       }
+         //       if ((transferToSide != null) && icpTrajectoryGenerator.isDone() && icpTrajectoryHasBeenInitialized.getBooleanValue())
+         //       {
+         //          transferICPTrajectoryDone.set(true);
+         //       }
 
          if (icpTrajectoryGenerator.isDone() && (transferToSide == null))
          {
@@ -285,7 +284,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          finalDesiredICP.changeFrame(desiredICP.getReferenceFrame());
          icpTrajectoryGenerator.initialize(desiredICP.getFramePoint2dCopy(), finalDesiredICP, doubleSupportTime, omega0,
-                                           amountToBeInsideDoubleSupport.getDoubleValue());
+               amountToBeInsideDoubleSupport.getDoubleValue());
 
          if (transferToSide == null)
             centerOfMassHeightTrajectoryGenerator.initialize(getSupportLeg(), getUpcomingSupportLeg());
@@ -309,7 +308,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       }
    }
 
-
    private class SingleSupportState extends State
    {
       private final RobotSide swingSide;
@@ -321,7 +319,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       private final FrameVector angularVelocityToPack;
       private final FrameVector angularAccelerationToPack;
-      
+
       private int counter = 0;
 
       public SingleSupportState(RobotSide robotSide)
@@ -332,10 +330,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          this.positionToPack = new FramePoint(supportAnkleZUpFrame);
          this.velocityToPack = new FrameVector(supportAnkleZUpFrame);
          this.accelerationToPack = new FrameVector(supportAnkleZUpFrame);
-         
+
          this.angularVelocityToPack = new FrameVector(worldFrame);
          this.angularAccelerationToPack = new FrameVector(worldFrame);
-         
+
       }
 
       @Override
@@ -366,22 +364,21 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          positionToPack.changeFrame(worldFrame);
          velocityToPack.changeFrame(worldFrame);
          accelerationToPack.changeFrame(worldFrame);
-         
+
          EndEffectorPoseTwistAndSpatialAccelerationCalculator footPoseTwistAndSpatialAccelerationCalculator = footPoseTwistAndSpatialAccelerationCalculators
                .get(swingSide);
 
          FramePose desiredPose = footPoseTwistAndSpatialAccelerationCalculator.calculateDesiredEndEffectorPoseFromDesiredPositions(positionToPack,
                desiredSwingFootOrientation.getFrameOrientationCopy());
-         Twist desiredTwist = footPoseTwistAndSpatialAccelerationCalculator.calculateDesiredEndEffectorTwistFromDesiredVelocities(velocityToPack, angularVelocityToPack);
-         SpatialAccelerationVector desiredSpatialAcceleration = footPoseTwistAndSpatialAccelerationCalculator.calculateDesiredEndEffectorSpatialAccelerationFromDesiredAccelerations(accelerationToPack,
-               angularAccelerationToPack);
-         
+         Twist desiredTwist = footPoseTwistAndSpatialAccelerationCalculator.calculateDesiredEndEffectorTwistFromDesiredVelocities(velocityToPack,
+               angularVelocityToPack);
+         SpatialAccelerationVector desiredSpatialAcceleration = footPoseTwistAndSpatialAccelerationCalculator
+               .calculateDesiredEndEffectorSpatialAccelerationFromDesiredAccelerations(accelerationToPack, angularAccelerationToPack);
+
          footSpatialAccelerationControlModules.get(swingSide).doPositionControl(desiredPose, desiredTwist, desiredSpatialAcceleration);
          footSpatialAccelerationControlModules.get(swingSide).packAcceleration(commandedSpatialAccelerations.get(swingSide).get(LimbName.LEG));
-         
-         
-         controlDesiredFootPosVelAccForSupportSide(swingSide.getOppositeSide(), trailingFootPitch.getDoubleValue());    // FIXME: make it a smooth trajectory
-         
+
+         controlDesiredFootPosVelAccForSupportSide(swingSide.getOppositeSide(), trailingFootPitch.getDoubleValue()); // FIXME: make it a smooth trajectory
 
          counter++;
 
@@ -403,9 +400,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          limbNullspaceMultipliers.get(swingSide).get(LimbName.LEG).set(swingNullspaceMultiplier);
          limbNullspaceMultipliers.get(supportSide).get(LimbName.LEG).set(0.0);
          trajectoryInitialized.get(swingSide).set(false);
-         
+
          desiredSwingFootOrientation.setYawPitchRoll(0.0, 0.0, 0.0);
-         
+
          setStanceControlGains(supportSide);
          setSwingControlGains(swingSide);
 
@@ -417,7 +414,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          upcomingSupportLeg.set(upcomingSupportLeg.getEnumValue().getOppositeSide());
       }
    }
-
 
    public class DoneWithDoubleSupportCondition implements StateTransitionCondition
    {
@@ -437,18 +433,16 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       }
    }
 
-
    public class DoneWithTransferCondition implements StateTransitionCondition
    {
       public boolean checkCondition()
       {
          double orbitalEnergy = flatThenPolynomialCoMHeightTrajectoryGenerator.computeOrbitalEnergyIfInitializedNow(getUpcomingSupportLeg());
 
-//       return transferICPTrajectoryDone.getBooleanValue() && orbitalEnergy > minOrbitalEnergy;
+         //       return transferICPTrajectoryDone.getBooleanValue() && orbitalEnergy > minOrbitalEnergy;
          return orbitalEnergy > minOrbitalEnergyForSingleSupport.getDoubleValue();
       }
    }
-
 
    public class DoneWithSingleSupportCondition implements StateTransitionCondition
    {
@@ -463,7 +457,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       }
    }
 
-
    public class StopWalkingCondition extends DoneWithSingleSupportCondition
    {
       public boolean checkCondition()
@@ -472,7 +465,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       }
    }
 
-
    public class ResetICPTrajectoryAction implements StateTransitionAction
    {
       public void doTransitionAction()
@@ -480,7 +472,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          icpTrajectoryGenerator.reset();
       }
    }
-
 
    public void setPreviousCoP(FramePoint2d previousCoP)
    {
@@ -537,7 +528,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       centroid.changeFrameUsingTransform(desiredHeadingControlModule.getDesiredHeadingFrame(), footstepTransform);
       FramePoint2d ret = centroid.toFramePoint2d();
 
-      double extraX = 0.0;    // 0.02
+      double extraX = 0.0; // 0.02
       double extraY = robotSide.negateIfLeftSide(0.04);
       FrameVector2d offset = new FrameVector2d(desiredHeadingControlModule.getDesiredHeadingFrame(), extraX, extraY);
       offset.changeFrame(ret.getReferenceFrame());
@@ -553,7 +544,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       initialDesiredICP.changeFrame(referenceFrame);
 
       // TODO: think about setting the shift factor here
-      FramePoint2d finalDesiredICP = getDoubleSupportFinalDesiredICPForWalking(desiredFootstep, bipedFeet.get(swingSide).getFootPolygonInSoleFrame());    // yes, swing side
+      FramePoint2d finalDesiredICP = getDoubleSupportFinalDesiredICPForWalking(desiredFootstep, bipedFeet.get(swingSide).getFootPolygonInSoleFrame()); // yes, swing side
       finalDesiredICP.changeFrame(referenceFrame);
 
       FrameLineSegment2d initialToFinal = new FrameLineSegment2d(initialDesiredICP, finalDesiredICP);
@@ -565,15 +556,15 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    {
       FramePoint desiredEndEffectorPosition = new FramePoint(referenceFrames.getFootFrame(supportSide));
       desiredEndEffectorPosition.changeFrame(worldFrame);
-   
+
       Orientation desiredEndEffectorOrientation = new Orientation(worldFrame, 0.0, footPitch, 0.0);
-      
+
       FrameVector desiredLinearVelocity = new FrameVector(worldFrame);
       FrameVector desiredAngularVelocity = new FrameVector(worldFrame);
-      
+
       FrameVector desiredLinearAcceleration = new FrameVector(worldFrame);
       FrameVector desiredAngularAcceleration = new FrameVector(worldFrame);
-      
+
       EndEffectorPoseTwistAndSpatialAccelerationCalculator footPoseTwistAndSpatialAccelerationCalculator = footPoseTwistAndSpatialAccelerationCalculators
             .get(supportSide);
       FramePose desiredPose = footPoseTwistAndSpatialAccelerationCalculator.calculateDesiredEndEffectorPoseFromDesiredPositions(desiredEndEffectorPosition,
@@ -635,7 +626,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       taskSpaceAccelerationWithRespectToWorld.packAccelerationOfPointFixedInBodyFrame(footTwist, swingAnkle, initialAcceleration);
       initialAcceleration.changeFrame(trajectoryGeneratorFrame);
 
-      initialAcceleration.setToZero(trajectoryGeneratorFrame);    // TODO
+      initialAcceleration.setToZero(trajectoryGeneratorFrame); // TODO
 
       footTwist.changeFrame(swingFootFrame);
       FrameVector initialVelocity = new FrameVector(trajectoryGeneratorFrame);
@@ -650,20 +641,20 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       CartesianTrajectoryGenerator cartesianTrajectoryGenerator = footCartesianTrajectoryGenerators.get(swingSide);
       cartesianTrajectoryGenerator.initialize(initialPosition, initialVelocity, initialAcceleration, finalDesiredStepLocation, finalDesiredVelocity);
-      
+
       desiredSwingFootOrientation.set(desiredFootstep.getFootstepOrientationInFrame(worldFrame));
 
-      desiredICP.set(capturePoint);    // TODO: is this what we want?
+      desiredICP.set(capturePoint); // TODO: is this what we want?
       FramePoint2d finalDesiredICP = getSingleSupportFinalDesiredICPForWalking(desiredFootstep, swingSide);
       icpTrajectoryGenerator.initialize(desiredICP.getFramePoint2dCopy(), finalDesiredICP, footCartesianTrajectoryGenerators.get(swingSide).getFinalTime(),
-                                        omega0, amountToBeInsideSingleSupport.getDoubleValue());
+            omega0, amountToBeInsideSingleSupport.getDoubleValue());
 
       limbNullspaceMultipliers.get(swingSide).get(LimbName.LEG).set(0.0);
       trajectoryInitialized.get(swingSide).set(true);
 
       // TODO: orientation stuff
 
-      stateMachine.doAction();    // computes trajectory and stores results in YoFrameVectors and Points.
+      stateMachine.doAction(); // computes trajectory and stores results in YoFrameVectors and Points.
    }
 
    public boolean trajectoryInitialized(RobotSide robotSide)
@@ -691,7 +682,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       stateMachine.checkTransitionConditionsThoroughly();
       stateMachine.doAction();
    }
-   
+
    private void setSwingControlGains(RobotSide swingSide)
    {
       RigidBodySpatialAccelerationControlModule footSpatialAccelerationControlModule = footSpatialAccelerationControlModules.get(swingSide);
