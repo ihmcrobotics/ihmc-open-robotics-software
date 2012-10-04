@@ -15,7 +15,7 @@ import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
-import us.ihmc.utilities.math.geometry.Orientation;
+import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
@@ -151,7 +151,7 @@ public class SteppingStonesDesiredFootstepCalculator implements DesiredFootstepC
       if (captureRegion == null)
       {
          // Foot Step Orientation
-         Orientation footstepOrientation = new Orientation(nominalLocation.getReferenceFrame());
+         FrameOrientation footstepOrientation = new FrameOrientation(nominalLocation.getReferenceFrame());
          footstepOrientation.setYawPitchRoll(stepYaw.getDoubleValue(), 0.0, 0.0);
 
          // Create a foot Step Pose from Position and Orientation
@@ -192,7 +192,7 @@ public class SteppingStonesDesiredFootstepCalculator implements DesiredFootstepC
       locationToReturn.add(nominalToAdjusted);
 
       // Foot Step Orientation
-      Orientation footstepOrientation = new Orientation(nominalLocation.getReferenceFrame());
+      FrameOrientation footstepOrientation = new FrameOrientation(nominalLocation.getReferenceFrame());
       footstepOrientation.setYawPitchRoll(stepYaw.getDoubleValue(), 0.0, 0.0);
 
       // Create a foot Step Pose from Position and Orientation

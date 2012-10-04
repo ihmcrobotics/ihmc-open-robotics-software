@@ -5,7 +5,7 @@ import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenc
 import us.ihmc.commonWalkingControlModules.sensors.ProcessedSensorsInterface;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.FramePoint;
-import us.ihmc.utilities.math.geometry.Orientation;
+import us.ihmc.utilities.math.geometry.FrameOrientation;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
@@ -45,9 +45,9 @@ public class SineWaveDesiredPelvisOrientationControlModule implements DesiredPel
       parentRegistry.addChild(registry);
    }
    
-   public Orientation getDesiredPelvisOrientationSingleSupport(RobotSide robotSide)
+   public FrameOrientation getDesiredPelvisOrientationSingleSupport(RobotSide robotSide)
    {
-      return new Orientation(referenceFrames.getPelvisFrame());
+      return new FrameOrientation(referenceFrames.getPelvisFrame());
    }
    
    public void setAlphaForFilterFreqInHz(double filterFreqInHz, double dt)
@@ -55,7 +55,7 @@ public class SineWaveDesiredPelvisOrientationControlModule implements DesiredPel
       alphaDesiredOrientation.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(filterFreqInHz, dt));
    }
 
-   public Orientation getDesiredPelvisOrientationDoubleSupport()
+   public FrameOrientation getDesiredPelvisOrientationDoubleSupport()
    {
       double time = processedSensors.getTime();
       
@@ -65,7 +65,7 @@ public class SineWaveDesiredPelvisOrientationControlModule implements DesiredPel
       
       orientationVector.update(roll, pitch, yaw);
      
-      return new Orientation(referenceFrames.getMidFeetZUpFrame(), orientationVector.getZ(), orientationVector.getY(), orientationVector.getX());
+      return new FrameOrientation(referenceFrames.getMidFeetZUpFrame(), orientationVector.getZ(), orientationVector.getY(), orientationVector.getX());
    }
 
    public void setParametersForM2V2()
@@ -75,14 +75,14 @@ public class SineWaveDesiredPelvisOrientationControlModule implements DesiredPel
       rollFreq.set(0.5);
    }
 
-   public void setDesiredPelvisOrientation(Orientation orientation)
+   public void setDesiredPelvisOrientation(FrameOrientation orientation)
    {
       // empty
    }
 
-   public Orientation getEstimatedOrientationAtEndOfStep(RobotSide robotSide, FramePoint desiredFootLocation)
+   public FrameOrientation getEstimatedOrientationAtEndOfStep(RobotSide robotSide, FramePoint desiredFootLocation)
    {
-      return new Orientation(referenceFrames.getMidFeetZUpFrame());
+      return new FrameOrientation(referenceFrames.getMidFeetZUpFrame());
    }
 
    public void useTwistScale(boolean useTwistScale)

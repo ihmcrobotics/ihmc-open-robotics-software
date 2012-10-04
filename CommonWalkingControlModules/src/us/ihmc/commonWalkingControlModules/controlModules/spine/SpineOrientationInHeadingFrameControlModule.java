@@ -8,7 +8,7 @@ import us.ihmc.commonWalkingControlModules.partNamesAndTorques.SpineJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.SpineTorques;
 import us.ihmc.commonWalkingControlModules.sensors.ProcessedSensorsInterface;
 import us.ihmc.utilities.math.geometry.FrameVector;
-import us.ihmc.utilities.math.geometry.Orientation;
+import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.GeometricJacobian;
 import us.ihmc.utilities.screwTheory.Wrench;
@@ -62,7 +62,7 @@ public class SpineOrientationInHeadingFrameControlModule implements SpineControl
       spineTorquesToPack.setTorquesToZero();
      
       ReferenceFrame desiredHeadingFrame = desiredHeadingControlModule.getDesiredHeadingFrame();
-      Orientation desiredChestOrientation = new Orientation(desiredHeadingFrame);
+      FrameOrientation desiredChestOrientation = new FrameOrientation(desiredHeadingFrame);
       desiredChestOrientation.setYawPitchRoll(0.0, desiredPitch.getDoubleValue(), desiredRoll.getDoubleValue());
       desiredChestOrientation.changeFrame(bodyFrame);
       chestAngularVelocity.set(processedSensors.getChestAngularVelocityInChestFrame());

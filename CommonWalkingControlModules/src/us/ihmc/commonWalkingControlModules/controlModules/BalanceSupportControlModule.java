@@ -18,7 +18,7 @@ import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
-import us.ihmc.utilities.math.geometry.Orientation;
+import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.Wrench;
 
@@ -75,7 +75,7 @@ public class BalanceSupportControlModule
     * @param desiredPelvisOrientation the desired orientation of the pelvis link
     * @param upperBodyWrench TODO
     */
-   public void doSingleSupportBalance(LegTorques supportLegTorquesToPack, FrameVector2d desiredVelocity, Orientation desiredPelvisOrientation,
+   public void doSingleSupportBalance(LegTorques supportLegTorquesToPack, FrameVector2d desiredVelocity, FrameOrientation desiredPelvisOrientation,
                                       Wrench upperBodyWrench, SingleSupportCondition singleSupportCondition, double timeInState)
    {
       virtualToePointCalculator.hideVisualizationGraphics();
@@ -111,7 +111,7 @@ public class BalanceSupportControlModule
     * @param desiredPelvisOrientation the desired orientation of the pelvis link
     */
    public void doDoubleSupportBalance(LowerBodyTorques lowerBodyTorquesToPack, RobotSide loadingLeg, FrameVector2d desiredVelocity,
-                                      Orientation desiredPelvisOrientation)
+                                      FrameOrientation desiredPelvisOrientation)
    {
       ankleOverRotationControlModule.resetForNextStep();
 

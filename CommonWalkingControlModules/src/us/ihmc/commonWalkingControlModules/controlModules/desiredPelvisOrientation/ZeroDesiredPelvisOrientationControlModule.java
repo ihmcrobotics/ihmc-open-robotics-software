@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.desiredPelvisOrientat
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.DesiredPelvisOrientationControlModule;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.FramePoint;
-import us.ihmc.utilities.math.geometry.Orientation;
+import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 public class ZeroDesiredPelvisOrientationControlModule implements DesiredPelvisOrientationControlModule
@@ -15,24 +15,24 @@ public class ZeroDesiredPelvisOrientationControlModule implements DesiredPelvisO
       this.desiredHeadingFrame = desiredHeadingFrame;
    }
 
-   public Orientation getDesiredPelvisOrientationSingleSupport(RobotSide robotSide)
+   public FrameOrientation getDesiredPelvisOrientationSingleSupport(RobotSide robotSide)
    {
-      return new Orientation(desiredHeadingFrame);
+      return new FrameOrientation(desiredHeadingFrame);
    }
 
-   public Orientation getDesiredPelvisOrientationDoubleSupport()
+   public FrameOrientation getDesiredPelvisOrientationDoubleSupport()
    {
-      return new Orientation(desiredHeadingFrame);
+      return new FrameOrientation(desiredHeadingFrame);
    }
 
-   public void setDesiredPelvisOrientation(Orientation orientation)
+   public void setDesiredPelvisOrientation(FrameOrientation orientation)
    {
       // empty
    }
 
-   public Orientation getEstimatedOrientationAtEndOfStep(RobotSide robotSide, FramePoint desiredFootLocation)
+   public FrameOrientation getEstimatedOrientationAtEndOfStep(RobotSide robotSide, FramePoint desiredFootLocation)
    {
-      return new Orientation(desiredHeadingFrame);
+      return new FrameOrientation(desiredHeadingFrame);
    }
 
    public void useTwistScale(boolean useTwistScale)

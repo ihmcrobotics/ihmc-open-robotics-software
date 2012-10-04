@@ -7,7 +7,7 @@ import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
-import us.ihmc.utilities.math.geometry.Orientation;
+import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
@@ -98,7 +98,7 @@ public class ComponentBasedDesiredFootstepCalculator implements DesiredFootstepC
 
 //    FramePoint footstepPosition = new FramePoint(supportAnkleZUpFrame, stepForward, stepSideways, 0.0);
 //    Orientation footstepOrientation = new Orientation(supportAnkleZUpFrame);
-      Orientation footstepOrientation = new Orientation(desiredHeadingFrame);
+      FrameOrientation footstepOrientation = new FrameOrientation(desiredHeadingFrame);
       footstepOrientation.changeFrame(supportAnkleZUpFrame);
 
       FramePose footstepPose = new FramePose(footstepPosition, footstepOrientation);

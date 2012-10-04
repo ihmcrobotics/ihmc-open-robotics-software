@@ -8,7 +8,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
-import us.ihmc.utilities.math.geometry.Orientation;
+import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.utilities.screwTheory.Twist;
@@ -84,7 +84,7 @@ public class FixedAxisOfRotationControlModule
       initialOrientation.getMatrix3d(initialRotation);
       rotationMatrix.mul(initialRotation, rotationMatrix);
 
-      Orientation orientation = new Orientation(desiredPose.getReferenceFrame(), rotationMatrix);
+      FrameOrientation orientation = new FrameOrientation(desiredPose.getReferenceFrame(), rotationMatrix);
       desiredPose.setOrientation(orientation);
 
       FrameVector axisOfRotation = this.axisOfRotation.getFrameVectorCopy();

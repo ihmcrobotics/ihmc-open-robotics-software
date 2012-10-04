@@ -20,7 +20,7 @@ import us.ihmc.utilities.math.geometry.FrameLineSegment2d;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
-import us.ihmc.utilities.math.geometry.Orientation;
+import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.Wrench;
 
@@ -182,7 +182,7 @@ public class CommonStanceSubController implements StanceSubController
    public void doTransitionIntoLateStance(RobotSide stanceSide)
    {
       ReferenceFrame desiredHeadingFrame = desiredHeadingControlModule.getDesiredHeadingFrame();
-      Orientation finalOrientation = new Orientation(desiredHeadingFrame, 0.0, toeOffFootPitch.getDoubleValue(), 0.0);
+      FrameOrientation finalOrientation = new FrameOrientation(desiredHeadingFrame, 0.0, toeOffFootPitch.getDoubleValue(), 0.0);
       footOrientationControlModule.initializeFootOrientationMove(toeOffMoveDuration.getDoubleValue(), finalOrientation, stanceSide);
    }
 
@@ -271,7 +271,7 @@ public class CommonStanceSubController implements StanceSubController
 
    public void doTransitionIntoSingleLegBalance(RobotSide supportLeg, double[] desiredYawPitchRoll)
    {
-      desiredPelvisOrientationControlModule.setDesiredPelvisOrientation(new Orientation(desiredHeadingControlModule.getDesiredHeadingFrame(), desiredYawPitchRoll));
+      desiredPelvisOrientationControlModule.setDesiredPelvisOrientation(new FrameOrientation(desiredHeadingControlModule.getDesiredHeadingFrame(), desiredYawPitchRoll));
    }
 
    public void doTransitionOutOfEarlyStance(RobotSide stanceSide)
@@ -424,7 +424,7 @@ public class CommonStanceSubController implements StanceSubController
          desiredVelocity = desiredVelocityControlModule.getDesiredVelocity();
       }
 
-      Orientation desiredPelvisOrientation =
+      FrameOrientation desiredPelvisOrientation =
          desiredPelvisOrientationControlModule.getDesiredPelvisOrientationSingleSupport(legTorquesToPackForStanceSide.getRobotSide());
       Wrench upperBodyWrench = couplingRegistry.getDesiredUpperBodyWrench();
       balanceSupportControlModule.doSingleSupportBalance(legTorquesToPackForStanceSide, desiredVelocity, desiredPelvisOrientation, upperBodyWrench, singleSupportCondition, timeInState);
@@ -435,7 +435,7 @@ public class CommonStanceSubController implements StanceSubController
       FrameVector2d desiredVelocity = walk
                                       ? desiredVelocityControlModule.getDesiredVelocity()
                                       : new FrameVector2d(desiredVelocityControlModule.getDesiredVelocity().getReferenceFrame());
-      Orientation desiredPelvisOrientation = desiredPelvisOrientationControlModule.getDesiredPelvisOrientationDoubleSupport();
+      FrameOrientation desiredPelvisOrientation = desiredPelvisOrientationControlModule.getDesiredPelvisOrientationDoubleSupport();
       balanceSupportControlModule.doDoubleSupportBalance(lowerBodyTorquesToPack, loadingLeg, desiredVelocity, desiredPelvisOrientation);
 
 //    balanceSupportControlModule.doDoubleSupportBalanceToeOff(lowerBodyTorquesToPack, loadingLeg, desiredVelocity, desiredPelvisOrientation);
@@ -447,7 +447,7 @@ public class CommonStanceSubController implements StanceSubController
       zeroVelocity = zeroVelocity.changeFrameCopy(desiredHeadingControlModule.getDesiredHeadingFrame());
 
 //    desiredVelocityControlModule.setDesiredVelocity(zeroVelocity);
-      Orientation desiredPelvisOrientation = desiredPelvisOrientationControlModule.getDesiredPelvisOrientationDoubleSupport();
+      FrameOrientation desiredPelvisOrientation = desiredPelvisOrientationControlModule.getDesiredPelvisOrientationDoubleSupport();
       balanceSupportControlModule.doDoubleSupportBalance(lowerBodyTorquesToPack, loadingLeg, zeroVelocity.toFrameVector2d(), desiredPelvisOrientation);
    }
 

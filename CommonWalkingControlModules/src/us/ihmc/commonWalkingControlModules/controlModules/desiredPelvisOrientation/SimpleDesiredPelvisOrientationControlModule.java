@@ -6,7 +6,7 @@ import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.FramePoint;
-import us.ihmc.utilities.math.geometry.Orientation;
+import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
@@ -45,14 +45,14 @@ public class SimpleDesiredPelvisOrientationControlModule implements DesiredPelvi
       parentRegistry.addChild(registry);
    }
 
-   public Orientation getDesiredPelvisOrientationSingleSupport(RobotSide robotSide)
+   public FrameOrientation getDesiredPelvisOrientationSingleSupport(RobotSide robotSide)
    {
       if (!usingExternallySpecifiedOrientation.getBooleanValue())
          setDesiredPelvisOrientationScaledKneeToKnee(robotSide);
       return desiredPelvisOrientation.getFrameOrientationCopy();
    }
 
-   public Orientation getDesiredPelvisOrientationDoubleSupport()
+   public FrameOrientation getDesiredPelvisOrientationDoubleSupport()
    {
       if (!usingExternallySpecifiedOrientation.getBooleanValue())
          setDesiredPelvisOrientationScaledKneeToKnee(null);
@@ -111,7 +111,7 @@ public class SimpleDesiredPelvisOrientationControlModule implements DesiredPelvi
       pelvisRollPelvisYawScale.set(0.2);
    }
 
-   public void setDesiredPelvisOrientation(Orientation orientation)
+   public void setDesiredPelvisOrientation(FrameOrientation orientation)
    {
       if (orientation != null)
       {
@@ -122,7 +122,7 @@ public class SimpleDesiredPelvisOrientationControlModule implements DesiredPelvi
          this.usingExternallySpecifiedOrientation.set(false);
    }
 
-   public Orientation getEstimatedOrientationAtEndOfStep(RobotSide stanceSide, FramePoint desiredFootLocation)
+   public FrameOrientation getEstimatedOrientationAtEndOfStep(RobotSide stanceSide, FramePoint desiredFootLocation)
    {
       ReferenceFrame referenceFrame = desiredFootLocation.getReferenceFrame();
       FramePoint desiredFootPosition = desiredFootLocation;
@@ -144,7 +144,7 @@ public class SimpleDesiredPelvisOrientationControlModule implements DesiredPelvi
       
       double desiredPelvisRoll = getDesiredPelvisRoll(desiredPelvisYaw);
       
-      return new Orientation(referenceFrame, desiredPelvisYaw, userDesiredPelvisPitch.getDoubleValue(), desiredPelvisRoll);
+      return new FrameOrientation(referenceFrame, desiredPelvisYaw, userDesiredPelvisPitch.getDoubleValue(), desiredPelvisRoll);
       
       
    }

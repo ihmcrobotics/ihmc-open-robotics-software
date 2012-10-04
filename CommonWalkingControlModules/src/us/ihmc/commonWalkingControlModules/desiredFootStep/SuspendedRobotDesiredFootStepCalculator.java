@@ -6,7 +6,7 @@ import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
-import us.ihmc.utilities.math.geometry.Orientation;
+import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
@@ -85,7 +85,7 @@ public class SuspendedRobotDesiredFootStepCalculator implements DesiredFootstepC
       footstepPosition.add(footstepOffset); 
 
       // Footstep Orientation
-      Orientation footstepOrientation = new Orientation(desiredHeadingFrame); 
+      FrameOrientation footstepOrientation = new FrameOrientation(desiredHeadingFrame); 
       footstepOrientation.setYawPitchRoll(stepYaw.getDoubleValue(), stepPitch.getDoubleValue(), stepRoll.getDoubleValue());
 //      footstepOrientation.changeFrame(supportAnkleZUpFrame);
       

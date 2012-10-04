@@ -6,7 +6,7 @@ import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenc
 import us.ihmc.commonWalkingControlModules.sensors.ProcessedSensorsInterface;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.FrameVector;
-import us.ihmc.utilities.math.geometry.Orientation;
+import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.Twist;
 import us.ihmc.utilities.screwTheory.Wrench;
@@ -67,7 +67,7 @@ public class AxisAnglePelvisOrientationControlModule implements PelvisOrientatio
       axisAngleOrientationController.setDerivativeGains(30.0, 18.0, 5.0); // 80.0, 75.0, 30.0
    }
 
-   public FrameVector computePelvisTorque(RobotSide supportLeg, Orientation desiredPelvisOrientation)
+   public FrameVector computePelvisTorque(RobotSide supportLeg, FrameOrientation desiredPelvisOrientation)
    {
       Twist twistOfPelvisWithRespectToWorld = processedSensors.getTwistOfPelvisWithRespectToWorld();
       twistOfPelvisWithRespectToWorld.changeFrame(bodyFrame);

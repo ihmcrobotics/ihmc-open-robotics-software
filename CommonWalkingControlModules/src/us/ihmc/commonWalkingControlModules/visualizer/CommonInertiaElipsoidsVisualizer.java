@@ -11,7 +11,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.Updatable;
 import us.ihmc.utilities.InertiaTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
-import us.ihmc.utilities.math.geometry.Orientation;
+import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
@@ -174,7 +174,7 @@ public class CommonInertiaElipsoidsVisualizer implements Updatable
          tempCoMPosition.changeFrame(worldFrame);
          tempCoMPosition.add(inertiaEllipsoidGhostOffset.getFrameVectorCopy());
          
-         Orientation orientation = new Orientation(comData.rigidBody.getBodyFixedFrame());
+         FrameOrientation orientation = new FrameOrientation(comData.rigidBody.getBodyFixedFrame());
          orientation.changeFrame(worldFrame);
          
          comData.position.set(tempCoMPosition);

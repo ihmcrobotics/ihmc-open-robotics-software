@@ -28,7 +28,7 @@ import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FramePose;
-import us.ihmc.utilities.math.geometry.Orientation;
+import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.RevoluteJoint;
 
@@ -271,7 +271,7 @@ public class JointSpaceSwingSubController implements SwingSubController
       useBodyPositionEstimation = useBodyPositionEstimation & this.useBodyPositionEstimation.getBooleanValue();
       
       FramePoint desiredPosition = desiredPositions.get(swingLeg).getFramePointCopy();
-      Orientation desiredOrientation = desiredOrientations.get(swingLeg).getFrameOrientationCopy();
+      FrameOrientation desiredOrientation = desiredOrientations.get(swingLeg).getFrameOrientationCopy();
 
       LegJointPositions legJointPositions = jointPositions.get(swingLeg);
       LegJointVelocities legJointVelocities = jointVelocities.get(swingLeg);
@@ -388,7 +388,7 @@ public class JointSpaceSwingSubController implements SwingSubController
       
       FramePoint endPoint = new FramePoint(desiredFootstepPose.getPosition());
       endPoint.changeFrame(desiredPositions.get(swingSide).getReferenceFrame());
-      Orientation endOrientation = new Orientation(desiredFootstepPose.getOrientation());
+      FrameOrientation endOrientation = new FrameOrientation(desiredFootstepPose.getOrientation());
       endOrientation.changeFrame(desiredOrientations.get(swingSide).getReferenceFrame());
       
       // Setup the orientation trajectory
