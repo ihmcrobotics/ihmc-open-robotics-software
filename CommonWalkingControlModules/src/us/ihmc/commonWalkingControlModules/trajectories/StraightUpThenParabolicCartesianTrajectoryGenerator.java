@@ -9,6 +9,7 @@ import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
+import com.yobotics.simulationconstructionset.util.trajectory.CartesianTrajectoryGenerator;
 import com.yobotics.simulationconstructionset.util.trajectory.PolynomialSpline;
 import com.yobotics.simulationconstructionset.util.trajectory.YoMinimumJerkTrajectory;
 import com.yobotics.simulationconstructionset.util.trajectory.YoParabolicTrajectoryGenerator;

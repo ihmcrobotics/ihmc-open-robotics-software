@@ -11,7 +11,6 @@ import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegTorques;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.sensors.ProcessedSensorsInterface;
-import us.ihmc.commonWalkingControlModules.trajectories.CartesianTrajectoryGenerator;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.kinematics.OrientationInterpolationCalculator;
@@ -36,6 +35,7 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPositi
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameOrientation;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
+import com.yobotics.simulationconstructionset.util.trajectory.CartesianTrajectoryGenerator;
 import com.yobotics.simulationconstructionset.util.trajectory.YoMinimumJerkTrajectory;
 
 public class ChangingEndpointSwingSubController implements SwingSubController

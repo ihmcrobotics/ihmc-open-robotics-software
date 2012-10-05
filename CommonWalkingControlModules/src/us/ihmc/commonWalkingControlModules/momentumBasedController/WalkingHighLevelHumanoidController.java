@@ -12,7 +12,6 @@ import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.sensors.ProcessedSensorsInterface;
-import us.ihmc.commonWalkingControlModules.trajectories.CartesianTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.FifthOrderWaypointCartesianTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.FlatThenPolynomialCoMHeightTrajectoryGenerator;
 import us.ihmc.robotSide.RobotSide;
@@ -42,6 +41,7 @@ import com.yobotics.simulationconstructionset.util.statemachines.StateMachine;
 import com.yobotics.simulationconstructionset.util.statemachines.StateTransition;
 import com.yobotics.simulationconstructionset.util.statemachines.StateTransitionAction;
 import com.yobotics.simulationconstructionset.util.statemachines.StateTransitionCondition;
+import com.yobotics.simulationconstructionset.util.trajectory.CartesianTrajectoryGenerator;
 
 public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoidController
 {
