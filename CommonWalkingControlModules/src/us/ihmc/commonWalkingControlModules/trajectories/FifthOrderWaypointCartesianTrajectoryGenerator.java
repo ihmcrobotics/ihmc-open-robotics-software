@@ -10,6 +10,7 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.trajectory.CartesianTrajectoryGenerator;
 import com.yobotics.simulationconstructionset.util.trajectory.PolynomialSpline;
 
 public class FifthOrderWaypointCartesianTrajectoryGenerator implements CartesianTrajectoryGenerator
