@@ -234,11 +234,41 @@ public class RobotTest
    }
 
    @Test
-   public void testCompareFloatingJointAndFLoatingPlanarJoint() throws UnreasonableAccelerationException, SimulationExceededMaximumTimeException, InterruptedException
+   public void testCalculateAngularMomentum()
+   {
+	   double epsilon = 1e-7;
+	   Robot robot1 = new Robot("r1");
+	   FloatingJoint floatingJoint1 = new FloatingJoint("joint1", new Vector3d(),robot1);
+	   robot1.addRootJoint(floatingJoint1);
+	   Link onlyLink=new Link("SphericalLink");
+	   onlyLink.setComOffset(new Vector3d(0.0, 0.0, 0.0));
+	   onlyLink.setMass(1.0);
+	   onlyLink.setMomentOfInertia(1.0, 1.0, 1.0);
+	   floatingJoint1.setLink(onlyLink);
+	   floatingJoint1.setPosition(new Point3d(1.0,1.0,1.0));
+	   floatingJoint1.setAngularVelocityInBody(new Vector3d(1.0,0.0,0.0));
+	   floatingJoint1.setVelocity(-1.0, 0.0, 0.0);
+	   Vector3d angularMomentumReturned = new Vector3d();
+	   robot1.computeAngularMomentum(angularMomentumReturned);
+	   JUnitTools.assertTuple3dEquals(new Vector3d(0.0, 0.0, 0.0), angularMomentumReturned, epsilon);
+	   robot1.update();
+	   robot1.computeAngularMomentum(angularMomentumReturned);
+	   JUnitTools.assertTuple3dEquals(new Vector3d(0.0, 0.0, 0.0), angularMomentumReturned, epsilon);
+	   robot1.updateVelocities();
+	   robot1.computeAngularMomentum(angularMomentumReturned);
+	   //System.out.printf("Momentum <%+3.4f,%+3.4f,%+3.4f>", angularMomentumReturned.x,angularMomentumReturned.y,angularMomentumReturned.z);
+	   JUnitTools.assertTuple3dEquals(new Vector3d(1.0, -1.0, 1.0), angularMomentumReturned, epsilon);
+	   floatingJoint1.setPosition(new Vector3d());
+	   
+   }
+   
+   @Test
+   public void testCompareFloatingJointAndFLoatingPlanarJoint()
+           throws UnreasonableAccelerationException, SimulationExceededMaximumTimeException, InterruptedException
    {
       long seed = 101L;
       Random random = new Random(seed);
-      double gravity = 0.0; // random.nextDouble();
+      double gravity = 0.0;    // random.nextDouble();
 
       Vector3d offset = new Vector3d(random.nextDouble(), 0.0, random.nextDouble());
 
@@ -259,13 +289,13 @@ public class RobotTest
       pin2.setLink(new Link(pin1.getLink()));
 
       Robot[] robots = new Robot[] {robot1, robot2};
-      PinJoint[] pinJoints = new PinJoint[]{pin1, pin2};
+      PinJoint[] pinJoints = new PinJoint[] {pin1, pin2};
       for (Robot robot : robots)
       {
-//         System.out.println(new RobotExplorer(robot));
+//       System.out.println(new RobotExplorer(robot));
          robot.setGravity(gravity);
       }
-      
+
       double q = random.nextDouble();
       double tau = random.nextDouble();
       for (PinJoint pinJoint : pinJoints)
@@ -279,23 +309,23 @@ public class RobotTest
          robot.doDynamicsButDoNotIntegrate();
       }
 
-//      double simulateTime = 2.0;
-//      SimulationConstructionSet scs = new SimulationConstructionSet(robot1, SHOW_GUI);
-//      scs.setDT(1e-4, 10);
-//      scs.setGroundVisible(false);
-//      Thread simThread = new Thread(scs, "sim thread");
-//      simThread.start();
-//      BlockingSimulationRunner simulationRunner = new BlockingSimulationRunner(scs, 50.0);
-//      simulationRunner.simulateAndBlock(simulateTime);
-//      sleepIfShowingGUI();
-      
-//      System.out.println(floatingJoint1.getQddx() + ", " + floatingJoint2.getQdd_t1());
-//      System.out.println(floatingJoint1.getQddy());
-//      System.out.println(floatingJoint1.getQddz() + ", " + floatingJoint2.getQdd_t2());
-//      
-//      System.out.println(floatingJoint1.getAngularAccelerationX());
-//      System.out.println(floatingJoint1.getAngularAccelerationY() + ", " + floatingJoint2.getQdd_rot());
-//      System.out.println(floatingJoint1.getAngularAccelerationZ());
+//    double simulateTime = 2.0;
+//    SimulationConstructionSet scs = new SimulationConstructionSet(robot1, SHOW_GUI);
+//    scs.setDT(1e-4, 10);
+//    scs.setGroundVisible(false);
+//    Thread simThread = new Thread(scs, "sim thread");
+//    simThread.start();
+//    BlockingSimulationRunner simulationRunner = new BlockingSimulationRunner(scs, 50.0);
+//    simulationRunner.simulateAndBlock(simulateTime);
+//    sleepIfShowingGUI();
+
+//    System.out.println(floatingJoint1.getQddx() + ", " + floatingJoint2.getQdd_t1());
+//    System.out.println(floatingJoint1.getQddy());
+//    System.out.println(floatingJoint1.getQddz() + ", " + floatingJoint2.getQdd_t2());
+//    
+//    System.out.println(floatingJoint1.getAngularAccelerationX());
+//    System.out.println(floatingJoint1.getAngularAccelerationY() + ", " + floatingJoint2.getQdd_rot());
+//    System.out.println(floatingJoint1.getAngularAccelerationZ());
 
       double epsilon = 1e-9;
       assertEquals(floatingJoint1.getQddx().getDoubleValue(), floatingJoint2.getQdd_t1().getDoubleValue(), epsilon);
@@ -440,7 +470,7 @@ public class RobotTest
 
       return ret;
    }
-   
+
    private Link massiveLink()
    {
       Link ret = new Link("massiveLink");
