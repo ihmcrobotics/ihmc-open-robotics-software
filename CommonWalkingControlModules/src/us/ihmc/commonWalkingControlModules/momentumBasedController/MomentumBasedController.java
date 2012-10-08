@@ -149,7 +149,7 @@ public class MomentumBasedController implements RobotController
          isCoPOnEdge.put(robotSide, new BooleanYoVariable("is" + robotSide.getCamelCaseNameForMiddleOfExpression() + "CoPOnEdge", registry));
 
          EndEffectorPoseTwistAndSpatialAccelerationCalculator feetPoseTwistAndSpatialAccelerationCalculator = new EndEffectorPoseTwistAndSpatialAccelerationCalculator(
-               robotSide, LimbName.LEG, fullRobotModel, twistCalculator);
+        		 fullRobotModel.getEndEffector(robotSide, LimbName.LEG), fullRobotModel.getEndEffectorFrame(robotSide, LimbName.LEG), elevatorFrame, twistCalculator);
          footPoseTwistAndSpatialAccelerationCalculators.put(robotSide, feetPoseTwistAndSpatialAccelerationCalculator);
       }
 
