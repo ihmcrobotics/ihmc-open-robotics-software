@@ -70,7 +70,7 @@ public class SimulationConstructionSetSetupTest
       window.dispose();
    }
 
-   @Ignore
+   @Test
    public void testSimulationConstructionSet()
    {
       SimulationConstructionSet scs = new SimulationConstructionSet();
