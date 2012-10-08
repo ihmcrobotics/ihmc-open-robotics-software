@@ -131,7 +131,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
                worldFrame, stepTime, waypointHeight, registry));
          trajectoryInitialized.put(robotSide, new BooleanYoVariable(robotSide.getCamelCaseNameForStartOfExpression() + "TrajectoryInitialized", registry));
          EndEffectorPoseTwistAndSpatialAccelerationCalculator feetPoseTwistAndSpatialAccelerationCalculator = new EndEffectorPoseTwistAndSpatialAccelerationCalculator(
-               robotSide, LimbName.LEG, fullRobotModel, twistCalculator);
+        		 fullRobotModel.getEndEffector(robotSide, LimbName.LEG), fullRobotModel.getEndEffectorFrame(robotSide, LimbName.LEG), elevatorFrame, twistCalculator);
          footPoseTwistAndSpatialAccelerationCalculators.put(robotSide, feetPoseTwistAndSpatialAccelerationCalculator);
 
          String controlModuleNamePrefix = robotSide.getCamelCaseNameForStartOfExpression() + "Leg";
