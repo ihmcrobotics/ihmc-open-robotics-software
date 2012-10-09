@@ -31,7 +31,7 @@ public class SimulationConstructionSetSetupTest
    @Test
    public void testHelloUniverse()
    {
-      boolean WAIT_FOR_HUMAN_TO_PUSH_BUTTON = true; //false;
+      boolean WAIT_FOR_HUMAN_TO_PUSH_BUTTON = false;
 
       JButton jButton = new JButton("Close");
       final boolean[] buttonWasPushed = new boolean[1];
