@@ -17,7 +17,6 @@ import javax.swing.JButton;
 import javax.swing.JWindow;
 import javax.vecmath.Point3d;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sun.j3d.utils.applet.MainFrame;
@@ -27,7 +26,8 @@ import com.yobotics.simulationconstructionset.gui.SplashPanel;
 
 public class SimulationConstructionSetSetupTest
 {
-
+   private static final int pauseTimeForGUIs = 5000;
+   
    @Test
    public void testHelloUniverse()
    {
@@ -50,7 +50,7 @@ public class SimulationConstructionSetSetupTest
 
       MainFrame mainFrame = new MainFrame(helloUniverse, 256, 256);
 
-      sleep(5000); 
+      sleep(pauseTimeForGUIs); 
 
       while (WAIT_FOR_HUMAN_TO_PUSH_BUTTON && !buttonWasPushed[0])
       {
@@ -66,18 +66,30 @@ public class SimulationConstructionSetSetupTest
       SplashPanel splashPanel = new SplashPanel();
       JWindow window = splashPanel.showSplashScreen();
 
-      sleep(5000);
+      sleep(pauseTimeForGUIs);
       window.dispose();
    }
 
    @Test
-   public void testSimulationConstructionSet()
+   public void testSimulationConstructionSetWithoutARobot()
    {
       SimulationConstructionSet scs = new SimulationConstructionSet();
       Thread thread = new Thread(scs);
       thread.start();
 
-      sleep(5000);
+      sleep(pauseTimeForGUIs);
+      scs.closeAndDispose();
+   }
+   
+   @Test
+   public void testSimulationConstructionSetWithARobot()
+   {
+      Robot robot = new Robot("NullRobot");
+      SimulationConstructionSet scs = new SimulationConstructionSet(robot);
+      Thread thread = new Thread(scs);
+      thread.start();
+
+      sleep(pauseTimeForGUIs);
       scs.closeAndDispose();
    }
 
