@@ -489,6 +489,12 @@ public class MomentumBasedController implements RobotController
          }
       }
 
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         Wrench handWrench = highLevelHumanoidController.getExternalHandWrench(robotSide);
+         inverseDynamicsCalculator.setExternalWrench(fullRobotModel.getHand(robotSide), handWrench);
+      }
+      
       optimizer.solveForRootJointAcceleration(desiredAngularCentroidalMomentumRate, desiredLinearCentroidalMomentumRate);
    }
 
