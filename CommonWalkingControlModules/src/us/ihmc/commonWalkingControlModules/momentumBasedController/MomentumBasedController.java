@@ -221,7 +221,7 @@ public class MomentumBasedController implements RobotController
       }
 
       kAngularMomentumZ.set(10.0); // 50.0); // 10.0);
-      kPelvisYaw.set(0.0); // 100.0); // was 0.0 for M3 movie
+      kPelvisYaw.set(100.0); // was 0.0 for M3 movie
       kUpperBody.set(100.0);
       zetaUpperBody.set(1.0);
       omega0.set(3.0); // just to initialize, will be reset every tick. TODO: integrate ICP control law, fz calculation and omega0 calculation
@@ -253,6 +253,7 @@ public class MomentumBasedController implements RobotController
 
    public void doControl()
    {
+      desiredHeadingControlModule.updateDesiredHeadingFrame();
       FramePoint2d capturePoint = computeCapturePoint();
 
       for (RobotSide robotSide : RobotSide.values())
@@ -560,7 +561,7 @@ public class MomentumBasedController implements RobotController
       FrameVector ret = new FrameVector(midFeetZUp);
       FrameVector angularMomentum = processedSensors.getAngularMomentumInFrame(midFeetZUp);
       Matrix3d pelvisToWorld = new Matrix3d();
-      fullRobotModel.getPelvis().getBodyFixedFrame().getTransformToDesiredFrame(ReferenceFrame.getWorldFrame()).get(pelvisToWorld);
+      fullRobotModel.getPelvis().getBodyFixedFrame().getTransformToDesiredFrame(desiredHeadingControlModule.getDesiredHeadingFrame()).get(pelvisToWorld); // TODO: take into account the twist of the desired heading frame w.r.t world.
       double pelvisYaw = RotationFunctions.getYaw(pelvisToWorld);
       ret.setZ(-kAngularMomentumZ.getDoubleValue() * angularMomentum.getZ() - kPelvisYaw.getDoubleValue() * pelvisYaw);
 

@@ -50,8 +50,8 @@ public class ContactController implements RobotController
    
    public void initialize()
    {
-      contactModel.setKContact(1000.0);
-      contactModel.setBContact(100.0);
+      contactModel.setKContact(10000.0);
+      contactModel.setBContact(1000.0);
       contactModel.setFrictionCoefficients(0.5, 0.3);
    }
   
