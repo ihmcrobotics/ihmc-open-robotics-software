@@ -372,11 +372,13 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
                desiredSwingFootOrientation.getFrameOrientationCopy());
          Twist desiredTwist = footPoseTwistAndSpatialAccelerationCalculator.calculateDesiredEndEffectorTwistFromDesiredVelocities(velocityToPack,
                angularVelocityToPack);
-         SpatialAccelerationVector desiredSpatialAcceleration = footPoseTwistAndSpatialAccelerationCalculator
+         SpatialAccelerationVector feedForwardSpatialAcceleration = footPoseTwistAndSpatialAccelerationCalculator
                .calculateDesiredEndEffectorSpatialAccelerationFromDesiredAccelerations(accelerationToPack, angularAccelerationToPack);
 
-         footSpatialAccelerationControlModules.get(swingSide).doPositionControl(desiredPose, desiredTwist, desiredSpatialAcceleration);
-         footSpatialAccelerationControlModules.get(swingSide).packAcceleration(commandedSpatialAccelerations.get(swingSide).get(LimbName.LEG));
+         footSpatialAccelerationControlModules.get(swingSide).doPositionControl(desiredPose, desiredTwist, feedForwardSpatialAcceleration);
+         SpatialAccelerationVector footAcceleration = new SpatialAccelerationVector();
+         footSpatialAccelerationControlModules.get(swingSide).packAcceleration(footAcceleration);
+         setEndEffectorSpatialAcceleration(swingSide, LimbName.LEG, footAcceleration);
 
          controlDesiredFootPosVelAccForSupportSide(swingSide.getOppositeSide(), trailingFootPitch.getDoubleValue()); // FIXME: make it a smooth trajectory
 
@@ -571,11 +573,13 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             desiredEndEffectorOrientation);
       Twist desiredTwist = footPoseTwistAndSpatialAccelerationCalculator.calculateDesiredEndEffectorTwistFromDesiredVelocities(desiredLinearVelocity,
             desiredAngularVelocity);
-      SpatialAccelerationVector desiredSpatialAcceleration = footPoseTwistAndSpatialAccelerationCalculator
+      SpatialAccelerationVector feedForwardSpatialAcceleration = footPoseTwistAndSpatialAccelerationCalculator
             .calculateDesiredEndEffectorSpatialAccelerationFromDesiredAccelerations(desiredLinearAcceleration, desiredAngularAcceleration);
 
-      footSpatialAccelerationControlModules.get(supportSide).doPositionControl(desiredPose, desiredTwist, desiredSpatialAcceleration);
-      footSpatialAccelerationControlModules.get(supportSide).packAcceleration(commandedSpatialAccelerations.get(supportSide).get(LimbName.LEG));
+      footSpatialAccelerationControlModules.get(supportSide).doPositionControl(desiredPose, desiredTwist, feedForwardSpatialAcceleration);     
+      SpatialAccelerationVector footAcceleration = new SpatialAccelerationVector();
+      footSpatialAccelerationControlModules.get(supportSide).packAcceleration(footAcceleration);
+      setEndEffectorSpatialAcceleration(supportSide, LimbName.LEG, footAcceleration);
    }
 
    private void setSupportLeg(RobotSide supportLeg)

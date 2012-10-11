@@ -36,7 +36,7 @@ public class RigidBodySpatialAccelerationControlModule
 
    public void packAcceleration(SpatialAccelerationVector accelerationToPack)
    {
-      accelerationToPack.checkAndSet(acceleration);
+      accelerationToPack.set(acceleration);
    }
 
    public FrameVector getPositionErrorInWorld()

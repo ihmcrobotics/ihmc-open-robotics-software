@@ -452,7 +452,7 @@ public class MomentumBasedController implements RobotController
          {
 
             SpatialAccelerationVector desiredEndEffectorAccelerationInWorld = desiredEndEffectorAccelerationsInWorld.get(robotSide).get(limbName);
-            desiredEndEffectorAccelerationInWorld.set(highLevelHumanoidController.getCommandedEndEffectorAcceleration(robotSide, limbName));
+            desiredEndEffectorAccelerationInWorld.set(highLevelHumanoidController.getEndEffectorAcceleration(robotSide, limbName));
 
             if (limbName == LimbName.LEG)
             {
