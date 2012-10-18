@@ -16,8 +16,8 @@ public class DRCGuiInitialSetup implements GuiInitialSetup
 
    public void initializeGUI(SimulationConstructionSet scs, R2Robot robot)
    {
-     setUpGUI(scs); 
-      
+      setUpGUI(scs);
+
       if (R2Parameters.USE_SLIDER_BOARD)
          setupSliderBoard(scs);
 
@@ -26,7 +26,13 @@ public class DRCGuiInitialSetup implements GuiInitialSetup
       exportTorqueAndSpeedButton.addActionListener(dataExporter);
       scs.addButton(exportTorqueAndSpeedButton);
 
-     
+      CameraConfiguration behindPelvis = new CameraConfiguration("BehindPelvis");
+      behindPelvis.setCameraTracking(false, true, true, false);
+      behindPelvis.setCameraDolly(false, true, true, false);
+      behindPelvis.setCameraFix(0.0, 0.0, 1.0);
+      behindPelvis.setCameraPosition(-2.5, 0.0, 1.0);
+      behindPelvis.setCameraTrackingVars("q_x", "q_y", "q_z");
+      scs.setupCamera(behindPelvis);
 
       CameraConfiguration camera5 = new CameraConfiguration("HMD_LeftEye");
       camera5.setCameraMount("leftEye");
@@ -36,20 +42,22 @@ public class DRCGuiInitialSetup implements GuiInitialSetup
       scs.setupCamera(camera6);
    }
 
-   public void setShowGUI(boolean showGUI) {
+   public void setShowGUI(boolean showGUI)
+   {
       this.showGUI = showGUI;
    }
-   
-   public boolean isGuiShown() {
+
+   public boolean isGuiShown()
+   {
       return showGUI;
    }
 
    private void setupSliderBoard(SimulationConstructionSet scs)
    {
-//      EvolutionUC33ESetup setup = new EvolutionUC33ESetup(scs);
-//      setup.setupEvolutionForDrivingUpperBodyDesiredPosition();
+//    EvolutionUC33ESetup setup = new EvolutionUC33ESetup(scs);
+//    setup.setupEvolutionForDrivingUpperBodyDesiredPosition();
    }
-   
+
    private void setUpGUI(SimulationConstructionSet scs)
    {
    }

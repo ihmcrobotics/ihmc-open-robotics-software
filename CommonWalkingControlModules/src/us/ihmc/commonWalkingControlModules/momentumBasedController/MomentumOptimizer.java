@@ -106,7 +106,7 @@ public abstract class MomentumOptimizer implements Lmdif_fcn
               controlDT);
       MatrixYoVariableConversionTools.storeInYoVariables(previousCentroidalMomentumMatrix, yoPreviousCentroidalMomentumMatrix);
 
-      updateBeforeSolving();
+      updateBeforeSolving(x);
 
       info[1] = 0;
       Minpack_f77.lmdif1_f77(this, m, n, x, fvec, tol, info);    // also sets the result in the full robot model
@@ -145,7 +145,7 @@ public abstract class MomentumOptimizer implements Lmdif_fcn
       }
    }
 
-   protected abstract void updateBeforeSolving();
+   protected abstract void updateBeforeSolving(double[] x);
 
    protected abstract void updateAtStartOfFcn(double[] x);
 }
