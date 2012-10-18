@@ -195,6 +195,8 @@ public class MomentumBasedController implements RobotController
       this.legStrengthCalculator = new TeeterTotterLegStrengthCalculator(registry);
 
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
+//      this.centerOfMassHeightControlModule = new PartialCenterOfMassHeightControlModule(processedSensors, registry, centerOfMassControlType);
+
       switch (centerOfMassControlType)
       {
       case TOTAL_COM:
@@ -202,11 +204,11 @@ public class MomentumBasedController implements RobotController
          break;
 
       case LOWER_COM:
-         this.centerOfMassHeightControlModule = new PartialCenterOfMassHeightControlModule(processedSensors, registry, fullRobotModel.getLowerBodyRigidBodiesInOrder());
+         this.centerOfMassHeightControlModule = new PartialCenterOfMassHeightControlModule(processedSensors, registry, centerOfMassControlType);
          break;
          
       case UPPER_COM:
-         this.centerOfMassHeightControlModule = new PartialCenterOfMassHeightControlModule(processedSensors, registry, fullRobotModel.getUpperBodyRigidBodiesInOrder());
+         this.centerOfMassHeightControlModule = new PartialCenterOfMassHeightControlModule(processedSensors, registry, centerOfMassControlType);
          break;
       default:
          throw new RuntimeException("No center of mass height control module defined for center of mass control type: " + centerOfMassControlType);
