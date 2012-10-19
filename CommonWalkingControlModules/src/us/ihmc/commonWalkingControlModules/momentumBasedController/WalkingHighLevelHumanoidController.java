@@ -93,7 +93,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          YoVariableRegistry registry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       super(fullRobotModel, referenceFrames, processedSensors, twistCalculator, bipedFeet, bipedSupportPolygons, controlDT, desiredHeadingControlModule,
-            footSwitches, registry);
+            footSwitches, CenterOfMassControlType.TOTAL_COM, registry);
       SimpleWorldDesiredFootstepCalculator simpleDesiredFootstepCalculator = new SimpleWorldDesiredFootstepCalculator(bipedFeet, referenceFrames,
             desiredHeadingControlModule, registry);
 

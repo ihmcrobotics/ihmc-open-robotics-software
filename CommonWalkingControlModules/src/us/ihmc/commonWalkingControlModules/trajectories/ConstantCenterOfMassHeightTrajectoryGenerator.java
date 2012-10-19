@@ -7,12 +7,14 @@ import us.ihmc.robotSide.RobotSide;
 
 public class ConstantCenterOfMassHeightTrajectoryGenerator implements CenterOfMassHeightTrajectoryGenerator
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final DoubleYoVariable desiredCenterOfMassHeight = new DoubleYoVariable("desiredCenterOfMassHeight", registry);
+   private final YoVariableRegistry registry;
+   private final DoubleYoVariable desiredCenterOfMassHeight;
 
    public ConstantCenterOfMassHeightTrajectoryGenerator(YoVariableRegistry parentRegistry)
    {
+      registry = new YoVariableRegistry(getClass().getSimpleName());
       parentRegistry.addChild(registry);
+      desiredCenterOfMassHeight = new DoubleYoVariable("desiredCenterOfMassHeight", registry); 
       desiredCenterOfMassHeight.set(1.15);
    }
 
@@ -41,6 +43,9 @@ public class ConstantCenterOfMassHeightTrajectoryGenerator implements CenterOfMa
       return 0.0;
    }
 
-
+   public void setDesiredCenterOfMassHeight(double desiredCoMHeight)
+   {
+      desiredCenterOfMassHeight.set(desiredCoMHeight);
+   }
 
 }
