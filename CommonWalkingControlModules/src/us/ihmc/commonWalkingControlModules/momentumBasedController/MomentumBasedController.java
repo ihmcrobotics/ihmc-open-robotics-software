@@ -125,7 +125,7 @@ public class MomentumBasedController implements RobotController
    public MomentumBasedController(ProcessedSensorsInterface processedSensors, ProcessedOutputsInterface processedOutputs,
                                   CommonWalkingReferenceFrames referenceFrames, TwistCalculator twistCalculator, double controlDT,
                                   DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, SideDependentList<BipedFootInterface> bipedFeet,
-                                  BipedSupportPolygons bipedSupportPolygons, DesiredHeadingControlModule desiredHeadingControlModule, CenterOfMassControlType centerOfMassControlType,
+                                  BipedSupportPolygons bipedSupportPolygons, DesiredHeadingControlModule desiredHeadingControlModule,
                                   HighLevelHumanoidController highLevelHumanoidController)
    {
       this.processedSensors = processedSensors;
@@ -195,24 +195,7 @@ public class MomentumBasedController implements RobotController
       this.legStrengthCalculator = new TeeterTotterLegStrengthCalculator(registry);
 
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
-//      this.centerOfMassHeightControlModule = new PartialCenterOfMassHeightControlModule(processedSensors, registry, centerOfMassControlType);
-
-      switch (centerOfMassControlType)
-      {
-      case TOTAL_COM:
-         this.centerOfMassHeightControlModule = new CenterOfMassHeightControlModule(processedSensors, registry);
-         break;
-
-      case LOWER_COM:
-         this.centerOfMassHeightControlModule = new PartialCenterOfMassHeightControlModule(processedSensors, registry, centerOfMassControlType);
-         break;
-         
-      case UPPER_COM:
-         this.centerOfMassHeightControlModule = new PartialCenterOfMassHeightControlModule(processedSensors, registry, centerOfMassControlType);
-         break;
-      default:
-         throw new RuntimeException("No center of mass height control module defined for center of mass control type: " + centerOfMassControlType);
-      }
+      this.centerOfMassHeightControlModule = new PartialCenterOfMassHeightControlModule(processedSensors, registry, highLevelHumanoidController.getCoMControlType());
       
       centerOfMassHeightControlModule.setParametersForR2InverseDynamics();
       
