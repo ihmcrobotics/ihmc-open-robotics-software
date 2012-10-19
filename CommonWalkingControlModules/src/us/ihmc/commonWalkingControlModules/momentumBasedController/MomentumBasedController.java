@@ -512,21 +512,20 @@ public class MomentumBasedController implements RobotController
          inverseDynamicsCalculator.setExternalWrench(fullRobotModel.getHand(robotSide), handWrench);
       }
 
-      // +++121017: do this to make the optimization stuff rewindable (needs to have the same seed to get the same answer at the end)
-//      Set<RevoluteJoint> revoluteJoints = desiredAccelerationYoVariables.keySet();
-//      for (RevoluteJoint revoluteJoint : revoluteJoints)
-//      {
-//         revoluteJoint.setQddDesired(desiredAccelerationYoVariables.get(revoluteJoint).getDoubleValue());
-//      }
-//
-//      SpatialAccelerationVector rootJointAcceleration = new SpatialAccelerationVector();
-//      SixDoFJoint rootJoint = fullRobotModel.getRootJoint();
-//      rootJoint.packDesiredJointAcceleration(rootJointAcceleration);
-//      rootJointAcceleration.setLinearPart(desiredPelvisLinearAcceleration.getFrameVectorCopy().getVector());
-//      rootJointAcceleration.setAngularPart(desiredPelvisAngularAcceleration.getFrameVectorCopy().getVector());
-//      rootJoint.setDesiredAcceleration(rootJointAcceleration);
+     // Use the current values as the initial guess for the next optimization.
+      double[] initialGuess = new double[]
+            {
+            0.0,
+            desiredPelvisAngularAcceleration.getX(),
+            desiredPelvisAngularAcceleration.getY(),
+            desiredPelvisAngularAcceleration.getZ(),
+            desiredPelvisLinearAcceleration.getX(),
+            desiredPelvisLinearAcceleration.getY(),
+            desiredPelvisLinearAcceleration.getZ(),
+            };
 
-      optimizer.solveForRootJointAcceleration(desiredAngularCentroidalMomentumRate, desiredLinearCentroidalMomentumRate);
+
+      optimizer.solveForRootJointAcceleration(initialGuess, desiredAngularCentroidalMomentumRate, desiredLinearCentroidalMomentumRate);
    }
 
    private void fixDesiredCoPNumericalRoundoff(FramePoint2d desiredCoP, FrameConvexPolygon2d polygon)

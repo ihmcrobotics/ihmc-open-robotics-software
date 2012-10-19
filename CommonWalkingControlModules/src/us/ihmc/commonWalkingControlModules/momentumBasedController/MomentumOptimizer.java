@@ -32,7 +32,6 @@ public abstract class MomentumOptimizer implements Lmdif_fcn
 
    private final int m;
    private final int n;
-   private final double[] x;
    private final double[] fvec;
    private final double tol = 1e-9;
    private final int[] info = new int[2];
@@ -61,7 +60,6 @@ public abstract class MomentumOptimizer implements Lmdif_fcn
       jointAccelerationsMatrix = new DenseMatrix64F(nDegreesOfFreedom, 1);
       m = Momentum.SIZE;
       n = 6;
-      x = new double[n + 1];
       fvec = new double[m + 1];
 
       this.controlDT = controlDT;
@@ -94,7 +92,7 @@ public abstract class MomentumOptimizer implements Lmdif_fcn
       MatrixYoVariableConversionTools.storeInYoVariables(previousCentroidalMomentumMatrix, yoPreviousCentroidalMomentumMatrix);
    }
 
-   public void solveForRootJointAcceleration(FrameVector desiredAngularCentroidalMomentumRate, FrameVector desiredLinearCentroidalMomentumRate)
+   public void solveForRootJointAcceleration(double[] initialGuess, FrameVector desiredAngularCentroidalMomentumRate, FrameVector desiredLinearCentroidalMomentumRate)
    {
       this.desiredAngularCentroidalMomentumRate.set(desiredAngularCentroidalMomentumRate);
       this.desiredLinearCentroidalMomentumRate.set(desiredLinearCentroidalMomentumRate);
@@ -106,11 +104,11 @@ public abstract class MomentumOptimizer implements Lmdif_fcn
               controlDT);
       MatrixYoVariableConversionTools.storeInYoVariables(previousCentroidalMomentumMatrix, yoPreviousCentroidalMomentumMatrix);
 
-      updateBeforeSolving(x);
+      updateBeforeSolving(initialGuess);
 
       info[1] = 0;
-      Minpack_f77.lmdif1_f77(this, m, n, x, fvec, tol, info);    // also sets the result in the full robot model
-      fcn(m, n, x, fvec, info);
+      Minpack_f77.lmdif1_f77(this, m, n, initialGuess, fvec, tol, info);    // also sets the result in the full robot model
+      fcn(m, n, initialGuess, fvec, info);
    }
 
    public final void fcn(int m, int n, double[] x, double[] fvec, int[] iflag)
