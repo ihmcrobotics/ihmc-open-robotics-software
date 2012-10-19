@@ -1,6 +1,7 @@
 package us.ihmc.darpaRoboticsChallenge;
 
 import net.java.games.input.Component;
+import net.java.games.input.Component.Identifier;
 import net.java.games.input.Controller;
 import net.java.games.input.ControllerEnvironment;
 
@@ -32,11 +33,6 @@ public class JinputJoystickController
          throw new RuntimeException("joystick not found");
       }
 
-//      for (Component component : joystickController.getComponents())
-//      {
-//         System.out.println(component.getName());
-//      }
-
       joystickUpdater = new JoystickUpdater(joystickController);
       joystickUpdater.setPollInterval(pollIntervalMillis);
 
@@ -45,19 +41,19 @@ public class JinputJoystickController
       thread.start();
 
       DoubleYoVariable desiredCenterOfMassHeight = (DoubleYoVariable) holder.getVariable("desiredCenterOfMassHeight");
-      joystickUpdater.addListener(new DoubleYoVariableJoystickEventListener(desiredCenterOfMassHeight, findComponent("slider"), minHeight, maxHeight,
+      joystickUpdater.addListener(new DoubleYoVariableJoystickEventListener(desiredCenterOfMassHeight, findComponent(Component.Identifier.Axis.SLIDER), minHeight, maxHeight,
               deadZone, true));
 
       DoubleYoVariable desiredPelvisRoll = (DoubleYoVariable) holder.getVariable("desiredPelvisRoll");
-      joystickUpdater.addListener(new DoubleYoVariableJoystickEventListener(desiredPelvisRoll, findComponent("x"), -maxRoll, maxRoll,
+      joystickUpdater.addListener(new DoubleYoVariableJoystickEventListener(desiredPelvisRoll, findComponent(Component.Identifier.Axis.X), -maxRoll, maxRoll,
               deadZone, false));
 
       DoubleYoVariable desiredPelvisPitch = (DoubleYoVariable) holder.getVariable("desiredPelvisPitch");
-      joystickUpdater.addListener(new DoubleYoVariableJoystickEventListener(desiredPelvisPitch, findComponent("y"), -maxPitch, maxPitch,
+      joystickUpdater.addListener(new DoubleYoVariableJoystickEventListener(desiredPelvisPitch, findComponent(Component.Identifier.Axis.Y), -maxPitch, maxPitch,
               deadZone, true));
 
       DoubleYoVariable desiredHeadingFinal = (DoubleYoVariable) holder.getVariable("desiredHeadingFinal");
-      joystickUpdater.addListener(new DoubleYoVariableJoystickEventListener(desiredHeadingFinal, findComponent("rz"), -maxYaw, maxYaw,
+      joystickUpdater.addListener(new DoubleYoVariableJoystickEventListener(desiredHeadingFinal, findComponent(Component.Identifier.Axis.RZ), -maxYaw, maxYaw,
               deadZone, true));
    }
 
@@ -78,14 +74,14 @@ public class JinputJoystickController
       return null;
    }
 
-   private Component findComponent(String name)
+   private Component findComponent(Identifier identifier)
    {
       for (Component component : joystickController.getComponents())
       {
-         if (component.getName().equals(name))
+         if (component.getIdentifier().equals(identifier))
             return component;
       }
 
-      throw new RuntimeException("component " + name + " not found");
+      throw new RuntimeException("component with identifier " + identifier + " not found");
    }
 }
