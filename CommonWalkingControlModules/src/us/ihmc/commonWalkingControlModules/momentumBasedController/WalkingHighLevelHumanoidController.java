@@ -12,6 +12,7 @@ import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.sensors.ProcessedSensorsInterface;
+import us.ihmc.commonWalkingControlModules.trajectories.CenterOfMassHeightTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.FifthOrderWaypointCartesianTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.FlatThenPolynomialCoMHeightTrajectoryGenerator;
 import us.ihmc.robotSide.RobotSide;
@@ -51,7 +52,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    }
 
    private final StateMachine stateMachine;
-
+   private final CenterOfMassHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator;
    private final SideDependentList<WalkingState> singleSupportStateEnums = new SideDependentList<WalkingHighLevelHumanoidController.WalkingState>(
          WalkingState.LEFT_SUPPORT, WalkingState.RIGHT_SUPPORT);
 
@@ -86,6 +87,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    private final SideDependentList<EndEffectorPoseTwistAndSpatialAccelerationCalculator> footPoseTwistAndSpatialAccelerationCalculators = new SideDependentList<EndEffectorPoseTwistAndSpatialAccelerationCalculator>();
    private final SideDependentList<RigidBodySpatialAccelerationControlModule> footSpatialAccelerationControlModules = new SideDependentList<RigidBodySpatialAccelerationControlModule>();
+
 
    public WalkingHighLevelHumanoidController(FullRobotModel fullRobotModel, CommonWalkingReferenceFrames referenceFrames, TwistCalculator twistCalculator,
          SideDependentList<BipedFootInterface> bipedFeet, BipedSupportPolygons bipedSupportPolygons, SideDependentList<FootSwitchInterface> footSwitches,
@@ -685,6 +687,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    {
       stateMachine.checkTransitionConditionsThoroughly();
       stateMachine.doAction();
+      desiredCoMHeight.set(centerOfMassHeightTrajectoryGenerator.getDesiredCenterOfMassHeight());
+      desiredCoMHeightSlope.set(centerOfMassHeightTrajectoryGenerator.getDesiredCenterOfMassHeightSlope());
+      desiredCoMHeightSecondDerivative.set(centerOfMassHeightTrajectoryGenerator.getDesiredCenterOfMassHeightSecondDerivative());
    }
 
    private void setSwingControlGains(RobotSide swingSide)
