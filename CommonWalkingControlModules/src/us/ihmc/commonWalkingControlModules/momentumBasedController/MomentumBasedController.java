@@ -100,6 +100,8 @@ public class MomentumBasedController implements RobotController
    private final DesiredHeadingControlModule desiredHeadingControlModule;
    private final DesiredCoPAndCMPControlModule desiredCoPAndCMPControlModule;
 
+   private final ThreeDoFAngularAccelerationControlModule chestAngularAccelerationcalculator;
+
    private final YoFrameVector desiredPelvisLinearAcceleration;
    private final YoFrameVector desiredPelvisAngularAcceleration;
    private final YoFrameVector desiredPelvisForce;
@@ -121,12 +123,13 @@ public class MomentumBasedController implements RobotController
    private final BooleanYoVariable leftInSingularRegion = new BooleanYoVariable("leftInSingularRegion", registry);
    private final BooleanYoVariable rightInSingularRegion = new BooleanYoVariable("rightInSingularRegion", registry);
    private final SideDependentList<BooleanYoVariable> inSingularRegions = new SideDependentList<BooleanYoVariable>(leftInSingularRegion, rightInSingularRegion);
+   private boolean doChestOrientationControl;
 
    public MomentumBasedController(ProcessedSensorsInterface processedSensors, ProcessedOutputsInterface processedOutputs,
                                   CommonWalkingReferenceFrames referenceFrames, TwistCalculator twistCalculator, double controlDT,
                                   DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, SideDependentList<BipedFootInterface> bipedFeet,
                                   BipedSupportPolygons bipedSupportPolygons, DesiredHeadingControlModule desiredHeadingControlModule,
-                                  HighLevelHumanoidController highLevelHumanoidController)
+                                  HighLevelHumanoidController highLevelHumanoidController, boolean doChestOrientationControl)
    {
       this.processedSensors = processedSensors;
       this.fullRobotModel = processedSensors.getFullRobotModel();
@@ -190,6 +193,11 @@ public class MomentumBasedController implements RobotController
       // this.desiredCoPAndCMPControlModule = new SacrificeCMPCoPAndCMPControlModule(desiredCapturePointToDesiredCoPControlModule,
       // desiredCapturePointToDesiredCoPControlModule, desiredCenterOfPressureFilter, visualizer, bipedSupportPolygons, processedSensors, referenceFrames, registry).setGains(3e-2, 1.0);
 
+      RigidBody pelvis = fullRobotModel.getPelvis();
+      RigidBody chest = fullRobotModel.getChest();
+      this.chestAngularAccelerationcalculator = new ThreeDoFAngularAccelerationControlModule(pelvis, chest);
+
+      
       virtualToePointCalculator = new NewGeometricVirtualToePointCalculator(referenceFrames, registry, dynamicGraphicObjectsListRegistry, 0.95);
 
       this.legStrengthCalculator = new TeeterTotterLegStrengthCalculator(registry);
@@ -232,6 +240,8 @@ public class MomentumBasedController implements RobotController
             desiredAccelerationYoVariables.put((RevoluteJoint) joint, new DoubleYoVariable(joint.getName() + "qdd_d", registry));
          }
       }
+      
+      this.doChestOrientationControl = doChestOrientationControl;
 
       kAngularMomentumZ.set(10.0);    // 50.0); // 10.0);
       kPelvisYaw.set(100.0);    // was 0.0 for M3 movie
@@ -436,8 +446,14 @@ public class MomentumBasedController implements RobotController
 
       doPDControl(kUpperBody, dUpperBody, fullRobotModel.getNeckJointList());
 
-      // doChestOrientationControl();
-      doPDControl(kUpperBody, dUpperBody, fullRobotModel.getSpineJointList());
+      if (doChestOrientationControl)
+      {
+         chestAngularAccelerationcalculator.doControl(highLevelHumanoidController.getChestAngularAcceleration());         
+      }
+      else
+      {         
+         doPDControl(kUpperBody, dUpperBody, fullRobotModel.getSpineJointList());
+      }
 
       FrameVector desiredAngularCentroidalMomentumRate = new FrameVector(totalGroundReactionWrench.getExpressedInFrame(),
                                                             totalGroundReactionWrench.getAngularPartCopy());
@@ -570,20 +586,6 @@ public class MomentumBasedController implements RobotController
 
       return GeometryTools.getIntersectionBetweenLineAndPlane(pointOnPlane, planeNormal, lineStart, lineEnd);
    }
-
-   // private void doChestOrientationControl()
-   // {
-   // // FIXME: Complete hack.
-   // RevoluteJoint[] spineJoints = fullRobotModel.getSpineJointList();
-   // Transform3D chestToPelvis = spineJoints[0].getFrameAfterJoint().getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());
-   // double[] yawPitchRoll = new double[3];
-   // RotationFunctions.getYawPitchRoll(yawPitchRoll, chestToPelvis);
-   // double k = 100.0;
-   // double b = 40.0;
-   // spineJoints[0].setQddDesired(-k * yawPitchRoll[1] - b * spineJoints[0].getQd());
-   // spineJoints[1].setQddDesired(-k * yawPitchRoll[0] - b * spineJoints[1].getQd());
-   // spineJoints[2].setQddDesired(-k * yawPitchRoll[2] - b * spineJoints[2].getQd());
-   // }
 
    private FrameVector determineGroundReactionMoment()
    {
