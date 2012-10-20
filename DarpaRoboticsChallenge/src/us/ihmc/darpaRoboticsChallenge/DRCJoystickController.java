@@ -11,7 +11,7 @@ import com.yobotics.simulationconstructionset.joystick.DoubleYoVariableJoystickE
 import com.yobotics.simulationconstructionset.joystick.JoystickUpdater;
 
 
-public class JinputJoystickController
+public class DRCJoystickController
 {
    private double deadZone = 0.05;
 
@@ -25,7 +25,7 @@ public class JinputJoystickController
    private final JoystickUpdater joystickUpdater;
    private final Controller joystickController;
 
-   public JinputJoystickController(YoVariableHolder holder)
+   public DRCJoystickController(YoVariableHolder holder)
    {
       joystickController = findController();
       if (joystickController == null)
