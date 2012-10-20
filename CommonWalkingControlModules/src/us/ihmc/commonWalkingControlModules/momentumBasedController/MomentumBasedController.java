@@ -569,7 +569,7 @@ public class MomentumBasedController implements RobotController
       double zdDesired = dzdxDesired * xd;
       double zddDesired = d2zdx2Desired * MathTools.square(xd) + dzdxDesired * xdd;
 
-      double fZ = centerOfMassHeightControlModule.doCenterOfMassHeightControl(zDesired, zdDesired, zddDesired, supportLeg);
+      double fZ = centerOfMassHeightControlModule.doCenterOfMassHeightControl(zDesired, zdDesired, zddDesired, supportLeg, highLevelHumanoidController.getCoMControlType());
 
       return fZ;
    }
