@@ -562,7 +562,7 @@ public class SimulationConstructionSetTest
    }
 
 
-   private class SimpleRobot extends Robot
+   public static class SimpleRobot extends Robot
    {
       private static final long serialVersionUID = 43883985473093746L;
 
