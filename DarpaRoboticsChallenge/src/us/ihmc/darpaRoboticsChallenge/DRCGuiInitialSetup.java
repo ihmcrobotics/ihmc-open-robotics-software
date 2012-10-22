@@ -61,5 +61,4 @@ public class DRCGuiInitialSetup implements GuiInitialSetup
    private void setUpGUI(SimulationConstructionSet scs)
    {
    }
-
 }
