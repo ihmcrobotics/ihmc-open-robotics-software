@@ -1,21 +1,32 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.EnumYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
+import us.ihmc.commonWalkingControlModules.momentumBasedController.CenterOfMassControlType;
+import us.ihmc.commonWalkingControlModules.sensors.ProcessedSensorsInterface;
 import us.ihmc.robotSide.RobotSide;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 public class ConstantCenterOfMassHeightTrajectoryGenerator implements CenterOfMassHeightTrajectoryGenerator
 {
    private final YoVariableRegistry registry;
    private final DoubleYoVariable desiredCenterOfMassHeight;
+   private final EnumYoVariable<CenterOfMassControlType> centerOfMassControlType;
+   private final ProcessedSensorsInterface processedSensors;
+   private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   public ConstantCenterOfMassHeightTrajectoryGenerator(YoVariableRegistry parentRegistry)
+   public ConstantCenterOfMassHeightTrajectoryGenerator(ProcessedSensorsInterface processedSensors, YoVariableRegistry parentRegistry)
    {
+      this.processedSensors = processedSensors;
       registry = new YoVariableRegistry(getClass().getSimpleName());
-      parentRegistry.addChild(registry);
       desiredCenterOfMassHeight = new DoubleYoVariable("desiredCenterOfMassHeight", registry); 
+      centerOfMassControlType = EnumYoVariable.create("comControlType", CenterOfMassControlType.class, registry);
+      parentRegistry.addChild(registry);
+
       desiredCenterOfMassHeight.set(1.15);
+      centerOfMassControlType.set(CenterOfMassControlType.TOTAL_COM);
    }
 
    public void initialize(RobotSide supportLeg, RobotSide upcomingSupportLeg)
@@ -43,9 +54,14 @@ public class ConstantCenterOfMassHeightTrajectoryGenerator implements CenterOfMa
       return 0.0;
    }
 
-   public void setDesiredCenterOfMassHeight(double desiredCoMHeight)
+   public void setControlType(CenterOfMassControlType centerOfMassControlType)
    {
-      desiredCenterOfMassHeight.set(desiredCoMHeight);
+      if (centerOfMassControlType != this.centerOfMassControlType.getEnumValue())
+      {
+         double currentHeight = processedSensors.getCenterOfMassPositionInFrame(worldFrame, centerOfMassControlType).getZ();
+         this.desiredCenterOfMassHeight.set(currentHeight);
+         this.centerOfMassControlType.set(centerOfMassControlType);
+      }
    }
 
 }
