@@ -5,6 +5,7 @@ import static org.junit.Assert.assertFalse;
 
 import java.util.ArrayList;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
@@ -12,7 +13,6 @@ import com.yobotics.simulationconstructionset.EnumYoVariable;
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.SimulationConstructionSetTest;
-import com.yobotics.simulationconstructionset.SimulationConstructionSetTest.SimpleRobot;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.robotController.RobotController;
 import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
@@ -32,6 +32,7 @@ public class YoEntryBoxTest
 
    private class SimpleController implements RobotControllerWithAttachRobot
    {
+      private static final long serialVersionUID = -4163260281627030963L;
       private YoVariableRegistry registry;
       private EnumYoVariable<BadGreekEnum> badGreekVariable;
       private EnumYoVariable<LargeEnum> largeEnumVariable;
@@ -40,14 +41,8 @@ public class YoEntryBoxTest
       private DoubleYoVariable time;
       private String name = "simpleController";
 
-      public SimpleController(SimpleRobot robot)
-      {
-         attachRobot(robot);
-      }
-
       public SimpleController()
       {
-         // TODO Auto-generated constructor stub
       }
 
       public void attachRobot(Robot robot)
@@ -64,7 +59,6 @@ public class YoEntryBoxTest
          numberVariable = new DoubleYoVariable("numberVariable", registry);
          numberVariable.set(42.0);
          time = robot.getYoTime();
-         boolean registryNull = (registry == null);
       }
 
       public void initialize()
@@ -127,7 +121,7 @@ public class YoEntryBoxTest
    public final static int DELAY_TIME_FOR_TESTING_CONCURRENT_UPDATE = 500;    // TODO: Find a way to avoid having this parameter matter. I worry about this one.
 
    // GT - these values are twice the minimum working values for Trogdor.
-  // @Ignore // This test is for humans to view
+   @Ignore // This test is for humans to view
    @Test
    public void testEnumDisplay() throws SimulationExceededMaximumTimeException, InterruptedException
    {
@@ -138,6 +132,8 @@ public class YoEntryBoxTest
       scs.setupEntryBox("badGreekVariable");
       scs.setupEntryBox("smallEnumVariable");
       Thread.sleep(10000);
+      
+      scs.closeAndDispose();
    }
 
    @Test
@@ -187,6 +183,7 @@ public class YoEntryBoxTest
       assertEquals(YoEnumEntryContainer.class, newBadGreekBox.getActiveYoVariableEntryContainer().getClass());
       Thread.sleep(DELAY_TIME_FOR_HUMAN_CONVENIENT_VIEWING * 4);
 
+      scs.closeAndDispose();
    }
 
    public <T extends RobotControllerWithAttachRobot> SimulationConstructionSet setupSCS(T controller) throws InterruptedException
