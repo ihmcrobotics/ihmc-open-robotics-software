@@ -130,6 +130,92 @@ public class TimeScriptTest
    
    
    @Test
+   public void testTimeScriptCommand()
+   {
+      TimeScript timeScript = new TimeScript(rootRegistry);
+
+      double timeOne = 1.0;
+      double timeTwo = 2.2;
+      double timeThree = 3.3;
+
+      double initialValue = 0.3;
+      final double valueOne = 3.7;
+      final double valueTwo = 5.6;
+      final double valueThree = 9.9;
+      
+      doubleVariable.set(initialValue);
+      
+      TimeScriptEntry timeScriptEntryOne = new TimeScriptEntry(timeOne);
+
+      TimeScriptCommand timeScriptCommandOne = new TimeScriptCommand()
+      {
+         public void doCommand()
+         {  
+            doubleVariable.set(valueOne);
+         }
+      };
+      
+      timeScriptEntryOne.addTimeScriptCommand(timeScriptCommandOne);
+      timeScript.addEntry(timeScriptEntryOne);
+      
+      
+      TimeScriptEntry timeScriptEntryTwo = new TimeScriptEntry(timeTwo);
+
+      TimeScriptCommand timeScriptCommandTwo = new TimeScriptCommand()
+      {
+         public void doCommand()
+         {  
+            doubleVariable.set(valueTwo);
+         }
+      };
+      
+      timeScriptEntryTwo.addTimeScriptCommand(timeScriptCommandTwo);
+      timeScript.addEntry(timeScriptEntryTwo);
+      
+      TimeScriptEntry timeScriptEntryThree = new TimeScriptEntry(timeThree);
+
+      TimeScriptCommand timeScriptCommandThree = new TimeScriptCommand()
+      {
+         public void doCommand()
+         {  
+            doubleVariable.set(valueThree);
+         }
+      };
+      
+      timeScriptEntryThree.addTimeScriptCommand(timeScriptCommandThree);
+      timeScript.addEntry(timeScriptEntryThree);
+      
+      double epsilon = 1e-10;
+      double time = 0.0;
+      timeScript.doScript(time);
+      
+      assertEquals(initialValue, doubleVariable.getDoubleValue(), epsilon);
+      
+      for (time=0.0; time<10.0; time=time+0.001)
+      {
+         timeScript.doScript(time);
+         
+         if (time < timeOne)
+         {
+            assertEquals(initialValue, doubleVariable.getDoubleValue(), epsilon);
+         }
+         else if (time < timeTwo)
+         {
+            assertEquals(valueOne, doubleVariable.getDoubleValue(), epsilon);
+         }
+         else if (time < timeThree)
+         {
+            assertEquals(valueTwo, doubleVariable.getDoubleValue(), epsilon);
+         }
+         else
+         {
+            assertEquals(valueThree, doubleVariable.getDoubleValue(), epsilon);
+         }
+      }
+   }
+   
+   
+   @Test
    public void testSaveAndLoad()
    {
       Random random = new Random(1776L);
