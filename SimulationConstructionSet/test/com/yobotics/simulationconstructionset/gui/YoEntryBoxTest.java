@@ -117,8 +117,8 @@ public class YoEntryBoxTest
    }
 
 
-   public final static int DELAY_TIME_FOR_HUMAN_CONVENIENT_VIEWING = 180;    // 400 and you can see it change. lower than 100 and scs isn't fast enough for the asserts.
-   public final static int DELAY_TIME_FOR_TESTING_CONCURRENT_UPDATE = 500;    // TODO: Find a way to avoid having this parameter matter. I worry about this one.
+   public final static int DELAY_TIME_FOR_HUMAN_CONVENIENT_VIEWING = 360;    // 400 and you can see it change. lower than 100 and scs isn't fast enough for the asserts.
+   public final static int DELAY_TIME_FOR_TESTING_CONCURRENT_UPDATE = 1000;    // TODO: Find a way to avoid having this parameter matter. I worry about this one.
 
    // GT - these values are twice the minimum working values for Trogdor.
    @Ignore // This test is for humans to view
