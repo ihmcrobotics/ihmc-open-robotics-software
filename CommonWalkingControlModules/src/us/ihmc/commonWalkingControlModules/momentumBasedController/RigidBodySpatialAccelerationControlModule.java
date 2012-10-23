@@ -13,24 +13,22 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public class RigidBodySpatialAccelerationControlModule
 {
-   protected final YoVariableRegistry registry;
-   protected final ReferenceFrame elevatorFrame;
+   private final YoVariableRegistry registry;
    private final TwistCalculator twistCalculator;
    private final SE3PDController se3pdController;
-   protected final SpatialAccelerationVector acceleration;
-   protected final RigidBody endEffector;
-   protected final ReferenceFrame endEffectorFrame;
+   private final SpatialAccelerationVector acceleration;
+   private final RigidBody endEffector;
+   private final ReferenceFrame endEffectorFrame;
 
-   public RigidBodySpatialAccelerationControlModule(String namePrefix, ReferenceFrame elevatorFrame, TwistCalculator twistCalculator, RigidBody endEffector,
+   public RigidBodySpatialAccelerationControlModule(String namePrefix, TwistCalculator twistCalculator, RigidBody endEffector,
            ReferenceFrame endEffectorFrame, YoVariableRegistry parentRegistry)
    {
       this.registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
-      this.elevatorFrame = elevatorFrame;
       this.twistCalculator = twistCalculator;
       this.endEffector = endEffector;
       this.endEffectorFrame = endEffectorFrame;
       this.se3pdController = new SE3PDController(namePrefix, endEffectorFrame, registry);
-      this.acceleration = new SpatialAccelerationVector(endEffectorFrame, elevatorFrame, endEffectorFrame);
+      this.acceleration = new SpatialAccelerationVector();
       parentRegistry.addChild(registry);
    }
 
@@ -49,13 +47,12 @@ public class RigidBodySpatialAccelerationControlModule
    }
 
    public void doPositionControl(FramePose desiredEndEffectorPose, Twist desiredEndEffectorTwist,
-                                 SpatialAccelerationVector feedForwardEndEffectorSpatialAcceleration)
+                                 SpatialAccelerationVector feedForwardEndEffectorSpatialAcceleration, RigidBody base)
    {
       Twist currentTwist = new Twist();
-      twistCalculator.packTwistOfBody(currentTwist, endEffector);
+      twistCalculator.packRelativeTwist(currentTwist, base, endEffector);
       currentTwist.changeBodyFrameNoRelativeTwist(endEffectorFrame);
       currentTwist.changeFrame(endEffectorFrame);
-      currentTwist.changeBaseFrameNoRelativeTwist(elevatorFrame);
 
       se3pdController.compute(acceleration, desiredEndEffectorPose, desiredEndEffectorTwist, feedForwardEndEffectorSpatialAcceleration, currentTwist);
    }

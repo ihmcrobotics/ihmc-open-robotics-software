@@ -26,6 +26,7 @@ import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.utilities.screwTheory.Twist;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
@@ -133,12 +134,12 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
                worldFrame, stepTime, waypointHeight, registry));
          trajectoryInitialized.put(robotSide, new BooleanYoVariable(robotSide.getCamelCaseNameForStartOfExpression() + "TrajectoryInitialized", registry));
          EndEffectorPoseTwistAndSpatialAccelerationCalculator feetPoseTwistAndSpatialAccelerationCalculator = new EndEffectorPoseTwistAndSpatialAccelerationCalculator(
-        		 fullRobotModel.getEndEffector(robotSide, LimbName.LEG), fullRobotModel.getEndEffectorFrame(robotSide, LimbName.LEG), elevatorFrame, twistCalculator);
+        		 fullRobotModel.getEndEffector(robotSide, LimbName.LEG), fullRobotModel.getEndEffectorFrame(robotSide, LimbName.LEG), twistCalculator);
          footPoseTwistAndSpatialAccelerationCalculators.put(robotSide, feetPoseTwistAndSpatialAccelerationCalculator);
 
          String controlModuleNamePrefix = robotSide.getCamelCaseNameForStartOfExpression() + "Leg";
          RigidBodySpatialAccelerationControlModule rigidBodySpatialAccelerationControlModule = new RigidBodySpatialAccelerationControlModule(
-               controlModuleNamePrefix, elevatorFrame, twistCalculator, fullRobotModel.getEndEffector(robotSide, LimbName.LEG),
+               controlModuleNamePrefix, twistCalculator, fullRobotModel.getEndEffector(robotSide, LimbName.LEG),
                fullRobotModel.getEndEffectorFrame(robotSide, LimbName.LEG), registry);
 
          footSpatialAccelerationControlModules.put(robotSide, rigidBodySpatialAccelerationControlModule);
@@ -369,15 +370,16 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          EndEffectorPoseTwistAndSpatialAccelerationCalculator footPoseTwistAndSpatialAccelerationCalculator = footPoseTwistAndSpatialAccelerationCalculators
                .get(swingSide);
+         RigidBody elevator = fullRobotModel.getElevator();
 
          FramePose desiredPose = footPoseTwistAndSpatialAccelerationCalculator.calculateDesiredEndEffectorPoseFromDesiredPositions(positionToPack,
                desiredSwingFootOrientation.getFrameOrientationCopy());
          Twist desiredTwist = footPoseTwistAndSpatialAccelerationCalculator.calculateDesiredEndEffectorTwistFromDesiredVelocities(velocityToPack,
-               angularVelocityToPack);
+               angularVelocityToPack, elevator);
          SpatialAccelerationVector feedForwardSpatialAcceleration = footPoseTwistAndSpatialAccelerationCalculator
-               .calculateDesiredEndEffectorSpatialAccelerationFromDesiredAccelerations(accelerationToPack, angularAccelerationToPack);
+               .calculateDesiredEndEffectorSpatialAccelerationFromDesiredAccelerations(accelerationToPack, angularAccelerationToPack, elevator);
 
-         footSpatialAccelerationControlModules.get(swingSide).doPositionControl(desiredPose, desiredTwist, feedForwardSpatialAcceleration);
+         footSpatialAccelerationControlModules.get(swingSide).doPositionControl(desiredPose, desiredTwist, feedForwardSpatialAcceleration, elevator);
          SpatialAccelerationVector footAcceleration = new SpatialAccelerationVector();
          footSpatialAccelerationControlModules.get(swingSide).packAcceleration(footAcceleration);
          setEndEffectorSpatialAcceleration(swingSide, LimbName.LEG, footAcceleration);
@@ -571,14 +573,15 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       EndEffectorPoseTwistAndSpatialAccelerationCalculator footPoseTwistAndSpatialAccelerationCalculator = footPoseTwistAndSpatialAccelerationCalculators
             .get(supportSide);
+      RigidBody elevator = fullRobotModel.getElevator();
       FramePose desiredPose = footPoseTwistAndSpatialAccelerationCalculator.calculateDesiredEndEffectorPoseFromDesiredPositions(desiredEndEffectorPosition,
             desiredEndEffectorOrientation);
       Twist desiredTwist = footPoseTwistAndSpatialAccelerationCalculator.calculateDesiredEndEffectorTwistFromDesiredVelocities(desiredLinearVelocity,
-            desiredAngularVelocity);
+            desiredAngularVelocity, elevator );
       SpatialAccelerationVector feedForwardSpatialAcceleration = footPoseTwistAndSpatialAccelerationCalculator
-            .calculateDesiredEndEffectorSpatialAccelerationFromDesiredAccelerations(desiredLinearAcceleration, desiredAngularAcceleration);
+            .calculateDesiredEndEffectorSpatialAccelerationFromDesiredAccelerations(desiredLinearAcceleration, desiredAngularAcceleration, elevator);
 
-      footSpatialAccelerationControlModules.get(supportSide).doPositionControl(desiredPose, desiredTwist, feedForwardSpatialAcceleration);     
+      footSpatialAccelerationControlModules.get(supportSide).doPositionControl(desiredPose, desiredTwist, feedForwardSpatialAcceleration, fullRobotModel.getElevator());     
       SpatialAccelerationVector footAcceleration = new SpatialAccelerationVector();
       footSpatialAccelerationControlModules.get(supportSide).packAcceleration(footAcceleration);
       setEndEffectorSpatialAcceleration(supportSide, LimbName.LEG, footAcceleration);

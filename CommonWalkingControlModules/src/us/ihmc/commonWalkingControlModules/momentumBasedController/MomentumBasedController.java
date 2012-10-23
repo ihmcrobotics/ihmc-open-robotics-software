@@ -160,7 +160,7 @@ public class MomentumBasedController implements RobotController
 
          EndEffectorPoseTwistAndSpatialAccelerationCalculator feetPoseTwistAndSpatialAccelerationCalculator =
             new EndEffectorPoseTwistAndSpatialAccelerationCalculator(fullRobotModel.getEndEffector(robotSide, LimbName.LEG),
-               fullRobotModel.getEndEffectorFrame(robotSide, LimbName.LEG), elevatorFrame, twistCalculator);
+               fullRobotModel.getEndEffectorFrame(robotSide, LimbName.LEG), twistCalculator);
          footPoseTwistAndSpatialAccelerationCalculators.put(robotSide, feetPoseTwistAndSpatialAccelerationCalculator);
       }
 
@@ -510,7 +510,7 @@ public class MomentumBasedController implements RobotController
                      // use zero angular acceleration and zero linear acceleration of origin
                      desiredEndEffectorAccelerationInWorld.set(
                          footPoseTwistAndSpatialAccelerationCalculators.get(robotSide).calculateDesiredEndEffectorSpatialAccelerationFromDesiredAccelerations(
-                            new FrameVector(worldFrame), new FrameVector(worldFrame)));
+                            new FrameVector(worldFrame), new FrameVector(worldFrame), fullRobotModel.getElevator()));
                   }
 
                }
