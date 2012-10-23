@@ -127,7 +127,6 @@ public class YoEntryBoxTest
    {
       SimpleController controller = new SimpleController();
       SimulationConstructionSet scs = setupSCS(controller);
-      StandardSimulationGUI scsGUI = scs.getStandardSimulationGUI();
       scs.setupEntryBox("largeEnumVariable");
       scs.setupEntryBox("badGreekVariable");
       scs.setupEntryBox("smallEnumVariable");
