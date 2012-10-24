@@ -16,7 +16,6 @@ import us.ihmc.commonWalkingControlModules.controlModules.NewGeometricVirtualToe
 import us.ihmc.commonWalkingControlModules.controlModules.PartialCenterOfMassHeightControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.SacrificeDeltaCMPDesiredCoPAndCMPControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.TeeterTotterLegStrengthCalculator;
-import us.ihmc.commonWalkingControlModules.controlModules.pelvisOrientation.AxisAnglePelvisOrientationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.velocityViaCoP.CapturabilityBasedDesiredCoPVisualizer;
 import us.ihmc.commonWalkingControlModules.controlModules.velocityViaCoP.SimpleDesiredCenterOfPressureFilter;
 import us.ihmc.commonWalkingControlModules.controlModules.velocityViaCoP.SpeedControllingDesiredCoPCalculator;
@@ -72,7 +71,6 @@ public class MomentumBasedController implements RobotController
    private final ProcessedOutputsInterface processedOutputs;
    private final InverseDynamicsCalculator inverseDynamicsCalculator;
 
-   private final AxisAnglePelvisOrientationControlModule orientationControlModule;
    private final BipedSupportPolygons bipedSupportPolygons;
    private final VirtualToePointCalculator virtualToePointCalculator;
    private final CenterOfMassHeightControlModule centerOfMassHeightControlModule;
@@ -165,7 +163,6 @@ public class MomentumBasedController implements RobotController
       }
 
       this.desiredHeadingControlModule = desiredHeadingControlModule;
-      this.orientationControlModule = new AxisAnglePelvisOrientationControlModule(processedSensors, referenceFrames, null, registry, false);
       midFeetZUp = referenceFrames.getMidFeetZUpFrame();
 
       for (RobotSide robotSide : RobotSide.values())
@@ -208,7 +205,6 @@ public class MomentumBasedController implements RobotController
       centerOfMassHeightControlModule.setParametersForR2InverseDynamics();
       
       this.totalMass = TotalMassCalculator.computeSubTreeMass(elevator);
-      orientationControlModule.setupParametersForR2();
 
       this.highLevelHumanoidController = highLevelHumanoidController;
       optimizer = new BipedMomentumOptimizer(fullRobotModel, referenceFrames.getCenterOfMassFrame(), controlDT, twistCalculator, registry);
