@@ -15,6 +15,7 @@ import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTools;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.EnumYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.MatrixYoVariableConversionTools;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
@@ -33,7 +34,7 @@ public abstract class MomentumOptimizer implements Lmdif_fcn
    private final int m;
    private final int n;
    private final double[] fvec;
-   private final double tol = 1e-9;
+   private final double tol = 1e-15; // 1e-9;
    private final int[] info = new int[2];
 
    protected final double controlDT;
@@ -47,6 +48,8 @@ public abstract class MomentumOptimizer implements Lmdif_fcn
    private final YoFrameVector desiredAngularCentroidalMomentumRate;
    private final YoFrameVector linearCentroidalMomentumRateError;
    private final YoFrameVector angularCentroidalMomentumRateError;
+   
+   private final EnumYoVariable<LMDiffInfoCode> infoEnum = EnumYoVariable.create("lmdiffInfo", LMDiffInfoCode.class, registry);
 
    private final InverseDynamicsJoint[] jointsInOrder;
 
@@ -108,6 +111,7 @@ public abstract class MomentumOptimizer implements Lmdif_fcn
 
       info[1] = 0;
       Minpack_f77.lmdif1_f77(this, m, n, initialGuess, fvec, tol, info);    // also sets the result in the full robot model
+      infoEnum.set(LMDiffInfoCode.getCodeFromInt(info[1]));
       fcn(m, n, initialGuess, fvec, info);
    }
 
@@ -146,4 +150,22 @@ public abstract class MomentumOptimizer implements Lmdif_fcn
    protected abstract void updateBeforeSolving(double[] x);
 
    protected abstract void updateAtStartOfFcn(double[] x);
+
+   private static enum LMDiffInfoCode
+   {
+      IMPROPER_INPUT_PARAMETERS(0), SOS_ERROR_WITHIN_TOL(1), SOL_ERROR_WITHIN_TOL(2), SOS_AND_SOL_WITHIN_TOL(3), ORTHOGONAL_TO_JACOBIAN(4), MAX_CALLS_REACHED(5), TOL_TOO_SMALL_SOS(6), TOL_TOO_SMALL_SOL(7);
+      private final int code;
+      private LMDiffInfoCode(int code)
+      {
+         this.code = code;
+      }
+
+      private static LMDiffInfoCode getCodeFromInt(int code)
+      {
+         for (LMDiffInfoCode info : values())
+            if (info.code == code)
+               return info;
+         throw new RuntimeException("Code " + code + " not recognized");
+      }
+   }
 }
