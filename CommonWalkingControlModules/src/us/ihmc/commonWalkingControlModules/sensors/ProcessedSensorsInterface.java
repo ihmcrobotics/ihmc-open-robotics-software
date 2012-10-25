@@ -77,5 +77,4 @@ public interface ProcessedSensorsInterface
    public abstract HashMap<FramePoint2d, Boolean> getContactMap(RobotSide robotSide);
    
    public abstract FrameVector getFingerForce(RobotSide robotSide, FingerName fingerName);
-   public abstract SideDependentList<EnumMap<FingerName, YoFrameVector>> getFingerForces();
 }
