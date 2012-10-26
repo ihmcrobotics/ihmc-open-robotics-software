@@ -110,7 +110,28 @@ public abstract class MomentumOptimizer implements Lmdif_fcn
       updateBeforeSolving(initialGuess);
 
       info[1] = 0;
-      Minpack_f77.lmdif1_f77(this, m, n, initialGuess, fvec, tol, info);    // also sets the result in the full robot model
+//      Minpack_f77.lmdif1_f77(this, m, n, initialGuess, fvec, tol, info);    // also sets the result in the full robot model
+
+
+      // TODO: make fields:
+      double diag[] = new double[n+1];
+      int nfev[] = new int[2];
+      double fjac[][] = new double[m+1][n+1];
+      int ipvt[] = new int[n+1];
+      double qtf[] = new double[n+1];
+
+
+      double factor = 100.0;
+      int maxfev = 200*(n + 1);
+      double ftol = 0.0; // tol;
+      double xtol = tol;
+      double gtol = 0.0;
+      double epsfcn = 0.0;
+      int mode = 1;
+      int nprint = 0;
+
+      Minpack_f77.lmdif_f77(this, m, n, initialGuess, fvec, ftol, xtol, gtol, maxfev, epsfcn, diag, mode, factor, nprint, info, nfev, fjac, ipvt, qtf);
+      
       infoEnum.set(LMDiffInfoCode.getCodeFromInt(info[1]));
       fcn(m, n, initialGuess, fvec, info);
    }
@@ -153,7 +174,7 @@ public abstract class MomentumOptimizer implements Lmdif_fcn
 
    private static enum LMDiffInfoCode
    {
-      IMPROPER_INPUT_PARAMETERS(0), SOS_ERROR_WITHIN_TOL(1), SOL_ERROR_WITHIN_TOL(2), SOS_AND_SOL_WITHIN_TOL(3), ORTHOGONAL_TO_JACOBIAN(4), MAX_CALLS_REACHED(5), TOL_TOO_SMALL_SOS(6), TOL_TOO_SMALL_SOL(7);
+      IMPROPER_INPUT_PARAMETERS(0), SOS_ERROR_WITHIN_TOL(1), SOL_ERROR_WITHIN_TOL(2), SOS_AND_SOL_WITHIN_TOL(3), ORTHOGONAL_TO_JACOBIAN(4), MAX_CALLS_REACHED(5), TOL_TOO_SMALL_SOS(6), TOL_TOO_SMALL_SOL(7), TOL_TOO_SMALL_ORTH(8);
       private final int code;
       private LMDiffInfoCode(int code)
       {
