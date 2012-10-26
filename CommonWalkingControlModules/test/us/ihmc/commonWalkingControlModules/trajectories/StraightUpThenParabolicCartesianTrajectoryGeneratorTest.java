@@ -11,14 +11,7 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
-import com.yobotics.simulationconstructionset.Robot;
-import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.robotController.RobotController;
-import com.yobotics.simulationconstructionset.util.graphics.BagOfBalls;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 
 public class StraightUpThenParabolicCartesianTrajectoryGeneratorTest
 {
@@ -33,9 +26,9 @@ public class StraightUpThenParabolicCartesianTrajectoryGeneratorTest
       FrameVector velocityToPack = new FrameVector(referenceFrame);
       FrameVector accelerationToPack = new FrameVector(referenceFrame);
 
-      int n = 1000;
+      int nTests = 100;
       double epsilon = 1e-3;
-      for (int i = 0; i < n; i++)
+      for (int i = 0; i < nTests; i++)
       {
          double straightUpVelocity = random.nextDouble();
          double parabolicTime = straightUpVelocity + random.nextDouble();
