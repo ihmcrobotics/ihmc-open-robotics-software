@@ -113,6 +113,7 @@ public class MomentumBasedController implements RobotController
    private final HashMap<RevoluteJoint, DoubleYoVariable> desiredAccelerationYoVariables = new HashMap<RevoluteJoint, DoubleYoVariable>();
 
    private final SideDependentList<Double> lambdas = new SideDependentList<Double>();
+   private final SideDependentList<DoubleYoVariable> kValues = new SideDependentList<DoubleYoVariable>();
 
    private final FootPolygonVisualizer footPolygonVisualizer;
    private final DoubleYoVariable omega0 = new DoubleYoVariable("omega0", registry);
@@ -235,6 +236,11 @@ public class MomentumBasedController implements RobotController
          {
             desiredAccelerationYoVariables.put((RevoluteJoint) joint, new DoubleYoVariable(joint.getName() + "qdd_d", registry));
          }
+      }
+      
+      for (RobotSide robotSide : RobotSide.values())
+      {
+         kValues.put(robotSide, new DoubleYoVariable(robotSide.getCamelCaseNameForStartOfExpression() + "KValue", registry));
       }
       
       this.doChestOrientationControl = doChestOrientationControl;
@@ -392,10 +398,10 @@ public class MomentumBasedController implements RobotController
       double omega0 = Math.sqrt(omega0Squared);
       this.omega0.set(omega0);
       double k1PlusK2 = omega0Squared * totalMass;
-      SideDependentList<Double> ks = new SideDependentList<Double>();
       for (RobotSide robotSide : RobotSide.values())
       {
-         ks.put(robotSide, lambdas.get(robotSide) * k1PlusK2);
+         double k = lambdas.get(robotSide) * k1PlusK2;
+         kValues.get(robotSide).set(k);
       }
 
       FrameVector totalgroundReactionMoment = determineGroundReactionMoment();
@@ -413,7 +419,7 @@ public class MomentumBasedController implements RobotController
          FramePoint virtualToePoint = virtualToePointsOnSole.get(robotSide);
          virtualToePoint.changeFrame(frame);
          groundReactionForce.sub(virtualToePoint);
-         groundReactionForce.scale(ks.get(robotSide));
+         groundReactionForce.scale(kValues.get(robotSide).getDoubleValue());
 
          FrameVector groundReactionMoment = new FrameVector(totalgroundReactionMoment);
 
