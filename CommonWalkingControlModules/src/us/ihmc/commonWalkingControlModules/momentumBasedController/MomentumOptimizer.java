@@ -34,7 +34,7 @@ public abstract class MomentumOptimizer implements Lmdif_fcn
    private final int m;
    private final int n;
    private final double[] fvec;
-   private final double tol = 1e-15; // 1e-9;
+   private final double tol = 1e-9;
    private final int[] info = new int[2];
 
    protected final double controlDT;
@@ -125,7 +125,7 @@ public abstract class MomentumOptimizer implements Lmdif_fcn
       int maxfev = 200*(n + 1);
       double ftol = 0.0; // tol;
       double xtol = tol;
-      double gtol = 0.0;
+      double gtol = tol;
       double epsfcn = 0.0;
       int mode = 1;
       int nprint = 0;
