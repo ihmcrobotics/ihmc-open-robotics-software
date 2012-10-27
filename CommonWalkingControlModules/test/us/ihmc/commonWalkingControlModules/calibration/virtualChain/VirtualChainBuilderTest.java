@@ -96,10 +96,9 @@ public class VirtualChainBuilderTest
       Point3d centerOfMass = new Point3d();
       exampleRobot.computeCenterOfMass(centerOfMass);
 
-      System.out.println("centerOfMass = " + centerOfMass);
-      System.out.println("shouldBeExactCenterOfMass = " + shouldBeExactCenterOfMass);
-
-      System.out.println("\nExact VirtualChainCenterOfMassEstimator:\n" + estimator);
+//      System.out.println("centerOfMass = " + centerOfMass);
+//      System.out.println("shouldBeExactCenterOfMass = " + shouldBeExactCenterOfMass);
+//      System.out.println("\nExact VirtualChainCenterOfMassEstimator:\n" + estimator);
 
       VirtualChainBuilderTest.assertFramePointEquals(centerOfMass, shouldBeExactCenterOfMass, 1e-7);
       ArrayList<ReferenceFrame> referenceFrames = VirtualChainConstructorFromARobot.getReferenceFrames(virtualLinkFromJoint);
@@ -155,7 +154,7 @@ public class VirtualChainBuilderTest
          VirtualChainCenterOfMassEstimator virtualChainCenterOfMassEstimator = new VirtualChainCenterOfMassEstimator(baseFrame,
                                                                                   estimatedVirtualChainParameterVectors);
 
-         System.out.println("VirtualChainCenterOfMassEstimator:\n" + virtualChainCenterOfMassEstimator);
+//         System.out.println("VirtualChainCenterOfMassEstimator:\n" + virtualChainCenterOfMassEstimator);
 
          // Now compare and make sure it is close
 

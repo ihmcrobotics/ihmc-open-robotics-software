@@ -24,7 +24,8 @@ public class TakeoffLandingCartesianTrajectoryGeneratorTest
    public void testOne()
    {
       boolean pause = false;
-      System.out.println("Pausing...");
+      if (pause)
+         System.out.println("Pausing...");
       while(pause)
       {
          try
