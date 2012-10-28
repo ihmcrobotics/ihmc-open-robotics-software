@@ -123,9 +123,9 @@ public abstract class MomentumOptimizer implements Lmdif_fcn
 
       double factor = 100.0;
       int maxfev = 200*(n + 1);
-      double ftol = 0.0; // tol;
+      double ftol = tol;
       double xtol = tol;
-      double gtol = tol;
+      double gtol = 0.0;
       double epsfcn = 0.0;
       int mode = 1;
       int nprint = 0;
