@@ -95,8 +95,10 @@ public abstract class MomentumOptimizer implements Lmdif_fcn
       MatrixYoVariableConversionTools.storeInYoVariables(previousCentroidalMomentumMatrix, yoPreviousCentroidalMomentumMatrix);
    }
 
-   public void solveForRootJointAcceleration(double[] initialGuess, FrameVector desiredAngularCentroidalMomentumRate, FrameVector desiredLinearCentroidalMomentumRate)
+   public void solveForRootJointAcceleration(FrameVector desiredAngularCentroidalMomentumRate, FrameVector desiredLinearCentroidalMomentumRate)
    {
+      double[] x = new double[n + 1];
+      
       this.desiredAngularCentroidalMomentumRate.set(desiredAngularCentroidalMomentumRate);
       this.desiredLinearCentroidalMomentumRate.set(desiredLinearCentroidalMomentumRate);
 
@@ -107,7 +109,7 @@ public abstract class MomentumOptimizer implements Lmdif_fcn
               controlDT);
       MatrixYoVariableConversionTools.storeInYoVariables(previousCentroidalMomentumMatrix, yoPreviousCentroidalMomentumMatrix);
 
-      updateBeforeSolving(initialGuess);
+      updateBeforeSolving(x);
 
       info[1] = 0;
 //      Minpack_f77.lmdif1_f77(this, m, n, initialGuess, fvec, tol, info);    // also sets the result in the full robot model
@@ -130,10 +132,11 @@ public abstract class MomentumOptimizer implements Lmdif_fcn
       int mode = 1;
       int nprint = 0;
 
-      Minpack_f77.lmdif_f77(this, m, n, initialGuess, fvec, ftol, xtol, gtol, maxfev, epsfcn, diag, mode, factor, nprint, info, nfev, fjac, ipvt, qtf);
+      Minpack_f77.lmdif_f77(this, m, n, x, fvec, ftol, xtol, gtol, maxfev, epsfcn, diag, mode, factor, nprint, info, nfev, fjac, ipvt, qtf);
       
       infoEnum.set(LMDiffInfoCode.getCodeFromInt(info[1]));
-      fcn(m, n, initialGuess, fvec, info);
+      if (infoEnum.getEnumValue() != LMDiffInfoCode.SOL_ERROR_WITHIN_TOL && infoEnum.getEnumValue() != LMDiffInfoCode.SOS_AND_SOL_WITHIN_TOL)
+         throw new RuntimeException("infoEnum = " + infoEnum.getEnumValue());
    }
 
    public final void fcn(int m, int n, double[] x, double[] fvec, int[] iflag)
