@@ -77,6 +77,9 @@ public class VirtualChainCenterOfMassEstimator implements CenterOfMassEstimator
          virtualChainParameterVectors.add(frameVector);
       }
 
+      if (reader != null)
+         reader.close();
+
       System.out.println("Virtual chain parameters have been successfully read from the file " + file.toString());
    }
 
