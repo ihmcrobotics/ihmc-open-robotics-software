@@ -30,13 +30,12 @@ public class CommonWalkingGuideLineCalculator implements GuideLineCalculator
    private final DoubleYoVariable velocityGainY = new DoubleYoVariable("velocityGainY", registry);
 
 
-   private final double footLength, footBack;
+//   private final double footLength, footBack;
 
-   public CommonWalkingGuideLineCalculator(CommonWalkingReferenceFrames referenceFrames, double footLength, double footBack, BooleanYoVariable onFinalStep,
-           YoVariableRegistry parentRegistry)
+   public CommonWalkingGuideLineCalculator(CommonWalkingReferenceFrames referenceFrames, BooleanYoVariable onFinalStep, YoVariableRegistry parentRegistry)
    {
-      this.footLength = footLength;
-      this.footBack = footBack;
+//      this.footLength = footLength;
+//      this.footBack = footBack;
       this.footZUpFrames = referenceFrames.getAnkleZUpReferenceFrames();
       parentRegistry.addChild(registry);
    }

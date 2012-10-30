@@ -6,7 +6,6 @@ import us.ihmc.commonWalkingControlModules.sensors.LegToTrustForVelocityReadOnly
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.AbstractInverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.Twist;
