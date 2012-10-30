@@ -99,21 +99,19 @@ public class MomentumOptimizerTest
       YoVariableRegistry registry = new YoVariableRegistry("test");
       MomentumOptimizer optimizer = new BasicMomentumOptimizer(rootJoint, elevator, centerOfMassFrame, dt, registry);
 
-      initializeOptimizer(elevator, rootJoint, joints, dt, desiredAngularCentroidalMomentumRate, desiredLinearCentroidalMomentumRate, optimizer, null);
+      initializeOptimizer(elevator, rootJoint, joints, dt, desiredAngularCentroidalMomentumRate, desiredLinearCentroidalMomentumRate, optimizer);
       checkAgainstInverseDynamicsCalculator(rootJoint, desiredAngularCentroidalMomentumRate, desiredLinearCentroidalMomentumRate, 1e-6);
       checkAgainstNumericalDifferentiation(rootJoint, joints, dt, desiredAngularCentroidalMomentumRate, desiredLinearCentroidalMomentumRate, 1e-5);
    }
 
 
    public static void initializeOptimizer(RigidBody elevator, SixDoFJoint rootJoint, List<RevoluteJoint> joints, double dt,
-         FrameVector desiredAngularCentroidalMomentumRate, FrameVector desiredLinearCentroidalMomentumRate, MomentumOptimizer optimizer, double[] initialGuess)
+         FrameVector desiredAngularCentroidalMomentumRate, FrameVector desiredLinearCentroidalMomentumRate, MomentumOptimizer optimizer)
    {
       optimizer.initialize();
       ScrewTestTools.integrateVelocities(rootJoint, dt);
       ScrewTestTools.integrateVelocities(joints, dt);
       elevator.updateFramesRecursively();
-      if (initialGuess == null)
-         initialGuess = new double[rootJoint.getDegreesOfFreedom() + 1];
       optimizer.solveForRootJointAcceleration(desiredAngularCentroidalMomentumRate, desiredLinearCentroidalMomentumRate);
    }
 
