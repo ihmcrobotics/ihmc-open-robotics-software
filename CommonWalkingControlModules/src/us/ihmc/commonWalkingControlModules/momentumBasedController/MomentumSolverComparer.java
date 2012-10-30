@@ -101,8 +101,6 @@ public class MomentumSolverComparer
       centerOfMassFrame.update();
       MomentumOptimizer optimizer = createAndInitializeMomentumOptimizer(elevator, rootJoint, joints, dt, centerOfMassFrame);
 
-      double[] initialGuess = new double[rootJoint.getDegreesOfFreedom() + 1];
-
       long startNanos = System.nanoTime();
 
       for (int i = 0; i < nTests; i++)
@@ -110,7 +108,7 @@ public class MomentumSolverComparer
          FrameVector desiredAngularCentroidalMomentumRate = new FrameVector(centerOfMassFrame, RandomTools.getRandomVector(random));
          FrameVector desiredLinearCentroidalMomentumRate = new FrameVector(centerOfMassFrame, RandomTools.getRandomVector(random));
 
-         optimizer.solveForRootJointAcceleration(initialGuess, desiredAngularCentroidalMomentumRate, desiredLinearCentroidalMomentumRate);
+         optimizer.solveForRootJointAcceleration(desiredAngularCentroidalMomentumRate, desiredLinearCentroidalMomentumRate);
       }
 
       long stopNanos = System.nanoTime();

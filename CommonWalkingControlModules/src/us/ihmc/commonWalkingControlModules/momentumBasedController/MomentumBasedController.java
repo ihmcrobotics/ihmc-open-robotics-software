@@ -208,7 +208,7 @@ public class MomentumBasedController implements RobotController
       this.totalMass = TotalMassCalculator.computeSubTreeMass(elevator);
 
       this.highLevelHumanoidController = highLevelHumanoidController;
-      optimizer = new BipedMomentumOptimizer(fullRobotModel, referenceFrames.getCenterOfMassFrame(), controlDT, twistCalculator, registry);
+      optimizer = new BipedMomentumOptimizer(fullRobotModel, referenceFrames.getCenterOfMassFrame(), controlDT, twistCalculator, registry, 3e-2, 5e-2);
 
       this.desiredPelvisLinearAcceleration = new YoFrameVector("desiredPelvisLinearAcceleration", "", referenceFrames.getPelvisFrame(), registry);
       this.desiredPelvisAngularAcceleration = new YoFrameVector("desiredPelvisAngularAcceleration", "", referenceFrames.getPelvisFrame(), registry);
@@ -530,20 +530,7 @@ public class MomentumBasedController implements RobotController
          inverseDynamicsCalculator.setExternalWrench(fullRobotModel.getHand(robotSide), handWrench);
       }
 
-     // Use the current values as the initial guess for the next optimization.
-      double[] initialGuess = new double[]
-            {
-            0.0,
-            desiredPelvisAngularAcceleration.getX(),
-            desiredPelvisAngularAcceleration.getY(),
-            desiredPelvisAngularAcceleration.getZ(),
-            desiredPelvisLinearAcceleration.getX(),
-            desiredPelvisLinearAcceleration.getY(),
-            desiredPelvisLinearAcceleration.getZ(),
-            };
-
-
-      optimizer.solveForRootJointAcceleration(initialGuess, desiredAngularCentroidalMomentumRate, desiredLinearCentroidalMomentumRate);
+      optimizer.solveForRootJointAcceleration(desiredAngularCentroidalMomentumRate, desiredLinearCentroidalMomentumRate);
    }
 
    private void fixDesiredCoPNumericalRoundoff(FramePoint2d desiredCoP, FrameConvexPolygon2d polygon)

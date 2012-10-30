@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import javax.media.j3d.Transform3D;
@@ -87,19 +88,6 @@ public class MomentumOptimizerTest
       doChecks(random, elevator, rootJoint, joints);
    }
 
-   private MomentumOptimizer createAndInitializeMomentumOptimizer(RigidBody elevator, SixDoFJoint rootJoint, ArrayList<RevoluteJoint> joints, double dt,
-           ReferenceFrame centerOfMassFrame)
-   {
-      YoVariableRegistry registry = new YoVariableRegistry("test");
-      MomentumOptimizer optimizer = new BasicMomentumOptimizer(rootJoint, elevator, centerOfMassFrame, dt, registry);
-      optimizer.initialize();
-      ScrewTestTools.integrateVelocities(rootJoint, dt);
-      ScrewTestTools.integrateVelocities(joints, dt);
-      elevator.updateFramesRecursively();
-
-      return optimizer;
-   }
-
    private void doChecks(Random random, RigidBody elevator, SixDoFJoint rootJoint, ArrayList<RevoluteJoint> joints)
    {
       double dt = 1e-8;
@@ -108,17 +96,28 @@ public class MomentumOptimizerTest
 
       FrameVector desiredAngularCentroidalMomentumRate = new FrameVector(centerOfMassFrame, RandomTools.getRandomVector(random));
       FrameVector desiredLinearCentroidalMomentumRate = new FrameVector(centerOfMassFrame, RandomTools.getRandomVector(random));
+      YoVariableRegistry registry = new YoVariableRegistry("test");
+      MomentumOptimizer optimizer = new BasicMomentumOptimizer(rootJoint, elevator, centerOfMassFrame, dt, registry);
 
-      MomentumOptimizer optimizer = createAndInitializeMomentumOptimizer(elevator, rootJoint, joints, dt, centerOfMassFrame);
-
-      double[] initialGuess = new double[rootJoint.getDegreesOfFreedom() + 1];
-      optimizer.solveForRootJointAcceleration(initialGuess, desiredAngularCentroidalMomentumRate, desiredLinearCentroidalMomentumRate);
-
+      initializeOptimizer(elevator, rootJoint, joints, dt, desiredAngularCentroidalMomentumRate, desiredLinearCentroidalMomentumRate, optimizer, null);
       checkAgainstInverseDynamicsCalculator(rootJoint, desiredAngularCentroidalMomentumRate, desiredLinearCentroidalMomentumRate, 1e-6);
       checkAgainstNumericalDifferentiation(rootJoint, joints, dt, desiredAngularCentroidalMomentumRate, desiredLinearCentroidalMomentumRate, 1e-5);
    }
 
-   private static void checkAgainstNumericalDifferentiation(SixDoFJoint rootJoint, ArrayList<RevoluteJoint> joints, double dt,
+
+   public static void initializeOptimizer(RigidBody elevator, SixDoFJoint rootJoint, List<RevoluteJoint> joints, double dt,
+         FrameVector desiredAngularCentroidalMomentumRate, FrameVector desiredLinearCentroidalMomentumRate, MomentumOptimizer optimizer, double[] initialGuess)
+   {
+      optimizer.initialize();
+      ScrewTestTools.integrateVelocities(rootJoint, dt);
+      ScrewTestTools.integrateVelocities(joints, dt);
+      elevator.updateFramesRecursively();
+      if (initialGuess == null)
+         initialGuess = new double[rootJoint.getDegreesOfFreedom() + 1];
+      optimizer.solveForRootJointAcceleration(desiredAngularCentroidalMomentumRate, desiredLinearCentroidalMomentumRate);
+   }
+
+   public static void checkAgainstNumericalDifferentiation(SixDoFJoint rootJoint, List<RevoluteJoint> joints, double dt,
            FrameVector desiredAngularCentroidalMomentumRate, FrameVector desiredLinearCentroidalMomentumRate, double epsilon)
    {
       desiredAngularCentroidalMomentumRate.checkReferenceFrameMatch(desiredLinearCentroidalMomentumRate.getReferenceFrame());
@@ -153,7 +152,7 @@ public class MomentumOptimizerTest
       JUnitTools.assertTuple3dEquals(desiredLinearCentroidalMomentumRate.getVector(), momentumRateNumerical.getLinearPartCopy(), epsilon);
    }
 
-   private static void checkAgainstInverseDynamicsCalculator(SixDoFJoint rootJoint, FrameVector desiredAngularCentroidalMomentumRate,
+   public static void checkAgainstInverseDynamicsCalculator(SixDoFJoint rootJoint, FrameVector desiredAngularCentroidalMomentumRate,
            FrameVector desiredLinearCentroidalMomentumRate, double epsilonInverseDynamics)
    {
       desiredAngularCentroidalMomentumRate.checkReferenceFrameMatch(desiredLinearCentroidalMomentumRate.getReferenceFrame());
