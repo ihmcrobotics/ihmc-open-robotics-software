@@ -9,6 +9,8 @@ import javax.vecmath.Vector3d;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.utilities.test.JUnitTools;
+
 
 public class KinematicPointTest 
 {
@@ -42,20 +44,23 @@ public class KinematicPointTest
 	@Test
 	public void testSetOffsetJointWithBothVectorAndXYAndZValuesAsParameters()
 	{
-		assertTrue(1.0 == kinematicPoint.getOffset().getX());
-		assertTrue(2.0 == kinematicPoint.getOffset().getY());
-		assertTrue(3.0 == kinematicPoint.getOffset().getZ());
+	   Robot robot = new Robot("testRobot");
+      KinematicPoint kinematicPoint = new KinematicPoint("testPoint", robot);
+      
+		assertTrue(0.0 == kinematicPoint.getOffsetCopy().getX());
+		assertTrue(0.0 == kinematicPoint.getOffsetCopy().getY());
+		assertTrue(0.0 == kinematicPoint.getOffsetCopy().getZ());
 
 		kinematicPoint.setOffsetJoint(3.0, 4.0, 7.0);
-		assertTrue(3.0 == kinematicPoint.getOffset().getX());
-		assertTrue(4.0 == kinematicPoint.getOffset().getY());
-		assertTrue(7.0 == kinematicPoint.getOffset().getZ());
+		assertTrue(3.0 == kinematicPoint.getOffsetCopy().getX());
+		assertTrue(4.0 == kinematicPoint.getOffsetCopy().getY());
+		assertTrue(7.0 == kinematicPoint.getOffsetCopy().getZ());
 		
 		Vector3d vectorTest = new Vector3d(9.0, 1.0, 5.0);
 		kinematicPoint.setOffsetJoint(vectorTest);
-		assertTrue(9.0 == kinematicPoint.getOffset().getX());
-		assertTrue(1.0 == kinematicPoint.getOffset().getY());
-		assertTrue(5.0 == kinematicPoint.getOffset().getZ());
+		assertTrue(9.0 == kinematicPoint.getOffsetCopy().getX());
+		assertTrue(1.0 == kinematicPoint.getOffsetCopy().getY());
+		assertTrue(5.0 == kinematicPoint.getOffsetCopy().getZ());
 	}
 	
 //	@Test
@@ -156,6 +161,19 @@ public class KinematicPointTest
 	}
 	
 	
-	
+	@Test
+	public void testChangeableOffset()
+	{
+	   Robot robot = new Robot("testRobot");
+	   
+	   KinematicPoint kinematicPoint = new KinematicPoint("kp_test", robot);
+	   
+	   Vector3d offset = new Vector3d(0.1, 0.2, 0.3);
+	   kinematicPoint.setOffsetJoint(offset);
+	   
+	   Vector3d offsetCopy = kinematicPoint.getOffsetCopy();
+	   
+	   JUnitTools.assertTuple3dEquals(offset, offsetCopy, 1e-14);
+	}
 
 }
