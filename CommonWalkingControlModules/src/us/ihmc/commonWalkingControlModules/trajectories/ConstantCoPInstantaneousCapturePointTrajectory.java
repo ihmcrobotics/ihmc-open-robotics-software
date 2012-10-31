@@ -25,7 +25,8 @@ public class ConstantCoPInstantaneousCapturePointTrajectory
    private final DoubleYoVariable moveTime;
    private final DoubleYoVariable currentTime;
 
-   public ConstantCoPInstantaneousCapturePointTrajectory(BipedSupportPolygons bipedSupportPolygons, double gravity, double deltaT, YoVariableRegistry parentRegistry)
+   public ConstantCoPInstantaneousCapturePointTrajectory(BipedSupportPolygons bipedSupportPolygons, double gravity, double deltaT,
+           YoVariableRegistry parentRegistry)
    {
       this.bipedSupportPolygons = bipedSupportPolygons;
       this.gravity = gravity;
@@ -33,7 +34,7 @@ public class ConstantCoPInstantaneousCapturePointTrajectory
       this.registry = new YoVariableRegistry(getClass().getSimpleName());
 
       ReferenceFrame referenceFrame = ReferenceFrame.getWorldFrame();
-      initialDesiredICP =  new YoFramePoint2d("initialDesiredICP", "", referenceFrame, registry);
+      initialDesiredICP = new YoFramePoint2d("initialDesiredICP", "", referenceFrame, registry);
       finalDesiredICP = new YoFramePoint2d("finalDesiredICP", "", referenceFrame, registry);
 
       moveTime = new DoubleYoVariable("icpTrajectoryMoveTime", registry);
@@ -45,6 +46,8 @@ public class ConstantCoPInstantaneousCapturePointTrajectory
 
    public void initialize(FramePoint2d initialDesiredICP, FramePoint2d finalDesiredICP, double moveTime, double omega0, double amountToBeInside)
    {
+      if (moveTime == 0.0)
+         throw new RuntimeException();
       initialDesiredICP.changeFrame(this.initialDesiredICP.getReferenceFrame());
       finalDesiredICP.changeFrame(this.finalDesiredICP.getReferenceFrame());
 
@@ -58,7 +61,7 @@ public class ConstantCoPInstantaneousCapturePointTrajectory
                                               comHeight, gravity);
       if (!initialDesiredICP.epsilonEquals(finalDesiredICP, 0.0))
       {
-         FrameConvexPolygon2d supportPolygon = bipedSupportPolygons.getSupportPolygonInMidFeetZUp(); // bipedSupportPolygons.getFootPolygonInAnkleZUp(supportSide);
+         FrameConvexPolygon2d supportPolygon = bipedSupportPolygons.getSupportPolygonInMidFeetZUp();    // bipedSupportPolygons.getFootPolygonInAnkleZUp(supportSide);
 
          FrameLine2d line = new FrameLine2d(initialDesiredICP, finalDesiredICP);
          line.changeFrame(supportPolygon.getReferenceFrame());
@@ -67,45 +70,42 @@ public class ConstantCoPInstantaneousCapturePointTrajectory
          equivalentConstantCoP.changeFrame(initialDesiredICP.getReferenceFrame());
          moveTime = EquivalentConstantCoPCalculator.computeMoveTime(initialDesiredICP, finalDesiredICP, equivalentConstantCoP, comHeight, gravity);
       }
+
       this.moveTime.set(moveTime);
    }
 
    public void pack(FramePoint2d desiredPosition, FrameVector2d desiredVelocity, double omega0)
    {
-//      double currentTime = isDone() ? moveTime.getDoubleValue() : this.currentTime.getDoubleValue();
-      double currentTime = this.currentTime.getDoubleValue();
+//    double currentTime = isDone() ? moveTime.getDoubleValue() : this.currentTime.getDoubleValue();
+      if (moveTime.getDoubleValue() > 0.0)
+      {
+         double currentTime = this.currentTime.getDoubleValue();
 
-      double expT = Math.exp(omega0 * currentTime);
-      double expTf = Math.exp(omega0 * moveTime.getDoubleValue());
-      double parameter = (expT - 1.0) / (expTf - 1.0);
-      double parameterd = omega0 * expT / (expTf - 1.0);
+         double expT = Math.exp(omega0 * currentTime);
+         double expTf = Math.exp(omega0 * moveTime.getDoubleValue());
+         double parameter = (expT - 1.0) / (expTf - 1.0);
+         double parameterd = omega0 * expT / (expTf - 1.0);
 
-      FrameVector2d initialToFinal = new FrameVector2d(finalDesiredICP.getFramePoint2dCopy());
-      initialToFinal.sub(initialDesiredICP.getFramePoint2dCopy());
+         FrameVector2d initialToFinal = new FrameVector2d(finalDesiredICP.getFramePoint2dCopy());
+         initialToFinal.sub(initialDesiredICP.getFramePoint2dCopy());
 
-      FrameVector2d offset = new FrameVector2d(initialToFinal);
-      offset.scale(parameter);
-      FramePoint2d desiredICPLocal = initialDesiredICP.getFramePoint2dCopy();
-      desiredICPLocal.add(offset);
-      desiredICPLocal.changeFrame(desiredPosition.getReferenceFrame());
-      desiredPosition.set(desiredICPLocal);
+         FrameVector2d offset = new FrameVector2d(initialToFinal);
+         offset.scale(parameter);
+         FramePoint2d desiredICPLocal = initialDesiredICP.getFramePoint2dCopy();
+         desiredICPLocal.add(offset);
+         desiredICPLocal.changeFrame(desiredPosition.getReferenceFrame());
+         desiredPosition.set(desiredICPLocal);
 
-//      if (isDone())
-//      {
-//         desiredVelocity.set(0.0, 0.0);
-//      }
-//      else
-//      {
-//         FrameVector2d desiredICPVelocityLocal = new FrameVector2d(initialToFinal);
-//         desiredICPVelocityLocal.scale(parameterd);
-//         desiredICPVelocityLocal.changeFrame(desiredVelocity.getReferenceFrame());
-//         desiredVelocity.set(desiredICPVelocityLocal);
-//      }
-      
-      FrameVector2d desiredICPVelocityLocal = new FrameVector2d(initialToFinal);
-      desiredICPVelocityLocal.scale(parameterd);
-      desiredICPVelocityLocal.changeFrame(desiredVelocity.getReferenceFrame());
-      desiredVelocity.set(desiredICPVelocityLocal);
+         FrameVector2d desiredICPVelocityLocal = new FrameVector2d(initialToFinal);
+         desiredICPVelocityLocal.scale(parameterd);
+         desiredICPVelocityLocal.changeFrame(desiredVelocity.getReferenceFrame());
+         desiredVelocity.set(desiredICPVelocityLocal);
+      }
+      else
+      {
+         finalDesiredICP.getFramePoint2dAndChangeFrame(desiredPosition);
+         desiredVelocity.set(finalDesiredICP.getReferenceFrame(), 0.0, 0.0);
+      }
 
       this.currentTime.add(deltaT);
    }
