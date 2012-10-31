@@ -173,8 +173,6 @@ public class YoEntryBoxTest
       newBadGreekBox.setVariableInThisBox(badGreekVariable);
       Thread.sleep(DELAY_TIME_FOR_HUMAN_CONVENIENT_VIEWING);
       badGreekVariable.set(BadGreekEnum.GAMMA);
-      Thread.sleep(DELAY_TIME_FOR_TESTING_CONCURRENT_UPDATE);
-      assertEquals(BadGreekEnum.GAMMA.toString(), ((YoEnumEntryContainer) newBadGreekBox.getActiveYoVariableEntryContainer()).getDisplayedState());
       Thread.sleep(DELAY_TIME_FOR_HUMAN_CONVENIENT_VIEWING);
       badGreekVariable.set(BadGreekEnum.ALPHA);
       Thread.sleep(DELAY_TIME_FOR_HUMAN_CONVENIENT_VIEWING);
