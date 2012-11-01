@@ -59,7 +59,8 @@ public class ConstantCoPInstantaneousCapturePointTrajectory
       double comHeight = gravity / MathTools.square(omega0);
       FramePoint2d equivalentConstantCoP = EquivalentConstantCoPCalculator.computeEquivalentConstantCoP(initialDesiredICP, finalDesiredICP, moveTime,
                                               comHeight, gravity);
-      if (!initialDesiredICP.epsilonEquals(finalDesiredICP, 0.0))
+      double epsilon = 1e-12;
+      if (!initialDesiredICP.epsilonEquals(finalDesiredICP, epsilon))
       {
          FrameConvexPolygon2d supportPolygon = bipedSupportPolygons.getSupportPolygonInMidFeetZUp();    // bipedSupportPolygons.getFootPolygonInAnkleZUp(supportSide);
 
@@ -70,6 +71,8 @@ public class ConstantCoPInstantaneousCapturePointTrajectory
          equivalentConstantCoP.changeFrame(initialDesiredICP.getReferenceFrame());
          moveTime = EquivalentConstantCoPCalculator.computeMoveTime(initialDesiredICP, finalDesiredICP, equivalentConstantCoP, comHeight, gravity);
       }
+      if (Double.isInfinite(moveTime))
+         throw new RuntimeException();
 
       this.moveTime.set(moveTime);
    }
