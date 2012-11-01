@@ -25,14 +25,16 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Point3f;
 import javax.vecmath.Vector3d;
 
+import stl_loader.StlFile;
 import us.ihmc.utilities.InertiaTools;
 import us.ihmc.utilities.math.geometry.GeometryGenerator;
 
+import com.eteks.sweethome3d.j3d.DAELoader;
 import com.mnstarfire.loaders3d.Loader3DS;
+import com.sun.j3d.loaders.Loader;
 import com.sun.j3d.utils.picking.PickTool;
 import com.yobotics.simulationconstructionset.robotdefinition.AppearanceDefinition;
 import com.yobotics.simulationconstructionset.robotdefinition.LinkGraphicsDefinition;
-import com.yobotics.simulationconstructionset.robotdefinition.linkgraphicinstructions.LinkGraphicsAdd3DSFile;
 import com.yobotics.simulationconstructionset.robotdefinition.linkgraphicinstructions.LinkGraphicsAddArcTorus;
 import com.yobotics.simulationconstructionset.robotdefinition.linkgraphicinstructions.LinkGraphicsAddCone;
 import com.yobotics.simulationconstructionset.robotdefinition.linkgraphicinstructions.LinkGraphicsAddCoordinateSystem;
@@ -40,6 +42,7 @@ import com.yobotics.simulationconstructionset.robotdefinition.linkgraphicinstruc
 import com.yobotics.simulationconstructionset.robotdefinition.linkgraphicinstructions.LinkGraphicsAddCylinder;
 import com.yobotics.simulationconstructionset.robotdefinition.linkgraphicinstructions.LinkGraphicsAddEllipsoid;
 import com.yobotics.simulationconstructionset.robotdefinition.linkgraphicinstructions.LinkGraphicsAddHemiEllipsoid;
+import com.yobotics.simulationconstructionset.robotdefinition.linkgraphicinstructions.LinkGraphicsAddModelFile;
 import com.yobotics.simulationconstructionset.robotdefinition.linkgraphicinstructions.LinkGraphicsAddPolygonDouble;
 import com.yobotics.simulationconstructionset.robotdefinition.linkgraphicinstructions.LinkGraphicsAddPolygonFloat;
 import com.yobotics.simulationconstructionset.robotdefinition.linkgraphicinstructions.LinkGraphicsAddPyramidCube;
@@ -75,7 +78,6 @@ public class LinkGraphics
    private Group lastGroup;
    private LinkGraphicsDefinition linkGraphicsDefinition;
 
-
    public LinkGraphics(LinkGraphicsDefinition linkGraphicsDefinition)
    {
       this();
@@ -88,23 +90,21 @@ public class LinkGraphics
 
       for (LinkGraphicsInstruction instruction : graphicsDefinition.getInstructions())
       {
-         if (instruction instanceof LinkGraphicsAdd3DSFile)
+         if (instruction instanceof LinkGraphicsAddModelFile)
          {
             // Appearance app = new Appearance();
 
-
-            if (((LinkGraphicsAdd3DSFile) instruction).getAppearance() != null)
+            if (((LinkGraphicsAddModelFile) instruction).getAppearance() != null)
             {
-               Color3f color = ((LinkGraphicsAdd3DSFile) instruction).getAppearance().getColor();
+               Color3f color = ((LinkGraphicsAddModelFile) instruction).getAppearance().getColor();
                Appearance app = new Appearance();
                Material tmp = new Material();
                tmp.setAmbientColor(color);
-               app.setMaterial(tmp);    // YoAppearance.Color(new Color(color.x, color.y, color.z));
-               this.add3DSFile(((LinkGraphicsAdd3DSFile) instruction).getFileName(), app);
+               app.setMaterial(tmp); // YoAppearance.Color(new Color(color.x, color.y, color.z));
+               this.addModelFile(((LinkGraphicsAddModelFile) instruction).getFileName(), app);
             }
             else
-               this.add3DSFile(((LinkGraphicsAdd3DSFile) instruction).getFileName());
-
+               this.addModelFile(((LinkGraphicsAddModelFile) instruction).getFileName());
 
          }
          else if (instruction instanceof LinkGraphicsAddArcTorus)
@@ -117,11 +117,11 @@ public class LinkGraphics
                tmp.setAmbientColor(color);
                app.setMaterial(tmp);
                this.addArcTorus(((LinkGraphicsAddArcTorus) instruction).getStartAngle(), ((LinkGraphicsAddArcTorus) instruction).getEndAngle(),
-                                ((LinkGraphicsAddArcTorus) instruction).getMajorRadius(), ((LinkGraphicsAddArcTorus) instruction).getMinorRadius(), app);
+                     ((LinkGraphicsAddArcTorus) instruction).getMajorRadius(), ((LinkGraphicsAddArcTorus) instruction).getMinorRadius(), app);
             }
             else
                this.addArcTorus(((LinkGraphicsAddArcTorus) instruction).getStartAngle(), ((LinkGraphicsAddArcTorus) instruction).getEndAngle(),
-                                ((LinkGraphicsAddArcTorus) instruction).getMajorRadius(), ((LinkGraphicsAddArcTorus) instruction).getMinorRadius());
+                     ((LinkGraphicsAddArcTorus) instruction).getMajorRadius(), ((LinkGraphicsAddArcTorus) instruction).getMinorRadius());
 
          }
          else if (instruction instanceof LinkGraphicsAddCone)
@@ -169,7 +169,7 @@ public class LinkGraphics
                app.setMaterial(tmp);
 
                this.addCube(((LinkGraphicsAddCube) instruction).getX(), ((LinkGraphicsAddCube) instruction).getY(), ((LinkGraphicsAddCube) instruction).getZ(),
-                            app);
+                     app);
             }
             else
                this.addCube(((LinkGraphicsAddCube) instruction).getX(), ((LinkGraphicsAddCube) instruction).getY(), ((LinkGraphicsAddCube) instruction).getZ());
@@ -184,11 +184,11 @@ public class LinkGraphics
                tmp.setAmbientColor(color);
                app.setMaterial(tmp);
                this.addEllipsoid(((LinkGraphicsAddEllipsoid) instruction).getXRad(), ((LinkGraphicsAddEllipsoid) instruction).getYRad(),
-                                 ((LinkGraphicsAddEllipsoid) instruction).getZRad(), app);
+                     ((LinkGraphicsAddEllipsoid) instruction).getZRad(), app);
             }
             else
                this.addEllipsoid(((LinkGraphicsAddEllipsoid) instruction).getXRad(), ((LinkGraphicsAddEllipsoid) instruction).getYRad(),
-                                 ((LinkGraphicsAddEllipsoid) instruction).getZRad());
+                     ((LinkGraphicsAddEllipsoid) instruction).getZRad());
          }
          else if (instruction instanceof LinkGraphicsAddHemiEllipsoid)
          {
@@ -200,11 +200,11 @@ public class LinkGraphics
                tmp.setAmbientColor(color);
                app.setMaterial(tmp);
                this.addHemiEllipsoid(((LinkGraphicsAddHemiEllipsoid) instruction).getXRad(), ((LinkGraphicsAddHemiEllipsoid) instruction).getYRad(),
-                                     ((LinkGraphicsAddHemiEllipsoid) instruction).getZRad(), app);
+                     ((LinkGraphicsAddHemiEllipsoid) instruction).getZRad(), app);
             }
             else
                this.addHemiEllipsoid(((LinkGraphicsAddHemiEllipsoid) instruction).getXRad(), ((LinkGraphicsAddHemiEllipsoid) instruction).getYRad(),
-                                     ((LinkGraphicsAddHemiEllipsoid) instruction).getZRad());
+                     ((LinkGraphicsAddHemiEllipsoid) instruction).getZRad());
 
          }
          else if (instruction instanceof LinkGraphicsAddPyramidCube)
@@ -217,11 +217,11 @@ public class LinkGraphics
                tmp.setAmbientColor(color);
                app.setMaterial(tmp);
                this.addPyramidCube(((LinkGraphicsAddPyramidCube) instruction).getX(), ((LinkGraphicsAddPyramidCube) instruction).getY(),
-                                   ((LinkGraphicsAddPyramidCube) instruction).getZ(), ((LinkGraphicsAddPyramidCube) instruction).getHeight(), app);
+                     ((LinkGraphicsAddPyramidCube) instruction).getZ(), ((LinkGraphicsAddPyramidCube) instruction).getHeight(), app);
             }
             else
                this.addPyramidCube(((LinkGraphicsAddPyramidCube) instruction).getX(), ((LinkGraphicsAddPyramidCube) instruction).getY(),
-                                   ((LinkGraphicsAddPyramidCube) instruction).getZ(), ((LinkGraphicsAddPyramidCube) instruction).getHeight());
+                     ((LinkGraphicsAddPyramidCube) instruction).getZ(), ((LinkGraphicsAddPyramidCube) instruction).getHeight());
          }
          else if (instruction instanceof LinkGraphicsAddSphere)
          {
@@ -261,11 +261,11 @@ public class LinkGraphics
                tmp.setAmbientColor(color);
                app.setMaterial(tmp);
                this.addWedge(((LinkGraphicsAddWedge) instruction).getX(), ((LinkGraphicsAddWedge) instruction).getY(),
-                             ((LinkGraphicsAddWedge) instruction).getZ(), app);
+                     ((LinkGraphicsAddWedge) instruction).getZ(), app);
             }
             else
                this.addWedge(((LinkGraphicsAddWedge) instruction).getX(), ((LinkGraphicsAddWedge) instruction).getY(),
-                             ((LinkGraphicsAddWedge) instruction).getZ());
+                     ((LinkGraphicsAddWedge) instruction).getZ());
          }
          else if (instruction instanceof LinkGraphicsAddTruncatedCone)
          {
@@ -277,13 +277,13 @@ public class LinkGraphics
                tmp.setAmbientColor(color);
                app.setMaterial(tmp);
                this.addGenTruncatedCone(((LinkGraphicsAddTruncatedCone) instruction).getHeight(), ((LinkGraphicsAddTruncatedCone) instruction).getBX(),
-                                        ((LinkGraphicsAddTruncatedCone) instruction).getBY(), ((LinkGraphicsAddTruncatedCone) instruction).getTX(),
-                                        ((LinkGraphicsAddTruncatedCone) instruction).getTY(), app);
+                     ((LinkGraphicsAddTruncatedCone) instruction).getBY(), ((LinkGraphicsAddTruncatedCone) instruction).getTX(),
+                     ((LinkGraphicsAddTruncatedCone) instruction).getTY(), app);
             }
             else
                this.addGenTruncatedCone(((LinkGraphicsAddTruncatedCone) instruction).getHeight(), ((LinkGraphicsAddTruncatedCone) instruction).getBX(),
-                                        ((LinkGraphicsAddTruncatedCone) instruction).getBY(), ((LinkGraphicsAddTruncatedCone) instruction).getTX(),
-                                        ((LinkGraphicsAddTruncatedCone) instruction).getTY());
+                     ((LinkGraphicsAddTruncatedCone) instruction).getBY(), ((LinkGraphicsAddTruncatedCone) instruction).getTX(),
+                     ((LinkGraphicsAddTruncatedCone) instruction).getTY());
          }
          else if (instruction instanceof LinkGraphicsIdentity)
          {
@@ -379,19 +379,11 @@ public class LinkGraphics
    }
 
    /*
-    * public void removeAllGraphics()
-    * {
-    * for(int i=0; i<linkBG.numChildren(); i++)
-    * {
-    *  //Node child = linkBG.getChild(i);
-    *  linkBG.removeChild(i);
-    * }
-    *
-    * this.numShapes = 0;
-    * this.lastGroup = linkBG;
-    * }
+    * public void removeAllGraphics() { for(int i=0; i<linkBG.numChildren();
+    * i++) { //Node child = linkBG.getChild(i); linkBG.removeChild(i); }
+    * 
+    * this.numShapes = 0; this.lastGroup = linkBG; }
     */
-
 
    /**
     * Configures the passed in node based on its type.  If the node is a Shape3D or a
@@ -430,7 +422,8 @@ public class LinkGraphics
          else if (leaf instanceof Light)
          {
             // System.out.println("leaf is a light");
-            @SuppressWarnings("unused") Light light = (Light) leaf;
+            @SuppressWarnings("unused")
+            Light light = (Light) leaf;
          }
 
          // else System.out.println("leaf is NOT a Shape3D");
@@ -500,7 +493,7 @@ public class LinkGraphics
       else if (rotAxis == Link.Y)
          t1.rotY(rotAng);
 
-         // else if (rotAxis == Link.Z)
+      // else if (rotAxis == Link.Z)
       else
          t1.rotZ(rotAng);
 
@@ -819,13 +812,9 @@ public class LinkGraphics
    }
 
    /*
-    * protected void addTransformGroup(TransformGroup transGroup)
-    * {
-    * this.lastGroup.addChild(transGroup);
-    * this.numShapes++;
-    * }
+    * protected void addTransformGroup(TransformGroup transGroup) {
+    * this.lastGroup.addChild(transGroup); this.numShapes++; }
     */
-
 
    /**
     * Adds the specified VRML file to the center of the current coordinate system
@@ -857,7 +846,7 @@ public class LinkGraphics
       // int flag = org.web3d.j3d.loaders.VRML97Loader.LOAD_ALL; flag &= ~org.web3d.j3d.loaders.VRML97Loader.LOAD_BEHAVIOR_NODES; // Static Loads only
       // org.web3d.j3d.loaders.VRML97Loader loader = new org.web3d.j3d.loaders.VRML97Loader(flag);
 
-      com.sun.j3d.loaders.vrml97.VrmlLoader loader = new com.sun.j3d.loaders.vrml97.VrmlLoader();    // Use with old x3d.jar
+      com.sun.j3d.loaders.vrml97.VrmlLoader loader = new com.sun.j3d.loaders.vrml97.VrmlLoader(); // Use with old x3d.jar
 
       com.sun.j3d.loaders.Scene model = null;
 
@@ -887,8 +876,6 @@ public class LinkGraphics
 
    }
 
-
-
    /**
     * Adds the specified VRML file to the center of the current coordinate system
     * using the provided appearance.  VRML or Virtual Reality Modeling Language is
@@ -904,7 +891,7 @@ public class LinkGraphics
       // int flag = org.web3d.j3d.loaders.VRML97Loader.LOAD_ALL; flag &= ~org.web3d.j3d.loaders.VRML97Loader.LOAD_BEHAVIOR_NODES; // Static Loads only
       // org.web3d.j3d.loaders.VRML97Loader loader = new org.web3d.j3d.loaders.VRML97Loader(flag);
 
-      com.sun.j3d.loaders.vrml97.VrmlLoader loader = new com.sun.j3d.loaders.vrml97.VrmlLoader();    // Use with old x3d.jar
+      com.sun.j3d.loaders.vrml97.VrmlLoader loader = new com.sun.j3d.loaders.vrml97.VrmlLoader(); // Use with old x3d.jar
 
       com.sun.j3d.loaders.Scene model = null;
 
@@ -958,9 +945,9 @@ public class LinkGraphics
     *
     * @param fileURL URL pointing to the desired 3ds file.
     */
-   public void add3DSFile(URL fileURL)
+   public void addModelFile(URL fileURL)
    {
-      add3DSFile(fileURL, null);
+      addModelFile(fileURL, null);
 
       // linkGraphicsDefinition.addInstruction(new LinkGraphicsAdd3DSFile(fileURL.getPath()));
    }
@@ -974,11 +961,11 @@ public class LinkGraphics
     * @param fileURL URL pointing to the desired 3ds file.
     * @param app Appearance to use with the 3ds model once imported.
     */
-   public void add3DSFile(URL fileURL, Appearance app)
+   public void addModelFile(URL fileURL, Appearance app)
    {
       if (fileURL == null)
       {
-         System.err.println("fileURL == null in add3DSFile");
+         System.err.println("fileURL == null in addModelFile");
 
          return;
       }
@@ -994,40 +981,37 @@ public class LinkGraphics
          return;
       }
 
-      add3DSFile(fileName, app);
+      addModelFile(fileName, app);
 
-//    if (app != null)
-//       linkGraphicsDefinition.addInstruction(new LinkGraphicsAdd3DSFile(fileURL.getPath(), new AppearanceDefinition(getColor(app))));
-//    else
-//       linkGraphicsDefinition.addInstruction(new LinkGraphicsAdd3DSFile(fileURL.getPath()));
+      //    if (app != null)
+      //       linkGraphicsDefinition.addInstruction(new LinkGraphicsAdd3DSFile(fileURL.getPath(), new AppearanceDefinition(getColor(app))));
+      //    else
+      //       linkGraphicsDefinition.addInstruction(new LinkGraphicsAdd3DSFile(fileURL.getPath()));
    }
 
    /*
-    *  public void add3DSFile2(URL fileURL, Appearance app)
-    * {
-    * Loader3DS loader = new Loader3DS();
-    * loader.setTextureLightingOn(); // turns on modulate mode for textures (lighting)
-    *
-    *
-    * String URLBase = fileURL.toString();
-    * System.out.println(URLBase);
+    * public void add3DSFile2(URL fileURL, Appearance app) { Loader3DS loader =
+    * new Loader3DS(); loader.setTextureLightingOn(); // turns on modulate mode
+    * for textures (lighting)
+    * 
+    * 
+    * String URLBase = fileURL.toString(); System.out.println(URLBase);
     * //URLBase = URLBase.substring(URLBase.lastIndexOf("/"));
-    *
+    * 
     * URLBase = URLBase.substring(0, URLBase.lastIndexOf("/"));
-    *
-    * System.out.println(URLBase);
-    * loader.setURLBase(URLBase);
-    *
+    * 
+    * System.out.println(URLBase); loader.setURLBase(URLBase);
+    * 
     * com.sun.j3d.loaders.Scene scene = null;
-    *
-    * try{scene = loader.load(fileURL);}
-    * catch(FileNotFoundException e){System.err.println("File Not Found in add3DSFile: " + fileURL + "  " + e);return;}
-    *
+    * 
+    * try{scene = loader.load(fileURL);} catch(FileNotFoundException
+    * e){System.err.println("File Not Found in add3DSFile: " + fileURL + "  " +
+    * e);return;}
+    * 
     * BranchGroup branchGroup = scene.getSceneGroup();
-    *
+    * 
     * if (app != null) recursiveSetEnabling(branchGroup, app, 0);
-    * this.addBranchGroup(scene.getSceneGroup());
-    * }
+    * this.addBranchGroup(scene.getSceneGroup()); }
     */
 
    /**
@@ -1038,9 +1022,9 @@ public class LinkGraphics
     *
     * @param fileName File path of the desired 3ds file.
     */
-   public void add3DSFile(String fileName)
+   public void addModelFile(String fileName)
    {
-      add3DSFile(fileName, null);
+      addModelFile(fileName, null);
 
       // linkGraphicsDefinition.addInstruction(new LinkGraphicsAdd3DSFile(fileName));
    }
@@ -1054,10 +1038,34 @@ public class LinkGraphics
     * @param fileName File path to the desired 3ds file.
     * @param app Appearance to use with the model once imported.
     */
-   public void add3DSFile(String fileName, Appearance app)
+   /**
+   * @param fileName
+   * @param app
+   */
+   public void addModelFile(String fileName, Appearance app)
    {
-      Loader3DS loader = new Loader3DS();
-      loader.setTextureLightingOn();    // turns on modulate mode for textures (lighting)
+      //Determine filename
+      String ext = fileName.substring(fileName.length() - 3);
+      Loader loader = null;
+      if (ext.equalsIgnoreCase("3ds"))
+      {
+         Loader3DS loader3ds = new Loader3DS();
+         loader3ds.setTextureLightingOn(); // turns on modulate mode for textures (lighting)
+         loader = loader3ds;
+      }
+      else if (ext.equalsIgnoreCase("dae"))
+      {
+         loader = new DAELoader();
+      }
+      else if (ext.equalsIgnoreCase("stl"))
+      {
+         loader = new StlFile();
+//         fileName = "file://" + fileName;
+      }
+      else
+      {
+         throw new RuntimeException("Support for " + ext + " files not implemented yet");
+      }
 
       com.sun.j3d.loaders.Scene scene = null;
 
@@ -1067,7 +1075,7 @@ public class LinkGraphics
       }
       catch (FileNotFoundException e)
       {
-         System.err.println("File Not Found in add3DSFile: " + fileName + "  " + e);
+         System.err.println("File Not Found in addModelFile: " + fileName + "  " + e);
 
          return;
       }
@@ -1085,17 +1093,15 @@ public class LinkGraphics
 
       this.addGroup(transGroup);
       if (app != null)
-         linkGraphicsDefinition.addInstruction(new LinkGraphicsAdd3DSFile(fileName, new AppearanceDefinition(getColor(app))));
+         linkGraphicsDefinition.addInstruction(new LinkGraphicsAddModelFile(fileName, new AppearanceDefinition(getColor(app))));
       else
-         linkGraphicsDefinition.addInstruction(new LinkGraphicsAdd3DSFile(fileName));
+         linkGraphicsDefinition.addInstruction(new LinkGraphicsAddModelFile(fileName));
    }
-
 
    public void addCoordinateSystem(double length)
    {
       addCoordinateSystem(length, YoAppearance.Black());
    }
-
 
    public void addCoordinateSystem(double length, Appearance arrowAppearance)
    {
@@ -1111,8 +1117,7 @@ public class LinkGraphics
     *
     * @param length the length in meters of each axis arrow.
     */
-   public void addCoordinateSystem(double length, Appearance xAxisAppearance, Appearance yAxisAppearance, Appearance zAxisAppearance,
-                                   Appearance arrowAppearance)
+   public void addCoordinateSystem(double length, Appearance xAxisAppearance, Appearance yAxisAppearance, Appearance zAxisAppearance, Appearance arrowAppearance)
    {
       Geometry bar = GeometryGenerator.Cylinder(length / 32.0, length, 15);
       Geometry arrow = GeometryGenerator.Cone(length / 10.0, length / 15.0, 15);
@@ -1189,9 +1194,6 @@ public class LinkGraphics
       Geometry cubeGeom = GeometryGenerator.Cube(lx, ly, lz);
       addShape(cubeGeom, cubeApp);
 
-
-
-
       if (cubeApp != null)
          linkGraphicsDefinition.addInstruction(new LinkGraphicsAddCube(lx, ly, lz, new AppearanceDefinition(getColor(cubeApp))));
       else
@@ -1266,7 +1268,7 @@ public class LinkGraphics
    {
       addSphere(radius, YoAppearance.Black());
 
-//    linkGraphicsDefinition.addInstruction(new LinkGraphicsAddSphere(radius));
+      //    linkGraphicsDefinition.addInstruction(new LinkGraphicsAddSphere(radius));
    }
 
    /**
@@ -1605,8 +1607,8 @@ public class LinkGraphics
       // Geometry arcTorusGeom = GeometryGenerator.Sphere(0.2f,15,15);
       addShape(arcTorusGeom, arcTorusApp);
       if (arcTorusApp != null)
-         linkGraphicsDefinition.addInstruction(new LinkGraphicsAddArcTorus(startAngle, endAngle, majorRadius, minorRadius,
-                 new AppearanceDefinition(getColor(arcTorusApp))));
+         linkGraphicsDefinition.addInstruction(new LinkGraphicsAddArcTorus(startAngle, endAngle, majorRadius, minorRadius, new AppearanceDefinition(
+               getColor(arcTorusApp))));
       else
          linkGraphicsDefinition.addInstruction(new LinkGraphicsAddArcTorus(startAngle, endAngle, majorRadius, minorRadius));
    }
@@ -1770,10 +1772,9 @@ public class LinkGraphics
       return shape;
    }
 
-
    public void createInertiaEllipsoid(Link link, Appearance appearance)
    {
-//    LinkGraphics linkGraphics = link.getLinkGraphics();
+      //    LinkGraphics linkGraphics = link.getLinkGraphics();
       this.identity();
       Vector3d comOffSet = new Vector3d();
       link.getComOffset(comOffSet);
@@ -1789,30 +1790,19 @@ public class LinkGraphics
       this.addEllipsoid(ellipsoidRadii.x, ellipsoidRadii.y, ellipsoidRadii.z, appearance);
 
       comOffSet.scale(-1.0);
-      this.translate(comOffSet);    // translate back
+      this.translate(comOffSet); // translate back
    }
 
-
-
    /*
-    * public String getName()
-    * {
-    * return this.name;
-    * }
+    * public String getName() { return this.name; }
     */
 
    /*
-    * public int getNumShapes()
-    * {
-    * return this.numShapes;
-    * }
+    * public int getNumShapes() { return this.numShapes; }
     */
 
    /*
-    * public BranchGroup getBranchGroup()
-    * {
-    * return linkBG;
-    * }
+    * public BranchGroup getBranchGroup() { return linkBG; }
     */
 
    /**

@@ -2,17 +2,17 @@ package com.yobotics.simulationconstructionset.robotdefinition.linkgraphicinstru
 
 import com.yobotics.simulationconstructionset.robotdefinition.AppearanceDefinition;
 
-public class LinkGraphicsAdd3DSFile implements LinkGraphicsInstruction
+public class LinkGraphicsAddModelFile implements LinkGraphicsInstruction
 {
    private String fileName;
    private AppearanceDefinition appearance = null;
 
-   public LinkGraphicsAdd3DSFile(String fileName)
+   public LinkGraphicsAddModelFile(String fileName)
    {
       this(fileName, null);
    }
 
-   public LinkGraphicsAdd3DSFile(String fileName, AppearanceDefinition appearence)
+   public LinkGraphicsAddModelFile(String fileName, AppearanceDefinition appearence)
    {
       this.fileName = fileName;
       this.appearance = appearence;
