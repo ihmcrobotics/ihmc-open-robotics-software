@@ -46,8 +46,6 @@ public class ConstantCoPInstantaneousCapturePointTrajectory
 
    public void initialize(FramePoint2d initialDesiredICP, FramePoint2d finalDesiredICP, double moveTime, double omega0, double amountToBeInside)
    {
-      if (moveTime == 0.0)
-         throw new RuntimeException();
       initialDesiredICP.changeFrame(this.initialDesiredICP.getReferenceFrame());
       finalDesiredICP.changeFrame(this.finalDesiredICP.getReferenceFrame());
 
@@ -55,13 +53,14 @@ public class ConstantCoPInstantaneousCapturePointTrajectory
       this.finalDesiredICP.set(finalDesiredICP);
       currentTime.set(0.0);
 
-      // make sure it is feasible by adjusting move time
-      double comHeight = gravity / MathTools.square(omega0);
-      FramePoint2d equivalentConstantCoP = EquivalentConstantCoPCalculator.computeEquivalentConstantCoP(initialDesiredICP, finalDesiredICP, moveTime,
-                                              comHeight, gravity);
       double epsilon = 1e-12;
       if (!initialDesiredICP.epsilonEquals(finalDesiredICP, epsilon))
       {
+         // make sure it is feasible by adjusting move time
+         double comHeight = gravity / MathTools.square(omega0);
+         FramePoint2d equivalentConstantCoP = EquivalentConstantCoPCalculator.computeEquivalentConstantCoP(initialDesiredICP, finalDesiredICP, moveTime,
+                                                 comHeight, gravity);
+
          FrameConvexPolygon2d supportPolygon = bipedSupportPolygons.getSupportPolygonInMidFeetZUp();    // bipedSupportPolygons.getFootPolygonInAnkleZUp(supportSide);
 
          FrameLine2d line = new FrameLine2d(initialDesiredICP, finalDesiredICP);
