@@ -14,7 +14,7 @@ import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint2d;
 
-public class ConstantCoPInstantaneousCapturePointTrajectory
+public class ConstantCoPInstantaneousCapturePointTrajectory implements InstantaneousCapturePointTrajectory
 {
    private final YoVariableRegistry registry;
    private final BipedSupportPolygons bipedSupportPolygons;

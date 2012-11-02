@@ -10,8 +10,9 @@ public class ZeroToOneParabolicVelocityTrajectoryGenerator implements DoubleTraj
    private final YoVariableRegistry registry;
    private final DoubleYoVariable trajectoryTime;
    private final DoubleYoVariable currentTime;
-   
+
    private final DoubleYoVariable currentValue;
+   private final DoubleYoVariable currentTimeDerivative;
    
    public ZeroToOneParabolicVelocityTrajectoryGenerator(String namePrefix, double trajectoryTime, YoVariableRegistry parentRegistry)
    {
@@ -22,6 +23,7 @@ public class ZeroToOneParabolicVelocityTrajectoryGenerator implements DoubleTraj
       this.trajectoryTime = new DoubleYoVariable(namePrefix + "TrajectoryTime", registry);
       this.currentTime = new DoubleYoVariable(namePrefix + "Time", registry);
       this.currentValue = new DoubleYoVariable(namePrefix + "CurrentValue", registry);
+      this.currentTimeDerivative = new DoubleYoVariable(namePrefix + "CurrentTimeDerivative", registry);
       
       this.trajectoryTime.set(trajectoryTime);
       
@@ -40,9 +42,11 @@ public class ZeroToOneParabolicVelocityTrajectoryGenerator implements DoubleTraj
       time = MathTools.clipToMinMax(time, 0.0, trajectoryTime.getDoubleValue());
       double finalTime = trajectoryTime.getDoubleValue();
       
-      double output = - 6.0 / MathTools.square(finalTime) * (MathTools.cube(time) / (3.0 * finalTime) - MathTools.square(time) / 2.0);
-      
+      double output = -6.0 / MathTools.square(finalTime) * (MathTools.cube(time) / (3.0 * finalTime) - MathTools.square(time) / 2.0);
       currentValue.set(output);
+      
+      double timeDerivative = -6.0 * (-time + MathTools.square(time)/finalTime) / MathTools.square(finalTime);
+      currentTimeDerivative.set(timeDerivative);
    }
 
    public boolean isDone()
@@ -54,5 +58,14 @@ public class ZeroToOneParabolicVelocityTrajectoryGenerator implements DoubleTraj
    {
       return currentValue.getDoubleValue();
    }
+   
+   public double getTimeDerivative()
+   {
+      return currentTimeDerivative.getDoubleValue();
+   }
 
+   public void setTrajectoryTime(double trajectoryTime)
+   {
+      this.trajectoryTime.set(trajectoryTime);
+   }
 }
