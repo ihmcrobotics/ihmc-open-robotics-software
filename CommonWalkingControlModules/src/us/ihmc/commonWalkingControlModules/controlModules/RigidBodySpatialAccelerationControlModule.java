@@ -1,6 +1,5 @@
-package us.ihmc.commonWalkingControlModules.momentumBasedController;
+package us.ihmc.commonWalkingControlModules.controlModules;
 
-import us.ihmc.commonWalkingControlModules.controlModules.SE3PDController;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;

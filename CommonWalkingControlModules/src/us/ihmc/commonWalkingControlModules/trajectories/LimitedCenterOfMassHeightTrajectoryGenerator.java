@@ -4,7 +4,7 @@ import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.EnumYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
-import us.ihmc.commonWalkingControlModules.momentumBasedController.CenterOfMassControlType;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.CenterOfMassControlMode;
 import us.ihmc.commonWalkingControlModules.sensors.ProcessedSensorsInterface;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.MathTools;
@@ -17,7 +17,7 @@ public class LimitedCenterOfMassHeightTrajectoryGenerator implements CenterOfMas
    private final DoubleYoVariable desiredCenterOfMassHeightFinal;
    private final DoubleYoVariable maxCenterOfMassHeight;
    private final DoubleYoVariable minCenterOfMassHeight;
-   private final EnumYoVariable<CenterOfMassControlType> centerOfMassControlType;
+   private final EnumYoVariable<CenterOfMassControlMode> centerOfMassControlType;
    private final ProcessedSensorsInterface processedSensors;
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    
@@ -33,7 +33,7 @@ public class LimitedCenterOfMassHeightTrajectoryGenerator implements CenterOfMas
       maxCenterOfMassHeight = new DoubleYoVariable("maxCenterOfMassHeight", registry); 
       minCenterOfMassHeight = new DoubleYoVariable("minCenterOfMassHeightFinal", registry); 
       
-      centerOfMassControlType = EnumYoVariable.create("comControlType", CenterOfMassControlType.class, registry);
+      centerOfMassControlType = EnumYoVariable.create("comControlType", CenterOfMassControlMode.class, registry);
       parentRegistry.addChild(registry);
 
       desiredCenterOfMassHeight.set(processedSensors.getCenterOfMassPositionInFrame(worldFrame, centerOfMassControlType.getEnumValue()).getZ());
@@ -43,7 +43,7 @@ public class LimitedCenterOfMassHeightTrajectoryGenerator implements CenterOfMas
       maxCoMHeightDot.set(0.1);
       this.controlDT = controlDT;
       
-      centerOfMassControlType.set(CenterOfMassControlType.TOTAL_COM);
+      centerOfMassControlType.set(CenterOfMassControlMode.TOTAL_COM);
    }
 
    public void initialize(RobotSide supportLeg, RobotSide upcomingSupportLeg)
@@ -77,7 +77,7 @@ public class LimitedCenterOfMassHeightTrajectoryGenerator implements CenterOfMas
       return 0.0;
    }
 
-   public void setControlType(CenterOfMassControlType centerOfMassControlType)
+   public void setControlType(CenterOfMassControlMode centerOfMassControlType)
    {
       if (centerOfMassControlType != this.centerOfMassControlType.getEnumValue())
       {

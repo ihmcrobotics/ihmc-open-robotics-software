@@ -21,9 +21,11 @@ import us.ihmc.commonWalkingControlModules.controlModules.velocityViaCoP.SimpleD
 import us.ihmc.commonWalkingControlModules.controlModules.velocityViaCoP.SpeedControllingDesiredCoPCalculator;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredHeadingControlModule;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelHumanoidController;
 import us.ihmc.commonWalkingControlModules.kinematics.SpatialAccelerationProjector;
 import us.ihmc.commonWalkingControlModules.outputs.ProcessedOutputsInterface;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
+import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LimbName;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.ProcessedSensorsInterface;
 import us.ihmc.robotSide.RobotSide;
@@ -39,12 +41,14 @@ import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.GeometryTools;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RotationFunctions;
+import us.ihmc.utilities.screwTheory.EndEffectorPoseTwistAndSpatialAccelerationCalculator;
 import us.ihmc.utilities.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.RevoluteJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTools;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
+import us.ihmc.utilities.screwTheory.ThreeDoFAngularAccelerationCalculator;
 import us.ihmc.utilities.screwTheory.TotalMassCalculator;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 import us.ihmc.utilities.screwTheory.Wrench;
@@ -98,7 +102,7 @@ public class MomentumBasedController implements RobotController
    private final DesiredHeadingControlModule desiredHeadingControlModule;
    private final DesiredCoPAndCMPControlModule desiredCoPAndCMPControlModule;
 
-   private final ThreeDoFAngularAccelerationControlModule chestAngularAccelerationcalculator;
+   private final ThreeDoFAngularAccelerationCalculator chestAngularAccelerationcalculator;
 
    private final YoFrameVector desiredPelvisLinearAcceleration;
    private final YoFrameVector desiredPelvisAngularAcceleration;
@@ -193,7 +197,7 @@ public class MomentumBasedController implements RobotController
 
       RigidBody pelvis = fullRobotModel.getPelvis();
       RigidBody chest = fullRobotModel.getChest();
-      this.chestAngularAccelerationcalculator = new ThreeDoFAngularAccelerationControlModule(pelvis, chest);
+      this.chestAngularAccelerationcalculator = new ThreeDoFAngularAccelerationCalculator(pelvis, chest);
 
       
       virtualToePointCalculator = new NewGeometricVirtualToePointCalculator(referenceFrames, registry, dynamicGraphicObjectsListRegistry, 0.95);
@@ -450,7 +454,7 @@ public class MomentumBasedController implements RobotController
 
       if (doChestOrientationControl)
       {
-         chestAngularAccelerationcalculator.doControl(highLevelHumanoidController.getChestAngularAcceleration());         
+         chestAngularAccelerationcalculator.compute(highLevelHumanoidController.getChestAngularAcceleration());         
       }
       else
       {         
