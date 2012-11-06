@@ -4,7 +4,7 @@ import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.EnumYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
-import us.ihmc.commonWalkingControlModules.momentumBasedController.CenterOfMassControlType;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.CenterOfMassControlMode;
 import us.ihmc.commonWalkingControlModules.sensors.ProcessedSensorsInterface;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -13,7 +13,7 @@ public class ConstantCenterOfMassHeightTrajectoryGenerator implements CenterOfMa
 {
    private final YoVariableRegistry registry;
    private final DoubleYoVariable desiredCenterOfMassHeight;
-   private final EnumYoVariable<CenterOfMassControlType> centerOfMassControlType;
+   private final EnumYoVariable<CenterOfMassControlMode> centerOfMassControlType;
    private final ProcessedSensorsInterface processedSensors;
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -22,11 +22,11 @@ public class ConstantCenterOfMassHeightTrajectoryGenerator implements CenterOfMa
       this.processedSensors = processedSensors;
       registry = new YoVariableRegistry(getClass().getSimpleName());
       desiredCenterOfMassHeight = new DoubleYoVariable("desiredCenterOfMassHeight", registry); 
-      centerOfMassControlType = EnumYoVariable.create("comControlType", CenterOfMassControlType.class, registry);
+      centerOfMassControlType = EnumYoVariable.create("comControlType", CenterOfMassControlMode.class, registry);
       parentRegistry.addChild(registry);
 
       desiredCenterOfMassHeight.set(1.15);
-      centerOfMassControlType.set(CenterOfMassControlType.TOTAL_COM);
+      centerOfMassControlType.set(CenterOfMassControlMode.TOTAL_COM);
    }
 
    public void initialize(RobotSide supportLeg, RobotSide upcomingSupportLeg)
@@ -54,7 +54,7 @@ public class ConstantCenterOfMassHeightTrajectoryGenerator implements CenterOfMa
       return 0.0;
    }
 
-   public void setControlType(CenterOfMassControlType centerOfMassControlType)
+   public void setControlType(CenterOfMassControlMode centerOfMassControlType)
    {
       if (centerOfMassControlType != this.centerOfMassControlType.getEnumValue())
       {
