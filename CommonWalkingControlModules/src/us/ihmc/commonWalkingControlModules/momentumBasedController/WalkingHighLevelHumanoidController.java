@@ -5,8 +5,8 @@ import javax.media.j3d.Transform3D;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedFootInterface;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.FootPolygonEnum;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculator;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.SimpleWorldDesiredFootstepCalculator;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredHeadingControlModule;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
@@ -93,21 +93,12 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    public WalkingHighLevelHumanoidController(FullRobotModel fullRobotModel, CommonWalkingReferenceFrames referenceFrames, TwistCalculator twistCalculator,
          SideDependentList<BipedFootInterface> bipedFeet, BipedSupportPolygons bipedSupportPolygons, SideDependentList<FootSwitchInterface> footSwitches,
          ProcessedSensorsInterface processedSensors, DoubleYoVariable t, double controlDT, DesiredHeadingControlModule desiredHeadingControlModule,
-         YoVariableRegistry registry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+         YoVariableRegistry registry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, DesiredFootstepCalculator desiredFootstepCalculator)
    {
       super(fullRobotModel, referenceFrames, processedSensors, twistCalculator, bipedFeet, bipedSupportPolygons, controlDT, desiredHeadingControlModule,
             footSwitches, CenterOfMassControlType.TOTAL_COM, registry);
-      SimpleWorldDesiredFootstepCalculator simpleDesiredFootstepCalculator = new SimpleWorldDesiredFootstepCalculator(bipedFeet, referenceFrames,
-            desiredHeadingControlModule, registry);
 
-      //    SimpleDesiredFootstepCalculator simpleDesiredFootstepCalculator = new SimpleDesiredFootstepCalculator(referenceFrames.getAnkleZUpReferenceFrames(),
-      //    desiredHeadingControlModule, registry); // TODO: pass in
-      //    BoxDesiredFootstepCalculator boxDesiredFootstepCalculator = new BoxDesiredFootstepCalculator(referenceFrames.getAnkleZUpReferenceFrames(),
-      //          desiredHeadingControlModule, registry);
-      //    boxDesiredFootstepCalculator.setupParametersForR2();
-      //    this.desiredFootstepCalculator = boxDesiredFootstepCalculator;
-      simpleDesiredFootstepCalculator.setupParametersForR2InverseDynamics();
-      this.desiredFootstepCalculator = simpleDesiredFootstepCalculator;
+      this.desiredFootstepCalculator = desiredFootstepCalculator;
 
       // this.centerOfMassHeightTrajectoryGenerator = new OrbitalEnergyCubicTrajectoryGenerator(processedSensors, referenceFrames,
       // desiredHeadingControlModule.getDesiredHeadingFrame(), footHeight, parentRegistry);
@@ -117,7 +108,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       // this.centerOfMassHeightTrajectoryGenerator = new ConstantCenterOfMassHeightTrajectoryGenerator(registry);
       this.flatThenPolynomialCoMHeightTrajectoryGenerator = new FlatThenPolynomialCoMHeightTrajectoryGenerator("", processedSensors,
-            simpleDesiredFootstepCalculator, desiredHeadingControlModule.getDesiredHeadingFrame(), bipedFeet, referenceFrames, registry);
+            desiredFootstepCalculator, desiredHeadingControlModule.getDesiredHeadingFrame(), bipedFeet, referenceFrames, registry);
       this.centerOfMassHeightTrajectoryGenerator = flatThenPolynomialCoMHeightTrajectoryGenerator;
 
       String namePrefix = "walking";
@@ -161,8 +152,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       for (RobotSide robotSide : RobotSide.values())
       {
-         controlModes.get(robotSide).get(LimbName.LEG).set(ControlMode.CARTESIAN_SPACE);
-         controlModes.get(robotSide).get(LimbName.ARM).set(ControlMode.JOINT_SPACE);
+         controlModes.get(robotSide).get(LimbName.LEG).set(LimbControlMode.CARTESIAN_SPACE);
+         controlModes.get(robotSide).get(LimbName.ARM).set(LimbControlMode.JOINT_SPACE);
       }
    }
 
