@@ -9,7 +9,7 @@ import us.ihmc.utilities.math.MathTools;
 
 import com.yobotics.simulationconstructionset.GroundProfile;
 
-public class ListOfHeightsStairGroundProfile implements GroundProfile
+public class VaryingStairGroundProfile implements GroundProfile
 {
    private final double xMin, xMax, yMin, yMax;
    private final double
@@ -18,12 +18,12 @@ public class ListOfHeightsStairGroundProfile implements GroundProfile
    private final double[] stepStartXValues;
    private final double[] groundHeights;
 
-   public ListOfHeightsStairGroundProfile(double[] stepHeights, double[] stepTreads, double initialHeight, double startX)
+   public VaryingStairGroundProfile(double startX, double startZ, double[] stepTreads, double[] stepRises)
    {
       if (MathTools.min(stepTreads) <= 0.0)
          throw new RuntimeException("Step treads must be positive");
 
-      if (stepHeights.length != stepTreads.length + 1)
+      if (stepRises.length != stepTreads.length + 1)
          throw new RuntimeException("stepHeights.length != stepTreads.length + 1");
       
       double[] xCumulativeSum = MathTools.cumulativeSumDoubles(stepTreads);
@@ -32,11 +32,11 @@ public class ListOfHeightsStairGroundProfile implements GroundProfile
       for (int i = 0; i < stepStartXValues.length; i++)
          stepStartXValues[i] = stepStartXValues[i] + startX;
 
-      double[] heightCumulativeSum = MathTools.cumulativeSumDoubles(stepHeights);
+      double[] heightCumulativeSum = MathTools.cumulativeSumDoubles(stepRises);
       groundHeights = new double[heightCumulativeSum.length + 1];
       System.arraycopy(heightCumulativeSum, 0, groundHeights, 1, heightCumulativeSum.length);
       for (int i = 0; i < groundHeights.length; i++)
-         groundHeights[i] = groundHeights[i] + initialHeight;
+         groundHeights[i] = groundHeights[i] + startZ;
 
       double leadInX = 1.0;
       double leadOutX = 1.0;

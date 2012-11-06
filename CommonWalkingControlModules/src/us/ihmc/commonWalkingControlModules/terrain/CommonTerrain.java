@@ -31,27 +31,36 @@ import com.yobotics.simulationconstructionset.util.ground.steppingStones.Steppin
 
 public class CommonTerrain
 {
-   private SteppingStones steppingStones;
-   private GroundProfile groundProfile;
+   private final SteppingStones steppingStones;
+   private final GroundProfile groundProfile;
 
    public CommonTerrain(TerrainType terrainType, YoVariableRegistry registry)
    {
-      setUpTerrain(terrainType, registry);
       this.steppingStones = null;
+      this.groundProfile = setUpTerrain(terrainType, registry);
    }
 
    public CommonTerrain(ConvexPolygon2d footPolygon, SteppingStonePattern steppingStonePattern, boolean useSteppingStonesGroundModel,
-                        YoVariableRegistry registry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+                        YoVariableRegistry registry)
    {
-      setUpSteppingStones(footPolygon, steppingStonePattern, useSteppingStonesGroundModel, registry);
+      this.steppingStones = setUpSteppingStones(footPolygon, steppingStonePattern, useSteppingStonesGroundModel, registry);
 
-      if (dynamicGraphicObjectsListRegistry != null)
+      if (useSteppingStonesGroundModel)
       {
-         System.out.println("Registering Stepping Stones Artifact");
-
-         SteppingStonesArtifact steppingStonesArtifact = new SteppingStonesArtifact("SteppingStones", steppingStones, Color.magenta, Color.GREEN);
-         dynamicGraphicObjectsListRegistry.registerArtifact("Stepping Stones", steppingStonesArtifact);
+         System.out.println("Using a stepping stone ground model");
+         groundProfile = new SteppingStonesGroundProfile(steppingStones);
       }
+      else
+      {
+         System.out.println("Drawing SteppingStones but using a flat ground model.");
+         groundProfile = new FlatGroundProfile();
+      }
+   }
+
+   public CommonTerrain(GroundProfile groundProfile)
+   {
+      this.steppingStones = null;
+      this.groundProfile = groundProfile;
    }
 
    public GroundProfile getGroundProfile()
@@ -96,12 +105,20 @@ public class CommonTerrain
 
    }
 
+   public void registerSteppingStonesArtifact(DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+   {
+      System.out.println("Registering Stepping Stones Artifact");
+
+      SteppingStonesArtifact steppingStonesArtifact = new SteppingStonesArtifact("SteppingStones", steppingStones, Color.magenta, Color.GREEN);
+      dynamicGraphicObjectsListRegistry.registerArtifact("Stepping Stones", steppingStonesArtifact);
+   }
 
    public static final double FLAT_HEIGHT = 0.0;
 
-   private void setUpSteppingStones(ConvexPolygon2d footPolygon, SteppingStonePattern steppingStonePattern, boolean useSteppingStonesGroundModel,
+   private SteppingStones setUpSteppingStones(ConvexPolygon2d footPolygon, SteppingStonePattern steppingStonePattern, boolean useSteppingStonesGroundModel,
                                     YoVariableRegistry registry)
    {
+      SteppingStones steppingStones;
       switch (steppingStonePattern)
       {
          case WHOLE_WORLD :
@@ -153,18 +170,8 @@ public class CommonTerrain
             throw new RuntimeException("Shouldn't get here!");
          }
       }
-
-      if (useSteppingStonesGroundModel)
-      {
-         System.out.println("Using a stepping stone ground model");
-         groundProfile = new SteppingStonesGroundProfile(steppingStones);
-      }
-      else
-      {
-         System.out.println("Drawing SteppingStones but using a flat ground model.");
-         groundProfile = new FlatGroundProfile();
-      }
-
+      
+      return steppingStones;
    }
 
 
@@ -347,6 +354,7 @@ public class CommonTerrain
 
    private GroundProfile setUpTerrain(TerrainType terrainType, YoVariableRegistry registry)
    {
+      GroundProfile groundProfile;
       switch (terrainType)
       {
          case FLAT :
