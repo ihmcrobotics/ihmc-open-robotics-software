@@ -376,7 +376,8 @@ public class CommonTerrain
             break;
 
          case STAIR :
-            groundProfile = new StairGroundProfile(registry);
+              groundProfile = new StairGroundProfile(registry);
+//              groundProfile = new ListOfHeightsStairGroundProfile(new double[] {0.1, 0.2, 0.3}, new double[] {0.1, 0.2}, 0.0, 0.0);
 
             break;
 
