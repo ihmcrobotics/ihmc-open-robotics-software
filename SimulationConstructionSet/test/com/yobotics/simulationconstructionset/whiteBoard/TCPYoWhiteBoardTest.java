@@ -7,7 +7,7 @@ import org.junit.Test;
 
 public class TCPYoWhiteBoardTest extends YoWhiteBoardTest
 {
-   @Test(timeout = 10000l)
+   @Test(timeout = 30000l)
    public void testTCPWhiteBoardOne() throws IOException
    {
       String IPAddress = "localHost";
@@ -27,7 +27,7 @@ public class TCPYoWhiteBoardTest extends YoWhiteBoardTest
    }
    
    
-   @Test(timeout = 10000l)
+   @Test(timeout = 30000l)
    public void testTCPWhiteBoardTwo() throws IOException
    {
       String IPAddress = "localHost";
