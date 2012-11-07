@@ -5,6 +5,7 @@ import java.util.Arrays;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.utilities.CheckTools;
 import us.ihmc.utilities.math.MathTools;
 
 import com.yobotics.simulationconstructionset.GroundProfile;
@@ -90,12 +91,9 @@ public class VaryingStairGroundProfile implements GroundProfile
 
    public double heightAt(double x, double y, double z)
    {
-      // read info on how Arrays.binarySearch works for index magic.
-      int index = Arrays.binarySearch(stepStartXValues, x);
-      if (index < 0)
-         index = -(index + 1);
+      int index = computeStepNumber(x);
 
-      double height = groundHeights[index];
+      double height = computeGroundHeight(index);
 
       return height;
    }
@@ -110,4 +108,27 @@ public class VaryingStairGroundProfile implements GroundProfile
       normal.set(0.0, 0.0, 1.0);
    }
 
+   public int computeStepNumber(double x)
+   {
+      // read Arrays.binarySearch javadoc for index magic.
+      int index = Arrays.binarySearch(stepStartXValues, x);
+      if (index < 0)
+         index = -(index + 1);
+      return index;
+   }
+
+   public double computeStepStartX(int index)
+   {
+      CheckTools.checkRange(index, 0, stepStartXValues.length);
+
+      if (index == stepStartXValues.length)
+         return Double.POSITIVE_INFINITY;
+      else
+         return stepStartXValues[index];
+   }
+
+   public double computeGroundHeight(int index)
+   {
+      return groundHeights[index];
+   }
 }
