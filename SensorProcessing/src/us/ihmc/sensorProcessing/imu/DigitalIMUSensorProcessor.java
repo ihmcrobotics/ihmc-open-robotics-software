@@ -81,7 +81,7 @@ public class DigitalIMUSensorProcessor implements IMUSensorProcessor
       acceleration.sub(accelerationOffset);
 
       // use rotationMatrixBeforeOffset instead of rotationMatrix, because the accelerations are measured in IMU body!
-      // accel^W = R^W_IMUBody * accel^IMUBody
+      // a(M') = R(M'S') * a(S')
       rotationMatrixBeforeOffset.transform(acceleration);
       acceleration.setZ(acceleration.getZ() - localGravityZ);
       FrameVector frameAcceleration = new FrameVector(ReferenceFrame.getWorldFrame(), acceleration);
