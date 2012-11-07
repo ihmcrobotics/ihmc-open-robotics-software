@@ -67,7 +67,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    private final double doubleSupportTime = 0.2; // 0.6;    // 0.3
    private final double stepTime = 0.45; // 0.5; // 0.55;    // 0.55;
-   private final double waypointHeight = -0.13; // 0.05; // 0.15;
+   private final double waypointHeight = 0.05; // -0.13; // 0.05; // 0.15; FIXME: this is not flexible with respect to step height; need a better trajectory
 
    private final DoubleYoVariable singleSupportICPGlideScaleFactor = new DoubleYoVariable("singleSupportICPGlideScaleFactor", registry);
    private final BooleanYoVariable walk = new BooleanYoVariable("walk", registry);
