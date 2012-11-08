@@ -78,32 +78,59 @@ public class RotatableConvexPolygonTerrainObjectTest
    @Test
    public void testClosestIntersectionTo()
    {
-      Point3d pointToPack = new Point3d();
+	   Point3d pointToPack = new Point3d();
+	   
+	   Point3d expectedPoint = new Point3d(2.0,0.0,0.5);	   
+	   flatTopFaceOctagon3d.closestIntersectionTo(3.0, 0.0, 0.5, pointToPack);	//Point on lateral surface
+	   JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon);
 
-      // Point above centroid
-      flatTopFaceOctagon3d.closestIntersectionTo(0.0, 0.0, 1.5, pointToPack);
-      Point3d expectedPoint = new Point3d(0.0, 0.0, 1.0);
-      JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon);
+	   expectedPoint.set(-1.5,-1.5,0.0);	   
+	   flatTopFaceOctagon3d.closestIntersectionTo(-4.0, -4.0, 0.0, pointToPack);	//Point on lateral surface
+	   JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon);
 
-      // Point outside, but below top surface
-      flatTopFaceOctagon3d.closestIntersectionTo(3.0, 1.5, 0.5, pointToPack);
-      expectedPoint.set(2.0, 1.0, 0.5);
-      JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon);
-
-      // Point outside and above top surface
-      flatTopFaceOctagon3d.closestIntersectionTo(3.0, 1.5, 1.5, pointToPack);
-      expectedPoint.set(2.0, 1.0, 1.0);
-      JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon);
-
-      // Point centroid, inclined top surface
-      inclinedTopFaceOctagon3d.closestIntersectionTo(0.0, 0.0, 1.0, pointToPack);
-      expectedPoint = new Point3d(0.0, 0.0, 1.0);
-      JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon);
-      
-      // Point high above centroid, inclined top surface
-      inclinedTopFaceOctagon3d.closestIntersectionTo(0.0, 0.0, 15.0, pointToPack);
-      expectedPoint = new Point3d(0.0, -2.0, 3.0);
-      JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon);
+	   expectedPoint.set(0.0,2.0,0.9);	   
+	   flatTopFaceOctagon3d.closestIntersectionTo(0.0,2.3,0.9, pointToPack);	//Point on lateral surface
+	   JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon);
+	   
+	   expectedPoint.set(1.0,-1.0,1.0);	   
+	   flatTopFaceOctagon3d.closestIntersectionTo(1.0,-1.0,1.1, pointToPack);	//Point on top surface
+	   JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon);	 
+	   
+	   expectedPoint.set(1.5,-1.5,1.0);	   
+	   flatTopFaceOctagon3d.closestIntersectionTo(1.5,-1.5,1.0, pointToPack);	//Point on top surface edge
+	   JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon);
+	   
+   
+	   
+//      Point3d pointToPack = new Point3d();
+//
+//      // Point above centroid
+//      flatTopFaceOctagon3d.closestIntersectionTo(0.0, 0.0, 1.5, pointToPack);
+//      Point3d expectedPoint = new Point3d(0.0, 0.0, 1.0);
+//      JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon);
+//
+//      // Point outside, but below top surface
+//      flatTopFaceOctagon3d.closestIntersectionTo(3.0, 1.5, 0.5, pointToPack);
+//      expectedPoint.set(2.0, 1.0, 0.5);
+//      JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon);
+//
+//      // Point outside and above top surface
+//      flatTopFaceOctagon3d.closestIntersectionTo(3.0, 1.5, 1.5, pointToPack);
+//      expectedPoint.set(2.0, 1.0, 1.0);
+//      JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon);
+//
+//      // Point centroid, inclined top surface
+//      inclinedTopFaceOctagon3d.closestIntersectionTo(0.0, 0.0, 1.0, pointToPack);
+//      expectedPoint = new Point3d(0.0, 0.0, 1.0);
+//      JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon);
+//      
+//      // Point high above centroid, inclined top surface
+//      inclinedTopFaceOctagon3d.closestIntersectionTo(0.0, 0.0, 15.0, pointToPack);
+//      expectedPoint = new Point3d(0.0, -2.0, 3.0);
+//      JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon);
+	   
+	   
+	   
    }
    
    @Test
@@ -179,7 +206,7 @@ public class RotatableConvexPolygonTerrainObjectTest
    public void testSetupInEnvironment()
    {
       SimulationConstructionSet scs = new SimulationConstructionSet();
-      scs.addStaticLinkGraphics(flatTopFaceOctagon3d.getLinkGraphics());
+      scs.addStaticLinkGraphics(inclinedTopFaceOctagon3d.getLinkGraphics());
       
       scs.setGroundVisible(false);
 
