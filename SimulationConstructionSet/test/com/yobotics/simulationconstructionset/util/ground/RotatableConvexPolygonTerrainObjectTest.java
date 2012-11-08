@@ -5,7 +5,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
@@ -14,11 +14,11 @@ import javax.vecmath.Vector3d;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.gui.clickListeners.Clicked3DPointListener;
-
 import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
+import us.ihmc.utilities.math.geometry.Plane3d;
 import us.ihmc.utilities.test.JUnitTools;
+
+import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 
 public class RotatableConvexPolygonTerrainObjectTest
 {
@@ -104,6 +104,27 @@ public class RotatableConvexPolygonTerrainObjectTest
       inclinedTopFaceOctagon3d.closestIntersectionTo(0.0, 0.0, 15.0, pointToPack);
       expectedPoint = new Point3d(0.0, -2.0, 3.0);
       JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon);
+   }
+   
+   @Test
+   public void testIsInsedeTheFace(){
+	   Point3d faceCenter = new Point3d(1.0,0.0,0.0);
+	   Vector3d faceNormal = new Vector3d(1.0,0.0,0.0);	   
+	   Plane3d facePlane = new Plane3d(faceCenter,faceNormal);
+	   ArrayList<Point3d> faceVertices3d = new ArrayList<Point3d>();
+	   faceVertices3d.add(new Point3d(1.0,-2.0,0.0));
+	   faceVertices3d.add(new Point3d(1.0,0.0,-2.0));
+	   faceVertices3d.add(new Point3d(1.0,2.0,0.0));
+	   faceVertices3d.add(new Point3d(1.0,0.0,2.0));
+	   //Expected conversions v1=(2.0, 0.0) v2=(0.0, 2.0) v3=(-2.0, 0.0) v4=(0.0, -2.0)	   
+	   Point3d pointToCheck = new Point3d(1.0,-1.0,0.0); //Point inside (1.0, 0.0)
+	   assertTrue(flatTopFaceOctagon3d.isInsadeTheFace(facePlane,faceVertices3d,pointToCheck));
+	   
+	   pointToCheck.set(1.0,-1.0,1.0);//Point on the edge (1.0, 1.0)
+	   assertTrue(flatTopFaceOctagon3d.isInsadeTheFace(facePlane,faceVertices3d,pointToCheck));
+	   
+	   pointToCheck.set(1.0, 1.0, 2.0);//Point outside (-1.0, -2.0)
+	   assertFalse(flatTopFaceOctagon3d.isInsadeTheFace(facePlane,faceVertices3d,pointToCheck));
    }
 
    @Test
