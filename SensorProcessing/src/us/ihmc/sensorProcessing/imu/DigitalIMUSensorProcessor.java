@@ -7,7 +7,6 @@ import javax.vecmath.Vector3d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
-import com.yobotics.robotconstructionset.calibrationProperties.IMUCalibrationProperties;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.processedSensors.ProcessedIMUSensorsWriteOnlyInterface;
 import com.yobotics.simulationconstructionset.rawSensors.RawIMUSensorsInterface;
