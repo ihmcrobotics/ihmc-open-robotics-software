@@ -1062,6 +1062,7 @@ public class LinkGraphics
          Loader3DS loader3ds = new Loader3DS();
          loader3ds.setTextureLightingOn(); // turns on modulate mode for textures (lighting)
          loader = loader3ds;
+         break;
       default:
          throw new RuntimeException("Unkown filetype: " + modelFileType);
       }
