@@ -25,7 +25,8 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Point3f;
 import javax.vecmath.Vector3d;
 
-import stl_loader.StlFile;
+import org.j3d.renderer.java3d.loaders.STLLoader;
+
 import us.ihmc.utilities.InertiaTools;
 import us.ihmc.utilities.math.geometry.GeometryGenerator;
 
@@ -1045,28 +1046,26 @@ public class LinkGraphics
    public void addModelFile(String fileName, Appearance app)
    {
       //Determine filename
-      String ext = fileName.substring(fileName.length() - 3);
-      Loader loader = null;
-      if (ext.equalsIgnoreCase("3ds"))
+      
+      ModelFileType modelFileType = ModelFileType.getFileType(fileName);
+      Loader loader;
+      switch (modelFileType)
       {
+      case COLLADA:
+         loader = new DAELoader();
+         break;
+      case _STL:
+         loader = new STLLoader();
+         fileName = "file://" + fileName;
+         break;
+      case _3DS:
          Loader3DS loader3ds = new Loader3DS();
          loader3ds.setTextureLightingOn(); // turns on modulate mode for textures (lighting)
          loader = loader3ds;
+      default:
+         throw new RuntimeException("Unkown filetype: " + modelFileType);
       }
-      else if (ext.equalsIgnoreCase("dae"))
-      {
-         loader = new DAELoader();
-      }
-      else if (ext.equalsIgnoreCase("stl"))
-      {
-         loader = new StlFile();
-//         fileName = "file://" + fileName;
-      }
-      else
-      {
-         throw new RuntimeException("Support for " + ext + " files not implemented yet");
-      }
-
+      
       com.sun.j3d.loaders.Scene scene = null;
 
       try
