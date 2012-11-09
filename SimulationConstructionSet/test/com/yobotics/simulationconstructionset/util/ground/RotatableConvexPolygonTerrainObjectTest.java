@@ -22,7 +22,7 @@ import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 
 public class RotatableConvexPolygonTerrainObjectTest
 {
-   private RotatableConvexPolygonTerrainObject flatTopFaceOctagon3d, inclinedTopFaceOctagon3d;
+   private RotatableConvexPolygonTerrainObject flatTopFaceOctagon3d, inclinedTopFaceOctagon3d, inclinedTopFaceOctagon3dSecond;
    private Vector3d normalZVector, normalYZVector;
    private ConvexPolygon2d convexPolygon;
    private double[][] pointList;
@@ -47,6 +47,8 @@ public class RotatableConvexPolygonTerrainObjectTest
       normalYZVector = new Vector3d(0.0, 1.0, 1.0);
 
       inclinedTopFaceOctagon3d = new RotatableConvexPolygonTerrainObject(normalYZVector, convexPolygon, centroidHeight);
+      
+      inclinedTopFaceOctagon3dSecond = new RotatableConvexPolygonTerrainObject(normalYZVector, convexPolygon, 3);
    }
 
    @Test
@@ -100,7 +102,29 @@ public class RotatableConvexPolygonTerrainObjectTest
 	   flatTopFaceOctagon3d.closestIntersectionTo(1.5,-1.5,1.0, pointToPack);	//Point on top surface edge
 	   JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon);
 	   
-   
+	   expectedPoint.set(0.0,1.5,1.5);	   
+	   inclinedTopFaceOctagon3dSecond.closestIntersectionTo(0.0,2.0,2.0, pointToPack);	//Point on top (inclined) surface
+	   JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon);
+	   
+	   expectedPoint.set(0.0,2.0,0.5);	   
+	   inclinedTopFaceOctagon3dSecond.closestIntersectionTo(0.0,3.0,0.5, pointToPack);	//Point on lateral surface
+	   JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon);	   
+	   
+	   expectedPoint = new Point3d(1.0,2.0,0.5);	   
+	   flatTopFaceOctagon3d.closestIntersectionTo(1.1, 5.0, 0.5, pointToPack);	//Point on lateral edge
+	   JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon);	   
+	   
+	   expectedPoint = new Point3d(1.0,2.0,1.0);	   
+	   flatTopFaceOctagon3d.closestIntersectionTo(1.1, 5.0, 2.0, pointToPack);	//Point on the top corner
+	   JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon);
+	   
+	   expectedPoint = new Point3d(-1.0,-2.0,1.0);	   
+	   flatTopFaceOctagon3d.closestIntersectionTo(-2.0,-4.0,1.5, pointToPack);	//Point on the top corner
+	   JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon);	
+
+	   expectedPoint = new Point3d(-2.0,0.0,1.0);	   
+	   flatTopFaceOctagon3d.closestIntersectionTo(-3.0,0.0,1.5, pointToPack);	//Point on the top edge
+	   JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon);	
 	   
 //      Point3d pointToPack = new Point3d();
 //
