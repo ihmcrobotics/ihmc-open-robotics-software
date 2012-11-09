@@ -585,22 +585,6 @@ public class SimulationConstructionSetTest
          this.addRootJoint(rootJoint);
       }
    }
-   
-   private void sleepForever()
-   {
-      while(true)
-      {
-         try
-         {
-            Thread.sleep(1000);
-            
-           
-//            System.out.println(MouseInfo.getPointerInfo().getLocation());
-         } 
-         catch (InterruptedException e)
-         {
-         }
-      }
-   }
+   // use ThreadTools.sleepForever() if you want to pause to see the GUI
 
 }
