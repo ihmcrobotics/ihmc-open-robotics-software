@@ -129,7 +129,7 @@ public class DRCDemo01Environment implements CommonAvatarEnvironmentInterface
       }
       
       ConvexPolygon2d convexPolygon = new ConvexPolygon2d(vertexPoints);
-      RotatableConvexPolygonTerrainObject rock = new RotatableConvexPolygonTerrainObject(normal, convexPolygon, centroidHeight);
+      RotatableConvexPolygonTerrainObject rock = new RotatableConvexPolygonTerrainObject(normal, convexPolygon, centroidHeight, YoAppearance.Red());
       this.combinedTerrainObject.addTerrainObject(rock);
    }
 
