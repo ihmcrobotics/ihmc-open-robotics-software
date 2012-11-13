@@ -1056,7 +1056,6 @@ public class LinkGraphics
          break;
       case _STL:
          loader = new STLLoader();
-         fileName = "file://" + fileName;
          break;
       case _3DS:
          Loader3DS loader3ds = new Loader3DS();
