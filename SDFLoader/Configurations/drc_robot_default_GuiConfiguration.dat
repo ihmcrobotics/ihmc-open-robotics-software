@@ -1,5 +1,17 @@
 <GraphGroup>
 	<Cols>1</Cols>
+	<Graph>
+		<Variables></Variables>
+		<GraphConfiguration>
+			<Name>config1</Name>
+			<ScalingMethod>0</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>false</ShowBaseLines>
+			<BaseLines></BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
 </GraphGroup>
 <Entry Boxes></Entry Boxes>
 
@@ -43,8 +55,8 @@
 </Track Booleans>
 </Track data>
 <Fix Position>
-<Fix X>0.0</Fix X>
-<Fix Y>0.0</Fix Y>
-<Fix Z>0.6</Fix Z>
+<Fix X>0.6295615439097554</Fix X>
+<Fix Y>-0.20458852172748188</Fix Y>
+<Fix Z>-0.47541792721144094</Fix Z>
 </Fix Position>
 </Canvas 1>
