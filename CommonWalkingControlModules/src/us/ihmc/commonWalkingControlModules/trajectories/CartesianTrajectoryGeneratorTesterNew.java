@@ -31,11 +31,11 @@ public class CartesianTrajectoryGeneratorTesterNew
       //      private final FramePoint finalDesiredPosition = new FramePoint(referenceFrame, 0.3, 0.1, 0.25);
       //      private final FrameVector finalDesiredVelocity = new FrameVector(referenceFrame, -0.1, 0.1, -0.1);
 
-            private final FramePoint initialPosition = new FramePoint(referenceFrame, 0.0, 0.0, 0.0);
-            private final FrameVector initialVelocity = new FrameVector(referenceFrame, 0.1, 0.0, 0.0);
-            private final FrameVector initialAcceleration = new FrameVector(referenceFrame, -0.1, -0.2, -0.3);
-            private final FramePoint finalDesiredPosition = new FramePoint(referenceFrame, 0.3, 0.1, 0.25);
-            private final FrameVector finalDesiredVelocity = new FrameVector(referenceFrame, -0.1, 0.1, -0.1);
+//            private final FramePoint initialPosition = new FramePoint(referenceFrame, 0.0, 0.0, 0.0);
+//            private final FrameVector initialVelocity = new FrameVector(referenceFrame, 0.1, 0.0, 0.0);
+//            private final FrameVector initialAcceleration = new FrameVector(referenceFrame, -0.1, -0.2, -0.3);
+//            private final FramePoint finalDesiredPosition = new FramePoint(referenceFrame, 0.3, 0.1, 0.25);
+//            private final FrameVector finalDesiredVelocity = new FrameVector(referenceFrame, -0.1, 0.1, -0.1);
 
       //      private final FramePoint initialPosition = new FramePoint(referenceFrame, 0.0, 0.0, 0.0);
       //      private final FrameVector initialVelocity = new FrameVector(referenceFrame, 0.0, 0.0, 0.0);
@@ -43,11 +43,11 @@ public class CartesianTrajectoryGeneratorTesterNew
       //      private final FramePoint finalDesiredPosition = new FramePoint(referenceFrame, 0.3, 0.1, 0.25);
       //      private final FrameVector finalDesiredVelocity = new FrameVector(referenceFrame, 0.0, 0.0, 0.0);
 
-//      private final FramePoint initialPosition = new FramePoint(referenceFrame, 0.0, 0.0, 0.0);
-//      private final FrameVector initialVelocity = new FrameVector(referenceFrame, 0.0, 0.0, 0.0);
-//      private final FrameVector initialAcceleration = new FrameVector(referenceFrame, 0.0, 0.0, 0.0);
-//      private final FramePoint finalDesiredPosition = new FramePoint(referenceFrame, 0.3, 0.1, 0.25);
-//      private final FrameVector finalDesiredVelocity = new FrameVector(referenceFrame, 0.0, 0.0, 0.0);
+      private final FramePoint initialPosition = new FramePoint(referenceFrame, -0.05666757380023707, 0.10052877782151563, 0.3309106951292634);
+      private final FrameVector initialVelocity = new FrameVector(referenceFrame, 0.002249342893913859, -0.0033555201145383877, -0.0029238257850914256);
+      private final FrameVector initialAcceleration = new FrameVector(referenceFrame, 0.0, 0.0, 0.0);
+      private final FramePoint finalDesiredPosition = new FramePoint(referenceFrame, 0.2090459436488653, 0.09971527634692637, 1.086355304703153);
+      private final FrameVector finalDesiredVelocity = new FrameVector(referenceFrame, 0.0, 0.0, 0.0);
 
       private final FramePoint positionToPack = new FramePoint(referenceFrame);
       private final FrameVector velocityToPack = new FrameVector(referenceFrame);
