@@ -98,15 +98,12 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    public WalkingHighLevelHumanoidController(FullRobotModel fullRobotModel, CommonWalkingReferenceFrames referenceFrames, TwistCalculator twistCalculator,
          SideDependentList<BipedFootInterface> bipedFeet, BipedSupportPolygons bipedSupportPolygons, SideDependentList<FootSwitchInterface> footSwitches,
          ProcessedSensorsInterface processedSensors, double controlDT, DesiredHeadingControlModule desiredHeadingControlModule,
-         YoVariableRegistry registry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, DesiredFootstepCalculator desiredFootstepCalculator)
+         YoVariableRegistry registry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, DesiredFootstepCalculator desiredFootstepCalculator, boolean liftUpHeels)
    {
       super(fullRobotModel, referenceFrames, processedSensors, twistCalculator, bipedFeet, bipedSupportPolygons, controlDT, desiredHeadingControlModule,
             footSwitches, CenterOfMassControlMode.TOTAL_COM, registry);
 
       this.desiredFootstepCalculator = desiredFootstepCalculator;
-
-      // this.centerOfMassHeightTrajectoryGenerator = new OrbitalEnergyCubicTrajectoryGenerator(processedSensors, referenceFrames,
-      // desiredHeadingControlModule.getDesiredHeadingFrame(), footHeight, parentRegistry);
 
       // this.centerOfMassHeightTrajectoryGenerator = new LinearFootstepCalculatorBasedCoMHeightTrajectoryGenerator(processedSensors, desiredFootstepCalculator,
       // referenceFrames, desiredHeadingControlModule.getDesiredHeadingFrame(), registry);
@@ -147,10 +144,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       setUpStateMachine();
 
       walk.set(false);
-      liftUpHeels.set(true);
+      this.liftUpHeels.set(liftUpHeels);
       trailingFootPitch.set(0.05);
       leadingFootPitch.set(0.8);
-      minOrbitalEnergyForSingleSupport.set(0.007);
+      minOrbitalEnergyForSingleSupport.set(0.007); // 0.008
       amountToBeInsideSingleSupport.set(0.0);
       amountToBeInsideDoubleSupport.set(0.05);
       desiredPelvisPitch.set(0.6);
