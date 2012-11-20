@@ -8,6 +8,7 @@ import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.robotSide.RobotSide;
+import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.MatrixTools;
 
 import com.yobotics.simulationconstructionset.FloatingJoint;
@@ -25,6 +26,8 @@ public class SDFRobot extends Robot
    private final HashMap<String, PinJoint> robotJoints = new HashMap<String, PinJoint>();
 
    private final FloatingJoint rootJoint;
+   
+   private final SideDependentList<ArrayList<GroundContactPoint>> groundContactPoints = new SideDependentList<ArrayList<GroundContactPoint>>();
 
    public SDFRobot(GeneralizedSDFRobotModel generalizedSDFRobotModel, SDFJointNameMap sdfJointNameMap)
    {
@@ -59,15 +62,19 @@ public class SDFRobot extends Robot
 
       for(RobotSide robotSide : RobotSide.values)
       {
+         ArrayList<GroundContactPoint> groundContactPointsForSide = new ArrayList<GroundContactPoint>();
+         
          int i = 0;
          for(Vector3d groundContactPointOffset : sdfJointNameMap.getFootOffset(robotSide))
          {
             String jointName = sdfJointNameMap.getJointBeforeFootName(robotSide);
             GroundContactPoint groundContactPoint = new GroundContactPoint("gc_" + jointName + "_" + i, groundContactPointOffset, this);
             robotJoints.get(jointName).addGroundContactPoint(groundContactPoint);
+            groundContactPointsForSide.add(groundContactPoint);
             i++;
             
          }
+         groundContactPoints.put(robotSide, groundContactPointsForSide);
       }
       
    }
@@ -108,6 +115,19 @@ public class SDFRobot extends Robot
          addJointsRecursively(child, scsJoint, chainRotation);
       }
       
+   }
+   
+   public boolean hasGroundContact(RobotSide robotSide)
+   {
+      for(GroundContactPoint groundContactPoint : groundContactPoints.get(robotSide))
+      {
+         if(groundContactPoint.isInContact())
+         {
+            return true;
+         }
+      }
+      
+      return false;
    }
    
    private Link createLink(SDFLinkHolder link, Matrix3d rotation)
