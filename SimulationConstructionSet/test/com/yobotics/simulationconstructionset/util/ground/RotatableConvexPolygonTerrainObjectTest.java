@@ -125,40 +125,35 @@ public class RotatableConvexPolygonTerrainObjectTest
 	   expectedPoint = new Point3d(-2.0,0.0,1.0);	   
 	   flatTopFaceOctagon3d.closestIntersectionTo(-3.0,0.0,1.5, pointToPack);	//Point on the top edge
 	   JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon);	
+
+      expectedPoint = new Point3d(2.0, 0.0, 0.5);
+      flatTopFaceOctagon3d.closestIntersectionTo(1.99,0.0,0.5, pointToPack);  //Point just inside the rightmost vertical plane
+      JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon); 
 	   
-//      Point3d pointToPack = new Point3d();
-//
-//      // Point above centroid
-//      flatTopFaceOctagon3d.closestIntersectionTo(0.0, 0.0, 1.5, pointToPack);
-//      Point3d expectedPoint = new Point3d(0.0, 0.0, 1.0);
-//      JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon);
-//
-//      // Point outside, but below top surface
-//      flatTopFaceOctagon3d.closestIntersectionTo(3.0, 1.5, 0.5, pointToPack);
-//      expectedPoint.set(2.0, 1.0, 0.5);
-//      JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon);
-//
-//      // Point outside and above top surface
-//      flatTopFaceOctagon3d.closestIntersectionTo(3.0, 1.5, 1.5, pointToPack);
-//      expectedPoint.set(2.0, 1.0, 1.0);
-//      JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon);
-//
-//      // Point centroid, inclined top surface
-//      inclinedTopFaceOctagon3d.closestIntersectionTo(0.0, 0.0, 1.0, pointToPack);
-//      expectedPoint = new Point3d(0.0, 0.0, 1.0);
-//      JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon);
-//      
-//      // Point high above centroid, inclined top surface
-//      inclinedTopFaceOctagon3d.closestIntersectionTo(0.0, 0.0, 15.0, pointToPack);
-//      expectedPoint = new Point3d(0.0, -2.0, 3.0);
-//      JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon);
+      expectedPoint = new Point3d(2.0, 0.0, 0.5);
+      inclinedTopFaceOctagon3dSecond.closestIntersectionTo(1.99,0.0,0.5, pointToPack);  //Point just inside the rightmost vertical plane
+      JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon); 
 	   
-	   
-	   
+      expectedPoint = new Point3d(2.0, 0.0, 0.5);
+      flatTopFaceOctagon3d.closestIntersectionTo(1.5,0.0,0.5, pointToPack);  //Point just inside the rightmost vertical plane
+      JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon); 
+      
+      expectedPoint = new Point3d(2.0, 0.0, 0.5);
+      inclinedTopFaceOctagon3dSecond.closestIntersectionTo(1.5,0.0,0.5, pointToPack);  //Point just inside the rightmost vertical plane
+      JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon); 
+
+      expectedPoint = new Point3d(1.49, 0.0, 1.0);
+      flatTopFaceOctagon3d.closestIntersectionTo(1.49,0.0,0.5, pointToPack);  //Point just inside the rightmost vertical plane
+      JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon); 
+      
+      expectedPoint = new Point3d(2.0, 0.0, 0.5);
+      inclinedTopFaceOctagon3dSecond.closestIntersectionTo(1.49,0.0,0.5, pointToPack);  //Point just inside the rightmost vertical plane
+      JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon); 
+      
    }
    
    @Test
-   public void testIsInsedeTheFace(){
+   public void testIsInsideTheFace(){
 	   Point3d faceCenter = new Point3d(1.0,0.0,0.0);
 	   Vector3d faceNormal = new Vector3d(1.0,0.0,0.0);	   
 	   Plane3d facePlane = new Plane3d(faceCenter,faceNormal);
@@ -169,19 +164,24 @@ public class RotatableConvexPolygonTerrainObjectTest
 	   faceVertices3d.add(new Point3d(1.0,0.0,2.0));
 	   //Expected conversions v1=(2.0, 0.0) v2=(0.0, 2.0) v3=(-2.0, 0.0) v4=(0.0, -2.0)	   
 	   Point3d pointToCheck = new Point3d(1.0,-1.0,0.0); //Point inside (1.0, 0.0)
-	   assertTrue(flatTopFaceOctagon3d.isInsadeTheFace(facePlane,faceVertices3d,pointToCheck));
+	   assertTrue(flatTopFaceOctagon3d.isInsideTheFace(facePlane,faceVertices3d,pointToCheck));
 	   
 	   pointToCheck.set(1.0,-1.0,1.0);//Point on the edge (1.0, 1.0)
-	   assertTrue(flatTopFaceOctagon3d.isInsadeTheFace(facePlane,faceVertices3d,pointToCheck));
+	   assertTrue(flatTopFaceOctagon3d.isInsideTheFace(facePlane,faceVertices3d,pointToCheck));
 	   
 	   pointToCheck.set(1.0, 1.0, 2.0);//Point outside (-1.0, -2.0)
-	   assertFalse(flatTopFaceOctagon3d.isInsadeTheFace(facePlane,faceVertices3d,pointToCheck));
+	   assertFalse(flatTopFaceOctagon3d.isInsideTheFace(facePlane,faceVertices3d,pointToCheck));
    }
 
    @Test
    public void testSurfaceNormalAt()
    {
-      fail("Not yet implemented");
+      Vector3d normalToPack = new Vector3d();
+      flatTopFaceOctagon3d.surfaceNormalAt(0.0, 0.0, 1.01, normalToPack);
+      JUnitTools.assertTuple3dEquals(new Vector3d(0.0, 0.0, 1.0), normalToPack, 1e-4);
+      
+      flatTopFaceOctagon3d.surfaceNormalAt(0.0, 0.0, 0.99, normalToPack);
+      JUnitTools.assertTuple3dEquals(new Vector3d(0.0, 0.0, 1.0), normalToPack, 1e-4);
    }
 
    @Test
@@ -226,7 +226,6 @@ public class RotatableConvexPolygonTerrainObjectTest
       fail("Not yet implemented");
    }
    
-   @Test
    public void testSetupInEnvironment()
    {
       SimulationConstructionSet scs = new SimulationConstructionSet();
