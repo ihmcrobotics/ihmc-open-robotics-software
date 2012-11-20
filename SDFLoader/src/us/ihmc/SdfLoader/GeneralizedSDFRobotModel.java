@@ -5,21 +5,27 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
 
-import com.sun.xml.internal.bind.v2.runtime.unmarshaller.XsiNilLoader.Array;
+import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.xmlDescription.SDFJoint;
 import us.ihmc.SdfLoader.xmlDescription.SDFLink;
+import us.ihmc.SdfLoader.xmlDescription.SDFModel;
 
 public class GeneralizedSDFRobotModel
 {
    private final String name;
    private final String resourceDirectory;
    private final ArrayList<SDFLinkHolder> rootLinks = new ArrayList<SDFLinkHolder>();
+   private final Vector3d rootOffset = new Vector3d();
 
-   public GeneralizedSDFRobotModel(String name, List<SDFJoint> sdfJoints, List<SDFLink> sdfLinks, String resourceDirectory)
+   public GeneralizedSDFRobotModel(String name, SDFModel model, String resourceDirectory)
    {
       this.name = name;
       this.resourceDirectory = resourceDirectory;
+      
+      List<SDFLink> sdfLinks = model.getLinks();
+      List<SDFJoint> sdfJoints = model.getJoints();
+      
       HashMap<String, SDFJointHolder> joints = new HashMap<String, SDFJointHolder>();
       HashMap<String, SDFLinkHolder> links = new HashMap<String, SDFLinkHolder>();
 
@@ -45,6 +51,8 @@ public class GeneralizedSDFRobotModel
       }
 
       findRootLinks(links);
+      
+      SDFConversionsHelper.poseToTransform(model.getPose()).get(rootOffset);
 
       System.out.println(rootLinks.get(0).getChilderen());
    }
@@ -64,6 +72,11 @@ public class GeneralizedSDFRobotModel
    public ArrayList<SDFLinkHolder> getRootLinks()
    {
       return rootLinks;
+   }
+   
+   public Vector3d getRootOffset()
+   {
+      return rootOffset;
    }
    
    public String getName()
