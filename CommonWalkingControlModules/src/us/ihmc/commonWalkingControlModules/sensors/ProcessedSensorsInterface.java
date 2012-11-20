@@ -3,7 +3,6 @@ package us.ihmc.commonWalkingControlModules.sensors;
 import java.util.HashMap;
 
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.CenterOfMassControlMode;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.ArmJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.FingerName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
@@ -28,7 +27,6 @@ public interface ProcessedSensorsInterface
    public abstract double getKneeAngle(RobotSide robotSide);
 
    public abstract FramePoint getCenterOfMassPositionInFrame(ReferenceFrame referenceFrame);
-   public abstract FramePoint getCenterOfMassPositionInFrame(ReferenceFrame referenceFrame, CenterOfMassControlMode centerOfMassControlType);
 
    public abstract FrameVector getGravityInWorldFrame();
 
@@ -47,7 +45,6 @@ public interface ProcessedSensorsInterface
 
 
    public abstract double getTotalMass();
-   public abstract double getTotalMass(CenterOfMassControlMode centerOfMassControlType);
    
    public abstract String getLegJointPositionName(RobotSide robotSide, LegJointName jointName);
 
@@ -65,7 +62,6 @@ public interface ProcessedSensorsInterface
    
    public abstract FrameVector getBodyVelocity();
    public abstract FrameVector getCenterOfMassVelocityInFrame(ReferenceFrame referenceFrame);
-   public abstract FrameVector getCenterOfMassVelocityInFrame(ReferenceFrame referenceFrame, CenterOfMassControlMode centerOfMassControlType);
    
    public abstract FramePoint getCentroidalMomentPivotInFrame(ReferenceFrame referenceFrame);
    public abstract FrameVector getAngularMomentumInFrame(ReferenceFrame midFeetZUp);
