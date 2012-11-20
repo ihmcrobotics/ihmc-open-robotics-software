@@ -81,6 +81,7 @@ public class MomentumBasedController implements RobotController
 
    private final SideDependentList<BipedFootInterface> bipedFeet;
    private final ReferenceFrame midFeetZUp;
+   private final double gravityZ;
    private final double totalMass;
 
    private final HighLevelHumanoidController highLevelHumanoidController;
@@ -127,18 +128,21 @@ public class MomentumBasedController implements RobotController
    private final SideDependentList<BooleanYoVariable> inSingularRegions = new SideDependentList<BooleanYoVariable>(leftInSingularRegion, rightInSingularRegion);
 
    public MomentumBasedController(ProcessedSensorsInterface processedSensors, ProcessedOutputsInterface processedOutputs,
-                                  CommonWalkingReferenceFrames referenceFrames, TwistCalculator twistCalculator, double controlDT,
+                                  double gravityZ, CommonWalkingReferenceFrames referenceFrames, TwistCalculator twistCalculator, double controlDT,
                                   DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, SideDependentList<BipedFootInterface> bipedFeet,
                                   BipedSupportPolygons bipedSupportPolygons, DesiredHeadingControlModule desiredHeadingControlModule,
                                   HighLevelHumanoidController highLevelHumanoidController)
    {
+      MathTools.checkIfInRange(gravityZ, 0.0, Double.POSITIVE_INFINITY);
+
       this.processedSensors = processedSensors;
       this.fullRobotModel = processedSensors.getFullRobotModel();
       this.referenceFrames = referenceFrames;
       this.processedOutputs = processedOutputs;
+      this.gravityZ = gravityZ;
 
       RigidBody elevator = fullRobotModel.getElevator();
-      this.inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, -processedSensors.getGravityInWorldFrame().getZ());
+      this.inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, gravityZ);
 
       this.bipedFeet = bipedFeet;
       this.bipedSupportPolygons = bipedSupportPolygons;
@@ -451,7 +455,7 @@ public class MomentumBasedController implements RobotController
                                                             totalGroundReactionWrench.getAngularPartCopy());
       FrameVector desiredLinearCentroidalMomentumRate = new FrameVector(totalGroundReactionWrench.getExpressedInFrame(),
                                                            totalGroundReactionWrench.getLinearPartCopy());
-      desiredLinearCentroidalMomentumRate.setZ(desiredLinearCentroidalMomentumRate.getZ() + processedSensors.getGravityInWorldFrame().getZ() * totalMass);
+      desiredLinearCentroidalMomentumRate.setZ(desiredLinearCentroidalMomentumRate.getZ() - gravityZ * totalMass);
 
       for (RobotSide robotSide : RobotSide.values())
       {
