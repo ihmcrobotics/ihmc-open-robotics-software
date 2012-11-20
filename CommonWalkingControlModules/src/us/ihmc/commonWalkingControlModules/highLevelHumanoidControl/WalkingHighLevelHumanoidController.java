@@ -106,8 +106,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          ProcessedSensorsInterface processedSensors, double gravityZ, DoubleYoVariable yoTime, double controlDT, DesiredHeadingControlModule desiredHeadingControlModule,
          YoVariableRegistry registry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, DesiredFootstepCalculator desiredFootstepCalculator, boolean liftUpHeels)
    {
-      super(fullRobotModel, referenceFrames, processedSensors, twistCalculator, bipedFeet, bipedSupportPolygons, controlDT, desiredHeadingControlModule,
-            footSwitches, CenterOfMassControlMode.TOTAL_COM, registry);
+      super(fullRobotModel, referenceFrames, gravityZ, twistCalculator, bipedFeet, bipedSupportPolygons, controlDT, desiredHeadingControlModule, footSwitches,
+            CenterOfMassControlMode.TOTAL_COM, registry);
 
       this.desiredFootstepCalculator = desiredFootstepCalculator;
 
