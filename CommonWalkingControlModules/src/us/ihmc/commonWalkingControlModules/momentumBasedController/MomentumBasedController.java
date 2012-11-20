@@ -40,6 +40,8 @@ import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.GeometryTools;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RotationFunctions;
+import us.ihmc.utilities.screwTheory.CenterOfMassCalculator;
+import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
 import us.ihmc.utilities.screwTheory.EndEffectorPoseTwistAndSpatialAccelerationCalculator;
 import us.ihmc.utilities.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
@@ -71,6 +73,9 @@ public class MomentumBasedController implements RobotController
 
    private final ProcessedSensorsInterface processedSensors;
 
+   private final CenterOfMassCalculator centerOfMassCalculator;
+   private final CenterOfMassJacobian centerOfMassJacobian;
+   
    private final ProcessedOutputsInterface processedOutputs;
    private final InverseDynamicsCalculator inverseDynamicsCalculator;
 
@@ -126,6 +131,8 @@ public class MomentumBasedController implements RobotController
    private final BooleanYoVariable leftInSingularRegion = new BooleanYoVariable("leftInSingularRegion", registry);
    private final BooleanYoVariable rightInSingularRegion = new BooleanYoVariable("rightInSingularRegion", registry);
    private final SideDependentList<BooleanYoVariable> inSingularRegions = new SideDependentList<BooleanYoVariable>(leftInSingularRegion, rightInSingularRegion);
+  
+   private final YoFrameVector comVelDifference = new YoFrameVector("comVelDifference", worldFrame, registry);
 
    public MomentumBasedController(ProcessedSensorsInterface processedSensors, ProcessedOutputsInterface processedOutputs,
                                   double gravityZ, CommonWalkingReferenceFrames referenceFrames, TwistCalculator twistCalculator, double controlDT,
@@ -134,13 +141,16 @@ public class MomentumBasedController implements RobotController
                                   HighLevelHumanoidController highLevelHumanoidController)
    {
       MathTools.checkIfInRange(gravityZ, 0.0, Double.POSITIVE_INFINITY);
-
+      
       this.processedSensors = processedSensors;
       this.fullRobotModel = processedSensors.getFullRobotModel();
       this.referenceFrames = referenceFrames;
       this.processedOutputs = processedOutputs;
       this.gravityZ = gravityZ;
 
+      this.centerOfMassCalculator = new CenterOfMassCalculator(fullRobotModel.getElevator(), ReferenceFrame.getWorldFrame());
+      this.centerOfMassJacobian = new CenterOfMassJacobian(fullRobotModel.getElevator());
+      
       RigidBody elevator = fullRobotModel.getElevator();
       this.inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, gravityZ);
 
@@ -256,7 +266,10 @@ public class MomentumBasedController implements RobotController
    public void initialize()
    {
       optimizer.initialize();
-      highLevelHumanoidController.setCapturePoint(computeCapturePoint());
+      FramePoint centerOfMass = computeCenterOfMass();
+      FrameVector centerOfMassVelocity = computeCenterOfMassVelocity();
+      FramePoint2d capturePoint = computeCapturePoint(centerOfMass, centerOfMassVelocity);
+      highLevelHumanoidController.setCapturePoint(capturePoint);
       highLevelHumanoidController.setOmega0(omega0.getDoubleValue());
       highLevelHumanoidController.initialize();
       doControl();
@@ -280,7 +293,16 @@ public class MomentumBasedController implements RobotController
    public void doControl()
    {
       desiredHeadingControlModule.updateDesiredHeadingFrame();
-      FramePoint2d capturePoint = computeCapturePoint();
+      FramePoint centerOfMass = computeCenterOfMass();
+      FrameVector centerOfMassVelocity = computeCenterOfMassVelocity();
+      
+      centerOfMass.changeFrame(ReferenceFrame.getWorldFrame());
+      centerOfMassVelocity.changeFrame(ReferenceFrame.getWorldFrame());
+
+      comVelDifference.set(centerOfMassVelocity);
+      comVelDifference.sub(processedSensors.getCenterOfMassVelocityInFrame(worldFrame));
+      
+      FramePoint2d capturePoint = computeCapturePoint(centerOfMass, centerOfMassVelocity);
 
       for (RobotSide robotSide : RobotSide.values())
       {
@@ -303,10 +325,27 @@ public class MomentumBasedController implements RobotController
       updateYoVariables(capturePoint);
    }
 
-   private FramePoint2d computeCapturePoint()
+   private FramePoint computeCenterOfMass()
    {
-      FramePoint2d ret = processedSensors.getCenterOfMassPositionInFrame(worldFrame).toFramePoint2d();
-      FrameVector2d velocityPart = processedSensors.getCenterOfMassVelocityInFrame(worldFrame).toFrameVector2d();
+      centerOfMassCalculator.compute();
+      return centerOfMassCalculator.getCenterOfMass();
+   }
+
+   private FrameVector computeCenterOfMassVelocity()
+   {
+      centerOfMassJacobian.compute();
+      FrameVector ret = new FrameVector(ReferenceFrame.getWorldFrame());
+      centerOfMassJacobian.packCenterOfMassVelocity(ret);
+      return ret;
+   }
+
+   private FramePoint2d computeCapturePoint(FramePoint centerOfMass, FrameVector centerOfMassVelocity)
+   {
+      centerOfMass.changeFrame(worldFrame);
+      centerOfMassVelocity.changeFrame(worldFrame);
+
+      FramePoint2d ret = centerOfMass.toFramePoint2d();
+      FrameVector2d velocityPart = centerOfMassVelocity.toFrameVector2d();
       velocityPart.scale(1.0 / omega0.getDoubleValue());
       ret.add(velocityPart);
 
