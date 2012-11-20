@@ -45,6 +45,8 @@ import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
 import us.ihmc.utilities.screwTheory.EndEffectorPoseTwistAndSpatialAccelerationCalculator;
 import us.ihmc.utilities.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
+import us.ihmc.utilities.screwTheory.Momentum;
+import us.ihmc.utilities.screwTheory.MomentumCalculator;
 import us.ihmc.utilities.screwTheory.RevoluteJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTools;
@@ -71,10 +73,9 @@ public class MomentumBasedController implements RobotController
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
 
-   private final ProcessedSensorsInterface processedSensors;
-
    private final CenterOfMassCalculator centerOfMassCalculator;
    private final CenterOfMassJacobian centerOfMassJacobian;
+   private final MomentumCalculator momentumCalculator;
    
    private final ProcessedOutputsInterface processedOutputs;
    private final InverseDynamicsCalculator inverseDynamicsCalculator;
@@ -132,7 +133,6 @@ public class MomentumBasedController implements RobotController
    private final BooleanYoVariable rightInSingularRegion = new BooleanYoVariable("rightInSingularRegion", registry);
    private final SideDependentList<BooleanYoVariable> inSingularRegions = new SideDependentList<BooleanYoVariable>(leftInSingularRegion, rightInSingularRegion);
   
-   private final YoFrameVector comVelDifference = new YoFrameVector("comVelDifference", worldFrame, registry);
 
    public MomentumBasedController(ProcessedSensorsInterface processedSensors, ProcessedOutputsInterface processedOutputs,
                                   double gravityZ, CommonWalkingReferenceFrames referenceFrames, TwistCalculator twistCalculator, double controlDT,
@@ -142,7 +142,6 @@ public class MomentumBasedController implements RobotController
    {
       MathTools.checkIfInRange(gravityZ, 0.0, Double.POSITIVE_INFINITY);
       
-      this.processedSensors = processedSensors;
       this.fullRobotModel = processedSensors.getFullRobotModel();
       this.referenceFrames = referenceFrames;
       this.processedOutputs = processedOutputs;
@@ -150,6 +149,7 @@ public class MomentumBasedController implements RobotController
 
       this.centerOfMassCalculator = new CenterOfMassCalculator(fullRobotModel.getElevator(), ReferenceFrame.getWorldFrame());
       this.centerOfMassJacobian = new CenterOfMassJacobian(fullRobotModel.getElevator());
+      this.momentumCalculator = new MomentumCalculator(twistCalculator);
       
       RigidBody elevator = fullRobotModel.getElevator();
       this.inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, gravityZ);
@@ -299,9 +299,6 @@ public class MomentumBasedController implements RobotController
       centerOfMass.changeFrame(ReferenceFrame.getWorldFrame());
       centerOfMassVelocity.changeFrame(ReferenceFrame.getWorldFrame());
 
-      comVelDifference.set(centerOfMassVelocity);
-      comVelDifference.sub(processedSensors.getCenterOfMassVelocityInFrame(worldFrame));
-      
       FramePoint2d capturePoint = computeCapturePoint(centerOfMass, centerOfMassVelocity);
 
       for (RobotSide robotSide : RobotSide.values())
@@ -616,7 +613,12 @@ public class MomentumBasedController implements RobotController
    private FrameVector determineGroundReactionMoment()
    {
       FrameVector ret = new FrameVector(midFeetZUp);
-      FrameVector angularMomentum = processedSensors.getAngularMomentumInFrame(midFeetZUp);
+      
+      Momentum momentum = new Momentum(centerOfMassFrame);
+      momentumCalculator.computeAndPack(momentum);
+      FrameVector angularMomentum = new FrameVector(momentum.getExpressedInFrame(), momentum.getAngularPartCopy());
+      angularMomentum.changeFrame(midFeetZUp);
+
       Matrix3d pelvisToWorld = new Matrix3d();
       fullRobotModel.getPelvis().getBodyFixedFrame().getTransformToDesiredFrame(desiredHeadingControlModule.getDesiredHeadingFrame()).get(pelvisToWorld);    // TODO: take into account the twist of the desired heading frame w.r.t world.
       double pelvisYaw = RotationFunctions.getYaw(pelvisToWorld);
