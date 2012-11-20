@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.kinematics;
 
+import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
+import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
 import us.ihmc.commonWalkingControlModules.sensors.ProcessedSensorsInterface;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -10,17 +12,19 @@ import us.ihmc.utilities.screwTheory.Twist;
 public class FootTwistCalculator
 {
    private final ProcessedSensorsInterface processedSensors;
-   private final RevoluteJoint[] legJointList;
+   private final RobotSide robotSide;
+   private final FullRobotModel fullRobotModel;
    private final Twist tempTwist = new Twist();
    private final RigidBody pelvis;
    private final ReferenceFrame footFrame;
 
    public FootTwistCalculator(RobotSide robotSide, ProcessedSensorsInterface processedSensors)
    {
+      this.robotSide = robotSide;
       this.processedSensors = processedSensors;
-      this.legJointList = processedSensors.getFullRobotModel().getLegJointList(robotSide);
-      this.pelvis = processedSensors.getFullRobotModel().getPelvis();
-      this.footFrame = legJointList[legJointList.length - 1].getFrameAfterJoint();
+      this.fullRobotModel = processedSensors.getFullRobotModel();
+      this.pelvis = fullRobotModel.getPelvis();
+      this.footFrame = fullRobotModel.getFoot(robotSide).getParentJoint().getFrameAfterJoint();
    }
 
    public Twist computeFootTwist()
@@ -28,8 +32,9 @@ public class FootTwistCalculator
       Twist ret = processedSensors.getTwistOfPelvisWithRespectToWorld();
       ret.changeBodyFrameNoRelativeTwist(pelvis.getBodyFixedFrame());
 
-      for (RevoluteJoint joint : legJointList)
+      for (LegJointName legJointName : fullRobotModel.getRobotSpecificJointNames().getLegJointNames())
       {
+         RevoluteJoint joint = fullRobotModel.getLegJoint(robotSide, legJointName);
          joint.packSuccessorTwist(tempTwist);
          ret.changeFrame(tempTwist.getExpressedInFrame());
          ret.add(tempTwist);

@@ -16,6 +16,7 @@ import com.yobotics.simulationconstructionset.util.PIDController;
 public abstract class PDArmControlModule implements ArmControlModule
 {
    protected final ProcessedSensorsInterface processedSensors;
+   private final ArmJointName[] armJointNames;
    protected final YoVariableRegistry registry = new YoVariableRegistry("PDControlModule");
    protected final SideDependentList<EnumMap<ArmJointName, PIDController>> armControllers = SideDependentList.createListOfEnumMaps(ArmJointName.class);
 //   private final SideDependentList<ArmTorques> armTorquesList = new SideDependentList<ArmTorques>();
@@ -28,6 +29,7 @@ public abstract class PDArmControlModule implements ArmControlModule
    public PDArmControlModule(ProcessedSensorsInterface processedSensors, double controlDT, YoVariableRegistry parentRegistry)
    {
       this.processedSensors = processedSensors;
+      this.armJointNames = processedSensors.getFullRobotModel().getRobotSpecificJointNames().getArmJointNames();
       this.controlDT = controlDT;
       
       populateYoVariables();
@@ -49,7 +51,7 @@ public abstract class PDArmControlModule implements ArmControlModule
          ArmTorques armTorques = armTorquesToPack[robotSide.ordinal()];
          EnumMap<ArmJointName, PIDController> armController = armControllers.get(robotSide);
 
-         for (ArmJointName armJointName : ArmJointName.values())
+         for (ArmJointName armJointName : armJointNames)
          {
             PIDController pidController = armController.get(armJointName);
             double desiredPosition = desiredArmJointPositions.get(robotSide).get(armJointName).getDoubleValue();

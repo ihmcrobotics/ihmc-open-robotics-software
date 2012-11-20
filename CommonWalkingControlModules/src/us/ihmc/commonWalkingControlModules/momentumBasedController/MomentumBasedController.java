@@ -21,8 +21,10 @@ import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelHumanoidController;
 import us.ihmc.commonWalkingControlModules.kinematics.SpatialAccelerationProjector;
 import us.ihmc.commonWalkingControlModules.outputs.ProcessedOutputsInterface;
+import us.ihmc.commonWalkingControlModules.partNamesAndTorques.ArmJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LimbName;
+import us.ihmc.commonWalkingControlModules.partNamesAndTorques.NeckJointName;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
@@ -290,7 +292,7 @@ public class MomentumBasedController implements RobotController
       FrameVector centerOfMassVelocity = computeCenterOfMassVelocity();
       FramePoint2d capturePoint = computeCapturePoint(centerOfMass, centerOfMassVelocity);
       Momentum momentum = computeCentroidalMomentum();
-      
+
       for (RobotSide robotSide : RobotSide.values())
       {
          bipedFeet.get(robotSide).setIsSupportingFoot(isFootConstrained(robotSide));
@@ -477,10 +479,16 @@ public class MomentumBasedController implements RobotController
       double dUpperBody = 2.0 * zetaUpperBody.getDoubleValue() * Math.sqrt(kUpperBody);
       for (RobotSide robotSide : RobotSide.values())
       {
-         doPDControl(kUpperBody, dUpperBody, fullRobotModel.getArmJointList(robotSide));
+         for(ArmJointName armJointName : fullRobotModel.getRobotSpecificJointNames().getArmJointNames())
+         {
+            doPDControl(kUpperBody, dUpperBody, fullRobotModel.getArmJoint(robotSide, armJointName));
+         }
       }
 
-      doPDControl(kUpperBody, dUpperBody, fullRobotModel.getNeckJointList());
+      for(NeckJointName neckJointName : fullRobotModel.getRobotSpecificJointNames().getNeckJointNames())
+      {
+         doPDControl(kUpperBody, dUpperBody, fullRobotModel.getNeckJoint(neckJointName));
+      }
 
       chestAngularAccelerationcalculator.compute(highLevelHumanoidController.getChestAngularAcceleration());         
 
@@ -627,12 +635,9 @@ public class MomentumBasedController implements RobotController
       this.capturePoint.set(capturePoint);
    }
 
-   private static void doPDControl(double k, double d, RevoluteJoint[] joints)
+   private static void doPDControl(double k, double d, RevoluteJoint joint)
    {
-      for (RevoluteJoint joint : joints)
-      {
-         joint.setQddDesired(computeDesiredAcceleration(k, d, 0.0, 0.0, joint));
-      }
+      joint.setQddDesired(computeDesiredAcceleration(k, d, 0.0, 0.0, joint));
    }
 
    private static double computeDesiredAcceleration(double k, double d, double qDesired, double qdDesired, RevoluteJoint joint)
