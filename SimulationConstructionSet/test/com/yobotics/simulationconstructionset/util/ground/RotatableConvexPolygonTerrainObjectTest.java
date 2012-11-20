@@ -62,16 +62,18 @@ public class RotatableConvexPolygonTerrainObjectTest
          expectedY = centroidHeight - point[1];
          assertEquals(expectedY, inclinedTopFaceOctagon3d.heightAt(point[0], point[1], centroidHeight), epsilon);
       }
+      
+      assertEquals(0.0, flatTopFaceOctagon3d.heightAt(5.0, 5.0, 5.0), epsilon);
    }
 
    @Test
-   public void testIsInside()
+   public void testIsClose()
    {
       assertTrue(flatTopFaceOctagon3d.isClose(0.0, 0.0, 0.5));    // Point Inside
       assertFalse(flatTopFaceOctagon3d.isClose(0.0, 0.0, 1.5));    // Point On the top Outside
       assertFalse(flatTopFaceOctagon3d.isClose(2.0, 2.0, 1.5));    // Point Outside
 
-      assertFalse(inclinedTopFaceOctagon3d.isClose(0.0, 1.0, centroidHeight));    // Point Outside
+      assertTrue(inclinedTopFaceOctagon3d.isClose(0.0, 1.0, centroidHeight));    // Point Outside
       assertTrue(inclinedTopFaceOctagon3d.isClose(0.0, -1.0, centroidHeight));    // Point Inside
       assertTrue(inclinedTopFaceOctagon3d.isClose(0.0, 0.0, centroidHeight));    // Point is on the center of the top surface
 
@@ -182,6 +184,11 @@ public class RotatableConvexPolygonTerrainObjectTest
       
       flatTopFaceOctagon3d.surfaceNormalAt(0.0, 0.0, 0.99, normalToPack);
       JUnitTools.assertTuple3dEquals(new Vector3d(0.0, 0.0, 1.0), normalToPack, 1e-4);
+       
+      Vector3d expected = new Vector3d(1.0, 0.0, 0.5);
+      expected.normalize();
+      flatTopFaceOctagon3d.surfaceNormalAt(3.0, 0.0, 1.5, normalToPack);  //Point on top surface edge
+      JUnitTools.assertTuple3dEquals(expected, normalToPack, epsilon);
    }
 
    @Test
