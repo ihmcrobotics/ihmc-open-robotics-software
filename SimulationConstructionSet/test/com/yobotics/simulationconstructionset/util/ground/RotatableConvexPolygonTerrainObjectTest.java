@@ -213,21 +213,10 @@ public class RotatableConvexPolygonTerrainObjectTest
    {
       fail("Not yet implemented");
    }
-
-   @Test
-   public void testGetXTiles()
-   {
-      fail("Not yet implemented");
-   }
-
-   @Test
-   public void testGetYTiles()
-   {
-      fail("Not yet implemented");
-   }
    
    public void testSetupInEnvironment()
    {
+      // Not an actual test, could be given @Test for visual confirmation though
       SimulationConstructionSet scs = new SimulationConstructionSet();
       scs.addStaticLinkGraphics(inclinedTopFaceOctagon3d.getLinkGraphics());
       
