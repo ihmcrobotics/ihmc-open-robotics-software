@@ -31,6 +31,7 @@ import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
 import us.ihmc.utilities.screwTheory.EndEffectorPoseTwistAndSpatialAccelerationCalculator;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
@@ -59,6 +60,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    }
 
    private final StateMachine stateMachine;
+   private final CenterOfMassJacobian centerOfMassJacobian;
+
    private final CenterOfMassHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator;
    private final SideDependentList<WalkingState> singleSupportStateEnums = new SideDependentList<WalkingHighLevelHumanoidController.WalkingState>(
          WalkingState.LEFT_SUPPORT, WalkingState.RIGHT_SUPPORT);
@@ -100,7 +103,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    public WalkingHighLevelHumanoidController(FullRobotModel fullRobotModel, CommonWalkingReferenceFrames referenceFrames, TwistCalculator twistCalculator,
          SideDependentList<BipedFootInterface> bipedFeet, BipedSupportPolygons bipedSupportPolygons, SideDependentList<FootSwitchInterface> footSwitches,
-         ProcessedSensorsInterface processedSensors, double controlDT, DesiredHeadingControlModule desiredHeadingControlModule,
+         ProcessedSensorsInterface processedSensors, double gravityZ, DoubleYoVariable yoTime, double controlDT, DesiredHeadingControlModule desiredHeadingControlModule,
          YoVariableRegistry registry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, DesiredFootstepCalculator desiredFootstepCalculator, boolean liftUpHeels)
    {
       super(fullRobotModel, referenceFrames, processedSensors, twistCalculator, bipedFeet, bipedSupportPolygons, controlDT, desiredHeadingControlModule,
@@ -112,12 +115,13 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       // referenceFrames, desiredHeadingControlModule.getDesiredHeadingFrame(), registry);
 
       // this.centerOfMassHeightTrajectoryGenerator = new ConstantCenterOfMassHeightTrajectoryGenerator(registry);
-      this.flatThenPolynomialCoMHeightTrajectoryGenerator = new FlatThenPolynomialCoMHeightTrajectoryGenerator("", processedSensors,
+      this.centerOfMassJacobian = new CenterOfMassJacobian(fullRobotModel.getElevator());
+      this.flatThenPolynomialCoMHeightTrajectoryGenerator = new FlatThenPolynomialCoMHeightTrajectoryGenerator("", gravityZ, referenceFrames.getCenterOfMassFrame(), centerOfMassJacobian,
             desiredFootstepCalculator, desiredHeadingControlModule.getDesiredHeadingFrame(), bipedFeet, referenceFrames, registry);
       this.centerOfMassHeightTrajectoryGenerator = flatThenPolynomialCoMHeightTrajectoryGenerator;
 
       String namePrefix = "walking";
-      this.stateMachine = new StateMachine(namePrefix + "State", namePrefix + "SwitchTime", WalkingState.class, processedSensors.getYoTime(), registry);
+      this.stateMachine = new StateMachine(namePrefix + "State", namePrefix + "SwitchTime", WalkingState.class, yoTime, registry);
       upcomingSupportLeg.set(RobotSide.LEFT);
 
       singleSupportICPGlideScaleFactor.set(0.9);
@@ -678,7 +682,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       if (comTrajectoryCounter >= 500)
       {
-         FramePoint desiredCoM = processedSensors.getCenterOfMassPositionInFrame(worldFrame);
+         FramePoint desiredCoM = new FramePoint(referenceFrames.getCenterOfMassFrame());
+         desiredCoM.changeFrame(worldFrame);
          desiredCoM.setY(0.0);
          desiredCoM.setZ(centerOfMassHeightTrajectoryGenerator.getDesiredCenterOfMassHeight());
          comTrajectoryBagOfBalls.setBallLoop(desiredCoM);
