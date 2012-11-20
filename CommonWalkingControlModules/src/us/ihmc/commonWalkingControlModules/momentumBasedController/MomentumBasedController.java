@@ -18,7 +18,6 @@ import us.ihmc.commonWalkingControlModules.controlModules.SacrificeDeltaCMPDesir
 import us.ihmc.commonWalkingControlModules.controlModules.TeeterTotterLegStrengthCalculator;
 import us.ihmc.commonWalkingControlModules.controlModules.velocityViaCoP.CapturabilityBasedDesiredCoPVisualizer;
 import us.ihmc.commonWalkingControlModules.controlModules.velocityViaCoP.SimpleDesiredCenterOfPressureFilter;
-import us.ihmc.commonWalkingControlModules.controlModules.velocityViaCoP.SpeedControllingDesiredCoPCalculator;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredHeadingControlModule;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelHumanoidController;
@@ -176,17 +175,14 @@ public class MomentumBasedController implements RobotController
 
       bipedSupportPolygons.update(bipedFeet.get(RobotSide.LEFT), bipedFeet.get(RobotSide.RIGHT));
 
-      SpeedControllingDesiredCoPCalculator desiredCapturePointToDesiredCoPControlModule = new SpeedControllingDesiredCoPCalculator(processedSensors,
-                                                                                             referenceFrames, registry, dynamicGraphicObjectsListRegistry);
-      desiredCapturePointToDesiredCoPControlModule.setParametersForR2InverseDynamics();
       SimpleDesiredCenterOfPressureFilter desiredCenterOfPressureFilter = new SimpleDesiredCenterOfPressureFilter(bipedSupportPolygons, referenceFrames,
                                                                              controlDT, registry);
       desiredCenterOfPressureFilter.setParametersForR2InverseDynamics();
 
       CapturabilityBasedDesiredCoPVisualizer visualizer = new CapturabilityBasedDesiredCoPVisualizer(registry, dynamicGraphicObjectsListRegistry);
       SacrificeDeltaCMPDesiredCoPAndCMPControlModule desiredCoPAndCMPControlModule =
-         new SacrificeDeltaCMPDesiredCoPAndCMPControlModule(desiredCapturePointToDesiredCoPControlModule, desiredCapturePointToDesiredCoPControlModule,
-            desiredCenterOfPressureFilter, visualizer, bipedSupportPolygons, processedSensors, referenceFrames, registry);
+         new SacrificeDeltaCMPDesiredCoPAndCMPControlModule(desiredCenterOfPressureFilter, visualizer,
+            bipedSupportPolygons, processedSensors, referenceFrames, registry);
       desiredCoPAndCMPControlModule.setGains(3e-2, 1.0);
       this.desiredCoPAndCMPControlModule = desiredCoPAndCMPControlModule;
 
