@@ -7,8 +7,11 @@ import javax.media.j3d.Transform3D;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.MatrixTools;
 
+import com.yobotics.simulationconstructionset.FloatingJoint;
+import com.yobotics.simulationconstructionset.GroundContactPoint;
 import com.yobotics.simulationconstructionset.Joint;
 import com.yobotics.simulationconstructionset.Link;
 import com.yobotics.simulationconstructionset.PinJoint;
@@ -19,12 +22,11 @@ public class SDFRobot extends Robot
    private static final long serialVersionUID = 5864358637898048080L;
    
    private final String resourceDirectory;
-   
-   private final ArrayList<Joint> rootJoints = new ArrayList<Joint>();
-   
    private final HashMap<String, PinJoint> robotJoints = new HashMap<String, PinJoint>();
 
-   public SDFRobot(GeneralizedSDFRobotModel generalizedSDFRobotModel)
+   private final FloatingJoint rootJoint;
+
+   public SDFRobot(GeneralizedSDFRobotModel generalizedSDFRobotModel, SDFJointNameMap sdfJointNameMap)
    {
       super(generalizedSDFRobotModel.getName());
       this.resourceDirectory = generalizedSDFRobotModel.getResourceDirectory();
@@ -33,31 +35,53 @@ public class SDFRobot extends Robot
 
       ArrayList<SDFLinkHolder> rootLinks = generalizedSDFRobotModel.getRootLinks();
       
-      
-      for(SDFLinkHolder rootLink : rootLinks)
+      if(rootLinks.size() > 1)
       {
-         Vector3d offset = new Vector3d();
-         Matrix3d rotation = new Matrix3d();
-         rootLink.getTransformFromModelReferenceFrame().get(rotation, offset);
-         Joint rootJoint = new PinJoint(rootLink.getName(), offset, this, Joint.X);
-         Link scsRootLink = createLink(rootLink, rotation);
-         rootJoint.setLink(scsRootLink);
-         addRootJoint(rootJoint);
-         rootJoints.add(rootJoint);
-         
-         for(SDFJointHolder child : rootLink.getChilderen())
+         throw new RuntimeException("Can only accomodate one root link for now");
+      }
+      
+      SDFLinkHolder rootLink = rootLinks.get(0);
+      
+      Vector3d offset = new Vector3d();
+      Matrix3d rotation = new Matrix3d();
+      rootLink.getTransformFromModelReferenceFrame().get(rotation, offset);
+      rootJoint = new FloatingJoint(rootLink.getName(), generalizedSDFRobotModel.getRootOffset(), this);
+      Link scsRootLink = createLink(rootLink, rotation);
+      rootJoint.setLink(scsRootLink);
+      addRootJoint(rootJoint);
+      
+      
+      for(SDFJointHolder child : rootLink.getChilderen())
+      {
+         addJointsRecursively(child, rootJoint, MatrixTools.IDENTITY);
+      }
+      
+
+      for(RobotSide robotSide : RobotSide.values)
+      {
+         int i = 0;
+         for(Vector3d groundContactPointOffset : sdfJointNameMap.getFootOffset(robotSide))
          {
-            addJointsRecursively(child, rootJoint, MatrixTools.IDENTITY);
+            String jointName = sdfJointNameMap.getJointBeforeFootName(robotSide);
+            GroundContactPoint groundContactPoint = new GroundContactPoint("gc_" + jointName + "_" + i, groundContactPointOffset, this);
+            robotJoints.get(jointName).addGroundContactPoint(groundContactPoint);
+            i++;
+            
          }
       }
       
+   }
+   
+   public void getRootJointToWorldTransform(Transform3D transform)
+   {
+      rootJoint.getTransformToWorld(transform);
    }
    
    public PinJoint getJoint(String name)
    {
       return robotJoints.get(name);
    }
-
+   
    private void addJointsRecursively(SDFJointHolder joint, Joint scsParentJoint, Matrix3d chainRotationIn)
    {
       System.out.println("Adding joint " + joint.getName() + " to " + scsParentJoint.getName());

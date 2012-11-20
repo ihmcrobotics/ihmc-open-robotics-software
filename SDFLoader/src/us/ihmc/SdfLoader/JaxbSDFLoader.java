@@ -8,11 +8,14 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
+import us.ihmc.SdfLoader.drcRobot.DRCRobotJointMap;
 import us.ihmc.SdfLoader.xmlDescription.SDFGazebo;
 import us.ihmc.SdfLoader.xmlDescription.SDFModel;
 
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
+import com.yobotics.simulationconstructionset.robotController.ModularRobotController;
 import com.yobotics.simulationconstructionset.robotController.RobotController;
+import com.yobotics.simulationconstructionset.util.LinearGroundContactModel;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class JaxbSDFLoader
@@ -46,23 +49,33 @@ public class JaxbSDFLoader
          throw new RuntimeException(modelName + " not found");
       }
 
-      GeneralizedSDFRobotModel generalizedSDFRobotModel = new GeneralizedSDFRobotModel(modelName, model.getJoints(), model.getLinks(), resourceDirectory);
+      GeneralizedSDFRobotModel generalizedSDFRobotModel = new GeneralizedSDFRobotModel(modelName, model, resourceDirectory);
 
-      robot = new SDFRobot(generalizedSDFRobotModel);
-      fullRobotModel = new SDFFullRobotModel(generalizedSDFRobotModel.getRootLinks().get(0));
+      DRCRobotJointMap sdfJointNameMap = new DRCRobotJointMap();
+      robot = new SDFRobot(generalizedSDFRobotModel, sdfJointNameMap);
+      fullRobotModel = new SDFFullRobotModel(generalizedSDFRobotModel.getRootLinks().get(0), sdfJointNameMap);
    }
 
    public static void main(String[] args) throws FileNotFoundException, JAXBException
    {
      JaxbSDFLoader jaxbSDFLoader = new JaxbSDFLoader();
      DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
-     RobotController controller = new AllAnglesToZeroController(jaxbSDFLoader.robot, jaxbSDFLoader.fullRobotModel, dynamicGraphicObjectsListRegistry);
-     jaxbSDFLoader.robot.setController(controller);
+     RobotController controller = new AllAnglesController(jaxbSDFLoader.fullRobotModel, dynamicGraphicObjectsListRegistry);
+     
+     ModularRobotController modularRobotController = new ModularRobotController("jaxbController");
+     SDFPerfectSimulatedSensorReaderAndWriter sensorReaderAndOutputWriter = new SDFPerfectSimulatedSensorReaderAndWriter(jaxbSDFLoader.robot, jaxbSDFLoader.fullRobotModel);
+     modularRobotController.setRawSensorReader(sensorReaderAndOutputWriter);
+     modularRobotController.addRobotController(controller);
+     modularRobotController.setRawOutputWriter(sensorReaderAndOutputWriter);
+
+     
+     jaxbSDFLoader.robot.setController(modularRobotController);
      
      
      SimulationConstructionSet scs = new SimulationConstructionSet(jaxbSDFLoader.robot);
-     scs.setGroundVisible(false);
-
+     scs.setMaxBufferSize(65536);
+     LinearGroundContactModel linearGroundContactModel = new LinearGroundContactModel(jaxbSDFLoader.robot, 150.0, 50.0, 25000.0, 1000.0, scs.getRootRegistry());
+     jaxbSDFLoader.robot.setGroundContactModel(linearGroundContactModel);
      dynamicGraphicObjectsListRegistry.addDynamicGraphicsObjectListsToSimulationConstructionSet(scs);
      
      Thread thread = new Thread(scs);

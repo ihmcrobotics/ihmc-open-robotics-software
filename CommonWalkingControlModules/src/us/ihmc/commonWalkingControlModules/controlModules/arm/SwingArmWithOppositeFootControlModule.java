@@ -39,7 +39,7 @@ public class SwingArmWithOppositeFootControlModule extends PDArmControlModule
             desiredArmJointVelocities.get(robotSide).get(armJointName).set(0.0);
          }
          
-         desiredArmJointPositions.get(robotSide).get(ArmJointName.ELBOW).set(-0.3); // bend elbow a little
+         desiredArmJointPositions.get(robotSide).get(ArmJointName.ELBOW_PITCH).set(-0.3); // bend elbow a little
          
          final RobotSide oppositeSide = robotSide.getOppositeSide();
          final ReferenceFrame oppositeFootFrame = referenceFrames.getFootFrame(oppositeSide);
@@ -60,14 +60,14 @@ public class SwingArmWithOppositeFootControlModule extends PDArmControlModule
          armControllers.get(robotSide).get(ArmJointName.SHOULDER_PITCH).setProportionalGain(200.0);
          armControllers.get(robotSide).get(ArmJointName.SHOULDER_ROLL).setProportionalGain(100.0);
          armControllers.get(robotSide).get(ArmJointName.SHOULDER_YAW).setProportionalGain(100.0);
-         armControllers.get(robotSide).get(ArmJointName.ELBOW).setProportionalGain(100.0);
+         armControllers.get(robotSide).get(ArmJointName.ELBOW_PITCH).setProportionalGain(100.0);
          armControllers.get(robotSide).get(ArmJointName.WRIST_ROLL).setProportionalGain(100.0);
          armControllers.get(robotSide).get(ArmJointName.WRIST_PITCH).setProportionalGain(100.0);
 
          armControllers.get(robotSide).get(ArmJointName.SHOULDER_PITCH).setDerivativeGain(2.0);
          armControllers.get(robotSide).get(ArmJointName.SHOULDER_ROLL).setDerivativeGain(10.0);
          armControllers.get(robotSide).get(ArmJointName.SHOULDER_YAW).setDerivativeGain(10.0);
-         armControllers.get(robotSide).get(ArmJointName.ELBOW).setDerivativeGain(10.0);
+         armControllers.get(robotSide).get(ArmJointName.ELBOW_PITCH).setDerivativeGain(10.0);
          armControllers.get(robotSide).get(ArmJointName.WRIST_ROLL).setDerivativeGain(10.0);
          armControllers.get(robotSide).get(ArmJointName.WRIST_PITCH).setDerivativeGain(10.0);
       }      
