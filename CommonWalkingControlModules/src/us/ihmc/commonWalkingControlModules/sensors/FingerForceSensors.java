@@ -1,0 +1,10 @@
+package us.ihmc.commonWalkingControlModules.sensors;
+
+import us.ihmc.commonWalkingControlModules.partNamesAndTorques.FingerName;
+import us.ihmc.robotSide.RobotSide;
+import us.ihmc.utilities.math.geometry.FrameVector;
+
+public interface FingerForceSensors
+{
+   public abstract FrameVector getFingerForce(RobotSide robotSide, FingerName fingerName);
+}

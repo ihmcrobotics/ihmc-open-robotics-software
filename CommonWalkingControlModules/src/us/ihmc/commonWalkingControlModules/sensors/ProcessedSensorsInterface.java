@@ -4,7 +4,6 @@ import java.util.HashMap;
 
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.ArmJointName;
-import us.ihmc.commonWalkingControlModules.partNamesAndTorques.FingerName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.NeckJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.SpineJointName;
@@ -19,7 +18,7 @@ import us.ihmc.utilities.screwTheory.Twist;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 
-public interface ProcessedSensorsInterface
+public interface ProcessedSensorsInterface extends FingerForceSensors
 {
    public abstract double getTime();
    public abstract DoubleYoVariable getYoTime();
@@ -67,6 +66,4 @@ public interface ProcessedSensorsInterface
    public abstract FrameVector getAngularMomentumInFrame(ReferenceFrame midFeetZUp);
    
    public abstract HashMap<FramePoint2d, Boolean> getContactMap(RobotSide robotSide);
-   
-   public abstract FrameVector getFingerForce(RobotSide robotSide, FingerName fingerName);
 }
