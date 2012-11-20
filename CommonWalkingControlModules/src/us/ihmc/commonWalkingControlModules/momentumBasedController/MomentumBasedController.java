@@ -16,7 +16,6 @@ import us.ihmc.commonWalkingControlModules.controlModules.SacrificeDeltaCMPDesir
 import us.ihmc.commonWalkingControlModules.controlModules.TeeterTotterLegStrengthCalculator;
 import us.ihmc.commonWalkingControlModules.controlModules.velocityViaCoP.CapturabilityBasedDesiredCoPVisualizer;
 import us.ihmc.commonWalkingControlModules.controlModules.velocityViaCoP.SimpleDesiredCenterOfPressureFilter;
-import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredHeadingControlModule;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelHumanoidController;
 import us.ihmc.commonWalkingControlModules.kinematics.SpatialAccelerationProjector;
@@ -103,7 +102,6 @@ public class MomentumBasedController implements RobotController
    private final SideDependentList<BooleanYoVariable> isCoPOnEdge = new SideDependentList<BooleanYoVariable>();
    private final SideDependentList<YoFramePoint> desiredFootPositionsInWorld = new SideDependentList<YoFramePoint>();
 
-   private final DesiredHeadingControlModule desiredHeadingControlModule;
    private final DesiredCoPAndCMPControlModule desiredCoPAndCMPControlModule;
 
    private final ThreeDoFAngularAccelerationCalculator chestAngularAccelerationcalculator;
@@ -136,8 +134,7 @@ public class MomentumBasedController implements RobotController
    public MomentumBasedController(FullRobotModel fullRobotModel, ProcessedOutputsInterface processedOutputs,
                                   double gravityZ, CommonWalkingReferenceFrames referenceFrames, TwistCalculator twistCalculator, double controlDT,
                                   DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, SideDependentList<BipedFootInterface> bipedFeet,
-                                  BipedSupportPolygons bipedSupportPolygons, DesiredHeadingControlModule desiredHeadingControlModule,
-                                  HighLevelHumanoidController highLevelHumanoidController)
+                                  BipedSupportPolygons bipedSupportPolygons, HighLevelHumanoidController highLevelHumanoidController)
    {
       MathTools.checkIfInRange(gravityZ, 0.0, Double.POSITIVE_INFINITY);
       
@@ -178,7 +175,6 @@ public class MomentumBasedController implements RobotController
          footPoseTwistAndSpatialAccelerationCalculators.put(robotSide, feetPoseTwistAndSpatialAccelerationCalculator);
       }
 
-      this.desiredHeadingControlModule = desiredHeadingControlModule;
       midFeetZUp = referenceFrames.getMidFeetZUpFrame();
 
       for (RobotSide robotSide : RobotSide.values())
@@ -287,7 +283,6 @@ public class MomentumBasedController implements RobotController
 
    public void doControl()
    {
-      desiredHeadingControlModule.updateDesiredHeadingFrame();
       FramePoint centerOfMass = computeCenterOfMass();
       FrameVector centerOfMassVelocity = computeCenterOfMassVelocity();
       FramePoint2d capturePoint = computeCapturePoint(centerOfMass, centerOfMassVelocity);
@@ -356,8 +351,10 @@ public class MomentumBasedController implements RobotController
       highLevelHumanoidController.packDesiredICP(desiredCapturePoint);
       FrameVector2d desiredCapturePointVelocity = new FrameVector2d(worldFrame);
       highLevelHumanoidController.packDesiredICPVelocity(desiredCapturePointVelocity);
-      double desiredPelvisRoll = highLevelHumanoidController.getDesiredPelvisRoll();
-      double desiredPelvisPitch = highLevelHumanoidController.getDesiredPelvisPitch();
+      
+      double[] desiredPelvisYawPitchRoll = highLevelHumanoidController.getDesiredPelvisOrientation().getYawPitchRoll();
+      double desiredPelvisRoll = desiredPelvisYawPitchRoll[2];
+      double desiredPelvisPitch = highLevelHumanoidController.getDesiredPelvisOrientation().getYawPitchRoll()[1];
       desiredCoPAndCMPControlModule.compute(capturePoint, supportLeg, desiredCapturePoint, desiredCapturePointVelocity, desiredPelvisRoll, desiredPelvisPitch,
               omega0.getDoubleValue(), momentum);
       FramePoint2d desiredCoP = new FramePoint2d(worldFrame);
@@ -375,9 +372,7 @@ public class MomentumBasedController implements RobotController
       fixDesiredCoPNumericalRoundoff(desiredCoP, bipedSupportPolygons.getSupportPolygonInMidFeetZUp());
       desiredCoP.changeFrame(frame);
 
-      centerOfMass.changeFrame(desiredHeadingControlModule.getDesiredHeadingFrame());
-
-      this.fZ .set(computeFz());
+      this.fZ.set(computeFz());
 
       SideDependentList<FramePoint2d> virtualToePoints = new SideDependentList<FramePoint2d>();
       if (supportLeg == null)
@@ -421,6 +416,7 @@ public class MomentumBasedController implements RobotController
       vtpToVTPLine.orthogonalProjection(r22d);    // not sure if necessary.
       double x2 = vtpToVTPLine.getParameterGivenPointEpsilon(r22d, 1e-12);
       double z2 = r2.getZ();
+      centerOfMass.changeFrame(worldFrame);
       double z = centerOfMass.getZ();
 
       double omega0Squared = (fZ.getDoubleValue() * (x1 - x2))
@@ -605,9 +601,11 @@ public class MomentumBasedController implements RobotController
       angularMomentum.changeFrame(midFeetZUp);
 
       Matrix3d pelvisToWorld = new Matrix3d();
-      fullRobotModel.getPelvis().getBodyFixedFrame().getTransformToDesiredFrame(desiredHeadingControlModule.getDesiredHeadingFrame()).get(pelvisToWorld);    // TODO: take into account the twist of the desired heading frame w.r.t world.
+      fullRobotModel.getPelvis().getBodyFixedFrame().getTransformToDesiredFrame(worldFrame).get(pelvisToWorld);
       double pelvisYaw = RotationFunctions.getYaw(pelvisToWorld);
-      ret.setZ(-kAngularMomentumZ.getDoubleValue() * angularMomentum.getZ() - kPelvisYaw.getDoubleValue() * pelvisYaw);
+      double desiredPelvisYaw = highLevelHumanoidController.getDesiredPelvisOrientation().getYawPitchRoll()[0];
+      
+      ret.setZ(-kAngularMomentumZ.getDoubleValue() * angularMomentum.getZ() + kPelvisYaw.getDoubleValue() * (desiredPelvisYaw - pelvisYaw));
 
       return ret;
    }

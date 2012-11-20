@@ -9,7 +9,6 @@ import us.ihmc.commonWalkingControlModules.controlModules.RigidBodyOrientationCo
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculator;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
-import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredHeadingControlModule;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.LimbControlMode;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LimbName;
@@ -105,11 +104,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    public WalkingHighLevelHumanoidController(FullRobotModel fullRobotModel, CommonWalkingReferenceFrames referenceFrames, TwistCalculator twistCalculator,
            SideDependentList<BipedFootInterface> bipedFeet, BipedSupportPolygons bipedSupportPolygons, SideDependentList<FootSwitchInterface> footSwitches,
            ProcessedSensorsInterface processedSensors, double gravityZ, DoubleYoVariable yoTime, double controlDT,
-           DesiredHeadingControlModule desiredHeadingControlModule, YoVariableRegistry registry,
-           DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, DesiredFootstepCalculator desiredFootstepCalculator, boolean liftUpHeels)
+           YoVariableRegistry registry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
+           DesiredFootstepCalculator desiredFootstepCalculator, boolean liftUpHeels)
    {
-      super(fullRobotModel, referenceFrames, gravityZ, twistCalculator, bipedFeet, bipedSupportPolygons, controlDT, desiredHeadingControlModule, footSwitches,
-            registry);
+      super(fullRobotModel, referenceFrames, gravityZ, twistCalculator, bipedFeet, bipedSupportPolygons, controlDT, footSwitches, registry);
 
       this.desiredFootstepCalculator = desiredFootstepCalculator;
 
@@ -119,7 +117,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       // this.centerOfMassHeightTrajectoryGenerator = new ConstantCenterOfMassHeightTrajectoryGenerator(registry);
       this.centerOfMassJacobian = new CenterOfMassJacobian(fullRobotModel.getElevator());
       this.flatThenPolynomialCoMHeightTrajectoryGenerator = new FlatThenPolynomialCoMHeightTrajectoryGenerator("", gravityZ,
-              referenceFrames.getCenterOfMassFrame(), centerOfMassJacobian, desiredFootstepCalculator, desiredHeadingControlModule.getDesiredHeadingFrame(),
+              referenceFrames.getCenterOfMassFrame(), centerOfMassJacobian, desiredFootstepCalculator, worldFrame,
               bipedFeet, referenceFrames, registry);
       this.centerOfMassHeightTrajectoryGenerator = flatThenPolynomialCoMHeightTrajectoryGenerator;
       this.centerOfMassHeightController = new PDController("comHeight", registry);
@@ -171,7 +169,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       minOrbitalEnergyForSingleSupport.set(0.007);    // 0.008
       amountToBeInsideSingleSupport.set(0.0);
       amountToBeInsideDoubleSupport.set(0.05);
-      desiredPelvisPitch.set(0.6);
+      desiredPelvisOrientation.setYawPitchRoll(0.0, 0.6, 0.0); // TODO: get from desired pelvis orientation control module
 
       for (RobotSide robotSide : RobotSide.values())
       {
@@ -545,7 +543,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          throw new RuntimeException("not in sole frame");
       }
 
-      footstep.changeFrame(desiredHeadingControlModule.getDesiredHeadingFrame());
+      ReferenceFrame stairDirectionFrame = worldFrame;
+      footstep.changeFrame(stairDirectionFrame);
 
       Transform3D footstepTransform = new Transform3D();
       footstep.getFootstepPose().getTransform3D(footstepTransform);
@@ -553,12 +552,12 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       FramePoint2d centroid2d = footPolygonInSoleFrame.getCentroidCopy();
       FramePoint centroid = centroid2d.toFramePoint();
       centroid.changeFrame(referenceFrames.getFootFrame(robotSide));
-      centroid.changeFrameUsingTransform(desiredHeadingControlModule.getDesiredHeadingFrame(), footstepTransform);
+      centroid.changeFrameUsingTransform(stairDirectionFrame, footstepTransform);
       FramePoint2d ret = centroid.toFramePoint2d();
 
       double extraX = 0.0;    // 0.02
       double extraY = robotSide.negateIfLeftSide(0.04);
-      FrameVector2d offset = new FrameVector2d(desiredHeadingControlModule.getDesiredHeadingFrame(), extraX, extraY);
+      FrameVector2d offset = new FrameVector2d(stairDirectionFrame, extraX, extraY);
       offset.changeFrame(ret.getReferenceFrame());
       ret.add(offset);
 
@@ -758,18 +757,18 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       double dzdxDesired = centerOfMassHeightTrajectoryGenerator.getDesiredCenterOfMassHeightSlope();
       double d2zdx2Desired = centerOfMassHeightTrajectoryGenerator.getDesiredCenterOfMassHeightSecondDerivative();
 
-      ReferenceFrame desiredHeadingFrame = desiredHeadingControlModule.getDesiredHeadingFrame();
+      ReferenceFrame stairDirectionFrame = worldFrame;
 
-      desiredICPVelocity.changeFrame(desiredHeadingFrame);
+      desiredICPVelocity.changeFrame(stairDirectionFrame);
 
       FramePoint com = new FramePoint(referenceFrames.getCenterOfMassFrame());
-      com.changeFrame(desiredHeadingFrame);
+      com.changeFrame(stairDirectionFrame);
 
       // TODO: computing Jacobian a bunch of times...
-      FrameVector comd = new FrameVector(desiredHeadingFrame);
+      FrameVector comd = new FrameVector(stairDirectionFrame);
       centerOfMassJacobian.compute();
       centerOfMassJacobian.packCenterOfMassVelocity(comd);
-      comd.changeFrame(desiredHeadingFrame);
+      comd.changeFrame(stairDirectionFrame);
 
       // TODO: use current omega0 instead of previous
       double xd = comd.getX();
