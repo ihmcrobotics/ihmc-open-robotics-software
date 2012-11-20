@@ -11,9 +11,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.FootPolygonVisua
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.DesiredCoPAndCMPControlModule;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.LegStrengthCalculator;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.VirtualToePointCalculator;
-import us.ihmc.commonWalkingControlModules.controlModules.CenterOfMassHeightControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.NewGeometricVirtualToePointCalculator;
-import us.ihmc.commonWalkingControlModules.controlModules.PartialCenterOfMassHeightControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.SacrificeDeltaCMPDesiredCoPAndCMPControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.TeeterTotterLegStrengthCalculator;
 import us.ihmc.commonWalkingControlModules.controlModules.velocityViaCoP.CapturabilityBasedDesiredCoPVisualizer;
@@ -26,7 +24,6 @@ import us.ihmc.commonWalkingControlModules.outputs.ProcessedOutputsInterface;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LimbName;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
-import us.ihmc.commonWalkingControlModules.sensors.ProcessedSensorsInterface;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.MathTools;
@@ -82,7 +79,6 @@ public class MomentumBasedController implements RobotController
 
    private final BipedSupportPolygons bipedSupportPolygons;
    private final VirtualToePointCalculator virtualToePointCalculator;
-   private final CenterOfMassHeightControlModule centerOfMassHeightControlModule;
    private final LegStrengthCalculator legStrengthCalculator;
 
    private final SideDependentList<BipedFootInterface> bipedFeet;
@@ -126,6 +122,7 @@ public class MomentumBasedController implements RobotController
    private final SideDependentList<DoubleYoVariable> kValues = new SideDependentList<DoubleYoVariable>();
 
    private final FootPolygonVisualizer footPolygonVisualizer;
+   private final DoubleYoVariable fZ = new DoubleYoVariable("fZ", registry);
    private final DoubleYoVariable omega0 = new DoubleYoVariable("omega0", registry);
    private final YoFramePoint capturePoint = new YoFramePoint("capturePoint", worldFrame, registry);
 
@@ -134,7 +131,7 @@ public class MomentumBasedController implements RobotController
    private final SideDependentList<BooleanYoVariable> inSingularRegions = new SideDependentList<BooleanYoVariable>(leftInSingularRegion, rightInSingularRegion);
   
 
-   public MomentumBasedController(ProcessedSensorsInterface processedSensors, ProcessedOutputsInterface processedOutputs,
+   public MomentumBasedController(FullRobotModel fullRobotModel, ProcessedOutputsInterface processedOutputs,
                                   double gravityZ, CommonWalkingReferenceFrames referenceFrames, TwistCalculator twistCalculator, double controlDT,
                                   DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, SideDependentList<BipedFootInterface> bipedFeet,
                                   BipedSupportPolygons bipedSupportPolygons, DesiredHeadingControlModule desiredHeadingControlModule,
@@ -142,7 +139,7 @@ public class MomentumBasedController implements RobotController
    {
       MathTools.checkIfInRange(gravityZ, 0.0, Double.POSITIVE_INFINITY);
       
-      this.fullRobotModel = processedSensors.getFullRobotModel();
+      this.fullRobotModel = fullRobotModel;
       this.referenceFrames = referenceFrames;
       this.processedOutputs = processedOutputs;
       this.gravityZ = gravityZ;
@@ -196,7 +193,7 @@ public class MomentumBasedController implements RobotController
       CapturabilityBasedDesiredCoPVisualizer visualizer = new CapturabilityBasedDesiredCoPVisualizer(registry, dynamicGraphicObjectsListRegistry);
       SacrificeDeltaCMPDesiredCoPAndCMPControlModule desiredCoPAndCMPControlModule =
          new SacrificeDeltaCMPDesiredCoPAndCMPControlModule(desiredCenterOfPressureFilter, visualizer,
-            bipedSupportPolygons, processedSensors, referenceFrames, registry);
+            bipedSupportPolygons, fullRobotModel.getPelvis().getBodyFixedFrame(), registry);
       desiredCoPAndCMPControlModule.setGains(3e-2, 1.0);
       this.desiredCoPAndCMPControlModule = desiredCoPAndCMPControlModule;
 
@@ -214,10 +211,6 @@ public class MomentumBasedController implements RobotController
       this.legStrengthCalculator = new TeeterTotterLegStrengthCalculator(registry);
 
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
-      this.centerOfMassHeightControlModule = new PartialCenterOfMassHeightControlModule(processedSensors, registry, highLevelHumanoidController.getCoMControlType());
-      
-      centerOfMassHeightControlModule.setParametersForR2InverseDynamics();
-      
       this.totalMass = TotalMassCalculator.computeSubTreeMass(elevator);
 
       this.highLevelHumanoidController = highLevelHumanoidController;
@@ -295,12 +288,9 @@ public class MomentumBasedController implements RobotController
       desiredHeadingControlModule.updateDesiredHeadingFrame();
       FramePoint centerOfMass = computeCenterOfMass();
       FrameVector centerOfMassVelocity = computeCenterOfMassVelocity();
-      
-      centerOfMass.changeFrame(ReferenceFrame.getWorldFrame());
-      centerOfMassVelocity.changeFrame(ReferenceFrame.getWorldFrame());
-
       FramePoint2d capturePoint = computeCapturePoint(centerOfMass, centerOfMassVelocity);
-
+      Momentum momentum = computeCentroidalMomentum();
+      
       for (RobotSide robotSide : RobotSide.values())
       {
          bipedFeet.get(robotSide).setIsSupportingFoot(isFootConstrained(robotSide));
@@ -316,7 +306,7 @@ public class MomentumBasedController implements RobotController
       highLevelHumanoidController.setOmega0(omega0.getDoubleValue());
       highLevelHumanoidController.doControl();
 
-      doMomentumBasedControl(centerOfMass, centerOfMassVelocity, capturePoint);
+      doMomentumBasedControl(centerOfMass, centerOfMassVelocity, capturePoint, momentum);
       inverseDynamicsCalculator.compute();
       fullRobotModel.setTorques(processedOutputs);
       updateYoVariables(capturePoint);
@@ -349,7 +339,14 @@ public class MomentumBasedController implements RobotController
       return ret;
    }
 
-   private void doMomentumBasedControl(FramePoint centerOfMass, FrameVector centerOfMassVelocity, FramePoint2d capturePoint)
+   public Momentum computeCentroidalMomentum()
+   {
+      Momentum momentum = new Momentum(centerOfMassFrame);
+      momentumCalculator.computeAndPack(momentum);
+      return momentum;
+   }
+
+   private void doMomentumBasedControl(FramePoint centerOfMass, FrameVector centerOfMassVelocity, FramePoint2d capturePoint, Momentum momentum)
    {
       ReferenceFrame frame = worldFrame;
       RobotSide supportLeg = highLevelHumanoidController.getSupportLeg();
@@ -360,7 +357,7 @@ public class MomentumBasedController implements RobotController
       double desiredPelvisRoll = highLevelHumanoidController.getDesiredPelvisRoll();
       double desiredPelvisPitch = highLevelHumanoidController.getDesiredPelvisPitch();
       desiredCoPAndCMPControlModule.compute(capturePoint, supportLeg, desiredCapturePoint, desiredCapturePointVelocity, desiredPelvisRoll, desiredPelvisPitch,
-              omega0.getDoubleValue());
+              omega0.getDoubleValue(), momentum);
       FramePoint2d desiredCoP = new FramePoint2d(worldFrame);
       desiredCoPAndCMPControlModule.packCoP(desiredCoP);
       FramePoint2d desiredCMP = new FramePoint2d(worldFrame);
@@ -378,7 +375,7 @@ public class MomentumBasedController implements RobotController
 
       centerOfMass.changeFrame(desiredHeadingControlModule.getDesiredHeadingFrame());
 
-      double fZ = computeFz(supportLeg, desiredCoP, centerOfMass, centerOfMassVelocity);
+      this.fZ .set(computeFz());
 
       SideDependentList<FramePoint2d> virtualToePoints = new SideDependentList<FramePoint2d>();
       if (supportLeg == null)
@@ -424,7 +421,7 @@ public class MomentumBasedController implements RobotController
       double z2 = r2.getZ();
       double z = centerOfMass.getZ();
 
-      double omega0Squared = (fZ * (x1 - x2))
+      double omega0Squared = (fZ.getDoubleValue() * (x1 - x2))
                              / (totalMass
                                 * (x1 * (z - lambdas.get(RobotSide.LEFT) * z1 + (-1 + lambdas.get(RobotSide.LEFT)) * z2)
                                    + x2 * (-z + z1 - lambdas.get(RobotSide.RIGHT) * z1 + lambdas.get(RobotSide.RIGHT) * z2)));
@@ -441,7 +438,7 @@ public class MomentumBasedController implements RobotController
          kValues.get(robotSide).set(k);
       }
 
-      FrameVector totalgroundReactionMoment = determineGroundReactionMoment();
+      FrameVector totalgroundReactionMoment = determineGroundReactionMoment(momentum);
       Wrench totalGroundReactionWrench = new Wrench(centerOfMassFrame, centerOfMassFrame);
 
       for (RobotSide robotSide : RobotSide.values())
@@ -574,26 +571,9 @@ public class MomentumBasedController implements RobotController
          throw new RuntimeException("desired CoP outside polygon by " + distance);
    }
 
-   private double computeFz(RobotSide supportLeg, FramePoint2d desiredCoP, FramePoint com, FrameVector comd)
+   private double computeFz()
    {
-      double dzdxDesired = highLevelHumanoidController.getDesiredCoMHeightSlope();
-      double d2zdx2Desired = highLevelHumanoidController.getDesiredCoMHeightSecondDerivative();
-      ReferenceFrame desiredHeadingFrame = desiredHeadingControlModule.getDesiredHeadingFrame();
-
-      desiredCoP.changeFrame(desiredHeadingFrame);
-      com.changeFrame(desiredHeadingFrame);
-      comd.changeFrame(desiredHeadingFrame);
-      
-      double xd = comd.getX();
-      double copX = desiredCoP.changeFrameCopy(desiredHeadingFrame).getX();
-      double xdd = MathTools.square(omega0.getDoubleValue()) * (com.getX() - copX);    // TODO: use current omega0 instead of previous
-
-      double zDesired = highLevelHumanoidController.getDesiredCoMHeight();
-      double zdDesired = dzdxDesired * xd;
-      double zddDesired = d2zdx2Desired * MathTools.square(xd) + dzdxDesired * xdd;
-
-      double fZ = centerOfMassHeightControlModule.doCenterOfMassHeightControl(zDesired, zdDesired, zddDesired, supportLeg, highLevelHumanoidController.getCoMControlType());
-
+      double fZ = totalMass * (gravityZ + highLevelHumanoidController.getDesiredCoMHeightAcceleration());
       return fZ;
    }
 
@@ -610,12 +590,9 @@ public class MomentumBasedController implements RobotController
       return GeometryTools.getIntersectionBetweenLineAndPlane(pointOnPlane, planeNormal, lineStart, lineEnd);
    }
 
-   private FrameVector determineGroundReactionMoment()
+   private FrameVector determineGroundReactionMoment(Momentum momentum)
    {
       FrameVector ret = new FrameVector(midFeetZUp);
-      
-      Momentum momentum = new Momentum(centerOfMassFrame);
-      momentumCalculator.computeAndPack(momentum);
       FrameVector angularMomentum = new FrameVector(momentum.getExpressedInFrame(), momentum.getAngularPartCopy());
       angularMomentum.changeFrame(midFeetZUp);
 
