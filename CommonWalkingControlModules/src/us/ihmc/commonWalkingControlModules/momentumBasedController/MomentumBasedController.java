@@ -319,7 +319,7 @@ public class MomentumBasedController implements RobotController
       highLevelHumanoidController.setOmega0(omega0.getDoubleValue());
       highLevelHumanoidController.doControl();
 
-      doMomentumBasedControl(capturePoint);
+      doMomentumBasedControl(centerOfMass, centerOfMassVelocity, capturePoint);
       inverseDynamicsCalculator.compute();
       fullRobotModel.setTorques(processedOutputs);
       updateYoVariables(capturePoint);
@@ -352,7 +352,7 @@ public class MomentumBasedController implements RobotController
       return ret;
    }
 
-   private void doMomentumBasedControl(FramePoint2d capturePoint)
+   private void doMomentumBasedControl(FramePoint centerOfMass, FrameVector centerOfMassVelocity, FramePoint2d capturePoint)
    {
       ReferenceFrame frame = worldFrame;
       RobotSide supportLeg = highLevelHumanoidController.getSupportLeg();
@@ -379,9 +379,9 @@ public class MomentumBasedController implements RobotController
       fixDesiredCoPNumericalRoundoff(desiredCoP, bipedSupportPolygons.getSupportPolygonInMidFeetZUp());
       desiredCoP.changeFrame(frame);
 
-      FramePoint com = processedSensors.getCenterOfMassPositionInFrame(desiredHeadingControlModule.getDesiredHeadingFrame());
+      centerOfMass.changeFrame(desiredHeadingControlModule.getDesiredHeadingFrame());
 
-      double fZ = computeFz(supportLeg, desiredCoP, com);
+      double fZ = computeFz(supportLeg, desiredCoP, centerOfMass, centerOfMassVelocity);
 
       SideDependentList<FramePoint2d> virtualToePoints = new SideDependentList<FramePoint2d>();
       if (supportLeg == null)
@@ -425,7 +425,7 @@ public class MomentumBasedController implements RobotController
       vtpToVTPLine.orthogonalProjection(r22d);    // not sure if necessary.
       double x2 = vtpToVTPLine.getParameterGivenPointEpsilon(r22d, 1e-12);
       double z2 = r2.getZ();
-      double z = com.getZ();
+      double z = centerOfMass.getZ();
 
       double omega0Squared = (fZ * (x1 - x2))
                              / (totalMass
@@ -577,12 +577,16 @@ public class MomentumBasedController implements RobotController
          throw new RuntimeException("desired CoP outside polygon by " + distance);
    }
 
-   private double computeFz(RobotSide supportLeg, FramePoint2d desiredCoP, FramePoint com)
+   private double computeFz(RobotSide supportLeg, FramePoint2d desiredCoP, FramePoint com, FrameVector comd)
    {
       double dzdxDesired = highLevelHumanoidController.getDesiredCoMHeightSlope();
       double d2zdx2Desired = highLevelHumanoidController.getDesiredCoMHeightSecondDerivative();
       ReferenceFrame desiredHeadingFrame = desiredHeadingControlModule.getDesiredHeadingFrame();
-      FrameVector comd = processedSensors.getCenterOfMassVelocityInFrame(desiredHeadingFrame);
+
+      desiredCoP.changeFrame(desiredHeadingFrame);
+      com.changeFrame(desiredHeadingFrame);
+      comd.changeFrame(desiredHeadingFrame);
+      
       double xd = comd.getX();
       double copX = desiredCoP.changeFrameCopy(desiredHeadingFrame).getX();
       double xdd = MathTools.square(omega0.getDoubleValue()) * (com.getX() - copX);    // TODO: use current omega0 instead of previous
