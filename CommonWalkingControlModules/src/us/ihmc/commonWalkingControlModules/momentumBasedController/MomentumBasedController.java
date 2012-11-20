@@ -126,13 +126,12 @@ public class MomentumBasedController implements RobotController
    private final BooleanYoVariable leftInSingularRegion = new BooleanYoVariable("leftInSingularRegion", registry);
    private final BooleanYoVariable rightInSingularRegion = new BooleanYoVariable("rightInSingularRegion", registry);
    private final SideDependentList<BooleanYoVariable> inSingularRegions = new SideDependentList<BooleanYoVariable>(leftInSingularRegion, rightInSingularRegion);
-   private boolean doChestOrientationControl;
 
    public MomentumBasedController(ProcessedSensorsInterface processedSensors, ProcessedOutputsInterface processedOutputs,
                                   CommonWalkingReferenceFrames referenceFrames, TwistCalculator twistCalculator, double controlDT,
                                   DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, SideDependentList<BipedFootInterface> bipedFeet,
                                   BipedSupportPolygons bipedSupportPolygons, DesiredHeadingControlModule desiredHeadingControlModule,
-                                  HighLevelHumanoidController highLevelHumanoidController, boolean doChestOrientationControl)
+                                  HighLevelHumanoidController highLevelHumanoidController)
    {
       this.processedSensors = processedSensors;
       this.fullRobotModel = processedSensors.getFullRobotModel();
@@ -247,8 +246,6 @@ public class MomentumBasedController implements RobotController
          kValues.put(robotSide, new DoubleYoVariable(robotSide.getCamelCaseNameForStartOfExpression() + "KValue", registry));
       }
       
-      this.doChestOrientationControl = doChestOrientationControl;
-
       kAngularMomentumZ.set(10.0);    // 50.0); // 10.0);
       kPelvisYaw.set(100.0);    // was 0.0 for M3 movie
       kUpperBody.set(100.0);
@@ -452,14 +449,7 @@ public class MomentumBasedController implements RobotController
 
       doPDControl(kUpperBody, dUpperBody, fullRobotModel.getNeckJointList());
 
-      if (doChestOrientationControl)
-      {
-         chestAngularAccelerationcalculator.compute(highLevelHumanoidController.getChestAngularAcceleration());         
-      }
-      else
-      {         
-         doPDControl(kUpperBody, dUpperBody, fullRobotModel.getSpineJointList());
-      }
+      chestAngularAccelerationcalculator.compute(highLevelHumanoidController.getChestAngularAcceleration());         
 
       FrameVector desiredAngularCentroidalMomentumRate = new FrameVector(totalGroundReactionWrench.getExpressedInFrame(),
                                                             totalGroundReactionWrench.getAngularPartCopy());
