@@ -8,7 +8,6 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
-import us.ihmc.SdfLoader.drcRobot.DRCRobotJointMap;
 import us.ihmc.SdfLoader.xmlDescription.SDFGazebo;
 import us.ihmc.SdfLoader.xmlDescription.SDFModel;
 
@@ -17,7 +16,7 @@ public class JaxbSDFLoader
    private final SDFRobot robot;
    private final SDFFullRobotModel fullRobotModel;
 
-   public JaxbSDFLoader(String fileName, String modelName, String resourceDirectory) throws JAXBException, FileNotFoundException
+   public JaxbSDFLoader(String fileName, String modelName, String resourceDirectory, SDFJointNameMap sdfJointNameMap) throws JAXBException, FileNotFoundException
    {
       JAXBContext context = JAXBContext.newInstance(SDFGazebo.class);
       Unmarshaller um = context.createUnmarshaller();
@@ -40,7 +39,6 @@ public class JaxbSDFLoader
 
       GeneralizedSDFRobotModel generalizedSDFRobotModel = new GeneralizedSDFRobotModel(modelName, model, resourceDirectory);
 
-      DRCRobotJointMap sdfJointNameMap = new DRCRobotJointMap();
       robot = new SDFRobot(generalizedSDFRobotModel, sdfJointNameMap);
       fullRobotModel = new SDFFullRobotModel(generalizedSDFRobotModel.getRootLinks().get(0), sdfJointNameMap);
    }
