@@ -5,6 +5,7 @@ import javax.media.j3d.Transform3D;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedFootInterface;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.FootPolygonEnum;
+import us.ihmc.commonWalkingControlModules.controlModules.RigidBodyOrientationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculator;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
@@ -94,6 +95,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final SideDependentList<EndEffectorPoseTwistAndSpatialAccelerationCalculator> footPoseTwistAndSpatialAccelerationCalculators = new SideDependentList<EndEffectorPoseTwistAndSpatialAccelerationCalculator>();
    private final SideDependentList<RigidBodySpatialAccelerationControlModule> footSpatialAccelerationControlModules = new SideDependentList<RigidBodySpatialAccelerationControlModule>();
 
+   private final RigidBodyOrientationControlModule chestOrientationControlModule;
+
 
    public WalkingHighLevelHumanoidController(FullRobotModel fullRobotModel, CommonWalkingReferenceFrames referenceFrames, TwistCalculator twistCalculator,
          SideDependentList<BipedFootInterface> bipedFeet, BipedSupportPolygons bipedSupportPolygons, SideDependentList<FootSwitchInterface> footSwitches,
@@ -121,6 +124,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       FramePoint2d finalDesiredICPForDoubleSupportStance = getDoubleSupportFinalDesiredICPForDoubleSupportStance();
       finalDesiredICPForDoubleSupportStance.changeFrame(desiredICP.getReferenceFrame());
 
+      this.chestOrientationControlModule = new RigidBodyOrientationControlModule("chest", fullRobotModel.getPelvis(), fullRobotModel.getChest(), twistCalculator, registry);
+      chestOrientationControlModule.setProportionalGains(100.0, 100.0, 100.0);
+      chestOrientationControlModule.setDerivativeGains(20.0, 20.0, 20.0);
+      
       for (RobotSide robotSide : RobotSide.values())
       {
          footCartesianTrajectoryGenerators.put(robotSide, new FifthOrderWaypointCartesianTrajectoryGenerator(robotSide.getCamelCaseNameForStartOfExpression(),
@@ -686,6 +693,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       desiredCoMHeight.set(centerOfMassHeightTrajectoryGenerator.getDesiredCenterOfMassHeight());
       desiredCoMHeightSlope.set(centerOfMassHeightTrajectoryGenerator.getDesiredCenterOfMassHeightSlope());
       desiredCoMHeightSecondDerivative.set(centerOfMassHeightTrajectoryGenerator.getDesiredCenterOfMassHeightSecondDerivative());
+      doChestControl();
    }
 
    private void setSwingControlGains(RobotSide swingSide)
@@ -706,5 +714,17 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       footSpatialAccelerationControlModule.setPositionDerivativeGains(0.0, 0.0, 0.0);
       footSpatialAccelerationControlModule.setOrientationProportionalGains(500.0, 500.0, 500.0);
       footSpatialAccelerationControlModule.setOrientationDerivativeGains(75.0, 75.0, 75.0);
+   }
+   
+   private void doChestControl()
+   {
+      ReferenceFrame pelvisFrame = fullRobotModel.getPelvis().getBodyFixedFrame();
+      FrameOrientation desiredOrientation = new FrameOrientation(pelvisFrame);
+      FrameVector desiredAngularVelocity = new FrameVector(pelvisFrame);
+      FrameVector desiredAngularAcceleration = new FrameVector(pelvisFrame);
+      
+      FrameVector outputToPack = new FrameVector(fullRobotModel.getChest().getBodyFixedFrame());
+      chestOrientationControlModule.controlSpine(outputToPack, desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
+      chestAngularAccelerationWithRespectToPelvis.set(outputToPack);
    }
 }
