@@ -3,7 +3,6 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
-import us.ihmc.utilities.math.geometry.FrameLine2d;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -139,14 +138,12 @@ public class ParabolicVelocityInstantaneousCapturePointTrajectory implements Ins
       parameterGenerator.compute(currentTime.getDoubleValue());
       
       double parameter = parameterGenerator.getValue();
-      double parameterDot = parameterGenerator.getTimeDerivative();
-      double oneMinusParameter = 1.0 - parameter;
-      
+      double parameterDot = parameterGenerator.getVelocity();
       tempPointInitialDesired.setAndChangeFrame(initialDesiredICP.getFramePoint2dCopy());
       tempPointFinalDesired.setAndChangeFrame(finalDesiredICP.getFramePoint2dCopy());
       
       desiredPosition.setAndChangeFrame(tempPointInitialDesired);
-      desiredPosition.scale(oneMinusParameter);
+      desiredPosition.scale(1.0 - parameter);
       tempPointFinalDesired.scale(parameter);
       desiredPosition.add(tempPointFinalDesired);
       

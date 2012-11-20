@@ -58,10 +58,15 @@ public class ZeroToOneParabolicVelocityTrajectoryGenerator implements DoubleTraj
    {
       return currentValue.getDoubleValue();
    }
-   
-   public double getTimeDerivative()
+
+   public double getVelocity()
    {
       return currentTimeDerivative.getDoubleValue();
+   }
+
+   public double getAcceleration()
+   {
+      return 0.0;
    }
 
    public void setTrajectoryTime(double trajectoryTime)
