@@ -209,34 +209,18 @@ public class SDFFullRobotModel implements FullRobotModel
    {
       return armJointLists.get(robotSide).get(armJointName);
    }
-
-   public RevoluteJoint[] getLegJointList(RobotSide robotSide)
+   
+   public RevoluteJoint getSpineJoint(SpineJointName spineJointName)
    {
-      RevoluteJoint[] ret = new RevoluteJoint[legJointLists.get(robotSide).size()];
-      legJointLists.get(robotSide).values().toArray(ret);
-      return ret;
+      return spineJoints.get(spineJointName);
    }
 
-   public RevoluteJoint[] getArmJointList(RobotSide robotSide)
+   public RevoluteJoint getNeckJoint(NeckJointName neckJointName)
    {
-      RevoluteJoint[] ret = new RevoluteJoint[armJointLists.get(robotSide).size()];
-      armJointLists.get(robotSide).values().toArray(ret);
-      return ret;
+      return neckJoints.get(neckJointName);
    }
 
-   public RevoluteJoint[] getSpineJointList()
-   {
-      RevoluteJoint[] ret = new RevoluteJoint[spineJoints.values().size()];
-      spineJoints.values().toArray(ret);
-      return ret;
-   }
 
-   public RevoluteJoint[] getNeckJointList()
-   {
-      RevoluteJoint[] ret = new RevoluteJoint[neckJoints.values().size()];
-      neckJoints.values().toArray(ret);
-      return ret;
-   }
 
    public LegJointVelocities getLegJointVelocities(RobotSide robotSide)
    {
@@ -322,5 +306,6 @@ public class SDFFullRobotModel implements FullRobotModel
    {
       return revoluteJoints;
    }
+
 
 }
