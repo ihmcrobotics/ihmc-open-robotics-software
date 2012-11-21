@@ -120,6 +120,12 @@ public class SDFRobot extends Robot
       scsJoint.setLink(createLink(joint.getChild(), chainRotation));
       scsParentJoint.addJoint(scsJoint);
 
+      
+
+      
+//      scsJoint.setLimitStops(joint.getLowerLimit(), joint.getUpperLimit(), 0.0001 * joint.getContactKp(), joint.getContactKd());
+      scsJoint.setLimitStops(joint.getLowerLimit(), joint.getUpperLimit(), 100.0, 25.0);
+      
       robotJoints.put(joint.getName(), scsJoint);
 
       for (SDFJointHolder child : joint.getChild().getChilderen())
