@@ -17,6 +17,8 @@ import com.yobotics.simulationconstructionset.YoAppearance;
 
 public class SDFLinkGraphics extends LinkGraphics
 {
+   private static final boolean SHOW_COORDINATE_SYSTEMS = false;
+
    public SDFLinkGraphics(Matrix3d rotation, List<SDFVisual> sdfVisuals, String resourceDirectory)
    {
       rotate(rotation);
@@ -48,7 +50,10 @@ public class SDFLinkGraphics extends LinkGraphics
       {
          appearance = YoAppearance.BlackMetalMaterial(); // Otherwise it becomes a white blob
       }
-      addCoordinateSystem(0.1);
+      if (SHOW_COORDINATE_SYSTEMS)
+      {
+         addCoordinateSystem(0.1);         
+      }
 
       translate(offset);
       rotate(rotation);
