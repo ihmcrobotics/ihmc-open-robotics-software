@@ -1,7 +1,5 @@
 package us.ihmc.SdfLoader;
 
-import java.util.ArrayList;
-
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Vector3d;
 
@@ -21,13 +19,19 @@ public class SDFJointHolder
    private final double upperLimit;
    private final double lowerLimit;
    private final Transform3D transformFromChildLink;
-
+   private double damping = 0.0;
+   private double friction = 0.0;
+   
    // Set by loader
    private SDFLinkHolder parent;
    private SDFLinkHolder child;
 
    //Calculated 
    private Transform3D transformFromParentJoint = null;
+   
+   private double contactKp;
+   private double contactKd;
+   private double maxVel;
 
    public SDFJointHolder(SDFJoint sdfJoint, SDFLinkHolder parent, SDFLinkHolder child)
    {
@@ -47,14 +51,57 @@ public class SDFJointHolder
       upperLimit = Double.parseDouble(sdfJoint.getAxis().getLimit().getUpper());
       lowerLimit = Double.parseDouble(sdfJoint.getAxis().getLimit().getLower());
       
+      if(sdfJoint.getAxis().getDynamics() != null)
+      {
+         if(sdfJoint.getAxis().getDynamics().getFriction() != null)
+         {
+            friction = Double.parseDouble(sdfJoint.getAxis().getDynamics().getFriction());
+         }
+         if(sdfJoint.getAxis().getDynamics().getDamping() != null)
+         {
+            damping = Double.parseDouble(sdfJoint.getAxis().getDynamics().getDamping());
+         }
+      }
+      
       transformFromChildLink = SDFConversionsHelper.poseToTransform(sdfJoint.getPose());
 
+      if(parent == null || child == null)
+      {
+         throw new RuntimeException("Cannot make joint with null parent or child links");
+      }
+      
       this.parent = parent;
       this.child = child;
       parent.addChild(this);
       child.setJoint(this);
+      
+      calculateContactGains();
    }
    
+   private void calculateContactGains()
+   {
+      double parentKp = parent.getContactKp();
+      double childKp = child.getContactKp();
+      
+      if(Math.abs(parentKp) > 1e-3 && Math.abs(childKp) > 1e-3)
+      {
+         contactKp = 1.0 / (( 1.0 / parentKp ) + (1.0 / childKp));
+      }
+      else if (Math.abs(parentKp) > 1e-3)
+      {
+         contactKp = parentKp;
+      }
+      else if (Math.abs(childKp) > 1e-3)
+      {
+         contactKp = childKp;
+      }
+      
+      contactKd = parent.getContactKd() + child.getContactKd();
+      
+      maxVel = Math.min(parent.getContactMaxVel(), child.getContactMaxVel());
+      
+   }
+
    public void calculateTransformToParent()
    {
 
@@ -134,8 +181,35 @@ public class SDFJointHolder
       return transformFromParentJoint;
    }
 
+   public double getContactKp()
+   {
+      return contactKp;
+   }
+
+   public double getContactKd()
+   {
+      return contactKd;
+   }
+
+   public double getMaxVel()
+   {
+      return maxVel;
+   }
+
    public String toString()
    {
       return name;
    }
+
+   public double getDamping()
+   {
+      return damping;
+   }
+
+   public double getFriction()
+   {
+      return friction;
+   }
+   
+   
 }

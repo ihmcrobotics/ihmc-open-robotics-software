@@ -11,6 +11,7 @@ public class SDFLink
    private String pose;
    private Inertial inertial;
    private List<SDFVisual> visuals;
+   private Collision collision;
 
    public String getName()
    {
@@ -56,6 +57,17 @@ public class SDFLink
       this.visuals = visual;
    }
 
+   public Collision getCollision()
+   {
+      return collision;
+   }
+
+   @XmlElement(name = "collision")
+   public void setCollision(Collision collision)
+   {
+      this.collision = collision;
+   }
+
    public static class Inertial
    {
       private String mass;
@@ -95,7 +107,7 @@ public class SDFLink
          this.inertia = inertia;
       }
    }
-   
+
    public String toString()
    {
       return name;

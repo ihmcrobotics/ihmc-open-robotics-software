@@ -21,6 +21,10 @@ public class SDFLinkHolder
    private final Transform3D inertialFrameWithRespectToLinkFrame;
    private final Matrix3d inertia;
    
+   private double contactKp = 0.0;
+   private double contactKd = 0.0;
+   private double contactMaxVel = 0.0;;
+   
    private final List<SDFVisual> visuals;
    
    // Set by loader
@@ -39,6 +43,25 @@ public class SDFLinkHolder
      inertialFrameWithRespectToLinkFrame = SDFConversionsHelper.poseToTransform(sdfLink.getInertial().getPose());
      inertia = SDFConversionsHelper.sdfInertiaToMatrix3d(sdfLink.getInertial().getInertia());
      visuals = sdfLink.getVisuals();
+     if(sdfLink.getCollision() != null)
+     {
+        if(sdfLink.getCollision().getSurface() != null)
+        {
+           if(sdfLink.getCollision().getSurface().getContact() != null)
+           {
+              if(sdfLink.getCollision().getSurface().getContact().getOde() != null)
+              {
+                 if(sdfLink.getCollision().getSurface().getContact().getOde().getKp() != null)
+                    contactKp = Double.parseDouble(sdfLink.getCollision().getSurface().getContact().getOde().getKp());
+                 if(sdfLink.getCollision().getSurface().getContact().getOde().getKd() != null)
+                    contactKd = Double.parseDouble(sdfLink.getCollision().getSurface().getContact().getOde().getKd());
+                 if(sdfLink.getCollision().getSurface().getContact().getOde().getMaxVel() != null)
+                    contactMaxVel = Double.parseDouble(sdfLink.getCollision().getSurface().getContact().getOde().getMaxVel());
+                 
+              }
+           }
+        }
+     }
    }
 
    public Transform3D getTransformFromModelReferenceFrame()
@@ -123,4 +146,21 @@ public class SDFLinkHolder
    {
       return CoMOffset;
    }
+
+   public double getContactKp()
+   {
+      return contactKp;
+   }
+
+   public double getContactKd()
+   {
+      return contactKd;
+   }
+
+   public double getContactMaxVel()
+   {
+      return contactMaxVel;
+   }
+   
+   
 }
