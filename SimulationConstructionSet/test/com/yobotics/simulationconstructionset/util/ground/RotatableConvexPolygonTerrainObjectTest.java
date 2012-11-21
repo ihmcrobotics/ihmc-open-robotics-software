@@ -47,8 +47,8 @@ public class RotatableConvexPolygonTerrainObjectTest
       normalYZVector = new Vector3d(0.0, 1.0, 1.0);
 
       inclinedTopFaceOctagon3d = new RotatableConvexPolygonTerrainObject(normalYZVector, convexPolygon, centroidHeight);
-      
-      inclinedTopFaceOctagon3dSecond = new RotatableConvexPolygonTerrainObject(normalYZVector, convexPolygon, 3);
+
+      inclinedTopFaceOctagon3dSecond = new RotatableConvexPolygonTerrainObject(normalYZVector, convexPolygon, 3.0);
    }
 
    @Test
@@ -62,7 +62,7 @@ public class RotatableConvexPolygonTerrainObjectTest
          expectedY = centroidHeight - point[1];
          assertEquals(expectedY, inclinedTopFaceOctagon3d.heightAt(point[0], point[1], centroidHeight), epsilon);
       }
-      
+
       assertEquals(0.0, flatTopFaceOctagon3d.heightAt(5.0, 5.0, 5.0), epsilon);
    }
 
@@ -82,97 +82,99 @@ public class RotatableConvexPolygonTerrainObjectTest
    @Test
    public void testClosestIntersectionTo()
    {
-	   Point3d pointToPack = new Point3d();
-	   
-	   Point3d expectedPoint = new Point3d(2.0,0.0,0.5);	   
-	   flatTopFaceOctagon3d.closestIntersectionTo(3.0, 0.0, 0.5, pointToPack);	//Point on lateral surface
-	   JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon);
+      Point3d pointToPack = new Point3d();
 
-	   expectedPoint.set(-1.5,-1.5,0.0);	   
-	   flatTopFaceOctagon3d.closestIntersectionTo(-4.0, -4.0, 0.0, pointToPack);	//Point on lateral surface
-	   JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon);
+      Point3d expectedPoint = new Point3d(2.0, 0.0, 0.5);
+      flatTopFaceOctagon3d.closestIntersectionTo(3.0, 0.0, 0.5, pointToPack);    // Point on lateral surface
+      JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon);
 
-	   expectedPoint.set(0.0,2.0,0.9);	   
-	   flatTopFaceOctagon3d.closestIntersectionTo(0.0,2.3,0.9, pointToPack);	//Point on lateral surface
-	   JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon);
-	   
-	   expectedPoint.set(1.0,-1.0,1.0);	   
-	   flatTopFaceOctagon3d.closestIntersectionTo(1.0,-1.0,1.1, pointToPack);	//Point on top surface
-	   JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon);	 
-	   
-	   expectedPoint.set(1.5,-1.5,1.0);	   
-	   flatTopFaceOctagon3d.closestIntersectionTo(1.5,-1.5,1.0, pointToPack);	//Point on top surface edge
-	   JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon);
-	   
-	   expectedPoint.set(0.0,1.5,1.5);	   
-	   inclinedTopFaceOctagon3dSecond.closestIntersectionTo(0.0,2.0,2.0, pointToPack);	//Point on top (inclined) surface
-	   JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon);
-	   
-	   expectedPoint.set(0.0,2.0,0.5);	   
-	   inclinedTopFaceOctagon3dSecond.closestIntersectionTo(0.0,3.0,0.5, pointToPack);	//Point on lateral surface
-	   JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon);	   
-	   
-	   expectedPoint = new Point3d(1.0,2.0,0.5);	   
-	   flatTopFaceOctagon3d.closestIntersectionTo(1.1, 5.0, 0.5, pointToPack);	//Point on lateral edge
-	   JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon);	   
-	   
-	   expectedPoint = new Point3d(1.0,2.0,1.0);	   
-	   flatTopFaceOctagon3d.closestIntersectionTo(1.1, 5.0, 2.0, pointToPack);	//Point on the top corner
-	   JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon);
-	   
-	   expectedPoint = new Point3d(-1.0,-2.0,1.0);	   
-	   flatTopFaceOctagon3d.closestIntersectionTo(-2.0,-4.0,1.5, pointToPack);	//Point on the top corner
-	   JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon);	
+      expectedPoint.set(-1.5, -1.5, 0.0);
+      flatTopFaceOctagon3d.closestIntersectionTo(-4.0, -4.0, 0.0, pointToPack);    // Point on lateral surface
+      JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon);
 
-	   expectedPoint = new Point3d(-2.0,0.0,1.0);	   
-	   flatTopFaceOctagon3d.closestIntersectionTo(-3.0,0.0,1.5, pointToPack);	//Point on the top edge
-	   JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon);	
+      expectedPoint.set(0.0, 2.0, 0.9);
+      flatTopFaceOctagon3d.closestIntersectionTo(0.0, 2.3, 0.9, pointToPack);    // Point on lateral surface
+      JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon);
+
+      expectedPoint.set(1.0, -1.0, 1.0);
+      flatTopFaceOctagon3d.closestIntersectionTo(1.0, -1.0, 1.1, pointToPack);    // Point on top surface
+      JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon);
+
+      expectedPoint.set(1.5, -1.5, 1.0);
+      flatTopFaceOctagon3d.closestIntersectionTo(1.5, -1.5, 1.0, pointToPack);    // Point on top surface edge
+      JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon);
+
+      expectedPoint.set(0.0, 1.5, 1.5);
+      inclinedTopFaceOctagon3dSecond.closestIntersectionTo(0.0, 2.0, 2.0, pointToPack);    // Point on top (inclined) surface
+      JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon);
+
+      expectedPoint.set(0.0, 2.0, 0.5);
+      inclinedTopFaceOctagon3dSecond.closestIntersectionTo(0.0, 3.0, 0.5, pointToPack);    // Point on lateral surface
+      JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon);
+
+      expectedPoint = new Point3d(1.0, 2.0, 0.5);
+      flatTopFaceOctagon3d.closestIntersectionTo(1.1, 5.0, 0.5, pointToPack);    // Point on lateral edge
+      JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon);
+
+      expectedPoint = new Point3d(1.0, 2.0, 1.0);
+      flatTopFaceOctagon3d.closestIntersectionTo(1.1, 5.0, 2.0, pointToPack);    // Point on the top corner
+      JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon);
+
+      expectedPoint = new Point3d(-1.0, -2.0, 1.0);
+      flatTopFaceOctagon3d.closestIntersectionTo(-2.0, -4.0, 1.5, pointToPack);    // Point on the top corner
+      JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon);
+
+      expectedPoint = new Point3d(-2.0, 0.0, 1.0);
+      flatTopFaceOctagon3d.closestIntersectionTo(-3.0, 0.0, 1.5, pointToPack);    // Point on the top edge
+      JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon);
 
       expectedPoint = new Point3d(2.0, 0.0, 0.5);
-      flatTopFaceOctagon3d.closestIntersectionTo(1.99,0.0,0.5, pointToPack);  //Point just inside the rightmost vertical plane
-      JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon); 
-	   
+      flatTopFaceOctagon3d.closestIntersectionTo(1.99, 0.0, 0.5, pointToPack);    // Point just inside the rightmost vertical plane
+      JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon);
+
       expectedPoint = new Point3d(2.0, 0.0, 0.5);
-      inclinedTopFaceOctagon3dSecond.closestIntersectionTo(1.99,0.0,0.5, pointToPack);  //Point just inside the rightmost vertical plane
-      JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon); 
-	   
+      inclinedTopFaceOctagon3dSecond.closestIntersectionTo(1.99, 0.0, 0.5, pointToPack);    // Point just inside the rightmost vertical plane
+      JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon);
+
       expectedPoint = new Point3d(2.0, 0.0, 0.5);
-      flatTopFaceOctagon3d.closestIntersectionTo(1.5,0.0,0.5, pointToPack);  //Point just inside the rightmost vertical plane
-      JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon); 
-      
+      flatTopFaceOctagon3d.closestIntersectionTo(1.5, 0.0, 0.5, pointToPack);    // Point just inside the rightmost vertical plane
+      JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon);
+
       expectedPoint = new Point3d(2.0, 0.0, 0.5);
-      inclinedTopFaceOctagon3dSecond.closestIntersectionTo(1.5,0.0,0.5, pointToPack);  //Point just inside the rightmost vertical plane
-      JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon); 
+      inclinedTopFaceOctagon3dSecond.closestIntersectionTo(1.5, 0.0, 0.5, pointToPack);    // Point just inside the rightmost vertical plane
+      JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon);
 
       expectedPoint = new Point3d(1.49, 0.0, 1.0);
-      flatTopFaceOctagon3d.closestIntersectionTo(1.49,0.0,0.5, pointToPack);  //Point just inside the rightmost vertical plane
-      JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon); 
-      
+      flatTopFaceOctagon3d.closestIntersectionTo(1.49, 0.0, 0.5, pointToPack);    // Point just inside the rightmost vertical plane
+      JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon);
+
       expectedPoint = new Point3d(2.0, 0.0, 0.5);
-      inclinedTopFaceOctagon3dSecond.closestIntersectionTo(1.49,0.0,0.5, pointToPack);  //Point just inside the rightmost vertical plane
-      JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon); 
-      
+      inclinedTopFaceOctagon3dSecond.closestIntersectionTo(1.49, 0.0, 0.5, pointToPack);    // Point just inside the rightmost vertical plane
+      JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon);
+
    }
-   
+
    @Test
-   public void testIsInsideTheFace(){
-	   Point3d faceCenter = new Point3d(1.0,0.0,0.0);
-	   Vector3d faceNormal = new Vector3d(1.0,0.0,0.0);	   
-	   Plane3d facePlane = new Plane3d(faceCenter,faceNormal);
-	   ArrayList<Point3d> faceVertices3d = new ArrayList<Point3d>();
-	   faceVertices3d.add(new Point3d(1.0,-2.0,0.0));
-	   faceVertices3d.add(new Point3d(1.0,0.0,-2.0));
-	   faceVertices3d.add(new Point3d(1.0,2.0,0.0));
-	   faceVertices3d.add(new Point3d(1.0,0.0,2.0));
-	   //Expected conversions v1=(2.0, 0.0) v2=(0.0, 2.0) v3=(-2.0, 0.0) v4=(0.0, -2.0)	   
-	   Point3d pointToCheck = new Point3d(1.0,-1.0,0.0); //Point inside (1.0, 0.0)
-	   assertTrue(flatTopFaceOctagon3d.isInsideTheFace(facePlane,faceVertices3d,pointToCheck));
-	   
-	   pointToCheck.set(1.0,-1.0,1.0);//Point on the edge (1.0, 1.0)
-	   assertTrue(flatTopFaceOctagon3d.isInsideTheFace(facePlane,faceVertices3d,pointToCheck));
-	   
-	   pointToCheck.set(1.0, 1.0, 2.0);//Point outside (-1.0, -2.0)
-	   assertFalse(flatTopFaceOctagon3d.isInsideTheFace(facePlane,faceVertices3d,pointToCheck));
+   public void testIsInsideTheFace()
+   {
+      Point3d faceCenter = new Point3d(1.0, 0.0, 0.0);
+      Vector3d faceNormal = new Vector3d(1.0, 0.0, 0.0);
+      Plane3d facePlane = new Plane3d(faceCenter, faceNormal);
+      ArrayList<Point3d> faceVertices3d = new ArrayList<Point3d>();
+      faceVertices3d.add(new Point3d(1.0, -2.0, 0.0));
+      faceVertices3d.add(new Point3d(1.0, 0.0, -2.0));
+      faceVertices3d.add(new Point3d(1.0, 2.0, 0.0));
+      faceVertices3d.add(new Point3d(1.0, 0.0, 2.0));
+
+      // Expected conversions v1=(2.0, 0.0) v2=(0.0, 2.0) v3=(-2.0, 0.0) v4=(0.0, -2.0)
+      Point3d pointToCheck = new Point3d(1.0, -1.0, 0.0);    // Point inside (1.0, 0.0)
+      assertTrue(flatTopFaceOctagon3d.isInsideTheFace(facePlane, faceVertices3d, pointToCheck));
+
+      pointToCheck.set(1.0, -1.0, 1.0);    // Point on the edge (1.0, 1.0)
+      assertTrue(flatTopFaceOctagon3d.isInsideTheFace(facePlane, faceVertices3d, pointToCheck));
+
+      pointToCheck.set(1.0, 1.0, 2.0);    // Point outside (-1.0, -2.0)
+      assertFalse(flatTopFaceOctagon3d.isInsideTheFace(facePlane, faceVertices3d, pointToCheck));
    }
 
    @Test
@@ -181,66 +183,185 @@ public class RotatableConvexPolygonTerrainObjectTest
       Vector3d normalToPack = new Vector3d();
       flatTopFaceOctagon3d.surfaceNormalAt(0.0, 0.0, 1.01, normalToPack);
       JUnitTools.assertTuple3dEquals(new Vector3d(0.0, 0.0, 1.0), normalToPack, 1e-4);
-      
+
       flatTopFaceOctagon3d.surfaceNormalAt(0.0, 0.0, 0.99, normalToPack);
       JUnitTools.assertTuple3dEquals(new Vector3d(0.0, 0.0, 1.0), normalToPack, 1e-4);
-       
+
       Vector3d expected = new Vector3d(1.0, 0.0, 0.5);
       expected.normalize();
-      flatTopFaceOctagon3d.surfaceNormalAt(3.0, 0.0, 1.5, normalToPack);  //Point on top surface edge
+      flatTopFaceOctagon3d.surfaceNormalAt(3.0, 0.0, 1.5, normalToPack);    // Point on top surface edge
       JUnitTools.assertTuple3dEquals(expected, normalToPack, epsilon);
    }
 
    @Test
    public void testClosestIntersectionAndNormalAt()
    {
-      fail("Not yet implemented");
+      Point3d pointToPack = new Point3d();
+      Vector3d normalToPack = new Vector3d();
+      Vector3d expectedVector = new Vector3d();
+
+      Point3d expectedPoint = new Point3d(2.0, 0.0, 0.5);
+      expectedVector.set(1.0, 0.0, 0.0);
+      flatTopFaceOctagon3d.closestIntersectionAndNormalAt(3.0, 0.0, 0.5, pointToPack, normalToPack);    // Point on lateral surface
+      JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon);
+      JUnitTools.assertTuple3dEquals(expectedVector, normalToPack, epsilon);
+
+      expectedPoint.set(-1.5, -1.5, 0.0);
+      expectedVector.set(-1.0, -1.0, 0.0);
+      expectedVector.normalize();
+      flatTopFaceOctagon3d.closestIntersectionAndNormalAt(-4.0, -4.0, 0.0, pointToPack, normalToPack);    // Point on lateral surface
+      JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon);
+      JUnitTools.assertTuple3dEquals(expectedVector, normalToPack, epsilon);
+
+      expectedPoint.set(0.0, 2.0, 0.9);
+      expectedVector.set(0.0, 1.0, 0.0);
+      flatTopFaceOctagon3d.closestIntersectionAndNormalAt(0.0, 2.3, 0.9, pointToPack, normalToPack);    // Point on lateral surface
+      JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon);
+      JUnitTools.assertTuple3dEquals(expectedVector, normalToPack, epsilon);
+
+      expectedPoint.set(1.0, -1.0, 1.0);
+      expectedVector.set(0.0, 0.0, 1.0);
+      flatTopFaceOctagon3d.closestIntersectionAndNormalAt(1.0, -1.0, 1.1, pointToPack, normalToPack);    // Point on top surface
+      JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon);
+      JUnitTools.assertTuple3dEquals(expectedVector, normalToPack, epsilon);
+
+      expectedPoint.set(1.5, -1.5, 1.0);
+      expectedVector.set(1.0, -1.0, 0.0);
+      expectedVector.normalize();
+      flatTopFaceOctagon3d.closestIntersectionAndNormalAt(1.5, -1.5, 1.0, pointToPack, normalToPack);    // Point on top surface edge
+      JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon);
+      JUnitTools.assertTuple3dEquals(expectedVector, normalToPack, epsilon);
+
+      expectedPoint.set(0.0, 1.5, 1.5);
+      expectedVector.set(0.0, 1.0, 1.0);
+      expectedVector.normalize();
+      inclinedTopFaceOctagon3dSecond.closestIntersectionAndNormalAt(0.0, 2.0, 2.0, pointToPack, normalToPack);    // Point on top (inclined) surface
+      JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon);
+      JUnitTools.assertTuple3dEquals(expectedVector, normalToPack, epsilon);
+
+      expectedPoint.set(0.0, 2.0, 0.5);
+      expectedVector.set(.0, 1.0, 0.0);
+      inclinedTopFaceOctagon3dSecond.closestIntersectionAndNormalAt(0.0, 3.0, 0.5, pointToPack, normalToPack);    // Point on lateral surface
+      JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon);
+      JUnitTools.assertTuple3dEquals(expectedVector, normalToPack, epsilon);
+
+      expectedPoint = new Point3d(1.0, 2.0, 0.5);
+      expectedVector.set(1.1, 5.0, 0.5);
+      expectedVector.sub(expectedPoint);
+      expectedVector.normalize();
+      flatTopFaceOctagon3d.closestIntersectionAndNormalAt(1.1, 5.0, 0.5, pointToPack, normalToPack);    // Point on lateral edge
+      JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon);
+      JUnitTools.assertTuple3dEquals(expectedVector, normalToPack, epsilon);
+
+      expectedPoint = new Point3d(1.0, 2.0, 1.0);
+      expectedVector.set(1.1, 5.0, 2.0);
+      expectedVector.sub(expectedPoint);
+      expectedVector.normalize();
+      flatTopFaceOctagon3d.closestIntersectionAndNormalAt(1.1, 5.0, 2.0, pointToPack, normalToPack);    // Point on the top corner
+      JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon);
+      JUnitTools.assertTuple3dEquals(expectedVector, normalToPack, epsilon);
+
+      expectedPoint = new Point3d(-1.0, -2.0, 1.0);
+      expectedVector.set(-2.0, -4.0, 1.5);
+      expectedVector.sub(expectedPoint);
+      expectedVector.normalize();
+      flatTopFaceOctagon3d.closestIntersectionAndNormalAt(-2.0, -4.0, 1.5, pointToPack, normalToPack);    // Point on the top corner
+      JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon);
+      JUnitTools.assertTuple3dEquals(expectedVector, normalToPack, epsilon);
+
+      expectedPoint = new Point3d(-2.0, 0.0, 1.0);
+      expectedVector.set(-3.0, 0.0, 1.5);
+      expectedVector.sub(expectedPoint);
+      expectedVector.normalize();
+      flatTopFaceOctagon3d.closestIntersectionAndNormalAt(-3.0, 0.0, 1.5, pointToPack, normalToPack);    // Point on the top edge
+      JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon);
+      JUnitTools.assertTuple3dEquals(expectedVector, normalToPack, epsilon);
+
+      expectedPoint = new Point3d(2.0, 0.0, 0.5);
+      expectedVector.set(1.0, 0.0, 0.0);
+      flatTopFaceOctagon3d.closestIntersectionAndNormalAt(1.99, 0.0, 0.5, pointToPack, normalToPack);    // Point just inside the rightmost vertical plane
+      JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon);
+      JUnitTools.assertTuple3dEquals(expectedVector, normalToPack, epsilon);
+
+      expectedPoint = new Point3d(2.0, 0.0, 0.5);
+      inclinedTopFaceOctagon3dSecond.closestIntersectionAndNormalAt(1.99, 0.0, 0.5, pointToPack, normalToPack);    // Point just inside the rightmost vertical plane
+      JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon);
+      JUnitTools.assertTuple3dEquals(expectedVector, normalToPack, epsilon);
+
+      expectedPoint = new Point3d(2.0, 0.0, 0.5);
+      flatTopFaceOctagon3d.closestIntersectionAndNormalAt(1.5, 0.0, 0.5, pointToPack, normalToPack);    // Point just inside the rightmost vertical plane
+      JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon);
+      JUnitTools.assertTuple3dEquals(expectedVector, normalToPack, epsilon);
+
+      expectedPoint = new Point3d(2.0, 0.0, 0.5);
+      inclinedTopFaceOctagon3dSecond.closestIntersectionAndNormalAt(1.5, 0.0, 0.5, pointToPack, normalToPack);    // Point just inside the rightmost vertical plane
+      JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon);
+      JUnitTools.assertTuple3dEquals(expectedVector, normalToPack, epsilon);
+
+      expectedPoint = new Point3d(1.49, 0.0, 1.0);
+      expectedVector.set(0.0, 0.0, 1.0);
+      flatTopFaceOctagon3d.closestIntersectionAndNormalAt(1.49, 0.0, 0.5, pointToPack, normalToPack);    // Point just inside the rightmost vertical plane
+      JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon);
+      JUnitTools.assertTuple3dEquals(expectedVector, normalToPack, epsilon);
+
+      expectedPoint = new Point3d(2.0, 0.0, 0.5);
+      expectedVector.set(1.0, 0.0, 0.0);
+      inclinedTopFaceOctagon3dSecond.closestIntersectionAndNormalAt(1.49, 0.0, 0.5, pointToPack, normalToPack);    // Point just inside the rightmost vertical plane
+      JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon);
+      JUnitTools.assertTuple3dEquals(expectedVector, normalToPack, epsilon);
+      
+      expectedPoint = new Point3d(0.0, -1.85, 4.85);
+      expectedVector.set(0.0, 1.0, 1.0);
+      expectedVector.normalize();
+      inclinedTopFaceOctagon3dSecond.closestIntersectionAndNormalAt(0.0, -1.8, 4.9, pointToPack, normalToPack);    // Point just inside the 'back' (lowest y) vertical plane
+      JUnitTools.assertTuple3dEquals(expectedPoint, pointToPack, epsilon);
+      JUnitTools.assertTuple3dEquals(expectedVector, normalToPack, epsilon);
    }
 
    @Test
    public void testGetXMin()
    {
-      fail("Not yet implemented");
+      assertEquals(-2.0, flatTopFaceOctagon3d.getXMin(), epsilon);
    }
 
    @Test
    public void testGetXMax()
    {
-      fail("Not yet implemented");
+      assertEquals(2.0, flatTopFaceOctagon3d.getXMax(), epsilon);
    }
 
    @Test
    public void testGetYMin()
    {
-      fail("Not yet implemented");
+      assertEquals(-2.0, flatTopFaceOctagon3d.getYMin(), epsilon);
    }
 
    @Test
    public void testGetYMax()
    {
-      fail("Not yet implemented");
+      assertEquals(2.0, flatTopFaceOctagon3d.getYMax(), epsilon);
    }
-   
+
    public void testSetupInEnvironment()
    {
       // Not an actual test, could be given @Test for visual confirmation though
       SimulationConstructionSet scs = new SimulationConstructionSet();
       scs.addStaticLinkGraphics(inclinedTopFaceOctagon3d.getLinkGraphics());
-      
+
       scs.setGroundVisible(false);
 
       scs.startOnAThread();
-      
-      while(true)
+
+      while (true)
       {
          try
          {
             Thread.sleep(1000);
-         } 
+         }
          catch (InterruptedException e)
          {
          }
-         
+
       }
    }
 
