@@ -10,13 +10,13 @@ public class ConstantCenterOfMassHeightTrajectoryGenerator implements CenterOfMa
    private final YoVariableRegistry registry;
    private final DoubleYoVariable desiredCenterOfMassHeight;
 
-   public ConstantCenterOfMassHeightTrajectoryGenerator(YoVariableRegistry parentRegistry)
+   public ConstantCenterOfMassHeightTrajectoryGenerator(double initialDesiredCoMHeight, YoVariableRegistry parentRegistry)
    {
       registry = new YoVariableRegistry(getClass().getSimpleName());
       desiredCenterOfMassHeight = new DoubleYoVariable("desiredCenterOfMassHeight", registry); 
       parentRegistry.addChild(registry);
 
-      desiredCenterOfMassHeight.set(1.15);
+      desiredCenterOfMassHeight.set(initialDesiredCoMHeight);
    }
 
    public void initialize(RobotSide supportLeg, RobotSide upcomingSupportLeg)

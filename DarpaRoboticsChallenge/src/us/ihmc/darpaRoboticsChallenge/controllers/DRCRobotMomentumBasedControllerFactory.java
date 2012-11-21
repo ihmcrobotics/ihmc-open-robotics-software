@@ -13,6 +13,7 @@ import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
+import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
@@ -33,7 +34,7 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
 
    public RobotController getController(FullRobotModel fullRobotModel, ReferenceFrames referenceFrames, SteppingStones steppingStones,
          double controlDT, DoubleYoVariable yoTime, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, GUISetterUpperRegistry guiSetterUpperRegistry,
-         TwistCalculator twistCalculator, SideDependentList<FootSwitchInterface> footSwitches)
+         TwistCalculator twistCalculator, CenterOfMassJacobian centerOfMassJacobian, SideDependentList<FootSwitchInterface> footSwitches)
    {
       double footForward = 0.17;
       double footBack = 0.07;
@@ -61,8 +62,8 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
 
       double gravityZ = 9.81;
       HighLevelHumanoidController highLevelHumanoidController = highLevelHumanoidControllerFactory.create(fullRobotModel, referenceFrames, 
-            null, yoTime, gravityZ, twistCalculator, bipedFeet, bipedSupportPolygons, controlDT, desiredHeadingControlModule, footSwitches,
-            dynamicGraphicObjectsListRegistry, highLevelControllerRegistry, guiSetterUpperRegistry);
+            null, yoTime, gravityZ, twistCalculator, centerOfMassJacobian, bipedFeet, bipedSupportPolygons, controlDT, desiredHeadingControlModule,
+            footSwitches, dynamicGraphicObjectsListRegistry, highLevelControllerRegistry, guiSetterUpperRegistry);
 
       MomentumBasedController momentumBasedController = new MomentumBasedController(fullRobotModel, null, gravityZ, referenceFrames,
             twistCalculator, controlDT, dynamicGraphicObjectsListRegistry, bipedFeet, bipedSupportPolygons, highLevelHumanoidController);
