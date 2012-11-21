@@ -6,9 +6,13 @@ import java.util.Map.Entry;
 
 import javax.media.j3d.Transform3D;
 
+import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
 import us.ihmc.utilities.Pair;
+import us.ihmc.utilities.math.geometry.FrameVector;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.RevoluteJoint;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
+import us.ihmc.utilities.screwTheory.Twist;
 
 import com.yobotics.simulationconstructionset.PinJoint;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
@@ -21,14 +25,16 @@ public class SDFPerfectSimulatedSensorReaderAndWriter implements RawSensorReader
    private final String name;   
    private final SDFRobot robot;
    private final SDFFullRobotModel sdfFullRobotModel;
+   private final ReferenceFrames referenceFrames;
    
    private final ArrayList<Pair<PinJoint, RevoluteJoint>> revoluteJoints = new ArrayList<Pair<PinJoint, RevoluteJoint>>();
    
-   public SDFPerfectSimulatedSensorReaderAndWriter(SDFRobot robot, SDFFullRobotModel sdfFullRobotModel)
+   public SDFPerfectSimulatedSensorReaderAndWriter(SDFRobot robot, SDFFullRobotModel sdfFullRobotModel, ReferenceFrames referenceFrames)
    {
       this.name = robot.getName() + "SimulatedSensorReader";
       this.robot = robot;
       this.sdfFullRobotModel = sdfFullRobotModel;
+      this.referenceFrames = referenceFrames;
       
       HashMap<String, RevoluteJoint> joints = sdfFullRobotModel.getRevoluteJointsMap();
       
@@ -41,11 +47,12 @@ public class SDFPerfectSimulatedSensorReaderAndWriter implements RawSensorReader
          Pair<PinJoint, RevoluteJoint> jointPair = new Pair<PinJoint, RevoluteJoint>(pinJoint, revoluteJoint);
          revoluteJoints.add(jointPair);
       }
+      
    }
 
    public void initialize()
    {
-      
+      read();      
    }
 
    public YoVariableRegistry getYoVariableRegistry()
@@ -82,7 +89,23 @@ public class SDFPerfectSimulatedSensorReaderAndWriter implements RawSensorReader
       robot.getRootJointToWorldTransform(temporaryRootToWorldTransform);
       rootJoint.setPositionAndRotation(temporaryRootToWorldTransform);
       
-      sdfFullRobotModel.updateFrames();
+      referenceFrames.updateFrames();
+      
+      
+      ReferenceFrame elevatorFrame = rootJoint.getFrameBeforeJoint();
+      ReferenceFrame pelvisFrame = rootJoint.getFrameAfterJoint();
+
+      FrameVector linearVelocity = robot.getRootJointVelocity();
+      linearVelocity.changeFrame(pelvisFrame);
+
+      FrameVector angularVelocity = robot.getPelvisAngularVelocityInPelvisFrame(pelvisFrame);
+      angularVelocity.changeFrame(pelvisFrame);
+
+      Twist bodyTwist = new Twist(pelvisFrame, elevatorFrame, pelvisFrame, linearVelocity.getVector(), angularVelocity.getVector());
+      rootJoint.setJointTwist(bodyTwist);
+      
+      // Think about adding root body acceleration to the fullrobotmodel
+      
    }
 
    public void write()

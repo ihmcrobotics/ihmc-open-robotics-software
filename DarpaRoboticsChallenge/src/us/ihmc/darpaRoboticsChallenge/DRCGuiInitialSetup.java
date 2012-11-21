@@ -7,6 +7,7 @@ import us.ihmc.projectM.R2Sim02.R2Parameters;
 import us.ihmc.projectM.R2Sim02.R2Robot;
 import us.ihmc.projectM.R2Sim02.initialSetup.GuiInitialSetup;
 
+import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.gui.camera.CameraConfiguration;
 
@@ -14,17 +15,12 @@ public class DRCGuiInitialSetup implements GuiInitialSetup
 {
    private boolean showGUI = true;
 
-   public void initializeGUI(SimulationConstructionSet scs, R2Robot robot)
+   public void initializeGUI(SimulationConstructionSet scs, Robot robot)
    {
       setUpGUI(scs);
 
       if (R2Parameters.USE_SLIDER_BOARD)
          setupSliderBoard(scs);
-
-      JButton exportTorqueAndSpeedButton = new JButton("Export Torque And Speed");
-      DataExporter dataExporter = new DataExporter(scs, robot);
-      exportTorqueAndSpeedButton.addActionListener(dataExporter);
-      scs.addButton(exportTorqueAndSpeedButton);
 
       CameraConfiguration behindPelvis = new CameraConfiguration("BehindPelvis");
       behindPelvis.setCameraTracking(false, true, true, false);
@@ -54,11 +50,20 @@ public class DRCGuiInitialSetup implements GuiInitialSetup
 
    private void setupSliderBoard(SimulationConstructionSet scs)
    {
-//    EvolutionUC33ESetup setup = new EvolutionUC33ESetup(scs);
-//    setup.setupEvolutionForDrivingUpperBodyDesiredPosition();
+      //    EvolutionUC33ESetup setup = new EvolutionUC33ESetup(scs);
+      //    setup.setupEvolutionForDrivingUpperBodyDesiredPosition();
    }
 
    private void setUpGUI(SimulationConstructionSet scs)
    {
+   }
+
+   public void initializeGUI(SimulationConstructionSet scs, R2Robot robot)
+   {
+      initializeGUI(scs, robot);
+      JButton exportTorqueAndSpeedButton = new JButton("Export Torque And Speed");
+      DataExporter dataExporter = new DataExporter(scs, robot);
+      exportTorqueAndSpeedButton.addActionListener(dataExporter);
+      scs.addButton(exportTorqueAndSpeedButton);
    }
 }

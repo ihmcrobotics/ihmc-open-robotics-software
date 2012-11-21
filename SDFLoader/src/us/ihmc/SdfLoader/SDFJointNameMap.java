@@ -31,5 +31,6 @@ public interface SDFJointNameMap extends RobotSpecificJointNames
    public String getChestName();
    
    public String getJointBeforeFootName(RobotSide robotSide);
-   public List<Vector3d> getFootOffset(RobotSide robotSide);
+   public double getAnkleHeight();
+   public List<Vector3d> getGroundContactPointOffset(RobotSide robotSide);
 }
