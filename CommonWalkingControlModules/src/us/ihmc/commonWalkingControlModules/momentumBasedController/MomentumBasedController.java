@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController;
 
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.List;
 
 import javax.vecmath.Matrix3d;
 
@@ -20,10 +21,8 @@ import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelHumanoidController;
 import us.ihmc.commonWalkingControlModules.kinematics.SpatialAccelerationProjector;
 import us.ihmc.commonWalkingControlModules.outputs.ProcessedOutputsInterface;
-import us.ihmc.commonWalkingControlModules.partNamesAndTorques.ArmJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LimbName;
-import us.ihmc.commonWalkingControlModules.partNamesAndTorques.NeckJointName;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
@@ -473,18 +472,8 @@ public class MomentumBasedController implements RobotController
 
       double kUpperBody = this.kUpperBody.getDoubleValue();
       double dUpperBody = 2.0 * zetaUpperBody.getDoubleValue() * Math.sqrt(kUpperBody);
-      for (RobotSide robotSide : RobotSide.values())
-      {
-         for(ArmJointName armJointName : fullRobotModel.getRobotSpecificJointNames().getArmJointNames())
-         {
-            doPDControl(kUpperBody, dUpperBody, fullRobotModel.getArmJoint(robotSide, armJointName));
-         }
-      }
 
-      for(NeckJointName neckJointName : fullRobotModel.getRobotSpecificJointNames().getNeckJointNames())
-      {
-         doPDControl(kUpperBody, dUpperBody, fullRobotModel.getNeckJoint(neckJointName));
-      }
+      doPDControlRecursively(fullRobotModel.getChest().getChildrenJoints(), kUpperBody, dUpperBody);
 
       chestAngularAccelerationcalculator.compute(highLevelHumanoidController.getChestAngularAcceleration());         
 
@@ -562,6 +551,16 @@ public class MomentumBasedController implements RobotController
       }
 
       optimizer.solveForRootJointAcceleration(desiredAngularCentroidalMomentumRate, desiredLinearCentroidalMomentumRate);
+   }
+
+   private void doPDControlRecursively(List<InverseDynamicsJoint> joints, double k, double d)
+   {
+      for (InverseDynamicsJoint joint : joints)
+      {
+         if (joint instanceof RevoluteJoint)
+            doPDControl(k, d, (RevoluteJoint) joint);
+         doPDControlRecursively(joint.getSuccessor().getChildrenJoints(), k, d);
+      }
    }
 
    private void fixDesiredCoPNumericalRoundoff(FramePoint2d desiredCoP, FrameConvexPolygon2d polygon)
