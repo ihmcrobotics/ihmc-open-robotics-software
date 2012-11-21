@@ -5,7 +5,6 @@ import javax.media.j3d.BranchGroup;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.terrain.CommonTerrain;
 import us.ihmc.commonWalkingControlModules.terrain.TerrainType;
-import us.ihmc.projectM.R2Sim02.R2Parameters;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.GroundProfile;

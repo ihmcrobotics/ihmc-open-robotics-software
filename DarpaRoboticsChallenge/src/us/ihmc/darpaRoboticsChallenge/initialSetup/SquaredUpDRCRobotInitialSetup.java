@@ -28,7 +28,7 @@ public class SquaredUpDRCRobotInitialSetup implements DRCRobotInitialSetup
       Vector3d offset = new Vector3d();
       rootToWorld.get(offset);
       
-      offset.setZ(offset.getZ() - 0.045);
+      offset.setZ(offset.getZ() - 0.11);
       
       robot.setPositionInWorld(offset);
       
