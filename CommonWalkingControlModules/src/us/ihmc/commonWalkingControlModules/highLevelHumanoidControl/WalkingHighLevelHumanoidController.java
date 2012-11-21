@@ -14,7 +14,6 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.LimbControlMo
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LimbName;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
-import us.ihmc.commonWalkingControlModules.sensors.ProcessedSensorsInterface;
 import us.ihmc.commonWalkingControlModules.trajectories.CenterOfMassHeightTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.FifthOrderWaypointCartesianTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.FlatThenPolynomialCoMHeightTrajectoryGenerator;
@@ -102,10 +101,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
 
    public WalkingHighLevelHumanoidController(FullRobotModel fullRobotModel, CommonWalkingReferenceFrames referenceFrames, TwistCalculator twistCalculator,
-           SideDependentList<BipedFootInterface> bipedFeet, BipedSupportPolygons bipedSupportPolygons, SideDependentList<FootSwitchInterface> footSwitches,
-           ProcessedSensorsInterface processedSensors, double gravityZ, DoubleYoVariable yoTime, double controlDT,
-           YoVariableRegistry registry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
-           DesiredFootstepCalculator desiredFootstepCalculator, boolean liftUpHeels)
+         SideDependentList<BipedFootInterface> bipedFeet, BipedSupportPolygons bipedSupportPolygons, SideDependentList<FootSwitchInterface> footSwitches,
+         double gravityZ, DoubleYoVariable yoTime, double controlDT, YoVariableRegistry registry,
+         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, DesiredFootstepCalculator desiredFootstepCalculator, boolean liftUpHeels)
    {
       super(fullRobotModel, referenceFrames, gravityZ, twistCalculator, bipedFeet, bipedSupportPolygons, controlDT, footSwitches, registry);
 
@@ -519,7 +517,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private FramePoint2d getDoubleSupportFinalDesiredICPForDoubleSupportStance()
    {
       FramePoint2d ret = new FramePoint2d(worldFrame);
-      double trailingFootToLeadingFootFactor = 0.25;
+      double trailingFootToLeadingFootFactor = 0.5; //0.25;
       for (RobotSide robotSide : RobotSide.values())
       {
          FramePoint2d centroid = new FramePoint2d(ret.getReferenceFrame());
@@ -782,6 +780,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       double zdCurrent = comd.getZ();
 
       double zddDesired = centerOfMassHeightController.compute(zCurrent, zDesired, zdCurrent, zdDesired) + zddFeedForward;
+      double epsilon = 1e-12;
+      zddDesired = MathTools.clipToMinMax(zddDesired, -gravity + epsilon, Double.POSITIVE_INFINITY);
 
       return zddDesired;
    }

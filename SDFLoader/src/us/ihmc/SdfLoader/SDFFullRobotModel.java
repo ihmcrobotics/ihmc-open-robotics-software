@@ -69,6 +69,8 @@ public class SDFFullRobotModel implements FullRobotModel
          throw new RuntimeException("Pelvis joint is assumed to be the root joint");
       }
 
+//      System.out.println("Adding rigid body " + rootLink.getName() + "; Mass: " + rootLink.getMass() + "; ixx: " + rootLink.getInertia().m00 + "; iyy: " + rootLink.getInertia().m11
+//            + "; izz: " + rootLink.getInertia().m22 + "; COM Offset: " + rootLink.getCoMOffset());
       pelvis = ScrewTools.addRigidBody(rootLink.getName(), rootJoint, rootLink.getInertia(), rootLink.getMass(), rootLink.getCoMOffset());
 
       for (SDFJointHolder sdfJoint : rootLink.getChilderen())
@@ -103,17 +105,17 @@ public class SDFFullRobotModel implements FullRobotModel
 
    private void addJointsRecursively(SDFJointHolder joint, RigidBody parentBody)
    {
-      System.out.println("Adding joint " + joint.getName() + " to " + parentBody.getName());
+//      System.out.println("Adding joint " + joint.getName() + " to " + parentBody.getName());
       RevoluteJoint inverseDynamicsJoint = ScrewTools.addRevoluteJoint(joint.getName(), parentBody, joint.getTransformFromParentJoint(), joint.getAxis());
       SDFLinkHolder childLink = joint.getChild();
       RigidBody rigidBody = ScrewTools.addRigidBody(childLink.getName(), inverseDynamicsJoint, childLink.getInertia(), childLink.getMass(),
             childLink.getCoMOffset());
-      System.out.println("Adding rigid body " + childLink.getName() + ", ixx: " + childLink.getInertia().m00 + "; iyy + " + childLink.getInertia().m11
-            + "; izz: " + childLink.getInertia().m22);
+//      System.out.println("Adding rigid body " + childLink.getName() + "; Mass: " + childLink.getMass() + "; ixx: " + childLink.getInertia().m00 + "; iyy: " + childLink.getInertia().m11
+//            + "; izz: " + childLink.getInertia().m22 + "; COM Offset: " + childLink.getCoMOffset());
 
       revoluteJoints.put(joint.getName(), inverseDynamicsJoint);
 
-      if (joint.getName() == sdfJointNameMap.getChestName())
+      if (rigidBody.getName().equals(sdfJointNameMap.getChestName()))
       {
          chest = rigidBody;
       }

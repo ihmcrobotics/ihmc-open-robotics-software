@@ -10,11 +10,13 @@ import javax.xml.bind.Unmarshaller;
 
 import us.ihmc.SdfLoader.xmlDescription.SDFGazebo;
 import us.ihmc.SdfLoader.xmlDescription.SDFModel;
+import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
 
 public class JaxbSDFLoader
 {
    private final SDFRobot robot;
    private final SDFFullRobotModel fullRobotModel;
+   private final ReferenceFrames referenceFrames;
 
    public JaxbSDFLoader(String fileName, String modelName, String resourceDirectory, SDFJointNameMap sdfJointNameMap) throws JAXBException, FileNotFoundException
    {
@@ -41,6 +43,7 @@ public class JaxbSDFLoader
 
       robot = new SDFRobot(generalizedSDFRobotModel, sdfJointNameMap);
       fullRobotModel = new SDFFullRobotModel(generalizedSDFRobotModel.getRootLinks().get(0), sdfJointNameMap);
+      referenceFrames = new ReferenceFrames(fullRobotModel, sdfJointNameMap, sdfJointNameMap.getAnkleHeight());
    }
 
    public SDFRobot getRobot()
@@ -52,6 +55,14 @@ public class JaxbSDFLoader
    {
       return fullRobotModel;
    }
+
+   public ReferenceFrames getReferenceFrames()
+   {
+      return referenceFrames;
+   }
+   
+   
+   
 
    //   public static void main(String[] args) throws FileNotFoundException, JAXBException
    //   {

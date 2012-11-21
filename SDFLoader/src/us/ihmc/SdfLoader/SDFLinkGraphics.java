@@ -39,9 +39,6 @@ public class SDFLinkGraphics extends LinkGraphics
    
    private void addMesh(String mesh, Transform3D visualPose)
    {
-
-      System.out.println(mesh);
-
       Vector3d offset = new Vector3d();
       Matrix3d rotation = new Matrix3d();
       visualPose.get(rotation, offset);

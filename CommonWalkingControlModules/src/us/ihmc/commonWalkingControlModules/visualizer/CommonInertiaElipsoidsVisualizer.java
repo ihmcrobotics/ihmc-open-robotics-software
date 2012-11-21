@@ -20,6 +20,7 @@ import us.ihmc.utilities.screwTheory.RigidBodyInertia;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoAppearance;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.robotController.RobotController;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicEllipsoid;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
@@ -27,8 +28,10 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFrameOrientatio
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 
-public class CommonInertiaElipsoidsVisualizer implements Updatable
+public class CommonInertiaElipsoidsVisualizer implements Updatable, RobotController
 {
+   private static final long serialVersionUID = 4388684010468926404L;
+
    private final String name = getClass().getSimpleName();
 
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
@@ -59,8 +62,12 @@ public class CommonInertiaElipsoidsVisualizer implements Updatable
 
    public CommonInertiaElipsoidsVisualizer(RigidBody rootBody, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
    {
-      inertiaEllipsoidGhostOffset.set(-0.5, 0.0, 0.0);      
+      this(rootBody, dynamicGraphicObjectsListRegistry);
       parentRegistry.addChild(registry);
+   }  
+   public CommonInertiaElipsoidsVisualizer(RigidBody rootBody, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+      {
+      inertiaEllipsoidGhostOffset.set(-0.5, 0.0, 0.0);
 
       findMinimumAndMaximumMassOfRigidBodies(rootBody);
       addRigidBodyAndChilderenToVisualization(rootBody);
@@ -180,5 +187,30 @@ public class CommonInertiaElipsoidsVisualizer implements Updatable
          comData.position.set(tempCoMPosition);
          comData.orientation.set(orientation);
       }
+   }
+
+   public void initialize()
+   {
+      update();
+   }
+
+   public YoVariableRegistry getYoVariableRegistry()
+   {
+      return registry;
+   }
+
+   public String getName()
+   {
+      return name;
+   }
+
+   public String getDescription()
+   {
+      return getName();
+   }
+
+   public void doControl()
+   {
+      update();
    }
 }
