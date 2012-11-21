@@ -103,7 +103,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    public WalkingHighLevelHumanoidController(FullRobotModel fullRobotModel, CommonWalkingReferenceFrames referenceFrames, TwistCalculator twistCalculator,
          SideDependentList<BipedFootInterface> bipedFeet, BipedSupportPolygons bipedSupportPolygons, SideDependentList<FootSwitchInterface> footSwitches,
          double gravityZ, DoubleYoVariable yoTime, double controlDT, YoVariableRegistry registry,
-         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, DesiredFootstepCalculator desiredFootstepCalculator, boolean liftUpHeels)
+         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, DesiredFootstepCalculator desiredFootstepCalculator, boolean liftUpHeels, FrameOrientation desiredPelvisOrientation)
    {
       super(fullRobotModel, referenceFrames, gravityZ, twistCalculator, bipedFeet, bipedSupportPolygons, controlDT, footSwitches, registry);
 
@@ -167,7 +167,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       minOrbitalEnergyForSingleSupport.set(0.007);    // 0.008
       amountToBeInsideSingleSupport.set(0.0);
       amountToBeInsideDoubleSupport.set(0.05);
-      desiredPelvisOrientation.setYawPitchRoll(0.0, 0.6, 0.0); // TODO: get from desired pelvis orientation control module
+      this.desiredPelvisOrientation.set(desiredPelvisOrientation);
 
       for (RobotSide robotSide : RobotSide.values())
       {
