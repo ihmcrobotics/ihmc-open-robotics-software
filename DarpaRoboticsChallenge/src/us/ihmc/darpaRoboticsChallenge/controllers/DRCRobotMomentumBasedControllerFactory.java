@@ -4,6 +4,8 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedFootInterfa
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ResizableBipedFoot;
 import us.ihmc.commonWalkingControlModules.controllers.ControllerFactory;
+import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredVelocityControlModule;
+import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.ManualDesiredVelocityControlModule;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.SimpleDesiredHeadingControlModule;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelHumanoidController;
@@ -59,10 +61,12 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
 
       SimpleDesiredHeadingControlModule desiredHeadingControlModule = new SimpleDesiredHeadingControlModule(0.0, controlDT, highLevelControllerRegistry);
       desiredHeadingControlModule.setMaxHeadingDot(0.4);
+      
+      DesiredVelocityControlModule desiredVelocityControlModule = new ManualDesiredVelocityControlModule(highLevelControllerRegistry);
 
       double gravityZ = 9.81;
       HighLevelHumanoidController highLevelHumanoidController = highLevelHumanoidControllerFactory.create(fullRobotModel, referenceFrames, 
-            null, yoTime, gravityZ, twistCalculator, centerOfMassJacobian, bipedFeet, bipedSupportPolygons, controlDT, desiredHeadingControlModule,
+            null, yoTime, gravityZ, twistCalculator, centerOfMassJacobian, bipedFeet, bipedSupportPolygons, controlDT, desiredHeadingControlModule, desiredVelocityControlModule,
             footSwitches, dynamicGraphicObjectsListRegistry, highLevelControllerRegistry, guiSetterUpperRegistry);
 
       MomentumBasedController momentumBasedController = new MomentumBasedController(fullRobotModel, null, gravityZ, referenceFrames,
