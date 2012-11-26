@@ -36,6 +36,8 @@ public class SimpleDesiredHeadingControlModule implements DesiredHeadingControlM
 
       this.desiredHeadingFinal.set(desiredHeadingfinal);
       this.desiredHeading.set(this.desiredHeadingFinal.getDoubleValue());    // The final is the first one according to the initial setup of the robot
+      
+      updateDesiredHeadingFrame();
    }
    
    public void setMaxHeadingDot(double maxHeadingDot)

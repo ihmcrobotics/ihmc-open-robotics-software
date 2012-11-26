@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl;
 
+import java.util.ArrayList;
+
 import javax.media.j3d.Transform3D;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedFootInterface;
@@ -7,6 +9,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPoly
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.FootPolygonEnum;
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodyOrientationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
+import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculator;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
@@ -100,9 +103,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
            CenterOfMassJacobian centerOfMassJacobian, SideDependentList<BipedFootInterface> bipedFeet, BipedSupportPolygons bipedSupportPolygons,
            SideDependentList<FootSwitchInterface> footSwitches, double gravityZ, DoubleYoVariable yoTime, double controlDT, YoVariableRegistry registry,
            DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, DesiredFootstepCalculator desiredFootstepCalculator,
-           CenterOfMassHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator, SideDependentList<CartesianTrajectoryGenerator> footCartesianTrajectoryGenerators, boolean liftUpHeels, FrameOrientation desiredPelvisOrientation)
+           CenterOfMassHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator, SideDependentList<CartesianTrajectoryGenerator> footCartesianTrajectoryGenerators, boolean liftUpHeels, FrameOrientation desiredPelvisOrientation, ArrayList<Updatable> updatables)
    {
-      super(fullRobotModel, referenceFrames, gravityZ, twistCalculator, bipedFeet, bipedSupportPolygons, controlDT, footSwitches, registry);
+      super(fullRobotModel, referenceFrames, yoTime, gravityZ, twistCalculator, bipedFeet, bipedSupportPolygons, controlDT, footSwitches, updatables, registry);
 
       this.desiredFootstepCalculator = desiredFootstepCalculator;
 
@@ -714,6 +717,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    public void doControl()
    {
+      
       stateMachine.checkTransitionConditionsThoroughly();
       stateMachine.doAction();
       desiredCoMHeightAcceleration.set(computeDesiredCoMHeightAcceleration(desiredICPVelocity.getFrameVector2dCopy()));

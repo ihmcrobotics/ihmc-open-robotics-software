@@ -300,6 +300,7 @@ public class MomentumBasedController implements RobotController
 
       highLevelHumanoidController.setCapturePoint(capturePoint);
       highLevelHumanoidController.setOmega0(omega0.getDoubleValue());
+      highLevelHumanoidController.update();
       highLevelHumanoidController.doControl();
 
       doMomentumBasedControl(centerOfMass, centerOfMassVelocity, capturePoint, momentum);

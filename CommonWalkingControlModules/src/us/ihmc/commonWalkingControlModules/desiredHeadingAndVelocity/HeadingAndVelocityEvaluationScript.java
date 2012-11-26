@@ -109,37 +109,17 @@ public class HeadingAndVelocityEvaluationScript implements Updatable
          switch (evaluationEvent.getEnumValue())
          {
             case DO_NOTHING_FOR_A_TINY_BIT :
-            {
-               desiredHeadingControlModule.setFinalHeadingTargetAngle(previousDesiredHeadingAngle);
-               desiredVelocityDirection.set(desiredHeading);
-
-               break;
-            }
-
             case STEP_IN_PLACE :
-            {
-               desiredHeadingControlModule.setFinalHeadingTargetAngle(previousDesiredHeadingAngle);
-               desiredVelocityDirection.set(desiredHeading);
-
-               break;
-            }
-
             case SPEED_UP_TO_MAX_STRAIGHT :
-            {
-               desiredHeadingControlModule.setFinalHeadingTargetAngle(previousDesiredHeadingAngle);
-               desiredVelocityDirection.set(desiredHeading);
-
-               break;
-            }
-
             case GO_TO_CRUISE_STRAIGHT :
+            case SLOW_DOWN_TO_ZERO_STRAIGHT :
             {
                desiredHeadingControlModule.setFinalHeadingTargetAngle(previousDesiredHeadingAngle);
                desiredVelocityDirection.set(desiredHeading);
 
                break;
-
             }
+
 
             case TURN_180_CRUISE :
             {
@@ -151,14 +131,6 @@ public class HeadingAndVelocityEvaluationScript implements Updatable
 
             case SLOW_DOWN_TO_ZERO :
             {
-               break;
-            }
-
-            case SLOW_DOWN_TO_ZERO_STRAIGHT :
-            {
-               desiredHeadingControlModule.setFinalHeadingTargetAngle(previousDesiredHeadingAngle);
-               desiredVelocityDirection.set(desiredHeading);
-
                break;
             }
 
@@ -235,6 +207,7 @@ public class HeadingAndVelocityEvaluationScript implements Updatable
                throw new RuntimeException("Should never get here!");
             }
          }
+
       }
 
 

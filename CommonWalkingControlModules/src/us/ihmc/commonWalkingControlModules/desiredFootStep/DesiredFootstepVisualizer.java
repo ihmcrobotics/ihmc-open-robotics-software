@@ -290,7 +290,7 @@ public class DesiredFootstepVisualizer
          for (int j = 0; j < ticksPerStep; j++)
          {
             headingAndVelocityEvaluationScript.update(time);
-            desiredHeadingControlModule.updateDesiredHeadingFrame();
+//            desiredHeadingControlModule.updateDesiredHeadingFrame();
 
             FrameVector2d desiredHeading = desiredHeadingControlModule.getDesiredHeading();
             FrameVector2d desiredVelocity = desiredVelocityControlModule.getDesiredVelocity();
