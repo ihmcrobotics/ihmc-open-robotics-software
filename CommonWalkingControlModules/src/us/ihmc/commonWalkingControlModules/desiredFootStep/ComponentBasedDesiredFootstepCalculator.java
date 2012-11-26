@@ -4,10 +4,10 @@ import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredHead
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredVelocityControlModule;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
+import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
-import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
@@ -31,15 +31,16 @@ public class ComponentBasedDesiredFootstepCalculator implements DesiredFootstepC
    private final DoubleYoVariable velocityMagnitudeInHeading = new DoubleYoVariable("velocityMagnitudeInHeading", registry);
    private final DoubleYoVariable velocityMagnitudeToLeftOfHeading = new DoubleYoVariable("velocityMagnitudeToLeftOfHeading", registry);
 
-   private final SideDependentList<ReferenceFrame> ankleZUpFrames;
+   private final SideDependentList<? extends ReferenceFrame> ankleZUpFrames;
 
    private final DesiredHeadingControlModule desiredHeadingControlModule;
    private final DesiredVelocityControlModule desiredVelocityControlModule;
 
    private DesiredFootstepAdjustor desiredFootstepAdjustor;
 
-   public ComponentBasedDesiredFootstepCalculator(SideDependentList<ReferenceFrame> ankleZUpFrames, DesiredHeadingControlModule desiredHeadingControlModule,
-           DesiredVelocityControlModule desiredVelocityControlModule, YoVariableRegistry parentRegistry)
+   public ComponentBasedDesiredFootstepCalculator(SideDependentList<? extends ReferenceFrame> ankleZUpFrames,
+           DesiredHeadingControlModule desiredHeadingControlModule, DesiredVelocityControlModule desiredVelocityControlModule,
+           YoVariableRegistry parentRegistry)
    {
       this.ankleZUpFrames = ankleZUpFrames;
 
@@ -118,32 +119,66 @@ public class ComponentBasedDesiredFootstepCalculator implements DesiredFootstepC
 
    public void setupParametersForM2V2()
    {
-      inPlaceWidth.set(0.25);
-      walkingForwardWidth.set(0.17);
+      setInPlaceWidth(0.25);
+      setWalkingForwardWidth(0.17);
 
-      maxStepLength.set(0.4);
+      setMaxStepLength(0.4);
 
-      sidestepMaxWidth.set(0.3);
-      sidestepMinWidth.set(0.15);
+      setSidestepMaxWidth(0.3);
+      setSidestepMinWidth(0.15);
 
-      minStepWidth.set(0.2);
-      maxStepWidth.set(0.4);
+      setMinStepWidth(0.2);
+      setMaxStepWidth(0.4);
    }
 
    public void setupParametersForR2()
    {
-      inPlaceWidth.set(0.4);
-      walkingForwardWidth.set(0.25);
+      setInPlaceWidth(0.4);
+      setWalkingForwardWidth(0.25);
 
-      maxStepLength.set(0.6);
+      setMaxStepLength(0.6);
 
-      sidestepMaxWidth.set(0.4);
-      sidestepMinWidth.set(0.15);
+      setSidestepMaxWidth(0.4);
+      setSidestepMinWidth(0.15);
 
-      minStepWidth.set(0.25);
-      maxStepWidth.set(0.5);
+      setMinStepWidth(0.25);
+      setMaxStepWidth(0.5);
    }
 
+   public void setInPlaceWidth(double inPlaceWidth)
+   {
+      this.inPlaceWidth.set(inPlaceWidth);
+   }
+
+   public void setWalkingForwardWidth(double walkingForwardWidth)
+   {
+      this.walkingForwardWidth.set(walkingForwardWidth);
+   }
+
+   public void setMaxStepLength(double maxStepLength)
+   {
+      this.maxStepLength.set(maxStepLength);
+   }
+
+   public void setSidestepMaxWidth(double sidestepMaxWidth)
+   {
+      this.sidestepMaxWidth.set(sidestepMaxWidth);
+   }
+
+   public void setSidestepMinWidth(double sidestepMinWidth)
+   {
+      this.sidestepMinWidth.set(sidestepMinWidth);
+   }
+
+   public void setMinStepWidth(double minStepWidth)
+   {
+      this.minStepWidth.set(minStepWidth);
+   }
+
+   public void setMaxStepWidth(double maxStepWidth)
+   {
+      this.maxStepWidth.set(maxStepWidth);
+   }
 
    public void addDesiredFootstepAdjustor(DesiredFootstepAdjustor desiredFootstepAdjustor)
    {
