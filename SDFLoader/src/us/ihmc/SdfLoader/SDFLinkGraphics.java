@@ -60,11 +60,7 @@ public class SDFLinkGraphics extends LinkGraphics
 
       addModelFile(mesh, appearance);
 
-      // Revert to origin
-      rotation.invert();
-      offset.scale(-1.0);
-      rotate(rotation);
-      translate(offset);
+      identity();
    }
    
    private String convertToFullPath(String resourceDirectory, String meshPath)
