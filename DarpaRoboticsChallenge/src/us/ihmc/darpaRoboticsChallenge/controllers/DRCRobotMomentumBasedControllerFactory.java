@@ -60,17 +60,10 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
       bipedFeet.put(RobotSide.RIGHT, rightFoot);
       bipedFeet.put(RobotSide.LEFT, leftFoot);
 
-      SimpleDesiredHeadingControlModule desiredHeadingControlModule = new SimpleDesiredHeadingControlModule(0.0, controlDT, highLevelControllerRegistry);
-      desiredHeadingControlModule.setMaxHeadingDot(0.4);
-      desiredHeadingControlModule.updateDesiredHeadingFrame();
-      
-      ManualDesiredVelocityControlModule desiredVelocityControlModule = new ManualDesiredVelocityControlModule(highLevelControllerRegistry);
-      desiredVelocityControlModule.setDesiredVelocity(new FrameVector2d(ReferenceFrame.getWorldFrame(), 1.0, 0.0));
 
       double gravityZ = 9.81;
       HighLevelHumanoidController highLevelHumanoidController = highLevelHumanoidControllerFactory.create(fullRobotModel, referenceFrames, 
-            null, yoTime, gravityZ, twistCalculator, centerOfMassJacobian, bipedFeet, bipedSupportPolygons, controlDT, desiredHeadingControlModule, desiredVelocityControlModule,
-            footSwitches, dynamicGraphicObjectsListRegistry, highLevelControllerRegistry, guiSetterUpperRegistry);
+            null, yoTime, gravityZ, twistCalculator, centerOfMassJacobian, bipedFeet, bipedSupportPolygons, controlDT, footSwitches, dynamicGraphicObjectsListRegistry, highLevelControllerRegistry, guiSetterUpperRegistry);
 
       MomentumBasedController momentumBasedController = new MomentumBasedController(fullRobotModel, null, gravityZ, referenceFrames,
             twistCalculator, controlDT, dynamicGraphicObjectsListRegistry, bipedFeet, bipedSupportPolygons, highLevelHumanoidController);
