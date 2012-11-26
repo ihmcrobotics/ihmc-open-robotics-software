@@ -9,7 +9,6 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
 import us.ihmc.commonWalkingControlModules.controllers.ControllerFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.BoxStepHighLevelHumanoidControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.FlatGroundWalkingHighLevelHumanoidControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelHumanoidControllerFactory;
 import us.ihmc.commonWalkingControlModules.terrain.TerrainType;
@@ -59,8 +58,8 @@ public class DRCFlatGroundWalkingTrack
       YoVariableRegistry registry = new YoVariableRegistry("adjustableParabolicTrajectoryDemoSimRegistry");
       selectedListener = new DRCDemo0SelectedListener(dynamicGraphicObjectsListRegistry, registry);
 
-      double desiredCoMHeight = 0.95;
-      HighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory = new FlatGroundWalkingHighLevelHumanoidControllerFactory();
+      double desiredCoMHeight = 0.9;
+      HighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory = new FlatGroundWalkingHighLevelHumanoidControllerFactory(desiredCoMHeight);
       ControllerFactory controllerFactory = new DRCRobotMomentumBasedControllerFactory(highLevelHumanoidControllerFactory);
 
       environment = new DRCDemo01Environment(dynamicGraphicObjectsListRegistry);
