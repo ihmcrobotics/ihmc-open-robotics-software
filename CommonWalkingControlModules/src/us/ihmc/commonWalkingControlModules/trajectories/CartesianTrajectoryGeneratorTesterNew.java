@@ -13,6 +13,7 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 import com.yobotics.simulationconstructionset.util.trajectory.CartesianTrajectoryGenerator;
+import com.yobotics.simulationconstructionset.util.trajectory.ConstantDoubleProvider;
 
 public class CartesianTrajectoryGeneratorTesterNew
 {
@@ -67,7 +68,7 @@ public class CartesianTrajectoryGeneratorTesterNew
          //                 registry);
          //         trajectoryGenerator.initialize(initialPosition, initialVelocity, null, finalDesiredPosition, null);
 
-         trajectoryGenerator = new FifthOrderWaypointCartesianTrajectoryGenerator("test", referenceFrame, stepTime, groundClearance, registry);
+         trajectoryGenerator = new FifthOrderWaypointCartesianTrajectoryGenerator("test", referenceFrame, new ConstantDoubleProvider(stepTime), groundClearance, registry);
          trajectoryGenerator.initialize(initialPosition, initialVelocity, initialAcceleration, finalDesiredPosition, finalDesiredVelocity);
 
          bagOfBalls = new BagOfBalls((int) (getTrajectoryTime() / dt), registry, dynamicGraphicObjectsListRegistry);
