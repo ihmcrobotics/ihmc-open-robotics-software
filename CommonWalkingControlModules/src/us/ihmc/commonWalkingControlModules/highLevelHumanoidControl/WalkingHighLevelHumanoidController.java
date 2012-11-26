@@ -19,6 +19,9 @@ import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenc
 import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.trajectories.CenterOfMassHeightTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.FlatThenPolynomialCoMHeightTrajectoryGenerator;
+import us.ihmc.commonWalkingControlModules.trajectories.OrientationInterpolationTrajectoryGenerator;
+import us.ihmc.commonWalkingControlModules.trajectories.OrientationTrajectoryGenerator;
+import us.ihmc.commonWalkingControlModules.trajectories.SettableOrientationProvider;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.MathTools;
@@ -52,6 +55,7 @@ import com.yobotics.simulationconstructionset.util.statemachines.StateTransition
 import com.yobotics.simulationconstructionset.util.statemachines.StateTransitionAction;
 import com.yobotics.simulationconstructionset.util.statemachines.StateTransitionCondition;
 import com.yobotics.simulationconstructionset.util.trajectory.CartesianTrajectoryGenerator;
+import com.yobotics.simulationconstructionset.util.trajectory.DoubleProvider;
 
 public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoidController
 {
@@ -98,12 +102,19 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    private final RigidBodyOrientationControlModule chestOrientationControlModule;
 
+   private final DoubleYoVariable userDesiredPelvisPitch = new DoubleYoVariable("userDesiredPelvisPitch", registry);
+   private final SettableOrientationProvider initialPelvisOrientationProvider;
+   private final SettableOrientationProvider finalPelvisOrientationProvider;
+   private final OrientationTrajectoryGenerator pelvisOrientationTrajectoryGenerator;
+
 
    public WalkingHighLevelHumanoidController(FullRobotModel fullRobotModel, CommonWalkingReferenceFrames referenceFrames, TwistCalculator twistCalculator,
            CenterOfMassJacobian centerOfMassJacobian, SideDependentList<BipedFootInterface> bipedFeet, BipedSupportPolygons bipedSupportPolygons,
            SideDependentList<FootSwitchInterface> footSwitches, double gravityZ, DoubleYoVariable yoTime, double controlDT, YoVariableRegistry registry,
            DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, DesiredFootstepCalculator desiredFootstepCalculator,
-           CenterOfMassHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator, SideDependentList<CartesianTrajectoryGenerator> footCartesianTrajectoryGenerators, boolean liftUpHeels, FrameOrientation desiredPelvisOrientation, ArrayList<Updatable> updatables)
+           CenterOfMassHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator,
+           SideDependentList<CartesianTrajectoryGenerator> footCartesianTrajectoryGenerators, DoubleProvider stepTimeProvider, boolean liftUpHeels,
+           double desiredPelvisPitch, ArrayList<Updatable> updatables)
    {
       super(fullRobotModel, referenceFrames, yoTime, gravityZ, twistCalculator, bipedFeet, bipedSupportPolygons, controlDT, footSwitches, updatables, registry);
 
@@ -152,6 +163,11 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          footSpatialAccelerationControlModules.put(robotSide, rigidBodySpatialAccelerationControlModule);
       }
 
+      initialPelvisOrientationProvider = new SettableOrientationProvider("initialPelvis", worldFrame, registry);
+      finalPelvisOrientationProvider = new SettableOrientationProvider("finalPelvis", worldFrame, registry);
+      this.pelvisOrientationTrajectoryGenerator = new OrientationInterpolationTrajectoryGenerator("pelvis", worldFrame, stepTimeProvider,
+              initialPelvisOrientationProvider, finalPelvisOrientationProvider, registry);
+
       footTrajectoryBagOfBalls = new BagOfBalls(100, 0.01, "footBagOfBalls", YoAppearance.Black(), registry, dynamicGraphicObjectsListRegistry);
       comTrajectoryBagOfBalls = new BagOfBalls(500, 0.01, "comBagOfBalls", YoAppearance.Red(), registry, dynamicGraphicObjectsListRegistry);
 
@@ -164,7 +180,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       minOrbitalEnergyForSingleSupport.set(0.007);    // 0.008
       amountToBeInsideSingleSupport.set(0.0);
       amountToBeInsideDoubleSupport.set(0.05);
-      this.desiredPelvisOrientation.set(desiredPelvisOrientation);
+      this.userDesiredPelvisPitch.set(desiredPelvisPitch);
+      this.desiredPelvisOrientation.setYawPitchRoll(0.0, desiredPelvisPitch, 0.0);
 
       for (RobotSide robotSide : RobotSide.values())
       {
@@ -330,6 +347,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       private final FrameVector angularVelocityToPack;
       private final FrameVector angularAccelerationToPack;
+      private final FrameOrientation desiredPelvisOrientationToPack;
 
       private int counter = 0;
 
@@ -344,7 +362,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          this.angularVelocityToPack = new FrameVector(worldFrame);
          this.angularAccelerationToPack = new FrameVector(worldFrame);
-
+         this.desiredPelvisOrientationToPack = new FrameOrientation(worldFrame);
       }
 
       @Override
@@ -371,6 +389,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             // don't change desiredICP
             desiredICPVelocity.set(0.0, 0.0);
          }
+
+         pelvisOrientationTrajectoryGenerator.compute(stateMachine.timeInCurrentState());
+         pelvisOrientationTrajectoryGenerator.packOrientation(desiredPelvisOrientationToPack);
+         desiredPelvisOrientation.set(desiredPelvisOrientationToPack);
 
          positionToPack.changeFrame(worldFrame);
          velocityToPack.changeFrame(worldFrame);
@@ -671,6 +693,16 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       initialVelocity.changeFrame(trajectoryGeneratorFrame);
 
       Footstep desiredFootstep = desiredFootstepCalculator.updateAndGetDesiredFootstep(supportSide);
+
+      FrameOrientation initialPelvisOrientation = new FrameOrientation(referenceFrames.getAnkleZUpFrame(supportSide));
+      initialPelvisOrientation.changeFrame(worldFrame);
+      initialPelvisOrientationProvider.setOrientation(initialPelvisOrientation);
+
+      FrameOrientation finalPelvisOrientation = desiredFootstep.getFootstepOrientationInFrame(worldFrame);
+      finalPelvisOrientation.setYawPitchRoll(finalPelvisOrientation.getYawPitchRoll()[0], userDesiredPelvisPitch.getDoubleValue(), 0.0);
+      finalPelvisOrientationProvider.setOrientation(finalPelvisOrientation);
+      pelvisOrientationTrajectoryGenerator.initialize();
+
       FramePoint finalDesiredStepLocation = desiredFootstep.getFootstepPositionInFrame(trajectoryGeneratorFrame);
       finalDesiredStepLocation.setZ(finalDesiredStepLocation.getZ());
 

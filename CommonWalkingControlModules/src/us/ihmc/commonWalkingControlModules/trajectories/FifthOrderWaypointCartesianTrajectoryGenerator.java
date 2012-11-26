@@ -11,6 +11,7 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.trajectory.CartesianTrajectoryGenerator;
+import com.yobotics.simulationconstructionset.util.trajectory.DoubleProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.PolynomialSpline;
 
 public class FifthOrderWaypointCartesianTrajectoryGenerator implements CartesianTrajectoryGenerator
@@ -19,15 +20,16 @@ public class FifthOrderWaypointCartesianTrajectoryGenerator implements Cartesian
    private final YoVariableRegistry registry;
    private final EnumMap<Direction, PolynomialSpline> spaceSplines = new EnumMap<Direction, PolynomialSpline>(Direction.class);
    private final PolynomialSpline timeSpline;
-
+   private final DoubleProvider stepTimeProvider;
+   
    private final DoubleYoVariable waypointHeight;
-   private final DoubleYoVariable totalTime;
+   private final DoubleYoVariable stepTime;
    private final DoubleYoVariable timeIntoStep;
 
    private final ReferenceFrame referenceFrame;
    private final FrameVector tempVector = new FrameVector(ReferenceFrame.getWorldFrame());
    
-   public FifthOrderWaypointCartesianTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, double totalTime, double groundClearance,
+   public FifthOrderWaypointCartesianTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, DoubleProvider stepTimeProvider, double groundClearance,
          YoVariableRegistry parentRegistry)
    {
       this.registry = new YoVariableRegistry(namePrefix + namePostFix);
@@ -37,22 +39,24 @@ public class FifthOrderWaypointCartesianTrajectoryGenerator implements Cartesian
          spaceSplines.put(direction, new PolynomialSpline(namePrefix + direction, 5, registry));
       }
       timeSpline = new PolynomialSpline(namePrefix + "Time", 4, registry);
+      this.stepTimeProvider = stepTimeProvider;
 
       this.waypointHeight = new DoubleYoVariable("waypointHeight", registry);
-      this.totalTime = new DoubleYoVariable("stepTime", registry);
+      this.stepTime = new DoubleYoVariable("stepTime", registry);
       this.timeIntoStep = new DoubleYoVariable("timeIntoStep", registry);
       this.referenceFrame = referenceFrame;
       parentRegistry.addChild(registry);
 
-      MathTools.checkIfInRange(totalTime, 0.0, Double.POSITIVE_INFINITY);
-
-      this.totalTime.set(totalTime);
       this.waypointHeight.set(groundClearance);
    }
 
    public void initialize(FramePoint initialPosition, FrameVector initialVelocity, FrameVector initialAcceleration, FramePoint finalDesiredPosition,
          FrameVector finalDesiredVelocity)
    {
+      double stepTime = stepTimeProvider.getValue();
+      MathTools.checkIfInRange(stepTime, 0.0, Double.POSITIVE_INFINITY);
+      this.stepTime.set(stepTime);
+      
       initialPosition.checkReferenceFrameMatch(referenceFrame);
       initialVelocity.checkReferenceFrameMatch(referenceFrame);
       initialAcceleration.checkReferenceFrameMatch(referenceFrame);
@@ -105,7 +109,7 @@ public class FifthOrderWaypointCartesianTrajectoryGenerator implements Cartesian
          finalParameterd = 0.0;
       else
          finalParameterd = finalDesiredVelocity.length() / finalDirection.length();
-      timeSpline.setCubic(0.0, totalTime.getDoubleValue(), 0.0, initialParameterd, 1.0, finalParameterd);
+      timeSpline.setCubic(0.0, stepTime, 0.0, initialParameterd, 1.0, finalParameterd);
    }
 
    public void computeNextTick(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack, double deltaT)
@@ -115,7 +119,7 @@ public class FifthOrderWaypointCartesianTrajectoryGenerator implements Cartesian
       accelerationToPack.setToZero(referenceFrame);
       tempVector.setToZero(referenceFrame);
 
-      double totalTime = this.totalTime.getDoubleValue();
+      double totalTime = this.stepTime.getDoubleValue();
       if (timeIntoStep.getDoubleValue() > totalTime)
          timeIntoStep.set(totalTime);
 
@@ -169,11 +173,11 @@ public class FifthOrderWaypointCartesianTrajectoryGenerator implements Cartesian
 
    public boolean isDone()
    {
-      return timeIntoStep.getDoubleValue() >= totalTime.getDoubleValue();
+      return timeIntoStep.getDoubleValue() >= stepTime.getDoubleValue();
    }
 
    public double getFinalTime()
    {
-      return totalTime.getDoubleValue();
+      return stepTime.getDoubleValue();
    }
 }
