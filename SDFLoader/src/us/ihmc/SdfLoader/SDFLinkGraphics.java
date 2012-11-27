@@ -4,7 +4,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 
-import javax.media.j3d.Appearance;
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
@@ -14,6 +13,7 @@ import us.ihmc.SdfLoader.xmlDescription.SDFVisual;
 import com.yobotics.simulationconstructionset.LinkGraphics;
 import com.yobotics.simulationconstructionset.ModelFileType;
 import com.yobotics.simulationconstructionset.YoAppearance;
+import com.yobotics.simulationconstructionset.graphics.YoAppearanceDefinition;
 
 public class SDFLinkGraphics extends LinkGraphics
 {
@@ -45,7 +45,7 @@ public class SDFLinkGraphics extends LinkGraphics
       Matrix3d rotation = new Matrix3d();
       visualPose.get(rotation, offset);
 
-      Appearance appearance = null;
+      YoAppearanceDefinition appearance = null;
       if (ModelFileType.getFileType(mesh) == ModelFileType._STL)
       {
          appearance = YoAppearance.BlackMetalMaterial(); // Otherwise it becomes a white blob

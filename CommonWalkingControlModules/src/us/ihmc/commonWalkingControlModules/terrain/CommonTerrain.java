@@ -17,6 +17,7 @@ import com.yobotics.simulationconstructionset.LinkGraphics;
 import com.yobotics.simulationconstructionset.TexturedGround;
 import com.yobotics.simulationconstructionset.YoAppearance;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.renderer.j3d.J3DAppearance;
 import com.yobotics.simulationconstructionset.util.FlatGroundProfile;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.ground.AlternatingSlopesGroundProfile;
@@ -95,7 +96,7 @@ public class CommonTerrain
       if (groundProfile != null)
       {
          BranchGroup branchGroup = new BranchGroup();
-         TexturedGround texturedGround = new TexturedGround(groundProfile, 300, 300, YoAppearance.DarkGreen(), new Transform3D());
+         TexturedGround texturedGround = new TexturedGround(groundProfile, 300, 300, new J3DAppearance(YoAppearance.DarkGreen()), new Transform3D());
          branchGroup.addChild(texturedGround.getBranchGroup());
 
          return branchGroup;

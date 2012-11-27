@@ -4,16 +4,11 @@ import java.awt.Color;
 import java.awt.Component;
 import java.net.URL;
 
-import javax.media.j3d.Appearance;
-import javax.media.j3d.Material;
-import javax.media.j3d.PolygonAttributes;
-import javax.media.j3d.Texture;
-import javax.media.j3d.TextureAttributes;
-import javax.media.j3d.TextureUnitState;
-import javax.media.j3d.TransparencyAttributes;
-import javax.vecmath.Color3f;
-
-import com.sun.j3d.utils.image.TextureLoader;
+import com.yobotics.simulationconstructionset.graphics.YoAppearanceDefinition;
+import com.yobotics.simulationconstructionset.graphics.YoAppearanceMaterial;
+import com.yobotics.simulationconstructionset.graphics.YoAppearanceRGBColor;
+import com.yobotics.simulationconstructionset.graphics.YoAppearanceTexture;
+import com.yobotics.simulationconstructionset.graphics.YoAppearanceTransparant;
 
 //http://www.wdvl.com/Graphics/Colour/  has some of the color names I'm using...
 
@@ -26,268 +21,109 @@ import com.sun.j3d.utils.image.TextureLoader;
  * @version Beta 1.0
  */
 
-
 public class YoAppearance
 {
-   public static Appearance YoboticsTexture(Component comp)
-   {
-      Appearance ret = new Appearance();
 
+   public static YoAppearanceDefinition YoboticsTexture(Component comp)
+   {
       URL fileURL = SimulationConstructionSet.class.getResource("images/yobotics.jpg");
-      TextureLoader loader = new TextureLoader(fileURL, comp);
-
-      PolygonAttributes polyAttributes = new PolygonAttributes();
-      polyAttributes.setCullFace(PolygonAttributes.CULL_NONE);
-      ret.setPolygonAttributes(polyAttributes);
-
-      Texture texture = loader.getTexture();
-      texture.setMagFilter(Texture.BASE_LEVEL_LINEAR);
-      texture.setBoundaryModeS(Texture.WRAP);
-      texture.setBoundaryModeT(Texture.WRAP);
-      ret.setTexture(texture);
-
-      TextureAttributes texAttr = new TextureAttributes();
-      texAttr.setTextureMode(TextureAttributes.REPLACE);
-      ret.setTextureAttributes(texAttr);
-
-      return ret;
+      return Texture(fileURL, comp);
    }
 
-   public static Appearance Texture(URL fileURL, Component comp)
+   public static YoAppearanceDefinition Texture(URL fileURL, Component comp)
    {
-      Appearance ret = new Appearance();
 
-      // URL fileURL =  SimulationConstructionSet.class.getResource("images/earth.jpg");
-      TextureLoader loader = new TextureLoader(fileURL, comp);
+      return new YoAppearanceTexture(fileURL, comp);
 
-      PolygonAttributes polyAttributes = new PolygonAttributes();
-      polyAttributes.setCullFace(PolygonAttributes.CULL_NONE);
-
-      // polyAttributes.setCullFace(PolygonAttributes.CULL_BACK);
-      ret.setPolygonAttributes(polyAttributes);
-
-      Texture texture = loader.getTexture();
-      texture.setMagFilter(Texture.BASE_LEVEL_LINEAR);
-      texture.setBoundaryModeS(Texture.WRAP);
-      texture.setBoundaryModeT(Texture.WRAP);
-      ret.setTexture(texture);
-
-      TextureAttributes texAttr = new TextureAttributes();
-      texAttr.setTextureMode(TextureAttributes.REPLACE);
-      ret.setTextureAttributes(texAttr);
-
-      return ret;
    }
 
-
-   public static Appearance EarthTexture(Component comp)
+   public static YoAppearanceDefinition EarthTexture(Component comp)
    {
-      Appearance ret = new Appearance();
 
       URL fileURL = SimulationConstructionSet.class.getResource("images/earth.jpg");
-      TextureLoader loader = new TextureLoader(fileURL, comp);
+      return Texture(fileURL, comp);
 
-      PolygonAttributes polyAttributes = new PolygonAttributes();
-      polyAttributes.setCullFace(PolygonAttributes.CULL_NONE);
-
-      // polyAttributes.setCullFace(PolygonAttributes.CULL_BACK);
-      ret.setPolygonAttributes(polyAttributes);
-
-      Texture texture = loader.getTexture();
-      texture.setMagFilter(Texture.BASE_LEVEL_LINEAR);
-      texture.setBoundaryModeS(Texture.WRAP);
-      texture.setBoundaryModeT(Texture.WRAP);
-      ret.setTexture(texture);
-
-      TextureAttributes texAttr = new TextureAttributes();
-      texAttr.setTextureMode(TextureAttributes.REPLACE);
-      ret.setTextureAttributes(texAttr);
-
-      return ret;
    }
 
-   public static Appearance StoneTexture(Component comp)
+   public static YoAppearanceDefinition StoneTexture(Component comp)
    {
-      Appearance ret = new Appearance();
-
-      // TextureLoader loader = new TextureLoader("C:/images/stone.jpg", comp);
 
       URL fileURL = SimulationConstructionSet.class.getResource("images/stone.jpg");
-
-      // URL iconURL =  SimulationConstructionSet.class.getResource("icons/YoGoInPoint24_2.gif");
-      TextureLoader loader = new TextureLoader(fileURL, comp);
-
-
-
-      PolygonAttributes polyAttributes = new PolygonAttributes();
-      polyAttributes.setCullFace(PolygonAttributes.CULL_NONE);
-      ret.setPolygonAttributes(polyAttributes);
-
-      Texture texture = loader.getTexture();
-      texture.setMagFilter(Texture.BASE_LEVEL_LINEAR);
-      texture.setBoundaryModeS(Texture.WRAP);
-      texture.setBoundaryModeT(Texture.WRAP);
-      ret.setTexture(texture);
-
-      TextureAttributes texAttr = new TextureAttributes();
-      texAttr.setTextureMode(TextureAttributes.REPLACE);
-
-      ret.setTextureAttributes(texAttr);
-
-      return ret;
+      return Texture(fileURL, comp);
    }
 
-
-   protected static Appearance StoneTextureExperiment(Component comp)
+   public static YoAppearanceDefinition PlaneMaterial()
    {
-      Appearance ret = new Appearance();
-
-      PolygonAttributes polyAttributes = new PolygonAttributes();
-      polyAttributes.setCullFace(PolygonAttributes.CULL_NONE);
-      ret.setPolygonAttributes(polyAttributes);
-
-      TextureUnitState textureUnitState[] = new TextureUnitState[2];
-
-      URL fileURL1 = SimulationConstructionSet.class.getResource("images/earth.jpg");
-      URL fileURL2 = SimulationConstructionSet.class.getResource("images/stone.jpg");
-
-      TextureLoader loader2 = new TextureLoader(fileURL1, comp);
-      TextureLoader loader1 = new TextureLoader(fileURL2, comp);
-
-      Texture texture1 = loader1.getTexture();
-      Texture texture2 = loader2.getTexture();
-
-      TextureAttributes texAttr1 = new TextureAttributes();
-
-      // texAttr1.setTextureMode(TextureAttributes.DECAL);
-
-      TextureAttributes texAttr2 = new TextureAttributes();
-
-      // texAttr2.setTextureMode(TextureAttributes.DECAL);
-
-      textureUnitState[0] = new TextureUnitState(texture1, texAttr1, null);
-
-      // textureUnitState[0].setCapability(TextureUnitState.ALLOW_STATE_WRITE);
-
-      textureUnitState[1] = new TextureUnitState(texture2, texAttr2, null);
-
-      // textureUnitState[1].setCapability(TextureUnitState.ALLOW_STATE_WRITE);
-
-      // texture1.setMipMapMode(Texture.MULTI_LEVEL_MIPMAP);
-      // texture1.setMagFilter(Texture.BASE_LEVEL_POINT);
-      // texture1.setMinFilter(Texture.BASE_LEVEL_POINT);
-      // texture1.setBoundaryModeS(Texture.CLAMP);
-      // texture1.setBoundaryModeT(Texture.CLAMP);
-      // ret.setTexture(texture1);
-
-      // TextureAttributes texAttr = new TextureAttributes();
-      // texAttr.setTextureMode(TextureAttributes.REPLACE);
-      // ret.setTextureAttributes(texAttr);
-
-      ret.setTextureUnitState(textureUnitState);
-
-      return ret;
-   }
-
-
-   public static Appearance PlaneMaterial()
-   {
-      Appearance ret = new Appearance();
-      Material mat = new Material();
+      YoAppearanceMaterial mat = new YoAppearanceMaterial();
       mat.setSpecularColor(0.5f, 0.5f, 0.5f);
       mat.setDiffuseColor(0.2f, 0.4f, 0.5f);
       mat.setShininess(7.5f);
       mat.setAmbientColor(0.17f, 0.5f, 0.7f);
-      ret.setMaterial(mat);
-
-      return ret;
+      return mat;
    }
 
-   public static Appearance AluminumMaterial()
+   public static YoAppearanceDefinition AluminumMaterial()
    {
-      Appearance ret = new Appearance();
-      Material mat = new Material();
+      YoAppearanceMaterial mat = new YoAppearanceMaterial();
       mat.setSpecularColor(0.5f, 0.5f, 0.5f);
       mat.setDiffuseColor(0.2f, 0.4f, 0.5f);
       mat.setShininess(7.5f);
       mat.setAmbientColor(0.17f, 0.5f, 0.7f);
-      ret.setMaterial(mat);
-
-      return ret;
+      return mat;
    }
 
-   public static Appearance BlackMetalMaterial()
+   public static YoAppearanceDefinition BlackMetalMaterial()
    {
-      Appearance ret = new Appearance();
-      Material mat = new Material();
+      YoAppearanceMaterial mat = new YoAppearanceMaterial();
       mat.setSpecularColor(0.5f, 0.5f, 0.5f);
       mat.setDiffuseColor(0.2f, 0.4f, 0.5f);
       mat.setShininess(6.0f);
       mat.setAmbientColor(0.16f, 0.18f, 0.2f);
-      ret.setMaterial(mat);
-
-      return ret;
+      return mat;
    }
 
-   public static Appearance FenceMaterial()
+   public static YoAppearanceDefinition FenceMaterial()
    {
-      Appearance ret = new Appearance();
-      Material mat = new Material();
+      YoAppearanceMaterial mat = new YoAppearanceMaterial();
       mat.setSpecularColor(0.4f, 0.4f, 0.4f);
       mat.setDiffuseColor(0.95f, 0.95f, 0.95f);
       mat.setShininess(2.0f);
       mat.setAmbientColor(0.45f, 0.45f, 0.45f);
-      ret.setMaterial(mat);
-
-      return ret;
+      return mat;
    }
 
-   public static Appearance RGBColor(double red, double green, double blue)
+   public static YoAppearanceDefinition RGBColor(double red, double green, double blue)
    {
-      return RGBColor((float) red, (float) green, (float) blue);
+      return new YoAppearanceRGBColor(red, green, blue);
    }
 
-   public static Appearance RGBColor(float red, float green, float blue)
+   public static YoAppearanceDefinition RGBColor(float red, float green, float blue)
    {
-      Appearance ret = new Appearance();
-      ret.setCapability(Appearance.ALLOW_MATERIAL_WRITE);
-      ret.setCapability(Appearance.ALLOW_MATERIAL_READ);
-      Material mat = new Material();
-      mat.setAmbientColor(red, green, blue);
+      return new YoAppearanceRGBColor(red, green, blue);
 
-      ret.setMaterial(mat);
-
-      return ret;
    }
 
-   public static Appearance RGBColorFrom8BitInts(int red, int green, int blue)
+   public static YoAppearanceDefinition RGBColorFrom8BitInts(int red, int green, int blue)
    {
       return RGBColor(((red)) / 255.0, ((green)) / 255.0, ((blue)) / 255.0);
    }
 
-   public static Appearance Color(Color color)
+   public static YoAppearanceDefinition Color(Color color)
    {
-      Appearance ret = new Appearance();
-      Material mat = new Material();
-      mat.setAmbientColor(new Color3f(color));
-
-      ret.setMaterial(mat);
-
-      return ret;
+      return RGBColor(color.getRed(), color.getGreen(), color.getBlue());
    }
 
-
-   public static Appearance Black()
+   public static YoAppearanceDefinition Black()
    {
       return RGBColor(0.0f, 0.0f, 0.0f);
    }
 
-   public static Appearance White()
+   public static YoAppearanceDefinition White()
    {
       return RGBColor(1.0f, 1.0f, 1.0f);
    }
 
-   public static Appearance Red()
+   public static YoAppearanceDefinition Red()
    {
       return RGBColor(1.0f, 0.0f, 0.0f);
    }
@@ -295,149 +131,140 @@ public class YoAppearance
    /**
     * Some colors from: http://cloford.com/resources/colours/500col.htm
     */
-   public static Appearance Pink()
+   public static YoAppearanceDefinition Pink()
    {
       return RGBColorFrom8BitInts(255, 192, 203);
    }
 
-
-   public static Appearance Orange()
+   public static YoAppearanceDefinition Orange()
    {
       return RGBColorFrom8BitInts(255, 128, 0);
    }
 
-   public static Appearance Orchid()
+   public static YoAppearanceDefinition Orchid()
    {
       return RGBColorFrom8BitInts(218, 112, 214);
    }
 
-
-   public static Appearance DarkRed()
+   public static YoAppearanceDefinition DarkRed()
    {
       return RGBColor(0.3f, 0.0f, 0.0f);
    }
 
-   public static Appearance Blue()
+   public static YoAppearanceDefinition Blue()
    {
       return RGBColor(0.0f, 0.0f, 1.0f);
    }
 
-   public static Appearance DarkBlue()
+   public static YoAppearanceDefinition DarkBlue()
    {
       return RGBColor(0.0f, 0.0f, 0.3f);
    }
-   
 
-   public static Appearance Brown()
+   public static YoAppearanceDefinition Brown()
    {
       return RGBColorFrom8BitInts(165, 42, 42);
    }
 
-
-   public static Appearance Green()
+   public static YoAppearanceDefinition Green()
    {
       return RGBColor(0.0f, 1.0f, 0.0f);
    }
 
-   public static Appearance DarkGreen()
+   public static YoAppearanceDefinition DarkGreen()
    {
       return RGBColor(0.0f, 0.3f, 0.0f);
    }
 
-   public static Appearance Silver()
+   public static YoAppearanceDefinition Silver()
    {
       return RGBColor(0.75f, 0.75f, 0.75f);
    }
 
-   public static Appearance Gray()
+   public static YoAppearanceDefinition Gray()
    {
       return RGBColor(0.50f, 0.50f, 0.50f);
    }
 
-   public static Appearance Maroon()
+   public static YoAppearanceDefinition Maroon()
    {
       return RGBColor(0.50f, 0.0f, 0.0f);
    }
 
-   public static Appearance Purple()
+   public static YoAppearanceDefinition Purple()
    {
       return RGBColor(0.50f, 0.0f, 0.50f);
    }
 
-   public static Appearance Fuchsia()
+   public static YoAppearanceDefinition Fuchsia()
    {
       return RGBColor(1.0f, 0.0f, 1.0f);
    }
 
-   public static Appearance Olive()
+   public static YoAppearanceDefinition Olive()
    {
       return RGBColor(0.50f, 0.50f, 0.0f);
    }
 
-   public static Appearance Yellow()
+   public static YoAppearanceDefinition Yellow()
    {
       return RGBColor(1.0f, 1.0f, 0.0f);
    }
 
-   public static Appearance Navy()
+   public static YoAppearanceDefinition Navy()
    {
       return RGBColor(0.0f, 0.0f, 0.50f);
    }
 
-   public static Appearance Teal()
+   public static YoAppearanceDefinition Teal()
    {
       return RGBColor(0.0f, 0.50f, 0.50f);
    }
 
-   public static Appearance Aqua()
+   public static YoAppearanceDefinition Aqua()
    {
       return RGBColor(0.0f, 1.0f, 1.0f);
    }
-   
-   public static Appearance Transparent()
+
+   public static YoAppearanceDefinition Transparent()
    {
-      Appearance ret = new Appearance();
-      TransparencyAttributes ta = new TransparencyAttributes();
-      ta.setTransparency(1.0f);
-      ret.setTransparencyAttributes(ta);
-      return ret;
+      return new YoAppearanceTransparant();
    }
 
-   public static void makeTransparent(Appearance app, float transparency)
+   public static void makeTransparent(YoAppearanceDefinition appearance, float f)
    {
-      TransparencyAttributes ta = new TransparencyAttributes();
-      ta.setTransparency(transparency);
-      ta.setTransparencyMode(TransparencyAttributes.BLENDED);
-
-      app.setTransparencyAttributes(ta);
+      System.err.println("Transparancy not supported for now");
    }
 
-   public static void makeLineDrawing(Appearance app)
-   {
-      PolygonAttributes pa = new PolygonAttributes();
-      pa.setPolygonMode(PolygonAttributes.POLYGON_LINE);
-      app.setPolygonAttributes(pa);
-   }
-
+   //   public static void makeTransparent(YoAppearanceDefinition app, float transparency)
+   //   {
+   //      TransparencyAttributes ta = new TransparencyAttributes();
+   //      ta.setTransparency(transparency);
+   //      ta.setTransparencyMode(TransparencyAttributes.BLENDED);
+   //
+   //      app.setTransparencyAttributes(ta);
+   //   }
+   //
+   //   public static void makeLineDrawing(YoAppearanceDefinition app)
+   //   {
+   //      PolygonAttributes pa = new PolygonAttributes();
+   //      pa.setPolygonMode(PolygonAttributes.POLYGON_LINE);
+   //      app.setPolygonAttributes(pa);
+   //   }
 
    /*
-    * public static Appearance Transparent()
-    * {
-    * Appearance ret = new Appearance();
-    * Material mat = new Material();
-    * mat.setAmbientColor(0.0f,0.0f,0.0f);
-    *
+    * public static YoAppearanceDefinition Transparent() {
+    * YoAppearanceDefinition ret = new YoAppearanceDefinition(); Material mat =
+    * new Material(); mat.setAmbientColor(0.0f,0.0f,0.0f);
+    * 
     * TransparencyAttributes ta = new TransparencyAttributes();
     * ta.setTransparency(0.5f);
     * ta.setTransparencyMode(TransparencyAttributes.BLENDED);
-    *
-    * ret.setTransparencyAttributes(ta);
-    * ret.setMaterial(mat);
-    * return ret;
-    * }
+    * 
+    * ret.setTransparencyAttributes(ta); ret.setMaterial(mat); return ret; }
     */
 
-   // public YoAppearance()
+   // public YoYoAppearanceDefinition()
    // {
    // }
 }

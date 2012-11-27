@@ -2,8 +2,6 @@ package us.ihmc.commonWalkingControlModules.calculators;
 
 import java.util.ArrayList;
 
-import javax.media.j3d.Appearance;
-
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
@@ -14,6 +12,7 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import com.yobotics.simulationconstructionset.GroundContactPoint;
 import com.yobotics.simulationconstructionset.YoAppearance;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.graphics.YoAppearanceDefinition;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicVector;
@@ -59,7 +58,7 @@ public class GroundReactionTorqueCalculator
       DynamicGraphicObjectsList dynamicGraphicObjectsList = new DynamicGraphicObjectsList("Ground-Foot Torques");
 
       double scaleFactor = 0.01;
-      Appearance appearance = YoAppearance.Purple();    // BlackMetalMaterial();
+      YoAppearanceDefinition appearance = YoAppearance.Purple();    // BlackMetalMaterial();
 
       for (RobotSide robotSide : RobotSide.values())
       {
