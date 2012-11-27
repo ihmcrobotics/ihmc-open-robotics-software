@@ -13,7 +13,7 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 public class DesiredFootstepCalculatorTools
 {
-   public static double computeMinZWithRespectToAnkleInWorldFrame(Matrix3d footToWorldRotation, ReferenceFrame footFrame, BipedFootInterface bipedFoot)
+   public static double computeMinZWithRespectToAnkleInWorldFrame(Matrix3d footToWorldRotation, BipedFootInterface bipedFoot)
    {
       ArrayList<FramePoint2d> footPoints = bipedFoot.getFootPolygonInSoleFrame().getClockwiseOrderedListOfFramePoints();
       double minZ = Double.POSITIVE_INFINITY;
@@ -23,7 +23,7 @@ public class DesiredFootstepCalculatorTools
       {
          tempFramePoint.setToZero(footPoint.getReferenceFrame());
          tempFramePoint.setXY(footPoint);
-         tempFramePoint.changeFrame(footFrame);
+         tempFramePoint.changeFrame(bipedFoot.getFootFrame());
          tempVector.set(tempFramePoint.getPoint());
          footToWorldRotation.transform(tempVector);
          if (tempVector.getZ() < minZ)
@@ -33,7 +33,7 @@ public class DesiredFootstepCalculatorTools
       return minZ;
    }
 
-   public static double computeMaxXWithRespectToAnkleInFrame(Matrix3d footToWorldRotation, ReferenceFrame footFrame, BipedFootInterface bipedFoot, ReferenceFrame frame)
+   public static double computeMaxXWithRespectToAnkleInFrame(Matrix3d footToWorldRotation, BipedFootInterface bipedFoot, ReferenceFrame frame)
    {
       Transform3D worldToDesiredHeadingFrame = frame.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());
       ArrayList<FramePoint2d> footPoints = bipedFoot.getFootPolygonInSoleFrame().getClockwiseOrderedListOfFramePoints();
@@ -44,7 +44,7 @@ public class DesiredFootstepCalculatorTools
       {
          tempFramePoint.setToZero(footPoint.getReferenceFrame());
          tempFramePoint.setXY(footPoint);
-         tempFramePoint.changeFrame(footFrame);
+         tempFramePoint.changeFrame(bipedFoot.getFootFrame());
          tempVector.set(tempFramePoint.getPoint());    // foot point w.r.t. ankle in foot frame
          footToWorldRotation.transform(tempVector);    // foot point w.r.t. ankle in world frame
          worldToDesiredHeadingFrame.transform(tempVector);    // foot point w.r.t. ankle in desired heading frame
@@ -54,7 +54,7 @@ public class DesiredFootstepCalculatorTools
 
       return maxX;
    }
-   
+
    public static FramePoint computeMinZPointInFrame(Transform3D footToWorldTransform, BipedFootInterface bipedFoot, ReferenceFrame frame)
    {
       ArrayList<FramePoint2d> footPoints = bipedFoot.getFootPolygonInSoleFrame().getClockwiseOrderedListOfFramePoints();
@@ -66,6 +66,7 @@ public class DesiredFootstepCalculatorTools
       {
          tempFramePoint.setToZero(footPoint.getReferenceFrame());
          tempFramePoint.setXY(footPoint);
+         tempFramePoint.changeFrame(bipedFoot.getFootFrame());
          tempFramePoint.changeFrameUsingTransform(ReferenceFrame.getWorldFrame(), footToWorldTransform);
          tempFramePoint.changeFrame(frame);
          if (tempFramePoint.getZ() < minFramePoint.getZ())
@@ -92,6 +93,7 @@ public class DesiredFootstepCalculatorTools
       {
          tempFramePoint.setToZero(footPoint.getReferenceFrame());
          tempFramePoint.setXY(footPoint);
+         tempFramePoint.changeFrame(bipedFoot.getFootFrame());
          tempFramePoint.changeFrameUsingTransform(ReferenceFrame.getWorldFrame(), footToWorldTransform);
          tempFramePoint.changeFrame(frame);
          if (tempFramePoint.getX() > maxFramePoint.getX())

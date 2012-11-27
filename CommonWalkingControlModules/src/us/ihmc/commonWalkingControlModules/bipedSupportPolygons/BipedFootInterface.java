@@ -3,11 +3,14 @@ package us.ihmc.commonWalkingControlModules.bipedSupportPolygons;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 public interface BipedFootInterface
 {
    public abstract RobotSide getRobotSide();
 
+   public abstract ReferenceFrame getFootFrame();
+   
    public abstract FrameConvexPolygon2d getFootPolygonInUseInAnkleZUp();
 
    public abstract FrameConvexPolygon2d getFlatFootPolygonInAnkleZUp();
