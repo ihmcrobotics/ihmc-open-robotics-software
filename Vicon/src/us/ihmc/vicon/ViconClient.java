@@ -16,10 +16,11 @@ import java.util.Vector;
 
 public class ViconClient
 {
-   private boolean DEBUG = true;
+   private boolean DEBUG = false;
    private static ViconClient viconSingleton;
    protected RemoteConnection viconServer;
    protected ArrayList<ViconFrames> viconFrames = new ArrayList<ViconFrames>();
+   protected ArrayList<ViconListener> listeners = new ArrayList<ViconListener>();
    private final HashMap<String, ViconModelReading> mapModelToPoseReading = new HashMap<String, ViconModelReading>();
    private String myIP;
    private int myPort = 4444;
@@ -135,6 +136,11 @@ public class ViconClient
       this.viconFrames.add(viconFrames);
    }
 
+   public void registerListener(ViconListener viconListener)
+   {
+      listeners.add(viconListener);
+   }
+
    private void registerPoseListener(String host, Integer port)
    {
       Vector<Serializable> parameters = new Vector<Serializable>();
@@ -184,6 +190,11 @@ public class ViconClient
                   synchronized (mapModelToPoseReading)
                   {
                      mapModelToPoseReading.put(poseReading.getModelName(), poseReading);
+
+                     for(ViconListener viconListener: listeners)
+                     {
+                        viconListener.update(poseReading);
+                     }
 
                      if (viconFrames != null)
                      {
