@@ -11,7 +11,6 @@ import javax.media.j3d.Geometry;
 import javax.media.j3d.Group;
 import javax.media.j3d.Leaf;
 import javax.media.j3d.Light;
-import javax.media.j3d.Material;
 import javax.media.j3d.Node;
 import javax.media.j3d.PolygonAttributes;
 import javax.media.j3d.Shape3D;
@@ -34,7 +33,8 @@ import com.eteks.sweethome3d.j3d.DAELoader;
 import com.mnstarfire.loaders3d.Loader3DS;
 import com.sun.j3d.loaders.Loader;
 import com.sun.j3d.utils.picking.PickTool;
-import com.yobotics.simulationconstructionset.robotdefinition.AppearanceDefinition;
+import com.yobotics.simulationconstructionset.graphics.YoAppearanceDefinition;
+import com.yobotics.simulationconstructionset.renderer.j3d.J3DAppearance;
 import com.yobotics.simulationconstructionset.robotdefinition.LinkGraphicsDefinition;
 import com.yobotics.simulationconstructionset.robotdefinition.linkgraphicinstructions.LinkGraphicsAddArcTorus;
 import com.yobotics.simulationconstructionset.robotdefinition.linkgraphicinstructions.LinkGraphicsAddCone;
@@ -97,12 +97,7 @@ public class LinkGraphics
 
             if (((LinkGraphicsAddModelFile) instruction).getAppearance() != null)
             {
-               Color3f color = ((LinkGraphicsAddModelFile) instruction).getAppearance().getColor();
-               Appearance app = new Appearance();
-               Material tmp = new Material();
-               tmp.setAmbientColor(color);
-               app.setMaterial(tmp); // YoAppearance.Color(new Color(color.x, color.y, color.z));
-               this.addModelFile(((LinkGraphicsAddModelFile) instruction).getFileName(), app);
+               this.addModelFile(((LinkGraphicsAddModelFile) instruction).getFileName(), ((LinkGraphicsAddModelFile) instruction).getAppearance());
             }
             else
                this.addModelFile(((LinkGraphicsAddModelFile) instruction).getFileName());
@@ -112,13 +107,9 @@ public class LinkGraphics
          {
             if (((LinkGraphicsAddArcTorus) instruction).getAppearance() != null)
             {
-               Color3f color = ((LinkGraphicsAddArcTorus) instruction).getAppearance().getColor();
-               Appearance app = new Appearance();
-               Material tmp = new Material();
-               tmp.setAmbientColor(color);
-               app.setMaterial(tmp);
+               
                this.addArcTorus(((LinkGraphicsAddArcTorus) instruction).getStartAngle(), ((LinkGraphicsAddArcTorus) instruction).getEndAngle(),
-                     ((LinkGraphicsAddArcTorus) instruction).getMajorRadius(), ((LinkGraphicsAddArcTorus) instruction).getMinorRadius(), app);
+                     ((LinkGraphicsAddArcTorus) instruction).getMajorRadius(), ((LinkGraphicsAddArcTorus) instruction).getMinorRadius(), ((LinkGraphicsAddArcTorus) instruction).getAppearance());
             }
             else
                this.addArcTorus(((LinkGraphicsAddArcTorus) instruction).getStartAngle(), ((LinkGraphicsAddArcTorus) instruction).getEndAngle(),
@@ -129,13 +120,7 @@ public class LinkGraphics
          {
             if (((LinkGraphicsAddCone) instruction).getAppearance() != null)
             {
-               Color3f color = ((LinkGraphicsAddCone) instruction).getAppearance().getColor();
-               Appearance app = new Appearance();
-               Material tmp = new Material();
-               tmp.setAmbientColor(color);
-               app.setMaterial(tmp);
-
-               this.addCone(((LinkGraphicsAddCone) instruction).getHeight(), ((LinkGraphicsAddCone) instruction).getRadius(), app);
+               this.addCone(((LinkGraphicsAddCone) instruction).getHeight(), ((LinkGraphicsAddCone) instruction).getRadius(), ((LinkGraphicsAddCone) instruction).getAppearance());
             }
             else
                this.addCone(((LinkGraphicsAddCone) instruction).getHeight(), ((LinkGraphicsAddCone) instruction).getRadius());
@@ -144,12 +129,7 @@ public class LinkGraphics
          {
             if (((LinkGraphicsAddCylinder) instruction).getAppearance() != null)
             {
-               Color3f color = ((LinkGraphicsAddCylinder) instruction).getAppearance().getColor();
-               Appearance app = new Appearance();
-               Material tmp = new Material();
-               tmp.setAmbientColor(color);
-               app.setMaterial(tmp);
-               this.addCylinder(((LinkGraphicsAddCylinder) instruction).getHeight(), ((LinkGraphicsAddCylinder) instruction).getRadius(), app);
+               this.addCylinder(((LinkGraphicsAddCylinder) instruction).getHeight(), ((LinkGraphicsAddCylinder) instruction).getRadius(), ((LinkGraphicsAddCylinder) instruction).getAppearance());
 
             }
             else
@@ -163,14 +143,8 @@ public class LinkGraphics
          {
             if (((LinkGraphicsAddCube) instruction).getAppearance() != null)
             {
-               Color3f color = ((LinkGraphicsAddCube) instruction).getAppearance().getColor();
-               Appearance app = new Appearance();
-               Material tmp = new Material();
-               tmp.setAmbientColor(color);
-               app.setMaterial(tmp);
-
                this.addCube(((LinkGraphicsAddCube) instruction).getX(), ((LinkGraphicsAddCube) instruction).getY(), ((LinkGraphicsAddCube) instruction).getZ(),
-                     app);
+                     ((LinkGraphicsAddCube) instruction).getAppearance());
             }
             else
                this.addCube(((LinkGraphicsAddCube) instruction).getX(), ((LinkGraphicsAddCube) instruction).getY(), ((LinkGraphicsAddCube) instruction).getZ());
@@ -179,13 +153,8 @@ public class LinkGraphics
          {
             if (((LinkGraphicsAddEllipsoid) instruction).getAppearance() != null)
             {
-               Color3f color = ((LinkGraphicsAddEllipsoid) instruction).getAppearance().getColor();
-               Appearance app = new Appearance();
-               Material tmp = new Material();
-               tmp.setAmbientColor(color);
-               app.setMaterial(tmp);
                this.addEllipsoid(((LinkGraphicsAddEllipsoid) instruction).getXRad(), ((LinkGraphicsAddEllipsoid) instruction).getYRad(),
-                     ((LinkGraphicsAddEllipsoid) instruction).getZRad(), app);
+                     ((LinkGraphicsAddEllipsoid) instruction).getZRad(), ((LinkGraphicsAddEllipsoid) instruction).getAppearance());
             }
             else
                this.addEllipsoid(((LinkGraphicsAddEllipsoid) instruction).getXRad(), ((LinkGraphicsAddEllipsoid) instruction).getYRad(),
@@ -195,13 +164,8 @@ public class LinkGraphics
          {
             if (((LinkGraphicsAddHemiEllipsoid) instruction).getAppearance() != null)
             {
-               Color3f color = ((LinkGraphicsAddHemiEllipsoid) instruction).getAppearance().getColor();
-               Appearance app = new Appearance();
-               Material tmp = new Material();
-               tmp.setAmbientColor(color);
-               app.setMaterial(tmp);
                this.addHemiEllipsoid(((LinkGraphicsAddHemiEllipsoid) instruction).getXRad(), ((LinkGraphicsAddHemiEllipsoid) instruction).getYRad(),
-                     ((LinkGraphicsAddHemiEllipsoid) instruction).getZRad(), app);
+                     ((LinkGraphicsAddHemiEllipsoid) instruction).getZRad(), ((LinkGraphicsAddHemiEllipsoid) instruction).getAppearance());
             }
             else
                this.addHemiEllipsoid(((LinkGraphicsAddHemiEllipsoid) instruction).getXRad(), ((LinkGraphicsAddHemiEllipsoid) instruction).getYRad(),
@@ -212,13 +176,8 @@ public class LinkGraphics
          {
             if (((LinkGraphicsAddPyramidCube) instruction).getAppearance() != null)
             {
-               Color3f color = ((LinkGraphicsAddPyramidCube) instruction).getAppearance().getColor();
-               Appearance app = new Appearance();
-               Material tmp = new Material();
-               tmp.setAmbientColor(color);
-               app.setMaterial(tmp);
                this.addPyramidCube(((LinkGraphicsAddPyramidCube) instruction).getX(), ((LinkGraphicsAddPyramidCube) instruction).getY(),
-                     ((LinkGraphicsAddPyramidCube) instruction).getZ(), ((LinkGraphicsAddPyramidCube) instruction).getHeight(), app);
+                     ((LinkGraphicsAddPyramidCube) instruction).getZ(), ((LinkGraphicsAddPyramidCube) instruction).getHeight(), ((LinkGraphicsAddPyramidCube) instruction).getAppearance());
             }
             else
                this.addPyramidCube(((LinkGraphicsAddPyramidCube) instruction).getX(), ((LinkGraphicsAddPyramidCube) instruction).getY(),
@@ -228,12 +187,7 @@ public class LinkGraphics
          {
             if (((LinkGraphicsAddSphere) instruction).getAppearance() != null)
             {
-               Color3f color = ((LinkGraphicsAddSphere) instruction).getAppearance().getColor();
-               Appearance app = new Appearance();
-               Material tmp = new Material();
-               tmp.setAmbientColor(color);
-               app.setMaterial(tmp);
-               this.addSphere(((LinkGraphicsAddSphere) instruction).getRadius(), app);
+               this.addSphere(((LinkGraphicsAddSphere) instruction).getRadius(), ((LinkGraphicsAddSphere) instruction).getAppearance());
             }
             else
                this.addSphere(((LinkGraphicsAddSphere) instruction).getRadius());
@@ -242,12 +196,7 @@ public class LinkGraphics
          {
             if (((LinkGraphicsAddVRMLFile) instruction).getAppearance() != null)
             {
-               Color3f color = ((LinkGraphicsAddVRMLFile) instruction).getAppearance().getColor();
-               Appearance app = new Appearance();
-               Material tmp = new Material();
-               tmp.setAmbientColor(color);
-               app.setMaterial(tmp);
-               this.addVRMLFile(((LinkGraphicsAddVRMLFile) instruction).getFileName(), app);
+               this.addVRMLFile(((LinkGraphicsAddVRMLFile) instruction).getFileName(), ((LinkGraphicsAddVRMLFile) instruction).getAppearance());
             }
             else
                this.addVRMLFile(((LinkGraphicsAddVRMLFile) instruction).getFileName());
@@ -256,13 +205,8 @@ public class LinkGraphics
          {
             if (((LinkGraphicsAddWedge) instruction).getAppearance() != null)
             {
-               Color3f color = ((LinkGraphicsAddWedge) instruction).getAppearance().getColor();
-               Appearance app = new Appearance();
-               Material tmp = new Material();
-               tmp.setAmbientColor(color);
-               app.setMaterial(tmp);
                this.addWedge(((LinkGraphicsAddWedge) instruction).getX(), ((LinkGraphicsAddWedge) instruction).getY(),
-                     ((LinkGraphicsAddWedge) instruction).getZ(), app);
+                     ((LinkGraphicsAddWedge) instruction).getZ(), ((LinkGraphicsAddWedge) instruction).getAppearance());
             }
             else
                this.addWedge(((LinkGraphicsAddWedge) instruction).getX(), ((LinkGraphicsAddWedge) instruction).getY(),
@@ -272,14 +216,9 @@ public class LinkGraphics
          {
             if (((LinkGraphicsAddTruncatedCone) instruction).getAppearance() != null)
             {
-               Color3f color = ((LinkGraphicsAddTruncatedCone) instruction).getAppearance().getColor();
-               Appearance app = new Appearance();
-               Material tmp = new Material();
-               tmp.setAmbientColor(color);
-               app.setMaterial(tmp);
                this.addGenTruncatedCone(((LinkGraphicsAddTruncatedCone) instruction).getHeight(), ((LinkGraphicsAddTruncatedCone) instruction).getBX(),
                      ((LinkGraphicsAddTruncatedCone) instruction).getBY(), ((LinkGraphicsAddTruncatedCone) instruction).getTX(),
-                     ((LinkGraphicsAddTruncatedCone) instruction).getTY(), app);
+                     ((LinkGraphicsAddTruncatedCone) instruction).getTY(), ((LinkGraphicsAddTruncatedCone) instruction).getAppearance());
             }
             else
                this.addGenTruncatedCone(((LinkGraphicsAddTruncatedCone) instruction).getHeight(), ((LinkGraphicsAddTruncatedCone) instruction).getBX(),
@@ -751,6 +690,11 @@ public class LinkGraphics
     * @param geometry Geometry of the new shape.
     * @param appearance Appearance of the new shape.
     */
+     
+   public Shape3D addShape(Geometry geometry, YoAppearanceDefinition appearance)
+   {
+      return addShape(geometry, new J3DAppearance(appearance));
+   }
    public Shape3D addShape(Geometry geometry, Appearance appearance)
    {
       Shape3D linkShape = new Shape3D();
@@ -838,10 +782,10 @@ public class LinkGraphics
     * a standard file format describing 3d objects.  For more information google
     * VRML and read about it.
     *
-    * @param fileURL URL describing the location of the VRML file.
-    * @param app Appearance to use in the creation of this shape.
+    * @param fileUrl URL describing the location of the VRML file.
+    * @param yoAppearanceDefinition Appearance to use in the creation of this shape.
     */
-   public void addVRMLFile(URL fileURL, Appearance app)
+   public void addVRMLFile(URL fileUrl, YoAppearanceDefinition yoAppearanceDefinition)
    {
       // Use with new xj3d stuff
       // int flag = org.web3d.j3d.loaders.VRML97Loader.LOAD_ALL; flag &= ~org.web3d.j3d.loaders.VRML97Loader.LOAD_BEHAVIOR_NODES; // Static Loads only
@@ -853,7 +797,7 @@ public class LinkGraphics
 
       try
       {
-         model = loader.load(fileURL);
+         model = loader.load(fileUrl);
       }
       catch (Exception e)
       {
@@ -866,14 +810,14 @@ public class LinkGraphics
       // this.addTranfromGroup(viewGroups);
       // System.out.println(vrmlGroup);
 
-      if (app != null)
-         recursiveSetEnabling(vrmlGroup, app, 0);
+      if (yoAppearanceDefinition != null)
+         recursiveSetEnabling(vrmlGroup, new J3DAppearance(yoAppearanceDefinition), 0);
 
       this.addBranchGroup(vrmlGroup);
-      if (app != null)
-         linkGraphicsDefinition.addInstruction(new LinkGraphicsAddVRMLFile(fileURL.getPath(), new AppearanceDefinition(getColor(app))));
+      if (yoAppearanceDefinition != null)
+         linkGraphicsDefinition.addInstruction(new LinkGraphicsAddVRMLFile(fileUrl.getPath(), yoAppearanceDefinition));
       else
-         linkGraphicsDefinition.addInstruction(new LinkGraphicsAddVRMLFile(fileURL.getPath()));
+         linkGraphicsDefinition.addInstruction(new LinkGraphicsAddVRMLFile(fileUrl.getPath()));
 
    }
 
@@ -886,7 +830,7 @@ public class LinkGraphics
     * @param fileName Path to the desired file.
     * @param app Appearance to use with the VRML file.
     */
-   public void addVRMLFile(String fileName, Appearance app)
+   public void addVRMLFile(String fileName, YoAppearanceDefinition app)
    {
       // Use with new xj3d stuff
       // int flag = org.web3d.j3d.loaders.VRML97Loader.LOAD_ALL; flag &= ~org.web3d.j3d.loaders.VRML97Loader.LOAD_BEHAVIOR_NODES; // Static Loads only
@@ -914,11 +858,11 @@ public class LinkGraphics
       // System.out.println(vrmlGroup);
 
       if (app != null)
-         recursiveSetEnabling(vrmlGroup, app, 0);
+         recursiveSetEnabling(vrmlGroup, new J3DAppearance(app), 0);
 
       this.addBranchGroup(vrmlGroup);
       if (app != null)
-         linkGraphicsDefinition.addInstruction(new LinkGraphicsAddVRMLFile(fileName, new AppearanceDefinition(getColor(app))));
+         linkGraphicsDefinition.addInstruction(new LinkGraphicsAddVRMLFile(fileName, app));
       else
          linkGraphicsDefinition.addInstruction(new LinkGraphicsAddVRMLFile(fileName));
    }
@@ -960,9 +904,9 @@ public class LinkGraphics
     * of more complicated and detailed system representations in simulations.
     *
     * @param fileURL URL pointing to the desired 3ds file.
-    * @param app Appearance to use with the 3ds model once imported.
+    * @param yoAppearanceDefinition Appearance to use with the 3ds model once imported.
     */
-   public void addModelFile(URL fileURL, Appearance app)
+   public void addModelFile(URL fileURL, YoAppearanceDefinition yoAppearanceDefinition)
    {
       if (fileURL == null)
       {
@@ -982,7 +926,7 @@ public class LinkGraphics
          return;
       }
 
-      addModelFile(fileName, app);
+      addModelFile(fileName, yoAppearanceDefinition);
 
       //    if (app != null)
       //       linkGraphicsDefinition.addInstruction(new LinkGraphicsAdd3DSFile(fileURL.getPath(), new AppearanceDefinition(getColor(app))));
@@ -1043,7 +987,7 @@ public class LinkGraphics
    * @param fileName
    * @param app
    */
-   public void addModelFile(String fileName, Appearance app)
+   public void addModelFile(String fileName, YoAppearanceDefinition app)
    {
       //Determine filename
       
@@ -1084,15 +1028,15 @@ public class LinkGraphics
 
       BranchGroup branchGroup = scene.getSceneGroup();
       transGroup.addChild(branchGroup);
-
+      
       if (app != null)
-         recursiveSetEnabling(branchGroup, app, 0);
+         recursiveSetEnabling(branchGroup, new J3DAppearance(app), 0);
 
       // this.addBranchGroup(branchGroup);
 
       this.addGroup(transGroup);
       if (app != null)
-         linkGraphicsDefinition.addInstruction(new LinkGraphicsAddModelFile(fileName, new AppearanceDefinition(getColor(app))));
+         linkGraphicsDefinition.addInstruction(new LinkGraphicsAddModelFile(fileName, app));
       else
          linkGraphicsDefinition.addInstruction(new LinkGraphicsAddModelFile(fileName));
    }
@@ -1102,7 +1046,7 @@ public class LinkGraphics
       addCoordinateSystem(length, YoAppearance.Black());
    }
 
-   public void addCoordinateSystem(double length, Appearance arrowAppearance)
+   public void addCoordinateSystem(double length, YoAppearanceDefinition arrowAppearance)
    {
       addCoordinateSystem(length, YoAppearance.Red(), YoAppearance.White(), YoAppearance.Blue(), arrowAppearance);
 
@@ -1116,7 +1060,7 @@ public class LinkGraphics
     *
     * @param length the length in meters of each axis arrow.
     */
-   public void addCoordinateSystem(double length, Appearance xAxisAppearance, Appearance yAxisAppearance, Appearance zAxisAppearance, Appearance arrowAppearance)
+   public void addCoordinateSystem(double length, YoAppearanceDefinition xAxisAppearance, YoAppearanceDefinition yAxisAppearance, YoAppearanceDefinition zAxisAppearance, YoAppearanceDefinition arrowAppearance)
    {
       Geometry bar = GeometryGenerator.Cylinder(length / 32.0, length, 15);
       Geometry arrow = GeometryGenerator.Cone(length / 10.0, length / 15.0, 15);
@@ -1126,9 +1070,9 @@ public class LinkGraphics
       TransformGroup yAxisGroup = rotateTransformGroup(-Math.PI / 2.0, Link.X);
       TransformGroup xAxisGroup = rotateTransformGroup(Math.PI / 2.0, Link.Y);
 
-      addShapeToGroup(bar, xAxisAppearance, xAxisGroup);
-      addShapeToGroup(bar, yAxisAppearance, yAxisGroup);
-      addShapeToGroup(bar, zAxisAppearance, base);
+      addShapeToGroup(bar, new J3DAppearance(xAxisAppearance), xAxisGroup);
+      addShapeToGroup(bar, new J3DAppearance(yAxisAppearance), yAxisGroup);
+      addShapeToGroup(bar, new J3DAppearance(zAxisAppearance), base);
 
       base.addChild(xAxisGroup);
       base.addChild(yAxisGroup);
@@ -1136,10 +1080,10 @@ public class LinkGraphics
       TransformGroup transZGroup1 = translateTransformGroup(0.0, 0.0, length);
       TransformGroup transZGroup2 = translateTransformGroup(0.0, 0.0, length);
       TransformGroup transZGroup3 = translateTransformGroup(0.0, 0.0, length);
-
-      addShapeToGroup(arrow, arrowAppearance, transZGroup1);
-      addShapeToGroup(arrow, arrowAppearance, transZGroup2);
-      addShapeToGroup(arrow, arrowAppearance, transZGroup3);
+      Appearance j3dArrowAppearance = new J3DAppearance(arrowAppearance);
+      addShapeToGroup(arrow, j3dArrowAppearance, transZGroup1);
+      addShapeToGroup(arrow, j3dArrowAppearance, transZGroup2);
+      addShapeToGroup(arrow, j3dArrowAppearance, transZGroup3);
 
       base.addChild(transZGroup1);
       xAxisGroup.addChild(transZGroup2);
@@ -1188,13 +1132,13 @@ public class LinkGraphics
     * @param lz length of the cube in the z direction.
     * @param cubeApp Appearance of the cube.  See {@link YoAppearance YoAppearance} for implementations.
     */
-   public void addCube(double lx, double ly, double lz, Appearance cubeApp)
+   public void addCube(double lx, double ly, double lz, YoAppearanceDefinition cubeApp)
    {
       Geometry cubeGeom = GeometryGenerator.Cube(lx, ly, lz);
       addShape(cubeGeom, cubeApp);
 
       if (cubeApp != null)
-         linkGraphicsDefinition.addInstruction(new LinkGraphicsAddCube(lx, ly, lz, new AppearanceDefinition(getColor(cubeApp))));
+         linkGraphicsDefinition.addInstruction(new LinkGraphicsAddCube(lx, ly, lz, cubeApp));
       else
          linkGraphicsDefinition.addInstruction(new LinkGraphicsAddCube(lx, ly, lz));
    }
@@ -1240,12 +1184,12 @@ public class LinkGraphics
     * @param lz length of the wedge in the z direction.
     * @param wedgeApp Appearance of the wedge.  See {@link YoAppearance YoAppearance} for implementations.
     */
-   public void addWedge(double lx, double ly, double lz, Appearance wedgeApp)
+   public void addWedge(double lx, double ly, double lz, YoAppearanceDefinition wedgeApp)
    {
       Geometry wedgeGeom = GeometryGenerator.Wedge(lx, ly, lz);
       addShape(wedgeGeom, wedgeApp);
       if (wedgeApp != null)
-         linkGraphicsDefinition.addInstruction(new LinkGraphicsAddWedge(lx, ly, lz, new AppearanceDefinition(getColor(wedgeApp))));
+         linkGraphicsDefinition.addInstruction(new LinkGraphicsAddWedge(lx, ly, lz, wedgeApp));
       else
          linkGraphicsDefinition.addInstruction(new LinkGraphicsAddWedge(lx, ly, lz));
    }
@@ -1284,12 +1228,12 @@ public class LinkGraphics
     * @param radius radius of the new sphere in meters.
     * @param sphereApp Appearance to be used with the new sphere.  See {@link YoAppearance YoAppearance} for implementations.
     */
-   public void addSphere(double radius, Appearance sphereApp)
+   public void addSphere(double radius, YoAppearanceDefinition sphereApp)
    {
       Geometry sphereGeom = GeometryGenerator.Sphere(radius, 15, 15);
       addShape(sphereGeom, sphereApp);
       if (sphereApp != null)
-         linkGraphicsDefinition.addInstruction(new LinkGraphicsAddSphere(radius, new AppearanceDefinition(getColor(sphereApp))));
+         linkGraphicsDefinition.addInstruction(new LinkGraphicsAddSphere(radius, sphereApp));
       else
          linkGraphicsDefinition.addInstruction(new LinkGraphicsAddSphere(radius));
    }
@@ -1332,12 +1276,12 @@ public class LinkGraphics
     * @param zRad z direction radius in meters
     * @param ellipsoidApp Appearance to be used with the new ellipsoid.  See {@link YoAppearance YoAppearance} for implementations.
     */
-   public void addEllipsoid(double xRad, double yRad, double zRad, Appearance ellipsoidApp)
+   public void addEllipsoid(double xRad, double yRad, double zRad, YoAppearanceDefinition ellipsoidApp)
    {
       Geometry ellipsoidGeom = GeometryGenerator.Ellipsoid(xRad, yRad, zRad, 15, 15);
       addShape(ellipsoidGeom, ellipsoidApp);
       if (ellipsoidApp != null)
-         linkGraphicsDefinition.addInstruction(new LinkGraphicsAddEllipsoid(xRad, yRad, zRad, new AppearanceDefinition(getColor(ellipsoidApp))));
+         linkGraphicsDefinition.addInstruction(new LinkGraphicsAddEllipsoid(xRad, yRad, zRad, ellipsoidApp));
       else
          linkGraphicsDefinition.addInstruction(new LinkGraphicsAddEllipsoid(xRad, yRad, zRad));
    }
@@ -1378,12 +1322,12 @@ public class LinkGraphics
     * @param radius cylinder radius in meters.
     * @param cylApp Appearance to be used with the new cylinder.  See {@link YoAppearance YoAppearance} for implementations.
     */
-   public void addCylinder(double height, double radius, Appearance cylApp)
+   public void addCylinder(double height, double radius, YoAppearanceDefinition cylApp)
    {
       Geometry cylGeom = GeometryGenerator.Cylinder(radius, height, 15);
       addShape(cylGeom, cylApp);
       if (cylApp != null)
-         linkGraphicsDefinition.addInstruction(new LinkGraphicsAddCylinder(height, radius, new AppearanceDefinition(getColor(cylApp))));
+         linkGraphicsDefinition.addInstruction(new LinkGraphicsAddCylinder(height, radius, cylApp));
       else
          linkGraphicsDefinition.addInstruction(new LinkGraphicsAddCylinder(height, radius));
    }
@@ -1424,12 +1368,12 @@ public class LinkGraphics
     * @param radius cone radius in meters.
     * @param coneApp Appearance to be used with the new cone.  See {@link YoAppearance YoAppearance} for implementations.
     */
-   public void addCone(double height, double radius, Appearance coneApp)
+   public void addCone(double height, double radius, YoAppearanceDefinition coneApp)
    {
       Geometry coneGeom = GeometryGenerator.Cone(height, radius, 15);
       addShape(coneGeom, coneApp);
       if (coneApp != null)
-         linkGraphicsDefinition.addInstruction(new LinkGraphicsAddCone(height, radius, new AppearanceDefinition(getColor(coneApp))));
+         linkGraphicsDefinition.addInstruction(new LinkGraphicsAddCone(height, radius, coneApp));
       else
          linkGraphicsDefinition.addInstruction(new LinkGraphicsAddCone(height, radius));
    }
@@ -1482,12 +1426,12 @@ public class LinkGraphics
     * @param ty y direction width of the top in meters
     * @param coneApp Appearance to be used with the new truncated cone.  See {@link YoAppearance YoAppearance} for implementations.
     */
-   public void addGenTruncatedCone(double height, double bx, double by, double tx, double ty, Appearance coneApp)
+   public void addGenTruncatedCone(double height, double bx, double by, double tx, double ty, YoAppearanceDefinition coneApp)
    {
       Geometry genTruncatedConeGeom = GeometryGenerator.GenTruncatedCone(height, bx, by, tx, ty, 15);
       addShape(genTruncatedConeGeom, coneApp);
       if (coneApp != null)
-         linkGraphicsDefinition.addInstruction(new LinkGraphicsAddTruncatedCone(height, bx, by, tx, ty, new AppearanceDefinition(getColor(coneApp))));
+         linkGraphicsDefinition.addInstruction(new LinkGraphicsAddTruncatedCone(height, bx, by, tx, ty, coneApp));
       else
          linkGraphicsDefinition.addInstruction(new LinkGraphicsAddTruncatedCone(height, bx, by, tx, ty));
    }
@@ -1534,12 +1478,12 @@ public class LinkGraphics
     * @param zRad radius of the ellipsoid in the z direction.
     * @param hEApp Appearance to be used with the new hemi ellipsoid.  See {@link YoAppearance YoAppearance} for implementations.
     */
-   public void addHemiEllipsoid(double xRad, double yRad, double zRad, Appearance hEApp)
+   public void addHemiEllipsoid(double xRad, double yRad, double zRad, YoAppearanceDefinition hEApp)
    {
       Geometry hEGeom = GeometryGenerator.HemiEllipsoid(xRad, yRad, zRad, 16, 16);
       addShape(hEGeom, hEApp);
       if (hEApp != null)
-         linkGraphicsDefinition.addInstruction(new LinkGraphicsAddHemiEllipsoid(xRad, yRad, zRad, new AppearanceDefinition(getColor(hEApp))));
+         linkGraphicsDefinition.addInstruction(new LinkGraphicsAddHemiEllipsoid(xRad, yRad, zRad, hEApp));
       else
          linkGraphicsDefinition.addInstruction(new LinkGraphicsAddHemiEllipsoid(xRad, yRad, zRad));
    }
@@ -1598,7 +1542,7 @@ public class LinkGraphics
     * @param minorRadius Distance from the center of the torus to the walls on either side.
     * @param arcTorusApp Appearance to be used with the new arctorus.  See {@link YoAppearance YoAppearance} for implementations.
     */
-   public void addArcTorus(double startAngle, double endAngle, double majorRadius, double minorRadius, Appearance arcTorusApp)
+   public void addArcTorus(double startAngle, double endAngle, double majorRadius, double minorRadius, YoAppearanceDefinition arcTorusApp)
    {
       // System.out.println("start: " + startAngle + ", end: " + endAngle + ", MR: " + majorRadius + ", mr: " + minorRadius);
       Geometry arcTorusGeom = GeometryGenerator.ArcTorus(startAngle, endAngle, majorRadius, minorRadius, 15);
@@ -1606,8 +1550,7 @@ public class LinkGraphics
       // Geometry arcTorusGeom = GeometryGenerator.Sphere(0.2f,15,15);
       addShape(arcTorusGeom, arcTorusApp);
       if (arcTorusApp != null)
-         linkGraphicsDefinition.addInstruction(new LinkGraphicsAddArcTorus(startAngle, endAngle, majorRadius, minorRadius, new AppearanceDefinition(
-               getColor(arcTorusApp))));
+         linkGraphicsDefinition.addInstruction(new LinkGraphicsAddArcTorus(startAngle, endAngle, majorRadius, minorRadius, arcTorusApp));
       else
          linkGraphicsDefinition.addInstruction(new LinkGraphicsAddArcTorus(startAngle, endAngle, majorRadius, minorRadius));
    }
@@ -1658,12 +1601,12 @@ public class LinkGraphics
     * @param lh Height of the pyramids in meters.
     * @param cubeApp Appearance to be used with the new pyramid cube.  See {@link YoAppearance YoAppearance} for implementations.
     */
-   public void addPyramidCube(double lx, double ly, double lz, double lh, Appearance cubeApp)
+   public void addPyramidCube(double lx, double ly, double lz, double lh, YoAppearanceDefinition cubeApp)
    {
       Geometry cubeGeom = GeometryGenerator.PyramidCube(lx, ly, lz, lh);
       addShape(cubeGeom, cubeApp);
       if (cubeApp != null)
-         linkGraphicsDefinition.addInstruction(new LinkGraphicsAddPyramidCube(lx, ly, lz, lh, new AppearanceDefinition(getColor(cubeApp))));
+         linkGraphicsDefinition.addInstruction(new LinkGraphicsAddPyramidCube(lx, ly, lz, lh, cubeApp));
       else
          linkGraphicsDefinition.addInstruction(new LinkGraphicsAddPyramidCube(lx, ly, lz, lh));
    }
@@ -1692,12 +1635,12 @@ public class LinkGraphics
     * @param polygonPoints Point3f array containing the desired points.
     * @param appearance Appearance to be used with the new polygon.  See {@link YoAppearance YoAppearance} for implementations.
     */
-   public Shape3D addPolygon(Point3f[] polygonPoints, Appearance appearance)
+   public Shape3D addPolygon(Point3f[] polygonPoints, YoAppearanceDefinition appearance)
    {
       Geometry geometry = GeometryGenerator.Polygon(polygonPoints);
       Shape3D shape = addShape(geometry, appearance);
       if (appearance != null)
-         linkGraphicsDefinition.addInstruction(new LinkGraphicsAddPolygonFloat(polygonPoints, new AppearanceDefinition(getColor(appearance))));
+         linkGraphicsDefinition.addInstruction(new LinkGraphicsAddPolygonFloat(polygonPoints, appearance));
       else
          linkGraphicsDefinition.addInstruction(new LinkGraphicsAddPolygonFloat(polygonPoints));
 
@@ -1713,18 +1656,18 @@ public class LinkGraphics
     * @param polygonPoints ArrayList containing the points.
     * @param appearance Appearance to be used with the new polygon.  See {@link YoAppearance YoAppearance} for implementations.
     */
-   public void addPolygon(ArrayList<Point3d> polygonPoints, Appearance appearance)
+   public void addPolygon(ArrayList<Point3d> polygonPoints, YoAppearanceDefinition yoAppearance)
    {
       PolygonAttributes polyAttributes = new PolygonAttributes();
       polyAttributes.setCullFace(PolygonAttributes.CULL_NONE);
-
+      Appearance appearance = new J3DAppearance(yoAppearance);
       // polyAttributes.setCullFace(PolygonAttributes.CULL_BACK);
       appearance.setPolygonAttributes(polyAttributes);
 
       Geometry geometry = GeometryGenerator.Polygon(polygonPoints);
       addShape(geometry, appearance);
-      if (appearance != null)
-         linkGraphicsDefinition.addInstruction(new LinkGraphicsAddPolygonDouble(polygonPoints, new AppearanceDefinition(getColor(appearance))));
+      if (yoAppearance != null)
+         linkGraphicsDefinition.addInstruction(new LinkGraphicsAddPolygonDouble(polygonPoints, yoAppearance));
       else
          linkGraphicsDefinition.addInstruction(new LinkGraphicsAddPolygonDouble(polygonPoints));
    }
@@ -1753,25 +1696,26 @@ public class LinkGraphics
     * @param polygonPoints Array containing the points
     * @param appearance Appearance to be used with the new polygon.  See {@link YoAppearance YoAppearance} for implementations.
     */
-   public Shape3D addPolygon(Point3d[] polygonPoints, Appearance appearance)
+   public Shape3D addPolygon(Point3d[] polygonPoints, YoAppearanceDefinition yoAppearance)
    {
       PolygonAttributes polyAttributes = new PolygonAttributes();
       polyAttributes.setCullFace(PolygonAttributes.CULL_NONE);
 
-      // polyAttributes.setCullFace(PolygonAttributes.CULL_BACK);
+//       polyAttributes.setCullFace(PolygonAttributes.CULL_BACK);
+      Appearance appearance = new J3DAppearance(yoAppearance);
       appearance.setPolygonAttributes(polyAttributes);
 
       Geometry geometry = GeometryGenerator.Polygon(polygonPoints);
       Shape3D shape = addShape(geometry, appearance);
-      if (appearance != null)
-         linkGraphicsDefinition.addInstruction(new LinkGraphicsAddPolygonDouble(polygonPoints, new AppearanceDefinition(getColor(appearance))));
+      if (yoAppearance != null)
+         linkGraphicsDefinition.addInstruction(new LinkGraphicsAddPolygonDouble(polygonPoints, yoAppearance));
       else
          linkGraphicsDefinition.addInstruction(new LinkGraphicsAddPolygonDouble(polygonPoints));
 
       return shape;
    }
 
-   public void createInertiaEllipsoid(Link link, Appearance appearance)
+   public void createInertiaEllipsoid(Link link, YoAppearanceDefinition appearance)
    {
       //    LinkGraphics linkGraphics = link.getLinkGraphics();
       this.identity();

@@ -1,18 +1,18 @@
 package com.yobotics.simulationconstructionset.robotdefinition.linkgraphicinstructions;
 
-import com.yobotics.simulationconstructionset.robotdefinition.AppearanceDefinition;
+import com.yobotics.simulationconstructionset.graphics.YoAppearanceDefinition;
 
 public class LinkGraphicsAddModelFile implements LinkGraphicsInstruction
 {
    private String fileName;
-   private AppearanceDefinition appearance = null;
+   private YoAppearanceDefinition appearance = null;
 
    public LinkGraphicsAddModelFile(String fileName)
    {
       this(fileName, null);
    }
 
-   public LinkGraphicsAddModelFile(String fileName, AppearanceDefinition appearence)
+   public LinkGraphicsAddModelFile(String fileName, YoAppearanceDefinition appearence)
    {
       this.fileName = fileName;
       this.appearance = appearence;
@@ -23,7 +23,7 @@ public class LinkGraphicsAddModelFile implements LinkGraphicsInstruction
       return fileName;
    }
 
-   public AppearanceDefinition getAppearance()
+   public YoAppearanceDefinition getAppearance()
    {
       return appearance;
    }

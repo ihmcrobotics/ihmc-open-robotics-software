@@ -4,14 +4,13 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.media.j3d.Appearance;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.Updatable;
 import us.ihmc.utilities.InertiaTools;
-import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
+import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
@@ -20,6 +19,7 @@ import us.ihmc.utilities.screwTheory.RigidBodyInertia;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoAppearance;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.graphics.YoAppearanceDefinition;
 import com.yobotics.simulationconstructionset.robotController.RobotController;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicEllipsoid;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject;
@@ -144,7 +144,7 @@ public class CommonInertiaElipsoidsVisualizer implements Updatable, RobotControl
             centerOfMassData.add(comData);
             
             Color color = getColor(mass); 
-            Appearance appearance = YoAppearance.Color(color);
+            YoAppearanceDefinition appearance = YoAppearance.Color(color);
             
             DynamicGraphicEllipsoid comViz = new DynamicGraphicEllipsoid(rigidBodyName + "CoMPosition", comPosition, comOrientation, appearance, radii);  
             dynamicGraphicObjects.add(comViz);
