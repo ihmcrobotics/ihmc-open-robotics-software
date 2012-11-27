@@ -4,6 +4,8 @@ import java.awt.Color;
 import java.awt.Component;
 import java.net.URL;
 
+import javax.vecmath.Color3f;
+
 import com.yobotics.simulationconstructionset.graphics.YoAppearanceDefinition;
 import com.yobotics.simulationconstructionset.graphics.YoAppearanceMaterial;
 import com.yobotics.simulationconstructionset.graphics.YoAppearanceRGBColor;
@@ -110,7 +112,12 @@ public class YoAppearance
 
    public static YoAppearanceDefinition Color(Color color)
    {
-      return RGBColor(color.getRed(), color.getGreen(), color.getBlue());
+      return Color(new Color3f(color));
+   }
+   
+   public static YoAppearanceDefinition Color(Color3f color)
+   {
+      return RGBColor(color.getX(), color.getY(), color.getZ());
    }
 
    public static YoAppearanceDefinition Black()
