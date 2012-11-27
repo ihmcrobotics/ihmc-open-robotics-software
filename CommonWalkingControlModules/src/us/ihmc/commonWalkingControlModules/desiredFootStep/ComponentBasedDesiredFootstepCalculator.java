@@ -1,22 +1,25 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
+import javax.media.j3d.Transform3D;
+import javax.vecmath.Matrix3d;
+import javax.vecmath.Vector3d;
+
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedFootInterface;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredHeadingControlModule;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredVelocityControlModule;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
-import us.ihmc.utilities.math.geometry.FrameOrientation;
+import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
-import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.math.geometry.RotationFunctions;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
-public class ComponentBasedDesiredFootstepCalculator implements DesiredFootstepCalculator
+public class ComponentBasedDesiredFootstepCalculator extends AbstractAdjustableDesiredFootstepCalculator
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry("ComponentBasedDesiredFootstepCalculator");
-
    private final DoubleYoVariable inPlaceWidth = new DoubleYoVariable("inPlaceWidth", registry);
    private final DoubleYoVariable walkingForwardWidth = new DoubleYoVariable("walkingForwardWidth", registry);
    private final DoubleYoVariable maxStepLength = new DoubleYoVariable("maxStepLength", registry);
@@ -24,40 +27,49 @@ public class ComponentBasedDesiredFootstepCalculator implements DesiredFootstepC
    private final DoubleYoVariable minStepWidth = new DoubleYoVariable("minStepWidth", registry);
    private final DoubleYoVariable maxStepWidth = new DoubleYoVariable("maxStepWidth", registry);
 
-
    private final DoubleYoVariable sidestepMaxWidth = new DoubleYoVariable("sidestepMaxWidth", registry);
    private final DoubleYoVariable sidestepMinWidth = new DoubleYoVariable("sidestepMinWidth", registry);
+   private final DoubleYoVariable stepPitch = new DoubleYoVariable("stepPitch", registry);
 
    private final DoubleYoVariable velocityMagnitudeInHeading = new DoubleYoVariable("velocityMagnitudeInHeading", registry);
    private final DoubleYoVariable velocityMagnitudeToLeftOfHeading = new DoubleYoVariable("velocityMagnitudeToLeftOfHeading", registry);
 
    private final SideDependentList<? extends ReferenceFrame> ankleZUpFrames;
+   private final SideDependentList<BipedFootInterface> bipedFeet;
 
    private final DesiredHeadingControlModule desiredHeadingControlModule;
    private final DesiredVelocityControlModule desiredVelocityControlModule;
 
-   private DesiredFootstepAdjustor desiredFootstepAdjustor;
-
-   public ComponentBasedDesiredFootstepCalculator(SideDependentList<? extends ReferenceFrame> ankleZUpFrames,
+   public ComponentBasedDesiredFootstepCalculator(SideDependentList<? extends ReferenceFrame> ankleZUpFrames, SideDependentList<BipedFootInterface> bipedFeet,
            DesiredHeadingControlModule desiredHeadingControlModule, DesiredVelocityControlModule desiredVelocityControlModule,
            YoVariableRegistry parentRegistry)
    {
+      super(getFramesToStoreFootstepsIn(), parentRegistry);
+
       this.ankleZUpFrames = ankleZUpFrames;
+      this.bipedFeet = bipedFeet;
 
       this.desiredHeadingControlModule = desiredHeadingControlModule;
       this.desiredVelocityControlModule = desiredVelocityControlModule;
-
-      parentRegistry.addChild(registry);
    }
 
-
-   public Footstep updateAndGetDesiredFootstep(RobotSide supportLegSide)
+   public void initializeDesiredFootstep(RobotSide supportLegSide)
    {
       RobotSide swingLegSide = supportLegSide.getOppositeSide();
 
       ReferenceFrame supportAnkleZUpFrame = ankleZUpFrames.get(supportLegSide);
       ReferenceFrame desiredHeadingFrame = desiredHeadingControlModule.getDesiredHeadingFrame();
 
+      FrameVector2d desiredOffsetFromAnkle = computeDesiredOffsetFromSupportAnkle(swingLegSide, supportAnkleZUpFrame, desiredHeadingFrame);
+      Matrix3d footToWorldRotation = computeDesiredFootRotation(desiredHeadingFrame);
+      FramePoint footstepPosition = computeDesiredFootPosition(swingLegSide, supportAnkleZUpFrame, desiredOffsetFromAnkle, footToWorldRotation);
+      footstepPosition.changeFrame(ReferenceFrame.getWorldFrame());
+      setYoVariables(swingLegSide, footToWorldRotation, footstepPosition.getVectorCopy());
+   }
+
+   // TODO: clean up
+   private FrameVector2d computeDesiredOffsetFromSupportAnkle(RobotSide swingLegSide, ReferenceFrame supportAnkleZUpFrame, ReferenceFrame desiredHeadingFrame)
+   {
       FrameVector2d desiredHeading = desiredHeadingControlModule.getDesiredHeading();
       FrameVector2d desiredVelocity = desiredVelocityControlModule.getDesiredVelocity();
       FrameVector2d toLeftOfDesiredHeading = new FrameVector2d(desiredHeading.getReferenceFrame(), -desiredHeading.getY(), desiredHeading.getX());
@@ -71,50 +83,53 @@ public class ComponentBasedDesiredFootstepCalculator implements DesiredFootstepC
       FrameVector2d desiredVelocityInSupportAnkleZUpFrame = desiredVelocity.changeFrameCopy(supportAnkleZUpFrame);
       FrameVector2d desiredVelocityInHeadingFrame = desiredVelocity.changeFrameCopy(desiredHeadingFrame);
 
-      FrameVector2d desiredPositionInHeading = new FrameVector2d(desiredHeadingFrame, 0.0, swingLegSide.negateIfRightSide(inPlaceWidth.getDoubleValue()));    // desiredVelocityInHeadingFrame);
-      desiredPositionInHeading.add(desiredVelocityInHeadingFrame);
+      FrameVector2d desiredOffsetFromAnkle = new FrameVector2d(desiredHeadingFrame, 0.0, swingLegSide.negateIfRightSide(inPlaceWidth.getDoubleValue()));    // desiredVelocityInHeadingFrame);
+      desiredOffsetFromAnkle.add(desiredVelocityInHeadingFrame);
 
-      if (desiredPositionInHeading.getX() > maxStepLength.getDoubleValue())
-         desiredPositionInHeading.setX(maxStepLength.getDoubleValue());
+      if (desiredOffsetFromAnkle.getX() > maxStepLength.getDoubleValue())
+         desiredOffsetFromAnkle.setX(maxStepLength.getDoubleValue());
 
       if (swingLegSide == RobotSide.LEFT)
       {
-         if (desiredPositionInHeading.getY() > maxStepWidth.getDoubleValue())
-            desiredPositionInHeading.setY(maxStepWidth.getDoubleValue());
-         if (desiredPositionInHeading.getY() < minStepWidth.getDoubleValue())
-            desiredPositionInHeading.setY(minStepWidth.getDoubleValue());
+         desiredOffsetFromAnkle.setY(MathTools.clipToMinMax(desiredOffsetFromAnkle.getY(), minStepWidth.getDoubleValue(), maxStepWidth.getDoubleValue()));
       }
       else
       {
-         if (desiredPositionInHeading.getY() < -maxStepWidth.getDoubleValue())
-            desiredPositionInHeading.setY(-maxStepWidth.getDoubleValue());
-         if (desiredPositionInHeading.getY() > -minStepWidth.getDoubleValue())
-            desiredPositionInHeading.setY(-minStepWidth.getDoubleValue());
+         desiredOffsetFromAnkle.setY(MathTools.clipToMinMax(desiredOffsetFromAnkle.getY(), -maxStepWidth.getDoubleValue(), -minStepWidth.getDoubleValue()));
       }
 
-      FrameVector2d desiredPositionInSupport = desiredPositionInHeading.changeFrameCopy(supportAnkleZUpFrame);
-
-      FramePoint footstepPosition = new FramePoint(supportAnkleZUpFrame, desiredPositionInSupport.getX(), desiredPositionInSupport.getY(), 0.0);
-
-
-//    FramePoint footstepPosition = new FramePoint(supportAnkleZUpFrame, stepForward, stepSideways, 0.0);
-//    Orientation footstepOrientation = new Orientation(supportAnkleZUpFrame);
-      FrameOrientation footstepOrientation = new FrameOrientation(desiredHeadingFrame);
-      footstepOrientation.changeFrame(supportAnkleZUpFrame);
-
-      FramePose footstepPose = new FramePose(footstepPosition, footstepOrientation);
-      Footstep footstep = new Footstep(swingLegSide, footstepPose);
-
-      if (desiredFootstepAdjustor != null)
-      {
-         return desiredFootstepAdjustor.adjustDesiredFootstep(footstep);
-      }
-
-      return footstep;
+      return desiredOffsetFromAnkle;
    }
 
-   public void initializeDesiredFootstep(RobotSide supportLegSide)
+   private Matrix3d computeDesiredFootRotation(ReferenceFrame desiredHeadingFrame)
    {
+      Transform3D footToSupportTransform = desiredHeadingFrame.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());
+      Matrix3d footToSupportRotation = new Matrix3d();
+      footToSupportTransform.get(footToSupportRotation);
+      double yaw = RotationFunctions.getYaw(footToSupportRotation);
+      double pitch = stepPitch.getDoubleValue();
+      double roll = 0.0;
+      RotationFunctions.setYawPitchRoll(footToSupportRotation, yaw, pitch, roll);
+
+      return footToSupportRotation;
+   }
+
+   private FramePoint computeDesiredFootPosition(RobotSide swingLegSide, ReferenceFrame supportAnkleZUpFrame, FrameVector2d desiredOffsetFromAnkle,
+           Matrix3d footToWorldRotation)
+   {
+      desiredOffsetFromAnkle.changeFrame(supportAnkleZUpFrame);
+      FramePoint footstepPosition = new FramePoint(supportAnkleZUpFrame, desiredOffsetFromAnkle.getX(), desiredOffsetFromAnkle.getY(), 0.0);
+      footstepPosition.changeFrame(ReferenceFrame.getWorldFrame());
+      double minZ = DesiredFootstepCalculatorTools.computeMinZWithRespectToAnkleInWorldFrame(footToWorldRotation, bipedFeet.get(swingLegSide));
+      footstepPosition.setZ(-minZ);
+
+      return footstepPosition;
+   }
+
+   private void setYoVariables(RobotSide swingLegSide, Matrix3d rotation, Vector3d translation)
+   {
+      footstepOrientations.get(swingLegSide).set(rotation);
+      footstepPositions.get(swingLegSide).set(translation);
    }
 
    public void setupParametersForM2V2()
@@ -180,10 +195,13 @@ public class ComponentBasedDesiredFootstepCalculator implements DesiredFootstepC
       this.maxStepWidth.set(maxStepWidth);
    }
 
-   public void addDesiredFootstepAdjustor(DesiredFootstepAdjustor desiredFootstepAdjustor)
+   public void setStepPitch(double stepPitch)
    {
-      this.desiredFootstepAdjustor = desiredFootstepAdjustor;
-
+      this.stepPitch.set(stepPitch);
    }
 
+   private static SideDependentList<ReferenceFrame> getFramesToStoreFootstepsIn()
+   {
+      return new SideDependentList<ReferenceFrame>(ReferenceFrame.getWorldFrame(), ReferenceFrame.getWorldFrame());
+   }
 }

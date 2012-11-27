@@ -495,4 +495,9 @@ public class ResizableBipedFoot implements BipedFootInterface
    {
       // empty
    }
+
+   public ReferenceFrame getFootFrame()
+   {
+      return footFrame;
+   }
 }

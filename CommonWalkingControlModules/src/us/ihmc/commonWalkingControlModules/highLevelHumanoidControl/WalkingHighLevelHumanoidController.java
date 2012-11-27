@@ -802,9 +802,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       FramePoint com = new FramePoint(referenceFrames.getCenterOfMassFrame());
       com.changeFrame(stairDirectionFrame);
 
-      // TODO: computing Jacobian a bunch of times...
       FrameVector comd = new FrameVector(stairDirectionFrame);
-      centerOfMassJacobian.compute();
       centerOfMassJacobian.packCenterOfMassVelocity(comd);
       comd.changeFrame(stairDirectionFrame);
 

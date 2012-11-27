@@ -18,8 +18,6 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 //TODO: currently only works when the stairs are oriented in the x direction in world frame
 public class VaryingStairDesiredFootstepCalculator extends SimpleWorldDesiredFootstepCalculator
 {
-   private YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-
    private final DoubleYoVariable stepXAfterNosing = new DoubleYoVariable("stepXAfterNosing", registry);
    private final DoubleYoVariable stepLengthOnFlatGround = new DoubleYoVariable("stepLengthOnFlatGround", registry);
    private final DoubleYoVariable stepLengthMinimum = new DoubleYoVariable("stepLengthMinimum", registry);
@@ -82,10 +80,9 @@ public class VaryingStairDesiredFootstepCalculator extends SimpleWorldDesiredFoo
       Matrix3d footToWorldRotation = new Matrix3d();
       footstepOrientations.get(swingLegSide).getMatrix3d(footToWorldRotation);
       double swingMinZWithRespectToAnkle = DesiredFootstepCalculatorTools.computeMinZWithRespectToAnkleInWorldFrame(footToWorldRotation,
-                                              referenceFrames.getFootFrame(swingLegSide), bipedFeet.get(swingLegSide));
+                                              bipedFeet.get(swingLegSide));
       double swingMaxXWithRespectToAnkle = DesiredFootstepCalculatorTools.computeMaxXWithRespectToAnkleInFrame(footToWorldRotation,
-                                              referenceFrames.getFootFrame(swingLegSide), bipedFeet.get(swingLegSide),
-                                              desiredHeadingControlModule.getDesiredHeadingFrame());
+                                              bipedFeet.get(swingLegSide), desiredHeadingControlModule.getDesiredHeadingFrame());
 
 
       double swingAnkleX = oneStepLookAheadX - swingMaxXWithRespectToAnkle;
