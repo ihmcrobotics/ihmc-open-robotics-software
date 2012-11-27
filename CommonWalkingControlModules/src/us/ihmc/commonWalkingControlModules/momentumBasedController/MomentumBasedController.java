@@ -351,11 +351,8 @@ public class MomentumBasedController implements RobotController
       highLevelHumanoidController.packDesiredICP(desiredCapturePoint);
       FrameVector2d desiredCapturePointVelocity = new FrameVector2d(worldFrame);
       highLevelHumanoidController.packDesiredICPVelocity(desiredCapturePointVelocity);
-      
-      double[] desiredPelvisYawPitchRoll = highLevelHumanoidController.getDesiredPelvisOrientation().getYawPitchRoll();
-      double desiredPelvisRoll = desiredPelvisYawPitchRoll[2];
-      double desiredPelvisPitch = highLevelHumanoidController.getDesiredPelvisOrientation().getYawPitchRoll()[1];
-      desiredCoPAndCMPControlModule.compute(capturePoint, supportLeg, desiredCapturePoint, desiredCapturePointVelocity, desiredPelvisRoll, desiredPelvisPitch,
+
+      desiredCoPAndCMPControlModule.compute(capturePoint, supportLeg, desiredCapturePoint, desiredCapturePointVelocity, highLevelHumanoidController.getDesiredPelvisOrientation(),
               omega0.getDoubleValue(), momentum);
       FramePoint2d desiredCoP = new FramePoint2d(worldFrame);
       desiredCoPAndCMPControlModule.packCoP(desiredCoP);
