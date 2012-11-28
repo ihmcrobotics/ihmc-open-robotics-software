@@ -52,7 +52,6 @@ import com.yobotics.simulationconstructionset.robotdefinition.linkgraphicinstruc
 import com.yobotics.simulationconstructionset.robotdefinition.linkgraphicinstructions.LinkGraphicsAddVRMLFile;
 import com.yobotics.simulationconstructionset.robotdefinition.linkgraphicinstructions.LinkGraphicsAddWedge;
 import com.yobotics.simulationconstructionset.robotdefinition.linkgraphicinstructions.LinkGraphicsIdentity;
-import com.yobotics.simulationconstructionset.robotdefinition.linkgraphicinstructions.LinkGraphicsInstruction;
 import com.yobotics.simulationconstructionset.robotdefinition.linkgraphicinstructions.LinkGraphicsRotate;
 import com.yobotics.simulationconstructionset.robotdefinition.linkgraphicinstructions.LinkGraphicsRotateDefinedAxis;
 import com.yobotics.simulationconstructionset.robotdefinition.linkgraphicinstructions.LinkGraphicsRotateMatrix;
@@ -71,7 +70,7 @@ import com.yobotics.simulationconstructionset.robotdefinition.linkgraphicinstruc
  * @author not attributable
  * @version 1.0
  */
-public class LinkGraphics
+public class LinkGraphics extends LinkGraphicsInstructionExecutor
 {
    // private BranchGroup linkBG;
    private SharedGroup sharedGroup;
@@ -85,174 +84,169 @@ public class LinkGraphics
       setUpGraphicsFromDefinition(linkGraphicsDefinition);
    }
 
-   private void setUpGraphicsFromDefinition(LinkGraphicsDefinition graphicsDefinition)
+   protected void doLinkGraphicsTranslateInstruction(LinkGraphicsTranslate linkGraphicsTranslate)
    {
-      // LinkGraphics this = new LinkGraphics();
+      this.translate(linkGraphicsTranslate.getTranslation());
+   }
 
-      for (LinkGraphicsInstruction instruction : graphicsDefinition.getInstructions())
+   protected void doLinkGraphicsScaleInstruction(LinkGraphicsScale linkGraphicsScale)
+   {
+      this.scale(linkGraphicsScale.getScaleFactor());
+   }
+
+
+   protected void doLinkGraphicsRotateMatrixInstruction(LinkGraphicsRotateMatrix linkGraphicsRotateMatrix)
+   {
+      this.rotate(linkGraphicsRotateMatrix.getRotationMatrix());
+   }
+
+   protected void doLinkGraphicsRotateDefinedAxisInstruction(LinkGraphicsRotateDefinedAxis linkGraphicsRotateDefinedAxis)
+   {
+      this.rotate(linkGraphicsRotateDefinedAxis.getAngle(), linkGraphicsRotateDefinedAxis.getAxis());
+   }
+
+   protected void doLinkGraphicsRotateInstruction(LinkGraphicsRotate linkGraphicsRotate)
+   {
+      this.rotate(linkGraphicsRotate.getAngle(), linkGraphicsRotate.getAxis());
+   }
+
+   protected void doLinkGraphicsIdentityInstruction()
+   {
+      this.identity();
+   }
+
+   protected void doLinkGraphicsAddTruncatedConeInstruction(LinkGraphicsAddTruncatedCone linkGraphicsAddTruncatedCone)
+   {
+      if (linkGraphicsAddTruncatedCone.getAppearance() != null)
       {
-         if (instruction instanceof LinkGraphicsAddModelFile)
-         {
-            // Appearance app = new Appearance();
+         this.addGenTruncatedCone(linkGraphicsAddTruncatedCone.getHeight(), linkGraphicsAddTruncatedCone.getBX(), linkGraphicsAddTruncatedCone.getBY(),
+                                  linkGraphicsAddTruncatedCone.getTX(), linkGraphicsAddTruncatedCone.getTY(), linkGraphicsAddTruncatedCone.getAppearance());
+      }
+      else
+         this.addGenTruncatedCone(linkGraphicsAddTruncatedCone.getHeight(), linkGraphicsAddTruncatedCone.getBX(), linkGraphicsAddTruncatedCone.getBY(),
+                                  linkGraphicsAddTruncatedCone.getTX(), linkGraphicsAddTruncatedCone.getTY());
+   }
 
-            if (((LinkGraphicsAddModelFile) instruction).getAppearance() != null)
-            {
-               this.addModelFile(((LinkGraphicsAddModelFile) instruction).getFileName(), ((LinkGraphicsAddModelFile) instruction).getAppearance());
-            }
-            else
-               this.addModelFile(((LinkGraphicsAddModelFile) instruction).getFileName());
+   protected void doLinkGraphicsAddWedgeInstruction(LinkGraphicsAddWedge linkGraphicsAddWedge)
+   {
+      if (linkGraphicsAddWedge.getAppearance() != null)
+      {
+         this.addWedge(linkGraphicsAddWedge.getX(), linkGraphicsAddWedge.getY(), linkGraphicsAddWedge.getZ(), linkGraphicsAddWedge.getAppearance());
+      }
+      else
+         this.addWedge(linkGraphicsAddWedge.getX(), linkGraphicsAddWedge.getY(), linkGraphicsAddWedge.getZ());
+   }
 
-         }
-         else if (instruction instanceof LinkGraphicsAddArcTorus)
-         {
-            if (((LinkGraphicsAddArcTorus) instruction).getAppearance() != null)
-            {
-               
-               this.addArcTorus(((LinkGraphicsAddArcTorus) instruction).getStartAngle(), ((LinkGraphicsAddArcTorus) instruction).getEndAngle(),
-                     ((LinkGraphicsAddArcTorus) instruction).getMajorRadius(), ((LinkGraphicsAddArcTorus) instruction).getMinorRadius(), ((LinkGraphicsAddArcTorus) instruction).getAppearance());
-            }
-            else
-               this.addArcTorus(((LinkGraphicsAddArcTorus) instruction).getStartAngle(), ((LinkGraphicsAddArcTorus) instruction).getEndAngle(),
-                     ((LinkGraphicsAddArcTorus) instruction).getMajorRadius(), ((LinkGraphicsAddArcTorus) instruction).getMinorRadius());
+   protected void doLinkGraphicsAddVRMLFileInstruction(LinkGraphicsAddVRMLFile linkGraphicsAddVRMLFile)
+   {
+      if (linkGraphicsAddVRMLFile.getAppearance() != null)
+      {
+         this.addVRMLFile(linkGraphicsAddVRMLFile.getFileName(), linkGraphicsAddVRMLFile.getAppearance());
+      }
+      else
+         this.addVRMLFile(linkGraphicsAddVRMLFile.getFileName());
+   }
 
-         }
-         else if (instruction instanceof LinkGraphicsAddCone)
-         {
-            if (((LinkGraphicsAddCone) instruction).getAppearance() != null)
-            {
-               this.addCone(((LinkGraphicsAddCone) instruction).getHeight(), ((LinkGraphicsAddCone) instruction).getRadius(), ((LinkGraphicsAddCone) instruction).getAppearance());
-            }
-            else
-               this.addCone(((LinkGraphicsAddCone) instruction).getHeight(), ((LinkGraphicsAddCone) instruction).getRadius());
-         }
-         else if (instruction instanceof LinkGraphicsAddCylinder)
-         {
-            if (((LinkGraphicsAddCylinder) instruction).getAppearance() != null)
-            {
-               this.addCylinder(((LinkGraphicsAddCylinder) instruction).getHeight(), ((LinkGraphicsAddCylinder) instruction).getRadius(), ((LinkGraphicsAddCylinder) instruction).getAppearance());
+   protected void doLinkGraphicsAddSphereInstruction(LinkGraphicsAddSphere linkGraphicsAddSphere)
+   {
+      if (linkGraphicsAddSphere.getAppearance() != null)
+      {
+         this.addSphere(linkGraphicsAddSphere.getRadius(), linkGraphicsAddSphere.getAppearance());
+      }
+      else
+         this.addSphere(linkGraphicsAddSphere.getRadius());
+   }
 
-            }
-            else
-               this.addCylinder(((LinkGraphicsAddCylinder) instruction).getHeight(), ((LinkGraphicsAddCylinder) instruction).getRadius());
-         }
-         else if (instruction instanceof LinkGraphicsAddCoordinateSystem)
-         {
-            this.addCoordinateSystem(((LinkGraphicsAddCoordinateSystem) instruction).getLength());
-         }
-         else if (instruction instanceof LinkGraphicsAddCube)
-         {
-            if (((LinkGraphicsAddCube) instruction).getAppearance() != null)
-            {
-               this.addCube(((LinkGraphicsAddCube) instruction).getX(), ((LinkGraphicsAddCube) instruction).getY(), ((LinkGraphicsAddCube) instruction).getZ(),
-                     ((LinkGraphicsAddCube) instruction).getAppearance());
-            }
-            else
-               this.addCube(((LinkGraphicsAddCube) instruction).getX(), ((LinkGraphicsAddCube) instruction).getY(), ((LinkGraphicsAddCube) instruction).getZ());
-         }
-         else if (instruction instanceof LinkGraphicsAddEllipsoid)
-         {
-            if (((LinkGraphicsAddEllipsoid) instruction).getAppearance() != null)
-            {
-               this.addEllipsoid(((LinkGraphicsAddEllipsoid) instruction).getXRad(), ((LinkGraphicsAddEllipsoid) instruction).getYRad(),
-                     ((LinkGraphicsAddEllipsoid) instruction).getZRad(), ((LinkGraphicsAddEllipsoid) instruction).getAppearance());
-            }
-            else
-               this.addEllipsoid(((LinkGraphicsAddEllipsoid) instruction).getXRad(), ((LinkGraphicsAddEllipsoid) instruction).getYRad(),
-                     ((LinkGraphicsAddEllipsoid) instruction).getZRad());
-         }
-         else if (instruction instanceof LinkGraphicsAddHemiEllipsoid)
-         {
-            if (((LinkGraphicsAddHemiEllipsoid) instruction).getAppearance() != null)
-            {
-               this.addHemiEllipsoid(((LinkGraphicsAddHemiEllipsoid) instruction).getXRad(), ((LinkGraphicsAddHemiEllipsoid) instruction).getYRad(),
-                     ((LinkGraphicsAddHemiEllipsoid) instruction).getZRad(), ((LinkGraphicsAddHemiEllipsoid) instruction).getAppearance());
-            }
-            else
-               this.addHemiEllipsoid(((LinkGraphicsAddHemiEllipsoid) instruction).getXRad(), ((LinkGraphicsAddHemiEllipsoid) instruction).getYRad(),
-                     ((LinkGraphicsAddHemiEllipsoid) instruction).getZRad());
+   protected void doLinkGraphicsAddPyramidCubeInstruction(LinkGraphicsAddPyramidCube linkGraphicsAddPyramidCube)
+   {
+      if (linkGraphicsAddPyramidCube.getAppearance() != null)
+      {
+         this.addPyramidCube(linkGraphicsAddPyramidCube.getX(), linkGraphicsAddPyramidCube.getY(), linkGraphicsAddPyramidCube.getZ(),
+                             linkGraphicsAddPyramidCube.getHeight(), linkGraphicsAddPyramidCube.getAppearance());
+      }
+      else
+         this.addPyramidCube(linkGraphicsAddPyramidCube.getX(), linkGraphicsAddPyramidCube.getY(), linkGraphicsAddPyramidCube.getZ(),
+                             linkGraphicsAddPyramidCube.getHeight());
+   }
 
-         }
-         else if (instruction instanceof LinkGraphicsAddPyramidCube)
-         {
-            if (((LinkGraphicsAddPyramidCube) instruction).getAppearance() != null)
-            {
-               this.addPyramidCube(((LinkGraphicsAddPyramidCube) instruction).getX(), ((LinkGraphicsAddPyramidCube) instruction).getY(),
-                     ((LinkGraphicsAddPyramidCube) instruction).getZ(), ((LinkGraphicsAddPyramidCube) instruction).getHeight(), ((LinkGraphicsAddPyramidCube) instruction).getAppearance());
-            }
-            else
-               this.addPyramidCube(((LinkGraphicsAddPyramidCube) instruction).getX(), ((LinkGraphicsAddPyramidCube) instruction).getY(),
-                     ((LinkGraphicsAddPyramidCube) instruction).getZ(), ((LinkGraphicsAddPyramidCube) instruction).getHeight());
-         }
-         else if (instruction instanceof LinkGraphicsAddSphere)
-         {
-            if (((LinkGraphicsAddSphere) instruction).getAppearance() != null)
-            {
-               this.addSphere(((LinkGraphicsAddSphere) instruction).getRadius(), ((LinkGraphicsAddSphere) instruction).getAppearance());
-            }
-            else
-               this.addSphere(((LinkGraphicsAddSphere) instruction).getRadius());
-         }
-         else if (instruction instanceof LinkGraphicsAddVRMLFile)
-         {
-            if (((LinkGraphicsAddVRMLFile) instruction).getAppearance() != null)
-            {
-               this.addVRMLFile(((LinkGraphicsAddVRMLFile) instruction).getFileName(), ((LinkGraphicsAddVRMLFile) instruction).getAppearance());
-            }
-            else
-               this.addVRMLFile(((LinkGraphicsAddVRMLFile) instruction).getFileName());
-         }
-         else if (instruction instanceof LinkGraphicsAddWedge)
-         {
-            if (((LinkGraphicsAddWedge) instruction).getAppearance() != null)
-            {
-               this.addWedge(((LinkGraphicsAddWedge) instruction).getX(), ((LinkGraphicsAddWedge) instruction).getY(),
-                     ((LinkGraphicsAddWedge) instruction).getZ(), ((LinkGraphicsAddWedge) instruction).getAppearance());
-            }
-            else
-               this.addWedge(((LinkGraphicsAddWedge) instruction).getX(), ((LinkGraphicsAddWedge) instruction).getY(),
-                     ((LinkGraphicsAddWedge) instruction).getZ());
-         }
-         else if (instruction instanceof LinkGraphicsAddTruncatedCone)
-         {
-            if (((LinkGraphicsAddTruncatedCone) instruction).getAppearance() != null)
-            {
-               this.addGenTruncatedCone(((LinkGraphicsAddTruncatedCone) instruction).getHeight(), ((LinkGraphicsAddTruncatedCone) instruction).getBX(),
-                     ((LinkGraphicsAddTruncatedCone) instruction).getBY(), ((LinkGraphicsAddTruncatedCone) instruction).getTX(),
-                     ((LinkGraphicsAddTruncatedCone) instruction).getTY(), ((LinkGraphicsAddTruncatedCone) instruction).getAppearance());
-            }
-            else
-               this.addGenTruncatedCone(((LinkGraphicsAddTruncatedCone) instruction).getHeight(), ((LinkGraphicsAddTruncatedCone) instruction).getBX(),
-                     ((LinkGraphicsAddTruncatedCone) instruction).getBY(), ((LinkGraphicsAddTruncatedCone) instruction).getTX(),
-                     ((LinkGraphicsAddTruncatedCone) instruction).getTY());
-         }
-         else if (instruction instanceof LinkGraphicsIdentity)
-         {
-            this.identity();
-         }
-         else if (instruction instanceof LinkGraphicsRotate)
-         {
-            this.rotate(((LinkGraphicsRotate) instruction).getAngle(), ((LinkGraphicsRotate) instruction).getAxis());
-         }
-         else if (instruction instanceof LinkGraphicsRotateDefinedAxis)
-         {
-            this.rotate(((LinkGraphicsRotateDefinedAxis) instruction).getAngle(), ((LinkGraphicsRotateDefinedAxis) instruction).getAxis());
-         }
-         else if (instruction instanceof LinkGraphicsRotateMatrix)
-         {
-            this.rotate(((LinkGraphicsRotateMatrix) instruction).getRotationMatrix());
-         }
-         else if (instruction instanceof LinkGraphicsScale)
-         {
-            this.scale(((LinkGraphicsScale) instruction).getScaleFactor());
-         }
-         else if (instruction instanceof LinkGraphicsTranslate)
-         {
-            this.translate(((LinkGraphicsTranslate) instruction).getTranslation());
-         }
+   protected void doLinkGraphicsAddHemiEllipsoidInstruction(LinkGraphicsAddHemiEllipsoid linkGraphicsAddHemiEllipsoid)
+   {
+      if (linkGraphicsAddHemiEllipsoid.getAppearance() != null)
+      {
+         this.addHemiEllipsoid(linkGraphicsAddHemiEllipsoid.getXRad(), linkGraphicsAddHemiEllipsoid.getYRad(), linkGraphicsAddHemiEllipsoid.getZRad(),
+                               linkGraphicsAddHemiEllipsoid.getAppearance());
+      }
+      else
+         this.addHemiEllipsoid(linkGraphicsAddHemiEllipsoid.getXRad(), linkGraphicsAddHemiEllipsoid.getYRad(), linkGraphicsAddHemiEllipsoid.getZRad());
+   }
+
+   protected void doLinkGraphicsAddEllipsoidInstruction(LinkGraphicsAddEllipsoid linkGraphicsAddEllipsoid)
+   {
+      if (linkGraphicsAddEllipsoid.getAppearance() != null)
+      {
+         this.addEllipsoid(linkGraphicsAddEllipsoid.getXRad(), linkGraphicsAddEllipsoid.getYRad(), linkGraphicsAddEllipsoid.getZRad(),
+                           linkGraphicsAddEllipsoid.getAppearance());
+      }
+      else
+         this.addEllipsoid(linkGraphicsAddEllipsoid.getXRad(), linkGraphicsAddEllipsoid.getYRad(), linkGraphicsAddEllipsoid.getZRad());
+   }
+
+   protected void doLinkGraphicsAddCubeInstruction(LinkGraphicsAddCube linkGraphicsAddCube)
+   {
+      if (linkGraphicsAddCube.getAppearance() != null)
+      {
+         this.addCube(linkGraphicsAddCube.getX(), linkGraphicsAddCube.getY(), linkGraphicsAddCube.getZ(), linkGraphicsAddCube.getAppearance());
+      }
+      else
+         this.addCube(linkGraphicsAddCube.getX(), linkGraphicsAddCube.getY(), linkGraphicsAddCube.getZ());
+   }
+
+   protected void doLinkGraphicsAddCoordinateSystemInstruction(LinkGraphicsAddCoordinateSystem linkGraphicsAddCoordinateSystem)
+   {
+      this.addCoordinateSystem(linkGraphicsAddCoordinateSystem.getLength());
+   }
+
+   protected void doLinkGraphicsAddCylinderInstruction(LinkGraphicsAddCylinder linkGraphicsAddCylinder)
+   {
+      if (linkGraphicsAddCylinder.getAppearance() != null)
+      {
+         this.addCylinder(linkGraphicsAddCylinder.getHeight(), linkGraphicsAddCylinder.getRadius(), linkGraphicsAddCylinder.getAppearance());
 
       }
+      else
+         this.addCylinder(linkGraphicsAddCylinder.getHeight(), linkGraphicsAddCylinder.getRadius());
+   }
 
-      // return this;
+   protected void doLinkGraphicsAddConeInstruction(LinkGraphicsAddCone linkGraphicsAddCone)
+   {
+      if (linkGraphicsAddCone.getAppearance() != null)
+      {
+         this.addCone(linkGraphicsAddCone.getHeight(), linkGraphicsAddCone.getRadius(), linkGraphicsAddCone.getAppearance());
+      }
+      else
+         this.addCone(linkGraphicsAddCone.getHeight(), linkGraphicsAddCone.getRadius());
+   }
+
+   protected void doLinkGraphicsAddModelFileInstruction(LinkGraphicsAddModelFile linkGraphicsAddModelFile)
+   {
+      if (linkGraphicsAddModelFile.getAppearance() != null)
+      {
+         this.addModelFile(linkGraphicsAddModelFile.getFileName(), linkGraphicsAddModelFile.getAppearance());
+      }
+      else
+         this.addModelFile(linkGraphicsAddModelFile.getFileName());
+   }
+
+   protected void doLinkGraphicsAddArcTorusInstruction(LinkGraphicsAddArcTorus linkGraphicsAddArcTorus)
+   {
+      if (linkGraphicsAddArcTorus.getAppearance() != null)
+      {
+         this.addArcTorus(linkGraphicsAddArcTorus.getStartAngle(), linkGraphicsAddArcTorus.getEndAngle(), linkGraphicsAddArcTorus.getMajorRadius(),
+                          linkGraphicsAddArcTorus.getMinorRadius(), linkGraphicsAddArcTorus.getAppearance());
+      }
+      else
+         this.addArcTorus(linkGraphicsAddArcTorus.getStartAngle(), linkGraphicsAddArcTorus.getEndAngle(), linkGraphicsAddArcTorus.getMajorRadius(),
+                          linkGraphicsAddArcTorus.getMinorRadius());
    }
 
    /**
@@ -321,7 +315,7 @@ public class LinkGraphics
    /*
     * public void removeAllGraphics() { for(int i=0; i<linkBG.numChildren();
     * i++) { //Node child = linkBG.getChild(i); linkBG.removeChild(i); }
-    * 
+    *
     * this.numShapes = 0; this.lastGroup = linkBG; }
     */
 
@@ -362,8 +356,7 @@ public class LinkGraphics
          else if (leaf instanceof Light)
          {
             // System.out.println("leaf is a light");
-            @SuppressWarnings("unused")
-            Light light = (Light) leaf;
+            @SuppressWarnings("unused") Light light = (Light) leaf;
          }
 
          // else System.out.println("leaf is NOT a Shape3D");
@@ -433,7 +426,7 @@ public class LinkGraphics
       else if (rotAxis == Link.Y)
          t1.rotY(rotAng);
 
-      // else if (rotAxis == Link.Z)
+         // else if (rotAxis == Link.Z)
       else
          t1.rotZ(rotAng);
 
@@ -690,11 +683,12 @@ public class LinkGraphics
     * @param geometry Geometry of the new shape.
     * @param appearance Appearance of the new shape.
     */
-     
+
    public Shape3D addShape(Geometry geometry, YoAppearanceDefinition appearance)
    {
       return addShape(geometry, new J3DAppearance(appearance));
    }
+
    public Shape3D addShape(Geometry geometry, Appearance appearance)
    {
       Shape3D linkShape = new Shape3D();
@@ -791,7 +785,7 @@ public class LinkGraphics
       // int flag = org.web3d.j3d.loaders.VRML97Loader.LOAD_ALL; flag &= ~org.web3d.j3d.loaders.VRML97Loader.LOAD_BEHAVIOR_NODES; // Static Loads only
       // org.web3d.j3d.loaders.VRML97Loader loader = new org.web3d.j3d.loaders.VRML97Loader(flag);
 
-      com.sun.j3d.loaders.vrml97.VrmlLoader loader = new com.sun.j3d.loaders.vrml97.VrmlLoader(); // Use with old x3d.jar
+      com.sun.j3d.loaders.vrml97.VrmlLoader loader = new com.sun.j3d.loaders.vrml97.VrmlLoader();    // Use with old x3d.jar
 
       com.sun.j3d.loaders.Scene model = null;
 
@@ -836,7 +830,7 @@ public class LinkGraphics
       // int flag = org.web3d.j3d.loaders.VRML97Loader.LOAD_ALL; flag &= ~org.web3d.j3d.loaders.VRML97Loader.LOAD_BEHAVIOR_NODES; // Static Loads only
       // org.web3d.j3d.loaders.VRML97Loader loader = new org.web3d.j3d.loaders.VRML97Loader(flag);
 
-      com.sun.j3d.loaders.vrml97.VrmlLoader loader = new com.sun.j3d.loaders.vrml97.VrmlLoader(); // Use with old x3d.jar
+      com.sun.j3d.loaders.vrml97.VrmlLoader loader = new com.sun.j3d.loaders.vrml97.VrmlLoader();    // Use with old x3d.jar
 
       com.sun.j3d.loaders.Scene model = null;
 
@@ -928,33 +922,33 @@ public class LinkGraphics
 
       addModelFile(fileName, yoAppearanceDefinition);
 
-      //    if (app != null)
-      //       linkGraphicsDefinition.addInstruction(new LinkGraphicsAdd3DSFile(fileURL.getPath(), new AppearanceDefinition(getColor(app))));
-      //    else
-      //       linkGraphicsDefinition.addInstruction(new LinkGraphicsAdd3DSFile(fileURL.getPath()));
+      // if (app != null)
+      // linkGraphicsDefinition.addInstruction(new LinkGraphicsAdd3DSFile(fileURL.getPath(), new AppearanceDefinition(getColor(app))));
+      // else
+      // linkGraphicsDefinition.addInstruction(new LinkGraphicsAdd3DSFile(fileURL.getPath()));
    }
 
    /*
     * public void add3DSFile2(URL fileURL, Appearance app) { Loader3DS loader =
     * new Loader3DS(); loader.setTextureLightingOn(); // turns on modulate mode
     * for textures (lighting)
-    * 
-    * 
+    *
+    *
     * String URLBase = fileURL.toString(); System.out.println(URLBase);
     * //URLBase = URLBase.substring(URLBase.lastIndexOf("/"));
-    * 
+    *
     * URLBase = URLBase.substring(0, URLBase.lastIndexOf("/"));
-    * 
+    *
     * System.out.println(URLBase); loader.setURLBase(URLBase);
-    * 
+    *
     * com.sun.j3d.loaders.Scene scene = null;
-    * 
+    *
     * try{scene = loader.load(fileURL);} catch(FileNotFoundException
     * e){System.err.println("File Not Found in add3DSFile: " + fileURL + "  " +
     * e);return;}
-    * 
+    *
     * BranchGroup branchGroup = scene.getSceneGroup();
-    * 
+    *
     * if (app != null) recursiveSetEnabling(branchGroup, app, 0);
     * this.addBranchGroup(scene.getSceneGroup()); }
     */
@@ -983,33 +977,40 @@ public class LinkGraphics
     * @param fileName File path to the desired 3ds file.
     * @param app Appearance to use with the model once imported.
     */
+
    /**
-   * @param fileName
-   * @param app
-   */
+    * @param fileName
+    * @param app
+    */
    public void addModelFile(String fileName, YoAppearanceDefinition app)
    {
-      //Determine filename
-      
+      // Determine filename
+
       ModelFileType modelFileType = ModelFileType.getFileType(fileName);
       Loader loader;
       switch (modelFileType)
       {
-      case COLLADA:
-         loader = new DAELoader();
-         break;
-      case _STL:
-         loader = new STLLoader();
-         break;
-      case _3DS:
-         Loader3DS loader3ds = new Loader3DS();
-         loader3ds.setTextureLightingOn(); // turns on modulate mode for textures (lighting)
-         loader = loader3ds;
-         break;
-      default:
-         throw new RuntimeException("Unkown filetype: " + modelFileType);
+         case COLLADA :
+            loader = new DAELoader();
+
+            break;
+
+         case _STL :
+            loader = new STLLoader();
+
+            break;
+
+         case _3DS :
+            Loader3DS loader3ds = new Loader3DS();
+            loader3ds.setTextureLightingOn();    // turns on modulate mode for textures (lighting)
+            loader = loader3ds;
+
+            break;
+
+         default :
+            throw new RuntimeException("Unkown filetype: " + modelFileType);
       }
-      
+
       com.sun.j3d.loaders.Scene scene = null;
 
       try
@@ -1028,7 +1029,7 @@ public class LinkGraphics
 
       BranchGroup branchGroup = scene.getSceneGroup();
       transGroup.addChild(branchGroup);
-      
+
       if (app != null)
          recursiveSetEnabling(branchGroup, new J3DAppearance(app), 0);
 
@@ -1060,7 +1061,8 @@ public class LinkGraphics
     *
     * @param length the length in meters of each axis arrow.
     */
-   public void addCoordinateSystem(double length, YoAppearanceDefinition xAxisAppearance, YoAppearanceDefinition yAxisAppearance, YoAppearanceDefinition zAxisAppearance, YoAppearanceDefinition arrowAppearance)
+   public void addCoordinateSystem(double length, YoAppearanceDefinition xAxisAppearance, YoAppearanceDefinition yAxisAppearance,
+                                   YoAppearanceDefinition zAxisAppearance, YoAppearanceDefinition arrowAppearance)
    {
       Geometry bar = GeometryGenerator.Cylinder(length / 32.0, length, 15);
       Geometry arrow = GeometryGenerator.Cone(length / 10.0, length / 15.0, 15);
@@ -1211,7 +1213,7 @@ public class LinkGraphics
    {
       addSphere(radius, YoAppearance.Black());
 
-      //    linkGraphicsDefinition.addInstruction(new LinkGraphicsAddSphere(radius));
+      // linkGraphicsDefinition.addInstruction(new LinkGraphicsAddSphere(radius));
    }
 
    /**
@@ -1661,6 +1663,7 @@ public class LinkGraphics
       PolygonAttributes polyAttributes = new PolygonAttributes();
       polyAttributes.setCullFace(PolygonAttributes.CULL_NONE);
       Appearance appearance = new J3DAppearance(yoAppearance);
+
       // polyAttributes.setCullFace(PolygonAttributes.CULL_BACK);
       appearance.setPolygonAttributes(polyAttributes);
 
@@ -1701,7 +1704,7 @@ public class LinkGraphics
       PolygonAttributes polyAttributes = new PolygonAttributes();
       polyAttributes.setCullFace(PolygonAttributes.CULL_NONE);
 
-//       polyAttributes.setCullFace(PolygonAttributes.CULL_BACK);
+//    polyAttributes.setCullFace(PolygonAttributes.CULL_BACK);
       Appearance appearance = new J3DAppearance(yoAppearance);
       appearance.setPolygonAttributes(polyAttributes);
 
@@ -1717,8 +1720,7 @@ public class LinkGraphics
 
    public void createInertiaEllipsoid(Link link, YoAppearanceDefinition appearance)
    {
-      //    LinkGraphics linkGraphics = link.getLinkGraphics();
-      this.identity();
+      doLinkGraphicsIdentityInstruction();
       Vector3d comOffSet = new Vector3d();
       link.getComOffset(comOffSet);
       this.translate(comOffSet);
@@ -1733,7 +1735,7 @@ public class LinkGraphics
       this.addEllipsoid(ellipsoidRadii.x, ellipsoidRadii.y, ellipsoidRadii.z, appearance);
 
       comOffSet.scale(-1.0);
-      this.translate(comOffSet); // translate back
+      this.translate(comOffSet);    // translate back
    }
 
    /*
