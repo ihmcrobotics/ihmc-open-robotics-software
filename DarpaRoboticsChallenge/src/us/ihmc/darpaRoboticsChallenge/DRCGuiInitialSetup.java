@@ -60,7 +60,6 @@ public class DRCGuiInitialSetup implements GuiInitialSetup
 
    public void initializeGUI(SimulationConstructionSet scs, R2Robot robot)
    {
-      initializeGUI(scs, robot);
       JButton exportTorqueAndSpeedButton = new JButton("Export Torque And Speed");
       DataExporter dataExporter = new DataExporter(scs, robot);
       exportTorqueAndSpeedButton.addActionListener(dataExporter);
