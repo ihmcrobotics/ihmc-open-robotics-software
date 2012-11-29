@@ -310,8 +310,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          }
          else
          {
-            Footstep currentFootstep = new Footstep(transferToSide, new FramePose(referenceFrames.getFootFrame(transferToSide)));
-            finalDesiredICP = getDoubleSupportFinalDesiredICPForWalking(currentFootstep, bipedFeet.get(transferToSide).getFootPolygonInSoleFrame());
+            Footstep currentFootstep = new Footstep(new FramePose(referenceFrames.getFootFrame(transferToSide)));
+            finalDesiredICP = getDoubleSupportFinalDesiredICPForWalking(currentFootstep, bipedFeet.get(transferToSide).getFootPolygonInSoleFrame(), transferToSide);
          }
 
          finalDesiredICP.changeFrame(desiredICP.getReferenceFrame());
@@ -523,28 +523,28 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       return ret;
    }
 
-   private FramePoint2d getDoubleSupportFinalDesiredICPForWalking(Footstep footstep, FrameConvexPolygon2d footPolygonInSoleFrame)
+   private FramePoint2d getDoubleSupportFinalDesiredICPForWalking(Footstep footstep, FrameConvexPolygon2d footPolygonInSoleFrame, RobotSide transferToSide)
    {
-      RobotSide robotSide = footstep.getFootstepSide();
-      if (footPolygonInSoleFrame.getReferenceFrame() != referenceFrames.getSoleFrame(robotSide))
+      if (footPolygonInSoleFrame.getReferenceFrame() != referenceFrames.getSoleFrame(transferToSide))
       {
          throw new RuntimeException("not in sole frame");
       }
 
       ReferenceFrame stairDirectionFrame = worldFrame;
-      footstep.changeFrame(stairDirectionFrame);
+      FramePose footstepPose = footstep.getFootstepPose();
+      footstepPose.changeFrame(stairDirectionFrame);
 
       Transform3D footstepTransform = new Transform3D();
-      footstep.getFootstepPose().getTransform3D(footstepTransform);
+      footstepPose.getTransform3D(footstepTransform);
 
       FramePoint2d centroid2d = footPolygonInSoleFrame.getCentroidCopy();
       FramePoint centroid = centroid2d.toFramePoint();
-      centroid.changeFrame(referenceFrames.getFootFrame(robotSide));
+      centroid.changeFrame(referenceFrames.getFootFrame(transferToSide));
       centroid.changeFrameUsingTransform(stairDirectionFrame, footstepTransform);
       FramePoint2d ret = centroid.toFramePoint2d();
 
       double extraX = 0.0;    // 0.02
-      double extraY = robotSide.negateIfLeftSide(0.04);
+      double extraY = transferToSide.negateIfLeftSide(0.04);
       FrameVector2d offset = new FrameVector2d(stairDirectionFrame, extraX, extraY);
       offset.changeFrame(ret.getReferenceFrame());
       ret.add(offset);
@@ -559,7 +559,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       initialDesiredICP.changeFrame(referenceFrame);
 
       // TODO: think about setting the shift factor here
-      FramePoint2d finalDesiredICP = getDoubleSupportFinalDesiredICPForWalking(desiredFootstep, bipedFeet.get(swingSide).getFootPolygonInSoleFrame());    // yes, swing side
+      FramePoint2d finalDesiredICP = getDoubleSupportFinalDesiredICPForWalking(desiredFootstep, bipedFeet.get(swingSide).getFootPolygonInSoleFrame(), swingSide);    // yes, swing side
       finalDesiredICP.changeFrame(referenceFrame);
 
       FrameLineSegment2d initialToFinal = new FrameLineSegment2d(initialDesiredICP, finalDesiredICP);
