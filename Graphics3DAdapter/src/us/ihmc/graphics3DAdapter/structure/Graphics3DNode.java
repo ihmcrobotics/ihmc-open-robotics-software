@@ -1,16 +1,39 @@
 package us.ihmc.graphics3DAdapter.structure;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
-import com.yobotics.simulationconstructionset.LinkGraphics;
+import javax.media.j3d.Transform3D;
 
-import us.ihmc.graphics3DAdapter.generics.GenericTransform;
+import us.ihmc.graphics3DAdapter.graphics.GraphicsObject;
 
-public interface Graphics3DNode
+public class Graphics3DNode
 {
-   public void packTransformToParent(GenericTransform transform);
-   public ArrayList<Graphics3DNode> getChildrenNodes();
+   private final Transform3D transform = new Transform3D();
+   private GraphicsObject graphicsObject;
+   private final ArrayList<Graphics3DNode> childeren = new ArrayList<Graphics3DNode>();
    
-   //TODO: Move LinkGraphics to graphics3DAdapter and rename to GraphicObject
-   public LinkGraphics getGraphicObject();
+   public Transform3D getTransform()
+   {
+      return transform;
+   }
+   public void setTransform(Transform3D transform)
+   {
+      this.transform.set(transform);
+   }
+   
+   public void addChild(Graphics3DNode child)
+   {
+      childeren.add(child);
+   }
+   public List<Graphics3DNode> getChildrenNodes()
+   {
+      return Collections.unmodifiableList(childeren);
+   }
+   
+   public GraphicsObject getGraphicsObject()
+   {
+      return graphicsObject;
+   }
 }
