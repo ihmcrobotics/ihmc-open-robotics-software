@@ -924,7 +924,7 @@ public class LinkGraphics
    public void createInertiaEllipsoid(Link link, YoAppearanceDefinition appearance)
    {
       
-      throw new RuntimeException("Inertia ellipsoids not implemented");
+      System.err.println("Inertia ellipsoids not implemented");
 //      //    LinkGraphics linkGraphics = link.getLinkGraphics();
 //      this.identity();
 //      Vector3d comOffSet = new Vector3d();
