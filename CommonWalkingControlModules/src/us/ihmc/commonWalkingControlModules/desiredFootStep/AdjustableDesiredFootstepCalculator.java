@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactableBody;
 import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredHeadingControlModule;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredVelocityControlModule;
@@ -60,12 +61,12 @@ public class AdjustableDesiredFootstepCalculator extends AbstractAdjustableDesir
    private final DesiredVelocityControlModule desiredVelocityControlModule;
 
 
-   public AdjustableDesiredFootstepCalculator(CouplingRegistry couplingRegistry,
+   public AdjustableDesiredFootstepCalculator(SideDependentList<? extends ContactableBody> contactableBodies, CouplingRegistry couplingRegistry,
            DesiredHeadingControlModule desiredHeadingControlModule, DesiredVelocityControlModule desiredVelocityControlModule,
            YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
            SideDependentList<ReferenceFrame> ankleZUpFrames)
    {
-      super(getFramesToSaveFootstepIn(ankleZUpFrames), parentRegistry);
+      super(contactableBodies, getFramesToSaveFootstepIn(ankleZUpFrames), parentRegistry);
 
       this.couplingRegistry = couplingRegistry;
       this.desiredHeadingControlModule = desiredHeadingControlModule;

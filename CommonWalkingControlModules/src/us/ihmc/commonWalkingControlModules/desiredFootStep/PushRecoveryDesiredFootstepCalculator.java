@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactableBody;
 import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.robotSide.RobotSide;
@@ -25,10 +26,12 @@ public class PushRecoveryDesiredFootstepCalculator implements DesiredFootstepCal
    private final SideDependentList<YoFrameOrientation> stepOrientations = new SideDependentList<YoFrameOrientation>();
    private final DoubleYoVariable stepDistance = new DoubleYoVariable("stepDistance", registry);
 
-   public PushRecoveryDesiredFootstepCalculator(CommonWalkingReferenceFrames referenceFrames, CouplingRegistry couplingRegistry,
+   private final SideDependentList<? extends ContactableBody> contactableBodies;
+
+   public PushRecoveryDesiredFootstepCalculator(SideDependentList<? extends ContactableBody> contactableBodies, CommonWalkingReferenceFrames referenceFrames, CouplingRegistry couplingRegistry,
            YoVariableRegistry parentRegistry)
    {
-
+      this.contactableBodies = contactableBodies;
       this.referenceFrames = referenceFrames;
       this.couplingRegistry = couplingRegistry;
       
@@ -59,7 +62,7 @@ public class PushRecoveryDesiredFootstepCalculator implements DesiredFootstepCal
 
       RobotSide swingSide = supportLegSide.getOppositeSide();
       FramePose footstepPose = new FramePose(stepPositions.get(swingSide).getFramePointCopy(), stepOrientations.get(swingSide).getFrameOrientationCopy());
-      Footstep desiredFootstep = new Footstep(footstepPose);
+      Footstep desiredFootstep = new Footstep(contactableBodies.get(swingSide).getRigidBody(), footstepPose);
       return desiredFootstep;
    }
 

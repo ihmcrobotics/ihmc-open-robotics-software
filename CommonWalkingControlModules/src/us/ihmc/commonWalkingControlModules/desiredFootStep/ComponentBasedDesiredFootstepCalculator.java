@@ -44,7 +44,7 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractAdjustableD
            DesiredHeadingControlModule desiredHeadingControlModule, DesiredVelocityControlModule desiredVelocityControlModule,
            YoVariableRegistry parentRegistry)
    {
-      super(getFramesToStoreFootstepsIn(), parentRegistry);
+      super(bipedFeet, getFramesToStoreFootstepsIn(), parentRegistry);
 
       this.ankleZUpFrames = ankleZUpFrames;
       this.bipedFeet = bipedFeet;

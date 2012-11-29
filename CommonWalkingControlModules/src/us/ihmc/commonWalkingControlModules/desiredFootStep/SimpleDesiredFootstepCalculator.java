@@ -3,6 +3,7 @@
 
 package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactableBody;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredHeadingControlModule;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
@@ -29,9 +30,11 @@ public class SimpleDesiredFootstepCalculator implements DesiredFootstepCalculato
    private final DoubleYoVariable stepYaw = new DoubleYoVariable("stepYaw", registry);
    private final DoubleYoVariable stepPitch = new DoubleYoVariable("stepPitch", registry);
    private final DoubleYoVariable stepRoll = new DoubleYoVariable("stepRoll", registry);
+   private final SideDependentList<? extends ContactableBody> contactableBodies;
 
-   public SimpleDesiredFootstepCalculator(SideDependentList<ReferenceFrame> ankleZUpFrames, DesiredHeadingControlModule desiredHeadingControlModule, YoVariableRegistry parentRegistry)
+   public SimpleDesiredFootstepCalculator(SideDependentList<? extends ContactableBody> contactableBodies, SideDependentList<ReferenceFrame> ankleZUpFrames, DesiredHeadingControlModule desiredHeadingControlModule, YoVariableRegistry parentRegistry)
    {
+      this.contactableBodies = contactableBodies;
       this.ankleZUpFrames = ankleZUpFrames;
       this.desiredHeadingControlModule = desiredHeadingControlModule;
       parentRegistry.addChild(registry);
@@ -65,7 +68,7 @@ public class SimpleDesiredFootstepCalculator implements DesiredFootstepCalculato
       
       // Create a foot Step Pose from Position and Orientation
       FramePose footstepPose = new FramePose(footstepPosition, footstepOrientation);
-      Footstep desiredFootstep = new Footstep(footstepPose);
+      Footstep desiredFootstep = new Footstep(contactableBodies.get(swingLegSide).getRigidBody(), footstepPose);
       
       return desiredFootstep;
    }

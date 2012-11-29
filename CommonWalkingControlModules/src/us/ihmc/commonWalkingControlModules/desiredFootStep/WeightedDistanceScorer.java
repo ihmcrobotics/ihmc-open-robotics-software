@@ -9,6 +9,7 @@ import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.BoundingBox2d;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
+import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
@@ -57,10 +58,10 @@ public class WeightedDistanceScorer extends BasicReachableScorer
       this.stepDistance = stepDistance;
    }
 
-   public double getStepLocationScore(RobotSide supportLeg, Footstep desiredFootstep)
+   public double getStepLocationScore(RobotSide supportLeg, FramePose desiredFramePose)
    {
       // return 0.0 if unreachable
-      double score = super.getStepLocationScore(supportLeg, desiredFootstep);
+      double score = super.getStepLocationScore(supportLeg, desiredFramePose);
       if (score == 0.0)
          return score;
 
@@ -90,8 +91,8 @@ public class WeightedDistanceScorer extends BasicReachableScorer
       nominalSwingToPosition.setY(nominalSwingToPosition.getY() + stepDistance.getDoubleValue() * Math.sin(sideDependentAngle));
 
       // find the weighted distance from nominal
-      double dx = Math.abs(nominalSwingToPosition.getX() - desiredFootstep.getPose().getX());
-      double dy = Math.abs(nominalSwingToPosition.getY() - desiredFootstep.getPose().getY()) * yWeight;
+      double dx = Math.abs(nominalSwingToPosition.getX() - desiredFramePose.getX());
+      double dy = Math.abs(nominalSwingToPosition.getY() - desiredFramePose.getY()) * yWeight;
       double weightedDistance = Math.sqrt((dx * dx) + (dy * dy));
 
       if (weightedDistance < GreatDX)
