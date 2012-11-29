@@ -97,7 +97,9 @@ public class CapturabilityBasedDesiredFootstepAdjustor implements DesiredFootste
       {
          nextStepIsInsideCaptureRegion.set(false);
 
+         nextStep2d.changeFrame(captureRegion.getReferenceFrame());
          captureRegion.orthogonalProjection(nextStep2d);
+         nextStep2d.changeFrame(baseFootstep.getReferenceFrame());
          baseFootstep.setFootstepPositionChangeOnlyXY(nextStep2d);
       }
       else

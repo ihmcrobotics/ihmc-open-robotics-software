@@ -83,7 +83,7 @@ public abstract class RegularWalkingGaitAbstractController implements RobotContr
    public RegularWalkingGaitAbstractController(String name, RobotSpecificJointNames robotJointNames, DoubleYoVariable time,
            ProcessedOutputsInterface processedOutputs, DoEveryTickSubController doEveryTickSubController, StanceSubController stanceSubController,
            SwingSubController swingSubController, UpperBodySubController upperBodySubController, CommonWalkingReferenceFrames referenceFrames,
-           YoVariableRegistry controllerRegistry)
+           YoVariableRegistry controllerRegistry, RobotSide initialLoadingLeg)
    {
       this.name = name;
       this.robotJointNames = robotJointNames;
@@ -102,7 +102,7 @@ public abstract class RegularWalkingGaitAbstractController implements RobotContr
       lowerBodyTorques = new LowerBodyTorques(robotJointNames);
 
       walkingStateMachine = new StateMachine("walkingState", "switchTime", RegularWalkingState.class, time, childRegistry);
-      setupStateMachine();
+      setupStateMachine(initialLoadingLeg);
 
       stepsToTake.set(16000);
       stepsTaken.set(0);
@@ -828,11 +828,11 @@ public abstract class RegularWalkingGaitAbstractController implements RobotContr
       }
    }
 
-   private void setupStateMachine()
+   private void setupStateMachine(RobotSide initialLoadingLeg)
    {
       // Create states
       StartWalkingDoubleSupportState startWalkingDoubleSupportState = new StartWalkingDoubleSupportState(RegularWalkingState.StartWalkingDoubleSupportState,
-                                                                         RobotSide.LEFT);
+                                                                         initialLoadingLeg);
 
       TransferAllLoadToLegForWalkingState transferAllLoadToLeftLegForWalkingState =
          new TransferAllLoadToLegForWalkingState(RegularWalkingState.TransferAllLoadToLeftLegForWalking, RobotSide.LEFT);
@@ -1006,7 +1006,11 @@ public abstract class RegularWalkingGaitAbstractController implements RobotContr
 
       // Begin: Add transitions
       // Start Walking
-      startWalkingDoubleSupportState.addStateTransition(toTransferAllLoadToLeftLegForWalkingState);
+      if (initialLoadingLeg == RobotSide.LEFT)
+         startWalkingDoubleSupportState.addStateTransition(toTransferAllLoadToLeftLegForWalkingState);
+      else
+         startWalkingDoubleSupportState.addStateTransition(toTransferAllLoadToRightLegForWalkingState);
+
 //      startWalkingDoubleSupportState.addStateTransition(toTransferAllLoadToRightLegForWalkingState);
 
       // Stop walking
