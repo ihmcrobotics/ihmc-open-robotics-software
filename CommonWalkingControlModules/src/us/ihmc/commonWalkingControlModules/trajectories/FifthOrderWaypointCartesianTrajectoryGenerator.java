@@ -10,11 +10,13 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.util.trajectory.CartesianTrajectoryGenerator;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 import com.yobotics.simulationconstructionset.util.trajectory.DoubleProvider;
+import com.yobotics.simulationconstructionset.util.trajectory.LegacyCartesianTrajectoryGeneratorPositionTrajectoryGeneratorWrapper;
 import com.yobotics.simulationconstructionset.util.trajectory.PolynomialSpline;
 
-public class FifthOrderWaypointCartesianTrajectoryGenerator implements CartesianTrajectoryGenerator
+public class FifthOrderWaypointCartesianTrajectoryGenerator implements LegacyCartesianTrajectoryGeneratorPositionTrajectoryGeneratorWrapper
 {
    private final String namePostFix = getClass().getSimpleName();
    private final YoVariableRegistry registry;
@@ -25,6 +27,10 @@ public class FifthOrderWaypointCartesianTrajectoryGenerator implements Cartesian
    private final DoubleYoVariable waypointHeight;
    private final DoubleYoVariable stepTime;
    private final DoubleYoVariable timeIntoStep;
+   
+   private final YoFramePoint desiredPosition;
+   private final YoFrameVector desiredVelocity;
+   private final YoFrameVector desiredAcceleration;
 
    private final ReferenceFrame referenceFrame;
    private final FrameVector tempVector = new FrameVector(ReferenceFrame.getWorldFrame());
@@ -44,6 +50,11 @@ public class FifthOrderWaypointCartesianTrajectoryGenerator implements Cartesian
       this.waypointHeight = new DoubleYoVariable("waypointHeight", registry);
       this.stepTime = new DoubleYoVariable("stepTime", registry);
       this.timeIntoStep = new DoubleYoVariable("timeIntoStep", registry);
+      
+      this.desiredPosition = new YoFramePoint("desiredPosition", referenceFrame, registry);
+      this.desiredVelocity = new YoFrameVector("desiredVelocity", referenceFrame, registry);
+      this.desiredAcceleration = new YoFrameVector("desiredAcceleration", referenceFrame, registry);
+      
       this.referenceFrame = referenceFrame;
       parentRegistry.addChild(registry);
 
@@ -112,18 +123,17 @@ public class FifthOrderWaypointCartesianTrajectoryGenerator implements Cartesian
       timeSpline.setCubic(0.0, stepTime, 0.0, initialParameterd, 1.0, finalParameterd);
    }
 
-   public void computeNextTick(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack, double deltaT)
+   public void compute(double time)
    {
-      positionToPack.setToZero(referenceFrame);
-      velocityToPack.setToZero(referenceFrame);
-      accelerationToPack.setToZero(referenceFrame);
       tempVector.setToZero(referenceFrame);
+      
+      timeIntoStep.set(time);
 
       double totalTime = this.stepTime.getDoubleValue();
-      if (timeIntoStep.getDoubleValue() > totalTime)
-         timeIntoStep.set(totalTime);
+      if (time > totalTime)
+         time = totalTime;
 
-      timeSpline.compute(timeIntoStep.getDoubleValue());
+      timeSpline.compute(time);
       double parameter = timeSpline.getPosition();
       double parameterd = timeSpline.getVelocity();
       double parameterdd = timeSpline.getAcceleration();
@@ -146,19 +156,18 @@ public class FifthOrderWaypointCartesianTrajectoryGenerator implements Cartesian
       {
          PolynomialSpline spaceSpline = spaceSplines.get(direction);
          spaceSpline.compute(parameter);
-         positionToPack.set(direction, spaceSplines.get(direction).getPosition());
+         desiredPosition.set(direction, spaceSplines.get(direction).getPosition());
          tempVector.set(direction, spaceSplines.get(direction).getVelocity());
-         accelerationToPack.set(direction, spaceSplines.get(direction).getAcceleration());
+         desiredAcceleration.set(direction, spaceSplines.get(direction).getAcceleration());
       }
 
-      velocityToPack.setAndChangeFrame(tempVector);
-      velocityToPack.scale(parameterd);
+      desiredVelocity.set(tempVector);
+      desiredVelocity.scale(parameterd);
 
-      accelerationToPack.scale(parameterd * parameterd);
+      desiredAcceleration.scale(parameterd * parameterd);
       tempVector.scale(parameterdd);
-      accelerationToPack.add(tempVector);
+      desiredAcceleration.add(tempVector);
 
-      timeIntoStep.add(deltaT);
    }
 
    public void updateFinalDesiredPosition(FramePoint finalDesiredPosition)
@@ -179,5 +188,25 @@ public class FifthOrderWaypointCartesianTrajectoryGenerator implements Cartesian
    public double getFinalTime()
    {
       return stepTime.getDoubleValue();
+   }
+
+   public void packPosition(FramePoint positionToPack)
+   {
+      desiredPosition.getFramePointAndChangeFrameOfPackedPoint(positionToPack);
+   }
+
+   public void packVelocity(FrameVector velocityToPack)
+   {
+      desiredVelocity.getFrameVectorAndChangeFrameOfPackedVector(velocityToPack);
+   }
+
+   public void packAcceleration(FrameVector accelerationToPack)
+   {
+      desiredAcceleration.getFrameVectorAndChangeFrameOfPackedVector(accelerationToPack);      
+   }
+
+   public void initialize()
+   {
+      // should call other initialize...
    }
 }

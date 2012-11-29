@@ -28,6 +28,8 @@ public interface BipedFootInterface
    public abstract FramePoint[] getHeelPointsCopy();
 
    public abstract void setFootPolygonInUse(FootPolygonEnum footPolygonInUse);
+   
+   public abstract FootPolygonEnum getFootPolygonInUse();
 
    public abstract void setShift(double shift);
 }
