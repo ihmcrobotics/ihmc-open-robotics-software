@@ -508,19 +508,18 @@ public class MomentumBasedController implements RobotController
             if (limbName == LimbName.LEG)
             {
                BipedFootInterface bipedFoot = bipedFeet.get(robotSide);
-               FrameConvexPolygon2d footPolygon = bipedFoot.getFootPolygonInSoleFrame();
-               FramePoint footCoPOnSole = virtualToePointsOnSole.get(robotSide);
-               footCoPOnSole.changeFrame(footPolygon.getReferenceFrame());
-               FramePoint2d footCoPOnSole2d = footCoPOnSole.toFramePoint2d();
-               FrameLineSegment2d closestEdge = footPolygon.getClosestEdge(footCoPOnSole2d);
-               double epsilonPointOnEdge = 1e-3;
-               boolean isCoPOnEdge = closestEdge.distance(footCoPOnSole2d) < epsilonPointOnEdge;
-               this.isCoPOnEdge.get(robotSide).set(isCoPOnEdge);
 
-               boolean isConstrained = isFootConstrained(robotSide);
-
-               if (isConstrained)
+               if (bipedFoot.isSupportingFoot())
                {
+                  FrameConvexPolygon2d footPolygon = bipedFoot.getFootPolygonInSoleFrame();
+                  FramePoint footCoPOnSole = virtualToePointsOnSole.get(robotSide);
+                  footCoPOnSole.changeFrame(footPolygon.getReferenceFrame());
+                  FramePoint2d footCoPOnSole2d = footCoPOnSole.toFramePoint2d();
+                  FrameLineSegment2d closestEdge = footPolygon.getClosestEdge(footCoPOnSole2d);
+                  double epsilonPointOnEdge = 1e-3;
+                  boolean isCoPOnEdge = closestEdge.distance(footCoPOnSole2d) < epsilonPointOnEdge;
+                  this.isCoPOnEdge.get(robotSide).set(isCoPOnEdge);
+
                   if (isCoPOnEdge)
                   {
                      spatialAccelerationProjectors.get(robotSide).projectAcceleration(desiredEndEffectorAccelerationInWorld, closestEdge);
@@ -532,7 +531,6 @@ public class MomentumBasedController implements RobotController
                          footPoseTwistAndSpatialAccelerationCalculators.get(robotSide).calculateDesiredEndEffectorSpatialAccelerationFromDesiredAccelerations(
                             new FrameVector(worldFrame), new FrameVector(worldFrame), fullRobotModel.getElevator()));
                   }
-
                }
             }
 

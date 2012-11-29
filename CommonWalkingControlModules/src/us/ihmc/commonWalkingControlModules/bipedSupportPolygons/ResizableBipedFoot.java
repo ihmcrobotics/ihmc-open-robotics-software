@@ -183,6 +183,7 @@ public class ResizableBipedFoot implements BipedFootInterface
       switch (footPolygonEnum)
       {
          case FLAT :
+         case FREE : // TODO
          {
             footPolygonPoints.addAll(toePoints);
             footPolygonPoints.addAll(heelPoints);
@@ -228,7 +229,7 @@ public class ResizableBipedFoot implements BipedFootInterface
 
          default :
          {
-            throw new RuntimeException("Unrecognized foot polygon");
+            throw new RuntimeException("Unrecognized foot polygon: " + footPolygonEnum);
          }
       }
       return footPolygonPoints;
@@ -300,6 +301,11 @@ public class ResizableBipedFoot implements BipedFootInterface
       this.footPolygonInUseEnum.set(footPolygonInUse);
       if (footPolygonInUse == FootPolygonEnum.FLAT)
          setShift(Double.NaN);
+   }
+   
+   public FootPolygonEnum getFootPolygonInUse()
+   {
+      return footPolygonInUseEnum.getEnumValue();
    }
 
    public void setShift(double shift)
