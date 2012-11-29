@@ -90,8 +90,8 @@ public class WeightedDistanceScorer extends BasicReachableScorer
       nominalSwingToPosition.setY(nominalSwingToPosition.getY() + stepDistance.getDoubleValue() * Math.sin(sideDependentAngle));
 
       // find the weighted distance from nominal
-      double dx = Math.abs(nominalSwingToPosition.getX() - desiredFootstep.getFootstepPose().getX());
-      double dy = Math.abs(nominalSwingToPosition.getY() - desiredFootstep.getFootstepPose().getY()) * yWeight;
+      double dx = Math.abs(nominalSwingToPosition.getX() - desiredFootstep.getPose().getX());
+      double dy = Math.abs(nominalSwingToPosition.getY() - desiredFootstep.getPose().getY()) * yWeight;
       double weightedDistance = Math.sqrt((dx * dx) + (dy * dy));
 
       if (weightedDistance < GreatDX)

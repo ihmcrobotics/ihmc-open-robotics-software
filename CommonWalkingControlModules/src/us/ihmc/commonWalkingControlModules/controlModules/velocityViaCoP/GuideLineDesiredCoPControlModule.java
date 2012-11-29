@@ -134,7 +134,7 @@ public class GuideLineDesiredCoPControlModule implements DesiredCoPControlModule
       if (desiredVelocity.lengthSquared() > 0.0)
       {
          Footstep footstep = couplingRegistry.getDesiredFootstep();
-         FramePoint finalDesiredSwingTarget = footstep.getFootstepPose().getPosition();
+         FramePoint finalDesiredSwingTarget = footstep.getPose().getPosition();
          FrameVector2d desiredVelocityInSupportFootFrame = desiredVelocity.changeFrameCopy(supportFootAnkleZUpFrame);
          guideLineCalculator.update(supportLeg, bipedSupportPolygons, capturePoint2d, finalDesiredSwingTarget, desiredVelocityInSupportFootFrame);
          guideLine = guideLineCalculator.getGuideLine(supportLeg);
