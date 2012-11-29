@@ -22,7 +22,7 @@ import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.util.trajectory.PolynomialSpline;
+import com.yobotics.simulationconstructionset.util.trajectory.YoPolynomial;
 
 public class FlatThenPolynomialCoMHeightTrajectoryGenerator implements CenterOfMassHeightTrajectoryGenerator
 {
@@ -38,7 +38,7 @@ public class FlatThenPolynomialCoMHeightTrajectoryGenerator implements CenterOfM
    
    private final double gravityZ;
 
-   private final PolynomialSpline heightSplineInFootFrame;
+   private final YoPolynomial heightSplineInFootFrame;
    private final DoubleYoVariable footX;
    private final DoubleYoVariable footZ;
 
@@ -55,7 +55,7 @@ public class FlatThenPolynomialCoMHeightTrajectoryGenerator implements CenterOfM
 
    private final DoubleYoVariable orbitalEnergy;
 
-   private final PolynomialSpline testHeightSplineInFootFrame;
+   private final YoPolynomial testHeightSplineInFootFrame;
    private final DoubleYoVariable deltaZ;
 
    public FlatThenPolynomialCoMHeightTrajectoryGenerator(String namePrefix, double gravityZ, ReferenceFrame centerOfMassFrame, CenterOfMassJacobian centerOfMassJacobian,
@@ -72,7 +72,7 @@ public class FlatThenPolynomialCoMHeightTrajectoryGenerator implements CenterOfM
 
       this.registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
 
-      heightSplineInFootFrame = new PolynomialSpline("heightSplineInFootFrame", numberOfCoefficients, registry);
+      heightSplineInFootFrame = new YoPolynomial("heightSplineInFootFrame", numberOfCoefficients, registry);
       footX = new DoubleYoVariable("footX", registry);
       footZ = new DoubleYoVariable("footZ", registry);
 
@@ -89,7 +89,7 @@ public class FlatThenPolynomialCoMHeightTrajectoryGenerator implements CenterOfM
 
       orbitalEnergy = new DoubleYoVariable("orbitalEnergy", registry);
 
-      testHeightSplineInFootFrame = new PolynomialSpline("testHeightSplineInFootFrame", numberOfCoefficients, registry);
+      testHeightSplineInFootFrame = new YoPolynomial("testHeightSplineInFootFrame", numberOfCoefficients, registry);
       deltaZ = new DoubleYoVariable("deltaZ", registry);
 
       nominalHeightAboveGround.set(1.35);
@@ -128,7 +128,7 @@ public class FlatThenPolynomialCoMHeightTrajectoryGenerator implements CenterOfM
     * @param spline
     * @return the minimum and maximum abscissa for which the spline is valid
     */
-   private double[] initializeSpline(RobotSide supportLeg, PolynomialSpline spline, double offsetX, double offsetZ)
+   private double[] initializeSpline(RobotSide supportLeg, YoPolynomial spline, double offsetX, double offsetZ)
    {
       double x = getCurrentCoMX();
 
@@ -211,7 +211,7 @@ public class FlatThenPolynomialCoMHeightTrajectoryGenerator implements CenterOfM
       return computeOrbitalEnergy(testHeightSplineInFootFrame, x, xd, gravityZ);
    }
 
-   private double computeOrbitalEnergy(PolynomialSpline spline, double x, double xd, double g)
+   private double computeOrbitalEnergy(YoPolynomial spline, double x, double xd, double g)
    {
       return OrbitalEnergyCalculator.computeOrbitalEnergy(spline, g, x, xd);
    }

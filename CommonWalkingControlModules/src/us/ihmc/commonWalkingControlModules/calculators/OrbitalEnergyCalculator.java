@@ -2,11 +2,11 @@ package us.ihmc.commonWalkingControlModules.calculators;
 
 import us.ihmc.utilities.math.MathTools;
 
-import com.yobotics.simulationconstructionset.util.trajectory.PolynomialSpline;
+import com.yobotics.simulationconstructionset.util.trajectory.YoPolynomial;
 
 public class OrbitalEnergyCalculator
 {
-   public static double computeOrbitalEnergy(PolynomialSpline spline, double g, double x, double xd)
+   public static double computeOrbitalEnergy(YoPolynomial spline, double g, double x, double xd)
    {
       spline.compute(x);
       double f = spline.getPosition();
@@ -23,7 +23,7 @@ public class OrbitalEnergyCalculator
       return 0.5 * MathTools.square(xd) - g / (2.0 * z) * MathTools.square(xd);
    }
    
-   private static double computeIntegralTerm(PolynomialSpline spline, double x)
+   private static double computeIntegralTerm(YoPolynomial spline, double x)
    {
       double integral = 0.0;
       double xPower = x;
@@ -36,7 +36,7 @@ public class OrbitalEnergyCalculator
       return integral;
    }
 
-   public static void computeParabolicCoefficientsUsingOrbitalEnergy(PolynomialSpline spline, double orbitalEnergyDesired, double g, double x0, double xd0,
+   public static void computeParabolicCoefficientsUsingOrbitalEnergy(YoPolynomial spline, double orbitalEnergyDesired, double g, double x0, double xd0,
            double z0, double dzdx0)
    {
       double a0 = (-4 * orbitalEnergyDesired + (g * Math.pow(x0, 2) + 2 * Math.pow(xd0, 2) * (dzdx0 * x0 - z0)) * (dzdx0 * x0 - z0)) / (g * Math.pow(x0, 2));
@@ -47,7 +47,7 @@ public class OrbitalEnergyCalculator
       spline.setDirectly(a);
    }
 
-   public static void computeParabolicCoefficientsUsingZFinal(PolynomialSpline spline, double g, double x0, double xd0, double xf, double z0, double dzdx0,
+   public static void computeParabolicCoefficientsUsingZFinal(YoPolynomial spline, double g, double x0, double xd0, double xf, double z0, double dzdx0,
            double zf)
    {
       double a0 = (xf * (dzdx0 * x0 * (x0 - xf) + (-2 * x0 + xf) * z0) + Math.pow(x0, 2) * zf) / Math.pow(x0 - xf, 2);
@@ -57,7 +57,7 @@ public class OrbitalEnergyCalculator
       spline.setDirectly(a);
    }
 
-   public static void computeCubicCoefficientsGivenZf(PolynomialSpline spline, double orbitalEnergyDesired, double g, double x0, double xd0, double xf, double z0,
+   public static void computeCubicCoefficientsGivenZf(YoPolynomial spline, double orbitalEnergyDesired, double g, double x0, double xd0, double xf, double z0,
            double dzdx0, double zf)
    {
       double a0 =
@@ -89,7 +89,7 @@ public class OrbitalEnergyCalculator
       spline.setDirectly(a);
    }
 
-   public static void computeCubicCoefficientsGivenDzdxf(PolynomialSpline spline, double orbitalEnergyDesired, double g, double x0, double xd0, double xf,
+   public static void computeCubicCoefficientsGivenDzdxf(YoPolynomial spline, double orbitalEnergyDesired, double g, double x0, double xd0, double xf,
            double z0, double dzdx0, double dzdxf)
    {
       double a0 =
@@ -118,7 +118,7 @@ public class OrbitalEnergyCalculator
       spline.setDirectly(a);
    }
 
-   public static void computeQuarticCoefficients(PolynomialSpline spline, double orbitalEnergyDesired, double g, double x0, double xd0, double xf, double z0,
+   public static void computeQuarticCoefficients(YoPolynomial spline, double orbitalEnergyDesired, double g, double x0, double xd0, double xf, double z0,
            double dzdx0, double zf, double dzdxf)
    {
       double a0 = (-(dzdxf * g * Math.pow(x0, 5) * (x0 - 2 * xf) * (x0 - xf) * xf) + 2 * dzdx0 * g * Math.pow(x0, 6) * Math.pow(xf, 2)
