@@ -15,6 +15,7 @@ public class ScreenCapture implements Serializable
    private int[] _bytesOut = null;
    private int _height, _width;
    private Vector3f location;
+   private Quaternion rotation;
 
    public Vector3f getLocation()
    {
@@ -37,8 +38,6 @@ public class ScreenCapture implements Serializable
 
 
 
-
-   private Quaternion rotation;
 
    public ScreenCapture(BufferedImage bi, Vector3f location, Quaternion rotation)
    {
