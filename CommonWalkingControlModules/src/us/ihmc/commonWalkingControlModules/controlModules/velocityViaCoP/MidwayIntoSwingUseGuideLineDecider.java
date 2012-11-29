@@ -1,11 +1,11 @@
 package us.ihmc.commonWalkingControlModules.controlModules.velocityViaCoP;
 
-import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
-
 import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.SingleSupportCondition;
 import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
+
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public class MidwayIntoSwingUseGuideLineDecider implements UseGuideLineDecider
 {

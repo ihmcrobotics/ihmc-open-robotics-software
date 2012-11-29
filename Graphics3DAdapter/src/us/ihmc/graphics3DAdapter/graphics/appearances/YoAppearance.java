@@ -1,4 +1,4 @@
-package com.yobotics.simulationconstructionset;
+package us.ihmc.graphics3DAdapter.graphics.appearances;
 
 import java.awt.Color;
 import java.awt.Component;
@@ -6,11 +6,9 @@ import java.net.URL;
 
 import javax.vecmath.Color3f;
 
-import com.yobotics.simulationconstructionset.graphics.YoAppearanceDefinition;
-import com.yobotics.simulationconstructionset.graphics.YoAppearanceMaterial;
-import com.yobotics.simulationconstructionset.graphics.YoAppearanceRGBColor;
-import com.yobotics.simulationconstructionset.graphics.YoAppearanceTexture;
-import com.yobotics.simulationconstructionset.graphics.YoAppearanceTransparant;
+import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
+
+
 
 //http://www.wdvl.com/Graphics/Colour/  has some of the color names I'm using...
 
@@ -28,7 +26,7 @@ public class YoAppearance
 
    public static YoAppearanceDefinition YoboticsTexture(Component comp)
    {
-      URL fileURL = SimulationConstructionSet.class.getResource("images/yobotics.jpg");
+      URL fileURL = Graphics3DAdapter.class.getResource("images/yobotics.jpg");
       return Texture(fileURL, comp);
    }
 
@@ -42,7 +40,7 @@ public class YoAppearance
    public static YoAppearanceDefinition EarthTexture(Component comp)
    {
 
-      URL fileURL = SimulationConstructionSet.class.getResource("images/earth.jpg");
+      URL fileURL = Graphics3DAdapter.class.getResource("images/earth.jpg");
       return Texture(fileURL, comp);
 
    }
@@ -50,7 +48,7 @@ public class YoAppearance
    public static YoAppearanceDefinition StoneTexture(Component comp)
    {
 
-      URL fileURL = SimulationConstructionSet.class.getResource("images/stone.jpg");
+      URL fileURL = Graphics3DAdapter.class.getResource("images/stone.jpg");
       return Texture(fileURL, comp);
    }
 

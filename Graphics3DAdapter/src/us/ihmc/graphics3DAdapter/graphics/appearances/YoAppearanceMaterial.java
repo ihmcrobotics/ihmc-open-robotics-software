@@ -1,4 +1,4 @@
-package com.yobotics.simulationconstructionset.graphics;
+package us.ihmc.graphics3DAdapter.graphics.appearances;
 
 import javax.vecmath.Color3f;
 

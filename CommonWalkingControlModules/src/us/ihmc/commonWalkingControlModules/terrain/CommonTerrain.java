@@ -10,14 +10,15 @@ import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.vecmath.Point2d;
 
+import us.ihmc.graphics3DAdapter.graphics.LinkGraphics;
+import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
 
 import com.yobotics.simulationconstructionset.GroundProfile;
-import com.yobotics.simulationconstructionset.LinkGraphics;
 import com.yobotics.simulationconstructionset.TexturedGround;
-import com.yobotics.simulationconstructionset.YoAppearance;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.renderer.j3d.J3DAppearance;
+import com.yobotics.simulationconstructionset.renderer.j3d.J3DLinkGraphics;
 import com.yobotics.simulationconstructionset.util.FlatGroundProfile;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.ground.AlternatingSlopesGroundProfile;
@@ -86,7 +87,7 @@ public class CommonTerrain
             groundBelow.translate(0.0, 0.0, -0.2);
             groundBelow.addCube(10.0, 10.0, 0.1, YoAppearance.Green());
 
-            javax.media.j3d.Link link = new javax.media.j3d.Link(groundBelow.getSharedGroup());
+            javax.media.j3d.Link link = new javax.media.j3d.Link(new J3DLinkGraphics(groundBelow).getSharedGroup());
             branchGroup.addChild(link);
          }
 

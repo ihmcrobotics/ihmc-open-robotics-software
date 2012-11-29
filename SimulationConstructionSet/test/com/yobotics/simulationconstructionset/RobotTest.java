@@ -11,6 +11,9 @@ import javax.vecmath.Vector3d;
 
 import org.junit.Test;
 
+import us.ihmc.graphics3DAdapter.graphics.LinkGraphics;
+import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceDefinition;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.math.RotationalInertiaCalculator;
 import us.ihmc.utilities.test.JUnitTools;
@@ -382,12 +385,23 @@ public class RobotTest
 
       LinkGraphics linkGraphics = new LinkGraphics();
       linkGraphics.addCoordinateSystem(COORDINATE_SYSTEM_LENGTH);
-      linkGraphics.createInertiaEllipsoid(ret, YoAppearance.Red());
+      createInertiaEllipsoid(ret, linkGraphics, YoAppearance.Red());
       ret.setLinkGraphics(linkGraphics);
 
       return ret;
    }
 
+   public static void createInertiaEllipsoid(Link ret, LinkGraphics linkGraphics, YoAppearanceDefinition appearance)
+   {
+      Matrix3d momentOfInertia = new Matrix3d();
+      ret.getMomentOfInertia(momentOfInertia);
+      Vector3d comOffset = new Vector3d();
+      ret.getComOffset(comOffset);
+      double mass = ret.getMass();
+      
+      linkGraphics.createInertiaEllipsoid(momentOfInertia, comOffset, mass, appearance);
+   }
+   
    private static Link link21(Random random, double l2, double r2)
    {
       Link ret = new Link("link2");
@@ -399,7 +413,7 @@ public class RobotTest
 
       LinkGraphics linkGraphics = new LinkGraphics();
       linkGraphics.addCoordinateSystem(COORDINATE_SYSTEM_LENGTH);
-      linkGraphics.createInertiaEllipsoid(ret, YoAppearance.Orange());
+      createInertiaEllipsoid(ret, linkGraphics, YoAppearance.Orange());
       ret.setLinkGraphics(linkGraphics);
 
       return ret;
@@ -415,7 +429,7 @@ public class RobotTest
       ret.setMomentOfInertia(link2moi);
       LinkGraphics linkGraphics = new LinkGraphics();
       linkGraphics.addCoordinateSystem(COORDINATE_SYSTEM_LENGTH);
-      linkGraphics.createInertiaEllipsoid(ret, YoAppearance.Aqua());
+      createInertiaEllipsoid(ret, linkGraphics, YoAppearance.Aqua());
       ret.setLinkGraphics(linkGraphics);
 
       return ret;
@@ -433,7 +447,7 @@ public class RobotTest
       ret.setMomentOfInertia(link1moi);
       LinkGraphics linkGraphics = new LinkGraphics();
       linkGraphics.addCoordinateSystem(COORDINATE_SYSTEM_LENGTH);
-      linkGraphics.createInertiaEllipsoid(ret, YoAppearance.Blue());
+      createInertiaEllipsoid(ret, linkGraphics, YoAppearance.Blue());
       ret.setLinkGraphics(linkGraphics);
 
       return ret;
@@ -449,7 +463,7 @@ public class RobotTest
 
       LinkGraphics linkGraphics = new LinkGraphics();
       linkGraphics.addCoordinateSystem(COORDINATE_SYSTEM_LENGTH);
-      linkGraphics.createInertiaEllipsoid(ret, YoAppearance.Orange());
+      createInertiaEllipsoid(ret, linkGraphics, YoAppearance.Orange());
       ret.setLinkGraphics(linkGraphics);
 
       return ret;
@@ -465,7 +479,7 @@ public class RobotTest
 
       LinkGraphics linkGraphics = new LinkGraphics();
       linkGraphics.addCoordinateSystem(COORDINATE_SYSTEM_LENGTH);
-      linkGraphics.createInertiaEllipsoid(ret, YoAppearance.Orange());
+      createInertiaEllipsoid(ret, linkGraphics, YoAppearance.Orange());
       ret.setLinkGraphics(linkGraphics);
 
       return ret;

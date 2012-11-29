@@ -3,11 +3,12 @@ package us.ihmc.IMUKalmanFilter.TestCases;
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.graphics3DAdapter.graphics.LinkGraphics;
+
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.ExternalForcePoint;
 import com.yobotics.simulationconstructionset.FloatingJoint;
 import com.yobotics.simulationconstructionset.Link;
-import com.yobotics.simulationconstructionset.LinkGraphics;
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 

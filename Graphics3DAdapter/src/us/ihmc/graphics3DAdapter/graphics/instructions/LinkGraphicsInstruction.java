@@ -1,6 +1,6 @@
-package com.yobotics.simulationconstructionset.robotdefinition.linkgraphicinstructions;
+package us.ihmc.graphics3DAdapter.graphics.instructions;
 
-import com.yobotics.simulationconstructionset.graphics.YoAppearanceDefinition;
+import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceDefinition;
 
 public abstract class LinkGraphicsInstruction implements LinkGraphicsPrimitiveInstruction
 {

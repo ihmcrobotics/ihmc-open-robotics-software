@@ -6,12 +6,12 @@ import java.util.List;
 
 import javax.media.j3d.Transform3D;
 
-import us.ihmc.graphics3DAdapter.graphics.GraphicsObject;
+import us.ihmc.graphics3DAdapter.graphics.LinkGraphics;
 
 public class Graphics3DNode
 {
    private final Transform3D transform = new Transform3D();
-   private GraphicsObject graphicsObject;
+   private LinkGraphics graphicsObject;
    private final ArrayList<Graphics3DNode> childeren = new ArrayList<Graphics3DNode>();
    
    public Transform3D getTransform()
@@ -32,12 +32,12 @@ public class Graphics3DNode
       return Collections.unmodifiableList(childeren);
    }
    
-   public GraphicsObject getGraphicsObject()
+   public LinkGraphics getGraphicsObject()
    {
       return graphicsObject;
    }
    
-   public void setGraphicsObject(GraphicsObject graphicsObject)
+   public void setGraphicsObject(LinkGraphics graphicsObject)
    {
       this.graphicsObject = graphicsObject;
    }

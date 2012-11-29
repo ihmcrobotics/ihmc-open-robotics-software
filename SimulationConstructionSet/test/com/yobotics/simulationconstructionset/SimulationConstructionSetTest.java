@@ -11,6 +11,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import us.ihmc.graphics3DAdapter.graphics.LinkGraphics;
 import us.ihmc.utilities.keyboardAndMouse.GhostMousePlayback;
 
 public class SimulationConstructionSetTest

@@ -1,7 +1,5 @@
 package us.ihmc.commonWalkingControlModules.kinematics;
 
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
-
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointVelocities;
@@ -12,6 +10,8 @@ import us.ihmc.utilities.screwTheory.DesiredJointAccelerationCalculator;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.utilities.screwTheory.Twist;
+
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public class DesiredJointAccelerationCalculatorInWorldFrame
 {
