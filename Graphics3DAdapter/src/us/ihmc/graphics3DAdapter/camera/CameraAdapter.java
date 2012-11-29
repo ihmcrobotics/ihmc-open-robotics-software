@@ -1,9 +1,9 @@
 package us.ihmc.graphics3DAdapter.camera;
 
-import java.awt.Panel;
+import javax.swing.JPanel;
 
 public interface CameraAdapter
 {
-   public Panel getPanel();
+   public JPanel getPanel();
    public void destroy();
 }
