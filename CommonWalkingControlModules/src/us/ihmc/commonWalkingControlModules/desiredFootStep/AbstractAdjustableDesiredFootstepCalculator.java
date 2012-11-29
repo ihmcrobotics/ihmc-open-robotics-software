@@ -44,9 +44,13 @@ public abstract class AbstractAdjustableDesiredFootstepCalculator implements Des
 
       if (desiredFootstepAdjustor != null)
       {
-         return desiredFootstepAdjustor.adjustDesiredFootstep(desiredFootstep, swingLegSide);
-      }
+         desiredFootstep = desiredFootstepAdjustor.adjustDesiredFootstep(desiredFootstep, swingLegSide);
 
+         desiredFootstep.getPose(footstepPose);
+         footstepPositions.get(swingLegSide).set(footstepPose.getPosition());
+         footstepOrientations.get(swingLegSide).set(footstepPose.getOrientation());
+      }
+      
       return desiredFootstep;
    }
 

@@ -6,24 +6,19 @@ import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredVelo
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.MathTools;
+import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
-import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
-import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFrameOrientation;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 
 
-public class AdjustableDesiredFootstepCalculator implements DesiredFootstepCalculator
+public class AdjustableDesiredFootstepCalculator extends AbstractAdjustableDesiredFootstepCalculator
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry("AdjustableDesiredFootstepCalculator");
-
    // Tunable robot-dependent parameters
    private double goodStandingStepWidth;
    private double goodWalkingStepWidth;
@@ -36,9 +31,7 @@ public class AdjustableDesiredFootstepCalculator implements DesiredFootstepCalcu
 
    private double stepWidthSlopeProfile;
    private double stepWidthYInterceptProfile;
-
-   private DesiredFootstepAdjustor desiredFootstepAdjustor;
-  
+ 
    // Footstep parameters
    private final DoubleYoVariable stepLength = new DoubleYoVariable("stepLength", "step length. [m]", registry);
    private final DoubleYoVariable stepWidth = new DoubleYoVariable("stepWidth", "step width. [m]", registry);
@@ -66,42 +59,19 @@ public class AdjustableDesiredFootstepCalculator implements DesiredFootstepCalcu
    private final DesiredHeadingControlModule desiredHeadingControlModule;
    private final DesiredVelocityControlModule desiredVelocityControlModule;
 
-   // Desired Footstep
-   // private Footstep initialFootstep;
-   private final SideDependentList<YoFramePoint> desiredFootstepPositions;    // = new YoFramePoint("desiredFootstepPosition", "", ReferenceFrame.getWorldFrame(), registry);
-   private final SideDependentList<YoFrameOrientation> desiredFootstepOrientations;    // = new YoFrameOrientation("desiredFootstepOrientation", "", ReferenceFrame.getWorldFrame(), registry);
-
-// private Footstep desiredFootstep; 
 
    public AdjustableDesiredFootstepCalculator(CouplingRegistry couplingRegistry,
            DesiredHeadingControlModule desiredHeadingControlModule, DesiredVelocityControlModule desiredVelocityControlModule,
            YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
            SideDependentList<ReferenceFrame> ankleZUpFrames)
    {
-      desiredFootstepPositions = new SideDependentList<YoFramePoint>();    // = new YoFramePoint("desiredFootstepPosition", "", ReferenceFrame.getWorldFrame(), registry);
-      desiredFootstepOrientations = new SideDependentList<YoFrameOrientation>();
-
-      desiredFootstepPositions.set(RobotSide.LEFT,
-                                   new YoFramePoint("leftDesiredFootstepPosition", "", ankleZUpFrames.get(RobotSide.RIGHT), registry));
-      desiredFootstepPositions.set(RobotSide.RIGHT,
-                                   new YoFramePoint("rightDesiredFootstepPosition", "", ankleZUpFrames.get(RobotSide.LEFT), registry));
-
-      desiredFootstepOrientations.set(RobotSide.LEFT,
-                                      new YoFrameOrientation("leftDesiredFootstepOrientation", "", ankleZUpFrames.get(RobotSide.RIGHT),
-                                         registry));
-      desiredFootstepOrientations.set(RobotSide.RIGHT,
-                                      new YoFrameOrientation("rightDesiredFootstepOrientation", "", ankleZUpFrames.get(RobotSide.LEFT),
-                                         registry));
-
-
-      parentRegistry.addChild(registry);
+      super(getFramesToSaveFootstepIn(ankleZUpFrames), parentRegistry);
 
       this.couplingRegistry = couplingRegistry;
       this.desiredHeadingControlModule = desiredHeadingControlModule;
       this.desiredVelocityControlModule = desiredVelocityControlModule;
       this.ankleZUpFrames = ankleZUpFrames;
    }
-
 
    public void initializeDesiredFootstep(RobotSide supportLegSide)
    {
@@ -127,7 +97,7 @@ public class AdjustableDesiredFootstepCalculator implements DesiredFootstepCalcu
 
       // Create the desired footstep position using the parameters previously computed
       ReferenceFrame supportLegAnkleZUpFrame = ankleZUpFrames.get(supportLegSide);
-      desiredFootstepPositions.get(swingLegSide).set(supportLegAnkleZUpFrame, stepLength.getDoubleValue(), stepWidth.getDoubleValue(),
+      footstepPositions.get(swingLegSide).set(supportLegAnkleZUpFrame, stepLength.getDoubleValue(), stepWidth.getDoubleValue(),
                                    stepHeight.getDoubleValue());
 
 //    desiredFootstepPosition.changeFrame(supportLegAnkleZUpFrame);
@@ -212,9 +182,9 @@ public class AdjustableDesiredFootstepCalculator implements DesiredFootstepCalcu
 //    desiredFootstepOrientation = new Orientation(desiredFootstepPosition.getReferenceFrame(), stepYaw.getDoubleValue(), stepPitch.getDoubleValue(), stepRoll.getDoubleValue());
       FrameOrientation desiredFootstepOrientation = new FrameOrientation(desiredHeadingFrame, stepYaw.getDoubleValue(), stepPitch.getDoubleValue(),
                                                   stepRoll.getDoubleValue());
-      desiredFootstepOrientation.changeFrame(desiredFootstepPositions.get(swingLegSide).getReferenceFrame());
+      desiredFootstepOrientation.changeFrame(footstepOrientations.get(swingLegSide).getReferenceFrame());
 
-      desiredFootstepOrientations.get(swingLegSide).set(desiredFootstepOrientation);
+      footstepOrientations.get(swingLegSide).set(desiredFootstepOrientation);
    }
 
 //   private void computeFootstepYaw(RobotSide swingSide, ReferenceFrame desiredHeadingFrame)
@@ -237,30 +207,6 @@ public class AdjustableDesiredFootstepCalculator implements DesiredFootstepCalcu
    {
    }
 
-
-   public Footstep updateAndGetDesiredFootstep(RobotSide supportLegSide)
-   {
-      RobotSide swingLegSide = supportLegSide.getOppositeSide();
-
-      // Assemble Position and Orientation in the desiredFootStep
-      FramePose footstepPose = new FramePose(desiredFootstepPositions.get(swingLegSide).getFramePointCopy(),
-                                  desiredFootstepOrientations.get(swingLegSide).getFrameOrientationCopy());
-
-      Footstep baseFootstep = new Footstep(footstepPose);
-      
-      if (desiredFootstepAdjustor == null) return baseFootstep;
-      
-//      Footstep adjustedFootstep = adjustDesiredFootstepPosition(baseFootstep, swingLegSide, couplingRegistry.getCaptureRegion());
-      Footstep adjustedFootstep = desiredFootstepAdjustor.adjustDesiredFootstep(baseFootstep, swingLegSide);
-      
-      FramePose adjustedFootstepPose = adjustedFootstep.getPose();
-      desiredFootstepPositions.get(swingLegSide).set(adjustedFootstepPose.getPosition());
-      desiredFootstepOrientations.get(swingLegSide).set(adjustedFootstepPose.getOrientation());
-
-      return adjustedFootstep;
-   }
-
-  
    public void setupParametersForR2()
    {
       goodStandingStepWidth = (0.1016 + 0.09) * 2.0;
@@ -307,10 +253,8 @@ public class AdjustableDesiredFootstepCalculator implements DesiredFootstepCalcu
       stepWidthYInterceptProfile = goodStandingStepWidth - stepWidthSlopeProfile * robotMinVelocity;
    }
 
-   public void addDesiredFootstepAdjustor(DesiredFootstepAdjustor desiredFootstepAdjustor)
+   private static SideDependentList<ReferenceFrame> getFramesToSaveFootstepIn(SideDependentList<ReferenceFrame> ankleZUpFrames)
    {
-      this.desiredFootstepAdjustor = desiredFootstepAdjustor;
+      return new SideDependentList<ReferenceFrame>(ankleZUpFrames.get(RobotSide.RIGHT), ankleZUpFrames.get(RobotSide.LEFT)); // switch
    }
-
-
 }
