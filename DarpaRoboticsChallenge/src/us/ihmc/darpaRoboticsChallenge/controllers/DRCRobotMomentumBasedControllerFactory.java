@@ -17,6 +17,7 @@ import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
+import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
@@ -49,10 +50,19 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
       double narrowWidthOnToesPercentage = 1.0;
       double maxToePointsBack = 0.999;
       double maxHeelPointsForward = 0.999;
+      
+      RigidBody rightFootBody = fullRobotModel.getFoot(RobotSide.RIGHT);
+      ReferenceFrame rightAnkleZUpFrame = referenceFrames.getAnkleZUpFrame(RobotSide.RIGHT);
+      ReferenceFrame rightSoleFrame = referenceFrames.getSoleFrame(RobotSide.RIGHT);
+
+      RigidBody leftFootBody = fullRobotModel.getFoot(RobotSide.LEFT);
+      ReferenceFrame leftAnkleZUpFrame = referenceFrames.getAnkleZUpFrame(RobotSide.LEFT);
+      ReferenceFrame leftSoleFrame = referenceFrames.getSoleFrame(RobotSide.LEFT);
+      
       ResizableBipedFoot rightFoot = ResizableBipedFoot.createRectangularRightFoot(footRotationPreventionFactor, footRotationPreventionFactor, footForward,
-            footBack, footWidth, footHeight, narrowWidthOnToesPercentage, maxToePointsBack, maxHeelPointsForward, referenceFrames, highLevelControllerRegistry,
+            footBack, footWidth, footHeight, narrowWidthOnToesPercentage, maxToePointsBack, maxHeelPointsForward, rightFootBody, rightAnkleZUpFrame, rightSoleFrame, highLevelControllerRegistry,
             dynamicGraphicObjectsListRegistry);
-      ResizableBipedFoot leftFoot = rightFoot.createLeftFootAsMirrorImage(referenceFrames, highLevelControllerRegistry, dynamicGraphicObjectsListRegistry);
+      ResizableBipedFoot leftFoot = rightFoot.createLeftFootAsMirrorImage(leftFootBody, leftAnkleZUpFrame, leftSoleFrame, highLevelControllerRegistry, dynamicGraphicObjectsListRegistry);
       SideDependentList<BipedFootInterface> bipedFeet = new SideDependentList<BipedFootInterface>();
       BipedSupportPolygons bipedSupportPolygons = new BipedSupportPolygons(referenceFrames.getAnkleZUpReferenceFrames(), referenceFrames.getMidFeetZUpFrame(),
             highLevelControllerRegistry, dynamicGraphicObjectsListRegistry);

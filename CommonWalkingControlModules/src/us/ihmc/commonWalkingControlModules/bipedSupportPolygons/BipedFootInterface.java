@@ -5,7 +5,7 @@ import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
-public interface BipedFootInterface
+public interface BipedFootInterface extends ContactablePlaneBody
 {
    public abstract RobotSide getRobotSide();
 
