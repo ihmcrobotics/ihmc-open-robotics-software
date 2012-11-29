@@ -1,8 +1,11 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
+import java.util.List;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactableBody;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
+import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
@@ -44,7 +47,7 @@ public abstract class AbstractAdjustableDesiredFootstepCalculator implements Des
       FramePose footstepPose = new FramePose(footstepPositions.get(swingLegSide).getFramePointCopy(),
                                   footstepOrientations.get(swingLegSide).getFrameOrientationCopy());
       ContactableBody foot = contactableBodies.get(swingLegSide);
-      Footstep desiredFootstep = new Footstep(foot.getRigidBody(), footstepPose, foot.getContactPoints());
+      Footstep desiredFootstep = new Footstep(foot.getRigidBody(), footstepPose, getContactPoints(swingLegSide));
 
       if (desiredFootstepAdjustor != null)
       {
@@ -62,4 +65,6 @@ public abstract class AbstractAdjustableDesiredFootstepCalculator implements Des
    {
       this.desiredFootstepAdjustor = desiredFootstepAdjustor;
    }
+
+   protected abstract List<FramePoint> getContactPoints(RobotSide swingSide);
 }

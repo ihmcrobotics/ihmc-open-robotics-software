@@ -1,6 +1,9 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Matrix3d;
@@ -9,6 +12,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedFootInterface;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
+import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 public class DesiredFootstepCalculatorTools
@@ -69,19 +73,20 @@ public class DesiredFootstepCalculatorTools
          tempFramePoint.changeFrame(bipedFoot.getFootFrame());
          tempFramePoint.changeFrameUsingTransform(ReferenceFrame.getWorldFrame(), footToWorldTransform);
          tempFramePoint.changeFrame(frame);
+
          if (tempFramePoint.getZ() < minFramePoint.getZ())
          {
             minFramePoint.set(tempFramePoint);
             pointFound = true;
          }
       }
-      
+
       if (!pointFound)
          throw new RuntimeException();
 
       return minFramePoint;
    }
-   
+
    public static FramePoint computeMaxXPointInFrame(Transform3D footToWorldTransform, BipedFootInterface bipedFoot, ReferenceFrame frame)
    {
       ArrayList<FramePoint2d> footPoints = bipedFoot.getFootPolygonInSoleFrame().getClockwiseOrderedListOfFramePoints();
@@ -96,16 +101,52 @@ public class DesiredFootstepCalculatorTools
          tempFramePoint.changeFrame(bipedFoot.getFootFrame());
          tempFramePoint.changeFrameUsingTransform(ReferenceFrame.getWorldFrame(), footToWorldTransform);
          tempFramePoint.changeFrame(frame);
+
          if (tempFramePoint.getX() > maxFramePoint.getX())
          {
             maxFramePoint.set(tempFramePoint);
             pointFound = true;
          }
       }
-      
+
       if (!pointFound)
          throw new RuntimeException();
 
       return maxFramePoint;
+   }
+
+   public static List<FramePoint> computeMaximumPointsInDirection(List<FramePoint> framePoints, FrameVector searchDirection, int nPoints)
+   {
+      if (framePoints.size() < nPoints)
+         throw new RuntimeException("Not enough points");
+      List<FramePoint> ret = new ArrayList<FramePoint>(framePoints);
+      Collections.sort(ret, new SearchDirectionFramePointComparator(searchDirection));
+
+      while (ret.size() > nPoints)
+      {
+         ret.remove(0);
+      }
+
+      return ret;
+   }
+
+   public static class SearchDirectionFramePointComparator implements Comparator<FramePoint>
+   {
+      private final FrameVector searchDirection;
+      private final FrameVector differenceVector = new FrameVector(ReferenceFrame.getWorldFrame());
+
+      public SearchDirectionFramePointComparator(FrameVector searchDirection)
+      {
+         this.searchDirection = searchDirection;
+      }
+
+      public int compare(FramePoint o1, FramePoint o2)
+      {
+         differenceVector.setAndChangeFrame(o1);
+         differenceVector.sub(o2);
+         double dotProduct = searchDirection.dot(differenceVector);
+
+         return Double.compare(dotProduct, 0.0);
+      }
    }
 }

@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
+import java.util.List;
+
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
@@ -11,6 +13,7 @@ import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
+import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RotationFunctions;
@@ -203,5 +206,25 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractAdjustableD
    private static SideDependentList<ReferenceFrame> getFramesToStoreFootstepsIn()
    {
       return new SideDependentList<ReferenceFrame>(ReferenceFrame.getWorldFrame(), ReferenceFrame.getWorldFrame());
+   }
+
+   protected List<FramePoint> getContactPoints(RobotSide swingSide)
+   {
+      double stepPitch = this.stepPitch.getDoubleValue();
+      List<FramePoint> allContactPoints = bipedFeet.get(swingSide).getContactPoints();
+      if (stepPitch == 0.0)
+      {
+         return allContactPoints;
+      }
+      else
+      {
+         FrameVector forwardInFootFrame = new FrameVector(bipedFeet.get(swingSide).getFootFrame());
+         ReferenceFrame frame = allContactPoints.get(0).getReferenceFrame();
+         forwardInFootFrame.changeFrame(frame);
+         forwardInFootFrame.scale(Math.signum(stepPitch));
+         int nPoints = 2;
+
+         return DesiredFootstepCalculatorTools.computeMaximumPointsInDirection(allContactPoints, forwardInFootFrame, nPoints);
+      }
    }
 }

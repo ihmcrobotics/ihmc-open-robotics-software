@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
+import java.util.List;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactableBody;
 import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredHeadingControlModule;
@@ -257,5 +259,10 @@ public class AdjustableDesiredFootstepCalculator extends AbstractAdjustableDesir
    private static SideDependentList<ReferenceFrame> getFramesToSaveFootstepIn(SideDependentList<ReferenceFrame> ankleZUpFrames)
    {
       return new SideDependentList<ReferenceFrame>(ankleZUpFrames.get(RobotSide.RIGHT), ankleZUpFrames.get(RobotSide.LEFT)); // switch
+   }
+
+   protected List<FramePoint> getContactPoints(RobotSide swingSide)
+   {
+      return contactableBodies.get(swingSide).getContactPoints();
    }
 }

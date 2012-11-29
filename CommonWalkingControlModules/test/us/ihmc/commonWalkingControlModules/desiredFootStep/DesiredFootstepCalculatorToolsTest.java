@@ -1,0 +1,52 @@
+package us.ihmc.commonWalkingControlModules.desiredFootStep;
+
+import static org.junit.Assert.*;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
+import org.junit.Test;
+
+import us.ihmc.utilities.RandomTools;
+import us.ihmc.utilities.math.geometry.FramePoint;
+import us.ihmc.utilities.math.geometry.FrameVector;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
+
+public class DesiredFootstepCalculatorToolsTest
+{
+   @Test
+   public void testComputeMaximumPoints()
+   {
+      ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+      List<FramePoint> input = new ArrayList<FramePoint>();
+      Random random = new Random(1245L);
+
+      int nTests = 100;
+      for (int i = 0; i < nTests; i++)
+      {         
+         int nPointsIn = 4;
+         double maxLength = 5.0;
+         for (int j = 0; j < nPointsIn; j++)
+         {
+            input.add(new FramePoint(worldFrame, RandomTools.getRandomVector(random, maxLength)));
+         }
+         
+         
+         FrameVector minusYDirection = new FrameVector(worldFrame, 0.0, -1.0, 0.0);
+         int nPointsOut = random.nextInt(nPointsIn);
+         List<FramePoint> outputX = DesiredFootstepCalculatorTools.computeMaximumPointsInDirection(input, minusYDirection, nPointsOut);
+         
+         List<FramePoint> notIncludedX = new ArrayList<FramePoint>(input);
+         notIncludedX.removeAll(outputX);
+         
+         for (FramePoint notIncludedPoint : notIncludedX)
+         {
+            for (FramePoint includedPoint : outputX)
+            {
+               assertTrue(notIncludedPoint.getY() > includedPoint.getY());
+            }
+         }
+      }
+   }
+}
