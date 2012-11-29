@@ -156,7 +156,7 @@ public class SteppingStonesDesiredFootstepCalculator implements DesiredFootstepC
 
          // Create a foot Step Pose from Position and Orientation
          FramePose footstepPose = new FramePose(nominalLocation, footstepOrientation);
-         desiredFootstep = new Footstep(supportLegSide.getOppositeSide(), footstepPose);
+         desiredFootstep = new Footstep(footstepPose);
       }
 
       captureRegion = captureRegion.changeFrameCopy(ReferenceFrame.getWorldFrame());
@@ -197,7 +197,7 @@ public class SteppingStonesDesiredFootstepCalculator implements DesiredFootstepC
 
       // Create a foot Step Pose from Position and Orientation
       FramePose footstepPose = new FramePose(locationToReturn, footstepOrientation);
-      desiredFootstep = new Footstep(supportLegSide.getOppositeSide(), footstepPose);
+      desiredFootstep = new Footstep(footstepPose);
       
       return desiredFootstep;
       }

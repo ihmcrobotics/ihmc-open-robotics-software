@@ -228,7 +228,7 @@ public class FlatThenPolynomialCoMHeightTrajectoryGenerator implements CenterOfM
    private double computeXf(RobotSide supportLeg, Footstep footstep)
    {
       double supportFootMaxX = findMaxXOfGroundContactPoints(supportLeg);
-      double swingFootMaxX = findMaxXOfGroundContactPoints(footstep);
+      double swingFootMaxX = findMaxXOfGroundContactPoints(footstep, supportLeg.getOppositeSide());
 
       return (supportFootMaxX + swingFootMaxX) / 2.0;
    }
@@ -269,21 +269,20 @@ public class FlatThenPolynomialCoMHeightTrajectoryGenerator implements CenterOfM
       return maxX;
    }
 
-   private double findMaxXOfGroundContactPoints(Footstep footstep)
+   private double findMaxXOfGroundContactPoints(Footstep footstep, RobotSide swingSide)
    {
-      RobotSide robotSide = footstep.getFootstepSide();
       FramePose footstepPose = footstep.getFootstepPose();
       Transform3D desiredFootToDesiredHeading = new Transform3D();
       footstepPose.getTransform3D(desiredFootToDesiredHeading);
 
-      ArrayList<FramePoint2d> footPoints = bipedFeet.get(robotSide).getFootPolygonInSoleFrame().getClockwiseOrderedListOfFramePoints();
+      ArrayList<FramePoint2d> footPoints = bipedFeet.get(swingSide).getFootPolygonInSoleFrame().getClockwiseOrderedListOfFramePoints();
       double maxX = Double.NEGATIVE_INFINITY;
       FramePoint tempFramePoint = new FramePoint(ReferenceFrame.getWorldFrame());
       for (FramePoint2d footPoint : footPoints)
       {
          tempFramePoint.setToZero(footPoint.getReferenceFrame());
          tempFramePoint.setXY(footPoint);
-         tempFramePoint.changeFrame(referenceFrames.getFootFrame(robotSide));
+         tempFramePoint.changeFrame(referenceFrames.getFootFrame(swingSide));
 
          tempFramePoint.changeFrameUsingTransform(referenceFrame, desiredFootToDesiredHeading);
          if (tempFramePoint.getX() > maxX)

@@ -55,10 +55,8 @@ public class CapturabilityBasedDesiredFootstepAdjustor implements DesiredFootste
       parentRegistry.addChild(registry);
    }
    
-   public Footstep adjustDesiredFootstep(Footstep baseFootstep)
-   {
-      RobotSide swingLegSide = baseFootstep.getFootstepSide();
-            
+   public Footstep adjustDesiredFootstep(Footstep baseFootstep, RobotSide swingLegSide)
+   {            
       if (!projectIntoCaptureRegion.getBooleanValue())
       {
          nextStepIsInsideCaptureRegion.set(false);

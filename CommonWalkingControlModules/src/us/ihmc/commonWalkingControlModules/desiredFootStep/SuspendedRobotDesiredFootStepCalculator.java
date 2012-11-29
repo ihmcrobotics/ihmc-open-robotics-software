@@ -91,7 +91,7 @@ public class SuspendedRobotDesiredFootStepCalculator implements DesiredFootstepC
       
       // Create a foot Step Pose from Position and Orientation
       FramePose footstepPose = new FramePose(footstepPosition, footstepOrientation);
-      Footstep desiredFootstep = new Footstep(swingLegSide, footstepPose);
+      Footstep desiredFootstep = new Footstep(footstepPose);
       
       return desiredFootstep;
    }

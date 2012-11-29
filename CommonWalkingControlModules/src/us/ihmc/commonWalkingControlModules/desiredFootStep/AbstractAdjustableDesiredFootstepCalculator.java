@@ -40,11 +40,11 @@ public abstract class AbstractAdjustableDesiredFootstepCalculator implements Des
 
       FramePose footstepPose = new FramePose(footstepPositions.get(swingLegSide).getFramePointCopy(),
                                   footstepOrientations.get(swingLegSide).getFrameOrientationCopy());
-      Footstep desiredFootstep = new Footstep(swingLegSide, footstepPose);
+      Footstep desiredFootstep = new Footstep(footstepPose);
 
       if (desiredFootstepAdjustor != null)
       {
-         return desiredFootstepAdjustor.adjustDesiredFootstep(desiredFootstep);
+         return desiredFootstepAdjustor.adjustDesiredFootstep(desiredFootstep, swingLegSide);
       }
 
       return desiredFootstep;

@@ -316,7 +316,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       walkingTrajectoryGenerator.initialize(startPoint, initialSwingVelocityVector, null, endPoint, null);
 
       // Setup the orientation trajectory
-      setupSwingFootOrientationTrajectory(desiredFootstep);
+      setupSwingFootOrientationTrajectory(desiredFootstep, swingSide);
 
       // Set the finalDesiredSwingPosition
       endPoint.changeFrame(finalDesiredSwingFootPosition.getReferenceFrame());
@@ -576,19 +576,18 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       }
    }
 
-   private void setupSwingFootOrientationTrajectory(Footstep desiredFootStep)
+   private void setupSwingFootOrientationTrajectory(Footstep desiredFootStep, RobotSide swingSide)
    { 
       minimumJerkTrajectoryForFootOrientation.setParams(0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, swingOrientationTime.getDoubleValue());
 
-      initializeStartOrientationToMatchActual(desiredFootStep.getFootstepSide());
+      initializeStartOrientationToMatchActual(swingSide);
 
 //    Orientation endOrientation = desiredFootStep.getFootstepPose().getOrientation().changeFrameCopy(endSwingOrientation.getReferenceFrame());
 //    endSwingOrientation.set(endOrientation);
 
       FrameOrientation endOrientation = desiredFootStep.getFootstepPose().getOrientation();
-      RobotSide swingFootSide = desiredFootStep.getFootstepSide();
-      ReferenceFrame supportFootAnkleZUpFrame = referenceFrames.getAnkleZUpFrame(swingFootSide.getOppositeSide());
-      endSwingOrientations.get(swingFootSide).set(endOrientation.changeFrameCopy(supportFootAnkleZUpFrame));
+      ReferenceFrame supportFootAnkleZUpFrame = referenceFrames.getAnkleZUpFrame(swingSide.getOppositeSide());
+      endSwingOrientations.get(swingSide).set(endOrientation.changeFrameCopy(supportFootAnkleZUpFrame));
    }
 
    private void initializeStartOrientationToMatchActual(RobotSide swingSide)
