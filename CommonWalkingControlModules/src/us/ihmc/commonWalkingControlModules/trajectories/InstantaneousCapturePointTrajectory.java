@@ -1,9 +1,9 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
-import com.yobotics.simulationconstructionset.util.trajectory.Finishable;
-
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
+
+import com.yobotics.simulationconstructionset.util.trajectory.Finishable;
 
 public interface InstantaneousCapturePointTrajectory extends Finishable
 {

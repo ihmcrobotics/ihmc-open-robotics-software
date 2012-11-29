@@ -14,6 +14,8 @@ import javax.vecmath.Vector3d;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.graphics3DAdapter.graphics.LinkGraphics;
+import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -23,11 +25,9 @@ import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.ExternalForcePoint;
 import com.yobotics.simulationconstructionset.FloatingJoint;
 import com.yobotics.simulationconstructionset.Link;
-import com.yobotics.simulationconstructionset.LinkGraphics;
 import com.yobotics.simulationconstructionset.PinJoint;
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.UnreasonableAccelerationException;
-import com.yobotics.simulationconstructionset.YoAppearance;
 import com.yobotics.simulationconstructionset.util.robotExplorer.RobotExplorer;
 
 /**
@@ -424,7 +424,11 @@ public class InverseDynamicsCalculatorTest
       link.setComOffset(comOffset);
 
       LinkGraphics linkGraphics = new LinkGraphics();
-      linkGraphics.createInertiaEllipsoid(link, YoAppearance.Red());
+      Matrix3d momentOfInertia = new Matrix3d();
+      link.getMomentOfInertia(momentOfInertia);
+      double mass = link.getMass();
+      
+      linkGraphics.createInertiaEllipsoid(momentOfInertia, comOffset, mass, YoAppearance.Red());
       link.setLinkGraphics(linkGraphics);
 
       return link;

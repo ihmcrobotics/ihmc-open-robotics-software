@@ -1,9 +1,9 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
-import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
-
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.FramePoint;
+
+import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 
 public interface GroundTrajectoryGenerator
 {

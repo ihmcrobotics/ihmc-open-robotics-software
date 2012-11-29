@@ -1,8 +1,6 @@
-package com.yobotics.simulationconstructionset.robotdefinition.linkgraphicinstructions;
+package us.ihmc.graphics3DAdapter.graphics.instructions;
 
 import javax.vecmath.Matrix3d;
-
-import com.yobotics.simulationconstructionset.gui.XMLReaderUtility;
 
 public class LinkGraphicsRotateMatrix implements LinkGraphicsPrimitiveInstruction
 {
@@ -19,8 +17,8 @@ public class LinkGraphicsRotateMatrix implements LinkGraphicsPrimitiveInstructio
 
    public String toString()
    {
-
-      return "\t\t\t<RotateMatrix>"+XMLReaderUtility.matrix3DToString(rot)+"</RotateMatrix>\n";
+      String matrix = rot.toString().replaceAll("\n", ", ");
+      return "\t\t\t<RotateMatrix>"+matrix.substring(0, matrix.length() - 2)+"</RotateMatrix>\n";
    }
    public boolean hasChangedSinceLastCalled()
    {

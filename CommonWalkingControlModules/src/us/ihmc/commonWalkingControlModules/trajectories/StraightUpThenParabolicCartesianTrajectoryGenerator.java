@@ -10,9 +10,9 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 import com.yobotics.simulationconstructionset.util.trajectory.CartesianTrajectoryGenerator;
-import com.yobotics.simulationconstructionset.util.trajectory.YoPolynomial;
 import com.yobotics.simulationconstructionset.util.trajectory.YoMinimumJerkTrajectory;
 import com.yobotics.simulationconstructionset.util.trajectory.YoParabolicTrajectoryGenerator;
+import com.yobotics.simulationconstructionset.util.trajectory.YoPolynomial;
 
 public class StraightUpThenParabolicCartesianTrajectoryGenerator implements CartesianTrajectoryGenerator
 {

@@ -5,10 +5,10 @@ import javax.media.j3d.BranchGroup;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.terrain.CommonTerrain;
 import us.ihmc.commonWalkingControlModules.terrain.TerrainType;
+import us.ihmc.graphics3DAdapter.graphics.LinkGraphics;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.GroundProfile;
-import com.yobotics.simulationconstructionset.LinkGraphics;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.LinearGroundContactModel;

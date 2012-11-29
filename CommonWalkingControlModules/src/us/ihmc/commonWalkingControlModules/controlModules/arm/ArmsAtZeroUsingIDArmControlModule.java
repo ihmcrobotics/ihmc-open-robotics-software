@@ -2,7 +2,6 @@ package us.ihmc.commonWalkingControlModules.controlModules.arm;
 
 import java.util.EnumMap;
 
-import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.ArmJointName;
 import us.ihmc.commonWalkingControlModules.sensors.ProcessedSensorsInterface;
 import us.ihmc.robotSide.RobotSide;

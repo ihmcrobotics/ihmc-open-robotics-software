@@ -1,4 +1,4 @@
-package com.yobotics.simulationconstructionset.robotdefinition.linkgraphicinstructions;
+package us.ihmc.graphics3DAdapter.graphics.instructions;
 
 import javax.vecmath.Vector3d;
 

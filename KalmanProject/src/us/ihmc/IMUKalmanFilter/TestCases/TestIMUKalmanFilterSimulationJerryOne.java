@@ -3,10 +3,10 @@ package us.ihmc.IMUKalmanFilter.TestCases;
 import us.ihmc.IMUKalmanFilter.QuaternionBasedArrayFullIMUKalmanFilter;
 import us.ihmc.IMUKalmanFilter.QuaternionBasedFullIMUKalmanFilter;
 import us.ihmc.IMUKalmanFilter.QuaternionBasedJamaFullIMUKalmanFilter;
+import us.ihmc.graphics3DAdapter.graphics.LinkGraphics;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.Link;
-import com.yobotics.simulationconstructionset.LinkGraphics;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.util.inputdevices.MidiSliderBoard;
 

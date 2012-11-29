@@ -11,10 +11,10 @@ import org.junit.Test;
 
 import us.ihmc.utilities.math.Differentiator;
 import us.ihmc.utilities.math.MathTools;
+import us.ihmc.utilities.math.geometry.Direction;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.math.geometry.Direction;
 
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
