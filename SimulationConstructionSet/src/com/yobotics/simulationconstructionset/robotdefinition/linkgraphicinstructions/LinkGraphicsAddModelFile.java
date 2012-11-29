@@ -2,10 +2,9 @@ package com.yobotics.simulationconstructionset.robotdefinition.linkgraphicinstru
 
 import com.yobotics.simulationconstructionset.graphics.YoAppearanceDefinition;
 
-public class LinkGraphicsAddModelFile implements LinkGraphicsInstruction
+public class LinkGraphicsAddModelFile extends LinkGraphicsInstruction
 {
    private String fileName;
-   private YoAppearanceDefinition appearance = null;
 
    public LinkGraphicsAddModelFile(String fileName)
    {
@@ -23,10 +22,6 @@ public class LinkGraphicsAddModelFile implements LinkGraphicsInstruction
       return fileName;
    }
 
-   public YoAppearanceDefinition getAppearance()
-   {
-      return appearance;
-   }
 
    public String toString()
    {

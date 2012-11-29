@@ -2,7 +2,7 @@ package com.yobotics.simulationconstructionset.robotdefinition.linkgraphicinstru
 
 import javax.vecmath.Vector3d;
 
-public class LinkGraphicsRotate implements LinkGraphicsInstruction
+public class LinkGraphicsRotate implements LinkGraphicsPrimitiveInstruction
 {
    private double angle;
    private Vector3d axis;
@@ -24,5 +24,9 @@ public class LinkGraphicsRotate implements LinkGraphicsInstruction
    public String toString()
    {
       return "\t\t\t<Rotate>"+angle+","+axis.x+","+axis.y+","+axis.z+"</Rotate>\n";
+   }
+   public boolean hasChangedSinceLastCalled()
+   {
+      return false;
    }
 }

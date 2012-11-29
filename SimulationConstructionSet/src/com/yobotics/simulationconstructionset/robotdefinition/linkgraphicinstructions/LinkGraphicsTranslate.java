@@ -2,7 +2,7 @@ package com.yobotics.simulationconstructionset.robotdefinition.linkgraphicinstru
 
 import javax.vecmath.Vector3d;
 
-public class LinkGraphicsTranslate implements LinkGraphicsInstruction
+public class LinkGraphicsTranslate implements LinkGraphicsPrimitiveInstruction
 {
    private Vector3d translation = new Vector3d();
 
@@ -25,5 +25,10 @@ public class LinkGraphicsTranslate implements LinkGraphicsInstruction
    public String toString()
    {
       return "\t\t\t<Translate>" + translation + "</Translate>\n";
+   }
+
+   public boolean hasChangedSinceLastCalled()
+   {
+      return false;
    }
 }
