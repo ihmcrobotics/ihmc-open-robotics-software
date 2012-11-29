@@ -10,7 +10,7 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 import com.yobotics.simulationconstructionset.util.trajectory.CartesianTrajectoryGenerator;
-import com.yobotics.simulationconstructionset.util.trajectory.PolynomialSpline;
+import com.yobotics.simulationconstructionset.util.trajectory.YoPolynomial;
 import com.yobotics.simulationconstructionset.util.trajectory.YoMinimumJerkTrajectory;
 import com.yobotics.simulationconstructionset.util.trajectory.YoParabolicTrajectoryGenerator;
 
@@ -18,7 +18,7 @@ public class StraightUpThenParabolicCartesianTrajectoryGenerator implements Cart
 {
    private final String namePostFix = getClass().getSimpleName();
    private final YoVariableRegistry registry;
-   private final PolynomialSpline straightUpParameterTrajectory;
+   private final YoPolynomial straightUpParameterTrajectory;
    private final YoMinimumJerkTrajectory parabolicParameterTrajectory;
    private final YoParabolicTrajectoryGenerator parabolicTrajectoryGenerator;
    private final DoubleYoVariable groundClearance;
@@ -35,7 +35,7 @@ public class StraightUpThenParabolicCartesianTrajectoryGenerator implements Cart
    {
       this.registry = new YoVariableRegistry(namePrefix + namePostFix);
 
-      this.straightUpParameterTrajectory = new PolynomialSpline(namePrefix + "StraightUp", 6, registry);
+      this.straightUpParameterTrajectory = new YoPolynomial(namePrefix + "StraightUp", 6, registry);
       this.parabolicParameterTrajectory = new YoMinimumJerkTrajectory(namePrefix + "Parabolic", registry);
       this.parabolicTrajectoryGenerator = new YoParabolicTrajectoryGenerator(namePrefix, referenceFrame, registry);
       this.groundClearance = new DoubleYoVariable("groundClearance", registry);

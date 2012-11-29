@@ -14,14 +14,14 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 import com.yobotics.simulationconstructionset.util.trajectory.DoubleProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.LegacyCartesianTrajectoryGeneratorPositionTrajectoryGeneratorWrapper;
-import com.yobotics.simulationconstructionset.util.trajectory.PolynomialSpline;
+import com.yobotics.simulationconstructionset.util.trajectory.YoPolynomial;
 
 public class FifthOrderWaypointCartesianTrajectoryGenerator implements LegacyCartesianTrajectoryGeneratorPositionTrajectoryGeneratorWrapper
 {
    private final String namePostFix = getClass().getSimpleName();
    private final YoVariableRegistry registry;
-   private final EnumMap<Direction, PolynomialSpline> spaceSplines = new EnumMap<Direction, PolynomialSpline>(Direction.class);
-   private final PolynomialSpline timeSpline;
+   private final EnumMap<Direction, YoPolynomial> spaceSplines = new EnumMap<Direction, YoPolynomial>(Direction.class);
+   private final YoPolynomial timeSpline;
    private final DoubleProvider stepTimeProvider;
    
    private final DoubleYoVariable waypointHeight;
@@ -42,9 +42,9 @@ public class FifthOrderWaypointCartesianTrajectoryGenerator implements LegacyCar
 
       for (Direction direction : Direction.values())
       {
-         spaceSplines.put(direction, new PolynomialSpline(namePrefix + direction, 5, registry));
+         spaceSplines.put(direction, new YoPolynomial(namePrefix + direction, 5, registry));
       }
-      timeSpline = new PolynomialSpline(namePrefix + "Time", 4, registry);
+      timeSpline = new YoPolynomial(namePrefix + "Time", 4, registry);
       this.stepTimeProvider = stepTimeProvider;
 
       this.waypointHeight = new DoubleYoVariable("waypointHeight", registry);
@@ -98,7 +98,7 @@ public class FifthOrderWaypointCartesianTrajectoryGenerator implements LegacyCar
          double zIntermediate = intermediatePosition.get(direction);
          double zf = finalDesiredPosition.get(direction);
          double zdf = finalDirection.get(direction);
-         PolynomialSpline spaceSpline = spaceSplines.get(direction);
+         YoPolynomial spaceSpline = spaceSplines.get(direction);
          spaceSpline.setQuarticUsingWayPoint(t0, tIntermediate, tFinal, z0, zd0, zIntermediate, zf, zdf);
       }
 
@@ -154,7 +154,7 @@ public class FifthOrderWaypointCartesianTrajectoryGenerator implements LegacyCar
 
       for (Direction direction : Direction.values())
       {
-         PolynomialSpline spaceSpline = spaceSplines.get(direction);
+         YoPolynomial spaceSpline = spaceSplines.get(direction);
          spaceSpline.compute(parameter);
          desiredPosition.set(direction, spaceSplines.get(direction).getPosition());
          tempVector.set(direction, spaceSplines.get(direction).getVelocity());
