@@ -310,8 +310,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          }
          else
          {
-            Footstep currentFootstep = new Footstep(new FramePose(referenceFrames.getFootFrame(transferToSide)));
-            finalDesiredICP = getDoubleSupportFinalDesiredICPForWalking(currentFootstep, bipedFeet.get(transferToSide).getFootPolygonInSoleFrame(), transferToSide);
+            FramePose currentFramePose = new FramePose(referenceFrames.getFootFrame(transferToSide));
+            finalDesiredICP = getDoubleSupportFinalDesiredICPForWalking(currentFramePose, bipedFeet.get(transferToSide).getFootPolygonInSoleFrame(), transferToSide);
          }
 
          finalDesiredICP.changeFrame(desiredICP.getReferenceFrame());
@@ -523,7 +523,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       return ret;
    }
 
-   private FramePoint2d getDoubleSupportFinalDesiredICPForWalking(Footstep footstep, FrameConvexPolygon2d footPolygonInSoleFrame, RobotSide transferToSide)
+   private FramePoint2d getDoubleSupportFinalDesiredICPForWalking(FramePose footstepPose, FrameConvexPolygon2d footPolygonInSoleFrame, RobotSide transferToSide)
    {
       if (footPolygonInSoleFrame.getReferenceFrame() != referenceFrames.getSoleFrame(transferToSide))
       {
@@ -531,7 +531,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       }
 
       ReferenceFrame stairDirectionFrame = worldFrame;
-      FramePose footstepPose = footstep.getPose();
       footstepPose.changeFrame(stairDirectionFrame);
 
       Transform3D footstepTransform = new Transform3D();
@@ -559,7 +558,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       initialDesiredICP.changeFrame(referenceFrame);
 
       // TODO: think about setting the shift factor here
-      FramePoint2d finalDesiredICP = getDoubleSupportFinalDesiredICPForWalking(desiredFootstep, bipedFeet.get(swingSide).getFootPolygonInSoleFrame(), swingSide);    // yes, swing side
+      FramePoint2d finalDesiredICP = getDoubleSupportFinalDesiredICPForWalking(desiredFootstep.getPoseCopy(), bipedFeet.get(swingSide).getFootPolygonInSoleFrame(), swingSide);    // yes, swing side
       finalDesiredICP.changeFrame(referenceFrame);
 
       FrameLineSegment2d initialToFinal = new FrameLineSegment2d(initialDesiredICP, finalDesiredICP);

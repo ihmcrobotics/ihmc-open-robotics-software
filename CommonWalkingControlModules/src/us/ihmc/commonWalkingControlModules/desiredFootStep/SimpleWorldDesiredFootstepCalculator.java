@@ -37,7 +37,7 @@ public class SimpleWorldDesiredFootstepCalculator extends AbstractAdjustableDesi
    public SimpleWorldDesiredFootstepCalculator(SideDependentList<BipedFootInterface> bipedFeet, CommonWalkingReferenceFrames referenceFrames,
            DesiredHeadingControlModule desiredHeadingControlModule, YoVariableRegistry parentRegistry)
    {
-      super(getFramesToStoreFootstepsIn(), parentRegistry);
+      super(bipedFeet, getFramesToStoreFootstepsIn(), parentRegistry);
       this.desiredHeadingControlModule = desiredHeadingControlModule;
       this.referenceFrames = referenceFrames;
       this.bipedFeet = bipedFeet;

@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactableBody;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredHeadingControlModule;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
@@ -28,43 +29,48 @@ public class SuspendedRobotDesiredFootStepCalculator implements DesiredFootstepC
    private final DoubleYoVariable stepYaw = new DoubleYoVariable("stepYaw", registry);
    private final DoubleYoVariable stepPitch = new DoubleYoVariable("stepPitch", registry);
    private final DoubleYoVariable stepRoll = new DoubleYoVariable("stepRoll", registry);
-   
+
    private final IntegerYoVariable state = new IntegerYoVariable("state", registry);
-   
-   public SuspendedRobotDesiredFootStepCalculator(SideDependentList<ReferenceFrame> ankleZUpFrames, DesiredHeadingControlModule desiredHeadingControlModule, YoVariableRegistry parentRegistry)
+   private final SideDependentList<? extends ContactableBody> contactableBodies;
+
+   public SuspendedRobotDesiredFootStepCalculator(SideDependentList<? extends ContactableBody> contactableBodies,
+           SideDependentList<ReferenceFrame> ankleZUpFrames, DesiredHeadingControlModule desiredHeadingControlModule, YoVariableRegistry parentRegistry)
    {
+      this.contactableBodies = contactableBodies;
       this.ankleZUpFrames = ankleZUpFrames;
       this.desiredHeadingControlModule = desiredHeadingControlModule;
       parentRegistry.addChild(registry);
-      
+
       stepLength.set(0.20);
       stepWidth.set(0.22);
       stepHeight.set(0.0);
       stepYaw.set(0.0);
       stepPitch.set(0.0);
       stepRoll.set(0.0);
-      
+
       state.set(0);
 
    }
 
    public void initializeDesiredFootstep(RobotSide supportLegSide)
    {
-      
-      switch(state.getIntegerValue())
+      switch (state.getIntegerValue())
       {
-      case 0:
-         currentStepLength.set(stepLength.getDoubleValue());
-         break;
-      case 1:
-         currentStepLength.set(-stepLength.getDoubleValue());
-         break;
+         case 0 :
+            currentStepLength.set(stepLength.getDoubleValue());
+
+            break;
+
+         case 1 :
+            currentStepLength.set(-stepLength.getDoubleValue());
+
+            break;
       }
-      
+
       state.increment();
-      if(state.getIntegerValue() > 1)
+      if (state.getIntegerValue() > 1)
          state.set(0);
-      
+
       updateAndGetDesiredFootstep(supportLegSide);
    }
 
@@ -78,34 +84,37 @@ public class SuspendedRobotDesiredFootStepCalculator implements DesiredFootstepC
 
       // Footstep Position
       FramePoint footstepPosition = new FramePoint(supportAnkleZUpFrame);
-      FrameVector footstepOffset = new FrameVector(desiredHeadingFrame, currentStepLength.getDoubleValue(), supportLegSide.negateIfLeftSide(stepWidth.getDoubleValue()), stepHeight.getDoubleValue());
-      
+      FrameVector footstepOffset = new FrameVector(desiredHeadingFrame, currentStepLength.getDoubleValue(),
+                                      supportLegSide.negateIfLeftSide(stepWidth.getDoubleValue()), stepHeight.getDoubleValue());
+
       footstepPosition.changeFrame(desiredHeadingFrame);
-//      footstepOffset.changeFrame(supportAnkleZUpFrame);
-      footstepPosition.add(footstepOffset); 
+
+//    footstepOffset.changeFrame(supportAnkleZUpFrame);
+      footstepPosition.add(footstepOffset);
 
       // Footstep Orientation
-      FrameOrientation footstepOrientation = new FrameOrientation(desiredHeadingFrame); 
+      FrameOrientation footstepOrientation = new FrameOrientation(desiredHeadingFrame);
       footstepOrientation.setYawPitchRoll(stepYaw.getDoubleValue(), stepPitch.getDoubleValue(), stepRoll.getDoubleValue());
-//      footstepOrientation.changeFrame(supportAnkleZUpFrame);
-      
+
+//    footstepOrientation.changeFrame(supportAnkleZUpFrame);
+
       // Create a foot Step Pose from Position and Orientation
       FramePose footstepPose = new FramePose(footstepPosition, footstepOrientation);
-      Footstep desiredFootstep = new Footstep(footstepPose);
-      
+      Footstep desiredFootstep = new Footstep(contactableBodies.get(swingLegSide).getRigidBody(), footstepPose);
+
       return desiredFootstep;
    }
 
    public void setupParametersForM2V2()
    {
       // TODO Auto-generated method stub
-      
+
    }
 
    public void setupParametersForR2()
    {
       // TODO Auto-generated method stub
-      
+
    }
-   
+
 }

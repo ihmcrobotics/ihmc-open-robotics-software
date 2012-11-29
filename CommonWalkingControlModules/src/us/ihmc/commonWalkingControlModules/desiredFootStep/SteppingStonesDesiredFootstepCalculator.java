@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import javax.vecmath.Point2d;
 
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactableBody;
 import us.ihmc.commonWalkingControlModules.captureRegion.CaptureRegionCalculator;
 import us.ihmc.commonWalkingControlModules.captureRegion.SteppingStonesCaptureRegionIntersectionCalculator;
 import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
@@ -66,22 +67,25 @@ public class SteppingStonesDesiredFootstepCalculator implements DesiredFootstepC
    private final CaptureRegionStepLocationSelectionMethod captureRegionStepLocationSelectionMethod = CaptureRegionStepLocationSelectionMethod.NEAREST_POINT;
 
    private boolean VISUALIZE = true;
-   
+
    private final CouplingRegistry couplingRegistry;
 
    private Footstep desiredFootstep;
 
-   
+   private final SideDependentList<? extends ContactableBody> contactableBodies;
+
+
    // Constructors
-   public SteppingStonesDesiredFootstepCalculator(SteppingStones steppingStones, CouplingRegistry couplingRegistry, CommonWalkingReferenceFrames commonWalkingReferenceFrames,
-           CaptureRegionCalculator captureRegionCalculator, YoVariableRegistry yoVariableRegistry,
-           DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+   public SteppingStonesDesiredFootstepCalculator(SideDependentList<? extends ContactableBody> contactableBodies, SteppingStones steppingStones,
+           CouplingRegistry couplingRegistry, CommonWalkingReferenceFrames commonWalkingReferenceFrames, CaptureRegionCalculator captureRegionCalculator,
+           YoVariableRegistry yoVariableRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       percentNominalToAdjusted.set(1.0);
 
       this.couplingRegistry = couplingRegistry;
+      this.contactableBodies = contactableBodies;
 
-      
+
       double defaultStepWidth = 0.22;
       stanceWidth.set(defaultStepWidth);
       double defaultStanceLength = captureRegionCalculator.getKinematicRangeFromContactReferencePoint() * 0.5;    // 0.7;//0.40;
@@ -128,10 +132,10 @@ public class SteppingStonesDesiredFootstepCalculator implements DesiredFootstepC
    }
 
    // Getters
-//   public Footstep getDesiredFootstep()
-//   {
-//      return desiredFootstep;
-//   }
+// public Footstep getDesiredFootstep()
+// {
+//    return desiredFootstep;
+// }
 
 
    public void initializeDesiredFootstep(RobotSide supportLegSide)
@@ -147,7 +151,7 @@ public class SteppingStonesDesiredFootstepCalculator implements DesiredFootstepC
       Point2d nominalLocation2d = new Point2d(nominalLocation.getX(), nominalLocation.getY());
 
       FrameConvexPolygon2d captureRegion = couplingRegistry.getCaptureRegion();
-      
+
       if (captureRegion == null)
       {
          // Foot Step Orientation
@@ -156,7 +160,7 @@ public class SteppingStonesDesiredFootstepCalculator implements DesiredFootstepC
 
          // Create a foot Step Pose from Position and Orientation
          FramePose footstepPose = new FramePose(nominalLocation, footstepOrientation);
-         desiredFootstep = new Footstep(footstepPose);
+         desiredFootstep = new Footstep(contactableBodies.get(supportLegSide.getOppositeSide()).getRigidBody(), footstepPose);
       }
 
       captureRegion = captureRegion.changeFrameCopy(ReferenceFrame.getWorldFrame());
@@ -197,10 +201,10 @@ public class SteppingStonesDesiredFootstepCalculator implements DesiredFootstepC
 
       // Create a foot Step Pose from Position and Orientation
       FramePose footstepPose = new FramePose(locationToReturn, footstepOrientation);
-      desiredFootstep = new Footstep(footstepPose);
-      
+      desiredFootstep = new Footstep(contactableBodies.get(supportLegSide.getOppositeSide()).getRigidBody(), footstepPose);
+
       return desiredFootstep;
-      }
+   }
 
    public FramePoint getNominalStepLocation(RobotSide supportLeg)
    {
@@ -218,9 +222,9 @@ public class SteppingStonesDesiredFootstepCalculator implements DesiredFootstepC
       return desiredSwingToPosition;
    }
 
-   public double getStepLocationScore(RobotSide supportLeg, Footstep desiredFootstep)
+   public double getStepLocationScore(RobotSide supportLeg, FramePose desiredFootPose)
    {
-      return stepLocationScorer.getStepLocationScore(supportLeg, desiredFootstep);
+      return stepLocationScorer.getStepLocationScore(supportLeg, desiredFootPose);
    }
 
    private void computeAndSetBestNearestPointToStepTo(Point2d nominalLocation2d, ArrayList<ConvexPolygon2d> captureRegionSteppingStonesIntersections)
@@ -284,15 +288,14 @@ public class SteppingStonesDesiredFootstepCalculator implements DesiredFootstepC
    private enum CaptureRegionStepLocationSelectionMethod {NEAREST_CENTROID, NEAREST_POINT}
 
    public void setupParametersForM2V2()
-   {      
+   {
    }
 
    public void setupParametersForR2()
-   {      
+   {
    }
 
 
 
 
-  
 }

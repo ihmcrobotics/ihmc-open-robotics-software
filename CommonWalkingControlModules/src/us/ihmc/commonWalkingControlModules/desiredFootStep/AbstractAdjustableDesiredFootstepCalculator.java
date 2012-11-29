@@ -1,9 +1,11 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactableBody;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.screwTheory.RigidBody;
 
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameOrientation;
@@ -14,11 +16,13 @@ public abstract class AbstractAdjustableDesiredFootstepCalculator implements Des
    protected final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    protected final SideDependentList<YoFramePoint> footstepPositions = new SideDependentList<YoFramePoint>();
    protected final SideDependentList<YoFrameOrientation> footstepOrientations = new SideDependentList<YoFrameOrientation>();
+   protected final SideDependentList<? extends ContactableBody> contactableBodies;
 
    private DesiredFootstepAdjustor desiredFootstepAdjustor;
 
-   public AbstractAdjustableDesiredFootstepCalculator(SideDependentList<ReferenceFrame> framesToSaveFootstepIn, YoVariableRegistry parentRegistry)
+   public AbstractAdjustableDesiredFootstepCalculator(SideDependentList<? extends ContactableBody> contactableBodies, SideDependentList<ReferenceFrame> framesToSaveFootstepIn, YoVariableRegistry parentRegistry)
    {
+      this.contactableBodies = contactableBodies;
       for (RobotSide robotSide : RobotSide.values())
       {
          String namePrefix = robotSide.getCamelCaseNameForMiddleOfExpression() + "Footstep";
@@ -40,7 +44,8 @@ public abstract class AbstractAdjustableDesiredFootstepCalculator implements Des
 
       FramePose footstepPose = new FramePose(footstepPositions.get(swingLegSide).getFramePointCopy(),
                                   footstepOrientations.get(swingLegSide).getFrameOrientationCopy());
-      Footstep desiredFootstep = new Footstep(footstepPose);
+      RigidBody foot = contactableBodies.get(swingLegSide).getRigidBody();
+      Footstep desiredFootstep = new Footstep(foot, footstepPose);
 
       if (desiredFootstepAdjustor != null)
       {

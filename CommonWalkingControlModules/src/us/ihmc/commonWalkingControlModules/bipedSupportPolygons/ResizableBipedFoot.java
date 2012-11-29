@@ -521,7 +521,7 @@ public class ResizableBipedFoot implements BipedFootInterface
       return getFootPolygonInSoleFrame();
    }
 
-   public RigidBody getContactingBody()
+   public RigidBody getRigidBody()
    {
       return body;
    }
