@@ -100,12 +100,18 @@ public class SimpleDesiredCapturePointCalculator implements DesiredCapturePointC
    private boolean useToePoint()
    {
       RobotSide upcomingSupportLeg = couplingRegistry.getUpcomingSupportLeg();
-      RobotSide upcomingSwingLeg = upcomingSupportLeg.getOppositeSide();
       
-      FramePoint upcomingSupportPoint = new FramePoint(referenceFrames.getAnkleZUpFrame(upcomingSupportLeg));
-      upcomingSupportPoint.changeFrame(referenceFrames.getAnkleZUpFrame(upcomingSwingLeg));
-      
-      return upcomingSupportPoint.getX() > footForward && USEUPCOMINGSWINGTOEASSWEETSPOT; 
+      if (upcomingSupportLeg == null)
+         return false;
+      else
+      {         
+         RobotSide upcomingSwingLeg = upcomingSupportLeg.getOppositeSide();
+         
+         FramePoint upcomingSupportPoint = new FramePoint(referenceFrames.getAnkleZUpFrame(upcomingSupportLeg));
+         upcomingSupportPoint.changeFrame(referenceFrames.getAnkleZUpFrame(upcomingSwingLeg));
+         
+         return upcomingSupportPoint.getX() > footForward && USEUPCOMINGSWINGTOEASSWEETSPOT; 
+      }
    }
    
    private FramePoint2d computeCapturePointMotion()
