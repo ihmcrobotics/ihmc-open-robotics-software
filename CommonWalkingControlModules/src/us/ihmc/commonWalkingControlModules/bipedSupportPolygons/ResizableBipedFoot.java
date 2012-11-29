@@ -1,17 +1,18 @@
 package us.ihmc.commonWalkingControlModules.bipedSupportPolygons;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 
-import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.ConvexHullCalculator2d;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.screwTheory.RigidBody;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.EnumYoVariable;
@@ -23,6 +24,7 @@ public class ResizableBipedFoot implements BipedFootInterface
 {
    private final YoVariableRegistry registry;
 
+   private final RigidBody body;
    private final RobotSide robotSide;
    private final ReferenceFrame footFrame, ankleZUpFrame, soleFrame;
 
@@ -40,9 +42,10 @@ public class ResizableBipedFoot implements BipedFootInterface
    private final FramePoint insideToePoint, outsideToePoint, insideHeelPoint, outsideHeelPoint;
 
    // Constructor:
-   public ResizableBipedFoot(CommonWalkingReferenceFrames referenceFrames, RobotSide robotSide, ArrayList<Point3d> clockwiseToePoints,
-                             ArrayList<Point3d> clockwiseHeelPoints, double maxToePointsBack, double maxHeelPointsForward, double narrowWidthOnToesPercentage,
-                             YoVariableRegistry yoVariableRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+   public ResizableBipedFoot(RigidBody body, ReferenceFrame ankleZUpFrame, ReferenceFrame soleFrame, RobotSide robotSide,
+                             ArrayList<Point3d> clockwiseToePoints, ArrayList<Point3d> clockwiseHeelPoints, double maxToePointsBack,
+                             double maxHeelPointsForward, double narrowWidthOnToesPercentage, YoVariableRegistry yoVariableRegistry,
+                             DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       registry = new YoVariableRegistry(robotSide + "BipedFoot");
       this.narrowWidthOnToesPercentage = narrowWidthOnToesPercentage;
@@ -87,11 +90,12 @@ public class ResizableBipedFoot implements BipedFootInterface
          throw new RuntimeException("Not convex and clockwise when fully on heel!");
 
       // Actual construction:
+      this.body = body;
       this.robotSide = robotSide;
 
-      this.footFrame = referenceFrames.getFootFrame(robotSide);
-      this.ankleZUpFrame = referenceFrames.getAnkleZUpFrame(robotSide);
-      this.soleFrame = referenceFrames.getSoleFrame(robotSide);
+      this.footFrame = body.getParentJoint().getFrameAfterJoint();
+      this.ankleZUpFrame = ankleZUpFrame;
+      this.soleFrame = soleFrame;
       this.toePoints = new ArrayList<FramePoint>(clockwiseToePoints.size());
       this.heelPoints = new ArrayList<FramePoint>(clockwiseHeelPoints.size());
 
@@ -183,10 +187,11 @@ public class ResizableBipedFoot implements BipedFootInterface
       switch (footPolygonEnum)
       {
          case FLAT :
-         case FREE : // TODO
+         case FREE :    // TODO
          {
             footPolygonPoints.addAll(toePoints);
             footPolygonPoints.addAll(heelPoints);
+
             break;
          }
 
@@ -232,6 +237,7 @@ public class ResizableBipedFoot implements BipedFootInterface
             throw new RuntimeException("Unrecognized foot polygon: " + footPolygonEnum);
          }
       }
+
       return footPolygonPoints;
    }
 
@@ -245,10 +251,10 @@ public class ResizableBipedFoot implements BipedFootInterface
 
    private ArrayList<FramePoint2d> changeFrameToZUpAndProjectToXYPlane(ReferenceFrame zUpFrame, ArrayList<FramePoint> points)
    {
-//      if (!zUpFrame.isZupFrame())
-//      {
-//         throw new RuntimeException("Must be a ZUp frame!");
-//      }
+//    if (!zUpFrame.isZupFrame())
+//    {
+//       throw new RuntimeException("Must be a ZUp frame!");
+//    }
 
       ArrayList<FramePoint2d> ret = new ArrayList<FramePoint2d>(points.size());
 
@@ -302,7 +308,7 @@ public class ResizableBipedFoot implements BipedFootInterface
       if (footPolygonInUse == FootPolygonEnum.FLAT)
          setShift(Double.NaN);
    }
-   
+
    public FootPolygonEnum getFootPolygonInUse()
    {
       return footPolygonInUseEnum.getEnumValue();
@@ -315,19 +321,21 @@ public class ResizableBipedFoot implements BipedFootInterface
       this.shift.set(shift);
    }
 
-   public static ResizableBipedFoot createRectangularRightFoot(double footForward, double footBack, double footWidth, double footHeight, double narrowWidthOnToesPercentage, CommonWalkingReferenceFrames referenceFrames,
-           DoubleYoVariable time, YoVariableRegistry yoVariableRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+   public static ResizableBipedFoot createRectangularRightFoot(double footForward, double footBack, double footWidth, double footHeight,
+           double narrowWidthOnToesPercentage, RigidBody body, ReferenceFrame ankleZUpFrame, ReferenceFrame soleFrame, DoubleYoVariable time,
+           YoVariableRegistry yoVariableRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       double PREVENT_ROTATION_FACTOR = 0.75;    // 0.8;//0.8;
 
-      return createRectangularRightFoot(PREVENT_ROTATION_FACTOR, PREVENT_ROTATION_FACTOR, footForward, footBack, footWidth, footHeight, narrowWidthOnToesPercentage, 0.8, 0.8,
-                                        referenceFrames, yoVariableRegistry, dynamicGraphicObjectsListRegistry);
+      return createRectangularRightFoot(PREVENT_ROTATION_FACTOR, PREVENT_ROTATION_FACTOR, footForward, footBack, footWidth, footHeight,
+                                        narrowWidthOnToesPercentage, 0.8, 0.8, body, ankleZUpFrame, soleFrame, yoVariableRegistry, dynamicGraphicObjectsListRegistry);
    }
 
    // Foot creators:
    public static ResizableBipedFoot createRectangularRightFoot(double preventRotationFactorLength, double preventRotationFactorWidth, double footForward,
-           double footBack, double footWidth, double footHeight, double narrowWidthOnToesPercentage, double maxToePointsBack,
-           double maxHeelPointsForward, CommonWalkingReferenceFrames referenceFrames, YoVariableRegistry yoVariableRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+           double footBack, double footWidth, double footHeight, double narrowWidthOnToesPercentage, double maxToePointsBack, double maxHeelPointsForward,
+           RigidBody body, ReferenceFrame ankleZUpFrame, ReferenceFrame soleFrame, YoVariableRegistry yoVariableRegistry,
+           DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       Point3d frontLeft = new Point3d(preventRotationFactorLength * footForward, preventRotationFactorWidth * footWidth / 2.0, -footHeight);
       Point3d frontRight = new Point3d(preventRotationFactorLength * footForward, -preventRotationFactorWidth * footWidth / 2.0, -footHeight);
@@ -345,10 +353,11 @@ public class ResizableBipedFoot implements BipedFootInterface
       heelPoints.add(hindRight);
       heelPoints.add(hindLeft);
 
-      return new ResizableBipedFoot(referenceFrames, RobotSide.RIGHT, toePoints, heelPoints, maxToePointsBack, maxHeelPointsForward, narrowWidthOnToesPercentage, yoVariableRegistry, dynamicGraphicObjectsListRegistry);
+      return new ResizableBipedFoot(body, ankleZUpFrame, soleFrame, RobotSide.RIGHT, toePoints, heelPoints, maxToePointsBack, maxHeelPointsForward,
+                                    narrowWidthOnToesPercentage, yoVariableRegistry, dynamicGraphicObjectsListRegistry);
    }
 
-   public ResizableBipedFoot createLeftFootAsMirrorImage(CommonWalkingReferenceFrames referenceFrames, YoVariableRegistry yoVariableRegistry,
+   public ResizableBipedFoot createLeftFootAsMirrorImage(RigidBody body, ReferenceFrame ankleZUpFrame, ReferenceFrame soleFrame, YoVariableRegistry yoVariableRegistry,
            DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       if (this.getRobotSide() != RobotSide.RIGHT)
@@ -368,8 +377,8 @@ public class ResizableBipedFoot implements BipedFootInterface
          mirrorHeelPoints.add(new Point3d(heelPoints.get(i).getX(), -heelPoints.get(i).getY(), heelPoints.get(i).getZ()));
       }
 
-      return new ResizableBipedFoot(referenceFrames, RobotSide.LEFT, mirrorToePoints, mirrorHeelPoints, this.maxToePointsBack, this.maxHeelPointsForward, this.narrowWidthOnToesPercentage, yoVariableRegistry,
-                                    dynamicGraphicObjectsListRegistry);
+      return new ResizableBipedFoot(body, ankleZUpFrame, soleFrame, RobotSide.LEFT, mirrorToePoints, mirrorHeelPoints, this.maxToePointsBack, this.maxHeelPointsForward,
+                                    this.narrowWidthOnToesPercentage, yoVariableRegistry, dynamicGraphicObjectsListRegistry);
    }
 
    private static FramePoint minXMaxYPointCopy(ArrayList<FramePoint> pointList)
@@ -503,6 +512,29 @@ public class ResizableBipedFoot implements BipedFootInterface
    }
 
    public ReferenceFrame getFootFrame()
+   {
+      return getBodyFrame();
+   }
+
+   public FrameConvexPolygon2d getContactPolygon()
+   {
+      return getFootPolygonInSoleFrame();
+   }
+
+   public RigidBody getContactingBody()
+   {
+      return body;
+   }
+
+   public List<FramePoint> getContactPoints()
+   {
+      List<FramePoint> ret = new ArrayList<FramePoint>(heelPoints.size() + toePoints.size());
+      ret.addAll(heelPoints);
+      ret.addAll(toePoints);
+      return ret;
+   }
+
+   public ReferenceFrame getBodyFrame()
    {
       return footFrame;
    }

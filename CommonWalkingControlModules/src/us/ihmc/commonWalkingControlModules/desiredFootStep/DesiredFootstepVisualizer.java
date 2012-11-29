@@ -239,7 +239,6 @@ public class DesiredFootstepVisualizer
          ZUpFrame ankleZUpFrame = new ZUpFrame(ReferenceFrame.getWorldFrame(), footFrame, robotSideName + "AnkleZUp");
          ankleZUpFrames.put(robotSide, ankleZUpFrame);
 
-
          BipedFootInterface foot = new SimpleBipedFoot(footFrame, ankleZUpFrame, soleFrame, robotSide, footForward, footBackward, footWidth / 2.0,
                                       footWidth / 2.0, parentRegistry);
          bipedFeet.put(robotSide, foot);
