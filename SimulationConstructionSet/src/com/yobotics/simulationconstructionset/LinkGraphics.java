@@ -11,6 +11,8 @@ import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.utilities.InertiaTools;
+
 import com.yobotics.simulationconstructionset.graphics.YoAppearanceDefinition;
 import com.yobotics.simulationconstructionset.renderer.j3d.J3DLinkGraphics;
 import com.yobotics.simulationconstructionset.robotdefinition.LinkGraphicsDefinition;
@@ -924,24 +926,22 @@ public class LinkGraphics
    public void createInertiaEllipsoid(Link link, YoAppearanceDefinition appearance)
    {
       
-      System.err.println("Inertia ellipsoids not implemented");
-//      //    LinkGraphics linkGraphics = link.getLinkGraphics();
-//      this.identity();
-//      Vector3d comOffSet = new Vector3d();
-//      link.getComOffset(comOffSet);
-//      this.translate(comOffSet);
-//      Matrix3d momentOfInertia = new Matrix3d();
-//      link.getMomentOfInertia(momentOfInertia);
-//      double mass = link.getMass();
-//
-//      Vector3d principalMomentsOfInertia = new Vector3d(momentOfInertia.m00, momentOfInertia.m11, momentOfInertia.m22);
-//
-//      Vector3d ellipsoidRadii = InertiaTools.getInertiaEllipsoidRadii(principalMomentsOfInertia, mass);
-//
-//      this.addEllipsoid(ellipsoidRadii.x, ellipsoidRadii.y, ellipsoidRadii.z, appearance);
-//
-//      comOffSet.scale(-1.0);
-//      this.translate(comOffSet); // translate back
+      this.identity();
+      Vector3d comOffSet = new Vector3d();
+      link.getComOffset(comOffSet);
+      this.translate(comOffSet);
+      Matrix3d momentOfInertia = new Matrix3d();
+      link.getMomentOfInertia(momentOfInertia);
+      double mass = link.getMass();
+
+      Vector3d principalMomentsOfInertia = new Vector3d(momentOfInertia.m00, momentOfInertia.m11, momentOfInertia.m22);
+
+      Vector3d ellipsoidRadii = InertiaTools.getInertiaEllipsoidRadii(principalMomentsOfInertia, mass);
+
+      this.addEllipsoid(ellipsoidRadii.x, ellipsoidRadii.y, ellipsoidRadii.z, appearance);
+
+      comOffSet.scale(-1.0);
+      this.translate(comOffSet); // translate back
    }
 
 
