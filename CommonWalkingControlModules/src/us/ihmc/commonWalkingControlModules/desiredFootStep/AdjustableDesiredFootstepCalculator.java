@@ -253,7 +253,7 @@ public class AdjustableDesiredFootstepCalculator implements DesiredFootstepCalcu
 //      Footstep adjustedFootstep = adjustDesiredFootstepPosition(baseFootstep, swingLegSide, couplingRegistry.getCaptureRegion());
       Footstep adjustedFootstep = desiredFootstepAdjustor.adjustDesiredFootstep(baseFootstep, swingLegSide);
       
-      FramePose adjustedFootstepPose = adjustedFootstep.getFootstepPose();
+      FramePose adjustedFootstepPose = adjustedFootstep.getPose();
       desiredFootstepPositions.get(swingLegSide).set(adjustedFootstepPose.getPosition());
       desiredFootstepOrientations.get(swingLegSide).set(adjustedFootstepPose.getOrientation());
 

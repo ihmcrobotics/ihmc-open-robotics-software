@@ -86,7 +86,7 @@ public class CapturabilityBasedDesiredFootstepAdjustor implements DesiredFootste
 
    private Footstep projectIntoCaptureRegion(Footstep baseFootstep, RobotSide swingLegSide, FrameConvexPolygon2d captureRegion)
    {      
-      FramePoint2d nextStep2d = baseFootstep.getFootstepPosition2dCopy();
+      FramePoint2d nextStep2d = baseFootstep.getPosition2dCopy();
       nextStep2d.changeFrame(captureRegion.getReferenceFrame());
       FrameConvexPolygon2d nextStepFootPolygon = buildNextStepFootPolygon(nextStep2d);
 
@@ -98,7 +98,7 @@ public class CapturabilityBasedDesiredFootstepAdjustor implements DesiredFootste
          nextStep2d.changeFrame(captureRegion.getReferenceFrame());
          captureRegion.orthogonalProjection(nextStep2d);
          nextStep2d.changeFrame(baseFootstep.getReferenceFrame());
-         baseFootstep.setFootstepPositionChangeOnlyXY(nextStep2d);
+         baseFootstep.setPositionChangeOnlyXY(nextStep2d);
       }
       else
       {
@@ -114,7 +114,7 @@ public class CapturabilityBasedDesiredFootstepAdjustor implements DesiredFootste
       ArrayList<ConvexPolygon2d> steppingStoneCaptureRegionIntersections =
          steppingStonesCaptureRegionIntersectionCalculator.findIntersectionsBetweenSteppingStonesAndCaptureRegion(captureRegion);
 
-      FramePoint2d nextStep2d = baseFootstep.getFootstepPosition2dCopy();
+      FramePoint2d nextStep2d = baseFootstep.getPosition2dCopy();
       nextStep2d.changeFrame(captureRegion.getReferenceFrame());
 
 //    FrameConvexPolygon2d nextStepFootPolygon = buildNextStepFootPolygon(nextStep2d);
@@ -136,7 +136,7 @@ public class CapturabilityBasedDesiredFootstepAdjustor implements DesiredFootste
 
          nextStep2d.changeFrame(baseFootstep.getReferenceFrame());
 
-         baseFootstep.setFootstepPositionChangeOnlyXY(nextStep2d);
+         baseFootstep.setPositionChangeOnlyXY(nextStep2d);
       }
 
       return baseFootstep;

@@ -406,7 +406,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       public void doTransitionOutOfAction()
       {
          Footstep desiredFootstep = desiredFootstepCalculator.updateAndGetDesiredFootstep(swingSide.getOppositeSide());
-         FrameOrientation desiredFootstepOrientation = desiredFootstep.getFootstepOrientationInFrame(worldFrame);
+         FrameOrientation desiredFootstepOrientation = desiredFootstep.getOrientationInFrame(worldFrame);
          double footPitch = desiredFootstepOrientation.getYawPitchRoll()[1];
          upcomingSupportLeg.set(upcomingSupportLeg.getEnumValue().getOppositeSide());
          onToesInitialPitchProviders.get(getUpcomingSupportLeg().getOppositeSide()).set(footPitch);
@@ -531,7 +531,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       }
 
       ReferenceFrame stairDirectionFrame = worldFrame;
-      FramePose footstepPose = footstep.getFootstepPose();
+      FramePose footstepPose = footstep.getPose();
       footstepPose.changeFrame(stairDirectionFrame);
 
       Transform3D footstepTransform = new Transform3D();
@@ -626,12 +626,12 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       initialPelvisOrientation.changeFrame(worldFrame);
       initialPelvisOrientationProvider.setOrientation(initialPelvisOrientation);
 
-      FrameOrientation finalPelvisOrientation = desiredFootstep.getFootstepOrientationInFrame(worldFrame);
+      FrameOrientation finalPelvisOrientation = desiredFootstep.getOrientationInFrame(worldFrame);
       finalPelvisOrientation.setYawPitchRoll(finalPelvisOrientation.getYawPitchRoll()[0], userDesiredPelvisPitch.getDoubleValue(), 0.0);
       finalPelvisOrientationProvider.setOrientation(finalPelvisOrientation);
       pelvisOrientationTrajectoryGenerator.initialize();
 
-      FramePoint finalDesiredStepLocation = desiredFootstep.getFootstepPositionInFrame(trajectoryGeneratorFrame);
+      FramePoint finalDesiredStepLocation = desiredFootstep.getPositionInFrame(trajectoryGeneratorFrame);
       finalDesiredStepLocation.setZ(finalDesiredStepLocation.getZ());
 
       FrameVector finalDesiredVelocity = new FrameVector(trajectoryGeneratorFrame);
@@ -751,7 +751,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       public void packOrientation(FrameOrientation orientationToPack)
       {
          Footstep footstep = desiredFootstepCalculator.updateAndGetDesiredFootstep(swingSide.getOppositeSide());
-         orientationToPack.set(footstep.getFootstepOrientationInFrame(worldFrame));
+         orientationToPack.set(footstep.getOrientationInFrame(worldFrame));
       }
 
    }

@@ -30,7 +30,7 @@ public class DoubleAndSingleSupportDurationUpdater
    public void update(Footstep desiredFootstep, RobotSide supportLeg, FrameVector2d desiredVelocity)
    {
       ReferenceFrame supportAnkleZUpFrame = referenceFrames.getAnkleZUpFrame(supportLeg);
-      FrameVector2d desiredStepVector = new FrameVector2d(desiredFootstep.getFootstepPositionInFrame(supportAnkleZUpFrame).toFramePoint2d());
+      FrameVector2d desiredStepVector = new FrameVector2d(desiredFootstep.getPositionInFrame(supportAnkleZUpFrame).toFramePoint2d());
       desiredVelocity = desiredVelocity.changeFrameCopy(supportAnkleZUpFrame);
       double desiredVelocityMagnitude = desiredVelocity.length();
       double stepDistanceAlongDesiredVelocity = desiredStepVector.dot(desiredVelocity) / desiredVelocityMagnitude;

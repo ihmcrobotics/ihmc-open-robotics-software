@@ -18,8 +18,8 @@ public class BasicReachableScorer implements StepLocationScorer
    public double getStepLocationScore(RobotSide supportLeg, Footstep desiredFootstep)
    {
       FrameConvexPolygon2d reachableRegion = captureRegionCalculator.getReachableRegion(supportLeg);
-      if (reachableRegion.isPointInside(new FramePoint2d(desiredFootstep.getReferenceFrame(), desiredFootstep.getFootstepPose().getX(),
-              desiredFootstep.getFootstepPose().getY())))
+      if (reachableRegion.isPointInside(new FramePoint2d(desiredFootstep.getReferenceFrame(), desiredFootstep.getPose().getX(),
+              desiredFootstep.getPose().getY())))
          return 1.0;
       else
          return 0.0;

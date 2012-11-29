@@ -137,7 +137,7 @@ public class DesiredFootstepVisualizer
 
 //    System.out.println("desiredFootstep = " + desiredFootstep);
 
-      FramePose pose = desiredFootstep.getFootstepPose();
+      FramePose pose = desiredFootstep.getPose();
       pose = pose.changeFrameCopy(ReferenceFrame.getWorldFrame());
       footFrames.get(swingLegSide).updatePose(pose);
 
@@ -345,11 +345,12 @@ public class DesiredFootstepVisualizer
 
          Footstep footstep = visualizer.takeAndVisualizeAStep(swingLegSide);
 
-         bagsOfBalls.get(swingLegSide).setBall(footstep.getFootstepPositionInFrame(ReferenceFrame.getWorldFrame()));
+         bagsOfBalls.get(swingLegSide).setBall(footstep.getPositionInFrame(ReferenceFrame.getWorldFrame()));
 
          PoseReferenceFrame footToMoveFrame = feetPoseReferenceFrames.get(swingLegSide);
 
-         FramePose poseToMoveTo = footstep.getFootstepPoseCopy();
+         FramePose poseToMoveTo = new FramePose(ReferenceFrame.getWorldFrame());
+         footstep.getPose(poseToMoveTo);
          poseToMoveTo.changeFrame(ReferenceFrame.getWorldFrame());
 
          footToMoveFrame.updatePose(poseToMoveTo);
