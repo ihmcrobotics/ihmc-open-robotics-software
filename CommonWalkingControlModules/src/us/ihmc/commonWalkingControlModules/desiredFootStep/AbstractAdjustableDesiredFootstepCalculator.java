@@ -5,7 +5,6 @@ import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.RigidBody;
 
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameOrientation;
@@ -44,8 +43,8 @@ public abstract class AbstractAdjustableDesiredFootstepCalculator implements Des
 
       FramePose footstepPose = new FramePose(footstepPositions.get(swingLegSide).getFramePointCopy(),
                                   footstepOrientations.get(swingLegSide).getFrameOrientationCopy());
-      RigidBody foot = contactableBodies.get(swingLegSide).getRigidBody();
-      Footstep desiredFootstep = new Footstep(foot, footstepPose);
+      ContactableBody foot = contactableBodies.get(swingLegSide);
+      Footstep desiredFootstep = new Footstep(foot.getRigidBody(), footstepPose, foot.getContactPoints());
 
       if (desiredFootstepAdjustor != null)
       {
