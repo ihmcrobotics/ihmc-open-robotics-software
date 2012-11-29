@@ -3,6 +3,8 @@
 
 package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
+import java.util.List;
+
 import javax.vecmath.Matrix3d;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedFootInterface;
@@ -131,9 +133,13 @@ public class SimpleWorldDesiredFootstepCalculator extends AbstractAdjustableDesi
 //    stepRoll.set(0.0);
    }
 
-
    private static SideDependentList<ReferenceFrame> getFramesToStoreFootstepsIn()
    {
       return new SideDependentList<ReferenceFrame>(ReferenceFrame.getWorldFrame(), ReferenceFrame.getWorldFrame());
+   }
+
+   protected List<FramePoint> getContactPoints(RobotSide swingSide)
+   {
+      return contactableBodies.get(swingSide).getContactPoints();
    }
 }
