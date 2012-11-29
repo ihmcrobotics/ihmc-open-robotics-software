@@ -36,4 +36,9 @@ public class Graphics3DNode
    {
       return graphicsObject;
    }
+   
+   public void setGraphicsObject(GraphicsObject graphicsObject)
+   {
+      this.graphicsObject = graphicsObject;
+   }
 }
