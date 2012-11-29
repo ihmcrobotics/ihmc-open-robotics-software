@@ -10,10 +10,10 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.xmlDescription.SDFVisual;
 import us.ihmc.graphics3DAdapter.graphics.LinkGraphics;
+import us.ihmc.graphics3DAdapter.graphics.ModelFileType;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceDefinition;
 
-import com.yobotics.simulationconstructionset.ModelFileType;
 
 public class SDFLinkGraphics extends LinkGraphics
 {

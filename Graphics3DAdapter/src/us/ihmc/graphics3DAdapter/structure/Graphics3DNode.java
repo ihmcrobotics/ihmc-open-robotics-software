@@ -10,9 +10,15 @@ import us.ihmc.graphics3DAdapter.graphics.LinkGraphics;
 
 public class Graphics3DNode
 {
+   private final String name;
    private final Transform3D transform = new Transform3D();
    private LinkGraphics graphicsObject;
    private final ArrayList<Graphics3DNode> childeren = new ArrayList<Graphics3DNode>();
+   
+   public Graphics3DNode(String name)
+   {
+      this.name = name;
+   }
    
    public Transform3D getTransform()
    {
@@ -40,5 +46,9 @@ public class Graphics3DNode
    public void setGraphicsObject(LinkGraphics graphicsObject)
    {
       this.graphicsObject = graphicsObject;
+   }
+   public String getName()
+   {
+      return name;
    }
 }

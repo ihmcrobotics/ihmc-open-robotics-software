@@ -1,7 +1,6 @@
 package us.ihmc.graphics3DAdapter.examples;
 
 import javax.media.j3d.Transform3D;
-import javax.swing.JPanel;
 import javax.vecmath.Color3f;
 
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
@@ -18,7 +17,7 @@ public class Graphics3DAdapterExampleOne
  
    public void doExampleOne(Graphics3DAdapter adapter)
    {
-      Graphics3DNode teapotAndSphereNode = new Graphics3DNode();
+      Graphics3DNode teapotAndSphereNode = new Graphics3DNode("teaPot");
        
 //      teapotAndSphereNode.rotateAboutX(Math.PI/4.0);
      
@@ -36,16 +35,17 @@ public class Graphics3DAdapterExampleOne
       adapter.addRootNode(teapotAndSphereNode);
       
      
-      JPanel jPanel = adapter.getDefaultCamera().getPanel();
+//      JPanel jPanel = adapter.getDefaultCamera().getPanel();
    
    
+      
       double rotation = 0.0;
       while(true)
       {
-         rotation += 0.001;
+         rotation += 0.01;
          Transform3D transform = new Transform3D();
          
-         transform.rotX(rotation);
+         transform.rotZ(rotation);
          
          teapotAndSphereNode.setTransform(transform);
          
@@ -53,7 +53,7 @@ public class Graphics3DAdapterExampleOne
          sphereAppearanceHolder.setAppearance(new YoAppearanceRGBColor(color));
          try
          {
-            Thread.sleep(100L);
+            Thread.sleep(10L);
          }
          catch (InterruptedException e)
          {
