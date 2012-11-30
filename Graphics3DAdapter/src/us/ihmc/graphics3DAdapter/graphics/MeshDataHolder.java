@@ -10,9 +10,9 @@ public class MeshDataHolder
    private final int[] polygonIndices;
    private final int[] polygonStripCounts;
    
-   public MeshDataHolder(Point3f[] points, TexCoord2f[] textPoints, int[] polygonIndices, int[] polygonStripCounts)
+   public MeshDataHolder(Point3f[] vertices, TexCoord2f[] textPoints, int[] polygonIndices, int[] polygonStripCounts)
    {
-      this.vertices = points;
+      this.vertices = vertices;
       this.texturePoints = textPoints;
       this.polygonIndices = polygonIndices;
       this.polygonStripCounts = polygonStripCounts;

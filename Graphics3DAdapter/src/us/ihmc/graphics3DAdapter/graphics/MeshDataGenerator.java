@@ -44,10 +44,11 @@ public class MeshDataGenerator
       float longitude;
       float ztheta;
 
-      Point3f points[] = new Point3f[(N + 1) * (M + 1)];
-
-      // Point2f textPoints[] = new Point2f[(N+1)*(M+1)];
-      TexCoord2f textPoints[] = new TexCoord2f[(N + 1) * (M + 1)];
+      // FIXME: Array should be smaller, or completely filled. Temporary solution is using smaller arrays.
+//      Point3f points[] = new Point3f[(N + 1) * (M + 1)];
+//      TexCoord2f textPoints[] = new TexCoord2f[(N + 1) * (M + 1)];
+      Point3f points[] = new Point3f[(N + 1) * (M) + 1];
+      TexCoord2f textPoints[] = new TexCoord2f[(N + 1) * (M) + 1];
 
       // for (int i=0;i<=N;i++)
       for (int j = 0; j <= M; j++)
