@@ -102,6 +102,7 @@ public class LinkGraphics
     */
    public void combine(LinkGraphics linkGraphics)
    {
+      this.identity();
       this.linkGraphicsInstructions.addAll(linkGraphics.getLinkGraphicsInstructions());
    }
    
