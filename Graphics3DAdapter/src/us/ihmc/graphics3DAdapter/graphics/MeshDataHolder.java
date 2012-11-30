@@ -28,7 +28,7 @@ public class MeshDataHolder
       return texturePoints;
    }
    
-   public int[] getTriangleIndices()
+   public int[] getPolygonIndices()
    {
       return polygonIndices;
    }
