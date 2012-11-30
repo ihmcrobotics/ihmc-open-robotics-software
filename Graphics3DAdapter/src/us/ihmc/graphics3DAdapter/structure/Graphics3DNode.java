@@ -20,22 +20,28 @@ public class Graphics3DNode
       this.name = name;
    }
    
-   public Transform3D getTransform()
+   public synchronized Transform3D getTransform()
    {
       return transform;
    }
-   public void setTransform(Transform3D transform)
+   public synchronized void setTransform(Transform3D transform)
    {
       this.transform.set(transform);
    }
    
    public void addChild(Graphics3DNode child)
    {
-      childeren.add(child);
+      synchronized(childeren)
+      {
+         childeren.add(child);
+      }
    }
    public List<Graphics3DNode> getChildrenNodes()
    {
-      return Collections.unmodifiableList(childeren);
+      synchronized(childeren)
+      {
+         return Collections.unmodifiableList(childeren);
+      }
    }
    
    public LinkGraphics getGraphicsObject()
