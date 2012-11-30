@@ -2,18 +2,19 @@ package us.ihmc.darpaRoboticsChallenge;
 
 import javax.swing.JButton;
 
+import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
+import us.ihmc.graphics3DAdapter.jme.JMEGraphics3dAdapter;
 import us.ihmc.projectM.R2Sim02.DataExporter;
 import us.ihmc.projectM.R2Sim02.R2Parameters;
 import us.ihmc.projectM.R2Sim02.R2Robot;
-import us.ihmc.projectM.R2Sim02.initialSetup.GuiInitialSetup;
 
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.gui.camera.CameraConfiguration;
 
-public class DRCGuiInitialSetup implements GuiInitialSetup
+public class DRCGuiInitialSetup
 {
-   private boolean showGUI = true;
+   private Graphics3DAdapter graphics3dAdapter = new JMEGraphics3dAdapter();
 
    public void initializeGUI(SimulationConstructionSet scs, Robot robot)
    {
@@ -38,16 +39,6 @@ public class DRCGuiInitialSetup implements GuiInitialSetup
       scs.setupCamera(camera6);
    }
 
-   public void setShowGUI(boolean showGUI)
-   {
-      this.showGUI = showGUI;
-   }
-
-   public boolean isGuiShown()
-   {
-      return showGUI;
-   }
-
    private void setupSliderBoard(SimulationConstructionSet scs)
    {
       //    EvolutionUC33ESetup setup = new EvolutionUC33ESetup(scs);
@@ -64,5 +55,15 @@ public class DRCGuiInitialSetup implements GuiInitialSetup
       DataExporter dataExporter = new DataExporter(scs, robot);
       exportTorqueAndSpeedButton.addActionListener(dataExporter);
       scs.addButton(exportTorqueAndSpeedButton);
+   }
+
+   public Graphics3DAdapter getGraphics3dAdapter()
+   {
+      return graphics3dAdapter;
+   }
+
+   public void setGraphics3dAdapter(Graphics3DAdapter graphics3dAdapter)
+   {
+      this.graphics3dAdapter = graphics3dAdapter;
    }
 }
