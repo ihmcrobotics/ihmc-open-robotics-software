@@ -11,7 +11,8 @@ public interface Graphics3DAdapter
    public CameraAdapter getDefaultCamera();
    public CameraAdapter createNewCamera();
    
-   public void start();
+   public void setHeightMap(HeightMap heightMap);
+   
    public Object getGraphicsConch();
    
 }

@@ -236,9 +236,9 @@ public class YoAppearance
       return new YoAppearanceTransparant();
    }
 
-   public static void makeTransparent(YoAppearanceDefinition appearance, float f)
+   public static void makeTransparent(YoAppearanceDefinition appearance, double f)
    {
-      System.err.println("Transparancy not supported for now");
+      appearance.setTransparancy(f);
    }
 
    //   public static void makeTransparent(YoAppearanceDefinition app, float transparency)
