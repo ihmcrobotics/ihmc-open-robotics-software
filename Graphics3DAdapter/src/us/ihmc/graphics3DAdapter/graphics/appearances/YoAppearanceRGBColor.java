@@ -2,7 +2,7 @@ package us.ihmc.graphics3DAdapter.graphics.appearances;
 
 import javax.vecmath.Color3f;
 
-public class YoAppearanceRGBColor implements YoAppearanceDefinition
+public class YoAppearanceRGBColor extends YoAppearanceTransparancy
 {
    private final float red, green, blue;
    

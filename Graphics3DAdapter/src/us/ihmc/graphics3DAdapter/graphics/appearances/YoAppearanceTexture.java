@@ -3,7 +3,7 @@ package us.ihmc.graphics3DAdapter.graphics.appearances;
 import java.awt.Component;
 import java.net.URL;
 
-public class YoAppearanceTexture implements YoAppearanceDefinition
+public class YoAppearanceTexture extends YoAppearanceTransparancy
 {
    private final URL fileURL;
    private final Component comp;
