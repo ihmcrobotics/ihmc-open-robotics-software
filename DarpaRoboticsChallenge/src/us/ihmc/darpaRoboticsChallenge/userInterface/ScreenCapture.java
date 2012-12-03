@@ -13,9 +13,6 @@ import sun.awt.image.ImageFormatException;
 
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
-import com.sun.image.codec.jpeg.JPEGCodec;
-import com.sun.image.codec.jpeg.JPEGEncodeParam;
-import com.sun.image.codec.jpeg.JPEGImageEncoder;
 
 public class ScreenCapture implements Serializable
 {
@@ -80,11 +77,13 @@ public class ScreenCapture implements Serializable
    {
       ByteArrayOutputStream os = new ByteArrayOutputStream();
 
-      JPEGImageEncoder encoder = JPEGCodec.createJPEGEncoder(os);
-      JPEGEncodeParam param = encoder.getDefaultJPEGEncodeParam(img);
-      param.setQuality(0.1f, true);
-      encoder.setJPEGEncodeParam(param);
-      encoder.encode(img);
+      ImageIO.write(img, "jpeg", os);
+
+      // JPEGImageEncoder encoder = JPEGCodec.createJPEGEncoder(os);
+      // JPEGEncodeParam param = encoder.getDefaultJPEGEncodeParam(img);
+      // param.setQuality(0.1f, true);
+      // encoder.setJPEGEncodeParam(param);
+      // encoder.encode(img);
 
       return os.toByteArray();
    }
