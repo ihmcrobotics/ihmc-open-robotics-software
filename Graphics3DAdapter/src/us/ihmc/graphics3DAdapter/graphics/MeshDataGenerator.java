@@ -9,6 +9,7 @@ import javax.vecmath.TexCoord2f;
 
 public class MeshDataGenerator
 {
+
    private MeshDataGenerator()
    {
       // Prevent an object being generated.
@@ -774,6 +775,7 @@ public class MeshDataGenerator
       int[] polygonIndices = new int[pPoints.length];
       
       int index;
+      int pointIndex = 0;
       Point3f point;
       for (int i = 0; i < pPoints.length; i++)
       {
@@ -782,8 +784,9 @@ public class MeshDataGenerator
          
          if(index == -1)
          {
-            index = i;
+            index = pointIndex;
             pointSet.add(point);
+            pointIndex++;
          }
          
          polygonIndices[i] = index;
