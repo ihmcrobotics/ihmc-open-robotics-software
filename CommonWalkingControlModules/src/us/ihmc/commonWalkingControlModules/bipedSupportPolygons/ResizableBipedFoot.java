@@ -328,7 +328,8 @@ public class ResizableBipedFoot implements BipedFootInterface
       double PREVENT_ROTATION_FACTOR = 0.75;    // 0.8;//0.8;
 
       return createRectangularRightFoot(PREVENT_ROTATION_FACTOR, PREVENT_ROTATION_FACTOR, footForward, footBack, footWidth, footHeight,
-                                        narrowWidthOnToesPercentage, 0.8, 0.8, body, ankleZUpFrame, soleFrame, yoVariableRegistry, dynamicGraphicObjectsListRegistry);
+                                        narrowWidthOnToesPercentage, 0.8, 0.8, body, ankleZUpFrame, soleFrame, yoVariableRegistry,
+                                        dynamicGraphicObjectsListRegistry);
    }
 
    // Foot creators:
@@ -357,8 +358,8 @@ public class ResizableBipedFoot implements BipedFootInterface
                                     narrowWidthOnToesPercentage, yoVariableRegistry, dynamicGraphicObjectsListRegistry);
    }
 
-   public ResizableBipedFoot createLeftFootAsMirrorImage(RigidBody body, ReferenceFrame ankleZUpFrame, ReferenceFrame soleFrame, YoVariableRegistry yoVariableRegistry,
-           DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+   public ResizableBipedFoot createLeftFootAsMirrorImage(RigidBody body, ReferenceFrame ankleZUpFrame, ReferenceFrame soleFrame,
+           YoVariableRegistry yoVariableRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       if (this.getRobotSide() != RobotSide.RIGHT)
          throw new RuntimeException("Implicit parameter is not a right foot!");
@@ -377,8 +378,8 @@ public class ResizableBipedFoot implements BipedFootInterface
          mirrorHeelPoints.add(new Point3d(heelPoints.get(i).getX(), -heelPoints.get(i).getY(), heelPoints.get(i).getZ()));
       }
 
-      return new ResizableBipedFoot(body, ankleZUpFrame, soleFrame, RobotSide.LEFT, mirrorToePoints, mirrorHeelPoints, this.maxToePointsBack, this.maxHeelPointsForward,
-                                    this.narrowWidthOnToesPercentage, yoVariableRegistry, dynamicGraphicObjectsListRegistry);
+      return new ResizableBipedFoot(body, ankleZUpFrame, soleFrame, RobotSide.LEFT, mirrorToePoints, mirrorHeelPoints, this.maxToePointsBack,
+                                    this.maxHeelPointsForward, this.narrowWidthOnToesPercentage, yoVariableRegistry, dynamicGraphicObjectsListRegistry);
    }
 
    private static FramePoint minXMaxYPointCopy(ArrayList<FramePoint> pointList)
@@ -529,13 +530,27 @@ public class ResizableBipedFoot implements BipedFootInterface
    public List<FramePoint> getContactPoints()
    {
       List<FramePoint> ret = new ArrayList<FramePoint>(heelPoints.size() + toePoints.size());
-      ret.addAll(heelPoints);
-      ret.addAll(toePoints);
+
+      for (FramePoint point : heelPoints)
+      {
+         ret.add(new FramePoint(point));
+      }
+
+      for (FramePoint point : toePoints)
+      {
+         ret.add(new FramePoint(point));
+      }
+
       return ret;
    }
 
    public ReferenceFrame getBodyFrame()
    {
       return footFrame;
+   }
+
+   public List<FramePoint> computeFootPoints()
+   {
+      return computeFootPolygonPoints(getFootPolygonInUse());
    }
 }

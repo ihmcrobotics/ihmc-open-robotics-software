@@ -9,7 +9,7 @@ import javax.media.j3d.Transform3D;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedFootInterface;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -17,9 +17,9 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 public class DesiredFootstepCalculatorTools
 {
-   public static double computeMinZWithRespectToAnkleInWorldFrame(Matrix3d footToWorldRotation, BipedFootInterface bipedFoot)
+   public static double computeMinZWithRespectToAnkleInWorldFrame(Matrix3d footToWorldRotation, ContactablePlaneBody contactablePlaneBody)
    {
-      ArrayList<FramePoint2d> footPoints = bipedFoot.getFootPolygonInSoleFrame().getClockwiseOrderedListOfFramePoints();
+      ArrayList<FramePoint2d> footPoints = contactablePlaneBody.getContactPolygon().getClockwiseOrderedListOfFramePoints();
       double minZ = Double.POSITIVE_INFINITY;
       FramePoint tempFramePoint = new FramePoint(ReferenceFrame.getWorldFrame());
       Vector3d tempVector = new Vector3d();
@@ -27,7 +27,7 @@ public class DesiredFootstepCalculatorTools
       {
          tempFramePoint.setToZero(footPoint.getReferenceFrame());
          tempFramePoint.setXY(footPoint);
-         tempFramePoint.changeFrame(bipedFoot.getFootFrame());
+         tempFramePoint.changeFrame(contactablePlaneBody.getBodyFrame());
          tempVector.set(tempFramePoint.getPoint());
          footToWorldRotation.transform(tempVector);
          if (tempVector.getZ() < minZ)
@@ -37,10 +37,10 @@ public class DesiredFootstepCalculatorTools
       return minZ;
    }
 
-   public static double computeMaxXWithRespectToAnkleInFrame(Matrix3d footToWorldRotation, BipedFootInterface bipedFoot, ReferenceFrame frame)
+   public static double computeMaxXWithRespectToAnkleInFrame(Matrix3d footToWorldRotation, ContactablePlaneBody contactablePlaneBody, ReferenceFrame frame)
    {
       Transform3D worldToDesiredHeadingFrame = frame.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());
-      ArrayList<FramePoint2d> footPoints = bipedFoot.getFootPolygonInSoleFrame().getClockwiseOrderedListOfFramePoints();
+      ArrayList<FramePoint2d> footPoints = contactablePlaneBody.getContactPolygon().getClockwiseOrderedListOfFramePoints();
       double maxX = Double.NEGATIVE_INFINITY;
       FramePoint tempFramePoint = new FramePoint(ReferenceFrame.getWorldFrame());
       Vector3d tempVector = new Vector3d();
@@ -48,7 +48,7 @@ public class DesiredFootstepCalculatorTools
       {
          tempFramePoint.setToZero(footPoint.getReferenceFrame());
          tempFramePoint.setXY(footPoint);
-         tempFramePoint.changeFrame(bipedFoot.getFootFrame());
+         tempFramePoint.changeFrame(contactablePlaneBody.getBodyFrame());
          tempVector.set(tempFramePoint.getPoint());    // foot point w.r.t. ankle in foot frame
          footToWorldRotation.transform(tempVector);    // foot point w.r.t. ankle in world frame
          worldToDesiredHeadingFrame.transform(tempVector);    // foot point w.r.t. ankle in desired heading frame
@@ -59,9 +59,9 @@ public class DesiredFootstepCalculatorTools
       return maxX;
    }
 
-   public static FramePoint computeMinZPointInFrame(Transform3D footToWorldTransform, BipedFootInterface bipedFoot, ReferenceFrame frame)
+   public static FramePoint computeMinZPointInFrame(Transform3D footToWorldTransform, ContactablePlaneBody contactablePlaneBody, ReferenceFrame frame)
    {
-      ArrayList<FramePoint2d> footPoints = bipedFoot.getFootPolygonInSoleFrame().getClockwiseOrderedListOfFramePoints();
+      ArrayList<FramePoint2d> footPoints = contactablePlaneBody.getContactPolygon().getClockwiseOrderedListOfFramePoints();
       FramePoint minFramePoint = new FramePoint(frame);
       minFramePoint.setZ(Double.POSITIVE_INFINITY);
       FramePoint tempFramePoint = new FramePoint(ReferenceFrame.getWorldFrame());
@@ -70,7 +70,7 @@ public class DesiredFootstepCalculatorTools
       {
          tempFramePoint.setToZero(footPoint.getReferenceFrame());
          tempFramePoint.setXY(footPoint);
-         tempFramePoint.changeFrame(bipedFoot.getFootFrame());
+         tempFramePoint.changeFrame(contactablePlaneBody.getBodyFrame());
          tempFramePoint.changeFrameUsingTransform(ReferenceFrame.getWorldFrame(), footToWorldTransform);
          tempFramePoint.changeFrame(frame);
 
@@ -87,9 +87,9 @@ public class DesiredFootstepCalculatorTools
       return minFramePoint;
    }
 
-   public static FramePoint computeMaxXPointInFrame(Transform3D footToWorldTransform, BipedFootInterface bipedFoot, ReferenceFrame frame)
+   public static FramePoint computeMaxXPointInFrame(Transform3D footToWorldTransform, ContactablePlaneBody contactablePlaneBody, ReferenceFrame frame)
    {
-      ArrayList<FramePoint2d> footPoints = bipedFoot.getFootPolygonInSoleFrame().getClockwiseOrderedListOfFramePoints();
+      ArrayList<FramePoint2d> footPoints = contactablePlaneBody.getContactPolygon().getClockwiseOrderedListOfFramePoints();
       FramePoint maxFramePoint = new FramePoint(frame);
       maxFramePoint.setX(Double.NEGATIVE_INFINITY);
       FramePoint tempFramePoint = new FramePoint(ReferenceFrame.getWorldFrame());
@@ -98,7 +98,7 @@ public class DesiredFootstepCalculatorTools
       {
          tempFramePoint.setToZero(footPoint.getReferenceFrame());
          tempFramePoint.setXY(footPoint);
-         tempFramePoint.changeFrame(bipedFoot.getFootFrame());
+         tempFramePoint.changeFrame(contactablePlaneBody.getBodyFrame());
          tempFramePoint.changeFrameUsingTransform(ReferenceFrame.getWorldFrame(), footToWorldTransform);
          tempFramePoint.changeFrame(frame);
 
@@ -119,6 +119,7 @@ public class DesiredFootstepCalculatorTools
    {
       if (framePoints.size() < nPoints)
          throw new RuntimeException("Not enough points");
+      searchDirection.changeFrame(framePoints.get(0).getReferenceFrame());
       List<FramePoint> ret = new ArrayList<FramePoint>(framePoints);
       Collections.sort(ret, new SearchDirectionFramePointComparator(searchDirection));
 
@@ -130,7 +131,40 @@ public class DesiredFootstepCalculatorTools
       return ret;
    }
 
-   public static class SearchDirectionFramePointComparator implements Comparator<FramePoint>
+   
+   public static List<FramePoint> fixTwoPointsAndCopy(List<FramePoint> contactPoints)
+   {
+      // FIXME: terrible, we need to make it so that ConvexPolygons can consist of fewer than 3 points
+      List<FramePoint> contactPointsCopy = new ArrayList<FramePoint>(contactPoints.size() + 1);
+      for (FramePoint framePoint : contactPoints)
+      {
+         contactPointsCopy.add(framePoint);
+      }
+
+      if (contactPointsCopy.size() == 2)
+      {
+         ReferenceFrame referenceFrame = contactPoints.get(0).getReferenceFrame();
+         FramePoint thirdPoint = new FramePoint(contactPoints.get(0));
+         
+         FrameVector pointToPoint = new FrameVector(contactPoints.get(1));
+         pointToPoint.sub(contactPoints.get(0));
+         pointToPoint.scale(0.5);
+         thirdPoint.add(pointToPoint);
+         
+         FrameVector z = new FrameVector(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 1.0);
+         z.changeFrame(referenceFrame);
+         FrameVector cross = new FrameVector(referenceFrame);
+         cross.cross(pointToPoint, z);
+         cross.normalize();
+         cross.scale(1e-3);
+         thirdPoint.add(cross);
+
+         contactPointsCopy.add(thirdPoint);
+      }
+      return contactPointsCopy;
+   }
+   
+   private static class SearchDirectionFramePointComparator implements Comparator<FramePoint>
    {
       private final FrameVector searchDirection;
       private final FrameVector differenceVector = new FrameVector(ReferenceFrame.getWorldFrame());

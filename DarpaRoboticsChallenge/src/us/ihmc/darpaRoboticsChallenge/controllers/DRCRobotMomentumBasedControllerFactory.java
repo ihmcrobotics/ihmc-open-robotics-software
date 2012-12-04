@@ -2,10 +2,10 @@ package us.ihmc.darpaRoboticsChallenge.controllers;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedFootInterface;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.RectangularContactableBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ResizableBipedFoot;
 import us.ihmc.commonWalkingControlModules.controllers.ControllerFactory;
-import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.ManualDesiredVelocityControlModule;
-import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.SimpleDesiredHeadingControlModule;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelHumanoidController;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelHumanoidControllerFactory;
@@ -14,7 +14,6 @@ import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
-import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
 import us.ihmc.utilities.screwTheory.RigidBody;
@@ -36,47 +35,40 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
       this.highLevelHumanoidControllerFactory = highLevelHumanoidControllerFactory;
    }
 
-   public RobotController getController(FullRobotModel fullRobotModel, ReferenceFrames referenceFrames, SteppingStones steppingStones,
-         double controlDT, DoubleYoVariable yoTime, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, GUISetterUpperRegistry guiSetterUpperRegistry,
-         TwistCalculator twistCalculator, CenterOfMassJacobian centerOfMassJacobian, SideDependentList<FootSwitchInterface> footSwitches)
+   public RobotController getController(FullRobotModel fullRobotModel, ReferenceFrames referenceFrames, SteppingStones steppingStones, double controlDT,
+           DoubleYoVariable yoTime, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, GUISetterUpperRegistry guiSetterUpperRegistry,
+           TwistCalculator twistCalculator, CenterOfMassJacobian centerOfMassJacobian, SideDependentList<FootSwitchInterface> footSwitches)
    {
       double footForward = 0.17;
       double footBack = 0.07;
       double footWidth = 0.12;
-      double footHeight = 0.084;
 
       YoVariableRegistry highLevelControllerRegistry = new YoVariableRegistry("highLevelController");
-      double footRotationPreventionFactor = 1.0;
-      double narrowWidthOnToesPercentage = 1.0;
-      double maxToePointsBack = 0.999;
-      double maxHeelPointsForward = 0.999;
       
-      RigidBody rightFootBody = fullRobotModel.getFoot(RobotSide.RIGHT);
-      ReferenceFrame rightAnkleZUpFrame = referenceFrames.getAnkleZUpFrame(RobotSide.RIGHT);
-      ReferenceFrame rightSoleFrame = referenceFrames.getSoleFrame(RobotSide.RIGHT);
+      SideDependentList<ContactablePlaneBody> bipedFeet = new SideDependentList<ContactablePlaneBody>();
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         RigidBody footBody = fullRobotModel.getFoot(robotSide);
+         ReferenceFrame soleFrame = referenceFrames.getSoleFrame(robotSide);
+         double left = footWidth / 2.0;
+         double right = -footWidth / 2.0;
+         
+         ContactablePlaneBody foot = new RectangularContactableBody(footBody, soleFrame, footForward, footBack, left, right);
+         bipedFeet.put(robotSide, foot);
+      }
 
-      RigidBody leftFootBody = fullRobotModel.getFoot(RobotSide.LEFT);
-      ReferenceFrame leftAnkleZUpFrame = referenceFrames.getAnkleZUpFrame(RobotSide.LEFT);
-      ReferenceFrame leftSoleFrame = referenceFrames.getSoleFrame(RobotSide.LEFT);
-      
-      ResizableBipedFoot rightFoot = ResizableBipedFoot.createRectangularRightFoot(footRotationPreventionFactor, footRotationPreventionFactor, footForward,
-            footBack, footWidth, footHeight, narrowWidthOnToesPercentage, maxToePointsBack, maxHeelPointsForward, rightFootBody, rightAnkleZUpFrame, rightSoleFrame, highLevelControllerRegistry,
-            dynamicGraphicObjectsListRegistry);
-      ResizableBipedFoot leftFoot = rightFoot.createLeftFootAsMirrorImage(leftFootBody, leftAnkleZUpFrame, leftSoleFrame, highLevelControllerRegistry, dynamicGraphicObjectsListRegistry);
-      SideDependentList<BipedFootInterface> bipedFeet = new SideDependentList<BipedFootInterface>();
       BipedSupportPolygons bipedSupportPolygons = new BipedSupportPolygons(referenceFrames.getAnkleZUpReferenceFrames(), referenceFrames.getMidFeetZUpFrame(),
             highLevelControllerRegistry, dynamicGraphicObjectsListRegistry);
 
-      bipedFeet.put(RobotSide.RIGHT, rightFoot);
-      bipedFeet.put(RobotSide.LEFT, leftFoot);
-
-
       double gravityZ = 9.81;
-      HighLevelHumanoidController highLevelHumanoidController = highLevelHumanoidControllerFactory.create(fullRobotModel, referenceFrames, 
-            null, yoTime, gravityZ, twistCalculator, centerOfMassJacobian, bipedFeet, bipedSupportPolygons, controlDT, footSwitches, dynamicGraphicObjectsListRegistry, highLevelControllerRegistry, guiSetterUpperRegistry);
 
-      MomentumBasedController momentumBasedController = new MomentumBasedController(fullRobotModel, null, gravityZ, referenceFrames,
-            twistCalculator, controlDT, dynamicGraphicObjectsListRegistry, bipedFeet, bipedSupportPolygons, highLevelHumanoidController);
+      HighLevelHumanoidController highLevelHumanoidController = highLevelHumanoidControllerFactory.create(fullRobotModel, referenceFrames, null, yoTime,
+                                                                   gravityZ, twistCalculator, centerOfMassJacobian, bipedFeet, bipedSupportPolygons, controlDT,
+                                                                   footSwitches, dynamicGraphicObjectsListRegistry, highLevelControllerRegistry,
+                                                                   guiSetterUpperRegistry);
+
+      MomentumBasedController momentumBasedController = new MomentumBasedController(fullRobotModel, null, gravityZ, referenceFrames, twistCalculator,
+                                                           controlDT, dynamicGraphicObjectsListRegistry, bipedSupportPolygons, highLevelHumanoidController);
       momentumBasedController.getYoVariableRegistry().addChild(highLevelControllerRegistry);
 
       return momentumBasedController;

@@ -6,7 +6,7 @@ import javax.media.j3d.Transform3D;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedFootInterface;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredHeadingControlModule;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredVelocityControlModule;
 import us.ihmc.robotSide.RobotSide;
@@ -38,12 +38,12 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractAdjustableD
    private final DoubleYoVariable velocityMagnitudeToLeftOfHeading = new DoubleYoVariable("velocityMagnitudeToLeftOfHeading", registry);
 
    private final SideDependentList<? extends ReferenceFrame> ankleZUpFrames;
-   private final SideDependentList<BipedFootInterface> bipedFeet;
+   private final SideDependentList<? extends ContactablePlaneBody> bipedFeet;
 
    private final DesiredHeadingControlModule desiredHeadingControlModule;
    private final DesiredVelocityControlModule desiredVelocityControlModule;
 
-   public ComponentBasedDesiredFootstepCalculator(SideDependentList<? extends ReferenceFrame> ankleZUpFrames, SideDependentList<BipedFootInterface> bipedFeet,
+   public ComponentBasedDesiredFootstepCalculator(SideDependentList<? extends ReferenceFrame> ankleZUpFrames, SideDependentList<? extends ContactablePlaneBody> bipedFeet,
            DesiredHeadingControlModule desiredHeadingControlModule, DesiredVelocityControlModule desiredVelocityControlModule,
            YoVariableRegistry parentRegistry)
    {
@@ -218,7 +218,7 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractAdjustableD
       }
       else
       {
-         FrameVector forwardInFootFrame = new FrameVector(bipedFeet.get(swingSide).getFootFrame());
+         FrameVector forwardInFootFrame = new FrameVector(bipedFeet.get(swingSide).getBodyFrame());
          ReferenceFrame frame = allContactPoints.get(0).getReferenceFrame();
          forwardInFootFrame.changeFrame(frame);
          forwardInFootFrame.scale(Math.signum(stepPitch));
