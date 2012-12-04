@@ -16,4 +16,5 @@ public interface Graphics3DAdapter
    public Object getGraphicsConch();
    public void setGroundVisible(boolean isVisible);
    
+   public PickingAdapter getPickingAdapter();
 }
