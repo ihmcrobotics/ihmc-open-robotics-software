@@ -356,26 +356,21 @@ public class MomentumBasedController implements RobotController
 
       FrameVector totalgroundReactionMoment = determineGroundReactionMoment(momentum);
 
-      SideDependentList<Wrench> groundReactionWrenches = computeGroundReactionWrenches(frame, desiredDeltaCMP, virtualToePointsOnSole,
+      HashMap<RigidBody, Wrench> groundReactionWrenches = computeGroundReactionWrenches(frame, desiredDeltaCMP, virtualToePointsOnSole,
                                                             totalgroundReactionMoment);
-
-      setGroundReactionWrenches(groundReactionWrenches, inverseDynamicsCalculator);
-
-      Wrench totalGroundReactionWrench = new Wrench(centerOfMassFrame, centerOfMassFrame);
-      for (RobotSide robotSide : RobotSide.values())
-      {
-         Wrench groundReactionWrench = groundReactionWrenches.get(robotSide);
-         groundReactionWrench.changeFrame(centerOfMassFrame);
-         groundReactionWrench.changeBodyFrameAttachedToSameBody(centerOfMassFrame);
-         totalGroundReactionWrench.add(groundReactionWrench);
-      }
 
       double kUpperBody = this.kUpperBody.getDoubleValue();
       double dUpperBody = 2.0 * zetaUpperBody.getDoubleValue() * Math.sqrt(kUpperBody);
-
+      
       doPDControlRecursively(fullRobotModel.getChest().getChildrenJoints(), kUpperBody, dUpperBody);
-
+      
       chestAngularAccelerationcalculator.compute(highLevelHumanoidController.getChestAngularAcceleration());
+
+
+
+      setGroundReactionWrenches(groundReactionWrenches, inverseDynamicsCalculator);
+
+      Wrench totalGroundReactionWrench = computeTotalGroundReactionWrench(groundReactionWrenches);
 
       FrameVector desiredAngularCentroidalMomentumRate = new FrameVector(totalGroundReactionWrench.getExpressedInFrame(),
                                                             totalGroundReactionWrench.getAngularPartCopy());
@@ -454,21 +449,37 @@ public class MomentumBasedController implements RobotController
       optimizer.solveForRootJointAcceleration(desiredAngularCentroidalMomentumRate, desiredLinearCentroidalMomentumRate);
    }
 
-   private void setGroundReactionWrenches(SideDependentList<Wrench> groundReactionWrenches, InverseDynamicsCalculator inverseDynamicsCalculator)
+   private Wrench computeTotalGroundReactionWrench(HashMap<RigidBody, Wrench> groundReactionWrenches)
    {
-      for (RobotSide robotSide : RobotSide.values())
+      Wrench totalGroundReactionWrench = new Wrench(centerOfMassFrame, centerOfMassFrame);
+
+      Wrench temporaryWrench = new Wrench();
+      for (RigidBody rigidBody : groundReactionWrenches.keySet())
       {
-         RigidBody foot = fullRobotModel.getFoot(robotSide);
-         Wrench groundReactionWrench = groundReactionWrenches.get(robotSide);
-         groundReactionWrench.changeFrame(foot.getBodyFixedFrame());
-         inverseDynamicsCalculator.setExternalWrench(foot, groundReactionWrench);
+         temporaryWrench.set(groundReactionWrenches.get(rigidBody));
+         temporaryWrench.changeFrame(centerOfMassFrame);
+         temporaryWrench.changeBodyFrameAttachedToSameBody(centerOfMassFrame);
+         totalGroundReactionWrench.add(temporaryWrench);
+      }
+
+      return totalGroundReactionWrench;
+   }
+
+   private void setGroundReactionWrenches(HashMap<RigidBody, Wrench> groundReactionWrenches, InverseDynamicsCalculator inverseDynamicsCalculator)
+   {
+      for (RigidBody rigidBody : groundReactionWrenches.keySet())
+      {
+         Wrench groundReactionWrench = groundReactionWrenches.get(rigidBody);
+         groundReactionWrench.changeFrame(rigidBody.getBodyFixedFrame());
+         inverseDynamicsCalculator.setExternalWrench(rigidBody, groundReactionWrench);
       }
    }
 
-   private SideDependentList<Wrench> computeGroundReactionWrenches(ReferenceFrame frame, FrameVector2d desiredDeltaCMP,
+   // SPECIFIC
+   private HashMap<RigidBody, Wrench> computeGroundReactionWrenches(ReferenceFrame frame, FrameVector2d desiredDeltaCMP,
            SideDependentList<FramePoint> virtualToePointsOnSole, FrameVector totalgroundReactionMoment)
    {
-      SideDependentList<Wrench> groundReactionWrenches = new SideDependentList<Wrench>();
+      HashMap<RigidBody, Wrench> groundReactionWrenches = new HashMap<RigidBody, Wrench>();
       for (RobotSide robotSide : RobotSide.values())
       {
          FramePoint groundReactionForceTerminalPoint = new FramePoint(centerOfMassFrame);
@@ -494,12 +505,13 @@ public class MomentumBasedController implements RobotController
          torque.cross(virtualToePoint, groundReactionForce);
          Wrench groundReactionWrench = new Wrench(footCoMFrame, frame, groundReactionForce.getVector(), torque.getVector());
          groundReactionWrench.addAngularPart(groundReactionMoment.getVector());
-         groundReactionWrenches.put(robotSide, groundReactionWrench);
+         groundReactionWrenches.put(foot, groundReactionWrench);
       }
 
       return groundReactionWrenches;
    }
 
+   // SPECIFIC
    private double computeOmega0(FramePoint centerOfMass, SideDependentList<FramePoint> virtualToePointsOnSole)
    {
       FrameLine2d vtpToVTPLine = new FrameLine2d(virtualToePointsOnSole.get(RobotSide.LEFT).toFramePoint2d(),
@@ -532,6 +544,7 @@ public class MomentumBasedController implements RobotController
       return omega0;
    }
 
+   // SPECIFIC
    private SideDependentList<FramePoint2d> computeVirtualToePoints(RobotSide supportLeg, FramePoint2d desiredCoP)
    {
       SideDependentList<FramePoint2d> virtualToePoints = new SideDependentList<FramePoint2d>();
