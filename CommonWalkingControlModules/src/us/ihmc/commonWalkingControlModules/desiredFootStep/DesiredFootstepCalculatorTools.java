@@ -9,6 +9,7 @@ import javax.media.j3d.Transform3D;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactableBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
@@ -17,17 +18,16 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 public class DesiredFootstepCalculatorTools
 {
-   public static double computeMinZWithRespectToAnkleInWorldFrame(Matrix3d footToWorldRotation, ContactablePlaneBody contactablePlaneBody)
+   public static double computeMinZWithRespectToAnkleInWorldFrame(Matrix3d footToWorldRotation, ContactableBody contactableBody)
    {
-      ArrayList<FramePoint2d> footPoints = contactablePlaneBody.getContactPolygon().getClockwiseOrderedListOfFramePoints();
+      List<FramePoint> footPoints = contactableBody.getContactPoints();
       double minZ = Double.POSITIVE_INFINITY;
       FramePoint tempFramePoint = new FramePoint(ReferenceFrame.getWorldFrame());
       Vector3d tempVector = new Vector3d();
-      for (FramePoint2d footPoint : footPoints)
+      for (FramePoint footPoint : footPoints)
       {
-         tempFramePoint.setToZero(footPoint.getReferenceFrame());
-         tempFramePoint.setXY(footPoint);
-         tempFramePoint.changeFrame(contactablePlaneBody.getBodyFrame());
+         tempFramePoint.setAndChangeFrame(footPoint);
+         tempFramePoint.changeFrame(contactableBody.getBodyFrame());
          tempVector.set(tempFramePoint.getPoint());
          footToWorldRotation.transform(tempVector);
          if (tempVector.getZ() < minZ)
