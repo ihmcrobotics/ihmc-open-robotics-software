@@ -404,15 +404,19 @@ public class MeshDataGenerator
    public static MeshDataHolder ArcTorus(float startAngle, float endAngle, float majorRadius, float minorRadius, int N)
    {
       Point3f points[] = new Point3f[N * N];
+      TexCoord2f[] textPoints = new TexCoord2f[N * N];
       double angle1, angle2;
       double cenX, cenY;
       double pX, pY, pZ;
+      float texY, texX;
 
       for (int i = 0; i < N; i++)
       {
          angle1 = startAngle + i * (endAngle - startAngle) / (N - 1);
          cenX = majorRadius * Math.cos(angle1);
          cenY = majorRadius * Math.sin(angle1);
+         
+         texY = (float) i / (float) N;
 
          for (int j = 0; j < N; j++)
          {
@@ -421,6 +425,9 @@ public class MeshDataGenerator
             pY = cenY + minorRadius * Math.sin(angle1) * Math.cos(angle2);
             pZ = minorRadius * Math.sin(angle2);
             points[i * N + j] = new Point3f((float) pX, (float) pY, (float) pZ);
+            
+            texX = (float) j / (float) N;
+            textPoints[i * N + j] = new TexCoord2f(texX, texY);
          }
       }
 
@@ -456,7 +463,7 @@ public class MeshDataGenerator
          pStripCounts[i] = 4;
       }
 
-      return new MeshDataHolder(points, null, polygonIndices, pStripCounts); // TODO Think about how to properly map a texture onto this.
+      return new MeshDataHolder(points, textPoints, polygonIndices, pStripCounts);
    }
 
    public static MeshDataHolder Cube(double lx, double ly, double lz)
