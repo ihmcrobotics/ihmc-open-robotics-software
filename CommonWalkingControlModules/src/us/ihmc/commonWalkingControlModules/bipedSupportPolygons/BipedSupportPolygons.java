@@ -1,12 +1,14 @@
 package us.ihmc.commonWalkingControlModules.bipedSupportPolygons;
 
 import java.awt.Color;
+import java.util.List;
 
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2dAndConnectingEdges;
 import us.ihmc.utilities.math.geometry.FrameLineSegment2d;
+import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
@@ -112,7 +114,7 @@ public class BipedSupportPolygons
    {
       return footPolygonsInMidFeetZUp.get(robotSide);
    }
-   
+
    public SideDependentList<FrameConvexPolygon2d> getFootPolygonsInMidFeetZUp()
    {
       return footPolygonsInMidFeetZUp;
@@ -128,30 +130,38 @@ public class BipedSupportPolygons
       return new FramePoint2d(sweetSpots.get(robotSide));
    }
 
-   public void update(BipedFootInterface leftFoot, BipedFootInterface rightFoot)
+   public void update(SideDependentList<List<FramePoint>> contactPoints)
    {
-      // Extract the foot polygons in use from the leftFoot and the rightFoot
-
-      SideDependentList<BipedFootInterface> feet = new SideDependentList<BipedFootInterface>(leftFoot, rightFoot);
-
+      boolean inDoubleSupport = true;
+      boolean neitherFootIsSupportingFoot = true;
+      RobotSide supportSide = null;
       for (RobotSide robotSide : RobotSide.values())
       {
-         BipedFootInterface foot = feet.get(robotSide);
-         FrameConvexPolygon2d footPolygonInFootFrame = foot.getFootPolygonInUseInAnkleZUp();
-         FrameConvexPolygon2d footPolygonInAnkleZUp = footPolygonInFootFrame.changeFrameAndProjectToXYPlaneCopy(ankleZUpFrames.get(robotSide));
-         FrameConvexPolygon2d footPolygonsInMidFeetZUp = footPolygonInAnkleZUp.changeFrameCopy(midFeetZUp);
+         List<FramePoint> contactPointsForSide = contactPoints.get(robotSide);
+         boolean isSupportFoot = contactPointsForSide.size() > 0;
+         if (isSupportFoot)
+         {
+            supportSide = robotSide;
+            neitherFootIsSupportingFoot = false;
+
+            FrameConvexPolygon2d footPolygonInAnkleZUp = FrameConvexPolygon2d.constructByProjectionOntoXYPlane(contactPointsForSide,
+                                                            ankleZUpFrames.get(robotSide));
+            FrameConvexPolygon2d footPolygonInMidFeetZUp = FrameConvexPolygon2d.constructByProjectionOntoXYPlane(contactPointsForSide, midFeetZUp);
 
 
-         this.footPolygonsInAnkleZUp.set(robotSide, footPolygonInAnkleZUp);
-         this.footPolygonsInMidFeetZUp.set(robotSide, footPolygonsInMidFeetZUp);
-         this.sweetSpots.set(robotSide, footPolygonsInAnkleZUp.get(robotSide).getCentroidCopy());    // Sweet spots are the centroids of the foot polygons.
-
+            this.footPolygonsInAnkleZUp.set(robotSide, footPolygonInAnkleZUp);
+            this.footPolygonsInMidFeetZUp.set(robotSide, footPolygonInMidFeetZUp);
+            this.sweetSpots.set(robotSide, footPolygonsInAnkleZUp.get(robotSide).getCentroidCopy());    // Sweet spots are the centroids of the foot polygons.
+         }
+         else
+         {
+            inDoubleSupport = false;
+         }
       }
 
       // Get the support polygon. If in double support, it is the combined polygon.
       // FIXME: Assumes the individual feet polygons are disjoint for faster computation. Will crash if the feet overlap.
       // If in single support, then the support polygon is just the foot polygon of the supporting foot.
-      boolean inDoubleSupport = rightFoot.isSupportingFoot() && leftFoot.isSupportingFoot();
       if (inDoubleSupport)
       {
 //       ArrayList<FramePoint2d> allPoints = new ArrayList<FramePoint2d>();
@@ -175,15 +185,12 @@ public class BipedSupportPolygons
       }
       else
       {
-         boolean neitherFootIsSupportingFoot = !leftFoot.isSupportingFoot() &&!rightFoot.isSupportingFoot();
          if (neitherFootIsSupportingFoot)
          {
             throw new RuntimeException("neither foot is a supporting foot!");
          }
 
-         RobotSide supportSide = leftFoot.isSupportingFoot() ? RobotSide.LEFT : RobotSide.RIGHT;
          supportPolygonInMidFeetZUp = footPolygonsInMidFeetZUp.get(supportSide);
-
 
          connectingEdge1 = null;
          connectingEdge2 = null;

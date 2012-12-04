@@ -7,7 +7,7 @@ import java.util.List;
 
 import javax.vecmath.Matrix3d;
 
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedFootInterface;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredHeadingControlModule;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.robotSide.RobotSide;
@@ -34,9 +34,9 @@ public class SimpleWorldDesiredFootstepCalculator extends AbstractAdjustableDesi
    protected final DoubleYoVariable stepYaw = new DoubleYoVariable("stepYaw", registry);
    protected final DoubleYoVariable stepPitch = new DoubleYoVariable("stepPitch", registry);
    protected final DoubleYoVariable stepRoll = new DoubleYoVariable("stepRoll", registry);
-   protected final SideDependentList<BipedFootInterface> bipedFeet;
+   protected final SideDependentList<ContactablePlaneBody> bipedFeet;
 
-   public SimpleWorldDesiredFootstepCalculator(SideDependentList<BipedFootInterface> bipedFeet, CommonWalkingReferenceFrames referenceFrames,
+   public SimpleWorldDesiredFootstepCalculator(SideDependentList<ContactablePlaneBody> bipedFeet, CommonWalkingReferenceFrames referenceFrames,
            DesiredHeadingControlModule desiredHeadingControlModule, YoVariableRegistry parentRegistry)
    {
       super(bipedFeet, getFramesToStoreFootstepsIn(), parentRegistry);

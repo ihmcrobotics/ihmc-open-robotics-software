@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.bipedSupportPolygons;
 
+import java.util.List;
+
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -32,4 +34,6 @@ public interface BipedFootInterface extends ContactablePlaneBody
    public abstract FootPolygonEnum getFootPolygonInUse();
 
    public abstract void setShift(double shift);
+   
+   public abstract List<FramePoint> computeFootPoints();
 }

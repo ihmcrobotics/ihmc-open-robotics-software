@@ -1,11 +1,11 @@
 package us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedFeetUpdater;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedFootInterface;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.FootPolygonVisualizer;
 import us.ihmc.commonWalkingControlModules.captureRegion.CapturePointCalculatorInterface;
 import us.ihmc.commonWalkingControlModules.captureRegion.CaptureRegionCalculator;
 import us.ihmc.commonWalkingControlModules.controlModules.DoubleAndSingleSupportDurationUpdater;
@@ -17,6 +17,7 @@ import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredVelo
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.ProcessedSensorsInterface;
 import us.ihmc.robotSide.RobotSide;
+import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
@@ -29,34 +30,28 @@ public class CommonDoEveryTickSubController implements DoEveryTickSubController
    private final BipedFootInterface leftFoot;
    private final BipedFootInterface rightFoot;
    private final BipedFeetUpdater bipedFeetUpdater;
-   private final FootPolygonVisualizer footPolygonVisualizer;
 
    private final DesiredHeadingControlModule desiredHeadingControlModule;
    private final DesiredVelocityControlModule desiredVelocityControlModule;
    private final DesiredFootstepCalculator desiredFootstepCalculator;
    private final DoubleAndSingleSupportDurationUpdater doubleAndSingleSupportDurationUpdater;
-   
+
    private final CapturePointCalculatorInterface capturePointCalculator;
    private final CaptureRegionCalculator captureRegionCalculator;
    private final CouplingRegistry couplingRegistry;
-   
+
    private ArrayList<Updatable> updatables;
-   
+
    private double initialDesiredHeading;
    private final ProcessedSensorsInterface processedSensors;
 
-   
-   public CommonDoEveryTickSubController(ProcessedSensorsInterface processedSensors,
-         CommonWalkingReferenceFrames referenceFrames, 
-         BipedFootInterface leftFoot, BipedFootInterface rightFoot,
-           BipedFeetUpdater bipedFeetUpdater, 
-           FootPolygonVisualizer footPolygonVisualizer, DesiredHeadingControlModule desiredHeadingControlModule, 
-           DesiredVelocityControlModule desiredVelocityControlModule,
-           DesiredFootstepCalculator desiredFootstepCalculator, 
-           DoubleAndSingleSupportDurationUpdater doubleAndSingleSupportDurationUpdater,
-           CapturePointCalculatorInterface capturePointCalculator,
-           CaptureRegionCalculator captureRegionCalculator, 
-           CouplingRegistry couplingRegistry, double initialDesiredHeading)
+
+   public CommonDoEveryTickSubController(ProcessedSensorsInterface processedSensors, CommonWalkingReferenceFrames referenceFrames, BipedFootInterface leftFoot,
+           BipedFootInterface rightFoot, BipedFeetUpdater bipedFeetUpdater, Updatable footPolygonVisualizer,
+           DesiredHeadingControlModule desiredHeadingControlModule, DesiredVelocityControlModule desiredVelocityControlModule,
+           DesiredFootstepCalculator desiredFootstepCalculator, DoubleAndSingleSupportDurationUpdater doubleAndSingleSupportDurationUpdater,
+           CapturePointCalculatorInterface capturePointCalculator, CaptureRegionCalculator captureRegionCalculator, CouplingRegistry couplingRegistry,
+           double initialDesiredHeading)
    {
       this.processedSensors = processedSensors;
       this.referenceFrames = referenceFrames;
@@ -64,7 +59,6 @@ public class CommonDoEveryTickSubController implements DoEveryTickSubController
       this.leftFoot = leftFoot;
       this.rightFoot = rightFoot;
       this.bipedFeetUpdater = bipedFeetUpdater;
-      this.footPolygonVisualizer = footPolygonVisualizer;
 
       this.desiredHeadingControlModule = desiredHeadingControlModule;
       this.desiredVelocityControlModule = desiredVelocityControlModule;
@@ -75,6 +69,8 @@ public class CommonDoEveryTickSubController implements DoEveryTickSubController
       this.captureRegionCalculator = captureRegionCalculator;
       this.couplingRegistry = couplingRegistry;
       this.initialDesiredHeading = initialDesiredHeading;
+
+      addUpdatable(footPolygonVisualizer);
    }
 
    public void addUpdatable(Updatable updatable)
@@ -83,10 +79,10 @@ public class CommonDoEveryTickSubController implements DoEveryTickSubController
       {
          updatables = new ArrayList<Updatable>();
       }
-      
+
       updatables.add(updatable);
    }
-   
+
    private void doUpdatables(double time)
    {
       if (updatables != null)
@@ -100,8 +96,6 @@ public class CommonDoEveryTickSubController implements DoEveryTickSubController
 
    public void doEveryControlTick(RobotSide supportLeg)
    {
-      doUpdatables(processedSensors.getTime());
-      
       desiredVelocityControlModule.updateDesiredVelocity();
       FrameVector2d desiredVelocity = desiredVelocityControlModule.getDesiredVelocity();
       couplingRegistry.setDesiredVelocity(desiredVelocity);
@@ -116,8 +110,9 @@ public class CommonDoEveryTickSubController implements DoEveryTickSubController
       bipedFeetUpdater.updateBipedFeet(leftFoot, rightFoot, supportLeg, capturePointInMidfeetZUp, forceHindOnToes);
 
       BipedSupportPolygons bipedSupportPolygons = couplingRegistry.getBipedSupportPolygons();
-      bipedSupportPolygons.update(leftFoot, rightFoot);
-      footPolygonVisualizer.update();
+
+      bipedSupportPolygons.update(new SideDependentList<List<FramePoint>>(leftFoot.computeFootPoints(), rightFoot.computeFootPoints()));
+      doUpdatables(processedSensors.getTime());
 
       if (supportLeg != null)
       {
@@ -127,16 +122,17 @@ public class CommonDoEveryTickSubController implements DoEveryTickSubController
          FrameConvexPolygon2d captureRegion = captureRegionCalculator.calculateCaptureRegion(supportLeg, supportFoot,
                                                  couplingRegistry.getEstimatedSwingTimeRemaining());
          couplingRegistry.setCaptureRegion(captureRegion);
-         
+
          // Desired Footstep
          Footstep desiredFootstep = desiredFootstepCalculator.updateAndGetDesiredFootstep(supportLeg);
-//         RobotSide swingLeg = supportLeg.getOppositeSide();
-//         if (desiredFootstep.getFootstepSide() != swingLeg)
-//         {
-//            throw new RuntimeException("desiredFootstep.getFootstepSide() != swingLeg");
-//         }
+
+//       RobotSide swingLeg = supportLeg.getOppositeSide();
+//       if (desiredFootstep.getFootstepSide() != swingLeg)
+//       {
+//          throw new RuntimeException("desiredFootstep.getFootstepSide() != swingLeg");
+//       }
          couplingRegistry.setDesiredFootstep(desiredFootstep);
-         
+
          doubleAndSingleSupportDurationUpdater.update(desiredFootstep, supportLeg, desiredVelocity);
          couplingRegistry.setDoubleSupportDuration(doubleAndSingleSupportDurationUpdater.getDoubleSupportDuration());
          couplingRegistry.setSingleSupportDuration(doubleAndSingleSupportDurationUpdater.getSingleSupportDuration());
@@ -156,6 +152,7 @@ public class CommonDoEveryTickSubController implements DoEveryTickSubController
          System.out.println("Resetting desired heading to current heading.");
          initialDesiredHeading = processedSensors.getPelvisOrientationInFrame(ReferenceFrame.getWorldFrame()).getYawPitchRoll()[0];
       }
+
       System.out.println("Resetting desired heading to " + initialDesiredHeading);
       desiredHeadingControlModule.resetHeadingAngle(initialDesiredHeading);
    }

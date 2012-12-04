@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import javax.media.j3d.Transform3D;
 
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedFootInterface;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.calculators.OrbitalEnergyCalculator;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculator;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
@@ -31,7 +31,7 @@ public class FlatThenPolynomialCoMHeightTrajectoryGenerator implements CenterOfM
    private final CenterOfMassJacobian centerOfMassJacobian;
    private final DesiredFootstepCalculator desiredFootstepCalculator;
    private final ReferenceFrame referenceFrame;
-   private final SideDependentList<BipedFootInterface> bipedFeet;
+   private final SideDependentList<ContactablePlaneBody> bipedFeet;
    private final CommonWalkingReferenceFrames referenceFrames;
 
    private static final int numberOfCoefficients = 6;
@@ -59,7 +59,7 @@ public class FlatThenPolynomialCoMHeightTrajectoryGenerator implements CenterOfM
    private final DoubleYoVariable deltaZ;
 
    public FlatThenPolynomialCoMHeightTrajectoryGenerator(String namePrefix, double gravityZ, ReferenceFrame centerOfMassFrame, CenterOfMassJacobian centerOfMassJacobian,
-           DesiredFootstepCalculator desiredFootstepCalculator, ReferenceFrame desiredHeadingFrame, SideDependentList<BipedFootInterface> bipedFeet,
+           DesiredFootstepCalculator desiredFootstepCalculator, ReferenceFrame desiredHeadingFrame, SideDependentList<ContactablePlaneBody> bipedFeet,
            CommonWalkingReferenceFrames referenceFrames, YoVariableRegistry parentRegistry)
    {
       this.gravityZ = gravityZ;
@@ -236,7 +236,7 @@ public class FlatThenPolynomialCoMHeightTrajectoryGenerator implements CenterOfM
    private double findMinZOfGroundContactPoints(RobotSide robotSide)
    {
       double minZ = Double.POSITIVE_INFINITY;
-      ArrayList<FramePoint2d> footPoints = bipedFeet.get(robotSide).getFootPolygonInSoleFrame().getClockwiseOrderedListOfFramePoints();
+      ArrayList<FramePoint2d> footPoints = bipedFeet.get(robotSide).getContactPolygon().getClockwiseOrderedListOfFramePoints();
       FramePoint tempFramePoint = new FramePoint(ReferenceFrame.getWorldFrame());
       for (FramePoint2d footPoint : footPoints)
       {
@@ -254,7 +254,7 @@ public class FlatThenPolynomialCoMHeightTrajectoryGenerator implements CenterOfM
    private double findMaxXOfGroundContactPoints(RobotSide robotSide)
    {
       double maxX = Double.NEGATIVE_INFINITY;
-      ArrayList<FramePoint2d> footPoints = bipedFeet.get(robotSide).getFootPolygonInSoleFrame().getClockwiseOrderedListOfFramePoints();
+      ArrayList<FramePoint2d> footPoints = bipedFeet.get(robotSide).getContactPolygon().getClockwiseOrderedListOfFramePoints();
       FramePoint tempFramePoint = new FramePoint(ReferenceFrame.getWorldFrame());
       for (FramePoint2d footPoint : footPoints)
       {
@@ -275,7 +275,7 @@ public class FlatThenPolynomialCoMHeightTrajectoryGenerator implements CenterOfM
       Transform3D desiredFootToDesiredHeading = new Transform3D();
       footstepPose.getTransform3D(desiredFootToDesiredHeading);
 
-      ArrayList<FramePoint2d> footPoints = bipedFeet.get(swingSide).getFootPolygonInSoleFrame().getClockwiseOrderedListOfFramePoints();
+      ArrayList<FramePoint2d> footPoints = bipedFeet.get(swingSide).getContactPolygon().getClockwiseOrderedListOfFramePoints();
       double maxX = Double.NEGATIVE_INFINITY;
       FramePoint tempFramePoint = new FramePoint(ReferenceFrame.getWorldFrame());
       for (FramePoint2d footPoint : footPoints)

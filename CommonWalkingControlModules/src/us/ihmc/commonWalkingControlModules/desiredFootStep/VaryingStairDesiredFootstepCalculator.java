@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.desiredFootStep;
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Matrix3d;
 
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedFootInterface;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredHeadingControlModule;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.terrain.VaryingStairGroundProfile;
@@ -25,7 +25,7 @@ public class VaryingStairDesiredFootstepCalculator extends SimpleWorldDesiredFoo
    private final VaryingStairGroundProfile groundProfile;
 
 
-   public VaryingStairDesiredFootstepCalculator(VaryingStairGroundProfile groundProfile, SideDependentList<BipedFootInterface> bipedFeet,
+   public VaryingStairDesiredFootstepCalculator(VaryingStairGroundProfile groundProfile, SideDependentList<ContactablePlaneBody> bipedFeet,
            CommonWalkingReferenceFrames referenceFrames, DesiredHeadingControlModule desiredHeadingControlModule, YoVariableRegistry parentRegistry)
    {
       super(bipedFeet, referenceFrames, desiredHeadingControlModule, parentRegistry);

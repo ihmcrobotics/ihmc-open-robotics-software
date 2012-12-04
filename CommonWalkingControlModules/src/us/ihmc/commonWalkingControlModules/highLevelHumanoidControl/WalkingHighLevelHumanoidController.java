@@ -1,17 +1,23 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 import javax.media.j3d.Transform3D;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedFootInterface;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactableBody;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.FootPolygonEnum;
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodyOrientationControlModule;
 import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculator;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorTools;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.CapturePointCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.LimbControlMode;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LimbName;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
@@ -60,7 +66,7 @@ import com.yobotics.simulationconstructionset.util.trajectory.DoubleTrajectoryGe
 import com.yobotics.simulationconstructionset.util.trajectory.LegacyCartesianTrajectoryGeneratorPositionTrajectoryGeneratorWrapper;
 import com.yobotics.simulationconstructionset.util.trajectory.PositionTrajectoryGenerator;
 
-// TODO: don't use BipedFoot to control FootStateMachine
+//TODO: don't use BipedFoot to control FootStateMachine
 public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoidController
 {
    private static enum WalkingState {LEFT_SUPPORT, RIGHT_SUPPORT, TRANSFER_TO_LEFT_SUPPORT, TRANSFER_TO_RIGHT_SUPPORT, DOUBLE_SUPPORT}
@@ -100,7 +106,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final SettableOrientationProvider finalPelvisOrientationProvider;
    private final OrientationTrajectoryGenerator pelvisOrientationTrajectoryGenerator;
 
-   private final SideDependentList<FootStateMachine> footStateMachines = new SideDependentList<FootStateMachine>();
+   private final HashMap<RigidBody, FootStateMachine> footStateMachines = new HashMap<RigidBody, FootStateMachine>();
    private final SideDependentList<LegacyCartesianTrajectoryGeneratorPositionTrajectoryGeneratorWrapper> footPositionTrajectoryGenerators;
    private final DoubleProvider swingTimeProvider;
    private final SideDependentList<YoVariableDoubleProvider> onToesInitialPitchProviders = new SideDependentList<YoVariableDoubleProvider>();
@@ -108,22 +114,19 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final BooleanYoVariable stayOnToes = new BooleanYoVariable("stayOnToes", registry);
 
    public WalkingHighLevelHumanoidController(FullRobotModel fullRobotModel, CommonWalkingReferenceFrames referenceFrames, TwistCalculator twistCalculator,
-           CenterOfMassJacobian centerOfMassJacobian, SideDependentList<BipedFootInterface> bipedFeet, BipedSupportPolygons bipedSupportPolygons,
+           CenterOfMassJacobian centerOfMassJacobian, SideDependentList<? extends ContactablePlaneBody> bipedFeet, BipedSupportPolygons bipedSupportPolygons,
            SideDependentList<FootSwitchInterface> footSwitches, double gravityZ, DoubleYoVariable yoTime, double controlDT, YoVariableRegistry registry,
            DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, DesiredFootstepCalculator desiredFootstepCalculator,
            CenterOfMassHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator,
-           SideDependentList<LegacyCartesianTrajectoryGeneratorPositionTrajectoryGeneratorWrapper> footPositionTrajectoryGenerators, DoubleProvider swingTimeProvider, boolean liftUpHeels,
-           double desiredPelvisPitch, ArrayList<Updatable> updatables)
+           SideDependentList<LegacyCartesianTrajectoryGeneratorPositionTrajectoryGeneratorWrapper> footPositionTrajectoryGenerators,
+           DoubleProvider swingTimeProvider, boolean stayOntoes, double desiredPelvisPitch, ArrayList<Updatable> updatables)
    {
-      super(fullRobotModel, referenceFrames, yoTime, gravityZ, twistCalculator, bipedFeet, bipedSupportPolygons, controlDT, footSwitches, updatables, registry);
+      super(fullRobotModel, referenceFrames, yoTime, gravityZ, twistCalculator, bipedFeet, bipedSupportPolygons, controlDT, footSwitches, updatables, registry,
+            dynamicGraphicObjectsListRegistry);
 
       this.desiredFootstepCalculator = desiredFootstepCalculator;
 
-      // this.centerOfMassHeightTrajectoryGenerator = new LinearFootstepCalculatorBasedCoMHeightTrajectoryGenerator(processedSensors, desiredFootstepCalculator,
-      // referenceFrames, desiredHeadingControlModule.getDesiredHeadingFrame(), registry);
-
-      // this.centerOfMassHeightTrajectoryGenerator = new ConstantCenterOfMassHeightTrajectoryGenerator(registry);
-      this.centerOfMassJacobian = centerOfMassJacobian;    // new CenterOfMassJacobian(fullRobotModel.getElevator());
+      this.centerOfMassJacobian = centerOfMassJacobian;
       this.centerOfMassHeightTrajectoryGenerator = centerOfMassHeightTrajectoryGenerator;
       this.swingTimeProvider = swingTimeProvider;
 
@@ -137,8 +140,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       upcomingSupportLeg.set(RobotSide.RIGHT);
 
       singleSupportICPGlideScaleFactor.set(0.9);
-      FramePoint2d finalDesiredICPForDoubleSupportStance = getDoubleSupportFinalDesiredICPForDoubleSupportStance();
-      finalDesiredICPForDoubleSupportStance.changeFrame(desiredICP.getReferenceFrame());
+
 
       this.chestOrientationControlModule = new RigidBodyOrientationControlModule("chest", fullRobotModel.getPelvis(), fullRobotModel.getChest(),
               twistCalculator, registry);
@@ -149,15 +151,16 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       for (RobotSide robotSide : RobotSide.values())
       {
+         contactStates.get(fullRobotModel.getFoot(robotSide)).setContactPoints(bipedFeet.get(robotSide).getContactPoints());    // flat feet
          trajectoryInitialized.put(robotSide, new BooleanYoVariable(robotSide.getCamelCaseNameForStartOfExpression() + "TrajectoryInitialized", registry));
 
          String sideString = robotSide.getCamelCaseNameForStartOfExpression();
          RigidBody footBody = fullRobotModel.getFoot(robotSide);
-         BipedFootInterface bipedFoot = bipedFeet.get(robotSide);
+         ContactablePlaneBody bipedFoot = bipedFeet.get(robotSide);
 
          PositionTrajectoryGenerator swingPositionTrajectoryGenerator = footPositionTrajectoryGenerators.get(robotSide);
 
-         OrientationProvider initialOrientationProvider = new CurrentOrientationProvider(worldFrame, bipedFoot.getFootFrame());
+         OrientationProvider initialOrientationProvider = new CurrentOrientationProvider(worldFrame, bipedFoot.getBodyFrame());
          OrientationProvider finalOrientationProvider = new DesiredFootstepBasedOrientationProvider(robotSide);
 
          OrientationTrajectoryGenerator swingOrientationTrajectoryGenerator = new OrientationInterpolationTrajectoryGenerator(sideString
@@ -176,9 +179,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          onToesInitialPitchProviders.put(robotSide, onToesInitialPitchProvider);
          onToesFinalPitchProviders.put(robotSide, onToesFinalPitchProvider);
 
-         FootStateMachine footStateMachine = new FootStateMachine(footBody, bipedFoot, swingPositionTrajectoryGenerator, swingOrientationTrajectoryGenerator,
-                                                onHeelPitchTrajectoryGenerator, onToesPitchTrajectoryGenerator, yoTime, twistCalculator, registry);
-         footStateMachines.put(robotSide, footStateMachine);
+         FootStateMachine footStateMachine = new FootStateMachine(bipedFoot, swingPositionTrajectoryGenerator, swingOrientationTrajectoryGenerator, onHeelPitchTrajectoryGenerator,
+                                                onToesPitchTrajectoryGenerator, yoTime, twistCalculator, registry);
+         footStateMachines.put(footBody, footStateMachine);
       }
 
       initialPelvisOrientationProvider = new SettableOrientationProvider("initialPelvis", worldFrame, registry);
@@ -194,10 +197,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       minOrbitalEnergyForSingleSupport.set(0.007);    // 0.008
       amountToBeInsideSingleSupport.set(0.0);
       amountToBeInsideDoubleSupport.set(0.05);
-      doubleSupportTimeProvider.set(0.2); // 0.5);    // 0.2);    // 0.6;    // 0.3
+      doubleSupportTimeProvider.set(0.2);    // 0.5);    // 0.2);    // 0.6;    // 0.3
       this.userDesiredPelvisPitch.set(desiredPelvisPitch);
       this.desiredPelvisOrientation.setYawPitchRoll(0.0, desiredPelvisPitch, 0.0);
-      stayOnToes.set(liftUpHeels);
+      this.stayOnToes.set(stayOntoes);
 
       for (RobotSide robotSide : RobotSide.values())
       {
@@ -277,28 +280,23 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       public void doTransitionIntoAction()
       {
          setSupportLeg(null);
-         
+
          onToesInitialPitchProviders.get(getUpcomingSupportLeg()).set(0.05);
          onToesFinalPitchProviders.get(getUpcomingSupportLeg()).set(0.05);
 
          if (transferToSide == null)
          {
-            onToesInitialPitchProviders.get(getUpcomingSupportLeg().getOppositeSide()).set(0.8);            
+            onToesInitialPitchProviders.get(getUpcomingSupportLeg().getOppositeSide()).set(0.8);
          }
 
          onToesFinalPitchProviders.get(getUpcomingSupportLeg().getOppositeSide()).set(0.8);
 
          for (RobotSide robotSide : RobotSide.values())
          {
-            if (stayOnToes.getBooleanValue())
-            {
-               footStateMachines.get(robotSide).setRequestedState(FootPolygonEnum.ONTOES);
-               bipedFeet.get(robotSide).setShift(1.0);               
-            }
-            else
-               footStateMachines.get(robotSide).setRequestedState(FootPolygonEnum.FLAT);
-            bipedSupportPolygons.update(bipedFeet.get(RobotSide.LEFT), bipedFeet.get(RobotSide.RIGHT));
+            setContactStateForSupport(robotSide, contactablePlaneBodies.get(robotSide));
          }
+
+         updateBipedSupportPolygons();
 
          FramePoint2d finalDesiredICP;
 
@@ -311,7 +309,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          else
          {
             FramePose currentFramePose = new FramePose(referenceFrames.getFootFrame(transferToSide));
-            finalDesiredICP = getDoubleSupportFinalDesiredICPForWalking(currentFramePose, bipedFeet.get(transferToSide).getFootPolygonInSoleFrame(), transferToSide);
+            FrameConvexPolygon2d footPolygon = computeFootPolygon(transferToSide, referenceFrames.getSoleFrame(transferToSide));
+            finalDesiredICP = getDoubleSupportFinalDesiredICPForWalking(currentFramePose, footPolygon, transferToSide);
          }
 
          finalDesiredICP.changeFrame(desiredICP.getReferenceFrame());
@@ -385,21 +384,21 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       {
          RobotSide supportSide = swingSide.getOppositeSide();
          setSupportLeg(supportSide);
-         
-         if (stayOnToes.getBooleanValue())
-         {
-            footStateMachines.get(supportSide).setRequestedState(FootPolygonEnum.ONTOES);
-            bipedFeet.get(supportSide).setShift(1.0);               
-         }
-         else
-            footStateMachines.get(supportSide).setRequestedState(FootPolygonEnum.FLAT);
-         bipedSupportPolygons.update(bipedFeet.get(RobotSide.LEFT), bipedFeet.get(RobotSide.RIGHT));
+
+         setContactStateForSupport(swingSide, contactablePlaneBodies.get(supportSide));
+         setContactStateForSwing(contactablePlaneBodies.get(swingSide));
+         updateBipedSupportPolygons();
 
          centerOfMassHeightTrajectoryGenerator.initialize(getSupportLeg(), upcomingSupportLeg.getEnumValue());
          limbNullspaceMultipliers.get(swingSide).get(LimbName.LEG).set(swingNullspaceMultiplier);
          limbNullspaceMultipliers.get(supportSide).get(LimbName.LEG).set(0.0);
          trajectoryInitialized.get(swingSide).set(false);
 
+      }
+
+      private void setContactStateForSwing(ContactableBody contactableBody)
+      {
+         contactStates.get(contactableBody.getRigidBody()).setContactPoints(new ArrayList<FramePoint>());
       }
 
       @Override
@@ -511,7 +510,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       for (RobotSide robotSide : RobotSide.values())
       {
          FramePoint2d centroid = new FramePoint2d(ret.getReferenceFrame());
-         bipedFeet.get(robotSide).getFootPolygonInUseInAnkleZUp().getCentroid(centroid);
+         FrameConvexPolygon2d footPolygon = computeFootPolygon(robotSide, referenceFrames.getAnkleZUpFrame(robotSide));
+         footPolygon.getCentroid(centroid);
          centroid.changeFrame(ret.getReferenceFrame());
          if (robotSide == getUpcomingSupportLeg())
             centroid.scale(trailingFootToLeadingFootFactor);
@@ -557,8 +557,19 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       FramePoint2d initialDesiredICP = desiredICP.getFramePoint2dCopy();
       initialDesiredICP.changeFrame(referenceFrame);
 
-      // TODO: think about setting the shift factor here
-      FramePoint2d finalDesiredICP = getDoubleSupportFinalDesiredICPForWalking(desiredFootstep.getPoseCopy(), bipedFeet.get(swingSide).getFootPolygonInSoleFrame(), swingSide);    // yes, swing side
+      FrameConvexPolygon2d footPolygon;
+      ContactablePlaneBody contactableBody = contactablePlaneBodies.get(swingSide);
+      if (stayOnToes.getBooleanValue())
+      {
+         List<FramePoint> contactPoints = getContactPointsForWalkingOnToes(contactableBody);
+         footPolygon = FrameConvexPolygon2d.constructByProjectionOntoXYPlane(contactPoints, referenceFrames.getSoleFrame(swingSide));
+      }
+      else
+      {
+         footPolygon = contactableBody.getContactPolygon();
+      }
+
+      FramePoint2d finalDesiredICP = getDoubleSupportFinalDesiredICPForWalking(desiredFootstep.getPoseCopy(), footPolygon, swingSide);    // yes, swing side
       finalDesiredICP.changeFrame(referenceFrame);
 
       FrameLineSegment2d initialToFinal = new FrameLineSegment2d(initialDesiredICP, finalDesiredICP);
@@ -569,12 +580,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private void setSupportLeg(RobotSide supportLeg)
    {
       this.supportLeg.set(supportLeg);
-
-      for (RobotSide robotSide : RobotSide.values())
-      {
-         boolean isSupportingFoot = (supportLeg == robotSide) || (supportLeg == null);
-         bipedFeet.get(robotSide).setIsSupportingFoot(isSupportingFoot);
-      }
    }
 
    public void initializeTrajectory(RobotSide swingSide, SpatialAccelerationVector taskSpaceAcceleration)
@@ -639,14 +644,24 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       cartesianTrajectoryGenerator.initialize(initialPosition, initialVelocity, initialAcceleration, finalDesiredStepLocation, finalDesiredVelocity);
 
 
-      desiredICP.set(capturePoint);    // TODO: is this what we want?
+      FramePoint centerOfMass = new FramePoint(referenceFrames.getCenterOfMassFrame());
+      centerOfMass.changeFrame(worldFrame);
+      FrameVector centerOfMassVelocity = new FrameVector(worldFrame);
+      centerOfMassJacobian.packCenterOfMassVelocity(centerOfMassVelocity);
+      ContactablePlaneBody contactablePlaneBody = contactablePlaneBodies.get(supportSide);
+      Transform3D footToWorldTransform = contactablePlaneBody.getBodyFrame().getTransformToDesiredFrame(worldFrame);
+      double footHeight = DesiredFootstepCalculatorTools.computeMinZPointInFrame(footToWorldTransform, contactablePlaneBody, worldFrame).getZ();
+      double comHeight = centerOfMass.getZ() - footHeight;
+      double omega0 = CapturePointCalculator.computeOmega0ConstantHeight(gravity, comHeight);
+      desiredICP.set(CapturePointCalculator.computeCapturePoint(centerOfMass, centerOfMassVelocity, omega0));    // TODO: is this what we want?
+      
       FramePoint2d finalDesiredICP = getSingleSupportFinalDesiredICPForWalking(desiredFootstep, swingSide);
-      icpTrajectoryGenerator.initialize(desiredICP.getFramePoint2dCopy(), finalDesiredICP, swingTimeProvider.getValue(),
-                                        omega0, amountToBeInsideSingleSupport.getDoubleValue());
+      icpTrajectoryGenerator.initialize(desiredICP.getFramePoint2dCopy(), finalDesiredICP, swingTimeProvider.getValue(), omega0,
+                                        amountToBeInsideSingleSupport.getDoubleValue());
 
       limbNullspaceMultipliers.get(swingSide).get(LimbName.LEG).set(0.0);
       trajectoryInitialized.get(swingSide).set(true);
-      footStateMachines.get(swingSide).setRequestedState(FootPolygonEnum.FREE);
+      footStateMachines.get(fullRobotModel.getFoot(swingSide)).setRequestedState(FootPolygonEnum.FREE);
 
 
       stateMachine.doAction();    // computes trajectory and stores results in YoFrameVectors and Points.
@@ -733,7 +748,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       for (RobotSide robotSide : RobotSide.values())
       {
          SpatialAccelerationVector footAcceleration = new SpatialAccelerationVector();
-         footStateMachines.get(robotSide).packDesiredFootAcceleration(footAcceleration);
+         footStateMachines.get(fullRobotModel.getFoot(robotSide)).packDesiredFootAcceleration(footAcceleration);
          setEndEffectorSpatialAcceleration(robotSide, LimbName.LEG, footAcceleration);
       }
    }
@@ -752,6 +767,49 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          Footstep footstep = desiredFootstepCalculator.updateAndGetDesiredFootstep(swingSide.getOppositeSide());
          orientationToPack.set(footstep.getOrientationInFrame(worldFrame));
       }
+   }
 
+
+   private void setContactStateForSupport(RobotSide supportSide, ContactableBody contactableBody)
+   {
+      if (stayOnToes.getBooleanValue())
+      {
+         List<FramePoint> contactPoints = getContactPointsForWalkingOnToes(contactableBody);
+         contactStates.get(contactableBody.getRigidBody()).setContactPoints(contactPoints);
+         footStateMachines.get(contactableBody.getRigidBody()).setRequestedState(FootPolygonEnum.ONTOES);
+      }
+      else
+      {
+         contactStates.get(contactableBody.getRigidBody()).setContactPoints(contactableBody.getContactPoints());
+      }
+   }
+
+   private List<FramePoint> getContactPointsForWalkingOnToes(ContactableBody contactableBody)
+   {
+      FrameVector forward = new FrameVector(contactableBody.getBodyFrame(), 1.0, 0.0, 0.0);
+      List<FramePoint> contactPoints = DesiredFootstepCalculatorTools.computeMaximumPointsInDirection(contactableBody.getContactPoints(), forward, 2);
+      contactPoints = DesiredFootstepCalculatorTools.fixTwoPointsAndCopy(contactPoints);    // TODO: terrible
+
+      return contactPoints;
+   }
+
+   private void updateBipedSupportPolygons()
+   {
+      SideDependentList<List<FramePoint>> contactPoints = new SideDependentList<List<FramePoint>>();
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         contactPoints.put(robotSide, contactStates.get(fullRobotModel.getFoot(robotSide)).getContactPoints());
+      }
+
+      bipedSupportPolygons.update(contactPoints);
+   }
+
+// TODO: should probably precompute this somewhere else
+   private FrameConvexPolygon2d computeFootPolygon(RobotSide robotSide, ReferenceFrame referenceFrame)
+   {
+      List<FramePoint> contactPoints = contactStates.get(fullRobotModel.getFoot(robotSide)).getContactPoints();
+      FrameConvexPolygon2d footPolygon = FrameConvexPolygon2d.constructByProjectionOntoXYPlane(contactPoints, referenceFrame);
+
+      return footPolygon;
    }
 }
