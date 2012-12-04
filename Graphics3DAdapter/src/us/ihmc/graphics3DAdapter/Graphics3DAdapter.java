@@ -14,5 +14,6 @@ public interface Graphics3DAdapter
    public void setHeightMap(HeightMap heightMap);
    
    public Object getGraphicsConch();
+   public void setGroundVisible(boolean isVisible);
    
 }
