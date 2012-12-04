@@ -893,8 +893,14 @@ public class LinkGraphics
     */
    public void addPyramidCube(double lx, double ly, double lz, double lh, YoAppearanceDefinition cubeApp)
    {
-         linkGraphicsInstructions.add(new LinkGraphicsAddPyramidCube(lx, ly, lz, lh, cubeApp));
+      linkGraphicsInstructions.add(new LinkGraphicsAddPyramidCube(lx, ly, lz, lh, cubeApp));
    }
+   
+   public void addPolygon(ArrayList<Point3d> polygonPoints)
+   {
+      addPolygon(polygonPoints, YoAppearance.Black());
+   }
+   
    /**
     * Creates a polygon centered at the current coordinate system with the given vertices.
     * The points this shape is composed of must be coplanar and the order matters.  Randomly
@@ -906,8 +912,7 @@ public class LinkGraphics
     */
    public void addPolygon(ArrayList<Point3d> polygonPoints, YoAppearanceDefinition yoAppearance)
    {
-
-         linkGraphicsInstructions.add(new LinkGraphicsAddPolygonDouble(polygonPoints, yoAppearance));
+      linkGraphicsInstructions.add(new LinkGraphicsAddPolygonDouble(polygonPoints, yoAppearance));
    }
 
    /**
@@ -936,8 +941,7 @@ public class LinkGraphics
     */
    public void addPolygon(Point3d[] polygonPoints, YoAppearanceDefinition yoAppearance)
    {
-         linkGraphicsInstructions.add(new LinkGraphicsAddPolygonDouble(polygonPoints, yoAppearance));
-
+      linkGraphicsInstructions.add(new LinkGraphicsAddPolygonDouble(polygonPoints, yoAppearance));
    }
 
    public LinkGraphicsInstruction addText(String text, YoAppearanceDefinition yoAppearance)
