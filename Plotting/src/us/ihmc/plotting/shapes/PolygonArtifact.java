@@ -1,12 +1,15 @@
 package us.ihmc.plotting.shapes;
 
+import java.awt.Color;
+import java.awt.Graphics;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.vecmath.Point2d;
+
 import us.ihmc.plotting.Artifact;
 import us.ihmc.utilities.math.geometry.BoundingBox2d;
 import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
-
-import javax.vecmath.Point2d;
-import java.awt.*;
-import java.util.ArrayList;
 
 public class PolygonArtifact extends Artifact
 {
@@ -38,7 +41,7 @@ public class PolygonArtifact extends Artifact
       this.color = color;
    }
 
-   public PolygonArtifact(String id, boolean fill, Color color, ArrayList<Point2d> points)
+   public PolygonArtifact(String id, boolean fill, Color color, List<Point2d> points)
    {
       super(id);
       setLevel(2);
@@ -77,7 +80,7 @@ public class PolygonArtifact extends Artifact
    }
 
 
-   public void setPoints(ArrayList<Point2d> points)
+   public void setPoints(List<Point2d> points)
    {
       this.points.clear();
       this.points.addAll(points);
