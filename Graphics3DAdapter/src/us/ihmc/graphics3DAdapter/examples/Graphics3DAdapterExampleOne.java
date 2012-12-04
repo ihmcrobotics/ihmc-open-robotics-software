@@ -18,7 +18,7 @@ public class Graphics3DAdapterExampleOne
  
    public void doExampleOne(Graphics3DAdapter adapter)
    {
-      Graphics3DNode teapotAndSphereNode = new Graphics3DNode("teaPot", NodeType.OBJECT);
+      Graphics3DNode teapotAndSphereNode = new Graphics3DNode("teaPot", NodeType.JOINT);
        
 //      teapotAndSphereNode.rotateAboutX(Math.PI/4.0);
      
