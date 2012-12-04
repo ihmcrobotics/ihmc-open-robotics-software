@@ -135,7 +135,7 @@ public class DesiredFootstepCalculatorTools
    public static List<FramePoint> fixTwoPointsAndCopy(List<FramePoint> contactPoints)
    {
       // FIXME: terrible, we need to make it so that ConvexPolygons can consist of fewer than 3 points
-      List<FramePoint> contactPointsCopy = new ArrayList<FramePoint>(contactPoints.size() + 1);
+      List<FramePoint> contactPointsCopy = new ArrayList<FramePoint>(contactPoints.size() + 2);
       for (FramePoint framePoint : contactPoints)
       {
          contactPointsCopy.add(framePoint);
@@ -144,22 +144,24 @@ public class DesiredFootstepCalculatorTools
       if (contactPointsCopy.size() == 2)
       {
          ReferenceFrame referenceFrame = contactPoints.get(0).getReferenceFrame();
-         FramePoint thirdPoint = new FramePoint(contactPoints.get(0));
          
          FrameVector pointToPoint = new FrameVector(contactPoints.get(1));
          pointToPoint.sub(contactPoints.get(0));
-         pointToPoint.scale(0.5);
-         thirdPoint.add(pointToPoint);
          
          FrameVector z = new FrameVector(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 1.0);
          z.changeFrame(referenceFrame);
          FrameVector cross = new FrameVector(referenceFrame);
          cross.cross(pointToPoint, z);
          cross.normalize();
-         cross.scale(1e-3);
-         thirdPoint.add(cross);
+         cross.scale(1e-5);
+         
+         for (int i = 0; i < 2; i++)
+         {
+            FramePoint extraPoint = new FramePoint(contactPoints.get(i));
+            extraPoint.add(cross);
+            contactPointsCopy.add(extraPoint);
+         }
 
-         contactPointsCopy.add(thirdPoint);
       }
       return contactPointsCopy;
    }
