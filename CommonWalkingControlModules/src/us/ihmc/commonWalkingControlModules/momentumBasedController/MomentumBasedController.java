@@ -72,7 +72,7 @@ public class MomentumBasedController implements RobotController
    private final CenterOfMassCalculator centerOfMassCalculator;
    private final CenterOfMassJacobian centerOfMassJacobian;
    private final MomentumCalculator momentumCalculator;
-   
+
    private final ProcessedOutputsInterface processedOutputs;
    private final InverseDynamicsCalculator inverseDynamicsCalculator;
 
@@ -125,15 +125,15 @@ public class MomentumBasedController implements RobotController
    private final BooleanYoVariable leftInSingularRegion = new BooleanYoVariable("leftInSingularRegion", registry);
    private final BooleanYoVariable rightInSingularRegion = new BooleanYoVariable("rightInSingularRegion", registry);
    private final SideDependentList<BooleanYoVariable> inSingularRegions = new SideDependentList<BooleanYoVariable>(leftInSingularRegion, rightInSingularRegion);
-  
 
-   public MomentumBasedController(FullRobotModel fullRobotModel, ProcessedOutputsInterface processedOutputs,
-                                  double gravityZ, CommonWalkingReferenceFrames referenceFrames, TwistCalculator twistCalculator, double controlDT,
+
+   public MomentumBasedController(FullRobotModel fullRobotModel, ProcessedOutputsInterface processedOutputs, double gravityZ,
+                                  CommonWalkingReferenceFrames referenceFrames, TwistCalculator twistCalculator, double controlDT,
                                   DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, BipedSupportPolygons bipedSupportPolygons,
                                   HighLevelHumanoidController highLevelHumanoidController)
    {
       MathTools.checkIfInRange(gravityZ, 0.0, Double.POSITIVE_INFINITY);
-      
+
       this.fullRobotModel = fullRobotModel;
       this.referenceFrames = referenceFrames;
       this.processedOutputs = processedOutputs;
@@ -143,7 +143,7 @@ public class MomentumBasedController implements RobotController
       this.centerOfMassJacobian = new CenterOfMassJacobian(fullRobotModel.getElevator());
       this.momentumCalculator = new MomentumCalculator(twistCalculator);
       this.highLevelHumanoidController = highLevelHumanoidController;
-      
+
       RigidBody elevator = fullRobotModel.getElevator();
       this.inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, gravityZ);
 
@@ -180,8 +180,8 @@ public class MomentumBasedController implements RobotController
 
       CapturabilityBasedDesiredCoPVisualizer visualizer = new CapturabilityBasedDesiredCoPVisualizer(registry, dynamicGraphicObjectsListRegistry);
       SacrificeDeltaCMPDesiredCoPAndCMPControlModule desiredCoPAndCMPControlModule =
-         new SacrificeDeltaCMPDesiredCoPAndCMPControlModule(desiredCenterOfPressureFilter, visualizer,
-            bipedSupportPolygons, fullRobotModel.getPelvis().getBodyFixedFrame(), registry);
+         new SacrificeDeltaCMPDesiredCoPAndCMPControlModule(desiredCenterOfPressureFilter, visualizer, bipedSupportPolygons,
+            fullRobotModel.getPelvis().getBodyFixedFrame(), registry);
       desiredCoPAndCMPControlModule.setGains(3e-2, 1.0);
       this.desiredCoPAndCMPControlModule = desiredCoPAndCMPControlModule;
 
@@ -193,7 +193,7 @@ public class MomentumBasedController implements RobotController
       RigidBody chest = fullRobotModel.getChest();
       this.chestAngularAccelerationcalculator = new ThreeDoFAngularAccelerationCalculator(pelvis, chest);
 
-      
+
       virtualToePointCalculator = new NewGeometricVirtualToePointCalculator(referenceFrames, registry, dynamicGraphicObjectsListRegistry, 0.95);
 
       this.legStrengthCalculator = new TeeterTotterLegStrengthCalculator(registry);
@@ -230,12 +230,12 @@ public class MomentumBasedController implements RobotController
             desiredAccelerationYoVariables.put((RevoluteJoint) joint, new DoubleYoVariable(joint.getName() + "qdd_d", registry));
          }
       }
-      
+
       for (RobotSide robotSide : RobotSide.values())
       {
          kValues.put(robotSide, new DoubleYoVariable(robotSide.getCamelCaseNameForStartOfExpression() + "KValue", registry));
       }
-      
+
       kAngularMomentumZ.set(10.0);    // 50.0); // 10.0);
       kPelvisYaw.set(100.0);    // was 0.0 for M3 movie
       kUpperBody.set(100.0);
@@ -293,6 +293,7 @@ public class MomentumBasedController implements RobotController
    private FramePoint computeCenterOfMass()
    {
       centerOfMassCalculator.compute();
+
       return centerOfMassCalculator.getCenterOfMass();
    }
 
@@ -301,6 +302,7 @@ public class MomentumBasedController implements RobotController
       centerOfMassJacobian.compute();
       FrameVector ret = new FrameVector(ReferenceFrame.getWorldFrame());
       centerOfMassJacobian.packCenterOfMassVelocity(ret);
+
       return ret;
    }
 
@@ -308,6 +310,7 @@ public class MomentumBasedController implements RobotController
    {
       Momentum momentum = new Momentum(centerOfMassFrame);
       momentumCalculator.computeAndPack(momentum);
+
       return momentum;
    }
 
@@ -320,8 +323,8 @@ public class MomentumBasedController implements RobotController
       FrameVector2d desiredCapturePointVelocity = new FrameVector2d(worldFrame);
       highLevelHumanoidController.packDesiredICPVelocity(desiredCapturePointVelocity);
 
-      desiredCoPAndCMPControlModule.compute(capturePoint, supportLeg, desiredCapturePoint, desiredCapturePointVelocity, highLevelHumanoidController.getDesiredPelvisOrientation(),
-              omega0.getDoubleValue(), momentum);
+      desiredCoPAndCMPControlModule.compute(capturePoint, supportLeg, desiredCapturePoint, desiredCapturePointVelocity,
+              highLevelHumanoidController.getDesiredPelvisOrientation(), omega0.getDoubleValue(), momentum);
       FramePoint2d desiredCoP = new FramePoint2d(worldFrame);
       desiredCoPAndCMPControlModule.packCoP(desiredCoP);
       FramePoint2d desiredCMP = new FramePoint2d(worldFrame);
@@ -329,73 +332,22 @@ public class MomentumBasedController implements RobotController
       highLevelHumanoidController.setPreviousCoP(desiredCoP);
 
       desiredCoP.changeFrame(frame);
-      desiredCMP.changeFrame(frame);
+      fixDesiredCoPNumericalRoundoff(desiredCoP, bipedSupportPolygons.getSupportPolygonInMidFeetZUp());
 
+      desiredCMP.changeFrame(frame);
       FrameVector2d desiredDeltaCMP = new FrameVector2d(desiredCMP);
       desiredDeltaCMP.sub(desiredCoP);
 
-      fixDesiredCoPNumericalRoundoff(desiredCoP, bipedSupportPolygons.getSupportPolygonInMidFeetZUp());
-      desiredCoP.changeFrame(frame);
-
       this.fZ.set(computeFz());
 
-      SideDependentList<FramePoint2d> virtualToePoints = new SideDependentList<FramePoint2d>();
-      if (supportLeg == null)
-      {
-         virtualToePointCalculator.packVirtualToePoints(virtualToePoints, bipedSupportPolygons, desiredCoP,
-                 highLevelHumanoidController.getUpcomingSupportLeg());
-      }
-      else
-      {
-         virtualToePointCalculator.hideVisualizationGraphics();
-         FrameConvexPolygon2d footPolygonInAnkleZUp = bipedSupportPolygons.getFootPolygonInAnkleZUp(supportLeg);
-         fixDesiredCoPNumericalRoundoff(desiredCoP, footPolygonInAnkleZUp);
-         desiredCoP.changeFrame(frame);
-
-         virtualToePoints.put(supportLeg, desiredCoP);
-         virtualToePoints.put(supportLeg.getOppositeSide(), new FramePoint2d(frame));
-      }
-
+      SideDependentList<FramePoint2d> virtualToePoints = computeVirtualToePoints(supportLeg, desiredCoP);
       legStrengthCalculator.packLegStrengths(lambdas, virtualToePoints, desiredCoP);
+      SideDependentList<FramePoint> virtualToePointsOnSole = projectOntoSole(virtualToePoints);
 
-      SideDependentList<FramePoint> virtualToePointsOnSole = new SideDependentList<FramePoint>();
-      for (RobotSide robotSide : RobotSide.values())
-      {
-         virtualToePoints.get(robotSide).changeFrame(worldFrame);
-         FramePoint virtualToePoint = virtualToePoints.get(robotSide).toFramePoint();
-         virtualToePoint = projectPointOntoSole(robotSide, virtualToePoint);
-         virtualToePoint.changeFrame(worldFrame);
-         virtualToePointsOnSole.put(robotSide, virtualToePoint);
-      }
-
-      FrameLine2d vtpToVTPLine = new FrameLine2d(virtualToePointsOnSole.get(RobotSide.LEFT).toFramePoint2d(),
-                                    virtualToePointsOnSole.get(RobotSide.RIGHT).toFramePoint2d());
-
-      FramePoint r1 = virtualToePointsOnSole.get(RobotSide.LEFT);
-      FramePoint2d r12d = r1.toFramePoint2d();
-      vtpToVTPLine.orthogonalProjection(r12d);    // not sure if necessary.
-      double x1 = vtpToVTPLine.getParameterGivenPointEpsilon(r12d, 1e-12);
-      double z1 = r1.getZ();
-
-      FramePoint r2 = virtualToePointsOnSole.get(RobotSide.RIGHT);
-      FramePoint2d r22d = r2.toFramePoint2d();
-      vtpToVTPLine.orthogonalProjection(r22d);    // not sure if necessary.
-      double x2 = vtpToVTPLine.getParameterGivenPointEpsilon(r22d, 1e-12);
-      double z2 = r2.getZ();
-      centerOfMass.changeFrame(worldFrame);
-      double z = centerOfMass.getZ();
-
-      double omega0Squared = (fZ.getDoubleValue() * (x1 - x2))
-                             / (totalMass
-                                * (x1 * (z - lambdas.get(RobotSide.LEFT) * z1 + (-1 + lambdas.get(RobotSide.LEFT)) * z2)
-                                   + x2 * (-z + z1 - lambdas.get(RobotSide.RIGHT) * z1 + lambdas.get(RobotSide.RIGHT) * z2)));
-
-      if (omega0Squared <= 0.0)
-         throw new RuntimeException("omega0Squared <= 0.0. omega0Squared = " + omega0Squared);
-
-      double omega0 = Math.sqrt(omega0Squared);
+      double omega0 = computeOmega0(centerOfMass, virtualToePointsOnSole);
       this.omega0.set(omega0);
-      double k1PlusK2 = omega0Squared * totalMass;
+
+      double k1PlusK2 = MathTools.square(omega0) * totalMass;
       for (RobotSide robotSide : RobotSide.values())
       {
          double k = lambdas.get(robotSide) * k1PlusK2;
@@ -403,35 +355,16 @@ public class MomentumBasedController implements RobotController
       }
 
       FrameVector totalgroundReactionMoment = determineGroundReactionMoment(momentum);
-      Wrench totalGroundReactionWrench = new Wrench(centerOfMassFrame, centerOfMassFrame);
 
+      SideDependentList<Wrench> groundReactionWrenches = computeGroundReactionWrenches(frame, desiredDeltaCMP, virtualToePointsOnSole,
+                                                            totalgroundReactionMoment);
+
+      setGroundReactionWrenches(groundReactionWrenches, inverseDynamicsCalculator);
+
+      Wrench totalGroundReactionWrench = new Wrench(centerOfMassFrame, centerOfMassFrame);
       for (RobotSide robotSide : RobotSide.values())
       {
-         FramePoint groundReactionForceTerminalPoint = new FramePoint(centerOfMassFrame);
-         groundReactionForceTerminalPoint.changeFrame(frame);
-         desiredDeltaCMP.changeFrame(frame);
-         groundReactionForceTerminalPoint.setX(groundReactionForceTerminalPoint.getX() - desiredDeltaCMP.getX());
-         groundReactionForceTerminalPoint.setY(groundReactionForceTerminalPoint.getY() - desiredDeltaCMP.getY());
-         FrameVector groundReactionForce = new FrameVector(groundReactionForceTerminalPoint);
-
-         FramePoint virtualToePoint = virtualToePointsOnSole.get(robotSide);
-         virtualToePoint.changeFrame(frame);
-         groundReactionForce.sub(virtualToePoint);
-         groundReactionForce.scale(kValues.get(robotSide).getDoubleValue());
-
-         FrameVector groundReactionMoment = new FrameVector(totalgroundReactionMoment);
-
-         // TODO: base on contact situation.
-         groundReactionMoment.scale(lambdas.get(robotSide));
-
-         RigidBody foot = fullRobotModel.getFoot(robotSide);
-         ReferenceFrame footCoMFrame = foot.getBodyFixedFrame();
-         FrameVector torque = new FrameVector(frame);
-         torque.cross(virtualToePoint, groundReactionForce);
-         Wrench groundReactionWrench = new Wrench(footCoMFrame, frame, groundReactionForce.getVector(), torque.getVector());
-         groundReactionWrench.addAngularPart(groundReactionMoment.getVector());
-         groundReactionWrench.changeFrame(footCoMFrame);
-         inverseDynamicsCalculator.setExternalWrench(foot, groundReactionWrench);
+         Wrench groundReactionWrench = groundReactionWrenches.get(robotSide);
          groundReactionWrench.changeFrame(centerOfMassFrame);
          groundReactionWrench.changeBodyFrameAttachedToSameBody(centerOfMassFrame);
          totalGroundReactionWrench.add(groundReactionWrench);
@@ -442,7 +375,7 @@ public class MomentumBasedController implements RobotController
 
       doPDControlRecursively(fullRobotModel.getChest().getChildrenJoints(), kUpperBody, dUpperBody);
 
-      chestAngularAccelerationcalculator.compute(highLevelHumanoidController.getChestAngularAcceleration());         
+      chestAngularAccelerationcalculator.compute(highLevelHumanoidController.getChestAngularAcceleration());
 
       FrameVector desiredAngularCentroidalMomentumRate = new FrameVector(totalGroundReactionWrench.getExpressedInFrame(),
                                                             totalGroundReactionWrench.getAngularPartCopy());
@@ -462,7 +395,7 @@ public class MomentumBasedController implements RobotController
          inSingularRegion.set(optimizer.inSingularRegion(robotSide, LimbName.LEG));
 
          // if ((supportLeg == robotSide.getOppositeSide()) &&!optimizer.inSingularRegion(robotSide) &&!stateMachine.trajectoryInitialized(robotSide))
-         if (isSwingLeg && (leavingKneeLockRegion || (!inSingularRegion.getBooleanValue() && !trajectoryInitialized)))
+         if (isSwingLeg && (leavingKneeLockRegion || (!inSingularRegion.getBooleanValue() &&!trajectoryInitialized)))
          {
             SpatialAccelerationVector taskSpaceAcceleration = new SpatialAccelerationVector();
             optimizer.computeMatchingNondegenerateTaskSpaceAcceleration(robotSide, LimbName.LEG, taskSpaceAcceleration);
@@ -478,11 +411,12 @@ public class MomentumBasedController implements RobotController
             {
                RigidBody foot = fullRobotModel.getEndEffector(robotSide, limbName);
                List<FramePoint> footContactPoints = highLevelHumanoidController.getContactPoints(foot);
-               
+
                if (footContactPoints.size() > 0)
                {
-                  footContactPoints = DesiredFootstepCalculatorTools.fixTwoPointsAndCopy(footContactPoints); // TODO: terrible
-                  FrameConvexPolygon2d footPolygon = FrameConvexPolygon2d.constructByProjectionOntoXYPlane(footContactPoints, referenceFrames.getSoleFrame(robotSide));
+                  footContactPoints = DesiredFootstepCalculatorTools.fixTwoPointsAndCopy(footContactPoints);    // TODO: terrible
+                  FrameConvexPolygon2d footPolygon = FrameConvexPolygon2d.constructByProjectionOntoXYPlane(footContactPoints,
+                                                        referenceFrames.getSoleFrame(robotSide));
                   FramePoint footCoPOnSole = virtualToePointsOnSole.get(robotSide);
                   footCoPOnSole.changeFrame(footPolygon.getReferenceFrame());
                   FramePoint2d footCoPOnSole2d = footCoPOnSole.toFramePoint2d();
@@ -520,6 +454,121 @@ public class MomentumBasedController implements RobotController
       optimizer.solveForRootJointAcceleration(desiredAngularCentroidalMomentumRate, desiredLinearCentroidalMomentumRate);
    }
 
+   private void setGroundReactionWrenches(SideDependentList<Wrench> groundReactionWrenches, InverseDynamicsCalculator inverseDynamicsCalculator)
+   {
+      for (RobotSide robotSide : RobotSide.values())
+      {
+         RigidBody foot = fullRobotModel.getFoot(robotSide);
+         Wrench groundReactionWrench = groundReactionWrenches.get(robotSide);
+         groundReactionWrench.changeFrame(foot.getBodyFixedFrame());
+         inverseDynamicsCalculator.setExternalWrench(foot, groundReactionWrench);
+      }
+   }
+
+   private SideDependentList<Wrench> computeGroundReactionWrenches(ReferenceFrame frame, FrameVector2d desiredDeltaCMP,
+           SideDependentList<FramePoint> virtualToePointsOnSole, FrameVector totalgroundReactionMoment)
+   {
+      SideDependentList<Wrench> groundReactionWrenches = new SideDependentList<Wrench>();
+      for (RobotSide robotSide : RobotSide.values())
+      {
+         FramePoint groundReactionForceTerminalPoint = new FramePoint(centerOfMassFrame);
+         groundReactionForceTerminalPoint.changeFrame(frame);
+         desiredDeltaCMP.changeFrame(frame);
+         groundReactionForceTerminalPoint.setX(groundReactionForceTerminalPoint.getX() - desiredDeltaCMP.getX());
+         groundReactionForceTerminalPoint.setY(groundReactionForceTerminalPoint.getY() - desiredDeltaCMP.getY());
+         FrameVector groundReactionForce = new FrameVector(groundReactionForceTerminalPoint);
+
+         FramePoint virtualToePoint = virtualToePointsOnSole.get(robotSide);
+         virtualToePoint.changeFrame(frame);
+         groundReactionForce.sub(virtualToePoint);
+         groundReactionForce.scale(kValues.get(robotSide).getDoubleValue());
+
+         FrameVector groundReactionMoment = new FrameVector(totalgroundReactionMoment);
+
+         // TODO: base on contact situation.
+         groundReactionMoment.scale(lambdas.get(robotSide));
+
+         RigidBody foot = fullRobotModel.getFoot(robotSide);
+         ReferenceFrame footCoMFrame = foot.getBodyFixedFrame();
+         FrameVector torque = new FrameVector(frame);
+         torque.cross(virtualToePoint, groundReactionForce);
+         Wrench groundReactionWrench = new Wrench(footCoMFrame, frame, groundReactionForce.getVector(), torque.getVector());
+         groundReactionWrench.addAngularPart(groundReactionMoment.getVector());
+         groundReactionWrenches.put(robotSide, groundReactionWrench);
+      }
+
+      return groundReactionWrenches;
+   }
+
+   private double computeOmega0(FramePoint centerOfMass, SideDependentList<FramePoint> virtualToePointsOnSole)
+   {
+      FrameLine2d vtpToVTPLine = new FrameLine2d(virtualToePointsOnSole.get(RobotSide.LEFT).toFramePoint2d(),
+                                    virtualToePointsOnSole.get(RobotSide.RIGHT).toFramePoint2d());
+
+      FramePoint r1 = virtualToePointsOnSole.get(RobotSide.LEFT);
+      FramePoint2d r12d = r1.toFramePoint2d();
+      vtpToVTPLine.orthogonalProjection(r12d);    // not sure if necessary.
+      double x1 = vtpToVTPLine.getParameterGivenPointEpsilon(r12d, 1e-12);
+      double z1 = r1.getZ();
+
+      FramePoint r2 = virtualToePointsOnSole.get(RobotSide.RIGHT);
+      FramePoint2d r22d = r2.toFramePoint2d();
+      vtpToVTPLine.orthogonalProjection(r22d);    // not sure if necessary.
+      double x2 = vtpToVTPLine.getParameterGivenPointEpsilon(r22d, 1e-12);
+      double z2 = r2.getZ();
+      centerOfMass.changeFrame(worldFrame);
+      double z = centerOfMass.getZ();
+
+      double omega0Squared = (fZ.getDoubleValue() * (x1 - x2))
+                             / (totalMass
+                                * (x1 * (z - lambdas.get(RobotSide.LEFT) * z1 + (-1 + lambdas.get(RobotSide.LEFT)) * z2)
+                                   + x2 * (-z + z1 - lambdas.get(RobotSide.RIGHT) * z1 + lambdas.get(RobotSide.RIGHT) * z2)));
+
+      if (omega0Squared <= 0.0)
+         throw new RuntimeException("omega0Squared <= 0.0. omega0Squared = " + omega0Squared);
+
+      double omega0 = Math.sqrt(omega0Squared);
+
+      return omega0;
+   }
+
+   private SideDependentList<FramePoint2d> computeVirtualToePoints(RobotSide supportLeg, FramePoint2d desiredCoP)
+   {
+      SideDependentList<FramePoint2d> virtualToePoints = new SideDependentList<FramePoint2d>();
+      if (supportLeg == null)
+      {
+         virtualToePointCalculator.packVirtualToePoints(virtualToePoints, bipedSupportPolygons, desiredCoP,
+                 highLevelHumanoidController.getUpcomingSupportLeg());
+      }
+      else
+      {
+         virtualToePointCalculator.hideVisualizationGraphics();
+         FrameConvexPolygon2d footPolygonInAnkleZUp = bipedSupportPolygons.getFootPolygonInAnkleZUp(supportLeg);
+         fixDesiredCoPNumericalRoundoff(desiredCoP, footPolygonInAnkleZUp);
+
+         virtualToePoints.put(supportLeg, desiredCoP);
+         virtualToePoints.put(supportLeg.getOppositeSide(), new FramePoint2d(desiredCoP.getReferenceFrame()));
+      }
+
+      return virtualToePoints;
+   }
+
+
+   private SideDependentList<FramePoint> projectOntoSole(SideDependentList<FramePoint2d> virtualToePoints)
+   {
+      SideDependentList<FramePoint> virtualToePointsOnSole = new SideDependentList<FramePoint>();
+      for (RobotSide robotSide : RobotSide.values())
+      {
+         virtualToePoints.get(robotSide).changeFrame(worldFrame);
+         FramePoint virtualToePoint = virtualToePoints.get(robotSide).toFramePoint();
+         virtualToePoint = projectPointOntoSole(robotSide, virtualToePoint);
+         virtualToePoint.changeFrame(worldFrame);
+         virtualToePointsOnSole.put(robotSide, virtualToePoint);
+      }
+
+      return virtualToePointsOnSole;
+   }
+
    private void doPDControlRecursively(List<InverseDynamicsJoint> joints, double k, double d)
    {
       for (InverseDynamicsJoint joint : joints)
@@ -532,6 +581,7 @@ public class MomentumBasedController implements RobotController
 
    private void fixDesiredCoPNumericalRoundoff(FramePoint2d desiredCoP, FrameConvexPolygon2d polygon)
    {
+      ReferenceFrame originalReferenceFrame = desiredCoP.getReferenceFrame();
       double epsilon = 1e-10;
       desiredCoP.changeFrame(polygon.getReferenceFrame());
       FramePoint2d originalDesiredCoP = new FramePoint2d(desiredCoP);
@@ -539,11 +589,13 @@ public class MomentumBasedController implements RobotController
       double distance = originalDesiredCoP.distance(desiredCoP);
       if (distance > epsilon)
          throw new RuntimeException("desired CoP outside polygon by " + distance);
+      desiredCoP.changeFrame(originalReferenceFrame);
    }
 
    private double computeFz()
    {
       double fZ = totalMass * (gravityZ + highLevelHumanoidController.getDesiredCoMHeightAcceleration());
+
       return fZ;
    }
 
@@ -570,7 +622,7 @@ public class MomentumBasedController implements RobotController
       fullRobotModel.getPelvis().getBodyFixedFrame().getTransformToDesiredFrame(worldFrame).get(pelvisToWorld);
       double pelvisYaw = RotationFunctions.getYaw(pelvisToWorld);
       double desiredPelvisYaw = highLevelHumanoidController.getDesiredPelvisOrientation().getYawPitchRoll()[0];
-      
+
       ret.setZ(-kAngularMomentumZ.getDoubleValue() * angularMomentum.getZ() + kPelvisYaw.getDoubleValue() * (desiredPelvisYaw - pelvisYaw));
 
       return ret;
@@ -617,6 +669,7 @@ public class MomentumBasedController implements RobotController
          RigidBody foot = fullRobotModel.getFoot(robotSide);
          footContactPoints.put(robotSide, highLevelHumanoidController.getContactPoints(foot));
       }
+
       bipedSupportPolygons.update(footContactPoints);
    }
 }
