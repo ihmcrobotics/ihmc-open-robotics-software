@@ -15,6 +15,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.SacrificeDeltaCMPDesir
 import us.ihmc.commonWalkingControlModules.controlModules.TeeterTotterLegStrengthCalculator;
 import us.ihmc.commonWalkingControlModules.controlModules.velocityViaCoP.CapturabilityBasedDesiredCoPVisualizer;
 import us.ihmc.commonWalkingControlModules.controlModules.velocityViaCoP.SimpleDesiredCenterOfPressureFilter;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorTools;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelHumanoidController;
 import us.ihmc.commonWalkingControlModules.kinematics.SpatialAccelerationProjector;
@@ -346,6 +347,7 @@ public class MomentumBasedController implements RobotController
       }
       else
       {
+         virtualToePointCalculator.hideVisualizationGraphics();
          FrameConvexPolygon2d footPolygonInAnkleZUp = bipedSupportPolygons.getFootPolygonInAnkleZUp(supportLeg);
          fixDesiredCoPNumericalRoundoff(desiredCoP, footPolygonInAnkleZUp);
          desiredCoP.changeFrame(frame);
@@ -474,10 +476,12 @@ public class MomentumBasedController implements RobotController
 
             if (limbName == LimbName.LEG)
             {
-               if (isFootConstrained(robotSide))
+               RigidBody foot = fullRobotModel.getEndEffector(robotSide, limbName);
+               List<FramePoint> footContactPoints = highLevelHumanoidController.getContactPoints(foot);
+               
+               if (footContactPoints.size() > 0)
                {
-                  RigidBody foot = fullRobotModel.getEndEffector(robotSide, limbName);
-                  List<FramePoint> footContactPoints = highLevelHumanoidController.getContactPoints(foot);
+                  footContactPoints = DesiredFootstepCalculatorTools.fixTwoPointsAndCopy(footContactPoints); // TODO: terrible
                   FrameConvexPolygon2d footPolygon = FrameConvexPolygon2d.constructByProjectionOntoXYPlane(footContactPoints, referenceFrames.getSoleFrame(robotSide));
                   FramePoint footCoPOnSole = virtualToePointsOnSole.get(robotSide);
                   footCoPOnSole.changeFrame(footPolygon.getReferenceFrame());
@@ -603,15 +607,6 @@ public class MomentumBasedController implements RobotController
    private static double computeDesiredAcceleration(double k, double d, double qDesired, double qdDesired, RevoluteJoint joint)
    {
       return k * (qDesired - joint.getQ()) + d * (qdDesired - joint.getQd());
-   }
-
-   private boolean isFootConstrained(RobotSide robotSide)
-   {
-      RobotSide supportLeg = highLevelHumanoidController.getSupportLeg();
-      if (supportLeg == null)
-         return true;
-      else
-         return robotSide == supportLeg;
    }
 
    private void updateBipedSupportPolygons(BipedSupportPolygons bipedSupportPolygons)

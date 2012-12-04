@@ -187,7 +187,6 @@ public class ResizableBipedFoot implements BipedFootInterface
       switch (footPolygonEnum)
       {
          case FLAT :
-         case FREE :    // TODO
          {
             footPolygonPoints.addAll(toePoints);
             footPolygonPoints.addAll(heelPoints);

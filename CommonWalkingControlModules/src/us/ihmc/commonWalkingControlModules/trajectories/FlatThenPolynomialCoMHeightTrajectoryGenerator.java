@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.media.j3d.Transform3D;
 
@@ -254,16 +255,13 @@ public class FlatThenPolynomialCoMHeightTrajectoryGenerator implements CenterOfM
    private double findMaxXOfGroundContactPoints(RobotSide robotSide)
    {
       double maxX = Double.NEGATIVE_INFINITY;
-      ArrayList<FramePoint2d> footPoints = bipedFeet.get(robotSide).getContactPolygon().getClockwiseOrderedListOfFramePoints();
-      FramePoint tempFramePoint = new FramePoint(ReferenceFrame.getWorldFrame());
-      for (FramePoint2d footPoint : footPoints)
+      List<FramePoint> footPoints = bipedFeet.get(robotSide).getContactPoints();
+      for (FramePoint footPoint : footPoints)
       {
-         tempFramePoint.setToZero(footPoint.getReferenceFrame());
-         tempFramePoint.setXY(footPoint);
-         tempFramePoint.changeFrame(referenceFrame);
+         footPoint.changeFrame(referenceFrame);
 
-         if (tempFramePoint.getX() > maxX)
-            maxX = tempFramePoint.getX();
+         if (footPoint.getX() > maxX)
+            maxX = footPoint.getX();
       }
 
       return maxX;
@@ -275,18 +273,15 @@ public class FlatThenPolynomialCoMHeightTrajectoryGenerator implements CenterOfM
       Transform3D desiredFootToDesiredHeading = new Transform3D();
       footstepPose.getTransform3D(desiredFootToDesiredHeading);
 
-      ArrayList<FramePoint2d> footPoints = bipedFeet.get(swingSide).getContactPolygon().getClockwiseOrderedListOfFramePoints();
+      List<FramePoint> footPoints = bipedFeet.get(swingSide).getContactPoints();
       double maxX = Double.NEGATIVE_INFINITY;
-      FramePoint tempFramePoint = new FramePoint(ReferenceFrame.getWorldFrame());
-      for (FramePoint2d footPoint : footPoints)
+      for (FramePoint footPoint : footPoints)
       {
-         tempFramePoint.setToZero(footPoint.getReferenceFrame());
-         tempFramePoint.setXY(footPoint);
-         tempFramePoint.changeFrame(referenceFrames.getFootFrame(swingSide));
+         footPoint.changeFrame(referenceFrames.getFootFrame(swingSide));
 
-         tempFramePoint.changeFrameUsingTransform(referenceFrame, desiredFootToDesiredHeading);
-         if (tempFramePoint.getX() > maxX)
-            maxX = tempFramePoint.getX();
+         footPoint.changeFrameUsingTransform(referenceFrame, desiredFootToDesiredHeading);
+         if (footPoint.getX() > maxX)
+            maxX = footPoint.getX();
       }
 
       return maxX;

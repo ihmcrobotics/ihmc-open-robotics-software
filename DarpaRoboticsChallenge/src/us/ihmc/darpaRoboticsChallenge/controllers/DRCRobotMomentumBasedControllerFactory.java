@@ -53,7 +53,7 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
          double left = footWidth / 2.0;
          double right = -footWidth / 2.0;
          
-         ContactablePlaneBody foot = new RectangularContactableBody(footBody, soleFrame, footForward, footBack, left, right);
+         ContactablePlaneBody foot = new RectangularContactableBody(footBody, soleFrame, footForward, -footBack, left, right);
          bipedFeet.put(robotSide, foot);
       }
 
