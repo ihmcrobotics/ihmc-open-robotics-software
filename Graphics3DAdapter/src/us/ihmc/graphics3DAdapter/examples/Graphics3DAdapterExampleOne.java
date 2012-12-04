@@ -4,6 +4,7 @@ import javax.media.j3d.Transform3D;
 import javax.vecmath.Color3f;
 
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
+import us.ihmc.graphics3DAdapter.NodeType;
 import us.ihmc.graphics3DAdapter.graphics.LinkGraphics;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceRGBColor;
@@ -17,7 +18,7 @@ public class Graphics3DAdapterExampleOne
  
    public void doExampleOne(Graphics3DAdapter adapter)
    {
-      Graphics3DNode teapotAndSphereNode = new Graphics3DNode("teaPot");
+      Graphics3DNode teapotAndSphereNode = new Graphics3DNode("teaPot", NodeType.OBJECT);
        
 //      teapotAndSphereNode.rotateAboutX(Math.PI/4.0);
      
