@@ -45,6 +45,8 @@ public class MeshDataGenerator
       float longitude;
       float ztheta;
 
+      // FIXME: polygons at the opposite z-ends are done improperly, possibly in the cw order rather than ccw. This is not the case in the HemiEllipsoid, so maybe look for differences?
+      
       // FIXME: Array should be smaller, or completely filled. Temporary solution uses smaller arrays.
 //      Point3f points[] = new Point3f[(N + 1) * (M + 1)];
 //      TexCoord2f textPoints[] = new TexCoord2f[(N + 1) * (M + 1)];
@@ -475,7 +477,7 @@ public class MeshDataGenerator
    {
       Point3f points[] = new Point3f[8];
 
-      TexCoord2f textPoints[] = new TexCoord2f[4];
+      TexCoord2f textPoints[] = new TexCoord2f[8];
 
       points[0] = new Point3f(-lx / 2.0f, -ly / 2.0f, 0.0f);
       points[1] = new Point3f(lx / 2.0f, -ly / 2.0f, 0.0f);
@@ -490,6 +492,10 @@ public class MeshDataGenerator
       textPoints[1] = new TexCoord2f(1.0f, 0.0f);
       textPoints[2] = new TexCoord2f(1.0f, 1.0f);
       textPoints[3] = new TexCoord2f(0.0f, 1.0f);
+      textPoints[4] = new TexCoord2f(0.0f, 0.0f);
+      textPoints[5] = new TexCoord2f(1.0f, 0.0f);
+      textPoints[6] = new TexCoord2f(1.0f, 1.0f);
+      textPoints[7] = new TexCoord2f(0.0f, 1.0f);
 
       int[] polygonIndices = new int[6 * 4];
 
@@ -686,9 +692,10 @@ public class MeshDataGenerator
 
    public static MeshDataHolder PyramidCube(float lx, float ly, float lz, float lh)
    {
+      // FIXME: the pyramid doesn't show.
       Point3f points[] = new Point3f[10];
 
-      TexCoord2f textPoints[] = new TexCoord2f[4];
+      TexCoord2f textPoints[] = new TexCoord2f[10];
 
       points[0] = new Point3f(-lx / 2.0f, -ly / 2.0f, 0.0f);
       points[1] = new Point3f(lx / 2.0f, -ly / 2.0f, 0.0f);
@@ -706,6 +713,13 @@ public class MeshDataGenerator
       textPoints[1] = new TexCoord2f(0.75f, 0.5f);
       textPoints[2] = new TexCoord2f(0.75f, 0.75f);
       textPoints[3] = new TexCoord2f(0.5f, 0.75f);
+      textPoints[4] = new TexCoord2f(0.5f, 0.5f);
+      textPoints[5] = new TexCoord2f(0.75f, 0.5f);
+      textPoints[6] = new TexCoord2f(0.75f, 0.75f);
+      textPoints[7] = new TexCoord2f(0.5f, 0.75f);
+      
+      textPoints[8] = new TexCoord2f(0.675f, 0.675f);
+      textPoints[9] = new TexCoord2f(0.675f, 0.675f);
 
       int[] polygonIndices = new int[4 * 4 + 8 * 3];
       int index = 0;
