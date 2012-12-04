@@ -952,6 +952,9 @@ public class LinkGraphics
    public void addBranchGroup(BranchGroup branchGroup)
    {
       System.err.println("Adding branchgroups to LinkGraphics is deprecated");
+      
+      Thread.dumpStack();
+      
       linkGraphicsInstructions.add(new LinkGraphicsAddBranchGroup(branchGroup));
    }
    
