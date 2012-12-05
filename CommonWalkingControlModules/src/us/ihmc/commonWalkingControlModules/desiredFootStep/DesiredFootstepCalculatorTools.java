@@ -10,9 +10,7 @@ import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactableBody;
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.utilities.math.geometry.FramePoint;
-import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
@@ -37,18 +35,17 @@ public class DesiredFootstepCalculatorTools
       return minZ;
    }
 
-   public static double computeMaxXWithRespectToAnkleInFrame(Matrix3d footToWorldRotation, ContactablePlaneBody contactablePlaneBody, ReferenceFrame frame)
+   public static double computeMaxXWithRespectToAnkleInFrame(Matrix3d footToWorldRotation, ContactableBody contactableBody, ReferenceFrame frame)
    {
       Transform3D worldToDesiredHeadingFrame = frame.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());
-      ArrayList<FramePoint2d> footPoints = contactablePlaneBody.getContactPolygon().getClockwiseOrderedListOfFramePoints();
+      List<FramePoint> footPoints = contactableBody.getContactPoints();
       double maxX = Double.NEGATIVE_INFINITY;
       FramePoint tempFramePoint = new FramePoint(ReferenceFrame.getWorldFrame());
       Vector3d tempVector = new Vector3d();
-      for (FramePoint2d footPoint : footPoints)
+      for (FramePoint footPoint : footPoints)
       {
-         tempFramePoint.setToZero(footPoint.getReferenceFrame());
-         tempFramePoint.setXY(footPoint);
-         tempFramePoint.changeFrame(contactablePlaneBody.getBodyFrame());
+         tempFramePoint.setAndChangeFrame(footPoint);
+         tempFramePoint.changeFrame(contactableBody.getBodyFrame());
          tempVector.set(tempFramePoint.getPoint());    // foot point w.r.t. ankle in foot frame
          footToWorldRotation.transform(tempVector);    // foot point w.r.t. ankle in world frame
          worldToDesiredHeadingFrame.transform(tempVector);    // foot point w.r.t. ankle in desired heading frame
@@ -59,18 +56,17 @@ public class DesiredFootstepCalculatorTools
       return maxX;
    }
 
-   public static FramePoint computeMinZPointInFrame(Transform3D footToWorldTransform, ContactablePlaneBody contactablePlaneBody, ReferenceFrame frame)
+   public static FramePoint computeMinZPointInFrame(Transform3D footToWorldTransform, ContactableBody contactableBody, ReferenceFrame frame)
    {
-      ArrayList<FramePoint2d> footPoints = contactablePlaneBody.getContactPolygon().getClockwiseOrderedListOfFramePoints();
+      List<FramePoint> footPoints = contactableBody.getContactPoints();
       FramePoint minFramePoint = new FramePoint(frame);
       minFramePoint.setZ(Double.POSITIVE_INFINITY);
       FramePoint tempFramePoint = new FramePoint(ReferenceFrame.getWorldFrame());
       boolean pointFound = false;
-      for (FramePoint2d footPoint : footPoints)
+      for (FramePoint footPoint : footPoints)
       {
-         tempFramePoint.setToZero(footPoint.getReferenceFrame());
-         tempFramePoint.setXY(footPoint);
-         tempFramePoint.changeFrame(contactablePlaneBody.getBodyFrame());
+         tempFramePoint.setAndChangeFrame(footPoint);
+         tempFramePoint.changeFrame(contactableBody.getBodyFrame());
          tempFramePoint.changeFrameUsingTransform(ReferenceFrame.getWorldFrame(), footToWorldTransform);
          tempFramePoint.changeFrame(frame);
 
@@ -87,18 +83,17 @@ public class DesiredFootstepCalculatorTools
       return minFramePoint;
    }
 
-   public static FramePoint computeMaxXPointInFrame(Transform3D footToWorldTransform, ContactablePlaneBody contactablePlaneBody, ReferenceFrame frame)
+   public static FramePoint computeMaxXPointInFrame(Transform3D footToWorldTransform, ContactableBody contactableBody, ReferenceFrame frame)
    {
-      ArrayList<FramePoint2d> footPoints = contactablePlaneBody.getContactPolygon().getClockwiseOrderedListOfFramePoints();
+      List<FramePoint> footPoints = contactableBody.getContactPoints();
       FramePoint maxFramePoint = new FramePoint(frame);
       maxFramePoint.setX(Double.NEGATIVE_INFINITY);
       FramePoint tempFramePoint = new FramePoint(ReferenceFrame.getWorldFrame());
       boolean pointFound = false;
-      for (FramePoint2d footPoint : footPoints)
+      for (FramePoint footPoint : footPoints)
       {
-         tempFramePoint.setToZero(footPoint.getReferenceFrame());
-         tempFramePoint.setXY(footPoint);
-         tempFramePoint.changeFrame(contactablePlaneBody.getBodyFrame());
+         tempFramePoint.setAndChangeFrame(footPoint);
+         tempFramePoint.changeFrame(contactableBody.getBodyFrame());
          tempFramePoint.changeFrameUsingTransform(ReferenceFrame.getWorldFrame(), footToWorldTransform);
          tempFramePoint.changeFrame(frame);
 

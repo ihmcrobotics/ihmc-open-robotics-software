@@ -248,7 +248,7 @@ public class ResizableBipedFoot implements BipedFootInterface
       return new FrameConvexPolygon2d(projectedFootPolygonPoints);
    }
 
-   private ArrayList<FramePoint2d> changeFrameToZUpAndProjectToXYPlane(ReferenceFrame zUpFrame, ArrayList<FramePoint> points)
+   private ArrayList<FramePoint2d> changeFrameToZUpAndProjectToXYPlane(ReferenceFrame zUpFrame, List<FramePoint> points)
    {
 //    if (!zUpFrame.isZupFrame())
 //    {
@@ -551,5 +551,18 @@ public class ResizableBipedFoot implements BipedFootInterface
    public List<FramePoint> computeFootPoints()
    {
       return computeFootPolygonPoints(getFootPolygonInUse());
+   }
+
+   public ReferenceFrame getPlaneFrame()
+   {
+      return soleFrame;
+   }
+
+   public List<FramePoint2d> getContactPoints2d()
+   {
+      List<FramePoint> footPolygonPoints = getContactPoints();
+      ArrayList<FramePoint2d> projectedFootPolygonPoints = changeFrameToZUpAndProjectToXYPlane(soleFrame, footPolygonPoints);
+
+      return projectedFootPolygonPoints;
    }
 }
