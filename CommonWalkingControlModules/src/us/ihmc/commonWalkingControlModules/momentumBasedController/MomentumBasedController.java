@@ -7,6 +7,7 @@ import java.util.List;
 import javax.vecmath.Matrix3d;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
+import us.ihmc.commonWalkingControlModules.calculators.GainCalculator;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.DesiredCoPAndCMPControlModule;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.LegStrengthCalculator;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.VirtualToePointCalculator;
@@ -360,7 +361,7 @@ public class MomentumBasedController implements RobotController
                                                              totalgroundReactionMoment);
 
       double kUpperBody = this.kUpperBody.getDoubleValue();
-      double dUpperBody = 2.0 * zetaUpperBody.getDoubleValue() * Math.sqrt(kUpperBody);
+      double dUpperBody = GainCalculator.computeDerivativeGain(kUpperBody, zetaUpperBody.getDoubleValue());
 
       doPDControlRecursively(fullRobotModel.getChest().getChildrenJoints(), kUpperBody, dUpperBody);
 
