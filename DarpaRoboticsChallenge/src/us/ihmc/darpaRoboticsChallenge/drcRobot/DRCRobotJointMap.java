@@ -21,6 +21,7 @@ public class DRCRobotJointMap implements SDFJointNameMap, RobotSpecificJointName
 {
    private final String chestName = "utorso";
    private final String pelvisName = "pelvis";
+   private final String headName = "head";
    private final double ankleHeight = 0.084;
    
    private final LegJointName[] legJoints = { LegJointName.HIP_YAW, LegJointName.HIP_ROLL, LegJointName.HIP_PITCH, LegJointName.KNEE, LegJointName.ANKLE_PITCH, LegJointName.ANKLE_ROLL };
@@ -160,6 +161,13 @@ public class DRCRobotJointMap implements SDFJointNameMap, RobotSpecificJointName
    }
 
 
+   
+   public String getHeadName()
+   {
+      return headName;
+   }
+
+   
 
    public LegJointName[] getLegJointNames()
    {
@@ -207,5 +215,4 @@ public class DRCRobotJointMap implements SDFJointNameMap, RobotSpecificJointName
    {
       return ankleHeight;
    }
-
 }

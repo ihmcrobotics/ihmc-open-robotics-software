@@ -49,6 +49,7 @@ public class SDFFullRobotModel implements FullRobotModel
 
    private final RigidBody pelvis;
    private RigidBody chest;
+   private RigidBody head;
 
    private final SideDependentList<RigidBody> feet = new SideDependentList<RigidBody>();
    private final SideDependentList<RigidBody> hands = new SideDependentList<RigidBody>();
@@ -118,6 +119,11 @@ public class SDFFullRobotModel implements FullRobotModel
       if (rigidBody.getName().equals(sdfJointNameMap.getChestName()))
       {
          chest = rigidBody;
+      }
+      
+      if (rigidBody.getName().equals(sdfJointNameMap.getHeadName()))
+      {
+         head = rigidBody;
       }
 
       Pair<RobotSide, LimbName> limbSideAndName = sdfJointNameMap.getLimbName(childLink.getName());
@@ -257,6 +263,11 @@ public class SDFFullRobotModel implements FullRobotModel
       return chest;
    }
 
+   public RigidBody getHead()
+   {
+      return head;
+   }
+
    public void setTorques(ProcessedOutputsInterface processedOutputs)
    {
       // TODO Auto-generated method stub
@@ -308,6 +319,4 @@ public class SDFFullRobotModel implements FullRobotModel
    {
       return revoluteJoints;
    }
-
-
 }

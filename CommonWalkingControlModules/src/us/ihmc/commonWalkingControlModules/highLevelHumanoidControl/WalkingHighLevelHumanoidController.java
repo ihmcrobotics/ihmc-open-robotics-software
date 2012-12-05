@@ -10,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPoly
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
+import us.ihmc.commonWalkingControlModules.calculators.GainCalculator;
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodyOrientationControlModule;
 import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculator;
@@ -43,7 +44,10 @@ import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
+import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
+import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
+import us.ihmc.utilities.screwTheory.ScrewTools;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.utilities.screwTheory.Twist;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
@@ -110,6 +114,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final SideDependentList<YoVariableDoubleProvider> onEdgeFinalAngleProviders = new SideDependentList<YoVariableDoubleProvider>();
    private final BooleanYoVariable stayOnToes = new BooleanYoVariable("stayOnToes", registry);
    private final DoubleYoVariable trailingFootPitch = new DoubleYoVariable("trailingFootPitch", registry);
+   private final OneDoFJoint[] upperBodyJoints;
+
+   private final DoubleYoVariable kUpperBody = new DoubleYoVariable("kUpperBody", registry);
+   private final DoubleYoVariable zetaUpperBody = new DoubleYoVariable("zetaUpperBody", registry);
 
    public WalkingHighLevelHumanoidController(FullRobotModel fullRobotModel, CommonWalkingReferenceFrames referenceFrames, TwistCalculator twistCalculator,
            CenterOfMassJacobian centerOfMassJacobian, SideDependentList<? extends ContactablePlaneBody> bipedFeet, BipedSupportPolygons bipedSupportPolygons,
@@ -198,6 +206,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       this.desiredPelvisOrientation.setYawPitchRoll(0.0, desiredPelvisPitch, 0.0);
       this.stayOnToes.set(stayOntoes);
       this.trailingFootPitch.set(trailingFootPitch);
+      kUpperBody.set(100.0);
+      zetaUpperBody.set(1.0);
 
       double initialLeadingFootPitch = 0.05;
 
@@ -207,6 +217,11 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       RobotSide trailingLeg = leadingLeg.getOppositeSide();
       onEdgeInitialAngleProviders.get(trailingLeg).set(this.trailingFootPitch.getDoubleValue());
+
+      InverseDynamicsJoint[] upperBodyJoints = ScrewTools.computeJointsInOrder(fullRobotModel.getChest());
+      int nRevoluteJoints = ScrewTools.computeNumberOfJointsOfType(OneDoFJoint.class, upperBodyJoints);
+      this.upperBodyJoints = new OneDoFJoint[nRevoluteJoints];
+      ScrewTools.filterJoints(upperBodyJoints, this.upperBodyJoints, OneDoFJoint.class);
 
       for (RobotSide robotSide : RobotSide.values())
       {
@@ -693,6 +708,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       stateMachine.doAction();
       desiredCoMHeightAcceleration.set(computeDesiredCoMHeightAcceleration(desiredICPVelocity.getFrameVector2dCopy()));
       doChestControl();
+      doUpperBodyControl();
    }
 
    private void doChestControl()
@@ -705,6 +721,14 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       FrameVector outputToPack = new FrameVector(fullRobotModel.getChest().getBodyFixedFrame());
       chestOrientationControlModule.controlSpine(outputToPack, desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
       chestAngularAccelerationWithRespectToPelvis.set(outputToPack);
+   }
+
+   private void doUpperBodyControl()
+   {
+      double kUpperBody = this.kUpperBody.getDoubleValue();
+      double dUpperBody = GainCalculator.computeDerivativeGain(kUpperBody, zetaUpperBody.getDoubleValue());
+
+      doPDControl(upperBodyJoints, kUpperBody, dUpperBody);
    }
 
    private double computeDesiredCoMHeightAcceleration(FrameVector2d desiredICPVelocity)
