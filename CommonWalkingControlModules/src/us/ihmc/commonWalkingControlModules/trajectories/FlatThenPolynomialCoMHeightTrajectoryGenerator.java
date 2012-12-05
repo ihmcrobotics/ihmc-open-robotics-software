@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.media.j3d.Transform3D;
@@ -8,13 +7,13 @@ import javax.media.j3d.Transform3D;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.calculators.OrbitalEnergyCalculator;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculator;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorTools;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
-import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -236,35 +235,18 @@ public class FlatThenPolynomialCoMHeightTrajectoryGenerator implements CenterOfM
 
    private double findMinZOfGroundContactPoints(RobotSide robotSide)
    {
-      double minZ = Double.POSITIVE_INFINITY;
-      ArrayList<FramePoint2d> footPoints = bipedFeet.get(robotSide).getContactPolygon().getClockwiseOrderedListOfFramePoints();
-      FramePoint tempFramePoint = new FramePoint(ReferenceFrame.getWorldFrame());
-      for (FramePoint2d footPoint : footPoints)
-      {
-         tempFramePoint.setToZero(footPoint.getReferenceFrame());
-         tempFramePoint.setXY(footPoint);
-         tempFramePoint.changeFrame(referenceFrame);
-
-         if (tempFramePoint.getZ() < minZ)
-            minZ = tempFramePoint.getZ();
-      }
-
-      return minZ;
+      ContactablePlaneBody contactableBody = bipedFeet.get(robotSide);
+      Transform3D footToWorldTransform = contactableBody.getBodyFrame().getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());
+      FramePoint minZPoint = DesiredFootstepCalculatorTools.computeMinZPointInFrame(footToWorldTransform, contactableBody, referenceFrame);
+      return minZPoint.getZ();
    }
 
    private double findMaxXOfGroundContactPoints(RobotSide robotSide)
    {
-      double maxX = Double.NEGATIVE_INFINITY;
-      List<FramePoint> footPoints = bipedFeet.get(robotSide).getContactPoints();
-      for (FramePoint footPoint : footPoints)
-      {
-         footPoint.changeFrame(referenceFrame);
-
-         if (footPoint.getX() > maxX)
-            maxX = footPoint.getX();
-      }
-
-      return maxX;
+      ContactablePlaneBody contactableBody = bipedFeet.get(robotSide);
+      Transform3D footToWorldTransform = contactableBody.getBodyFrame().getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());
+      FramePoint maxXPoint = DesiredFootstepCalculatorTools.computeMaxXPointInFrame(footToWorldTransform, contactableBody, referenceFrame);
+      return maxXPoint.getX();
    }
 
    private double findMaxXOfGroundContactPoints(Footstep footstep, RobotSide swingSide)

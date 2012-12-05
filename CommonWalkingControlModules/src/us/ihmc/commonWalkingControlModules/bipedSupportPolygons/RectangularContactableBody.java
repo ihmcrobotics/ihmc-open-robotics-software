@@ -8,6 +8,7 @@ import javax.vecmath.Point2d;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
+import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.RigidBody;
 
@@ -55,5 +56,21 @@ public class RectangularContactableBody implements ContactablePlaneBody
    public FrameConvexPolygon2d getContactPolygon()
    {
       return new FrameConvexPolygon2d(soleFrame, contactPoints);
+   }
+
+   public ReferenceFrame getPlaneFrame()
+   {
+      return soleFrame;
+   }
+
+   public List<FramePoint2d> getContactPoints2d()
+   {
+      List<FramePoint2d> ret = new ArrayList<FramePoint2d>(contactPoints.size());
+      for (Point2d point : contactPoints)
+      {
+         ret.add(new FramePoint2d(soleFrame, point));
+      }
+
+      return ret;
    }
 }

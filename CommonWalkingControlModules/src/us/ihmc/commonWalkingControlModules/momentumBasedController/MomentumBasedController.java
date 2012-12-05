@@ -357,13 +357,13 @@ public class MomentumBasedController implements RobotController
       FrameVector totalgroundReactionMoment = determineGroundReactionMoment(momentum);
 
       HashMap<RigidBody, Wrench> groundReactionWrenches = computeGroundReactionWrenches(frame, desiredDeltaCMP, virtualToePointsOnSole,
-                                                            totalgroundReactionMoment);
+                                                             totalgroundReactionMoment);
 
       double kUpperBody = this.kUpperBody.getDoubleValue();
       double dUpperBody = 2.0 * zetaUpperBody.getDoubleValue() * Math.sqrt(kUpperBody);
-      
+
       doPDControlRecursively(fullRobotModel.getChest().getChildrenJoints(), kUpperBody, dUpperBody);
-      
+
       chestAngularAccelerationcalculator.compute(highLevelHumanoidController.getChestAngularAcceleration());
 
 
@@ -380,6 +380,7 @@ public class MomentumBasedController implements RobotController
 
       for (RobotSide robotSide : RobotSide.values())
       {
+         // TODO: get rid of this
          boolean isSwingLeg = supportLeg == robotSide.getOppositeSide();
          double maxKneeAngle = 0.4;
          boolean leavingKneeLockRegion = optimizer.leavingSingularRegion(robotSide, LimbName.LEG)
@@ -402,6 +403,7 @@ public class MomentumBasedController implements RobotController
             SpatialAccelerationVector desiredEndEffectorAccelerationInWorld = desiredEndEffectorAccelerationsInWorld.get(robotSide).get(limbName);
             desiredEndEffectorAccelerationInWorld.set(highLevelHumanoidController.getEndEffectorAcceleration(robotSide, limbName));
 
+            // TODO: get rid of this:
             if (limbName == LimbName.LEG)
             {
                RigidBody foot = fullRobotModel.getEndEffector(robotSide, limbName);
