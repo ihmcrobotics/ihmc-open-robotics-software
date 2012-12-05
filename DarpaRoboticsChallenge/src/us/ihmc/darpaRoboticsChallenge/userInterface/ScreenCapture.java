@@ -68,7 +68,6 @@ public class ScreenCapture implements Serializable
       this.rotation = rotation;
       this.location = location;
 
-      System.out.println("size " + _bytesOut.length);
 
       // bi.getRGB(0, 0, _width, _height, _bytesOut, 0, _width);
    }
