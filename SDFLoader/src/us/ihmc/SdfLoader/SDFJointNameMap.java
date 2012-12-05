@@ -29,6 +29,7 @@ public interface SDFJointNameMap extends RobotSpecificJointNames
    
    public String getPelvisName();
    public String getChestName();
+   public String getHeadName();
    
    public String getJointBeforeFootName(RobotSide robotSide);
    public double getAnkleHeight();

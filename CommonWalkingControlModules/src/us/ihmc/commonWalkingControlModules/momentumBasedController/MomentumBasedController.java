@@ -6,8 +6,10 @@ import java.util.List;
 
 import javax.vecmath.Matrix3d;
 
+import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.MatrixFeatures;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
-import us.ihmc.commonWalkingControlModules.calculators.GainCalculator;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.DesiredCoPAndCMPControlModule;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.LegStrengthCalculator;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.VirtualToePointCalculator;
@@ -110,8 +112,6 @@ public class MomentumBasedController implements RobotController
    private final YoFrameVector desiredPelvisTorque;
    private final ReferenceFrame centerOfMassFrame;
 
-   private final DoubleYoVariable kUpperBody = new DoubleYoVariable("kUpperBody", registry);
-   private final DoubleYoVariable zetaUpperBody = new DoubleYoVariable("zetaUpperBody", registry);
    private final DoubleYoVariable kAngularMomentumZ = new DoubleYoVariable("kAngularMomentumZ", registry);
    private final DoubleYoVariable kPelvisYaw = new DoubleYoVariable("kPelvisYaw", registry);
    private final HashMap<RevoluteJoint, DoubleYoVariable> desiredAccelerationYoVariables = new HashMap<RevoluteJoint, DoubleYoVariable>();
@@ -239,8 +239,6 @@ public class MomentumBasedController implements RobotController
 
       kAngularMomentumZ.set(10.0);    // 50.0); // 10.0);
       kPelvisYaw.set(100.0);    // was 0.0 for M3 movie
-      kUpperBody.set(100.0);
-      zetaUpperBody.set(1.0);
       omega0.set(3.0);    // just to initialize, will be reset every tick. TODO: integrate ICP control law, fz calculation and omega0 calculation
    }
 
@@ -315,6 +313,12 @@ public class MomentumBasedController implements RobotController
       return momentum;
    }
 
+   /**
+    * @param centerOfMass
+    * @param centerOfMassVelocity
+    * @param capturePoint
+    * @param momentum
+    */
    private void doMomentumBasedControl(FramePoint centerOfMass, FrameVector centerOfMassVelocity, FramePoint2d capturePoint, Momentum momentum)
    {
       ReferenceFrame frame = worldFrame;
@@ -359,11 +363,6 @@ public class MomentumBasedController implements RobotController
 
       HashMap<RigidBody, Wrench> groundReactionWrenches = computeGroundReactionWrenches(frame, desiredDeltaCMP, virtualToePointsOnSole,
                                                              totalgroundReactionMoment);
-
-      double kUpperBody = this.kUpperBody.getDoubleValue();
-      double dUpperBody = GainCalculator.computeDerivativeGain(kUpperBody, zetaUpperBody.getDoubleValue());
-
-      doPDControlRecursively(fullRobotModel.getChest().getChildrenJoints(), kUpperBody, dUpperBody);
 
       chestAngularAccelerationcalculator.compute(highLevelHumanoidController.getChestAngularAcceleration());
 
@@ -447,6 +446,14 @@ public class MomentumBasedController implements RobotController
       {
          Wrench handWrench = highLevelHumanoidController.getExternalHandWrench(robotSide);
          inverseDynamicsCalculator.setExternalWrench(fullRobotModel.getHand(robotSide), handWrench);
+      }
+
+      HashMap<InverseDynamicsJoint, DenseMatrix64F> jointAccelerations = highLevelHumanoidController.getJointAccelerations();
+      for (InverseDynamicsJoint joint : jointAccelerations.keySet())
+      {
+         DenseMatrix64F jointAcceleration = jointAccelerations.get(joint);
+         if (!MatrixFeatures.hasNaN(jointAcceleration))
+            joint.setDesiredAcceleration(jointAcceleration, 0);
       }
 
       optimizer.solveForRootJointAcceleration(desiredAngularCentroidalMomentumRate, desiredLinearCentroidalMomentumRate);
@@ -585,16 +592,6 @@ public class MomentumBasedController implements RobotController
       return virtualToePointsOnSole;
    }
 
-   private void doPDControlRecursively(List<InverseDynamicsJoint> joints, double k, double d)
-   {
-      for (InverseDynamicsJoint joint : joints)
-      {
-         if (joint instanceof RevoluteJoint)
-            doPDControl(k, d, (RevoluteJoint) joint);
-         doPDControlRecursively(joint.getSuccessor().getChildrenJoints(), k, d);
-      }
-   }
-
    private void fixDesiredCoPNumericalRoundoff(FramePoint2d desiredCoP, FrameConvexPolygon2d polygon)
    {
       ReferenceFrame originalReferenceFrame = desiredCoP.getReferenceFrame();
@@ -665,16 +662,6 @@ public class MomentumBasedController implements RobotController
       FramePoint capturePoint = capturePoint2d.toFramePoint();
       capturePoint.changeFrame(worldFrame);
       this.capturePoint.set(capturePoint);
-   }
-
-   private static void doPDControl(double k, double d, RevoluteJoint joint)
-   {
-      joint.setQddDesired(computeDesiredAcceleration(k, d, 0.0, 0.0, joint));
-   }
-
-   private static double computeDesiredAcceleration(double k, double d, double qDesired, double qdDesired, RevoluteJoint joint)
-   {
-      return k * (qDesired - joint.getQ()) + d * (qdDesired - joint.getQd());
    }
 
    private void updateBipedSupportPolygons(BipedSupportPolygons bipedSupportPolygons)
