@@ -3,6 +3,7 @@ package us.ihmc.graphics3DAdapter.examples;
 import java.awt.BorderLayout;
 import java.awt.Canvas;
 import java.awt.Container;
+import java.awt.Dimension;
 import java.util.ArrayList;
 
 import javax.media.j3d.Transform3D;
@@ -39,6 +40,7 @@ public class Graphics3DAdapterExampleOne
       contentPane.add("Center", panel);
       
       jFrame.pack();
+      jFrame.setSize(new Dimension (600, 300));
       jFrame.setVisible(true);
       
       
