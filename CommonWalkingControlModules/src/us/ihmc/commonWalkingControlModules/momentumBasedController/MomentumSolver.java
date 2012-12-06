@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.ejml.alg.dense.linsol.LinearSolver;
-import org.ejml.alg.dense.linsol.LinearSolverFactory;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
@@ -59,7 +58,7 @@ public class MomentumSolver
    private final TwistCalculator twistCalculator;
    private final Twist twistOfCurrentWithRespectToNew = new Twist();
    private final Twist twistOfBodyWithRespectToBase = new Twist();
-   
+
    private final DenseMatrix64F convectiveTermMatrix = new DenseMatrix64F(SpatialAccelerationVector.SIZE, 1);
    private final LinearSolver<DenseMatrix64F> jacobianSolver;
    private final DenseMatrix64F jacobianInverse = new DenseMatrix64F(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
@@ -84,7 +83,8 @@ public class MomentumSolver
    private final int[] rows;
 
 
-   public MomentumSolver(SixDoFJoint rootJoint, RigidBody elevator, ReferenceFrame centerOfMassFrame, TwistCalculator twistCalculator, double controlDT, YoVariableRegistry parentRegistry)
+   public MomentumSolver(SixDoFJoint rootJoint, RigidBody elevator, ReferenceFrame centerOfMassFrame, TwistCalculator twistCalculator,
+                         LinearSolver<DenseMatrix64F> jacobianSolver, double controlDT, YoVariableRegistry parentRegistry)
    {
       this.rootJoint = rootJoint;
       this.twistCalculator = twistCalculator;
@@ -131,7 +131,7 @@ public class MomentumSolver
          rows[i] = i;
       }
 
-      jacobianSolver = LinearSolverFactory.linear(rowDimension);    // TODO: implement singularity robust version
+      this.jacobianSolver = jacobianSolver;    // LinearSolverFactory.linear(rowDimension);    // TODO: implement singularity robust version
 
       parentRegistry.addChild(registry);
    }
@@ -196,8 +196,8 @@ public class MomentumSolver
       }
    }
 
-   private void handleTaskSpaceAccelerations(DenseMatrix64F aHatRoot, DenseMatrix64F b, HashMap<MechanismGeometricJacobian, DenseMatrix64F> cTaskSpaceMap, DenseMatrix64F centroidalMomentumMatrix,
-           Map<MechanismGeometricJacobian, SpatialAccelerationVector> taskSpaceAccelerations)
+   private void handleTaskSpaceAccelerations(DenseMatrix64F aHatRoot, DenseMatrix64F b, HashMap<MechanismGeometricJacobian, DenseMatrix64F> cTaskSpaceMap,
+           DenseMatrix64F centroidalMomentumMatrix, Map<MechanismGeometricJacobian, SpatialAccelerationVector> taskSpaceAccelerations)
    {
       cTaskSpaceMap.clear();
       ReferenceFrame rootBodyFrame = rootJoint.getPredecessor().getBodyFixedFrame();
@@ -260,7 +260,8 @@ public class MomentumSolver
       }
    }
 
-   private void solveAndSetTaskSpaceAccelerations(DenseMatrix64F vdotRoot, HashMap<MechanismGeometricJacobian, DenseMatrix64F> cTaskSpaceMap, Map<MechanismGeometricJacobian, SpatialAccelerationVector> taskSpaceAccelerations)
+   private void solveAndSetTaskSpaceAccelerations(DenseMatrix64F vdotRoot, HashMap<MechanismGeometricJacobian, DenseMatrix64F> cTaskSpaceMap,
+           Map<MechanismGeometricJacobian, SpatialAccelerationVector> taskSpaceAccelerations)
    {
       // TODO: nullspace
       for (MechanismGeometricJacobian jacobian : taskSpaceAccelerations.keySet())

@@ -7,6 +7,7 @@ import java.util.Random;
 
 import javax.media.j3d.Transform3D;
 
+import org.ejml.alg.dense.linsol.LinearSolverFactory;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.RandomMatrices;
 
@@ -22,6 +23,7 @@ import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTestTools;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
+import us.ihmc.utilities.screwTheory.SpatialMotionVector;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
@@ -89,7 +91,8 @@ public class MomentumSolverComparer
    {
       YoVariableRegistry registry = new YoVariableRegistry("test");
       TwistCalculator twistCalculator = new TwistCalculator(elevator.getBodyFixedFrame(), elevator);
-      MomentumSolver solver = new MomentumSolver(rootJoint, elevator, centerOfMassFrame, twistCalculator, dt, registry);
+      MomentumSolver solver = new MomentumSolver(rootJoint, elevator, centerOfMassFrame, twistCalculator, LinearSolverFactory.linear(SpatialMotionVector.SIZE),
+                                 dt, registry);
       solver.initialize();
       ScrewTestTools.integrateVelocities(rootJoint, dt);
       ScrewTestTools.integrateVelocities(joints, dt);
