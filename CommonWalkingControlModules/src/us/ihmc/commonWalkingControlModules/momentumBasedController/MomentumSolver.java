@@ -200,6 +200,7 @@ public class MomentumSolver
    {
       cTaskSpaceMap.clear();
       ReferenceFrame rootJointFrame = rootJoint.getFrameAfterJoint();
+      RigidBody rootJointPredecessor = rootJoint.getPredecessor();
       RigidBody rootJointSuccessor = rootJoint.getSuccessor();
       for (MechanismGeometricJacobian jacobian : taskSpaceAccelerations.keySet())
       {
@@ -207,7 +208,7 @@ public class MomentumSolver
          if (taskSpaceAcceleration.getExpressedInFrame() != rootJointFrame)
          {
             twistCalculator.packRelativeTwist(twistOfCurrentWithRespectToNew, rootJointSuccessor, jacobian.getEndEffector());
-            twistCalculator.packTwistOfBody(twistOfBodyWithRespectToBase, jacobian.getEndEffector());
+            twistCalculator.packRelativeTwist(twistOfBodyWithRespectToBase, rootJointPredecessor, jacobian.getEndEffector());
             taskSpaceAcceleration.changeFrame(rootJointSuccessor.getBodyFixedFrame(), twistOfCurrentWithRespectToNew, twistOfBodyWithRespectToBase);
             taskSpaceAcceleration.changeFrameNoRelativeMotion(rootJointFrame);
          }
