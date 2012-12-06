@@ -17,4 +17,7 @@ public interface Graphics3DAdapter
    public void setGroundVisible(boolean isVisible);
    
    public PickingAdapter getPickingAdapter();
+   
+   
+   public void addSelectedListener(SelectedListener selectedListener);
 }
