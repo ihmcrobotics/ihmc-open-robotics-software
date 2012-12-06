@@ -541,8 +541,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          throw new RuntimeException("not in sole frame");
       }
 
-      ReferenceFrame stairDirectionFrame = worldFrame;
-      footstepPose.changeFrame(stairDirectionFrame);
+      ReferenceFrame frame = referenceFrames.getAnkleZUpFrame(transferToSide);
+      footstepPose.changeFrame(frame);
 
       Transform3D footstepTransform = new Transform3D();
       footstepPose.getTransform3D(footstepTransform);
@@ -550,12 +550,12 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       FramePoint2d centroid2d = footPolygonInSoleFrame.getCentroidCopy();
       FramePoint centroid = centroid2d.toFramePoint();
       centroid.changeFrame(referenceFrames.getFootFrame(transferToSide));
-      centroid.changeFrameUsingTransform(stairDirectionFrame, footstepTransform);
+      centroid.changeFrameUsingTransform(frame, footstepTransform);
       FramePoint2d ret = centroid.toFramePoint2d();
 
       double extraX = 0.0;    // 0.02
       double extraY = transferToSide.negateIfLeftSide(0.04);
-      FrameVector2d offset = new FrameVector2d(stairDirectionFrame, extraX, extraY);
+      FrameVector2d offset = new FrameVector2d(frame, extraX, extraY);
       offset.changeFrame(ret.getReferenceFrame());
       ret.add(offset);
 
