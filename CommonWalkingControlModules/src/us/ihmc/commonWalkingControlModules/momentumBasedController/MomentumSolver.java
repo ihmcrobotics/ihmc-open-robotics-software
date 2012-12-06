@@ -57,6 +57,7 @@ public class MomentumSolver
    private final SpatialAccelerationVector convectiveTerm = new SpatialAccelerationVector();
    private final TwistCalculator twistCalculator;
    private final Twist twistOfCurrentWithRespectToNew = new Twist();
+   private final Twist twistOfBodyWithRespectToBase = new Twist();
 
    private final DenseMatrix64F convectiveTermMatrix = new DenseMatrix64F(SpatialAccelerationVector.SIZE, 1);
    private final LinearSolver<DenseMatrix64F> jacobianSolver;
@@ -203,7 +204,13 @@ public class MomentumSolver
       for (MechanismGeometricJacobian jacobian : taskSpaceAccelerations.keySet())
       {
          SpatialAccelerationVector taskSpaceAcceleration = taskSpaceAccelerations.get(jacobian);
-         taskSpaceAcceleration.getExpressedInFrame().checkReferenceFrameMatch(rootJointFrame);
+         if (taskSpaceAcceleration.getExpressedInFrame() != rootJointFrame)
+         {
+            twistCalculator.packRelativeTwist(twistOfCurrentWithRespectToNew, rootJointSuccessor, jacobian.getEndEffector());
+            twistCalculator.packTwistOfBody(twistOfBodyWithRespectToBase, jacobian.getEndEffector());
+            taskSpaceAcceleration.changeFrame(rootJointSuccessor.getBodyFixedFrame(), twistOfCurrentWithRespectToNew, twistOfBodyWithRespectToBase);
+            taskSpaceAcceleration.changeFrameNoRelativeMotion(rootJointFrame);
+         }
 
          // JInverse
          jacobian.compute();
