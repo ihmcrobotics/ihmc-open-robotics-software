@@ -15,7 +15,10 @@ public class Graphics3DNode
    private final String name;
    private final NodeType nodeType;
    private final Transform3D transform = new Transform3D();
+   
    private LinkGraphics graphicsObject;
+   private boolean hasGraphicsObjectChanged = false;
+
    private final ArrayList<Graphics3DNode> childeren = new ArrayList<Graphics3DNode>();
    private final ArrayList<SelectedListener> selectedListeners = new ArrayList<SelectedListener>();
 
@@ -50,15 +53,28 @@ public class Graphics3DNode
          return Collections.unmodifiableList(childeren);
       }
    }
-
-   public LinkGraphics getGraphicsObject()
+   
+   public synchronized LinkGraphics getGraphicsObjectAndResetHasGraphicsObjectChanged()
    {
-      return graphicsObject;
+      LinkGraphics ret = graphicsObject;
+      setHasGraphicsObjectChanged(false);
+      return ret;
+   }
+   
+   public synchronized void setHasGraphicsObjectChanged(boolean hasGraphicsObjectChanged)
+   {
+      this.hasGraphicsObjectChanged = hasGraphicsObjectChanged;
+   }
+   
+   public boolean getHasGraphicsObjectChanged()
+   {
+      return hasGraphicsObjectChanged;
    }
 
    public void setGraphicsObject(LinkGraphics graphicsObject)
    {
       this.graphicsObject = graphicsObject;
+      setHasGraphicsObjectChanged(true);
    }
 
    public String getName()

@@ -4,11 +4,13 @@ import java.awt.BorderLayout;
 import java.awt.Canvas;
 import java.awt.Container;
 import java.util.ArrayList;
+import java.util.Random;
 
 import javax.media.j3d.Transform3D;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.vecmath.Color3f;
+import javax.vecmath.Vector3d;
 
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
 import us.ihmc.graphics3DAdapter.NodeType;
@@ -18,6 +20,7 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceRGBColor;
 import us.ihmc.graphics3DAdapter.graphics.instructions.LinkGraphicsInstruction;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
+import us.ihmc.utilities.ThreadTools;
 
 public class Graphics3DAdapterExampleOne
 {
@@ -84,6 +87,66 @@ public class Graphics3DAdapterExampleOne
       }
    }
 
+   
+   public void doExampleTwo(Graphics3DAdapter adapter)
+   {
+      Random random = new Random(1776L);
+      
+      Graphics3DNode node1 = new Graphics3DNode("node1", NodeType.JOINT);
+      
+      Transform3D transform1 = new Transform3D();
+      transform1.setTranslation(new Vector3d(2.0, 0.0, 0.0));
+      node1.setTransform(transform1);
+      
+      Graphics3DNode node2 = new Graphics3DNode("node2", NodeType.JOINT);
+      Graphics3DNode rootNode = new Graphics3DNode("rootNode", NodeType.JOINT);
+     
+      LinkGraphics object2 = createCubeObject(0.6);
+      LinkGraphics object1 = createRandomObject(random);
+      
+      node1.setGraphicsObject(object1);
+      node2.setGraphicsObject(object2);
+      
+      rootNode.addChild(node1);
+      rootNode.addChild(node2);
+      
+      adapter.addRootNode(rootNode);
+
+      Canvas canvas = adapter.getDefaultCamera().getCanvas();
+      JPanel panel = new JPanel(new BorderLayout());
+      panel.add("Center", canvas);
+      
+      JFrame jFrame = new JFrame("Example Two");
+      Container contentPane = jFrame.getContentPane();
+      contentPane.setLayout(new BorderLayout());
+      contentPane.add("Center", panel);
+      
+      jFrame.pack();
+      jFrame.setVisible(true);
+      jFrame.setSize(800, 600);
+      
+      double rotation = 0.0;
+      
+      int count = 0;
+      
+      while (true)
+      {
+         rotation = rotation + 0.01;
+         node2.getTransform().rotZ(rotation);
+         
+         count++;
+         if (count > 200)
+         {
+            LinkGraphics randomObject = createRandomObject(random);
+            node1.setGraphicsObject(randomObject);
+            count = 0;
+         }
+         
+         ThreadTools.sleep(1L);
+      }
+   }
+   
+   
    private LinkGraphics createTeapotObject()
    {
 	      //teapot = assetManager.loadModel("Models/Teapot/Teapot.mesh.xml");
@@ -96,6 +159,56 @@ public class Graphics3DAdapterExampleOne
       teapotObject.rotate(Math.PI / 4.0, LinkGraphics.X);
 
       return teapotObject;
+   }
+   
+   private LinkGraphics createSphereObject(double radius)
+   {
+      LinkGraphics sphere = new LinkGraphics();
+      sphere.addSphere(radius, YoAppearance.Green());
+
+      return sphere;
+   }
+   
+   private LinkGraphics createCylinderObject(double radius)
+   {
+      LinkGraphics cylinder = new LinkGraphics();
+      double height = 1.0;
+      cylinder.addCylinder(height, radius, YoAppearance.Pink());
+
+      return cylinder;
+   }
+   
+   private LinkGraphics createCubeObject(double lengthWidthHeight)
+   {
+      LinkGraphics cube = new LinkGraphics();
+      cube.addCube(lengthWidthHeight, lengthWidthHeight, lengthWidthHeight, YoAppearance.Red());
+
+      return cube;
+   }
+   
+   private LinkGraphics createRandomObject(Random random)
+   {
+      int selection = random.nextInt(3);
+      
+      switch (selection)
+      {
+      case 0:
+      {
+         return createCubeObject(random.nextDouble());
+      }
+      case 1:
+      {
+         return createSphereObject(random.nextDouble() * 0.5);
+      }
+      case 2:
+      {
+         return createCylinderObject(random.nextDouble() * 0.5);
+      }
+      default:
+      {
+         throw new RuntimeException("Should not get here");
+      }
+      }
    }
 
    
