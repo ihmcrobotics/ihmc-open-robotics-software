@@ -43,7 +43,7 @@ public class DesiredJointAccelerationCalculatorInWorldFrame
       this.footFrame = fullRobotModel.getFoot(swingSide).getBodyFixedFrame();
       this.pelvisFrame = fullRobotModel.getPelvis().getBodyFixedFrame();
       this.jacobianSolver = new DampedLeastSquaresJacobianSolver(swingSide.getCamelCaseNameForMiddleOfExpression() + "JacobianSolver", swingLegJacobian.getGeometricJacobian().getNumberOfColumns(), registry);
-      this.desiredJointAccelerationCalculator = new DesiredJointAccelerationCalculator(fullRobotModel.getPelvis(), fullRobotModel.getFoot(swingSide), swingLegJacobian.getGeometricJacobian(), jacobianSolver);
+      this.desiredJointAccelerationCalculator = new DesiredJointAccelerationCalculator(swingLegJacobian.getGeometricJacobian(), jacobianSolver);
       parentRegistry.addChild(registry);
    }
 
