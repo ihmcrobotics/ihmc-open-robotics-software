@@ -4,7 +4,7 @@ import javax.vecmath.Color3f;
 
 public class YoAppearanceRGBColor extends YoAppearanceTransparancy
 {
-   private final float red, green, blue;
+   private final Color3f color; 
    
    public YoAppearanceRGBColor(double red, double green, double blue)
    {
@@ -13,28 +13,31 @@ public class YoAppearanceRGBColor extends YoAppearanceTransparancy
    
    public YoAppearanceRGBColor(Color3f color)
    {
-      this(color.x, color.y, color.z);
+      this.color = new Color3f(color);
    }
    
    public YoAppearanceRGBColor(float red, float green, float blue)
    {
-      this.red = red;
-      this.green = green;
-      this.blue = blue;
+      this(new Color3f(red, green, blue));
    }
 
    public float getRed()
    {
-      return red;
+      return color.getX();
    }
 
    public float getGreen()
    {
-      return green;
+      return color.getY();
    }
 
    public float getBlue()
    {
-      return blue;
+      return color.getZ();
+   }
+   
+   public Color3f getColor()
+   {
+      return color;
    }
 }

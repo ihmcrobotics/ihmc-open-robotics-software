@@ -7,6 +7,7 @@ import java.util.List;
 import javax.media.j3d.Transform3D;
 
 import us.ihmc.graphics3DAdapter.NodeType;
+import us.ihmc.graphics3DAdapter.SelectedListener;
 import us.ihmc.graphics3DAdapter.graphics.LinkGraphics;
 
 public class Graphics3DNode
@@ -16,6 +17,7 @@ public class Graphics3DNode
    private final Transform3D transform = new Transform3D();
    private LinkGraphics graphicsObject;
    private final ArrayList<Graphics3DNode> childeren = new ArrayList<Graphics3DNode>();
+   private final ArrayList<SelectedListener> selectedListeners = new ArrayList<SelectedListener>();
 
    public Graphics3DNode(String name, NodeType nodeType)
    {
@@ -67,5 +69,18 @@ public class Graphics3DNode
    public NodeType getNodeType()
    {
       return nodeType;
+   }
+
+   public void notifySelectedListeners(String modifierKey)
+   {
+      for(SelectedListener selectedListener : selectedListeners)
+      {
+         selectedListener.selected(this, modifierKey);
+      }
+   }
+   
+   public void addSelectedListener(SelectedListener selectedListener)
+   {
+      selectedListeners.add(selectedListener);
    }
 }

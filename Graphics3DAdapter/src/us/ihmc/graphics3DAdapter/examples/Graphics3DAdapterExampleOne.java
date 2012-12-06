@@ -3,7 +3,6 @@ package us.ihmc.graphics3DAdapter.examples;
 import java.awt.BorderLayout;
 import java.awt.Canvas;
 import java.awt.Container;
-import java.awt.Dimension;
 import java.util.ArrayList;
 
 import javax.media.j3d.Transform3D;
@@ -13,6 +12,7 @@ import javax.vecmath.Color3f;
 
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
 import us.ihmc.graphics3DAdapter.NodeType;
+import us.ihmc.graphics3DAdapter.SelectedListener;
 import us.ihmc.graphics3DAdapter.graphics.LinkGraphics;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceRGBColor;
@@ -40,17 +40,30 @@ public class Graphics3DAdapterExampleOne
       contentPane.add("Center", panel);
       
       jFrame.pack();
-      jFrame.setSize(new Dimension (600, 300));
       jFrame.setVisible(true);
+      jFrame.setSize(800, 600);
       
+      
+      SelectedListener selectedListener = new SelectedListener()
+      {
+         
+         public void selected(Graphics3DNode graphics3dNode, String modifierKey)
+         {
+            System.out.println("Selected " + graphics3dNode.getName());
+         }
+      };
+      
+      
+      adapter.addSelectedListener(selectedListener);
+      teapotAndSphereNode.addSelectedListener(selectedListener);
       
       RotateAndScaleNodeRunnable rotator = new RotateAndScaleNodeRunnable(teapotAndSphereNode);
       BlinkRunnable blinker = new BlinkRunnable(sphereAppearanceHolder);
      
 
       ArrayList<Runnable> runnables = new ArrayList<Runnable>();
-      runnables.add(rotator);
-      runnables.add(blinker);
+//      runnables.add(rotator);
+//      runnables.add(blinker);
 
       while (true)
       {
