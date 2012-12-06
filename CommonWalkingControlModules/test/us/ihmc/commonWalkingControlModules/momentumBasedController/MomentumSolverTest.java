@@ -15,6 +15,7 @@ import org.junit.Test;
 
 import us.ihmc.utilities.MechanismGeometricJacobian;
 import us.ihmc.utilities.RandomTools;
+import us.ihmc.utilities.math.DampedLeastSquaresSolver;
 import us.ihmc.utilities.math.geometry.CenterOfMassReferenceFrame;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -27,6 +28,7 @@ import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTestTools;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
+import us.ihmc.utilities.screwTheory.SpatialMotionVector;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 import us.ihmc.utilities.screwTheory.Wrench;
 import us.ihmc.utilities.test.JUnitTools;
@@ -157,7 +159,10 @@ public class MomentumSolverTest
            ArrayList<RevoluteJoint> joints, double dt, ReferenceFrame centerOfMassFrame, TwistCalculator twistCalculator)
    {
       YoVariableRegistry registry = new YoVariableRegistry("test");
-      MomentumSolver solver = new MomentumSolver(rootJoint, elevator, centerOfMassFrame, twistCalculator, dt, registry);
+      DampedLeastSquaresSolver jacobianSolver = new DampedLeastSquaresSolver(SpatialMotionVector.SIZE);
+      jacobianSolver.setAlpha(0.0);
+      MomentumSolver solver = new MomentumSolver(rootJoint, elevator, centerOfMassFrame, twistCalculator, jacobianSolver,
+                                 dt, registry);
       solver.initialize();
 
       for (SixDoFJoint sixDoFJoint : sixDoFJoints)
@@ -178,7 +183,7 @@ public class MomentumSolverTest
       double dt = 1e-8;
       ReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("com", worldFrame, elevator);
       centerOfMassFrame.update();
-      
+
       TwistCalculator twistCalculator = new TwistCalculator(elevator.getBodyFixedFrame(), elevator);
 
       FrameVector desiredAngularCentroidalMomentumRate = new FrameVector(centerOfMassFrame, RandomTools.getRandomVector(random));
@@ -190,7 +195,8 @@ public class MomentumSolverTest
       solver.solve(desiredAngularCentroidalMomentumRate, desiredLinearCentroidalMomentumRate, jointSpaceAccelerations, taskSpaceAccelerations);
 
       checkAgainstInverseDynamicsCalculator(rootJoint, desiredAngularCentroidalMomentumRate, desiredLinearCentroidalMomentumRate, 1e-6);
-      checkAgainstNumericalDifferentiation(rootJoint, sixDoFJoints, oneDoFJoints, dt, desiredAngularCentroidalMomentumRate, desiredLinearCentroidalMomentumRate, 1e-4);
+      checkAgainstNumericalDifferentiation(rootJoint, sixDoFJoints, oneDoFJoints, dt, desiredAngularCentroidalMomentumRate,
+              desiredLinearCentroidalMomentumRate, 1e-4);
    }
 
    private static void checkAgainstNumericalDifferentiation(SixDoFJoint rootJoint, List<SixDoFJoint> sixDoFJoints, ArrayList<RevoluteJoint> joints, double dt,
@@ -209,7 +215,7 @@ public class MomentumSolverTest
       {
          ScrewTestTools.copyDesiredAccelerationToActual(sixDoFJoint);
          ScrewTestTools.integrateAccelerations(sixDoFJoint, dt);
-         ScrewTestTools.integrateVelocities(sixDoFJoint, dt);         
+         ScrewTestTools.integrateVelocities(sixDoFJoint, dt);
       }
 
       ScrewTestTools.copyDesiredAccelerationsToActual(joints);
