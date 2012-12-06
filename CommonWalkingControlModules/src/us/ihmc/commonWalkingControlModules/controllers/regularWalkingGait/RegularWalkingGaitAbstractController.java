@@ -70,7 +70,7 @@ public abstract class RegularWalkingGaitAbstractController implements RobotContr
    
    protected final StateMachine walkingStateMachine;
    protected final EnumYoVariable<RobotSide> supportLegYoVariable = new EnumYoVariable<RobotSide>("supportLegForWalkingCtrlr",
-                                                                       "Current support leg. Null if double support", childRegistry, RobotSide.class);
+                                                                       "Current support leg. Null if double support", childRegistry, RobotSide.class, true);
    protected final EnumYoVariable<RobotSide> oneLegBalanceSide = new EnumYoVariable<RobotSide>("oneLegBalanceSide", childRegistry, RobotSide.class);
    
    private final DoubleYoVariable timeInSwing = new DoubleYoVariable("timeInSwing", childRegistry);
