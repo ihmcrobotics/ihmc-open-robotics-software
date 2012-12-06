@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -9,9 +10,7 @@ import javax.media.j3d.Transform3D;
 import javax.vecmath.Vector3d;
 
 import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
 import org.ejml.ops.RandomMatrices;
-import org.ejml.ops.SpecializedOps;
 import org.junit.Test;
 
 import us.ihmc.utilities.MechanismGeometricJacobian;
@@ -64,8 +63,21 @@ public class MomentumSolverTest
       ScrewTestTools.setRandomVelocity(rootJoint, random);
       ScrewTestTools.setRandomPositions(joints, random);
       ScrewTestTools.setRandomVelocities(joints, random);
-      elevator.updateFramesRecursively();         
-      doChecks(random, elevator, rootJoint, joints);  
+      elevator.updateFramesRecursively();
+      ArrayList<SixDoFJoint> sixDoFJoints = new ArrayList<SixDoFJoint>();
+      sixDoFJoints.add(rootJoint);
+
+      Map<InverseDynamicsJoint, DenseMatrix64F> jointSpaceAccelerations = new HashMap<InverseDynamicsJoint, DenseMatrix64F>();
+      for (RevoluteJoint joint : joints)
+      {
+         DenseMatrix64F jointSpaceAcceleration = new DenseMatrix64F(joint.getDegreesOfFreedom(), 1);
+         RandomMatrices.setRandom(jointSpaceAcceleration, -1.0, 1.0, random);
+         jointSpaceAccelerations.put(joint, jointSpaceAcceleration);
+      }
+
+      Map<MechanismGeometricJacobian, SpatialAccelerationVector> taskSpaceAccelerations = new HashMap<MechanismGeometricJacobian, SpatialAccelerationVector>();
+
+      doChecks(random, elevator, rootJoint, sixDoFJoints, joints, jointSpaceAccelerations, taskSpaceAccelerations);
    }
 
 
@@ -90,32 +102,8 @@ public class MomentumSolverTest
       ScrewTestTools.setRandomVelocities(joints, random);
       elevator.updateFramesRecursively();
 
-      doChecks(random, elevator, rootJoint, joints);
-   }
-
-   private MomentumSolver createAndInitializeMomentumOptimizer(RigidBody elevator, SixDoFJoint rootJoint, ArrayList<RevoluteJoint> joints, double dt,
-           ReferenceFrame centerOfMassFrame)
-   {
-      YoVariableRegistry registry = new YoVariableRegistry("test");
-      MomentumSolver solver = new MomentumSolver(rootJoint, elevator, centerOfMassFrame, dt, registry);
-      solver.initialize();
-      ScrewTestTools.integrateVelocities(rootJoint, dt);
-      ScrewTestTools.integrateVelocities(joints, dt);
-      elevator.updateFramesRecursively();
-
-      return solver;
-   }
-
-   private void doChecks(Random random, RigidBody elevator, SixDoFJoint rootJoint, ArrayList<RevoluteJoint> joints)
-   {
-      double dt = 1e-8;
-      ReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("com", worldFrame, elevator);
-      centerOfMassFrame.update();
-
-      FrameVector desiredAngularCentroidalMomentumRate = new FrameVector(centerOfMassFrame, RandomTools.getRandomVector(random));
-      FrameVector desiredLinearCentroidalMomentumRate = new FrameVector(centerOfMassFrame, RandomTools.getRandomVector(random));
-
-      MomentumSolver solver = createAndInitializeMomentumOptimizer(elevator, rootJoint, joints, dt, centerOfMassFrame);
+      ArrayList<SixDoFJoint> sixDoFJoints = new ArrayList<SixDoFJoint>();
+      sixDoFJoints.add(rootJoint);
 
       Map<InverseDynamicsJoint, DenseMatrix64F> jointSpaceAccelerations = new HashMap<InverseDynamicsJoint, DenseMatrix64F>();
       for (RevoluteJoint joint : joints)
@@ -126,13 +114,86 @@ public class MomentumSolverTest
       }
 
       Map<MechanismGeometricJacobian, SpatialAccelerationVector> taskSpaceAccelerations = new HashMap<MechanismGeometricJacobian, SpatialAccelerationVector>();
+
+      doChecks(random, elevator, rootJoint, sixDoFJoints, joints, jointSpaceAccelerations, taskSpaceAccelerations);
+   }
+
+   @Test
+   public void testTwoFloatingBodiesWithTaskSpaceAcceleration()
+   {
+      Random random = new Random(12342L);
+      ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new Transform3D());
+      RigidBody elevator = new RigidBody("elevator", elevatorFrame);
+      SixDoFJoint rootJoint = new SixDoFJoint("rootJoint", elevator, elevatorFrame);
+      RigidBody rootBody = ScrewTestTools.addRandomRigidBody("rootBody", random, rootJoint);
+
+      SixDoFJoint secondFloatingJoint = new SixDoFJoint("secondFloatingJoint", rootBody, rootBody.getBodyFixedFrame());
+      RigidBody secondBody = ScrewTestTools.addRandomRigidBody("secondBody", random, secondFloatingJoint);
+
+      ScrewTestTools.setRandomPositionAndOrientation(rootJoint, random);
+      ScrewTestTools.setRandomVelocity(rootJoint, random);
+
+      ScrewTestTools.setRandomPositionAndOrientation(secondFloatingJoint, random);
+      ScrewTestTools.setRandomVelocity(secondFloatingJoint, random);
+      elevator.updateFramesRecursively();
+
+      ArrayList<SixDoFJoint> sixDoFJoints = new ArrayList<SixDoFJoint>();
+      sixDoFJoints.add(rootJoint);
+      sixDoFJoints.add(secondFloatingJoint);
+      ArrayList<RevoluteJoint> oneDoFJoints = new ArrayList<RevoluteJoint>();
+
+      Map<InverseDynamicsJoint, DenseMatrix64F> jointSpaceAccelerations = new HashMap<InverseDynamicsJoint, DenseMatrix64F>();
+      Map<MechanismGeometricJacobian, SpatialAccelerationVector> taskSpaceAccelerations = new HashMap<MechanismGeometricJacobian, SpatialAccelerationVector>();
+      MechanismGeometricJacobian jacobian = new MechanismGeometricJacobian(rootBody, secondBody, elevatorFrame);
+      SpatialAccelerationVector spatialAcceleration = new SpatialAccelerationVector(jacobian.getEndEffectorFrame(), jacobian.getBaseFrame(),
+                                                         jacobian.getJacobianFrame(), RandomTools.getRandomVector(random), RandomTools.getRandomVector(random));
+
+      taskSpaceAccelerations.put(jacobian, spatialAcceleration);
+
+      doChecks(random, elevator, rootJoint, sixDoFJoints, oneDoFJoints, jointSpaceAccelerations, taskSpaceAccelerations);
+   }
+
+   private MomentumSolver createAndInitializeMomentumOptimizer(RigidBody elevator, SixDoFJoint rootJoint, List<SixDoFJoint> sixDoFJoints,
+           ArrayList<RevoluteJoint> joints, double dt, ReferenceFrame centerOfMassFrame, TwistCalculator twistCalculator)
+   {
+      YoVariableRegistry registry = new YoVariableRegistry("test");
+      MomentumSolver solver = new MomentumSolver(rootJoint, elevator, centerOfMassFrame, twistCalculator, dt, registry);
+      solver.initialize();
+
+      for (SixDoFJoint sixDoFJoint : sixDoFJoints)
+      {
+         ScrewTestTools.integrateVelocities(sixDoFJoint, dt);
+      }
+
+      ScrewTestTools.integrateVelocities(joints, dt);
+      elevator.updateFramesRecursively();
+
+      return solver;
+   }
+
+   private void doChecks(Random random, RigidBody elevator, SixDoFJoint rootJoint, List<SixDoFJoint> sixDoFJoints, ArrayList<RevoluteJoint> oneDoFJoints,
+                         Map<InverseDynamicsJoint, DenseMatrix64F> jointSpaceAccelerations,
+                         Map<MechanismGeometricJacobian, SpatialAccelerationVector> taskSpaceAccelerations)
+   {
+      double dt = 1e-8;
+      ReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("com", worldFrame, elevator);
+      centerOfMassFrame.update();
+      
+      TwistCalculator twistCalculator = new TwistCalculator(elevator.getBodyFixedFrame(), elevator);
+
+      FrameVector desiredAngularCentroidalMomentumRate = new FrameVector(centerOfMassFrame, RandomTools.getRandomVector(random));
+      FrameVector desiredLinearCentroidalMomentumRate = new FrameVector(centerOfMassFrame, RandomTools.getRandomVector(random));
+
+      MomentumSolver solver = createAndInitializeMomentumOptimizer(elevator, rootJoint, sixDoFJoints, oneDoFJoints, dt, centerOfMassFrame, twistCalculator);
+
+      twistCalculator.compute();
       solver.solve(desiredAngularCentroidalMomentumRate, desiredLinearCentroidalMomentumRate, jointSpaceAccelerations, taskSpaceAccelerations);
 
       checkAgainstInverseDynamicsCalculator(rootJoint, desiredAngularCentroidalMomentumRate, desiredLinearCentroidalMomentumRate, 1e-6);
-      checkAgainstNumericalDifferentiation(rootJoint, joints, dt, desiredAngularCentroidalMomentumRate, desiredLinearCentroidalMomentumRate, 1e-5);
+      checkAgainstNumericalDifferentiation(rootJoint, sixDoFJoints, oneDoFJoints, dt, desiredAngularCentroidalMomentumRate, desiredLinearCentroidalMomentumRate, 1e-4);
    }
 
-   private static void checkAgainstNumericalDifferentiation(SixDoFJoint rootJoint, ArrayList<RevoluteJoint> joints, double dt,
+   private static void checkAgainstNumericalDifferentiation(SixDoFJoint rootJoint, List<SixDoFJoint> sixDoFJoints, ArrayList<RevoluteJoint> joints, double dt,
            FrameVector desiredAngularCentroidalMomentumRate, FrameVector desiredLinearCentroidalMomentumRate, double epsilon)
    {
       desiredAngularCentroidalMomentumRate.checkReferenceFrameMatch(desiredLinearCentroidalMomentumRate.getReferenceFrame());
@@ -144,13 +205,15 @@ public class MomentumSolverTest
       twistCalculator.compute();
       momentumCalculator.computeAndPack(momentum0);
 
-      ScrewTestTools.copyDesiredAccelerationToActual(rootJoint);
+      for (SixDoFJoint sixDoFJoint : sixDoFJoints)
+      {
+         ScrewTestTools.copyDesiredAccelerationToActual(sixDoFJoint);
+         ScrewTestTools.integrateAccelerations(sixDoFJoint, dt);
+         ScrewTestTools.integrateVelocities(sixDoFJoint, dt);         
+      }
+
       ScrewTestTools.copyDesiredAccelerationsToActual(joints);
-
-      ScrewTestTools.integrateAccelerations(rootJoint, dt);
       ScrewTestTools.integrateAccelerations(joints, dt);
-
-      ScrewTestTools.integrateVelocities(rootJoint, dt);
       ScrewTestTools.integrateVelocities(joints, dt);
 
       rootJoint.getPredecessor().updateFramesRecursively();

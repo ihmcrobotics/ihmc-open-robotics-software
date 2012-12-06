@@ -22,6 +22,7 @@ import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTestTools;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
+import us.ihmc.utilities.screwTheory.TwistCalculator;
 
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
@@ -87,11 +88,13 @@ public class MomentumSolverComparer
            ReferenceFrame centerOfMassFrame)
    {
       YoVariableRegistry registry = new YoVariableRegistry("test");
-      MomentumSolver solver = new MomentumSolver(rootJoint, elevator, centerOfMassFrame, dt, registry);
+      TwistCalculator twistCalculator = new TwistCalculator(elevator.getBodyFixedFrame(), elevator);
+      MomentumSolver solver = new MomentumSolver(rootJoint, elevator, centerOfMassFrame, twistCalculator, dt, registry);
       solver.initialize();
       ScrewTestTools.integrateVelocities(rootJoint, dt);
       ScrewTestTools.integrateVelocities(joints, dt);
       elevator.updateFramesRecursively();
+      twistCalculator.compute();
 
       return solver;
    }
