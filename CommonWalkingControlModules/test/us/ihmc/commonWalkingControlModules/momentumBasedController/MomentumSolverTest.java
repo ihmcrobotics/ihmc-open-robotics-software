@@ -150,7 +150,7 @@ public class MomentumSolverTest
       Map<InverseDynamicsJoint, DenseMatrix64F> jointSpaceAccelerations = new HashMap<InverseDynamicsJoint, DenseMatrix64F>();
       Map<MechanismGeometricJacobian, SpatialAccelerationVector> taskSpaceAccelerations = new HashMap<MechanismGeometricJacobian, SpatialAccelerationVector>();
       MechanismGeometricJacobian jacobian = new MechanismGeometricJacobian(rootBody, secondBody, rootJoint.getFrameAfterJoint());
-      SpatialAccelerationVector spatialAcceleration = new SpatialAccelerationVector(jacobian.getEndEffectorFrame(), elevatorFrame, jacobian.getJacobianFrame(),
+      SpatialAccelerationVector spatialAcceleration = new SpatialAccelerationVector(jacobian.getEndEffectorFrame(), elevatorFrame, jacobian.getEndEffectorFrame(),
                                                          RandomTools.getRandomVector(random), RandomTools.getRandomVector(random));
 
       taskSpaceAccelerations.put(jacobian, spatialAcceleration);
