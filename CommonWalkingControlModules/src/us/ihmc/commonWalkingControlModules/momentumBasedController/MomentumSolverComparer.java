@@ -1,21 +1,27 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 
 import javax.media.j3d.Transform3D;
 
 import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.RandomMatrices;
 
+import us.ihmc.utilities.MechanismGeometricJacobian;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.geometry.CenterOfMassReferenceFrame;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.RevoluteJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTestTools;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
+import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
@@ -37,6 +43,7 @@ public class MomentumSolverComparer
       ArrayList<RevoluteJoint> joints = new ArrayList<RevoluteJoint>();
 
       ScrewTestTools.createRandomTreeRobot(joints, rootBody, 25, random);
+      ReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("com", worldFrame, elevator);
 
       ScrewTestTools.setRandomPositionAndOrientation(rootJoint, random);
       ScrewTestTools.setRandomVelocity(rootJoint, random);
@@ -45,17 +52,30 @@ public class MomentumSolverComparer
       elevator.updateFramesRecursively();
 
       double dt = 1e-8;
-      ReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("com", worldFrame, elevator);
       centerOfMassFrame.update();
       MomentumSolver solver = createAndInitializeMomentumSolver(elevator, rootJoint, joints, dt, centerOfMassFrame);
 
       long startNanos = System.nanoTime();
 
+      Map<InverseDynamicsJoint, DenseMatrix64F> jointSpaceAccelerations = new HashMap<InverseDynamicsJoint, DenseMatrix64F>();
+      Map<MechanismGeometricJacobian, SpatialAccelerationVector> taskSpaceAccelerations = new HashMap<MechanismGeometricJacobian, SpatialAccelerationVector>();
+      for (RevoluteJoint joint : joints)
+      {
+         DenseMatrix64F jointSpaceAcceleration = new DenseMatrix64F(joint.getDegreesOfFreedom(), 1);
+         jointSpaceAccelerations.put(joint, jointSpaceAcceleration);
+      }
+
       for (int i = 0; i < nTests; i++)
       {
          FrameVector desiredAngularCentroidalMomentumRate = new FrameVector(centerOfMassFrame, RandomTools.getRandomVector(random));
          FrameVector desiredLinearCentroidalMomentumRate = new FrameVector(centerOfMassFrame, RandomTools.getRandomVector(random));
-         solver.solveForRootJointAcceleration(desiredAngularCentroidalMomentumRate, desiredLinearCentroidalMomentumRate);
+
+         for (RevoluteJoint joint : joints)
+         {
+            RandomMatrices.setRandom(jointSpaceAccelerations.get(joint), -1.0, 1.0, random);
+         }
+
+         solver.solve(desiredAngularCentroidalMomentumRate, desiredLinearCentroidalMomentumRate, jointSpaceAccelerations, taskSpaceAccelerations);
       }
 
       long stopNanos = System.nanoTime();
