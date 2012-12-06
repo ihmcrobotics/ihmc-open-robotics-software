@@ -51,7 +51,6 @@ import us.ihmc.utilities.screwTheory.RevoluteJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTools;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
-import us.ihmc.utilities.screwTheory.ThreeDoFAngularAccelerationCalculator;
 import us.ihmc.utilities.screwTheory.TotalMassCalculator;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 import us.ihmc.utilities.screwTheory.Wrench;
@@ -103,8 +102,6 @@ public class MomentumBasedController implements RobotController
    private final SideDependentList<YoFramePoint> desiredFootPositionsInWorld = new SideDependentList<YoFramePoint>();
 
    private final DesiredCoPAndCMPControlModule desiredCoPAndCMPControlModule;
-
-   private final ThreeDoFAngularAccelerationCalculator chestAngularAccelerationcalculator;
 
    private final YoFrameVector desiredPelvisLinearAcceleration;
    private final YoFrameVector desiredPelvisAngularAcceleration;
@@ -189,11 +186,6 @@ public class MomentumBasedController implements RobotController
 
       // this.desiredCoPAndCMPControlModule = new SacrificeCMPCoPAndCMPControlModule(desiredCapturePointToDesiredCoPControlModule,
       // desiredCapturePointToDesiredCoPControlModule, desiredCenterOfPressureFilter, visualizer, bipedSupportPolygons, processedSensors, referenceFrames, registry).setGains(3e-2, 1.0);
-
-      RigidBody pelvis = fullRobotModel.getPelvis();
-      RigidBody chest = fullRobotModel.getChest();
-      this.chestAngularAccelerationcalculator = new ThreeDoFAngularAccelerationCalculator(pelvis, chest);
-
 
       virtualToePointCalculator = new NewGeometricVirtualToePointCalculator(referenceFrames, registry, dynamicGraphicObjectsListRegistry, 0.95);
 
@@ -363,10 +355,6 @@ public class MomentumBasedController implements RobotController
 
       HashMap<RigidBody, Wrench> groundReactionWrenches = computeGroundReactionWrenches(frame, desiredDeltaCMP, virtualToePointsOnSole,
                                                              totalgroundReactionMoment);
-
-      chestAngularAccelerationcalculator.compute(highLevelHumanoidController.getChestAngularAcceleration());
-
-
 
       setGroundReactionWrenches(groundReactionWrenches, inverseDynamicsCalculator);
 

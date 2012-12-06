@@ -6,6 +6,8 @@ import java.util.List;
 
 import javax.media.j3d.Transform3D;
 
+import org.ejml.data.DenseMatrix64F;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
@@ -721,6 +723,18 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       FrameVector outputToPack = new FrameVector(fullRobotModel.getChest().getBodyFixedFrame());
       chestOrientationControlModule.controlSpine(outputToPack, desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
       chestAngularAccelerationWithRespectToPelvis.set(outputToPack);
+      chestAngularAccelerationcalculator.compute(getChestAngularAcceleration());
+      // TODO: have chestAngularAccelerationcalculator not set the result in the joints
+      for (InverseDynamicsJoint joint : spineJoints)
+      {
+         DenseMatrix64F jointAcceleration = jointAccelerations.get(joint);
+         if (jointAcceleration == null)
+         {
+            jointAcceleration = new DenseMatrix64F(joint.getDegreesOfFreedom(), 1);
+            jointAccelerations.put(joint, jointAcceleration);
+         }
+         joint.packDesiredAccelerationMatrix(jointAcceleration, 0);
+      }
    }
 
    private void doUpperBodyControl()
