@@ -13,8 +13,8 @@ public class SupportLegAndLegToTrustForVelocity implements LegToTrustForVelocity
    private final YoVariableRegistry registry = new YoVariableRegistry("SupportLegAndLegToTrustForVelocity");
 
    private final SideDependentList<BooleanYoVariable> legsToTrustForVelocity = new SideDependentList<BooleanYoVariable>();
-   private final EnumYoVariable<RobotSide> supportLeg = EnumYoVariable.create("supportLeg", RobotSide.class, registry);
-   private final EnumYoVariable<RobotSide> legToUseForCOMOffset = EnumYoVariable.create("legToUseForCOMOffset", RobotSide.class, registry);
+   private final EnumYoVariable<RobotSide> supportLeg = EnumYoVariable.create("supportLeg", "", RobotSide.class, registry, true);
+   private final EnumYoVariable<RobotSide> legToUseForCOMOffset = EnumYoVariable.create("legToUseForCOMOffset", "", RobotSide.class, registry, true);
 
    public SupportLegAndLegToTrustForVelocity(YoVariableRegistry parentRegistry)
    {

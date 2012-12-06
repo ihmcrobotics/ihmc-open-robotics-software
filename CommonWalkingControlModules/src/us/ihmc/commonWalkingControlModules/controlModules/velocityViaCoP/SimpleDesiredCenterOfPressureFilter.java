@@ -29,7 +29,7 @@ public class SimpleDesiredCenterOfPressureFilter implements DesiredCenterOfPress
 
    private final DoubleYoVariable desiredCoPBreakFrequencyHertz = new DoubleYoVariable("desiredCoPBreakFrequencyHertz", registry);
    private final DoubleYoVariable alphaDesiredCoP = new DoubleYoVariable("alphaDesiredCoP", registry);
-   private final EnumYoVariable<RobotSide> supportLegPreviousTick = EnumYoVariable.create("supportLegPreviousTick", RobotSide.class, registry);
+   private final EnumYoVariable<RobotSide> supportLegPreviousTick = EnumYoVariable.create("supportLegPreviousTick", "", RobotSide.class, registry, true);
    private final BipedSupportPolygons bipedSupportPolygons;
    private final double controlDT;
    private final FramePoint2d returnedFilteredDesiredCoP = new FramePoint2d(ReferenceFrame.getWorldFrame());

@@ -59,6 +59,7 @@ public class Graphics3DAdapterExampleOne
       
       RotateAndScaleNodeRunnable rotator = new RotateAndScaleNodeRunnable(teapotAndSphereNode);
       BlinkRunnable blinker = new BlinkRunnable(sphereAppearanceHolder);
+      AddAndRemoveObjectRunnable addAndRemoveObjectsRunnable = new AddAndRemoveObjectRunnable(teapotAndSphereNode);
      
 
       ArrayList<Runnable> runnables = new ArrayList<Runnable>();
@@ -156,16 +157,15 @@ public class Graphics3DAdapterExampleOne
    }
 
 
-   abstract class LinkGraphicsInstructionModifyingRunnable implements Runnable
+   private class AddAndRemoveObjectRunnable
    {
-      LinkGraphicsInstruction instruction;
-
-      abstract public void run();
-
-      public void setLinkGraphicsInstruction(LinkGraphicsInstruction instruction)
+      private Graphics3DNode graphics3DNode;
+      
+      public AddAndRemoveObjectRunnable(Graphics3DNode rootNode)
       {
-         this.instruction = instruction;
+         // TODO Auto-generated constructor stub
       }
+      
    }
 
 }
