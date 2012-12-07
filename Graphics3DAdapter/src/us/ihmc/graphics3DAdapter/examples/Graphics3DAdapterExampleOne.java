@@ -3,6 +3,8 @@ package us.ihmc.graphics3DAdapter.examples;
 import java.awt.BorderLayout;
 import java.awt.Canvas;
 import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -15,6 +17,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
 import us.ihmc.graphics3DAdapter.NodeType;
 import us.ihmc.graphics3DAdapter.SelectedListener;
+import us.ihmc.graphics3DAdapter.camera.CameraAdapter;
 import us.ihmc.graphics3DAdapter.graphics.LinkGraphics;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceRGBColor;
@@ -27,24 +30,23 @@ public class Graphics3DAdapterExampleOne
    public void doExampleOne(Graphics3DAdapter adapter)
    {
       Graphics3DNode teapotAndSphereNode = new Graphics3DNode("teaPot", NodeType.JOINT);
-      LinkGraphics teapotObject = createTeapotObject();
-      LinkGraphicsInstruction sphereAppearanceHolder = teapotObject.addSphere(2.0, YoAppearance.Red());
+      LinkGraphics teapotObject = new LinkGraphics();
+      LinkGraphicsInstruction teapotAppearanceHolder = teapotObject.addTeaPot(YoAppearance.Red());
 
       teapotAndSphereNode.setGraphicsObject(teapotObject);
       adapter.addRootNode(teapotAndSphereNode);
+      
+      Graphics3DNode box = new Graphics3DNode("box", NodeType.JOINT);
+      LinkGraphics boxGraphics = new LinkGraphics();
+      boxGraphics.addCube(1.0, 1.0, 1.0, YoAppearance.Green());
+      box.setGraphicsObject(boxGraphics);
+      adapter.addRootNode(box);
 
       Canvas canvas = adapter.getDefaultCamera().getCanvas();
-      JPanel panel = new JPanel(new BorderLayout());
-      panel.add("Center", canvas);
+      createNewWindow(canvas);
       
-      JFrame jFrame = new JFrame("Example One");
-      Container contentPane = jFrame.getContentPane();
-      contentPane.setLayout(new BorderLayout());
-      contentPane.add("Center", panel);
-      
-      jFrame.pack();
-      jFrame.setVisible(true);
-      jFrame.setSize(800, 600);
+      CameraAdapter secondCamera = adapter.createNewCamera();
+      createNewWindow(secondCamera.getCanvas());
       
       
       SelectedListener selectedListener = new SelectedListener()
@@ -58,16 +60,18 @@ public class Graphics3DAdapterExampleOne
       
       
       adapter.addSelectedListener(selectedListener);
-      teapotAndSphereNode.addSelectedListener(selectedListener);
+      box.addSelectedListener(selectedListener);
       
       RotateAndScaleNodeRunnable rotator = new RotateAndScaleNodeRunnable(teapotAndSphereNode);
-      BlinkRunnable blinker = new BlinkRunnable(sphereAppearanceHolder);
-      AddAndRemoveObjectRunnable addAndRemoveObjectsRunnable = new AddAndRemoveObjectRunnable(teapotAndSphereNode);
-     
+      BlinkRunnable blinker = new BlinkRunnable(teapotAppearanceHolder);
 
+
+      adapter.getDefaultCamera().getCameraController().trackNode(teapotAndSphereNode);
+      
+      
       ArrayList<Runnable> runnables = new ArrayList<Runnable>();
-//      runnables.add(rotator);
-//      runnables.add(blinker);
+      runnables.add(rotator);
+      runnables.add(blinker);
 
       while (true)
       {
@@ -86,7 +90,6 @@ public class Graphics3DAdapterExampleOne
          }
       }
    }
-
    
    public void doExampleTwo(Graphics3DAdapter adapter)
    {
@@ -146,19 +149,39 @@ public class Graphics3DAdapterExampleOne
       }
    }
    
-   
-   private LinkGraphics createTeapotObject()
+   public void createWindow(Canvas canvas1, Canvas canvas2)
    {
-	      //teapot = assetManager.loadModel("Models/Teapot/Teapot.mesh.xml");
-      LinkGraphics teapotObject = new LinkGraphics();
-//      teapotObject.addModelFile("Models/Teapot/Teapot.mesh.xml");
-      teapotObject.translate(0.0, 1.0, 1.0);
-      teapotObject.rotate(Math.PI / 4.0, LinkGraphics.X);
-      teapotObject.addEllipsoid(2.0, 2.0, 1.5);
-      teapotObject.translate(0.0, 2.0, 1.0);
-      teapotObject.rotate(Math.PI / 4.0, LinkGraphics.X);
+      JPanel panel = new JPanel(new FlowLayout());
+      panel.add("Center", canvas1);
+      panel.add("East", canvas2);
+      canvas1.setPreferredSize(new Dimension(390,600));
+      canvas2.setPreferredSize(new Dimension(390,600));
+      
+      JFrame jFrame = new JFrame("Example One");
+      jFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+      Container contentPane = jFrame.getContentPane();
+      contentPane.setLayout(new BorderLayout());
+      contentPane.add(panel);
+      
+      jFrame.pack();
+      jFrame.setVisible(true);
+      jFrame.setSize(800, 600);
+   }
 
-      return teapotObject;
+   public void createNewWindow(Canvas canvas)
+   {
+      JPanel panel = new JPanel(new BorderLayout());
+      panel.add("Center", canvas);
+      
+      JFrame jFrame = new JFrame("Example One");
+      jFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+      Container contentPane = jFrame.getContentPane();
+      contentPane.setLayout(new BorderLayout());
+      contentPane.add("Center", panel);
+      
+      jFrame.pack();
+      jFrame.setVisible(true);
+      jFrame.setSize(800, 600);
    }
    
    private LinkGraphics createSphereObject(double radius)
@@ -240,6 +263,7 @@ public class Graphics3DAdapterExampleOne
       private final Graphics3DNode node;
       private double rotation = 0.0;
       private double scale = 1.0;
+      private double translation = 0.0;
       private boolean scalingDown = true;
       
       public RotateAndScaleNodeRunnable(Graphics3DNode node)
@@ -250,6 +274,7 @@ public class Graphics3DAdapterExampleOne
       public void run()
       {
          rotation += 0.01;
+         translation += 0.01;
          
          if (scalingDown)
          {
@@ -263,22 +288,23 @@ public class Graphics3DAdapterExampleOne
          }
          
          Transform3D transform = new Transform3D();
-         transform.rotZ(rotation);
+         transform.setEuler(new Vector3d(Math.PI/2.0, 0.0, rotation));
+         transform.setTranslation(new Vector3d(translation, 0.0, 0.0));
          transform.setScale(scale);
          node.setTransform(transform);
       }
    }
 
-
-   private class AddAndRemoveObjectRunnable
+   abstract class LinkGraphicsInstructionModifyingRunnable implements Runnable
    {
-      private Graphics3DNode graphics3DNode;
-      
-      public AddAndRemoveObjectRunnable(Graphics3DNode rootNode)
+      LinkGraphicsInstruction instruction;
+
+      abstract public void run();
+
+      public void setLinkGraphicsInstruction(LinkGraphicsInstruction instruction)
       {
-         // TODO Auto-generated constructor stub
+         this.instruction = instruction;
       }
-      
    }
 
 }
