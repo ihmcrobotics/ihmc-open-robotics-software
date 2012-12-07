@@ -10,6 +10,7 @@ import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.graphics3DAdapter.HeightMap;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.instructions.LinkGraphicsAddArcTorus;
@@ -19,6 +20,7 @@ import us.ihmc.graphics3DAdapter.graphics.instructions.LinkGraphicsAddCoordinate
 import us.ihmc.graphics3DAdapter.graphics.instructions.LinkGraphicsAddCube;
 import us.ihmc.graphics3DAdapter.graphics.instructions.LinkGraphicsAddCylinder;
 import us.ihmc.graphics3DAdapter.graphics.instructions.LinkGraphicsAddEllipsoid;
+import us.ihmc.graphics3DAdapter.graphics.instructions.LinkGraphicsAddHeightMap;
 import us.ihmc.graphics3DAdapter.graphics.instructions.LinkGraphicsAddHemiEllipsoid;
 import us.ihmc.graphics3DAdapter.graphics.instructions.LinkGraphicsAddModelFile;
 import us.ihmc.graphics3DAdapter.graphics.instructions.LinkGraphicsAddPolygonDouble;
@@ -965,12 +967,9 @@ public class LinkGraphics
    
    public void createInertiaEllipsoid(Matrix3d momentOfInertia, Vector3d comOffset, double mass, YoAppearanceDefinition appearance)
    {
-      
-
       Vector3d principalMomentsOfInertia = new Vector3d(momentOfInertia.m00, momentOfInertia.m11, momentOfInertia.m22);
       Vector3d ellipsoidRadii = InertiaTools.getInertiaEllipsoidRadii(principalMomentsOfInertia, mass);
 
-      this.translate(comOffset);
       this.addEllipsoid(ellipsoidRadii.x, ellipsoidRadii.y, ellipsoidRadii.z, appearance);
 
       this.identity();
@@ -983,6 +982,14 @@ public class LinkGraphics
       linkGraphicsInstructions.add(linkGraphicsAddTeaPot);
       return linkGraphicsAddTeaPot;
    }
+
+   public LinkGraphicsInstruction addHeightMap(HeightMap heightMap, YoAppearanceDefinition appearance)
+   {
+      LinkGraphicsAddHeightMap instruction = new LinkGraphicsAddHeightMap(heightMap, appearance);
+      linkGraphicsInstructions.add(instruction);
+      return instruction;
+   }
+
 
    
 //   /*

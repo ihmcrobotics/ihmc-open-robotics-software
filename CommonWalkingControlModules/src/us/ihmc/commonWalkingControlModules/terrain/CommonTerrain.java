@@ -75,11 +75,11 @@ public class CommonTerrain
       return steppingStones;
    }
 
-   public BranchGroup createBranchGroup(boolean drawGroundBelow)
+   public ArrayList<LinkGraphics> createLinkGraphics(boolean drawGroundBelow)
    {
       if (steppingStones != null)
       {
-         BranchGroup branchGroup = steppingStones.createBranchGroup();
+         ArrayList<LinkGraphics> linkGraphics = steppingStones.createLinkGraphics();
 
          if (drawGroundBelow)
          {
@@ -87,20 +87,20 @@ public class CommonTerrain
             groundBelow.translate(0.0, 0.0, -0.2);
             groundBelow.addCube(10.0, 10.0, 0.1, YoAppearance.Green());
 
-            javax.media.j3d.Link link = new javax.media.j3d.Link(new J3DLinkGraphics(groundBelow).getSharedGroup());
-            branchGroup.addChild(link);
+            linkGraphics.add(groundBelow);
          }
 
-         return branchGroup;
+         return linkGraphics;
       }
 
       if (groundProfile != null)
       {
-         BranchGroup branchGroup = new BranchGroup();
-         TexturedGround texturedGround = new TexturedGround(groundProfile, 300, 300, new J3DAppearance(YoAppearance.DarkGreen()), new Transform3D());
-         branchGroup.addChild(texturedGround.getBranchGroup());
-
-         return branchGroup;
+         ArrayList<LinkGraphics> ret = new ArrayList<LinkGraphics>();
+         
+         LinkGraphics texturedGroundLinkGraphics = new LinkGraphics();
+         texturedGroundLinkGraphics.addHeightMap(groundProfile, YoAppearance.DarkGreen());
+         ret.add(texturedGroundLinkGraphics);
+         return ret;
       }
 
       throw new RuntimeException("Both steppingStones and groundProfile are null!");

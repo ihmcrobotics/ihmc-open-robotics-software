@@ -1,6 +1,6 @@
 package us.ihmc.darpaRoboticsChallenge;
 
-import javax.media.j3d.BranchGroup;
+import java.util.ArrayList;
 
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.terrain.CommonTerrain;
@@ -70,8 +70,8 @@ public class DRCSCSInitialSetup
       if (drawGround)
       {
          boolean drawGroundBelow = false;
-         BranchGroup branchGroup = commonTerrain.createBranchGroup(drawGroundBelow);
-         robot.addStaticBranchGroup(branchGroup);
+         ArrayList<LinkGraphics> branchGroup = commonTerrain.createLinkGraphics(drawGroundBelow);
+         robot.addStaticLinkGraphics(branchGroup);
       }
 
       // TODO: change this to scs.setGroundContactModel(groundContactModel);
