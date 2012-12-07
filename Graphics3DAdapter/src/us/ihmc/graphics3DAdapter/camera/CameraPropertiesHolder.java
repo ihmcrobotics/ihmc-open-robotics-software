@@ -1,4 +1,4 @@
-package com.yobotics.simulationconstructionset.gui.camera;
+package us.ihmc.graphics3DAdapter.camera;
 
 public interface CameraPropertiesHolder
 {
