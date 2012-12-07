@@ -616,7 +616,7 @@ public class MeshDataGenerator
    {
       Point3f points[] = new Point3f[6];
 
-      TexCoord2f textPoints[] = new TexCoord2f[4];
+      TexCoord2f textPoints[] = new TexCoord2f[6];
 
       points[0] = new Point3f(-lx / 2.0f, -ly / 2.0f, 0.0f);
       points[1] = new Point3f(lx / 2.0f, -ly / 2.0f, 0.0f);
@@ -631,6 +631,9 @@ public class MeshDataGenerator
       textPoints[1] = new TexCoord2f(1.0f, 0.0f);
       textPoints[2] = new TexCoord2f(1.0f, 1.0f);
       textPoints[3] = new TexCoord2f(0.0f, 1.0f);
+      
+      textPoints[4] = new TexCoord2f(0.0f, 1.0f);
+      textPoints[5] = new TexCoord2f(1.0f, 1.0f);
 
       int[] polygonIndices = new int[3 * 4 + 2 * 3];
 
