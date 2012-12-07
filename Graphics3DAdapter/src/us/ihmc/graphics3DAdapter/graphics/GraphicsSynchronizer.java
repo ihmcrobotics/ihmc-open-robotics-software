@@ -1,4 +1,4 @@
-package com.yobotics.simulationconstructionset.gui.graphics;
+package us.ihmc.graphics3DAdapter.graphics;
 
 public class GraphicsSynchronizer
 {
