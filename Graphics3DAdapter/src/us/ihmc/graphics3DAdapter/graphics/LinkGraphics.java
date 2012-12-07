@@ -24,6 +24,7 @@ import us.ihmc.graphics3DAdapter.graphics.instructions.LinkGraphicsAddModelFile;
 import us.ihmc.graphics3DAdapter.graphics.instructions.LinkGraphicsAddPolygonDouble;
 import us.ihmc.graphics3DAdapter.graphics.instructions.LinkGraphicsAddPyramidCube;
 import us.ihmc.graphics3DAdapter.graphics.instructions.LinkGraphicsAddSphere;
+import us.ihmc.graphics3DAdapter.graphics.instructions.LinkGraphicsAddTeaPot;
 import us.ihmc.graphics3DAdapter.graphics.instructions.LinkGraphicsAddText;
 import us.ihmc.graphics3DAdapter.graphics.instructions.LinkGraphicsAddTruncatedCone;
 import us.ihmc.graphics3DAdapter.graphics.instructions.LinkGraphicsAddVRMLFile;
@@ -975,6 +976,13 @@ public class LinkGraphics
       this.identity();
    }
 
+   
+   public LinkGraphicsAddTeaPot addTeaPot(YoAppearanceDefinition appearance)
+   {
+      LinkGraphicsAddTeaPot linkGraphicsAddTeaPot = new LinkGraphicsAddTeaPot(appearance);
+      linkGraphicsInstructions.add(linkGraphicsAddTeaPot);
+      return linkGraphicsAddTeaPot;
+   }
 
    
 //   /*
