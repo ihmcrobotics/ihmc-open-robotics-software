@@ -22,6 +22,7 @@ import us.ihmc.graphics3DAdapter.graphics.instructions.LinkGraphicsAddCylinder;
 import us.ihmc.graphics3DAdapter.graphics.instructions.LinkGraphicsAddEllipsoid;
 import us.ihmc.graphics3DAdapter.graphics.instructions.LinkGraphicsAddHeightMap;
 import us.ihmc.graphics3DAdapter.graphics.instructions.LinkGraphicsAddHemiEllipsoid;
+import us.ihmc.graphics3DAdapter.graphics.instructions.LinkGraphicsAddMeshData;
 import us.ihmc.graphics3DAdapter.graphics.instructions.LinkGraphicsAddModelFile;
 import us.ihmc.graphics3DAdapter.graphics.instructions.LinkGraphicsAddPolygonDouble;
 import us.ihmc.graphics3DAdapter.graphics.instructions.LinkGraphicsAddPyramidCube;
@@ -549,12 +550,18 @@ public class LinkGraphics
     */
    public LinkGraphicsAddSphere addSphere(double radius, YoAppearanceDefinition sphereApp)
    {
-     
-         LinkGraphicsAddSphere instruction = new LinkGraphicsAddSphere(radius, sphereApp);
-         linkGraphicsInstructions.add(instruction);
-         return instruction;
+      LinkGraphicsAddSphere instruction = new LinkGraphicsAddSphere(radius, sphereApp);
+      linkGraphicsInstructions.add(instruction);
+      return instruction;
    }
 
+   public LinkGraphicsAddMeshData addMeshData(MeshDataHolder meshData, YoAppearanceDefinition meshAppearance)
+   {
+      LinkGraphicsAddMeshData instruction = new LinkGraphicsAddMeshData(meshData, meshAppearance);
+      linkGraphicsInstructions.add(instruction);
+      return instruction;
+   }
+   
    /**
     * Adds a solid ellipsoid with the given radii centered on the origin of the current coordinate system.
     * </ br></ br>
