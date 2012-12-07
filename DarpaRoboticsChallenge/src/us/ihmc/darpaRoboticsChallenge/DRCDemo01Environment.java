@@ -8,13 +8,13 @@ import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.commonAvatarInterfaces.CommonAvatarEnvironmentInterface;
+import us.ihmc.graphics3DAdapter.SelectedListenerFromSCS;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceDefinition;
 import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
 
 import com.yobotics.simulationconstructionset.ExternalForcePoint;
 import com.yobotics.simulationconstructionset.Robot;
-import com.yobotics.simulationconstructionset.gui.clickListeners.SelectedListener;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.ground.CombinedTerrainObject;
 import com.yobotics.simulationconstructionset.util.ground.RotatableConvexPolygonTerrainObject;
@@ -222,7 +222,7 @@ public class DRCDemo01Environment implements CommonAvatarEnvironmentInterface
 
    }
 
-   public void addSelectableListenerToSelectables(SelectedListener selectedListener)
+   public void addSelectableListenerToSelectables(SelectedListenerFromSCS selectedListener)
    {
       // TODO Auto-generated method stub
 
