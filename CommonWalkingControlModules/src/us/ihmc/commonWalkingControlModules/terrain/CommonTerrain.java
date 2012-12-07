@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.io.File;
 import java.util.ArrayList;
 
-import javax.media.j3d.BranchGroup;
 import javax.media.j3d.Transform3D;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -15,10 +14,7 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
 
 import com.yobotics.simulationconstructionset.GroundProfile;
-import com.yobotics.simulationconstructionset.TexturedGround;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.renderer.j3d.J3DAppearance;
-import com.yobotics.simulationconstructionset.renderer.j3d.J3DLinkGraphics;
 import com.yobotics.simulationconstructionset.util.FlatGroundProfile;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.ground.AlternatingSlopesGroundProfile;
