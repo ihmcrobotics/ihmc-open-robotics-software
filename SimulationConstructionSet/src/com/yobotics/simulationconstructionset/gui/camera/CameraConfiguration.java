@@ -68,7 +68,6 @@ public class CameraConfiguration
       this.fieldOfView = fieldOfView;
    }
 
-
    public void setCameraTracking(boolean track, boolean trackX, boolean trackY, boolean trackZ)
    {
       this.isTracking = track;
@@ -125,6 +124,41 @@ public class CameraConfiguration
       this.camX = camX;
       this.camY = camY;
       this.camZ = camZ;
+   }
+
+   public String getTrackXVar()
+   {
+      return trackXVar;
+   }
+   
+   public String getTrackYVar()
+   {
+      return trackYVar;
+   }
+   
+   public String getTrackZVar()
+   {
+      return trackZVar;
+   }
+   
+   public String getDollyXVar()
+   {
+      return dollyXVar;
+   }
+   
+   public String getDollyYVar()
+   {
+      return dollyYVar;
+   }
+   
+   public String getDollyZVar()
+   {
+      return dollyZVar;
+   }
+
+   public String getFieldOfViewVar()
+   {
+      return fieldOfViewVar;
    }
 
 
