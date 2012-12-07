@@ -3,6 +3,7 @@ package us.ihmc.darpaRoboticsChallenge;
 import javax.swing.JButton;
 
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
+import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
 import us.ihmc.graphics3DAdapter.jme.JMEGraphics3dAdapter;
 import us.ihmc.projectM.R2Sim02.DataExporter;
 import us.ihmc.projectM.R2Sim02.R2Parameters;
@@ -10,7 +11,6 @@ import us.ihmc.projectM.R2Sim02.R2Robot;
 
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.gui.camera.CameraConfiguration;
 
 public class DRCGuiInitialSetup
 {

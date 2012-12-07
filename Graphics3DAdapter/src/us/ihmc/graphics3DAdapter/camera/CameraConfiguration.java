@@ -1,4 +1,4 @@
-package com.yobotics.simulationconstructionset.gui.camera;
+package us.ihmc.graphics3DAdapter.camera;
 
 
 
@@ -10,16 +10,16 @@ public class CameraConfiguration
    protected String dollyXVar = "q_x", dollyYVar = "q_y", dollyZVar = "q_z";
 
    protected String fieldOfViewVar = null;
-   protected double fieldOfView = -1.0;    // Camera.DEFAULT_FIELD_OF_VIEW;
+   public double fieldOfView = -1.0;    // Camera.DEFAULT_FIELD_OF_VIEW;
 
    protected boolean isMounted = false;
    protected String mountName = "";
 
-   protected double camX, camY, camZ, fixX, fixY, fixZ;
-   protected boolean isTracking = true, isTrackingX = true, isTrackingY = true, isTrackingZ = false;
-   protected boolean isDolly = false, isDollyX = true, isDollyY = true, isDollyZ = false;
-   protected double trackDX = 0.0, trackDY = 0.0, trackDZ = 0.0;
-   protected double dollyDX = 2.0, dollyDY = 12.0, dollyDZ = 0.0;
+   public double camX, camY, camZ, fixX, fixY, fixZ;
+   public boolean isTracking = true, isTrackingX = true, isTrackingY = true, isTrackingZ = false;
+   public boolean isDolly = false, isDollyX = true, isDollyY = true, isDollyZ = false;
+   public double trackDX = 0.0, trackDY = 0.0, trackDZ = 0.0;
+   public double dollyDX = 2.0, dollyDY = 12.0, dollyDZ = 0.0;
 
    // protected double clipNear = 0.1, clipFar = 100.0;
    // protected YoVariable track_x_var, track_y_var, track_z_var, dolly_x_var, dolly_y_var, dolly_z_var;
