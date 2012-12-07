@@ -10,12 +10,12 @@ import javax.vecmath.Point3d;
 import org.junit.Test;
 
 import us.ihmc.graphics3DAdapter.java3D.fromSCS.Clicked3DPointListener;
+import us.ihmc.graphics3DAdapter.java3D.fromSCS.SelectablePickedListener;
 
 import com.yobotics.simulationconstructionset.DoNothingController;
 import com.yobotics.simulationconstructionset.GroundContactModel;
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.gui.clickListeners.SelectablePickedListener;
 import com.yobotics.simulationconstructionset.util.LinearStickSlipGroundContactModel;
 
 public class SimpleCombinedTerrainObjectEnvinronmentTest
