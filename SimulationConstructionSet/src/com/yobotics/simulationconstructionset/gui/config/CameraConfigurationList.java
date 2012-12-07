@@ -2,7 +2,8 @@ package com.yobotics.simulationconstructionset.gui.config;
 
 import java.util.ArrayList;
 
-import com.yobotics.simulationconstructionset.gui.camera.CameraConfiguration;
+import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
+
 
 public class CameraConfigurationList
 {
