@@ -12,6 +12,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.RandomMatrices;
 
 import us.ihmc.utilities.MechanismGeometricJacobian;
+import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.geometry.CenterOfMassReferenceFrame;
@@ -61,7 +62,7 @@ public class MomentumSolverComparer
       long startNanos = System.nanoTime();
 
       Map<InverseDynamicsJoint, DenseMatrix64F> jointSpaceAccelerations = new HashMap<InverseDynamicsJoint, DenseMatrix64F>();
-      Map<MechanismGeometricJacobian, SpatialAccelerationVector> taskSpaceAccelerations = new HashMap<MechanismGeometricJacobian, SpatialAccelerationVector>();
+      Map<MechanismGeometricJacobian, Pair<SpatialAccelerationVector, DenseMatrix64F>> taskSpaceAccelerations = new HashMap<MechanismGeometricJacobian, Pair<SpatialAccelerationVector,DenseMatrix64F>>();
       for (RevoluteJoint joint : joints)
       {
          DenseMatrix64F jointSpaceAcceleration = new DenseMatrix64F(joint.getDegreesOfFreedom(), 1);
