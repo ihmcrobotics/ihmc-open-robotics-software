@@ -16,6 +16,7 @@ import org.ejml.ops.RandomMatrices;
 import org.junit.Test;
 
 import us.ihmc.utilities.MechanismGeometricJacobian;
+import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.math.geometry.CenterOfMassReferenceFrame;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -80,7 +81,9 @@ public class MomentumSolverTest
          jointSpaceAccelerations.put(joint, jointSpaceAcceleration);
       }
 
-      Map<MechanismGeometricJacobian, SpatialAccelerationVector> taskSpaceAccelerations = new HashMap<MechanismGeometricJacobian, SpatialAccelerationVector>();
+      Map<MechanismGeometricJacobian, Pair<SpatialAccelerationVector, DenseMatrix64F>> taskSpaceAccelerations = new HashMap<MechanismGeometricJacobian,
+                                                                                                                   Pair<SpatialAccelerationVector,
+                                                                                                                      DenseMatrix64F>>();
 
       doChecks(random, elevator, rootJoint, sixDoFJoints, joints, jointSpaceAccelerations, taskSpaceAccelerations);
    }
@@ -118,7 +121,9 @@ public class MomentumSolverTest
          jointSpaceAccelerations.put(joint, jointSpaceAcceleration);
       }
 
-      Map<MechanismGeometricJacobian, SpatialAccelerationVector> taskSpaceAccelerations = new HashMap<MechanismGeometricJacobian, SpatialAccelerationVector>();
+      Map<MechanismGeometricJacobian, Pair<SpatialAccelerationVector, DenseMatrix64F>> taskSpaceAccelerations = new HashMap<MechanismGeometricJacobian,
+                                                                                                                   Pair<SpatialAccelerationVector,
+                                                                                                                      DenseMatrix64F>>();
 
       doChecks(random, elevator, rootJoint, sixDoFJoints, joints, jointSpaceAccelerations, taskSpaceAccelerations);
    }
@@ -148,12 +153,18 @@ public class MomentumSolverTest
       ArrayList<RevoluteJoint> oneDoFJoints = new ArrayList<RevoluteJoint>();
 
       Map<InverseDynamicsJoint, DenseMatrix64F> jointSpaceAccelerations = new HashMap<InverseDynamicsJoint, DenseMatrix64F>();
-      Map<MechanismGeometricJacobian, SpatialAccelerationVector> taskSpaceAccelerations = new HashMap<MechanismGeometricJacobian, SpatialAccelerationVector>();
+      Map<MechanismGeometricJacobian, Pair<SpatialAccelerationVector, DenseMatrix64F>> taskSpaceAccelerations = new HashMap<MechanismGeometricJacobian,
+                                                                                                                   Pair<SpatialAccelerationVector,
+                                                                                                                      DenseMatrix64F>>();
       MechanismGeometricJacobian jacobian = new MechanismGeometricJacobian(rootBody, secondBody, rootJoint.getFrameAfterJoint());
-      SpatialAccelerationVector spatialAcceleration = new SpatialAccelerationVector(jacobian.getEndEffectorFrame(), elevatorFrame, jacobian.getEndEffectorFrame(),
-                                                         RandomTools.getRandomVector(random), RandomTools.getRandomVector(random));
+//      SpatialAccelerationVector spatialAcceleration = new SpatialAccelerationVector(jacobian.getEndEffectorFrame(), elevatorFrame,
+//            jacobian.getEndEffectorFrame());
+      SpatialAccelerationVector spatialAcceleration = new SpatialAccelerationVector(jacobian.getEndEffectorFrame(), elevatorFrame,
+                                                         jacobian.getEndEffectorFrame(), RandomTools.getRandomVector(random),
+                                                         RandomTools.getRandomVector(random));
 
-      taskSpaceAccelerations.put(jacobian, spatialAcceleration);
+      Pair<SpatialAccelerationVector, DenseMatrix64F> pair = new Pair<SpatialAccelerationVector, DenseMatrix64F>(spatialAcceleration, new DenseMatrix64F(0, 0));
+      taskSpaceAccelerations.put(jacobian, pair);
 
       doChecks(random, elevator, rootJoint, sixDoFJoints, oneDoFJoints, jointSpaceAccelerations, taskSpaceAccelerations);
    }
@@ -163,8 +174,8 @@ public class MomentumSolverTest
    {
       YoVariableRegistry registry = new YoVariableRegistry("test");
 
-//      DampedLeastSquaresSolver jacobianSolver = new DampedLeastSquaresSolver(SpatialMotionVector.SIZE);
-//      jacobianSolver.setAlpha(0.0);
+//    DampedLeastSquaresSolver jacobianSolver = new DampedLeastSquaresSolver(SpatialMotionVector.SIZE);
+//    jacobianSolver.setAlpha(0.0);
       LinearSolver<DenseMatrix64F> jacobianSolver = LinearSolverFactory.linear(SpatialMotionVector.SIZE);
       MomentumSolver solver = new MomentumSolver(rootJoint, elevator, centerOfMassFrame, twistCalculator, jacobianSolver, dt, registry);
       solver.initialize();
@@ -182,7 +193,7 @@ public class MomentumSolverTest
 
    private void doChecks(Random random, RigidBody elevator, SixDoFJoint rootJoint, List<SixDoFJoint> sixDoFJoints, ArrayList<RevoluteJoint> oneDoFJoints,
                          Map<InverseDynamicsJoint, DenseMatrix64F> jointSpaceAccelerations,
-                         Map<MechanismGeometricJacobian, SpatialAccelerationVector> taskSpaceAccelerations)
+                         Map<MechanismGeometricJacobian, Pair<SpatialAccelerationVector, DenseMatrix64F>> taskSpaceAccelerations)
    {
       double dt = 1e-8;
       ReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("com", worldFrame, elevator);
@@ -199,10 +210,10 @@ public class MomentumSolverTest
       solver.solve(desiredAngularCentroidalMomentumRate, desiredLinearCentroidalMomentumRate, jointSpaceAccelerations, taskSpaceAccelerations);
 
       checkJointSpaceAccelerations(jointSpaceAccelerations, 0.0);
-      checkTaskSpaceAccelerations(rootJoint, twistCalculator, taskSpaceAccelerations, 1e-5);
       checkAgainstInverseDynamicsCalculator(rootJoint, desiredAngularCentroidalMomentumRate, desiredLinearCentroidalMomentumRate, 1e-6);
       checkAgainstNumericalDifferentiation(rootJoint, sixDoFJoints, oneDoFJoints, dt, desiredAngularCentroidalMomentumRate,
               desiredLinearCentroidalMomentumRate, 1e-4);
+      checkTaskSpaceAccelerations(rootJoint, twistCalculator, taskSpaceAccelerations, 1e-5);
    }
 
    private static void checkJointSpaceAccelerations(Map<InverseDynamicsJoint, DenseMatrix64F> jointSpaceAccelerations, double epsilon)
@@ -216,7 +227,7 @@ public class MomentumSolverTest
    }
 
    private static void checkTaskSpaceAccelerations(SixDoFJoint rootJoint, TwistCalculator twistCalculator,
-           Map<MechanismGeometricJacobian, SpatialAccelerationVector> taskSpaceAccelerations, double epsilon)
+           Map<MechanismGeometricJacobian, Pair<SpatialAccelerationVector, DenseMatrix64F>> taskSpaceAccelerations, double epsilon)
    {
       RigidBody elevator = rootJoint.getPredecessor();
       ReferenceFrame rootFrame = elevator.getBodyFixedFrame();
@@ -227,7 +238,7 @@ public class MomentumSolverTest
 
       for (MechanismGeometricJacobian jacobian : taskSpaceAccelerations.keySet())
       {
-         SpatialAccelerationVector acceleration = taskSpaceAccelerations.get(jacobian);
+         SpatialAccelerationVector acceleration = taskSpaceAccelerations.get(jacobian).first();
 
          SpatialAccelerationVector checkAcceleration = new SpatialAccelerationVector();
          spatialAccelerationCalculator.packAccelerationOfBody(checkAcceleration, jacobian.getEndEffector());
