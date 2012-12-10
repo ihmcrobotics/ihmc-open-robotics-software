@@ -42,10 +42,11 @@ public class Graphics3DAdapterExampleOne
       box.setGraphicsObject(boxGraphics);
       adapter.addRootNode(box);
 
-      Canvas canvas = adapter.getDefaultCamera().getCanvas();
+      CameraAdapter camera = adapter.createNewCamera(null, null, null, null, null, null);
+      Canvas canvas = camera.getCanvas();
       createNewWindow(canvas);
       
-      CameraAdapter secondCamera = adapter.createNewCamera();
+      CameraAdapter secondCamera = adapter.createNewCamera(null, null, null, null, null, null);
       createNewWindow(secondCamera.getCanvas());
       
       
@@ -65,8 +66,8 @@ public class Graphics3DAdapterExampleOne
       RotateAndScaleNodeRunnable rotator = new RotateAndScaleNodeRunnable(teapotAndSphereNode);
       BlinkRunnable blinker = new BlinkRunnable(teapotAppearanceHolder);
 
-
-      adapter.getDefaultCamera().getCameraController().trackNode(teapotAndSphereNode);
+      
+      camera.getCameraController().trackNode(teapotAndSphereNode);
       
       
       ArrayList<Runnable> runnables = new ArrayList<Runnable>();
@@ -115,7 +116,8 @@ public class Graphics3DAdapterExampleOne
       
       adapter.addRootNode(rootNode);
 
-      Canvas canvas = adapter.getDefaultCamera().getCanvas();
+      CameraAdapter camera = adapter.createNewCamera(null, null, null, null, null, null);
+      Canvas canvas = camera.getCanvas();
       JPanel panel = new JPanel(new BorderLayout());
       panel.add("Center", canvas);
       
