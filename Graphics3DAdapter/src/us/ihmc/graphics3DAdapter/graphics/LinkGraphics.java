@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.media.j3d.Appearance;
-import javax.media.j3d.BranchGroup;
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Color3f;
 import javax.vecmath.Matrix3d;
@@ -17,7 +16,6 @@ import us.ihmc.graphics3DAdapter.HeightMap;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.instructions.LinkGraphicsAddArcTorus;
-import us.ihmc.graphics3DAdapter.graphics.instructions.LinkGraphicsAddBranchGroup;
 import us.ihmc.graphics3DAdapter.graphics.instructions.LinkGraphicsAddCone;
 import us.ihmc.graphics3DAdapter.graphics.instructions.LinkGraphicsAddCoordinateSystem;
 import us.ihmc.graphics3DAdapter.graphics.instructions.LinkGraphicsAddCube;
@@ -980,16 +978,6 @@ public class LinkGraphics
       linkGraphicsInstructions.add(instruction);
       return instruction;
       
-   }
-   
-   @Deprecated
-   public void addBranchGroup(BranchGroup branchGroup)
-   {
-      System.err.println("Adding branchgroups to LinkGraphics is deprecated");
-      
-      Thread.dumpStack();
-      
-      linkGraphicsInstructions.add(new LinkGraphicsAddBranchGroup(branchGroup));
    }
    
    public void createInertiaEllipsoid(Matrix3d momentOfInertia, Vector3d comOffset, double mass, YoAppearanceDefinition appearance)
