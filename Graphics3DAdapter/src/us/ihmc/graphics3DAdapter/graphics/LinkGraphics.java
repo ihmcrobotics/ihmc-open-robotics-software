@@ -5,6 +5,7 @@ import java.util.ArrayList;
 
 import javax.media.j3d.Appearance;
 import javax.media.j3d.BranchGroup;
+import javax.media.j3d.Transform3D;
 import javax.vecmath.Color3f;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
@@ -994,9 +995,14 @@ public class LinkGraphics
       return linkGraphicsAddTeaPot;
    }
 
-   public LinkGraphicsInstruction addHeightMap(HeightMap heightMap, YoAppearanceDefinition appearance)
+   public LinkGraphicsInstruction addHeightMap(HeightMap heightMap, int xPointsPerSide, int yPointsPerSide, YoAppearanceDefinition appearance)
    {
-      LinkGraphicsAddHeightMap instruction = new LinkGraphicsAddHeightMap(heightMap, appearance);
+      return addHeightMap(heightMap, xPointsPerSide, yPointsPerSide, appearance, null);
+   }
+   
+   public LinkGraphicsInstruction addHeightMap(HeightMap heightMap, int xPointsPerSide, int yPointsPerSide, YoAppearanceDefinition appearance, Transform3D transform)
+   {
+      LinkGraphicsAddHeightMap instruction = new LinkGraphicsAddHeightMap(heightMap, xPointsPerSide, yPointsPerSide, appearance, transform);
       linkGraphicsInstructions.add(instruction);
       return instruction;
    }
