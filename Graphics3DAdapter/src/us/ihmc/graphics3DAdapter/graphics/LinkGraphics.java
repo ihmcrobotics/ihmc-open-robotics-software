@@ -224,10 +224,11 @@ public class LinkGraphics
     *
     * @param scaleFactor Factor by which the coordinate system is scaled.  For example, 0.5 would
     * reduce future objects size by 50% whereas 2 would double it.
+    * @return 
     */
-   public void scale(double scaleFactor)
+   public LinkGraphicsScale scale(double scaleFactor)
    {
-      linkGraphicsInstructions.add(new LinkGraphicsScale(scaleFactor));
+      return scale(new Vector3d(scaleFactor, scaleFactor, scaleFactor));
    }
 
    /**
@@ -237,10 +238,13 @@ public class LinkGraphics
     * scale factors in each dimension.
     *
     * @param scaleFactors Vector3d describing the scaling factors in each dimension.
+    * @return 
     */
-   public void scale(Vector3d scaleFactors)
+   public LinkGraphicsScale scale(Vector3d scaleFactors)
    {
-      linkGraphicsInstructions.add(new LinkGraphicsScale(scaleFactors));
+      LinkGraphicsScale linkGraphicsScale = new LinkGraphicsScale(scaleFactors);
+      linkGraphicsInstructions.add(linkGraphicsScale);
+      return linkGraphicsScale;
    }
 
    /**
