@@ -9,8 +9,7 @@ import javax.vecmath.Point3d;
 
 import org.junit.Test;
 
-import us.ihmc.graphics3DAdapter.java3D.fromSCS.Clicked3DPointListener;
-import us.ihmc.graphics3DAdapter.java3D.fromSCS.SelectablePickedListener;
+import us.ihmc.graphics3DAdapter.java3D.interfaces.Clicked3DPointListener;
 
 import com.yobotics.simulationconstructionset.DoNothingController;
 import com.yobotics.simulationconstructionset.GroundContactModel;
@@ -169,8 +168,6 @@ public class SimpleCombinedTerrainObjectEnvinronmentTest
       {
          SimulationConstructionSet scs = new SimulationConstructionSet(robotBoxes);
          scs.addStaticLinkGraphics(combinedEnvironment.getLinkGraphics());
-         SelectablePickedListener boxPickedListener = new SelectablePickedListener();
-         scs.attachClickedPickableObjectListener(boxPickedListener);
 
          scs.setGroundVisible(false);
 
