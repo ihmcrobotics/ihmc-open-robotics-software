@@ -9,7 +9,7 @@ import javax.vecmath.Point3d;
 
 import org.junit.Test;
 
-import us.ihmc.graphics3DAdapter.java3D.interfaces.Clicked3DPointListener;
+import us.ihmc.graphics3DAdapter.holders.Clicked3DPointListener;
 
 import com.yobotics.simulationconstructionset.DoNothingController;
 import com.yobotics.simulationconstructionset.GroundContactModel;
