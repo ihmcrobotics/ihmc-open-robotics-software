@@ -2,9 +2,6 @@ package us.ihmc.darpaRoboticsChallenge;
 
 import java.awt.Component;
 
-import javax.media.j3d.BranchGroup;
-import javax.media.j3d.Transform3D;
-import javax.media.j3d.TransformGroup;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
@@ -16,16 +13,13 @@ import us.ihmc.darpaRoboticsChallenge.controllers.DRCRobotMomentumBasedControlle
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.SquaredUpDRCRobotInitialSetup;
 import us.ihmc.graphics3DAdapter.graphics.LinkGraphics;
-import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
-import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import com.martiansoftware.jsap.JSAPException;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicCheckBoxMenuItem;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.GraphicsHelper;
 import com.yobotics.simulationconstructionset.util.inputdevices.MidiSliderBoard;
 
 public class DRCFlatGroundWalkingTrack
