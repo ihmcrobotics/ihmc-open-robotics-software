@@ -15,6 +15,7 @@ import us.ihmc.commonWalkingControlModules.terrain.TerrainType;
 import us.ihmc.darpaRoboticsChallenge.controllers.DRCRobotMomentumBasedControllerFactory;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.SquaredUpDRCRobotInitialSetup;
+import us.ihmc.graphics3DAdapter.graphics.LinkGraphics;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -229,21 +230,15 @@ public class DRCFlatGroundWalkingTrack
    {
       if (showInstructions)
       {
-         BranchGroup board = GraphicsHelper.createBranchgroupFrom3ds(getClass().getResource("3ds/billboard.3DS"));
-         Transform3D transform3d = new Transform3D();
-         transform3d.rotX(Math.toRadians(90));
-         transform3d.rotZ(Math.toRadians(90));
-         FrameOrientation orientation = new FrameOrientation(ReferenceFrame.getWorldFrame());
-         orientation.setYawPitchRoll(Math.toRadians(90), 0.0, Math.toRadians(90));
-
-         transform3d.setRotation(orientation.getQuaternion());
-         transform3d.setScale(0.2);
-         transform3d.setTranslation(new Vector3d(-1.0, -1.0, 0));
-         TransformGroup group = new TransformGroup(transform3d);
-         group.addChild(board);
-         BranchGroup base = new BranchGroup();
-         base.addChild(group);
-         scs.addStaticBranchGroup(base);
+         if (showInstructions)
+         {
+            LinkGraphics linkGraphics = new LinkGraphics();
+            linkGraphics.translate(new Vector3d(-1.0, -1.0, 0.0));
+            linkGraphics.rotate(Math.toRadians(90), LinkGraphics.Z);
+            linkGraphics.scale(0.2);
+            linkGraphics.addModelFile(getClass().getResource("3ds/billboard.3DS"));
+            scs.addStaticLinkGraphics(linkGraphics);
+         }
       }
    }
 
