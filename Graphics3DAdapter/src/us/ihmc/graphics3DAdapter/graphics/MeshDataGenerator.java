@@ -1,6 +1,7 @@
 package us.ihmc.graphics3DAdapter.graphics;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
@@ -133,10 +134,76 @@ public class MeshDataGenerator
       return Polygon(points);
    }
 
+   
+   public static MeshDataHolder ExtrudedPolygon(List<Point2d> polygonPoints, double extrusionHeight)
+   {
+      Point2d[] points = new Point2d[polygonPoints.size()];
+      int i = 0;
+      for (Point2d point2d : polygonPoints)
+      {
+         points[i++] = new Point2d(point2d);
+      }
+
+      return ExtrudedPolygon(points, extrusionHeight);
+   }
 
    public static MeshDataHolder ExtrudedPolygon(Point2d[] polygonPoints, double extrusionHeight)
    {
-      throw new RuntimeException("Implement Me!. Perhaps learn from and pattern match http://www.interactivemesh.org/testspace/awtshapeextruder.html");
+      int numberOfPointsOnPolygon = polygonPoints.length;
+
+      Point3f vertices[] = new Point3f[2 * numberOfPointsOnPolygon];
+      TexCoord2f[] texturePoints = new TexCoord2f[vertices.length];  
+
+      for (int i = 0; i < numberOfPointsOnPolygon; i++)
+      {
+         vertices[i] = new Point3f((float) (polygonPoints[i].getX()), (float) (polygonPoints[i].getY()), 0.0f);
+         vertices[i + numberOfPointsOnPolygon] = new Point3f((float) (polygonPoints[i].getX()), (float) (polygonPoints[i].getY()), (float) extrusionHeight);
+      
+         //TODO: Figure out how to texture an extruded polygon!
+         texturePoints[i] = new TexCoord2f();
+         texturePoints[i + numberOfPointsOnPolygon] = new TexCoord2f();
+      }
+      
+      int[] polygonIndices = new int[2 * numberOfPointsOnPolygon + 4 * numberOfPointsOnPolygon];
+      int[] polygonStripCounts = new int[2 + numberOfPointsOnPolygon];
+
+      // Bottom Polygon:
+      int indexCount = 0;
+      for (int i=0; i<numberOfPointsOnPolygon; i++)
+      {
+         polygonIndices[indexCount] = i;
+         indexCount++;
+      }
+      polygonStripCounts[0] = numberOfPointsOnPolygon;
+      
+      // Top Polygon:
+      for (int i=0; i<numberOfPointsOnPolygon; i++)
+      {
+         polygonIndices[indexCount] = numberOfPointsOnPolygon + i;
+         indexCount++;
+      }
+      polygonStripCounts[1] = numberOfPointsOnPolygon;
+
+      // Side rectangles:
+      for (int i=0; i<numberOfPointsOnPolygon; i++)
+      {
+         polygonIndices[indexCount++] = i;
+         polygonIndices[indexCount++] = (i + 1) % numberOfPointsOnPolygon;
+
+
+         int index = numberOfPointsOnPolygon + i + 1;
+         if (index >= 2.0 * numberOfPointsOnPolygon)
+         {
+            index = numberOfPointsOnPolygon;
+         }
+         polygonIndices[indexCount++] = index;
+
+         polygonIndices[indexCount++] = numberOfPointsOnPolygon + i;
+         
+         polygonStripCounts[2+i] = 4;
+      }
+             
+      return new MeshDataHolder(vertices, texturePoints, polygonIndices, polygonStripCounts);
    }
 
 

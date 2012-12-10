@@ -2,12 +2,14 @@ package us.ihmc.graphics3DAdapter.graphics;
 
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.media.j3d.Appearance;
 import javax.media.j3d.BranchGroup;
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Color3f;
 import javax.vecmath.Matrix3d;
+import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
@@ -21,6 +23,7 @@ import us.ihmc.graphics3DAdapter.graphics.instructions.LinkGraphicsAddCoordinate
 import us.ihmc.graphics3DAdapter.graphics.instructions.LinkGraphicsAddCube;
 import us.ihmc.graphics3DAdapter.graphics.instructions.LinkGraphicsAddCylinder;
 import us.ihmc.graphics3DAdapter.graphics.instructions.LinkGraphicsAddEllipsoid;
+import us.ihmc.graphics3DAdapter.graphics.instructions.LinkGraphicsAddExtrudedPolygon;
 import us.ihmc.graphics3DAdapter.graphics.instructions.LinkGraphicsAddHeightMap;
 import us.ihmc.graphics3DAdapter.graphics.instructions.LinkGraphicsAddHemiEllipsoid;
 import us.ihmc.graphics3DAdapter.graphics.instructions.LinkGraphicsAddMeshData;
@@ -957,6 +960,18 @@ public class LinkGraphics
    public void addPolygon(Point3d[] polygonPoints, YoAppearanceDefinition yoAppearance)
    {
       linkGraphicsInstructions.add(new LinkGraphicsAddPolygonDouble(polygonPoints, yoAppearance));
+   }
+   
+   
+   public void addExtrudedPolygon(List<Point2d> polygonPoints, double height)
+   {
+      addExtrudedPolygon(polygonPoints, height, YoAppearance.Black());
+   }
+   
+   public void addExtrudedPolygon(List<Point2d> polygonPoints, double height, YoAppearanceDefinition appearance)
+   {
+      LinkGraphicsInstruction instruction = new LinkGraphicsAddExtrudedPolygon(polygonPoints, height, appearance);
+      linkGraphicsInstructions.add(instruction);
    }
 
    public LinkGraphicsInstruction addText(String text, YoAppearanceDefinition yoAppearance)
