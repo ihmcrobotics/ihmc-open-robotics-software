@@ -1,10 +1,10 @@
 package us.ihmc.graphics3DAdapter.graphics;
 
-public class GraphicsSynchronizer
+public class GraphicsConch
 {
    private static boolean createdOne = false;
    
-   public GraphicsSynchronizer()
+   public GraphicsConch()
    {
       if (createdOne)
       {
