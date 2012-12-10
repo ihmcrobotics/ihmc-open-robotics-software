@@ -94,7 +94,7 @@ public class CommonTerrain
          ArrayList<LinkGraphics> ret = new ArrayList<LinkGraphics>();
          
          LinkGraphics texturedGroundLinkGraphics = new LinkGraphics();
-         texturedGroundLinkGraphics.addHeightMap(groundProfile, YoAppearance.DarkGreen());
+         texturedGroundLinkGraphics.addHeightMap(groundProfile, 300, 300, YoAppearance.DarkGreen());
          ret.add(texturedGroundLinkGraphics);
          return ret;
       }
