@@ -11,8 +11,6 @@ import org.ejml.alg.dense.linsol.LinearSolverFactory;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.RandomMatrices;
 
-import us.ihmc.utilities.MechanismGeometricJacobian;
-import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.geometry.CenterOfMassReferenceFrame;
@@ -23,7 +21,7 @@ import us.ihmc.utilities.screwTheory.RevoluteJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTestTools;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
-import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
+import us.ihmc.utilities.screwTheory.SpatialForceVector;
 import us.ihmc.utilities.screwTheory.SpatialMotionVector;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 
@@ -62,7 +60,6 @@ public class MomentumSolverComparer
       long startNanos = System.nanoTime();
 
       Map<InverseDynamicsJoint, DenseMatrix64F> jointSpaceAccelerations = new HashMap<InverseDynamicsJoint, DenseMatrix64F>();
-      Map<MechanismGeometricJacobian, Pair<SpatialAccelerationVector, DenseMatrix64F>> taskSpaceAccelerations = new HashMap<MechanismGeometricJacobian, Pair<SpatialAccelerationVector,DenseMatrix64F>>();
       for (RevoluteJoint joint : joints)
       {
          DenseMatrix64F jointSpaceAcceleration = new DenseMatrix64F(joint.getDegreesOfFreedom(), 1);
@@ -71,15 +68,15 @@ public class MomentumSolverComparer
 
       for (int i = 0; i < nTests; i++)
       {
-         FrameVector desiredAngularCentroidalMomentumRate = new FrameVector(centerOfMassFrame, RandomTools.getRandomVector(random));
-         FrameVector desiredLinearCentroidalMomentumRate = new FrameVector(centerOfMassFrame, RandomTools.getRandomVector(random));
-
+         SpatialForceVector desiredMomentumRate = new SpatialForceVector(centerOfMassFrame, RandomTools.getRandomVector(random), RandomTools.getRandomVector(random));
          for (RevoluteJoint joint : joints)
          {
-            RandomMatrices.setRandom(jointSpaceAccelerations.get(joint), -1.0, 1.0, random);
+            DenseMatrix64F jointAcceleration = jointSpaceAccelerations.get(joint);
+            RandomMatrices.setRandom(jointAcceleration, -1.0, 1.0, random);
+            solver.setDesiredJointAcceleration(joint, jointAcceleration);
          }
-
-         solver.solve(desiredAngularCentroidalMomentumRate, desiredLinearCentroidalMomentumRate, jointSpaceAccelerations, taskSpaceAccelerations);
+         solver.setDesiredCentroidalMomentumRate(desiredMomentumRate);
+         solver.solve();
       }
 
       long stopNanos = System.nanoTime();

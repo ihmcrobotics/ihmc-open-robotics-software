@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.vecmath.Vector3d;
+
 import org.ejml.alg.dense.linsol.LinearSolver;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
@@ -16,23 +18,23 @@ import us.ihmc.utilities.MechanismGeometricJacobian;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.NullspaceCalculator;
-import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.CentroidalMomentumMatrix;
 import us.ihmc.utilities.screwTheory.DesiredJointAccelerationCalculator;
+import us.ihmc.utilities.screwTheory.DesiredJointAccelerationCalculatorOld;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.Momentum;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTools;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
+import us.ihmc.utilities.screwTheory.SpatialForceVector;
 import us.ihmc.utilities.screwTheory.Twist;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.MatrixYoVariableConversionTools;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 
 public class MomentumSolver
 {
@@ -73,9 +75,6 @@ public class MomentumSolver
    private final DenseMatrix64F previousCentroidalMomentumMatrix;
    private final DoubleYoVariable[][] yoPreviousCentroidalMomentumMatrix;    // to make numerical differentiation rewindable
 
-   private final YoFrameVector desiredLinearCentroidalMomentumRate;
-   private final YoFrameVector desiredAngularCentroidalMomentumRate;
-
    private final InverseDynamicsJoint[] jointsInOrder;
    private final List<InverseDynamicsJoint> jointsInOrderList;
    private final SixDoFJoint rootJoint;
@@ -83,6 +82,11 @@ public class MomentumSolver
    private final int[] columnsForRootJoint;
    private final int[] rows;
 
+   private final SpatialForceVector desiredCentroidalMomentumRate;
+   private final Map<InverseDynamicsJoint, DenseMatrix64F> jointSpaceAccelerations = new HashMap<InverseDynamicsJoint, DenseMatrix64F>();
+   private final Map<MechanismGeometricJacobian, Pair<SpatialAccelerationVector, DenseMatrix64F>> spatialAccelerations =
+      new HashMap<MechanismGeometricJacobian, Pair<SpatialAccelerationVector, DenseMatrix64F>>();
+   private final Vector3d nanVector = new Vector3d(Double.NaN, Double.NaN, Double.NaN);
 
    public MomentumSolver(SixDoFJoint rootJoint, RigidBody elevator, ReferenceFrame centerOfMassFrame, TwistCalculator twistCalculator,
                          LinearSolver<DenseMatrix64F> jacobianSolver, double controlDT, YoVariableRegistry parentRegistry)
@@ -101,6 +105,8 @@ public class MomentumSolver
 
       this.controlDT = controlDT;
 
+      desiredCentroidalMomentumRate = new SpatialForceVector(centerOfMassFrame);
+
       this.centroidalMomentumMatrix = new CentroidalMomentumMatrix(elevator, centerOfMassFrame);
       this.previousCentroidalMomentumMatrix = new DenseMatrix64F(centroidalMomentumMatrix.getMatrix().getNumRows(),
               centroidalMomentumMatrix.getMatrix().getNumCols());
@@ -117,9 +123,6 @@ public class MomentumSolver
       this.aTaskSpace = new DenseMatrix64F(rowDimension, rowDimension);
       this.vdotTaskSpace = new DenseMatrix64F(rowDimension, 1);
       this.cTaskSpace = new DenseMatrix64F(rowDimension, 1);
-
-      this.desiredLinearCentroidalMomentumRate = new YoFrameVector("desiredLinearCentroidalMomentumRate", "", centerOfMassFrame, registry);
-      this.desiredAngularCentroidalMomentumRate = new YoFrameVector("desiredAngularCentroidalMomentumRate", "", centerOfMassFrame, registry);
 
       yoPreviousCentroidalMomentumMatrix = new DoubleYoVariable[previousCentroidalMomentumMatrix.getNumRows()][previousCentroidalMomentumMatrix.getNumCols()];
       MatrixYoVariableConversionTools.populateYoVariables(yoPreviousCentroidalMomentumMatrix, "previousCMMatrix", registry);
@@ -144,16 +147,35 @@ public class MomentumSolver
       MatrixYoVariableConversionTools.storeInYoVariables(previousCentroidalMomentumMatrix, yoPreviousCentroidalMomentumMatrix);
    }
 
-   public void solve(FrameVector desiredAngularCentroidalMomentumRate, FrameVector desiredLinearCentroidalMomentumRate,
-                     Map<InverseDynamicsJoint, DenseMatrix64F> jointSpaceAccelerations,
-                     Map<MechanismGeometricJacobian, Pair<SpatialAccelerationVector, DenseMatrix64F>> taskSpaceAccelerations)
+   public void reset()
    {
-      checkFullyConstrained(jointSpaceAccelerations, taskSpaceAccelerations);
+      desiredCentroidalMomentumRate.setAngularPart(nanVector);
+      desiredCentroidalMomentumRate.setLinearPart(nanVector);
+      jointSpaceAccelerations.clear();
+      spatialAccelerations.clear();
+   }
+
+   public void setDesiredCentroidalMomentumRate(SpatialForceVector desiredCentroidalMomentumRate)
+   {
+      this.desiredCentroidalMomentumRate.set(desiredCentroidalMomentumRate);
+   }
+
+   public void setDesiredJointAcceleration(InverseDynamicsJoint joint, DenseMatrix64F jointAcceleration)
+   {
+      jointSpaceAccelerations.put(joint, jointAcceleration);
+   }
+
+   public void setDesiredSpatialAcceleration(MechanismGeometricJacobian jacobian,
+           Pair<SpatialAccelerationVector, DenseMatrix64F> spatialAccelerationAndNullspaceMultiplier)
+   {
+      spatialAccelerations.put(jacobian, spatialAccelerationAndNullspaceMultiplier);
+   }
+
+   public void solve()
+   {
+      checkFullyConstrained(jointSpaceAccelerations, spatialAccelerations);
       dMap.clear();
       jacobianInverseMap.clear();
-
-      this.desiredAngularCentroidalMomentumRate.set(desiredAngularCentroidalMomentumRate);
-      this.desiredLinearCentroidalMomentumRate.set(desiredLinearCentroidalMomentumRate);
 
       centroidalMomentumMatrix.compute();
       MatrixYoVariableConversionTools.getFromYoVariables(previousCentroidalMomentumMatrix, yoPreviousCentroidalMomentumMatrix);
@@ -161,26 +183,21 @@ public class MomentumSolver
               controlDT);
       MatrixYoVariableConversionTools.storeInYoVariables(previousCentroidalMomentumMatrix, yoPreviousCentroidalMomentumMatrix);
 
+      convertInternalSpatialAccelerationsToJointSpace(jointSpaceAccelerations, spatialAccelerations);
       initializeAHatRoot(aHatRoot, centroidalMomentumMatrix.getMatrix());
-      initializeB(b, desiredAngularCentroidalMomentumRate, desiredLinearCentroidalMomentumRate, centroidalMomentumMatrixDerivative, jointsInOrder);
+      initializeB(b, desiredCentroidalMomentumRate, centroidalMomentumMatrixDerivative, jointsInOrder);
       handleJointSpaceAccelerations(b, centroidalMomentumMatrix.getMatrix(), jointSpaceAccelerations);
-      handleTaskSpaceAccelerations(aHatRoot, b, dMap, centroidalMomentumMatrix.getMatrix(), taskSpaceAccelerations);
+      handleTaskSpaceAccelerations(aHatRoot, b, dMap, centroidalMomentumMatrix.getMatrix(), spatialAccelerations);
 
       solveAndSetRootJointAcceleration(vdotRoot, aHatRoot, b, rootJoint);
       solveAndSetJointspaceAccelerations(jointSpaceAccelerations);
       solveAndSetTaskSpaceAccelerations(vdotRoot, dMap, jacobianInverseMap);
    }
 
-   private void initializeB(DenseMatrix64F b, FrameVector desiredAngularCentroidalMomentumRate, FrameVector desiredLinearCentroidalMomentumRate,
-                            DenseMatrix64F centroidalMomentumMatrixDerivative, InverseDynamicsJoint[] jointsInOrder)
+   private void initializeB(DenseMatrix64F b, SpatialForceVector desiredCentroidalMomentumRate, DenseMatrix64F centroidalMomentumMatrixDerivative,
+                            InverseDynamicsJoint[] jointsInOrder)
    {
-      b.set(0, 0, desiredAngularCentroidalMomentumRate.getX());
-      b.set(1, 0, desiredAngularCentroidalMomentumRate.getY());
-      b.set(2, 0, desiredAngularCentroidalMomentumRate.getZ());
-      b.set(3, 0, desiredLinearCentroidalMomentumRate.getX());
-      b.set(4, 0, desiredLinearCentroidalMomentumRate.getY());
-      b.set(5, 0, desiredLinearCentroidalMomentumRate.getZ());
-
+      desiredCentroidalMomentumRate.packMatrix(b);
       ScrewTools.packJointVelocitiesMatrix(jointsInOrder, v);
       CommonOps.mult(centroidalMomentumMatrixDerivative, v, adotv);
       CommonOps.subEquals(b, adotv);
@@ -233,7 +250,7 @@ public class MomentumSolver
 
          if (nullity > 0)
          {
-            nullspaceCalculator.removeNullspaceComponent(jacobianInverse, jacobianInverse);
+            nullspaceCalculator.removeNullspaceComponent(jacobianInverse);
          }
 
          jacobianInverseMap.put(jacobian, jacobianInverse);
@@ -243,7 +260,7 @@ public class MomentumSolver
          extractMatrixBlock(aTaskSpace, centroidalMomentumMatrix, indices);
 
          // convectiveTerm
-         DesiredJointAccelerationCalculator desiredJointAccelerationCalculator = new DesiredJointAccelerationCalculator(jacobian, null);    // TODO: garbage
+         DesiredJointAccelerationCalculatorOld desiredJointAccelerationCalculator = new DesiredJointAccelerationCalculatorOld(jacobian, null);    // TODO: garbage
          desiredJointAccelerationCalculator.computeJacobianDerivativeTerm(convectiveTerm);
          twistCalculator.packRelativeTwist(twistOfCurrentWithRespectToNew, rootJointSuccessor, jacobian.getEndEffector());
          convectiveTerm.changeFrame(rootJointSuccessor.getBodyFixedFrame(), twistOfCurrentWithRespectToNew, twistOfCurrentWithRespectToNew);
@@ -262,8 +279,7 @@ public class MomentumSolver
 
          if (nullity > 0)
          {
-            DenseMatrix64F nullspace = nullspaceCalculator.getNullspace();
-            CommonOps.multAdd(nullspace, nullspaceMultiplier, d);
+            nullspaceCalculator.addNullspaceComponent(d, nullspaceMultiplier);
          }
 
          dMap.put(jacobian, d);
@@ -331,6 +347,57 @@ public class MomentumSolver
 
       if (!allJoints.containsAll(jointsInOrderList))
          throw new RuntimeException("Not correctly constrained");
+   }
+
+   private void convertInternalSpatialAccelerationsToJointSpace(Map<InverseDynamicsJoint, DenseMatrix64F> jointSpaceAccelerations,
+           Map<MechanismGeometricJacobian, Pair<SpatialAccelerationVector, DenseMatrix64F>> spatialAccelerations)
+   {
+      for (MechanismGeometricJacobian jacobian : spatialAccelerations.keySet())
+      {
+         Pair<SpatialAccelerationVector, DenseMatrix64F> pair = spatialAccelerations.get(jacobian);
+         SpatialAccelerationVector spatialAcceleration = pair.first();
+         ReferenceFrame baseFrame = spatialAcceleration.getBaseFrame();
+         boolean isWithRespectToWorld = baseFrame == rootJoint.getPredecessor().getBodyFixedFrame();
+         if (!isWithRespectToWorld)
+         {
+            if (baseFrame == jacobian.getBaseFrame())
+            {
+               // convert to joint space accelerations
+               DesiredJointAccelerationCalculator desiredJointAccelerationCalculator = new DesiredJointAccelerationCalculator(jacobian, jacobianSolver);
+               jacobian.compute();
+               desiredJointAccelerationCalculator.compute(spatialAcceleration);
+
+               DenseMatrix64F jointAccelerations = new DenseMatrix64F(jacobian.getNumberOfColumns(), 1);
+               ScrewTools.packDesiredJointAccelerationsMatrix(jacobian.getJointsInOrder(), jointAccelerations);
+
+               DenseMatrix64F nullspaceMultipliers = pair.second();
+               int nullity = nullspaceMultipliers.getNumCols();
+
+               if (nullity > 0)
+               {
+                  nullspaceCalculator.setMatrix(jacobian.getJacobianMatrix(), nullity);
+                  nullspaceCalculator.removeNullspaceComponent(jointAccelerations);
+                  nullspaceCalculator.addNullspaceComponent(jointAccelerations, nullspaceMultipliers);
+               }
+
+               int index = 0;
+               for (InverseDynamicsJoint joint : jacobian.getJointsInOrder())
+               {
+                  DenseMatrix64F jointAcceleration = new DenseMatrix64F(joint.getDegreesOfFreedom(), 1);
+                  int degreesOfFreedom = joint.getDegreesOfFreedom();
+                  CommonOps.extract(jointAccelerations, index, index + degreesOfFreedom, 0, 1, jointAcceleration, 0, 0);
+                  jointSpaceAccelerations.put(joint, jointAcceleration);
+                  index += degreesOfFreedom;
+               }
+
+               spatialAccelerations.remove(jacobian);
+            }
+            else
+            {
+               throw new RuntimeException("Case not yet implemented");
+            }
+         }
+      }
    }
 
    private void initializeAHatRoot(DenseMatrix64F aHatRoot, DenseMatrix64F centroidalMomentumMatrix)
