@@ -35,7 +35,7 @@ public interface Graphics3DAdapter
    
    public void setBackgroundColor(Color3f color);
 
-   public void setBackgroundImage(URL fileURL, int imageScaleMode);
+   public void setBackgroundImage(URL fileURL, Graphics3DBackgroundScaleMode backgroundScaleMode);
 
    public void setGroundAppearance(YoAppearanceDefinition app);
 }
