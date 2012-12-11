@@ -134,7 +134,7 @@ public class JOptimizerConvexOptimizationAdapter implements ConvexOptimizationAd
       throw new RuntimeException("Not yet implemented");
    }
 
-   public void addSecondOrderConeConstraints(double[][] secondOrderConeAMatrix, double[] secondOrderConeBVector, double[] secondOrderConeCVector,
+   public void addSecondOrderConeConstraints(double[][] secondOrderConeAMatrix, double secondOrderConeBScalar, double[] secondOrderConeCVector,
          double secondOrderConeDScalar)
    {
       throw new RuntimeException("Not yet implemented");      

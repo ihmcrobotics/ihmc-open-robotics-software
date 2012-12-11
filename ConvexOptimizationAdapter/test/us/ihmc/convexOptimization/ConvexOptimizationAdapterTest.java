@@ -2,12 +2,19 @@ package us.ihmc.convexOptimization;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.ArrayList;
+
 import org.junit.Ignore;
 import org.junit.Test;
 
 import com.joptimizer.functions.ConvexMultivariateRealFunction;
 import com.joptimizer.functions.LinearMultivariateRealFunction;
 import com.joptimizer.functions.QuadraticMultivariateRealFunction;
+import com.joptimizer.functions.SOCPLogarithmicBarrier;
+import com.joptimizer.functions.SOCPLogarithmicBarrier.SOCPConstraintParameters;
+import com.joptimizer.optimizers.BarrierMethod;
+import com.joptimizer.optimizers.OptimizationRequest;
+import com.joptimizer.optimizers.OptimizationResponse;
 
 public abstract class ConvexOptimizationAdapterTest
 {
@@ -151,6 +158,33 @@ public abstract class ConvexOptimizationAdapterTest
       
       assertEquals(1.0/2.0 * (-1.0 - Math.sqrt(17.0)), solution[0], 1e-5);
       assertEquals(1.0/2.0 * (9.0 + Math.sqrt(17.0)), solution[1], 1e-5);
+   }
+   
+   
+   @Test
+   public void testASecondOrderLorenzConeProblemUsingSOCP() throws Exception
+   {
+      // Minimize -(x + y) subject to z <= sqrt(18) and sqrt(x^2 + y^2) <= z. Answer should be (3, 3, sqrt(18))
+      ConvexOptimizationAdapter convexOptimizationAdapter = createConvexOptimizationAdapter();
+      convexOptimizationAdapter.setLinearCostFunctionVector(new double[]{-1.0, -1.0, 0.0});
+
+      double[][] secondOrderConeAMatrix = new double[][]{{1.0, 0.0, 0.0}, {0.0, 1.0, 0.0}, {0.0, 0.0, 0.0}};
+      double secondOrderConeBScalar = 0.0;
+      double[] secondOrderConeCVector = new double[]{0.0, 0.0, 1.0};
+      double secondOrderConeDScalar = 0.0;
+      
+      convexOptimizationAdapter.addSecondOrderConeConstraints(secondOrderConeAMatrix, secondOrderConeBScalar, secondOrderConeCVector, secondOrderConeDScalar);
+
+      // inequalities
+      convexOptimizationAdapter.setLinearInequalityConstraints(new double[][]{{0.0, 0.0, 1.0}}, new double[]{Math.sqrt(18.0)}); // z <= sqrt(18.0)
+
+      double[] solution = convexOptimizationAdapter.solve();
+
+//      if (VERBOSE) System.out.println("solution = (" + solution[0] + ", " + solution[1] + ", " + solution[2] + ")");
+
+      assertEquals(3.0, solution[0], 1e-5);
+      assertEquals(3.0, solution[1], 1e-5);
+      assertEquals(Math.sqrt(18.0), solution[2], 1e-5);
    }
 
 }
