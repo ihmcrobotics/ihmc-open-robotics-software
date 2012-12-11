@@ -128,6 +128,17 @@ public class JOptimizerConvexOptimizationAdapter implements ConvexOptimizationAd
    public void dispose()
    {
    }
+
+   public void addQuadraticInequalities(double[][] pMatrix, double[] qVector, double r)
+   {
+      throw new RuntimeException("Not yet implemented");
+   }
+
+   public void addSecondOrderConeConstraints(double[][] secondOrderConeAMatrix, double[] secondOrderConeBVector, double[] secondOrderConeCVector,
+         double secondOrderConeDScalar)
+   {
+      throw new RuntimeException("Not yet implemented");      
+   }
    
 }
 
