@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
 
 import us.ihmc.graphics3DAdapter.NodeType;
 import us.ihmc.graphics3DAdapter.SelectedListener;
@@ -90,12 +91,14 @@ public class Graphics3DNode
       return nodeType;
    }
 
-   public void notifySelectedListeners(String modifierKey, Point3d location)
+   public void notifySelectedListeners(int[] modifierKeys, Point3d location, Point3d cameraPosition, Vector3d lookAtDirection)
    {
       for(SelectedListener selectedListener : selectedListeners)
       {
-         selectedListener.selected(this, modifierKey, location);
+         selectedListener.selected(this, modifierKeys, location, cameraPosition, lookAtDirection);
       }
+      
+      graphicsObject.notifySelectedListeners(this, modifierKeys, location, cameraPosition, lookAtDirection);
    }
    
    public void addSelectedListener(SelectedListener selectedListener)

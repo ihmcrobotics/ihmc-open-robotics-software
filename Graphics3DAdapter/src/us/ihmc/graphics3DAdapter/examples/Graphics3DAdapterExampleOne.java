@@ -6,6 +6,7 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Random;
 
 import javax.media.j3d.Transform3D;
@@ -19,6 +20,7 @@ import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
 import us.ihmc.graphics3DAdapter.NodeType;
 import us.ihmc.graphics3DAdapter.SelectedListener;
 import us.ihmc.graphics3DAdapter.camera.CameraAdapter;
+import us.ihmc.graphics3DAdapter.camera.CameraTrackAndDollyVariablesHolder;
 import us.ihmc.graphics3DAdapter.graphics.LinkGraphics;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceRGBColor;
@@ -28,6 +30,64 @@ import us.ihmc.utilities.ThreadTools;
 
 public class Graphics3DAdapterExampleOne
 {
+   private CameraTrackAndDollyVariablesHolder cameraTrackAndDollyVariablesHolder = new CameraTrackAndDollyVariablesHolder()
+   {
+      
+      public double getTrackZVar()
+      {
+         // TODO Auto-generated method stub
+         return 0;
+      }
+      
+      public double getTrackYVar()
+      {
+         // TODO Auto-generated method stub
+         return 0;
+      }
+      
+      public double getTrackXVar()
+      {
+         // TODO Auto-generated method stub
+         return 0;
+      }
+      
+      public double getFieldOfViewVar()
+      {
+         // TODO Auto-generated method stub
+         return Double.NaN;
+      }
+      
+      public double getDollyZVar()
+      {
+         // TODO Auto-generated method stub
+         return 0;
+      }
+      
+      public double getDollyYVar()
+      {
+         // TODO Auto-generated method stub
+         return 0;
+      }
+      
+      public double getDollyXVar()
+      {
+         // TODO Auto-generated method stub
+         return 0;
+      }
+      
+      public void getCameraTrackVariable(Point3d trackPositionToPack)
+      {
+         // TODO Auto-generated method stub
+         
+      }
+      
+      public void getCameraDollyVariable(Point3d trackPositionToPack)
+      {
+         // TODO Auto-generated method stub
+         
+      }
+   };
+
    public void doExampleOne(Graphics3DAdapter adapter)
    {
       Graphics3DNode teapotAndSphereNode = new Graphics3DNode("teaPot", NodeType.JOINT);
@@ -43,19 +103,21 @@ public class Graphics3DAdapterExampleOne
       box.setGraphicsObject(boxGraphics);
       adapter.addRootNode(box);
 
-      CameraAdapter camera = adapter.createNewCamera(null, null, null, null, null, null);
+      CameraAdapter camera = adapter.createNewCamera(cameraTrackAndDollyVariablesHolder, null, null);
       Canvas canvas = camera.getCanvas();
       createNewWindow(canvas);
       
-      CameraAdapter secondCamera = adapter.createNewCamera(null, null, null, null, null, null);
+      CameraAdapter secondCamera = adapter.createNewCamera(cameraTrackAndDollyVariablesHolder, null, null);
       createNewWindow(secondCamera.getCanvas());
       
       
       SelectedListener selectedListener = new SelectedListener()
       {
-         public void selected(Graphics3DNode graphics3dNode, String modifierKey, Point3d location)
+
+
+         public void selected(Graphics3DNode graphics3dNode, int[] modifierKeys, Point3d location, Point3d cameraLocation, Vector3d lookAtDirection)
          {
-            System.out.println("Selected " + graphics3dNode.getName() + " @ location " + location);            
+            System.out.println("Selected " + graphics3dNode.getName() + " @ location " + location);                        
          }
       };
       
@@ -111,8 +173,22 @@ public class Graphics3DAdapterExampleOne
       rootNode.addChild(node2);
       
       adapter.addRootNode(rootNode);
+      
+      SelectedListener selectedListener = new SelectedListener()
+      {
 
-      CameraAdapter camera = adapter.createNewCamera(null, null, null, null, null, null);
+
+         public void selected(Graphics3DNode graphics3dNode, int[] modifierKeys, Point3d location, Point3d cameraLocation, Vector3d lookAtDirection)
+         {
+            System.out.println("Selected " + graphics3dNode.getName() + " @ location " + location + ", modifierKeys : " + Arrays.toString(modifierKeys));                        
+         }
+      };
+      
+      
+      adapter.addSelectedListener(selectedListener);
+      node2.addSelectedListener(selectedListener);
+
+      CameraAdapter camera = adapter.createNewCamera(cameraTrackAndDollyVariablesHolder, null, null);
       Canvas canvas = camera.getCanvas();
       JPanel panel = new JPanel(new BorderLayout());
       panel.add("Center", canvas);

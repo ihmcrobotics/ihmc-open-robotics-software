@@ -13,6 +13,7 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.graphics3DAdapter.HeightMap;
+import us.ihmc.graphics3DAdapter.SelectedListener;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.instructions.LinkGraphicsAddArcTorus;
@@ -41,6 +42,7 @@ import us.ihmc.graphics3DAdapter.graphics.instructions.LinkGraphicsRotate;
 import us.ihmc.graphics3DAdapter.graphics.instructions.LinkGraphicsRotateMatrix;
 import us.ihmc.graphics3DAdapter.graphics.instructions.LinkGraphicsScale;
 import us.ihmc.graphics3DAdapter.graphics.instructions.LinkGraphicsTranslate;
+import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
 import us.ihmc.utilities.InertiaTools;
 
 /**
@@ -67,6 +69,8 @@ public class LinkGraphics
    public static final Axis Z = Axis.Z;
    
    private ArrayList<LinkGraphicsPrimitiveInstruction> linkGraphicsInstructions;
+   
+   private final ArrayList<SelectedListener> selectedListeners = new ArrayList<SelectedListener>();
 
    public LinkGraphics(ArrayList<LinkGraphicsPrimitiveInstruction> linkGraphicsInstructions)
    {
@@ -1011,22 +1015,11 @@ public class LinkGraphics
    }
 
 
-   
-//   /*
-//    * J3D transition stuff
-//    */
-//   private J3DLinkGraphics j3dLinkGraphics = null;
-//   public SharedGroup getSharedGroup()
-//   {
-//      if(j3dLinkGraphics == null)
-//         j3dLinkGraphics = new J3DLinkGraphics(this);
-//      
-//      return j3dLinkGraphics.getSharedGroup();
-//   }
-//   
-//   public void updateGraphics()
-//   {
-//      if(j3dLinkGraphics != null)
-//         j3dLinkGraphics.updateGraphics();
-//   }
+   public void notifySelectedListeners(Graphics3DNode graphics3dNode, int[] modifierKeys, Point3d location, Point3d cameraPosition, Vector3d lookAtDirection)
+   {
+      for(SelectedListener selectedListener : selectedListeners)
+      {
+         selectedListener.selected(graphics3dNode, modifierKeys, location, cameraPosition, lookAtDirection);
+      }
+   }
 }

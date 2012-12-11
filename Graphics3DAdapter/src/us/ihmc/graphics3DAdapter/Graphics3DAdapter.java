@@ -8,8 +8,6 @@ import javax.vecmath.Color3f;
 import us.ihmc.graphics3DAdapter.camera.CameraAdapter;
 import us.ihmc.graphics3DAdapter.camera.CameraTrackAndDollyVariablesHolder;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceDefinition;
-import us.ihmc.graphics3DAdapter.holders.Clicked3DPointListenersHolder;
-import us.ihmc.graphics3DAdapter.holders.ClickedPickableObjectListenersHolder;
 import us.ihmc.graphics3DAdapter.holders.NavigatingCameraHolder;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
 
@@ -19,8 +17,7 @@ public interface Graphics3DAdapter
    public void removeRootNode(Graphics3DNode rootNode);
    
    public CameraAdapter createNewCamera(CameraTrackAndDollyVariablesHolder cameraTrackAndDollyYoVariablesHolder, GraphicsDevice graphicsDevice,
-         NavigatingCameraHolder navigatingCameraHolder, Clicked3DPointListenersHolder clicked3dPointForReleaseListenersHolder,
-         ClickedPickableObjectListenersHolder clickedPickableObjectListenersHolder, Clicked3DPointListenersHolder clicked3DPointForReleaseListenersHolder);
+         NavigatingCameraHolder navigatingCameraHolder);
    
    public void setHeightMap(HeightMap heightMap);
    
