@@ -16,5 +16,5 @@ public interface SelectedListener
     * @param cameraLocation camera position
     * @param lookAtDirection camera view direction
     */
-   public void selected(Graphics3DNode graphics3dNode, int[] modifierKeys, Point3d location, Point3d cameraLocation, Vector3d lookAtDirection);
+   public void selected(Graphics3DNode graphics3dNode, ModifierKeyHolder modifierKeyHolder, Point3d location, Point3d cameraLocation, Vector3d lookAtDirection);
 }

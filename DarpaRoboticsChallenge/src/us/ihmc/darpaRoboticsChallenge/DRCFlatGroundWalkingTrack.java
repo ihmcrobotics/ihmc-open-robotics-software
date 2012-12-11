@@ -96,7 +96,7 @@ public class DRCFlatGroundWalkingTrack
       drcSimulation.addAdditionalYoVariableRegistriesToSCS(registry);
 
       // attach release listener
-      simulationConstructionSet.attachClicked3DPointForReleaseListener(selectedListener);
+      simulationConstructionSet.attachSelectedListener(selectedListener);
       setUpDemoButtons(simulationConstructionSet);
 
       simulationConstructionSet.setCameraPosition(6.0, -2.0, 4.5);

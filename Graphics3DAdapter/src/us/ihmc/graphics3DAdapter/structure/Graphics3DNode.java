@@ -8,6 +8,7 @@ import javax.media.j3d.Transform3D;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.graphics3DAdapter.ModifierKeyHolder;
 import us.ihmc.graphics3DAdapter.NodeType;
 import us.ihmc.graphics3DAdapter.SelectedListener;
 import us.ihmc.graphics3DAdapter.graphics.LinkGraphics;
@@ -91,7 +92,7 @@ public class Graphics3DNode
       return nodeType;
    }
 
-   public void notifySelectedListeners(int[] modifierKeys, Point3d location, Point3d cameraPosition, Vector3d lookAtDirection)
+   public void notifySelectedListeners(ModifierKeyHolder modifierKeys, Point3d location, Point3d cameraPosition, Vector3d lookAtDirection)
    {
       for(SelectedListener selectedListener : selectedListeners)
       {
