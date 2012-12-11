@@ -2,14 +2,16 @@ package com.yobotics.simulationconstructionset.util.environments;
 
 import static org.junit.Assert.assertEquals;
 
-import java.awt.event.MouseEvent;
 import java.util.Random;
 
 import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
 
 import org.junit.Test;
 
-import us.ihmc.graphics3DAdapter.holders.Clicked3DPointListener;
+import us.ihmc.graphics3DAdapter.ModifierKeyHolder;
+import us.ihmc.graphics3DAdapter.SelectedListener;
+import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
 
 import com.yobotics.simulationconstructionset.DoNothingController;
 import com.yobotics.simulationconstructionset.GroundContactModel;
@@ -171,18 +173,14 @@ public class SimpleCombinedTerrainObjectEnvinronmentTest
 
          scs.setGroundVisible(false);
 
-         scs.attachClicked3DPointListener(new Clicked3DPointListener()
+         scs.attachSelectedListener(new SelectedListener()
          {
-            
-            public void clicked3DPoint(MouseEvent mouseEvent, Point3d pointClicked, Point3d cameraPosition, Point3d fixPosition)
-            {
-               if (mouseEvent.getButton() == MouseEvent.BUTTON3)
-               {
-                  System.out.println("Clicked on Point " + pointClicked);
-               }
+            public void selected(Graphics3DNode graphics3dNode, ModifierKeyHolder modifierKeyHolder, Point3d location, Point3d cameraLocation,
+                  Vector3d lookAtDirection)
+            {              
+               System.out.println("Clicked on Point " + location);
             }
          });
-         
          
          scs.startOnAThread();
          

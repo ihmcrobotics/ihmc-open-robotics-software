@@ -13,6 +13,7 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.graphics3DAdapter.HeightMap;
+import us.ihmc.graphics3DAdapter.ModifierKeyHolder;
 import us.ihmc.graphics3DAdapter.SelectedListener;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceDefinition;
@@ -1015,11 +1016,11 @@ public class LinkGraphics
    }
 
 
-   public void notifySelectedListeners(Graphics3DNode graphics3dNode, int[] modifierKeys, Point3d location, Point3d cameraPosition, Vector3d lookAtDirection)
+   public void notifySelectedListeners(Graphics3DNode graphics3dNode, ModifierKeyHolder modifierKeyHolder, Point3d location, Point3d cameraPosition, Vector3d lookAtDirection)
    {
       for(SelectedListener selectedListener : selectedListeners)
       {
-         selectedListener.selected(graphics3dNode, modifierKeys, location, cameraPosition, lookAtDirection);
+         selectedListener.selected(graphics3dNode, modifierKeyHolder, location, cameraPosition, lookAtDirection);
       }
    }
 }

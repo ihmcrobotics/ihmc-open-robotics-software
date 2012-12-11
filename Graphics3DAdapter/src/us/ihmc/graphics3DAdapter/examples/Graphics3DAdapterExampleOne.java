@@ -6,7 +6,6 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Random;
 
 import javax.media.j3d.Transform3D;
@@ -17,6 +16,7 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
+import us.ihmc.graphics3DAdapter.ModifierKeyHolder;
 import us.ihmc.graphics3DAdapter.NodeType;
 import us.ihmc.graphics3DAdapter.SelectedListener;
 import us.ihmc.graphics3DAdapter.camera.CameraAdapter;
@@ -114,10 +114,11 @@ public class Graphics3DAdapterExampleOne
       SelectedListener selectedListener = new SelectedListener()
       {
 
-
-         public void selected(Graphics3DNode graphics3dNode, int[] modifierKeys, Point3d location, Point3d cameraLocation, Vector3d lookAtDirection)
+         public void selected(Graphics3DNode graphics3dNode, ModifierKeyHolder modifierKeyHolder, Point3d location, Point3d cameraLocation,
+               Vector3d lookAtDirection)
          {
             System.out.println("Selected " + graphics3dNode.getName() + " @ location " + location);                        
+            
          }
       };
       
@@ -176,11 +177,11 @@ public class Graphics3DAdapterExampleOne
       
       SelectedListener selectedListener = new SelectedListener()
       {
-
-
-         public void selected(Graphics3DNode graphics3dNode, int[] modifierKeys, Point3d location, Point3d cameraLocation, Vector3d lookAtDirection)
+         public void selected(Graphics3DNode graphics3dNode, ModifierKeyHolder modifierKeyHolder, Point3d location, Point3d cameraLocation,
+               Vector3d lookAtDirection)
          {
-            System.out.println("Selected " + graphics3dNode.getName() + " @ location " + location + ", modifierKeys : " + Arrays.toString(modifierKeys));                        
+            System.out.println("Selected " + graphics3dNode.getName() + " @ location " + location);                        
+            
          }
       };
       
