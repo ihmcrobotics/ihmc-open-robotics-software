@@ -3,11 +3,12 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.vecmath.Matrix3d;
+import javax.vecmath.Vector3d;
 
 import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.MatrixFeatures;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.DesiredCoPAndCMPControlModule;
@@ -23,13 +24,16 @@ import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelHumanoidController;
 import us.ihmc.commonWalkingControlModules.kinematics.SpatialAccelerationProjector;
 import us.ihmc.commonWalkingControlModules.outputs.ProcessedOutputsInterface;
-import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LimbName;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
+import us.ihmc.utilities.MechanismGeometricJacobian;
+import us.ihmc.utilities.Pair;
+import us.ihmc.utilities.math.DampedLeastSquaresSolver;
 import us.ihmc.utilities.math.MathTools;
+import us.ihmc.utilities.math.geometry.AngleTools;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameLine2d;
 import us.ihmc.utilities.math.geometry.FrameLineSegment2d;
@@ -51,6 +55,8 @@ import us.ihmc.utilities.screwTheory.RevoluteJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTools;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
+import us.ihmc.utilities.screwTheory.SpatialForceVector;
+import us.ihmc.utilities.screwTheory.SpatialMotionVector;
 import us.ihmc.utilities.screwTheory.TotalMassCalculator;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 import us.ihmc.utilities.screwTheory.Wrench;
@@ -87,7 +93,7 @@ public class MomentumBasedController implements RobotController
    private final double totalMass;
 
    private final HighLevelHumanoidController highLevelHumanoidController;
-   private final BipedMomentumOptimizer optimizer;
+   private final MomentumSolver solver;
 
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final FullRobotModel fullRobotModel;
@@ -124,6 +130,7 @@ public class MomentumBasedController implements RobotController
    private final BooleanYoVariable rightInSingularRegion = new BooleanYoVariable("rightInSingularRegion", registry);
    private final SideDependentList<BooleanYoVariable> inSingularRegions = new SideDependentList<BooleanYoVariable>(leftInSingularRegion, rightInSingularRegion);
 
+   private final SpatialForceVector gravitationalWrench;
 
    public MomentumBasedController(FullRobotModel fullRobotModel, ProcessedOutputsInterface processedOutputs, double gravityZ,
                                   CommonWalkingReferenceFrames referenceFrames, TwistCalculator twistCalculator, double controlDT,
@@ -194,7 +201,11 @@ public class MomentumBasedController implements RobotController
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
       this.totalMass = TotalMassCalculator.computeSubTreeMass(elevator);
 
-      optimizer = new BipedMomentumOptimizer(fullRobotModel, referenceFrames.getCenterOfMassFrame(), controlDT, twistCalculator, registry, 3e-2, 5e-2);
+      gravitationalWrench = new SpatialForceVector(centerOfMassFrame, new Vector3d(0.0, 0.0, totalMass * gravityZ), new Vector3d());
+
+      DampedLeastSquaresSolver jacobianSolver = new DampedLeastSquaresSolver(SpatialMotionVector.SIZE);
+      jacobianSolver.setAlpha(5e-2);
+      solver = new MomentumSolver(fullRobotModel.getRootJoint(), elevator, centerOfMassFrame, twistCalculator, jacobianSolver, controlDT, registry);
 
       this.desiredPelvisLinearAcceleration = new YoFrameVector("desiredPelvisLinearAcceleration", "", referenceFrames.getPelvisFrame(), registry);
       this.desiredPelvisAngularAcceleration = new YoFrameVector("desiredPelvisAngularAcceleration", "", referenceFrames.getPelvisFrame(), registry);
@@ -236,7 +247,7 @@ public class MomentumBasedController implements RobotController
 
    public void initialize()
    {
-      optimizer.initialize();
+      solver.initialize();
       FramePoint centerOfMass = computeCenterOfMass();
       FrameVector centerOfMassVelocity = computeCenterOfMassVelocity();
       FramePoint2d capturePoint = CapturePointCalculator.computeCapturePoint(centerOfMass, centerOfMassVelocity, omega0.getDoubleValue());
@@ -360,41 +371,59 @@ public class MomentumBasedController implements RobotController
 
       Wrench totalGroundReactionWrench = computeTotalGroundReactionWrench(groundReactionWrenches);
 
-      FrameVector desiredAngularCentroidalMomentumRate = new FrameVector(totalGroundReactionWrench.getExpressedInFrame(),
-                                                            totalGroundReactionWrench.getAngularPartCopy());
-      FrameVector desiredLinearCentroidalMomentumRate = new FrameVector(totalGroundReactionWrench.getExpressedInFrame(),
-                                                           totalGroundReactionWrench.getLinearPartCopy());
-      desiredLinearCentroidalMomentumRate.setZ(desiredLinearCentroidalMomentumRate.getZ() - gravityZ * totalMass);
+      SpatialForceVector desiredCentroidalMomentumRate = new SpatialForceVector(totalGroundReactionWrench);
+      desiredCentroidalMomentumRate.sub(gravitationalWrench);
 
-      for (RobotSide robotSide : RobotSide.values())
+//      for (RobotSide robotSide : RobotSide.values())
+//      {
+//       // TODO: get rid of this
+//       boolean isSwingLeg = supportLeg == robotSide.getOppositeSide();
+//       double maxKneeAngle = 0.4;
+//       boolean leavingKneeLockRegion = optimizer.leavingSingularRegion(robotSide, LimbName.LEG)
+//                                       && (fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE).getQ() < maxKneeAngle);    // TODO: hack
+//       boolean trajectoryInitialized = highLevelHumanoidController.trajectoryInitialized(robotSide);
+//
+//       BooleanYoVariable inSingularRegion = inSingularRegions.get(robotSide);
+//       inSingularRegion.set(optimizer.inSingularRegion(robotSide, LimbName.LEG));
+//
+//       // if ((supportLeg == robotSide.getOppositeSide()) &&!optimizer.inSingularRegion(robotSide) &&!stateMachine.trajectoryInitialized(robotSide))
+//       if (isSwingLeg && (leavingKneeLockRegion || (!inSingularRegion.getBooleanValue() &&!trajectoryInitialized)))
+//       {
+//          SpatialAccelerationVector taskSpaceAcceleration = new SpatialAccelerationVector();
+//
+////        optimizer.computeMatchingNondegenerateTaskSpaceAcceleration(robotSide, LimbName.LEG, taskSpaceAcceleration);
+//          highLevelHumanoidController.initializeTrajectory(robotSide, taskSpaceAcceleration);
+//       }
+//      }
+
+      solver.reset();
+      solver.setDesiredCentroidalMomentumRate(desiredCentroidalMomentumRate);
+
+
+
+
+      HashMap<InverseDynamicsJoint, DenseMatrix64F> jointAccelerations = highLevelHumanoidController.getJointAccelerations();
+      for (InverseDynamicsJoint joint : jointAccelerations.keySet())
       {
-         // TODO: get rid of this
-         boolean isSwingLeg = supportLeg == robotSide.getOppositeSide();
-         double maxKneeAngle = 0.4;
-         boolean leavingKneeLockRegion = optimizer.leavingSingularRegion(robotSide, LimbName.LEG)
-                                         && (fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE).getQ() < maxKneeAngle);    // TODO: hack
-         boolean trajectoryInitialized = highLevelHumanoidController.trajectoryInitialized(robotSide);
+         solver.setDesiredJointAcceleration(joint, jointAccelerations.get(joint));
+      }
 
-         BooleanYoVariable inSingularRegion = inSingularRegions.get(robotSide);
-         inSingularRegion.set(optimizer.inSingularRegion(robotSide, LimbName.LEG));
 
-         // if ((supportLeg == robotSide.getOppositeSide()) &&!optimizer.inSingularRegion(robotSide) &&!stateMachine.trajectoryInitialized(robotSide))
-         if (isSwingLeg && (leavingKneeLockRegion || (!inSingularRegion.getBooleanValue() &&!trajectoryInitialized)))
+
+
+      Map<MechanismGeometricJacobian, Pair<SpatialAccelerationVector, DenseMatrix64F>> taskAccelerations = highLevelHumanoidController.getTaskAccelerations();
+
+      for (MechanismGeometricJacobian jacobian : taskAccelerations.keySet())
+      {
+         Pair<SpatialAccelerationVector, DenseMatrix64F> pair = taskAccelerations.get(jacobian);
+         SpatialAccelerationVector spatialAcceleration = pair.first();
+
+         // TODO: get rid of this:
+         for (RobotSide robotSide : RobotSide.values())
          {
-            SpatialAccelerationVector taskSpaceAcceleration = new SpatialAccelerationVector();
-            optimizer.computeMatchingNondegenerateTaskSpaceAcceleration(robotSide, LimbName.LEG, taskSpaceAcceleration);
-            highLevelHumanoidController.initializeTrajectory(robotSide, taskSpaceAcceleration);
-         }
-
-         for (LimbName limbName : LimbName.values())
-         {
-            SpatialAccelerationVector desiredEndEffectorAccelerationInWorld = desiredEndEffectorAccelerationsInWorld.get(robotSide).get(limbName);
-            desiredEndEffectorAccelerationInWorld.set(highLevelHumanoidController.getEndEffectorAcceleration(robotSide, limbName));
-
-            // TODO: get rid of this:
-            if (limbName == LimbName.LEG)
+            RigidBody foot = fullRobotModel.getFoot(robotSide);
+            if (jacobian.getEndEffectorFrame() == foot.getBodyFixedFrame())
             {
-               RigidBody foot = fullRobotModel.getEndEffector(robotSide, limbName);
                List<FramePoint> footContactPoints = highLevelHumanoidController.getContactPoints(foot);
 
                if (footContactPoints.size() > 0)
@@ -412,22 +441,21 @@ public class MomentumBasedController implements RobotController
 
                   if (isCoPOnEdge)
                   {
-                     spatialAccelerationProjectors.get(robotSide).projectAcceleration(desiredEndEffectorAccelerationInWorld, closestEdge);
+                     spatialAccelerationProjectors.get(robotSide).projectAcceleration(spatialAcceleration, closestEdge);
                   }
                   else
                   {
                      // use zero angular acceleration and zero linear acceleration of origin
-                     desiredEndEffectorAccelerationInWorld.set(
+                     spatialAcceleration.set(
                          footPoseTwistAndSpatialAccelerationCalculators.get(robotSide).calculateDesiredEndEffectorSpatialAccelerationFromDesiredAccelerations(
                             new FrameVector(worldFrame), new FrameVector(worldFrame), fullRobotModel.getElevator()));
+                     spatialAcceleration.changeFrameNoRelativeMotion(foot.getBodyFixedFrame());
+                     spatialAcceleration.changeBodyFrameNoRelativeAcceleration(foot.getBodyFixedFrame());
                   }
                }
             }
-
-            optimizer.setControlMode(robotSide, limbName, highLevelHumanoidController.getControlMode(robotSide, limbName));
-            optimizer.setDesiredEndEffectorAccelerationInWorld(robotSide, limbName, desiredEndEffectorAccelerationInWorld);
-            optimizer.setNullspaceMultiplier(robotSide, limbName, highLevelHumanoidController.getNullspaceMultiplier(robotSide, limbName));
          }
+         solver.setDesiredSpatialAcceleration(jacobian, pair);
       }
 
       for (RobotSide robotSide : RobotSide.values)
@@ -436,15 +464,7 @@ public class MomentumBasedController implements RobotController
          inverseDynamicsCalculator.setExternalWrench(fullRobotModel.getHand(robotSide), handWrench);
       }
 
-      HashMap<InverseDynamicsJoint, DenseMatrix64F> jointAccelerations = highLevelHumanoidController.getJointAccelerations();
-      for (InverseDynamicsJoint joint : jointAccelerations.keySet())
-      {
-         DenseMatrix64F jointAcceleration = jointAccelerations.get(joint);
-         if (!MatrixFeatures.hasNaN(jointAcceleration))
-            joint.setDesiredAcceleration(jointAcceleration, 0);
-      }
-
-      optimizer.solveForRootJointAcceleration(desiredAngularCentroidalMomentumRate, desiredLinearCentroidalMomentumRate);
+      solver.solve();
    }
 
    private Wrench computeTotalGroundReactionWrench(HashMap<RigidBody, Wrench> groundReactionWrenches)
@@ -624,7 +644,8 @@ public class MomentumBasedController implements RobotController
       double pelvisYaw = RotationFunctions.getYaw(pelvisToWorld);
       double desiredPelvisYaw = highLevelHumanoidController.getDesiredPelvisOrientation().getYawPitchRoll()[0];
 
-      ret.setZ(-kAngularMomentumZ.getDoubleValue() * angularMomentum.getZ() + kPelvisYaw.getDoubleValue() * (desiredPelvisYaw - pelvisYaw));
+      double error = AngleTools.computeAngleDifferenceMinusPiToPi(desiredPelvisYaw, pelvisYaw);
+      ret.setZ(-kAngularMomentumZ.getDoubleValue() * angularMomentum.getZ() + kPelvisYaw.getDoubleValue() * error);
 
       return ret;
    }

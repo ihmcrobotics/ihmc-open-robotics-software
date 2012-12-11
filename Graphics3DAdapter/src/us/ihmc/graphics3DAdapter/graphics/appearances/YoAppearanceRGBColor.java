@@ -18,7 +18,7 @@ public class YoAppearanceRGBColor extends YoAppearanceTransparancy
    
    public YoAppearanceRGBColor(float red, float green, float blue)
    {
-      this(new Color3f(red, green, blue));
+      this.color = new Color3f(red, green, blue);
    }
 
    public float getRed()

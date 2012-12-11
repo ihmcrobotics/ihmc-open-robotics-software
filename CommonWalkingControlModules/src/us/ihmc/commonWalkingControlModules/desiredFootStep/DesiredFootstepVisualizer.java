@@ -278,12 +278,8 @@ public class DesiredFootstepVisualizer
       ComponentBasedDesiredFootstepCalculator desiredFootstepCalculator = new ComponentBasedDesiredFootstepCalculator(ankleZUpFrames, bipedFeet,
                                                                              desiredHeadingControlModule, desiredVelocityControlModule, parentRegistry);
       desiredFootstepCalculator.setInPlaceWidth(0.4);
-      desiredFootstepCalculator.setWalkingForwardWidth(0.25);
 
       desiredFootstepCalculator.setMaxStepLength(0.6);
-
-      desiredFootstepCalculator.setSidestepMaxWidth(0.4);
-      desiredFootstepCalculator.setSidestepMinWidth(0.15);
 
       desiredFootstepCalculator.setMinStepWidth(0.25);
       desiredFootstepCalculator.setMaxStepWidth(0.5);

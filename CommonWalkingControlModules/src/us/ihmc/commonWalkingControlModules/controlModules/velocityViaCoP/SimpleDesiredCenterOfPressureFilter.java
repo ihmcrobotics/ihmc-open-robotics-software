@@ -156,7 +156,7 @@ public class SimpleDesiredCenterOfPressureFilter implements DesiredCenterOfPress
       desiredCoPBreakFrequencyHertz.set(8.84);
       resetCoPFiltersWhenGoingToDoubleSupport.set(false);
    }
-   
+
    public void setParametersForR2InverseDynamics()
    {
       desiredCoPBreakFrequencyHertz.set(8.84);   

@@ -24,14 +24,11 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 public class ComponentBasedDesiredFootstepCalculator extends AbstractAdjustableDesiredFootstepCalculator
 {
    private final DoubleYoVariable inPlaceWidth = new DoubleYoVariable("inPlaceWidth", registry);
-   private final DoubleYoVariable walkingForwardWidth = new DoubleYoVariable("walkingForwardWidth", registry);
    private final DoubleYoVariable maxStepLength = new DoubleYoVariable("maxStepLength", registry);
 
    private final DoubleYoVariable minStepWidth = new DoubleYoVariable("minStepWidth", registry);
    private final DoubleYoVariable maxStepWidth = new DoubleYoVariable("maxStepWidth", registry);
 
-   private final DoubleYoVariable sidestepMaxWidth = new DoubleYoVariable("sidestepMaxWidth", registry);
-   private final DoubleYoVariable sidestepMinWidth = new DoubleYoVariable("sidestepMinWidth", registry);
    private final DoubleYoVariable stepPitch = new DoubleYoVariable("stepPitch", registry);
 
    private final DoubleYoVariable velocityMagnitudeInHeading = new DoubleYoVariable("velocityMagnitudeInHeading", registry);
@@ -80,10 +77,10 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractAdjustableD
       velocityMagnitudeInHeading.set(desiredVelocity.dot(desiredHeading));
       velocityMagnitudeToLeftOfHeading.set(desiredVelocity.dot(toLeftOfDesiredHeading));
 
-      double stepForward = maxStepLength.getDoubleValue() * velocityMagnitudeInHeading.getDoubleValue();
-      double stepSideways = swingLegSide.negateIfRightSide(inPlaceWidth.getDoubleValue());    // maxStepLength.getDoubleValue() * velocityMagnitudeToLeftOfHeading;
+//      double stepForward = maxStepLength.getDoubleValue() * velocityMagnitudeInHeading.getDoubleValue();
+//      double stepSideways = swingLegSide.negateIfRightSide(inPlaceWidth.getDoubleValue());    // maxStepLength.getDoubleValue() * velocityMagnitudeToLeftOfHeading;
 
-      FrameVector2d desiredVelocityInSupportAnkleZUpFrame = desiredVelocity.changeFrameCopy(supportAnkleZUpFrame);
+//      FrameVector2d desiredVelocityInSupportAnkleZUpFrame = desiredVelocity.changeFrameCopy(supportAnkleZUpFrame);
       FrameVector2d desiredVelocityInHeadingFrame = desiredVelocity.changeFrameCopy(desiredHeadingFrame);
 
       FrameVector2d desiredOffsetFromAnkle = new FrameVector2d(desiredHeadingFrame, 0.0, swingLegSide.negateIfRightSide(inPlaceWidth.getDoubleValue()));    // desiredVelocityInHeadingFrame);
@@ -138,12 +135,8 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractAdjustableD
    public void setupParametersForM2V2()
    {
       setInPlaceWidth(0.25);
-      setWalkingForwardWidth(0.17);
 
       setMaxStepLength(0.4);
-
-      setSidestepMaxWidth(0.3);
-      setSidestepMinWidth(0.15);
 
       setMinStepWidth(0.2);
       setMaxStepWidth(0.4);
@@ -152,12 +145,8 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractAdjustableD
    public void setupParametersForR2()
    {
       setInPlaceWidth(0.4);
-      setWalkingForwardWidth(0.25);
 
       setMaxStepLength(0.6);
-
-      setSidestepMaxWidth(0.4);
-      setSidestepMinWidth(0.15);
 
       setMinStepWidth(0.25);
       setMaxStepWidth(0.5);
@@ -168,24 +157,9 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractAdjustableD
       this.inPlaceWidth.set(inPlaceWidth);
    }
 
-   public void setWalkingForwardWidth(double walkingForwardWidth)
-   {
-      this.walkingForwardWidth.set(walkingForwardWidth);
-   }
-
    public void setMaxStepLength(double maxStepLength)
    {
       this.maxStepLength.set(maxStepLength);
-   }
-
-   public void setSidestepMaxWidth(double sidestepMaxWidth)
-   {
-      this.sidestepMaxWidth.set(sidestepMaxWidth);
-   }
-
-   public void setSidestepMinWidth(double sidestepMinWidth)
-   {
-      this.sidestepMinWidth.set(sidestepMinWidth);
    }
 
    public void setMinStepWidth(double minStepWidth)
