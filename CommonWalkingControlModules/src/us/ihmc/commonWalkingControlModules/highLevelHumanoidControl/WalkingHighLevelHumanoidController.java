@@ -94,7 +94,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
 
    private final double swingNullspaceMultiplier = 500.0;    // needs to be pretty high to fight the limit stops...
-   private final SideDependentList<BooleanYoVariable> trajectoryInitialized = new SideDependentList<BooleanYoVariable>();
 
    private final BagOfBalls comTrajectoryBagOfBalls;
    private int comTrajectoryCounter = 0;
@@ -123,7 +122,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final DoubleYoVariable kUpperBody = new DoubleYoVariable("kUpperBody", registry);
    private final DoubleYoVariable zetaUpperBody = new DoubleYoVariable("zetaUpperBody", registry);
    private final YoPositionProvider finalPositionProvider;
-   
+
    private final InstantaneousCapturePointTrajectory icpTrajectoryGenerator;
 
    public WalkingHighLevelHumanoidController(FullRobotModel fullRobotModel, CommonWalkingReferenceFrames referenceFrames, TwistCalculator twistCalculator,
@@ -150,9 +149,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       String namePrefix = "walking";
       icpTrajectoryGenerator = new ConstantCoPInstantaneousCapturePointTrajectory(bipedSupportPolygons, gravity, controlDT, registry);
-//      doubleSupportICPTrajectoryGenerator = new ParabolicVelocityInstantaneousCapturePointTrajectory(namePrefix,
-//            bipedSupportPolygons, controlDT, registry);
-      
+
+//    doubleSupportICPTrajectoryGenerator = new ParabolicVelocityInstantaneousCapturePointTrajectory(namePrefix,
+//          bipedSupportPolygons, controlDT, registry);
+
       this.stateMachine = new StateMachine(namePrefix + "State", namePrefix + "SwitchTime", WalkingState.class, yoTime, registry);
       upcomingSupportLeg.set(RobotSide.RIGHT);
 
@@ -170,8 +170,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       for (RobotSide robotSide : RobotSide.values())
       {
          contactStates.get(fullRobotModel.getFoot(robotSide)).setContactPoints(bipedFeet.get(robotSide).getContactPoints2d());    // flat feet
-         trajectoryInitialized.put(robotSide, new BooleanYoVariable(robotSide.getCamelCaseNameForStartOfExpression() + "TrajectoryInitialized", registry));
-
          String sideString = robotSide.getCamelCaseNameForStartOfExpression();
          RigidBody footBody = fullRobotModel.getFoot(robotSide);
          ContactablePlaneBody bipedFoot = bipedFeet.get(robotSide);
@@ -212,7 +210,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       walk.set(false);
       minOrbitalEnergyForSingleSupport.set(0.007);    // 0.008
       amountToBeInsideSingleSupport.set(0.0);
-      amountToBeInsideDoubleSupport.set(0.03); // 0.02); // TODO: possibly link to limit in SacrificeDeltaCMP control module
+      amountToBeInsideDoubleSupport.set(0.03);    // 0.02); // TODO: possibly link to limit in SacrificeDeltaCMP control module
       doubleSupportTimeProvider.set(0.2);    // 0.5);    // 0.2);    // 0.6;    // 0.3
       this.userDesiredPelvisPitch.set(desiredPelvisPitch);
       this.stayOnToes.set(stayOntoes);
@@ -327,14 +325,14 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          }
          else
          {
-//            if (transferToSide != null)
-//               setOnToesContactState(bipedFeet.get(trailingLeg));
-//            else
-//               setFlatFootContactState(bipedFeet.get(trailingLeg));
+//          if (transferToSide != null)
+//             setOnToesContactState(bipedFeet.get(trailingLeg));
+//          else
+//             setFlatFootContactState(bipedFeet.get(trailingLeg));
             setFlatFootContactState(bipedFeet.get(trailingLeg));
             setFlatFootContactState(bipedFeet.get(getUpcomingSupportLeg()));
          }
-         
+
 
          updateBipedSupportPolygons();
 
@@ -377,7 +375,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    private class SingleSupportState extends State
    {
-
       private final RobotSide swingSide;
       private final FrameOrientation desiredPelvisOrientationToPack;
 
@@ -394,7 +391,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          evaluateCoMTrajectory();
 
          PositionTrajectoryGenerator positionTrajectoryGenerator = footPositionTrajectoryGenerators.get(swingSide);
-         if (!positionTrajectoryGenerator.isDone() && trajectoryInitialized.get(swingSide).getBooleanValue())
+         if (!positionTrajectoryGenerator.isDone())
          {
             FramePoint2d desiredICPLocal = new FramePoint2d(desiredICP.getReferenceFrame());
             FrameVector2d desiredICPVelocityLocal = new FrameVector2d(desiredICPVelocity.getReferenceFrame());
@@ -430,6 +427,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          {
             setFlatFootContactState(bipedFeet.get(supportSide));
          }
+
          setContactStateForSwing(bipedFeet.get(swingSide));
          updateBipedSupportPolygons();
 
@@ -440,7 +438,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       public void doTransitionOutOfAction()
       {
          upcomingSupportLeg.set(upcomingSupportLeg.getEnumValue().getOppositeSide());
-         trajectoryInitialized.get(swingSide).set(false);    // TODO: remove
 
 //       ContactableBody swingFoot = contactablePlaneBodies.get(swingSide);
 //       Footstep desiredFootstep = desiredFootstepCalculator.updateAndGetDesiredFootstep(swingSide.getOppositeSide());
@@ -500,7 +497,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          double minimumSwingTime = swingTimeProvider.getValue() * minimumSwingFraction;
          boolean footHitGround = (stateMachine.timeInCurrentState() > minimumSwingTime) && footSwitches.get(swingSide).hasFootHitGround();
 
-         return trajectoryInitialized.get(swingSide).getBooleanValue() && (footPositionTrajectoryGenerators.get(swingSide).isDone() || footHitGround);
+         return (footPositionTrajectoryGenerators.get(swingSide).isDone() || footHitGround);
       }
    }
 
@@ -689,35 +686,27 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       setContactStateForSwing(swingFoot);
       setSupportLeg(supportSide);
       updateBipedSupportPolygons();
-      
+
       icpTrajectoryGenerator.initialize(desiredICP.getFramePoint2dCopy(), finalDesiredICP, swingTimeProvider.getValue(), omega0,
                                         amountToBeInsideSingleSupport.getDoubleValue());
 
-      trajectoryInitialized.get(swingSide).set(true);
-
-
       stateMachine.doAction();    // computes trajectory and stores results in YoFrameVectors and Points.
-   }
-
-   public boolean trajectoryInitialized(RobotSide robotSide)
-   {
-      return trajectoryInitialized.get(robotSide).getBooleanValue();
    }
 
    private void evaluateCoMTrajectory()
    {
       centerOfMassHeightTrajectoryGenerator.compute();
-      comTrajectoryCounter++;
-
-      if (comTrajectoryCounter >= 5)
-      {
-         FramePoint desiredCoM = new FramePoint(referenceFrames.getCenterOfMassFrame());
-         desiredCoM.changeFrame(worldFrame);
-         desiredCoM.setY(0.0);
-         desiredCoM.setZ(centerOfMassHeightTrajectoryGenerator.getDesiredCenterOfMassHeight());
-         comTrajectoryBagOfBalls.setBallLoop(desiredCoM);
-         comTrajectoryCounter = 0;
-      }
+//      comTrajectoryCounter++;
+//
+//      if (comTrajectoryCounter >= 5)
+//      {
+//         FramePoint desiredCoM = new FramePoint(referenceFrames.getCenterOfMassFrame());
+//         desiredCoM.changeFrame(worldFrame);
+//         desiredCoM.setY(0.0);
+//         desiredCoM.setZ(centerOfMassHeightTrajectoryGenerator.getDesiredCenterOfMassHeight());
+//         comTrajectoryBagOfBalls.setBallLoop(desiredCoM);
+//         comTrajectoryCounter = 0;
+//      }
    }
 
    public void doControl()
@@ -810,9 +799,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          footAcceleration.changeBodyFrameNoRelativeAcceleration(bodyFixedFrame);
          footAcceleration.changeFrameNoRelativeMotion(bodyFixedFrame);
          DenseMatrix64F nullspaceMultipliers = new DenseMatrix64F(1, 0);
- 
-         Pair<SpatialAccelerationVector, DenseMatrix64F> pair = new Pair<SpatialAccelerationVector, DenseMatrix64F>(footAcceleration,
-                                                                   nullspaceMultipliers);
+
+         Pair<SpatialAccelerationVector, DenseMatrix64F> pair = new Pair<SpatialAccelerationVector, DenseMatrix64F>(footAcceleration, nullspaceMultipliers);
          setEndEffectorSpatialAcceleration(robotSide, LimbName.LEG, pair);
       }
    }
