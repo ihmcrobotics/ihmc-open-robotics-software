@@ -12,6 +12,7 @@ import javax.media.j3d.Transform3D;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.vecmath.Color3f;
+import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
@@ -52,10 +53,9 @@ public class Graphics3DAdapterExampleOne
       
       SelectedListener selectedListener = new SelectedListener()
       {
-         
-         public void selected(Graphics3DNode graphics3dNode, String modifierKey)
+         public void selected(Graphics3DNode graphics3dNode, String modifierKey, Point3d location)
          {
-            System.out.println("Selected " + graphics3dNode.getName());
+            System.out.println("Selected " + graphics3dNode.getName() + " @ location " + location);            
          }
       };
       
@@ -66,10 +66,6 @@ public class Graphics3DAdapterExampleOne
       RotateAndScaleNodeRunnable rotator = new RotateAndScaleNodeRunnable(teapotAndSphereNode);
       BlinkRunnable blinker = new BlinkRunnable(teapotAppearanceHolder);
 
-      
-      camera.getCameraController().trackNode(teapotAndSphereNode);
-      
-      
       ArrayList<Runnable> runnables = new ArrayList<Runnable>();
       runnables.add(rotator);
       runnables.add(blinker);
