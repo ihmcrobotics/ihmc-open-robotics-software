@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 import javax.media.j3d.Transform3D;
+import javax.vecmath.Point3d;
 
 import us.ihmc.graphics3DAdapter.NodeType;
 import us.ihmc.graphics3DAdapter.SelectedListener;
@@ -89,11 +90,11 @@ public class Graphics3DNode
       return nodeType;
    }
 
-   public void notifySelectedListeners(String modifierKey)
+   public void notifySelectedListeners(String modifierKey, Point3d location)
    {
       for(SelectedListener selectedListener : selectedListeners)
       {
-         selectedListener.selected(this, modifierKey);
+         selectedListener.selected(this, modifierKey, location);
       }
    }
    

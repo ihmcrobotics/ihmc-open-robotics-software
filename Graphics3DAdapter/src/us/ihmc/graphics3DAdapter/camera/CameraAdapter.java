@@ -17,6 +17,9 @@ public interface CameraAdapter
 
    public abstract void destroy();
    public abstract void registerAsKeyListener();
+   public abstract double getFieldOfView();
+   public abstract double getPhysicalWidth();
+   public abstract double getPhysicalHeight();
 
 
 }
