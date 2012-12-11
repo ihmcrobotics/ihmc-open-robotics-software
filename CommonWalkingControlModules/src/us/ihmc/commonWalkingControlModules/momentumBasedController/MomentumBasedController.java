@@ -44,8 +44,6 @@ import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.GeometryTools;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RotationFunctions;
-import us.ihmc.utilities.screwTheory.CenterOfMassCalculator;
-import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
 import us.ihmc.utilities.screwTheory.EndEffectorPoseTwistAndSpatialAccelerationCalculator;
 import us.ihmc.utilities.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
@@ -67,7 +65,6 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.robotController.RobotController;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition.GraphicType;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 
@@ -77,8 +74,6 @@ public class MomentumBasedController implements RobotController
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
 
-   private final CenterOfMassCalculator centerOfMassCalculator;
-   private final CenterOfMassJacobian centerOfMassJacobian;
    private final MomentumCalculator momentumCalculator;
 
    private final ProcessedOutputsInterface processedOutputs;
@@ -123,12 +118,10 @@ public class MomentumBasedController implements RobotController
    private final SideDependentList<DoubleYoVariable> kValues = new SideDependentList<DoubleYoVariable>();
 
    private final DoubleYoVariable fZ = new DoubleYoVariable("fZ", registry);
-   private final DoubleYoVariable omega0 = new DoubleYoVariable("omega0", registry);
-   private final YoFramePoint capturePoint = new YoFramePoint("capturePoint", worldFrame, registry);
 
    private final BooleanYoVariable leftInSingularRegion = new BooleanYoVariable("leftInSingularRegion", registry);
    private final BooleanYoVariable rightInSingularRegion = new BooleanYoVariable("rightInSingularRegion", registry);
-   private final SideDependentList<BooleanYoVariable> inSingularRegions = new SideDependentList<BooleanYoVariable>(leftInSingularRegion, rightInSingularRegion);
+//   private final SideDependentList<BooleanYoVariable> inSingularRegions = new SideDependentList<BooleanYoVariable>(leftInSingularRegion, rightInSingularRegion);
 
    private final SpatialForceVector gravitationalWrench;
 
@@ -144,8 +137,6 @@ public class MomentumBasedController implements RobotController
       this.processedOutputs = processedOutputs;
       this.gravityZ = gravityZ;
 
-      this.centerOfMassCalculator = new CenterOfMassCalculator(fullRobotModel.getElevator(), ReferenceFrame.getWorldFrame());
-      this.centerOfMassJacobian = new CenterOfMassJacobian(fullRobotModel.getElevator());
       this.momentumCalculator = new MomentumCalculator(twistCalculator);
       this.highLevelHumanoidController = highLevelHumanoidController;
 
@@ -222,10 +213,6 @@ public class MomentumBasedController implements RobotController
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(name, desiredSwingFootPositionViz);
       }
 
-      DynamicGraphicPosition capturePointViz = capturePoint.createDynamicGraphicPosition("Capture Point", 0.01, YoAppearance.Blue(), GraphicType.ROTATED_CROSS);
-      dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("Capture Point", capturePointViz);
-      dynamicGraphicObjectsListRegistry.registerArtifact("Capture Point", capturePointViz.createArtifact());
-
       InverseDynamicsJoint[] joints = ScrewTools.computeJointsInOrder(elevator);
       for (InverseDynamicsJoint joint : joints)
       {
@@ -242,17 +229,11 @@ public class MomentumBasedController implements RobotController
 
       kAngularMomentumZ.set(10.0);    // 50.0); // 10.0);
       kPelvisYaw.set(100.0);    // was 0.0 for M3 movie
-      omega0.set(3.0);    // just to initialize, will be reset every tick. TODO: integrate ICP control law, fz calculation and omega0 calculation
    }
 
    public void initialize()
    {
       solver.initialize();
-      FramePoint centerOfMass = computeCenterOfMass();
-      FrameVector centerOfMassVelocity = computeCenterOfMassVelocity();
-      FramePoint2d capturePoint = CapturePointCalculator.computeCapturePoint(centerOfMass, centerOfMassVelocity, omega0.getDoubleValue());
-      highLevelHumanoidController.setCapturePoint(capturePoint);
-      highLevelHumanoidController.setOmega0(omega0.getDoubleValue());
       highLevelHumanoidController.initialize();
       doControl();
    }
@@ -274,38 +255,17 @@ public class MomentumBasedController implements RobotController
 
    public void doControl()
    {
-      FramePoint centerOfMass = computeCenterOfMass();
-      FrameVector centerOfMassVelocity = computeCenterOfMassVelocity();
-      FramePoint2d capturePoint = CapturePointCalculator.computeCapturePoint(centerOfMass, centerOfMassVelocity, omega0.getDoubleValue());
       Momentum momentum = computeCentroidalMomentum();
 
       updateBipedSupportPolygons(bipedSupportPolygons);
 
-      highLevelHumanoidController.setCapturePoint(capturePoint);
-      highLevelHumanoidController.setOmega0(omega0.getDoubleValue());
       highLevelHumanoidController.update();
       highLevelHumanoidController.doControl();
 
-      doMomentumBasedControl(centerOfMass, centerOfMassVelocity, capturePoint, momentum);
+      doMomentumBasedControl(highLevelHumanoidController.getInstantaneousCapturePoint(), momentum);
       inverseDynamicsCalculator.compute();
       fullRobotModel.setTorques(processedOutputs);
-      updateYoVariables(capturePoint);
-   }
-
-   private FramePoint computeCenterOfMass()
-   {
-      centerOfMassCalculator.compute();
-
-      return centerOfMassCalculator.getCenterOfMass();
-   }
-
-   private FrameVector computeCenterOfMassVelocity()
-   {
-      centerOfMassJacobian.compute();
-      FrameVector ret = new FrameVector(ReferenceFrame.getWorldFrame());
-      centerOfMassJacobian.packCenterOfMassVelocity(ret);
-
-      return ret;
+      updateYoVariables();
    }
 
    public Momentum computeCentroidalMomentum()
@@ -317,12 +277,11 @@ public class MomentumBasedController implements RobotController
    }
 
    /**
-    * @param centerOfMass
     * @param centerOfMassVelocity
     * @param capturePoint
     * @param momentum
     */
-   private void doMomentumBasedControl(FramePoint centerOfMass, FrameVector centerOfMassVelocity, FramePoint2d capturePoint, Momentum momentum)
+   private void doMomentumBasedControl(FramePoint2d capturePoint, Momentum momentum)
    {
       ReferenceFrame frame = worldFrame;
       RobotSide supportLeg = highLevelHumanoidController.getSupportLeg();
@@ -332,7 +291,7 @@ public class MomentumBasedController implements RobotController
       highLevelHumanoidController.packDesiredICPVelocity(desiredCapturePointVelocity);
 
       desiredCoPAndCMPControlModule.compute(capturePoint, supportLeg, desiredCapturePoint, desiredCapturePointVelocity,
-              highLevelHumanoidController.getDesiredPelvisOrientation(), omega0.getDoubleValue(), momentum);
+              highLevelHumanoidController.getDesiredPelvisOrientation(), highLevelHumanoidController.getOmega0(), momentum);
       FramePoint2d desiredCoP = new FramePoint2d(worldFrame);
       desiredCoPAndCMPControlModule.packCoP(desiredCoP);
       FramePoint2d desiredCMP = new FramePoint2d(worldFrame);
@@ -352,8 +311,9 @@ public class MomentumBasedController implements RobotController
       legStrengthCalculator.packLegStrengths(lambdas, virtualToePoints, desiredCoP);
       SideDependentList<FramePoint> virtualToePointsOnSole = projectOntoSole(virtualToePoints);
 
+      FramePoint centerOfMass = new FramePoint(centerOfMassFrame);
       double omega0 = computeOmega0(centerOfMass, virtualToePointsOnSole);
-      this.omega0.set(omega0);
+      highLevelHumanoidController.setOmega0(omega0);
 
       double k1PlusK2 = MathTools.square(omega0) * totalMass;
       for (RobotSide robotSide : RobotSide.values())
@@ -650,7 +610,7 @@ public class MomentumBasedController implements RobotController
       return ret;
    }
 
-   private void updateYoVariables(FramePoint2d capturePoint2d)
+   private void updateYoVariables()
    {
       SpatialAccelerationVector pelvisAcceleration = new SpatialAccelerationVector();
       fullRobotModel.getRootJoint().packDesiredJointAcceleration(pelvisAcceleration);
@@ -667,10 +627,6 @@ public class MomentumBasedController implements RobotController
       {
          desiredAccelerationYoVariables.get(joint).set(joint.getQddDesired());
       }
-
-      FramePoint capturePoint = capturePoint2d.toFramePoint();
-      capturePoint.changeFrame(worldFrame);
-      this.capturePoint.set(capturePoint);
    }
 
    private void updateBipedSupportPolygons(BipedSupportPolygons bipedSupportPolygons)
