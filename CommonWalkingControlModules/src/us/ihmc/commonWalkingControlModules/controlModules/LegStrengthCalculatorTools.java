@@ -25,10 +25,13 @@ public class LegStrengthCalculatorTools
    public static void normalize(SideDependentList<Double> legStrengths)
    {
       double sum = MathTools.sumDoubles(legStrengths.values());
-      double scaling = 1.0 / sum;
-      for (RobotSide robotSide : RobotSide.values())
+      if (sum != 0.0)
       {
-         legStrengths.put(robotSide, legStrengths.get(robotSide) * scaling);
+         double scaling = 1.0 / sum;
+         for (RobotSide robotSide : RobotSide.values())
+         {
+            legStrengths.put(robotSide, legStrengths.get(robotSide) * scaling);
+         }         
       }
    }
 }
