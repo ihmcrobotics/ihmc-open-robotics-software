@@ -11,9 +11,11 @@ import javax.vecmath.Vector3d;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactState;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.DesiredCoPAndCMPControlModule;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.LegStrengthCalculator;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.VirtualToePointCalculator;
+import us.ihmc.commonWalkingControlModules.controlModules.LegStrengthCalculatorTools;
 import us.ihmc.commonWalkingControlModules.controlModules.NewGeometricVirtualToePointCalculator;
 import us.ihmc.commonWalkingControlModules.controlModules.SacrificeDeltaCMPDesiredCoPAndCMPControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.TeeterTotterLegStrengthCalculator;
@@ -119,8 +121,8 @@ public class MomentumBasedController implements RobotController
 
    private final DoubleYoVariable fZ = new DoubleYoVariable("fZ", registry);
 
-   private final BooleanYoVariable leftInSingularRegion = new BooleanYoVariable("leftInSingularRegion", registry);
-   private final BooleanYoVariable rightInSingularRegion = new BooleanYoVariable("rightInSingularRegion", registry);
+//   private final BooleanYoVariable leftInSingularRegion = new BooleanYoVariable("leftInSingularRegion", registry);
+//   private final BooleanYoVariable rightInSingularRegion = new BooleanYoVariable("rightInSingularRegion", registry);
 //   private final SideDependentList<BooleanYoVariable> inSingularRegions = new SideDependentList<BooleanYoVariable>(leftInSingularRegion, rightInSingularRegion);
 
    private final SpatialForceVector gravitationalWrench;
@@ -178,7 +180,7 @@ public class MomentumBasedController implements RobotController
       SacrificeDeltaCMPDesiredCoPAndCMPControlModule desiredCoPAndCMPControlModule =
          new SacrificeDeltaCMPDesiredCoPAndCMPControlModule(desiredCenterOfPressureFilter, visualizer, bipedSupportPolygons,
             fullRobotModel.getPelvis().getBodyFixedFrame(), registry);
-      desiredCoPAndCMPControlModule.setGains(3e-2, 1.0);
+      desiredCoPAndCMPControlModule.setGains(3e-2, 1.0, 1.5);
       this.desiredCoPAndCMPControlModule = desiredCoPAndCMPControlModule;
 
 
@@ -457,9 +459,30 @@ public class MomentumBasedController implements RobotController
    private HashMap<RigidBody, Wrench> computeGroundReactionWrenches(ReferenceFrame frame, FrameVector2d desiredDeltaCMP,
            SideDependentList<FramePoint> virtualToePointsOnSole, FrameVector totalgroundReactionMoment)
    {
+      SideDependentList<Double> momentWeightings = new SideDependentList<Double>();
+      for (RobotSide robotSide : RobotSide.values())
+      {
+         RigidBody foot = fullRobotModel.getFoot(robotSide);
+         ContactState contactState = highLevelHumanoidController.getContactState(foot);
+         FramePoint virtualToePoint = virtualToePointsOnSole.get(robotSide);
+         virtualToePoint.changeFrame(contactState.getBodyFrame());
+         List<FramePoint> contactPoints = contactState.getContactPoints();
+         double momentWeighting;
+         if (contactPoints.size() > 0)
+         {
+            double minDistance = GeometryTools.minimumDistance(virtualToePoint, contactPoints);
+            momentWeighting = minDistance * lambdas.get(robotSide);            
+         }
+         else
+            momentWeighting = 0.0;
+         momentWeightings.put(robotSide, momentWeighting);  
+      }
+      LegStrengthCalculatorTools.normalize(momentWeightings);
+
       HashMap<RigidBody, Wrench> groundReactionWrenches = new HashMap<RigidBody, Wrench>();
       for (RobotSide robotSide : RobotSide.values())
       {
+
          FramePoint groundReactionForceTerminalPoint = new FramePoint(centerOfMassFrame);
          groundReactionForceTerminalPoint.changeFrame(frame);
          desiredDeltaCMP.changeFrame(frame);
@@ -475,7 +498,8 @@ public class MomentumBasedController implements RobotController
          FrameVector groundReactionMoment = new FrameVector(totalgroundReactionMoment);
 
          // TODO: base on contact situation.
-         groundReactionMoment.scale(lambdas.get(robotSide));
+         groundReactionMoment.scale(lambdas.get(robotSide)); // momentWeightings.get(robotSide));
+
 
          RigidBody foot = fullRobotModel.getFoot(robotSide);
          ReferenceFrame footCoMFrame = foot.getBodyFixedFrame();

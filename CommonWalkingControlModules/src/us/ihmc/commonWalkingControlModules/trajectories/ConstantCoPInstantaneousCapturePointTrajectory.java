@@ -4,7 +4,6 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPoly
 import us.ihmc.commonWalkingControlModules.calculators.EquivalentConstantCoPCalculator;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
-import us.ihmc.utilities.math.geometry.FrameLine2d;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.GeometryTools;
@@ -63,10 +62,11 @@ public class ConstantCoPInstantaneousCapturePointTrajectory implements Instantan
 
          FrameConvexPolygon2d supportPolygon = bipedSupportPolygons.getSupportPolygonInMidFeetZUp();    // bipedSupportPolygons.getFootPolygonInAnkleZUp(supportSide);
 
-         FrameLine2d line = new FrameLine2d(initialDesiredICP, finalDesiredICP);
-         line.changeFrame(supportPolygon.getReferenceFrame());
+         FrameVector2d vector = new FrameVector2d(initialDesiredICP, finalDesiredICP);
+         vector.changeFrame(supportPolygon.getReferenceFrame());
          equivalentConstantCoP.changeFrame(supportPolygon.getReferenceFrame());
-         GeometryTools.movePointInsidePolygonAlongLine(equivalentConstantCoP, supportPolygon, line, amountToBeInside);
+         GeometryTools.movePointInsidePolygonAlongVector(equivalentConstantCoP, vector, supportPolygon, amountToBeInside);
+
          equivalentConstantCoP.changeFrame(initialDesiredICP.getReferenceFrame());
          moveTime = EquivalentConstantCoPCalculator.computeMoveTime(initialDesiredICP, finalDesiredICP, equivalentConstantCoP, comHeight, gravity);
       }
