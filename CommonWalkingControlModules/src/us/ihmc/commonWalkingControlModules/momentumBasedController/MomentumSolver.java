@@ -21,7 +21,6 @@ import us.ihmc.utilities.math.NullspaceCalculator;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.CentroidalMomentumMatrix;
 import us.ihmc.utilities.screwTheory.DesiredJointAccelerationCalculator;
-import us.ihmc.utilities.screwTheory.DesiredJointAccelerationCalculatorOld;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.Momentum;
 import us.ihmc.utilities.screwTheory.RigidBody;
@@ -64,7 +63,7 @@ public class MomentumSolver
 
    private final DenseMatrix64F convectiveTermMatrix = new DenseMatrix64F(SpatialAccelerationVector.SIZE, 1);
    private final HashMap<MechanismGeometricJacobian, DenseMatrix64F> dMap = new HashMap<MechanismGeometricJacobian, DenseMatrix64F>();
-   private HashMap<MechanismGeometricJacobian, DenseMatrix64F> jacobianInverseMap = new HashMap<MechanismGeometricJacobian, DenseMatrix64F>();
+   private final HashMap<MechanismGeometricJacobian, DenseMatrix64F> jacobianInverseMap = new HashMap<MechanismGeometricJacobian, DenseMatrix64F>();
    private final LinearSolver<DenseMatrix64F> jacobianSolver;
    private final NullspaceCalculator nullspaceCalculator;
 
@@ -157,7 +156,7 @@ public class MomentumSolver
 
    public void setDesiredCentroidalMomentumRate(SpatialForceVector desiredCentroidalMomentumRate)
    {
-      this.desiredCentroidalMomentumRate.set(desiredCentroidalMomentumRate);
+      this.desiredCentroidalMomentumRate.checkAndSet(desiredCentroidalMomentumRate);
    }
 
    public void setDesiredJointAcceleration(InverseDynamicsJoint joint, DenseMatrix64F jointAcceleration)
@@ -168,7 +167,23 @@ public class MomentumSolver
    public void setDesiredSpatialAcceleration(MechanismGeometricJacobian jacobian,
            Pair<SpatialAccelerationVector, DenseMatrix64F> spatialAccelerationAndNullspaceMultiplier)
    {
-      spatialAccelerations.put(jacobian, spatialAccelerationAndNullspaceMultiplier);
+      ReferenceFrame baseFrame = spatialAccelerationAndNullspaceMultiplier.first().getBaseFrame();
+      boolean isWithRespectToWorld = baseFrame == rootJoint.getPredecessor().getBodyFixedFrame();
+      if (isWithRespectToWorld)
+      {
+         spatialAccelerations.put(jacobian, spatialAccelerationAndNullspaceMultiplier);
+      }
+      else
+      {
+         if (baseFrame == jacobian.getBaseFrame())
+         {
+            convertInternalSpatialAccelerationToJointSpace(jacobian, spatialAccelerationAndNullspaceMultiplier);
+         }
+         else
+         {
+            throw new RuntimeException("Case not yet implemented");
+         }
+      }
    }
 
    public void solve()
@@ -183,7 +198,6 @@ public class MomentumSolver
               controlDT);
       MatrixYoVariableConversionTools.storeInYoVariables(previousCentroidalMomentumMatrix, yoPreviousCentroidalMomentumMatrix);
 
-      convertInternalSpatialAccelerationsToJointSpace(jointSpaceAccelerations, spatialAccelerations);
       initializeAHatRoot(aHatRoot, centroidalMomentumMatrix.getMatrix());
       initializeB(b, desiredCentroidalMomentumRate, centroidalMomentumMatrixDerivative, jointsInOrder);
       handleJointSpaceAccelerations(b, centroidalMomentumMatrix.getMatrix(), jointSpaceAccelerations);
@@ -234,6 +248,10 @@ public class MomentumSolver
             taskSpaceAcceleration.changeFrameNoRelativeMotion(rootJointFrame);
          }
 
+         // J
+         jacobian.changeFrame(rootJointFrame);
+         jacobian.compute();
+
          DenseMatrix64F nullspaceMultiplier = pair.second();
          int nullity = nullspaceMultiplier.getNumCols();
 
@@ -243,7 +261,6 @@ public class MomentumSolver
          }
 
          // JInverse
-         jacobian.compute();
          jacobianSolver.setA(jacobian.getJacobianMatrix());
          DenseMatrix64F jacobianInverse = new DenseMatrix64F(jacobian.getNumberOfColumns(), jacobian.getNumberOfColumns());
          jacobianSolver.invert(jacobianInverse);
@@ -256,11 +273,11 @@ public class MomentumSolver
          jacobianInverseMap.put(jacobian, jacobianInverse);
 
          // aTaskSpace
-         int[] indices = ScrewTools.computeIndicesForJoint(jointsInOrder, jacobian.getJointsInOrder());
-         extractMatrixBlock(aTaskSpace, centroidalMomentumMatrix, indices);
+         int[] columnIndices = ScrewTools.computeIndicesForJoint(jointsInOrder, jacobian.getJointsInOrder());
+         extractMatrixBlock(aTaskSpace, centroidalMomentumMatrix, columnIndices);
 
          // convectiveTerm
-         DesiredJointAccelerationCalculatorOld desiredJointAccelerationCalculator = new DesiredJointAccelerationCalculatorOld(jacobian, null);    // TODO: garbage
+         DesiredJointAccelerationCalculator desiredJointAccelerationCalculator = new DesiredJointAccelerationCalculator(jacobian, null);    // TODO: garbage
          desiredJointAccelerationCalculator.computeJacobianDerivativeTerm(convectiveTerm);
          twistCalculator.packRelativeTwist(twistOfCurrentWithRespectToNew, rootJointSuccessor, jacobian.getEndEffector());
          convectiveTerm.changeFrame(rootJointSuccessor.getBodyFixedFrame(), twistOfCurrentWithRespectToNew, twistOfCurrentWithRespectToNew);
@@ -349,57 +366,6 @@ public class MomentumSolver
          throw new RuntimeException("Not correctly constrained");
    }
 
-   private void convertInternalSpatialAccelerationsToJointSpace(Map<InverseDynamicsJoint, DenseMatrix64F> jointSpaceAccelerations,
-           Map<MechanismGeometricJacobian, Pair<SpatialAccelerationVector, DenseMatrix64F>> spatialAccelerations)
-   {
-      for (MechanismGeometricJacobian jacobian : spatialAccelerations.keySet())
-      {
-         Pair<SpatialAccelerationVector, DenseMatrix64F> pair = spatialAccelerations.get(jacobian);
-         SpatialAccelerationVector spatialAcceleration = pair.first();
-         ReferenceFrame baseFrame = spatialAcceleration.getBaseFrame();
-         boolean isWithRespectToWorld = baseFrame == rootJoint.getPredecessor().getBodyFixedFrame();
-         if (!isWithRespectToWorld)
-         {
-            if (baseFrame == jacobian.getBaseFrame())
-            {
-               // convert to joint space accelerations
-               DesiredJointAccelerationCalculator desiredJointAccelerationCalculator = new DesiredJointAccelerationCalculator(jacobian, jacobianSolver);
-               jacobian.compute();
-               desiredJointAccelerationCalculator.compute(spatialAcceleration);
-
-               DenseMatrix64F jointAccelerations = new DenseMatrix64F(jacobian.getNumberOfColumns(), 1);
-               ScrewTools.packDesiredJointAccelerationsMatrix(jacobian.getJointsInOrder(), jointAccelerations);
-
-               DenseMatrix64F nullspaceMultipliers = pair.second();
-               int nullity = nullspaceMultipliers.getNumCols();
-
-               if (nullity > 0)
-               {
-                  nullspaceCalculator.setMatrix(jacobian.getJacobianMatrix(), nullity);
-                  nullspaceCalculator.removeNullspaceComponent(jointAccelerations);
-                  nullspaceCalculator.addNullspaceComponent(jointAccelerations, nullspaceMultipliers);
-               }
-
-               int index = 0;
-               for (InverseDynamicsJoint joint : jacobian.getJointsInOrder())
-               {
-                  DenseMatrix64F jointAcceleration = new DenseMatrix64F(joint.getDegreesOfFreedom(), 1);
-                  int degreesOfFreedom = joint.getDegreesOfFreedom();
-                  CommonOps.extract(jointAccelerations, index, index + degreesOfFreedom, 0, 1, jointAcceleration, 0, 0);
-                  jointSpaceAccelerations.put(joint, jointAcceleration);
-                  index += degreesOfFreedom;
-               }
-
-               spatialAccelerations.remove(jacobian);
-            }
-            else
-            {
-               throw new RuntimeException("Case not yet implemented");
-            }
-         }
-      }
-   }
-
    private void initializeAHatRoot(DenseMatrix64F aHatRoot, DenseMatrix64F centroidalMomentumMatrix)
    {
       MatrixTools.getMatrixBlock(aHatRoot, centroidalMomentumMatrix, rows, columnsForRootJoint);
@@ -409,5 +375,37 @@ public class MomentumSolver
    {
       matrixToPack.reshape(rows.length, jointSpaceIndices.length);
       MatrixTools.getMatrixBlock(matrixToPack, centroidalMomentumMatrix, rows, jointSpaceIndices);
+   }
+
+   private void convertInternalSpatialAccelerationToJointSpace(MechanismGeometricJacobian jacobian, Pair<SpatialAccelerationVector, DenseMatrix64F> pair)
+   {
+      SpatialAccelerationVector spatialAcceleration = pair.first();
+      jacobian.changeFrame(spatialAcceleration.getExpressedInFrame());
+      jacobian.compute();
+      DesiredJointAccelerationCalculator desiredJointAccelerationCalculator = new DesiredJointAccelerationCalculator(jacobian, jacobianSolver);
+      desiredJointAccelerationCalculator.compute(spatialAcceleration);
+
+      DenseMatrix64F jointAccelerations = new DenseMatrix64F(jacobian.getNumberOfColumns(), 1);
+      ScrewTools.packDesiredJointAccelerationsMatrix(jacobian.getJointsInOrder(), jointAccelerations);
+
+      DenseMatrix64F nullspaceMultipliers = pair.second();
+      int nullity = nullspaceMultipliers.getNumCols();
+
+      if (nullity > 0)
+      {
+         nullspaceCalculator.setMatrix(jacobian.getJacobianMatrix(), nullity);
+         nullspaceCalculator.removeNullspaceComponent(jointAccelerations);
+         nullspaceCalculator.addNullspaceComponent(jointAccelerations, nullspaceMultipliers);
+      }
+
+      int index = 0;
+      for (InverseDynamicsJoint joint : jacobian.getJointsInOrder())
+      {
+         DenseMatrix64F jointAcceleration = new DenseMatrix64F(joint.getDegreesOfFreedom(), 1);
+         int degreesOfFreedom = joint.getDegreesOfFreedom();
+         CommonOps.extract(jointAccelerations, index, index + degreesOfFreedom, 0, 1, jointAcceleration, 0, 0);
+         jointSpaceAccelerations.put(joint, jointAcceleration);
+         index += degreesOfFreedom;
+      }
    }
 }

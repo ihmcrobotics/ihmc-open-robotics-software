@@ -26,6 +26,7 @@ public class CapturabilityBasedDesiredCoPVisualizer
    private final YoFramePoint desiredCoP = new YoFramePoint("desiredCoP", "", world, registry);
    private final YoFramePoint desiredCapturePoint = new YoFramePoint("desiredCapturePoint", "", world, registry);
    private final YoFrameLineSegment2d guideLine = new YoFrameLineSegment2d("guideLine", "", world, registry);
+   private final YoFramePoint desiredCMP = new YoFramePoint("desiredCMP", "", world, registry);
 
    public CapturabilityBasedDesiredCoPVisualizer(YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
@@ -36,11 +37,13 @@ public class CapturabilityBasedDesiredCoPVisualizer
       {
          addDesiredCoPViz(dynamicGraphicObjectList, artifactList);
          addDesiredCapturePointViz(dynamicGraphicObjectList, artifactList);
+         addDesiredCMPViz(dynamicGraphicObjectList, artifactList);
          addGuideLineViz(artifactList);
 
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectList);
          dynamicGraphicObjectsListRegistry.registerArtifactList(artifactList);
       }
+      desiredCMP.setToNaN();
 
       parentRegistry.addChild(registry);
    }
@@ -51,6 +54,14 @@ public class CapturabilityBasedDesiredCoPVisualizer
                                                 DynamicGraphicPosition.GraphicType.CROSS);
       dynamicGraphicObjectList.add(desiredCoPViz);
       artifactList.add(desiredCoPViz.createArtifact());
+   }
+
+   private void addDesiredCMPViz(DynamicGraphicObjectsList dynamicGraphicObjectList, ArtifactList artifactList)
+   {
+      DynamicGraphicPosition desiredCMPViz = desiredCMP.createDynamicGraphicPosition("Desired CMP", 0.012, YoAppearance.Red(),
+                                                DynamicGraphicPosition.GraphicType.CROSS);
+      dynamicGraphicObjectList.add(desiredCMPViz);
+      artifactList.add(desiredCMPViz.createArtifact());
    }
 
    private void addDesiredCapturePointViz(DynamicGraphicObjectsList dynamicGraphicObjectList, ArtifactList artifactList)
@@ -96,5 +107,11 @@ public class CapturabilityBasedDesiredCoPVisualizer
    private void hideGuideLine()
    {
       guideLine.setFrameLineSegment2d(null);
+   }
+
+   public void setDesiredCMP(FramePoint2d desiredCMP)
+   {
+      desiredCMP.changeFrame(this.desiredCMP.getReferenceFrame());
+      this.desiredCMP.set(desiredCMP.getX(), desiredCMP.getY(), 0.0);
    }
 }
