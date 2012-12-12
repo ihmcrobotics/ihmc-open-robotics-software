@@ -4,9 +4,9 @@ import javax.vecmath.Point3d;
 
 public interface CameraTrackingAndDollyPositionHolder
 {
-   public abstract void getCameraTrackingPosition(Point3d trackPositionToPack);
+   public abstract void getTrackingPosition(Point3d trackPositionToPack);
    
-   public abstract void getCameraDollyPosition(Point3d dollyPositionToPack);
+   public abstract void getDollyPosition(Point3d dollyPositionToPack);
    
    public abstract double getTrackingX();
 

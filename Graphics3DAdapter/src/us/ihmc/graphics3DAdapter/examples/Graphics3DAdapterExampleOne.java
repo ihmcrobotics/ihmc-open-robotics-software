@@ -19,8 +19,9 @@ import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
 import us.ihmc.graphics3DAdapter.ModifierKeyHolder;
 import us.ihmc.graphics3DAdapter.NodeType;
 import us.ihmc.graphics3DAdapter.SelectedListener;
+import us.ihmc.graphics3DAdapter.camera.CameraController;
+import us.ihmc.graphics3DAdapter.camera.SimpleCameraTrackingAndDollyPositionHolder;
 import us.ihmc.graphics3DAdapter.camera.ViewportAdapter;
-import us.ihmc.graphics3DAdapter.camera.CameraTrackingAndDollyPositionHolder;
 import us.ihmc.graphics3DAdapter.graphics.LinkGraphics;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceRGBColor;
@@ -29,87 +30,34 @@ import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
 import us.ihmc.utilities.ThreadTools;
 
 public class Graphics3DAdapterExampleOne
-{
-   private CameraTrackingAndDollyPositionHolder cameraTrackAndDollyVariablesHolder = new CameraTrackingAndDollyPositionHolder()
-   {
-      
-      public double getTrackingZ()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-      
-      public double getTrackingY()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-      
-      public double getTrackingX()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-      
-      public double getFieldOfView()
-      {
-         // TODO Auto-generated method stub
-         return Double.NaN;
-      }
-      
-      public double getDollyZ()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-      
-      public double getDollyY()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-      
-      public double getDollyX()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-      
-      public void getCameraTrackingPosition(Point3d trackPositionToPack)
-      {
-         // TODO Auto-generated method stub
-         
-      }
-      
-      public void getCameraDollyPosition(Point3d trackPositionToPack)
-      {
-         // TODO Auto-generated method stub
-         
-      }
-   };
+{   
 
-   public void doExampleOne(Graphics3DAdapter adapter)
+   public void doExampleOne(Graphics3DAdapter graphics3DAdapter)
    {
       Graphics3DNode teapotAndSphereNode = new Graphics3DNode("teaPot", NodeType.JOINT);
       LinkGraphics teapotObject = new LinkGraphics();
       LinkGraphicsInstruction teapotAppearanceHolder = teapotObject.addTeaPot(YoAppearance.Red());
 
       teapotAndSphereNode.setGraphicsObject(teapotObject);
-      adapter.addRootNode(teapotAndSphereNode);
+      graphics3DAdapter.addRootNode(teapotAndSphereNode);
       
       Graphics3DNode box = new Graphics3DNode("box", NodeType.JOINT);
       LinkGraphics boxGraphics = new LinkGraphics();
       boxGraphics.addCube(1.0, 1.0, 1.0, YoAppearance.Green());
       box.setGraphicsObject(boxGraphics);
-      adapter.addRootNode(box);
+      graphics3DAdapter.addRootNode(box);
 
-      ViewportAdapter camera = adapter.createNewViewport(cameraTrackAndDollyVariablesHolder, null, null);
-      Canvas canvas = camera.getCanvas();
+      PanBackAndForthTrackingAndDollyPositionHolder cameraTrackAndDollyVariablesHolder = new PanBackAndForthTrackingAndDollyPositionHolder(0.0, 2.0, 0.2);
+      
+      ViewportAdapter viewportAdapter = graphics3DAdapter.createNewViewport(cameraTrackAndDollyVariablesHolder, null, null);
+      Canvas canvas = viewportAdapter.getCanvas();
       createNewWindow(canvas);
       
-      ViewportAdapter secondCamera = adapter.createNewViewport(cameraTrackAndDollyVariablesHolder, null, null);
+      ViewportAdapter secondCamera = graphics3DAdapter.createNewViewport(cameraTrackAndDollyVariablesHolder, null, null);
       createNewWindow(secondCamera.getCanvas());
       
+      CameraController cameraController = viewportAdapter.getCameraController();
+      cameraController.setTracking(true, true, false, false);
       
       SelectedListener selectedListener = new SelectedListener()
       {
@@ -123,7 +71,7 @@ public class Graphics3DAdapterExampleOne
       };
       
       
-      adapter.addSelectedListener(selectedListener);
+      graphics3DAdapter.addSelectedListener(selectedListener);
       box.addSelectedListener(selectedListener);
       
       RotateAndScaleNodeRunnable rotator = new RotateAndScaleNodeRunnable(teapotAndSphereNode);
@@ -188,6 +136,8 @@ public class Graphics3DAdapterExampleOne
       
       adapter.addSelectedListener(selectedListener);
       node2.addSelectedListener(selectedListener);
+
+      PanBackAndForthTrackingAndDollyPositionHolder cameraTrackAndDollyVariablesHolder = new PanBackAndForthTrackingAndDollyPositionHolder(0.0, 2.0, 0.2);
 
       ViewportAdapter camera = adapter.createNewViewport(cameraTrackAndDollyVariablesHolder, null, null);
       Canvas canvas = camera.getCanvas();
@@ -381,5 +331,40 @@ public class Graphics3DAdapterExampleOne
          this.instruction = instruction;
       }
    }
+   
+   private class PanBackAndForthTrackingAndDollyPositionHolder extends SimpleCameraTrackingAndDollyPositionHolder implements Runnable
+   {
+      private long startTime = System.currentTimeMillis();
+      private final double panXOffset, panXAmplitude, panXFrequency;
+      
+      public PanBackAndForthTrackingAndDollyPositionHolder(double panXOffset, double panXAmplitude, double panXFrequency)
+      {
+         this.panXOffset = panXOffset;
+         this.panXAmplitude = panXAmplitude;
+         this.panXFrequency = panXFrequency;
+         
+         Thread thread = new Thread(this);
+         thread.start();
+      }
+
+      public void run()
+      {
+         while(true)
+         {
+            long currentTime = System.currentTimeMillis(); 
+            double time = (currentTime - startTime) * 0.001;
+            
+            double cameraTrackingX = panXOffset + panXAmplitude * Math.sin(2.0 * Math.PI * panXFrequency * time);
+            this.setTrackingX(cameraTrackingX);
+            
+            ThreadTools.sleep(100L);
+
+         }
+         
+      }
+      
+      
+   }
+ 
 
 }
