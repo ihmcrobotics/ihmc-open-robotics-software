@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import us.ihmc.convexOptimization.ConvexOptimizationAdapter;
+
 import com.joptimizer.functions.ConvexMultivariateRealFunction;
 import com.joptimizer.functions.LinearMultivariateRealFunction;
 import com.joptimizer.functions.QuadraticMultivariateRealFunction;
@@ -33,6 +35,25 @@ public class SimpleJOptimizerTest
       double[][] equalityAMatrix = new double[][]{{1.0}};
       double[] equalityBVector = new double[]{2.0};
       
+      
+      double[] solution = solveOptimizationProblem(objectiveFunction, equalityAMatrix, equalityBVector);
+
+      if (VERBOSE) System.out.println("testReallyReallySimpleOptimizationProblem: solution = (" + solution[0] + ")");
+      
+      assertEquals(2.0, solution[0], 1e-5);
+   }
+   
+   //TODO: This one seems broken!
+   @Test
+   public void testASimpleRedundantEqualityCase() throws Exception
+   {
+      // Minimize x subject to x = 2 and x = 2;
+      double[] minimizeF = new double[] {1.0};
+      LinearMultivariateRealFunction objectiveFunction = new LinearMultivariateRealFunction(minimizeF, 0.0);
+
+      // equalities
+      double[][] equalityAMatrix = new double[][]{{1.0}, {1.0}};
+      double[] equalityBVector = new double[]{2.0, 2.0};
       
       double[] solution = solveOptimizationProblem(objectiveFunction, equalityAMatrix, equalityBVector);
 
@@ -314,10 +335,13 @@ public class SimpleJOptimizerTest
    }
    
    
+   //TODO: This one seems broken!
    @Test
    public void testASecondOrderLorenzConeProblemUsingSOCP() throws Exception
    {
       // Minimize -(x + y) subject to z <= sqrt(18) and sqrt(x^2 + y^2) <= z. Answer should be (3, 3, sqrt(18))
+      // Use SOCP constraints directly.
+      
       double[] minimizeF = new double[] {-1.0, -1.0, 0.0};
       LinearMultivariateRealFunction objectiveFunction = new LinearMultivariateRealFunction(minimizeF, 0.0);
 
