@@ -20,7 +20,7 @@ import us.ihmc.graphics3DAdapter.ModifierKeyHolder;
 import us.ihmc.graphics3DAdapter.NodeType;
 import us.ihmc.graphics3DAdapter.SelectedListener;
 import us.ihmc.graphics3DAdapter.camera.ViewportAdapter;
-import us.ihmc.graphics3DAdapter.camera.CameraTrackAndDollyVariablesHolder;
+import us.ihmc.graphics3DAdapter.camera.CameraTrackingAndDollyPositionHolder;
 import us.ihmc.graphics3DAdapter.graphics.LinkGraphics;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceRGBColor;
@@ -30,58 +30,58 @@ import us.ihmc.utilities.ThreadTools;
 
 public class Graphics3DAdapterExampleOne
 {
-   private CameraTrackAndDollyVariablesHolder cameraTrackAndDollyVariablesHolder = new CameraTrackAndDollyVariablesHolder()
+   private CameraTrackingAndDollyPositionHolder cameraTrackAndDollyVariablesHolder = new CameraTrackingAndDollyPositionHolder()
    {
       
-      public double getTrackZVar()
+      public double getTrackingZ()
       {
          // TODO Auto-generated method stub
          return 0;
       }
       
-      public double getTrackYVar()
+      public double getTrackingY()
       {
          // TODO Auto-generated method stub
          return 0;
       }
       
-      public double getTrackXVar()
+      public double getTrackingX()
       {
          // TODO Auto-generated method stub
          return 0;
       }
       
-      public double getFieldOfViewVar()
+      public double getFieldOfView()
       {
          // TODO Auto-generated method stub
          return Double.NaN;
       }
       
-      public double getDollyZVar()
+      public double getDollyZ()
       {
          // TODO Auto-generated method stub
          return 0;
       }
       
-      public double getDollyYVar()
+      public double getDollyY()
       {
          // TODO Auto-generated method stub
          return 0;
       }
       
-      public double getDollyXVar()
+      public double getDollyX()
       {
          // TODO Auto-generated method stub
          return 0;
       }
       
-      public void getCameraTrackVariable(Point3d trackPositionToPack)
+      public void getCameraTrackingPosition(Point3d trackPositionToPack)
       {
          // TODO Auto-generated method stub
          
       }
       
-      public void getCameraDollyVariable(Point3d trackPositionToPack)
+      public void getCameraDollyPosition(Point3d trackPositionToPack)
       {
          // TODO Auto-generated method stub
          

@@ -18,7 +18,7 @@ public interface CameraController extends CameraPropertiesHolder
 
    public void setDolly(boolean dolly, boolean dollyX, boolean dollyY, boolean dollyZ);
 
-   public CameraTrackAndDollyVariablesHolder getCameraTrackAndDollyVariablesHolder();
+   public CameraTrackingAndDollyPositionHolder getCameraTrackAndDollyVariablesHolder();
 
   
    public void setConfiguration(CameraConfiguration config, CameraMountList mountList);
