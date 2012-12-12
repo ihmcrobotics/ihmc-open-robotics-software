@@ -18,6 +18,7 @@ import us.ihmc.utilities.MechanismGeometricJacobian;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.NullspaceCalculator;
+import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.CentroidalMomentumMatrix;
 import us.ihmc.utilities.screwTheory.DesiredJointAccelerationCalculator;
@@ -159,6 +160,12 @@ public class MomentumSolver
       this.desiredCentroidalMomentumRate.checkAndSet(desiredCentroidalMomentumRate);
    }
 
+   public void setDesiredCentroidalLinearMomentumRate(FrameVector desiredCentroidalLinearMomentumRate)
+   {
+      this.desiredCentroidalMomentumRate.getExpressedInFrame().checkReferenceFrameMatch(desiredCentroidalLinearMomentumRate.getReferenceFrame());
+      this.desiredCentroidalMomentumRate.setLinearPart(desiredCentroidalLinearMomentumRate.getVector());
+   }
+   
    public void setDesiredJointAcceleration(InverseDynamicsJoint joint, DenseMatrix64F jointAcceleration)
    {
       jointSpaceAccelerations.put(joint, jointAcceleration);
@@ -280,7 +287,8 @@ public class MomentumSolver
          DesiredJointAccelerationCalculator desiredJointAccelerationCalculator = new DesiredJointAccelerationCalculator(jacobian, null);    // TODO: garbage
          desiredJointAccelerationCalculator.computeJacobianDerivativeTerm(convectiveTerm);
          twistCalculator.packRelativeTwist(twistOfCurrentWithRespectToNew, rootJointSuccessor, jacobian.getEndEffector());
-         convectiveTerm.changeFrame(rootJointSuccessor.getBodyFixedFrame(), twistOfCurrentWithRespectToNew, twistOfCurrentWithRespectToNew);
+         twistCalculator.packRelativeTwist(twistOfBodyWithRespectToBase, jacobian.getBase(), jacobian.getEndEffector());
+         convectiveTerm.changeFrame(rootJointSuccessor.getBodyFixedFrame(), twistOfCurrentWithRespectToNew, twistOfBodyWithRespectToBase);
          convectiveTerm.changeFrameNoRelativeMotion(rootJoint.getFrameAfterJoint());
          convectiveTerm.packMatrix(convectiveTermMatrix, 0);
 
