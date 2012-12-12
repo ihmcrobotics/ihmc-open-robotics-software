@@ -4,5 +4,5 @@ public interface YoAppearanceDefinition
 {
    public void setTransparancy(double transparancy);
 
-   public double getTransparancy();
+   public double getTransparency();
 }

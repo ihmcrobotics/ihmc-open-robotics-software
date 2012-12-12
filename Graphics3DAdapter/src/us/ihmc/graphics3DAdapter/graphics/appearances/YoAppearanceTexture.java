@@ -3,16 +3,16 @@ package us.ihmc.graphics3DAdapter.graphics.appearances;
 import java.awt.Component;
 import java.net.URL;
 
-public class YoAppearanceTexture extends YoAppearanceTransparancy
+public class YoAppearanceTexture extends YoAppearanceTransparency
 {
    private final URL fileURL;
-   private final Component comp;
+   private final Component component;
 
-   public YoAppearanceTexture(URL fileURL, Component comp)
+   public YoAppearanceTexture(URL fileURL, Component component)
    {
       super();
       this.fileURL = fileURL;
-      this.comp = comp;
+      this.component = component;
    }
 
    public URL getFileURL()
@@ -20,9 +20,9 @@ public class YoAppearanceTexture extends YoAppearanceTransparancy
       return fileURL;
    }
 
-   public Component getComp()
+   public Component getComponent()
    {
-      return comp;
+      return component;
    }
 
 }

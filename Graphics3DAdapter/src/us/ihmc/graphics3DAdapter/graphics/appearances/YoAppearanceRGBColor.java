@@ -4,32 +4,32 @@ import java.awt.Color;
 
 import javax.vecmath.Color3f;
 
-public class YoAppearanceRGBColor extends YoAppearanceTransparancy
+public class YoAppearanceRGBColor extends YoAppearanceTransparency
 {
    private final Color3f color; 
    
-   public YoAppearanceRGBColor(Color3f color, double transparancy)
+   public YoAppearanceRGBColor(Color3f color, double transparency)
    {
       this.color = new Color3f(color);
-      this.transparancy = transparancy;
+      setTransparency(transparency);
    }
    
-   public YoAppearanceRGBColor(Color color, double transparancy)
+   public YoAppearanceRGBColor(Color color, double transparency)
    {
       this.color = new Color3f(color);
-      this.transparancy = transparancy;
+      setTransparency(transparency);
    }
    
-   public YoAppearanceRGBColor(float red, float green, float blue, double transparancy)
+   public YoAppearanceRGBColor(float red, float green, float blue, double transparency)
    {
       this.color = new Color3f(red, green, blue);
-      this.transparancy = transparancy;
+      setTransparency(transparency);
    }
    
-   public YoAppearanceRGBColor(double red, double green, double blue, double transparancy)
+   public YoAppearanceRGBColor(double red, double green, double blue, double transparency)
    {
       this.color = new Color3f((float) red, (float) green, (float) blue);
-      this.transparancy = transparancy;
+      setTransparency(transparency);
    }
 
    public float getRed()
