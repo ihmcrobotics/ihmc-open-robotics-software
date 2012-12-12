@@ -11,10 +11,10 @@ public class LinkGraphicsAddModelFile extends LinkGraphicsInstruction
       this(fileName, null);
    }
 
-   public LinkGraphicsAddModelFile(String fileName, YoAppearanceDefinition appearence)
+   public LinkGraphicsAddModelFile(String fileName, YoAppearanceDefinition appearance)
    {
       this.fileName = fileName;
-      this.appearance = appearence;
+      setAppearance(appearance);
    }
 
    public String getFileName()
@@ -26,9 +26,8 @@ public class LinkGraphicsAddModelFile extends LinkGraphicsInstruction
    public String toString()
    {
 	   String ret = "\t\t\t<Add3DSFile>\n\t\t\t\t<Name>"+fileName+"</Name>\n";
-	   if (appearance != null) {
-		   ret += appearance;
-	   }
+	   if (getAppearance() != null)
+         ret += getAppearance().toString();
 	   ret += "\t\t\t</Add3DSFile>\n";
 	   return ret;
    }

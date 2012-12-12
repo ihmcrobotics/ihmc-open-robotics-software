@@ -17,7 +17,7 @@ public class LinkGraphicsAddHeightMap extends LinkGraphicsInstruction
       this.xPointsPerSide = xPointsPerSide;
       this.yPointsPerSide = yPointsPerSide;
       
-      this.appearance = appearance;
+      setAppearance(appearance);
       
       this.transform = transform;
    }
