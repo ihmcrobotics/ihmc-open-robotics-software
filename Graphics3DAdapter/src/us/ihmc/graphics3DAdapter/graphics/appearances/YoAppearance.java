@@ -94,12 +94,12 @@ public class YoAppearance
 
    public static YoAppearanceDefinition RGBColor(double red, double green, double blue)
    {
-      return new YoAppearanceRGBColor(red, green, blue);
+      return new YoAppearanceRGBColor(red, green, blue, 0.0);
    }
 
    public static YoAppearanceDefinition RGBColor(float red, float green, float blue)
    {
-      return new YoAppearanceRGBColor(red, green, blue);
+      return new YoAppearanceRGBColor(red, green, blue, 0.0);
 
    }
 
