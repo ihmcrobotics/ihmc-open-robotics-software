@@ -38,6 +38,22 @@ public abstract class ConvexOptimizationAdapterTest
    }
    
    @Test
+   public void testASimpleRedundantEqualityCase()
+   {
+      // Minimize x subject to x = 2 and x = 2;
+      ConvexOptimizationAdapter convexOptimizationAdapter = createConvexOptimizationAdapter();
+      
+      convexOptimizationAdapter.setLinearCostFunctionVector(new double[]{1.0});
+      convexOptimizationAdapter.setLinearEqualityConstraintsAMatrix(new double[][]{{1.0}, {1.0}});
+      convexOptimizationAdapter.setLinearEqualityConstraintsBVector(new double[]{2.0, 2.0});
+      
+      double[] solution = convexOptimizationAdapter.solve();
+      
+      assertEquals(1, solution.length);
+      assertEquals(2.0, solution[0], 1e-7);
+   }
+   
+   @Test
    public void testASimpleInequalityCase()
    {
       // Minimize x subject to -x <= -2; (x >= 2)
