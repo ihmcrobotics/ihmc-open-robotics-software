@@ -4,7 +4,6 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceDefinition;
 
 public abstract class LinkGraphicsInstruction implements LinkGraphicsPrimitiveInstruction
 {
-
    private boolean hasChanged = false;
    private YoAppearanceDefinition appearance = null;
 
@@ -13,7 +12,7 @@ public abstract class LinkGraphicsInstruction implements LinkGraphicsPrimitiveIn
       return hasChanged;
    }
    
-   public void setHasChanged()
+   public final void setHasChanged()
    {
       this.hasChanged = true;
    }
