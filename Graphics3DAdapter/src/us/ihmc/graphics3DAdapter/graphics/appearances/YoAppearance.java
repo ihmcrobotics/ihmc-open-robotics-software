@@ -233,7 +233,7 @@ public class YoAppearance
 
    public static YoAppearanceDefinition Transparent()
    {
-      return new YoAppearanceTransparant();
+      return new YoAppearanceTransparent();
    }
 
    public static void makeTransparent(YoAppearanceDefinition appearance, double f)
