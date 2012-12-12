@@ -74,6 +74,7 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractAdjustableD
       FrameVector2d desiredVelocity = desiredVelocityControlModule.getDesiredVelocity();
       FrameVector2d toLeftOfDesiredHeading = new FrameVector2d(desiredHeading.getReferenceFrame(), -desiredHeading.getY(), desiredHeading.getX());
 
+      desiredVelocity.changeFrame(desiredHeading.getReferenceFrame());
       velocityMagnitudeInHeading.set(desiredVelocity.dot(desiredHeading));
       velocityMagnitudeToLeftOfHeading.set(desiredVelocity.dot(toLeftOfDesiredHeading));
 
