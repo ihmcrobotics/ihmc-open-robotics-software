@@ -3,7 +3,7 @@ package us.ihmc.graphics3DAdapter.camera;
 import java.awt.Canvas;
 
 
-public interface CameraAdapter
+public interface ViewportAdapter
 {
 
    public abstract Canvas getCanvas();
