@@ -944,9 +944,9 @@ public class LinkGraphics
     *
     * @param polygonPoint Array containing Point3d's to be used when generating the shape.
     */
-   public void addPolygon(Point3d[] polygonPoint)
+   public LinkGraphicsAddPolygonDouble addPolygon(Point3d[] polygonPoint)
    {
-      addPolygon(polygonPoint, YoAppearance.Black());
+      return addPolygon(polygonPoint, YoAppearance.Black());
 
       // linkGraphicsInstructions.add(new LinkGraphicsAddPolygonDouble(polygonPoint));
    }
@@ -960,9 +960,11 @@ public class LinkGraphics
     * @param polygonPoints Array containing the points
     * @param appearance Appearance to be used with the new polygon.  See {@link YoAppopearance YoAppearance} for implementations.
     */
-   public void addPolygon(Point3d[] polygonPoints, YoAppearanceDefinition yoAppearance)
+   public LinkGraphicsAddPolygonDouble addPolygon(Point3d[] polygonPoints, YoAppearanceDefinition yoAppearance)
    {
-      linkGraphicsInstructions.add(new LinkGraphicsAddPolygonDouble(polygonPoints, yoAppearance));
+      LinkGraphicsAddPolygonDouble linkGraphicsAddPolygonDouble = new LinkGraphicsAddPolygonDouble(polygonPoints, yoAppearance);
+      linkGraphicsInstructions.add(linkGraphicsAddPolygonDouble);
+      return linkGraphicsAddPolygonDouble;
    }
    
    
@@ -1022,5 +1024,10 @@ public class LinkGraphics
       {
          selectedListener.selected(graphics3dNode, modifierKeyHolder, location, cameraPosition, lookAtDirection);
       }
+   }
+   
+   public void registerSelectedListener(SelectedListener selectedListener)
+   {
+      selectedListeners.add(selectedListener);
    }
 }

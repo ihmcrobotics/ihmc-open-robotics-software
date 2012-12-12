@@ -326,7 +326,7 @@ public class Graphics3DAdapterExampleOne
          if (transparency > 1.0) transparency = 0.0;
          
          Color3f color = new Color3f((float) Math.random(), (float) Math.random(), (float) Math.random());
-         YoAppearanceRGBColor appearance = new YoAppearanceRGBColor(color);
+         YoAppearanceRGBColor appearance = new YoAppearanceRGBColor(color, 0.0);
          appearance.setTransparancy(transparency);
          instruction.setAppearance(appearance);
       }
