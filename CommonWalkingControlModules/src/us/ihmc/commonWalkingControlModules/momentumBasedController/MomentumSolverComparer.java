@@ -75,8 +75,8 @@ public class MomentumSolverComparer
             RandomMatrices.setRandom(jointAcceleration, -1.0, 1.0, random);
             solver.setDesiredJointAcceleration(joint, jointAcceleration);
          }
-         solver.setDesiredCentroidalMomentumRate(desiredMomentumRate);
-         solver.solve();
+         solver.compute();
+         solver.solve(desiredMomentumRate);
       }
 
       long stopNanos = System.nanoTime();
