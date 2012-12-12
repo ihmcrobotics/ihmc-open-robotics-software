@@ -80,7 +80,6 @@ public class MomentumSolverTest
 
       SpatialForceVector desiredMomentumRate = new SpatialForceVector(centerOfMassFrame, RandomTools.getRandomVector(random),
                                                   RandomTools.getRandomVector(random));
-      solver.setDesiredCentroidalMomentumRate(desiredMomentumRate);
 
       Map<InverseDynamicsJoint, DenseMatrix64F> jointAccelerations = new HashMap<InverseDynamicsJoint, DenseMatrix64F>();
       for (RevoluteJoint joint : revoluteJoints)
@@ -92,7 +91,8 @@ public class MomentumSolverTest
       }
 
       twistCalculator.compute();
-      solver.solve();
+      solver.compute();
+      solver.solve(desiredMomentumRate);
 
       for (RevoluteJoint joint : revoluteJoints)
       {
@@ -136,8 +136,7 @@ public class MomentumSolverTest
       MomentumSolver solver = createAndInitializeMomentumOptimizer(elevator, rootJoint, sixDoFJoints, revoluteJoints, DT, centerOfMassFrame, twistCalculator);
 
       SpatialForceVector desiredMomentumRate = new SpatialForceVector(centerOfMassFrame, RandomTools.getRandomVector(random),
-            RandomTools.getRandomVector(random));
-      solver.setDesiredCentroidalMomentumRate(desiredMomentumRate);
+                                                  RandomTools.getRandomVector(random));
 
       Map<InverseDynamicsJoint, DenseMatrix64F> jointAccelerations = new HashMap<InverseDynamicsJoint, DenseMatrix64F>();
       for (RevoluteJoint joint : revoluteJoints)
@@ -149,7 +148,8 @@ public class MomentumSolverTest
       }
 
       twistCalculator.compute();
-      solver.solve();
+      solver.compute();
+      solver.solve(desiredMomentumRate);
 
       for (RevoluteJoint joint : revoluteJoints)
       {
@@ -192,10 +192,9 @@ public class MomentumSolverTest
       MomentumSolver solver = createAndInitializeMomentumOptimizer(elevator, rootJoint, sixDoFJoints, oneDoFJoints, DT, centerOfMassFrame, twistCalculator);
 
       SpatialForceVector desiredMomentumRate = new SpatialForceVector(centerOfMassFrame, RandomTools.getRandomVector(random),
-            RandomTools.getRandomVector(random));
+                                                  RandomTools.getRandomVector(random));
 
-      solver.setDesiredCentroidalMomentumRate(desiredMomentumRate);
-      
+
       MechanismGeometricJacobian jacobian = new MechanismGeometricJacobian(rootBody, secondBody, rootJoint.getFrameAfterJoint());
 
 //    SpatialAccelerationVector spatialAcceleration = new SpatialAccelerationVector(jacobian.getEndEffectorFrame(), elevatorFrame,
@@ -204,11 +203,13 @@ public class MomentumSolverTest
                                                          jacobian.getEndEffectorFrame(), RandomTools.getRandomVector(random),
                                                          RandomTools.getRandomVector(random));
 
-      Pair<SpatialAccelerationVector, DenseMatrix64F> pair = new Pair<SpatialAccelerationVector, DenseMatrix64F>(spatialAcceleration, new DenseMatrix64F(SpatialMotionVector.SIZE, 0));
+      Pair<SpatialAccelerationVector, DenseMatrix64F> pair = new Pair<SpatialAccelerationVector, DenseMatrix64F>(spatialAcceleration,
+                                                                new DenseMatrix64F(SpatialMotionVector.SIZE, 0));
       solver.setDesiredSpatialAcceleration(jacobian, pair);
 
       twistCalculator.compute();
-      solver.solve();
+      solver.compute();
+      solver.solve(desiredMomentumRate);
 
       checkTaskSpaceAcceleration(rootJoint, twistCalculator, jacobian, pair, 1e-9);
       checkAgainstInverseDynamicsCalculator(rootJoint, desiredMomentumRate, 1e-6);
@@ -240,13 +241,12 @@ public class MomentumSolverTest
       centerOfMassFrame.update();
 
       TwistCalculator twistCalculator = new TwistCalculator(elevator.getBodyFixedFrame(), elevator);
-      MomentumSolver solver = createAndInitializeMomentumOptimizer(elevator, rootJoint, sixDoFJoints,
-                                 randomFloatingChain.getRevoluteJoints(), DT, centerOfMassFrame, twistCalculator);
+      MomentumSolver solver = createAndInitializeMomentumOptimizer(elevator, rootJoint, sixDoFJoints, randomFloatingChain.getRevoluteJoints(), DT,
+                                 centerOfMassFrame, twistCalculator);
 
       SpatialForceVector desiredMomentumRate = new SpatialForceVector(centerOfMassFrame, RandomTools.getRandomVector(random),
-            RandomTools.getRandomVector(random));
-      solver.setDesiredCentroidalMomentumRate(desiredMomentumRate);
-      
+                                                  RandomTools.getRandomVector(random));
+
       RigidBody base = rootJoint.getSuccessor();
       List<RevoluteJoint> revoluteJoints = randomFloatingChain.getRevoluteJoints();
       RigidBody endEffector = revoluteJoints.get(revoluteJoints.size() - 1).getSuccessor();
@@ -254,12 +254,14 @@ public class MomentumSolverTest
       SpatialAccelerationVector internalAcceleration = new SpatialAccelerationVector(endEffector.getBodyFixedFrame(), base.getBodyFixedFrame(),
                                                           endEffector.getBodyFixedFrame(), RandomTools.getRandomVector(random),
                                                           RandomTools.getRandomVector(random));
-      Pair<SpatialAccelerationVector, DenseMatrix64F> pair = new Pair<SpatialAccelerationVector, DenseMatrix64F>(internalAcceleration, new DenseMatrix64F(SpatialMotionVector.SIZE, 0));
+      Pair<SpatialAccelerationVector, DenseMatrix64F> pair = new Pair<SpatialAccelerationVector, DenseMatrix64F>(internalAcceleration,
+                                                                new DenseMatrix64F(SpatialMotionVector.SIZE, 0));
 
       solver.setDesiredSpatialAcceleration(jacobian, pair);
 
       twistCalculator.compute();
-      solver.solve();
+      solver.compute();
+      solver.solve(desiredMomentumRate);
 
       checkInternalAcceleration(rootJoint, twistCalculator, jacobian, pair, 1e-9);
       checkAgainstInverseDynamicsCalculator(rootJoint, desiredMomentumRate, 1e-6);
@@ -323,13 +325,13 @@ public class MomentumSolverTest
    }
 
    private void checkInternalAcceleration(SixDoFJoint rootJoint, TwistCalculator twistCalculator, MechanismGeometricJacobian jacobian,
-         Pair<SpatialAccelerationVector, DenseMatrix64F> pair, double epsilon)
+           Pair<SpatialAccelerationVector, DenseMatrix64F> pair, double epsilon)
    {
       RigidBody elevator = rootJoint.getPredecessor();
       ReferenceFrame rootFrame = elevator.getBodyFixedFrame();
       SpatialAccelerationVector rootAcceleration = new SpatialAccelerationVector(rootFrame, rootFrame, rootFrame);
       SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(elevator, rootFrame, rootAcceleration, twistCalculator,
-            true, true);
+                                                                       true, true);
       spatialAccelerationCalculator.compute();
 
       SpatialAccelerationVector checkAcceleration = new SpatialAccelerationVector();
@@ -339,7 +341,7 @@ public class MomentumSolverTest
 
       JUnitTools.assertSpatialMotionVectorEquals(spatialAcceleration, checkAcceleration, epsilon);
    }
-   
+
    private static void checkAgainstNumericalDifferentiation(SixDoFJoint rootJoint, List<SixDoFJoint> sixDoFJoints, List<RevoluteJoint> joints, double dt,
            SpatialForceVector desiredMomentumRate, double epsilon)
    {
