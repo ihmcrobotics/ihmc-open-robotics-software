@@ -33,7 +33,7 @@ public class ClassicCameraController implements CameraController
    private double trackDX = 0.0, trackDY = 0.0, trackDZ = 0.0;
    private double dollyDX = 2.0, dollyDY = 12.0, dollyDZ = 0.0;
 
-   private ViewportAdapter cameraAdapter;
+   private ViewportAdapter viewportAdapter;
 
    // Flying
    private boolean fly = true;
@@ -68,9 +68,9 @@ public class ClassicCameraController implements CameraController
 
    private final CameraTrackingAndDollyPositionHolder cameraTrackAndDollyVariablesHolder;
 
-   public ClassicCameraController(ViewportAdapter cameraAdapter, CameraTrackingAndDollyPositionHolder cameraTrackAndDollyVariablesHolder)
+   public ClassicCameraController(ViewportAdapter viewportAdapter, CameraTrackingAndDollyPositionHolder cameraTrackAndDollyVariablesHolder)
    {
-      this.cameraAdapter = cameraAdapter;
+      this.viewportAdapter = viewportAdapter;
 
       this.camX = CAMERA_START_X;
       this.camY = CAMERA_START_Y;
@@ -146,8 +146,8 @@ public class ClassicCameraController implements CameraController
       //      else
       this.fieldOfView = config.fieldOfView;
 
-      if ((fieldOfView < 0.0) && (cameraAdapter != null))
-         fieldOfView = cameraAdapter.getFieldOfView();
+      if ((fieldOfView < 0.0) && (viewportAdapter != null))
+         fieldOfView = viewportAdapter.getFieldOfView();
       else
          setFieldOfView(fieldOfView);
 
@@ -651,7 +651,7 @@ public class ClassicCameraController implements CameraController
    private Vector3d rotVector = new Vector3d();
    private AxisAngle4d rotAxisAngle4d = new AxisAngle4d();
 
-   public void doMouseDraggedLeft(int dx, int dy, Transform3D currXform)
+   public void doMouseDraggedLeft(int dx, int dy)
    {
       // Rotate around fix point:
 
@@ -674,9 +674,7 @@ public class ClassicCameraController implements CameraController
       delZ0 = camZ - fixZ;
 
       // v3d.set(delX0, delY0, delZ0);
-
-      rotVector.set(-1.0, 0.0, 0.0);
-      currXform.transform(rotVector);
+      rotVector.cross(new Vector3d(0.0, 0.0, -1.0), v3d);
       rotAxisAngle4d.set(rotVector, dy * rotate_factor / 4.0);
 
       t3d.set(rotAxisAngle4d);
@@ -707,7 +705,7 @@ public class ClassicCameraController implements CameraController
 
    }
 
-   public void doMouseDraggedRight(int dx, int dy, Transform3D currXform)
+   public void doMouseDraggedRight(int dx, int dy)
    {
       // Elevate up and down
       double delX0 = camX - fixX, delY0 = camY - fixY, delZ0 = camZ - fixZ;
@@ -731,7 +729,7 @@ public class ClassicCameraController implements CameraController
       // v3d.set(delX0, delY0, delZ0);
 
       rotVector.set(-1.0, 0.0, 0.0);
-      currXform.transform(rotVector);
+      rotVector.cross(new Vector3d(0.0, 0.0, -1.0), v3d);
       rotAxisAngle4d.set(rotVector, dy * rotate_camera_factor / 4.0);
 
       t3d.set(rotAxisAngle4d);
@@ -773,9 +771,9 @@ public class ClassicCameraController implements CameraController
       if (fieldOfView > MAX_FIELD_OF_VIEW)
          fieldOfView = MAX_FIELD_OF_VIEW;
 
-      if (cameraAdapter != null)
+      if (viewportAdapter != null)
       {
-         cameraAdapter.setFieldOfView(fieldOfView);
+         viewportAdapter.setFieldOfView(fieldOfView);
       }
    }
 
@@ -783,12 +781,12 @@ public class ClassicCameraController implements CameraController
    {
       // Zooms in and out
 
-      if ((this.isMounted) && (cameraAdapter != null))
+      if ((this.isMounted) && (viewportAdapter != null))
       {
          // zoom_scale = zoom_scale + dy * 0.1;
          // if (zoom_scale < 0.1) zoom_scale = 0.1;
 
-         double fieldOfView = cameraAdapter.getFieldOfView();
+         double fieldOfView = viewportAdapter.getFieldOfView();
          fieldOfView = fieldOfView + dy * 0.02;
 
          setFieldOfView(fieldOfView);
@@ -874,8 +872,8 @@ public class ClassicCameraController implements CameraController
    public void pan(double dx, double dy)
    {
       double distanceFromCameraToFix = Math.sqrt(Math.pow(camX - fixX, 2) + Math.pow(camY - fixY, 2) + Math.pow(camZ - fixZ, 2));
-      dx *= distanceFromCameraToFix / cameraAdapter.getPhysicalWidth() * .00023;
-      dy *= distanceFromCameraToFix / cameraAdapter.getPhysicalHeight() * .00007;
+      dx *= distanceFromCameraToFix / viewportAdapter.getPhysicalWidth() * .00023;
+      dy *= distanceFromCameraToFix / viewportAdapter.getPhysicalHeight() * .00007;
       double theta = Math.PI / 2 + Math.atan2((camZ - fixZ), Math.hypot(camX - fixX, camY - fixY));
       if (!isTracking || !isTrackingZ)
       {
