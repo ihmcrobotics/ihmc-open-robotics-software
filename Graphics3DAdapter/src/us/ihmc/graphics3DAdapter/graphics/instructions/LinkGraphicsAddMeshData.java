@@ -10,7 +10,7 @@ public class LinkGraphicsAddMeshData extends LinkGraphicsInstruction
    public LinkGraphicsAddMeshData(MeshDataHolder meshData, YoAppearanceDefinition appearance)
    {
       this.meshData = meshData;
-      this.appearance = appearance;
+      setAppearance(appearance);
    }
 
    public MeshDataHolder getMeshData()
@@ -22,8 +22,8 @@ public class LinkGraphicsAddMeshData extends LinkGraphicsInstruction
    {
     String ret = "\t\t\t<AddMeshData>\n";
     ret += "\t\t\t\t<MeshData>"+ meshData +"</MeshData>\n";
-    if (appearance != null)
-      ret += appearance.toString();
+    if (getAppearance() != null)
+       ret += getAppearance().toString();
     ret += "\t\t\t</AddMeshData>\n";
     return ret;
    }

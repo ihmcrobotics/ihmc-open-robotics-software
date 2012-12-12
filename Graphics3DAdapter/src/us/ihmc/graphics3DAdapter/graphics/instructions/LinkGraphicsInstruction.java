@@ -5,12 +5,22 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceDefinition;
 public abstract class LinkGraphicsInstruction implements LinkGraphicsPrimitiveInstruction
 {
 
-   boolean hasChanged = false;
-   protected YoAppearanceDefinition appearance = null;
+   private boolean hasChanged = false;
+   private YoAppearanceDefinition appearance = null;
 
    public final boolean hasChanged()
    {
       return hasChanged;
+   }
+   
+   public void setHasChanged()
+   {
+      this.hasChanged = true;
+   }
+   
+   public final void resetHasChanged()
+   {
+      hasChanged = false;
    }
 
    public final YoAppearanceDefinition getAppearance()
@@ -24,9 +34,6 @@ public abstract class LinkGraphicsInstruction implements LinkGraphicsPrimitiveIn
       hasChanged = true;
    }
 
-   public final void reset()
-   {
-      hasChanged = false;
-   }
+   
 
 }
