@@ -4,9 +4,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.media.j3d.Appearance;
 import javax.media.j3d.Transform3D;
-import javax.vecmath.Color3f;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
@@ -87,20 +85,6 @@ public class LinkGraphics
       linkGraphicsInstructions = new ArrayList<LinkGraphicsPrimitiveInstruction>();
    }
 
-   /**
-    * gets a color from an appearance
-    */
-   public Color3f getColor(Appearance app)
-   {
-      Color3f color = new Color3f();
-      if (app.getMaterial() != null)
-         app.getMaterial().getAmbientColor(color);
-      else
-         return null;
-
-      return color;
-   }
-
    public ArrayList<LinkGraphicsPrimitiveInstruction> getLinkGraphicsInstructions()
    {
       return linkGraphicsInstructions;
@@ -121,13 +105,6 @@ public class LinkGraphics
    {
       this.linkGraphicsInstructions.add(instruction);
    }
-
-   /*
-    * public void removeAllGraphics() { for(int i=0; i<linkBG.numChildren();
-    * i++) { //Node child = linkBG.getChild(i); linkBG.removeChild(i); }
-    * 
-    * this.numShapes = 0; this.lastGroup = linkBG; }
-    */
 
    /**
     * Translates from the current position by the specified distances.  Graphic
@@ -263,12 +240,6 @@ public class LinkGraphics
       linkGraphicsInstructions.add(new LinkGraphicsIdentity());
    }
 
-
-   /*
-    * protected void addTransformGroup(TransformGroup transGroup) {
-    * this.lastGroup.addChild(transGroup); this.numShapes++; }
-    */
-
    /**
     * Adds the specified VRML file to the center of the current coordinate system
     * using the default appearance.  VRML, or Virtual Reality Modeling Language, is
@@ -280,8 +251,6 @@ public class LinkGraphics
    public void addVRMLFile(URL fileURL)
    {
       addVRMLFile(fileURL, null);
-
-      // linkGraphicsInstructions.add(new LinkGraphicsAddVRMLFile(fileURL.getPath()));
    }
 
    /**
@@ -295,9 +264,7 @@ public class LinkGraphics
     */
    public void addVRMLFile(URL fileUrl, YoAppearanceDefinition yoAppearanceDefinition)
    {
-      
       linkGraphicsInstructions.add(new LinkGraphicsAddVRMLFile(fileUrl.getPath(), yoAppearanceDefinition));
-
    }
 
    /**
@@ -311,7 +278,6 @@ public class LinkGraphics
     */
    public void addVRMLFile(String fileName, YoAppearanceDefinition app)
    {
-      
          linkGraphicsInstructions.add(new LinkGraphicsAddVRMLFile(fileName, app));
    }
 
@@ -326,8 +292,6 @@ public class LinkGraphics
    public void addVRMLFile(String fileName)
    {
       addVRMLFile(fileName, null);
-
-      // linkGraphicsInstructions.add(new LinkGraphicsAddVRMLFile(fileName));
    }
 
    /**
@@ -341,8 +305,6 @@ public class LinkGraphics
    public void addModelFile(URL fileURL)
    {
       addModelFile(fileURL, null);
-
-      // linkGraphicsInstructions.add(new LinkGraphicsAdd3DSFile(fileURL.getPath()));
    }
 
    /**
@@ -405,8 +367,7 @@ public class LinkGraphics
    */
    public void addModelFile(String fileName, YoAppearanceDefinition app)
    {
-     
-         linkGraphicsInstructions.add(new LinkGraphicsAddModelFile(fileName, app));
+      linkGraphicsInstructions.add(new LinkGraphicsAddModelFile(fileName, app));
    }
 
    public void addCoordinateSystem(double length)
@@ -417,7 +378,6 @@ public class LinkGraphics
    public void addCoordinateSystem(double length, YoAppearanceDefinition arrowAppearance)
    {
       addCoordinateSystem(length, YoAppearance.Red(), YoAppearance.White(), YoAppearance.Blue(), arrowAppearance);
-
    }
 
    /**
@@ -430,7 +390,6 @@ public class LinkGraphics
     */
    public void addCoordinateSystem(double length, YoAppearanceDefinition xAxisAppearance, YoAppearanceDefinition yAxisAppearance, YoAppearanceDefinition zAxisAppearance, YoAppearanceDefinition arrowAppearance)
    {
-     
       linkGraphicsInstructions.add(new LinkGraphicsAddCoordinateSystem(length));
    }
 
@@ -452,8 +411,6 @@ public class LinkGraphics
    public void addCube(double lx, double ly, double lz)
    {
       addCube(lx, ly, lz, YoAppearance.Black());
-
-      // linkGraphicsInstructions.add(new LinkGraphicsAddCube(lx, ly, lz));
    }
 
    /**
@@ -475,8 +432,7 @@ public class LinkGraphics
     */
    public void addCube(double lx, double ly, double lz, YoAppearanceDefinition cubeApp)
    {
-     
-         linkGraphicsInstructions.add(new LinkGraphicsAddCube(lx, ly, lz, cubeApp));
+      linkGraphicsInstructions.add(new LinkGraphicsAddCube(lx, ly, lz, cubeApp));
    }
 
    /**
@@ -498,8 +454,6 @@ public class LinkGraphics
    public void addWedge(double lx, double ly, double lz)
    {
       addWedge(lx, ly, lz, YoAppearance.Black());
-
-      // linkGraphicsInstructions.add(new LinkGraphicsAddWedge(lx, ly, lz));
    }
 
    /**
@@ -541,8 +495,6 @@ public class LinkGraphics
    public void addSphere(double radius)
    {
       addSphere(radius, YoAppearance.Black());
-
-      //    linkGraphicsInstructions.add(new LinkGraphicsAddSphere(radius));
    }
 
    /**
@@ -591,8 +543,6 @@ public class LinkGraphics
    public void addEllipsoid(double xRad, double yRad, double zRad)
    {
       addEllipsoid(xRad, yRad, zRad, YoAppearance.Black());
-
-      // linkGraphicsInstructions.add(new LinkGraphicsAddEllipsoid(xRad, yRad, zRad));
    }
 
    /**
@@ -635,8 +585,6 @@ public class LinkGraphics
    public void addCylinder(double height, double radius)
    {
       addCylinder(height, radius, YoAppearance.Black());
-
-      // linkGraphicsInstructions.add(new LinkGraphicsAddCylinder(height, radius));
    }
 
    /**
@@ -656,10 +604,9 @@ public class LinkGraphics
     */
    public LinkGraphicsAddCylinder addCylinder(double height, double radius, YoAppearanceDefinition cylApp)
    {
-      
-         LinkGraphicsAddCylinder instruction = new LinkGraphicsAddCylinder(height, radius, cylApp);
-         linkGraphicsInstructions.add(instruction);
-         return instruction;
+      LinkGraphicsAddCylinder instruction = new LinkGraphicsAddCylinder(height, radius, cylApp);
+      linkGraphicsInstructions.add(instruction);
+      return instruction;
    }
 
    /**
@@ -679,8 +626,6 @@ public class LinkGraphics
    public void addCone(double height, double radius)
    {
       addCone(height, radius, YoAppearance.Black());
-
-      // linkGraphicsInstructions.add(new LinkGraphicsAddCone(height, radius));
    }
 
    /**
@@ -700,8 +645,7 @@ public class LinkGraphics
     */
    public void addCone(double height, double radius, YoAppearanceDefinition coneApp)
    {
-      
-         linkGraphicsInstructions.add(new LinkGraphicsAddCone(height, radius, coneApp));
+      linkGraphicsInstructions.add(new LinkGraphicsAddCone(height, radius, coneApp));
    }
 
    /**
@@ -726,8 +670,6 @@ public class LinkGraphics
    public void addGenTruncatedCone(double height, double bx, double by, double tx, double ty)
    {
       addGenTruncatedCone(height, bx, by, tx, ty, YoAppearance.Black());
-
-      // linkGraphicsInstructions.add(new LinkGraphicsAddTruncatedCone(height, bx, by, tx, ty));
    }
 
    /**
@@ -777,8 +719,6 @@ public class LinkGraphics
    public void addHemiEllipsoid(double xRad, double yRad, double zRad)
    {
       addHemiEllipsoid(xRad, yRad, zRad, YoAppearance.Black());
-
-      // linkGraphicsInstructions.add(new LinkGraphicsAddHemiEllipsoid(xRad, yRad, zRad));
    }
 
    /**
@@ -829,9 +769,6 @@ public class LinkGraphics
    public void addArcTorus(double startAngle, double endAngle, double majorRadius, double minorRadius)
    {
       addArcTorus(startAngle, endAngle, majorRadius, minorRadius, YoAppearance.Black());
-
-      // addCylinder(1.0f, 0.2f);
-      // linkGraphicsInstructions.add(new LinkGraphicsAddArcTorus(startAngle, endAngle, majorRadius, minorRadius));
    }
 
    /**
@@ -860,10 +797,9 @@ public class LinkGraphics
     */
    public LinkGraphicsAddArcTorus addArcTorus(double startAngle, double endAngle, double majorRadius, double minorRadius, YoAppearanceDefinition arcTorusApp)
    {
-
-         LinkGraphicsAddArcTorus instruction = new LinkGraphicsAddArcTorus(startAngle, endAngle, majorRadius, minorRadius, arcTorusApp);
-         linkGraphicsInstructions.add(instruction);
-         return instruction;
+      LinkGraphicsAddArcTorus instruction = new LinkGraphicsAddArcTorus(startAngle, endAngle, majorRadius, minorRadius, arcTorusApp);
+      linkGraphicsInstructions.add(instruction);
+      return instruction;
    }
 
    /**
@@ -888,8 +824,6 @@ public class LinkGraphics
    public void addPyramidCube(double lx, double ly, double lz, double lh)
    {
       addPyramidCube(lx, ly, lz, lh, YoAppearance.Black());
-
-      // linkGraphicsInstructions.add(new LinkGraphicsAddPyramidCube(lx, ly, lz, lh));
    }
 
    /**
@@ -947,8 +881,6 @@ public class LinkGraphics
    public LinkGraphicsAddPolygonDouble addPolygon(Point3d[] polygonPoint)
    {
       return addPolygon(polygonPoint, YoAppearance.Black());
-
-      // linkGraphicsInstructions.add(new LinkGraphicsAddPolygonDouble(polygonPoint));
    }
 
    /**
@@ -984,7 +916,6 @@ public class LinkGraphics
       LinkGraphicsInstruction instruction = new LinkGraphicsAddText(text, yoAppearance);
       linkGraphicsInstructions.add(instruction);
       return instruction;
-      
    }
    
    public void createInertiaEllipsoid(Matrix3d momentOfInertia, Vector3d comOffset, double mass, YoAppearanceDefinition appearance)
@@ -993,7 +924,6 @@ public class LinkGraphics
       Vector3d ellipsoidRadii = InertiaTools.getInertiaEllipsoidRadii(principalMomentsOfInertia, mass);
 
       this.addEllipsoid(ellipsoidRadii.x, ellipsoidRadii.y, ellipsoidRadii.z, appearance);
-
       this.identity();
    }
 
@@ -1016,8 +946,7 @@ public class LinkGraphics
       linkGraphicsInstructions.add(instruction);
       return instruction;
    }
-
-
+   
    public void notifySelectedListeners(Graphics3DNode graphics3dNode, ModifierKeyHolder modifierKeyHolder, Point3d location, Point3d cameraPosition, Vector3d lookAtDirection)
    {
       for(SelectedListener selectedListener : selectedListeners)
