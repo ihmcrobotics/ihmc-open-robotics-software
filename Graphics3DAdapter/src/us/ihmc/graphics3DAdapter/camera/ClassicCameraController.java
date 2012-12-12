@@ -66,9 +66,9 @@ public class ClassicCameraController implements CameraController
    private int cameraKeyPointIndex;
    private ArrayList<Integer> cameraKeyPoints = new ArrayList<Integer>(0);
 
-   private final CameraTrackAndDollyVariablesHolder cameraTrackAndDollyVariablesHolder;
+   private final CameraTrackingAndDollyPositionHolder cameraTrackAndDollyVariablesHolder;
 
-   public ClassicCameraController(ViewportAdapter cameraAdapter, CameraTrackAndDollyVariablesHolder cameraTrackAndDollyVariablesHolder)
+   public ClassicCameraController(ViewportAdapter cameraAdapter, CameraTrackingAndDollyPositionHolder cameraTrackAndDollyVariablesHolder)
    {
       this.cameraAdapter = cameraAdapter;
 
@@ -101,7 +101,7 @@ public class ClassicCameraController implements CameraController
       return isMounted;
    }
 
-   public CameraTrackAndDollyVariablesHolder getCameraTrackAndDollyVariablesHolder()
+   public CameraTrackingAndDollyPositionHolder getCameraTrackAndDollyVariablesHolder()
    {
       return cameraTrackAndDollyVariablesHolder;
    }
@@ -330,21 +330,21 @@ public class ClassicCameraController implements CameraController
       {
          if (isTrackingX)
          {
-            double trackX = cameraTrackAndDollyVariablesHolder.getTrackXVar();
+            double trackX = cameraTrackAndDollyVariablesHolder.getTrackingX();
             if (!Double.isNaN(trackX))
                fixX = trackX + trackDX;
          }
 
          if (isTrackingY)
          {
-            double trackY = cameraTrackAndDollyVariablesHolder.getTrackYVar();
+            double trackY = cameraTrackAndDollyVariablesHolder.getTrackingY();
             if (!Double.isNaN(trackY))
                fixY = trackY + trackDY;
          }
 
          if (isTrackingZ)
          {
-            double trackZ = cameraTrackAndDollyVariablesHolder.getTrackZVar();
+            double trackZ = cameraTrackAndDollyVariablesHolder.getTrackingZ();
             if (!Double.isNaN(trackZ))
                fixZ = trackZ + trackDZ;
          }
@@ -352,7 +352,7 @@ public class ClassicCameraController implements CameraController
 
       if (isDolly)
       {
-         double dollyX = cameraTrackAndDollyVariablesHolder.getDollyXVar();
+         double dollyX = cameraTrackAndDollyVariablesHolder.getDollyX();
          if (isDollyX)
          {
             if (!Double.isNaN(dollyX))
@@ -361,20 +361,20 @@ public class ClassicCameraController implements CameraController
 
          if (isDollyY)
          {
-            double dollyY = cameraTrackAndDollyVariablesHolder.getDollyYVar();
+            double dollyY = cameraTrackAndDollyVariablesHolder.getDollyY();
             if (!Double.isNaN(dollyY))
                camY = dollyY + dollyDY;
          }
 
          if (isDollyZ)
          {
-            double dollyZ = cameraTrackAndDollyVariablesHolder.getDollyZVar();
+            double dollyZ = cameraTrackAndDollyVariablesHolder.getDollyZ();
             if (!Double.isNaN(dollyZ))
                camZ = dollyZ + dollyDZ;
          }
       }
 
-      double fieldOfView = cameraTrackAndDollyVariablesHolder.getFieldOfViewVar();
+      double fieldOfView = cameraTrackAndDollyVariablesHolder.getFieldOfView();
       if (!Double.isNaN(fieldOfView))
          setFieldOfView(fieldOfView);
 
@@ -1021,32 +1021,32 @@ public class ClassicCameraController implements CameraController
 
    public double getTrackXVar()
    {
-      return cameraTrackAndDollyVariablesHolder.getTrackXVar();
+      return cameraTrackAndDollyVariablesHolder.getTrackingX();
    }
 
    public double getTrackYVar()
    {
-      return cameraTrackAndDollyVariablesHolder.getTrackYVar();
+      return cameraTrackAndDollyVariablesHolder.getTrackingY();
    }
 
    public double getTrackZVar()
    {
-      return cameraTrackAndDollyVariablesHolder.getTrackZVar();
+      return cameraTrackAndDollyVariablesHolder.getTrackingZ();
    }
 
    public double getDollyXVar()
    {
-      return cameraTrackAndDollyVariablesHolder.getDollyXVar();
+      return cameraTrackAndDollyVariablesHolder.getDollyX();
    }
 
    public double getDollyYVar()
    {
-      return cameraTrackAndDollyVariablesHolder.getDollyYVar();
+      return cameraTrackAndDollyVariablesHolder.getDollyY();
    }
 
    public double getDollyZVar()
    {
-      return cameraTrackAndDollyVariablesHolder.getDollyZVar();
+      return cameraTrackAndDollyVariablesHolder.getDollyZ();
    }
 
 

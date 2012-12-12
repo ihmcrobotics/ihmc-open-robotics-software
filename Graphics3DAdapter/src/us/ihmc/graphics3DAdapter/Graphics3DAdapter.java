@@ -6,7 +6,7 @@ import java.net.URL;
 import javax.vecmath.Color3f;
 
 import us.ihmc.graphics3DAdapter.camera.ViewportAdapter;
-import us.ihmc.graphics3DAdapter.camera.CameraTrackAndDollyVariablesHolder;
+import us.ihmc.graphics3DAdapter.camera.CameraTrackingAndDollyPositionHolder;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceDefinition;
 import us.ihmc.graphics3DAdapter.holders.NavigatingCameraHolder;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
@@ -16,7 +16,7 @@ public interface Graphics3DAdapter
    public void addRootNode(Graphics3DNode rootNode);
    public void removeRootNode(Graphics3DNode rootNode);
    
-   public ViewportAdapter createNewViewport(CameraTrackAndDollyVariablesHolder cameraTrackAndDollyYoVariablesHolder, GraphicsDevice graphicsDevice,
+   public ViewportAdapter createNewViewport(CameraTrackingAndDollyPositionHolder cameraTrackAndDollyYoVariablesHolder, GraphicsDevice graphicsDevice,
          NavigatingCameraHolder navigatingCameraHolder);
    
    public void setHeightMap(HeightMap heightMap);
