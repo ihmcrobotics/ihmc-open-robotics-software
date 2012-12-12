@@ -9,15 +9,17 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector2d;
 public class ManualDesiredVelocityControlModule implements DesiredVelocityControlModule
 {
    private final YoVariableRegistry registry = new YoVariableRegistry("SimpleDesiredVelocityControlModule");
-   private final YoFrameVector2d desiredVelocity = new YoFrameVector2d("desiredVelocity", "", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector2d desiredVelocity;
    
-   public ManualDesiredVelocityControlModule(YoVariableRegistry parentRegistry)
+   public ManualDesiredVelocityControlModule(ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry)
    {
+      desiredVelocity = new YoFrameVector2d("desiredVelocity", "", referenceFrame, registry);
       parentRegistry.addChild(registry);
    }
    
    public void setDesiredVelocity(FrameVector2d newDesiredVelocity)
    {
+      newDesiredVelocity.changeFrame(desiredVelocity.getReferenceFrame());
       desiredVelocity.set(newDesiredVelocity);  
    }
 

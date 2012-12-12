@@ -93,7 +93,7 @@ public class HeadingAndVelocityEvaluationScript implements Updatable
 
    public void update(double time)
    {
-      desiredHeadingControlModule.updateDesiredHeadingFrame();
+//      desiredHeadingControlModule.updateDesiredHeadingFrame();
 
       FrameVector2d desiredHeading = desiredHeadingControlModule.getDesiredHeading();
       double previousDesiredHeadingAngle = desiredHeadingControlModule.getDesiredHeadingAngle();

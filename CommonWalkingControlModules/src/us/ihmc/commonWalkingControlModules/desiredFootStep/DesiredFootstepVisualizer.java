@@ -268,7 +268,7 @@ public class DesiredFootstepVisualizer
 
       SimpleDesiredHeadingControlModule desiredHeadingControlModule = new SimpleDesiredHeadingControlModule(desiredHeadingFinal, controlDT, parentRegistry);
 
-      ManualDesiredVelocityControlModule desiredVelocityControlModule = new ManualDesiredVelocityControlModule(parentRegistry);
+      ManualDesiredVelocityControlModule desiredVelocityControlModule = new ManualDesiredVelocityControlModule(ReferenceFrame.getWorldFrame(), parentRegistry);
 
 //    SimpleDesiredFootstepCalculator desiredFootstepCalculator = new SimpleDesiredFootstepCalculator(ankleZUpFrames,
 //                                                                                    desiredHeadingControlModule,

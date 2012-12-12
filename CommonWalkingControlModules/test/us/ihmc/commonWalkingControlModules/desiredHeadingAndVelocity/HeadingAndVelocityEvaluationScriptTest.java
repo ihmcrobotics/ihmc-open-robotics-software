@@ -52,7 +52,7 @@ public class HeadingAndVelocityEvaluationScriptTest
       double desiredHeadingFinal = 0.0;
       
       SimpleDesiredHeadingControlModule desiredHeadingControlModule = new SimpleDesiredHeadingControlModule(desiredHeadingFinal , controlDT, parentRegistry);
-      ManualDesiredVelocityControlModule desiredVelocityControlModule = new ManualDesiredVelocityControlModule(parentRegistry);
+      ManualDesiredVelocityControlModule desiredVelocityControlModule = new ManualDesiredVelocityControlModule(ReferenceFrame.getWorldFrame(), parentRegistry);
       
       boolean cycleThroughAllEvents = true;
       HeadingAndVelocityEvaluationScript script = new HeadingAndVelocityEvaluationScript(cycleThroughAllEvents, controlDT, desiredHeadingControlModule, desiredVelocityControlModule, parentRegistry); 
