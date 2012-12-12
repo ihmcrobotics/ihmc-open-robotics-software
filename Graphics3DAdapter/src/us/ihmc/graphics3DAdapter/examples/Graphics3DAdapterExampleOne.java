@@ -19,7 +19,7 @@ import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
 import us.ihmc.graphics3DAdapter.ModifierKeyHolder;
 import us.ihmc.graphics3DAdapter.NodeType;
 import us.ihmc.graphics3DAdapter.SelectedListener;
-import us.ihmc.graphics3DAdapter.camera.CameraAdapter;
+import us.ihmc.graphics3DAdapter.camera.ViewportAdapter;
 import us.ihmc.graphics3DAdapter.camera.CameraTrackAndDollyVariablesHolder;
 import us.ihmc.graphics3DAdapter.graphics.LinkGraphics;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
@@ -103,11 +103,11 @@ public class Graphics3DAdapterExampleOne
       box.setGraphicsObject(boxGraphics);
       adapter.addRootNode(box);
 
-      CameraAdapter camera = adapter.createNewCamera(cameraTrackAndDollyVariablesHolder, null, null);
+      ViewportAdapter camera = adapter.createNewViewport(cameraTrackAndDollyVariablesHolder, null, null);
       Canvas canvas = camera.getCanvas();
       createNewWindow(canvas);
       
-      CameraAdapter secondCamera = adapter.createNewCamera(cameraTrackAndDollyVariablesHolder, null, null);
+      ViewportAdapter secondCamera = adapter.createNewViewport(cameraTrackAndDollyVariablesHolder, null, null);
       createNewWindow(secondCamera.getCanvas());
       
       
@@ -189,7 +189,7 @@ public class Graphics3DAdapterExampleOne
       adapter.addSelectedListener(selectedListener);
       node2.addSelectedListener(selectedListener);
 
-      CameraAdapter camera = adapter.createNewCamera(cameraTrackAndDollyVariablesHolder, null, null);
+      ViewportAdapter camera = adapter.createNewViewport(cameraTrackAndDollyVariablesHolder, null, null);
       Canvas canvas = camera.getCanvas();
       JPanel panel = new JPanel(new BorderLayout());
       panel.add("Center", canvas);
