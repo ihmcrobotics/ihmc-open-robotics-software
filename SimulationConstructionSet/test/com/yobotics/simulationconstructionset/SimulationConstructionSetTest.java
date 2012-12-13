@@ -11,7 +11,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import us.ihmc.graphics3DAdapter.graphics.LinkGraphics;
+import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.utilities.keyboardAndMouse.GhostMousePlayback;
 
 public class SimulationConstructionSetTest
@@ -577,7 +577,7 @@ public class SimulationConstructionSetTest
          
          rootJoint.setPosition(new Point3d(0.1, 0.2, 1.2));
          
-         LinkGraphics linkGraphics = new LinkGraphics();
+         Graphics3DObject linkGraphics = new Graphics3DObject();
          linkGraphics.addCube(0.1, 0.1, 0.1);
          
          body.setLinkGraphics(linkGraphics);
