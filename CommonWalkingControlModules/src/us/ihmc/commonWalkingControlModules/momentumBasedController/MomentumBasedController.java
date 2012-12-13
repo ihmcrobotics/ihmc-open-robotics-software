@@ -113,7 +113,7 @@ public class MomentumBasedController implements RobotController
    private final YoFrameVector desiredPelvisForce;
    private final YoFrameVector desiredPelvisTorque;
    private final ReferenceFrame centerOfMassFrame;
-   
+
    private final AxisAngleOrientationController pelvisOrientationController;
 
    private final DoubleYoVariable kAngularMomentumZ = new DoubleYoVariable("kAngularMomentumZ", registry);
@@ -152,8 +152,8 @@ public class MomentumBasedController implements RobotController
 
       this.bipedSupportPolygons = bipedSupportPolygons;
       this.pelvisOrientationController = new AxisAngleOrientationController("pelvis", fullRobotModel.getRootJoint().getFrameAfterJoint(), registry);
-      pelvisOrientationController.setProportionalGains(100.0, 100.0, 100.0);
-      pelvisOrientationController.setDerivativeGains(20.0, 20.0, 20.0);
+      pelvisOrientationController.setProportionalGains(10.0, 10.0, 10.0);
+      pelvisOrientationController.setDerivativeGains(2.0, 2.0, 2.0);
 
       ReferenceFrame elevatorFrame = fullRobotModel.getElevatorFrame();
       for (RobotSide robotSide : RobotSide.values())
@@ -429,40 +429,67 @@ public class MomentumBasedController implements RobotController
       }
 
       solver.compute();
-      
-      
-      // TODO: cleanup
-//      DenseMatrix64F momentumSubspace = new DenseMatrix64F(SpatialForceVector.SIZE, 3);
-//      momentumSubspace.set(3, 0, 1.0);
-//      momentumSubspace.set(4, 1, 1.0);
-//      momentumSubspace.set(5, 2, 1.0);
-//      
-//      DenseMatrix64F momentumMultipliers = new DenseMatrix64F(3, 1);
-//      MatrixTools.setDenseMatrixFromTuple3d(momentumMultipliers, desiredCentroidalMomentumRate.getLinearPartCopy(), 0, 0);
-//      
-//      DenseMatrix64F accelerationSubspace = new DenseMatrix64F(SpatialMotionVector.SIZE, 3);
-//      accelerationSubspace.set(0, 0, 1.0);
-//      accelerationSubspace.set(1, 1, 1.0);
-//      accelerationSubspace.set(2, 2, 1.0);
-//      
-//      DenseMatrix64F accelerationMultipliers = new DenseMatrix64F(3, 1);
-//      
-//      Twist rootJointTwist = new Twist();
-//      twistCalculator.packTwistOfBody(rootJointTwist, fullRobotModel.getRootJoint().getSuccessor());
-//      ReferenceFrame pelvisFrame = fullRobotModel.getRootJoint().getFrameAfterJoint();
-//      rootJointTwist.changeFrame(pelvisFrame);
+
+
+      // TODO
+//    if (supportLeg != null)
+//    {
+////       solver.solve(desiredCentroidalMomentumRate);
+//       
+//       SpatialAccelerationVector desiredRootJointAcceleration = new SpatialAccelerationVector();
+//       fullRobotModel.getRootJoint().packDesiredJointAcceleration(desiredRootJointAcceleration);
+//       
+//       DenseMatrix64F momentumSubspace = new DenseMatrix64F(SpatialForceVector.SIZE, 3);
+////       momentumSubspace.set(2, 0, 1.0);
+//       momentumSubspace.set(3, 0, 1.0);
+//       momentumSubspace.set(4, 1, 1.0);
+//       momentumSubspace.set(5, 2, 1.0);
+//       
+//       DenseMatrix64F momentumMultipliers = new DenseMatrix64F(3, 1);
+////       Vector3d angularPart = desiredCentroidalMomentumRate.getAngularPartCopy();
+////       momentumMultipliers.set(0, 0, angularPart.getZ());        
+////       MatrixTools.setDenseMatrixFromTuple3d(momentumMultipliers, desiredCentroidalMomentumRate.getLinearPartCopy(), 1, 0);
+//       MatrixTools.setDenseMatrixFromTuple3d(momentumMultipliers, desiredCentroidalMomentumRate.getLinearPartCopy(), 0, 0);
+//       
+//       DenseMatrix64F accelerationSubspace = new DenseMatrix64F(SpatialMotionVector.SIZE, 3);
+//       accelerationSubspace.set(0, 0, 1.0);
+//       accelerationSubspace.set(1, 1, 1.0);
+//       accelerationSubspace.set(2, 2, 1.0);
+//       
+//       DenseMatrix64F accelerationMultipliers = new DenseMatrix64F(3, 1);
+//       
+//       Twist rootJointTwist = new Twist();
+//       twistCalculator.packTwistOfBody(rootJointTwist, fullRobotModel.getRootJoint().getSuccessor());
+//       ReferenceFrame pelvisFrame = fullRobotModel.getRootJoint().getFrameAfterJoint();
+//       rootJointTwist.changeFrame(pelvisFrame);
 //
-//      FrameOrientation desiredPelvisOrientation = new FrameOrientation(worldFrame);
-//      desiredPelvisOrientation.changeFrame(pelvisFrame);
-//      FrameVector desiredPelvisAngularAcceleration = new FrameVector(pelvisFrame);
-//      FrameVector desiredAngularVelocity = new FrameVector(pelvisFrame);
-//      FrameVector currentAngularVelocity = new FrameVector(rootJointTwist.getExpressedInFrame(), rootJointTwist.getAngularPartCopy());
-//      FrameVector feedForward = new FrameVector(pelvisFrame);
-//      pelvisOrientationController.compute(desiredPelvisAngularAcceleration, desiredPelvisOrientation, desiredAngularVelocity, currentAngularVelocity, feedForward);
-//      MatrixTools.setDenseMatrixFromTuple3d(accelerationMultipliers, desiredPelvisAngularAcceleration.getVector(), 0, 0);
+//       FrameOrientation desiredPelvisOrientation = new FrameOrientation(worldFrame);
+//       desiredPelvisOrientation.changeFrame(pelvisFrame);
+//       FrameVector desiredPelvisAngularAcceleration = new FrameVector(pelvisFrame);
+//       FrameVector desiredAngularVelocity = new FrameVector(pelvisFrame);
+//       FrameVector currentAngularVelocity = new FrameVector(rootJointTwist.getExpressedInFrame(), rootJointTwist.getAngularPartCopy());
+//       FrameVector feedForward = new FrameVector(pelvisFrame);
+//       pelvisOrientationController.compute(desiredPelvisAngularAcceleration, desiredPelvisOrientation, desiredAngularVelocity, currentAngularVelocity, feedForward);
+////       accelerationMultipliers.set(0, 0, desiredPelvisAngularAcceleration.getX());
+////       accelerationMultipliers.set(1, 0, desiredPelvisAngularAcceleration.getY());
+//       
+//       MatrixTools.setDenseMatrixFromTuple3d(accelerationMultipliers, desiredPelvisAngularAcceleration.getVector(), 0, 0);
+////       MatrixTools.setDenseMatrixFromTuple3d(accelerationMultipliers, desiredRootJointAcceleration.getAngularPartCopy(), 0, 0);
 //
-//      solver.solve(accelerationSubspace, accelerationMultipliers, momentumSubspace, momentumMultipliers);
-      
+//       solver.solve(accelerationSubspace, accelerationMultipliers, momentumSubspace, momentumMultipliers);
+//       
+//       RigidBody foot = fullRobotModel.getFoot(supportLeg);
+//       Wrench footWrench = new Wrench(foot.getBodyFixedFrame(), centerOfMassFrame);
+//       solver.getRateOfChangeOfMomentum(footWrench);
+//       footWrench.add(gravitationalWrench);
+//       footWrench.changeFrame(foot.getBodyFixedFrame());
+//
+//       inverseDynamicsCalculator.setExternalWrench(foot, footWrench);
+//    }
+//    else
+//    {
+//       solver.solve(desiredCentroidalMomentumRate);
+//    }
       solver.solve(desiredCentroidalMomentumRate);
    }
 
