@@ -57,6 +57,7 @@ public class MomentumSolver
    private final DenseMatrix64F b;
    private final DenseMatrix64F bHat;
 
+   private final DenseMatrix64F aHatRootN;
    private final DenseMatrix64F f;
    private final DenseMatrix64F alpha2Beta2;
    private final DenseMatrix64F alpha2;
@@ -135,6 +136,7 @@ public class MomentumSolver
       this.vdotTaskSpace = new DenseMatrix64F(rowDimension, 1);
       this.cTaskSpace = new DenseMatrix64F(rowDimension, 1);
 
+      this.aHatRootN = new DenseMatrix64F(rowDimension, rowDimension); // will reshape later
       this.f = new DenseMatrix64F(rowDimension, rowDimension);
       this.alpha2Beta2 = new DenseMatrix64F(rowDimension, 1);
       this.alpha2 = new DenseMatrix64F(rowDimension, 1);    // will reshape later
@@ -247,6 +249,11 @@ public class MomentumSolver
       solveAndSetAccelerations(T, alpha1, N, beta1);
    }
 
+   public void getRateOfChangeOfMomentum(SpatialForceVector rateOfChangeOfMomentumToPack)
+   {
+      rateOfChangeOfMomentumToPack.set(centroidalMomentumMatrix.getReferenceFrame(), hdot);
+   }
+   
    private void solveAndSetAccelerations(DenseMatrix64F T, DenseMatrix64F alpha1, DenseMatrix64F N, DenseMatrix64F beta1)
    {
       solveAndSetRootJointAcceleration(vdotRoot, aHatRoot, b, T, alpha1, N, beta1, rootJoint);
@@ -363,15 +370,18 @@ public class MomentumSolver
       if (!MatrixFeatures.isConstantVal(orthogonalCheck, 0.0, epsilonOrthogonal))
          throw new RuntimeException("subspaces not orthogonal");
 
-      int n = SpatialMotionVector.SIZE;
-
-      // f
       int momentumSubspaceRank = N.getNumCols();
       int accelerationSubspaceRank = T.getNumCols();
-      f.reshape(aHatRoot.getNumRows(), N.getNumCols());
-      CommonOps.mult(aHatRoot, N, f);
-      f.reshape(n, n);
+      
+      // aHatRootN
+      aHatRootN.reshape(aHatRoot.getNumRows(), N.getNumCols());
+      CommonOps.mult(aHatRoot, N, aHatRootN);
+
+      // f
+      CommonOps.insert(aHatRootN, f, 0, 0);
+      CommonOps.scale(-1.0, T); // TODO: not so nice
       CommonOps.insert(T, f, 0, momentumSubspaceRank);
+      CommonOps.scale(-1.0, T); // TODO: not so nice
 
       // vdot1
       checkDimensions(T, alpha1, vdotRoot);
@@ -414,6 +424,12 @@ public class MomentumSolver
       if (accelerationSubspaceRank > 0)    // handle EJML stupidity
          CommonOps.multAdd(T, beta2, hdot);
 
+      
+      DenseMatrix64F check = new DenseMatrix64F(6, 1);
+      CommonOps.mult(aHatRoot, vdotRoot, check);
+      CommonOps.subEquals(check, hdot);
+      CommonOps.subEquals(check, b);
+      
       rootJoint.setDesiredAcceleration(vdotRoot, 0);
    }
 

@@ -65,6 +65,7 @@ import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.robotController.RobotController;
+import com.yobotics.simulationconstructionset.util.AxisAngleOrientationController;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
@@ -95,6 +96,7 @@ public class MomentumBasedController implements RobotController
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final FullRobotModel fullRobotModel;
    private final CommonWalkingReferenceFrames referenceFrames;
+   private final TwistCalculator twistCalculator;
 
    private final SideDependentList<EnumMap<LimbName, SpatialAccelerationVector>> desiredEndEffectorAccelerationsInWorld =
       SideDependentList.createListOfEnumMaps(LimbName.class);
@@ -111,6 +113,8 @@ public class MomentumBasedController implements RobotController
    private final YoFrameVector desiredPelvisForce;
    private final YoFrameVector desiredPelvisTorque;
    private final ReferenceFrame centerOfMassFrame;
+   
+   private final AxisAngleOrientationController pelvisOrientationController;
 
    private final DoubleYoVariable kAngularMomentumZ = new DoubleYoVariable("kAngularMomentumZ", registry);
    private final DoubleYoVariable kPelvisYaw = new DoubleYoVariable("kPelvisYaw", registry);
@@ -139,6 +143,7 @@ public class MomentumBasedController implements RobotController
       this.processedOutputs = processedOutputs;
       this.gravityZ = gravityZ;
 
+      this.twistCalculator = twistCalculator;
       this.momentumCalculator = new MomentumCalculator(twistCalculator);
       this.highLevelHumanoidController = highLevelHumanoidController;
 
@@ -146,6 +151,9 @@ public class MomentumBasedController implements RobotController
       this.inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, gravityZ);
 
       this.bipedSupportPolygons = bipedSupportPolygons;
+      this.pelvisOrientationController = new AxisAngleOrientationController("pelvis", fullRobotModel.getRootJoint().getFrameAfterJoint(), registry);
+      pelvisOrientationController.setProportionalGains(100.0, 100.0, 100.0);
+      pelvisOrientationController.setDerivativeGains(20.0, 20.0, 20.0);
 
       ReferenceFrame elevatorFrame = fullRobotModel.getElevatorFrame();
       for (RobotSide robotSide : RobotSide.values())
@@ -421,6 +429,40 @@ public class MomentumBasedController implements RobotController
       }
 
       solver.compute();
+      
+      
+      // TODO: cleanup
+//      DenseMatrix64F momentumSubspace = new DenseMatrix64F(SpatialForceVector.SIZE, 3);
+//      momentumSubspace.set(3, 0, 1.0);
+//      momentumSubspace.set(4, 1, 1.0);
+//      momentumSubspace.set(5, 2, 1.0);
+//      
+//      DenseMatrix64F momentumMultipliers = new DenseMatrix64F(3, 1);
+//      MatrixTools.setDenseMatrixFromTuple3d(momentumMultipliers, desiredCentroidalMomentumRate.getLinearPartCopy(), 0, 0);
+//      
+//      DenseMatrix64F accelerationSubspace = new DenseMatrix64F(SpatialMotionVector.SIZE, 3);
+//      accelerationSubspace.set(0, 0, 1.0);
+//      accelerationSubspace.set(1, 1, 1.0);
+//      accelerationSubspace.set(2, 2, 1.0);
+//      
+//      DenseMatrix64F accelerationMultipliers = new DenseMatrix64F(3, 1);
+//      
+//      Twist rootJointTwist = new Twist();
+//      twistCalculator.packTwistOfBody(rootJointTwist, fullRobotModel.getRootJoint().getSuccessor());
+//      ReferenceFrame pelvisFrame = fullRobotModel.getRootJoint().getFrameAfterJoint();
+//      rootJointTwist.changeFrame(pelvisFrame);
+//
+//      FrameOrientation desiredPelvisOrientation = new FrameOrientation(worldFrame);
+//      desiredPelvisOrientation.changeFrame(pelvisFrame);
+//      FrameVector desiredPelvisAngularAcceleration = new FrameVector(pelvisFrame);
+//      FrameVector desiredAngularVelocity = new FrameVector(pelvisFrame);
+//      FrameVector currentAngularVelocity = new FrameVector(rootJointTwist.getExpressedInFrame(), rootJointTwist.getAngularPartCopy());
+//      FrameVector feedForward = new FrameVector(pelvisFrame);
+//      pelvisOrientationController.compute(desiredPelvisAngularAcceleration, desiredPelvisOrientation, desiredAngularVelocity, currentAngularVelocity, feedForward);
+//      MatrixTools.setDenseMatrixFromTuple3d(accelerationMultipliers, desiredPelvisAngularAcceleration.getVector(), 0, 0);
+//
+//      solver.solve(accelerationSubspace, accelerationMultipliers, momentumSubspace, momentumMultipliers);
+      
       solver.solve(desiredCentroidalMomentumRate);
    }
 
