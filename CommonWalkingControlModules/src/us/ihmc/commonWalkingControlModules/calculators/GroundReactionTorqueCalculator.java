@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceDefinition;
+import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -58,7 +58,7 @@ public class GroundReactionTorqueCalculator
       DynamicGraphicObjectsList dynamicGraphicObjectsList = new DynamicGraphicObjectsList("Ground-Foot Torques");
 
       double scaleFactor = 0.01;
-      YoAppearanceDefinition appearance = YoAppearance.Purple();    // BlackMetalMaterial();
+      AppearanceDefinition appearance = YoAppearance.Purple();    // BlackMetalMaterial();
 
       for (RobotSide robotSide : RobotSide.values())
       {

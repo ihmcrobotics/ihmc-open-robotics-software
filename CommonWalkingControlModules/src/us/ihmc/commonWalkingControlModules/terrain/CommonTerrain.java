@@ -9,7 +9,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.vecmath.Point2d;
 
-import us.ihmc.graphics3DAdapter.graphics.LinkGraphics;
+import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
 
@@ -71,15 +71,15 @@ public class CommonTerrain
       return steppingStones;
    }
 
-   public ArrayList<LinkGraphics> createLinkGraphics(boolean drawGroundBelow)
+   public ArrayList<Graphics3DObject> createLinkGraphics(boolean drawGroundBelow)
    {
       if (steppingStones != null)
       {
-         ArrayList<LinkGraphics> linkGraphics = steppingStones.createLinkGraphics();
+         ArrayList<Graphics3DObject> linkGraphics = steppingStones.createLinkGraphics();
 
          if (drawGroundBelow)
          {
-            LinkGraphics groundBelow = new LinkGraphics();
+            Graphics3DObject groundBelow = new Graphics3DObject();
             groundBelow.translate(0.0, 0.0, -0.2);
             groundBelow.addCube(10.0, 10.0, 0.1, YoAppearance.Green());
 
@@ -91,9 +91,9 @@ public class CommonTerrain
 
       if (groundProfile != null)
       {
-         ArrayList<LinkGraphics> ret = new ArrayList<LinkGraphics>();
+         ArrayList<Graphics3DObject> ret = new ArrayList<Graphics3DObject>();
          
-         LinkGraphics texturedGroundLinkGraphics = new LinkGraphics();
+         Graphics3DObject texturedGroundLinkGraphics = new Graphics3DObject();
          texturedGroundLinkGraphics.addHeightMap(groundProfile, 300, 300, YoAppearance.DarkGreen());
          ret.add(texturedGroundLinkGraphics);
          return ret;
