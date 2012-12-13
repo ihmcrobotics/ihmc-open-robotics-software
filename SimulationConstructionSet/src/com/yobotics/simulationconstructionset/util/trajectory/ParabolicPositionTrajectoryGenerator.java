@@ -125,8 +125,13 @@ public class ParabolicPositionTrajectoryGenerator implements PositionTrajectoryG
 
       FramePoint finalPosition = new FramePoint(ReferenceFrame.getWorldFrame());
       finalPositionProvider.get(finalPosition);
+      
+      initialPosition.changeFrame(parabolicTrajectoryGenerator.getReferenceFrame());
+      finalPosition.changeFrame(parabolicTrajectoryGenerator.getReferenceFrame());
+      double maxAnkleHeight = Math.max(initialPosition.getZ(), finalPosition.getZ());
+      double apexHeight = maxAnkleHeight + groundClearance.getDoubleValue();
 
-      parabolicTrajectoryGenerator.initialize(initialPosition, finalPosition, groundClearance.getDoubleValue(), middleOfTrajectoryParameter);
+      parabolicTrajectoryGenerator.initialize(initialPosition, finalPosition, apexHeight, middleOfTrajectoryParameter);
    }
 
    public void compute(double time)
