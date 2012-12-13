@@ -9,8 +9,10 @@ import java.util.Map;
 import java.util.Set;
 
 import org.ejml.alg.dense.linsol.LinearSolver;
+import org.ejml.alg.dense.mult.MatrixDimensionException;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
+import org.ejml.ops.MatrixFeatures;
 
 import us.ihmc.utilities.MechanismGeometricJacobian;
 import us.ihmc.utilities.Pair;
@@ -26,6 +28,7 @@ import us.ihmc.utilities.screwTheory.ScrewTools;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.utilities.screwTheory.SpatialForceVector;
+import us.ihmc.utilities.screwTheory.SpatialMotionVector;
 import us.ihmc.utilities.screwTheory.Twist;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 
@@ -53,6 +56,18 @@ public class MomentumSolver
 
    private final DenseMatrix64F b;
    private final DenseMatrix64F bHat;
+
+   private final DenseMatrix64F f;
+   private final DenseMatrix64F alpha2Beta2;
+   private final DenseMatrix64F alpha2;
+   private final DenseMatrix64F beta2;
+   private final DenseMatrix64F aVdotRoot1;
+   private final DenseMatrix64F hdot;
+
+   private final DenseMatrix64F T;
+   private final DenseMatrix64F alpha1;
+   private final DenseMatrix64F N;
+   private final DenseMatrix64F beta1;
 
    private final SpatialAccelerationVector convectiveTerm = new SpatialAccelerationVector();
    private final TwistCalculator twistCalculator;
@@ -82,6 +97,9 @@ public class MomentumSolver
    private final Map<InverseDynamicsJoint, DenseMatrix64F> jointSpaceAccelerations = new HashMap<InverseDynamicsJoint, DenseMatrix64F>();
    private final Map<MechanismGeometricJacobian, Pair<SpatialAccelerationVector, DenseMatrix64F>> spatialAccelerations =
       new HashMap<MechanismGeometricJacobian, Pair<SpatialAccelerationVector, DenseMatrix64F>>();
+
+   private final DenseMatrix64F orthogonalCheck;
+
 
    public MomentumSolver(SixDoFJoint rootJoint, RigidBody elevator, ReferenceFrame centerOfMassFrame, TwistCalculator twistCalculator,
                          LinearSolver<DenseMatrix64F> jacobianSolver, double controlDT, YoVariableRegistry parentRegistry)
@@ -117,6 +135,18 @@ public class MomentumSolver
       this.vdotTaskSpace = new DenseMatrix64F(rowDimension, 1);
       this.cTaskSpace = new DenseMatrix64F(rowDimension, 1);
 
+      this.f = new DenseMatrix64F(rowDimension, rowDimension);
+      this.alpha2Beta2 = new DenseMatrix64F(rowDimension, 1);
+      this.alpha2 = new DenseMatrix64F(rowDimension, 1);    // will reshape later
+      this.beta2 = new DenseMatrix64F(rowDimension, 1);    // will reshape later
+      this.aVdotRoot1 = new DenseMatrix64F(rowDimension, 1);
+      this.hdot = new DenseMatrix64F(rowDimension, 1);
+
+      T = new DenseMatrix64F(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);    // will reshape later
+      alpha1 = new DenseMatrix64F(SpatialMotionVector.SIZE, 1);    // will reshape later
+      N = new DenseMatrix64F(SpatialForceVector.SIZE, SpatialForceVector.SIZE);    // will reshape later
+      beta1 = new DenseMatrix64F(SpatialForceVector.SIZE, 1);    // will reshape later
+
       yoPreviousCentroidalMomentumMatrix = new DoubleYoVariable[previousCentroidalMomentumMatrix.getNumRows()][previousCentroidalMomentumMatrix.getNumCols()];
       MatrixYoVariableConversionTools.populateYoVariables(yoPreviousCentroidalMomentumMatrix, "previousCMMatrix", registry);
 
@@ -129,6 +159,8 @@ public class MomentumSolver
 
       this.jacobianSolver = jacobianSolver;
       this.nullspaceCalculator = new NullspaceCalculator(rowDimension);
+
+      orthogonalCheck = new DenseMatrix64F(rowDimension / 2, rowDimension / 2);    // oversized unless momentumSubspace and accelerationSubspace have 3 columns each
 
       parentRegistry.addChild(registry);
    }
@@ -193,13 +225,36 @@ public class MomentumSolver
 
    public void solve(SpatialForceVector momentumRateOfChange)
    {
-      solveAndSetRootJointAcceleration(vdotRoot, aHatRoot, b, momentumRateOfChange, rootJoint);
+      T.reshape(SpatialMotionVector.SIZE, 0);
+      alpha1.reshape(T.getNumCols(), 1);
+      N.reshape(SpatialForceVector.SIZE, SpatialForceVector.SIZE);
+      beta1.reshape(N.getNumCols(), 1);
+
+      CommonOps.setIdentity(N);
+      momentumRateOfChange.packMatrix(beta1);
+
+      solveAndSetAccelerations(T, alpha1, N, beta1);
+   }
+
+   public void solve(DenseMatrix64F accelerationSubspace, DenseMatrix64F accelerationMultipliers, DenseMatrix64F momentumSubspace,
+                     DenseMatrix64F momentumMultipliers)
+   {
+      T.setReshape(accelerationSubspace);
+      alpha1.setReshape(accelerationMultipliers);
+      N.setReshape(momentumSubspace);
+      beta1.setReshape(momentumMultipliers);
+
+      solveAndSetAccelerations(T, alpha1, N, beta1);
+   }
+
+   private void solveAndSetAccelerations(DenseMatrix64F T, DenseMatrix64F alpha1, DenseMatrix64F N, DenseMatrix64F beta1)
+   {
+      solveAndSetRootJointAcceleration(vdotRoot, aHatRoot, b, T, alpha1, N, beta1, rootJoint);
       solveAndSetJointspaceAccelerations(jointSpaceAccelerations);
       solveAndSetTaskSpaceAccelerations(vdotRoot, dMap, jacobianInverseMap);
    }
-   
-   private void initializeB(DenseMatrix64F b, DenseMatrix64F centroidalMomentumMatrixDerivative,
-                            InverseDynamicsJoint[] jointsInOrder)
+
+   private void initializeB(DenseMatrix64F b, DenseMatrix64F centroidalMomentumMatrixDerivative, InverseDynamicsJoint[] jointsInOrder)
    {
       ScrewTools.packJointVelocitiesMatrix(jointsInOrder, v);
       CommonOps.mult(centroidalMomentumMatrixDerivative, v, b);
@@ -299,12 +354,75 @@ public class MomentumSolver
       }
    }
 
-   private void solveAndSetRootJointAcceleration(DenseMatrix64F vdotRoot, DenseMatrix64F aHatRoot, DenseMatrix64F b, SpatialForceVector momentumRateOfChange, SixDoFJoint rootJoint)
+   private void solveAndSetRootJointAcceleration(DenseMatrix64F vdotRoot, DenseMatrix64F aHatRoot, DenseMatrix64F b, DenseMatrix64F T, DenseMatrix64F alpha1,
+           DenseMatrix64F N, DenseMatrix64F beta1, SixDoFJoint rootJoint)
    {
-      momentumRateOfChange.packMatrix(bHat);
-      CommonOps.addEquals(bHat, b);
-      CommonOps.solve(aHatRoot, bHat, vdotRoot);
+      double epsilonOrthogonal = 1e-10;
+      orthogonalCheck.reshape(N.getNumCols(), T.getNumCols());
+      CommonOps.multTransA(N, T, orthogonalCheck);
+      if (!MatrixFeatures.isConstantVal(orthogonalCheck, 0.0, epsilonOrthogonal))
+         throw new RuntimeException("subspaces not orthogonal");
+
+      int n = SpatialMotionVector.SIZE;
+
+      // f
+      int momentumSubspaceRank = N.getNumCols();
+      int accelerationSubspaceRank = T.getNumCols();
+      f.reshape(aHatRoot.getNumRows(), N.getNumCols());
+      CommonOps.mult(aHatRoot, N, f);
+      f.reshape(n, n);
+      CommonOps.insert(T, f, 0, momentumSubspaceRank);
+
+      // vdot1
+      checkDimensions(T, alpha1, vdotRoot);
+      if (accelerationSubspaceRank == 0)    // handle EJML stupidity
+         CommonOps.set(vdotRoot, 0.0);
+      else
+         CommonOps.mult(T, alpha1, vdotRoot);
+
+      // hdot1
+      checkDimensions(N, beta1, hdot);
+      if (momentumSubspaceRank == 0)    // handle EJML stupidity
+         CommonOps.set(hdot, 0.0);
+      else
+         CommonOps.mult(N, beta1, hdot);
+
+      // aVdot1
+      CommonOps.mult(aHatRoot, vdotRoot, aVdotRoot1);
+
+      // bHat
+      bHat.set(b);
+      CommonOps.addEquals(bHat, hdot);
+      CommonOps.subEquals(bHat, aVdotRoot1);
+
+      // alpha2Beta2
+      CommonOps.solve(f, bHat, alpha2Beta2);
+
+      // alpha2
+      alpha2.reshape(momentumSubspaceRank, 1);
+      CommonOps.extract(alpha2Beta2, 0, momentumSubspaceRank, 0, 1, alpha2, 0, 0);
+
+      // beta2
+      beta2.reshape(accelerationSubspaceRank, 1);
+      CommonOps.extract(alpha2Beta2, momentumSubspaceRank, alpha2Beta2.getNumRows(), 0, 1, beta2, 0, 0);
+
+      // vdotRoot
+      if (momentumSubspaceRank > 0)    // handle EJML stupidity
+         CommonOps.multAdd(N, alpha2, vdotRoot);
+
+      // hdot
+      if (accelerationSubspaceRank > 0)    // handle EJML stupidity
+         CommonOps.multAdd(T, beta2, hdot);
+
       rootJoint.setDesiredAcceleration(vdotRoot, 0);
+   }
+
+   private void checkDimensions(DenseMatrix64F a, DenseMatrix64F b, DenseMatrix64F c)
+   {
+      if (a.numCols != b.numRows)
+         throw new MatrixDimensionException("The 'a' and 'b' matrices do not have compatible dimensions");
+      else if ((a.numRows != c.numRows) || (b.numCols != c.numCols))
+         throw new MatrixDimensionException("The results matrix does not have the desired dimensions");
    }
 
    private void solveAndSetJointspaceAccelerations(Map<InverseDynamicsJoint, DenseMatrix64F> jointSpaceAccelerations)
