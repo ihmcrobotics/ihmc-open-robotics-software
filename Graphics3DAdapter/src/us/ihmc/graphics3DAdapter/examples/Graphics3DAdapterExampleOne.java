@@ -17,32 +17,32 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
 import us.ihmc.graphics3DAdapter.ModifierKeyHolder;
-import us.ihmc.graphics3DAdapter.NodeType;
 import us.ihmc.graphics3DAdapter.SelectedListener;
 import us.ihmc.graphics3DAdapter.camera.CameraController;
 import us.ihmc.graphics3DAdapter.camera.SimpleCameraTrackingAndDollyPositionHolder;
 import us.ihmc.graphics3DAdapter.camera.ViewportAdapter;
-import us.ihmc.graphics3DAdapter.graphics.LinkGraphics;
+import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceRGBColor;
-import us.ihmc.graphics3DAdapter.graphics.instructions.LinkGraphicsInstruction;
+import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DInstruction;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
+import us.ihmc.graphics3DAdapter.structure.Graphics3DNodeType;
 import us.ihmc.utilities.ThreadTools;
 
 public class Graphics3DAdapterExampleOne
 {   
 
-   public void doExampleOne(Graphics3DAdapter graphics3DAdapter)
+   public void doExample(Graphics3DAdapter graphics3DAdapter)
    {
-      Graphics3DNode teapotAndSphereNode = new Graphics3DNode("teaPot", NodeType.JOINT);
-      LinkGraphics teapotObject = new LinkGraphics();
-      LinkGraphicsInstruction teapotAppearanceHolder = teapotObject.addTeaPot(YoAppearance.Red());
+      Graphics3DNode teapotAndSphereNode = new Graphics3DNode("teaPot", Graphics3DNodeType.JOINT);
+      Graphics3DObject teapotObject = new Graphics3DObject();
+      Graphics3DInstruction teapotAppearanceHolder = teapotObject.addTeaPot(YoAppearance.Red());
 
       teapotAndSphereNode.setGraphicsObject(teapotObject);
       graphics3DAdapter.addRootNode(teapotAndSphereNode);
       
-      Graphics3DNode box = new Graphics3DNode("box", NodeType.JOINT);
-      LinkGraphics boxGraphics = new LinkGraphics();
+      Graphics3DNode box = new Graphics3DNode("box", Graphics3DNodeType.JOINT);
+      Graphics3DObject boxGraphics = new Graphics3DObject();
       boxGraphics.addCube(1.0, 1.0, 1.0, YoAppearance.Green());
       box.setGraphicsObject(boxGraphics);
       graphics3DAdapter.addRootNode(box);
@@ -99,80 +99,7 @@ public class Graphics3DAdapterExampleOne
       }
    }
    
-   public void doExampleTwo(Graphics3DAdapter adapter)
-   {
-      Random random = new Random(1776L);
-      
-      Graphics3DNode node1 = new Graphics3DNode("node1", NodeType.JOINT);
-      
-      Transform3D transform1 = new Transform3D();
-      transform1.setTranslation(new Vector3d(2.0, 0.0, 0.0));
-      node1.setTransform(transform1);
-      
-      Graphics3DNode node2 = new Graphics3DNode("node2", NodeType.JOINT);
-      Graphics3DNode rootNode = new Graphics3DNode("rootNode", NodeType.JOINT);
-     
-      LinkGraphics object2 = createCubeObject(0.6);
-      LinkGraphics object1 = createRandomObject(random);
-      
-      node1.setGraphicsObject(object1);
-      node2.setGraphicsObject(object2);
-      
-      rootNode.addChild(node1);
-      rootNode.addChild(node2);
-      
-      adapter.addRootNode(rootNode);
-      
-      SelectedListener selectedListener = new SelectedListener()
-      {
-         public void selected(Graphics3DNode graphics3dNode, ModifierKeyHolder modifierKeyHolder, Point3d location, Point3d cameraLocation,
-               Vector3d lookAtDirection)
-         {
-            System.out.println("Selected " + graphics3dNode.getName() + " @ location " + location);                        
-            
-         }
-      };
-      
-      
-      adapter.addSelectedListener(selectedListener);
-      node2.addSelectedListener(selectedListener);
-
-      PanBackAndForthTrackingAndDollyPositionHolder cameraTrackAndDollyVariablesHolder = new PanBackAndForthTrackingAndDollyPositionHolder(0.0, 2.0, 0.2);
-
-      ViewportAdapter camera = adapter.createNewViewport(cameraTrackAndDollyVariablesHolder, null, null);
-      Canvas canvas = camera.getCanvas();
-      JPanel panel = new JPanel(new BorderLayout());
-      panel.add("Center", canvas);
-      
-      JFrame jFrame = new JFrame("Example Two");
-      Container contentPane = jFrame.getContentPane();
-      contentPane.setLayout(new BorderLayout());
-      contentPane.add("Center", panel);
-      
-      jFrame.pack();
-      jFrame.setVisible(true);
-      jFrame.setSize(800, 600);
-      
-      double rotation = 0.0;
-      
-      int count = 0;
-      
-      while (true)
-      {
-         rotation = rotation + 0.01;
-         node2.getTransform().rotZ(rotation);
-         
-         count++;
-         if (count > 200)
-         {
-            LinkGraphics randomObject = createRandomObject(random);
-            node1.setGraphicsObject(randomObject);
-            count = 0;
-         }
-         
-         ThreadTools.sleep(1L);
-      }
-   }
+   
    
    public void createWindow(Canvas canvas1, Canvas canvas2)
    {
@@ -209,32 +136,32 @@ public class Graphics3DAdapterExampleOne
       jFrame.setSize(800, 600);
    }
    
-   private LinkGraphics createSphereObject(double radius)
+   public static Graphics3DObject createSphereObject(double radius)
    {
-      LinkGraphics sphere = new LinkGraphics();
+      Graphics3DObject sphere = new Graphics3DObject();
       sphere.addSphere(radius, YoAppearance.Green());
 
       return sphere;
    }
    
-   private LinkGraphics createCylinderObject(double radius)
+   public static Graphics3DObject createCylinderObject(double radius)
    {
-      LinkGraphics cylinder = new LinkGraphics();
+      Graphics3DObject cylinder = new Graphics3DObject();
       double height = 1.0;
       cylinder.addCylinder(height, radius, YoAppearance.Pink());
 
       return cylinder;
    }
    
-   private LinkGraphics createCubeObject(double lengthWidthHeight)
+   public static Graphics3DObject createCubeObject(double lengthWidthHeight)
    {
-      LinkGraphics cube = new LinkGraphics();
+      Graphics3DObject cube = new Graphics3DObject();
       cube.addCube(lengthWidthHeight, lengthWidthHeight, lengthWidthHeight, YoAppearance.Red());
 
       return cube;
    }
    
-   private LinkGraphics createRandomObject(Random random)
+   public static Graphics3DObject createRandomObject(Random random)
    {
       int selection = random.nextInt(3);
       
@@ -262,10 +189,10 @@ public class Graphics3DAdapterExampleOne
    
    private class BlinkRunnable implements Runnable
    {
-      private final LinkGraphicsInstruction instruction;
+      private final Graphics3DInstruction instruction;
       private double transparency = 0.0;
       
-      public BlinkRunnable(LinkGraphicsInstruction instruction)
+      public BlinkRunnable(Graphics3DInstruction instruction)
       {
          this.instruction = instruction;
       }
@@ -317,18 +244,6 @@ public class Graphics3DAdapterExampleOne
          transform.setTranslation(new Vector3d(translation, 0.0, 0.0));
          transform.setScale(scale);
          node.setTransform(transform);
-      }
-   }
-
-   abstract class LinkGraphicsInstructionModifyingRunnable implements Runnable
-   {
-      LinkGraphicsInstruction instruction;
-
-      abstract public void run();
-
-      public void setLinkGraphicsInstruction(LinkGraphicsInstruction instruction)
-      {
-         this.instruction = instruction;
       }
    }
    

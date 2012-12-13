@@ -1,11 +1,11 @@
 package us.ihmc.graphics3DAdapter.graphics.instructions;
 
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceDefinition;
+import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 
-public abstract class LinkGraphicsInstruction implements LinkGraphicsPrimitiveInstruction
+public abstract class Graphics3DInstruction implements Graphics3DPrimitiveInstruction
 {
    private boolean hasChanged = false;
-   private YoAppearanceDefinition appearance = null;
+   private AppearanceDefinition appearance = null;
 
    public final boolean hasChanged()
    {
@@ -22,12 +22,12 @@ public abstract class LinkGraphicsInstruction implements LinkGraphicsPrimitiveIn
       hasChanged = false;
    }
 
-   public final YoAppearanceDefinition getAppearance()
+   public final AppearanceDefinition getAppearance()
    {
       return appearance;
    }
 
-   public final void setAppearance(YoAppearanceDefinition appearance)
+   public final void setAppearance(AppearanceDefinition appearance)
    {
       this.appearance = appearance;
       hasChanged = true;

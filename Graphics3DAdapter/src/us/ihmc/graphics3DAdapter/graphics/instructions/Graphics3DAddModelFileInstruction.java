@@ -1,17 +1,17 @@
 package us.ihmc.graphics3DAdapter.graphics.instructions;
 
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceDefinition;
+import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 
-public class LinkGraphicsAddModelFile extends LinkGraphicsInstruction
+public class Graphics3DAddModelFileInstruction extends Graphics3DInstruction
 {
    private String fileName;
 
-   public LinkGraphicsAddModelFile(String fileName)
+   public Graphics3DAddModelFileInstruction(String fileName)
    {
       this(fileName, null);
    }
 
-   public LinkGraphicsAddModelFile(String fileName, YoAppearanceDefinition appearance)
+   public Graphics3DAddModelFileInstruction(String fileName, AppearanceDefinition appearance)
    {
       this.fileName = fileName;
       setAppearance(appearance);

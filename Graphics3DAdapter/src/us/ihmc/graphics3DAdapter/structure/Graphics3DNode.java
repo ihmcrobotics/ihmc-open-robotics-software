@@ -9,17 +9,16 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.graphics3DAdapter.ModifierKeyHolder;
-import us.ihmc.graphics3DAdapter.NodeType;
 import us.ihmc.graphics3DAdapter.SelectedListener;
-import us.ihmc.graphics3DAdapter.graphics.LinkGraphics;
+import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 
 public class Graphics3DNode
 {
    private final String name;
-   private final NodeType nodeType;
+   private final Graphics3DNodeType nodeType;
    private final Transform3D transform = new Transform3D();
    
-   private LinkGraphics graphicsObject;
+   private Graphics3DObject graphicsObject;
    private boolean hasGraphicsObjectChanged = false;
 
    private final ArrayList<Graphics3DNode> childeren = new ArrayList<Graphics3DNode>();
@@ -27,7 +26,7 @@ public class Graphics3DNode
    
    private boolean freezeFrame = false;
 
-   public Graphics3DNode(String name, NodeType nodeType)
+   public Graphics3DNode(String name, Graphics3DNodeType nodeType)
    {
       this.name = name;
       this.nodeType = nodeType;
@@ -59,9 +58,9 @@ public class Graphics3DNode
       }
    }
    
-   public synchronized LinkGraphics getGraphicsObjectAndResetHasGraphicsObjectChanged()
+   public synchronized Graphics3DObject getGraphicsObjectAndResetHasGraphicsObjectChanged()
    {
-      LinkGraphics ret = graphicsObject;
+      Graphics3DObject ret = graphicsObject;
       setHasGraphicsObjectChanged(false);
       return ret;
    }
@@ -76,7 +75,7 @@ public class Graphics3DNode
       return hasGraphicsObjectChanged;
    }
 
-   public void setGraphicsObject(LinkGraphics graphicsObject)
+   public void setGraphicsObject(Graphics3DObject graphicsObject)
    {
       this.graphicsObject = graphicsObject;
       setHasGraphicsObjectChanged(true);
@@ -87,7 +86,7 @@ public class Graphics3DNode
       return name;
    }
 
-   public NodeType getNodeType()
+   public Graphics3DNodeType getNodeType()
    {
       return nodeType;
    }

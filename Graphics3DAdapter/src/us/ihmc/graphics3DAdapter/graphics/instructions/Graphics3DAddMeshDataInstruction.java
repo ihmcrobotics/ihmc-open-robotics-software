@@ -1,13 +1,13 @@
 package us.ihmc.graphics3DAdapter.graphics.instructions;
 
 import us.ihmc.graphics3DAdapter.graphics.MeshDataHolder;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceDefinition;
+import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 
-public class LinkGraphicsAddMeshData extends LinkGraphicsInstruction
+public class Graphics3DAddMeshDataInstruction extends Graphics3DInstruction
 {
    private final MeshDataHolder meshData;
    
-   public LinkGraphicsAddMeshData(MeshDataHolder meshData, YoAppearanceDefinition appearance)
+   public Graphics3DAddMeshDataInstruction(MeshDataHolder meshData, AppearanceDefinition appearance)
    {
       this.meshData = meshData;
       setAppearance(appearance);

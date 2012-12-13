@@ -1,6 +1,6 @@
 package us.ihmc.graphics3DAdapter.graphics.instructions;
 
-public class LinkGraphicsIdentity implements LinkGraphicsPrimitiveInstruction
+public class Graphics3DIdentityInstruction implements Graphics3DPrimitiveInstruction
 {
    public String toString()
    {

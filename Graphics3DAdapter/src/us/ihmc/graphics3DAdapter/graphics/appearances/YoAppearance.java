@@ -24,20 +24,20 @@ import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
 public class YoAppearance
 {
 
-   public static YoAppearanceDefinition YoboticsTexture(Component comp)
+   public static AppearanceDefinition YoboticsTexture(Component comp)
    {
       URL fileURL = Graphics3DAdapter.class.getResource("images/yobotics.jpg");
       return Texture(fileURL, comp);
    }
 
-   public static YoAppearanceDefinition Texture(URL fileURL, Component comp)
+   public static AppearanceDefinition Texture(URL fileURL, Component comp)
    {
 
       return new YoAppearanceTexture(fileURL, comp);
 
    }
 
-   public static YoAppearanceDefinition EarthTexture(Component comp)
+   public static AppearanceDefinition EarthTexture(Component comp)
    {
 
       URL fileURL = Graphics3DAdapter.class.getResource("images/earth.jpg");
@@ -45,14 +45,14 @@ public class YoAppearance
 
    }
 
-   public static YoAppearanceDefinition StoneTexture(Component comp)
+   public static AppearanceDefinition StoneTexture(Component comp)
    {
 
       URL fileURL = Graphics3DAdapter.class.getResource("images/stone.jpg");
       return Texture(fileURL, comp);
    }
 
-   public static YoAppearanceDefinition PlaneMaterial()
+   public static AppearanceDefinition PlaneMaterial()
    {
       YoAppearanceMaterial mat = new YoAppearanceMaterial();
       mat.setSpecularColor(0.5f, 0.5f, 0.5f);
@@ -62,7 +62,7 @@ public class YoAppearance
       return mat;
    }
 
-   public static YoAppearanceDefinition AluminumMaterial()
+   public static AppearanceDefinition AluminumMaterial()
    {
       YoAppearanceMaterial mat = new YoAppearanceMaterial();
       mat.setSpecularColor(0.5f, 0.5f, 0.5f);
@@ -72,7 +72,7 @@ public class YoAppearance
       return mat;
    }
 
-   public static YoAppearanceDefinition BlackMetalMaterial()
+   public static AppearanceDefinition BlackMetalMaterial()
    {
       YoAppearanceMaterial mat = new YoAppearanceMaterial();
       mat.setSpecularColor(0.5f, 0.5f, 0.5f);
@@ -82,7 +82,7 @@ public class YoAppearance
       return mat;
    }
 
-   public static YoAppearanceDefinition FenceMaterial()
+   public static AppearanceDefinition FenceMaterial()
    {
       YoAppearanceMaterial mat = new YoAppearanceMaterial();
       mat.setSpecularColor(0.4f, 0.4f, 0.4f);
@@ -92,43 +92,43 @@ public class YoAppearance
       return mat;
    }
 
-   public static YoAppearanceDefinition RGBColor(double red, double green, double blue)
+   public static AppearanceDefinition RGBColor(double red, double green, double blue)
    {
       return new YoAppearanceRGBColor(red, green, blue, 0.0);
    }
 
-   public static YoAppearanceDefinition RGBColor(float red, float green, float blue)
+   public static AppearanceDefinition RGBColor(float red, float green, float blue)
    {
       return new YoAppearanceRGBColor(red, green, blue, 0.0);
 
    }
 
-   public static YoAppearanceDefinition RGBColorFrom8BitInts(int red, int green, int blue)
+   public static AppearanceDefinition RGBColorFrom8BitInts(int red, int green, int blue)
    {
       return RGBColor(((red)) / 255.0, ((green)) / 255.0, ((blue)) / 255.0);
    }
 
-   public static YoAppearanceDefinition Color(Color color)
+   public static AppearanceDefinition Color(Color color)
    {
       return Color(new Color3f(color));
    }
    
-   public static YoAppearanceDefinition Color(Color3f color)
+   public static AppearanceDefinition Color(Color3f color)
    {
       return RGBColor(color.getX(), color.getY(), color.getZ());
    }
 
-   public static YoAppearanceDefinition Black()
+   public static AppearanceDefinition Black()
    {
       return RGBColor(0.0f, 0.0f, 0.0f);
    }
 
-   public static YoAppearanceDefinition White()
+   public static AppearanceDefinition White()
    {
       return RGBColor(1.0f, 1.0f, 1.0f);
    }
 
-   public static YoAppearanceDefinition Red()
+   public static AppearanceDefinition Red()
    {
       return RGBColor(1.0f, 0.0f, 0.0f);
    }
@@ -136,107 +136,107 @@ public class YoAppearance
    /**
     * Some colors from: http://cloford.com/resources/colours/500col.htm
     */
-   public static YoAppearanceDefinition Pink()
+   public static AppearanceDefinition Pink()
    {
       return RGBColorFrom8BitInts(255, 192, 203);
    }
 
-   public static YoAppearanceDefinition Orange()
+   public static AppearanceDefinition Orange()
    {
       return RGBColorFrom8BitInts(255, 128, 0);
    }
 
-   public static YoAppearanceDefinition Orchid()
+   public static AppearanceDefinition Orchid()
    {
       return RGBColorFrom8BitInts(218, 112, 214);
    }
 
-   public static YoAppearanceDefinition DarkRed()
+   public static AppearanceDefinition DarkRed()
    {
       return RGBColor(0.3f, 0.0f, 0.0f);
    }
 
-   public static YoAppearanceDefinition Blue()
+   public static AppearanceDefinition Blue()
    {
       return RGBColor(0.0f, 0.0f, 1.0f);
    }
 
-   public static YoAppearanceDefinition DarkBlue()
+   public static AppearanceDefinition DarkBlue()
    {
       return RGBColor(0.0f, 0.0f, 0.3f);
    }
 
-   public static YoAppearanceDefinition Brown()
+   public static AppearanceDefinition Brown()
    {
       return RGBColorFrom8BitInts(165, 42, 42);
    }
 
-   public static YoAppearanceDefinition Green()
+   public static AppearanceDefinition Green()
    {
       return RGBColor(0.0f, 1.0f, 0.0f);
    }
 
-   public static YoAppearanceDefinition DarkGreen()
+   public static AppearanceDefinition DarkGreen()
    {
       return RGBColor(0.0f, 0.3f, 0.0f);
    }
 
-   public static YoAppearanceDefinition Silver()
+   public static AppearanceDefinition Silver()
    {
       return RGBColor(0.75f, 0.75f, 0.75f);
    }
 
-   public static YoAppearanceDefinition Gray()
+   public static AppearanceDefinition Gray()
    {
       return RGBColor(0.50f, 0.50f, 0.50f);
    }
 
-   public static YoAppearanceDefinition Maroon()
+   public static AppearanceDefinition Maroon()
    {
       return RGBColor(0.50f, 0.0f, 0.0f);
    }
 
-   public static YoAppearanceDefinition Purple()
+   public static AppearanceDefinition Purple()
    {
       return RGBColor(0.50f, 0.0f, 0.50f);
    }
 
-   public static YoAppearanceDefinition Fuchsia()
+   public static AppearanceDefinition Fuchsia()
    {
       return RGBColor(1.0f, 0.0f, 1.0f);
    }
 
-   public static YoAppearanceDefinition Olive()
+   public static AppearanceDefinition Olive()
    {
       return RGBColor(0.50f, 0.50f, 0.0f);
    }
 
-   public static YoAppearanceDefinition Yellow()
+   public static AppearanceDefinition Yellow()
    {
       return RGBColor(1.0f, 1.0f, 0.0f);
    }
 
-   public static YoAppearanceDefinition Navy()
+   public static AppearanceDefinition Navy()
    {
       return RGBColor(0.0f, 0.0f, 0.50f);
    }
 
-   public static YoAppearanceDefinition Teal()
+   public static AppearanceDefinition Teal()
    {
       return RGBColor(0.0f, 0.50f, 0.50f);
    }
 
-   public static YoAppearanceDefinition Aqua()
+   public static AppearanceDefinition Aqua()
    {
       return RGBColor(0.0f, 1.0f, 1.0f);
    }
 
-   public static YoAppearanceDefinition Transparent()
+   public static AppearanceDefinition Transparent()
    {
       return new YoAppearanceTransparent();
    }
 
-   public static void makeTransparent(YoAppearanceDefinition appearance, double f)
+   public static void makeTransparent(AppearanceDefinition appearance, double f)
    {
       appearance.setTransparancy(f);
    }
