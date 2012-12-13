@@ -150,7 +150,7 @@ public class SDFRobot extends Robot
 
    private Link createLink(SDFLinkHolder link, Matrix3d rotation)
    {
-      SDFLinkGraphics linkGraphics = new SDFLinkGraphics(rotation, link.getVisuals(), resourceDirectory);
+      SDFGraphics3DObject linkGraphics = new SDFGraphics3DObject(rotation, link.getVisuals(), resourceDirectory);
 
       Link scsLink = new Link(link.getName());
       scsLink.setLinkGraphics(linkGraphics);
