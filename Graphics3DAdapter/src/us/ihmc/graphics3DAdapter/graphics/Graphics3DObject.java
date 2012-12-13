@@ -14,49 +14,38 @@ import us.ihmc.graphics3DAdapter.HeightMap;
 import us.ihmc.graphics3DAdapter.ModifierKeyHolder;
 import us.ihmc.graphics3DAdapter.SelectedListener;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceDefinition;
-import us.ihmc.graphics3DAdapter.graphics.instructions.LinkGraphicsAddArcTorus;
-import us.ihmc.graphics3DAdapter.graphics.instructions.LinkGraphicsAddCone;
-import us.ihmc.graphics3DAdapter.graphics.instructions.LinkGraphicsAddCoordinateSystem;
-import us.ihmc.graphics3DAdapter.graphics.instructions.LinkGraphicsAddCube;
-import us.ihmc.graphics3DAdapter.graphics.instructions.LinkGraphicsAddCylinder;
-import us.ihmc.graphics3DAdapter.graphics.instructions.LinkGraphicsAddEllipsoid;
-import us.ihmc.graphics3DAdapter.graphics.instructions.LinkGraphicsAddExtrudedPolygon;
-import us.ihmc.graphics3DAdapter.graphics.instructions.LinkGraphicsAddHeightMap;
-import us.ihmc.graphics3DAdapter.graphics.instructions.LinkGraphicsAddHemiEllipsoid;
-import us.ihmc.graphics3DAdapter.graphics.instructions.LinkGraphicsAddMeshData;
-import us.ihmc.graphics3DAdapter.graphics.instructions.LinkGraphicsAddModelFile;
-import us.ihmc.graphics3DAdapter.graphics.instructions.LinkGraphicsAddPolygonDouble;
-import us.ihmc.graphics3DAdapter.graphics.instructions.LinkGraphicsAddPyramidCube;
-import us.ihmc.graphics3DAdapter.graphics.instructions.LinkGraphicsAddSphere;
-import us.ihmc.graphics3DAdapter.graphics.instructions.LinkGraphicsAddTeaPot;
-import us.ihmc.graphics3DAdapter.graphics.instructions.LinkGraphicsAddText;
-import us.ihmc.graphics3DAdapter.graphics.instructions.LinkGraphicsAddTruncatedCone;
-import us.ihmc.graphics3DAdapter.graphics.instructions.LinkGraphicsAddVRMLFile;
-import us.ihmc.graphics3DAdapter.graphics.instructions.LinkGraphicsAddWedge;
-import us.ihmc.graphics3DAdapter.graphics.instructions.LinkGraphicsIdentity;
-import us.ihmc.graphics3DAdapter.graphics.instructions.LinkGraphicsInstruction;
-import us.ihmc.graphics3DAdapter.graphics.instructions.LinkGraphicsPrimitiveInstruction;
-import us.ihmc.graphics3DAdapter.graphics.instructions.LinkGraphicsRotate;
-import us.ihmc.graphics3DAdapter.graphics.instructions.LinkGraphicsRotateMatrix;
-import us.ihmc.graphics3DAdapter.graphics.instructions.LinkGraphicsScale;
-import us.ihmc.graphics3DAdapter.graphics.instructions.LinkGraphicsTranslate;
+import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
+import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DAddArcTorusInstruction;
+import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DAddConeInstruction;
+import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DAddCoordinateSystemInstruction;
+import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DAddCubeInstruction;
+import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DAddCylinderInstruction;
+import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DAddEllipsoidInstruction;
+import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DAddExtrudedPolygonInstruction;
+import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DAddHeightMapInstruction;
+import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DAddHemiEllipsoidInstruction;
+import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DAddMeshDataInstruction;
+import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DAddModelFileInstruction;
+import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DAddPolygonInstruction;
+import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DAddPyramidCubeInstruction;
+import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DAddSphereInstruction;
+import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DAddTeaPotInstruction;
+import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DAddTextInstruction;
+import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DAddTruncatedConeInstruction;
+import us.ihmc.graphics3DAdapter.graphics.instructions.GraphicsAddVRMLFileInstruction;
+import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DAddWedgeInstruction;
+import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DIdentityInstruction;
+import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DInstruction;
+import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DPrimitiveInstruction;
+import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DRotateInstruction;
+import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DRotateMatrixInstruction;
+import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DScaleInstruction;
+import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DTranslateInstruction;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
 import us.ihmc.utilities.InertiaTools;
 
-/**
- * <p>Title: SimulationConstructionSet</p>
- *
- * <p>Description: </p>
- *
- * <p>Copyright: Copyright (c) 2000</p>
- *
- * <p>Company: Yobotics, Inc.</p>
- *
- * @author not attributable
- * @version 1.0
- */
-public class LinkGraphics
+
+public class Graphics3DObject
 {
    private enum Axis
    {
@@ -67,11 +56,11 @@ public class LinkGraphics
    public static final Axis Y = Axis.Y;
    public static final Axis Z = Axis.Z;
    
-   private ArrayList<LinkGraphicsPrimitiveInstruction> linkGraphicsInstructions;
+   private ArrayList<Graphics3DPrimitiveInstruction> linkGraphicsInstructions;
    
    private final ArrayList<SelectedListener> selectedListeners = new ArrayList<SelectedListener>();
 
-   public LinkGraphics(ArrayList<LinkGraphicsPrimitiveInstruction> linkGraphicsInstructions)
+   public Graphics3DObject(ArrayList<Graphics3DPrimitiveInstruction> linkGraphicsInstructions)
    {
       this();
       this.linkGraphicsInstructions = linkGraphicsInstructions;
@@ -80,12 +69,12 @@ public class LinkGraphics
    /**
     * Default no-arg constructor.  This creates a new empty LinkGraphics component.
     */
-   public LinkGraphics()
+   public Graphics3DObject()
    {
-      linkGraphicsInstructions = new ArrayList<LinkGraphicsPrimitiveInstruction>();
+      linkGraphicsInstructions = new ArrayList<Graphics3DPrimitiveInstruction>();
    }
 
-   public ArrayList<LinkGraphicsPrimitiveInstruction> getLinkGraphicsInstructions()
+   public ArrayList<Graphics3DPrimitiveInstruction> getLinkGraphicsInstructions()
    {
       return linkGraphicsInstructions;
    }
@@ -95,13 +84,13 @@ public class LinkGraphics
     *
     * @param linkGraphics LinkGraphics to combine with.
     */
-   public void combine(LinkGraphics linkGraphics)
+   public void combine(Graphics3DObject linkGraphics)
    {
       this.identity();
       this.linkGraphicsInstructions.addAll(linkGraphics.getLinkGraphicsInstructions());
    }
    
-   public void addInstruction(LinkGraphicsPrimitiveInstruction instruction)
+   public void addInstruction(Graphics3DPrimitiveInstruction instruction)
    {
       this.linkGraphicsInstructions.add(instruction);
    }
@@ -119,7 +108,7 @@ public class LinkGraphics
     */
    public void translate(double tx, double ty, double tz)
    {
-      linkGraphicsInstructions.add(new LinkGraphicsTranslate(tx, ty, tz));
+      linkGraphicsInstructions.add(new Graphics3DTranslateInstruction(tx, ty, tz));
    }
 
    /**
@@ -133,7 +122,7 @@ public class LinkGraphics
     */
    public void translate(Vector3d translation)
    {
-      linkGraphicsInstructions.add(new LinkGraphicsTranslate(translation));
+      linkGraphicsInstructions.add(new Graphics3DTranslateInstruction(translation));
    }
 
    /**
@@ -184,7 +173,7 @@ public class LinkGraphics
     */
    public void rotate(double rotAng, Vector3d rotAxis)
    {
-      linkGraphicsInstructions.add(new LinkGraphicsRotate(rotAng, rotAxis));
+      linkGraphicsInstructions.add(new Graphics3DRotateInstruction(rotAng, rotAxis));
    }
 
    /**
@@ -198,7 +187,7 @@ public class LinkGraphics
     */
    public void rotate(Matrix3d rot)
    {
-      linkGraphicsInstructions.add(new LinkGraphicsRotateMatrix(rot));
+      linkGraphicsInstructions.add(new Graphics3DRotateMatrixInstruction(rot));
    }
 
    /**
@@ -210,7 +199,7 @@ public class LinkGraphics
     * reduce future objects size by 50% whereas 2 would double it.
     * @return 
     */
-   public LinkGraphicsScale scale(double scaleFactor)
+   public Graphics3DScaleInstruction scale(double scaleFactor)
    {
       return scale(new Vector3d(scaleFactor, scaleFactor, scaleFactor));
    }
@@ -224,9 +213,9 @@ public class LinkGraphics
     * @param scaleFactors Vector3d describing the scaling factors in each dimension.
     * @return 
     */
-   public LinkGraphicsScale scale(Vector3d scaleFactors)
+   public Graphics3DScaleInstruction scale(Vector3d scaleFactors)
    {
-      LinkGraphicsScale linkGraphicsScale = new LinkGraphicsScale(scaleFactors);
+      Graphics3DScaleInstruction linkGraphicsScale = new Graphics3DScaleInstruction(scaleFactors);
       linkGraphicsInstructions.add(linkGraphicsScale);
       return linkGraphicsScale;
    }
@@ -237,7 +226,7 @@ public class LinkGraphics
     */
    public void identity()
    {
-      linkGraphicsInstructions.add(new LinkGraphicsIdentity());
+      linkGraphicsInstructions.add(new Graphics3DIdentityInstruction());
    }
 
    /**
@@ -262,9 +251,9 @@ public class LinkGraphics
     * @param fileUrl URL describing the location of the VRML file.
     * @param yoAppearanceDefinition Appearance to use in the creation of this shape.
     */
-   public void addVRMLFile(URL fileUrl, YoAppearanceDefinition yoAppearanceDefinition)
+   public void addVRMLFile(URL fileUrl, AppearanceDefinition yoAppearanceDefinition)
    {
-      linkGraphicsInstructions.add(new LinkGraphicsAddVRMLFile(fileUrl.getPath(), yoAppearanceDefinition));
+      linkGraphicsInstructions.add(new GraphicsAddVRMLFileInstruction(fileUrl.getPath(), yoAppearanceDefinition));
    }
 
    /**
@@ -276,9 +265,9 @@ public class LinkGraphics
     * @param fileName Path to the desired file.
     * @param app Appearance to use with the VRML file.
     */
-   public void addVRMLFile(String fileName, YoAppearanceDefinition app)
+   public void addVRMLFile(String fileName, AppearanceDefinition app)
    {
-         linkGraphicsInstructions.add(new LinkGraphicsAddVRMLFile(fileName, app));
+         linkGraphicsInstructions.add(new GraphicsAddVRMLFileInstruction(fileName, app));
    }
 
    /**
@@ -316,7 +305,7 @@ public class LinkGraphics
     * @param fileURL URL pointing to the desired 3ds file.
     * @param yoAppearanceDefinition Appearance to use with the 3ds model once imported.
     */
-   public void addModelFile(URL fileURL, YoAppearanceDefinition yoAppearanceDefinition)
+   public void addModelFile(URL fileURL, AppearanceDefinition yoAppearanceDefinition)
    {
       if (fileURL == null)
       {
@@ -365,9 +354,9 @@ public class LinkGraphics
    * @param fileName
    * @param app
    */
-   public void addModelFile(String fileName, YoAppearanceDefinition app)
+   public void addModelFile(String fileName, AppearanceDefinition app)
    {
-      linkGraphicsInstructions.add(new LinkGraphicsAddModelFile(fileName, app));
+      linkGraphicsInstructions.add(new Graphics3DAddModelFileInstruction(fileName, app));
    }
 
    public void addCoordinateSystem(double length)
@@ -375,7 +364,7 @@ public class LinkGraphics
       addCoordinateSystem(length, YoAppearance.Black());
    }
 
-   public void addCoordinateSystem(double length, YoAppearanceDefinition arrowAppearance)
+   public void addCoordinateSystem(double length, AppearanceDefinition arrowAppearance)
    {
       addCoordinateSystem(length, YoAppearance.Red(), YoAppearance.White(), YoAppearance.Blue(), arrowAppearance);
    }
@@ -388,9 +377,9 @@ public class LinkGraphics
     *
     * @param length the length in meters of each axis arrow.
     */
-   public void addCoordinateSystem(double length, YoAppearanceDefinition xAxisAppearance, YoAppearanceDefinition yAxisAppearance, YoAppearanceDefinition zAxisAppearance, YoAppearanceDefinition arrowAppearance)
+   public void addCoordinateSystem(double length, AppearanceDefinition xAxisAppearance, AppearanceDefinition yAxisAppearance, AppearanceDefinition zAxisAppearance, AppearanceDefinition arrowAppearance)
    {
-      linkGraphicsInstructions.add(new LinkGraphicsAddCoordinateSystem(length));
+      linkGraphicsInstructions.add(new Graphics3DAddCoordinateSystemInstruction(length));
    }
 
    /**
@@ -430,9 +419,9 @@ public class LinkGraphics
     * @param lz length of the cube in the z direction.
     * @param cubeApp Appearance of the cube.  See {@link YoAppearance YoAppearance} for implementations.
     */
-   public void addCube(double lx, double ly, double lz, YoAppearanceDefinition cubeApp)
+   public void addCube(double lx, double ly, double lz, AppearanceDefinition cubeApp)
    {
-      linkGraphicsInstructions.add(new LinkGraphicsAddCube(lx, ly, lz, cubeApp));
+      linkGraphicsInstructions.add(new Graphics3DAddCubeInstruction(lx, ly, lz, cubeApp));
    }
 
    /**
@@ -474,9 +463,9 @@ public class LinkGraphics
     * @param lz length of the wedge in the z direction.
     * @param wedgeApp Appearance of the wedge.  See {@link YoAppearance YoAppearance} for implementations.
     */
-   public void addWedge(double lx, double ly, double lz, YoAppearanceDefinition wedgeApp)
+   public void addWedge(double lx, double ly, double lz, AppearanceDefinition wedgeApp)
    {
-         linkGraphicsInstructions.add(new LinkGraphicsAddWedge(lx, ly, lz, wedgeApp));
+         linkGraphicsInstructions.add(new Graphics3DAddWedgeInstruction(lx, ly, lz, wedgeApp));
    }
 
    /**
@@ -511,16 +500,16 @@ public class LinkGraphics
     * @param radius radius of the new sphere in meters.
     * @param sphereApp Appearance to be used with the new sphere.  See {@link YoAppearance YoAppearance} for implementations.
     */
-   public LinkGraphicsAddSphere addSphere(double radius, YoAppearanceDefinition sphereApp)
+   public Graphics3DAddSphereInstruction addSphere(double radius, AppearanceDefinition sphereApp)
    {
-      LinkGraphicsAddSphere instruction = new LinkGraphicsAddSphere(radius, sphereApp);
+      Graphics3DAddSphereInstruction instruction = new Graphics3DAddSphereInstruction(radius, sphereApp);
       linkGraphicsInstructions.add(instruction);
       return instruction;
    }
 
-   public LinkGraphicsAddMeshData addMeshData(MeshDataHolder meshData, YoAppearanceDefinition meshAppearance)
+   public Graphics3DAddMeshDataInstruction addMeshData(MeshDataHolder meshData, AppearanceDefinition meshAppearance)
    {
-      LinkGraphicsAddMeshData instruction = new LinkGraphicsAddMeshData(meshData, meshAppearance);
+      Graphics3DAddMeshDataInstruction instruction = new Graphics3DAddMeshDataInstruction(meshData, meshAppearance);
       linkGraphicsInstructions.add(instruction);
       return instruction;
    }
@@ -561,9 +550,9 @@ public class LinkGraphics
     * @param zRad z direction radius in meters
     * @param ellipsoidApp Appearance to be used with the new ellipsoid.  See {@link YoAppearance YoAppearance} for implementations.
     */
-   public LinkGraphicsAddEllipsoid addEllipsoid(double xRad, double yRad, double zRad, YoAppearanceDefinition ellipsoidApp)
+   public Graphics3DAddEllipsoidInstruction addEllipsoid(double xRad, double yRad, double zRad, AppearanceDefinition ellipsoidApp)
    {
-         LinkGraphicsAddEllipsoid instruction = new LinkGraphicsAddEllipsoid(xRad, yRad, zRad, ellipsoidApp);
+         Graphics3DAddEllipsoidInstruction instruction = new Graphics3DAddEllipsoidInstruction(xRad, yRad, zRad, ellipsoidApp);
          linkGraphicsInstructions.add(instruction);
          return instruction;
    }
@@ -602,9 +591,9 @@ public class LinkGraphics
     * @param radius cylinder radius in meters.
     * @param cylApp Appearance to be used with the new cylinder.  See {@link YoAppearance YoAppearance} for implementations.
     */
-   public LinkGraphicsAddCylinder addCylinder(double height, double radius, YoAppearanceDefinition cylApp)
+   public Graphics3DAddCylinderInstruction addCylinder(double height, double radius, AppearanceDefinition cylApp)
    {
-      LinkGraphicsAddCylinder instruction = new LinkGraphicsAddCylinder(height, radius, cylApp);
+      Graphics3DAddCylinderInstruction instruction = new Graphics3DAddCylinderInstruction(height, radius, cylApp);
       linkGraphicsInstructions.add(instruction);
       return instruction;
    }
@@ -643,9 +632,9 @@ public class LinkGraphics
     * @param radius cone radius in meters.
     * @param coneApp Appearance to be used with the new cone.  See {@link YoAppearance YoAppearance} for implementations.
     */
-   public void addCone(double height, double radius, YoAppearanceDefinition coneApp)
+   public void addCone(double height, double radius, AppearanceDefinition coneApp)
    {
-      linkGraphicsInstructions.add(new LinkGraphicsAddCone(height, radius, coneApp));
+      linkGraphicsInstructions.add(new Graphics3DAddConeInstruction(height, radius, coneApp));
    }
 
    /**
@@ -694,9 +683,9 @@ public class LinkGraphics
     * @param ty y direction width of the top in meters
     * @param coneApp Appearance to be used with the new truncated cone.  See {@link YoAppearance YoAppearance} for implementations.
     */
-   public void addGenTruncatedCone(double height, double bx, double by, double tx, double ty, YoAppearanceDefinition coneApp)
+   public void addGenTruncatedCone(double height, double bx, double by, double tx, double ty, AppearanceDefinition coneApp)
    {
-         linkGraphicsInstructions.add(new LinkGraphicsAddTruncatedCone(height, bx, by, tx, ty, coneApp));
+         linkGraphicsInstructions.add(new Graphics3DAddTruncatedConeInstruction(height, bx, by, tx, ty, coneApp));
    }
 
    /**
@@ -739,9 +728,9 @@ public class LinkGraphics
     * @param zRad radius of the ellipsoid in the z direction.
     * @param hEApp Appearance to be used with the new hemi ellipsoid.  See {@link YoAppearance YoAppearance} for implementations.
     */
-   public void addHemiEllipsoid(double xRad, double yRad, double zRad, YoAppearanceDefinition hEApp)
+   public void addHemiEllipsoid(double xRad, double yRad, double zRad, AppearanceDefinition hEApp)
    {
-         linkGraphicsInstructions.add(new LinkGraphicsAddHemiEllipsoid(xRad, yRad, zRad, hEApp));
+         linkGraphicsInstructions.add(new Graphics3DAddHemiEllipsoidInstruction(xRad, yRad, zRad, hEApp));
    }
 
    /**
@@ -795,9 +784,9 @@ public class LinkGraphics
     * @param minorRadius Distance from the center of the torus to the walls on either side.
     * @param arcTorusApp Appearance to be used with the new arctorus.  See {@link YoAppearance YoAppearance} for implementations.
     */
-   public LinkGraphicsAddArcTorus addArcTorus(double startAngle, double endAngle, double majorRadius, double minorRadius, YoAppearanceDefinition arcTorusApp)
+   public Graphics3DAddArcTorusInstruction addArcTorus(double startAngle, double endAngle, double majorRadius, double minorRadius, AppearanceDefinition arcTorusApp)
    {
-      LinkGraphicsAddArcTorus instruction = new LinkGraphicsAddArcTorus(startAngle, endAngle, majorRadius, minorRadius, arcTorusApp);
+      Graphics3DAddArcTorusInstruction instruction = new Graphics3DAddArcTorusInstruction(startAngle, endAngle, majorRadius, minorRadius, arcTorusApp);
       linkGraphicsInstructions.add(instruction);
       return instruction;
    }
@@ -846,9 +835,9 @@ public class LinkGraphics
     * @param lh Height of the pyramids in meters.
     * @param cubeApp Appearance to be used with the new pyramid cube.  See {@link YoAppearance YoAppearance} for implementations.
     */
-   public void addPyramidCube(double lx, double ly, double lz, double lh, YoAppearanceDefinition cubeApp)
+   public void addPyramidCube(double lx, double ly, double lz, double lh, AppearanceDefinition cubeApp)
    {
-      linkGraphicsInstructions.add(new LinkGraphicsAddPyramidCube(lx, ly, lz, lh, cubeApp));
+      linkGraphicsInstructions.add(new Graphics3DAddPyramidCubeInstruction(lx, ly, lz, lh, cubeApp));
    }
    
    public void addPolygon(ArrayList<Point3d> polygonPoints)
@@ -865,9 +854,9 @@ public class LinkGraphics
     * @param polygonPoints ArrayList containing the points.
     * @param appearance Appearance to be used with the new polygon.  See {@link YoAppearance YoAppearance} for implementations.
     */
-   public void addPolygon(ArrayList<Point3d> polygonPoints, YoAppearanceDefinition yoAppearance)
+   public void addPolygon(ArrayList<Point3d> polygonPoints, AppearanceDefinition yoAppearance)
    {
-      linkGraphicsInstructions.add(new LinkGraphicsAddPolygonDouble(polygonPoints, yoAppearance));
+      linkGraphicsInstructions.add(new Graphics3DAddPolygonInstruction(polygonPoints, yoAppearance));
    }
 
    /**
@@ -878,7 +867,7 @@ public class LinkGraphics
     *
     * @param polygonPoint Array containing Point3d's to be used when generating the shape.
     */
-   public LinkGraphicsAddPolygonDouble addPolygon(Point3d[] polygonPoint)
+   public Graphics3DAddPolygonInstruction addPolygon(Point3d[] polygonPoint)
    {
       return addPolygon(polygonPoint, YoAppearance.Black());
    }
@@ -892,9 +881,9 @@ public class LinkGraphics
     * @param polygonPoints Array containing the points
     * @param appearance Appearance to be used with the new polygon.  See {@link YoAppopearance YoAppearance} for implementations.
     */
-   public LinkGraphicsAddPolygonDouble addPolygon(Point3d[] polygonPoints, YoAppearanceDefinition yoAppearance)
+   public Graphics3DAddPolygonInstruction addPolygon(Point3d[] polygonPoints, AppearanceDefinition yoAppearance)
    {
-      LinkGraphicsAddPolygonDouble linkGraphicsAddPolygonDouble = new LinkGraphicsAddPolygonDouble(polygonPoints, yoAppearance);
+      Graphics3DAddPolygonInstruction linkGraphicsAddPolygonDouble = new Graphics3DAddPolygonInstruction(polygonPoints, yoAppearance);
       linkGraphicsInstructions.add(linkGraphicsAddPolygonDouble);
       return linkGraphicsAddPolygonDouble;
    }
@@ -905,20 +894,20 @@ public class LinkGraphics
       addExtrudedPolygon(polygonPoints, height, YoAppearance.Black());
    }
    
-   public void addExtrudedPolygon(List<Point2d> polygonPoints, double height, YoAppearanceDefinition appearance)
+   public void addExtrudedPolygon(List<Point2d> polygonPoints, double height, AppearanceDefinition appearance)
    {
-      LinkGraphicsInstruction instruction = new LinkGraphicsAddExtrudedPolygon(polygonPoints, height, appearance);
+      Graphics3DInstruction instruction = new Graphics3DAddExtrudedPolygonInstruction(polygonPoints, height, appearance);
       linkGraphicsInstructions.add(instruction);
    }
 
-   public LinkGraphicsInstruction addText(String text, YoAppearanceDefinition yoAppearance)
+   public Graphics3DInstruction addText(String text, AppearanceDefinition yoAppearance)
    {
-      LinkGraphicsInstruction instruction = new LinkGraphicsAddText(text, yoAppearance);
+      Graphics3DInstruction instruction = new Graphics3DAddTextInstruction(text, yoAppearance);
       linkGraphicsInstructions.add(instruction);
       return instruction;
    }
    
-   public void createInertiaEllipsoid(Matrix3d momentOfInertia, Vector3d comOffset, double mass, YoAppearanceDefinition appearance)
+   public void createInertiaEllipsoid(Matrix3d momentOfInertia, Vector3d comOffset, double mass, AppearanceDefinition appearance)
    {
       Vector3d principalMomentsOfInertia = new Vector3d(momentOfInertia.m00, momentOfInertia.m11, momentOfInertia.m22);
       Vector3d ellipsoidRadii = InertiaTools.getInertiaEllipsoidRadii(principalMomentsOfInertia, mass);
@@ -928,21 +917,21 @@ public class LinkGraphics
    }
 
    
-   public LinkGraphicsAddTeaPot addTeaPot(YoAppearanceDefinition appearance)
+   public Graphics3DAddTeaPotInstruction addTeaPot(AppearanceDefinition appearance)
    {
-      LinkGraphicsAddTeaPot linkGraphicsAddTeaPot = new LinkGraphicsAddTeaPot(appearance);
+      Graphics3DAddTeaPotInstruction linkGraphicsAddTeaPot = new Graphics3DAddTeaPotInstruction(appearance);
       linkGraphicsInstructions.add(linkGraphicsAddTeaPot);
       return linkGraphicsAddTeaPot;
    }
 
-   public LinkGraphicsInstruction addHeightMap(HeightMap heightMap, int xPointsPerSide, int yPointsPerSide, YoAppearanceDefinition appearance)
+   public Graphics3DInstruction addHeightMap(HeightMap heightMap, int xPointsPerSide, int yPointsPerSide, AppearanceDefinition appearance)
    {
       return addHeightMap(heightMap, xPointsPerSide, yPointsPerSide, appearance, null);
    }
    
-   public LinkGraphicsInstruction addHeightMap(HeightMap heightMap, int xPointsPerSide, int yPointsPerSide, YoAppearanceDefinition appearance, Transform3D transform)
+   public Graphics3DInstruction addHeightMap(HeightMap heightMap, int xPointsPerSide, int yPointsPerSide, AppearanceDefinition appearance, Transform3D transform)
    {
-      LinkGraphicsAddHeightMap instruction = new LinkGraphicsAddHeightMap(heightMap, xPointsPerSide, yPointsPerSide, appearance, transform);
+      Graphics3DAddHeightMapInstruction instruction = new Graphics3DAddHeightMapInstruction(heightMap, xPointsPerSide, yPointsPerSide, appearance, transform);
       linkGraphicsInstructions.add(instruction);
       return instruction;
    }

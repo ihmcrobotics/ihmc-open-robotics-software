@@ -7,7 +7,7 @@ import javax.vecmath.Color3f;
 
 import us.ihmc.graphics3DAdapter.camera.ViewportAdapter;
 import us.ihmc.graphics3DAdapter.camera.CameraTrackingAndDollyPositionHolder;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceDefinition;
+import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.holders.NavigatingCameraHolder;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
 
@@ -34,5 +34,5 @@ public interface Graphics3DAdapter
 
    public void setBackgroundImage(URL fileURL, Graphics3DBackgroundScaleMode backgroundScaleMode);
 
-   public void setGroundAppearance(YoAppearanceDefinition app);
+   public void setGroundAppearance(AppearanceDefinition app);
 }

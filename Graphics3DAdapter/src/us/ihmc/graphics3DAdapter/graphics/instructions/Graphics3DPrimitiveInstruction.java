@@ -1,6 +1,6 @@
 package us.ihmc.graphics3DAdapter.graphics.instructions;
 
-public interface LinkGraphicsPrimitiveInstruction
+public interface Graphics3DPrimitiveInstruction
 {
 
 }

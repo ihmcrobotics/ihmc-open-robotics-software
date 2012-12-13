@@ -2,17 +2,17 @@ package us.ihmc.graphics3DAdapter.graphics.instructions;
 
 import javax.vecmath.Vector3d;
 
-public class LinkGraphicsScale implements LinkGraphicsPrimitiveInstruction
+public class Graphics3DScaleInstruction implements Graphics3DPrimitiveInstruction
 {
    private Vector3d scaleFactor;
    private boolean changed = false;
 
-   public LinkGraphicsScale(double scale)
+   public Graphics3DScaleInstruction(double scale)
    {
       scaleFactor = new Vector3d(scale, scale, scale);
    }
 
-   public LinkGraphicsScale(Vector3d scale)
+   public Graphics3DScaleInstruction(Vector3d scale)
    {
       scaleFactor = scale;
    }

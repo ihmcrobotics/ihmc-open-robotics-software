@@ -2,12 +2,12 @@ package us.ihmc.graphics3DAdapter.graphics.instructions;
 
 import javax.vecmath.Vector3d;
 
-public class LinkGraphicsRotate implements LinkGraphicsPrimitiveInstruction
+public class Graphics3DRotateInstruction implements Graphics3DPrimitiveInstruction
 {
    private double angle;
    private Vector3d axis;
 
-   public LinkGraphicsRotate(double angle, Vector3d axis)
+   public Graphics3DRotateInstruction(double angle, Vector3d axis)
    {
       this.angle = angle;
       this.axis = axis;

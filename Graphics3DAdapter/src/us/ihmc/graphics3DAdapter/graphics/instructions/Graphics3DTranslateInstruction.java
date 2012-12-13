@@ -2,16 +2,16 @@ package us.ihmc.graphics3DAdapter.graphics.instructions;
 
 import javax.vecmath.Vector3d;
 
-public class LinkGraphicsTranslate implements LinkGraphicsPrimitiveInstruction
+public class Graphics3DTranslateInstruction implements Graphics3DPrimitiveInstruction
 {
    private Vector3d translation = new Vector3d();
 
-   public LinkGraphicsTranslate(Vector3d translation)
+   public Graphics3DTranslateInstruction(Vector3d translation)
    {
       this.translation = translation;
    }
 
-   public LinkGraphicsTranslate(double tx, double ty, double tz)
+   public Graphics3DTranslateInstruction(double tx, double ty, double tz)
    {
       translation = new Vector3d(tx, ty, tz);
    }

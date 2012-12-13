@@ -1,6 +1,6 @@
 package us.ihmc.graphics3DAdapter.graphics.appearances;
 
-public abstract class YoAppearanceTransparency implements YoAppearanceDefinition
+public abstract class YoAppearanceTransparency implements AppearanceDefinition
 {
    private double transparency = 0.0;
 
