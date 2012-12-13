@@ -56,43 +56,43 @@ public class Graphics3DObject
    public static final Axis Y = Axis.Y;
    public static final Axis Z = Axis.Z;
    
-   private ArrayList<Graphics3DPrimitiveInstruction> linkGraphicsInstructions;
+   private ArrayList<Graphics3DPrimitiveInstruction> graphics3DInstructions;
    
    private final ArrayList<SelectedListener> selectedListeners = new ArrayList<SelectedListener>();
 
-   public Graphics3DObject(ArrayList<Graphics3DPrimitiveInstruction> linkGraphicsInstructions)
+   public Graphics3DObject(ArrayList<Graphics3DPrimitiveInstruction> graphics3DInstructions)
    {
       this();
-      this.linkGraphicsInstructions = linkGraphicsInstructions;
+      this.graphics3DInstructions = graphics3DInstructions;
    }
 
    /**
-    * Default no-arg constructor.  This creates a new empty LinkGraphics component.
+    * Default no-arg constructor.  This creates a new empty Graphics3DObject component.
     */
    public Graphics3DObject()
    {
-      linkGraphicsInstructions = new ArrayList<Graphics3DPrimitiveInstruction>();
+      graphics3DInstructions = new ArrayList<Graphics3DPrimitiveInstruction>();
    }
 
-   public ArrayList<Graphics3DPrimitiveInstruction> getLinkGraphicsInstructions()
+   public ArrayList<Graphics3DPrimitiveInstruction> getGraphics3DInstructions()
    {
-      return linkGraphicsInstructions;
+      return graphics3DInstructions;
    }
    
    /**
-    * Merge this with the specified LinkGraphics.
+    * Merge this with the specified Graphics3DObject.
     *
-    * @param linkGraphics LinkGraphics to combine with.
+    * @param graphics3DObject Graphics3DObject to combine with.
     */
-   public void combine(Graphics3DObject linkGraphics)
+   public void combine(Graphics3DObject Graphics3DObject)
    {
       this.identity();
-      this.linkGraphicsInstructions.addAll(linkGraphics.getLinkGraphicsInstructions());
+      this.graphics3DInstructions.addAll(Graphics3DObject.getGraphics3DInstructions());
    }
    
    public void addInstruction(Graphics3DPrimitiveInstruction instruction)
    {
-      this.linkGraphicsInstructions.add(instruction);
+      this.graphics3DInstructions.add(instruction);
    }
 
    /**
@@ -108,7 +108,7 @@ public class Graphics3DObject
     */
    public void translate(double tx, double ty, double tz)
    {
-      linkGraphicsInstructions.add(new Graphics3DTranslateInstruction(tx, ty, tz));
+      graphics3DInstructions.add(new Graphics3DTranslateInstruction(tx, ty, tz));
    }
 
    /**
@@ -122,7 +122,7 @@ public class Graphics3DObject
     */
    public void translate(Vector3d translation)
    {
-      linkGraphicsInstructions.add(new Graphics3DTranslateInstruction(translation));
+      graphics3DInstructions.add(new Graphics3DTranslateInstruction(translation));
    }
 
    /**
@@ -173,7 +173,7 @@ public class Graphics3DObject
     */
    public void rotate(double rotAng, Vector3d rotAxis)
    {
-      linkGraphicsInstructions.add(new Graphics3DRotateInstruction(rotAng, rotAxis));
+      graphics3DInstructions.add(new Graphics3DRotateInstruction(rotAng, rotAxis));
    }
 
    /**
@@ -187,7 +187,7 @@ public class Graphics3DObject
     */
    public void rotate(Matrix3d rot)
    {
-      linkGraphicsInstructions.add(new Graphics3DRotateMatrixInstruction(rot));
+      graphics3DInstructions.add(new Graphics3DRotateMatrixInstruction(rot));
    }
 
    /**
@@ -215,9 +215,9 @@ public class Graphics3DObject
     */
    public Graphics3DScaleInstruction scale(Vector3d scaleFactors)
    {
-      Graphics3DScaleInstruction linkGraphicsScale = new Graphics3DScaleInstruction(scaleFactors);
-      linkGraphicsInstructions.add(linkGraphicsScale);
-      return linkGraphicsScale;
+      Graphics3DScaleInstruction graphics3DScale = new Graphics3DScaleInstruction(scaleFactors);
+      graphics3DInstructions.add(graphics3DScale);
+      return graphics3DScale;
    }
 
    /**
@@ -226,7 +226,7 @@ public class Graphics3DObject
     */
    public void identity()
    {
-      linkGraphicsInstructions.add(new Graphics3DIdentityInstruction());
+      graphics3DInstructions.add(new Graphics3DIdentityInstruction());
    }
 
    /**
@@ -253,7 +253,7 @@ public class Graphics3DObject
     */
    public void addVRMLFile(URL fileUrl, AppearanceDefinition yoAppearanceDefinition)
    {
-      linkGraphicsInstructions.add(new GraphicsAddVRMLFileInstruction(fileUrl.getPath(), yoAppearanceDefinition));
+      graphics3DInstructions.add(new GraphicsAddVRMLFileInstruction(fileUrl.getPath(), yoAppearanceDefinition));
    }
 
    /**
@@ -267,7 +267,7 @@ public class Graphics3DObject
     */
    public void addVRMLFile(String fileName, AppearanceDefinition app)
    {
-         linkGraphicsInstructions.add(new GraphicsAddVRMLFileInstruction(fileName, app));
+         graphics3DInstructions.add(new GraphicsAddVRMLFileInstruction(fileName, app));
    }
 
    /**
@@ -356,7 +356,7 @@ public class Graphics3DObject
    */
    public void addModelFile(String fileName, AppearanceDefinition app)
    {
-      linkGraphicsInstructions.add(new Graphics3DAddModelFileInstruction(fileName, app));
+      graphics3DInstructions.add(new Graphics3DAddModelFileInstruction(fileName, app));
    }
 
    public void addCoordinateSystem(double length)
@@ -379,7 +379,7 @@ public class Graphics3DObject
     */
    public void addCoordinateSystem(double length, AppearanceDefinition xAxisAppearance, AppearanceDefinition yAxisAppearance, AppearanceDefinition zAxisAppearance, AppearanceDefinition arrowAppearance)
    {
-      linkGraphicsInstructions.add(new Graphics3DAddCoordinateSystemInstruction(length));
+      graphics3DInstructions.add(new Graphics3DAddCoordinateSystemInstruction(length));
    }
 
    /**
@@ -421,7 +421,7 @@ public class Graphics3DObject
     */
    public void addCube(double lx, double ly, double lz, AppearanceDefinition cubeApp)
    {
-      linkGraphicsInstructions.add(new Graphics3DAddCubeInstruction(lx, ly, lz, cubeApp));
+      graphics3DInstructions.add(new Graphics3DAddCubeInstruction(lx, ly, lz, cubeApp));
    }
 
    /**
@@ -465,7 +465,7 @@ public class Graphics3DObject
     */
    public void addWedge(double lx, double ly, double lz, AppearanceDefinition wedgeApp)
    {
-         linkGraphicsInstructions.add(new Graphics3DAddWedgeInstruction(lx, ly, lz, wedgeApp));
+         graphics3DInstructions.add(new Graphics3DAddWedgeInstruction(lx, ly, lz, wedgeApp));
    }
 
    /**
@@ -503,14 +503,14 @@ public class Graphics3DObject
    public Graphics3DAddSphereInstruction addSphere(double radius, AppearanceDefinition sphereApp)
    {
       Graphics3DAddSphereInstruction instruction = new Graphics3DAddSphereInstruction(radius, sphereApp);
-      linkGraphicsInstructions.add(instruction);
+      graphics3DInstructions.add(instruction);
       return instruction;
    }
 
    public Graphics3DAddMeshDataInstruction addMeshData(MeshDataHolder meshData, AppearanceDefinition meshAppearance)
    {
       Graphics3DAddMeshDataInstruction instruction = new Graphics3DAddMeshDataInstruction(meshData, meshAppearance);
-      linkGraphicsInstructions.add(instruction);
+      graphics3DInstructions.add(instruction);
       return instruction;
    }
    
@@ -553,7 +553,7 @@ public class Graphics3DObject
    public Graphics3DAddEllipsoidInstruction addEllipsoid(double xRad, double yRad, double zRad, AppearanceDefinition ellipsoidApp)
    {
          Graphics3DAddEllipsoidInstruction instruction = new Graphics3DAddEllipsoidInstruction(xRad, yRad, zRad, ellipsoidApp);
-         linkGraphicsInstructions.add(instruction);
+         graphics3DInstructions.add(instruction);
          return instruction;
    }
 
@@ -594,7 +594,7 @@ public class Graphics3DObject
    public Graphics3DAddCylinderInstruction addCylinder(double height, double radius, AppearanceDefinition cylApp)
    {
       Graphics3DAddCylinderInstruction instruction = new Graphics3DAddCylinderInstruction(height, radius, cylApp);
-      linkGraphicsInstructions.add(instruction);
+      graphics3DInstructions.add(instruction);
       return instruction;
    }
 
@@ -634,7 +634,7 @@ public class Graphics3DObject
     */
    public void addCone(double height, double radius, AppearanceDefinition coneApp)
    {
-      linkGraphicsInstructions.add(new Graphics3DAddConeInstruction(height, radius, coneApp));
+      graphics3DInstructions.add(new Graphics3DAddConeInstruction(height, radius, coneApp));
    }
 
    /**
@@ -685,7 +685,7 @@ public class Graphics3DObject
     */
    public void addGenTruncatedCone(double height, double bx, double by, double tx, double ty, AppearanceDefinition coneApp)
    {
-         linkGraphicsInstructions.add(new Graphics3DAddTruncatedConeInstruction(height, bx, by, tx, ty, coneApp));
+         graphics3DInstructions.add(new Graphics3DAddTruncatedConeInstruction(height, bx, by, tx, ty, coneApp));
    }
 
    /**
@@ -730,7 +730,7 @@ public class Graphics3DObject
     */
    public void addHemiEllipsoid(double xRad, double yRad, double zRad, AppearanceDefinition hEApp)
    {
-         linkGraphicsInstructions.add(new Graphics3DAddHemiEllipsoidInstruction(xRad, yRad, zRad, hEApp));
+         graphics3DInstructions.add(new Graphics3DAddHemiEllipsoidInstruction(xRad, yRad, zRad, hEApp));
    }
 
    /**
@@ -787,7 +787,7 @@ public class Graphics3DObject
    public Graphics3DAddArcTorusInstruction addArcTorus(double startAngle, double endAngle, double majorRadius, double minorRadius, AppearanceDefinition arcTorusApp)
    {
       Graphics3DAddArcTorusInstruction instruction = new Graphics3DAddArcTorusInstruction(startAngle, endAngle, majorRadius, minorRadius, arcTorusApp);
-      linkGraphicsInstructions.add(instruction);
+      graphics3DInstructions.add(instruction);
       return instruction;
    }
 
@@ -837,7 +837,7 @@ public class Graphics3DObject
     */
    public void addPyramidCube(double lx, double ly, double lz, double lh, AppearanceDefinition cubeApp)
    {
-      linkGraphicsInstructions.add(new Graphics3DAddPyramidCubeInstruction(lx, ly, lz, lh, cubeApp));
+      graphics3DInstructions.add(new Graphics3DAddPyramidCubeInstruction(lx, ly, lz, lh, cubeApp));
    }
    
    public void addPolygon(ArrayList<Point3d> polygonPoints)
@@ -856,7 +856,7 @@ public class Graphics3DObject
     */
    public void addPolygon(ArrayList<Point3d> polygonPoints, AppearanceDefinition yoAppearance)
    {
-      linkGraphicsInstructions.add(new Graphics3DAddPolygonInstruction(polygonPoints, yoAppearance));
+      graphics3DInstructions.add(new Graphics3DAddPolygonInstruction(polygonPoints, yoAppearance));
    }
 
    /**
@@ -883,9 +883,9 @@ public class Graphics3DObject
     */
    public Graphics3DAddPolygonInstruction addPolygon(Point3d[] polygonPoints, AppearanceDefinition yoAppearance)
    {
-      Graphics3DAddPolygonInstruction linkGraphicsAddPolygonDouble = new Graphics3DAddPolygonInstruction(polygonPoints, yoAppearance);
-      linkGraphicsInstructions.add(linkGraphicsAddPolygonDouble);
-      return linkGraphicsAddPolygonDouble;
+      Graphics3DAddPolygonInstruction graphics3DAddPolygonDouble = new Graphics3DAddPolygonInstruction(polygonPoints, yoAppearance);
+      graphics3DInstructions.add(graphics3DAddPolygonDouble);
+      return graphics3DAddPolygonDouble;
    }
    
    
@@ -897,13 +897,13 @@ public class Graphics3DObject
    public void addExtrudedPolygon(List<Point2d> polygonPoints, double height, AppearanceDefinition appearance)
    {
       Graphics3DInstruction instruction = new Graphics3DAddExtrudedPolygonInstruction(polygonPoints, height, appearance);
-      linkGraphicsInstructions.add(instruction);
+      graphics3DInstructions.add(instruction);
    }
 
    public Graphics3DInstruction addText(String text, AppearanceDefinition yoAppearance)
    {
       Graphics3DInstruction instruction = new Graphics3DAddTextInstruction(text, yoAppearance);
-      linkGraphicsInstructions.add(instruction);
+      graphics3DInstructions.add(instruction);
       return instruction;
    }
    
@@ -919,9 +919,9 @@ public class Graphics3DObject
    
    public Graphics3DAddTeaPotInstruction addTeaPot(AppearanceDefinition appearance)
    {
-      Graphics3DAddTeaPotInstruction linkGraphicsAddTeaPot = new Graphics3DAddTeaPotInstruction(appearance);
-      linkGraphicsInstructions.add(linkGraphicsAddTeaPot);
-      return linkGraphicsAddTeaPot;
+      Graphics3DAddTeaPotInstruction graphics3DAddTeaPot = new Graphics3DAddTeaPotInstruction(appearance);
+      graphics3DInstructions.add(graphics3DAddTeaPot);
+      return graphics3DAddTeaPot;
    }
 
    public Graphics3DInstruction addHeightMap(HeightMap heightMap, int xPointsPerSide, int yPointsPerSide, AppearanceDefinition appearance)
@@ -932,7 +932,7 @@ public class Graphics3DObject
    public Graphics3DInstruction addHeightMap(HeightMap heightMap, int xPointsPerSide, int yPointsPerSide, AppearanceDefinition appearance, Transform3D transform)
    {
       Graphics3DAddHeightMapInstruction instruction = new Graphics3DAddHeightMapInstruction(heightMap, xPointsPerSide, yPointsPerSide, appearance, transform);
-      linkGraphicsInstructions.add(instruction);
+      graphics3DInstructions.add(instruction);
       return instruction;
    }
    
