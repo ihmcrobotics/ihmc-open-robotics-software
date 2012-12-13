@@ -14,7 +14,7 @@ import javax.vecmath.Vector3d;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.graphics3DAdapter.graphics.LinkGraphics;
+import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -423,7 +423,7 @@ public class InverseDynamicsCalculatorTest
       Vector3d comOffset = useZeroCoMOffset ? new Vector3d() : new Vector3d(random.nextDouble(), random.nextDouble(), random.nextDouble());
       link.setComOffset(comOffset);
 
-      LinkGraphics linkGraphics = new LinkGraphics();
+      Graphics3DObject linkGraphics = new Graphics3DObject();
       Matrix3d momentOfInertia = new Matrix3d();
       link.getMomentOfInertia(momentOfInertia);
       double mass = link.getMass();
