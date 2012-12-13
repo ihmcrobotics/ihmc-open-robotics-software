@@ -18,6 +18,7 @@ import org.junit.Test;
 import us.ihmc.utilities.MechanismGeometricJacobian;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.RandomTools;
+import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.geometry.CenterOfMassReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.InverseDynamicsCalculator;
@@ -167,21 +168,21 @@ public class MomentumSolverTest
       ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new Transform3D());
       RigidBody elevator = new RigidBody("elevator", elevatorFrame);
       SixDoFJoint rootJoint = new SixDoFJoint("rootJoint", elevator, elevatorFrame);
-      RigidBody rootBody = ScrewTestTools.addRandomRigidBody("rootBody", random, rootJoint);
+      RigidBody body0 = ScrewTestTools.addRandomRigidBody("rootBody", random, rootJoint);
 
-      SixDoFJoint secondFloatingJoint = new SixDoFJoint("secondFloatingJoint", rootBody, rootBody.getBodyFixedFrame());
-      RigidBody secondBody = ScrewTestTools.addRandomRigidBody("secondBody", random, secondFloatingJoint);
+      SixDoFJoint body1 = new SixDoFJoint("secondFloatingJoint", body0, body0.getBodyFixedFrame());
+      RigidBody secondBody = ScrewTestTools.addRandomRigidBody("secondBody", random, body1);
 
       ScrewTestTools.setRandomPositionAndOrientation(rootJoint, random);
       ScrewTestTools.setRandomVelocity(rootJoint, random);
 
-      ScrewTestTools.setRandomPositionAndOrientation(secondFloatingJoint, random);
-      ScrewTestTools.setRandomVelocity(secondFloatingJoint, random);
+      ScrewTestTools.setRandomPositionAndOrientation(body1, random);
+      ScrewTestTools.setRandomVelocity(body1, random);
       elevator.updateFramesRecursively();
 
       ArrayList<SixDoFJoint> sixDoFJoints = new ArrayList<SixDoFJoint>();
       sixDoFJoints.add(rootJoint);
-      sixDoFJoints.add(secondFloatingJoint);
+      sixDoFJoints.add(body1);
       ArrayList<RevoluteJoint> oneDoFJoints = new ArrayList<RevoluteJoint>();
 
       ReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("com", worldFrame, elevator);
@@ -191,14 +192,10 @@ public class MomentumSolverTest
       TwistCalculator twistCalculator = new TwistCalculator(elevator.getBodyFixedFrame(), elevator);
       MomentumSolver solver = createAndInitializeMomentumOptimizer(elevator, rootJoint, sixDoFJoints, oneDoFJoints, DT, centerOfMassFrame, twistCalculator);
 
-      SpatialForceVector desiredMomentumRate = new SpatialForceVector(centerOfMassFrame, RandomTools.getRandomVector(random),
-                                                  RandomTools.getRandomVector(random));
 
 
-      MechanismGeometricJacobian jacobian = new MechanismGeometricJacobian(rootBody, secondBody, rootJoint.getFrameAfterJoint());
+      MechanismGeometricJacobian jacobian = new MechanismGeometricJacobian(body0, secondBody, rootJoint.getFrameAfterJoint());
 
-//    SpatialAccelerationVector spatialAcceleration = new SpatialAccelerationVector(jacobian.getEndEffectorFrame(), elevatorFrame,
-//          jacobian.getEndEffectorFrame());
       SpatialAccelerationVector spatialAcceleration = new SpatialAccelerationVector(jacobian.getEndEffectorFrame(), elevatorFrame,
                                                          jacobian.getEndEffectorFrame(), RandomTools.getRandomVector(random),
                                                          RandomTools.getRandomVector(random));
@@ -209,6 +206,9 @@ public class MomentumSolverTest
 
       twistCalculator.compute();
       solver.compute();
+
+      SpatialForceVector desiredMomentumRate = new SpatialForceVector(centerOfMassFrame, RandomTools.getRandomVector(random),
+            RandomTools.getRandomVector(random));
       solver.solve(desiredMomentumRate);
 
       checkTaskSpaceAcceleration(rootJoint, twistCalculator, jacobian, pair, 1e-9);
@@ -247,8 +247,8 @@ public class MomentumSolverTest
       SpatialForceVector desiredMomentumRate = new SpatialForceVector(centerOfMassFrame, RandomTools.getRandomVector(random),
                                                   RandomTools.getRandomVector(random));
 
-      RigidBody base = rootJoint.getSuccessor();
       List<RevoluteJoint> revoluteJoints = randomFloatingChain.getRevoluteJoints();
+      RigidBody base = rootJoint.getSuccessor();
       RigidBody endEffector = revoluteJoints.get(revoluteJoints.size() - 1).getSuccessor();
       MechanismGeometricJacobian jacobian = new MechanismGeometricJacobian(base, endEffector, endEffector.getBodyFixedFrame());
       SpatialAccelerationVector internalAcceleration = new SpatialAccelerationVector(endEffector.getBodyFixedFrame(), base.getBodyFixedFrame(),
@@ -268,6 +268,86 @@ public class MomentumSolverTest
       checkAgainstNumericalDifferentiation(rootJoint, sixDoFJoints, revoluteJoints, DT, desiredMomentumRate, 1e-4);
    }
 
+   @Test
+   public void testSubspaces()
+   {
+      Random random = new Random(12342L);
+      ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new Transform3D());
+      RigidBody elevator = new RigidBody("elevator", elevatorFrame);
+      SixDoFJoint rootJoint = new SixDoFJoint("rootJoint", elevator, elevatorFrame);
+      RigidBody body0 = ScrewTestTools.addRandomRigidBody("rootBody", random, rootJoint);
+
+      SixDoFJoint body1 = new SixDoFJoint("secondFloatingJoint", body0, body0.getBodyFixedFrame());
+      RigidBody secondBody = ScrewTestTools.addRandomRigidBody("secondBody", random, body1);
+
+      ScrewTestTools.setRandomPositionAndOrientation(rootJoint, random);
+      ScrewTestTools.setRandomVelocity(rootJoint, random);
+
+      ScrewTestTools.setRandomPositionAndOrientation(body1, random);
+      ScrewTestTools.setRandomVelocity(body1, random);
+      elevator.updateFramesRecursively();
+
+      ArrayList<SixDoFJoint> sixDoFJoints = new ArrayList<SixDoFJoint>();
+      sixDoFJoints.add(rootJoint);
+      sixDoFJoints.add(body1);
+      ArrayList<RevoluteJoint> oneDoFJoints = new ArrayList<RevoluteJoint>();
+
+      ReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("com", worldFrame, elevator);
+      centerOfMassFrame.update();
+
+
+      TwistCalculator twistCalculator = new TwistCalculator(elevator.getBodyFixedFrame(), elevator);
+      MomentumSolver solver = createAndInitializeMomentumOptimizer(elevator, rootJoint, sixDoFJoints, oneDoFJoints, DT, centerOfMassFrame, twistCalculator);
+
+
+
+      MechanismGeometricJacobian jacobian = new MechanismGeometricJacobian(body0, secondBody, rootJoint.getFrameAfterJoint());
+
+      SpatialAccelerationVector spatialAcceleration = new SpatialAccelerationVector(jacobian.getEndEffectorFrame(), elevatorFrame,
+                                                         jacobian.getEndEffectorFrame(), RandomTools.getRandomVector(random),
+                                                         RandomTools.getRandomVector(random));
+
+      Pair<SpatialAccelerationVector, DenseMatrix64F> pair = new Pair<SpatialAccelerationVector, DenseMatrix64F>(spatialAcceleration,
+                                                                new DenseMatrix64F(SpatialMotionVector.SIZE, 0));
+      solver.setDesiredSpatialAcceleration(jacobian, pair);
+
+      twistCalculator.compute();
+      solver.compute();
+
+      Vector3d rateOfChangeOfLinearMomentum = RandomTools.getRandomVector(random);
+      DenseMatrix64F momentumSubspace = new DenseMatrix64F(SpatialForceVector.SIZE, 3);
+      momentumSubspace.set(3, 0, 1.0);
+      momentumSubspace.set(4, 1, 1.0);
+      momentumSubspace.set(5, 2, 1.0);
+
+      DenseMatrix64F momentumMultipliers = new DenseMatrix64F(3, 1);
+      MatrixTools.setDenseMatrixFromTuple3d(momentumMultipliers, rateOfChangeOfLinearMomentum, 0, 0);
+
+      Vector3d angularAcceleration = RandomTools.getRandomVector(random);
+      DenseMatrix64F accelerationSubspace = new DenseMatrix64F(SpatialMotionVector.SIZE, 3);
+      accelerationSubspace.set(0, 0, 1.0);
+      accelerationSubspace.set(1, 1, 1.0);
+      accelerationSubspace.set(2, 2, 1.0);
+
+      DenseMatrix64F accelerationMultipliers = new DenseMatrix64F(3, 1);
+      MatrixTools.setDenseMatrixFromTuple3d(accelerationMultipliers, angularAcceleration, 0, 0);
+
+      solver.solve(accelerationSubspace, accelerationMultipliers, momentumSubspace, momentumMultipliers);
+
+      SpatialForceVector desiredMomentumRate = new SpatialForceVector(centerOfMassFrame);
+      solver.getRateOfChangeOfMomentum(desiredMomentumRate);
+
+      JUnitTools.assertTuple3dEquals(rateOfChangeOfLinearMomentum, desiredMomentumRate.getLinearPartCopy(), 1e-9);
+
+      SpatialAccelerationVector pelvisAcceleration = new SpatialAccelerationVector();
+      rootJoint.packDesiredJointAcceleration(pelvisAcceleration);
+      JUnitTools.assertTuple3dEquals(angularAcceleration, pelvisAcceleration.getAngularPartCopy(), 1e-9);
+
+      checkTaskSpaceAcceleration(rootJoint, twistCalculator, jacobian, pair, 1e-9);
+      checkAgainstInverseDynamicsCalculator(rootJoint, desiredMomentumRate, 1e-6);
+      checkAgainstNumericalDifferentiation(rootJoint, sixDoFJoints, oneDoFJoints, DT, desiredMomentumRate, 1e-4);
+   }
+
    private MomentumSolver createAndInitializeMomentumOptimizer(RigidBody elevator, SixDoFJoint rootJoint, List<SixDoFJoint> sixDoFJoints,
            List<RevoluteJoint> joints, double dt, ReferenceFrame centerOfMassFrame, TwistCalculator twistCalculator)
    {
@@ -284,6 +364,7 @@ public class MomentumSolverTest
          ScrewTestTools.integrateVelocities(sixDoFJoint, dt);
       }
 
+      
       ScrewTestTools.integrateVelocities(joints, dt);
       elevator.updateFramesRecursively();
       twistCalculator.compute();
