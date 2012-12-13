@@ -3,7 +3,7 @@ package com.yobotics.simulationconstructionset.simulatedSensors;
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.graphics3DAdapter.graphics.LinkGraphics;
+import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
@@ -57,7 +57,7 @@ public class SingleRigidBodyRobot extends Robot
       ret.setMomentOfInertia(Iyy1, Iyy1, Iyy1/10.0);
 
       // create a LinkGraphics object to manipulate the visual representation of the link
-      LinkGraphics linkGraphics = new LinkGraphics();
+      Graphics3DObject linkGraphics = new Graphics3DObject();
       //linkGraphics.translate(new Vector3d(0.0, 0.0, -L1 / 2.0));
       linkGraphics.addCylinder(L1, R1);
       
