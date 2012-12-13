@@ -7,8 +7,8 @@ import java.util.Random;
 
 import javax.media.j3d.Transform3D;
 
-import org.ejml.alg.dense.linsol.LinearSolverFactory;
 import org.ejml.data.DenseMatrix64F;
+import org.ejml.factory.LinearSolverFactory;
 import org.ejml.ops.RandomMatrices;
 
 import us.ihmc.utilities.RandomTools;

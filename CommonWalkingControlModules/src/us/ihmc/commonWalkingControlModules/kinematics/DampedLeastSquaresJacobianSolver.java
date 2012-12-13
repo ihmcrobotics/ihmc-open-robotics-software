@@ -1,8 +1,8 @@
 package us.ihmc.commonWalkingControlModules.kinematics;
 
-import org.ejml.alg.dense.linsol.LinearSolver;
-import org.ejml.alg.dense.linsol.LinearSolverFactory;
 import org.ejml.data.DenseMatrix64F;
+import org.ejml.factory.LinearSolver;
+import org.ejml.factory.LinearSolverFactory;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.utilities.math.MathTools;
