@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.terrain.CommonTerrain;
 import us.ihmc.commonWalkingControlModules.terrain.TerrainType;
-import us.ihmc.graphics3DAdapter.graphics.LinkGraphics;
+import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.GroundProfile;
@@ -70,7 +70,7 @@ public class DRCSCSInitialSetup
       if (drawGround)
       {
          boolean drawGroundBelow = false;
-         ArrayList<LinkGraphics> branchGroup = commonTerrain.createLinkGraphics(drawGroundBelow);
+         ArrayList<Graphics3DObject> branchGroup = commonTerrain.createLinkGraphics(drawGroundBelow);
          robot.addStaticLinkGraphics(branchGroup);
       }
 
@@ -102,7 +102,7 @@ public class DRCSCSInitialSetup
       scs.setDT(simulateDT, recordFrequency);
       if (SHOW_WORLD_COORDINATE_FRAME)
       {
-         LinkGraphics linkGraphics = new LinkGraphics();
+         Graphics3DObject linkGraphics = new Graphics3DObject();
          linkGraphics.addCoordinateSystem(0.3);
          scs.addStaticLinkGraphics(linkGraphics);         
       }

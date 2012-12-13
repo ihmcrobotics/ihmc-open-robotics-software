@@ -9,7 +9,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.commonAvatarInterfaces.CommonAvatarEnvironmentInterface;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceDefinition;
+import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
 
 import com.yobotics.simulationconstructionset.ExternalForcePoint;
@@ -186,7 +186,7 @@ public class DRCDemo01Environment implements CommonAvatarEnvironmentInterface
          points.add(localTopRight);
          
          ConvexPolygon2d convexPolygon = new ConvexPolygon2d(points);
-         YoAppearanceDefinition appearance = YoAppearance.Brown();
+         AppearanceDefinition appearance = YoAppearance.Brown();
 //         YoAppearance.makeTransparent(appearance, 0.7f);
          RotatableConvexPolygonTerrainObject pillar = new RotatableConvexPolygonTerrainObject(normal, convexPolygon, centroidHeight, appearance);
          combinedTerrainObject.addTerrainObject(pillar);
