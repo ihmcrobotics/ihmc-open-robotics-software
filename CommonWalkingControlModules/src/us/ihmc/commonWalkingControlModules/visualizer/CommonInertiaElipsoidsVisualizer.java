@@ -9,7 +9,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.Updatable;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceDefinition;
+import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.utilities.InertiaTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -144,7 +144,7 @@ public class CommonInertiaElipsoidsVisualizer implements Updatable, RobotControl
             centerOfMassData.add(comData);
             
             Color color = getColor(mass); 
-            YoAppearanceDefinition appearance = YoAppearance.Color(color);
+            AppearanceDefinition appearance = YoAppearance.Color(color);
             
             DynamicGraphicEllipsoid comViz = new DynamicGraphicEllipsoid(rigidBodyName + "CoMPosition", comPosition, comOrientation, appearance, radii);  
             dynamicGraphicObjects.add(comViz);
