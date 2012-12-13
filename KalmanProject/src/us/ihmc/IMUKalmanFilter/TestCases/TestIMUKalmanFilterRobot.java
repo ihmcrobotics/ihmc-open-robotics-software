@@ -3,7 +3,7 @@ package us.ihmc.IMUKalmanFilter.TestCases;
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.graphics3DAdapter.graphics.LinkGraphics;
+import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.ExternalForcePoint;
@@ -45,7 +45,7 @@ public class TestIMUKalmanFilterRobot extends Robot
       rootJoint = new FloatingJoint("root", new Vector3d(0.0, 0.0, 0.0), this);
 
       Link link = new Link("ahrs");
-      LinkGraphics linkGraphics = new LinkGraphics();
+      Graphics3DObject linkGraphics = new Graphics3DObject();
       linkGraphics.addCoordinateSystem(0.2);
       linkGraphics.translate(0.0, 0.0, -0.05);
       linkGraphics.addCube(0.1, 0.1, 0.1);

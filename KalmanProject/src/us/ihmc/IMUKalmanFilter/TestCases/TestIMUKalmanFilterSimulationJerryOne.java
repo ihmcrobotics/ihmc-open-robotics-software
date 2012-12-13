@@ -3,7 +3,7 @@ package us.ihmc.IMUKalmanFilter.TestCases;
 import us.ihmc.IMUKalmanFilter.QuaternionBasedArrayFullIMUKalmanFilter;
 import us.ihmc.IMUKalmanFilter.QuaternionBasedFullIMUKalmanFilter;
 import us.ihmc.IMUKalmanFilter.QuaternionBasedJamaFullIMUKalmanFilter;
-import us.ihmc.graphics3DAdapter.graphics.LinkGraphics;
+import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.Link;
@@ -43,7 +43,7 @@ public class TestIMUKalmanFilterSimulationJerryOne
       scs.setDT(SIMULATION_DT, (int) (WINDOW / SIMULATION_DT));
 
       Link coords = new Link("coords");
-      LinkGraphics linkGraphics = new LinkGraphics();
+      Graphics3DObject linkGraphics = new Graphics3DObject();
       linkGraphics.addCoordinateSystem(0.2);
       coords.setLinkGraphics(linkGraphics);
       scs.addStaticLink(coords);
