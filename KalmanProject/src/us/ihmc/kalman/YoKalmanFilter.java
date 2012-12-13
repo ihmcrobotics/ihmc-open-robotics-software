@@ -11,11 +11,11 @@ import static org.ejml.ops.CommonOps.addEquals;
 import static org.ejml.ops.CommonOps.sub;
 import static org.ejml.ops.CommonOps.subEquals;
 
-import org.ejml.alg.dense.linsol.LinearSolver;
-import org.ejml.alg.dense.linsol.LinearSolverFactory;
 import org.ejml.alg.dense.mult.MatrixMatrixMult;
 import org.ejml.alg.dense.mult.MatrixVectorMult;
 import org.ejml.data.DenseMatrix64F;
+import org.ejml.factory.LinearSolver;
+import org.ejml.factory.LinearSolverFactory;
 import org.ejml.ops.MatrixFeatures;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;

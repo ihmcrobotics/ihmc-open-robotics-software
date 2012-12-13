@@ -1,10 +1,10 @@
 package us.ihmc.commonWalkingControlModules.kinematics;
 
 import org.ejml.UtilEjml;
-import org.ejml.alg.dense.decomposition.DecompositionFactory;
-import org.ejml.alg.dense.decomposition.SingularValueDecomposition;
 import org.ejml.alg.dense.linsol.svd.SolvePseudoInverseSvd;
 import org.ejml.data.DenseMatrix64F;
+import org.ejml.factory.DecompositionFactory;
+import org.ejml.factory.SingularValueDecomposition;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.SingularOps;
 
@@ -113,7 +113,7 @@ public class SingularityRobustJacobianSolver implements JacobianSolver
    {
       DenseMatrix64F jacobian = dampedLeastSquaresJacobianSolver.getJacobianMatrix();
       svd.decompose(jacobian);
-      SingularOps.nullSpace(svd, nullspace);
+      SingularOps.nullSpace(svd, nullspace, UtilEjml.EPS);
 
       DenseMatrix64F augmentedTaskJointAccelerations = computeAugmentedTaskJointAccelerations(jacobian, taskAcceleration, nullspace,
                                                           nullspaceMultiplier != 0.0);

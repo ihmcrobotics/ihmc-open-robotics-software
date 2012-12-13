@@ -8,9 +8,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.ejml.alg.dense.linsol.LinearSolver;
 import org.ejml.alg.dense.mult.MatrixDimensionException;
 import org.ejml.data.DenseMatrix64F;
+import org.ejml.factory.LinearSolver;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.MatrixFeatures;
 
@@ -386,14 +386,14 @@ public class MomentumSolver
       // vdot1
       checkDimensions(T, alpha1, vdotRoot);
       if (accelerationSubspaceRank == 0)    // handle EJML stupidity
-         CommonOps.set(vdotRoot, 0.0);
+         CommonOps.fill(vdotRoot, 0.0);
       else
          CommonOps.mult(T, alpha1, vdotRoot);
 
       // hdot1
       checkDimensions(N, beta1, hdot);
       if (momentumSubspaceRank == 0)    // handle EJML stupidity
-         CommonOps.set(hdot, 0.0);
+         CommonOps.fill(hdot, 0.0);
       else
          CommonOps.mult(N, beta1, hdot);
 
