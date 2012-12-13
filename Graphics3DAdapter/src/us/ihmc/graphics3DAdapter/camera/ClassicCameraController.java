@@ -22,8 +22,9 @@ public class ClassicCameraController implements CameraController
 
    private double camX, camY, camZ, fixX, fixY, fixZ;
 
-   private double zoom_factor = 0.005;
-   private double rotate_factor = 0.015, rotate_camera_factor = 0.006;
+   private double zoom_factor = 1.0;
+   private double rotate_factor = 1.0; 
+   private double rotate_camera_factor = 1.0;
 
    private boolean isMounted = false;
    private TransformToScreenHolder cameraMount;
@@ -651,7 +652,7 @@ public class ClassicCameraController implements CameraController
    private Vector3d rotVector = new Vector3d();
    private AxisAngle4d rotAxisAngle4d = new AxisAngle4d();
 
-   public void doMouseDraggedLeft(int dx, int dy)
+   public void doMouseDraggedLeft(float dx, float dy)
    {
       // Rotate around fix point:
 
@@ -705,7 +706,7 @@ public class ClassicCameraController implements CameraController
 
    }
 
-   public void doMouseDraggedRight(int dx, int dy)
+   public void doMouseDraggedRight(float dx, float dy)
    {
       // Elevate up and down
       double delX0 = camX - fixX, delY0 = camY - fixY, delZ0 = camZ - fixZ;
@@ -777,7 +778,7 @@ public class ClassicCameraController implements CameraController
       }
    }
 
-   public void doMouseDraggedMiddle(int dx, int dy)
+   public void doMouseDraggedMiddle(float dx, float dy)
    {
       // Zooms in and out
 
