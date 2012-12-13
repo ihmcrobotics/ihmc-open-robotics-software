@@ -15,11 +15,11 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 
 
-public class SDFLinkGraphics extends Graphics3DObject
+public class SDFGraphics3DObject extends Graphics3DObject
 {
    private static final boolean SHOW_COORDINATE_SYSTEMS = false;
 
-   public SDFLinkGraphics(Matrix3d rotation, List<SDFVisual> sdfVisuals, String resourceDirectory)
+   public SDFGraphics3DObject(Matrix3d rotation, List<SDFVisual> sdfVisuals, String resourceDirectory)
    {
       rotate(rotation);
       
