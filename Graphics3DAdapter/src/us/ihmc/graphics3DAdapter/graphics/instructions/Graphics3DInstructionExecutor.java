@@ -17,181 +17,181 @@ public abstract class Graphics3DInstructionExecutor
       {
          if (instruction instanceof Graphics3DAddModelFileInstruction)
          {
-            Graphics3DAddModelFileInstruction linkGraphicsAddModelFile = (Graphics3DAddModelFileInstruction) instruction;
-            doLinkGraphicsAddModelFileInstruction(linkGraphicsAddModelFile);
+            Graphics3DAddModelFileInstruction graphics3DAddModelFile = (Graphics3DAddModelFileInstruction) instruction;
+            doAddModelFileInstruction(graphics3DAddModelFile);
 
          }
          else if (instruction instanceof Graphics3DAddArcTorusInstruction)
          {
-            Graphics3DAddArcTorusInstruction linkGraphicsAddArcTorus = (Graphics3DAddArcTorusInstruction) instruction;
-            doLinkGraphicsAddArcTorusInstruction(linkGraphicsAddArcTorus);
+            Graphics3DAddArcTorusInstruction graphics3DAddArcTorus = (Graphics3DAddArcTorusInstruction) instruction;
+            doAddArcTorusInstruction(graphics3DAddArcTorus);
 
          }
          else if (instruction instanceof Graphics3DAddConeInstruction)
          {
-            Graphics3DAddConeInstruction linkGraphicsAddCone = (Graphics3DAddConeInstruction) instruction;
-            doLinkGraphicsAddConeInstruction(linkGraphicsAddCone);
+            Graphics3DAddConeInstruction graphics3DAddCone = (Graphics3DAddConeInstruction) instruction;
+            doAddConeInstruction(graphics3DAddCone);
          }
          else if (instruction instanceof Graphics3DAddCylinderInstruction)
          {
-            Graphics3DAddCylinderInstruction linkGraphicsAddCylinder = (Graphics3DAddCylinderInstruction) instruction;
-            doLinkGraphicsAddCylinderInstruction(linkGraphicsAddCylinder);
+            Graphics3DAddCylinderInstruction graphics3DAddCylinder = (Graphics3DAddCylinderInstruction) instruction;
+            doAddCylinderInstruction(graphics3DAddCylinder);
          }
          else if (instruction instanceof Graphics3DAddCoordinateSystemInstruction)
          {
-            Graphics3DAddCoordinateSystemInstruction linkGraphicsAddCoordinateSystem = (Graphics3DAddCoordinateSystemInstruction) instruction;
-            doLinkGraphicsAddCoordinateSystemInstruction(linkGraphicsAddCoordinateSystem);
+            Graphics3DAddCoordinateSystemInstruction graphics3DAddCoordinateSystem = (Graphics3DAddCoordinateSystemInstruction) instruction;
+            doAddCoordinateSystemInstruction(graphics3DAddCoordinateSystem);
          }
          else if (instruction instanceof Graphics3DAddCubeInstruction)
          {
-            Graphics3DAddCubeInstruction linkGraphicsAddCube = (Graphics3DAddCubeInstruction) instruction;
-            doLinkGraphicsAddCubeInstruction(linkGraphicsAddCube);
+            Graphics3DAddCubeInstruction graphics3DAddCube = (Graphics3DAddCubeInstruction) instruction;
+            doAddCubeInstruction(graphics3DAddCube);
          }
          else if (instruction instanceof Graphics3DAddEllipsoidInstruction)
          {
-            Graphics3DAddEllipsoidInstruction linkGraphicsAddEllipsoid = (Graphics3DAddEllipsoidInstruction) instruction;
-            doLinkGraphicsAddEllipsoidInstruction(linkGraphicsAddEllipsoid);
+            Graphics3DAddEllipsoidInstruction graphics3DAddEllipsoid = (Graphics3DAddEllipsoidInstruction) instruction;
+            doAddEllipsoidInstruction(graphics3DAddEllipsoid);
          }
          else if (instruction instanceof Graphics3DAddHemiEllipsoidInstruction)
          {
-            Graphics3DAddHemiEllipsoidInstruction linkGraphicsAddHemiEllipsoid = (Graphics3DAddHemiEllipsoidInstruction) instruction;
-            doLinkGraphicsAddHemiEllipsoidInstruction(linkGraphicsAddHemiEllipsoid);
+            Graphics3DAddHemiEllipsoidInstruction graphics3DAddHemiEllipsoid = (Graphics3DAddHemiEllipsoidInstruction) instruction;
+            doAddHemiEllipsoidInstruction(graphics3DAddHemiEllipsoid);
 
          }
          else if (instruction instanceof Graphics3DAddPyramidCubeInstruction)
          {
-            Graphics3DAddPyramidCubeInstruction linkGraphicsAddPyramidCube = (Graphics3DAddPyramidCubeInstruction) instruction;
-            doLinkGraphicsAddPyramidCubeInstruction(linkGraphicsAddPyramidCube);
+            Graphics3DAddPyramidCubeInstruction graphics3DAddPyramidCube = (Graphics3DAddPyramidCubeInstruction) instruction;
+            doAddPyramidCubeInstruction(graphics3DAddPyramidCube);
          }
          else if (instruction instanceof Graphics3DAddSphereInstruction)
          {
-            Graphics3DAddSphereInstruction linkGraphicsAddSphere = (Graphics3DAddSphereInstruction) instruction;
-            doLinkGraphicsAddSphereInstruction(linkGraphicsAddSphere);
+            Graphics3DAddSphereInstruction graphics3DAddSphere = (Graphics3DAddSphereInstruction) instruction;
+            doAddSphereInstruction(graphics3DAddSphere);
          }
          else if (instruction instanceof GraphicsAddVRMLFileInstruction)
          {
-            GraphicsAddVRMLFileInstruction linkGraphicsAddVRMLFile = (GraphicsAddVRMLFileInstruction) instruction;
-            doLinkGraphicsAddVRMLFileInstruction(linkGraphicsAddVRMLFile);
+            GraphicsAddVRMLFileInstruction graphics3DAddVRMLFile = (GraphicsAddVRMLFileInstruction) instruction;
+            doAddVRMLFileInstruction(graphics3DAddVRMLFile);
          }
          else if (instruction instanceof Graphics3DAddWedgeInstruction)
          {
-            Graphics3DAddWedgeInstruction linkGraphicsAddWedge = (Graphics3DAddWedgeInstruction) instruction;
-            doLinkGraphicsAddWedgeInstruction(linkGraphicsAddWedge);
+            Graphics3DAddWedgeInstruction graphics3DAddWedge = (Graphics3DAddWedgeInstruction) instruction;
+            doAddWedgeInstruction(graphics3DAddWedge);
          }
          else if (instruction instanceof Graphics3DAddTruncatedConeInstruction)
          {
-            Graphics3DAddTruncatedConeInstruction linkGraphicsAddTruncatedCone = (Graphics3DAddTruncatedConeInstruction) instruction;
-            doLinkGraphicsAddTruncatedConeInstruction(linkGraphicsAddTruncatedCone);
+            Graphics3DAddTruncatedConeInstruction graphics3DAddTruncatedCone = (Graphics3DAddTruncatedConeInstruction) instruction;
+            doAddTruncatedConeInstruction(graphics3DAddTruncatedCone);
          }
          else if (instruction instanceof Graphics3DAddPolygonInstruction)
          {
-            Graphics3DAddPolygonInstruction linkGraphicsAddPolygonDouble = (Graphics3DAddPolygonInstruction) instruction;
-            doLinkGraphicsAddPolygonDoubleInstruction(linkGraphicsAddPolygonDouble);
+            Graphics3DAddPolygonInstruction graphics3DAddPolygonDouble = (Graphics3DAddPolygonInstruction) instruction;
+            doAddPolygonDoubleInstruction(graphics3DAddPolygonDouble);
          }
          else if (instruction instanceof Graphics3DAddExtrudedPolygonInstruction)
          {
-            Graphics3DAddExtrudedPolygonInstruction linkGraphicsAddExtrudedPolygon = (Graphics3DAddExtrudedPolygonInstruction) instruction;
-            doLinkGraphicsAddExtrudedPolygonInstruction(linkGraphicsAddExtrudedPolygon);
+            Graphics3DAddExtrudedPolygonInstruction graphics3DAddExtrudedPolygon = (Graphics3DAddExtrudedPolygonInstruction) instruction;
+            doAddExtrudedPolygonInstruction(graphics3DAddExtrudedPolygon);
          }
          else if (instruction instanceof Graphics3DIdentityInstruction)
          {
-            doLinkGraphicsIdentityInstruction();
+            doIdentityInstruction();
          }
          else if (instruction instanceof Graphics3DRotateInstruction)
          {
-            Graphics3DRotateInstruction linkGraphicsRotate = (Graphics3DRotateInstruction) instruction;
-            doLinkGraphicsRotateInstruction(linkGraphicsRotate);
+            Graphics3DRotateInstruction graphics3DRotate = (Graphics3DRotateInstruction) instruction;
+            doRotateInstruction(graphics3DRotate);
          }
          else if (instruction instanceof Graphics3DRotateMatrixInstruction)
          {
-            Graphics3DRotateMatrixInstruction linkGraphicsRotateMatrix = (Graphics3DRotateMatrixInstruction) instruction;
-            doLinkGraphicsRotateMatrixInstruction(linkGraphicsRotateMatrix);
+            Graphics3DRotateMatrixInstruction graphics3DRotateMatrix = (Graphics3DRotateMatrixInstruction) instruction;
+            doRotateMatrixInstruction(graphics3DRotateMatrix);
          }
          else if (instruction instanceof Graphics3DScaleInstruction)
          {
-            Graphics3DScaleInstruction linkGraphicsScale = (Graphics3DScaleInstruction) instruction;
-            doLinkGraphicsScaleInstruction(linkGraphicsScale);
+            Graphics3DScaleInstruction graphics3DScale = (Graphics3DScaleInstruction) instruction;
+            doScaleInstruction(graphics3DScale);
          }
          else if (instruction instanceof Graphics3DTranslateInstruction)
          {
-            Graphics3DTranslateInstruction linkGraphicsTranslate = (Graphics3DTranslateInstruction) instruction;
-            doLinkGraphicsTranslateInstruction(linkGraphicsTranslate);
+            Graphics3DTranslateInstruction graphics3DTranslate = (Graphics3DTranslateInstruction) instruction;
+            doTranslateInstruction(graphics3DTranslate);
          }
          else if (instruction instanceof Graphics3DAddTextInstruction)
          {
-            Graphics3DAddTextInstruction linkGraphicsAddText = (Graphics3DAddTextInstruction) instruction;
-            doLinkGraphicslinkGraphicsAddTextInstruction(linkGraphicsAddText);
+            Graphics3DAddTextInstruction graphics3DAddText = (Graphics3DAddTextInstruction) instruction;
+            doAddTextInstruction(graphics3DAddText);
          }
          else if (instruction instanceof Graphics3DAddTeaPotInstruction)
          {
-            Graphics3DAddTeaPotInstruction linkGraphicsAddTeaPot = (Graphics3DAddTeaPotInstruction) instruction;
-            doLinkGraphicsAddTeaPot(linkGraphicsAddTeaPot);
+            Graphics3DAddTeaPotInstruction graphics3DAddTeaPot = (Graphics3DAddTeaPotInstruction) instruction;
+            doAddTeaPotInstruction(graphics3DAddTeaPot);
          }
          else if (instruction instanceof Graphics3DAddHeightMapInstruction)
          {
-            Graphics3DAddHeightMapInstruction linkGraphicsAddHeightMap = (Graphics3DAddHeightMapInstruction) instruction;
-            doLinkGraphicsAddHeightMapInstruction(linkGraphicsAddHeightMap);
+            Graphics3DAddHeightMapInstruction graphics3DAddHeightMap = (Graphics3DAddHeightMapInstruction) instruction;
+            doAddHeightMapInstruction(graphics3DAddHeightMap);
          }
          else if (instruction instanceof Graphics3DAddMeshDataInstruction)
          {
-            Graphics3DAddMeshDataInstruction linkGraphicsAddMeshData = (Graphics3DAddMeshDataInstruction) instruction;
-            doLinkGraphicsAddMeshDataInstruction(linkGraphicsAddMeshData);
+            Graphics3DAddMeshDataInstruction graphics3DAddMeshData = (Graphics3DAddMeshDataInstruction) instruction;
+            doAddMeshDataInstruction(graphics3DAddMeshData);
          }
          else
          {
-            System.err.println("Unknown LinkGraphicsDefinition: " + instruction.getClass().getSimpleName());
+            System.err.println("Unknown graphics3DDefinition: " + instruction.getClass().getSimpleName());
          }
 
       }
 
    }
 
-   protected abstract void doLinkGraphicsAddMeshDataInstruction(Graphics3DAddMeshDataInstruction linkGraphicsAddMeshData);
+   protected abstract void doAddMeshDataInstruction(Graphics3DAddMeshDataInstruction graphics3DAddMeshData);
 
-   protected abstract void doLinkGraphicsAddTeaPot(Graphics3DAddTeaPotInstruction linkGraphicsAddTeaPot);
+   protected abstract void doAddTeaPotInstruction(Graphics3DAddTeaPotInstruction graphics3DAddTeaPot);
 
-   protected abstract void doLinkGraphicsAddHeightMapInstruction(Graphics3DAddHeightMapInstruction linkGraphicsAddHeightMap);
+   protected abstract void doAddHeightMapInstruction(Graphics3DAddHeightMapInstruction graphics3DAddHeightMap);
 
-   protected abstract void doLinkGraphicslinkGraphicsAddTextInstruction(Graphics3DAddTextInstruction linkGraphicsAddText);
+   protected abstract void doAddTextInstruction(Graphics3DAddTextInstruction graphics3DAddText);
 
-   protected abstract void doLinkGraphicsAddArcTorusInstruction(Graphics3DAddArcTorusInstruction linkGraphicsAddArcTorus);
+   protected abstract void doAddArcTorusInstruction(Graphics3DAddArcTorusInstruction graphics3DAddArcTorus);
 
-   protected abstract void doLinkGraphicsAddModelFileInstruction(Graphics3DAddModelFileInstruction linkGraphicsAddModelFile);
+   protected abstract void doAddModelFileInstruction(Graphics3DAddModelFileInstruction graphics3DAddModelFile);
 
-   protected abstract void doLinkGraphicsAddConeInstruction(Graphics3DAddConeInstruction linkGraphicsAddCone);
+   protected abstract void doAddConeInstruction(Graphics3DAddConeInstruction graphics3DAddCone);
 
-   protected abstract void doLinkGraphicsAddCylinderInstruction(Graphics3DAddCylinderInstruction linkGraphicsAddCylinder);
+   protected abstract void doAddCylinderInstruction(Graphics3DAddCylinderInstruction graphics3DAddCylinder);
 
-   protected abstract void doLinkGraphicsAddCoordinateSystemInstruction(Graphics3DAddCoordinateSystemInstruction linkGraphicsAddCoordinateSystem);
+   protected abstract void doAddCoordinateSystemInstruction(Graphics3DAddCoordinateSystemInstruction graphics3DAddCoordinateSystem);
 
-   protected abstract void doLinkGraphicsAddCubeInstruction(Graphics3DAddCubeInstruction linkGraphicsAddCube);
+   protected abstract void doAddCubeInstruction(Graphics3DAddCubeInstruction graphics3DAddCube);
 
-   protected abstract void doLinkGraphicsAddEllipsoidInstruction(Graphics3DAddEllipsoidInstruction linkGraphicsAddEllipsoid);
+   protected abstract void doAddEllipsoidInstruction(Graphics3DAddEllipsoidInstruction graphics3DAddEllipsoid);
 
-   protected abstract void doLinkGraphicsAddHemiEllipsoidInstruction(Graphics3DAddHemiEllipsoidInstruction linkGraphicsAddHemiEllipsoid);
+   protected abstract void doAddHemiEllipsoidInstruction(Graphics3DAddHemiEllipsoidInstruction graphics3DAddHemiEllipsoid);
 
-   protected abstract void doLinkGraphicsAddPolygonDoubleInstruction(Graphics3DAddPolygonInstruction linkGraphicsAddPolygonDouble);
+   protected abstract void doAddPolygonDoubleInstruction(Graphics3DAddPolygonInstruction graphics3DAddPolygonDouble);
 
-   protected abstract void doLinkGraphicsAddExtrudedPolygonInstruction(Graphics3DAddExtrudedPolygonInstruction linkGraphicsAddExtrudedPolygon);
+   protected abstract void doAddExtrudedPolygonInstruction(Graphics3DAddExtrudedPolygonInstruction graphics3DAddExtrudedPolygon);
 
-   protected abstract void doLinkGraphicsAddPyramidCubeInstruction(Graphics3DAddPyramidCubeInstruction linkGraphicsAddPyramidCube);
+   protected abstract void doAddPyramidCubeInstruction(Graphics3DAddPyramidCubeInstruction graphics3DAddPyramidCube);
 
-   protected abstract void doLinkGraphicsAddSphereInstruction(Graphics3DAddSphereInstruction linkGraphicsAddSphere);
+   protected abstract void doAddSphereInstruction(Graphics3DAddSphereInstruction graphics3DAddSphere);
 
-   protected abstract void doLinkGraphicsAddVRMLFileInstruction(GraphicsAddVRMLFileInstruction linkGraphicsAddVRMLFile);
+   protected abstract void doAddVRMLFileInstruction(GraphicsAddVRMLFileInstruction graphics3DAddVRMLFile);
 
-   protected abstract void doLinkGraphicsAddWedgeInstruction(Graphics3DAddWedgeInstruction linkGraphicsAddWedge);
+   protected abstract void doAddWedgeInstruction(Graphics3DAddWedgeInstruction graphics3DAddWedge);
 
-   protected abstract void doLinkGraphicsAddTruncatedConeInstruction(Graphics3DAddTruncatedConeInstruction linkGraphicsAddTruncatedCone);
+   protected abstract void doAddTruncatedConeInstruction(Graphics3DAddTruncatedConeInstruction graphics3DAddTruncatedCone);
 
-   protected abstract void doLinkGraphicsIdentityInstruction();
+   protected abstract void doIdentityInstruction();
 
-   protected abstract void doLinkGraphicsRotateInstruction(Graphics3DRotateInstruction linkGraphicsRotate);
+   protected abstract void doRotateInstruction(Graphics3DRotateInstruction graphics3DRotate);
 
-   protected abstract void doLinkGraphicsRotateMatrixInstruction(Graphics3DRotateMatrixInstruction linkGraphicsRotateMatrix);
+   protected abstract void doRotateMatrixInstruction(Graphics3DRotateMatrixInstruction graphics3DRotateMatrix);
 
-   protected abstract void doLinkGraphicsScaleInstruction(Graphics3DScaleInstruction linkGraphicsScale);
+   protected abstract void doScaleInstruction(Graphics3DScaleInstruction graphics3DScale);
 
-   protected abstract void doLinkGraphicsTranslateInstruction(Graphics3DTranslateInstruction linkGraphicsTranslate);
+   protected abstract void doTranslateInstruction(Graphics3DTranslateInstruction graphics3DTranslate);
 
 }
