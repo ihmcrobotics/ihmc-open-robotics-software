@@ -11,9 +11,9 @@ import javax.vecmath.Vector3d;
 
 import org.junit.Test;
 
-import us.ihmc.graphics3DAdapter.graphics.LinkGraphics;
+import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceDefinition;
+import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.math.RotationalInertiaCalculator;
 import us.ihmc.utilities.test.JUnitTools;
@@ -383,7 +383,7 @@ public class RobotTest
       ret.setComOffset(0.0, 0.0, -l1 / 2.0);
       ret.setMomentOfInertia(RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidEllipsoid(ret.getMass(), r1, r1, l1 / 2.0));
 
-      LinkGraphics linkGraphics = new LinkGraphics();
+      Graphics3DObject linkGraphics = new Graphics3DObject();
       linkGraphics.addCoordinateSystem(COORDINATE_SYSTEM_LENGTH);
       createInertiaEllipsoid(ret, linkGraphics, YoAppearance.Red());
       ret.setLinkGraphics(linkGraphics);
@@ -391,7 +391,7 @@ public class RobotTest
       return ret;
    }
 
-   public static void createInertiaEllipsoid(Link ret, LinkGraphics linkGraphics, YoAppearanceDefinition appearance)
+   public static void createInertiaEllipsoid(Link ret, Graphics3DObject linkGraphics, AppearanceDefinition appearance)
    {
       Matrix3d momentOfInertia = new Matrix3d();
       ret.getMomentOfInertia(momentOfInertia);
@@ -411,7 +411,7 @@ public class RobotTest
 //    ret.setComOffset(0.0, 0.0, 0.0);
       ret.setMomentOfInertia(RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidEllipsoid(ret.getMass(), r2, r2, l2 / 2.0));
 
-      LinkGraphics linkGraphics = new LinkGraphics();
+      Graphics3DObject linkGraphics = new Graphics3DObject();
       linkGraphics.addCoordinateSystem(COORDINATE_SYSTEM_LENGTH);
       createInertiaEllipsoid(ret, linkGraphics, YoAppearance.Orange());
       ret.setLinkGraphics(linkGraphics);
@@ -427,7 +427,7 @@ public class RobotTest
       Matrix3d link2moi = new Matrix3d();
       link21.getMomentOfInertia(link2moi);
       ret.setMomentOfInertia(link2moi);
-      LinkGraphics linkGraphics = new LinkGraphics();
+      Graphics3DObject linkGraphics = new Graphics3DObject();
       linkGraphics.addCoordinateSystem(COORDINATE_SYSTEM_LENGTH);
       createInertiaEllipsoid(ret, linkGraphics, YoAppearance.Aqua());
       ret.setLinkGraphics(linkGraphics);
@@ -445,7 +445,7 @@ public class RobotTest
       Matrix3d link1moi = new Matrix3d();
       link11.getMomentOfInertia(link1moi);
       ret.setMomentOfInertia(link1moi);
-      LinkGraphics linkGraphics = new LinkGraphics();
+      Graphics3DObject linkGraphics = new Graphics3DObject();
       linkGraphics.addCoordinateSystem(COORDINATE_SYSTEM_LENGTH);
       createInertiaEllipsoid(ret, linkGraphics, YoAppearance.Blue());
       ret.setLinkGraphics(linkGraphics);
@@ -461,7 +461,7 @@ public class RobotTest
       ret.setMomentOfInertia(RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidEllipsoid(ret.getMass(), random.nextDouble(), random.nextDouble(),
               random.nextDouble()));
 
-      LinkGraphics linkGraphics = new LinkGraphics();
+      Graphics3DObject linkGraphics = new Graphics3DObject();
       linkGraphics.addCoordinateSystem(COORDINATE_SYSTEM_LENGTH);
       createInertiaEllipsoid(ret, linkGraphics, YoAppearance.Orange());
       ret.setLinkGraphics(linkGraphics);
@@ -477,7 +477,7 @@ public class RobotTest
       ret.setMomentOfInertia(RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidEllipsoid(ret.getMass(), random.nextDouble(), random.nextDouble(),
               random.nextDouble()));
 
-      LinkGraphics linkGraphics = new LinkGraphics();
+      Graphics3DObject linkGraphics = new Graphics3DObject();
       linkGraphics.addCoordinateSystem(COORDINATE_SYSTEM_LENGTH);
       createInertiaEllipsoid(ret, linkGraphics, YoAppearance.Orange());
       ret.setLinkGraphics(linkGraphics);
