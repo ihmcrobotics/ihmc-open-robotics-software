@@ -9,13 +9,13 @@ import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.xmlDescription.SDFVisual;
-import us.ihmc.graphics3DAdapter.graphics.LinkGraphics;
+import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.ModelFileType;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceDefinition;
+import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 
 
-public class SDFLinkGraphics extends LinkGraphics
+public class SDFLinkGraphics extends Graphics3DObject
 {
    private static final boolean SHOW_COORDINATE_SYSTEMS = false;
 
@@ -45,7 +45,7 @@ public class SDFLinkGraphics extends LinkGraphics
       Matrix3d rotation = new Matrix3d();
       visualPose.get(rotation, offset);
 
-      YoAppearanceDefinition appearance = null;
+      AppearanceDefinition appearance = null;
       if (ModelFileType.getFileType(mesh) == ModelFileType._STL)
       {
          appearance = YoAppearance.BlackMetalMaterial(); // Otherwise it becomes a white blob
