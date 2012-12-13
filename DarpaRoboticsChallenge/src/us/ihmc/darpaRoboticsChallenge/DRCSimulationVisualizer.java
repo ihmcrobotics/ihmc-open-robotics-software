@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceDefinition;
+import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 
 import com.yobotics.simulationconstructionset.GroundContactPoint;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
@@ -18,7 +18,7 @@ public class DRCSimulationVisualizer
       DynamicGraphicObjectsList dynamicGraphicObjectsList = new DynamicGraphicObjectsList("Simulation Viz");
 
       ArrayList<GroundContactPoint> groundContactPoints = sdfRobot.getAllGroundContactPoints();
-      YoAppearanceDefinition appearance = YoAppearance.Red(); // BlackMetalMaterial();
+      AppearanceDefinition appearance = YoAppearance.Red(); // BlackMetalMaterial();
 
       for (GroundContactPoint groundContactPoint : groundContactPoints)
       {

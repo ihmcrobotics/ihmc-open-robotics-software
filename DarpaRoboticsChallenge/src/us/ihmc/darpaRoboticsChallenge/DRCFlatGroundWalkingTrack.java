@@ -12,7 +12,7 @@ import us.ihmc.commonWalkingControlModules.terrain.TerrainType;
 import us.ihmc.darpaRoboticsChallenge.controllers.DRCRobotMomentumBasedControllerFactory;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.SquaredUpDRCRobotInitialSetup;
-import us.ihmc.graphics3DAdapter.graphics.LinkGraphics;
+import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.utilities.math.geometry.FramePoint;
 
 import com.martiansoftware.jsap.JSAPException;
@@ -226,9 +226,9 @@ public class DRCFlatGroundWalkingTrack
       {
          if (showInstructions)
          {
-            LinkGraphics linkGraphics = new LinkGraphics();
+            Graphics3DObject linkGraphics = new Graphics3DObject();
             linkGraphics.translate(new Vector3d(-1.0, -1.0, 0.0));
-            linkGraphics.rotate(Math.toRadians(90), LinkGraphics.Z);
+            linkGraphics.rotate(Math.toRadians(90), Graphics3DObject.Z);
             linkGraphics.scale(0.2);
             linkGraphics.addModelFile(getClass().getResource("3ds/billboard.3DS"));
             scs.addStaticLinkGraphics(linkGraphics);
