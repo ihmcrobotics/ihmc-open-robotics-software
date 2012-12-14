@@ -1,15 +1,21 @@
 package us.ihmc.graphics3DAdapter.camera;
 
-import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 
 import javax.media.j3d.Transform3D;
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Point3d;
+import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
+import us.ihmc.graphics3DAdapter.holders.ActiveViewportHolder;
+import us.ihmc.graphics3DAdapter.input.Key;
+import us.ihmc.graphics3DAdapter.input.ModifierKeyInterface;
+import us.ihmc.graphics3DAdapter.input.MouseButton;
+import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
 
-public class ClassicCameraController implements CameraController
+public class ClassicCameraController implements TrackingDollyCameraController
 {
    public static final double MIN_FIELD_OF_VIEW = 0.001;
    public static final double MAX_FIELD_OF_VIEW = 2.0;
@@ -20,10 +26,12 @@ public class ClassicCameraController implements CameraController
    private final static double CAMERA_START_Y = -6.0;
    private final static double CAMERA_START_Z = 1.0;
 
+   private final ActiveViewportHolder activeViewHolder = ActiveViewportHolder.getInstance();
+   
    private double camX, camY, camZ, fixX, fixY, fixZ;
 
    private double zoom_factor = 1.0;
-   private double rotate_factor = 1.0; 
+   private double rotate_factor = 1.0;
    private double rotate_camera_factor = 1.0;
 
    private boolean isMounted = false;
@@ -34,7 +42,7 @@ public class ClassicCameraController implements CameraController
    private double trackDX = 0.0, trackDY = 0.0, trackDZ = 0.0;
    private double dollyDX = 2.0, dollyDY = 12.0, dollyDZ = 0.0;
 
-   private ViewportAdapter viewportAdapter;
+   private final ViewportAdapter viewportAdapter;
 
    // Flying
    private boolean fly = true;
@@ -69,6 +77,15 @@ public class ClassicCameraController implements CameraController
 
    private final CameraTrackingAndDollyPositionHolder cameraTrackAndDollyVariablesHolder;
 
+   public static ClassicCameraController createClassicCameraControllerAndAddListeners(ViewportAdapter viewportAdapter, CameraTrackingAndDollyPositionHolder cameraTrackAndDollyVariablesHolder, Graphics3DAdapter graphics3dAdapter)
+   {
+      ClassicCameraController classicCameraController = new ClassicCameraController(viewportAdapter, cameraTrackAndDollyVariablesHolder);
+      graphics3dAdapter.addKeyListener(classicCameraController);
+      graphics3dAdapter.addMouseListener(classicCameraController);
+      graphics3dAdapter.addSelectedListener(classicCameraController);
+      return classicCameraController;
+   }
+   
    public ClassicCameraController(ViewportAdapter viewportAdapter, CameraTrackingAndDollyPositionHolder cameraTrackAndDollyVariablesHolder)
    {
       this.viewportAdapter = viewportAdapter;
@@ -327,6 +344,16 @@ public class ClassicCameraController implements CameraController
 
    public void update()
    {
+      if(!activeViewHolder.isActiveViewport(viewportAdapter))
+      {
+         forward = false;
+         backward = false;
+         left = false;
+         right = false;
+         up = false;
+         down = false;
+      }
+      
       if (isTracking)
       {
          if (isTrackingX)
@@ -384,12 +411,12 @@ public class ClassicCameraController implements CameraController
       {
          if (forward)
          {
-            moveCameraForward(-1);
+            moveCameraForward(-0.5);
          }
 
          if (backward)
          {
-            moveCameraForward(1);
+            moveCameraForward(0.5);
          }
 
          if (left)
@@ -652,7 +679,7 @@ public class ClassicCameraController implements CameraController
    private Vector3d rotVector = new Vector3d();
    private AxisAngle4d rotAxisAngle4d = new AxisAngle4d();
 
-   public void doMouseDraggedLeft(float dx, float dy)
+   public void doMouseDraggedLeft(double dx, double dy)
    {
       // Rotate around fix point:
 
@@ -706,7 +733,7 @@ public class ClassicCameraController implements CameraController
 
    }
 
-   public void doMouseDraggedRight(float dx, float dy)
+   public void doMouseDraggedRight(double dx, double dy)
    {
       // Elevate up and down
       double delX0 = camX - fixX, delY0 = camY - fixY, delZ0 = camZ - fixZ;
@@ -778,7 +805,7 @@ public class ClassicCameraController implements CameraController
       }
    }
 
-   public void doMouseDraggedMiddle(float dx, float dy)
+   public void doMouseDraggedMiddle(double dx, double dy)
    {
       // Zooms in and out
 
@@ -833,7 +860,7 @@ public class ClassicCameraController implements CameraController
 
    }
 
-   private void moveCameraForward(int distance)
+   private void moveCameraForward(double distance)
    {
       double angleXY = Math.atan2(camY - fixY, camX - fixX);
       double angleZ = Math.atan2(camZ - fixZ, Math.hypot(camY - fixY, camX - fixX));
@@ -1048,7 +1075,6 @@ public class ClassicCameraController implements CameraController
       return cameraTrackAndDollyVariablesHolder.getDollyZ();
    }
 
-
    public void nextStoredPosition()
    {
       if (storedCameraPositions.size() > 0)
@@ -1097,6 +1123,7 @@ public class ClassicCameraController implements CameraController
 
    public void computeTransform(Transform3D currXform)
    {
+      update();
       TransformToScreenHolder cameraMount = getCameraMount();
       if (isMounted() && (cameraMount != null))
       {
@@ -1165,73 +1192,108 @@ public class ClassicCameraController implements CameraController
 
    }
 
-   public void keyPressed(int keyCode)
+   public void keyPressed(Key key)
    {
-      
+      if(!activeViewHolder.isActiveViewport(viewportAdapter))
+         return;
 
-      if (keyCode == KeyEvent.VK_W)
+      switch (key)
       {
+      case W:
          forward = true;
-      }
-      else if (keyCode == KeyEvent.VK_S)
-      {
+         break;
+      case S:
          backward = true;
-      }
-      else if (keyCode == KeyEvent.VK_A)
-      {
+         break;
+      case A:
          left = true;
-      }
-      else if (keyCode == KeyEvent.VK_D)
-      {
+         break;
+      case D:
          right = true;
-      }
-      else if (keyCode == KeyEvent.VK_Q)
-      {
+         break;
+      case Q:
          up = true;
-      }
-      else if (keyCode == KeyEvent.VK_Z)
-      {
+         break;
+      case Z:
          down = true;
+         break;
+      }
+
+   }
+
+   public void keyReleased(Key key)
+   {
+      if(!activeViewHolder.isActiveViewport(viewportAdapter))
+         return;
+      
+      switch(key)
+      {
+      case W:
+         forward = false;
+         break;
+      case S:
+         backward = false;
+         break;
+      case A:
+         left = false;
+         break;
+      case D:
+         right = false;
+         break;
+      case Q:
+         up = false;
+         break;
+      case Z:
+         down = false;
+         break;
+      case RIGHT:
+         nextStoredPosition();
+         break;
+      case LEFT:
+         previousStoredPosition();
+         break;
+      case K:
+         storePosition();
+         break;
+      }
+      
+   }
+   
+   public void selected(Graphics3DNode graphics3dNode, ModifierKeyInterface modifierKeyHolder, Point3d location, Point3d cameraLocation, Quat4d cameraRotation)
+   {
+      if(!activeViewHolder.isActiveViewport(viewportAdapter))
+         return;
+      
+      if(modifierKeyHolder.isKeyPressed(Key.SHIFT))
+      {
+         if (!isTracking() || !isTrackingX())
+            setFixX(location.x);
+         if (!isTracking() || !isTrackingY())
+            setFixY(location.y);
+         if (!isTracking() || !isTrackingZ())
+            setFixZ(location.z);
       }
    }
 
-   public void keyReleased(int keyCode)
+   public void mouseDragged(MouseButton mouseButton, double dx, double dy)
    {
-      if (keyCode == KeyEvent.VK_W)
+      if(!activeViewHolder.isActiveViewport(viewportAdapter))
+         return;
+      
+      switch(mouseButton)
       {
-         forward = false;
-      }
-      else if (keyCode == KeyEvent.VK_S)
-      {
-         backward = false;
-      }
-      else if (keyCode == KeyEvent.VK_A)
-      {
-         left = false;
-      }
-      else if (keyCode == KeyEvent.VK_D)
-      {
-         right = false;
-      }
-      else if (keyCode == KeyEvent.VK_Q)
-      {
-         up = false;
-      }
-      else if (keyCode == KeyEvent.VK_Z)
-      {
-         down = false;
-      }
-      else if (keyCode == KeyEvent.VK_RIGHT)
-      {
-         nextStoredPosition();
-      }
-      else if (keyCode == KeyEvent.VK_LEFT)
-      {
-         previousStoredPosition();
-      }
-      else if (keyCode == KeyEvent.VK_K)
-      {
-         storePosition();
+      case LEFT:
+         doMouseDraggedLeft(dx, dy);
+         break;
+      case RIGHT:
+         doMouseDraggedRight(dx, dy);
+         break;
+      case MIDDLE:
+         doMouseDraggedMiddle(dx, dy);
+         break;
+      case LEFTRIGHT:
+         pan(dx, dy);
+         break;
       }
    }
 }

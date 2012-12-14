@@ -9,14 +9,16 @@ import javax.media.j3d.Transform3D;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.vecmath.Point3d;
+import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
-import us.ihmc.graphics3DAdapter.ModifierKeyHolder;
-import us.ihmc.graphics3DAdapter.SelectedListener;
+import us.ihmc.graphics3DAdapter.camera.ClassicCameraController;
 import us.ihmc.graphics3DAdapter.camera.SimpleCameraTrackingAndDollyPositionHolder;
 import us.ihmc.graphics3DAdapter.camera.ViewportAdapter;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
+import us.ihmc.graphics3DAdapter.input.ModifierKeyInterface;
+import us.ihmc.graphics3DAdapter.input.SelectedListener;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNodeType;
 import us.ihmc.utilities.ThreadTools;
@@ -49,8 +51,8 @@ public class Graphics3DAdapterExampleTwo
       
       SelectedListener selectedListener = new SelectedListener()
       {
-         public void selected(Graphics3DNode graphics3dNode, ModifierKeyHolder modifierKeyHolder, Point3d location, Point3d cameraLocation,
-               Vector3d lookAtDirection)
+         public void selected(Graphics3DNode graphics3dNode, ModifierKeyInterface modifierKeyHolder, Point3d location, Point3d cameraLocation,
+               Quat4d cameraRotation)
          {
             System.out.println("Selected " + graphics3dNode.getName() + " @ location " + location);                        
             
@@ -61,8 +63,9 @@ public class Graphics3DAdapterExampleTwo
       node2.addSelectedListener(selectedListener);
 
       SimpleCameraTrackingAndDollyPositionHolder cameraTrackAndDollyVariablesHolder = new SimpleCameraTrackingAndDollyPositionHolder();
-
-      ViewportAdapter camera = adapter.createNewViewport(cameraTrackAndDollyVariablesHolder, null, null);
+      ViewportAdapter camera = adapter.createNewViewport(null);
+      ClassicCameraController classicCameraController = ClassicCameraController.createClassicCameraControllerAndAddListeners(camera, cameraTrackAndDollyVariablesHolder, adapter);
+      camera.setCameraController(classicCameraController);
       Canvas canvas = camera.getCanvas();
       JPanel panel = new JPanel(new BorderLayout());
       panel.add("Center", canvas);

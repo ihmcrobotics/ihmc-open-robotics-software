@@ -9,6 +9,7 @@ public interface ViewportAdapter
    public abstract Canvas getCanvas();
    public abstract CaptureDevice getCaptureDevice();
 
+   public abstract void setCameraController(CameraController cameraController);
    public abstract CameraController getCameraController();
 
    public abstract void setClipDistances(double near, double far);

@@ -1,7 +1,7 @@
-package us.ihmc.graphics3DAdapter;
+package us.ihmc.graphics3DAdapter.input;
 
 import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
+import javax.vecmath.Quat4d;
 
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
 
@@ -14,7 +14,7 @@ public interface SelectedListener
     * @param modifierKeys TODO
     * @param location location of the selected point
     * @param cameraLocation camera position
-    * @param lookAtDirection camera view direction
+    * @param cameraRotation camera view direction
     */
-   public void selected(Graphics3DNode graphics3dNode, ModifierKeyHolder modifierKeyHolder, Point3d location, Point3d cameraLocation, Vector3d lookAtDirection);
+   public void selected(Graphics3DNode graphics3dNode, ModifierKeyInterface modifierKeyInterface, Point3d location, Point3d cameraLocation, Quat4d cameraRotation);
 }

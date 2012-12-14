@@ -13,18 +13,19 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.vecmath.Color3f;
 import javax.vecmath.Point3d;
+import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
-import us.ihmc.graphics3DAdapter.ModifierKeyHolder;
-import us.ihmc.graphics3DAdapter.SelectedListener;
-import us.ihmc.graphics3DAdapter.camera.CameraController;
+import us.ihmc.graphics3DAdapter.camera.ClassicCameraController;
 import us.ihmc.graphics3DAdapter.camera.SimpleCameraTrackingAndDollyPositionHolder;
 import us.ihmc.graphics3DAdapter.camera.ViewportAdapter;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceRGBColor;
 import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DInstruction;
+import us.ihmc.graphics3DAdapter.input.ModifierKeyInterface;
+import us.ihmc.graphics3DAdapter.input.SelectedListener;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNodeType;
 import us.ihmc.utilities.ThreadTools;
@@ -49,21 +50,24 @@ public class Graphics3DAdapterExampleOne
 
       PanBackAndForthTrackingAndDollyPositionHolder cameraTrackAndDollyVariablesHolder = new PanBackAndForthTrackingAndDollyPositionHolder(0.0, 2.0, 0.2);
       
-      ViewportAdapter viewportAdapter = graphics3DAdapter.createNewViewport(cameraTrackAndDollyVariablesHolder, null, null);
+      ViewportAdapter viewportAdapter = graphics3DAdapter.createNewViewport(null);
+      ClassicCameraController classicCameraController = ClassicCameraController.createClassicCameraControllerAndAddListeners(viewportAdapter, cameraTrackAndDollyVariablesHolder, graphics3DAdapter);
+      viewportAdapter.setCameraController(classicCameraController);
       Canvas canvas = viewportAdapter.getCanvas();
       createNewWindow(canvas);
       
-      ViewportAdapter secondCamera = graphics3DAdapter.createNewViewport(cameraTrackAndDollyVariablesHolder, null, null);
+      ViewportAdapter secondCamera = graphics3DAdapter.createNewViewport(null);
+      ClassicCameraController secondController = ClassicCameraController.createClassicCameraControllerAndAddListeners(secondCamera, cameraTrackAndDollyVariablesHolder, graphics3DAdapter);
+      secondCamera.setCameraController(secondController);
       createNewWindow(secondCamera.getCanvas());
       
-      CameraController cameraController = viewportAdapter.getCameraController();
-      cameraController.setTracking(true, true, false, false);
+      classicCameraController.setTracking(true, true, false, false);
       
       SelectedListener selectedListener = new SelectedListener()
       {
 
-         public void selected(Graphics3DNode graphics3dNode, ModifierKeyHolder modifierKeyHolder, Point3d location, Point3d cameraLocation,
-               Vector3d lookAtDirection)
+         public void selected(Graphics3DNode graphics3dNode, ModifierKeyInterface modifierKeyHolder, Point3d location, Point3d cameraLocation,
+               Quat4d cameraRotation)
          {
             System.out.println("Selected " + graphics3dNode.getName() + " @ location " + location);                        
             
