@@ -12,8 +12,8 @@ import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.graphics3DAdapter.HeightMap;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
+import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DAddArcTorusInstruction;
 import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DAddConeInstruction;
 import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DAddCoordinateSystemInstruction;
@@ -31,7 +31,6 @@ import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DAddSphereInstru
 import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DAddTeaPotInstruction;
 import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DAddTextInstruction;
 import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DAddTruncatedConeInstruction;
-import us.ihmc.graphics3DAdapter.graphics.instructions.GraphicsAddVRMLFileInstruction;
 import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DAddWedgeInstruction;
 import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DIdentityInstruction;
 import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DInstruction;
@@ -228,60 +227,6 @@ public class Graphics3DObject
    public void identity()
    {
       graphics3DInstructions.add(new Graphics3DIdentityInstruction());
-   }
-
-   /**
-    * Adds the specified VRML file to the center of the current coordinate system
-    * using the default appearance.  VRML, or Virtual Reality Modeling Language, is
-    * a standard file format describing 3d objects.  For more information google
-    * VRML and read about it.
-    *
-    * @param fileURL URL describing the location of the VMRL file.
-    */
-   public void addVRMLFile(URL fileURL)
-   {
-      addVRMLFile(fileURL, null);
-   }
-
-   /**
-    * Adds the specified VRML file to the center of the current coordinate system
-    * using the provided appearance.  VRML or Virtual Reality Modeling Language is
-    * a standard file format describing 3d objects.  For more information google
-    * VRML and read about it.
-    *
-    * @param fileUrl URL describing the location of the VRML file.
-    * @param yoAppearanceDefinition Appearance to use in the creation of this shape.
-    */
-   public void addVRMLFile(URL fileUrl, AppearanceDefinition yoAppearanceDefinition)
-   {
-      graphics3DInstructions.add(new GraphicsAddVRMLFileInstruction(fileUrl.getPath(), yoAppearanceDefinition));
-   }
-
-   /**
-    * Adds the specified VRML file to the center of the current coordinate system
-    * using the provided appearance.  VRML or Virtual Reality Modeling Language is
-    * a standard file format describing 3d objects.  For more information google
-    * VRML and read about it.
-    *
-    * @param fileName Path to the desired file.
-    * @param app Appearance to use with the VRML file.
-    */
-   public void addVRMLFile(String fileName, AppearanceDefinition app)
-   {
-         graphics3DInstructions.add(new GraphicsAddVRMLFileInstruction(fileName, app));
-   }
-
-   /**
-    * Adds the specified VRML file to the center of the current coordinate system
-    * using the default appearance.  VRML, or Virtual Reality Modeling Language, is
-    * a standard file format describing 3d objects.  For more information google
-    * VRML and read about it.
-    *
-    * @param fileName String
-    */
-   public void addVRMLFile(String fileName)
-   {
-      addVRMLFile(fileName, null);
    }
 
    /**
