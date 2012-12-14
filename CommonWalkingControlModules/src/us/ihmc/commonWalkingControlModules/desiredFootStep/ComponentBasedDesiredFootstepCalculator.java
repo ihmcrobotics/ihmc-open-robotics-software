@@ -34,7 +34,7 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractAdjustableD
    private final DoubleYoVariable velocityMagnitudeInHeading = new DoubleYoVariable("velocityMagnitudeInHeading", registry);
    private final DoubleYoVariable velocityMagnitudeToLeftOfHeading = new DoubleYoVariable("velocityMagnitudeToLeftOfHeading", registry);
 
-   private final SideDependentList<? extends ReferenceFrame> ankleZUpFrames;
+   private SideDependentList<? extends ReferenceFrame> ankleZUpFrames;
    private final SideDependentList<? extends ContactablePlaneBody> bipedFeet;
 
    private final DesiredHeadingControlModule desiredHeadingControlModule;
@@ -51,6 +51,16 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractAdjustableD
 
       this.desiredHeadingControlModule = desiredHeadingControlModule;
       this.desiredVelocityControlModule = desiredVelocityControlModule;
+   }
+
+   protected SideDependentList<? extends ReferenceFrame> getAnkleZUpFrames()
+   {
+      return ankleZUpFrames;
+   }
+
+   protected void setAnkleZUpFrames(SideDependentList<? extends ReferenceFrame> ankleZUpFrames)
+   {
+      this.ankleZUpFrames = ankleZUpFrames;
    }
 
    public void initializeDesiredFootstep(RobotSide supportLegSide)
