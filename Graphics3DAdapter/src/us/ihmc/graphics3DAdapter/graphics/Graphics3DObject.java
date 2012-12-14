@@ -8,11 +8,10 @@ import javax.media.j3d.Transform3D;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
+import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.graphics3DAdapter.HeightMap;
-import us.ihmc.graphics3DAdapter.ModifierKeyHolder;
-import us.ihmc.graphics3DAdapter.SelectedListener;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DAddArcTorusInstruction;
@@ -41,6 +40,8 @@ import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DRotateInstructi
 import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DRotateMatrixInstruction;
 import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DScaleInstruction;
 import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DTranslateInstruction;
+import us.ihmc.graphics3DAdapter.input.ModifierKeyInterface;
+import us.ihmc.graphics3DAdapter.input.SelectedListener;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
 import us.ihmc.utilities.InertiaTools;
 
@@ -936,11 +937,11 @@ public class Graphics3DObject
       return instruction;
    }
    
-   public void notifySelectedListeners(Graphics3DNode graphics3dNode, ModifierKeyHolder modifierKeyHolder, Point3d location, Point3d cameraPosition, Vector3d lookAtDirection)
+   public void notifySelectedListeners(Graphics3DNode graphics3dNode, ModifierKeyInterface modifierKeyHolder, Point3d location, Point3d cameraPosition, Quat4d cameraRotation)
    {
       for(SelectedListener selectedListener : selectedListeners)
       {
-         selectedListener.selected(graphics3dNode, modifierKeyHolder, location, cameraPosition, lookAtDirection);
+         selectedListener.selected(graphics3dNode, modifierKeyHolder, location, cameraPosition, cameraRotation);
       }
    }
    

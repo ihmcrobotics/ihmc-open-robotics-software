@@ -6,9 +6,10 @@ import java.net.URL;
 import javax.vecmath.Color3f;
 
 import us.ihmc.graphics3DAdapter.camera.ViewportAdapter;
-import us.ihmc.graphics3DAdapter.camera.CameraTrackingAndDollyPositionHolder;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
-import us.ihmc.graphics3DAdapter.holders.NavigatingCameraHolder;
+import us.ihmc.graphics3DAdapter.input.KeyListener;
+import us.ihmc.graphics3DAdapter.input.MouseListener;
+import us.ihmc.graphics3DAdapter.input.SelectedListener;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
 
 public interface Graphics3DAdapter
@@ -16,8 +17,7 @@ public interface Graphics3DAdapter
    public void addRootNode(Graphics3DNode rootNode);
    public void removeRootNode(Graphics3DNode rootNode);
    
-   public ViewportAdapter createNewViewport(CameraTrackingAndDollyPositionHolder cameraTrackAndDollyYoVariablesHolder, GraphicsDevice graphicsDevice,
-         NavigatingCameraHolder navigatingCameraHolder);
+   public ViewportAdapter createNewViewport(GraphicsDevice graphicsDevice);
    
    public void setHeightMap(HeightMap heightMap);
    
@@ -27,6 +27,8 @@ public interface Graphics3DAdapter
    public RayCollisionAdapter getRayCollisionAdapter();
    
    public void addSelectedListener(SelectedListener selectedListener);
+   public void addKeyListener(KeyListener keyListener);
+   public void addMouseListener(MouseListener mouseListener);
    
    public void destroy();
    

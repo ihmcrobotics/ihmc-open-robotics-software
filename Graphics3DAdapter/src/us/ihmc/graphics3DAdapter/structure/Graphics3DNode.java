@@ -6,11 +6,11 @@ import java.util.List;
 
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
+import javax.vecmath.Quat4d;
 
-import us.ihmc.graphics3DAdapter.ModifierKeyHolder;
-import us.ihmc.graphics3DAdapter.SelectedListener;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
+import us.ihmc.graphics3DAdapter.input.ModifierKeyInterface;
+import us.ihmc.graphics3DAdapter.input.SelectedListener;
 
 public class Graphics3DNode
 {
@@ -91,14 +91,14 @@ public class Graphics3DNode
       return nodeType;
    }
 
-   public void notifySelectedListeners(ModifierKeyHolder modifierKeys, Point3d location, Point3d cameraPosition, Vector3d lookAtDirection)
+   public void notifySelectedListeners(ModifierKeyInterface modifierKeys, Point3d location, Point3d cameraPosition, Quat4d cameraRotation)
    {
       for(SelectedListener selectedListener : selectedListeners)
       {
-         selectedListener.selected(this, modifierKeys, location, cameraPosition, lookAtDirection);
+         selectedListener.selected(this, modifierKeys, location, cameraPosition, cameraRotation);
       }
       
-      graphicsObject.notifySelectedListeners(this, modifierKeys, location, cameraPosition, lookAtDirection);
+      graphicsObject.notifySelectedListeners(this, modifierKeys, location, cameraPosition, cameraRotation);
    }
    
    public void addSelectedListener(SelectedListener selectedListener)

@@ -5,12 +5,12 @@ import static org.junit.Assert.assertEquals;
 import java.util.Random;
 
 import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
+import javax.vecmath.Quat4d;
 
 import org.junit.Test;
 
-import us.ihmc.graphics3DAdapter.ModifierKeyHolder;
-import us.ihmc.graphics3DAdapter.SelectedListener;
+import us.ihmc.graphics3DAdapter.input.ModifierKeyInterface;
+import us.ihmc.graphics3DAdapter.input.SelectedListener;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
 
 import com.yobotics.simulationconstructionset.DoNothingController;
@@ -175,8 +175,8 @@ public class SimpleCombinedTerrainObjectEnvinronmentTest
 
          scs.attachSelectedListener(new SelectedListener()
          {
-            public void selected(Graphics3DNode graphics3dNode, ModifierKeyHolder modifierKeyHolder, Point3d location, Point3d cameraLocation,
-                  Vector3d lookAtDirection)
+            public void selected(Graphics3DNode graphics3dNode, ModifierKeyInterface modifierKeyHolder, Point3d location, Point3d cameraLocation,
+                  Quat4d cameraRotation)
             {              
                System.out.println("Clicked on Point " + location);
             }
