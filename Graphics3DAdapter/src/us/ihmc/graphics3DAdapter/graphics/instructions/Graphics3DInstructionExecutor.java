@@ -68,11 +68,6 @@ public abstract class Graphics3DInstructionExecutor
             Graphics3DAddSphereInstruction graphics3DAddSphere = (Graphics3DAddSphereInstruction) instruction;
             doAddSphereInstruction(graphics3DAddSphere);
          }
-         else if (instruction instanceof GraphicsAddVRMLFileInstruction)
-         {
-            GraphicsAddVRMLFileInstruction graphics3DAddVRMLFile = (GraphicsAddVRMLFileInstruction) instruction;
-            doAddVRMLFileInstruction(graphics3DAddVRMLFile);
-         }
          else if (instruction instanceof Graphics3DAddWedgeInstruction)
          {
             Graphics3DAddWedgeInstruction graphics3DAddWedge = (Graphics3DAddWedgeInstruction) instruction;
@@ -177,8 +172,6 @@ public abstract class Graphics3DInstructionExecutor
    protected abstract void doAddPyramidCubeInstruction(Graphics3DAddPyramidCubeInstruction graphics3DAddPyramidCube);
 
    protected abstract void doAddSphereInstruction(Graphics3DAddSphereInstruction graphics3DAddSphere);
-
-   protected abstract void doAddVRMLFileInstruction(GraphicsAddVRMLFileInstruction graphics3DAddVRMLFile);
 
    protected abstract void doAddWedgeInstruction(Graphics3DAddWedgeInstruction graphics3DAddWedge);
 

@@ -2,7 +2,7 @@ package us.ihmc.graphics3DAdapter.graphics;
 
 public enum ModelFileType
 {
-   COLLADA, _3DS, _STL;
+   COLLADA, _3DS, _STL, _VRML, _OBJ;
    
    public static ModelFileType getFileType(String fileName)
    {
@@ -18,6 +18,14 @@ public enum ModelFileType
       else if (ext.equalsIgnoreCase("stl"))
       {
          return _STL;
+      }
+      else if (ext.equalsIgnoreCase("wrl"))
+      {
+         return _VRML;
+      }
+      else if (ext.equalsIgnoreCase("obj"))
+      {
+         return _OBJ;
       }
       else
       {
