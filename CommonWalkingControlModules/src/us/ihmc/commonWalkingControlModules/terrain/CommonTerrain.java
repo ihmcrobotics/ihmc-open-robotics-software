@@ -14,7 +14,6 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
 
 import com.yobotics.simulationconstructionset.GroundProfile;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.FlatGroundProfile;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.ground.AlternatingSlopesGroundProfile;
@@ -32,16 +31,15 @@ public class CommonTerrain
    private final SteppingStones steppingStones;
    private final GroundProfile groundProfile;
 
-   public CommonTerrain(TerrainType terrainType, YoVariableRegistry registry)
+   public CommonTerrain(TerrainType terrainType)
    {
       this.steppingStones = null;
-      this.groundProfile = setUpTerrain(terrainType, registry);
+      this.groundProfile = setUpTerrain(terrainType);
    }
 
-   public CommonTerrain(ConvexPolygon2d footPolygon, SteppingStonePattern steppingStonePattern, boolean useSteppingStonesGroundModel,
-                        YoVariableRegistry registry)
+   public CommonTerrain(ConvexPolygon2d footPolygon, SteppingStonePattern steppingStonePattern, boolean useSteppingStonesGroundModel)
    {
-      this.steppingStones = setUpSteppingStones(footPolygon, steppingStonePattern, useSteppingStonesGroundModel, registry);
+      this.steppingStones = setUpSteppingStones(footPolygon, steppingStonePattern, useSteppingStonesGroundModel);
 
       if (useSteppingStonesGroundModel)
       {
@@ -113,8 +111,7 @@ public class CommonTerrain
 
    public static final double FLAT_HEIGHT = 0.0;
 
-   private SteppingStones setUpSteppingStones(ConvexPolygon2d footPolygon, SteppingStonePattern steppingStonePattern, boolean useSteppingStonesGroundModel,
-                                    YoVariableRegistry registry)
+   private SteppingStones setUpSteppingStones(ConvexPolygon2d footPolygon, SteppingStonePattern steppingStonePattern, boolean useSteppingStonesGroundModel)
    {
       SteppingStones steppingStones;
       switch (steppingStonePattern)
@@ -350,7 +347,7 @@ public class CommonTerrain
    }
 
 
-   private GroundProfile setUpTerrain(TerrainType terrainType, YoVariableRegistry registry)
+   private GroundProfile setUpTerrain(TerrainType terrainType)
    {
       GroundProfile groundProfile;
       switch (terrainType)
@@ -377,12 +374,12 @@ public class CommonTerrain
             break;
 
          case STEP_UP :
-            groundProfile = new StepUpGroundProfile(registry);
+            groundProfile = new StepUpGroundProfile(1.4, 0.1);
 
             break;
 
          case STAIR :
-              groundProfile = new StairGroundProfile(registry);
+              groundProfile = new StairGroundProfile(0.15, 0.35);
 //              groundProfile = new ListOfHeightsStairGroundProfile(new double[] {0.1, 0.2, 0.3}, new double[] {0.1, 0.2}, 0.0, 0.0);
 
             break;
