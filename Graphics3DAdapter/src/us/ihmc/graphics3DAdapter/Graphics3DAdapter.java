@@ -37,4 +37,5 @@ public interface Graphics3DAdapter
    public void setBackgroundImage(URL fileURL, Graphics3DBackgroundScaleMode backgroundScaleMode);
 
    public void setGroundAppearance(AppearanceDefinition app);
+   public void freezeFrame(Graphics3DNode rootJoint);
 }

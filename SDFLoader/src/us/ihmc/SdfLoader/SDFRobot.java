@@ -8,6 +8,7 @@ import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.MatrixTools;
@@ -20,8 +21,9 @@ import com.yobotics.simulationconstructionset.Joint;
 import com.yobotics.simulationconstructionset.Link;
 import com.yobotics.simulationconstructionset.PinJoint;
 import com.yobotics.simulationconstructionset.Robot;
+import com.yobotics.simulationconstructionset.graphics.GraphicsObjectsHolder;
 
-public class SDFRobot extends Robot
+public class SDFRobot extends Robot implements GraphicsObjectsHolder
 {
    private static final long serialVersionUID = 5864358637898048080L;
 
@@ -172,6 +174,15 @@ public class SDFRobot extends Robot
    {
       Vector3d angularVelocity = rootJoint.getAngularVelocityInBody();
       return new FrameVector(pelvisFrame, angularVelocity);
+   }
+
+   public Graphics3DObject getGraphicsObject(String name)
+   {
+      if(rootJoint.getName().equals(name))
+      {
+         return rootJoint.getLink().getLinkGraphics();
+      }
+      return robotJoints.get(name).getLink().getLinkGraphics();
    }
 
 

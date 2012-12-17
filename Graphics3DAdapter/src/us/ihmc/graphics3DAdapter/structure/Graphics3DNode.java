@@ -23,8 +23,6 @@ public class Graphics3DNode
 
    private final ArrayList<Graphics3DNode> childeren = new ArrayList<Graphics3DNode>();
    private final ArrayList<SelectedListener> selectedListeners = new ArrayList<SelectedListener>();
-   
-   private boolean freezeFrame = false;
 
    public Graphics3DNode(String name, Graphics3DNodeType nodeType)
    {
@@ -104,15 +102,5 @@ public class Graphics3DNode
    public void addSelectedListener(SelectedListener selectedListener)
    {
       selectedListeners.add(selectedListener);
-   }
-   
-   public void setFreezeFrame(boolean freezeFrame)
-   {
-      this.freezeFrame = freezeFrame;
-   }
-   
-   public boolean getFreezeFrame()
-   {
-      return freezeFrame;
    }
 }
