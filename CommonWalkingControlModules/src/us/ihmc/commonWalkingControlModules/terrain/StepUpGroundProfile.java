@@ -4,29 +4,26 @@ package us.ihmc.commonWalkingControlModules.terrain;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
-import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.GroundProfile;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public class StepUpGroundProfile implements GroundProfile
 {
    private final double xMin, xMax, yMin, yMax;
-   private final double xTiles = 1.0, yTiles = 1.0;
-   
-   private final DoubleYoVariable groundXStep, groundZStep;
-   
-   public StepUpGroundProfile(YoVariableRegistry registry)
+   private final double
+      xTiles = 1.0, yTiles = 1.0;
+
+   private final double groundXStep;
+   private final double groundZStep;
+
+   public StepUpGroundProfile(double groundXStep, double groundZStep)
    {
       this.xMin = -1.0;
       this.xMax = 4.0;
       this.yMin = -1.0;
       this.yMax = 1.0;
-      
-      groundXStep = new DoubleYoVariable("groundXStep", registry);
-      groundZStep = new DoubleYoVariable("groundZStep", registry);
-      
-      groundXStep.set(1.4);
-      groundZStep.set(0.10); //0.07);
+
+      this.groundXStep = groundXStep;
+      this.groundZStep = groundZStep;
    }
 
    public void closestIntersectionAndNormalAt(double x, double y, double z, Point3d intersection, Vector3d normal)
@@ -73,7 +70,9 @@ public class StepUpGroundProfile implements GroundProfile
 
    public double heightAt(double x, double y, double z)
    {
-      if (x > groundXStep.getDoubleValue()) return groundZStep.getDoubleValue();
+      if (x > groundXStep)
+         return groundZStep;
+
       return 0.0;
    }
 
@@ -88,4 +87,3 @@ public class StepUpGroundProfile implements GroundProfile
    }
 
 }
-
