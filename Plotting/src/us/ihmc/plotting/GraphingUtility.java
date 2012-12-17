@@ -1,9 +1,8 @@
 package us.ihmc.plotting;
 
-import org.jfree.chart.ChartFactory;
-import org.jfree.chart.ChartPanel;
-import org.jfree.chart.JFreeChart;
+import org.jfree.chart.*;
 import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
@@ -15,6 +14,7 @@ import javax.swing.*;
 import javax.vecmath.Point2d;
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Iterator;
 
 /**
  * User: mjohnson
@@ -61,6 +61,55 @@ public class GraphingUtility
       ChartPanel chartPanel = new ChartPanel(chart);
       //      chartPanel.setPreferredSize(new java.awt.Dimension(600, 400));
       return chartPanel;
+   }
+
+   public static void increaseFontSize(JFreeChart chart, int amount)
+   {
+      XYPlot plot = chart.getXYPlot();
+
+      Font font = plot.getDomainAxis().getTickLabelFont();
+      int size = font.getSize();
+      size += amount;
+      Font bigger = new Font(font.getName(), font.getStyle(), size);
+      ValueAxis valueAxis = plot.getDomainAxis();
+      valueAxis.setTickLabelFont(bigger);
+
+      font = plot.getDomainAxis().getLabelFont();
+      size = font.getSize();
+      size += amount;
+      bigger = new Font(font.getName(), font.getStyle(), size);
+      valueAxis.setLabelFont(bigger);
+
+      plot.setDomainAxis(valueAxis);
+
+      font = plot.getRangeAxis().getTickLabelFont();
+      size = font.getSize();
+      size += amount;
+      bigger = new Font(font.getName(), font.getStyle(), size);
+      valueAxis = plot.getRangeAxis();
+      valueAxis.setTickLabelFont(bigger);
+
+      font = plot.getRangeAxis().getLabelFont();
+      size = font.getSize();
+      size += amount;
+      bigger = new Font(font.getName(), font.getStyle(), size);
+      valueAxis.setLabelFont(bigger);
+
+      plot.setRangeAxis(valueAxis);
+
+      font = chart.getTitle().getFont();
+      size = font.getSize();
+      size += amount;
+      bigger = new Font(font.getName(), font.getStyle(), size);
+      chart.getTitle().setFont(bigger);
+
+      plot.setRangeAxis(valueAxis);
+
+      font = chart.getLegend().getItemFont();
+      size = font.getSize();
+      size += amount;
+      bigger = new Font(font.getName(), font.getStyle(), size);
+      chart.getLegend().setItemFont(bigger);
    }
 
    public static ChartPanel createGraph(String title, String xAxisLabel, String yAxisLabel, XYDataset dataset, double minRange, double maxRange)
@@ -195,6 +244,7 @@ public class GraphingUtility
 
       jPanel.add(chartPanel, gbc);
       gbc.gridy++;
+      GraphingUtility.increaseFontSize(chartPanel2.getChart(), 6);
       jPanel.add(chartPanel2, gbc);
 
       JFrame jFrame = new JFrame("Test Graph");
