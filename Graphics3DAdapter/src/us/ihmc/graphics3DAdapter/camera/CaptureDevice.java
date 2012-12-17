@@ -16,4 +16,6 @@ public interface CaptureDevice
 
    public abstract void setSize(int width, int height);
 
+   public abstract void streamTo(CameraStreamer cameraStreamer);
+
 }
