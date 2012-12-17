@@ -59,7 +59,7 @@ public class GraphingUtility
       //      plot.getRangeAxis().setRange(90.0, 100.0);
 
       ChartPanel chartPanel = new ChartPanel(chart);
-      chartPanel.setPreferredSize(new java.awt.Dimension(800, 600));
+      //      chartPanel.setPreferredSize(new java.awt.Dimension(600, 400));
       return chartPanel;
    }
 
@@ -100,7 +100,7 @@ public class GraphingUtility
       plot.getRangeAxis().setRange(minRange, maxRange);
 
       ChartPanel chartPanel = new ChartPanel(chart);
-      chartPanel.setPreferredSize(new java.awt.Dimension(800, 600));
+      //      chartPanel.setPreferredSize(new java.awt.Dimension(600, 400));
       return chartPanel;
    }
 
@@ -184,9 +184,21 @@ public class GraphingUtility
       XYSeriesCollection xySeriesCollection = GraphingUtility.createXYSeriesCollection(data);
 
       ChartPanel chartPanel = GraphingUtility.createGraph("BIN Noise vs. Flight Path Angle", "Flight Path Angle (degrees)", "BIN Noise", xySeriesCollection);
+      ChartPanel chartPanel2 = GraphingUtility.createGraph("BIN Noise vs. Flight Path Angle", "Flight Path Angle (degrees)", "BIN Noise", xySeriesCollection);
+
+      JPanel jPanel = new JPanel();
+      jPanel.setLayout(new GridBagLayout());
+      GridBagConstraints gbc = new GridBagConstraints();
+      gbc.fill = GridBagConstraints.BOTH;
+      gbc.weightx = 1.0;
+      gbc.weighty = 1.0;
+
+      jPanel.add(chartPanel, gbc);
+      gbc.gridy++;
+      jPanel.add(chartPanel2, gbc);
 
       JFrame jFrame = new JFrame("Test Graph");
-      jFrame.getContentPane().add(chartPanel);
+      jFrame.getContentPane().add(jPanel);
       jFrame.pack();
       jFrame.setVisible(true);
    }
