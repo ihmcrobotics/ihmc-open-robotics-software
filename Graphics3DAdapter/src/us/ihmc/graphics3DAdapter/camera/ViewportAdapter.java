@@ -17,7 +17,6 @@ public interface ViewportAdapter
    public abstract void setFieldOfView(double fieldOfView);
 
    public abstract void destroy();
-   public abstract void registerAsKeyListener();
    public abstract double getFieldOfView();
    public abstract double getPhysicalWidth();
    public abstract double getPhysicalHeight();
