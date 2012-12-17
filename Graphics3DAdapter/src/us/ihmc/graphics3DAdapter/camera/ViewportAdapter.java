@@ -21,6 +21,7 @@ public interface ViewportAdapter
    public abstract double getFieldOfView();
    public abstract double getPhysicalWidth();
    public abstract double getPhysicalHeight();
+   public abstract void setupOffscreenView(int width, int height);
 
 
 }
