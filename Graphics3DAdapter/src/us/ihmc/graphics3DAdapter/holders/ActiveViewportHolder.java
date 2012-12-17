@@ -1,5 +1,6 @@
 package us.ihmc.graphics3DAdapter.holders;
 
+import us.ihmc.graphics3DAdapter.camera.CameraController;
 import us.ihmc.graphics3DAdapter.camera.ViewportAdapter;
 
 public class ActiveViewportHolder
@@ -26,6 +27,11 @@ public class ActiveViewportHolder
    public boolean isActiveViewport(ViewportAdapter viewport)
    {
       return this.activeViewPort == viewport;
+   }
+   
+   public boolean isActiveCamera(CameraController cameraController)
+   {
+      return this.activeViewPort.getCameraController() == cameraController;
    }
 
 }

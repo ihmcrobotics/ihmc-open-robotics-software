@@ -1223,7 +1223,7 @@ public class ClassicCameraController implements TrackingDollyCameraController
 
    public void keyReleased(Key key)
    {
-      if(!activeViewHolder.isActiveViewport(viewportAdapter))
+      if(!activeViewHolder.isActiveCamera(this))
          return;
       
       switch(key)
@@ -1261,7 +1261,7 @@ public class ClassicCameraController implements TrackingDollyCameraController
    
    public void selected(Graphics3DNode graphics3dNode, ModifierKeyInterface modifierKeyHolder, Point3d location, Point3d cameraLocation, Quat4d cameraRotation)
    {
-      if(!activeViewHolder.isActiveViewport(viewportAdapter))
+      if(!activeViewHolder.isActiveCamera(this))
          return;
       
       if(modifierKeyHolder.isKeyPressed(Key.SHIFT))
@@ -1277,7 +1277,7 @@ public class ClassicCameraController implements TrackingDollyCameraController
 
    public void mouseDragged(MouseButton mouseButton, double dx, double dy)
    {
-      if(!activeViewHolder.isActiveViewport(viewportAdapter))
+      if(!activeViewHolder.isActiveCamera(this))
          return;
       
       switch(mouseButton)
