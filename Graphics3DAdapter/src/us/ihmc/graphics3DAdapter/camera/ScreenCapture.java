@@ -8,8 +8,8 @@ import java.io.InputStream;
 import java.io.Serializable;
 
 import javax.imageio.ImageIO;
-import javax.vecmath.Quat4f;
-import javax.vecmath.Vector3f;
+import javax.vecmath.Point3d;
+import javax.vecmath.Quat4d;
 
 import sun.awt.image.ImageFormatException;
 
@@ -19,10 +19,10 @@ public class ScreenCapture implements Serializable
    private static final long serialVersionUID = 4267642643460511978L;
    private byte[] bytesOut = null;
    private final int height, width;
-   private final Vector3f location;
-   private final Quat4f rotation;
+   private final Point3d location;
+   private final Quat4d rotation;
 
-   public ScreenCapture(BufferedImage bufferedImage, Vector3f location, Quat4f rotation)
+   public ScreenCapture(BufferedImage bufferedImage, Point3d location, Quat4d rotation)
    {
       this.height = bufferedImage.getHeight();
       this.width = bufferedImage.getWidth();
@@ -47,12 +47,12 @@ public class ScreenCapture implements Serializable
       // bi.getRGB(0, 0, _width, _height, _bytesOut, 0, _width);
    }
 
-   public Vector3f getLocation()
+   public Point3d getLocation()
    {
       return location;
    }
 
-   public Quat4f getRotation()
+   public Quat4d getRotation()
    {
       return rotation;
    }
