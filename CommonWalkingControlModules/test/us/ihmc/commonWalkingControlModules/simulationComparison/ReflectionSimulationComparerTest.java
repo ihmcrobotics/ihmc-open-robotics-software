@@ -19,6 +19,9 @@ import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.UnreasonableAccelerationException;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.robotController.RobotController;
+import com.yobotics.simulationconstructionset.util.simulationTesting.ReflectionSimulationComparer;
+import com.yobotics.simulationconstructionset.util.simulationTesting.SimpleRewindabilityComparisonScript;
+import com.yobotics.simulationconstructionset.util.simulationTesting.SimulationComparisonScript;
 
 public class ReflectionSimulationComparerTest
 {
@@ -75,7 +78,7 @@ public class ReflectionSimulationComparerTest
       int nTicksCompare = 121; 
       int nTicksFinal = 11; 
       SimulationComparisonScript script = new SimpleRewindabilityComparisonScript(nTicksInitial, nTicksCompare, nTicksFinal);
-      ReflectionSimulationComparer.compareTwoSimulations(scs0, scs1, script);
+      ReflectionSimulationComparer.compareTwoSimulations(scs0, scs1, script, true);
    }
 
 
