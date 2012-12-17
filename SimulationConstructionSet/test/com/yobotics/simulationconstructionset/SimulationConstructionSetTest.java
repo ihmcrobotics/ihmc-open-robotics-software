@@ -6,8 +6,6 @@ import java.awt.AWTException;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -16,18 +14,8 @@ import us.ihmc.utilities.keyboardAndMouse.GhostMousePlayback;
 
 public class SimulationConstructionSetTest
 {
-
-   @Before
-   public void setUp() throws Exception
-   {
-   }
-
-   @After
-   public void tearDown() throws Exception
-   {
-   }
    
-   @Ignore
+   @Ignore //Don't do GhostMouseStuff. We need to get this working with a better GUI Tester, perhaps GUIDancer
    public void testOne() throws AWTException
    {
       SimpleRobot simpleRobot = new SimpleRobot();
@@ -45,6 +33,7 @@ public class SimulationConstructionSetTest
 //      sleepForever();
    }
    
+   @Ignore //Don't do GhostMouseStuff. We need to get this working with a better GUI Tester, perhaps GUIDancer.
    @Test
    public void testTwo() throws AWTException
    {
