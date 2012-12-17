@@ -13,7 +13,6 @@ import us.ihmc.darpaRoboticsChallenge.controllers.DRCRobotMomentumBasedControlle
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.SquaredUpDRCRobotInitialSetup;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
-import us.ihmc.utilities.math.geometry.FramePoint;
 
 import com.martiansoftware.jsap.JSAPException;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
@@ -26,7 +25,6 @@ public class DRCFlatGroundWalkingTrack
 {
    private final DRCSimulation drcSimulation;
    private final DRCDemo01Environment environment;
-   private final DRCDemo0SelectedListener selectedListener;
 
    public DRCFlatGroundWalkingTrack(DRCGuiInitialSetup guiInitialSetup, AutomaticSimulationRunner automaticSimulationRunner, double timePerRecordTick,
                    int simulationDataBufferSize, boolean doChestOrientationControl, boolean showInstructions)
@@ -51,31 +49,15 @@ public class DRCFlatGroundWalkingTrack
 
       DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
       YoVariableRegistry registry = new YoVariableRegistry("adjustableParabolicTrajectoryDemoSimRegistry");
-      selectedListener = new DRCDemo0SelectedListener(dynamicGraphicObjectsListRegistry, registry);
 
       double desiredCoMHeight = 0.9;
       HighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory = new FlatGroundWalkingHighLevelHumanoidControllerFactory(desiredCoMHeight);
       ControllerFactory controllerFactory = new DRCRobotMomentumBasedControllerFactory(highLevelHumanoidControllerFactory);
 
       environment = new DRCDemo01Environment(dynamicGraphicObjectsListRegistry);
-      environment.addSelectableListenerToSelectables(selectedListener);
 
 //      r2Simulation = new R2Simulation(environment, r2InitialSetup, sensorNoiseInitialSetup, controllerFactory, scsInitialSetup, guiInitialSetup);
       drcSimulation = new DRCSimulation(drcRobotInitialSetup, controllerFactory, scsInitialSetup, guiInitialSetup);
-
-      // attach slider board for apex control
-//    final DoubleYoVariable desiredApex = new DoubleYoVariable("apexValue", registry);
-//    desiredApex.set(1.5);
-//    desiredApex.addVariableChangedListener(new VariableChangedListener()
-//    {
-//       public void variableChanged(YoVariable variable)
-//       {
-//          if (variable == desiredApex)
-//          {
-//             selectedListener.setApex(desiredApex.getDoubleValue());
-//          }
-//       }
-//    });
 
       SimulationConstructionSet simulationConstructionSet = drcSimulation.getSimulationConstructionSet();
       MidiSliderBoard sliderBoard = new MidiSliderBoard(simulationConstructionSet);
@@ -95,8 +77,6 @@ public class DRCFlatGroundWalkingTrack
       drcSimulation.addAdditionalDynamicGraphicObjectsListRegistries(dynamicGraphicObjectsListRegistry);
       drcSimulation.addAdditionalYoVariableRegistriesToSCS(registry);
 
-      // attach release listener
-      simulationConstructionSet.attachSelectedListener(selectedListener);
       setUpDemoButtons(simulationConstructionSet);
 
       simulationConstructionSet.setCameraPosition(6.0, -2.0, 4.5);
@@ -177,11 +157,6 @@ public class DRCFlatGroundWalkingTrack
       return environment;
    }
 
-   public DRCDemo0SelectedListener getSelectedListener()
-   {
-      return selectedListener;
-   }
-
    private void setUpDemoButtons(SimulationConstructionSet scs)
    {
 //      // an angel loses its wings :(
@@ -234,10 +209,5 @@ public class DRCFlatGroundWalkingTrack
             scs.addStaticLinkGraphics(linkGraphics);
          }
       }
-   }
-
-   public void setTrajectoryEndPoint(FramePoint endPoint)
-   {
-      selectedListener.setTrajectoryEndPoint(endPoint);
    }
 }

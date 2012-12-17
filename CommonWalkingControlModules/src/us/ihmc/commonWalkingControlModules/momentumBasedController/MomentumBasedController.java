@@ -245,7 +245,6 @@ public class MomentumBasedController implements RobotController
    {
       solver.initialize();
       highLevelHumanoidController.initialize();
-      doControl();
    }
 
    public YoVariableRegistry getYoVariableRegistry()
