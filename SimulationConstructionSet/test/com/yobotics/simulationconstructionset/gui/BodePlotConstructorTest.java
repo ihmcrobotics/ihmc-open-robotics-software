@@ -1,39 +1,19 @@
 package com.yobotics.simulationconstructionset.gui;
 
-import junit.framework.TestCase;
+import org.junit.Ignore;
+import org.junit.Test;
+
 import us.ihmc.utilities.linearDynamicSystems.TransferFunction;
 import us.ihmc.utilities.test.HumanAssistedTestFrame;
 
 /**
- * <p>Title: SimulationConstructionSet</p>
- *
- * <p>Description: </p>
- *
- * <p>Copyright: Copyright (c) 2000</p>
- *
- * <p>Company: Yobotics, Inc.</p>
- *
- * @author not attributable
- * @version 1.0
+ * All tests ignored because they are human assisted. They also might not work.
  */
-public class TestBodePlotConstructor extends TestCase
+public class BodePlotConstructorTest
 {
-   public TestBodePlotConstructor(String name)
-   {
-      super(name);
-   }
-
-   protected void setUp() throws Exception
-   {
-      super.setUp();
-   }
-
-   protected void tearDown() throws Exception
-   {
-      super.tearDown();
-   }
-
-   public void DONTtestSimpleFilter()
+   @Ignore
+   @Test
+   public void testSimpleFilter()
    {
       // int n = 1000;
       double T = 5.0;
@@ -61,7 +41,9 @@ public class TestBodePlotConstructor extends TestCase
       humanAssistedTestFrame.setVisible(false);
    }
 
-   public void DONTtestSingleFreqPhaseShift()
+   @Test
+   @Ignore
+   public void testSingleFreqPhaseShift()
    {
       // int n = 1000;
       double T = 5.0;
@@ -89,6 +71,8 @@ public class TestBodePlotConstructor extends TestCase
       humanAssistedTestFrame.setVisible(false);
    }
 
+   @Test
+   @Ignore
    public void testSecondOrderResponse()
    {
       double T = 5.0;
