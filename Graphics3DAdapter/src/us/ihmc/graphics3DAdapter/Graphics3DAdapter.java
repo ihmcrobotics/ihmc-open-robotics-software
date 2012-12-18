@@ -30,7 +30,7 @@ public interface Graphics3DAdapter
    public void addKeyListener(KeyListener keyListener);
    public void addMouseListener(MouseListener mouseListener);
    
-   public void destroy();
+   public void closeAndDispose();
    
    public void setBackgroundColor(Color3f color);
 
