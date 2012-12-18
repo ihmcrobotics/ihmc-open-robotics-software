@@ -17,7 +17,8 @@ public interface Graphics3DAdapter
    public void addRootNode(Graphics3DNode rootNode);
    public void removeRootNode(Graphics3DNode rootNode);
    
-   public ViewportAdapter createNewViewport(GraphicsDevice graphicsDevice);
+   public ViewportAdapter createNewViewport(GraphicsDevice graphicsDevice, boolean isMainViewport);
+   public void closeViewport(ViewportAdapter viewport);
    
    public void setHeightMap(HeightMap heightMap);
    
