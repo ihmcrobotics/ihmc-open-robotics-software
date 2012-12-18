@@ -241,7 +241,7 @@ public class MomentumSolver
       initializeAHatRoot(aHatRoot, centroidalMomentumMatrix.getMatrix());
       initializeB(b, centroidalMomentumMatrixDerivative, jointsInOrder);
       handleJointSpaceAccelerations(b, centroidalMomentumMatrix.getMatrix(), jointSpaceAccelerations);
-      handleAngularAccelerationsWithRespectToWorld(aHatRoot, b, dMap, centroidalMomentumMatrix.getMatrix(), angularAccelerationsWithRespectToWorld);
+//      handleAngularAccelerationsWithRespectToWorld(aHatRoot, b, dMap, centroidalMomentumMatrix.getMatrix(), angularAccelerationsWithRespectToWorld);
       handleTaskSpaceAccelerations(aHatRoot, b, dMap, centroidalMomentumMatrix.getMatrix(), spatialAccelerations, nullspaceMultipliers);
    }
 
