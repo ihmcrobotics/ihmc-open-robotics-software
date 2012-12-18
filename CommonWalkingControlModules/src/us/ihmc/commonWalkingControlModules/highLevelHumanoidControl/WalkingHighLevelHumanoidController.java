@@ -800,7 +800,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          ReferenceFrame bodyFixedFrame = fullRobotModel.getFoot(robotSide).getBodyFixedFrame();
          footAcceleration.changeBodyFrameNoRelativeAcceleration(bodyFixedFrame);
          footAcceleration.changeFrameNoRelativeMotion(bodyFixedFrame);
-         DenseMatrix64F nullspaceMultipliers = new DenseMatrix64F(1, 0);
+         DenseMatrix64F nullspaceMultipliers = new DenseMatrix64F(0, 1);
 
          Pair<SpatialAccelerationVector, DenseMatrix64F> pair = new Pair<SpatialAccelerationVector, DenseMatrix64F>(footAcceleration, nullspaceMultipliers);
          setEndEffectorSpatialAcceleration(robotSide, LimbName.LEG, pair);
