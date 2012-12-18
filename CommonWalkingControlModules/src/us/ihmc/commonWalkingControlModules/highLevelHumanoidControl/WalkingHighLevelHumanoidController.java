@@ -93,8 +93,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final BooleanYoVariable walk = new BooleanYoVariable("walk", registry);
 
 
+   // FIXME: reimplement nullspace stuff:
    private final double swingNullspaceMultiplier = 500.0;    // needs to be pretty high to fight the limit stops...
-
+   
+   // FIXME: reimplement and improve com trajectory visualization
    private final BagOfBalls comTrajectoryBagOfBalls;
    private int comTrajectoryCounter = 0;
 
