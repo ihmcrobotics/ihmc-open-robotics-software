@@ -50,13 +50,13 @@ public class Graphics3DAdapterExampleOne
 
       PanBackAndForthTrackingAndDollyPositionHolder cameraTrackAndDollyVariablesHolder = new PanBackAndForthTrackingAndDollyPositionHolder(0.0, 2.0, 0.2);
       
-      ViewportAdapter viewportAdapter = graphics3DAdapter.createNewViewport(null);
+      ViewportAdapter viewportAdapter = graphics3DAdapter.createNewViewport(null, false);
       ClassicCameraController classicCameraController = ClassicCameraController.createClassicCameraControllerAndAddListeners(viewportAdapter, cameraTrackAndDollyVariablesHolder, graphics3DAdapter);
       viewportAdapter.setCameraController(classicCameraController);
       Canvas canvas = viewportAdapter.getCanvas();
       createNewWindow(canvas);
       
-      ViewportAdapter secondCamera = graphics3DAdapter.createNewViewport(null);
+      ViewportAdapter secondCamera = graphics3DAdapter.createNewViewport(null, false);
       ClassicCameraController secondController = ClassicCameraController.createClassicCameraControllerAndAddListeners(secondCamera, cameraTrackAndDollyVariablesHolder, graphics3DAdapter);
       secondCamera.setCameraController(secondController);
       createNewWindow(secondCamera.getCanvas());
