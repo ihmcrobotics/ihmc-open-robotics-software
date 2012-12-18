@@ -367,7 +367,7 @@ public class MomentumBasedController implements RobotController
 
       solver.reset();
 
-      HashMap<InverseDynamicsJoint, DenseMatrix64F> jointAccelerations = highLevelHumanoidController.getJointAccelerations();
+      Map<InverseDynamicsJoint, DenseMatrix64F> jointAccelerations = highLevelHumanoidController.getJointAccelerations();
       for (InverseDynamicsJoint joint : jointAccelerations.keySet())
       {
          solver.setDesiredJointAcceleration(joint, jointAccelerations.get(joint));
