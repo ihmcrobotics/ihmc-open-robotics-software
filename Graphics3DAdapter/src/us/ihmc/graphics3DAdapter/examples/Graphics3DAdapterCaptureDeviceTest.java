@@ -3,18 +3,14 @@ package us.ihmc.graphics3DAdapter.examples;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
-import java.awt.Graphics;
-import java.awt.image.BufferedImage;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
 
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
-import us.ihmc.graphics3DAdapter.camera.CameraStreamer;
 import us.ihmc.graphics3DAdapter.camera.CaptureDevice;
 import us.ihmc.graphics3DAdapter.camera.ClassicCameraController;
+import us.ihmc.graphics3DAdapter.camera.JPanelCameraStreamer;
 import us.ihmc.graphics3DAdapter.camera.SimpleCameraTrackingAndDollyPositionHolder;
 import us.ihmc.graphics3DAdapter.camera.ViewportAdapter;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
@@ -45,7 +41,7 @@ public class Graphics3DAdapterCaptureDeviceTest
 
 
       CaptureDevice captureDevice = viewportAdapter.getCaptureDevice();
-      VideoCapture videoCapture = new VideoCapture();
+      JPanelCameraStreamer videoCapture = new JPanelCameraStreamer();
       captureDevice.streamTo(videoCapture);
 
       createNewWindow(videoCapture);
@@ -67,31 +63,7 @@ public class Graphics3DAdapterCaptureDeviceTest
    
    
 
-   public class VideoCapture extends JPanel implements CameraStreamer
-   {
-      private static final long serialVersionUID = -6832977971630763132L;
-      private BufferedImage bufferedImage;
-      
-      public VideoCapture()
-      {
-         super();
-      }
-      
-      public synchronized void updateImage(BufferedImage bufferedImage, Point3d cameraLocation, Quat4d cameraOrientation)
-      {
-         this.bufferedImage = bufferedImage;
-         repaint();
-      }
-
-      protected synchronized void paintComponent(Graphics g)
-      {
-         if (bufferedImage != null)
-         {
-            g.drawImage(bufferedImage, 0, 0, this);
-         }
-      }
-
-   }
+   
    
    private class PanBackAndForthTrackingAndDollyPositionHolder extends SimpleCameraTrackingAndDollyPositionHolder implements Runnable
    {
