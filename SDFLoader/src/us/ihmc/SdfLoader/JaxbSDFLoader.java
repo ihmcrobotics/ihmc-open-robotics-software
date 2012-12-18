@@ -8,7 +8,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
-import us.ihmc.SdfLoader.xmlDescription.SDFGazebo;
+import us.ihmc.SdfLoader.xmlDescription.SDFRoot;
 import us.ihmc.SdfLoader.xmlDescription.SDFModel;
 import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
 
@@ -20,13 +20,13 @@ public class JaxbSDFLoader
 
    public JaxbSDFLoader(String fileName, String modelName, String resourceDirectory, SDFJointNameMap sdfJointNameMap) throws JAXBException, FileNotFoundException
    {
-      JAXBContext context = JAXBContext.newInstance(SDFGazebo.class);
+      JAXBContext context = JAXBContext.newInstance(SDFRoot.class);
       Unmarshaller um = context.createUnmarshaller();
       File file = new File(fileName);
-      SDFGazebo gazebo = (SDFGazebo) um.unmarshal(new FileReader(file));
+      SDFRoot sdfRoot = (SDFRoot) um.unmarshal(new FileReader(file));
 
       SDFModel model = null;
-      for (SDFModel modelInstance : gazebo.getWorld().getModels())
+      for (SDFModel modelInstance : sdfRoot.getWorld().getModels())
       {
          if (modelName.equals(modelInstance.getName()))
          {
