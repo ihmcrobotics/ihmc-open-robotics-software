@@ -3,8 +3,8 @@ package us.ihmc.darpaRoboticsChallenge;
 import java.util.ArrayList;
 
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
+import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 
 import com.yobotics.simulationconstructionset.GroundContactPoint;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
