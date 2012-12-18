@@ -19,7 +19,7 @@ import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNodeType;
 import us.ihmc.utilities.ThreadTools;
 
-public class Graphics3DAdapterCaptureDeviceTest
+public class Graphics3DAdapterCaptureDeviceTester
 {
    public void doExample(Graphics3DAdapter graphics3DAdapter)
    {
