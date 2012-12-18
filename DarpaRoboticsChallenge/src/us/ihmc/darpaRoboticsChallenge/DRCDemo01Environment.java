@@ -15,7 +15,6 @@ import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
 import com.yobotics.simulationconstructionset.ExternalForcePoint;
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.util.environments.SelectableObjectListener;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.ground.CombinedTerrainObject;
 import com.yobotics.simulationconstructionset.util.ground.RotatableConvexPolygonTerrainObject;
 import com.yobotics.simulationconstructionset.util.ground.TerrainObject;
@@ -23,7 +22,6 @@ import com.yobotics.simulationconstructionset.util.ground.TerrainObject;
 public class DRCDemo01Environment implements CommonAvatarEnvironmentInterface
 {
    private final CombinedTerrainObject combinedTerrainObject;
-   private final DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry;
 
    private final Random random = new Random(1989L);
    
@@ -44,10 +42,8 @@ public class DRCDemo01Environment implements CommonAvatarEnvironmentInterface
    private static final boolean FULLY_RANDOM = true; // Will do a neat grid if set to false;
    private static final int ROCKS_PER_ROW = 5;
    
-   public DRCDemo01Environment(DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+   public DRCDemo01Environment()
    {
-      this.dynamicGraphicObjectsListRegistry = dynamicGraphicObjectsListRegistry;
-
       combinedTerrainObject = new CombinedTerrainObject("Rocks with a wall");
       addWall();
       addPillars();
