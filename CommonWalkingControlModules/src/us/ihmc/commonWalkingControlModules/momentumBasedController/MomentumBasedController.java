@@ -418,7 +418,7 @@ public class MomentumBasedController implements RobotController
             }
          }
 
-         solver.setDesiredSpatialAcceleration(jacobian, pair);
+         solver.setDesiredSpatialAcceleration(jacobian, pair.first(), pair.second());
       }
 
       for (RobotSide robotSide : RobotSide.values)
