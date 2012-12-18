@@ -26,7 +26,7 @@ public class SimpleCombinedTerrainObjectEnvinronmentTest
    @Test
    public void testSimpleCombinedTerrainObjectEnvironment()
    {
-      SimpleCombinedTerrainObjectsEnvironment combinedEnvironment = new SimpleCombinedTerrainObjectsEnvironment(150.0);
+      SimpleCombinedTerrainObjectsEnvironment combinedEnvironment = new SimpleCombinedTerrainObjectsEnvironment();
 
       double[][] flatTableAndRampPointsToVerify = new double[][]
             {
