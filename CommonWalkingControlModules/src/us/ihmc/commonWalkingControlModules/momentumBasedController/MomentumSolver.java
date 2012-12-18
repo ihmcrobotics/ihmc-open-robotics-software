@@ -2,8 +2,8 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -11,6 +11,7 @@ import java.util.Set;
 import org.ejml.alg.dense.mult.MatrixDimensionException;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.LinearSolver;
+import org.ejml.factory.LinearSolverFactory;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.MatrixFeatures;
 
@@ -76,9 +77,12 @@ public class MomentumSolver
    private final Twist twistOfBodyWithRespectToBase = new Twist();
 
    private final DenseMatrix64F convectiveTermMatrix = new DenseMatrix64F(SpatialAccelerationVector.SIZE, 1);
-   private final HashMap<MechanismGeometricJacobian, DenseMatrix64F> dMap = new HashMap<MechanismGeometricJacobian, DenseMatrix64F>();
-   private final HashMap<MechanismGeometricJacobian, DenseMatrix64F> jacobianInverseMap = new HashMap<MechanismGeometricJacobian, DenseMatrix64F>();
+   
+   // LinkedHashMaps so that order of computation is defined, to make rewindability checks using reflection easier
+   private final LinkedHashMap<MechanismGeometricJacobian, DenseMatrix64F> dMap = new LinkedHashMap<MechanismGeometricJacobian, DenseMatrix64F>();
+   private final LinkedHashMap<MechanismGeometricJacobian, DenseMatrix64F> jacobianInverseMap = new LinkedHashMap<MechanismGeometricJacobian, DenseMatrix64F>();
    private final LinearSolver<DenseMatrix64F> jacobianSolver;
+   private final LinearSolver<DenseMatrix64F> alpha2Beta2Solver = LinearSolverFactory.linear(SpatialMotionVector.SIZE);
    private final NullspaceCalculator nullspaceCalculator;
 
    private final double controlDT;
@@ -95,12 +99,12 @@ public class MomentumSolver
    private final int[] columnsForRootJoint;
    private final int[] rows;
 
-   private final Map<InverseDynamicsJoint, DenseMatrix64F> jointSpaceAccelerations = new HashMap<InverseDynamicsJoint, DenseMatrix64F>();
-   private final Map<MechanismGeometricJacobian, Pair<SpatialAccelerationVector, DenseMatrix64F>> spatialAccelerations =
-      new HashMap<MechanismGeometricJacobian, Pair<SpatialAccelerationVector, DenseMatrix64F>>();
+   // LinkedHashMaps so that order of computation is defined, to make rewindability checks using reflection easier
+   private final LinkedHashMap<InverseDynamicsJoint, DenseMatrix64F> jointSpaceAccelerations = new LinkedHashMap<InverseDynamicsJoint, DenseMatrix64F>();
+   private final LinkedHashMap<MechanismGeometricJacobian, Pair<SpatialAccelerationVector, DenseMatrix64F>> spatialAccelerations =
+      new LinkedHashMap<MechanismGeometricJacobian, Pair<SpatialAccelerationVector, DenseMatrix64F>>();
 
    private final DenseMatrix64F orthogonalCheck;
-
 
    public MomentumSolver(SixDoFJoint rootJoint, RigidBody elevator, ReferenceFrame centerOfMassFrame, TwistCalculator twistCalculator,
                          LinearSolver<DenseMatrix64F> jacobianSolver, double controlDT, YoVariableRegistry parentRegistry)
@@ -210,6 +214,7 @@ public class MomentumSolver
    public void compute()
    {
       checkFullyConstrained(jointSpaceAccelerations, spatialAccelerations);
+
       dMap.clear();
       jacobianInverseMap.clear();
 
@@ -269,20 +274,20 @@ public class MomentumSolver
    }
 
    private void handleJointSpaceAccelerations(DenseMatrix64F b, DenseMatrix64F centroidalMomentumMatrix,
-           Map<InverseDynamicsJoint, DenseMatrix64F> jointSpaceAccelerations)
+         LinkedHashMap<InverseDynamicsJoint, DenseMatrix64F> jointSpaceAccelerations)
    {
       for (InverseDynamicsJoint joint : jointSpaceAccelerations.keySet())
       {
          int[] jointSpaceColumnIndices = ScrewTools.computeIndicesForJoint(jointsInOrder, joint);
          extractMatrixBlock(aJointSpace, centroidalMomentumMatrix, jointSpaceColumnIndices);
          DenseMatrix64F vdotJointSpace = jointSpaceAccelerations.get(joint);
-         CommonOps.mult(this.aJointSpace, vdotJointSpace, aJointSpaceVdotJointSpace);
+         CommonOps.mult(aJointSpace, vdotJointSpace, aJointSpaceVdotJointSpace);
          CommonOps.subEquals(b, aJointSpaceVdotJointSpace);
       }
    }
 
-   private void handleTaskSpaceAccelerations(DenseMatrix64F aHatRoot, DenseMatrix64F b, HashMap<MechanismGeometricJacobian, DenseMatrix64F> dMap,
-           DenseMatrix64F centroidalMomentumMatrix, Map<MechanismGeometricJacobian, Pair<SpatialAccelerationVector, DenseMatrix64F>> taskSpaceAccelerations)
+   private void handleTaskSpaceAccelerations(DenseMatrix64F aHatRoot, DenseMatrix64F b, LinkedHashMap<MechanismGeometricJacobian, DenseMatrix64F> dMap,
+           DenseMatrix64F centroidalMomentumMatrix, LinkedHashMap<MechanismGeometricJacobian, Pair<SpatialAccelerationVector, DenseMatrix64F>> taskSpaceAccelerations)
    {
       ReferenceFrame rootJointFrame = rootJoint.getFrameAfterJoint();
       RigidBody rootJointPredecessor = rootJoint.getPredecessor();
@@ -406,7 +411,8 @@ public class MomentumSolver
       CommonOps.subEquals(bHat, aVdotRoot1);
 
       // alpha2Beta2
-      CommonOps.solve(f, bHat, alpha2Beta2);
+      alpha2Beta2Solver.setA(f);
+      alpha2Beta2Solver.solve(bHat, alpha2Beta2);
 
       // alpha2
       alpha2.reshape(momentumSubspaceRank, 1);
@@ -449,8 +455,8 @@ public class MomentumSolver
       }
    }
 
-   private void solveAndSetTaskSpaceAccelerations(DenseMatrix64F vdotRoot, HashMap<MechanismGeometricJacobian, DenseMatrix64F> dMap,
-           HashMap<MechanismGeometricJacobian, DenseMatrix64F> jacobianInverseMap)
+   private void solveAndSetTaskSpaceAccelerations(DenseMatrix64F vdotRoot, LinkedHashMap<MechanismGeometricJacobian, DenseMatrix64F> dMap,
+         LinkedHashMap<MechanismGeometricJacobian, DenseMatrix64F> jacobianInverseMap)
    {
       for (MechanismGeometricJacobian jacobian : dMap.keySet())
       {
