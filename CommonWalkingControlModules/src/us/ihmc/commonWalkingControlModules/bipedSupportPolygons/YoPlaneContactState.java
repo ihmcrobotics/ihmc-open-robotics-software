@@ -7,6 +7,7 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
+import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint2d;
 
@@ -16,11 +17,13 @@ public class YoPlaneContactState implements PlaneContactState
    private final YoVariableRegistry registry;
    private final ReferenceFrame referenceFrame;
    private final List<YoFramePoint2d> contactPoints = new ArrayList<YoFramePoint2d>();
+   private final BooleanYoVariable inContact;
 
    public YoPlaneContactState(String namePrefix, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry)
    {
       this.namePrefix = namePrefix;
       this.registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
+      this.inContact = new BooleanYoVariable(namePrefix + "InContact", registry);
       this.referenceFrame = referenceFrame;
       parentRegistry.addChild(registry);
    }
@@ -30,6 +33,7 @@ public class YoPlaneContactState implements PlaneContactState
       createYoFramePoints(contactPoints);
 
       FramePoint2d temp = new FramePoint2d(referenceFrame);
+      inContact.set(false);
       for (int i = 0; i < this.contactPoints.size(); i++)
       {
          if (i < contactPoints.size())
@@ -38,6 +42,7 @@ public class YoPlaneContactState implements PlaneContactState
             temp.setAndChangeFrame(point);
             temp.changeFrame(referenceFrame);
             this.contactPoints.get(i).set(temp);
+            inContact.set(true);
          }
          else
             this.contactPoints.get(i).set(Double.NaN, Double.NaN);
@@ -90,5 +95,10 @@ public class YoPlaneContactState implements PlaneContactState
    public ReferenceFrame getPlaneFrame()
    {
       return referenceFrame;
+   }
+
+   public boolean inContact()
+   {
+      return inContact.getBooleanValue();
    }
 }
