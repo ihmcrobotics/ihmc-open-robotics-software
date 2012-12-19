@@ -7,6 +7,7 @@ import org.ejml.factory.LinearSolverFactory;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.MatrixFeatures;
 
+import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.screwTheory.Momentum;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
 
@@ -42,9 +43,7 @@ public class RootJointSolver
 
       // f
       CommonOps.insert(aHatRootN, f, 0, 0);
-      CommonOps.scale(-1.0, T);    // TODO: not so nice
-      CommonOps.insert(T, f, 0, momentumSubspaceRank);
-      CommonOps.scale(-1.0, T);    // TODO: not so nice
+      MatrixTools.setMatrixBlock(f, 0, momentumSubspaceRank, T, 0, 0, T.numRows, T.numCols, -1.0);
 
       // vdot1
       checkDimensions(T, alpha1, vdotRoot);
