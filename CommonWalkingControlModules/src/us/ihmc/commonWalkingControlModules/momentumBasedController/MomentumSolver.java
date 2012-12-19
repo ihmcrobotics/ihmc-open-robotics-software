@@ -1,12 +1,10 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.LinearSolver;
@@ -76,6 +74,7 @@ public class MomentumSolver
    private final LinkedHashMap<MechanismGeometricJacobian, DenseMatrix64F> taskSpaceSelectionMatrices = new LinkedHashMap<MechanismGeometricJacobian,
                                                                                                            DenseMatrix64F>();
 
+   private final List<InverseDynamicsJoint> unconstrainedJoints = new ArrayList<InverseDynamicsJoint>();
 
    public MomentumSolver(SixDoFJoint rootJoint, RigidBody elevator, ReferenceFrame centerOfMassFrame, TwistCalculator twistCalculator,
                          LinearSolver<DenseMatrix64F> jacobianSolver, double controlDT, YoVariableRegistry parentRegistry)
@@ -117,6 +116,7 @@ public class MomentumSolver
       MatrixYoVariableConversionTools.populateYoVariables(yoPreviousCentroidalMomentumMatrix, "previousCMMatrix", registry);
 
       parentRegistry.addChild(registry);
+      reset();
    }
 
    public void initialize()
@@ -133,10 +133,14 @@ public class MomentumSolver
       nullspaceMultipliers.clear();
       taskSpaceSelectionMatrices.clear();
       taskSpaceConstraintResolver.reset();
+      unconstrainedJoints.clear();
+      unconstrainedJoints.addAll(jointsInOrderList);
+      unconstrainedJoints.remove(rootJoint);
    }
 
    public void setDesiredJointAcceleration(InverseDynamicsJoint joint, DenseMatrix64F jointAcceleration)
    {
+      checkAndRegisterConstraint(joint);
       jointSpaceAccelerations.put(joint, jointAcceleration);
    }
 
@@ -144,7 +148,14 @@ public class MomentumSolver
            DenseMatrix64F nullspaceMultipliers)
    {
       checkNullspaceDimensions(jacobian, nullspaceMultipliers);
+
+      for (InverseDynamicsJoint joint : jacobian.getJointsInOrder())
+      {
+         checkAndRegisterConstraint(joint);
+      }
+
       ReferenceFrame baseFrame = spatialAcceleration.getBaseFrame();
+
       boolean isWithRespectToWorld = baseFrame == rootJoint.getPredecessor().getBodyFixedFrame();
       if (isWithRespectToWorld)
       {
@@ -171,6 +182,11 @@ public class MomentumSolver
    public void setDesiredAngularAccelerationWithRespectToWorld(MechanismGeometricJacobian jacobian, FrameVector desiredAngularAcceleration,
            DenseMatrix64F nullspaceMultiplier)
    {
+      for (InverseDynamicsJoint joint : jacobian.getJointsInOrder())
+      {
+         checkAndRegisterConstraint(joint);
+      }
+
       ReferenceFrame elevator = rootJoint.getPredecessor().getBodyFixedFrame();
       SpatialAccelerationVector spatialAcceleration = new SpatialAccelerationVector(jacobian.getEndEffector().getBodyFixedFrame(), elevator,
                                                          desiredAngularAcceleration.getReferenceFrame());
@@ -188,7 +204,7 @@ public class MomentumSolver
 
    public void compute()
    {
-      checkFullyConstrained(jointSpaceAccelerations, spatialAccelerations);
+      checkFullyConstrained();
 
       centroidalMomentumMatrix.compute();
       MatrixYoVariableConversionTools.getFromYoVariables(previousCentroidalMomentumMatrix, yoPreviousCentroidalMomentumMatrix);
@@ -249,39 +265,21 @@ public class MomentumSolver
       CommonOps.scale(-1.0, b);
    }
 
-   private void checkFullyConstrained(Map<InverseDynamicsJoint, DenseMatrix64F> jointSpaceAccelerations,
-                                      LinkedHashMap<MechanismGeometricJacobian, SpatialAccelerationVector> spatialAccelerations)
+   private void checkFullyConstrained()
    {
-      int totalJointsWithPossibleDuplication = 0;
-      Set<InverseDynamicsJoint> allJoints = new HashSet<InverseDynamicsJoint>(jointsInOrder.length);
-      for (InverseDynamicsJoint joint : jointSpaceAccelerations.keySet())
-      {
-         allJoints.add(joint);
-         totalJointsWithPossibleDuplication++;
-      }
-
-      for (MechanismGeometricJacobian jacobian : spatialAccelerations.keySet())
-      {
-         for (InverseDynamicsJoint taskSpaceJoint : jacobian.getJointsInOrder())
-         {
-            allJoints.add(taskSpaceJoint);
-            totalJointsWithPossibleDuplication++;
-         }
-      }
-
-      allJoints.add(rootJoint);
-      totalJointsWithPossibleDuplication++;
-
-      if (totalJointsWithPossibleDuplication != allJoints.size())
-         throw new RuntimeException("There are multiply constrained joints");
-
-      if (!allJoints.containsAll(jointsInOrderList))
-         throw new RuntimeException("Not correctly constrained");
+      if (unconstrainedJoints.size() > 0)
+         throw new RuntimeException("Not fully constrained. Unconstrained joints: " + unconstrainedJoints);
    }
 
    private void initializeAHatRoot(DenseMatrix64F aHatRoot, DenseMatrix64F centroidalMomentumMatrix)
    {
       MatrixTools.extractColumns(centroidalMomentumMatrix, aHatRoot, columnsForRootJoint);
+   }
+
+   private void checkAndRegisterConstraint(InverseDynamicsJoint joint)
+   {
+      if (!unconstrainedJoints.remove(joint))
+         throw new RuntimeException("Joint overconstrained: " + joint);
    }
 
    private static void checkNullspaceDimensions(MechanismGeometricJacobian jacobian, DenseMatrix64F nullspaceMultipliers)
