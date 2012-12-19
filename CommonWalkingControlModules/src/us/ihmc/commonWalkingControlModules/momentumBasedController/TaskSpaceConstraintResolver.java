@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController;
 
 import java.util.LinkedHashMap;
+import java.util.Map;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.LinearSolver;
@@ -60,9 +61,9 @@ public class TaskSpaceConstraintResolver
       this.jacobianSolver = jacobianSolver;
 
       int size = Momentum.SIZE;
-      this.aTaskSpace = new DenseMatrix64F(size, size); // reshaped
-      this.vdotTaskSpace = new DenseMatrix64F(size, 1); // reshaped
-      this.cTaskSpace = new DenseMatrix64F(size, 1); // reshaped
+      this.aTaskSpace = new DenseMatrix64F(size, size);    // reshaped
+      this.vdotTaskSpace = new DenseMatrix64F(size, 1);    // reshaped
+      this.cTaskSpace = new DenseMatrix64F(size, 1);    // reshaped
       this.taskSpaceAccelerationMatrix = new DenseMatrix64F(size, 1);
       this.sJInverse = new DenseMatrix64F(size, size);
    }
@@ -161,6 +162,37 @@ public class TaskSpaceConstraintResolver
          vdotTaskSpace.setReshape(d);
          CommonOps.multAdd(-1.0, jacobianInverse, vdotRoot, vdotTaskSpace);
          ScrewTools.setDesiredAccelerations(jacobian.getJointsInOrder(), vdotTaskSpace);
+      }
+   }
+
+   public void convertInternalSpatialAccelerationToJointSpace(Map<InverseDynamicsJoint, DenseMatrix64F> jointSpaceAccelerations,
+           MechanismGeometricJacobian jacobian, SpatialAccelerationVector spatialAcceleration, DenseMatrix64F nullspaceMultipliers)
+   {
+      jacobian.changeFrame(spatialAcceleration.getExpressedInFrame());
+      jacobian.compute();
+      DesiredJointAccelerationCalculator desiredJointAccelerationCalculator = new DesiredJointAccelerationCalculator(jacobian, jacobianSolver);
+      desiredJointAccelerationCalculator.compute(spatialAcceleration);
+
+      DenseMatrix64F jointAccelerations = new DenseMatrix64F(jacobian.getNumberOfColumns(), 1);
+      ScrewTools.packDesiredJointAccelerationsMatrix(jacobian.getJointsInOrder(), jointAccelerations);
+
+      int nullity = nullspaceMultipliers.getNumRows();
+
+      if (nullity > 0)
+      {
+         nullspaceCalculator.setMatrix(jacobian.getJacobianMatrix(), nullity);
+         nullspaceCalculator.removeNullspaceComponent(jointAccelerations);
+         nullspaceCalculator.addNullspaceComponent(jointAccelerations, nullspaceMultipliers);
+      }
+
+      int index = 0;
+      for (InverseDynamicsJoint joint : jacobian.getJointsInOrder())
+      {
+         DenseMatrix64F jointAcceleration = new DenseMatrix64F(joint.getDegreesOfFreedom(), 1);
+         int degreesOfFreedom = joint.getDegreesOfFreedom();
+         CommonOps.extract(jointAccelerations, index, index + degreesOfFreedom, 0, 1, jointAcceleration, 0, 0);
+         jointSpaceAccelerations.put(joint, jointAcceleration);
+         index += degreesOfFreedom;
       }
    }
 }
