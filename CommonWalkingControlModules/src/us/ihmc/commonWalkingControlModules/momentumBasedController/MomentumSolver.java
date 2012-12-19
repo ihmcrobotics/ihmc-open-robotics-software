@@ -241,8 +241,7 @@ public class MomentumSolver
       initializeAHatRoot(aHatRoot, centroidalMomentumMatrix.getMatrix());
       initializeB(b, centroidalMomentumMatrixDerivative, jointsInOrder);
       handleJointSpaceAccelerations(b, centroidalMomentumMatrix.getMatrix(), jointSpaceAccelerations);
-//      handleAngularAccelerationsWithRespectToWorld(aHatRoot, b, dMap, centroidalMomentumMatrix.getMatrix(), angularAccelerationsWithRespectToWorld);
-      handleTaskSpaceAccelerations(aHatRoot, b, dMap, centroidalMomentumMatrix.getMatrix(), spatialAccelerations, nullspaceMultipliers);
+      handleTaskSpaceAccelerations(aHatRoot, b, dMap, jacobianInverseMap, centroidalMomentumMatrix.getMatrix(), spatialAccelerations, nullspaceMultipliers);
    }
 
    public void solve(SpatialForceVector momentumRateOfChange)
@@ -302,7 +301,8 @@ public class MomentumSolver
    }
 
    private void handleTaskSpaceAccelerations(DenseMatrix64F aHatRoot, DenseMatrix64F b, LinkedHashMap<MechanismGeometricJacobian, DenseMatrix64F> dMap,
-           DenseMatrix64F centroidalMomentumMatrix, LinkedHashMap<MechanismGeometricJacobian, SpatialAccelerationVector> taskSpaceAccelerations,
+           LinkedHashMap<MechanismGeometricJacobian, DenseMatrix64F> jacobianInverseMap, DenseMatrix64F centroidalMomentumMatrix,
+           LinkedHashMap<MechanismGeometricJacobian, SpatialAccelerationVector> taskSpaceAccelerations,
            LinkedHashMap<MechanismGeometricJacobian, DenseMatrix64F> nullspaceMultipliers)
    {
       ReferenceFrame rootJointFrame = rootJoint.getFrameAfterJoint();
@@ -319,29 +319,15 @@ public class MomentumSolver
             taskSpaceAcceleration.changeFrameNoRelativeMotion(rootJointFrame);
          }
 
+         // taskSpaceAcceleration
+         DenseMatrix64F taskSpaceAccelerationMatrix = new DenseMatrix64F(SpatialAccelerationVector.SIZE, 1);
+         taskSpaceAcceleration.packMatrix(taskSpaceAccelerationMatrix, 0);
+
          // J
          jacobian.changeFrame(rootJointFrame);
          jacobian.compute();
-
+         DenseMatrix64F jacobianMatrix = jacobian.getJacobianMatrix();
          DenseMatrix64F nullspaceMultiplier = nullspaceMultipliers.get(jacobian);
-         int nullity = nullspaceMultiplier.getNumRows();
-
-         if (nullity > 0)
-         {
-            nullspaceCalculator.setMatrix(jacobian.getJacobianMatrix(), nullity);
-         }
-
-         // JInverse
-         jacobianSolver.setA(jacobian.getJacobianMatrix());
-         DenseMatrix64F jacobianInverse = new DenseMatrix64F(jacobian.getNumberOfColumns(), jacobian.getNumberOfColumns());
-         jacobianSolver.invert(jacobianInverse);
-
-         if (nullity > 0)
-         {
-            nullspaceCalculator.removeNullspaceComponent(jacobianInverse);
-         }
-
-         jacobianInverseMap.put(jacobian, jacobianInverse);
 
          // aTaskSpace
          int[] columnIndices = ScrewTools.computeIndicesForJoint(jointsInOrder, jacobian.getJointsInOrder());
@@ -355,46 +341,61 @@ public class MomentumSolver
          convectiveTerm.changeFrame(rootJointSuccessor.getBodyFixedFrame(), twistOfCurrentWithRespectToNew, twistOfBodyWithRespectToBase);
          convectiveTerm.changeFrameNoRelativeMotion(rootJoint.getFrameAfterJoint());
          convectiveTerm.packMatrix(convectiveTermMatrix, 0);
-
-         // cTaskSpace
          convectiveTerm.getBodyFrame().checkReferenceFrameMatch(taskSpaceAcceleration.getBodyFrame());
          convectiveTerm.getExpressedInFrame().checkReferenceFrameMatch(taskSpaceAcceleration.getExpressedInFrame());
-         taskSpaceAcceleration.packMatrix(cTaskSpace, 0);
-         CommonOps.subEquals(cTaskSpace, convectiveTermMatrix);
 
-         // d
-         DenseMatrix64F d = new DenseMatrix64F(jacobianInverse.getNumRows(), cTaskSpace.getNumCols());
-         CommonOps.mult(jacobianInverse, cTaskSpace, d);
+         // pass in:
+         DenseMatrix64F jacobianInverse = new DenseMatrix64F(jacobianMatrix.getNumCols(), jacobianMatrix.getNumCols());    // TODO: garbage
+         DenseMatrix64F d = new DenseMatrix64F(jacobianInverse.getNumRows(), 1);
 
-         if (nullity > 0)
-         {
-            nullspaceCalculator.addNullspaceComponent(d, nullspaceMultiplier);
-         }
+         handleAccelerationWithRespectToWorld(aHatRoot, b, jacobianInverse, d, taskSpaceAccelerationMatrix, jacobianMatrix, nullspaceMultiplier);
 
+         jacobianInverseMap.put(jacobian, jacobianInverse);
          dMap.put(jacobian, d);
-
-         // update aHatRoot
-         CommonOps.multAdd(-1.0, aTaskSpace, jacobianInverse, aHatRoot);
-
-         // update b
-         CommonOps.multAdd(-1.0, aTaskSpace, d, b);
       }
    }
 
-   private void handleAngularAccelerationsWithRespectToWorld(DenseMatrix64F aHatRoot, DenseMatrix64F b,
-           LinkedHashMap<MechanismGeometricJacobian, DenseMatrix64F> dMap, DenseMatrix64F centroidalMomentumMatrix,
-           LinkedHashMap<MechanismGeometricJacobian, FrameVector> angularAccelerationsWithRespectToWorld)
+   /**
+    *
+    * @param aHatRoot modified
+    * @param b modified
+    * @param jacobianInverse modified
+    * @param d modified
+    * @param taskSpaceAccelerationMatrix not modified
+    * @param jacobianMatrix not modified
+    * @param nullspaceMultiplier not modified
+    */
+   private void handleAccelerationWithRespectToWorld(DenseMatrix64F aHatRoot, DenseMatrix64F b, DenseMatrix64F jacobianInverse, DenseMatrix64F d,
+           DenseMatrix64F taskSpaceAccelerationMatrix, DenseMatrix64F jacobianMatrix, DenseMatrix64F nullspaceMultiplier)
    {
-      throw new RuntimeException("not yet implemented");
-//      ReferenceFrame rootJointFrame = rootJoint.getFrameAfterJoint();
-//      for (MechanismGeometricJacobian jacobian : angularAccelerationsWithRespectToWorld.keySet())
-//      {
-//         FrameVector angularAcceleration = angularAccelerationsWithRespectToWorld.get(jacobian);
-//         if (angularAcceleration.getReferenceFrame() != rootJointFrame)
-//         {
-//            throw new RuntimeException("Acceleration must be ");
-//         }
-//      }
+      // JInverse
+      jacobianSolver.setA(jacobianMatrix);
+      jacobianSolver.invert(jacobianInverse);
+
+      int nullity = nullspaceMultiplier.getNumRows();
+      if (nullity > 0)
+      {
+         nullspaceCalculator.setMatrix(jacobianMatrix, nullity);
+         nullspaceCalculator.removeNullspaceComponent(jacobianInverse);
+      }
+
+      // cTaskSpace
+      cTaskSpace.set(taskSpaceAccelerationMatrix);
+      CommonOps.subEquals(cTaskSpace, convectiveTermMatrix);
+
+      // d
+      CommonOps.mult(jacobianInverse, cTaskSpace, d);
+
+      if (nullity > 0)
+      {
+         nullspaceCalculator.addNullspaceComponent(d, nullspaceMultiplier);
+      }
+
+      // update aHatRoot
+      CommonOps.multAdd(-1.0, aTaskSpace, jacobianInverse, aHatRoot);
+
+      // update b
+      CommonOps.multAdd(-1.0, aTaskSpace, d, b);
    }
 
    private void solveAndSetRootJointAcceleration(DenseMatrix64F vdotRoot, DenseMatrix64F aHatRoot, DenseMatrix64F b, DenseMatrix64F T, DenseMatrix64F alpha1,
