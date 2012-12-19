@@ -74,6 +74,8 @@ public class ScreenCapture implements Serializable
 
    public static BufferedImage byteArrayToBufferedImage(byte[] bytes)
    {
+      if (bytes == null) return null;
+      
       InputStream inputStream = new ByteArrayInputStream(bytes);
       BufferedImage bufferedImageFromConvert = null;
       try
@@ -82,7 +84,8 @@ public class ScreenCapture implements Serializable
       }
       catch (IOException e)
       {
-         e.printStackTrace();
+         return null;
+//         e.printStackTrace();
       }
 
       return bufferedImageFromConvert;
