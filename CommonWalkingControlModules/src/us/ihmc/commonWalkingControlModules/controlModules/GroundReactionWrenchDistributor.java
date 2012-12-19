@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.momentumBasedController;
+package us.ihmc.commonWalkingControlModules.controlModules;
 
 import java.util.HashMap;
 import java.util.List;
@@ -7,9 +7,6 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPoly
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactState;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.LegStrengthCalculator;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.VirtualToePointCalculator;
-import us.ihmc.commonWalkingControlModules.controlModules.LegStrengthCalculatorTools;
-import us.ihmc.commonWalkingControlModules.controlModules.NewGeometricVirtualToePointCalculator;
-import us.ihmc.commonWalkingControlModules.controlModules.TeeterTotterLegStrengthCalculator;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.robotSide.RobotSide;

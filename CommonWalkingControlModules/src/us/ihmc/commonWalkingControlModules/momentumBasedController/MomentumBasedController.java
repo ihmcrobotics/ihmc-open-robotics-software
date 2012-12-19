@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
 import org.ejml.data.DenseMatrix64F;
@@ -13,6 +12,8 @@ import org.ejml.data.DenseMatrix64F;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactState;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.DesiredCoPAndCMPControlModule;
+import us.ihmc.commonWalkingControlModules.controlModules.GroundReactionMomentControlModule;
+import us.ihmc.commonWalkingControlModules.controlModules.GroundReactionWrenchDistributor;
 import us.ihmc.commonWalkingControlModules.controlModules.SacrificeDeltaCMPDesiredCoPAndCMPControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.velocityViaCoP.CapturabilityBasedDesiredCoPVisualizer;
 import us.ihmc.commonWalkingControlModules.controlModules.velocityViaCoP.SimpleDesiredCenterOfPressureFilter;
@@ -30,7 +31,6 @@ import us.ihmc.utilities.MechanismGeometricJacobian;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.math.DampedLeastSquaresSolver;
 import us.ihmc.utilities.math.MathTools;
-import us.ihmc.utilities.math.geometry.AngleTools;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameLineSegment2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -38,7 +38,6 @@ import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.math.geometry.RotationFunctions;
 import us.ihmc.utilities.screwTheory.EndEffectorPoseTwistAndSpatialAccelerationCalculator;
 import us.ihmc.utilities.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
@@ -77,7 +76,6 @@ public class MomentumBasedController implements RobotController
 
    private final BipedSupportPolygons bipedSupportPolygons;
 
-   private final ReferenceFrame midFeetZUp;
    private final double gravityZ;
    private final double totalMass;
 
@@ -106,8 +104,7 @@ public class MomentumBasedController implements RobotController
 
    private final AxisAngleOrientationController pelvisOrientationController;
 
-   private final DoubleYoVariable kAngularMomentumZ = new DoubleYoVariable("kAngularMomentumZ", registry);
-   private final DoubleYoVariable kPelvisYaw = new DoubleYoVariable("kPelvisYaw", registry);
+
    private final HashMap<RevoluteJoint, DoubleYoVariable> desiredAccelerationYoVariables = new HashMap<RevoluteJoint, DoubleYoVariable>();
 
 
@@ -118,6 +115,8 @@ public class MomentumBasedController implements RobotController
 // private final SideDependentList<BooleanYoVariable> inSingularRegions = new SideDependentList<BooleanYoVariable>(leftInSingularRegion, rightInSingularRegion);
 
    private final SpatialForceVector gravitationalWrench;
+
+   private final GroundReactionMomentControlModule groundReactionMomentControlModule;
    private final GroundReactionWrenchDistributor groundReactionWrenchDistributor;
 
    public MomentumBasedController(FullRobotModel fullRobotModel, ProcessedOutputsInterface processedOutputs, double gravityZ,
@@ -134,6 +133,8 @@ public class MomentumBasedController implements RobotController
 
       this.momentumCalculator = new MomentumCalculator(twistCalculator);
       this.highLevelHumanoidController = highLevelHumanoidController;
+      this.groundReactionMomentControlModule = new GroundReactionMomentControlModule(fullRobotModel.getPelvis().getBodyFixedFrame(), registry);
+      this.groundReactionMomentControlModule.setGains(10.0, 100.0);    // kPelvisYaw was 0.0 for M3 movie
       this.groundReactionWrenchDistributor = new GroundReactionWrenchDistributor(referenceFrames, fullRobotModel, dynamicGraphicObjectsListRegistry, registry);
 
       RigidBody elevator = fullRobotModel.getElevator();
@@ -164,8 +165,6 @@ public class MomentumBasedController implements RobotController
                fullRobotModel.getEndEffectorFrame(robotSide, LimbName.LEG), twistCalculator);
          footPoseTwistAndSpatialAccelerationCalculators.put(robotSide, feetPoseTwistAndSpatialAccelerationCalculator);
       }
-
-      midFeetZUp = referenceFrames.getMidFeetZUpFrame();
 
       updateBipedSupportPolygons(bipedSupportPolygons);
 
@@ -216,11 +215,6 @@ public class MomentumBasedController implements RobotController
             desiredAccelerationYoVariables.put((RevoluteJoint) joint, new DoubleYoVariable(joint.getName() + "qdd_d", registry));
          }
       }
-
-
-
-      kAngularMomentumZ.set(10.0);    // 50.0); // 10.0);
-      kPelvisYaw.set(100.0);    // was 0.0 for M3 movie
    }
 
    public void initialize()
@@ -297,7 +291,8 @@ public class MomentumBasedController implements RobotController
       desiredDeltaCMP.sub(desiredCoP);
 
       this.fZ.set(computeFz());
-      FrameVector totalgroundReactionMoment = determineGroundReactionMoment(momentum);
+      double desiredPelvisYaw = highLevelHumanoidController.getDesiredPelvisOrientation().getYawPitchRoll()[0];
+      FrameVector totalgroundReactionMoment = groundReactionMomentControlModule.determineGroundReactionMoment(momentum, desiredPelvisYaw);
 
       SideDependentList<ContactState> footContactStates = new SideDependentList<ContactState>();
       for (RobotSide robotSide : RobotSide.values())
@@ -316,28 +311,6 @@ public class MomentumBasedController implements RobotController
 
       SpatialForceVector desiredCentroidalMomentumRate = new SpatialForceVector(totalGroundReactionWrench);
       desiredCentroidalMomentumRate.sub(gravitationalWrench);
-
-//    for (RobotSide robotSide : RobotSide.values())
-//    {
-//     // TODO: get rid of this
-//     boolean isSwingLeg = supportLeg == robotSide.getOppositeSide();
-//     double maxKneeAngle = 0.4;
-//     boolean leavingKneeLockRegion = optimizer.leavingSingularRegion(robotSide, LimbName.LEG)
-//                                     && (fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE).getQ() < maxKneeAngle);    // TODO: hack
-//     boolean trajectoryInitialized = highLevelHumanoidController.trajectoryInitialized(robotSide);
-//
-//     BooleanYoVariable inSingularRegion = inSingularRegions.get(robotSide);
-//     inSingularRegion.set(optimizer.inSingularRegion(robotSide, LimbName.LEG));
-//
-//     // if ((supportLeg == robotSide.getOppositeSide()) &&!optimizer.inSingularRegion(robotSide) &&!stateMachine.trajectoryInitialized(robotSide))
-//     if (isSwingLeg && (leavingKneeLockRegion || (!inSingularRegion.getBooleanValue() &&!trajectoryInitialized)))
-//     {
-//        SpatialAccelerationVector taskSpaceAcceleration = new SpatialAccelerationVector();
-//
-////      optimizer.computeMatchingNondegenerateTaskSpaceAcceleration(robotSide, LimbName.LEG, taskSpaceAcceleration);
-//        highLevelHumanoidController.initializeTrajectory(robotSide, taskSpaceAcceleration);
-//     }
-//    }
 
       solver.reset();
 
@@ -403,66 +376,6 @@ public class MomentumBasedController implements RobotController
 
       solver.compute();
 
-
-      // TODO
-//    if (supportLeg != null)
-//    {
-////       solver.solve(desiredCentroidalMomentumRate);
-//       
-//       SpatialAccelerationVector desiredRootJointAcceleration = new SpatialAccelerationVector();
-//       fullRobotModel.getRootJoint().packDesiredJointAcceleration(desiredRootJointAcceleration);
-//       
-//       DenseMatrix64F momentumSubspace = new DenseMatrix64F(SpatialForceVector.SIZE, 3);
-////       momentumSubspace.set(2, 0, 1.0);
-//       momentumSubspace.set(3, 0, 1.0);
-//       momentumSubspace.set(4, 1, 1.0);
-//       momentumSubspace.set(5, 2, 1.0);
-//       
-//       DenseMatrix64F momentumMultipliers = new DenseMatrix64F(3, 1);
-////       Vector3d angularPart = desiredCentroidalMomentumRate.getAngularPartCopy();
-////       momentumMultipliers.set(0, 0, angularPart.getZ());        
-////       MatrixTools.setDenseMatrixFromTuple3d(momentumMultipliers, desiredCentroidalMomentumRate.getLinearPartCopy(), 1, 0);
-//       MatrixTools.setDenseMatrixFromTuple3d(momentumMultipliers, desiredCentroidalMomentumRate.getLinearPartCopy(), 0, 0);
-//       
-//       DenseMatrix64F accelerationSubspace = new DenseMatrix64F(SpatialMotionVector.SIZE, 3);
-//       accelerationSubspace.set(0, 0, 1.0);
-//       accelerationSubspace.set(1, 1, 1.0);
-//       accelerationSubspace.set(2, 2, 1.0);
-//       
-//       DenseMatrix64F accelerationMultipliers = new DenseMatrix64F(3, 1);
-//       
-//       Twist rootJointTwist = new Twist();
-//       twistCalculator.packTwistOfBody(rootJointTwist, fullRobotModel.getRootJoint().getSuccessor());
-//       ReferenceFrame pelvisFrame = fullRobotModel.getRootJoint().getFrameAfterJoint();
-//       rootJointTwist.changeFrame(pelvisFrame);
-//
-//       FrameOrientation desiredPelvisOrientation = new FrameOrientation(worldFrame);
-//       desiredPelvisOrientation.changeFrame(pelvisFrame);
-//       FrameVector desiredPelvisAngularAcceleration = new FrameVector(pelvisFrame);
-//       FrameVector desiredAngularVelocity = new FrameVector(pelvisFrame);
-//       FrameVector currentAngularVelocity = new FrameVector(rootJointTwist.getExpressedInFrame(), rootJointTwist.getAngularPartCopy());
-//       FrameVector feedForward = new FrameVector(pelvisFrame);
-//       pelvisOrientationController.compute(desiredPelvisAngularAcceleration, desiredPelvisOrientation, desiredAngularVelocity, currentAngularVelocity, feedForward);
-////       accelerationMultipliers.set(0, 0, desiredPelvisAngularAcceleration.getX());
-////       accelerationMultipliers.set(1, 0, desiredPelvisAngularAcceleration.getY());
-//       
-//       MatrixTools.setDenseMatrixFromTuple3d(accelerationMultipliers, desiredPelvisAngularAcceleration.getVector(), 0, 0);
-////       MatrixTools.setDenseMatrixFromTuple3d(accelerationMultipliers, desiredRootJointAcceleration.getAngularPartCopy(), 0, 0);
-//
-//       solver.solve(accelerationSubspace, accelerationMultipliers, momentumSubspace, momentumMultipliers);
-//       
-//       RigidBody foot = fullRobotModel.getFoot(supportLeg);
-//       Wrench footWrench = new Wrench(foot.getBodyFixedFrame(), centerOfMassFrame);
-//       solver.getRateOfChangeOfMomentum(footWrench);
-//       footWrench.add(gravitationalWrench);
-//       footWrench.changeFrame(foot.getBodyFixedFrame());
-//
-//       inverseDynamicsCalculator.setExternalWrench(foot, footWrench);
-//    }
-//    else
-//    {
-//       solver.solve(desiredCentroidalMomentumRate);
-//    }
       solver.solve(desiredCentroidalMomentumRate);
    }
 
@@ -510,23 +423,6 @@ public class MomentumBasedController implements RobotController
       double fZ = totalMass * (gravityZ + highLevelHumanoidController.getDesiredCoMHeightAcceleration());
 
       return fZ;
-   }
-
-   private FrameVector determineGroundReactionMoment(Momentum momentum)
-   {
-      FrameVector ret = new FrameVector(midFeetZUp);
-      FrameVector angularMomentum = new FrameVector(momentum.getExpressedInFrame(), momentum.getAngularPartCopy());
-      angularMomentum.changeFrame(midFeetZUp);
-
-      Matrix3d pelvisToWorld = new Matrix3d();
-      fullRobotModel.getPelvis().getBodyFixedFrame().getTransformToDesiredFrame(worldFrame).get(pelvisToWorld);
-      double pelvisYaw = RotationFunctions.getYaw(pelvisToWorld);
-      double desiredPelvisYaw = highLevelHumanoidController.getDesiredPelvisOrientation().getYawPitchRoll()[0];
-
-      double error = AngleTools.computeAngleDifferenceMinusPiToPi(desiredPelvisYaw, pelvisYaw);
-      ret.setZ(-kAngularMomentumZ.getDoubleValue() * angularMomentum.getZ() + kPelvisYaw.getDoubleValue() * error);
-
-      return ret;
    }
 
    private void updateYoVariables()
