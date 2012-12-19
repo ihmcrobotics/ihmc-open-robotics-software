@@ -43,6 +43,9 @@ public class GroundReactionWrenchDistributor
    private final SideDependentList<RigidBody> feet = new SideDependentList<RigidBody>();
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
+   private HashMap<RigidBody, Wrench> groundReactionWrenches; // TODO: garbage
+   private SideDependentList<FramePoint> virtualToePointsOnSole; // TODO: garbage
+
    public GroundReactionWrenchDistributor(CommonWalkingReferenceFrames referenceFrames, FullRobotModel fullRobotModel,
            DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
    {
@@ -56,16 +59,21 @@ public class GroundReactionWrenchDistributor
          this.feet.put(robotSide, fullRobotModel.getFoot(robotSide));
       }
 
+      for (RobotSide robotSide : RobotSide.values())
+      {
+         kValues.put(robotSide, new DoubleYoVariable(robotSide.getCamelCaseNameForStartOfExpression() + "KValue", registry));
+      }
+
       parentRegistry.addChild(registry);
    }
 
-   public HashMap<RigidBody, Wrench> distributeGroundReactionWrench(FramePoint2d desiredCoP, FrameVector2d desiredDeltaCMP, double fZ,
+   public void distributeGroundReactionWrench(FramePoint2d desiredCoP, FrameVector2d desiredDeltaCMP, double fZ,
            FrameVector totalgroundReactionMoment, SideDependentList<ContactState> contactStates, BipedSupportPolygons bipedSupportPolygons,
            RobotSide upcomingSupportLeg)
    {
       SideDependentList<FramePoint2d> virtualToePoints = computeVirtualToePoints(desiredCoP, contactStates, bipedSupportPolygons, upcomingSupportLeg);
       legStrengthCalculator.packLegStrengths(lambdas, virtualToePoints, desiredCoP);
-      SideDependentList<FramePoint> virtualToePointsOnSole = projectOntoSole(virtualToePoints);
+      virtualToePointsOnSole = projectOntoSole(virtualToePoints);
 
       FramePoint centerOfMass = new FramePoint(referenceFrames.getCenterOfMassFrame());
       double omega0 = computeOmega0(centerOfMass, fZ, virtualToePointsOnSole);
@@ -77,13 +85,20 @@ public class GroundReactionWrenchDistributor
          kValues.get(robotSide).set(k);
       }
 
-      HashMap<RigidBody, Wrench> groundReactionWrenches = computeGroundReactionWrenches(desiredDeltaCMP, virtualToePointsOnSole, totalgroundReactionMoment,
+      groundReactionWrenches = computeGroundReactionWrenches(desiredDeltaCMP, virtualToePointsOnSole, totalgroundReactionMoment,
                                                              contactStates);
+   }
 
+   public HashMap<RigidBody, Wrench> getGroundReactionWrenches()
+   {
       return groundReactionWrenches;
    }
 
-
+   public SideDependentList<FramePoint> getVirtualToePointsOnSole()
+   {
+      return virtualToePointsOnSole;
+   }
+   
    private HashMap<RigidBody, Wrench> computeGroundReactionWrenches(FrameVector2d desiredDeltaCMP, SideDependentList<FramePoint> virtualToePointsOnSole,
            FrameVector totalgroundReactionMoment, SideDependentList<ContactState> contactStates)
    {
