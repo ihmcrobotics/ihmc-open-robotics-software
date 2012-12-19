@@ -53,12 +53,12 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractAdjustableD
       this.desiredVelocityControlModule = desiredVelocityControlModule;
    }
 
-   protected SideDependentList<? extends ReferenceFrame> getAnkleZUpFrames()
+   public SideDependentList<? extends ReferenceFrame> getAnkleZUpFrames()
    {
       return ankleZUpFrames;
    }
 
-   protected void setAnkleZUpFrames(SideDependentList<? extends ReferenceFrame> ankleZUpFrames)
+   public void setAnkleZUpFrames(SideDependentList<? extends ReferenceFrame> ankleZUpFrames)
    {
       this.ankleZUpFrames = ankleZUpFrames;
    }
