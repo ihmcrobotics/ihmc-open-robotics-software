@@ -40,8 +40,8 @@ public class GroundReactionWrenchDistributor
    private final SideDependentList<RigidBody> feet = new SideDependentList<RigidBody>();
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private HashMap<RigidBody, Wrench> groundReactionWrenches; // TODO: garbage
-   private SideDependentList<FramePoint> virtualToePointsOnSole; // TODO: garbage
+   private HashMap<RigidBody, Wrench> groundReactionWrenches;    // TODO: garbage
+   private SideDependentList<FramePoint> virtualToePointsOnSole;    // TODO: garbage
 
    public GroundReactionWrenchDistributor(CommonWalkingReferenceFrames referenceFrames, FullRobotModel fullRobotModel,
            DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
@@ -64,9 +64,8 @@ public class GroundReactionWrenchDistributor
       parentRegistry.addChild(registry);
    }
 
-   public void distributeGroundReactionWrench(FramePoint2d desiredCoP, FrameVector2d desiredDeltaCMP, double fZ,
-           FrameVector totalgroundReactionMoment, SideDependentList<ContactState> contactStates, BipedSupportPolygons bipedSupportPolygons,
-           RobotSide upcomingSupportLeg)
+   public void distributeGroundReactionWrench(FramePoint2d desiredCoP, FrameVector2d desiredDeltaCMP, double fZ, FrameVector totalgroundReactionMoment,
+           SideDependentList<ContactState> contactStates, BipedSupportPolygons bipedSupportPolygons, RobotSide upcomingSupportLeg)
    {
       SideDependentList<FramePoint2d> virtualToePoints = computeVirtualToePoints(desiredCoP, contactStates, bipedSupportPolygons, upcomingSupportLeg);
       legStrengthCalculator.packLegStrengths(lambdas, virtualToePoints, desiredCoP);
@@ -82,8 +81,7 @@ public class GroundReactionWrenchDistributor
          kValues.get(robotSide).set(k);
       }
 
-      groundReactionWrenches = computeGroundReactionWrenches(desiredDeltaCMP, virtualToePointsOnSole, totalgroundReactionMoment,
-                                                             contactStates);
+      groundReactionWrenches = computeGroundReactionWrenches(desiredDeltaCMP, virtualToePointsOnSole, totalgroundReactionMoment, contactStates);
    }
 
    public HashMap<RigidBody, Wrench> getGroundReactionWrenches()
@@ -95,7 +93,7 @@ public class GroundReactionWrenchDistributor
    {
       return virtualToePointsOnSole;
    }
-   
+
    private HashMap<RigidBody, Wrench> computeGroundReactionWrenches(FrameVector2d desiredDeltaCMP, SideDependentList<FramePoint> virtualToePointsOnSole,
            FrameVector totalgroundReactionMoment, SideDependentList<ContactState> contactStates)
    {
@@ -199,7 +197,7 @@ public class GroundReactionWrenchDistributor
       {
          virtualToePointCalculator.hideVisualizationGraphics();
          FrameConvexPolygon2d footPolygonInAnkleZUp = bipedSupportPolygons.getFootPolygonInAnkleZUp(supportLeg);
-         fixDesiredCoPNumericalRoundoff(desiredCoP, footPolygonInAnkleZUp);
+         GeometryTools.projectOntoPolygonAndCheckDistance(desiredCoP, footPolygonInAnkleZUp, 1e-10);    // fix numerical roundoff
 
          virtualToePoints.put(supportLeg, desiredCoP);
          virtualToePoints.put(supportLeg.getOppositeSide(), new FramePoint2d(desiredCoP.getReferenceFrame()));
@@ -257,18 +255,5 @@ public class GroundReactionWrenchDistributor
       lineEnd.changeFrame(soleFrame);    // then change frame to sole frame
 
       return GeometryTools.getIntersectionBetweenLineAndPlane(pointOnPlane, planeNormal, lineStart, lineEnd);
-   }
-
-   private static void fixDesiredCoPNumericalRoundoff(FramePoint2d desiredCoP, FrameConvexPolygon2d polygon)
-   {
-      ReferenceFrame originalReferenceFrame = desiredCoP.getReferenceFrame();
-      double epsilon = 1e-10;
-      desiredCoP.changeFrame(polygon.getReferenceFrame());
-      FramePoint2d originalDesiredCoP = new FramePoint2d(desiredCoP);
-      polygon.orthogonalProjection(desiredCoP);
-      double distance = originalDesiredCoP.distance(desiredCoP);
-      if (distance > epsilon)
-         throw new RuntimeException("desired CoP outside polygon by " + distance);
-      desiredCoP.changeFrame(originalReferenceFrame);
    }
 }
