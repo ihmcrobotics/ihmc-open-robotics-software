@@ -37,6 +37,7 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
+import us.ihmc.utilities.math.geometry.GeometryTools;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.EndEffectorPoseTwistAndSpatialAccelerationCalculator;
 import us.ihmc.utilities.screwTheory.InverseDynamicsCalculator;
@@ -285,7 +286,7 @@ public class MomentumBasedController implements RobotController
       highLevelHumanoidController.setPreviousCoP(desiredCoP);
 
       desiredCoP.changeFrame(frame);
-      fixDesiredCoPNumericalRoundoff(desiredCoP, bipedSupportPolygons.getSupportPolygonInMidFeetZUp());
+      GeometryTools.projectOntoPolygonAndCheckDistance(desiredCoP, bipedSupportPolygons.getSupportPolygonInMidFeetZUp(), 1e-10);    // fix numerical roundoff
 
       desiredCMP.changeFrame(frame);
       FrameVector2d desiredDeltaCMP = new FrameVector2d(desiredCMP);
@@ -388,19 +389,6 @@ public class MomentumBasedController implements RobotController
          groundReactionWrench.changeFrame(rigidBody.getBodyFixedFrame());
          inverseDynamicsCalculator.setExternalWrench(rigidBody, groundReactionWrench);
       }
-   }
-
-   private void fixDesiredCoPNumericalRoundoff(FramePoint2d desiredCoP, FrameConvexPolygon2d polygon)
-   {
-      ReferenceFrame originalReferenceFrame = desiredCoP.getReferenceFrame();
-      double epsilon = 1e-10;
-      desiredCoP.changeFrame(polygon.getReferenceFrame());
-      FramePoint2d originalDesiredCoP = new FramePoint2d(desiredCoP);
-      polygon.orthogonalProjection(desiredCoP);
-      double distance = originalDesiredCoP.distance(desiredCoP);
-      if (distance > epsilon)
-         throw new RuntimeException("desired CoP outside polygon by " + distance);
-      desiredCoP.changeFrame(originalReferenceFrame);
    }
 
    private double computeFz()
