@@ -565,4 +565,9 @@ public class ResizableBipedFoot implements BipedFootInterface
 
       return projectedFootPolygonPoints;
    }
+
+   public boolean inContact()
+   {
+      throw new RuntimeException();
+   }
 }

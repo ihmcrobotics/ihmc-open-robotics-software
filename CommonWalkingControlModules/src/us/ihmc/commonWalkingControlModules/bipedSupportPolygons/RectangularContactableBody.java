@@ -73,4 +73,9 @@ public class RectangularContactableBody implements ContactablePlaneBody
 
       return ret;
    }
+
+   public boolean inContact()
+   {
+      throw new RuntimeException();
+   }
 }
