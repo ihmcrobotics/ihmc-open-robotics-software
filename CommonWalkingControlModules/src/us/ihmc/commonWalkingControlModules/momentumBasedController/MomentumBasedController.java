@@ -50,6 +50,7 @@ import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.utilities.screwTheory.SpatialForceVector;
 import us.ihmc.utilities.screwTheory.SpatialMotionVector;
 import us.ihmc.utilities.screwTheory.TotalMassCalculator;
+import us.ihmc.utilities.screwTheory.TotalWrenchCalculator;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 import us.ihmc.utilities.screwTheory.Wrench;
 
@@ -307,7 +308,7 @@ public class MomentumBasedController implements RobotController
 
       setGroundReactionWrenches(groundReactionWrenches, inverseDynamicsCalculator);
 
-      Wrench totalGroundReactionWrench = computeTotalGroundReactionWrench(groundReactionWrenches);
+      Wrench totalGroundReactionWrench = TotalWrenchCalculator.computeTotalWrench(groundReactionWrenches.values(), centerOfMassFrame);
 
       SpatialForceVector desiredCentroidalMomentumRate = new SpatialForceVector(totalGroundReactionWrench);
       desiredCentroidalMomentumRate.sub(gravitationalWrench);
@@ -377,22 +378,6 @@ public class MomentumBasedController implements RobotController
       solver.compute();
 
       solver.solve(desiredCentroidalMomentumRate);
-   }
-
-   private Wrench computeTotalGroundReactionWrench(HashMap<RigidBody, Wrench> groundReactionWrenches)
-   {
-      Wrench totalGroundReactionWrench = new Wrench(centerOfMassFrame, centerOfMassFrame);
-
-      Wrench temporaryWrench = new Wrench();
-      for (RigidBody rigidBody : groundReactionWrenches.keySet())
-      {
-         temporaryWrench.set(groundReactionWrenches.get(rigidBody));
-         temporaryWrench.changeFrame(centerOfMassFrame);
-         temporaryWrench.changeBodyFrameAttachedToSameBody(centerOfMassFrame);
-         totalGroundReactionWrench.add(temporaryWrench);
-      }
-
-      return totalGroundReactionWrench;
    }
 
    private void setGroundReactionWrenches(HashMap<RigidBody, Wrench> groundReactionWrenches, InverseDynamicsCalculator inverseDynamicsCalculator)
