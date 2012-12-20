@@ -737,15 +737,8 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 
       FrameVector outputToPack = new FrameVector(fullRobotModel.getChest().getBodyFixedFrame());
       chestOrientationControlModule.controlSpine(outputToPack, desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
-      chestAngularAccelerationWithRespectToPelvis.set(outputToPack);
-      chestAngularAccelerationcalculator.compute(outputToPack);
-
-      for (InverseDynamicsJoint joint : spineJoints)
-      {
-         DenseMatrix64F jointAcceleration = new DenseMatrix64F(joint.getDegreesOfFreedom(), 1);    // TODO: garbage
-         joint.packDesiredAccelerationMatrix(jointAcceleration, 0);
-         solver.setDesiredJointAcceleration(joint, jointAcceleration);
-      }
+      DenseMatrix64F nullspaceMultiplier = new DenseMatrix64F(0, 1);
+      solver.setDesiredAngularAcceleration(spineJacobian, pelvisFrame, outputToPack, nullspaceMultiplier);
    }
 
    private void doUpperBodyControl()

@@ -63,7 +63,6 @@ import us.ihmc.utilities.screwTheory.SpatialAccelerationCalculator;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.utilities.screwTheory.SpatialForceVector;
 import us.ihmc.utilities.screwTheory.SpatialMotionVector;
-import us.ihmc.utilities.screwTheory.ThreeDoFAngularAccelerationCalculator;
 import us.ihmc.utilities.screwTheory.TotalMassCalculator;
 import us.ihmc.utilities.screwTheory.TotalWrenchCalculator;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
@@ -72,7 +71,6 @@ import us.ihmc.utilities.screwTheory.Wrench;
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.EnumYoVariable;
-import com.yobotics.simulationconstructionset.IntegerYoVariable;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition.GraphicType;
@@ -117,13 +115,10 @@ public abstract class ICPAndMomentumBasedController extends MomentumBasedControl
 
    protected final DoubleYoVariable desiredCoMHeightAcceleration;
    protected final SideDependentList<EnumMap<LimbName, MechanismGeometricJacobian>> jacobians = SideDependentList.createListOfEnumMaps(LimbName.class);
+   protected final MechanismGeometricJacobian spineJacobian;
 
-
-   protected final ThreeDoFAngularAccelerationCalculator chestAngularAccelerationcalculator;
-   protected final InverseDynamicsJoint[] spineJoints;
-   protected final YoFrameVector chestAngularAccelerationWithRespectToPelvis;
    protected final YoFrameOrientation desiredPelvisOrientation;
-
+   
    protected final YoFramePoint capturePoint;
    protected final DoubleYoVariable omega0;
 
@@ -192,10 +187,11 @@ public abstract class ICPAndMomentumBasedController extends MomentumBasedControl
       this.groundReactionMomentControlModule.setGains(10.0, 100.0);    // kPelvisYaw was 0.0 for M3 movie
       this.groundReactionWrenchDistributor = new GroundReactionWrenchDistributor(referenceFrames, fullRobotModel, dynamicGraphicObjectsListRegistry, registry);
 
+      this.desiredPelvisOrientation = new YoFrameOrientation("desiredPelvis", worldFrame, registry);
       
       omega0 = new DoubleYoVariable("omega0", registry);
       capturePoint = new YoFramePoint("capturePoint", worldFrame, registry);
-
+      
       this.desiredPelvisLinearAcceleration = new YoFrameVector("desiredPelvisLinearAcceleration", "", referenceFrames.getPelvisFrame(), registry);
       this.desiredPelvisAngularAcceleration = new YoFrameVector("desiredPelvisAngularAcceleration", "", referenceFrames.getPelvisFrame(), registry);
       this.desiredPelvisForce = new YoFrameVector("desiredPelvisForce", "", centerOfMassFrame, registry);
@@ -210,14 +206,9 @@ public abstract class ICPAndMomentumBasedController extends MomentumBasedControl
          this.updatables.addAll(updatables);
       }
 
-      this.chestAngularAccelerationWithRespectToPelvis = new YoFrameVector("chestAngularAccelerationWithRespectToPelvis",
-              fullRobotModel.getChest().getBodyFixedFrame(), registry);
-
-      this.desiredPelvisOrientation = new YoFrameOrientation("desiredPelvis", worldFrame, registry);
+      this.spineJacobian = new MechanismGeometricJacobian(fullRobotModel.getPelvis(), fullRobotModel.getChest(), fullRobotModel.getRootJoint().getFrameAfterJoint());
 
       this.desiredCoMHeightAcceleration = new DoubleYoVariable("desiredCoMHeightAcceleration", registry);
-
-      this.chestAngularAccelerationcalculator = new ThreeDoFAngularAccelerationCalculator(fullRobotModel.getPelvis(), fullRobotModel.getChest());
 
       desiredICP = new YoFramePoint2d("desiredICP", "", ReferenceFrame.getWorldFrame(), registry);
       desiredICPVelocity = new YoFrameVector2d("desiredICPVelocity", "", ReferenceFrame.getWorldFrame(), registry);
@@ -226,8 +217,6 @@ public abstract class ICPAndMomentumBasedController extends MomentumBasedControl
       upcomingSupportLeg = EnumYoVariable.create("upcomingSupportLeg", "", RobotSide.class, registry, true);
 
       elevatorFrame = fullRobotModel.getElevatorFrame();
-
-      spineJoints = ScrewTools.createJointPath(fullRobotModel.getPelvis(), fullRobotModel.getChest());
       
       EnumMap<LimbName, RigidBody> bases = new EnumMap<LimbName, RigidBody>(LimbName.class);
       bases.put(LimbName.LEG, fullRobotModel.getPelvis());

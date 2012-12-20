@@ -41,7 +41,6 @@ public class MomentumSolver
    private final DenseMatrix64F b;
    private final DenseMatrix64F v;
 
-   private final DenseMatrix64F s;
    private final DenseMatrix64F T;
    private final DenseMatrix64F alpha1;
    private final DenseMatrix64F N;
@@ -106,7 +105,6 @@ public class MomentumSolver
       b = new DenseMatrix64F(centroidalMomentumMatrixDerivative.getNumRows(), v.getNumCols());
       aHatRoot = new DenseMatrix64F(size, rootJoint.getDegreesOfFreedom());
 
-      s = new DenseMatrix64F(size, size);    // will reshape later
       T = new DenseMatrix64F(size, size);    // will reshape later
       alpha1 = new DenseMatrix64F(size, 1);    // will reshape later
       N = new DenseMatrix64F(size, size);    // will reshape later
@@ -147,6 +145,30 @@ public class MomentumSolver
    public void setDesiredSpatialAcceleration(MechanismGeometricJacobian jacobian, SpatialAccelerationVector spatialAcceleration,
            DenseMatrix64F nullspaceMultipliers)
    {
+      int size = SpatialAccelerationVector.SIZE;
+      DenseMatrix64F s = new DenseMatrix64F(size, size);    // TODO: garbage
+      CommonOps.setIdentity(s);
+      setDesiredSpatialAcceleration(jacobian, spatialAcceleration, nullspaceMultipliers, s);
+   }
+
+   public void setDesiredAngularAcceleration(MechanismGeometricJacobian jacobian, ReferenceFrame baseFrame, FrameVector desiredAngularAcceleration,
+           DenseMatrix64F nullspaceMultiplier)
+   {
+      SpatialAccelerationVector spatialAcceleration = new SpatialAccelerationVector(jacobian.getEndEffector().getBodyFixedFrame(), baseFrame,
+                                                         desiredAngularAcceleration.getReferenceFrame());
+      spatialAcceleration.setAngularPart(desiredAngularAcceleration.getVector());
+
+      DenseMatrix64F selectionMatrix = new DenseMatrix64F(3, SpatialMotionVector.SIZE);    // TODO: garbage
+      selectionMatrix.set(0, 0, 1.0);
+      selectionMatrix.set(1, 1, 1.0);
+      selectionMatrix.set(2, 2, 1.0);
+
+      setDesiredSpatialAcceleration(jacobian, spatialAcceleration, nullspaceMultiplier, selectionMatrix);
+   }
+
+   public void setDesiredSpatialAcceleration(MechanismGeometricJacobian jacobian, SpatialAccelerationVector spatialAcceleration,
+           DenseMatrix64F nullspaceMultipliers, DenseMatrix64F selectionMatrix)
+   {
       checkNullspaceDimensions(jacobian, nullspaceMultipliers);
 
       for (InverseDynamicsJoint joint : jacobian.getJointsInOrder())
@@ -155,51 +177,25 @@ public class MomentumSolver
       }
 
       ReferenceFrame baseFrame = spatialAcceleration.getBaseFrame();
-
       boolean isWithRespectToWorld = baseFrame == rootJoint.getPredecessor().getBodyFixedFrame();
       if (isWithRespectToWorld)
       {
-         s.reshape(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
-         CommonOps.setIdentity(s);
          this.spatialAccelerations.put(jacobian, spatialAcceleration);
          this.nullspaceMultipliers.put(jacobian, nullspaceMultipliers);
-         this.taskSpaceSelectionMatrices.put(jacobian, s);
+         this.taskSpaceSelectionMatrices.put(jacobian, selectionMatrix);
       }
       else
       {
          if (baseFrame == jacobian.getBaseFrame())
          {
             taskSpaceConstraintResolver.convertInternalSpatialAccelerationToJointSpace(jointSpaceAccelerations, jacobian, spatialAcceleration,
-                    nullspaceMultipliers);
+                    nullspaceMultipliers, selectionMatrix);
          }
          else
          {
             throw new RuntimeException("Case not yet implemented");
          }
       }
-   }
-
-   public void setDesiredAngularAccelerationWithRespectToWorld(MechanismGeometricJacobian jacobian, FrameVector desiredAngularAcceleration,
-           DenseMatrix64F nullspaceMultiplier)
-   {
-      for (InverseDynamicsJoint joint : jacobian.getJointsInOrder())
-      {
-         checkAndRegisterConstraint(joint);
-      }
-
-      ReferenceFrame elevator = rootJoint.getPredecessor().getBodyFixedFrame();
-      SpatialAccelerationVector spatialAcceleration = new SpatialAccelerationVector(jacobian.getEndEffector().getBodyFixedFrame(), elevator,
-                                                         desiredAngularAcceleration.getReferenceFrame());
-      spatialAcceleration.setAngularPart(desiredAngularAcceleration.getVector());
-
-      s.reshape(3, SpatialMotionVector.SIZE);
-      s.set(0, 0, 1.0);
-      s.set(1, 1, 1.0);
-      s.set(2, 2, 1.0);
-
-      spatialAccelerations.put(jacobian, spatialAcceleration);
-      nullspaceMultipliers.put(jacobian, nullspaceMultiplier);
-      taskSpaceSelectionMatrices.put(jacobian, s);
    }
 
    public void compute()
