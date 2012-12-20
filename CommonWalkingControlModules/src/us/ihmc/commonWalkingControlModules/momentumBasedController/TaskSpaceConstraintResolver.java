@@ -37,7 +37,7 @@ public class TaskSpaceConstraintResolver
    private final DenseMatrix64F cTaskSpace;
    private final DenseMatrix64F taskSpaceAccelerationMatrix;
    private final DenseMatrix64F sJInverse;
-
+   private final DenseMatrix64F sJ;
 
    private final SpatialAccelerationVector convectiveTerm = new SpatialAccelerationVector();
    private final Twist twistOfCurrentWithRespectToNew = new Twist();
@@ -65,7 +65,8 @@ public class TaskSpaceConstraintResolver
       this.vdotTaskSpace = new DenseMatrix64F(size, 1);    // reshaped
       this.cTaskSpace = new DenseMatrix64F(size, 1);    // reshaped
       this.taskSpaceAccelerationMatrix = new DenseMatrix64F(size, 1);
-      this.sJInverse = new DenseMatrix64F(size, size);
+      this.sJInverse = new DenseMatrix64F(size, size);    // reshaped
+      this.sJ = new DenseMatrix64F(size, size);    // reshaped
    }
 
    public void reset()
@@ -94,7 +95,7 @@ public class TaskSpaceConstraintResolver
       // J
       jacobian.changeFrame(rootJointFrame);
       jacobian.compute();
-      DenseMatrix64F sJ = new DenseMatrix64F(selectionMatrix.getNumRows(), jacobian.getNumberOfColumns());
+      sJ.reshape(selectionMatrix.getNumRows(), jacobian.getNumberOfColumns());
       CommonOps.mult(selectionMatrix, jacobian.getJacobianMatrix(), sJ);
 
       // aTaskSpace
@@ -166,31 +167,49 @@ public class TaskSpaceConstraintResolver
    }
 
    public void convertInternalSpatialAccelerationToJointSpace(Map<InverseDynamicsJoint, DenseMatrix64F> jointSpaceAccelerations,
-           MechanismGeometricJacobian jacobian, SpatialAccelerationVector spatialAcceleration, DenseMatrix64F nullspaceMultipliers)
+           MechanismGeometricJacobian jacobian, SpatialAccelerationVector spatialAcceleration, DenseMatrix64F nullspaceMultipliers,
+           DenseMatrix64F selectionMatrix)
    {
       jacobian.changeFrame(spatialAcceleration.getExpressedInFrame());
       jacobian.compute();
-      DesiredJointAccelerationCalculator desiredJointAccelerationCalculator = new DesiredJointAccelerationCalculator(jacobian, jacobianSolver);
-      desiredJointAccelerationCalculator.compute(spatialAcceleration);
+      DesiredJointAccelerationCalculator desiredJointAccelerationCalculator = new DesiredJointAccelerationCalculator(jacobian, null);
 
-      DenseMatrix64F jointAccelerations = new DenseMatrix64F(jacobian.getNumberOfColumns(), 1);
-      ScrewTools.packDesiredJointAccelerationsMatrix(jacobian.getJointsInOrder(), jointAccelerations);
+      // convectiveTerm
+      desiredJointAccelerationCalculator.computeJacobianDerivativeTerm(convectiveTerm);
+      convectiveTerm.packMatrix(convectiveTermMatrix, 0);
+
+      // sJ
+      sJ.reshape(selectionMatrix.getNumRows(), jacobian.getNumberOfColumns());
+      CommonOps.mult(selectionMatrix, jacobian.getJacobianMatrix(), sJ);
+
+      // taskSpaceAcceleration
+      spatialAcceleration.packMatrix(taskSpaceAccelerationMatrix, 0);
+
+      // c
+      cTaskSpace.reshape(selectionMatrix.getNumRows(), 1);
+      cTaskSpace.zero();
+      CommonOps.multAdd(1.0, selectionMatrix, taskSpaceAccelerationMatrix, cTaskSpace);
+      CommonOps.multAdd(-1.0, selectionMatrix, convectiveTermMatrix, cTaskSpace);
+
+      jacobianSolver.setA(sJ);
+      vdotTaskSpace.reshape(cTaskSpace.getNumRows(), 1);
+      jacobianSolver.solve(cTaskSpace, vdotTaskSpace);
 
       int nullity = nullspaceMultipliers.getNumRows();
 
       if (nullity > 0)
       {
-         nullspaceCalculator.setMatrix(jacobian.getJacobianMatrix(), nullity);
-         nullspaceCalculator.removeNullspaceComponent(jointAccelerations);
-         nullspaceCalculator.addNullspaceComponent(jointAccelerations, nullspaceMultipliers);
+         nullspaceCalculator.setMatrix(sJ, nullity); // TODO: check if this works
+         nullspaceCalculator.removeNullspaceComponent(vdotTaskSpace);
+         nullspaceCalculator.addNullspaceComponent(vdotTaskSpace, nullspaceMultipliers);
       }
 
       int index = 0;
       for (InverseDynamicsJoint joint : jacobian.getJointsInOrder())
       {
-         DenseMatrix64F jointAcceleration = new DenseMatrix64F(joint.getDegreesOfFreedom(), 1);
+         DenseMatrix64F jointAcceleration = new DenseMatrix64F(joint.getDegreesOfFreedom(), 1); // TODO: garbage
          int degreesOfFreedom = joint.getDegreesOfFreedom();
-         CommonOps.extract(jointAccelerations, index, index + degreesOfFreedom, 0, 1, jointAcceleration, 0, 0);
+         CommonOps.extract(vdotTaskSpace, index, index + degreesOfFreedom, 0, 1, jointAcceleration, 0, 0);
          jointSpaceAccelerations.put(joint, jointAcceleration);
          index += degreesOfFreedom;
       }

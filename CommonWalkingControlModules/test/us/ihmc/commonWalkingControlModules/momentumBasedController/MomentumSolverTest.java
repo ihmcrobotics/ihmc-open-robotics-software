@@ -384,7 +384,7 @@ public class MomentumSolverTest
       FrameVector endEffectorAngularAcceleration = new FrameVector(rootJoint.getFrameAfterJoint(), RandomTools.getRandomVector(random));
       DenseMatrix64F nullspaceMultiplier = new DenseMatrix64F(0, 1);
 
-      solver.setDesiredAngularAccelerationWithRespectToWorld(jacobian, endEffectorAngularAcceleration, nullspaceMultiplier);
+      solver.setDesiredAngularAcceleration(jacobian, elevator.getBodyFixedFrame(), endEffectorAngularAcceleration, nullspaceMultiplier);
 
       twistCalculator.compute();
       solver.compute();
