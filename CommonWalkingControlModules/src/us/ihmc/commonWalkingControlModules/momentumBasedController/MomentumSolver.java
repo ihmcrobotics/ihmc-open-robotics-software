@@ -288,4 +288,9 @@ public class MomentumSolver
       if (nullspaceMultipliers.getNumRows() > jacobian.getNumberOfColumns())
          throw new RuntimeException("nullspaceMultipliers dimension too large");
    }
+
+   public SpatialAccelerationVector getSpatialAcceleration(MechanismGeometricJacobian jacobian)
+   {
+      return spatialAccelerations.get(jacobian);
+   }
 }
