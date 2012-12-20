@@ -131,11 +131,12 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 
    public WalkingHighLevelHumanoidController(FullRobotModel fullRobotModel, CommonWalkingReferenceFrames referenceFrames, TwistCalculator twistCalculator,
            CenterOfMassJacobian centerOfMassJacobian, SideDependentList<? extends ContactablePlaneBody> bipedFeet, BipedSupportPolygons bipedSupportPolygons,
-           SideDependentList<FootSwitchInterface> footSwitches, double gravityZ, DoubleYoVariable yoTime, double controlDT, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
-           DesiredFootstepCalculator desiredFootstepCalculator, CenterOfMassHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator,
-           SideDependentList<PositionTrajectoryGenerator> footPositionTrajectoryGenerators,
-           DoubleProvider swingTimeProvider, YoPositionProvider finalPositionProvider,
-           boolean stayOntoes, double desiredPelvisPitch, double trailingFootPitch, ArrayList<Updatable> updatables, ProcessedOutputsInterface processedOutputs)
+           SideDependentList<FootSwitchInterface> footSwitches, double gravityZ, DoubleYoVariable yoTime, double controlDT,
+           DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, DesiredFootstepCalculator desiredFootstepCalculator,
+           CenterOfMassHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator,
+           SideDependentList<PositionTrajectoryGenerator> footPositionTrajectoryGenerators, DoubleProvider swingTimeProvider,
+           YoPositionProvider finalPositionProvider, boolean stayOntoes, double desiredPelvisPitch, double trailingFootPitch, ArrayList<Updatable> updatables,
+           ProcessedOutputsInterface processedOutputs)
    {
       super(fullRobotModel, centerOfMassJacobian, referenceFrames, yoTime, gravityZ, twistCalculator, bipedFeet, bipedSupportPolygons, controlDT,
             processedOutputs, footSwitches, updatables, dynamicGraphicObjectsListRegistry);
@@ -164,8 +165,8 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 
       this.finalPositionProvider = finalPositionProvider;
 
-      this.chestOrientationControlModule = new RigidBodyOrientationControlModule("chest", fullRobotModel.getPelvis(), fullRobotModel.getChest(),
-              twistCalculator, registry);
+      RigidBody chestControlBase = fullRobotModel.getPelvis();    // fullRobotModel.getElevator();
+      this.chestOrientationControlModule = new RigidBodyOrientationControlModule("chest", chestControlBase, fullRobotModel.getChest(), twistCalculator, registry);
       chestOrientationControlModule.setProportionalGains(100.0, 100.0, 100.0);
       chestOrientationControlModule.setDerivativeGains(20.0, 20.0, 20.0);
 
@@ -535,6 +536,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       }
    }
 
+
    private FramePoint2d getDoubleSupportFinalDesiredICPForDoubleSupportStance()
    {
       FramePoint2d ret = new FramePoint2d(worldFrame);
@@ -730,15 +732,15 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
    // TODO: code duplication with box moving
    private void doChestControl()
    {
-      ReferenceFrame pelvisFrame = fullRobotModel.getPelvis().getBodyFixedFrame();
-      FrameOrientation desiredOrientation = new FrameOrientation(pelvisFrame);
-      FrameVector desiredAngularVelocity = new FrameVector(pelvisFrame);
-      FrameVector desiredAngularAcceleration = new FrameVector(pelvisFrame);
+      ReferenceFrame baseFrame = chestOrientationControlModule.getBase().getBodyFixedFrame();
+      FrameOrientation desiredOrientation = new FrameOrientation(baseFrame);
+      FrameVector desiredAngularVelocity = new FrameVector(baseFrame);
+      FrameVector desiredAngularAcceleration = new FrameVector(baseFrame);
 
-      FrameVector outputToPack = new FrameVector(fullRobotModel.getChest().getBodyFixedFrame());
-      chestOrientationControlModule.controlSpine(outputToPack, desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
+      FrameVector outputToPack = new FrameVector(baseFrame);
+      chestOrientationControlModule.compute(outputToPack, desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
       DenseMatrix64F nullspaceMultiplier = new DenseMatrix64F(0, 1);
-      solver.setDesiredAngularAcceleration(spineJacobian, pelvisFrame, outputToPack, nullspaceMultiplier);
+      solver.setDesiredAngularAcceleration(spineJacobian, baseFrame, outputToPack, nullspaceMultiplier);
    }
 
    private void doUpperBodyControl()

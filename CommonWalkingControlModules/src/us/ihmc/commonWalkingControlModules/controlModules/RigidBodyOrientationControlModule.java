@@ -28,7 +28,7 @@ public class RigidBodyOrientationControlModule
       this.twistCalculator = twistCalculator;
    }
    
-   public void controlSpine(FrameVector outputToPack, FrameOrientation desiredOrientation, FrameVector desiredAngularVelocity, FrameVector feedForwardAngularAcceleration)
+   public void compute(FrameVector outputToPack, FrameOrientation desiredOrientation, FrameVector desiredAngularVelocity, FrameVector feedForwardAngularAcceleration)
    {
       // using twists is a bit overkill; optimize if needed.
       twistCalculator.packRelativeTwist(endEffectorTwist, base, endEffector);
@@ -50,6 +50,11 @@ public class RigidBodyOrientationControlModule
    public void setDerivativeGains(double derivativeGainX, double derivativeGainY, double derivativeGainZ)
    {
       axisAngleOrientationController.setDerivativeGains(derivativeGainX, derivativeGainY, derivativeGainZ);
+   }
+
+   public RigidBody getBase()
+   {
+      return base;
    }
 }
 
