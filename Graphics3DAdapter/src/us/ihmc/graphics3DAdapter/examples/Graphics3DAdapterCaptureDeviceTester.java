@@ -58,12 +58,9 @@ public class Graphics3DAdapterCaptureDeviceTester
             e.printStackTrace();
          }
       }
-
    }
    
-   
 
-   
    
    private class PanBackAndForthTrackingAndDollyPositionHolder extends SimpleCameraTrackingAndDollyPositionHolder implements Runnable
    {
@@ -91,12 +88,8 @@ public class Graphics3DAdapterCaptureDeviceTester
             this.setTrackingX(cameraTrackingX);
             
             ThreadTools.sleep(100L);
-
          }
-         
       }
-      
-      
    }
    
    public void createNewWindow(Component canvas)
