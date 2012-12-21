@@ -119,10 +119,10 @@ public class DataBufferTest
    @Test
    public void testAddNewEntry() throws RepeatDataBufferEntryException
    {
-      dataBuffer.addNewEntry(doubleYoVariable, testBufferSize);
-      dataBuffer.addNewEntry(booleanYoVariable, testBufferSize);
-      dataBuffer.addNewEntry(integerYoVariable, testBufferSize);
-      dataBuffer.addNewEntry(enumYoVariable, testBufferSize);
+      dataBuffer.addVariable(doubleYoVariable, testBufferSize);
+      dataBuffer.addVariable(booleanYoVariable, testBufferSize);
+      dataBuffer.addVariable(integerYoVariable, testBufferSize);
+      dataBuffer.addVariable(enumYoVariable, testBufferSize);
       
       DataBufferEntry doubleDataBufferEntryTest = new DataBufferEntry(doubleYoVariable, testBufferSize);
       DataBufferEntry booleanDataBufferEntryTest = new DataBufferEntry(booleanYoVariable, testBufferSize);
@@ -259,10 +259,10 @@ public class DataBufferTest
    @Test
    public void testGetVariables() throws RepeatDataBufferEntryException
    {
-      dataBuffer.addNewEntry(doubleYoVariable, testBufferSize);
-      dataBuffer.addNewEntry(booleanYoVariable, testBufferSize);
-      dataBuffer.addNewEntry(integerYoVariable, testBufferSize);
-      dataBuffer.addNewEntry(enumYoVariable, testBufferSize);
+      dataBuffer.addVariable(doubleYoVariable, testBufferSize);
+      dataBuffer.addVariable(booleanYoVariable, testBufferSize);
+      dataBuffer.addVariable(integerYoVariable, testBufferSize);
+      dataBuffer.addVariable(enumYoVariable, testBufferSize);
       
       ArrayList<YoVariable> expectedArrayOfVariables = new ArrayList<YoVariable>();
       expectedArrayOfVariables.add(doubleYoVariable);
