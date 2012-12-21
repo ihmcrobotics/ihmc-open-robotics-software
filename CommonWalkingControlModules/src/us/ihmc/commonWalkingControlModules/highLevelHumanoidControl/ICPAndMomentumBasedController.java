@@ -270,8 +270,8 @@ public abstract class ICPAndMomentumBasedController extends MomentumBasedControl
       CapturabilityBasedDesiredCoPVisualizer visualizer = new CapturabilityBasedDesiredCoPVisualizer(registry, dynamicGraphicObjectsListRegistry);
       SacrificeDeltaCMPDesiredCoPAndCMPControlModule desiredCoPAndCMPControlModule =
          new SacrificeDeltaCMPDesiredCoPAndCMPControlModule(desiredCenterOfPressureFilter, visualizer, bipedSupportPolygons,
-            fullRobotModel.getPelvis().getBodyFixedFrame(), registry);
-      desiredCoPAndCMPControlModule.setGains(3e-2, 1.0, 1.5);
+            fullRobotModel.getPelvis().getBodyFixedFrame(), controlDT, registry);
+      desiredCoPAndCMPControlModule.setGains(3e-2, 1.0, 1.5, 15.0);
       this.desiredCoPAndCMPControlModule = desiredCoPAndCMPControlModule;
 
       this.totalMass = TotalMassCalculator.computeSubTreeMass(elevator);
