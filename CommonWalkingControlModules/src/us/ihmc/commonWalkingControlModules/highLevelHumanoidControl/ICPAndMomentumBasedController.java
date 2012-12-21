@@ -23,7 +23,6 @@ import us.ihmc.commonWalkingControlModules.controlModules.SacrificeDeltaCMPDesir
 import us.ihmc.commonWalkingControlModules.controlModules.velocityViaCoP.CapturabilityBasedDesiredCoPVisualizer;
 import us.ihmc.commonWalkingControlModules.controlModules.velocityViaCoP.SimpleDesiredCenterOfPressureFilter;
 import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.Updatable;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculator;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorTools;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.kinematics.SpatialAccelerationProjector;
@@ -99,7 +98,6 @@ public abstract class ICPAndMomentumBasedController extends MomentumBasedControl
    protected final LinkedHashMap<RigidBody, YoPlaneContactState> contactStates = new LinkedHashMap<RigidBody, YoPlaneContactState>();
    private final ArrayList<Updatable> updatables = new ArrayList<Updatable>();
 
-   protected DesiredFootstepCalculator desiredFootstepCalculator;
    protected final SideDependentList<FootSwitchInterface> footSwitches;
 
    protected final double controlDT;

@@ -127,7 +127,9 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
    private final DoubleYoVariable zetaUpperBody = new DoubleYoVariable("zetaUpperBody", registry);
    private final YoPositionProvider finalPositionProvider;
 
+   private final DesiredFootstepCalculator desiredFootstepCalculator;
    private final InstantaneousCapturePointTrajectory icpTrajectoryGenerator;
+   private final SideDependentList<SettableOrientationProvider> finalFootOrientationProviders = new SideDependentList<SettableOrientationProvider>();
 
    public WalkingHighLevelHumanoidController(FullRobotModel fullRobotModel, CommonWalkingReferenceFrames referenceFrames, TwistCalculator twistCalculator,
            CenterOfMassJacobian centerOfMassJacobian, SideDependentList<? extends ContactablePlaneBody> bipedFeet, BipedSupportPolygons bipedSupportPolygons,
@@ -166,7 +168,8 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       this.finalPositionProvider = finalPositionProvider;
 
       RigidBody chestControlBase = fullRobotModel.getPelvis();    // fullRobotModel.getElevator();
-      this.chestOrientationControlModule = new RigidBodyOrientationControlModule("chest", chestControlBase, fullRobotModel.getChest(), twistCalculator, registry);
+      this.chestOrientationControlModule = new RigidBodyOrientationControlModule("chest", chestControlBase, fullRobotModel.getChest(), twistCalculator,
+              registry);
       chestOrientationControlModule.setProportionalGains(100.0, 100.0, 100.0);
       chestOrientationControlModule.setDerivativeGains(20.0, 20.0, 20.0);
 
@@ -182,11 +185,12 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
          PositionTrajectoryGenerator swingPositionTrajectoryGenerator = footPositionTrajectoryGenerators.get(robotSide);
 
          OrientationProvider initialOrientationProvider = new CurrentOrientationProvider(worldFrame, bipedFoot.getBodyFrame());
-         OrientationProvider finalOrientationProvider = new DesiredFootstepBasedOrientationProvider(robotSide);
+         SettableOrientationProvider finalFootOrientationProvider = new SettableOrientationProvider(sideString + "FinalFootOrientation", worldFrame, registry);
+         finalFootOrientationProviders.put(robotSide, finalFootOrientationProvider);
 
          OrientationTrajectoryGenerator swingOrientationTrajectoryGenerator = new OrientationInterpolationTrajectoryGenerator(sideString
                                                                                  + "SwingFootOrientation", worldFrame, swingTimeProvider,
-                                                                                    initialOrientationProvider, finalOrientationProvider, registry);
+                                                                                    initialOrientationProvider, finalFootOrientationProvider, registry);
 
          YoVariableDoubleProvider onEdgeInitialPitchProvider = new YoVariableDoubleProvider(sideString + "OnToesInitialPitch", registry);
          YoVariableDoubleProvider onEdgeFinalPitchProvider = new YoVariableDoubleProvider(sideString + "OnToesFinalPitch", registry);
@@ -662,6 +666,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 
       Footstep desiredFootstep = desiredFootstepCalculator.updateAndGetDesiredFootstep(supportSide);
       finalPositionProvider.set(desiredFootstep.getPositionInFrame(worldFrame));
+      finalFootOrientationProviders.get(swingSide).setOrientation(desiredFootstep.getOrientationInFrame(worldFrame));
 
       FrameOrientation initialPelvisOrientation = new FrameOrientation(worldFrame);
       finalPelvisOrientationProvider.get(initialPelvisOrientation);
@@ -868,21 +873,5 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       FrameConvexPolygon2d footPolygon = FrameConvexPolygon2d.constructByProjectionOntoXYPlane(contactPoints, referenceFrame);
 
       return footPolygon;
-   }
-
-   private class DesiredFootstepBasedOrientationProvider implements OrientationProvider
-   {
-      private RobotSide swingSide;
-
-      public DesiredFootstepBasedOrientationProvider(RobotSide swingSide)
-      {
-         this.swingSide = swingSide;
-      }
-
-      public void get(FrameOrientation orientationToPack)
-      {
-         Footstep footstep = desiredFootstepCalculator.updateAndGetDesiredFootstep(swingSide.getOppositeSide());
-         orientationToPack.set(footstep.getOrientationInFrame(worldFrame));
-      }
    }
 }
