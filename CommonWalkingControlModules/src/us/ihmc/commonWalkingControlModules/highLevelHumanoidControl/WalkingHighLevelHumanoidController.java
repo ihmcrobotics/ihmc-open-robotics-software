@@ -15,9 +15,9 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactSt
 import us.ihmc.commonWalkingControlModules.calculators.GainCalculator;
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodyOrientationControlModule;
 import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.Updatable;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculator;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorTools;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepProvider;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.CapturePointCalculator;
 import us.ihmc.commonWalkingControlModules.outputs.ProcessedOutputsInterface;
@@ -92,7 +92,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
    private final YoVariableDoubleProvider doubleSupportTimeProvider = new YoVariableDoubleProvider("doubleSupportTime", registry);
 
    private final DoubleYoVariable singleSupportICPGlideScaleFactor = new DoubleYoVariable("singleSupportICPGlideScaleFactor", registry);
-   private final BooleanYoVariable walk = new BooleanYoVariable("walk", registry);
+//   private final BooleanYoVariable walk = new BooleanYoVariable("walk", registry);
 
 
    // FIXME: reimplement nullspace stuff:
@@ -127,14 +127,15 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
    private final DoubleYoVariable zetaUpperBody = new DoubleYoVariable("zetaUpperBody", registry);
    private final YoPositionProvider finalPositionProvider;
 
-   private final DesiredFootstepCalculator desiredFootstepCalculator;
+   private Footstep nextFootstep = null;
+   private final FootstepProvider footstepProvider;
    private final InstantaneousCapturePointTrajectory icpTrajectoryGenerator;
    private final SideDependentList<SettableOrientationProvider> finalFootOrientationProviders = new SideDependentList<SettableOrientationProvider>();
 
    public WalkingHighLevelHumanoidController(FullRobotModel fullRobotModel, CommonWalkingReferenceFrames referenceFrames, TwistCalculator twistCalculator,
            CenterOfMassJacobian centerOfMassJacobian, SideDependentList<? extends ContactablePlaneBody> bipedFeet, BipedSupportPolygons bipedSupportPolygons,
            SideDependentList<FootSwitchInterface> footSwitches, double gravityZ, DoubleYoVariable yoTime, double controlDT,
-           DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, DesiredFootstepCalculator desiredFootstepCalculator,
+           DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, FootstepProvider footstepProvider,
            CenterOfMassHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator,
            SideDependentList<PositionTrajectoryGenerator> footPositionTrajectoryGenerators, DoubleProvider swingTimeProvider,
            YoPositionProvider finalPositionProvider, boolean stayOntoes, double desiredPelvisPitch, double trailingFootPitch, ArrayList<Updatable> updatables,
@@ -143,11 +144,10 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       super(fullRobotModel, centerOfMassJacobian, referenceFrames, yoTime, gravityZ, twistCalculator, bipedFeet, bipedSupportPolygons, controlDT,
             processedOutputs, footSwitches, updatables, dynamicGraphicObjectsListRegistry);
 
-      this.desiredFootstepCalculator = desiredFootstepCalculator;
-
       this.centerOfMassJacobian = centerOfMassJacobian;
       this.centerOfMassHeightTrajectoryGenerator = centerOfMassHeightTrajectoryGenerator;
       this.swingTimeProvider = swingTimeProvider;
+      this.footstepProvider = footstepProvider;
 
       this.centerOfMassHeightController = new PDController("comHeight", registry);
       centerOfMassHeightController.setProportionalGain(40.0);    // about 4000 / totalMass
@@ -216,7 +216,6 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 
       setUpStateMachine(swingTimeProvider);
 
-      walk.set(false);
       minOrbitalEnergyForSingleSupport.set(0.007);    // 0.008
       amountToBeInsideSingleSupport.set(0.0);
       amountToBeInsideDoubleSupport.set(0.03);    // 0.02); // TODO: possibly link to limit in SacrificeDeltaCMP control module
@@ -324,6 +323,9 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
             desiredICPVelocity.set(desiredICPVelocityLocal);
          }
 
+         if (nextFootstep == null)
+            nextFootstep = footstepProvider.poll();
+
          doFootcontrol();
       }
 
@@ -375,15 +377,8 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
          icpTrajectoryGenerator.initialize(desiredICP.getFramePoint2dCopy(), finalDesiredICP, doubleSupportTimeProvider.getValue(), getOmega0(),
                                            amountToBeInsideDoubleSupport.getDoubleValue());
 
-         if (transferToSide == null)
-            centerOfMassHeightTrajectoryGenerator.initialize(getSupportLeg(), getUpcomingSupportLeg());
-         else
-         {
-            desiredFootstepCalculator.initializeDesiredFootstep(transferToSide);
-            centerOfMassHeightTrajectoryGenerator.initialize(getSupportLeg(), upcomingSupportLeg.getEnumValue());
-         }
+         centerOfMassHeightTrajectoryGenerator.initialize(getSupportLeg());
       }
-
 
       @Override
       public void doTransitionOutOfAction()
@@ -452,7 +447,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
          setContactStateForSwing(bipedFeet.get(swingSide));
          updateBipedSupportPolygons();
 
-         centerOfMassHeightTrajectoryGenerator.initialize(getSupportLeg(), upcomingSupportLeg.getEnumValue());
+         centerOfMassHeightTrajectoryGenerator.initialize(getSupportLeg());
       }
 
       @Override
@@ -470,19 +465,24 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 
    public class DoneWithDoubleSupportCondition implements StateTransitionCondition
    {
-      private final RobotSide robotSide;
+      private final RobotSide transferToSide;
 
       public DoneWithDoubleSupportCondition(RobotSide robotSide)
       {
-         this.robotSide = robotSide;
+         this.transferToSide = robotSide;
       }
 
       public boolean checkCondition()
       {
-         boolean doubleSupportTimeHasPassed = stateMachine.timeInCurrentState() > doubleSupportTimeProvider.getValue();
-         boolean transferringToThisRobotSide = robotSide == upcomingSupportLeg.getEnumValue();
-
-         return walk.getBooleanValue() && transferringToThisRobotSide && doubleSupportTimeHasPassed;
+         if (nextFootstep == null)
+            return false;
+         else
+         {
+            boolean doubleSupportTimeHasPassed = stateMachine.timeInCurrentState() > doubleSupportTimeProvider.getValue();
+            RobotSide upcomingSwingSide = transferToSide.getOppositeSide();
+            boolean transferringToThisRobotSide = nextFootstep.getBody() == fullRobotModel.getFoot(upcomingSwingSide);
+            return transferringToThisRobotSide && doubleSupportTimeHasPassed;
+         }
       }
    }
 
@@ -527,7 +527,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
    {
       public boolean checkCondition()
       {
-         return !walk.getBooleanValue() && ((getSupportLeg() == null) || super.checkCondition());
+         return footstepProvider.isEmpty() && ((getSupportLeg() == null) || super.checkCondition());
       }
    }
 
@@ -664,24 +664,23 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 
 //      initialAcceleration.setToZero(trajectoryGeneratorFrame);    // TODO
 
-      Footstep desiredFootstep = desiredFootstepCalculator.updateAndGetDesiredFootstep(supportSide);
-      finalPositionProvider.set(desiredFootstep.getPositionInFrame(worldFrame));
-      finalFootOrientationProviders.get(swingSide).setOrientation(desiredFootstep.getOrientationInFrame(worldFrame));
+      finalPositionProvider.set(nextFootstep.getPositionInFrame(worldFrame));
+      finalFootOrientationProviders.get(swingSide).setOrientation(nextFootstep.getOrientationInFrame(worldFrame));
 
       FrameOrientation initialPelvisOrientation = new FrameOrientation(worldFrame);
       finalPelvisOrientationProvider.get(initialPelvisOrientation);
       initialPelvisOrientation.changeFrame(worldFrame);
       initialPelvisOrientationProvider.setOrientation(initialPelvisOrientation);
 
-      FrameOrientation finalPelvisOrientation = desiredFootstep.getOrientationInFrame(worldFrame);
+      FrameOrientation finalPelvisOrientation = nextFootstep.getOrientationInFrame(worldFrame);
       finalPelvisOrientation.setYawPitchRoll(finalPelvisOrientation.getYawPitchRoll()[0], userDesiredPelvisPitch.getDoubleValue(), 0.0);
       finalPelvisOrientationProvider.setOrientation(finalPelvisOrientation);
       pelvisOrientationTrajectoryGenerator.initialize();
 
-      FramePoint finalDesiredStepLocation = desiredFootstep.getPositionInFrame(trajectoryGeneratorFrame);
+      FramePoint finalDesiredStepLocation = nextFootstep.getPositionInFrame(trajectoryGeneratorFrame);
       finalDesiredStepLocation.setZ(finalDesiredStepLocation.getZ());
 
-      double stepPitch = desiredFootstep.getOrientationInFrame(worldFrame).getYawPitchRoll()[1];
+      double stepPitch = nextFootstep.getOrientationInFrame(worldFrame).getYawPitchRoll()[1];
       onEdgeInitialAngleProviders.get(swingSide).set(stepPitch);
       onEdgeFinalAngleProviders.get(swingSide).set(stepPitch);
 
@@ -696,7 +695,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       computeCapturePoint();
       desiredICP.set(capturePoint.getFramePoint2dCopy());    // TODO: is this what we want?
 
-      FramePoint2d finalDesiredICP = getSingleSupportFinalDesiredICPForWalking(desiredFootstep, swingSide);
+      FramePoint2d finalDesiredICP = getSingleSupportFinalDesiredICPForWalking(nextFootstep, swingSide);
 
       ContactablePlaneBody swingFoot = bipedFeet.get(swingSide);
       setContactStateForSwing(swingFoot);
@@ -705,6 +704,8 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 
       icpTrajectoryGenerator.initialize(desiredICP.getFramePoint2dCopy(), finalDesiredICP, swingTimeProvider.getValue(), omega0,
                                         amountToBeInsideSingleSupport.getDoubleValue());
+      
+      nextFootstep = null;
    }
 
    private void evaluateCoMTrajectory()
