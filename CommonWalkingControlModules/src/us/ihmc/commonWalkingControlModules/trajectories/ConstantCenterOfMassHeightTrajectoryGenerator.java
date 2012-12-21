@@ -19,7 +19,7 @@ public class ConstantCenterOfMassHeightTrajectoryGenerator implements CenterOfMa
       desiredCenterOfMassHeight.set(initialDesiredCoMHeight);
    }
 
-   public void initialize(RobotSide supportLeg, RobotSide upcomingSupportLeg)
+   public void initialize(RobotSide supportLeg)
    {
       // empty
    }
