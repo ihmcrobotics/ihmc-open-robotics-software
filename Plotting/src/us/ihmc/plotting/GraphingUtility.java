@@ -24,42 +24,60 @@ public class GraphingUtility
 {
    public static ChartPanel createGraph(String title, String xAxisLabel, String yAxisLabel, XYDataset dataset)
    {
+      return createGraph(title, xAxisLabel, yAxisLabel, dataset, true);
+   }
+
+   public static ChartPanel createGraph(String title, String xAxisLabel, String yAxisLabel, XYDataset dataset, boolean showSeriesShape)
+   {
       // create the chart
-      final JFreeChart chart = ChartFactory.createXYLineChart(title,   // chart title
-              xAxisLabel,                                              // x axis label
-              yAxisLabel,                                              // y axis label
-              dataset,                                                 // data
-              PlotOrientation.VERTICAL, true,                          // include legend
-              true,                                                    // tooltips
-              false                                                    // urls
-      );
+      final JFreeChart chart = ChartFactory.createXYLineChart(title,    // chart title
+         xAxisLabel,    // x axis label
+         yAxisLabel,    // y axis label
+         dataset,    // data
+         PlotOrientation.VERTICAL, true,    // include legend
+         true,    // tooltips
+         false    // urls
+            );
 
       // NOW DO SOME OPTIONAL CUSTOMISATION OF THE CHART...
       chart.setBackgroundPaint(Color.white);
 
-      //        final StandardLegend legend = (StandardLegend) chart.getLegend();
-      //      legend.setDisplaySeriesShapes(true);
+      // final StandardLegend legend = (StandardLegend) chart.getLegend();
+      // legend.setDisplaySeriesShapes(true);
 
       // get a reference to the plot for further customisation...
       final XYPlot plot = chart.getXYPlot();
       plot.setBackgroundPaint(Color.white);
-      //    plot.setAxisOffset(new Spacer(Spacer.ABSOLUTE, 5.0, 5.0, 5.0, 5.0));
+
+      // plot.setAxisOffset(new Spacer(Spacer.ABSOLUTE, 5.0, 5.0, 5.0, 5.0));
       plot.setDomainGridlinePaint(Color.lightGray);
       plot.setRangeGridlinePaint(Color.lightGray);
 
       final XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer();
-      //        renderer.setSeriesLinesVisible(0, false);
-      //        renderer.setSeriesShapesVisible(1, false);
+
+      // renderer.setSeriesLinesVisible(0, false);
+      // renderer.setSeriesShapesVisible(1, false);
+
+      if (!showSeriesShape)
+      {
+         for (int i = 0; i < dataset.getSeriesCount(); i++)
+         {
+            renderer.setSeriesShapesVisible(i, false);
+         }
+      }
+
+
       plot.setRenderer(renderer);
 
       // change the auto tick unit selection to integer units only...
       final NumberAxis rangeAxis = (NumberAxis) plot.getRangeAxis();
       rangeAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
 
-      //      plot.getRangeAxis().setRange(90.0, 100.0);
+      // plot.getRangeAxis().setRange(90.0, 100.0);
 
       ChartPanel chartPanel = new ChartPanel(chart);
-      //      chartPanel.setPreferredSize(new java.awt.Dimension(600, 400));
+
+      // chartPanel.setPreferredSize(new java.awt.Dimension(600, 400));
       return chartPanel;
    }
 
@@ -115,31 +133,33 @@ public class GraphingUtility
    public static ChartPanel createGraph(String title, String xAxisLabel, String yAxisLabel, XYDataset dataset, double minRange, double maxRange)
    {
       // create the chart
-      final JFreeChart chart = ChartFactory.createXYLineChart(title,   // chart title
-              xAxisLabel,                                              // x axis label
-              yAxisLabel,                                              // y axis label
-              dataset,                                                 // data
-              PlotOrientation.VERTICAL, true,                          // include legend
-              true,                                                    // tooltips
-              false                                                    // urls
-      );
+      final JFreeChart chart = ChartFactory.createXYLineChart(title,    // chart title
+         xAxisLabel,    // x axis label
+         yAxisLabel,    // y axis label
+         dataset,    // data
+         PlotOrientation.VERTICAL, true,    // include legend
+         true,    // tooltips
+         false    // urls
+            );
 
       // NOW DO SOME OPTIONAL CUSTOMISATION OF THE CHART...
       chart.setBackgroundPaint(Color.white);
 
-      //        final StandardLegend legend = (StandardLegend) chart.getLegend();
-      //      legend.setDisplaySeriesShapes(true);
+      // final StandardLegend legend = (StandardLegend) chart.getLegend();
+      // legend.setDisplaySeriesShapes(true);
 
       // get a reference to the plot for further customisation...
       final XYPlot plot = chart.getXYPlot();
       plot.setBackgroundPaint(Color.white);
-      //    plot.setAxisOffset(new Spacer(Spacer.ABSOLUTE, 5.0, 5.0, 5.0, 5.0));
+
+      // plot.setAxisOffset(new Spacer(Spacer.ABSOLUTE, 5.0, 5.0, 5.0, 5.0));
       plot.setDomainGridlinePaint(Color.lightGray);
       plot.setRangeGridlinePaint(Color.lightGray);
 
       final XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer();
-      //        renderer.setSeriesLinesVisible(0, false);
-      //        renderer.setSeriesShapesVisible(1, false);
+
+      // renderer.setSeriesLinesVisible(0, false);
+      // renderer.setSeriesShapesVisible(1, false);
       plot.setRenderer(renderer);
 
       // change the auto tick unit selection to integer units only...
@@ -149,7 +169,8 @@ public class GraphingUtility
       plot.getRangeAxis().setRange(minRange, maxRange);
 
       ChartPanel chartPanel = new ChartPanel(chart);
-      //      chartPanel.setPreferredSize(new java.awt.Dimension(600, 400));
+
+      // chartPanel.setPreferredSize(new java.awt.Dimension(600, 400));
       return chartPanel;
    }
 
@@ -190,6 +211,7 @@ public class GraphingUtility
       {
          dataSet.addSeries(dataSets.get(i));
       }
+
       return dataSet;
    }
 
