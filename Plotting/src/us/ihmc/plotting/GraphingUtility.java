@@ -5,6 +5,7 @@ import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
@@ -24,10 +25,10 @@ public class GraphingUtility
 {
    public static ChartPanel createGraph(String title, String xAxisLabel, String yAxisLabel, XYDataset dataset)
    {
-      return createGraph(title, xAxisLabel, yAxisLabel, dataset, true);
+      return createGraph(title, xAxisLabel, yAxisLabel, dataset, true, false);
    }
 
-   public static ChartPanel createGraph(String title, String xAxisLabel, String yAxisLabel, XYDataset dataset, boolean showSeriesShape)
+   public static ChartPanel createGraph(String title, String xAxisLabel, String yAxisLabel, XYDataset dataset, boolean showSeriesShape, boolean independentYaxes)
    {
       // create the chart
       final JFreeChart chart = ChartFactory.createXYLineChart(title,    // chart title
@@ -52,7 +53,8 @@ public class GraphingUtility
       // plot.setAxisOffset(new Spacer(Spacer.ABSOLUTE, 5.0, 5.0, 5.0, 5.0));
       plot.setDomainGridlinePaint(Color.lightGray);
       plot.setRangeGridlinePaint(Color.lightGray);
-
+      
+      
       final XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer();
 
       // renderer.setSeriesLinesVisible(0, false);
@@ -73,14 +75,59 @@ public class GraphingUtility
       final NumberAxis rangeAxis = (NumberAxis) plot.getRangeAxis();
       rangeAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
 
+      if (independentYaxes && plot.getSeriesCount() > 1)
+      {  
+         for(int i=0; i<plot.getSeriesCount(); i++)
+         {
+            NumberAxis axis = new NumberAxis("Additional Axes " + i);
+            axis.setAutoRange(true);
+            plot.setRangeAxis(1, axis);
+            plot.mapDatasetToRangeAxis(1, 1);            
+         }
+         
+      }
+      
+//      
+//      plot.setRangeAxis(1,valueAxis1);
+      
       // plot.getRangeAxis().setRange(90.0, 100.0);
 
+      
       ChartPanel chartPanel = new ChartPanel(chart);
 
+    
       // chartPanel.setPreferredSize(new java.awt.Dimension(600, 400));
       return chartPanel;
    }
+   
+   public static void addDataSetToXYPlot(ChartPanel chartPanel, XYDataset dataset, String yAxisLabel, boolean showSeriesShape, boolean independentYaxis)
+   {
+      XYPlot plot = chartPanel.getChart().getXYPlot();
+      
+      int seriesCount = plot.getSeriesCount();
+      if (independentYaxis)
+      {
+         NumberAxis axis = new NumberAxis(yAxisLabel);
+         axis.setAutoRange(true);
+         plot.setRangeAxis(seriesCount, axis);
+         
+         plot.mapDatasetToRangeAxis(seriesCount, seriesCount);   
+      }
 
+      plot.setDataset(seriesCount, dataset);
+      
+      XYLineAndShapeRenderer xyLineAndShapeRenderer = new XYLineAndShapeRenderer();
+//      xyLineAndShapeRenderer.setSeriesPaint(seriesCount, plot.getDrawingSupplier().getNextPaint());
+      plot.setRenderer(seriesCount, xyLineAndShapeRenderer);
+      
+      if (!showSeriesShape)
+      {
+//         xyLineAndShapeRenderer = (XYLineAndShapeRenderer) plot.getRenderer();
+         xyLineAndShapeRenderer.setSeriesShapesVisible(0, false);   
+      }      
+   }
+
+   
    public static void increaseFontSize(JFreeChart chart, int amount)
    {
       XYPlot plot = chart.getXYPlot();
