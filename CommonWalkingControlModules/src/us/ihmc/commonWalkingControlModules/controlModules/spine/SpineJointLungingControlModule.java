@@ -78,14 +78,14 @@ public class SpineJointLungingControlModule implements SpineLungingControlModule
 	private final InverseDynamicsCalculator spineJointIDCalc;
 	private final RigidBody pelvis;
 	private final RigidBody chest;
-	private final RevoluteJoint[] spineRevoluteJointList;
+	private final EnumMap<SpineJointName, RevoluteJoint> spineRevoluteJointList;
 
 	private SpineTorques spineTorques = new SpineTorques();
 
 	private final CommonWalkingReferenceFrames referenceFrames;
 
 	public SpineJointLungingControlModule(ProcessedSensorsInterface processedSensors, double controlDT, YoVariableRegistry parentRegistry,
-			InverseDynamicsCalculator spineJointIDCalc, RigidBody chest, RevoluteJoint[] spineRevoluteJointList,
+			InverseDynamicsCalculator spineJointIDCalc, RigidBody chest, EnumMap<SpineJointName, RevoluteJoint> spineRevoluteJointList,
 			CommonWalkingReferenceFrames referenceFrames, double maxHipTorque)
 	{
 		this.robotMass = processedSensors.getTotalMass();
@@ -173,7 +173,7 @@ public class SpineJointLungingControlModule implements SpineLungingControlModule
 
 		for (SpineJointName spineJointName : SpineJointName.values())
 		{
-			double torque = spineRevoluteJointList[spineJointName.ordinal()].getTau(); // FIXME: DON'T USE ORDINAL
+			double torque = spineRevoluteJointList.get(spineJointName).getTau();
 			spineTorques.setTorque(spineJointName, torque);
 		}
 	}
@@ -208,7 +208,7 @@ public class SpineJointLungingControlModule implements SpineLungingControlModule
 		
 		for (SpineJointName spineJointName : SpineJointName.values())
 		{
-			double torque = spineRevoluteJointList[spineJointName.ordinal()].getTau(); // FIXME: DON'T USE ORDINAL
+			double torque = spineRevoluteJointList.get(spineJointName).getTau();
 			spineTorques.setTorque(spineJointName, torque);
 		}
 		
@@ -343,7 +343,7 @@ public class SpineJointLungingControlModule implements SpineLungingControlModule
 	{
 		for (SpineJointName spineJointName : SpineJointName.values())
 		{
-			RevoluteJoint spineRevoluteJoint = spineRevoluteJointList[spineJointName.ordinal()]; // FIXME: DON'T USE ORDINAL
+			RevoluteJoint spineRevoluteJoint = spineRevoluteJointList.get(spineJointName);
 
 			double actualPosition = processedSensors.getSpineJointPosition(spineJointName);
 			double actualVelocity = processedSensors.getSpineJointVelocity(spineJointName);
@@ -360,7 +360,7 @@ public class SpineJointLungingControlModule implements SpineLungingControlModule
 	{
 		for (SpineJointName spineJointName : SpineJointName.values())
 		{
-			RevoluteJoint spineRevoluteJoint = spineRevoluteJointList[spineJointName.ordinal()]; // FIXME: DON'T USE ORDINAL
+			RevoluteJoint spineRevoluteJoint = spineRevoluteJointList.get(spineJointName);
 			spineRevoluteJoint.setQddDesired(0.0);
 		}
 	}

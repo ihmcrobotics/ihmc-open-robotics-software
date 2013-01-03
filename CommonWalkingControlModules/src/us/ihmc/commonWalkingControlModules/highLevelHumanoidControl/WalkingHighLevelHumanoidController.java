@@ -78,7 +78,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 
    private static enum WalkingState {LEFT_SUPPORT, RIGHT_SUPPORT, TRANSFER_TO_LEFT_SUPPORT, TRANSFER_TO_RIGHT_SUPPORT, DOUBLE_SUPPORT}
 
-   private final StateMachine stateMachine;
+   private final StateMachine<WalkingState> stateMachine;
    private final CenterOfMassJacobian centerOfMassJacobian;
 
    private final CenterOfMassHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator;
@@ -160,7 +160,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 //    doubleSupportICPTrajectoryGenerator = new ParabolicVelocityInstantaneousCapturePointTrajectory(namePrefix,
 //          bipedSupportPolygons, controlDT, registry);
 
-      this.stateMachine = new StateMachine(namePrefix + "State", namePrefix + "SwitchTime", WalkingState.class, yoTime, registry);
+      this.stateMachine = new StateMachine<WalkingState>(namePrefix + "State", namePrefix + "SwitchTime", WalkingState.class, yoTime, registry); // this is used by name, and it is ugly.
       upcomingSupportLeg.set(RobotSide.RIGHT);
 
       singleSupportICPGlideScaleFactor.set(0.9);
@@ -259,24 +259,24 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 
       for (RobotSide robotSide : RobotSide.values())
       {
-         State transferState = new DoubleSupportState(robotSide);
-         StateTransition toDoubleSupport = new StateTransition(doubleSupportState.getStateEnum(), new StopWalkingCondition(), new ResetICPTrajectoryAction());
+         State<WalkingState> transferState = new DoubleSupportState(robotSide);
+         StateTransition<WalkingState> toDoubleSupport = new StateTransition<WalkingState>(doubleSupportState.getStateEnum(), new StopWalkingCondition(), new ResetICPTrajectoryAction());
          transferState.addStateTransition(toDoubleSupport);
-         StateTransition toSingleSupport = new StateTransition(singleSupportStateEnums.get(robotSide), new DoneWithTransferCondition());
+         StateTransition<WalkingState> toSingleSupport = new StateTransition<WalkingState>(singleSupportStateEnums.get(robotSide), new DoneWithTransferCondition());
          transferState.addStateTransition(toSingleSupport);
          stateMachine.addState(transferState);
 
-         State singleSupportState = new SingleSupportState(robotSide);
-         StateTransition toDoubleSupport2 = new StateTransition(doubleSupportState.getStateEnum(), new StopWalkingCondition(), new ResetICPTrajectoryAction());
+         State<WalkingState> singleSupportState = new SingleSupportState(robotSide);
+         StateTransition<WalkingState> toDoubleSupport2 = new StateTransition<WalkingState>(doubleSupportState.getStateEnum(), new StopWalkingCondition(), new ResetICPTrajectoryAction());
          singleSupportState.addStateTransition(toDoubleSupport2);
-         StateTransition toTransfer = new StateTransition(transferStateEnums.get(robotSide.getOppositeSide()), new DoneWithSingleSupportCondition());
+         StateTransition<WalkingState> toTransfer = new StateTransition<WalkingState>(transferStateEnums.get(robotSide.getOppositeSide()), new DoneWithSingleSupportCondition());
          singleSupportState.addStateTransition(toTransfer);
          stateMachine.addState(singleSupportState);
       }
 
       for (RobotSide robotSide : RobotSide.values())
       {
-         StateTransition toTransfer = new StateTransition(transferStateEnums.get(robotSide), new DoneWithDoubleSupportCondition(robotSide));
+         StateTransition<WalkingState> toTransfer = new StateTransition<WalkingState>(transferStateEnums.get(robotSide), new DoneWithDoubleSupportCondition(robotSide));
          doubleSupportState.addStateTransition(toTransfer);
       }
    }
@@ -294,7 +294,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       stateMachine.setCurrentState(WalkingState.DOUBLE_SUPPORT);
    }
 
-   private class DoubleSupportState extends State
+   private class DoubleSupportState extends State<WalkingState>
    {
       private final RobotSide transferToSide;
 
@@ -388,7 +388,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
    }
 
 
-   private class SingleSupportState extends State
+   private class SingleSupportState extends State<WalkingState>
    {
       private final RobotSide swingSide;
       private final FrameOrientation desiredPelvisOrientationToPack;
