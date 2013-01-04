@@ -100,7 +100,17 @@ public class GraphingUtility
       return chartPanel;
    }
    
-   public static void addDataSetToXYPlot(ChartPanel chartPanel, XYDataset dataset, String yAxisLabel, boolean showSeriesShape, boolean independentYaxis)
+   /**
+    * 
+    * @param chartPanel
+    * @param dataset
+    * @param yAxisLabel
+    * @param showSeriesShape
+    * @param independentYaxis
+    * @param yAxisMin Set this to NaN to use autoscaling
+    * @param yAxisMax
+    */
+   public static void addDataSetToXYPlot(ChartPanel chartPanel, XYDataset dataset, String yAxisLabel, boolean showSeriesShape, boolean independentYaxis, double yAxisMin, double yAxisMax)
    {
       XYPlot plot = chartPanel.getChart().getXYPlot();
       
@@ -108,7 +118,11 @@ public class GraphingUtility
       if (independentYaxis)
       {
          NumberAxis axis = new NumberAxis(yAxisLabel);
-         axis.setAutoRange(true);
+         if(Double.isNaN(yAxisMin))
+            axis.setAutoRange(true);
+         else
+            axis.setRange(yAxisMin, yAxisMax);
+         
          plot.setRangeAxis(seriesCount, axis);
          
          plot.mapDatasetToRangeAxis(seriesCount, seriesCount);   
