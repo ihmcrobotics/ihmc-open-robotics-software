@@ -4,8 +4,8 @@ import org.jfree.chart.*;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.plot.XYPlot;
-import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
@@ -15,7 +15,6 @@ import javax.swing.*;
 import javax.vecmath.Point2d;
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.Iterator;
 
 /**
  * User: mjohnson
@@ -142,6 +141,16 @@ public class GraphingUtility
    }
 
    
+   public static void addVerticalMarkerToXYPlot(ChartPanel chartPanel, double xValue)
+   {
+      ValueMarker marker = new ValueMarker(xValue);
+      marker.setPaint(Color.BLACK);
+      
+      XYPlot plot = (XYPlot) chartPanel.getChart().getPlot();
+      plot.addDomainMarker(marker);
+   }
+
+
    public static void increaseFontSize(JFreeChart chart, int amount)
    {
       XYPlot plot = chart.getXYPlot();
