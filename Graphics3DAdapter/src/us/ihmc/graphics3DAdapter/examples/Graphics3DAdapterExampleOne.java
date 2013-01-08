@@ -69,7 +69,10 @@ public class Graphics3DAdapterExampleOne
          public void selected(Graphics3DNode graphics3dNode, ModifierKeyInterface modifierKeyHolder, Point3d location, Point3d cameraLocation,
                Quat4d cameraRotation)
          {
-            System.out.println("Selected " + graphics3dNode.getName() + " @ location " + location);                        
+        	 if(graphics3dNode != null)
+        	 {
+        		 System.out.println("Selected " + graphics3dNode.getName() + " @ location " + location);                                		 
+        	 }
             
          }
       };
