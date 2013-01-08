@@ -38,9 +38,9 @@ public class Graphics3DAdapterExampleOne
       Graphics3DNode teapotAndSphereNode = new Graphics3DNode("teaPot", Graphics3DNodeType.JOINT);
       Graphics3DObject teapotObject = new Graphics3DObject();
       Graphics3DInstruction teapotAppearanceHolder = teapotObject.addTeaPot(YoAppearance.Red());
-
       teapotAndSphereNode.setGraphicsObject(teapotObject);
       graphics3DAdapter.addRootNode(teapotAndSphereNode);
+      BlinkRunnable blinker = new BlinkRunnable(teapotAppearanceHolder);
       
       Graphics3DNode box = new Graphics3DNode("box", Graphics3DNodeType.JOINT);
       Graphics3DObject boxGraphics = new Graphics3DObject();
@@ -79,7 +79,6 @@ public class Graphics3DAdapterExampleOne
       box.addSelectedListener(selectedListener);
       
       RotateAndScaleNodeRunnable rotator = new RotateAndScaleNodeRunnable(teapotAndSphereNode);
-      BlinkRunnable blinker = new BlinkRunnable(teapotAppearanceHolder);
 
       ArrayList<Runnable> runnables = new ArrayList<Runnable>();
       runnables.add(rotator);
