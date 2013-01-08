@@ -1,22 +1,14 @@
 package us.ihmc.graphics3DAdapter.examples;
 
-import java.awt.BorderLayout;
-import java.awt.Canvas;
-import java.awt.Container;
 import java.util.ArrayList;
 import java.util.Random;
 
-import javax.swing.JFrame;
-import javax.swing.JPanel;
 import javax.vecmath.Point3d;
 import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
-import us.ihmc.graphics3DAdapter.camera.CameraTrackingAndDollyPositionHolder;
-import us.ihmc.graphics3DAdapter.camera.ClassicCameraController;
-import us.ihmc.graphics3DAdapter.camera.SimpleCameraTrackingAndDollyPositionHolder;
-import us.ihmc.graphics3DAdapter.camera.ViewportAdapter;
+import us.ihmc.graphics3DAdapter.Graphics3DAdapterTools;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
@@ -54,12 +46,7 @@ public class Graphics3DStaticEllipsoidExample
          graphics3DAdapter.addRootNode(node);
       }    
       
-      ViewportAdapter viewportAdapter = graphics3DAdapter.createNewViewport(null, false);
-      CameraTrackingAndDollyPositionHolder cameraTrackingAndDollyPositionHolder = new SimpleCameraTrackingAndDollyPositionHolder();
-      ClassicCameraController classicCameraController = ClassicCameraController.createClassicCameraControllerAndAddListeners(viewportAdapter, cameraTrackingAndDollyPositionHolder, graphics3DAdapter);
-      viewportAdapter.setCameraController(classicCameraController);
-      Canvas canvas = viewportAdapter.getCanvas();
-      createNewWindow(canvas);
+      Graphics3DAdapterTools.createNewWindow(graphics3DAdapter, "Graphics3DStaticEllipsoidExample", 800, 600);
    }
    
    public boolean isPointNearSurfaceOfAnEllipsoid(Point3d point, double epsilon)
@@ -81,23 +68,6 @@ public class Graphics3DStaticEllipsoidExample
 
       return false;
    }
-   
-   private void createNewWindow(Canvas canvas)
-   {
-      JPanel panel = new JPanel(new BorderLayout());
-      panel.add("Center", canvas);
-      
-      JFrame jFrame = new JFrame("Example One");
-      jFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-      Container contentPane = jFrame.getContentPane();
-      contentPane.setLayout(new BorderLayout());
-      contentPane.add("Center", panel);
-      
-      jFrame.pack();
-      jFrame.setVisible(true);
-      jFrame.setSize(800, 600);
-   }
-   
    
    private double generateRandomDoubleBetween(Random random, double minValue, double maxValue)
    {
