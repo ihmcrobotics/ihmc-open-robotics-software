@@ -21,6 +21,7 @@ import us.ihmc.graphics3DAdapter.input.ModifierKeyInterface;
 import us.ihmc.graphics3DAdapter.input.SelectedListener;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNodeType;
+import us.ihmc.graphics3DAdapter.utils.GraphicsDemoTools;
 import us.ihmc.utilities.ThreadTools;
 
 public class Graphics3DAdapterExampleTwo
@@ -38,8 +39,8 @@ public class Graphics3DAdapterExampleTwo
       Graphics3DNode node2 = new Graphics3DNode("node2", Graphics3DNodeType.JOINT);
       Graphics3DNode rootNode = new Graphics3DNode("rootNode", Graphics3DNodeType.JOINT);
      
-      Graphics3DObject object2 = Graphics3DAdapterExampleOne.createCubeObject(0.6);
-      Graphics3DObject object1 = Graphics3DAdapterExampleOne.createRandomObject(random);
+      Graphics3DObject object2 = GraphicsDemoTools.createCubeObject(0.6);
+      Graphics3DObject object1 = GraphicsDemoTools.createRandomObject(random);
       
       node1.setGraphicsObject(object1);
       node2.setGraphicsObject(object2);
@@ -91,7 +92,7 @@ public class Graphics3DAdapterExampleTwo
          count++;
          if (count > 200)
          {
-            Graphics3DObject randomObject = Graphics3DAdapterExampleOne.createRandomObject(random);
+            Graphics3DObject randomObject = GraphicsDemoTools.createRandomObject(random);
             node1.setGraphicsObject(randomObject);
             count = 0;
          }
