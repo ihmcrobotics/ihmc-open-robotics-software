@@ -475,9 +475,9 @@ public class Graphics3DObject
     * @param yRad y direction radius in meters
     * @param zRad z direction radius in meters
     */
-   public void addEllipsoid(double xRad, double yRad, double zRad)
+   public void addEllipsoid(double xRadius, double yRadius, double zRadius)
    {
-      addEllipsoid(xRad, yRad, zRad, YoAppearance.Black());
+      addEllipsoid(xRadius, yRadius, zRadius, YoAppearance.Black());
    }
 
    /**
@@ -496,9 +496,9 @@ public class Graphics3DObject
     * @param zRad z direction radius in meters
     * @param ellipsoidApp Appearance to be used with the new ellipsoid.  See {@link YoAppearance YoAppearance} for implementations.
     */
-   public Graphics3DAddEllipsoidInstruction addEllipsoid(double xRad, double yRad, double zRad, AppearanceDefinition ellipsoidApp)
+   public Graphics3DAddEllipsoidInstruction addEllipsoid(double xRadius, double yRadius, double zRadius, AppearanceDefinition ellipsoidApp)
    {
-         Graphics3DAddEllipsoidInstruction instruction = new Graphics3DAddEllipsoidInstruction(xRad, yRad, zRad, ellipsoidApp);
+         Graphics3DAddEllipsoidInstruction instruction = new Graphics3DAddEllipsoidInstruction(xRadius, yRadius, zRadius, ellipsoidApp);
          graphics3DInstructions.add(instruction);
          return instruction;
    }
