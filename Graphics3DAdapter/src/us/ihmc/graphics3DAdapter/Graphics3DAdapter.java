@@ -25,7 +25,7 @@ public interface Graphics3DAdapter
    public Object getGraphicsConch();
    public void setGroundVisible(boolean isVisible);
    
-   public RayCollisionAdapter getRayCollisionAdapter();
+   public MultiRayTracer getMultiRayTracer();
    
    public void addSelectedListener(SelectedListener selectedListener);
    public void addKeyListener(KeyListener keyListener);
