@@ -42,4 +42,9 @@ public class DesiredFootstepCalculatorFootstepProviderWrapper implements Footste
    {
       return !walk.getBooleanValue();
    }
+   
+   public void setWalk(boolean walk)
+   {
+      this.walk.set(walk);
+   }
 }
