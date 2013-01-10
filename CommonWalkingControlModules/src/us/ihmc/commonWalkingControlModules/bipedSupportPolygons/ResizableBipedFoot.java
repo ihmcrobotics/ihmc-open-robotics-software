@@ -11,6 +11,7 @@ import us.ihmc.utilities.math.geometry.ConvexHullCalculator2d;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
+import us.ihmc.utilities.math.geometry.GeometryTools;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.RigidBody;
 
@@ -171,7 +172,7 @@ public class ResizableBipedFoot implements BipedFootInterface
 
       ArrayList<FramePoint> footPolygonPoints = computeFootPolygonPoints(footPolygonEnum);
 
-      ArrayList<FramePoint2d> projectedFootPolygonPoints = changeFrameToZUpAndProjectToXYPlane(ankleZUpFrame, footPolygonPoints);
+      ArrayList<FramePoint2d> projectedFootPolygonPoints = GeometryTools.changeFrameToZUpAndProjectToXYPlane(ankleZUpFrame, footPolygonPoints);
       FrameConvexPolygon2d ret = new FrameConvexPolygon2d(projectedFootPolygonPoints);
 
       return ret;
@@ -243,32 +244,12 @@ public class ResizableBipedFoot implements BipedFootInterface
    public FrameConvexPolygon2d getFlatFootPolygonInAnkleZUp()
    {
       ArrayList<FramePoint> footPolygonPoints = computeFootPolygonPoints(FootPolygonEnum.FLAT);
-      ArrayList<FramePoint2d> projectedFootPolygonPoints = changeFrameToZUpAndProjectToXYPlane(ankleZUpFrame, footPolygonPoints);
+      ArrayList<FramePoint2d> projectedFootPolygonPoints = GeometryTools.changeFrameToZUpAndProjectToXYPlane(ankleZUpFrame, footPolygonPoints);
 
       return new FrameConvexPolygon2d(projectedFootPolygonPoints);
    }
 
-   private ArrayList<FramePoint2d> changeFrameToZUpAndProjectToXYPlane(ReferenceFrame zUpFrame, List<FramePoint> points)
-   {
-//    if (!zUpFrame.isZupFrame())
-//    {
-//       throw new RuntimeException("Must be a ZUp frame!");
-//    }
-
-      ArrayList<FramePoint2d> ret = new ArrayList<FramePoint2d>(points.size());
-
-      for (int i = 0; i < points.size(); i++)
-      {
-         FramePoint framePoint = points.get(i);
-         framePoint = framePoint.changeFrameCopy(zUpFrame);
-
-         ret.add(framePoint.toFramePoint2d());
-      }
-
-      return ret;
-   }
-
-   private ArrayList<Point2d> projectToXYPlane(ArrayList<Point3d> points)
+   private ArrayList<Point2d> projectToXYPlane(List<Point3d> points)
    {
       ArrayList<Point2d> ret = new ArrayList<Point2d>(points.size());
       for (int i = 0; i < points.size(); i++)
@@ -500,7 +481,7 @@ public class ResizableBipedFoot implements BipedFootInterface
 
       ArrayList<FramePoint> footPolygonPoints = computeFootPolygonPoints(footPolygonEnum);
 
-      ArrayList<FramePoint2d> projectedFootPolygonPoints = changeFrameToZUpAndProjectToXYPlane(soleFrame, footPolygonPoints);
+      ArrayList<FramePoint2d> projectedFootPolygonPoints = GeometryTools.changeFrameToZUpAndProjectToXYPlane(soleFrame, footPolygonPoints);
       FrameConvexPolygon2d ret = new FrameConvexPolygon2d(projectedFootPolygonPoints);
 
       return ret;
@@ -561,7 +542,7 @@ public class ResizableBipedFoot implements BipedFootInterface
    public List<FramePoint2d> getContactPoints2d()
    {
       List<FramePoint> footPolygonPoints = getContactPoints();
-      ArrayList<FramePoint2d> projectedFootPolygonPoints = changeFrameToZUpAndProjectToXYPlane(soleFrame, footPolygonPoints);
+      ArrayList<FramePoint2d> projectedFootPolygonPoints = GeometryTools.changeFrameToZUpAndProjectToXYPlane(soleFrame, footPolygonPoints);
 
       return projectedFootPolygonPoints;
    }
