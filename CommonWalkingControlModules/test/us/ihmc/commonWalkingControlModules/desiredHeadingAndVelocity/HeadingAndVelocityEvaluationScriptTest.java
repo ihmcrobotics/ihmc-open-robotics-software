@@ -5,8 +5,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.HeadingAndVelocityEvaluationScript.HeadingAndVelocityEvaluationEvent;
@@ -32,18 +30,9 @@ public class HeadingAndVelocityEvaluationScriptTest
    private static final double HEADING_VIZ_Z = 0.03;
    private static final double VELOCITY_VIZ_Z = 0.06;
 
-   @Before
-   public void setUp() throws Exception
-   {
-   }
 
-   @After
-   public void tearDown() throws Exception
-   {
-   }
-   
    @Test
-   public void testOne()
+   public void testHeadingAndVelocityEvaluationScript()
    {
       YoVariableRegistry parentRegistry = new YoVariableRegistry("HeadingAndVelocityEvaluationScriptTest");
       DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
@@ -85,6 +74,8 @@ public class HeadingAndVelocityEvaluationScriptTest
       {
          script.update(time);
 
+         desiredHeadingControlModule.updateDesiredHeadingFrame();
+         
          FrameVector2d desiredHeading = desiredHeadingControlModule.getDesiredHeading();
          FrameVector2d desiredVelocity = desiredVelocityControlModule.getDesiredVelocity();
          double desiredHeadingAngle = desiredHeadingControlModule.getDesiredHeadingAngle();
