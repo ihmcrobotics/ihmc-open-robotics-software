@@ -1,6 +1,7 @@
 package us.ihmc.graphics3DAdapter.camera;
 
 import java.awt.Canvas;
+import java.nio.FloatBuffer;
 
 
 public interface ViewportAdapter
@@ -20,6 +21,7 @@ public interface ViewportAdapter
    public abstract double getPhysicalWidth();
    public abstract double getPhysicalHeight();
    public abstract void setupOffscreenView(int width, int height);
+   public abstract FloatBuffer getZBuffer();
 
 
 }
