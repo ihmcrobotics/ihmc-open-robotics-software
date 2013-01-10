@@ -278,25 +278,22 @@ public class DesiredFootstepVisualizer
          private final double totalDistance = 10.0;
          private double distanceAlongPath;
          
-         @Override
+
          public void compute(double distanceAlongPath)
          {     
             this.distanceAlongPath = distanceAlongPath;
          }
 
-         @Override
          public double getTotalDistance()
          {
             return totalDistance;
          }
 
-         @Override
          public FramePoint2d getPosition()
          {
             return new FramePoint2d(ReferenceFrame.getWorldFrame(), distanceAlongPath, 0.0);
          }
 
-         @Override
          public double getHeadingInFrame(ReferenceFrame frame)
          {
             return 0.0;
