@@ -54,7 +54,7 @@ public class FootstepDataTest
       FootstepDataConsumer footstepDataConsumer = new FootstepDataConsumer();
       StreamingDataTCPClient streamingDataTCPClient = new StreamingDataTCPClient("localhost", 7777);
       streamingDataTCPClient.registerStreamingDataConsumer(footstepDataConsumer);
-      streamingDataTCPClient.connectToServer();
+      streamingDataTCPClient.connectToServer(false);
 
       ThreadTools.sleep(1000);
 
