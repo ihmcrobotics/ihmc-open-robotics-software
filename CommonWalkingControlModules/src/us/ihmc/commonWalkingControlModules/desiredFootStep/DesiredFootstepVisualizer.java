@@ -314,7 +314,7 @@ public class DesiredFootstepVisualizer
       List<Footstep> footsteps = pathBasedFootstepListCreator.compute(initialStanceFootstep);
       
       long dataIdentifier = 1776L;
-      FootstepConsumer footstepConsumer = new FootstepConsumer(dataIdentifier);
+      FootstepConsumer footstepConsumer = new FootstepConsumer(dataIdentifier, bipedFeet.values());
 
       for (Footstep footstep : footsteps)
       {
