@@ -1,7 +1,8 @@
 package us.ihmc.graphics3DAdapter.camera;
 
 import java.awt.Canvas;
-import java.nio.FloatBuffer;
+
+import javax.vecmath.Point3d;
 
 
 public interface ViewportAdapter
@@ -21,7 +22,8 @@ public interface ViewportAdapter
    public abstract double getPhysicalWidth();
    public abstract double getPhysicalHeight();
    public abstract void setupOffscreenView(int width, int height);
-   public abstract FloatBuffer getZBuffer();
+   public abstract double[][] getZBuffer();
+   public abstract Point3d getWorldCoordinatesFromScreenCoordinates(float f, float g, double z);
 
 
 }
