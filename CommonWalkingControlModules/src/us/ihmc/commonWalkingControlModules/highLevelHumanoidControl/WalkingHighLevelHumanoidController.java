@@ -92,7 +92,8 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
    private final YoVariableDoubleProvider doubleSupportTimeProvider = new YoVariableDoubleProvider("doubleSupportTime", registry);
 
    private final DoubleYoVariable singleSupportICPGlideScaleFactor = new DoubleYoVariable("singleSupportICPGlideScaleFactor", registry);
-//   private final BooleanYoVariable walk = new BooleanYoVariable("walk", registry);
+
+// private final BooleanYoVariable walk = new BooleanYoVariable("walk", registry);
 
 
    // FIXME: reimplement nullspace stuff:
@@ -121,7 +122,9 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
    private final SideDependentList<YoVariableDoubleProvider> onEdgeFinalAngleProviders = new SideDependentList<YoVariableDoubleProvider>();
    private final BooleanYoVariable stayOnToes = new BooleanYoVariable("stayOnToes", registry);
    private final DoubleYoVariable trailingFootPitch = new DoubleYoVariable("trailingFootPitch", registry);
-   private final OneDoFJoint[] upperBodyJoints;
+   private final OneDoFJoint[] neckJoints;
+   private final SideDependentList<OneDoFJoint[]> armJoints = new SideDependentList<OneDoFJoint[]>();
+   private final OneDoFJoint[] postHeadJoints; // on DRC robot: hokuyo_joint
 
    private final DoubleYoVariable kUpperBody = new DoubleYoVariable("kUpperBody", registry);
    private final DoubleYoVariable zetaUpperBody = new DoubleYoVariable("zetaUpperBody", registry);
@@ -160,7 +163,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 //    doubleSupportICPTrajectoryGenerator = new ParabolicVelocityInstantaneousCapturePointTrajectory(namePrefix,
 //          bipedSupportPolygons, controlDT, registry);
 
-      this.stateMachine = new StateMachine<WalkingState>(namePrefix + "State", namePrefix + "SwitchTime", WalkingState.class, yoTime, registry); // this is used by name, and it is ugly.
+      this.stateMachine = new StateMachine<WalkingState>(namePrefix + "State", namePrefix + "SwitchTime", WalkingState.class, yoTime, registry);    // this is used by name, and it is ugly.
       upcomingSupportLeg.set(RobotSide.RIGHT);
 
       singleSupportICPGlideScaleFactor.set(0.9);
@@ -235,10 +238,26 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       RobotSide trailingLeg = leadingLeg.getOppositeSide();
       onEdgeInitialAngleProviders.get(trailingLeg).set(this.trailingFootPitch.getDoubleValue());
 
-      InverseDynamicsJoint[] upperBodyJoints = ScrewTools.computeJointsInOrder(fullRobotModel.getChest());
-      int nRevoluteJoints = ScrewTools.computeNumberOfJointsOfType(OneDoFJoint.class, upperBodyJoints);
-      this.upperBodyJoints = new OneDoFJoint[nRevoluteJoints];
-      ScrewTools.filterJoints(upperBodyJoints, this.upperBodyJoints, OneDoFJoint.class);
+      this.neckJoints = createOneDoFJointPath(fullRobotModel.getChest(), fullRobotModel.getHead());
+      List<InverseDynamicsJoint> postHeadJointsList = fullRobotModel.getHead().getChildrenJoints();
+      InverseDynamicsJoint[] postHeadJointsArray = new InverseDynamicsJoint[postHeadJointsList.size()];
+      postHeadJointsList.toArray(postHeadJointsArray);
+      this.postHeadJoints = new OneDoFJoint[ScrewTools.computeNumberOfJointsOfType(OneDoFJoint.class, postHeadJointsArray)];
+      ScrewTools.filterJoints(postHeadJointsArray, postHeadJoints, OneDoFJoint.class);
+
+      for (RobotSide robotSide : RobotSide.values())
+      {
+         armJoints.put(robotSide, createOneDoFJointPath(fullRobotModel.getChest(), fullRobotModel.getHand(robotSide)));
+      }
+   }
+
+   private OneDoFJoint[] createOneDoFJointPath(RigidBody base, RigidBody endEffector)
+   {
+      InverseDynamicsJoint[] joints = ScrewTools.createJointPath(base, endEffector);
+      OneDoFJoint[] oneDoFJoints = new OneDoFJoint[ScrewTools.computeNumberOfJointsOfType(OneDoFJoint.class, joints)];
+      ScrewTools.filterJoints(joints, oneDoFJoints, OneDoFJoint.class);
+
+      return oneDoFJoints;
    }
 
    private RobotSide getUpcomingSupportLeg()
@@ -260,23 +279,28 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       for (RobotSide robotSide : RobotSide.values())
       {
          State<WalkingState> transferState = new DoubleSupportState(robotSide);
-         StateTransition<WalkingState> toDoubleSupport = new StateTransition<WalkingState>(doubleSupportState.getStateEnum(), new StopWalkingCondition(), new ResetICPTrajectoryAction());
+         StateTransition<WalkingState> toDoubleSupport = new StateTransition<WalkingState>(doubleSupportState.getStateEnum(), new StopWalkingCondition(),
+                                                            new ResetICPTrajectoryAction());
          transferState.addStateTransition(toDoubleSupport);
-         StateTransition<WalkingState> toSingleSupport = new StateTransition<WalkingState>(singleSupportStateEnums.get(robotSide), new DoneWithTransferCondition());
+         StateTransition<WalkingState> toSingleSupport = new StateTransition<WalkingState>(singleSupportStateEnums.get(robotSide),
+                                                            new DoneWithTransferCondition());
          transferState.addStateTransition(toSingleSupport);
          stateMachine.addState(transferState);
 
          State<WalkingState> singleSupportState = new SingleSupportState(robotSide);
-         StateTransition<WalkingState> toDoubleSupport2 = new StateTransition<WalkingState>(doubleSupportState.getStateEnum(), new StopWalkingCondition(), new ResetICPTrajectoryAction());
+         StateTransition<WalkingState> toDoubleSupport2 = new StateTransition<WalkingState>(doubleSupportState.getStateEnum(), new StopWalkingCondition(),
+                                                             new ResetICPTrajectoryAction());
          singleSupportState.addStateTransition(toDoubleSupport2);
-         StateTransition<WalkingState> toTransfer = new StateTransition<WalkingState>(transferStateEnums.get(robotSide.getOppositeSide()), new DoneWithSingleSupportCondition());
+         StateTransition<WalkingState> toTransfer = new StateTransition<WalkingState>(transferStateEnums.get(robotSide.getOppositeSide()),
+                                                       new DoneWithSingleSupportCondition());
          singleSupportState.addStateTransition(toTransfer);
          stateMachine.addState(singleSupportState);
       }
 
       for (RobotSide robotSide : RobotSide.values())
       {
-         StateTransition<WalkingState> toTransfer = new StateTransition<WalkingState>(transferStateEnums.get(robotSide), new DoneWithDoubleSupportCondition(robotSide));
+         StateTransition<WalkingState> toTransfer = new StateTransition<WalkingState>(transferStateEnums.get(robotSide),
+                                                       new DoneWithDoubleSupportCondition(robotSide));
          doubleSupportState.addStateTransition(toTransfer);
       }
    }
@@ -481,6 +505,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
             boolean doubleSupportTimeHasPassed = stateMachine.timeInCurrentState() > doubleSupportTimeProvider.getValue();
             RobotSide upcomingSwingSide = transferToSide.getOppositeSide();
             boolean transferringToThisRobotSide = nextFootstep.getBody() == fullRobotModel.getFoot(upcomingSwingSide);
+
             return transferringToThisRobotSide && doubleSupportTimeHasPassed;
          }
       }
@@ -704,7 +729,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 
       icpTrajectoryGenerator.initialize(desiredICP.getFramePoint2dCopy(), finalDesiredICP, swingTimeProvider.getValue(), omega0,
                                         amountToBeInsideSingleSupport.getDoubleValue());
-      
+
       nextFootstep = null;
    }
 
@@ -754,7 +779,13 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       double kUpperBody = this.kUpperBody.getDoubleValue();
       double dUpperBody = GainCalculator.computeDerivativeGain(kUpperBody, zetaUpperBody.getDoubleValue());
 
-      doPDControl(upperBodyJoints, kUpperBody, dUpperBody);
+      doPDControl(neckJoints, kUpperBody, dUpperBody);
+      doPDControl(postHeadJoints, kUpperBody, dUpperBody);
+
+      for (RobotSide robotSide : RobotSide.values())
+      {
+         doPDControl(armJoints.get(robotSide), kUpperBody, dUpperBody);
+      }
    }
 
    private double computeDesiredCoMHeightAcceleration(FrameVector2d desiredICPVelocity)
