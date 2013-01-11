@@ -77,8 +77,6 @@ public class DRCFlatGroundWalkingTrack
       drcSimulation.addAdditionalDynamicGraphicObjectsListRegistries(dynamicGraphicObjectsListRegistry);
       drcSimulation.addAdditionalYoVariableRegistriesToSCS(registry);
 
-      setUpDemoButtons(simulationConstructionSet);
-
       simulationConstructionSet.setCameraPosition(6.0, -2.0, 4.5);
       simulationConstructionSet.setCameraFix(-0.44, -0.17, 0.75);
       hideDynamicGraphicsForActualDemo(showInstructions);
@@ -155,44 +153,6 @@ public class DRCFlatGroundWalkingTrack
    public DRCDemo01Environment getEnvironment()
    {
       return environment;
-   }
-
-   private void setUpDemoButtons(SimulationConstructionSet scs)
-   {
-//      // an angel loses its wings :(
-//      final BooleanYoVariable doBoxPickAction = (BooleanYoVariable) scs.getVariable("doBoxPickAction");
-//
-//      if (doBoxPickAction != null)
-//      {
-//         final JButton button = new JButton("Start Action");
-//         button.addActionListener(new ActionListener()
-//         {
-//            public void actionPerformed(ActionEvent arg0)
-//            {
-//               doBoxPickAction.set(!doBoxPickAction.getBooleanValue());
-//            }
-//         });
-//         doBoxPickAction.addVariableChangedListener(new VariableChangedListener()
-//         {
-//            public void variableChanged(YoVariable v)
-//            {
-//               if (((BooleanYoVariable) v).getBooleanValue())
-//               {
-//                  button.setText("Stop Action");
-//                  button.setEnabled(true);
-//               }
-//               else
-//               {
-//                  button.setText("Start Action");
-//                  button.setEnabled(true);
-//               }
-//
-//            }
-//         });
-//         scs.addButton(button);
-//      }
-//      else
-//         System.err.println("DrcDemo.setUpDemoButtons: the variable doBoxPickAction has been changed");
    }
 
    private void setUpInstructionsBoard(SimulationConstructionSet scs, boolean showInstructions)
