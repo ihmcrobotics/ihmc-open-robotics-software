@@ -6,9 +6,13 @@ import javax.vecmath.Vector3d;
 
 public class DRCConfigParameters
 {
+   // Set whether or not to use GFE Robot Model
    public static final boolean USE_GFE_ROBOT_MODEL = false;
+
+   // Convenience field
    public static final boolean USE_R2_ROBOT_MODEL = !USE_GFE_ROBOT_MODEL;
 
+   // DRC Robot Model Parameters
    public static final double DRC_ROBOT_ANKLE_HEIGHT = 0.084;
    public static final double DRC_ROBOT_FOOT_WIDTH = 0.12;
    public static final double DRC_ROBOT_FOOT_FORWARD = 0.18;
@@ -26,9 +30,9 @@ public class DRCConfigParameters
    };
 
    // Networking
-   public static final String OPERATOR_INTERFACE_BG_VIDEO_SERVER_IP_ADDRESS = "localhost";
-   public static final int OPERATOR_INTERFACE_BG_VIDEO_SERVER_PORT_NUMBER = 2099;
-   public static final String ROBOT_DATA_RECEIVER_IP_ADDRESS = "localhost";
+   public static final String SCS_MACHINE_IP_ADDRESS = "localhost";
+   public static final String OPERATOR_INTERFACE_IP_ADDRESS = "localhost";
+   public static final int BG_VIDEO_SERVER_PORT_NUMBER = 2099;   
    public static final int ROBOT_DATA_RECEIVER_PORT_NUMBER = 7777;
 
 }
