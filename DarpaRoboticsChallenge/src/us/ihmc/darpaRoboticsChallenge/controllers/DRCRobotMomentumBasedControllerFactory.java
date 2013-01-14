@@ -12,6 +12,8 @@ import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.remote.DataObjectServer;
+import us.ihmc.utilities.remote.serialization.JointConfigurationDataSender;
 import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
@@ -26,10 +28,17 @@ import com.yobotics.simulationconstructionset.util.ground.steppingStones.Steppin
 public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
 {
    private final HighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory;
+   private final boolean setUpServer;
 
    public DRCRobotMomentumBasedControllerFactory(HighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory)
    {
-      this.highLevelHumanoidControllerFactory = highLevelHumanoidControllerFactory;
+      this(highLevelHumanoidControllerFactory, false);
+   }
+   
+   public DRCRobotMomentumBasedControllerFactory(HighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory, boolean setUpServer)
+   {
+	   this.highLevelHumanoidControllerFactory = highLevelHumanoidControllerFactory;
+	   this.setUpServer = setUpServer;	   
    }
 
    public RobotController getController(FullRobotModel fullRobotModel, ReferenceFrames referenceFrames, SteppingStones steppingStones, double controlDT,
@@ -41,6 +50,9 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
       double footWidth = DRCConfigParameters.DRC_ROBOT_FOOT_WIDTH;
 
       YoVariableRegistry specificRegistry = new YoVariableRegistry("specific");
+      
+      if(setUpServer)
+    	  createJointPositionServer(fullRobotModel);
       
       SideDependentList<ContactablePlaneBody> bipedFeet = new SideDependentList<ContactablePlaneBody>();
       for (RobotSide robotSide : RobotSide.values)
@@ -65,6 +77,16 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
                                                                    guiSetterUpperRegistry, null);
       highLevelHumanoidController.getYoVariableRegistry().addChild(specificRegistry);
       return highLevelHumanoidController;
+   }
+   
+   private void createJointPositionServer(FullRobotModel fullRobotModel)
+   {
+      int PORT = DRCConfigParameters.ROBOT_DATA_RECEIVER_PORT_NUMBER;
+      int identifier = 5;
+      long updatePeriodInMilliseconds = DRCConfigParameters.ROBOT_JOINT_SERVER_UPDATE_MILLIS;
+      DataObjectServer server = new DataObjectServer(PORT);
+      JointConfigurationDataSender jointConfigurationDataSender = new JointConfigurationDataSender(identifier, fullRobotModel.getElevator(), server);
+      jointConfigurationDataSender.startUpdateThread(updatePeriodInMilliseconds);
    }
 
    public int getSimulationTicksPerControlTick()

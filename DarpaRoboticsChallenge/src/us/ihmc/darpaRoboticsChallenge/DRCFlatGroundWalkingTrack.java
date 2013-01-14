@@ -3,7 +3,6 @@ package us.ihmc.darpaRoboticsChallenge;
 import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
 import us.ihmc.commonWalkingControlModules.controllers.ControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.FlatGroundWalkingHighLevelHumanoidControllerFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelHumanoidControllerFactory;
 import us.ihmc.commonWalkingControlModules.terrain.TerrainType;
 import us.ihmc.darpaRoboticsChallenge.controllers.DRCRobotMomentumBasedControllerFactory;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
@@ -19,9 +18,15 @@ public class DRCFlatGroundWalkingTrack
 {
    private final DRCSimulation drcSimulation;
    private final DRCDemo01Environment environment;
+   
+   public DRCFlatGroundWalkingTrack(DRCGuiInitialSetup guiInitialSetup, AutomaticSimulationRunner automaticSimulationRunner, double timePerRecordTick,
+           int simulationDataBufferSize, boolean doChestOrientationControl)
+   {
+	   this(guiInitialSetup, automaticSimulationRunner, timePerRecordTick, simulationDataBufferSize, doChestOrientationControl, null, -1);
+   }
 
    public DRCFlatGroundWalkingTrack(DRCGuiInitialSetup guiInitialSetup, AutomaticSimulationRunner automaticSimulationRunner, double timePerRecordTick,
-                   int simulationDataBufferSize, boolean doChestOrientationControl)
+                   int simulationDataBufferSize, boolean doChestOrientationControl, String ipAddress, int portNumber)
    {
       DRCSCSInitialSetup scsInitialSetup;
       DRCRobotInitialSetup drcRobotInitialSetup;
@@ -50,9 +55,10 @@ public class DRCFlatGroundWalkingTrack
       double minStepWidth = 0.15;
       double maxStepWidth = 0.4;
       double stepPitch = 0.0;
-      HighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory = new FlatGroundWalkingHighLevelHumanoidControllerFactory(desiredCoMHeight,
+      FlatGroundWalkingHighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory = new FlatGroundWalkingHighLevelHumanoidControllerFactory(desiredCoMHeight,
                                                                                  inPlaceWidth, maxStepLength, minStepWidth, maxStepWidth, stepPitch);
-      ControllerFactory controllerFactory = new DRCRobotMomentumBasedControllerFactory(highLevelHumanoidControllerFactory);
+      highLevelHumanoidControllerFactory.setupForNetworkedFootstepProvider(ipAddress, portNumber);
+      ControllerFactory controllerFactory = new DRCRobotMomentumBasedControllerFactory(highLevelHumanoidControllerFactory, true);
 
       environment = new DRCDemo01Environment();
 
