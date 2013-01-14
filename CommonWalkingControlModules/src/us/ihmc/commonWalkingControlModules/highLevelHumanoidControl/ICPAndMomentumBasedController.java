@@ -358,8 +358,9 @@ public abstract class ICPAndMomentumBasedController extends MomentumBasedControl
       groundReactionWrenchDistributor.distributeGroundReactionWrench(desiredCoP, desiredDeltaCMP, fZ.getDoubleValue(), totalgroundReactionMoment,
               footContactStates, bipedSupportPolygons, upcomingSupportLeg.getEnumValue());
 
+      this.omega0.set(groundReactionWrenchDistributor.getOmega0());
+      
       HashMap<RigidBody, Wrench> groundReactionWrenches = groundReactionWrenchDistributor.getGroundReactionWrenches();
-
       setGroundReactionWrenches(groundReactionWrenches, inverseDynamicsCalculator);
 
       Wrench totalGroundReactionWrench = TotalWrenchCalculator.computeTotalWrench(groundReactionWrenches.values(), centerOfMassFrame);

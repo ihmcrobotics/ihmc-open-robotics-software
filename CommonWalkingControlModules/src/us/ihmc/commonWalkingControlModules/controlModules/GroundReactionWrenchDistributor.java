@@ -42,6 +42,7 @@ public class GroundReactionWrenchDistributor
 
    private HashMap<RigidBody, Wrench> groundReactionWrenches;    // TODO: garbage
    private SideDependentList<FramePoint> virtualToePointsOnSole;    // TODO: garbage
+   private final DoubleYoVariable omega0 = new DoubleYoVariable("omega0", registry);
 
    public GroundReactionWrenchDistributor(CommonWalkingReferenceFrames referenceFrames, FullRobotModel fullRobotModel,
            DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
@@ -73,6 +74,7 @@ public class GroundReactionWrenchDistributor
 
       FramePoint centerOfMass = new FramePoint(referenceFrames.getCenterOfMassFrame());
       double omega0 = computeOmega0(centerOfMass, fZ, virtualToePointsOnSole);
+      this.omega0.set(omega0);
 
       double k1PlusK2 = MathTools.square(omega0) * totalMass;
       for (RobotSide robotSide : RobotSide.values())
@@ -89,6 +91,11 @@ public class GroundReactionWrenchDistributor
       return groundReactionWrenches;
    }
 
+   public double getOmega0()
+   {
+      return omega0.getDoubleValue();
+   }
+   
    public SideDependentList<FramePoint> getVirtualToePointsOnSole()
    {
       return virtualToePointsOnSole;
