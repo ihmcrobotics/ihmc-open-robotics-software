@@ -13,7 +13,6 @@ import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LimbName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.NeckJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.RobotSpecificJointNames;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.SpineJointName;
-import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.Pair;
@@ -23,7 +22,7 @@ public class DRCRobotJointMap implements SDFJointNameMap, RobotSpecificJointName
    private final String chestName = "utorso";
    private final String pelvisName = "pelvis";
    private final String headName = "head";
-   private final double ankleHeight = DRCConfigParameters.DRC_ROBOT_ANKLE_HEIGHT;
+   private final double ankleHeight = DRCRobotParameters.DRC_ROBOT_ANKLE_HEIGHT;
    
    private final LegJointName[] legJoints = { LegJointName.HIP_YAW, LegJointName.HIP_ROLL, LegJointName.HIP_PITCH, LegJointName.KNEE, LegJointName.ANKLE_PITCH, LegJointName.ANKLE_ROLL };
    private final ArmJointName[] armJoints = { ArmJointName.SHOULDER_PITCH, ArmJointName.SHOULDER_ROLL, ArmJointName.ELBOW_PITCH, ArmJointName.ELBOW_ROLL, ArmJointName.WRIST_PITCH, ArmJointName.WRIST_ROLL };
@@ -77,7 +76,7 @@ public class DRCRobotJointMap implements SDFJointNameMap, RobotSpecificJointName
 //         groundContactPointOffsetFromFoot.add(new Vector3d(0.18, -0.06, -ankleHeight));
 //         groundContactPointOffsetFromFoot.add(new Vector3d(0.18, 0.06, -ankleHeight));
          
-         groundContactPointOffsetFromFeet.put(robotSide, DRCConfigParameters.DRC_ROBOT_GROUND_CONTACT_POINT_OFFSET_FROM_FOOT);
+         groundContactPointOffsetFromFeet.put(robotSide, DRCRobotParameters.DRC_ROBOT_GROUND_CONTACT_POINT_OFFSET_FROM_FOOT);
          
       }
       

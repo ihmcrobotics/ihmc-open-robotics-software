@@ -9,6 +9,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelHum
 import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotParameters;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -45,9 +46,9 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
            DoubleYoVariable yoTime, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, GUISetterUpperRegistry guiSetterUpperRegistry,
            TwistCalculator twistCalculator, CenterOfMassJacobian centerOfMassJacobian, SideDependentList<FootSwitchInterface> footSwitches)
    {
-      double footForward = DRCConfigParameters.DRC_ROBOT_FOOT_FORWARD;
-      double footBack = DRCConfigParameters.DRC_ROBOT_FOOT_BACK;
-      double footWidth = DRCConfigParameters.DRC_ROBOT_FOOT_WIDTH;
+      double footForward = DRCRobotParameters.DRC_ROBOT_FOOT_FORWARD;
+      double footBack = DRCRobotParameters.DRC_ROBOT_FOOT_BACK;
+      double footWidth = DRCRobotParameters.DRC_ROBOT_FOOT_WIDTH;
 
       YoVariableRegistry specificRegistry = new YoVariableRegistry("specific");
       

@@ -1,8 +1,5 @@
 package us.ihmc.darpaRoboticsChallenge;
 
-import java.util.ArrayList;
-
-import javax.vecmath.Vector3d;
 
 public class DRCConfigParameters
 {
@@ -11,23 +8,6 @@ public class DRCConfigParameters
 
    // Convenience field
    public static final boolean USE_R2_ROBOT_MODEL = !USE_GFE_ROBOT_MODEL;
-
-   // DRC Robot Model Parameters
-   public static final double DRC_ROBOT_ANKLE_HEIGHT = 0.084;
-   public static final double DRC_ROBOT_FOOT_WIDTH = 0.12;
-   public static final double DRC_ROBOT_FOOT_FORWARD = 0.18;
-   public static final double DRC_ROBOT_FOOT_BACK = 0.07;
-
-   @SuppressWarnings("serial")
-   public static final ArrayList<Vector3d> DRC_ROBOT_GROUND_CONTACT_POINT_OFFSET_FROM_FOOT = new ArrayList<Vector3d>()
-   {
-      {
-         add(new Vector3d(-DRC_ROBOT_FOOT_BACK, -(DRC_ROBOT_FOOT_WIDTH / 2.0), -DRC_ROBOT_ANKLE_HEIGHT));
-         add(new Vector3d(-DRC_ROBOT_FOOT_BACK, DRC_ROBOT_FOOT_WIDTH / 2.0, -DRC_ROBOT_ANKLE_HEIGHT));
-         add(new Vector3d(DRC_ROBOT_FOOT_FORWARD, -(DRC_ROBOT_FOOT_WIDTH / 2.0), -DRC_ROBOT_ANKLE_HEIGHT));
-         add(new Vector3d(DRC_ROBOT_FOOT_FORWARD, DRC_ROBOT_FOOT_WIDTH / 2.0, -DRC_ROBOT_ANKLE_HEIGHT));
-      }
-   };
 
    public static final boolean STREAM_VIDEO = true;
 
