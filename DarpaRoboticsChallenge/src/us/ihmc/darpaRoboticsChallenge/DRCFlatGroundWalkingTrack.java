@@ -18,23 +18,17 @@ public class DRCFlatGroundWalkingTrack
 {
    private final DRCSimulation drcSimulation;
    private final DRCDemo01Environment environment;
-   
-   public DRCFlatGroundWalkingTrack(DRCGuiInitialSetup guiInitialSetup, AutomaticSimulationRunner automaticSimulationRunner, double timePerRecordTick,
-           int simulationDataBufferSize, boolean doChestOrientationControl)
-   {
-	   this(guiInitialSetup, automaticSimulationRunner, timePerRecordTick, simulationDataBufferSize, doChestOrientationControl, null, -1);
-   }
 
    public DRCFlatGroundWalkingTrack(DRCGuiInitialSetup guiInitialSetup, AutomaticSimulationRunner automaticSimulationRunner, double timePerRecordTick,
-                   int simulationDataBufferSize, boolean doChestOrientationControl, String ipAddress, int portNumber)
+                                    int simulationDataBufferSize, boolean doChestOrientationControl, String ipAddress, int portNumber)
    {
       DRCSCSInitialSetup scsInitialSetup;
       DRCRobotInitialSetup drcRobotInitialSetup;
 
       drcRobotInitialSetup = new SquaredUpDRCRobotInitialSetup();
-      
-      
-      
+
+
+
       scsInitialSetup = new DRCSCSInitialSetup(TerrainType.FLAT);
       scsInitialSetup.setSimulationDataBufferSize(simulationDataBufferSize);
 
@@ -49,20 +43,20 @@ public class DRCFlatGroundWalkingTrack
       DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
       YoVariableRegistry registry = new YoVariableRegistry("adjustableParabolicTrajectoryDemoSimRegistry");
 
-      double desiredCoMHeight = 0.8;
+      double desiredCoMHeight = 0.9;
       double inPlaceWidth = 0.25;
       double maxStepLength = 0.35;
       double minStepWidth = 0.15;
       double maxStepWidth = 0.4;
       double stepPitch = 0.0;
-      FlatGroundWalkingHighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory = new FlatGroundWalkingHighLevelHumanoidControllerFactory(desiredCoMHeight,
-                                                                                 inPlaceWidth, maxStepLength, minStepWidth, maxStepWidth, stepPitch);
+      FlatGroundWalkingHighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory =
+         new FlatGroundWalkingHighLevelHumanoidControllerFactory(desiredCoMHeight, inPlaceWidth, maxStepLength, minStepWidth, maxStepWidth, stepPitch);
       highLevelHumanoidControllerFactory.setupForNetworkedFootstepProvider(ipAddress, portNumber);
       ControllerFactory controllerFactory = new DRCRobotMomentumBasedControllerFactory(highLevelHumanoidControllerFactory, true);
 
       environment = new DRCDemo01Environment();
 
-//      r2Simulation = new R2Simulation(environment, r2InitialSetup, sensorNoiseInitialSetup, controllerFactory, scsInitialSetup, guiInitialSetup);
+//    r2Simulation = new R2Simulation(environment, r2InitialSetup, sensorNoiseInitialSetup, controllerFactory, scsInitialSetup, guiInitialSetup);
       drcSimulation = new DRCSimulation(drcRobotInitialSetup, controllerFactory, scsInitialSetup, guiInitialSetup);
 
       SimulationConstructionSet simulationConstructionSet = drcSimulation.getSimulationConstructionSet();
@@ -94,11 +88,12 @@ public class DRCFlatGroundWalkingTrack
       {
          drcSimulation.start(null);
       }
-      
-      if(DRCConfigParameters.STREAM_VIDEO)
+
+      if (DRCConfigParameters.STREAM_VIDEO)
       {
-    	  System.out.println("Streaming SCS Video");
-    	  drcSimulation.getSimulationConstructionSet().startStreamingVideoData(DRCConfigParameters.SCS_MACHINE_IP_ADDRESS, DRCConfigParameters.BG_VIDEO_SERVER_PORT_NUMBER);
+         System.out.println("Streaming SCS Video");
+         drcSimulation.getSimulationConstructionSet().startStreamingVideoData(DRCConfigParameters.SCS_MACHINE_IP_ADDRESS,
+                 DRCConfigParameters.BG_VIDEO_SERVER_PORT_NUMBER);
       }
    }
 
@@ -120,7 +115,13 @@ public class DRCFlatGroundWalkingTrack
 
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup();
 
-      new DRCFlatGroundWalkingTrack(guiInitialSetup, automaticSimulationRunner, 0.005, 16000, true);
+      double timePerRecordTick = 0.005;
+      int simulationDataBufferSize = 16000;
+      boolean doChestOrientationControl = true;
+      String ipAddress = null;
+      int portNumber = -1;
+      new DRCFlatGroundWalkingTrack(guiInitialSetup, automaticSimulationRunner, timePerRecordTick, simulationDataBufferSize, doChestOrientationControl,
+                                    ipAddress, portNumber);
    }
 
 
