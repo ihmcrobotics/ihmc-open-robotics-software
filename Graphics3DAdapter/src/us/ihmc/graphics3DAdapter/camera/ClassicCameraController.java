@@ -11,11 +11,14 @@ import javax.vecmath.Vector3d;
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
 import us.ihmc.graphics3DAdapter.holders.ActiveViewportHolder;
 import us.ihmc.graphics3DAdapter.input.Key;
+import us.ihmc.graphics3DAdapter.input.KeyListener;
 import us.ihmc.graphics3DAdapter.input.ModifierKeyInterface;
 import us.ihmc.graphics3DAdapter.input.MouseButton;
+import us.ihmc.graphics3DAdapter.input.MouseListener;
+import us.ihmc.graphics3DAdapter.input.SelectedListener;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
 
-public class ClassicCameraController implements TrackingDollyCameraController
+public class ClassicCameraController implements TrackingDollyCameraController, KeyListener, MouseListener, SelectedListener
 {
    public static final double MIN_FIELD_OF_VIEW = 0.001;
    public static final double MAX_FIELD_OF_VIEW = 2.0;

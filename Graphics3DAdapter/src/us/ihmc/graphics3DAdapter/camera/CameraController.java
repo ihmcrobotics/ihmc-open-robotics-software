@@ -8,7 +8,7 @@ import us.ihmc.graphics3DAdapter.input.MouseListener;
 import us.ihmc.graphics3DAdapter.input.SelectedListener;
 
 
-public interface CameraController extends KeyListener, MouseListener, SelectedListener
+public interface CameraController
 {
    public void computeTransform(Transform3D cameraTransform);
 }
