@@ -4,7 +4,7 @@ package us.ihmc.darpaRoboticsChallenge;
 public class DRCConfigParameters
 {
    // Set whether or not to use GFE Robot Model
-   public static final boolean USE_GFE_ROBOT_MODEL = true;
+   public static final boolean USE_GFE_ROBOT_MODEL = false;
 
    // Convenience field
    public static final boolean USE_R2_ROBOT_MODEL = !USE_GFE_ROBOT_MODEL;
