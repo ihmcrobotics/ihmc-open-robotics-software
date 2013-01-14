@@ -94,6 +94,12 @@ public class DRCFlatGroundWalkingTrack
       {
          drcSimulation.start(null);
       }
+      
+      if(DRCConfigParameters.STREAM_VIDEO)
+      {
+    	  System.out.println("Streaming SCS Video");
+    	  drcSimulation.getSimulationConstructionSet().startStreamingVideoData(DRCConfigParameters.SCS_MACHINE_IP_ADDRESS, DRCConfigParameters.BG_VIDEO_SERVER_PORT_NUMBER);
+      }
    }
 
    private void setUpJoyStick(SimulationConstructionSet simulationConstructionSet)
