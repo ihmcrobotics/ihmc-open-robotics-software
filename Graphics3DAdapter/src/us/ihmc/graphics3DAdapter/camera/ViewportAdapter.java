@@ -4,6 +4,8 @@ import java.awt.Canvas;
 
 import javax.vecmath.Point3d;
 
+import us.ihmc.graphics3DAdapter.ContextSwitchedListener;
+
 
 public interface ViewportAdapter
 {
@@ -24,6 +26,7 @@ public interface ViewportAdapter
    public abstract void setupOffscreenView(int width, int height);
    public abstract double[][] getZBuffer();
    public abstract Point3d getWorldCoordinatesFromScreenCoordinates(float f, float g, double z);
+   public abstract void addContextSwitchedListener(ContextSwitchedListener contextSwitchedListener);
 
 
 }
