@@ -28,6 +28,8 @@ public class DRCConfigParameters
          add(new Vector3d(DRC_ROBOT_FOOT_FORWARD, DRC_ROBOT_FOOT_WIDTH / 2.0, -DRC_ROBOT_ANKLE_HEIGHT));
       }
    };
+   
+   public static final boolean STREAM_VIDEO = true;
 
    // Networking
    public static final String SCS_MACHINE_IP_ADDRESS = "localhost";
