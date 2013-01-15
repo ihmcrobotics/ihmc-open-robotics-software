@@ -1,22 +1,23 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.concurrent.ConcurrentLinkedQueue;
+
+import javax.vecmath.Point3d;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactableBody;
 import us.ihmc.utilities.io.streamingData.StreamingDataConsumer;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
-import javax.vecmath.Point3d;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.concurrent.ConcurrentLinkedQueue;
-
 public class FootstepConsumer implements FootstepProvider, StreamingDataConsumer
 {
    private final ConcurrentLinkedQueue<Footstep> footstepQueue = new ConcurrentLinkedQueue<Footstep>();
    private final long dataIdentifier;
    private final Collection<? extends ContactableBody> rigidBodyList;
+   int j=0;
 
    public FootstepConsumer(long dataIdentifier, Collection<? extends ContactableBody> rigidBodyList)
    {
@@ -35,6 +36,7 @@ public class FootstepConsumer implements FootstepProvider, StreamingDataConsumer
       {
          throw new RuntimeException("Wrong data identifier: " + dataIdentifier + ". Expected: " + this.dataIdentifier);
       }
+      System.out.println("FootstepConsumer: consume: "+(++j)+" footsteps received, Ah Ah Ah!");
       FootstepData footstepData = (FootstepData) object;
       ContactableBody contactableBody = findContactableBodyByName(footstepData.getRigidBodyName());
       ArrayList<FramePoint> expectedContactPoints = new ArrayList<FramePoint>();
