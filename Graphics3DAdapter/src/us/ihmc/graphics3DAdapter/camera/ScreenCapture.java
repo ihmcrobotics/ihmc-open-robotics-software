@@ -17,6 +17,7 @@ import sun.awt.image.ImageFormatException;
 public class ScreenCapture implements Serializable
 {
    private static final long serialVersionUID = 4267642643460511978L;
+   private static final boolean isOpenJDK = System.getProperty("java.vm.name").indexOf("OpenJDK") != -1;
    private byte[] bytesOut = null;
    private final int height, width;
    private final Point3d location;
@@ -61,7 +62,15 @@ public class ScreenCapture implements Serializable
    {
       ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
-      ImageIO.write(image, "jpeg", outputStream);
+      if(isOpenJDK)
+      {
+         System.err.println("OpenJDK doesn't ship with JPEG libraries. Streaming using PNG images.");
+         ImageIO.write(image, "png", outputStream);
+      }
+      else
+      {
+         ImageIO.write(image, "jpeg", outputStream);
+      }
 
       // JPEGImageEncoder encoder = JPEGCodec.createJPEGEncoder(os);
       // JPEGEncodeParam param = encoder.getDefaultJPEGEncodeParam(img);

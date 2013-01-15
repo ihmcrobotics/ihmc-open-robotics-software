@@ -9,7 +9,7 @@ public class SDFGeometry
    private Cylinder cylinder;
    private Mesh mesh;
    private Plane plane;
-   private Image image;
+   private GeometryImage image;
    private HeightMap heightMap;
 
    public Box getBox()
@@ -67,13 +67,13 @@ public class SDFGeometry
       this.plane = plane;
    }
 
-   public Image getImage()
+   public GeometryImage getImage()
    {
       return image;
    }
 
    @XmlElement(name = "image")
-   public void setImage(Image image)
+   public void setImage(GeometryImage image)
    {
       this.image = image;
    }
@@ -206,7 +206,7 @@ public class SDFGeometry
       }
    }
 
-   public static class Image
+   public static class GeometryImage
    {
       private String uri;
       private String scale;

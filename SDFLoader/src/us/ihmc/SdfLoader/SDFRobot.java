@@ -9,7 +9,7 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor;
-import us.ihmc.SdfLoader.xmlDescription.SDFSensor.SDFCamera;
+import us.ihmc.SdfLoader.xmlDescription.SDFSensor.Camera;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
@@ -37,6 +37,7 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder
 
    private final SideDependentList<ArrayList<GroundContactPoint>> groundContactPoints = new SideDependentList<ArrayList<GroundContactPoint>>();
 
+   private final HashMap<String, SDFCamera> cameras = new HashMap<String, SDFCamera>();
    
    public SDFRobot(GeneralizedSDFRobotModel generalizedSDFRobotModel, SDFJointNameMap sdfJointNameMap)
    {
@@ -149,7 +150,7 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder
          {
             if("camera".equals(sensor.getType()))
             {
-               final SDFCamera camera = sensor.getCamera();
+               final Camera camera = sensor.getCamera();
                
                if(camera != null)
                {
@@ -159,6 +160,9 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder
                   double clipFar = Double.parseDouble(camera.getClip().getFar());
                   CameraMount mount = new CameraMount(sensor.getName(), pose, fieldOfView, clipNear, clipFar, this);
                   scsJoint.addCameraMount(mount);
+                  
+                  SDFCamera sdfCamera = new SDFCamera(Integer.parseInt(camera.getImage().getWidth()), Integer.parseInt(camera.getImage().getHeight()));
+                  cameras.put(sensor.getName(), sdfCamera);
                }
                else
                {
@@ -218,6 +222,10 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder
       return robotJoints.get(name).getLink().getLinkGraphics();
    }
 
+   public SDFCamera getCamera(String name)
+   {
+      return cameras.get(name);
+   }
 
 
 }
