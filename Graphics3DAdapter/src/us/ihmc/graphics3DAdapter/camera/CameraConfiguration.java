@@ -4,13 +4,17 @@ package us.ihmc.graphics3DAdapter.camera;
 
 public class CameraConfiguration
 {
+   public static final double DEFAULT_FIELD_OF_VIEW = Math.PI/4.0;
+   public static final double DEFAULT_CLIP_DISTANCE_NEAR = 0.1;
+   public static final double DEFAULT_CLIP_DISTANCE_FAR = 100.0;
+   
    protected String name;
 
    protected String trackXVar = "q_x", trackYVar = "q_y", trackZVar = "q_z";
    protected String dollyXVar = "q_x", dollyYVar = "q_y", dollyZVar = "q_z";
 
    protected String fieldOfViewVar = null;
-   public double fieldOfView = -1.0;    // Camera.DEFAULT_FIELD_OF_VIEW;
+   public double fieldOfView = DEFAULT_FIELD_OF_VIEW, clipDistanceNear = DEFAULT_CLIP_DISTANCE_NEAR, clipDistanceFar = DEFAULT_CLIP_DISTANCE_FAR;
 
    protected boolean isMounted = false;
    protected String mountName = "";
@@ -125,6 +129,12 @@ public class CameraConfiguration
       this.camY = camY;
       this.camZ = camZ;
    }
+   
+   public void setClipDistance(double near, double far)
+   {
+      this.clipDistanceNear = near;
+      this.clipDistanceFar = far;
+   }
 
    public String getTrackXVar()
    {
@@ -160,6 +170,5 @@ public class CameraConfiguration
    {
       return fieldOfViewVar;
    }
-
 
 }

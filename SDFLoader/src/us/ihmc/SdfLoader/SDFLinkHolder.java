@@ -8,6 +8,7 @@ import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.xmlDescription.SDFLink;
+import us.ihmc.SdfLoader.xmlDescription.SDFSensor;
 import us.ihmc.SdfLoader.xmlDescription.SDFVisual;
 import us.ihmc.utilities.math.MatrixTools;
 
@@ -26,6 +27,7 @@ public class SDFLinkHolder
    private double contactMaxVel = 0.0;;
    
    private final List<SDFVisual> visuals;
+   private final List<SDFSensor> sensors;
    
    // Set by loader
    private SDFJointHolder joint = null;
@@ -43,6 +45,7 @@ public class SDFLinkHolder
      inertialFrameWithRespectToLinkFrame = SDFConversionsHelper.poseToTransform(sdfLink.getInertial().getPose());
      inertia = SDFConversionsHelper.sdfInertiaToMatrix3d(sdfLink.getInertial().getInertia());
      visuals = sdfLink.getVisuals();
+     sensors = sdfLink.getSensors();
      if(sdfLink.getCollision() != null)
      {
         if(sdfLink.getCollision().getSurface() != null)
@@ -160,6 +163,11 @@ public class SDFLinkHolder
    public double getContactMaxVel()
    {
       return contactMaxVel;
+   }
+
+   public List<SDFSensor> getSensors()
+   {
+      return sensors;
    }
    
    

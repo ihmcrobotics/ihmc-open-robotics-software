@@ -57,6 +57,10 @@ public interface CameraPropertiesHolder
    public void setDollyYOffset(double dy);
 
    public void setDollyZOffset(double dz);
+   
+   public void setFieldOfView(double fieldOfView);
+   public void setClipDistanceNear(double near);
+   public void setClipDistanceFar(double far);
 
    public double getFixX();
 
