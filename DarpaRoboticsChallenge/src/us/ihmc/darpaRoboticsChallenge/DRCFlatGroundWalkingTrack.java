@@ -1,5 +1,6 @@
 package us.ihmc.darpaRoboticsChallenge;
 
+import us.ihmc.SdfLoader.SDFCamera;
 import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
 import us.ihmc.commonWalkingControlModules.controllers.ControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.FlatGroundWalkingHighLevelHumanoidControllerFactory;
@@ -7,6 +8,7 @@ import us.ihmc.commonWalkingControlModules.terrain.TerrainType;
 import us.ihmc.darpaRoboticsChallenge.controllers.DRCRobotMomentumBasedControllerFactory;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.SquaredUpDRCRobotInitialSetup;
+import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
 
 import com.martiansoftware.jsap.JSAPException;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
@@ -92,8 +94,21 @@ public class DRCFlatGroundWalkingTrack
       if (DRCConfigParameters.STREAM_VIDEO)
       {
          System.out.println("Streaming SCS Video");
-         drcSimulation.getSimulationConstructionSet().startStreamingVideoData(DRCConfigParameters.SCS_MACHINE_IP_ADDRESS,
-                 DRCConfigParameters.BG_VIDEO_SERVER_PORT_NUMBER);
+         
+         String cameraName = "left_camera_sensor";
+         CameraConfiguration videoConfiguration = new CameraConfiguration(cameraName);
+         videoConfiguration.setCameraMount(cameraName);
+         
+         SDFCamera camera = drcSimulation.getRobot().getCamera(cameraName);
+         int width = camera.getWidth();
+         int height = camera.getHeight();
+         
+         // Decrease resolution to improve performance
+         // TODO: Revert to full resolution images
+         width = 640;
+         height = 480;
+         
+         drcSimulation.getSimulationConstructionSet().startStreamingVideoData(videoConfiguration, width, height, DRCConfigParameters.BG_VIDEO_SERVER_PORT_NUMBER);
       }
    }
 

@@ -9,7 +9,7 @@ public class SDFSensor
    private String type;
    private String updateRate;
    private String pose;
-   private SDFCamera camera;
+   private Camera camera;
 
    public String getName()
    {
@@ -55,23 +55,23 @@ public class SDFSensor
       this.pose = pose;
    }
 
-   public SDFCamera getCamera()
+   public Camera getCamera()
    {
       return camera;
    }
 
    @XmlElement(name = "camera")
-   public void setCamera(SDFCamera camera)
+   public void setCamera(Camera camera)
    {
       this.camera = camera;
    }
 
-   public static class SDFCamera
+   public static class Camera
    {
       private String pose;
       private String horizontalFov;
-      private SDFImage image;
-      private SDFClip clip;
+      private SensorImage image;
+      private Clip clip;
 
       public String getPose()
       {
@@ -95,29 +95,29 @@ public class SDFSensor
          this.horizontalFov = horizontalFov;
       }
 
-      public SDFImage getImage()
+      public SensorImage getImage()
       {
          return image;
       }
 
       @XmlElement(name = "image")
-      public void setImage(SDFImage image)
+      public void setImage(SensorImage image)
       {
          this.image = image;
       }
 
-      public SDFClip getClip()
+      public Clip getClip()
       {
          return clip;
       }
 
       @XmlElement(name = "clip")
-      public void setClip(SDFClip clip)
+      public void setClip(Clip clip)
       {
          this.clip = clip;
       }
 
-      public static class SDFImage
+      public static class SensorImage
       {
          private String width;
          private String height;
@@ -157,7 +157,7 @@ public class SDFSensor
          }
       }
 
-      public static class SDFClip
+      public static class Clip
       {
          private String near;
          private String far;
