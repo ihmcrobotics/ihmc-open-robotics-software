@@ -124,7 +124,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
    private final DoubleYoVariable trailingFootPitch = new DoubleYoVariable("trailingFootPitch", registry);
    private final OneDoFJoint[] neckJoints;
    private final SideDependentList<OneDoFJoint[]> armJoints = new SideDependentList<OneDoFJoint[]>();
-   private final OneDoFJoint[] postHeadJoints; // on DRC robot: hokuyo_joint
+   private final OneDoFJoint[] postHeadJoints;    // on DRC robot: hokuyo_joint
 
    private final DoubleYoVariable kUpperBody = new DoubleYoVariable("kUpperBody", registry);
    private final DoubleYoVariable zetaUpperBody = new DoubleYoVariable("zetaUpperBody", registry);
@@ -356,6 +356,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       @Override
       public void doTransitionIntoAction()
       {
+         System.out.println("WalkingHighLevelController: enteringDoubleSupportState");
          setSupportLeg(null);
 
          RobotSide trailingLeg = getUpcomingSupportLeg().getOppositeSide();
@@ -407,6 +408,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       @Override
       public void doTransitionOutOfAction()
       {
+         System.out.println("WalkingHighLevelController: leavingDoubleSupportState");
          desiredICPVelocity.set(0.0, 0.0);
       }
    }
@@ -454,6 +456,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       @Override
       public void doTransitionIntoAction()
       {
+         System.out.println("WalkingHighLevelController: enteringSingleSupportState");
          RobotSide supportSide = swingSide.getOppositeSide();
          initializeTrajectory(swingSide, null);
 
@@ -477,6 +480,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       @Override
       public void doTransitionOutOfAction()
       {
+         System.out.println("WalkingHighLevelController: leavingDoubleSupportState");
          upcomingSupportLeg.set(upcomingSupportLeg.getEnumValue().getOppositeSide());
 
 //       ContactableBody swingFoot = contactablePlaneBodies.get(swingSide);
@@ -552,7 +556,8 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
    {
       public boolean checkCondition()
       {
-         return footstepProvider.isEmpty() && ((getSupportLeg() == null) || super.checkCondition());
+         boolean readyToStopWalking = (footstepProvider.isEmpty() && nextFootstep==null) && ((getSupportLeg() == null) || super.checkCondition());
+         return readyToStopWalking;
       }
    }
 
@@ -729,7 +734,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 
       icpTrajectoryGenerator.initialize(desiredICP.getFramePoint2dCopy(), finalDesiredICP, swingTimeProvider.getValue(), omega0,
                                         amountToBeInsideSingleSupport.getDoubleValue());
-
+      System.out.println("nextFootstep will change now!");
       nextFootstep = null;
    }
 
