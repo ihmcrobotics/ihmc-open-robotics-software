@@ -3,34 +3,34 @@ package us.ihmc.graphics3DAdapter.camera;
 
 import java.util.ArrayList;
 
-import us.ihmc.graphics3DAdapter.camera.TransformToScreenHolder;
+import us.ihmc.graphics3DAdapter.camera.CameraMountInterface;
 
 
 public class CameraMountList implements java.io.Serializable
 {
    private static final long serialVersionUID = 7819849315544602348L;
-   private ArrayList<TransformToScreenHolder> mounts = new ArrayList<TransformToScreenHolder>();
+   private ArrayList<CameraMountInterface> mounts = new ArrayList<CameraMountInterface>();
 
    public CameraMountList()
    {
    }
 
-   public void addCameraMount(TransformToScreenHolder mount)
+   public void addCameraMount(CameraMountInterface mount)
    {
       mounts.add(mount);
    }
 
-   public void addCameraMounts(ArrayList<TransformToScreenHolder> mountArrayList)
+   public void addCameraMounts(ArrayList<CameraMountInterface> mountArrayList)
    {
       mounts.addAll(mountArrayList);
    }
 
 
-   public TransformToScreenHolder getCameraMount(String name)
+   public CameraMountInterface getCameraMount(String name)
    {
       for (int i = 0; i < mounts.size(); i++)
       {
-         TransformToScreenHolder mount = mounts.get(i);
+         CameraMountInterface mount = mounts.get(i);
 
          if (mount.getName().equals(name))
          {

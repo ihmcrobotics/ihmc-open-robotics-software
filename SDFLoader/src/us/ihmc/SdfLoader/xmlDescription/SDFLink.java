@@ -11,6 +11,7 @@ public class SDFLink
    private String pose;
    private Inertial inertial;
    private List<SDFVisual> visuals;
+   private List<SDFSensor> sensors;
    private Collision collision;
 
    public String getName()
@@ -68,6 +69,17 @@ public class SDFLink
       this.collision = collision;
    }
 
+   public List<SDFSensor> getSensors()
+   {
+      return sensors;
+   }
+
+   @XmlElement(name = "sensor")
+   public void setSensors(List<SDFSensor> sensors)
+   {
+      this.sensors = sensors;
+   }
+   
    public static class Inertial
    {
       private String mass;
@@ -112,4 +124,6 @@ public class SDFLink
    {
       return name;
    }
+
+   
 }

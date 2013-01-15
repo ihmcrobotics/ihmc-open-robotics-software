@@ -8,6 +8,8 @@ import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.SdfLoader.xmlDescription.SDFSensor;
+import us.ihmc.SdfLoader.xmlDescription.SDFSensor.SDFCamera;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
@@ -15,6 +17,7 @@ import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
+import com.yobotics.simulationconstructionset.CameraMount;
 import com.yobotics.simulationconstructionset.FloatingJoint;
 import com.yobotics.simulationconstructionset.GroundContactPoint;
 import com.yobotics.simulationconstructionset.Joint;
@@ -122,6 +125,7 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder
       scsJoint.setLink(createLink(joint.getChild(), chainRotation));
       scsParentJoint.addJoint(scsJoint);
 
+      addCameraMounts(scsJoint, joint.getChild());
       
 
       
@@ -135,6 +139,34 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder
          addJointsRecursively(child, scsJoint, chainRotation);
       }
 
+   }
+
+   private void addCameraMounts(PinJoint scsJoint, SDFLinkHolder child)
+   {
+      if(child.getSensors() != null)
+      {
+         for(SDFSensor sensor : child.getSensors())
+         {
+            if("camera".equals(sensor.getType()))
+            {
+               final SDFCamera camera = sensor.getCamera();
+               
+               if(camera != null)
+               {
+                  Transform3D pose = SDFConversionsHelper.poseToTransform(sensor.getPose());
+                  double fieldOfView = Double.parseDouble(camera.getHorizontalFov());
+                  double clipNear = Double.parseDouble(camera.getClip().getNear());
+                  double clipFar = Double.parseDouble(camera.getClip().getFar());
+                  CameraMount mount = new CameraMount(sensor.getName(), pose, fieldOfView, clipNear, clipFar, this);
+                  scsJoint.addCameraMount(mount);
+               }
+               else
+               {
+                  System.err.println("JAXB loader: No camera section defined for camera sensor " + sensor.getName() + ", ignoring sensor.");
+               }
+            }
+         }
+      }
    }
 
    public boolean hasGroundContact(RobotSide robotSide)
@@ -159,6 +191,7 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder
       scsLink.setComOffset(link.getCoMOffset());
       scsLink.setMass(link.getMass());
       scsLink.setMomentOfInertia(link.getInertia());
+      
       return scsLink;
 
    }

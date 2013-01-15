@@ -15,7 +15,6 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject
 public class DRCSCSInitialSetup
 {
    private static final boolean SHOW_WORLD_COORDINATE_FRAME = false;
-
    private double simulateDT = 0.0001;    // 0.00005; //
    private int recordFrequency = 1;    // 10;
 
@@ -23,6 +22,7 @@ public class DRCSCSInitialSetup
    private int simulationDataBufferSize = 16000;
    private double gravity = -9.81;
    private final CommonTerrain commonTerrain;
+
 
    public DRCSCSInitialSetup(TerrainType terrainType)
    {
@@ -85,6 +85,8 @@ public class DRCSCSInitialSetup
          scs.addStaticLinkGraphics(linkGraphics);
       }
 
+      
+      
       /*
        * This makes sure that the initial values of all YoVariables that are added to the scs (i.e. at index 0 of the data buffer)
        * are properly stored in the data buffer

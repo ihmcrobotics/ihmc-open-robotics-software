@@ -6,7 +6,6 @@ import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
 import us.ihmc.graphics3DAdapter.jme.JMEGraphics3dAdapter;
 import us.ihmc.projectM.R2Sim02.DataExporter;
-import us.ihmc.projectM.R2Sim02.R2Parameters;
 import us.ihmc.projectM.R2Sim02.R2Robot;
 
 import com.yobotics.simulationconstructionset.Robot;
@@ -20,8 +19,7 @@ public class DRCGuiInitialSetup
    {
       setUpGUI(scs);
 
-      if (R2Parameters.USE_SLIDER_BOARD)
-         setupSliderBoard(scs);
+      setupSliderBoard(scs);
 
       CameraConfiguration behindPelvis = new CameraConfiguration("BehindPelvis");
       behindPelvis.setCameraTracking(false, true, true, false);
@@ -31,11 +29,11 @@ public class DRCGuiInitialSetup
       behindPelvis.setCameraTrackingVars("q_x", "q_y", "q_z");
       scs.setupCamera(behindPelvis);
 
-      CameraConfiguration camera5 = new CameraConfiguration("HMD_LeftEye");
-      camera5.setCameraMount("leftEye");
+      CameraConfiguration camera5 = new CameraConfiguration("left_camera_sensor");
+      camera5.setCameraMount("left_camera_sensor");
       scs.setupCamera(camera5);
-      CameraConfiguration camera6 = new CameraConfiguration("HMD_RightEye");
-      camera6.setCameraMount("rightEye");
+      CameraConfiguration camera6 = new CameraConfiguration("right_camera_sensor");
+      camera6.setCameraMount("right_camera_sensor");
       scs.setupCamera(camera6);
    }
 

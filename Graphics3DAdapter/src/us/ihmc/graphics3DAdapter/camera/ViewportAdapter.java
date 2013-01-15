@@ -16,10 +16,6 @@ public interface ViewportAdapter
    public abstract void setCameraController(CameraController cameraController);
    public abstract CameraController getCameraController();
 
-   public abstract void setClipDistances(double near, double far);
-
-   public abstract void setFieldOfView(double fieldOfView);
-
    public abstract double getFieldOfView();
    public abstract double getPhysicalWidth();
    public abstract double getPhysicalHeight();

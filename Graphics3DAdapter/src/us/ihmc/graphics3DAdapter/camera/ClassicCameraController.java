@@ -22,6 +22,7 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
 {
    public static final double MIN_FIELD_OF_VIEW = 0.001;
    public static final double MAX_FIELD_OF_VIEW = 2.0;
+   
 
    private static final double MIN_CAMERA_POSITION_TO_FIX_DISTANCE = 0.1; // 0.8;
 
@@ -31,6 +32,10 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
 
    private final ActiveViewportHolder activeViewHolder = ActiveViewportHolder.getInstance();
    
+   private double fieldOfView = CameraConfiguration.DEFAULT_FIELD_OF_VIEW;
+   private double clipDistanceNear = CameraConfiguration.DEFAULT_CLIP_DISTANCE_NEAR;
+   private double clipDistanceFar = CameraConfiguration.DEFAULT_CLIP_DISTANCE_FAR;
+   
    private double camX, camY, camZ, fixX, fixY, fixZ;
 
    private double zoom_factor = 1.0;
@@ -38,7 +43,7 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
    private double rotate_camera_factor = 1.0;
 
    private boolean isMounted = false;
-   private TransformToScreenHolder cameraMount;
+   private CameraMountInterface cameraMount;
 
    private boolean isTracking = true, isTrackingX = true, isTrackingY = true, isTrackingZ = false;
    private boolean isDolly = false, isDollyX = true, isDollyY = true, isDollyZ = false;
@@ -79,6 +84,7 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
    private ArrayList<Integer> cameraKeyPoints = new ArrayList<Integer>(0);
 
    private final CameraTrackingAndDollyPositionHolder cameraTrackAndDollyVariablesHolder;
+   
 
    public static ClassicCameraController createClassicCameraControllerAndAddListeners(ViewportAdapter viewportAdapter, CameraTrackingAndDollyPositionHolder cameraTrackAndDollyVariablesHolder, Graphics3DAdapter graphics3dAdapter)
    {
@@ -107,12 +113,12 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
       setDolly(false);
    }
 
-   public void setCameraMount(TransformToScreenHolder mount)
+   public void setCameraMount(CameraMountInterface mount)
    {
       this.cameraMount = mount;
    }
 
-   public TransformToScreenHolder getCameraMount()
+   public CameraMountInterface getCameraMount()
    {
       return cameraMount;
    }
@@ -134,7 +140,9 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
 
       this.isMounted = config.isCameraMounted();
       if (isMounted && (mountList != null))
+      {
          this.cameraMount = mountList.getCameraMount(config.getCameraMountName());
+      }
 
       this.camX = config.camX;
       this.camY = config.camY;
@@ -159,18 +167,10 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
       this.dollyDY = config.dollyDY;
       this.dollyDZ = config.dollyDZ;
 
-      //      if (config.fieldOfViewVar != null)
-      //      {
-      //         this.field_of_view_var = (DoubleYoVariable) varlist.getVariable(config.fieldOfViewVar);
-      //         fieldOfView = field_of_view_var.getDoubleValue();
-      //      }
-      //      else
-      this.fieldOfView = config.fieldOfView;
-
-      if ((fieldOfView < 0.0) && (viewportAdapter != null))
-         fieldOfView = viewportAdapter.getFieldOfView();
-      else
-         setFieldOfView(fieldOfView);
+      setFieldOfView(config.fieldOfView);
+      this.clipDistanceFar = config.clipDistanceFar;
+      this.clipDistanceNear = config.clipDistanceNear;
+      
 
       // this.update();
    }
@@ -791,7 +791,7 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
 
    }
 
-   private double fieldOfView = -1.0; // DEFAULT_FIELD_OF_VIEW;
+
 
    public void setFieldOfView(double fov)
    {
@@ -801,11 +801,6 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
          fieldOfView = MIN_FIELD_OF_VIEW;
       if (fieldOfView > MAX_FIELD_OF_VIEW)
          fieldOfView = MAX_FIELD_OF_VIEW;
-
-      if (viewportAdapter != null)
-      {
-         viewportAdapter.setFieldOfView(fieldOfView);
-      }
    }
 
    public void doMouseDraggedMiddle(double dx, double dy)
@@ -814,15 +809,7 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
 
       if ((this.isMounted) && (viewportAdapter != null))
       {
-         // zoom_scale = zoom_scale + dy * 0.1;
-         // if (zoom_scale < 0.1) zoom_scale = 0.1;
-
-         double fieldOfView = viewportAdapter.getFieldOfView();
-         fieldOfView = fieldOfView + dy * 0.02;
-
-         setFieldOfView(fieldOfView);
-
-         // System.out.println(fieldOfView);
+         cameraMount.zoom(dy * 0.1);
       }
 
       else
@@ -1127,7 +1114,7 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
    public void computeTransform(Transform3D currXform)
    {
       update();
-      TransformToScreenHolder cameraMount = getCameraMount();
+      CameraMountInterface cameraMount = getCameraMount();
       if (isMounted() && (cameraMount != null))
       {
          cameraMount.getTransformToScreen(currXform);
@@ -1298,5 +1285,51 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
          pan(dx, dy);
          break;
       }
+   }
+
+   public double getClipNear()
+   {
+      if(isMounted)
+      {
+         return cameraMount.getClipDistanceNear();
+      }
+      else
+      {
+         return clipDistanceNear;
+      }
+   }
+
+   public double getClipFar()
+   {
+      if(isMounted)
+      {
+         return cameraMount.getClipDistanceFar();
+      }
+      else
+      {
+         return clipDistanceFar;
+      }
+   }
+
+   public double getFieldOfViewInRadians()
+   {
+      if(isMounted)
+      {
+         return cameraMount.getFieldOfView();
+      }
+      else
+      {
+         return fieldOfView;
+      }
+   }
+
+   public void setClipDistanceNear(double near)
+   {
+      clipDistanceNear = near;
+   }
+
+   public void setClipDistanceFar(double far)
+   {
+      clipDistanceFar = far;
    }
 }
