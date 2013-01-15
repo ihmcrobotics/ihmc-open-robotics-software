@@ -78,7 +78,7 @@ public class ReflectionSimulationComparerTest
       int nTicksCompare = 121; 
       int nTicksFinal = 11; 
       SimulationComparisonScript script = new SimpleRewindabilityComparisonScript(nTicksInitial, nTicksCompare, nTicksFinal);
-      ReflectionSimulationComparer.compareTwoSimulations(scs0, scs1, script, true);
+      ReflectionSimulationComparer.compareTwoSimulations(scs0, scs1, script, true, true);
    }
 
 
@@ -115,7 +115,7 @@ public class ReflectionSimulationComparerTest
       int nTicksCompare = 30; 
       int nTicksFinal = 40; 
       SimulationComparisonScript script = new SimpleRewindabilityComparisonScript(nTicksInitial, nTicksCompare, nTicksFinal);
-      ReflectionSimulationComparer.compareTwoSimulations(scs0, scs1, script, false);
+      ReflectionSimulationComparer.compareTwoSimulations(scs0, scs1, script, false, true);
    }
    
    private class RewindableOrNotRewindableController implements RobotController
