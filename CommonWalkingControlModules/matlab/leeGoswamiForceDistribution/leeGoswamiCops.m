@@ -27,17 +27,20 @@ for i = 1 : nFeet
     REndIndex = RStartIndex + vectorLength - 1;
     R = Rs(:, RStartIndex : REndIndex);
 
-    fb = R' * f;
-    
-    col0 = -R(:, 2) * fb(3) + R(:, 3) * fb(2);
-    col1 = R(:, 1) * fb(3) - R(:, 3) * fb(1);
-    col2 = R(:, 3);
-
-    Psiki = [col0, col1, col2];
+%     fb = R' * f;
+%     col0 = -R(:, 2) * fb(3) + R(:, 3) * fb(2);
+%     col1 = R(:, 1) * fb(3) - R(:, 3) * fb(1);
+%     col2 = R(:, 3);
+% 
+%     Psiki = [col0, col1, col2];
+    A = -tilde(f) * R;
+    Psiki = [A(:, 1:2) R(:, 3)];
     Psik(:, RStartIndex : REndIndex) = Psiki;
 
     h = H(i);
-    kappak = kappak + h * (R(:, 2) * fb(1) - R(:, 1) * fb(2));
+%     kappaki = h * (R(:, 2) * fb(1) - R(:, 1) * fb(2))
+    kappaki = A(:, 3) * h;
+    kappak = kappak + kappaki;
 end
 
 
