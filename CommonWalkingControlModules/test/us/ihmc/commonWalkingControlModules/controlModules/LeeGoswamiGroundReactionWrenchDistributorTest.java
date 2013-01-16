@@ -35,15 +35,16 @@ public class LeeGoswamiGroundReactionWrenchDistributorTest
       LeeGoswamiGroundReactionWrenchDistributor distributor = new LeeGoswamiGroundReactionWrenchDistributor(centerOfMassFrame, gravitationalAcceleration, mass, nSupportVectors, parentRegistry);
   
       double coefficientOfFriction = 1.0;
+      double rotationalCoefficientOfFriction = 0.5;
       double footLength = 0.3;
       double footWidth = 0.15;
       Point3d leftMidfootLocation = new Point3d(0.0, 0.5, 0.0);
       SimplePlaneContactState leftFootContactState = new SimplePlaneContactState(footLength, footWidth, leftMidfootLocation);
-      distributor.addContact(leftFootContactState, coefficientOfFriction);
+      distributor.addContact(leftFootContactState, coefficientOfFriction, rotationalCoefficientOfFriction);
       
       Point3d rightMidfootLocation = new Point3d(0.0, -0.5, 0.0);
       SimplePlaneContactState rightFootContactState = new SimplePlaneContactState(footLength, footWidth, rightMidfootLocation);
-      distributor.addContact(rightFootContactState, coefficientOfFriction);
+      distributor.addContact(rightFootContactState, coefficientOfFriction, rotationalCoefficientOfFriction);
    
       Vector3d linearPart = new Vector3d();
       Vector3d angularPart = new Vector3d();
