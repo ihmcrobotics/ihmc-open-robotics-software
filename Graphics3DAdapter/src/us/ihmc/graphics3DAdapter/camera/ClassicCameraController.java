@@ -30,8 +30,6 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
    private final static double CAMERA_START_Y = -6.0;
    private final static double CAMERA_START_Z = 1.0;
 
-   private final ActiveViewportHolder activeViewHolder = ActiveViewportHolder.getInstance();
-   
    private double fieldOfView = CameraConfiguration.DEFAULT_FIELD_OF_VIEW;
    private double clipDistanceNear = CameraConfiguration.DEFAULT_CLIP_DISTANCE_NEAR;
    private double clipDistanceFar = CameraConfiguration.DEFAULT_CLIP_DISTANCE_FAR;
@@ -86,17 +84,20 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
    private final CameraTrackingAndDollyPositionHolder cameraTrackAndDollyVariablesHolder;
    
 
+   private Graphics3DAdapter graphics3dAdapter;
+
    public static ClassicCameraController createClassicCameraControllerAndAddListeners(ViewportAdapter viewportAdapter, CameraTrackingAndDollyPositionHolder cameraTrackAndDollyVariablesHolder, Graphics3DAdapter graphics3dAdapter)
    {
-      ClassicCameraController classicCameraController = new ClassicCameraController(viewportAdapter, cameraTrackAndDollyVariablesHolder);
+      ClassicCameraController classicCameraController = new ClassicCameraController(graphics3dAdapter, viewportAdapter, cameraTrackAndDollyVariablesHolder);
       graphics3dAdapter.addKeyListener(classicCameraController);
       graphics3dAdapter.addMouseListener(classicCameraController);
       graphics3dAdapter.addSelectedListener(classicCameraController);
       return classicCameraController;
    }
    
-   public ClassicCameraController(ViewportAdapter viewportAdapter, CameraTrackingAndDollyPositionHolder cameraTrackAndDollyVariablesHolder)
+   public ClassicCameraController(Graphics3DAdapter graphics3dAdapter, ViewportAdapter viewportAdapter, CameraTrackingAndDollyPositionHolder cameraTrackAndDollyVariablesHolder)
    {
+      this.graphics3dAdapter = graphics3dAdapter;
       this.viewportAdapter = viewportAdapter;
 
       this.camX = CAMERA_START_X;
@@ -347,7 +348,7 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
 
    public void update()
    {
-      if(!activeViewHolder.isActiveViewport(viewportAdapter))
+      if(graphics3dAdapter.getContextManager().getCurrentViewport() != viewportAdapter)
       {
          forward = false;
          backward = false;
@@ -1184,7 +1185,7 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
 
    public void keyPressed(Key key)
    {
-      if(!activeViewHolder.isActiveViewport(viewportAdapter))
+      if(graphics3dAdapter.getContextManager().getCurrentViewport() != viewportAdapter)
          return;
 
       switch (key)
@@ -1213,7 +1214,7 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
 
    public void keyReleased(Key key)
    {
-      if(!activeViewHolder.isActiveCamera(this))
+      if(graphics3dAdapter.getContextManager().getCurrentViewport() != viewportAdapter)
          return;
       
       switch(key)
@@ -1251,7 +1252,7 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
    
    public void selected(Graphics3DNode graphics3dNode, ModifierKeyInterface modifierKeyHolder, Point3d location, Point3d cameraLocation, Quat4d cameraRotation)
    {
-      if(!activeViewHolder.isActiveCamera(this))
+      if(graphics3dAdapter.getContextManager().getCurrentViewport() != viewportAdapter)
          return;
       
       if(modifierKeyHolder.isKeyPressed(Key.SHIFT))
@@ -1267,7 +1268,7 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
 
    public void mouseDragged(MouseButton mouseButton, double dx, double dy)
    {
-      if(!activeViewHolder.isActiveCamera(this))
+      if(graphics3dAdapter.getContextManager().getCurrentViewport() != viewportAdapter)
          return;
       
       switch(mouseButton)

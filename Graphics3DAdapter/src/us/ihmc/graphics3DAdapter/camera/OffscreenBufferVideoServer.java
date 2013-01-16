@@ -14,10 +14,10 @@ public class OffscreenBufferVideoServer
    
    public OffscreenBufferVideoServer(Graphics3DAdapter adapter, CameraMountList mountList, CameraConfiguration cameraConfiguration, CameraTrackingAndDollyPositionHolder cameraTrackingAndDollyPositionHolder, int width, int height, int port)
    {  
-      ViewportAdapter viewport = adapter.createNewViewport(null, false);
+      ViewportAdapter viewport = adapter.createNewViewport(null, false, true);
       viewport.setupOffscreenView(width, height);
       
-      ClassicCameraController cameraController = new ClassicCameraController(viewport, cameraTrackingAndDollyPositionHolder);
+      ClassicCameraController cameraController = new ClassicCameraController(adapter, viewport, cameraTrackingAndDollyPositionHolder);
       cameraController.setConfiguration(cameraConfiguration, mountList);
       viewport.setCameraController(cameraController);
       

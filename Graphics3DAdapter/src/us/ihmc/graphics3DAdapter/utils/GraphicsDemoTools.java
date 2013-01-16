@@ -51,7 +51,7 @@ public class GraphicsDemoTools
    }
    public static void addFirstCamera(Graphics3DAdapter graphics3DAdapter, PanBackAndForthTrackingAndDollyPositionHolder cameraTrackAndDollyVariablesHolder)
    {
-      ViewportAdapter viewportAdapter = graphics3DAdapter.createNewViewport(null, false);
+      ViewportAdapter viewportAdapter = graphics3DAdapter.createNewViewport(null, false, false);
       ClassicCameraController classicCameraController = ClassicCameraController.createClassicCameraControllerAndAddListeners(viewportAdapter,
                                                            cameraTrackAndDollyVariablesHolder, graphics3DAdapter);
       viewportAdapter.setCameraController(classicCameraController);
@@ -72,7 +72,7 @@ public class GraphicsDemoTools
 
    public static void addSecondCamera(Graphics3DAdapter graphics3DAdapter, PanBackAndForthTrackingAndDollyPositionHolder cameraTrackAndDollyVariablesHolder)
    {
-      ViewportAdapter secondCamera = graphics3DAdapter.createNewViewport(null, false);
+      ViewportAdapter secondCamera = graphics3DAdapter.createNewViewport(null, false, false);
       ClassicCameraController secondController = ClassicCameraController.createClassicCameraControllerAndAddListeners(secondCamera,
                                                     cameraTrackAndDollyVariablesHolder, graphics3DAdapter);
       secondCamera.setCameraController(secondController);

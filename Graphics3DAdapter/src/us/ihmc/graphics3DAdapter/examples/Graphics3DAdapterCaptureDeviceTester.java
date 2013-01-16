@@ -32,8 +32,8 @@ public class Graphics3DAdapterCaptureDeviceTester
 
       PanBackAndForthTrackingAndDollyPositionHolder cameraTrackAndDollyVariablesHolder = new PanBackAndForthTrackingAndDollyPositionHolder(0.0, 2.0, 0.2);
       
-      ViewportAdapter viewportAdapter = graphics3DAdapter.createNewViewport(null, false);
-      ClassicCameraController classicCameraController = new ClassicCameraController(viewportAdapter, cameraTrackAndDollyVariablesHolder);
+      ViewportAdapter viewportAdapter = graphics3DAdapter.createNewViewport(null, false, false);
+      ClassicCameraController classicCameraController = new ClassicCameraController(graphics3DAdapter, viewportAdapter, cameraTrackAndDollyVariablesHolder);
       classicCameraController.setTracking(true, true, false, false);
 
       viewportAdapter.setCameraController(classicCameraController);
