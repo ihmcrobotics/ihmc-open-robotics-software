@@ -169,16 +169,16 @@ public class LeeGoswamiGroundReactionWrenchDistributorTest
          frontLeft.setY(frontLeft.getY() + footWidth/2.0);
          
          Point3d frontRight = new Point3d(midfootLocation);
-         frontLeft.setX(frontLeft.getX() + footLength/2.0);
-         frontLeft.setY(frontLeft.getY() - footWidth/2.0);
+         frontRight.setX(frontLeft.getX() + footLength/2.0);
+         frontRight.setY(frontLeft.getY() - footWidth/2.0);
          
          Point3d backLeft = new Point3d(midfootLocation);
-         frontLeft.setX(frontLeft.getX() - footLength/2.0);
-         frontLeft.setY(frontLeft.getY() + footWidth/2.0);
+         backLeft.setX(frontLeft.getX() - footLength/2.0);
+         backLeft.setY(frontLeft.getY() + footWidth/2.0);
          
          Point3d backRight = new Point3d(midfootLocation);
-         frontLeft.setX(frontLeft.getX() - footLength/2.0);
-         frontLeft.setY(frontLeft.getY() - footWidth/2.0);
+         backRight.setX(frontLeft.getX() - footLength/2.0);
+         backRight.setY(frontLeft.getY() - footWidth/2.0);
          
          contactPoints.add(new FramePoint(ReferenceFrame.getWorldFrame(), frontLeft));
          contactPoints.add(new FramePoint(ReferenceFrame.getWorldFrame(), frontRight));

@@ -156,22 +156,27 @@ public class LeeGoswamiGroundReactionWrenchDistributor
       double epsilonF = this.epsilonF.getDoubleValue();
 
       // TODO: call force solver with phi, xi, and epsilonf
+      // TODO: set forces (expressed in CoM frame)
    }
 
+   // TODO: assumes that ankle is directly above origin of planeFrame for a contact state
    private void solveCoPsAndNormalTorques(HashMap<PlaneContactState, FramePoint2d> centersOfPressure, HashMap<PlaneContactState, Double> normalTorques,
            Vector3d desiredNetTorque, HashMap<PlaneContactState, FrameVector> forces)
    {
       // psiK, kappaK
       MatrixTools.setDenseMatrixFromTuple3d(kappaK, desiredNetTorque, 0, 0);
       int startColumn = 0;
+      
+      // TODO: garbage
+      DenseMatrix64F a = new DenseMatrix64F(VECTOR3D_LENGTH, VECTOR3D_LENGTH);
+      DenseMatrix64F skew = new DenseMatrix64F(VECTOR3D_LENGTH, VECTOR3D_LENGTH);
+      FramePoint ankle = new FramePoint(ReferenceFrame.getWorldFrame());
+
       for (PlaneContactState contactState : contactStates)
       {
          FrameVector force = forces.get(contactState);
-
-         DenseMatrix64F a = new DenseMatrix64F(VECTOR3D_LENGTH, VECTOR3D_LENGTH);
          force.changeFrame(centerOfMassFrame);
 
-         DenseMatrix64F skew = new DenseMatrix64F(VECTOR3D_LENGTH, VECTOR3D_LENGTH);
          MatrixTools.vectorToSkewSymmetricMatrix(skew, force.getVector());
 
          Transform3D transform = contactState.getBodyFrame().getTransformToDesiredFrame(centerOfMassFrame);
@@ -182,15 +187,15 @@ public class LeeGoswamiGroundReactionWrenchDistributor
          CommonOps.mult(-1.0, skew, rotationMatrix, a);
 
          // update psiK
-         CommonOps.extract(a, 0, a.getNumRows(), 0, 2, psik, 0, startColumn);
-         CommonOps.extract(rotationMatrix, 0, rotationMatrix.getNumRows(), 2, 3, psik, 0, startColumn + 2);
+         CommonOps.extract(a, 0, a.getNumRows(), 0, 2, psik, 0, startColumn); // first two columns of A
+         CommonOps.extract(rotationMatrix, 0, rotationMatrix.getNumRows(), 2, 3, psik, 0, startColumn + 2); // last column of R
          startColumn += VECTOR3D_LENGTH;
 
          // update kappaK
-         FramePoint ankle = new FramePoint(contactState.getBodyFrame());
+         ankle.setToZero(contactState.getBodyFrame());
          ankle.changeFrame(contactState.getPlaneFrame());
          double ankleHeight = ankle.getZ();
-         MatrixTools.addMatrixBlock(kappaK, 0, 0, a, 0, 2, a.getNumRows(), 1, ankleHeight);
+         MatrixTools.addMatrixBlock(kappaK, 0, 0, a, 0, 2, a.getNumRows(), 1, ankleHeight); // last column of A times h
       }
 
       // etaMin, etaMax (assumes rectangular feet)
@@ -210,6 +215,7 @@ public class LeeGoswamiGroundReactionWrenchDistributor
 
          for (FramePoint2d contactPoint : contactPoints)
          {
+            contactPoint.changeFrame(contactState.getPlaneFrame());
             double x = contactPoint.getX();
             double y = contactPoint.getY();
             if (x < xMin)
@@ -229,6 +235,8 @@ public class LeeGoswamiGroundReactionWrenchDistributor
          etaMax.set(startRow + 0, 0, xMax);
          etaMax.set(startRow + 1, 0, yMax);
          etaMax.set(startRow + 2, 0, tauMax);
+
+         startRow += VECTOR3D_LENGTH;
       }
 
       // etad (average of min and max for now; could change later
