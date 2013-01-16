@@ -4,6 +4,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import javax.media.j3d.Transform3D;
+import javax.vecmath.Matrix3d;
+import javax.vecmath.Vector3d;
+
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
@@ -25,10 +29,16 @@ public class LeeGoswamiGroundReactionWrenchDistributor
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final DoubleYoVariable wk = new DoubleYoVariable("wk", registry);    // TODO: better name
+   private final DoubleYoVariable wf = new DoubleYoVariable("wf", registry);    // TODO: better name
+   private final DoubleYoVariable epsilonF = new DoubleYoVariable("epsilonF", registry);    // TODO: better name
+   private final DoubleYoVariable epsilonP = new DoubleYoVariable("epsilonP", registry);    // TODO: better name
+
    private final ReferenceFrame centerOfMassFrame;
 
    private final List<PlaneContactState> contactStates = new ArrayList<PlaneContactState>();
    private final HashMap<PlaneContactState, Double> coefficientsOfFriction = new HashMap<PlaneContactState, Double>();
+   private final HashMap<PlaneContactState, Double> rotationalCoefficientsOfFriction = new HashMap<PlaneContactState, Double>();
+
    private final HashMap<PlaneContactState, FrameVector> forces = new HashMap<PlaneContactState, FrameVector>();
    private final HashMap<PlaneContactState, FramePoint2d> centersOfPressure = new HashMap<PlaneContactState, FramePoint2d>();
    private final HashMap<PlaneContactState, Double> normalTorques = new HashMap<PlaneContactState, Double>();
@@ -37,10 +47,19 @@ public class LeeGoswamiGroundReactionWrenchDistributor
    private final FrameVector gravitationalForce;
    private final int nSupportVectors;
 
-   private final DenseMatrix64F phi;
-   private final DenseMatrix64F beta;
-   private final DenseMatrix64F delta;
-   private final DenseMatrix64F xi;
+   private final DenseMatrix64F phi = new DenseMatrix64F(0);    // note: this is phi as in the paper *without* the bottom epsilonF * 1 block
+   private final DenseMatrix64F beta = new DenseMatrix64F(0);
+   private final DenseMatrix64F delta = new DenseMatrix64F(0);
+   private final DenseMatrix64F xi = new DenseMatrix64F(0);    // note this is xi as in the paper *without* the zeros appended at the end
+
+   private final DenseMatrix64F psik = new DenseMatrix64F(0);
+   private final DenseMatrix64F kappaK = new DenseMatrix64F(0);
+   private final DenseMatrix64F etaMin = new DenseMatrix64F(0);
+   private final DenseMatrix64F etaMax = new DenseMatrix64F(0);
+   private final DenseMatrix64F etaD = new DenseMatrix64F(0);
+
+   private final Matrix3d tempMatrix = new Matrix3d();
+
 
    public LeeGoswamiGroundReactionWrenchDistributor(ReferenceFrame centerOfMassFrame, FrameVector gravitationalAcceleration, double mass, int nSupportVectors,
            YoVariableRegistry parentRegistry)
@@ -52,38 +71,57 @@ public class LeeGoswamiGroundReactionWrenchDistributor
       gravitationalForce.changeFrame(centerOfMassFrame);
 
       this.nSupportVectors = nSupportVectors;
-      int defaultNumberOfContacts = 2;    // reshape stuff later
-      phi = new DenseMatrix64F(Momentum.SIZE, defaultNumberOfContacts * nSupportVectors);
-      beta = new DenseMatrix64F(VECTOR3D_LENGTH, defaultNumberOfContacts * nSupportVectors);
-      delta = new DenseMatrix64F(VECTOR3D_LENGTH, defaultNumberOfContacts * nSupportVectors);
-      xi = new DenseMatrix64F(Momentum.SIZE, 1);
 
       parentRegistry.addChild(registry);
    }
 
    public void reset()
    {
+      // TODO: keep a storage of setting and result objects that persists and can be coupled to different contact states 
       contactStates.clear();
       coefficientsOfFriction.clear();
+      rotationalCoefficientsOfFriction.clear();
       forces.clear();
       centersOfPressure.clear();
       normalTorques.clear();
    }
 
-   public void addContact(PlaneContactState contactState, double coefficientOfFriction)
+   public void addContact(PlaneContactState contactState, double coefficientOfFriction, double rotationalCoefficientOfFriction)
    {
-      // TODO: reshape matrices, update hashmaps
+      contactStates.add(contactState);
+      coefficientsOfFriction.put(contactState, coefficientOfFriction);
+      rotationalCoefficientsOfFriction.put(contactState, rotationalCoefficientOfFriction);
+      forces.put(contactState, new FrameVector(contactState.getBodyFrame()));
+      centersOfPressure.put(contactState, new FramePoint2d(contactState.getPlaneFrame()));
+      normalTorques.put(contactState, 0.0);
+
+      int nContacts = contactStates.size();
+      phi.reshape(Momentum.SIZE, nContacts * nSupportVectors);
+      beta.reshape(VECTOR3D_LENGTH, nContacts * nSupportVectors);
+      delta.reshape(VECTOR3D_LENGTH, nContacts * nSupportVectors);
+      xi.reshape(Momentum.SIZE, 1);
+
+      psik.reshape(VECTOR3D_LENGTH, nContacts * VECTOR3D_LENGTH);
+      kappaK.reshape(VECTOR3D_LENGTH, 1);
+      etaMin.reshape(nContacts * VECTOR3D_LENGTH, 1);
+      etaMax.reshape(nContacts * VECTOR3D_LENGTH, 1);
+      etaD.reshape(nContacts * VECTOR3D_LENGTH, 1);
    }
 
-   public void solve(SpatialForceVector groundReactionWrench)
+   public void solve(SpatialForceVector desiredNetSpatialForceVector)
    {
-      int nContacts = coefficientsOfFriction.size();
+      desiredNetSpatialForceVector.changeFrame(centerOfMassFrame);
 
+      solveForces(forces, desiredNetSpatialForceVector);
+      solveCoPsAndNormalTorques(centersOfPressure, normalTorques, desiredNetSpatialForceVector.getAngularPartCopy(), forces);
+   }
+
+   private void solveForces(HashMap<PlaneContactState, FrameVector> forces, SpatialForceVector desiredNetSpatialForceVector)
+   {
       // phi
       int startColumn = 0;
-      for (int i = 0; i < nContacts; i++)
+      for (PlaneContactState contactState : contactStates)
       {
-         PlaneContactState contactState = contactStates.get(i);
          double mu = coefficientsOfFriction.get(contactState);
 
          // update beta
@@ -104,7 +142,101 @@ public class LeeGoswamiGroundReactionWrenchDistributor
       MatrixTools.setMatrixBlock(delta, 0, 0, phi, startRow, 0, delta.getNumRows(), delta.getNumCols(), wk.getDoubleValue());
       startRow += delta.getNumRows();
 
-      // TODO: epsilonf * eye(nFeet * nSupportVectors)
+      // xi
+      Vector3d desiredNetForce = new Vector3d();
+      desiredNetSpatialForceVector.packLinearPart(desiredNetForce);
+      desiredNetForce.sub(gravitationalForce.getVector());
+      MatrixTools.setDenseMatrixFromTuple3d(xi, desiredNetForce, 0, 0);
+
+      Vector3d desiredNetTorque = new Vector3d();
+      desiredNetSpatialForceVector.packAngularPart(desiredNetTorque);
+      desiredNetTorque.scale(wf.getDoubleValue());
+      MatrixTools.setDenseMatrixFromTuple3d(xi, desiredNetTorque, VECTOR3D_LENGTH, 0);
+
+      double epsilonF = this.epsilonF.getDoubleValue();
+
+      // TODO: call force solver with phi, xi, and epsilonf
+   }
+
+   private void solveCoPsAndNormalTorques(HashMap<PlaneContactState, FramePoint2d> centersOfPressure, HashMap<PlaneContactState, Double> normalTorques,
+           Vector3d desiredNetTorque, HashMap<PlaneContactState, FrameVector> forces)
+   {
+      // psiK, kappaK
+      MatrixTools.setDenseMatrixFromTuple3d(kappaK, desiredNetTorque, 0, 0);
+      int startColumn = 0;
+      for (PlaneContactState contactState : contactStates)
+      {
+         FrameVector force = forces.get(contactState);
+
+         DenseMatrix64F a = new DenseMatrix64F(VECTOR3D_LENGTH, VECTOR3D_LENGTH);
+         force.changeFrame(centerOfMassFrame);
+
+         DenseMatrix64F skew = new DenseMatrix64F(VECTOR3D_LENGTH, VECTOR3D_LENGTH);
+         MatrixTools.vectorToSkewSymmetricMatrix(skew, force.getVector());
+
+         Transform3D transform = contactState.getBodyFrame().getTransformToDesiredFrame(centerOfMassFrame);
+         transform.get(tempMatrix);
+         DenseMatrix64F rotationMatrix = new DenseMatrix64F(VECTOR3D_LENGTH, VECTOR3D_LENGTH);
+         MatrixTools.setDenseMatrixFromMatrix3d(0, 0, tempMatrix, rotationMatrix);
+
+         CommonOps.mult(-1.0, skew, rotationMatrix, a);
+
+         // update psiK
+         CommonOps.extract(a, 0, a.getNumRows(), 0, 2, psik, 0, startColumn);
+         CommonOps.extract(rotationMatrix, 0, rotationMatrix.getNumRows(), 2, 3, psik, 0, startColumn + 2);
+         startColumn += VECTOR3D_LENGTH;
+
+         // update kappaK
+         FramePoint ankle = new FramePoint(contactState.getBodyFrame());
+         ankle.changeFrame(contactState.getPlaneFrame());
+         double ankleHeight = ankle.getZ();
+         MatrixTools.addMatrixBlock(kappaK, 0, 0, a, 0, 2, a.getNumRows(), 1, ankleHeight);
+      }
+
+      // etaMin, etaMax (assumes rectangular feet)
+      int startRow = 0;
+      for (PlaneContactState contactState : contactStates)
+      {
+         FrameVector force = forces.get(contactState);
+         force.changeFrame(contactState.getPlaneFrame());
+         double normalForce = force.getZ();
+         double tauMax = rotationalCoefficientsOfFriction.get(contactState) * normalForce;
+
+         List<FramePoint2d> contactPoints = contactState.getContactPoints2d();
+         double xMin = Double.POSITIVE_INFINITY;
+         double xMax = Double.NEGATIVE_INFINITY;
+         double yMin = Double.POSITIVE_INFINITY;
+         double yMax = Double.NEGATIVE_INFINITY;
+
+         for (FramePoint2d contactPoint : contactPoints)
+         {
+            double x = contactPoint.getX();
+            double y = contactPoint.getY();
+            if (x < xMin)
+               xMin = x;
+            if (x > xMax)
+               xMax = x;
+            if (y < yMin)
+               yMin = y;
+            if (y > yMax)
+               yMax = y;
+         }
+
+         etaMin.set(startRow + 0, 0, xMin);
+         etaMin.set(startRow + 1, 0, yMin);
+         etaMin.set(startRow + 2, 0, -tauMax);
+
+         etaMax.set(startRow + 0, 0, xMax);
+         etaMax.set(startRow + 1, 0, yMax);
+         etaMax.set(startRow + 2, 0, tauMax);
+      }
+
+      // etad (average of min and max for now; could change later
+      CommonOps.add(0.5, etaMin, etaMax, etaD);
+
+      double epsilonP = this.epsilonP.getDoubleValue();
+
+      // TODO: call CoP solver with Psi, kappa, etaMin, etaMax, etad, and epsilonP
    }
 
    public FramePoint2d getCenterOfPressure(PlaneContactState contactState)
