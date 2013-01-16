@@ -64,7 +64,7 @@ public class Graphics3DAdapterExampleTwo
       node2.addSelectedListener(selectedListener);
 
       SimpleCameraTrackingAndDollyPositionHolder cameraTrackAndDollyVariablesHolder = new SimpleCameraTrackingAndDollyPositionHolder();
-      ViewportAdapter camera = adapter.createNewViewport(null, false);
+      ViewportAdapter camera = adapter.createNewViewport(null, false, false);
       ClassicCameraController classicCameraController = ClassicCameraController.createClassicCameraControllerAndAddListeners(camera, cameraTrackAndDollyVariablesHolder, adapter);
       camera.setCameraController(classicCameraController);
       Canvas canvas = camera.getCanvas();

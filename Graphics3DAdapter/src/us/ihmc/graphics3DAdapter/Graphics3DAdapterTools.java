@@ -17,7 +17,7 @@ public class Graphics3DAdapterTools
    
    public static void createNewWindow(Graphics3DAdapter graphics3DAdapter, String title, int width, int height)
    {
-      ViewportAdapter viewportAdapter = graphics3DAdapter.createNewViewport(null, false);
+      ViewportAdapter viewportAdapter = graphics3DAdapter.createNewViewport(null, false, false);
       CameraTrackingAndDollyPositionHolder cameraTrackingAndDollyPositionHolder = new SimpleCameraTrackingAndDollyPositionHolder();
       ClassicCameraController classicCameraController = ClassicCameraController.createClassicCameraControllerAndAddListeners(viewportAdapter, cameraTrackingAndDollyPositionHolder, graphics3DAdapter);
       viewportAdapter.setCameraController(classicCameraController);
