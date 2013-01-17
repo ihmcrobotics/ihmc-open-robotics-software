@@ -11,7 +11,7 @@ Vars vars;
 Params params;
 Workspace work;
 Settings settings;
-#define NUMTESTS 0
+#define NUMTESTS 1
 int main(int argc, char **argv) {
   int num_iters;
 #if (NUMTESTS > 0)
@@ -25,8 +25,16 @@ int main(int argc, char **argv) {
   /* Solve problem instance for the record. */
   settings.verbose = 1;
   num_iters = solve();
+
 #ifndef ZERO_LIBRARY_MODE
 #if (NUMTESTS > 0)
+
+  printf("rho:\n");
+  for (i = 0; i < 8; i++)
+  {
+	  printf("%.5f\n", vars.rho[i]);
+  }
+
   /* Now solve multiple problem instances for timing purposes. */
   settings.verbose = 0;
   tic();
