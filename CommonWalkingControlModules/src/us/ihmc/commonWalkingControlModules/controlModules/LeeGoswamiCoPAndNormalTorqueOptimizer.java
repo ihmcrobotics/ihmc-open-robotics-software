@@ -154,7 +154,7 @@ public class LeeGoswamiCoPAndNormalTorqueOptimizer
       double epsilonCoP = this.epsilonCoP.getDoubleValue();
       double epsilonTauN = this.epsilonTauN.getDoubleValue();
 
-      double[] copsAndNormalTorques = leeGoswamiCoPAndNormalTorqueOptimizerNative.solve(psik, kappaK, etaMax, etaMax, epsilonCoP, epsilonTauN);
+      double[] copsAndNormalTorques = leeGoswamiCoPAndNormalTorqueOptimizerNative.solve(psik, kappaK, etaMin, etaMax, epsilonCoP, epsilonTauN);
 
       int index = 0;
       for (PlaneContactState contactState : centersOfPressure.keySet())
