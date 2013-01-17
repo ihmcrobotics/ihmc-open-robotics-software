@@ -1,4 +1,4 @@
-/* Produced by CVXGEN, 2013-01-17 22:23:42 +0000.  */
+/* Produced by CVXGEN, 2013-01-17 22:52:37 +0000.  */
 /* CVXGEN is Copyright (C) 2006-2012 Jacob Mattingley, jem@cvxgen.com. */
 /* The code in this file is Copyright (C) 2006-2012 Jacob Mattingley. */
 /* CVXGEN, or solvers produced by CVXGEN, cannot be used for commercial */
@@ -27,8 +27,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
   const char *status_names[] = {"optval", "gap", "steps", "converged"};
   mwSize dims1x1of1[1] = {1};
   mwSize dims[1];
-  const char *var_names[] = {"eta_1", "eta_2", "eta"};
-  const int num_var_names = 3;
+  const char *var_names[] = {"eta"};
+  const int num_var_names = 1;
   /* Avoid compiler warnings of unused variables by using a dummy assignment. */
   warned_diags = j = 0;
   extra_solves = 0;
@@ -70,71 +70,30 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
   }
   valid_vars = 0;
   this_var_errors = 0;
-  xm = mxGetField(prhs[0], 0, "Psi_k_1");
+  xm = mxGetField(prhs[0], 0, "Psi_k");
   if (xm == NULL) {
-    /* Attempt to pull Psi_k_1 from a cell array, as an additional option. */
-    cell = mxGetField(prhs[0], 0, "Psi_k");
-    if (cell != NULL)
-      xm = mxGetCell(cell, 0);
-  }
-  if (xm == NULL) {
-    printf("could not find params.Psi_k_1 or params.Psi_k{1}.\n");
+    printf("could not find params.Psi_k.\n");
   } else {
-    if (!((mxGetM(xm) == 3) && (mxGetN(xm) == 3))) {
-      printf("Psi_k_1 must be size (3,3), not (%d,%d).\n", mxGetM(xm), mxGetN(xm));
+    if (!((mxGetM(xm) == 3) && (mxGetN(xm) == 6))) {
+      printf("Psi_k must be size (3,6), not (%d,%d).\n", mxGetM(xm), mxGetN(xm));
       this_var_errors++;
     }
     if (mxIsComplex(xm)) {
-      printf("parameter Psi_k_1 must be real.\n");
+      printf("parameter Psi_k must be real.\n");
       this_var_errors++;
     }
     if (!mxIsClass(xm, "double")) {
-      printf("parameter Psi_k_1 must be a full matrix of doubles.\n");
+      printf("parameter Psi_k must be a full matrix of doubles.\n");
       this_var_errors++;
     }
     if (mxIsSparse(xm)) {
-      printf("parameter Psi_k_1 must be a full matrix.\n");
+      printf("parameter Psi_k must be a full matrix.\n");
       this_var_errors++;
     }
     if (this_var_errors == 0) {
-      dest = params.Psi_k_1;
+      dest = params.Psi_k;
       src = mxGetPr(xm);
-      for (i = 0; i < 9; i++)
-        *dest++ = *src++;
-      valid_vars++;
-    }
-  }
-  this_var_errors = 0;
-  xm = mxGetField(prhs[0], 0, "Psi_k_2");
-  if (xm == NULL) {
-    /* Attempt to pull Psi_k_2 from a cell array, as an additional option. */
-    cell = mxGetField(prhs[0], 0, "Psi_k");
-    if (cell != NULL)
-      xm = mxGetCell(cell, 1);
-  }
-  if (xm == NULL) {
-    printf("could not find params.Psi_k_2 or params.Psi_k{2}.\n");
-  } else {
-    if (!((mxGetM(xm) == 3) && (mxGetN(xm) == 3))) {
-      printf("Psi_k_2 must be size (3,3), not (%d,%d).\n", mxGetM(xm), mxGetN(xm));
-      this_var_errors++;
-    }
-    if (mxIsComplex(xm)) {
-      printf("parameter Psi_k_2 must be real.\n");
-      this_var_errors++;
-    }
-    if (!mxIsClass(xm, "double")) {
-      printf("parameter Psi_k_2 must be a full matrix of doubles.\n");
-      this_var_errors++;
-    }
-    if (mxIsSparse(xm)) {
-      printf("parameter Psi_k_2 must be a full matrix.\n");
-      this_var_errors++;
-    }
-    if (this_var_errors == 0) {
-      dest = params.Psi_k_2;
-      src = mxGetPr(xm);
-      for (i = 0; i < 9; i++)
+      for (i = 0; i < 18; i++)
         *dest++ = *src++;
       valid_vars++;
     }
@@ -144,8 +103,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
   if (xm == NULL) {
     printf("could not find params.epsilon.\n");
   } else {
-    if (!((mxGetM(xm) == 3) && (mxGetN(xm) == 3))) {
-      printf("epsilon must be size (3,3), not (%d,%d).\n", mxGetM(xm), mxGetN(xm));
+    if (!((mxGetM(xm) == 6) && (mxGetN(xm) == 6))) {
+      printf("epsilon must be size (6,6), not (%d,%d).\n", mxGetM(xm), mxGetN(xm));
       this_var_errors++;
     }
     if (mxIsComplex(xm)) {
@@ -163,319 +122,155 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     if (this_var_errors == 0) {
       dest = params.epsilon;
       src = mxGetPr(xm);
-      for (i = 0; i < 9; i++)
+      warned_diags = 0;
+      for (i = 0; i < 6; i++) {
+        for (j = 0; j < 6; j++) {
+          if (i == j) {
+            *dest++ = *src;
+          } else if (!warned_diags && (*src != 0)) {
+            printf("\n!!! Warning: ignoring off-diagonal elements in epsilon !!!\n\n");
+            warned_diags = 1;
+          }
+          src++;
+        }
+      }
+      valid_vars++;
+    }
+  }
+  this_var_errors = 0;
+  xm = mxGetField(prhs[0], 0, "eta_d");
+  if (xm == NULL) {
+    printf("could not find params.eta_d.\n");
+  } else {
+    if (!((mxGetM(xm) == 6) && (mxGetN(xm) == 1))) {
+      printf("eta_d must be size (6,1), not (%d,%d).\n", mxGetM(xm), mxGetN(xm));
+      this_var_errors++;
+    }
+    if (mxIsComplex(xm)) {
+      printf("parameter eta_d must be real.\n");
+      this_var_errors++;
+    }
+    if (!mxIsClass(xm, "double")) {
+      printf("parameter eta_d must be a full matrix of doubles.\n");
+      this_var_errors++;
+    }
+    if (mxIsSparse(xm)) {
+      printf("parameter eta_d must be a full matrix.\n");
+      this_var_errors++;
+    }
+    if (this_var_errors == 0) {
+      dest = params.eta_d;
+      src = mxGetPr(xm);
+      for (i = 0; i < 6; i++)
         *dest++ = *src++;
       valid_vars++;
     }
   }
   this_var_errors = 0;
-  xm = mxGetField(prhs[0], 0, "eta_d_1");
+  xm = mxGetField(prhs[0], 0, "etamax");
   if (xm == NULL) {
-    /* Attempt to pull eta_d_1 from a cell array, as an additional option. */
-    cell = mxGetField(prhs[0], 0, "eta_d");
-    if (cell != NULL)
-      xm = mxGetCell(cell, 0);
-  }
-  if (xm == NULL) {
-    printf("could not find params.eta_d_1 or params.eta_d{1}.\n");
+    printf("could not find params.etamax.\n");
   } else {
-    if (!((mxGetM(xm) == 3) && (mxGetN(xm) == 1))) {
-      printf("eta_d_1 must be size (3,1), not (%d,%d).\n", mxGetM(xm), mxGetN(xm));
+    if (!((mxGetM(xm) == 6) && (mxGetN(xm) == 1))) {
+      printf("etamax must be size (6,1), not (%d,%d).\n", mxGetM(xm), mxGetN(xm));
       this_var_errors++;
     }
     if (mxIsComplex(xm)) {
-      printf("parameter eta_d_1 must be real.\n");
+      printf("parameter etamax must be real.\n");
       this_var_errors++;
     }
     if (!mxIsClass(xm, "double")) {
-      printf("parameter eta_d_1 must be a full matrix of doubles.\n");
+      printf("parameter etamax must be a full matrix of doubles.\n");
       this_var_errors++;
     }
     if (mxIsSparse(xm)) {
-      printf("parameter eta_d_1 must be a full matrix.\n");
+      printf("parameter etamax must be a full matrix.\n");
       this_var_errors++;
     }
     if (this_var_errors == 0) {
-      dest = params.eta_d_1;
+      dest = params.etamax;
+      src = mxGetPr(xm);
+      for (i = 0; i < 6; i++)
+        *dest++ = *src++;
+      valid_vars++;
+    }
+  }
+  this_var_errors = 0;
+  xm = mxGetField(prhs[0], 0, "etamin");
+  if (xm == NULL) {
+    printf("could not find params.etamin.\n");
+  } else {
+    if (!((mxGetM(xm) == 6) && (mxGetN(xm) == 1))) {
+      printf("etamin must be size (6,1), not (%d,%d).\n", mxGetM(xm), mxGetN(xm));
+      this_var_errors++;
+    }
+    if (mxIsComplex(xm)) {
+      printf("parameter etamin must be real.\n");
+      this_var_errors++;
+    }
+    if (!mxIsClass(xm, "double")) {
+      printf("parameter etamin must be a full matrix of doubles.\n");
+      this_var_errors++;
+    }
+    if (mxIsSparse(xm)) {
+      printf("parameter etamin must be a full matrix.\n");
+      this_var_errors++;
+    }
+    if (this_var_errors == 0) {
+      dest = params.etamin;
+      src = mxGetPr(xm);
+      for (i = 0; i < 6; i++)
+        *dest++ = *src++;
+      valid_vars++;
+    }
+  }
+  this_var_errors = 0;
+  xm = mxGetField(prhs[0], 0, "kappa_k");
+  if (xm == NULL) {
+    printf("could not find params.kappa_k.\n");
+  } else {
+    if (!((mxGetM(xm) == 3) && (mxGetN(xm) == 1))) {
+      printf("kappa_k must be size (3,1), not (%d,%d).\n", mxGetM(xm), mxGetN(xm));
+      this_var_errors++;
+    }
+    if (mxIsComplex(xm)) {
+      printf("parameter kappa_k must be real.\n");
+      this_var_errors++;
+    }
+    if (!mxIsClass(xm, "double")) {
+      printf("parameter kappa_k must be a full matrix of doubles.\n");
+      this_var_errors++;
+    }
+    if (mxIsSparse(xm)) {
+      printf("parameter kappa_k must be a full matrix.\n");
+      this_var_errors++;
+    }
+    if (this_var_errors == 0) {
+      dest = params.kappa_k;
       src = mxGetPr(xm);
       for (i = 0; i < 3; i++)
         *dest++ = *src++;
       valid_vars++;
     }
   }
-  this_var_errors = 0;
-  xm = mxGetField(prhs[0], 0, "eta_d_2");
-  if (xm == NULL) {
-    /* Attempt to pull eta_d_2 from a cell array, as an additional option. */
-    cell = mxGetField(prhs[0], 0, "eta_d");
-    if (cell != NULL)
-      xm = mxGetCell(cell, 1);
-  }
-  if (xm == NULL) {
-    printf("could not find params.eta_d_2 or params.eta_d{2}.\n");
-  } else {
-    if (!((mxGetM(xm) == 3) && (mxGetN(xm) == 1))) {
-      printf("eta_d_2 must be size (3,1), not (%d,%d).\n", mxGetM(xm), mxGetN(xm));
-      this_var_errors++;
-    }
-    if (mxIsComplex(xm)) {
-      printf("parameter eta_d_2 must be real.\n");
-      this_var_errors++;
-    }
-    if (!mxIsClass(xm, "double")) {
-      printf("parameter eta_d_2 must be a full matrix of doubles.\n");
-      this_var_errors++;
-    }
-    if (mxIsSparse(xm)) {
-      printf("parameter eta_d_2 must be a full matrix.\n");
-      this_var_errors++;
-    }
-    if (this_var_errors == 0) {
-      dest = params.eta_d_2;
-      src = mxGetPr(xm);
-      for (i = 0; i < 3; i++)
-        *dest++ = *src++;
-      valid_vars++;
-    }
-  }
-  this_var_errors = 0;
-  xm = mxGetField(prhs[0], 0, "etamax_1");
-  if (xm == NULL) {
-    /* Attempt to pull etamax_1 from a cell array, as an additional option. */
-    cell = mxGetField(prhs[0], 0, "etamax");
-    if (cell != NULL)
-      xm = mxGetCell(cell, 0);
-  }
-  if (xm == NULL) {
-    printf("could not find params.etamax_1 or params.etamax{1}.\n");
-  } else {
-    if (!((mxGetM(xm) == 3) && (mxGetN(xm) == 1))) {
-      printf("etamax_1 must be size (3,1), not (%d,%d).\n", mxGetM(xm), mxGetN(xm));
-      this_var_errors++;
-    }
-    if (mxIsComplex(xm)) {
-      printf("parameter etamax_1 must be real.\n");
-      this_var_errors++;
-    }
-    if (!mxIsClass(xm, "double")) {
-      printf("parameter etamax_1 must be a full matrix of doubles.\n");
-      this_var_errors++;
-    }
-    if (mxIsSparse(xm)) {
-      printf("parameter etamax_1 must be a full matrix.\n");
-      this_var_errors++;
-    }
-    if (this_var_errors == 0) {
-      dest = params.etamax_1;
-      src = mxGetPr(xm);
-      for (i = 0; i < 3; i++)
-        *dest++ = *src++;
-      valid_vars++;
-    }
-  }
-  this_var_errors = 0;
-  xm = mxGetField(prhs[0], 0, "etamax_2");
-  if (xm == NULL) {
-    /* Attempt to pull etamax_2 from a cell array, as an additional option. */
-    cell = mxGetField(prhs[0], 0, "etamax");
-    if (cell != NULL)
-      xm = mxGetCell(cell, 1);
-  }
-  if (xm == NULL) {
-    printf("could not find params.etamax_2 or params.etamax{2}.\n");
-  } else {
-    if (!((mxGetM(xm) == 3) && (mxGetN(xm) == 1))) {
-      printf("etamax_2 must be size (3,1), not (%d,%d).\n", mxGetM(xm), mxGetN(xm));
-      this_var_errors++;
-    }
-    if (mxIsComplex(xm)) {
-      printf("parameter etamax_2 must be real.\n");
-      this_var_errors++;
-    }
-    if (!mxIsClass(xm, "double")) {
-      printf("parameter etamax_2 must be a full matrix of doubles.\n");
-      this_var_errors++;
-    }
-    if (mxIsSparse(xm)) {
-      printf("parameter etamax_2 must be a full matrix.\n");
-      this_var_errors++;
-    }
-    if (this_var_errors == 0) {
-      dest = params.etamax_2;
-      src = mxGetPr(xm);
-      for (i = 0; i < 3; i++)
-        *dest++ = *src++;
-      valid_vars++;
-    }
-  }
-  this_var_errors = 0;
-  xm = mxGetField(prhs[0], 0, "etamin_1");
-  if (xm == NULL) {
-    /* Attempt to pull etamin_1 from a cell array, as an additional option. */
-    cell = mxGetField(prhs[0], 0, "etamin");
-    if (cell != NULL)
-      xm = mxGetCell(cell, 0);
-  }
-  if (xm == NULL) {
-    printf("could not find params.etamin_1 or params.etamin{1}.\n");
-  } else {
-    if (!((mxGetM(xm) == 3) && (mxGetN(xm) == 1))) {
-      printf("etamin_1 must be size (3,1), not (%d,%d).\n", mxGetM(xm), mxGetN(xm));
-      this_var_errors++;
-    }
-    if (mxIsComplex(xm)) {
-      printf("parameter etamin_1 must be real.\n");
-      this_var_errors++;
-    }
-    if (!mxIsClass(xm, "double")) {
-      printf("parameter etamin_1 must be a full matrix of doubles.\n");
-      this_var_errors++;
-    }
-    if (mxIsSparse(xm)) {
-      printf("parameter etamin_1 must be a full matrix.\n");
-      this_var_errors++;
-    }
-    if (this_var_errors == 0) {
-      dest = params.etamin_1;
-      src = mxGetPr(xm);
-      for (i = 0; i < 3; i++)
-        *dest++ = *src++;
-      valid_vars++;
-    }
-  }
-  this_var_errors = 0;
-  xm = mxGetField(prhs[0], 0, "etamin_2");
-  if (xm == NULL) {
-    /* Attempt to pull etamin_2 from a cell array, as an additional option. */
-    cell = mxGetField(prhs[0], 0, "etamin");
-    if (cell != NULL)
-      xm = mxGetCell(cell, 1);
-  }
-  if (xm == NULL) {
-    printf("could not find params.etamin_2 or params.etamin{2}.\n");
-  } else {
-    if (!((mxGetM(xm) == 3) && (mxGetN(xm) == 1))) {
-      printf("etamin_2 must be size (3,1), not (%d,%d).\n", mxGetM(xm), mxGetN(xm));
-      this_var_errors++;
-    }
-    if (mxIsComplex(xm)) {
-      printf("parameter etamin_2 must be real.\n");
-      this_var_errors++;
-    }
-    if (!mxIsClass(xm, "double")) {
-      printf("parameter etamin_2 must be a full matrix of doubles.\n");
-      this_var_errors++;
-    }
-    if (mxIsSparse(xm)) {
-      printf("parameter etamin_2 must be a full matrix.\n");
-      this_var_errors++;
-    }
-    if (this_var_errors == 0) {
-      dest = params.etamin_2;
-      src = mxGetPr(xm);
-      for (i = 0; i < 3; i++)
-        *dest++ = *src++;
-      valid_vars++;
-    }
-  }
-  this_var_errors = 0;
-  xm = mxGetField(prhs[0], 0, "kappa_k_1");
-  if (xm == NULL) {
-    /* Attempt to pull kappa_k_1 from a cell array, as an additional option. */
-    cell = mxGetField(prhs[0], 0, "kappa_k");
-    if (cell != NULL)
-      xm = mxGetCell(cell, 0);
-  }
-  if (xm == NULL) {
-    printf("could not find params.kappa_k_1 or params.kappa_k{1}.\n");
-  } else {
-    if (!((mxGetM(xm) == 3) && (mxGetN(xm) == 1))) {
-      printf("kappa_k_1 must be size (3,1), not (%d,%d).\n", mxGetM(xm), mxGetN(xm));
-      this_var_errors++;
-    }
-    if (mxIsComplex(xm)) {
-      printf("parameter kappa_k_1 must be real.\n");
-      this_var_errors++;
-    }
-    if (!mxIsClass(xm, "double")) {
-      printf("parameter kappa_k_1 must be a full matrix of doubles.\n");
-      this_var_errors++;
-    }
-    if (mxIsSparse(xm)) {
-      printf("parameter kappa_k_1 must be a full matrix.\n");
-      this_var_errors++;
-    }
-    if (this_var_errors == 0) {
-      dest = params.kappa_k_1;
-      src = mxGetPr(xm);
-      for (i = 0; i < 3; i++)
-        *dest++ = *src++;
-      valid_vars++;
-    }
-  }
-  this_var_errors = 0;
-  xm = mxGetField(prhs[0], 0, "kappa_k_2");
-  if (xm == NULL) {
-    /* Attempt to pull kappa_k_2 from a cell array, as an additional option. */
-    cell = mxGetField(prhs[0], 0, "kappa_k");
-    if (cell != NULL)
-      xm = mxGetCell(cell, 1);
-  }
-  if (xm == NULL) {
-    printf("could not find params.kappa_k_2 or params.kappa_k{2}.\n");
-  } else {
-    if (!((mxGetM(xm) == 3) && (mxGetN(xm) == 1))) {
-      printf("kappa_k_2 must be size (3,1), not (%d,%d).\n", mxGetM(xm), mxGetN(xm));
-      this_var_errors++;
-    }
-    if (mxIsComplex(xm)) {
-      printf("parameter kappa_k_2 must be real.\n");
-      this_var_errors++;
-    }
-    if (!mxIsClass(xm, "double")) {
-      printf("parameter kappa_k_2 must be a full matrix of doubles.\n");
-      this_var_errors++;
-    }
-    if (mxIsSparse(xm)) {
-      printf("parameter kappa_k_2 must be a full matrix.\n");
-      this_var_errors++;
-    }
-    if (this_var_errors == 0) {
-      dest = params.kappa_k_2;
-      src = mxGetPr(xm);
-      for (i = 0; i < 3; i++)
-        *dest++ = *src++;
-      valid_vars++;
-    }
-  }
-  if (valid_vars != 11) {
-    printf("Error: %d parameters are invalid.\n", 11 - valid_vars);
+  if (valid_vars != 6) {
+    printf("Error: %d parameters are invalid.\n", 6 - valid_vars);
     mexErrMsgTxt("invalid parameters found.");
   }
   if (prepare_for_c) {
     printf("settings.prepare_for_c == 1. thus, outputting for C.\n");
-    for (i = 0; i < 9; i++)
-      printf("  params.Psi_k_1[%d] = %.6g;\n", i, params.Psi_k_1[i]);
+    for (i = 0; i < 18; i++)
+      printf("  params.Psi_k[%d] = %.6g;\n", i, params.Psi_k[i]);
     for (i = 0; i < 3; i++)
-      printf("  params.kappa_k_1[%d] = %.6g;\n", i, params.kappa_k_1[i]);
-    for (i = 0; i < 9; i++)
+      printf("  params.kappa_k[%d] = %.6g;\n", i, params.kappa_k[i]);
+    for (i = 0; i < 6; i++)
+      printf("  params.eta_d[%d] = %.6g;\n", i, params.eta_d[i]);
+    for (i = 0; i < 6; i++)
       printf("  params.epsilon[%d] = %.6g;\n", i, params.epsilon[i]);
-    for (i = 0; i < 3; i++)
-      printf("  params.eta_d_1[%d] = %.6g;\n", i, params.eta_d_1[i]);
-    for (i = 0; i < 9; i++)
-      printf("  params.Psi_k_2[%d] = %.6g;\n", i, params.Psi_k_2[i]);
-    for (i = 0; i < 3; i++)
-      printf("  params.kappa_k_2[%d] = %.6g;\n", i, params.kappa_k_2[i]);
-    for (i = 0; i < 3; i++)
-      printf("  params.eta_d_2[%d] = %.6g;\n", i, params.eta_d_2[i]);
-    for (i = 0; i < 3; i++)
-      printf("  params.etamin_1[%d] = %.6g;\n", i, params.etamin_1[i]);
-    for (i = 0; i < 3; i++)
-      printf("  params.etamin_2[%d] = %.6g;\n", i, params.etamin_2[i]);
-    for (i = 0; i < 3; i++)
-      printf("  params.etamax_1[%d] = %.6g;\n", i, params.etamax_1[i]);
-    for (i = 0; i < 3; i++)
-      printf("  params.etamax_2[%d] = %.6g;\n", i, params.etamax_2[i]);
+    for (i = 0; i < 6; i++)
+      printf("  params.etamin[%d] = %.6g;\n", i, params.etamin[i]);
+    for (i = 0; i < 6; i++)
+      printf("  params.etamax[%d] = %.6g;\n", i, params.etamax[i]);
   }
   /* Perform the actual solve in here. */
   steps = solve();
@@ -499,32 +294,11 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
   *mxGetPr(xm) = work.converged;
   /* Extract variable values. */
   plhs[0] = mxCreateStructArray(1, dims1x1of1, num_var_names, var_names);
-  /* Create cell arrays for indexed variables. */
-  dims[0] = 2;
-  cell = mxCreateCellArray(1, dims);
-  mxSetField(plhs[0], 0, "eta", cell);
-  xm = mxCreateDoubleMatrix(3, 1, mxREAL);
-  mxSetField(plhs[0], 0, "eta_1", xm);
-  xm_cell = mxCreateDoubleMatrix(3, 1, mxREAL);
-  cell = mxGetField(plhs[0], 0, "eta");
-  mxSetCell(cell, 0, xm_cell);
+  xm = mxCreateDoubleMatrix(6, 1, mxREAL);
+  mxSetField(plhs[0], 0, "eta", xm);
   dest = mxGetPr(xm);
-  dest_cell = mxGetPr(xm_cell);
-  src = vars.eta_1;
-  for (i = 0; i < 3; i++) {
-    *dest++ = *src;
-    *dest_cell++ = *src++;
-  }
-  xm = mxCreateDoubleMatrix(3, 1, mxREAL);
-  mxSetField(plhs[0], 0, "eta_2", xm);
-  xm_cell = mxCreateDoubleMatrix(3, 1, mxREAL);
-  cell = mxGetField(plhs[0], 0, "eta");
-  mxSetCell(cell, 1, xm_cell);
-  dest = mxGetPr(xm);
-  dest_cell = mxGetPr(xm_cell);
-  src = vars.eta_2;
-  for (i = 0; i < 3; i++) {
-    *dest++ = *src;
-    *dest_cell++ = *src++;
+  src = vars.eta;
+  for (i = 0; i < 6; i++) {
+    *dest++ = *src++;
   }
 }

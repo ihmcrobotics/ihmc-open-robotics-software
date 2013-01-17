@@ -1,4 +1,4 @@
-/* Produced by CVXGEN, 2013-01-17 22:23:43 +0000.  */
+/* Produced by CVXGEN, 2013-01-17 22:52:37 +0000.  */
 /* CVXGEN is Copyright (C) 2006-2012 Jacob Mattingley, jem@cvxgen.com. */
 /* The code in this file is Copyright (C) 2006-2012 Jacob Mattingley. */
 /* CVXGEN, or solvers produced by CVXGEN, cannot be used for commercial */
@@ -28,61 +28,44 @@
 #define pm(A, m, n) printmatrix(#A, A, m, n, 1)
 #endif
 typedef struct Params_t {
-  double Psi_k_1[9];
-  double kappa_k_1[3];
-  double epsilon[9];
-  double eta_d_1[3];
-  double Psi_k_2[9];
-  double kappa_k_2[3];
-  double eta_d_2[3];
-  double etamin_1[3];
-  double etamin_2[3];
-  double etamax_1[3];
-  double etamax_2[3];
-  double *Psi_k[3];
-  double *kappa_k[3];
-  double *eta_d[3];
-  double *etamin[3];
-  double *etamax[3];
+  double Psi_k[18];
+  double kappa_k[3];
+  double eta_d[6];
+  double epsilon[6];
+  double etamin[6];
+  double etamax[6];
 } Params;
 typedef struct Vars_t {
-  double *eta_1; /* 3 rows. */
-  double *eta_2; /* 3 rows. */
-  double *eta[3];
+  double *t_01; /* 3 rows. */
+  double *eta; /* 6 rows. */
 } Vars;
 typedef struct Workspace_t {
   double h[12];
   double s_inv[12];
   double s_inv_z[12];
-  double *b;
-  double q[6];
-  double rhs[30];
-  double x[30];
+  double b[3];
+  double q[9];
+  double rhs[36];
+  double x[36];
   double *s;
   double *z;
   double *y;
-  double lhs_aff[30];
-  double lhs_cc[30];
-  double buffer[30];
-  double buffer2[30];
-  double KKT[60];
-  double L[30];
-  double d[30];
-  double v[30];
-  double d_inv[30];
+  double lhs_aff[36];
+  double lhs_cc[36];
+  double buffer[36];
+  double buffer2[36];
+  double KKT[78];
+  double L[48];
+  double d[36];
+  double v[36];
+  double d_inv[36];
   double gap;
   double optval;
   double ineq_resid_squared;
   double eq_resid_squared;
   double block_33[1];
   /* Pre-op symbols. */
-  double quad_557401407488[9];
-  double quad_544982749184[9];
-  double quad_875231227904[9];
-  double quad_573953101824[1];
-  double quad_34828926976[1];
-  double quad_49710497792[1];
-  double quad_859417034752[1];
+  double quad_153257975808[1];
   int converged;
 } Workspace;
 typedef struct Settings_t {
@@ -128,8 +111,6 @@ void pre_ops(void);
 double eval_gap(void);
 void set_defaults(void);
 void setup_pointers(void);
-void setup_indexed_params(void);
-void setup_indexed_optvars(void);
 void setup_indexing(void);
 void set_start(void);
 double eval_objv(void);
