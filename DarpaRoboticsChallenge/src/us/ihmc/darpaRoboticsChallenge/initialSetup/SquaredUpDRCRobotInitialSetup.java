@@ -10,8 +10,14 @@ public class SquaredUpDRCRobotInitialSetup implements DRCRobotInitialSetup
 
    public void initializeRobot(SDFRobot robot)
    {
-//      robot.getJoint("l_arm_shx").setQ(-1.4);
-//      robot.getJoint("r_arm_shx").setQ(1.4);
+      
+      
+      // Avoid singularities at startup
+      robot.getJoint("l_arm_ely").setQ(1.57);
+      robot.getJoint("l_arm_elx").setQ(1.57);
+      
+      robot.getJoint("r_arm_ely").setQ(1.57);
+      robot.getJoint("r_arm_elx").setQ(-1.57);
       
       robot.getJoint("l_leg_lhy").setQ(-0.4);
       robot.getJoint("r_leg_lhy").setQ(-0.4);
