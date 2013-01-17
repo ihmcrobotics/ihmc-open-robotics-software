@@ -11,7 +11,7 @@ import us.ihmc.utilities.screwTheory.SpatialForceVector;
 
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
-public class LeeGoswamiGroundReactionWrenchDistributor
+public class LeeGoswamiGroundReactionWrenchDistributor implements GroundReactionWrenchDistributorInterface
 {
    private final ReferenceFrame centerOfMassFrame;
 
