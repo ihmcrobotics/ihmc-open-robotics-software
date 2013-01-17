@@ -20,7 +20,7 @@ public class LeeGoswamiGroundReactionWrenchDistributor
 
    private final LinkedHashMap<PlaneContactState, FrameVector> forces = new LinkedHashMap<PlaneContactState, FrameVector>();
    private final LinkedHashMap<PlaneContactState, FramePoint2d> centersOfPressure = new LinkedHashMap<PlaneContactState, FramePoint2d>();
-   private final HashMap<PlaneContactState, Double> normalTorques = new HashMap<PlaneContactState, Double>();
+   private final LinkedHashMap<PlaneContactState, Double> normalTorques = new LinkedHashMap<PlaneContactState, Double>();
 
    private final LeeGoswamiForceOptimizer leeGoswamiForceOptimizer;
    private final LeeGoswamiCoPAndNormalTorqueOptimizer leeGoswamiCoPAndNormalTorqueOptimizer;
@@ -36,6 +36,7 @@ public class LeeGoswamiGroundReactionWrenchDistributor
 
    public void reset()
    {
+      // TODO: inefficient; should hang on to a bunch of temporary objects instead of deleting all references to them 
       coefficientsOfFriction.clear();
       rotationalCoefficientsOfFriction.clear();
       forces.clear();
@@ -59,7 +60,7 @@ public class LeeGoswamiGroundReactionWrenchDistributor
       desiredNetSpatialForceVector.changeFrame(centerOfMassFrame);
 
       leeGoswamiForceOptimizer.solve(forces, coefficientsOfFriction, desiredNetSpatialForceVector);
-      leeGoswamiCoPAndNormalTorqueOptimizer.solve(centersOfPressure, normalTorques, rotationalCoefficientsOfFriction, desiredNetSpatialForceVector.getAngularPartCopy(), forces);
+      leeGoswamiCoPAndNormalTorqueOptimizer.solve(centersOfPressure, normalTorques, rotationalCoefficientsOfFriction, leeGoswamiForceOptimizer.getTorqueError(), forces);
    }
 
    public FrameVector getForce(PlaneContactState planeContactState)
