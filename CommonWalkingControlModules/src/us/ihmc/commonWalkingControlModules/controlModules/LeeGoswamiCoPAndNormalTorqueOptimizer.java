@@ -154,15 +154,15 @@ public class LeeGoswamiCoPAndNormalTorqueOptimizer
       double epsilonCoP = this.epsilonCoP.getDoubleValue();
       double epsilonTauN = this.epsilonTauN.getDoubleValue();
 
-      double[] copsAndNormalTorques = leeGoswamiCoPAndNormalTorqueOptimizerNative.solve(psik, kappaK, etaMin, etaMax, epsilonCoP, epsilonTauN);
+//      double[] copsAndNormalTorques = leeGoswamiCoPAndNormalTorqueOptimizerNative.solve(psik, kappaK, etaMin, etaMax, epsilonCoP, epsilonTauN);
 
-      int index = 0;
-      for (PlaneContactState contactState : centersOfPressure.keySet())
-      {
-         FramePoint2d cop = centersOfPressure.get(contactState);
-         cop.setX(copsAndNormalTorques[index++]);
-         cop.setY(copsAndNormalTorques[index++]);
-         normalTorques.put(contactState, copsAndNormalTorques[index++]);
-      }
+//      int index = 0;
+//      for (PlaneContactState contactState : centersOfPressure.keySet())
+//      {
+//         FramePoint2d cop = centersOfPressure.get(contactState);
+//         cop.setX(copsAndNormalTorques[index++]);
+//         cop.setY(copsAndNormalTorques[index++]);
+//         normalTorques.put(contactState, copsAndNormalTorques[index++]);
+//      }
    }
 }

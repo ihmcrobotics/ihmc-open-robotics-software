@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 
@@ -32,12 +31,23 @@ public class LeeGoswamiForceOptimizer
    private final FrameVector gravitationalForce;
    private final int nSupportVectors;
 
+   private final DenseMatrix64F phi;
+   private final DenseMatrix64F xi;
+   private final DenseMatrix64F rho;
+
+   private final DenseMatrix64F phiBlock;
+   private final DenseMatrix64F rhoBlock;
+   private final DenseMatrix64F wrench;
+   private final DenseMatrix64F wrenchErrorMatrix;
+
    // column major:
-   private final double[] phi; // note: this is phi as in the paper *without* the bottom epsilonF * 1 block
-   private final double[] xi;    // note: this is xi as in the paper *without* the zeros appended at the end
+   private final double[] phiArray;    // note: this is phi as in the paper *without* the bottom epsilonF * 1 block
+   private final double[] xiArray;    // note: this is xi as in the paper *without* the zeros appended at the end
 
    private final LeeGoswamiForceOptimizerNative leeGoswamiForceOptimizerNative;
-   
+
+   private final SpatialForceVector wrenchError;
+
    public LeeGoswamiForceOptimizer(ReferenceFrame centerOfMassFrame, FrameVector gravitationalAcceleration, double mass, int nSupportVectors,
                                    YoVariableRegistry parentRegistry)
    {
@@ -52,10 +62,21 @@ public class LeeGoswamiForceOptimizer
       int maxNContacts = 2;
       int nRows = 2 * VECTOR3D_LENGTH;
       int nColumns = maxNContacts * nSupportVectors;
-      phi = new double[nRows * nColumns];
-      xi = new double[nRows];
-      
+
+      phi = new DenseMatrix64F(nRows, nColumns);
+      xi = new DenseMatrix64F(nRows, 1);
+      rho = new DenseMatrix64F(nColumns, 1);
+      phiBlock = new DenseMatrix64F(nRows, nSupportVectors);
+      rhoBlock = new DenseMatrix64F(nSupportVectors, 1);
+      wrench = new DenseMatrix64F(nRows, 1);
+      wrenchErrorMatrix = new DenseMatrix64F(nRows, 1);
+
+      phiArray = new double[phi.getNumElements()];
+      xiArray = new double[xi.getNumElements()];
+
       leeGoswamiForceOptimizerNative = new LeeGoswamiForceOptimizerNative(nRows, nColumns);
+      
+      wrenchError = new SpatialForceVector(centerOfMassFrame);
 
       parentRegistry.addChild(registry);
    }
@@ -63,69 +84,81 @@ public class LeeGoswamiForceOptimizer
    public void solve(LinkedHashMap<PlaneContactState, FrameVector> forces, HashMap<PlaneContactState, Double> coefficientsOfFriction,
                      SpatialForceVector desiredNetSpatialForceVector)
    {
-      // phi
-      DenseMatrix64F phiBlock = new DenseMatrix64F(2 * VECTOR3D_LENGTH, nSupportVectors);
-      int startIndex = 0;
-      Arrays.fill(phi, 0.0);
+      int startColumn = 0;
       for (PlaneContactState contactState : forces.keySet())
       {
+         // betaBlock
          double mu = coefficientsOfFriction.get(contactState);
-
-         // update beta
          DenseMatrix64F betaBlock = computeBetaBlock(contactState, mu, nSupportVectors, centerOfMassFrame);
-         CommonOps.insert(betaBlock, phiBlock, 0, 0);
 
-         // update delta
-         DenseMatrix64F deltaBlock = computeDeltaBlock(contactState, betaBlock, centerOfMassFrame);
-         CommonOps.scale(wf.getDoubleValue(), deltaBlock);
-         CommonOps.insert(deltaBlock, phiBlock, VECTOR3D_LENGTH, 0);
+         // deltaBlock
+         DenseMatrix64F deltaBlock = computeDeltaBlock(contactState, betaBlock, centerOfMassFrame, wf.getDoubleValue());
 
-         MatrixTools.denseMatrixToArrayColumnMajor(phiBlock, 0, 0, phiBlock.getNumRows(), phiBlock.getNumCols(), phi, startIndex);
-         startIndex += phiBlock.getNumElements();
+         // update phi
+         CommonOps.insert(deltaBlock, phi, 0, startColumn);
+         CommonOps.insert(betaBlock, phi, deltaBlock.getNumRows(), startColumn);
+         startColumn += betaBlock.getNumCols();
       }
 
-      // xi
-      Arrays.fill(xi, 0.0);
-      Vector3d desiredNetForce = new Vector3d();
-      desiredNetSpatialForceVector.packLinearPart(desiredNetForce);
-      desiredNetForce.sub(gravitationalForce.getVector());
-      MatrixTools.tuple3dToArray(desiredNetForce, xi, 0);
+      MatrixTools.denseMatrixToArrayColumnMajor(phi, 0, 0, phi.getNumRows(), phi.getNumCols(), phiArray, 0);
 
+      // kd
       Vector3d desiredNetTorque = new Vector3d();
       desiredNetSpatialForceVector.packAngularPart(desiredNetTorque);
       desiredNetTorque.scale(wf.getDoubleValue());
-      MatrixTools.tuple3dToArray(desiredNetTorque, xi, VECTOR3D_LENGTH);
+      MatrixTools.setDenseMatrixFromTuple3d(xi, desiredNetTorque, 0, 0);
+
+      // ld - mg
+      Vector3d desiredNetForce = new Vector3d();
+      desiredNetSpatialForceVector.packLinearPart(desiredNetForce);
+      desiredNetForce.sub(gravitationalForce.getVector());
+      MatrixTools.setDenseMatrixFromTuple3d(xi, desiredNetForce, VECTOR3D_LENGTH, 0);
+
+      // xi
+      MatrixTools.denseMatrixToArrayColumnMajor(xi, 0, 0, xi.getNumRows(), xi.getNumCols(), xiArray, 0);
 
       double epsilonF = this.epsilonF.getDoubleValue();
 
       try
       {
-         leeGoswamiForceOptimizerNative.solve(phi, xi, epsilonF);
+         leeGoswamiForceOptimizerNative.solve(phiArray, xiArray, epsilonF);
       }
       catch (NoConvergenceException e)
       {
          // TODO Auto-generated catch block
          e.printStackTrace();
       }
-      
-      double[] forceArray = leeGoswamiForceOptimizerNative.getRho(); 
-      
 
-      int index = 0;
+      double[] rhoArray = leeGoswamiForceOptimizerNative.getRho();
+      rho.set(rho.getNumRows(), rho.getNumCols(), false, rhoArray);
+
+      desiredNetSpatialForceVector.packMatrix(wrenchErrorMatrix);
+      int i = 0;
       for (FrameVector force : forces.values())
       {
-         // FIXME: what I get back is rho, not f
+         // phiBlock
+         CommonOps.extract(phi, 0, phiBlock.getNumRows(), i * phiBlock.getNumCols(), (i + 1) * phiBlock.getNumCols(), phiBlock, 0, 0);
+
+         // rhoBlock
+         CommonOps.extract(rho, i * rhoBlock.getNumRows(), (i + 1) * rhoBlock.getNumRows(), 0, 1, rhoBlock, 0, 0);
+
+         // forceAndTorque
+         CommonOps.mult(phiBlock, rhoBlock, wrench);
+
          force.setToZero(centerOfMassFrame);
-         force.setX(forceArray[index++]);
-         force.setY(forceArray[index++]);
-         force.setZ(forceArray[index++]);
+         MatrixTools.denseMatrixToVector3d(wrench, force.getVector(), VECTOR3D_LENGTH, 0);
+
+         CommonOps.subEquals(wrenchErrorMatrix, wrench);
+         i++;
       }
+
+      wrenchError.set(desiredNetSpatialForceVector.getExpressedInFrame(), wrenchErrorMatrix);
+      wrenchError.addLinearPart(gravitationalForce.getVector());
    }
 
    public Vector3d getTorqueError()
    {
-      // FIXME
-      throw new RuntimeException("not yet implemented");
+      return wrenchError.getAngularPartCopy();
    }
 
    // TODO: garbage
@@ -149,7 +182,7 @@ public class LeeGoswamiForceOptimizer
    }
 
    // TODO: garbage
-   private static DenseMatrix64F computeDeltaBlock(PlaneContactState contactState, DenseMatrix64F betaBlock, ReferenceFrame centerOfMassFrame)
+   private static DenseMatrix64F computeDeltaBlock(PlaneContactState contactState, DenseMatrix64F betaBlock, ReferenceFrame centerOfMassFrame, double wf)
    {
       FramePoint ankle = new FramePoint(contactState.getBodyFrame());
       ankle.changeFrame(centerOfMassFrame);
@@ -159,6 +192,8 @@ public class LeeGoswamiForceOptimizer
 
       DenseMatrix64F deltaBlock = new DenseMatrix64F(VECTOR3D_LENGTH, betaBlock.getNumCols());
       CommonOps.mult(skew, betaBlock, deltaBlock);
+
+      CommonOps.scale(wf, deltaBlock);
 
       return deltaBlock;
    }
