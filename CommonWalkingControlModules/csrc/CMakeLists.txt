@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 2.6)
+project(CommonWalkingControlModules)
+
+include_directories(${JNI_INCLUDE_DIRS})
+
+add_library(LeeGoswamiForceOptimizer SHARED LeeGoswamiForceOptimizerNative.c leeGoswamiForceOptimizer/util.c leeGoswamiForceOptimizer/solver.c leeGoswamiForceOptimizer/matrix_support.c leeGoswamiForceOptimizer/ldl.c)
+target_link_libraries(LeeGoswamiForceOptimizer m)
