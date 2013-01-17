@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -30,45 +31,49 @@ public class LeeGoswamiCoPAndNormalTorqueOptimizer
    private final DoubleYoVariable epsilonTauN = new DoubleYoVariable("epsilonTauN", registry);
 
    private final ReferenceFrame centerOfMassFrame;
-   
-   private final DenseMatrix64F psik = new DenseMatrix64F(0);
-   private final DenseMatrix64F kappaK = new DenseMatrix64F(0);
-   private final DenseMatrix64F etaMin = new DenseMatrix64F(0);
-   private final DenseMatrix64F etaMax = new DenseMatrix64F(0);
-   private final DenseMatrix64F etaD = new DenseMatrix64F(0);
+
+   private final double[] psik;
+   private final double[] kappaK;
+   private final double[] etaMin;
+   private final double[] etaMax;
+   private final double[] etaD;
 
    private final Matrix3d tempMatrix = new Matrix3d();
+
+   private LeeGoswamiCoPAndNormalTorqueOptimizerNative leeGoswamiCoPAndNormalTorqueOptimizerNative;
 
    public LeeGoswamiCoPAndNormalTorqueOptimizer(ReferenceFrame centerOfMassFrame, YoVariableRegistry parentRegistry)
    {
       this.centerOfMassFrame = centerOfMassFrame;
       parentRegistry.addChild(registry);
-   }
-   
-   private void reshape(int nContacts)
-   {
-      psik.reshape(VECTOR3D_LENGTH, nContacts * VECTOR3D_LENGTH);
-      kappaK.reshape(VECTOR3D_LENGTH, 1);
-      etaMin.reshape(nContacts * VECTOR3D_LENGTH, 1);
-      etaMax.reshape(nContacts * VECTOR3D_LENGTH, 1);
-      etaD.reshape(nContacts * VECTOR3D_LENGTH, 1);
+
+      int maxNContacts = 2;
+      int nRows = VECTOR3D_LENGTH;
+      int nColumns = maxNContacts * VECTOR3D_LENGTH;
+
+      psik = new double[nRows * nColumns];
+      kappaK = new double[nRows];
+      etaMin = new double[nColumns];
+      etaMax = new double[nColumns];
+      etaD = new double[nColumns];
    }
 
    // TODO: assumes that ankle is directly above origin of planeFrame for a contact state
-   public void solve(LinkedHashMap<PlaneContactState, FramePoint2d> centersOfPressure, HashMap<PlaneContactState, Double> normalTorques,
-           HashMap<PlaneContactState, Double> rotationalCoefficientsOfFriction, Vector3d desiredNetTorque, HashMap<PlaneContactState, FrameVector> forces)
+   public void solve(LinkedHashMap<PlaneContactState, FramePoint2d> centersOfPressure, LinkedHashMap<PlaneContactState, Double> normalTorques,
+                     HashMap<PlaneContactState, Double> rotationalCoefficientsOfFriction, Vector3d desiredNetTorque,
+                     HashMap<PlaneContactState, FrameVector> forces)
    {
-      reshape(centersOfPressure.size());
-      
       // psiK, kappaK
-      MatrixTools.setDenseMatrixFromTuple3d(kappaK, desiredNetTorque, 0, 0);
-      int startColumn = 0;
+      Arrays.fill(psik, 0.0);
+      Arrays.fill(kappaK, 0.0);
 
       // TODO: garbage
       DenseMatrix64F a = new DenseMatrix64F(VECTOR3D_LENGTH, VECTOR3D_LENGTH);
       DenseMatrix64F skew = new DenseMatrix64F(VECTOR3D_LENGTH, VECTOR3D_LENGTH);
       FramePoint ankle = new FramePoint(ReferenceFrame.getWorldFrame());
+      Vector3d tempKappa = new Vector3d();
 
+      int startIndex = 0;
       for (PlaneContactState contactState : centersOfPressure.keySet())
       {
          FrameVector force = forces.get(contactState);
@@ -84,16 +89,20 @@ public class LeeGoswamiCoPAndNormalTorqueOptimizer
          CommonOps.mult(-1.0, skew, rotationMatrix, a);
 
          // update psiK
-         CommonOps.extract(a, 0, a.getNumRows(), 0, 2, psik, 0, startColumn);    // first two columns of A
-         CommonOps.extract(rotationMatrix, 0, rotationMatrix.getNumRows(), 2, 3, psik, 0, startColumn + 2);    // last column of R
-         startColumn += VECTOR3D_LENGTH;
+         startIndex += MatrixTools.denseMatrixToArrayColumnMajor(a, 0, 0, a.getNumRows(), 2, psik, startIndex);    // first two columns of A
+         startIndex += MatrixTools.denseMatrixToArrayColumnMajor(rotationMatrix, 0, 2, rotationMatrix.getNumRows(), 1, psik, startIndex);    // last column of R
 
          // update kappaK
          ankle.setToZero(contactState.getBodyFrame());
          ankle.changeFrame(contactState.getPlaneFrame());
          double ankleHeight = ankle.getZ();
-         MatrixTools.addMatrixBlock(kappaK, 0, 0, a, 0, 2, a.getNumRows(), 1, ankleHeight);    // last column of A times h
+
+         MatrixTools.denseMatrixToVector3d(a, tempKappa, 0, 2);
+         tempKappa.scale(ankleHeight);    // last column of A times h
+         desiredNetTorque.add(tempKappa);
       }
+
+      MatrixTools.tuple3dToArray(desiredNetTorque, kappaK, 0);
 
       // etaMin, etaMax (assumes rectangular feet)
       int startRow = 0;
@@ -125,23 +134,35 @@ public class LeeGoswamiCoPAndNormalTorqueOptimizer
                yMax = y;
          }
 
-         etaMin.set(startRow + 0, 0, xMin);
-         etaMin.set(startRow + 1, 0, yMin);
-         etaMin.set(startRow + 2, 0, -tauMax);
+         etaMin[startRow + 0] = xMin;
+         etaMin[startRow + 1] = yMin;
+         etaMin[startRow + 2] = -tauMax;
 
-         etaMax.set(startRow + 0, 0, xMax);
-         etaMax.set(startRow + 1, 0, yMax);
-         etaMax.set(startRow + 2, 0, tauMax);
+         etaMax[startRow + 0] = xMax;
+         etaMax[startRow + 1] = yMax;
+         etaMax[startRow + 2] = tauMax;
 
          startRow += VECTOR3D_LENGTH;
       }
 
       // etad (average of min and max for now; could change later
-      CommonOps.add(0.5, etaMin, etaMax, etaD);
+      for (int i = 0; i < etaMin.length; i++)
+      {
+         etaD[i] = (etaMin[i] + etaMax[i]) * 0.5;
+      }
 
       double epsilonCoP = this.epsilonCoP.getDoubleValue();
       double epsilonTauN = this.epsilonTauN.getDoubleValue();
 
-      // TODO: call CoP solver with Psi, kappa, etaMin, etaMax, etad, and epsilonP
+      double[] copsAndNormalTorques = leeGoswamiCoPAndNormalTorqueOptimizerNative.solve(psik, kappaK, etaMax, etaMax, epsilonCoP, epsilonTauN);
+
+      int index = 0;
+      for (PlaneContactState contactState : centersOfPressure.keySet())
+      {
+         FramePoint2d cop = centersOfPressure.get(contactState);
+         cop.setX(copsAndNormalTorques[index++]);
+         cop.setY(copsAndNormalTorques[index++]);
+         normalTorques.put(contactState, copsAndNormalTorques[index++]);
+      }
    }
 }
