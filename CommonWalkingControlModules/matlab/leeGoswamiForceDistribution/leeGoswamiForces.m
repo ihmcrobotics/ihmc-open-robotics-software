@@ -1,5 +1,5 @@
 
-function [F, kError, lError] = leeGoswamiForces(kd, ld, m, g, rG, rs, Rs, mus, wk, epsilonf, nSupportVectors)
+function [F, kdError, ldError] = leeGoswamiForces(kd, ld, m, g, rG, rs, Rs, mus, wk, epsilonf, nSupportVectors)
 
 nFeet = length(mus);
 vectorLength = 3;
@@ -51,10 +51,10 @@ for i = 1 : nFeet
     F(:, i) = f;
 end
 
-lSol = m * g + Beta * rho;
-kSol = Delta * rho;
+ldSol = m * g + Beta * rho;
+kdSol = Delta * rho;
 
-lError = ld - lSol;
-kError = kd - kSol;
+ldError = ld - ldSol;
+kdError = kd - kdSol;
 
 end
