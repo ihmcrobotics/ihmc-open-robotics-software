@@ -8,6 +8,6 @@ import javax.vecmath.Quat4d;
 public interface CameraStreamer
 {
 
-   public void updateImage(BufferedImage bufferedImage, Point3d cameraLocation, Quat4d cameraOrientation);
+   public void updateImage(BufferedImage bufferedImage, Point3d cameraLocation, Quat4d cameraOrientation, float fov);
 
 }
