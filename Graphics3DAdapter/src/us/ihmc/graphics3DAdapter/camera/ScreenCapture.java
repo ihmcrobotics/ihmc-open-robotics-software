@@ -22,8 +22,9 @@ public class ScreenCapture implements Serializable
    private final int height, width;
    private final Point3d location;
    private final Quat4d rotation;
+   private float fov;
 
-   public ScreenCapture(BufferedImage bufferedImage, Point3d location, Quat4d rotation)
+   public ScreenCapture(BufferedImage bufferedImage, Point3d location, Quat4d rotation, float fov)
    {
       this.height = bufferedImage.getHeight();
       this.width = bufferedImage.getWidth();
@@ -43,6 +44,7 @@ public class ScreenCapture implements Serializable
 
       this.rotation = rotation;
       this.location = location;
+      this.fov = fov;
 
 
       // bi.getRGB(0, 0, _width, _height, _bytesOut, 0, _width);
@@ -56,6 +58,11 @@ public class ScreenCapture implements Serializable
    public Quat4d getRotation()
    {
       return rotation;
+   }
+   
+   public float getFov()
+   {
+      return fov;
    }
    
    public static byte[] bufferedImageToByteArray(BufferedImage image) throws ImageFormatException, IOException

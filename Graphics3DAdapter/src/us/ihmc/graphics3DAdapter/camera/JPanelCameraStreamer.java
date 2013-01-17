@@ -15,15 +15,17 @@ public class JPanelCameraStreamer extends JPanel implements CameraStreamer
 {
    private static final long serialVersionUID = -6832977971630763132L;
    private BufferedImage bufferedImage;
+   private float fov;
    
    public JPanelCameraStreamer()
    {
       super();
    }
    
-   public synchronized void updateImage(BufferedImage bufferedImage, Point3d cameraLocation, Quat4d cameraOrientation)
+   public synchronized void updateImage(BufferedImage bufferedImage, Point3d cameraLocation, Quat4d cameraOrientation, float fov)
    {
       this.bufferedImage = bufferedImage;
+      this.fov = fov;
       repaint();
    }
 
