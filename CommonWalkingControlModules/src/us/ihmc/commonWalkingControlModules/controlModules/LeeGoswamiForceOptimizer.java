@@ -10,6 +10,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
+import us.ihmc.utilities.exeptions.NoConvergenceException;
 import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -35,7 +36,7 @@ public class LeeGoswamiForceOptimizer
    private final double[] phi; // note: this is phi as in the paper *without* the bottom epsilonF * 1 block
    private final double[] xi;    // note: this is xi as in the paper *without* the zeros appended at the end
 
-   private final LeeGoswamiForceOptimizerNative leeGoswamiForceOptimizerNative = new LeeGoswamiForceOptimizerNative();
+   private final LeeGoswamiForceOptimizerNative leeGoswamiForceOptimizerNative;
    
    public LeeGoswamiForceOptimizer(ReferenceFrame centerOfMassFrame, FrameVector gravitationalAcceleration, double mass, int nSupportVectors,
                                    YoVariableRegistry parentRegistry)
@@ -53,6 +54,8 @@ public class LeeGoswamiForceOptimizer
       int nColumns = maxNContacts * nSupportVectors;
       phi = new double[nRows * nColumns];
       xi = new double[nRows];
+      
+      leeGoswamiForceOptimizerNative = new LeeGoswamiForceOptimizerNative(nRows, nColumns);
 
       parentRegistry.addChild(registry);
    }
@@ -95,7 +98,18 @@ public class LeeGoswamiForceOptimizer
 
       double epsilonF = this.epsilonF.getDoubleValue();
 
-      double[] forceArray = leeGoswamiForceOptimizerNative.computeForces(phi, xi, epsilonF);
+      try
+      {
+         leeGoswamiForceOptimizerNative.solve(phi, xi, epsilonF);
+      }
+      catch (NoConvergenceException e)
+      {
+         // TODO Auto-generated catch block
+         e.printStackTrace();
+      }
+      
+      double[] forceArray = leeGoswamiForceOptimizerNative.getRho(); 
+      
 
       int index = 0;
       for (FrameVector force : forces.values())
