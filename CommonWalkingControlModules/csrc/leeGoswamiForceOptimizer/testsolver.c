@@ -1,4 +1,4 @@
-/* Produced by CVXGEN, 2013-01-16 23:02:00 +0000.  */
+/* Produced by CVXGEN, 2013-01-17 15:52:18 +0000.  */
 /* CVXGEN is Copyright (C) 2006-2012 Jacob Mattingley, jem@cvxgen.com. */
 /* The code in this file is Copyright (C) 2006-2012 Jacob Mattingley. */
 /* CVXGEN, or solvers produced by CVXGEN, cannot be used for commercial */
@@ -11,7 +11,7 @@ Vars vars;
 Params params;
 Workspace work;
 Settings settings;
-#define NUMTESTS 10000
+#define NUMTESTS 0
 int main(int argc, char **argv) {
   int num_iters;
 #if (NUMTESTS > 0)
@@ -96,59 +96,11 @@ void load_default_data(void) {
   params.Phi[45] = 1.442135651787706;
   params.Phi[46] = 0.34501161787128565;
   params.Phi[47] = -0.8660485502711608;
-  params.Phi[48] = -0.8880899735055947;
-  params.Phi[49] = -0.1815116979122129;
-  params.Phi[50] = -1.17835862158005;
-  params.Phi[51] = -1.1944851558277074;
-  params.Phi[52] = 0.05614023926976763;
-  params.Phi[53] = -1.6510825248767813;
-  params.Phi[54] = -0.06565787059365391;
-  params.Phi[55] = -0.5512951504486665;
-  params.Phi[56] = 0.8307464872626844;
-  params.Phi[57] = 0.9869848924080182;
-  params.Phi[58] = 0.7643716874230573;
-  params.Phi[59] = 0.7567216550196565;
-  params.Phi[60] = -0.5055995034042868;
-  params.Phi[61] = 0.6725392189410702;
-  params.Phi[62] = -0.6406053441727284;
-  params.Phi[63] = 0.29117547947550015;
-  params.Phi[64] = -0.6967713677405021;
-  params.Phi[65] = -0.21941980294587182;
-  params.Phi[66] = -1.753884276680243;
-  params.Phi[67] = -1.0292983112626475;
-  params.Phi[68] = 1.8864104246942706;
-  params.Phi[69] = -1.077663182579704;
-  params.Phi[70] = 0.7659100437893209;
-  params.Phi[71] = 0.6019074328549583;
-  params.Phi[72] = 0.8957565577499285;
-  params.Phi[73] = -0.09964555746227477;
-  params.Phi[74] = 0.38665509840745127;
-  params.Phi[75] = -1.7321223042686946;
-  params.Phi[76] = -1.7097514487110663;
-  params.Phi[77] = -1.2040958948116867;
-  params.Phi[78] = -1.3925560119658358;
-  params.Phi[79] = -1.5995826216742213;
-  params.Phi[80] = -1.4828245415645833;
-  params.Phi[81] = 0.21311092723061398;
-  params.Phi[82] = -1.248740700304487;
-  params.Phi[83] = 1.808404972124833;
-  params.Phi[84] = 0.7264471152297065;
-  params.Phi[85] = 0.16407869343908477;
-  params.Phi[86] = 0.8287224032315907;
-  params.Phi[87] = -0.9444533161899464;
-  params.Phi[88] = 1.7069027370149112;
-  params.Phi[89] = 1.3567722311998827;
-  params.Phi[90] = 0.9052779937121489;
-  params.Phi[91] = -0.07904017565835986;
-  params.Phi[92] = 1.3684127435065871;
-  params.Phi[93] = 0.979009293697437;
-  params.Phi[94] = 0.6413036255984501;
-  params.Phi[95] = 1.6559010680237511;
-  params.xi[0] = 0.5346622551502991;
-  params.xi[1] = -0.5362376605895625;
-  params.xi[2] = 0.2113782926017822;
-  params.xi[3] = -1.2144776931994525;
-  params.xi[4] = -1.2317108144255875;
-  params.xi[5] = 0.9026784957312834;
-  params.epsilon_f[0] = 1.5698734068622622;
+  params.xi[0] = -0.8880899735055947;
+  params.xi[1] = -0.1815116979122129;
+  params.xi[2] = -1.17835862158005;
+  params.xi[3] = -1.1944851558277074;
+  params.xi[4] = 0.05614023926976763;
+  params.xi[5] = -1.6510825248767813;
+  params.epsilon_f[0] = 0.967171064703173;
 }
