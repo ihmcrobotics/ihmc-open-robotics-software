@@ -64,4 +64,7 @@ assertEpsilonEquals('ld error should be accurately checked',ldErrorCheck, ldErro
 result.feet = feet;
 result.ldError = ldError;
 result.kdError = kdError;
+
+result.kdEps = norm(result.kdError);
+result.ldEps = norm(result.ldError);
 end
