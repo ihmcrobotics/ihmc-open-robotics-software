@@ -4,8 +4,10 @@ import java.util.ArrayList;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
+import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.SpatialForceVector;
 
@@ -32,10 +34,7 @@ public class GroundReactionWrenchDistributorVisuzalizer
    
    private final ArrayList<YoFrameConvexPolygon2d> contactPolygonsWorld = new ArrayList<YoFrameConvexPolygon2d>();
    
-   
-   private final SimulationConstructionSet scs;
-   
-   public GroundReactionWrenchDistributorVisuzalizer(int maxNumberOfFeet, int maxNumberOfVertices)
+   public GroundReactionWrenchDistributorVisuzalizer(int maxNumberOfFeet, int maxNumberOfVertices, YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       for (int i=0; i<maxNumberOfFeet; i++)
       {
@@ -43,13 +42,7 @@ public class GroundReactionWrenchDistributorVisuzalizer
          contactPolygonsWorld.add(contactPolygon);
       }
       
-      Robot nullRobot = new Robot("null");
-      scs = new SimulationConstructionSet(nullRobot);
-      
-      
-      DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
-      
-      DynamicGraphicPosition centerOfMassWorldViz = new DynamicGraphicPosition("centerOfMass", "", registry, 0.03, YoAppearance.Red(), GraphicType.BALL_WITH_CROSS);
+      DynamicGraphicPosition centerOfMassWorldViz = new DynamicGraphicPosition("centerOfMassViz", centerOfMassWorld, 0.03, YoAppearance.Purple(), GraphicType.BALL_WITH_CROSS);
       DynamicGraphicVector totalForceWorldViz = new DynamicGraphicVector("totalForceViz", centerOfMassWorld, totalForceWorld, 0.03, YoAppearance.Yellow());
 
       DynamicGraphicObjectsList dynamicGraphicObjectsList = new DynamicGraphicObjectsList("GroundReactionWrenchDistributorVisuzalizer");
@@ -58,12 +51,10 @@ public class GroundReactionWrenchDistributorVisuzalizer
       
       dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectsList);
       
-      dynamicGraphicObjectsListRegistry.addDynamicGraphicsObjectListsToSimulationConstructionSet(scs);
-      scs.startOnAThread();
+      parentRegistry.addChild(registry);
    }
    
-   
-   public void update(LeeGoswamiGroundReactionWrenchDistributor distributor, ReferenceFrame centerOfMassFrame, ArrayList<PlaneContactState> contactStates, SpatialForceVector totalBodyWrench)
+   public void update(GroundReactionWrenchDistributorInterface distributor, ReferenceFrame centerOfMassFrame, ArrayList<PlaneContactState> contactStates, SpatialForceVector totalBodyWrench)
    {
       FramePoint centerOfMassPosition = new FramePoint(centerOfMassFrame);
       centerOfMassPosition.changeFrame(worldFrame);
@@ -79,14 +70,44 @@ public class GroundReactionWrenchDistributorVisuzalizer
       
       totalForceWorld.set(totalForceOnCenterOfMass);
       totalMomentWorld.set(totalTorqueOnCenterOfMass);
-      
-      
    }
-   
+    
    
    public static void main(String[] args)
    {
+      DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
+
+      Robot nullRobot = new Robot("null");
+      SimulationConstructionSet scs = new SimulationConstructionSet(nullRobot);
+
+      int maxNumberOfFeet = 4;
+      int maxNumberOfVertices = 10;
+      GroundReactionWrenchDistributorVisuzalizer visualizer = new GroundReactionWrenchDistributorVisuzalizer(maxNumberOfFeet, maxNumberOfVertices, scs.getRootRegistry(), dynamicGraphicObjectsListRegistry);
       
+      ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+      
+      ReferenceFrame centerOfMassFrame = new PoseReferenceFrame("centerOfMass", worldFrame);
+      FrameVector gravitationalAcceleration = new FrameVector(worldFrame, 0.0, 0.0, -9.81);
+      double mass = 100.0;
+      int nSupportVectors = 4;
+
+      dynamicGraphicObjectsListRegistry.addDynamicGraphicsObjectListsToSimulationConstructionSet(scs);
+      scs.startOnAThread();
+      YoVariableRegistry parentRegistry = scs.getRootRegistry();
+            
+      
+      GroundReactionWrenchDistributorInterface distributor = new LeeGoswamiGroundReactionWrenchDistributor(centerOfMassFrame, gravitationalAcceleration, mass, nSupportVectors, parentRegistry);
+      ArrayList<PlaneContactState> contactStates = new ArrayList<PlaneContactState>();
+      
+      while(true)
+      {
+         SpatialForceVector desiredNetSpatialForceVector = new SpatialForceVector(worldFrame);
+         distributor.solve(desiredNetSpatialForceVector);
+         
+         visualizer.update(distributor, centerOfMassFrame, contactStates, desiredNetSpatialForceVector);
+         scs.tickAndUpdate();
+         ThreadTools.sleep(100L);
+      }
    }
    
 }
