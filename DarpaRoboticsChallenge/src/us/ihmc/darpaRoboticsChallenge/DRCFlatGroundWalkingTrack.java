@@ -2,6 +2,7 @@ package us.ihmc.darpaRoboticsChallenge;
 
 import us.ihmc.SdfLoader.SDFCamera;
 import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.ControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.FlatGroundWalkingHighLevelHumanoidControllerFactory;
 import us.ihmc.commonWalkingControlModules.terrain.TerrainType;
@@ -26,9 +27,9 @@ public class DRCFlatGroundWalkingTrack
    {
       DRCSCSInitialSetup scsInitialSetup;
       DRCRobotInitialSetup drcRobotInitialSetup;
+      WalkingControllerParameters drcRobotParameters = new DRCRobotWalkingControllerParameters();
 
       drcRobotInitialSetup = new SquaredUpDRCRobotInitialSetup();
-
 
 
       scsInitialSetup = new DRCSCSInitialSetup(TerrainType.FLAT);
@@ -45,14 +46,13 @@ public class DRCFlatGroundWalkingTrack
       DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
       YoVariableRegistry registry = new YoVariableRegistry("adjustableParabolicTrajectoryDemoSimRegistry");
 
-      double desiredCoMHeight = 0.9;
       double inPlaceWidth = 0.25;
       double maxStepLength = 0.35;
       double minStepWidth = 0.15;
       double maxStepWidth = 0.4;
       double stepPitch = 0.0;
-      FlatGroundWalkingHighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory =
-         new FlatGroundWalkingHighLevelHumanoidControllerFactory(desiredCoMHeight, inPlaceWidth, maxStepLength, minStepWidth, maxStepWidth, stepPitch);
+      FlatGroundWalkingHighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory = new FlatGroundWalkingHighLevelHumanoidControllerFactory(drcRobotParameters,
+            inPlaceWidth, maxStepLength, minStepWidth, maxStepWidth, stepPitch);
       highLevelHumanoidControllerFactory.setupForNetworkedFootstepProvider(ipAddress, portNumber);
       ControllerFactory controllerFactory = new DRCRobotMomentumBasedControllerFactory(highLevelHumanoidControllerFactory, true);
 
