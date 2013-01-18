@@ -42,7 +42,12 @@ public class DesiredFootstepCalculatorFootstepProviderWrapper implements Footste
    {
       return !walk.getBooleanValue();
    }
-   
+
+   public void notifyComplete()
+   {
+      System.out.println("notifyComplete not implemented in DesiredFootstepCalculatorFootstepProviderWrapper");
+   }
+
    public void setWalk(boolean walk)
    {
       this.walk.set(walk);
