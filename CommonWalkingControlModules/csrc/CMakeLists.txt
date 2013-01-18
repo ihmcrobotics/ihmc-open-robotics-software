@@ -4,9 +4,11 @@ project(CommonWalkingControlModules)
 include_directories(${JNI_INCLUDE_DIRS})
 
 add_library(LeeGoswamiForceOptimizer SHARED LeeGoswamiForceOptimizerNative.c leeGoswamiForceOptimizer/util.c leeGoswamiForceOptimizer/solver.c leeGoswamiForceOptimizer/matrix_support.c leeGoswamiForceOptimizer/ldl.c)
-target_link_libraries(LeeGoswamiForceOptimizer m)
-
+if(NOT WIN32)
+	target_link_libraries(LeeGoswamiForceOptimizer m)
+endif()
 add_library(LeeGoswamiCoPAndNormalTorqueOptimizer SHARED LeeGoswamiCoPAndNormalTorqueOptimizerNative.c leeGoswamiCoPAndNormalTorqueOptimizer/util.c leeGoswamiCoPAndNormalTorqueOptimizer/solver.c leeGoswamiCoPAndNormalTorqueOptimizer/matrix_support.c leeGoswamiCoPAndNormalTorqueOptimizer/ldl.c)
-target_link_libraries(LeeGoswamiCoPAndNormalTorqueOptimizer m)
-
-INSTALL(TARGETS LeeGoswamiForceOptimizer LeeGoswamiCoPAndNormalTorqueOptimizer LIBRARY DESTINATION ${CMAKE_SOURCE_DIR}/lib)
+if(NOT WIN32)
+	target_link_libraries(LeeGoswamiCoPAndNormalTorqueOptimizer m)
+endif()
+INSTALL(TARGETS LeeGoswamiForceOptimizer LeeGoswamiCoPAndNormalTorqueOptimizer RUNTIME DESTINATION ${CMAKE_SOURCE_DIR}/lib LIBRARY DESTINATION ${CMAKE_SOURCE_DIR}/lib)
