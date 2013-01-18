@@ -329,6 +329,66 @@ public class FootstepDataTest
       streamingDataTCPServer.close();
    }
 
+   @Test
+   public void testPassingFootstepStatus()
+   {
+      QueueBasedStreamingDataProducer<FootstepStatus> queueBasedStreamingDataProducer = new QueueBasedStreamingDataProducer<FootstepStatus>(1111L);
+      StreamingDataTCPServer streamingDataTCPServer = new StreamingDataTCPServer(7777);
+      streamingDataTCPServer.registerStreamingDataProducer(queueBasedStreamingDataProducer);
+      streamingDataTCPServer.startOnAThread();
+
+      FootstepStatusConsumer footstepStatusConsumer = new FootstepStatusConsumer();
+      StreamingDataTCPClient streamingDataTCPClient = new StreamingDataTCPClient("localhost", 7777);
+      streamingDataTCPClient.registerStreamingDataConsumer(footstepStatusConsumer);
+      streamingDataTCPClient.connectToServer(false);
+
+      ThreadTools.sleep(1000);
+
+      queueBasedStreamingDataProducer.startProducingData();
+
+      Random random = new Random(77);
+      ArrayList<FootstepStatus> footstepStatuses = new ArrayList<FootstepStatus>();
+      int numberToTest = 10;
+      for (int footstepNumber = 0; footstepNumber < numberToTest; footstepNumber++)
+      {
+         RigidBody endEffector = new RigidBody("rigid_" + footstepNumber, ReferenceFrame.getWorldFrame());
+         FramePose pose = new FramePose(ReferenceFrame.getWorldFrame(), new Point3d(footstepNumber, 0.0, 0.0), new Quat4d(random.nextDouble(), random.nextDouble(), random.nextDouble(), random.nextDouble()));
+         ArrayList<FramePoint> expectedContactPoints = new ArrayList<FramePoint>();
+         for (int i = 0; i < 3; i++)
+         {
+            FramePoint framePoint = new FramePoint(ReferenceFrame.getWorldFrame(), footstepNumber, i, 0.0);
+            expectedContactPoints.add(framePoint);
+         }
+
+
+         Footstep footstep = new Footstep(endEffector, pose, expectedContactPoints);
+         FootstepData footstepData = new FootstepData(footstep);
+         FootstepStatus.Status status = FootstepStatus.Status.STARTED;
+         boolean isComplete = random.nextBoolean();
+         if(isComplete)
+         {
+            status = FootstepStatus.Status.COMPLETED;
+         }
+         FootstepStatus footstepStatus = new FootstepStatus(footstepData, status);
+         footstepStatuses.add(footstepStatus);
+         queueBasedStreamingDataProducer.queueDataToSend(footstepStatus);
+      }
+      ArrayList<FootstepStatus> reconstructedFootsteps = footstepStatusConsumer.getReconstructedFootsteps();
+
+      ThreadTools.sleep(1000);
+      for (int i = 0; i < footstepStatuses.size(); i++)
+      {
+         FootstepStatus footstepStatus = footstepStatuses.get(i);
+         FootstepStatus reconstructedFootstepStatus = reconstructedFootsteps.get(i);
+         assertTrue(footstepStatus.getStatus() == reconstructedFootstepStatus.getStatus());
+         assertTrue(footstepStatus.getFootstepData().getLocation().epsilonEquals(reconstructedFootstepStatus.getFootstepData().getLocation(), 0.0001));
+      }
+
+      streamingDataTCPClient.close();
+      streamingDataTCPServer.close();
+   }
+
+
    private class FootstepDataConsumer extends AbstractStreamingDataConsumer<FootstepData>
    {
       ArrayList<Footstep> reconstructedFootsteps = new ArrayList<Footstep>();
@@ -411,6 +471,26 @@ public class FootstepDataTest
       public ArrayList<Boolean> getReconstructedCommands()
       {
          return reconstructedCommands;
+      }
+   }
+
+   private class FootstepStatusConsumer extends AbstractStreamingDataConsumer<FootstepStatus>
+   {
+      private ArrayList<FootstepStatus> reconstructedFootstepStatuses = new ArrayList<FootstepStatus>();
+
+      public FootstepStatusConsumer()
+      {
+         super(1111L, FootstepStatus.class);
+      }
+
+      protected void processPacket(FootstepStatus footstepStatus)
+      {
+         reconstructedFootstepStatuses.add(footstepStatus);
+      }
+
+      public ArrayList<FootstepStatus> getReconstructedFootsteps()
+      {
+         return reconstructedFootstepStatuses;
       }
    }
 }
