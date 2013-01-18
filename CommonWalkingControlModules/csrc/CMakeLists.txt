@@ -5,3 +5,7 @@ include_directories(${JNI_INCLUDE_DIRS})
 
 add_library(LeeGoswamiForceOptimizer SHARED LeeGoswamiForceOptimizerNative.c leeGoswamiForceOptimizer/util.c leeGoswamiForceOptimizer/solver.c leeGoswamiForceOptimizer/matrix_support.c leeGoswamiForceOptimizer/ldl.c)
 target_link_libraries(LeeGoswamiForceOptimizer m)
+
+add_library(LeeGoswamiCoPAndNormalTorqueOptimizer SHARED LeeGoswamiCoPAndNormalTorqueOptimizerNative.c leeGoswamiCoPAndNormalTorqueOptimizer/util.c leeGoswamiCoPAndNormalTorqueOptimizer/solver.c leeGoswamiCoPAndNormalTorqueOptimizer/matrix_support.c leeGoswamiCoPAndNormalTorqueOptimizer/ldl.c)
+target_link_libraries(LeeGoswamiCoPAndNormalTorqueOptimizer m)
+

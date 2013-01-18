@@ -7,12 +7,12 @@
 
 #include <stdio.h>
 #include "LeeGoswamiForceOptimizerNative.h"
-
-#define phiSize us_ihmc_commonWalkingControlModules_controlModules_LeeGoswamiForceOptimizerNative_n * us_ihmc_commonWalkingControlModules_controlModules_LeeGoswamiForceOptimizerNative_m
-#define xiSize us_ihmc_commonWalkingControlModules_controlModules_LeeGoswamiForceOptimizerNative_n
-#define rhoSize us_ihmc_commonWalkingControlModules_controlModules_LeeGoswamiForceOptimizerNative_m
-
 #include "leeGoswamiForceOptimizer/solver.h"
+
+#define phiSize us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_LeeGoswamiForceOptimizerNative_n * us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_LeeGoswamiForceOptimizerNative_m
+#define xiSize us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_LeeGoswamiForceOptimizerNative_n
+#define rhoSize us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_LeeGoswamiForceOptimizerNative_m
+
 Vars vars;
 Params params;
 Workspace work;
@@ -23,7 +23,7 @@ jobject xiByteBuffer;
 jobject rhoByteBuffer;
 
 
-JNIEXPORT void JNICALL Java_us_ihmc_commonWalkingControlModules_controlModules_LeeGoswamiForceOptimizerNative_initialize
+JNIEXPORT void JNICALL Java_us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_LeeGoswamiForceOptimizerNative_initialize
   (JNIEnv* env, jclass jClass)
 {
 	set_defaults();
@@ -35,25 +35,25 @@ JNIEXPORT void JNICALL Java_us_ihmc_commonWalkingControlModules_controlModules_L
 	rhoByteBuffer = (*env)->NewDirectByteBuffer(env, vars.rho, sizeof(double) * rhoSize);
 }
 
-JNIEXPORT jobject JNICALL Java_us_ihmc_commonWalkingControlModules_controlModules_LeeGoswamiForceOptimizerNative_getPhiBuffer
+JNIEXPORT jobject JNICALL Java_us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_LeeGoswamiForceOptimizerNative_getPhiBuffer
   (JNIEnv* env, jclass jClass)
 {
 	return phiByteBuffer;
 }
 
-JNIEXPORT jobject JNICALL Java_us_ihmc_commonWalkingControlModules_controlModules_LeeGoswamiForceOptimizerNative_getXiBuffer
+JNIEXPORT jobject JNICALL Java_us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_LeeGoswamiForceOptimizerNative_getXiBuffer
   (JNIEnv* env, jclass jClass)
 {
 	return xiByteBuffer;
 }
 
-JNIEXPORT jobject JNICALL Java_us_ihmc_commonWalkingControlModules_controlModules_LeeGoswamiForceOptimizerNative_getRhoBuffer
+JNIEXPORT jobject JNICALL Java_us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_LeeGoswamiForceOptimizerNative_getRhoBuffer
   (JNIEnv* env, jclass jClass)
 {
 	return rhoByteBuffer;
 }
 
-JNIEXPORT jint JNICALL Java_us_ihmc_commonWalkingControlModules_controlModules_LeeGoswamiForceOptimizerNative_solveNative
+JNIEXPORT jint JNICALL Java_us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_LeeGoswamiForceOptimizerNative_solveNative
   (JNIEnv* env, jclass jClass, jdouble epsilonF)
 {
 	int numberOfIterations;
@@ -72,8 +72,8 @@ JNIEXPORT jint JNICALL Java_us_ihmc_commonWalkingControlModules_controlModules_L
 	}
 }
 
-JNIEXPORT jdouble JNICALL Java_us_ihmc_commonWalkingControlModules_controlModules_LeeGoswamiForceOptimizerNative_getOptValNative
-  (JNIEnv* env, jclass jClass)
-{
+JNIEXPORT jdouble JNICALL Java_us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_LeeGoswamiForceOptimizerNative_getOptValNative
+  (
+		JNIEnv* env, jclass jClass) {
 	return work.optval;
 }

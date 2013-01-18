@@ -1,12 +1,11 @@
-package us.ihmc.commonWalkingControlModules.controlModules;
+package us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.DoubleBuffer;
 
-import cern.colt.Arrays;
-
 import us.ihmc.utilities.exeptions.NoConvergenceException;
+import cern.colt.Arrays;
 
 public class LeeGoswamiForceOptimizerNative
 {
@@ -31,23 +30,27 @@ public class LeeGoswamiForceOptimizerNative
    private static final DoubleBuffer xiDoubleBuffer;
    private static final DoubleBuffer rhoDoubleBuffer;
 
+   public static DoubleBuffer setupBuffer(ByteBuffer buffer)
+   {
+      buffer.order(ByteOrder.nativeOrder());
+      return buffer.asDoubleBuffer();
+   }
+   
+   public static void setBufferToArray(DoubleBuffer buffer, double[] array)
+   {
+      buffer.rewind();
+      buffer.put(array);
+   }
+   
    static
    {
       System.loadLibrary("LeeGoswamiForceOptimizer");
 
       initialize();
 
-      ByteBuffer phiBuffer = getPhiBuffer();
-      phiBuffer.order(ByteOrder.nativeOrder());
-      phiDoubleBuffer = phiBuffer.asDoubleBuffer();
-
-      ByteBuffer xiBuffer = getXiBuffer();
-      xiBuffer.order(ByteOrder.nativeOrder());
-      xiDoubleBuffer = xiBuffer.asDoubleBuffer();
-
-      ByteBuffer rhoBuffer = getRhoBuffer().asReadOnlyBuffer();
-      rhoBuffer.order(ByteOrder.nativeOrder());
-      rhoDoubleBuffer = rhoBuffer.asDoubleBuffer();
+      phiDoubleBuffer = setupBuffer(getPhiBuffer());
+      xiDoubleBuffer = setupBuffer(getXiBuffer());
+      rhoDoubleBuffer = setupBuffer(getRhoBuffer().asReadOnlyBuffer());
    }
 
    private final double[] rho = new double[m];
@@ -66,12 +69,9 @@ public class LeeGoswamiForceOptimizerNative
 
       synchronized (solveConch)
       {
-         phiDoubleBuffer.rewind();
-         xiDoubleBuffer.rewind();
-
-         phiDoubleBuffer.put(phi);
-         xiDoubleBuffer.put(xi);
-
+         setBufferToArray(phiDoubleBuffer, phi);
+         setBufferToArray(xiDoubleBuffer, xi);
+         
          numberOfIterations = solveNative(epsilonf);
 
          rhoDoubleBuffer.rewind();
