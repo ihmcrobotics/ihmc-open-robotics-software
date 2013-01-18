@@ -11,11 +11,8 @@ public interface GroundReactionWrenchDistributorInterface
    public abstract void reset();
 
    public abstract void addContact(PlaneContactState contactState, double coefficientOfFriction, double rotationalCoefficientOfFriction);
-
    
-   //TODO: I think the desiredNetSpatialForceVector should be the total desired wrench on the body from the feet, and therefore include mg in it
-   // when this is called, instead of adding mg to it. The GroundReactionWrenchDistributor should not have to be created with m and g.
-   // But let's discuss more...
+   // The desiredNetSpatialForceVector is the total desired wrench on the body from the contact points.
    public abstract void solve(SpatialForceVector desiredNetSpatialForceVector);
 
    //TODO: Make these be pack methods instead of get methods.
