@@ -15,6 +15,7 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.LeeGoswamiCoPAndNormalTorqueOptimizerNative;
 import us.ihmc.utilities.exeptions.NoConvergenceException;
+import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
@@ -31,6 +32,7 @@ public class LeeGoswamiCoPAndNormalTorqueOptimizer
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final DoubleYoVariable epsilonCoP = new DoubleYoVariable("epsilonCoP", registry);    // TODO: better name
    private final DoubleYoVariable epsilonTauN = new DoubleYoVariable("epsilonTauN", registry);
+   private final DoubleYoVariable copAndNormalTorqueOptimalValue = new DoubleYoVariable("copAndNormalTorqueOptimalValue", registry);
 
    private final ReferenceFrame centerOfMassFrame;
 
@@ -44,6 +46,7 @@ public class LeeGoswamiCoPAndNormalTorqueOptimizer
    private final Matrix3d tempMatrix = new Matrix3d();
 
    private LeeGoswamiCoPAndNormalTorqueOptimizerNative leeGoswamiCoPAndNormalTorqueOptimizerNative;
+
 
    public LeeGoswamiCoPAndNormalTorqueOptimizer(ReferenceFrame centerOfMassFrame, YoVariableRegistry parentRegistry)
    {
@@ -64,6 +67,16 @@ public class LeeGoswamiCoPAndNormalTorqueOptimizer
       leeGoswamiCoPAndNormalTorqueOptimizerNative = new LeeGoswamiCoPAndNormalTorqueOptimizerNative(VECTOR3D_LENGTH, maxNContacts);
    }
 
+   public void setEpsilonCoP(double epsilonCoP)
+   {
+      this.epsilonCoP.set(epsilonCoP);
+   }
+
+   public void setEpsilonTauN(double epsilonTauN)
+   {
+      this.epsilonTauN.set(epsilonTauN);
+   }
+
    // TODO: assumes that ankle is directly above origin of planeFrame for a contact state
    public void solve(LinkedHashMap<PlaneContactState, FramePoint2d> centersOfPressure, LinkedHashMap<PlaneContactState, Double> normalTorques,
                      HashMap<PlaneContactState, Double> rotationalCoefficientsOfFriction, Vector3d desiredNetTorque,
@@ -71,13 +84,13 @@ public class LeeGoswamiCoPAndNormalTorqueOptimizer
    {
       // psiK, kappaK
       Arrays.fill(psik, 0.0);
-      Arrays.fill(kappaK, 0.0);
+      MatrixTools.tuple3dToArray(desiredNetTorque, kappaK, 0);
 
       // TODO: garbage
       DenseMatrix64F a = new DenseMatrix64F(VECTOR3D_LENGTH, VECTOR3D_LENGTH);
       DenseMatrix64F skew = new DenseMatrix64F(VECTOR3D_LENGTH, VECTOR3D_LENGTH);
       FramePoint ankle = new FramePoint(ReferenceFrame.getWorldFrame());
-      Vector3d tempKappa = new Vector3d();
+      Vector3d tempKappaVector = new Vector3d();
 
       int startIndex = 0;
       for (PlaneContactState contactState : centersOfPressure.keySet())
@@ -103,12 +116,13 @@ public class LeeGoswamiCoPAndNormalTorqueOptimizer
          ankle.changeFrame(contactState.getPlaneFrame());
          double ankleHeight = ankle.getZ();
 
-         MatrixTools.denseMatrixToVector3d(a, tempKappa, 0, 2);
-         tempKappa.scale(ankleHeight);    // last column of A times h
-         desiredNetTorque.add(tempKappa);
+         MatrixTools.denseMatrixToVector3d(a, tempKappaVector, 0, 2);
+         tempKappaVector.scale(ankleHeight);    // last column of A times h
+         desiredNetTorque.add(tempKappaVector);
+         kappaK[0] += tempKappaVector.getX();
+         kappaK[1] += tempKappaVector.getY();
+         kappaK[2] += tempKappaVector.getZ();
       }
-
-      MatrixTools.tuple3dToArray(desiredNetTorque, kappaK, 0);
 
       // etaMin, etaMax (assumes rectangular feet)
       int startRow = 0;
@@ -159,11 +173,13 @@ public class LeeGoswamiCoPAndNormalTorqueOptimizer
 
       // epsilon
       int epsilonIndex = 0;
+      double epsilonCoPSquared = MathTools.square(epsilonCoP.getDoubleValue());
+      double epsilonTauNSquared = MathTools.square(epsilonTauN.getDoubleValue());
       for (int i = 0; i < centersOfPressure.size(); i++)
       {
-         epsilon[epsilonIndex++] = epsilonCoP.getDoubleValue();
-         epsilon[epsilonIndex++] = epsilonCoP.getDoubleValue();
-         epsilon[epsilonIndex++] = epsilonTauN.getDoubleValue();
+         epsilon[epsilonIndex++] = epsilonCoPSquared;
+         epsilon[epsilonIndex++] = epsilonCoPSquared;
+         epsilon[epsilonIndex++] = epsilonTauNSquared;
       }
 
       try
@@ -176,6 +192,7 @@ public class LeeGoswamiCoPAndNormalTorqueOptimizer
       }
 
       double[] eta = leeGoswamiCoPAndNormalTorqueOptimizerNative.getEta();
+      this.copAndNormalTorqueOptimalValue.set(leeGoswamiCoPAndNormalTorqueOptimizerNative.getOptval());
 
       int etaIndex = 0;
       for (PlaneContactState contactState : centersOfPressure.keySet())

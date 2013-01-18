@@ -3,11 +3,14 @@ package us.ihmc.commonWalkingControlModules.controlModules;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 
+import javax.vecmath.Vector3d;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.SpatialForceVector;
+import us.ihmc.utilities.screwTheory.Wrench;
 
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
@@ -33,9 +36,17 @@ public class LeeGoswamiGroundReactionWrenchDistributor implements GroundReaction
       this.leeGoswamiCoPAndNormalTorqueOptimizer = new LeeGoswamiCoPAndNormalTorqueOptimizer(centerOfMassFrame, parentRegistry);
    }
 
+   public void setWeights(double wk, double epsilonF, double epsilonCoP, double epsilonTauN)
+   {
+      leeGoswamiForceOptimizer.setWk(wk);
+      leeGoswamiForceOptimizer.setEpsilonF(epsilonF);
+      leeGoswamiCoPAndNormalTorqueOptimizer.setEpsilonCoP(epsilonCoP);
+      leeGoswamiCoPAndNormalTorqueOptimizer.setEpsilonTauN(epsilonTauN);
+   }
+
    public void reset()
    {
-      // TODO: inefficient; should hang on to a bunch of temporary objects instead of deleting all references to them 
+      // TODO: inefficient; should hang on to a bunch of temporary objects instead of deleting all references to them
       coefficientsOfFriction.clear();
       rotationalCoefficientsOfFriction.clear();
       forces.clear();
@@ -59,7 +70,8 @@ public class LeeGoswamiGroundReactionWrenchDistributor implements GroundReaction
       desiredGroundReactionWrench.changeFrame(centerOfMassFrame);
 
       leeGoswamiForceOptimizer.solve(forces, coefficientsOfFriction, desiredGroundReactionWrench);
-      leeGoswamiCoPAndNormalTorqueOptimizer.solve(centersOfPressure, normalTorques, rotationalCoefficientsOfFriction, leeGoswamiForceOptimizer.getTorqueError(), forces);
+      leeGoswamiCoPAndNormalTorqueOptimizer.solve(centersOfPressure, normalTorques, rotationalCoefficientsOfFriction,
+              leeGoswamiForceOptimizer.getTorqueError(), forces);
    }
 
    public FrameVector getForce(PlaneContactState planeContactState)
@@ -75,5 +87,24 @@ public class LeeGoswamiGroundReactionWrenchDistributor implements GroundReaction
    public double getNormalTorque(PlaneContactState contactState)
    {
       return normalTorques.get(contactState);
+   }
+
+   public Wrench getExternalWrench(PlaneContactState contactState, ReferenceFrame bodyFrame)
+   {
+      ReferenceFrame planeFrame = contactState.getPlaneFrame();
+      FrameVector force = forces.get(contactState);
+      FramePoint2d cop = centersOfPressure.get(contactState);
+      double normalTorque = normalTorques.get(contactState);
+
+      force.changeFrame(planeFrame);
+      cop.changeFrame(planeFrame);
+
+      // r x f + tauN
+      Vector3d torque = new Vector3d();
+      torque.setX(cop.getY() * force.getZ());
+      torque.setY(-cop.getX() * force.getZ());
+      torque.setZ(cop.getX() * force.getY() - cop.getY() * force.getX() + normalTorque);
+
+      return new Wrench(bodyFrame, planeFrame, force.getVector(), torque);
    }
 }
