@@ -9,9 +9,12 @@ import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2dAndConnectingEdges;
 import us.ihmc.utilities.math.geometry.FrameLineSegment2d;
+import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
+import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
+import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.SpatialForceVector;
 
@@ -42,25 +45,17 @@ public class GeometricFlatGroundReactionWrenchDistributor implements GroundReact
    private final SideDependentList<FramePoint2d> virtualToePoints = new SideDependentList<FramePoint2d>(new FramePoint2d(worldFrame), new FramePoint2d(worldFrame));
    private final SideDependentList<Double> legStrengths = new SideDependentList<Double>();
    
-   private final ReferenceFrame centerOfMassFrame;
-   private final FrameVector gravitationalAcceleration;
-   private final double mass;
-   
-   public GeometricFlatGroundReactionWrenchDistributor(ReferenceFrame centerOfMassFrame, FrameVector gravitationalAcceleration, double mass, YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+   public GeometricFlatGroundReactionWrenchDistributor(YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       this.virtualToePointCalculator = new NewGeometricVirtualToePointCalculator(parentRegistry, dynamicGraphicObjectsListRegistry, 0.95);
       this.legStrengthCalculator = new TeeterTotterLegStrengthCalculator(parentRegistry);
       
       virtualToePointCalculator.setAllFramesToComputeInToWorld();
-      
-      this.centerOfMassFrame = centerOfMassFrame;
-      this.gravitationalAcceleration = gravitationalAcceleration;
-      this.mass = mass;
    }
    
    public void reset()
    {
-      contactStates.clear();
+      contactStates.clear();      
       footConvexPolygons.clear();
    }
 
@@ -122,21 +117,21 @@ public class GeometricFlatGroundReactionWrenchDistributor implements GroundReact
       RobotSide upcomingSupportSide = RobotSide.LEFT; //null;
       FramePoint2d centerOfPressure2d = centerOfPressure.toFramePoint2d();
       
+      boolean needToProject = !supportPolygon.isPointInside(centerOfPressure2d);
+      if (needToProject)
+      {
+         supportPolygon.orthogonalProjection(centerOfPressure2d);
+      }
       virtualToePointCalculator.packVirtualToePoints(virtualToePoints, centerOfPressure2d, footConvexPolygons, supportPolygon, connectingEdge1, connectingEdge2, upcomingSupportSide);
-      legStrengthCalculator.packLegStrengths(legStrengths, virtualToePoints, centerOfPressure2d);   
+      legStrengthCalculator.packLegStrengths(legStrengths, virtualToePoints, centerOfPressure2d);
+      
+      // Verify that virtual toe points and leg strength percentages give the overall force:
    }
 
    public FramePoint2d getCenterOfPressure(PlaneContactState contactState)
    {
-      if (contactStates.get(RobotSide.LEFT) == contactState)
-      {
-         return new FramePoint2d(virtualToePoints.get(RobotSide.LEFT));
-      }
-      else if (contactStates.get(RobotSide.LEFT) == contactState)
-      {
-         return new FramePoint2d(virtualToePoints.get(RobotSide.RIGHT));
-      }
-      else throw new RuntimeException("Don't have that contact state in my contact states!");
+      RobotSide robotSide = getRobotSide(contactState);
+      return new FramePoint2d(virtualToePoints.get(robotSide));
    }
 
    public double getNormalTorque(PlaneContactState contactState)
@@ -144,10 +139,13 @@ public class GeometricFlatGroundReactionWrenchDistributor implements GroundReact
       RobotSide robotSide = getRobotSide(contactState);
       
       SpatialForceVector temporaryForceVector = new SpatialForceVector(desiredTotalForceVector);
+      temporaryForceVector.scale(legStrengths.get(robotSide));
       
-      temporaryForceVector.changeFrame(contactState.getPlaneFrame());
-      FrameVector torque = new FrameVector(contactState.getPlaneFrame(), temporaryForceVector.getAngularPartCopy());
-      torque.scale(legStrengths.get(robotSide));
+      FramePoint2d virtualToePoint = virtualToePoints.get(robotSide);
+      ReferenceFrame virtualToePointFrame = createVTPReferenceFrame(virtualToePoint);
+      
+      temporaryForceVector.changeFrame(virtualToePointFrame);
+      FrameVector torque = new FrameVector(virtualToePointFrame, temporaryForceVector.getAngularPartCopy());
 
       return torque.getZ();
    }
@@ -165,13 +163,27 @@ public class GeometricFlatGroundReactionWrenchDistributor implements GroundReact
       return force;
    }
    
+   private ReferenceFrame createVTPReferenceFrame(FramePoint2d virtualToePoint2d)
+   {
+      PoseReferenceFrame vtpFrame = new PoseReferenceFrame("vtpFrame", virtualToePoint2d.getReferenceFrame());
+      
+      FramePoint position = new FramePoint(virtualToePoint2d.getReferenceFrame());
+      position.setXY(virtualToePoint2d);
+      FrameOrientation orientation = new FrameOrientation(virtualToePoint2d.getReferenceFrame());
+      FramePose pose = new FramePose(position, orientation);
+      vtpFrame.updatePose(pose);
+      vtpFrame.update();
+      
+      return vtpFrame;
+      
+   }
    private RobotSide getRobotSide(PlaneContactState contactState)
    {
       if (contactStates.get(RobotSide.LEFT) == contactState)
       {
          return RobotSide.LEFT;
       }
-      else if (contactStates.get(RobotSide.LEFT) == contactState)
+      else if (contactStates.get(RobotSide.RIGHT) == contactState)
       {
          return RobotSide.RIGHT;
       }
