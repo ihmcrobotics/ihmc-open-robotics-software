@@ -64,8 +64,8 @@ public class CentroidalMomentumMatrixTest
       Random random = new Random(167L);
 
       double mass = random.nextDouble();
-      Matrix3d momentOfInertia = RandomTools.getRandomDiagonalMatrix3d(random);
-      Vector3d comOffset = RandomTools.getRandomVector(random);
+      Matrix3d momentOfInertia = RandomTools.generateRandomDiagonalMatrix3d(random);
+      Vector3d comOffset = RandomTools.generateRandomVector(random);
 
       Robot robot = new Robot("robot");
       FloatingJoint rootJoint = new FloatingJoint("rootJoint", new Vector3d(), robot);
@@ -88,13 +88,13 @@ public class CentroidalMomentumMatrixTest
       int nTests = 10;
       for (int i = 0; i < nTests; i++)
       {
-         Vector3d position = RandomTools.getRandomVector(random);
+         Vector3d position = RandomTools.generateRandomVector(random);
          Matrix3d rotation = new Matrix3d();
          RotationFunctions.setYawPitchRoll(rotation, random.nextDouble(), random.nextDouble(), random.nextDouble());
-         Vector3d linearVelocityInBody = RandomTools.getRandomVector(random);
+         Vector3d linearVelocityInBody = RandomTools.generateRandomVector(random);
          Vector3d linearVelocityInWorld = new Vector3d(linearVelocityInBody);
          rotation.transform(linearVelocityInWorld);
-         Vector3d angularVelocity = RandomTools.getRandomVector(random);
+         Vector3d angularVelocity = RandomTools.generateRandomVector(random);
 
          rootJoint.setPosition(position);
          rootJoint.setRotation(rotation);

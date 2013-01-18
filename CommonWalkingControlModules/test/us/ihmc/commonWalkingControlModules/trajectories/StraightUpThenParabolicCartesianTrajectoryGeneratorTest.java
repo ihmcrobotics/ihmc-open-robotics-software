@@ -37,8 +37,8 @@ public class StraightUpThenParabolicCartesianTrajectoryGeneratorTest
          StraightUpThenParabolicCartesianTrajectoryGenerator trajectoryGenerator = new StraightUpThenParabolicCartesianTrajectoryGenerator("test",
                                                                                       referenceFrame, straightUpVelocity, parabolicTime, groundClearance, registry);
 
-         FramePoint initialPosition = new FramePoint(referenceFrame, RandomTools.getRandomVector(random));
-         FrameVector initialVelocity = new FrameVector(referenceFrame, RandomTools.getRandomVector(random));
+         FramePoint initialPosition = new FramePoint(referenceFrame, RandomTools.generateRandomVector(random));
+         FrameVector initialVelocity = new FrameVector(referenceFrame, RandomTools.generateRandomVector(random));
          FramePoint finalDesiredPosition = new FramePoint(initialPosition);
          finalDesiredPosition.add(new FrameVector(referenceFrame, random.nextDouble(), random.nextDouble(), random.nextDouble()));
 

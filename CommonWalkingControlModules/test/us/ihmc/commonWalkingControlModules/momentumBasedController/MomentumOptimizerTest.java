@@ -94,8 +94,8 @@ public class MomentumOptimizerTest
       ReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("com", worldFrame, elevator);
       centerOfMassFrame.update();
 
-      FrameVector desiredAngularCentroidalMomentumRate = new FrameVector(centerOfMassFrame, RandomTools.getRandomVector(random));
-      FrameVector desiredLinearCentroidalMomentumRate = new FrameVector(centerOfMassFrame, RandomTools.getRandomVector(random));
+      FrameVector desiredAngularCentroidalMomentumRate = new FrameVector(centerOfMassFrame, RandomTools.generateRandomVector(random));
+      FrameVector desiredLinearCentroidalMomentumRate = new FrameVector(centerOfMassFrame, RandomTools.generateRandomVector(random));
       YoVariableRegistry registry = new YoVariableRegistry("test");
       MomentumOptimizer optimizer = new BasicMomentumOptimizer(rootJoint, elevator, centerOfMassFrame, dt, registry);
 

@@ -68,7 +68,7 @@ public class MomentumSolverComparer
 
       for (int i = 0; i < nTests; i++)
       {
-         SpatialForceVector desiredMomentumRate = new SpatialForceVector(centerOfMassFrame, RandomTools.getRandomVector(random), RandomTools.getRandomVector(random));
+         SpatialForceVector desiredMomentumRate = new SpatialForceVector(centerOfMassFrame, RandomTools.generateRandomVector(random), RandomTools.generateRandomVector(random));
          for (RevoluteJoint joint : joints)
          {
             DenseMatrix64F jointAcceleration = jointSpaceAccelerations.get(joint);
@@ -129,8 +129,8 @@ public class MomentumSolverComparer
 
       for (int i = 0; i < nTests; i++)
       {
-         FrameVector desiredAngularCentroidalMomentumRate = new FrameVector(centerOfMassFrame, RandomTools.getRandomVector(random));
-         FrameVector desiredLinearCentroidalMomentumRate = new FrameVector(centerOfMassFrame, RandomTools.getRandomVector(random));
+         FrameVector desiredAngularCentroidalMomentumRate = new FrameVector(centerOfMassFrame, RandomTools.generateRandomVector(random));
+         FrameVector desiredLinearCentroidalMomentumRate = new FrameVector(centerOfMassFrame, RandomTools.generateRandomVector(random));
 
          optimizer.solveForRootJointAcceleration(desiredAngularCentroidalMomentumRate, desiredLinearCentroidalMomentumRate);
       }

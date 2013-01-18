@@ -29,7 +29,7 @@ public class DesiredFootstepCalculatorToolsTest
          double maxLength = 5.0;
          for (int j = 0; j < nPointsIn; j++)
          {
-            input.add(new FramePoint(worldFrame, RandomTools.getRandomVector(random, maxLength)));
+            input.add(new FramePoint(worldFrame, RandomTools.generateRandomVector(random, maxLength)));
          }
          
          

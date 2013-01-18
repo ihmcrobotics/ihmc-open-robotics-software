@@ -93,16 +93,16 @@ public class CenterOfPressureResolverTest
       
       for (int i=0; i<numberOfTests; i++)
       {
-         Point3d groundPoint = RandomTools.getRandomPoint(random, 1.0, 1.0, 0.2);
+         Point3d groundPoint = RandomTools.generateRandomPoint(random, 1.0, 1.0, 0.2);
          
-         Vector3d groundNormal = RandomTools.getRandomVector(random);
+         Vector3d groundNormal = RandomTools.generateRandomVector(random);
          groundNormal.setZ(1.0);
          groundNormal.normalize();
          
-         Point3d centerOfMassPoint = RandomTools.getRandomPoint(random, 1.0, 1.0, 0.2);
+         Point3d centerOfMassPoint = RandomTools.generateRandomPoint(random, 1.0, 1.0, 0.2);
          centerOfMassPoint.setZ(1.2);
          
-         Vector3d centerOfMassForce = RandomTools.getRandomVector(random, 100.0);
+         Vector3d centerOfMassForce = RandomTools.generateRandomVector(random, 100.0);
          centerOfMassForce.setZ(127.0);
          
          Vector3d centerOfMassTorque = new Vector3d(0.0, 0.0, 0.0);

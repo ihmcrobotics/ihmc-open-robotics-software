@@ -222,8 +222,8 @@ public class RobotTest
               random.nextDouble(), random.nextDouble()));
       root1.setLink(floatingBody);
 
-      Vector3d offset = RandomTools.getRandomVector(random);
-      PinJoint pin1 = new PinJoint("pin1", offset, robot, RandomTools.getRandomVector(random));
+      Vector3d offset = RandomTools.generateRandomVector(random);
+      PinJoint pin1 = new PinJoint("pin1", offset, robot, RandomTools.generateRandomVector(random));
       pin1.setLink(massiveLink());
       root1.addJoint(pin1);
 
