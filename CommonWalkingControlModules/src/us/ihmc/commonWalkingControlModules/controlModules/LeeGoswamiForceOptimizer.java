@@ -29,7 +29,6 @@ public class LeeGoswamiForceOptimizer
    private final DoubleYoVariable epsilonF = new DoubleYoVariable("epsilonF", registry);    // TODO: better name
 
    private final ReferenceFrame centerOfMassFrame;
-   private final FrameVector gravitationalForce;
    private final int nSupportVectors;
 
    private final DenseMatrix64F phi;
@@ -49,14 +48,10 @@ public class LeeGoswamiForceOptimizer
 
    private final SpatialForceVector wrenchError;
 
-   public LeeGoswamiForceOptimizer(ReferenceFrame centerOfMassFrame, FrameVector gravitationalAcceleration, double mass, int nSupportVectors,
+   public LeeGoswamiForceOptimizer(ReferenceFrame centerOfMassFrame, int nSupportVectors,
                                    YoVariableRegistry parentRegistry)
    {
       this.centerOfMassFrame = centerOfMassFrame;
-
-      this.gravitationalForce = new FrameVector(gravitationalAcceleration);
-      gravitationalForce.scale(mass);
-      gravitationalForce.changeFrame(centerOfMassFrame);
 
       this.nSupportVectors = nSupportVectors;
 
@@ -112,7 +107,6 @@ public class LeeGoswamiForceOptimizer
       // ld - mg
       Vector3d desiredNetForce = new Vector3d();
       desiredNetSpatialForceVector.packLinearPart(desiredNetForce);
-      desiredNetForce.sub(gravitationalForce.getVector());
       MatrixTools.setDenseMatrixFromTuple3d(xi, desiredNetForce, VECTOR3D_LENGTH, 0);
 
       // xi
@@ -154,7 +148,6 @@ public class LeeGoswamiForceOptimizer
       }
 
       wrenchError.set(desiredNetSpatialForceVector.getExpressedInFrame(), wrenchErrorMatrix);
-      wrenchError.addLinearPart(gravitationalForce.getVector());
    }
 
    public Vector3d getTorqueError()
