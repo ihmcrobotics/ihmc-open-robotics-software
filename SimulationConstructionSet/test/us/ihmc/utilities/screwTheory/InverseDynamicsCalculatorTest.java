@@ -319,11 +319,11 @@ public class InverseDynamicsCalculatorTest
       PinJoint previousJoint = null;
       for (int i = 0; i < jointAxes.length; i++)
       {         
-         Vector3d jointOffset = RandomTools.getRandomVector(random);
+         Vector3d jointOffset = RandomTools.generateRandomVector(random);
          Vector3d jointAxis = jointAxes[i];
-         Matrix3d momentOfInertia = RandomTools.getRandomDiagonalMatrix3d(random);
+         Matrix3d momentOfInertia = RandomTools.generateRandomDiagonalMatrix3d(random);
          double mass = random.nextDouble();
-         Vector3d comOffset = RandomTools.getRandomVector(random);
+         Vector3d comOffset = RandomTools.generateRandomVector(random);
          double jointPosition = random.nextDouble();
          double jointVelocity = useRandomVelocity ? random.nextDouble() : 0.0;
          double jointAcceleration = useRandomAcceleration ? random.nextDouble() : 0.0;
@@ -366,12 +366,12 @@ public class InverseDynamicsCalculatorTest
       
       for (int i = 0; i < numberOfJoints; i++)
       {         
-         Vector3d jointOffset = RandomTools.getRandomVector(random);
+         Vector3d jointOffset = RandomTools.generateRandomVector(random);
          Vector3d jointAxis = new Vector3d(random.nextDouble(), random.nextDouble(), random.nextDouble());
          jointAxis.normalize();
-         Matrix3d momentOfInertia = RandomTools.getRandomDiagonalMatrix3d(random);
+         Matrix3d momentOfInertia = RandomTools.generateRandomDiagonalMatrix3d(random);
          double mass = random.nextDouble();
-         Vector3d comOffset = RandomTools.getRandomVector(random);
+         Vector3d comOffset = RandomTools.generateRandomVector(random);
          double jointPosition = random.nextDouble();
          double jointVelocity = useRandomVelocity ? random.nextDouble() : 0.0;
          double jointAcceleration = useRandomAcceleration ? random.nextDouble() : 0.0;

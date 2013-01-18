@@ -329,10 +329,10 @@ public class LeeGoswamiGroundReactionWrenchDistributorTest
 
       public static FlatGroundPlaneContactState createRandomFlatGroundContactState(Random random, boolean leftSide)
       {
-         double footLength = RandomTools.getRandomDouble(random, 0.1, 0.3);
-         double footWidth = RandomTools.getRandomDouble(random, 0.1, 0.2);
+         double footLength = RandomTools.generateRandomDouble(random, 0.1, 0.3);
+         double footWidth = RandomTools.generateRandomDouble(random, 0.1, 0.2);
          
-         Point3d midfootLocation = RandomTools.getRandomPoint(random, -1.0, 0.3, 0.0, 1.0, 1.0, 0.0);
+         Point3d midfootLocation = RandomTools.generateRandomPoint(random, -1.0, 0.3, 0.0, 1.0, 1.0, 0.0);
          midfootLocation.setZ(0.0);
          
          if (!leftSide) midfootLocation.setY(-midfootLocation.getY());
@@ -414,10 +414,10 @@ public class LeeGoswamiGroundReactionWrenchDistributorTest
       {
          ReferenceFrame contactPlaneFrame = contactState.getPlaneFrame();
        
-         double normalForce = RandomTools.getRandomDouble(random, 10.0, 100.0);
+         double normalForce = RandomTools.generateRandomDouble(random, 10.0, 100.0);
          double parallelForceMagnitude = random.nextDouble() * coefficientOfFriction * normalForce;
          
-         Vector2d parallelForce2d = RandomTools.getRandomVector2d(random, parallelForceMagnitude);
+         Vector2d parallelForce2d = RandomTools.generateRandomVector2d(random, parallelForceMagnitude);
          Vector3d totalForce = new Vector3d(parallelForce2d.getX(), parallelForce2d.getY(), normalForce);
          
          double normalTorque = random.nextDouble() * normalTorqueCoefficientOfFriction * normalForce;

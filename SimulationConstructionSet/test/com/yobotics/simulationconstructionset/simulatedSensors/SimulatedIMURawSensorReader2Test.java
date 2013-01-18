@@ -33,11 +33,11 @@ public class SimulatedIMURawSensorReader2Test
    public void test() throws SimulationExceededMaximumTimeException, UnreasonableAccelerationException
    {
       SingleRigidBodyRobot robot = new SingleRigidBodyRobot();
-      robot.setPosition(RandomTools.getRandomVector(random));
+      robot.setPosition(RandomTools.generateRandomVector(random));
       robot.setYawPitchRoll(random.nextDouble(), random.nextDouble(), random.nextDouble());
-      robot.setAngularVelocity(RandomTools.getRandomVector(random));
-      robot.setLinearVelocity(RandomTools.getRandomVector(random));
-      robot.setExternalForce(RandomTools.getRandomVector(random));
+      robot.setAngularVelocity(RandomTools.generateRandomVector(random));
+      robot.setLinearVelocity(RandomTools.generateRandomVector(random));
+      robot.setExternalForce(RandomTools.generateRandomVector(random));
       
       SimulatedSensorsTestFullRobotModel fullRobotModel = new SimulatedSensorsTestFullRobotModel();
       YoVariableRegistry registry = new YoVariableRegistry("test");
