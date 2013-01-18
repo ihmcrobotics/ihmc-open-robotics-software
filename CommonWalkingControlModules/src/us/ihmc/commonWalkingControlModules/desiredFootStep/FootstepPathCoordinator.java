@@ -21,6 +21,7 @@ public class FootstepPathCoordinator implements FootstepProvider
    private final BooleanYoVariable isPaused = new BooleanYoVariable("isPaused", registry);
    private final QueueBasedStreamingDataProducer<FootstepStatus> footstepStatusDataProducer;
    private final StreamingDataTCPServer streamingDataTCPServer;
+   private Footstep stepInProgress = null;
 
    public FootstepPathCoordinator()
    {
@@ -41,23 +42,31 @@ public class FootstepPathCoordinator implements FootstepProvider
 
    public Footstep poll()
    {
-      Footstep footstep = footstepQueue.poll();
-      if (footstep != null)
+      stepInProgress = footstepQueue.poll();
+      if (stepInProgress != null)
       {
-         notifyConsumersOfStatus(footstep);
+         notifyConsumersOfStatus(stepInProgress, FootstepStatus.Status.STARTED);
       }
-      return footstep;
+      return stepInProgress;
    }
 
-   private void notifyConsumersOfStatus(Footstep footstep)
+   private void notifyConsumersOfStatus(Footstep footstep, FootstepStatus.Status status)
    {
-      FootstepStatus footstepStatus = new FootstepStatus(new FootstepData(footstep), FootstepStatus.Status.STARTED);
+      FootstepStatus footstepStatus = new FootstepStatus(new FootstepData(footstep), status);
       footstepStatusDataProducer.queueDataToSend(footstepStatus);
    }
 
    public boolean isEmpty()
    {
       return (!walk.getBooleanValue() || footstepQueue.isEmpty());
+   }
+
+   public void notifyComplete()
+   {
+      if (stepInProgress != null)
+      {
+         notifyConsumersOfStatus(stepInProgress, FootstepStatus.Status.COMPLETED);
+      }
    }
 
    public void updatePath(ArrayList<Footstep> footsteps)
@@ -83,6 +92,7 @@ public class FootstepPathCoordinator implements FootstepProvider
       }
 
       this.isPaused.set(isPaused);
+      System.out.println("isPaused = " + isPaused);;
 
       if (isPaused)
       {

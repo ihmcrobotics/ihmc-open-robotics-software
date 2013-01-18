@@ -512,6 +512,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
          System.out.println("WalkingHighLevelController: leavingDoubleSupportState");
          upcomingSupportLeg.set(upcomingSupportLeg.getEnumValue().getOppositeSide());
 
+         footstepProvider.notifyComplete();
 //       ContactableBody swingFoot = contactablePlaneBodies.get(swingSide);
 //       Footstep desiredFootstep = desiredFootstepCalculator.updateAndGetDesiredFootstep(swingSide.getOppositeSide());
 //       contactStates.get(swingFoot).setContactPoints(desiredFootstep.getExpectedContactPoints());
