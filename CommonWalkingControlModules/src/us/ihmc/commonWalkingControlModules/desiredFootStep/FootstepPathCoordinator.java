@@ -2,12 +2,10 @@ package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactableBody;
 import us.ihmc.utilities.io.streamingData.QueueBasedStreamingDataProducer;
 import us.ihmc.utilities.io.streamingData.StreamingDataTCPServer;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
@@ -22,30 +20,32 @@ public class FootstepPathCoordinator implements FootstepProvider
    private final BooleanYoVariable walk = new BooleanYoVariable("walk", registry);
    private final BooleanYoVariable isPaused = new BooleanYoVariable("isPaused", registry);
    private final QueueBasedStreamingDataProducer<FootstepStatus> footstepStatusDataProducer;
+   private final StreamingDataTCPServer streamingDataTCPServer;
 
-   public FootstepPathCoordinator(Collection<? extends ContactableBody> rigidBodyList, long footstepPathDataIdentifier, long pauseCommandDataIdentifier)
+   public FootstepPathCoordinator()
    {
-      new FootstepPathConsumer(footstepPathDataIdentifier, rigidBodyList, this);
-      new PauseCommandConsumer(pauseCommandDataIdentifier, this);
       setPaused(false);
       setWalk(true);
       footstepStatusDataProducer = new QueueBasedStreamingDataProducer<FootstepStatus>(4444L);
-      StreamingDataTCPServer streamingDataTCPServer = new StreamingDataTCPServer(4444);
+      streamingDataTCPServer = new StreamingDataTCPServer(4444);
       streamingDataTCPServer.registerStreamingDataProducer(footstepStatusDataProducer);
       streamingDataTCPServer.startOnAThread();
       footstepStatusDataProducer.startProducingData();
    }
 
-   public FootstepPathCoordinator(Collection<? extends ContactableBody> rigidBodyList, long footstepPathDataIdentifier, long pauseCommandDataIdentifier, YoVariableRegistry parentRegistry)
+   public FootstepPathCoordinator(YoVariableRegistry parentRegistry)
    {
-      this(rigidBodyList, footstepPathDataIdentifier, pauseCommandDataIdentifier);
+      this();
       parentRegistry.addChild(registry);
    }
 
    public Footstep poll()
    {
       Footstep footstep = footstepQueue.poll();
-      notifyConsumersOfStatus(footstep);
+      if (footstep != null)
+      {
+         notifyConsumersOfStatus(footstep);
+      }
       return footstep;
    }
 
@@ -101,5 +101,10 @@ public class FootstepPathCoordinator implements FootstepProvider
    public void setWalk(boolean walk)
    {
       this.walk.set(walk);
+   }
+
+   public void close()
+   {
+      streamingDataTCPServer.close();
    }
 }
