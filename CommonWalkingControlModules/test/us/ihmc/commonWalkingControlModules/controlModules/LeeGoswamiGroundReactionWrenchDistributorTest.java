@@ -54,6 +54,7 @@ public class LeeGoswamiGroundReactionWrenchDistributorTest
       YoVariableRegistry parentRegistry = new YoVariableRegistry("registry");
       
       GroundReactionWrenchDistributorInterface distributor = new LeeGoswamiGroundReactionWrenchDistributor(centerOfMassFrame, gravitationalAcceleration, mass, nSupportVectors, parentRegistry);
+//      GroundReactionWrenchDistributorInterface distributor = new GeometricFlatGroundReactionWrenchDistributor(centerOfMassFrame, gravitationalAcceleration, mass, parentRegistry, null);
   
       double rotationalCoefficientOfFriction = 0.5;
       double footLength = 0.3;
@@ -69,8 +70,8 @@ public class LeeGoswamiGroundReactionWrenchDistributorTest
       contactStates.add(leftFootContactState);
       contactStates.add(rightFootContactState);
       
-      Vector3d linearPart = new Vector3d();
-      Vector3d angularPart = new Vector3d();
+      Vector3d linearPart = new Vector3d(0.0, 0.0, mass * 9.81);
+      Vector3d angularPart = new Vector3d(0.0, 0.0, 0.0);
       
       SpatialForceVector desiredNetSpatialForceVector = new SpatialForceVector(ReferenceFrame.getWorldFrame(), linearPart, angularPart);
       distributor.solve(desiredNetSpatialForceVector);
@@ -183,26 +184,26 @@ public class LeeGoswamiGroundReactionWrenchDistributorTest
          frontLeft.setY(frontLeft.getY() + footWidth/2.0);
          
          Point3d frontRight = new Point3d(midfootLocation);
-         frontRight.setX(frontLeft.getX() + footLength/2.0);
-         frontRight.setY(frontLeft.getY() - footWidth/2.0);
+         frontRight.setX(frontRight.getX() + footLength/2.0);
+         frontRight.setY(frontRight.getY() - footWidth/2.0);
          
          Point3d backLeft = new Point3d(midfootLocation);
-         backLeft.setX(frontLeft.getX() - footLength/2.0);
-         backLeft.setY(frontLeft.getY() + footWidth/2.0);
+         backLeft.setX(backLeft.getX() - footLength/2.0);
+         backLeft.setY(backLeft.getY() + footWidth/2.0);
          
          Point3d backRight = new Point3d(midfootLocation);
-         backRight.setX(frontLeft.getX() - footLength/2.0);
-         backRight.setY(frontLeft.getY() - footWidth/2.0);
+         backRight.setX(backRight.getX() - footLength/2.0);
+         backRight.setY(backRight.getY() - footWidth/2.0);
          
          contactPoints.add(new FramePoint(ReferenceFrame.getWorldFrame(), frontLeft));
          contactPoints.add(new FramePoint(ReferenceFrame.getWorldFrame(), frontRight));
-         contactPoints.add(new FramePoint(ReferenceFrame.getWorldFrame(), backLeft));
          contactPoints.add(new FramePoint(ReferenceFrame.getWorldFrame(), backRight));
+         contactPoints.add(new FramePoint(ReferenceFrame.getWorldFrame(), backLeft));
          
          contactPoints2d.add(new FramePoint2d(ReferenceFrame.getWorldFrame(), projectToXY(frontLeft)));
          contactPoints2d.add(new FramePoint2d(ReferenceFrame.getWorldFrame(), projectToXY(frontRight)));
-         contactPoints2d.add(new FramePoint2d(ReferenceFrame.getWorldFrame(), projectToXY(backLeft)));
          contactPoints2d.add(new FramePoint2d(ReferenceFrame.getWorldFrame(), projectToXY(backRight)));
+         contactPoints2d.add(new FramePoint2d(ReferenceFrame.getWorldFrame(), projectToXY(backLeft)));
          
       }
       
