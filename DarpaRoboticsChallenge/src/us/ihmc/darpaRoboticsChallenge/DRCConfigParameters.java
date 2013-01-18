@@ -18,6 +18,10 @@ public class DRCConfigParameters
    public static final int ROBOT_DATA_RECEIVER_PORT_NUMBER = 7777;
    public static final int FOOTSTEP_PLANNER_STREAMING_SERVER_PORT_NUMBER = 9876;
    public static final long FOOTSTEP_PLANNER_STREAMING_SERVER_DATA_IDENTIFIER = 9876L;
+
+   public static final int FOOTSTEP_STATUS_PORT_NUMBER = 4444;
+   public static final long FOOTSTEP_STATUS_DATA_IDENTIFIER = 4444L;
+
    public static final int LIDAR_DATA_PORT_NUMBER = 4697;
    
    public static final long ROBOT_JOINT_SERVER_UPDATE_MILLIS = 100;

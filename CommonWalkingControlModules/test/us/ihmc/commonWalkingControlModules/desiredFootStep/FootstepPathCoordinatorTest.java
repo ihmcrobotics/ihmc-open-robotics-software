@@ -23,19 +23,24 @@ public class FootstepPathCoordinatorTest
    @Test
    public void testPoll() throws Exception
    {
-      FootstepPathCoordinator footstepPathCoordinator = new FootstepPathCoordinator(null, 2222L, 3333L);
+      FootstepPathCoordinator footstepPathCoordinator = new FootstepPathCoordinator();
+      FootstepPathConsumer footstepPathConsumer = new FootstepPathConsumer(2222L,  null, footstepPathCoordinator);
+      PauseCommandConsumer pauseCommandConsumer = new PauseCommandConsumer(3333L, footstepPathCoordinator);
       ArrayList<Footstep> footsteps = createRandomFootsteps(10);
       footstepPathCoordinator.updatePath(footsteps);
       for (Footstep footstep : footsteps)
       {
          compareFootsteps(footstep, footstepPathCoordinator.poll());
       }
+      footstepPathCoordinator.close();
    }
 
    @Test
    public void testIsEmpty() throws Exception
    {
-      FootstepPathCoordinator footstepPathCoordinator = new FootstepPathCoordinator(null, 2222L, 3333L);
+      FootstepPathCoordinator footstepPathCoordinator = new FootstepPathCoordinator();
+      FootstepPathConsumer footstepPathConsumer = new FootstepPathConsumer(2222L,  null, footstepPathCoordinator);
+      PauseCommandConsumer pauseCommandConsumer = new PauseCommandConsumer(3333L, footstepPathCoordinator);;
       assertTrue(footstepPathCoordinator.isEmpty());
 
       ArrayList<Footstep> footsteps = createRandomFootsteps(10);
@@ -48,12 +53,16 @@ public class FootstepPathCoordinatorTest
       }
 
       assertTrue(footstepPathCoordinator.isEmpty());
+      footstepPathCoordinator.close();
+
    }
 
    @Test
    public void testUpdatePath() throws Exception
    {
-      FootstepPathCoordinator footstepPathCoordinator = new FootstepPathCoordinator(null, 2222L, 3333L);
+      FootstepPathCoordinator footstepPathCoordinator = new FootstepPathCoordinator();
+      FootstepPathConsumer footstepPathConsumer = new FootstepPathConsumer(2222L,  null, footstepPathCoordinator);
+      PauseCommandConsumer pauseCommandConsumer = new PauseCommandConsumer(3333L, footstepPathCoordinator);
       assertTrue(footstepPathCoordinator.isEmpty());
 
       int numberTotest = 10;
@@ -100,12 +109,16 @@ public class FootstepPathCoordinatorTest
       }
       assertTrue(footstepPathCoordinator.isEmpty());
 
+      footstepPathCoordinator.close();
+
    }
 
    @Test
    public void testSetPaused() throws Exception
    {
-      FootstepPathCoordinator footstepPathCoordinator = new FootstepPathCoordinator(null, 2222L, 3333L);
+      FootstepPathCoordinator footstepPathCoordinator = new FootstepPathCoordinator();
+      FootstepPathConsumer footstepPathConsumer = new FootstepPathConsumer(2222L,  null, footstepPathCoordinator);
+      PauseCommandConsumer pauseCommandConsumer = new PauseCommandConsumer(3333L, footstepPathCoordinator);
       int numberTotest = 10;
       ArrayList<Footstep> footsteps = createRandomFootsteps(numberTotest);
       footstepPathCoordinator.updatePath(footsteps);
@@ -143,6 +156,9 @@ public class FootstepPathCoordinatorTest
       count++;
       compareFootsteps(footsteps.get(count), footstepPathCoordinator.poll());
       assertFalse(footstepPathCoordinator.isEmpty());
+
+      footstepPathCoordinator.close();
+
    }
 
    private void compareFootsteps(Footstep footstep1, Footstep footstep2)
