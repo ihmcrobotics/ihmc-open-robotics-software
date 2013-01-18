@@ -96,7 +96,7 @@ public class GroundReactionWrenchDistributorVisuzalizer
       YoVariableRegistry parentRegistry = scs.getRootRegistry();
             
       
-      GroundReactionWrenchDistributorInterface distributor = new LeeGoswamiGroundReactionWrenchDistributor(centerOfMassFrame, gravitationalAcceleration, mass, nSupportVectors, parentRegistry);
+      GroundReactionWrenchDistributorInterface distributor = new LeeGoswamiGroundReactionWrenchDistributor(centerOfMassFrame, nSupportVectors, parentRegistry);
       ArrayList<PlaneContactState> contactStates = new ArrayList<PlaneContactState>();
       
       while(true)

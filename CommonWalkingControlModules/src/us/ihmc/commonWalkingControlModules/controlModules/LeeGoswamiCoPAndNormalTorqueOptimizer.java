@@ -14,6 +14,7 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.LeeGoswamiCoPAndNormalTorqueOptimizerNative;
+import us.ihmc.utilities.exeptions.NoConvergenceException;
 import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
@@ -38,6 +39,7 @@ public class LeeGoswamiCoPAndNormalTorqueOptimizer
    private final double[] etaMin;
    private final double[] etaMax;
    private final double[] etaD;
+   private final double[] epsilon;
 
    private final Matrix3d tempMatrix = new Matrix3d();
 
@@ -57,6 +59,9 @@ public class LeeGoswamiCoPAndNormalTorqueOptimizer
       etaMin = new double[nColumns];
       etaMax = new double[nColumns];
       etaD = new double[nColumns];
+      epsilon = new double[nColumns];
+
+      leeGoswamiCoPAndNormalTorqueOptimizerNative = new LeeGoswamiCoPAndNormalTorqueOptimizerNative(VECTOR3D_LENGTH, maxNContacts);
    }
 
    // TODO: assumes that ankle is directly above origin of planeFrame for a contact state
@@ -152,18 +157,33 @@ public class LeeGoswamiCoPAndNormalTorqueOptimizer
          etaD[i] = (etaMin[i] + etaMax[i]) * 0.5;
       }
 
-      double epsilonCoP = this.epsilonCoP.getDoubleValue();
-      double epsilonTauN = this.epsilonTauN.getDoubleValue();
+      // epsilon
+      int epsilonIndex = 0;
+      for (int i = 0; i < centersOfPressure.size(); i++)
+      {
+         epsilon[epsilonIndex++] = epsilonCoP.getDoubleValue();
+         epsilon[epsilonIndex++] = epsilonCoP.getDoubleValue();
+         epsilon[epsilonIndex++] = epsilonTauN.getDoubleValue();
+      }
 
-//      double[] copsAndNormalTorques = leeGoswamiCoPAndNormalTorqueOptimizerNative.solve(psik, kappaK, etaMin, etaMax, epsilonCoP, epsilonTauN);
+      try
+      {
+         leeGoswamiCoPAndNormalTorqueOptimizerNative.solve(psik, kappaK, etaMin, etaMax, etaD, epsilon);
+      }
+      catch (NoConvergenceException e)
+      {
+         e.printStackTrace();
+      }
 
-//      int index = 0;
-//      for (PlaneContactState contactState : centersOfPressure.keySet())
-//      {
-//         FramePoint2d cop = centersOfPressure.get(contactState);
-//         cop.setX(copsAndNormalTorques[index++]);
-//         cop.setY(copsAndNormalTorques[index++]);
-//         normalTorques.put(contactState, copsAndNormalTorques[index++]);
-//      }
+      double[] eta = leeGoswamiCoPAndNormalTorqueOptimizerNative.getEta();
+
+      int etaIndex = 0;
+      for (PlaneContactState contactState : centersOfPressure.keySet())
+      {
+         FramePoint2d cop = centersOfPressure.get(contactState);
+         cop.setX(eta[etaIndex++]);
+         cop.setY(eta[etaIndex++]);
+         normalTorques.put(contactState, eta[etaIndex++]);
+      }
    }
 }

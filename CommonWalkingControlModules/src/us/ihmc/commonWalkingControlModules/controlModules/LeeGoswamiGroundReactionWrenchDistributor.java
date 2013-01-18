@@ -26,11 +26,10 @@ public class LeeGoswamiGroundReactionWrenchDistributor implements GroundReaction
    private final LeeGoswamiCoPAndNormalTorqueOptimizer leeGoswamiCoPAndNormalTorqueOptimizer;
 
 
-   public LeeGoswamiGroundReactionWrenchDistributor(ReferenceFrame centerOfMassFrame, FrameVector gravitationalAcceleration, double mass, int nSupportVectors,
-           YoVariableRegistry parentRegistry)
+   public LeeGoswamiGroundReactionWrenchDistributor(ReferenceFrame centerOfMassFrame, int nSupportVectors, YoVariableRegistry parentRegistry)
    {
       this.centerOfMassFrame = centerOfMassFrame;
-      this.leeGoswamiForceOptimizer = new LeeGoswamiForceOptimizer(centerOfMassFrame, gravitationalAcceleration, mass, nSupportVectors, parentRegistry);
+      this.leeGoswamiForceOptimizer = new LeeGoswamiForceOptimizer(centerOfMassFrame, nSupportVectors, parentRegistry);
       this.leeGoswamiCoPAndNormalTorqueOptimizer = new LeeGoswamiCoPAndNormalTorqueOptimizer(centerOfMassFrame, parentRegistry);
    }
 
@@ -55,11 +54,11 @@ public class LeeGoswamiGroundReactionWrenchDistributor implements GroundReaction
       normalTorques.put(contactState, 0.0);
    }
 
-   public void solve(SpatialForceVector desiredNetSpatialForceVector)
+   public void solve(SpatialForceVector desiredGroundReactionWrench)
    {
-      desiredNetSpatialForceVector.changeFrame(centerOfMassFrame);
+      desiredGroundReactionWrench.changeFrame(centerOfMassFrame);
 
-      leeGoswamiForceOptimizer.solve(forces, coefficientsOfFriction, desiredNetSpatialForceVector);
+      leeGoswamiForceOptimizer.solve(forces, coefficientsOfFriction, desiredGroundReactionWrench);
       leeGoswamiCoPAndNormalTorqueOptimizer.solve(centersOfPressure, normalTorques, rotationalCoefficientsOfFriction, leeGoswamiForceOptimizer.getTorqueError(), forces);
    }
 
