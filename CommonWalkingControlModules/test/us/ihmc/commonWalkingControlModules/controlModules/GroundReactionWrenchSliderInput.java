@@ -5,6 +5,7 @@ import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
+import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -129,7 +130,7 @@ public class GroundReactionWrenchSliderInput
          desiredNetSpatialForceVector.setAngularPart(torqueOnCenterOfMass.getFrameVectorCopy().getVector());
          desiredNetSpatialForceVector.setLinearPart(forceOnCenterOfMass.getFrameVectorCopy().getVector());
          
-         distributor.solve(desiredNetSpatialForceVector);
+         distributor.solve(desiredNetSpatialForceVector, null);
          
          visualizer.update(scs, distributor, centerOfMassFrame, contactStates, desiredNetSpatialForceVector);
          scs.tickAndUpdate();

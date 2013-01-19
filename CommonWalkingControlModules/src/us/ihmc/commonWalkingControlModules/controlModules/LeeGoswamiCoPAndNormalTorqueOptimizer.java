@@ -28,6 +28,7 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 public class LeeGoswamiCoPAndNormalTorqueOptimizer
 {
    private static final int VECTOR3D_LENGTH = 3;
+   private final int maxNContacts = 2;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final DoubleYoVariable epsilonCoP = new DoubleYoVariable("epsilonCoP", registry);    // TODO: better name
@@ -53,7 +54,6 @@ public class LeeGoswamiCoPAndNormalTorqueOptimizer
       this.centerOfMassFrame = centerOfMassFrame;
       parentRegistry.addChild(registry);
 
-      int maxNContacts = 2;
       int nRows = VECTOR3D_LENGTH;
       int nColumns = maxNContacts * VECTOR3D_LENGTH;
 
@@ -126,6 +126,9 @@ public class LeeGoswamiCoPAndNormalTorqueOptimizer
 
       // etaMin, etaMax (assumes rectangular feet)
       int startRow = 0;
+      Arrays.fill(etaMin, 0.0);
+      Arrays.fill(etaMax, 0.0);
+      Arrays.fill(etaD, 0.0);
       for (PlaneContactState contactState : centersOfPressure.keySet())
       {
          FrameVector force = forces.get(contactState);
@@ -154,6 +157,9 @@ public class LeeGoswamiCoPAndNormalTorqueOptimizer
                yMax = y;
          }
 
+         if (Double.isInfinite(xMax))
+            throw new RuntimeException();
+         
          etaMin[startRow + 0] = xMin;
          etaMin[startRow + 1] = yMin;
          etaMin[startRow + 2] = -tauMax;

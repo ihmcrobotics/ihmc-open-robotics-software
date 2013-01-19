@@ -79,9 +79,9 @@ public class GeometricFlatGroundReactionWrenchDistributor implements GroundReact
       
    }
 
-   public void solve(SpatialForceVector desiredNetSpatialForceVector)
+   public void solve(SpatialForceVector desiredGroundReactionWrench, RobotSide upcomingSupportLeg)
    {
-      this.desiredTotalForceVector.set(desiredNetSpatialForceVector);
+      this.desiredTotalForceVector.set(desiredGroundReactionWrench);
       footConvexPolygons.clear();
       
       for (RobotSide robotSide : RobotSide.values())
@@ -101,9 +101,9 @@ public class GeometricFlatGroundReactionWrenchDistributor implements GroundReact
          footConvexPolygons.set(robotSide, convexPolygon);
       }
       
-      FramePoint centerOfPressure = new FramePoint(worldFrame);
+      FramePoint2d centerOfPressure2d = new FramePoint2d(worldFrame);
 
-      double normalTorque = centerOfPressureResolver.resolveCenterOfPressureAndNormalTorque(centerOfPressure, desiredTotalForceVector, worldFrame);
+      double normalTorque = centerOfPressureResolver.resolveCenterOfPressureAndNormalTorque(centerOfPressure2d, desiredTotalForceVector, worldFrame);
 
       FrameConvexPolygon2d leftFootPolygon = footConvexPolygons.get(RobotSide.LEFT);
       FrameConvexPolygon2d rightFootPolygon = footConvexPolygons.get(RobotSide.RIGHT);
@@ -115,7 +115,6 @@ public class GeometricFlatGroundReactionWrenchDistributor implements GroundReact
       FrameLineSegment2d connectingEdge2 = supportPolygonAndConnectingEdges.getConnectingEdge2();
       
       RobotSide upcomingSupportSide = RobotSide.LEFT; //null;
-      FramePoint2d centerOfPressure2d = centerOfPressure.toFramePoint2d();
       
       boolean needToProject = !supportPolygon.isPointInside(centerOfPressure2d);
       if (needToProject)

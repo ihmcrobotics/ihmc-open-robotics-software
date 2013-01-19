@@ -3,14 +3,12 @@ package us.ihmc.commonWalkingControlModules.controlModules;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 
-import javax.vecmath.Vector3d;
-
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
+import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.SpatialForceVector;
-import us.ihmc.utilities.screwTheory.Wrench;
 
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
@@ -57,15 +55,14 @@ public class LeeGoswamiGroundReactionWrenchDistributor implements GroundReaction
    public void addContact(PlaneContactState contactState, double coefficientOfFriction, double rotationalCoefficientOfFriction)
    {
       coefficientsOfFriction.put(contactState, coefficientOfFriction);
-      forces.put(contactState, new FrameVector(contactState.getBodyFrame()));
-
       rotationalCoefficientsOfFriction.put(contactState, rotationalCoefficientOfFriction);
+
       forces.put(contactState, new FrameVector(centerOfMassFrame));
       centersOfPressure.put(contactState, new FramePoint2d(contactState.getPlaneFrame()));
       normalTorques.put(contactState, 0.0);
    }
 
-   public void solve(SpatialForceVector desiredGroundReactionWrench)
+   public void solve(SpatialForceVector desiredGroundReactionWrench, RobotSide upcomingSupportleg)
    {
       desiredGroundReactionWrench.changeFrame(centerOfMassFrame);
 
@@ -87,24 +84,5 @@ public class LeeGoswamiGroundReactionWrenchDistributor implements GroundReaction
    public double getNormalTorque(PlaneContactState contactState)
    {
       return normalTorques.get(contactState);
-   }
-
-   public Wrench getExternalWrench(PlaneContactState contactState, ReferenceFrame bodyFrame)
-   {
-      ReferenceFrame planeFrame = contactState.getPlaneFrame();
-      FrameVector force = forces.get(contactState);
-      FramePoint2d cop = centersOfPressure.get(contactState);
-      double normalTorque = normalTorques.get(contactState);
-
-      force.changeFrame(planeFrame);
-      cop.changeFrame(planeFrame);
-
-      // r x f + tauN
-      Vector3d torque = new Vector3d();
-      torque.setX(cop.getY() * force.getZ());
-      torque.setY(-cop.getX() * force.getZ());
-      torque.setZ(cop.getX() * force.getY() - cop.getY() * force.getX() + normalTorque);
-
-      return new Wrench(bodyFrame, planeFrame, force.getVector(), torque);
    }
 }
