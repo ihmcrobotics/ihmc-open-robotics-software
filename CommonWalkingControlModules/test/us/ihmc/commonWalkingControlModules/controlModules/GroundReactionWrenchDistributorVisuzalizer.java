@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
@@ -12,6 +13,7 @@ import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.math.geometry.TranslationReferenceFrame;
 import us.ihmc.utilities.screwTheory.SpatialForceVector;
 
 import com.yobotics.simulationconstructionset.Robot;
@@ -23,6 +25,8 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPolygo
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition.GraphicType;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicVector;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicYoFramePolygon;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFrameConvexPolygon2d;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameOrientation;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
@@ -41,23 +45,22 @@ public class GroundReactionWrenchDistributorVisuzalizer
    private final YoFrameVector totalForceWorld = new YoFrameVector("totalForce", worldFrame, registry);
    private final YoFrameVector totalMomentWorld = new YoFrameVector("totalMoment", worldFrame, registry);
    
-//   private final ArrayList<YoFrameConvexPolygon2d> contactPolygonsWorld = new ArrayList<YoFrameConvexPolygon2d>();
+   private final ArrayList<YoFrameConvexPolygon2d> contactPolygonsWorld = new ArrayList<YoFrameConvexPolygon2d>();
    private final ArrayList<YoFramePoint> contactReferencePoints = new ArrayList<YoFramePoint>();
    private final ArrayList<YoFrameOrientation> contactPlaneOrientations = new ArrayList<YoFrameOrientation>();
-   private final ArrayList<DynamicGraphicPolygon> dynamicGraphicPolygons = new ArrayList<DynamicGraphicPolygon>();
    
    private final ArrayList<YoFramePoint> contactCenterOfPressures = new ArrayList<YoFramePoint>();
    private final ArrayList<YoFrameVector> contactForces = new ArrayList<YoFrameVector>();
    private final ArrayList<YoFrameVector> contactMoments = new ArrayList<YoFrameVector>();
    
-   public GroundReactionWrenchDistributorVisuzalizer(int maxNumberOfFeet, YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+   public GroundReactionWrenchDistributorVisuzalizer(int maxNumberOfFeet, int maxNumberOfVertices, YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       DynamicGraphicObjectsList dynamicGraphicObjectsList = new DynamicGraphicObjectsList("GroundReactionWrenchDistributorVisuzalizer");
 
       for (int i=0; i<maxNumberOfFeet; i++)
       {
-//         YoFrameConvexPolygon2d contactPolygon = new YoFrameConvexPolygon2d("contact" + i, "", worldFrame, maxNumberOfVertices, registry);
-//         contactPolygonsWorld.add(contactPolygon);
+         YoFrameConvexPolygon2d contactPolygon = new YoFrameConvexPolygon2d("contact" + i, "", worldFrame, maxNumberOfVertices, registry);
+         contactPolygonsWorld.add(contactPolygon);
 
          YoFramePoint contactReferencePoint = new YoFramePoint("contactReference" + i, worldFrame, registry);
          contactReferencePoints.add(contactReferencePoint);
@@ -65,8 +68,7 @@ public class GroundReactionWrenchDistributorVisuzalizer
          YoFrameOrientation contactPlaneOrientation = new YoFrameOrientation("contactOrientation" + i, worldFrame, registry);
          contactPlaneOrientations.add(contactPlaneOrientation);
 
-         DynamicGraphicPolygon dynamicGraphicPolygon = new DynamicGraphicPolygon("contactPolygon"+i, null, contactReferencePoint, contactPlaneOrientation, 1.0, YoAppearance.Green());
-         dynamicGraphicPolygons.add(dynamicGraphicPolygon);
+         DynamicGraphicYoFramePolygon dynamicGraphicPolygon = new DynamicGraphicYoFramePolygon("contactPolygon"+i, contactPolygon, contactReferencePoint, contactPlaneOrientation, 1.0, YoAppearance.Green());
          dynamicGraphicObjectsList.add(dynamicGraphicPolygon);
          
          YoFramePoint contactCenterOfPressure = new YoFramePoint("contactCoP"+i, worldFrame, registry);
@@ -83,16 +85,18 @@ public class GroundReactionWrenchDistributorVisuzalizer
          DynamicGraphicVector contactForceViz = new DynamicGraphicVector("contactForceViz" + i, contactCenterOfPressure, contactForce, FORCE_VECTOR_SCALE, YoAppearance.Pink());
          dynamicGraphicObjectsList.add(contactForceViz);
          
-         DynamicGraphicVector contactMomentViz = new DynamicGraphicVector("contactMomentViz" + i, contactCenterOfPressure, contactMoment, MOMENT_VECTOR_SCALE, YoAppearance.Orange());
+         DynamicGraphicVector contactMomentViz = new DynamicGraphicVector("contactMomentViz" + i, contactCenterOfPressure, contactMoment, MOMENT_VECTOR_SCALE, YoAppearance.Black());
          dynamicGraphicObjectsList.add(contactMomentViz);
 
       }
 
       DynamicGraphicPosition centerOfMassWorldViz = new DynamicGraphicPosition("centerOfMassViz", centerOfMassWorld, COM_VIZ_RADIUS, YoAppearance.Purple(), GraphicType.BALL_WITH_CROSS);
       DynamicGraphicVector totalForceWorldViz = new DynamicGraphicVector("totalForceViz", centerOfMassWorld, totalForceWorld, FORCE_VECTOR_SCALE, YoAppearance.Yellow());
+      DynamicGraphicVector totalMomentWorldViz = new DynamicGraphicVector("totalMomentViz", centerOfMassWorld, totalMomentWorld, MOMENT_VECTOR_SCALE, YoAppearance.Black());
 
       dynamicGraphicObjectsList.add(centerOfMassWorldViz);
       dynamicGraphicObjectsList.add(totalForceWorldViz);
+      dynamicGraphicObjectsList.add(totalMomentWorldViz);
       
       dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectsList);
       
@@ -123,15 +127,13 @@ public class GroundReactionWrenchDistributorVisuzalizer
          
          List<FramePoint2d> contactPoints = contactState.getContactPoints2d();
          FrameConvexPolygon2d frameConvexPolygon2d = new FrameConvexPolygon2d(contactPoints);
+
+         YoFrameConvexPolygon2d yoFrameConvexPolygon2d = contactPolygonsWorld.get(i);
+         yoFrameConvexPolygon2d.setConvexPolygon2d(frameConvexPolygon2d.getConvexPolygon2d());
          
-//         DynamicGraphicPolygon dynamicGraphicPolygon = dynamicGraphicPolygons.get(i);
-//         dynamicGraphicPolygon.updateConvexPolygon2d(frameConvexPolygon2d.getConvexPolygon2d());
-         
-         
-         // For now make a new polygon on each update:
-         DynamicGraphicPolygon dynamicGraphicPolygon = new DynamicGraphicPolygon("hackyPolygon"+index, frameConvexPolygon2d.getConvexPolygon2d(), contactReferencePoints.get(i), contactPlaneOrientations.get(i), 1.0, YoAppearance.Green());
-         scs.addDynamicGraphicObject(dynamicGraphicPolygon);
-         
+//         // For now make a new polygon on each update:
+//         DynamicGraphicPolygon dynamicGraphicPolygon = new DynamicGraphicPolygon("hackyPolygon"+index, frameConvexPolygon2d.getConvexPolygon2d(), contactReferencePoints.get(i), contactPlaneOrientations.get(i), 1.0, YoAppearance.Green());
+//         scs.addDynamicGraphicObject(dynamicGraphicPolygon);
          
          YoFramePoint contactCenterOfPressureForViz = contactCenterOfPressures.get(i);
          YoFrameVector contactForceForViz = contactForces.get(i);
@@ -163,9 +165,9 @@ public class GroundReactionWrenchDistributorVisuzalizer
       Robot nullRobot = new Robot("null");
       SimulationConstructionSet scs = new SimulationConstructionSet(nullRobot);
 
-      int maxNumberOfFeet = 4;
+      int numberOfContacts = 2;
       int maxNumberOfVertices = 10;
-      GroundReactionWrenchDistributorVisuzalizer visualizer = new GroundReactionWrenchDistributorVisuzalizer(maxNumberOfFeet, scs.getRootRegistry(), dynamicGraphicObjectsListRegistry);
+      GroundReactionWrenchDistributorVisuzalizer visualizer = new GroundReactionWrenchDistributorVisuzalizer(numberOfContacts, maxNumberOfVertices, scs.getRootRegistry(), dynamicGraphicObjectsListRegistry);
       
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       
@@ -174,16 +176,62 @@ public class GroundReactionWrenchDistributorVisuzalizer
       double mass = 100.0;
       int nSupportVectors = 4;
 
-      dynamicGraphicObjectsListRegistry.addDynamicGraphicsObjectListsToSimulationConstructionSet(scs);
-      scs.startOnAThread();
-      YoVariableRegistry parentRegistry = scs.getRootRegistry();
-            
+      YoVariableRegistry registry = new YoVariableRegistry("Wrench");
+      ArrayList<YoFrameVector> contactTranslations = new ArrayList<YoFrameVector>();
       
-      GroundReactionWrenchDistributorInterface distributor = new LeeGoswamiGroundReactionWrenchDistributor(centerOfMassFrame, nSupportVectors, parentRegistry);
+      
+      
+      GroundReactionWrenchDistributorInterface distributor = new GeometricFlatGroundReactionWrenchDistributor(registry, dynamicGraphicObjectsListRegistry);
+//    GroundReactionWrenchDistributorInterface distributor = new LeeGoswamiGroundReactionWrenchDistributor(centerOfMassFrame, nSupportVectors, parentRegistry);
+      
+      dynamicGraphicObjectsListRegistry.addDynamicGraphicsObjectListsToSimulationConstructionSet(scs);
+      
+      
       ArrayList<PlaneContactState> contactStates = new ArrayList<PlaneContactState>();
+      double coefficientOfFriction = 0.7;
+      double rotationalCoefficientOfFriction = 0.02;
+      
+      double footLength = 0.3;
+      double footWidth = 0.15;
+      
+      for (int i=0; i<numberOfContacts; i++)
+      {
+         YoFrameVector contactTranslation = new YoFrameVector("contactTranslation"+i, worldFrame, registry);
+         contactTranslation.set(1.0 * i, 0.0, 0.05);
+         contactTranslations.add(contactTranslation );
+         
+         TranslationReferenceFrame planeFrame = new TranslationReferenceFrame("contact"+i, worldFrame);
+         planeFrame.updateTranslation(contactTranslation.getFrameVectorCopy());
+         planeFrame.update();
+         
+         YoPlaneContactState yoPlaneContactState = new YoPlaneContactState("contact" + i, planeFrame, registry);
+         
+         List<FramePoint2d> contactPoints = new ArrayList<FramePoint2d>();
+         contactPoints.add(new FramePoint2d(planeFrame, footLength/2.0, footWidth/2.0));
+         contactPoints.add(new FramePoint2d(planeFrame, footLength/2.0, -footWidth/2.0));
+         contactPoints.add(new FramePoint2d(planeFrame, -footLength/2.0, -footWidth/2.0));
+         contactPoints.add(new FramePoint2d(planeFrame, -footLength/2.0, footWidth/2.0));
+         
+         yoPlaneContactState.setContactPoints(contactPoints);
+         
+         contactStates.add(yoPlaneContactState);
+         distributor.addContact(yoPlaneContactState, coefficientOfFriction, rotationalCoefficientOfFriction);
+      }
+      
+      scs.addYoVariableRegistry(registry);
+      scs.startOnAThread();
       
       while(true)
       {
+         for (int i=0; i<numberOfContacts; i++)
+         {
+            PlaneContactState contactState = contactStates.get(i);
+            TranslationReferenceFrame planeFrame = (TranslationReferenceFrame) contactState.getPlaneFrame();
+            FrameVector contactTranslation = contactTranslations.get(i).getFrameVectorCopy();
+            planeFrame.updateTranslation(contactTranslation);
+            planeFrame.update();
+         }
+         
          SpatialForceVector desiredNetSpatialForceVector = new SpatialForceVector(worldFrame);
          distributor.solve(desiredNetSpatialForceVector);
          
