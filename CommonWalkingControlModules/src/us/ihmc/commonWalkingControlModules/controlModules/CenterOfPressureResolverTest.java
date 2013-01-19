@@ -15,6 +15,7 @@ import org.junit.Test;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
+import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
@@ -156,9 +157,10 @@ public class CenterOfPressureResolverTest
       CenterOfPressureResolver centerOfPressureResolver = new CenterOfPressureResolver();
       
       PoseReferenceFrame groundPlaneFrame = createPlaneFrame("groundPlaneFrame", groundPoint, groundNormal);      
-      FramePoint centerOfPressure = new FramePoint(worldFrame);
+      FramePoint2d centerOfPressure2d = new FramePoint2d(worldFrame);
       
-      double normalTorqueAtCenterOfPressure = centerOfPressureResolver.resolveCenterOfPressureAndNormalTorque(centerOfPressure, spatialForceVector, groundPlaneFrame);
+      double normalTorqueAtCenterOfPressure = centerOfPressureResolver.resolveCenterOfPressureAndNormalTorque(centerOfPressure2d, spatialForceVector, groundPlaneFrame);
+      FramePoint centerOfPressure = centerOfPressure2d.toFramePoint();
       centerOfPressure.changeFrame(worldFrame);
       return new Pair<FramePoint, Double>(centerOfPressure, normalTorqueAtCenterOfPressure);
    }

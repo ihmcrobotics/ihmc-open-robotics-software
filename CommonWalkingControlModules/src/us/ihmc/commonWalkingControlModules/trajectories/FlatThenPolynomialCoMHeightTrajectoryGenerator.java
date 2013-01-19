@@ -92,7 +92,7 @@ public class FlatThenPolynomialCoMHeightTrajectoryGenerator implements CenterOfM
       testHeightSplineInFootFrame = new YoPolynomial("testHeightSplineInFootFrame", numberOfCoefficients, registry);
       deltaZ = new DoubleYoVariable("deltaZ", registry);
 
-      nominalHeightAboveGround.set(1.35);
+      nominalHeightAboveGround.set(1.32);
       initialHeightAboveGround.set(1.28);
       parentRegistry.addChild(registry);
    }

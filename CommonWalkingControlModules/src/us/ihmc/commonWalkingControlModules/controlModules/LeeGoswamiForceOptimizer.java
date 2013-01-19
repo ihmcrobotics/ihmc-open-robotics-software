@@ -23,6 +23,7 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 public class LeeGoswamiForceOptimizer
 {
    private static final int VECTOR3D_LENGTH = 3;
+   private final int maxNContacts = 2;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final DoubleYoVariable wk = new DoubleYoVariable("wk", registry);    // TODO: better name
@@ -53,7 +54,6 @@ public class LeeGoswamiForceOptimizer
 
       this.nSupportVectors = nSupportVectors;
 
-      int maxNContacts = 2;
       int nRows = 2 * VECTOR3D_LENGTH;
       int nColumns = maxNContacts * nSupportVectors;
 
@@ -87,7 +87,10 @@ public class LeeGoswamiForceOptimizer
    public void solve(LinkedHashMap<PlaneContactState, FrameVector> forces, HashMap<PlaneContactState, Double> coefficientsOfFriction,
                      SpatialForceVector desiredNetSpatialForceVector)
    {
+      // phi
       int startColumn = 0;
+      CommonOps.fill(phi, 0.0);
+      
       for (PlaneContactState contactState : forces.keySet())
       {
          // betaBlock
@@ -106,13 +109,14 @@ public class LeeGoswamiForceOptimizer
       MatrixTools.denseMatrixToArrayColumnMajor(phi, 0, 0, phi.getNumRows(), phi.getNumCols(), phiArray, 0);
 
       desiredNetSpatialForceVector.changeFrame(centerOfMassFrame);
+
       // kd
       Vector3d desiredNetTorque = new Vector3d();
       desiredNetSpatialForceVector.packAngularPart(desiredNetTorque);
       desiredNetTorque.scale(wk.getDoubleValue());
       MatrixTools.setDenseMatrixFromTuple3d(xi, desiredNetTorque, 0, 0);
 
-      // ld - mg
+      // ld
       Vector3d desiredNetForce = new Vector3d();
       desiredNetSpatialForceVector.packLinearPart(desiredNetForce);
       MatrixTools.setDenseMatrixFromTuple3d(xi, desiredNetForce, VECTOR3D_LENGTH, 0);

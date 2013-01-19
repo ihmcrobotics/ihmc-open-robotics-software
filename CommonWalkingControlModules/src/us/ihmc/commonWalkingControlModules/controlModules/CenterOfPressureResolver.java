@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.controlModules;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.utilities.math.geometry.FramePoint;
+import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.SpatialForceVector;
 
@@ -27,7 +27,7 @@ public class CenterOfPressureResolver
    private final Vector3d torqueAtZeroInPlaneFrame = new Vector3d();
    private final Vector3d forceInPlaneFrame = new Vector3d();
    
-   public double resolveCenterOfPressureAndNormalTorque(FramePoint centerOfPressureToPack, SpatialForceVector spatialForceVector, ReferenceFrame centerOfPressurePlaneFrame)
+   public double resolveCenterOfPressureAndNormalTorque(FramePoint2d centerOfPressureToPack, SpatialForceVector spatialForceVector, ReferenceFrame centerOfPressurePlaneFrame)
    {
       // First resolve the wrench at the plane origin:
       wrenchResolvedOnPlane.set(spatialForceVector);
@@ -49,7 +49,7 @@ public class CenterOfPressureResolver
   
       double normalTorqueAtCenterOfPressure = torqueAtZeroInPlaneFrame.getZ() - vector12x * forceInPlaneFrame.getY() + vector12y * forceInPlaneFrame.getX();
       
-      centerOfPressureToPack.set(centerOfPressurePlaneFrame, vector12x, vector12y, 0.0);
+      centerOfPressureToPack.set(centerOfPressurePlaneFrame, vector12x, vector12y);
       return normalTorqueAtCenterOfPressure;
    }
   
