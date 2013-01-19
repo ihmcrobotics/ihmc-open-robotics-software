@@ -39,6 +39,7 @@ public class LeeGoswamiGroundReactionWrenchDistributorTest
    private static final boolean VISUALIZE = false;
    private static boolean DEBUG = false;
    
+   
    @Test
    public void testSimpleWrenchDistributionWithGeometricFlatGroundDistributor()
    {
@@ -50,6 +51,7 @@ public class LeeGoswamiGroundReactionWrenchDistributorTest
       
       testSimpleWrenchDistribution(centerOfMassFrame, distributor, parentRegistry);
    }
+   
    
    @Test
    public void testSimpleWrenchDistributionWithLeeGoswamiDistributor()
@@ -76,6 +78,7 @@ public class LeeGoswamiGroundReactionWrenchDistributorTest
       boolean verifyForcesAreInsideFrictionCones = false;
       testRandomFlatGroundExamples(verifyForcesAreInsideFrictionCones, centerOfMassFrame, distributor, parentRegistry);
    }
+   
    
    @Test
    public void testRandomFlatGroundExamplesWithLeeGoswamiDistributor()
@@ -138,7 +141,8 @@ public class LeeGoswamiGroundReactionWrenchDistributorTest
          SimulationConstructionSet scs = new SimulationConstructionSet(robot);
 
          int maxNumberOfFeet = 2;
-         GroundReactionWrenchDistributorVisuzalizer visualizer = new GroundReactionWrenchDistributorVisuzalizer(maxNumberOfFeet, scs.getRootRegistry(), dynamicGraphicObjectsListRegistry);
+         int maxNumberOfVertices = 10;
+         GroundReactionWrenchDistributorVisuzalizer visualizer = new GroundReactionWrenchDistributorVisuzalizer(maxNumberOfFeet, maxNumberOfVertices, scs.getRootRegistry(), dynamicGraphicObjectsListRegistry);
 
          dynamicGraphicObjectsListRegistry.addDynamicGraphicsObjectListsToSimulationConstructionSet(scs);
          addCoordinateSystem(scs);
@@ -171,7 +175,8 @@ public class LeeGoswamiGroundReactionWrenchDistributorTest
          scs = new SimulationConstructionSet(robot);
 
          int maxNumberOfFeet = 2; //6;
-         visualizer = new GroundReactionWrenchDistributorVisuzalizer(maxNumberOfFeet, scs.getRootRegistry(), dynamicGraphicObjectsListRegistry);
+         int maxNumberOfVertices = 10;
+         visualizer = new GroundReactionWrenchDistributorVisuzalizer(maxNumberOfFeet, maxNumberOfVertices, scs.getRootRegistry(), dynamicGraphicObjectsListRegistry);
 
          dynamicGraphicObjectsListRegistry.addDynamicGraphicsObjectListsToSimulationConstructionSet(scs);
          
@@ -179,7 +184,7 @@ public class LeeGoswamiGroundReactionWrenchDistributorTest
          scs.startOnAThread(); 
       }
       
-      int numberOfTests = 5;
+      int numberOfTests = 50;
       
       for (int i=0; i<numberOfTests; i++)
       {
@@ -213,8 +218,17 @@ public class LeeGoswamiGroundReactionWrenchDistributorTest
       
       if (VISUALIZE)
       {
+         deleteFirstDataPointAndCropData(scs);
          ThreadTools.sleepForever();
       }
+   }
+
+   private void deleteFirstDataPointAndCropData(SimulationConstructionSet scs)
+   {
+      scs.gotoInPointNow();
+      scs.tick(1);
+      scs.setInPoint();
+      scs.cropBuffer();
    }
 
    private void addCoordinateSystem(SimulationConstructionSet scs)
