@@ -23,14 +23,11 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 public class LeeGoswamiForceOptimizer
 {
    private static final int VECTOR3D_LENGTH = 3;
-   private final int maxNContacts = 2;
-
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final DoubleYoVariable wk = new DoubleYoVariable("wk", registry);    // TODO: better name
    private final DoubleYoVariable epsilonF = new DoubleYoVariable("epsilonF", registry);    // TODO: better name
 
    private final ReferenceFrame centerOfMassFrame;
-   private final int nSupportVectors;
 
    private final DenseMatrix64F phi;
    private final DenseMatrix64F xi;
@@ -48,20 +45,18 @@ public class LeeGoswamiForceOptimizer
 
    private final SpatialForceVector wrenchError;
 
-   public LeeGoswamiForceOptimizer(ReferenceFrame centerOfMassFrame, int nSupportVectors, YoVariableRegistry parentRegistry)
+   public LeeGoswamiForceOptimizer(ReferenceFrame centerOfMassFrame, YoVariableRegistry parentRegistry)
    {
       this.centerOfMassFrame = centerOfMassFrame;
 
-      this.nSupportVectors = nSupportVectors;
-
       int nRows = 2 * VECTOR3D_LENGTH;
-      int nColumns = maxNContacts * nSupportVectors;
+      int nColumns = LeeGoswamiForceOptimizerNative.MAX_NUMBER_OF_CONTACTS * LeeGoswamiForceOptimizerNative.NUMBER_OF_SUPPORT_VECTORS;
 
       phi = new DenseMatrix64F(nRows, nColumns);
       xi = new DenseMatrix64F(nRows, 1);
       rho = new DenseMatrix64F(nColumns, 1);
-      betaBlock = new DenseMatrix64F(VECTOR3D_LENGTH, nSupportVectors);
-      rhoBlock = new DenseMatrix64F(nSupportVectors, 1);
+      betaBlock = new DenseMatrix64F(VECTOR3D_LENGTH, LeeGoswamiForceOptimizerNative.NUMBER_OF_SUPPORT_VECTORS);
+      rhoBlock = new DenseMatrix64F(LeeGoswamiForceOptimizerNative.NUMBER_OF_SUPPORT_VECTORS, 1);
       forceMatrix = new DenseMatrix64F(VECTOR3D_LENGTH, 1);
 
       phiArray = new double[phi.getNumElements()];
@@ -95,7 +90,7 @@ public class LeeGoswamiForceOptimizer
       {
          // betaBlock
          double mu = coefficientsOfFriction.get(contactState);
-         DenseMatrix64F betaBlock = computeBetaBlock(contactState, mu, nSupportVectors, centerOfMassFrame);
+         DenseMatrix64F betaBlock = computeBetaBlock(contactState, mu, LeeGoswamiForceOptimizerNative.NUMBER_OF_SUPPORT_VECTORS, centerOfMassFrame);
 
          // deltaBlock
          DenseMatrix64F deltaBlock = computeDeltaBlock(contactState, betaBlock, centerOfMassFrame, wk.getDoubleValue());

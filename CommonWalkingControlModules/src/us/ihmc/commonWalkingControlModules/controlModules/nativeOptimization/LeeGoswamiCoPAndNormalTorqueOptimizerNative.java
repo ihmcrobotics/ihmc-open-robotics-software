@@ -10,8 +10,8 @@ import us.ihmc.utilities.exeptions.NoConvergenceException;
 
 public class LeeGoswamiCoPAndNormalTorqueOptimizerNative
 {
+   public final static int MAX_NUMBER_OF_CONTACTS = 2;
    private final static int vectorLength = 3;
-   private final static int nFeet = 2;
 
    private static native void initialize();
 
@@ -73,13 +73,12 @@ public class LeeGoswamiCoPAndNormalTorqueOptimizerNative
 
    }
 
-   private final double[] eta = new double[nFeet * vectorLength];
+   private final double[] eta = new double[MAX_NUMBER_OF_CONTACTS * vectorLength];
    double optval = 0.0;
 
-   public LeeGoswamiCoPAndNormalTorqueOptimizerNative(double vectorLength, double nFeet)
+   public LeeGoswamiCoPAndNormalTorqueOptimizerNative(double vectorLength)
    {
       assert LeeGoswamiCoPAndNormalTorqueOptimizerNative.vectorLength == vectorLength;
-      assert LeeGoswamiCoPAndNormalTorqueOptimizerNative.nFeet == nFeet;
    }
 
    public int solve(double[] psiK, double[] kappaK, double[] etaMin, double[] etaMax, double[] etaD, double[] epsilon) throws NoConvergenceException
@@ -125,16 +124,16 @@ public class LeeGoswamiCoPAndNormalTorqueOptimizerNative
    public static void main(String[] args)
    {
       
-      double[] psiK = new double[vectorLength * nFeet * vectorLength];
+      double[] psiK = new double[vectorLength * MAX_NUMBER_OF_CONTACTS * vectorLength];
       double[] kappaK = new double[vectorLength];
-      double[] etaMin = new double[nFeet * vectorLength]; 
-      double[] etaMax = new double[nFeet * vectorLength];
-      double[] etaD = new double[nFeet * vectorLength]; 
-      double[] epsilon = new double[nFeet * vectorLength];
+      double[] etaMin = new double[MAX_NUMBER_OF_CONTACTS * vectorLength]; 
+      double[] etaMax = new double[MAX_NUMBER_OF_CONTACTS * vectorLength];
+      double[] etaD = new double[MAX_NUMBER_OF_CONTACTS * vectorLength]; 
+      double[] epsilon = new double[MAX_NUMBER_OF_CONTACTS * vectorLength];
 
       load_default_data(psiK, kappaK, etaD, epsilon, etaMin, etaMax);
 
-      LeeGoswamiCoPAndNormalTorqueOptimizerNative leeGoswamiCoPAndNormalTorqueOptimizerNative = new LeeGoswamiCoPAndNormalTorqueOptimizerNative(vectorLength, nFeet);
+      LeeGoswamiCoPAndNormalTorqueOptimizerNative leeGoswamiCoPAndNormalTorqueOptimizerNative = new LeeGoswamiCoPAndNormalTorqueOptimizerNative(vectorLength);
 
       long time = System.nanoTime();
       for (int i = 0; true; i++)
