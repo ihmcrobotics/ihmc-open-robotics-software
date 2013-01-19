@@ -12,6 +12,8 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFrameConvexPolygon2d;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFrameOrientation;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 
@@ -30,8 +32,7 @@ public class DynamicGraphicObjectEvaluation
    {
       Robot robot = new Robot("null");
 
-
-      SimulationConstructionSet scs = new SimulationConstructionSet(robot, graphicsAdapter, 100);
+      final SimulationConstructionSet scs = new SimulationConstructionSet(robot, graphicsAdapter, 100);
 
       YoVariableRegistry registry = new YoVariableRegistry("Polygon");
       DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
@@ -46,8 +47,11 @@ public class DynamicGraphicObjectEvaluation
       AppearanceDefinition appearance = YoAppearance.Red();
       appearance.setTransparancy(0.8);
 
-      final DynamicGraphicPolygon dynamicGraphicPolygon = new DynamicGraphicPolygon("Position", polygon, "polygon", "", registry, 3.0, appearance);
+      final DynamicGraphicPolygon dynamicGraphicPolygon = new DynamicGraphicPolygon("Polygon", polygon, "polygon", "", registry, 3.0, appearance);
       final DynamicGraphicText3D dynamicGraphicText = new DynamicGraphicText3D("Text", "Hello", "text", "", registry, 0.2, YoAppearance.Blue());
+      
+      dynamicGraphicText.setPosition(1.0, 0.0, 0.2);
+      dynamicGraphicText.setYawPitchRoll(0.3, 0.0, 0.0);
       
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       YoFramePoint yoFramePoint = new YoFramePoint("position", "", worldFrame , registry);
@@ -61,13 +65,18 @@ public class DynamicGraphicObjectEvaluation
       dynamicGraphicPolygon.setPosition(0.1, 0.2, 1.0);
       dynamicGraphicPolygon.setYawPitchRoll(-0.1, -0.4, -0.3);
 
-      dynamicGraphicText.setPosition(1.0, 0.0, 0.2);
-      dynamicGraphicText.setYawPitchRoll(0.3, 0.0, 0.0);
-
+      final YoFrameConvexPolygon2d yoFramePolygon = new YoFrameConvexPolygon2d("yoPolygon", "", worldFrame, 10, registry);
+      YoFramePoint yoFramePolygonPosition = new YoFramePoint("yoPolygonPosition", "", worldFrame, registry);
+      yoFramePolygonPosition.set(2.0, 1.0, 0.3);
+      YoFrameOrientation yoFramePolygonOrientation = new YoFrameOrientation("yoPolygonOrientation", "", worldFrame, registry);
+      yoFramePolygonOrientation.setYawPitchRoll(1.2, 0.1, 0.4);
+      final DynamicGraphicYoFramePolygon dynamicGraphicYoFramePolygon = new DynamicGraphicYoFramePolygon("YoFramePolygon", yoFramePolygon, yoFramePolygonPosition, yoFramePolygonOrientation, 1.0, YoAppearance.DarkBlue());
+    
       DynamicGraphicObjectsList dynamicGraphicObjectsList = new DynamicGraphicObjectsList("Polygon");
       dynamicGraphicObjectsList.add(dynamicGraphicPolygon);
       dynamicGraphicObjectsList.add(dynamicGraphicText);
       dynamicGraphicObjectsList.add(dynamicGraphicVector);
+      dynamicGraphicObjectsList.add(dynamicGraphicYoFramePolygon);
 
       dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectsList);
 
@@ -90,18 +99,32 @@ public class DynamicGraphicObjectEvaluation
       {
          public void run()
          {
-            while (true)
+            int i = 0;
+            
+            while (i++ < 20)
             {
                quickPause();
 
                ConvexPolygon2d newPolygon = new ConvexPolygon2d(secondPointList);
                dynamicGraphicPolygon.updateConvexPolygon2d(newPolygon);
+               
+               ConvexPolygon2d newYoPolygon = new ConvexPolygon2d(pointList);
+               yoFramePolygon.setConvexPolygon2d(newYoPolygon);
+
                dynamicGraphicText.setText("Hello");
 
+               scs.tickAndUpdate();
+               
                quickPause();
                newPolygon = new ConvexPolygon2d(pointList);
                dynamicGraphicPolygon.updateConvexPolygon2d(newPolygon);
+               
+               newYoPolygon = new ConvexPolygon2d(secondPointList);
+               yoFramePolygon.setConvexPolygon2d(newYoPolygon);
+               
                dynamicGraphicText.setText("GoodBye");
+
+               scs.tickAndUpdate();
 
             }
          }
