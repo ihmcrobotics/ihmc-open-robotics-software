@@ -28,7 +28,6 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 public class LeeGoswamiCoPAndNormalTorqueOptimizer
 {
    private static final int VECTOR3D_LENGTH = 3;
-   private final int maxNContacts = 2;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final DoubleYoVariable epsilonCoP = new DoubleYoVariable("epsilonCoP", registry);    // TODO: better name
@@ -55,7 +54,7 @@ public class LeeGoswamiCoPAndNormalTorqueOptimizer
       parentRegistry.addChild(registry);
 
       int nRows = VECTOR3D_LENGTH;
-      int nColumns = maxNContacts * VECTOR3D_LENGTH;
+      int nColumns = LeeGoswamiCoPAndNormalTorqueOptimizerNative.MAX_NUMBER_OF_CONTACTS * VECTOR3D_LENGTH;
 
       psik = new double[nRows * nColumns];
       kappaK = new double[nRows];
@@ -64,7 +63,7 @@ public class LeeGoswamiCoPAndNormalTorqueOptimizer
       etaD = new double[nColumns];
       epsilon = new double[nColumns];
 
-      leeGoswamiCoPAndNormalTorqueOptimizerNative = new LeeGoswamiCoPAndNormalTorqueOptimizerNative(VECTOR3D_LENGTH, maxNContacts);
+      leeGoswamiCoPAndNormalTorqueOptimizerNative = new LeeGoswamiCoPAndNormalTorqueOptimizerNative(VECTOR3D_LENGTH);
    }
 
    public void setEpsilonCoP(double epsilonCoP)

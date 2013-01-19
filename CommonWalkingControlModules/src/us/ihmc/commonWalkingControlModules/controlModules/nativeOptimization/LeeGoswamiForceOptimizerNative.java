@@ -9,8 +9,11 @@ import cern.colt.Arrays;
 
 public class LeeGoswamiForceOptimizerNative
 {
-   private final static int n = 6;
-   private final static int m = 8;
+   public static final int NUMBER_OF_SUPPORT_VECTORS = 4;
+   public static final int MAX_NUMBER_OF_CONTACTS = 2;
+
+   private final static int n = 3 * MAX_NUMBER_OF_CONTACTS;
+   private final static int m = NUMBER_OF_SUPPORT_VECTORS * MAX_NUMBER_OF_CONTACTS;
 
    private static native void initialize();
 
