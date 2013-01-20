@@ -37,6 +37,7 @@ public class DynamicGraphicObjectEvaluation
       YoVariableRegistry registry = new YoVariableRegistry("Polygon");
       DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
 
+      // Polygon:
       final double[][] pointList = new double[][]
       {
          {0.0, 0.0}, {0.0, 1.0}, {1.0, 1.0}, {1.0, 0.0}, {0.5, 1.2}, {0.5, -0.2}
@@ -48,11 +49,15 @@ public class DynamicGraphicObjectEvaluation
       appearance.setTransparancy(0.8);
 
       final DynamicGraphicPolygon dynamicGraphicPolygon = new DynamicGraphicPolygon("Polygon", polygon, "polygon", "", registry, 3.0, appearance);
-      final DynamicGraphicText3D dynamicGraphicText = new DynamicGraphicText3D("Text", "Hello", "text", "", registry, 0.2, YoAppearance.Blue());
+      dynamicGraphicPolygon.setPosition(0.1, 0.2, 1.0);
+      dynamicGraphicPolygon.setYawPitchRoll(-0.1, -0.4, -0.3);
       
+      // 3D Text:
+      final DynamicGraphicText3D dynamicGraphicText = new DynamicGraphicText3D("Text", "Hello", "text", "", registry, 0.2, YoAppearance.Blue());
       dynamicGraphicText.setPosition(1.0, 0.0, 0.2);
       dynamicGraphicText.setYawPitchRoll(0.3, 0.0, 0.0);
       
+      // Vector:
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       YoFramePoint yoFramePoint = new YoFramePoint("position", "", worldFrame , registry);
       YoFrameVector yoFrameVector = new YoFrameVector("vector", "", worldFrame, registry);
@@ -62,9 +67,7 @@ public class DynamicGraphicObjectEvaluation
       
       final DynamicGraphicVector dynamicGraphicVector = new DynamicGraphicVector("Vector", yoFramePoint, yoFrameVector, 1.0, YoAppearance.Yellow());
 
-      dynamicGraphicPolygon.setPosition(0.1, 0.2, 1.0);
-      dynamicGraphicPolygon.setYawPitchRoll(-0.1, -0.4, -0.3);
-
+      // YoFrameConvexPolygon2d:
       final YoFrameConvexPolygon2d yoFramePolygon = new YoFrameConvexPolygon2d("yoPolygon", "", worldFrame, 10, registry);
       YoFramePoint yoFramePolygonPosition = new YoFramePoint("yoPolygonPosition", "", worldFrame, registry);
       yoFramePolygonPosition.set(2.0, 1.0, 0.3);
@@ -72,11 +75,25 @@ public class DynamicGraphicObjectEvaluation
       yoFramePolygonOrientation.setYawPitchRoll(1.2, 0.1, 0.4);
       final DynamicGraphicYoFramePolygon dynamicGraphicYoFramePolygon = new DynamicGraphicYoFramePolygon("YoFramePolygon", yoFramePolygon, yoFramePolygonPosition, yoFramePolygonOrientation, 1.0, YoAppearance.DarkBlue());
     
+      // Box Ghost:
+      Graphics3DObject boxGhostGraphics = new Graphics3DObject();
+      AppearanceDefinition transparantBlue = YoAppearance.Blue();
+      YoAppearance.makeTransparent(transparantBlue, 0.5);
+      boxGhostGraphics.translate(0.0, 0.0, -0.5);
+      boxGhostGraphics.addCube(1.0, 1.0, 1.0, transparantBlue);
+      
+      YoFramePoint boxPosition = new YoFramePoint("boxPosition", "", worldFrame, registry);
+      double boxSize = 0.3;
+      boxPosition.set(boxSize/2.0, boxSize/2.0, boxSize/2.0);
+      YoFrameOrientation boxOrientation = new YoFrameOrientation("boxOrientation", worldFrame, registry);
+      DynamicGraphicShape dynamicGraphicBoxGhost = new DynamicGraphicShape("boxGhost", boxGhostGraphics, boxPosition, boxOrientation, boxSize);      
+      
       DynamicGraphicObjectsList dynamicGraphicObjectsList = new DynamicGraphicObjectsList("Polygon");
       dynamicGraphicObjectsList.add(dynamicGraphicPolygon);
       dynamicGraphicObjectsList.add(dynamicGraphicText);
       dynamicGraphicObjectsList.add(dynamicGraphicVector);
       dynamicGraphicObjectsList.add(dynamicGraphicYoFramePolygon);
+      dynamicGraphicObjectsList.add(dynamicGraphicBoxGhost);
 
       dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectsList);
 
