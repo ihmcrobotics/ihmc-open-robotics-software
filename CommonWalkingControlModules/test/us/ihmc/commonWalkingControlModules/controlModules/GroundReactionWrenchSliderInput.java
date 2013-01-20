@@ -32,7 +32,7 @@ public class GroundReactionWrenchSliderInput
 
       int numberOfContacts = 2;
       int maxNumberOfVertices = 10;
-      GroundReactionWrenchDistributorVisuzalizer visualizer = new GroundReactionWrenchDistributorVisuzalizer(numberOfContacts, maxNumberOfVertices, scs.getRootRegistry(), dynamicGraphicObjectsListRegistry);
+      GroundReactionWrenchDistributorVisualizer visualizer = new GroundReactionWrenchDistributorVisualizer(numberOfContacts, maxNumberOfVertices, scs.getRootRegistry(), dynamicGraphicObjectsListRegistry);
       
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       
