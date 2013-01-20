@@ -37,10 +37,10 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject
 
 public class LeeGoswamiGroundReactionWrenchDistributorTest
 {
-   private static final boolean VISUALIZE = true;
+   private static final boolean VISUALIZE = false;
    private static boolean DEBUG = false;
    
-   @Ignore
+   
    @Test
    public void testSimpleWrenchDistributionWithGeometricFlatGroundDistributor()
    {
@@ -53,7 +53,7 @@ public class LeeGoswamiGroundReactionWrenchDistributorTest
       testSimpleWrenchDistribution(centerOfMassFrame, distributor, parentRegistry);
    }
    
-   @Ignore
+   
    @Test
    public void testSimpleWrenchDistributionWithLeeGoswamiDistributor()
    {
@@ -80,7 +80,7 @@ public class LeeGoswamiGroundReactionWrenchDistributorTest
       testRandomFlatGroundExamples(verifyForcesAreInsideFrictionCones, centerOfMassFrame, distributor, parentRegistry);
    }
    
-   @Ignore 
+    
    @Test
    public void testRandomFlatGroundExamplesWithLeeGoswamiDistributor()
    {
