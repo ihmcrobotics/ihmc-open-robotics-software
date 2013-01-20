@@ -13,6 +13,7 @@ import javax.vecmath.Quat4d;
 import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
@@ -36,9 +37,10 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject
 
 public class LeeGoswamiGroundReactionWrenchDistributorTest
 {
-   private static final boolean VISUALIZE = false;
+   private static final boolean VISUALIZE = true;
    private static boolean DEBUG = false;
    
+   @Ignore
    @Test
    public void testSimpleWrenchDistributionWithGeometricFlatGroundDistributor()
    {
@@ -51,6 +53,7 @@ public class LeeGoswamiGroundReactionWrenchDistributorTest
       testSimpleWrenchDistribution(centerOfMassFrame, distributor, parentRegistry);
    }
    
+   @Ignore
    @Test
    public void testSimpleWrenchDistributionWithLeeGoswamiDistributor()
    {
@@ -77,6 +80,7 @@ public class LeeGoswamiGroundReactionWrenchDistributorTest
       testRandomFlatGroundExamples(verifyForcesAreInsideFrictionCones, centerOfMassFrame, distributor, parentRegistry);
    }
    
+   @Ignore 
    @Test
    public void testRandomFlatGroundExamplesWithLeeGoswamiDistributor()
    {
@@ -139,7 +143,7 @@ public class LeeGoswamiGroundReactionWrenchDistributorTest
 
          int maxNumberOfFeet = 2;
          int maxNumberOfVertices = 10;
-         GroundReactionWrenchDistributorVisuzalizer visualizer = new GroundReactionWrenchDistributorVisuzalizer(maxNumberOfFeet, maxNumberOfVertices, scs.getRootRegistry(), dynamicGraphicObjectsListRegistry);
+         GroundReactionWrenchDistributorVisualizer visualizer = new GroundReactionWrenchDistributorVisualizer(maxNumberOfFeet, maxNumberOfVertices, scs.getRootRegistry(), dynamicGraphicObjectsListRegistry);
 
          dynamicGraphicObjectsListRegistry.addDynamicGraphicsObjectListsToSimulationConstructionSet(scs);
          addCoordinateSystem(scs);
@@ -161,7 +165,7 @@ public class LeeGoswamiGroundReactionWrenchDistributorTest
       double coefficientOfFriction = 0.87;
       double rotationalCoefficientOfFriction = 0.13;
       
-      GroundReactionWrenchDistributorVisuzalizer visualizer = null;
+      GroundReactionWrenchDistributorVisualizer visualizer = null;
       SimulationConstructionSet scs = null;
       
       if (VISUALIZE)
@@ -173,7 +177,7 @@ public class LeeGoswamiGroundReactionWrenchDistributorTest
 
          int maxNumberOfFeet = 2; //6;
          int maxNumberOfVertices = 10;
-         visualizer = new GroundReactionWrenchDistributorVisuzalizer(maxNumberOfFeet, maxNumberOfVertices, scs.getRootRegistry(), dynamicGraphicObjectsListRegistry);
+         visualizer = new GroundReactionWrenchDistributorVisualizer(maxNumberOfFeet, maxNumberOfVertices, scs.getRootRegistry(), dynamicGraphicObjectsListRegistry);
 
          dynamicGraphicObjectsListRegistry.addDynamicGraphicsObjectListsToSimulationConstructionSet(scs);
          
@@ -181,7 +185,7 @@ public class LeeGoswamiGroundReactionWrenchDistributorTest
          scs.startOnAThread(); 
       }
       
-      int numberOfTests = 5;
+      int numberOfTests = 50;
       
       for (int i=0; i<numberOfTests; i++)
       {
@@ -215,8 +219,17 @@ public class LeeGoswamiGroundReactionWrenchDistributorTest
       
       if (VISUALIZE)
       {
+         deleteFirstDataPointAndCropData(scs);
          ThreadTools.sleepForever();
       }
+   }
+
+   private void deleteFirstDataPointAndCropData(SimulationConstructionSet scs)
+   {
+      scs.gotoInPointNow();
+      scs.tick(1);
+      scs.setInPoint();
+      scs.cropBuffer();
    }
 
    private void addCoordinateSystem(SimulationConstructionSet scs)

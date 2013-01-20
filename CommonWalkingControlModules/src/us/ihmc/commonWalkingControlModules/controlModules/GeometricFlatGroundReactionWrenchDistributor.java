@@ -113,15 +113,13 @@ public class GeometricFlatGroundReactionWrenchDistributor implements GroundReact
       FrameConvexPolygon2d supportPolygon = supportPolygonAndConnectingEdges.getFrameConvexPolygon2d();
       FrameLineSegment2d connectingEdge1 = supportPolygonAndConnectingEdges.getConnectingEdge1();
       FrameLineSegment2d connectingEdge2 = supportPolygonAndConnectingEdges.getConnectingEdge2();
-      
-      RobotSide upcomingSupportSide = RobotSide.LEFT; //null;
-      
+            
       boolean needToProject = !supportPolygon.isPointInside(centerOfPressure2d);
       if (needToProject)
       {
          supportPolygon.orthogonalProjection(centerOfPressure2d);
       }
-      virtualToePointCalculator.packVirtualToePoints(virtualToePoints, centerOfPressure2d, footConvexPolygons, supportPolygon, connectingEdge1, connectingEdge2, upcomingSupportSide);
+      virtualToePointCalculator.packVirtualToePoints(virtualToePoints, centerOfPressure2d, footConvexPolygons, supportPolygon, connectingEdge1, connectingEdge2, upcomingSupportLeg);
       legStrengthCalculator.packLegStrengths(legStrengths, virtualToePoints, centerOfPressure2d);
       
       // Verify that virtual toe points and leg strength percentages give the overall force:
