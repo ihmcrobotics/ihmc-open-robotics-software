@@ -193,6 +193,8 @@ public class LeeGoswamiCoPAndNormalTorqueOptimizer
       }
       catch (NoConvergenceException e)
       {
+         for (PlaneContactState contactState : forces.keySet())
+            forces.get(contactState).changeFrame(centerOfMassFrame);
          e.printStackTrace();
       }
 

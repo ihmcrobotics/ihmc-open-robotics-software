@@ -19,10 +19,4 @@ public interface VirtualToePointCalculator
 
    public abstract void packVirtualToePoints(SideDependentList<FramePoint2d> originalVirtualToePoints, FramePoint2d copDesired,
          FrameConvexPolygon2dAndConnectingEdges supportPolygonAndEdges, RobotSide upcomingSupportSide);
-   
-   /**
-    * Call during single support to hide the visualization graphics that will clutter things up.
-    */
-   public abstract void hideVisualizationGraphics();
-
 }

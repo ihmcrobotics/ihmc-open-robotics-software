@@ -9,7 +9,6 @@ import javax.vecmath.Vector2d;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.VirtualToePointCalculator;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
@@ -18,7 +17,6 @@ import us.ihmc.utilities.math.geometry.FrameGeometry2dPlotter;
 import us.ihmc.utilities.math.geometry.FrameGeometryTestFrame;
 import us.ihmc.utilities.math.geometry.FrameLine2d;
 import us.ihmc.utilities.math.geometry.FrameLineSegment2d;
-import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.Line2d;
@@ -28,15 +26,10 @@ import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.time.GlobalTimer;
-import com.yobotics.simulationconstructionset.util.graphics.ArtifactList;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 
 public class GeometricVirtualToePointCalculator implements VirtualToePointCalculator
 {
-   private static final boolean VISUALIZE = true;
    private boolean DEBUG_VIZ = false;
    private boolean removeDebugVizEachTime = true;
 
@@ -50,8 +43,6 @@ public class GeometricVirtualToePointCalculator implements VirtualToePointCalcul
    private final DoubleYoVariable vtpApproachingFootDistance = new DoubleYoVariable("vtpApproachingFootDistance", registry);
    
    private final DoubleYoVariable vtpMorphPercent = new DoubleYoVariable("vtpMorphPercent", registry);
-
-   private final SideDependentList<YoFramePoint> virtualToePointsWorld = new SideDependentList<YoFramePoint>();
 
    protected SideDependentList<ReferenceFrame> individualFootFramesForReturn;
    protected ReferenceFrame commonZUpFrame, world;
@@ -67,30 +58,6 @@ public class GeometricVirtualToePointCalculator implements VirtualToePointCalcul
 
    public GeometricVirtualToePointCalculator(YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
-      for (RobotSide robotSide : RobotSide.values())
-      {
-         YoFramePoint virtualToePointWorld = new YoFramePoint(robotSide + "VTP", "", ReferenceFrame.getWorldFrame(), registry);
-         virtualToePointsWorld.put(robotSide, virtualToePointWorld);
-      }
-
-      if (VISUALIZE && (dynamicGraphicObjectsListRegistry != null))
-      {
-         DynamicGraphicObjectsList dynamicGraphicObjectsList = new DynamicGraphicObjectsList("VTP Calculator");
-         ArtifactList artifactList = new ArtifactList("VTP Calculator");
-
-         for (RobotSide robotSide : RobotSide.values())
-         {
-            final YoFramePoint virtualToePointWorld = virtualToePointsWorld.get(robotSide);
-            DynamicGraphicPosition virtualToePointViz = new DynamicGraphicPosition(robotSide + " VTP", virtualToePointWorld, 0.006, YoAppearance.Orange(),
-                  DynamicGraphicPosition.GraphicType.SOLID_BALL);
-            dynamicGraphicObjectsList.add(virtualToePointViz);
-            artifactList.add(virtualToePointViz.createArtifact());
-         }
-
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectsList);
-         dynamicGraphicObjectsListRegistry.registerArtifactList(artifactList);
-      }
-
       globalTimer = new GlobalTimer("VTPCalculatorTimer", registry);
 
       if ((parentRegistry != null))
@@ -233,18 +200,6 @@ public class GeometricVirtualToePointCalculator implements VirtualToePointCalcul
       copDesired.changeFrame(commonZUpFrame);
       calculateForDoubleSupport(virtualToePoints, copDesired, footPolygonsInMidFeetZUp, supportPolygonInMidFeetZUp, connectingEdge1, connectingEdge2,
             upcomingSupportSide);
-
-      // Visualizer stuff:
-      if (VISUALIZE)
-      {
-         // Virtual toe points:
-         for (RobotSide robotSide : RobotSide.values())
-         {
-            FramePoint vtp3D = virtualToePoints.get(robotSide).toFramePoint();
-            vtp3D.changeFrame(world);
-            virtualToePointsWorld.get(robotSide).set(vtp3D);
-         }
-      }
 
       globalTimer.stopTimer();
 
@@ -696,10 +651,6 @@ public class GeometricVirtualToePointCalculator implements VirtualToePointCalcul
 
    public void hideVisualizationGraphics()
    {
-      for (RobotSide robotSide : RobotSide.values())
-      {
-         virtualToePointsWorld.get(robotSide).setToNaN();
-      }
    }
 
    protected enum MorphMethod
