@@ -15,7 +15,6 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public class FootstepPathCoordinator implements FootstepProvider
 {
    private final ConcurrentLinkedQueue<Footstep> footstepQueue = new ConcurrentLinkedQueue<Footstep>();
-   private final ConcurrentLinkedQueue<Footstep> pausedFootstepQueue = new ConcurrentLinkedQueue<Footstep>();
    private YoVariableRegistry registry = new YoVariableRegistry("FootstepPathCoordinator");
    private final BooleanYoVariable walk = new BooleanYoVariable("walk", registry);
    private final BooleanYoVariable isPaused = new BooleanYoVariable("isPaused", registry);
@@ -42,6 +41,11 @@ public class FootstepPathCoordinator implements FootstepProvider
 
    public Footstep poll()
    {
+      if (isPaused.getBooleanValue())
+      {
+         return null;
+      }
+
       stepInProgress = footstepQueue.poll();
       if (stepInProgress != null)
       {
@@ -58,7 +62,7 @@ public class FootstepPathCoordinator implements FootstepProvider
 
    public boolean isEmpty()
    {
-      return (!walk.getBooleanValue() || footstepQueue.isEmpty());
+      return (!walk.getBooleanValue() || footstepQueue.isEmpty() || isPaused.getBooleanValue());
    }
 
    public void notifyComplete()
@@ -71,17 +75,8 @@ public class FootstepPathCoordinator implements FootstepProvider
 
    public void updatePath(ArrayList<Footstep> footsteps)
    {
-      if (isPaused.getBooleanValue())
-      {
-         pausedFootstepQueue.clear();
-         pausedFootstepQueue.addAll(footsteps);
-      }
-      else
-      {
-         footstepQueue.clear();
-         footstepQueue.addAll(footsteps);
-      }
-
+      footstepQueue.clear();
+      footstepQueue.addAll(footsteps);
    }
 
    public void setPaused(Boolean isPaused)
@@ -92,20 +87,7 @@ public class FootstepPathCoordinator implements FootstepProvider
       }
 
       this.isPaused.set(isPaused);
-      System.out.println("FootstepPathCoordinator: isPaused = " + isPaused);;
-
-      if (isPaused)
-      {
-         pausedFootstepQueue.clear();
-         pausedFootstepQueue.addAll(footstepQueue);
-         footstepQueue.clear();
-      }
-      else
-      {
-         footstepQueue.clear();
-         footstepQueue.addAll(pausedFootstepQueue);
-         pausedFootstepQueue.clear();
-      }
+      System.out.println("FootstepPathCoordinator: isPaused = " + isPaused);
    }
 
    public void setWalk(boolean walk)

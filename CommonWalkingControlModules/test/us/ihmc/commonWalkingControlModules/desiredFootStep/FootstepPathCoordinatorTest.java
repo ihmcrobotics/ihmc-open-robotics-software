@@ -11,8 +11,7 @@ import javax.vecmath.Quat4d;
 import java.util.ArrayList;
 import java.util.Random;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * User: Matt
@@ -20,56 +19,62 @@ import static org.junit.Assert.assertTrue;
  */
 public class FootstepPathCoordinatorTest
 {
+   /**
+    * This test only verifies that polling returns the first footstep in the list *
+    */
    @Test
    public void testPoll() throws Exception
    {
+      // create a random list of footsteps
       FootstepPathCoordinator footstepPathCoordinator = new FootstepPathCoordinator();
-      FootstepPathConsumer footstepPathConsumer = new FootstepPathConsumer(2222L,  null, footstepPathCoordinator);
-      PauseCommandConsumer pauseCommandConsumer = new PauseCommandConsumer(3333L, footstepPathCoordinator);
       ArrayList<Footstep> footsteps = createRandomFootsteps(10);
       footstepPathCoordinator.updatePath(footsteps);
+
+      // verify that poll returns the same footsteps
       for (Footstep footstep : footsteps)
       {
          compareFootsteps(footstep, footstepPathCoordinator.poll());
       }
+
+      // verify that poll returns null is empty
+      assertNull(footstepPathCoordinator.poll());
+
       footstepPathCoordinator.close();
    }
 
    @Test
    public void testIsEmpty() throws Exception
    {
+      // verify list is initially empty
       FootstepPathCoordinator footstepPathCoordinator = new FootstepPathCoordinator();
-      FootstepPathConsumer footstepPathConsumer = new FootstepPathConsumer(2222L,  null, footstepPathCoordinator);
-      PauseCommandConsumer pauseCommandConsumer = new PauseCommandConsumer(3333L, footstepPathCoordinator);;
       assertTrue(footstepPathCoordinator.isEmpty());
 
+      // create a random list of footsteps
       ArrayList<Footstep> footsteps = createRandomFootsteps(10);
       footstepPathCoordinator.updatePath(footsteps);
 
+      // verify list is not empty while each step is removed
       for (Footstep footstep : footsteps)
       {
          assertFalse(footstepPathCoordinator.isEmpty());
          compareFootsteps(footstep, footstepPathCoordinator.poll());
       }
 
+      // verify list is empty after all footsteps are removed
       assertTrue(footstepPathCoordinator.isEmpty());
-      footstepPathCoordinator.close();
 
+      footstepPathCoordinator.close();
    }
 
    @Test
    public void testUpdatePath() throws Exception
    {
+      // create a random list of footsteps
       FootstepPathCoordinator footstepPathCoordinator = new FootstepPathCoordinator();
-      FootstepPathConsumer footstepPathConsumer = new FootstepPathConsumer(2222L,  null, footstepPathCoordinator);
-      PauseCommandConsumer pauseCommandConsumer = new PauseCommandConsumer(3333L, footstepPathCoordinator);
-      assertTrue(footstepPathCoordinator.isEmpty());
-
-      int numberTotest = 10;
-      ArrayList<Footstep> footsteps = createRandomFootsteps(numberTotest);
+      ArrayList<Footstep> footsteps = createRandomFootsteps(10);
       footstepPathCoordinator.updatePath(footsteps);
-      assertFalse(footstepPathCoordinator.isEmpty());
 
+      // verify first two steps are the same
       int count = 0;
       compareFootsteps(footsteps.get(count), footstepPathCoordinator.poll());
       assertFalse(footstepPathCoordinator.isEmpty());
@@ -77,59 +82,45 @@ public class FootstepPathCoordinatorTest
       compareFootsteps(footsteps.get(count), footstepPathCoordinator.poll());
       assertFalse(footstepPathCoordinator.isEmpty());
 
+      // create another random list of footsteps
       ArrayList<Footstep> footsteps2 = createRandomFootsteps(3);
       footstepPathCoordinator.updatePath(footsteps2);
+
+      // verify all steps match the newest footstep path
       assertFalse(footstepPathCoordinator.isEmpty());
       for (Footstep footstep : footsteps2)
       {
          compareFootsteps(footstep, footstepPathCoordinator.poll());
       }
-      assertTrue(footstepPathCoordinator.isEmpty());
 
-
-      int pathLength = 5;
-      ArrayList<Footstep> footsteps3 = createRandomFootsteps(pathLength);
-      footstepPathCoordinator.updatePath(footsteps3);
-      assertFalse(footstepPathCoordinator.isEmpty());
-      int i = 0;
-      for (; i < 3; i++)
-      {
-         compareFootsteps(footsteps.get(i), footstepPathCoordinator.poll());
-      }
-      assertFalse(footstepPathCoordinator.isEmpty());
-
-      footstepPathCoordinator.setPaused(true);
-      assertTrue(footstepPathCoordinator.isEmpty());
-      footstepPathCoordinator.setPaused(false);
-      assertFalse(footstepPathCoordinator.isEmpty());
-
-      for (; i < pathLength; i++)
-      {
-         compareFootsteps(footsteps.get(i), footstepPathCoordinator.poll());
-      }
+      // verify the list is empty after removing all the newest footstep path steps
       assertTrue(footstepPathCoordinator.isEmpty());
 
       footstepPathCoordinator.close();
-
    }
 
    @Test
    public void testSetPaused() throws Exception
    {
+      // create a random list of footsteps
       FootstepPathCoordinator footstepPathCoordinator = new FootstepPathCoordinator();
-      FootstepPathConsumer footstepPathConsumer = new FootstepPathConsumer(2222L,  null, footstepPathCoordinator);
-      PauseCommandConsumer pauseCommandConsumer = new PauseCommandConsumer(3333L, footstepPathCoordinator);
-      int numberTotest = 10;
-      ArrayList<Footstep> footsteps = createRandomFootsteps(numberTotest);
+      ArrayList<Footstep> footsteps = createRandomFootsteps(10);
       footstepPathCoordinator.updatePath(footsteps);
 
+      // verify first two steps are the same
       int count = 0;
       compareFootsteps(footsteps.get(count), footstepPathCoordinator.poll());
       assertFalse(footstepPathCoordinator.isEmpty());
+      count++;
+      compareFootsteps(footsteps.get(count), footstepPathCoordinator.poll());
+      assertFalse(footstepPathCoordinator.isEmpty());
 
+      // pause and verify the list appears empty and that polling yields null
       footstepPathCoordinator.setPaused(true);
       assertTrue(footstepPathCoordinator.isEmpty());
+      assertNull(footstepPathCoordinator.poll());
 
+      // resume and verify three more steps
       footstepPathCoordinator.setPaused(false);
       assertFalse(footstepPathCoordinator.isEmpty());
       count++;
@@ -138,24 +129,64 @@ public class FootstepPathCoordinatorTest
       compareFootsteps(footsteps.get(count), footstepPathCoordinator.poll());
       count++;
       compareFootsteps(footsteps.get(count), footstepPathCoordinator.poll());
-      count++;
-      compareFootsteps(footsteps.get(count), footstepPathCoordinator.poll());
 
+      // resume and then resume again and verify the isEmpty method
       footstepPathCoordinator.setPaused(false);
       assertFalse(footstepPathCoordinator.isEmpty());
 
+      // pause and then pause again and verify the isEmpty method
       footstepPathCoordinator.setPaused(true);
       assertTrue(footstepPathCoordinator.isEmpty());
+      assertNull(footstepPathCoordinator.poll());
 
       footstepPathCoordinator.setPaused(true);
       assertTrue(footstepPathCoordinator.isEmpty());
+      assertNull(footstepPathCoordinator.poll());
 
+      // resume
       footstepPathCoordinator.setPaused(false);
       assertFalse(footstepPathCoordinator.isEmpty());
 
+      // verify one more footstep
       count++;
       compareFootsteps(footsteps.get(count), footstepPathCoordinator.poll());
       assertFalse(footstepPathCoordinator.isEmpty());
+
+      // create another random list of footsteps
+      ArrayList<Footstep> footsteps2 = createRandomFootsteps(3);
+      footstepPathCoordinator.updatePath(footsteps2);
+
+      // verify first footstep matches new path
+      count = 0;
+      compareFootsteps(footsteps2.get(count), footstepPathCoordinator.poll());
+      assertFalse(footstepPathCoordinator.isEmpty());
+
+      // pause and verify the list appears empty and that polling yields null
+      footstepPathCoordinator.setPaused(true);
+      assertTrue(footstepPathCoordinator.isEmpty());
+      assertNull(footstepPathCoordinator.poll());
+
+      // create another random list of footsteps
+      ArrayList<Footstep> footsteps3 = createRandomFootsteps(5);
+      footstepPathCoordinator.updatePath(footsteps3);
+
+      // verify the list appears empty and that polling yields null
+      footstepPathCoordinator.setPaused(true);
+      assertTrue(footstepPathCoordinator.isEmpty());
+      assertNull(footstepPathCoordinator.poll());
+
+      // resume
+      footstepPathCoordinator.setPaused(false);
+      assertFalse(footstepPathCoordinator.isEmpty());
+
+      // verify all steps match the newest footstep path
+      for (Footstep footstep : footsteps3)
+      {
+         compareFootsteps(footstep, footstepPathCoordinator.poll());
+      }
+
+      // verify the list is empty after removing all the newest footstep path steps
+      assertTrue(footstepPathCoordinator.isEmpty());
 
       footstepPathCoordinator.close();
 
