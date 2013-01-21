@@ -2,6 +2,7 @@ package us.ihmc.darpaRoboticsChallenge;
 
 import java.util.ArrayList;
 
+import us.ihmc.commonAvatarInterfaces.CommonAvatarEnvironmentInterface;
 import us.ihmc.commonWalkingControlModules.terrain.CommonTerrain;
 import us.ihmc.commonWalkingControlModules.terrain.TerrainType;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
@@ -33,6 +34,11 @@ public class DRCSCSInitialSetup
    public DRCSCSInitialSetup(GroundProfile groundProfile)
    {
       commonTerrain = new CommonTerrain(groundProfile);
+   }
+   
+   public DRCSCSInitialSetup(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface)
+   {
+      this(commonAvatarEnvironmentInterface.getTerrainObject());
    }
 
    public void initializeRobot(Robot robot, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
