@@ -52,7 +52,7 @@ public class FootstepPathCoordinator implements FootstepProvider
 
    private void notifyConsumersOfStatus(Footstep footstep, FootstepStatus.Status status)
    {
-      FootstepStatus footstepStatus = new FootstepStatus(new FootstepData(footstep), status);
+      FootstepStatus footstepStatus = new FootstepStatus(footstep, status);
       footstepStatusDataProducer.queueDataToSend(footstepStatus);
    }
 

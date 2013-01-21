@@ -2,10 +2,7 @@ package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
 import org.junit.Test;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.io.streamingData.AbstractStreamingDataConsumer;
-import us.ihmc.utilities.io.streamingData.QueueBasedStreamingDataProducer;
-import us.ihmc.utilities.io.streamingData.StreamingDataTCPClient;
-import us.ihmc.utilities.io.streamingData.StreamingDataTCPServer;
+import us.ihmc.utilities.io.streamingData.*;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -26,6 +23,13 @@ import static org.junit.Assert.assertTrue;
  */
 public class FootstepDataTest
 {
+   private QueueBasedStreamingDataProducer queueBasedStreamingDataProducer;
+   private StreamingDataTCPServer streamingDataTCPServer;
+   private StreamingDataTCPClient streamingDataTCPClient;
+
+   /**
+    * This test just verifies that FootstepData can be correctly serialized *
+    */
    @Test
    public void testFootstepDataSerialization()
    {
@@ -43,154 +47,80 @@ public class FootstepDataTest
       JUnitTools.assertSerializable(footstepData);
    }
 
+   /**
+    * This test verifies that FootstepData can be sent and received using our current message passing utilities *
+    */
    @Test
    public void testPassingFootstepData()
    {
-      QueueBasedStreamingDataProducer queueBasedStreamingDataProducer = new QueueBasedStreamingDataProducer(1111L);
-      StreamingDataTCPServer streamingDataTCPServer = new StreamingDataTCPServer(7777);
-      streamingDataTCPServer.registerStreamingDataProducer(queueBasedStreamingDataProducer);
-      streamingDataTCPServer.startOnAThread();
-
+      // setup comms
+      long dataIdentifier = 1111L;
+      int port = 7777;
+      createStreamingDataProducer(dataIdentifier, port);
       FootstepDataConsumer footstepDataConsumer = new FootstepDataConsumer();
-      StreamingDataTCPClient streamingDataTCPClient = new StreamingDataTCPClient("localhost", 7777);
-      streamingDataTCPClient.registerStreamingDataConsumer(footstepDataConsumer);
-      streamingDataTCPClient.connectToServer(false);
-
-      ThreadTools.sleep(1000);
-
+      createStreamingDataConsumer(footstepDataConsumer, port);
+      ThreadTools.sleep(100);
       queueBasedStreamingDataProducer.startProducingData();
 
-      Random random = new Random(77);
-      ArrayList<Footstep> footsteps = new ArrayList<Footstep>();
-      int numberToTest = 50;
-      for (int footstepNumber = 0; footstepNumber < numberToTest; footstepNumber++)
+      // create test footsteps
+      ArrayList<Footstep> sentFootsteps = createRandomFootsteps(50);
+      for (Footstep footstep : sentFootsteps)
       {
-         RigidBody endEffector = new RigidBody("rigid_" + footstepNumber, ReferenceFrame.getWorldFrame());
-         FramePose pose = new FramePose(ReferenceFrame.getWorldFrame(), new Point3d(footstepNumber, 0.0, 0.0), new Quat4d(random.nextDouble(), random.nextDouble(), random.nextDouble(), random.nextDouble()));
-         ArrayList<FramePoint> expectedContactPoints = new ArrayList<FramePoint>();
-         for (int i = 0; i < 3; i++)
-         {
-            FramePoint framePoint = new FramePoint(ReferenceFrame.getWorldFrame(), footstepNumber, i, 0.0);
-            expectedContactPoints.add(framePoint);
-         }
-
-
-         Footstep footstep = new Footstep(endEffector, pose, expectedContactPoints);
-         footsteps.add(footstep);
-         //         System.out.println("footstep.getPose() = " + footstep.getPose());
-
          Serializable footstepData = new FootstepData(footstep);
-
          queueBasedStreamingDataProducer.queueDataToSend(footstepData);
       }
-      ArrayList<Footstep> reconstructedFootsteps = footstepDataConsumer.getReconstructedFootsteps();
+      ThreadTools.sleep(100);
 
-      ThreadTools.sleep(1000);
-      for (int i = 0; i < footsteps.size(); i++)
-      {
-         Footstep footstep = footsteps.get(i);
-         Footstep reconstructedFootstep = reconstructedFootsteps.get(i);
-         //         System.out.println(" reconstructedFootstep.getPose() = " + reconstructedFootstep.getPose());
-         assertTrue(footstep.getBody().getName().equals(reconstructedFootstep.getBody().getName()));
-         assertTrue(footstep.getPose().epsilonEquals(reconstructedFootstep.getPose(), 0.0001));
-         for (int j = 0; j < footstep.getExpectedContactPoints().size(); j++)
-         {
-            FramePoint framePoint = footstep.getExpectedContactPoints().get(j);
-            FramePoint reconstructedFramePoint = reconstructedFootstep.getExpectedContactPoints().get(j);
-            assertTrue(framePoint.epsilonEquals(reconstructedFramePoint, 0.0001));
-         }
-      }
+      // verify received correctly
+      ArrayList<Footstep> receivedFootsteps = footstepDataConsumer.getReconstructedFootsteps();
+      compareFootstepsSentWithReceived(sentFootsteps, receivedFootsteps);
 
-      streamingDataTCPClient.close();
-      streamingDataTCPServer.close();
+      cleanUp();
    }
 
    @Test
    public void testPassingFootstepPath()
    {
+      // setup comms
+      long dataIdentifier = 2222L;
       int port = 2222;
-      QueueBasedStreamingDataProducer queueBasedStreamingDataProducer = new QueueBasedStreamingDataProducer(port);
-      StreamingDataTCPServer streamingDataTCPServer = new StreamingDataTCPServer(port);
-      streamingDataTCPServer.registerStreamingDataProducer(queueBasedStreamingDataProducer);
-      streamingDataTCPServer.startOnAThread();
-
+      createStreamingDataProducer(dataIdentifier, port);
       FootstepPathConsumer footstepPathConsumer = new FootstepPathConsumer();
-      StreamingDataTCPClient streamingDataTCPClient = new StreamingDataTCPClient("localhost", port);
-      streamingDataTCPClient.registerStreamingDataConsumer(footstepPathConsumer);
-      streamingDataTCPClient.connectToServer(false);
-
-      ThreadTools.sleep(1000);
-
+      createStreamingDataConsumer(footstepPathConsumer, port);
+      ThreadTools.sleep(100);
       queueBasedStreamingDataProducer.startProducingData();
 
-      Random random = new Random(77);
-      ArrayList<Footstep> footsteps = new ArrayList<Footstep>();
+      // create test footsteps
+      ArrayList<Footstep> sentFootsteps = createRandomFootsteps(50);
       ArrayList<Serializable> footstepsData = new ArrayList<Serializable>();
-      int numberToTest = 50;
-      for (int footstepNumber = 0; footstepNumber < numberToTest; footstepNumber++)
+      for (Footstep footstep : sentFootsteps)
       {
-         RigidBody endEffector = new RigidBody("rigid_" + footstepNumber, ReferenceFrame.getWorldFrame());
-         FramePose pose = new FramePose(ReferenceFrame.getWorldFrame(), new Point3d(footstepNumber, 0.0, 0.0), new Quat4d(random.nextDouble(), random.nextDouble(), random.nextDouble(), random.nextDouble()));
-         ArrayList<FramePoint> expectedContactPoints = new ArrayList<FramePoint>();
-         for (int i = 0; i < 3; i++)
-         {
-            FramePoint framePoint = new FramePoint(ReferenceFrame.getWorldFrame(), footstepNumber, i, 0.0);
-            expectedContactPoints.add(framePoint);
-         }
-
-
-         Footstep footstep = new Footstep(endEffector, pose, expectedContactPoints);
-         footsteps.add(footstep);
-         //         System.out.println("footstep.getPose() = " + footstep.getPose());
-
          Serializable footstepData = new FootstepData(footstep);
          footstepsData.add(footstepData);
       }
-
       queueBasedStreamingDataProducer.queueDataToSend(footstepsData);
+      ThreadTools.sleep(100);
 
-      ThreadTools.sleep(1000);
+      // verify received correctly
+      ArrayList<Footstep> receivedFootsteps = footstepPathConsumer.getReconstructedFootsteps();
+      compareFootstepsSentWithReceived(sentFootsteps, receivedFootsteps);
 
-      ArrayList<Footstep> reconstructedFootsteps = footstepPathConsumer.getReconstructedFootsteps();
-
-      ThreadTools.sleep(1000);
-      for (int i = 0; i < footsteps.size(); i++)
-      {
-         Footstep footstep = footsteps.get(i);
-         Footstep reconstructedFootstep = reconstructedFootsteps.get(i);
-         //         System.out.println(" reconstructedFootstep.getPose() = " + reconstructedFootstep.getPose());
-         assertTrue(footstep.getBody().getName().equals(reconstructedFootstep.getBody().getName()));
-         assertTrue(footstep.getPose().epsilonEquals(reconstructedFootstep.getPose(), 0.0001));
-         for (int j = 0; j < footstep.getExpectedContactPoints().size(); j++)
-         {
-            FramePoint framePoint = footstep.getExpectedContactPoints().get(j);
-            FramePoint reconstructedFramePoint = reconstructedFootstep.getExpectedContactPoints().get(j);
-            assertTrue(framePoint.epsilonEquals(reconstructedFramePoint, 0.0001));
-         }
-      }
-
-      streamingDataTCPClient.close();
-      streamingDataTCPServer.close();
+      cleanUp();
    }
 
    @Test
    public void testPassingPauseCommand()
    {
+      // setup comms
+      long dataIdentifier = 3333L;
       int port = 3333;
-      QueueBasedStreamingDataProducer queueBasedStreamingDataProducer = new QueueBasedStreamingDataProducer(port);
-      StreamingDataTCPServer streamingDataTCPServer = new StreamingDataTCPServer(port);
-      streamingDataTCPServer.registerStreamingDataProducer(queueBasedStreamingDataProducer);
-      streamingDataTCPServer.startOnAThread();
-
+      createStreamingDataProducer(dataIdentifier, port);
       PauseConsumer pauseConsumer = new PauseConsumer();
-      StreamingDataTCPClient streamingDataTCPClient = new StreamingDataTCPClient("localhost", port);
-      streamingDataTCPClient.registerStreamingDataConsumer(pauseConsumer);
-      streamingDataTCPClient.connectToServer(false);
-
-      ThreadTools.sleep(1000);
-
+      createStreamingDataConsumer(pauseConsumer, port);
+      ThreadTools.sleep(100);
       queueBasedStreamingDataProducer.startProducingData();
 
+      // create test commands
       ArrayList<Boolean> commands = new ArrayList<Boolean>();
       Random random = new Random(77);
       int numberToTest = 10;
@@ -200,156 +130,158 @@ public class FootstepDataTest
          commands.add(isPaused);
          queueBasedStreamingDataProducer.queueDataToSend(isPaused);
       }
-      ThreadTools.sleep(200);
+      ThreadTools.sleep(100);
 
+      // verify received correctly
       ArrayList<Boolean> reconstructedCommands = pauseConsumer.getReconstructedCommands();
       for (int i = 0; i < commands.size(); i++)
       {
          Boolean isPaused = commands.get(i);
          Boolean reconstructedCommand = reconstructedCommands.get(i);
-         //         System.out.println(" reconstructedFootstep.getPose() = " + reconstructedFootstep.getPose());
          assertTrue(isPaused.booleanValue() == reconstructedCommand.booleanValue());
       }
 
-      streamingDataTCPClient.close();
-      streamingDataTCPServer.close();
+      cleanUp();
    }
 
    @Test
    public void testPassingFootstepPathAndPauseCommands()
    {
+      // Create one server for two types of data
       int pathPort = 2222;
       QueueBasedStreamingDataProducer pathQueueBasedStreamingDataProducer = new QueueBasedStreamingDataProducer(2222L);
-      StreamingDataTCPServer streamingDataTCPServer = new StreamingDataTCPServer(pathPort);
+      streamingDataTCPServer = new StreamingDataTCPServer(pathPort);
       streamingDataTCPServer.registerStreamingDataProducer(pathQueueBasedStreamingDataProducer);
       QueueBasedStreamingDataProducer pauseQueueBasedStreamingDataProducer = new QueueBasedStreamingDataProducer(3333L);
       streamingDataTCPServer.registerStreamingDataProducer(pauseQueueBasedStreamingDataProducer);
       streamingDataTCPServer.startOnAThread();
 
+      // create one client for two types of data
       FootstepPathConsumer footstepPathConsumer = new FootstepPathConsumer();
       PauseConsumer pauseConsumer = new PauseConsumer();
-      StreamingDataTCPClient streamingDataTCPClient = new StreamingDataTCPClient("localhost", pathPort);
+      streamingDataTCPClient = new StreamingDataTCPClient("localhost", pathPort);
       streamingDataTCPClient.registerStreamingDataConsumer(footstepPathConsumer);
       streamingDataTCPClient.registerStreamingDataConsumer(pauseConsumer);
       streamingDataTCPClient.connectToServer(false);
 
-      ThreadTools.sleep(1000);
-
+      ThreadTools.sleep(100);
       pathQueueBasedStreamingDataProducer.startProducingData();
       pauseQueueBasedStreamingDataProducer.startProducingData();
 
-      Random random = new Random(77);
-      ArrayList<Footstep> footsteps = new ArrayList<Footstep>();
+      // send test footstep path
+      ArrayList<Footstep> sentFootsteps = createRandomFootsteps(50);
       ArrayList<Serializable> footstepsData = new ArrayList<Serializable>();
-      int numberToTest = 10;
-      for (int footstepNumber = 0; footstepNumber < numberToTest; footstepNumber++)
+      for (Footstep footstep : sentFootsteps)
       {
-         RigidBody endEffector = new RigidBody("rigid_" + footstepNumber, ReferenceFrame.getWorldFrame());
-         FramePose pose = new FramePose(ReferenceFrame.getWorldFrame(), new Point3d(footstepNumber, 0.0, 0.0), new Quat4d(random.nextDouble(), random.nextDouble(), random.nextDouble(), random.nextDouble()));
-         ArrayList<FramePoint> expectedContactPoints = new ArrayList<FramePoint>();
-         for (int i = 0; i < 3; i++)
-         {
-            FramePoint framePoint = new FramePoint(ReferenceFrame.getWorldFrame(), footstepNumber, i, 0.0);
-            expectedContactPoints.add(framePoint);
-         }
-
-
-         Footstep footstep = new Footstep(endEffector, pose, expectedContactPoints);
-         footsteps.add(footstep);
-         //         System.out.println("footstep.getPose() = " + footstep.getPose());
-
          Serializable footstepData = new FootstepData(footstep);
          footstepsData.add(footstepData);
       }
       pathQueueBasedStreamingDataProducer.queueDataToSend(footstepsData);
+      ThreadTools.sleep(100);
 
+      // send some commands
       ArrayList<Boolean> commands = new ArrayList<Boolean>();
-      numberToTest = 3;
+      int numberToTest = 3;
+      Random random = new Random(777);
       for (int i = 0; i < numberToTest; i++)
       {
          boolean isPaused = random.nextBoolean();
          commands.add(isPaused);
          pauseQueueBasedStreamingDataProducer.queueDataToSend(isPaused);
       }
-      ThreadTools.sleep(200);
+      ThreadTools.sleep(100);
 
+      // send another footstep path
+      ArrayList<Footstep> sentFootsteps2 = createRandomFootsteps(50);
       footstepsData = new ArrayList<Serializable>();
-      numberToTest = 5;
-      for (int footstepNumber = 0; footstepNumber < numberToTest; footstepNumber++)
+      for (Footstep footstep : sentFootsteps)
       {
-         RigidBody endEffector = new RigidBody("rigid_" + footstepNumber, ReferenceFrame.getWorldFrame());
-         FramePose pose = new FramePose(ReferenceFrame.getWorldFrame(), new Point3d(footstepNumber, 0.0, 0.0), new Quat4d(random.nextDouble(), random.nextDouble(), random.nextDouble(), random.nextDouble()));
-         ArrayList<FramePoint> expectedContactPoints = new ArrayList<FramePoint>();
-         for (int i = 0; i < 3; i++)
-         {
-            FramePoint framePoint = new FramePoint(ReferenceFrame.getWorldFrame(), footstepNumber, i, 0.0);
-            expectedContactPoints.add(framePoint);
-         }
-
-
-         Footstep footstep = new Footstep(endEffector, pose, expectedContactPoints);
-         footsteps.add(footstep);
-         //         System.out.println("footstep.getPose() = " + footstep.getPose());
-
          Serializable footstepData = new FootstepData(footstep);
          footstepsData.add(footstepData);
       }
       pathQueueBasedStreamingDataProducer.queueDataToSend(footstepsData);
+      sentFootsteps.addAll(sentFootsteps2);
+      ThreadTools.sleep(100);
 
-      ThreadTools.sleep(1000);
+      // verify footsteps received correctly
+      ArrayList<Footstep> receivedFootsteps = footstepPathConsumer.getReconstructedFootsteps();
+      compareFootstepsSentWithReceived(sentFootsteps, receivedFootsteps);
 
-      ArrayList<Footstep> reconstructedFootsteps = footstepPathConsumer.getReconstructedFootsteps();
-
-      ThreadTools.sleep(1000);
-      for (int i = 0; i < footsteps.size(); i++)
-      {
-         Footstep footstep = footsteps.get(i);
-         Footstep reconstructedFootstep = reconstructedFootsteps.get(i);
-         //         System.out.println(" reconstructedFootstep.getPose() = " + reconstructedFootstep.getPose());
-         assertTrue(footstep.getBody().getName().equals(reconstructedFootstep.getBody().getName()));
-         assertTrue(footstep.getPose().epsilonEquals(reconstructedFootstep.getPose(), 0.0001));
-         for (int j = 0; j < footstep.getExpectedContactPoints().size(); j++)
-         {
-            FramePoint framePoint = footstep.getExpectedContactPoints().get(j);
-            FramePoint reconstructedFramePoint = reconstructedFootstep.getExpectedContactPoints().get(j);
-            assertTrue(framePoint.epsilonEquals(reconstructedFramePoint, 0.0001));
-         }
-      }
-
+      // verify commands received correctly
       ArrayList<Boolean> reconstructedCommands = pauseConsumer.getReconstructedCommands();
       for (int i = 0; i < commands.size(); i++)
       {
          Boolean isPaused = commands.get(i);
          Boolean reconstructedCommand = reconstructedCommands.get(i);
-         //         System.out.println(" reconstructedFootstep.getPose() = " + reconstructedFootstep.getPose());
          assertTrue(isPaused.booleanValue() == reconstructedCommand.booleanValue());
       }
 
-      streamingDataTCPClient.close();
-      streamingDataTCPServer.close();
+      cleanUp();
    }
 
    @Test
    public void testPassingFootstepStatus()
    {
-      QueueBasedStreamingDataProducer<FootstepStatus> queueBasedStreamingDataProducer = new QueueBasedStreamingDataProducer<FootstepStatus>(1111L);
-      StreamingDataTCPServer streamingDataTCPServer = new StreamingDataTCPServer(7777);
-      streamingDataTCPServer.registerStreamingDataProducer(queueBasedStreamingDataProducer);
-      streamingDataTCPServer.startOnAThread();
-
+      // setup comms
+      long dataIdentifier = 1111L;
+      int port = 7777;
+      createStreamingDataProducer(dataIdentifier, port);
       FootstepStatusConsumer footstepStatusConsumer = new FootstepStatusConsumer();
-      StreamingDataTCPClient streamingDataTCPClient = new StreamingDataTCPClient("localhost", 7777);
-      streamingDataTCPClient.registerStreamingDataConsumer(footstepStatusConsumer);
-      streamingDataTCPClient.connectToServer(false);
-
-      ThreadTools.sleep(1000);
-
+      createStreamingDataConsumer(footstepStatusConsumer, port);
+      ThreadTools.sleep(100);
       queueBasedStreamingDataProducer.startProducingData();
 
+      // create test footsteps
+      Random random = new Random(777);
+      ArrayList<Footstep> sentFootsteps = createRandomFootsteps(50);
+      ArrayList<FootstepStatus> sentFootstepStatus = new ArrayList<FootstepStatus>();
+      for (Footstep footstep : sentFootsteps)
+      {
+         FootstepStatus.Status status = FootstepStatus.Status.STARTED;
+         boolean isComplete = random.nextBoolean();
+         if (isComplete)
+         {
+            status = FootstepStatus.Status.COMPLETED;
+         }
+         FootstepStatus footstepStatus = new FootstepStatus(footstep, status);
+         sentFootstepStatus.add(footstepStatus);
+         queueBasedStreamingDataProducer.queueDataToSend(footstepStatus);
+      }
+      ThreadTools.sleep(100);
+
+      // verify received correctly
+      ArrayList<FootstepStatus> receivedFootsteps = footstepStatusConsumer.getReconstructedFootsteps();
+      compareStatusSentWithReceived(sentFootstepStatus, receivedFootsteps);
+
+      cleanUp();
+   }
+
+   private void createStreamingDataProducer(long dataIdentifier, int port)
+   {
+      queueBasedStreamingDataProducer = new QueueBasedStreamingDataProducer(dataIdentifier);
+      streamingDataTCPServer = new StreamingDataTCPServer(port);
+      streamingDataTCPServer.registerStreamingDataProducer(queueBasedStreamingDataProducer);
+      streamingDataTCPServer.startOnAThread();
+   }
+
+   private void createStreamingDataConsumer(StreamingDataConsumer streamingDataConsumer, int port)
+   {
+      streamingDataTCPClient = new StreamingDataTCPClient("localhost", port);
+      streamingDataTCPClient.registerStreamingDataConsumer(streamingDataConsumer);
+      streamingDataTCPClient.connectToServer(false);
+   }
+
+   private void cleanUp()
+   {
+      streamingDataTCPClient.close();
+      streamingDataTCPServer.close();
+   }
+
+   private ArrayList<Footstep> createRandomFootsteps(int number)
+   {
       Random random = new Random(77);
-      ArrayList<FootstepStatus> footstepStatuses = new ArrayList<FootstepStatus>();
-      int numberToTest = 10;
-      for (int footstepNumber = 0; footstepNumber < numberToTest; footstepNumber++)
+      ArrayList<Footstep> footsteps = new ArrayList<Footstep>();
+      for (int footstepNumber = 0; footstepNumber < number; footstepNumber++)
       {
          RigidBody endEffector = new RigidBody("rigid_" + footstepNumber, ReferenceFrame.getWorldFrame());
          FramePose pose = new FramePose(ReferenceFrame.getWorldFrame(), new Point3d(footstepNumber, 0.0, 0.0), new Quat4d(random.nextDouble(), random.nextDouble(), random.nextDouble(), random.nextDouble()));
@@ -360,34 +292,41 @@ public class FootstepDataTest
             expectedContactPoints.add(framePoint);
          }
 
-
          Footstep footstep = new Footstep(endEffector, pose, expectedContactPoints);
-         FootstepData footstepData = new FootstepData(footstep);
-         FootstepStatus.Status status = FootstepStatus.Status.STARTED;
-         boolean isComplete = random.nextBoolean();
-         if(isComplete)
-         {
-            status = FootstepStatus.Status.COMPLETED;
-         }
-         FootstepStatus footstepStatus = new FootstepStatus(footstepData, status);
-         footstepStatuses.add(footstepStatus);
-         queueBasedStreamingDataProducer.queueDataToSend(footstepStatus);
-      }
-      ArrayList<FootstepStatus> reconstructedFootsteps = footstepStatusConsumer.getReconstructedFootsteps();
-
-      ThreadTools.sleep(1000);
-      for (int i = 0; i < footstepStatuses.size(); i++)
-      {
-         FootstepStatus footstepStatus = footstepStatuses.get(i);
-         FootstepStatus reconstructedFootstepStatus = reconstructedFootsteps.get(i);
-         assertTrue(footstepStatus.getStatus() == reconstructedFootstepStatus.getStatus());
-         assertTrue(footstepStatus.getFootstepData().getLocation().epsilonEquals(reconstructedFootstepStatus.getFootstepData().getLocation(), 0.0001));
+         footsteps.add(footstep);
       }
 
-      streamingDataTCPClient.close();
-      streamingDataTCPServer.close();
+      return footsteps;
    }
 
+   private void compareFootstepsSentWithReceived(ArrayList<Footstep> sentFootsteps, ArrayList<Footstep> receivedFootsteps)
+   {
+      for (int i = 0; i < sentFootsteps.size(); i++)
+      {
+         Footstep sentFootstep = sentFootsteps.get(i);
+         Footstep receivedFootstep = receivedFootsteps.get(i);
+
+         assertTrue(sentFootstep.getBody().getName().equals(receivedFootstep.getBody().getName()));
+         assertTrue(sentFootstep.getPose().epsilonEquals(receivedFootstep.getPose(), 0.0001));
+         for (int j = 0; j < sentFootstep.getExpectedContactPoints().size(); j++)
+         {
+            FramePoint sentFramePoint = sentFootstep.getExpectedContactPoints().get(j);
+            FramePoint receivedFramePoint = receivedFootstep.getExpectedContactPoints().get(j);
+            assertTrue(sentFramePoint.epsilonEquals(receivedFramePoint, 0.0001));
+         }
+      }
+   }
+
+   private void compareStatusSentWithReceived(ArrayList<FootstepStatus> sentFootstepStatus, ArrayList<FootstepStatus> receivedFootsteps)
+   {
+      for (int i = 0; i < sentFootstepStatus.size(); i++)
+      {
+         FootstepStatus footstepStatus = sentFootstepStatus.get(i);
+         FootstepStatus reconstructedFootstepStatus = receivedFootsteps.get(i);
+         assertTrue(footstepStatus.getStatus() == reconstructedFootstepStatus.getStatus());
+         assertTrue(footstepStatus.getLocation().epsilonEquals(reconstructedFootstepStatus.getLocation(), 0.0001));
+      }
+   }
 
    private class FootstepDataConsumer extends AbstractStreamingDataConsumer<FootstepData>
    {
