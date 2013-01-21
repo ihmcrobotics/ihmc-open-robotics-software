@@ -336,39 +336,13 @@ public class LeeGoswamiGroundReactionWrenchDistributorTest
    {
       ReferenceFrame expressedInFrame = totalBodyWrench.getExpressedInFrame();
 
-      FrameVector totalForce = new FrameVector(expressedInFrame);
-      FrameVector totalMoment = new FrameVector(expressedInFrame);
-
-      for (PlaneContactState planeContactState : contactStates)
-      {
-         FrameVector contactForce = distributor.getForce(planeContactState).changeFrameCopy(expressedInFrame);
-         totalForce.add(contactForce);
-
-         double normalTorqueMagnitude = distributor.getNormalTorque(planeContactState);
-         FrameVector normalTorque = new FrameVector(planeContactState.getPlaneFrame(), 0.0, 0.0, normalTorqueMagnitude);
-
-         FramePoint2d centerOfPressure2d = distributor.getCenterOfPressure(planeContactState);
-
-         FramePoint centerOfPressure3d = new FramePoint(centerOfPressure2d.getReferenceFrame());
-         centerOfPressure3d.setXY(centerOfPressure2d);
-         centerOfPressure3d.changeFrame(expressedInFrame);
-
-         FrameVector copToCoMVector = new FrameVector(centerOfMassFrame);
-         copToCoMVector.changeFrame(expressedInFrame);
-         copToCoMVector.sub(centerOfPressure3d);
-
-         FrameVector crossProductTorque = new FrameVector(expressedInFrame);
-         crossProductTorque.cross(contactForce, copToCoMVector);
-
-         totalMoment.add(crossProductTorque);
-         totalMoment.add(normalTorque.changeFrameCopy(expressedInFrame));
-      }
-
+      SpatialForceVector achievedWrench = GroundReactionWrenchDistributorAchievedWrenchCalculator.computeAchievedWrench(distributor, expressedInFrame, contactStates);
+      
       FrameVector totalBodyForce = totalBodyWrench.getLinearPartAsFrameVectorCopy();
-      assertTrue("totalForce = " + totalForce + "totalBodyForce = " + totalBodyForce, totalForce.epsilonEquals(totalBodyForce, 1e-7));
+      assertTrue("achievedWrench = " + achievedWrench + "totalBodyForce = " + totalBodyForce, achievedWrench.getLinearPartAsFrameVectorCopy().epsilonEquals(totalBodyForce, 1e-7));
 
       FrameVector totalBodyMoment = totalBodyWrench.getAngularPartAsFrameVectorCopy();
-      assertTrue("totalMoment = " + totalMoment + ", totalBodyMoment = " + totalBodyMoment, totalMoment.epsilonEquals(totalBodyMoment, 1e-7));
+      assertTrue("achievedWrench = " + achievedWrench + ", totalBodyMoment = " + totalBodyMoment, achievedWrench.getAngularPartAsFrameVectorCopy().epsilonEquals(totalBodyMoment, 1e-7));
    }
 
    private void verifyForcesAreInsideFrictionCones(GroundReactionWrenchDistributorInterface distributor, ArrayList<PlaneContactState> contactStates,

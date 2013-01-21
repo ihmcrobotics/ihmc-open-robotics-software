@@ -4,11 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
+import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
+import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.SpatialForceVector;
 
@@ -36,8 +38,11 @@ public class GroundReactionWrenchDistributorVisualizer
   
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final YoFramePoint centerOfMassWorld = new YoFramePoint("centerOfMassViz", "", worldFrame, registry);
-   private final YoFrameVector totalForceWorld = new YoFrameVector("totalForceViz", worldFrame, registry);
-   private final YoFrameVector totalMomentWorld = new YoFrameVector("totalMomentViz", worldFrame, registry);
+   private final YoFrameVector desiredForceWorld = new YoFrameVector("desiredForceViz", worldFrame, registry);
+   private final YoFrameVector desiredMomentWorld = new YoFrameVector("desiredMomentViz", worldFrame, registry);
+   
+   private final YoFrameVector achievedForceWorld = new YoFrameVector("achievedForceViz", worldFrame, registry);
+   private final YoFrameVector achievedMomentWorld = new YoFrameVector("achievedMomentViz", worldFrame, registry);
    
    private final ArrayList<YoFrameConvexPolygon2d> contactPolygonsWorld = new ArrayList<YoFrameConvexPolygon2d>();
    private final ArrayList<YoFramePoint> contactReferencePoints = new ArrayList<YoFramePoint>();
@@ -84,36 +89,46 @@ public class GroundReactionWrenchDistributorVisualizer
 
       }
 
+      AppearanceDefinition desiredForceAppearance = YoAppearance.Yellow();
+      desiredForceAppearance.setTransparancy(0.9);
+      
+      AppearanceDefinition desiredMomentAppearance = YoAppearance.Purple();
+      desiredMomentAppearance.setTransparancy(0.9);
+      
       DynamicGraphicPosition centerOfMassWorldViz = new DynamicGraphicPosition("centerOfMassViz", centerOfMassWorld, COM_VIZ_RADIUS, YoAppearance.Purple(), GraphicType.BALL_WITH_CROSS);
-      DynamicGraphicVector totalForceWorldViz = new DynamicGraphicVector("totalForceViz", centerOfMassWorld, totalForceWorld, FORCE_VECTOR_SCALE, YoAppearance.Yellow());
-      DynamicGraphicVector totalMomentWorldViz = new DynamicGraphicVector("totalMomentViz", centerOfMassWorld, totalMomentWorld, MOMENT_VECTOR_SCALE, YoAppearance.Black());
+      DynamicGraphicVector desiredForceWorldViz = new DynamicGraphicVector("desiredForceViz", centerOfMassWorld, desiredForceWorld, FORCE_VECTOR_SCALE, desiredForceAppearance);
+      DynamicGraphicVector desiredMomentWorldViz = new DynamicGraphicVector("desiredMomentViz", centerOfMassWorld, desiredMomentWorld, MOMENT_VECTOR_SCALE, desiredMomentAppearance);
+      DynamicGraphicVector achievedForceWorldViz = new DynamicGraphicVector("achievedForceViz", centerOfMassWorld, achievedForceWorld, FORCE_VECTOR_SCALE, YoAppearance.Yellow());
+      DynamicGraphicVector achievedMomentWorldViz = new DynamicGraphicVector("achievedMomentViz", centerOfMassWorld, achievedMomentWorld, MOMENT_VECTOR_SCALE, YoAppearance.Purple());
 
       dynamicGraphicObjectsList.add(centerOfMassWorldViz);
-      dynamicGraphicObjectsList.add(totalForceWorldViz);
-      dynamicGraphicObjectsList.add(totalMomentWorldViz);
+      dynamicGraphicObjectsList.add(desiredForceWorldViz);
+      dynamicGraphicObjectsList.add(desiredMomentWorldViz);
+      dynamicGraphicObjectsList.add(achievedForceWorldViz);
+      dynamicGraphicObjectsList.add(achievedMomentWorldViz);
       
       dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectsList);
       
       parentRegistry.addChild(registry);
    }
    
-   public void update(SimulationConstructionSet scs, GroundReactionWrenchDistributorInterface distributor, ReferenceFrame centerOfMassFrame, ArrayList<PlaneContactState> contactStates, SpatialForceVector totalBodyWrench)
+   public void update(SimulationConstructionSet scs, GroundReactionWrenchDistributorInterface distributor, ReferenceFrame centerOfMassFrame, ArrayList<PlaneContactState> contactStates, SpatialForceVector desiredBodyWrench)
    {
       FramePoint centerOfMassPosition = new FramePoint(centerOfMassFrame);
       centerOfMassPosition.changeFrame(worldFrame);
       
       centerOfMassWorld.set(centerOfMassPosition);
       
-      SpatialForceVector totalWrenchOnCenterOfMass = new SpatialForceVector(totalBodyWrench);
-      totalWrenchOnCenterOfMass.changeFrame(centerOfMassFrame);
-      FrameVector totalForceOnCenterOfMass = totalWrenchOnCenterOfMass.getLinearPartAsFrameVectorCopy();
-      FrameVector totalTorqueOnCenterOfMass = totalWrenchOnCenterOfMass.getAngularPartAsFrameVectorCopy();
-      totalForceOnCenterOfMass.changeFrame(worldFrame);
-      totalTorqueOnCenterOfMass.changeFrame(worldFrame);
+      SpatialForceVector desiredWrenchOnCenterOfMass = new SpatialForceVector(desiredBodyWrench);
+      desiredWrenchOnCenterOfMass.changeFrame(centerOfMassFrame);
+      FrameVector desiredForceOnCenterOfMass = desiredWrenchOnCenterOfMass.getLinearPartAsFrameVectorCopy();
+      FrameVector desiredTorqueOnCenterOfMass = desiredWrenchOnCenterOfMass.getAngularPartAsFrameVectorCopy();
+      desiredForceOnCenterOfMass.changeFrame(worldFrame);
+      desiredTorqueOnCenterOfMass.changeFrame(worldFrame);
       
-      totalForceWorld.set(totalForceOnCenterOfMass);
-      totalMomentWorld.set(totalTorqueOnCenterOfMass);
-      
+      desiredForceWorld.set(desiredForceOnCenterOfMass);
+      desiredMomentWorld.set(desiredTorqueOnCenterOfMass);
+            
       for (int i=0; i<contactStates.size(); i++)
       {
          PlaneContactState contactState = contactStates.get(i);
@@ -123,10 +138,6 @@ public class GroundReactionWrenchDistributorVisualizer
 
          YoFrameConvexPolygon2d yoFrameConvexPolygon2d = contactPolygonsWorld.get(i);
          yoFrameConvexPolygon2d.setFrameConvexPolygon2d(frameConvexPolygon2d.changeFrameCopy(ReferenceFrame.getWorldFrame()));
-         
-//         // For now make a new polygon on each update:
-//         DynamicGraphicPolygon dynamicGraphicPolygon = new DynamicGraphicPolygon("hackyPolygon"+index, frameConvexPolygon2d.getConvexPolygon2d(), contactReferencePoints.get(i), contactPlaneOrientations.get(i), 1.0, YoAppearance.Green());
-//         scs.addDynamicGraphicObject(dynamicGraphicPolygon);
          
          YoFramePoint contactCenterOfPressureForViz = contactCenterOfPressures.get(i);
          YoFrameVector contactForceForViz = contactForces.get(i);
@@ -144,8 +155,13 @@ public class GroundReactionWrenchDistributorVisualizer
          double normalTorque = distributor.getNormalTorque(contactState);
          FrameVector normalForce = new FrameVector(centerOfPressure2d.getReferenceFrame(), 0.0, 0.0, normalTorque);
          contactMomentForViz.set(normalForce.changeFrameCopy(worldFrame));
-
       }
+      
+      SpatialForceVector achievedWrenchOnCenterOfMass = GroundReactionWrenchDistributorAchievedWrenchCalculator.computeAchievedWrench(distributor, desiredBodyWrench.getExpressedInFrame(), contactStates);
+      
+      achievedForceWorld.set(achievedWrenchOnCenterOfMass.getLinearPartAsFrameVectorCopy().changeFrameCopy(worldFrame));
+      achievedMomentWorld.set(achievedWrenchOnCenterOfMass.getAngularPartAsFrameVectorCopy().changeFrameCopy(worldFrame));
+      
       
       scs.tickAndUpdate();
    }
