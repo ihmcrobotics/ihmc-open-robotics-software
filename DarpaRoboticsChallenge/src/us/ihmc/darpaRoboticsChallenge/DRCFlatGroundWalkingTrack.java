@@ -5,7 +5,6 @@ import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSi
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.ControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.FlatGroundWalkingHighLevelHumanoidControllerFactory;
-import us.ihmc.commonWalkingControlModules.terrain.TerrainType;
 import us.ihmc.darpaRoboticsChallenge.controllers.DRCRobotMomentumBasedControllerFactory;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.SquaredUpDRCRobotInitialSetup;
@@ -31,8 +30,8 @@ public class DRCFlatGroundWalkingTrack
 
       drcRobotInitialSetup = new SquaredUpDRCRobotInitialSetup();
 
-
-      scsInitialSetup = new DRCSCSInitialSetup(TerrainType.FLAT);
+      environment = new DRCDemo01Environment();
+      scsInitialSetup = new DRCSCSInitialSetup(environment);
       scsInitialSetup.setSimulationDataBufferSize(simulationDataBufferSize);
 
       double dt = scsInitialSetup.getDT();
@@ -56,10 +55,10 @@ public class DRCFlatGroundWalkingTrack
       highLevelHumanoidControllerFactory.setupForNetworkedFootstepProvider(ipAddress, portNumber);
       ControllerFactory controllerFactory = new DRCRobotMomentumBasedControllerFactory(highLevelHumanoidControllerFactory, true);
 
-      environment = new DRCDemo01Environment();
+      
 
 //    r2Simulation = new R2Simulation(environment, r2InitialSetup, sensorNoiseInitialSetup, controllerFactory, scsInitialSetup, guiInitialSetup);
-      drcSimulation = new DRCSimulation(drcRobotInitialSetup, controllerFactory, scsInitialSetup, guiInitialSetup);
+      drcSimulation = new DRCSimulation(environment, drcRobotInitialSetup, controllerFactory, scsInitialSetup, guiInitialSetup);
 
       SimulationConstructionSet simulationConstructionSet = drcSimulation.getSimulationConstructionSet();
       MidiSliderBoard sliderBoard = new MidiSliderBoard(simulationConstructionSet);
