@@ -19,7 +19,7 @@ import com.yobotics.simulationconstructionset.util.inputdevices.MidiSliderBoard;
 public class DRCFlatGroundWalkingTrack
 {
    private final DRCSimulation drcSimulation;
-   private final DRCDemo01Environment environment;
+   private final DRCDemo01NavigationEnvironment environment;
 
    public DRCFlatGroundWalkingTrack(DRCGuiInitialSetup guiInitialSetup, AutomaticSimulationRunner automaticSimulationRunner, double timePerRecordTick,
                                     int simulationDataBufferSize, boolean doChestOrientationControl, String ipAddress, int portNumber)
@@ -30,7 +30,7 @@ public class DRCFlatGroundWalkingTrack
 
       drcRobotInitialSetup = new SquaredUpDRCRobotInitialSetup();
 
-      environment = new DRCDemo01Environment();
+      environment = new DRCDemo01NavigationEnvironment();
       scsInitialSetup = new DRCSCSInitialSetup(environment);
       scsInitialSetup.setSimulationDataBufferSize(simulationDataBufferSize);
 
@@ -144,7 +144,7 @@ public class DRCFlatGroundWalkingTrack
       return drcSimulation.getSimulationConstructionSet();
    }
 
-   public DRCDemo01Environment getEnvironment()
+   public DRCDemo01NavigationEnvironment getEnvironment()
    {
       return environment;
    }

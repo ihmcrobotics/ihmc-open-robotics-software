@@ -168,7 +168,7 @@ public class YoAppearance
 
    public static AppearanceDefinition Brown()
    {
-      return RGBColorFrom8BitInts(165, 42, 42);
+      return RGBColorFrom8BitInts(70, 40, 0);
    }
 
    public static AppearanceDefinition Green()
@@ -188,7 +188,7 @@ public class YoAppearance
 
    public static AppearanceDefinition Gray()
    {
-      return RGBColor(0.50f, 0.50f, 0.50f);
+      return RGBColorFrom8BitInts(129, 129, 129);
    }
 
    public static AppearanceDefinition Maroon()
