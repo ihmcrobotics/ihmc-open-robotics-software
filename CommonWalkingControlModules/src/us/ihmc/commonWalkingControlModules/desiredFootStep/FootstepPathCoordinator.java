@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.desiredFootStep;
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import us.ihmc.utilities.io.streamingData.QueueBasedStreamingDataProducer;
+import us.ihmc.utilities.io.streamingData.StreamingDataTCPClient;
 import us.ihmc.utilities.io.streamingData.StreamingDataTCPServer;
 
 import java.util.ArrayList;
@@ -26,6 +27,7 @@ public class FootstepPathCoordinator implements FootstepProvider
    {
       setPaused(false);
       setWalk(true);
+
       footstepStatusDataProducer = new QueueBasedStreamingDataProducer<FootstepStatus>(4444L);
       streamingDataTCPServer = new StreamingDataTCPServer(4444);
       streamingDataTCPServer.registerStreamingDataProducer(footstepStatusDataProducer);

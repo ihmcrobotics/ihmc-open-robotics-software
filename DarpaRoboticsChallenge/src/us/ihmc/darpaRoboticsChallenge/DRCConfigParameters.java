@@ -17,8 +17,8 @@ public class DRCConfigParameters
    public static final int BG_VIDEO_SERVER_PORT_NUMBER = 2099;
    public static final int ROBOT_DATA_RECEIVER_PORT_NUMBER = 7777;
 
-   public static final int FOOTSTEP_PLANNER_STREAMING_SERVER_PORT_NUMBER = 9876;
-   public static final long FOOTSTEP_PLANNER_STREAMING_SERVER_DATA_IDENTIFIER = 9876L;
+   public static final int FOOTSTEP_PATH_PORT_NUMBER = 3333;
+   public static final long FOOTSTEP_PATH_DATA_IDENTIFIER = 3333L;
 
    public static final int FOOTSTEP_STATUS_PORT_NUMBER = 4444;
    public static final long FOOTSTEP_STATUS_DATA_IDENTIFIER = 4444L;
