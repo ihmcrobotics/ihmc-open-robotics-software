@@ -114,6 +114,14 @@ public class YoVariableHolderImplementationNewTest
    }
    
    @Test
+   public void testGetVariableCaseInsensitive()
+   {
+      yoVariableHolderImplementation.addVariablesToHolder(testVariables);
+      YoVariable variable = yoVariableHolderImplementation.getVariable("DoubleYoVariable");
+      assertTrue(testVariables.get(0) == variable);
+   }
+   
+   @Test
    public void testGetVariableWithNameSpace() 
    {
       YoVariableRegistry testRegistry;
@@ -121,6 +129,17 @@ public class YoVariableHolderImplementationNewTest
       DoubleYoVariable doubleYoVariableWithNameSpace = new DoubleYoVariable("doubleYoVariableWithNameSpace", testRegistry);
       yoVariableHolderImplementation.addVariableToHolder(doubleYoVariableWithNameSpace);
       assertEquals(doubleYoVariableWithNameSpace, yoVariableHolderImplementation.getVariable("testRegistry", "doubleYoVariableWithNameSpace"));
+   }
+   
+   @Test
+   public void testGetVariableWithNameSpaceCaseInsensitiveExceptNameSpace() 
+   {
+      YoVariableRegistry testRegistry;
+      testRegistry = new YoVariableRegistry("testRegistry"); 
+      DoubleYoVariable doubleYoVariableWithNameSpace = new DoubleYoVariable("doubleYoVariableWithNameSpace", testRegistry);
+      yoVariableHolderImplementation.addVariableToHolder(doubleYoVariableWithNameSpace);
+      assertEquals(doubleYoVariableWithNameSpace, yoVariableHolderImplementation.getVariable("testRegistry", "DOUBLEYoVariableWithNameSpace"));
+      assertNull(yoVariableHolderImplementation.getVariable("TESTRegistry", "doubleYoVariableWithNameSpace"));
    }
    
    @Test
