@@ -41,11 +41,11 @@ public class GroundReactionWrenchSliderInput
 
       YoVariableRegistry registry = new YoVariableRegistry("Wrench");
       YoFramePoint centerOfMassPosition = new YoFramePoint("centerOfMass", "", worldFrame, registry);      
-      YoFrameVector forceOnCenterOfMass = new YoFrameVector("forceOnCenterOfMass", "", worldFrame, registry);      
-      YoFrameVector torqueOnCenterOfMass = new YoFrameVector("torqueOnCenterOfMass", "", worldFrame, registry);      
-      centerOfMassPosition.set(1.0, 0.5, 1.0);
-      forceOnCenterOfMass.set(10.0, 20.0, 1000.0);
-      torqueOnCenterOfMass.set(1.0, 2.0, 3.0);
+      YoFrameVector desiredForceOnCenterOfMass = new YoFrameVector("forceDesired", "", worldFrame, registry);      
+      YoFrameVector desiredTorqueOnCenterOfMass = new YoFrameVector("torqueDesired", "", worldFrame, registry);      
+      centerOfMassPosition.set(0.1, 0.1, 1.0);
+      desiredForceOnCenterOfMass.set(10.0, 20.0, 1000.0);
+      desiredTorqueOnCenterOfMass.set(1.0, 2.0, 3.0);
       
       ArrayList<YoFrameVector> contactTranslations = new ArrayList<YoFrameVector>();
       
@@ -94,21 +94,26 @@ public class GroundReactionWrenchSliderInput
       scs.addYoVariableRegistry(registry);
       
       MidiSliderBoard sliderBoard = new MidiSliderBoard(scs);
-      sliderBoard.setSlider(0, "forceOnCenterOfMassx", scs, -100.0, 100.0);
-      sliderBoard.setSlider(1, "forceOnCenterOfMassy", scs, -100.0, 100.0);
-      sliderBoard.setSlider(2, "forceOnCenterOfMassz", scs, 100.0, 2000.0);
+      sliderBoard.setSlider(0, "forceDesiredX", scs, -100.0, 100.0);
+      sliderBoard.setSlider(1, "forceDesiredY", scs, -100.0, 100.0);
+      sliderBoard.setSlider(2, "forceDesiredZ", scs, 100.0, 2000.0);
       
-      sliderBoard.setSlider(3, "torqueOnCenterOfMassx", scs, -20.0, 20.0);
-      sliderBoard.setSlider(4, "torqueOnCenterOfMassy", scs, -20.0, 20.0);
-      sliderBoard.setSlider(5, "torqueOnCenterOfMassz", scs, -20.0, 20.0);
+      sliderBoard.setSlider(3, "torqueDesiredX", scs, -20.0, 20.0);
+      sliderBoard.setSlider(4, "torqueDesiredY", scs, -20.0, 20.0);
+      sliderBoard.setSlider(5, "torqueDesiredZ", scs, -20.0, 20.0);
       
-      sliderBoard.setSlider(6, "contactTranslation0x", scs, -2.0, 2.0);
-      sliderBoard.setSlider(7, "contactTranslation0y", scs, -2.5, -0.3);
-      sliderBoard.setSlider(8, "contactTranslation0z", scs, -0.05, 0.3);
+      sliderBoard.setSlider(6, "contactTranslation0X", scs, -2.0, 2.0);
+      sliderBoard.setSlider(7, "contactTranslation0Y", scs, -2.5, -0.3);
+      sliderBoard.setSlider(8, "contactTranslation0Z", scs, -0.05, 0.3);
       
-      sliderBoard.setSlider(9, "contactTranslation1x", scs, -2.0, 2.0);
-      sliderBoard.setSlider(10, "contactTranslation1y", scs, 0.3, 2.5);
-      sliderBoard.setSlider(11, "contactTranslation1z", scs, -0.05, 0.3);
+      sliderBoard.setSlider(9, "contactTranslation1X", scs, -2.0, 2.0);
+      sliderBoard.setSlider(10, "contactTranslation1Y", scs, 0.3, 2.5);
+      sliderBoard.setSlider(11, "contactTranslation1Z", scs, -0.05, 0.3);
+      
+      MidiSliderBoard sliderBoard2 = new MidiSliderBoard(scs);
+      sliderBoard2.setSlider(0, "centerOfMassX", scs, -2.0, 2.0);
+      sliderBoard2.setSlider(1, "centerOfMassY", scs, -2.0, 2.0);
+      sliderBoard2.setSlider(2, "centerOfMassZ", scs, 0.0, 4.0);
       
       scs.startOnAThread();
       
@@ -127,8 +132,8 @@ public class GroundReactionWrenchSliderInput
          }
          
          SpatialForceVector desiredNetSpatialForceVector = new SpatialForceVector(centerOfMassFrame);
-         desiredNetSpatialForceVector.setAngularPart(torqueOnCenterOfMass.getFrameVectorCopy().getVector());
-         desiredNetSpatialForceVector.setLinearPart(forceOnCenterOfMass.getFrameVectorCopy().getVector());
+         desiredNetSpatialForceVector.setAngularPart(desiredTorqueOnCenterOfMass.getFrameVectorCopy().getVector());
+         desiredNetSpatialForceVector.setLinearPart(desiredForceOnCenterOfMass.getFrameVectorCopy().getVector());
          
          distributor.solve(desiredNetSpatialForceVector, null);
          
