@@ -18,7 +18,7 @@ public class PauseCommandConsumer extends AbstractStreamingDataConsumer<Boolean>
 
    protected void processPacket(Boolean packet)
    {
-      System.out.println("processPacket");
+      System.out.println("PauseCommandConsumer: processPacket");
       Boolean isPaused = (Boolean) packet;
       footstepPathCoordinator.setPaused(isPaused);
    }

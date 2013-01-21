@@ -76,7 +76,7 @@ public class FootstepConsumer implements FootstepProvider, StreamingDataConsumer
 
    public void notifyComplete()
    {
-      System.out.println("notifyComplete not implemented in FootstepConsumer");
+      System.out.println("FootstepConsumer: notifyComplete not implemented in FootstepConsumer");
    }
 
    public long getDataIdentifier()

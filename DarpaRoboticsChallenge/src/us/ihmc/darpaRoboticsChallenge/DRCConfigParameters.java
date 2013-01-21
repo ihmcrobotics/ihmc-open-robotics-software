@@ -29,5 +29,6 @@ public class DRCConfigParameters
    public static final int LIDAR_DATA_PORT_NUMBER = 4697;
    
    public static final long ROBOT_JOINT_SERVER_UPDATE_MILLIS = 100;
+   
 
 }

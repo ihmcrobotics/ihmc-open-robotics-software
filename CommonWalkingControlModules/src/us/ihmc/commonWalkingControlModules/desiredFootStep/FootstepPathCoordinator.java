@@ -92,7 +92,7 @@ public class FootstepPathCoordinator implements FootstepProvider
       }
 
       this.isPaused.set(isPaused);
-      System.out.println("isPaused = " + isPaused);;
+      System.out.println("FootstepPathCoordinator: isPaused = " + isPaused);;
 
       if (isPaused)
       {
