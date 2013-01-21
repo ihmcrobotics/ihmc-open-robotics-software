@@ -99,6 +99,7 @@ public abstract class ICPAndMomentumBasedController extends MomentumBasedControl
    protected final TwistCalculator twistCalculator;
    protected final SpatialAccelerationCalculator spatialAccelerationCalculator;
    protected final SideDependentList<? extends ContactablePlaneBody> bipedFeet;
+   private final HashMap<ContactablePlaneBody, YoFramePoint> centersOfPressure = new HashMap<ContactablePlaneBody, YoFramePoint>();
    protected final LinkedHashMap<RigidBody, YoPlaneContactState> contactStates = new LinkedHashMap<RigidBody, YoPlaneContactState>();
    private final ArrayList<Updatable> updatables = new ArrayList<Updatable>();
 
@@ -167,8 +168,8 @@ public abstract class ICPAndMomentumBasedController extends MomentumBasedControl
    public ICPAndMomentumBasedController(FullRobotModel fullRobotModel, CenterOfMassJacobian centerOfMassJacobian, CommonWalkingReferenceFrames referenceFrames,
            DoubleYoVariable yoTime, double gravityZ, TwistCalculator twistCalculator, SideDependentList<? extends ContactablePlaneBody> bipedFeet,
            BipedSupportPolygons bipedSupportPolygons, double controlDT, ProcessedOutputsInterface processedOutputs,
-           SideDependentList<FootSwitchInterface> footSwitches, GroundReactionWrenchDistributorInterface groundReactionWrenchDistributor, ArrayList<Updatable> updatables,
-           DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+           SideDependentList<FootSwitchInterface> footSwitches, GroundReactionWrenchDistributorInterface groundReactionWrenchDistributor,
+           ArrayList<Updatable> updatables, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       super(fullRobotModel.getRootJoint(), referenceFrames.getCenterOfMassFrame(), twistCalculator, createJacobianSolver(), controlDT);
       MathTools.checkIfInRange(gravityZ, 0.0, Double.POSITIVE_INFINITY);
@@ -212,6 +213,17 @@ public abstract class ICPAndMomentumBasedController extends MomentumBasedControl
       this.desiredGroundReactionForce = new YoFrameVector("desiredGroundReactionForce", centerOfMassFrame, registry);
       this.admissibleDesiredGroundReactionTorque = new YoFrameVector("admissibleDesiredGroundReactionTorque", centerOfMassFrame, registry);
       this.admissibleDesiredGroundReactionForce = new YoFrameVector("admissibleDesiredGroundReactionForce", centerOfMassFrame, registry);
+
+      for (ContactablePlaneBody contactableBody : bipedFeet)
+      {
+         String copName = contactableBody.getRigidBody().getName() + "CoP";
+         String listName = "cops";
+         YoFramePoint cop = new YoFramePoint(copName, worldFrame, registry);
+         DynamicGraphicPosition copViz = cop.createDynamicGraphicPosition(copName, 0.005, YoAppearance.Navy(), GraphicType.BALL);
+         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(listName, copViz);
+         dynamicGraphicObjectsListRegistry.registerArtifact(listName, copViz.createArtifact());
+         centersOfPressure.put(contactableBody, cop);
+      }
 
       DynamicGraphicPosition capturePointViz = capturePoint.createDynamicGraphicPosition("Capture Point", 0.01, YoAppearance.Blue(), GraphicType.ROTATED_CROSS);
       dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("Capture Point", capturePointViz);
@@ -398,7 +410,8 @@ public abstract class ICPAndMomentumBasedController extends MomentumBasedControl
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         RigidBody rigidBody = bipedFeet.get(robotSide).getRigidBody();
+         ContactablePlaneBody contactablePlaneBody = bipedFeet.get(robotSide);
+         RigidBody rigidBody = contactablePlaneBody.getRigidBody();
          PlaneContactState contactState = contactStates.get(rigidBody);
          List<FramePoint> footContactPoints = contactState.getContactPoints();
 
@@ -407,6 +420,9 @@ public abstract class ICPAndMomentumBasedController extends MomentumBasedControl
             FrameVector force = groundReactionWrenchDistributor.getForce(contactState);
             FramePoint2d cop = groundReactionWrenchDistributor.getCenterOfPressure(contactState);
             cops.add(cop);
+            FramePoint cop3d = cop.toFramePoint();
+            cop3d.changeFrame(worldFrame);
+            centersOfPressure.get(contactablePlaneBody).set(cop3d);
             double normalTorque = groundReactionWrenchDistributor.getNormalTorque(contactState);
             Wrench groundReactionWrench = new Wrench(rigidBody.getBodyFixedFrame(), contactState.getPlaneFrame());
             CenterOfPressureTools.computeWrench(groundReactionWrench, force, cop, normalTorque);
@@ -415,6 +431,10 @@ public abstract class ICPAndMomentumBasedController extends MomentumBasedControl
             inverseDynamicsCalculator.setExternalWrench(rigidBody, groundReactionWrench);
 
             projectSpatialAccelerationIfNecessary(robotSide, rigidBody, footContactPoints, cop);
+         }
+         else
+         {
+            centersOfPressure.get(contactablePlaneBody).setToNaN();
          }
       }
 
@@ -457,6 +477,7 @@ public abstract class ICPAndMomentumBasedController extends MomentumBasedControl
             cop.changeFrame(copToCoPFrame.getParent());
             cops.add(cop);
          }
+
          copToCoPFrame.setOriginAndPositionToPointAt(cops.get(0), cops.get(1));
          copToCoPFrame.update();
          FramePoint2d pseudoCoP2d = new FramePoint2d(copToCoPFrame);

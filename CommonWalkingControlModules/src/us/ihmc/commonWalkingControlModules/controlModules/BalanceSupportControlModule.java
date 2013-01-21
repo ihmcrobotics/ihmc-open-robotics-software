@@ -13,9 +13,11 @@ import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.Single
 import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegTorques;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LowerBodyTorques;
+import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
+import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
@@ -23,6 +25,10 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.Wrench;
 
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition.GraphicType;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 
 public class BalanceSupportControlModule
 {
@@ -38,18 +44,20 @@ public class BalanceSupportControlModule
    private final BipedSupportPolygons bipedSupportPolygons;
 
    private final CouplingRegistry couplingRegistry;
-   
+
    private final SideDependentList<Double> legStrengths = new SideDependentList<Double>();
    private final SideDependentList<FramePoint2d> virtualToePoints = new SideDependentList<FramePoint2d>();
+   private final SideDependentList<YoFramePoint> virtualToePointsInWorld = new SideDependentList<YoFramePoint>();
    private final YoVariableRegistry registry = new YoVariableRegistry("BalanceSupportControlModule");
-   
 
-   public BalanceSupportControlModule(DesiredCoPControlModule velocityViaCoPControlModule,
-                                      VirtualToePointCalculator virtualToePointAndLegStrengthCalculator, LegStrengthCalculator legStrengthCalculator,
-                                      PelvisHeightControlModule pelvisHeightControlModule, PelvisOrientationControlModule pelvisOrientationControlModule,
+
+   public BalanceSupportControlModule(DesiredCoPControlModule velocityViaCoPControlModule, VirtualToePointCalculator virtualToePointAndLegStrengthCalculator,
+                                      LegStrengthCalculator legStrengthCalculator, PelvisHeightControlModule pelvisHeightControlModule,
+                                      PelvisOrientationControlModule pelvisOrientationControlModule,
                                       VirtualSupportActuatorControlModule virtualSupportActuatorControlModule, KneeDamperControlModule kneeDamperControlModule,
                                       HipDamperControlModule hipDamperControlModule, BipedSupportPolygons bipedSupportPolygons,
-                                      AnkleOverRotationControlModule ankleOverRotationControlModule, CouplingRegistry couplingRegistry, YoVariableRegistry parentRegistry)
+                                      AnkleOverRotationControlModule ankleOverRotationControlModule, CouplingRegistry couplingRegistry,
+                                      YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       this.velocityViaCoPControlModule = velocityViaCoPControlModule;
       this.virtualToePointCalculator = virtualToePointAndLegStrengthCalculator;
@@ -63,8 +71,21 @@ public class BalanceSupportControlModule
       this.ankleOverRotationControlModule = ankleOverRotationControlModule;
       this.couplingRegistry = couplingRegistry;
 
-      
-      
+      for (RobotSide robotSide : RobotSide.values())
+      {
+         String copName = robotSide.getCamelCaseNameForStartOfExpression() + "VTP";
+         String listName = "VTPs";
+         YoFramePoint vtp = new YoFramePoint(copName, ReferenceFrame.getWorldFrame(), registry);
+
+         if (dynamicGraphicObjectsListRegistry != null)
+         {
+            DynamicGraphicPosition copViz = vtp.createDynamicGraphicPosition(copName, 0.005, YoAppearance.Navy(), GraphicType.BALL);
+            dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(listName, copViz);
+            dynamicGraphicObjectsListRegistry.registerArtifact(listName, copViz.createArtifact());
+            virtualToePointsInWorld.put(robotSide, vtp);
+         }
+      }
+
       parentRegistry.addChild(registry);
    }
 
@@ -78,15 +99,14 @@ public class BalanceSupportControlModule
    public void doSingleSupportBalance(LegTorques supportLegTorquesToPack, FrameVector2d desiredVelocity, FrameOrientation desiredPelvisOrientation,
                                       Wrench upperBodyWrench, SingleSupportCondition singleSupportCondition, double timeInState)
    {
-      virtualToePointCalculator.hideVisualizationGraphics();
-
       RobotSide supportLeg = supportLegTorquesToPack.getRobotSide();
 
       // compute desired CoP (=VTP) using velocityViaCoPControlModule. Should be inside the foot polygon already at this point.
-      FramePoint2d vtpInAnklePitchFrame = velocityViaCoPControlModule.computeDesiredCoPSingleSupport(supportLeg, desiredVelocity, singleSupportCondition, timeInState);
+      FramePoint2d vtpInAnklePitchFrame = velocityViaCoPControlModule.computeDesiredCoPSingleSupport(supportLeg, desiredVelocity, singleSupportCondition,
+                                             timeInState);
       couplingRegistry.setDesiredCoP(vtpInAnklePitchFrame);
-      
-      
+
+
       // compute desired torques on the pelvis using PelvisOrientationControlModule.
       FrameVector torqueOnPelvisInPelvisFrame = pelvisOrientationControlModule.computePelvisTorque(supportLeg, desiredPelvisOrientation);
 
@@ -121,6 +141,14 @@ public class BalanceSupportControlModule
 
       // compute VTPs and leg strengths
       virtualToePointCalculator.packVirtualToePoints(virtualToePoints, bipedSupportPolygons, desiredCoP, couplingRegistry.getUpcomingSupportLeg());
+
+      for (RobotSide robotSide : RobotSide.values())
+      {
+         FramePoint virtualToePoint = virtualToePoints.get(robotSide).toFramePoint();
+         virtualToePoint.changeFrame(ReferenceFrame.getWorldFrame());
+         virtualToePointsInWorld.get(robotSide).set(virtualToePoint);
+      }
+
       legStrengthCalculator.packLegStrengths(legStrengths, virtualToePoints, desiredCoP);
 
       // compute desired torques on the pelvis using PelvisOrientationControlModule.
@@ -129,26 +157,28 @@ public class BalanceSupportControlModule
       // compute desired z-component of force on the body using PelvisHeightController
       double desiredPelvisHeightInWorld = getDesiredPelvisHeight();
       double fZOnPelvisInPelvisFrame = pelvisHeightControlModule.doPelvisHeightControl(desiredPelvisHeightInWorld, null);
-      
+
       Wrench wrenchDueToUpperBodyLunging = couplingRegistry.getActualUpperBodyLungingWrench();
-      
+
       if (wrenchDueToUpperBodyLunging != null)
       {
-         FrameVector wrenchDueToUpperBodyDynamicsLinearPart = new FrameVector(wrenchDueToUpperBodyLunging.getExpressedInFrame(), wrenchDueToUpperBodyLunging.getLinearPartCopy());
+         FrameVector wrenchDueToUpperBodyDynamicsLinearPart = new FrameVector(wrenchDueToUpperBodyLunging.getExpressedInFrame(),
+                                                                 wrenchDueToUpperBodyLunging.getLinearPartCopy());
          wrenchDueToUpperBodyDynamicsLinearPart.changeFrame(ReferenceFrame.getWorldFrame());
          double fZupperBodyOffset = wrenchDueToUpperBodyDynamicsLinearPart.getZ();
-//         System.out.println("fZupperBodyOffset: " + fZupperBodyOffset);
+
+//       System.out.println("fZupperBodyOffset: " + fZupperBodyOffset);
          fZOnPelvisInPelvisFrame += fZupperBodyOffset;
       }
 
-      // TODO think of a smarter way to not let the robot toe off while lunging sideways. 
+      // TODO think of a smarter way to not let the robot toe off while lunging sideways.
       if (couplingRegistry.getLungeAxisInFrame(ReferenceFrame.getWorldFrame()) != null)
       {
          fZOnPelvisInPelvisFrame *= 0.5;
       }
-      
-      double deltaNx = 0.0; //TODO: Rethink the deltaNx stuff and see what it should be...
-      
+
+      double deltaNx = 0.0;    // TODO: Rethink the deltaNx stuff and see what it should be...
+
       // compute joint torques using virtual support actuators
       virtualSupportActuatorControlModule.controlDoubleSupport(lowerBodyTorquesToPack, virtualToePoints, legStrengths, fZOnPelvisInPelvisFrame,
               torqueOnPelvisInPelvisFrame, deltaNx);

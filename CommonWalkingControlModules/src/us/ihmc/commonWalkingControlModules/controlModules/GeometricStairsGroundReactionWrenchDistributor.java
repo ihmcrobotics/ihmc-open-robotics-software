@@ -134,7 +134,6 @@ public class GeometricStairsGroundReactionWrenchDistributor implements GroundRea
       else
       {
          RobotSide supportLeg = getSupportLeg(contactStates);
-         virtualToePointCalculator.hideVisualizationGraphics();
          FrameConvexPolygon2d footPolygonInAnkleZUp = bipedSupportPolygons.getFootPolygonInAnkleZUp(supportLeg);
          FramePoint2d footCenterOfPressure2d = new FramePoint2d(centerOfPressure2d);
          GeometryTools.projectOntoPolygonAndCheckDistance(footCenterOfPressure2d, footPolygonInAnkleZUp, 1e-10);    // fix numerical roundoff
