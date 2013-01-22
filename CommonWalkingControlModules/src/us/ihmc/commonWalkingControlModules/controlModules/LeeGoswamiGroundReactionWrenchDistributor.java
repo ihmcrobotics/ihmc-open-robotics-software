@@ -27,7 +27,7 @@ public class LeeGoswamiGroundReactionWrenchDistributor implements GroundReaction
    private final LeeGoswamiCoPAndNormalTorqueOptimizer leeGoswamiCoPAndNormalTorqueOptimizer;
 
 
-   public LeeGoswamiGroundReactionWrenchDistributor(ReferenceFrame centerOfMassFrame, int nSupportVectors, YoVariableRegistry parentRegistry)
+   public LeeGoswamiGroundReactionWrenchDistributor(ReferenceFrame centerOfMassFrame, YoVariableRegistry parentRegistry)
    {
       this.centerOfMassFrame = centerOfMassFrame;
       this.leeGoswamiForceOptimizer = new LeeGoswamiForceOptimizer(centerOfMassFrame, parentRegistry);

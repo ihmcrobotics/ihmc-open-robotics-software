@@ -60,7 +60,7 @@ public class LeeGoswamiGroundReactionWrenchDistributorTest
       Point3d centerOfMassPoint3d = new Point3d(0.0, 0.0, 1.0);
       PoseReferenceFrame centerOfMassFrame = createCenterOfMassFrame(centerOfMassPoint3d);
 
-      GroundReactionWrenchDistributorInterface distributor = new LeeGoswamiGroundReactionWrenchDistributor(centerOfMassFrame, nSupportVectors, parentRegistry);
+      GroundReactionWrenchDistributorInterface distributor = new LeeGoswamiGroundReactionWrenchDistributor(centerOfMassFrame, parentRegistry);
       testSimpleWrenchDistribution(centerOfMassFrame, distributor, parentRegistry);
    }
 
@@ -86,7 +86,7 @@ public class LeeGoswamiGroundReactionWrenchDistributorTest
 
       int nSupportVectors = 4;
       YoVariableRegistry parentRegistry = new YoVariableRegistry("registry");
-      GroundReactionWrenchDistributorInterface distributor = new LeeGoswamiGroundReactionWrenchDistributor(centerOfMassFrame, nSupportVectors, parentRegistry);
+      GroundReactionWrenchDistributorInterface distributor = new LeeGoswamiGroundReactionWrenchDistributor(centerOfMassFrame, parentRegistry);
 
       boolean verifyForcesAreInsideFrictionCones = false;
       testRandomFlatGroundExamples(verifyForcesAreInsideFrictionCones, centerOfMassFrame, distributor, parentRegistry);
@@ -101,7 +101,7 @@ public class LeeGoswamiGroundReactionWrenchDistributorTest
       int nSupportVectors = 4;
       YoVariableRegistry parentRegistry = new YoVariableRegistry("registry");
 
-      GroundReactionWrenchDistributorInterface distributor = new LeeGoswamiGroundReactionWrenchDistributor(centerOfMassFrame, nSupportVectors, parentRegistry);
+      GroundReactionWrenchDistributorInterface distributor = new LeeGoswamiGroundReactionWrenchDistributor(centerOfMassFrame, parentRegistry);
       testNonFlatGroundExample(centerOfMassFrame, distributor, parentRegistry);
    }
    
@@ -114,7 +114,7 @@ public class LeeGoswamiGroundReactionWrenchDistributorTest
       int nSupportVectors = 4;
       YoVariableRegistry parentRegistry = new YoVariableRegistry("registry");
 
-      GroundReactionWrenchDistributorInterface distributor = new LeeGoswamiGroundReactionWrenchDistributor(centerOfMassFrame, nSupportVectors, parentRegistry);
+      GroundReactionWrenchDistributorInterface distributor = new LeeGoswamiGroundReactionWrenchDistributor(centerOfMassFrame, parentRegistry);
       testTroublesomeExampleOne(centerOfMassFrame, distributor, parentRegistry);
    }
    
