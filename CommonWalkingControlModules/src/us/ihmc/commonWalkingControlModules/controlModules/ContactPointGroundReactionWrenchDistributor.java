@@ -193,8 +193,8 @@ public class ContactPointGroundReactionWrenchDistributor implements GroundReacti
 
          // force, CoP, normal torque
          FrameVector force = forces.get(contactState);
-         force.setToZero(contactState.getPlaneFrame());
-         tempWrench.packLinearPart(force.getVector());
+         force.setToZero(contactState.getPlaneFrame());         
+         tempWrench.packLinearPart(force);
          FramePoint2d centerOfPressure = centersOfPressure.get(contactState);
          double normalTorque = centerOfPressureResolver.resolveCenterOfPressureAndNormalTorque(centerOfPressure, tempWrench, contactState.getPlaneFrame());
          normalTorques.put(contactState, normalTorque);
