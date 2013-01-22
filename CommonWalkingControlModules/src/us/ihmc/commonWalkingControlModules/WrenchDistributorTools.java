@@ -1,9 +1,13 @@
 package us.ihmc.commonWalkingControlModules;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.vecmath.Vector3d;
 
+import org.ejml.data.DenseMatrix64F;
+
+import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -45,5 +49,15 @@ public class WrenchDistributorTools
 
       normalizedSupportVectorToPack.set(contactPlaneFrame, x, y, z);
       normalizedSupportVectorToPack.scale(1.0/(1.0 + mu*mu)); // Fast normalize.
+   }
+
+   public static void computeSupportVectorMatrixBlock(DenseMatrix64F supportVectorMatrixBlock, ArrayList<FrameVector> normalizedSupportVectors, ReferenceFrame referenceFrame)
+   {
+      for (int i = 0; i < normalizedSupportVectors.size(); i++)
+      {
+         FrameVector normalizedSupportVector = normalizedSupportVectors.get(i);
+         normalizedSupportVector.changeFrame(referenceFrame);
+         MatrixTools.setDenseMatrixFromTuple3d(supportVectorMatrixBlock, normalizedSupportVector.getVector(), 0, i);
+      }
    }
 }
