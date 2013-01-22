@@ -49,9 +49,9 @@ public class GroundReactionWrenchSliderInput
       
       ArrayList<YoFrameVector> contactTranslations = new ArrayList<YoFrameVector>();
       
-      GroundReactionWrenchDistributorInterface distributor = new GeometricFlatGroundReactionWrenchDistributor(registry, dynamicGraphicObjectsListRegistry);
+//      GroundReactionWrenchDistributorInterface distributor = new GeometricFlatGroundReactionWrenchDistributor(registry, dynamicGraphicObjectsListRegistry);
 //    GroundReactionWrenchDistributorInterface distributor = new LeeGoswamiGroundReactionWrenchDistributor(centerOfMassFrame, nSupportVectors, parentRegistry);
-      
+      GroundReactionWrenchDistributorInterface distributor = new ContactPointGroundReactionWrenchDistributor(centerOfMassFrame, registry);
       dynamicGraphicObjectsListRegistry.addDynamicGraphicsObjectListsToSimulationConstructionSet(scs);
       
       
