@@ -60,7 +60,7 @@ public class ContactPointGroundReactionWrenchDistributor implements GroundReacti
                                             ContactPointWrenchOptimizerNative.NUMBER_OF_SUPPORT_VECTORS
                                             * ContactPointWrenchOptimizerNative.NUMBER_OF_POINTS_PER_CONTACT);
    private final DenseMatrix64F rhoBlock = new DenseMatrix64F(ContactPointWrenchOptimizerNative.NUMBER_OF_SUPPORT_VECTORS
-                                              * ContactPointWrenchOptimizerNative.NUMBER_OF_POINTS_PER_CONTACT);
+                                              * ContactPointWrenchOptimizerNative.NUMBER_OF_POINTS_PER_CONTACT, 1);
    private final DenseMatrix64F tempWrenchMatrix = new DenseMatrix64F(Wrench.SIZE, 1);
    private final Wrench tempWrench = new Wrench();
 
@@ -223,12 +223,13 @@ public class ContactPointGroundReactionWrenchDistributor implements GroundReacti
       int bMatrixRow = contactNumber;
       int supportVectorMatrixRow = 2;    // z force
       int nBlocks = ContactPointWrenchOptimizerNative.NUMBER_OF_POINTS_PER_CONTACT;
-      int startColumn = 0;
+      int startColumn = contactNumber
+            * (ContactPointWrenchOptimizerNative.NUMBER_OF_SUPPORT_VECTORS * ContactPointWrenchOptimizerNative.NUMBER_OF_POINTS_PER_CONTACT);
       for (int columnBlockNumber = 0; columnBlockNumber < nBlocks; columnBlockNumber++)
       {
          CommonOps.extract(supportVectorMatrixBlock, supportVectorMatrixRow, supportVectorMatrixRow + 1, 0, supportVectorMatrixBlock.getNumCols(),
                            normalForceSelectorBMatrix, bMatrixRow, startColumn);
-         startColumn += normalForceSelectorBMatrix.getNumCols();
+         startColumn += supportVectorMatrixBlock.getNumCols();
       }
    }
 
@@ -236,7 +237,8 @@ public class ContactPointGroundReactionWrenchDistributor implements GroundReacti
    {
       int nBlocks = ContactPointWrenchOptimizerNative.NUMBER_OF_POINTS_PER_CONTACT;
       int startRow = Wrench.SIZE / 2;
-      int startColumn = 0;
+      int startColumn = contactNumber
+                        * (ContactPointWrenchOptimizerNative.NUMBER_OF_SUPPORT_VECTORS * ContactPointWrenchOptimizerNative.NUMBER_OF_POINTS_PER_CONTACT);
       for (int columnBlockNumber = 0; columnBlockNumber < nBlocks; columnBlockNumber++)
       {
          CommonOps.extract(aForceBlock, 0, aForceBlock.getNumRows(), 0, aForceBlock.getNumCols(), aMatrix, startRow, startColumn);

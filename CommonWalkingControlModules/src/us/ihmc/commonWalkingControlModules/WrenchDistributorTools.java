@@ -48,7 +48,7 @@ public class WrenchDistributorTools
       double z = 1.0;
 
       normalizedSupportVectorToPack.set(contactPlaneFrame, x, y, z);
-      normalizedSupportVectorToPack.scale(1.0/(1.0 + mu*mu)); // Fast normalize.
+      normalizedSupportVectorToPack.normalize();
    }
 
    public static void computeSupportVectorMatrixBlock(DenseMatrix64F supportVectorMatrixBlock, ArrayList<FrameVector> normalizedSupportVectors, ReferenceFrame referenceFrame)
