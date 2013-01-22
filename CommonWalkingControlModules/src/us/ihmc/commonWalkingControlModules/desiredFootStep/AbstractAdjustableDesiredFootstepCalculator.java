@@ -2,7 +2,10 @@ package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
 import java.util.List;
 
+import javax.vecmath.Vector3d;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactableBody;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -72,4 +75,6 @@ public abstract class AbstractAdjustableDesiredFootstepCalculator implements Des
    }
 
    protected abstract List<FramePoint> getContactPoints(RobotSide swingSide);
+
+
 }
