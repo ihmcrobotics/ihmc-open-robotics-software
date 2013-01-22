@@ -40,8 +40,9 @@ public class ContactPointGroundReactionWrenchDistributor implements GroundReacti
    private final int rhoDimension = ContactPointWrenchOptimizerNative.NUMBER_OF_SUPPORT_VECTORS
                                     * ContactPointWrenchOptimizerNative.NUMBER_OF_POINTS_PER_CONTACT * ContactPointWrenchOptimizerNative.MAX_NUMBER_OF_CONTACTS;
 
-   private final DenseMatrix64F aMatrix = new DenseMatrix64F(Wrench.SIZE, rhoDimension);
    private final DenseMatrix64F desiredWrench = new DenseMatrix64F(Wrench.SIZE, 1);
+
+   private final DenseMatrix64F aMatrix = new DenseMatrix64F(Wrench.SIZE, rhoDimension);
    private final DenseMatrix64F normalForceSelectorBMatrix = new DenseMatrix64F(ContactPointWrenchOptimizerNative.MAX_NUMBER_OF_CONTACTS, rhoDimension);
    private final double[] minimumNormalForces = new double[ContactPointWrenchOptimizerNative.MAX_NUMBER_OF_CONTACTS];
 
@@ -61,6 +62,11 @@ public class ContactPointGroundReactionWrenchDistributor implements GroundReacti
    public ContactPointGroundReactionWrenchDistributor(ReferenceFrame centerOfMassFrame, YoVariableRegistry parentRegistry)
    {
       this.centerOfMassFrame = centerOfMassFrame;
+      
+      for (int i=0; i<ContactPointWrenchOptimizerNative.NUMBER_OF_SUPPORT_VECTORS; i++)
+      {
+         normalizedSupportVectors.add(new FrameVector(ReferenceFrame.getWorldFrame()));
+      }
    }
 
    public void setWeights(double[] diagonalCWeights, double epsilonRho)
