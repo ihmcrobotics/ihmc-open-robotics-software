@@ -130,6 +130,34 @@ public class LeeGoswamiGroundReactionWrenchDistributorTest
       boolean feasibleMomentSolutions = true;
       testRandomFlatGroundExamples(verifyForcesAreInsideFrictionCones, feasibleMomentSolutions, centerOfMassFrame, distributor, parentRegistry);
    }
+   
+   @Test
+   public void testRandomFlatGroundExamplesWithContactPointDistributor()
+   {
+      Point3d centerOfMassPoint3d = new Point3d(0.2, 0.1, 1.07);
+      PoseReferenceFrame centerOfMassFrame = createCenterOfMassFrame(centerOfMassPoint3d);
+
+      YoVariableRegistry parentRegistry = new YoVariableRegistry("registry");
+      GroundReactionWrenchDistributorInterface distributor = new ContactPointGroundReactionWrenchDistributor(centerOfMassFrame, parentRegistry);
+
+      boolean verifyForcesAreInsideFrictionCones = false;
+      boolean feasibleMomentSolutions = false;
+      testRandomFlatGroundExamples(verifyForcesAreInsideFrictionCones, feasibleMomentSolutions, centerOfMassFrame, distributor, parentRegistry);
+   }
+   
+   @Test
+   public void testRandomFlatGroundExamplesWithViableMomentSolutionsWithContactPointDistributor()
+   {
+      Point3d centerOfMassPoint3d = new Point3d(0.2, 0.1, 1.07);
+      PoseReferenceFrame centerOfMassFrame = createCenterOfMassFrame(centerOfMassPoint3d);
+
+      YoVariableRegistry parentRegistry = new YoVariableRegistry("registry");
+      GroundReactionWrenchDistributorInterface distributor = new ContactPointGroundReactionWrenchDistributor(centerOfMassFrame, parentRegistry);
+      
+      boolean verifyForcesAreInsideFrictionCones = false;
+      boolean feasibleMomentSolutions = true;
+      testRandomFlatGroundExamples(verifyForcesAreInsideFrictionCones, feasibleMomentSolutions, centerOfMassFrame, distributor, parentRegistry);
+   }
 
    @Test
    public void testSimpleNonFlatGroundExampleWithLeeGoswamiDistributor()
@@ -142,6 +170,18 @@ public class LeeGoswamiGroundReactionWrenchDistributorTest
       GroundReactionWrenchDistributorInterface distributor = new LeeGoswamiGroundReactionWrenchDistributor(centerOfMassFrame, parentRegistry);
       testNonFlatGroundExample(centerOfMassFrame, distributor, parentRegistry);
    }
+   
+   @Test
+   public void testSimpleNonFlatGroundExampleWithContactPointDistributor()
+   {
+      Point3d centerOfMassPoint3d = new Point3d(0.0, 0.0, 1.0);
+      PoseReferenceFrame centerOfMassFrame = createCenterOfMassFrame(centerOfMassPoint3d);
+
+      YoVariableRegistry parentRegistry = new YoVariableRegistry("registry");
+
+      GroundReactionWrenchDistributorInterface distributor = new ContactPointGroundReactionWrenchDistributor(centerOfMassFrame, parentRegistry);
+      testNonFlatGroundExample(centerOfMassFrame, distributor, parentRegistry);
+   }
 
    @Test
    public void testTroublesomeExamplesWithLeeGoswamiDistributor()
@@ -152,6 +192,19 @@ public class LeeGoswamiGroundReactionWrenchDistributorTest
       YoVariableRegistry parentRegistry = new YoVariableRegistry("registry");
 
       GroundReactionWrenchDistributorInterface distributor = new LeeGoswamiGroundReactionWrenchDistributor(centerOfMassFrame, parentRegistry);
+      testTroublesomeExampleOne(centerOfMassFrame, distributor, parentRegistry);
+      testTroublesomeExampleTwo(centerOfMassFrame, distributor, parentRegistry);
+   }
+   
+   @Test
+   public void testTroublesomeExamplesWithContactPointDistributor()
+   {
+      Point3d centerOfMassPoint3d = new Point3d(0.2, 0.1, 1.07);
+      PoseReferenceFrame centerOfMassFrame = createCenterOfMassFrame(centerOfMassPoint3d);
+
+      YoVariableRegistry parentRegistry = new YoVariableRegistry("registry");
+
+      GroundReactionWrenchDistributorInterface distributor = new ContactPointGroundReactionWrenchDistributor(centerOfMassFrame, parentRegistry);
       testTroublesomeExampleOne(centerOfMassFrame, distributor, parentRegistry);
       testTroublesomeExampleTwo(centerOfMassFrame, distributor, parentRegistry);
    }
