@@ -11,7 +11,7 @@ import javax.vecmath.Vector3d;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.LinearSolver;
 
-import us.ihmc.commonWalkingControlModules.CenterOfPressureTools;
+import us.ihmc.commonWalkingControlModules.WrenchDistributorTools;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactState;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
@@ -425,7 +425,7 @@ public abstract class ICPAndMomentumBasedController extends MomentumBasedControl
             centersOfPressure.get(contactablePlaneBody).set(cop3d);
             double normalTorque = groundReactionWrenchDistributor.getNormalTorque(contactState);
             Wrench groundReactionWrench = new Wrench(rigidBody.getBodyFixedFrame(), contactState.getPlaneFrame());
-            CenterOfPressureTools.computeWrench(groundReactionWrench, force, cop, normalTorque);
+            WrenchDistributorTools.computeWrench(groundReactionWrench, force, cop, normalTorque);
             groundReactionWrench.changeFrame(rigidBody.getBodyFixedFrame());
             wrenches.add(groundReactionWrench);
             inverseDynamicsCalculator.setExternalWrench(rigidBody, groundReactionWrench);
