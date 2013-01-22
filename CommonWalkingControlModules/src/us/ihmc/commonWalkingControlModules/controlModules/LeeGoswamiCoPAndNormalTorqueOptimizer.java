@@ -22,6 +22,7 @@ import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
+import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
@@ -33,6 +34,7 @@ public class LeeGoswamiCoPAndNormalTorqueOptimizer
    private final DoubleYoVariable epsilonCoP = new DoubleYoVariable("epsilonCoP", registry);    // TODO: better name
    private final DoubleYoVariable epsilonTauN = new DoubleYoVariable("epsilonTauN", registry);
    private final DoubleYoVariable copAndNormalTorqueOptimalValue = new DoubleYoVariable("copAndNormalTorqueOptimalValue", registry);
+   private final BooleanYoVariable converged = new BooleanYoVariable("copAndNormalTorqueConverged", registry);
 
    private final ReferenceFrame centerOfMassFrame;
 
@@ -46,6 +48,7 @@ public class LeeGoswamiCoPAndNormalTorqueOptimizer
    private final Matrix3d tempMatrix = new Matrix3d();
 
    private LeeGoswamiCoPAndNormalTorqueOptimizerNative leeGoswamiCoPAndNormalTorqueOptimizerNative;
+
 
 
    public LeeGoswamiCoPAndNormalTorqueOptimizer(ReferenceFrame centerOfMassFrame, YoVariableRegistry parentRegistry)
@@ -190,12 +193,11 @@ public class LeeGoswamiCoPAndNormalTorqueOptimizer
       try
       {
          leeGoswamiCoPAndNormalTorqueOptimizerNative.solve(psik, kappaK, etaMin, etaMax, etaD, epsilon);
+         converged.set(true);
       }
       catch (NoConvergenceException e)
       {
-         for (PlaneContactState contactState : forces.keySet())
-            forces.get(contactState).changeFrame(centerOfMassFrame);
-         e.printStackTrace();
+         converged.set(false);
       }
 
       double[] eta = leeGoswamiCoPAndNormalTorqueOptimizerNative.getEta();
