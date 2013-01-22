@@ -62,6 +62,18 @@ public class LeeGoswamiGroundReactionWrenchDistributorTest
       GroundReactionWrenchDistributorInterface distributor = new LeeGoswamiGroundReactionWrenchDistributor(centerOfMassFrame, parentRegistry);
       testSimpleWrenchDistribution(centerOfMassFrame, distributor, parentRegistry);
    }
+   
+   @Test
+   public void testSimpleWrenchDistributionWithContactPointDistributor()
+   {
+      YoVariableRegistry parentRegistry = new YoVariableRegistry("registry");
+
+      Point3d centerOfMassPoint3d = new Point3d(0.0, 0.0, 1.0);
+      PoseReferenceFrame centerOfMassFrame = createCenterOfMassFrame(centerOfMassPoint3d);
+
+      GroundReactionWrenchDistributorInterface distributor = new ContactPointGroundReactionWrenchDistributor(centerOfMassFrame, parentRegistry);
+      testSimpleWrenchDistribution(centerOfMassFrame, distributor, parentRegistry);
+   }
 
    @Test
    public void testRandomFlatGroundExamplesWithGeometricFlatGroundDistributor()
