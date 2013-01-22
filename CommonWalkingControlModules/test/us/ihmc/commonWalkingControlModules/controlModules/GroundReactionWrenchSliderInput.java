@@ -9,6 +9,7 @@ import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
+import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.TranslationReferenceFrame;
 import us.ihmc.utilities.screwTheory.SpatialForceVector;
@@ -51,7 +52,7 @@ public class GroundReactionWrenchSliderInput
       
 //      GroundReactionWrenchDistributorInterface distributor = new GeometricFlatGroundReactionWrenchDistributor(registry, dynamicGraphicObjectsListRegistry);
 //    GroundReactionWrenchDistributorInterface distributor = new LeeGoswamiGroundReactionWrenchDistributor(centerOfMassFrame, nSupportVectors, parentRegistry);
-      GroundReactionWrenchDistributorInterface distributor = new ContactPointGroundReactionWrenchDistributor(centerOfMassFrame, registry);
+      GroundReactionWrenchDistributorInterface distributor = createContactPointDistributor(registry, centerOfMassFrame);
       dynamicGraphicObjectsListRegistry.addDynamicGraphicsObjectListsToSimulationConstructionSet(scs);
       
       
@@ -141,5 +142,18 @@ public class GroundReactionWrenchSliderInput
          scs.tickAndUpdate();
          ThreadTools.sleep(100L);
       }
+   }
+   
+   private static ContactPointGroundReactionWrenchDistributor createContactPointDistributor(YoVariableRegistry parentRegistry, ReferenceFrame centerOfMassFrame)
+   {
+      ContactPointGroundReactionWrenchDistributor distributor = new ContactPointGroundReactionWrenchDistributor(centerOfMassFrame, parentRegistry);
+      
+      double[] diagonalCWeights = new double[]{1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
+      double epsilonRho = 0.0;
+      distributor.setWeights(diagonalCWeights, epsilonRho);
+      
+      double[] minimumNormalForces = new double[]{0.0, 0.0};
+      distributor.setMinimumNormalForces(minimumNormalForces);
+      return distributor;
    }
 }
