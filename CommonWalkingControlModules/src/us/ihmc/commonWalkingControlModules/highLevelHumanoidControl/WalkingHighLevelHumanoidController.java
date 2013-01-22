@@ -82,7 +82,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
    private static final long serialVersionUID = 7436158470125024491L;
 
    private static enum WalkingState {LEFT_SUPPORT, RIGHT_SUPPORT, TRANSFER_TO_LEFT_SUPPORT, TRANSFER_TO_RIGHT_SUPPORT, DOUBLE_SUPPORT}
-
+   private final static boolean DEBUG=false;
    private final StateMachine<WalkingState> stateMachine;
    private final CenterOfMassJacobian centerOfMassJacobian;
 
@@ -391,7 +391,8 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       @Override
       public void doTransitionIntoAction()
       {
-         System.out.println("WalkingHighLevelController: enteringDoubleSupportState");
+         if(DEBUG)
+            System.out.println("WalkingHighLevelHumanoidController: enteringDoubleSupportState");
          setSupportLeg(null);
 
          RobotSide trailingLeg = getUpcomingSupportLeg().getOppositeSide();
@@ -444,7 +445,8 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       @Override
       public void doTransitionOutOfAction()
       {
-         System.out.println("WalkingHighLevelController: leavingDoubleSupportState");
+         if(DEBUG)
+            System.out.println("WalkingHighLevelHumanoidController: leavingDoubleSupportState");
          desiredICPVelocity.set(0.0, 0.0);
       }
    }
@@ -492,7 +494,8 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       @Override
       public void doTransitionIntoAction()
       {
-         System.out.println("WalkingHighLevelController: enteringSingleSupportState");
+         if(DEBUG)
+            System.out.println("WalkingHighLevelHumanoidController: enteringSingleSupportState");
          RobotSide supportSide = swingSide.getOppositeSide();
          initializeTrajectory(swingSide, null);
 
@@ -516,7 +519,8 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       @Override
       public void doTransitionOutOfAction()
       {
-         System.out.println("WalkingHighLevelController: leavingDoubleSupportState");
+         if(DEBUG)
+            System.out.println("WalkingHighLevelController: leavingDoubleSupportState");
          upcomingSupportLeg.set(upcomingSupportLeg.getEnumValue().getOppositeSide());
 
          footstepProvider.notifyComplete();
@@ -773,7 +777,8 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 
       icpTrajectoryGenerator.initialize(desiredICP.getFramePoint2dCopy(), finalDesiredICP, swingTimeProvider.getValue(), omega0,
                                         amountToBeInsideSingleSupport.getDoubleValue());
-      System.out.println("nextFootstep will change now!");
+      if(DEBUG)
+         System.out.println("WalkingHighLevelHumanoidController: nextFootstep will change now!");
       nextFootstep = null;
    }
 
