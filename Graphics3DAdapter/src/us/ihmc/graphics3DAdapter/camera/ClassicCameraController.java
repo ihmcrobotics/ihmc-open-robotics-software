@@ -9,7 +9,6 @@ import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
-import us.ihmc.graphics3DAdapter.holders.ActiveViewportHolder;
 import us.ihmc.graphics3DAdapter.input.Key;
 import us.ihmc.graphics3DAdapter.input.KeyListener;
 import us.ihmc.graphics3DAdapter.input.ModifierKeyInterface;
@@ -1312,7 +1311,7 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
       }
    }
 
-   public double getFieldOfViewInRadians()
+   public double getHorizontalFieldOfViewInRadians()
    {
       if(isMounted)
       {
