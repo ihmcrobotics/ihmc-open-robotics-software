@@ -100,7 +100,7 @@ public class ContactPointWrenchOptimizerNative
 
    }
 
-   public double[] getRho(int i)
+   public double[] getRho()
    {
       return rho;
    }
@@ -121,7 +121,7 @@ public class ContactPointWrenchOptimizerNative
 
       load_default_data(a, w, c, b, fMin, epsilon);
 
-      ContactPointWrenchOptimizerNative leeGoswamiForceOptimizerNative = new ContactPointWrenchOptimizerNative();
+      ContactPointWrenchOptimizerNative contactPointWrenchOptimizerNative = new ContactPointWrenchOptimizerNative();
 
       long time = System.nanoTime();
       for (int i = 0; true; i++)
@@ -130,15 +130,12 @@ public class ContactPointWrenchOptimizerNative
          {
             System.out.println("10000 iterations took " + (System.nanoTime() - time) / 1e9 + " seconds");
 
-            for (int j = 0; j < MAX_NUMBER_OF_CONTACTS; j++)
-            {
-               System.out.println(Arrays.toString(leeGoswamiForceOptimizerNative.getRho(j)));
-            }
+            System.out.println(Arrays.toString(contactPointWrenchOptimizerNative.getRho()));
 
             time = System.nanoTime();
          }
 
-         leeGoswamiForceOptimizerNative.solve(a, c, b, w, fMin, epsilon[0]);
+         contactPointWrenchOptimizerNative.solve(a, c, b, w, fMin, epsilon[0]);
       }
    }
 
