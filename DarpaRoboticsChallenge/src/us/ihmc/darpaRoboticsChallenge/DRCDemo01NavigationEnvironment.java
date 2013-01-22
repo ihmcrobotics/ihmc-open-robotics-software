@@ -1,5 +1,6 @@
 package us.ihmc.darpaRoboticsChallenge;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -11,6 +12,8 @@ import javax.vecmath.Vector3d;
 import us.ihmc.commonAvatarInterfaces.CommonAvatarEnvironmentInterface;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceTexture;
+import us.ihmc.projectM.R2Sim02.terrainObjects.SimpleEvaluationTerrain;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.GeometryTools;
@@ -238,10 +241,17 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
 
       //  setUpCone(0, 0, 10, 12, 0.005, YoAppearance.Brown());
 
+      URL fileURL = DRCDemo01NavigationEnvironment.class.getResource("Textures/ground2.png");
+      YoAppearanceTexture texture = new YoAppearanceTexture(fileURL, null);
+
       Transform3D location = new Transform3D();
       location.setTranslation(new Vector3d(0, 0, -0.5));
-      RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(location, 400, 400, 1, YoAppearance.DarkGreen());
+
+      RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(location, 35, 35, 1, texture);
       combinedTerrainObject.addTerrainObject(newBox);
+      RotatableBoxTerrainObject newBox2 = new RotatableBoxTerrainObject(location, 200, 200, 0.75, YoAppearance.DarkGray());
+      combinedTerrainObject.addTerrainObject(newBox2);
+
    }
 
    private void addRocks()
