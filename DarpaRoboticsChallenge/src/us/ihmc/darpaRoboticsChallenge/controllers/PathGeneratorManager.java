@@ -5,7 +5,7 @@ import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
 import us.ihmc.robotSide.SideDependentList;
 
-public interface FootstepGeneratorManager
+public interface PathGeneratorManager
 {
    public FullRobotModel getFullRobotModel();
    public ReferenceFrames getReferenceFrames();
