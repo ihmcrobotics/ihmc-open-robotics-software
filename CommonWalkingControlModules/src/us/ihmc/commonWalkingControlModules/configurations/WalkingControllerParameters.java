@@ -14,4 +14,6 @@ public interface WalkingControllerParameters
 
    public abstract double getDesiredCoMHeight();
 
+   public abstract boolean doStrictPelvisControl();
+
 }

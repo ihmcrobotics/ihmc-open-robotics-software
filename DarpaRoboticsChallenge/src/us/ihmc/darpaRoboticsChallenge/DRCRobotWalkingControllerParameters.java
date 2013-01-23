@@ -29,7 +29,12 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
    
    public double getDesiredCoMHeight()
    {
-      return 0.85;
+      return 0.88;
+   }
+
+   public boolean doStrictPelvisControl()
+   {
+      return true;
    }
 
    public Vector3d getDesiredHeadOffsetWithRespectToNeck()

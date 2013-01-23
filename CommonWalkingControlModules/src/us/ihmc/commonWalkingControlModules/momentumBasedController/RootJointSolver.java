@@ -92,6 +92,8 @@ public class RootJointSolver
       CommonOps.mult(aHatRoot, vdotRoot, check);
       CommonOps.subEquals(check, hdot);
       CommonOps.subEquals(check, b);
+      if (!MatrixFeatures.isConstantVal(check, 0.0, 1e-9))
+         throw new RuntimeException();
 
       rootJoint.setDesiredAcceleration(vdotRoot, 0);
    }

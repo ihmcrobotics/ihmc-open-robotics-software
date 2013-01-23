@@ -165,7 +165,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
            ProcessedOutputsInterface processedOutputs, WalkingControllerParameters walkingControllerParameters)
    {
       super(fullRobotModel, centerOfMassJacobian, referenceFrames, yoTime, gravityZ, twistCalculator, bipedFeet, bipedSupportPolygons, controlDT,
-            processedOutputs, footSwitches, groundReactionWrenchDistributor, updatables, dynamicGraphicObjectsListRegistry);
+            processedOutputs, footSwitches, groundReactionWrenchDistributor, updatables, walkingControllerParameters.doStrictPelvisControl(), dynamicGraphicObjectsListRegistry);
 
       this.centerOfMassJacobian = centerOfMassJacobian;
       this.centerOfMassHeightTrajectoryGenerator = centerOfMassHeightTrajectoryGenerator;
