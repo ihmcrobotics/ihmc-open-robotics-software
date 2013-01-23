@@ -872,6 +872,15 @@ public class LeeGoswamiGroundReactionWrenchDistributorTest
 
       return spatialForceVector;
    }
+   
+   private static SpatialForceVector generateRandomAchievableSpatialForceVectorUsingContactPoints(Random random, ReferenceFrame centerOfMassFrame,
+         ArrayList<PlaneContactState> contactStates, double coefficientOfFriction, boolean feasibleSolution)
+   {
+      SpatialForceVector spatialForceVector = new SpatialForceVector();
+      
+      
+      return spatialForceVector;
+   }
 
    private static ReferenceFrame generateRandomCenterOfPressureFrame(Random random, PlaneContactState contactState, ReferenceFrame contactPlaneFrame)
    {
