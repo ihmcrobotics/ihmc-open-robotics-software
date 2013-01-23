@@ -1,6 +1,7 @@
 package us.ihmc.darpaRoboticsChallenge;
 
 import javax.media.j3d.Transform3D;
+import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.robotSide.RobotSide;
@@ -29,5 +30,10 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
    public double getDesiredCoMHeight()
    {
       return 0.85;
+   }
+
+   public Vector3d getDesiredHeadOffsetWithRespectToNeck()
+   {
+      return new Vector3d(-0.053, 0.0, 0.024);
    }
 }
