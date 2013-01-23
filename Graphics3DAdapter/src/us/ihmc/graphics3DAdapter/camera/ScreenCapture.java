@@ -18,6 +18,13 @@ public class ScreenCapture implements Serializable
 {
    private static final long serialVersionUID = 4267642643460511978L;
    private static final boolean isOpenJDK = System.getProperty("java.vm.name").indexOf("OpenJDK") != -1;
+   static
+   {
+      if(isOpenJDK)
+      {
+         System.err.println("OpenJDK doesn't ship with JPEG libraries. Streaming using PNG images.");
+      }
+   }
    private byte[] bytesOut = null;
    private final int height, width;
    private final Point3d location;
@@ -46,7 +53,6 @@ public class ScreenCapture implements Serializable
       this.location = location;
       this.fov = fov;
 
-
       // bi.getRGB(0, 0, _width, _height, _bytesOut, 0, _width);
    }
 
@@ -71,7 +77,6 @@ public class ScreenCapture implements Serializable
 
       if(isOpenJDK)
       {
-         System.err.println("OpenJDK doesn't ship with JPEG libraries. Streaming using PNG images.");
          ImageIO.write(image, "png", outputStream);
       }
       else
