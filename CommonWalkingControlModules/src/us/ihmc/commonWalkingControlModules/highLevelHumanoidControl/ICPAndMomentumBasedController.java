@@ -126,7 +126,7 @@ public abstract class ICPAndMomentumBasedController extends MomentumBasedControl
    protected final SideDependentList<EnumMap<LimbName, MechanismGeometricJacobian>> jacobians = SideDependentList.createListOfEnumMaps(LimbName.class);
    protected final MechanismGeometricJacobian spineJacobian;
    protected final MechanismGeometricJacobian neckJacobian;
-   
+
    protected final YoFrameOrientation desiredPelvisOrientation;
    private final AxisAngleOrientationController pelvisOrientationController;
 
@@ -183,6 +183,8 @@ public abstract class ICPAndMomentumBasedController extends MomentumBasedControl
    private final OriginAndPointFrame copToCoPFrame = new OriginAndPointFrame("copToCoP", worldFrame);
    private ReferenceFrame pelvisFrame;
    private final boolean doStrictPelvisControl;
+   private final DenseMatrix64F momentumSubspace;
+   private final DenseMatrix64F accelerationSubspace;
 
    public ICPAndMomentumBasedController(FullRobotModel fullRobotModel, CenterOfMassJacobian centerOfMassJacobian, CommonWalkingReferenceFrames referenceFrames,
            DoubleYoVariable yoTime, double gravityZ, TwistCalculator twistCalculator, SideDependentList<? extends ContactablePlaneBody> bipedFeet,
@@ -222,17 +224,18 @@ public abstract class ICPAndMomentumBasedController extends MomentumBasedControl
       this.desiredPelvisOrientation = new YoFrameOrientation("desiredPelvis", worldFrame, registry);
 
       this.doStrictPelvisControl = doStrictPelvisControl;
+
       if (doStrictPelvisControl)
       {
          this.pelvisOrientationController = new AxisAngleOrientationController("pelvis", pelvisFrame, registry);
          pelvisOrientationController.setProportionalGains(100.0, 100.0, 100.0);    // 100.0, 100.0, 100.0);
-         pelvisOrientationController.setDerivativeGains(20.0, 20.0, 20.0);    // 20.0, 20.0, 20.0);         
+         pelvisOrientationController.setDerivativeGains(20.0, 20.0, 20.0);    // 20.0, 20.0, 20.0);
       }
       else
       {
          this.pelvisOrientationController = null;
       }
-      
+
       omega0 = new DoubleYoVariable("omega0", registry);
       capturePoint = new YoFramePoint("capturePoint", worldFrame, registry);
 
@@ -247,9 +250,10 @@ public abstract class ICPAndMomentumBasedController extends MomentumBasedControl
 
       if (doStrictPelvisControl)
       {
-//    alphaFz.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(7.0, controlDT));
-         alphaGroundReactionWrench.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(7.0, controlDT));         
+//       alphaFz.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(7.0, controlDT));
+         alphaGroundReactionWrench.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(7.0, controlDT));
       }
+
       this.desiredGroundReactionTorque = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector("desiredGroundReactionTorque", "", registry,
               alphaGroundReactionWrench, unfilteredDesiredGroundReactionTorque);
       this.desiredGroundReactionForce = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector("desiredGroundReactionForce", "", registry,
@@ -284,7 +288,7 @@ public abstract class ICPAndMomentumBasedController extends MomentumBasedControl
       this.spineJacobian = new MechanismGeometricJacobian(fullRobotModel.getPelvis(), fullRobotModel.getChest(),
               fullRobotModel.getRootJoint().getFrameAfterJoint());
       this.neckJacobian = new MechanismGeometricJacobian(fullRobotModel.getChest(), fullRobotModel.getHead(), fullRobotModel.getHead().getBodyFixedFrame());
-      
+
       this.desiredCoMHeightAcceleration = new DoubleYoVariable("desiredCoMHeightAcceleration", registry);
 
       desiredICP = new YoFramePoint2d("desiredICP", "", ReferenceFrame.getWorldFrame(), registry);
@@ -374,6 +378,16 @@ public abstract class ICPAndMomentumBasedController extends MomentumBasedControl
       }
 
       this.updatables.add(new FootPolygonVisualizer(footContactStates, dynamicGraphicObjectsListRegistry, registry));
+
+      momentumSubspace = new DenseMatrix64F(SpatialForceVector.SIZE, 3);
+      momentumSubspace.set(3, 0, 1.0);
+      momentumSubspace.set(4, 1, 1.0);
+      momentumSubspace.set(5, 2, 1.0);
+
+      accelerationSubspace = new DenseMatrix64F(SpatialMotionVector.SIZE, 3);
+      accelerationSubspace.set(0, 0, 1.0);
+      accelerationSubspace.set(1, 1, 1.0);
+      accelerationSubspace.set(2, 2, 1.0);
    }
 
 
@@ -454,18 +468,8 @@ public abstract class ICPAndMomentumBasedController extends MomentumBasedControl
 
       if (doStrictPelvisControl)
       {
-         DenseMatrix64F momentumSubspace = new DenseMatrix64F(SpatialForceVector.SIZE, 3);
-         momentumSubspace.set(3, 0, 1.0);
-         momentumSubspace.set(4, 1, 1.0);
-         momentumSubspace.set(5, 2, 1.0);
-
          DenseMatrix64F momentumMultipliers = new DenseMatrix64F(3, 1);
          MatrixTools.setDenseMatrixFromTuple3d(momentumMultipliers, desiredCentroidalMomentumRate.getLinearPartCopy(), 0, 0);
-
-         DenseMatrix64F accelerationSubspace = new DenseMatrix64F(SpatialMotionVector.SIZE, 3);
-         accelerationSubspace.set(0, 0, 1.0);
-         accelerationSubspace.set(1, 1, 1.0);
-         accelerationSubspace.set(2, 2, 1.0);
 
          DenseMatrix64F accelerationMultipliers = new DenseMatrix64F(3, 1);
          FrameVector pelvisAngularAcceleration = computeDesiredPelvisAngularAcceleration();
