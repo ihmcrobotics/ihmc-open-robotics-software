@@ -10,10 +10,11 @@ import us.ihmc.projectM.R2Sim02.R2Robot;
 
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
+import com.yobotics.simulationconstructionset.SupportedGraphics3DAdapter;
 
 public class DRCGuiInitialSetup
 {
-   private Graphics3DAdapter graphics3dAdapter = new JMEGraphics3dAdapter();
+   private SupportedGraphics3DAdapter graphics3dAdapter = SupportedGraphics3DAdapter.JAVA_MONKEY_ENGINE;
 
    public void initializeGUI(SimulationConstructionSet scs, Robot robot)
    {
@@ -55,12 +56,12 @@ public class DRCGuiInitialSetup
       scs.addButton(exportTorqueAndSpeedButton);
    }
 
-   public Graphics3DAdapter getGraphics3dAdapter()
+   public SupportedGraphics3DAdapter getGraphics3dAdapter()
    {
       return graphics3dAdapter;
    }
 
-   public void setGraphics3dAdapter(Graphics3DAdapter graphics3dAdapter)
+   public void setGraphics3dAdapter(SupportedGraphics3DAdapter graphics3dAdapter)
    {
       this.graphics3dAdapter = graphics3dAdapter;
    }
