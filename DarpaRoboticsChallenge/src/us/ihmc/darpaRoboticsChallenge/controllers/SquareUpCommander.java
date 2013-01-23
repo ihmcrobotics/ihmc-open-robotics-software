@@ -1,7 +1,9 @@
 package us.ihmc.darpaRoboticsChallenge.controllers;
 
+import javax.swing.*;
+import java.util.ArrayList;
+
 public interface SquareUpCommander
 {
-   public void squareUp();
-
+   public ArrayList<JMenuItem> getMenuItems();
 }
