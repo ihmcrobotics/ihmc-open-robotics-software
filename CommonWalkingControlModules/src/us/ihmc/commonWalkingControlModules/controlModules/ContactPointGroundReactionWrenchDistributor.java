@@ -124,20 +124,22 @@ public class ContactPointGroundReactionWrenchDistributor implements GroundReacti
       normalForceSelectorBMatrix.zero();
 
       int contactNumber = 0;
-      int aTorquePartColumn = 0;
       for (PlaneContactState contactState : contactStates)
       {
          List<FramePoint2d> contactPoints2d = contactState.getContactPoints2d();
+         int nContactPoints = contactPoints2d.size();
+         
          WrenchDistributorTools.getSupportVectors(normalizedSupportVectors, coefficientsOfFriction.get(contactState), contactState.getPlaneFrame());
 
          // B
          WrenchDistributorTools.computeSupportVectorMatrixBlock(supportVectorMatrixVBlock, normalizedSupportVectors, contactState.getPlaneFrame());
-         placeBBlock(normalForceSelectorBMatrix, supportVectorMatrixVBlock, contactNumber);
+         placeBBlock(normalForceSelectorBMatrix, supportVectorMatrixVBlock, contactNumber, nContactPoints);
 
          // force part of A
          WrenchDistributorTools.computeSupportVectorMatrixBlock(supportVectorMatrixVBlock, normalizedSupportVectors, centerOfMassFrame);
-         placeAForceBlock(aMatrix, supportVectorMatrixVBlock, contactNumber);
+         placeAForceBlock(aMatrix, supportVectorMatrixVBlock, contactNumber, nContactPoints);
 
+         int aTorquePartColumn = contactNumber * ContactPointWrenchOptimizerNative.NUMBER_OF_POINTS_PER_CONTACT * ContactPointWrenchOptimizerNative.NUMBER_OF_SUPPORT_VECTORS;
          for (FramePoint2d contactPoint2d : contactPoints2d)
          {
             // torque part of A
@@ -218,11 +220,11 @@ public class ContactPointGroundReactionWrenchDistributor implements GroundReacti
       return normalTorques.get(contactState);
    }
 
-   private static void placeBBlock(DenseMatrix64F normalForceSelectorBMatrix, DenseMatrix64F supportVectorMatrixBlock, int contactNumber)
+   private static void placeBBlock(DenseMatrix64F normalForceSelectorBMatrix, DenseMatrix64F supportVectorMatrixBlock, int contactNumber, int nContactPoints)
    {
       int bMatrixRow = contactNumber;
       int supportVectorMatrixRow = 2;    // z force
-      int nBlocks = ContactPointWrenchOptimizerNative.NUMBER_OF_POINTS_PER_CONTACT;
+      int nBlocks = nContactPoints;
       int startColumn = contactNumber
             * (ContactPointWrenchOptimizerNative.NUMBER_OF_SUPPORT_VECTORS * ContactPointWrenchOptimizerNative.NUMBER_OF_POINTS_PER_CONTACT);
       for (int columnBlockNumber = 0; columnBlockNumber < nBlocks; columnBlockNumber++)
@@ -233,9 +235,9 @@ public class ContactPointGroundReactionWrenchDistributor implements GroundReacti
       }
    }
 
-   private static void placeAForceBlock(DenseMatrix64F aMatrix, DenseMatrix64F aForceBlock, int contactNumber)
+   private static void placeAForceBlock(DenseMatrix64F aMatrix, DenseMatrix64F aForceBlock, int contactNumber, int nContactPoints)
    {
-      int nBlocks = ContactPointWrenchOptimizerNative.NUMBER_OF_POINTS_PER_CONTACT;
+      int nBlocks = nContactPoints;
       int startRow = Wrench.SIZE / 2;
       int startColumn = contactNumber
                         * (ContactPointWrenchOptimizerNative.NUMBER_OF_SUPPORT_VECTORS * ContactPointWrenchOptimizerNative.NUMBER_OF_POINTS_PER_CONTACT);
