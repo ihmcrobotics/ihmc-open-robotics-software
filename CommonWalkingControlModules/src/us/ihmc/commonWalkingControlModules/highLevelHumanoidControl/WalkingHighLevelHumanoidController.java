@@ -7,6 +7,7 @@ import java.util.List;
 import javax.media.j3d.Transform3D;
 
 import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
@@ -52,6 +53,7 @@ import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.math.geometry.ZUpFrame;
 import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
 import us.ihmc.utilities.screwTheory.EndEffectorPoseTwistAndSpatialAccelerationCalculator;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
@@ -125,6 +127,9 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       new SideDependentList<RigidBodySpatialAccelerationControlModule>();
    private final SideDependentList<EndEffectorPoseTwistAndSpatialAccelerationCalculator> handPoseTwistAndSpatialAccelerationCalculators =
       new SideDependentList<EndEffectorPoseTwistAndSpatialAccelerationCalculator>();
+   private final EndEffectorPoseTwistAndSpatialAccelerationCalculator headPoseTwistAndSpatialAccelerationCalculator;
+   private final RigidBodySpatialAccelerationControlModule headController;
+   
    private final SideDependentList<PositionTrajectoryGenerator> footPositionTrajectoryGenerators;
    private final DoubleProvider swingTimeProvider;
    private final SideDependentList<YoVariableDoubleProvider> onEdgeInitialAngleProviders = new SideDependentList<YoVariableDoubleProvider>();
@@ -143,8 +148,11 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
    private final FootstepProvider footstepProvider;
    private final InstantaneousCapturePointTrajectory icpTrajectoryGenerator;
    private final SideDependentList<SettableOrientationProvider> finalFootOrientationProviders = new SideDependentList<SettableOrientationProvider>();
-
+   
    private final SideDependentList<FramePose> desiredHandPoses = new SideDependentList<FramePose>();
+   private final ReferenceFrame neckFrame;
+   private final FrameVector desiredHeadOffsetWithRespectToNeck;
+   private final ZUpFrame desiredHeadOrientationReferenceFrame;
 
    public WalkingHighLevelHumanoidController(FullRobotModel fullRobotModel, CommonWalkingReferenceFrames referenceFrames, TwistCalculator twistCalculator,
            CenterOfMassJacobian centerOfMassJacobian, SideDependentList<? extends ContactablePlaneBody> bipedFeet, BipedSupportPolygons bipedSupportPolygons,
@@ -282,7 +290,19 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 
          this.desiredHandPoses.put(robotSide, desiredHandPosition);
       }
+      
+      neckFrame = neckJoints[0].getFrameBeforeJoint();
+      desiredHeadOffsetWithRespectToNeck = new FrameVector(worldFrame, walkingControllerParameters.getDesiredHeadOffsetWithRespectToNeck());
+      
+      headPoseTwistAndSpatialAccelerationCalculator = new EndEffectorPoseTwistAndSpatialAccelerationCalculator(fullRobotModel.getHead(), fullRobotModel
+            .getHead().getBodyFixedFrame(), twistCalculator);
+      headController = new RigidBodySpatialAccelerationControlModule("headOrientation", twistCalculator, fullRobotModel.getHead(), fullRobotModel.getHead().getBodyFixedFrame(), registry);
+      headController.setPositionProportionalGains(150.0, 150.0, 150.0);
+      headController.setPositionDerivativeGains(30.0, 30.0, 30.0);
+      headController.setOrientationProportionalGains(100.0, 200.0, 100.0);
+      headController.setOrientationDerivativeGains(20.0, 20.0, 20.0);
 
+      desiredHeadOrientationReferenceFrame = new ZUpFrame(elevatorFrame, chestOrientationControlModule.getBase().getBodyFixedFrame(), "desiredHeadOrientationReferenceFrame");
 
    }
 
@@ -828,9 +848,62 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       double kUpperBody = this.kUpperBody.getDoubleValue();
       double dUpperBody = GainCalculator.computeDerivativeGain(kUpperBody, zetaUpperBody.getDoubleValue());
 
-      doPDControl(neckJoints, kUpperBody, dUpperBody);
       doPDControl(postHeadJoints, kUpperBody, dUpperBody);
 
+
+      doNeckControl();
+      doArmControl();
+   }
+
+   public void doNeckControl()
+   {
+      //TODO: implement desiredHeadOrientationController
+      neckJacobian.compute();
+      desiredHeadOrientationReferenceFrame.update();
+      FramePoint desiredHeadPosition = new FramePoint(neckFrame);
+      FrameOrientation desiredHeadOrientation = new FrameOrientation(desiredHeadOrientationReferenceFrame);
+     
+      desiredHeadPosition.add(desiredHeadOffsetWithRespectToNeck.changeFrameCopy(neckFrame));
+      
+      FramePose desiredHeadPose = headPoseTwistAndSpatialAccelerationCalculator.calculateDesiredEndEffectorPoseFromDesiredPositions(desiredHeadPosition,
+            desiredHeadOrientation);
+      final RigidBody referenceBody = fullRobotModel.getElevator();
+      
+      Twist twistOfChestWithRespectToElevator = new Twist();
+      twistCalculator.packRelativeTwist(twistOfChestWithRespectToElevator, referenceBody, fullRobotModel.getChest());
+      twistOfChestWithRespectToElevator.changeBodyFrameNoRelativeTwist(neckFrame);
+      
+      FrameVector desiredLinearVelocity = twistOfChestWithRespectToElevator.getBodyOriginLinearVelocityInBaseFrame();
+      
+      Twist desiredHeadTwist = headPoseTwistAndSpatialAccelerationCalculator.calculateDesiredEndEffectorTwistFromDesiredVelocities(desiredLinearVelocity,
+            new FrameVector(elevatorFrame), referenceBody);
+
+      
+      //TODO: Calculate twist
+      SpatialAccelerationVector desiredHeadAcceleration = headPoseTwistAndSpatialAccelerationCalculator
+            .calculateDesiredEndEffectorSpatialAccelerationFromDesiredAccelerations(new FrameVector(neckFrame), new FrameVector(elevatorFrame),
+                  referenceBody);
+      
+      SpatialAccelerationVector headAcceleration = new SpatialAccelerationVector();
+      headController.doPositionControl(desiredHeadPose, desiredHeadTwist, desiredHeadAcceleration, referenceBody);
+      headController.packAcceleration(headAcceleration);
+      
+      
+      
+      
+      DenseMatrix64F jacobianMatrix = neckJacobian.getJacobianMatrix();
+      DenseMatrix64F jacobianInverse = new DenseMatrix64F(jacobianMatrix.getNumCols(),jacobianMatrix.getNumRows());
+      DenseMatrix64F projector = new DenseMatrix64F(jacobianMatrix.getNumRows(), jacobianMatrix.getNumRows());
+      CommonOps.pinv(jacobianMatrix, jacobianInverse);
+      CommonOps.mult(jacobianMatrix, jacobianInverse, projector);
+      
+      
+      DenseMatrix64F nullspaceMultipliers = new DenseMatrix64F(0, 1);
+      solver.setDesiredSpatialAcceleration(neckJacobian, headAcceleration, nullspaceMultipliers, jacobianInverse);
+   }
+
+   public void doArmControl()
+   {
       for (RobotSide robotSide : RobotSide.values())
       {
          final ReferenceFrame chestFrame = fullRobotModel.getChest().getBodyFixedFrame();
