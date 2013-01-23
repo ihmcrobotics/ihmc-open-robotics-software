@@ -10,7 +10,6 @@ import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
-import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.SpatialForceVector;
 
@@ -29,8 +28,8 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 
 public class GroundReactionWrenchDistributorVisualizer
 {
-   private static final double FORCE_VECTOR_SCALE = 0.003;
-   private static final double MOMENT_VECTOR_SCALE = 0.1;
+   private static final double FORCE_VECTOR_SCALE = 1.0/600.0; // 6000N is drawn 1 meter long. 
+   private static final double MOMENT_VECTOR_SCALE = 1.0/50.0; // 50 Nm is drawn 1 meter long.
    private static final double COM_VIZ_RADIUS = 0.1;
    private static final double COP_VIZ_RADIUS = 0.05;
 
@@ -114,56 +113,63 @@ public class GroundReactionWrenchDistributorVisualizer
    
    public void update(SimulationConstructionSet scs, GroundReactionWrenchDistributorInterface distributor, ReferenceFrame centerOfMassFrame, ArrayList<PlaneContactState> contactStates, SpatialForceVector desiredBodyWrench)
    {
-      FramePoint centerOfMassPosition = new FramePoint(centerOfMassFrame);
-      centerOfMassPosition.changeFrame(worldFrame);
-      
-      centerOfMassWorld.set(centerOfMassPosition);
-      
-      SpatialForceVector desiredWrenchOnCenterOfMass = new SpatialForceVector(desiredBodyWrench);
-      desiredWrenchOnCenterOfMass.changeFrame(centerOfMassFrame);
-      FrameVector desiredForceOnCenterOfMass = desiredWrenchOnCenterOfMass.getLinearPartAsFrameVectorCopy();
-      FrameVector desiredTorqueOnCenterOfMass = desiredWrenchOnCenterOfMass.getAngularPartAsFrameVectorCopy();
-      desiredForceOnCenterOfMass.changeFrame(worldFrame);
-      desiredTorqueOnCenterOfMass.changeFrame(worldFrame);
-      
-      desiredForceWorld.set(desiredForceOnCenterOfMass);
-      desiredMomentWorld.set(desiredTorqueOnCenterOfMass);
-            
-      for (int i=0; i<contactStates.size(); i++)
+      try
       {
-         PlaneContactState contactState = contactStates.get(i);
-         
-         List<FramePoint2d> contactPoints = contactState.getContactPoints2d();
-         FrameConvexPolygon2d frameConvexPolygon2d = new FrameConvexPolygon2d(contactPoints);
+         FramePoint centerOfMassPosition = new FramePoint(centerOfMassFrame);
+         centerOfMassPosition.changeFrame(worldFrame);
 
-         YoFrameConvexPolygon2d yoFrameConvexPolygon2d = contactPolygonsWorld.get(i);
-         yoFrameConvexPolygon2d.setFrameConvexPolygon2d(frameConvexPolygon2d.changeFrameCopy(ReferenceFrame.getWorldFrame()));
-         
-         YoFramePoint contactCenterOfPressureForViz = contactCenterOfPressures.get(i);
-         YoFrameVector contactForceForViz = contactForces.get(i);
-         YoFrameVector contactMomentForViz = contactMoments.get(i);
-         
-         FramePoint2d centerOfPressure2d = distributor.getCenterOfPressure(contactState);
-         
-         FramePoint centerOfPressure = new FramePoint(centerOfPressure2d.getReferenceFrame(), centerOfPressure2d.getX(), centerOfPressure2d.getY(), 0.0);
-         centerOfPressure.changeFrame(worldFrame);
-         contactCenterOfPressureForViz.set(centerOfPressure);
-         
-         FrameVector contactForce = distributor.getForce(contactState);
-         contactForceForViz.set(contactForce.changeFrameCopy(worldFrame));
-         
-         double normalTorque = distributor.getNormalTorque(contactState);
-         FrameVector normalForce = new FrameVector(centerOfPressure2d.getReferenceFrame(), 0.0, 0.0, normalTorque);
-         contactMomentForViz.set(normalForce.changeFrameCopy(worldFrame));
+         centerOfMassWorld.set(centerOfMassPosition);
+
+         SpatialForceVector desiredWrenchOnCenterOfMass = new SpatialForceVector(desiredBodyWrench);
+         desiredWrenchOnCenterOfMass.changeFrame(centerOfMassFrame);
+         FrameVector desiredForceOnCenterOfMass = desiredWrenchOnCenterOfMass.getLinearPartAsFrameVectorCopy();
+         FrameVector desiredTorqueOnCenterOfMass = desiredWrenchOnCenterOfMass.getAngularPartAsFrameVectorCopy();
+         desiredForceOnCenterOfMass.changeFrame(worldFrame);
+         desiredTorqueOnCenterOfMass.changeFrame(worldFrame);
+
+         desiredForceWorld.set(desiredForceOnCenterOfMass);
+         desiredMomentWorld.set(desiredTorqueOnCenterOfMass);
+
+         for (int i=0; i<contactStates.size(); i++)
+         {
+            PlaneContactState contactState = contactStates.get(i);
+
+            List<FramePoint2d> contactPoints = contactState.getContactPoints2d();
+            FrameConvexPolygon2d frameConvexPolygon2d = new FrameConvexPolygon2d(contactPoints);
+
+            YoFrameConvexPolygon2d yoFrameConvexPolygon2d = contactPolygonsWorld.get(i);
+            yoFrameConvexPolygon2d.setFrameConvexPolygon2d(frameConvexPolygon2d.changeFrameCopy(ReferenceFrame.getWorldFrame()));
+
+            YoFramePoint contactCenterOfPressureForViz = contactCenterOfPressures.get(i);
+            YoFrameVector contactForceForViz = contactForces.get(i);
+            YoFrameVector contactMomentForViz = contactMoments.get(i);
+
+            FramePoint2d centerOfPressure2d = distributor.getCenterOfPressure(contactState);
+
+            FramePoint centerOfPressure = new FramePoint(centerOfPressure2d.getReferenceFrame(), centerOfPressure2d.getX(), centerOfPressure2d.getY(), 0.0);
+            centerOfPressure.changeFrame(worldFrame);
+            contactCenterOfPressureForViz.set(centerOfPressure);
+
+            FrameVector contactForce = distributor.getForce(contactState);
+            contactForceForViz.set(contactForce.changeFrameCopy(worldFrame));
+
+            double normalTorque = distributor.getNormalTorque(contactState);
+            FrameVector normalForce = new FrameVector(centerOfPressure2d.getReferenceFrame(), 0.0, 0.0, normalTorque);
+            contactMomentForViz.set(normalForce.changeFrameCopy(worldFrame));
+         }
+
+         SpatialForceVector achievedWrenchOnCenterOfMass = GroundReactionWrenchDistributorAchievedWrenchCalculator.computeAchievedWrench(distributor, desiredBodyWrench.getExpressedInFrame(), contactStates);
+
+         achievedForceWorld.set(achievedWrenchOnCenterOfMass.getLinearPartAsFrameVectorCopy().changeFrameCopy(worldFrame));
+         achievedMomentWorld.set(achievedWrenchOnCenterOfMass.getAngularPartAsFrameVectorCopy().changeFrameCopy(worldFrame));
+
+
+         scs.tickAndUpdate();
       }
-      
-      SpatialForceVector achievedWrenchOnCenterOfMass = GroundReactionWrenchDistributorAchievedWrenchCalculator.computeAchievedWrench(distributor, desiredBodyWrench.getExpressedInFrame(), contactStates);
-      
-      achievedForceWorld.set(achievedWrenchOnCenterOfMass.getLinearPartAsFrameVectorCopy().changeFrameCopy(worldFrame));
-      achievedMomentWorld.set(achievedWrenchOnCenterOfMass.getAngularPartAsFrameVectorCopy().changeFrameCopy(worldFrame));
-      
-      
-      scs.tickAndUpdate();
+      catch(RuntimeException exception)
+      {
+         System.err.println("Exception Thrown in GroundReactionWrenchDistributorVisualizer.update(): " + exception);
+      }
    }
 
    

@@ -5,11 +5,9 @@ import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
-import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
-import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.TranslationReferenceFrame;
 import us.ihmc.utilities.screwTheory.SpatialForceVector;
@@ -52,7 +50,10 @@ public class GroundReactionWrenchSliderInput
       
 //      GroundReactionWrenchDistributorInterface distributor = new GeometricFlatGroundReactionWrenchDistributor(registry, dynamicGraphicObjectsListRegistry);
 //    GroundReactionWrenchDistributorInterface distributor = new LeeGoswamiGroundReactionWrenchDistributor(centerOfMassFrame, nSupportVectors, parentRegistry);
-      GroundReactionWrenchDistributorInterface distributor = createContactPointDistributor(registry, centerOfMassFrame);
+      
+      ContactPointWrenchDistributorSliderInput contactPointWrenchDistributorSliderInput = new ContactPointWrenchDistributorSliderInput(scs, registry, centerOfMassFrame);
+      GroundReactionWrenchDistributorInterface distributor = contactPointWrenchDistributorSliderInput.getDistributor();
+      
       dynamicGraphicObjectsListRegistry.addDynamicGraphicsObjectListsToSimulationConstructionSet(scs);
       
       
@@ -120,6 +121,8 @@ public class GroundReactionWrenchSliderInput
       
       while(true)
       {
+         contactPointWrenchDistributorSliderInput.updateWeights();
+         
          centerOfMassFrame.updateTranslation(centerOfMassPosition.getFrameVectorCopy());
          centerOfMassFrame.update();
          
@@ -143,17 +146,5 @@ public class GroundReactionWrenchSliderInput
          ThreadTools.sleep(100L);
       }
    }
-   
-   private static ContactPointGroundReactionWrenchDistributor createContactPointDistributor(YoVariableRegistry parentRegistry, ReferenceFrame centerOfMassFrame)
-   {
-      ContactPointGroundReactionWrenchDistributor distributor = new ContactPointGroundReactionWrenchDistributor(centerOfMassFrame, parentRegistry);
-      
-      double[] diagonalCWeights = new double[]{1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
-      double epsilonRho = 0.0;
-      distributor.setWeights(diagonalCWeights, epsilonRho);
-      
-      double[] minimumNormalForces = new double[]{0.0, 0.0};
-      distributor.setMinimumNormalForces(minimumNormalForces);
-      return distributor;
-   }
+ 
 }
