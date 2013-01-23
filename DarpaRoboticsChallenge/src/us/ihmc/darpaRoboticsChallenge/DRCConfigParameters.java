@@ -13,7 +13,7 @@ public class DRCConfigParameters
 
    // Networking
    public static final String SCS_MACHINE_IP_ADDRESS = "localhost"; //"10.100.0.37";
-   public static final String OPERATOR_INTERFACE_IP_ADDRESS = "localhost";
+   public static final String OPERATOR_INTERFACE_IP_ADDRESS = "localhost"; //"10.4.8.1";
    public static final int BG_VIDEO_SERVER_PORT_NUMBER = 2099;
    public static final int ROBOT_DATA_RECEIVER_PORT_NUMBER = 7777;
 
