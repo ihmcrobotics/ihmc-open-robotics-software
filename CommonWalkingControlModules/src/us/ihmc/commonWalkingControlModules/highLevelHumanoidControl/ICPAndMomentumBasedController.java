@@ -386,7 +386,7 @@ public abstract class ICPAndMomentumBasedController extends MomentumBasedControl
       desiredGroundReactionTorque.set(totalGroundReactionWrench.getAngularPartCopy());
       desiredGroundReactionForce.set(totalGroundReactionWrench.getLinearPartCopy());
 
-      double coefficientOfFriction = 0.5;    // TODO
+      double coefficientOfFriction = 1.0; // 0.5;    // TODO
       double rotationalCoefficientOfFriction = 0.5;    // TODO
 
       groundReactionWrenchDistributor.reset();
