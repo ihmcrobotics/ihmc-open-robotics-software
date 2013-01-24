@@ -1,7 +1,6 @@
 package us.ihmc.darpaRoboticsChallenge;
 
 import javax.media.j3d.Transform3D;
-import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.robotSide.RobotSide;
@@ -37,8 +36,8 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
       return true;
    }
 
-   public Vector3d getDesiredHeadOffsetWithRespectToNeck()
+   public String[] neckJointsToUseForHeadOrientationControl()
    {
-      return new Vector3d(-0.053, 0.0, 0.024);
+      return new String[] { "neck_ay" };
    }
 }

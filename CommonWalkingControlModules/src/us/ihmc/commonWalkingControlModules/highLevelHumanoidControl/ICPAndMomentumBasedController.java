@@ -125,8 +125,7 @@ public abstract class ICPAndMomentumBasedController extends MomentumBasedControl
    protected final DoubleYoVariable desiredCoMHeightAcceleration;
    protected final SideDependentList<EnumMap<LimbName, MechanismGeometricJacobian>> jacobians = SideDependentList.createListOfEnumMaps(LimbName.class);
    protected final MechanismGeometricJacobian spineJacobian;
-   protected final MechanismGeometricJacobian neckJacobian;
-
+   
    protected final YoFrameOrientation desiredPelvisOrientation;
    private final AxisAngleOrientationController pelvisOrientationController;
 
@@ -287,8 +286,7 @@ public abstract class ICPAndMomentumBasedController extends MomentumBasedControl
 
       this.spineJacobian = new MechanismGeometricJacobian(fullRobotModel.getPelvis(), fullRobotModel.getChest(),
               fullRobotModel.getRootJoint().getFrameAfterJoint());
-      this.neckJacobian = new MechanismGeometricJacobian(fullRobotModel.getChest(), fullRobotModel.getHead(), fullRobotModel.getHead().getBodyFixedFrame());
-
+      
       this.desiredCoMHeightAcceleration = new DoubleYoVariable("desiredCoMHeightAcceleration", registry);
 
       desiredICP = new YoFramePoint2d("desiredICP", "", ReferenceFrame.getWorldFrame(), registry);
