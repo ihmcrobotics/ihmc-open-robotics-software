@@ -52,7 +52,6 @@ public class DRCFlatGroundWalkingTrack
       double stepPitch = 0.0;
       FlatGroundWalkingHighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory = new FlatGroundWalkingHighLevelHumanoidControllerFactory(drcRobotParameters,
             inPlaceWidth, maxStepLength, minStepWidth, maxStepWidth, stepPitch);
-      highLevelHumanoidControllerFactory.setupForNetworkedFootstepProvider(DRCConfigParameters.OPERATOR_INTERFACE_IP_ADDRESS, portNumber);
       ControllerFactory controllerFactory = new DRCRobotMomentumBasedControllerFactory(highLevelHumanoidControllerFactory, true);
 
       
