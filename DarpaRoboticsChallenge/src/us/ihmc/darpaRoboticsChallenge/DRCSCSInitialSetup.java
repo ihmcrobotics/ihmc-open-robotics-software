@@ -6,14 +6,16 @@ import us.ihmc.commonAvatarInterfaces.CommonAvatarEnvironmentInterface;
 import us.ihmc.commonWalkingControlModules.terrain.CommonTerrain;
 import us.ihmc.commonWalkingControlModules.terrain.TerrainType;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
+import us.ihmc.projectM.R2Sim02.initialSetup.ScsInitialSetup;
 
 import com.yobotics.simulationconstructionset.GroundProfile;
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.util.LinearGroundContactModel;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import com.yobotics.simulationconstructionset.util.ground.steppingStones.SteppingStones;
 
-public class DRCSCSInitialSetup
+public class DRCSCSInitialSetup implements ScsInitialSetup
 {
    private static final boolean SHOW_WORLD_COORDINATE_FRAME = false;
    private double simulateDT = 0.0001;    // 0.00005; //
@@ -35,7 +37,7 @@ public class DRCSCSInitialSetup
    {
       commonTerrain = new CommonTerrain(groundProfile);
    }
-   
+
    public DRCSCSInitialSetup(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface)
    {
       this(commonAvatarEnvironmentInterface.getTerrainObject());
@@ -91,8 +93,8 @@ public class DRCSCSInitialSetup
          scs.addStaticLinkGraphics(linkGraphics);
       }
 
-      
-      
+
+
       /*
        * This makes sure that the initial values of all YoVariables that are added to the scs (i.e. at index 0 of the data buffer)
        * are properly stored in the data buffer
@@ -109,5 +111,25 @@ public class DRCSCSInitialSetup
    public void setRecordFrequency(int recordFrequency)
    {
       this.recordFrequency = recordFrequency;
+   }
+
+   public int getRecordFrequency()
+   {
+      return recordFrequency;
+   }
+
+   public double getGravity()
+   {
+      return gravity;
+   }
+
+   public GroundProfile getGroundProfile()
+   {
+      return commonTerrain.getGroundProfile();
+   }
+
+   public SteppingStones getSteppingStones()
+   {
+      return commonTerrain.getSteppingStones();
    }
 }
