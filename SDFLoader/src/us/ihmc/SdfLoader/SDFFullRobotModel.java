@@ -314,9 +314,4 @@ public class SDFFullRobotModel implements FullRobotModel
       revoluteJoints.values().toArray(revoluteJointsAsArray);
       return revoluteJointsAsArray;
    }
-
-   public HashMap<String, RevoluteJoint> getRevoluteJointsMap()
-   {
-      return revoluteJoints;
-   }
 }

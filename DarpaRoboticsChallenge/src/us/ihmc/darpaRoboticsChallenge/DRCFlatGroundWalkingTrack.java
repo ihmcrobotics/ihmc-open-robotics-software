@@ -1,11 +1,14 @@
 package us.ihmc.darpaRoboticsChallenge;
 
+import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFCamera;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.ControllerFactory;
+import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.FlatGroundWalkingHighLevelHumanoidControllerFactory;
+import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.darpaRoboticsChallenge.controllers.DRCRobotMomentumBasedControllerFactory;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.SquaredUpDRCRobotInitialSetup;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
@@ -19,17 +22,15 @@ import com.yobotics.simulationconstructionset.util.inputdevices.MidiSliderBoard;
 
 public class DRCFlatGroundWalkingTrack
 {
-   private final DRCSimulation drcSimulation;
+   private final DRCSimulation<SDFRobot> drcSimulation;
    private final DRCDemo01NavigationEnvironment environment;
 
    public DRCFlatGroundWalkingTrack(DRCGuiInitialSetup guiInitialSetup, AutomaticSimulationRunner automaticSimulationRunner, double timePerRecordTick,
                                     int simulationDataBufferSize, boolean doChestOrientationControl, String ipAddress, int portNumber)
    {
       DRCSCSInitialSetup scsInitialSetup;
-      RobotInitialSetup<SDFRobot> drcRobotInitialSetup;
+      RobotInitialSetup<SDFRobot> drcRobotInitialSetup = new SquaredUpDRCRobotInitialSetup();
       WalkingControllerParameters drcRobotParameters = new DRCRobotWalkingControllerParameters();
-
-      drcRobotInitialSetup = new SquaredUpDRCRobotInitialSetup();
 
       environment = new DRCDemo01NavigationEnvironment();
       scsInitialSetup = new DRCSCSInitialSetup(environment);
@@ -58,7 +59,11 @@ public class DRCFlatGroundWalkingTrack
       
 
 //    r2Simulation = new R2Simulation(environment, r2InitialSetup, sensorNoiseInitialSetup, controllerFactory, scsInitialSetup, guiInitialSetup);
-      drcSimulation = new DRCSimulation(environment, drcRobotInitialSetup, controllerFactory, scsInitialSetup, guiInitialSetup);
+      JaxbSDFLoader jaxbSDFLoader = DRCRobotSDFLoader.loadDRCRobot();
+      SDFRobot robot = jaxbSDFLoader.getRobot();
+      FullRobotModel fullRobotModel = jaxbSDFLoader.getFullRobotModel();
+      CommonWalkingReferenceFrames referenceFrames = jaxbSDFLoader.getReferenceFrames();
+      drcSimulation = new DRCSimulation<SDFRobot>(robot, environment, drcRobotInitialSetup, controllerFactory, scsInitialSetup, guiInitialSetup, fullRobotModel, referenceFrames);
 
       SimulationConstructionSet simulationConstructionSet = drcSimulation.getSimulationConstructionSet();
       MidiSliderBoard sliderBoard = new MidiSliderBoard(simulationConstructionSet);

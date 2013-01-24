@@ -10,6 +10,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor;
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor.Camera;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HumanoidRobot;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
@@ -26,7 +27,7 @@ import com.yobotics.simulationconstructionset.PinJoint;
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.graphics.GraphicsObjectsHolder;
 
-public class SDFRobot extends Robot implements GraphicsObjectsHolder
+public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRobot
 {
    private static final long serialVersionUID = 5864358637898048080L;
 
@@ -102,7 +103,7 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder
       rootJoint.setPosition(offset);
    }
 
-   public PinJoint getJoint(String name)
+   public PinJoint getPinJoint(String name)
    {
       return robotJoints.get(name);
    }
