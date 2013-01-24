@@ -4,8 +4,9 @@ import javax.media.j3d.Transform3D;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.projectM.R2Sim02.initialSetup.RobotInitialSetup;
 
-public class SquaredUpDRCRobotInitialSetup implements DRCRobotInitialSetup
+public class SquaredUpDRCRobotInitialSetup implements RobotInitialSetup<SDFRobot>
 {
 
    public void initializeRobot(SDFRobot robot)
