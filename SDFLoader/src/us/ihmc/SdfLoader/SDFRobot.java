@@ -2,6 +2,7 @@ package us.ihmc.SdfLoader;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Matrix3d;
@@ -27,7 +28,7 @@ import com.yobotics.simulationconstructionset.PinJoint;
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.graphics.GraphicsObjectsHolder;
 
-public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRobot
+public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRobot // TODO: make an SDFHumanoidRobot
 {
    private static final long serialVersionUID = 5864358637898048080L;
 
@@ -174,19 +175,6 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRo
       }
    }
 
-   public boolean hasGroundContact(RobotSide robotSide)
-   {
-      for (GroundContactPoint groundContactPoint : groundContactPoints.get(robotSide))
-      {
-         if (groundContactPoint.isInContact())
-         {
-            return true;
-         }
-      }
-
-      return false;
-   }
-
    private Link createLink(SDFLinkHolder link, Matrix3d rotation)
    {
       SDFGraphics3DObject linkGraphics = new SDFGraphics3DObject(rotation, link.getVisuals(), resourceDirectory);
@@ -228,5 +216,8 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRo
       return cameras.get(name);
    }
 
-
+   public List<GroundContactPoint> getFootGroundContactPoints(RobotSide robotSide)
+   {
+      return groundContactPoints.get(robotSide);
+   }
 }
