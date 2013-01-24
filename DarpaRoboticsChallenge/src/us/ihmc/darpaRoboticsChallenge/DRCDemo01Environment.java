@@ -205,12 +205,6 @@ public class DRCDemo01Environment implements CommonAvatarEnvironmentInterface
 
    }
 
-   public void addContactPoints(ArrayList<ExternalForcePoint> contactPoints)
-   {
-      // TODO Auto-generated method stub
-
-   }
-
    public void addContactPoints(ExternalForcePoint[] externalForcePoints)
    {
       // TODO Auto-generated method stub
