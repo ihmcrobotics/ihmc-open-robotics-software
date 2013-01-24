@@ -1,14 +1,15 @@
 package us.ihmc.darpaRoboticsChallenge;
 
 import us.ihmc.SdfLoader.SDFCamera;
+import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.ControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.FlatGroundWalkingHighLevelHumanoidControllerFactory;
 import us.ihmc.darpaRoboticsChallenge.controllers.DRCRobotMomentumBasedControllerFactory;
-import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.SquaredUpDRCRobotInitialSetup;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
+import us.ihmc.projectM.R2Sim02.initialSetup.RobotInitialSetup;
 
 import com.martiansoftware.jsap.JSAPException;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
@@ -25,7 +26,7 @@ public class DRCFlatGroundWalkingTrack
                                     int simulationDataBufferSize, boolean doChestOrientationControl, String ipAddress, int portNumber)
    {
       DRCSCSInitialSetup scsInitialSetup;
-      DRCRobotInitialSetup drcRobotInitialSetup;
+      RobotInitialSetup<SDFRobot> drcRobotInitialSetup;
       WalkingControllerParameters drcRobotParameters = new DRCRobotWalkingControllerParameters();
 
       drcRobotInitialSetup = new SquaredUpDRCRobotInitialSetup();
