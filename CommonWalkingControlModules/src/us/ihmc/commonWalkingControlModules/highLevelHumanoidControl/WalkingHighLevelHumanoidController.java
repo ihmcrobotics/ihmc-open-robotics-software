@@ -320,16 +320,24 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
          neckJointsToPositionControl[neckJointsToPositionControlIndex] = neckJoint;
          neckJointsToPositionControlIndex++;
       }
-           
-      final RigidBody base = necksJointsForOrientationControl[0].getPredecessor();
-      final RigidBody head = necksJointsForOrientationControl[necksJointsForOrientationControl.length-1].getSuccessor();
-      this.neckJacobian = new MechanismGeometricJacobian(base, head, head.getBodyFixedFrame());
+      if(necksJointsForOrientationControl.length > 0)
+      {
+         final RigidBody base = necksJointsForOrientationControl[0].getPredecessor();
+         final RigidBody head = necksJointsForOrientationControl[necksJointsForOrientationControl.length-1].getSuccessor();
+         this.neckJacobian = new MechanismGeometricJacobian(base, head, head.getBodyFixedFrame());
+         desiredHeadOrientationReferenceFrame = new ZUpFrame(elevatorFrame, chestOrientationControlModule.getBase().getBodyFixedFrame(), "desiredHeadOrientationReferenceFrame");
+         
+         headOrientationController = new AxisAngleOrientationController("headOrientationController", neckJacobian.getEndEffectorFrame(), registry);
+         headOrientationController.setProportionalGains(100.0, 100.0, 100.0);
+         headOrientationController.setDerivativeGains(50.0, 50.0, 50.0);
+      }
+      else
+      {
+         neckJacobian = null;
+         desiredHeadOrientationReferenceFrame = null;
+         headOrientationController = null;
+      }
       
-      desiredHeadOrientationReferenceFrame = new ZUpFrame(elevatorFrame, chestOrientationControlModule.getBase().getBodyFixedFrame(), "desiredHeadOrientationReferenceFrame");
-      
-      headOrientationController = new AxisAngleOrientationController("headOrientationController", neckJacobian.getEndEffectorFrame(), registry);
-      headOrientationController.setProportionalGains(100.0, 100.0, 100.0);
-      headOrientationController.setDerivativeGains(50.0, 50.0, 50.0);
    }
 
    private OneDoFJoint[] createOneDoFJointPath(RigidBody base, RigidBody endEffector)
@@ -877,13 +885,16 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       doPDControl(postHeadJoints, kUpperBody, dUpperBody);
       doPDControl(neckJointsToPositionControl, kUpperBody, dUpperBody);
 
-
-      doNeckControl();
+      if(headOrientationController != null)
+      {
+         doNeckControl();         
+      }
       doArmControl();
    }
 
    public void doNeckControl()
-   {      
+   {   
+      
       //TODO: implement desiredHeadOrientationController
       neckJacobian.compute();
       desiredHeadOrientationReferenceFrame.update();
