@@ -26,7 +26,7 @@ import com.yobotics.simulationconstructionset.util.trajectory.YoPolynomial;
 
 public class FlatThenPolynomialCoMHeightTrajectoryGenerator implements CenterOfMassHeightTrajectoryGenerator
 {
-   private final YoVariableRegistry registry;
+   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final ReferenceFrame centerOfMassFrame;
    private final CenterOfMassJacobian centerOfMassJacobian;
    private final DesiredFootstepCalculator desiredFootstepCalculator;
@@ -38,29 +38,29 @@ public class FlatThenPolynomialCoMHeightTrajectoryGenerator implements CenterOfM
    
    private final double gravityZ;
 
-   private final YoPolynomial heightSplineInFootFrame;
-   private final DoubleYoVariable footX;
-   private final DoubleYoVariable footZ;
+   private final YoPolynomial heightSplineInFootFrame = new YoPolynomial("heightSplineInFootFrame", numberOfCoefficients, registry);
+   private final DoubleYoVariable footX = new DoubleYoVariable("footX", registry);
+   private final DoubleYoVariable footZ = new DoubleYoVariable("footZ", registry);
 
-   private final DoubleYoVariable minXForSpline;
-   private final DoubleYoVariable maxXForSpline;
+   private final DoubleYoVariable minXForSpline = new DoubleYoVariable("minXForSpline", registry);
+   private final DoubleYoVariable maxXForSpline = new DoubleYoVariable("maxXForSpline", registry);
 
-   private final DoubleYoVariable initialHeightAboveGround;
-   private final DoubleYoVariable nominalHeightAboveGround;
-   private final BooleanYoVariable hasBeenInitialized;
+   private final DoubleYoVariable initialHeightAboveGround = new DoubleYoVariable("initialHeightAboveGround", registry);
+   private final DoubleYoVariable nominalHeightAboveGround = new DoubleYoVariable("nominalHeightAboveGround", registry);
+   private final BooleanYoVariable hasBeenInitialized = new BooleanYoVariable("hasBeenInitialized", registry);
 
-   private final DoubleYoVariable desiredComHeightInWorld;
-   private final DoubleYoVariable desiredComHeightSlope;
-   private final DoubleYoVariable desiredComHeightSecondDerivative;
+   private final DoubleYoVariable desiredComHeightInWorld = new DoubleYoVariable("desiredComHeightInWorld", registry);
+   private final DoubleYoVariable desiredComHeightSlope = new DoubleYoVariable("desiredComHeightSlope", registry);
+   private final DoubleYoVariable desiredComHeightSecondDerivative = new DoubleYoVariable("desiredComHeightSecondDerivative", registry);
 
-   private final DoubleYoVariable orbitalEnergy;
+   private final DoubleYoVariable orbitalEnergy = new DoubleYoVariable("orbitalEnergy", registry);
 
-   private final YoPolynomial testHeightSplineInFootFrame;
-   private final DoubleYoVariable deltaZ;
+   private final YoPolynomial testHeightSplineInFootFrame = new YoPolynomial("testHeightSplineInFootFrame", numberOfCoefficients, registry);
+   private final DoubleYoVariable deltaZ = new DoubleYoVariable("deltaZ", registry);
 
-   public FlatThenPolynomialCoMHeightTrajectoryGenerator(String namePrefix, double gravityZ, ReferenceFrame centerOfMassFrame, CenterOfMassJacobian centerOfMassJacobian,
-           DesiredFootstepCalculator desiredFootstepCalculator, ReferenceFrame desiredHeadingFrame, SideDependentList<ContactablePlaneBody> bipedFeet,
-           CommonWalkingReferenceFrames referenceFrames, YoVariableRegistry parentRegistry)
+   public FlatThenPolynomialCoMHeightTrajectoryGenerator(double gravityZ, ReferenceFrame centerOfMassFrame, CenterOfMassJacobian centerOfMassJacobian, DesiredFootstepCalculator desiredFootstepCalculator,
+           ReferenceFrame desiredHeadingFrame, SideDependentList<ContactablePlaneBody> bipedFeet, CommonWalkingReferenceFrames referenceFrames,
+           YoVariableRegistry parentRegistry)
    {
       this.gravityZ = gravityZ;
       this.centerOfMassFrame = centerOfMassFrame;
@@ -69,28 +69,6 @@ public class FlatThenPolynomialCoMHeightTrajectoryGenerator implements CenterOfM
       this.referenceFrame = desiredHeadingFrame;
       this.bipedFeet = bipedFeet;
       this.referenceFrames = referenceFrames;
-
-      this.registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
-
-      heightSplineInFootFrame = new YoPolynomial("heightSplineInFootFrame", numberOfCoefficients, registry);
-      footX = new DoubleYoVariable("footX", registry);
-      footZ = new DoubleYoVariable("footZ", registry);
-
-      minXForSpline = new DoubleYoVariable("minXForSpline", registry);
-      maxXForSpline = new DoubleYoVariable("maxXForSpline", registry);
-
-      initialHeightAboveGround = new DoubleYoVariable("initialHeightAboveGround", registry);
-      nominalHeightAboveGround = new DoubleYoVariable("nominalHeightAboveGround", registry);
-      hasBeenInitialized = new BooleanYoVariable("hasBeenInitialized", registry);
-
-      desiredComHeightInWorld = new DoubleYoVariable("desiredComHeightInWorld", registry);
-      desiredComHeightSlope = new DoubleYoVariable("desiredComHeightSlope", registry);
-      desiredComHeightSecondDerivative = new DoubleYoVariable("desiredComHeightSecondDerivative", registry);
-
-      orbitalEnergy = new DoubleYoVariable("orbitalEnergy", registry);
-
-      testHeightSplineInFootFrame = new YoPolynomial("testHeightSplineInFootFrame", numberOfCoefficients, registry);
-      deltaZ = new DoubleYoVariable("deltaZ", registry);
 
       nominalHeightAboveGround.set(1.32);
       initialHeightAboveGround.set(1.28);

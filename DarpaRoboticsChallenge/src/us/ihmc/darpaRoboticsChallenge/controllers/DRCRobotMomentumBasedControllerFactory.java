@@ -85,7 +85,8 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
       int identifier = 5;
       long updatePeriodInMilliseconds = DRCConfigParameters.ROBOT_JOINT_SERVER_UPDATE_MILLIS;
       DataObjectServer server = new DataObjectServer(PORT);
-      JointConfigurationDataSender jointConfigurationDataSender = new JointConfigurationDataSender(identifier, fullRobotModel.getElevator(), server);
+      JointConfigurationDataSender jointConfigurationDataSender = new JointConfigurationDataSender(identifier, fullRobotModel.getElevator());
+      jointConfigurationDataSender.registerConsumer(server);
       jointConfigurationDataSender.startUpdateThread(updatePeriodInMilliseconds);
    }
 
