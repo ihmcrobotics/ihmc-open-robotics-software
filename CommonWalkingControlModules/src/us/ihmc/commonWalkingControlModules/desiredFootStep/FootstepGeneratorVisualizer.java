@@ -205,7 +205,7 @@ public class FootstepGeneratorVisualizer
 
 
 //      ArrayList<Footstep> footsteps = FootstepUtils.makeTurningFootsteps(heading, stepAngle, stepWidth, startStanceFootstep, startSwingFootstep, bipedFeet);
-      Linear2DPathBasedDesiredFootstepListGenerator generator = new Linear2DPathBasedDesiredFootstepListGenerator(worldFrame, bipedFeet);
+      FootstepGenerator generator = new FootstepGenerator(worldFrame, bipedFeet);
             
       generator.setSwingStart(startSwingFootstep);
       

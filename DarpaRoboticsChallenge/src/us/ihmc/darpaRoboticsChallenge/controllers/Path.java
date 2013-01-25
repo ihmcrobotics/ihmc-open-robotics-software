@@ -3,7 +3,7 @@ package us.ihmc.darpaRoboticsChallenge.controllers;
 import java.util.ArrayList;
 
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
-import us.ihmc.userInterface.modifiableObjects.GraphicsActivationLevel;
+import us.ihmc.userInterface.modifiableObjects.PathActivationLevel;
 
 public interface Path
 {
@@ -11,6 +11,6 @@ public interface Path
 
    public void cancel();
 
-   public void activateGraphics(GraphicsActivationLevel activationLevel);
+   public void activateGraphics(PathActivationLevel activationLevel);
 
 }
