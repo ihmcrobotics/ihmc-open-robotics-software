@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 import javax.media.j3d.Transform3D;
@@ -140,6 +141,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
    private final OneDoFJoint[] neckJoints;
    private final SideDependentList<OneDoFJoint[]> armJoints = new SideDependentList<OneDoFJoint[]>();
    private final OneDoFJoint[] postHeadJoints;    // on DRC robot: hokuyo_joint
+   private final SideDependentList<OneDoFJoint[]> handJoints = new SideDependentList<OneDoFJoint[]>();
 
    private final DoubleYoVariable kUpperBody = new DoubleYoVariable("kUpperBody", registry);
    private final DoubleYoVariable zetaUpperBody = new DoubleYoVariable("zetaUpperBody", registry);
@@ -294,6 +296,15 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
          FramePose desiredHandPosition = new FramePose(chestFrame, walkingControllerParameters.getDesiredHandPosesWithRespectToChestFrame().get(robotSide));
 
          this.desiredHandPoses.put(robotSide, desiredHandPosition);
+         
+         HashSet<OneDoFJoint> allSideHandJoints = new HashSet<OneDoFJoint>();
+         
+         for (InverseDynamicsJoint handChildJoint : hand.getChildrenJoints())
+         {
+            allSideHandJoints.add((OneDoFJoint)handChildJoint);
+            createHandJoints(robotSide, handChildJoint, allSideHandJoints);
+         }
+         handJoints.put(robotSide, allSideHandJoints.toArray(new OneDoFJoint[allSideHandJoints.size()]));
       }
       
       final String[] neckJointsToUseForHeadOrientationControl = walkingControllerParameters.neckJointsToUseForHeadOrientationControl();
@@ -340,6 +351,15 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       
    }
 
+   private void createHandJoints(RobotSide side, InverseDynamicsJoint parentJoint, HashSet<OneDoFJoint> allSideHandJoints)
+   {
+      for (InverseDynamicsJoint childJoint : parentJoint.getSuccessor().getChildrenJoints())
+      {
+         allSideHandJoints.add((OneDoFJoint) childJoint);
+         createHandJoints(side, childJoint, allSideHandJoints);
+      }
+   }
+   
    private OneDoFJoint[] createOneDoFJointPath(RigidBody base, RigidBody endEffector)
    {
       InverseDynamicsJoint[] joints = ScrewTools.createJointPath(base, endEffector);
@@ -882,6 +902,10 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       double kUpperBody = this.kUpperBody.getDoubleValue();
       double dUpperBody = GainCalculator.computeDerivativeGain(kUpperBody, zetaUpperBody.getDoubleValue());
 
+      for(RobotSide robotSide : RobotSide.values)
+      {
+         doPDControl(handJoints.get(robotSide), kUpperBody, dUpperBody);
+      }
       doPDControl(postHeadJoints, kUpperBody, dUpperBody);
       doPDControl(neckJointsToPositionControl, kUpperBody, dUpperBody);
 
