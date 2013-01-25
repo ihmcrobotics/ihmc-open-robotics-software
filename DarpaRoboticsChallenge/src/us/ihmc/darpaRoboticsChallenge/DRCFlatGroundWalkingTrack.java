@@ -1,39 +1,33 @@
 package us.ihmc.darpaRoboticsChallenge;
 
-import us.ihmc.SdfLoader.JaxbSDFLoader;
-import us.ihmc.SdfLoader.SDFCamera;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.ControllerFactory;
-import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.FlatGroundWalkingHighLevelHumanoidControllerFactory;
-import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
+import us.ihmc.commonWalkingControlModules.terrain.TerrainType;
 import us.ihmc.darpaRoboticsChallenge.controllers.DRCRobotMomentumBasedControllerFactory;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.SquaredUpDRCRobotInitialSetup;
-import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
 import us.ihmc.projectM.R2Sim02.initialSetup.RobotInitialSetup;
 
 import com.martiansoftware.jsap.JSAPException;
-import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.inputdevices.MidiSliderBoard;
 
 public class DRCFlatGroundWalkingTrack
 {
-   private final DRCSimulation<SDFRobot> drcSimulation;
-   private final DRCDemo01NavigationEnvironment environment;
+   private final HumanoidRobotSimulation<SDFRobot> drcSimulation;
 
    public DRCFlatGroundWalkingTrack(DRCGuiInitialSetup guiInitialSetup, AutomaticSimulationRunner automaticSimulationRunner, double timePerRecordTick,
-                                    int simulationDataBufferSize, boolean doChestOrientationControl, String ipAddress, int portNumber)
+                     int simulationDataBufferSize, boolean doChestOrientationControl)
    {
       DRCSCSInitialSetup scsInitialSetup;
-      RobotInitialSetup<SDFRobot> drcRobotInitialSetup = new SquaredUpDRCRobotInitialSetup();
+      RobotInitialSetup<SDFRobot> robotInitialSetup;
       WalkingControllerParameters drcRobotParameters = new DRCRobotWalkingControllerParameters();
 
-      environment = new DRCDemo01NavigationEnvironment();
-      scsInitialSetup = new DRCSCSInitialSetup(environment);
+      robotInitialSetup = new SquaredUpDRCRobotInitialSetup();
+
+      scsInitialSetup = new DRCSCSInitialSetup(TerrainType.FLAT);
       scsInitialSetup.setSimulationDataBufferSize(simulationDataBufferSize);
 
       double dt = scsInitialSetup.getDT();
@@ -41,8 +35,6 @@ public class DRCFlatGroundWalkingTrack
       if (recordFrequency < 1)
          recordFrequency = 1;
       scsInitialSetup.setRecordFrequency(recordFrequency);
-
-
 
       DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
       YoVariableRegistry registry = new YoVariableRegistry("adjustableParabolicTrajectoryDemoSimRegistry");
@@ -56,35 +48,11 @@ public class DRCFlatGroundWalkingTrack
             inPlaceWidth, maxStepLength, minStepWidth, maxStepWidth, stepPitch);
       ControllerFactory controllerFactory = new DRCRobotMomentumBasedControllerFactory(highLevelHumanoidControllerFactory, true);
 
-      
-
-//    r2Simulation = new R2Simulation(environment, r2InitialSetup, sensorNoiseInitialSetup, controllerFactory, scsInitialSetup, guiInitialSetup);
-      JaxbSDFLoader jaxbSDFLoader = DRCRobotSDFLoader.loadDRCRobot();
-      SDFRobot robot = jaxbSDFLoader.getRobot();
-      FullRobotModel fullRobotModel = jaxbSDFLoader.getFullRobotModel();
-      CommonWalkingReferenceFrames referenceFrames = jaxbSDFLoader.getReferenceFrames();
-      drcSimulation = new DRCSimulation<SDFRobot>(robot, environment, drcRobotInitialSetup, controllerFactory, scsInitialSetup, guiInitialSetup, fullRobotModel, referenceFrames);
-
-      SimulationConstructionSet simulationConstructionSet = drcSimulation.getSimulationConstructionSet();
-      MidiSliderBoard sliderBoard = new MidiSliderBoard(simulationConstructionSet);
-      int i = 1;
-
-      // TODO: get these from CommonAvatarUserInterface once it exists:
-      sliderBoard.setSlider(i++, "desiredICPParameterX", getSimulationConstructionSet(), 0.0, 1.0);
-      sliderBoard.setSlider(i++, "desiredICPParameterY", getSimulationConstructionSet(), 0.0, 1.0);
-      sliderBoard.setSlider(i++, "desiredHeadingFinal", getSimulationConstructionSet(), Math.toRadians(-30.0), Math.toRadians(30.0));
-      sliderBoard.setSlider(i++, "desiredPelvisPitch", getSimulationConstructionSet(), Math.toRadians(-20.0), Math.toRadians(20.0));
-      sliderBoard.setSlider(i++, "desiredPelvisRoll", getSimulationConstructionSet(), Math.toRadians(-20.0), Math.toRadians(20.0));
-      sliderBoard.setSlider(i++, "desiredCenterOfMassHeightFinal", getSimulationConstructionSet(), 0.42, 1.5);
-
-      setUpJoyStick(getSimulationConstructionSet());
+      drcSimulation = DRCSimulationFactory.createSimulation(controllerFactory, null, robotInitialSetup, scsInitialSetup, guiInitialSetup);
 
       // add other registries
       drcSimulation.addAdditionalDynamicGraphicObjectsListRegistries(dynamicGraphicObjectsListRegistry);
       drcSimulation.addAdditionalYoVariableRegistriesToSCS(registry);
-
-      simulationConstructionSet.setCameraPosition(6.0, -2.0, 4.5);
-      simulationConstructionSet.setCameraFix(-0.44, -0.17, 0.75);
 
       if (automaticSimulationRunner != null)
       {
@@ -94,38 +62,6 @@ public class DRCFlatGroundWalkingTrack
       {
          drcSimulation.start(null);
       }
-
-      if (DRCConfigParameters.STREAM_VIDEO)
-      {
-         System.out.println("Streaming SCS Video");
-         
-         String cameraName = "left_camera_sensor";
-         CameraConfiguration videoConfiguration = new CameraConfiguration(cameraName);
-         videoConfiguration.setCameraMount(cameraName);
-         
-         SDFCamera camera = drcSimulation.getRobot().getCamera(cameraName);
-         int width = camera.getWidth();
-         int height = camera.getHeight();
-         
-         // Decrease resolution to improve performance
-         // TODO: Revert to full resolution images
-         width = 640;
-         height = 480;
-         
-         drcSimulation.getSimulationConstructionSet().startStreamingVideoData(videoConfiguration, width, height, DRCConfigParameters.BG_VIDEO_SERVER_PORT_NUMBER);
-      }
-   }
-
-   private void setUpJoyStick(SimulationConstructionSet simulationConstructionSet)
-   {
-      try
-      {
-         new DRCJoystickController(simulationConstructionSet);
-      }
-      catch (RuntimeException e)
-      {
-         System.out.println("Could not connect to joystick");
-      }
    }
 
    public static void main(String[] args) throws JSAPException
@@ -134,23 +70,6 @@ public class DRCFlatGroundWalkingTrack
 
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup();
 
-      double timePerRecordTick = 0.005;
-      int simulationDataBufferSize = 16000;
-      boolean doChestOrientationControl = true;
-      String ipAddress = null;
-      int portNumber = -1;
-      new DRCFlatGroundWalkingTrack(guiInitialSetup, automaticSimulationRunner, timePerRecordTick, simulationDataBufferSize, doChestOrientationControl,
-                                    ipAddress, portNumber);
-   }
-
-
-   public SimulationConstructionSet getSimulationConstructionSet()
-   {
-      return drcSimulation.getSimulationConstructionSet();
-   }
-
-   public DRCDemo01NavigationEnvironment getEnvironment()
-   {
-      return environment;
+      new DRCFlatGroundWalkingTrack(guiInitialSetup, automaticSimulationRunner, 0.005, 16000, true);
    }
 }
