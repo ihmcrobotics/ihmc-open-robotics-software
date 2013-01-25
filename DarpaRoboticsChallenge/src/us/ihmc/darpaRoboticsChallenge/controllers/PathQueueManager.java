@@ -7,6 +7,6 @@ public interface PathQueueManager
 
    public abstract void updateFootstepStatus(FootstepStatus footstepStatus);
 
-   public abstract void setPathReplacer(AbstractPathGenerator pathReplacer);
+   public abstract void setPathReplacer(Path pathReplacer);
 
 }
