@@ -24,7 +24,6 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.gui.GUISetterUpperRegistry;
 import com.yobotics.simulationconstructionset.robotController.RobotController;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.ground.steppingStones.SteppingStones;
 
 public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
 {
@@ -42,9 +41,9 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
 	   this.setUpServer = setUpServer;	   
    }
 
-   public RobotController getController(FullRobotModel fullRobotModel, CommonWalkingReferenceFrames referenceFrames, SteppingStones steppingStones, double controlDT,
-           DoubleYoVariable yoTime, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, GUISetterUpperRegistry guiSetterUpperRegistry,
-           TwistCalculator twistCalculator, CenterOfMassJacobian centerOfMassJacobian, SideDependentList<FootSwitchInterface> footSwitches)
+   public RobotController getController(FullRobotModel fullRobotModel, CommonWalkingReferenceFrames referenceFrames, double controlDT, DoubleYoVariable yoTime,
+           DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, GUISetterUpperRegistry guiSetterUpperRegistry, TwistCalculator twistCalculator,
+           CenterOfMassJacobian centerOfMassJacobian, SideDependentList<FootSwitchInterface> footSwitches)
    {
       double footForward = DRCRobotParameters.DRC_ROBOT_FOOT_FORWARD;
       double footBack = DRCRobotParameters.DRC_ROBOT_FOOT_BACK;
