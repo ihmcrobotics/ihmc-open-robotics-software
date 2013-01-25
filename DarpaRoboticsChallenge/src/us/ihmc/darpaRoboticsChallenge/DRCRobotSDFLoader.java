@@ -9,8 +9,8 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 
 public class DRCRobotSDFLoader
 {
-   private static final String fileName = "Models/GFE/atlas.sdf";
-   private static final String modelName = "atlas";
+   private static final String fileName = "Models/GFE/models/drc_robot/gfe.sdf";
+   private static final String modelName = "drc_robot";
    private static final String resourceDirectory = "Models/GFE/models/";
 
 
