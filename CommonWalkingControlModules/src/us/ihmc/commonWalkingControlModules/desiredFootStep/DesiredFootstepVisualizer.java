@@ -271,7 +271,7 @@ public class DesiredFootstepVisualizer
       DesiredFootstepVisualizer desiredFootstepVisualizer = new DesiredFootstepVisualizer(parentRegistry, dynamicGraphicObjectsListRegistry);
       
       SideDependentList<? extends ContactablePlaneBody> bipedFeet =  desiredFootstepVisualizer.getBipedFeet();
-      Linear2DPathBasedDesiredFootstepListGenerator linear2DPathBasedDesiredFootstepListGenerator = new Linear2DPathBasedDesiredFootstepListGenerator(ReferenceFrame.getWorldFrame(), bipedFeet);
+      FootstepGenerator footstepGenerator = new FootstepGenerator(ReferenceFrame.getWorldFrame(), bipedFeet);
       
       OverheadPath footstepPath = new OverheadPath()
       {
@@ -299,7 +299,7 @@ public class DesiredFootstepVisualizer
             return 0.0;
          }};
       
-      linear2DPathBasedDesiredFootstepListGenerator.setFootstepPath(footstepPath);
+      footstepGenerator.setFootstepPath(footstepPath);
       
       RobotSide initialStanceSide = RobotSide.LEFT;
       RobotSide swingLegSide = initialStanceSide.getOppositeSide();
@@ -309,9 +309,9 @@ public class DesiredFootstepVisualizer
       List<FramePoint> expectedContactPoints = bipedFeet.get(initialStanceSide).getContactPoints();
       
       Footstep initialStanceFootstep = new Footstep(endEffector , pose, expectedContactPoints);
-      linear2DPathBasedDesiredFootstepListGenerator.setStepLength(0.2);
-      linear2DPathBasedDesiredFootstepListGenerator.setStepWidth(0.1);
-      List<Footstep> footsteps = linear2DPathBasedDesiredFootstepListGenerator.generateDesiredFootstepList(initialStanceFootstep);
+      footstepGenerator.setStepLength(0.2);
+      footstepGenerator.setStepWidth(0.1);
+      List<Footstep> footsteps = footstepGenerator.generateDesiredFootstepList(initialStanceFootstep);
       
       long dataIdentifier = 1776L;
       FootstepConsumer footstepConsumer = new FootstepConsumer(dataIdentifier, bipedFeet.values());
