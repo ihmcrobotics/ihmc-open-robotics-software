@@ -86,6 +86,8 @@ public class SDFFullRobotModel implements FullRobotModel
       {
          String name = joint.getName();
          JointRole role = sdfJointNameMap.getJointRole(name);
+         if(role == null)
+            continue;
          switch (role)
          {
          case LEG:
