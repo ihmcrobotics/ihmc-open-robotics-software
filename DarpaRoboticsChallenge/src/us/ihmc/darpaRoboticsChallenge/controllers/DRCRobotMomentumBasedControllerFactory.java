@@ -81,10 +81,10 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
    
    private void createJointPositionServer(FullRobotModel fullRobotModel)
    {
-      int PORT = DRCConfigParameters.ROBOT_DATA_RECEIVER_PORT_NUMBER;
-      int identifier = 5;
+      int port = DRCConfigParameters.ROBOT_DATA_RECEIVER_PORT_NUMBER;
+      long identifier = DRCConfigParameters.JOINT_DATA_IDENTIFIER;
       long updatePeriodInMilliseconds = DRCConfigParameters.ROBOT_JOINT_SERVER_UPDATE_MILLIS;
-      DataObjectServer server = new DataObjectServer(PORT);
+      DataObjectServer server = new DataObjectServer(port);
       JointConfigurationDataSender jointConfigurationDataSender = new JointConfigurationDataSender(identifier, fullRobotModel.getElevator());
       jointConfigurationDataSender.registerConsumer(server);
       jointConfigurationDataSender.startUpdateThread(updatePeriodInMilliseconds);
