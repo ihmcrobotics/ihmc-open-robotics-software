@@ -1,17 +1,16 @@
 package com.yobotics.simulationconstructionset;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
-import java.util.Collections;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.yobotics.simulationconstructionset.DataBuffer.RepeatDataBufferEntryException;
-import com.yobotics.simulationconstructionset.gui.config.VarGroupList;
 
 public class DataBufferTest
 {
@@ -371,6 +370,118 @@ public class DataBufferTest
       dataBuffer.changeBufferSize(newBufferSize);
       System.out.println(newBufferSize + " " + dataBuffer.getBufferSize()); 
       assertEquals(newBufferSize, dataBuffer.getBufferSize());
+   }
+   
+   @Test
+   public void testTick()
+   {
+      int numberOfTicksAndUpdates = 20;
+      for (int i=0; i<numberOfTicksAndUpdates; i++)
+      {
+         dataBuffer.tickAndUpdate();
+      }
+      
+      dataBuffer.gotoInPoint();
+      
+      int expectedIndex = 0;
+      while(dataBuffer.getIndex() < dataBuffer.getBufferInOutLength()-1)
+      {
+         assertEquals(expectedIndex, dataBuffer.getIndex());
+         boolean rolledOver = dataBuffer.tick(1);
+         assertFalse(rolledOver);
+         expectedIndex++;
+      }
+      
+      boolean rolledOver = dataBuffer.tick(1);
+      assertTrue(rolledOver);
+      expectedIndex = 0;
+      assertEquals(expectedIndex, dataBuffer.getIndex());
+      
+      rolledOver = dataBuffer.tick(1);
+      assertFalse(rolledOver);
+      expectedIndex = 1;
+      assertEquals(expectedIndex, dataBuffer.getIndex());
+
+   }
+   
+   
+   @Test
+   public void testIsIndexBetweenInAndOutPoint()
+   {
+      assertEquals(0, dataBuffer.getIndex());
+      assertEquals(0, dataBuffer.getInPoint());
+      assertEquals(0, dataBuffer.getOutPoint());
+      assertTrue(dataBuffer.isIndexBetweenInAndOutPoint(0));
+      assertFalse(dataBuffer.isIndexBetweenInAndOutPoint(1));
+      assertFalse(dataBuffer.isIndexBetweenInAndOutPoint(-1));
+      
+      dataBuffer.tickAndUpdate();
+      assertEquals(1, dataBuffer.getIndex());
+      assertEquals(0, dataBuffer.getInPoint());
+      assertEquals(1, dataBuffer.getOutPoint());
+      assertTrue(dataBuffer.isIndexBetweenInAndOutPoint(0));
+      assertTrue(dataBuffer.isIndexBetweenInAndOutPoint(1));
+      assertFalse(dataBuffer.isIndexBetweenInAndOutPoint(-1));
+      
+      dataBuffer.tickAndUpdate();
+      assertEquals(2, dataBuffer.getIndex());
+      assertEquals(0, dataBuffer.getInPoint());
+      assertEquals(2, dataBuffer.getOutPoint());
+      assertTrue(dataBuffer.isIndexBetweenInAndOutPoint(0));
+      assertTrue(dataBuffer.isIndexBetweenInAndOutPoint(1));
+      assertTrue(dataBuffer.isIndexBetweenInAndOutPoint(2));
+      assertFalse(dataBuffer.isIndexBetweenInAndOutPoint(3));
+      assertFalse(dataBuffer.isIndexBetweenInAndOutPoint(-1));
+      
+      int numTicks = 20;
+      for (int i=0; i<numTicks; i++)
+      {
+         dataBuffer.tickAndUpdate();
+      }
+      assertEquals(dataBuffer.getOutPoint(), dataBuffer.getIndex());
+      assertEquals(0, dataBuffer.getInPoint());
+
+      assertTrue(dataBuffer.isIndexBetweenInAndOutPoint(dataBuffer.getIndex()-1));
+      assertTrue(dataBuffer.isIndexBetweenInAndOutPoint(dataBuffer.getIndex()));
+      assertFalse(dataBuffer.isIndexBetweenInAndOutPoint(dataBuffer.getIndex()+1));
+      assertFalse(dataBuffer.isIndexBetweenInAndOutPoint(dataBuffer.getInPoint()-1));
+      assertTrue(dataBuffer.isIndexBetweenInAndOutPoint(dataBuffer.getInPoint()));
+      assertTrue(dataBuffer.isIndexBetweenInAndOutPoint(dataBuffer.getInPoint()+1));
+      assertTrue(dataBuffer.isIndexBetweenInAndOutPoint(dataBuffer.getOutPoint()-1));
+      assertTrue(dataBuffer.isIndexBetweenInAndOutPoint(dataBuffer.getOutPoint()));
+      assertFalse(dataBuffer.isIndexBetweenInAndOutPoint(dataBuffer.getOutPoint()+1));
+      
+      dataBuffer.cropData();
+      dataBuffer.gotoOutPoint();
+      
+      dataBuffer.setWrapBuffer(true);
+      
+      assertEquals(dataBuffer.getOutPoint(), dataBuffer.getIndex());
+      assertEquals(0, dataBuffer.getInPoint());
+      
+      numTicks = 7;
+      
+      for (int i=0; i<numTicks; i++)
+      {
+         dataBuffer.tickAndUpdate();
+      }
+      
+      assertEquals(dataBuffer.getOutPoint(), dataBuffer.getIndex());
+      assertEquals(numTicks - 1, dataBuffer.getOutPoint());
+      assertEquals(numTicks, dataBuffer.getInPoint());
+      
+      assertTrue(dataBuffer.isIndexBetweenInAndOutPoint(dataBuffer.getIndex()-1));
+      assertTrue(dataBuffer.isIndexBetweenInAndOutPoint(dataBuffer.getIndex()));
+      assertFalse(dataBuffer.isIndexBetweenInAndOutPoint(dataBuffer.getIndex()+1));
+      
+      dataBuffer.tickAndUpdate();
+      assertEquals(dataBuffer.getOutPoint(), dataBuffer.getIndex());
+      assertEquals(dataBuffer.getOutPoint(), dataBuffer.getInPoint()-1);
+      
+      assertTrue(dataBuffer.isIndexBetweenInAndOutPoint(dataBuffer.getIndex()-1));
+      assertTrue(dataBuffer.isIndexBetweenInAndOutPoint(dataBuffer.getIndex()));
+      assertFalse(dataBuffer.isIndexBetweenInAndOutPoint(dataBuffer.getIndex()+1));
+
    }
    
 //   @Test
