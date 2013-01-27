@@ -1,14 +1,14 @@
 package us.ihmc.darpaRoboticsChallenge;
 
-import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
 import us.ihmc.projectM.R2Sim02.initialSetup.GuiInitialSetup;
 
+import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 
-public class DRCGuiInitialSetup implements GuiInitialSetup<SDFRobot>
+public class DRCGuiInitialSetup implements GuiInitialSetup
 {
-   public void initializeGUI(SimulationConstructionSet scs, SDFRobot robot)
+   public void initializeGUI(SimulationConstructionSet scs, Robot robot)
    {
       CameraConfiguration behindPelvis = new CameraConfiguration("BehindPelvis");
       behindPelvis.setCameraTracking(false, true, true, false);
