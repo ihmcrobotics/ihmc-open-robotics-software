@@ -88,7 +88,8 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
    private static final long serialVersionUID = 7436158470125024491L;
 
    private static enum WalkingState {LEFT_SUPPORT, RIGHT_SUPPORT, TRANSFER_TO_LEFT_SUPPORT, TRANSFER_TO_RIGHT_SUPPORT, DOUBLE_SUPPORT}
-   private final static boolean DEBUG=false;
+
+   private final static boolean DEBUG = false;
    private final StateMachine<WalkingState> stateMachine;
    private final CenterOfMassJacobian centerOfMassJacobian;
 
@@ -131,7 +132,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       new SideDependentList<RigidBodySpatialAccelerationControlModule>();
    private final SideDependentList<EndEffectorPoseTwistAndSpatialAccelerationCalculator> handPoseTwistAndSpatialAccelerationCalculators =
       new SideDependentList<EndEffectorPoseTwistAndSpatialAccelerationCalculator>();
-   
+
    private final SideDependentList<PositionTrajectoryGenerator> footPositionTrajectoryGenerators;
    private final DoubleProvider swingTimeProvider;
    private final SideDependentList<YoVariableDoubleProvider> onEdgeInitialAngleProviders = new SideDependentList<YoVariableDoubleProvider>();
@@ -151,14 +152,14 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
    private final FootstepProvider footstepProvider;
    private final InstantaneousCapturePointTrajectory icpTrajectoryGenerator;
    private final SideDependentList<SettableOrientationProvider> finalFootOrientationProviders = new SideDependentList<SettableOrientationProvider>();
-   
+
    private final SideDependentList<FramePose> desiredHandPoses = new SideDependentList<FramePose>();
 
    private final MechanismGeometricJacobian neckJacobian;
    private final ZUpFrame desiredHeadOrientationReferenceFrame;
    private final OneDoFJoint[] neckJointsToPositionControl;
    private final AxisAngleOrientationController headOrientationController;
-   
+
 
 
    public WalkingHighLevelHumanoidController(FullRobotModel fullRobotModel, CommonWalkingReferenceFrames referenceFrames, TwistCalculator twistCalculator,
@@ -172,7 +173,8 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
            ProcessedOutputsInterface processedOutputs, WalkingControllerParameters walkingControllerParameters)
    {
       super(fullRobotModel, centerOfMassJacobian, referenceFrames, yoTime, gravityZ, twistCalculator, bipedFeet, bipedSupportPolygons, controlDT,
-            processedOutputs, footSwitches, groundReactionWrenchDistributor, updatables, walkingControllerParameters.doStrictPelvisControl(), dynamicGraphicObjectsListRegistry);
+            processedOutputs, footSwitches, groundReactionWrenchDistributor, updatables, walkingControllerParameters.doStrictPelvisControl(),
+            dynamicGraphicObjectsListRegistry);
 
       this.centerOfMassJacobian = centerOfMassJacobian;
       this.centerOfMassHeightTrajectoryGenerator = centerOfMassHeightTrajectoryGenerator;
@@ -296,48 +298,52 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
          FramePose desiredHandPosition = new FramePose(chestFrame, walkingControllerParameters.getDesiredHandPosesWithRespectToChestFrame().get(robotSide));
 
          this.desiredHandPoses.put(robotSide, desiredHandPosition);
-         
+
          HashSet<OneDoFJoint> allSideHandJoints = new HashSet<OneDoFJoint>();
-         
+
          for (InverseDynamicsJoint handChildJoint : hand.getChildrenJoints())
          {
-            allSideHandJoints.add((OneDoFJoint)handChildJoint);
+            allSideHandJoints.add((OneDoFJoint) handChildJoint);
             createHandJoints(robotSide, handChildJoint, allSideHandJoints);
          }
+
          handJoints.put(robotSide, allSideHandJoints.toArray(new OneDoFJoint[allSideHandJoints.size()]));
       }
-      
+
       final String[] neckJointsToUseForHeadOrientationControl = walkingControllerParameters.neckJointsToUseForHeadOrientationControl();
       OneDoFJoint[] necksJointsForOrientationControl = new OneDoFJoint[neckJointsToUseForHeadOrientationControl.length];
       neckJointsToPositionControl = new OneDoFJoint[neckJoints.length - neckJointsToUseForHeadOrientationControl.length];
-      
-      
+
+
       int neckJointsForOrientationControlIndex = 0;
       int neckJointsToPositionControlIndex = 0;
-      
+
       OneDoFJointLoop:
-      for(OneDoFJoint neckJoint : neckJoints)
+      for (OneDoFJoint neckJoint : neckJoints)
       {
-         for(String neckJointName : neckJointsToUseForHeadOrientationControl)
+         for (String neckJointName : neckJointsToUseForHeadOrientationControl)
          {
-            if(neckJoint.getName().equals(neckJointName))
+            if (neckJoint.getName().equals(neckJointName))
             {
                necksJointsForOrientationControl[neckJointsForOrientationControlIndex] = neckJoint;
                neckJointsForOrientationControlIndex++;
+
                continue OneDoFJointLoop;
             }
          }
-         
+
          neckJointsToPositionControl[neckJointsToPositionControlIndex] = neckJoint;
          neckJointsToPositionControlIndex++;
       }
-      if(necksJointsForOrientationControl.length > 0)
+
+      if (necksJointsForOrientationControl.length > 0)
       {
          final RigidBody base = necksJointsForOrientationControl[0].getPredecessor();
-         final RigidBody head = necksJointsForOrientationControl[necksJointsForOrientationControl.length-1].getSuccessor();
+         final RigidBody head = necksJointsForOrientationControl[necksJointsForOrientationControl.length - 1].getSuccessor();
          this.neckJacobian = new MechanismGeometricJacobian(base, head, head.getBodyFixedFrame());
-         desiredHeadOrientationReferenceFrame = new ZUpFrame(elevatorFrame, chestOrientationControlModule.getBase().getBodyFixedFrame(), "desiredHeadOrientationReferenceFrame");
-         
+         desiredHeadOrientationReferenceFrame = new ZUpFrame(elevatorFrame, chestOrientationControlModule.getBase().getBodyFixedFrame(),
+                 "desiredHeadOrientationReferenceFrame");
+
          headOrientationController = new AxisAngleOrientationController("headOrientationController", neckJacobian.getEndEffectorFrame(), registry);
          headOrientationController.setProportionalGains(100.0, 100.0, 100.0);
          headOrientationController.setDerivativeGains(50.0, 50.0, 50.0);
@@ -348,7 +354,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
          desiredHeadOrientationReferenceFrame = null;
          headOrientationController = null;
       }
-      
+
    }
 
    private void createHandJoints(RobotSide side, InverseDynamicsJoint parentJoint, HashSet<OneDoFJoint> allSideHandJoints)
@@ -359,7 +365,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
          createHandJoints(side, childJoint, allSideHandJoints);
       }
    }
-   
+
    private OneDoFJoint[] createOneDoFJointPath(RigidBody base, RigidBody endEffector)
    {
       InverseDynamicsJoint[] joints = ScrewTools.createJointPath(base, endEffector);
@@ -465,7 +471,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       @Override
       public void doTransitionIntoAction()
       {
-         if(DEBUG)
+         if (DEBUG)
             System.out.println("WalkingHighLevelHumanoidController: enteringDoubleSupportState");
          setSupportLeg(null);
 
@@ -519,7 +525,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       @Override
       public void doTransitionOutOfAction()
       {
-         if(DEBUG)
+         if (DEBUG)
             System.out.println("WalkingHighLevelHumanoidController: leavingDoubleSupportState");
          desiredICPVelocity.set(0.0, 0.0);
       }
@@ -568,7 +574,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       @Override
       public void doTransitionIntoAction()
       {
-         if(DEBUG)
+         if (DEBUG)
             System.out.println("WalkingHighLevelHumanoidController: enteringSingleSupportState");
          RobotSide supportSide = swingSide.getOppositeSide();
          initializeTrajectory(swingSide, null);
@@ -593,7 +599,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       @Override
       public void doTransitionOutOfAction()
       {
-         if(DEBUG)
+         if (DEBUG)
             System.out.println("WalkingHighLevelController: leavingDoubleSupportState");
          upcomingSupportLeg.set(upcomingSupportLeg.getEnumValue().getOppositeSide());
 
@@ -851,7 +857,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 
       icpTrajectoryGenerator.initialize(desiredICP.getFramePoint2dCopy(), finalDesiredICP, swingTimeProvider.getValue(), omega0,
                                         amountToBeInsideSingleSupport.getDoubleValue());
-      if(DEBUG)
+      if (DEBUG)
          System.out.println("WalkingHighLevelHumanoidController: nextFootstep will change now!");
       nextFootstep = null;
    }
@@ -902,63 +908,66 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       double kUpperBody = this.kUpperBody.getDoubleValue();
       double dUpperBody = GainCalculator.computeDerivativeGain(kUpperBody, zetaUpperBody.getDoubleValue());
 
-      for(RobotSide robotSide : RobotSide.values)
+      for (RobotSide robotSide : RobotSide.values)
       {
          doPDControl(handJoints.get(robotSide), kUpperBody, dUpperBody);
       }
+
       doPDControl(postHeadJoints, kUpperBody, dUpperBody);
       doPDControl(neckJointsToPositionControl, kUpperBody, dUpperBody);
 
-      if(headOrientationController != null)
+      if (headOrientationController != null)
       {
-         doNeckControl();         
+         doNeckControl();
       }
+
       doArmControl();
    }
 
    public void doNeckControl()
-   {   
-      
-      //TODO: implement desiredHeadOrientationController
+   {
+      // TODO: implement desiredHeadOrientationController
       neckJacobian.compute();
       desiredHeadOrientationReferenceFrame.update();
       FrameOrientation desiredHeadOrientation = new FrameOrientation(desiredHeadOrientationReferenceFrame);
-     
-      final RigidBody elevator = fullRobotModel.getElevator();
-      
-          
-      SpatialAccelerationVector headAcceleration = new SpatialAccelerationVector(neckJacobian.getEndEffectorFrame(), elevatorFrame, neckJacobian.getEndEffectorFrame());
 
-      
+      final RigidBody elevator = fullRobotModel.getElevator();
+
+
+      SpatialAccelerationVector headAcceleration = new SpatialAccelerationVector(neckJacobian.getEndEffectorFrame(), elevatorFrame,
+                                                      neckJacobian.getEndEffectorFrame());
+
+
       Twist twistOfHeadWithRespectToElevator = new Twist();
       twistCalculator.packRelativeTwist(twistOfHeadWithRespectToElevator, elevator, neckJacobian.getEndEffector());
       FrameVector currentAngularVelocity = new FrameVector(neckJacobian.getEndEffectorFrame(), twistOfHeadWithRespectToElevator.getAngularPartCopy());
-            
+
       FrameVector desiredAngularAcceleration = new FrameVector(elevatorFrame);
-      headOrientationController.compute(desiredAngularAcceleration, desiredHeadOrientation, new FrameVector(elevatorFrame), currentAngularVelocity, new FrameVector(elevatorFrame));
+      headOrientationController.compute(desiredAngularAcceleration, desiredHeadOrientation, new FrameVector(elevatorFrame), currentAngularVelocity,
+                                        new FrameVector(elevatorFrame));
       headAcceleration.setAngularPart(desiredAngularAcceleration.getVector());
-      
+
       DenseMatrix64F jacobianMatrix = neckJacobian.getJacobianMatrix();
-      DenseMatrix64F jacobianInverse = new DenseMatrix64F(jacobianMatrix.getNumCols(),jacobianMatrix.getNumRows());
+      DenseMatrix64F jacobianInverse = new DenseMatrix64F(jacobianMatrix.getNumCols(), jacobianMatrix.getNumRows());
       CommonOps.pinv(jacobianMatrix, jacobianInverse);
-      
-      
-      
-      for(int i = 0; i < jacobianInverse.getNumRows(); i++)
+
+
+
+      for (int i = 0; i < jacobianInverse.getNumRows(); i++)
       {
-         Vector3d angularPart = new Vector3d(jacobianInverse.get(i, 0),jacobianInverse.get(i, 1), jacobianInverse.get(i, 2));
+         Vector3d angularPart = new Vector3d(jacobianInverse.get(i, 0), jacobianInverse.get(i, 1), jacobianInverse.get(i, 2));
          angularPart.normalize();
-         
+
          jacobianInverse.set(i, 0, angularPart.getX());
          jacobianInverse.set(i, 1, angularPart.getY());
          jacobianInverse.set(i, 2, angularPart.getZ());
-         
-         for(int j = 3; j < 6; j++)
+
+         for (int j = 3; j < 6; j++)
          {
             jacobianInverse.set(i, j, 0.0);
          }
       }
-      
+
       DenseMatrix64F nullspaceMultipliers = new DenseMatrix64F(0, 1);
       solver.setDesiredSpatialAcceleration(neckJacobian, headAcceleration, nullspaceMultipliers, jacobianInverse);
    }
