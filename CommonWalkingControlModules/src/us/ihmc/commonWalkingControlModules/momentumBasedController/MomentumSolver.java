@@ -193,7 +193,7 @@ public class MomentumSolver
          }
          else
          {
-            throw new RuntimeException("Case not yet implemented");
+            throw new RuntimeException("Case not yet implemented: baseFrame = " + baseFrame);
          }
       }
    }
