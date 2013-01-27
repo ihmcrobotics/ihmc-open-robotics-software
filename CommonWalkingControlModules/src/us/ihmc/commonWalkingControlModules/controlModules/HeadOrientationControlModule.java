@@ -11,7 +11,6 @@ import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.OriginAndPointFrame;
-import us.ihmc.utilities.math.geometry.PointXAxisAtPositionFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
@@ -73,21 +72,21 @@ public class HeadOrientationControlModule
 
    public void compute()
    {
-      neckJacobian.changeFrame(framesToTrackIn[trackingFrameIndex.getIntegerValue()]);
       neckJacobian.compute();
       FrameOrientation desiredHeadOrientation = getDesiredFrameOrientation();
-
 
       Twist twistOfHeadWithRespectToElevator = new Twist();
       twistCalculator.packRelativeTwist(twistOfHeadWithRespectToElevator, elevator, neckJacobian.getEndEffector());
       FrameVector currentAngularVelocity = new FrameVector(neckJacobian.getEndEffectorFrame(), twistOfHeadWithRespectToElevator.getAngularPartCopy());
 
-      FrameVector desiredAngularAcceleration = new FrameVector(elevatorFrame);
-      headOrientationController.compute(desiredAngularAcceleration, desiredHeadOrientation, new FrameVector(elevatorFrame), currentAngularVelocity,
+      ReferenceFrame frameToTrackIn = framesToTrackIn[trackingFrameIndex.getIntegerValue()];
+      FrameVector desiredAngularVelocity = new FrameVector(frameToTrackIn);
+      FrameVector desiredAngularAccelerationFeedForward = new FrameVector(frameToTrackIn);
+      headOrientationController.compute(desiredAngularAccelerationFeedForward, desiredHeadOrientation, desiredAngularVelocity, currentAngularVelocity,
                                         new FrameVector(elevatorFrame));
 
-      spatialAcceleration.set(neckJacobian.getEndEffectorFrame(), elevatorFrame, desiredAngularAcceleration.getReferenceFrame(), new Vector3d(),
-                              desiredAngularAcceleration.getVector());
+      spatialAcceleration.set(neckJacobian.getEndEffectorFrame(), elevatorFrame, desiredAngularAccelerationFeedForward.getReferenceFrame(), new Vector3d(),
+                              desiredAngularAccelerationFeedForward.getVector());
 
       computeSelectionMatrix(neckJacobian, selectionMatrix);
    }
