@@ -44,8 +44,9 @@ public class DRCFlatGroundWalkingTrack
       double minStepWidth = 0.15;
       double maxStepWidth = 0.4;
       double stepPitch = 0.0;
+      boolean useVelocityAndHeadingScript = true;
       FlatGroundWalkingHighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory = new FlatGroundWalkingHighLevelHumanoidControllerFactory(drcRobotParameters,
-            inPlaceWidth, maxStepLength, minStepWidth, maxStepWidth, stepPitch);
+            inPlaceWidth, maxStepLength, minStepWidth, maxStepWidth, stepPitch, useVelocityAndHeadingScript);
       ControllerFactory controllerFactory = new DRCRobotMomentumBasedControllerFactory(highLevelHumanoidControllerFactory, true);
 
       drcSimulation = DRCSimulationFactory.createSimulation(controllerFactory, null, robotInitialSetup, scsInitialSetup, guiInitialSetup);
