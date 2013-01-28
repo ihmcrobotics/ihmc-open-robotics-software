@@ -70,6 +70,11 @@ public class HeadOrientationControlModule
       parentRegistry.addChild(registry);
    }
 
+   public ReferenceFrame getElevatorFrame()
+   {
+      return elevatorFrame;
+   }
+
    public void compute()
    {
       neckJacobian.compute();
