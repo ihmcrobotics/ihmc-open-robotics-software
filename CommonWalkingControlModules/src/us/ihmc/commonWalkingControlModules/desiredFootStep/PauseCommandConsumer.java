@@ -8,6 +8,7 @@ import us.ihmc.utilities.io.streamingData.AbstractStreamingDataConsumer;
  */
 public class PauseCommandConsumer extends AbstractStreamingDataConsumer<Boolean>
 {
+   private static final boolean DEBUG = false;
    private FootstepPathCoordinator footstepPathCoordinator;
 
    public PauseCommandConsumer(long dataIdentifier, FootstepPathCoordinator footstepPathCoordinator)
@@ -18,7 +19,8 @@ public class PauseCommandConsumer extends AbstractStreamingDataConsumer<Boolean>
 
    protected void processPacket(Boolean packet)
    {
-      System.out.println("PauseCommandConsumer: processPacket");
+      if (DEBUG)
+         System.out.println("PauseCommandConsumer: processPacket");
       Boolean isPaused = (Boolean) packet;
       footstepPathCoordinator.setPaused(isPaused);
    }
