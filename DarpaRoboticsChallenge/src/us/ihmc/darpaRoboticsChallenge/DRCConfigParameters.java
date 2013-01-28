@@ -28,6 +28,9 @@ public class DRCConfigParameters
    public static final int PAUSE_COMMAND_PORT_NUMBER = 5555;
    public static final long PAUSE_COMMAND_DATA_IDENTIFIER = 5555L;
 
+   public static final int ABSOLUTE_HEADING_COMMAND_PORT_NUMBER = 6666;
+   public static final long ABSOLUTE_HEADING_COMMAND_DATA_IDENTIFIER = 6666L;
+
    public static final int LIDAR_DATA_PORT_NUMBER = 4697;
    
    public static final long ROBOT_JOINT_SERVER_UPDATE_MILLIS = 100;

@@ -21,6 +21,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.RigidBodyOrientationCo
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorTools;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredHeadOrientationProvider;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepProvider;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
@@ -161,7 +162,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
    public WalkingHighLevelHumanoidController(FullRobotModel fullRobotModel, CommonWalkingReferenceFrames referenceFrames, TwistCalculator twistCalculator,
            CenterOfMassJacobian centerOfMassJacobian, SideDependentList<? extends ContactablePlaneBody> bipedFeet, BipedSupportPolygons bipedSupportPolygons,
            SideDependentList<FootSwitchInterface> footSwitches, double gravityZ, DoubleYoVariable yoTime, double controlDT,
-           DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, FootstepProvider footstepProvider,
+           DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, FootstepProvider footstepProvider, DesiredHeadOrientationProvider desiredHeadOrientationProvider,
            CenterOfMassHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator,
            GroundReactionWrenchDistributorInterface groundReactionWrenchDistributor,
            SideDependentList<PositionTrajectoryGenerator> footPositionTrajectoryGenerators, DoubleProvider swingTimeProvider,
@@ -343,6 +344,11 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
          double headKd = GainCalculator.computeDerivativeGain(headKp, headZeta);
          headOrientationControlModule.setProportionalGains(headKp, headKp, headKp);
          headOrientationControlModule.setDerivativeGains(headKd, headKd, headKd);
+
+         if(desiredHeadOrientationProvider != null)
+         {
+            desiredHeadOrientationProvider.setHeadOrientationControlModule(headOrientationControlModule);
+         }
       }
       else
       {
