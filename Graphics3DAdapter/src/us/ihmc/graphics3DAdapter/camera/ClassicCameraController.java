@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import javax.media.j3d.Transform3D;
 import javax.vecmath.AxisAngle4d;
+import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
@@ -1107,7 +1108,8 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
 
    }
 
-   private double[] t3DMatrix = new double[16];
+   private Matrix3d rotationMatrix = new Matrix3d();
+   private Vector3d positionOffset = new Vector3d();
 
    private Vector3d zAxis = new Vector3d(), yAxis = new Vector3d(), xAxis = new Vector3d();
 
@@ -1117,68 +1119,84 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
       CameraMountInterface cameraMount = getCameraMount();
       if (isMounted() && (cameraMount != null))
       {
-         cameraMount.getTransformToScreen(currXform);
+         cameraMount.getTransformToCamera(currXform);
          return;
       }
 
-      // Note: The following you should be able to just do with Transform3D.lookAt()...
-      double delX = getCamX() - getFixX();
-      if (Double.isNaN(delX))
-         return;
-      double delY = getCamY() - getFixY();
-      if (Double.isNaN(delY))
-         return;
-      double delZ = getCamZ() - getFixZ();
-      if (Double.isNaN(delZ))
-         return;
+//      // Note: The following you should be able to just do with Transform3D.lookAt()...
+//      double delX = getCamX() - getFixX();
+//      if (Double.isNaN(delX))
+//         return;
+//      double delY = getCamY() - getFixY();
+//      if (Double.isNaN(delY))
+//         return;
+//      double delZ = getCamZ() - getFixZ();
+//      if (Double.isNaN(delZ))
+//         return;
+//
+//      // Z axis points away from camera look ray...
+//      zAxis.set(delX, delY, delZ);
+//
+//      if (zAxis.length() < 1.0e-10)
+//         zAxis.set(0.0, 0.0, -1.0); // Prevent "non-congruent transform above ViewPlatform exceptions...
+//      if (zAxis.length() > 1.0e100)
+//         return;
+//
+//      zAxis.normalize();
+//
+//      yAxis.set(0.0, 0.0, 1.0);
+//
+//      if (yAxis.equals(zAxis))
+//      {
+//         yAxis.set(0.0, 1.0, 0.0);
+//      }
+//
+//      xAxis.cross(yAxis, zAxis);
+//      xAxis.normalize();
+//
+//      yAxis.cross(zAxis, xAxis);
+//
+//      /*
+//       * double[] t3DMatrix = new double[] {xAxis.x, yAxis.x, zAxis.x,
+//       * classicCameraController.getCamX(), xAxis.y, yAxis.y, zAxis.y,
+//       * classicCameraController.getCamY(), xAxis.z, yAxis.z, zAxis.z,
+//       * classicCameraController.getCamZ(), 0.0, 0.0, 0.0, 1.0};
+//       */
+//
+//      t3DMatrix[0] = xAxis.x;
+//      t3DMatrix[1] = yAxis.x;
+//      t3DMatrix[2] = zAxis.x;
+//      t3DMatrix[3] = getCamX();
+//      t3DMatrix[4] = xAxis.y;
+//      t3DMatrix[5] = yAxis.y;
+//      t3DMatrix[6] = zAxis.y;
+//      t3DMatrix[7] = getCamY();
+//      t3DMatrix[8] = xAxis.z;
+//      t3DMatrix[9] = yAxis.z;
+//      t3DMatrix[10] = zAxis.z;
+//      t3DMatrix[11] = getCamZ();
+//      t3DMatrix[12] = 0.0;
+//      t3DMatrix[13] = 0.0;
+//      t3DMatrix[14] = 0.0;
+//      t3DMatrix[15] = 1.0;
 
-      // Z axis points away from camera look ray...
-      zAxis.set(delX, delY, delZ);
+      
+      positionOffset.set(getCamX(), getCamY(), getCamZ());
+      xAxis.set(getFixX(), getFixY(), getFixZ());
 
-      if (zAxis.length() < 1.0e-10)
-         zAxis.set(0.0, 0.0, -1.0); // Prevent "non-congruent transform above ViewPlatform exceptions...
-      if (zAxis.length() > 1.0e100)
-         return;
-
-      zAxis.normalize();
-
-      yAxis.set(0.0, 0.0, 1.0);
-
-      if (yAxis.equals(zAxis))
-      {
-         yAxis.set(0.0, 1.0, 0.0);
-      }
-
-      xAxis.cross(yAxis, zAxis);
+      xAxis.sub(positionOffset);
       xAxis.normalize();
-
+      zAxis.set(0.0, 0.0, 1.0);
       yAxis.cross(zAxis, xAxis);
-
-      /*
-       * double[] t3DMatrix = new double[] {xAxis.x, yAxis.x, zAxis.x,
-       * classicCameraController.getCamX(), xAxis.y, yAxis.y, zAxis.y,
-       * classicCameraController.getCamY(), xAxis.z, yAxis.z, zAxis.z,
-       * classicCameraController.getCamZ(), 0.0, 0.0, 0.0, 1.0};
-       */
-
-      t3DMatrix[0] = xAxis.x;
-      t3DMatrix[1] = yAxis.x;
-      t3DMatrix[2] = zAxis.x;
-      t3DMatrix[3] = getCamX();
-      t3DMatrix[4] = xAxis.y;
-      t3DMatrix[5] = yAxis.y;
-      t3DMatrix[6] = zAxis.y;
-      t3DMatrix[7] = getCamY();
-      t3DMatrix[8] = xAxis.z;
-      t3DMatrix[9] = yAxis.z;
-      t3DMatrix[10] = zAxis.z;
-      t3DMatrix[11] = getCamZ();
-      t3DMatrix[12] = 0.0;
-      t3DMatrix[13] = 0.0;
-      t3DMatrix[14] = 0.0;
-      t3DMatrix[15] = 1.0;
-
-      currXform.set(t3DMatrix);
+      zAxis.cross(xAxis, yAxis);
+      
+           
+      rotationMatrix.setColumn(0, xAxis);
+      rotationMatrix.setColumn(1, yAxis);
+      rotationMatrix.setColumn(2, zAxis);
+      
+      
+      currXform.set(rotationMatrix, positionOffset, 1.0);
 
    }
 
