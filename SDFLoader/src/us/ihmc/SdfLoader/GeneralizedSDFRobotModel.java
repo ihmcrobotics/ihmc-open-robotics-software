@@ -34,9 +34,13 @@ public class GeneralizedSDFRobotModel
       {
          links.put(sdfLink.getName(), new SDFLinkHolder(sdfLink));
       }
-      for (SDFJoint sdfJoint : sdfJoints)
+      
+      if(sdfJoints != null)
       {
-         joints.put(sdfJoint.getName(), new SDFJointHolder(sdfJoint, links.get(sdfJoint.getParent()), links.get(sdfJoint.getChild())));
+         for (SDFJoint sdfJoint : sdfJoints)
+         {
+            joints.put(sdfJoint.getName(), new SDFJointHolder(sdfJoint, links.get(sdfJoint.getParent()), links.get(sdfJoint.getChild())));
+         }
       }
 
       // Calculate transformations between joints

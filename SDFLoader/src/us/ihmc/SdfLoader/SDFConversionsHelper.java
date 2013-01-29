@@ -60,25 +60,26 @@ public class SDFConversionsHelper
 
    public static Matrix3d sdfInertiaToMatrix3d(SDFInertia sdfInertia)
    {
-      double ixx = Double.parseDouble(sdfInertia.getIxx());
-      double ixy = Double.parseDouble(sdfInertia.getIxy());
-      double ixz = Double.parseDouble(sdfInertia.getIxz());
-      double iyy = Double.parseDouble(sdfInertia.getIyy());
-      double iyz = Double.parseDouble(sdfInertia.getIyz());
-      double izz = Double.parseDouble(sdfInertia.getIzz());
       
-     
       Matrix3d inertia = new Matrix3d();
-      inertia.m00 = ixx;
-      inertia.m01 = ixy;
-      inertia.m02 = ixz;
-      inertia.m10 = ixy;
-      inertia.m11 = iyy;
-      inertia.m12 = iyz;
-      inertia.m20 = ixz;
-      inertia.m21 = iyz;
-      inertia.m22 = izz;
-      
+      if(sdfInertia != null)
+      {
+         double ixx = Double.parseDouble(sdfInertia.getIxx());
+         double ixy = Double.parseDouble(sdfInertia.getIxy());
+         double ixz = Double.parseDouble(sdfInertia.getIxz());
+         double iyy = Double.parseDouble(sdfInertia.getIyy());
+         double iyz = Double.parseDouble(sdfInertia.getIyz());
+         double izz = Double.parseDouble(sdfInertia.getIzz());
+         inertia.m00 = ixx;
+         inertia.m01 = ixy;
+         inertia.m02 = ixz;
+         inertia.m10 = ixy;
+         inertia.m11 = iyy;
+         inertia.m12 = iyz;
+         inertia.m20 = ixz;
+         inertia.m21 = iyz;
+         inertia.m22 = izz;
+      }
       return inertia;
    }
 }

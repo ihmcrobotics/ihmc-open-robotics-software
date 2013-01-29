@@ -42,8 +42,16 @@ public class JaxbSDFLoader
       GeneralizedSDFRobotModel generalizedSDFRobotModel = new GeneralizedSDFRobotModel(modelName, model, resourceDirectory);
 
       robot = new SDFRobot(generalizedSDFRobotModel, sdfJointNameMap);
-      fullRobotModel = new SDFFullRobotModel(generalizedSDFRobotModel.getRootLinks().get(0), sdfJointNameMap);
-      referenceFrames = new ReferenceFrames(fullRobotModel, sdfJointNameMap, sdfJointNameMap.getAnkleHeight());
+      if(sdfJointNameMap != null)
+      {
+         fullRobotModel = new SDFFullRobotModel(generalizedSDFRobotModel.getRootLinks().get(0), sdfJointNameMap);
+         referenceFrames = new ReferenceFrames(fullRobotModel, sdfJointNameMap, sdfJointNameMap.getAnkleHeight());
+      }
+      else
+      {
+         fullRobotModel = null;
+         referenceFrames = null;
+      }
    }
 
    public SDFRobot getRobot()

@@ -70,21 +70,24 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRo
          addJointsRecursively(child, rootJoint, MatrixTools.IDENTITY);
       }
 
-      for (RobotSide robotSide : RobotSide.values)
+      if(sdfJointNameMap != null)
       {
-         ArrayList<GroundContactPoint> groundContactPointsForSide = new ArrayList<GroundContactPoint>();
-
-         int i = 0;
-         for (Vector3d groundContactPointOffset : sdfJointNameMap.getGroundContactPointOffset(robotSide))
+         for (RobotSide robotSide : RobotSide.values)
          {
-            String jointName = sdfJointNameMap.getJointBeforeFootName(robotSide);
-            GroundContactPoint groundContactPoint = new GroundContactPoint("gc_" + jointName + "_" + i, groundContactPointOffset, this);
-            robotJoints.get(jointName).addGroundContactPoint(groundContactPoint);
-            groundContactPointsForSide.add(groundContactPoint);
-            i++;
-
+            ArrayList<GroundContactPoint> groundContactPointsForSide = new ArrayList<GroundContactPoint>();
+   
+            int i = 0;
+            for (Vector3d groundContactPointOffset : sdfJointNameMap.getGroundContactPointOffset(robotSide))
+            {
+               String jointName = sdfJointNameMap.getJointBeforeFootName(robotSide);
+               GroundContactPoint groundContactPoint = new GroundContactPoint("gc_" + jointName + "_" + i, groundContactPointOffset, this);
+               robotJoints.get(jointName).addGroundContactPoint(groundContactPoint);
+               groundContactPointsForSide.add(groundContactPoint);
+               i++;
+   
+            }
+            groundContactPoints.put(robotSide, groundContactPointsForSide);
          }
-         groundContactPoints.put(robotSide, groundContactPointsForSide);
       }
       
       

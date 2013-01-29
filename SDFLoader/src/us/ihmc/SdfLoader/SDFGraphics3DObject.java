@@ -46,6 +46,7 @@ public class SDFGraphics3DObject extends Graphics3DObject
          {
             double length = Double.parseDouble(sdfVisual.getGeometry().getCylinder().getLength());
             double radius = Double.parseDouble(sdfVisual.getGeometry().getCylinder().getRadius()); 
+            translate(0.0, 0.0, -length/2.0);
             addCylinder(length, radius, YoAppearance.White());
          }
          else if(sdfVisual.getGeometry().getBox() != null)
@@ -54,6 +55,7 @@ public class SDFGraphics3DObject extends Graphics3DObject
             double bx = Double.parseDouble(boxDimensions[0]);
             double by = Double.parseDouble(boxDimensions[1]);
             double bz = Double.parseDouble(boxDimensions[2]);
+            translate(0.0, 0.0, -bz/2.0);
             addCube(bx, by, bz, YoAppearance.AluminumMaterial());
          }
          else if(sdfVisual.getGeometry().getSphere() != null)
