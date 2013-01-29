@@ -78,7 +78,7 @@ public class SDFJointHolder
       calculateContactGains();
    }
    
-   private String createValidVariableName(String name)
+   public static String createValidVariableName(String name)
    {
       name = name.replaceAll("[//[//]///]", "");
       return name;
