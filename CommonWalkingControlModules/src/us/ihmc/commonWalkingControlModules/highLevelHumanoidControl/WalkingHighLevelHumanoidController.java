@@ -157,6 +157,8 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
    private final OneDoFJoint[] neckJointsToPositionControl;
    private final GeometricJacobian neckJacobian;
    private final HeadOrientationControlModule headOrientationControlModule;
+   
+   private final boolean checkOrbitalCondition;
 
 
 
@@ -281,6 +283,8 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       postHeadJointsList.toArray(postHeadJointsArray);
       this.postHeadJoints = new OneDoFJoint[ScrewTools.computeNumberOfJointsOfType(OneDoFJoint.class, postHeadJointsArray)];
       ScrewTools.filterJoints(postHeadJointsArray, postHeadJoints, OneDoFJoint.class);
+      
+      this.checkOrbitalCondition = walkingControllerParameters.checkOrbitalCondition();
 
       for (RobotSide robotSide : RobotSide.values())
       {
@@ -651,8 +655,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
    {
       public boolean checkCondition()
       {
-         // TODO: not really nice, but it'll do:
-         if (centerOfMassHeightTrajectoryGenerator instanceof FlatThenPolynomialCoMHeightTrajectoryGenerator)
+         if (checkOrbitalCondition)
          {
             FlatThenPolynomialCoMHeightTrajectoryGenerator flatThenPolynomialCoMHeightTrajectoryGenerator =
                (FlatThenPolynomialCoMHeightTrajectoryGenerator) centerOfMassHeightTrajectoryGenerator;

@@ -40,4 +40,9 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
    {
       return new String[] { "neck_ay" };
    }
+   
+   public boolean checkOrbitalCondition() 
+   {
+      return false;
+   }
 }
