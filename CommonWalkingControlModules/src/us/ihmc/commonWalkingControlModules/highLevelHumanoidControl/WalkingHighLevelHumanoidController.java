@@ -141,7 +141,8 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
    private final SideDependentList<OneDoFJoint[]> armJoints = new SideDependentList<OneDoFJoint[]>();
    private final OneDoFJoint[] postHeadJoints;    // on DRC robot: hokuyo_joint
    private final SideDependentList<OneDoFJoint[]> handJoints = new SideDependentList<OneDoFJoint[]>();
-
+   private final OneDoFJoint[] imuJoints; // if really intertial motion sensor, why a joint?
+   
    private final DoubleYoVariable kUpperBody = new DoubleYoVariable("kUpperBody", registry);
    private final DoubleYoVariable zetaUpperBody = new DoubleYoVariable("zetaUpperBody", registry);
    private final YoPositionProvider finalPositionProvider;
@@ -242,6 +243,15 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       this.pelvisOrientationTrajectoryGenerator = new OrientationInterpolationTrajectoryGenerator("pelvis", worldFrame, swingTimeProvider,
               initialPelvisOrientationProvider, finalPelvisOrientationProvider, registry);
 
+      List<InverseDynamicsJoint> pelvisJoints = chestControlBase.getChildrenJoints();
+      imuJoints = new OneDoFJoint[1];
+      for(InverseDynamicsJoint pjoint : pelvisJoints)
+      {
+         if (pjoint.getName().equals("imu_joint"))
+         {
+            imuJoints[0] = (OneDoFJoint)pjoint;
+         }
+      }
       comTrajectoryBagOfBalls = new BagOfBalls(500, 0.01, "comBagOfBalls", YoAppearance.Red(), registry, dynamicGraphicObjectsListRegistry);
 
       setUpStateMachine(swingTimeProvider);
@@ -288,8 +298,6 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 
          handPoseTwistAndSpatialAccelerationCalculators.put(robotSide,
                  new EndEffectorPoseTwistAndSpatialAccelerationCalculator(hand, hand.getBodyFixedFrame(), twistCalculator));
-
-
 
          final ReferenceFrame chestFrame = fullRobotModel.getChest().getBodyFixedFrame();
          FramePose desiredHandPosition = new FramePose(chestFrame, walkingControllerParameters.getDesiredHandPosesWithRespectToChestFrame().get(robotSide));
@@ -916,7 +924,12 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 
       doPDControl(postHeadJoints, kUpperBody, dUpperBody);
       doPDControl(neckJointsToPositionControl, kUpperBody, dUpperBody);
-
+      
+      if (imuJoints[0] != null)
+      {
+         doPDControl(imuJoints, kUpperBody, dUpperBody);
+      }
+      
       if (headOrientationControlModule != null)
       {
          doNeckControl();
