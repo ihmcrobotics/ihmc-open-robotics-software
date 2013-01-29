@@ -35,7 +35,7 @@ public class SDFJointHolder
 
    public SDFJointHolder(SDFJoint sdfJoint, SDFLinkHolder parent, SDFLinkHolder child)
    {
-      name = sdfJoint.getName();
+      name = createValidVariableName(sdfJoint.getName());
       String typeString = sdfJoint.getType();
 
       if (typeString.equalsIgnoreCase("revolute"))
@@ -76,6 +76,12 @@ public class SDFJointHolder
       child.setJoint(this);
       
       calculateContactGains();
+   }
+   
+   private String createValidVariableName(String name)
+   {
+      name = name.replaceAll("[//[//]///]", "");
+      return name;
    }
    
    private void calculateContactGains()
