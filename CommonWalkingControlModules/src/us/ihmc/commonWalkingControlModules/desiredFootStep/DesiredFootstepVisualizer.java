@@ -47,6 +47,7 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFrameConvexPoly
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 import com.yobotics.simulationconstructionset.util.trajectory.OverheadPath;
+import com.yobotics.simulationconstructionset.util.trajectory.StraightLineOverheadPath;
 
 public class DesiredFootstepVisualizer
 {
@@ -271,33 +272,9 @@ public class DesiredFootstepVisualizer
       DesiredFootstepVisualizer desiredFootstepVisualizer = new DesiredFootstepVisualizer(parentRegistry, dynamicGraphicObjectsListRegistry);
       
       SideDependentList<? extends ContactablePlaneBody> bipedFeet =  desiredFootstepVisualizer.getBipedFeet();
-      FootstepGenerator footstepGenerator = new FootstepGenerator(ReferenceFrame.getWorldFrame(), bipedFeet);
+      FootstepGenerator footstepGenerator = new FootstepGenerator(bipedFeet);
       
-      OverheadPath footstepPath = new OverheadPath()
-      {
-         private final double totalDistance = 10.0;
-         private double distanceAlongPath;
-         
-
-         public void compute(double distanceAlongPath)
-         {     
-            this.distanceAlongPath = distanceAlongPath;
-         }
-
-         public double getTotalDistance()
-         {
-            return totalDistance;
-         }
-
-         public FramePoint2d getPosition()
-         {
-            return new FramePoint2d(ReferenceFrame.getWorldFrame(), distanceAlongPath, 0.0);
-         }
-
-         public double getHeadingInFrame(ReferenceFrame frame)
-         {
-            return 0.0;
-         }};
+      OverheadPath footstepPath = new StraightLineOverheadPath(new FramePoint2d(ReferenceFrame.getWorldFrame()), new FramePoint2d(ReferenceFrame.getWorldFrame(),10.0,0.0),0.0);
       
       footstepGenerator.setFootstepPath(footstepPath);
       
