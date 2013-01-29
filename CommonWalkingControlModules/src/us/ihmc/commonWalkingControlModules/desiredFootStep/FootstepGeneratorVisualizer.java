@@ -188,7 +188,8 @@ public class FootstepGeneratorVisualizer
       generator.setFootstepPath(footstepPath);
       ContactablePlaneBody leftFoot = bipedFeet.get(RobotSide.LEFT);
       Footstep startStanceFootstep = new Footstep(leftFoot.getRigidBody(), startStanceFootPose, leftFoot.getContactPoints());
-      List<Footstep> footsteps = generator.generateDesiredFootstepList(startStanceFootstep);
+      generator.setStanceStart(startStanceFootstep);
+      List<Footstep> footsteps = generator.generateDesiredFootstepList();
       return footsteps;
    }
 

@@ -288,7 +288,8 @@ public class DesiredFootstepVisualizer
       Footstep initialStanceFootstep = new Footstep(endEffector , pose, expectedContactPoints);
       footstepGenerator.setStepLength(0.2);
       footstepGenerator.setStepWidth(0.1);
-      List<Footstep> footsteps = footstepGenerator.generateDesiredFootstepList(initialStanceFootstep);
+      footstepGenerator.setStanceStart(initialStanceFootstep);
+      List<Footstep> footsteps = footstepGenerator.generateDesiredFootstepList();
       
       long dataIdentifier = 1776L;
       FootstepConsumer footstepConsumer = new FootstepConsumer(dataIdentifier, bipedFeet.values());

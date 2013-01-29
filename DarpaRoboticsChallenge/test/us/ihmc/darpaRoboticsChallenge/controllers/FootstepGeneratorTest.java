@@ -90,7 +90,8 @@ public class FootstepGeneratorTest
       Footstep swingStart = FootstepUtils.getCurrentFootstep(RobotSide.LEFT, referenceFrames, bipedFeet);
       Footstep stanceStart = FootstepUtils.getCurrentFootstep(RobotSide.RIGHT, referenceFrames, bipedFeet);
       footstepGenerator.setSwingStart(swingStart);
-      footSteps=footstepGenerator.generateDesiredFootstepList(stanceStart);
+      footstepGenerator.setStanceStart(stanceStart);
+      footSteps=footstepGenerator.generateDesiredFootstepList();
    }
 
    private static void assertLastStepIsPointingCorrectly(Footstep footstep, Point3d destination)
