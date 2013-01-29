@@ -8,6 +8,10 @@ import us.ihmc.robotSide.SideDependentList;
 
 public class DRCRobotWalkingControllerParameters implements WalkingControllerParameters
 {
+   private boolean checkOrbitalCondition;
+   private double nominalHeightAboveGround;
+   private double initialHeightAboveGround;
+   
    public SideDependentList<Transform3D> getDesiredHandPosesWithRespectToChestFrame()
    {
       SideDependentList<Transform3D> handPoseWithRespectToChestFrame = new SideDependentList<Transform3D>();
@@ -43,6 +47,31 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
    
    public boolean checkOrbitalCondition() 
    {
-      return false;
+      return checkOrbitalCondition;
+   }
+   
+   public void setCheckOrbitalCondition(boolean checkOrbitalCondition) {
+      this.checkOrbitalCondition = checkOrbitalCondition;
+   }
+
+   public double nominalHeightAboveGround()
+   {
+      return nominalHeightAboveGround;
+   }
+
+   public void setNominalHeightAboveGround(double nominalHeightAboveGround)
+   {
+      this.nominalHeightAboveGround = nominalHeightAboveGround;
+      
+   }
+
+   public double initialHeightAboveGround()
+   {
+      return initialHeightAboveGround;
+   }
+
+   public void setInitialHeightAboveGround(double initialHeightAboveGround)
+   {
+      this.initialHeightAboveGround = initialHeightAboveGround;
    }
 }
