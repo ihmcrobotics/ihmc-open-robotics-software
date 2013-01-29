@@ -21,7 +21,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactSt
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.DesiredCoPAndCMPControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.CenterOfPressureResolver;
 import us.ihmc.commonWalkingControlModules.controlModules.GroundReactionMomentControlModule;
-import us.ihmc.commonWalkingControlModules.controlModules.GroundReactionWrenchDistributorInterface;
+import us.ihmc.commonWalkingControlModules.controlModules.GroundReactionWrenchDistributor;
 import us.ihmc.commonWalkingControlModules.controlModules.NoLungingDesiredCoPAndCMPControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.SacrificeDeltaCMPDesiredCoPAndCMPControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.velocityViaCoP.CapturabilityBasedDesiredCoPVisualizer;
@@ -30,7 +30,7 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalcul
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.kinematics.SpatialAccelerationProjector;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.CapturePointCalculator;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumSolver;
 import us.ihmc.commonWalkingControlModules.outputs.ProcessedOutputsInterface;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LimbName;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
@@ -63,6 +63,7 @@ import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.RevoluteJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTools;
+import us.ihmc.utilities.screwTheory.SixDoFJoint;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationCalculator;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.utilities.screwTheory.SpatialForceVector;
@@ -76,6 +77,8 @@ import us.ihmc.utilities.screwTheory.Wrench;
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.EnumYoVariable;
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.robotController.RobotController;
 import com.yobotics.simulationconstructionset.util.AxisAngleOrientationController;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
@@ -93,9 +96,14 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector2d;
  * @author twan
  *
  */
-public abstract class ICPAndMomentumBasedController extends MomentumBasedController
+public abstract class ICPAndMomentumBasedController implements RobotController
 {
    private static final long serialVersionUID = -7013956504623280825L;
+   
+   private final String name = getClass().getSimpleName();
+   protected final YoVariableRegistry registry = new YoVariableRegistry(name);
+   protected final MomentumSolver solver;
+
    protected final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    protected final ReferenceFrame elevatorFrame;
 
@@ -169,7 +177,7 @@ public abstract class ICPAndMomentumBasedController extends MomentumBasedControl
 
    private final GroundReactionMomentControlModule groundReactionMomentControlModule;
 
-   private final GroundReactionWrenchDistributorInterface groundReactionWrenchDistributor;
+   private final GroundReactionWrenchDistributor groundReactionWrenchDistributor;
    private final CenterOfPressureResolver centerOfPressureResolver = new CenterOfPressureResolver();
 
    private final SideDependentList<EndEffectorPoseTwistAndSpatialAccelerationCalculator> footPoseTwistAndSpatialAccelerationCalculators =
@@ -188,10 +196,14 @@ public abstract class ICPAndMomentumBasedController extends MomentumBasedControl
    public ICPAndMomentumBasedController(FullRobotModel fullRobotModel, CenterOfMassJacobian centerOfMassJacobian, CommonWalkingReferenceFrames referenceFrames,
            DoubleYoVariable yoTime, double gravityZ, TwistCalculator twistCalculator, SideDependentList<? extends ContactablePlaneBody> bipedFeet,
            BipedSupportPolygons bipedSupportPolygons, double controlDT, ProcessedOutputsInterface processedOutputs,
-           SideDependentList<FootSwitchInterface> footSwitches, GroundReactionWrenchDistributorInterface groundReactionWrenchDistributor,
+           SideDependentList<FootSwitchInterface> footSwitches, GroundReactionWrenchDistributor groundReactionWrenchDistributor,
            ArrayList<Updatable> updatables, boolean doStrictPelvisControl, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
-   {
-      super(fullRobotModel.getRootJoint(), referenceFrames.getCenterOfMassFrame(), twistCalculator, createJacobianSolver(), controlDT);
+   {      
+      centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
+      SixDoFJoint rootJoint= fullRobotModel.getRootJoint();
+      LinearSolver<DenseMatrix64F> jacobianSolver = createJacobianSolver();
+      this.solver = new MomentumSolver(rootJoint, rootJoint.getPredecessor(), centerOfMassFrame, twistCalculator, jacobianSolver , controlDT, registry);
+
       MathTools.checkIfInRange(gravityZ, 0.0, Double.POSITIVE_INFINITY);
 
       this.fullRobotModel = fullRobotModel;
@@ -207,7 +219,6 @@ public abstract class ICPAndMomentumBasedController extends MomentumBasedControl
 
       RigidBody elevator = fullRobotModel.getElevator();
       this.spatialAccelerationCalculator = new SpatialAccelerationCalculator(elevator, twistCalculator, gravity, true);
-      this.centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
 
       this.processedOutputs = processedOutputs;
       this.gravityZ = gravityZ;
@@ -793,5 +804,25 @@ public abstract class ICPAndMomentumBasedController extends MomentumBasedControl
       }
 
       bipedSupportPolygons.update(footContactPoints);
+   }
+   
+   public void initialize()
+   {
+      solver.initialize();
+   }
+
+   public YoVariableRegistry getYoVariableRegistry()
+   {
+      return registry;
+   }
+
+   public String getName()
+   {
+      return name;
+   }
+
+   public String getDescription()
+   {
+      return getName();
    }
 }

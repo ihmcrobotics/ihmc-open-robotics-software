@@ -15,7 +15,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactStat
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.calculators.GainCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.controlModules.GroundReactionWrenchDistributorInterface;
+import us.ihmc.commonWalkingControlModules.controlModules.GroundReactionWrenchDistributor;
 import us.ihmc.commonWalkingControlModules.controlModules.HeadOrientationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodyOrientationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
@@ -164,7 +164,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
            SideDependentList<FootSwitchInterface> footSwitches, double gravityZ, DoubleYoVariable yoTime, double controlDT,
            DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, FootstepProvider footstepProvider, DesiredHeadOrientationProvider desiredHeadOrientationProvider,
            CenterOfMassHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator,
-           GroundReactionWrenchDistributorInterface groundReactionWrenchDistributor,
+           GroundReactionWrenchDistributor groundReactionWrenchDistributor,
            SideDependentList<PositionTrajectoryGenerator> footPositionTrajectoryGenerators, DoubleProvider swingTimeProvider,
            YoPositionProvider finalPositionProvider, boolean stayOntoes, double desiredPelvisPitch, double trailingFootPitch, ArrayList<Updatable> updatables,
            ProcessedOutputsInterface processedOutputs, WalkingControllerParameters walkingControllerParameters)

@@ -28,7 +28,7 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject
  * Contact States surface normals must be straight up, i.e. their reference frames must be ZUp Frames.
  * The Center of Pressure will be resolved in world frame, particularly with z=0 and ZUp surface normal.
  */
-public class GeometricFlatGroundReactionWrenchDistributor implements GroundReactionWrenchDistributorInterface
+public class GeometricFlatGroundReactionWrenchDistributor implements GroundReactionWrenchDistributor
 {
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    

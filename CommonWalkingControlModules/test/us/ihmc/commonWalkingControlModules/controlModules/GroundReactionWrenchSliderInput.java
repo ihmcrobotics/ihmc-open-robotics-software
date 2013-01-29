@@ -52,7 +52,7 @@ public class GroundReactionWrenchSliderInput
 //    GroundReactionWrenchDistributorInterface distributor = new LeeGoswamiGroundReactionWrenchDistributor(centerOfMassFrame, nSupportVectors, parentRegistry);
       
       ContactPointWrenchDistributorSliderInput contactPointWrenchDistributorSliderInput = new ContactPointWrenchDistributorSliderInput(scs, registry, centerOfMassFrame);
-      GroundReactionWrenchDistributorInterface distributor = contactPointWrenchDistributorSliderInput.getDistributor();
+      GroundReactionWrenchDistributor distributor = contactPointWrenchDistributorSliderInput.getDistributor();
       
       dynamicGraphicObjectsListRegistry.addDynamicGraphicsObjectListsToSimulationConstructionSet(scs);
       
