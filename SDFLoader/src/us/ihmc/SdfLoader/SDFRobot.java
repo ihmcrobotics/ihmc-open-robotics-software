@@ -28,7 +28,7 @@ import com.yobotics.simulationconstructionset.PinJoint;
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.graphics.GraphicsObjectsHolder;
 
-public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRobot // TODO: make an SDFHumanoidRobot
+public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRobot    // TODO: make an SDFHumanoidRobot
 {
    private static final long serialVersionUID = 5864358637898048080L;
 
@@ -40,7 +40,7 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRo
    private final SideDependentList<ArrayList<GroundContactPoint>> groundContactPoints = new SideDependentList<ArrayList<GroundContactPoint>>();
 
    private final HashMap<String, SDFCamera> cameras = new HashMap<String, SDFCamera>();
-   
+
    public SDFRobot(GeneralizedSDFRobotModel generalizedSDFRobotModel, SDFJointNameMap sdfJointNameMap)
    {
       super(generalizedSDFRobotModel.getName());
@@ -70,12 +70,12 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRo
          addJointsRecursively(child, rootJoint, MatrixTools.IDENTITY);
       }
 
-      if(sdfJointNameMap != null)
+      if (sdfJointNameMap != null)
       {
          for (RobotSide robotSide : RobotSide.values)
          {
             ArrayList<GroundContactPoint> groundContactPointsForSide = new ArrayList<GroundContactPoint>();
-   
+
             int i = 0;
             for (Vector3d groundContactPointOffset : sdfJointNameMap.getGroundContactPointOffset(robotSide))
             {
@@ -83,14 +83,20 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRo
                GroundContactPoint groundContactPoint = new GroundContactPoint("gc_" + jointName + "_" + i, groundContactPointOffset, this);
                robotJoints.get(jointName).addGroundContactPoint(groundContactPoint);
                groundContactPointsForSide.add(groundContactPoint);
+               Graphics3DObject graphics = robotJoints.get(jointName).getLink().getLinkGraphics();
+
+//             graphics.identity();
+//             graphics.translate(groundContactPointOffset);
+//             graphics.addSphere(0.01, YoAppearance.Orange());
                i++;
-   
+
             }
+
             groundContactPoints.put(robotSide, groundContactPointsForSide);
          }
       }
-      
-      
+
+
       Point3d centerOfMass = new Point3d();
       double totalMass = computeCenterOfMass(centerOfMass);
       System.out.println("Total mass: " + totalMass);
@@ -114,7 +120,7 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRo
 
    private void addJointsRecursively(SDFJointHolder joint, Joint scsParentJoint, Matrix3d chainRotationIn)
    {
-//      System.out.println("Adding joint " + joint.getName() + " to " + scsParentJoint.getName());
+//    System.out.println("Adding joint " + joint.getName() + " to " + scsParentJoint.getName());
       Vector3d offset = new Vector3d();
       Matrix3d rotation = new Matrix3d();
       Transform3D transform = new Transform3D();
@@ -132,12 +138,25 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRo
       scsParentJoint.addJoint(scsJoint);
 
       addCameraMounts(scsJoint, joint.getChild());
-      
 
-      
-//      scsJoint.setLimitStops(joint.getLowerLimit(), joint.getUpperLimit(), 0.0001 * joint.getContactKp(), joint.getContactKd());
-      scsJoint.setLimitStops(joint.getLowerLimit(), joint.getUpperLimit(), 100.0, 25.0);
-      
+
+
+      if ((joint.getContactKd() == 0.0) && (joint.getContactKp() == 0.0))
+      {
+         if (scsJoint.getName().contains("finger"))
+         {
+            scsJoint.setLimitStops(joint.getLowerLimit(), joint.getUpperLimit(), 10.0, 2.5);
+         }
+         else
+         {
+            scsJoint.setLimitStops(joint.getLowerLimit(), joint.getUpperLimit(), 100.0, 20.0);
+         }
+      }
+      else
+      {
+         scsJoint.setLimitStops(joint.getLowerLimit(), joint.getUpperLimit(), 0.0001 * joint.getContactKp(), joint.getContactKd());
+      }
+
       robotJoints.put(joint.getName(), scsJoint);
 
       for (SDFJointHolder child : joint.getChild().getChilderen())
@@ -149,15 +168,16 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRo
 
    private void addCameraMounts(PinJoint scsJoint, SDFLinkHolder child)
    {
-      if(child.getSensors() != null)
+      if (child.getSensors() != null)
       {
-         for(SDFSensor sensor : child.getSensors())
+         for (SDFSensor sensor : child.getSensors())
          {
-            if("camera".equals(sensor.getType()))
+            if ("camera".equals(sensor.getType()) || "multicamera".equals(sensor.getType()))
             {
+               // TODO: handle left and right sides of multicamera
                final Camera camera = sensor.getCamera();
-               
-               if(camera != null)
+
+               if (camera != null)
                {
                   Transform3D pose = SDFConversionsHelper.poseToTransform(sensor.getPose());
                   double fieldOfView = Double.parseDouble(camera.getHorizontalFov());
@@ -165,7 +185,7 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRo
                   double clipFar = Double.parseDouble(camera.getClip().getFar());
                   CameraMount mount = new CameraMount(sensor.getName(), pose, fieldOfView, clipNear, clipFar, this);
                   scsJoint.addCameraMount(mount);
-                  
+
                   SDFCamera sdfCamera = new SDFCamera(Integer.parseInt(camera.getImage().getWidth()), Integer.parseInt(camera.getImage().getHeight()));
                   cameras.put(sensor.getName(), sdfCamera);
                }
@@ -174,6 +194,7 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRo
                   System.err.println("JAXB loader: No camera section defined for camera sensor " + sensor.getName() + ", ignoring sensor.");
                }
             }
+
          }
       }
    }
@@ -187,7 +208,7 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRo
       scsLink.setComOffset(link.getCoMOffset());
       scsLink.setMass(link.getMass());
       scsLink.setMomentOfInertia(link.getInertia());
-      
+
       return scsLink;
 
    }
@@ -196,21 +217,24 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRo
    {
       FrameVector ret = new FrameVector(ReferenceFrame.getWorldFrame());
       rootJoint.getVelocity(ret.getVector());
+
       return ret;
    }
-   
+
    public FrameVector getPelvisAngularVelocityInPelvisFrame(ReferenceFrame pelvisFrame)
    {
       Vector3d angularVelocity = rootJoint.getAngularVelocityInBody();
+
       return new FrameVector(pelvisFrame, angularVelocity);
    }
 
    public Graphics3DObject getGraphicsObject(String name)
    {
-      if(rootJoint.getName().equals(name))
+      if (rootJoint.getName().equals(name))
       {
          return rootJoint.getLink().getLinkGraphics();
       }
+
       return robotJoints.get(name).getLink().getLinkGraphics();
    }
 
