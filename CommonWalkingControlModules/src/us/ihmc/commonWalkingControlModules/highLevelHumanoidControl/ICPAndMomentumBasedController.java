@@ -510,8 +510,8 @@ public abstract class ICPAndMomentumBasedController implements RobotController
       double rotationalCoefficientOfFriction = 0.5;    // TODO
 
       
-      groundReactionWrenchDistributor.reset();
-//      groundReactionWrenchDistributorInputData.reset();
+//      groundReactionWrenchDistributor.reset();
+      groundReactionWrenchDistributorInputData.reset();
       
       for (RobotSide robotSide : RobotSide.values)
       {
