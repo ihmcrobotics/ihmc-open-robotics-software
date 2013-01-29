@@ -35,7 +35,7 @@ public abstract class MomentumBasedController implements RobotController
 
    public String getName()
    {
-      return getName();
+      return name;
    }
 
    public String getDescription()

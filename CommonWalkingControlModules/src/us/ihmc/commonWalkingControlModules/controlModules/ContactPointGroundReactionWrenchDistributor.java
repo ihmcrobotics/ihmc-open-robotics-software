@@ -23,7 +23,7 @@ import us.ihmc.utilities.screwTheory.Wrench;
 
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
-public class ContactPointGroundReactionWrenchDistributor implements GroundReactionWrenchDistributorInterface
+public class ContactPointGroundReactionWrenchDistributor implements GroundReactionWrenchDistributor
 {
    private final ReferenceFrame centerOfMassFrame;
 

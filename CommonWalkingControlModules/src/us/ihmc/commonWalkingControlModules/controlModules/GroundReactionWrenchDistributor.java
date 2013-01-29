@@ -6,7 +6,7 @@ import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.screwTheory.SpatialForceVector;
 
-public interface GroundReactionWrenchDistributorInterface
+public interface GroundReactionWrenchDistributor
 {
 
    public abstract void reset();

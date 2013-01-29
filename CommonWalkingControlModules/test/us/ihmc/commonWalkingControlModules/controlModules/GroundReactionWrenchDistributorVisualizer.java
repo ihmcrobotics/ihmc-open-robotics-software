@@ -111,7 +111,7 @@ public class GroundReactionWrenchDistributorVisualizer
       parentRegistry.addChild(registry);
    }
    
-   public void update(SimulationConstructionSet scs, GroundReactionWrenchDistributorInterface distributor, ReferenceFrame centerOfMassFrame, ArrayList<PlaneContactState> contactStates, SpatialForceVector desiredBodyWrench)
+   public void update(SimulationConstructionSet scs, GroundReactionWrenchDistributor distributor, ReferenceFrame centerOfMassFrame, ArrayList<PlaneContactState> contactStates, SpatialForceVector desiredBodyWrench)
    {
       try
       {

@@ -27,7 +27,7 @@ import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
-public class GeometricStairsGroundReactionWrenchDistributor implements GroundReactionWrenchDistributorInterface
+public class GeometricStairsGroundReactionWrenchDistributor implements GroundReactionWrenchDistributor
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final VirtualToePointCalculator virtualToePointCalculator;
