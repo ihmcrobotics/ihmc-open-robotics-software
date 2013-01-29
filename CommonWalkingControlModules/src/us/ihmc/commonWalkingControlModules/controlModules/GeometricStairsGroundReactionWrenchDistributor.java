@@ -242,7 +242,7 @@ public class GeometricStairsGroundReactionWrenchDistributor implements GroundRea
       outputData.reset();
       for (PlaneContactState planeContactState : contactStates)
       {
-         outputData.set(planeContactState, forces.get(planeContactState), centersOfPressure.get(planeContactState), normalTorques.get(planeContactState));
+         outputData.set(planeContactState, getForce(planeContactState), getCenterOfPressure(planeContactState), getNormalTorque(planeContactState));
       }
    }
    

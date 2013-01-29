@@ -95,7 +95,7 @@ public class LeeGoswamiGroundReactionWrenchDistributor implements GroundReaction
       outputData.reset();
       for (PlaneContactState planeContactState : forces.keySet())
       {
-         outputData.set(planeContactState, forces.get(planeContactState), centersOfPressure.get(planeContactState), normalTorques.get(planeContactState));
+         outputData.set(planeContactState, getForce(planeContactState), getCenterOfPressure(planeContactState), getNormalTorque(planeContactState));
       }
    }
    
