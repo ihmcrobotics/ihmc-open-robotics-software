@@ -21,10 +21,12 @@ public class SDFGraphics3DObject extends Graphics3DObject
 
    public SDFGraphics3DObject(Matrix3d rotation, List<SDFVisual> sdfVisuals, String resourceDirectory)
    {
-      rotate(rotation);
       
       for(SDFVisual sdfVisual : sdfVisuals)
       {
+         identity();
+         rotate(rotation);
+         
          Transform3D visualPose = SDFConversionsHelper.poseToTransform(sdfVisual.getPose());
          Vector3d modelOffset = new Vector3d();
          Matrix3d modelRotation = new Matrix3d();
@@ -68,9 +70,8 @@ public class SDFGraphics3DObject extends Graphics3DObject
             System.err.println("Visual for " + sdfVisual.getName() + " not implemented yet");
          }
 
-         identity();
+         
       }
-      identity();
    }
    
    private void addMesh(String mesh, Transform3D visualPose)
