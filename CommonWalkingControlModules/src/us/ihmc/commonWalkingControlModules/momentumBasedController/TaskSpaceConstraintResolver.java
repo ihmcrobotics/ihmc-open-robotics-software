@@ -63,7 +63,7 @@ public class TaskSpaceConstraintResolver
       int size = Momentum.SIZE;
       this.aTaskSpace = new DenseMatrix64F(size, size);    // reshaped
       this.vdotTaskSpace = new DenseMatrix64F(size, 1);    // reshaped
-      this.cTaskSpace = new DenseMatrix64F(size, 1);    // reshaped
+      this.cTaskSpace = new DenseMatrix64F(size, 1);
       this.taskSpaceAccelerationMatrix = new DenseMatrix64F(size, 1);
       this.sJInverse = new DenseMatrix64F(size, size);    // reshaped
       this.sJ = new DenseMatrix64F(size, size);    // reshaped
@@ -128,14 +128,17 @@ public class TaskSpaceConstraintResolver
          nullspaceCalculator.removeNullspaceComponent(sJInverse);
       }
 
+      // Phi
+      DenseMatrix64F phi = new DenseMatrix64F(sJInverse.getNumRows(), selectionMatrix.getNumCols());    // TODO: garbage
+      CommonOps.mult(sJInverse, selectionMatrix, phi);
+
       // cTaskSpace
-      cTaskSpace.reshape(selectionMatrix.getNumRows(), 1);
       cTaskSpace.zero();
-      CommonOps.multAdd(1.0, selectionMatrix, taskSpaceAccelerationMatrix, cTaskSpace);
-      CommonOps.multAdd(-1.0, selectionMatrix, convectiveTermMatrix, cTaskSpace);
+      cTaskSpace.reshape(taskSpaceAccelerationMatrix.getNumRows(), 1);
+      CommonOps.sub(taskSpaceAccelerationMatrix, convectiveTermMatrix, cTaskSpace);
 
       // d
-      CommonOps.mult(sJInverse, cTaskSpace, d);
+      CommonOps.mult(phi, cTaskSpace, d);
 
       if (nullity > 0)
       {
@@ -143,14 +146,12 @@ public class TaskSpaceConstraintResolver
       }
 
       // update aHatRoot
-      DenseMatrix64F sJInverseS = new DenseMatrix64F(sJInverse.getNumRows(), selectionMatrix.getNumCols());    // TODO: garbage
-      CommonOps.mult(sJInverse, selectionMatrix, sJInverseS);
-      CommonOps.multAdd(-1.0, aTaskSpace, sJInverseS, aHatRoot);
+      CommonOps.multAdd(-1.0, aTaskSpace, phi, aHatRoot);
 
       // update b
       CommonOps.multAdd(-1.0, aTaskSpace, d, b);
 
-      jacobianInverseMap.put(jacobian, sJInverseS);
+      jacobianInverseMap.put(jacobian, phi);
       dMap.put(jacobian, d);
    }
 
