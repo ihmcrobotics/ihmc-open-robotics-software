@@ -139,19 +139,15 @@ public class FootstepGeneratorVisualizer
    public static void main(String[] args)
    {
       Robot nullRobot = new Robot("FootstepVisualizerRobot");
-      SimulationConstructionSet scs = new SimulationConstructionSet(nullRobot);
-      scs.setDT(0.25, 1);
-      
-      int maxNumberOfContacts = 2;
-      int maxPointsPerContact = 4;
-      YoVariableRegistry rootRegistry = scs.getRootRegistry();
-      DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
-      FootstepGeneratorVisualizer footstepGeneratorVisualizer = new FootstepGeneratorVisualizer(maxNumberOfContacts, maxPointsPerContact, rootRegistry, dynamicGraphicObjectsListRegistry);
-   
-      double heading = Math.PI;
-      double stepAngle = Math.PI/16.0;
-      double stepWidth = 0.2;
+
+      List<Footstep> footsteps = generateDefaultFootstepList();
      
+      visualizeFootsteps(nullRobot, footsteps);
+   }
+
+
+   public static List<Footstep> generateDefaultFootstepList()
+   {
       SideDependentList<ContactablePlaneBody> bipedFeet = new SideDependentList<ContactablePlaneBody>();
       SideDependentList<PoseReferenceFrame> soleFrames = new  SideDependentList<PoseReferenceFrame>();
       SideDependentList<SixDoFJoint> sixDoFJoints = new  SideDependentList<SixDoFJoint>();
@@ -177,53 +173,72 @@ public class FootstepGeneratorVisualizer
          bipedFeet.set(robotSide, contactableBody);
       }
       
-      FramePose startStanceFootPose = new FramePose(worldFrame, new Point3d(0.0, 0.2, 0.0), new Quat4d());
-      FramePose startSwingFootPose = new FramePose(worldFrame, new Point3d(0.0, -0.2, 0.0), new Quat4d());
-      ContactablePlaneBody leftFoot = bipedFeet.get(RobotSide.LEFT);
-      ContactablePlaneBody rightFoot = bipedFeet.get(RobotSide.RIGHT);
    
-      soleFrames.get(RobotSide.LEFT).updatePose(startStanceFootPose);
-      soleFrames.get(RobotSide.RIGHT).updatePose(startSwingFootPose);
       
-      soleFrames.get(RobotSide.LEFT).update();
-      soleFrames.get(RobotSide.RIGHT).update();
+      FramePose startStanceFootPose = setupStanceFoot(soleFrames, sixDoFJoints);
+      FramePose startSwingFootPose = setupSwingFoot(soleFrames, sixDoFJoints);
       
-      Point3d stanceAnklePosition = startStanceFootPose.getPosition().getPointCopy();
-      Point3d swingAnklePosition = startSwingFootPose.getPosition().getPointCopy();
-      
-      // No idea why this isn't changing anything
-//    stanceAnklePosition.setZ(stanceAnklePosition.getZ() + 0.1);
-//    swingAnklePosition.setZ(swingAnklePosition.getZ() + 0.1);
-      
-      sixDoFJoints.get(RobotSide.LEFT).setPosition(stanceAnklePosition);
-      sixDoFJoints.get(RobotSide.RIGHT).setPosition(swingAnklePosition);
-      
-      Footstep startStanceFootstep = new Footstep(leftFoot.getRigidBody(), startStanceFootPose, leftFoot.getContactPoints());
+     
+
+      FootstepGenerator generator = new FootstepGenerator( bipedFeet);
+      ContactablePlaneBody rightFoot = bipedFeet.get(RobotSide.RIGHT);
       Footstep startSwingFootstep = new Footstep(rightFoot.getRigidBody(), startSwingFootPose, rightFoot.getContactPoints());
-     
-      dynamicGraphicObjectsListRegistry.addDynamicGraphicsObjectListsToSimulationConstructionSet(scs);
-
-
-//      ArrayList<Footstep> footsteps = FootstepUtils.makeTurningFootsteps(heading, stepAngle, stepWidth, startStanceFootstep, startSwingFootstep, bipedFeet);
-      FootstepGenerator generator = new FootstepGenerator(worldFrame, bipedFeet);
-            
       generator.setSwingStart(startSwingFootstep);
-      
-      FramePoint2d startPoint = new FramePoint2d(worldFrame, new Point2d(0.0, 0.0));
-      FramePoint2d endPoint = new FramePoint2d(worldFrame, new Point2d(-5.0, 0.0));
-      
-      OverheadPath footstepPath = new StraightLineOverheadPath(startPoint, endPoint);
+      OverheadPath footstepPath = generateSimpleOverheadPath();
       generator.setFootstepPath(footstepPath);
-      
+      ContactablePlaneBody leftFoot = bipedFeet.get(RobotSide.LEFT);
+      Footstep startStanceFootstep = new Footstep(leftFoot.getRigidBody(), startStanceFootPose, leftFoot.getContactPoints());
       List<Footstep> footsteps = generator.generateDesiredFootstepList(startStanceFootstep);
+      return footsteps;
+   }
 
-//      ArrayList<Footstep> footsteps = FootstepUtils.(heading, stepAngle, stepWidth, startStanceFootstep, startSwingFootstep, bipedFeet);
-     
+
+   public static FramePose setupStanceFoot(SideDependentList<PoseReferenceFrame> soleFrames, SideDependentList<SixDoFJoint> sixDoFJoints)
+   {
+      FramePose startStanceFootPose = new FramePose(worldFrame, new Point3d(0.0, 0.2, 0.0), new Quat4d());
+      soleFrames.get(RobotSide.LEFT).updatePose(startStanceFootPose);
+      soleFrames.get(RobotSide.LEFT).update();
+      Point3d stanceAnklePosition = startStanceFootPose.getPosition().getPointCopy();
+      sixDoFJoints.get(RobotSide.LEFT).setPosition(stanceAnklePosition);
+      return startStanceFootPose;
+   }
+
+
+   public static FramePose setupSwingFoot(SideDependentList<PoseReferenceFrame> soleFrames, SideDependentList<SixDoFJoint> sixDoFJoints)
+   {
+      FramePose startSwingFootPose = new FramePose(worldFrame, new Point3d(0.0, -0.2, 0.0), new Quat4d());
+      soleFrames.get(RobotSide.RIGHT).updatePose(startSwingFootPose);
+      soleFrames.get(RobotSide.RIGHT).update();
+      Point3d swingAnklePosition = startSwingFootPose.getPosition().getPointCopy();
+      sixDoFJoints.get(RobotSide.RIGHT).setPosition(swingAnklePosition);
+      return startSwingFootPose;
+   }
+
+
+   public static void visualizeFootsteps(Robot nullRobot, List<Footstep> footsteps)
+   {
+      SimulationConstructionSet scs = new SimulationConstructionSet(nullRobot);
+      scs.setDT(0.25, 1);
+      YoVariableRegistry rootRegistry = scs.getRootRegistry();
+      DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
+      int maxNumberOfContacts = 2;
+      int maxPointsPerContact = 4;
+      FootstepGeneratorVisualizer footstepGeneratorVisualizer = new FootstepGeneratorVisualizer(maxNumberOfContacts, maxPointsPerContact, rootRegistry, dynamicGraphicObjectsListRegistry);
+      dynamicGraphicObjectsListRegistry.addDynamicGraphicsObjectListsToSimulationConstructionSet(scs);
       footstepGeneratorVisualizer.addFootstepsAndTickAndUpdate(scs, footsteps);
          
       scs.startOnAThread();
       
       deleteFirstDataPointAndCropData(scs);
+   }
+
+
+   public static OverheadPath generateSimpleOverheadPath()
+   {
+      FramePoint2d startPoint = new FramePoint2d(worldFrame, new Point2d(0.0, 0.0));
+      FramePoint2d endPoint = new FramePoint2d(worldFrame, new Point2d(-5.0, 0.0));
+      OverheadPath footstepPath = new StraightLineOverheadPath(startPoint, endPoint,0.0);
+      return footstepPath;
    }
 
    private static void deleteFirstDataPointAndCropData(SimulationConstructionSet scs)
