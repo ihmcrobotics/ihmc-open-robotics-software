@@ -572,14 +572,14 @@ public class MomentumSolverTest
    private static void setRandomPositionsAndVelocities(Random random, RigidBody elevator, List<SixDoFJoint> sixDoFJoints,
            List<? extends OneDoFJoint> oneDoFJoints)
    {
-      ScrewTestTools.setRandomPositions(oneDoFJoints, random);
-      ScrewTestTools.setRandomVelocities(oneDoFJoints, random);
-
       for (SixDoFJoint sixDoFJoint : sixDoFJoints)
       {
          ScrewTestTools.setRandomPositionAndOrientation(sixDoFJoint, random);
          ScrewTestTools.setRandomVelocity(sixDoFJoint, random);
       }
+
+      ScrewTestTools.setRandomPositions(oneDoFJoints, random);
+      ScrewTestTools.setRandomVelocities(oneDoFJoints, random);
 
       elevator.updateFramesRecursively();
    }
