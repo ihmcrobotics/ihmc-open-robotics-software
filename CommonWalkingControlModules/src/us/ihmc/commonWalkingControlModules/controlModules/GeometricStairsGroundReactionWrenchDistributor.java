@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -78,6 +79,24 @@ public class GeometricStairsGroundReactionWrenchDistributor implements GroundRea
       up = new FrameVector(centerOfMassFrame, 0.0, 0.0, 1.0);
    }
 
+   public void resetAndSolve(GroundReactionWrenchDistributorInputData groundReactionWrenchDistributorInputData)
+   {
+      reset();
+      
+      ArrayList<PlaneContactState> contactStates = groundReactionWrenchDistributorInputData.getContactStates();
+      ArrayList<Double> coefficientsOfFriction = groundReactionWrenchDistributorInputData.getCoefficientsOfFriction();
+      ArrayList<Double> rotationalCoefficientsOfFriction = groundReactionWrenchDistributorInputData.getRotationalCoefficientsOfFriction();
+      
+      for (int i=0; i<contactStates.size(); i++)
+      {
+         addContact(contactStates.get(i), coefficientsOfFriction.get(i), rotationalCoefficientsOfFriction.get(i));
+      }
+    
+      SpatialForceVector desiredGroundReactionWrench = groundReactionWrenchDistributorInputData.getDesiredNetSpatialForceVector();
+      RobotSide upcomingSupportleg = groundReactionWrenchDistributorInputData.getUpcomingSupportSide();
+      this.solve(desiredGroundReactionWrench, upcomingSupportleg);
+   }
+   
    public void reset()
    {
       // TODO: inefficient
@@ -218,6 +237,15 @@ public class GeometricStairsGroundReactionWrenchDistributor implements GroundRea
       }
    }
 
+   public void getOutputData(GroundReactionWrenchDistributorOutputData outputData)
+   {
+      outputData.reset();
+      for (PlaneContactState planeContactState : contactStates)
+      {
+         outputData.set(planeContactState, forces.get(planeContactState), centersOfPressure.get(planeContactState), normalTorques.get(planeContactState));
+      }
+   }
+   
    public FrameVector getForce(PlaneContactState planeContactState)
    {
       return forces.get(planeContactState);

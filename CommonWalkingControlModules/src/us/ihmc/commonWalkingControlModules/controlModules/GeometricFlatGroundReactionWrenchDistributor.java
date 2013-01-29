@@ -53,6 +53,24 @@ public class GeometricFlatGroundReactionWrenchDistributor implements GroundReact
       virtualToePointCalculator.setAllFramesToComputeInToWorld();
    }
    
+   public void resetAndSolve(GroundReactionWrenchDistributorInputData groundReactionWrenchDistributorInputData)
+   {
+      reset();
+      
+      ArrayList<PlaneContactState> contactStates = groundReactionWrenchDistributorInputData.getContactStates();
+      ArrayList<Double> coefficientsOfFriction = groundReactionWrenchDistributorInputData.getCoefficientsOfFriction();
+      ArrayList<Double> rotationalCoefficientsOfFriction = groundReactionWrenchDistributorInputData.getRotationalCoefficientsOfFriction();
+      
+      for (int i=0; i<contactStates.size(); i++)
+      {
+         addContact(contactStates.get(i), coefficientsOfFriction.get(i), rotationalCoefficientsOfFriction.get(i));
+      }
+    
+      SpatialForceVector desiredGroundReactionWrench = groundReactionWrenchDistributorInputData.getDesiredNetSpatialForceVector();
+      RobotSide upcomingSupportleg = groundReactionWrenchDistributorInputData.getUpcomingSupportSide();
+      this.solve(desiredGroundReactionWrench, upcomingSupportleg);
+   }
+   
    public void reset()
    {
       contactStates.clear();      
@@ -125,6 +143,15 @@ public class GeometricFlatGroundReactionWrenchDistributor implements GroundReact
       // Verify that virtual toe points and leg strength percentages give the overall force:
    }
 
+   public void getOutputData(GroundReactionWrenchDistributorOutputData outputData)
+   {
+      outputData.reset();
+      for (PlaneContactState planeContactState : contactStates)
+      {
+         outputData.set(planeContactState, getForce(planeContactState), getCenterOfPressure(planeContactState), getNormalTorque(planeContactState));
+      }
+   }
+   
    public FramePoint2d getCenterOfPressure(PlaneContactState contactState)
    {
       RobotSide robotSide = getRobotSide(contactState);
