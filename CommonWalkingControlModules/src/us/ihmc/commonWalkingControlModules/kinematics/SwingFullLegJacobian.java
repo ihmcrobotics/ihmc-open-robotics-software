@@ -8,7 +8,7 @@ import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointVelocities;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegTorques;
 import us.ihmc.robotSide.RobotSide;
-import us.ihmc.utilities.MechanismGeometricJacobian;
+import us.ihmc.utilities.screwTheory.GeometricJacobian;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.utilities.screwTheory.Twist;
@@ -20,7 +20,7 @@ public class SwingFullLegJacobian
 {
    private final YoVariableRegistry registry;
    private final RobotSide robotSide;
-   private final MechanismGeometricJacobian geometricJacobian;
+   private final GeometricJacobian geometricJacobian;
    private final DenseMatrix64F jointVelocitiesVector;
    private final DampedLeastSquaresJacobianSolver jacobianSolver;
 
@@ -34,7 +34,7 @@ public class SwingFullLegJacobian
       this.robotSide = robotSide;
       RigidBody pelvis = fullRobotModel.getPelvis();
       RigidBody foot = fullRobotModel.getFoot(robotSide);
-      geometricJacobian = new MechanismGeometricJacobian(pelvis, foot, foot.getBodyFixedFrame());
+      geometricJacobian = new GeometricJacobian(pelvis, foot, foot.getBodyFixedFrame());
       jointVelocitiesVector = new DenseMatrix64F(geometricJacobian.getNumberOfColumns(), 1);
       jacobianSolver = new DampedLeastSquaresJacobianSolver(robotSide.getCamelCaseNameForStartOfExpression() + "JacobianSolver", geometricJacobian.getNumberOfColumns(), registry);
       parentRegistry.addChild(registry);
@@ -63,7 +63,10 @@ public class SwingFullLegJacobian
    public Twist getTwistOfFootWithRespectToPelvisInFootFrame(LegJointVelocities jointVelocities)
    {
       DenseMatrix64F jointVelocitiesVector = jointVelocities.toDenseMatrix();
-      return geometricJacobian.getTwist(jointVelocitiesVector);
+      DenseMatrix64F twistMatrix = new DenseMatrix64F(Twist.SIZE, 1);
+      CommonOps.mult(getJacobian(), jointVelocitiesVector, twistMatrix);
+      Twist ret = new Twist(geometricJacobian.getEndEffectorFrame(), geometricJacobian.getBaseFrame(), geometricJacobian.getJacobianFrame(), twistMatrix);
+      return ret;
    }
    
    /**
@@ -136,7 +139,7 @@ public class SwingFullLegJacobian
       return geometricJacobian.toString();
    }
 
-   public MechanismGeometricJacobian getGeometricJacobian()
+   public GeometricJacobian getGeometricJacobian()
    {
       return geometricJacobian;
    }

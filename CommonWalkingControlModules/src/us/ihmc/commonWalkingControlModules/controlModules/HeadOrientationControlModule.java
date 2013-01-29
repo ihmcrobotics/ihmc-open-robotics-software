@@ -6,12 +6,12 @@ import org.apache.commons.lang.ArrayUtils;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
-import us.ihmc.utilities.MechanismGeometricJacobian;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.OriginAndPointFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.screwTheory.GeometricJacobian;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.utilities.screwTheory.Twist;
@@ -27,7 +27,7 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFramePointInMul
 public class HeadOrientationControlModule
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final MechanismGeometricJacobian neckJacobian;
+   private final GeometricJacobian neckJacobian;
    private final TwistCalculator twistCalculator;
    private final RigidBody elevator;
    private final ReferenceFrame elevatorFrame;
@@ -43,7 +43,7 @@ public class HeadOrientationControlModule
    private final IntegerYoVariable trackingFrameIndex = new IntegerYoVariable("trackingFrameIndex", registry);
    private final EnumYoVariable<HeadTrackingMode> headTrackingMode = EnumYoVariable.create("headTrackingMode", HeadTrackingMode.class, registry);
 
-   public HeadOrientationControlModule(MechanismGeometricJacobian neckJacobian, TwistCalculator twistCalculator, RigidBody chest,
+   public HeadOrientationControlModule(GeometricJacobian neckJacobian, TwistCalculator twistCalculator, RigidBody chest,
            YoVariableRegistry parentRegistry)
    {
       this.neckJacobian = neckJacobian;
@@ -120,7 +120,7 @@ public class HeadOrientationControlModule
       }
    }
 
-   private static void computeSelectionMatrix(MechanismGeometricJacobian jacobian, DenseMatrix64F selectionMatrix)
+   private static void computeSelectionMatrix(GeometricJacobian jacobian, DenseMatrix64F selectionMatrix)
    {
       DenseMatrix64F jacobianMatrix = jacobian.getJacobianMatrix();
       CommonOps.pinv(jacobianMatrix, selectionMatrix);

@@ -44,7 +44,6 @@ import us.ihmc.commonWalkingControlModules.trajectories.YoVariableDoubleProvider
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
-import us.ihmc.utilities.MechanismGeometricJacobian;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
@@ -58,6 +57,7 @@ import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
 import us.ihmc.utilities.screwTheory.EndEffectorPoseTwistAndSpatialAccelerationCalculator;
+import us.ihmc.utilities.screwTheory.GeometricJacobian;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
@@ -154,7 +154,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
    private final SideDependentList<FramePose> desiredHandPoses = new SideDependentList<FramePose>();
 
    private final OneDoFJoint[] neckJointsToPositionControl;
-   private final MechanismGeometricJacobian neckJacobian;
+   private final GeometricJacobian neckJacobian;
    private final HeadOrientationControlModule headOrientationControlModule;
 
 
@@ -337,7 +337,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       {
          final RigidBody neckBase = necksJointsForOrientationControl[0].getPredecessor();
          final RigidBody head = necksJointsForOrientationControl[necksJointsForOrientationControl.length - 1].getSuccessor();
-         neckJacobian = new MechanismGeometricJacobian(neckBase, head, head.getBodyFixedFrame());
+         neckJacobian = new GeometricJacobian(neckBase, head, head.getBodyFixedFrame());
          headOrientationControlModule = new HeadOrientationControlModule(neckJacobian, twistCalculator, fullRobotModel.getChest(), registry);
          double headKp = 100.0;
          double headZeta = 1.0;
