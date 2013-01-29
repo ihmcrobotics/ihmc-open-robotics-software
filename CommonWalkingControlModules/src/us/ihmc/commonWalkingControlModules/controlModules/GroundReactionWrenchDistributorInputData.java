@@ -8,7 +8,7 @@ import us.ihmc.utilities.screwTheory.SpatialForceVector;
 
 public class GroundReactionWrenchDistributorInputData
 {
-   private final ArrayList<PlaneContactState> contactStates = new ArrayList<>();
+   private final ArrayList<PlaneContactState> contactStates = new ArrayList<PlaneContactState>();
    private final ArrayList<Double> coefficientsOfFriction = new ArrayList<Double>();
    private final ArrayList<Double> rotationalCoefficientsOfFriction = new ArrayList<Double>();
    
