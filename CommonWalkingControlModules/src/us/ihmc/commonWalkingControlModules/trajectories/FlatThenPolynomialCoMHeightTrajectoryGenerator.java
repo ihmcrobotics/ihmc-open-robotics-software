@@ -6,6 +6,7 @@ import javax.media.j3d.Transform3D;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.calculators.OrbitalEnergyCalculator;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculator;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorTools;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
@@ -60,7 +61,7 @@ public class FlatThenPolynomialCoMHeightTrajectoryGenerator implements CenterOfM
 
    public FlatThenPolynomialCoMHeightTrajectoryGenerator(double gravityZ, ReferenceFrame centerOfMassFrame, CenterOfMassJacobian centerOfMassJacobian, DesiredFootstepCalculator desiredFootstepCalculator,
            ReferenceFrame desiredHeadingFrame, SideDependentList<ContactablePlaneBody> bipedFeet, CommonWalkingReferenceFrames referenceFrames,
-           YoVariableRegistry parentRegistry)
+           WalkingControllerParameters walkingControllerParameters, YoVariableRegistry parentRegistry)
    {
       this.gravityZ = gravityZ;
       this.centerOfMassFrame = centerOfMassFrame;
@@ -70,8 +71,8 @@ public class FlatThenPolynomialCoMHeightTrajectoryGenerator implements CenterOfM
       this.bipedFeet = bipedFeet;
       this.referenceFrames = referenceFrames;
 
-      nominalHeightAboveGround.set(1.32);
-      initialHeightAboveGround.set(1.28);
+      nominalHeightAboveGround.set(walkingControllerParameters.nominalHeightAboveGround());
+      initialHeightAboveGround.set(walkingControllerParameters.initialHeightAboveGround());
       parentRegistry.addChild(registry);
    }
 
