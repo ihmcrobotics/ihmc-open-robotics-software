@@ -504,13 +504,14 @@ public abstract class ICPAndMomentumBasedController implements RobotController
       
       
       GroundReactionWrenchDistributorInputData groundReactionWrenchDistributorInputData = new GroundReactionWrenchDistributorInputData();
-      GroundReactionWrenchDistributorOutputData groundReactionWrenchDistributorOutputData = new GroundReactionWrenchDistributorOutputData();
+//      GroundReactionWrenchDistributorOutputData groundReactionWrenchDistributorOutputData = new GroundReactionWrenchDistributorOutputData();
       
       double coefficientOfFriction = 1.0;    // 0.5;    // TODO
       double rotationalCoefficientOfFriction = 0.5;    // TODO
 
-//      groundReactionWrenchDistributor.reset();
-      groundReactionWrenchDistributorInputData.reset();
+      
+      groundReactionWrenchDistributor.reset();
+//      groundReactionWrenchDistributorInputData.reset();
       
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -529,7 +530,7 @@ public abstract class ICPAndMomentumBasedController implements RobotController
       groundReactionWrenchDistributorInputData.setSpatialForceVectorAndUpcomingSupportSide(totalGroundReactionWrench, upcomingSupportLeg.getEnumValue());
       
       groundReactionWrenchDistributor.resetAndSolve(groundReactionWrenchDistributorInputData);
-      groundReactionWrenchDistributor.getOutputData(groundReactionWrenchDistributorOutputData);
+//      groundReactionWrenchDistributor.getOutputData(groundReactionWrenchDistributorOutputData);
 //      groundReactionWrenchDistributor.solve(totalGroundReactionWrench, upcomingSupportLeg.getEnumValue());
       
       List<Wrench> wrenches = new ArrayList<Wrench>();
@@ -544,15 +545,20 @@ public abstract class ICPAndMomentumBasedController implements RobotController
 
          if (footContactPoints.size() > 0)
          {
-            FrameVector force = groundReactionWrenchDistributorOutputData.getForce(contactState);
-            FramePoint2d cop = groundReactionWrenchDistributorOutputData.getCenterOfPressure(contactState);
+            FrameVector force = groundReactionWrenchDistributor.getForce(contactState);
+            FramePoint2d cop = groundReactionWrenchDistributor.getCenterOfPressure(contactState);
+            double normalTorque = groundReactionWrenchDistributor.getNormalTorque(contactState);
+            
+//            FrameVector force = groundReactionWrenchDistributorOutputData.getForce(contactState);
+//            FramePoint2d cop = groundReactionWrenchDistributorOutputData.getCenterOfPressure(contactState);
+//            double normalTorque = groundReactionWrenchDistributorOutputData.getNormalTorque(contactState);
+
             determineCoPOnEdge(robotSide, footContactPoints, cop);
 
             cops.add(cop);
             FramePoint cop3d = cop.toFramePoint();
             cop3d.changeFrame(worldFrame);
             centersOfPressure.get(contactablePlaneBody).set(cop3d);
-            double normalTorque = groundReactionWrenchDistributorOutputData.getNormalTorque(contactState);
             Wrench groundReactionWrench = new Wrench(rigidBody.getBodyFixedFrame(), contactState.getPlaneFrame());
             WrenchDistributorTools.computeWrench(groundReactionWrench, force, cop, normalTorque);
             groundReactionWrench.changeFrame(rigidBody.getBodyFixedFrame());
