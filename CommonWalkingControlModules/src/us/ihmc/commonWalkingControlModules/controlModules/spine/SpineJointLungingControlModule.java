@@ -20,7 +20,6 @@ import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.CompositeRigidBodyInertia;
-import us.ihmc.utilities.screwTheory.GeometricJacobian;
 import us.ihmc.utilities.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.RevoluteJoint;
@@ -29,7 +28,6 @@ import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.utilities.screwTheory.Twist;
 import us.ihmc.utilities.screwTheory.Wrench;
 
-import com.mathworks.jama.Matrix;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.PIDController;
@@ -421,10 +419,8 @@ public class SpineJointLungingControlModule implements SpineLungingControlModule
 
 	private FrameVector getIDRevoluteJointAxis(InverseDynamicsJoint jointName, ReferenceFrame expressedInFrame)
 	{
-		Matrix jointVelocity = new Matrix(1, 1);
-		jointVelocity.set(0, 0, 1.0);
-		GeometricJacobian jointJacobian = jointName.getMotionSubspace();
-		Twist twistToPack = jointJacobian.getTwist(jointVelocity);
+		Twist twistToPack = new Twist();
+		jointName.packJointTwist(twistToPack);
 
 
 		Vector3d axis = twistToPack.getAngularPartCopy();

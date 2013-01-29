@@ -40,7 +40,6 @@ import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
-import us.ihmc.utilities.MechanismGeometricJacobian;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.math.DampedLeastSquaresSolver;
 import us.ihmc.utilities.math.MathTools;
@@ -57,6 +56,7 @@ import us.ihmc.utilities.math.geometry.OriginAndPointFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
 import us.ihmc.utilities.screwTheory.EndEffectorPoseTwistAndSpatialAccelerationCalculator;
+import us.ihmc.utilities.screwTheory.GeometricJacobian;
 import us.ihmc.utilities.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.Momentum;
@@ -133,8 +133,8 @@ public abstract class ICPAndMomentumBasedController implements RobotController
 
 
    protected final DoubleYoVariable desiredCoMHeightAcceleration;
-   protected final SideDependentList<EnumMap<LimbName, MechanismGeometricJacobian>> jacobians = SideDependentList.createListOfEnumMaps(LimbName.class);
-   protected final MechanismGeometricJacobian spineJacobian;
+   protected final SideDependentList<EnumMap<LimbName, GeometricJacobian>> jacobians = SideDependentList.createListOfEnumMaps(LimbName.class);
+   protected final GeometricJacobian spineJacobian;
    
    protected final YoFrameOrientation desiredPelvisOrientation;
    private final AxisAngleOrientationController pelvisOrientationController;
@@ -297,7 +297,7 @@ public abstract class ICPAndMomentumBasedController implements RobotController
          this.updatables.addAll(updatables);
       }
 
-      this.spineJacobian = new MechanismGeometricJacobian(fullRobotModel.getPelvis(), fullRobotModel.getChest(),
+      this.spineJacobian = new GeometricJacobian(fullRobotModel.getPelvis(), fullRobotModel.getChest(),
               fullRobotModel.getRootJoint().getFrameAfterJoint());
       
       this.desiredCoMHeightAcceleration = new DoubleYoVariable("desiredCoMHeightAcceleration", registry);
@@ -319,7 +319,7 @@ public abstract class ICPAndMomentumBasedController implements RobotController
          for (LimbName limbName : LimbName.values())
          {
             RigidBody endEffector = fullRobotModel.getEndEffector(robotSide, limbName);
-            MechanismGeometricJacobian jacobian = new MechanismGeometricJacobian(bases.get(limbName), endEffector, endEffector.getBodyFixedFrame());
+            GeometricJacobian jacobian = new GeometricJacobian(bases.get(limbName), endEffector, endEffector.getBodyFixedFrame());
             jacobians.get(robotSide).put(limbName, jacobian);
             if (limbName == LimbName.LEG)    // because it needs sole frame
                contactStates.put(endEffector, new YoPlaneContactState(endEffector.getName(), referenceFrames.getSoleFrame(robotSide), registry));
@@ -414,7 +414,7 @@ public abstract class ICPAndMomentumBasedController implements RobotController
    protected void setEndEffectorSpatialAcceleration(RobotSide robotSide, LimbName limbName,
            Pair<SpatialAccelerationVector, DenseMatrix64F> endEffectorSpatialAcceleration)
    {
-      MechanismGeometricJacobian jacobian = jacobians.get(robotSide).get(limbName);
+      GeometricJacobian jacobian = jacobians.get(robotSide).get(limbName);
       endEffectorSpatialAcceleration.first().getBodyFrame().checkReferenceFrameMatch(jacobian.getEndEffectorFrame());
       solver.setDesiredSpatialAcceleration(jacobian, endEffectorSpatialAcceleration.first(), endEffectorSpatialAcceleration.second());    // TODO: get rid of pair
    }
@@ -644,7 +644,7 @@ public abstract class ICPAndMomentumBasedController implements RobotController
 
    private void projectSpatialAcceleration(RobotSide robotSide, RigidBody foot)
    {
-      MechanismGeometricJacobian jacobian = jacobians.get(robotSide).get(LimbName.LEG);
+      GeometricJacobian jacobian = jacobians.get(robotSide).get(LimbName.LEG);
 
       // FIXME: nasty action at a distance
       SpatialAccelerationVector spatialAcceleration = solver.getSpatialAcceleration(jacobian);

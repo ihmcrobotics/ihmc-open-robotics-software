@@ -7,11 +7,11 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.LinearSolver;
 import org.ejml.ops.CommonOps;
 
-import us.ihmc.utilities.MechanismGeometricJacobian;
 import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.NullspaceCalculator;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.DesiredJointAccelerationCalculator;
+import us.ihmc.utilities.screwTheory.GeometricJacobian;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.Momentum;
 import us.ihmc.utilities.screwTheory.RigidBody;
@@ -44,8 +44,8 @@ public class TaskSpaceConstraintResolver
    private final Twist twistOfBodyWithRespectToBase = new Twist();
 
    // LinkedHashMaps so that order of computation is defined, to make rewindability checks using reflection easier
-   private final LinkedHashMap<MechanismGeometricJacobian, DenseMatrix64F> dMap = new LinkedHashMap<MechanismGeometricJacobian, DenseMatrix64F>();
-   private final LinkedHashMap<MechanismGeometricJacobian, DenseMatrix64F> jacobianInverseMap = new LinkedHashMap<MechanismGeometricJacobian, DenseMatrix64F>();
+   private final LinkedHashMap<GeometricJacobian, DenseMatrix64F> dMap = new LinkedHashMap<GeometricJacobian, DenseMatrix64F>();
+   private final LinkedHashMap<GeometricJacobian, DenseMatrix64F> jacobianInverseMap = new LinkedHashMap<GeometricJacobian, DenseMatrix64F>();
 
    private final DenseMatrix64F convectiveTermMatrix = new DenseMatrix64F(SpatialAccelerationVector.SIZE, 1);
 
@@ -76,7 +76,7 @@ public class TaskSpaceConstraintResolver
    }
 
    public void handleTaskSpaceAccelerations(DenseMatrix64F aHatRoot, DenseMatrix64F b, DenseMatrix64F centroidalMomentumMatrix,
-           MechanismGeometricJacobian jacobian, SpatialAccelerationVector taskSpaceAcceleration, DenseMatrix64F nullspaceMultiplier,
+           GeometricJacobian jacobian, SpatialAccelerationVector taskSpaceAcceleration, DenseMatrix64F nullspaceMultiplier,
            DenseMatrix64F selectionMatrix)
    {
       assert(selectionMatrix.getNumCols() == SpatialAccelerationVector.SIZE);
@@ -156,7 +156,7 @@ public class TaskSpaceConstraintResolver
 
    public void solveAndSetTaskSpaceAccelerations(DenseMatrix64F vdotRoot)
    {
-      for (MechanismGeometricJacobian jacobian : dMap.keySet())
+      for (GeometricJacobian jacobian : dMap.keySet())
       {
          DenseMatrix64F d = dMap.get(jacobian);
          DenseMatrix64F jacobianInverse = jacobianInverseMap.get(jacobian);
@@ -167,7 +167,7 @@ public class TaskSpaceConstraintResolver
    }
 
    public void convertInternalSpatialAccelerationToJointSpace(Map<InverseDynamicsJoint, DenseMatrix64F> jointSpaceAccelerations,
-           MechanismGeometricJacobian jacobian, SpatialAccelerationVector spatialAcceleration, DenseMatrix64F nullspaceMultipliers,
+           GeometricJacobian jacobian, SpatialAccelerationVector spatialAcceleration, DenseMatrix64F nullspaceMultipliers,
            DenseMatrix64F selectionMatrix)
    {
       jacobian.changeFrame(spatialAcceleration.getExpressedInFrame());

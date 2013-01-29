@@ -1,11 +1,11 @@
 package us.ihmc.commonWalkingControlModules.kinematics;
 
-import java.util.ArrayList;
-
 import javax.media.j3d.Transform3D;
+import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
 import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointVelocities;
@@ -18,6 +18,9 @@ import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.GeometricJacobian;
+import us.ihmc.utilities.screwTheory.RevoluteJoint;
+import us.ihmc.utilities.screwTheory.RigidBody;
+import us.ihmc.utilities.screwTheory.ScrewTools;
 import us.ihmc.utilities.screwTheory.Twist;
 import us.ihmc.utilities.screwTheory.Wrench;
 
@@ -27,83 +30,49 @@ public class StanceFullLegJacobian
 {
    private final RobotSide robotSide;
    private final LegJointName[] legJointNames;
-   
+
    private final ReferenceFrame pelvisFrame;
    private final ReferenceFrame footFrame;
-   private final VTPXFrame vtpXFrame;
-   private final VTPYFrame vtpYFrame;
 
    private final GeometricJacobian legJacobian;
    private final GeometricJacobian vtpJacobian;
+   private final RevoluteJoint vtpXJoint;
+   private final RevoluteJoint vtpYJoint;
+   private final VTPXFrame vtpXFrame;
+   private final VTPYFrame vtpYFrame;
 
    /**
     * Constructs a new StanceFullLegJacobian, for the given side of the robot
     * @param robotSpecificJointNames robot specific joint names
     * @param footHeight height of the origin of the foot frame above the sole of the foot
     */
-   public StanceFullLegJacobian(RobotSide robotSide, CommonWalkingReferenceFrames frames, RobotSpecificJointNames robotSpecificJointNames, double footHeight)
+   public StanceFullLegJacobian(RigidBody pelvis, RigidBody foot, RobotSide robotSide, CommonWalkingReferenceFrames frames,
+                                RobotSpecificJointNames robotSpecificJointNames, double footHeight)
    {
       this.robotSide = robotSide;
       this.legJointNames = robotSpecificJointNames.getLegJointNames();
 
       pelvisFrame = frames.getPelvisFrame();
       footFrame = frames.getFootFrame(robotSide);
-      
-      vtpXFrame = new VTPXFrame("VTPXFrame", footFrame, footHeight);
-      vtpYFrame = new VTPYFrame("VTPYFrame", vtpXFrame);
 
-      Vector3d zero = new Vector3d();
-      
-      ArrayList<Twist> legTwists = new ArrayList<Twist>();
-      ReferenceFrame baseFrame = pelvisFrame;
-      for (LegJointName legJointName : legJointNames)
-      {
-         ReferenceFrame bodyFrame = frames.getLegJointFrame(robotSide, legJointName);
-         ReferenceFrame expressedInFrame = bodyFrame;
-         Twist twist = new Twist(bodyFrame, baseFrame, expressedInFrame, zero, legJointName.getJointAxis());
-         
-         legTwists.add(twist);
-         
-         baseFrame = bodyFrame; // for next iteration
-      }
-
-      for (Twist twist : legTwists)
-      {
-         twist.invert();
-      }
-
-      // define relevant frames
-      ReferenceFrame legEndEffectorFrame = pelvisFrame;
-      ReferenceFrame legJacobianBaseFrame = footFrame;
       ReferenceFrame jacobianFrame = pelvisFrame;
 
       // create openChainJacobian
-      legJacobian = new GeometricJacobian(legTwists, legEndEffectorFrame, legJacobianBaseFrame, jacobianFrame);
-
+      legJacobian = new GeometricJacobian(pelvis, foot, jacobianFrame);
 
       // Build vtpJacobian
-      Vector3d x = new Vector3d(1.0, 0.0, 0.0);
-      Vector3d y = new Vector3d(0.0, 1.0, 0.0);
-      
-      Twist vtpXTwist = new Twist(vtpXFrame, footFrame, vtpXFrame, zero, y);
-      Twist vtpYTwist = new Twist(vtpYFrame, vtpXFrame, vtpYFrame, zero, x);
-
-      ArrayList<Twist> vtpTwists = new ArrayList<Twist>();
-      vtpTwists.add(vtpXTwist);
-      vtpTwists.add(vtpYTwist);
-
-      for (Twist twist : vtpTwists)
-      {
-         twist.invert();
-      }
-
-      // define relevant frames
-      ReferenceFrame vtpEndEffectorFrame = footFrame;
-      ReferenceFrame vtpJacobianBaseFrame = vtpYFrame;
+      vtpXFrame = new VTPXFrame(robotSide + "Vtpx", footFrame, footHeight);
+      vtpYFrame = new VTPYFrame(robotSide + "Vtpy", vtpXFrame);
+      RigidBody vtpJacobianBase = new RigidBody("vtpJacobianBase", footFrame);
+      FrameVector x = new FrameVector(vtpYFrame, 1.0, 0.0, 0.0);
+      FrameVector y = new FrameVector(vtpXFrame, 0.0, 1.0, 0.0);
+      vtpXJoint = new RevoluteJoint("vtpX", vtpJacobianBase, vtpXFrame, y);
+      RigidBody dummyBody = ScrewTools.addRigidBody("dummyBody", vtpXJoint, new Matrix3d(), 0.0, new Vector3d());
+      vtpYJoint = new RevoluteJoint("vtpY", dummyBody, vtpYFrame, x);
+      RigidBody vtpJacobianEndEffector = ScrewTools.addRigidBody("vtpJacobianBase", vtpYJoint, new Matrix3d(), 0.0, new Vector3d());
 
       // create openChainJacobian
-      vtpJacobian = new GeometricJacobian(vtpTwists, vtpEndEffectorFrame, vtpJacobianBaseFrame, jacobianFrame);
-
+      vtpJacobian = new GeometricJacobian(vtpJacobianBase, vtpJacobianEndEffector, jacobianFrame);
    }
 
    /**
@@ -125,9 +94,10 @@ public class StanceFullLegJacobian
       vtpInFootFrame.checkReferenceFrameMatch(footFrame);
       vtpXFrame.set(vtpInFootFrame.getX());
       vtpYFrame.set(vtpInFootFrame.getY());
-
+      
       vtpXFrame.update();
       vtpYFrame.update();
+//      vtpXJoint.getPredecessor().updateFramesRecursively();
 
       vtpJacobian.compute();
    }
@@ -152,7 +122,15 @@ public class StanceFullLegJacobian
          jointVelocitiesVector.set(i, 0, jointVelocities.getJointVelocity(legJointName));
       }
 
-      return legJacobian.getTwist(jointVelocitiesVector);
+      DenseMatrix64F twistMatrix = new DenseMatrix64F(Twist.SIZE, 1);
+      CommonOps.mult(legJacobian.getJacobianMatrix(), jointVelocitiesVector, twistMatrix);
+
+      Twist ret = new Twist(legJacobian.getEndEffectorFrame(), legJacobian.getBaseFrame(), legJacobian.getJacobianFrame(), twistMatrix);
+      ret.invert();
+      ret.changeBaseFrameNoRelativeTwist(footFrame);
+      ret.changeBodyFrameNoRelativeTwist(pelvisFrame);
+
+      return ret;
    }
 
    /**
@@ -189,62 +167,17 @@ public class StanceFullLegJacobian
       Matrix B = vtpJacobianMatrix.getMatrix(bRows, columns).transpose();
 
       Matrix nxyzFZ = new Matrix(4, 1);
-      nxyzFZ.set(0, 0, torqueOnPelvis.getX());
-      nxyzFZ.set(1, 0, torqueOnPelvis.getY());
-      nxyzFZ.set(2, 0, torqueOnPelvis.getZ());
-      nxyzFZ.set(3, 0, fZOnPelvisInPelvisFrame);
+      nxyzFZ.set(0, 0, -torqueOnPelvis.getX());
+      nxyzFZ.set(1, 0, -torqueOnPelvis.getY());
+      nxyzFZ.set(2, 0, -torqueOnPelvis.getZ());
+      nxyzFZ.set(3, 0, -fZOnPelvisInPelvisFrame);
 
-      Matrix Fxy = (A.solve(B.times(nxyzFZ))).times(-1.0);
+      Matrix Fxy = (A.solve(B.times(nxyzFZ)));
 
       Vector3d forceOnPelvisInPelvisFrame = new Vector3d(Fxy.get(0, 0), Fxy.get(1, 0), fZOnPelvisInPelvisFrame);
 
-      return new Wrench(pelvisFrame, pelvisFrame, forceOnPelvisInPelvisFrame, torqueOnPelvis.getVectorCopy());
-   }
-   
-   /**
-    * Computes the desired wrench on the pelvis, expressed in the pelvis frame, such that there are no torques at the vtp.
-    * @param forceOnPelvis desired force vector on pelvis
-    * @param nZOnPelvisInPelvisFrame desired torque around the z-axis, expressed in PelvisFrame
-    * @return a wrench that requires no torque about the vtp, but still has the required nZ and forces.
-    */
-   public Wrench getWrenchInVTPNullSpace(FrameVector forceOnPelvis, double nZOnPelvisInPelvisFrame)
-   {
-      /*
-       * tauVTP = JVTPTranspose * FxyzNxyz
-       *                                              [ Nx ]
-       *                                              [ Ny ]
-       *                                               ----
-       * [ tauVTPx ] = [ J11 J21 | J31 J41 J51 J61] * [ Nz ]
-       * [ tauVTPy ]   [ J12 J22 | J32 J42 J52 J62]   [ Fx ]   = [ 0 ]
-       *                      A           B           [ Fy ]     [ 0 ]
-       *                                              [ Fz ]
-       *                                              
-       * A * Fxy + B * NzFxyz = 0
-       * Fxy = -A^(-1) * B * NzFxyz
-       */
-      forceOnPelvis.checkReferenceFrameMatch(pelvisFrame);
-
-      Matrix vtpJacobianMatrix = new Matrix(6, vtpJacobian.getNumberOfColumns());
-      MatrixTools.convertEJMLToJama(vtpJacobian.getJacobianMatrix(), vtpJacobianMatrix);
-
-      int[] columns = {0, 1};
-      int[] aRows = {0, 1};
-      Matrix A = vtpJacobianMatrix.getMatrix(aRows, columns).transpose();
-
-      int[] bRows = {2, 3, 4, 5};
-      Matrix B = vtpJacobianMatrix.getMatrix(bRows, columns).transpose();
-
-      Matrix NzFxyz = new Matrix(4, 1);
-      NzFxyz.set(0, 0, nZOnPelvisInPelvisFrame);
-      NzFxyz.set(1, 0, forceOnPelvis.getX());
-      NzFxyz.set(2, 0, forceOnPelvis.getY());
-      NzFxyz.set(3, 0, forceOnPelvis.getZ());
-
-      Matrix Nxy = (A.solve(B.times(NzFxyz))).times(-1.0);
-
-      Vector3d torqueOnPelvisInPelvisFrame = new Vector3d(Nxy.get(0, 0), Nxy.get(1,0), nZOnPelvisInPelvisFrame);
-
-      return new Wrench(pelvisFrame, pelvisFrame, forceOnPelvis.getVector(), torqueOnPelvisInPelvisFrame);
+      Wrench ret = new Wrench(pelvisFrame, pelvisFrame, forceOnPelvisInPelvisFrame, torqueOnPelvis.getVectorCopy());
+      return ret;
    }
 
    /**
@@ -261,6 +194,8 @@ public class StanceFullLegJacobian
       // the actual computation
       DenseMatrix64F jointTorques = legJacobian.computeJointTorques(wrenchOnPelvisInPelvisFrame);
       DenseMatrix64F vtpTorques = vtpJacobian.computeJointTorques(wrenchOnPelvisInPelvisFrame);
+
+      CommonOps.scale(-1.0, jointTorques); // because pelvis is the base, not the end effector
       
       for (int i = 0; i < legJointNames.length; i++)
       {

@@ -17,12 +17,12 @@ import org.ejml.factory.LinearSolverFactory;
 import org.ejml.ops.RandomMatrices;
 import org.junit.Test;
 
-import us.ihmc.utilities.MechanismGeometricJacobian;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.geometry.CenterOfMassReferenceFrame;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.screwTheory.GeometricJacobian;
 import us.ihmc.utilities.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.Momentum;
@@ -186,7 +186,7 @@ public class MomentumSolverTest
 
 
 
-      MechanismGeometricJacobian jacobian = new MechanismGeometricJacobian(body0, secondBody, rootJoint.getFrameAfterJoint());
+      GeometricJacobian jacobian = new GeometricJacobian(body0, secondBody, rootJoint.getFrameAfterJoint());
 
       SpatialAccelerationVector spatialAcceleration = new SpatialAccelerationVector(jacobian.getEndEffectorFrame(), elevatorFrame,
                                                          jacobian.getEndEffectorFrame(), RandomTools.generateRandomVector(random),
@@ -240,7 +240,7 @@ public class MomentumSolverTest
       RevoluteJoint firstJoint = revoluteJoints.get(0);
       RigidBody base = firstJoint.getSuccessor();
       RigidBody endEffector = revoluteJoints.get(revoluteJoints.size() - 1).getSuccessor();
-      MechanismGeometricJacobian jacobian = new MechanismGeometricJacobian(base, endEffector, endEffector.getBodyFixedFrame());
+      GeometricJacobian jacobian = new GeometricJacobian(base, endEffector, endEffector.getBodyFixedFrame());
       SpatialAccelerationVector taskSpaceAcceleration = new SpatialAccelerationVector(endEffector.getBodyFixedFrame(), elevator.getBodyFixedFrame(),
             endEffector.getBodyFixedFrame(), RandomTools.generateRandomVector(random),
             RandomTools.generateRandomVector(random));
@@ -292,7 +292,7 @@ public class MomentumSolverTest
       List<RevoluteJoint> revoluteJoints = randomFloatingChain.getRevoluteJoints();
       RigidBody base = rootJoint.getSuccessor();
       RigidBody endEffector = revoluteJoints.get(revoluteJoints.size() - 1).getSuccessor();
-      MechanismGeometricJacobian jacobian = new MechanismGeometricJacobian(base, endEffector, endEffector.getBodyFixedFrame());
+      GeometricJacobian jacobian = new GeometricJacobian(base, endEffector, endEffector.getBodyFixedFrame());
       SpatialAccelerationVector internalAcceleration = new SpatialAccelerationVector(endEffector.getBodyFixedFrame(), base.getBodyFixedFrame(),
                                                           endEffector.getBodyFixedFrame(), RandomTools.generateRandomVector(random),
                                                           RandomTools.generateRandomVector(random));
@@ -337,7 +337,7 @@ public class MomentumSolverTest
 
 
 
-      MechanismGeometricJacobian jacobian = new MechanismGeometricJacobian(body0, secondBody, rootJoint.getFrameAfterJoint());
+      GeometricJacobian jacobian = new GeometricJacobian(body0, secondBody, rootJoint.getFrameAfterJoint());
 
       SpatialAccelerationVector spatialAcceleration = new SpatialAccelerationVector(jacobian.getEndEffectorFrame(), elevatorFrame,
                                                          jacobian.getEndEffectorFrame(), RandomTools.generateRandomVector(random),
@@ -417,7 +417,7 @@ public class MomentumSolverTest
       List<RevoluteJoint> revoluteJoints = randomFloatingChain.getRevoluteJoints();
       RigidBody base = rootJoint.getSuccessor();
       RigidBody endEffector = revoluteJoints.get(revoluteJoints.size() - 1).getSuccessor();
-      MechanismGeometricJacobian jacobian = new MechanismGeometricJacobian(base, endEffector, endEffector.getBodyFixedFrame());
+      GeometricJacobian jacobian = new GeometricJacobian(base, endEffector, endEffector.getBodyFixedFrame());
       FrameVector endEffectorAngularAcceleration = new FrameVector(rootJoint.getFrameAfterJoint(), RandomTools.generateRandomVector(random));
       DenseMatrix64F nullspaceMultiplier = new DenseMatrix64F(0, 1);
 
@@ -467,7 +467,7 @@ public class MomentumSolverTest
       JUnitTools.assertMatrixEquals(jointAcceleration, check, epsilon);
    }
 
-   private static void checkTaskSpaceAcceleration(SixDoFJoint rootJoint, TwistCalculator twistCalculator, MechanismGeometricJacobian jacobian,
+   private static void checkTaskSpaceAcceleration(SixDoFJoint rootJoint, TwistCalculator twistCalculator, GeometricJacobian jacobian,
            SpatialAccelerationVector spatialAcceleration, double epsilon, boolean angularPartOnly)
    {
       RigidBody elevator = rootJoint.getPredecessor();
@@ -502,7 +502,7 @@ public class MomentumSolverTest
       }
    }
 
-   private void checkInternalAcceleration(SixDoFJoint rootJoint, TwistCalculator twistCalculator, MechanismGeometricJacobian jacobian,
+   private void checkInternalAcceleration(SixDoFJoint rootJoint, TwistCalculator twistCalculator, GeometricJacobian jacobian,
            SpatialAccelerationVector spatialAcceleration, double epsilon)
    {
       RigidBody elevator = rootJoint.getPredecessor();

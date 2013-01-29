@@ -11,12 +11,12 @@ import org.ejml.factory.LinearSolver;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.utilities.CheckTools;
-import us.ihmc.utilities.MechanismGeometricJacobian;
 import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.NullspaceCalculator;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.CentroidalMomentumMatrix;
+import us.ihmc.utilities.screwTheory.GeometricJacobian;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.Momentum;
 import us.ihmc.utilities.screwTheory.RigidBody;
@@ -66,11 +66,11 @@ public class MomentumSolver
 
    // LinkedHashMaps so that order of computation is defined, to make rewindability checks using reflection easier
    private final LinkedHashMap<InverseDynamicsJoint, DenseMatrix64F> jointSpaceAccelerations = new LinkedHashMap<InverseDynamicsJoint, DenseMatrix64F>();
-   private final LinkedHashMap<MechanismGeometricJacobian, SpatialAccelerationVector> spatialAccelerations = new LinkedHashMap<MechanismGeometricJacobian,
+   private final LinkedHashMap<GeometricJacobian, SpatialAccelerationVector> spatialAccelerations = new LinkedHashMap<GeometricJacobian,
                                                                                                                 SpatialAccelerationVector>();
-   private final LinkedHashMap<MechanismGeometricJacobian, DenseMatrix64F> nullspaceMultipliers = new LinkedHashMap<MechanismGeometricJacobian,
+   private final LinkedHashMap<GeometricJacobian, DenseMatrix64F> nullspaceMultipliers = new LinkedHashMap<GeometricJacobian,
                                                                                                      DenseMatrix64F>();
-   private final LinkedHashMap<MechanismGeometricJacobian, DenseMatrix64F> taskSpaceSelectionMatrices = new LinkedHashMap<MechanismGeometricJacobian,
+   private final LinkedHashMap<GeometricJacobian, DenseMatrix64F> taskSpaceSelectionMatrices = new LinkedHashMap<GeometricJacobian,
                                                                                                            DenseMatrix64F>();
 
    private final List<InverseDynamicsJoint> unconstrainedJoints = new ArrayList<InverseDynamicsJoint>();
@@ -142,7 +142,7 @@ public class MomentumSolver
       jointSpaceAccelerations.put(joint, jointAcceleration);
    }
 
-   public void setDesiredSpatialAcceleration(MechanismGeometricJacobian jacobian, SpatialAccelerationVector spatialAcceleration,
+   public void setDesiredSpatialAcceleration(GeometricJacobian jacobian, SpatialAccelerationVector spatialAcceleration,
            DenseMatrix64F nullspaceMultipliers)
    {
       int size = SpatialAccelerationVector.SIZE;
@@ -151,7 +151,7 @@ public class MomentumSolver
       setDesiredSpatialAcceleration(jacobian, spatialAcceleration, nullspaceMultipliers, s);
    }
 
-   public void setDesiredAngularAcceleration(MechanismGeometricJacobian jacobian, ReferenceFrame baseFrame, FrameVector desiredAngularAcceleration,
+   public void setDesiredAngularAcceleration(GeometricJacobian jacobian, ReferenceFrame baseFrame, FrameVector desiredAngularAcceleration,
            DenseMatrix64F nullspaceMultiplier)
    {
       SpatialAccelerationVector spatialAcceleration = new SpatialAccelerationVector(jacobian.getEndEffector().getBodyFixedFrame(), baseFrame,
@@ -166,7 +166,7 @@ public class MomentumSolver
       setDesiredSpatialAcceleration(jacobian, spatialAcceleration, nullspaceMultiplier, selectionMatrix);
    }
 
-   public void setDesiredSpatialAcceleration(MechanismGeometricJacobian jacobian, SpatialAccelerationVector spatialAcceleration,
+   public void setDesiredSpatialAcceleration(GeometricJacobian jacobian, SpatialAccelerationVector spatialAcceleration,
            DenseMatrix64F nullspaceMultipliers, DenseMatrix64F selectionMatrix)
    {
       checkNullspaceDimensions(jacobian, nullspaceMultipliers);
@@ -217,7 +217,7 @@ public class MomentumSolver
          jointSpaceConstraintResolver.handleJointSpaceAcceleration(b, centroidalMomentumMatrix.getMatrix(), joint, jointSpaceAcceleration);
       }
 
-      for (MechanismGeometricJacobian jacobian : spatialAccelerations.keySet())
+      for (GeometricJacobian jacobian : spatialAccelerations.keySet())
       {
          SpatialAccelerationVector taskSpaceAcceleration = spatialAccelerations.get(jacobian);
          DenseMatrix64F nullspaceMultiplier = nullspaceMultipliers.get(jacobian);
@@ -278,14 +278,14 @@ public class MomentumSolver
          throw new RuntimeException("Joint overconstrained: " + joint);
    }
 
-   private static void checkNullspaceDimensions(MechanismGeometricJacobian jacobian, DenseMatrix64F nullspaceMultipliers)
+   private static void checkNullspaceDimensions(GeometricJacobian jacobian, DenseMatrix64F nullspaceMultipliers)
    {
       CheckTools.checkEquals(nullspaceMultipliers.getNumCols(), 1);
       if (nullspaceMultipliers.getNumRows() > jacobian.getNumberOfColumns())
          throw new RuntimeException("nullspaceMultipliers dimension too large");
    }
 
-   public SpatialAccelerationVector getSpatialAcceleration(MechanismGeometricJacobian jacobian)
+   public SpatialAccelerationVector getSpatialAcceleration(GeometricJacobian jacobian)
    {
       return spatialAccelerations.get(jacobian);
    }
