@@ -10,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenc
 import us.ihmc.commonWalkingControlModules.sensors.CenterOfMassJacobianUpdater;
 import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.sensors.TwistUpdater;
+import us.ihmc.commonWalkingControlModules.visualizer.CommonInertiaElipsoidsVisualizer;
 import us.ihmc.darpaRoboticsChallenge.sensors.PerfectFootswitch;
 import us.ihmc.projectM.R2Sim02.initialSetup.GuiInitialSetup;
 import us.ihmc.projectM.R2Sim02.initialSetup.RobotInitialSetup;
@@ -29,6 +30,8 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject
 
 public class DRCSimulationFactory
 {
+   public static boolean SHOW_INERTIA_ELLIPSOIDS = false;
+   
    public static HumanoidRobotSimulation<SDFRobot> createSimulation(ControllerFactory controllerFactory,
            CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, RobotInitialSetup<SDFRobot> robotInitialSetup, ScsInitialSetup scsInitialSetup,
            GuiInitialSetup guiInitialSetup)
@@ -64,6 +67,11 @@ public class DRCSimulationFactory
       modularRobotController.setRawSensorReader(sensorReaderAndOutputWriter);
       modularRobotController.setSensorProcessor(createSensorProcessor(twistCalculator, centerOfMassJacobian));
       modularRobotController.addRobotController(robotController);
+      
+      if (SHOW_INERTIA_ELLIPSOIDS)
+      {
+         modularRobotController.addRobotController(new CommonInertiaElipsoidsVisualizer(fullRobotModel.getElevator(), dynamicGraphicObjectsListRegistry));
+      }
       modularRobotController.setRawOutputWriter(sensorReaderAndOutputWriter);
 
       return new HumanoidRobotSimulation<SDFRobot>(robot, modularRobotController, simulationTicksPerControlTick, fullRobotModel, commonAvatarEnvironmentInterface,
