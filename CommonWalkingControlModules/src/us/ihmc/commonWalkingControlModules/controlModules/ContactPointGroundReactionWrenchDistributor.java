@@ -95,6 +95,24 @@ public class ContactPointGroundReactionWrenchDistributor implements GroundReacti
       }
    }
 
+   public void resetAndSolve(GroundReactionWrenchDistributorInputData groundReactionWrenchDistributorInputData)
+   {
+      reset();
+      
+      ArrayList<PlaneContactState> contactStates = groundReactionWrenchDistributorInputData.getContactStates();
+      ArrayList<Double> coefficientsOfFriction = groundReactionWrenchDistributorInputData.getCoefficientsOfFriction();
+      ArrayList<Double> rotationalCoefficientsOfFriction = groundReactionWrenchDistributorInputData.getRotationalCoefficientsOfFriction();
+      
+      for (int i=0; i<contactStates.size(); i++)
+      {
+         addContact(contactStates.get(i), coefficientsOfFriction.get(i), rotationalCoefficientsOfFriction.get(i));
+      }
+    
+      SpatialForceVector desiredGroundReactionWrench = groundReactionWrenchDistributorInputData.getDesiredNetSpatialForceVector();
+      RobotSide upcomingSupportleg = groundReactionWrenchDistributorInputData.getUpcomingSupportSide();
+      this.solve(desiredGroundReactionWrench, upcomingSupportleg);
+   }
+   
    public void reset()
    {
       // TODO: inefficient; should hang on to a bunch of temporary objects instead of deleting all references to them
@@ -205,6 +223,16 @@ public class ContactPointGroundReactionWrenchDistributor implements GroundReacti
       }
    }
 
+   
+   public void getOutputData(GroundReactionWrenchDistributorOutputData outputData)
+   {
+      outputData.reset();
+      for (PlaneContactState planeContactState : contactStates)
+      {
+         outputData.set(planeContactState, forces.get(planeContactState), centersOfPressure.get(planeContactState), normalTorques.get(planeContactState));
+      }
+   }
+   
    public FrameVector getForce(PlaneContactState planeContactState)
    {
       return forces.get(planeContactState);
@@ -253,4 +281,6 @@ public class ContactPointGroundReactionWrenchDistributor implements GroundReacti
       int startRow = 0;
       MatrixTools.setDenseMatrixFromTuple3d(aMatrix, aTorqueColumn.getVector(), startRow, columnNumber);
    }
+
+   
 }

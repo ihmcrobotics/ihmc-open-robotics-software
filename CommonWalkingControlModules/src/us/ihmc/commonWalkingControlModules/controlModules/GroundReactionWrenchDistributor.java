@@ -16,6 +16,8 @@ public interface GroundReactionWrenchDistributor
    // The desiredNetSpatialForceVector is the total desired wrench on the body from the contact points.
    public abstract void solve(SpatialForceVector desiredNetSpatialForceVector, RobotSide upcomingSupportSide);
 
+   public abstract void resetAndSolve(GroundReactionWrenchDistributorInputData groundReactionWrenchDistributorInputData);
+
    //TODO: Make these be pack methods instead of get methods.
       
    public abstract FramePoint2d getCenterOfPressure(PlaneContactState contactState);
@@ -24,4 +26,5 @@ public interface GroundReactionWrenchDistributor
    
    public abstract double getNormalTorque(PlaneContactState contactState);
 
+   public abstract void getOutputData(GroundReactionWrenchDistributorOutputData outputData);
 }
