@@ -12,8 +12,10 @@ public interface WalkingControllerParameters
 
    public abstract boolean doStrictPelvisControl();
    
-   public abstract String[] neckJointsToUseForHeadOrientationControl();
+   public abstract String[] getHeadOrientationControlJointNames();
    
+   public abstract String[] getChestOrientationControlJointNames();
+
    public abstract boolean checkOrbitalCondition();
    
    public abstract void setCheckOrbitalCondition(boolean checkOrbitalCondition);

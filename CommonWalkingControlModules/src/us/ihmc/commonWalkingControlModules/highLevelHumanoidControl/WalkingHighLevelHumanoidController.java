@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -15,9 +16,10 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactStat
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.calculators.GainCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.controlModules.ChestOrientationControlModule;
+import us.ihmc.commonWalkingControlModules.controlModules.DegenerateOrientationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.GroundReactionWrenchDistributor;
 import us.ihmc.commonWalkingControlModules.controlModules.HeadOrientationControlModule;
-import us.ihmc.commonWalkingControlModules.controlModules.RigidBodyOrientationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorTools;
@@ -118,7 +120,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
    private final DoubleYoVariable amountToBeInsideSingleSupport = new DoubleYoVariable("amountToBeInsideSingleSupport", registry);
    private final DoubleYoVariable amountToBeInsideDoubleSupport = new DoubleYoVariable("amountToBeInsideDoubleSupport", registry);
 
-   private final RigidBodyOrientationControlModule chestOrientationControlModule;
+   private final DegenerateOrientationControlModule chestOrientationControlModule;
 
    private final DoubleYoVariable userDesiredPelvisPitch = new DoubleYoVariable("userDesiredPelvisPitch", registry);
    private final SettableOrientationProvider initialPelvisOrientationProvider;
@@ -137,12 +139,9 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
    private final SideDependentList<YoVariableDoubleProvider> onEdgeFinalAngleProviders = new SideDependentList<YoVariableDoubleProvider>();
    private final BooleanYoVariable stayOnToes = new BooleanYoVariable("stayOnToes", registry);
    private final DoubleYoVariable trailingFootPitch = new DoubleYoVariable("trailingFootPitch", registry);
-   private final OneDoFJoint[] neckJoints;
    private final SideDependentList<OneDoFJoint[]> armJoints = new SideDependentList<OneDoFJoint[]>();
-   private final OneDoFJoint[] postHeadJoints;    // on DRC robot: hokuyo_joint
    private final SideDependentList<OneDoFJoint[]> handJoints = new SideDependentList<OneDoFJoint[]>();
-   private final OneDoFJoint[] imuJoints; // if really intertial motion sensor, why a joint?
-   
+
    private final DoubleYoVariable kUpperBody = new DoubleYoVariable("kUpperBody", registry);
    private final DoubleYoVariable zetaUpperBody = new DoubleYoVariable("zetaUpperBody", registry);
    private final YoPositionProvider finalPositionProvider;
@@ -154,10 +153,9 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 
    private final SideDependentList<FramePose> desiredHandPoses = new SideDependentList<FramePose>();
 
-   private final OneDoFJoint[] neckJointsToPositionControl;
-   private final GeometricJacobian neckJacobian;
+   private final OneDoFJoint[] positionControlJoints;
    private final HeadOrientationControlModule headOrientationControlModule;
-   
+
    private final boolean checkOrbitalCondition;
 
 
@@ -165,12 +163,11 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
    public WalkingHighLevelHumanoidController(FullRobotModel fullRobotModel, CommonWalkingReferenceFrames referenceFrames, TwistCalculator twistCalculator,
            CenterOfMassJacobian centerOfMassJacobian, SideDependentList<? extends ContactablePlaneBody> bipedFeet, BipedSupportPolygons bipedSupportPolygons,
            SideDependentList<FootSwitchInterface> footSwitches, double gravityZ, DoubleYoVariable yoTime, double controlDT,
-           DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, FootstepProvider footstepProvider, DesiredHeadOrientationProvider desiredHeadOrientationProvider,
-           CenterOfMassHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator,
-           GroundReactionWrenchDistributor groundReactionWrenchDistributor,
-           SideDependentList<PositionTrajectoryGenerator> footPositionTrajectoryGenerators, DoubleProvider swingTimeProvider,
-           YoPositionProvider finalPositionProvider, boolean stayOntoes, double desiredPelvisPitch, double trailingFootPitch, ArrayList<Updatable> updatables,
-           ProcessedOutputsInterface processedOutputs, WalkingControllerParameters walkingControllerParameters)
+           DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, FootstepProvider footstepProvider,
+           DesiredHeadOrientationProvider desiredHeadOrientationProvider, CenterOfMassHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator,
+           GroundReactionWrenchDistributor groundReactionWrenchDistributor, SideDependentList<PositionTrajectoryGenerator> footPositionTrajectoryGenerators,
+           DoubleProvider swingTimeProvider, YoPositionProvider finalPositionProvider, boolean stayOntoes, double desiredPelvisPitch, double trailingFootPitch,
+           ArrayList<Updatable> updatables, ProcessedOutputsInterface processedOutputs, WalkingControllerParameters walkingControllerParameters)
    {
       super(fullRobotModel, centerOfMassJacobian, referenceFrames, yoTime, gravityZ, twistCalculator, bipedFeet, bipedSupportPolygons, controlDT,
             processedOutputs, footSwitches, groundReactionWrenchDistributor, updatables, walkingControllerParameters.doStrictPelvisControl(),
@@ -198,12 +195,6 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       singleSupportICPGlideScaleFactor.set(0.9);
 
       this.finalPositionProvider = finalPositionProvider;
-
-      RigidBody chestControlBase = fullRobotModel.getPelvis();    // fullRobotModel.getElevator();
-      this.chestOrientationControlModule = new RigidBodyOrientationControlModule("chest", chestControlBase, fullRobotModel.getChest(), twistCalculator,
-              registry);
-      chestOrientationControlModule.setProportionalGains(100.0, 100.0, 100.0);
-      chestOrientationControlModule.setDerivativeGains(20.0, 20.0, 20.0);
 
       this.footPositionTrajectoryGenerators = footPositionTrajectoryGenerators;
 
@@ -245,15 +236,6 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       this.pelvisOrientationTrajectoryGenerator = new OrientationInterpolationTrajectoryGenerator("pelvis", worldFrame, swingTimeProvider,
               initialPelvisOrientationProvider, finalPelvisOrientationProvider, registry);
 
-      List<InverseDynamicsJoint> pelvisJoints = chestControlBase.getChildrenJoints();
-      imuJoints = new OneDoFJoint[1];
-      for(InverseDynamicsJoint pjoint : pelvisJoints)
-      {
-         if (pjoint.getName().equals("imu_joint"))
-         {
-            imuJoints[0] = (OneDoFJoint)pjoint;
-         }
-      }
       comTrajectoryBagOfBalls = new BagOfBalls(500, 0.01, "comBagOfBalls", YoAppearance.Red(), registry, dynamicGraphicObjectsListRegistry);
 
       setUpStateMachine(swingTimeProvider);
@@ -277,13 +259,6 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       RobotSide trailingLeg = leadingLeg.getOppositeSide();
       onEdgeInitialAngleProviders.get(trailingLeg).set(this.trailingFootPitch.getDoubleValue());
 
-      this.neckJoints = createOneDoFJointPath(fullRobotModel.getChest(), fullRobotModel.getHead());
-      List<InverseDynamicsJoint> postHeadJointsList = fullRobotModel.getHead().getChildrenJoints();
-      InverseDynamicsJoint[] postHeadJointsArray = new InverseDynamicsJoint[postHeadJointsList.size()];
-      postHeadJointsList.toArray(postHeadJointsArray);
-      this.postHeadJoints = new OneDoFJoint[ScrewTools.computeNumberOfJointsOfType(OneDoFJoint.class, postHeadJointsArray)];
-      ScrewTools.filterJoints(postHeadJointsArray, postHeadJoints, OneDoFJoint.class);
-      
       this.checkOrbitalCondition = walkingControllerParameters.checkOrbitalCondition();
 
       for (RobotSide robotSide : RobotSide.values())
@@ -319,37 +294,17 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
          handJoints.put(robotSide, allSideHandJoints.toArray(new OneDoFJoint[allSideHandJoints.size()]));
       }
 
-      final String[] neckJointsToUseForHeadOrientationControl = walkingControllerParameters.neckJointsToUseForHeadOrientationControl();
-      OneDoFJoint[] necksJointsForOrientationControl = new OneDoFJoint[neckJointsToUseForHeadOrientationControl.length];
-      neckJointsToPositionControl = new OneDoFJoint[neckJoints.length - neckJointsToUseForHeadOrientationControl.length];
+      String[] headOrientationControlJointNames = walkingControllerParameters.getHeadOrientationControlJointNames();
+      String[] chestOrientationControlJointNames = walkingControllerParameters.getChestOrientationControlJointNames();
 
+      InverseDynamicsJoint[] allJoints = ScrewTools.computeJointsInOrder(fullRobotModel.getElevator());
+      InverseDynamicsJoint[] headOrientationControlJoints = ScrewTools.findJointsWithNames(allJoints, headOrientationControlJointNames);
+      InverseDynamicsJoint[] chestOrientationControlJoints = ScrewTools.findJointsWithNames(allJoints, chestOrientationControlJointNames);
 
-      int neckJointsForOrientationControlIndex = 0;
-      int neckJointsToPositionControlIndex = 0;
-
-      OneDoFJointLoop:
-      for (OneDoFJoint neckJoint : neckJoints)
+      if (headOrientationControlJoints.length > 0)
       {
-         for (String neckJointName : neckJointsToUseForHeadOrientationControl)
-         {
-            if (neckJoint.getName().equals(neckJointName))
-            {
-               necksJointsForOrientationControl[neckJointsForOrientationControlIndex] = neckJoint;
-               neckJointsForOrientationControlIndex++;
-
-               continue OneDoFJointLoop;
-            }
-         }
-
-         neckJointsToPositionControl[neckJointsToPositionControlIndex] = neckJoint;
-         neckJointsToPositionControlIndex++;
-      }
-
-      if (necksJointsForOrientationControl.length > 0)
-      {
-         final RigidBody neckBase = necksJointsForOrientationControl[0].getPredecessor();
-         final RigidBody head = necksJointsForOrientationControl[necksJointsForOrientationControl.length - 1].getSuccessor();
-         neckJacobian = new GeometricJacobian(neckBase, head, head.getBodyFixedFrame());
+         final RigidBody head = fullRobotModel.getHead();
+         GeometricJacobian neckJacobian = new GeometricJacobian(headOrientationControlJoints, head.getBodyFixedFrame());
          headOrientationControlModule = new HeadOrientationControlModule(neckJacobian, twistCalculator, fullRobotModel.getChest(), registry);
          double headKp = 100.0;
          double headZeta = 1.0;
@@ -357,7 +312,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
          headOrientationControlModule.setProportionalGains(headKp, headKp, headKp);
          headOrientationControlModule.setDerivativeGains(headKd, headKd, headKd);
 
-         if(desiredHeadOrientationProvider != null)
+         if (desiredHeadOrientationProvider != null)
          {
             desiredHeadOrientationProvider.setHeadOrientationControlModule(headOrientationControlModule);
          }
@@ -365,9 +320,45 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       else
       {
          headOrientationControlModule = null;
-         neckJacobian = null;
       }
 
+      if (chestOrientationControlJoints.length > 0)
+      {
+         RigidBody chest = fullRobotModel.getChest();
+         GeometricJacobian spineJacobian = new GeometricJacobian(chestOrientationControlJoints, chest.getBodyFixedFrame());
+         chestOrientationControlModule = new ChestOrientationControlModule(fullRobotModel.getPelvis(), fullRobotModel.getChest(), spineJacobian,
+                 twistCalculator);
+         chestOrientationControlModule.setProportionalGains(100.0, 100.0, 100.0);
+         chestOrientationControlModule.setDerivativeGains(20.0, 20.0, 20.0);
+      }
+      else
+      {
+         chestOrientationControlModule = null;
+      }
+
+      List<InverseDynamicsJoint> unconstrainedJoints = new ArrayList<InverseDynamicsJoint>(Arrays.asList(allJoints));
+      for (RobotSide robotSide : RobotSide.values())
+      {
+         RigidBody hand = fullRobotModel.getHand(robotSide);
+         InverseDynamicsJoint[] armJoints = ScrewTools.createJointPath(fullRobotModel.getChest(), hand);
+         unconstrainedJoints.removeAll(Arrays.asList(armJoints));
+
+         RigidBody foot = fullRobotModel.getFoot(robotSide);
+         InverseDynamicsJoint[] legJoints = ScrewTools.createJointPath(fullRobotModel.getPelvis(), foot);
+         unconstrainedJoints.removeAll(Arrays.asList(legJoints));
+      }
+
+      unconstrainedJoints.removeAll(Arrays.asList(headOrientationControlJoints));
+      unconstrainedJoints.removeAll(Arrays.asList(chestOrientationControlJoints));
+      unconstrainedJoints.remove(fullRobotModel.getRootJoint());
+      InverseDynamicsJoint[] unconstrainedJointsArray = new InverseDynamicsJoint[unconstrainedJoints.size()];
+      unconstrainedJoints.toArray(unconstrainedJointsArray);
+      positionControlJoints = new OneDoFJoint[unconstrainedJointsArray.length];
+      ScrewTools.filterJoints(unconstrainedJointsArray, positionControlJoints, OneDoFJoint.class);
+
+      unconstrainedJoints.removeAll(Arrays.asList(positionControlJoints));
+      if (unconstrainedJoints.size() > 0)
+         throw new RuntimeException("Joints unconstrained: " + unconstrainedJoints);
    }
 
    private void createHandJoints(RobotSide side, InverseDynamicsJoint parentJoint, HashSet<OneDoFJoint> allSideHandJoints)
@@ -657,7 +648,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       {
          if (checkOrbitalCondition)
          {
-         // TODO: not really nice, but it'll do:
+            // TODO: not really nice, but it'll do:
             FlatThenPolynomialCoMHeightTrajectoryGenerator flatThenPolynomialCoMHeightTrajectoryGenerator =
                (FlatThenPolynomialCoMHeightTrajectoryGenerator) centerOfMassHeightTrajectoryGenerator;
             double orbitalEnergy = flatThenPolynomialCoMHeightTrajectoryGenerator.computeOrbitalEnergyIfInitializedNow(getUpcomingSupportLeg());
@@ -898,58 +889,37 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       stateMachine.checkTransitionConditionsThoroughly();
       stateMachine.doAction();
       desiredCoMHeightAcceleration.set(computeDesiredCoMHeightAcceleration(desiredICPVelocity.getFrameVector2dCopy()));
-      doChestControl();
-      doUpperBodyControl();
-   }
 
-   // TODO: code duplication with box moving
-   private void doChestControl()
-   {
-      ReferenceFrame baseFrame = chestOrientationControlModule.getBase().getBodyFixedFrame();
-      FrameOrientation desiredOrientation = new FrameOrientation(baseFrame);
-      FrameVector desiredAngularVelocity = new FrameVector(baseFrame);
-      FrameVector desiredAngularAcceleration = new FrameVector(baseFrame);
-
-      FrameVector outputToPack = new FrameVector(baseFrame);
-      chestOrientationControlModule.compute(outputToPack, desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
-      outputToPack.changeFrame(spineJacobian.getEndEffectorFrame());
-      DenseMatrix64F nullspaceMultiplier = new DenseMatrix64F(0, 1);
-      solver.setDesiredAngularAcceleration(spineJacobian, baseFrame, outputToPack, nullspaceMultiplier);
-   }
-
-   private void doUpperBodyControl()
-   {
       double kUpperBody = this.kUpperBody.getDoubleValue();
       double dUpperBody = GainCalculator.computeDerivativeGain(kUpperBody, zetaUpperBody.getDoubleValue());
-
-      for (RobotSide robotSide : RobotSide.values)
+      for (OneDoFJoint joint : positionControlJoints)
       {
-         doPDControl(handJoints.get(robotSide), kUpperBody, dUpperBody);
+         doPDControl(joint, kUpperBody, dUpperBody);
       }
 
-      doPDControl(postHeadJoints, kUpperBody, dUpperBody);
-      doPDControl(neckJointsToPositionControl, kUpperBody, dUpperBody);
-      
-      if (imuJoints[0] != null)
-      {
-         doPDControl(imuJoints, kUpperBody, dUpperBody);
-      }
-      
+      if (chestOrientationControlModule != null)
+         doChestControl();
+
       if (headOrientationControlModule != null)
-      {
-         doNeckControl();
-      }
+         doHeadControl();
 
       doArmControl();
    }
 
-   public void doNeckControl()
+   private void doChestControl()
    {
-      neckJacobian.compute();
+      chestOrientationControlModule.compute();
+      DenseMatrix64F nullspaceMultipliers = new DenseMatrix64F(0, 1);
+      solver.setDesiredSpatialAcceleration(chestOrientationControlModule.getJacobian(), chestOrientationControlModule.getSpatialAcceleration(),
+              nullspaceMultipliers, chestOrientationControlModule.getSelectionMatrix());
+   }
+
+   public void doHeadControl()
+   {
       headOrientationControlModule.compute();
       DenseMatrix64F nullspaceMultipliers = new DenseMatrix64F(0, 1);
-      solver.setDesiredSpatialAcceleration(neckJacobian, headOrientationControlModule.getSpatialAcceleration(), nullspaceMultipliers,
-              headOrientationControlModule.getSelectionMatrix());
+      solver.setDesiredSpatialAcceleration(headOrientationControlModule.getJacobian(), headOrientationControlModule.getSpatialAcceleration(),
+              nullspaceMultipliers, headOrientationControlModule.getSelectionMatrix());
    }
 
    public void doArmControl()
