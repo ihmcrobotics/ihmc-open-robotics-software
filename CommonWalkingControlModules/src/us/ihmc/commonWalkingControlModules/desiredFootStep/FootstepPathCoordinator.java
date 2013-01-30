@@ -3,7 +3,6 @@ package us.ihmc.commonWalkingControlModules.desiredFootStep;
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import us.ihmc.utilities.io.streamingData.QueueBasedStreamingDataProducer;
-import us.ihmc.utilities.io.streamingData.StreamingDataTCPClient;
 import us.ihmc.utilities.io.streamingData.StreamingDataTCPServer;
 
 import java.util.ArrayList;
@@ -15,6 +14,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  */
 public class FootstepPathCoordinator implements FootstepProvider
 {
+   private boolean DEBUG = false;
    private final ConcurrentLinkedQueue<Footstep> footstepQueue = new ConcurrentLinkedQueue<Footstep>();
    private YoVariableRegistry registry = new YoVariableRegistry("FootstepPathCoordinator");
    private final BooleanYoVariable walk = new BooleanYoVariable("walk", registry);
@@ -89,7 +89,10 @@ public class FootstepPathCoordinator implements FootstepProvider
       }
 
       this.isPaused.set(isPaused);
-      System.out.println("FootstepPathCoordinator: isPaused = " + isPaused);
+      if (DEBUG)
+      {
+         System.out.println("FootstepPathCoordinator: isPaused = " + isPaused);
+      }
    }
 
    public void setWalk(boolean walk)

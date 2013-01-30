@@ -28,8 +28,11 @@ public class DRCConfigParameters
    public static final int PAUSE_COMMAND_PORT_NUMBER = 5555;
    public static final long PAUSE_COMMAND_DATA_IDENTIFIER = 5555L;
 
-   public static final int ABSOLUTE_HEADING_COMMAND_PORT_NUMBER = 6666;
-   public static final long ABSOLUTE_HEADING_COMMAND_DATA_IDENTIFIER = 6666L;
+   public static final int ABSOLUTE_HEAD_ORIENTATION_PORT_NUMBER = 6666;
+   public static final long ABSOLUTE_HEAD_ORIENTATION_DATA_IDENTIFIER = 6666L;
+
+   public static final int RELATIVE_HEAD_ORIENTATION_PORT_NUMBER = 8888;
+   public static final long RELATIVE_HEAD_ORIENTATION_DATA_IDENTIFIER = 8888L;
 
    public static final int LIDAR_DATA_PORT_NUMBER = 4697;
    
