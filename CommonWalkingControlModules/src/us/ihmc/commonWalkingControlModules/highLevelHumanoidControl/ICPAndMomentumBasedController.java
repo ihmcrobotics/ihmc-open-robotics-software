@@ -734,11 +734,11 @@ public abstract class ICPAndMomentumBasedController implements RobotController
    {
       for (OneDoFJoint joint : joints)
       {
-         doPDControl(k, d, joint);
+         doPDControl(joint, k, d);
       }
    }
 
-   protected void doPDControl(double k, double d, OneDoFJoint joint)
+   protected void doPDControl(OneDoFJoint joint, double k, double d)
    {
       double desiredAcceleration = computeDesiredAcceleration(k, d, 0.0, 0.0, joint);
       DenseMatrix64F jointAcceleration = new DenseMatrix64F(joint.getDegreesOfFreedom(), 1);

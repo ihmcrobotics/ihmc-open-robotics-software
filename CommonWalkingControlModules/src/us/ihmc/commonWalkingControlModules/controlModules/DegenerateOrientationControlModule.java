@@ -64,6 +64,11 @@ public abstract class DegenerateOrientationControlModule
       return selectionMatrix;
    }
 
+   public GeometricJacobian getJacobian()
+   {
+      return jacobian;
+   }
+   
    public void setProportionalGains(double proportionalGainX, double proportionalGainY, double proportionalGainZ)
    {
       rigidBodyOrientationControlModule.setProportionalGains(proportionalGainX, proportionalGainY, proportionalGainZ);
