@@ -24,9 +24,12 @@ import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FramePose;
+import us.ihmc.utilities.math.geometry.FramePose2d;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.ZUpFrame;
+import us.ihmc.utilities.math.overheadPath.OverheadPath;
+import us.ihmc.utilities.math.overheadPath.TurnThenStraightOverheadPath;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTools;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
@@ -46,8 +49,6 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicVector
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameConvexPolygon2d;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
-import com.yobotics.simulationconstructionset.util.trajectory.OverheadPath;
-import com.yobotics.simulationconstructionset.util.trajectory.StraightLineOverheadPath;
 
 public class DesiredFootstepVisualizer
 {
@@ -274,7 +275,7 @@ public class DesiredFootstepVisualizer
       SideDependentList<? extends ContactablePlaneBody> bipedFeet =  desiredFootstepVisualizer.getBipedFeet();
       FootstepGenerator footstepGenerator = new FootstepGenerator(bipedFeet);
       
-      OverheadPath footstepPath = new StraightLineOverheadPath(new FramePoint2d(ReferenceFrame.getWorldFrame()), new FramePoint2d(ReferenceFrame.getWorldFrame(),10.0,0.0),0.0);
+      OverheadPath footstepPath = new TurnThenStraightOverheadPath(new FramePose2d(ReferenceFrame.getWorldFrame()), new FramePoint2d(ReferenceFrame.getWorldFrame(),10.0,0.0),0.0);
       
       footstepGenerator.setFootstepPath(footstepPath);
       
