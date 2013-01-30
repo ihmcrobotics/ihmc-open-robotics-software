@@ -27,11 +27,12 @@ import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
+import us.ihmc.utilities.math.geometry.FramePose2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.math.overheadPath.OverheadPath;
+import us.ihmc.utilities.math.overheadPath.TurnThenStraightOverheadPath;
 
 import com.yobotics.simulationconstructionset.Robot;
-import com.yobotics.simulationconstructionset.util.trajectory.OverheadPath;
-import com.yobotics.simulationconstructionset.util.trajectory.StraightLineOverheadPath;
 
 public class FootstepGeneratorTest
 {
@@ -70,7 +71,7 @@ public class FootstepGeneratorTest
    private void testPathToDestination(Point3d destination)
    {
       setupRobotParameters();
-      OverheadPath pathToDestination = new StraightLineOverheadPath(new FramePoint2d(WORLD_FRAME), new FramePoint2d(WORLD_FRAME,destination.x,destination.y),SIDESTEP?Math.PI/2:0.0);
+      OverheadPath pathToDestination = new TurnThenStraightOverheadPath(new FramePose2d(WORLD_FRAME), new FramePoint2d(WORLD_FRAME,destination.x,destination.y),SIDESTEP?Math.PI/2:0.0);
       generateFootstepsUsingPath(pathToDestination);
       FootstepValidityMetric footstepValidityMetric = new SemiCircularStepValidityMetric(fullRobotModel.getFoot(RobotSide.LEFT), 0.08, 0.8, 0.8);
       assertAllStepsValid(footstepValidityMetric);

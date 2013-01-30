@@ -19,8 +19,11 @@ import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FramePose;
+import us.ihmc.utilities.math.geometry.FramePose2d;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.math.overheadPath.OverheadPath;
+import us.ihmc.utilities.math.overheadPath.TurnThenStraightOverheadPath;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTestTools;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
@@ -33,8 +36,6 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicYoFramePolygon;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameConvexPolygon2d;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePose;
-import com.yobotics.simulationconstructionset.util.trajectory.OverheadPath;
-import com.yobotics.simulationconstructionset.util.trajectory.StraightLineOverheadPath;
 
 public class FootstepGeneratorVisualizer
 {
@@ -236,9 +237,9 @@ public class FootstepGeneratorVisualizer
 
    public static OverheadPath generateSimpleOverheadPath()
    {
-      FramePoint2d startPoint = new FramePoint2d(worldFrame, new Point2d(0.0, 0.0));
+      FramePose2d startPoint = new FramePose2d(worldFrame, new Point2d(0.0, 0.0), 0.0);
       FramePoint2d endPoint = new FramePoint2d(worldFrame, new Point2d(-5.0, 0.0));
-      OverheadPath footstepPath = new StraightLineOverheadPath(startPoint, endPoint,0.0);
+      OverheadPath footstepPath = new TurnThenStraightOverheadPath(startPoint, endPoint,0.0);
       return footstepPath;
    }
 
