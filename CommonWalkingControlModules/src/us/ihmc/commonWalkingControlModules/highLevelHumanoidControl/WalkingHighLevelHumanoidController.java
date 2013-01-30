@@ -657,6 +657,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       {
          if (checkOrbitalCondition)
          {
+         // TODO: not really nice, but it'll do:
             FlatThenPolynomialCoMHeightTrajectoryGenerator flatThenPolynomialCoMHeightTrajectoryGenerator =
                (FlatThenPolynomialCoMHeightTrajectoryGenerator) centerOfMassHeightTrajectoryGenerator;
             double orbitalEnergy = flatThenPolynomialCoMHeightTrajectoryGenerator.computeOrbitalEnergyIfInitializedNow(getUpcomingSupportLeg());
@@ -911,6 +912,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 
       FrameVector outputToPack = new FrameVector(baseFrame);
       chestOrientationControlModule.compute(outputToPack, desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
+      outputToPack.changeFrame(spineJacobian.getEndEffectorFrame());
       DenseMatrix64F nullspaceMultiplier = new DenseMatrix64F(0, 1);
       solver.setDesiredAngularAcceleration(spineJacobian, baseFrame, outputToPack, nullspaceMultiplier);
    }
