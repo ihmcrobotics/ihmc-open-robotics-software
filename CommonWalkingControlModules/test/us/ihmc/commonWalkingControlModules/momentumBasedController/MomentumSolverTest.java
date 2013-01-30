@@ -224,6 +224,7 @@ public class MomentumSolverTest
       sixDoFJoints.add(rootJoint);
       
       setRandomPositionsAndVelocities(random, randomFloatingChain.getElevator(), sixDoFJoints, randomFloatingChain.getRevoluteJoints());
+//      randomFloatingChain.getRevoluteJoints().get(0).setQd(0.0);
 
       RigidBody elevator = randomFloatingChain.getElevator();
       ReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("com", worldFrame, elevator);
@@ -418,7 +419,7 @@ public class MomentumSolverTest
       RigidBody base = rootJoint.getSuccessor();
       RigidBody endEffector = revoluteJoints.get(revoluteJoints.size() - 1).getSuccessor();
       GeometricJacobian jacobian = new GeometricJacobian(base, endEffector, endEffector.getBodyFixedFrame());
-      FrameVector endEffectorAngularAcceleration = new FrameVector(rootJoint.getFrameAfterJoint(), RandomTools.generateRandomVector(random));
+      FrameVector endEffectorAngularAcceleration = new FrameVector(endEffector.getBodyFixedFrame(), RandomTools.generateRandomVector(random));
       DenseMatrix64F nullspaceMultiplier = new DenseMatrix64F(0, 1);
 
       solver.setDesiredAngularAcceleration(jacobian, elevator.getBodyFixedFrame(), endEffectorAngularAcceleration, nullspaceMultiplier);
@@ -487,7 +488,7 @@ public class MomentumSolverTest
       twistOfCurrentWithRespectToNew.changeBaseFrameNoRelativeTwist(rootJoint.getFrameAfterJoint());
 
       twistCalculator.packTwistOfBody(twistOfBodyWithRespectToBase, jacobian.getEndEffector());
-      checkAcceleration.changeFrame(spatialAcceleration.getExpressedInFrame(), twistOfCurrentWithRespectToNew, twistOfBodyWithRespectToBase);
+//      checkAcceleration.changeFrame(spatialAcceleration.getExpressedInFrame(), twistOfCurrentWithRespectToNew, twistOfBodyWithRespectToBase);
 
       if (angularPartOnly)
       {
