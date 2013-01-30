@@ -17,14 +17,8 @@ public interface WalkingControllerParameters
    public abstract String[] getChestOrientationControlJointNames();
 
    public abstract boolean checkOrbitalCondition();
-   
-   public abstract void setCheckOrbitalCondition(boolean checkOrbitalCondition);
-   
+
    public abstract double nominalHeightAboveGround();
-   
-   public abstract void setNominalHeightAboveGround(double nominalHeightAboveGround);
-   
+
    public abstract double initialHeightAboveGround();
-   
-   public abstract void setInitialHeightAboveGround(double initialHeightAboveGround);
 }
