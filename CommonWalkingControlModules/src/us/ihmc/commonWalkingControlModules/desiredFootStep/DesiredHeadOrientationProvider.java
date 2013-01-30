@@ -1,14 +1,13 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
+import javax.vecmath.Point2d;
+import javax.vecmath.Point3d;
+
 import us.ihmc.commonWalkingControlModules.controlModules.HeadOrientationControlModule;
 import us.ihmc.utilities.io.streamingData.AbstractStreamingDataConsumer;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-
-import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3f;
 
 /**
  * User: Matt
@@ -21,13 +20,13 @@ public class DesiredHeadOrientationProvider
 
    private AbstractStreamingDataConsumer<Point3d> absoluteHeadOrientationConsumer;
    private AbstractStreamingDataConsumer<Point2d> relativeHeadOrientationConsumer;
+   private final ReferenceFrame elevatorFrame;
 
-   public DesiredHeadOrientationProvider(long absoluteHeadOrientationDataIdentifier, long relativeHeadOrientationDataIdentifier)
+   public DesiredHeadOrientationProvider(long absoluteHeadOrientationDataIdentifier, long relativeHeadOrientationDataIdentifier, ReferenceFrame elevatorFrame)
    {
-      super();
-
       absoluteHeadOrientationConsumer = new AbsoluteHeadOrientationConsumer(absoluteHeadOrientationDataIdentifier);
       relativeHeadOrientationConsumer = new RelativeHeadOrientationConsumer(relativeHeadOrientationDataIdentifier);
+      this.elevatorFrame = elevatorFrame;
    }
 
    public AbstractStreamingDataConsumer<Point3d> getAbsoluteHeadOrientationConsumer()
@@ -47,7 +46,6 @@ public class DesiredHeadOrientationProvider
 
    private class AbsoluteHeadOrientationConsumer extends AbstractStreamingDataConsumer<Point3d>
    {
-
       public AbsoluteHeadOrientationConsumer(long objectIdentifier)
       {
          super(objectIdentifier, Point3d.class);
@@ -63,10 +61,11 @@ public class DesiredHeadOrientationProvider
          if (headOrientationControlModule != null)
          {
             FramePoint pointToTrack = new FramePoint(ReferenceFrame.getWorldFrame(), point3d);
-            headOrientationControlModule.setPointToTrack(pointToTrack, headOrientationControlModule.getElevatorFrame());
+            headOrientationControlModule.setPointToTrack(pointToTrack, elevatorFrame);
          }
       }
    }
+
 
    private class RelativeHeadOrientationConsumer extends AbstractStreamingDataConsumer<Point2d>
    {
@@ -88,9 +87,8 @@ public class DesiredHeadOrientationProvider
             double pitch = point2d.getY();
             double roll = 0.0;
             FrameOrientation frameOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame(), yaw, pitch, roll);
-            headOrientationControlModule.setOrientationToTrack(frameOrientation, headOrientationControlModule.getElevatorFrame());
+            headOrientationControlModule.setOrientationToTrack(frameOrientation, elevatorFrame);
          }
       }
    }
 }
-

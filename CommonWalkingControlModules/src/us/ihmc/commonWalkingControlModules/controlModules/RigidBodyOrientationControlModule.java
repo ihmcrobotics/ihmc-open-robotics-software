@@ -56,5 +56,10 @@ public class RigidBodyOrientationControlModule
    {
       return base;
    }
+
+   public RigidBody getEndEffector()
+   {
+      return endEffector;
+   }
 }
 
