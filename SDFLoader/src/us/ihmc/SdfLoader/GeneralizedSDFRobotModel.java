@@ -1,5 +1,6 @@
 package us.ihmc.SdfLoader;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -14,11 +15,11 @@ import us.ihmc.SdfLoader.xmlDescription.SDFModel;
 public class GeneralizedSDFRobotModel
 {
    private final String name;
-   private final String resourceDirectory;
+   private final File resourceDirectory;
    private final ArrayList<SDFLinkHolder> rootLinks = new ArrayList<SDFLinkHolder>();
    private final Vector3d rootOffset = new Vector3d();
 
-   public GeneralizedSDFRobotModel(String name, SDFModel model, String resourceDirectory)
+   public GeneralizedSDFRobotModel(String name, SDFModel model, File resourceDirectory)
    {
       this.name = name;
       this.resourceDirectory = resourceDirectory;
@@ -88,7 +89,7 @@ public class GeneralizedSDFRobotModel
       return name;
    }
 
-   public String getResourceDirectory()
+   public File getResourceDirectory()
    {
       return resourceDirectory;
    }

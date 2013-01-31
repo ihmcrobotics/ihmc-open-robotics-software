@@ -1,5 +1,6 @@
 package us.ihmc.SdfLoader;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -32,7 +33,7 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRo
 {
    private static final long serialVersionUID = 5864358637898048080L;
 
-   private final String resourceDirectory;
+   private final File resourceDirectory;
    private final HashMap<String, PinJoint> robotJoints = new HashMap<String, PinJoint>();
 
    private final FloatingJoint rootJoint;
@@ -201,6 +202,7 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRo
 
    private Link createLink(SDFLinkHolder link, Matrix3d rotation)
    {
+      
       SDFGraphics3DObject linkGraphics = new SDFGraphics3DObject(rotation, link.getVisuals(), resourceDirectory);
 
       Link scsLink = new Link(link.getName());
