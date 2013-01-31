@@ -1,5 +1,6 @@
 package us.ihmc.SdfLoader;
 
+import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
@@ -11,15 +12,15 @@ import javax.vecmath.Vector3d;
 import us.ihmc.SdfLoader.xmlDescription.SDFVisual;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.ModelFileType;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
+import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 
 
 public class SDFGraphics3DObject extends Graphics3DObject
 {
    private static final boolean SHOW_COORDINATE_SYSTEMS = false;
 
-   public SDFGraphics3DObject(Matrix3d rotation, List<SDFVisual> sdfVisuals, String resourceDirectory)
+   public SDFGraphics3DObject(Matrix3d rotation, List<SDFVisual> sdfVisuals, File resourceDirectory)
    {
       
       for(SDFVisual sdfVisual : sdfVisuals)
@@ -89,13 +90,15 @@ public class SDFGraphics3DObject extends Graphics3DObject
 
    }
    
-   private String convertToFullPath(String resourceDirectory, String meshPath)
+   private String convertToFullPath(File resourceDirectory, String meshPath)
    {
+
       try
       {
          URI meshURI = new URI(meshPath);
-         return resourceDirectory + meshURI.getAuthority() + meshURI.getPath();
-
+         String returnString = resourceDirectory+ File.separator + meshURI.getAuthority() 
+         		+ meshURI.getPath();
+         return returnString;
       }
       catch (URISyntaxException e)
       {

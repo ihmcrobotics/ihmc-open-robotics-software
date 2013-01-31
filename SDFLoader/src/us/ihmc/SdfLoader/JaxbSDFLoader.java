@@ -3,13 +3,14 @@ package us.ihmc.SdfLoader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.net.URL;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
-import us.ihmc.SdfLoader.xmlDescription.SDFRoot;
 import us.ihmc.SdfLoader.xmlDescription.SDFModel;
+import us.ihmc.SdfLoader.xmlDescription.SDFRoot;
 import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
 
 public class JaxbSDFLoader
@@ -18,11 +19,20 @@ public class JaxbSDFLoader
    private final SDFFullRobotModel fullRobotModel;
    private final ReferenceFrames referenceFrames;
 
-   public JaxbSDFLoader(String fileName, String modelName, String resourceDirectory, SDFJointNameMap sdfJointNameMap) throws JAXBException, FileNotFoundException
+   public JaxbSDFLoader(URL fileURL, String modelName, URL resourceDirectory, SDFJointNameMap sdfJointNameMap) throws JAXBException, FileNotFoundException
+   {
+      this(fileURL.getFile(), modelName, resourceDirectory.getFile(), sdfJointNameMap);
+   }
+   
+   public JaxbSDFLoader(String filename, String modelName, String resourceDirectory, SDFJointNameMap sdfJointNameMap) throws JAXBException, FileNotFoundException
+   {
+      this(new File(filename), modelName, new File(resourceDirectory), sdfJointNameMap);
+   }
+   
+   public JaxbSDFLoader(File file, String modelName, File resourceDirectory, SDFJointNameMap sdfJointNameMap) throws JAXBException, FileNotFoundException
    {
       JAXBContext context = JAXBContext.newInstance(SDFRoot.class);
       Unmarshaller um = context.createUnmarshaller();
-      File file = new File(fileName);
       SDFRoot sdfRoot = (SDFRoot) um.unmarshal(new FileReader(file));
 
       SDFModel model = null;
