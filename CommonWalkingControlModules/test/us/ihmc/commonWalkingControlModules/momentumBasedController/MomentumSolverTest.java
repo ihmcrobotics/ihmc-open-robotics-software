@@ -70,7 +70,7 @@ public class MomentumSolverTest
       sixDoFJoints.add(rootJoint);
       List<RevoluteJoint> revoluteJoints = randomFloatingChain.getRevoluteJoints();
 
-      setRandomPositionsAndVelocities(random, randomFloatingChain.getElevator());
+      setRandomPositionsAndVelocities(random, randomFloatingChain.getElevator(), sixDoFJoints, revoluteJoints);
 
 
       RigidBody elevator = randomFloatingChain.getElevator();
@@ -93,7 +93,6 @@ public class MomentumSolverTest
          jointAccelerations.put(joint, jointSpaceAcceleration);
       }
 
-      twistCalculator.compute();
       solver.compute();
       solver.solve(desiredMomentumRate);
 
@@ -124,7 +123,7 @@ public class MomentumSolverTest
 
       ScrewTestTools.createRandomTreeRobot(revoluteJoints, body0, 25, random);
 
-      setRandomPositionsAndVelocities(random, elevator);
+      setRandomPositionsAndVelocities(random, elevator, sixDoFJoints, revoluteJoints);
 
       ReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("com", worldFrame, elevator);
       centerOfMassFrame.update();
@@ -144,7 +143,6 @@ public class MomentumSolverTest
          jointAccelerations.put(joint, jointSpaceAcceleration);
       }
 
-      twistCalculator.compute();
       solver.compute();
       solver.solve(desiredMomentumRate);
 
@@ -174,7 +172,7 @@ public class MomentumSolverTest
       sixDoFJoints.add(body1);
       ArrayList<RevoluteJoint> oneDoFJoints = new ArrayList<RevoluteJoint>();
 
-      setRandomPositionsAndVelocities(random, elevator);
+      setRandomPositionsAndVelocities(random, elevator, sixDoFJoints, oneDoFJoints);
 
 
       ReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("com", worldFrame, elevator);
@@ -195,7 +193,6 @@ public class MomentumSolverTest
       DenseMatrix64F nullspaceMultiplier = new DenseMatrix64F(0, 1);
       solver.setDesiredSpatialAcceleration(jacobian, spatialAcceleration, nullspaceMultiplier);
 
-      twistCalculator.compute();
       solver.compute();
 
       SpatialForceVector desiredMomentumRate = new SpatialForceVector(centerOfMassFrame, RandomTools.generateRandomVector(random),
@@ -223,7 +220,7 @@ public class MomentumSolverTest
       ArrayList<SixDoFJoint> sixDoFJoints = new ArrayList<SixDoFJoint>();
       sixDoFJoints.add(rootJoint);
       
-      setRandomPositionsAndVelocities(random, randomFloatingChain.getElevator());
+      setRandomPositionsAndVelocities(random, randomFloatingChain.getElevator(), sixDoFJoints, randomFloatingChain.getRevoluteJoints());
 //      randomFloatingChain.getRevoluteJoints().get(0).setQd(0.0);
 
       RigidBody elevator = randomFloatingChain.getElevator();
@@ -252,7 +249,6 @@ public class MomentumSolverTest
       firstJointAcceleration.set(0, 0, random.nextDouble());
       solver.setDesiredJointAcceleration(firstJoint, firstJointAcceleration);
 
-      twistCalculator.compute();
       solver.compute();
       solver.solve(desiredMomentumRate);
 
@@ -277,7 +273,7 @@ public class MomentumSolverTest
       ArrayList<SixDoFJoint> sixDoFJoints = new ArrayList<SixDoFJoint>();
       sixDoFJoints.add(rootJoint);
 
-      setRandomPositionsAndVelocities(random, randomFloatingChain.getElevator());
+      setRandomPositionsAndVelocities(random, randomFloatingChain.getElevator(), sixDoFJoints, randomFloatingChain.getRevoluteJoints());
 
       RigidBody elevator = randomFloatingChain.getElevator();
       ReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("com", worldFrame, elevator);
@@ -301,7 +297,6 @@ public class MomentumSolverTest
 
       solver.setDesiredSpatialAcceleration(jacobian, internalAcceleration, nullspaceMultiplier);
 
-      twistCalculator.compute();
       solver.compute();
       solver.solve(desiredMomentumRate);
 
@@ -327,7 +322,7 @@ public class MomentumSolverTest
       sixDoFJoints.add(body1);
       ArrayList<RevoluteJoint> oneDoFJoints = new ArrayList<RevoluteJoint>();
 
-      setRandomPositionsAndVelocities(random, elevator);
+      setRandomPositionsAndVelocities(random, elevator, sixDoFJoints, oneDoFJoints);
 
       ReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("com", worldFrame, elevator);
       centerOfMassFrame.update();
@@ -347,7 +342,6 @@ public class MomentumSolverTest
       DenseMatrix64F nullspaceMultiplier = new DenseMatrix64F(0, 1);
       solver.setDesiredSpatialAcceleration(jacobian, spatialAcceleration, nullspaceMultiplier);
 
-      twistCalculator.compute();
       solver.compute();
 
       Vector3d rateOfChangeOfLinearMomentum = RandomTools.generateRandomVector(random);
@@ -402,7 +396,7 @@ public class MomentumSolverTest
       ArrayList<SixDoFJoint> sixDoFJoints = new ArrayList<SixDoFJoint>();
       sixDoFJoints.add(rootJoint);
 
-      setRandomPositionsAndVelocities(random, randomFloatingChain.getElevator());
+      setRandomPositionsAndVelocities(random, randomFloatingChain.getElevator(), sixDoFJoints, randomFloatingChain.getRevoluteJoints());
 
       RigidBody elevator = randomFloatingChain.getElevator();
       ReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("com", worldFrame, elevator);
@@ -424,7 +418,6 @@ public class MomentumSolverTest
 
       solver.setDesiredAngularAcceleration(jacobian, elevator.getBodyFixedFrame(), endEffectorAngularAcceleration, nullspaceMultiplier);
 
-      twistCalculator.compute();
       solver.compute();
       solver.solve(desiredMomentumRate);
 
@@ -570,22 +563,17 @@ public class MomentumSolverTest
       JUnitTools.assertSpatialForceVectorEquals(desiredMomentumRate, rootJointWrench, epsilonInverseDynamics);
    }
 
-   private static void setRandomPositionsAndVelocities(Random random, RigidBody elevator)
+   private static void setRandomPositionsAndVelocities(Random random, RigidBody elevator, List<SixDoFJoint> sixDoFJoints,
+           List<? extends OneDoFJoint> oneDoFJoints)
    {
-      for (InverseDynamicsJoint joint : elevator.getChildrenJoints())
+      for (SixDoFJoint sixDoFJoint : sixDoFJoints)
       {
-         if (joint instanceof OneDoFJoint)
-         {
-            OneDoFJoint oneDoFJoint = (OneDoFJoint) joint;
-            ScrewTestTools.setRandomPosition(oneDoFJoint, random);
-            ScrewTestTools.setRandomVelocity(oneDoFJoint, random);
-         }
-         if (joint instanceof SixDoFJoint)
-         {
-            ScrewTestTools.setRandomPositionAndOrientation(((SixDoFJoint) joint), random);
-            
-         }
+         ScrewTestTools.setRandomPositionAndOrientation(sixDoFJoint, random);
+         ScrewTestTools.setRandomVelocity(sixDoFJoint, random);
       }
+
+      ScrewTestTools.setRandomPositions(oneDoFJoints, random);
+      ScrewTestTools.setRandomVelocities(oneDoFJoints, random);
 
       elevator.updateFramesRecursively();
    }
