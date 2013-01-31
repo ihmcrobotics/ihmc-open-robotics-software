@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.ejml.data.DenseMatrix64F;
@@ -25,11 +26,12 @@ public class JointSpaceConstraintResolver
       CommonOps.subEquals(b, aJointSpaceVdotJointSpace);
    }
 
-   public void solveAndSetJointspaceAccelerations(Map<InverseDynamicsJoint, DenseMatrix64F> jointSpaceAccelerations)
+   public void solveAndSetJointspaceAccelerations(Map<InverseDynamicsJoint, DenseMatrix64F> jointSpaceAccelerations, LinkedHashMap<InverseDynamicsJoint, Boolean> jointAccelerationValidMap)
    {
       for (InverseDynamicsJoint joint : jointSpaceAccelerations.keySet())
       {
          joint.setDesiredAcceleration(jointSpaceAccelerations.get(joint), 0);
+         jointAccelerationValidMap.put(joint, true);
       }
    }
 }
