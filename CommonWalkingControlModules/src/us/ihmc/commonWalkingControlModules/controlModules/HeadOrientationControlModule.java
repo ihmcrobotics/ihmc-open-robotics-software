@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.controlModules;
 
 import org.apache.commons.lang.ArrayUtils;
 
+import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -12,6 +13,7 @@ import us.ihmc.utilities.screwTheory.GeometricJacobian;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.EnumYoVariable;
 import com.yobotics.simulationconstructionset.IntegerYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
@@ -27,6 +29,11 @@ public class HeadOrientationControlModule extends DegenerateOrientationControlMo
 
    private final IntegerYoVariable trackingFrameIndex = new IntegerYoVariable("trackingFrameIndex", registry);
    private final EnumYoVariable<HeadTrackingMode> headTrackingMode = EnumYoVariable.create("headTrackingMode", HeadTrackingMode.class, registry);
+   
+   private final DoubleYoVariable yawLimit = new DoubleYoVariable("yawLimit", registry);
+   private final DoubleYoVariable pitchLowerLimit = new DoubleYoVariable("pitchLowerLimit", registry);
+   private final DoubleYoVariable pitchUpperLimit = new DoubleYoVariable("pitchUpperLimit", registry);
+   private final DoubleYoVariable rollLimit = new DoubleYoVariable("rollLimit", registry);
 
    public HeadOrientationControlModule(GeometricJacobian neckJacobian, TwistCalculator twistCalculator, RigidBody chest, YoVariableRegistry parentRegistry)
    {
@@ -42,10 +49,13 @@ public class HeadOrientationControlModule extends DegenerateOrientationControlMo
 
       headTrackingMode.set(HeadTrackingMode.ORIENTATION);
       trackingFrameIndex.set(getTrackingFrameIndex(chestFrame));
+      
+      setHeadOrientationLimits();
 
       parentRegistry.addChild(registry);
    }
 
+   @Override
    protected FrameOrientation getDesiredFrameOrientation()
    {
       ReferenceFrame referenceFrame = framesToTrackIn[trackingFrameIndex.getIntegerValue()];
@@ -61,15 +71,53 @@ public class HeadOrientationControlModule extends DegenerateOrientationControlMo
             FramePoint positionToPointAt = pointToTrack.getPointInFrame(referenceFrame).getFramePointCopy();
             pointTrackingFrame.setPositionToPointAt(positionToPointAt);
             pointTrackingFrame.update();
+            
+            FrameOrientation frameOrientation = new FrameOrientation(pointTrackingFrame);
+            enforceLimits(frameOrientation);
 
-            return new FrameOrientation(pointTrackingFrame);
+            return frameOrientation;
          }
 
          default :
             throw new RuntimeException("Case " + headTrackingMode.getEnumValue() + " not handled.");
       }
    }
+   
+   private void enforceLimits(FrameOrientation orientation)
+   {
+      ReferenceFrame initialReferenceFrame = orientation.getReferenceFrame();
+      orientation.changeFrame(getJacobian().getBaseFrame());
+      
+      double[] yawPitchRoll = orientation.getYawPitchRoll();
+      
+      for (int i = 0; i < yawPitchRoll.length; i++)
+      {
+         if (i == 0)
+            yawPitchRoll[i] = MathTools.clipToMinMax(yawPitchRoll[i], yawLimit.getDoubleValue(), -yawLimit.getDoubleValue());
+         if (i == 1)
+            yawPitchRoll[i] = MathTools.clipToMinMax(yawPitchRoll[i], pitchLowerLimit.getDoubleValue(), pitchUpperLimit.getDoubleValue());
+         if (i == 2)
+            yawPitchRoll[i] = MathTools.clipToMinMax(yawPitchRoll[i], rollLimit.getDoubleValue(), -rollLimit.getDoubleValue());
+      }
+      
+      orientation.setYawPitchRoll(yawPitchRoll);
+      orientation.changeFrame(initialReferenceFrame);
+   }
+   
+   private void setHeadOrientationLimits()
+   {
+      yawLimit.set(-Math.PI/2);
+      pitchLowerLimit.set(-Math.PI/3);
+      pitchUpperLimit.set(Math.PI/4);
+      rollLimit.set(-Math.PI/4);
+      
+//      yawLimit.set(0.0);
+//      pitchLowerLimit.set(0.0);
+//      pitchUpperLimit.set(0.0);
+//      rollLimit.set(0.0);
+   }
 
+   @Override
    protected FrameVector getDesiredAngularVelocity()
    {
       ReferenceFrame frameToTrackIn = framesToTrackIn[trackingFrameIndex.getIntegerValue()];
@@ -77,6 +125,7 @@ public class HeadOrientationControlModule extends DegenerateOrientationControlMo
       return new FrameVector(frameToTrackIn);
    }
 
+   @Override
    protected FrameVector getDesiredAngularAccelerationFeedForward()
    {
       ReferenceFrame frameToTrackIn = framesToTrackIn[trackingFrameIndex.getIntegerValue()];
