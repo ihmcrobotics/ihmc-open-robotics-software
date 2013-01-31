@@ -59,11 +59,13 @@ public class HeadOrientationControlModule extends DegenerateOrientationControlMo
    protected FrameOrientation getDesiredFrameOrientation()
    {
       ReferenceFrame referenceFrame = framesToTrackIn[trackingFrameIndex.getIntegerValue()];
+      FrameOrientation frameOrientation;
       switch (headTrackingMode.getEnumValue())
       {
          case ORIENTATION :
          {
-            return orientationToTrack.getOrientationInFrame(referenceFrame).getFrameOrientationCopy();
+            frameOrientation = orientationToTrack.getOrientationInFrame(referenceFrame).getFrameOrientationCopy();
+            break;
          }
 
          case POINT :
@@ -72,15 +74,18 @@ public class HeadOrientationControlModule extends DegenerateOrientationControlMo
             pointTrackingFrame.setPositionToPointAt(positionToPointAt);
             pointTrackingFrame.update();
 
-            FrameOrientation frameOrientation = new FrameOrientation(pointTrackingFrame);
-            enforceLimits(frameOrientation);
+            frameOrientation = new FrameOrientation(pointTrackingFrame);
 
-            return frameOrientation;
+            break;
          }
 
          default :
             throw new RuntimeException("Case " + headTrackingMode.getEnumValue() + " not handled.");
       }
+      
+      enforceLimits(frameOrientation);
+      
+      return frameOrientation;
    }
 
    private void enforceLimits(FrameOrientation orientation)
