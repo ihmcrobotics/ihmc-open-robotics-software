@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController;
 
+import java.util.LinkedHashMap;
+
 import org.ejml.alg.dense.mult.MatrixDimensionException;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.LinearSolver;
@@ -8,6 +10,7 @@ import org.ejml.ops.CommonOps;
 import org.ejml.ops.MatrixFeatures;
 
 import us.ihmc.utilities.math.MatrixTools;
+import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.Momentum;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
 
@@ -26,7 +29,7 @@ public class RootJointSolver
    private final LinearSolver<DenseMatrix64F> alpha2Beta2Solver = LinearSolverFactory.linear(size);
 
    public void solveAndSetRootJointAcceleration(DenseMatrix64F vdotRoot, DenseMatrix64F aHatRoot, DenseMatrix64F b, DenseMatrix64F T, DenseMatrix64F alpha1,
-           DenseMatrix64F N, DenseMatrix64F beta1, SixDoFJoint rootJoint)
+           DenseMatrix64F N, DenseMatrix64F beta1, SixDoFJoint rootJoint, LinkedHashMap<InverseDynamicsJoint, Boolean> jointAccelerationValidMap)
    {
       double epsilonOrthogonal = 1e-10;
       orthogonalCheck.reshape(N.getNumCols(), T.getNumCols());
@@ -96,6 +99,7 @@ public class RootJointSolver
          throw new RuntimeException();
 
       rootJoint.setDesiredAcceleration(vdotRoot, 0);
+      jointAccelerationValidMap.put(rootJoint, true);
    }
 
    public DenseMatrix64F getRateOfChangeOfMomentum()

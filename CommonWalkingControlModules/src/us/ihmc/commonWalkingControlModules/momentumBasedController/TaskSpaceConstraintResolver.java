@@ -179,7 +179,7 @@ public class TaskSpaceConstraintResolver
       CommonOps.multAdd(-1.0, aTaskSpace, phiC, bHat);
    }
 
-   public void solveAndSetTaskSpaceAccelerations()
+   public void solveAndSetTaskSpaceAccelerations(LinkedHashMap<InverseDynamicsJoint, Boolean> jointAccelerationValidMap)
    {
       for (GeometricJacobian jacobian : phiCMap.keySet())
       {
@@ -188,6 +188,9 @@ public class TaskSpaceConstraintResolver
          Map<InverseDynamicsJoint, DenseMatrix64F> phiJMapForJacobian = phiJMap.get(jacobian);
          for (InverseDynamicsJoint unconstrainedJointOnPath : phiJMapForJacobian.keySet())
          {
+            if (!jointAccelerationValidMap.get(unconstrainedJointOnPath))
+               throw new RuntimeException("Trying to use invalid data to compute task space constrained joint accelerations");
+
             DenseMatrix64F vdot = new DenseMatrix64F(unconstrainedJointOnPath.getDegreesOfFreedom(), 1);
             DenseMatrix64F phiJ = phiJMapForJacobian.get(unconstrainedJointOnPath);
             unconstrainedJointOnPath.packDesiredAccelerationMatrix(vdot, 0);
@@ -195,6 +198,10 @@ public class TaskSpaceConstraintResolver
          }
 
          ScrewTools.setDesiredAccelerations(jacobian.getJointsInOrder(), vdotTaskSpace);
+         for (InverseDynamicsJoint joint : jacobian.getJointsInOrder())
+         {
+            jointAccelerationValidMap.put(joint, true);
+         }
       }
    }
 

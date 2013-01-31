@@ -64,6 +64,7 @@ public class MomentumSolver
 
    // LinkedHashMaps so that order of computation is defined
    private final LinkedHashMap<InverseDynamicsJoint, int[]> columnsForJoints = new LinkedHashMap<InverseDynamicsJoint, int[]>();
+   private final LinkedHashMap<InverseDynamicsJoint, Boolean> jointAccelerationValidMap = new LinkedHashMap<InverseDynamicsJoint, Boolean>();
    private final LinkedHashMap<InverseDynamicsJoint, DenseMatrix64F> aHats = new LinkedHashMap<InverseDynamicsJoint, DenseMatrix64F>();
    private final LinkedHashMap<InverseDynamicsJoint, DenseMatrix64F> jointSpaceAccelerations = new LinkedHashMap<InverseDynamicsJoint, DenseMatrix64F>();
    private final LinkedHashMap<GeometricJacobian, SpatialAccelerationVector> spatialAccelerations = new LinkedHashMap<GeometricJacobian,
@@ -136,6 +137,11 @@ public class MomentumSolver
       unconstrainedJoints.clear();
       unconstrainedJoints.addAll(jointsInOrderList);
       unconstrainedJoints.remove(rootJoint);
+
+      for (InverseDynamicsJoint joint : jointsInOrder)
+      {
+         jointAccelerationValidMap.put(joint, false);
+      }
    }
 
    public void setDesiredJointAcceleration(InverseDynamicsJoint joint, DenseMatrix64F jointAcceleration)
@@ -245,9 +251,15 @@ public class MomentumSolver
                      DenseMatrix64F momentumMultipliers)
    {
       rootJointSolver.solveAndSetRootJointAcceleration(vdotRoot, aHats.get(rootJoint), b, accelerationSubspace, accelerationMultipliers, momentumSubspace,
-              momentumMultipliers, rootJoint);
-      jointSpaceConstraintResolver.solveAndSetJointspaceAccelerations(jointSpaceAccelerations);
-      taskSpaceConstraintResolver.solveAndSetTaskSpaceAccelerations();
+              momentumMultipliers, rootJoint, jointAccelerationValidMap);
+      jointSpaceConstraintResolver.solveAndSetJointspaceAccelerations(jointSpaceAccelerations, jointAccelerationValidMap);
+      taskSpaceConstraintResolver.solveAndSetTaskSpaceAccelerations(jointAccelerationValidMap);
+      
+      for (InverseDynamicsJoint joint : jointAccelerationValidMap.keySet())
+      {
+         if (!jointAccelerationValidMap.get(joint))
+            throw new RuntimeException("Joint acceleration for " + joint.getName() + " is invalid at the end of solve.");
+      }
    }
 
    public void getRateOfChangeOfMomentum(SpatialForceVector rateOfChangeOfMomentumToPack)
