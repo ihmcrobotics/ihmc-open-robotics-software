@@ -36,9 +36,9 @@ import com.yobotics.simulationconstructionset.Robot;
 
 public class FootstepGeneratorTest
 {
-   private final static boolean VISUALIZE = true;
-   private final static boolean SIDESTEP = true;
-   private final static boolean DEBUG=true;
+   private final static boolean VISUALIZE = false;
+   private final static boolean SIDESTEP = false;
+   private final static boolean DEBUG = false;
    public static final ReferenceFrame WORLD_FRAME = ReferenceFrames.getWorldFrame();
    List<Footstep> footSteps = new ArrayList<Footstep>();
    FullRobotModel fullRobotModel;
@@ -52,62 +52,74 @@ public class FootstepGeneratorTest
       Point3d destination = new Point3d(5.0, 0.0, 0.0);
       testPathToDestination(destination);
    }
+
    @Test
    public void testAngledPaths()
    {
       double maxAngle = Math.PI;
-      double angle  = 0;
+      double angle = 0;
       int n = 10;
-      for (int i=-n;i<=n;i++)
+      for (int i = -n; i <= n; i++)
       {
-         angle = (maxAngle*i)/n;
-         Point3d destination = new Point3d(5.0*Math.cos(angle), 5.0*Math.sin(angle), 0.0);
+         angle = (maxAngle * i) / n;
+         Point3d destination = new Point3d(5.0 * Math.cos(angle), 5.0 * Math.sin(angle), 0.0);
          testPathToDestination(destination);
       }
    }
-   
-
 
    private void testPathToDestination(Point3d destination)
    {
       setupRobotParameters();
-      OverheadPath pathToDestination = new TurnThenStraightOverheadPath(new FramePose2d(WORLD_FRAME), new FramePoint2d(WORLD_FRAME,destination.x,destination.y),SIDESTEP?Math.PI/2:0.0);
+      OverheadPath pathToDestination = new TurnThenStraightOverheadPath(new FramePose2d(WORLD_FRAME),
+                                          new FramePoint2d(WORLD_FRAME, destination.x, destination.y), SIDESTEP ? Math.PI / 2 : 0.0);
+      if(DEBUG)
+         System.out.println("FootstepGeneratorTest: startPose="+pathToDestination.getPoseAtS(0.0).toString());
+      if(DEBUG)
+         System.out.println("FootstepGeneratorTest: start++Pose="+pathToDestination.getPoseAtS(0.25).toString());
+      if(DEBUG)
+         System.out.println("FootstepGeneratorTest: intPose="+pathToDestination.getPoseAtS(0.5).toString());
+      if(DEBUG)
+         System.out.println("FootstepGeneratorTest: int++Pose="+pathToDestination.getPoseAtS(0.75).toString());
+      if(DEBUG)
+         System.out.println("FootstepGeneratorTest: endPose="+pathToDestination.getPoseAtS(1.0).toString());
       generateFootstepsUsingPath(pathToDestination);
       FootstepValidityMetric footstepValidityMetric = new SemiCircularStepValidityMetric(fullRobotModel.getFoot(RobotSide.LEFT), 0.08, 0.8, 0.8);
       assertAllStepsValid(footstepValidityMetric);
-      assertLastStepIsPointingCorrectly(footSteps.get(footSteps.size()-1),destination);
-      if(VISUALIZE)
+      assertLastStepIsPointingCorrectly(footSteps.get(footSteps.size() - 1), destination);
+      if (VISUALIZE)
          FootstepGeneratorVisualizer.visualizeFootsteps(new Robot("null"), footSteps);
-      if(VISUALIZE)
+      if (VISUALIZE)
          ThreadTools.sleepForever();
    }
+
    public void generateFootstepsUsingPath(OverheadPath pathToDestination)
    {
       FootstepGenerator footstepGenerator = new FootstepGenerator(bipedFeet);
       footstepGenerator.setFootstepPath(pathToDestination);
-      footstepGenerator.setStepAngle(Math.PI/6);
+      footstepGenerator.setStepAngle(Math.PI / 6);
       footstepGenerator.setStepLength(0.4);
       footstepGenerator.setStepWidth(0.2);
       Footstep swingStart = FootstepUtils.getCurrentFootstep(RobotSide.LEFT, referenceFrames, bipedFeet);
       Footstep stanceStart = FootstepUtils.getCurrentFootstep(RobotSide.RIGHT, referenceFrames, bipedFeet);
       footstepGenerator.setSwingStart(swingStart);
       footstepGenerator.setStanceStart(stanceStart);
-      footSteps=footstepGenerator.generateDesiredFootstepList();
+      footSteps = footstepGenerator.generateDesiredFootstepList();
    }
 
    private static void assertLastStepIsPointingCorrectly(Footstep footstep, Point3d destination)
    {
-      Vector3d footstepOrientation =SIDESTEP?new Vector3d(0.0,-1.0,0.0):new Vector3d(1.0,0.0,0.0);
+      Vector3d footstepOrientation = SIDESTEP ? new Vector3d(0.0, -1.0, 0.0) : new Vector3d(1.0, 0.0, 0.0);
       footstep.getPose().getOrientationMatrix3d().transform(footstepOrientation);
       footstepOrientation.normalize();
       Vector3d pathOrientation = new Vector3d(destination);
       pathOrientation.normalize();
-      assertEquals(pathOrientation.getX(),footstepOrientation.getX(),1e-1);
-      assertEquals(pathOrientation.getY(),footstepOrientation.getY(),1e-1);
-      assertEquals(pathOrientation.getZ(),footstepOrientation.getZ(),1e-1);
-      
-      
+      assertEquals(pathOrientation.getX(), footstepOrientation.getX(), 1e-1);
+      assertEquals(pathOrientation.getY(), footstepOrientation.getY(), 1e-1);
+      assertEquals(pathOrientation.getZ(), footstepOrientation.getZ(), 1e-1);
+
+
    }
+
    private void assertAllStepsValid(FootstepValidityMetric footstepValidityMetric)
    {
       ArrayList<Footstep> testableFootstepQueue = prependStanceToFootstepQueue();
@@ -125,7 +137,7 @@ public class FootstepGeneratorTest
       SideDependentList<Footstep> currentFootLocations = new SideDependentList<Footstep>();
       for (RobotSide side : RobotSide.values)
       {
-         currentFootLocations.put(side, FootstepUtils.generateStandingFootstep(side,fullRobotModel,referenceFrames,bipedFeet));
+         currentFootLocations.put(side, FootstepUtils.generateStandingFootstep(side, fullRobotModel, referenceFrames, bipedFeet));
       }
 
       boolean firstStepIsLeft = footSteps.get(0).getBody() == fullRobotModel.getFoot(RobotSide.LEFT);
