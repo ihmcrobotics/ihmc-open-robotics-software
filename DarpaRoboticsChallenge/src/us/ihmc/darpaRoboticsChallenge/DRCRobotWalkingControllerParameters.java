@@ -52,31 +52,16 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
    
    public boolean checkOrbitalCondition() 
    {
-      return checkOrbitalCondition;
-   }
-   
-   public void setCheckOrbitalCondition(boolean checkOrbitalCondition) {
-      this.checkOrbitalCondition = checkOrbitalCondition;
+      return false;
    }
 
    public double nominalHeightAboveGround()
    {
-      return nominalHeightAboveGround;
-   }
-
-   public void setNominalHeightAboveGround(double nominalHeightAboveGround)
-   {
-      this.nominalHeightAboveGround = nominalHeightAboveGround;
-      
+      return 0.9;
    }
 
    public double initialHeightAboveGround()
    {
-      return initialHeightAboveGround;
-   }
-
-   public void setInitialHeightAboveGround(double initialHeightAboveGround)
-   {
-      this.initialHeightAboveGround = initialHeightAboveGround;
+      return 0.86;
    }
 }
