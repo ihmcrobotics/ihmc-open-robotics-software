@@ -184,7 +184,7 @@ public class FootstepGeneratorVisualizer
       FootstepGenerator generator = new FootstepGenerator( bipedFeet);
       ContactablePlaneBody rightFoot = bipedFeet.get(RobotSide.RIGHT);
       Footstep startSwingFootstep = new Footstep(rightFoot.getRigidBody(), startSwingFootPose, rightFoot.getContactPoints());
-      generator.setSwingStart(startSwingFootstep);
+//      generator.setSwingStart(startSwingFootstep);
       OverheadPath footstepPath = generateSimpleOverheadPath();
       generator.setFootstepPath(footstepPath);
       ContactablePlaneBody leftFoot = bipedFeet.get(RobotSide.LEFT);

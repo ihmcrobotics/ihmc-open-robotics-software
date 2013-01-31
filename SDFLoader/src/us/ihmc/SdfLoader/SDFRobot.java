@@ -28,9 +28,12 @@ import com.yobotics.simulationconstructionset.Link;
 import com.yobotics.simulationconstructionset.PinJoint;
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.graphics.GraphicsObjectsHolder;
+import com.yobotics.simulationconstructionset.simulatedSensors.RayTraceLIDARSensor;
 
 public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRobot    // TODO: make an SDFHumanoidRobot
 {
+   private static final boolean DEBUG = true;
+
    private static final long serialVersionUID = 5864358637898048080L;
 
    private final File resourceDirectory;
@@ -84,7 +87,7 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRo
                GroundContactPoint groundContactPoint = new GroundContactPoint("gc_" + jointName + "_" + i, groundContactPointOffset, this);
                robotJoints.get(jointName).addGroundContactPoint(groundContactPoint);
                groundContactPointsForSide.add(groundContactPoint);
-               Graphics3DObject graphics = robotJoints.get(jointName).getLink().getLinkGraphics();
+//               Graphics3DObject graphics = robotJoints.get(jointName).getLink().getLinkGraphics();
 
 //             graphics.identity();
 //             graphics.translate(groundContactPointOffset);
@@ -139,6 +142,7 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRo
       scsParentJoint.addJoint(scsJoint);
 
       addCameraMounts(scsJoint, joint.getChild());
+      addLidarMounts(scsJoint, joint.getChild());
 
 
 
@@ -194,6 +198,22 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRo
                {
                   System.err.println("JAXB loader: No camera section defined for camera sensor " + sensor.getName() + ", ignoring sensor.");
                }
+            }
+
+         }
+      }
+   }
+   
+   private void addLidarMounts(PinJoint scsJoint, SDFLinkHolder child)
+   {
+      if (child.getSensors() != null)
+      {
+         for (SDFSensor sensor : child.getSensors())
+         {
+            if ("ray".equals(sensor.getType()))
+            {
+               if (DEBUG)
+                  System.out.println("SDFRobot has a lidar!");
             }
 
          }

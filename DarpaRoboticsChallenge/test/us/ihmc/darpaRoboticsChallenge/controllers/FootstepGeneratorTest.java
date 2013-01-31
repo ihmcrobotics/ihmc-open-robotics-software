@@ -101,7 +101,7 @@ public class FootstepGeneratorTest
       footstepGenerator.setStepWidth(0.2);
       Footstep swingStart = FootstepUtils.getCurrentFootstep(RobotSide.LEFT, referenceFrames, bipedFeet);
       Footstep stanceStart = FootstepUtils.getCurrentFootstep(RobotSide.RIGHT, referenceFrames, bipedFeet);
-      footstepGenerator.setSwingStart(swingStart);
+//      footstepGenerator.setSwingStart(swingStart);
       footstepGenerator.setStanceStart(stanceStart);
       footSteps = footstepGenerator.generateDesiredFootstepList();
    }
