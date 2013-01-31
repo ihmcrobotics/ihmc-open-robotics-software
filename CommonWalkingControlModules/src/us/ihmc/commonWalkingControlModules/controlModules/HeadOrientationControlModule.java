@@ -29,7 +29,7 @@ public class HeadOrientationControlModule extends DegenerateOrientationControlMo
 
    private final IntegerYoVariable trackingFrameIndex = new IntegerYoVariable("trackingFrameIndex", registry);
    private final EnumYoVariable<HeadTrackingMode> headTrackingMode = EnumYoVariable.create("headTrackingMode", HeadTrackingMode.class, registry);
-   
+
    private final DoubleYoVariable yawLimit = new DoubleYoVariable("yawLimit", registry);
    private final DoubleYoVariable pitchLowerLimit = new DoubleYoVariable("pitchLowerLimit", registry);
    private final DoubleYoVariable pitchUpperLimit = new DoubleYoVariable("pitchUpperLimit", registry);
@@ -49,7 +49,7 @@ public class HeadOrientationControlModule extends DegenerateOrientationControlMo
 
       headTrackingMode.set(HeadTrackingMode.ORIENTATION);
       trackingFrameIndex.set(getTrackingFrameIndex(chestFrame));
-      
+
       setHeadOrientationLimits();
 
       parentRegistry.addChild(registry);
@@ -71,7 +71,7 @@ public class HeadOrientationControlModule extends DegenerateOrientationControlMo
             FramePoint positionToPointAt = pointToTrack.getPointInFrame(referenceFrame).getFramePointCopy();
             pointTrackingFrame.setPositionToPointAt(positionToPointAt);
             pointTrackingFrame.update();
-            
+
             FrameOrientation frameOrientation = new FrameOrientation(pointTrackingFrame);
             enforceLimits(frameOrientation);
 
@@ -82,39 +82,33 @@ public class HeadOrientationControlModule extends DegenerateOrientationControlMo
             throw new RuntimeException("Case " + headTrackingMode.getEnumValue() + " not handled.");
       }
    }
-   
+
    private void enforceLimits(FrameOrientation orientation)
    {
       ReferenceFrame initialReferenceFrame = orientation.getReferenceFrame();
       orientation.changeFrame(getJacobian().getBaseFrame());
-      
+
       double[] yawPitchRoll = orientation.getYawPitchRoll();
-      
-      for (int i = 0; i < yawPitchRoll.length; i++)
-      {
-         if (i == 0)
-            yawPitchRoll[i] = MathTools.clipToMinMax(yawPitchRoll[i], yawLimit.getDoubleValue(), -yawLimit.getDoubleValue());
-         if (i == 1)
-            yawPitchRoll[i] = MathTools.clipToMinMax(yawPitchRoll[i], pitchLowerLimit.getDoubleValue(), pitchUpperLimit.getDoubleValue());
-         if (i == 2)
-            yawPitchRoll[i] = MathTools.clipToMinMax(yawPitchRoll[i], rollLimit.getDoubleValue(), -rollLimit.getDoubleValue());
-      }
-      
+
+      yawPitchRoll[0] = MathTools.clipToMinMax(yawPitchRoll[0], -yawLimit.getDoubleValue(), yawLimit.getDoubleValue());
+      yawPitchRoll[1] = MathTools.clipToMinMax(yawPitchRoll[1], pitchLowerLimit.getDoubleValue(), pitchUpperLimit.getDoubleValue());
+      yawPitchRoll[2] = MathTools.clipToMinMax(yawPitchRoll[2], -rollLimit.getDoubleValue(), rollLimit.getDoubleValue());
+
       orientation.setYawPitchRoll(yawPitchRoll);
       orientation.changeFrame(initialReferenceFrame);
    }
-   
+
    private void setHeadOrientationLimits()
    {
-      yawLimit.set(-Math.PI/2);
-      pitchLowerLimit.set(-Math.PI/3);
-      pitchUpperLimit.set(Math.PI/4);
-      rollLimit.set(-Math.PI/4);
-      
-//      yawLimit.set(0.0);
-//      pitchLowerLimit.set(0.0);
-//      pitchUpperLimit.set(0.0);
-//      rollLimit.set(0.0);
+      yawLimit.set(Math.PI / 2);
+      pitchLowerLimit.set(-Math.PI / 3);
+      pitchUpperLimit.set(Math.PI / 4);
+      rollLimit.set(Math.PI / 4);
+
+//    yawLimit.set(0.0);
+//    pitchLowerLimit.set(0.0);
+//    pitchUpperLimit.set(0.0);
+//    rollLimit.set(0.0);
    }
 
    @Override
