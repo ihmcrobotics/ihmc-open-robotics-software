@@ -4,6 +4,7 @@ import java.awt.Canvas;
 
 import javax.vecmath.Point3d;
 
+import us.ihmc.graphics3DAdapter.CameraAdapter;
 import us.ihmc.graphics3DAdapter.ContextSwitchedListener;
 
 
@@ -15,6 +16,8 @@ public interface ViewportAdapter
 
    public abstract void setCameraController(CameraController cameraController);
    public abstract CameraController getCameraController();
+   
+   public abstract CameraAdapter getCamera();
 
    public abstract double getFieldOfView();
    public abstract double getPhysicalWidth();

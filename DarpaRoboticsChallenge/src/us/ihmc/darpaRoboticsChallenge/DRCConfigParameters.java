@@ -1,5 +1,9 @@
 package us.ihmc.darpaRoboticsChallenge;
 
+import us.ihmc.graphics3DAdapter.camera.VideoSettings;
+import us.ihmc.graphics3DAdapter.camera.VideoSettings.Quality;
+import us.ihmc.graphics3DAdapter.camera.VideoSettingsH264LowLatency;
+
 
 public class DRCConfigParameters
 {
@@ -35,5 +39,7 @@ public class DRCConfigParameters
    
    public static final long ROBOT_JOINT_SERVER_UPDATE_MILLIS = 100;
    
+   
+   public static final VideoSettings VIDEOSETTINGS = new VideoSettingsH264LowLatency(800, 600, Quality.MEDIUM);
 
 }

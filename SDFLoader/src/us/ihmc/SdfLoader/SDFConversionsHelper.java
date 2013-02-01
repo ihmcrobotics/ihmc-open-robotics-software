@@ -4,10 +4,7 @@ import javax.media.j3d.Transform3D;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
-import org.w3c.dom.Element;
-
 import us.ihmc.SdfLoader.xmlDescription.SDFInertia;
-import us.ihmc.SdfLoader.xmlDescription.SDFLink;
 
 public class SDFConversionsHelper
 {
