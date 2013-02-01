@@ -14,8 +14,10 @@ import us.ihmc.SdfLoader.xmlDescription.SDFSensor;
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor.Camera;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HumanoidRobot;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
+import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
+import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -28,14 +30,14 @@ import com.yobotics.simulationconstructionset.Link;
 import com.yobotics.simulationconstructionset.PinJoint;
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.graphics.GraphicsObjectsHolder;
-import com.yobotics.simulationconstructionset.simulatedSensors.RayTraceLIDARSensor;
 
 public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRobot    // TODO: make an SDFHumanoidRobot
 {
    private static final boolean DEBUG = true;
+   private static final boolean SHOW_CONTACT_POINTS = true;
 
    private static final long serialVersionUID = 5864358637898048080L;
-
+   
    private final File resourceDirectory;
    private final HashMap<String, PinJoint> robotJoints = new HashMap<String, PinJoint>();
 
@@ -80,24 +82,29 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRo
          {
             ArrayList<GroundContactPoint> groundContactPointsForSide = new ArrayList<GroundContactPoint>();
 
-            int i = 0;
-            for (Vector3d groundContactPointOffset : sdfJointNameMap.getGroundContactPointOffset(robotSide))
+            if (sdfJointNameMap.getJointGroundContactPoints(robotSide) != null)
             {
-               String jointName = sdfJointNameMap.getJointBeforeFootName(robotSide);
-               GroundContactPoint groundContactPoint = new GroundContactPoint("gc_" + jointName + "_" + i, groundContactPointOffset, this);
-               robotJoints.get(jointName).addGroundContactPoint(groundContactPoint);
-               groundContactPointsForSide.add(groundContactPoint);
-//               Graphics3DObject graphics = robotJoints.get(jointName).getLink().getLinkGraphics();
-
-//             graphics.identity();
-//             graphics.translate(groundContactPointOffset);
-//             graphics.addSphere(0.01, YoAppearance.Orange());
-               i++;
-
+               int i = 0;
+               for (Pair<String,Vector3d> jointContactPoint : sdfJointNameMap.getJointGroundContactPoints(robotSide))
+               {
+                  String jointName = jointContactPoint.first();
+                  GroundContactPoint groundContactPoint = new GroundContactPoint("gc_" + SDFJointHolder.createValidVariableName(jointName) + "_" + i, jointContactPoint.second(), this);
+                  robotJoints.get(jointName).addGroundContactPoint(groundContactPoint);
+                  groundContactPointsForSide.add(groundContactPoint);
+   
+                  if (SHOW_CONTACT_POINTS)
+                  {
+                     Graphics3DObject graphics = robotJoints.get(jointName).getLink().getLinkGraphics();
+                     graphics.identity();
+                     graphics.translate(jointContactPoint.second());
+                     graphics.addSphere(0.002, YoAppearance.Orange());
+                  }
+                  i++;
+               }
             }
-
             groundContactPoints.put(robotSide, groundContactPointsForSide);
          }
+         
       }
 
 
@@ -135,7 +142,7 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRo
 
       Matrix3d chainRotation = new Matrix3d(chainRotationIn);
       chainRotation.mul(rotation);
-
+      
       Vector3d jointAxis = new Vector3d(joint.getAxis());
       PinJoint scsJoint = new PinJoint(SDFConversionsHelper.sanitizeJointName(joint.getName()), offset, this, jointAxis);
       scsJoint.setLink(createLink(joint.getChild(), chainRotation));
@@ -143,8 +150,6 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRo
 
       addCameraMounts(scsJoint, joint.getChild());
       addLidarMounts(scsJoint, joint.getChild());
-
-
 
       if ((joint.getContactKd() == 0.0) && (joint.getContactKp() == 0.0))
       {
@@ -203,7 +208,7 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRo
          }
       }
    }
-   
+
    private void addLidarMounts(PinJoint scsJoint, SDFLinkHolder child)
    {
       if (child.getSensors() != null)
@@ -222,7 +227,6 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRo
 
    private Link createLink(SDFLinkHolder link, Matrix3d rotation)
    {
-      
       SDFGraphics3DObject linkGraphics = new SDFGraphics3DObject(rotation, link.getVisuals(), resourceDirectory);
 
       Link scsLink = new Link(link.getName());
