@@ -18,7 +18,7 @@ public class DRCFlatGroundWalkingTrack
 {
    private final HumanoidRobotSimulation<SDFRobot> drcSimulation;
 
-   public DRCFlatGroundWalkingTrack(DRCGuiInitialSetup guiInitialSetup, AutomaticSimulationRunner automaticSimulationRunner, double timePerRecordTick,
+   public DRCFlatGroundWalkingTrack(DRCRobotModel robotModel, DRCGuiInitialSetup guiInitialSetup, AutomaticSimulationRunner automaticSimulationRunner, double timePerRecordTick,
                      int simulationDataBufferSize, boolean doChestOrientationControl)
    {
       DRCSCSInitialSetup scsInitialSetup;
@@ -49,7 +49,7 @@ public class DRCFlatGroundWalkingTrack
             inPlaceWidth, maxStepLength, minStepWidth, maxStepWidth, stepPitch, useVelocityAndHeadingScript);
       ControllerFactory controllerFactory = new DRCRobotMomentumBasedControllerFactory(highLevelHumanoidControllerFactory, true);
 
-      drcSimulation = DRCSimulationFactory.createSimulation(controllerFactory, null, robotInitialSetup, scsInitialSetup, guiInitialSetup);
+      drcSimulation = DRCSimulationFactory.createSimulation(robotModel, controllerFactory, null, robotInitialSetup, scsInitialSetup, guiInitialSetup);
 
       // add other registries
       drcSimulation.addAdditionalDynamicGraphicObjectsListRegistries(dynamicGraphicObjectsListRegistry);
@@ -71,6 +71,6 @@ public class DRCFlatGroundWalkingTrack
 
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup();
 
-      new DRCFlatGroundWalkingTrack(guiInitialSetup, automaticSimulationRunner, 0.005, 16000, true);
+      new DRCFlatGroundWalkingTrack(DRCRobotModel.getDefaultRobotModel(), guiInitialSetup, automaticSimulationRunner, 0.005, 16000, true);
    }
 }

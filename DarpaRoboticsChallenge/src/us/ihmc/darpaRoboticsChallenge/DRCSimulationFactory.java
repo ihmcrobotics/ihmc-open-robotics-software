@@ -32,7 +32,7 @@ public class DRCSimulationFactory
 {
    public static boolean SHOW_INERTIA_ELLIPSOIDS = false;
    
-   public static HumanoidRobotSimulation<SDFRobot> createSimulation(ControllerFactory controllerFactory,
+   public static HumanoidRobotSimulation<SDFRobot> createSimulation(DRCRobotModel robotModel, ControllerFactory controllerFactory,
            CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, RobotInitialSetup<SDFRobot> robotInitialSetup, ScsInitialSetup scsInitialSetup,
            GuiInitialSetup guiInitialSetup)
    {
@@ -43,9 +43,12 @@ public class DRCSimulationFactory
       int simulationTicksPerControlTick = controllerFactory.getSimulationTicksPerControlTick();
       double controlDT = simulateDT * simulationTicksPerControlTick;
 
-      JaxbSDFLoader jaxbSDFLoader = DRCRobotSDFLoader.loadDRCRobot();
+      DRCRobotSDFLoader drcRobotSDFLoader = new DRCRobotSDFLoader(robotModel);
+      JaxbSDFLoader jaxbSDFLoader = drcRobotSDFLoader.loadDRCRobot();
       SDFRobot robot = jaxbSDFLoader.getRobot();
       FullRobotModel fullRobotModel = jaxbSDFLoader.getFullRobotModel();
+//      FullRobotModel fullRobotModelForController = new FullRobotModelWithRandomParameterVariations(fullRobotModel);
+      
       CommonWalkingReferenceFrames referenceFrames = jaxbSDFLoader.getReferenceFrames();
 
       SideDependentList<FootSwitchInterface> footSwitches = new SideDependentList<FootSwitchInterface>();
