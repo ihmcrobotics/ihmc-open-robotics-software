@@ -93,6 +93,16 @@ public class TaskSpaceConstraintResolver
       sJ.reshape(selectionMatrix.getNumRows(), jacobian.getNumberOfColumns());
       CommonOps.mult(selectionMatrix, jacobian.getJacobianMatrix(), sJ);
 
+      double determinantOfSJ = CommonOps.det(sJ);
+      if (Math.abs(determinantOfSJ) < 1e-10)
+      {
+         System.err.println("selectionMatrix = " + selectionMatrix);
+         System.err.println("Jacobian Matrix = " + jacobian.getJacobianMatrix());
+         System.err.println("sJ = " + sJ);
+         
+         throw new RuntimeException("SJ is not invertible. Determinant = " + determinantOfSJ);
+      }
+      
       // aTaskSpace
       int[] columnIndices = ScrewTools.computeIndicesForJoint(jointsInOrder, constrainedJoints);
       aTaskSpace.reshape(aTaskSpace.getNumRows(), columnIndices.length);

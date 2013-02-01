@@ -163,36 +163,41 @@ public class MomentumSolverTest
       ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new Transform3D());
       RigidBody elevator = new RigidBody("elevator", elevatorFrame);
       SixDoFJoint rootJoint = new SixDoFJoint("rootJoint", elevator, elevatorFrame);
-      RigidBody body0 = ScrewTestTools.addRandomRigidBody("rootBody", random, rootJoint);
+      RigidBody firstBody = ScrewTestTools.addRandomRigidBody("rootBody", random, rootJoint);
 
-      SixDoFJoint body1 = new SixDoFJoint("secondFloatingJoint", body0, body0.getBodyFixedFrame());
-      RigidBody secondBody = ScrewTestTools.addRandomRigidBody("secondBody", random, body1);
+      SixDoFJoint sixDoFJointBetweenFirstAndSecondBody = new SixDoFJoint("secondFloatingJoint", firstBody, firstBody.getBodyFixedFrame());
+      RigidBody secondBody = ScrewTestTools.addRandomRigidBody("secondBody", random, sixDoFJointBetweenFirstAndSecondBody);
 
       ArrayList<SixDoFJoint> sixDoFJoints = new ArrayList<SixDoFJoint>();
       sixDoFJoints.add(rootJoint);
-      sixDoFJoints.add(body1);
+      sixDoFJoints.add(sixDoFJointBetweenFirstAndSecondBody);
       ArrayList<RevoluteJoint> oneDoFJoints = new ArrayList<RevoluteJoint>();
 
       setRandomPositionsAndVelocities(random, elevator, sixDoFJoints, oneDoFJoints);
 
-
       ReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("com", worldFrame, elevator);
       centerOfMassFrame.update();
-
 
       TwistCalculator twistCalculator = new TwistCalculator(elevator.getBodyFixedFrame(), elevator);
       MomentumSolver solver = createAndInitializeMomentumOptimizer(elevator, rootJoint, sixDoFJoints, oneDoFJoints, DT, centerOfMassFrame, twistCalculator);
 
+      //TODO: I'm really confused here. Shouldn't the Jacobian and the Spatial Acceleration have the same frames?
+      GeometricJacobian jacobian = new GeometricJacobian(firstBody, secondBody, rootJoint.getFrameAfterJoint());
+//      GeometricJacobian jacobian = new GeometricJacobian(elevator, secondBody, secondBody.getBodyFixedFrame());
 
-
-      GeometricJacobian jacobian = new GeometricJacobian(body0, secondBody, rootJoint.getFrameAfterJoint());
-
+//      SpatialAccelerationVector spatialAcceleration = new SpatialAccelerationVector(jacobian.getEndEffectorFrame(), jacobian.getBaseFrame(),
+//                                                         jacobian.getEndEffectorFrame(), RandomTools.generateRandomVector(random),
+//                                                         RandomTools.generateRandomVector(random));
+      
       SpatialAccelerationVector spatialAcceleration = new SpatialAccelerationVector(jacobian.getEndEffectorFrame(), elevatorFrame,
-                                                         jacobian.getEndEffectorFrame(), RandomTools.generateRandomVector(random),
-                                                         RandomTools.generateRandomVector(random));
+            jacobian.getEndEffectorFrame(), RandomTools.generateRandomVector(random),
+            RandomTools.generateRandomVector(random));
 
       DenseMatrix64F nullspaceMultiplier = new DenseMatrix64F(0, 1);
-      solver.setDesiredSpatialAcceleration(jacobian, spatialAcceleration, nullspaceMultiplier);
+//      InverseDynamicsJoint[] contrainedJoints = extractJoints(jacobian.getJointsInOrder(), 1);
+      InverseDynamicsJoint[] contrainedJoints = jacobian.getJointsInOrder();
+      
+      solver.setDesiredSpatialAcceleration(contrainedJoints, jacobian, spatialAcceleration, nullspaceMultiplier);
 
       solver.compute();
 
@@ -205,6 +210,19 @@ public class MomentumSolverTest
       checkAgainstNumericalDifferentiation(rootJoint, sixDoFJoints, new ArrayList<RevoluteJoint>(), DT, desiredMomentumRate, 1e-4);
    }
 
+   private InverseDynamicsJoint[] extractJoints(InverseDynamicsJoint[] joints, Integer... jointIndices)
+   {
+      InverseDynamicsJoint[] jointsToReturn = new InverseDynamicsJoint[jointIndices.length];
+      
+      int index = 0;
+      for (int jointIndex : jointIndices)
+      {
+         jointsToReturn[index] = joints[jointIndex];
+         index++;
+      }
+      return jointsToReturn;
+   }
+   
    @Test
    public void testJointSpaceAndTaskSpaceAccelerations()
    {
@@ -370,14 +388,14 @@ public class MomentumSolverTest
    }
    
    
-   @Ignore //Not working yet. Not sure the test case is right yet, either.
+   @Ignore //Not working yet. We need to revisit momentum solving, add cases like this, clean it up, optimize it, and make it pretty
    @Test
    public void testTwoInternalOverlappingSpatialAccelerations()
    {
       // This is the chicken and the egg test with the GFE Robot. We want to 
       // do both chest orientation control and head orientation control.
-      // We will try to control the pitch and roll of the chest
-      // and pitch and yaw of the head.
+      // However, the constrained joints of one contraint are a function
+      // of the unconstrained joints of the other constraint and vice versa.
       
       Random random = new Random(44345L);
       Vector3d[] jointAxes = new Vector3d[]
@@ -405,34 +423,48 @@ public class MomentumSolverTest
                                                   RandomTools.generateRandomVector(random));
 
       List<RevoluteJoint> revoluteJoints = randomFloatingChain.getRevoluteJoints();
-      RigidBody base = rootJoint.getSuccessor();
+      RigidBody baseRigidBody = rootJoint.getPredecessor();
       
-      RigidBody pelvisRigidBody = revoluteJoints.get(0).getSuccessor(); 
-      RigidBody chestRigidBody = revoluteJoints.get(revoluteJoints.size() - 2).getSuccessor(); 
-      RigidBody headRigidBody = revoluteJoints.get(revoluteJoints.size() - 1).getSuccessor();
+      InverseDynamicsJoint back_lbz = revoluteJoints.get(0);
+      InverseDynamicsJoint back_mby = revoluteJoints.get(1);
+      InverseDynamicsJoint back_ubx = revoluteJoints.get(2);
+      InverseDynamicsJoint neck_ay = revoluteJoints.get(3);
       
+      RigidBody pelvisRigidBody = back_lbz.getPredecessor();  
+      RigidBody chestRigidBody = neck_ay.getPredecessor();
+      RigidBody headRigidBody = neck_ay.getSuccessor();
+      
+      // Constrain pitch and roll acceleration of the chest with respect to the pelvis, 
+      // using back_mdy and back_ubx
+
       GeometricJacobian pelvisToChestJacobian = new GeometricJacobian(pelvisRigidBody, chestRigidBody, chestRigidBody.getBodyFixedFrame());
       SpatialAccelerationVector pelvisToChestInternalAcceleration = new SpatialAccelerationVector(chestRigidBody.getBodyFixedFrame(), pelvisRigidBody.getBodyFixedFrame(),
             chestRigidBody.getBodyFixedFrame(), RandomTools.generateRandomVector(random),
             RandomTools.generateRandomVector(random));
-      DenseMatrix64F pelvisToChestNullspaceMultiplier = new DenseMatrix64F(0, 2);
+      DenseMatrix64F pelvisToChestNullspaceMultiplier = new DenseMatrix64F(0, 1);
 
-      // Constrain pitch and roll acceleration of the chest with respect to the pelvis.
       DenseMatrix64F pelvisToChestSelectionMatrix = new DenseMatrix64F(2, SpatialMotionVector.SIZE);
-      pelvisToChestSelectionMatrix.set(0, 1, 1.0);
-      pelvisToChestSelectionMatrix.set(1, 2, 1.0);
-      solver.setDesiredSpatialAcceleration(pelvisToChestJacobian, pelvisToChestInternalAcceleration, pelvisToChestNullspaceMultiplier, pelvisToChestSelectionMatrix);
+      pelvisToChestSelectionMatrix.set(0, 0, 1.0); // wx (roll of chest)
+      pelvisToChestSelectionMatrix.set(1, 1, 1.0); // wy (pitch of chest)
+     
       
-      GeometricJacobian elevatorToHeadJacobian = new GeometricJacobian(base, headRigidBody, headRigidBody.getBodyFixedFrame());
-      SpatialAccelerationVector elevatorToHeadInternalAcceleration = new SpatialAccelerationVector(headRigidBody.getBodyFixedFrame(), base.getBodyFixedFrame(),
+      InverseDynamicsJoint[] pelvisToChestConstrainedJoints = new InverseDynamicsJoint[]{back_mby, back_ubx};
+      solver.setDesiredSpatialAcceleration(pelvisToChestConstrainedJoints, pelvisToChestJacobian, pelvisToChestInternalAcceleration, pelvisToChestNullspaceMultiplier, pelvisToChestSelectionMatrix);
+      
+      // Constrain pitch and yaw acceleration of the head with respect to the elevator
+      // using neck_ay and back_lbz
+      GeometricJacobian elevatorToHeadJacobian = new GeometricJacobian(pelvisRigidBody, headRigidBody, headRigidBody.getBodyFixedFrame());
+      SpatialAccelerationVector elevatorToHeadInternalAcceleration = new SpatialAccelerationVector(headRigidBody.getBodyFixedFrame(), baseRigidBody.getBodyFixedFrame(),
             headRigidBody.getBodyFixedFrame(), RandomTools.generateRandomVector(random),
             RandomTools.generateRandomVector(random));
-      DenseMatrix64F elvatorToHeadNullspaceMultiplier = new DenseMatrix64F(0, 1);
+      DenseMatrix64F elevatorToHeadNullspaceMultiplier = new DenseMatrix64F(0, 1);
       
-      // Constrain pitch acceleration of the head with respect to world.
-      DenseMatrix64F elevatorToHeadSelectionMatrix = new DenseMatrix64F(3, SpatialMotionVector.SIZE);
-      elevatorToHeadSelectionMatrix.set(0, 2, 1.0);
-      solver.setDesiredSpatialAcceleration(elevatorToHeadJacobian, elevatorToHeadInternalAcceleration, elvatorToHeadNullspaceMultiplier, elevatorToHeadSelectionMatrix);
+      DenseMatrix64F elevatorToHeadSelectionMatrix = new DenseMatrix64F(2, SpatialMotionVector.SIZE);
+      elevatorToHeadSelectionMatrix.set(0, 1, 1.0); // wy (pitch of head)
+      elevatorToHeadSelectionMatrix.set(1, 2, 1.0); // wz (yaw of head)
+      
+      InverseDynamicsJoint[] elevatorToHeadConstrainedJoints = new InverseDynamicsJoint[]{back_lbz, neck_ay};
+      solver.setDesiredSpatialAcceleration(elevatorToHeadConstrainedJoints, elevatorToHeadJacobian, elevatorToHeadInternalAcceleration, elevatorToHeadNullspaceMultiplier, elevatorToHeadSelectionMatrix);
 
       solver.compute();
       solver.solve(desiredMomentumRate);
