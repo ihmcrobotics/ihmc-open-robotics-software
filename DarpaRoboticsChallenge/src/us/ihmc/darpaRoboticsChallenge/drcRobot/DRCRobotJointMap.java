@@ -122,19 +122,13 @@ public class DRCRobotJointMap implements SDFJointNameMap, RobotSpecificJointName
          // add butt contact points on back of thighs
          for (int i = 0; i < 2; i++)
          {
-            String joint;
-            if (i == 0)
-               joint = "leg_uhz";
-            else
-               joint = "leg_kny";
-            
             double xOffset = DRCRobotParameters.thighContactPointOffsets[i][0];
             double yInnerOffset = DRCRobotParameters.thighContactPointOffsets[i][1] * ((robotSide == RobotSide.RIGHT) ? -1 : 1);
             double yOuterOffset = DRCRobotParameters.thighContactPointOffsets[i][2] * ((robotSide == RobotSide.RIGHT) ? -1 : 1);
             double zOffset = DRCRobotParameters.thighContactPointOffsets[i][3];
             
-            jointGroundContactPoints.add(new Pair<String, Vector3d>(prefix+joint, new Vector3d(xOffset, yInnerOffset, zOffset)));
-            jointGroundContactPoints.add(new Pair<String, Vector3d>(prefix+joint, new Vector3d(xOffset, yOuterOffset, zOffset)));
+            jointGroundContactPoints.add(new Pair<String, Vector3d>(prefix+"leg_uhz", new Vector3d(xOffset, yInnerOffset, zOffset)));
+            jointGroundContactPoints.add(new Pair<String, Vector3d>(prefix+"leg_uhz", new Vector3d(xOffset, yOuterOffset, zOffset)));
          }
       }
       
