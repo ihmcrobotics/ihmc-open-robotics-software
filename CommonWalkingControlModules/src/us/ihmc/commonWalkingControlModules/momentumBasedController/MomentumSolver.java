@@ -197,7 +197,8 @@ public class MomentumSolver
          DenseMatrix64F selectionMatrix)
    {
       checkNullspaceDimensions(jacobian, nullspaceMultipliers);
-
+      checkSelectionMatrixHasSameNumberOfRowsAsConstrainedJoints(selectionMatrix, constrainedJoints);
+      
       for (InverseDynamicsJoint joint : constrainedJoints)
       {
          checkAndRegisterConstraint(joint, jacobian);
@@ -223,6 +224,22 @@ public class MomentumSolver
             throw new RuntimeException("Case not yet implemented: baseFrame = " + baseFrame);
          }
       }
+   }
+
+   private void checkSelectionMatrixHasSameNumberOfRowsAsConstrainedJoints(DenseMatrix64F selectionMatrix, InverseDynamicsJoint[] constrainedJoints)
+   {
+      int numberOfConstrainedJoints = 0;
+      
+      for (InverseDynamicsJoint constrainedJoint : constrainedJoints)
+      {
+         numberOfConstrainedJoints = numberOfConstrainedJoints + constrainedJoint.getDegreesOfFreedom();
+      }
+      
+      if (selectionMatrix.getNumRows() != numberOfConstrainedJoints)
+      {
+         throw new RuntimeException("selectionMatrix.getNumRows() != numberOfConstrainedJoints. selectionMatrix.getNumRows() = " + selectionMatrix.getNumRows()  + ", numberOfConstrainedJoints = " + numberOfConstrainedJoints);
+      }
+      
    }
 
    public void compute()
