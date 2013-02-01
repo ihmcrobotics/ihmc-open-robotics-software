@@ -312,7 +312,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
          ReferenceFrame[] availableHeadOrientationControlFrames = new ReferenceFrame[] {pelvisZUpFrame, pelvisFrame, ReferenceFrame.getWorldFrame()};
          headOrientationControlModule = new HeadOrientationControlModule(neckJacobian, pelvis, elevator, twistCalculator, availableHeadOrientationControlFrames, registry);
          headOrientationControlModule.setOrientationToTrack(new FrameOrientation(pelvisZUpFrame), pelvis);
-         double headKp = 100.0;
+         double headKp = 40.0;
          double headZeta = 1.0;
          double headKd = GainCalculator.computeDerivativeGain(headKp, headZeta);
          headOrientationControlModule.setProportionalGains(headKp, headKp, headKp);
