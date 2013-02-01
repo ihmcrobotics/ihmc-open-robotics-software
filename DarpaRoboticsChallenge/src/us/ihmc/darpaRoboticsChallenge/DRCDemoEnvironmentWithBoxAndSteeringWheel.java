@@ -16,7 +16,9 @@ import com.yobotics.simulationconstructionset.util.ground.TerrainObject;
 
 public class DRCDemoEnvironmentWithBoxAndSteeringWheel implements CommonAvatarEnvironmentInterface
 {
-   private static final double BOX_DIMENSION = 0.5;
+   private static final double BOX_LENGTH = 0.5;
+   private static final double BOX_WIDTH = 0.5;
+   private static final double BOX_HEIGHT = 0.5;
    private final CombinedTerrainObject combinedTerrainObject;
 
    public DRCDemoEnvironmentWithBoxAndSteeringWheel()
@@ -29,7 +31,7 @@ public class DRCDemoEnvironmentWithBoxAndSteeringWheel implements CommonAvatarEn
       CombinedTerrainObject terrainObject = new CombinedTerrainObject("carSeatBox");
 
       // seat
-      terrainObject.addBox(0, 0, BOX_DIMENSION, BOX_DIMENSION, BOX_DIMENSION);
+      terrainObject.addBox(-BOX_LENGTH / 2.0, -BOX_WIDTH / 2.0, BOX_LENGTH / 2.0, BOX_WIDTH / 2.0, BOX_HEIGHT);
 
       // ground
       terrainObject.addBox(-100.0, -100.0, 100.0, 100.0, -0.05, 0.0, YoAppearance.DarkGray());

@@ -90,7 +90,7 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRo
                Graphics3DObject graphics = robotJoints.get(jointName).getLink().getLinkGraphics();
                graphics.identity();
                graphics.translate(jointContactPoint.second());
-               graphics.addSphere(0.002, YoAppearance.Orange());
+               graphics.addSphere(0.01, YoAppearance.Orange());
             }
             i++;
          }

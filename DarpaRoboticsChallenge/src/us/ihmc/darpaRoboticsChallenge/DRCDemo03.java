@@ -5,8 +5,7 @@ import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSi
 import us.ihmc.commonWalkingControlModules.controllers.ControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.DrivingHighLevelHumanoidFactory;
 import us.ihmc.darpaRoboticsChallenge.controllers.DRCRobotMomentumBasedControllerFactory;
-import us.ihmc.darpaRoboticsChallenge.initialSetup.SquaredUpDRCRobotInitialSetup;
-import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
+import us.ihmc.darpaRoboticsChallenge.initialSetup.DrivingDRCRobotInitialSetup;
 import us.ihmc.projectM.R2Sim02.initialSetup.RobotInitialSetup;
 
 import com.martiansoftware.jsap.JSAPException;
@@ -23,7 +22,7 @@ public class DRCDemo03
          int simulationDataBufferSize, String ipAddress, int portNumber)
    {
       DRCSCSInitialSetup scsInitialSetup;
-      RobotInitialSetup<SDFRobot> robotInitialSetup = new SquaredUpDRCRobotInitialSetup();
+      RobotInitialSetup<SDFRobot> robotInitialSetup = new DrivingDRCRobotInitialSetup();
 
       environment = new DRCDemoEnvironmentWithBoxAndSteeringWheel();
       scsInitialSetup = new DRCSCSInitialSetup(environment);
@@ -60,30 +59,6 @@ public class DRCDemo03
       {
          drcSimulation.start(null);
       }
-
-      if (DRCConfigParameters.STREAM_VIDEO)
-      {
-         System.out.println("Streaming SCS Video");
-         String cameraName = "stereo_camera";
-         if (robotModel == DRCRobotModel.ATLAS_NO_HANDS)
-         {
-            cameraName = "left_camera_sensor";
-         }
-
-         CameraConfiguration cameraConfiguration = new CameraConfiguration(cameraName);
-         cameraConfiguration.setCameraMount(cameraName);
-
-         
-
-         // Decrease resolution to improve performance
-         // TODO: Revert to full resolution images
-//         SDFCamera camera = drcSimulation.getRobot().getCamera(cameraName);;
-//         int width = camera.getWidth();
-//         int height = camera.getHeight();
-         
-         drcSimulation.getSimulationConstructionSet().startStreamingVideoData(cameraConfiguration, DRCConfigParameters.VIDEOSETTINGS,
-                 DRCConfigParameters.BG_VIDEO_SERVER_PORT_NUMBER);
-      }
    }
 
    public static void main(String[] args) throws JSAPException
@@ -96,7 +71,7 @@ public class DRCDemo03
       int simulationDataBufferSize = 16000;
       String ipAddress = null;
       int portNumber = -1;
-      new DRCDemo03(DRCRobotModel.getDefaultRobotModel(), guiInitialSetup, automaticSimulationRunner, timePerRecordTick, simulationDataBufferSize, ipAddress,
+      new DRCDemo03(DRCRobotModel.ATLAS_SANDIA_HANDS, guiInitialSetup, automaticSimulationRunner, timePerRecordTick, simulationDataBufferSize, ipAddress,
                                      portNumber);
    }
 
