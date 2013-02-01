@@ -1,13 +1,16 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
-import javax.vecmath.Point2d;
+import java.util.HashMap;
+
 import javax.vecmath.Point3d;
+import javax.vecmath.Quat4d;
 
 import us.ihmc.commonWalkingControlModules.controlModules.HeadOrientationControlModule;
 import us.ihmc.utilities.io.streamingData.AbstractStreamingDataConsumer;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.screwTheory.RigidBody;
 
 /**
  * User: Matt
@@ -18,76 +21,78 @@ public class DesiredHeadOrientationProvider
    private static final boolean DEBUG = false;
    private HeadOrientationControlModule headOrientationControlModule;
 
-   private AbstractStreamingDataConsumer<Point3d> absoluteHeadOrientationConsumer;
-   private AbstractStreamingDataConsumer<Point2d> relativeHeadOrientationConsumer;
-   private final ReferenceFrame elevatorFrame;
+   private AbstractStreamingDataConsumer<HeadOrientationPacket> headOrientationPacketConsumer;
+   private final HashMap<String, ReferenceFrame> availableHeadControlFrames = new HashMap<String, ReferenceFrame>();
+   private final HashMap<String, RigidBody> availableBases = new HashMap<String, RigidBody>();
 
-   public DesiredHeadOrientationProvider(long absoluteHeadOrientationDataIdentifier, long relativeHeadOrientationDataIdentifier, ReferenceFrame elevatorFrame)
+   public DesiredHeadOrientationProvider(long headOrientationControlIdentifier)
    {
-      absoluteHeadOrientationConsumer = new AbsoluteHeadOrientationConsumer(absoluteHeadOrientationDataIdentifier);
-      relativeHeadOrientationConsumer = new RelativeHeadOrientationConsumer(relativeHeadOrientationDataIdentifier);
-      this.elevatorFrame = elevatorFrame;
+      headOrientationPacketConsumer = new HeadOrientationPacketConsumer(headOrientationControlIdentifier);
    }
 
-   public AbstractStreamingDataConsumer<Point3d> getAbsoluteHeadOrientationConsumer()
+   public AbstractStreamingDataConsumer<HeadOrientationPacket> getHeadOrientationPacketConsumer()
    {
-      return absoluteHeadOrientationConsumer;
-   }
-
-   public AbstractStreamingDataConsumer<Point2d> getRelativeHeadOrientationConsumer()
-   {
-      return relativeHeadOrientationConsumer;
+      return headOrientationPacketConsumer;
    }
 
    public void setHeadOrientationControlModule(HeadOrientationControlModule headOrientationControlModule)
    {
       this.headOrientationControlModule = headOrientationControlModule;
-   }
-
-   private class AbsoluteHeadOrientationConsumer extends AbstractStreamingDataConsumer<Point3d>
-   {
-      public AbsoluteHeadOrientationConsumer(long objectIdentifier)
+      
+      for (ReferenceFrame frame : headOrientationControlModule.getAvailableHeadControlFrames())
       {
-         super(objectIdentifier, Point3d.class);
+         this.availableHeadControlFrames.put(frame.getName(), frame);
       }
 
-      protected void processPacket(Point3d point3d)
+      for (RigidBody base : headOrientationControlModule.getAvailableBases())
+      {
+         this.availableBases.put(base.getName(), base);
+      }
+   }
+
+   private class HeadOrientationPacketConsumer extends AbstractStreamingDataConsumer<HeadOrientationPacket>
+   {
+      public HeadOrientationPacketConsumer(long objectIdentifier)
+      {
+         super(objectIdentifier, HeadOrientationPacket.class);
+      }
+
+      protected void processPacket(HeadOrientationPacket packet)
       {
          if (DEBUG)
          {
-            System.out.println("DesiredHeadOrientationProvider: absolute orientation: " + point3d);
+            System.out.println(packet);
          }
 
          if (headOrientationControlModule != null)
          {
-            FramePoint pointToTrack = new FramePoint(ReferenceFrame.getWorldFrame(), point3d);
-            headOrientationControlModule.setPointToTrack(pointToTrack, elevatorFrame);
-         }
-      }
-   }
+            ReferenceFrame frame = availableHeadControlFrames.get(packet.getFrameName());
+            if (frame == null)
+               throw new RuntimeException("Frame with name " + packet.getFrameName() + " is not an available head control frame");
 
+            RigidBody base = availableBases.get(packet.getBaseName());
+            if (base == null)
+               throw new RuntimeException("Base with name " + packet.getBaseName() + " is not an available head control base");
 
-   private class RelativeHeadOrientationConsumer extends AbstractStreamingDataConsumer<Point2d>
-   {
-      public RelativeHeadOrientationConsumer(long objectIdentifier)
-      {
-         super(objectIdentifier, Point2d.class);
-      }
+            Quat4d quaternion = packet.getQuaternion();
+            Point3d point = packet.getPoint();
 
-      protected void processPacket(Point2d point2d)
-      {
-         if (DEBUG)
-         {
-            System.out.println("DesiredHeadOrientationProvider: relative orientation: " + point2d);
-         }
+            boolean hasBeenSet = false;
+            if (quaternion != null)
+            {
+               assert !hasBeenSet;
+               FrameOrientation frameOrientation = new FrameOrientation(frame, quaternion);
+               headOrientationControlModule.setOrientationToTrack(frameOrientation, base);
+            }
 
-         if (headOrientationControlModule != null)
-         {
-            double yaw = point2d.getX();
-            double pitch = point2d.getY();
-            double roll = 0.0;
-            FrameOrientation frameOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame(), yaw, pitch, roll);
-            headOrientationControlModule.setOrientationToTrack(frameOrientation, elevatorFrame);
+            if (point != null)
+            {
+               assert !hasBeenSet;
+               FramePoint pointToTrack = new FramePoint(frame, point);
+               headOrientationControlModule.setPointToTrack(pointToTrack, base);
+            }
+
+            assert hasBeenSet;
          }
       }
    }

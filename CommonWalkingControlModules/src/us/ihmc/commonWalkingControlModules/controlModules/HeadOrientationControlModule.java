@@ -35,43 +35,41 @@ public class HeadOrientationControlModule extends DegenerateOrientationControlMo
    private final DoubleYoVariable pitchUpperLimit = new DoubleYoVariable("pitchUpperLimit", registry);
    private final DoubleYoVariable rollLimit = new DoubleYoVariable("rollLimit", registry);
 
-   public HeadOrientationControlModule(GeometricJacobian neckJacobian, TwistCalculator twistCalculator, RigidBody chest, YoVariableRegistry parentRegistry)
+   public HeadOrientationControlModule(GeometricJacobian neckJacobian, RigidBody pelvis, RigidBody elevator, TwistCalculator twistCalculator,
+           ReferenceFrame[] availableHeadOrientationControlFrames, YoVariableRegistry parentRegistry)
    {
-      super("head", twistCalculator.getRootBody(), neckJacobian.getEndEffector(), neckJacobian, twistCalculator);
-      ReferenceFrame chestFrame = chest.getBodyFixedFrame();
+      super("head", new RigidBody[] {elevator, pelvis}, neckJacobian.getEndEffector(), neckJacobian, twistCalculator, parentRegistry);
 
       pointTrackingFrame = new OriginAndPointFrame("headTrackingFrame", neckJacobian.getEndEffectorFrame());
 
-      framesToTrackIn = new ReferenceFrame[] {chestFrame, twistCalculator.getRootBody().getBodyFixedFrame()};
+      this.framesToTrackIn = availableHeadOrientationControlFrames;
 
       orientationToTrack = new YoFrameOrientationInMultipleFrames("headOrientationToTrack", framesToTrackIn, registry);
       pointToTrack = new YoFramePointInMultipleFrames("headPointToTrack", framesToTrackIn, registry);
 
-      headTrackingMode.set(HeadTrackingMode.ORIENTATION);
-      trackingFrameIndex.set(getTrackingFrameIndex(chestFrame));
-
       setHeadOrientationLimits();
-
-      parentRegistry.addChild(registry);
    }
 
    @Override
    protected FrameOrientation getDesiredFrameOrientation()
    {
       ReferenceFrame referenceFrame = framesToTrackIn[trackingFrameIndex.getIntegerValue()];
+
+      FramePoint positionToPointAt = pointToTrack.getPointInFrame(referenceFrame).getFramePointCopy();
+      pointTrackingFrame.setPositionToPointAt(positionToPointAt);
+
       FrameOrientation frameOrientation;
       switch (headTrackingMode.getEnumValue())
       {
          case ORIENTATION :
          {
             frameOrientation = orientationToTrack.getOrientationInFrame(referenceFrame).getFrameOrientationCopy();
+
             break;
          }
 
          case POINT :
          {
-            FramePoint positionToPointAt = pointToTrack.getPointInFrame(referenceFrame).getFramePointCopy();
-            pointTrackingFrame.setPositionToPointAt(positionToPointAt);
             pointTrackingFrame.update();
 
             frameOrientation = new FrameOrientation(pointTrackingFrame);
@@ -82,9 +80,9 @@ public class HeadOrientationControlModule extends DegenerateOrientationControlMo
          default :
             throw new RuntimeException("Case " + headTrackingMode.getEnumValue() + " not handled.");
       }
-      
+
       enforceLimits(frameOrientation);
-      
+
       return frameOrientation;
    }
 
@@ -132,16 +130,16 @@ public class HeadOrientationControlModule extends DegenerateOrientationControlMo
       return new FrameVector(frameToTrackIn);
    }
 
-   public void setOrientationToTrack(FrameOrientation orientation, ReferenceFrame frameToTrackIn)
+   public void setOrientationToTrack(FrameOrientation orientation, RigidBody base)
    {
-      this.trackingFrameIndex.set(getTrackingFrameIndex(frameToTrackIn));
+      this.trackingFrameIndex.set(getTrackingFrameIndex(orientation.getReferenceFrame()));
       this.headTrackingMode.set(HeadTrackingMode.ORIENTATION);
       this.orientationToTrack.setFrameOrientation(orientation);
    }
 
-   public void setPointToTrack(FramePoint point, ReferenceFrame frameToTrackIn)
+   public void setPointToTrack(FramePoint point, RigidBody base)
    {
-      this.trackingFrameIndex.set(getTrackingFrameIndex(frameToTrackIn));
+      this.trackingFrameIndex.set(getTrackingFrameIndex(point.getReferenceFrame()));
       this.headTrackingMode.set(HeadTrackingMode.POINT);
       this.pointToTrack.setFramePoint(point);
    }
@@ -150,10 +148,15 @@ public class HeadOrientationControlModule extends DegenerateOrientationControlMo
    {
       int trackingFrameIndex = ArrayUtils.indexOf(framesToTrackIn, frameToTrackIn);
       if (trackingFrameIndex == -1)
-         throw new RuntimeException("Frame to track in not found");
+         throw new RuntimeException("Frame to track in not found: " + frameToTrackIn.getName());
 
       return trackingFrameIndex;
    }
 
    private enum HeadTrackingMode {ORIENTATION, POINT;}
+
+   public ReferenceFrame[] getAvailableHeadControlFrames()
+   {
+      return framesToTrackIn;
+   }
 }

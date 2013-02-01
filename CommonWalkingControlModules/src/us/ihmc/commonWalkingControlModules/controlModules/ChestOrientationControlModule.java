@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameOrientation;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 
@@ -16,9 +17,10 @@ public class ChestOrientationControlModule extends DegenerateOrientationControlM
    private final YoFrameVector desiredAngularVelocity;
    private final YoFrameVector feedForwardAngularAcceleration;
 
-   public ChestOrientationControlModule(RigidBody pelvis, RigidBody chest, GeometricJacobian jacobian, TwistCalculator twistCalculator)
+   public ChestOrientationControlModule(RigidBody pelvis, RigidBody chest, GeometricJacobian jacobian, TwistCalculator twistCalculator,
+           YoVariableRegistry parentRegistry)
    {
-      super("chest", pelvis, chest, jacobian, twistCalculator);
+      super("chest", new RigidBody[] {pelvis}, chest, jacobian, twistCalculator, parentRegistry);
       ReferenceFrame baseFrame = pelvis.getBodyFixedFrame();
       this.desiredOrientation = new YoFrameOrientation("desiredChestOrientation", baseFrame, registry);
       this.desiredAngularVelocity = new YoFrameVector("desiredChestAngularVelocity", baseFrame, registry);
@@ -39,6 +41,6 @@ public class ChestOrientationControlModule extends DegenerateOrientationControlM
    {
       return feedForwardAngularAcceleration.getFrameVectorCopy();
    }
-   
+
    // TODO: add setters for Yo stuff once we need them
 }
