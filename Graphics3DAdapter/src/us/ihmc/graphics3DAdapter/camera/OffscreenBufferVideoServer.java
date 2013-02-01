@@ -2,15 +2,12 @@ package us.ihmc.graphics3DAdapter.camera;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.util.concurrent.ConcurrentLinkedDeque;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
 import us.ihmc.graphics3DAdapter.CameraAdapter;
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
-import us.ihmc.utilities.io.streamingData.StreamingDataConsumer;
-import us.ihmc.utilities.io.streamingData.StreamingDataProducer;
 
 public class OffscreenBufferVideoServer
 {
@@ -52,19 +49,8 @@ public class OffscreenBufferVideoServer
       videoDataCompressor.close();
    }
 
-   private class CameraUpdater implements StreamingDataProducer, CameraStreamer
+   private class CameraUpdater implements CameraStreamer
    {
-      private ConcurrentLinkedDeque<StreamingDataConsumer> consumers = new ConcurrentLinkedDeque<StreamingDataConsumer>();
-
-      public void registerConsumer(StreamingDataConsumer consumer)
-      {
-         consumers.add(consumer);
-      }
-
-      public long getDataIdentifier()
-      {
-         return 7797525979L;
-      }
 
       public void updateImage(BufferedImage bufferedImage, Point3d cameraPosition, Quat4d cameraOrientation, double fov)
       {
