@@ -127,8 +127,8 @@ public class DRCRobotJointMap implements SDFJointNameMap, RobotSpecificJointName
             double yOuterOffset = DRCRobotParameters.thighContactPointOffsets[i][2] * ((robotSide == RobotSide.RIGHT) ? -1 : 1);
             double zOffset = DRCRobotParameters.thighContactPointOffsets[i][3];
             
-            jointGroundContactPoints.add(new Pair<String, Vector3d>(prefix+"leg_uhz", new Vector3d(xOffset, yInnerOffset, zOffset)));
-            jointGroundContactPoints.add(new Pair<String, Vector3d>(prefix+"leg_uhz", new Vector3d(xOffset, yOuterOffset, zOffset)));
+            jointGroundContactPoints.add(new Pair<String, Vector3d>(prefix+"leg_lhy", new Vector3d(xOffset, yInnerOffset, zOffset)));
+            jointGroundContactPoints.add(new Pair<String, Vector3d>(prefix+"leg_lhy", new Vector3d(xOffset, yOuterOffset, zOffset)));
          }
       }
       
