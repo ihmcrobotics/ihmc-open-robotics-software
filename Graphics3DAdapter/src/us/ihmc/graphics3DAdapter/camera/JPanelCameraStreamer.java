@@ -11,21 +11,20 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
 
-public class JPanelCameraStreamer extends JPanel implements CameraStreamer
+public class JPanelCameraStreamer extends JPanel implements CameraViewer, VideoStreamer, CameraStreamer
 {
    private static final long serialVersionUID = -6832977971630763132L;
    private BufferedImage bufferedImage;
-   private float fov;
    
    public JPanelCameraStreamer()
    {
       super();
    }
+
    
-   public synchronized void updateImage(BufferedImage bufferedImage, Point3d cameraLocation, Quat4d cameraOrientation, float fov)
+   public synchronized void updateImage(BufferedImage bufferedImage, Point3d cameraPosition, Quat4d cameraOrientation, double fov)
    {
       this.bufferedImage = bufferedImage;
-      this.fov = fov;
       repaint();
    }
 
@@ -52,6 +51,27 @@ public class JPanelCameraStreamer extends JPanel implements CameraStreamer
       jFrame.setVisible(true);
       jFrame.setSize(800, 600);
       jFrame.setLocation(xLocation, yLocation); 
+   }
+
+
+   public Point3d getCameraPosition()
+   {
+      // TODO Auto-generated method stub
+      return null;
+   }
+
+
+   public Quat4d getCameraOrientation()
+   {
+      // TODO Auto-generated method stub
+      return null;
+   }
+
+
+   public double getFieldOfView()
+   {
+      // TODO Auto-generated method stub
+      return 0;
    }
 
 }

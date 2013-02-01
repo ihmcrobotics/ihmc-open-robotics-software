@@ -42,7 +42,7 @@ public class Graphics3DAdapterCaptureDeviceTester
 
       CaptureDevice captureDevice = viewportAdapter.getCaptureDevice();
       JPanelCameraStreamer videoCapture = new JPanelCameraStreamer();
-      captureDevice.streamTo(videoCapture);
+      captureDevice.streamTo(videoCapture, 25);
 
       createNewWindow(videoCapture);
       
