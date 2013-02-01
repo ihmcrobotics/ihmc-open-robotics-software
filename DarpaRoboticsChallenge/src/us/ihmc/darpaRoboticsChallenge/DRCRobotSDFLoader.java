@@ -10,13 +10,16 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 
 public class DRCRobotSDFLoader
 {
-   public static RobotModel selectedModel = RobotModel.ATLAS_NO_HANDS;
+   private final DRCRobotModel selectedModel;
 
-   
 
-   public static enum RobotModel {ATLAS_NO_HANDS, ATLAS_IROBOT_HANDS, ATLAS_SANDIA_HANDS;}
+   public DRCRobotSDFLoader(DRCRobotModel selectedModel)
+   {
+      this.selectedModel = selectedModel;
+   }
 
-   public static JaxbSDFLoader loadDRCRobot()
+
+   public JaxbSDFLoader loadDRCRobot()
    {
       URL fileURL;
       String modelName;
