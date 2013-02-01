@@ -12,7 +12,7 @@ public class DRCRobotSDFLoader
 {
    private final DRCRobotModel selectedModel;
 
-
+   
    public DRCRobotSDFLoader(DRCRobotModel selectedModel)
    {
       this.selectedModel = selectedModel;
@@ -30,6 +30,7 @@ public class DRCRobotSDFLoader
          case ATLAS_NO_HANDS :
             fileURL = myClass.getResource("models/GFE/models/drc_robot/gfe.sdf");
             modelName = "drc_robot";
+            
             resourceDirectory = myClass.getResource("models/GFE/models/");
             break;
 
@@ -52,7 +53,7 @@ public class DRCRobotSDFLoader
       JaxbSDFLoader jaxbSDFLoader;
       try
       {
-         jaxbSDFLoader = new JaxbSDFLoader(fileURL, modelName, resourceDirectory, new DRCRobotJointMap());
+         jaxbSDFLoader = new JaxbSDFLoader(fileURL, modelName, resourceDirectory, new DRCRobotJointMap(selectedModel));
       }
       catch (FileNotFoundException e)
       {
@@ -67,4 +68,5 @@ public class DRCRobotSDFLoader
 
       return jaxbSDFLoader;
    }
+   
 }
