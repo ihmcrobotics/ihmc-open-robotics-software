@@ -7,6 +7,7 @@ import java.util.Map;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.LinearSolver;
 import org.ejml.ops.CommonOps;
+import org.ejml.ops.MatrixFeatures;
 
 import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.NullspaceCalculator;
@@ -40,7 +41,8 @@ public class TaskSpaceConstraintResolver
 
    private final DenseMatrix64F convectiveTermMatrix = new DenseMatrix64F(SpatialAccelerationVector.SIZE, 1);
 
-   public TaskSpaceConstraintResolver(InverseDynamicsJoint[] jointsInOrder, NullspaceCalculator nullspaceCalculator, LinearSolver<DenseMatrix64F> jacobianSolver)
+   public TaskSpaceConstraintResolver(InverseDynamicsJoint[] jointsInOrder, NullspaceCalculator nullspaceCalculator,
+                                      LinearSolver<DenseMatrix64F> jacobianSolver)
    {
       this.jointsInOrder = jointsInOrder;
       this.nullspaceCalculator = nullspaceCalculator;
@@ -64,7 +66,7 @@ public class TaskSpaceConstraintResolver
    public void handleTaskSpaceAccelerations(HashMap<InverseDynamicsJoint, DenseMatrix64F> aHats, DenseMatrix64F bHat, DenseMatrix64F centroidalMomentumMatrix,
            GeometricJacobian jacobian, SpatialAccelerationVector taskSpaceAcceleration, DenseMatrix64F nullspaceMultiplier, DenseMatrix64F selectionMatrix)
    {
-      if(selectionMatrix.getNumCols() != SpatialAccelerationVector.SIZE)
+      if (selectionMatrix.getNumCols() != SpatialAccelerationVector.SIZE)
       {
          throw new RuntimeException("selectionMatrix.getNumCols() != SpatialAccelerationVector.SIZE");
       }
@@ -87,29 +89,19 @@ public class TaskSpaceConstraintResolver
       taskSpaceAcceleration.packMatrix(taskSpaceAccelerationMatrix, 0);
 
       // J
-//      jacobian.changeFrame(rootJointFrame);
+//    jacobian.changeFrame(rootJointFrame);
       jacobian.changeFrame(taskSpaceAcceleration.getExpressedInFrame());
       jacobian.compute();
       sJ.reshape(selectionMatrix.getNumRows(), jacobian.getNumberOfColumns());
       CommonOps.mult(selectionMatrix, jacobian.getJacobianMatrix(), sJ);
 
-      double determinantOfSJ = CommonOps.det(sJ);
-      if (Math.abs(determinantOfSJ) < 1e-10)
-      {
-         System.err.println("selectionMatrix = " + selectionMatrix);
-         System.err.println("Jacobian Matrix = " + jacobian.getJacobianMatrix());
-         System.err.println("sJ = " + sJ);
-         
-         throw new RuntimeException("SJ is not invertible. Determinant = " + determinantOfSJ);
-      }
-      
       // aTaskSpace
       int[] columnIndices = ScrewTools.computeIndicesForJoint(jointsInOrder, constrainedJoints);
       aTaskSpace.reshape(aTaskSpace.getNumRows(), columnIndices.length);
       MatrixTools.extractColumns(centroidalMomentumMatrix, aTaskSpace, columnIndices);
 
       // convectiveTerm
-      GeometricJacobian baseToEndEffectorJacobian = new GeometricJacobian(base, endEffector, taskSpaceAcceleration.getExpressedInFrame()); // FIXME: garbage, repeated computation
+      GeometricJacobian baseToEndEffectorJacobian = new GeometricJacobian(base, endEffector, taskSpaceAcceleration.getExpressedInFrame());    // FIXME: garbage, repeated computation
       baseToEndEffectorJacobian.compute();
       DesiredJointAccelerationCalculator desiredJointAccelerationCalculator = new DesiredJointAccelerationCalculator(baseToEndEffectorJacobian, null);    // TODO: garbage
       desiredJointAccelerationCalculator.computeJacobianDerivativeTerm(convectiveTerm);
@@ -124,6 +116,15 @@ public class TaskSpaceConstraintResolver
       // JInverse
       jacobianSolver.setA(sJ);
       jacobianSolver.invert(sJInverse);
+
+      if (MatrixFeatures.hasNaN(sJInverse))
+      {
+         System.err.println("selectionMatrix = " + selectionMatrix);
+         System.err.println("Jacobian Matrix = " + jacobian.getJacobianMatrix());
+         System.err.println("sJ = " + sJ);
+
+         throw new RuntimeException("Inverse of SJ contains NaN.");
+      }
 
       int nullity = nullspaceMultiplier.getNumRows();
       if (nullity > 0)
@@ -187,6 +188,7 @@ public class TaskSpaceConstraintResolver
          }
 
          ScrewTools.setDesiredAccelerations(jacobian.getJointsInOrder(), vdotTaskSpace);
+
          for (InverseDynamicsJoint joint : jacobian.getJointsInOrder())
          {
             jointAccelerationValidMap.put(joint, true);
@@ -255,7 +257,7 @@ public class TaskSpaceConstraintResolver
       while (currentBody != base)
       {
          InverseDynamicsJoint parentJoint = currentBody.getParentJoint();
-         if (constrainedJointsIndex >= 0 && constrainedJoints[constrainedJointsIndex] == parentJoint)
+         if ((constrainedJointsIndex >= 0) && (constrainedJoints[constrainedJointsIndex] == parentJoint))
          {
             constrainedJointsIndex--;
          }
@@ -275,27 +277,29 @@ public class TaskSpaceConstraintResolver
 
       return ret;
    }
-   
+
 
    private RigidBody getBase(SpatialAccelerationVector taskSpaceAcceleration)
    {
       for (InverseDynamicsJoint joint : jointsInOrder)
-      {         
+      {
          RigidBody predecessor = joint.getPredecessor();
          if (predecessor.getBodyFixedFrame() == taskSpaceAcceleration.getBaseFrame())
             return predecessor;
       }
+
       throw new RuntimeException("Base for " + taskSpaceAcceleration + " could not be determined");
    }
 
    private RigidBody getEndEffector(SpatialAccelerationVector taskSpaceAcceleration)
    {
       for (InverseDynamicsJoint joint : jointsInOrder)
-      {         
+      {
          RigidBody successor = joint.getSuccessor();
          if (successor.getBodyFixedFrame() == taskSpaceAcceleration.getBodyFrame())
             return successor;
       }
+
       throw new RuntimeException("End effector for " + taskSpaceAcceleration + " could not be determined");
    }
 }
