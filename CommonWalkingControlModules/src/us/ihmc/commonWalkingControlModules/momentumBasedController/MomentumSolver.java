@@ -196,6 +196,8 @@ public class MomentumSolver
    public void setDesiredSpatialAcceleration(InverseDynamicsJoint[] constrainedJoints, GeometricJacobian jacobian, SpatialAccelerationVector spatialAcceleration, DenseMatrix64F nullspaceMultipliers,
          DenseMatrix64F selectionMatrix)
    {
+      jacobian = extractJacobianElementsForConstrainedJoints(constrainedJoints, jacobian);
+      
       checkNullspaceDimensions(jacobian, nullspaceMultipliers);
       checkSelectionMatrixHasSameNumberOfRowsAsConstrainedJoints(selectionMatrix, constrainedJoints);
 
@@ -221,6 +223,12 @@ public class MomentumSolver
          this.nullspaceMultipliers.put(jacobian, nullspaceMultipliers);
          this.taskSpaceSelectionMatrices.put(jacobian, selectionMatrix);
       }
+   }
+
+   private GeometricJacobian extractJacobianElementsForConstrainedJoints(InverseDynamicsJoint[] constrainedJoints, GeometricJacobian jacobian)
+   {
+      //TODO: Inefficient garbage. Also, should have something that is defined as a partial part of a Jacobian...
+      return new GeometricJacobian(constrainedJoints, jacobian.getJacobianFrame());
    }
 
    private void checkSelectionMatrixHasSameNumberOfRowsAsConstrainedJoints(DenseMatrix64F selectionMatrix, InverseDynamicsJoint[] constrainedJoints)
