@@ -18,6 +18,9 @@ import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.EnumYoVariable;
 import com.yobotics.simulationconstructionset.IntegerYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicReferenceFrame;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameOrientationInMultipleFrames;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePointInMultipleFrames;
 
@@ -27,26 +30,39 @@ public class HeadOrientationControlModule extends DegenerateOrientationControlMo
    private final YoFramePointInMultipleFrames pointToTrack;
    private final ReferenceFrame[] framesToTrackIn;
    private final OriginAndPointFrame pointTrackingFrame;
+   private final DynamicGraphicReferenceFrame pointTrackingFrameFiz;
 
-   private final IntegerYoVariable trackingFrameIndex = new IntegerYoVariable("trackingFrameIndex", registry);
+   private final IntegerYoVariable trackingFrameIndex = new IntegerYoVariable("headTrackingFrameIndex", registry);
    private final EnumYoVariable<HeadTrackingMode> headTrackingMode = EnumYoVariable.create("headTrackingMode", HeadTrackingMode.class, registry);
 
    private final DoubleYoVariable yawLimit = new DoubleYoVariable("yawLimit", registry);
    private final DoubleYoVariable pitchLowerLimit = new DoubleYoVariable("pitchLowerLimit", registry);
    private final DoubleYoVariable pitchUpperLimit = new DoubleYoVariable("pitchUpperLimit", registry);
    private final DoubleYoVariable rollLimit = new DoubleYoVariable("rollLimit", registry);
-
+   
    public HeadOrientationControlModule(GeometricJacobian neckJacobian, RigidBody pelvis, RigidBody elevator, TwistCalculator twistCalculator,
-           ReferenceFrame[] availableHeadOrientationControlFrames, YoVariableRegistry parentRegistry)
+           ReferenceFrame[] availableHeadOrientationControlFrames, YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       super("head", new RigidBody[] {elevator, pelvis}, neckJacobian.getEndEffector(), neckJacobian, twistCalculator, parentRegistry);
 
-      pointTrackingFrame = new OriginAndPointFrame("headTrackingFrame", neckJacobian.getEndEffectorFrame());
+      pointTrackingFrame = new OriginAndPointFrame("headPointTrackingFrame", ReferenceFrame.getWorldFrame());
 
       this.framesToTrackIn = availableHeadOrientationControlFrames;
 
       orientationToTrack = new YoFrameOrientationInMultipleFrames("headOrientationToTrack", framesToTrackIn, registry);
       pointToTrack = new YoFramePointInMultipleFrames("headPointToTrack", framesToTrackIn, registry);
+      
+      if (dynamicGraphicObjectsListRegistry != null)
+      {
+         pointTrackingFrameFiz = new DynamicGraphicReferenceFrame(pointTrackingFrame, registry, 0.3);
+         DynamicGraphicObjectsList dynamicGraphicObjectsList = new DynamicGraphicObjectsList(getClass().getSimpleName());
+         dynamicGraphicObjectsList.add(pointTrackingFrameFiz);
+         dynamicGraphicObjectsList.hideDynamicGraphicObjects();
+      }
+      else
+      {
+         pointTrackingFrameFiz = null;
+      }
 
       setHeadOrientationLimits();
    }
@@ -57,7 +73,8 @@ public class HeadOrientationControlModule extends DegenerateOrientationControlMo
       ReferenceFrame referenceFrame = framesToTrackIn[trackingFrameIndex.getIntegerValue()];
 
       FramePoint positionToPointAt = pointToTrack.getPointInFrame(referenceFrame).getFramePointCopy();
-      pointTrackingFrame.setPositionToPointAt(positionToPointAt);
+      ReferenceFrame headFrame = jacobian.getEndEffectorFrame(); // TODO: change to midEyeFrame?
+      pointTrackingFrame.setOriginAndPositionToPointAt(new FramePoint(headFrame), positionToPointAt);
 
       FrameOrientation frameOrientation;
       switch (headTrackingMode.getEnumValue())
@@ -72,6 +89,7 @@ public class HeadOrientationControlModule extends DegenerateOrientationControlMo
          case POINT :
          {
             pointTrackingFrame.update();
+            pointTrackingFrameFiz.update();
 
             frameOrientation = new FrameOrientation(pointTrackingFrame);
 
