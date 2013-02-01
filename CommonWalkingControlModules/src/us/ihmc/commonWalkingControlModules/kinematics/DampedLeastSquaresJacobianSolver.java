@@ -12,6 +12,10 @@ import us.ihmc.utilities.screwTheory.JacobianSolver;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
+/*
+ * Use DampedLeastSquaresSolver instead
+ */
+@Deprecated
 public class DampedLeastSquaresJacobianSolver implements JacobianSolver
 {
    private final YoVariableRegistry registry;

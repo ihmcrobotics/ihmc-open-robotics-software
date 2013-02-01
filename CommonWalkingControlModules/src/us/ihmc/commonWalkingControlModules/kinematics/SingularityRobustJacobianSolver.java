@@ -16,6 +16,10 @@ import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
+/*
+ * Use DampedLeastSquaresJacobianSolver in combination with NullspaceCalculator instead
+ */
+@Deprecated
 public class SingularityRobustJacobianSolver implements JacobianSolver
 {
    private final YoVariableRegistry registry;
