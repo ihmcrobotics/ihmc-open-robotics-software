@@ -100,7 +100,7 @@ public class SDFLinkHolder
       this.CoMOffset.set(CoMOffset);
    }
 
-   public ArrayList<SDFJointHolder> getChilderen()
+   public ArrayList<SDFJointHolder> getChildren()
    {
       return childeren;
    }
