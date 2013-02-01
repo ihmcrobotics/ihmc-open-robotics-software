@@ -1,5 +1,6 @@
 package us.ihmc.darpaRoboticsChallenge;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.commonAvatarInterfaces.CommonAvatarEnvironmentInterface;
@@ -39,8 +40,7 @@ public class DRCDemoEnvironmentWithBoxAndSteeringWheel implements CommonAvatarEn
 
    public List<Robot> getEnvironmentRobots()
    {
-      // TODO Auto-generated method stub
-      return null;
+      return new ArrayList<Robot>(); // FIXME
    }
 
    public void createAndSetContactControllerToARobot()
