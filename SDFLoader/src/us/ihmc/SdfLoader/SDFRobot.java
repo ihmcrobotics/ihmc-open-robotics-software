@@ -43,7 +43,7 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRo
 
    private final FloatingJoint rootJoint;
 
-   private final SideDependentList<ArrayList<GroundContactPoint>> groundContactPoints = new SideDependentList<ArrayList<GroundContactPoint>>();
+   private final ArrayList<GroundContactPoint> groundContactPoints = new ArrayList<GroundContactPoint>();
 
    private final HashMap<String, SDFCamera> cameras = new HashMap<String, SDFCamera>();
 
@@ -76,37 +76,26 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRo
          addJointsRecursively(child, rootJoint, MatrixTools.IDENTITY);
       }
 
-      if (sdfJointNameMap != null)
+      if (sdfJointNameMap != null && sdfJointNameMap.getJointGroundContactPoints() != null)
       {
-         for (RobotSide robotSide : RobotSide.values)
+         int i = 0;
+         for (Pair<String,Vector3d> jointContactPoint : sdfJointNameMap.getJointGroundContactPoints())
          {
-            ArrayList<GroundContactPoint> groundContactPointsForSide = new ArrayList<GroundContactPoint>();
+            String jointName = jointContactPoint.first();
+            GroundContactPoint groundContactPoint = new GroundContactPoint("gc_" + SDFJointHolder.createValidVariableName(jointName) + "_" + i, jointContactPoint.second(), this);
+            robotJoints.get(jointName).addGroundContactPoint(groundContactPoint);
+            groundContactPoints.add(groundContactPoint);
 
-            if (sdfJointNameMap.getJointGroundContactPoints(robotSide) != null)
+            if (SHOW_CONTACT_POINTS)
             {
-               int i = 0;
-               for (Pair<String,Vector3d> jointContactPoint : sdfJointNameMap.getJointGroundContactPoints(robotSide))
-               {
-                  String jointName = jointContactPoint.first();
-                  GroundContactPoint groundContactPoint = new GroundContactPoint("gc_" + SDFJointHolder.createValidVariableName(jointName) + "_" + i, jointContactPoint.second(), this);
-                  robotJoints.get(jointName).addGroundContactPoint(groundContactPoint);
-                  groundContactPointsForSide.add(groundContactPoint);
-   
-                  if (SHOW_CONTACT_POINTS)
-                  {
-                     Graphics3DObject graphics = robotJoints.get(jointName).getLink().getLinkGraphics();
-                     graphics.identity();
-                     graphics.translate(jointContactPoint.second());
-                     graphics.addSphere(0.002, YoAppearance.Orange());
-                  }
-                  i++;
-               }
+               Graphics3DObject graphics = robotJoints.get(jointName).getLink().getLinkGraphics();
+               graphics.identity();
+               graphics.translate(jointContactPoint.second());
+               graphics.addSphere(0.002, YoAppearance.Orange());
             }
-            groundContactPoints.put(robotSide, groundContactPointsForSide);
+            i++;
          }
-         
       }
-
 
       Point3d centerOfMass = new Point3d();
       double totalMass = computeCenterOfMass(centerOfMass);
@@ -271,6 +260,6 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRo
 
    public List<GroundContactPoint> getFootGroundContactPoints(RobotSide robotSide)
    {
-      return groundContactPoints.get(robotSide);
+      return groundContactPoints;
    }
 }
