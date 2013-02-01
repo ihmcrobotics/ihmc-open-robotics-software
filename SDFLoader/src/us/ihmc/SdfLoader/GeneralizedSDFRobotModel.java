@@ -58,8 +58,6 @@ public class GeneralizedSDFRobotModel
       findRootLinks(links);
       
       SDFConversionsHelper.poseToTransform(model.getPose()).get(rootOffset);
-
-      System.out.println(rootLinks.get(0).getChilderen());
    }
 
    private void findRootLinks(HashMap<String, SDFLinkHolder> links)

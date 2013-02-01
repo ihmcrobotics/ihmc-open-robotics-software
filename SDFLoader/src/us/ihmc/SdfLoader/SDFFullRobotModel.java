@@ -74,7 +74,7 @@ public class SDFFullRobotModel implements FullRobotModel
 //            + "; izz: " + rootLink.getInertia().m22 + "; COM Offset: " + rootLink.getCoMOffset());
       pelvis = ScrewTools.addRigidBody(rootLink.getName(), rootJoint, rootLink.getInertia(), rootLink.getMass(), rootLink.getCoMOffset());
 
-      for (SDFJointHolder sdfJoint : rootLink.getChilderen())
+      for (SDFJointHolder sdfJoint : rootLink.getChildren())
       {
          addJointsRecursively(sdfJoint, pelvis);
       }
@@ -168,7 +168,7 @@ public class SDFFullRobotModel implements FullRobotModel
          }
       }
 
-      for (SDFJointHolder sdfJoint : childLink.getChilderen())
+      for (SDFJointHolder sdfJoint : childLink.getChildren())
       {
          addJointsRecursively(sdfJoint, rigidBody);
       }

@@ -71,7 +71,7 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRo
       rootJoint.setLink(scsRootLink);
       addRootJoint(rootJoint);
 
-      for (SDFJointHolder child : rootLink.getChilderen())
+      for (SDFJointHolder child : rootLink.getChildren())
       {
          addJointsRecursively(child, rootJoint, MatrixTools.IDENTITY);
       }
@@ -158,7 +158,7 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRo
 
       robotJoints.put(joint.getName(), scsJoint);
 
-      for (SDFJointHolder child : joint.getChild().getChilderen())
+      for (SDFJointHolder child : joint.getChild().getChildren())
       {
          addJointsRecursively(child, scsJoint, chainRotation);
       }
