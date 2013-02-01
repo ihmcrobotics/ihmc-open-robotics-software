@@ -146,19 +146,32 @@ public class MomentumSolver
 
    public void setDesiredJointAcceleration(InverseDynamicsJoint joint, DenseMatrix64F jointAcceleration)
    {
-      checkAndRegisterConstraint(joint);
+      checkAndRegisterConstraint(joint, null);
       jointSpaceAccelerations.put(joint, jointAcceleration);
    }
-
+   
    public void setDesiredSpatialAcceleration(GeometricJacobian jacobian, SpatialAccelerationVector spatialAcceleration, DenseMatrix64F nullspaceMultipliers)
+   {
+      InverseDynamicsJoint[] constrainedJoints = jacobian.getJointsInOrder();
+      setDesiredSpatialAcceleration(constrainedJoints, jacobian, spatialAcceleration, nullspaceMultipliers);
+   }
+   
+   public void setDesiredSpatialAcceleration(InverseDynamicsJoint[] constrainedJoints, GeometricJacobian jacobian, SpatialAccelerationVector spatialAcceleration, DenseMatrix64F nullspaceMultipliers)
    {
       int size = SpatialAccelerationVector.SIZE;
       DenseMatrix64F selectionMatrix = new DenseMatrix64F(size, size);    // TODO: garbage
       CommonOps.setIdentity(selectionMatrix);
-      setDesiredSpatialAcceleration(jacobian, spatialAcceleration, nullspaceMultipliers, selectionMatrix);
+      setDesiredSpatialAcceleration(constrainedJoints, jacobian, spatialAcceleration, nullspaceMultipliers, selectionMatrix);
    }
 
    public void setDesiredAngularAcceleration(GeometricJacobian jacobian, ReferenceFrame baseFrame, FrameVector desiredAngularAcceleration,
+         DenseMatrix64F nullspaceMultiplier)
+   {
+      InverseDynamicsJoint[] constrainedJoints = jacobian.getJointsInOrder();
+      setDesiredAngularAcceleration(constrainedJoints, jacobian, baseFrame, desiredAngularAcceleration, nullspaceMultiplier);
+   }
+   
+   public void setDesiredAngularAcceleration(InverseDynamicsJoint[] constrainedJoints, GeometricJacobian jacobian, ReferenceFrame baseFrame, FrameVector desiredAngularAcceleration,
            DenseMatrix64F nullspaceMultiplier)
    {
       SpatialAccelerationVector spatialAcceleration = new SpatialAccelerationVector(jacobian.getEndEffector().getBodyFixedFrame(), baseFrame,
@@ -170,17 +183,24 @@ public class MomentumSolver
       selectionMatrix.set(1, 1, 1.0);
       selectionMatrix.set(2, 2, 1.0);
 
-      setDesiredSpatialAcceleration(jacobian, spatialAcceleration, nullspaceMultiplier, selectionMatrix);
+      setDesiredSpatialAcceleration(constrainedJoints , jacobian, spatialAcceleration, nullspaceMultiplier, selectionMatrix);
    }
 
    public void setDesiredSpatialAcceleration(GeometricJacobian jacobian, SpatialAccelerationVector spatialAcceleration, DenseMatrix64F nullspaceMultipliers,
-           DenseMatrix64F selectionMatrix)
+         DenseMatrix64F selectionMatrix)
+   {
+      InverseDynamicsJoint[] constrainedJoints = jacobian.getJointsInOrder();
+      setDesiredSpatialAcceleration(constrainedJoints, jacobian, spatialAcceleration, nullspaceMultipliers, selectionMatrix);
+   }
+
+   public void setDesiredSpatialAcceleration(InverseDynamicsJoint[] constrainedJoints, GeometricJacobian jacobian, SpatialAccelerationVector spatialAcceleration, DenseMatrix64F nullspaceMultipliers,
+         DenseMatrix64F selectionMatrix)
    {
       checkNullspaceDimensions(jacobian, nullspaceMultipliers);
 
-      for (InverseDynamicsJoint joint : jacobian.getJointsInOrder())
+      for (InverseDynamicsJoint joint : constrainedJoints)
       {
-         checkAndRegisterConstraint(joint);
+         checkAndRegisterConstraint(joint, jacobian);
       }
 
       ReferenceFrame baseFrame = spatialAcceleration.getBaseFrame();
@@ -288,10 +308,34 @@ public class MomentumSolver
       }
    }
 
-   private void checkAndRegisterConstraint(InverseDynamicsJoint joint)
+   private void checkAndRegisterConstraint(InverseDynamicsJoint joint, GeometricJacobian jacobian)
    {
+      if (jacobian != null) checkJointIsInJacobian(joint, jacobian);
+      
       if (!unconstrainedJoints.remove(joint))
          throw new RuntimeException("Joint overconstrained: " + joint);
+   }
+   
+   private static void checkJointIsInJacobian(InverseDynamicsJoint joint, GeometricJacobian jacobian)
+   {
+      InverseDynamicsJoint[] jointsInJacobian = jacobian.getJointsInOrder();
+      
+      boolean foundIt = false;
+      for (InverseDynamicsJoint jointInJacobian : jointsInJacobian)
+      {
+         if (jointInJacobian == joint) 
+         {
+            if (foundIt)
+            {
+               throw new RuntimeException("Found multiple copies of joint " + joint + " in Jacobian " + jacobian);
+            }
+            foundIt = true;
+         }  
+      }
+      if (!foundIt)
+      {
+         throw new RuntimeException("Did not find joint " + joint + " in Jacobian " + jacobian);
+      }
    }
 
    private static void checkNullspaceDimensions(GeometricJacobian jacobian, DenseMatrix64F nullspaceMultipliers)
