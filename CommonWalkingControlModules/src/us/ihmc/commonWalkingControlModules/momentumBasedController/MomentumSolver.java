@@ -153,9 +153,9 @@ public class MomentumSolver
    public void setDesiredSpatialAcceleration(GeometricJacobian jacobian, SpatialAccelerationVector spatialAcceleration, DenseMatrix64F nullspaceMultipliers)
    {
       int size = SpatialAccelerationVector.SIZE;
-      DenseMatrix64F s = new DenseMatrix64F(size, size);    // TODO: garbage
-      CommonOps.setIdentity(s);
-      setDesiredSpatialAcceleration(jacobian, spatialAcceleration, nullspaceMultipliers, s);
+      DenseMatrix64F selectionMatrix = new DenseMatrix64F(size, size);    // TODO: garbage
+      CommonOps.setIdentity(selectionMatrix);
+      setDesiredSpatialAcceleration(jacobian, spatialAcceleration, nullspaceMultipliers, selectionMatrix);
    }
 
    public void setDesiredAngularAcceleration(GeometricJacobian jacobian, ReferenceFrame baseFrame, FrameVector desiredAngularAcceleration,
