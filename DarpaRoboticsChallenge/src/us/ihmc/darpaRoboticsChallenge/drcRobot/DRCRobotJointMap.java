@@ -118,8 +118,26 @@ public class DRCRobotJointMap implements SDFJointNameMap, RobotSpecificJointName
             jointGroundContactPoints.add(new Pair<String, Vector3d>(prefix + "arm_mwx", new Vector3d(wcx, wcy, wcz)));
             
          }
-
+         
+         // add butt contact points on back of thighs
+         for (int i = 0; i < 2; i++)
+         {
+            String joint;
+            if (i == 0)
+               joint = "leg_uhz";
+            else
+               joint = "leg_kny";
+            
+            double xOffset = DRCRobotParameters.thighContactPointOffsets[i][0];
+            double yInnerOffset = DRCRobotParameters.thighContactPointOffsets[i][1] * ((robotSide == RobotSide.RIGHT) ? -1 : 1);
+            double yOuterOffset = DRCRobotParameters.thighContactPointOffsets[i][2] * ((robotSide == RobotSide.RIGHT) ? -1 : 1);
+            double zOffset = DRCRobotParameters.thighContactPointOffsets[i][3];
+            
+            jointGroundContactPoints.add(new Pair<String, Vector3d>(prefix+joint, new Vector3d(xOffset, yInnerOffset, zOffset)));
+            jointGroundContactPoints.add(new Pair<String, Vector3d>(prefix+joint, new Vector3d(xOffset, yOuterOffset, zOffset)));
+         }
       }
+      
       spineJointNames.put("back_lbz", SpineJointName.SPINE_YAW);
       spineJointNames.put("back_mby", SpineJointName.SPINE_PITCH);
       spineJointNames.put("back_ubx", SpineJointName.SPINE_ROLL);
@@ -148,16 +166,19 @@ public class DRCRobotJointMap implements SDFJointNameMap, RobotSpecificJointName
       }
    }
 
+   @Override
    public Pair<RobotSide, LegJointName> getLegJointName(String jointName)
    {
       return legJointNames.get(jointName);
    }
 
+   @Override
    public Pair<RobotSide, ArmJointName> getArmJointName(String jointName)
    {
       return armJointNames.get(jointName);
    }
 
+   @Override
    public Pair<RobotSide, LimbName> getLimbName(String limbName)
    {
       return limbNames.get(limbName);
@@ -165,6 +186,7 @@ public class DRCRobotJointMap implements SDFJointNameMap, RobotSpecificJointName
 
 
 
+   @Override
    public JointRole getJointRole(String jointName)
    {
       return jointRoles.get(jointName);
@@ -172,6 +194,7 @@ public class DRCRobotJointMap implements SDFJointNameMap, RobotSpecificJointName
 
 
 
+   @Override
    public NeckJointName getNeckJointName(String jointName)
    {
       return neckJointNames.get(jointName);
@@ -179,6 +202,7 @@ public class DRCRobotJointMap implements SDFJointNameMap, RobotSpecificJointName
 
 
 
+   @Override
    public SpineJointName getSpineJointName(String jointName)
    {
       return spineJointNames.get(jointName);
@@ -186,6 +210,7 @@ public class DRCRobotJointMap implements SDFJointNameMap, RobotSpecificJointName
 
 
 
+   @Override
    public String getPelvisName()
    {
       return pelvisName;
@@ -193,6 +218,7 @@ public class DRCRobotJointMap implements SDFJointNameMap, RobotSpecificJointName
 
 
 
+   @Override
    public String getChestName()
    {
       return chestName;
@@ -200,6 +226,7 @@ public class DRCRobotJointMap implements SDFJointNameMap, RobotSpecificJointName
 
 
 
+   @Override
    public String getHeadName()
    {
       return headName;
@@ -207,6 +234,7 @@ public class DRCRobotJointMap implements SDFJointNameMap, RobotSpecificJointName
 
 
 
+   @Override
    public LegJointName[] getLegJointNames()
    {
       return legJoints;
@@ -214,6 +242,7 @@ public class DRCRobotJointMap implements SDFJointNameMap, RobotSpecificJointName
 
 
 
+   @Override
    public ArmJointName[] getArmJointNames()
    {
       return armJoints;
@@ -221,6 +250,7 @@ public class DRCRobotJointMap implements SDFJointNameMap, RobotSpecificJointName
 
 
 
+   @Override
    public SpineJointName[] getSpineJointNames()
    {
       return spineJoints;
@@ -228,23 +258,27 @@ public class DRCRobotJointMap implements SDFJointNameMap, RobotSpecificJointName
 
 
 
+   @Override
    public NeckJointName[] getNeckJointNames()
    {
       return neckJoints;
    }
 
 
+   @Override
    public String getJointBeforeFootName(RobotSide robotSide)
    {
       return jointBeforeFeetNames.get(robotSide);
    }
 
 
+   @Override
    public List<Pair<String, Vector3d>> getJointGroundContactPoints()
    {
       return jointGroundContactPoints;
    }
 
+   @Override
    public double getAnkleHeight()
    {
       return ankleHeight;
