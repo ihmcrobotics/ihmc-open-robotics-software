@@ -10,26 +10,17 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.NullspaceCalculator;
-import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.DesiredJointAccelerationCalculator;
 import us.ihmc.utilities.screwTheory.GeometricJacobian;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.Momentum;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTools;
-import us.ihmc.utilities.screwTheory.SixDoFJoint;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
-import us.ihmc.utilities.screwTheory.Twist;
-import us.ihmc.utilities.screwTheory.TwistCalculator;
 
 public class TaskSpaceConstraintResolver
 {
-   private final ReferenceFrame rootJointFrame;
-   private final RigidBody rootJointPredecessor;
-   private final RigidBody rootJointSuccessor;
-
    private final InverseDynamicsJoint[] jointsInOrder;
-   private final TwistCalculator twistCalculator;
    private final NullspaceCalculator nullspaceCalculator;
    private final LinearSolver<DenseMatrix64F> jacobianSolver;
 
@@ -41,8 +32,6 @@ public class TaskSpaceConstraintResolver
    private final DenseMatrix64F sJ;
 
    private final SpatialAccelerationVector convectiveTerm = new SpatialAccelerationVector();
-   private final Twist twistOfCurrentWithRespectToNew = new Twist();
-   private final Twist twistOfBodyWithRespectToBase = new Twist();
 
    // LinkedHashMaps so that order of computation is defined, to make rewindability checks using reflection easier
    private final Map<GeometricJacobian, DenseMatrix64F> phiCMap = new LinkedHashMap<GeometricJacobian, DenseMatrix64F>();
@@ -51,14 +40,9 @@ public class TaskSpaceConstraintResolver
 
    private final DenseMatrix64F convectiveTermMatrix = new DenseMatrix64F(SpatialAccelerationVector.SIZE, 1);
 
-   public TaskSpaceConstraintResolver(SixDoFJoint rootJoint, InverseDynamicsJoint[] jointsInOrder, TwistCalculator twistCalculator,
-                                      NullspaceCalculator nullspaceCalculator, LinearSolver<DenseMatrix64F> jacobianSolver)
+   public TaskSpaceConstraintResolver(InverseDynamicsJoint[] jointsInOrder, NullspaceCalculator nullspaceCalculator, LinearSolver<DenseMatrix64F> jacobianSolver)
    {
-      rootJointFrame = rootJoint.getFrameAfterJoint();
-      rootJointPredecessor = rootJoint.getPredecessor();
-      rootJointSuccessor = rootJoint.getSuccessor();
       this.jointsInOrder = jointsInOrder;
-      this.twistCalculator = twistCalculator;
       this.nullspaceCalculator = nullspaceCalculator;
       this.jacobianSolver = jacobianSolver;
 
@@ -88,10 +72,6 @@ public class TaskSpaceConstraintResolver
       if (taskSpaceAcceleration.getExpressedInFrame() != taskSpaceAcceleration.getBodyFrame())
       {
          throw new RuntimeException("Not supported. Task space acceleration expressIn and body frames must be the same!");
-//         twistCalculator.packRelativeTwist(twistOfCurrentWithRespectToNew, rootJointSuccessor, jacobian.getEndEffector());
-//         twistCalculator.packRelativeTwist(twistOfBodyWithRespectToBase, rootJointPredecessor, jacobian.getEndEffector());
-//         taskSpaceAcceleration.changeFrame(rootJointSuccessor.getBodyFixedFrame(), twistOfCurrentWithRespectToNew, twistOfBodyWithRespectToBase);
-//         taskSpaceAcceleration.changeFrameNoRelativeMotion(rootJointFrame);
       }
 
       // joint bookkeeping
@@ -123,10 +103,6 @@ public class TaskSpaceConstraintResolver
       baseToEndEffectorJacobian.compute();
       DesiredJointAccelerationCalculator desiredJointAccelerationCalculator = new DesiredJointAccelerationCalculator(baseToEndEffectorJacobian, null);    // TODO: garbage
       desiredJointAccelerationCalculator.computeJacobianDerivativeTerm(convectiveTerm);
-//      twistCalculator.packRelativeTwist(twistOfCurrentWithRespectToNew, rootJointSuccessor, endEffector);
-//      twistCalculator.packRelativeTwist(twistOfBodyWithRespectToBase, base, endEffector);
-//      convectiveTerm.changeFrame(rootJointSuccessor.getBodyFixedFrame(), twistOfCurrentWithRespectToNew, twistOfBodyWithRespectToBase);
-//      convectiveTerm.changeFrameNoRelativeMotion(rootJointFrame);
       convectiveTerm.getBodyFrame().checkReferenceFrameMatch(taskSpaceAcceleration.getBodyFrame());
       convectiveTerm.getExpressedInFrame().checkReferenceFrameMatch(taskSpaceAcceleration.getExpressedInFrame());
       convectiveTerm.packMatrix(convectiveTermMatrix, 0);

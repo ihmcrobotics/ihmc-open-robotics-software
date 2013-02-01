@@ -8,10 +8,6 @@ import us.ihmc.robotSide.SideDependentList;
 
 public class DRCRobotWalkingControllerParameters implements WalkingControllerParameters
 {
-   private boolean checkOrbitalCondition;
-   private double nominalHeightAboveGround;
-   private double initialHeightAboveGround;
-   
    public SideDependentList<Transform3D> getDesiredHandPosesWithRespectToChestFrame()
    {
       SideDependentList<Transform3D> handPoseWithRespectToChestFrame = new SideDependentList<Transform3D>();
@@ -42,12 +38,15 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
 
    public String[] getHeadOrientationControlJointNames()
    {
-      return new String[] { "neck_ay" };
+//      return new String[] { "neck_ay" };
+      return new String[] {"back_lbz", "neck_ay"};
    }
    
    public String[] getChestOrientationControlJointNames()
    {
-      return new String[] {"back_lbz", "back_mby", "back_ubx"};
+//      return new String[] {"back_lbz", "back_mby", "back_ubx"};
+//      return new String[] {"back_mby"};
+      return new String[] {};
    }
    
    public boolean checkOrbitalCondition() 

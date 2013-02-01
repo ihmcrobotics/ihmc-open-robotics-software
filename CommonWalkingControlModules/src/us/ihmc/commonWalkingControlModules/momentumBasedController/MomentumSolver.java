@@ -85,7 +85,7 @@ public class MomentumSolver
       this.nullspaceCalculator = new NullspaceCalculator(size);
       this.rootJointSolver = new RootJointSolver();
       this.jointSpaceConstraintResolver = new JointSpaceConstraintResolver();
-      this.taskSpaceConstraintResolver = new TaskSpaceConstraintResolver(rootJoint, jointsInOrder, twistCalculator, nullspaceCalculator, jacobianSolver);
+      this.taskSpaceConstraintResolver = new TaskSpaceConstraintResolver(jointsInOrder, nullspaceCalculator, jacobianSolver);
 
       int nDegreesOfFreedom = ScrewTools.computeDegreesOfFreedom(jointsInOrder);
 
@@ -149,7 +149,7 @@ public class MomentumSolver
       checkAndRegisterConstraint(joint, null);
       jointSpaceAccelerations.put(joint, jointAcceleration);
    }
-   
+
    public void setDesiredSpatialAcceleration(GeometricJacobian jacobian, SpatialAccelerationVector spatialAcceleration, DenseMatrix64F nullspaceMultipliers)
    {
       InverseDynamicsJoint[] constrainedJoints = jacobian.getJointsInOrder();
@@ -165,7 +165,7 @@ public class MomentumSolver
    }
 
    public void setDesiredAngularAcceleration(GeometricJacobian jacobian, ReferenceFrame baseFrame, FrameVector desiredAngularAcceleration,
-         DenseMatrix64F nullspaceMultiplier)
+           DenseMatrix64F nullspaceMultiplier)
    {
       InverseDynamicsJoint[] constrainedJoints = jacobian.getJointsInOrder();
       setDesiredAngularAcceleration(constrainedJoints, jacobian, baseFrame, desiredAngularAcceleration, nullspaceMultiplier);
@@ -187,7 +187,7 @@ public class MomentumSolver
    }
 
    public void setDesiredSpatialAcceleration(GeometricJacobian jacobian, SpatialAccelerationVector spatialAcceleration, DenseMatrix64F nullspaceMultipliers,
-         DenseMatrix64F selectionMatrix)
+           DenseMatrix64F selectionMatrix)
    {
       InverseDynamicsJoint[] constrainedJoints = jacobian.getJointsInOrder();
       setDesiredSpatialAcceleration(constrainedJoints, jacobian, spatialAcceleration, nullspaceMultipliers, selectionMatrix);
@@ -198,31 +198,28 @@ public class MomentumSolver
    {
       checkNullspaceDimensions(jacobian, nullspaceMultipliers);
       checkSelectionMatrixHasSameNumberOfRowsAsConstrainedJoints(selectionMatrix, constrainedJoints);
-      
+
       for (InverseDynamicsJoint joint : constrainedJoints)
       {
          checkAndRegisterConstraint(joint, jacobian);
       }
 
       ReferenceFrame baseFrame = spatialAcceleration.getBaseFrame();
-      boolean isWithRespectToWorld = baseFrame == rootJoint.getPredecessor().getBodyFixedFrame();
-      if (isWithRespectToWorld)
+      if (baseFrame == jacobian.getBaseFrame())
+      {
+         /*
+          * TODO: I'd like to get rid of this case and also have it be handled as in the else block below
+          * but the results are currently different for some unknown reason, which causes R2StairClimbing to fail.
+          */
+
+         taskSpaceConstraintResolver.convertInternalSpatialAccelerationToJointSpace(jointSpaceAccelerations, jacobian, spatialAcceleration,
+                 nullspaceMultipliers, selectionMatrix);
+      }
+      else
       {
          this.spatialAccelerations.put(jacobian, spatialAcceleration);
          this.nullspaceMultipliers.put(jacobian, nullspaceMultipliers);
          this.taskSpaceSelectionMatrices.put(jacobian, selectionMatrix);
-      }
-      else
-      {
-         if (baseFrame == jacobian.getBaseFrame())
-         {
-            taskSpaceConstraintResolver.convertInternalSpatialAccelerationToJointSpace(jointSpaceAccelerations, jacobian, spatialAcceleration,
-                    nullspaceMultipliers, selectionMatrix);
-         }
-         else
-         {
-            throw new RuntimeException("Case not yet implemented: baseFrame = " + baseFrame);
-         }
       }
    }
 
@@ -291,7 +288,7 @@ public class MomentumSolver
               momentumMultipliers, rootJoint, jointAccelerationValidMap);
       jointSpaceConstraintResolver.solveAndSetJointspaceAccelerations(jointSpaceAccelerations, jointAccelerationValidMap);
       taskSpaceConstraintResolver.solveAndSetTaskSpaceAccelerations(jointAccelerationValidMap);
-      
+
       for (InverseDynamicsJoint joint : jointAccelerationValidMap.keySet())
       {
          if (!jointAccelerationValidMap.get(joint))
@@ -332,7 +329,7 @@ public class MomentumSolver
       if (!unconstrainedJoints.remove(joint))
          throw new RuntimeException("Joint overconstrained: " + joint);
    }
-   
+
    private static void checkJointIsInJacobian(InverseDynamicsJoint joint, GeometricJacobian jacobian)
    {
       InverseDynamicsJoint[] jointsInJacobian = jacobian.getJointsInOrder();

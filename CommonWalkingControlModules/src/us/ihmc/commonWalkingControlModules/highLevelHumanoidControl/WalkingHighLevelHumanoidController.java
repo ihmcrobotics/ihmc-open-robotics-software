@@ -297,15 +297,21 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       String[] headOrientationControlJointNames = walkingControllerParameters.getHeadOrientationControlJointNames();
       String[] chestOrientationControlJointNames = walkingControllerParameters.getChestOrientationControlJointNames();
 
-      InverseDynamicsJoint[] allJoints = ScrewTools.computeJointsInOrder(fullRobotModel.getElevator());
+      RigidBody elevator = fullRobotModel.getElevator();
+      InverseDynamicsJoint[] allJoints = ScrewTools.computeJointsInOrder(elevator);
       InverseDynamicsJoint[] headOrientationControlJoints = ScrewTools.findJointsWithNames(allJoints, headOrientationControlJointNames);
       InverseDynamicsJoint[] chestOrientationControlJoints = ScrewTools.findJointsWithNames(allJoints, chestOrientationControlJointNames);
 
+      RigidBody pelvis = fullRobotModel.getPelvis();
       if (headOrientationControlJoints.length > 0)
       {
          final RigidBody head = fullRobotModel.getHead();
          GeometricJacobian neckJacobian = new GeometricJacobian(headOrientationControlJoints, head.getBodyFixedFrame());
-         headOrientationControlModule = new HeadOrientationControlModule(neckJacobian, twistCalculator, fullRobotModel.getChest(), registry);
+         ReferenceFrame pelvisFrame = pelvis.getBodyFixedFrame();
+         ReferenceFrame pelvisZUpFrame = referenceFrames.getPelvisZUpFrame();
+         ReferenceFrame[] availableHeadOrientationControlFrames = new ReferenceFrame[] {pelvisZUpFrame, pelvisFrame, ReferenceFrame.getWorldFrame()};
+         headOrientationControlModule = new HeadOrientationControlModule(neckJacobian, pelvis, elevator, twistCalculator, availableHeadOrientationControlFrames, registry);
+         headOrientationControlModule.setOrientationToTrack(new FrameOrientation(pelvisZUpFrame), pelvis);
          double headKp = 100.0;
          double headZeta = 1.0;
          double headKd = GainCalculator.computeDerivativeGain(headKp, headZeta);
@@ -326,8 +332,8 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       {
          RigidBody chest = fullRobotModel.getChest();
          GeometricJacobian spineJacobian = new GeometricJacobian(chestOrientationControlJoints, chest.getBodyFixedFrame());
-         chestOrientationControlModule = new ChestOrientationControlModule(fullRobotModel.getPelvis(), fullRobotModel.getChest(), spineJacobian,
-                 twistCalculator);
+         chestOrientationControlModule = new ChestOrientationControlModule(pelvis, fullRobotModel.getChest(), spineJacobian,
+                 twistCalculator, registry);
          chestOrientationControlModule.setProportionalGains(100.0, 100.0, 100.0);
          chestOrientationControlModule.setDerivativeGains(20.0, 20.0, 20.0);
       }
@@ -344,7 +350,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
          unconstrainedJoints.removeAll(Arrays.asList(armJoints));
 
          RigidBody foot = fullRobotModel.getFoot(robotSide);
-         InverseDynamicsJoint[] legJoints = ScrewTools.createJointPath(fullRobotModel.getPelvis(), foot);
+         InverseDynamicsJoint[] legJoints = ScrewTools.createJointPath(pelvis, foot);
          unconstrainedJoints.removeAll(Arrays.asList(legJoints));
       }
 
