@@ -1,11 +1,10 @@
-package us.ihmc.commonWalkingControlModules.desiredFootStep;
+package us.ihmc.commonWalkingControlModules.controlModules.head;
 
 import java.util.HashMap;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
-import us.ihmc.commonWalkingControlModules.controlModules.HeadOrientationControlModule;
 import us.ihmc.utilities.io.streamingData.AbstractStreamingDataConsumer;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
