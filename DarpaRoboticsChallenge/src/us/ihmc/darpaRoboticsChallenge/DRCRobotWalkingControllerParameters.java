@@ -38,13 +38,11 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
 
    public String[] getHeadOrientationControlJointNames()
    {
-//      return new String[] { "neck_ay" };
-      return new String[] {"back_lbz", "neck_ay"};
+      return new String[] {"back_lbz", "back_ubx", "neck_ay"};
    }
    
    public String[] getChestOrientationControlJointNames()
    {
-//      return new String[] {"back_lbz", "back_mby", "back_ubx"};
 //      return new String[] {"back_mby"};
       return new String[] {};
    }

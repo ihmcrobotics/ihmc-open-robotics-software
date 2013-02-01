@@ -21,7 +21,7 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 public abstract class DegenerateOrientationControlModule
 {
    protected final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final GeometricJacobian jacobian;
+   protected final GeometricJacobian jacobian;
    private final DenseMatrix64F selectionMatrix;
    private final SpatialAccelerationVector spatialAcceleration = new SpatialAccelerationVector();
 
