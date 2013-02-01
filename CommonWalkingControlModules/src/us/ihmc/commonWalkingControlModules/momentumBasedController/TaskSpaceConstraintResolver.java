@@ -80,11 +80,14 @@ public class TaskSpaceConstraintResolver
    public void handleTaskSpaceAccelerations(HashMap<InverseDynamicsJoint, DenseMatrix64F> aHats, DenseMatrix64F bHat, DenseMatrix64F centroidalMomentumMatrix,
            GeometricJacobian jacobian, SpatialAccelerationVector taskSpaceAcceleration, DenseMatrix64F nullspaceMultiplier, DenseMatrix64F selectionMatrix)
    {
-      assert(selectionMatrix.getNumCols() == SpatialAccelerationVector.SIZE);
+      if(selectionMatrix.getNumCols() != SpatialAccelerationVector.SIZE)
+      {
+         throw new RuntimeException("selectionMatrix.getNumCols() != SpatialAccelerationVector.SIZE");
+      }
 
       if (taskSpaceAcceleration.getExpressedInFrame() != taskSpaceAcceleration.getBodyFrame())
       {
-         throw new RuntimeException("Not supported");
+         throw new RuntimeException("Not supported. Task space acceleration expressIn and body frames must be the same!");
 //         twistCalculator.packRelativeTwist(twistOfCurrentWithRespectToNew, rootJointSuccessor, jacobian.getEndEffector());
 //         twistCalculator.packRelativeTwist(twistOfBodyWithRespectToBase, rootJointPredecessor, jacobian.getEndEffector());
 //         taskSpaceAcceleration.changeFrame(rootJointSuccessor.getBodyFixedFrame(), twistOfCurrentWithRespectToNew, twistOfBodyWithRespectToBase);
