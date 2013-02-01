@@ -112,6 +112,11 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRo
       rootJoint.setPosition(offset);
    }
 
+   public void setOrientation(double yaw, double pitch, double roll)
+   {
+      rootJoint.setYawPitchRoll(yaw, pitch, roll);
+   }
+   
    public PinJoint getPinJoint(String name)
    {
       return robotJoints.get(name);
