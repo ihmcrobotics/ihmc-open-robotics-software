@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.commonAvatarInterfaces.CommonAvatarEnvironmentInterface;
+import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 
 import com.yobotics.simulationconstructionset.ExternalForcePoint;
 import com.yobotics.simulationconstructionset.Robot;
@@ -15,20 +16,23 @@ import com.yobotics.simulationconstructionset.util.ground.TerrainObject;
 
 public class DRCDemoEnvironmentWithBoxAndSteeringWheel implements CommonAvatarEnvironmentInterface
 {
-   private static final float BOX_DIMENSION = 0.5f;
+   private static final double BOX_DIMENSION = 0.5;
    private final CombinedTerrainObject combinedTerrainObject;
 
    public DRCDemoEnvironmentWithBoxAndSteeringWheel()
    {
-      combinedTerrainObject = createCarSeatBox();
-
+      combinedTerrainObject = createCombinedTerrainObject();
    }
 
-
-   private CombinedTerrainObject createCarSeatBox()
+   private CombinedTerrainObject createCombinedTerrainObject()
    {
       CombinedTerrainObject terrainObject = new CombinedTerrainObject("carSeatBox");
+
+      // seat
       terrainObject.addBox(0, 0, BOX_DIMENSION, BOX_DIMENSION, BOX_DIMENSION);
+
+      // ground
+      terrainObject.addBox(-100.0, -100.0, 100.0, 100.0, -0.05, 0.0, YoAppearance.DarkGray());
 
       return terrainObject;
    }
@@ -40,7 +44,7 @@ public class DRCDemoEnvironmentWithBoxAndSteeringWheel implements CommonAvatarEn
 
    public List<Robot> getEnvironmentRobots()
    {
-      return new ArrayList<Robot>(); // FIXME
+      return new ArrayList<Robot>();    // FIXME
    }
 
    public void createAndSetContactControllerToARobot()
@@ -64,17 +68,17 @@ public class DRCDemoEnvironmentWithBoxAndSteeringWheel implements CommonAvatarEn
    public static void main(String[] args)
    {
       DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
-      DRCDemoEnvironmentWithBoxAndSteeringWheel env = new DRCDemoEnvironmentWithBoxAndSteeringWheel();
+      DRCDemoEnvironmentWithBoxAndSteeringWheel environment = new DRCDemoEnvironmentWithBoxAndSteeringWheel();
 
-      ContactableSelectableSteeringWheelRobot bot = new ContactableSelectableSteeringWheelRobot("steeringWheel");
+      ContactableSelectableSteeringWheelRobot steeringWheel = new ContactableSelectableSteeringWheelRobot("steeringWheel");
 
-      SimulationConstructionSet scs = new SimulationConstructionSet(bot, 36000);
+      SimulationConstructionSet scs = new SimulationConstructionSet(steeringWheel, 36000);
       scs.setDT(0.001, 1);
 
-      scs.addStaticLinkGraphics(env.getTerrainObject().getLinkGraphics());
+      scs.addStaticLinkGraphics(environment.getTerrainObject().getLinkGraphics());
 
       scs.addDynamicGraphicObjectListRegistries(dynamicGraphicObjectsListRegistry);
-      scs.setGroundVisible(true);
+//      scs.setGroundVisible(true);
 
       scs.startOnAThread();
    }
