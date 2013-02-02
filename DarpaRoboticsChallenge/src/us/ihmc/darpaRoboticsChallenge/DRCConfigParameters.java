@@ -36,8 +36,11 @@ public class DRCConfigParameters
    public static final long HEAD_ORIENTATION_DATA_IDENTIFIER = 6666L;
 
    public static final int LIDAR_DATA_PORT_NUMBER = 4697;
+   public static final long LIDAR_DATA_IDENTIFIER = 4697L;
    
    public static final long ROBOT_JOINT_SERVER_UPDATE_MILLIS = 100;
+
+   public static final boolean STREAM_LIDAR = true;
    
    
    public static final VideoSettings VIDEOSETTINGS = new VideoSettingsH264LowLatency(800, 600, Quality.MEDIUM);
