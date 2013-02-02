@@ -11,6 +11,7 @@ import us.ihmc.darpaRoboticsChallenge.initialSetup.SquaredUpDRCRobotInitialSetup
 import us.ihmc.projectM.R2Sim02.initialSetup.RobotInitialSetup;
 
 import com.martiansoftware.jsap.JSAPException;
+import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
@@ -18,16 +19,14 @@ public class DRCFlatGroundWalkingTrack
 {
    private final HumanoidRobotSimulation<SDFRobot> drcSimulation;
 
-   public DRCFlatGroundWalkingTrack(DRCRobotModel robotModel, DRCGuiInitialSetup guiInitialSetup, AutomaticSimulationRunner automaticSimulationRunner, double timePerRecordTick,
-                     int simulationDataBufferSize, boolean doChestOrientationControl)
+   public DRCFlatGroundWalkingTrack(DRCRobotModel robotModel, DRCGuiInitialSetup guiInitialSetup, DRCSCSInitialSetup scsInitialSetup, 
+         AutomaticSimulationRunner automaticSimulationRunner, double timePerRecordTick,
+         int simulationDataBufferSize, boolean doChestOrientationControl)
    {
-      DRCSCSInitialSetup scsInitialSetup;
-      RobotInitialSetup<SDFRobot> robotInitialSetup;
+      RobotInitialSetup<SDFRobot> robotInitialSetup = new SquaredUpDRCRobotInitialSetup();
       WalkingControllerParameters drcRobotParameters = new DRCRobotWalkingControllerParameters();
 
-      robotInitialSetup = new SquaredUpDRCRobotInitialSetup();
-
-      scsInitialSetup = new DRCSCSInitialSetup(TerrainType.FLAT);
+//      scsInitialSetup = new DRCSCSInitialSetup(TerrainType.FLAT);
       scsInitialSetup.setSimulationDataBufferSize(simulationDataBufferSize);
 
       double dt = scsInitialSetup.getDT();
@@ -65,12 +64,20 @@ public class DRCFlatGroundWalkingTrack
       }
    }
 
+   public SimulationConstructionSet getSimulationConstructionSet()
+   {
+      return drcSimulation.getSimulationConstructionSet();
+   }
+   
    public static void main(String[] args) throws JSAPException
    {
       AutomaticSimulationRunner automaticSimulationRunner = null;
 
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup();
 
-      new DRCFlatGroundWalkingTrack(DRCRobotModel.getDefaultRobotModel(), guiInitialSetup, automaticSimulationRunner, 0.005, 16000, true);
+      DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(TerrainType.FLAT);
+      new DRCFlatGroundWalkingTrack(DRCRobotModel.getDefaultRobotModel(), guiInitialSetup, scsInitialSetup, automaticSimulationRunner, 0.005, 16000, true);
    }
+
+   
 }
