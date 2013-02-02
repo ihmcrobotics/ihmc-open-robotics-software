@@ -124,7 +124,7 @@ public class DRCFlatGroundWalkingTest
     
       initiateMotion(standingTimeDuration, blockingSimulationRunner, walk);
 
-      ThreadTools.sleepForever();
+//      ThreadTools.sleepForever();
       
       double timeIncrement = 1.0;
 
