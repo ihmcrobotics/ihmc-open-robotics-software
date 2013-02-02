@@ -40,7 +40,7 @@ public class DRCConfigParameters
    
    public static final long ROBOT_JOINT_SERVER_UPDATE_MILLIS = 100;
 
-   public static final boolean STREAM_LIDAR = true;
+   public static final boolean STREAM_LIDAR = false;
    
    
    public static final VideoSettings VIDEOSETTINGS = new VideoSettingsH264LowLatency(800, 600, Quality.MEDIUM);
