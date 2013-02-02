@@ -127,7 +127,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
    private final SettableOrientationProvider finalPelvisOrientationProvider;
    private final OrientationTrajectoryGenerator pelvisOrientationTrajectoryGenerator;
 
-   private final HashMap<RigidBody, EndEffectorControlModule> footStateMachines = new HashMap<RigidBody, EndEffectorControlModule>();
+   private final HashMap<ContactablePlaneBody, EndEffectorControlModule> endEffectorControlModules = new HashMap<ContactablePlaneBody, EndEffectorControlModule>();
    private final SideDependentList<RigidBodySpatialAccelerationControlModule> handControlModules =
       new SideDependentList<RigidBodySpatialAccelerationControlModule>();
    private final SideDependentList<EndEffectorPoseTwistAndSpatialAccelerationCalculator> handPoseTwistAndSpatialAccelerationCalculators =
@@ -228,7 +228,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 
          EndEffectorControlModule footStateMachine = new EndEffectorControlModule(bipedFoot, swingPositionTrajectoryGenerator,
                                                         swingOrientationTrajectoryGenerator, onToesPitchTrajectoryGenerator, yoTime, twistCalculator, registry);
-         footStateMachines.put(footBody, footStateMachine);
+         endEffectorControlModules.put(bipedFoot, footStateMachine);
       }
 
       initialPelvisOrientationProvider = new SettableOrientationProvider("initialPelvis", worldFrame, registry);
@@ -891,6 +891,13 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 
    public void doMotionControl()
    {
+      for (ContactablePlaneBody contactablePlaneBody : endEffectorControlModules.keySet())
+      {         
+         EndEffectorControlModule endEffectorControlModule = endEffectorControlModules.get(contactablePlaneBody);
+         FramePoint2d cop = centersOfPressure2d.get(contactablePlaneBody).getFramePoint2dCopy();
+         endEffectorControlModule.setCenterOfPressure(cop);
+      }
+
       computeCapturePoint();
       stateMachine.checkTransitionConditionsThoroughly();
       stateMachine.doAction();
@@ -1002,9 +1009,9 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
    {
       for (RobotSide robotSide : RobotSide.values())
       {
+         ContactablePlaneBody contactablePlaneBody = bipedFeet.get(robotSide);
          SpatialAccelerationVector footAcceleration = new SpatialAccelerationVector();
-         RigidBody foot = fullRobotModel.getFoot(robotSide);
-         footStateMachines.get(foot).packDesiredFootAcceleration(footAcceleration);
+         endEffectorControlModules.get(contactablePlaneBody).packDesiredFootAcceleration(footAcceleration);
          ReferenceFrame bodyFixedFrame = fullRobotModel.getFoot(robotSide).getBodyFixedFrame();
          footAcceleration.changeBodyFrameNoRelativeAcceleration(bodyFixedFrame);
          footAcceleration.changeFrameNoRelativeMotion(bodyFixedFrame);
@@ -1028,7 +1035,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       }
 
       contactState.setContactPoints(contactPoints2d);
-      updateFootStateMachine(rigidBody, contactState);
+      updateFootStateMachine(contactableBody, contactState);
    }
 
    private void setFlatFootContactState(ContactablePlaneBody contactableBody)
@@ -1036,7 +1043,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       RigidBody rigidBody = contactableBody.getRigidBody();
       YoPlaneContactState contactState = contactStates.get(rigidBody);
       contactState.setContactPoints(contactableBody.getContactPoints2d());
-      updateFootStateMachine(rigidBody, contactState);
+      updateFootStateMachine(contactableBody, contactState);
    }
 
    private void setContactStateForSwing(ContactablePlaneBody contactableBody)
@@ -1044,7 +1051,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       RigidBody rigidBody = contactableBody.getRigidBody();
       YoPlaneContactState contactState = contactStates.get(rigidBody);
       contactState.setContactPoints(new ArrayList<FramePoint2d>());
-      updateFootStateMachine(rigidBody, contactState);
+      updateFootStateMachine(contactableBody, contactState);
    }
 
    private List<FramePoint> getContactPointsForWalkingOnToes(ContactablePlaneBody contactableBody)
@@ -1055,10 +1062,10 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       return contactPoints;
    }
 
-   private void updateFootStateMachine(RigidBody rigidBody, PlaneContactState contactState)
+   private void updateFootStateMachine(ContactablePlaneBody contactablePlaneBody, PlaneContactState contactState)
    {
       List<FramePoint2d> contactPoints = contactState.getContactPoints2d();
-      footStateMachines.get(rigidBody).setContactPoints(contactPoints);
+      endEffectorControlModules.get(contactablePlaneBody).setContactPoints(contactPoints);
    }
 
    private void updateBipedSupportPolygons()
