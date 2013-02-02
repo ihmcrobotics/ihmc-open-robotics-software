@@ -12,6 +12,11 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor;
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor.Camera;
+import us.ihmc.SdfLoader.xmlDescription.SDFSensor.Plugin;
+import us.ihmc.SdfLoader.xmlDescription.SDFSensor.Ray;
+import us.ihmc.SdfLoader.xmlDescription.SDFSensor.Ray.Range;
+import us.ihmc.SdfLoader.xmlDescription.SDFSensor.Ray.Scan;
+import us.ihmc.SdfLoader.xmlDescription.SDFSensor.Ray.Scan.HorizontalScan;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HumanoidRobot;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
@@ -30,6 +35,11 @@ import com.yobotics.simulationconstructionset.Link;
 import com.yobotics.simulationconstructionset.PinJoint;
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.graphics.GraphicsObjectsHolder;
+import com.yobotics.simulationconstructionset.simulatedSensors.LIDARScanDefinition;
+import com.yobotics.simulationconstructionset.simulatedSensors.RayTraceLIDARSensor;
+import com.yobotics.simulationconstructionset.simulatedSensors.SimulatedLIDARSensorLimitationParameters;
+import com.yobotics.simulationconstructionset.simulatedSensors.SimulatedLIDARSensorNoiseParameters;
+import com.yobotics.simulationconstructionset.simulatedSensors.SimulatedLIDARSensorUpdateParameters;
 
 public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRobot    // TODO: make an SDFHumanoidRobot
 {
@@ -223,6 +233,62 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRo
             {
                if (DEBUG)
                   System.out.println("SDFRobot has a lidar!");
+               Ray sdfRay = sensor.getRay();
+               if (sdfRay == null)
+               {
+                  System.err.println("SDFRobot: lidar not present in ray type sensor " + sensor.getName() + ". Ignoring this sensor.");
+               }
+               else
+               {
+                  Range sdfRange = sdfRay.getRange();
+                  Scan sdfScan = sdfRay.getScan();
+                  double sdfMaxRange = Double.parseDouble(sdfRange.getMax());
+                  double sdfMinRange = Double.parseDouble(sdfRange.getMin());
+                  HorizontalScan sdfHorizontalScan = sdfScan.getHorizontal();
+                  double sdfMaxAngle = Double.parseDouble(sdfHorizontalScan.getMaxAngle());
+                  double sdfMinAngle = Double.parseDouble(sdfHorizontalScan.getMinAngle());
+//                  double sdfAngularResolution = Double.parseDouble(sdfHorizontalScan.getSillyAndProbablyNotUsefulResolution());
+                  int sdfSamples = Integer.parseInt(sdfHorizontalScan.getSamples());
+                  double sdfRangeResolution = Double.parseDouble(sdfRay.getRange().getResolution());
+
+                  double sdfGaussianNoise = 0.0;
+                  boolean sdfAlwaysOn = true;
+                  double sdfUpdateRate = Double.parseDouble(sensor.getUpdateRate());
+                  Plugin sdfLidarPlugin = sensor.getPlugin();
+                  if (sdfLidarPlugin != null)
+                  {
+                     sdfGaussianNoise = Double.parseDouble(sdfLidarPlugin.getGaussianNoise());
+                     sdfAlwaysOn = Boolean.parseBoolean(sdfLidarPlugin.getAlwaysOn());
+                     sdfUpdateRate = Double.parseDouble(sdfLidarPlugin.getUpdateRate());
+                  }
+                  else
+                  {
+                     System.err.println("SDFRobot: lidar does not have associated plugin in sensor " + sensor.getName() + ". Assuming zero gaussian noise.");
+                  }
+
+                  LIDARScanDefinition lidarScanDefinition = LIDARScanDefinition.PlanarSweep(sdfMaxAngle-sdfMinAngle, sdfSamples);
+                  Transform3D transform3d = SDFConversionsHelper.poseToTransform(sensor.getPose());
+                  
+                  SimulatedLIDARSensorNoiseParameters noiseParameters = new SimulatedLIDARSensorNoiseParameters();
+                  noiseParameters.setGaussianNoiseStandardDeviation(sdfGaussianNoise);
+                  
+                  SimulatedLIDARSensorLimitationParameters limitationParameters = new SimulatedLIDARSensorLimitationParameters();
+                  limitationParameters.setMaxRange(sdfMaxRange);
+                  limitationParameters.setMinRange(sdfMinRange);
+                  limitationParameters.setQuantization(sdfRangeResolution);
+                  
+                  SimulatedLIDARSensorUpdateParameters updateParameters = new SimulatedLIDARSensorUpdateParameters();
+                  updateParameters.setAlwaysOn(sdfAlwaysOn);
+                  updateParameters.setUpdateRate(sdfUpdateRate);
+//                  updateParameters.setServerPort() We can't know the server port in SDF Uploaders, so this must be specified afterwords, but searching the robot tree and assigning numbers.
+
+                  RayTraceLIDARSensor scsLidar = new RayTraceLIDARSensor(transform3d, lidarScanDefinition);
+                  scsLidar.setNoiseParameters(noiseParameters);
+                  scsLidar.setSensorLimitationParameters(limitationParameters);
+                  scsLidar.setLidarDaemonParameters(updateParameters);
+                  scsJoint.addSensor(scsLidar);
+
+               }
             }
 
          }
