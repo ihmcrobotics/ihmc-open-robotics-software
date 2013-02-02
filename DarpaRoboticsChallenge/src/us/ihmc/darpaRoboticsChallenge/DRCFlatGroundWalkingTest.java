@@ -42,7 +42,7 @@ public class DRCFlatGroundWalkingTest
    }
 
    @Test
-   public void testDRC2OverShallowRamp() throws SimulationExceededMaximumTimeException
+   public void testDRCOverShallowRamp() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
 
