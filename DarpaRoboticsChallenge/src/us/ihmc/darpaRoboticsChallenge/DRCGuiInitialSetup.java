@@ -8,6 +8,8 @@ import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 
 public class DRCGuiInitialSetup implements GuiInitialSetup
 {
+   private boolean isGuiShown = true;
+   
    public void initializeGUI(SimulationConstructionSet scs, Robot robot)
    {
       CameraConfiguration behindPelvis = new CameraConfiguration("BehindPelvis");
@@ -28,6 +30,11 @@ public class DRCGuiInitialSetup implements GuiInitialSetup
 
    public boolean isGuiShown()
    {
-      return true;
+      return isGuiShown;
+   }
+   
+   public void setIsGuiShown(boolean isGuiShown)
+   {
+      this.isGuiShown = isGuiShown;
    }
 }
