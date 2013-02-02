@@ -3,13 +3,13 @@ package us.ihmc.darpaRoboticsChallenge;
 import static org.junit.Assert.fail;
 
 import org.junit.After;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.utilities.ThreadTools;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
@@ -41,6 +41,7 @@ public class DRCFlatGroundWalkingTest
       }
    }
 
+   @Ignore
    @Test
    public void testDRCOverShallowRamp() throws SimulationExceededMaximumTimeException
    {
