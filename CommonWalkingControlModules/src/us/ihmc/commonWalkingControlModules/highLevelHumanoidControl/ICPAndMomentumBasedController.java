@@ -366,7 +366,6 @@ public abstract class ICPAndMomentumBasedController implements RobotController
 
    public final void doControl()
    {
-      Momentum momentum = computeCentroidalMomentum();
 
       updateBipedSupportPolygons(bipedSupportPolygons);
 
@@ -377,31 +376,7 @@ public abstract class ICPAndMomentumBasedController implements RobotController
 
       doMotionControl();
 
-      ReferenceFrame frame = worldFrame;
-      RobotSide supportLeg = this.supportLeg.getEnumValue();
-
-      FrameOrientation desiredPelvisOrientation = this.desiredPelvisOrientation.getFrameOrientationCopy();
-      desiredCoPAndCMPControlModule.compute(capturePoint.getFramePoint2dCopy(), supportLeg, desiredICP.getFramePoint2dCopy(),
-              desiredICPVelocity.getFrameVector2dCopy(), desiredPelvisOrientation, omega0.getDoubleValue(), momentum);
-      FramePoint2d desiredCoP2d = new FramePoint2d(worldFrame);
-      desiredCoPAndCMPControlModule.packCoP(desiredCoP2d);
-      FramePoint2d desiredCMP2d = new FramePoint2d(worldFrame);
-      desiredCoPAndCMPControlModule.packCMP(desiredCMP2d);
-
-      desiredCoP2d.changeFrame(frame);
-      GeometryTools.projectOntoPolygonAndCheckDistance(desiredCoP2d, bipedSupportPolygons.getSupportPolygonInMidFeetZUp(), 1e-10);    // fix numerical roundoff
-
-      desiredCMP2d.changeFrame(frame);
-      FrameVector2d desiredDeltaCMP = new FrameVector2d(desiredCMP2d);
-      desiredDeltaCMP.sub(desiredCoP2d);
-
-      this.fZ.update(computeFz());
-      FrameVector totalgroundReactionMoment = groundReactionMomentControlModule.determineGroundReactionMoment(momentum,
-                                                 desiredPelvisOrientation.getYawPitchRoll()[0]);
-
-      SpatialForceVector totalGroundReactionWrench = computeTotalGroundReactionWrench(desiredCoP2d, desiredCMP2d, totalgroundReactionMoment,
-                                                        fZ.getDoubleValue(), omega0.getDoubleValue());
-      totalGroundReactionWrench.changeFrame(centerOfMassFrame);
+      SpatialForceVector totalGroundReactionWrench = computeDesiredTotalGroundReactionWrench();
 
       SpatialForceVector desiredCentroidalMomentumRate = new SpatialForceVector(totalGroundReactionWrench);
       desiredCentroidalMomentumRate.sub(gravitationalWrench);
@@ -436,13 +411,10 @@ public abstract class ICPAndMomentumBasedController implements RobotController
 
       GroundReactionWrenchDistributorInputData groundReactionWrenchDistributorInputData = new GroundReactionWrenchDistributorInputData();
 
-//    GroundReactionWrenchDistributorOutputData groundReactionWrenchDistributorOutputData = new GroundReactionWrenchDistributorOutputData();
-
       double coefficientOfFriction = 1.0;    // 0.5;    // TODO
       double rotationalCoefficientOfFriction = 0.5;    // TODO
 
 
-//    groundReactionWrenchDistributor.reset();
       groundReactionWrenchDistributorInputData.reset();
 
       for (ContactablePlaneBody contactablePlaneBody : contactablePlaneBodies)
@@ -454,17 +426,12 @@ public abstract class ICPAndMomentumBasedController implements RobotController
          if (footContactPoints.size() > 0)
          {
             groundReactionWrenchDistributorInputData.addContact(contactState, coefficientOfFriction, rotationalCoefficientOfFriction);
-
-//          groundReactionWrenchDistributor.addContact(contactState, coefficientOfFriction, rotationalCoefficientOfFriction);
          }
       }
 
       groundReactionWrenchDistributorInputData.setSpatialForceVectorAndUpcomingSupportSide(totalGroundReactionWrench, upcomingSupportLeg.getEnumValue());
 
       groundReactionWrenchDistributor.resetAndSolve(groundReactionWrenchDistributorInputData);
-
-//    groundReactionWrenchDistributor.getOutputData(groundReactionWrenchDistributorOutputData);
-//    groundReactionWrenchDistributor.solve(totalGroundReactionWrench, upcomingSupportLeg.getEnumValue());
 
       List<Wrench> wrenches = new ArrayList<Wrench>();
       List<FramePoint2d> cops = new ArrayList<FramePoint2d>();
@@ -517,6 +484,38 @@ public abstract class ICPAndMomentumBasedController implements RobotController
       if (processedOutputs != null)
          fullRobotModel.setTorques(processedOutputs);
       updateYoVariables();
+   }
+
+
+   private SpatialForceVector computeDesiredTotalGroundReactionWrench()
+   {
+      Momentum momentum = computeCentroidalMomentum();
+      ReferenceFrame frame = worldFrame;
+      RobotSide supportLeg = this.supportLeg.getEnumValue();
+
+      FrameOrientation desiredPelvisOrientation = this.desiredPelvisOrientation.getFrameOrientationCopy();
+      desiredCoPAndCMPControlModule.compute(capturePoint.getFramePoint2dCopy(), supportLeg, desiredICP.getFramePoint2dCopy(),
+              desiredICPVelocity.getFrameVector2dCopy(), desiredPelvisOrientation, omega0.getDoubleValue(), momentum);
+      FramePoint2d desiredCoP2d = new FramePoint2d(worldFrame);
+      desiredCoPAndCMPControlModule.packCoP(desiredCoP2d);
+      FramePoint2d desiredCMP2d = new FramePoint2d(worldFrame);
+      desiredCoPAndCMPControlModule.packCMP(desiredCMP2d);
+
+      desiredCoP2d.changeFrame(frame);
+      GeometryTools.projectOntoPolygonAndCheckDistance(desiredCoP2d, bipedSupportPolygons.getSupportPolygonInMidFeetZUp(), 1e-10);    // fix numerical roundoff
+
+      desiredCMP2d.changeFrame(frame);
+      FrameVector2d desiredDeltaCMP = new FrameVector2d(desiredCMP2d);
+      desiredDeltaCMP.sub(desiredCoP2d);
+
+      this.fZ.update(computeFz());
+      FrameVector totalgroundReactionMoment = groundReactionMomentControlModule.determineGroundReactionMoment(momentum,
+                                                 desiredPelvisOrientation.getYawPitchRoll()[0]);
+
+      SpatialForceVector totalGroundReactionWrench = computeTotalGroundReactionWrench(desiredCoP2d, desiredCMP2d, totalgroundReactionMoment,
+                                                        fZ.getDoubleValue(), omega0.getDoubleValue());
+      totalGroundReactionWrench.changeFrame(centerOfMassFrame);
+      return totalGroundReactionWrench;
    }
 
 
