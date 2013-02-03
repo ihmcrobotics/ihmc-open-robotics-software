@@ -42,5 +42,15 @@ public class ChestOrientationControlModule extends DegenerateOrientationControlM
       return feedForwardAngularAcceleration.getFrameVectorCopy();
    }
 
-   // TODO: add setters for Yo stuff once we need them
+   public void setDesireds(FrameOrientation desiredOrientation, FrameVector desiredAngularVelocity, FrameVector feedForwardAngularAcceleration)
+   {
+      desiredOrientation.changeFrame(this.desiredOrientation.getReferenceFrame());
+      this.desiredOrientation.set(desiredOrientation);
+      
+      desiredAngularVelocity.changeFrame(this.desiredAngularVelocity.getReferenceFrame());
+      this.desiredAngularVelocity.set(desiredAngularVelocity);
+      
+      feedForwardAngularAcceleration.changeFrame(this.feedForwardAngularAcceleration.getReferenceFrame());
+      this.feedForwardAngularAcceleration.set(feedForwardAngularAcceleration);
+   }
 }
