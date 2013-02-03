@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl;
 
 import java.util.ArrayList;
-import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -31,13 +30,11 @@ import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.CapturePointCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumSolver;
 import us.ihmc.commonWalkingControlModules.outputs.ProcessedOutputsInterface;
-import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LimbName;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
-import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.math.DampedLeastSquaresSolver;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.MatrixTools;
@@ -109,7 +106,7 @@ public abstract class ICPAndMomentumBasedController implements RobotController
    protected final SideDependentList<? extends ContactablePlaneBody> bipedFeet;
    private final HashMap<ContactablePlaneBody, YoFramePoint> centersOfPressure = new HashMap<ContactablePlaneBody, YoFramePoint>();
    protected final HashMap<ContactablePlaneBody, YoFramePoint2d> centersOfPressure2d = new HashMap<ContactablePlaneBody, YoFramePoint2d>();
-   protected final LinkedHashMap<RigidBody, YoPlaneContactState> contactStates = new LinkedHashMap<RigidBody, YoPlaneContactState>();
+   protected final LinkedHashMap<ContactablePlaneBody, YoPlaneContactState> contactStates = new LinkedHashMap<ContactablePlaneBody, YoPlaneContactState>();
    private final ArrayList<Updatable> updatables = new ArrayList<Updatable>();
 
    protected final SideDependentList<FootSwitchInterface> footSwitches;
@@ -126,7 +123,6 @@ public abstract class ICPAndMomentumBasedController implements RobotController
 
 
    protected final DoubleYoVariable desiredCoMHeightAcceleration;
-   protected final SideDependentList<EnumMap<LimbName, GeometricJacobian>> jacobians = SideDependentList.createListOfEnumMaps(LimbName.class);
    protected final GeometricJacobian spineJacobian;
 
    protected final YoFrameOrientation desiredPelvisOrientation;
@@ -300,20 +296,12 @@ public abstract class ICPAndMomentumBasedController implements RobotController
 
       elevatorFrame = fullRobotModel.getElevatorFrame();
 
-      EnumMap<LimbName, RigidBody> bases = new EnumMap<LimbName, RigidBody>(LimbName.class);
-      bases.put(LimbName.LEG, fullRobotModel.getPelvis());
-      bases.put(LimbName.ARM, fullRobotModel.getChest());
-
-      for (RobotSide robotSide : RobotSide.values())
+      for (ContactablePlaneBody contactablePlaneBody : bipedFeet)
       {
-         for (LimbName limbName : LimbName.values())
-         {
-            RigidBody endEffector = fullRobotModel.getEndEffector(robotSide, limbName);
-            GeometricJacobian jacobian = new GeometricJacobian(bases.get(limbName), endEffector, endEffector.getBodyFixedFrame());
-            jacobians.get(robotSide).put(limbName, jacobian);
-            if (limbName == LimbName.LEG)    // because it needs sole frame
-               contactStates.put(endEffector, new YoPlaneContactState(endEffector.getName(), referenceFrames.getSoleFrame(robotSide), registry));
-         }
+         RigidBody rigidBody = contactablePlaneBody.getRigidBody();
+         YoPlaneContactState contactState = new YoPlaneContactState(rigidBody.getName(), contactablePlaneBody.getPlaneFrame(), registry);
+         contactState.setContactPoints(contactablePlaneBody.getContactPoints2d());    // initialize with flat 'feet'
+         contactStates.put(contactablePlaneBody, contactState);
       }
 
       InverseDynamicsJoint[] joints = ScrewTools.computeJointsInOrder(elevator);
@@ -323,13 +311,6 @@ public abstract class ICPAndMomentumBasedController implements RobotController
          {
             desiredAccelerationYoVariables.put((RevoluteJoint) joint, new DoubleYoVariable(joint.getName() + "qdd_d", registry));
          }
-      }
-
-      for (RobotSide robotSide : RobotSide.values())
-      {
-         RigidBody foot = fullRobotModel.getFoot(robotSide);
-         ContactablePlaneBody contactablePlaneBody = bipedFeet.get(robotSide);
-         contactStates.get(foot).setContactPoints(contactablePlaneBody.getContactPoints2d());    // flat feet
       }
 
       updateBipedSupportPolygons(bipedSupportPolygons);
@@ -357,13 +338,8 @@ public abstract class ICPAndMomentumBasedController implements RobotController
       omega0.set(3.39);    // FIXME: hack to resolve circularity
       computeCapturePoint();
 
-      SideDependentList<ContactState> footContactStates = new SideDependentList<ContactState>();
-      for (RobotSide robotSide : RobotSide.values())
-      {
-         footContactStates.put(robotSide, contactStates.get(fullRobotModel.getFoot(robotSide)));
-      }
 
-      this.updatables.add(new FootPolygonVisualizer(footContactStates, dynamicGraphicObjectsListRegistry, registry));
+      this.updatables.add(new FootPolygonVisualizer(contactStates.values(), dynamicGraphicObjectsListRegistry, registry));
 
       momentumSubspace = new DenseMatrix64F(SpatialForceVector.SIZE, 3);
       momentumSubspace.set(3, 0, 1.0);
@@ -383,15 +359,6 @@ public abstract class ICPAndMomentumBasedController implements RobotController
       jacobianSolver.setAlpha(5e-2);
 
       return jacobianSolver;
-   }
-
-
-   protected void setEndEffectorSpatialAcceleration(RobotSide robotSide, LimbName limbName,
-           Pair<SpatialAccelerationVector, DenseMatrix64F> endEffectorSpatialAcceleration)
-   {
-      GeometricJacobian jacobian = jacobians.get(robotSide).get(limbName);
-      endEffectorSpatialAcceleration.first().getBodyFrame().checkReferenceFrameMatch(jacobian.getEndEffectorFrame());
-      solver.setDesiredSpatialAcceleration(jacobian, endEffectorSpatialAcceleration.first(), endEffectorSpatialAcceleration.second());    // TODO: get rid of pair
    }
 
    protected void setExternalHandWrench(RobotSide robotSide, Wrench handWrench)
@@ -480,10 +447,9 @@ public abstract class ICPAndMomentumBasedController implements RobotController
 //    groundReactionWrenchDistributor.reset();
       groundReactionWrenchDistributorInputData.reset();
 
-      for (RobotSide robotSide : RobotSide.values)
+      for (ContactablePlaneBody contactablePlaneBody : bipedFeet)
       {
-         RigidBody rigidBody = bipedFeet.get(robotSide).getRigidBody();
-         PlaneContactState contactState = contactStates.get(rigidBody);
+         PlaneContactState contactState = contactStates.get(contactablePlaneBody);
 
          List<FramePoint> footContactPoints = contactState.getContactPoints();
 
@@ -505,11 +471,10 @@ public abstract class ICPAndMomentumBasedController implements RobotController
       List<Wrench> wrenches = new ArrayList<Wrench>();
       List<FramePoint2d> cops = new ArrayList<FramePoint2d>();
 
-      for (RobotSide robotSide : RobotSide.values)
+      for (ContactablePlaneBody contactablePlaneBody : bipedFeet)
       {
-         ContactablePlaneBody contactablePlaneBody = bipedFeet.get(robotSide);
          RigidBody rigidBody = contactablePlaneBody.getRigidBody();
-         PlaneContactState contactState = contactStates.get(rigidBody);
+         PlaneContactState contactState = contactStates.get(contactablePlaneBody);
          List<FramePoint> footContactPoints = contactState.getContactPoints();
 
          if (footContactPoints.size() > 0)
@@ -746,13 +711,12 @@ public abstract class ICPAndMomentumBasedController implements RobotController
       }
    }
 
-   private void updateBipedSupportPolygons(BipedSupportPolygons bipedSupportPolygons)
+   protected void updateBipedSupportPolygons(BipedSupportPolygons bipedSupportPolygons)
    {
       SideDependentList<List<FramePoint>> footContactPoints = new SideDependentList<List<FramePoint>>();
       for (RobotSide robotSide : RobotSide.values())
       {
-         RigidBody foot = fullRobotModel.getFoot(robotSide);
-         footContactPoints.put(robotSide, contactStates.get(foot).getContactPoints());
+         footContactPoints.put(robotSide, contactStates.get(bipedFeet.get(robotSide)).getContactPoints());
       }
 
       bipedSupportPolygons.update(footContactPoints);
