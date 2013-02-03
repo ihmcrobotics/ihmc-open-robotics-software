@@ -82,20 +82,18 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint2d;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector2d;
 
-/**
- * @author twan
- *
- */
 public abstract class ICPAndMomentumBasedController implements RobotController
 {
    private static final long serialVersionUID = -7013956504623280825L;
 
    private final String name = getClass().getSimpleName();
    protected final YoVariableRegistry registry = new YoVariableRegistry(name);
+   
    protected final MomentumSolver solver;
 
    protected final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    protected final ReferenceFrame elevatorFrame;
+   private final ReferenceFrame centerOfMassFrame;
 
    protected final FullRobotModel fullRobotModel;
    private final CenterOfMassJacobian centerOfMassJacobian;
@@ -109,30 +107,35 @@ public abstract class ICPAndMomentumBasedController implements RobotController
    protected final LinkedHashMap<ContactablePlaneBody, YoPlaneContactState> contactStates = new LinkedHashMap<ContactablePlaneBody, YoPlaneContactState>();
    private final ArrayList<Updatable> updatables = new ArrayList<Updatable>();
 
-   protected final SideDependentList<FootSwitchInterface> footSwitches;
 
+   protected final DoubleYoVariable yoTime;
    protected final double controlDT;
    protected final double gravity;
 
-   protected final DoubleYoVariable yoTime;
 
+   // TODO: move to subclasses:
+   protected final YoFrameOrientation desiredPelvisOrientation;
+   private final AxisAngleOrientationController pelvisOrientationController;
+   private final YoFrameVector desiredPelvisAngularAcceleration;
+
+   protected final SideDependentList<FootSwitchInterface> footSwitches;
+   protected final BipedSupportPolygons bipedSupportPolygons;
    protected final YoFramePoint2d desiredICP;
    protected final YoFrameVector2d desiredICPVelocity;
    protected final EnumYoVariable<RobotSide> supportLeg;
    protected final EnumYoVariable<RobotSide> upcomingSupportLeg;
-
-
    protected final DoubleYoVariable desiredCoMHeightAcceleration;
-
-   protected final YoFrameOrientation desiredPelvisOrientation;
-   private final AxisAngleOrientationController pelvisOrientationController;
-
    protected final YoFramePoint capturePoint;
    protected final DoubleYoVariable omega0;
-
    private final DesiredCoPAndCMPControlModule desiredCoPAndCMPControlModule;
+   private final DoubleYoVariable alphaFz = new DoubleYoVariable("alphaFz", registry);
+   private final AlphaFilteredYoVariable fZ = new AlphaFilteredYoVariable("fZ", registry, alphaFz);
+   private final GroundReactionMomentControlModule groundReactionMomentControlModule;
+   private final CenterOfPressureResolver centerOfPressureResolver = new CenterOfPressureResolver();
+   private final OriginAndPointFrame copToCoPFrame = new OriginAndPointFrame("copToCoP", worldFrame);
+   private final MomentumCalculator momentumCalculator;
 
-   private final YoFrameVector desiredPelvisAngularAcceleration;
+
    private final YoFrameVector finalDesiredPelvisLinearAcceleration;
    private final YoFrameVector finalDesiredPelvisAngularAcceleration;
    private final YoFrameVector desiredPelvisForce;
@@ -149,30 +152,17 @@ public abstract class ICPAndMomentumBasedController implements RobotController
    private final YoFrameVector groundReactionForceCheck;
 
    private final HashMap<RevoluteJoint, DoubleYoVariable> desiredAccelerationYoVariables = new HashMap<RevoluteJoint, DoubleYoVariable>();
-   private final DoubleYoVariable alphaFz = new DoubleYoVariable("alphaFz", registry);
-   private final AlphaFilteredYoVariable fZ = new AlphaFilteredYoVariable("fZ", registry, alphaFz);
    private final SpatialForceVector gravitationalWrench;
-
-   private final ReferenceFrame centerOfMassFrame;
-
-   private final MomentumCalculator momentumCalculator;
 
    private final ProcessedOutputsInterface processedOutputs;
    private final InverseDynamicsCalculator inverseDynamicsCalculator;
 
-   protected final BipedSupportPolygons bipedSupportPolygons;
-
    private final double gravityZ;
    private final double totalMass;
 
-   private final GroundReactionMomentControlModule groundReactionMomentControlModule;
-
    private final GroundReactionWrenchDistributor groundReactionWrenchDistributor;
-   private final CenterOfPressureResolver centerOfPressureResolver = new CenterOfPressureResolver();
 
-   private final OriginAndPointFrame copToCoPFrame = new OriginAndPointFrame("copToCoP", worldFrame);
-   private ReferenceFrame pelvisFrame;
-   private final boolean doStrictPelvisControl;
+   private final boolean doStrictPelvisControl; // TODO: remove, just have momentumSubspace and accelerationSubspace
    private final DenseMatrix64F momentumSubspace;
    private final DenseMatrix64F accelerationSubspace;
 
@@ -209,7 +199,7 @@ public abstract class ICPAndMomentumBasedController implements RobotController
       this.momentumCalculator = new MomentumCalculator(twistCalculator);
       this.inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, gravityZ);
 
-      this.pelvisFrame = referenceFrames.getPelvisFrame();
+      ReferenceFrame pelvisFrame = referenceFrames.getPelvisFrame();
       this.groundReactionMomentControlModule = new GroundReactionMomentControlModule(pelvisFrame, registry);
       this.groundReactionMomentControlModule.setGains(10.0, 100.0);    // kPelvisYaw was 0.0 for M3 movie
       this.totalMass = TotalMassCalculator.computeSubTreeMass(elevator);
@@ -391,7 +381,7 @@ public abstract class ICPAndMomentumBasedController implements RobotController
          DenseMatrix64F accelerationMultipliers = new DenseMatrix64F(3, 1);
          FrameVector pelvisAngularAcceleration = computeDesiredPelvisAngularAcceleration();
          this.desiredPelvisAngularAcceleration.set(pelvisAngularAcceleration);
-         pelvisAngularAcceleration.changeFrame(pelvisFrame);
+         pelvisAngularAcceleration.changeFrame(fullRobotModel.getPelvis().getBodyFixedFrame());
          MatrixTools.setDenseMatrixFromTuple3d(accelerationMultipliers, pelvisAngularAcceleration.getVector(), 0, 0);
 
          solver.solve(accelerationSubspace, accelerationMultipliers, momentumSubspace, momentumMultipliers);
@@ -407,13 +397,10 @@ public abstract class ICPAndMomentumBasedController implements RobotController
       totalGroundReactionWrench.setAngularPart(desiredGroundReactionTorque.getFrameVectorCopy().getVector());
       totalGroundReactionWrench.setLinearPart(desiredGroundReactionForce.getFrameVectorCopy().getVector());
 
-
-
       GroundReactionWrenchDistributorInputData groundReactionWrenchDistributorInputData = new GroundReactionWrenchDistributorInputData();
 
       double coefficientOfFriction = 1.0;    // 0.5;    // TODO
       double rotationalCoefficientOfFriction = 0.5;    // TODO
-
 
       groundReactionWrenchDistributorInputData.reset();
 
@@ -523,6 +510,7 @@ public abstract class ICPAndMomentumBasedController implements RobotController
    {
       Twist pelvisTwist = new Twist();
       twistCalculator.packTwistOfBody(pelvisTwist, fullRobotModel.getPelvis());
+      ReferenceFrame pelvisFrame = fullRobotModel.getPelvis().getBodyFixedFrame();
       FrameOrientation desiredPelvisOrientation = this.desiredPelvisOrientation.getFrameOrientationCopy();
       FrameVector desiredPelvisAngularVelocity = new FrameVector(pelvisFrame);
       FrameVector currentPelvisAngularVelocity = new FrameVector(pelvisTwist.getExpressedInFrame(), pelvisTwist.getAngularPartCopy());
