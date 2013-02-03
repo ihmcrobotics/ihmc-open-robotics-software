@@ -47,7 +47,6 @@ import us.ihmc.utilities.math.geometry.GeometryTools;
 import us.ihmc.utilities.math.geometry.OriginAndPointFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
-import us.ihmc.utilities.screwTheory.GeometricJacobian;
 import us.ihmc.utilities.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.Momentum;
@@ -124,7 +123,6 @@ public abstract class ICPAndMomentumBasedController implements RobotController
 
 
    protected final DoubleYoVariable desiredCoMHeightAcceleration;
-   protected final GeometricJacobian spineJacobian;
 
    protected final YoFrameOrientation desiredPelvisOrientation;
    private final AxisAngleOrientationController pelvisOrientationController;
@@ -285,8 +283,6 @@ public abstract class ICPAndMomentumBasedController implements RobotController
       {
          this.updatables.addAll(updatables);
       }
-
-      this.spineJacobian = new GeometricJacobian(fullRobotModel.getPelvis(), fullRobotModel.getChest(), fullRobotModel.getRootJoint().getFrameAfterJoint());
 
       this.desiredCoMHeightAcceleration = new DoubleYoVariable("desiredCoMHeightAcceleration", registry);
 
