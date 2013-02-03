@@ -103,6 +103,7 @@ public abstract class ICPAndMomentumBasedController implements RobotController
    protected final CommonWalkingReferenceFrames referenceFrames;
    protected final TwistCalculator twistCalculator;
    protected final SpatialAccelerationCalculator spatialAccelerationCalculator;
+   protected final List<ContactablePlaneBody> contactablePlaneBodies;
    protected final SideDependentList<? extends ContactablePlaneBody> bipedFeet;
    private final HashMap<ContactablePlaneBody, YoFramePoint> centersOfPressure = new HashMap<ContactablePlaneBody, YoFramePoint>();
    protected final HashMap<ContactablePlaneBody, YoFramePoint2d> centersOfPressure2d = new HashMap<ContactablePlaneBody, YoFramePoint2d>();
@@ -195,6 +196,7 @@ public abstract class ICPAndMomentumBasedController implements RobotController
       this.referenceFrames = referenceFrames;
       this.twistCalculator = twistCalculator;
       this.bipedFeet = bipedFeet;
+      this.contactablePlaneBodies = new ArrayList<ContactablePlaneBody>(bipedFeet.values());
       this.bipedSupportPolygons = bipedSupportPolygons;
       this.controlDT = controlDT;
       this.footSwitches = footSwitches;
@@ -447,7 +449,7 @@ public abstract class ICPAndMomentumBasedController implements RobotController
 //    groundReactionWrenchDistributor.reset();
       groundReactionWrenchDistributorInputData.reset();
 
-      for (ContactablePlaneBody contactablePlaneBody : bipedFeet)
+      for (ContactablePlaneBody contactablePlaneBody : contactablePlaneBodies)
       {
          PlaneContactState contactState = contactStates.get(contactablePlaneBody);
 
@@ -471,7 +473,7 @@ public abstract class ICPAndMomentumBasedController implements RobotController
       List<Wrench> wrenches = new ArrayList<Wrench>();
       List<FramePoint2d> cops = new ArrayList<FramePoint2d>();
 
-      for (ContactablePlaneBody contactablePlaneBody : bipedFeet)
+      for (ContactablePlaneBody contactablePlaneBody : contactablePlaneBodies)
       {
          RigidBody rigidBody = contactablePlaneBody.getRigidBody();
          PlaneContactState contactState = contactStates.get(contactablePlaneBody);
