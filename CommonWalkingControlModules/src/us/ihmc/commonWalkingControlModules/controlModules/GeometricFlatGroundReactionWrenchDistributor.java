@@ -59,12 +59,11 @@ public class GeometricFlatGroundReactionWrenchDistributor implements GroundReact
       reset();
       
       ArrayList<PlaneContactState> contactStates = groundReactionWrenchDistributorInputData.getContactStates();
-      ArrayList<Double> coefficientsOfFriction = groundReactionWrenchDistributorInputData.getCoefficientsOfFriction();
-      ArrayList<Double> rotationalCoefficientsOfFriction = groundReactionWrenchDistributorInputData.getRotationalCoefficientsOfFriction();
-      
-      for (int i=0; i<contactStates.size(); i++)
+   
+      for (PlaneContactState contactState : contactStates)
       {
-         addContact(contactStates.get(i), coefficientsOfFriction.get(i), rotationalCoefficientsOfFriction.get(i));
+         addContact(contactState, groundReactionWrenchDistributorInputData.getCoefficientOfFriction(contactState), 
+               groundReactionWrenchDistributorInputData.getRotationalCoefficientsOfFriction(contactState));
       }
     
       SpatialForceVector desiredGroundReactionWrench = groundReactionWrenchDistributorInputData.getDesiredNetSpatialForceVector();

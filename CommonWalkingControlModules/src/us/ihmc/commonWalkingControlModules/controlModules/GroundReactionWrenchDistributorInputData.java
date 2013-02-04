@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.robotSide.RobotSide;
@@ -9,8 +10,8 @@ import us.ihmc.utilities.screwTheory.SpatialForceVector;
 public class GroundReactionWrenchDistributorInputData
 {
    private final ArrayList<PlaneContactState> contactStates = new ArrayList<PlaneContactState>();
-   private final ArrayList<Double> coefficientsOfFriction = new ArrayList<Double>();
-   private final ArrayList<Double> rotationalCoefficientsOfFriction = new ArrayList<Double>();
+   private final LinkedHashMap<PlaneContactState, Double> coefficientsOfFriction = new LinkedHashMap<PlaneContactState, Double>();
+   private final LinkedHashMap<PlaneContactState, Double> rotationalCoefficientsOfFriction = new LinkedHashMap<PlaneContactState, Double>();
    
    private SpatialForceVector desiredNetSpatialForceVector;
    private RobotSide upcomingSupportSide;
@@ -25,8 +26,8 @@ public class GroundReactionWrenchDistributorInputData
    public void addContact(PlaneContactState contactState, double coefficientOfFriction, double rotationalCoefficientOfFriction)
    {
       contactStates.add(contactState);
-      coefficientsOfFriction.add(coefficientOfFriction);
-      rotationalCoefficientsOfFriction.add(rotationalCoefficientOfFriction);
+      coefficientsOfFriction.put(contactState, coefficientOfFriction);
+      rotationalCoefficientsOfFriction.put(contactState, rotationalCoefficientOfFriction);
    }
    
    public void setSpatialForceVectorAndUpcomingSupportSide(SpatialForceVector desiredNetSpatialForceVector, RobotSide upcomingSupportSide)
@@ -40,14 +41,14 @@ public class GroundReactionWrenchDistributorInputData
       return contactStates;
    }
    
-   public ArrayList<Double> getCoefficientsOfFriction()
+   public double getCoefficientOfFriction(PlaneContactState contactState)
    {
-      return coefficientsOfFriction;
+      return coefficientsOfFriction.get(contactState);
    }
    
-   public ArrayList<Double> getRotationalCoefficientsOfFriction()
+   public double getRotationalCoefficientsOfFriction(PlaneContactState contactState)
    {
-      return rotationalCoefficientsOfFriction;
+      return rotationalCoefficientsOfFriction.get(contactState);
    }
    
    public SpatialForceVector getDesiredNetSpatialForceVector()
