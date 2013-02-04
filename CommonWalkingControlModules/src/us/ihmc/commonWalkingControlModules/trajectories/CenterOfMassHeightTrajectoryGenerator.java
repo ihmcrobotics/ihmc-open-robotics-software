@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
 import us.ihmc.robotSide.RobotSide;
+import us.ihmc.utilities.math.geometry.FrameVector2d;
 
 
 public interface CenterOfMassHeightTrajectoryGenerator
@@ -11,7 +12,7 @@ public interface CenterOfMassHeightTrajectoryGenerator
 
    public abstract double getDesiredCenterOfMassHeight();
 
-   public abstract double getDesiredCenterOfMassHeightSlope();
+   public abstract FrameVector2d getDesiredCenterOfMassHeightSlope();
 
-   public abstract double getDesiredCenterOfMassHeightSecondDerivative();
+   public abstract FrameVector2d getDesiredCenterOfMassHeightSecondDerivative();
 }
