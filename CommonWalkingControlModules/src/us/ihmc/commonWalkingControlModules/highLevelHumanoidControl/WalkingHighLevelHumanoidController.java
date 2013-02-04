@@ -977,8 +977,8 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
    private double computeDesiredCoMHeightAcceleration(FrameVector2d desiredICPVelocity)
    {
       double zDesired = centerOfMassHeightTrajectoryGenerator.getDesiredCenterOfMassHeight();
-      double dzdxDesired = centerOfMassHeightTrajectoryGenerator.getDesiredCenterOfMassHeightSlope();
-      double d2zdx2Desired = centerOfMassHeightTrajectoryGenerator.getDesiredCenterOfMassHeightSecondDerivative();
+      double dzdxDesired = centerOfMassHeightTrajectoryGenerator.getDesiredCenterOfMassHeightSlope().getX();
+      double d2zdx2Desired = centerOfMassHeightTrajectoryGenerator.getDesiredCenterOfMassHeightSecondDerivative().getX();
 
       ReferenceFrame stairDirectionFrame = worldFrame;
 

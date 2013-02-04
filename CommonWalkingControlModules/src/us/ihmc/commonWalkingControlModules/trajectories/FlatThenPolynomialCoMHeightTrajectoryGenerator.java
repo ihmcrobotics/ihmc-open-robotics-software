@@ -16,6 +16,7 @@ import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
+import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
 
@@ -50,8 +51,10 @@ public class FlatThenPolynomialCoMHeightTrajectoryGenerator implements CenterOfM
    private final BooleanYoVariable hasBeenInitialized = new BooleanYoVariable("hasBeenInitialized", registry);
 
    private final DoubleYoVariable desiredComHeightInWorld = new DoubleYoVariable("desiredComHeightInWorld", registry);
-   private final DoubleYoVariable desiredComHeightSlope = new DoubleYoVariable("desiredComHeightSlope", registry);
-   private final DoubleYoVariable desiredComHeightSecondDerivative = new DoubleYoVariable("desiredComHeightSecondDerivative", registry);
+   private final DoubleYoVariable desiredComHeightSlopeX = new DoubleYoVariable("desiredComHeightSlopeX", registry);
+   private final DoubleYoVariable desiredComHeightSlopeY = new DoubleYoVariable("desiredComHeightSlopeY", registry);
+   private final DoubleYoVariable desiredComHeightSecondDerivativeX = new DoubleYoVariable("desiredComHeightSecondDerivativeX", registry);
+   private final DoubleYoVariable desiredComHeightSecondDerivativeY = new DoubleYoVariable("desiredComHeightSecondDerivativeY", registry);
 
    private final DoubleYoVariable orbitalEnergy = new DoubleYoVariable("orbitalEnergy", registry);
 
@@ -112,7 +115,7 @@ public class FlatThenPolynomialCoMHeightTrajectoryGenerator implements CenterOfM
 
       double x0 = x - offsetX;
       double z0 = getDesiredCenterOfMassHeight() - offsetZ;
-      double dzdx0 = getDesiredCenterOfMassHeightSlope();
+      double dzdx0 = getDesiredCenterOfMassHeightSlope().length();
       double d2zdx20 = 0.0;
 
       Footstep footstep = desiredFootstepCalculator.updateAndGetDesiredFootstep(supportLeg);
@@ -140,8 +143,8 @@ public class FlatThenPolynomialCoMHeightTrajectoryGenerator implements CenterOfM
 
       if (MathTools.isInsideBoundsInclusive(x, minXForSpline.getDoubleValue(), maxXForSpline.getDoubleValue()))
       {
-         desiredComHeightSlope.set(heightSplineInFootFrame.getVelocity());
-         desiredComHeightSecondDerivative.set(heightSplineInFootFrame.getAcceleration());
+         desiredComHeightSlopeX.set(heightSplineInFootFrame.getVelocity());
+         desiredComHeightSecondDerivativeX.set(heightSplineInFootFrame.getAcceleration());
          
          centerOfMassJacobian.compute();
          FrameVector comVelocity = new FrameVector(referenceFrame);
@@ -151,8 +154,8 @@ public class FlatThenPolynomialCoMHeightTrajectoryGenerator implements CenterOfM
       }
       else
       {
-         desiredComHeightSlope.set(0.0);
-         desiredComHeightSecondDerivative.set(0.0);
+         desiredComHeightSlopeX.set(0.0);
+         desiredComHeightSecondDerivativeX.set(0.0);
          orbitalEnergy.set(Double.NaN);
       }
    }
@@ -162,14 +165,14 @@ public class FlatThenPolynomialCoMHeightTrajectoryGenerator implements CenterOfM
       return desiredComHeightInWorld.getDoubleValue();
    }
 
-   public double getDesiredCenterOfMassHeightSlope()
+   public FrameVector2d getDesiredCenterOfMassHeightSlope()
    {
-      return desiredComHeightSlope.getDoubleValue();
+      return new FrameVector2d(referenceFrame, desiredComHeightSlopeX.getDoubleValue(), desiredComHeightSlopeY.getDoubleValue());
    }
 
-   public double getDesiredCenterOfMassHeightSecondDerivative()
+   public FrameVector2d getDesiredCenterOfMassHeightSecondDerivative()
    {
-      return desiredComHeightSecondDerivative.getDoubleValue();
+      return new FrameVector2d(referenceFrame, desiredComHeightSecondDerivativeX.getDoubleValue(), desiredComHeightSecondDerivativeY.getDoubleValue());
    }
 
    public double computeOrbitalEnergyIfInitializedNow(RobotSide upcomingSupportLeg)

@@ -1,6 +1,8 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
 import us.ihmc.robotSide.RobotSide;
+import us.ihmc.utilities.math.geometry.FrameVector2d;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
@@ -34,13 +36,13 @@ public class ConstantCenterOfMassHeightTrajectoryGenerator implements CenterOfMa
       return desiredCenterOfMassHeight.getDoubleValue();
    }
 
-   public double getDesiredCenterOfMassHeightSlope()
+   public FrameVector2d getDesiredCenterOfMassHeightSlope()
    {
-      return 0.0;
+      return new FrameVector2d(ReferenceFrame.getWorldFrame(), 0.0, 0.0);
    }
 
-   public double getDesiredCenterOfMassHeightSecondDerivative()
+   public FrameVector2d getDesiredCenterOfMassHeightSecondDerivative()
    {
-      return 0.0;
+      return new FrameVector2d(ReferenceFrame.getWorldFrame(), 0.0, 0.0);
    }
 }
