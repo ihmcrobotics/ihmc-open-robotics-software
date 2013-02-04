@@ -297,7 +297,6 @@ public class LeeGoswamiGroundReactionWrenchDistributorTest
    private void testTroublesomeExample(ReferenceFrame centerOfMassFrame, GroundReactionWrenchDistributor distributor,
            double[][] contactPointLocationsOne, double[][] contactPointLocationsTwo, Vector3d linearPart, Vector3d angularPart)
    {
-      distributor.reset();
       SpatialForceVector desiredNetSpatialForceVector = new SpatialForceVector(centerOfMassFrame, linearPart, angularPart);
 
       FlatGroundPlaneContactState contactStateOne = new FlatGroundPlaneContactState(contactPointLocationsOne);
@@ -311,8 +310,10 @@ public class LeeGoswamiGroundReactionWrenchDistributorTest
       double coefficientOfFriction = 0.87;
       double rotationalCoefficientOfFriction = 0.87;
 
-      distributor.addContact(contactStateOne, coefficientOfFriction, rotationalCoefficientOfFriction);
-      distributor.addContact(contactStateTwo, coefficientOfFriction, rotationalCoefficientOfFriction);
+      GroundReactionWrenchDistributorInputData inputData = new GroundReactionWrenchDistributorInputData();
+      
+      inputData.addContact(contactStateOne, coefficientOfFriction, rotationalCoefficientOfFriction);
+      inputData.addContact(contactStateTwo, coefficientOfFriction, rotationalCoefficientOfFriction);
 
 
       GroundReactionWrenchDistributorVisualizer visualizer = null;
@@ -337,7 +338,8 @@ public class LeeGoswamiGroundReactionWrenchDistributorTest
       }
 
 //    System.out.println("desiredNetSpatialForceVector = " + desiredNetSpatialForceVector);
-      distributor.solve(desiredNetSpatialForceVector, null);
+      inputData.setSpatialForceVectorAndUpcomingSupportSide(desiredNetSpatialForceVector, null);
+      distributor.solve(inputData);
 
 //    System.out.println("desiredNetSpatialForceVector = " + desiredNetSpatialForceVector);
       verifyForcesAreInsideFrictionCones(distributor, contactStates, coefficientOfFriction, rotationalCoefficientOfFriction);
@@ -386,7 +388,6 @@ public class LeeGoswamiGroundReactionWrenchDistributorTest
 
       for (int i = 0; i < numberOfTests; i++)
       {
-         distributor.reset();
          contactStates.clear();
 
          FlatGroundPlaneContactState leftFootContactState = FlatGroundPlaneContactState.createRandomFlatGroundContactState(random, true);
@@ -394,8 +395,11 @@ public class LeeGoswamiGroundReactionWrenchDistributorTest
 
          contactStates.add(leftFootContactState);
          contactStates.add(rightFootContactState);
-         distributor.addContact(leftFootContactState, coefficientOfFriction, rotationalCoefficientOfFriction);
-         distributor.addContact(rightFootContactState, coefficientOfFriction, rotationalCoefficientOfFriction);
+         
+         GroundReactionWrenchDistributorInputData inputData = new GroundReactionWrenchDistributorInputData();
+         
+         inputData.addContact(leftFootContactState, coefficientOfFriction, rotationalCoefficientOfFriction);
+         inputData.addContact(rightFootContactState, coefficientOfFriction, rotationalCoefficientOfFriction);
 
          SpatialForceVector desiredNetSpatialForceVector;
 
@@ -410,8 +414,9 @@ public class LeeGoswamiGroundReactionWrenchDistributorTest
             desiredNetSpatialForceVector = generateRandomAchievableSpatialForceVector(random, centerOfMassFrame, contactStates, coefficientOfFriction,
                     rotationalCoefficientOfFriction, feasibleMomentSolutions);
          }
-
-         distributor.solve(desiredNetSpatialForceVector, null);
+         
+         inputData.setSpatialForceVectorAndUpcomingSupportSide(desiredNetSpatialForceVector, null);
+         distributor.solve(inputData);
 
          if (verifyForcesAreInsideFrictionCones)
          {
@@ -494,9 +499,11 @@ public class LeeGoswamiGroundReactionWrenchDistributorTest
       double coefficientOfFriction = 1.0;
       double rotationalCoefficientOfFriction = 1.0;    // 0.1;
 
+      GroundReactionWrenchDistributorInputData inputData = new GroundReactionWrenchDistributorInputData();
+
       for (int i = 0; i < feetContactStates.length; i++)
       {
-         distributor.addContact(feetContactStates[i], coefficientOfFriction, rotationalCoefficientOfFriction);
+         inputData.addContact(feetContactStates[i], coefficientOfFriction, rotationalCoefficientOfFriction);
          contactStates.add(feetContactStates[i]);
       }
 
@@ -504,7 +511,10 @@ public class LeeGoswamiGroundReactionWrenchDistributorTest
       Vector3d angularPart = new Vector3d();    // 10.0, 12.0, 13.0);
 
       SpatialForceVector desiredNetSpatialForceVector = new SpatialForceVector(centerOfMassFrame, linearPart, angularPart);
-      distributor.solve(desiredNetSpatialForceVector, null);
+      
+      inputData.setSpatialForceVectorAndUpcomingSupportSide(desiredNetSpatialForceVector, null);
+      distributor.solve(inputData);
+      
       GroundReactionWrenchDistributorOutputData distributedWrench = distributor.getSolution();
 
       for (int i = 0; i < feetContactStates.length; i++)

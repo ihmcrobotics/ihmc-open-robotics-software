@@ -53,7 +53,8 @@ public class GroundReactionWrenchSliderInput
       
       ContactPointWrenchDistributorSliderInput contactPointWrenchDistributorSliderInput = new ContactPointWrenchDistributorSliderInput(scs, registry, centerOfMassFrame);
       GroundReactionWrenchDistributor distributor = contactPointWrenchDistributorSliderInput.getDistributor();
-      
+      GroundReactionWrenchDistributorInputData inputData = new GroundReactionWrenchDistributorInputData();
+
       dynamicGraphicObjectsListRegistry.addDynamicGraphicsObjectListsToSimulationConstructionSet(scs);
       
       
@@ -90,7 +91,7 @@ public class GroundReactionWrenchSliderInput
          yoPlaneContactState.setContactPoints(contactPoints);
          
          contactStates.add(yoPlaneContactState);
-         distributor.addContact(yoPlaneContactState, coefficientOfFriction, rotationalCoefficientOfFriction);
+         inputData.addContact(yoPlaneContactState, coefficientOfFriction, rotationalCoefficientOfFriction);
       }
       
       scs.addYoVariableRegistry(registry);
@@ -139,7 +140,8 @@ public class GroundReactionWrenchSliderInput
          desiredNetSpatialForceVector.setAngularPart(desiredTorqueOnCenterOfMass.getFrameVectorCopy().getVector());
          desiredNetSpatialForceVector.setLinearPart(desiredForceOnCenterOfMass.getFrameVectorCopy().getVector());
          
-         distributor.solve(desiredNetSpatialForceVector, null);
+         inputData.setSpatialForceVectorAndUpcomingSupportSide(desiredNetSpatialForceVector, null);
+         distributor.solve(inputData);
          
          visualizer.update(scs, distributor, centerOfMassFrame, contactStates, desiredNetSpatialForceVector);
          scs.tickAndUpdate();

@@ -1,32 +1,11 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
-import us.ihmc.robotSide.RobotSide;
-import us.ihmc.utilities.math.geometry.FramePoint2d;
-import us.ihmc.utilities.math.geometry.FrameVector;
-import us.ihmc.utilities.screwTheory.SpatialForceVector;
 
 public interface GroundReactionWrenchDistributor
 {
-
-   public abstract void reset();
-
-   public abstract void addContact(PlaneContactState contactState, double coefficientOfFriction, double rotationalCoefficientOfFriction);
-   
-   // The desiredNetSpatialForceVector is the total desired wrench on the body from the contact points.
-   public abstract void solve(SpatialForceVector desiredNetSpatialForceVector, RobotSide upcomingSupportSide);
-
-   public abstract void resetAndSolve(GroundReactionWrenchDistributorInputData groundReactionWrenchDistributorInputData);
-
-   //TODO: Make these be pack methods instead of get methods.
+   public abstract void solve(GroundReactionWrenchDistributorInputData groundReactionWrenchDistributorInputData);
       
    public abstract GroundReactionWrenchDistributorOutputData getSolution();
    
-   public abstract FramePoint2d getCenterOfPressure(PlaneContactState contactState);
-
-   public abstract FrameVector getForce(PlaneContactState contactState);
-   
-   public abstract double getNormalTorque(PlaneContactState contactState);
-
    public abstract void getOutputData(GroundReactionWrenchDistributorOutputData outputData);
 }

@@ -79,7 +79,7 @@ public class GeometricStairsGroundReactionWrenchDistributor implements GroundRea
       up = new FrameVector(centerOfMassFrame, 0.0, 0.0, 1.0);
    }
 
-   public void resetAndSolve(GroundReactionWrenchDistributorInputData groundReactionWrenchDistributorInputData)
+   public void solve(GroundReactionWrenchDistributorInputData groundReactionWrenchDistributorInputData)
    {
       reset();
       
@@ -109,6 +109,8 @@ public class GeometricStairsGroundReactionWrenchDistributor implements GroundRea
 
    public void addContact(PlaneContactState contactState, double coefficientOfFriction, double rotationalCoefficientOfFriction)
    {
+      if (contactState == null) throw new RuntimeException("contactState == null");
+      
       RobotSide robotSide = getRobotSide(contactState, feet);
       contactStates.put(robotSide, contactState);
       forces.put(contactState, new FrameVector(centerOfMassFrame));
@@ -242,7 +244,8 @@ public class GeometricStairsGroundReactionWrenchDistributor implements GroundRea
       outputData.reset();
       for (PlaneContactState planeContactState : contactStates)
       {
-         outputData.set(planeContactState, getForce(planeContactState), getCenterOfPressure(planeContactState), getNormalTorque(planeContactState));
+         if (planeContactState != null)
+            outputData.set(planeContactState, getForce(planeContactState), getCenterOfPressure(planeContactState), getNormalTorque(planeContactState));
       }
    }
    
@@ -377,16 +380,27 @@ public class GeometricStairsGroundReactionWrenchDistributor implements GroundRea
    public GroundReactionWrenchDistributorOutputData getSolution()
    {
       GroundReactionWrenchDistributorOutputData output = new GroundReactionWrenchDistributorOutputData();
-      
+
       for (PlaneContactState planeContactState : contactStates)
       {
-         FrameVector force = this.getForce(planeContactState);
-         FramePoint2d centerOfPressure = this.getCenterOfPressure(planeContactState);
-         double normalTorque = this.getNormalTorque(planeContactState);
-         
-         output.set(planeContactState, force, centerOfPressure, normalTorque);
+         if (planeContactState != null)
+         {
+            List<FramePoint> footContactPoints = planeContactState.getContactPoints();
+            if (footContactPoints.size() > 0)
+            {
+               FrameVector force = this.getForce(planeContactState);
+               FramePoint2d centerOfPressure = this.getCenterOfPressure(planeContactState);
+               double normalTorque = this.getNormalTorque(planeContactState);
+
+               output.set(planeContactState, force, centerOfPressure, normalTorque);
+            }
+            else
+            {
+               //            centersOfPressure.get(contactablePlaneBody).setToNaN();
+            }
+         }
       }
-      
+
       return output;
    }
 }

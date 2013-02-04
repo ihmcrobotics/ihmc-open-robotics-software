@@ -95,7 +95,7 @@ public class ContactPointGroundReactionWrenchDistributor implements GroundReacti
       }
    }
 
-   public void resetAndSolve(GroundReactionWrenchDistributorInputData groundReactionWrenchDistributorInputData)
+   public void solve(GroundReactionWrenchDistributorInputData groundReactionWrenchDistributorInputData)
    {
       reset();
       
