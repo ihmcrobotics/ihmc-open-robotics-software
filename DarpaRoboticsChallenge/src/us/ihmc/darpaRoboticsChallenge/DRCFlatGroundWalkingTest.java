@@ -1,6 +1,9 @@
 package us.ihmc.darpaRoboticsChallenge;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.fail;
+
+import java.util.ArrayList;
 
 import org.junit.After;
 import org.junit.Ignore;
@@ -19,6 +22,7 @@ import com.yobotics.simulationconstructionset.util.FlatGroundProfile;
 import com.yobotics.simulationconstructionset.util.ground.CombinedTerrainObject;
 import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import com.yobotics.simulationconstructionset.util.simulationTesting.NothingChangedVerifier;
 
 public class DRCFlatGroundWalkingTest
 {
@@ -26,7 +30,9 @@ public class DRCFlatGroundWalkingTest
    private static final boolean KEEP_SCS_UP = false;
 
    private static final boolean CREATE_MOVIE = BambooTools.doMovieCreation();
-   private static final boolean SHOW_GUI = ALWAYS_SHOW_GUI || CREATE_MOVIE;
+   private static final boolean checkNothingChanged = BambooTools.getCheckNothingChanged();
+
+   private static final boolean SHOW_GUI = ALWAYS_SHOW_GUI || checkNothingChanged || CREATE_MOVIE;
 
    private BlockingSimulationRunner blockingSimulationRunner;
    
@@ -72,6 +78,12 @@ public class DRCFlatGroundWalkingTest
       scs.addStaticLinkGraphics(combinedTerrainObject.getLinkGraphics());
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
 
+      NothingChangedVerifier nothingChangedVerifier = null;
+      if (checkNothingChanged)
+      {
+         nothingChangedVerifier = new NothingChangedVerifier("R2FlatGroundWalkingTest", scs);
+      }
+      
       BooleanYoVariable walk = (BooleanYoVariable) scs.getVariable("walk");
       DoubleYoVariable desiredSpeed = (DoubleYoVariable) scs.getVariable("desiredVelocityX");
       DoubleYoVariable desiredHeading = (DoubleYoVariable) scs.getVariable("desiredHeading");
@@ -95,6 +107,8 @@ public class DRCFlatGroundWalkingTest
          }
       }
 
+      if (checkNothingChanged) checkNothingChanged(nothingChangedVerifier);
+
       createMovie(scs);
    }
 
@@ -114,6 +128,13 @@ public class DRCFlatGroundWalkingTest
       GroundProfile groundProfile = new FlatGroundProfile();
 
       SimulationConstructionSet scs = setupScs(groundProfile, useVelocityAndHeadingScript);
+
+      NothingChangedVerifier nothingChangedVerifier = null;
+      if (checkNothingChanged)
+      {
+         nothingChangedVerifier = new NothingChangedVerifier("R2FlatGroundWalkingTest", scs);
+         walkingTimeDuration = 10.0;
+      }
 
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
 
@@ -145,6 +166,8 @@ public class DRCFlatGroundWalkingTest
          }
       }
 
+      if (checkNothingChanged) checkNothingChanged(nothingChangedVerifier);
+      
       createMovie(scs);
       BambooTools.reportTestFinishedMessage();
 
@@ -191,6 +214,19 @@ public class DRCFlatGroundWalkingTest
       return scs;
    }
 
+   private void checkNothingChanged(NothingChangedVerifier nothingChangedVerifier)
+   {
+      ArrayList<String> stringsToIgnore = new ArrayList<String>();
+      stringsToIgnore.add("nano");
+      stringsToIgnore.add("milli");
+      
+      boolean writeNewBaseFile = nothingChangedVerifier.getWriteNewBaseFile();
+      
+      double maxPercentDifference = 0.001;
+      nothingChangedVerifier.verifySameResultsAsPreviously(maxPercentDifference, stringsToIgnore);
+      assertFalse("Had to write new base file. On next run nothing should change", writeNewBaseFile);
+   }
+   
    private DRCGuiInitialSetup createGUIInitialSetup()
    {
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup();
