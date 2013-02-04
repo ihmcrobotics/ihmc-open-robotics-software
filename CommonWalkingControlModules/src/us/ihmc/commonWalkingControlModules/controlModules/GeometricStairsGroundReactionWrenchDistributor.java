@@ -100,7 +100,7 @@ public class GeometricStairsGroundReactionWrenchDistributor implements GroundRea
       this.getOutputData(distributedWrench);
    }
    
-   public void reset()
+   private void reset()
    {
       // TODO: inefficient
       contactStates.clear();
@@ -110,7 +110,7 @@ public class GeometricStairsGroundReactionWrenchDistributor implements GroundRea
       normalTorques.clear();
    }
 
-   public void addContact(PlaneContactState contactState, double coefficientOfFriction, double rotationalCoefficientOfFriction)
+   private void addContact(PlaneContactState contactState, double coefficientOfFriction, double rotationalCoefficientOfFriction)
    {
       if (contactState == null) throw new RuntimeException("contactState == null");
       
@@ -120,7 +120,7 @@ public class GeometricStairsGroundReactionWrenchDistributor implements GroundRea
       normalTorques.put(contactState, 0.0);
    }
 
-   public void solve(SpatialForceVector desiredGroundReactionWrench, RobotSide upcomingSupportSide)
+   private void solve(SpatialForceVector desiredGroundReactionWrench, RobotSide upcomingSupportSide)
    {
       desiredGroundReactionWrench.changeFrame(centerOfMassFrame);
 
@@ -242,7 +242,7 @@ public class GeometricStairsGroundReactionWrenchDistributor implements GroundRea
       }
    }
 
-   public void getOutputData(GroundReactionWrenchDistributorOutputData outputData)
+   private void getOutputData(GroundReactionWrenchDistributorOutputData outputData)
    {
       outputData.reset();
       for (PlaneContactState planeContactState : contactStates)
@@ -252,17 +252,17 @@ public class GeometricStairsGroundReactionWrenchDistributor implements GroundRea
       }
    }
    
-   public FrameVector getForce(PlaneContactState planeContactState)
+   private FrameVector getForce(PlaneContactState planeContactState)
    {
       return forces.get(planeContactState);
    }
 
-   public FramePoint2d getCenterOfPressure(PlaneContactState contactState)
+   private FramePoint2d getCenterOfPressure(PlaneContactState contactState)
    {
       return centersOfPressure.get(getRobotSide(contactState, feet));
    }
 
-   public double getNormalTorque(PlaneContactState contactState)
+   private double getNormalTorque(PlaneContactState contactState)
    {
       return normalTorques.get(contactState);
    }
@@ -377,33 +377,5 @@ public class GeometricStairsGroundReactionWrenchDistributor implements GroundRea
          throw new RuntimeException("robotSide for " + contactState + " could not be determined");
 
       return ret;
-   }
-   
-   
-   public GroundReactionWrenchDistributorOutputData getSolution()
-   {
-      GroundReactionWrenchDistributorOutputData output = new GroundReactionWrenchDistributorOutputData();
-
-      for (PlaneContactState planeContactState : contactStates)
-      {
-         if (planeContactState != null)
-         {
-            List<FramePoint> footContactPoints = planeContactState.getContactPoints();
-            if (footContactPoints.size() > 0)
-            {
-               FrameVector force = this.getForce(planeContactState);
-               FramePoint2d centerOfPressure = this.getCenterOfPressure(planeContactState);
-               double normalTorque = this.getNormalTorque(planeContactState);
-
-               output.set(planeContactState, force, centerOfPressure, normalTorque);
-            }
-            else
-            {
-               //            centersOfPressure.get(contactablePlaneBody).setToNaN();
-            }
-         }
-      }
-
-      return output;
    }
 }

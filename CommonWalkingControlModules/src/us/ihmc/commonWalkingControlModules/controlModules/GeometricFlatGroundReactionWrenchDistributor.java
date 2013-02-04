@@ -74,13 +74,13 @@ public class GeometricFlatGroundReactionWrenchDistributor implements GroundReact
       this.getOutputData(distributedWrench);
    }
    
-   public void reset()
+   private void reset()
    {
       contactStates.clear();      
       footConvexPolygons.clear();
    }
 
-   public void addContact(PlaneContactState contactState, double coefficientOfFriction, double rotationalCoefficientOfFriction)
+   private void addContact(PlaneContactState contactState, double coefficientOfFriction, double rotationalCoefficientOfFriction)
    {
       if (!contactState.getPlaneFrame().isZupFrame()) throw new RuntimeException("GeometricFlatGroundReactionWrenchDistributor: Must be a ZUpFrame!");
       
@@ -100,7 +100,7 @@ public class GeometricFlatGroundReactionWrenchDistributor implements GroundReact
       
    }
 
-   public void solve(SpatialForceVector desiredGroundReactionWrench, RobotSide upcomingSupportLeg)
+   private void solve(SpatialForceVector desiredGroundReactionWrench, RobotSide upcomingSupportLeg)
    {
       this.desiredTotalForceVector.set(desiredGroundReactionWrench);
       footConvexPolygons.clear();
@@ -124,6 +124,7 @@ public class GeometricFlatGroundReactionWrenchDistributor implements GroundReact
       
       FramePoint2d centerOfPressure2d = new FramePoint2d(worldFrame);
 
+      @SuppressWarnings("unused") // We don't use the normal torque for anything here. But we do use the other things.
       double normalTorque = centerOfPressureResolver.resolveCenterOfPressureAndNormalTorque(centerOfPressure2d, desiredTotalForceVector, worldFrame);
 
       FrameConvexPolygon2d leftFootPolygon = footConvexPolygons.get(RobotSide.LEFT);
@@ -146,7 +147,7 @@ public class GeometricFlatGroundReactionWrenchDistributor implements GroundReact
       // Verify that virtual toe points and leg strength percentages give the overall force:
    }
 
-   public void getOutputData(GroundReactionWrenchDistributorOutputData outputData)
+   private void getOutputData(GroundReactionWrenchDistributorOutputData outputData)
    {
       outputData.reset();
       for (PlaneContactState planeContactState : contactStates)
@@ -155,13 +156,13 @@ public class GeometricFlatGroundReactionWrenchDistributor implements GroundReact
       }
    }
    
-   public FramePoint2d getCenterOfPressure(PlaneContactState contactState)
+   private FramePoint2d getCenterOfPressure(PlaneContactState contactState)
    {
       RobotSide robotSide = getRobotSide(contactState);
       return new FramePoint2d(virtualToePoints.get(robotSide));
    }
 
-   public double getNormalTorque(PlaneContactState contactState)
+   private double getNormalTorque(PlaneContactState contactState)
    {
       RobotSide robotSide = getRobotSide(contactState);
       
@@ -177,7 +178,7 @@ public class GeometricFlatGroundReactionWrenchDistributor implements GroundReact
       return torque.getZ();
    }
 
-   public FrameVector getForce(PlaneContactState contactState)
+   private FrameVector getForce(PlaneContactState contactState)
    {
       RobotSide robotSide = getRobotSide(contactState);
       
@@ -202,8 +203,8 @@ public class GeometricFlatGroundReactionWrenchDistributor implements GroundReact
       vtpFrame.update();
       
       return vtpFrame;
-      
    }
+   
    private RobotSide getRobotSide(PlaneContactState contactState)
    {
       if (contactStates.get(RobotSide.LEFT) == contactState)
@@ -216,23 +217,6 @@ public class GeometricFlatGroundReactionWrenchDistributor implements GroundReact
       }
       else throw new RuntimeException("Don't have that contact state in my contact states!");
       
-   }
-   
-   
-   public GroundReactionWrenchDistributorOutputData getSolution()
-   {
-      GroundReactionWrenchDistributorOutputData output = new GroundReactionWrenchDistributorOutputData();
-      
-      for (PlaneContactState planeContactState : contactStates)
-      {
-         FrameVector force = this.getForce(planeContactState);
-         FramePoint2d centerOfPressure = this.getCenterOfPressure(planeContactState);
-         double normalTorque = this.getNormalTorque(planeContactState);
-         
-         output.set(planeContactState, force, centerOfPressure, normalTorque);
-      }
-      
-      return output;
    }
 
 }

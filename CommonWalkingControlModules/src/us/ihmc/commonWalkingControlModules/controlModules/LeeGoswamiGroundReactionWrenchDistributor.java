@@ -64,7 +64,7 @@ public class LeeGoswamiGroundReactionWrenchDistributor implements GroundReaction
       this.getOutputData(distributedWrench);
    }
    
-   public void reset()
+   private void reset()
    {
       // TODO: inefficient; should hang on to a bunch of temporary objects instead of deleting all references to them
       coefficientsOfFriction.clear();
@@ -74,7 +74,7 @@ public class LeeGoswamiGroundReactionWrenchDistributor implements GroundReaction
       normalTorques.clear();
    }
 
-   public void addContact(PlaneContactState contactState, double coefficientOfFriction, double rotationalCoefficientOfFriction)
+   private void addContact(PlaneContactState contactState, double coefficientOfFriction, double rotationalCoefficientOfFriction)
    {
       coefficientsOfFriction.put(contactState, coefficientOfFriction);
       rotationalCoefficientsOfFriction.put(contactState, rotationalCoefficientOfFriction);
@@ -84,7 +84,7 @@ public class LeeGoswamiGroundReactionWrenchDistributor implements GroundReaction
       normalTorques.put(contactState, 0.0);
    }
 
-   public void solve(SpatialForceVector desiredGroundReactionWrench, RobotSide upcomingSupportleg)
+   private void solve(SpatialForceVector desiredGroundReactionWrench, RobotSide upcomingSupportleg)
    {
       desiredGroundReactionWrench.changeFrame(centerOfMassFrame);
 
@@ -93,7 +93,7 @@ public class LeeGoswamiGroundReactionWrenchDistributor implements GroundReaction
               leeGoswamiForceOptimizer.getTorqueError(), forces);
    }
 
-   public void getOutputData(GroundReactionWrenchDistributorOutputData outputData)
+   private void getOutputData(GroundReactionWrenchDistributorOutputData outputData)
    {
       outputData.reset();
       for (PlaneContactState planeContactState : forces.keySet())
@@ -102,34 +102,19 @@ public class LeeGoswamiGroundReactionWrenchDistributor implements GroundReaction
       }
    }
    
-   public FrameVector getForce(PlaneContactState planeContactState)
+   private FrameVector getForce(PlaneContactState planeContactState)
    {
       return forces.get(planeContactState);
    }
 
-   public FramePoint2d getCenterOfPressure(PlaneContactState contactState)
+   private FramePoint2d getCenterOfPressure(PlaneContactState contactState)
    {
       return centersOfPressure.get(contactState);
    }
 
-   public double getNormalTorque(PlaneContactState contactState)
+   private double getNormalTorque(PlaneContactState contactState)
    {
       return normalTorques.get(contactState);
    }
-   
-   public GroundReactionWrenchDistributorOutputData getSolution()
-   {
-      GroundReactionWrenchDistributorOutputData output = new GroundReactionWrenchDistributorOutputData();
-      
-      for (PlaneContactState planeContactState : forces.keySet())
-      {
-         FrameVector force = this.getForce(planeContactState);
-         FramePoint2d centerOfPressure = this.getCenterOfPressure(planeContactState);
-         double normalTorque = this.getNormalTorque(planeContactState);
-         
-         output.set(planeContactState, force, centerOfPressure, normalTorque);
-      }
-      
-      return output;
-   }
+  
 }
