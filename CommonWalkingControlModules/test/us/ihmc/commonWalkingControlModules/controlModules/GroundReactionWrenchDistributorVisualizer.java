@@ -130,6 +130,8 @@ public class GroundReactionWrenchDistributorVisualizer
          desiredForceWorld.set(desiredForceOnCenterOfMass);
          desiredMomentWorld.set(desiredTorqueOnCenterOfMass);
 
+         GroundReactionWrenchDistributorOutputData distributedWrench = distributor.getSolution();
+
          for (int i=0; i<contactStates.size(); i++)
          {
             PlaneContactState contactState = contactStates.get(i);
@@ -144,16 +146,16 @@ public class GroundReactionWrenchDistributorVisualizer
             YoFrameVector contactForceForViz = contactForces.get(i);
             YoFrameVector contactMomentForViz = contactMoments.get(i);
 
-            FramePoint2d centerOfPressure2d = distributor.getCenterOfPressure(contactState);
+            FramePoint2d centerOfPressure2d = distributedWrench.getCenterOfPressure(contactState);
 
             FramePoint centerOfPressure = new FramePoint(centerOfPressure2d.getReferenceFrame(), centerOfPressure2d.getX(), centerOfPressure2d.getY(), 0.0);
             centerOfPressure.changeFrame(worldFrame);
             contactCenterOfPressureForViz.set(centerOfPressure);
 
-            FrameVector contactForce = distributor.getForce(contactState);
+            FrameVector contactForce = distributedWrench.getForce(contactState);
             contactForceForViz.set(contactForce.changeFrameCopy(worldFrame));
 
-            double normalTorque = distributor.getNormalTorque(contactState);
+            double normalTorque = distributedWrench.getNormalTorque(contactState);
             FrameVector normalForce = new FrameVector(centerOfPressure2d.getReferenceFrame(), 0.0, 0.0, normalTorque);
             contactMomentForViz.set(normalForce.changeFrameCopy(worldFrame));
          }

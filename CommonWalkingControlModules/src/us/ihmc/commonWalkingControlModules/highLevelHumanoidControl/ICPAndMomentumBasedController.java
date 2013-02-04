@@ -22,6 +22,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.CenterOfPressureResolv
 import us.ihmc.commonWalkingControlModules.controlModules.GroundReactionMomentControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.GroundReactionWrenchDistributor;
 import us.ihmc.commonWalkingControlModules.controlModules.GroundReactionWrenchDistributorInputData;
+import us.ihmc.commonWalkingControlModules.controlModules.GroundReactionWrenchDistributorOutputData;
 import us.ihmc.commonWalkingControlModules.controlModules.NoLungingDesiredCoPAndCMPControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.SacrificeDeltaCMPDesiredCoPAndCMPControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.velocityViaCoP.CapturabilityBasedDesiredCoPVisualizer;
@@ -429,6 +430,7 @@ public abstract class ICPAndMomentumBasedController implements RobotController
       groundReactionWrenchDistributorInputData.setSpatialForceVectorAndUpcomingSupportSide(totalGroundReactionWrench, upcomingSupportLeg.getEnumValue());
 
       groundReactionWrenchDistributor.resetAndSolve(groundReactionWrenchDistributorInputData);
+//      GroundReactionWrenchDistributorOutputData distributedWrench = groundReactionWrenchDistributor.getSolution();
 
       List<Wrench> wrenches = new ArrayList<Wrench>();
       List<FramePoint2d> cops = new ArrayList<FramePoint2d>();
@@ -441,6 +443,10 @@ public abstract class ICPAndMomentumBasedController implements RobotController
 
          if (footContactPoints.size() > 0)
          {
+//            FrameVector force = distributedWrench.getForce(contactState);
+//            FramePoint2d cop = distributedWrench.getCenterOfPressure(contactState);
+//            double normalTorque = distributedWrench.getNormalTorque(contactState);
+            
             FrameVector force = groundReactionWrenchDistributor.getForce(contactState);
             FramePoint2d cop = groundReactionWrenchDistributor.getCenterOfPressure(contactState);
             double normalTorque = groundReactionWrenchDistributor.getNormalTorque(contactState);
