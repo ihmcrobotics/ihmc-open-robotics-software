@@ -43,7 +43,7 @@ public class LeeGoswamiGroundReactionWrenchDistributor implements GroundReaction
       leeGoswamiCoPAndNormalTorqueOptimizer.setEpsilonTauN(epsilonTauN);
    }
 
-   public void resetAndSolve(GroundReactionWrenchDistributorInputData groundReactionWrenchDistributorInputData)
+   public void solve(GroundReactionWrenchDistributorInputData groundReactionWrenchDistributorInputData)
    {
       reset();
       

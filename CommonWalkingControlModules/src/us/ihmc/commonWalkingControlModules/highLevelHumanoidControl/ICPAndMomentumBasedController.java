@@ -429,8 +429,8 @@ public abstract class ICPAndMomentumBasedController implements RobotController
 
       groundReactionWrenchDistributorInputData.setSpatialForceVectorAndUpcomingSupportSide(totalGroundReactionWrench, upcomingSupportLeg.getEnumValue());
 
-      groundReactionWrenchDistributor.resetAndSolve(groundReactionWrenchDistributorInputData);
-//      GroundReactionWrenchDistributorOutputData distributedWrench = groundReactionWrenchDistributor.getSolution();
+      groundReactionWrenchDistributor.solve(groundReactionWrenchDistributorInputData);
+      GroundReactionWrenchDistributorOutputData distributedWrench = groundReactionWrenchDistributor.getSolution();
 
       List<Wrench> wrenches = new ArrayList<Wrench>();
       List<FramePoint2d> cops = new ArrayList<FramePoint2d>();
@@ -443,14 +443,10 @@ public abstract class ICPAndMomentumBasedController implements RobotController
 
          if (footContactPoints.size() > 0)
          {
-//            FrameVector force = distributedWrench.getForce(contactState);
-//            FramePoint2d cop = distributedWrench.getCenterOfPressure(contactState);
-//            double normalTorque = distributedWrench.getNormalTorque(contactState);
-            
-            FrameVector force = groundReactionWrenchDistributor.getForce(contactState);
-            FramePoint2d cop = groundReactionWrenchDistributor.getCenterOfPressure(contactState);
-            double normalTorque = groundReactionWrenchDistributor.getNormalTorque(contactState);
-
+            FrameVector force = distributedWrench.getForce(contactState);
+            FramePoint2d cop = distributedWrench.getCenterOfPressure(contactState);
+            double normalTorque = distributedWrench.getNormalTorque(contactState);
+           
             centersOfPressure2d.get(contactablePlaneBody).set(cop);
 
             cops.add(cop);

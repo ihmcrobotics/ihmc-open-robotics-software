@@ -53,7 +53,7 @@ public class GeometricFlatGroundReactionWrenchDistributor implements GroundReact
       virtualToePointCalculator.setAllFramesToComputeInToWorld();
    }
    
-   public void resetAndSolve(GroundReactionWrenchDistributorInputData groundReactionWrenchDistributorInputData)
+   public void solve(GroundReactionWrenchDistributorInputData groundReactionWrenchDistributorInputData)
    {
       reset();
       
