@@ -37,12 +37,25 @@ public class DRCConfigParameters
 
    public static final int LIDAR_DATA_PORT_NUMBER = 4697;
    public static final long LIDAR_DATA_IDENTIFIER = 4697L;
+   public static final int LIDAR_X_RESOLUTION_OVERRIDE = 50;
    
    public static final long ROBOT_JOINT_SERVER_UPDATE_MILLIS = 100;
 
-   public static final boolean STREAM_LIDAR = false;
+   public static final boolean STREAM_LIDAR = true;
    
-   
-   public static final VideoSettings VIDEOSETTINGS = new VideoSettingsH264LowLatency(800, 600, Quality.MEDIUM);
+//   public static final VideoSettings VIDEOSETTINGS = new VideoSettingsH264LowLatency(800, 600, Quality.MEDIUMs);
+   public static final VideoSettings VIDEOSETTINGS = new VideoSettingsH264LowLatency(200, 150, Quality.LOW);
+
+   static final int LIDAR_UPDATE_RATE_OVERRIDE = 1;
+
+   static final double LIDAR_VERTICAL_SCAN_ANGLE = 3.2;// optimistic, to say the least
+
+   static final double LIDAR_HORIZONTAL_SCAN_ANGLE = 0.3;
+
+   static final int LIDAR_SWEEPS_PER_SCAN = 60;
+
+   static final int LIDAR_POINTS_PER_SWEEP = 10;
+
+   static final boolean OVERRIDE_DRC_LIDAR_CONFIG = true;
 
 }
