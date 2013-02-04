@@ -1,8 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 
 import org.ejml.data.DenseMatrix64F;
@@ -26,13 +24,6 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 public class ContactPointGroundReactionWrenchDistributor implements GroundReactionWrenchDistributor
 {
    private final ReferenceFrame centerOfMassFrame;
-
-   private final ArrayList<PlaneContactState> contactStates = new ArrayList<PlaneContactState>();
-   private final HashMap<PlaneContactState, Double> coefficientsOfFriction = new HashMap<PlaneContactState, Double>();
-
-   private final LinkedHashMap<PlaneContactState, FrameVector> forces = new LinkedHashMap<PlaneContactState, FrameVector>();
-   private final LinkedHashMap<PlaneContactState, FramePoint2d> centersOfPressure = new LinkedHashMap<PlaneContactState, FramePoint2d>();
-   private final LinkedHashMap<PlaneContactState, Double> normalTorques = new LinkedHashMap<PlaneContactState, Double>();
 
    private final double[] diagonalCWeights = new double[Wrench.SIZE];
    private double epsilonRho;
@@ -96,61 +87,28 @@ public class ContactPointGroundReactionWrenchDistributor implements GroundReacti
    }
 
    public void solve(GroundReactionWrenchDistributorOutputData distributedWrench,
-         GroundReactionWrenchDistributorInputData groundReactionWrenchDistributorInputData)
+         GroundReactionWrenchDistributorInputData inputData)
    {
-      reset();
+      distributedWrench.reset();
 
-      ArrayList<PlaneContactState> contactStates = groundReactionWrenchDistributorInputData.getContactStates();
-      ArrayList<Double> coefficientsOfFriction = groundReactionWrenchDistributorInputData.getCoefficientsOfFriction();
-      ArrayList<Double> rotationalCoefficientsOfFriction = groundReactionWrenchDistributorInputData.getRotationalCoefficientsOfFriction();
-
-      for (int i=0; i<contactStates.size(); i++)
-      {
-         addContact(contactStates.get(i), coefficientsOfFriction.get(i), rotationalCoefficientsOfFriction.get(i));
-      }
-
-      SpatialForceVector desiredGroundReactionWrench = groundReactionWrenchDistributorInputData.getDesiredNetSpatialForceVector();
-      RobotSide upcomingSupportleg = groundReactionWrenchDistributorInputData.getUpcomingSupportSide();
-      this.solve(desiredGroundReactionWrench, upcomingSupportleg);
-      
-      this.getOutputData(distributedWrench);
-   }
-   
-   private void reset()
-   {
-      // TODO: inefficient; should hang on to a bunch of temporary objects instead of deleting all references to them
-      contactStates.clear();
-      coefficientsOfFriction.clear();
-      forces.clear();
-      centersOfPressure.clear();
-      normalTorques.clear();
-   }
-
-   private void addContact(PlaneContactState contactState, double coefficientOfFriction, double rotationalCoefficientOfFrictionIgnored)
-   {
-      contactStates.add(contactState);
-      coefficientsOfFriction.put(contactState, coefficientOfFriction);
-
-      forces.put(contactState, new FrameVector(centerOfMassFrame));
-      centersOfPressure.put(contactState, new FramePoint2d(contactState.getPlaneFrame()));
-      normalTorques.put(contactState, 0.0);
-   }
-
-   private void solve(SpatialForceVector desiredGroundReactionWrench, RobotSide upcomingSupportleg)
-   {
+      SpatialForceVector desiredGroundReactionWrench = inputData.getDesiredNetSpatialForceVector();
+      RobotSide upcomingSupportleg = inputData.getUpcomingSupportSide();
+           
       desiredGroundReactionWrench.changeFrame(centerOfMassFrame);
       desiredGroundReactionWrench.packMatrix(desiredWrench);
 
       aMatrix.zero();
       normalForceSelectorBMatrix.zero();
 
+      ArrayList<PlaneContactState> contactStates = inputData.getContactStates();
+      
       int contactNumber = 0;
       for (PlaneContactState contactState : contactStates)
       {
          List<FramePoint2d> contactPoints2d = contactState.getContactPoints2d();
          int nContactPoints = contactPoints2d.size();
          
-         WrenchDistributorTools.getSupportVectors(normalizedSupportVectors, coefficientsOfFriction.get(contactState), contactState.getPlaneFrame());
+         WrenchDistributorTools.getSupportVectors(normalizedSupportVectors, inputData.getCoefficientOfFriction(contactState), contactState.getPlaneFrame());
 
          // B
          WrenchDistributorTools.computeSupportVectorMatrixBlock(supportVectorMatrixVBlock, normalizedSupportVectors, contactState.getPlaneFrame());
@@ -215,40 +173,14 @@ public class ContactPointGroundReactionWrenchDistributor implements GroundReacti
          tempWrench.changeFrame(contactState.getPlaneFrame());
 
          // force, CoP, normal torque
-         FrameVector force = forces.get(contactState);
-         force.setToZero(contactState.getPlaneFrame());         
+         FrameVector force = new FrameVector(contactState.getPlaneFrame());
          tempWrench.packLinearPart(force);
-         FramePoint2d centerOfPressure = centersOfPressure.get(contactState);
+         FramePoint2d centerOfPressure = new FramePoint2d(contactState.getPlaneFrame());
          double normalTorque = centerOfPressureResolver.resolveCenterOfPressureAndNormalTorque(centerOfPressure, tempWrench, contactState.getPlaneFrame());
-         normalTorques.put(contactState, normalTorque);
 
+         distributedWrench.set(contactState, force, centerOfPressure, normalTorque);
          contactNumber++;
       }
-   }
-
-   
-   private void getOutputData(GroundReactionWrenchDistributorOutputData outputData)
-   {
-      outputData.reset();
-      for (PlaneContactState planeContactState : contactStates)
-      {
-         outputData.set(planeContactState, getForce(planeContactState), getCenterOfPressure(planeContactState), getNormalTorque(planeContactState));
-      }
-   }
-   
-   private FrameVector getForce(PlaneContactState planeContactState)
-   {
-      return forces.get(planeContactState);
-   }
-
-   private FramePoint2d getCenterOfPressure(PlaneContactState contactState)
-   {
-      return centersOfPressure.get(contactState);
-   }
-
-   private double getNormalTorque(PlaneContactState contactState)
-   {
-      return normalTorques.get(contactState);
    }
 
    private static void placeBBlock(DenseMatrix64F normalForceSelectorBMatrix, DenseMatrix64F supportVectorMatrixBlock, int contactNumber, int nContactPoints)
