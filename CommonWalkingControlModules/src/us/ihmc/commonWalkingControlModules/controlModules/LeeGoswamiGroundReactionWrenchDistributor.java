@@ -43,7 +43,8 @@ public class LeeGoswamiGroundReactionWrenchDistributor implements GroundReaction
       leeGoswamiCoPAndNormalTorqueOptimizer.setEpsilonTauN(epsilonTauN);
    }
 
-   public void solve(GroundReactionWrenchDistributorInputData groundReactionWrenchDistributorInputData)
+   public void solve(GroundReactionWrenchDistributorOutputData distributedWrench,
+         GroundReactionWrenchDistributorInputData groundReactionWrenchDistributorInputData)
    {
       reset();
       
@@ -59,6 +60,8 @@ public class LeeGoswamiGroundReactionWrenchDistributor implements GroundReaction
       SpatialForceVector desiredGroundReactionWrench = groundReactionWrenchDistributorInputData.getDesiredNetSpatialForceVector();
       RobotSide upcomingSupportleg = groundReactionWrenchDistributorInputData.getUpcomingSupportSide();
       this.solve(desiredGroundReactionWrench, upcomingSupportleg);
+      
+      this.getOutputData(distributedWrench);
    }
    
    public void reset()

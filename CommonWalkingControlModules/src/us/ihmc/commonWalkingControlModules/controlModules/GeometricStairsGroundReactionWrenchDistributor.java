@@ -79,7 +79,8 @@ public class GeometricStairsGroundReactionWrenchDistributor implements GroundRea
       up = new FrameVector(centerOfMassFrame, 0.0, 0.0, 1.0);
    }
 
-   public void solve(GroundReactionWrenchDistributorInputData groundReactionWrenchDistributorInputData)
+   public void solve(GroundReactionWrenchDistributorOutputData distributedWrench,
+         GroundReactionWrenchDistributorInputData groundReactionWrenchDistributorInputData)
    {
       reset();
       
@@ -95,6 +96,8 @@ public class GeometricStairsGroundReactionWrenchDistributor implements GroundRea
       SpatialForceVector desiredGroundReactionWrench = groundReactionWrenchDistributorInputData.getDesiredNetSpatialForceVector();
       RobotSide upcomingSupportleg = groundReactionWrenchDistributorInputData.getUpcomingSupportSide();
       this.solve(desiredGroundReactionWrench, upcomingSupportleg);
+      
+      this.getOutputData(distributedWrench);
    }
    
    public void reset()

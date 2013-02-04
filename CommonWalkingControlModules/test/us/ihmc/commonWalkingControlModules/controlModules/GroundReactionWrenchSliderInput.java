@@ -141,9 +141,11 @@ public class GroundReactionWrenchSliderInput
          desiredNetSpatialForceVector.setLinearPart(desiredForceOnCenterOfMass.getFrameVectorCopy().getVector());
          
          inputData.setSpatialForceVectorAndUpcomingSupportSide(desiredNetSpatialForceVector, null);
-         distributor.solve(inputData);
          
-         visualizer.update(scs, distributor, centerOfMassFrame, contactStates, desiredNetSpatialForceVector);
+         GroundReactionWrenchDistributorOutputData distributedWrench = new GroundReactionWrenchDistributorOutputData();
+         distributor.solve(distributedWrench, inputData);
+         
+         visualizer.update(scs, distributedWrench, centerOfMassFrame, contactStates, desiredNetSpatialForceVector);
          scs.tickAndUpdate();
          ThreadTools.sleep(100L);
       }

@@ -111,7 +111,7 @@ public class GroundReactionWrenchDistributorVisualizer
       parentRegistry.addChild(registry);
    }
    
-   public void update(SimulationConstructionSet scs, GroundReactionWrenchDistributor distributor, ReferenceFrame centerOfMassFrame, ArrayList<PlaneContactState> contactStates, SpatialForceVector desiredBodyWrench)
+   public void update(SimulationConstructionSet scs, GroundReactionWrenchDistributorOutputData distributedWrench, ReferenceFrame centerOfMassFrame, ArrayList<PlaneContactState> contactStates, SpatialForceVector desiredBodyWrench)
    {
       try
       {
@@ -129,8 +129,6 @@ public class GroundReactionWrenchDistributorVisualizer
 
          desiredForceWorld.set(desiredForceOnCenterOfMass);
          desiredMomentWorld.set(desiredTorqueOnCenterOfMass);
-
-         GroundReactionWrenchDistributorOutputData distributedWrench = distributor.getSolution();
 
          for (int i=0; i<contactStates.size(); i++)
          {
@@ -160,7 +158,7 @@ public class GroundReactionWrenchDistributorVisualizer
             contactMomentForViz.set(normalForce.changeFrameCopy(worldFrame));
          }
 
-         SpatialForceVector achievedWrenchOnCenterOfMass = GroundReactionWrenchDistributorAchievedWrenchCalculator.computeAchievedWrench(distributor, desiredBodyWrench.getExpressedInFrame(), contactStates);
+         SpatialForceVector achievedWrenchOnCenterOfMass = GroundReactionWrenchDistributorAchievedWrenchCalculator.computeAchievedWrench(distributedWrench, desiredBodyWrench.getExpressedInFrame(), contactStates);
 
          achievedForceWorld.set(achievedWrenchOnCenterOfMass.getLinearPartAsFrameVectorCopy().changeFrameCopy(worldFrame));
          achievedMomentWorld.set(achievedWrenchOnCenterOfMass.getAngularPartAsFrameVectorCopy().changeFrameCopy(worldFrame));

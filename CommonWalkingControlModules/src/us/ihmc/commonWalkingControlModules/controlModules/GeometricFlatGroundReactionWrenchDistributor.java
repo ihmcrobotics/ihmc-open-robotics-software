@@ -53,7 +53,8 @@ public class GeometricFlatGroundReactionWrenchDistributor implements GroundReact
       virtualToePointCalculator.setAllFramesToComputeInToWorld();
    }
    
-   public void solve(GroundReactionWrenchDistributorInputData groundReactionWrenchDistributorInputData)
+   public void solve(GroundReactionWrenchDistributorOutputData distributedWrench,
+         GroundReactionWrenchDistributorInputData groundReactionWrenchDistributorInputData)
    {
       reset();
       
@@ -69,6 +70,8 @@ public class GeometricFlatGroundReactionWrenchDistributor implements GroundReact
       SpatialForceVector desiredGroundReactionWrench = groundReactionWrenchDistributorInputData.getDesiredNetSpatialForceVector();
       RobotSide upcomingSupportleg = groundReactionWrenchDistributorInputData.getUpcomingSupportSide();
       this.solve(desiredGroundReactionWrench, upcomingSupportleg);
+      
+      this.getOutputData(distributedWrench);
    }
    
    public void reset()

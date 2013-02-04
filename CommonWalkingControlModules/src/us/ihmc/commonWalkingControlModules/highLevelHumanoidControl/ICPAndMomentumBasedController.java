@@ -429,8 +429,8 @@ public abstract class ICPAndMomentumBasedController implements RobotController
 
       groundReactionWrenchDistributorInputData.setSpatialForceVectorAndUpcomingSupportSide(totalGroundReactionWrench, upcomingSupportLeg.getEnumValue());
 
-      groundReactionWrenchDistributor.solve(groundReactionWrenchDistributorInputData);
-      GroundReactionWrenchDistributorOutputData distributedWrench = groundReactionWrenchDistributor.getSolution();
+      GroundReactionWrenchDistributorOutputData distributedWrench = new GroundReactionWrenchDistributorOutputData();
+      groundReactionWrenchDistributor.solve(distributedWrench, groundReactionWrenchDistributorInputData);
 
       List<Wrench> wrenches = new ArrayList<Wrench>();
       List<FramePoint2d> cops = new ArrayList<FramePoint2d>();
