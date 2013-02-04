@@ -45,25 +45,30 @@ public class DRCSimulationFactory
 
       DRCRobotSDFLoader drcRobotSDFLoader = new DRCRobotSDFLoader(robotModel);
       JaxbSDFLoader jaxbSDFLoader = drcRobotSDFLoader.loadDRCRobot();
-      SDFRobot robot = jaxbSDFLoader.getRobot();
-      FullRobotModel fullRobotModel = jaxbSDFLoader.getFullRobotModel();
-//      FullRobotModel fullRobotModelForController = new FullRobotModelWithRandomParameterVariations(fullRobotModel);
-      
-      CommonWalkingReferenceFrames referenceFrames = jaxbSDFLoader.getReferenceFrames();
+      SDFRobot simulatedRobot = jaxbSDFLoader.getRobot();
+      FullRobotModel fullRobotModelForSimulation = jaxbSDFLoader.getFullRobotModel();
+     
+//      drcRobotSDFLoader = new DRCRobotSDFLoader(robotModel);
+//      jaxbSDFLoader = drcRobotSDFLoader.loadDRCRobot();
+//      FullRobotModel fullRobotModelForController = new FullRobotModelWithUncertainty(jaxbSDFLoader.getFullRobotModel());
+//      CommonWalkingReferenceFrames referenceFramesForController = jaxbSDFLoader.getReferenceFrames();
+
+      FullRobotModel fullRobotModelForController = fullRobotModelForSimulation; 
+      CommonWalkingReferenceFrames referenceFramesForController = jaxbSDFLoader.getReferenceFrames();
 
       SideDependentList<FootSwitchInterface> footSwitches = new SideDependentList<FootSwitchInterface>();
       for (RobotSide robotSide : RobotSide.values())
       {
-         footSwitches.put(robotSide, new PerfectFootswitch(robot, robotSide));
+         footSwitches.put(robotSide, new PerfectFootswitch(simulatedRobot, robotSide));
       }
 
-      TwistCalculator twistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), fullRobotModel.getElevator());
-      CenterOfMassJacobian centerOfMassJacobian = new CenterOfMassJacobian(fullRobotModel.getElevator());
+      TwistCalculator twistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), fullRobotModelForController.getElevator());
+      CenterOfMassJacobian centerOfMassJacobian = new CenterOfMassJacobian(fullRobotModelForController.getElevator());
 
-      SDFPerfectSimulatedSensorReaderAndWriter sensorReaderAndOutputWriter = new SDFPerfectSimulatedSensorReaderAndWriter(robot, fullRobotModel,
-                                                                                referenceFrames);
+      SDFPerfectSimulatedSensorReaderAndWriter sensorReaderAndOutputWriter = new SDFPerfectSimulatedSensorReaderAndWriter(simulatedRobot, fullRobotModelForController,
+            referenceFramesForController);
 
-      RobotController robotController = controllerFactory.getController(fullRobotModel, referenceFrames, controlDT, robot.getYoTime(),
+      RobotController robotController = controllerFactory.getController(fullRobotModelForController, referenceFramesForController, controlDT, simulatedRobot.getYoTime(),
                                            dynamicGraphicObjectsListRegistry, guiSetterUpperRegistry, twistCalculator, centerOfMassJacobian, footSwitches);
 
       ModularRobotController modularRobotController = new ModularRobotController("ModularRobotController");
@@ -73,11 +78,11 @@ public class DRCSimulationFactory
       
       if (SHOW_INERTIA_ELLIPSOIDS)
       {
-         modularRobotController.addRobotController(new CommonInertiaElipsoidsVisualizer(fullRobotModel.getElevator(), dynamicGraphicObjectsListRegistry));
+         modularRobotController.addRobotController(new CommonInertiaElipsoidsVisualizer(fullRobotModelForSimulation.getElevator(), dynamicGraphicObjectsListRegistry));
       }
       modularRobotController.setRawOutputWriter(sensorReaderAndOutputWriter);
 
-      return new HumanoidRobotSimulation<SDFRobot>(robot, modularRobotController, simulationTicksPerControlTick, fullRobotModel, commonAvatarEnvironmentInterface,
+      return new HumanoidRobotSimulation<SDFRobot>(simulatedRobot, modularRobotController, simulationTicksPerControlTick, fullRobotModelForSimulation, commonAvatarEnvironmentInterface,
                                          robotInitialSetup, scsInitialSetup, guiInitialSetup, guiSetterUpperRegistry, dynamicGraphicObjectsListRegistry);
    }
 
