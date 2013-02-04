@@ -28,7 +28,9 @@ import us.ihmc.commonWalkingControlModules.controlModules.velocityViaCoP.Captura
 import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.Updatable;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.CapturePointCalculator;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumRateOfChangeData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumSolver;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.RootJointAccelerationData;
 import us.ihmc.commonWalkingControlModules.outputs.ProcessedOutputsInterface;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
@@ -88,7 +90,7 @@ public abstract class ICPAndMomentumBasedController implements RobotController
 
    private final String name = getClass().getSimpleName();
    protected final YoVariableRegistry registry = new YoVariableRegistry(name);
-   
+
    protected final MomentumSolver solver;
 
    protected final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -162,7 +164,7 @@ public abstract class ICPAndMomentumBasedController implements RobotController
 
    private final GroundReactionWrenchDistributor groundReactionWrenchDistributor;
 
-   private final boolean doStrictPelvisControl; // TODO: remove, just have momentumSubspace and accelerationSubspace
+   private final boolean doStrictPelvisControl;    // TODO: remove, just have momentumSubspace and accelerationSubspace
    private final DenseMatrix64F momentumSubspace;
    private final DenseMatrix64F accelerationSubspace;
 
@@ -356,7 +358,6 @@ public abstract class ICPAndMomentumBasedController implements RobotController
 
    public final void doControl()
    {
-
       updateBipedSupportPolygons(bipedSupportPolygons);
 
       callUpdatables();
@@ -366,12 +367,13 @@ public abstract class ICPAndMomentumBasedController implements RobotController
 
       doMotionControl();
 
+      solver.compute();
+
       SpatialForceVector totalGroundReactionWrench = computeDesiredTotalGroundReactionWrench();
 
       SpatialForceVector desiredCentroidalMomentumRate = new SpatialForceVector(totalGroundReactionWrench);
       desiredCentroidalMomentumRate.sub(gravitationalWrench);
 
-      solver.compute();
 
       if (doStrictPelvisControl)
       {
@@ -383,6 +385,14 @@ public abstract class ICPAndMomentumBasedController implements RobotController
          this.desiredPelvisAngularAcceleration.set(pelvisAngularAcceleration);
          pelvisAngularAcceleration.changeFrame(fullRobotModel.getPelvis().getBodyFixedFrame());
          MatrixTools.setDenseMatrixFromTuple3d(accelerationMultipliers, pelvisAngularAcceleration.getVector(), 0, 0);
+
+         RootJointAccelerationData rootJointAccelerationData = new RootJointAccelerationData();
+         rootJointAccelerationData.setAccelerationSubspace(accelerationSubspace);
+         rootJointAccelerationData.setAccelerationMultipliers(accelerationMultipliers);
+
+         MomentumRateOfChangeData momentumRateOfChangeData = new MomentumRateOfChangeData();
+         momentumRateOfChangeData.setMomentumSubspace(momentumSubspace);
+         momentumRateOfChangeData.setMomentumMultipliers(momentumMultipliers);
 
          solver.solve(accelerationSubspace, accelerationMultipliers, momentumSubspace, momentumMultipliers);
          solver.getRateOfChangeOfMomentum(totalGroundReactionWrench);
@@ -502,6 +512,7 @@ public abstract class ICPAndMomentumBasedController implements RobotController
       SpatialForceVector totalGroundReactionWrench = computeTotalGroundReactionWrench(desiredCoP2d, desiredCMP2d, totalgroundReactionMoment,
                                                         fZ.getDoubleValue(), omega0.getDoubleValue());
       totalGroundReactionWrench.changeFrame(centerOfMassFrame);
+
       return totalGroundReactionWrench;
    }
 
