@@ -339,15 +339,17 @@ public class LeeGoswamiGroundReactionWrenchDistributorTest
 
 //    System.out.println("desiredNetSpatialForceVector = " + desiredNetSpatialForceVector);
       inputData.setSpatialForceVectorAndUpcomingSupportSide(desiredNetSpatialForceVector, null);
-      distributor.solve(inputData);
+      
+      GroundReactionWrenchDistributorOutputData distributedWrench = new GroundReactionWrenchDistributorOutputData();
+      distributor.solve(distributedWrench, inputData);
 
 //    System.out.println("desiredNetSpatialForceVector = " + desiredNetSpatialForceVector);
-      verifyForcesAreInsideFrictionCones(distributor, contactStates, coefficientOfFriction, rotationalCoefficientOfFriction);
-      verifyWrenchesSumToExpectedTotal(centerOfMassFrame, desiredNetSpatialForceVector, contactStates, distributor, 1e-7, true);
+      verifyForcesAreInsideFrictionCones(distributedWrench, contactStates, coefficientOfFriction, rotationalCoefficientOfFriction);
+      verifyWrenchesSumToExpectedTotal(centerOfMassFrame, desiredNetSpatialForceVector, contactStates, distributedWrench, 1e-7, true);
 
       if (VISUALIZE)
       {
-         visualizer.update(scs, distributor, centerOfMassFrame, contactStates, desiredNetSpatialForceVector);
+         visualizer.update(scs, distributedWrench, centerOfMassFrame, contactStates, desiredNetSpatialForceVector);
 
 //       deleteFirstDataPointAndCropData(scs);
          ThreadTools.sleepForever();
@@ -416,23 +418,25 @@ public class LeeGoswamiGroundReactionWrenchDistributorTest
          }
          
          inputData.setSpatialForceVectorAndUpcomingSupportSide(desiredNetSpatialForceVector, null);
-         distributor.solve(inputData);
+         
+         GroundReactionWrenchDistributorOutputData distributedWrench = new GroundReactionWrenchDistributorOutputData();
+         distributor.solve(distributedWrench, inputData);
 
          if (verifyForcesAreInsideFrictionCones)
          {
-            verifyForcesAreInsideFrictionCones(distributor, contactStates, coefficientOfFriction, rotationalCoefficientOfFriction);
+            verifyForcesAreInsideFrictionCones(distributedWrench, contactStates, coefficientOfFriction, rotationalCoefficientOfFriction);
          }
 
 //       if (centersOfPressureAreInsideContactPolygons(distributor, contactStates))
 //       {
-         verifyCentersOfPressureAreInsideContactPolygons(distributor, contactStates);
-         verifyWrenchesSumToExpectedTotal(centerOfMassFrame, desiredNetSpatialForceVector, contactStates, distributor, 1e-4, !feasibleMomentSolutions);
+         verifyCentersOfPressureAreInsideContactPolygons(distributedWrench, contactStates);
+         verifyWrenchesSumToExpectedTotal(centerOfMassFrame, desiredNetSpatialForceVector, contactStates, distributedWrench, 1e-4, !feasibleMomentSolutions);
 
 //       }
 
          if (VISUALIZE)
          {
-            visualizer.update(scs, distributor, centerOfMassFrame, contactStates, desiredNetSpatialForceVector);
+            visualizer.update(scs, distributedWrench, centerOfMassFrame, contactStates, desiredNetSpatialForceVector);
          }
       }
 
@@ -513,9 +517,10 @@ public class LeeGoswamiGroundReactionWrenchDistributorTest
       SpatialForceVector desiredNetSpatialForceVector = new SpatialForceVector(centerOfMassFrame, linearPart, angularPart);
       
       inputData.setSpatialForceVectorAndUpcomingSupportSide(desiredNetSpatialForceVector, null);
-      distributor.solve(inputData);
       
-      GroundReactionWrenchDistributorOutputData distributedWrench = distributor.getSolution();
+      GroundReactionWrenchDistributorOutputData distributedWrench = new GroundReactionWrenchDistributorOutputData();
+      distributor.solve(distributedWrench, inputData);
+      
 
       for (int i = 0; i < feetContactStates.length; i++)
       {
@@ -524,9 +529,9 @@ public class LeeGoswamiGroundReactionWrenchDistributorTest
          printIfDebug("leftCenterOfPressure" + i + " = " + distributedWrench.getCenterOfPressure(feetContactStates[i]));
       }
 
-      verifyForcesAreInsideFrictionCones(distributor, contactStates, coefficientOfFriction, rotationalCoefficientOfFriction);
-      verifyCentersOfPressureAreInsideContactPolygons(distributor, contactStates);
-      verifyWrenchesSumToExpectedTotal(centerOfMassFrame, desiredNetSpatialForceVector, contactStates, distributor, 1e-7, false);
+      verifyForcesAreInsideFrictionCones(distributedWrench, contactStates, coefficientOfFriction, rotationalCoefficientOfFriction);
+      verifyCentersOfPressureAreInsideContactPolygons(distributedWrench, contactStates);
+      verifyWrenchesSumToExpectedTotal(centerOfMassFrame, desiredNetSpatialForceVector, contactStates, distributedWrench, 1e-7, false);
 
       if (VISUALIZE)
       {
@@ -545,7 +550,7 @@ public class LeeGoswamiGroundReactionWrenchDistributorTest
 
          scs.startOnAThread();
 
-         visualizer.update(scs, distributor, centerOfMassFrame, contactStates, desiredNetSpatialForceVector);
+         visualizer.update(scs, distributedWrench, centerOfMassFrame, contactStates, desiredNetSpatialForceVector);
 
          ThreadTools.sleepForever();
       }
@@ -583,11 +588,11 @@ public class LeeGoswamiGroundReactionWrenchDistributorTest
    }
 
    private void verifyWrenchesSumToExpectedTotal(ReferenceFrame centerOfMassFrame, SpatialForceVector totalBodyWrench,
-           ArrayList<PlaneContactState> contactStates, GroundReactionWrenchDistributor distributor, double epsilon, boolean onlyForces)
+           ArrayList<PlaneContactState> contactStates, GroundReactionWrenchDistributorOutputData distributedWrench, double epsilon, boolean onlyForces)
    {
       ReferenceFrame expressedInFrame = totalBodyWrench.getExpressedInFrame();
 
-      SpatialForceVector achievedWrench = GroundReactionWrenchDistributorAchievedWrenchCalculator.computeAchievedWrench(distributor, expressedInFrame,
+      SpatialForceVector achievedWrench = GroundReactionWrenchDistributorAchievedWrenchCalculator.computeAchievedWrench(distributedWrench, expressedInFrame,
                                              contactStates);
 
       FrameVector totalBodyForce = totalBodyWrench.getLinearPartAsFrameVectorCopy();
@@ -614,11 +619,9 @@ public class LeeGoswamiGroundReactionWrenchDistributorTest
       }
    }
 
-   private void verifyForcesAreInsideFrictionCones(GroundReactionWrenchDistributor distributor, ArrayList<PlaneContactState> contactStates,
+   private void verifyForcesAreInsideFrictionCones(GroundReactionWrenchDistributorOutputData distributedWrench, ArrayList<PlaneContactState> contactStates,
            double coefficientOfFriction, double normalTorqueCoefficientOfFriction)
    {
-      GroundReactionWrenchDistributorOutputData distributedWrench = distributor.getSolution();
-
       for (PlaneContactState contactState : contactStates)
       {
          FrameVector force = distributedWrench.getForce(contactState);
@@ -649,11 +652,9 @@ public class LeeGoswamiGroundReactionWrenchDistributorTest
 //    return footPolygon.isPointInside(centerOfPressure);
 // }
 
-   private void verifyCentersOfPressureAreInsideContactPolygons(GroundReactionWrenchDistributor distributor,
+   private void verifyCentersOfPressureAreInsideContactPolygons(GroundReactionWrenchDistributorOutputData distributedWrench,
            ArrayList<PlaneContactState> contactStates)
    {
-      GroundReactionWrenchDistributorOutputData distributedWrench = distributor.getSolution();
-
       for (PlaneContactState contactState : contactStates)
       {
          FramePoint2d centerOfPressure = distributedWrench.getCenterOfPressure(contactState);

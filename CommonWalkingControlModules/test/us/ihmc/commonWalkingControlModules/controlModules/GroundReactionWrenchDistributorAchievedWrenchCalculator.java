@@ -12,12 +12,10 @@ import us.ihmc.utilities.screwTheory.SpatialForceVector;
 public class GroundReactionWrenchDistributorAchievedWrenchCalculator
 {
 
-   public static SpatialForceVector computeAchievedWrench(GroundReactionWrenchDistributor distributor, ReferenceFrame expressedInFrame, List<PlaneContactState> contactStates)
+   public static SpatialForceVector computeAchievedWrench(GroundReactionWrenchDistributorOutputData distributedWrench, ReferenceFrame expressedInFrame, List<PlaneContactState> contactStates)
    {
       FrameVector totalForce = new FrameVector(expressedInFrame);
       FrameVector totalMoment = new FrameVector(expressedInFrame);
-
-      GroundReactionWrenchDistributorOutputData distributedWrench = distributor.getSolution();
       
       for (PlaneContactState planeContactState : contactStates)
       {

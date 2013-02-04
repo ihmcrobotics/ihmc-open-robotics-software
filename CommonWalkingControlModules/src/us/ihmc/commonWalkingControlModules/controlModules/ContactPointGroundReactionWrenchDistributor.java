@@ -95,22 +95,25 @@ public class ContactPointGroundReactionWrenchDistributor implements GroundReacti
       }
    }
 
-   public void solve(GroundReactionWrenchDistributorInputData groundReactionWrenchDistributorInputData)
+   public void solve(GroundReactionWrenchDistributorOutputData distributedWrench,
+         GroundReactionWrenchDistributorInputData groundReactionWrenchDistributorInputData)
    {
       reset();
-      
+
       ArrayList<PlaneContactState> contactStates = groundReactionWrenchDistributorInputData.getContactStates();
       ArrayList<Double> coefficientsOfFriction = groundReactionWrenchDistributorInputData.getCoefficientsOfFriction();
       ArrayList<Double> rotationalCoefficientsOfFriction = groundReactionWrenchDistributorInputData.getRotationalCoefficientsOfFriction();
-      
+
       for (int i=0; i<contactStates.size(); i++)
       {
          addContact(contactStates.get(i), coefficientsOfFriction.get(i), rotationalCoefficientsOfFriction.get(i));
       }
-    
+
       SpatialForceVector desiredGroundReactionWrench = groundReactionWrenchDistributorInputData.getDesiredNetSpatialForceVector();
       RobotSide upcomingSupportleg = groundReactionWrenchDistributorInputData.getUpcomingSupportSide();
       this.solve(desiredGroundReactionWrench, upcomingSupportleg);
+      
+      this.getOutputData(distributedWrench);
    }
    
    public void reset()
