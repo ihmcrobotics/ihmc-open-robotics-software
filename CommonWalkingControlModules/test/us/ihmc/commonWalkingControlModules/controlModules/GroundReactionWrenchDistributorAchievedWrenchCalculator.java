@@ -17,15 +17,17 @@ public class GroundReactionWrenchDistributorAchievedWrenchCalculator
       FrameVector totalForce = new FrameVector(expressedInFrame);
       FrameVector totalMoment = new FrameVector(expressedInFrame);
 
+      GroundReactionWrenchDistributorOutputData distributedWrench = distributor.getSolution();
+      
       for (PlaneContactState planeContactState : contactStates)
       {
-         FrameVector contactForce = distributor.getForce(planeContactState).changeFrameCopy(expressedInFrame);
+         FrameVector contactForce = distributedWrench.getForce(planeContactState).changeFrameCopy(expressedInFrame);
          totalForce.add(contactForce);
 
-         double normalTorqueMagnitude = distributor.getNormalTorque(planeContactState);
+         double normalTorqueMagnitude = distributedWrench.getNormalTorque(planeContactState);
          FrameVector normalTorque = new FrameVector(planeContactState.getPlaneFrame(), 0.0, 0.0, normalTorqueMagnitude);
 
-         FramePoint2d centerOfPressure2d = distributor.getCenterOfPressure(planeContactState);
+         FramePoint2d centerOfPressure2d = distributedWrench.getCenterOfPressure(planeContactState);
 
          FramePoint centerOfPressure3d = new FramePoint(centerOfPressure2d.getReferenceFrame());
          centerOfPressure3d.setXY(centerOfPressure2d);

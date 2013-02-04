@@ -505,12 +505,13 @@ public class LeeGoswamiGroundReactionWrenchDistributorTest
 
       SpatialForceVector desiredNetSpatialForceVector = new SpatialForceVector(centerOfMassFrame, linearPart, angularPart);
       distributor.solve(desiredNetSpatialForceVector, null);
+      GroundReactionWrenchDistributorOutputData distributedWrench = distributor.getSolution();
 
       for (int i = 0; i < feetContactStates.length; i++)
       {
-         printIfDebug("force" + i + " = " + distributor.getForce(feetContactStates[i]));
-         printIfDebug("leftNormalTorque" + i + " = " + distributor.getNormalTorque(feetContactStates[i]));
-         printIfDebug("leftCenterOfPressure" + i + " = " + distributor.getCenterOfPressure(feetContactStates[i]));
+         printIfDebug("force" + i + " = " + distributedWrench.getForce(feetContactStates[i]));
+         printIfDebug("leftNormalTorque" + i + " = " + distributedWrench.getNormalTorque(feetContactStates[i]));
+         printIfDebug("leftCenterOfPressure" + i + " = " + distributedWrench.getCenterOfPressure(feetContactStates[i]));
       }
 
       verifyForcesAreInsideFrictionCones(distributor, contactStates, coefficientOfFriction, rotationalCoefficientOfFriction);
@@ -606,10 +607,12 @@ public class LeeGoswamiGroundReactionWrenchDistributorTest
    private void verifyForcesAreInsideFrictionCones(GroundReactionWrenchDistributor distributor, ArrayList<PlaneContactState> contactStates,
            double coefficientOfFriction, double normalTorqueCoefficientOfFriction)
    {
+      GroundReactionWrenchDistributorOutputData distributedWrench = distributor.getSolution();
+
       for (PlaneContactState contactState : contactStates)
       {
-         FrameVector force = distributor.getForce(contactState);
-         double normalTorqe = distributor.getNormalTorque(contactState);
+         FrameVector force = distributedWrench.getForce(contactState);
+         double normalTorqe = distributedWrench.getNormalTorque(contactState);
 
          verifyForceIsInsideFrictionCone(force, normalTorqe, contactState, coefficientOfFriction, normalTorqueCoefficientOfFriction);
       }
@@ -639,9 +642,11 @@ public class LeeGoswamiGroundReactionWrenchDistributorTest
    private void verifyCentersOfPressureAreInsideContactPolygons(GroundReactionWrenchDistributor distributor,
            ArrayList<PlaneContactState> contactStates)
    {
+      GroundReactionWrenchDistributorOutputData distributedWrench = distributor.getSolution();
+
       for (PlaneContactState contactState : contactStates)
       {
-         FramePoint2d centerOfPressure = distributor.getCenterOfPressure(contactState);
+         FramePoint2d centerOfPressure = distributedWrench.getCenterOfPressure(contactState);
          verifyCenterOfPressureIsInsideFoot(centerOfPressure, contactState);
       }
    }

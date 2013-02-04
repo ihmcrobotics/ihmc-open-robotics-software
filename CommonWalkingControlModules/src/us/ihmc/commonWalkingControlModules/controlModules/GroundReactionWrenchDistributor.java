@@ -20,6 +20,8 @@ public interface GroundReactionWrenchDistributor
 
    //TODO: Make these be pack methods instead of get methods.
       
+   public abstract GroundReactionWrenchDistributorOutputData getSolution();
+   
    public abstract FramePoint2d getCenterOfPressure(PlaneContactState contactState);
 
    public abstract FrameVector getForce(PlaneContactState contactState);

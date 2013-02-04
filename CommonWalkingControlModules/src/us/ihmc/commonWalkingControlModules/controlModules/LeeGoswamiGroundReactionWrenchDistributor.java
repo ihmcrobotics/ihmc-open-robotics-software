@@ -113,4 +113,20 @@ public class LeeGoswamiGroundReactionWrenchDistributor implements GroundReaction
    {
       return normalTorques.get(contactState);
    }
+   
+   public GroundReactionWrenchDistributorOutputData getSolution()
+   {
+      GroundReactionWrenchDistributorOutputData output = new GroundReactionWrenchDistributorOutputData();
+      
+      for (PlaneContactState planeContactState : forces.keySet())
+      {
+         FrameVector force = this.getForce(planeContactState);
+         FramePoint2d centerOfPressure = this.getCenterOfPressure(planeContactState);
+         double normalTorque = this.getNormalTorque(planeContactState);
+         
+         output.set(planeContactState, force, centerOfPressure, normalTorque);
+      }
+      
+      return output;
+   }
 }

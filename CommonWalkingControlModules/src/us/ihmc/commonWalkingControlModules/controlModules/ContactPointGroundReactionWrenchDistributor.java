@@ -282,5 +282,21 @@ public class ContactPointGroundReactionWrenchDistributor implements GroundReacti
       MatrixTools.setDenseMatrixFromTuple3d(aMatrix, aTorqueColumn.getVector(), startRow, columnNumber);
    }
 
+   public GroundReactionWrenchDistributorOutputData getSolution()
+   {
+      GroundReactionWrenchDistributorOutputData output = new GroundReactionWrenchDistributorOutputData();
+      
+      for (PlaneContactState planeContactState : contactStates)
+      {
+         FrameVector force = this.getForce(planeContactState);
+         FramePoint2d centerOfPressure = this.getCenterOfPressure(planeContactState);
+         double normalTorque = this.getNormalTorque(planeContactState);
+         
+         output.set(planeContactState, force, centerOfPressure, normalTorque);
+      }
+      
+      return output;
+   }
+
    
 }
