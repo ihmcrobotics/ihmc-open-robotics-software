@@ -38,7 +38,7 @@ public class DRCLidar
             if (DRCConfigParameters.OVERRIDE_DRC_LIDAR_CONFIG)
             {
                LIDARScanDefinition largeScan = LIDARScanDefinition.defineSimplifiedNoddingLIDARScan(DRCConfigParameters.LIDAR_VERTICAL_SCAN_ANGLE, DRCConfigParameters.LIDAR_SWEEPS_PER_SCAN, DRCConfigParameters.LIDAR_HORIZONTAL_SCAN_ANGLE,
-                     DRCConfigParameters.LIDAR_POINTS_PER_SWEEP);
+                     DRCConfigParameters.LIDAR_POINTS_PER_SWEEP, DRCConfigParameters.MIN_LIDAR_DISTANCE);
                rayTraceLIDARSensor.setScan(largeScan);
                updateParameters.setUpdateRate(DRCConfigParameters.LIDAR_UPDATE_RATE_OVERRIDE);
             }
