@@ -30,7 +30,6 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.RootJointAcce
 import us.ihmc.commonWalkingControlModules.momentumBasedController.RootJointAccelerationData;
 import us.ihmc.commonWalkingControlModules.outputs.ProcessedOutputsInterface;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
-import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
@@ -102,7 +101,6 @@ public abstract class ICPAndMomentumBasedController implements RobotController
    protected final double gravity;
 
 
-   protected final SideDependentList<FootSwitchInterface> footSwitches;
    protected final BipedSupportPolygons bipedSupportPolygons;
    protected final YoFramePoint2d desiredICP;
    protected final YoFrameVector2d desiredICPVelocity;
@@ -144,9 +142,9 @@ public abstract class ICPAndMomentumBasedController implements RobotController
    public ICPAndMomentumBasedController(FullRobotModel fullRobotModel, CenterOfMassJacobian centerOfMassJacobian, CommonWalkingReferenceFrames referenceFrames,
            DoubleYoVariable yoTime, double gravityZ, TwistCalculator twistCalculator, SideDependentList<? extends ContactablePlaneBody> bipedFeet,
            BipedSupportPolygons bipedSupportPolygons, double controlDT, ProcessedOutputsInterface processedOutputs,
-           SideDependentList<FootSwitchInterface> footSwitches, GroundReactionWrenchDistributor groundReactionWrenchDistributor,
-           ArrayList<Updatable> updatables, MomentumRateOfChangeControlModule momentumRateOfChangeControlModule,
-           RootJointAccelerationControlModule rootJointAccelerationControlModule, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+           GroundReactionWrenchDistributor groundReactionWrenchDistributor, ArrayList<Updatable> updatables,
+           MomentumRateOfChangeControlModule momentumRateOfChangeControlModule, RootJointAccelerationControlModule rootJointAccelerationControlModule,
+           DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
       SixDoFJoint rootJoint = fullRobotModel.getRootJoint();
@@ -163,7 +161,6 @@ public abstract class ICPAndMomentumBasedController implements RobotController
       this.contactablePlaneBodies = new ArrayList<ContactablePlaneBody>(bipedFeet.values());
       this.bipedSupportPolygons = bipedSupportPolygons;
       this.controlDT = controlDT;
-      this.footSwitches = footSwitches;
       this.gravity = gravityZ;
       this.yoTime = yoTime;
 
