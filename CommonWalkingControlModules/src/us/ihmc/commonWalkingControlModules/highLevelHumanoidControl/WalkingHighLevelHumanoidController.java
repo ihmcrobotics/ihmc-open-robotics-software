@@ -29,6 +29,11 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepProvider;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.CapturePointCalculator;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.CapturePointData;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.CapturePointTrajectoryData;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.ICPBasedMomentumRateOfChangeControlModule;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.OrientationTrajectoryData;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.RootJointAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.outputs.ProcessedOutputsInterface;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LimbName;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
@@ -44,6 +49,7 @@ import us.ihmc.commonWalkingControlModules.trajectories.OrientationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.OrientationTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.SettableOrientationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.YoVariableDoubleProvider;
+import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
@@ -73,6 +79,7 @@ import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.util.PDController;
 import com.yobotics.simulationconstructionset.util.graphics.BagOfBalls;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFrameOrientation;
 import com.yobotics.simulationconstructionset.util.statemachines.State;
 import com.yobotics.simulationconstructionset.util.statemachines.StateMachine;
 import com.yobotics.simulationconstructionset.util.statemachines.StateTransition;
@@ -127,7 +134,8 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
    private final SettableOrientationProvider finalPelvisOrientationProvider;
    private final OrientationTrajectoryGenerator pelvisOrientationTrajectoryGenerator;
 
-   private final HashMap<ContactablePlaneBody, EndEffectorControlModule> endEffectorControlModules = new HashMap<ContactablePlaneBody, EndEffectorControlModule>();
+   private final HashMap<ContactablePlaneBody, EndEffectorControlModule> endEffectorControlModules = new HashMap<ContactablePlaneBody,
+                                                                                                        EndEffectorControlModule>();
    private final SideDependentList<RigidBodySpatialAccelerationControlModule> handControlModules =
       new SideDependentList<RigidBodySpatialAccelerationControlModule>();
    private final SideDependentList<EndEffectorPoseTwistAndSpatialAccelerationCalculator> handPoseTwistAndSpatialAccelerationCalculators =
@@ -158,6 +166,9 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 
    private final boolean checkOrbitalCondition;
    private final SideDependentList<EnumMap<LimbName, GeometricJacobian>> jacobians = SideDependentList.createListOfEnumMaps(LimbName.class);
+   private final ControlFlowInputPort<OrientationTrajectoryData> desiredPelvisOrientationTrajectoryInputPort;
+   private final ICPBasedMomentumRateOfChangeControlModule icpBasedMomentumRateOfChangeControlModule;
+   private final YoFrameOrientation desiredPelvisOrientation = new YoFrameOrientation("desiredPelvis", worldFrame, registry);
 
    public WalkingHighLevelHumanoidController(FullRobotModel fullRobotModel, CommonWalkingReferenceFrames referenceFrames, TwistCalculator twistCalculator,
            CenterOfMassJacobian centerOfMassJacobian, SideDependentList<? extends ContactablePlaneBody> bipedFeet, BipedSupportPolygons bipedSupportPolygons,
@@ -166,12 +177,16 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
            DesiredHeadOrientationProvider desiredHeadOrientationProvider, CenterOfMassHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator,
            GroundReactionWrenchDistributor groundReactionWrenchDistributor, SideDependentList<PositionTrajectoryGenerator> footPositionTrajectoryGenerators,
            DoubleProvider swingTimeProvider, YoPositionProvider finalPositionProvider, boolean stayOntoes, double desiredPelvisPitch, double trailingFootPitch,
-           ArrayList<Updatable> updatables, ProcessedOutputsInterface processedOutputs, WalkingControllerParameters walkingControllerParameters)
+           ArrayList<Updatable> updatables, ProcessedOutputsInterface processedOutputs, WalkingControllerParameters walkingControllerParameters,
+           ICPBasedMomentumRateOfChangeControlModule momentumRateOfChangeControlModule, RootJointAccelerationControlModule rootJointAccelerationControlModule,
+           ControlFlowInputPort<OrientationTrajectoryData> desiredPelvisOrientationTrajectoryInputPort)
    {
       super(fullRobotModel, centerOfMassJacobian, referenceFrames, yoTime, gravityZ, twistCalculator, bipedFeet, bipedSupportPolygons, controlDT,
-            processedOutputs, footSwitches, groundReactionWrenchDistributor, updatables, walkingControllerParameters.doStrictPelvisControl(),
+            processedOutputs, footSwitches, groundReactionWrenchDistributor, updatables, momentumRateOfChangeControlModule, rootJointAccelerationControlModule,
             dynamicGraphicObjectsListRegistry);
 
+      this.icpBasedMomentumRateOfChangeControlModule = momentumRateOfChangeControlModule;
+      this.desiredPelvisOrientationTrajectoryInputPort = desiredPelvisOrientationTrajectoryInputPort;
       this.centerOfMassJacobian = centerOfMassJacobian;
       this.centerOfMassHeightTrajectoryGenerator = centerOfMassHeightTrajectoryGenerator;
       this.swingTimeProvider = swingTimeProvider;
@@ -230,7 +245,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
          EndEffectorControlModule footStateMachine = new EndEffectorControlModule(bipedFoot, swingPositionTrajectoryGenerator,
                                                         swingOrientationTrajectoryGenerator, onToesPitchTrajectoryGenerator, yoTime, twistCalculator, registry);
          endEffectorControlModules.put(bipedFoot, footStateMachine);
-         
+
          for (LimbName limbName : LimbName.values())
          {
             RigidBody endEffector = fullRobotModel.getEndEffector(robotSide, limbName);
@@ -318,7 +333,8 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
          ReferenceFrame pelvisFrame = pelvis.getBodyFixedFrame();
          ReferenceFrame pelvisZUpFrame = referenceFrames.getPelvisZUpFrame();
          ReferenceFrame[] availableHeadOrientationControlFrames = new ReferenceFrame[] {pelvisZUpFrame, pelvisFrame, ReferenceFrame.getWorldFrame()};
-         headOrientationControlModule = new HeadOrientationControlModule(neckJacobian, pelvis, elevator, twistCalculator, availableHeadOrientationControlFrames, registry, dynamicGraphicObjectsListRegistry);
+         headOrientationControlModule = new HeadOrientationControlModule(neckJacobian, pelvis, elevator, twistCalculator,
+                 availableHeadOrientationControlFrames, registry, dynamicGraphicObjectsListRegistry);
          headOrientationControlModule.setOrientationToTrack(new FrameOrientation(pelvisZUpFrame), pelvis);
          double headKp = 40.0;
          double headZeta = 1.0;
@@ -340,8 +356,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       {
          RigidBody chest = fullRobotModel.getChest();
          GeometricJacobian spineJacobian = new GeometricJacobian(chestOrientationControlJoints, chest.getBodyFixedFrame());
-         chestOrientationControlModule = new ChestOrientationControlModule(pelvis, fullRobotModel.getChest(), spineJacobian,
-                 twistCalculator, registry);
+         chestOrientationControlModule = new ChestOrientationControlModule(pelvis, fullRobotModel.getChest(), spineJacobian, twistCalculator, registry);
          chestOrientationControlModule.setProportionalGains(100.0, 100.0, 100.0);
          chestOrientationControlModule.setDerivativeGains(20.0, 20.0, 20.0);
       }
@@ -900,7 +915,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
    public void doMotionControl()
    {
       for (ContactablePlaneBody contactablePlaneBody : endEffectorControlModules.keySet())
-      {         
+      {
          EndEffectorControlModule endEffectorControlModule = endEffectorControlModules.get(contactablePlaneBody);
          FramePoint2d cop = centersOfPressure2d.get(contactablePlaneBody).getFramePoint2dCopy();
          endEffectorControlModule.setCenterOfPressure(cop);
@@ -925,6 +940,33 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
          doHeadControl();
 
       doArmControl();
+
+      setICPBasedMomentumRateOfChangeControlModuleInputs();
+   }
+
+   // TODO: connect ports instead
+   private void setICPBasedMomentumRateOfChangeControlModuleInputs()
+   {
+      icpBasedMomentumRateOfChangeControlModule.getBipedSupportPolygonsInputPort().setData(bipedSupportPolygons);
+
+      CapturePointData capturePointData = new CapturePointData();
+      capturePointData.set(capturePoint.getFramePoint2dCopy(), omega0.getDoubleValue());
+      icpBasedMomentumRateOfChangeControlModule.getCapturePointInputPort().setData(capturePointData);
+
+      CapturePointTrajectoryData capturePointTrajectoryData = new CapturePointTrajectoryData();
+      capturePointTrajectoryData.set(desiredICP.getFramePoint2dCopy(), desiredICPVelocity.getFrameVector2dCopy());
+      icpBasedMomentumRateOfChangeControlModule.getDesiredCapturePointTrajectoryInputPort().setData(capturePointTrajectoryData);
+
+      icpBasedMomentumRateOfChangeControlModule.getSupportLegInputPort().setData(getSupportLeg());
+      
+      icpBasedMomentumRateOfChangeControlModule.getDesiredCenterOfMassHeightAccelerationInputPort().setData(desiredCoMHeightAcceleration.getDoubleValue());
+      
+               // FIXME: use angular velocity, angular acceleration
+      OrientationTrajectoryData desiredPelvisOrientationTrajectoryData = new OrientationTrajectoryData();
+         desiredPelvisOrientationTrajectoryData.set(desiredPelvisOrientation.getFrameOrientationCopy(), new FrameVector(worldFrame),
+                 new FrameVector(worldFrame));
+         desiredPelvisOrientationTrajectoryInputPort.setData(desiredPelvisOrientationTrajectoryData);
+      
    }
 
    private void doChestControl()
@@ -976,6 +1018,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 
    private double computeDesiredCoMHeightAcceleration(FrameVector2d desiredICPVelocity)
    {
+      // FIXME!!!:
       double zDesired = centerOfMassHeightTrajectoryGenerator.getDesiredCenterOfMassHeight();
       double dzdxDesired = centerOfMassHeightTrajectoryGenerator.getDesiredCenterOfMassHeightSlope().getX();
       double d2zdx2Desired = centerOfMassHeightTrajectoryGenerator.getDesiredCenterOfMassHeightSecondDerivative().getX();
