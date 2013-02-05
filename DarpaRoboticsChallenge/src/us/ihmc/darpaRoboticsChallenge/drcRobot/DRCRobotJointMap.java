@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import javax.vecmath.Point2d;
+import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFJointNameMap;
@@ -138,9 +140,11 @@ public class DRCRobotJointMap implements SDFJointNameMap, RobotSpecificJointName
          }
 
          // add butt contact points on back of thighs
-         for (Vector3d offset : DRCRobotParameters.thighContactPointOffsets.get(robotSide))
+         for (Point2d point : DRCRobotParameters.thighContactPoints.get(robotSide))
          {
-            thighGroundContactPoints.get(robotSide).add(new Pair<String, Vector3d>(prefix + "leg_lhy", offset));
+            Point3d point3d = new Point3d(point.getX(), point.getY(), 0.0);
+            DRCRobotParameters.thighContactPointTransforms.get(robotSide).transform(point3d);
+            thighGroundContactPoints.get(robotSide).add(new Pair<String, Vector3d>(prefix + "leg_lhy", new Vector3d(point3d)));
          }
       }
 
