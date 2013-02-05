@@ -132,7 +132,7 @@ public class FlatThenPolynomialCoMHeightTrajectoryGenerator implements CenterOfM
       return new double[] {x0, xf};
    }
 
-   public void compute()
+   private void compute()
    {
       double x = getCurrentCoMX() - footX.getDoubleValue();
       heightSplineInFootFrame.compute(MathTools.clipToMinMax(x, minXForSpline.getDoubleValue(), maxXForSpline.getDoubleValue()));
@@ -161,6 +161,8 @@ public class FlatThenPolynomialCoMHeightTrajectoryGenerator implements CenterOfM
    
    public void solve(CenterOfMassHeightOutputData centerOfMassHeightOutputDataToPack, CenterOfMassHeightInputData centerOfMassHeightInputData)
    {
+      compute();
+      
       centerOfMassHeightOutputDataToPack.setDesiredCenterOfMassHeight(desiredComHeightInWorld.getDoubleValue());
       centerOfMassHeightOutputDataToPack.setDesiredCenterOfMassHeightSlope(new FrameVector2d(referenceFrame, desiredComHeightSlope.getDoubleValue(), 0.0));
       centerOfMassHeightOutputDataToPack.setDesiredCenterOfMassHeightSecondDerivative(new FrameVector2d(referenceFrame, desiredComHeightSecondDerivative.getDoubleValue(), 0.0));

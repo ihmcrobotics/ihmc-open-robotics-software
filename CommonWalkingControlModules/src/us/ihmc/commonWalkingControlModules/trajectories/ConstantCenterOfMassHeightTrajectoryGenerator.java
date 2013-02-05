@@ -14,8 +14,6 @@ public class ConstantCenterOfMassHeightTrajectoryGenerator implements CenterOfMa
    
    private final YoVariableRegistry registry;
    private final DoubleYoVariable desiredCenterOfMassHeight;
-
-   private final CenterOfMassHeightOutputData centerOfMassHeightOutputData = new CenterOfMassHeightOutputData();
    
    public ConstantCenterOfMassHeightTrajectoryGenerator(double initialDesiredCoMHeight, YoVariableRegistry parentRegistry)
    {
@@ -31,16 +29,12 @@ public class ConstantCenterOfMassHeightTrajectoryGenerator implements CenterOfMa
       // empty
    }
 
-   public void compute()
-   {
-      // empty
-   }
    
    public void solve(CenterOfMassHeightOutputData centerOfMassHeightOutputDataToPack, CenterOfMassHeightInputData centerOfMassHeightInputData)
    {
       centerOfMassHeightOutputDataToPack.setDesiredCenterOfMassHeight(desiredCenterOfMassHeight.getDoubleValue());
-      centerOfMassHeightOutputData.setDesiredCenterOfMassHeightSlope(flatSlope);
-      centerOfMassHeightOutputData.setDesiredCenterOfMassHeightSecondDerivative(flatSecondDerivative);
+      centerOfMassHeightOutputDataToPack.setDesiredCenterOfMassHeightSlope(flatSlope);
+      centerOfMassHeightOutputDataToPack.setDesiredCenterOfMassHeightSecondDerivative(flatSecondDerivative);
    }
 
    public double getDesiredCenterOfMassHeight()

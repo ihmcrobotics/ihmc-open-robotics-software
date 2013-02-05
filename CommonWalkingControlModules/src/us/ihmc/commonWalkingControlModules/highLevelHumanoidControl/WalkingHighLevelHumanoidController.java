@@ -484,8 +484,6 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       @Override
       public void doAction()
       {
-         evaluateCoMTrajectory();
-
          if (icpTrajectoryGenerator.isDone() && (transferToSide == null))
          {
             // keep desiredICP the same
@@ -585,8 +583,6 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       @Override
       public void doAction()
       {
-         evaluateCoMTrajectory();
-
          PositionTrajectoryGenerator positionTrajectoryGenerator = footPositionTrajectoryGenerators.get(swingSide);
          if (!positionTrajectoryGenerator.isDone())
          {
@@ -902,23 +898,6 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       nextFootstep = null;
    }
 
-   private void evaluateCoMTrajectory()
-   {
-      centerOfMassHeightTrajectoryGenerator.compute();
-
-//    comTrajectoryCounter++;
-//
-//    if (comTrajectoryCounter >= 5)
-//    {
-//       FramePoint desiredCoM = new FramePoint(referenceFrames.getCenterOfMassFrame());
-//       desiredCoM.changeFrame(worldFrame);
-//       desiredCoM.setY(0.0);
-//       desiredCoM.setZ(centerOfMassHeightTrajectoryGenerator.getDesiredCenterOfMassHeight());
-//       comTrajectoryBagOfBalls.setBallLoop(desiredCoM);
-//       comTrajectoryCounter = 0;
-//    }
-   }
-
    public void doMotionControl()
    {
       for (ContactablePlaneBody contactablePlaneBody : endEffectorControlModules.keySet())
@@ -1032,6 +1011,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
    {
       ReferenceFrame frame = worldFrame;
 
+      centerOfMassHeightInputData.setSupportLeg(getSupportLeg());
       centerOfMassHeightTrajectoryGenerator.solve(centerOfMassHeightOutputData, centerOfMassHeightInputData);
       
       double zDesired = centerOfMassHeightOutputData.getDesiredCenterOfMassHeight();
