@@ -1,6 +1,5 @@
 package us.ihmc.darpaRoboticsChallenge.controllers;
 
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.RectangularContactableBody;
 import us.ihmc.commonWalkingControlModules.controllers.ControllerFactory;
@@ -30,15 +29,10 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
    private final HighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory;
    private final boolean setUpServer;
 
-   public DRCRobotMomentumBasedControllerFactory(HighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory)
-   {
-      this(highLevelHumanoidControllerFactory, false);
-   }
-   
    public DRCRobotMomentumBasedControllerFactory(HighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory, boolean setUpServer)
    {
-	   this.highLevelHumanoidControllerFactory = highLevelHumanoidControllerFactory;
-	   this.setUpServer = setUpServer;	   
+      this.highLevelHumanoidControllerFactory = highLevelHumanoidControllerFactory;
+      this.setUpServer = setUpServer;
    }
 
    public RobotController getController(FullRobotModel fullRobotModel, CommonWalkingReferenceFrames referenceFrames, double controlDT, DoubleYoVariable yoTime,
@@ -50,10 +44,10 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
       double footWidth = DRCRobotParameters.DRC_ROBOT_FOOT_WIDTH;
 
       YoVariableRegistry specificRegistry = new YoVariableRegistry("specific");
-      
-      if(setUpServer)
-    	  createJointPositionServer(fullRobotModel);
-      
+
+      if (setUpServer)
+         createJointPositionServer(fullRobotModel);
+
       SideDependentList<ContactablePlaneBody> bipedFeet = new SideDependentList<ContactablePlaneBody>();
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -61,27 +55,21 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
          ReferenceFrame soleFrame = referenceFrames.getSoleFrame(robotSide);
          double left = footWidth / 2.0;
          double right = -footWidth / 2.0;
-         
+
          ContactablePlaneBody foot = new RectangularContactableBody(footBody, soleFrame, footForward, -footBack, left, right);
          bipedFeet.put(robotSide, foot);
       }
 
-      SideDependentList<ContactablePlaneBody> thighs = new SideDependentList<ContactablePlaneBody>();
-      for (RobotSide robotSide : RobotSide.values())
-      {
-//         List<Ve>
-      }
-      
       double gravityZ = 9.81;
 
-      RobotController highLevelHumanoidController = highLevelHumanoidControllerFactory.create(fullRobotModel, referenceFrames, null, yoTime,
-                                                                   gravityZ, twistCalculator, centerOfMassJacobian, bipedFeet, controlDT, footSwitches,
-                                                                   dynamicGraphicObjectsListRegistry, specificRegistry, guiSetterUpperRegistry,
-                                                                   null);
+      RobotController highLevelHumanoidController = highLevelHumanoidControllerFactory.create(fullRobotModel, referenceFrames, null, yoTime, gravityZ,
+                                                       twistCalculator, centerOfMassJacobian, bipedFeet, controlDT, footSwitches,
+                                                       dynamicGraphicObjectsListRegistry, specificRegistry, guiSetterUpperRegistry, null);
       highLevelHumanoidController.getYoVariableRegistry().addChild(specificRegistry);
+
       return highLevelHumanoidController;
    }
-   
+
    private void createJointPositionServer(FullRobotModel fullRobotModel)
    {
       int port = DRCConfigParameters.ROBOT_DATA_RECEIVER_PORT_NUMBER;

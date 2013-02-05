@@ -1,13 +1,20 @@
 package us.ihmc.darpaRoboticsChallenge;
 
+import java.util.List;
+
+import javax.media.j3d.Transform3D;
+import javax.vecmath.Point2d;
+
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.controllers.ControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.DrivingHighLevelHumanoidControllerFactory;
 import us.ihmc.darpaRoboticsChallenge.controllers.DRCRobotMomentumBasedControllerFactory;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotParameters;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DrivingDRCRobotInitialSetup;
 import us.ihmc.projectM.R2Sim02.initialSetup.RobotInitialSetup;
+import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 
 import com.martiansoftware.jsap.JSAPException;
@@ -37,17 +44,28 @@ public class DRCDemo03
       scsInitialSetup.setRecordFrequency(recordFrequency);
 
       DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
-
-
-      SideDependentList<ContactablePlaneBody> thighs = new SideDependentList<ContactablePlaneBody>();
+     
+      DRCRobotJointMap jointMap = new DRCRobotJointMap(robotModel);
+      
+//      SideDependentList<ContactablePlaneBody> thighs = new SideDependentList<ContactablePlaneBody>();
+//      InverseDynamicsJoint[] allJoints = ScrewTools.computeJointsInOrder(fullRobotModel.getElevator());
       
       
+      SideDependentList<String> namesOfJointsBeforeThighs = new SideDependentList<String>();
+      SideDependentList<Transform3D> thighContactPointTransforms = new SideDependentList<Transform3D>();
+      SideDependentList<List<Point2d>> thighContactPoints = new SideDependentList<List<Point2d>>();
+      for (RobotSide robotSide : RobotSide.values())
+      {
+         namesOfJointsBeforeThighs.put(robotSide, jointMap.getNameOfJointBeforeThigh(robotSide));
+         thighContactPointTransforms.put(robotSide, DRCRobotParameters.thighContactPointTransforms.get(robotSide));
+         thighContactPoints.put(robotSide, DRCRobotParameters.thighContactPoints.get(robotSide));
+      }
       
-      DrivingHighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory = new DrivingHighLevelHumanoidControllerFactory(thighs);
-
+      
+      DrivingHighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory = new DrivingHighLevelHumanoidControllerFactory(namesOfJointsBeforeThighs, thighContactPointTransforms, thighContactPoints);
       ControllerFactory controllerFactory = new DRCRobotMomentumBasedControllerFactory(highLevelHumanoidControllerFactory, true);
 
-      drcSimulation = DRCSimulationFactory.createSimulation(robotModel, controllerFactory, environment, robotInitialSetup, scsInitialSetup, guiInitialSetup);
+      drcSimulation = DRCSimulationFactory.createSimulation(jointMap, controllerFactory, environment, robotInitialSetup, scsInitialSetup, guiInitialSetup);
 
       SimulationConstructionSet simulationConstructionSet = drcSimulation.getSimulationConstructionSet();
 
