@@ -504,6 +504,7 @@ public abstract class ICPAndMomentumBasedController implements RobotController
    public void initialize()
    {
       solver.initialize();
+      updateBipedSupportPolygons(bipedSupportPolygons);
    }
 
    public YoVariableRegistry getYoVariableRegistry()
