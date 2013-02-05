@@ -52,7 +52,7 @@ public class DRCConfigParameters
 
    static final double LIDAR_HORIZONTAL_SCAN_ANGLE = 0.1;
 
-   static final int LIDAR_SWEEPS_PER_SCAN = 40;
+   static final int LIDAR_SWEEPS_PER_SCAN = 14;
 
    static final int LIDAR_POINTS_PER_SWEEP = 40;
 
@@ -62,11 +62,11 @@ public class DRCConfigParameters
 
    public static final float LIDAR_MIN_DISTANCE = 0.2f;
 
-   public static final float LIDAR_SWEEP_MAX_YAW = 0.1f;
+   public static final float LIDAR_SWEEP_MAX_YAW = 0.6f;
 
-   public static final float LIDAR_SWEEP_MIN_YAW = -0.1f;
+   public static final float LIDAR_SWEEP_MIN_YAW = -0.6f;
 
-   public static final float LIDAR_SCAN_MAX_PITCH = 0.2f; // tilting the lidar down towards the ground
+   public static final float LIDAR_SCAN_MAX_PITCH = 0.3f; // tilting the lidar down towards the ground
 
    public static final float LDIAR_SCAN_MIN_PITCH = -0.1f;
 
