@@ -20,7 +20,7 @@ public class DRCDemoEnvironmentWithBoxAndSteeringWheel implements CommonAvatarEn
 {
    private static final double BOX_LENGTH = 0.5;
    private static final double BOX_WIDTH = 0.5;
-   private static final double BOX_HEIGHT = 0.51;
+   private static final double BOX_HEIGHT = 0.6;
    private final CombinedTerrainObject combinedTerrainObject;
 
    private final ArrayList<Robot> boxRobots = new ArrayList<Robot>();
