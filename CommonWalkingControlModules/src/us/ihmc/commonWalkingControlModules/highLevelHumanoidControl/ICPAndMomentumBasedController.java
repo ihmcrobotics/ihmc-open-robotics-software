@@ -12,12 +12,11 @@ import org.ejml.factory.LinearSolver;
 
 import us.ihmc.commonWalkingControlModules.WrenchDistributorTools;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactState;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.FootPolygonVisualizer;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
-import us.ihmc.commonWalkingControlModules.controlModules.CenterOfPressureResolver;
+import us.ihmc.commonWalkingControlModules.calculators.Omega0Calculator;
 import us.ihmc.commonWalkingControlModules.controlModules.GroundReactionWrenchDistributor;
 import us.ihmc.commonWalkingControlModules.controlModules.GroundReactionWrenchDistributorInputData;
 import us.ihmc.commonWalkingControlModules.controlModules.GroundReactionWrenchDistributorOutputData;
@@ -40,7 +39,6 @@ import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
-import us.ihmc.utilities.math.geometry.OriginAndPointFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
 import us.ihmc.utilities.screwTheory.InverseDynamicsCalculator;
@@ -113,9 +111,7 @@ public abstract class ICPAndMomentumBasedController implements RobotController
    protected final DoubleYoVariable desiredCoMHeightAcceleration;
    protected final YoFramePoint capturePoint;
    protected final DoubleYoVariable omega0;
-   private final CenterOfPressureResolver centerOfPressureResolver = new CenterOfPressureResolver();
-   private final OriginAndPointFrame copToCoPFrame = new OriginAndPointFrame("copToCoP", worldFrame);
-
+   private final Omega0Calculator omega0Calculator;
 
    private final YoFrameVector finalDesiredPelvisLinearAcceleration;
    private final YoFrameVector finalDesiredPelvisAngularAcceleration;
@@ -178,6 +174,7 @@ public abstract class ICPAndMomentumBasedController implements RobotController
       this.inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, gravityZ);
 
       this.totalMass = TotalMassCalculator.computeSubTreeMass(elevator);
+      this.omega0Calculator = new Omega0Calculator(centerOfMassFrame, totalMass);
 
       this.groundReactionWrenchDistributor = groundReactionWrenchDistributor;
 
@@ -258,8 +255,6 @@ public abstract class ICPAndMomentumBasedController implements RobotController
          }
       }
 
-      updateBipedSupportPolygons(bipedSupportPolygons);
-
       this.momentumRateOfChangeControlModule = momentumRateOfChangeControlModule;
       this.rootJointAccelerationControlModule = rootJointAccelerationControlModule;
 
@@ -288,7 +283,7 @@ public abstract class ICPAndMomentumBasedController implements RobotController
    }
 
    public abstract void doMotionControl();
-   
+
    public final void doControl()
    {
       updateBipedSupportPolygons(bipedSupportPolygons);
@@ -302,8 +297,6 @@ public abstract class ICPAndMomentumBasedController implements RobotController
 
       solver.compute();
 
-
-
       rootJointAccelerationControlModule.startComputation();
       rootJointAccelerationControlModule.waitUntilComputationIsDone();
       RootJointAccelerationData rootJointAccelerationData = rootJointAccelerationControlModule.getRootJointAccelerationOutputPort().getData();
@@ -314,7 +307,7 @@ public abstract class ICPAndMomentumBasedController implements RobotController
 
       solver.solve(rootJointAccelerationData.getAccelerationSubspace(), rootJointAccelerationData.getAccelerationMultipliers(),
                    momentumRateOfChangeData.getMomentumSubspace(), momentumRateOfChangeData.getMomentumMultipliers());
-      
+
       SpatialForceVector totalGroundReactionWrench = new SpatialForceVector(centerOfMassFrame);
       solver.getRateOfChangeOfMomentum(totalGroundReactionWrench);
       totalGroundReactionWrench.add(gravitationalWrench);
@@ -364,7 +357,7 @@ public abstract class ICPAndMomentumBasedController implements RobotController
             FrameVector force = distributedWrench.getForce(contactState);
             FramePoint2d cop = distributedWrench.getCenterOfPressure(contactState);
             double normalTorque = distributedWrench.getNormalTorque(contactState);
-           
+
             centersOfPressure2d.get(contactablePlaneBody).set(cop);
 
             cops.add(cop);
@@ -386,7 +379,7 @@ public abstract class ICPAndMomentumBasedController implements RobotController
       Wrench admissibleGroundReactionWrench = TotalWrenchCalculator.computeTotalWrench(wrenches, totalGroundReactionWrench.getExpressedInFrame());
       admissibleDesiredGroundReactionTorque.set(admissibleGroundReactionWrench.getAngularPartCopy());
       admissibleDesiredGroundReactionForce.set(admissibleGroundReactionWrench.getLinearPartCopy());
-      this.omega0.set(computeOmega0(cops, admissibleGroundReactionWrench));
+      this.omega0.set(omega0Calculator.computeOmega0(cops, admissibleGroundReactionWrench));
 
       SpatialForceVector desiredCentroidalMomentumRate = new SpatialForceVector();
       desiredCentroidalMomentumRate.set(admissibleGroundReactionWrench);
@@ -404,40 +397,6 @@ public abstract class ICPAndMomentumBasedController implements RobotController
       updateYoVariables();
    }
 
-   // FIXME: move this
-   private double computeOmega0(List<FramePoint2d> cop2ds, Wrench totalGroundReactionWrenchAfterProjection)
-   {
-      totalGroundReactionWrenchAfterProjection.changeFrame(centerOfMassFrame);
-      double fz = totalGroundReactionWrenchAfterProjection.getLinearPartCopy().getZ();
-
-      double deltaZ;
-      if (cop2ds.size() == 1)
-      {
-         FramePoint cop = cop2ds.get(0).toFramePoint();
-         cop.changeFrame(centerOfMassFrame);
-         deltaZ = -cop.getZ();
-      }
-      else    // assume 2 CoPs
-      {
-         List<FramePoint> cops = new ArrayList<FramePoint>(cop2ds.size());
-         for (FramePoint2d cop2d : cop2ds)
-         {
-            FramePoint cop = cop2d.toFramePoint();
-            cop.changeFrame(copToCoPFrame.getParent());
-            cops.add(cop);
-         }
-
-         copToCoPFrame.setOriginAndPositionToPointAt(cops.get(0), cops.get(1));
-         copToCoPFrame.update();
-         FramePoint2d pseudoCoP2d = new FramePoint2d(copToCoPFrame);
-         centerOfPressureResolver.resolveCenterOfPressureAndNormalTorque(pseudoCoP2d, totalGroundReactionWrenchAfterProjection, copToCoPFrame);
-         FramePoint pseudoCoP = pseudoCoP2d.toFramePoint();
-         pseudoCoP.changeFrame(centerOfMassFrame);
-         deltaZ = -pseudoCoP.getZ();
-      }
-
-      return Math.sqrt(fz / (totalMass * deltaZ));
-   }
 
    private void callUpdatables()
    {
@@ -503,14 +462,9 @@ public abstract class ICPAndMomentumBasedController implements RobotController
       return ret;
    }
 
-   public double getOmega0()
+   protected double getOmega0()
    {
       return omega0.getDoubleValue();
-   }
-
-   public ContactState getContactState(RigidBody rigidBody)
-   {
-      return contactStates.get(rigidBody);
    }
 
    private void updateYoVariables()
