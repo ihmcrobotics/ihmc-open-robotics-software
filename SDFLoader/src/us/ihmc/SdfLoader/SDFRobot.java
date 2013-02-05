@@ -34,7 +34,9 @@ import com.yobotics.simulationconstructionset.Link;
 import com.yobotics.simulationconstructionset.PinJoint;
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.graphics.GraphicsObjectsHolder;
+import com.yobotics.simulationconstructionset.simulatedSensors.FastPolarRayCastLIDAR;
 import com.yobotics.simulationconstructionset.simulatedSensors.LIDARScanDefinition;
+import com.yobotics.simulationconstructionset.simulatedSensors.PolarLidarScanDefinition;
 import com.yobotics.simulationconstructionset.simulatedSensors.RayTraceLIDARSensor;
 import com.yobotics.simulationconstructionset.simulatedSensors.SimulatedLIDARSensorLimitationParameters;
 import com.yobotics.simulationconstructionset.simulatedSensors.SimulatedLIDARSensorNoiseParameters;
@@ -44,6 +46,7 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRo
 {
    private static final boolean DEBUG = true;
    private static final boolean SHOW_CONTACT_POINTS = true;
+   private static final boolean USE_POLAR_LIDAR_MODEL  = true;
 
    private static final long serialVersionUID = 5864358637898048080L;
    
@@ -161,6 +164,10 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRo
       scsJoint.setLink(createLink(joint.getChild()));
       scsParentJoint.addJoint(scsJoint);
 
+      if(DEBUG)
+         if("hokuyo_joint".equals(scsJoint.getName()))
+            System.out.println("hokuyo joint's parent is : "+ scsParentJoint.getName());
+      
       addCameraMounts(scsJoint, joint.getChild());
       addLidarMounts(scsJoint, joint.getChild());
 
@@ -232,6 +239,8 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRo
             {
                if (DEBUG)
                   System.out.println("SDFRobot has a lidar!");
+               if(DEBUG)
+                  System.out.println("SDFRobot: the lidar is attached to link: "+scsJoint.getName());
                Ray sdfRay = sensor.getRay();
                if (sdfRay == null)
                {
@@ -265,6 +274,7 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRo
                      System.err.println("SDFRobot: lidar does not have associated plugin in sensor " + sensor.getName() + ". Assuming zero gaussian noise.");
                   }
 
+                  PolarLidarScanDefinition polarDefinition = new PolarLidarScanDefinition(sdfSamples, 1, (float)sdfMaxAngle, (float)sdfMinAngle, 0.0f, 0.0f, (float)sdfMinRange);
                   LIDARScanDefinition lidarScanDefinition = LIDARScanDefinition.PlanarSweep(sdfMaxAngle-sdfMinAngle, sdfSamples);
                   Transform3D transform3d = SDFConversionsHelper.poseToTransform(sensor.getPose());
                   
@@ -281,11 +291,21 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRo
                   updateParameters.setUpdateRate(sdfUpdateRate);
 //                  updateParameters.setServerPort() We can't know the server port in SDF Uploaders, so this must be specified afterwords, but searching the robot tree and assigning numbers.
 
-                  RayTraceLIDARSensor scsLidar = new RayTraceLIDARSensor(transform3d, lidarScanDefinition);
-                  scsLidar.setNoiseParameters(noiseParameters);
-                  scsLidar.setSensorLimitationParameters(limitationParameters);
-                  scsLidar.setLidarDaemonParameters(updateParameters);
-                  scsJoint.addSensor(scsLidar);
+                  if (!USE_POLAR_LIDAR_MODEL){
+                     RayTraceLIDARSensor scsLidar = new RayTraceLIDARSensor(transform3d, lidarScanDefinition);
+                     scsLidar.setNoiseParameters(noiseParameters);
+                     scsLidar.setSensorLimitationParameters(limitationParameters);
+                     scsLidar.setLidarDaemonParameters(updateParameters);
+                     scsJoint.addSensor(scsLidar);
+                  }
+                  else
+                  {
+                     FastPolarRayCastLIDAR scsLidar = new FastPolarRayCastLIDAR(transform3d, polarDefinition);
+                     scsLidar.setNoiseParameters(noiseParameters);
+                     scsLidar.setSensorLimitationParameters(limitationParameters);
+                     scsLidar.setLidarDaemonParameters(updateParameters);
+                     scsJoint.addSensor(scsLidar);
+                  }
 
                }
             }
