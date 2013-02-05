@@ -19,6 +19,7 @@ import us.ihmc.commonWalkingControlModules.calculators.GainCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.ChestOrientationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.DegenerateOrientationControlModule;
+import us.ihmc.commonWalkingControlModules.controlModules.EndEffectorControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.GroundReactionWrenchDistributor;
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.head.DesiredHeadOrientationProvider;
@@ -622,9 +623,6 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
          {
             setFlatFootContactState(bipedFeet.get(supportSide));
          }
-
-         setContactStateForSwing(bipedFeet.get(swingSide));
-         updateBipedSupportPolygons(bipedSupportPolygons);
 
          centerOfMassHeightTrajectoryGenerator.initialize(getSupportLeg());
       }
