@@ -10,9 +10,6 @@ public interface CenterOfMassHeightTrajectoryGenerator
 
    public abstract void compute();
 
-   public abstract double getDesiredCenterOfMassHeight();
+   public void solve(CenterOfMassHeightOutputData centerOfMassHeightOutputDataToPack, CenterOfMassHeightInputData centerOfMassHeightInputData);
 
-   public abstract FrameVector2d getDesiredCenterOfMassHeightSlope();
-
-   public abstract FrameVector2d getDesiredCenterOfMassHeightSecondDerivative();
 }
