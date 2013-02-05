@@ -89,7 +89,6 @@ public abstract class ICPAndMomentumBasedController implements RobotController
    protected final TwistCalculator twistCalculator;
    protected final SpatialAccelerationCalculator spatialAccelerationCalculator;
    protected final List<ContactablePlaneBody> contactablePlaneBodies;
-   protected final SideDependentList<? extends ContactablePlaneBody> bipedFeet;
    private final HashMap<ContactablePlaneBody, YoFramePoint> centersOfPressure = new HashMap<ContactablePlaneBody, YoFramePoint>();
    protected final HashMap<ContactablePlaneBody, YoFramePoint2d> centersOfPressure2d = new HashMap<ContactablePlaneBody, YoFramePoint2d>();
    protected final LinkedHashMap<ContactablePlaneBody, YoPlaneContactState> contactStates = new LinkedHashMap<ContactablePlaneBody, YoPlaneContactState>();
@@ -101,6 +100,7 @@ public abstract class ICPAndMomentumBasedController implements RobotController
    protected final double gravity;
 
 
+   protected final SideDependentList<? extends ContactablePlaneBody> bipedFeet;
    protected final BipedSupportPolygons bipedSupportPolygons;
    protected final YoFramePoint2d desiredICP;
    protected final YoFrameVector2d desiredICPVelocity;
@@ -131,8 +131,6 @@ public abstract class ICPAndMomentumBasedController implements RobotController
 
    private final ProcessedOutputsInterface processedOutputs;
    private final InverseDynamicsCalculator inverseDynamicsCalculator;
-
-   private final double totalMass;
 
    private final GroundReactionWrenchDistributor groundReactionWrenchDistributor;
 
@@ -170,7 +168,7 @@ public abstract class ICPAndMomentumBasedController implements RobotController
       this.processedOutputs = processedOutputs;
       this.inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, gravityZ);
 
-      this.totalMass = TotalMassCalculator.computeSubTreeMass(elevator);
+      double totalMass = TotalMassCalculator.computeSubTreeMass(elevator);
       this.omega0Calculator = new Omega0Calculator(centerOfMassFrame, totalMass);
 
       this.groundReactionWrenchDistributor = groundReactionWrenchDistributor;
