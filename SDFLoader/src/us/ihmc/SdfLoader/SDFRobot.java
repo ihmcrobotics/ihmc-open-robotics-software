@@ -94,15 +94,24 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRo
          footGroundContactPoints.put(robotSide, new ArrayList<GroundContactPoint>());
       }
 
+      HashMap<String, Integer> counters = new HashMap<String, Integer>();
       if (sdfJointNameMap != null)
       {
-         int i = 0;
          for (Pair<String, Vector3d> jointContactPoint : sdfJointNameMap.getJointNameGroundContactPointMap())
          {
             String jointName = jointContactPoint.first();
-            GroundContactPoint groundContactPoint = new GroundContactPoint("gc_" + SDFJointHolder.createValidVariableName(jointName) + "_" + i,
+
+            int count;
+            if (counters.get(jointName) == null)
+               count = 0;
+            else
+               count = counters.get(jointName);
+
+            GroundContactPoint groundContactPoint = new GroundContactPoint("gc_" + SDFJointHolder.createValidVariableName(jointName) + "_" + count++,
                                                        jointContactPoint.second(), this);
             robotJoints.get(jointName).addGroundContactPoint(groundContactPoint);
+
+            counters.put(jointName, count);
 
             if (SHOW_CONTACT_POINTS)
             {
@@ -118,8 +127,6 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRo
                if (jointName.equals(sdfJointNameMap.getJointBeforeFootName(robotSide)))
                   footGroundContactPoints.get(robotSide).add(groundContactPoint);
             }
-
-            i++;
          }
       }
 
