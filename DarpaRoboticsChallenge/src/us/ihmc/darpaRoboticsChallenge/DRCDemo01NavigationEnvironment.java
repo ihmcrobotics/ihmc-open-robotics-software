@@ -6,17 +6,13 @@ import java.util.Random;
 
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Point2d;
-import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.commonAvatarInterfaces.CommonAvatarEnvironmentInterface;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceTexture;
-import us.ihmc.projectM.R2Sim02.terrainObjects.SimpleEvaluationTerrain;
-import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
-import us.ihmc.utilities.math.geometry.GeometryTools;
 
 import com.yobotics.simulationconstructionset.ExternalForcePoint;
 import com.yobotics.simulationconstructionset.Robot;
@@ -46,7 +42,7 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
    private static final boolean FULLY_RANDOM = true; // Will do a neat grid if set to false;
    private static final int ROCKS_PER_ROW = 4;
 
-   private static final double FLOOR_THICKNESS = 0.001;
+//   private static final double FLOOR_THICKNESS = 0.001;
 
    public DRCDemo01NavigationEnvironment()
    {
@@ -206,16 +202,16 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
 
    private void createCoursePath(double courseLength, double angle)
    {
-
-      AppearanceDefinition app = YoAppearance.Gray();
-
-      double[] startTrackCenter = rotateAroundOrigin(2.1, 0.0, angle);
-      // setUpWall(startTrackCenter[0], startTrackCenter[1], 1.5f, 1.6f, FLOOR_THICKNESS, angle, app);
-      double[] mainTrackCenter = rotateAroundOrigin((courseLength / 2.0) + 4.25, 0.0f, angle);
-      // setUpWall(mainTrackCenter[0], mainTrackCenter[1], 3.0f, courseLength, FLOOR_THICKNESS, angle, app);
-      double[] startTrackRoundingCenter = rotateAroundOrigin(4.0, 0.0, angle);
-
-      //setUpCone(startTrackRoundingCenter[0], startTrackRoundingCenter[1], 1.5, 1.5, FLOOR_THICKNESS, app);
+//
+//      AppearanceDefinition app = YoAppearance.Gray();
+//
+//      double[] startTrackCenter = rotateAroundOrigin(2.1, 0.0, angle);
+//      // setUpWall(startTrackCenter[0], startTrackCenter[1], 1.5f, 1.6f, FLOOR_THICKNESS, angle, app);
+//      double[] mainTrackCenter = rotateAroundOrigin((courseLength / 2.0) + 4.25, 0.0f, angle);
+//      // setUpWall(mainTrackCenter[0], mainTrackCenter[1], 3.0f, courseLength, FLOOR_THICKNESS, angle, app);
+//      double[] startTrackRoundingCenter = rotateAroundOrigin(4.0, 0.0, angle);
+//
+//      //setUpCone(startTrackRoundingCenter[0], startTrackRoundingCenter[1], 1.5, 1.5, FLOOR_THICKNESS, app);
 
    }
 
@@ -230,7 +226,7 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
 
    private void setUpGround()
    {
-      AppearanceDefinition app = YoAppearance.Gray();
+//      AppearanceDefinition app = YoAppearance.Gray();
 
       //center
       //setUpCone(0, 0, 1.5, 1.5, FLOOR_THICKNESS, app);
