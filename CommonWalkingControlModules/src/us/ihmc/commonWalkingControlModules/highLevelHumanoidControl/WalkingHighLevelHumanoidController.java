@@ -956,15 +956,14 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       icpBasedMomentumRateOfChangeControlModule.getDesiredCapturePointTrajectoryInputPort().setData(capturePointTrajectoryData);
 
       icpBasedMomentumRateOfChangeControlModule.getSupportLegInputPort().setData(getSupportLeg());
-      
+
       icpBasedMomentumRateOfChangeControlModule.getDesiredCenterOfMassHeightAccelerationInputPort().setData(desiredCoMHeightAcceleration.getDoubleValue());
-      
-               // FIXME: use angular velocity, angular acceleration
+
+      // FIXME: use angular velocity, angular acceleration
       OrientationTrajectoryData desiredPelvisOrientationTrajectoryData = new OrientationTrajectoryData();
-         desiredPelvisOrientationTrajectoryData.set(desiredPelvisOrientation.getFrameOrientationCopy(), new FrameVector(worldFrame),
-                 new FrameVector(worldFrame));
-         desiredPelvisOrientationTrajectoryInputPort.setData(desiredPelvisOrientationTrajectoryData);
-      
+      desiredPelvisOrientationTrajectoryData.set(desiredPelvisOrientation.getFrameOrientationCopy(), new FrameVector(worldFrame), new FrameVector(worldFrame));
+      desiredPelvisOrientationTrajectoryInputPort.setData(desiredPelvisOrientationTrajectoryData);
+
    }
 
    private void doChestControl()
@@ -1016,29 +1015,31 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 
    private double computeDesiredCoMHeightAcceleration(FrameVector2d desiredICPVelocity)
    {
-      // FIXME!!!:
+      ReferenceFrame frame = worldFrame;
+
       double zDesired = centerOfMassHeightTrajectoryGenerator.getDesiredCenterOfMassHeight();
-      double dzdxDesired = centerOfMassHeightTrajectoryGenerator.getDesiredCenterOfMassHeightSlope().getX();
-      double d2zdx2Desired = centerOfMassHeightTrajectoryGenerator.getDesiredCenterOfMassHeightSecondDerivative().getX();
-
-      ReferenceFrame stairDirectionFrame = worldFrame;
-
-      desiredICPVelocity.changeFrame(stairDirectionFrame);
-
+      FrameVector2d dzdxDesired = centerOfMassHeightTrajectoryGenerator.getDesiredCenterOfMassHeightSlope();
+      FrameVector2d d2zdx2Desired = centerOfMassHeightTrajectoryGenerator.getDesiredCenterOfMassHeightSecondDerivative();
       FramePoint com = new FramePoint(referenceFrames.getCenterOfMassFrame());
-      com.changeFrame(stairDirectionFrame);
-
-      FrameVector comd = new FrameVector(stairDirectionFrame);
+      FrameVector comd = new FrameVector(frame);
       centerOfMassJacobian.packCenterOfMassVelocity(comd);
-      comd.changeFrame(stairDirectionFrame);
+
+      dzdxDesired.changeFrame(frame);
+      d2zdx2Desired.changeFrame(frame);
+      desiredICPVelocity.changeFrame(frame);
+      com.changeFrame(frame);
+
+      comd.changeFrame(frame);
 
       // TODO: use current omega0 instead of previous
-      double xd = comd.getX();
-      double icpdx = desiredICPVelocity.getX();
-      double xdd = getOmega0() * (icpdx - xd);    // MathTools.square(omega0.getDoubleValue()) * (com.getX() - copX);
+      FrameVector2d comd2d = comd.toFrameVector2d();
+      FrameVector2d comdd2d = new FrameVector2d(desiredICPVelocity);
+      comdd2d.sub(comd2d);
+      comdd2d.scale(getOmega0());    // MathTools.square(omega0.getDoubleValue()) * (com.getX() - copX);
+      FrameVector2d comd2dSquared = new FrameVector2d(comd2d.getReferenceFrame(), comd2d.getX() * comd2d.getX(), comd2d.getY() * comd2d.getY());
 
-      double zdDesired = dzdxDesired * xd;
-      double zddFeedForward = d2zdx2Desired * MathTools.square(xd) + dzdxDesired * xdd;
+      double zdDesired = dzdxDesired.dot(comd2d);
+      double zddFeedForward = d2zdx2Desired.dot(comd2dSquared) + dzdxDesired.dot(comdd2d);
 
       double zCurrent = com.getZ();
       double zdCurrent = comd.getZ();
