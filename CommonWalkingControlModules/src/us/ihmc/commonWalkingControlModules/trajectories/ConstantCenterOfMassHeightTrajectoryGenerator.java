@@ -9,9 +9,14 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public class ConstantCenterOfMassHeightTrajectoryGenerator implements CenterOfMassHeightTrajectoryGenerator
 {
+   private static final FrameVector2d flatSlope = new FrameVector2d(ReferenceFrame.getWorldFrame(), 0.0, 0.0);
+   private static final FrameVector2d flatSecondDerivative = new FrameVector2d(ReferenceFrame.getWorldFrame(), 0.0, 0.0);
+   
    private final YoVariableRegistry registry;
    private final DoubleYoVariable desiredCenterOfMassHeight;
 
+   private final CenterOfMassHeightOutputData centerOfMassHeightOutputData = new CenterOfMassHeightOutputData();
+   
    public ConstantCenterOfMassHeightTrajectoryGenerator(double initialDesiredCoMHeight, YoVariableRegistry parentRegistry)
    {
       registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -30,6 +35,13 @@ public class ConstantCenterOfMassHeightTrajectoryGenerator implements CenterOfMa
    {
       // empty
    }
+   
+   public void solve(CenterOfMassHeightOutputData centerOfMassHeightOutputDataToPack, CenterOfMassHeightInputData centerOfMassHeightInputData)
+   {
+      centerOfMassHeightOutputDataToPack.setDesiredCenterOfMassHeight(desiredCenterOfMassHeight.getDoubleValue());
+      centerOfMassHeightOutputData.setDesiredCenterOfMassHeightSlope(flatSlope);
+      centerOfMassHeightOutputData.setDesiredCenterOfMassHeightSecondDerivative(flatSecondDerivative);
+   }
 
    public double getDesiredCenterOfMassHeight()
    {
@@ -38,11 +50,11 @@ public class ConstantCenterOfMassHeightTrajectoryGenerator implements CenterOfMa
 
    public FrameVector2d getDesiredCenterOfMassHeightSlope()
    {
-      return new FrameVector2d(ReferenceFrame.getWorldFrame(), 0.0, 0.0);
+      return flatSlope;
    }
 
    public FrameVector2d getDesiredCenterOfMassHeightSecondDerivative()
    {
-      return new FrameVector2d(ReferenceFrame.getWorldFrame(), 0.0, 0.0);
+      return flatSlope;
    }
 }

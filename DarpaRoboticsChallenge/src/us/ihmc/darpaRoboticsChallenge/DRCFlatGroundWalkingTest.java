@@ -132,7 +132,7 @@ public class DRCFlatGroundWalkingTest
       NothingChangedVerifier nothingChangedVerifier = null;
       if (checkNothingChanged)
       {
-         nothingChangedVerifier = new NothingChangedVerifier("R2FlatGroundWalkingTest", scs);
+         nothingChangedVerifier = new NothingChangedVerifier("DRCFlatGroundWalkingTest", scs);
          walkingTimeDuration = 7.0;
       }
 
