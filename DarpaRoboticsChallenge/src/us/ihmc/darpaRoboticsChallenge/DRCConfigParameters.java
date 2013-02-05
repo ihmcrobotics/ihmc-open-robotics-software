@@ -52,9 +52,9 @@ public class DRCConfigParameters
 
    static final double LIDAR_HORIZONTAL_SCAN_ANGLE = 0.1;
 
-   static final int LIDAR_SWEEPS_PER_SCAN = 14;
+   static final int LIDAR_SWEEPS_PER_SCAN = 14;//1
 
-   static final int LIDAR_POINTS_PER_SWEEP = 40;
+   static final int LIDAR_POINTS_PER_SWEEP = 40;//640
 
    static final boolean OVERRIDE_DRC_LIDAR_CONFIG = true;
 
