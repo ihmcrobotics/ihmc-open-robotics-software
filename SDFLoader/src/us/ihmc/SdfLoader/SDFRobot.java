@@ -25,6 +25,8 @@ import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.polarLidarGeometry.LIDARScanDefinition;
+import us.ihmc.utilities.polarLidarGeometry.PolarLidarScanDefinition;
 
 import com.yobotics.simulationconstructionset.CameraMount;
 import com.yobotics.simulationconstructionset.FloatingJoint;
@@ -35,8 +37,6 @@ import com.yobotics.simulationconstructionset.PinJoint;
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.graphics.GraphicsObjectsHolder;
 import com.yobotics.simulationconstructionset.simulatedSensors.FastPolarRayCastLIDAR;
-import com.yobotics.simulationconstructionset.simulatedSensors.LIDARScanDefinition;
-import com.yobotics.simulationconstructionset.simulatedSensors.PolarLidarScanDefinition;
 import com.yobotics.simulationconstructionset.simulatedSensors.RayTraceLIDARSensor;
 import com.yobotics.simulationconstructionset.simulatedSensors.SimulatedLIDARSensorLimitationParameters;
 import com.yobotics.simulationconstructionset.simulatedSensors.SimulatedLIDARSensorNoiseParameters;

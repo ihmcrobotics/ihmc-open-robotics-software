@@ -5,10 +5,10 @@ import java.util.ArrayList;
 
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
+import us.ihmc.utilities.polarLidarGeometry.LIDARScanDefinition;
+import us.ihmc.utilities.polarLidarGeometry.PolarLidarScanDefinition;
 
 import com.yobotics.simulationconstructionset.simulatedSensors.FastPolarRayCastLIDAR;
-import com.yobotics.simulationconstructionset.simulatedSensors.LIDARScanDefinition;
-import com.yobotics.simulationconstructionset.simulatedSensors.PolarLidarScanDefinition;
 import com.yobotics.simulationconstructionset.simulatedSensors.RayTraceLIDARSensor;
 import com.yobotics.simulationconstructionset.simulatedSensors.SimulatedLIDARSensorUpdateParameters;
 
