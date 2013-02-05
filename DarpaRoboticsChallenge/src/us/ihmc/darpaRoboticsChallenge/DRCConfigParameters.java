@@ -40,23 +40,34 @@ public class DRCConfigParameters
 
    public static final long ROBOT_JOINT_SERVER_UPDATE_MILLIS = 100;
 
-   public static final boolean STREAM_LIDAR = true;
+   public static final boolean STREAM_VANILLA_LIDAR = false;
+   public static final boolean STREAM_POLAR_LIDAR = true;
 
    public static final VideoSettings VIDEOSETTINGS = new VideoSettingsH264LowLatency(800, 600, Quality.MEDIUM);
    //   public static final VideoSettings VIDEOSETTINGS = new VideoSettingsH264LowLatency(200, 150, Quality.LOW);
 
-   static final int LIDAR_UPDATE_RATE_OVERRIDE = 10;
+   static final int LIDAR_UPDATE_RATE_OVERRIDE = 3;
 
-   static final double LIDAR_VERTICAL_SCAN_ANGLE = 0.9;// optimistic, to say the least
+   static final double LIDAR_VERTICAL_SCAN_ANGLE = 0.9;
 
-   static final double LIDAR_HORIZONTAL_SCAN_ANGLE = 3.14;
+   static final double LIDAR_HORIZONTAL_SCAN_ANGLE = 0.1;
 
-   static final int LIDAR_SWEEPS_PER_SCAN = 4;
+   static final int LIDAR_SWEEPS_PER_SCAN = 40;
 
-   static final int LIDAR_POINTS_PER_SWEEP = 500;
+   static final int LIDAR_POINTS_PER_SWEEP = 40;
 
    static final boolean OVERRIDE_DRC_LIDAR_CONFIG = true;
 
    static final double MIN_LIDAR_DISTANCE = 0.2;
+
+   public static final float LIDAR_MIN_DISTANCE = 0.2f;
+
+   public static final float LIDAR_SWEEP_MAX_YAW = 0.1f;
+
+   public static final float LIDAR_SWEEP_MIN_YAW = -0.1f;
+
+   public static final float LIDAR_SCAN_MAX_PITCH = 0.2f; // tilting the lidar down towards the ground
+
+   public static final float LDIAR_SCAN_MIN_PITCH = -0.1f;
 
 }
