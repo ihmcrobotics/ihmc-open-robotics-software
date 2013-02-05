@@ -157,18 +157,27 @@ public class FlatThenPolynomialCoMHeightTrajectoryGenerator implements CenterOfM
          orbitalEnergy.set(Double.NaN);
       }
    }
+   
+   
+   public void solve(CenterOfMassHeightOutputData centerOfMassHeightOutputDataToPack, CenterOfMassHeightInputData centerOfMassHeightInputData)
+   {
+      centerOfMassHeightOutputDataToPack.setDesiredCenterOfMassHeight(desiredComHeightInWorld.getDoubleValue());
+      centerOfMassHeightOutputDataToPack.setDesiredCenterOfMassHeightSlope(new FrameVector2d(referenceFrame, desiredComHeightSlope.getDoubleValue(), 0.0));
+      centerOfMassHeightOutputDataToPack.setDesiredCenterOfMassHeightSecondDerivative(new FrameVector2d(referenceFrame, desiredComHeightSecondDerivative.getDoubleValue(), 0.0));
+   }
 
-   public double getDesiredCenterOfMassHeight()
+
+   private double getDesiredCenterOfMassHeight()
    {
       return desiredComHeightInWorld.getDoubleValue();
    }
 
-   public FrameVector2d getDesiredCenterOfMassHeightSlope()
+   private FrameVector2d getDesiredCenterOfMassHeightSlope()
    {
       return new FrameVector2d(referenceFrame, desiredComHeightSlope.getDoubleValue(), 0.0);
    }
 
-   public FrameVector2d getDesiredCenterOfMassHeightSecondDerivative()
+   private FrameVector2d getDesiredCenterOfMassHeightSecondDerivative()
    {
       return new FrameVector2d(referenceFrame, desiredComHeightSecondDerivative.getDoubleValue(), 0.0);
    }

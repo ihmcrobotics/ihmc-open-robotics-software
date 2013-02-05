@@ -39,6 +39,8 @@ import us.ihmc.commonWalkingControlModules.outputs.ProcessedOutputsInterface;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LimbName;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
+import us.ihmc.commonWalkingControlModules.trajectories.CenterOfMassHeightInputData;
+import us.ihmc.commonWalkingControlModules.trajectories.CenterOfMassHeightOutputData;
 import us.ihmc.commonWalkingControlModules.trajectories.CenterOfMassHeightTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantCoPInstantaneousCapturePointTrajectory;
 import us.ihmc.commonWalkingControlModules.trajectories.CubicPolynomialTrajectoryGenerator;
@@ -1020,13 +1022,23 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       }
    }
 
+   // Temporary objects to reduce garbage collection.
+   private final CenterOfMassHeightOutputData centerOfMassHeightOutputData = new CenterOfMassHeightOutputData();
+   private final CenterOfMassHeightInputData centerOfMassHeightInputData = new CenterOfMassHeightInputData();
+   private final FrameVector2d dzdxDesired = new FrameVector2d(ReferenceFrame.getWorldFrame());
+   private final FrameVector2d d2zdx2Desired = new FrameVector2d(ReferenceFrame.getWorldFrame());
+   
    private double computeDesiredCoMHeightAcceleration(FrameVector2d desiredICPVelocity)
    {
       ReferenceFrame frame = worldFrame;
 
-      double zDesired = centerOfMassHeightTrajectoryGenerator.getDesiredCenterOfMassHeight();
-      FrameVector2d dzdxDesired = centerOfMassHeightTrajectoryGenerator.getDesiredCenterOfMassHeightSlope();
-      FrameVector2d d2zdx2Desired = centerOfMassHeightTrajectoryGenerator.getDesiredCenterOfMassHeightSecondDerivative();
+      centerOfMassHeightTrajectoryGenerator.solve(centerOfMassHeightOutputData, centerOfMassHeightInputData);
+      
+      double zDesired = centerOfMassHeightOutputData.getDesiredCenterOfMassHeight();
+      
+      centerOfMassHeightOutputData.getDesiredCenterOfMassHeightSlope(dzdxDesired);
+      centerOfMassHeightOutputData.getDesiredCenterOfMassHeightSecondDerivative(d2zdx2Desired);
+      
       FramePoint com = new FramePoint(referenceFrames.getCenterOfMassFrame());
       FrameVector comd = new FrameVector(frame);
       centerOfMassJacobian.packCenterOfMassVelocity(comd);
