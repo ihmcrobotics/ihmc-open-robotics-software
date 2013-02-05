@@ -66,6 +66,12 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
          bipedFeet.put(robotSide, foot);
       }
 
+      SideDependentList<ContactablePlaneBody> thighs = new SideDependentList<ContactablePlaneBody>();
+      for (RobotSide robotSide : RobotSide.values())
+      {
+//         List<Ve>
+      }
+      
       double gravityZ = 9.81;
 
       RobotController highLevelHumanoidController = highLevelHumanoidControllerFactory.create(fullRobotModel, referenceFrames, null, yoTime,
