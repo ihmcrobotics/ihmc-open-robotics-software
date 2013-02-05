@@ -555,7 +555,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
          icpTrajectoryGenerator.initialize(desiredICP.getFramePoint2dCopy(), finalDesiredICP, doubleSupportTimeProvider.getValue(), getOmega0(),
                                            amountToBeInsideDoubleSupport.getDoubleValue());
 
-         centerOfMassHeightTrajectoryGenerator.initialize(getSupportLeg());
+         centerOfMassHeightTrajectoryGenerator.initialize(getSupportLeg(), nextFootstep);
       }
 
       @Override
@@ -629,7 +629,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
          setContactStateForSwing(bipedFeet.get(swingSide));
          updateBipedSupportPolygons(bipedSupportPolygons);
 
-         centerOfMassHeightTrajectoryGenerator.initialize(getSupportLeg());
+         centerOfMassHeightTrajectoryGenerator.initialize(getSupportLeg(), nextFootstep);
       }
 
       @Override
@@ -1011,7 +1011,28 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
    {
       ReferenceFrame frame = worldFrame;
 
+      centerOfMassHeightInputData.setCenterOfMassFrame(centerOfMassFrame);
+      
+      ArrayList<PlaneContactState> contactStatesList = new ArrayList<PlaneContactState>();
+      
+      if (getSupportLeg() == null)
+      {
+         ContactablePlaneBody leftFoot = bipedFeet.get(RobotSide.LEFT);
+         ContactablePlaneBody rightFoot = bipedFeet.get(RobotSide.RIGHT);
+         
+         contactStatesList.add(leftFoot);
+         contactStatesList.add(rightFoot);
+      }
+      else
+      {
+         contactStatesList.add(bipedFeet.get(getSupportLeg()));
+      }
+      
+      centerOfMassHeightInputData.setContactStates(contactStatesList);
+
       centerOfMassHeightInputData.setSupportLeg(getSupportLeg());
+      centerOfMassHeightInputData.setUpcomingFootstep(nextFootstep);
+      
       centerOfMassHeightTrajectoryGenerator.solve(centerOfMassHeightOutputData, centerOfMassHeightInputData);
       
       double zDesired = centerOfMassHeightOutputData.getDesiredCenterOfMassHeight();

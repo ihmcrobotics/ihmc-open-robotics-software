@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
+import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -24,7 +25,7 @@ public class ConstantCenterOfMassHeightTrajectoryGenerator implements CenterOfMa
       desiredCenterOfMassHeight.set(initialDesiredCoMHeight);
    }
 
-   public void initialize(RobotSide supportLeg)
+   public void initialize(RobotSide supportLeg, Footstep nextFootstep)
    {
       // empty
    }
