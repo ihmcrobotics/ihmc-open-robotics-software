@@ -54,12 +54,15 @@ public class DRCRobotJointMap implements SDFJointNameMap, RobotSpecificJointName
    private final SideDependentList<List<Pair<String, Vector3d>>> handGroundContactPoints = new SideDependentList<List<Pair<String, Vector3d>>>();
    private final SideDependentList<List<Pair<String, Vector3d>>> thighGroundContactPoints = new SideDependentList<List<Pair<String, Vector3d>>>();
    private final List<Pair<String, Vector3d>> jointNameGroundContactPointMap = new ArrayList<Pair<String, Vector3d>>();
+   private final DRCRobotModel selectedModel;
 
    public DRCRobotJointMap(DRCRobotModel selectedModel)
    {
+      this.selectedModel = selectedModel;
+
       for (RobotSide robotSide : RobotSide.values)
       {
-         String prefix = (robotSide == RobotSide.LEFT) ? "l_" : "r_";
+         String prefix = getRobotSidePrefix(robotSide);
 
          legJointNames.put(prefix + "leg_uhz", new Pair<RobotSide, LegJointName>(robotSide, LegJointName.HIP_YAW));
          legJointNames.put(prefix + "leg_mhx", new Pair<RobotSide, LegJointName>(robotSide, LegJointName.HIP_ROLL));
@@ -144,7 +147,7 @@ public class DRCRobotJointMap implements SDFJointNameMap, RobotSpecificJointName
          {
             Point3d point3d = new Point3d(point.getX(), point.getY(), 0.0);
             DRCRobotParameters.thighContactPointTransforms.get(robotSide).transform(point3d);
-            thighGroundContactPoints.get(robotSide).add(new Pair<String, Vector3d>(prefix + "leg_lhy", new Vector3d(point3d)));
+            thighGroundContactPoints.get(robotSide).add(new Pair<String, Vector3d>(getNameOfJointBeforeThigh(robotSide), new Vector3d(point3d)));
          }
       }
 
@@ -183,6 +186,16 @@ public class DRCRobotJointMap implements SDFJointNameMap, RobotSpecificJointName
       }
    }
 
+   public String getNameOfJointBeforeThigh(RobotSide robotSide)
+   {
+      return getRobotSidePrefix(robotSide) + "leg_lhy";
+   }
+
+   private String getRobotSidePrefix(RobotSide robotSide)
+   {
+      return (robotSide == RobotSide.LEFT) ? "l_" : "r_";
+   }
+
    public Pair<RobotSide, LegJointName> getLegJointName(String jointName)
    {
       return legJointNames.get(jointName);
@@ -198,76 +211,55 @@ public class DRCRobotJointMap implements SDFJointNameMap, RobotSpecificJointName
       return limbNames.get(limbName);
    }
 
-
-
    public JointRole getJointRole(String jointName)
    {
       return jointRoles.get(jointName);
    }
-
-
 
    public NeckJointName getNeckJointName(String jointName)
    {
       return neckJointNames.get(jointName);
    }
 
-
-
    public SpineJointName getSpineJointName(String jointName)
    {
       return spineJointNames.get(jointName);
    }
-
-
 
    public String getPelvisName()
    {
       return pelvisName;
    }
 
-
-
    public String getChestName()
    {
       return chestName;
    }
-
-
 
    public String getHeadName()
    {
       return headName;
    }
 
-
-
    public LegJointName[] getLegJointNames()
    {
       return legJoints;
    }
-
-
 
    public ArmJointName[] getArmJointNames()
    {
       return armJoints;
    }
 
-
-
    public SpineJointName[] getSpineJointNames()
    {
       return spineJoints;
    }
 
-
-
    public NeckJointName[] getNeckJointNames()
    {
       return neckJoints;
    }
-
 
    public String getJointBeforeFootName(RobotSide robotSide)
    {
@@ -297,5 +289,10 @@ public class DRCRobotJointMap implements SDFJointNameMap, RobotSpecificJointName
    public List<Pair<String, Vector3d>> getJointNameGroundContactPointMap()
    {
       return jointNameGroundContactPointMap;
+   }
+
+   public DRCRobotModel getSelectedModel()
+   {
+      return selectedModel;
    }
 }

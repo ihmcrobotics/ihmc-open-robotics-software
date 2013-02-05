@@ -10,21 +10,13 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 
 public class DRCRobotSDFLoader
 {
-   private final DRCRobotModel selectedModel;
-
-   
-   public DRCRobotSDFLoader(DRCRobotModel selectedModel)
-   {
-      this.selectedModel = selectedModel;
-   }
-
-
-   public JaxbSDFLoader loadDRCRobot()
+   public JaxbSDFLoader loadDRCRobot(DRCRobotJointMap jointMap)
    {
       URL fileURL;
       String modelName;
       URL resourceDirectory;
       Class<DRCRobotSDFLoader> myClass = DRCRobotSDFLoader.class;
+      DRCRobotModel selectedModel = jointMap.getSelectedModel();
       switch (selectedModel)
       {
          case ATLAS_NO_HANDS :
@@ -47,13 +39,13 @@ public class DRCRobotSDFLoader
 
             break;
          default:
-            throw new RuntimeException("DRCRobotSDFLoader: Unimplemented enumeration case : " +selectedModel);
+            throw new RuntimeException("DRCRobotSDFLoader: Unimplemented enumeration case : " + selectedModel);
       }
 
       JaxbSDFLoader jaxbSDFLoader;
       try
       {
-         jaxbSDFLoader = new JaxbSDFLoader(fileURL, modelName, resourceDirectory, new DRCRobotJointMap(selectedModel));
+         jaxbSDFLoader = new JaxbSDFLoader(fileURL, modelName, resourceDirectory, jointMap);
       }
       catch (FileNotFoundException e)
       {

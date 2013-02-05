@@ -11,6 +11,7 @@ import us.ihmc.commonWalkingControlModules.sensors.CenterOfMassJacobianUpdater;
 import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.sensors.TwistUpdater;
 import us.ihmc.commonWalkingControlModules.visualizer.CommonInertiaElipsoidsVisualizer;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.sensors.PerfectFootswitch;
 import us.ihmc.projectM.R2Sim02.initialSetup.GuiInitialSetup;
 import us.ihmc.projectM.R2Sim02.initialSetup.RobotInitialSetup;
@@ -32,7 +33,7 @@ public class DRCSimulationFactory
 {
    public static boolean SHOW_INERTIA_ELLIPSOIDS = false;
    
-   public static HumanoidRobotSimulation<SDFRobot> createSimulation(DRCRobotModel robotModel, ControllerFactory controllerFactory,
+   public static HumanoidRobotSimulation<SDFRobot> createSimulation(DRCRobotJointMap jointMap, ControllerFactory controllerFactory,
            CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, RobotInitialSetup<SDFRobot> robotInitialSetup, ScsInitialSetup scsInitialSetup,
            GuiInitialSetup guiInitialSetup)
    {
@@ -43,8 +44,8 @@ public class DRCSimulationFactory
       int simulationTicksPerControlTick = controllerFactory.getSimulationTicksPerControlTick();
       double controlDT = simulateDT * simulationTicksPerControlTick;
 
-      DRCRobotSDFLoader drcRobotSDFLoader = new DRCRobotSDFLoader(robotModel);
-      JaxbSDFLoader jaxbSDFLoader = drcRobotSDFLoader.loadDRCRobot();
+      DRCRobotSDFLoader drcRobotSDFLoader = new DRCRobotSDFLoader();
+      JaxbSDFLoader jaxbSDFLoader = drcRobotSDFLoader.loadDRCRobot(jointMap);
       SDFRobot simulatedRobot = jaxbSDFLoader.getRobot();
       FullRobotModel fullRobotModelForSimulation = jaxbSDFLoader.getFullRobotModel();
      
