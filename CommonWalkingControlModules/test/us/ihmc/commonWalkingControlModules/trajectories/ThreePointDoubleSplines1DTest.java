@@ -52,7 +52,7 @@ public class ThreePointDoubleSplines1DTest
       Point2d pointThree = new Point2d(2.0, zHeight + 2.0 * slope);
 
       Point2d[] points = new Point2d[] {pointOne, pointTwo, pointThree};
-      double[] slopes = new double[] {1.1, 1.1, 1.1};
+      double[] slopes = new double[] {slope, slope, slope};
       double[] secondDerivatives = new double[] {0.0, 0.0, 0.0};
 
       spline.setPoints(points, slopes, secondDerivatives);

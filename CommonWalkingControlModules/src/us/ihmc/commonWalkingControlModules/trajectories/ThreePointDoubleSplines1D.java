@@ -2,17 +2,30 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 
 import javax.vecmath.Point2d;
 
+import us.ihmc.utilities.math.MathTools;
+
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.trajectory.YoPolynomial;
+
 public class ThreePointDoubleSplines1D
 {
+   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private static final int numberOfCoefficients = 6;
+   
    private final Point2d[] points = new Point2d[3]; 
    private double[] slopes = new double[3];
    private double[] secondDerivatives = new double[3];
+   private YoPolynomial splines[] = new YoPolynomial[2];
    
    public ThreePointDoubleSplines1D()
    {
       for (int i=0; i<points.length; i++)
       {
          points[i] = new Point2d();
+      }
+      for (int i=0; i<splines.length; i++)
+      {
+         splines[i] = new YoPolynomial("spline" + i, numberOfCoefficients, registry);
       }
    }
 
@@ -24,15 +37,27 @@ public class ThreePointDoubleSplines1D
          this.slopes[i] = slopes[i];
          this.secondDerivatives[i] = secondDerivatives[i];
       }
+      for (int i=0; i<splines.length; i++)
+      {
+         splines[i].setQuintic(points[i].x, points[i+1].x, points[i].y, slopes[i], secondDerivatives[i], points[i+1].y, slopes[i+1], secondDerivatives[i+1]);
+      }
    }
 
    public double[] getZSlopeAndSecondDerivative(double queryPoint)
    {
-      double z = points[0].getY();
-      double slope = 0.0;
-      double secondDerivative = 0.0;
+      for (int i=0; i<splines.length; i++)
+      {
+         if (MathTools.isInsideBoundsInclusive(queryPoint, points[i].x, points[i+1].x))
+         {
+            splines[i].compute(queryPoint);
+            double z = splines[i].getPosition();
+            double slope = splines[i].getVelocity();
+            double secondDerivative = splines[i].getAcceleration();
+            return new double[]{z, slope, secondDerivative};
+         }
+      }
       
-      return new double[]{z, slope, secondDerivative};
+      throw new RuntimeException("queryPoint out of range");
    }
 
 }
