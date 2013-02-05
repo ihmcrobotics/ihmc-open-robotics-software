@@ -46,16 +46,18 @@ public class DRCConfigParameters
 //   public static final VideoSettings VIDEOSETTINGS = new VideoSettingsH264LowLatency(800, 600, Quality.MEDIUMs);
    public static final VideoSettings VIDEOSETTINGS = new VideoSettingsH264LowLatency(200, 150, Quality.LOW);
 
-   static final int LIDAR_UPDATE_RATE_OVERRIDE = 1;
+   static final int LIDAR_UPDATE_RATE_OVERRIDE = 10;
 
-   static final double LIDAR_VERTICAL_SCAN_ANGLE = 3.2;// optimistic, to say the least
+   static final double LIDAR_VERTICAL_SCAN_ANGLE = 0.9;// optimistic, to say the least
 
-   static final double LIDAR_HORIZONTAL_SCAN_ANGLE = 0.3;
+   static final double LIDAR_HORIZONTAL_SCAN_ANGLE = 3.14;
 
-   static final int LIDAR_SWEEPS_PER_SCAN = 60;
+   static final int LIDAR_SWEEPS_PER_SCAN = 4;
 
-   static final int LIDAR_POINTS_PER_SWEEP = 10;
+   static final int LIDAR_POINTS_PER_SWEEP = 500;
 
    static final boolean OVERRIDE_DRC_LIDAR_CONFIG = true;
+
+   static final double MIN_LIDAR_DISTANCE = 0.2;
 
 }
