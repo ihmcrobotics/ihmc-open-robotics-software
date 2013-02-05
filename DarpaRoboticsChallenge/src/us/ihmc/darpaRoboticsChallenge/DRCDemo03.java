@@ -2,11 +2,13 @@ package us.ihmc.darpaRoboticsChallenge;
 
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.controllers.ControllerFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.DrivingHighLevelHumanoidFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.DrivingHighLevelHumanoidControllerFactory;
 import us.ihmc.darpaRoboticsChallenge.controllers.DRCRobotMomentumBasedControllerFactory;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DrivingDRCRobotInitialSetup;
 import us.ihmc.projectM.R2Sim02.initialSetup.RobotInitialSetup;
+import us.ihmc.robotSide.SideDependentList;
 
 import com.martiansoftware.jsap.JSAPException;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
@@ -37,7 +39,11 @@ public class DRCDemo03
       DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
 
 
-      DrivingHighLevelHumanoidFactory highLevelHumanoidControllerFactory = new DrivingHighLevelHumanoidFactory();
+      SideDependentList<ContactablePlaneBody> thighs = new SideDependentList<ContactablePlaneBody>();
+      
+      
+      
+      DrivingHighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory = new DrivingHighLevelHumanoidControllerFactory(thighs);
 
       ControllerFactory controllerFactory = new DRCRobotMomentumBasedControllerFactory(highLevelHumanoidControllerFactory, true);
 
