@@ -1,22 +1,50 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController;
 
 import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
 
+import us.ihmc.utilities.math.MatrixTools;
+import us.ihmc.utilities.math.geometry.FrameVector;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
+import us.ihmc.utilities.screwTheory.SpatialForceVector;
 
 public class MomentumRateOfChangeData
 {
+   private final ReferenceFrame centerOfMassFrame;
    private final DenseMatrix64F momentumSubspace = new DenseMatrix64F(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
    private final DenseMatrix64F momentumMultipliers = new DenseMatrix64F(SpatialAccelerationVector.SIZE, 1);
 
-   public void setMomentumSubspace(DenseMatrix64F momentumSubspace)
+   public MomentumRateOfChangeData(ReferenceFrame centerOfMassFrame)
    {
-      this.momentumSubspace.setReshape(momentumSubspace);
+      this.centerOfMassFrame = centerOfMassFrame;
    }
 
-   public void setMomentumMultipliers(DenseMatrix64F momentumMultipliers)
+   public void set(SpatialForceVector momentumRateOfChange)
    {
-      this.momentumMultipliers.setReshape(momentumMultipliers);
+      momentumRateOfChange.changeFrame(centerOfMassFrame);
+      momentumSubspace.reshape(SpatialForceVector.SIZE, SpatialForceVector.SIZE);
+      CommonOps.setIdentity(momentumSubspace);
+      momentumMultipliers.reshape(SpatialForceVector.SIZE, 1);
+      momentumRateOfChange.packMatrix(momentumMultipliers);
+   }
+
+   public void setLinearMomentumRateOfChange(FrameVector linearMomentumRateOfChange)
+   {
+      linearMomentumRateOfChange.changeFrame(centerOfMassFrame);
+      momentumSubspace.reshape(SpatialForceVector.SIZE, 3);
+      momentumSubspace.set(3, 0, 1.0);
+      momentumSubspace.set(4, 1, 1.0);
+      momentumSubspace.set(5, 2, 1.0);
+
+      momentumMultipliers.reshape(momentumSubspace.getNumCols(), 1);
+      MatrixTools.setDenseMatrixFromTuple3d(momentumMultipliers, linearMomentumRateOfChange.getVector(), 0, 0);
+   }
+
+   public void setEmpty()
+   {
+      momentumSubspace.reshape(SpatialForceVector.SIZE, 0);
+      momentumMultipliers.reshape(0, 1);
    }
 
    public DenseMatrix64F getMomentumSubspace()

@@ -17,20 +17,17 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlane
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.FootPolygonVisualizer;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
-import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.DesiredCoPAndCMPControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.CenterOfPressureResolver;
-import us.ihmc.commonWalkingControlModules.controlModules.GroundReactionMomentControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.GroundReactionWrenchDistributor;
 import us.ihmc.commonWalkingControlModules.controlModules.GroundReactionWrenchDistributorInputData;
 import us.ihmc.commonWalkingControlModules.controlModules.GroundReactionWrenchDistributorOutputData;
-import us.ihmc.commonWalkingControlModules.controlModules.NoLungingDesiredCoPAndCMPControlModule;
-import us.ihmc.commonWalkingControlModules.controlModules.SacrificeDeltaCMPDesiredCoPAndCMPControlModule;
-import us.ihmc.commonWalkingControlModules.controlModules.velocityViaCoP.CapturabilityBasedDesiredCoPVisualizer;
 import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.Updatable;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.CapturePointCalculator;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumRateOfChangeControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumRateOfChangeData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumSolver;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.RootJointAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.RootJointAccelerationData;
 import us.ihmc.commonWalkingControlModules.outputs.ProcessedOutputsInterface;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
@@ -40,20 +37,14 @@ import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.DampedLeastSquaresSolver;
 import us.ihmc.utilities.math.MathTools;
-import us.ihmc.utilities.math.MatrixTools;
-import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
-import us.ihmc.utilities.math.geometry.FrameVector2d;
-import us.ihmc.utilities.math.geometry.GeometryTools;
 import us.ihmc.utilities.math.geometry.OriginAndPointFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
 import us.ihmc.utilities.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
-import us.ihmc.utilities.screwTheory.Momentum;
-import us.ihmc.utilities.screwTheory.MomentumCalculator;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.RevoluteJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
@@ -65,7 +56,6 @@ import us.ihmc.utilities.screwTheory.SpatialForceVector;
 import us.ihmc.utilities.screwTheory.SpatialMotionVector;
 import us.ihmc.utilities.screwTheory.TotalMassCalculator;
 import us.ihmc.utilities.screwTheory.TotalWrenchCalculator;
-import us.ihmc.utilities.screwTheory.Twist;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 import us.ihmc.utilities.screwTheory.Wrench;
 
@@ -73,13 +63,11 @@ import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.EnumYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.robotController.RobotController;
-import com.yobotics.simulationconstructionset.util.AxisAngleOrientationController;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition.GraphicType;
 import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoFrameVector;
 import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoVariable;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFrameOrientation;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint2d;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
@@ -116,11 +104,6 @@ public abstract class ICPAndMomentumBasedController implements RobotController
    protected final double gravity;
 
 
-   // TODO: move to subclasses:
-   protected final YoFrameOrientation desiredPelvisOrientation;
-   private final AxisAngleOrientationController pelvisOrientationController;
-   private final YoFrameVector desiredPelvisAngularAcceleration;
-
    protected final SideDependentList<FootSwitchInterface> footSwitches;
    protected final BipedSupportPolygons bipedSupportPolygons;
    protected final YoFramePoint2d desiredICP;
@@ -130,13 +113,8 @@ public abstract class ICPAndMomentumBasedController implements RobotController
    protected final DoubleYoVariable desiredCoMHeightAcceleration;
    protected final YoFramePoint capturePoint;
    protected final DoubleYoVariable omega0;
-   private final DesiredCoPAndCMPControlModule desiredCoPAndCMPControlModule;
-   private final DoubleYoVariable alphaFz = new DoubleYoVariable("alphaFz", registry);
-   private final AlphaFilteredYoVariable fZ = new AlphaFilteredYoVariable("fZ", registry, alphaFz);
-   private final GroundReactionMomentControlModule groundReactionMomentControlModule;
    private final CenterOfPressureResolver centerOfPressureResolver = new CenterOfPressureResolver();
    private final OriginAndPointFrame copToCoPFrame = new OriginAndPointFrame("copToCoP", worldFrame);
-   private final MomentumCalculator momentumCalculator;
 
 
    private final YoFrameVector finalDesiredPelvisLinearAcceleration;
@@ -160,20 +138,19 @@ public abstract class ICPAndMomentumBasedController implements RobotController
    private final ProcessedOutputsInterface processedOutputs;
    private final InverseDynamicsCalculator inverseDynamicsCalculator;
 
-   private final double gravityZ;
    private final double totalMass;
 
    private final GroundReactionWrenchDistributor groundReactionWrenchDistributor;
 
-   private final boolean doStrictPelvisControl;    // TODO: remove, just have momentumSubspace and accelerationSubspace
-   private final DenseMatrix64F momentumSubspace;
-   private final DenseMatrix64F accelerationSubspace;
+   private final MomentumRateOfChangeControlModule momentumRateOfChangeControlModule;
+   private final RootJointAccelerationControlModule rootJointAccelerationControlModule;
 
    public ICPAndMomentumBasedController(FullRobotModel fullRobotModel, CenterOfMassJacobian centerOfMassJacobian, CommonWalkingReferenceFrames referenceFrames,
            DoubleYoVariable yoTime, double gravityZ, TwistCalculator twistCalculator, SideDependentList<? extends ContactablePlaneBody> bipedFeet,
            BipedSupportPolygons bipedSupportPolygons, double controlDT, ProcessedOutputsInterface processedOutputs,
            SideDependentList<FootSwitchInterface> footSwitches, GroundReactionWrenchDistributor groundReactionWrenchDistributor,
-           ArrayList<Updatable> updatables, boolean doStrictPelvisControl, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+           ArrayList<Updatable> updatables, MomentumRateOfChangeControlModule momentumRateOfChangeControlModule,
+           RootJointAccelerationControlModule rootJointAccelerationControlModule, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
       SixDoFJoint rootJoint = fullRobotModel.getRootJoint();
@@ -198,35 +175,16 @@ public abstract class ICPAndMomentumBasedController implements RobotController
       this.spatialAccelerationCalculator = new SpatialAccelerationCalculator(elevator, twistCalculator, gravity, true);
 
       this.processedOutputs = processedOutputs;
-      this.gravityZ = gravityZ;
-      this.momentumCalculator = new MomentumCalculator(twistCalculator);
       this.inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, gravityZ);
 
-      ReferenceFrame pelvisFrame = referenceFrames.getPelvisFrame();
-      this.groundReactionMomentControlModule = new GroundReactionMomentControlModule(pelvisFrame, registry);
-      this.groundReactionMomentControlModule.setGains(10.0, 100.0);    // kPelvisYaw was 0.0 for M3 movie
       this.totalMass = TotalMassCalculator.computeSubTreeMass(elevator);
 
       this.groundReactionWrenchDistributor = groundReactionWrenchDistributor;
-      this.desiredPelvisOrientation = new YoFrameOrientation("desiredPelvis", worldFrame, registry);
-
-      this.doStrictPelvisControl = doStrictPelvisControl;
-
-      if (doStrictPelvisControl)
-      {
-         this.pelvisOrientationController = new AxisAngleOrientationController("pelvis", pelvisFrame, registry);
-         pelvisOrientationController.setProportionalGains(100.0, 100.0, 100.0);    // 100.0, 100.0, 100.0);
-         pelvisOrientationController.setDerivativeGains(20.0, 20.0, 20.0);    // 20.0, 20.0, 20.0);
-      }
-      else
-      {
-         this.pelvisOrientationController = null;
-      }
 
       omega0 = new DoubleYoVariable("omega0", registry);
       capturePoint = new YoFramePoint("capturePoint", worldFrame, registry);
 
-      this.desiredPelvisAngularAcceleration = new YoFrameVector("desiredPelvisAngularAcceleration", pelvisFrame, registry);
+      ReferenceFrame pelvisFrame = referenceFrames.getPelvisFrame();
       this.finalDesiredPelvisLinearAcceleration = new YoFrameVector("finalDesiredPelvisLinearAcceleration", "", pelvisFrame, registry);
       this.finalDesiredPelvisAngularAcceleration = new YoFrameVector("finalDesiredPelvisAngularAcceleration", "", pelvisFrame, registry);
       this.desiredPelvisForce = new YoFrameVector("desiredPelvisForce", "", centerOfMassFrame, registry);
@@ -235,11 +193,7 @@ public abstract class ICPAndMomentumBasedController implements RobotController
       this.unfilteredDesiredGroundReactionTorque = new YoFrameVector("unfilteredDesiredGroundReactionTorque", centerOfMassFrame, registry);
       this.unfilteredDesiredGroundReactionForce = new YoFrameVector("unfilteredDesiredGroundReactionForce", centerOfMassFrame, registry);
 
-      if (doStrictPelvisControl)
-      {
-//       alphaFz.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(7.0, controlDT));
-         alphaGroundReactionWrench.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(7.0, controlDT));
-      }
+      alphaGroundReactionWrench.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(7.0, controlDT));    // FIXME: use setter
 
       this.desiredGroundReactionTorque = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector("desiredGroundReactionTorque", "", registry,
               alphaGroundReactionWrench, unfilteredDesiredGroundReactionTorque);
@@ -306,23 +260,8 @@ public abstract class ICPAndMomentumBasedController implements RobotController
 
       updateBipedSupportPolygons(bipedSupportPolygons);
 
-      CapturabilityBasedDesiredCoPVisualizer visualizer = new CapturabilityBasedDesiredCoPVisualizer(registry, dynamicGraphicObjectsListRegistry);
-
-      if (doStrictPelvisControl)
-      {
-         NoLungingDesiredCoPAndCMPControlModule desiredCoPAndCMPControlModule = new NoLungingDesiredCoPAndCMPControlModule(visualizer, bipedSupportPolygons,
-                                                                                   controlDT, registry);
-         desiredCoPAndCMPControlModule.setGains(1.5, 1000.0);    // 7.0);
-         this.desiredCoPAndCMPControlModule = desiredCoPAndCMPControlModule;
-      }
-      else
-      {
-         SacrificeDeltaCMPDesiredCoPAndCMPControlModule desiredCoPAndCMPControlModule = new SacrificeDeltaCMPDesiredCoPAndCMPControlModule(visualizer,
-                                                                                           bipedSupportPolygons,
-                                                                                           fullRobotModel.getPelvis().getBodyFixedFrame(), controlDT, registry);
-         desiredCoPAndCMPControlModule.setGains(3e-2, 1.0, 1.5, 15.0);
-         this.desiredCoPAndCMPControlModule = desiredCoPAndCMPControlModule;
-      }
+      this.momentumRateOfChangeControlModule = momentumRateOfChangeControlModule;
+      this.rootJointAccelerationControlModule = rootJointAccelerationControlModule;
 
       gravitationalWrench = new SpatialForceVector(centerOfMassFrame, new Vector3d(0.0, 0.0, totalMass * gravityZ), new Vector3d());
 
@@ -332,15 +271,6 @@ public abstract class ICPAndMomentumBasedController implements RobotController
 
       this.updatables.add(new FootPolygonVisualizer(contactStates.values(), dynamicGraphicObjectsListRegistry, registry));
 
-      momentumSubspace = new DenseMatrix64F(SpatialForceVector.SIZE, 3);
-      momentumSubspace.set(3, 0, 1.0);
-      momentumSubspace.set(4, 1, 1.0);
-      momentumSubspace.set(5, 2, 1.0);
-
-      accelerationSubspace = new DenseMatrix64F(SpatialMotionVector.SIZE, 3);
-      accelerationSubspace.set(0, 0, 1.0);
-      accelerationSubspace.set(1, 1, 1.0);
-      accelerationSubspace.set(2, 2, 1.0);
    }
 
 
@@ -357,6 +287,8 @@ public abstract class ICPAndMomentumBasedController implements RobotController
       inverseDynamicsCalculator.setExternalWrench(fullRobotModel.getHand(robotSide), handWrench);
    }
 
+   public abstract void doMotionControl();
+   
    public final void doControl()
    {
       updateBipedSupportPolygons(bipedSupportPolygons);
@@ -370,36 +302,22 @@ public abstract class ICPAndMomentumBasedController implements RobotController
 
       solver.compute();
 
-      SpatialForceVector totalGroundReactionWrench = computeDesiredTotalGroundReactionWrench();
-
-      SpatialForceVector desiredCentroidalMomentumRate = new SpatialForceVector(totalGroundReactionWrench);
-      desiredCentroidalMomentumRate.sub(gravitationalWrench);
 
 
-      if (doStrictPelvisControl)
-      {
-         DenseMatrix64F momentumMultipliers = new DenseMatrix64F(3, 1);
-         MatrixTools.setDenseMatrixFromTuple3d(momentumMultipliers, desiredCentroidalMomentumRate.getLinearPartCopy(), 0, 0);
+      rootJointAccelerationControlModule.startComputation();
+      rootJointAccelerationControlModule.waitUntilComputationIsDone();
+      RootJointAccelerationData rootJointAccelerationData = rootJointAccelerationControlModule.getRootJointAccelerationOutputPort().getData();
 
-         DenseMatrix64F accelerationMultipliers = new DenseMatrix64F(3, 1);
-         FrameVector pelvisAngularAcceleration = computeDesiredPelvisAngularAcceleration();
-         this.desiredPelvisAngularAcceleration.set(pelvisAngularAcceleration);
-         pelvisAngularAcceleration.changeFrame(fullRobotModel.getPelvis().getBodyFixedFrame());
-         MatrixTools.setDenseMatrixFromTuple3d(accelerationMultipliers, pelvisAngularAcceleration.getVector(), 0, 0);
+      momentumRateOfChangeControlModule.startComputation();
+      momentumRateOfChangeControlModule.waitUntilComputationIsDone();
+      MomentumRateOfChangeData momentumRateOfChangeData = momentumRateOfChangeControlModule.getMomentumRateOfChangeOutputPort().getData();
 
-         RootJointAccelerationData rootJointAccelerationData = new RootJointAccelerationData();
-         rootJointAccelerationData.setAccelerationSubspace(accelerationSubspace);
-         rootJointAccelerationData.setAccelerationMultipliers(accelerationMultipliers);
-
-         MomentumRateOfChangeData momentumRateOfChangeData = new MomentumRateOfChangeData();
-         momentumRateOfChangeData.setMomentumSubspace(momentumSubspace);
-         momentumRateOfChangeData.setMomentumMultipliers(momentumMultipliers);
-
-         solver.solve(accelerationSubspace, accelerationMultipliers, momentumSubspace, momentumMultipliers);
-         solver.getRateOfChangeOfMomentum(totalGroundReactionWrench);
-
-         totalGroundReactionWrench.add(gravitationalWrench);
-      }
+      solver.solve(rootJointAccelerationData.getAccelerationSubspace(), rootJointAccelerationData.getAccelerationMultipliers(),
+                   momentumRateOfChangeData.getMomentumSubspace(), momentumRateOfChangeData.getMomentumMultipliers());
+      
+      SpatialForceVector totalGroundReactionWrench = new SpatialForceVector(centerOfMassFrame);
+      solver.getRateOfChangeOfMomentum(totalGroundReactionWrench);
+      totalGroundReactionWrench.add(gravitationalWrench);
 
       unfilteredDesiredGroundReactionTorque.set(totalGroundReactionWrench.getAngularPartCopy());
       unfilteredDesiredGroundReactionForce.set(totalGroundReactionWrench.getLinearPartCopy());
@@ -470,6 +388,7 @@ public abstract class ICPAndMomentumBasedController implements RobotController
       admissibleDesiredGroundReactionForce.set(admissibleGroundReactionWrench.getLinearPartCopy());
       this.omega0.set(computeOmega0(cops, admissibleGroundReactionWrench));
 
+      SpatialForceVector desiredCentroidalMomentumRate = new SpatialForceVector();
       desiredCentroidalMomentumRate.set(admissibleGroundReactionWrench);
       desiredCentroidalMomentumRate.sub(gravitationalWrench);
 
@@ -485,57 +404,7 @@ public abstract class ICPAndMomentumBasedController implements RobotController
       updateYoVariables();
    }
 
-
-   private SpatialForceVector computeDesiredTotalGroundReactionWrench()
-   {
-      Momentum momentum = computeCentroidalMomentum();
-      ReferenceFrame frame = worldFrame;
-      RobotSide supportLeg = this.supportLeg.getEnumValue();
-
-      FrameOrientation desiredPelvisOrientation = this.desiredPelvisOrientation.getFrameOrientationCopy();
-      desiredCoPAndCMPControlModule.compute(capturePoint.getFramePoint2dCopy(), supportLeg, desiredICP.getFramePoint2dCopy(),
-              desiredICPVelocity.getFrameVector2dCopy(), desiredPelvisOrientation, omega0.getDoubleValue(), momentum);
-      FramePoint2d desiredCoP2d = new FramePoint2d(worldFrame);
-      desiredCoPAndCMPControlModule.packCoP(desiredCoP2d);
-      FramePoint2d desiredCMP2d = new FramePoint2d(worldFrame);
-      desiredCoPAndCMPControlModule.packCMP(desiredCMP2d);
-
-      desiredCoP2d.changeFrame(frame);
-      GeometryTools.projectOntoPolygonAndCheckDistance(desiredCoP2d, bipedSupportPolygons.getSupportPolygonInMidFeetZUp(), 1e-10);    // fix numerical roundoff
-
-      desiredCMP2d.changeFrame(frame);
-      FrameVector2d desiredDeltaCMP = new FrameVector2d(desiredCMP2d);
-      desiredDeltaCMP.sub(desiredCoP2d);
-
-      this.fZ.update(computeFz());
-      FrameVector totalgroundReactionMoment = groundReactionMomentControlModule.determineGroundReactionMoment(momentum,
-                                                 desiredPelvisOrientation.getYawPitchRoll()[0]);
-
-      SpatialForceVector totalGroundReactionWrench = computeTotalGroundReactionWrench(desiredCoP2d, desiredCMP2d, totalgroundReactionMoment,
-                                                        fZ.getDoubleValue(), omega0.getDoubleValue());
-      totalGroundReactionWrench.changeFrame(centerOfMassFrame);
-
-      return totalGroundReactionWrench;
-   }
-
-
-   private FrameVector computeDesiredPelvisAngularAcceleration()
-   {
-      Twist pelvisTwist = new Twist();
-      twistCalculator.packTwistOfBody(pelvisTwist, fullRobotModel.getPelvis());
-      ReferenceFrame pelvisFrame = fullRobotModel.getPelvis().getBodyFixedFrame();
-      FrameOrientation desiredPelvisOrientation = this.desiredPelvisOrientation.getFrameOrientationCopy();
-      FrameVector desiredPelvisAngularVelocity = new FrameVector(pelvisFrame);
-      FrameVector currentPelvisAngularVelocity = new FrameVector(pelvisTwist.getExpressedInFrame(), pelvisTwist.getAngularPartCopy());
-      FrameVector feedForwardPelvisAcceleration = new FrameVector(pelvisFrame);
-      FrameVector pelvisAngularAcceleration = new FrameVector(pelvisFrame);
-      pelvisOrientationController.compute(pelvisAngularAcceleration, desiredPelvisOrientation, desiredPelvisAngularVelocity, currentPelvisAngularVelocity,
-              feedForwardPelvisAcceleration);
-
-      return pelvisAngularAcceleration;
-   }
-
-
+   // FIXME: move this
    private double computeOmega0(List<FramePoint2d> cop2ds, Wrench totalGroundReactionWrenchAfterProjection)
    {
       totalGroundReactionWrenchAfterProjection.changeFrame(centerOfMassFrame);
@@ -570,42 +439,6 @@ public abstract class ICPAndMomentumBasedController implements RobotController
       return Math.sqrt(fz / (totalMass * deltaZ));
    }
 
-   private SpatialForceVector computeTotalGroundReactionWrench(FramePoint2d desiredCoP2d, FramePoint2d desiredCMP2d, FrameVector totalgroundReactionMoment,
-           double fZ, double omega0)
-   {
-      FramePoint com = new FramePoint(centerOfMassFrame);
-      double zCoP = com.getZ() - fZ / (totalMass * MathTools.square(omega0));    // FIXME: hack to resolve circularity
-
-      FramePoint desiredCoP = desiredCoP2d.toFramePoint();
-      desiredCoP.changeFrame(com.getReferenceFrame());
-      desiredCoP.setZ(zCoP);
-
-      FramePoint desiredCMP = desiredCMP2d.toFramePoint();
-      desiredCMP.changeFrame(com.getReferenceFrame());
-      desiredCMP.setZ(zCoP);
-
-      FrameVector force = new FrameVector(com);
-      force.sub(desiredCMP);
-      force.scale(fZ / force.getZ());
-      FrameVector momentArm = new FrameVector(desiredCoP);
-      momentArm.sub(com);
-
-      SpatialForceVector totalGroundReactionWrench = SpatialForceVector.createUsingArm(centerOfMassFrame, force.getVector(), momentArm.getVector());
-      totalGroundReactionWrench.addAngularPart(totalgroundReactionMoment.getVector());
-
-      return totalGroundReactionWrench;
-   }
-
-   public abstract void doMotionControl();
-
-   private Momentum computeCentroidalMomentum()
-   {
-      Momentum momentum = new Momentum(centerOfMassFrame);
-      momentumCalculator.computeAndPack(momentum);
-
-      return momentum;
-   }
-
    private void callUpdatables()
    {
       double time = yoTime.getDoubleValue();
@@ -615,6 +448,7 @@ public abstract class ICPAndMomentumBasedController implements RobotController
       }
    }
 
+   // FIXME: get rid of this
    protected ReferenceFrame getHandFrame(RobotSide robotSide)
    {
       return fullRobotModel.getHand(robotSide).getBodyFixedFrame();
@@ -677,13 +511,6 @@ public abstract class ICPAndMomentumBasedController implements RobotController
    public ContactState getContactState(RigidBody rigidBody)
    {
       return contactStates.get(rigidBody);
-   }
-
-   private double computeFz()
-   {
-      double fZ = totalMass * (gravityZ + desiredCoMHeightAcceleration.getDoubleValue());    // TODO: don't rely on DoubleYoVariable being set
-
-      return fZ;
    }
 
    private void updateYoVariables()
