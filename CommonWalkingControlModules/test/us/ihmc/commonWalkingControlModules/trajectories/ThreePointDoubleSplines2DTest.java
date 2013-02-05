@@ -49,5 +49,6 @@ public class ThreePointDoubleSplines2DTest
       
       assertEquals(zHeight, z, 1e-7);
    }
+   
 
 }
