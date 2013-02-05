@@ -4,7 +4,6 @@ import us.ihmc.graphics3DAdapter.camera.VideoSettings;
 import us.ihmc.graphics3DAdapter.camera.VideoSettings.Quality;
 import us.ihmc.graphics3DAdapter.camera.VideoSettingsH264LowLatency;
 
-
 public class DRCConfigParameters
 {
    // Set whether or not to use GFE Robot Model
@@ -38,13 +37,13 @@ public class DRCConfigParameters
    public static final int LIDAR_DATA_PORT_NUMBER = 4697;
    public static final long LIDAR_DATA_IDENTIFIER = 4697L;
    public static final int LIDAR_X_RESOLUTION_OVERRIDE = 50;
-   
+
    public static final long ROBOT_JOINT_SERVER_UPDATE_MILLIS = 100;
 
    public static final boolean STREAM_LIDAR = true;
-   
-//   public static final VideoSettings VIDEOSETTINGS = new VideoSettingsH264LowLatency(800, 600, Quality.MEDIUMs);
-   public static final VideoSettings VIDEOSETTINGS = new VideoSettingsH264LowLatency(200, 150, Quality.LOW);
+
+   public static final VideoSettings VIDEOSETTINGS = new VideoSettingsH264LowLatency(800, 600, Quality.MEDIUM);
+   //   public static final VideoSettings VIDEOSETTINGS = new VideoSettingsH264LowLatency(200, 150, Quality.LOW);
 
    static final int LIDAR_UPDATE_RATE_OVERRIDE = 10;
 
