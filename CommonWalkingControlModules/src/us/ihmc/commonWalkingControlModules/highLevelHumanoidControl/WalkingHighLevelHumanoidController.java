@@ -184,7 +184,8 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
            ControlFlowInputPort<OrientationTrajectoryData> desiredPelvisOrientationTrajectoryInputPort)
    {
       super(fullRobotModel, centerOfMassJacobian, referenceFrames, yoTime, gravityZ, twistCalculator, bipedFeet, bipedSupportPolygons, controlDT,
-            processedOutputs, groundReactionWrenchDistributor, updatables, momentumRateOfChangeControlModule, rootJointAccelerationControlModule, dynamicGraphicObjectsListRegistry);
+            processedOutputs, groundReactionWrenchDistributor, updatables, momentumRateOfChangeControlModule, rootJointAccelerationControlModule,
+            dynamicGraphicObjectsListRegistry);
 
       this.icpBasedMomentumRateOfChangeControlModule = momentumRateOfChangeControlModule;
       this.desiredPelvisOrientationTrajectoryInputPort = desiredPelvisOrientationTrajectoryInputPort;
@@ -624,6 +625,11 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
          {
             setFlatFootContactState(bipedFeet.get(supportSide));
          }
+
+         // for some reason, having this here matters. Should have been done in initializeTrajectory already...
+         // TODO: figure out why
+         setContactStateForSwing(bipedFeet.get(swingSide));
+         updateBipedSupportPolygons(bipedSupportPolygons);
 
          centerOfMassHeightTrajectoryGenerator.initialize(getSupportLeg());
       }

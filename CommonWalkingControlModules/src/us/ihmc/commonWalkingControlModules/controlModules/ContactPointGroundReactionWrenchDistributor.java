@@ -9,7 +9,6 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.commonWalkingControlModules.WrenchDistributorTools;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.ContactPointWrenchOptimizerNative;
-import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.exeptions.NoConvergenceException;
 import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -86,14 +85,12 @@ public class ContactPointGroundReactionWrenchDistributor implements GroundReacti
       }
    }
 
-   public void solve(GroundReactionWrenchDistributorOutputData distributedWrench,
-         GroundReactionWrenchDistributorInputData inputData)
+   public void solve(GroundReactionWrenchDistributorOutputData distributedWrench, GroundReactionWrenchDistributorInputData inputData)
    {
       distributedWrench.reset();
 
       SpatialForceVector desiredGroundReactionWrench = inputData.getDesiredNetSpatialForceVector();
-      RobotSide upcomingSupportleg = inputData.getUpcomingSupportSide();
-           
+
       desiredGroundReactionWrench.changeFrame(centerOfMassFrame);
       desiredGroundReactionWrench.packMatrix(desiredWrench);
 
@@ -101,13 +98,13 @@ public class ContactPointGroundReactionWrenchDistributor implements GroundReacti
       normalForceSelectorBMatrix.zero();
 
       ArrayList<PlaneContactState> contactStates = inputData.getContactStates();
-      
+
       int contactNumber = 0;
       for (PlaneContactState contactState : contactStates)
       {
          List<FramePoint2d> contactPoints2d = contactState.getContactPoints2d();
          int nContactPoints = contactPoints2d.size();
-         
+
          WrenchDistributorTools.getSupportVectors(normalizedSupportVectors, inputData.getCoefficientOfFriction(contactState), contactState.getPlaneFrame());
 
          // B
@@ -118,7 +115,8 @@ public class ContactPointGroundReactionWrenchDistributor implements GroundReacti
          WrenchDistributorTools.computeSupportVectorMatrixBlock(supportVectorMatrixVBlock, normalizedSupportVectors, centerOfMassFrame);
          placeAForceBlock(aMatrix, supportVectorMatrixVBlock, contactNumber, nContactPoints);
 
-         int aTorquePartColumn = contactNumber * ContactPointWrenchOptimizerNative.NUMBER_OF_POINTS_PER_CONTACT * ContactPointWrenchOptimizerNative.NUMBER_OF_SUPPORT_VECTORS;
+         int aTorquePartColumn = contactNumber * ContactPointWrenchOptimizerNative.NUMBER_OF_POINTS_PER_CONTACT
+                                 * ContactPointWrenchOptimizerNative.NUMBER_OF_SUPPORT_VECTORS;
          for (FramePoint2d contactPoint2d : contactPoints2d)
          {
             // torque part of A
@@ -189,7 +187,7 @@ public class ContactPointGroundReactionWrenchDistributor implements GroundReacti
       int supportVectorMatrixRow = 2;    // z force
       int nBlocks = nContactPoints;
       int startColumn = contactNumber
-            * (ContactPointWrenchOptimizerNative.NUMBER_OF_SUPPORT_VECTORS * ContactPointWrenchOptimizerNative.NUMBER_OF_POINTS_PER_CONTACT);
+                        * (ContactPointWrenchOptimizerNative.NUMBER_OF_SUPPORT_VECTORS * ContactPointWrenchOptimizerNative.NUMBER_OF_POINTS_PER_CONTACT);
       for (int columnBlockNumber = 0; columnBlockNumber < nBlocks; columnBlockNumber++)
       {
          CommonOps.extract(supportVectorMatrixBlock, supportVectorMatrixRow, supportVectorMatrixRow + 1, 0, supportVectorMatrixBlock.getNumCols(),

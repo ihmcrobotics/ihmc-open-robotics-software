@@ -8,7 +8,7 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.OriginAndPointFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.Wrench;
+import us.ihmc.utilities.screwTheory.SpatialForceVector;
 
 public class Omega0Calculator
 {
@@ -24,10 +24,10 @@ public class Omega0Calculator
       this.totalMass = totalMass;
    }
 
-   public double computeOmega0(List<FramePoint2d> cop2ds, Wrench totalGroundReactionWrenchAfterProjection)
+   public double computeOmega0(List<FramePoint2d> cop2ds, SpatialForceVector totalGroundReactionWrench)
    {
-      totalGroundReactionWrenchAfterProjection.changeFrame(centerOfMassFrame);
-      double fz = totalGroundReactionWrenchAfterProjection.getLinearPartCopy().getZ();
+      totalGroundReactionWrench.changeFrame(centerOfMassFrame);
+      double fz = totalGroundReactionWrench.getLinearPartCopy().getZ();
 
       double deltaZ;
       if (cop2ds.size() == 1)
@@ -49,7 +49,7 @@ public class Omega0Calculator
          copToCoPFrame.setOriginAndPositionToPointAt(cops.get(0), cops.get(1));
          copToCoPFrame.update();
          FramePoint2d pseudoCoP2d = new FramePoint2d(copToCoPFrame);
-         centerOfPressureResolver.resolveCenterOfPressureAndNormalTorque(pseudoCoP2d, totalGroundReactionWrenchAfterProjection, copToCoPFrame);
+         centerOfPressureResolver.resolveCenterOfPressureAndNormalTorque(pseudoCoP2d, totalGroundReactionWrench, copToCoPFrame);
          FramePoint pseudoCoP = pseudoCoP2d.toFramePoint();
          pseudoCoP.changeFrame(centerOfMassFrame);
          deltaZ = -pseudoCoP.getZ();

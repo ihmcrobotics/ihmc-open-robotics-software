@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
-import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -44,25 +43,24 @@ public class LeeGoswamiGroundReactionWrenchDistributor implements GroundReaction
    }
 
    public void solve(GroundReactionWrenchDistributorOutputData distributedWrench,
-         GroundReactionWrenchDistributorInputData groundReactionWrenchDistributorInputData)
+                     GroundReactionWrenchDistributorInputData groundReactionWrenchDistributorInputData)
    {
       reset();
-      
+
       ArrayList<PlaneContactState> contactStates = groundReactionWrenchDistributorInputData.getContactStates();
-      
+
       for (PlaneContactState contactState : contactStates)
       {
-         addContact(contactState, groundReactionWrenchDistributorInputData.getCoefficientOfFriction(contactState), 
-               groundReactionWrenchDistributorInputData.getRotationalCoefficientsOfFriction(contactState));
+         addContact(contactState, groundReactionWrenchDistributorInputData.getCoefficientOfFriction(contactState),
+                    groundReactionWrenchDistributorInputData.getRotationalCoefficientsOfFriction(contactState));
       }
-    
+
       SpatialForceVector desiredGroundReactionWrench = groundReactionWrenchDistributorInputData.getDesiredNetSpatialForceVector();
-      RobotSide upcomingSupportleg = groundReactionWrenchDistributorInputData.getUpcomingSupportSide();
-      this.solve(desiredGroundReactionWrench, upcomingSupportleg);
-      
+      this.solve(desiredGroundReactionWrench);
+
       this.getOutputData(distributedWrench);
    }
-   
+
    private void reset()
    {
       // TODO: inefficient; should hang on to a bunch of temporary objects instead of deleting all references to them
@@ -83,7 +81,7 @@ public class LeeGoswamiGroundReactionWrenchDistributor implements GroundReaction
       normalTorques.put(contactState, 0.0);
    }
 
-   private void solve(SpatialForceVector desiredGroundReactionWrench, RobotSide upcomingSupportleg)
+   private void solve(SpatialForceVector desiredGroundReactionWrench)
    {
       desiredGroundReactionWrench.changeFrame(centerOfMassFrame);
 
@@ -95,12 +93,13 @@ public class LeeGoswamiGroundReactionWrenchDistributor implements GroundReaction
    private void getOutputData(GroundReactionWrenchDistributorOutputData outputData)
    {
       outputData.reset();
+
       for (PlaneContactState planeContactState : forces.keySet())
       {
          outputData.set(planeContactState, getForce(planeContactState), getCenterOfPressure(planeContactState), getNormalTorque(planeContactState));
       }
    }
-   
+
    private FrameVector getForce(PlaneContactState planeContactState)
    {
       return forces.get(planeContactState);
@@ -115,5 +114,5 @@ public class LeeGoswamiGroundReactionWrenchDistributor implements GroundReaction
    {
       return normalTorques.get(contactState);
    }
-  
+
 }

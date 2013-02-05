@@ -66,15 +66,12 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
          bipedFeet.put(robotSide, foot);
       }
 
-      BipedSupportPolygons bipedSupportPolygons = new BipedSupportPolygons(referenceFrames.getAnkleZUpReferenceFrames(), referenceFrames.getMidFeetZUpFrame(),
-            specificRegistry, dynamicGraphicObjectsListRegistry);
-
       double gravityZ = 9.81;
 
       RobotController highLevelHumanoidController = highLevelHumanoidControllerFactory.create(fullRobotModel, referenceFrames, null, yoTime,
-                                                                   gravityZ, twistCalculator, centerOfMassJacobian, bipedFeet, bipedSupportPolygons, controlDT,
-                                                                   footSwitches, dynamicGraphicObjectsListRegistry, specificRegistry,
-                                                                   guiSetterUpperRegistry, null);
+                                                                   gravityZ, twistCalculator, centerOfMassJacobian, bipedFeet, controlDT, footSwitches,
+                                                                   dynamicGraphicObjectsListRegistry, specificRegistry, guiSetterUpperRegistry,
+                                                                   null);
       highLevelHumanoidController.getYoVariableRegistry().addChild(specificRegistry);
       return highLevelHumanoidController;
    }
