@@ -59,6 +59,14 @@ public class DesiredFootstepCalculatorTools
    public static FramePoint computeMinZPointInFrame(Transform3D footToWorldTransform, ContactableBody contactableBody, ReferenceFrame frame)
    {
       List<FramePoint> footPoints = contactableBody.getContactPoints();
+      
+      ReferenceFrame bodyFrame = contactableBody.getBodyFrame();
+      
+      return computeMinZPointInFrame(footToWorldTransform, footPoints, bodyFrame, frame);
+   }
+      
+   public static FramePoint computeMinZPointInFrame(Transform3D footToWorldTransform, List<FramePoint> footPoints, ReferenceFrame bodyFrame, ReferenceFrame frame)
+   {
       FramePoint minFramePoint = new FramePoint(frame);
       minFramePoint.setZ(Double.POSITIVE_INFINITY);
       FramePoint tempFramePoint = new FramePoint(ReferenceFrame.getWorldFrame());
@@ -66,7 +74,7 @@ public class DesiredFootstepCalculatorTools
       for (FramePoint footPoint : footPoints)
       {
          tempFramePoint.setAndChangeFrame(footPoint);
-         tempFramePoint.changeFrame(contactableBody.getBodyFrame());
+         tempFramePoint.changeFrame(bodyFrame);
          tempFramePoint.changeFrameUsingTransform(ReferenceFrame.getWorldFrame(), footToWorldTransform);
          tempFramePoint.changeFrame(frame);
 

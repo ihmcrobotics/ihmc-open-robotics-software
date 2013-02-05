@@ -76,7 +76,7 @@ public class FlatThenPolynomialCoMHeightTrajectoryGenerator implements CenterOfM
       parentRegistry.addChild(registry);
    }
 
-   public void initialize(RobotSide supportLeg)
+   public void initialize(RobotSide supportLeg, Footstep nextFootstep)
    {
       if (supportLeg == null)
       {
