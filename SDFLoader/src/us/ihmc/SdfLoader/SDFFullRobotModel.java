@@ -6,6 +6,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 import javax.media.j3d.Transform3D;
+import javax.vecmath.Matrix3d;
+import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFJointNameMap.JointRole;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
@@ -22,6 +24,7 @@ import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.containers.ContainerTools;
+import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
@@ -76,7 +79,7 @@ public class SDFFullRobotModel implements FullRobotModel
 
       for (SDFJointHolder sdfJoint : rootLink.getChildren())
       {
-         addJointsRecursively(sdfJoint, pelvis);
+         addJointsRecursively(sdfJoint, pelvis, MatrixTools.IDENTITY);
       }
 
       Set<RigidBody> excludeBodiesForUpperBody = new HashSet<RigidBody>();
@@ -106,10 +109,26 @@ public class SDFFullRobotModel implements FullRobotModel
 
    }
 
-   private void addJointsRecursively(SDFJointHolder joint, RigidBody parentBody)
+   private void addJointsRecursively(SDFJointHolder joint, RigidBody parentBody, Matrix3d chainRotationIn)
    {
 //      System.out.println("Adding joint " + joint.getName() + " to " + parentBody.getName());
-      RevoluteJoint inverseDynamicsJoint = ScrewTools.addRevoluteJoint(joint.getName(), parentBody, joint.getTransformToParentJoint(), joint.getAxis());
+	   
+	   
+	  Matrix3d rotation = new Matrix3d();
+      joint.getTransformToParentJoint().get(rotation);
+
+      Matrix3d chainRotation = new Matrix3d(chainRotationIn);
+      chainRotation.mul(rotation);
+
+      Transform3D orientationTransform = new Transform3D();
+      orientationTransform.set(chainRotation);
+      orientationTransform.invert();
+
+      Vector3d jointAxis = new Vector3d(joint.getAxis());
+      orientationTransform.transform(jointAxis);
+	   
+	   
+      RevoluteJoint inverseDynamicsJoint = ScrewTools.addRevoluteJoint(joint.getName(), parentBody, joint.getTransformToParentJoint(), jointAxis);
       SDFLinkHolder childLink = joint.getChild();
       RigidBody rigidBody = ScrewTools.addRigidBody(childLink.getName(), inverseDynamicsJoint, childLink.getInertia(), childLink.getMass(),
             childLink.getCoMOffset());
@@ -170,7 +189,7 @@ public class SDFFullRobotModel implements FullRobotModel
 
       for (SDFJointHolder sdfJoint : childLink.getChildren())
       {
-         addJointsRecursively(sdfJoint, rigidBody);
+         addJointsRecursively(sdfJoint, rigidBody, chainRotation);
       }
 
    }
