@@ -23,6 +23,7 @@ import com.yobotics.simulationconstructionset.util.ground.TerrainObject;
 
 public class DRCDemoEnvironmentWithBoxAndSteeringWheel implements CommonAvatarEnvironmentInterface
 {
+   private static final boolean debug = false;
    private static final double BOX_LENGTH = 0.5;
    private static final double BOX_WIDTH = 0.5;
    private static final double BOX_HEIGHT = 0.51;
@@ -111,7 +112,10 @@ public class DRCDemoEnvironmentWithBoxAndSteeringWheel implements CommonAvatarEn
    public static void main(String[] args)
    {
       DRCDemoEnvironmentWithBoxAndSteeringWheel env = new DRCDemoEnvironmentWithBoxAndSteeringWheel();
-      env.testWheelContactPoints();
+      if (debug)
+      {
+         env.testWheelContactPoints();
+      }
    }
    
    
@@ -177,7 +181,6 @@ public class DRCDemoEnvironmentWithBoxAndSteeringWheel implements CommonAvatarEn
       linkGraphics.identity();
       linkGraphics.translate(point.x, point.y, point.z);
       linkGraphics.addSphere(radius, appearance);
-//      combinedTerrainObject..setLinkGraphics(linkGraphics);
    }
    
    
