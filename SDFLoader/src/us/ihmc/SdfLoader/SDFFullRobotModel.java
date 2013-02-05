@@ -109,7 +109,7 @@ public class SDFFullRobotModel implements FullRobotModel
    private void addJointsRecursively(SDFJointHolder joint, RigidBody parentBody)
    {
 //      System.out.println("Adding joint " + joint.getName() + " to " + parentBody.getName());
-      RevoluteJoint inverseDynamicsJoint = ScrewTools.addRevoluteJoint(joint.getName(), parentBody, joint.getTransformFromParentJoint(), joint.getAxis());
+      RevoluteJoint inverseDynamicsJoint = ScrewTools.addRevoluteJoint(joint.getName(), parentBody, joint.getTransformToParentJoint(), joint.getAxis());
       SDFLinkHolder childLink = joint.getChild();
       RigidBody rigidBody = ScrewTools.addRigidBody(childLink.getName(), inverseDynamicsJoint, childLink.getInertia(), childLink.getMass(),
             childLink.getCoMOffset());

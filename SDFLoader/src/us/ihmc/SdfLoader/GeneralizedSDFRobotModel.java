@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
 
-import javax.vecmath.Vector3d;
+import javax.media.j3d.Transform3D;
 
 import us.ihmc.SdfLoader.xmlDescription.SDFJoint;
 import us.ihmc.SdfLoader.xmlDescription.SDFLink;
@@ -17,7 +17,7 @@ public class GeneralizedSDFRobotModel
    private final String name;
    private final File resourceDirectory;
    private final ArrayList<SDFLinkHolder> rootLinks = new ArrayList<SDFLinkHolder>();
-   private final Vector3d rootOffset = new Vector3d();
+   private final Transform3D transformToRoot;
 
    public GeneralizedSDFRobotModel(String name, SDFModel model, File resourceDirectory)
    {
@@ -57,7 +57,8 @@ public class GeneralizedSDFRobotModel
 
       findRootLinks(links);
       
-      SDFConversionsHelper.poseToTransform(model.getPose()).get(rootOffset);
+      transformToRoot = SDFConversionsHelper.poseToTransform(model.getPose());
+
    }
 
    private void findRootLinks(HashMap<String, SDFLinkHolder> links)
@@ -77,9 +78,9 @@ public class GeneralizedSDFRobotModel
       return rootLinks;
    }
    
-   public Vector3d getRootOffset()
+   public Transform3D getTransformToRoot()
    {
-      return rootOffset;
+      return transformToRoot;
    }
    
    public String getName()
