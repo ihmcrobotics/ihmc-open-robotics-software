@@ -112,6 +112,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
    private final YoVariableDoubleProvider doubleSupportTimeProvider = new YoVariableDoubleProvider("doubleSupportTime", registry);
 
    private final DoubleYoVariable singleSupportICPGlideScaleFactor = new DoubleYoVariable("singleSupportICPGlideScaleFactor", registry);
+   protected final SideDependentList<FootSwitchInterface> footSwitches;
 
 // private final BooleanYoVariable walk = new BooleanYoVariable("walk", registry);
 
@@ -183,8 +184,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
            ControlFlowInputPort<OrientationTrajectoryData> desiredPelvisOrientationTrajectoryInputPort)
    {
       super(fullRobotModel, centerOfMassJacobian, referenceFrames, yoTime, gravityZ, twistCalculator, bipedFeet, bipedSupportPolygons, controlDT,
-            processedOutputs, footSwitches, groundReactionWrenchDistributor, updatables, momentumRateOfChangeControlModule, rootJointAccelerationControlModule,
-            dynamicGraphicObjectsListRegistry);
+            processedOutputs, groundReactionWrenchDistributor, updatables, momentumRateOfChangeControlModule, rootJointAccelerationControlModule, dynamicGraphicObjectsListRegistry);
 
       this.icpBasedMomentumRateOfChangeControlModule = momentumRateOfChangeControlModule;
       this.desiredPelvisOrientationTrajectoryInputPort = desiredPelvisOrientationTrajectoryInputPort;
@@ -192,6 +192,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       this.centerOfMassHeightTrajectoryGenerator = centerOfMassHeightTrajectoryGenerator;
       this.swingTimeProvider = swingTimeProvider;
       this.footstepProvider = footstepProvider;
+      this.footSwitches = footSwitches;
 
       this.centerOfMassHeightController = new PDController("comHeight", registry);
       centerOfMassHeightController.setProportionalGain(40.0);    // about 4000 / totalMass
