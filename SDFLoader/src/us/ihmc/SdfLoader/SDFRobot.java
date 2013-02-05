@@ -23,7 +23,6 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.Pair;
-import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
@@ -73,17 +72,17 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRo
 
       SDFLinkHolder rootLink = rootLinks.get(0);
 
-      Vector3d offset = new Vector3d();
-      Matrix3d rotation = new Matrix3d();
-      rootLink.getTransformFromModelReferenceFrame().get(rotation, offset);
-      rootJoint = new FloatingJoint(rootLink.getName(), generalizedSDFRobotModel.getRootOffset(), this);
-      Link scsRootLink = createLink(rootLink, rotation);
+      rootJoint = new FloatingJoint(rootLink.getName(), generalizedSDFRobotModel.getTransformToRoot(), this);
+      Link scsRootLink = createLink(rootLink);
       rootJoint.setLink(scsRootLink);
       addRootJoint(rootJoint);
 
+      
+      Matrix3d rootRotation = new Matrix3d();
+      generalizedSDFRobotModel.getTransformToRoot().get(rootRotation);
       for (SDFJointHolder child : rootLink.getChildren())
       {
-         addJointsRecursively(child, rootJoint, MatrixTools.IDENTITY);
+         addJointsRecursively(child, rootJoint, rootRotation);
       }
 
       if (sdfJointNameMap != null)
@@ -119,7 +118,7 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRo
 
       Point3d centerOfMass = new Point3d();
       double totalMass = computeCenterOfMass(centerOfMass);
-      System.out.println("Total mass: " + totalMass);
+      System.out.println("SDFRobot: Total robot mass: " + totalMass);
 
    }
 
@@ -145,21 +144,21 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRo
 
    private void addJointsRecursively(SDFJointHolder joint, Joint scsParentJoint, Matrix3d chainRotationIn)
    {
-//    System.out.println("Adding joint " + joint.getName() + " to " + scsParentJoint.getName());
-      Vector3d offset = new Vector3d();
       Matrix3d rotation = new Matrix3d();
-      Transform3D transform = new Transform3D();
-
-      joint.getTransformFromParentJoint().get(rotation, offset);
-      transform.setRotation(chainRotationIn);
-      transform.transform(offset);
+      joint.getTransformToParentJoint().get(rotation);
 
       Matrix3d chainRotation = new Matrix3d(chainRotationIn);
       chainRotation.mul(rotation);
       
+      Transform3D orientationTransform = new Transform3D();
+      orientationTransform.set(chainRotation);
+      orientationTransform.invert();
+      
       Vector3d jointAxis = new Vector3d(joint.getAxis());
-      PinJoint scsJoint = new PinJoint(SDFConversionsHelper.sanitizeJointName(joint.getName()), offset, this, jointAxis);
-      scsJoint.setLink(createLink(joint.getChild(), chainRotation));
+      orientationTransform.transform(jointAxis);
+      
+      PinJoint scsJoint = new PinJoint(SDFConversionsHelper.sanitizeJointName(joint.getName()), joint.getTransformToParentJoint(), this, jointAxis);
+      scsJoint.setLink(createLink(joint.getChild()));
       scsParentJoint.addJoint(scsJoint);
 
       addCameraMounts(scsJoint, joint.getChild());
@@ -295,9 +294,9 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRo
       }
    }
 
-   private Link createLink(SDFLinkHolder link, Matrix3d rotation)
+   private Link createLink(SDFLinkHolder link)
    {
-      SDFGraphics3DObject linkGraphics = new SDFGraphics3DObject(rotation, link.getVisuals(), resourceDirectory);
+      SDFGraphics3DObject linkGraphics = new SDFGraphics3DObject(link.getVisuals(), resourceDirectory);
 
       Link scsLink = new Link(link.getName());
       scsLink.setLinkGraphics(linkGraphics);

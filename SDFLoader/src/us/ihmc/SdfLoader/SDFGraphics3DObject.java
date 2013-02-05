@@ -20,13 +20,12 @@ public class SDFGraphics3DObject extends Graphics3DObject
 {
    private static final boolean SHOW_COORDINATE_SYSTEMS = false;
 
-   public SDFGraphics3DObject(Matrix3d rotation, List<SDFVisual> sdfVisuals, File resourceDirectory)
+   public SDFGraphics3DObject(List<SDFVisual> sdfVisuals, File resourceDirectory)
    {
       
       for(SDFVisual sdfVisual : sdfVisuals)
       {
          identity();
-         rotate(rotation);
          
          Transform3D visualPose = SDFConversionsHelper.poseToTransform(sdfVisual.getPose());
          Vector3d modelOffset = new Vector3d();

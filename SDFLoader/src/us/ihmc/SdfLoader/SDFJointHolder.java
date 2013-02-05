@@ -182,7 +182,7 @@ public class SDFJointHolder
       return child;
    }
 
-   public Transform3D getTransformFromParentJoint()
+   public Transform3D getTransformToParentJoint()
    {
       return transformFromParentJoint;
    }
