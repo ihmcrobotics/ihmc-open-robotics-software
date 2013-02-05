@@ -64,4 +64,12 @@ public class CenterOfMassHeightInputData
          this.contactStates.add(planeContactState);
       }
    }
+
+   public void set(ReferenceFrame centerOfMassFrame, RobotSide supportLeg, Footstep upcomingFootstep, List<PlaneContactState> contactStates)
+   {
+      this.setCenterOfMassFrame(centerOfMassFrame);
+      this.setSupportLeg(supportLeg);
+      this.setUpcomingFootstep(upcomingFootstep);
+      this.setContactStates(contactStates);
+   }
 }
