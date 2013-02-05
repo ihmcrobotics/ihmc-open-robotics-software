@@ -46,16 +46,16 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRo
 {
    private static final boolean DEBUG = true;
    private static final boolean SHOW_CONTACT_POINTS = true;
-   private static final boolean USE_POLAR_LIDAR_MODEL  = true;
+   private static final boolean USE_POLAR_LIDAR_MODEL = true;
 
    private static final long serialVersionUID = 5864358637898048080L;
-   
+
    private final File resourceDirectory;
    private final HashMap<String, PinJoint> robotJoints = new HashMap<String, PinJoint>();
 
    private final FloatingJoint rootJoint;
 
-   private final SideDependentList<ArrayList<GroundContactPoint>> groundContactPoints = new SideDependentList<ArrayList<GroundContactPoint>>();
+   private final SideDependentList<ArrayList<GroundContactPoint>> footGroundContactPoints = new SideDependentList<ArrayList<GroundContactPoint>>();
 
    private final HashMap<String, SDFCamera> cameras = new HashMap<String, SDFCamera>();
 
@@ -80,43 +80,47 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRo
       rootJoint.setLink(scsRootLink);
       addRootJoint(rootJoint);
 
-      
+
       Matrix3d rootRotation = new Matrix3d();
       generalizedSDFRobotModel.getTransformToRoot().get(rootRotation);
+
       for (SDFJointHolder child : rootLink.getChildren())
       {
          addJointsRecursively(child, rootJoint, rootRotation);
       }
 
+      for (RobotSide robotSide : RobotSide.values())
+      {
+         footGroundContactPoints.put(robotSide, new ArrayList<GroundContactPoint>());
+      }
+
       if (sdfJointNameMap != null)
       {
-         for (RobotSide robotSide : RobotSide.values)
+         int i = 0;
+         for (Pair<String, Vector3d> jointContactPoint : sdfJointNameMap.getJointNameGroundContactPointMap())
          {
-            ArrayList<GroundContactPoint> groundContactPointsForSide = new ArrayList<GroundContactPoint>();
+            String jointName = jointContactPoint.first();
+            GroundContactPoint groundContactPoint = new GroundContactPoint("gc_" + SDFJointHolder.createValidVariableName(jointName) + "_" + i,
+                                                       jointContactPoint.second(), this);
+            robotJoints.get(jointName).addGroundContactPoint(groundContactPoint);
 
-            if (sdfJointNameMap.getJointGroundContactPoints(robotSide) != null)
+            if (SHOW_CONTACT_POINTS)
             {
-               int i = 0;
-               for (Pair<String,Vector3d> jointContactPoint : sdfJointNameMap.getJointGroundContactPoints(robotSide))
-               {
-                  String jointName = jointContactPoint.first();
-                  GroundContactPoint groundContactPoint = new GroundContactPoint("gc_" + SDFJointHolder.createValidVariableName(jointName) + "_" + i, jointContactPoint.second(), this);
-                  robotJoints.get(jointName).addGroundContactPoint(groundContactPoint);
-                  groundContactPointsForSide.add(groundContactPoint);
-   
-                  if (SHOW_CONTACT_POINTS)
-                  {
-                     Graphics3DObject graphics = robotJoints.get(jointName).getLink().getLinkGraphics();
-                     graphics.identity();
-                     graphics.translate(jointContactPoint.second());
-                     graphics.addSphere(0.002, YoAppearance.Orange());
-                  }
-                  i++;
-               }
+               Graphics3DObject graphics = robotJoints.get(jointName).getLink().getLinkGraphics();
+               graphics.identity();
+               graphics.translate(jointContactPoint.second());
+               double radius = 0.01;
+               graphics.addSphere(radius, YoAppearance.Orange());
             }
-            groundContactPoints.put(robotSide, groundContactPointsForSide);
+
+            for (RobotSide robotSide : RobotSide.values())
+            {
+               if (jointName.equals(sdfJointNameMap.getJointBeforeFootName(robotSide)))
+                  footGroundContactPoints.get(robotSide).add(groundContactPoint);
+            }
+
+            i++;
          }
-         
       }
 
       Point3d centerOfMass = new Point3d();
@@ -139,7 +143,7 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRo
    {
       rootJoint.setYawPitchRoll(yaw, pitch, roll);
    }
-   
+
    public PinJoint getPinJoint(String name)
    {
       return robotJoints.get(name);
@@ -152,22 +156,22 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRo
 
       Matrix3d chainRotation = new Matrix3d(chainRotationIn);
       chainRotation.mul(rotation);
-      
+
       Transform3D orientationTransform = new Transform3D();
       orientationTransform.set(chainRotation);
       orientationTransform.invert();
-      
+
       Vector3d jointAxis = new Vector3d(joint.getAxis());
       orientationTransform.transform(jointAxis);
-      
+
       PinJoint scsJoint = new PinJoint(SDFConversionsHelper.sanitizeJointName(joint.getName()), joint.getTransformToParentJoint(), this, jointAxis);
       scsJoint.setLink(createLink(joint.getChild()));
       scsParentJoint.addJoint(scsJoint);
 
-      if(DEBUG)
-         if("hokuyo_joint".equals(scsJoint.getName()))
-            System.out.println("hokuyo joint's parent is : "+ scsParentJoint.getName());
-      
+      if (DEBUG)
+         if ("hokuyo_joint".equals(scsJoint.getName()))
+            System.out.println("hokuyo joint's parent is : " + scsParentJoint.getName());
+
       addCameraMounts(scsJoint, joint.getChild());
       addLidarMounts(scsJoint, joint.getChild());
 
@@ -239,8 +243,8 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRo
             {
                if (DEBUG)
                   System.out.println("SDFRobot has a lidar!");
-               if(DEBUG)
-                  System.out.println("SDFRobot: the lidar is attached to link: "+scsJoint.getName());
+               if (DEBUG)
+                  System.out.println("SDFRobot: the lidar is attached to link: " + scsJoint.getName());
                Ray sdfRay = sensor.getRay();
                if (sdfRay == null)
                {
@@ -255,7 +259,8 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRo
                   HorizontalScan sdfHorizontalScan = sdfScan.getHorizontal();
                   double sdfMaxAngle = Double.parseDouble(sdfHorizontalScan.getMaxAngle());
                   double sdfMinAngle = Double.parseDouble(sdfHorizontalScan.getMinAngle());
-//                  double sdfAngularResolution = Double.parseDouble(sdfHorizontalScan.getSillyAndProbablyNotUsefulResolution());
+
+//                double sdfAngularResolution = Double.parseDouble(sdfHorizontalScan.getSillyAndProbablyNotUsefulResolution());
                   int sdfSamples = Integer.parseInt(sdfHorizontalScan.getSamples());
                   double sdfRangeResolution = Double.parseDouble(sdfRay.getRange().getResolution());
 
@@ -274,24 +279,27 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRo
                      System.err.println("SDFRobot: lidar does not have associated plugin in sensor " + sensor.getName() + ". Assuming zero gaussian noise.");
                   }
 
-                  PolarLidarScanDefinition polarDefinition = new PolarLidarScanDefinition(sdfSamples, 1, (float)sdfMaxAngle, (float)sdfMinAngle, 0.0f, 0.0f, (float)sdfMinRange);
-                  LIDARScanDefinition lidarScanDefinition = LIDARScanDefinition.PlanarSweep(sdfMaxAngle-sdfMinAngle, sdfSamples);
+                  PolarLidarScanDefinition polarDefinition = new PolarLidarScanDefinition(sdfSamples, 1, (float) sdfMaxAngle, (float) sdfMinAngle, 0.0f, 0.0f,
+                                                                (float) sdfMinRange);
+                  LIDARScanDefinition lidarScanDefinition = LIDARScanDefinition.PlanarSweep(sdfMaxAngle - sdfMinAngle, sdfSamples);
                   Transform3D transform3d = SDFConversionsHelper.poseToTransform(sensor.getPose());
-                  
+
                   SimulatedLIDARSensorNoiseParameters noiseParameters = new SimulatedLIDARSensorNoiseParameters();
                   noiseParameters.setGaussianNoiseStandardDeviation(sdfGaussianNoise);
-                  
+
                   SimulatedLIDARSensorLimitationParameters limitationParameters = new SimulatedLIDARSensorLimitationParameters();
                   limitationParameters.setMaxRange(sdfMaxRange);
                   limitationParameters.setMinRange(sdfMinRange);
                   limitationParameters.setQuantization(sdfRangeResolution);
-                  
+
                   SimulatedLIDARSensorUpdateParameters updateParameters = new SimulatedLIDARSensorUpdateParameters();
                   updateParameters.setAlwaysOn(sdfAlwaysOn);
                   updateParameters.setUpdateRate(sdfUpdateRate);
-//                  updateParameters.setServerPort() We can't know the server port in SDF Uploaders, so this must be specified afterwords, but searching the robot tree and assigning numbers.
 
-                  if (!USE_POLAR_LIDAR_MODEL){
+//                updateParameters.setServerPort() We can't know the server port in SDF Uploaders, so this must be specified afterwords, but searching the robot tree and assigning numbers.
+
+                  if (!USE_POLAR_LIDAR_MODEL)
+                  {
                      RayTraceLIDARSensor scsLidar = new RayTraceLIDARSensor(transform3d, lidarScanDefinition);
                      scsLidar.setNoiseParameters(noiseParameters);
                      scsLidar.setSensorLimitationParameters(limitationParameters);
@@ -360,6 +368,6 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRo
 
    public List<GroundContactPoint> getFootGroundContactPoints(RobotSide robotSide)
    {
-      return groundContactPoints.get(robotSide);
+      return footGroundContactPoints.get(robotSide);
    }
 }
