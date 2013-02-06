@@ -1,7 +1,9 @@
 package us.ihmc.darpaRoboticsChallenge;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.net.URL;
+import java.util.ArrayList;
 
 import javax.xml.bind.JAXBException;
 
@@ -14,28 +16,30 @@ public class DRCRobotSDFLoader
    {
       URL fileURL;
       String modelName;
-      URL resourceDirectory;
+      ArrayList<String> resourceDirectories = new ArrayList<String>();
       Class<DRCRobotSDFLoader> myClass = DRCRobotSDFLoader.class;
       DRCRobotModel selectedModel = jointMap.getSelectedModel();
+      
+      resourceDirectories.add(myClass.getResource("models/GFE/gazebo_models/atlas_description").getFile());
+      resourceDirectories.add(myClass.getResource("models/GFE/gazebo_models/multisense_sl_description").getFile());
+      
       switch (selectedModel)
       {
          case ATLAS_NO_HANDS :
-            fileURL = myClass.getResource("models/GFE/models/drc_robot/gfe.sdf");
-            modelName = "drc_robot";
+            fileURL = myClass.getResource("models/GFE/atlas.sdf");
+            modelName = "atlas";
             
-            resourceDirectory = myClass.getResource("models/GFE/models/");
             break;
 
          case ATLAS_IROBOT_HANDS :
             fileURL = myClass.getResource("models/GFE/atlas_irobot_hands.sdf");
+            resourceDirectories.add(myClass.getResource("models/GFE/gazebo_models/irobot_hand_description").getFile());
             modelName = "atlas";
-            resourceDirectory = myClass.getResource("models/GFE/models/");
             break;
 
          case ATLAS_SANDIA_HANDS :
             fileURL = myClass.getResource("models/GFE/atlas_sandia_hands.sdf");
             modelName = "atlas";
-            resourceDirectory = myClass.getResource("models/GFE/models/");
 
             break;
          default:
@@ -45,7 +49,7 @@ public class DRCRobotSDFLoader
       JaxbSDFLoader jaxbSDFLoader;
       try
       {
-         jaxbSDFLoader = new JaxbSDFLoader(fileURL, modelName, resourceDirectory, jointMap);
+         jaxbSDFLoader = new JaxbSDFLoader(new File(fileURL.getFile()), modelName, resourceDirectories, jointMap);
       }
       catch (FileNotFoundException e)
       {

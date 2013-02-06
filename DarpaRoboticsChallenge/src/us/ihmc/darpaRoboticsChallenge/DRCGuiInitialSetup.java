@@ -20,12 +20,12 @@ public class DRCGuiInitialSetup implements GuiInitialSetup
       behindPelvis.setCameraTrackingVars("q_x", "q_y", "q_z");
       scs.setupCamera(behindPelvis);
 
-      CameraConfiguration camera5 = new CameraConfiguration("left_camera_sensor");
-      camera5.setCameraMount("left_camera_sensor");
+      CameraConfiguration camera5 = new CameraConfiguration("stereo_camera");
+      camera5.setCameraMount("stereo_camera");
       scs.setupCamera(camera5);
-      CameraConfiguration camera6 = new CameraConfiguration("right_camera_sensor");
-      camera6.setCameraMount("right_camera_sensor");
-      scs.setupCamera(camera6);
+//      CameraConfiguration camera6 = new CameraConfiguration("right_camera_sensor");
+//      camera6.setCameraMount("right_camera_sensor");
+//      scs.setupCamera(camera6);
    }
 
    public boolean isGuiShown()

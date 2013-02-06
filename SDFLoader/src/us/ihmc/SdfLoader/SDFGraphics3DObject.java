@@ -3,6 +3,7 @@ package us.ihmc.SdfLoader;
 import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.media.j3d.Transform3D;
@@ -20,7 +21,7 @@ public class SDFGraphics3DObject extends Graphics3DObject
 {
    private static final boolean SHOW_COORDINATE_SYSTEMS = false;
 
-   public SDFGraphics3DObject(List<SDFVisual> sdfVisuals, File resourceDirectory)
+   public SDFGraphics3DObject(List<SDFVisual> sdfVisuals, ArrayList<String> resourceDirectories)
    {
       
       for(SDFVisual sdfVisual : sdfVisuals)
@@ -41,7 +42,7 @@ public class SDFGraphics3DObject extends Graphics3DObject
          
          if(sdfVisual.getGeometry().getMesh() != null)
          {
-            String uri = convertToFullPath(resourceDirectory, sdfVisual.getGeometry().getMesh().getUri());
+            String uri = convertToFullPath(resourceDirectories, sdfVisual.getGeometry().getMesh().getUri());
             addMesh(uri, visualPose);
          }
          else if(sdfVisual.getGeometry().getCylinder() != null)
@@ -88,22 +89,30 @@ public class SDFGraphics3DObject extends Graphics3DObject
       addModelFile(mesh, appearance);
 
    }
-   
-   private String convertToFullPath(File resourceDirectory, String meshPath)
+
+   private String convertToFullPath(ArrayList<String> resourceDirectories, String meshPath)
    {
-
-      try
+      for (String resourceDirectory : resourceDirectories)
       {
-         URI meshURI = new URI(meshPath);
-         String returnString = resourceDirectory+ File.separator + meshURI.getAuthority() 
-         		+ meshURI.getPath();
-         return returnString;
+         String fullPath;
+         try
+         {
+            URI meshURI = new URI(meshPath);
+            fullPath = resourceDirectory + File.separator + meshURI.getAuthority() + meshURI.getPath();
+         }
+         catch (URISyntaxException e)
+         {
+            fullPath = meshPath;
+         }
+         
+         File testFile = new File(fullPath);
+         if(testFile.exists())
+         {
+            return fullPath;
+         }
       }
-      catch (URISyntaxException e)
-      {
-         return meshPath;
-      }
-
+      System.out.println(meshPath);
+      throw new RuntimeException("Resource not found");
    }
 
 }
