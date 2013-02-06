@@ -99,6 +99,18 @@
 \end_layout
 
 \begin_layout Standard
+with
+\begin_inset Formula 
+\[
+\bar{c}_{ab}=J_{a}J_{a}^{+}c_{b}+\left(I-J_{a}J_{a}^{+}\right)c_{a}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
 \begin_inset Formula 
 \[
 \hat{\dot{v}}_{b}=\bar{J}_{ab}^{+}\left(\dot{T}_{k}^{i,j}-\bar{c}_{ab}\right)
@@ -115,6 +127,14 @@
 \end_inset
 
 
+\end_layout
+
+\begin_layout Standard
+Since 
+\begin_inset Formula $J_{a}J_{a}^{+}$
+\end_inset
+
+ is a projection matrix, 
 \end_layout
 
 \end_body

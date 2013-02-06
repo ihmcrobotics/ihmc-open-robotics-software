@@ -67,14 +67,12 @@ import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
-import us.ihmc.utilities.screwTheory.EndEffectorPoseTwistAndSpatialAccelerationCalculator;
 import us.ihmc.utilities.screwTheory.GeometricJacobian;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTools;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
-import us.ihmc.utilities.screwTheory.Twist;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
@@ -142,8 +140,6 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
                                                                                                         EndEffectorControlModule>();
    private final SideDependentList<RigidBodySpatialAccelerationControlModule> handControlModules =
       new SideDependentList<RigidBodySpatialAccelerationControlModule>();
-   private final SideDependentList<EndEffectorPoseTwistAndSpatialAccelerationCalculator> handPoseTwistAndSpatialAccelerationCalculators =
-      new SideDependentList<EndEffectorPoseTwistAndSpatialAccelerationCalculator>();
 
    private final SideDependentList<PositionTrajectoryGenerator> footPositionTrajectoryGenerators;
    private final DoubleProvider swingTimeProvider;
@@ -302,9 +298,6 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
          rigidBodySpatialAccelerationControlModule.setOrientationProportionalGains(100.0, 100.0, 100.0);
          rigidBodySpatialAccelerationControlModule.setOrientationDerivativeGains(20.0, 20.0, 20.0);
          handControlModules.put(robotSide, rigidBodySpatialAccelerationControlModule);
-
-         handPoseTwistAndSpatialAccelerationCalculators.put(robotSide,
-                 new EndEffectorPoseTwistAndSpatialAccelerationCalculator(hand, hand.getBodyFixedFrame(), twistCalculator));
 
          final ReferenceFrame chestFrame = fullRobotModel.getChest().getBodyFixedFrame();
          FramePose desiredHandPosition = new FramePose(chestFrame, walkingControllerParameters.getDesiredHandPosesWithRespectToChestFrame().get(robotSide));
@@ -972,25 +965,18 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 
    public void doArmControl()
    {
+      RigidBody base = fullRobotModel.getChest();
+      final ReferenceFrame chestFrame = base.getBodyFixedFrame();
       for (RobotSide robotSide : RobotSide.values())
       {
-         final ReferenceFrame chestFrame = fullRobotModel.getChest().getBodyFixedFrame();
-
-
          FramePose desiredHandPose = desiredHandPoses.get(robotSide);
 
-         FramePose desiredPose =
-            handPoseTwistAndSpatialAccelerationCalculators.get(robotSide).calculateDesiredEndEffectorPoseFromDesiredPositions(desiredHandPose.getPosition(),
-               desiredHandPose.getOrientation());
-         Twist desiredTwist =
-            handPoseTwistAndSpatialAccelerationCalculators.get(robotSide).calculateDesiredEndEffectorTwistFromDesiredVelocities(new FrameVector(chestFrame),
-               new FrameVector(chestFrame), fullRobotModel.getChest());
-         SpatialAccelerationVector desiredSpatialAcceleration = handPoseTwistAndSpatialAccelerationCalculators.get(
-                                                                   robotSide).calculateDesiredEndEffectorSpatialAccelerationFromDesiredAccelerations(
-                                                                   new FrameVector(chestFrame), new FrameVector(chestFrame), fullRobotModel.getChest());
-
-         handControlModules.get(robotSide).doPositionControl(desiredPose, desiredTwist, desiredSpatialAcceleration, fullRobotModel.getChest());
-
+         FrameVector desiredLinearVelocityOfOrigin = new FrameVector(chestFrame);
+         FrameVector desiredAngularVelocity = new FrameVector(chestFrame);
+         FrameVector desiredLinearAccelerationOfOrigin = new FrameVector(chestFrame);
+         FrameVector desiredAngularAcceleration = new FrameVector(chestFrame);
+         handControlModules.get(robotSide).doPositionControl(desiredHandPose.getPosition(), desiredHandPose.getOrientation(), desiredLinearVelocityOfOrigin,
+                                desiredAngularVelocity, desiredLinearAccelerationOfOrigin, desiredAngularAcceleration, base);
 
          SpatialAccelerationVector handAcceleration = new SpatialAccelerationVector();
          handControlModules.get(robotSide).packAcceleration(handAcceleration);
@@ -1006,20 +992,20 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
    private final CenterOfMassHeightInputData centerOfMassHeightInputData = new CenterOfMassHeightInputData();
    private final FrameVector2d dzdxDesired = new FrameVector2d(ReferenceFrame.getWorldFrame());
    private final FrameVector2d d2zdx2Desired = new FrameVector2d(ReferenceFrame.getWorldFrame());
-   
+
    private double computeDesiredCoMHeightAcceleration(FrameVector2d desiredICPVelocity)
    {
       ReferenceFrame frame = worldFrame;
 
       centerOfMassHeightInputData.setCenterOfMassFrame(centerOfMassFrame);
-      
+
       ArrayList<PlaneContactState> contactStatesList = new ArrayList<PlaneContactState>();
-      
+
       if (getSupportLeg() == null)
       {
          ContactablePlaneBody leftFoot = bipedFeet.get(RobotSide.LEFT);
          ContactablePlaneBody rightFoot = bipedFeet.get(RobotSide.RIGHT);
-         
+
          contactStatesList.add(leftFoot);
          contactStatesList.add(rightFoot);
       }
@@ -1027,19 +1013,19 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       {
          contactStatesList.add(bipedFeet.get(getSupportLeg()));
       }
-      
+
       centerOfMassHeightInputData.setContactStates(contactStatesList);
 
       centerOfMassHeightInputData.setSupportLeg(getSupportLeg());
       centerOfMassHeightInputData.setUpcomingFootstep(nextFootstep);
-      
+
       centerOfMassHeightTrajectoryGenerator.solve(centerOfMassHeightOutputData, centerOfMassHeightInputData);
-      
+
       double zDesired = centerOfMassHeightOutputData.getDesiredCenterOfMassHeight();
-      
+
       centerOfMassHeightOutputData.getDesiredCenterOfMassHeightSlope(dzdxDesired);
       centerOfMassHeightOutputData.getDesiredCenterOfMassHeightSecondDerivative(d2zdx2Desired);
-      
+
       FramePoint com = new FramePoint(referenceFrames.getCenterOfMassFrame());
       FrameVector comd = new FrameVector(frame);
       centerOfMassJacobian.packCenterOfMassVelocity(comd);
