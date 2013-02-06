@@ -1,6 +1,5 @@
 package us.ihmc.SdfLoader;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -50,7 +49,7 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRo
 
    private static final long serialVersionUID = 5864358637898048080L;
 
-   private final File resourceDirectory;
+   private final ArrayList<String> resourceDirectories;
    private final HashMap<String, PinJoint> robotJoints = new HashMap<String, PinJoint>();
 
    private final FloatingJoint rootJoint;
@@ -62,7 +61,7 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRo
    public SDFRobot(GeneralizedSDFRobotModel generalizedSDFRobotModel, SDFJointNameMap sdfJointNameMap)
    {
       super(generalizedSDFRobotModel.getName());
-      this.resourceDirectory = generalizedSDFRobotModel.getResourceDirectory();
+      this.resourceDirectories = generalizedSDFRobotModel.getResourceDirectories();
 
       System.out.println("Creating root joints for root links");
 
@@ -331,7 +330,7 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRo
 
    private Link createLink(SDFLinkHolder link)
    {
-      SDFGraphics3DObject linkGraphics = new SDFGraphics3DObject(link.getVisuals(), resourceDirectory);
+      SDFGraphics3DObject linkGraphics = new SDFGraphics3DObject(link.getVisuals(), resourceDirectories);
 
       Link scsLink = new Link(link.getName());
       scsLink.setLinkGraphics(linkGraphics);

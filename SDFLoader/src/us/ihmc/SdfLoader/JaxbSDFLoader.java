@@ -3,7 +3,7 @@ package us.ihmc.SdfLoader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.net.URL;
+import java.util.ArrayList;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -19,17 +19,19 @@ public class JaxbSDFLoader
    private final SDFFullRobotModel fullRobotModel;
    private final ReferenceFrames referenceFrames;
 
-   public JaxbSDFLoader(URL fileURL, String modelName, URL resourceDirectory, SDFJointNameMap sdfJointNameMap) throws JAXBException, FileNotFoundException
+   private static ArrayList<String> createArrayListOfOneURL(String oneURL)
    {
-      this(fileURL.getFile(), modelName, resourceDirectory.getFile(), sdfJointNameMap);
+      ArrayList<String> ret = new ArrayList<String>();
+      ret.add(oneURL);
+      return ret;
    }
    
-   public JaxbSDFLoader(String filename, String modelName, String resourceDirectory, SDFJointNameMap sdfJointNameMap) throws JAXBException, FileNotFoundException
+   public JaxbSDFLoader(File file, String modelName, String resourceDirectory, SDFJointNameMap sdfJointNameMap) throws JAXBException, FileNotFoundException
    {
-      this(new File(filename), modelName, new File(resourceDirectory), sdfJointNameMap);
+      this(file, modelName, createArrayListOfOneURL(resourceDirectory), sdfJointNameMap);
    }
    
-   public JaxbSDFLoader(File file, String modelName, File resourceDirectory, SDFJointNameMap sdfJointNameMap) throws JAXBException, FileNotFoundException
+   public JaxbSDFLoader(File file, String modelName, ArrayList<String> resourceDirectories, SDFJointNameMap sdfJointNameMap) throws JAXBException, FileNotFoundException
    {
       JAXBContext context = JAXBContext.newInstance(SDFRoot.class);
       Unmarshaller um = context.createUnmarshaller();
@@ -49,7 +51,7 @@ public class JaxbSDFLoader
          throw new RuntimeException(modelName + " not found");
       }
 
-      GeneralizedSDFRobotModel generalizedSDFRobotModel = new GeneralizedSDFRobotModel(modelName, model, resourceDirectory);
+      GeneralizedSDFRobotModel generalizedSDFRobotModel = new GeneralizedSDFRobotModel(modelName, model, resourceDirectories);
 
       robot = new SDFRobot(generalizedSDFRobotModel, sdfJointNameMap);
       if(sdfJointNameMap != null)
