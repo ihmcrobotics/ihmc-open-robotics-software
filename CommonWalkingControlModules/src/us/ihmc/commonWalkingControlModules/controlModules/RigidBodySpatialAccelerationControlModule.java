@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
+import us.ihmc.utilities.math.geometry.FrameOrientation;
+import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -19,8 +21,8 @@ public class RigidBodySpatialAccelerationControlModule
    private final RigidBody endEffector;
    private final ReferenceFrame endEffectorFrame;
 
-   public RigidBodySpatialAccelerationControlModule(String namePrefix, TwistCalculator twistCalculator, RigidBody endEffector,
-           ReferenceFrame endEffectorFrame, YoVariableRegistry parentRegistry)
+   public RigidBodySpatialAccelerationControlModule(String namePrefix, TwistCalculator twistCalculator, RigidBody endEffector, ReferenceFrame endEffectorFrame,
+           YoVariableRegistry parentRegistry)
    {
       this.registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
       this.twistCalculator = twistCalculator;
@@ -54,6 +56,48 @@ public class RigidBodySpatialAccelerationControlModule
       currentTwist.changeFrame(endEffectorFrame);
 
       se3pdController.compute(acceleration, desiredEndEffectorPose, desiredEndEffectorTwist, feedForwardEndEffectorSpatialAcceleration, currentTwist);
+   }
+
+   public void doPositionControl(FramePoint desiredPosition, FrameOrientation desiredOrientation, FrameVector desiredLinearVelocityOfOrigin,
+                                 FrameVector desiredAngularVelocity, FrameVector desiredLinearAccelerationOfOrigin, FrameVector desiredAngularAcceleration,
+                                 RigidBody base)
+   {
+      FramePose desiredEndEffectorPose = calculateDesiredEndEffectorPoseFromDesiredPositions(desiredPosition, desiredOrientation);
+      Twist desiredEndEffectorTwist = calculateDesiredEndEffectorTwist(desiredLinearVelocityOfOrigin, desiredAngularVelocity, base);
+      SpatialAccelerationVector feedForwardEndEffectorSpatialAcceleration =
+         calculateDesiredEndEffectorSpatialAcceleration(desiredLinearAccelerationOfOrigin, desiredAngularAcceleration, base);
+      doPositionControl(desiredEndEffectorPose, desiredEndEffectorTwist, feedForwardEndEffectorSpatialAcceleration, base);
+   }
+
+   public FramePose calculateDesiredEndEffectorPoseFromDesiredPositions(FramePoint endEffectorPositionIn, FrameOrientation endEffectorOrientationIn)
+   {
+      FramePoint endEffectorPosition = endEffectorPositionIn.changeFrameCopy(endEffectorFrame);
+      FrameOrientation endEffectorOrientation = endEffectorOrientationIn.changeFrameCopy(endEffectorFrame);
+
+      return new FramePose(endEffectorPosition, endEffectorOrientation);
+   }
+
+   public Twist calculateDesiredEndEffectorTwist(FrameVector linearVelocityOfOrigin, FrameVector angularVelocity, RigidBody base)
+   {
+      angularVelocity.changeFrame(endEffectorFrame);
+      linearVelocityOfOrigin.changeFrame(endEffectorFrame);
+
+      return new Twist(endEffectorFrame, base.getBodyFixedFrame(), endEffectorFrame, linearVelocityOfOrigin.getVector(), angularVelocity.getVector());
+   }
+
+   public SpatialAccelerationVector calculateDesiredEndEffectorSpatialAcceleration(FrameVector linearAccelerationOfOrigin,
+           FrameVector angularAcceleration, RigidBody base)
+   {
+      angularAcceleration.changeFrame(endEffectorFrame);
+
+      linearAccelerationOfOrigin.changeFrame(endEffectorFrame);
+      Twist twistOfEndEffectorWithRespectToElevator = new Twist();
+      twistCalculator.packRelativeTwist(twistOfEndEffectorWithRespectToElevator, base, endEffector);
+      twistOfEndEffectorWithRespectToElevator.changeBodyFrameNoRelativeTwist(endEffectorFrame);
+      SpatialAccelerationVector spatialAcceleration = new SpatialAccelerationVector(endEffectorFrame, base.getBodyFixedFrame(), endEffectorFrame);
+      spatialAcceleration.setBasedOnOriginAcceleration(angularAcceleration, linearAccelerationOfOrigin, twistOfEndEffectorWithRespectToElevator);
+
+      return spatialAcceleration;
    }
 
    public void setPositionProportionalGains(double kx, double ky, double kz)
