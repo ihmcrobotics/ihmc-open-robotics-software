@@ -45,6 +45,8 @@ public class DRCDemoEnvironmentWithBoxAndSteeringWheel implements CommonAvatarEn
       Vector3d pinJointLinkCoMOffset = new Vector3d(0.0, 0.0, 0.05);
 
       ContactableSteeringWheelRobot bot = new ContactableSteeringWheelRobot("steeringWheel", pinJointTransformFromWorld, pinJointLinkCoMOffset);
+      bot.createAvailableContactPoints(1, 30, 1.0 / 2.0);
+      contactables.add(bot);
       boxRobots.add(bot);
    }
 
