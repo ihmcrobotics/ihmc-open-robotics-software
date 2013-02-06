@@ -916,7 +916,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       double dUpperBody = GainCalculator.computeDerivativeGain(kUpperBody, zetaUpperBody.getDoubleValue());
       for (OneDoFJoint joint : positionControlJoints)
       {
-         doPDControl(joint, kUpperBody, dUpperBody);
+         doPDControl(joint, kUpperBody, dUpperBody, 0.0, 0.0);
       }
 
       if (chestOrientationControlModule != null)
