@@ -155,20 +155,17 @@ public class NullGraphics3DAdapter implements Graphics3DAdapter
             return new CameraAdapter()
             {
 
-               @Override
                public float getHorizontalFovInRadians()
                {
                   return (float) Math.PI;
                }
 
-               @Override
                public Quat4d getCameraRotation()
                {
                   // TODO Auto-generated method stub
                   return new Quat4d();
                }
 
-               @Override
                public Point3d getCameraPosition()
                {
 
