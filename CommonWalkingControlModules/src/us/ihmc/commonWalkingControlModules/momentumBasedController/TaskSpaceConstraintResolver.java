@@ -73,7 +73,7 @@ public class TaskSpaceConstraintResolver
 
       if (taskSpaceAcceleration.getExpressedInFrame() != taskSpaceAcceleration.getBodyFrame())
       {
-         throw new RuntimeException("Not supported. Task space acceleration expressIn and body frames must be the same!");
+         throw new RuntimeException("Not supported. Task space acceleration expressedIn and body frames must be the same!");
       }
 
       // joint bookkeeping
