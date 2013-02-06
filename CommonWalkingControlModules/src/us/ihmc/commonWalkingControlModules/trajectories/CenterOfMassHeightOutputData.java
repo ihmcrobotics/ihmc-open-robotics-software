@@ -8,6 +8,7 @@ public class CenterOfMassHeightOutputData
    private double desiredCenterOfMassHeight;
    private final FrameVector2d desiredCenterOfMassHeightSlope = new FrameVector2d(ReferenceFrame.getWorldFrame());
    private final FrameVector2d desiredCenterOfMassHeightSecondDerivative = new FrameVector2d(ReferenceFrame.getWorldFrame());
+   private double ddzdxdy;
          
    public double getDesiredCenterOfMassHeight()
    {
@@ -51,5 +52,15 @@ public class CenterOfMassHeightOutputData
       this.desiredCenterOfMassHeight = outputData.desiredCenterOfMassHeight;
       this.desiredCenterOfMassHeightSlope.set(outputData.desiredCenterOfMassHeightSlope);
       this.desiredCenterOfMassHeightSecondDerivative.set(outputData.desiredCenterOfMassHeightSecondDerivative);
+   }
+
+   public double getDdzdxdy()
+   {
+      return ddzdxdy;
+   }
+
+   public void setDdzdxdy(double ddzdxdy)
+   {
+      this.ddzdxdy = ddzdxdy;
    }
 }
