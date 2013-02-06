@@ -21,14 +21,14 @@ public class CompressedVideoDataClient implements Runnable
    private final String host;
    private final int port;
    private final VideoSettings settings;
-   private final CameraViewer cameraViewer;
+   private final VideoStreamer videoStreamer;
    
-   public CompressedVideoDataClient(VideoSettings settings, String host, int port, CameraViewer cameraViewer)
+   public CompressedVideoDataClient(VideoSettings settings, String host, int port, VideoStreamer videoStreamer)
    {
       this.settings = settings;
       this.host = host;
       this.port = port;
-      this.cameraViewer = cameraViewer;
+      this.videoStreamer = videoStreamer;
    }
    
    public void run()
@@ -88,7 +88,7 @@ public class CompressedVideoDataClient implements Runnable
             
             if(pictureIn.isComplete())
             {
-               cameraViewer.updateImage(converter.toImage(pictureIn), packetData.getPosition(), packetData.getOrientation(), packetData.getFieldOfView());
+               videoStreamer.updateImage(converter.toImage(pictureIn), packetData.getPosition(), packetData.getOrientation(), packetData.getFieldOfView());
             }
             else
             {
