@@ -3,7 +3,11 @@ package us.ihmc.darpaRoboticsChallenge;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.media.j3d.Transform3D;
+import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
+
+import org.apache.commons.math3.util.FastMath;
 
 import us.ihmc.commonAvatarInterfaces.CommonAvatarEnvironmentInterface;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
@@ -27,13 +31,20 @@ public class DRCDemoEnvironmentWithBoxAndSteeringWheel implements CommonAvatarEn
    private final ArrayList<ExternalForcePoint> contactPoints = new ArrayList<ExternalForcePoint>();
    private final ArrayList<Contactable> contactables = new ArrayList<Contactable>();
 
-   private final Vector3d wheelLocation = new Vector3d(0.0, 0.25 + (2 * ContactableSelectableSteeringWheelRobot.DEFAULT_RADIUS), 0.75);
-
    public DRCDemoEnvironmentWithBoxAndSteeringWheel()
    {
       combinedTerrainObject = createCombinedTerrainObject();
-
-      ContactableSelectableSteeringWheelRobot bot = new ContactableSelectableSteeringWheelRobot("steeringWheel", wheelLocation);
+      Matrix3d pinJointZRotation = new Matrix3d();
+      pinJointZRotation.rotZ(-FastMath.PI / 2.0);
+      Matrix3d pinJointRotation = new Matrix3d();
+      pinJointRotation.rotY(-FastMath.PI / 4.0);
+      pinJointRotation.mul(pinJointZRotation);
+      
+      Vector3d pinJointLocation = new Vector3d(0.6, 0.0, 0.9);
+      Transform3D pinJointTransformFromWorld = new Transform3D(pinJointRotation, pinJointLocation, 1.0);
+      Vector3d pinJointLinkCoMOffset = new Vector3d(0.0, 0.0, 0.05);
+      
+      ContactableSelectableSteeringWheelRobot bot = new ContactableSelectableSteeringWheelRobot("steeringWheel", pinJointTransformFromWorld, pinJointLinkCoMOffset);
       boxRobots.add(bot);
    }
 
