@@ -95,7 +95,7 @@ public class DRCDemo03
       int simulationDataBufferSize = 16000;
       String ipAddress = null;
       int portNumber = -1;
-      new DRCDemo03(DRCRobotModel.ATLAS_NO_HANDS, guiInitialSetup, automaticSimulationRunner, timePerRecordTick, simulationDataBufferSize, ipAddress,
+      new DRCDemo03(DRCRobotModel.ATLAS_IROBOT_HANDS, guiInitialSetup, automaticSimulationRunner, timePerRecordTick, simulationDataBufferSize, ipAddress,
                                      portNumber);
    }
 

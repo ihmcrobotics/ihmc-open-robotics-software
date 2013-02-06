@@ -32,7 +32,7 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject
 public class DRCSimulationFactory
 {
    public static boolean SHOW_INERTIA_ELLIPSOIDS = false;
-   
+
    public static HumanoidRobotSimulation<SDFRobot> createSimulation(DRCRobotJointMap jointMap, ControllerFactory controllerFactory,
            CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, RobotInitialSetup<SDFRobot> robotInitialSetup, ScsInitialSetup scsInitialSetup,
            GuiInitialSetup guiInitialSetup)
@@ -48,13 +48,13 @@ public class DRCSimulationFactory
       JaxbSDFLoader jaxbSDFLoader = drcRobotSDFLoader.loadDRCRobot(jointMap);
       SDFRobot simulatedRobot = jaxbSDFLoader.getRobot();
       FullRobotModel fullRobotModelForSimulation = jaxbSDFLoader.getFullRobotModel();
-     
-//      drcRobotSDFLoader = new DRCRobotSDFLoader(robotModel);
-//      jaxbSDFLoader = drcRobotSDFLoader.loadDRCRobot();
-//      FullRobotModel fullRobotModelForController = new FullRobotModelWithUncertainty(jaxbSDFLoader.getFullRobotModel());
-//      CommonWalkingReferenceFrames referenceFramesForController = jaxbSDFLoader.getReferenceFrames();
 
-      FullRobotModel fullRobotModelForController = fullRobotModelForSimulation; 
+//    drcRobotSDFLoader = new DRCRobotSDFLoader(robotModel);
+//    jaxbSDFLoader = drcRobotSDFLoader.loadDRCRobot();
+//    FullRobotModel fullRobotModelForController = new FullRobotModelWithUncertainty(jaxbSDFLoader.getFullRobotModel());
+//    CommonWalkingReferenceFrames referenceFramesForController = jaxbSDFLoader.getReferenceFrames();
+
+      FullRobotModel fullRobotModelForController = fullRobotModelForSimulation;
       CommonWalkingReferenceFrames referenceFramesForController = jaxbSDFLoader.getReferenceFrames();
 
       SideDependentList<FootSwitchInterface> footSwitches = new SideDependentList<FootSwitchInterface>();
@@ -66,25 +66,29 @@ public class DRCSimulationFactory
       TwistCalculator twistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), fullRobotModelForController.getElevator());
       CenterOfMassJacobian centerOfMassJacobian = new CenterOfMassJacobian(fullRobotModelForController.getElevator());
 
-      SDFPerfectSimulatedSensorReaderAndWriter sensorReaderAndOutputWriter = new SDFPerfectSimulatedSensorReaderAndWriter(simulatedRobot, fullRobotModelForController,
-            referenceFramesForController);
+      SDFPerfectSimulatedSensorReaderAndWriter sensorReaderAndOutputWriter = new SDFPerfectSimulatedSensorReaderAndWriter(simulatedRobot,
+                                                                                fullRobotModelForController, referenceFramesForController);
 
-      RobotController robotController = controllerFactory.getController(fullRobotModelForController, referenceFramesForController, controlDT, simulatedRobot.getYoTime(),
-                                           dynamicGraphicObjectsListRegistry, guiSetterUpperRegistry, twistCalculator, centerOfMassJacobian, footSwitches);
+      RobotController robotController = controllerFactory.getController(fullRobotModelForController, referenceFramesForController, controlDT,
+                                           simulatedRobot.getYoTime(), dynamicGraphicObjectsListRegistry, guiSetterUpperRegistry, twistCalculator,
+                                           centerOfMassJacobian, footSwitches);
 
       ModularRobotController modularRobotController = new ModularRobotController("ModularRobotController");
       modularRobotController.setRawSensorReader(sensorReaderAndOutputWriter);
       modularRobotController.setSensorProcessor(createSensorProcessor(twistCalculator, centerOfMassJacobian));
       modularRobotController.addRobotController(robotController);
-      
+
       if (SHOW_INERTIA_ELLIPSOIDS)
       {
-         modularRobotController.addRobotController(new CommonInertiaElipsoidsVisualizer(fullRobotModelForSimulation.getElevator(), dynamicGraphicObjectsListRegistry));
+         modularRobotController.addRobotController(new CommonInertiaElipsoidsVisualizer(fullRobotModelForSimulation.getElevator(),
+                 dynamicGraphicObjectsListRegistry));
       }
+
       modularRobotController.setRawOutputWriter(sensorReaderAndOutputWriter);
 
-      return new HumanoidRobotSimulation<SDFRobot>(simulatedRobot, modularRobotController, simulationTicksPerControlTick, fullRobotModelForSimulation, commonAvatarEnvironmentInterface,
-                                         robotInitialSetup, scsInitialSetup, guiInitialSetup, guiSetterUpperRegistry, dynamicGraphicObjectsListRegistry);
+      return new HumanoidRobotSimulation<SDFRobot>(simulatedRobot, modularRobotController, simulationTicksPerControlTick, fullRobotModelForSimulation,
+                                         commonAvatarEnvironmentInterface, simulatedRobot.getAllGroundContactPoints(), robotInitialSetup, scsInitialSetup,
+                                         guiInitialSetup, guiSetterUpperRegistry, dynamicGraphicObjectsListRegistry);
    }
 
    private static SensorProcessor createSensorProcessor(TwistCalculator twistCalculator, CenterOfMassJacobian centerOfMassJacobian)
