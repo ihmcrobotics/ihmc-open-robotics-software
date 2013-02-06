@@ -32,8 +32,9 @@ public class DRCDemo03
    {
       DRCSCSInitialSetup scsInitialSetup;
       RobotInitialSetup<SDFRobot> robotInitialSetup = new DrivingDRCRobotInitialSetup();
+      DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
 
-      environment = new DRCDemoEnvironmentWithBoxAndSteeringWheel();
+      environment = new DRCDemoEnvironmentWithBoxAndSteeringWheel(dynamicGraphicObjectsListRegistry);
       scsInitialSetup = new DRCSCSInitialSetup(environment);
       scsInitialSetup.setSimulationDataBufferSize(simulationDataBufferSize);
 
@@ -43,7 +44,7 @@ public class DRCDemo03
          recordFrequency = 1;
       scsInitialSetup.setRecordFrequency(recordFrequency);
 
-      DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
+      
      
       DRCRobotJointMap jointMap = new DRCRobotJointMap(robotModel);
       
