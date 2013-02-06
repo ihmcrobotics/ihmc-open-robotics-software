@@ -11,7 +11,7 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
 
-public class JPanelCameraStreamer extends JPanel implements CameraViewer, VideoStreamer, CameraStreamer
+public class JPanelCameraStreamer extends JPanel implements VideoStreamer, CameraStreamer
 {
    private static final long serialVersionUID = -6832977971630763132L;
    private BufferedImage bufferedImage;
