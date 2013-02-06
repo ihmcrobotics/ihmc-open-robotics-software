@@ -16,6 +16,7 @@ import com.yobotics.simulationconstructionset.ExternalForcePoint;
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.util.environments.SelectableObject;
 import com.yobotics.simulationconstructionset.util.environments.SelectableObjectListener;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.ground.CombinedTerrainObject;
 import com.yobotics.simulationconstructionset.util.ground.Contactable;
 import com.yobotics.simulationconstructionset.util.ground.TerrainObject;
@@ -31,7 +32,7 @@ public class DRCDemoEnvironmentWithBoxAndSteeringWheel implements CommonAvatarEn
    private final ArrayList<ExternalForcePoint> contactPoints = new ArrayList<ExternalForcePoint>();
    private final ArrayList<Contactable> contactables = new ArrayList<Contactable>();
 
-   public DRCDemoEnvironmentWithBoxAndSteeringWheel()
+   public DRCDemoEnvironmentWithBoxAndSteeringWheel(DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       combinedTerrainObject = createCombinedTerrainObject();
       Matrix3d pinJointZRotation = new Matrix3d();
@@ -48,6 +49,8 @@ public class DRCDemoEnvironmentWithBoxAndSteeringWheel implements CommonAvatarEn
       bot.createAvailableContactPoints(1, 30, 1.0 / 2.0);
       contactables.add(bot);
       boxRobots.add(bot);
+      
+      bot.addDynamicGraphicForceVectorsToGroundContactPoints(1, 1.0/2.0, YoAppearance.Red(), dynamicGraphicObjectsListRegistry);
    }
 
    private CombinedTerrainObject createCombinedTerrainObject()
