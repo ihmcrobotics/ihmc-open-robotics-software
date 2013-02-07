@@ -1,6 +1,5 @@
 package us.ihmc.darpaRoboticsChallenge;
 
-import java.io.File;
 import java.util.List;
 
 import javax.media.j3d.Transform3D;
@@ -101,7 +100,7 @@ public class DRCDemo03
       int simulationDataBufferSize = 16000;
       String ipAddress = null;
       int portNumber = -1;
-      new DRCDemo03(DRCRobotModel.ATLAS_IROBOT_HANDS, guiInitialSetup, automaticSimulationRunner, timePerRecordTick, simulationDataBufferSize, ipAddress,
+      new DRCDemo03(DRCRobotModel.ATLAS_SANDIA_HANDS, guiInitialSetup, automaticSimulationRunner, timePerRecordTick, simulationDataBufferSize, ipAddress,
             portNumber);
    }
 
