@@ -73,12 +73,7 @@ public class DRCDemo03
       simulationConstructionSet.setCameraPosition(6.0, -2.0, 4.5);
       simulationConstructionSet.setCameraFix(-0.44, -0.17, 0.75);
 
-      Graphics3DObject seatGraphics = new Graphics3DObject();
-      seatGraphics.scale(0.25);
-      seatGraphics.translate(-1.25, 0, 3.25);
-      seatGraphics.rotate(Math.toRadians(90), Graphics3DObject.Z);
-      seatGraphics.addModelFile(DRCDemo03.class.getResource("models/seat.3DS"));
-      simulationConstructionSet.addStaticLinkGraphics(seatGraphics);
+      showSeatGraphics(simulationConstructionSet);
 
       if (automaticSimulationRunner != null)
       {
@@ -88,6 +83,16 @@ public class DRCDemo03
       {
          drcSimulation.start(null);
       }
+   }
+
+   private void showSeatGraphics(SimulationConstructionSet sim)
+   {
+      Graphics3DObject seatGraphics = new Graphics3DObject();
+      seatGraphics.scale(0.25);
+      seatGraphics.translate(-1.25, 0, 3.25);
+      seatGraphics.rotate(Math.toRadians(90), Graphics3DObject.Z);
+      seatGraphics.addModelFile(DRCDemo03.class.getResource("models/seat.3DS"));
+      sim.addStaticLinkGraphics(seatGraphics);
    }
 
    public static void main(String[] args) throws JSAPException
