@@ -36,7 +36,7 @@ import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
-public class LeeGoswamiGroundReactionWrenchDistributorTest
+public class GroundReactionWrenchDistributorTest
 {
    private static final boolean VISUALIZE = false;
    private static boolean DEBUG = false;
