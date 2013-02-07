@@ -2,10 +2,7 @@ package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
 import java.util.List;
 
-import javax.vecmath.Vector3d;
-
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactableBody;
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -26,9 +23,11 @@ public abstract class AbstractAdjustableDesiredFootstepCalculator implements Des
 
    private DesiredFootstepAdjustor desiredFootstepAdjustor;
 
-   public AbstractAdjustableDesiredFootstepCalculator(SideDependentList<? extends ContactableBody> contactableBodies, SideDependentList<ReferenceFrame> framesToSaveFootstepIn, YoVariableRegistry parentRegistry)
+   public AbstractAdjustableDesiredFootstepCalculator(SideDependentList<? extends ContactableBody> contactableBodies,
+           SideDependentList<ReferenceFrame> framesToSaveFootstepIn, YoVariableRegistry parentRegistry)
    {
       this.contactableBodies = contactableBodies;
+
       for (RobotSide robotSide : RobotSide.values())
       {
          String namePrefix = robotSide.getCamelCaseNameForMiddleOfExpression() + "Footstep";
@@ -65,7 +64,7 @@ public abstract class AbstractAdjustableDesiredFootstepCalculator implements Des
          footstepPositions.get(swingLegSide).set(footstepPose.getPosition());
          footstepOrientations.get(swingLegSide).set(footstepPose.getOrientation());
       }
-      
+
       return desiredFootstep;
    }
 
