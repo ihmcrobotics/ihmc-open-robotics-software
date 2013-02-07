@@ -9,6 +9,7 @@ import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 public class DRCGuiInitialSetup implements GuiInitialSetup
 {
    private boolean isGuiShown = true;
+   private boolean groundVisible = false;
    
    public void initializeGUI(SimulationConstructionSet scs, Robot robot)
    {
@@ -26,6 +27,8 @@ public class DRCGuiInitialSetup implements GuiInitialSetup
 //      CameraConfiguration camera6 = new CameraConfiguration("right_camera_sensor");
 //      camera6.setCameraMount("right_camera_sensor");
 //      scs.setupCamera(camera6);
+      
+      scs.setGroundVisible(groundVisible);
    }
 
    public boolean isGuiShown()

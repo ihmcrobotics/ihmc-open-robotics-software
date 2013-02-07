@@ -18,10 +18,12 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.SpatialForceVector;
 import us.ihmc.utilities.screwTheory.Wrench;
 
+import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public class ContactPointGroundReactionWrenchDistributor implements GroundReactionWrenchDistributor
 {
+   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final ReferenceFrame centerOfMassFrame;
 
    private final double[] diagonalCWeights = new double[Wrench.SIZE];
@@ -57,6 +59,9 @@ public class ContactPointGroundReactionWrenchDistributor implements GroundReacti
    private final ContactPointWrenchOptimizerNative contactPointWrenchOptimizerNative = new ContactPointWrenchOptimizerNative();
    private final CenterOfPressureResolver centerOfPressureResolver = new CenterOfPressureResolver();
 
+   private final BooleanYoVariable converged = new BooleanYoVariable("converged", registry);
+   private final BooleanYoVariable hasNotConvergedInPast = new BooleanYoVariable("hasNotConvergedInPast", registry);
+
    public ContactPointGroundReactionWrenchDistributor(ReferenceFrame centerOfMassFrame, YoVariableRegistry parentRegistry)
    {
       this.centerOfMassFrame = centerOfMassFrame;
@@ -65,6 +70,8 @@ public class ContactPointGroundReactionWrenchDistributor implements GroundReacti
       {
          normalizedSupportVectors.add(new FrameVector(ReferenceFrame.getWorldFrame()));
       }
+
+      parentRegistry.addChild(registry);
    }
 
    public void setWeights(double[] diagonalCWeights, double epsilonRho)
@@ -142,10 +149,18 @@ public class ContactPointGroundReactionWrenchDistributor implements GroundReacti
       {
          contactPointWrenchOptimizerNative.solve(aMatrixAsDoubleArray, diagonalCWeights, normalForceSelectorBMatrixAsDoubleArray, desiredWrenchAsDoubleArray,
                  minimumNormalForces, epsilonRho);
+         converged.set(true);
       }
       catch (NoConvergenceException e)
       {
-         e.printStackTrace();
+         if (!hasNotConvergedInPast.getBooleanValue())
+         {
+            e.printStackTrace();
+            System.err.println("WARNING: Only showing the stack trace of the first " + e.getClass().getSimpleName()
+                  + ". This may be happening more than once. See value of YoVariable " + converged.getName() + ".");            
+         }
+         converged.set(false);
+         hasNotConvergedInPast.set(true);
       }
 
       double[] rhoArray = contactPointWrenchOptimizerNative.getRho();

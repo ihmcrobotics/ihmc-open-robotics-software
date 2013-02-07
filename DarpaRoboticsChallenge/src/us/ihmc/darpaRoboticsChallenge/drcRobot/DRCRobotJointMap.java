@@ -197,7 +197,7 @@ public class DRCRobotJointMap implements SDFJointNameMap, RobotSpecificJointName
       }
    }
 
-   private String getNameOfJointBeforeHand(RobotSide robotSide)
+   public String getNameOfJointBeforeHand(RobotSide robotSide)
    {
       return getRobotSidePrefix(robotSide) + "arm_mwx";
    }
