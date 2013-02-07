@@ -4,53 +4,109 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.media.j3d.Transform3D;
+import javax.vecmath.Matrix3d;
+import javax.vecmath.Point2d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.SdfLoader.JaxbSDFLoader;
+import us.ihmc.SdfLoader.SDFPerfectSimulatedSensorReaderAndWriter;
+import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonAvatarInterfaces.CommonAvatarEnvironmentInterface;
+import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
+import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotParameters;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.projectM.R2Sim02.initialSetup.RobotInitialSetup;
+import us.ihmc.robotSide.RobotSide;
+import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import com.yobotics.simulationconstructionset.ExternalForcePoint;
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.util.environments.SelectableObjectListener;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.ground.CombinedTerrainObject;
+import com.yobotics.simulationconstructionset.util.ground.RotatableConvexPolygonTerrainObject;
 import com.yobotics.simulationconstructionset.util.ground.TerrainObject;
 
 public class MultiContactTestEnvironment implements CommonAvatarEnvironmentInterface
 {
    private final CombinedTerrainObject combinedTerrainObject;
-   private static final double X_LENGTH = 0.4;
-   private static final double Y_WIDTH = 0.4;
-   private static final double Z_HEIGHT = 0.1;
 
-   public MultiContactTestEnvironment(DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+   public MultiContactTestEnvironment(RobotInitialSetup<SDFRobot> robotInitialSetup, DRCRobotJointMap jointMap,
+                                      DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
-      combinedTerrainObject = createCombinedTerrainObject();
+      DRCRobotSDFLoader drcRobotSDFLoader = new DRCRobotSDFLoader();
+      JaxbSDFLoader jaxbSDFLoader = drcRobotSDFLoader.loadDRCRobot(jointMap);
+      SDFRobot robotForEnvironmentSetup = jaxbSDFLoader.getRobot();
+      robotForEnvironmentSetup.update();
+      FullRobotModel fullRobotModelForEnvironmentSetup = jaxbSDFLoader.getFullRobotModel();
+
+      robotInitialSetup.initializeRobot(robotForEnvironmentSetup);
+      CommonWalkingReferenceFrames referenceFramesForEnvironmentSetup = jaxbSDFLoader.getReferenceFrames();
+      SDFPerfectSimulatedSensorReaderAndWriter sensorReaderAndOutputWriter = new SDFPerfectSimulatedSensorReaderAndWriter(robotForEnvironmentSetup,
+                                                                                fullRobotModelForEnvironmentSetup, referenceFramesForEnvironmentSetup);
+      sensorReaderAndOutputWriter.read();
+
+      combinedTerrainObject = createCombinedTerrainObject(referenceFramesForEnvironmentSetup, fullRobotModelForEnvironmentSetup);
    }
 
-   private CombinedTerrainObject createCombinedTerrainObject()
+   private CombinedTerrainObject createCombinedTerrainObject(CommonWalkingReferenceFrames referenceFramesForEnvironmentSetup, FullRobotModel fullRobotModel)
    {
-      CombinedTerrainObject terrainObject = new CombinedTerrainObject("multiContactTest");
+      CombinedTerrainObject combinedTerrainObject = new CombinedTerrainObject(getClass().getSimpleName());
+      for (RobotSide robotSide : RobotSide.values())
+      {
+         ReferenceFrame soleFrame = referenceFramesForEnvironmentSetup.getSoleFrame(robotSide);
+         Transform3D transformToWorld = soleFrame.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());
+         combinedTerrainObject.addTerrainObject(createConvexPolygonTerrainObject(transformToWorld));
+      }
 
-      // contact 1 (left foot)
-      Transform3D configuration1 = new Transform3D();
-      configuration1.setEuler(new Vector3d(0.2, 0.3, -0.1));
-      configuration1.setTranslation(new Vector3d());
-      terrainObject.addRotatableBox(configuration1, X_LENGTH, Y_WIDTH, Z_HEIGHT, YoAppearance.DarkGray());
+      RobotSide handContactSide = RobotSide.LEFT;
+      ReferenceFrame handFrame = fullRobotModel.getHand(handContactSide).getParentJoint().getFrameAfterJoint();
+      Transform3D handToWorld = handFrame.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());
+      Transform3D handContactPlaneToWorld = new Transform3D();
+      handContactPlaneToWorld.mul(handToWorld, DRCRobotParameters.invisibleContactablePlaneHandContactPointTransforms.get(handContactSide));
+      combinedTerrainObject.addTerrainObject(createConvexPolygonTerrainObject(handContactPlaneToWorld));
 
-      // contact 2 (right foot)
-      Transform3D configuration2 = new Transform3D();
-      configuration2.setEuler(new Vector3d(-0.6, 0.2, 0.5));
-      configuration2.setTranslation(new Vector3d(0.4, -0.8, 0.3));
-      terrainObject.addRotatableBox(configuration2, X_LENGTH, Y_WIDTH, Z_HEIGHT, YoAppearance.DarkGray());
-      
-      // contact 3 (hand)
-      Transform3D configuration3 = new Transform3D();
-      configuration3.setEuler(new Vector3d(-0.3, -0.7, 0.5));
-      configuration3.setTranslation(new Vector3d(1.0, 0.1, 1.2));
-      terrainObject.addRotatableBox(configuration3, X_LENGTH, Y_WIDTH, Z_HEIGHT, YoAppearance.DarkGray());
+      return combinedTerrainObject;
+   }
 
-      return terrainObject;
+   private TerrainObject createConvexPolygonTerrainObject(Transform3D transformToWorld)
+   {
+      Matrix3d rotationToWorld = new Matrix3d();
+      transformToWorld.get(rotationToWorld);
+
+      Vector3d normal = new Vector3d();
+      rotationToWorld.getColumn(2, normal);
+
+      Vector3d centroid = new Vector3d();
+      transformToWorld.get(centroid);
+
+      int nPoints = 5;
+      double radius = 0.3;
+      ConvexPolygon2d convexPolygon = createContactPolygon(centroid, nPoints, radius);
+
+      TerrainObject contact = new RotatableConvexPolygonTerrainObject(normal, convexPolygon, centroid.getZ(), YoAppearance.DarkGray());
+
+      return contact;
+   }
+
+   private ConvexPolygon2d createContactPolygon(Vector3d centroid, int nPoints, double radius)
+   {
+      List<Point2d> pointList = new ArrayList<Point2d>();
+      double angleIncrement = 2.0 * Math.PI / ((double) nPoints);
+      for (int i = 0; i < nPoints; i++)
+      {
+         double angle = i * angleIncrement;
+         double x = radius * Math.cos(angle) + centroid.getX();
+         double y = radius * Math.sin(angle) + centroid.getY();
+         pointList.add(new Point2d(x, y));
+      }
+
+      ConvexPolygon2d convexPolygon = new ConvexPolygon2d(pointList);
+
+      return convexPolygon;
    }
 
    public TerrainObject getTerrainObject()

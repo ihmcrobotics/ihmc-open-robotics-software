@@ -12,7 +12,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.DrivingHighL
 import us.ihmc.darpaRoboticsChallenge.controllers.DRCRobotMomentumBasedControllerFactory;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotParameters;
-import us.ihmc.darpaRoboticsChallenge.initialSetup.DrivingDRCRobotInitialSetup;
+import us.ihmc.darpaRoboticsChallenge.initialSetup.MultiContactDRCRobotInitialSetup;
 import us.ihmc.projectM.R2Sim02.initialSetup.RobotInitialSetup;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
@@ -31,10 +31,13 @@ public class DRCMultiContact
          int simulationDataBufferSize, String ipAddress, int portNumber)
    {
       DRCSCSInitialSetup scsInitialSetup;
-      RobotInitialSetup<SDFRobot> robotInitialSetup = new DrivingDRCRobotInitialSetup();
+      RobotInitialSetup<SDFRobot> robotInitialSetup = new MultiContactDRCRobotInitialSetup();
+      
+      DRCRobotJointMap jointMap = new DRCRobotJointMap(robotModel);
+      
       DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
 
-      environment = new MultiContactTestEnvironment(dynamicGraphicObjectsListRegistry);
+      environment = new MultiContactTestEnvironment(robotInitialSetup, jointMap, dynamicGraphicObjectsListRegistry);
       scsInitialSetup = new DRCSCSInitialSetup(environment);
       scsInitialSetup.setSimulationDataBufferSize(simulationDataBufferSize);
 
@@ -44,7 +47,6 @@ public class DRCMultiContact
          recordFrequency = 1;
       scsInitialSetup.setRecordFrequency(recordFrequency);
 
-      DRCRobotJointMap jointMap = new DRCRobotJointMap(robotModel);
      
       SideDependentList<String> namesOfJointsBeforeThighs = new SideDependentList<String>();
       SideDependentList<Transform3D> thighContactPointTransforms = new SideDependentList<Transform3D>();
