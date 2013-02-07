@@ -20,6 +20,7 @@ import us.ihmc.robotSide.SideDependentList;
 import com.martiansoftware.jsap.JSAPException;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import com.yobotics.simulationconstructionset.util.inputdevices.MidiSliderBoard;
 
 public class DRCMultiContact
 {
@@ -65,6 +66,19 @@ public class DRCMultiContact
 
       SimulationConstructionSet simulationConstructionSet = drcSimulation.getSimulationConstructionSet();
 
+      MidiSliderBoard sliderBoard = new MidiSliderBoard(simulationConstructionSet);
+      sliderBoard.setSlider(1, "desiredCoMX", simulationConstructionSet, -0.2, 0.2);
+      sliderBoard.setSlider(2, "desiredCoMY", simulationConstructionSet, -0.2, 0.2);
+      sliderBoard.setSlider(3, "desiredCoMZ", simulationConstructionSet, 0.8, 1.2);
+      sliderBoard.setSlider(4, "desiredPelvisYaw", simulationConstructionSet, -Math.PI/8.0, Math.PI/8.0);
+      sliderBoard.setSlider(5, "desiredPelvisPitch", simulationConstructionSet, -Math.PI/8.0, Math.PI/8.0);
+      sliderBoard.setSlider(6, "desiredPelvisRoll", simulationConstructionSet, -Math.PI/8.0, Math.PI/8.0);
+      sliderBoard.setKnob(1, "desiredChestOrientationYaw", simulationConstructionSet, -Math.PI/8.0, Math.PI/8.0);
+      sliderBoard.setKnob(2, "desiredChestOrientationPitch", simulationConstructionSet, -Math.PI/8.0, Math.PI/8.0);
+      sliderBoard.setKnob(3, "desiredChestOrientationRoll", simulationConstructionSet, -Math.PI/8.0, Math.PI/8.0);
+
+      
+      
       // add other registries
       drcSimulation.addAdditionalDynamicGraphicObjectsListRegistries(dynamicGraphicObjectsListRegistry);
 
