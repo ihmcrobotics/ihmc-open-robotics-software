@@ -20,12 +20,12 @@ public class NewestCoMTrajectoryGenerator implements CenterOfMassHeightTrajector
    private final TwoPointSpline1D spline = new TwoPointSpline1D(registry);
    private final DoubleYoVariable nominalHeightAboveGround = new DoubleYoVariable("nominalHeightAboveGround", registry);
    private final DoubleYoVariable desiredCenterOfMassHeight = new DoubleYoVariable("desiredCenterOfMassHeight", registry);
-//   private final BooleanYoVariable coMGeneratorHasBeenInitializedBefore = new BooleanYoVariable("coMGeneratorHasBeenInitializedBefore", registry);
+   private final BooleanYoVariable coMGeneratorHasBeenInitializedBefore = new BooleanYoVariable("coMGeneratorHasBeenInitializedBefore", registry);
 
    public NewestCoMTrajectoryGenerator(double nominalHeightAboveGround, YoVariableRegistry parentRegistry)
    {
       this.nominalHeightAboveGround.set(nominalHeightAboveGround);
-//      coMGeneratorHasBeenInitializedBefore.set(false);
+      coMGeneratorHasBeenInitializedBefore.set(false);
       parentRegistry.addChild(registry);
    }
 
@@ -33,15 +33,15 @@ public class NewestCoMTrajectoryGenerator implements CenterOfMassHeightTrajector
    {
       FramePoint supportCenter = getSupportCenter(supportLeg);
       FramePoint footstepCenter = getFootstepCenter(nextFootstep);
-//      if (!coMGeneratorHasBeenInitializedBefore.getBooleanValue())
-//      {
-//         desiredCenterOfMassHeight.set(supportCenter.getZ() + nominalHeightAboveGround.getDoubleValue());
-//         coMGeneratorHasBeenInitializedBefore.set(true);
-//      }
+      if (!coMGeneratorHasBeenInitializedBefore.getBooleanValue())
+      {
+         desiredCenterOfMassHeight.set(supportCenter.getZ() + nominalHeightAboveGround.getDoubleValue());
+         coMGeneratorHasBeenInitializedBefore.set(true);
+      }
 
       double s0 = 0.0;
       double sF = footstepCenter.distance(supportCenter);
-      double z0 = supportCenter.getZ() + nominalHeightAboveGround.getDoubleValue(); //desiredCenterOfMassHeight.getDoubleValue();
+      double z0 = desiredCenterOfMassHeight.getDoubleValue();
       double zF = footstepCenter.getZ() + nominalHeightAboveGround.getDoubleValue();
       Point2d point0 = new Point2d(s0, z0);
       Point2d pointF = new Point2d(sF, zF);
