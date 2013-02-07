@@ -26,6 +26,7 @@ public class DRCRobotSDFLoader
       switch (selectedModel)
       {
          case ATLAS_NO_HANDS :
+         case ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS :
             fileURL = myClass.getResource("models/GFE/atlas.sdf");
             modelName = "atlas";
             
@@ -42,6 +43,7 @@ public class DRCRobotSDFLoader
             modelName = "atlas";
 
             break;
+
          default:
             throw new RuntimeException("DRCRobotSDFLoader: Unimplemented enumeration case : " + selectedModel);
       }
