@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.calibration.virtualChain;
 
 import us.ihmc.utilities.screwTheory.RevoluteJointReferenceFrame;
 
+import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJoint;
 import com.yobotics.simulationconstructionset.PinJoint;
 
 public class VirtualLinkFromPinJoint extends VirtualLinkFromJoint
@@ -21,7 +22,7 @@ public class VirtualLinkFromPinJoint extends VirtualLinkFromJoint
       {
          throw new RuntimeException("(this.referenceFrame != referenceFrame)");
       }
-      referenceFrame.set(((PinJoint) joint).getQ().getDoubleValue());
+      referenceFrame.set(((OneDegreeOfFreedomJoint) joint).getQ().getDoubleValue());
       referenceFrame.update();
    }
 }

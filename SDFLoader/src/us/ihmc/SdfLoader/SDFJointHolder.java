@@ -7,17 +7,15 @@ import us.ihmc.SdfLoader.xmlDescription.SDFJoint;
 
 public class SDFJointHolder
 {
-   enum JointType
-   {
-      REVOLUTE
-   }
-
    // Data from SDF
    private final String name;
    private final JointType type;
    private final Vector3d axis;
+   
+   private final boolean hasLimits;
    private final double upperLimit;
    private final double lowerLimit;
+   
    private final Transform3D transformFromChildLink;
    private double damping = 0.0;
    private double friction = 0.0;
@@ -42,14 +40,29 @@ public class SDFJointHolder
       {
          type = JointType.REVOLUTE;
       }
+      else if (typeString.equalsIgnoreCase("prismatic"))
+      {
+         type = JointType.PRISMATIC;
+      }
       else
       {
          throw new RuntimeException("Joint type " + typeString + " not implemented yet");
       }
 
       axis = SDFConversionsHelper.stringToAxis(sdfJoint.getAxis().getXyz());
-      upperLimit = Double.parseDouble(sdfJoint.getAxis().getLimit().getUpper());
-      lowerLimit = Double.parseDouble(sdfJoint.getAxis().getLimit().getLower());
+      
+      if(sdfJoint.getAxis().getLimit() != null)
+      {
+         hasLimits = true;
+         upperLimit = Double.parseDouble(sdfJoint.getAxis().getLimit().getUpper());
+         lowerLimit = Double.parseDouble(sdfJoint.getAxis().getLimit().getLower());
+      }
+      else
+      {
+         hasLimits = false;
+         upperLimit = Double.POSITIVE_INFINITY;
+         lowerLimit = Double.NEGATIVE_INFINITY;
+      }
       
       if(sdfJoint.getAxis().getDynamics() != null)
       {
@@ -165,6 +178,11 @@ public class SDFJointHolder
    public double getLowerLimit()
    {
       return lowerLimit;
+   }
+   
+   public boolean hasLimits()
+   {
+      return hasLimits;
    }
 
    public Transform3D getTransformFromChildLink()

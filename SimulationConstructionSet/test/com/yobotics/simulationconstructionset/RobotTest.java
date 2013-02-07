@@ -292,7 +292,7 @@ public class RobotTest
       pin2.setLink(new Link(pin1.getLink()));
 
       Robot[] robots = new Robot[] {robot1, robot2};
-      PinJoint[] pinJoints = new PinJoint[] {pin1, pin2};
+      OneDegreeOfFreedomJoint[] pinJoints = new OneDegreeOfFreedomJoint[] {pin1, pin2};
       for (Robot robot : robots)
       {
 //       System.out.println(new RobotExplorer(robot));
@@ -301,7 +301,7 @@ public class RobotTest
 
       double q = random.nextDouble();
       double tau = random.nextDouble();
-      for (PinJoint pinJoint : pinJoints)
+      for (OneDegreeOfFreedomJoint pinJoint : pinJoints)
       {
          pinJoint.setQ(q);
          pinJoint.setTau(tau);

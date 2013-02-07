@@ -44,8 +44,7 @@ public class DRCSimulationFactory
       int simulationTicksPerControlTick = controllerFactory.getSimulationTicksPerControlTick();
       double controlDT = simulateDT * simulationTicksPerControlTick;
 
-      DRCRobotSDFLoader drcRobotSDFLoader = new DRCRobotSDFLoader();
-      JaxbSDFLoader jaxbSDFLoader = drcRobotSDFLoader.loadDRCRobot(jointMap);
+      JaxbSDFLoader jaxbSDFLoader = DRCRobotSDFLoader.loadDRCRobot(jointMap);
       SDFRobot simulatedRobot = jaxbSDFLoader.getRobot();
       FullRobotModel fullRobotModelForSimulation = jaxbSDFLoader.getFullRobotModel();
 

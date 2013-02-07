@@ -14,12 +14,14 @@ import us.ihmc.SdfLoader.xmlDescription.SDFVisual;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.ModelFileType;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
+import us.ihmc.graphics3DAdapter.graphics.appearances.SDFAppearance;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 
 
 public class SDFGraphics3DObject extends Graphics3DObject
 {
    private static final boolean SHOW_COORDINATE_SYSTEMS = false;
+   private static final AppearanceDefinition DEFAULT_APPEARANCE = YoAppearance.White();
 
    public SDFGraphics3DObject(List<SDFVisual> sdfVisuals, ArrayList<String> resourceDirectories)
    {
@@ -40,17 +42,40 @@ public class SDFGraphics3DObject extends Graphics3DObject
          translate(modelOffset);
          rotate(modelRotation);       
          
+         AppearanceDefinition appearance = null;
+         if(sdfVisual.getMaterial() != null)
+         {
+            if(sdfVisual.getMaterial().getScript() != null)
+            {
+               System.out.println("Loading SDF Material");
+               ArrayList<String> paths = new ArrayList<String>();
+               
+               if(sdfVisual.getMaterial().getScript().getUri() != null)
+               {
+                  for(String uri : sdfVisual.getMaterial().getScript().getUri())
+                  {
+                     String fullPath = convertToFullPath(resourceDirectories, uri);
+                     paths.add(fullPath);
+                  }
+               }
+               
+               String name = sdfVisual.getMaterial().getScript().getName();
+               
+               appearance = new SDFAppearance(paths, name);
+            }
+         }
+         
          if(sdfVisual.getGeometry().getMesh() != null)
          {
             String uri = convertToFullPath(resourceDirectories, sdfVisual.getGeometry().getMesh().getUri());
-            addMesh(uri, visualPose);
+            addMesh(uri, visualPose, appearance);
          }
          else if(sdfVisual.getGeometry().getCylinder() != null)
          {
             double length = Double.parseDouble(sdfVisual.getGeometry().getCylinder().getLength());
             double radius = Double.parseDouble(sdfVisual.getGeometry().getCylinder().getRadius()); 
             translate(0.0, 0.0, -length/2.0);
-            addCylinder(length, radius, YoAppearance.White());
+            addCylinder(length, radius, getDefaultAppearanceIfNull(appearance));
          }
          else if(sdfVisual.getGeometry().getBox() != null)
          {
@@ -59,12 +84,12 @@ public class SDFGraphics3DObject extends Graphics3DObject
             double by = Double.parseDouble(boxDimensions[1]);
             double bz = Double.parseDouble(boxDimensions[2]);
             translate(0.0, 0.0, -bz/2.0);
-            addCube(bx, by, bz, YoAppearance.AluminumMaterial());
+            addCube(bx, by, bz, getDefaultAppearanceIfNull(appearance));
          }
          else if(sdfVisual.getGeometry().getSphere() != null)
          {
             double radius = Double.parseDouble(sdfVisual.getGeometry().getSphere().getRadius());
-            addSphere(radius, YoAppearance.White());
+            addSphere(radius, getDefaultAppearanceIfNull(appearance));
          }
          else
          {
@@ -75,14 +100,25 @@ public class SDFGraphics3DObject extends Graphics3DObject
       }
    }
    
-   private void addMesh(String mesh, Transform3D visualPose)
+   private static AppearanceDefinition getDefaultAppearanceIfNull(AppearanceDefinition appearance)
    {
-      
+      if(appearance == null)
+      {
+         return DEFAULT_APPEARANCE;
+      }
+      else
+      {
+         return appearance;
+      }
+   }
+   
+   private void addMesh(String mesh, Transform3D visualPose, AppearanceDefinition appearance)
+   {
 
-      AppearanceDefinition appearance = null;
+      // STL files do not have appearances
       if (ModelFileType.getFileType(mesh) == ModelFileType._STL)
       {
-         appearance = YoAppearance.BlackMetalMaterial(); // Otherwise it becomes a white blob
+         appearance = getDefaultAppearanceIfNull(appearance);
       }
       
 

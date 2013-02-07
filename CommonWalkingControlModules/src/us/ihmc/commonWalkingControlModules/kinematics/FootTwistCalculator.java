@@ -5,6 +5,7 @@ import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
 import us.ihmc.commonWalkingControlModules.sensors.ProcessedSensorsInterface;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.RevoluteJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.Twist;
@@ -34,7 +35,7 @@ public class FootTwistCalculator
 
       for (LegJointName legJointName : fullRobotModel.getRobotSpecificJointNames().getLegJointNames())
       {
-         RevoluteJoint joint = fullRobotModel.getLegJoint(robotSide, legJointName);
+         OneDoFJoint joint = fullRobotModel.getLegJoint(robotSide, legJointName);
          joint.packSuccessorTwist(tempTwist);
          ret.changeFrame(tempTwist.getExpressedInFrame());
          ret.add(tempTwist);
