@@ -9,6 +9,7 @@ import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
+import us.ihmc.commonWalkingControlModules.controlModules.ChestOrientationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.EndEffectorControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.GroundReactionWrenchDistributor;
 import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.Updatable;
@@ -47,6 +48,9 @@ public class MultiContactTestHumanoidController extends MomentumBasedController
    private final ControlFlowInputPort<FramePoint> desiredCoMPositionPort;
    private final YoFramePoint desiredCoMPosition = new YoFramePoint("desiredCoM", worldFrame, registry);
 
+   private final GeometricJacobian spineJacobian;
+   private final ChestOrientationControlModule chestOrientationControlModule;
+
    private final List<OneDoFJoint> positionControlJoints;
    private final HashMap<OneDoFJoint, Double> desiredJointPositions = new HashMap<OneDoFJoint, Double>();
 
@@ -62,6 +66,7 @@ public class MultiContactTestHumanoidController extends MomentumBasedController
                                                                                                                         FixedPositionTrajectoryGenerator>();
    private final HashMap<ContactablePlaneBody, FixedOrientationTrajectoryGenerator> swingOrientationTrajectoryGenerators =
       new HashMap<ContactablePlaneBody, FixedOrientationTrajectoryGenerator>();
+
 
    public MultiContactTestHumanoidController(FullRobotModel fullRobotModel, CenterOfMassJacobian centerOfMassJacobian,
            CommonWalkingReferenceFrames referenceFrames, DoubleYoVariable yoTime, double gravityZ, TwistCalculator twistCalculator,
@@ -81,7 +86,17 @@ public class MultiContactTestHumanoidController extends MomentumBasedController
       OneDoFJoint[] positionControlJointArray = new OneDoFJoint[ScrewTools.computeNumberOfJointsOfType(OneDoFJoint.class, joints)];
       ScrewTools.filterJoints(joints, positionControlJointArray, OneDoFJoint.class);
       positionControlJoints = new ArrayList<OneDoFJoint>(Arrays.asList(positionControlJointArray));
-      pelvisFrame = fullRobotModel.getPelvis().getBodyFixedFrame();
+
+      RigidBody pelvis = fullRobotModel.getPelvis();
+      RigidBody chest = fullRobotModel.getChest();
+
+      spineJacobian = new GeometricJacobian(pelvis, chest, chest.getBodyFixedFrame());
+      chestOrientationControlModule = new ChestOrientationControlModule(pelvis, chest, spineJacobian, twistCalculator, registry);
+      chestOrientationControlModule.setProportionalGains(100.0, 100.0, 100.0);
+      chestOrientationControlModule.setDerivativeGains(20.0, 20.0, 20.0);
+      positionControlJoints.removeAll(Arrays.asList(spineJacobian.getJointsInOrder()));
+
+      pelvisFrame = pelvis.getBodyFixedFrame();
 
       for (ContactablePlaneBody contactablePlaneBody : contactablePlaneBodiesAndBases.keySet())
       {
@@ -101,7 +116,7 @@ public class MultiContactTestHumanoidController extends MomentumBasedController
          EndEffectorControlModule endEffectorControlModule = new EndEffectorControlModule(contactablePlaneBody, swingPositionTrajectoryGenerator,
                                                                 swingOrientationTrajectoryGenerator, null, yoTime, twistCalculator, registry);
          endEffectorControlModules.put(contactablePlaneBody, endEffectorControlModule);
-         
+
          positionControlJoints.removeAll(Arrays.asList(jacobian.getJointsInOrder()));
       }
    }
@@ -135,12 +150,22 @@ public class MultiContactTestHumanoidController extends MomentumBasedController
    @Override
    public void doMotionControl()
    {
+      doChestcontrol();
       doEndEffectorControl();
       doCoMControl();
       doPelvisControl();
       doJointPositionControl();
    }
 
+
+   private void doChestcontrol()
+   {
+      chestOrientationControlModule.compute();
+      SpatialAccelerationVector chestAcceleration = chestOrientationControlModule.getSpatialAcceleration();
+      DenseMatrix64F nullspaceMultipliers = new DenseMatrix64F(0, 1);
+      DenseMatrix64F selectionMatrix = chestOrientationControlModule.getSelectionMatrix();
+      solver.setDesiredSpatialAcceleration(spineJacobian, chestAcceleration, nullspaceMultipliers, selectionMatrix);
+   }
 
    private void doEndEffectorControl()
    {

@@ -75,7 +75,7 @@ public class DRCFlatGroundWalkingTrack
    {
       AutomaticSimulationRunner automaticSimulationRunner = null;
 
-      DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup();
+      DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true);
 
       DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(TerrainType.FLAT);
       new DRCFlatGroundWalkingTrack(DRCRobotModel.getDefaultRobotModel(), guiInitialSetup, scsInitialSetup, automaticSimulationRunner, 0.005, 16000, true);
