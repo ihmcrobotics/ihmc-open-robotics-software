@@ -91,7 +91,7 @@ public class GroundReactionWrenchSliderInput
          yoPlaneContactState.setContactPoints(contactPoints);
          
          contactStates.add(yoPlaneContactState);
-         inputData.addContact(yoPlaneContactState, coefficientOfFriction, rotationalCoefficientOfFriction);
+         inputData.addContact(yoPlaneContactState, coefficientOfFriction);
       }
       
       scs.addYoVariableRegistry(registry);

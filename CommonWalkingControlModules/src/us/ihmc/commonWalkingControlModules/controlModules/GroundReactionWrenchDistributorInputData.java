@@ -11,7 +11,6 @@ public class GroundReactionWrenchDistributorInputData
 {
    private final ArrayList<PlaneContactState> contactStates = new ArrayList<PlaneContactState>();
    private final LinkedHashMap<PlaneContactState, Double> coefficientsOfFriction = new LinkedHashMap<PlaneContactState, Double>();
-   private final LinkedHashMap<PlaneContactState, Double> rotationalCoefficientsOfFriction = new LinkedHashMap<PlaneContactState, Double>();
    
    private SpatialForceVector desiredNetSpatialForceVector;
    private RobotSide upcomingSupportSide;
@@ -20,14 +19,12 @@ public class GroundReactionWrenchDistributorInputData
    {
       contactStates.clear();
       coefficientsOfFriction.clear();
-      rotationalCoefficientsOfFriction.clear();
    }
 
-   public void addContact(PlaneContactState contactState, double coefficientOfFriction, double rotationalCoefficientOfFriction)
+   public void addContact(PlaneContactState contactState, double coefficientOfFriction)
    {
       contactStates.add(contactState);
       coefficientsOfFriction.put(contactState, coefficientOfFriction);
-      rotationalCoefficientsOfFriction.put(contactState, rotationalCoefficientOfFriction);
    }
    
    public void setSpatialForceVectorAndUpcomingSupportSide(SpatialForceVector desiredNetSpatialForceVector, RobotSide upcomingSupportSide)
@@ -45,12 +42,7 @@ public class GroundReactionWrenchDistributorInputData
    {
       return coefficientsOfFriction.get(contactState);
    }
-   
-   public double getRotationalCoefficientsOfFriction(PlaneContactState contactState)
-   {
-      return rotationalCoefficientsOfFriction.get(contactState);
-   }
-   
+
    public SpatialForceVector getDesiredNetSpatialForceVector()
    {
       return desiredNetSpatialForceVector;

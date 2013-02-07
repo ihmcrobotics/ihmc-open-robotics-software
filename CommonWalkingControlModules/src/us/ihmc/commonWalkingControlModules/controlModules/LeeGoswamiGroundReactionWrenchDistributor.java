@@ -26,12 +26,16 @@ public class LeeGoswamiGroundReactionWrenchDistributor implements GroundReaction
    private final LeeGoswamiForceOptimizer leeGoswamiForceOptimizer;
    private final LeeGoswamiCoPAndNormalTorqueOptimizer leeGoswamiCoPAndNormalTorqueOptimizer;
 
+   private final double rotationalCoefficientOfFrictionMultiplier;
 
-   public LeeGoswamiGroundReactionWrenchDistributor(ReferenceFrame centerOfMassFrame, YoVariableRegistry parentRegistry)
+
+   public LeeGoswamiGroundReactionWrenchDistributor(ReferenceFrame centerOfMassFrame, YoVariableRegistry parentRegistry,
+           double rotationalCoefficientOfFrictionMultiplier)
    {
       this.centerOfMassFrame = centerOfMassFrame;
       this.leeGoswamiForceOptimizer = new LeeGoswamiForceOptimizer(centerOfMassFrame, parentRegistry);
       this.leeGoswamiCoPAndNormalTorqueOptimizer = new LeeGoswamiCoPAndNormalTorqueOptimizer(centerOfMassFrame, parentRegistry);
+      this.rotationalCoefficientOfFrictionMultiplier = rotationalCoefficientOfFrictionMultiplier;
    }
 
    public void setWeights(double wk, double epsilonF, double epsilonCoP, double epsilonTauN)
@@ -51,8 +55,7 @@ public class LeeGoswamiGroundReactionWrenchDistributor implements GroundReaction
 
       for (PlaneContactState contactState : contactStates)
       {
-         addContact(contactState, groundReactionWrenchDistributorInputData.getCoefficientOfFriction(contactState),
-                    groundReactionWrenchDistributorInputData.getRotationalCoefficientsOfFriction(contactState));
+         addContact(contactState, groundReactionWrenchDistributorInputData.getCoefficientOfFriction(contactState));
       }
 
       SpatialForceVector desiredGroundReactionWrench = groundReactionWrenchDistributorInputData.getDesiredNetSpatialForceVector();
@@ -71,9 +74,10 @@ public class LeeGoswamiGroundReactionWrenchDistributor implements GroundReaction
       normalTorques.clear();
    }
 
-   private void addContact(PlaneContactState contactState, double coefficientOfFriction, double rotationalCoefficientOfFriction)
+   private void addContact(PlaneContactState contactState, double coefficientOfFriction)
    {
       coefficientsOfFriction.put(contactState, coefficientOfFriction);
+      double rotationalCoefficientOfFriction = coefficientOfFriction * rotationalCoefficientOfFrictionMultiplier;
       rotationalCoefficientsOfFriction.put(contactState, rotationalCoefficientOfFriction);
 
       forces.put(contactState, new FrameVector(centerOfMassFrame));
