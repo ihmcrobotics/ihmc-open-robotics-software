@@ -113,7 +113,7 @@ public class DRCRobotJointMap implements SDFJointNameMap, RobotSpecificJointName
             double wcx = DRCRobotParameters.sandiaWristContactPointOffsets[0];
             double wcy = DRCRobotParameters.sandiaWristContactPointOffsets[1] * ((robotSide == RobotSide.RIGHT) ? -1 : 1);
             double wcz = DRCRobotParameters.sandiaWristContactPointOffsets[2];
-            handGroundContactPoints.get(robotSide).add(new Pair<String, Vector3d>(prefix + "arm_mwx", new Vector3d(wcx, wcy, wcz)));
+            handGroundContactPoints.get(robotSide).add(new Pair<String, Vector3d>(getNameOfJointBeforeHand(robotSide), new Vector3d(wcx, wcy, wcz)));
          }
          else if (selectedModel == DRCRobotModel.ATLAS_IROBOT_HANDS)
          {
@@ -138,10 +138,18 @@ public class DRCRobotJointMap implements SDFJointNameMap, RobotSpecificJointName
             double wcx = DRCRobotParameters.irobotWristContactPointOffsets[0];
             double wcy = DRCRobotParameters.irobotWristContactPointOffsets[1] * ((robotSide == RobotSide.RIGHT) ? -1 : 1);
             double wcz = DRCRobotParameters.irobotWristContactPointOffsets[2];
-            handGroundContactPoints.get(robotSide).add(new Pair<String, Vector3d>(prefix + "arm_mwx", new Vector3d(wcx, wcy, wcz)));
-
+            handGroundContactPoints.get(robotSide).add(new Pair<String, Vector3d>(getNameOfJointBeforeHand(robotSide), new Vector3d(wcx, wcy, wcz)));
          }
-
+         else if (selectedModel == DRCRobotModel.ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS)
+         {
+            for (Point2d point : DRCRobotParameters.invisibleContactablePlaneHandContactPoints.get(robotSide))
+            {
+               Point3d point3d = new Point3d(point.getX(), point.getY(), 0.0);
+               DRCRobotParameters.invisibleContactablePlaneHandContactPointTransforms.get(robotSide).transform(point3d);
+               handGroundContactPoints.get(robotSide).add(new Pair<String, Vector3d>(getNameOfJointBeforeHand(robotSide), new Vector3d(point3d)));
+            }
+         }
+         
          // add butt contact points on back of thighs
          for (Point2d point : DRCRobotParameters.thighContactPoints.get(robotSide))
          {
@@ -150,7 +158,10 @@ public class DRCRobotJointMap implements SDFJointNameMap, RobotSpecificJointName
             thighGroundContactPoints.get(robotSide).add(new Pair<String, Vector3d>(getNameOfJointBeforeThigh(robotSide), new Vector3d(point3d)));
          }
       }
+      
 
+      
+      
       spineJointNames.put("back_lbz", SpineJointName.SPINE_YAW);
       spineJointNames.put("back_mby", SpineJointName.SPINE_PITCH);
       spineJointNames.put("back_ubx", SpineJointName.SPINE_ROLL);
@@ -184,6 +195,11 @@ public class DRCRobotJointMap implements SDFJointNameMap, RobotSpecificJointName
          jointNameGroundContactPointMap.addAll(handGroundContactPoints.get(robotSide));
          jointNameGroundContactPointMap.addAll(thighGroundContactPoints.get(robotSide));
       }
+   }
+
+   private String getNameOfJointBeforeHand(RobotSide robotSide)
+   {
+      return getRobotSidePrefix(robotSide) + "arm_mwx";
    }
 
    public String getNameOfJointBeforeThigh(RobotSide robotSide)
