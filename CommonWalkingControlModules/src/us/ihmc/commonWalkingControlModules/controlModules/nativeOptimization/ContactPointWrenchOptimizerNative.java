@@ -11,7 +11,7 @@ public class ContactPointWrenchOptimizerNative
 {
    public static final int NUMBER_OF_POINTS_PER_CONTACT = 4;
    public static final int NUMBER_OF_SUPPORT_VECTORS = 4;
-   public static final int MAX_NUMBER_OF_CONTACTS = 2;
+   public static final int MAX_NUMBER_OF_CONTACTS = 3;
    public static final int WRENCH_LENGTH = 6;
 
    private static native void initialize();
