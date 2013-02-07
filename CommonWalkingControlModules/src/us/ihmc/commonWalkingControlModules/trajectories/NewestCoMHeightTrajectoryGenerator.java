@@ -1,11 +1,14 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
+import java.util.ArrayList;
+
 import javax.vecmath.Point2d;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -13,36 +16,28 @@ import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.LineSegment2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
-public class NewestCoMTrajectoryGenerator implements CenterOfMassHeightTrajectoryGenerator
+public class NewestCoMHeightTrajectoryGenerator implements CenterOfMassHeightTrajectoryGenerator
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final TwoPointSpline1D spline = new TwoPointSpline1D(registry);
    private final DoubleYoVariable nominalHeightAboveGround = new DoubleYoVariable("nominalHeightAboveGround", registry);
-   private final DoubleYoVariable desiredCenterOfMassHeight = new DoubleYoVariable("desiredCenterOfMassHeight", registry);
-   private final BooleanYoVariable coMGeneratorHasBeenInitializedBefore = new BooleanYoVariable("coMGeneratorHasBeenInitializedBefore", registry);
+   private LineSegment2d projectionSegment;
 
-   public NewestCoMTrajectoryGenerator(double nominalHeightAboveGround, YoVariableRegistry parentRegistry)
+   public NewestCoMHeightTrajectoryGenerator(double nominalHeightAboveGround, YoVariableRegistry parentRegistry)
    {
       this.nominalHeightAboveGround.set(nominalHeightAboveGround);
-      coMGeneratorHasBeenInitializedBefore.set(false);
       parentRegistry.addChild(registry);
    }
 
-   public void initialize(RobotSide supportLeg, Footstep nextFootstep)
+   public void initialize(RobotSide supportLeg, Footstep nextFootstep, ArrayList<PlaneContactState> contactStates)
    {
-      FramePoint supportCenter = getSupportCenter(supportLeg);
-      FramePoint footstepCenter = getFootstepCenter(nextFootstep);
-      if (!coMGeneratorHasBeenInitializedBefore.getBooleanValue())
-      {
-         desiredCenterOfMassHeight.set(supportCenter.getZ() + nominalHeightAboveGround.getDoubleValue());
-         coMGeneratorHasBeenInitializedBefore.set(true);
-      }
-
+      FramePoint[] contactStateCenters = getContactStateCenters(contactStates, nextFootstep);
+      projectionSegment.set(getPoint2d(contactStateCenters[0]), getPoint2d(contactStateCenters[1]));
       double s0 = 0.0;
-      double sF = footstepCenter.distance(supportCenter);
-      double z0 = desiredCenterOfMassHeight.getDoubleValue();
-      double zF = footstepCenter.getZ() + nominalHeightAboveGround.getDoubleValue();
+      double sF = projectionSegment.length();
+      double z0 = contactStateCenters[0].getZ() + nominalHeightAboveGround.getDoubleValue();;
+      double zF = contactStateCenters[1].getZ() + nominalHeightAboveGround.getDoubleValue();
       Point2d point0 = new Point2d(s0, z0);
       Point2d pointF = new Point2d(sF, zF);
       Point2d[] points = new Point2d[] {point0, pointF};
@@ -58,11 +53,8 @@ public class NewestCoMTrajectoryGenerator implements CenterOfMassHeightTrajector
 
    public void solve(CenterOfMassHeightOutputData centerOfMassHeightOutputDataToPack, CenterOfMassHeightInputData centerOfMassHeightInputData)
    {
-      FramePoint supportCenter = getSupportCenter(centerOfMassHeightInputData.getSupportLeg());
-      FramePoint footstepCenter = getFootstepCenter(centerOfMassHeightInputData.getUpcomingFootstep());
       Point2d queryPoint = getCenterOfMass2d(centerOfMassHeightInputData.getCenterOfMassFrame());
 
-      LineSegment2d projectionSegment = new LineSegment2d(getPoint2d(supportCenter), getPoint2d(footstepCenter));
       projectionSegment.orthogonalProjection(queryPoint);
       double splineQuery = projectionSegment.percentageAlongLineSegment(queryPoint) * projectionSegment.length();
 
@@ -70,7 +62,6 @@ public class NewestCoMTrajectoryGenerator implements CenterOfMassHeightTrajector
       double z = splineOutput[0];
       double dzds = splineOutput[1];
       double ddzdds = splineOutput[2];
-      desiredCenterOfMassHeight.set(z);
 
       double[] partialDerivativesWithRespectToS = getPartialDerivativesWithRespectToS(projectionSegment);
       double dsdx = partialDerivativesWithRespectToS[0];
@@ -99,14 +90,21 @@ public class NewestCoMTrajectoryGenerator implements CenterOfMassHeightTrajector
       return new double[] {dsdx, dsdy};
    }
 
-   private FramePoint getSupportCenter(RobotSide supportLeg)
+   private FramePoint[] getContactStateCenters(ArrayList<PlaneContactState> contactStates, Footstep nextFootstep)
    {
-      return null;
-   }
-
-   private FramePoint getFootstepCenter(Footstep nextFootstep)
-   {
-      return nextFootstep.getPositionInFrame(worldFrame);
+      FramePoint contactStateCenter0 = new FramePoint(contactStates.get(0).getBodyFrame());
+      contactStateCenter0.changeFrame(worldFrame);
+      FramePoint contactStateCenter1;
+      if (nextFootstep == null)
+      {
+         contactStateCenter1 = new FramePoint(contactStates.get(1).getBodyFrame());
+         contactStateCenter1.changeFrame(worldFrame);
+      }
+      else
+      {
+         contactStateCenter1 = nextFootstep.getPositionInFrame(worldFrame);
+      }
+      return new FramePoint[]{contactStateCenter0, contactStateCenter1};
    }
 
    private Point2d getCenterOfMass2d(ReferenceFrame centerOfMassFrame)
