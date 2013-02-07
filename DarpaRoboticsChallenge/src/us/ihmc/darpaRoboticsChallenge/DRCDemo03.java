@@ -73,7 +73,7 @@ public class DRCDemo03
       simulationConstructionSet.setCameraPosition(6.0, -2.0, 4.5);
       simulationConstructionSet.setCameraFix(-0.44, -0.17, 0.75);
 
-      showSeatGraphics(simulationConstructionSet);
+      //showSeatGraphics(simulationConstructionSet);
 
       if (automaticSimulationRunner != null)
       {
