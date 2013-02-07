@@ -16,14 +16,31 @@ public class ViconFrames
    protected static HashMap<String, ViconReferenceFrame> referenceFrames;
    protected static ReferenceFrame viconWorldFrame;
 
-   protected ViconFrames() throws Exception
+   protected ViconFrames(ReferenceFrame parentReferenceFrame) throws Exception
    {
-      initialize();
+      initialize(parentReferenceFrame);
    }
 
-   protected void initialize() throws Exception
+   protected void initialize(ReferenceFrame parentReferenceFrame) throws Exception
    {
-      viconWorldFrame = ReferenceFrame.constructAWorldFrame(worldFrameName);
+      if (parentReferenceFrame == null)
+         viconWorldFrame = ReferenceFrame.constructAWorldFrame(worldFrameName);
+      else
+      {
+         viconWorldFrame = new ReferenceFrame(worldFrameName, parentReferenceFrame, false, true, false)
+         {
+            /**
+             * 
+             */
+            private static final long serialVersionUID = 8016047182514159403L;
+
+            public void updateTransformToParent(Transform3D transformToParent)
+            {
+               setTransformToParent(transformToParent);
+            }
+         };
+      }
+         
       referenceFrames = new HashMap<String, ViconReferenceFrame>();
 
       viconClient = ViconClient.getInstance();
@@ -43,9 +60,14 @@ public class ViconFrames
 
    public static ViconFrames getInstance() throws Exception
    {
+      return getInstance(null);
+   }
+   
+   public static ViconFrames getInstance(ReferenceFrame parentReferenceFrame) throws Exception
+   {
       if (viconFramesSingleton == null)
       {
-         viconFramesSingleton = new ViconFrames();
+         viconFramesSingleton = new ViconFrames(parentReferenceFrame);
       }
 
       return viconFramesSingleton;
@@ -64,7 +86,6 @@ public class ViconFrames
    public synchronized ReferenceFrame getViconWorldFrame()
    {
       return viconWorldFrame;
-
    }
 
    public void updateTransformToParent(String name)
@@ -76,7 +97,7 @@ public class ViconFrames
       }
 
    }
-
+   
    public boolean isDataValid(String name)
    {
       if (referenceFrames.get(name) != null)
