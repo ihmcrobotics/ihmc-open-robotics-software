@@ -1,5 +1,6 @@
 package us.ihmc.darpaRoboticsChallenge;
 
+import java.io.File;
 import java.util.List;
 
 import javax.media.j3d.Transform3D;
@@ -13,6 +14,7 @@ import us.ihmc.darpaRoboticsChallenge.controllers.DRCRobotMomentumBasedControlle
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotParameters;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DrivingDRCRobotInitialSetup;
+import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.projectM.R2Sim02.initialSetup.RobotInitialSetup;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
@@ -26,9 +28,8 @@ public class DRCDemo03
    private final HumanoidRobotSimulation<SDFRobot> drcSimulation;
    private final DRCDemoEnvironmentWithBoxAndSteeringWheel environment;
 
-   public DRCDemo03(DRCRobotModel robotModel,
-         DRCGuiInitialSetup guiInitialSetup, AutomaticSimulationRunner automaticSimulationRunner, double timePerRecordTick,
-         int simulationDataBufferSize, String ipAddress, int portNumber)
+   public DRCDemo03(DRCRobotModel robotModel, DRCGuiInitialSetup guiInitialSetup, AutomaticSimulationRunner automaticSimulationRunner,
+         double timePerRecordTick, int simulationDataBufferSize, String ipAddress, int portNumber)
    {
       DRCSCSInitialSetup scsInitialSetup;
       RobotInitialSetup<SDFRobot> robotInitialSetup = new DrivingDRCRobotInitialSetup();
@@ -44,14 +45,11 @@ public class DRCDemo03
          recordFrequency = 1;
       scsInitialSetup.setRecordFrequency(recordFrequency);
 
-      
-     
       DRCRobotJointMap jointMap = new DRCRobotJointMap(robotModel);
-      
-//      SideDependentList<ContactablePlaneBody> thighs = new SideDependentList<ContactablePlaneBody>();
-//      InverseDynamicsJoint[] allJoints = ScrewTools.computeJointsInOrder(fullRobotModel.getElevator());
-      
-      
+
+      //      SideDependentList<ContactablePlaneBody> thighs = new SideDependentList<ContactablePlaneBody>();
+      //      InverseDynamicsJoint[] allJoints = ScrewTools.computeJointsInOrder(fullRobotModel.getElevator());
+
       SideDependentList<String> namesOfJointsBeforeThighs = new SideDependentList<String>();
       SideDependentList<Transform3D> thighContactPointTransforms = new SideDependentList<Transform3D>();
       SideDependentList<List<Point2d>> thighContactPoints = new SideDependentList<List<Point2d>>();
@@ -61,9 +59,9 @@ public class DRCDemo03
          thighContactPointTransforms.put(robotSide, DRCRobotParameters.thighContactPointTransforms.get(robotSide));
          thighContactPoints.put(robotSide, DRCRobotParameters.thighContactPoints.get(robotSide));
       }
-      
-      
-      DrivingHighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory = new DrivingHighLevelHumanoidControllerFactory(namesOfJointsBeforeThighs, thighContactPointTransforms, thighContactPoints);
+
+      DrivingHighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory = new DrivingHighLevelHumanoidControllerFactory(namesOfJointsBeforeThighs,
+            thighContactPointTransforms, thighContactPoints);
       ControllerFactory controllerFactory = new DRCRobotMomentumBasedControllerFactory(highLevelHumanoidControllerFactory, true);
 
       drcSimulation = DRCSimulationFactory.createSimulation(jointMap, controllerFactory, environment, robotInitialSetup, scsInitialSetup, guiInitialSetup);
@@ -75,6 +73,13 @@ public class DRCDemo03
 
       simulationConstructionSet.setCameraPosition(6.0, -2.0, 4.5);
       simulationConstructionSet.setCameraFix(-0.44, -0.17, 0.75);
+
+      Graphics3DObject seatGraphics = new Graphics3DObject();
+      seatGraphics.scale(0.25);
+      seatGraphics.translate(-1.25, 0, 3.25);
+      seatGraphics.rotate(Math.toRadians(90), Graphics3DObject.Z);
+      seatGraphics.addModelFile(DRCDemo03.class.getResource("models/seat.3DS"));
+      simulationConstructionSet.addStaticLinkGraphics(seatGraphics);
 
       if (automaticSimulationRunner != null)
       {
@@ -97,7 +102,7 @@ public class DRCDemo03
       String ipAddress = null;
       int portNumber = -1;
       new DRCDemo03(DRCRobotModel.ATLAS_IROBOT_HANDS, guiInitialSetup, automaticSimulationRunner, timePerRecordTick, simulationDataBufferSize, ipAddress,
-                                     portNumber);
+            portNumber);
    }
 
    public SimulationConstructionSet getSimulationConstructionSet()
