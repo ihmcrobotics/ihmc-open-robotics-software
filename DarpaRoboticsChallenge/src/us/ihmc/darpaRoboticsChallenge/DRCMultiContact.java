@@ -8,7 +8,7 @@ import javax.vecmath.Point2d;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
 import us.ihmc.commonWalkingControlModules.controllers.ControllerFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.DrivingHighLevelHumanoidControllerFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.MultiContactTestHumanoidControllerFactory;
 import us.ihmc.darpaRoboticsChallenge.controllers.DRCRobotMomentumBasedControllerFactory;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotParameters;
@@ -26,15 +26,14 @@ public class DRCMultiContact
    private final HumanoidRobotSimulation<SDFRobot> drcSimulation;
    private final MultiContactTestEnvironment environment;
 
-   public DRCMultiContact(DRCRobotModel robotModel,
-         DRCGuiInitialSetup guiInitialSetup, AutomaticSimulationRunner automaticSimulationRunner, double timePerRecordTick,
-         int simulationDataBufferSize, String ipAddress, int portNumber)
+   public DRCMultiContact(DRCRobotModel robotModel, DRCGuiInitialSetup guiInitialSetup, AutomaticSimulationRunner automaticSimulationRunner,
+                          double timePerRecordTick, int simulationDataBufferSize, String ipAddress, int portNumber)
    {
       DRCSCSInitialSetup scsInitialSetup;
       RobotInitialSetup<SDFRobot> robotInitialSetup = new MultiContactDRCRobotInitialSetup();
-      
+
       DRCRobotJointMap jointMap = new DRCRobotJointMap(robotModel);
-      
+
       DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
 
       environment = new MultiContactTestEnvironment(robotInitialSetup, jointMap, dynamicGraphicObjectsListRegistry);
@@ -47,24 +46,24 @@ public class DRCMultiContact
          recordFrequency = 1;
       scsInitialSetup.setRecordFrequency(recordFrequency);
 
-     
-      SideDependentList<String> namesOfJointsBeforeThighs = new SideDependentList<String>();
-      SideDependentList<Transform3D> thighContactPointTransforms = new SideDependentList<Transform3D>();
-      SideDependentList<List<Point2d>> thighContactPoints = new SideDependentList<List<Point2d>>();
+      SideDependentList<String> namesOfJointsBeforeHands = new SideDependentList<String>();
+      SideDependentList<Transform3D> handContactPointTransforms = new SideDependentList<Transform3D>();
+      SideDependentList<List<Point2d>> handContactPoints = new SideDependentList<List<Point2d>>();
       for (RobotSide robotSide : RobotSide.values())
       {
-         namesOfJointsBeforeThighs.put(robotSide, jointMap.getNameOfJointBeforeThigh(robotSide));
-         thighContactPointTransforms.put(robotSide, DRCRobotParameters.thighContactPointTransforms.get(robotSide));
-         thighContactPoints.put(robotSide, DRCRobotParameters.thighContactPoints.get(robotSide));
+         namesOfJointsBeforeHands.put(robotSide, jointMap.getNameOfJointBeforeHand(robotSide));
+         handContactPointTransforms.put(robotSide, DRCRobotParameters.invisibleContactablePlaneHandContactPointTransforms.get(robotSide));
+         handContactPoints.put(robotSide, DRCRobotParameters.invisibleContactablePlaneHandContactPoints.get(robotSide));
       }
-      
-      
-      DrivingHighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory = new DrivingHighLevelHumanoidControllerFactory(namesOfJointsBeforeThighs, thighContactPointTransforms, thighContactPoints);
+
+
+      MultiContactTestHumanoidControllerFactory highLevelHumanoidControllerFactory = new MultiContactTestHumanoidControllerFactory(namesOfJointsBeforeHands,
+                                                                                        handContactPointTransforms, handContactPoints);
       ControllerFactory controllerFactory = new DRCRobotMomentumBasedControllerFactory(highLevelHumanoidControllerFactory, true);
 
       drcSimulation = DRCSimulationFactory.createSimulation(jointMap, controllerFactory, environment, robotInitialSetup, scsInitialSetup, guiInitialSetup);
 
-      SimulationConstructionSet simulationConstructionSet = drcSimulation.getSimulationConstructionSet();     
+      SimulationConstructionSet simulationConstructionSet = drcSimulation.getSimulationConstructionSet();
 
       // add other registries
       drcSimulation.addAdditionalDynamicGraphicObjectsListRegistries(dynamicGraphicObjectsListRegistry);
@@ -92,8 +91,8 @@ public class DRCMultiContact
       int simulationDataBufferSize = 16000;
       String ipAddress = null;
       int portNumber = -1;
-      new DRCMultiContact(DRCRobotModel.ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS, guiInitialSetup, automaticSimulationRunner, timePerRecordTick, simulationDataBufferSize, ipAddress,
-                                     portNumber);
+      new DRCMultiContact(DRCRobotModel.ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS, guiInitialSetup, automaticSimulationRunner, timePerRecordTick,
+                          simulationDataBufferSize, ipAddress, portNumber);
    }
 
    public SimulationConstructionSet getSimulationConstructionSet()
