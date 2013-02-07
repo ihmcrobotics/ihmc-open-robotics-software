@@ -30,7 +30,7 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.RevoluteJoint;
+import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
@@ -435,7 +435,7 @@ public class JointSpaceSwingSubController implements SwingSubController
 
       for (LegJointName jointName : legJointNames)
       {
-         RevoluteJoint legJoint = fullRobotModel.getLegJoint(swingLeg, jointName);
+         OneDoFJoint legJoint = fullRobotModel.getLegJoint(swingLeg, jointName);
          swingPositions.setJointPosition(jointName, legJoint.getQ());
          swingVelocities.setJointVelocity(jointName, 0.0);//legJoint.getQd());
          swingAccelerations.setJointAcceleration(jointName, 0.0);//legJoint.getQdd());

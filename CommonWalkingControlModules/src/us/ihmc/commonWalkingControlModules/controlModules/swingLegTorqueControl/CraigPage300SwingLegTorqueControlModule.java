@@ -27,7 +27,7 @@ import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RotationFunctions;
 import us.ihmc.utilities.screwTheory.InverseDynamicsCalculator;
-import us.ihmc.utilities.screwTheory.RevoluteJoint;
+import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.utilities.screwTheory.Twist;
 import us.ihmc.utilities.screwTheory.Wrench;
@@ -195,7 +195,7 @@ public class CraigPage300SwingLegTorqueControlModule implements SwingLegTorqueCo
       LegJointName[] legJointNames = fullRobotModel.getRobotSpecificJointNames().getLegJointNames();
       for (LegJointName legJointName : legJointNames)
       {
-         RevoluteJoint revoluteJoint = fullRobotModel.getLegJoint(swingSide, legJointName);
+         OneDoFJoint revoluteJoint = fullRobotModel.getLegJoint(swingSide, legJointName);
          double qddDesired = revoluteJoint.getQddDesired();
 
          double desiredJointPosition = desiredLegJointPositions.get(swingSide).getJointPosition(legJointName);

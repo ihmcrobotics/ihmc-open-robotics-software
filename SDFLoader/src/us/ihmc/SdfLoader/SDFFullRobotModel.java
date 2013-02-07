@@ -28,7 +28,7 @@ import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
-import us.ihmc.utilities.screwTheory.RevoluteJoint;
+import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTools;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
@@ -41,12 +41,12 @@ public class SDFFullRobotModel implements FullRobotModel
    private final SixDoFJoint rootJoint;
 
 //   private final ArrayList<RevoluteJoint> revoluteJoints = new ArrayList<RevoluteJoint>();
-   private final HashMap<String, RevoluteJoint> revoluteJoints = new HashMap<String, RevoluteJoint>();
+   private final HashMap<String, OneDoFJoint> oneDoFJoints = new HashMap<String, OneDoFJoint>();
 
-   private final EnumMap<NeckJointName, RevoluteJoint> neckJoints = ContainerTools.createEnumMap(NeckJointName.class);
-   private final EnumMap<SpineJointName, RevoluteJoint> spineJoints = ContainerTools.createEnumMap(SpineJointName.class);
-   private final SideDependentList<EnumMap<ArmJointName, RevoluteJoint>> armJointLists = SideDependentList.createListOfEnumMaps(ArmJointName.class);
-   private final SideDependentList<EnumMap<LegJointName, RevoluteJoint>> legJointLists = SideDependentList.createListOfEnumMaps(LegJointName.class);
+   private final EnumMap<NeckJointName, OneDoFJoint> neckJoints = ContainerTools.createEnumMap(NeckJointName.class);
+   private final EnumMap<SpineJointName, OneDoFJoint> spineJoints = ContainerTools.createEnumMap(SpineJointName.class);
+   private final SideDependentList<EnumMap<ArmJointName, OneDoFJoint>> armJointLists = SideDependentList.createListOfEnumMaps(ArmJointName.class);
+   private final SideDependentList<EnumMap<LegJointName, OneDoFJoint>> legJointLists = SideDependentList.createListOfEnumMaps(LegJointName.class);
    private final RigidBody[] upperBody;
    private final RigidBody[] lowerBody;
 
@@ -128,14 +128,29 @@ public class SDFFullRobotModel implements FullRobotModel
       orientationTransform.transform(jointAxis);
 	   
 	   
-      RevoluteJoint inverseDynamicsJoint = ScrewTools.addRevoluteJoint(joint.getName(), parentBody, joint.getTransformToParentJoint(), jointAxis);
+      OneDoFJoint inverseDynamicsJoint;
+      
+      switch(joint.getType())
+      {
+      case REVOLUTE:
+         inverseDynamicsJoint = ScrewTools.addRevoluteJoint(joint.getName(), parentBody, joint.getTransformToParentJoint(), jointAxis);
+         break;
+      case PRISMATIC:
+         inverseDynamicsJoint = ScrewTools.addPrismaticJoint(joint.getName(), parentBody, joint.getTransformToParentJoint(), jointAxis);
+         break;
+      default:
+         throw new RuntimeException("Joint type not implemented: " + joint.getType());
+      }
+      
+      oneDoFJoints.put(joint.getName(), inverseDynamicsJoint);
+      
+      
       SDFLinkHolder childLink = joint.getChild();
       RigidBody rigidBody = ScrewTools.addRigidBody(childLink.getName(), inverseDynamicsJoint, childLink.getInertia(), childLink.getMass(),
             childLink.getCoMOffset());
 //      System.out.println("Adding rigid body " + childLink.getName() + "; Mass: " + childLink.getMass() + "; ixx: " + childLink.getInertia().m00 + "; iyy: " + childLink.getInertia().m11
 //            + "; izz: " + childLink.getInertia().m22 + "; COM Offset: " + childLink.getCoMOffset());
 
-      revoluteJoints.put(joint.getName(), inverseDynamicsJoint);
 
       if (rigidBody.getName().equals(sdfJointNameMap.getChestName()))
       {
@@ -229,22 +244,22 @@ public class SDFFullRobotModel implements FullRobotModel
       return elevator;
    }
 
-   public RevoluteJoint getLegJoint(RobotSide robotSide, LegJointName legJointName)
+   public OneDoFJoint getLegJoint(RobotSide robotSide, LegJointName legJointName)
    {
       return legJointLists.get(robotSide).get(legJointName);
    }
 
-   public RevoluteJoint getArmJoint(RobotSide robotSide, ArmJointName armJointName)
+   public OneDoFJoint getArmJoint(RobotSide robotSide, ArmJointName armJointName)
    {
       return armJointLists.get(robotSide).get(armJointName);
    }
    
-   public RevoluteJoint getSpineJoint(SpineJointName spineJointName)
+   public OneDoFJoint getSpineJoint(SpineJointName spineJointName)
    {
       return spineJoints.get(spineJointName);
    }
 
-   public RevoluteJoint getNeckJoint(NeckJointName neckJointName)
+   public OneDoFJoint getNeckJoint(NeckJointName neckJointName)
    {
       return neckJoints.get(neckJointName);
    }
@@ -329,10 +344,10 @@ public class SDFFullRobotModel implements FullRobotModel
       return upperBody;
    }
 
-   public RevoluteJoint[] getRevoluteJoints()
+   public OneDoFJoint[] getOneDoFJoints()
    {
-      RevoluteJoint[] revoluteJointsAsArray = new RevoluteJoint[revoluteJoints.size()];
-      revoluteJoints.values().toArray(revoluteJointsAsArray);
-      return revoluteJointsAsArray;
+      OneDoFJoint[] oneDoFJointsAsArray = new OneDoFJoint[oneDoFJoints.size()];
+      oneDoFJoints.values().toArray(oneDoFJointsAsArray);
+      return oneDoFJointsAsArray;
    }
 }

@@ -16,7 +16,7 @@ import us.ihmc.commonWalkingControlModules.sensors.ProcessedSensorsInterface;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.screwTheory.InverseDynamicsCalculator;
-import us.ihmc.utilities.screwTheory.RevoluteJoint;
+import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.utilities.screwTheory.Wrench;
 
@@ -85,7 +85,7 @@ public class PDPlusIDSwingLegTorqueControlOnlyModule implements SwingLegTorqueCo
       
       for (LegJointName legJointName : legJointNames)
       {
-         RevoluteJoint revoluteJoint = fullRobotModel.getLegJoint(swingSide, legJointName);         
+         OneDoFJoint revoluteJoint = fullRobotModel.getLegJoint(swingSide, legJointName);         
          double qddDesired = jointAccelerations.getJointAcceleration(legJointName);
          revoluteJoint.setQddDesired(qddDesired);
       }

@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -37,8 +38,17 @@ public class JaxbSDFLoader
       Unmarshaller um = context.createUnmarshaller();
       SDFRoot sdfRoot = (SDFRoot) um.unmarshal(new FileReader(file));
 
+      List<SDFModel> models;
       SDFModel model = null;
-      for (SDFModel modelInstance : sdfRoot.getWorld().getModels())
+      if(sdfRoot.getWorld() != null)
+      {
+         models = sdfRoot.getWorld().getModels();
+      }
+      else
+      {
+         models = sdfRoot.getModels();
+      }
+      for (SDFModel modelInstance : models)
       {
          if (modelName.equals(modelInstance.getName()))
          {

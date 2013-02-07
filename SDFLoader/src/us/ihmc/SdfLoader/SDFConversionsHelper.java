@@ -1,5 +1,7 @@
 package us.ihmc.SdfLoader;
 
+import java.util.Arrays;
+
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
@@ -34,8 +36,8 @@ public class SDFConversionsHelper
          return ret;
       }
       pose = pose.trim();
-      String[] data = pose.split("\\s");
-   
+      String[] data = pose.split("\\s+");
+      
       Transform3D translation = new Transform3D();
       Vector3d translationVector = new Vector3d();
       translationVector.setX(Double.parseDouble(data[0]));

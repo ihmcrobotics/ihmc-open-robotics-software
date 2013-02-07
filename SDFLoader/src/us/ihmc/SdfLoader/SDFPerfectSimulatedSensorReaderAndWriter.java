@@ -9,11 +9,11 @@ import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenc
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.RevoluteJoint;
+import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
 import us.ihmc.utilities.screwTheory.Twist;
 
-import com.yobotics.simulationconstructionset.PinJoint;
+import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJoint;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.robotController.RawOutputWriter;
 import com.yobotics.simulationconstructionset.robotController.RawSensorReader;
@@ -26,7 +26,7 @@ public class SDFPerfectSimulatedSensorReaderAndWriter implements RawSensorReader
    private final FullRobotModel fullRobotModel;
    private final CommonWalkingReferenceFrames referenceFrames;
 
-   private final ArrayList<Pair<PinJoint, RevoluteJoint>> revoluteJoints = new ArrayList<Pair<PinJoint, RevoluteJoint>>();
+   private final ArrayList<Pair<OneDegreeOfFreedomJoint,OneDoFJoint>> revoluteJoints = new ArrayList<Pair<OneDegreeOfFreedomJoint, OneDoFJoint>>();
 
    public SDFPerfectSimulatedSensorReaderAndWriter(SDFRobot robot, FullRobotModel fullRobotModel, CommonWalkingReferenceFrames referenceFrames)
    {
@@ -35,14 +35,14 @@ public class SDFPerfectSimulatedSensorReaderAndWriter implements RawSensorReader
       this.fullRobotModel = fullRobotModel;
       this.referenceFrames = referenceFrames;
 
-      RevoluteJoint[] revoluteJointsArray = fullRobotModel.getRevoluteJoints();
+      OneDoFJoint[] revoluteJointsArray = fullRobotModel.getOneDoFJoints();
 
-      for (RevoluteJoint revoluteJoint : revoluteJointsArray)
+      for (OneDoFJoint revoluteJoint : revoluteJointsArray)
       {
          String name = revoluteJoint.getName();
-         PinJoint pinJoint = robot.getPinJoint(name);
+         OneDegreeOfFreedomJoint pinJoint = robot.getPinJoint(name);
 
-         Pair<PinJoint, RevoluteJoint> jointPair = new Pair<PinJoint, RevoluteJoint>(pinJoint, revoluteJoint);
+         Pair<OneDegreeOfFreedomJoint,OneDoFJoint> jointPair = new Pair<OneDegreeOfFreedomJoint, OneDoFJoint>(pinJoint, revoluteJoint);
          this.revoluteJoints.add(jointPair);
       }
 
@@ -72,10 +72,10 @@ public class SDFPerfectSimulatedSensorReaderAndWriter implements RawSensorReader
 
    public void read()
    {
-      for (Pair<PinJoint, RevoluteJoint> jointPair : revoluteJoints)
+      for (Pair<OneDegreeOfFreedomJoint, OneDoFJoint> jointPair : revoluteJoints)
       {
-         PinJoint pinJoint = jointPair.first();
-         RevoluteJoint revoluteJoint = jointPair.second();
+         OneDegreeOfFreedomJoint pinJoint = jointPair.first();
+         OneDoFJoint revoluteJoint = jointPair.second();
 
          revoluteJoint.setQ(pinJoint.getQ().getDoubleValue());
          revoluteJoint.setQd(pinJoint.getQD().getDoubleValue());
@@ -108,10 +108,10 @@ public class SDFPerfectSimulatedSensorReaderAndWriter implements RawSensorReader
 
    public void write()
    {
-      for (Pair<PinJoint, RevoluteJoint> jointPair : revoluteJoints)
+      for (Pair<OneDegreeOfFreedomJoint, OneDoFJoint> jointPair : revoluteJoints)
       {
-         PinJoint pinJoint = jointPair.first();
-         RevoluteJoint revoluteJoint = jointPair.second();
+         OneDegreeOfFreedomJoint pinJoint = jointPair.first();
+         OneDoFJoint revoluteJoint = jointPair.second();
 
          pinJoint.setTau(revoluteJoint.getTau());
       }

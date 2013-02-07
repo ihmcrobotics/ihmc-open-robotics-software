@@ -25,6 +25,7 @@ import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.ExternalForcePoint;
 import com.yobotics.simulationconstructionset.FloatingJoint;
 import com.yobotics.simulationconstructionset.Link;
+import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJoint;
 import com.yobotics.simulationconstructionset.PinJoint;
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.UnreasonableAccelerationException;
@@ -254,7 +255,7 @@ public class InverseDynamicsCalculatorTest
    {
       for (RevoluteJoint idJoint : jointMap.keySet())
       {
-         PinJoint joint = jointMap.get(idJoint);
+         OneDegreeOfFreedomJoint joint = jointMap.get(idJoint);
          double tau = idJoint.getTau();
 //         System.out.println("tau = " + tau);
          
@@ -267,7 +268,7 @@ public class InverseDynamicsCalculatorTest
       double epsilon = 1e-12;
       for (RevoluteJoint idJoint : jointMap.keySet())
       {
-         PinJoint revoluteJoint = jointMap.get(idJoint);
+         OneDegreeOfFreedomJoint revoluteJoint = jointMap.get(idJoint);
 
          DoubleYoVariable qddVariable = revoluteJoint.getQDD();
          double qdd = qddVariable.getDoubleValue();
@@ -284,7 +285,7 @@ public class InverseDynamicsCalculatorTest
    private void assertZeroAccelerations(HashMap<RevoluteJoint, PinJoint> jointMap)
    {
       double epsilon = 1e-12;
-      for (PinJoint joint : jointMap.values())
+      for (OneDegreeOfFreedomJoint joint : jointMap.values())
       {
          double qdd = joint.getQDD().getDoubleValue();
          assertEquals(0.0, qdd, epsilon);

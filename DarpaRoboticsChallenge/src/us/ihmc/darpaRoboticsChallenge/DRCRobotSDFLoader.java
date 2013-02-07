@@ -12,7 +12,7 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 
 public class DRCRobotSDFLoader
 {
-   public JaxbSDFLoader loadDRCRobot(DRCRobotJointMap jointMap)
+   public static JaxbSDFLoader loadDRCRobot(DRCRobotJointMap jointMap)
    {
       URL fileURL;
       String modelName;
@@ -43,7 +43,6 @@ public class DRCRobotSDFLoader
             modelName = "atlas";
 
             break;
-
          default:
             throw new RuntimeException("DRCRobotSDFLoader: Unimplemented enumeration case : " + selectedModel);
       }

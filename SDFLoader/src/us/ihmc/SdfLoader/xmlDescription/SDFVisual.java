@@ -1,5 +1,7 @@
 package us.ihmc.SdfLoader.xmlDescription;
 
+import java.util.List;
+
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 
@@ -11,6 +13,7 @@ public class SDFVisual
    private String transparency;
    private String pose;
    private SDFGeometry geometry;
+   private SDFMaterial material;
 
    public String getName()
    {
@@ -39,7 +42,7 @@ public class SDFVisual
       return laserRetro;
    }
 
-   @XmlElement(name="laser_retro")
+   @XmlElement(name = "laser_retro")
    public void setLaserRetro(String laserRetro)
    {
       this.laserRetro = laserRetro;
@@ -50,7 +53,7 @@ public class SDFVisual
       return transparency;
    }
 
-   @XmlElement(name="transparency")
+   @XmlElement(name = "transparency")
    public void setTransparency(String transparency)
    {
       this.transparency = transparency;
@@ -61,7 +64,7 @@ public class SDFVisual
       return pose;
    }
 
-   @XmlElement(name="pose")
+   @XmlElement(name = "pose")
    public void setPose(String pose)
    {
       this.pose = pose;
@@ -72,10 +75,68 @@ public class SDFVisual
       return geometry;
    }
 
-   @XmlElement(name="geometry")
+   @XmlElement(name = "geometry")
    public void setGeometry(SDFGeometry geometry)
    {
       this.geometry = geometry;
+   }
+
+   public SDFMaterial getMaterial()
+   {
+      return material;
+   }
+
+   @XmlElement(name = "material")
+   public void setMaterial(SDFMaterial material)
+   {
+      this.material = material;
+   }
+
+   public static class SDFMaterial
+   {
+      private SDFScript script;
+
+
+      public SDFScript getScript()
+      {
+         return script;
+      }
+
+      @XmlElement(name = "script")
+      public void setScript(SDFScript script)
+      {
+         this.script = script;
+      }
+      
+      public static class SDFScript
+      {
+         private List<String> uri;
+         private String name;
+
+         public List<String> getUri()
+         {
+            return uri;
+         }
+
+         @XmlElement(name = "uri")
+         public void setUri(List<String> uri)
+         {
+            this.uri = uri;
+         }
+
+         public String getName()
+         {
+            return name;
+         }
+
+         @XmlElement(name = "name")
+         public void setName(String name)
+         {
+            this.name = name;
+         }
+
+      }
+
    }
 
 }
