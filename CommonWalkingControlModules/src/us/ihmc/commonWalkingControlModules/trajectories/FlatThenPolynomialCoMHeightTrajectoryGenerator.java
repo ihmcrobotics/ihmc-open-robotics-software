@@ -1,10 +1,12 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.media.j3d.Transform3D;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.calculators.OrbitalEnergyCalculator;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculator;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorTools;
@@ -76,7 +78,7 @@ public class FlatThenPolynomialCoMHeightTrajectoryGenerator implements CenterOfM
       parentRegistry.addChild(registry);
    }
 
-   public void initialize(RobotSide supportLeg, Footstep nextFootstep)
+   public void initialize(RobotSide supportLeg, Footstep nextFootstep, ArrayList<PlaneContactState> contactStates)
    {
       if (supportLeg == null)
       {

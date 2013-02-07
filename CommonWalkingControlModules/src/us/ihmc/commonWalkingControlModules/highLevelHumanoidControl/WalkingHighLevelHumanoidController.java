@@ -548,7 +548,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
          icpTrajectoryGenerator.initialize(desiredICP.getFramePoint2dCopy(), finalDesiredICP, doubleSupportTimeProvider.getValue(), getOmega0(),
                                            amountToBeInsideDoubleSupport.getDoubleValue());
 
-         centerOfMassHeightTrajectoryGenerator.initialize(getSupportLeg(), nextFootstep);
+         centerOfMassHeightTrajectoryGenerator.initialize(getSupportLeg(), nextFootstep, getContactStatesList());
       }
 
       @Override
@@ -622,7 +622,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
          setContactStateForSwing(bipedFeet.get(swingSide));
          updateBipedSupportPolygons(bipedSupportPolygons);
 
-         centerOfMassHeightTrajectoryGenerator.initialize(getSupportLeg(), nextFootstep);
+         centerOfMassHeightTrajectoryGenerator.initialize(getSupportLeg(), nextFootstep, getContactStatesList());
       }
 
       @Override
@@ -999,20 +999,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 
       centerOfMassHeightInputData.setCenterOfMassFrame(centerOfMassFrame);
 
-      ArrayList<PlaneContactState> contactStatesList = new ArrayList<PlaneContactState>();
-
-      if (getSupportLeg() == null)
-      {
-         ContactablePlaneBody leftFoot = bipedFeet.get(RobotSide.LEFT);
-         ContactablePlaneBody rightFoot = bipedFeet.get(RobotSide.RIGHT);
-
-         contactStatesList.add(leftFoot);
-         contactStatesList.add(rightFoot);
-      }
-      else
-      {
-         contactStatesList.add(bipedFeet.get(getSupportLeg()));
-      }
+      ArrayList<PlaneContactState> contactStatesList = getContactStatesList();
 
       centerOfMassHeightInputData.setContactStates(contactStatesList);
 
@@ -1055,6 +1042,25 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       zddDesired = MathTools.clipToMinMax(zddDesired, -gravity + epsilon, Double.POSITIVE_INFINITY);
 
       return zddDesired;
+   }
+
+   private ArrayList<PlaneContactState> getContactStatesList()
+   {
+      ArrayList<PlaneContactState> contactStatesList = new ArrayList<PlaneContactState>();
+
+      if (getSupportLeg() == null)
+      {
+         ContactablePlaneBody leftFoot = bipedFeet.get(RobotSide.LEFT);
+         ContactablePlaneBody rightFoot = bipedFeet.get(RobotSide.RIGHT);
+
+         contactStatesList.add(leftFoot);
+         contactStatesList.add(rightFoot);
+      }
+      else
+      {
+         contactStatesList.add(bipedFeet.get(getSupportLeg()));
+      }
+      return contactStatesList;
    }
 
    private void doFootcontrol()
