@@ -88,8 +88,7 @@ public class GeometricStairsGroundReactionWrenchDistributor implements GroundRea
       
       for (PlaneContactState contactState : contactStates)
       {
-         addContact(contactState, groundReactionWrenchDistributorInputData.getCoefficientOfFriction(contactState), 
-               groundReactionWrenchDistributorInputData.getRotationalCoefficientsOfFriction(contactState));
+         addContact(contactState, groundReactionWrenchDistributorInputData.getCoefficientOfFriction(contactState));
       }
     
       SpatialForceVector desiredGroundReactionWrench = groundReactionWrenchDistributorInputData.getDesiredNetSpatialForceVector();
@@ -109,7 +108,7 @@ public class GeometricStairsGroundReactionWrenchDistributor implements GroundRea
       normalTorques.clear();
    }
 
-   private void addContact(PlaneContactState contactState, double coefficientOfFriction, double rotationalCoefficientOfFriction)
+   private void addContact(PlaneContactState contactState, double coefficientOfFriction)
    {
       if (contactState == null) throw new RuntimeException("contactState == null");
       

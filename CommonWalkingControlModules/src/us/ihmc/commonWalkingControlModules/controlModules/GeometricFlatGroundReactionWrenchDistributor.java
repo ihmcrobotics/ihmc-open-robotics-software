@@ -62,8 +62,7 @@ public class GeometricFlatGroundReactionWrenchDistributor implements GroundReact
    
       for (PlaneContactState contactState : contactStates)
       {
-         addContact(contactState, groundReactionWrenchDistributorInputData.getCoefficientOfFriction(contactState), 
-               groundReactionWrenchDistributorInputData.getRotationalCoefficientsOfFriction(contactState));
+         addContact(contactState, groundReactionWrenchDistributorInputData.getCoefficientOfFriction(contactState));
       }
     
       SpatialForceVector desiredGroundReactionWrench = groundReactionWrenchDistributorInputData.getDesiredNetSpatialForceVector();
@@ -79,7 +78,7 @@ public class GeometricFlatGroundReactionWrenchDistributor implements GroundReact
       footConvexPolygons.clear();
    }
 
-   private void addContact(PlaneContactState contactState, double coefficientOfFriction, double rotationalCoefficientOfFriction)
+   private void addContact(PlaneContactState contactState, double coefficientOfFriction)
    {
       if (!contactState.getPlaneFrame().isZupFrame()) throw new RuntimeException("GeometricFlatGroundReactionWrenchDistributor: Must be a ZUpFrame!");
       

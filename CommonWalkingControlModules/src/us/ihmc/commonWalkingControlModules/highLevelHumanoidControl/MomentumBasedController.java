@@ -290,7 +290,7 @@ public abstract class MomentumBasedController implements RobotController
 
          if (footContactPoints.size() > 0)
          {
-            groundReactionWrenchDistributorInputData.addContact(contactState, coefficientOfFriction, rotationalCoefficientOfFriction);
+            groundReactionWrenchDistributorInputData.addContact(contactState, coefficientOfFriction);
          }
       }
 
