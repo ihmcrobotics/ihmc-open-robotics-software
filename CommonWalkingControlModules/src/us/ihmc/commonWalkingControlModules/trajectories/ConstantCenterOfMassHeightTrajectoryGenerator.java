@@ -1,21 +1,16 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
 import us.ihmc.robotSide.RobotSide;
-import us.ihmc.utilities.math.geometry.FrameVector2d;
-import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public class ConstantCenterOfMassHeightTrajectoryGenerator implements CenterOfMassHeightTrajectoryGenerator
 {
-   private static final FrameVector2d flatSlope = new FrameVector2d(ReferenceFrame.getWorldFrame(), 0.0, 0.0);
-   private static final FrameVector2d flatSecondDerivative = new FrameVector2d(ReferenceFrame.getWorldFrame(), 0.0, 0.0);
-   
    private final YoVariableRegistry registry;
    private final DoubleYoVariable desiredCenterOfMassHeight;
    
@@ -28,31 +23,19 @@ public class ConstantCenterOfMassHeightTrajectoryGenerator implements CenterOfMa
       desiredCenterOfMassHeight.set(initialDesiredCoMHeight);
    }
 
-   public void initialize(RobotSide supportLeg, Footstep nextFootstep, ArrayList<PlaneContactState> contactStates)
+   public void initialize(RobotSide supportLeg, Footstep nextFootstep, List<PlaneContactState> contactStates)
    {
       // empty
    }
 
    
-   public void solve(CenterOfMassHeightOutputData centerOfMassHeightOutputDataToPack, CenterOfMassHeightInputData centerOfMassHeightInputData)
+   public void solve(CenterOfMassHeightPartialDerivativesData coMHeightPartialDerivativesDataToPack, CenterOfMassHeightInputData centerOfMassHeightInputData)
    {
-      centerOfMassHeightOutputDataToPack.setDesiredCenterOfMassHeight(desiredCenterOfMassHeight.getDoubleValue());
-      centerOfMassHeightOutputDataToPack.setDesiredCenterOfMassHeightSlope(flatSlope);
-      centerOfMassHeightOutputDataToPack.setDesiredCenterOfMassHeightSecondDerivative(flatSecondDerivative);
-   }
-
-   public double getDesiredCenterOfMassHeight()
-   {
-      return desiredCenterOfMassHeight.getDoubleValue();
-   }
-
-   public FrameVector2d getDesiredCenterOfMassHeightSlope()
-   {
-      return flatSlope;
-   }
-
-   public FrameVector2d getDesiredCenterOfMassHeightSecondDerivative()
-   {
-      return flatSlope;
+      coMHeightPartialDerivativesDataToPack.setCoMHeight(desiredCenterOfMassHeight.getDoubleValue());
+      coMHeightPartialDerivativesDataToPack.setPartialD2zDx2(0.0);
+      coMHeightPartialDerivativesDataToPack.setPartialD2zDxDy(0.0);
+      coMHeightPartialDerivativesDataToPack.setPartialD2zDy2(0.0);
+      coMHeightPartialDerivativesDataToPack.setPartialDzDx(0.0);
+      coMHeightPartialDerivativesDataToPack.setPartialDzDy(0.0);
    }
 }
