@@ -28,6 +28,11 @@ public class NewestCoMHeightTrajectoryGenerator implements CoMHeightTrajectoryGe
       this.nominalHeightAboveGround.set(nominalHeightAboveGround);
       parentRegistry.addChild(registry);
    }
+   
+   public void setNominalHeightAboveGround(double nominalHeightAboveGround)
+   {
+      this.nominalHeightAboveGround.set(nominalHeightAboveGround);
+   }
 
    public void initialize(RobotSide supportLeg, Footstep nextFootstep, List<PlaneContactState> contactStates)
    {
