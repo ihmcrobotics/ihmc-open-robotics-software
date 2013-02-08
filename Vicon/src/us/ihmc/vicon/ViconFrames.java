@@ -16,6 +16,11 @@ public class ViconFrames
    protected static HashMap<String, ViconReferenceFrame> referenceFrames;
    protected static ReferenceFrame viconWorldFrame;
 
+   protected ViconFrames() throws Exception
+   {
+      initialize(null);
+   }
+
    protected ViconFrames(ReferenceFrame parentReferenceFrame) throws Exception
    {
       initialize(parentReferenceFrame);
