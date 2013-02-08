@@ -5,29 +5,44 @@ import javax.vecmath.Vector2d;
 
 public class CenterOfMassXYVelocityAndAccelerationData
 {
-   private Point2d comPosition = new Point2d();
-   private Vector2d comVelocity = new Vector2d();
-   private Vector2d comAcceleration = new Vector2d();
+   private Point2d comXYPosition = new Point2d();
+   private Vector2d comXYVelocity = new Vector2d();
+   private Vector2d comXYAcceleration = new Vector2d();
    
-   public void set(CenterOfMassXYVelocityAndAccelerationData comData)
+   public void set(CenterOfMassXYVelocityAndAccelerationData comXYData)
    {
-      this.comPosition.set(comData.comPosition);
-      this.comVelocity.set(comData.comVelocity);
-      this.comAcceleration.set(comData.comAcceleration);
+      this.comXYPosition.set(comXYData.comXYPosition);
+      this.comXYVelocity.set(comXYData.comXYVelocity);
+      this.comXYAcceleration.set(comXYData.comXYAcceleration);
    }
    
-   public void getCoMPosition(Point2d comPositionToPack)
+   public void getCoMXYPosition(Point2d comXYPositionToPack)
    {
-      comPositionToPack.set(this.comPosition);
+      comXYPositionToPack.set(this.comXYPosition);
    }
    
-   public void getCoMVelocity(Vector2d comVelocityToPack)
+   public void getCoMXYVelocity(Vector2d comXYVelocityToPack)
    {
-      comVelocityToPack.set(this.comVelocity);
+      comXYVelocityToPack.set(this.comXYVelocity);
    }
    
-   public void getCoMAcceleration(Vector2d comAccelerationToPack)
+   public void getCoMXYAcceleration(Vector2d comXYAccelerationToPack)
    {
-      comAccelerationToPack.set(this.comAcceleration);
+      comXYAccelerationToPack.set(this.comXYAcceleration);
+   }
+   
+   public void setCoMXYPosition(Point2d comXYPosition)
+   {
+      this.comXYPosition.set(comXYPosition);
+   }
+   
+   public void setCoMXYVelocity(Vector2d comXYVelocity)
+   {
+      this.comXYVelocity.set(comXYVelocity);
+   }
+   
+   public void setCoMXYAcceleration(Vector2d comXYAcceleration)
+   {
+      this.comXYVelocity.set(comXYAcceleration);
    }
 }

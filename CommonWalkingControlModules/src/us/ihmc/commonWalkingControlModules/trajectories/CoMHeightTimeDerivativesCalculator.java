@@ -11,9 +11,9 @@ public class CoMHeightTimeDerivativesCalculator
 
    public void computeCoMHeightTimeDerivatives(CoMHeightData comHeightDataToPack, CenterOfMassXYVelocityAndAccelerationData xyVelocityAndAcceleration, CenterOfMassHeightPartialDerivativesData comPartialDerivatives)
    {
-      xyVelocityAndAcceleration.getCoMPosition(comXYPosition);
-      xyVelocityAndAcceleration.getCoMVelocity(comXYVelocity);
-      xyVelocityAndAcceleration.getCoMAcceleration(comXYAcceleration);
+      xyVelocityAndAcceleration.getCoMXYPosition(comXYPosition);
+      xyVelocityAndAcceleration.getCoMXYVelocity(comXYVelocity);
+      xyVelocityAndAcceleration.getCoMXYAcceleration(comXYAcceleration);
       
       double comHeight = comPartialDerivatives.getCoMHeight();
       double dzDx = comPartialDerivatives.getPartialDzDx();
