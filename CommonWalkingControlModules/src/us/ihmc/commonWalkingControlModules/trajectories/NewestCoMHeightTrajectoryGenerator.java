@@ -17,6 +17,7 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 public class NewestCoMHeightTrajectoryGenerator implements CoMHeightTrajectoryGenerator
 {
+   private static final boolean DEBUG = true; 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final TwoPointSpline1D spline = new TwoPointSpline1D(registry);
@@ -31,12 +32,12 @@ public class NewestCoMHeightTrajectoryGenerator implements CoMHeightTrajectoryGe
 
    public void initialize(RobotSide supportLeg, Footstep nextFootstep, List<PlaneContactState> contactStates)
    {
-      FramePoint[] contactStateCenters = getContactStateCenters(contactStates, nextFootstep);
-      projectionSegment = new LineSegment2d(getPoint2d(contactStateCenters[0]), getPoint2d(contactStateCenters[1]));
+      FramePoint[] contactFramePositions = getContactStateCenters(contactStates, nextFootstep);
+      projectionSegment = new LineSegment2d(getPoint2d(contactFramePositions[0]), getPoint2d(contactFramePositions[1]));
       double s0 = 0.0;
       double sF = projectionSegment.length();
-      double z0 = contactStateCenters[0].getZ() + nominalHeightAboveGround.getDoubleValue();;
-      double zF = contactStateCenters[1].getZ() + nominalHeightAboveGround.getDoubleValue();
+      double z0 = contactFramePositions[0].getZ() + nominalHeightAboveGround.getDoubleValue();
+      double zF = contactFramePositions[1].getZ() + nominalHeightAboveGround.getDoubleValue();
       Point2d point0 = new Point2d(s0, z0);
       Point2d pointF = new Point2d(sF, zF);
       Point2d[] points = new Point2d[] {point0, pointF};
@@ -93,19 +94,25 @@ public class NewestCoMHeightTrajectoryGenerator implements CoMHeightTrajectoryGe
 
    private FramePoint[] getContactStateCenters(List<PlaneContactState> contactStates, Footstep nextFootstep)
    {
-      FramePoint contactStateCenter0 = new FramePoint(contactStates.get(0).getBodyFrame());
-      contactStateCenter0.changeFrame(worldFrame);
-      FramePoint contactStateCenter1;
+      FramePoint contactFramePosition0 = new FramePoint(contactStates.get(0).getBodyFrame());
+      contactFramePosition0.changeFrame(worldFrame);
+      FramePoint contactFramePosition1;
       if (nextFootstep == null)
       {
-         contactStateCenter1 = new FramePoint(contactStates.get(1).getBodyFrame());
-         contactStateCenter1.changeFrame(worldFrame);
+         contactFramePosition1 = new FramePoint(contactStates.get(1).getBodyFrame());
+         contactFramePosition1.changeFrame(worldFrame);
       }
       else
       {
-         contactStateCenter1 = nextFootstep.getPositionInFrame(worldFrame);
+         contactFramePosition1 = nextFootstep.getPositionInFrame(worldFrame);
       }
-      return new FramePoint[]{contactStateCenter0, contactStateCenter1};
+      if (DEBUG)
+      {
+         System.out.println("nextFootstep: " + nextFootstep);
+         System.out.println("contactFramePosition0: " + contactFramePosition0);
+         System.out.println("contactFramePosition1: " + contactFramePosition1 + "\n");
+      }
+      return new FramePoint[]{contactFramePosition0, contactFramePosition1};
    }
 
    private Point2d getCenterOfMass2d(ReferenceFrame centerOfMassFrame)
