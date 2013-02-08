@@ -38,13 +38,18 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
    private final SideDependentList<String> namesOfJointsBeforeHands;
    private final SideDependentList<Transform3D> handContactPointTransforms;
    private final SideDependentList<List<Point2d>> handContactPoints;
+   private final RobotSide[] footContactSides;
+   private final RobotSide[] handContactSides;
 
    public MultiContactTestHumanoidControllerFactory(SideDependentList<String> namesOfJointsBeforeHands,
-           SideDependentList<Transform3D> handContactPointTransforms, SideDependentList<List<Point2d>> handContactPoints)
+           SideDependentList<Transform3D> handContactPointTransforms, SideDependentList<List<Point2d>> handContactPoints, RobotSide[] footContactSides,
+           RobotSide[] handContactSides)
    {
       this.namesOfJointsBeforeHands = namesOfJointsBeforeHands;
       this.handContactPointTransforms = handContactPointTransforms;
       this.handContactPoints = handContactPoints;
+      this.footContactSides = footContactSides;
+      this.handContactSides = handContactSides;
    }
 
    public RobotController create(FullRobotModel fullRobotModel, CommonWalkingReferenceFrames referenceFrames, FingerForceSensors fingerForceSensors,
@@ -116,16 +121,24 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
                                                   rootJointAccelerationControlModule.getDesiredPelvisOrientationTrajectoryInputPort(),
                                                   dynamicGraphicObjectsListRegistry);
 
+
+
       double coefficientOfFriction = 1.0;
-      for (ContactablePlaneBody contactablePlaneBody : feet.values())
+
+      for (ContactablePlaneBody contactablePlaneBody : contactablePlaneBodiesAndBases.keySet())
       {
-         ret.setContactablePlaneBodiesInContact(contactablePlaneBody, true, coefficientOfFriction);
+         ret.setContactablePlaneBodiesInContact(contactablePlaneBody, false, coefficientOfFriction);
       }
 
-      RobotSide handInContactSide = RobotSide.LEFT;
-      ret.setContactablePlaneBodiesInContact(hands.get(handInContactSide), true, coefficientOfFriction);
-      ret.setContactablePlaneBodiesInContact(hands.get(handInContactSide.getOppositeSide()), false, coefficientOfFriction);
+      for (RobotSide robotSide : footContactSides)
+      {
+         ret.setContactablePlaneBodiesInContact(feet.get(robotSide), true, coefficientOfFriction);
+      }
 
+      for (RobotSide robotSide : handContactSides)
+      {
+         ret.setContactablePlaneBodiesInContact(hands.get(robotSide), true, coefficientOfFriction);
+      }
 
       return ret;
    }

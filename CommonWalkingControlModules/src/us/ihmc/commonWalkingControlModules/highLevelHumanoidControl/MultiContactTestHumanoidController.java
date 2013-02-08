@@ -55,7 +55,7 @@ public class MultiContactTestHumanoidController extends MomentumBasedController
    private final HashMap<OneDoFJoint, Double> desiredJointPositions = new HashMap<OneDoFJoint, Double>();
 
    private final ControlFlowInputPort<OrientationTrajectoryData> desiredPelvisOrientationPort;
-   private final YoFrameOrientation desiredPelvisOrientaton = new YoFrameOrientation("desiredPelvis", worldFrame, registry);
+   private final YoFrameOrientation desiredPelvisOrientation = new YoFrameOrientation("desiredPelvis", worldFrame, registry);
 
    private final ReferenceFrame pelvisFrame;
 
@@ -136,8 +136,8 @@ public class MultiContactTestHumanoidController extends MomentumBasedController
       desiredCoMPosition.set(currentCoM);
 
       FrameOrientation currentPelvisOrientaton = new FrameOrientation(pelvisFrame);
-      currentPelvisOrientaton.changeFrame(desiredPelvisOrientaton.getReferenceFrame());
-      desiredPelvisOrientaton.set(currentPelvisOrientaton);
+      currentPelvisOrientaton.changeFrame(desiredPelvisOrientation.getReferenceFrame());
+      desiredPelvisOrientation.set(currentPelvisOrientaton);
 
       for (ContactablePlaneBody contactablePlaneBody : contactablePlaneBodies)
       {
@@ -192,7 +192,8 @@ public class MultiContactTestHumanoidController extends MomentumBasedController
    private void doPelvisControl()
    {
       OrientationTrajectoryData pelvisOrientationTrajectoryData = new OrientationTrajectoryData();
-      pelvisOrientationTrajectoryData.set(desiredPelvisOrientaton.getFrameOrientationCopy(), new FrameVector(pelvisFrame), new FrameVector(pelvisFrame));
+      FrameOrientation desiredPelvisOrientation = this.desiredPelvisOrientation.getFrameOrientationCopy();
+      pelvisOrientationTrajectoryData.set(desiredPelvisOrientation, new FrameVector(pelvisFrame), new FrameVector(pelvisFrame));
       desiredPelvisOrientationPort.setData(pelvisOrientationTrajectoryData);
    }
 

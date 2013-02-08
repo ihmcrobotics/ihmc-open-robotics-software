@@ -1,4 +1,4 @@
-/* Produced by CVXGEN, 2013-02-07 00:01:30 -0500.  */
+/* Produced by CVXGEN, 2013-02-08 14:41:10 -0500.  */
 /* CVXGEN is Copyright (C) 2006-2012 Jacob Mattingley, jem@cvxgen.com. */
 /* The code in this file is Copyright (C) 2006-2012 Jacob Mattingley. */
 /* CVXGEN, or solvers produced by CVXGEN, cannot be used for commercial */
@@ -74,8 +74,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
   if (xm == NULL) {
     printf("could not find params.A.\n");
   } else {
-    if (!((mxGetM(xm) == 6) && (mxGetN(xm) == 48))) {
-      printf("A must be size (6,48), not (%d,%d).\n", mxGetM(xm), mxGetN(xm));
+    if (!((mxGetM(xm) == 6) && (mxGetN(xm) == 64))) {
+      printf("A must be size (6,64), not (%d,%d).\n", mxGetM(xm), mxGetN(xm));
       this_var_errors++;
     }
     if (mxIsComplex(xm)) {
@@ -93,7 +93,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     if (this_var_errors == 0) {
       dest = params.A;
       src = mxGetPr(xm);
-      for (i = 0; i < 288; i++)
+      for (i = 0; i < 384; i++)
         *dest++ = *src++;
       valid_vars++;
     }
@@ -103,8 +103,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
   if (xm == NULL) {
     printf("could not find params.B.\n");
   } else {
-    if (!((mxGetM(xm) == 3) && (mxGetN(xm) == 48))) {
-      printf("B must be size (3,48), not (%d,%d).\n", mxGetM(xm), mxGetN(xm));
+    if (!((mxGetM(xm) == 4) && (mxGetN(xm) == 64))) {
+      printf("B must be size (4,64), not (%d,%d).\n", mxGetM(xm), mxGetN(xm));
       this_var_errors++;
     }
     if (mxIsComplex(xm)) {
@@ -122,7 +122,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     if (this_var_errors == 0) {
       dest = params.B;
       src = mxGetPr(xm);
-      for (i = 0; i < 144; i++)
+      for (i = 0; i < 256; i++)
         *dest++ = *src++;
       valid_vars++;
     }
@@ -229,8 +229,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
   if (xm == NULL) {
     printf("could not find params.fmin.\n");
   } else {
-    if (!((mxGetM(xm) == 3) && (mxGetN(xm) == 1))) {
-      printf("fmin must be size (3,1), not (%d,%d).\n", mxGetM(xm), mxGetN(xm));
+    if (!((mxGetM(xm) == 4) && (mxGetN(xm) == 1))) {
+      printf("fmin must be size (4,1), not (%d,%d).\n", mxGetM(xm), mxGetN(xm));
       this_var_errors++;
     }
     if (mxIsComplex(xm)) {
@@ -248,7 +248,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     if (this_var_errors == 0) {
       dest = params.fmin;
       src = mxGetPr(xm);
-      for (i = 0; i < 3; i++)
+      for (i = 0; i < 4; i++)
         *dest++ = *src++;
       valid_vars++;
     }
@@ -259,7 +259,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
   }
   if (prepare_for_c) {
     printf("settings.prepare_for_c == 1. thus, outputting for C.\n");
-    for (i = 0; i < 288; i++)
+    for (i = 0; i < 384; i++)
       printf("  params.A[%d] = %.6g;\n", i, params.A[i]);
     for (i = 0; i < 6; i++)
       printf("  params.W[%d] = %.6g;\n", i, params.W[i]);
@@ -267,9 +267,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
       printf("  params.C[%d] = %.6g;\n", i, params.C[i]);
     for (i = 0; i < 1; i++)
       printf("  params.epsilon[%d] = %.6g;\n", i, params.epsilon[i]);
-    for (i = 0; i < 144; i++)
+    for (i = 0; i < 256; i++)
       printf("  params.B[%d] = %.6g;\n", i, params.B[i]);
-    for (i = 0; i < 3; i++)
+    for (i = 0; i < 4; i++)
       printf("  params.fmin[%d] = %.6g;\n", i, params.fmin[i]);
   }
   /* Perform the actual solve in here. */
@@ -294,11 +294,11 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
   *mxGetPr(xm) = work.converged;
   /* Extract variable values. */
   plhs[0] = mxCreateStructArray(1, dims1x1of1, num_var_names, var_names);
-  xm = mxCreateDoubleMatrix(48, 1, mxREAL);
+  xm = mxCreateDoubleMatrix(64, 1, mxREAL);
   mxSetField(plhs[0], 0, "rho", xm);
   dest = mxGetPr(xm);
   src = vars.rho;
-  for (i = 0; i < 48; i++) {
+  for (i = 0; i < 64; i++) {
     *dest++ = *src++;
   }
 }

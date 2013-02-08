@@ -12,7 +12,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.MultiContact
 import us.ihmc.darpaRoboticsChallenge.controllers.DRCRobotMomentumBasedControllerFactory;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotParameters;
-import us.ihmc.darpaRoboticsChallenge.initialSetup.MultiContactDRCRobotInitialSetup;
+import us.ihmc.darpaRoboticsChallenge.initialSetup.PushUpDRCRobotInitialSetup;
 import us.ihmc.projectM.R2Sim02.initialSetup.RobotInitialSetup;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
@@ -31,13 +31,21 @@ public class DRCMultiContact
                           double timePerRecordTick, int simulationDataBufferSize, String ipAddress, int portNumber)
    {
       DRCSCSInitialSetup scsInitialSetup;
-      RobotInitialSetup<SDFRobot> robotInitialSetup = new MultiContactDRCRobotInitialSetup();
+
+
+//    RobotSide[] footContactSides = RobotSide.values();
+//    RobotSide[] handContactSides = RobotSide.LEFT;
+//    RobotInitialSetup<SDFRobot> robotInitialSetup = new MultiContactDRCRobotInitialSetup();
+
+      RobotSide[] footContactSides = RobotSide.values();
+      RobotSide[] handContactSides = RobotSide.values();
+      RobotInitialSetup<SDFRobot> robotInitialSetup = new PushUpDRCRobotInitialSetup();
 
       DRCRobotJointMap jointMap = new DRCRobotJointMap(robotModel);
 
       DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
 
-      environment = new MultiContactTestEnvironment(robotInitialSetup, jointMap, dynamicGraphicObjectsListRegistry);
+      environment = new MultiContactTestEnvironment(robotInitialSetup, jointMap, dynamicGraphicObjectsListRegistry, footContactSides, handContactSides);
       scsInitialSetup = new DRCSCSInitialSetup(environment);
       scsInitialSetup.setSimulationDataBufferSize(simulationDataBufferSize);
 
@@ -59,26 +67,27 @@ public class DRCMultiContact
 
 
       MultiContactTestHumanoidControllerFactory highLevelHumanoidControllerFactory = new MultiContactTestHumanoidControllerFactory(namesOfJointsBeforeHands,
-                                                                                        handContactPointTransforms, handContactPoints);
+                                                                                        handContactPointTransforms, handContactPoints, footContactSides, handContactSides);
       ControllerFactory controllerFactory = new DRCRobotMomentumBasedControllerFactory(highLevelHumanoidControllerFactory, true);
 
       drcSimulation = DRCSimulationFactory.createSimulation(jointMap, controllerFactory, environment, robotInitialSetup, scsInitialSetup, guiInitialSetup);
 
       SimulationConstructionSet simulationConstructionSet = drcSimulation.getSimulationConstructionSet();
 
+      
       MidiSliderBoard sliderBoard = new MidiSliderBoard(simulationConstructionSet);
       sliderBoard.setSlider(1, "desiredCoMX", simulationConstructionSet, -0.2, 0.2);
       sliderBoard.setSlider(2, "desiredCoMY", simulationConstructionSet, -0.2, 0.2);
       sliderBoard.setSlider(3, "desiredCoMZ", simulationConstructionSet, 0.8, 1.2);
-      sliderBoard.setSlider(4, "desiredPelvisYaw", simulationConstructionSet, -Math.PI/8.0, Math.PI/8.0);
-      sliderBoard.setSlider(5, "desiredPelvisPitch", simulationConstructionSet, -Math.PI/8.0, Math.PI/8.0);
-      sliderBoard.setSlider(6, "desiredPelvisRoll", simulationConstructionSet, -Math.PI/8.0, Math.PI/8.0);
-      sliderBoard.setKnob(1, "desiredChestOrientationYaw", simulationConstructionSet, -Math.PI/8.0, Math.PI/8.0);
-      sliderBoard.setKnob(2, "desiredChestOrientationPitch", simulationConstructionSet, -Math.PI/8.0, Math.PI/8.0);
-      sliderBoard.setKnob(3, "desiredChestOrientationRoll", simulationConstructionSet, -Math.PI/8.0, Math.PI/8.0);
+      sliderBoard.setSlider(4, "desiredPelvisYaw", simulationConstructionSet, -Math.PI / 8.0, Math.PI / 8.0);
+      sliderBoard.setSlider(5, "desiredPelvisPitch", simulationConstructionSet, -Math.PI, Math.PI);
+      sliderBoard.setSlider(6, "desiredPelvisRoll", simulationConstructionSet, -Math.PI / 8.0, Math.PI / 8.0);
+      sliderBoard.setKnob(1, "desiredChestOrientationYaw", simulationConstructionSet, -Math.PI / 8.0, Math.PI / 8.0);
+      sliderBoard.setKnob(2, "desiredChestOrientationPitch", simulationConstructionSet, -Math.PI / 8.0, Math.PI / 8.0);
+      sliderBoard.setKnob(3, "desiredChestOrientationRoll", simulationConstructionSet, -Math.PI / 8.0, Math.PI / 8.0);
 
-      
-      
+
+
       // add other registries
       drcSimulation.addAdditionalDynamicGraphicObjectsListRegistries(dynamicGraphicObjectsListRegistry);
 

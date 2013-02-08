@@ -33,21 +33,25 @@ import com.yobotics.simulationconstructionset.util.ground.TerrainObject;
 public class MultiContactTestEnvironment implements CommonAvatarEnvironmentInterface
 {
    private final CombinedTerrainObject combinedTerrainObject;
+   private final RobotSide[] footContactSides;
+   private final RobotSide[] handContactSides;
 
    public MultiContactTestEnvironment(RobotInitialSetup<SDFRobot> robotInitialSetup, DRCRobotJointMap jointMap,
-                                      DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+                                      DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, RobotSide[] footContactSides, RobotSide[] handContactSides)
    {
-      DRCRobotSDFLoader drcRobotSDFLoader = new DRCRobotSDFLoader();
-      JaxbSDFLoader jaxbSDFLoader = drcRobotSDFLoader.loadDRCRobot(jointMap);
+      JaxbSDFLoader jaxbSDFLoader = DRCRobotSDFLoader.loadDRCRobot(jointMap);
       SDFRobot robotForEnvironmentSetup = jaxbSDFLoader.getRobot();
+      robotInitialSetup.initializeRobot(robotForEnvironmentSetup);
       robotForEnvironmentSetup.update();
       FullRobotModel fullRobotModelForEnvironmentSetup = jaxbSDFLoader.getFullRobotModel();
 
-      robotInitialSetup.initializeRobot(robotForEnvironmentSetup);
       CommonWalkingReferenceFrames referenceFramesForEnvironmentSetup = jaxbSDFLoader.getReferenceFrames();
       SDFPerfectSimulatedSensorReaderAndWriter sensorReaderAndOutputWriter = new SDFPerfectSimulatedSensorReaderAndWriter(robotForEnvironmentSetup,
                                                                                 fullRobotModelForEnvironmentSetup, referenceFramesForEnvironmentSetup);
       sensorReaderAndOutputWriter.read();
+      
+      this.footContactSides = footContactSides;
+      this.handContactSides = handContactSides;
 
       combinedTerrainObject = createCombinedTerrainObject(referenceFramesForEnvironmentSetup, fullRobotModelForEnvironmentSetup);
    }
@@ -55,19 +59,21 @@ public class MultiContactTestEnvironment implements CommonAvatarEnvironmentInter
    private CombinedTerrainObject createCombinedTerrainObject(CommonWalkingReferenceFrames referenceFramesForEnvironmentSetup, FullRobotModel fullRobotModel)
    {
       CombinedTerrainObject combinedTerrainObject = new CombinedTerrainObject(getClass().getSimpleName());
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : footContactSides)
       {
          ReferenceFrame soleFrame = referenceFramesForEnvironmentSetup.getSoleFrame(robotSide);
          Transform3D transformToWorld = soleFrame.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());
          combinedTerrainObject.addTerrainObject(createConvexPolygonTerrainObject(transformToWorld));
       }
 
-      RobotSide handContactSide = RobotSide.LEFT;
-      ReferenceFrame handFrame = fullRobotModel.getHand(handContactSide).getParentJoint().getFrameAfterJoint();
-      Transform3D handToWorld = handFrame.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());
-      Transform3D handContactPlaneToWorld = new Transform3D();
-      handContactPlaneToWorld.mul(handToWorld, DRCRobotParameters.invisibleContactablePlaneHandContactPointTransforms.get(handContactSide));
-      combinedTerrainObject.addTerrainObject(createConvexPolygonTerrainObject(handContactPlaneToWorld));
+      for (RobotSide robotSide : handContactSides)
+      {
+         ReferenceFrame handFrame = fullRobotModel.getHand(robotSide).getParentJoint().getFrameAfterJoint();
+         Transform3D handToWorld = handFrame.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());
+         Transform3D handContactPlaneToWorld = new Transform3D();
+         handContactPlaneToWorld.mul(handToWorld, DRCRobotParameters.invisibleContactablePlaneHandContactPointTransforms.get(robotSide));
+         combinedTerrainObject.addTerrainObject(createConvexPolygonTerrainObject(handContactPlaneToWorld));
+      }
 
       return combinedTerrainObject;
    }
