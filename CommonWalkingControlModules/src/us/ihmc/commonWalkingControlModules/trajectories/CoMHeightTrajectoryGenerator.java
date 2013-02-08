@@ -7,8 +7,8 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
 import us.ihmc.robotSide.RobotSide;
 
 
-public interface CenterOfMassHeightTrajectoryGenerator
+public interface CoMHeightTrajectoryGenerator
 {
    public abstract void initialize(RobotSide supportLeg, Footstep nextFootstep, List<PlaneContactState> contactStates);
-   public void solve(CenterOfMassHeightPartialDerivativesData coMHeightPartialDerivativesDataToPack, CenterOfMassHeightInputData centerOfMassHeightInputData);
+   public void solve(CoMHeightPartialDerivativesData coMHeightPartialDerivativesDataToPack, ContactStatesAndUpcomingFootstepData centerOfMassHeightInputData);
 }

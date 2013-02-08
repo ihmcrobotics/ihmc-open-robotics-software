@@ -26,7 +26,7 @@ import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.trajectory.YoPolynomial;
 
-public class FlatThenPolynomialCoMHeightTrajectoryGenerator implements CenterOfMassHeightTrajectoryGenerator
+public class FlatThenPolynomialCoMHeightTrajectoryGenerator implements CoMHeightTrajectoryGenerator
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final ReferenceFrame centerOfMassFrame;
@@ -160,7 +160,7 @@ public class FlatThenPolynomialCoMHeightTrajectoryGenerator implements CenterOfM
    }
    
    
-   public void solve(CenterOfMassHeightPartialDerivativesData coMHeightPartialDerivativesDataToPack, CenterOfMassHeightInputData centerOfMassHeightInputData)
+   public void solve(CoMHeightPartialDerivativesData coMHeightPartialDerivativesDataToPack, ContactStatesAndUpcomingFootstepData centerOfMassHeightInputData)
    {
       compute();
       

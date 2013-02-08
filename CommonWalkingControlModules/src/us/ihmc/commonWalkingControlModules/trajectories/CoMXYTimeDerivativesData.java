@@ -3,13 +3,13 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 
-public class CenterOfMassXYVelocityAndAccelerationData
+public class CoMXYTimeDerivativesData
 {
    private Point2d comXYPosition = new Point2d();
    private Vector2d comXYVelocity = new Vector2d();
    private Vector2d comXYAcceleration = new Vector2d();
    
-   public void set(CenterOfMassXYVelocityAndAccelerationData comXYData)
+   public void set(CoMXYTimeDerivativesData comXYData)
    {
       this.comXYPosition.set(comXYData.comXYPosition);
       this.comXYVelocity.set(comXYData.comXYVelocity);

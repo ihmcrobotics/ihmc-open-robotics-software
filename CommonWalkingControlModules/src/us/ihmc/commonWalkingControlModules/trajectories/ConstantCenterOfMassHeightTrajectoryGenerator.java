@@ -9,7 +9,7 @@ import us.ihmc.robotSide.RobotSide;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
-public class ConstantCenterOfMassHeightTrajectoryGenerator implements CenterOfMassHeightTrajectoryGenerator
+public class ConstantCenterOfMassHeightTrajectoryGenerator implements CoMHeightTrajectoryGenerator
 {
    private final YoVariableRegistry registry;
    private final DoubleYoVariable desiredCenterOfMassHeight;
@@ -29,7 +29,7 @@ public class ConstantCenterOfMassHeightTrajectoryGenerator implements CenterOfMa
    }
 
    
-   public void solve(CenterOfMassHeightPartialDerivativesData coMHeightPartialDerivativesDataToPack, CenterOfMassHeightInputData centerOfMassHeightInputData)
+   public void solve(CoMHeightPartialDerivativesData coMHeightPartialDerivativesDataToPack, ContactStatesAndUpcomingFootstepData centerOfMassHeightInputData)
    {
       coMHeightPartialDerivativesDataToPack.setCoMHeight(desiredCenterOfMassHeight.getDoubleValue());
       coMHeightPartialDerivativesDataToPack.setPartialD2zDx2(0.0);

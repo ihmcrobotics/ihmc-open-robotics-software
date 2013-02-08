@@ -2,11 +2,11 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 
 import us.ihmc.utilities.math.MathTools;
 
-public class CenterOfMassHeightPartialDerivativesData
+public class CoMHeightPartialDerivativesData
 {
    private double comHeight, partialDzDx, partialDzDy, partialD2zDx2, partialD2zDy2, partialD2zDxDy;
 
-   public void set(CenterOfMassHeightPartialDerivativesData centerOfMassHeightPartialDerivativesData)
+   public void set(CoMHeightPartialDerivativesData centerOfMassHeightPartialDerivativesData)
    {
       this.comHeight = centerOfMassHeightPartialDerivativesData.comHeight; 
       this.partialDzDx = centerOfMassHeightPartialDerivativesData.partialDzDx; 
