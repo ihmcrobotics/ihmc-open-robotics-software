@@ -35,19 +35,25 @@ public class NewestCoMHeightTrajectoryGeneratorTest
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    
    @Test
-   public void basicDoubleSupportCoMHeightTrajectoryTest()
+   public void flatDoubleSupportCoMHeightTrajectoryTest()
    {
       double nominalCoMHeight = 1.0;
-      Point3d contactCenter0 = new Point3d(0.0, 0.0, 0.0);
-      Point3d contactCenter1 = new Point3d(1.0, 0.0, 0.0);
+      Point3d contactFramePosition0 = new Point3d(0.0, 0.0, 0.0);
+      Point3d contactFramePosition1 = new Point3d(1.0, 0.0, 0.0);
       boolean doubleSupport = false;
       Point3d CoMQuery = new Point3d(0.5, 0.5, 0.5);
-      double[] expectedOutput = new double[6];
+      double expectedCoMHeight = 1.0;
+      double expectedDzdx = 0.0;
+      double expectedDzdy = 0.0;
+      double expectedDdzddx = 0.0;
+      double expectedDdzddy = 0.0;
+      double expectedDdzdxdy = 0.0;
+      double[] expectedOutput = new double[]{expectedCoMHeight, expectedDzdx, expectedDzdy, expectedDdzddx, expectedDdzddy, expectedDdzdxdy};
       
-      generalCoMHeightTrajectoryTest(nominalCoMHeight, contactCenter0, contactCenter1, doubleSupport, CoMQuery, expectedOutput);
+      generalCoMHeightTrajectoryTest(nominalCoMHeight, contactFramePosition0, contactFramePosition1, doubleSupport, CoMQuery, expectedOutput, 1e-7);
    }
    
-   public void generalCoMHeightTrajectoryTest(double nominalCoMHeight, Point3d contactCenter0, Point3d contactCenter1, boolean doubleSupport, Point3d CoMQuery, double[] expectedOutput)
+   public void generalCoMHeightTrajectoryTest(double nominalCoMHeight, Point3d contactCenter0, Point3d contactCenter1, boolean doubleSupport, Point3d CoMQuery, double[] expectedOutput, double epsilon)
    {
       ReferenceFrame centerOfMassFrame = createCenterOfMassFrame(CoMQuery);
       List<PlaneContactState> contactStates = new ArrayList<PlaneContactState>();
@@ -61,11 +67,7 @@ public class NewestCoMHeightTrajectoryGeneratorTest
       }
       else {
          //do not add a second element to contactStates
-         FrameOrientation2d footstepOrientation = new FrameOrientation2d(worldFrame);
-         FramePose2d footstepPose = new FramePose2d(new FramePoint2d(worldFrame, contactCenter1.getX(), contactCenter1.getY()), footstepOrientation);
-         RigidBody footBody = new RigidBody("footBody", worldFrame);
-         ContactablePlaneBody foot = new FootSpoof("foot", 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
-         nextFootstep = FootstepUtils.generateFootstep(footstepPose, foot, contactCenter1.getZ(), new Vector3d(0.0, 0.0, 1.0));
+         nextFootstep = getFootstep(contactCenter1);
       }
       
       CoMHeightPartialDerivativesData coMHeightPartialDerivativesData = new CoMHeightPartialDerivativesData();
@@ -76,6 +78,23 @@ public class NewestCoMHeightTrajectoryGeneratorTest
       CoMHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator = new NewestCoMHeightTrajectoryGenerator(nominalCoMHeight, registry);
       centerOfMassHeightTrajectoryGenerator.initialize(null, nextFootstep, contactStates);
       centerOfMassHeightTrajectoryGenerator.solve(coMHeightPartialDerivativesData, centerOfMassHeightInputData);
+      
+      assertEquals(expectedOutput[0], coMHeightPartialDerivativesData.getCoMHeight(), epsilon);
+      assertEquals(expectedOutput[1], coMHeightPartialDerivativesData.getPartialDzDx(), epsilon);
+      assertEquals(expectedOutput[2], coMHeightPartialDerivativesData.getPartialDzDy(), epsilon);
+      assertEquals(expectedOutput[3], coMHeightPartialDerivativesData.getPartialD2zDx2(), epsilon);
+      assertEquals(expectedOutput[4], coMHeightPartialDerivativesData.getPartialD2zDy2(), epsilon);
+      assertEquals(expectedOutput[5], coMHeightPartialDerivativesData.getPartialD2zDxDy(), epsilon);
+   }
+
+   private Footstep getFootstep(Point3d contactFrameCenter)
+   {
+      Footstep nextFootstep;
+      FrameOrientation2d footstepOrientation = new FrameOrientation2d(worldFrame);
+      FramePose2d footstepPose = new FramePose2d(new FramePoint2d(worldFrame, contactFrameCenter.getX(), contactFrameCenter.getY()), footstepOrientation);
+      ContactablePlaneBody foot = new FootSpoof("foot", 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+      nextFootstep = FootstepUtils.generateFootstep(footstepPose, foot, contactFrameCenter.getZ(), new Vector3d(0.0, 0.0, 1.0));
+      return nextFootstep;
    }
    
    private ReferenceFrame createCenterOfMassFrame(Point3d centerOfMassLocation)
