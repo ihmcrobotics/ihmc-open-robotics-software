@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import javax.vecmath.Point2d;
 
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactableBody;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.captureRegion.SteppingStonesCaptureRegionIntersectionCalculator;
 import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
 import us.ihmc.robotSide.RobotSide;
@@ -33,14 +33,14 @@ public class CapturabilityBasedDesiredFootstepAdjustor implements DesiredFootste
 
    private final BooleanYoVariable nextStepIsInsideCaptureRegion = new BooleanYoVariable("nextStepIsInsideCaptureRegion", registry);
 
-   private final SideDependentList<? extends ContactableBody> feet;
+   private final SideDependentList<? extends ContactablePlaneBody> feet;
 
    private double footForwardOffset;
    private double footBackwardOffset;
    private double footWidth;
 
 
-   public CapturabilityBasedDesiredFootstepAdjustor(CouplingRegistry couplingRegistry, SideDependentList<? extends ContactableBody> feet,
+   public CapturabilityBasedDesiredFootstepAdjustor(CouplingRegistry couplingRegistry, SideDependentList<? extends ContactablePlaneBody> feet,
            SteppingStones steppingStones, YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       this.couplingRegistry = couplingRegistry;

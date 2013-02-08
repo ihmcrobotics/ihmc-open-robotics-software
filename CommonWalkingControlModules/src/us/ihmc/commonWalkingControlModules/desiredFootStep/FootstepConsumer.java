@@ -6,7 +6,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.vecmath.Point3d;
 
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactableBody;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.utilities.io.streamingData.StreamingDataConsumer;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
@@ -16,10 +16,10 @@ public class FootstepConsumer implements FootstepProvider, StreamingDataConsumer
 {
    private final ConcurrentLinkedQueue<Footstep> footstepQueue = new ConcurrentLinkedQueue<Footstep>();
    private final long dataIdentifier;
-   private final Collection<? extends ContactableBody> rigidBodyList;
+   private final Collection<? extends ContactablePlaneBody> rigidBodyList;
    int j=0;
 
-   public FootstepConsumer(long dataIdentifier, Collection<? extends ContactableBody> rigidBodyList)
+   public FootstepConsumer(long dataIdentifier, Collection<? extends ContactablePlaneBody> rigidBodyList)
    {
       this.dataIdentifier = dataIdentifier;
       this.rigidBodyList = rigidBodyList;
@@ -38,7 +38,7 @@ public class FootstepConsumer implements FootstepProvider, StreamingDataConsumer
       }
       System.out.println("FootstepConsumer: consume: "+(++j)+" footsteps received, Ah Ah Ah!");
       FootstepData footstepData = (FootstepData) object;
-      ContactableBody contactableBody = findContactableBodyByName(footstepData.getRigidBodyName());
+      ContactablePlaneBody contactableBody = findContactableBodyByName(footstepData.getRigidBodyName());
       ArrayList<FramePoint> expectedContactPoints = new ArrayList<FramePoint>();
       for (int i = 0; i < footstepData.getExpectedContactPoints().size(); i++)
       {
@@ -51,9 +51,9 @@ public class FootstepConsumer implements FootstepProvider, StreamingDataConsumer
       footstepQueue.add(footstep);
    }
 
-   private ContactableBody findContactableBodyByName(String rigidBodyName)
+   private ContactablePlaneBody findContactableBodyByName(String rigidBodyName)
    {
-      for (ContactableBody contactableBody : rigidBodyList)
+      for (ContactablePlaneBody contactableBody : rigidBodyList)
       {
          if (contactableBody.getRigidBody().getName().equals(rigidBodyName))
          {

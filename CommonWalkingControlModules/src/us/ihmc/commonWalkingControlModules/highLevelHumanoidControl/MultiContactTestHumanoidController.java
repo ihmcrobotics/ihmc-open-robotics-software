@@ -204,14 +204,14 @@ public class MultiContactTestHumanoidController extends MomentumBasedController
       }
    }
 
-   public void setContactablePlaneBodiesInContact(ContactablePlaneBody contactablePlaneBody, boolean inContact)
+   public void setContactablePlaneBodiesInContact(ContactablePlaneBody contactablePlaneBody, boolean inContact, double coefficientOfFriction)
    {
       YoPlaneContactState contactState = contactStates.get(contactablePlaneBody);
       if (inContact)
       {
-         contactState.setContactPoints(contactablePlaneBody.getContactPoints2d());
+         contactState.set(contactablePlaneBody.getContactPoints2d(), coefficientOfFriction);
       }
       else
-         contactState.setContactPoints(new ArrayList<FramePoint2d>());
+         contactState.set(new ArrayList<FramePoint2d>(), coefficientOfFriction);
    }
 }

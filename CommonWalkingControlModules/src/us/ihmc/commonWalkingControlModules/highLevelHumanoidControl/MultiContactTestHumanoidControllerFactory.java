@@ -116,14 +116,15 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
                                                   rootJointAccelerationControlModule.getDesiredPelvisOrientationTrajectoryInputPort(),
                                                   dynamicGraphicObjectsListRegistry);
 
+      double coefficientOfFriction = 1.0;
       for (ContactablePlaneBody contactablePlaneBody : feet.values())
       {
-         ret.setContactablePlaneBodiesInContact(contactablePlaneBody, true);
+         ret.setContactablePlaneBodiesInContact(contactablePlaneBody, true, coefficientOfFriction);
       }
 
       RobotSide handInContactSide = RobotSide.LEFT;
-      ret.setContactablePlaneBodiesInContact(hands.get(handInContactSide), true);
-      ret.setContactablePlaneBodiesInContact(hands.get(handInContactSide.getOppositeSide()), false);
+      ret.setContactablePlaneBodiesInContact(hands.get(handInContactSide), true, coefficientOfFriction);
+      ret.setContactablePlaneBodiesInContact(hands.get(handInContactSide.getOppositeSide()), false, coefficientOfFriction);
 
 
       return ret;

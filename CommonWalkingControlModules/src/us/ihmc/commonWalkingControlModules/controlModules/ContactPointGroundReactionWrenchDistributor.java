@@ -112,7 +112,7 @@ public class ContactPointGroundReactionWrenchDistributor implements GroundReacti
          List<FramePoint2d> contactPoints2d = contactState.getContactPoints2d();
          int nContactPoints = contactPoints2d.size();
 
-         WrenchDistributorTools.getSupportVectors(normalizedSupportVectors, inputData.getCoefficientOfFriction(contactState), contactState.getPlaneFrame());
+         WrenchDistributorTools.getSupportVectors(normalizedSupportVectors, contactState.getCoefficientOfFriction(), contactState.getPlaneFrame());
 
          // B
          WrenchDistributorTools.computeSupportVectorMatrixBlock(supportVectorMatrixVBlock, normalizedSupportVectors, contactState.getPlaneFrame());

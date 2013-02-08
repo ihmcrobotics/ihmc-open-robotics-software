@@ -249,15 +249,16 @@ public class GroundReactionWrenchDistributorTest
 
    private void testSimpleWrenchDistribution(ReferenceFrame centerOfMassFrame, GroundReactionWrenchDistributor distributor, YoVariableRegistry parentRegistry)
    {
+      double coefficientOfFriction = 1.0;
       double footLength = 0.3;
       double footWidth = 0.15;
       Point3d leftMidfootLocation = new Point3d(0.0, 0.5, 0.0);
-      FlatGroundPlaneContactState leftFootContactState = new FlatGroundPlaneContactState(footLength, footWidth, leftMidfootLocation);
+      FlatGroundPlaneContactState leftFootContactState = new FlatGroundPlaneContactState(footLength, footWidth, leftMidfootLocation, coefficientOfFriction);
 
       Point3d rightMidfootLocation = new Point3d(0.0, -0.5, 0.0);
-      FlatGroundPlaneContactState rightFootContactState = new FlatGroundPlaneContactState(footLength, footWidth, rightMidfootLocation);
+      FlatGroundPlaneContactState rightFootContactState = new FlatGroundPlaneContactState(footLength, footWidth, rightMidfootLocation, coefficientOfFriction);
 
-      simpleTwoFootTest(centerOfMassFrame, distributor, parentRegistry, leftFootContactState, rightFootContactState);
+      simpleTwoFootTest(centerOfMassFrame, distributor, parentRegistry, leftFootContactState, rightFootContactState, coefficientOfFriction);
    }
 
    private void testTroublesomeExampleOne(ReferenceFrame centerOfMassFrame, GroundReactionWrenchDistributor distributor, YoVariableRegistry parentRegistry)
@@ -303,20 +304,20 @@ public class GroundReactionWrenchDistributorTest
    {
       SpatialForceVector desiredNetSpatialForceVector = new SpatialForceVector(centerOfMassFrame, linearPart, angularPart);
 
-      FlatGroundPlaneContactState contactStateOne = new FlatGroundPlaneContactState(contactPointLocationsOne);
-      FlatGroundPlaneContactState contactStateTwo = new FlatGroundPlaneContactState(contactPointLocationsTwo);
+      double coefficientOfFriction = 0.87;
+      FlatGroundPlaneContactState contactStateOne = new FlatGroundPlaneContactState(contactPointLocationsOne, coefficientOfFriction);
+      FlatGroundPlaneContactState contactStateTwo = new FlatGroundPlaneContactState(contactPointLocationsTwo, coefficientOfFriction);
 
       ArrayList<PlaneContactState> contactStates = new ArrayList<PlaneContactState>();
 
       contactStates.add(contactStateOne);
       contactStates.add(contactStateTwo);
 
-      double coefficientOfFriction = 0.87;
 
       GroundReactionWrenchDistributorInputData inputData = new GroundReactionWrenchDistributorInputData();
 
-      inputData.addContact(contactStateOne, coefficientOfFriction);
-      inputData.addContact(contactStateTwo, coefficientOfFriction);
+      inputData.addContact(contactStateOne);
+      inputData.addContact(contactStateTwo);
 
 
       GroundReactionWrenchDistributorVisualizer visualizer = null;
@@ -395,16 +396,16 @@ public class GroundReactionWrenchDistributorTest
       {
          contactStates.clear();
 
-         FlatGroundPlaneContactState leftFootContactState = FlatGroundPlaneContactState.createRandomFlatGroundContactState(random, true);
-         FlatGroundPlaneContactState rightFootContactState = FlatGroundPlaneContactState.createRandomFlatGroundContactState(random, false);
+         FlatGroundPlaneContactState leftFootContactState = FlatGroundPlaneContactState.createRandomFlatGroundContactState(random, true, coefficientOfFriction);
+         FlatGroundPlaneContactState rightFootContactState = FlatGroundPlaneContactState.createRandomFlatGroundContactState(random, false, coefficientOfFriction);
 
          contactStates.add(leftFootContactState);
          contactStates.add(rightFootContactState);
 
          GroundReactionWrenchDistributorInputData inputData = new GroundReactionWrenchDistributorInputData();
 
-         inputData.addContact(leftFootContactState, coefficientOfFriction);
-         inputData.addContact(rightFootContactState, coefficientOfFriction);
+         inputData.addContact(leftFootContactState);
+         inputData.addContact(rightFootContactState);
 
          SpatialForceVector desiredNetSpatialForceVector;
 
@@ -452,6 +453,7 @@ public class GroundReactionWrenchDistributorTest
 
    private void testNonFlatGroundExample(ReferenceFrame centerOfMassFrame, GroundReactionWrenchDistributor distributor, YoVariableRegistry parentRegistry)
    {
+      double coefficientOfFriction = 1.0;
       double footLength = 0.3;
       double footWidth = 0.15;
 
@@ -459,15 +461,15 @@ public class GroundReactionWrenchDistributorTest
       Vector3d leftNormalToContactPlane = new Vector3d(0.1, 0.0, 1.0);
       leftNormalToContactPlane.normalize();
       NonFlatGroundPlaneContactState leftFootContactState = new NonFlatGroundPlaneContactState(footLength, footWidth, leftMidfootLocation,
-                                                               leftNormalToContactPlane);
+                                                               leftNormalToContactPlane, coefficientOfFriction);
 
       Point3d rightMidfootLocation = new Point3d(0.0, -0.5, 0.0);
       Vector3d rightNormalToContactPlane = new Vector3d(-0.1, 0.0, 1.0);
       rightNormalToContactPlane.normalize();
       NonFlatGroundPlaneContactState rightFootContactState = new NonFlatGroundPlaneContactState(footLength, footWidth, rightMidfootLocation,
-                                                                rightNormalToContactPlane);
+                                                                rightNormalToContactPlane, coefficientOfFriction);
 
-      simpleTwoFootTest(centerOfMassFrame, distributor, parentRegistry, leftFootContactState, rightFootContactState);
+      simpleTwoFootTest(centerOfMassFrame, distributor, parentRegistry, leftFootContactState, rightFootContactState, coefficientOfFriction);
    }
 
 // private void testFourFeetExample(ReferenceFrame centerOfMassFrame, GroundReactionWrenchDistributorInterface distributor, YoVariableRegistry parentRegistry)
@@ -492,23 +494,22 @@ public class GroundReactionWrenchDistributorTest
 // }
 
    private void simpleTwoFootTest(ReferenceFrame centerOfMassFrame, GroundReactionWrenchDistributor distributor, YoVariableRegistry parentRegistry,
-                                  PlaneContactState leftFootContactState, PlaneContactState rightFootContactState)
+                                  PlaneContactState leftFootContactState, PlaneContactState rightFootContactState, double coefficientOfFriction)
    {
-      simpleNFootTest(centerOfMassFrame, distributor, parentRegistry, new PlaneContactState[] {leftFootContactState, rightFootContactState});
+      simpleNFootTest(centerOfMassFrame, distributor, parentRegistry, new PlaneContactState[] {leftFootContactState, rightFootContactState}, coefficientOfFriction);
    }
 
    private void simpleNFootTest(ReferenceFrame centerOfMassFrame, GroundReactionWrenchDistributor distributor, YoVariableRegistry parentRegistry,
-                                PlaneContactState[] feetContactStates)
+                                PlaneContactState[] feetContactStates, double coefficientOfFriction)
    {
       ArrayList<PlaneContactState> contactStates = new ArrayList<PlaneContactState>();
 
-      double coefficientOfFriction = 1.0;
 
       GroundReactionWrenchDistributorInputData inputData = new GroundReactionWrenchDistributorInputData();
 
       for (int i = 0; i < feetContactStates.length; i++)
       {
-         inputData.addContact(feetContactStates[i], coefficientOfFriction);
+         inputData.addContact(feetContactStates[i]);
          contactStates.add(feetContactStates[i]);
       }
 

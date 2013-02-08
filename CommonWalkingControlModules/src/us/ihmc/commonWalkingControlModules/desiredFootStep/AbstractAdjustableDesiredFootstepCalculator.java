@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
 import java.util.List;
 
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactableBody;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -19,11 +19,11 @@ public abstract class AbstractAdjustableDesiredFootstepCalculator implements Des
    protected final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    protected final SideDependentList<YoFramePoint> footstepPositions = new SideDependentList<YoFramePoint>();
    protected final SideDependentList<YoFrameOrientation> footstepOrientations = new SideDependentList<YoFrameOrientation>();
-   protected final SideDependentList<? extends ContactableBody> contactableBodies;
+   protected final SideDependentList<? extends ContactablePlaneBody> contactableBodies;
 
    private DesiredFootstepAdjustor desiredFootstepAdjustor;
 
-   public AbstractAdjustableDesiredFootstepCalculator(SideDependentList<? extends ContactableBody> contactableBodies,
+   public AbstractAdjustableDesiredFootstepCalculator(SideDependentList<? extends ContactablePlaneBody> contactableBodies,
            SideDependentList<ReferenceFrame> framesToSaveFootstepIn, YoVariableRegistry parentRegistry)
    {
       this.contactableBodies = contactableBodies;
@@ -49,12 +49,12 @@ public abstract class AbstractAdjustableDesiredFootstepCalculator implements Des
 
       FramePose footstepPose = new FramePose(footstepPositions.get(swingLegSide).getFramePointCopy(),
                                   footstepOrientations.get(swingLegSide).getFrameOrientationCopy());
-      ContactableBody foot = contactableBodies.get(swingLegSide);
+      ContactablePlaneBody foot = contactableBodies.get(swingLegSide);
       Footstep desiredFootstep = new Footstep(foot.getRigidBody(), footstepPose, getContactPoints(swingLegSide));
 
       if (desiredFootstepAdjustor != null)
       {
-         ContactableBody stanceFoot = contactableBodies.get(supportLegSide);
+         ContactablePlaneBody stanceFoot = contactableBodies.get(supportLegSide);
          RigidBody stanceFootBody = stanceFoot.getRigidBody();
          FramePose stanceFootPose = new FramePose(stanceFootBody.getBodyFixedFrame());
          Footstep stanceFootstep = new Footstep(stanceFootBody, stanceFootPose, stanceFoot.getContactPoints());

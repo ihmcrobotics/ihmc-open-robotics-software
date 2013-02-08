@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
 import java.util.List;
 
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactableBody;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredHeadingControlModule;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredVelocityControlModule;
@@ -63,7 +63,7 @@ public class AdjustableDesiredFootstepCalculator extends AbstractAdjustableDesir
    private final DesiredVelocityControlModule desiredVelocityControlModule;
 
 
-   public AdjustableDesiredFootstepCalculator(SideDependentList<? extends ContactableBody> contactableBodies, CouplingRegistry couplingRegistry,
+   public AdjustableDesiredFootstepCalculator(SideDependentList<? extends ContactablePlaneBody> contactableBodies, CouplingRegistry couplingRegistry,
            DesiredHeadingControlModule desiredHeadingControlModule, DesiredVelocityControlModule desiredVelocityControlModule,
            YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
            SideDependentList<ReferenceFrame> ankleZUpFrames)

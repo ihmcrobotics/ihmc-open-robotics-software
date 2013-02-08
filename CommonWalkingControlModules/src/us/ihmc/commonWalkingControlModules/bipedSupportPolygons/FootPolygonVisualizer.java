@@ -21,7 +21,7 @@ public class FootPolygonVisualizer implements Updatable
 {
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
-   private final HashMap<ContactState, YoFrameConvexPolygon2d> yoFootPolygons = new HashMap<ContactState, YoFrameConvexPolygon2d>();
+   private final HashMap<PlaneContactState, YoFrameConvexPolygon2d> yoFootPolygons = new HashMap<PlaneContactState, YoFrameConvexPolygon2d>();
    private static final List<Color> colors = new ArrayList<Color>();
    static
    {
@@ -29,13 +29,13 @@ public class FootPolygonVisualizer implements Updatable
       colors.add(new Color(202, 119, 11));
    }
 
-   public FootPolygonVisualizer(Collection<? extends ContactState> contactStates, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
+   public FootPolygonVisualizer(Collection<? extends PlaneContactState> contactStates, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
                                 YoVariableRegistry parentRegistry)
    {
       if (dynamicGraphicObjectsListRegistry != null)
       {
          int colorIndex = 0;
-         for (ContactState contactState : contactStates)
+         for (PlaneContactState contactState : contactStates)
          {
             String contactStateName = contactState.getBodyFrame().getName(); // TODO: give contactStates a name
             YoFrameConvexPolygon2d yoFootPolygon = new YoFrameConvexPolygon2d(contactStateName, "", ReferenceFrame.getWorldFrame(), 30, registry);
@@ -53,7 +53,7 @@ public class FootPolygonVisualizer implements Updatable
 
    public void update(double time)
    {
-      for (ContactState contactState : yoFootPolygons.keySet())
+      for (PlaneContactState contactState : yoFootPolygons.keySet())
       {
          YoFrameConvexPolygon2d yoFootPolygon = yoFootPolygons.get(contactState);
          if (yoFootPolygon != null)

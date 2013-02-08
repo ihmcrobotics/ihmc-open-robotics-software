@@ -55,7 +55,7 @@ public class LeeGoswamiGroundReactionWrenchDistributor implements GroundReaction
 
       for (PlaneContactState contactState : contactStates)
       {
-         addContact(contactState, groundReactionWrenchDistributorInputData.getCoefficientOfFriction(contactState));
+         addContact(contactState, contactState.getCoefficientOfFriction());
       }
 
       SpatialForceVector desiredGroundReactionWrench = groundReactionWrenchDistributorInputData.getDesiredNetSpatialForceVector();

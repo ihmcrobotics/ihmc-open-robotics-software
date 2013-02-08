@@ -9,14 +9,14 @@ import javax.media.j3d.Transform3D;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactableBody;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 public class DesiredFootstepCalculatorTools
 {
-   public static double computeMinZWithRespectToAnkleInWorldFrame(Matrix3d footToWorldRotation, ContactableBody contactableBody)
+   public static double computeMinZWithRespectToAnkleInWorldFrame(Matrix3d footToWorldRotation, ContactablePlaneBody contactableBody)
    {
       List<FramePoint> footPoints = contactableBody.getContactPoints();
       double minZ = Double.POSITIVE_INFINITY;
@@ -35,7 +35,7 @@ public class DesiredFootstepCalculatorTools
       return minZ;
    }
 
-   public static double computeMaxXWithRespectToAnkleInFrame(Matrix3d footToWorldRotation, ContactableBody contactableBody, ReferenceFrame frame)
+   public static double computeMaxXWithRespectToAnkleInFrame(Matrix3d footToWorldRotation, ContactablePlaneBody contactableBody, ReferenceFrame frame)
    {
       Transform3D worldToDesiredHeadingFrame = frame.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());
       List<FramePoint> footPoints = contactableBody.getContactPoints();
@@ -56,7 +56,7 @@ public class DesiredFootstepCalculatorTools
       return maxX;
    }
 
-   public static FramePoint computeMinZPointInFrame(Transform3D footToWorldTransform, ContactableBody contactableBody, ReferenceFrame frame)
+   public static FramePoint computeMinZPointInFrame(Transform3D footToWorldTransform, ContactablePlaneBody contactableBody, ReferenceFrame frame)
    {
       List<FramePoint> footPoints = contactableBody.getContactPoints();
       
@@ -91,7 +91,7 @@ public class DesiredFootstepCalculatorTools
       return minFramePoint;
    }
 
-   public static FramePoint computeMaxXPointInFrame(Transform3D footToWorldTransform, ContactableBody contactableBody, ReferenceFrame frame)
+   public static FramePoint computeMaxXPointInFrame(Transform3D footToWorldTransform, ContactablePlaneBody contactableBody, ReferenceFrame frame)
    {
       List<FramePoint> footPoints = contactableBody.getContactPoints();
       FramePoint maxFramePoint = new FramePoint(frame);
