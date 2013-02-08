@@ -201,7 +201,8 @@ public abstract class MomentumBasedController implements RobotController
       {
          RigidBody rigidBody = contactablePlaneBody.getRigidBody();
          YoPlaneContactState contactState = new YoPlaneContactState(rigidBody.getName(), contactablePlaneBody.getPlaneFrame(), registry);
-         contactState.setContactPoints(contactablePlaneBody.getContactPoints2d());    // initialize with flat 'feet'
+         double coefficientOfFriction = 1.0; // TODO: magic number...
+         contactState.set(contactablePlaneBody.getContactPoints2d(), coefficientOfFriction);    // initialize with flat 'feet'
          contactStates.put(contactablePlaneBody, contactState);
       }
 
@@ -277,9 +278,6 @@ public abstract class MomentumBasedController implements RobotController
 
       GroundReactionWrenchDistributorInputData groundReactionWrenchDistributorInputData = new GroundReactionWrenchDistributorInputData();
 
-      double coefficientOfFriction = 1.0;    // 0.5;    // TODO
-      double rotationalCoefficientOfFriction = 0.5;    // TODO
-
       groundReactionWrenchDistributorInputData.reset();
 
       for (ContactablePlaneBody contactablePlaneBody : contactablePlaneBodies)
@@ -290,7 +288,7 @@ public abstract class MomentumBasedController implements RobotController
 
          if (footContactPoints.size() > 0)
          {
-            groundReactionWrenchDistributorInputData.addContact(contactState, coefficientOfFriction);
+            groundReactionWrenchDistributorInputData.addContact(contactState);
          }
       }
 

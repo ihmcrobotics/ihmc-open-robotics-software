@@ -8,14 +8,14 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
-public class ContactStatesAndUpcomingFootstepData
+public class CenterOfMassHeightInputData
 {
    private RobotSide supportLeg;
    private ReferenceFrame centerOfMassFrame;
    private Footstep upcomingFootstep;
    private final ArrayList<PlaneContactState> contactStates = new ArrayList<PlaneContactState>();
    
-   public ContactStatesAndUpcomingFootstepData()
+   public CenterOfMassHeightInputData()
    {
       
    }
@@ -61,7 +61,7 @@ public class ContactStatesAndUpcomingFootstepData
       this.contactStates.addAll(contactStates);
    }
 
-   public void set(ReferenceFrame centerOfMassFrame, RobotSide supportLeg, Footstep upcomingFootstep, List<PlaneContactState> contactStates)
+   public void set(ReferenceFrame centerOfMassFrame, RobotSide supportLeg, Footstep upcomingFootstep, List<? extends PlaneContactState> contactStates)
    {
       this.setCenterOfMassFrame(centerOfMassFrame);
       this.setSupportLeg(supportLeg);

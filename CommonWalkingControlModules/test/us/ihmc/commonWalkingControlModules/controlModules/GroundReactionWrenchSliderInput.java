@@ -36,7 +36,6 @@ public class GroundReactionWrenchSliderInput
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       
       TranslationReferenceFrame centerOfMassFrame = new TranslationReferenceFrame("centerOfMassFrame", worldFrame);
-      int nSupportVectors = 4;
 
       YoVariableRegistry registry = new YoVariableRegistry("Wrench");
       YoFramePoint centerOfMassPosition = new YoFramePoint("centerOfMass", "", worldFrame, registry);      
@@ -60,7 +59,6 @@ public class GroundReactionWrenchSliderInput
       
       ArrayList<PlaneContactState> contactStates = new ArrayList<PlaneContactState>();
       double coefficientOfFriction = 0.7;
-      double rotationalCoefficientOfFriction = 0.02;
       
       double footLength = 0.3;
       double footWidth = 0.15;
@@ -88,10 +86,10 @@ public class GroundReactionWrenchSliderInput
          contactPoints.add(new FramePoint2d(planeFrame, -footLength/2.0, -footWidth/2.0));
          contactPoints.add(new FramePoint2d(planeFrame, -footLength/2.0, footWidth/2.0));
          
-         yoPlaneContactState.setContactPoints(contactPoints);
+         yoPlaneContactState.set(contactPoints, coefficientOfFriction);
          
          contactStates.add(yoPlaneContactState);
-         inputData.addContact(yoPlaneContactState, coefficientOfFriction);
+         inputData.addContact(yoPlaneContactState);
       }
       
       scs.addYoVariableRegistry(registry);

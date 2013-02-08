@@ -3,7 +3,7 @@
 
 package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactableBody;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredHeadingControlModule;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
@@ -30,9 +30,9 @@ public class SimpleDesiredFootstepCalculator implements DesiredFootstepCalculato
    private final DoubleYoVariable stepYaw = new DoubleYoVariable("stepYaw", registry);
    private final DoubleYoVariable stepPitch = new DoubleYoVariable("stepPitch", registry);
    private final DoubleYoVariable stepRoll = new DoubleYoVariable("stepRoll", registry);
-   private final SideDependentList<? extends ContactableBody> contactableBodies;
+   private final SideDependentList<? extends ContactablePlaneBody> contactableBodies;
 
-   public SimpleDesiredFootstepCalculator(SideDependentList<? extends ContactableBody> contactableBodies, SideDependentList<ReferenceFrame> ankleZUpFrames, DesiredHeadingControlModule desiredHeadingControlModule, YoVariableRegistry parentRegistry)
+   public SimpleDesiredFootstepCalculator(SideDependentList<? extends ContactablePlaneBody> contactableBodies, SideDependentList<ReferenceFrame> ankleZUpFrames, DesiredHeadingControlModule desiredHeadingControlModule, YoVariableRegistry parentRegistry)
    {
       this.contactableBodies = contactableBodies;
       this.ankleZUpFrames = ankleZUpFrames;
@@ -68,7 +68,7 @@ public class SimpleDesiredFootstepCalculator implements DesiredFootstepCalculato
       
       // Create a foot Step Pose from Position and Orientation
       FramePose footstepPose = new FramePose(footstepPosition, footstepOrientation);
-      ContactableBody foot = contactableBodies.get(swingLegSide);
+      ContactablePlaneBody foot = contactableBodies.get(swingLegSide);
       Footstep desiredFootstep = new Footstep(foot.getRigidBody(), footstepPose, foot.getContactPoints());
       
       return desiredFootstep;

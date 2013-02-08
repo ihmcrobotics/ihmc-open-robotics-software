@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactableBody;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredHeadingControlModule;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
@@ -31,9 +31,9 @@ public class SuspendedRobotDesiredFootStepCalculator implements DesiredFootstepC
    private final DoubleYoVariable stepRoll = new DoubleYoVariable("stepRoll", registry);
 
    private final IntegerYoVariable state = new IntegerYoVariable("state", registry);
-   private final SideDependentList<? extends ContactableBody> contactableBodies;
+   private final SideDependentList<? extends ContactablePlaneBody> contactableBodies;
 
-   public SuspendedRobotDesiredFootStepCalculator(SideDependentList<? extends ContactableBody> contactableBodies,
+   public SuspendedRobotDesiredFootStepCalculator(SideDependentList<? extends ContactablePlaneBody> contactableBodies,
            SideDependentList<ReferenceFrame> ankleZUpFrames, DesiredHeadingControlModule desiredHeadingControlModule, YoVariableRegistry parentRegistry)
    {
       this.contactableBodies = contactableBodies;
@@ -100,7 +100,7 @@ public class SuspendedRobotDesiredFootStepCalculator implements DesiredFootstepC
 
       // Create a foot Step Pose from Position and Orientation
       FramePose footstepPose = new FramePose(footstepPosition, footstepOrientation);
-      ContactableBody contactableBody = contactableBodies.get(swingLegSide);
+      ContactablePlaneBody contactableBody = contactableBodies.get(swingLegSide);
       Footstep desiredFootstep = new Footstep(contactableBody.getRigidBody(), footstepPose, contactableBody.getContactPoints());
 
       return desiredFootstep;

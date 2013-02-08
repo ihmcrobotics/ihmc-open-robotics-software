@@ -41,13 +41,13 @@ import us.ihmc.commonWalkingControlModules.outputs.ProcessedOutputsInterface;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LimbName;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
-import us.ihmc.commonWalkingControlModules.trajectories.ContactStatesAndUpcomingFootstepData;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightPartialDerivativesData;
+import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesCalculator;
+import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesData;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMXYTimeDerivativesData;
-import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesData;
-import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesCalculator;
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantCoPInstantaneousCapturePointTrajectory;
+import us.ihmc.commonWalkingControlModules.trajectories.ContactStatesAndUpcomingFootstepData;
 import us.ihmc.commonWalkingControlModules.trajectories.CubicPolynomialTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.CurrentOrientationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.FlatThenPolynomialCoMHeightTrajectoryGenerator;
@@ -108,7 +108,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 
    private final CoMHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator;
    private final CoMHeightTimeDerivativesCalculator coMHeightTimeDerivativesCalculator = new CoMHeightTimeDerivativesCalculator();
-   
+
    private final PDController centerOfMassHeightController;
    private final SideDependentList<WalkingState> singleSupportStateEnums = new SideDependentList<WalkingState>(WalkingState.LEFT_SUPPORT,
                                                                               WalkingState.RIGHT_SUPPORT);
@@ -177,6 +177,8 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
    private final ICPBasedMomentumRateOfChangeControlModule icpBasedMomentumRateOfChangeControlModule;
    private final YoFrameOrientation desiredPelvisOrientation = new YoFrameOrientation("desiredPelvis", worldFrame, registry);
 
+   private final DoubleYoVariable coefficientOfFriction = new DoubleYoVariable("coefficientOfFriction", registry);
+
    public WalkingHighLevelHumanoidController(FullRobotModel fullRobotModel, CommonWalkingReferenceFrames referenceFrames, TwistCalculator twistCalculator,
            CenterOfMassJacobian centerOfMassJacobian, SideDependentList<? extends ContactablePlaneBody> bipedFeet, BipedSupportPolygons bipedSupportPolygons,
            SideDependentList<FootSwitchInterface> footSwitches, double gravityZ, DoubleYoVariable yoTime, double controlDT,
@@ -224,10 +226,11 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       bases.put(LimbName.LEG, fullRobotModel.getPelvis());
       bases.put(LimbName.ARM, fullRobotModel.getChest());
 
+      coefficientOfFriction.set(1.0);
       for (RobotSide robotSide : RobotSide.values())
       {
          ContactablePlaneBody bipedFoot = bipedFeet.get(robotSide);
-         contactStates.get(bipedFoot).setContactPoints(bipedFoot.getContactPoints2d());    // flat feet
+         contactStates.get(bipedFoot).set(bipedFoot.getContactPoints2d(), coefficientOfFriction.getDoubleValue());    // flat feet
          String sideString = robotSide.getCamelCaseNameForStartOfExpression();
 
          PositionTrajectoryGenerator swingPositionTrajectoryGenerator = footPositionTrajectoryGenerators.get(robotSide);
@@ -1004,7 +1007,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 
       centerOfMassHeightInputData.setCenterOfMassFrame(centerOfMassFrame);
 
-      ArrayList<PlaneContactState> contactStatesList = getContactStatesList();
+      List<? extends PlaneContactState> contactStatesList = getContactStatesList();
 
       centerOfMassHeightInputData.setContactStates(contactStatesList);
 
@@ -1018,44 +1021,45 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       centerOfMassJacobian.packCenterOfMassVelocity(comd);
       com.changeFrame(frame);
       comd.changeFrame(frame);
-      
+
       // TODO: use current omega0 instead of previous
       FrameVector2d comd2d = comd.toFrameVector2d();
       FrameVector2d comdd2d = new FrameVector2d(desiredICPVelocity);
       comdd2d.sub(comd2d);
       comdd2d.scale(getOmega0());    // MathTools.square(omega0.getDoubleValue()) * (com.getX() - copX);
       FrameVector2d comd2dSquared = new FrameVector2d(comd2d.getReferenceFrame(), comd2d.getX() * comd2d.getX(), comd2d.getY() * comd2d.getY());
-      
-      
+
+
       CoMHeightTimeDerivativesData comHeightDataBeforeSmoothing = new CoMHeightTimeDerivativesData();
       CoMXYTimeDerivativesData xyVelocityAndAcceleration = new CoMXYTimeDerivativesData();
-      
+
       Point2d comXYPosition = new Point2d(com.getX(), com.getY());
       Vector2d comXYVelocity = comd2d.getVectorCopy();
       Vector2d comXYAcceleration = comdd2d.getVectorCopy();
-      
+
       xyVelocityAndAcceleration.setCoMXYPosition(comXYPosition);
       xyVelocityAndAcceleration.setCoMXYVelocity(comXYVelocity);
       xyVelocityAndAcceleration.setCoMXYAcceleration(comXYAcceleration);
-      
-      coMHeightTimeDerivativesCalculator.computeCoMHeightTimeDerivatives(comHeightDataBeforeSmoothing, xyVelocityAndAcceleration , coMHeightPartialDerivativesData);
-      
+
+      coMHeightTimeDerivativesCalculator.computeCoMHeightTimeDerivatives(comHeightDataBeforeSmoothing, xyVelocityAndAcceleration,
+              coMHeightPartialDerivativesData);
+
       double zDesired = coMHeightPartialDerivativesData.getCoMHeight();
       double dzdx = coMHeightPartialDerivativesData.getPartialDzDx();
       double dzdy = coMHeightPartialDerivativesData.getPartialDzDy();
       double ddzddx = coMHeightPartialDerivativesData.getPartialD2zDx2();
       double ddzddy = coMHeightPartialDerivativesData.getPartialD2zDy2();
       double ddzdxdy = coMHeightPartialDerivativesData.getPartialD2zDxDy();
-      
+
       FrameVector2d dzdxDesired = new FrameVector2d(worldFrame, dzdx, dzdy);
       FrameVector2d d2zdx2Desired = new FrameVector2d(worldFrame, ddzddx, ddzddy);
 
-      
+
 
       dzdxDesired.changeFrame(frame);
       d2zdx2Desired.changeFrame(frame);
       desiredICPVelocity.changeFrame(frame);
-       
+
 
       double zdDesired = dzdxDesired.dot(comd2d);
       double zddFeedForward = d2zdx2Desired.dot(comd2dSquared) + dzdxDesired.dot(comdd2d);
@@ -1070,22 +1074,17 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       return zddDesired;
    }
 
-   private ArrayList<PlaneContactState> getContactStatesList()
+   private List<PlaneContactState> getContactStatesList()
    {
-      ArrayList<PlaneContactState> contactStatesList = new ArrayList<PlaneContactState>();
+      List<PlaneContactState> contactStatesList = new ArrayList<PlaneContactState>();
 
-      if (getSupportLeg() == null)
+      for (ContactablePlaneBody contactablePlaneBody : bipedFeet)
       {
-         ContactablePlaneBody leftFoot = bipedFeet.get(RobotSide.LEFT);
-         ContactablePlaneBody rightFoot = bipedFeet.get(RobotSide.RIGHT);
+         YoPlaneContactState contactState = contactStates.get(contactablePlaneBody);
+         if (contactState.inContact())
+            contactStatesList.add(contactState);
+      }
 
-         contactStatesList.add(leftFoot);
-         contactStatesList.add(rightFoot);
-      }
-      else
-      {
-         contactStatesList.add(bipedFeet.get(getSupportLeg()));
-      }
       return contactStatesList;
    }
 
@@ -1117,21 +1116,21 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
          contactPoints2d.add(contactPoint.toFramePoint2d());
       }
 
-      contactState.setContactPoints(contactPoints2d);
+      contactState.set(contactPoints2d, coefficientOfFriction.getDoubleValue());
       updateFootStateMachine(contactableBody, contactState);
    }
 
    private void setFlatFootContactState(ContactablePlaneBody contactableBody)
    {
       YoPlaneContactState contactState = contactStates.get(contactableBody);
-      contactState.setContactPoints(contactableBody.getContactPoints2d());
+      contactState.set(contactableBody.getContactPoints2d(), coefficientOfFriction.getDoubleValue());
       updateFootStateMachine(contactableBody, contactState);
    }
 
    private void setContactStateForSwing(ContactablePlaneBody contactableBody)
    {
       YoPlaneContactState contactState = contactStates.get(contactableBody);
-      contactState.setContactPoints(new ArrayList<FramePoint2d>());
+      contactState.set(new ArrayList<FramePoint2d>(), coefficientOfFriction.getDoubleValue());
       updateFootStateMachine(contactableBody, contactState);
    }
 

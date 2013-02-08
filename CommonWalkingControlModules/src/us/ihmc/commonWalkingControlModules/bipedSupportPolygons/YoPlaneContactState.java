@@ -8,6 +8,7 @@ import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint2d;
 
@@ -18,22 +19,25 @@ public class YoPlaneContactState implements PlaneContactState
    private final ReferenceFrame referenceFrame;
    private final List<YoFramePoint2d> contactPoints = new ArrayList<YoFramePoint2d>();
    private final BooleanYoVariable inContact;
+   private final DoubleYoVariable coefficientOfFriction;
 
    public YoPlaneContactState(String namePrefix, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry)
    {
       this.namePrefix = namePrefix;
       this.registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
       this.inContact = new BooleanYoVariable(namePrefix + "InContact", registry);
+      this.coefficientOfFriction = new DoubleYoVariable(namePrefix + "CoefficientOfFriction", registry);
       this.referenceFrame = referenceFrame;
       parentRegistry.addChild(registry);
    }
 
-   public void setContactPoints(List<FramePoint2d> contactPoints)
+   public void set(List<FramePoint2d> contactPoints, double coefficientOfFriction)
    {
       createYoFramePoints(contactPoints);
 
       FramePoint2d temp = new FramePoint2d(referenceFrame);
       inContact.set(false);
+
       for (int i = 0; i < this.contactPoints.size(); i++)
       {
          if (i < contactPoints.size())
@@ -47,6 +51,10 @@ public class YoPlaneContactState implements PlaneContactState
          else
             this.contactPoints.get(i).set(Double.NaN, Double.NaN);
       }
+
+      if (coefficientOfFriction < 0.0)
+         throw new RuntimeException("Coefficient of friction is negative: " + coefficientOfFriction);
+      this.coefficientOfFriction.set(coefficientOfFriction);
    }
 
    public List<FramePoint2d> getContactPoints2d()
@@ -100,5 +108,10 @@ public class YoPlaneContactState implements PlaneContactState
    public boolean inContact()
    {
       return inContact.getBooleanValue();
+   }
+
+   public double getCoefficientOfFriction()
+   {
+      return coefficientOfFriction.getDoubleValue();
    }
 }

@@ -1,33 +1,29 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.media.j3d.Transform3D;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import org.junit.Test;
 
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
-
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.FlatGroundPlaneContactState;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.RectangularContactableBody;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootSpoof;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepUtils;
 import us.ihmc.utilities.math.geometry.FrameOrientation2d;
-import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FramePose2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.TranslationReferenceFrame;
-import us.ihmc.utilities.screwTheory.RigidBody;
+
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public class NewestCoMHeightTrajectoryGeneratorTest
 {
@@ -58,12 +54,12 @@ public class NewestCoMHeightTrajectoryGeneratorTest
       ReferenceFrame centerOfMassFrame = createCenterOfMassFrame(CoMQuery);
       List<PlaneContactState> contactStates = new ArrayList<PlaneContactState>();
       Footstep nextFootstep = null;
-      contactStates.add(new FlatGroundPlaneContactState(0.2, 0.1, contactCenter0));
+      contactStates.add(new FlatGroundPlaneContactState(0.2, 0.1, contactCenter0, 0.0));
       
       if (doubleSupport)
       {
          //leave nextFootstep as null
-         contactStates.add(new FlatGroundPlaneContactState(0.2, 0.1, contactCenter1));
+         contactStates.add(new FlatGroundPlaneContactState(0.2, 0.1, contactCenter1, 0.0));
       }
       else {
          //do not add a second element to contactStates
@@ -92,7 +88,7 @@ public class NewestCoMHeightTrajectoryGeneratorTest
       Footstep nextFootstep;
       FrameOrientation2d footstepOrientation = new FrameOrientation2d(worldFrame);
       FramePose2d footstepPose = new FramePose2d(new FramePoint2d(worldFrame, contactFrameCenter.getX(), contactFrameCenter.getY()), footstepOrientation);
-      ContactablePlaneBody foot = new FootSpoof("foot", 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+      ContactablePlaneBody foot = new FootSpoof("foot", 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
       nextFootstep = FootstepUtils.generateFootstep(footstepPose, foot, contactFrameCenter.getZ(), new Vector3d(0.0, 0.0, 1.0));
       return nextFootstep;
    }

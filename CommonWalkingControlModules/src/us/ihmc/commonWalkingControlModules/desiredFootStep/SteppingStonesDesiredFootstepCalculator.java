@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import javax.vecmath.Point2d;
 
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactableBody;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.captureRegion.CaptureRegionCalculator;
 import us.ihmc.commonWalkingControlModules.captureRegion.SteppingStonesCaptureRegionIntersectionCalculator;
 import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
@@ -72,11 +72,11 @@ public class SteppingStonesDesiredFootstepCalculator implements DesiredFootstepC
 
    private Footstep desiredFootstep;
 
-   private final SideDependentList<? extends ContactableBody> contactableBodies;
+   private final SideDependentList<? extends ContactablePlaneBody> contactableBodies;
 
 
    // Constructors
-   public SteppingStonesDesiredFootstepCalculator(SideDependentList<? extends ContactableBody> contactableBodies, SteppingStones steppingStones,
+   public SteppingStonesDesiredFootstepCalculator(SideDependentList<? extends ContactablePlaneBody> contactableBodies, SteppingStones steppingStones,
            CouplingRegistry couplingRegistry, CommonWalkingReferenceFrames commonWalkingReferenceFrames, CaptureRegionCalculator captureRegionCalculator,
            YoVariableRegistry yoVariableRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
@@ -160,7 +160,7 @@ public class SteppingStonesDesiredFootstepCalculator implements DesiredFootstepC
 
          // Create a foot Step Pose from Position and Orientation
          FramePose footstepPose = new FramePose(nominalLocation, footstepOrientation);
-         ContactableBody foot = contactableBodies.get(supportLegSide.getOppositeSide());
+         ContactablePlaneBody foot = contactableBodies.get(supportLegSide.getOppositeSide());
          desiredFootstep = new Footstep(foot.getRigidBody(), footstepPose, foot.getContactPoints());
       }
 
@@ -202,7 +202,7 @@ public class SteppingStonesDesiredFootstepCalculator implements DesiredFootstepC
 
       // Create a foot Step Pose from Position and Orientation
       FramePose footstepPose = new FramePose(locationToReturn, footstepOrientation);
-      ContactableBody foot = contactableBodies.get(supportLegSide.getOppositeSide());
+      ContactablePlaneBody foot = contactableBodies.get(supportLegSide.getOppositeSide());
       desiredFootstep = new Footstep(foot.getRigidBody(), footstepPose, foot.getContactPoints());
 
       return desiredFootstep;

@@ -57,8 +57,8 @@ public class DRCSCSInitialSetup implements ScsInitialSetup
 //      LinearStickSlipGroundContactModel groundContactModel = new LinearStickSlipGroundContactModel(robot, groundKxy, groundBxy, groundKz, groundBz, alphaSlip,
 //                                                                alphaStick, robot.getRobotsYoVariableRegistry());
 
-    LinearGroundContactModel groundContactModel = new LinearGroundContactModel(robot, groundKxy, groundBxy, groundKz, groundBz,
-                                                     robot.getRobotsYoVariableRegistry());
+      LinearGroundContactModel groundContactModel = new LinearGroundContactModel(robot, groundKxy, groundBxy, groundKz, groundBz,
+            robot.getRobotsYoVariableRegistry());
 
 
       if ((commonTerrain.getSteppingStones() != null) && (dynamicGraphicObjectsListRegistry != null))

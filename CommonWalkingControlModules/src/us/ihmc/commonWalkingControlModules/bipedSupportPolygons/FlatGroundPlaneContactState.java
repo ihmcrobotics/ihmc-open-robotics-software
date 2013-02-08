@@ -16,8 +16,9 @@ public class FlatGroundPlaneContactState implements PlaneContactState
 {
    private final ArrayList<FramePoint> contactPoints;
    private final ArrayList<FramePoint2d> contactPoints2d;
+   private final double coefficientOfFriction;
 
-   public static FlatGroundPlaneContactState createRandomFlatGroundContactState(Random random, boolean leftSide)
+   public static FlatGroundPlaneContactState createRandomFlatGroundContactState(Random random, boolean leftSide, double coefficientOfFriction)
    {
       double footLength = RandomTools.generateRandomDouble(random, 0.1, 0.3);
       double footWidth = RandomTools.generateRandomDouble(random, 0.1, 0.2);
@@ -28,12 +29,12 @@ public class FlatGroundPlaneContactState implements PlaneContactState
       if (!leftSide)
          midfootLocation.setY(-midfootLocation.getY());
 
-      FlatGroundPlaneContactState flatGroundPlaneContactState = new FlatGroundPlaneContactState(footLength, footWidth, midfootLocation);
+      FlatGroundPlaneContactState flatGroundPlaneContactState = new FlatGroundPlaneContactState(footLength, footWidth, midfootLocation, coefficientOfFriction);
 
       return flatGroundPlaneContactState;
    }
 
-   public FlatGroundPlaneContactState(double[][] contactPointLocations)
+   public FlatGroundPlaneContactState(double[][] contactPointLocations, double coefficientOfFriction)
    {
       contactPoints = new ArrayList<FramePoint>();
       contactPoints2d = new ArrayList<FramePoint2d>();
@@ -43,9 +44,10 @@ public class FlatGroundPlaneContactState implements PlaneContactState
          contactPoints.add(new FramePoint(ReferenceFrame.getWorldFrame(), contactPointLocation[0], contactPointLocation[1], 0.0));
          contactPoints2d.add(new FramePoint2d(ReferenceFrame.getWorldFrame(), contactPointLocation[0], contactPointLocation[1]));
       }
+      this.coefficientOfFriction = coefficientOfFriction;
    }
 
-   public FlatGroundPlaneContactState(double footLength, double footWidth, Point3d midfootLocation)
+   public FlatGroundPlaneContactState(double footLength, double footWidth, Point3d midfootLocation, double coefficientOfFriction)
    {
       contactPoints = new ArrayList<FramePoint>();
       contactPoints2d = new ArrayList<FramePoint2d>();
@@ -76,6 +78,7 @@ public class FlatGroundPlaneContactState implements PlaneContactState
       contactPoints2d.add(new FramePoint2d(ReferenceFrame.getWorldFrame(), projectToXY(backRight)));
       contactPoints2d.add(new FramePoint2d(ReferenceFrame.getWorldFrame(), projectToXY(backLeft)));
 
+      this.coefficientOfFriction = coefficientOfFriction;
    }
 
    private Point2d projectToXY(Point3d point)
@@ -112,6 +115,11 @@ public class FlatGroundPlaneContactState implements PlaneContactState
    public String toString()
    {
       return contactPoints2d.toString();
+   }
+
+   public double getCoefficientOfFriction()
+   {
+      return coefficientOfFriction;
    }
 
 }

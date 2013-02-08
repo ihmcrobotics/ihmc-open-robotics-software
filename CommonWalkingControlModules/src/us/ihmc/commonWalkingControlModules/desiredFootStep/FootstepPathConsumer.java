@@ -1,14 +1,15 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactableBody;
+import java.util.ArrayList;
+import java.util.Collection;
+
+import javax.vecmath.Point3d;
+
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.utilities.io.streamingData.AbstractStreamingDataConsumer;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-
-import javax.vecmath.Point3d;
-import java.util.ArrayList;
-import java.util.Collection;
 
 /**
  * User: Matt
@@ -17,9 +18,9 @@ import java.util.Collection;
 public class FootstepPathConsumer extends AbstractStreamingDataConsumer<ArrayList>
 {
    private FootstepPathCoordinator footstepPathCoordinator;
-   private final Collection<? extends ContactableBody> rigidBodyList;
+   private final Collection<? extends ContactablePlaneBody> rigidBodyList;
 
-   public FootstepPathConsumer(long dataIdentifier, Collection<? extends ContactableBody> rigidBodyList, FootstepPathCoordinator footstepPathCoordinator)
+   public FootstepPathConsumer(long dataIdentifier, Collection<? extends ContactablePlaneBody> rigidBodyList, FootstepPathCoordinator footstepPathCoordinator)
    {
       super(dataIdentifier, ArrayList.class);
       this.footstepPathCoordinator = footstepPathCoordinator;
@@ -32,7 +33,7 @@ public class FootstepPathConsumer extends AbstractStreamingDataConsumer<ArrayLis
       for (Object footstepObject : footstepList)
       {
          FootstepData footstepData = (FootstepData) footstepObject;
-         ContactableBody contactableBody = findContactableBodyByName(footstepData.getRigidBodyName());
+         ContactablePlaneBody contactableBody = findContactableBodyByName(footstepData.getRigidBodyName());
          ArrayList<FramePoint> expectedContactPoints = new ArrayList<FramePoint>();
          for (int i = 0; i < footstepData.getExpectedContactPoints().size(); i++)
          {
@@ -46,9 +47,9 @@ public class FootstepPathConsumer extends AbstractStreamingDataConsumer<ArrayLis
       footstepPathCoordinator.updatePath(footsteps);
    }
 
-   private ContactableBody findContactableBodyByName(String rigidBodyName)
+   private ContactablePlaneBody findContactableBodyByName(String rigidBodyName)
    {
-      for (ContactableBody contactableBody : rigidBodyList)
+      for (ContactablePlaneBody contactableBody : rigidBodyList)
       {
          if (contactableBody.getRigidBody().getName().equals(rigidBodyName))
          {

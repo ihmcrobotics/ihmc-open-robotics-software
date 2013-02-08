@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactState;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.LegStrengthCalculator;
@@ -88,7 +87,7 @@ public class GeometricStairsGroundReactionWrenchDistributor implements GroundRea
       
       for (PlaneContactState contactState : contactStates)
       {
-         addContact(contactState, groundReactionWrenchDistributorInputData.getCoefficientOfFriction(contactState));
+         addContact(contactState);
       }
     
       SpatialForceVector desiredGroundReactionWrench = groundReactionWrenchDistributorInputData.getDesiredNetSpatialForceVector();
@@ -108,7 +107,7 @@ public class GeometricStairsGroundReactionWrenchDistributor implements GroundRea
       normalTorques.clear();
    }
 
-   private void addContact(PlaneContactState contactState, double coefficientOfFriction)
+   private void addContact(PlaneContactState contactState)
    {
       if (contactState == null) throw new RuntimeException("contactState == null");
       
@@ -308,7 +307,7 @@ public class GeometricStairsGroundReactionWrenchDistributor implements GroundRea
       RobotSide supportSide = null;
       for (RobotSide robotSide : RobotSide.values())
       {
-         ContactState contactState = contactStates.get(robotSide);
+         PlaneContactState contactState = contactStates.get(robotSide);
          if (contactState == null || !contactState.inContact())
          {
             inDoubleSupport = false;
