@@ -12,5 +12,6 @@ public interface CameraStreamer
    public Quat4d getCameraOrientation();
    public double getFieldOfView();
    public void updateImage(BufferedImage bufferedImage, Point3d cameraPosition, Quat4d cameraOrientation, double fov);
+   public boolean isReadyForNewData();
 
 }

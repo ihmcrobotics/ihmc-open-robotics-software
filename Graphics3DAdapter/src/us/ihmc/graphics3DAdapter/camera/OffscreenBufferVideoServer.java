@@ -1,7 +1,6 @@
 package us.ihmc.graphics3DAdapter.camera;
 
 import java.awt.image.BufferedImage;
-import java.io.IOException;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
@@ -12,7 +11,7 @@ import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
 public class OffscreenBufferVideoServer
 {
 
-   private final CompressedVideoDataServer videoDataCompressor;
+   private final CompressedVideoDataServer compressedVideoDataServer;
 
    private final CameraAdapter camera;
 
@@ -28,16 +27,8 @@ public class OffscreenBufferVideoServer
       cameraController.setConfiguration(cameraConfiguration, mountList);
       viewport.setCameraController(cameraController);
 
-      try
-      {
-         videoDataCompressor = new CompressedVideoDataServer(settings, port);
-      }
-      catch (IOException e)
-      {
-         throw new RuntimeException(e.getMessage());
-      }
-
       CameraUpdater cameraUpdater = new CameraUpdater();
+      compressedVideoDataServer = new CompressedVideoDataServer(settings, port);
       
 
       viewport.getCaptureDevice().streamTo(cameraUpdater, 25);
@@ -46,7 +37,7 @@ public class OffscreenBufferVideoServer
 
    public void close()
    {
-      videoDataCompressor.close();
+      compressedVideoDataServer.close();
    }
 
    private class CameraUpdater implements CameraStreamer
@@ -54,7 +45,7 @@ public class OffscreenBufferVideoServer
 
       public void updateImage(BufferedImage bufferedImage, Point3d cameraPosition, Quat4d cameraOrientation, double fov)
       {
-         videoDataCompressor.updateImage(bufferedImage, cameraPosition, cameraOrientation, fov);
+         compressedVideoDataServer.updateImage(bufferedImage, cameraPosition, cameraOrientation, fov);
       }
 
       public Point3d getCameraPosition()
@@ -71,5 +62,12 @@ public class OffscreenBufferVideoServer
       {
          return camera.getHorizontalFovInRadians();
       }
+
+      public boolean isReadyForNewData()
+      {
+         return compressedVideoDataServer.isConnected();
+      }
+      
+      
    }
 }
