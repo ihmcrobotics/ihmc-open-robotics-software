@@ -1,4 +1,4 @@
-/* Produced by CVXGEN, 2013-02-07 00:01:31 -0500.  */
+/* Produced by CVXGEN, 2013-02-08 14:41:12 -0500.  */
 /* CVXGEN is Copyright (C) 2006-2012 Jacob Mattingley, jem@cvxgen.com. */
 /* The code in this file is Copyright (C) 2006-2012 Jacob Mattingley. */
 /* CVXGEN, or solvers produced by CVXGEN, cannot be used for commercial */
@@ -8,12 +8,12 @@
 /* Description: Support functions for matrix multiplication and vector filling. */
 #include "solver.h"
 void multbymA(double *lhs, double *rhs) {
-  lhs[0] = -rhs[0]*(params.A[0])-rhs[1]*(params.A[6])-rhs[2]*(params.A[12])-rhs[3]*(params.A[18])-rhs[4]*(params.A[24])-rhs[5]*(params.A[30])-rhs[6]*(params.A[36])-rhs[7]*(params.A[42])-rhs[8]*(params.A[48])-rhs[9]*(params.A[54])-rhs[10]*(params.A[60])-rhs[11]*(params.A[66])-rhs[12]*(params.A[72])-rhs[13]*(params.A[78])-rhs[14]*(params.A[84])-rhs[15]*(params.A[90])-rhs[16]*(params.A[96])-rhs[17]*(params.A[102])-rhs[18]*(params.A[108])-rhs[19]*(params.A[114])-rhs[20]*(params.A[120])-rhs[21]*(params.A[126])-rhs[22]*(params.A[132])-rhs[23]*(params.A[138])-rhs[24]*(params.A[144])-rhs[25]*(params.A[150])-rhs[26]*(params.A[156])-rhs[27]*(params.A[162])-rhs[28]*(params.A[168])-rhs[29]*(params.A[174])-rhs[30]*(params.A[180])-rhs[31]*(params.A[186])-rhs[32]*(params.A[192])-rhs[33]*(params.A[198])-rhs[34]*(params.A[204])-rhs[35]*(params.A[210])-rhs[36]*(params.A[216])-rhs[37]*(params.A[222])-rhs[38]*(params.A[228])-rhs[39]*(params.A[234])-rhs[40]*(params.A[240])-rhs[41]*(params.A[246])-rhs[42]*(params.A[252])-rhs[43]*(params.A[258])-rhs[44]*(params.A[264])-rhs[45]*(params.A[270])-rhs[46]*(params.A[276])-rhs[47]*(params.A[282])-rhs[48]*(-1);
-  lhs[1] = -rhs[0]*(params.A[1])-rhs[1]*(params.A[7])-rhs[2]*(params.A[13])-rhs[3]*(params.A[19])-rhs[4]*(params.A[25])-rhs[5]*(params.A[31])-rhs[6]*(params.A[37])-rhs[7]*(params.A[43])-rhs[8]*(params.A[49])-rhs[9]*(params.A[55])-rhs[10]*(params.A[61])-rhs[11]*(params.A[67])-rhs[12]*(params.A[73])-rhs[13]*(params.A[79])-rhs[14]*(params.A[85])-rhs[15]*(params.A[91])-rhs[16]*(params.A[97])-rhs[17]*(params.A[103])-rhs[18]*(params.A[109])-rhs[19]*(params.A[115])-rhs[20]*(params.A[121])-rhs[21]*(params.A[127])-rhs[22]*(params.A[133])-rhs[23]*(params.A[139])-rhs[24]*(params.A[145])-rhs[25]*(params.A[151])-rhs[26]*(params.A[157])-rhs[27]*(params.A[163])-rhs[28]*(params.A[169])-rhs[29]*(params.A[175])-rhs[30]*(params.A[181])-rhs[31]*(params.A[187])-rhs[32]*(params.A[193])-rhs[33]*(params.A[199])-rhs[34]*(params.A[205])-rhs[35]*(params.A[211])-rhs[36]*(params.A[217])-rhs[37]*(params.A[223])-rhs[38]*(params.A[229])-rhs[39]*(params.A[235])-rhs[40]*(params.A[241])-rhs[41]*(params.A[247])-rhs[42]*(params.A[253])-rhs[43]*(params.A[259])-rhs[44]*(params.A[265])-rhs[45]*(params.A[271])-rhs[46]*(params.A[277])-rhs[47]*(params.A[283])-rhs[49]*(-1);
-  lhs[2] = -rhs[0]*(params.A[2])-rhs[1]*(params.A[8])-rhs[2]*(params.A[14])-rhs[3]*(params.A[20])-rhs[4]*(params.A[26])-rhs[5]*(params.A[32])-rhs[6]*(params.A[38])-rhs[7]*(params.A[44])-rhs[8]*(params.A[50])-rhs[9]*(params.A[56])-rhs[10]*(params.A[62])-rhs[11]*(params.A[68])-rhs[12]*(params.A[74])-rhs[13]*(params.A[80])-rhs[14]*(params.A[86])-rhs[15]*(params.A[92])-rhs[16]*(params.A[98])-rhs[17]*(params.A[104])-rhs[18]*(params.A[110])-rhs[19]*(params.A[116])-rhs[20]*(params.A[122])-rhs[21]*(params.A[128])-rhs[22]*(params.A[134])-rhs[23]*(params.A[140])-rhs[24]*(params.A[146])-rhs[25]*(params.A[152])-rhs[26]*(params.A[158])-rhs[27]*(params.A[164])-rhs[28]*(params.A[170])-rhs[29]*(params.A[176])-rhs[30]*(params.A[182])-rhs[31]*(params.A[188])-rhs[32]*(params.A[194])-rhs[33]*(params.A[200])-rhs[34]*(params.A[206])-rhs[35]*(params.A[212])-rhs[36]*(params.A[218])-rhs[37]*(params.A[224])-rhs[38]*(params.A[230])-rhs[39]*(params.A[236])-rhs[40]*(params.A[242])-rhs[41]*(params.A[248])-rhs[42]*(params.A[254])-rhs[43]*(params.A[260])-rhs[44]*(params.A[266])-rhs[45]*(params.A[272])-rhs[46]*(params.A[278])-rhs[47]*(params.A[284])-rhs[50]*(-1);
-  lhs[3] = -rhs[0]*(params.A[3])-rhs[1]*(params.A[9])-rhs[2]*(params.A[15])-rhs[3]*(params.A[21])-rhs[4]*(params.A[27])-rhs[5]*(params.A[33])-rhs[6]*(params.A[39])-rhs[7]*(params.A[45])-rhs[8]*(params.A[51])-rhs[9]*(params.A[57])-rhs[10]*(params.A[63])-rhs[11]*(params.A[69])-rhs[12]*(params.A[75])-rhs[13]*(params.A[81])-rhs[14]*(params.A[87])-rhs[15]*(params.A[93])-rhs[16]*(params.A[99])-rhs[17]*(params.A[105])-rhs[18]*(params.A[111])-rhs[19]*(params.A[117])-rhs[20]*(params.A[123])-rhs[21]*(params.A[129])-rhs[22]*(params.A[135])-rhs[23]*(params.A[141])-rhs[24]*(params.A[147])-rhs[25]*(params.A[153])-rhs[26]*(params.A[159])-rhs[27]*(params.A[165])-rhs[28]*(params.A[171])-rhs[29]*(params.A[177])-rhs[30]*(params.A[183])-rhs[31]*(params.A[189])-rhs[32]*(params.A[195])-rhs[33]*(params.A[201])-rhs[34]*(params.A[207])-rhs[35]*(params.A[213])-rhs[36]*(params.A[219])-rhs[37]*(params.A[225])-rhs[38]*(params.A[231])-rhs[39]*(params.A[237])-rhs[40]*(params.A[243])-rhs[41]*(params.A[249])-rhs[42]*(params.A[255])-rhs[43]*(params.A[261])-rhs[44]*(params.A[267])-rhs[45]*(params.A[273])-rhs[46]*(params.A[279])-rhs[47]*(params.A[285])-rhs[51]*(-1);
-  lhs[4] = -rhs[0]*(params.A[4])-rhs[1]*(params.A[10])-rhs[2]*(params.A[16])-rhs[3]*(params.A[22])-rhs[4]*(params.A[28])-rhs[5]*(params.A[34])-rhs[6]*(params.A[40])-rhs[7]*(params.A[46])-rhs[8]*(params.A[52])-rhs[9]*(params.A[58])-rhs[10]*(params.A[64])-rhs[11]*(params.A[70])-rhs[12]*(params.A[76])-rhs[13]*(params.A[82])-rhs[14]*(params.A[88])-rhs[15]*(params.A[94])-rhs[16]*(params.A[100])-rhs[17]*(params.A[106])-rhs[18]*(params.A[112])-rhs[19]*(params.A[118])-rhs[20]*(params.A[124])-rhs[21]*(params.A[130])-rhs[22]*(params.A[136])-rhs[23]*(params.A[142])-rhs[24]*(params.A[148])-rhs[25]*(params.A[154])-rhs[26]*(params.A[160])-rhs[27]*(params.A[166])-rhs[28]*(params.A[172])-rhs[29]*(params.A[178])-rhs[30]*(params.A[184])-rhs[31]*(params.A[190])-rhs[32]*(params.A[196])-rhs[33]*(params.A[202])-rhs[34]*(params.A[208])-rhs[35]*(params.A[214])-rhs[36]*(params.A[220])-rhs[37]*(params.A[226])-rhs[38]*(params.A[232])-rhs[39]*(params.A[238])-rhs[40]*(params.A[244])-rhs[41]*(params.A[250])-rhs[42]*(params.A[256])-rhs[43]*(params.A[262])-rhs[44]*(params.A[268])-rhs[45]*(params.A[274])-rhs[46]*(params.A[280])-rhs[47]*(params.A[286])-rhs[52]*(-1);
-  lhs[5] = -rhs[0]*(params.A[5])-rhs[1]*(params.A[11])-rhs[2]*(params.A[17])-rhs[3]*(params.A[23])-rhs[4]*(params.A[29])-rhs[5]*(params.A[35])-rhs[6]*(params.A[41])-rhs[7]*(params.A[47])-rhs[8]*(params.A[53])-rhs[9]*(params.A[59])-rhs[10]*(params.A[65])-rhs[11]*(params.A[71])-rhs[12]*(params.A[77])-rhs[13]*(params.A[83])-rhs[14]*(params.A[89])-rhs[15]*(params.A[95])-rhs[16]*(params.A[101])-rhs[17]*(params.A[107])-rhs[18]*(params.A[113])-rhs[19]*(params.A[119])-rhs[20]*(params.A[125])-rhs[21]*(params.A[131])-rhs[22]*(params.A[137])-rhs[23]*(params.A[143])-rhs[24]*(params.A[149])-rhs[25]*(params.A[155])-rhs[26]*(params.A[161])-rhs[27]*(params.A[167])-rhs[28]*(params.A[173])-rhs[29]*(params.A[179])-rhs[30]*(params.A[185])-rhs[31]*(params.A[191])-rhs[32]*(params.A[197])-rhs[33]*(params.A[203])-rhs[34]*(params.A[209])-rhs[35]*(params.A[215])-rhs[36]*(params.A[221])-rhs[37]*(params.A[227])-rhs[38]*(params.A[233])-rhs[39]*(params.A[239])-rhs[40]*(params.A[245])-rhs[41]*(params.A[251])-rhs[42]*(params.A[257])-rhs[43]*(params.A[263])-rhs[44]*(params.A[269])-rhs[45]*(params.A[275])-rhs[46]*(params.A[281])-rhs[47]*(params.A[287])-rhs[53]*(-1);
+  lhs[0] = -rhs[0]*(params.A[0])-rhs[1]*(params.A[6])-rhs[2]*(params.A[12])-rhs[3]*(params.A[18])-rhs[4]*(params.A[24])-rhs[5]*(params.A[30])-rhs[6]*(params.A[36])-rhs[7]*(params.A[42])-rhs[8]*(params.A[48])-rhs[9]*(params.A[54])-rhs[10]*(params.A[60])-rhs[11]*(params.A[66])-rhs[12]*(params.A[72])-rhs[13]*(params.A[78])-rhs[14]*(params.A[84])-rhs[15]*(params.A[90])-rhs[16]*(params.A[96])-rhs[17]*(params.A[102])-rhs[18]*(params.A[108])-rhs[19]*(params.A[114])-rhs[20]*(params.A[120])-rhs[21]*(params.A[126])-rhs[22]*(params.A[132])-rhs[23]*(params.A[138])-rhs[24]*(params.A[144])-rhs[25]*(params.A[150])-rhs[26]*(params.A[156])-rhs[27]*(params.A[162])-rhs[28]*(params.A[168])-rhs[29]*(params.A[174])-rhs[30]*(params.A[180])-rhs[31]*(params.A[186])-rhs[32]*(params.A[192])-rhs[33]*(params.A[198])-rhs[34]*(params.A[204])-rhs[35]*(params.A[210])-rhs[36]*(params.A[216])-rhs[37]*(params.A[222])-rhs[38]*(params.A[228])-rhs[39]*(params.A[234])-rhs[40]*(params.A[240])-rhs[41]*(params.A[246])-rhs[42]*(params.A[252])-rhs[43]*(params.A[258])-rhs[44]*(params.A[264])-rhs[45]*(params.A[270])-rhs[46]*(params.A[276])-rhs[47]*(params.A[282])-rhs[48]*(params.A[288])-rhs[49]*(params.A[294])-rhs[50]*(params.A[300])-rhs[51]*(params.A[306])-rhs[52]*(params.A[312])-rhs[53]*(params.A[318])-rhs[54]*(params.A[324])-rhs[55]*(params.A[330])-rhs[56]*(params.A[336])-rhs[57]*(params.A[342])-rhs[58]*(params.A[348])-rhs[59]*(params.A[354])-rhs[60]*(params.A[360])-rhs[61]*(params.A[366])-rhs[62]*(params.A[372])-rhs[63]*(params.A[378])-rhs[64]*(-1);
+  lhs[1] = -rhs[0]*(params.A[1])-rhs[1]*(params.A[7])-rhs[2]*(params.A[13])-rhs[3]*(params.A[19])-rhs[4]*(params.A[25])-rhs[5]*(params.A[31])-rhs[6]*(params.A[37])-rhs[7]*(params.A[43])-rhs[8]*(params.A[49])-rhs[9]*(params.A[55])-rhs[10]*(params.A[61])-rhs[11]*(params.A[67])-rhs[12]*(params.A[73])-rhs[13]*(params.A[79])-rhs[14]*(params.A[85])-rhs[15]*(params.A[91])-rhs[16]*(params.A[97])-rhs[17]*(params.A[103])-rhs[18]*(params.A[109])-rhs[19]*(params.A[115])-rhs[20]*(params.A[121])-rhs[21]*(params.A[127])-rhs[22]*(params.A[133])-rhs[23]*(params.A[139])-rhs[24]*(params.A[145])-rhs[25]*(params.A[151])-rhs[26]*(params.A[157])-rhs[27]*(params.A[163])-rhs[28]*(params.A[169])-rhs[29]*(params.A[175])-rhs[30]*(params.A[181])-rhs[31]*(params.A[187])-rhs[32]*(params.A[193])-rhs[33]*(params.A[199])-rhs[34]*(params.A[205])-rhs[35]*(params.A[211])-rhs[36]*(params.A[217])-rhs[37]*(params.A[223])-rhs[38]*(params.A[229])-rhs[39]*(params.A[235])-rhs[40]*(params.A[241])-rhs[41]*(params.A[247])-rhs[42]*(params.A[253])-rhs[43]*(params.A[259])-rhs[44]*(params.A[265])-rhs[45]*(params.A[271])-rhs[46]*(params.A[277])-rhs[47]*(params.A[283])-rhs[48]*(params.A[289])-rhs[49]*(params.A[295])-rhs[50]*(params.A[301])-rhs[51]*(params.A[307])-rhs[52]*(params.A[313])-rhs[53]*(params.A[319])-rhs[54]*(params.A[325])-rhs[55]*(params.A[331])-rhs[56]*(params.A[337])-rhs[57]*(params.A[343])-rhs[58]*(params.A[349])-rhs[59]*(params.A[355])-rhs[60]*(params.A[361])-rhs[61]*(params.A[367])-rhs[62]*(params.A[373])-rhs[63]*(params.A[379])-rhs[65]*(-1);
+  lhs[2] = -rhs[0]*(params.A[2])-rhs[1]*(params.A[8])-rhs[2]*(params.A[14])-rhs[3]*(params.A[20])-rhs[4]*(params.A[26])-rhs[5]*(params.A[32])-rhs[6]*(params.A[38])-rhs[7]*(params.A[44])-rhs[8]*(params.A[50])-rhs[9]*(params.A[56])-rhs[10]*(params.A[62])-rhs[11]*(params.A[68])-rhs[12]*(params.A[74])-rhs[13]*(params.A[80])-rhs[14]*(params.A[86])-rhs[15]*(params.A[92])-rhs[16]*(params.A[98])-rhs[17]*(params.A[104])-rhs[18]*(params.A[110])-rhs[19]*(params.A[116])-rhs[20]*(params.A[122])-rhs[21]*(params.A[128])-rhs[22]*(params.A[134])-rhs[23]*(params.A[140])-rhs[24]*(params.A[146])-rhs[25]*(params.A[152])-rhs[26]*(params.A[158])-rhs[27]*(params.A[164])-rhs[28]*(params.A[170])-rhs[29]*(params.A[176])-rhs[30]*(params.A[182])-rhs[31]*(params.A[188])-rhs[32]*(params.A[194])-rhs[33]*(params.A[200])-rhs[34]*(params.A[206])-rhs[35]*(params.A[212])-rhs[36]*(params.A[218])-rhs[37]*(params.A[224])-rhs[38]*(params.A[230])-rhs[39]*(params.A[236])-rhs[40]*(params.A[242])-rhs[41]*(params.A[248])-rhs[42]*(params.A[254])-rhs[43]*(params.A[260])-rhs[44]*(params.A[266])-rhs[45]*(params.A[272])-rhs[46]*(params.A[278])-rhs[47]*(params.A[284])-rhs[48]*(params.A[290])-rhs[49]*(params.A[296])-rhs[50]*(params.A[302])-rhs[51]*(params.A[308])-rhs[52]*(params.A[314])-rhs[53]*(params.A[320])-rhs[54]*(params.A[326])-rhs[55]*(params.A[332])-rhs[56]*(params.A[338])-rhs[57]*(params.A[344])-rhs[58]*(params.A[350])-rhs[59]*(params.A[356])-rhs[60]*(params.A[362])-rhs[61]*(params.A[368])-rhs[62]*(params.A[374])-rhs[63]*(params.A[380])-rhs[66]*(-1);
+  lhs[3] = -rhs[0]*(params.A[3])-rhs[1]*(params.A[9])-rhs[2]*(params.A[15])-rhs[3]*(params.A[21])-rhs[4]*(params.A[27])-rhs[5]*(params.A[33])-rhs[6]*(params.A[39])-rhs[7]*(params.A[45])-rhs[8]*(params.A[51])-rhs[9]*(params.A[57])-rhs[10]*(params.A[63])-rhs[11]*(params.A[69])-rhs[12]*(params.A[75])-rhs[13]*(params.A[81])-rhs[14]*(params.A[87])-rhs[15]*(params.A[93])-rhs[16]*(params.A[99])-rhs[17]*(params.A[105])-rhs[18]*(params.A[111])-rhs[19]*(params.A[117])-rhs[20]*(params.A[123])-rhs[21]*(params.A[129])-rhs[22]*(params.A[135])-rhs[23]*(params.A[141])-rhs[24]*(params.A[147])-rhs[25]*(params.A[153])-rhs[26]*(params.A[159])-rhs[27]*(params.A[165])-rhs[28]*(params.A[171])-rhs[29]*(params.A[177])-rhs[30]*(params.A[183])-rhs[31]*(params.A[189])-rhs[32]*(params.A[195])-rhs[33]*(params.A[201])-rhs[34]*(params.A[207])-rhs[35]*(params.A[213])-rhs[36]*(params.A[219])-rhs[37]*(params.A[225])-rhs[38]*(params.A[231])-rhs[39]*(params.A[237])-rhs[40]*(params.A[243])-rhs[41]*(params.A[249])-rhs[42]*(params.A[255])-rhs[43]*(params.A[261])-rhs[44]*(params.A[267])-rhs[45]*(params.A[273])-rhs[46]*(params.A[279])-rhs[47]*(params.A[285])-rhs[48]*(params.A[291])-rhs[49]*(params.A[297])-rhs[50]*(params.A[303])-rhs[51]*(params.A[309])-rhs[52]*(params.A[315])-rhs[53]*(params.A[321])-rhs[54]*(params.A[327])-rhs[55]*(params.A[333])-rhs[56]*(params.A[339])-rhs[57]*(params.A[345])-rhs[58]*(params.A[351])-rhs[59]*(params.A[357])-rhs[60]*(params.A[363])-rhs[61]*(params.A[369])-rhs[62]*(params.A[375])-rhs[63]*(params.A[381])-rhs[67]*(-1);
+  lhs[4] = -rhs[0]*(params.A[4])-rhs[1]*(params.A[10])-rhs[2]*(params.A[16])-rhs[3]*(params.A[22])-rhs[4]*(params.A[28])-rhs[5]*(params.A[34])-rhs[6]*(params.A[40])-rhs[7]*(params.A[46])-rhs[8]*(params.A[52])-rhs[9]*(params.A[58])-rhs[10]*(params.A[64])-rhs[11]*(params.A[70])-rhs[12]*(params.A[76])-rhs[13]*(params.A[82])-rhs[14]*(params.A[88])-rhs[15]*(params.A[94])-rhs[16]*(params.A[100])-rhs[17]*(params.A[106])-rhs[18]*(params.A[112])-rhs[19]*(params.A[118])-rhs[20]*(params.A[124])-rhs[21]*(params.A[130])-rhs[22]*(params.A[136])-rhs[23]*(params.A[142])-rhs[24]*(params.A[148])-rhs[25]*(params.A[154])-rhs[26]*(params.A[160])-rhs[27]*(params.A[166])-rhs[28]*(params.A[172])-rhs[29]*(params.A[178])-rhs[30]*(params.A[184])-rhs[31]*(params.A[190])-rhs[32]*(params.A[196])-rhs[33]*(params.A[202])-rhs[34]*(params.A[208])-rhs[35]*(params.A[214])-rhs[36]*(params.A[220])-rhs[37]*(params.A[226])-rhs[38]*(params.A[232])-rhs[39]*(params.A[238])-rhs[40]*(params.A[244])-rhs[41]*(params.A[250])-rhs[42]*(params.A[256])-rhs[43]*(params.A[262])-rhs[44]*(params.A[268])-rhs[45]*(params.A[274])-rhs[46]*(params.A[280])-rhs[47]*(params.A[286])-rhs[48]*(params.A[292])-rhs[49]*(params.A[298])-rhs[50]*(params.A[304])-rhs[51]*(params.A[310])-rhs[52]*(params.A[316])-rhs[53]*(params.A[322])-rhs[54]*(params.A[328])-rhs[55]*(params.A[334])-rhs[56]*(params.A[340])-rhs[57]*(params.A[346])-rhs[58]*(params.A[352])-rhs[59]*(params.A[358])-rhs[60]*(params.A[364])-rhs[61]*(params.A[370])-rhs[62]*(params.A[376])-rhs[63]*(params.A[382])-rhs[68]*(-1);
+  lhs[5] = -rhs[0]*(params.A[5])-rhs[1]*(params.A[11])-rhs[2]*(params.A[17])-rhs[3]*(params.A[23])-rhs[4]*(params.A[29])-rhs[5]*(params.A[35])-rhs[6]*(params.A[41])-rhs[7]*(params.A[47])-rhs[8]*(params.A[53])-rhs[9]*(params.A[59])-rhs[10]*(params.A[65])-rhs[11]*(params.A[71])-rhs[12]*(params.A[77])-rhs[13]*(params.A[83])-rhs[14]*(params.A[89])-rhs[15]*(params.A[95])-rhs[16]*(params.A[101])-rhs[17]*(params.A[107])-rhs[18]*(params.A[113])-rhs[19]*(params.A[119])-rhs[20]*(params.A[125])-rhs[21]*(params.A[131])-rhs[22]*(params.A[137])-rhs[23]*(params.A[143])-rhs[24]*(params.A[149])-rhs[25]*(params.A[155])-rhs[26]*(params.A[161])-rhs[27]*(params.A[167])-rhs[28]*(params.A[173])-rhs[29]*(params.A[179])-rhs[30]*(params.A[185])-rhs[31]*(params.A[191])-rhs[32]*(params.A[197])-rhs[33]*(params.A[203])-rhs[34]*(params.A[209])-rhs[35]*(params.A[215])-rhs[36]*(params.A[221])-rhs[37]*(params.A[227])-rhs[38]*(params.A[233])-rhs[39]*(params.A[239])-rhs[40]*(params.A[245])-rhs[41]*(params.A[251])-rhs[42]*(params.A[257])-rhs[43]*(params.A[263])-rhs[44]*(params.A[269])-rhs[45]*(params.A[275])-rhs[46]*(params.A[281])-rhs[47]*(params.A[287])-rhs[48]*(params.A[293])-rhs[49]*(params.A[299])-rhs[50]*(params.A[305])-rhs[51]*(params.A[311])-rhs[52]*(params.A[317])-rhs[53]*(params.A[323])-rhs[54]*(params.A[329])-rhs[55]*(params.A[335])-rhs[56]*(params.A[341])-rhs[57]*(params.A[347])-rhs[58]*(params.A[353])-rhs[59]*(params.A[359])-rhs[60]*(params.A[365])-rhs[61]*(params.A[371])-rhs[62]*(params.A[377])-rhs[63]*(params.A[383])-rhs[69]*(-1);
 }
 void multbymAT(double *lhs, double *rhs) {
   lhs[0] = -rhs[0]*(params.A[0])-rhs[1]*(params.A[1])-rhs[2]*(params.A[2])-rhs[3]*(params.A[3])-rhs[4]*(params.A[4])-rhs[5]*(params.A[5]);
@@ -64,12 +64,28 @@ void multbymAT(double *lhs, double *rhs) {
   lhs[45] = -rhs[0]*(params.A[270])-rhs[1]*(params.A[271])-rhs[2]*(params.A[272])-rhs[3]*(params.A[273])-rhs[4]*(params.A[274])-rhs[5]*(params.A[275]);
   lhs[46] = -rhs[0]*(params.A[276])-rhs[1]*(params.A[277])-rhs[2]*(params.A[278])-rhs[3]*(params.A[279])-rhs[4]*(params.A[280])-rhs[5]*(params.A[281]);
   lhs[47] = -rhs[0]*(params.A[282])-rhs[1]*(params.A[283])-rhs[2]*(params.A[284])-rhs[3]*(params.A[285])-rhs[4]*(params.A[286])-rhs[5]*(params.A[287]);
-  lhs[48] = -rhs[0]*(-1);
-  lhs[49] = -rhs[1]*(-1);
-  lhs[50] = -rhs[2]*(-1);
-  lhs[51] = -rhs[3]*(-1);
-  lhs[52] = -rhs[4]*(-1);
-  lhs[53] = -rhs[5]*(-1);
+  lhs[48] = -rhs[0]*(params.A[288])-rhs[1]*(params.A[289])-rhs[2]*(params.A[290])-rhs[3]*(params.A[291])-rhs[4]*(params.A[292])-rhs[5]*(params.A[293]);
+  lhs[49] = -rhs[0]*(params.A[294])-rhs[1]*(params.A[295])-rhs[2]*(params.A[296])-rhs[3]*(params.A[297])-rhs[4]*(params.A[298])-rhs[5]*(params.A[299]);
+  lhs[50] = -rhs[0]*(params.A[300])-rhs[1]*(params.A[301])-rhs[2]*(params.A[302])-rhs[3]*(params.A[303])-rhs[4]*(params.A[304])-rhs[5]*(params.A[305]);
+  lhs[51] = -rhs[0]*(params.A[306])-rhs[1]*(params.A[307])-rhs[2]*(params.A[308])-rhs[3]*(params.A[309])-rhs[4]*(params.A[310])-rhs[5]*(params.A[311]);
+  lhs[52] = -rhs[0]*(params.A[312])-rhs[1]*(params.A[313])-rhs[2]*(params.A[314])-rhs[3]*(params.A[315])-rhs[4]*(params.A[316])-rhs[5]*(params.A[317]);
+  lhs[53] = -rhs[0]*(params.A[318])-rhs[1]*(params.A[319])-rhs[2]*(params.A[320])-rhs[3]*(params.A[321])-rhs[4]*(params.A[322])-rhs[5]*(params.A[323]);
+  lhs[54] = -rhs[0]*(params.A[324])-rhs[1]*(params.A[325])-rhs[2]*(params.A[326])-rhs[3]*(params.A[327])-rhs[4]*(params.A[328])-rhs[5]*(params.A[329]);
+  lhs[55] = -rhs[0]*(params.A[330])-rhs[1]*(params.A[331])-rhs[2]*(params.A[332])-rhs[3]*(params.A[333])-rhs[4]*(params.A[334])-rhs[5]*(params.A[335]);
+  lhs[56] = -rhs[0]*(params.A[336])-rhs[1]*(params.A[337])-rhs[2]*(params.A[338])-rhs[3]*(params.A[339])-rhs[4]*(params.A[340])-rhs[5]*(params.A[341]);
+  lhs[57] = -rhs[0]*(params.A[342])-rhs[1]*(params.A[343])-rhs[2]*(params.A[344])-rhs[3]*(params.A[345])-rhs[4]*(params.A[346])-rhs[5]*(params.A[347]);
+  lhs[58] = -rhs[0]*(params.A[348])-rhs[1]*(params.A[349])-rhs[2]*(params.A[350])-rhs[3]*(params.A[351])-rhs[4]*(params.A[352])-rhs[5]*(params.A[353]);
+  lhs[59] = -rhs[0]*(params.A[354])-rhs[1]*(params.A[355])-rhs[2]*(params.A[356])-rhs[3]*(params.A[357])-rhs[4]*(params.A[358])-rhs[5]*(params.A[359]);
+  lhs[60] = -rhs[0]*(params.A[360])-rhs[1]*(params.A[361])-rhs[2]*(params.A[362])-rhs[3]*(params.A[363])-rhs[4]*(params.A[364])-rhs[5]*(params.A[365]);
+  lhs[61] = -rhs[0]*(params.A[366])-rhs[1]*(params.A[367])-rhs[2]*(params.A[368])-rhs[3]*(params.A[369])-rhs[4]*(params.A[370])-rhs[5]*(params.A[371]);
+  lhs[62] = -rhs[0]*(params.A[372])-rhs[1]*(params.A[373])-rhs[2]*(params.A[374])-rhs[3]*(params.A[375])-rhs[4]*(params.A[376])-rhs[5]*(params.A[377]);
+  lhs[63] = -rhs[0]*(params.A[378])-rhs[1]*(params.A[379])-rhs[2]*(params.A[380])-rhs[3]*(params.A[381])-rhs[4]*(params.A[382])-rhs[5]*(params.A[383]);
+  lhs[64] = -rhs[0]*(-1);
+  lhs[65] = -rhs[1]*(-1);
+  lhs[66] = -rhs[2]*(-1);
+  lhs[67] = -rhs[3]*(-1);
+  lhs[68] = -rhs[4]*(-1);
+  lhs[69] = -rhs[5]*(-1);
 }
 void multbymG(double *lhs, double *rhs) {
   lhs[0] = -rhs[0]*(-1);
@@ -120,65 +136,98 @@ void multbymG(double *lhs, double *rhs) {
   lhs[45] = -rhs[45]*(-1);
   lhs[46] = -rhs[46]*(-1);
   lhs[47] = -rhs[47]*(-1);
-  lhs[48] = -rhs[0]*(-params.B[0])-rhs[1]*(-params.B[3])-rhs[2]*(-params.B[6])-rhs[3]*(-params.B[9])-rhs[4]*(-params.B[12])-rhs[5]*(-params.B[15])-rhs[6]*(-params.B[18])-rhs[7]*(-params.B[21])-rhs[8]*(-params.B[24])-rhs[9]*(-params.B[27])-rhs[10]*(-params.B[30])-rhs[11]*(-params.B[33])-rhs[12]*(-params.B[36])-rhs[13]*(-params.B[39])-rhs[14]*(-params.B[42])-rhs[15]*(-params.B[45])-rhs[16]*(-params.B[48])-rhs[17]*(-params.B[51])-rhs[18]*(-params.B[54])-rhs[19]*(-params.B[57])-rhs[20]*(-params.B[60])-rhs[21]*(-params.B[63])-rhs[22]*(-params.B[66])-rhs[23]*(-params.B[69])-rhs[24]*(-params.B[72])-rhs[25]*(-params.B[75])-rhs[26]*(-params.B[78])-rhs[27]*(-params.B[81])-rhs[28]*(-params.B[84])-rhs[29]*(-params.B[87])-rhs[30]*(-params.B[90])-rhs[31]*(-params.B[93])-rhs[32]*(-params.B[96])-rhs[33]*(-params.B[99])-rhs[34]*(-params.B[102])-rhs[35]*(-params.B[105])-rhs[36]*(-params.B[108])-rhs[37]*(-params.B[111])-rhs[38]*(-params.B[114])-rhs[39]*(-params.B[117])-rhs[40]*(-params.B[120])-rhs[41]*(-params.B[123])-rhs[42]*(-params.B[126])-rhs[43]*(-params.B[129])-rhs[44]*(-params.B[132])-rhs[45]*(-params.B[135])-rhs[46]*(-params.B[138])-rhs[47]*(-params.B[141]);
-  lhs[49] = -rhs[0]*(-params.B[1])-rhs[1]*(-params.B[4])-rhs[2]*(-params.B[7])-rhs[3]*(-params.B[10])-rhs[4]*(-params.B[13])-rhs[5]*(-params.B[16])-rhs[6]*(-params.B[19])-rhs[7]*(-params.B[22])-rhs[8]*(-params.B[25])-rhs[9]*(-params.B[28])-rhs[10]*(-params.B[31])-rhs[11]*(-params.B[34])-rhs[12]*(-params.B[37])-rhs[13]*(-params.B[40])-rhs[14]*(-params.B[43])-rhs[15]*(-params.B[46])-rhs[16]*(-params.B[49])-rhs[17]*(-params.B[52])-rhs[18]*(-params.B[55])-rhs[19]*(-params.B[58])-rhs[20]*(-params.B[61])-rhs[21]*(-params.B[64])-rhs[22]*(-params.B[67])-rhs[23]*(-params.B[70])-rhs[24]*(-params.B[73])-rhs[25]*(-params.B[76])-rhs[26]*(-params.B[79])-rhs[27]*(-params.B[82])-rhs[28]*(-params.B[85])-rhs[29]*(-params.B[88])-rhs[30]*(-params.B[91])-rhs[31]*(-params.B[94])-rhs[32]*(-params.B[97])-rhs[33]*(-params.B[100])-rhs[34]*(-params.B[103])-rhs[35]*(-params.B[106])-rhs[36]*(-params.B[109])-rhs[37]*(-params.B[112])-rhs[38]*(-params.B[115])-rhs[39]*(-params.B[118])-rhs[40]*(-params.B[121])-rhs[41]*(-params.B[124])-rhs[42]*(-params.B[127])-rhs[43]*(-params.B[130])-rhs[44]*(-params.B[133])-rhs[45]*(-params.B[136])-rhs[46]*(-params.B[139])-rhs[47]*(-params.B[142]);
-  lhs[50] = -rhs[0]*(-params.B[2])-rhs[1]*(-params.B[5])-rhs[2]*(-params.B[8])-rhs[3]*(-params.B[11])-rhs[4]*(-params.B[14])-rhs[5]*(-params.B[17])-rhs[6]*(-params.B[20])-rhs[7]*(-params.B[23])-rhs[8]*(-params.B[26])-rhs[9]*(-params.B[29])-rhs[10]*(-params.B[32])-rhs[11]*(-params.B[35])-rhs[12]*(-params.B[38])-rhs[13]*(-params.B[41])-rhs[14]*(-params.B[44])-rhs[15]*(-params.B[47])-rhs[16]*(-params.B[50])-rhs[17]*(-params.B[53])-rhs[18]*(-params.B[56])-rhs[19]*(-params.B[59])-rhs[20]*(-params.B[62])-rhs[21]*(-params.B[65])-rhs[22]*(-params.B[68])-rhs[23]*(-params.B[71])-rhs[24]*(-params.B[74])-rhs[25]*(-params.B[77])-rhs[26]*(-params.B[80])-rhs[27]*(-params.B[83])-rhs[28]*(-params.B[86])-rhs[29]*(-params.B[89])-rhs[30]*(-params.B[92])-rhs[31]*(-params.B[95])-rhs[32]*(-params.B[98])-rhs[33]*(-params.B[101])-rhs[34]*(-params.B[104])-rhs[35]*(-params.B[107])-rhs[36]*(-params.B[110])-rhs[37]*(-params.B[113])-rhs[38]*(-params.B[116])-rhs[39]*(-params.B[119])-rhs[40]*(-params.B[122])-rhs[41]*(-params.B[125])-rhs[42]*(-params.B[128])-rhs[43]*(-params.B[131])-rhs[44]*(-params.B[134])-rhs[45]*(-params.B[137])-rhs[46]*(-params.B[140])-rhs[47]*(-params.B[143]);
+  lhs[48] = -rhs[48]*(-1);
+  lhs[49] = -rhs[49]*(-1);
+  lhs[50] = -rhs[50]*(-1);
+  lhs[51] = -rhs[51]*(-1);
+  lhs[52] = -rhs[52]*(-1);
+  lhs[53] = -rhs[53]*(-1);
+  lhs[54] = -rhs[54]*(-1);
+  lhs[55] = -rhs[55]*(-1);
+  lhs[56] = -rhs[56]*(-1);
+  lhs[57] = -rhs[57]*(-1);
+  lhs[58] = -rhs[58]*(-1);
+  lhs[59] = -rhs[59]*(-1);
+  lhs[60] = -rhs[60]*(-1);
+  lhs[61] = -rhs[61]*(-1);
+  lhs[62] = -rhs[62]*(-1);
+  lhs[63] = -rhs[63]*(-1);
+  lhs[64] = -rhs[0]*(-params.B[0])-rhs[1]*(-params.B[4])-rhs[2]*(-params.B[8])-rhs[3]*(-params.B[12])-rhs[4]*(-params.B[16])-rhs[5]*(-params.B[20])-rhs[6]*(-params.B[24])-rhs[7]*(-params.B[28])-rhs[8]*(-params.B[32])-rhs[9]*(-params.B[36])-rhs[10]*(-params.B[40])-rhs[11]*(-params.B[44])-rhs[12]*(-params.B[48])-rhs[13]*(-params.B[52])-rhs[14]*(-params.B[56])-rhs[15]*(-params.B[60])-rhs[16]*(-params.B[64])-rhs[17]*(-params.B[68])-rhs[18]*(-params.B[72])-rhs[19]*(-params.B[76])-rhs[20]*(-params.B[80])-rhs[21]*(-params.B[84])-rhs[22]*(-params.B[88])-rhs[23]*(-params.B[92])-rhs[24]*(-params.B[96])-rhs[25]*(-params.B[100])-rhs[26]*(-params.B[104])-rhs[27]*(-params.B[108])-rhs[28]*(-params.B[112])-rhs[29]*(-params.B[116])-rhs[30]*(-params.B[120])-rhs[31]*(-params.B[124])-rhs[32]*(-params.B[128])-rhs[33]*(-params.B[132])-rhs[34]*(-params.B[136])-rhs[35]*(-params.B[140])-rhs[36]*(-params.B[144])-rhs[37]*(-params.B[148])-rhs[38]*(-params.B[152])-rhs[39]*(-params.B[156])-rhs[40]*(-params.B[160])-rhs[41]*(-params.B[164])-rhs[42]*(-params.B[168])-rhs[43]*(-params.B[172])-rhs[44]*(-params.B[176])-rhs[45]*(-params.B[180])-rhs[46]*(-params.B[184])-rhs[47]*(-params.B[188])-rhs[48]*(-params.B[192])-rhs[49]*(-params.B[196])-rhs[50]*(-params.B[200])-rhs[51]*(-params.B[204])-rhs[52]*(-params.B[208])-rhs[53]*(-params.B[212])-rhs[54]*(-params.B[216])-rhs[55]*(-params.B[220])-rhs[56]*(-params.B[224])-rhs[57]*(-params.B[228])-rhs[58]*(-params.B[232])-rhs[59]*(-params.B[236])-rhs[60]*(-params.B[240])-rhs[61]*(-params.B[244])-rhs[62]*(-params.B[248])-rhs[63]*(-params.B[252]);
+  lhs[65] = -rhs[0]*(-params.B[1])-rhs[1]*(-params.B[5])-rhs[2]*(-params.B[9])-rhs[3]*(-params.B[13])-rhs[4]*(-params.B[17])-rhs[5]*(-params.B[21])-rhs[6]*(-params.B[25])-rhs[7]*(-params.B[29])-rhs[8]*(-params.B[33])-rhs[9]*(-params.B[37])-rhs[10]*(-params.B[41])-rhs[11]*(-params.B[45])-rhs[12]*(-params.B[49])-rhs[13]*(-params.B[53])-rhs[14]*(-params.B[57])-rhs[15]*(-params.B[61])-rhs[16]*(-params.B[65])-rhs[17]*(-params.B[69])-rhs[18]*(-params.B[73])-rhs[19]*(-params.B[77])-rhs[20]*(-params.B[81])-rhs[21]*(-params.B[85])-rhs[22]*(-params.B[89])-rhs[23]*(-params.B[93])-rhs[24]*(-params.B[97])-rhs[25]*(-params.B[101])-rhs[26]*(-params.B[105])-rhs[27]*(-params.B[109])-rhs[28]*(-params.B[113])-rhs[29]*(-params.B[117])-rhs[30]*(-params.B[121])-rhs[31]*(-params.B[125])-rhs[32]*(-params.B[129])-rhs[33]*(-params.B[133])-rhs[34]*(-params.B[137])-rhs[35]*(-params.B[141])-rhs[36]*(-params.B[145])-rhs[37]*(-params.B[149])-rhs[38]*(-params.B[153])-rhs[39]*(-params.B[157])-rhs[40]*(-params.B[161])-rhs[41]*(-params.B[165])-rhs[42]*(-params.B[169])-rhs[43]*(-params.B[173])-rhs[44]*(-params.B[177])-rhs[45]*(-params.B[181])-rhs[46]*(-params.B[185])-rhs[47]*(-params.B[189])-rhs[48]*(-params.B[193])-rhs[49]*(-params.B[197])-rhs[50]*(-params.B[201])-rhs[51]*(-params.B[205])-rhs[52]*(-params.B[209])-rhs[53]*(-params.B[213])-rhs[54]*(-params.B[217])-rhs[55]*(-params.B[221])-rhs[56]*(-params.B[225])-rhs[57]*(-params.B[229])-rhs[58]*(-params.B[233])-rhs[59]*(-params.B[237])-rhs[60]*(-params.B[241])-rhs[61]*(-params.B[245])-rhs[62]*(-params.B[249])-rhs[63]*(-params.B[253]);
+  lhs[66] = -rhs[0]*(-params.B[2])-rhs[1]*(-params.B[6])-rhs[2]*(-params.B[10])-rhs[3]*(-params.B[14])-rhs[4]*(-params.B[18])-rhs[5]*(-params.B[22])-rhs[6]*(-params.B[26])-rhs[7]*(-params.B[30])-rhs[8]*(-params.B[34])-rhs[9]*(-params.B[38])-rhs[10]*(-params.B[42])-rhs[11]*(-params.B[46])-rhs[12]*(-params.B[50])-rhs[13]*(-params.B[54])-rhs[14]*(-params.B[58])-rhs[15]*(-params.B[62])-rhs[16]*(-params.B[66])-rhs[17]*(-params.B[70])-rhs[18]*(-params.B[74])-rhs[19]*(-params.B[78])-rhs[20]*(-params.B[82])-rhs[21]*(-params.B[86])-rhs[22]*(-params.B[90])-rhs[23]*(-params.B[94])-rhs[24]*(-params.B[98])-rhs[25]*(-params.B[102])-rhs[26]*(-params.B[106])-rhs[27]*(-params.B[110])-rhs[28]*(-params.B[114])-rhs[29]*(-params.B[118])-rhs[30]*(-params.B[122])-rhs[31]*(-params.B[126])-rhs[32]*(-params.B[130])-rhs[33]*(-params.B[134])-rhs[34]*(-params.B[138])-rhs[35]*(-params.B[142])-rhs[36]*(-params.B[146])-rhs[37]*(-params.B[150])-rhs[38]*(-params.B[154])-rhs[39]*(-params.B[158])-rhs[40]*(-params.B[162])-rhs[41]*(-params.B[166])-rhs[42]*(-params.B[170])-rhs[43]*(-params.B[174])-rhs[44]*(-params.B[178])-rhs[45]*(-params.B[182])-rhs[46]*(-params.B[186])-rhs[47]*(-params.B[190])-rhs[48]*(-params.B[194])-rhs[49]*(-params.B[198])-rhs[50]*(-params.B[202])-rhs[51]*(-params.B[206])-rhs[52]*(-params.B[210])-rhs[53]*(-params.B[214])-rhs[54]*(-params.B[218])-rhs[55]*(-params.B[222])-rhs[56]*(-params.B[226])-rhs[57]*(-params.B[230])-rhs[58]*(-params.B[234])-rhs[59]*(-params.B[238])-rhs[60]*(-params.B[242])-rhs[61]*(-params.B[246])-rhs[62]*(-params.B[250])-rhs[63]*(-params.B[254]);
+  lhs[67] = -rhs[0]*(-params.B[3])-rhs[1]*(-params.B[7])-rhs[2]*(-params.B[11])-rhs[3]*(-params.B[15])-rhs[4]*(-params.B[19])-rhs[5]*(-params.B[23])-rhs[6]*(-params.B[27])-rhs[7]*(-params.B[31])-rhs[8]*(-params.B[35])-rhs[9]*(-params.B[39])-rhs[10]*(-params.B[43])-rhs[11]*(-params.B[47])-rhs[12]*(-params.B[51])-rhs[13]*(-params.B[55])-rhs[14]*(-params.B[59])-rhs[15]*(-params.B[63])-rhs[16]*(-params.B[67])-rhs[17]*(-params.B[71])-rhs[18]*(-params.B[75])-rhs[19]*(-params.B[79])-rhs[20]*(-params.B[83])-rhs[21]*(-params.B[87])-rhs[22]*(-params.B[91])-rhs[23]*(-params.B[95])-rhs[24]*(-params.B[99])-rhs[25]*(-params.B[103])-rhs[26]*(-params.B[107])-rhs[27]*(-params.B[111])-rhs[28]*(-params.B[115])-rhs[29]*(-params.B[119])-rhs[30]*(-params.B[123])-rhs[31]*(-params.B[127])-rhs[32]*(-params.B[131])-rhs[33]*(-params.B[135])-rhs[34]*(-params.B[139])-rhs[35]*(-params.B[143])-rhs[36]*(-params.B[147])-rhs[37]*(-params.B[151])-rhs[38]*(-params.B[155])-rhs[39]*(-params.B[159])-rhs[40]*(-params.B[163])-rhs[41]*(-params.B[167])-rhs[42]*(-params.B[171])-rhs[43]*(-params.B[175])-rhs[44]*(-params.B[179])-rhs[45]*(-params.B[183])-rhs[46]*(-params.B[187])-rhs[47]*(-params.B[191])-rhs[48]*(-params.B[195])-rhs[49]*(-params.B[199])-rhs[50]*(-params.B[203])-rhs[51]*(-params.B[207])-rhs[52]*(-params.B[211])-rhs[53]*(-params.B[215])-rhs[54]*(-params.B[219])-rhs[55]*(-params.B[223])-rhs[56]*(-params.B[227])-rhs[57]*(-params.B[231])-rhs[58]*(-params.B[235])-rhs[59]*(-params.B[239])-rhs[60]*(-params.B[243])-rhs[61]*(-params.B[247])-rhs[62]*(-params.B[251])-rhs[63]*(-params.B[255]);
 }
 void multbymGT(double *lhs, double *rhs) {
-  lhs[0] = -rhs[0]*(-1)-rhs[48]*(-params.B[0])-rhs[49]*(-params.B[1])-rhs[50]*(-params.B[2]);
-  lhs[1] = -rhs[1]*(-1)-rhs[48]*(-params.B[3])-rhs[49]*(-params.B[4])-rhs[50]*(-params.B[5]);
-  lhs[2] = -rhs[2]*(-1)-rhs[48]*(-params.B[6])-rhs[49]*(-params.B[7])-rhs[50]*(-params.B[8]);
-  lhs[3] = -rhs[3]*(-1)-rhs[48]*(-params.B[9])-rhs[49]*(-params.B[10])-rhs[50]*(-params.B[11]);
-  lhs[4] = -rhs[4]*(-1)-rhs[48]*(-params.B[12])-rhs[49]*(-params.B[13])-rhs[50]*(-params.B[14]);
-  lhs[5] = -rhs[5]*(-1)-rhs[48]*(-params.B[15])-rhs[49]*(-params.B[16])-rhs[50]*(-params.B[17]);
-  lhs[6] = -rhs[6]*(-1)-rhs[48]*(-params.B[18])-rhs[49]*(-params.B[19])-rhs[50]*(-params.B[20]);
-  lhs[7] = -rhs[7]*(-1)-rhs[48]*(-params.B[21])-rhs[49]*(-params.B[22])-rhs[50]*(-params.B[23]);
-  lhs[8] = -rhs[8]*(-1)-rhs[48]*(-params.B[24])-rhs[49]*(-params.B[25])-rhs[50]*(-params.B[26]);
-  lhs[9] = -rhs[9]*(-1)-rhs[48]*(-params.B[27])-rhs[49]*(-params.B[28])-rhs[50]*(-params.B[29]);
-  lhs[10] = -rhs[10]*(-1)-rhs[48]*(-params.B[30])-rhs[49]*(-params.B[31])-rhs[50]*(-params.B[32]);
-  lhs[11] = -rhs[11]*(-1)-rhs[48]*(-params.B[33])-rhs[49]*(-params.B[34])-rhs[50]*(-params.B[35]);
-  lhs[12] = -rhs[12]*(-1)-rhs[48]*(-params.B[36])-rhs[49]*(-params.B[37])-rhs[50]*(-params.B[38]);
-  lhs[13] = -rhs[13]*(-1)-rhs[48]*(-params.B[39])-rhs[49]*(-params.B[40])-rhs[50]*(-params.B[41]);
-  lhs[14] = -rhs[14]*(-1)-rhs[48]*(-params.B[42])-rhs[49]*(-params.B[43])-rhs[50]*(-params.B[44]);
-  lhs[15] = -rhs[15]*(-1)-rhs[48]*(-params.B[45])-rhs[49]*(-params.B[46])-rhs[50]*(-params.B[47]);
-  lhs[16] = -rhs[16]*(-1)-rhs[48]*(-params.B[48])-rhs[49]*(-params.B[49])-rhs[50]*(-params.B[50]);
-  lhs[17] = -rhs[17]*(-1)-rhs[48]*(-params.B[51])-rhs[49]*(-params.B[52])-rhs[50]*(-params.B[53]);
-  lhs[18] = -rhs[18]*(-1)-rhs[48]*(-params.B[54])-rhs[49]*(-params.B[55])-rhs[50]*(-params.B[56]);
-  lhs[19] = -rhs[19]*(-1)-rhs[48]*(-params.B[57])-rhs[49]*(-params.B[58])-rhs[50]*(-params.B[59]);
-  lhs[20] = -rhs[20]*(-1)-rhs[48]*(-params.B[60])-rhs[49]*(-params.B[61])-rhs[50]*(-params.B[62]);
-  lhs[21] = -rhs[21]*(-1)-rhs[48]*(-params.B[63])-rhs[49]*(-params.B[64])-rhs[50]*(-params.B[65]);
-  lhs[22] = -rhs[22]*(-1)-rhs[48]*(-params.B[66])-rhs[49]*(-params.B[67])-rhs[50]*(-params.B[68]);
-  lhs[23] = -rhs[23]*(-1)-rhs[48]*(-params.B[69])-rhs[49]*(-params.B[70])-rhs[50]*(-params.B[71]);
-  lhs[24] = -rhs[24]*(-1)-rhs[48]*(-params.B[72])-rhs[49]*(-params.B[73])-rhs[50]*(-params.B[74]);
-  lhs[25] = -rhs[25]*(-1)-rhs[48]*(-params.B[75])-rhs[49]*(-params.B[76])-rhs[50]*(-params.B[77]);
-  lhs[26] = -rhs[26]*(-1)-rhs[48]*(-params.B[78])-rhs[49]*(-params.B[79])-rhs[50]*(-params.B[80]);
-  lhs[27] = -rhs[27]*(-1)-rhs[48]*(-params.B[81])-rhs[49]*(-params.B[82])-rhs[50]*(-params.B[83]);
-  lhs[28] = -rhs[28]*(-1)-rhs[48]*(-params.B[84])-rhs[49]*(-params.B[85])-rhs[50]*(-params.B[86]);
-  lhs[29] = -rhs[29]*(-1)-rhs[48]*(-params.B[87])-rhs[49]*(-params.B[88])-rhs[50]*(-params.B[89]);
-  lhs[30] = -rhs[30]*(-1)-rhs[48]*(-params.B[90])-rhs[49]*(-params.B[91])-rhs[50]*(-params.B[92]);
-  lhs[31] = -rhs[31]*(-1)-rhs[48]*(-params.B[93])-rhs[49]*(-params.B[94])-rhs[50]*(-params.B[95]);
-  lhs[32] = -rhs[32]*(-1)-rhs[48]*(-params.B[96])-rhs[49]*(-params.B[97])-rhs[50]*(-params.B[98]);
-  lhs[33] = -rhs[33]*(-1)-rhs[48]*(-params.B[99])-rhs[49]*(-params.B[100])-rhs[50]*(-params.B[101]);
-  lhs[34] = -rhs[34]*(-1)-rhs[48]*(-params.B[102])-rhs[49]*(-params.B[103])-rhs[50]*(-params.B[104]);
-  lhs[35] = -rhs[35]*(-1)-rhs[48]*(-params.B[105])-rhs[49]*(-params.B[106])-rhs[50]*(-params.B[107]);
-  lhs[36] = -rhs[36]*(-1)-rhs[48]*(-params.B[108])-rhs[49]*(-params.B[109])-rhs[50]*(-params.B[110]);
-  lhs[37] = -rhs[37]*(-1)-rhs[48]*(-params.B[111])-rhs[49]*(-params.B[112])-rhs[50]*(-params.B[113]);
-  lhs[38] = -rhs[38]*(-1)-rhs[48]*(-params.B[114])-rhs[49]*(-params.B[115])-rhs[50]*(-params.B[116]);
-  lhs[39] = -rhs[39]*(-1)-rhs[48]*(-params.B[117])-rhs[49]*(-params.B[118])-rhs[50]*(-params.B[119]);
-  lhs[40] = -rhs[40]*(-1)-rhs[48]*(-params.B[120])-rhs[49]*(-params.B[121])-rhs[50]*(-params.B[122]);
-  lhs[41] = -rhs[41]*(-1)-rhs[48]*(-params.B[123])-rhs[49]*(-params.B[124])-rhs[50]*(-params.B[125]);
-  lhs[42] = -rhs[42]*(-1)-rhs[48]*(-params.B[126])-rhs[49]*(-params.B[127])-rhs[50]*(-params.B[128]);
-  lhs[43] = -rhs[43]*(-1)-rhs[48]*(-params.B[129])-rhs[49]*(-params.B[130])-rhs[50]*(-params.B[131]);
-  lhs[44] = -rhs[44]*(-1)-rhs[48]*(-params.B[132])-rhs[49]*(-params.B[133])-rhs[50]*(-params.B[134]);
-  lhs[45] = -rhs[45]*(-1)-rhs[48]*(-params.B[135])-rhs[49]*(-params.B[136])-rhs[50]*(-params.B[137]);
-  lhs[46] = -rhs[46]*(-1)-rhs[48]*(-params.B[138])-rhs[49]*(-params.B[139])-rhs[50]*(-params.B[140]);
-  lhs[47] = -rhs[47]*(-1)-rhs[48]*(-params.B[141])-rhs[49]*(-params.B[142])-rhs[50]*(-params.B[143]);
-  lhs[48] = 0;
-  lhs[49] = 0;
-  lhs[50] = 0;
-  lhs[51] = 0;
-  lhs[52] = 0;
-  lhs[53] = 0;
+  lhs[0] = -rhs[0]*(-1)-rhs[64]*(-params.B[0])-rhs[65]*(-params.B[1])-rhs[66]*(-params.B[2])-rhs[67]*(-params.B[3]);
+  lhs[1] = -rhs[1]*(-1)-rhs[64]*(-params.B[4])-rhs[65]*(-params.B[5])-rhs[66]*(-params.B[6])-rhs[67]*(-params.B[7]);
+  lhs[2] = -rhs[2]*(-1)-rhs[64]*(-params.B[8])-rhs[65]*(-params.B[9])-rhs[66]*(-params.B[10])-rhs[67]*(-params.B[11]);
+  lhs[3] = -rhs[3]*(-1)-rhs[64]*(-params.B[12])-rhs[65]*(-params.B[13])-rhs[66]*(-params.B[14])-rhs[67]*(-params.B[15]);
+  lhs[4] = -rhs[4]*(-1)-rhs[64]*(-params.B[16])-rhs[65]*(-params.B[17])-rhs[66]*(-params.B[18])-rhs[67]*(-params.B[19]);
+  lhs[5] = -rhs[5]*(-1)-rhs[64]*(-params.B[20])-rhs[65]*(-params.B[21])-rhs[66]*(-params.B[22])-rhs[67]*(-params.B[23]);
+  lhs[6] = -rhs[6]*(-1)-rhs[64]*(-params.B[24])-rhs[65]*(-params.B[25])-rhs[66]*(-params.B[26])-rhs[67]*(-params.B[27]);
+  lhs[7] = -rhs[7]*(-1)-rhs[64]*(-params.B[28])-rhs[65]*(-params.B[29])-rhs[66]*(-params.B[30])-rhs[67]*(-params.B[31]);
+  lhs[8] = -rhs[8]*(-1)-rhs[64]*(-params.B[32])-rhs[65]*(-params.B[33])-rhs[66]*(-params.B[34])-rhs[67]*(-params.B[35]);
+  lhs[9] = -rhs[9]*(-1)-rhs[64]*(-params.B[36])-rhs[65]*(-params.B[37])-rhs[66]*(-params.B[38])-rhs[67]*(-params.B[39]);
+  lhs[10] = -rhs[10]*(-1)-rhs[64]*(-params.B[40])-rhs[65]*(-params.B[41])-rhs[66]*(-params.B[42])-rhs[67]*(-params.B[43]);
+  lhs[11] = -rhs[11]*(-1)-rhs[64]*(-params.B[44])-rhs[65]*(-params.B[45])-rhs[66]*(-params.B[46])-rhs[67]*(-params.B[47]);
+  lhs[12] = -rhs[12]*(-1)-rhs[64]*(-params.B[48])-rhs[65]*(-params.B[49])-rhs[66]*(-params.B[50])-rhs[67]*(-params.B[51]);
+  lhs[13] = -rhs[13]*(-1)-rhs[64]*(-params.B[52])-rhs[65]*(-params.B[53])-rhs[66]*(-params.B[54])-rhs[67]*(-params.B[55]);
+  lhs[14] = -rhs[14]*(-1)-rhs[64]*(-params.B[56])-rhs[65]*(-params.B[57])-rhs[66]*(-params.B[58])-rhs[67]*(-params.B[59]);
+  lhs[15] = -rhs[15]*(-1)-rhs[64]*(-params.B[60])-rhs[65]*(-params.B[61])-rhs[66]*(-params.B[62])-rhs[67]*(-params.B[63]);
+  lhs[16] = -rhs[16]*(-1)-rhs[64]*(-params.B[64])-rhs[65]*(-params.B[65])-rhs[66]*(-params.B[66])-rhs[67]*(-params.B[67]);
+  lhs[17] = -rhs[17]*(-1)-rhs[64]*(-params.B[68])-rhs[65]*(-params.B[69])-rhs[66]*(-params.B[70])-rhs[67]*(-params.B[71]);
+  lhs[18] = -rhs[18]*(-1)-rhs[64]*(-params.B[72])-rhs[65]*(-params.B[73])-rhs[66]*(-params.B[74])-rhs[67]*(-params.B[75]);
+  lhs[19] = -rhs[19]*(-1)-rhs[64]*(-params.B[76])-rhs[65]*(-params.B[77])-rhs[66]*(-params.B[78])-rhs[67]*(-params.B[79]);
+  lhs[20] = -rhs[20]*(-1)-rhs[64]*(-params.B[80])-rhs[65]*(-params.B[81])-rhs[66]*(-params.B[82])-rhs[67]*(-params.B[83]);
+  lhs[21] = -rhs[21]*(-1)-rhs[64]*(-params.B[84])-rhs[65]*(-params.B[85])-rhs[66]*(-params.B[86])-rhs[67]*(-params.B[87]);
+  lhs[22] = -rhs[22]*(-1)-rhs[64]*(-params.B[88])-rhs[65]*(-params.B[89])-rhs[66]*(-params.B[90])-rhs[67]*(-params.B[91]);
+  lhs[23] = -rhs[23]*(-1)-rhs[64]*(-params.B[92])-rhs[65]*(-params.B[93])-rhs[66]*(-params.B[94])-rhs[67]*(-params.B[95]);
+  lhs[24] = -rhs[24]*(-1)-rhs[64]*(-params.B[96])-rhs[65]*(-params.B[97])-rhs[66]*(-params.B[98])-rhs[67]*(-params.B[99]);
+  lhs[25] = -rhs[25]*(-1)-rhs[64]*(-params.B[100])-rhs[65]*(-params.B[101])-rhs[66]*(-params.B[102])-rhs[67]*(-params.B[103]);
+  lhs[26] = -rhs[26]*(-1)-rhs[64]*(-params.B[104])-rhs[65]*(-params.B[105])-rhs[66]*(-params.B[106])-rhs[67]*(-params.B[107]);
+  lhs[27] = -rhs[27]*(-1)-rhs[64]*(-params.B[108])-rhs[65]*(-params.B[109])-rhs[66]*(-params.B[110])-rhs[67]*(-params.B[111]);
+  lhs[28] = -rhs[28]*(-1)-rhs[64]*(-params.B[112])-rhs[65]*(-params.B[113])-rhs[66]*(-params.B[114])-rhs[67]*(-params.B[115]);
+  lhs[29] = -rhs[29]*(-1)-rhs[64]*(-params.B[116])-rhs[65]*(-params.B[117])-rhs[66]*(-params.B[118])-rhs[67]*(-params.B[119]);
+  lhs[30] = -rhs[30]*(-1)-rhs[64]*(-params.B[120])-rhs[65]*(-params.B[121])-rhs[66]*(-params.B[122])-rhs[67]*(-params.B[123]);
+  lhs[31] = -rhs[31]*(-1)-rhs[64]*(-params.B[124])-rhs[65]*(-params.B[125])-rhs[66]*(-params.B[126])-rhs[67]*(-params.B[127]);
+  lhs[32] = -rhs[32]*(-1)-rhs[64]*(-params.B[128])-rhs[65]*(-params.B[129])-rhs[66]*(-params.B[130])-rhs[67]*(-params.B[131]);
+  lhs[33] = -rhs[33]*(-1)-rhs[64]*(-params.B[132])-rhs[65]*(-params.B[133])-rhs[66]*(-params.B[134])-rhs[67]*(-params.B[135]);
+  lhs[34] = -rhs[34]*(-1)-rhs[64]*(-params.B[136])-rhs[65]*(-params.B[137])-rhs[66]*(-params.B[138])-rhs[67]*(-params.B[139]);
+  lhs[35] = -rhs[35]*(-1)-rhs[64]*(-params.B[140])-rhs[65]*(-params.B[141])-rhs[66]*(-params.B[142])-rhs[67]*(-params.B[143]);
+  lhs[36] = -rhs[36]*(-1)-rhs[64]*(-params.B[144])-rhs[65]*(-params.B[145])-rhs[66]*(-params.B[146])-rhs[67]*(-params.B[147]);
+  lhs[37] = -rhs[37]*(-1)-rhs[64]*(-params.B[148])-rhs[65]*(-params.B[149])-rhs[66]*(-params.B[150])-rhs[67]*(-params.B[151]);
+  lhs[38] = -rhs[38]*(-1)-rhs[64]*(-params.B[152])-rhs[65]*(-params.B[153])-rhs[66]*(-params.B[154])-rhs[67]*(-params.B[155]);
+  lhs[39] = -rhs[39]*(-1)-rhs[64]*(-params.B[156])-rhs[65]*(-params.B[157])-rhs[66]*(-params.B[158])-rhs[67]*(-params.B[159]);
+  lhs[40] = -rhs[40]*(-1)-rhs[64]*(-params.B[160])-rhs[65]*(-params.B[161])-rhs[66]*(-params.B[162])-rhs[67]*(-params.B[163]);
+  lhs[41] = -rhs[41]*(-1)-rhs[64]*(-params.B[164])-rhs[65]*(-params.B[165])-rhs[66]*(-params.B[166])-rhs[67]*(-params.B[167]);
+  lhs[42] = -rhs[42]*(-1)-rhs[64]*(-params.B[168])-rhs[65]*(-params.B[169])-rhs[66]*(-params.B[170])-rhs[67]*(-params.B[171]);
+  lhs[43] = -rhs[43]*(-1)-rhs[64]*(-params.B[172])-rhs[65]*(-params.B[173])-rhs[66]*(-params.B[174])-rhs[67]*(-params.B[175]);
+  lhs[44] = -rhs[44]*(-1)-rhs[64]*(-params.B[176])-rhs[65]*(-params.B[177])-rhs[66]*(-params.B[178])-rhs[67]*(-params.B[179]);
+  lhs[45] = -rhs[45]*(-1)-rhs[64]*(-params.B[180])-rhs[65]*(-params.B[181])-rhs[66]*(-params.B[182])-rhs[67]*(-params.B[183]);
+  lhs[46] = -rhs[46]*(-1)-rhs[64]*(-params.B[184])-rhs[65]*(-params.B[185])-rhs[66]*(-params.B[186])-rhs[67]*(-params.B[187]);
+  lhs[47] = -rhs[47]*(-1)-rhs[64]*(-params.B[188])-rhs[65]*(-params.B[189])-rhs[66]*(-params.B[190])-rhs[67]*(-params.B[191]);
+  lhs[48] = -rhs[48]*(-1)-rhs[64]*(-params.B[192])-rhs[65]*(-params.B[193])-rhs[66]*(-params.B[194])-rhs[67]*(-params.B[195]);
+  lhs[49] = -rhs[49]*(-1)-rhs[64]*(-params.B[196])-rhs[65]*(-params.B[197])-rhs[66]*(-params.B[198])-rhs[67]*(-params.B[199]);
+  lhs[50] = -rhs[50]*(-1)-rhs[64]*(-params.B[200])-rhs[65]*(-params.B[201])-rhs[66]*(-params.B[202])-rhs[67]*(-params.B[203]);
+  lhs[51] = -rhs[51]*(-1)-rhs[64]*(-params.B[204])-rhs[65]*(-params.B[205])-rhs[66]*(-params.B[206])-rhs[67]*(-params.B[207]);
+  lhs[52] = -rhs[52]*(-1)-rhs[64]*(-params.B[208])-rhs[65]*(-params.B[209])-rhs[66]*(-params.B[210])-rhs[67]*(-params.B[211]);
+  lhs[53] = -rhs[53]*(-1)-rhs[64]*(-params.B[212])-rhs[65]*(-params.B[213])-rhs[66]*(-params.B[214])-rhs[67]*(-params.B[215]);
+  lhs[54] = -rhs[54]*(-1)-rhs[64]*(-params.B[216])-rhs[65]*(-params.B[217])-rhs[66]*(-params.B[218])-rhs[67]*(-params.B[219]);
+  lhs[55] = -rhs[55]*(-1)-rhs[64]*(-params.B[220])-rhs[65]*(-params.B[221])-rhs[66]*(-params.B[222])-rhs[67]*(-params.B[223]);
+  lhs[56] = -rhs[56]*(-1)-rhs[64]*(-params.B[224])-rhs[65]*(-params.B[225])-rhs[66]*(-params.B[226])-rhs[67]*(-params.B[227]);
+  lhs[57] = -rhs[57]*(-1)-rhs[64]*(-params.B[228])-rhs[65]*(-params.B[229])-rhs[66]*(-params.B[230])-rhs[67]*(-params.B[231]);
+  lhs[58] = -rhs[58]*(-1)-rhs[64]*(-params.B[232])-rhs[65]*(-params.B[233])-rhs[66]*(-params.B[234])-rhs[67]*(-params.B[235]);
+  lhs[59] = -rhs[59]*(-1)-rhs[64]*(-params.B[236])-rhs[65]*(-params.B[237])-rhs[66]*(-params.B[238])-rhs[67]*(-params.B[239]);
+  lhs[60] = -rhs[60]*(-1)-rhs[64]*(-params.B[240])-rhs[65]*(-params.B[241])-rhs[66]*(-params.B[242])-rhs[67]*(-params.B[243]);
+  lhs[61] = -rhs[61]*(-1)-rhs[64]*(-params.B[244])-rhs[65]*(-params.B[245])-rhs[66]*(-params.B[246])-rhs[67]*(-params.B[247]);
+  lhs[62] = -rhs[62]*(-1)-rhs[64]*(-params.B[248])-rhs[65]*(-params.B[249])-rhs[66]*(-params.B[250])-rhs[67]*(-params.B[251]);
+  lhs[63] = -rhs[63]*(-1)-rhs[64]*(-params.B[252])-rhs[65]*(-params.B[253])-rhs[66]*(-params.B[254])-rhs[67]*(-params.B[255]);
+  lhs[64] = 0;
+  lhs[65] = 0;
+  lhs[66] = 0;
+  lhs[67] = 0;
+  lhs[68] = 0;
+  lhs[69] = 0;
 }
 void multbyP(double *lhs, double *rhs) {
   /* TODO use the fact that P is symmetric? */
@@ -231,12 +280,28 @@ void multbyP(double *lhs, double *rhs) {
   lhs[45] = rhs[45]*(2*params.epsilon[0]);
   lhs[46] = rhs[46]*(2*params.epsilon[0]);
   lhs[47] = rhs[47]*(2*params.epsilon[0]);
-  lhs[48] = rhs[48]*(2*params.C[0]);
-  lhs[49] = rhs[49]*(2*params.C[1]);
-  lhs[50] = rhs[50]*(2*params.C[2]);
-  lhs[51] = rhs[51]*(2*params.C[3]);
-  lhs[52] = rhs[52]*(2*params.C[4]);
-  lhs[53] = rhs[53]*(2*params.C[5]);
+  lhs[48] = rhs[48]*(2*params.epsilon[0]);
+  lhs[49] = rhs[49]*(2*params.epsilon[0]);
+  lhs[50] = rhs[50]*(2*params.epsilon[0]);
+  lhs[51] = rhs[51]*(2*params.epsilon[0]);
+  lhs[52] = rhs[52]*(2*params.epsilon[0]);
+  lhs[53] = rhs[53]*(2*params.epsilon[0]);
+  lhs[54] = rhs[54]*(2*params.epsilon[0]);
+  lhs[55] = rhs[55]*(2*params.epsilon[0]);
+  lhs[56] = rhs[56]*(2*params.epsilon[0]);
+  lhs[57] = rhs[57]*(2*params.epsilon[0]);
+  lhs[58] = rhs[58]*(2*params.epsilon[0]);
+  lhs[59] = rhs[59]*(2*params.epsilon[0]);
+  lhs[60] = rhs[60]*(2*params.epsilon[0]);
+  lhs[61] = rhs[61]*(2*params.epsilon[0]);
+  lhs[62] = rhs[62]*(2*params.epsilon[0]);
+  lhs[63] = rhs[63]*(2*params.epsilon[0]);
+  lhs[64] = rhs[64]*(2*params.C[0]);
+  lhs[65] = rhs[65]*(2*params.C[1]);
+  lhs[66] = rhs[66]*(2*params.C[2]);
+  lhs[67] = rhs[67]*(2*params.C[3]);
+  lhs[68] = rhs[68]*(2*params.C[4]);
+  lhs[69] = rhs[69]*(2*params.C[5]);
 }
 void fillq(void) {
   work.q[0] = 0;
@@ -293,6 +358,22 @@ void fillq(void) {
   work.q[51] = 0;
   work.q[52] = 0;
   work.q[53] = 0;
+  work.q[54] = 0;
+  work.q[55] = 0;
+  work.q[56] = 0;
+  work.q[57] = 0;
+  work.q[58] = 0;
+  work.q[59] = 0;
+  work.q[60] = 0;
+  work.q[61] = 0;
+  work.q[62] = 0;
+  work.q[63] = 0;
+  work.q[64] = 0;
+  work.q[65] = 0;
+  work.q[66] = 0;
+  work.q[67] = 0;
+  work.q[68] = 0;
+  work.q[69] = 0;
 }
 void fillh(void) {
   work.h[0] = 0;
@@ -343,9 +424,26 @@ void fillh(void) {
   work.h[45] = 0;
   work.h[46] = 0;
   work.h[47] = 0;
-  work.h[48] = -params.fmin[0];
-  work.h[49] = -params.fmin[1];
-  work.h[50] = -params.fmin[2];
+  work.h[48] = 0;
+  work.h[49] = 0;
+  work.h[50] = 0;
+  work.h[51] = 0;
+  work.h[52] = 0;
+  work.h[53] = 0;
+  work.h[54] = 0;
+  work.h[55] = 0;
+  work.h[56] = 0;
+  work.h[57] = 0;
+  work.h[58] = 0;
+  work.h[59] = 0;
+  work.h[60] = 0;
+  work.h[61] = 0;
+  work.h[62] = 0;
+  work.h[63] = 0;
+  work.h[64] = -params.fmin[0];
+  work.h[65] = -params.fmin[1];
+  work.h[66] = -params.fmin[2];
+  work.h[67] = -params.fmin[3];
 }
 void fillb(void) {
   work.b[0] = params.W[0];
