@@ -9,7 +9,7 @@ public class CoMHeightTimeDerivativesCalculator
    private final Vector2d comXYVelocity = new Vector2d();
    private final Vector2d comXYAcceleration = new Vector2d();
 
-   public void computeCoMHeightTimeDerivatives(CoMHeightData comHeightDataToPack, CenterOfMassXYVelocityAndAccelerationData xyVelocityAndAcceleration, CenterOfMassHeightPartialDerivativesData comPartialDerivatives)
+   public void computeCoMHeightTimeDerivatives(CoMHeightTimeDerivativesData comHeightDataToPack, CoMXYTimeDerivativesData xyVelocityAndAcceleration, CoMHeightPartialDerivativesData comPartialDerivatives)
    {
       xyVelocityAndAcceleration.getCoMXYPosition(comXYPosition);
       xyVelocityAndAcceleration.getCoMXYVelocity(comXYVelocity);

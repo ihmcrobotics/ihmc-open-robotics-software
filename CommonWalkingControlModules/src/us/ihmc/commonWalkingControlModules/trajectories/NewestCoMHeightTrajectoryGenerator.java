@@ -15,7 +15,7 @@ import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.LineSegment2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
-public class NewestCoMHeightTrajectoryGenerator implements CenterOfMassHeightTrajectoryGenerator
+public class NewestCoMHeightTrajectoryGenerator implements CoMHeightTrajectoryGenerator
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -50,7 +50,7 @@ public class NewestCoMHeightTrajectoryGenerator implements CenterOfMassHeightTra
       return new Point2d(point.getX(), point.getY());
    }
 
-   public void solve(CenterOfMassHeightPartialDerivativesData coMHeightPartialDerivativesDataToPack, CenterOfMassHeightInputData centerOfMassHeightInputData)
+   public void solve(CoMHeightPartialDerivativesData coMHeightPartialDerivativesDataToPack, ContactStatesAndUpcomingFootstepData centerOfMassHeightInputData)
    {
       Point2d queryPoint = getCenterOfMass2d(centerOfMassHeightInputData.getCenterOfMassFrame());
 

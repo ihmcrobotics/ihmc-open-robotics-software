@@ -12,7 +12,7 @@ import com.mathworks.jama.Matrix;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
-public class CoMHeightAccelerationSmoother
+public class CoMHeightTimeDerivativesSmoother
 {
    private final double dt;
    
@@ -45,7 +45,7 @@ public class CoMHeightAccelerationSmoother
    private double maximumJerk = maximumAcceleration/0.1;
 
    
-   public CoMHeightAccelerationSmoother(double dt, YoVariableRegistry parentRegistry)
+   public CoMHeightTimeDerivativesSmoother(double dt, YoVariableRegistry parentRegistry)
    {
       this.dt = dt;
 
@@ -111,7 +111,7 @@ public class CoMHeightAccelerationSmoother
    }
    
 
-   public void smooth(CoMHeightData heightZDataOutputToPack, CoMHeightData heightZDataInput)
+   public void smooth(CoMHeightTimeDerivativesData heightZDataOutputToPack, CoMHeightTimeDerivativesData heightZDataInput)
    {
       double heightIn = heightZDataInput.getComHeight();
       double heightVelocityIn = heightZDataInput.getComHeightVelocity();
@@ -152,7 +152,7 @@ public class CoMHeightAccelerationSmoother
       
    }
 
-   public void initialize(CoMHeightData comHeightDataIn)
+   public void initialize(CoMHeightTimeDerivativesData comHeightDataIn)
    {
       smoothComHeight.set(comHeightDataIn.getComHeight());
       smoothComHeightVelocity.set(comHeightDataIn.getComHeightVelocity());

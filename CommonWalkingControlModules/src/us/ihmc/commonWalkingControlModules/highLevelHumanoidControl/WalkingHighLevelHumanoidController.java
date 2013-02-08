@@ -41,11 +41,11 @@ import us.ihmc.commonWalkingControlModules.outputs.ProcessedOutputsInterface;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LimbName;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
-import us.ihmc.commonWalkingControlModules.trajectories.CenterOfMassHeightInputData;
-import us.ihmc.commonWalkingControlModules.trajectories.CenterOfMassHeightPartialDerivativesData;
-import us.ihmc.commonWalkingControlModules.trajectories.CenterOfMassHeightTrajectoryGenerator;
-import us.ihmc.commonWalkingControlModules.trajectories.CenterOfMassXYVelocityAndAccelerationData;
-import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightData;
+import us.ihmc.commonWalkingControlModules.trajectories.ContactStatesAndUpcomingFootstepData;
+import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightPartialDerivativesData;
+import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTrajectoryGenerator;
+import us.ihmc.commonWalkingControlModules.trajectories.CoMXYTimeDerivativesData;
+import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesData;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesCalculator;
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantCoPInstantaneousCapturePointTrajectory;
 import us.ihmc.commonWalkingControlModules.trajectories.CubicPolynomialTrajectoryGenerator;
@@ -106,7 +106,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
    private final StateMachine<WalkingState> stateMachine;
    private final CenterOfMassJacobian centerOfMassJacobian;
 
-   private final CenterOfMassHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator;
+   private final CoMHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator;
    private final CoMHeightTimeDerivativesCalculator coMHeightTimeDerivativesCalculator = new CoMHeightTimeDerivativesCalculator();
    
    private final PDController centerOfMassHeightController;
@@ -181,7 +181,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
            CenterOfMassJacobian centerOfMassJacobian, SideDependentList<? extends ContactablePlaneBody> bipedFeet, BipedSupportPolygons bipedSupportPolygons,
            SideDependentList<FootSwitchInterface> footSwitches, double gravityZ, DoubleYoVariable yoTime, double controlDT,
            DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, FootstepProvider footstepProvider,
-           DesiredHeadOrientationProvider desiredHeadOrientationProvider, CenterOfMassHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator,
+           DesiredHeadOrientationProvider desiredHeadOrientationProvider, CoMHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator,
            GroundReactionWrenchDistributor groundReactionWrenchDistributor, SideDependentList<PositionTrajectoryGenerator> footPositionTrajectoryGenerators,
            DoubleProvider swingTimeProvider, YoPositionProvider finalPositionProvider, boolean stayOntoes, double desiredPelvisPitch, double trailingFootPitch,
            ArrayList<Updatable> updatables, ProcessedOutputsInterface processedOutputs, WalkingControllerParameters walkingControllerParameters,
@@ -995,8 +995,8 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
    }
 
    // Temporary objects to reduce garbage collection.
-   private final CenterOfMassHeightPartialDerivativesData coMHeightPartialDerivativesData = new CenterOfMassHeightPartialDerivativesData();
-   private final CenterOfMassHeightInputData centerOfMassHeightInputData = new CenterOfMassHeightInputData();
+   private final CoMHeightPartialDerivativesData coMHeightPartialDerivativesData = new CoMHeightPartialDerivativesData();
+   private final ContactStatesAndUpcomingFootstepData centerOfMassHeightInputData = new ContactStatesAndUpcomingFootstepData();
 
    private double computeDesiredCoMHeightAcceleration(FrameVector2d desiredICPVelocity)
    {
@@ -1027,8 +1027,8 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       FrameVector2d comd2dSquared = new FrameVector2d(comd2d.getReferenceFrame(), comd2d.getX() * comd2d.getX(), comd2d.getY() * comd2d.getY());
       
       
-      CoMHeightData comHeightDataBeforeSmoothing = new CoMHeightData();
-      CenterOfMassXYVelocityAndAccelerationData xyVelocityAndAcceleration = new CenterOfMassXYVelocityAndAccelerationData();
+      CoMHeightTimeDerivativesData comHeightDataBeforeSmoothing = new CoMHeightTimeDerivativesData();
+      CoMXYTimeDerivativesData xyVelocityAndAcceleration = new CoMXYTimeDerivativesData();
       
       Point2d comXYPosition = new Point2d(com.getX(), com.getY());
       Vector2d comXYVelocity = comd2d.getVectorCopy();

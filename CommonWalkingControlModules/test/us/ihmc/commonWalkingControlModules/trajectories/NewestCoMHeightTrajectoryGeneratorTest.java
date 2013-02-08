@@ -68,12 +68,12 @@ public class NewestCoMHeightTrajectoryGeneratorTest
          nextFootstep = FootstepUtils.generateFootstep(footstepPose, foot, contactCenter1.getZ(), new Vector3d(0.0, 0.0, 1.0));
       }
       
-      CenterOfMassHeightPartialDerivativesData coMHeightPartialDerivativesData = new CenterOfMassHeightPartialDerivativesData();
-      CenterOfMassHeightInputData centerOfMassHeightInputData = new CenterOfMassHeightInputData();
+      CoMHeightPartialDerivativesData coMHeightPartialDerivativesData = new CoMHeightPartialDerivativesData();
+      ContactStatesAndUpcomingFootstepData centerOfMassHeightInputData = new ContactStatesAndUpcomingFootstepData();
       
       centerOfMassHeightInputData.set(centerOfMassFrame, null, nextFootstep, contactStates);
       
-      CenterOfMassHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator = new NewestCoMHeightTrajectoryGenerator(nominalCoMHeight, registry);
+      CoMHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator = new NewestCoMHeightTrajectoryGenerator(nominalCoMHeight, registry);
       centerOfMassHeightTrajectoryGenerator.initialize(null, nextFootstep, contactStates);
       centerOfMassHeightTrajectoryGenerator.solve(coMHeightPartialDerivativesData, centerOfMassHeightInputData);
    }

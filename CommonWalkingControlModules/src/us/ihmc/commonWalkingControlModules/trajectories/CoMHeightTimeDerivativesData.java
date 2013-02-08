@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
-public class CoMHeightData
+public class CoMHeightTimeDerivativesData
 {
    private double comHeight, comHeightVelocity, comHeightAcceleration;
 
@@ -35,7 +35,7 @@ public class CoMHeightData
    }
 
 
-   public void set(CoMHeightData heightZData)
+   public void set(CoMHeightTimeDerivativesData heightZData)
    {
       this.comHeight = heightZData.comHeight;
       this.comHeightVelocity = heightZData.comHeightVelocity;

@@ -8,14 +8,14 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
-public class CenterOfMassHeightInputData
+public class ContactStatesAndUpcomingFootstepData
 {
    private RobotSide supportLeg;
    private ReferenceFrame centerOfMassFrame;
    private Footstep upcomingFootstep;
    private final ArrayList<PlaneContactState> contactStates = new ArrayList<PlaneContactState>();
    
-   public CenterOfMassHeightInputData()
+   public ContactStatesAndUpcomingFootstepData()
    {
       
    }
