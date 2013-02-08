@@ -212,7 +212,7 @@ public class NewestCoMHeightTrajectoryGeneratorTest
       FrameOrientation2d footstepOrientation = new FrameOrientation2d(worldFrame);
       FramePose2d footstepPose = new FramePose2d(new FramePoint2d(worldFrame, contactFrameCenter.getX(), contactFrameCenter.getY()), footstepOrientation);
       ContactablePlaneBody foot = new FootSpoof("foot", 0.0, 0.0, 0.0, 1.0, -1.0, 1.0, 0.0);
-      //TODO: remove negative sign from contactFrameCenter.getZ() once grey fixes generateFootstep()
+      //PATH TODO: remove negative sign from contactFrameCenter.getZ() once grey fixes generateFootstep()
       nextFootstep = FootstepUtils.generateFootstep(footstepPose, foot, -contactFrameCenter.getZ(), new Vector3d(0.0, 0.0, 1.0));
       return nextFootstep;
    }

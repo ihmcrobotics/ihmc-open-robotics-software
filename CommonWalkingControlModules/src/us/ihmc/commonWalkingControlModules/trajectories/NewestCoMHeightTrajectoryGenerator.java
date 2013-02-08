@@ -4,16 +4,15 @@ import java.util.List;
 
 import javax.vecmath.Point2d;
 
-import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
-
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.FramePoint;
-import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.LineSegment2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public class NewestCoMHeightTrajectoryGenerator implements CoMHeightTrajectoryGenerator
 {
