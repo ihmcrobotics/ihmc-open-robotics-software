@@ -8,6 +8,8 @@ import java.util.HashSet;
 import java.util.List;
 
 import javax.media.j3d.Transform3D;
+import javax.vecmath.Point2d;
+import javax.vecmath.Vector2d;
 
 import org.ejml.data.DenseMatrix64F;
 
@@ -40,9 +42,11 @@ import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LimbName;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.trajectories.CenterOfMassHeightInputData;
-import us.ihmc.commonWalkingControlModules.trajectories.CenterOfMassHeightOutputData;
 import us.ihmc.commonWalkingControlModules.trajectories.CenterOfMassHeightPartialDerivativesData;
 import us.ihmc.commonWalkingControlModules.trajectories.CenterOfMassHeightTrajectoryGenerator;
+import us.ihmc.commonWalkingControlModules.trajectories.CenterOfMassXYVelocityAndAccelerationData;
+import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightData;
+import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesCalculator;
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantCoPInstantaneousCapturePointTrajectory;
 import us.ihmc.commonWalkingControlModules.trajectories.CubicPolynomialTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.CurrentOrientationProvider;
@@ -103,6 +107,8 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
    private final CenterOfMassJacobian centerOfMassJacobian;
 
    private final CenterOfMassHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator;
+   private final CoMHeightTimeDerivativesCalculator coMHeightTimeDerivativesCalculator = new CoMHeightTimeDerivativesCalculator();
+   
    private final PDController centerOfMassHeightController;
    private final SideDependentList<WalkingState> singleSupportStateEnums = new SideDependentList<WalkingState>(WalkingState.LEFT_SUPPORT,
                                                                               WalkingState.RIGHT_SUPPORT);
@@ -1007,6 +1013,33 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 
       centerOfMassHeightTrajectoryGenerator.solve(coMHeightPartialDerivativesData, centerOfMassHeightInputData);
 
+      FramePoint com = new FramePoint(referenceFrames.getCenterOfMassFrame());
+      FrameVector comd = new FrameVector(frame);
+      centerOfMassJacobian.packCenterOfMassVelocity(comd);
+      com.changeFrame(frame);
+      comd.changeFrame(frame);
+      
+      // TODO: use current omega0 instead of previous
+      FrameVector2d comd2d = comd.toFrameVector2d();
+      FrameVector2d comdd2d = new FrameVector2d(desiredICPVelocity);
+      comdd2d.sub(comd2d);
+      comdd2d.scale(getOmega0());    // MathTools.square(omega0.getDoubleValue()) * (com.getX() - copX);
+      FrameVector2d comd2dSquared = new FrameVector2d(comd2d.getReferenceFrame(), comd2d.getX() * comd2d.getX(), comd2d.getY() * comd2d.getY());
+      
+      
+      CoMHeightData comHeightDataBeforeSmoothing = new CoMHeightData();
+      CenterOfMassXYVelocityAndAccelerationData xyVelocityAndAcceleration = new CenterOfMassXYVelocityAndAccelerationData();
+      
+      Point2d comXYPosition = new Point2d(com.getX(), com.getY());
+      Vector2d comXYVelocity = comd2d.getVectorCopy();
+      Vector2d comXYAcceleration = comdd2d.getVectorCopy();
+      
+      xyVelocityAndAcceleration.setCoMXYPosition(comXYPosition);
+      xyVelocityAndAcceleration.setCoMXYVelocity(comXYVelocity);
+      xyVelocityAndAcceleration.setCoMXYAcceleration(comXYAcceleration);
+      
+      coMHeightTimeDerivativesCalculator.computeCoMHeightTimeDerivatives(comHeightDataBeforeSmoothing, xyVelocityAndAcceleration , coMHeightPartialDerivativesData);
+      
       double zDesired = coMHeightPartialDerivativesData.getCoMHeight();
       double dzdx = coMHeightPartialDerivativesData.getPartialDzDx();
       double dzdy = coMHeightPartialDerivativesData.getPartialDzDy();
@@ -1017,23 +1050,12 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       FrameVector2d dzdxDesired = new FrameVector2d(worldFrame, dzdx, dzdy);
       FrameVector2d d2zdx2Desired = new FrameVector2d(worldFrame, ddzddx, ddzddy);
 
-      FramePoint com = new FramePoint(referenceFrames.getCenterOfMassFrame());
-      FrameVector comd = new FrameVector(frame);
-      centerOfMassJacobian.packCenterOfMassVelocity(comd);
+      
 
       dzdxDesired.changeFrame(frame);
       d2zdx2Desired.changeFrame(frame);
       desiredICPVelocity.changeFrame(frame);
-      com.changeFrame(frame);
-
-      comd.changeFrame(frame);
-
-      // TODO: use current omega0 instead of previous
-      FrameVector2d comd2d = comd.toFrameVector2d();
-      FrameVector2d comdd2d = new FrameVector2d(desiredICPVelocity);
-      comdd2d.sub(comd2d);
-      comdd2d.scale(getOmega0());    // MathTools.square(omega0.getDoubleValue()) * (com.getX() - copX);
-      FrameVector2d comd2dSquared = new FrameVector2d(comd2d.getReferenceFrame(), comd2d.getX() * comd2d.getX(), comd2d.getY() * comd2d.getY());
+       
 
       double zdDesired = dzdxDesired.dot(comd2d);
       double zddFeedForward = d2zdx2Desired.dot(comd2dSquared) + dzdxDesired.dot(comdd2d);
