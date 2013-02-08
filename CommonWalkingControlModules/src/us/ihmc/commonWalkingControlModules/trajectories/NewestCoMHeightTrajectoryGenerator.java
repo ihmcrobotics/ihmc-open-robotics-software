@@ -17,7 +17,7 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 public class NewestCoMHeightTrajectoryGenerator implements CoMHeightTrajectoryGenerator
 {
-   private static final boolean DEBUG = true; 
+   private static final boolean DEBUG = false; 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final TwoPointSpline1D spline = new TwoPointSpline1D(registry);
