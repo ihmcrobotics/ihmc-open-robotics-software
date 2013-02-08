@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.media.j3d.Transform3D;
@@ -78,7 +77,7 @@ public class FlatThenPolynomialCoMHeightTrajectoryGenerator implements CenterOfM
       parentRegistry.addChild(registry);
    }
 
-   public void initialize(RobotSide supportLeg, Footstep nextFootstep, ArrayList<PlaneContactState> contactStates)
+   public void initialize(RobotSide supportLeg, Footstep nextFootstep, List<PlaneContactState> contactStates)
    {
       if (supportLeg == null)
       {
@@ -161,13 +160,16 @@ public class FlatThenPolynomialCoMHeightTrajectoryGenerator implements CenterOfM
    }
    
    
-   public void solve(CenterOfMassHeightOutputData centerOfMassHeightOutputDataToPack, CenterOfMassHeightInputData centerOfMassHeightInputData)
+   public void solve(CenterOfMassHeightPartialDerivativesData coMHeightPartialDerivativesDataToPack, CenterOfMassHeightInputData centerOfMassHeightInputData)
    {
       compute();
       
-      centerOfMassHeightOutputDataToPack.setDesiredCenterOfMassHeight(desiredComHeightInWorld.getDoubleValue());
-      centerOfMassHeightOutputDataToPack.setDesiredCenterOfMassHeightSlope(new FrameVector2d(referenceFrame, desiredComHeightSlope.getDoubleValue(), 0.0));
-      centerOfMassHeightOutputDataToPack.setDesiredCenterOfMassHeightSecondDerivative(new FrameVector2d(referenceFrame, desiredComHeightSecondDerivative.getDoubleValue(), 0.0));
+      coMHeightPartialDerivativesDataToPack.setCoMHeight(desiredComHeightInWorld.getDoubleValue());
+      coMHeightPartialDerivativesDataToPack.setPartialDzDx(desiredComHeightSlope.getDoubleValue());
+      coMHeightPartialDerivativesDataToPack.setPartialDzDy(0.0);
+      coMHeightPartialDerivativesDataToPack.setPartialD2zDx2(desiredComHeightSecondDerivative.getDoubleValue());
+      coMHeightPartialDerivativesDataToPack.setPartialD2zDy2(0.0);
+      coMHeightPartialDerivativesDataToPack.setPartialD2zDxDy(0.0);
    }
 
 

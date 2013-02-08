@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
+import us.ihmc.utilities.math.MathTools;
+
 public class CenterOfMassHeightPartialDerivativesData
 {
    private double comHeight, partialDzDx, partialDzDy, partialD2zDx2, partialD2zDy2, partialD2zDxDy;
@@ -74,5 +76,10 @@ public class CenterOfMassHeightPartialDerivativesData
       this.partialD2zDxDy = partialD2zDxDy;
    }
 
-   
+   public boolean isFlat(double epsilon)
+   {
+      return MathTools.epsilonEquals(partialD2zDx2, 0.0, epsilon) && MathTools.epsilonEquals(partialD2zDxDy, 0.0, epsilon) && 
+            MathTools.epsilonEquals(partialD2zDy2, 0.0, epsilon) && MathTools.epsilonEquals(partialDzDx, 0.0, epsilon) && 
+            MathTools.epsilonEquals(partialDzDy, 0.0, epsilon);
+   }
 }

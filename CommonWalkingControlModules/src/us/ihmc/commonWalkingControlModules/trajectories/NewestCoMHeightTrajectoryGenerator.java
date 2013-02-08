@@ -1,10 +1,9 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import javax.vecmath.Point2d;
 
-import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
@@ -30,7 +29,7 @@ public class NewestCoMHeightTrajectoryGenerator implements CenterOfMassHeightTra
       parentRegistry.addChild(registry);
    }
 
-   public void initialize(RobotSide supportLeg, Footstep nextFootstep, ArrayList<PlaneContactState> contactStates)
+   public void initialize(RobotSide supportLeg, Footstep nextFootstep, List<PlaneContactState> contactStates)
    {
       FramePoint[] contactStateCenters = getContactStateCenters(contactStates, nextFootstep);
       projectionSegment.set(getPoint2d(contactStateCenters[0]), getPoint2d(contactStateCenters[1]));
@@ -51,7 +50,7 @@ public class NewestCoMHeightTrajectoryGenerator implements CenterOfMassHeightTra
       return new Point2d(point.getX(), point.getY());
    }
 
-   public void solve(CenterOfMassHeightOutputData centerOfMassHeightOutputDataToPack, CenterOfMassHeightInputData centerOfMassHeightInputData)
+   public void solve(CenterOfMassHeightPartialDerivativesData coMHeightPartialDerivativesDataToPack, CenterOfMassHeightInputData centerOfMassHeightInputData)
    {
       Point2d queryPoint = getCenterOfMass2d(centerOfMassHeightInputData.getCenterOfMassFrame());
 
@@ -76,10 +75,12 @@ public class NewestCoMHeightTrajectoryGenerator implements CenterOfMassHeightTra
       double ddzddy = dzds * ddsddy + ddzdds * dsdy * dsdy;
       double ddzdxdy = ddzdds * dsdx * dsdy + dzds * ddsdxdy;
       
-      centerOfMassHeightOutputDataToPack.setDesiredCenterOfMassHeight(z);
-      centerOfMassHeightOutputDataToPack.setDesiredCenterOfMassHeightSlope(new FrameVector2d(worldFrame, dzdx, dzdy));
-      centerOfMassHeightOutputDataToPack.setDesiredCenterOfMassHeightSecondDerivative(new FrameVector2d(worldFrame, ddzddx, ddzddy));
-      centerOfMassHeightOutputDataToPack.setDdzdxdy(ddzdxdy);
+      coMHeightPartialDerivativesDataToPack.setCoMHeight(z);
+      coMHeightPartialDerivativesDataToPack.setPartialDzDx(dzdx);
+      coMHeightPartialDerivativesDataToPack.setPartialDzDy(dzdy);
+      coMHeightPartialDerivativesDataToPack.setPartialD2zDxDy(ddzdxdy);
+      coMHeightPartialDerivativesDataToPack.setPartialD2zDx2(ddzddx);
+      coMHeightPartialDerivativesDataToPack.setPartialD2zDy2(ddzddy);
    }
 
    private double[] getPartialDerivativesWithRespectToS(LineSegment2d segment)
@@ -90,7 +91,7 @@ public class NewestCoMHeightTrajectoryGenerator implements CenterOfMassHeightTra
       return new double[] {dsdx, dsdy};
    }
 
-   private FramePoint[] getContactStateCenters(ArrayList<PlaneContactState> contactStates, Footstep nextFootstep)
+   private FramePoint[] getContactStateCenters(List<PlaneContactState> contactStates, Footstep nextFootstep)
    {
       FramePoint contactStateCenter0 = new FramePoint(contactStates.get(0).getBodyFrame());
       contactStateCenter0.changeFrame(worldFrame);
@@ -104,6 +105,8 @@ public class NewestCoMHeightTrajectoryGenerator implements CenterOfMassHeightTra
       {
          contactStateCenter1 = nextFootstep.getPositionInFrame(worldFrame);
       }
+      System.out.println(contactStateCenter0);
+      System.out.println(contactStateCenter1);
       return new FramePoint[]{contactStateCenter0, contactStateCenter1};
    }
 
