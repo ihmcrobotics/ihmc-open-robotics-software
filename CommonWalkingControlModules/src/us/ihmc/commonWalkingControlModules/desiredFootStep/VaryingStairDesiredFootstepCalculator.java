@@ -85,9 +85,9 @@ public class VaryingStairDesiredFootstepCalculator extends SimpleWorldDesiredFoo
                                               bipedFeet.get(swingLegSide), desiredHeadingControlModule.getDesiredHeadingFrame());
 
 
-      double swingAnkleX = oneStepLookAheadX - swingMaxXWithRespectToAnkle;
+      double swingAnkleX = oneStepLookAheadX - swingMaxXWithRespectToAnkle; // + addToStepLength.getDoubleValue();
       double swingAnkleY = stanceAnkle.getY() + supportLegSide.negateIfLeftSide(stepWidth.getDoubleValue());
-      double swingAnkleZ = oneStepLookAheadZ - swingMinZWithRespectToAnkle;
+      double swingAnkleZ = oneStepLookAheadZ - swingMinZWithRespectToAnkle; // + addToStepHeight.getDoubleValue();
 
       FramePoint newFootstepPosition = new FramePoint(ReferenceFrame.getWorldFrame(), swingAnkleX, swingAnkleY, swingAnkleZ);
       footstepPositions.get(swingLegSide).set(newFootstepPosition);
@@ -96,7 +96,7 @@ public class VaryingStairDesiredFootstepCalculator extends SimpleWorldDesiredFoo
    @Override
    public void setupParametersForR2InverseDynamics()
    {
-      stepXAfterNosing.set(0.035);
+      stepXAfterNosing.set(0.05); //035);
       stepLengthOnFlatGround.set(0.35);
       stepLengthMinimum.set(0.15);
       stepWidth.set(0.2);
