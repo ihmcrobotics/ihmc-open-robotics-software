@@ -74,4 +74,10 @@ public class JPanelCameraStreamer extends JPanel implements VideoStreamer, Camer
       return 0;
    }
 
+
+   public boolean isReadyForNewData()
+   {
+      return true;
+   }
+
 }
