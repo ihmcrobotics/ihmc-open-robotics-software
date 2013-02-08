@@ -44,6 +44,6 @@ public class CoMXYTimeDerivativesData
    
    public void setCoMXYAcceleration(FrameVector2d comXYAcceleration)
    {
-      this.comXYVelocity.set(comXYAcceleration);
+      this.comXYAcceleration.set(comXYAcceleration);
    }
 }

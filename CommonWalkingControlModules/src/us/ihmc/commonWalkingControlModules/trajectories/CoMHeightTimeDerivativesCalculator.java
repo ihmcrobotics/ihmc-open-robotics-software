@@ -10,11 +10,11 @@ public class CoMHeightTimeDerivativesCalculator
    private final FrameVector2d comXYVelocity = new FrameVector2d(ReferenceFrame.getWorldFrame());
    private final FrameVector2d comXYAcceleration = new FrameVector2d(ReferenceFrame.getWorldFrame());
 
-   public void computeCoMHeightTimeDerivatives(CoMHeightTimeDerivativesData comHeightDataToPack, CoMXYTimeDerivativesData xyVelocityAndAcceleration, CoMHeightPartialDerivativesData comPartialDerivatives)
+   public void computeCoMHeightTimeDerivatives(CoMHeightTimeDerivativesData comHeightDataToPack, CoMXYTimeDerivativesData comXYTimeDerivatives, CoMHeightPartialDerivativesData comPartialDerivatives)
    {
-      xyVelocityAndAcceleration.getCoMXYPosition(comXYPosition);
-      xyVelocityAndAcceleration.getCoMXYVelocity(comXYVelocity);
-      xyVelocityAndAcceleration.getCoMXYAcceleration(comXYAcceleration);
+      comXYTimeDerivatives.getCoMXYPosition(comXYPosition);
+      comXYTimeDerivatives.getCoMXYVelocity(comXYVelocity);
+      comXYTimeDerivatives.getCoMXYAcceleration(comXYAcceleration);
       
       double comHeight = comPartialDerivatives.getCoMHeight();
       double dzDx = comPartialDerivatives.getPartialDzDx();
@@ -24,13 +24,13 @@ public class CoMHeightTimeDerivativesCalculator
       double d2zDxDy = comPartialDerivatives.getPartialD2zDxDy();
       
       double xDot = comXYVelocity.getX();
-      double yDot = comXYVelocity.getX();
+      double yDot = comXYVelocity.getY();
       
       double xDDot = comXYAcceleration.getX();
-      double yDDot = comXYAcceleration.getX();
+      double yDDot = comXYAcceleration.getY();
       
       double comHeightVelocity = dzDx * xDot + dzDy * yDot;
-      double comHeightAcceleration = d2zDx2 * xDot * xDot + dzDx * xDDot+ d2zDy2 * yDot * yDot + dzDy * yDDot;
+      double comHeightAcceleration = d2zDx2 * xDot * xDot + dzDx * xDDot + d2zDy2 * yDot * yDot + dzDy * yDDot;
       
       comHeightDataToPack.setComHeight(comHeight);
       comHeightDataToPack.setComHeightVelocity(comHeightVelocity);
