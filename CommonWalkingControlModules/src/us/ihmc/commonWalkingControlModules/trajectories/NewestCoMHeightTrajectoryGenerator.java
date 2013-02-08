@@ -32,7 +32,7 @@ public class NewestCoMHeightTrajectoryGenerator implements CoMHeightTrajectoryGe
    public void initialize(RobotSide supportLeg, Footstep nextFootstep, List<PlaneContactState> contactStates)
    {
       FramePoint[] contactStateCenters = getContactStateCenters(contactStates, nextFootstep);
-      projectionSegment.set(getPoint2d(contactStateCenters[0]), getPoint2d(contactStateCenters[1]));
+      projectionSegment = new LineSegment2d(getPoint2d(contactStateCenters[0]), getPoint2d(contactStateCenters[1]));
       double s0 = 0.0;
       double sF = projectionSegment.length();
       double z0 = contactStateCenters[0].getZ() + nominalHeightAboveGround.getDoubleValue();;
@@ -105,8 +105,6 @@ public class NewestCoMHeightTrajectoryGenerator implements CoMHeightTrajectoryGe
       {
          contactStateCenter1 = nextFootstep.getPositionInFrame(worldFrame);
       }
-      System.out.println(contactStateCenter0);
-      System.out.println(contactStateCenter1);
       return new FramePoint[]{contactStateCenter0, contactStateCenter1};
    }
 
