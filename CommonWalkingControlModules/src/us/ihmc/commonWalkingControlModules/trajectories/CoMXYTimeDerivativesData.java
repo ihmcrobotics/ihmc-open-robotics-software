@@ -1,13 +1,14 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Vector2d;
+import us.ihmc.utilities.math.geometry.FramePoint2d;
+import us.ihmc.utilities.math.geometry.FrameVector2d;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 public class CoMXYTimeDerivativesData
 {
-   private Point2d comXYPosition = new Point2d();
-   private Vector2d comXYVelocity = new Vector2d();
-   private Vector2d comXYAcceleration = new Vector2d();
+   private FramePoint2d comXYPosition = new FramePoint2d(ReferenceFrame.getWorldFrame());
+   private FrameVector2d comXYVelocity = new FrameVector2d(ReferenceFrame.getWorldFrame());
+   private FrameVector2d comXYAcceleration = new FrameVector2d(ReferenceFrame.getWorldFrame());
    
    public void set(CoMXYTimeDerivativesData comXYData)
    {
@@ -16,32 +17,32 @@ public class CoMXYTimeDerivativesData
       this.comXYAcceleration.set(comXYData.comXYAcceleration);
    }
    
-   public void getCoMXYPosition(Point2d comXYPositionToPack)
+   public void getCoMXYPosition(FramePoint2d comXYPositionToPack)
    {
       comXYPositionToPack.set(this.comXYPosition);
    }
    
-   public void getCoMXYVelocity(Vector2d comXYVelocityToPack)
+   public void getCoMXYVelocity(FrameVector2d comXYVelocityToPack)
    {
       comXYVelocityToPack.set(this.comXYVelocity);
    }
    
-   public void getCoMXYAcceleration(Vector2d comXYAccelerationToPack)
+   public void getCoMXYAcceleration(FrameVector2d comXYAccelerationToPack)
    {
       comXYAccelerationToPack.set(this.comXYAcceleration);
    }
    
-   public void setCoMXYPosition(Point2d comXYPosition)
+   public void setCoMXYPosition(FramePoint2d comXYPosition)
    {
       this.comXYPosition.set(comXYPosition);
    }
    
-   public void setCoMXYVelocity(Vector2d comXYVelocity)
+   public void setCoMXYVelocity(FrameVector2d comXYVelocity)
    {
       this.comXYVelocity.set(comXYVelocity);
    }
    
-   public void setCoMXYAcceleration(Vector2d comXYAcceleration)
+   public void setCoMXYAcceleration(FrameVector2d comXYAcceleration)
    {
       this.comXYVelocity.set(comXYAcceleration);
    }

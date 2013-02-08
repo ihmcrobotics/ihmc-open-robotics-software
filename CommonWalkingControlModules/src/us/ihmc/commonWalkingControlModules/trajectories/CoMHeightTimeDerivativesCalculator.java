@@ -1,13 +1,14 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Vector2d;
+import us.ihmc.utilities.math.geometry.FramePoint2d;
+import us.ihmc.utilities.math.geometry.FrameVector2d;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 public class CoMHeightTimeDerivativesCalculator
 {   
-   private final Point2d comXYPosition = new Point2d();
-   private final Vector2d comXYVelocity = new Vector2d();
-   private final Vector2d comXYAcceleration = new Vector2d();
+   private final FramePoint2d comXYPosition = new FramePoint2d(ReferenceFrame.getWorldFrame());
+   private final FrameVector2d comXYVelocity = new FrameVector2d(ReferenceFrame.getWorldFrame());
+   private final FrameVector2d comXYAcceleration = new FrameVector2d(ReferenceFrame.getWorldFrame());
 
    public void computeCoMHeightTimeDerivatives(CoMHeightTimeDerivativesData comHeightDataToPack, CoMXYTimeDerivativesData xyVelocityAndAcceleration, CoMHeightPartialDerivativesData comPartialDerivatives)
    {
