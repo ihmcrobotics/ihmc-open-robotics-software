@@ -9,17 +9,8 @@ import javax.vecmath.Color3f;
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
 
 
-
 //http://www.wdvl.com/Graphics/Colour/  has some of the color names I'm using...
-
-/**
- * Title:        Yobotics! Simulation Construction Set<p>
- * Description:  Package for Simulating Dynamic Robots and Mechanisms<p>
- * Copyright:    Copyright (c) Jerry Pratt<p>
- * Company:      Yobotics, Inc. <p>
- * @author Jerry Pratt
- * @version Beta 1.0
- */
+// http://cloford.com/resources/colours/500col.htm
 
 public class YoAppearance
 {
@@ -100,12 +91,20 @@ public class YoAppearance
    public static AppearanceDefinition RGBColor(float red, float green, float blue)
    {
       return new YoAppearanceRGBColor(red, green, blue, 0.0);
-
    }
 
    public static AppearanceDefinition RGBColorFrom8BitInts(int red, int green, int blue)
    {
       return RGBColor(((red)) / 255.0, ((green)) / 255.0, ((blue)) / 255.0);
+   }
+   
+   public static AppearanceDefinition RGBColorFromHex(int hex)
+   {
+      int red = (hex>>16) & 0xff;
+      int green = (hex>>8) & 0xff;
+      int blue = hex & 0xff;
+      
+      return RGBColorFrom8BitInts(red, green, blue);
    }
 
    public static AppearanceDefinition Color(Color color)
@@ -205,6 +204,7 @@ public class YoAppearance
    {
       return RGBColor(0.50f, 0.0f, 0.50f);
    }
+   
 
    public static AppearanceDefinition Fuchsia()
    {
@@ -236,6 +236,56 @@ public class YoAppearance
       return RGBColor(0.0f, 1.0f, 1.0f);
    }
 
+   
+   //TODO: Finish the list below from
+   // From http://www.w3schools.com/html/html_colornames.asp
+   public static AppearanceDefinition AliceBlue()
+   {
+      return RGBColorFromHex(0xF0F8FF);
+   }
+   
+   public static AppearanceDefinition AntiqueWhite()
+   {
+      return RGBColorFromHex(0xFAEBD7);
+   }
+   
+//   public static AppearanceDefinition Aqua()
+//   {
+//      return RGBColorFromHex(0x00FFFF);
+//   }
+   
+   public static AppearanceDefinition Aquamarine()
+   {
+      return RGBColorFromHex(0x7FFFD4);
+   }
+   
+   public static AppearanceDefinition Azure()
+   {
+      return RGBColorFromHex(0xF0FFFF);
+   }
+   
+   public static AppearanceDefinition Beige()
+   {
+      return RGBColorFromHex(0xF5F5DC);
+   }
+   
+   
+   
+   public static AppearanceDefinition Gold()
+   {
+      return RGBColorFromHex(0xFFD700);
+   }
+   
+   public static AppearanceDefinition GoldenRod()
+   {
+      return RGBColorFromHex(0xDAA520);
+   }
+   
+   
+   
+   
+   
+   
    public static AppearanceDefinition Transparent()
    {
       return new YoAppearanceTransparent();
