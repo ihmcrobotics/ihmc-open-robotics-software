@@ -16,13 +16,13 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicCoordinateSystem;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 
 public class NewestCoMHeightTrajectoryGenerator implements CoMHeightTrajectoryGenerator
 {
+   public static final double DISTANCE_FROM_SOLE_TO_ANKLE = 0.08;
    private static final boolean DEBUG = false; 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -42,15 +42,18 @@ public class NewestCoMHeightTrajectoryGenerator implements CoMHeightTrajectoryGe
       this.nominalHeightAboveGround.set(nominalHeightAboveGround);
       parentRegistry.addChild(registry);
       
-      DynamicGraphicPosition position0 = new DynamicGraphicPosition("contactFrame0", contactFrameZeroPosition, 0.03, YoAppearance.Purple());
-      DynamicGraphicPosition position1 = new DynamicGraphicPosition("contactFrame1", contactFrameOnePosition, 0.03, YoAppearance.Gold());
-      
-      dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", position0);
-      dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", position1);
-      
-//      dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", contactFrameZero);
-//      dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", contactFrameOne);
+      if (dynamicGraphicObjectsListRegistry != null)
+      {
+         DynamicGraphicPosition position0 = new DynamicGraphicPosition("contactFrame0", contactFrameZeroPosition, 0.03, YoAppearance.Purple());
+         DynamicGraphicPosition position1 = new DynamicGraphicPosition("contactFrame1", contactFrameOnePosition, 0.03, YoAppearance.Gold());
 
+
+         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", position0);
+         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", position1);
+
+         //      dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", contactFrameZero);
+         //      dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", contactFrameOne);
+      }
    }
    
    public void setNominalHeightAboveGround(double nominalHeightAboveGround)
@@ -152,7 +155,7 @@ public class NewestCoMHeightTrajectoryGenerator implements CoMHeightTrajectoryGe
          poseFrame.update();
 //         contactFrameOne.setToReferenceFrame(poseFrame);
 
-         contactFramePosition1 = new FramePoint(poseFrame, 0.0, 0.0, -0.08); //TODO: Horrible hack and magic number
+         contactFramePosition1 = new FramePoint(poseFrame, 0.0, 0.0, -DISTANCE_FROM_SOLE_TO_ANKLE); //TODO: Horrible hack and magic number
          contactFramePosition1.changeFrame(worldFrame);
       }
       if (DEBUG)
