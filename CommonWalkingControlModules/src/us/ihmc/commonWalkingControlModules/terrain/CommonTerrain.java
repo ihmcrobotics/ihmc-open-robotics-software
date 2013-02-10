@@ -109,8 +109,6 @@ public class CommonTerrain
       dynamicGraphicObjectsListRegistry.registerArtifact("Stepping Stones", steppingStonesArtifact);
    }
 
-   public static final double FLAT_HEIGHT = 0.0;
-
    private SteppingStones setUpSteppingStones(ConvexPolygon2d footPolygon, SteppingStonePattern steppingStonePattern, boolean useSteppingStonesGroundModel)
    {
       SteppingStones steppingStones;
@@ -352,8 +350,13 @@ public class CommonTerrain
       GroundProfile groundProfile;
       switch (terrainType)
       {
-         case FLAT :
-            groundProfile = new FlatGroundProfile(FLAT_HEIGHT);
+         case FLAT_Z_ZERO :
+            groundProfile = new FlatGroundProfile(0.0);
+
+            break;
+            
+         case FLAT_Z_NEGATIVE_TWO :
+            groundProfile = new FlatGroundProfile(-2.0);
 
             break;
 
