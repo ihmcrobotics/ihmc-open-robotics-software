@@ -17,6 +17,7 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.FootSpoof;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepUtils;
 import us.ihmc.utilities.math.geometry.FrameOrientation2d;
+import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FramePose2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -190,14 +191,18 @@ public class NewestCoMHeightTrajectoryGeneratorTest
       
       centerOfMassHeightInputData.set(null, null, nextFootstep, contactStates);
       
-      CoMHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator = new NewestCoMHeightTrajectoryGenerator(nominalCoMHeight, registry);
+      CoMHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator = new NewestCoMHeightTrajectoryGenerator(nominalCoMHeight, null, registry);
       centerOfMassHeightTrajectoryGenerator.initialize(null, nextFootstep, contactStates);
       
+      FramePoint centerOfMassHeightPoint = new FramePoint(ReferenceFrame.getWorldFrame());
+
       for (int i = 0; i < coMQueries.length; i++)
       {
          centerOfMassHeightInputData.setCenterOfMassFrame(createCenterOfMassFrame(coMQueries[i]));
          centerOfMassHeightTrajectoryGenerator.solve(coMHeightPartialDerivativesData, centerOfMassHeightInputData);
-         assertEquals(expectedOutputs[i][0], coMHeightPartialDerivativesData.getCoMHeight(), epsilon);
+         
+         coMHeightPartialDerivativesData.getCoMHeight(centerOfMassHeightPoint);
+         assertEquals(expectedOutputs[i][0], centerOfMassHeightPoint.getZ(), epsilon);
          assertEquals(expectedOutputs[i][1], coMHeightPartialDerivativesData.getPartialDzDx(), epsilon);
          assertEquals(expectedOutputs[i][2], coMHeightPartialDerivativesData.getPartialDzDy(), epsilon);
          assertEquals(expectedOutputs[i][3], coMHeightPartialDerivativesData.getPartialD2zDx2(), epsilon);

@@ -5,6 +5,7 @@ import java.util.List;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
 import us.ihmc.robotSide.RobotSide;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
@@ -31,7 +32,7 @@ public class ConstantCenterOfMassHeightTrajectoryGenerator implements CoMHeightT
    
    public void solve(CoMHeightPartialDerivativesData coMHeightPartialDerivativesDataToPack, ContactStatesAndUpcomingFootstepData centerOfMassHeightInputData)
    {
-      coMHeightPartialDerivativesDataToPack.setCoMHeight(desiredCenterOfMassHeight.getDoubleValue());
+      coMHeightPartialDerivativesDataToPack.setCoMHeight(ReferenceFrame.getWorldFrame(), desiredCenterOfMassHeight.getDoubleValue());
       coMHeightPartialDerivativesDataToPack.setPartialD2zDx2(0.0);
       coMHeightPartialDerivativesDataToPack.setPartialD2zDxDy(0.0);
       coMHeightPartialDerivativesDataToPack.setPartialD2zDy2(0.0);

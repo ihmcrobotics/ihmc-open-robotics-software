@@ -20,11 +20,10 @@ public class DRCFlatGroundWalkingTrack
 {
    private final HumanoidRobotSimulation<SDFRobot> drcSimulation;
 
-   public DRCFlatGroundWalkingTrack(DRCRobotModel robotModel, DRCGuiInitialSetup guiInitialSetup, DRCSCSInitialSetup scsInitialSetup, 
-         AutomaticSimulationRunner automaticSimulationRunner, double timePerRecordTick,
+   public DRCFlatGroundWalkingTrack(DRCRobotModel robotModel, RobotInitialSetup<SDFRobot> robotInitialSetup, DRCGuiInitialSetup guiInitialSetup, DRCSCSInitialSetup scsInitialSetup, 
+         boolean useVelocityAndHeadingScript, AutomaticSimulationRunner automaticSimulationRunner, double timePerRecordTick,
          int simulationDataBufferSize, boolean doChestOrientationControl)
    {
-      RobotInitialSetup<SDFRobot> robotInitialSetup = new SquaredUpDRCRobotInitialSetup();
       WalkingControllerParameters drcRobotParameters = new DRCRobotWalkingControllerParameters();
 
 //      scsInitialSetup = new DRCSCSInitialSetup(TerrainType.FLAT);
@@ -44,7 +43,6 @@ public class DRCFlatGroundWalkingTrack
       double minStepWidth = 0.15;
       double maxStepWidth = 0.4;
       double stepPitch = 0.0;
-      boolean useVelocityAndHeadingScript = true;
       FlatGroundWalkingHighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory = new FlatGroundWalkingHighLevelHumanoidControllerFactory(drcRobotParameters,
             inPlaceWidth, maxStepLength, minStepWidth, maxStepWidth, stepPitch, useVelocityAndHeadingScript);
 
@@ -77,8 +75,15 @@ public class DRCFlatGroundWalkingTrack
 
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true);
 
+//      DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(TerrainType.FLAT_Z_NEGATIVE_TWO);
+//      RobotInitialSetup<SDFRobot> robotInitialSetup = new SquaredUpDRCRobotInitialSetup(-2.0);
+
       DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(TerrainType.FLAT_Z_ZERO);
-      new DRCFlatGroundWalkingTrack(DRCRobotModel.getDefaultRobotModel(), guiInitialSetup, scsInitialSetup, automaticSimulationRunner, 0.005, 16000, true);
+      RobotInitialSetup<SDFRobot> robotInitialSetup = new SquaredUpDRCRobotInitialSetup(0.0);
+
+      boolean useVelocityAndHeadingScript = true;
+
+      new DRCFlatGroundWalkingTrack(DRCRobotModel.getDefaultRobotModel(), robotInitialSetup, guiInitialSetup, scsInitialSetup, useVelocityAndHeadingScript, automaticSimulationRunner, 0.005, 16000, true);
    }
 
    

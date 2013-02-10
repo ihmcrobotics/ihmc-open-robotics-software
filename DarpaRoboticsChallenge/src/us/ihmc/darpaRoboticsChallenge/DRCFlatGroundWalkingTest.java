@@ -9,10 +9,14 @@ import org.junit.After;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
+import us.ihmc.darpaRoboticsChallenge.initialSetup.SquaredUpDRCRobotInitialSetup;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.projectM.R2Sim02.initialSetup.RobotInitialSetup;
+import us.ihmc.utilities.ThreadTools;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
@@ -185,7 +189,7 @@ public class DRCFlatGroundWalkingTest
    {
       if (CREATE_MOVIE)
       {
-         BambooTools.createMovieAndDataWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(scs);
+         BambooTools.createMovieAndDataWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(scs, 1);
       }
 
       if (KEEP_SCS_UP)
@@ -204,8 +208,9 @@ public class DRCFlatGroundWalkingTest
       int simulationDataBufferSize = 16000;
       boolean doChestOrientationControl = true;
       
+      RobotInitialSetup<SDFRobot> robotInitialSetup = new SquaredUpDRCRobotInitialSetup(0.0);
       DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(groundProfile);
-      DRCFlatGroundWalkingTrack drcFlatGroundWalkingTrack =  new DRCFlatGroundWalkingTrack(robotModel, guiInitialSetup, scsInitialSetup, automaticSimulationRunner, timePerRecordTick, simulationDataBufferSize, doChestOrientationControl);
+      DRCFlatGroundWalkingTrack drcFlatGroundWalkingTrack =  new DRCFlatGroundWalkingTrack(robotModel, robotInitialSetup, guiInitialSetup, scsInitialSetup, useVelocityAndHeadingScript, automaticSimulationRunner, timePerRecordTick, simulationDataBufferSize, doChestOrientationControl);
       
       SimulationConstructionSet scs = drcFlatGroundWalkingTrack.getSimulationConstructionSet();
       
