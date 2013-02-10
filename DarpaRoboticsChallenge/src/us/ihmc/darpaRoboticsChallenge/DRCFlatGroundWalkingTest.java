@@ -6,7 +6,6 @@ import static org.junit.Assert.fail;
 import java.util.ArrayList;
 
 import org.junit.After;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.SdfLoader.SDFRobot;
@@ -14,9 +13,9 @@ import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.SquaredUpDRCRobotInitialSetup;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
+import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.projectM.R2Sim02.initialSetup.RobotInitialSetup;
-import us.ihmc.utilities.ThreadTools;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
@@ -51,33 +50,46 @@ public class DRCFlatGroundWalkingTest
       }
    }
 
-   @Ignore
+
    @Test
    public void testDRCOverShallowRamp() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
 
       double standingTimeDuration = 1.0;
-      double walkingTimeDuration = 90.0;
+      double maximumWalkTime = 30.0;
       double desiredVelocityValue = 1.0;
       double desiredHeadingValue = 0.0;
 
-      double minCenterOfMassHeight = 0.8;
-      double maxCenterOfMassHeight = 1.5;
-
       boolean useVelocityAndHeadingScript = false;
+      boolean cheatWithGroundHeightAtForFootstep = true;
 
-      double rampXStart = -0.25;
+      double rampSlopeUp = 0.1;
+      double rampSlopeDown = 0.08;
+      
+      double rampXStart0 = 0.5;
+      double rampXLength0 = 2.0;
+      double landingHeight = rampSlopeUp * rampXLength0;
+      double landingLength = 1.0;
+      double rampXLength1 = landingHeight/rampSlopeDown;
+
       double rampYStart = -2.0;
-      double rampXEnd = 10.0;
       double rampYEnd = 6.0;
-      double rampHeight = 0.5;
 
+      double landingStartX = rampXStart0 + rampXLength0;
+      double landingEndX = landingStartX + landingLength;
+      double rampEndX = landingEndX + rampXLength1;
+      
       CombinedTerrainObject combinedTerrainObject = new CombinedTerrainObject("JustARamp");
-      combinedTerrainObject.addRamp(rampXStart, rampYStart, rampXEnd, rampYEnd, rampHeight, YoAppearance.Red());
-      combinedTerrainObject.addBox(rampXStart, rampYStart, rampXEnd, rampYEnd, -0.05, 0.0);
+     
+      AppearanceDefinition appearance = YoAppearance.Green();
+      combinedTerrainObject.addRamp(rampXStart0, rampYStart, landingStartX, rampYEnd, landingHeight, appearance);
+      combinedTerrainObject.addBox(landingStartX, rampYStart, landingEndX, rampYEnd, 0.0, landingHeight, YoAppearance.Gray());
+      combinedTerrainObject.addRamp(rampEndX, rampYStart, landingEndX, rampYEnd, landingHeight, appearance);      
+      
+      combinedTerrainObject.addBox(rampXStart0-2.0, rampYStart, rampEndX+2.0, rampYEnd, -0.05, 0.0);
 
-      SimulationConstructionSet scs = setupScs(combinedTerrainObject, useVelocityAndHeadingScript);
+      SimulationConstructionSet scs = setupScs(combinedTerrainObject, useVelocityAndHeadingScript, cheatWithGroundHeightAtForFootstep);
       scs.setGroundVisible(false);
       scs.addStaticLinkGraphics(combinedTerrainObject.getLinkGraphics());
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
@@ -89,6 +101,7 @@ public class DRCFlatGroundWalkingTest
       }
       
       BooleanYoVariable walk = (BooleanYoVariable) scs.getVariable("walk");
+      DoubleYoVariable q_x = (DoubleYoVariable) scs.getVariable("q_x");
       DoubleYoVariable desiredSpeed = (DoubleYoVariable) scs.getVariable("desiredVelocityX");
       DoubleYoVariable desiredHeading = (DoubleYoVariable) scs.getVariable("desiredHeading");
 //      DoubleYoVariable centerOfMassHeight = (DoubleYoVariable) scs.getVariable("ProcessedSensors.comPositionz");
@@ -100,15 +113,21 @@ public class DRCFlatGroundWalkingTest
       desiredSpeed.set(desiredVelocityValue);
       desiredHeading.set(desiredHeadingValue);
 
+//      ThreadTools.sleepForever();
+      
       double timeIncrement = 1.0;
-      while (scs.getTime() - standingTimeDuration < walkingTimeDuration)
+      boolean done = false;
+      while (!done)
       {
          blockingSimulationRunner.simulateAndBlock(timeIncrement);
-//         double adjustedCoM = centerOfMassHeight.getDoubleValue() - Math.min(leftFootHeight.getDoubleValue(), rightFootHeight.getDoubleValue());
-         if (Math.abs(comError.getDoubleValue()) > 0.01)
+         
+         if (Math.abs(comError.getDoubleValue()) > 0.05)
          {
-            fail("Math.abs(comError.getDoubleValue()");
+            fail("comError = " + Math.abs(comError.getDoubleValue()));
          }
+         
+         if (scs.getTime() > standingTimeDuration + maximumWalkTime) done = true;
+         if (q_x.getDoubleValue() > rampEndX) done = true;
       }
 
       if (checkNothingChanged) checkNothingChanged(nothingChangedVerifier);
@@ -124,14 +143,13 @@ public class DRCFlatGroundWalkingTest
       double standingTimeDuration = 1.0;
       double walkingTimeDuration = 90.0;
       double epsilonHeading = Math.PI / 4.0;
-      double minCenterOfMassHeight = 0.8;
-      double maxCenterOfMassHeight = 1.5;
 
       boolean useVelocityAndHeadingScript = true;
-
+      boolean cheatWithGroundHeightAtForFootstep = true;
+      
       GroundProfile groundProfile = new FlatGroundProfile();
 
-      SimulationConstructionSet scs = setupScs(groundProfile, useVelocityAndHeadingScript);
+      SimulationConstructionSet scs = setupScs(groundProfile, useVelocityAndHeadingScript, cheatWithGroundHeightAtForFootstep);
 
       NothingChangedVerifier nothingChangedVerifier = null;
       if (checkNothingChanged)
@@ -197,8 +215,9 @@ public class DRCFlatGroundWalkingTest
          BambooTools.sleepForever();
       }
    }
+   boolean setupForCheatingUsingGroundHeightAtForFootstepProvider = false;
 
-   private SimulationConstructionSet setupScs(GroundProfile groundProfile, boolean useVelocityAndHeadingScript)
+   private SimulationConstructionSet setupScs(GroundProfile groundProfile, boolean useVelocityAndHeadingScript, boolean cheatWithGroundHeightAtForFootstep)
    {
       AutomaticSimulationRunner automaticSimulationRunner = null;
       DRCGuiInitialSetup guiInitialSetup = createGUIInitialSetup();
@@ -210,7 +229,7 @@ public class DRCFlatGroundWalkingTest
       
       RobotInitialSetup<SDFRobot> robotInitialSetup = new SquaredUpDRCRobotInitialSetup(0.0);
       DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(groundProfile);
-      DRCFlatGroundWalkingTrack drcFlatGroundWalkingTrack =  new DRCFlatGroundWalkingTrack(robotModel, robotInitialSetup, guiInitialSetup, scsInitialSetup, useVelocityAndHeadingScript, automaticSimulationRunner, timePerRecordTick, simulationDataBufferSize, doChestOrientationControl);
+      DRCFlatGroundWalkingTrack drcFlatGroundWalkingTrack =  new DRCFlatGroundWalkingTrack(robotModel, robotInitialSetup, guiInitialSetup, scsInitialSetup, useVelocityAndHeadingScript, automaticSimulationRunner, timePerRecordTick, simulationDataBufferSize, doChestOrientationControl, cheatWithGroundHeightAtForFootstep);
       
       SimulationConstructionSet scs = drcFlatGroundWalkingTrack.getSimulationConstructionSet();
       
