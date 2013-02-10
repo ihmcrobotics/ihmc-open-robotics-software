@@ -101,7 +101,9 @@ public class SuspendedRobotDesiredFootStepCalculator implements DesiredFootstepC
       // Create a foot Step Pose from Position and Orientation
       FramePose footstepPose = new FramePose(footstepPosition, footstepOrientation);
       ContactablePlaneBody contactableBody = contactableBodies.get(swingLegSide);
-      Footstep desiredFootstep = new Footstep(contactableBody.getRigidBody(), footstepPose, contactableBody.getContactPoints());
+      
+      boolean trustHeight = false;
+      Footstep desiredFootstep = new Footstep(contactableBody.getRigidBody(), footstepPose, contactableBody.getContactPoints(), trustHeight);
 
       return desiredFootstep;
    }
