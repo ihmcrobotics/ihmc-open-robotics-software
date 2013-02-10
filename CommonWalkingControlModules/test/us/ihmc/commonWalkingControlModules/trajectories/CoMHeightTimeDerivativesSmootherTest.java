@@ -5,6 +5,8 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.math.geometry.FramePoint;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.Robot;
@@ -13,6 +15,8 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public class CoMHeightTimeDerivativesSmootherTest
 {
+   private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+         
 
    @Test
    public void testConstantHeight()
@@ -28,14 +32,16 @@ public class CoMHeightTimeDerivativesSmootherTest
       double comHeightVelocity = 0.0;
       double comHeightAcceleration = 0.0;
       
-      comHeightDataIn.setComHeight(comHeight);
+      comHeightDataIn.setComHeight(ReferenceFrame.getWorldFrame(), comHeight);
       comHeightDataIn.setComHeightVelocity(comHeightVelocity);
       comHeightDataIn.setComHeightAcceleration(comHeightAcceleration);
       
       smoother.initialize(comHeightDataIn);
       smoother.smooth(comHeightDataOut, comHeightDataIn);
       
-      double comHeightOut = comHeightDataOut.getComHeight();
+      FramePoint comHeightPoint = new FramePoint(ReferenceFrame.getWorldFrame());
+      comHeightDataOut.getComHeight(comHeightPoint);
+      double comHeightOut = comHeightPoint.getZ();
       double comHeightVelocityOut = comHeightDataOut.getComHeightVelocity();
       double comHeightAccelerationOut = comHeightDataOut.getComHeightAcceleration();
       
@@ -71,14 +77,16 @@ public class CoMHeightTimeDerivativesSmootherTest
       double comHeightVelocityIn = 0.0;
       double comHeightAccelerationIn = 0.0;
       
-      comHeightDataIn.setComHeight(comHeightIn);
+      comHeightDataIn.setComHeight(worldFrame, comHeightIn);
       comHeightDataIn.setComHeightVelocity(comHeightVelocityIn);
       comHeightDataIn.setComHeightAcceleration(comHeightAccelerationIn);
       
       smoother.initialize(comHeightDataIn);
       smoother.smooth(comHeightDataOut, comHeightDataIn);
       
-      double comHeightOut = comHeightDataOut.getComHeight();
+      FramePoint comHeightPoint = new FramePoint(ReferenceFrame.getWorldFrame());
+      comHeightDataOut.getComHeight(comHeightPoint);
+      double comHeightOut = comHeightPoint.getZ();
       double comHeightVelocityOut = comHeightDataOut.getComHeightVelocity();
       double comHeightAccelerationOut = comHeightDataOut.getComHeightAcceleration();
       
@@ -88,7 +96,7 @@ public class CoMHeightTimeDerivativesSmootherTest
       
     
       comHeightIn = 1.2;
-      comHeightDataIn.setComHeight(comHeightIn);
+      comHeightDataIn.setComHeight(worldFrame, comHeightIn);
       
       double previousCoMHeightOut = comHeightOut;
       double previousCoMHeightVelocityOut = comHeightVelocityOut;
@@ -104,7 +112,8 @@ public class CoMHeightTimeDerivativesSmootherTest
          testTime.add(dt);
          smoother.smooth(comHeightDataOut, comHeightDataIn);
          
-         double newComHeightOut = comHeightDataOut.getComHeight();
+         comHeightDataOut.getComHeight(comHeightPoint);
+         double newComHeightOut = comHeightPoint.getZ();
          estimatedZDot = (newComHeightOut - previousCoMHeightOut)/dt;
          estimatedZDDot = (estimatedZDot - previousCoMHeightVelocityOut)/dt;
 
@@ -121,7 +130,10 @@ public class CoMHeightTimeDerivativesSmootherTest
          }
       }
       
-      assertEquals(comHeightIn, comHeightDataOut.getComHeight(), 1e-4);
+      comHeightDataOut.getComHeight(comHeightPoint);
+      double finalComHeightOut = comHeightPoint.getZ();
+      
+      assertEquals(comHeightIn, finalComHeightOut, 1e-4);
       assertEquals(comHeightVelocityIn, comHeightDataOut.getComHeightVelocity(), 1e-3);
       assertEquals(comHeightAccelerationIn, comHeightDataOut.getComHeightAcceleration(), 1e-2);
       
@@ -166,7 +178,7 @@ public class CoMHeightTimeDerivativesSmootherTest
       double comHeightVelocityIn = 2.0 * Math.PI * frequency.getDoubleValue() * amplitude.getDoubleValue();
       double comHeightAccelerationIn = 0.0;
       
-      comHeightDataIn.setComHeight(comHeightIn);
+      comHeightDataIn.setComHeight(worldFrame, comHeightIn);
       comHeightDataIn.setComHeightVelocity(comHeightVelocityIn);
       comHeightDataIn.setComHeightAcceleration(comHeightAccelerationIn);
       
@@ -189,7 +201,7 @@ public class CoMHeightTimeDerivativesSmootherTest
          comHeightVelocityIn = twoPIFreq * amplitude.getDoubleValue() * Math.cos(twoPIFreq * testTime.getDoubleValue());
          comHeightAccelerationIn = -twoPIFreq * twoPIFreq * amplitude.getDoubleValue() * Math.sin(twoPIFreq * testTime.getDoubleValue());
          
-         comHeightDataIn.setComHeight(comHeightIn);
+         comHeightDataIn.setComHeight(worldFrame, comHeightIn);
          comHeightDataIn.setComHeightVelocity(comHeightVelocityIn);
          comHeightDataIn.setComHeightAcceleration(comHeightAccelerationIn);
          

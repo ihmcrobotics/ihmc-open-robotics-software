@@ -1,9 +1,12 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
 import us.ihmc.utilities.math.MathTools;
+import us.ihmc.utilities.math.geometry.FramePoint;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 public class CoMHeightPartialDerivativesData
 {
+   private ReferenceFrame frameOfCoMHeight;
    private double comHeight, partialDzDx, partialDzDy, partialD2zDx2, partialD2zDy2, partialD2zDxDy;
 
    public void set(CoMHeightPartialDerivativesData centerOfMassHeightPartialDerivativesData)
@@ -16,13 +19,14 @@ public class CoMHeightPartialDerivativesData
       this.partialD2zDxDy = centerOfMassHeightPartialDerivativesData.partialD2zDxDy;
    }
    
-   public double getCoMHeight()
+   public void getCoMHeight(FramePoint framePointToPack)
    {
-      return comHeight;
+      framePointToPack.set(frameOfCoMHeight, 0.0, 0.0, comHeight);
    }
    
-   public void setCoMHeight(double comHeight)
+   public void setCoMHeight(ReferenceFrame referenceFrame, double comHeight)
    {
+      this.frameOfCoMHeight = referenceFrame;
       this.comHeight = comHeight;
    }
    

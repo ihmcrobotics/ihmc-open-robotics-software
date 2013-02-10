@@ -6,13 +6,20 @@ import javax.vecmath.Point2d;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
+import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.FramePoint;
+import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.LineSegment2d;
+import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicCoordinateSystem;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 
 public class NewestCoMHeightTrajectoryGenerator implements CoMHeightTrajectoryGenerator
 {
@@ -21,12 +28,29 @@ public class NewestCoMHeightTrajectoryGenerator implements CoMHeightTrajectoryGe
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final TwoPointSpline1D spline = new TwoPointSpline1D(registry);
    private final DoubleYoVariable nominalHeightAboveGround = new DoubleYoVariable("nominalHeightAboveGround", registry);
+   private final DoubleYoVariable desiredCoMHeight = new DoubleYoVariable("desiredCoMHeight", registry);
    private LineSegment2d projectionSegment;
 
-   public NewestCoMHeightTrajectoryGenerator(double nominalHeightAboveGround, YoVariableRegistry parentRegistry)
+   private final YoFramePoint contactFrameZeroPosition = new YoFramePoint("contactFrameZeroPosition", worldFrame, registry);
+   private final YoFramePoint contactFrameOnePosition = new YoFramePoint("contactFrameOnePosition", worldFrame, registry);
+   
+//   private final DynamicGraphicCoordinateSystem contactFrameZero = new DynamicGraphicCoordinateSystem("contactFrame0", "", registry, 1.0);
+//   private final DynamicGraphicCoordinateSystem contactFrameOne = new DynamicGraphicCoordinateSystem("contactFrame1", "", registry, 1.0);
+   
+   public NewestCoMHeightTrajectoryGenerator(double nominalHeightAboveGround, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
    {
       this.nominalHeightAboveGround.set(nominalHeightAboveGround);
       parentRegistry.addChild(registry);
+      
+      DynamicGraphicPosition position0 = new DynamicGraphicPosition("contactFrame0", contactFrameZeroPosition, 0.03, YoAppearance.Purple());
+      DynamicGraphicPosition position1 = new DynamicGraphicPosition("contactFrame1", contactFrameOnePosition, 0.03, YoAppearance.Gold());
+      
+      dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", position0);
+      dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", position1);
+      
+//      dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", contactFrameZero);
+//      dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", contactFrameOne);
+
    }
    
    public void setNominalHeightAboveGround(double nominalHeightAboveGround)
@@ -37,6 +61,10 @@ public class NewestCoMHeightTrajectoryGenerator implements CoMHeightTrajectoryGe
    public void initialize(RobotSide supportLeg, Footstep nextFootstep, List<PlaneContactState> contactStates)
    {
       FramePoint[] contactFramePositions = getContactStateCenters(contactStates, nextFootstep);
+      
+      contactFrameZeroPosition.set(contactFramePositions[0]);
+      contactFrameOnePosition.set(contactFramePositions[1]);
+      
       projectionSegment = new LineSegment2d(getPoint2d(contactFramePositions[0]), getPoint2d(contactFramePositions[1]));
       double s0 = 0.0;
       double sF = projectionSegment.length();
@@ -80,12 +108,14 @@ public class NewestCoMHeightTrajectoryGenerator implements CoMHeightTrajectoryGe
       double ddzddy = dzds * ddsddy + ddzdds * dsdy * dsdy;
       double ddzdxdy = ddzdds * dsdx * dsdy + dzds * ddsdxdy;
       
-      coMHeightPartialDerivativesDataToPack.setCoMHeight(z);
+      coMHeightPartialDerivativesDataToPack.setCoMHeight(worldFrame, z);
       coMHeightPartialDerivativesDataToPack.setPartialDzDx(dzdx);
       coMHeightPartialDerivativesDataToPack.setPartialDzDy(dzdy);
       coMHeightPartialDerivativesDataToPack.setPartialD2zDxDy(ddzdxdy);
       coMHeightPartialDerivativesDataToPack.setPartialD2zDx2(ddzddx);
       coMHeightPartialDerivativesDataToPack.setPartialD2zDy2(ddzddy);
+      
+      desiredCoMHeight.set(z);
    }
 
    private double[] getPartialDerivativesWithRespectToS(LineSegment2d segment)
@@ -98,17 +128,32 @@ public class NewestCoMHeightTrajectoryGenerator implements CoMHeightTrajectoryGe
 
    private FramePoint[] getContactStateCenters(List<PlaneContactState> contactStates, Footstep nextFootstep)
    {
-      FramePoint contactFramePosition0 = new FramePoint(contactStates.get(0).getBodyFrame());
+      ReferenceFrame bodyFrame0 = contactStates.get(0).getBodyFrame();
+//      contactFrameZero.setToReferenceFrame(bodyFrame0);
+      
+      FramePoint contactFramePosition0 = new FramePoint(bodyFrame0);
       contactFramePosition0.changeFrame(worldFrame);
       FramePoint contactFramePosition1;
       if (nextFootstep == null)
       {
-         contactFramePosition1 = new FramePoint(contactStates.get(1).getBodyFrame());
+         if (contactStates.size() != 2) throw new RuntimeException("contactStates.size() != 2");
+         ReferenceFrame bodyFrame1 = contactStates.get(1).getBodyFrame();
+//         contactFrameOne.setToReferenceFrame(bodyFrame1);
+
+         contactFramePosition1 = new FramePoint(bodyFrame1);
          contactFramePosition1.changeFrame(worldFrame);
       }
       else
       {
-         contactFramePosition1 = nextFootstep.getPositionInFrame(worldFrame);
+         //TODO: Garbage
+         FramePose contactPointPose = nextFootstep.getPose();
+         PoseReferenceFrame poseFrame = new PoseReferenceFrame("Temp", contactPointPose.getReferenceFrame());
+         poseFrame.updatePose(contactPointPose);
+         poseFrame.update();
+//         contactFrameOne.setToReferenceFrame(poseFrame);
+
+         contactFramePosition1 = new FramePoint(poseFrame, 0.0, 0.0, -0.08); //TODO: Horrible hack and magic number
+         contactFramePosition1.changeFrame(worldFrame);
       }
       if (DEBUG)
       {

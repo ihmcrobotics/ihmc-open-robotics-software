@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
+import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -9,6 +10,7 @@ public class CoMHeightTimeDerivativesCalculator
    private final FramePoint2d comXYPosition = new FramePoint2d(ReferenceFrame.getWorldFrame());
    private final FrameVector2d comXYVelocity = new FrameVector2d(ReferenceFrame.getWorldFrame());
    private final FrameVector2d comXYAcceleration = new FrameVector2d(ReferenceFrame.getWorldFrame());
+   private final FramePoint centerOfMassHeightPoint = new FramePoint(ReferenceFrame.getWorldFrame());
 
    public void computeCoMHeightTimeDerivatives(CoMHeightTimeDerivativesData comHeightDataToPack, CoMXYTimeDerivativesData comXYTimeDerivatives, CoMHeightPartialDerivativesData comPartialDerivatives)
    {
@@ -16,7 +18,7 @@ public class CoMHeightTimeDerivativesCalculator
       comXYTimeDerivatives.getCoMXYVelocity(comXYVelocity);
       comXYTimeDerivatives.getCoMXYAcceleration(comXYAcceleration);
       
-      double comHeight = comPartialDerivatives.getCoMHeight();
+      comPartialDerivatives.getCoMHeight(centerOfMassHeightPoint);
       double dzDx = comPartialDerivatives.getPartialDzDx();
       double dzDy = comPartialDerivatives.getPartialDzDy();
       double d2zDx2 = comPartialDerivatives.getPartialD2zDx2();
@@ -32,7 +34,7 @@ public class CoMHeightTimeDerivativesCalculator
       double comHeightVelocity = dzDx * xDot + dzDy * yDot;
       double comHeightAcceleration = d2zDx2 * xDot * xDot + dzDx * xDDot + d2zDy2 * yDot * yDot + dzDy * yDDot;
       
-      comHeightDataToPack.setComHeight(comHeight);
+      comHeightDataToPack.setComHeight(centerOfMassHeightPoint.getReferenceFrame(), centerOfMassHeightPoint.getZ());
       comHeightDataToPack.setComHeightVelocity(comHeightVelocity);
       comHeightDataToPack.setComHeightAcceleration(comHeightAcceleration);
    }

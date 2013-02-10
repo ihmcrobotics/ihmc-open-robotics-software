@@ -164,7 +164,7 @@ public class FlatThenPolynomialCoMHeightTrajectoryGenerator implements CoMHeight
    {
       compute();
       
-      coMHeightPartialDerivativesDataToPack.setCoMHeight(desiredComHeightInWorld.getDoubleValue());
+      coMHeightPartialDerivativesDataToPack.setCoMHeight(ReferenceFrame.getWorldFrame(), desiredComHeightInWorld.getDoubleValue());
       coMHeightPartialDerivativesDataToPack.setPartialDzDx(desiredComHeightSlope.getDoubleValue());
       coMHeightPartialDerivativesDataToPack.setPartialDzDy(0.0);
       coMHeightPartialDerivativesDataToPack.setPartialD2zDx2(desiredComHeightSecondDerivative.getDoubleValue());

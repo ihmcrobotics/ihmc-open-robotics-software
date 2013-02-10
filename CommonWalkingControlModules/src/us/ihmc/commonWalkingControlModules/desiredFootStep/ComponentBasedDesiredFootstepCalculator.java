@@ -34,6 +34,8 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractAdjustableD
    private final DoubleYoVariable velocityMagnitudeInHeading = new DoubleYoVariable("velocityMagnitudeInHeading", registry);
    private final DoubleYoVariable velocityMagnitudeToLeftOfHeading = new DoubleYoVariable("velocityMagnitudeToLeftOfHeading", registry);
 
+   private final DoubleYoVariable stepZAboveAnkle = new DoubleYoVariable("stepZAboveAnkle", registry);
+   
    private SideDependentList<? extends ReferenceFrame> ankleZUpFrames;
    private final SideDependentList<? extends ContactablePlaneBody> bipedFeet;
 
@@ -129,10 +131,10 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractAdjustableD
            Matrix3d footToWorldRotation)
    {
       desiredOffsetFromAnkle.changeFrame(supportAnkleZUpFrame);
-      FramePoint footstepPosition = new FramePoint(supportAnkleZUpFrame, desiredOffsetFromAnkle.getX(), desiredOffsetFromAnkle.getY(), 0.0);
+      FramePoint footstepPosition = new FramePoint(supportAnkleZUpFrame, desiredOffsetFromAnkle.getX(), desiredOffsetFromAnkle.getY(), stepZAboveAnkle.getDoubleValue());
       footstepPosition.changeFrame(ReferenceFrame.getWorldFrame());
-      double minZ = DesiredFootstepCalculatorTools.computeMinZWithRespectToAnkleInWorldFrame(footToWorldRotation, bipedFeet.get(swingLegSide));
-      footstepPosition.setZ(-minZ);
+//      double minZ = DesiredFootstepCalculatorTools.computeMinZWithRespectToAnkleInWorldFrame(footToWorldRotation, bipedFeet.get(swingLegSide));
+//      footstepPosition.setZ(-minZ);
 
       return footstepPosition;
    }

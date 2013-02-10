@@ -7,6 +7,8 @@ import us.ihmc.utilities.linearDynamicSystems.EigenvalueDecomposer;
 import us.ihmc.utilities.linearDynamicSystems.SingleRealMode;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.dataStructures.ComplexNumber;
+import us.ihmc.utilities.math.geometry.FramePoint;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import com.mathworks.jama.Matrix;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
@@ -19,6 +21,8 @@ public class CoMHeightTimeDerivativesSmoother
 //   private final double maximumAcceleration = 10.0;
    
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   
+   private final FramePoint centerOfMassHeightPoint = new FramePoint(ReferenceFrame.getWorldFrame());
    
    private final DoubleYoVariable inputComHeight = new DoubleYoVariable("inputComHeight", registry);
    private final DoubleYoVariable inputComHeightVelocity = new DoubleYoVariable("inputComHeightVelocity", registry);
@@ -111,9 +115,12 @@ public class CoMHeightTimeDerivativesSmoother
    }
    
 
+   
    public void smooth(CoMHeightTimeDerivativesData heightZDataOutputToPack, CoMHeightTimeDerivativesData heightZDataInput)
    {
-      double heightIn = heightZDataInput.getComHeight();
+      heightZDataInput.getComHeight(centerOfMassHeightPoint);
+      double heightIn = centerOfMassHeightPoint.getZ();
+            
       double heightVelocityIn = heightZDataInput.getComHeightVelocity();
       double heightAccelerationIn = heightZDataInput.getComHeightAcceleration();
       
@@ -145,8 +152,7 @@ public class CoMHeightTimeDerivativesSmoother
       smoothComHeightVelocity.add(smoothComHeightAcceleration.getDoubleValue() * dt);
       smoothComHeight.add(smoothComHeightVelocity.getDoubleValue() * dt);
       
-      
-      heightZDataOutputToPack.setComHeight(smoothComHeight.getDoubleValue());
+      heightZDataOutputToPack.setComHeight(centerOfMassHeightPoint.getReferenceFrame(), smoothComHeight.getDoubleValue());
       heightZDataOutputToPack.setComHeightVelocity(smoothComHeightVelocity.getDoubleValue());
       heightZDataOutputToPack.setComHeightAcceleration(smoothComHeightAcceleration.getDoubleValue());
       
@@ -154,7 +160,9 @@ public class CoMHeightTimeDerivativesSmoother
 
    public void initialize(CoMHeightTimeDerivativesData comHeightDataIn)
    {
-      smoothComHeight.set(comHeightDataIn.getComHeight());
+      comHeightDataIn.getComHeight(centerOfMassHeightPoint);
+
+      smoothComHeight.set(centerOfMassHeightPoint.getZ());
       smoothComHeightVelocity.set(comHeightDataIn.getComHeightVelocity());
       smoothComHeightAcceleration.set(comHeightDataIn.getComHeightAcceleration());
       

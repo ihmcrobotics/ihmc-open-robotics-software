@@ -1,16 +1,21 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
+import us.ihmc.utilities.math.geometry.FramePoint;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
+
 public class CoMHeightTimeDerivativesData
 {
+   private ReferenceFrame frameOfCenterOfMassHeight;
    private double comHeight, comHeightVelocity, comHeightAcceleration;
 
-   public double getComHeight()
+   public void getComHeight(FramePoint framePointToPack)
    {
-      return comHeight;
+      framePointToPack.set(frameOfCenterOfMassHeight, 0.0, 0.0, comHeight);
    }
 
-   public void setComHeight(double comHeight)
+   public void setComHeight(ReferenceFrame referenceFrame, double comHeight)
    {
+      this.frameOfCenterOfMassHeight = referenceFrame;
       this.comHeight = comHeight;
    }
 
@@ -37,6 +42,7 @@ public class CoMHeightTimeDerivativesData
 
    public void set(CoMHeightTimeDerivativesData heightZData)
    {
+      this.frameOfCenterOfMassHeight = heightZData.frameOfCenterOfMassHeight;
       this.comHeight = heightZData.comHeight;
       this.comHeightVelocity = heightZData.comHeightVelocity;
       this.comHeightAcceleration = heightZData.comHeightAcceleration;   

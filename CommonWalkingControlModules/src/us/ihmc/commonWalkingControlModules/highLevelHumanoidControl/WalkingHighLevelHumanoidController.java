@@ -502,8 +502,10 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
          }
 
          if (nextFootstep == null)
+         {
             nextFootstep = footstepProvider.poll();
-
+         }
+         
          doFootcontrol();
       }
 
@@ -614,7 +616,6 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
          if (DEBUG)
             System.out.println("WalkingHighLevelHumanoidController: enteringSingleSupportState");
          RobotSide supportSide = swingSide.getOppositeSide();
-         initializeTrajectory(swingSide, null);
 
          setSupportLeg(supportSide);
 
@@ -633,6 +634,8 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
          updateBipedSupportPolygons(bipedSupportPolygons);
 
          centerOfMassHeightTrajectoryGenerator.initialize(getSupportLeg(), nextFootstep, getContactStatesList());
+         
+         initializeTrajectory(swingSide, null);
       }
 
       @Override
@@ -1040,21 +1043,11 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       coMHeightTimeDerivativesCalculator.computeCoMHeightTimeDerivatives(comHeightDataBeforeSmoothing, comXYTimeDerivatives,
               coMHeightPartialDerivatives);
 
-//      double zDesired = coMHeightPartialDerivatives.getCoMHeight();
-//      double dzdx = coMHeightPartialDerivatives.getPartialDzDx();
-//      double dzdy = coMHeightPartialDerivatives.getPartialDzDy();
-//      double ddzddx = coMHeightPartialDerivatives.getPartialD2zDx2();
-//      double ddzddy = coMHeightPartialDerivatives.getPartialD2zDy2();
-//      double ddzdxdy = coMHeightPartialDerivatives.getPartialD2zDxDy();
+      FramePoint centerOfMassHeightPoint = new FramePoint(ReferenceFrame.getWorldFrame());
 
-//      FrameVector2d dzdxDesired = new FrameVector2d(worldFrame, dzdx, dzdy);
-//      FrameVector2d d2zdx2Desired = new FrameVector2d(worldFrame, ddzddx, ddzddy);
-
-//      dzdxDesired.changeFrame(frame);
-//      d2zdx2Desired.changeFrame(frame);
-//      desiredICPVelocity.changeFrame(frame);
- 
-      double zDesired = comHeightDataBeforeSmoothing.getComHeight();
+      comHeightDataBeforeSmoothing.getComHeight(centerOfMassHeightPoint);
+      double zDesired = centerOfMassHeightPoint.getZ();
+      
       double zdDesired = comHeightDataBeforeSmoothing.getComHeightVelocity();
       double zddFeedForward = comHeightDataBeforeSmoothing.getComHeightAcceleration();
       
