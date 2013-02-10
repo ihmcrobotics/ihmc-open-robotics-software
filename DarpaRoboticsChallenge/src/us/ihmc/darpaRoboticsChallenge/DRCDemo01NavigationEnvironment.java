@@ -99,7 +99,7 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       AppearanceDefinition color = YoAppearance.DarkGray();
 
       createCoursePath(8, 0);
-      float rampHeight = 0.15f;
+      float rampHeight = 0.3f;
       setUpRamp(5.0f, 0.0f, 2.0f, 3.0f, rampHeight, color);
       setUpWall(7.0f, 0.0f, 2.0f, 1.0f, rampHeight, 0, color);
       setUpWall(8.0f, 0.5f, 1.0f, 1.0f, rampHeight, 0, color);

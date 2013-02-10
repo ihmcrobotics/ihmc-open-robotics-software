@@ -503,7 +503,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 
          if (nextFootstep == null)
          {
-            nextFootstep = footstepProvider.poll();
+            nextFootstep = footstepProvider.poll();  
          }
          
          doFootcontrol();
@@ -613,6 +613,20 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       @Override
       public void doTransitionIntoAction()
       {
+         if (!nextFootstep.getTrustHeight())
+         {
+            //TODO: This might be better placed somewhere else.
+            //TODO: Do more than just step at the previous ankle height.
+            // Probably do something a little smarter like take a cautious high step.
+            // Or we should have a mode that the user can set on how cautious to step.
+            
+            FramePoint supportAnklePosition = new FramePoint(referenceFrames.getAnkleZUpFrame(swingSide.getOppositeSide()));
+            supportAnklePosition.changeFrame(nextFootstep.getReferenceFrame());
+            double newHeight = supportAnklePosition.getZ();
+            
+            nextFootstep = Footstep.copyButChangeHeight(nextFootstep, newHeight);
+         }
+
          if (DEBUG)
             System.out.println("WalkingHighLevelHumanoidController: enteringSingleSupportState");
          RobotSide supportSide = swingSide.getOppositeSide();
