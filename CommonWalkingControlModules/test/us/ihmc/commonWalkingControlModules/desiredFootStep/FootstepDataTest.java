@@ -43,7 +43,8 @@ public class FootstepDataTest
          expectedContactPoints.add(framePoint);
       }
 
-      Footstep footstep = new Footstep(endEffector, pose, expectedContactPoints);
+      boolean trustHeight = true;
+      Footstep footstep = new Footstep(endEffector, pose, expectedContactPoints, trustHeight);
       FootstepData footstepData = new FootstepData(footstep);
       JUnitTools.assertSerializable(footstepData);
    }
@@ -299,7 +300,8 @@ public class FootstepDataTest
             expectedContactPoints.add(framePoint);
          }
 
-         Footstep footstep = new Footstep(endEffector, pose, expectedContactPoints);
+         boolean trustHeight = true;
+         Footstep footstep = new Footstep(endEffector, pose, expectedContactPoints, trustHeight);
          footsteps.add(footstep);
       }
 
@@ -370,7 +372,8 @@ public class FootstepDataTest
             expectedContactPoints.add(framePoint);
          }
 
-         Footstep footstep = new Footstep(endEffector, pose, expectedContactPoints);
+         boolean trustHeight = true;
+         Footstep footstep = new Footstep(endEffector, pose, expectedContactPoints, trustHeight);
          reconstructedFootsteps.add(footstep);
       }
 
@@ -403,7 +406,8 @@ public class FootstepDataTest
                expectedContactPoints.add(framePoint);
             }
 
-            Footstep footstep = new Footstep(endEffector, pose, expectedContactPoints);
+            boolean trustHeight = true;
+            Footstep footstep = new Footstep(endEffector, pose, expectedContactPoints, trustHeight);
             reconstructedFootstepPath.add(footstep);
          }
       }

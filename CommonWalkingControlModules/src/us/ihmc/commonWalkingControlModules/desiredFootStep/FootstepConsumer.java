@@ -46,7 +46,9 @@ public class FootstepConsumer implements FootstepProvider, StreamingDataConsumer
          FramePoint framePoint = new FramePoint(contactableBody.getBodyFrame(), point3d);
          expectedContactPoints.add(framePoint);
       }
-      Footstep footstep = new Footstep(contactableBody.getRigidBody(), new FramePose(ReferenceFrame.getWorldFrame(), footstepData.getLocation(), footstepData.getOrientation()), expectedContactPoints);
+      
+      boolean trustHeight = footstepData.getTrustHeight();
+      Footstep footstep = new Footstep(contactableBody.getRigidBody(), new FramePose(ReferenceFrame.getWorldFrame(), footstepData.getLocation(), footstepData.getOrientation()), expectedContactPoints, trustHeight);
       System.out.println("footstep = " + footstep);
       footstepQueue.add(footstep);
    }

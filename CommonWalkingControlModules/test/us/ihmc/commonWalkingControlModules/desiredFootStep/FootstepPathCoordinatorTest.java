@@ -219,7 +219,8 @@ public class FootstepPathCoordinatorTest
             expectedContactPoints.add(framePoint);
          }
 
-         Footstep footstep = new Footstep(endEffector, pose, expectedContactPoints);
+         boolean trustHeight = true;
+         Footstep footstep = new Footstep(endEffector, pose, expectedContactPoints, trustHeight);
          footsteps.add(footstep);
       }
       return footsteps;

@@ -286,7 +286,8 @@ public class DesiredFootstepVisualizer
       FramePose pose = new FramePose(ReferenceFrame.getWorldFrame());
       List<FramePoint> expectedContactPoints = bipedFeet.get(initialStanceSide).getContactPoints();
       
-      Footstep initialStanceFootstep = new Footstep(endEffector , pose, expectedContactPoints);
+      boolean trustHeight = false;
+      Footstep initialStanceFootstep = new Footstep(endEffector , pose, expectedContactPoints, trustHeight);
       footstepGenerator.setStepLength(0.2);
       footstepGenerator.setStepWidth(0.1);
       footstepGenerator.setStanceStart(initialStanceFootstep);

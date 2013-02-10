@@ -63,7 +63,9 @@ public class PushRecoveryDesiredFootstepCalculator implements DesiredFootstepCal
       RobotSide swingSide = supportLegSide.getOppositeSide();
       FramePose footstepPose = new FramePose(stepPositions.get(swingSide).getFramePointCopy(), stepOrientations.get(swingSide).getFrameOrientationCopy());
       ContactablePlaneBody foot = contactableBodies.get(swingSide);
-      Footstep desiredFootstep = new Footstep(foot.getRigidBody(), footstepPose, foot.getContactPoints());
+      
+      boolean trustHeight = false;
+      Footstep desiredFootstep = new Footstep(foot.getRigidBody(), footstepPose, foot.getContactPoints(), trustHeight);
       return desiredFootstep;
    }
 
