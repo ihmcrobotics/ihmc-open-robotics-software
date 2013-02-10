@@ -19,6 +19,7 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RotationFunctions;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.GroundProfile;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public class ComponentBasedDesiredFootstepCalculator extends AbstractAdjustableDesiredFootstepCalculator
@@ -34,7 +35,9 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractAdjustableD
    private final DoubleYoVariable velocityMagnitudeInHeading = new DoubleYoVariable("velocityMagnitudeInHeading", registry);
    private final DoubleYoVariable velocityMagnitudeToLeftOfHeading = new DoubleYoVariable("velocityMagnitudeToLeftOfHeading", registry);
 
+   //TODO: Fix up these hacks. Make it consistent whether footsteps are where the ankle should go or the sole.
    private final DoubleYoVariable stepZAboveAnkle = new DoubleYoVariable("stepZAboveAnkle", registry);
+   private final DoubleYoVariable ankleHeightAboveGround = new DoubleYoVariable("ankleHeightAboveGround", registry);
    
    private SideDependentList<? extends ReferenceFrame> ankleZUpFrames;
    private final SideDependentList<? extends ContactablePlaneBody> bipedFeet;
@@ -42,6 +45,8 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractAdjustableD
    private final DesiredHeadingControlModule desiredHeadingControlModule;
    private final DesiredVelocityControlModule desiredVelocityControlModule;
 
+   private GroundProfile groundProfile;
+   
    public ComponentBasedDesiredFootstepCalculator(SideDependentList<? extends ReferenceFrame> ankleZUpFrames, SideDependentList<? extends ContactablePlaneBody> bipedFeet,
            DesiredHeadingControlModule desiredHeadingControlModule, DesiredVelocityControlModule desiredVelocityControlModule,
            YoVariableRegistry parentRegistry)
@@ -55,6 +60,12 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractAdjustableD
       this.desiredVelocityControlModule = desiredVelocityControlModule;
    }
 
+   public void setGroundProfileAndAnkleHeightAboveGround(GroundProfile groundProfile, double ankleHeightAboveGround)
+   {
+      this.groundProfile = groundProfile;
+      this.ankleHeightAboveGround.set(ankleHeightAboveGround);
+   }
+   
    public SideDependentList<? extends ReferenceFrame> getAnkleZUpFrames()
    {
       return ankleZUpFrames;
@@ -133,6 +144,11 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractAdjustableD
       desiredOffsetFromAnkle.changeFrame(supportAnkleZUpFrame);
       FramePoint footstepPosition = new FramePoint(supportAnkleZUpFrame, desiredOffsetFromAnkle.getX(), desiredOffsetFromAnkle.getY(), stepZAboveAnkle.getDoubleValue());
       footstepPosition.changeFrame(ReferenceFrame.getWorldFrame());
+      
+      if (groundProfile != null)
+      {
+         footstepPosition.setZ(groundProfile.heightAt(footstepPosition.getX(), footstepPosition.getY(), footstepPosition.getZ()) + ankleHeightAboveGround.getDoubleValue());
+      }
 //      double minZ = DesiredFootstepCalculatorTools.computeMinZWithRespectToAnkleInWorldFrame(footToWorldRotation, bipedFeet.get(swingLegSide));
 //      footstepPosition.setZ(-minZ);
 

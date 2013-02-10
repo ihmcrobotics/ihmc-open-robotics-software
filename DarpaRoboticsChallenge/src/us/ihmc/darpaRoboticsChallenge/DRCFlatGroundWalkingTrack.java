@@ -6,6 +6,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controllers.ControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.FlatGroundWalkingHighLevelHumanoidControllerFactory;
 import us.ihmc.commonWalkingControlModules.terrain.TerrainType;
+import us.ihmc.commonWalkingControlModules.trajectories.NewestCoMHeightTrajectoryGenerator;
 import us.ihmc.darpaRoboticsChallenge.controllers.DRCRobotMomentumBasedControllerFactory;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.SquaredUpDRCRobotInitialSetup;
@@ -22,7 +23,7 @@ public class DRCFlatGroundWalkingTrack
 
    public DRCFlatGroundWalkingTrack(DRCRobotModel robotModel, RobotInitialSetup<SDFRobot> robotInitialSetup, DRCGuiInitialSetup guiInitialSetup, DRCSCSInitialSetup scsInitialSetup, 
          boolean useVelocityAndHeadingScript, AutomaticSimulationRunner automaticSimulationRunner, double timePerRecordTick,
-         int simulationDataBufferSize, boolean doChestOrientationControl)
+         int simulationDataBufferSize, boolean doChestOrientationControl, boolean cheatWithGroundHeightAtForFootstep)
    {
       WalkingControllerParameters drcRobotParameters = new DRCRobotWalkingControllerParameters();
 
@@ -46,6 +47,13 @@ public class DRCFlatGroundWalkingTrack
       FlatGroundWalkingHighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory = new FlatGroundWalkingHighLevelHumanoidControllerFactory(drcRobotParameters,
             inPlaceWidth, maxStepLength, minStepWidth, maxStepWidth, stepPitch, useVelocityAndHeadingScript);
 
+      if (cheatWithGroundHeightAtForFootstep)
+      {
+         //TODO: Clean up the stepping stuff. Make it consistent whether it is the location of the ankle or the sole.
+         double ankleHeightAboveGround = NewestCoMHeightTrajectoryGenerator.DISTANCE_FROM_SOLE_TO_ANKLE;
+         highLevelHumanoidControllerFactory.setupForCheatingUsingGroundHeightAtForFootstepProvider(scsInitialSetup.getGroundProfile(), ankleHeightAboveGround);
+      }
+      
       DRCRobotJointMap jointMap = new DRCRobotJointMap(DRCRobotModel.getDefaultRobotModel());
       ControllerFactory controllerFactory = new DRCRobotMomentumBasedControllerFactory(highLevelHumanoidControllerFactory, false);
       drcSimulation = DRCSimulationFactory.createSimulation(jointMap, controllerFactory, null, robotInitialSetup, scsInitialSetup, guiInitialSetup);
@@ -82,8 +90,13 @@ public class DRCFlatGroundWalkingTrack
       RobotInitialSetup<SDFRobot> robotInitialSetup = new SquaredUpDRCRobotInitialSetup(0.0);
 
       boolean useVelocityAndHeadingScript = true;
-
-      new DRCFlatGroundWalkingTrack(DRCRobotModel.getDefaultRobotModel(), robotInitialSetup, guiInitialSetup, scsInitialSetup, useVelocityAndHeadingScript, automaticSimulationRunner, 0.005, 16000, true);
+      boolean doChestOrientationControl = true;
+      boolean cheatWithGroundHeightAtForFootstep = false;
+      
+      new DRCFlatGroundWalkingTrack(DRCRobotModel.getDefaultRobotModel(), 
+            robotInitialSetup, guiInitialSetup, scsInitialSetup, 
+            useVelocityAndHeadingScript, automaticSimulationRunner, 0.005, 16000, 
+            doChestOrientationControl, cheatWithGroundHeightAtForFootstep);
    }
 
    
