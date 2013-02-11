@@ -247,7 +247,7 @@ public class FlatThenPolynomialCoMHeightTrajectoryGenerator implements CoMHeight
    {
       FramePose footstepPose = footstep.getPose();
       Transform3D desiredFootToDesiredHeading = new Transform3D();
-      footstepPose.getTransform3D(desiredFootToDesiredHeading);
+      footstepPose.getTransformFromPoseToFrame(desiredFootToDesiredHeading);
 
       List<FramePoint> footPoints = bipedFeet.get(swingSide).getContactPoints();
       double maxX = Double.NEGATIVE_INFINITY;

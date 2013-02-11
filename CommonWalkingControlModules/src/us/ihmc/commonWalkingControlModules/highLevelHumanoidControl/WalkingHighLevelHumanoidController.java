@@ -781,7 +781,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       footstepPose.changeFrame(frame);
 
       Transform3D footstepTransform = new Transform3D();
-      footstepPose.getTransform3D(footstepTransform);
+      footstepPose.getTransformFromPoseToFrame(footstepTransform);
 
       FramePoint2d centroid2d = footPolygonInSoleFrame.getCentroidCopy();
       FramePoint centroid = centroid2d.toFramePoint();

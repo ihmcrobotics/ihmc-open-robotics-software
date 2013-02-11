@@ -21,9 +21,11 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepValidityMetri
 import us.ihmc.commonWalkingControlModules.desiredFootStep.SemiCircularStepValidityMetric;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
+import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotParameters;
 import us.ihmc.darpaRoboticsChallenge.userInterface.DRCOperatorUserInterface;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
@@ -38,14 +40,17 @@ import com.yobotics.simulationconstructionset.Robot;
 
 public class FootstepGeneratorTest
 {
+   private static final double eps = 1e-7;
    private final static boolean VISUALIZE = false;
    private final static boolean SIDESTEP = false;
+   private final static boolean DEBUG_S_PARAM = false;
    private final static boolean DEBUG = false;
    public static final ReferenceFrame WORLD_FRAME = ReferenceFrames.getWorldFrame();
    List<Footstep> footSteps = new ArrayList<Footstep>();
    FullRobotModel fullRobotModel;
    ReferenceFrames referenceFrames;
    SideDependentList<ContactablePlaneBody> bipedFeet;
+
 
 
    @Test
@@ -74,18 +79,19 @@ public class FootstepGeneratorTest
       setupRobotParameters();
       OverheadPath pathToDestination = new TurnThenStraightOverheadPath(new FramePose2d(WORLD_FRAME),
                                           new FramePoint2d(WORLD_FRAME, destination.x, destination.y), SIDESTEP ? Math.PI / 2 : 0.0);
-      if(DEBUG)
-         System.out.println("FootstepGeneratorTest: startPose="+pathToDestination.getPoseAtS(0.0).toString());
-      if(DEBUG)
-         System.out.println("FootstepGeneratorTest: start++Pose="+pathToDestination.getPoseAtS(0.25).toString());
-      if(DEBUG)
-         System.out.println("FootstepGeneratorTest: intPose="+pathToDestination.getPoseAtS(0.5).toString());
-      if(DEBUG)
-         System.out.println("FootstepGeneratorTest: int++Pose="+pathToDestination.getPoseAtS(0.75).toString());
-      if(DEBUG)
-         System.out.println("FootstepGeneratorTest: endPose="+pathToDestination.getPoseAtS(1.0).toString());
+      if (DEBUG_S_PARAM)
+         System.out.println("FootstepGeneratorTest: startPose=" + pathToDestination.getPoseAtS(0.0).toString());
+      if (DEBUG_S_PARAM)
+         System.out.println("FootstepGeneratorTest: start++Pose=" + pathToDestination.getPoseAtS(0.25).toString());
+      if (DEBUG_S_PARAM)
+         System.out.println("FootstepGeneratorTest: intPose=" + pathToDestination.getPoseAtS(0.5).toString());
+      if (DEBUG_S_PARAM)
+         System.out.println("FootstepGeneratorTest: int++Pose=" + pathToDestination.getPoseAtS(0.75).toString());
+      if (DEBUG_S_PARAM)
+         System.out.println("FootstepGeneratorTest: endPose=" + pathToDestination.getPoseAtS(1.0).toString());
       generateFootstepsUsingPath(pathToDestination);
       FootstepValidityMetric footstepValidityMetric = new SemiCircularStepValidityMetric(fullRobotModel.getFoot(RobotSide.LEFT), 0.08, 0.8, 0.8);
+      assertAllStepsLevelAndZeroHeight();
       assertAllStepsValid(footstepValidityMetric);
       assertLastStepIsPointingCorrectly(footSteps.get(footSteps.size() - 1), destination);
       if (VISUALIZE)
@@ -103,7 +109,8 @@ public class FootstepGeneratorTest
       footstepGenerator.setStepWidth(0.2);
       Footstep swingStart = FootstepUtils.getCurrentFootstep(RobotSide.LEFT, referenceFrames, bipedFeet);
       Footstep stanceStart = FootstepUtils.getCurrentFootstep(RobotSide.RIGHT, referenceFrames, bipedFeet);
-//      footstepGenerator.setSwingStart(swingStart);
+
+//    footstepGenerator.setSwingStart(swingStart);
       footstepGenerator.setStanceStart(stanceStart);
       footSteps = footstepGenerator.generateDesiredFootstepList();
    }
@@ -134,6 +141,14 @@ public class FootstepGeneratorTest
       }
    }
 
+   private void assertAllStepsLevelAndZeroHeight()
+   {
+      for (Footstep footstep : footSteps)
+      {
+         assertEquals(DRCRobotParameters.DRC_ROBOT_ANKLE_HEIGHT, footstep.getPose().getZ(), eps);
+      }
+   }
+
    private ArrayList<Footstep> prependStanceToFootstepQueue()
    {
       SideDependentList<Footstep> currentFootLocations = new SideDependentList<Footstep>();
@@ -160,6 +175,7 @@ public class FootstepGeneratorTest
       fullRobotModel = jaxbSDFLoader.getFullRobotModel();
       referenceFrames = jaxbSDFLoader.getReferenceFrames();
       bipedFeet = DRCOperatorUserInterface.setupBipedFeet(referenceFrames, fullRobotModel);
+
    }
 
 

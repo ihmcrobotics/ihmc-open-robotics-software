@@ -70,6 +70,6 @@ public class DRCConfigParameters
 
    public static final float LDIAR_SCAN_MIN_PITCH = -0.1f;
 
-   public static final double GRID_RESOLUTION = 0.01;//centimeter resolution
+   public static final double GRID_RESOLUTION = 0.05;// 5 centimeter resolution
 
 }
