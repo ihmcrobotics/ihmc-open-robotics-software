@@ -22,6 +22,7 @@ import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.util.LinearStickSlipGroundContactModel;
 import com.yobotics.simulationconstructionset.util.environments.ContactableSelectableBoxRobot;
+import com.yobotics.simulationconstructionset.util.environments.ContactableToroidRobot;
 import com.yobotics.simulationconstructionset.util.environments.SelectableObject;
 import com.yobotics.simulationconstructionset.util.environments.SelectableObjectListener;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
@@ -50,7 +51,7 @@ public class DRCDemoEnvironmentSimpleSteeringWheelContact implements CommonAvata
       Transform3D pinJointTransformFromWorld = new Transform3D(pinJointRotation, pinJointLocation, 1.0);
       Vector3d pinJointLinkCoMOffset = new Vector3d(0.0, 0.0, 0.05);
 
-      ContactableSteeringWheelRobot bot = new ContactableSteeringWheelRobot("steeringWheel", pinJointTransformFromWorld, pinJointLinkCoMOffset);
+      ContactableToroidRobot bot = new ContactableToroidRobot("steeringWheel", pinJointTransformFromWorld, pinJointLinkCoMOffset);
       bot.createAvailableContactPoints(0, 30, 1.0 / 15.0);
       contactables.add(bot);
       envRobots.add(bot);
