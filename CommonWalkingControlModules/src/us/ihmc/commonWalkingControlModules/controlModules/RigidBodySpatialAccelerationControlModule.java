@@ -33,6 +33,11 @@ public class RigidBodySpatialAccelerationControlModule
       parentRegistry.addChild(registry);
    }
 
+   public RigidBody getEndEffector()
+   {
+      return endEffector;
+   }
+
    public void packAcceleration(SpatialAccelerationVector accelerationToPack)
    {
       accelerationToPack.set(acceleration);
