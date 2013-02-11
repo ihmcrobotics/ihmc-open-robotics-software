@@ -161,6 +161,8 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
    private final DoubleYoVariable zetaUpperBody = new DoubleYoVariable("zetaUpperBody", registry);
    private final YoPositionProvider finalPositionProvider;
 
+   private final DoubleYoVariable swingAboveSupportAnkle = new DoubleYoVariable("swingAboveSupportAnkle", registry);
+   
    private Footstep nextFootstep = null;
    private final FootstepProvider footstepProvider;
    private final InstantaneousCapturePointTrajectory icpTrajectoryGenerator;
@@ -560,7 +562,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
          icpTrajectoryGenerator.initialize(desiredICP.getFramePoint2dCopy(), finalDesiredICP, doubleSupportTimeProvider.getValue(), getOmega0(),
                                            amountToBeInsideDoubleSupport.getDoubleValue());
 
-         centerOfMassHeightTrajectoryGenerator.initialize(getSupportLeg(), nextFootstep, getContactStatesList());
+         centerOfMassHeightTrajectoryGenerator.initialize(getSupportLeg(), null, getContactStatesList());
       }
 
       @Override
@@ -622,7 +624,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
             
             FramePoint supportAnklePosition = new FramePoint(referenceFrames.getAnkleZUpFrame(swingSide.getOppositeSide()));
             supportAnklePosition.changeFrame(nextFootstep.getReferenceFrame());
-            double newHeight = supportAnklePosition.getZ();
+            double newHeight = supportAnklePosition.getZ() + swingAboveSupportAnkle.getDoubleValue();
             
             nextFootstep = Footstep.copyButChangeHeight(nextFootstep, newHeight);
          }
