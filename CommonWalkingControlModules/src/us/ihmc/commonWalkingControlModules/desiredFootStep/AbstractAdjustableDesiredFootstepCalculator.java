@@ -51,7 +51,7 @@ public abstract class AbstractAdjustableDesiredFootstepCalculator implements Des
                                   footstepOrientations.get(swingLegSide).getFrameOrientationCopy());
       ContactablePlaneBody foot = contactableBodies.get(swingLegSide);
       
-      boolean trustHeight = false;
+      boolean trustHeight = true;
       Footstep desiredFootstep = new Footstep(foot.getRigidBody(), footstepPose, getContactPoints(swingLegSide), trustHeight);
 
       if (desiredFootstepAdjustor != null)
