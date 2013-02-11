@@ -112,31 +112,21 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
 
    private void setUpPath4()
    {
-      createCoursePath(8, -45);
-      int numPillars = 4;
-      float initialOffset = 2.952f;
-      float pillarSeparation = 1.5f;
-      float pillarColorSeparateion = 0.1f;
+		AppearanceDefinition color = YoAppearance.DarkGray();
 
-      for (int i = 0; i < numPillars; i++)
-      {
-         AppearanceDefinition pillar1;
-         AppearanceDefinition pillar2;
-         if (i % 2 == 0)
-         {
-            pillar1 = YoAppearance.Green();
-            pillar2 = YoAppearance.Red();
-         }
-         else
-         {
-            pillar1 = YoAppearance.Red();
-            pillar2 = YoAppearance.Green();
-         }
+		createCoursePath(8, 180);
+		float rampHeight = 0.3f;
+		setUpRamp(-5.0f, 0.0f, 2.0f, -3.0f, rampHeight, color);
+		setUpWall(-7.0f, 0.0f, 2.0f, 1.0f, rampHeight, 0, color);
+		setUpWall(-8.0f, 0.25f, 0.5f, 0.5f, rampHeight, 0, color);
+		setUpWall(-8.5f, -0.25f, 0.5f, 0.5f, rampHeight, 0, color);
+		setUpWall(-9.3f, 0.25f, 0.5f, 0.5f, rampHeight, 0, color);
+		setUpWall(-10.5f, 0.0f, 2.0f, 1.0f, rampHeight, 0, color);
+		setUpRamp(-12.5f, 0.0f, 2.0f, 3.0f, rampHeight, color);
 
-         setUpCone(initialOffset + (i * pillarSeparation) + pillarColorSeparateion, initialOffset + (i * pillarSeparation), .25, .25, 3, pillar1);
-         setUpCone(initialOffset + (i * pillarSeparation), initialOffset + (i * pillarSeparation) + pillarColorSeparateion, .25, .25, 2.9, pillar2);
-      }
-
+		// Do this for a long ramp for testing:
+		// rampHeight = 1.0f;
+		// setUpRamp(10.1, 0.0f, 2.0f, 20.0f, rampHeight, color);
    }
 
    private void setUpPath5()
