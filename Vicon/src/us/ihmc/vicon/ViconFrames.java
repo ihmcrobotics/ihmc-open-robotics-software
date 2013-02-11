@@ -130,18 +130,25 @@ public class ViconFrames
    {
       try
       {
-         ViconFrames viconFrames = ViconFrames.getInstance();
-         Thread.sleep(3000);
+         ViconFrames viconFrames = ViconFrames.getInstance(null);
+//         Thread.sleep(3000);
          ArrayList<String> modelNames = viconFrames.getAvailableModels();
 
          while (true)
          {
-            ViconReferenceFrame drone = viconFrames.getBodyFrame(modelNames.get(0));
+            for(String name : modelNames)
+            {
+               System.out.println("\n\n ****************************");  
+               System.out.println("Model: " + name);
+               ViconReferenceFrame drone = viconFrames.getBodyFrame(name);
 
-            FramePose point = new FramePose(drone);
+               FramePose point = new FramePose(drone);
 
-            System.out.println(drone.isDataValid());
-            System.out.println(point.changeFrameCopy(viconFrames.getViconWorldFrame()));
+               System.out.println(drone.isDataValid());
+               System.out.println(point.changeFrameCopy(viconFrames.getViconWorldFrame()));
+            }
+            
+          
          }
 
       }
