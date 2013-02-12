@@ -89,7 +89,6 @@ public class TaskSpaceConstraintResolver
       taskSpaceAcceleration.packMatrix(taskSpaceAccelerationMatrix, 0);
 
       // J
-//    jacobian.changeFrame(rootJointFrame);
       jacobian.changeFrame(taskSpaceAcceleration.getExpressedInFrame());
       jacobian.compute();
       sJ.reshape(selectionMatrix.getNumRows(), jacobian.getNumberOfColumns());
@@ -129,13 +128,18 @@ public class TaskSpaceConstraintResolver
       int nullity = nullspaceMultiplier.getNumRows();
       if (nullity > 0)
       {
-         nullspaceCalculator.setMatrix(sJ, nullity);    // TODO: check if this works for S != I6
+         nullspaceCalculator.setMatrix(sJ, nullity);
          nullspaceCalculator.removeNullspaceComponent(sJInverse);
       }
 
       // Phi
       DenseMatrix64F phi = new DenseMatrix64F(sJInverse.getNumRows(), selectionMatrix.getNumCols());    // TODO: garbage
       CommonOps.mult(sJInverse, selectionMatrix, phi);
+      
+      if (nullity > 0)
+      {
+         assert(isNullspaceComponentZero(phi, nullspaceCalculator.getNullspace()));
+      }
 
       // cTaskSpace
       cTaskSpace.zero();
@@ -147,6 +151,8 @@ public class TaskSpaceConstraintResolver
 
       if (nullity > 0)
       {
+         // Phi * c + N * w
+         assert(isNullspaceComponentZero(phiC, nullspaceCalculator.getNullspace()));
          nullspaceCalculator.addNullspaceComponent(phiC, nullspaceMultiplier);
       }
 
@@ -160,6 +166,9 @@ public class TaskSpaceConstraintResolver
          // Phi * J
          DenseMatrix64F phiJ = new DenseMatrix64F(phi.getNumRows(), jointJacobian.getNumberOfColumns());
          CommonOps.mult(phi, jointJacobian.getJacobianMatrix(), phiJ);
+
+         if (nullity > 0)
+            assert(isNullspaceComponentZero(phiJ, nullspaceCalculator.getNullspace()));
          phiJMapForCurrentConstraint.put(unconstrainedJointOnPath, phiJ);
 
          CommonOps.multAdd(-1.0, aTaskSpace, phiJ, aHats.get(unconstrainedJointOnPath));
@@ -175,6 +184,7 @@ public class TaskSpaceConstraintResolver
       {
          DenseMatrix64F phiC = phiCMap.get(jacobian);
          vdotTaskSpace.setReshape(phiC);
+        
          Map<InverseDynamicsJoint, DenseMatrix64F> phiJMapForJacobian = phiJMap.get(jacobian);
          for (InverseDynamicsJoint unconstrainedJointOnPath : phiJMapForJacobian.keySet())
          {
@@ -242,6 +252,14 @@ public class TaskSpaceConstraintResolver
          jointSpaceAccelerations.put(joint, jointAcceleration);
          index += degreesOfFreedom;
       }
+   }
+
+   private boolean isNullspaceComponentZero(DenseMatrix64F matrixToTest, DenseMatrix64F nullspace)
+   {
+      DenseMatrix64F nullspaceCheck = new DenseMatrix64F(nullspace.getNumCols(), matrixToTest.getNumCols());
+      CommonOps.multTransA(nullspace, matrixToTest, nullspaceCheck);
+      boolean nullspaceComponentZero = MatrixFeatures.isConstantVal(nullspaceCheck, 0.0, 1e-7);
+      return nullspaceComponentZero;
    }
 
    private static InverseDynamicsJoint[] computeUnconstrainedJointsOnPath(InverseDynamicsJoint[] constrainedJoints, RigidBody base, RigidBody endEffector)
