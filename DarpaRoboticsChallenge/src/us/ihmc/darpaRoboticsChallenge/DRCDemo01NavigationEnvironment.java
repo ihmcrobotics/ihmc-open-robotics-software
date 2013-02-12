@@ -54,6 +54,7 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       setUpPath5();
       setUpPath6();
       setUpPath7();
+      setUpPath8();
 
       // addRocks();
       setUpGround();
@@ -112,22 +113,33 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
 
    private void setUpPath4()
    {
-		AppearanceDefinition color = YoAppearance.DarkGray();
+      createCoursePath(8, -45);
+      int numPillars = 4;
+      float initialOffset = 2.952f;
+      float pillarSeparation = 1.5f;
+      float pillarColorSeparateion = 0.1f;
 
-		createCoursePath(8, 180);
-		float rampHeight = 0.3f;
-		setUpRamp(-5.0f, 0.0f, 2.0f, -3.0f, rampHeight, color);
-		setUpWall(-7.0f, 0.0f, 2.0f, 1.0f, rampHeight, 0, color);
-		setUpWall(-8.0f, 0.25f, 0.5f, 0.5f, rampHeight, 0, color);
-		setUpWall(-8.5f, -0.25f, 0.5f, 0.5f, rampHeight, 0, color);
-		setUpWall(-9.3f, 0.25f, 0.5f, 0.5f, rampHeight, 0, color);
-		setUpWall(-10.5f, 0.0f, 2.0f, 1.0f, rampHeight, 0, color);
-		setUpRamp(-12.5f, 0.0f, 2.0f, 3.0f, rampHeight, color);
+      for (int i = 0; i < numPillars; i++)
+      {
+         AppearanceDefinition pillar1;
+         AppearanceDefinition pillar2;
+         if (i % 2 == 0)
+         {
+            pillar1 = YoAppearance.Green();
+            pillar2 = YoAppearance.Red();
+         }
+         else
+         {
+            pillar1 = YoAppearance.Red();
+            pillar2 = YoAppearance.Green();
+         }
 
-		// Do this for a long ramp for testing:
-		// rampHeight = 1.0f;
-		// setUpRamp(10.1, 0.0f, 2.0f, 20.0f, rampHeight, color);
+         setUpCone(initialOffset + (i * pillarSeparation) + pillarColorSeparateion, initialOffset + (i * pillarSeparation), .25, .25, 3, pillar1);
+         setUpCone(initialOffset + (i * pillarSeparation), initialOffset + (i * pillarSeparation) + pillarColorSeparateion, .25, .25, 2.9, pillar2);
+      }
+
    }
+   
 
    private void setUpPath5()
    {
@@ -193,6 +205,41 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       }
    }
 
+   private void setUpPath8()
+   {
+		AppearanceDefinition color = YoAppearance.DarkGray();
+
+		createCoursePath(8, 180);
+		float rampHeight = 0.3f;
+		// ramp up and landing
+		setUpRamp(-4.0f, 0.0f, 2.0f, -3.0f, rampHeight, color);
+		setUpWall(-6.0f, 0.0f, 2.0f, 1.0f, rampHeight, 0, color);
+		
+		// stepping stones
+		setUpWall(-7.0f, 0.25f, 0.5f, 0.5f, rampHeight, 0, color);
+		setUpWall(-7.5f, -0.25f, 0.5f, 0.5f, rampHeight, 0, color);
+		setUpWall(-8.3f, 0.25f, 0.5f, 0.5f, rampHeight, 0, color);
+		
+		// middle landing
+        setUpWall(-9.5f, 0.0f, 2.0f, 1.0f, rampHeight, 0, color);
+
+		// more difficult stepping stones
+		setUpWall(-10.6f, -0.35f, 0.5f, 0.5f, rampHeight, 0, color);
+		setUpWall(-11.2f, 0.35f, 0.5f, 0.5f, rampHeight, 0, color);
+		setUpWall(-12.1f, 0.15f, 0.5f, 0.5f, rampHeight, 0, color);
+		setUpWall(-13f, 0.95f, 0.5f, 0.5f, rampHeight, 0, color);
+		
+		// landing and ramp down
+		setUpWall(-14.75f, 0.5f, 2.0f, 1.0f, rampHeight, 0, color);
+		setUpRamp(-16.75f, 0.5f, 2.0f, 3.0f, rampHeight, color);
+
+		// Do this for a long ramp for testing:
+		// rampHeight = 1.0f;
+		// setUpRamp(10.1, 0.0f, 2.0f, 20.0f, rampHeight, color);
+   }
+
+   
+   
    private void createCoursePath(double courseLength, double angle)
    {
 //
@@ -236,7 +283,7 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       Transform3D location = new Transform3D();
       location.setTranslation(new Vector3d(0, 0, -0.5));
 
-      RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(location, 35, 35, 1, texture);
+      RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(location, 45, 45, 1, texture);
       combinedTerrainObject.addTerrainObject(newBox);
       RotatableBoxTerrainObject newBox2 = new RotatableBoxTerrainObject(location, 200, 200, 0.75, YoAppearance.DarkGray());
       combinedTerrainObject.addTerrainObject(newBox2);
