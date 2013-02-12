@@ -113,7 +113,7 @@ public class MultiContactTestHumanoidController extends MomentumBasedController
                                                                                       worldFrame, registry);
          swingOrientationTrajectoryGenerators.put(contactablePlaneBody, swingOrientationTrajectoryGenerator);
 
-         EndEffectorControlModule endEffectorControlModule = new EndEffectorControlModule(contactablePlaneBody, swingPositionTrajectoryGenerator,
+         EndEffectorControlModule endEffectorControlModule = new EndEffectorControlModule(contactablePlaneBody, jacobian, swingPositionTrajectoryGenerator,
                                                                 swingOrientationTrajectoryGenerator, null, yoTime, twistCalculator, registry);
          endEffectorControlModules.put(contactablePlaneBody, endEffectorControlModule);
 
@@ -171,13 +171,13 @@ public class MultiContactTestHumanoidController extends MomentumBasedController
    {
       for (ContactablePlaneBody contactablePlaneBody : endEffectorControlModules.keySet())
       {
-         GeometricJacobian jacobian = jacobians.get(contactablePlaneBody);
 
          EndEffectorControlModule endEffectorControlModule = endEffectorControlModules.get(contactablePlaneBody);
          endEffectorControlModule.setContactPoints(contactStates.get(contactablePlaneBody).getContactPoints2d());
          endEffectorControlModule.setCenterOfPressure(centersOfPressure2d.get(contactablePlaneBody).getFramePoint2dCopy());
          SpatialAccelerationVector acceleration = new SpatialAccelerationVector();
          endEffectorControlModule.packDesiredFootAcceleration(acceleration);
+         GeometricJacobian jacobian = endEffectorControlModule.getJacobian();
 
          DenseMatrix64F nullspaceMultipliers = new DenseMatrix64F(0, 1);
          solver.setDesiredSpatialAcceleration(jacobian, acceleration, nullspaceMultipliers);

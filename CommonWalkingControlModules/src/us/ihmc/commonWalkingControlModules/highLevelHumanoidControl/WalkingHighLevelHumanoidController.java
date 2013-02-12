@@ -8,8 +8,6 @@ import java.util.HashSet;
 import java.util.List;
 
 import javax.media.j3d.Transform3D;
-import javax.vecmath.Point2d;
-import javax.vecmath.Vector2d;
 
 import org.ejml.data.DenseMatrix64F;
 
@@ -232,6 +230,15 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 
       coefficientOfFriction.set(1.0);
       for (RobotSide robotSide : RobotSide.values())
+      {         
+         for (LimbName limbName : LimbName.values())
+         {
+            RigidBody endEffector = fullRobotModel.getEndEffector(robotSide, limbName);
+            GeometricJacobian jacobian = new GeometricJacobian(bases.get(limbName), endEffector, endEffector.getBodyFixedFrame());
+            jacobians.get(robotSide).put(limbName, jacobian);
+         }
+      }
+      for (RobotSide robotSide : RobotSide.values())
       {
          ContactablePlaneBody bipedFoot = bipedFeet.get(robotSide);
          contactStates.get(bipedFoot).set(bipedFoot.getContactPoints2d(), coefficientOfFriction.getDoubleValue());    // flat feet
@@ -257,16 +264,11 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
          onEdgeInitialAngleProviders.put(robotSide, onEdgeInitialPitchProvider);
          onEdgeFinalAngleProviders.put(robotSide, onEdgeFinalPitchProvider);
 
-         EndEffectorControlModule footStateMachine = new EndEffectorControlModule(bipedFoot, swingPositionTrajectoryGenerator,
+         GeometricJacobian jacobian = jacobians.get(robotSide).get(LimbName.LEG);
+         EndEffectorControlModule footStateMachine = new EndEffectorControlModule(bipedFoot, jacobian, swingPositionTrajectoryGenerator,
                                                         swingOrientationTrajectoryGenerator, onToesPitchTrajectoryGenerator, yoTime, twistCalculator, registry);
          endEffectorControlModules.put(bipedFoot, footStateMachine);
 
-         for (LimbName limbName : LimbName.values())
-         {
-            RigidBody endEffector = fullRobotModel.getEndEffector(robotSide, limbName);
-            GeometricJacobian jacobian = new GeometricJacobian(bases.get(limbName), endEffector, endEffector.getBodyFixedFrame());
-            jacobians.get(robotSide).put(limbName, jacobian);
-         }
       }
 
       initialPelvisOrientationProvider = new SettableOrientationProvider("initialPelvis", worldFrame, registry);
@@ -1105,13 +1107,14 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       {
          ContactablePlaneBody contactablePlaneBody = bipedFeet.get(robotSide);
          SpatialAccelerationVector footAcceleration = new SpatialAccelerationVector();
-         endEffectorControlModules.get(contactablePlaneBody).packDesiredFootAcceleration(footAcceleration);
+         EndEffectorControlModule endEffectorControlModule = endEffectorControlModules.get(contactablePlaneBody);
+         endEffectorControlModule.packDesiredFootAcceleration(footAcceleration);
          ReferenceFrame bodyFixedFrame = fullRobotModel.getFoot(robotSide).getBodyFixedFrame();
          footAcceleration.changeBodyFrameNoRelativeAcceleration(bodyFixedFrame);
          footAcceleration.changeFrameNoRelativeMotion(bodyFixedFrame);
          DenseMatrix64F nullspaceMultipliers = new DenseMatrix64F(0, 1);
 
-         GeometricJacobian jacobian = jacobians.get(robotSide).get(LimbName.LEG);
+         GeometricJacobian jacobian = endEffectorControlModule.getJacobian();
          solver.setDesiredSpatialAcceleration(jacobian, footAcceleration, nullspaceMultipliers);
       }
    }
