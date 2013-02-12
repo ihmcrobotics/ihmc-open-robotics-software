@@ -17,6 +17,7 @@ import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumRateOfChangeControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.OrientationTrajectoryData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.RootJointAccelerationControlModule;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
 import us.ihmc.commonWalkingControlModules.outputs.ProcessedOutputsInterface;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.trajectories.FixedOrientationTrajectoryGenerator;
@@ -175,12 +176,15 @@ public class MultiContactTestHumanoidController extends MomentumBasedController
          EndEffectorControlModule endEffectorControlModule = endEffectorControlModules.get(contactablePlaneBody);
          endEffectorControlModule.setContactPoints(contactStates.get(contactablePlaneBody).getContactPoints2d());
          endEffectorControlModule.setCenterOfPressure(centersOfPressure2d.get(contactablePlaneBody).getFramePoint2dCopy());
-         SpatialAccelerationVector acceleration = new SpatialAccelerationVector();
-         endEffectorControlModule.packDesiredFootAcceleration(acceleration);
-         GeometricJacobian jacobian = endEffectorControlModule.getJacobian();
+         endEffectorControlModule.startComputation();
+         endEffectorControlModule.waitUntilComputationIsDone();
+         TaskspaceConstraintData taskspaceConstraintData = endEffectorControlModule.getTaskSpaceConstraintOutputPort().getData();
 
-         DenseMatrix64F nullspaceMultipliers = new DenseMatrix64F(0, 1);
-         solver.setDesiredSpatialAcceleration(jacobian, acceleration, nullspaceMultipliers);
+         SpatialAccelerationVector acceleration = taskspaceConstraintData.getSpatialAcceleration();
+         DenseMatrix64F nullspaceMultipliers = taskspaceConstraintData.getNullspaceMultipliers();
+         DenseMatrix64F selectionMatrix = taskspaceConstraintData.getSelectionMatrix();
+         GeometricJacobian jacobian = endEffectorControlModule.getJacobian();
+         solver.setDesiredSpatialAcceleration(jacobian, acceleration, nullspaceMultipliers, selectionMatrix);
       }
    }
 
