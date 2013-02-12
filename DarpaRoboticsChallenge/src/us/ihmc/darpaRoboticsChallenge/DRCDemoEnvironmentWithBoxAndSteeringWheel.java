@@ -62,7 +62,7 @@ public class DRCDemoEnvironmentWithBoxAndSteeringWheel implements CommonAvatarEn
 
       double mass = 1.0;
       ContactableToroidRobot bot = new ContactableToroidRobot("steeringWheel", pinJointTransform, steeringWheelRadius, toroidRadius, mass);
-      bot.createAvailableContactPoints(1, 30, 1.0 / 2.0);
+      bot.createAvailableContactPoints(1, 30, 1.0 / 2.0, true);
       contactables.add(bot);
       boxRobots.add(bot);
       
