@@ -217,20 +217,6 @@ public class MomentumSolverTest
       checkAgainstNumericalDifferentiation(rootJoint, sixDoFJoints, new ArrayList<RevoluteJoint>(), DT, desiredMomentumRate, 1e-4);
    }
 
-   private InverseDynamicsJoint[] extractJoints(InverseDynamicsJoint[] joints, Integer... jointIndices)
-   {
-      InverseDynamicsJoint[] jointsToReturn = new InverseDynamicsJoint[jointIndices.length];
-
-      int index = 0;
-      for (int jointIndex : jointIndices)
-      {
-         jointsToReturn[index] = joints[jointIndex];
-         index++;
-      }
-
-      return jointsToReturn;
-   }
-
    @Test
    public void testJointSpaceAndTaskSpaceAccelerations()
    {
