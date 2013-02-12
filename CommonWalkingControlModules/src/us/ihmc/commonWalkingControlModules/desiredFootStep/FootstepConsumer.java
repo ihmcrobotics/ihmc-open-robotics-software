@@ -48,7 +48,8 @@ public class FootstepConsumer implements FootstepProvider, StreamingDataConsumer
       }
       
       boolean trustHeight = footstepData.getTrustHeight();
-      Footstep footstep = new Footstep(contactableBody.getRigidBody(), new FramePose(ReferenceFrame.getWorldFrame(), footstepData.getLocation(), footstepData.getOrientation()), expectedContactPoints, trustHeight);
+      String id = footstepData.getId();
+      Footstep footstep = new Footstep(id, contactableBody.getRigidBody(), new FramePose(ReferenceFrame.getWorldFrame(), footstepData.getLocation(), footstepData.getOrientation()), expectedContactPoints, trustHeight);
       System.out.println("footstep = " + footstep);
       footstepQueue.add(footstep);
    }

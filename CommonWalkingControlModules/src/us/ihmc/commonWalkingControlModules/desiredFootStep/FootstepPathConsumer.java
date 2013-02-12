@@ -1,15 +1,14 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
-import java.util.ArrayList;
-import java.util.Collection;
-
-import javax.vecmath.Point3d;
-
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.utilities.io.streamingData.AbstractStreamingDataConsumer;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+
+import javax.vecmath.Point3d;
+import java.util.ArrayList;
+import java.util.Collection;
 
 /**
  * User: Matt
@@ -17,6 +16,7 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
  */
 public class FootstepPathConsumer extends AbstractStreamingDataConsumer<ArrayList>
 {
+   private boolean DEBUG = false;
    private FootstepPathCoordinator footstepPathCoordinator;
    private final Collection<? extends ContactablePlaneBody> rigidBodyList;
 
@@ -41,8 +41,12 @@ public class FootstepPathConsumer extends AbstractStreamingDataConsumer<ArrayLis
             FramePoint framePoint = new FramePoint(contactableBody.getBodyFrame(), point3d);
             expectedContactPoints.add(framePoint);
          }
-         Footstep footstep = new Footstep(contactableBody.getRigidBody(), new FramePose(ReferenceFrame.getWorldFrame(), footstepData.getLocation(), footstepData.getOrientation()), expectedContactPoints, footstepData.getTrustHeight());
+         Footstep footstep = new Footstep(footstepData.getId(), contactableBody.getRigidBody(), new FramePose(ReferenceFrame.getWorldFrame(), footstepData.getLocation(), footstepData.getOrientation()), expectedContactPoints, footstepData.getTrustHeight());
          footsteps.add(footstep);
+         if (DEBUG)
+         {
+            System.out.println("FootstepPathConsumer received " + footstep);
+         }
       }
       footstepPathCoordinator.updatePath(footsteps);
    }

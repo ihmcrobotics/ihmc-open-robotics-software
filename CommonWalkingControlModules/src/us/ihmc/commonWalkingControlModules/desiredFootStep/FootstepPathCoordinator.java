@@ -49,6 +49,10 @@ public class FootstepPathCoordinator implements FootstepProvider
       }
 
       stepInProgress = footstepQueue.poll();
+      if (DEBUG)
+      {
+         System.out.println("stepInProgress= " + stepInProgress);
+      }
       if (stepInProgress != null)
       {
          notifyConsumersOfStatus(stepInProgress, FootstepStatus.Status.STARTED);
