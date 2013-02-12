@@ -44,6 +44,7 @@ import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightPartialDerivativesData;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesCalculator;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesData;
+import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesSmoother;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMXYTimeDerivativesData;
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantCoPInstantaneousCapturePointTrajectory;
@@ -108,7 +109,8 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 
    private final CoMHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator;
    private final CoMHeightTimeDerivativesCalculator coMHeightTimeDerivativesCalculator = new CoMHeightTimeDerivativesCalculator();
-
+   private final CoMHeightTimeDerivativesSmoother coMHeightTimeDerivativesSmoother = new CoMHeightTimeDerivativesSmoother(controlDT, registry);
+   
    private final PDController centerOfMassHeightController;
    private final SideDependentList<WalkingState> singleSupportStateEnums = new SideDependentList<WalkingState>(WalkingState.LEFT_SUPPORT,
                                                                               WalkingState.RIGHT_SUPPORT);
@@ -1050,6 +1052,8 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 
 
       CoMHeightTimeDerivativesData comHeightDataBeforeSmoothing = new CoMHeightTimeDerivativesData();
+      CoMHeightTimeDerivativesData comHeightDataAfterSmoothing = new CoMHeightTimeDerivativesData();
+      
       CoMXYTimeDerivativesData comXYTimeDerivatives = new CoMXYTimeDerivativesData();
 
       comXYTimeDerivatives.setCoMXYPosition(comPosition.toFramePoint2d());
@@ -1059,13 +1063,16 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       coMHeightTimeDerivativesCalculator.computeCoMHeightTimeDerivatives(comHeightDataBeforeSmoothing, comXYTimeDerivatives,
               coMHeightPartialDerivatives);
 
+      
+      coMHeightTimeDerivativesSmoother.smooth(comHeightDataAfterSmoothing, comHeightDataBeforeSmoothing);
+      
+      
       FramePoint centerOfMassHeightPoint = new FramePoint(ReferenceFrame.getWorldFrame());
-
-      comHeightDataBeforeSmoothing.getComHeight(centerOfMassHeightPoint);
+      comHeightDataAfterSmoothing.getComHeight(centerOfMassHeightPoint);
       double zDesired = centerOfMassHeightPoint.getZ();
       
-      double zdDesired = comHeightDataBeforeSmoothing.getComHeightVelocity();
-      double zddFeedForward = comHeightDataBeforeSmoothing.getComHeightAcceleration();
+      double zdDesired = comHeightDataAfterSmoothing.getComHeightVelocity();
+      double zddFeedForward = comHeightDataAfterSmoothing.getComHeightAcceleration();
       
       double zCurrent = comPosition.getZ();
       double zdCurrent = comVelocity.getZ();

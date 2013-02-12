@@ -21,12 +21,10 @@ public class DRCFlatGroundWalkingTrack
 {
    private final HumanoidRobotSimulation<SDFRobot> drcSimulation;
 
-   public DRCFlatGroundWalkingTrack(DRCRobotModel robotModel, RobotInitialSetup<SDFRobot> robotInitialSetup, DRCGuiInitialSetup guiInitialSetup, DRCSCSInitialSetup scsInitialSetup, 
+   public DRCFlatGroundWalkingTrack(DRCRobotWalkingControllerParameters drcControlParameters, DRCRobotModel robotModel, RobotInitialSetup<SDFRobot> robotInitialSetup, DRCGuiInitialSetup guiInitialSetup, DRCSCSInitialSetup scsInitialSetup, 
          boolean useVelocityAndHeadingScript, AutomaticSimulationRunner automaticSimulationRunner, double timePerRecordTick,
          int simulationDataBufferSize, boolean doChestOrientationControl, boolean cheatWithGroundHeightAtForFootstep)
    {
-      WalkingControllerParameters drcRobotParameters = new DRCRobotWalkingControllerParameters();
-
 //      scsInitialSetup = new DRCSCSInitialSetup(TerrainType.FLAT);
       scsInitialSetup.setSimulationDataBufferSize(simulationDataBufferSize);
 
@@ -44,7 +42,7 @@ public class DRCFlatGroundWalkingTrack
       double minStepWidth = 0.15;
       double maxStepWidth = 0.4;
       double stepPitch = 0.0;
-      FlatGroundWalkingHighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory = new FlatGroundWalkingHighLevelHumanoidControllerFactory(drcRobotParameters,
+      FlatGroundWalkingHighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory = new FlatGroundWalkingHighLevelHumanoidControllerFactory(drcControlParameters,
             inPlaceWidth, maxStepLength, minStepWidth, maxStepWidth, stepPitch, useVelocityAndHeadingScript);
 
       if (cheatWithGroundHeightAtForFootstep)
@@ -93,7 +91,9 @@ public class DRCFlatGroundWalkingTrack
       boolean doChestOrientationControl = true;
       boolean cheatWithGroundHeightAtForFootstep = false;
       
-      new DRCFlatGroundWalkingTrack(DRCRobotModel.getDefaultRobotModel(), 
+      DRCRobotWalkingControllerParameters drcControlParameters = new DRCRobotWalkingControllerParameters();
+
+      new DRCFlatGroundWalkingTrack(drcControlParameters, DRCRobotModel.getDefaultRobotModel(), 
             robotInitialSetup, guiInitialSetup, scsInitialSetup, 
             useVelocityAndHeadingScript, automaticSimulationRunner, 0.005, 16000, 
             doChestOrientationControl, cheatWithGroundHeightAtForFootstep);

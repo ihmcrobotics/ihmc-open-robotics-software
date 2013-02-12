@@ -11,6 +11,7 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import com.mathworks.jama.Matrix;
+import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
@@ -24,6 +25,8 @@ public class CoMHeightTimeDerivativesSmoother
    
    private final FramePoint centerOfMassHeightPoint = new FramePoint(ReferenceFrame.getWorldFrame());
    
+   private final BooleanYoVariable hasBeenInitialized = new BooleanYoVariable("hasBeenInitialized", registry);
+
    private final DoubleYoVariable inputComHeight = new DoubleYoVariable("inputComHeight", registry);
    private final DoubleYoVariable inputComHeightVelocity = new DoubleYoVariable("inputComHeightVelocity", registry);
    private final DoubleYoVariable inputComHeightAcceleration = new DoubleYoVariable("inputComHeightAcceleration", registry);
@@ -64,6 +67,8 @@ public class CoMHeightTimeDerivativesSmoother
       computeGainsByPolePlacement(w0, w1, zeta1);
       parentRegistry.addChild(registry);
       computeEigenvalues();
+      
+      hasBeenInitialized.set(false);
    }
    
    public void setMaximumAcceleration(double maximumAcceleration)
@@ -118,6 +123,8 @@ public class CoMHeightTimeDerivativesSmoother
    
    public void smooth(CoMHeightTimeDerivativesData heightZDataOutputToPack, CoMHeightTimeDerivativesData heightZDataInput)
    {
+      if (!hasBeenInitialized.getBooleanValue()) initialize(heightZDataInput);
+      
       heightZDataInput.getComHeight(centerOfMassHeightPoint);
       double heightIn = centerOfMassHeightPoint.getZ();
             
@@ -155,7 +162,6 @@ public class CoMHeightTimeDerivativesSmoother
       heightZDataOutputToPack.setComHeight(centerOfMassHeightPoint.getReferenceFrame(), smoothComHeight.getDoubleValue());
       heightZDataOutputToPack.setComHeightVelocity(smoothComHeightVelocity.getDoubleValue());
       heightZDataOutputToPack.setComHeightAcceleration(smoothComHeightAcceleration.getDoubleValue());
-      
    }
 
    public void initialize(CoMHeightTimeDerivativesData comHeightDataIn)
@@ -166,6 +172,6 @@ public class CoMHeightTimeDerivativesSmoother
       smoothComHeightVelocity.set(comHeightDataIn.getComHeightVelocity());
       smoothComHeightAcceleration.set(comHeightDataIn.getComHeightAcceleration());
       
-      
+      this.hasBeenInitialized.set(true);
    }
 }
