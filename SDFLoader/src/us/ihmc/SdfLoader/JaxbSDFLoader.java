@@ -12,13 +12,11 @@ import javax.xml.bind.Unmarshaller;
 
 import us.ihmc.SdfLoader.xmlDescription.SDFModel;
 import us.ihmc.SdfLoader.xmlDescription.SDFRoot;
-import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
 
 public class JaxbSDFLoader
 {
    private final SDFRobot robot;
    private final SDFFullRobotModel fullRobotModel;
-   private final ReferenceFrames referenceFrames;
 
    private static ArrayList<String> createArrayListOfOneURL(String oneURL)
    {
@@ -67,12 +65,10 @@ public class JaxbSDFLoader
       if(sdfJointNameMap != null)
       {
          fullRobotModel = new SDFFullRobotModel(generalizedSDFRobotModel.getRootLinks().get(0), sdfJointNameMap);
-         referenceFrames = new ReferenceFrames(fullRobotModel, sdfJointNameMap, sdfJointNameMap.getAnkleHeight());
       }
       else
       {
          fullRobotModel = null;
-         referenceFrames = null;
       }
    }
 
@@ -85,12 +81,6 @@ public class JaxbSDFLoader
    {
       return fullRobotModel;
    }
-
-   public ReferenceFrames getReferenceFrames()
-   {
-      return referenceFrames;
-   }
-   
    
    
 

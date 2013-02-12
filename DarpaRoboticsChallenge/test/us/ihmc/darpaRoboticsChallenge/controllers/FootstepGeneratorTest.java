@@ -21,7 +21,6 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepValidityMetri
 import us.ihmc.commonWalkingControlModules.desiredFootStep.SemiCircularStepValidityMetric;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
-import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
@@ -170,12 +169,10 @@ public class FootstepGeneratorTest
    private void setupRobotParameters()
    {
       DRCRobotJointMap jointMap = new DRCRobotJointMap(DRCRobotModel.getDefaultRobotModel());
-      DRCRobotSDFLoader drcRobotSDFLoader = new DRCRobotSDFLoader();
-      JaxbSDFLoader jaxbSDFLoader = drcRobotSDFLoader.loadDRCRobot(jointMap);
+      JaxbSDFLoader jaxbSDFLoader = DRCRobotSDFLoader.loadDRCRobot(jointMap);
       fullRobotModel = jaxbSDFLoader.getFullRobotModel();
-      referenceFrames = jaxbSDFLoader.getReferenceFrames();
+      referenceFrames = new ReferenceFrames(fullRobotModel, jointMap, jointMap.getAnkleHeight());
       bipedFeet = DRCOperatorUserInterface.setupBipedFeet(referenceFrames, fullRobotModel);
-
    }
 
 

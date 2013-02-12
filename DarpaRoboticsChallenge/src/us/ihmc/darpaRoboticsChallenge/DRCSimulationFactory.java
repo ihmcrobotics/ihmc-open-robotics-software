@@ -7,6 +7,7 @@ import us.ihmc.commonAvatarInterfaces.CommonAvatarEnvironmentInterface;
 import us.ihmc.commonWalkingControlModules.controllers.ControllerFactory;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
+import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.CenterOfMassJacobianUpdater;
 import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.sensors.TwistUpdater;
@@ -54,7 +55,7 @@ public class DRCSimulationFactory
 //    CommonWalkingReferenceFrames referenceFramesForController = jaxbSDFLoader.getReferenceFrames();
 
       FullRobotModel fullRobotModelForController = fullRobotModelForSimulation;
-      CommonWalkingReferenceFrames referenceFramesForController = jaxbSDFLoader.getReferenceFrames();
+      CommonWalkingReferenceFrames referenceFramesForController = new ReferenceFrames(fullRobotModelForSimulation, jointMap, jointMap.getAnkleHeight());
 
       SideDependentList<FootSwitchInterface> footSwitches = new SideDependentList<FootSwitchInterface>();
       for (RobotSide robotSide : RobotSide.values())
