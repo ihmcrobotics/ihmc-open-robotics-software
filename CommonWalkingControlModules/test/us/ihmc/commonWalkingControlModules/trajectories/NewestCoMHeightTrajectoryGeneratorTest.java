@@ -16,7 +16,6 @@ import us.ihmc.commonWalkingControlModules.controlModules.NonFlatGroundPlaneCont
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootSpoof;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepPoseFinder;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepUtils;
 import us.ihmc.utilities.math.geometry.FrameOrientation2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
