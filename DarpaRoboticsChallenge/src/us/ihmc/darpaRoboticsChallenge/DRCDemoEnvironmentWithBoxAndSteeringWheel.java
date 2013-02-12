@@ -35,18 +35,31 @@ public class DRCDemoEnvironmentWithBoxAndSteeringWheel implements CommonAvatarEn
 
    public DRCDemoEnvironmentWithBoxAndSteeringWheel(DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
+      /*
+       * Quick estimates from 3D files:
+       */
+      double steeringWheelAngleFromVertical = FastMath.toRadians(50.0);
+      double seatEdgeToSteeringWheelCentroidX = 0.18;
+      double seatEdgeToSteeringWheelCentroidZ = 0.24;
+      double externalSteeringWheelRadius = 0.175;
+      double internalSteeringWheelRadius = 0.142;
+
+      double toroidRadius = (externalSteeringWheelRadius - internalSteeringWheelRadius) / 2.0;
+      double steeringWheelRadius = (externalSteeringWheelRadius + internalSteeringWheelRadius) / 2.0;
+      double steeringWheelAngleFromHorizontal = steeringWheelAngleFromVertical - Math.PI / 2.0;
+      double steeringWheelCentroidX = BOX_LENGTH / 2.0 + seatEdgeToSteeringWheelCentroidX;
+      double steeringWheelCentroidZ = BOX_HEIGHT + seatEdgeToSteeringWheelCentroidZ;
+
       combinedTerrainObject = createCombinedTerrainObject();
       Matrix3d pinJointZRotation = new Matrix3d();
       pinJointZRotation.rotZ(-FastMath.PI / 2.0);
       Matrix3d pinJointRotation = new Matrix3d();
-      pinJointRotation.rotY(-FastMath.PI / 3.0);
+      pinJointRotation.rotY(steeringWheelAngleFromHorizontal);
       pinJointRotation.mul(pinJointZRotation);
 
-      Vector3d pinJointLocation = new Vector3d(0.6, 0.0, 0.9);
+      Vector3d pinJointLocation = new Vector3d(steeringWheelCentroidX, 0.0, steeringWheelCentroidZ);
       Transform3D pinJointTransform = new Transform3D(pinJointRotation, pinJointLocation, 1.0);
 
-      double steeringWheelRadius = 0.15;
-      double toroidRadius = 0.02;
       double mass = 1.0;
       ContactableToroidRobot bot = new ContactableToroidRobot("steeringWheel", pinJointTransform, steeringWheelRadius, toroidRadius, mass);
       bot.createAvailableContactPoints(1, 30, 1.0 / 2.0);
