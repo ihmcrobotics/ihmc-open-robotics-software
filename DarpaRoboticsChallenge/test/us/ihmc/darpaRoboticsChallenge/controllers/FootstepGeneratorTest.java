@@ -43,7 +43,6 @@ public class FootstepGeneratorTest
    private final static boolean VISUALIZE = false;
    private final static boolean SIDESTEP = false;
    private final static boolean DEBUG_S_PARAM = false;
-   private final static boolean DEBUG = false;
    public static final ReferenceFrame WORLD_FRAME = ReferenceFrames.getWorldFrame();
    List<Footstep> footSteps = new ArrayList<Footstep>();
    FullRobotModel fullRobotModel;
@@ -106,10 +105,8 @@ public class FootstepGeneratorTest
       footstepGenerator.setStepAngle(Math.PI / 6);
       footstepGenerator.setStepLength(0.4);
       footstepGenerator.setStepWidth(0.2);
-      Footstep swingStart = FootstepUtils.getCurrentFootstep(RobotSide.LEFT, referenceFrames, bipedFeet);
       Footstep stanceStart = FootstepUtils.getCurrentFootstep(RobotSide.RIGHT, referenceFrames, bipedFeet);
 
-//    footstepGenerator.setSwingStart(swingStart);
       footstepGenerator.setStanceStart(stanceStart);
       footSteps = footstepGenerator.generateDesiredFootstepList();
    }
