@@ -51,7 +51,7 @@ public class DRCDemoEnvironmentSimpleSteeringWheelContact implements CommonAvata
       Transform3D pinJointTransform = new Transform3D(pinJointRotation, pinJointLocation, 1.0);
 
       ContactableToroidRobot bot = new ContactableToroidRobot("steeringWheel", pinJointTransform);
-      bot.createAvailableContactPoints(0, 30, 1.0 / 15.0);
+      bot.createAvailableContactPoints(0, 30, 1.0 / 15.0, true);
       contactables.add(bot);
       envRobots.add(bot);
 
@@ -61,7 +61,7 @@ public class DRCDemoEnvironmentSimpleSteeringWheelContact implements CommonAvata
       double mass = 1.0;
       ContactableSelectableBoxRobot contactableBoxRobot = ContactableSelectableBoxRobot.createContactableWoodBoxRobot("BoxRobot1", length, width, height, mass);
       contactableBoxRobot.setPosition(0.6, 0.0, 3.0);
-      contactableBoxRobot.createAvailableContactPoints(0, 10, 1.0 / 15.0);
+      contactableBoxRobot.createAvailableContactPoints(0, 10, 1.0 / 15.0, true);
       
       GroundContactModel groundContactModel = createGroundContactModel(contactableBoxRobot, combinedTerrainObject);
       contactableBoxRobot.setGroundContactModel(groundContactModel);
