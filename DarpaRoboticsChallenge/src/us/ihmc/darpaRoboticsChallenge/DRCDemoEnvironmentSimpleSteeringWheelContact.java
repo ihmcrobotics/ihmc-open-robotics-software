@@ -48,10 +48,9 @@ public class DRCDemoEnvironmentSimpleSteeringWheelContact implements CommonAvata
       pinJointRotation.mul(pinJointZRotation);
 
       Vector3d pinJointLocation = new Vector3d(0.6, 0.0, 0.9);
-      Transform3D pinJointTransformFromWorld = new Transform3D(pinJointRotation, pinJointLocation, 1.0);
-      Vector3d pinJointLinkCoMOffset = new Vector3d(0.0, 0.0, 0.05);
+      Transform3D pinJointTransform = new Transform3D(pinJointRotation, pinJointLocation, 1.0);
 
-      ContactableToroidRobot bot = new ContactableToroidRobot("steeringWheel", pinJointTransformFromWorld, pinJointLinkCoMOffset);
+      ContactableToroidRobot bot = new ContactableToroidRobot("steeringWheel", pinJointTransform);
       bot.createAvailableContactPoints(0, 30, 1.0 / 15.0);
       contactables.add(bot);
       envRobots.add(bot);

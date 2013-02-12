@@ -43,13 +43,12 @@ public class DRCDemoEnvironmentWithBoxAndSteeringWheel implements CommonAvatarEn
       pinJointRotation.mul(pinJointZRotation);
 
       Vector3d pinJointLocation = new Vector3d(0.6, 0.0, 0.9);
-      Transform3D pinJointTransformFromWorld = new Transform3D(pinJointRotation, pinJointLocation, 1.0);
-      Vector3d pinJointLinkCoMOffset = new Vector3d(0.0, 0.0, 0.0);
+      Transform3D pinJointTransform = new Transform3D(pinJointRotation, pinJointLocation, 1.0);
 
       double steeringWheelRadius = 0.15;
       double toroidRadius = 0.02;
       double mass = 1.0;
-      ContactableToroidRobot bot = new ContactableToroidRobot("steeringWheel", pinJointTransformFromWorld, pinJointLinkCoMOffset, steeringWheelRadius, toroidRadius, mass);
+      ContactableToroidRobot bot = new ContactableToroidRobot("steeringWheel", pinJointTransform, steeringWheelRadius, toroidRadius, mass);
       bot.createAvailableContactPoints(1, 30, 1.0 / 2.0);
       contactables.add(bot);
       boxRobots.add(bot);
