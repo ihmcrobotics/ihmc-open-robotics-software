@@ -14,6 +14,7 @@ import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonAvatarInterfaces.CommonAvatarEnvironmentInterface;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
+import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotParameters;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
@@ -45,7 +46,7 @@ public class MultiContactTestEnvironment implements CommonAvatarEnvironmentInter
       robotForEnvironmentSetup.update();
       FullRobotModel fullRobotModelForEnvironmentSetup = jaxbSDFLoader.getFullRobotModel();
 
-      CommonWalkingReferenceFrames referenceFramesForEnvironmentSetup = jaxbSDFLoader.getReferenceFrames();
+      CommonWalkingReferenceFrames referenceFramesForEnvironmentSetup = new ReferenceFrames(fullRobotModelForEnvironmentSetup, jointMap, jointMap.getAnkleHeight());
       SDFPerfectSimulatedSensorReaderAndWriter sensorReaderAndOutputWriter = new SDFPerfectSimulatedSensorReaderAndWriter(robotForEnvironmentSetup,
                                                                                 fullRobotModelForEnvironmentSetup, referenceFramesForEnvironmentSetup);
       sensorReaderAndOutputWriter.read();

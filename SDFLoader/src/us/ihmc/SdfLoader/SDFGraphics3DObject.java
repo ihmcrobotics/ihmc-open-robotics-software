@@ -22,13 +22,23 @@ public class SDFGraphics3DObject extends Graphics3DObject
 {
    private static final boolean SHOW_COORDINATE_SYSTEMS = false;
    private static final AppearanceDefinition DEFAULT_APPEARANCE = YoAppearance.White();
-
+   
    public SDFGraphics3DObject(List<SDFVisual> sdfVisuals, ArrayList<String> resourceDirectories)
    {
+      this(sdfVisuals, resourceDirectories, new Transform3D());
+   }
+   
+   public SDFGraphics3DObject(List<SDFVisual> sdfVisuals, ArrayList<String> resourceDirectories, Transform3D graphicsTransform)
+   {
+      Matrix3d rotation = new Matrix3d();
+      Vector3d offset = new Vector3d();
+      graphicsTransform.get(rotation, offset);
       
       for(SDFVisual sdfVisual : sdfVisuals)
       {
          identity();
+         translate(offset);
+         rotate(rotation);
          
          Transform3D visualPose = SDFConversionsHelper.poseToTransform(sdfVisual.getPose());
          Vector3d modelOffset = new Vector3d();
