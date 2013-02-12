@@ -12,6 +12,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.MultiContact
 import us.ihmc.darpaRoboticsChallenge.controllers.DRCRobotMomentumBasedControllerFactory;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotParameters;
+import us.ihmc.darpaRoboticsChallenge.initialSetup.MultiContactDRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.PushUpDRCRobotInitialSetup;
 import us.ihmc.projectM.R2Sim02.initialSetup.RobotInitialSetup;
 import us.ihmc.robotSide.RobotSide;
@@ -34,7 +35,7 @@ public class DRCMultiContact
 
 
 //    RobotSide[] footContactSides = RobotSide.values();
-//    RobotSide[] handContactSides = RobotSide.LEFT;
+//    RobotSide[] handContactSides = new RobotSide[]{RobotSide.LEFT};
 //    RobotInitialSetup<SDFRobot> robotInitialSetup = new MultiContactDRCRobotInitialSetup();
 
       RobotSide[] footContactSides = RobotSide.values();
