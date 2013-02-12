@@ -89,11 +89,14 @@ public class DRCFlatGroundWalkingTest
       
       combinedTerrainObject.addBox(rampXStart0-2.0, rampYStart, rampEndX+2.0, rampYEnd, -0.05, 0.0);
 
-      SimulationConstructionSet scs = setupScs(combinedTerrainObject, useVelocityAndHeadingScript, cheatWithGroundHeightAtForFootstep);
+      DRCRobotWalkingControllerParameters drcControlParameters = new DRCRobotWalkingControllerParameters();
+      drcControlParameters.setInitialHeightAboveGround(drcControlParameters.initialHeightAboveGround() - 0.01); // Need to do this or the leg goes straight and the robot falls.
+      
+      SimulationConstructionSet scs = setupScs(drcControlParameters, combinedTerrainObject, useVelocityAndHeadingScript, cheatWithGroundHeightAtForFootstep);
       scs.setGroundVisible(false);
       scs.addStaticLinkGraphics(combinedTerrainObject.getLinkGraphics());
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
-
+      
       NothingChangedVerifier nothingChangedVerifier = null;
       if (checkNothingChanged)
       {
@@ -149,7 +152,8 @@ public class DRCFlatGroundWalkingTest
       
       GroundProfile groundProfile = new FlatGroundProfile();
 
-      SimulationConstructionSet scs = setupScs(groundProfile, useVelocityAndHeadingScript, cheatWithGroundHeightAtForFootstep);
+      DRCRobotWalkingControllerParameters drcControlParameters = new DRCRobotWalkingControllerParameters();      
+      SimulationConstructionSet scs = setupScs(drcControlParameters, groundProfile, useVelocityAndHeadingScript, cheatWithGroundHeightAtForFootstep);
 
       NothingChangedVerifier nothingChangedVerifier = null;
       if (checkNothingChanged)
@@ -217,7 +221,7 @@ public class DRCFlatGroundWalkingTest
    }
    boolean setupForCheatingUsingGroundHeightAtForFootstepProvider = false;
 
-   private SimulationConstructionSet setupScs(GroundProfile groundProfile, boolean useVelocityAndHeadingScript, boolean cheatWithGroundHeightAtForFootstep)
+   private SimulationConstructionSet setupScs(DRCRobotWalkingControllerParameters drcControlParameters, GroundProfile groundProfile, boolean useVelocityAndHeadingScript, boolean cheatWithGroundHeightAtForFootstep)
    {
       AutomaticSimulationRunner automaticSimulationRunner = null;
       DRCGuiInitialSetup guiInitialSetup = createGUIInitialSetup();
@@ -229,7 +233,8 @@ public class DRCFlatGroundWalkingTest
       
       RobotInitialSetup<SDFRobot> robotInitialSetup = new SquaredUpDRCRobotInitialSetup(0.0);
       DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(groundProfile);
-      DRCFlatGroundWalkingTrack drcFlatGroundWalkingTrack =  new DRCFlatGroundWalkingTrack(robotModel, robotInitialSetup, guiInitialSetup, scsInitialSetup, useVelocityAndHeadingScript, automaticSimulationRunner, timePerRecordTick, simulationDataBufferSize, doChestOrientationControl, cheatWithGroundHeightAtForFootstep);
+      
+      DRCFlatGroundWalkingTrack drcFlatGroundWalkingTrack =  new DRCFlatGroundWalkingTrack(drcControlParameters, robotModel, robotInitialSetup, guiInitialSetup, scsInitialSetup, useVelocityAndHeadingScript, automaticSimulationRunner, timePerRecordTick, simulationDataBufferSize, doChestOrientationControl, cheatWithGroundHeightAtForFootstep);
       
       SimulationConstructionSet scs = drcFlatGroundWalkingTrack.getSimulationConstructionSet();
       

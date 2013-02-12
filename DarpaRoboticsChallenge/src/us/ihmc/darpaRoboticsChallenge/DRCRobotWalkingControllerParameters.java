@@ -57,8 +57,15 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
       return 0.9;
    }
 
+   private double initialHeightAboveGround = 0.86;
+   
    public double initialHeightAboveGround()
    {
-      return 0.86;
+      return initialHeightAboveGround;
+   }
+   
+   public void setInitialHeightAboveGround(double initialHeightAboveGround)
+   {
+      this.initialHeightAboveGround = initialHeightAboveGround;
    }
 }
