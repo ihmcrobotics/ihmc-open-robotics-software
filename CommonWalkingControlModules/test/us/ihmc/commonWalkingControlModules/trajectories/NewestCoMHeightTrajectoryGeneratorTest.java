@@ -15,6 +15,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactStat
 import us.ihmc.commonWalkingControlModules.controlModules.NonFlatGroundPlaneContactState;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootSpoof;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepPoseFinder;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepUtils;
 import us.ihmc.utilities.math.geometry.FrameOrientation2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -30,6 +31,7 @@ public class NewestCoMHeightTrajectoryGeneratorTest
 {
    private final YoVariableRegistry registry = new YoVariableRegistry("NewestCoMHeightTrajectoryGeneratorTest");
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   private final FootstepPoseFinder poseFinder = new FootstepPoseFinder();
    
    @Test
    public void raisedFlatSingleSupportCoMHeightTrajectoryTest()
@@ -188,7 +190,7 @@ public class NewestCoMHeightTrajectoryGeneratorTest
       FrameOrientation2d footstepOrientation = new FrameOrientation2d(worldFrame);
       FramePose2d footstepPose = new FramePose2d(new FramePoint2d(worldFrame, contactFrameCenter.getX(), contactFrameCenter.getY()), footstepOrientation);
       ContactablePlaneBody foot = new FootSpoof("foot", 0.0, 0.0, 0.0, 1.0, -1.0, 1.0, 0.0);
-      nextFootstep = FootstepUtils.generateFootstep(footstepPose, foot, contactFrameCenter.getZ(), new Vector3d(0.0, 0.0, 1.0));
+      nextFootstep = poseFinder.generateFootstep(footstepPose, foot, contactFrameCenter.getZ(), new Vector3d(0.0, 0.0, 1.0));
       return nextFootstep;
    }
    
