@@ -30,6 +30,7 @@ import us.ihmc.utilities.polarLidarGeometry.PolarLidarScanDefinition;
 import us.ihmc.utilities.screwTheory.RigidBodyInertia;
 
 import com.yobotics.simulationconstructionset.CameraMount;
+import com.yobotics.simulationconstructionset.ExternalForcePoint;
 import com.yobotics.simulationconstructionset.FloatingJoint;
 import com.yobotics.simulationconstructionset.GroundContactPoint;
 import com.yobotics.simulationconstructionset.Joint;
@@ -119,7 +120,11 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRo
             GroundContactPoint groundContactPoint = new GroundContactPoint("gc_" + SDFJointHolder.createValidVariableName(jointName) + "_" + count++,
                   gcOffset, this);
             
+            ExternalForcePoint externalForcePoint = new ExternalForcePoint("ef_" + SDFJointHolder.createValidVariableName(jointName) + "_" + count++,
+                  gcOffset, this);
+            
             oneDoFJoints.get(jointName).addGroundContactPoint(groundContactPoint);
+            oneDoFJoints.get(jointName).addExternalForcePoint(externalForcePoint);
 
             counters.put(jointName, count);
 
