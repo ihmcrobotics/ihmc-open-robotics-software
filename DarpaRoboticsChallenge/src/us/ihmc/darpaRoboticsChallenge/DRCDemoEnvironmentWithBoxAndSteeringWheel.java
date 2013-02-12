@@ -42,7 +42,7 @@ public class DRCDemoEnvironmentWithBoxAndSteeringWheel implements CommonAvatarEn
       pinJointRotation.rotY(-FastMath.PI / 3.0);
       pinJointRotation.mul(pinJointZRotation);
 
-      Vector3d pinJointLocation = new Vector3d(0.65, 0.0, 0.9);
+      Vector3d pinJointLocation = new Vector3d(0.6, 0.0, 0.9);
       Transform3D pinJointTransformFromWorld = new Transform3D(pinJointRotation, pinJointLocation, 1.0);
       Vector3d pinJointLinkCoMOffset = new Vector3d(0.0, 0.0, 0.0);
 
