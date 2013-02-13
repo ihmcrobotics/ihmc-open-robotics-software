@@ -40,9 +40,9 @@ public class SDFPerfectSimulatedSensorReaderAndWriter implements RawSensorReader
       for (OneDoFJoint revoluteJoint : revoluteJointsArray)
       {
          String name = revoluteJoint.getName();
-         OneDegreeOfFreedomJoint pinJoint = robot.getPinJoint(name);
+         OneDegreeOfFreedomJoint oneDoFJoint = robot.getOneDoFJoint(name);
 
-         Pair<OneDegreeOfFreedomJoint,OneDoFJoint> jointPair = new Pair<OneDegreeOfFreedomJoint, OneDoFJoint>(pinJoint, revoluteJoint);
+         Pair<OneDegreeOfFreedomJoint,OneDoFJoint> jointPair = new Pair<OneDegreeOfFreedomJoint, OneDoFJoint>(oneDoFJoint, revoluteJoint);
          this.revoluteJoints.add(jointPair);
       }
 
