@@ -25,20 +25,20 @@ public class SquaredUpDRCRobotInitialSetup implements RobotInitialSetup<SDFRobot
       
       
       // Avoid singularities at startup
-      robot.getPinJoint("l_arm_ely").setQ(1.57);
-      robot.getPinJoint("l_arm_elx").setQ(1.57);
+      robot.getOneDoFJoint("l_arm_ely").setQ(1.57);
+      robot.getOneDoFJoint("l_arm_elx").setQ(1.57);
       
-      robot.getPinJoint("r_arm_ely").setQ(1.57);
-      robot.getPinJoint("r_arm_elx").setQ(-1.57);
+      robot.getOneDoFJoint("r_arm_ely").setQ(1.57);
+      robot.getOneDoFJoint("r_arm_elx").setQ(-1.57);
       
-      robot.getPinJoint("l_leg_lhy").setQ(-0.4);
-      robot.getPinJoint("r_leg_lhy").setQ(-0.4);
+      robot.getOneDoFJoint("l_leg_lhy").setQ(-0.4);
+      robot.getOneDoFJoint("r_leg_lhy").setQ(-0.4);
       
-      robot.getPinJoint("l_leg_kny").setQ(0.8);
-      robot.getPinJoint("r_leg_kny").setQ(0.8);
+      robot.getOneDoFJoint("l_leg_kny").setQ(0.8);
+      robot.getOneDoFJoint("r_leg_kny").setQ(0.8);
       
-      robot.getPinJoint("l_leg_uay").setQ(-0.4);
-      robot.getPinJoint("r_leg_uay").setQ(-0.4);
+      robot.getOneDoFJoint("l_leg_uay").setQ(-0.4);
+      robot.getOneDoFJoint("r_leg_uay").setQ(-0.4);
       
       
       Transform3D rootToWorld = new Transform3D();

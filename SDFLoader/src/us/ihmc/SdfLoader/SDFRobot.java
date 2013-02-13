@@ -51,6 +51,7 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRo
    private static final boolean DEBUG = true;
    private static final boolean SHOW_CONTACT_POINTS = true;
    private static final boolean USE_POLAR_LIDAR_MODEL = true;
+   private static final boolean SHOW_COM_REFERENCE_FRAMES = false;
 
    private static final long serialVersionUID = 5864358637898048080L;
 
@@ -166,7 +167,7 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRo
       rootJoint.setYawPitchRoll(yaw, pitch, roll);
    }
 
-   public OneDegreeOfFreedomJoint getPinJoint(String name)
+   public OneDegreeOfFreedomJoint getOneDoFJoint(String name)
    {
       return oneDoFJoints.get(name);
    }
@@ -415,7 +416,10 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRo
       scsLink.setComOffset(CoMOffset);
       scsLink.setMass(mass);
       scsLink.setMomentOfInertia(rigidBodyInertia.getMassMomentOfInertiaPartCopy());
-      scsLink.addCoordinateSystemToCOM(0.1);
+      if(SHOW_COM_REFERENCE_FRAMES)
+      {
+         scsLink.addCoordinateSystemToCOM(0.1);
+      }
       return scsLink;
 
    }
