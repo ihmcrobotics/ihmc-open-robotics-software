@@ -41,6 +41,7 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
 
    private static final boolean FULLY_RANDOM = true; // Will do a neat grid if set to false;
    private static final int ROCKS_PER_ROW = 4;
+   private static final boolean DIFFICULT_STEPPING_STONES = false; // for path 8, if true creates an extension to the path with harder steps
 
 //   private static final double FLOOR_THICKNESS = 0.001;
 
@@ -212,26 +213,41 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
 		createCoursePath(8, 180);
 		float rampHeight = 0.3f;
 		// ramp up and landing
-		setUpRamp(-4.0f, 0.0f, 2.0f, -3.0f, rampHeight, color);
-		setUpWall(-6.0f, 0.0f, 2.0f, 1.0f, rampHeight, 0, color);
+		setUpRamp(-5.0f, 0.0f, 3.0f, -3.0f, rampHeight, color);
+		setUpWall(-7.0f, 0.0f, 3.0f, 1.0f, rampHeight, 0, color);
 		
-		// stepping stones
-		setUpWall(-7.0f, 0.25f, 0.5f, 0.5f, rampHeight, 0, color);
-		setUpWall(-7.5f, -0.25f, 0.5f, 0.5f, rampHeight, 0, color);
-		setUpWall(-8.3f, 0.25f, 0.5f, 0.5f, rampHeight, 0, color);
+		// simple stepping stones, centered at x=-0.75m
+		setUpWall(-7.65f, -0.5f, 0.5f, 0.3f, rampHeight, 0, color);
+		setUpWall(-7.85f, -1.0f, 0.5f, 0.5f, rampHeight, 0, color);
+		setUpWall(-8.15f, -0.5f, 0.5f, 0.5f, rampHeight, 0, color);
+		setUpWall(-8.45f, -1.0f, 0.5f, 0.5f, rampHeight, 0, color);
+		setUpWall(-8.75f, -0.5f, 0.5f, 0.5f, rampHeight, 0, color);
+		setUpWall(-9.05f, -1.0f, 0.5f, 0.5f, rampHeight, 0, color);
+		setUpWall(-9.35f, -0.5f, 0.5f, 0.5f, rampHeight, 0, color);
+		setUpWall(-9.65f, -1.0f, 0.5f, 0.5f, rampHeight, 0, color);
+		setUpWall(-9.85f, -0.5f, 0.5f, 0.3f, rampHeight, 0, color);
+		
+		// qualification stepping stones, centered along x=0.75m
+		setUpWall(-8.0f, 1.0f, 0.5f, 0.5f, rampHeight, 0, color);
+		setUpWall(-8.5f, 0.5f, 0.5f, 0.5f, rampHeight, 0, color);
+		setUpWall(-9.3f, 1.0f, 0.5f, 0.5f, rampHeight, 0, color);
 		
 		// middle landing
-        setUpWall(-9.5f, 0.0f, 2.0f, 1.0f, rampHeight, 0, color);
+        setUpWall(-10.5f, 0.0f, 3.0f, 1.0f, rampHeight, 0, color);
 
-		// more difficult stepping stones
-		setUpWall(-10.6f, -0.35f, 0.5f, 0.5f, rampHeight, 0, color);
-		setUpWall(-11.2f, 0.35f, 0.5f, 0.5f, rampHeight, 0, color);
-		setUpWall(-12.1f, 0.15f, 0.5f, 0.5f, rampHeight, 0, color);
-		setUpWall(-13f, 0.95f, 0.5f, 0.5f, rampHeight, 0, color);
-		
-		// landing and ramp down
-		setUpWall(-14.75f, 0.5f, 2.0f, 1.0f, rampHeight, 0, color);
-		setUpRamp(-16.75f, 0.5f, 2.0f, 3.0f, rampHeight, color);
+        if(DIFFICULT_STEPPING_STONES) {
+    		// more difficult stepping stones
+    		setUpWall(-11.6f, -0.35f, 0.5f, 0.5f, rampHeight, 0, color);
+    		setUpWall(-12.2f, 0.35f, 0.5f, 0.5f, rampHeight, 0, color);
+    		setUpWall(-13.1f, 0.15f, 0.5f, 0.5f, rampHeight, 0, color);
+    		setUpWall(-14f, 0.95f, 0.5f, 0.5f, rampHeight, 0, color);
+    		
+    		// landing and ramp down
+    		setUpWall(-15.5f, 0.5f, 2.0f, 1.0f, rampHeight, 0, color);
+    		setUpRamp(-17.5f, 0.5f, 2.0f, 3.0f, rampHeight, color);	
+        } else {
+    		setUpRamp(-11.5f, 0.0f, 3.0f, 3.0f, rampHeight, color);	  	
+        }
 
 		// Do this for a long ramp for testing:
 		// rampHeight = 1.0f;
