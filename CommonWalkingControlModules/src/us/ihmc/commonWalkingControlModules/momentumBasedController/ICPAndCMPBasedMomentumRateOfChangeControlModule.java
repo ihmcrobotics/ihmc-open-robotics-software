@@ -10,7 +10,6 @@ import us.ihmc.commonWalkingControlModules.controlModules.GroundReactionMomentCo
 import us.ihmc.commonWalkingControlModules.controlModules.velocityViaCoP.CapturabilityBasedDesiredCoPVisualizer;
 import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
-import us.ihmc.controlFlow.ControlFlowTools;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
@@ -215,16 +214,6 @@ public class ICPAndCMPBasedMomentumRateOfChangeControlModule implements ICPBased
    public void waitUntilComputationIsDone()
    {
       // empty
-   }
-
-   public ControlFlowInputPort<?>[] getInputPorts()
-   {
-      return ControlFlowTools.getInputPorts(this);
-   }
-
-   public ControlFlowOutputPort<?>[] getOutputPorts()
-   {
-      return ControlFlowTools.getOutputPorts(this);
    }
 
    public ControlFlowInputPort<BipedSupportPolygons> getBipedSupportPolygonsInputPort()

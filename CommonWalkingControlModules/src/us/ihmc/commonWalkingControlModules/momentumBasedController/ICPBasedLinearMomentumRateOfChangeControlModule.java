@@ -5,7 +5,6 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPoly
 import us.ihmc.commonWalkingControlModules.controlModules.velocityViaCoP.CapturabilityBasedDesiredCoPVisualizer;
 import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
-import us.ihmc.controlFlow.ControlFlowTools;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
@@ -126,16 +125,6 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule implements ICPBased
    public ControlFlowOutputPort<MomentumRateOfChangeData> getMomentumRateOfChangeOutputPort()
    {
       return momentumRateOfChangeOutputPort;
-   }
-
-   public ControlFlowInputPort<?>[] getInputPorts()
-   {
-      return ControlFlowTools.getInputPorts(this);
-   }
-
-   public ControlFlowOutputPort<?>[] getOutputPorts()
-   {
-      return ControlFlowTools.getOutputPorts(this);
    }
 
    public ControlFlowInputPort<BipedSupportPolygons> getBipedSupportPolygonsInputPort()
