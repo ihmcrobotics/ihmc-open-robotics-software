@@ -3,7 +3,6 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController;
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodyOrientationControlModule;
 import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
-import us.ihmc.controlFlow.ControlFlowTools;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
@@ -75,16 +74,6 @@ public class RootJointAngularAccelerationControlModule implements RootJointAccel
    public ControlFlowInputPort<OrientationTrajectoryData> getDesiredPelvisOrientationTrajectoryInputPort()
    {
       return desiredPelvisOrientationTrajectoryInputPort;
-   }
-
-   public ControlFlowInputPort<?>[] getInputPorts()
-   {
-      return ControlFlowTools.getInputPorts(this);
-   }
-
-   public ControlFlowOutputPort<?>[] getOutputPorts()
-   {
-      return ControlFlowTools.getOutputPorts(this);
    }
 
    public ControlFlowOutputPort<RootJointAccelerationData> getRootJointAccelerationOutputPort()

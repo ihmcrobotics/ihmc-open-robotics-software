@@ -2,7 +2,6 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController;
 
 import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
-import us.ihmc.controlFlow.ControlFlowTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -51,17 +50,6 @@ public class CoMBasedMomentumRateOfChangeControlModule implements MomentumRateOf
    public void waitUntilComputationIsDone()
    {
 //    empty
-   }
-
-   public ControlFlowInputPort<?>[] getInputPorts()
-   {
-      return ControlFlowTools.getInputPorts(this);
-   }
-
-   public ControlFlowOutputPort<?>[] getOutputPorts()
-   {
-      return ControlFlowTools.getOutputPorts(this);
-
    }
 
    public ControlFlowOutputPort<MomentumRateOfChangeData> getMomentumRateOfChangeOutputPort()

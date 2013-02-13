@@ -1,8 +1,6 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController;
 
-import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
-import us.ihmc.controlFlow.ControlFlowTools;
 
 public class NullMomentumRateOfChangeControlModule implements MomentumRateOfChangeControlModule
 {
@@ -28,15 +26,5 @@ public class NullMomentumRateOfChangeControlModule implements MomentumRateOfChan
    public ControlFlowOutputPort<MomentumRateOfChangeData> getMomentumRateOfChangeOutputPort()
    {
       return momentumRateOfChangeOutputPort;
-   }
-
-   public ControlFlowInputPort<?>[] getInputPorts()
-   {
-      return ControlFlowTools.getInputPorts(this);
-   }
-
-   public ControlFlowOutputPort<?>[] getOutputPorts()
-   {
-      return ControlFlowTools.getOutputPorts(this);
    }
 }
