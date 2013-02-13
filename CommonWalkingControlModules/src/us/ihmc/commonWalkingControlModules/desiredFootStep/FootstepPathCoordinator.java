@@ -49,12 +49,13 @@ public class FootstepPathCoordinator implements FootstepProvider
       }
 
       stepInProgress = footstepQueue.poll();
-      if (DEBUG)
-      {
-         System.out.println("stepInProgress= " + stepInProgress);
-      }
+
       if (stepInProgress != null)
       {
+         if (DEBUG)
+         {
+            System.out.println("stepInProgress= " + stepInProgress);
+         }
          notifyConsumersOfStatus(stepInProgress, FootstepStatus.Status.STARTED);
       }
       return stepInProgress;
@@ -81,8 +82,18 @@ public class FootstepPathCoordinator implements FootstepProvider
 
    public void updatePath(ArrayList<Footstep> footsteps)
    {
+      if (DEBUG)
+      {
+         System.out.println("clearing queue\n" + footstepQueue);
+      }
       footstepQueue.clear();
       footstepQueue.addAll(footsteps);
+      if (DEBUG)
+      {
+         System.out.println("new queue\n" + footstepQueue);
+      }
+
+      setPaused(false);
    }
 
    public void setPaused(Boolean isPaused)
