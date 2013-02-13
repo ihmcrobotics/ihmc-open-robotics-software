@@ -77,8 +77,8 @@ public class ViconClient
          Object result = viconServer.SendRequest(remoteRequest);
 
          /*
-          * Check if result is an ArrayList<String>              *
-          * Compiler doesn't get this, so suppress warning about unchecked types          *
+          * Check if result is an ArrayList<String>
+          * Compiler doesn't get this, so suppress warning about unchecked types
           */
          if (result instanceof ArrayList)
          {
@@ -122,6 +122,7 @@ public class ViconClient
    public ViconModelReading getPoseReading(String modelName)
    {
       ViconModelReading pose;
+
       synchronized (mapModelToPoseReading)
       {
          pose = mapModelToPoseReading.get(modelName);
@@ -179,19 +180,18 @@ public class ViconClient
             int updateCount = 0;
             int nonUpdate = 0;
             ViconModelReading lastPoseReading = null;
-            while ((client != null) && !client.isClosed())
+            while ((client != null) &&!client.isClosed())
             {
                Object obj = _ois.readObject();
 
                if (obj instanceof ViconModelReading)
                {
                   ViconModelReading poseReading = (ViconModelReading) obj;
-
                   synchronized (mapModelToPoseReading)
                   {
                      mapModelToPoseReading.put(poseReading.getModelName(), poseReading);
 
-                     for(ViconListener viconListener: listeners)
+                     for (ViconListener viconListener : listeners)
                      {
                         viconListener.update(poseReading);
                      }
@@ -207,13 +207,14 @@ public class ViconClient
 
                   if (DEBUG)
                   {
-                     if ((lastPoseReading != null) && !poseReading.equals(lastPoseReading))
+                     if ((lastPoseReading != null) &&!poseReading.equals(lastPoseReading))
                      {
                         updateCount++;
                         long endTime = System.currentTimeMillis();
                         if ((endTime - startTime) > 1000)
                         {
-                           System.out.println("PoseListener updating at " + (int) ((double) updateCount / ((double) (endTime - startTime) / 1000.0)) + " Hz: " + "(" + nonUpdate + ") " + poseReading);
+                           System.out.println("PoseListener updating at " + (int) ((double) updateCount / ((double) (endTime - startTime) / 1000.0)) + " Hz: "
+                                              + "(" + nonUpdate + ") " + poseReading);
                            startTime = endTime;
                            updateCount = 0;
                            nonUpdate = 0;
@@ -247,6 +248,7 @@ public class ViconClient
             {
                System.out.println("ViconPoseListenerThread_ done");
             }
+
             xcp.printStackTrace();
          }
 
@@ -254,6 +256,7 @@ public class ViconClient
          {
             client.close();
             serverSocket.close();
+
             if (DEBUG)
             {
                System.out.println(".ViconPoseListenerThread_: ServerAccept Thread has Stopped.");
@@ -269,22 +272,23 @@ public class ViconClient
 
    public static void main(String[] args)
    {
-      //    try
-      //    {
-      //       System.out.println("inet: " + InetAddress.getLocalHost());
-      //       Enumeration inets = NetworkInterface.getNetworkInterfaces();
-      //       while (inets.hasMoreElements())
-      //       {
-      //          System.out.println(inets.nextElement());
-      //          System.out.println("--------------------------------");
-      //       }
-      //    }
-      //    catch (Exception e)
-      //    {
-      //       e.printStackTrace();
-      //    }
+      // try
+      // {
+      // System.out.println("inet: " + InetAddress.getLocalHost());
+      // Enumeration inets = NetworkInterface.getNetworkInterfaces();
+      // while (inets.hasMoreElements())
+      // {
+      // System.out.println(inets.nextElement());
+      // System.out.println("--------------------------------");
+      // }
+      // }
+      // catch (Exception e)
+      // {
+      // e.printStackTrace();
+      // }
 
       String ip = "10.4.1.100";
+
       // String ip = "10.2.36.1";
 
       for (int i = 0; i < args.length - 1; i++)
