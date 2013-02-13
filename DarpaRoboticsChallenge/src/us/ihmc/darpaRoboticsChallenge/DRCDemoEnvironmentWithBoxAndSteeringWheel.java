@@ -10,6 +10,7 @@ import javax.vecmath.Vector3d;
 import org.apache.commons.math3.util.FastMath;
 
 import us.ihmc.commonAvatarInterfaces.CommonAvatarEnvironmentInterface;
+import us.ihmc.darpaRoboticsChallenge.controllers.SteeringWheelDisturbanceController;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 
 import com.yobotics.simulationconstructionset.ExternalForcePoint;
@@ -21,6 +22,7 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject
 import com.yobotics.simulationconstructionset.util.ground.CombinedTerrainObject;
 import com.yobotics.simulationconstructionset.util.ground.Contactable;
 import com.yobotics.simulationconstructionset.util.ground.TerrainObject;
+import com.yobotics.simulationconstructionset.util.math.functionGenerator.YoFunctionGeneratorMode;
 
 public class DRCDemoEnvironmentWithBoxAndSteeringWheel implements CommonAvatarEnvironmentInterface
 {
@@ -29,9 +31,10 @@ public class DRCDemoEnvironmentWithBoxAndSteeringWheel implements CommonAvatarEn
    private static final double BOX_HEIGHT = 0.6;
    private final CombinedTerrainObject combinedTerrainObject;
 
-   private final ArrayList<Robot> boxRobots = new ArrayList<Robot>();
+   private final ArrayList<Robot> environmentRobots = new ArrayList<Robot>();
    private final ArrayList<ExternalForcePoint> contactPoints = new ArrayList<ExternalForcePoint>();
    private final ArrayList<Contactable> contactables = new ArrayList<Contactable>();
+   private final ContactableToroidRobot steeringWheelRobot;
 
    public DRCDemoEnvironmentWithBoxAndSteeringWheel(DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
@@ -61,12 +64,13 @@ public class DRCDemoEnvironmentWithBoxAndSteeringWheel implements CommonAvatarEn
       Transform3D pinJointTransform = new Transform3D(pinJointRotation, pinJointLocation, 1.0);
 
       double mass = 1.0;
-      ContactableToroidRobot bot = new ContactableToroidRobot("steeringWheel", pinJointTransform, steeringWheelRadius, toroidRadius, mass);
-      bot.createAvailableContactPoints(1, 30, 1.0 / 2.0, true);
-      contactables.add(bot);
-      boxRobots.add(bot);
+      steeringWheelRobot = new ContactableToroidRobot("steeringWheel", pinJointTransform, steeringWheelRadius, toroidRadius, mass);
+      steeringWheelRobot.setDamping(2.0);
+      steeringWheelRobot.createAvailableContactPoints(1, 30, 1.0 / 2.0, true);
+      contactables.add(steeringWheelRobot);
+      environmentRobots.add(steeringWheelRobot);
       
-      bot.addDynamicGraphicForceVectorsToGroundContactPoints(1, 1.0/2.0, YoAppearance.Red(), dynamicGraphicObjectsListRegistry);
+      steeringWheelRobot.addDynamicGraphicForceVectorsToGroundContactPoints(1, 1.0/2.0, YoAppearance.Red(), dynamicGraphicObjectsListRegistry);
    }
 
    private CombinedTerrainObject createCombinedTerrainObject()
@@ -89,7 +93,7 @@ public class DRCDemoEnvironmentWithBoxAndSteeringWheel implements CommonAvatarEn
 
    public List<Robot> getEnvironmentRobots()
    {
-      return new ArrayList<Robot>(boxRobots);
+      return new ArrayList<Robot>(environmentRobots);
    }
 
    public void addContactPoints(ExternalForcePoint[] contactPoints)
@@ -106,9 +110,14 @@ public class DRCDemoEnvironmentWithBoxAndSteeringWheel implements CommonAvatarEn
       ContactController contactController = new ContactController();
       contactController.addContactPoints(contactPoints);
       contactController.addContactables(contactables);
-      boxRobots.get(0).setController(contactController);
+      environmentRobots.get(0).setController(contactController);
    }
-
+   
+   public void activateDisturbanceControllerOnSteeringWheel(YoFunctionGeneratorMode disturbanceMode)
+   {
+      SteeringWheelDisturbanceController controller = new SteeringWheelDisturbanceController(steeringWheelRobot, disturbanceMode);
+      steeringWheelRobot.setController(controller);
+   }
 
    public void addSelectableListenerToSelectables(SelectableObjectListener selectedListener)
    {
