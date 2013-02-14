@@ -51,4 +51,9 @@ public class YoAppearanceRGBColor extends YoAppearanceTransparency
    {
       return color;
    }
+
+   public String toString()
+   {
+      return "YoAppearanceRGBColor{" + "color=" + color + '}';
+   }
 }
