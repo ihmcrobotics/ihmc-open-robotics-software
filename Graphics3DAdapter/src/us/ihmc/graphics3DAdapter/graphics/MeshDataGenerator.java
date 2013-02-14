@@ -762,7 +762,6 @@ public class MeshDataGenerator
 
    public static MeshDataHolder PyramidCube(float lx, float ly, float lz, float lh)
    {
-      // FIXME: the pyramid doesn't show.
       Point3f points[] = new Point3f[10];
 
       TexCoord2f textPoints[] = new TexCoord2f[10];
@@ -806,7 +805,7 @@ public class MeshDataGenerator
 
       for (int i = 0; i <= 3; i++)
       {
-         polygonIndices[index] =     (i + 1) % 4;
+         polygonIndices[index] = (i + 1) % 4;
          polygonIndices[index + 1] = i;
          polygonIndices[index + 2] = 9;
 
@@ -837,50 +836,52 @@ public class MeshDataGenerator
       return new MeshDataHolder(points, textPoints, polygonIndices, pStripCounts);
    }
 
-   public static MeshDataHolder griddedPolytope(Point3f[][] griddedPoints, double x_tiles, double y_tiles)
-   {
-      int firstSize = griddedPoints.length;
-      int secondSize = griddedPoints[0].length;
-
-      int totalN = firstSize * 2 * secondSize;
-
-      Point3f[] coords = new Point3f[totalN];
-
-      
-      int[] stripCounts = new int[firstSize];
-      TexCoord2f[] textPoints = new TexCoord2f[totalN];
-
-      int index = 0;
-      for (int i = 0; i < firstSize - 1; i++)
-      {
-         for (int j = 0; j < secondSize; j++)
-         {
-            coords[index] = new Point3f(griddedPoints[i + 1][j]);
-            textPoints[index] = new TexCoord2f((float) (x_tiles * ((float) i + 1) / (firstSize)),
-                                               (float) (y_tiles * (j) / (secondSize)));
-            
-            index++;
-
-            coords[index] = new Point3f(griddedPoints[i][j]);
-            textPoints[index] = new TexCoord2f((float) (x_tiles * (i) / (firstSize)), (float) (y_tiles * (j) / (secondSize)));
-            index++;
-         }
-      }
-      
-      for (int k = 0; k < secondSize; k++)
-      {
-//       stripCounts[k] = 2*(xPointsPerSide+1);
-         stripCounts[k] = 2 * firstSize;
-      }
-
-      int[] polygonIndices = new int[coords.length];
-      for(int l = 0; l < firstSize; l++)
-      {
-         // TODO: Fill polygonIndices.
-      }
-      
-      return new MeshDataHolder(coords, textPoints, polygonIndices, stripCounts);
-   }
+   //TODO: Figure out what a Gridded Polytope is and figure out how to draw them.
+//   public static MeshDataHolder griddedPolytope(Point3f[][] griddedPoints, double x_tiles, double y_tiles)
+//   {
+//      int firstSize = griddedPoints.length;
+//      int secondSize = griddedPoints[0].length;
+//
+//      int totalN = firstSize * 2 * secondSize;
+//
+//      Point3f[] coords = new Point3f[totalN];
+//
+//      
+//      int[] stripCounts = new int[firstSize];
+//      TexCoord2f[] textPoints = new TexCoord2f[totalN];
+//
+//      int index = 0;
+//      for (int i = 0; i < firstSize - 1; i++)
+//      {
+//         for (int j = 0; j < secondSize; j++)
+//         {
+//            coords[index] = new Point3f(griddedPoints[i + 1][j]);
+//            textPoints[index] = new TexCoord2f((float) (x_tiles * ((float) i + 1) / (firstSize)),
+//                                               (float) (y_tiles * (j) / (secondSize)));
+//            
+//            index++;
+//
+//            coords[index] = new Point3f(griddedPoints[i][j]);
+//            textPoints[index] = new TexCoord2f((float) (x_tiles * (i) / (firstSize)), (float) (y_tiles * (j) / (secondSize)));
+//            index++;
+//         }
+//      }
+//      
+//      for (int k = 0; k < secondSize; k++)
+//      {
+////       stripCounts[k] = 2*(xPointsPerSide+1);
+//         stripCounts[k] = 2 * firstSize;
+//      }
+//
+//      int[] polygonIndices = new int[coords.length];
+//      for(int l = 0; l < firstSize; l++)
+//      {
+//         // TODO: Fill polygonIndices.
+//      }
+//      
+//      return new MeshDataHolder(coords, textPoints, polygonIndices, stripCounts);
+//   }
+//   
    
    private static TexCoord2f[] generateInterpolatedTexturePoints(int numPoints)
    {
