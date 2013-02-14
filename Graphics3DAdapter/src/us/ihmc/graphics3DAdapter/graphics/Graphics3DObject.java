@@ -869,15 +869,10 @@ public class Graphics3DObject
       graphics3DInstructions.add(graphics3DAddTeaPot);
       return graphics3DAddTeaPot;
    }
-
+   
    public Graphics3DInstruction addHeightMap(HeightMap heightMap, int xPointsPerSide, int yPointsPerSide, AppearanceDefinition appearance)
    {
-      return addHeightMap(heightMap, xPointsPerSide, yPointsPerSide, appearance, null);
-   }
-   
-   public Graphics3DInstruction addHeightMap(HeightMap heightMap, int xPointsPerSide, int yPointsPerSide, AppearanceDefinition appearance, Transform3D transform)
-   {
-      Graphics3DAddHeightMapInstruction instruction = new Graphics3DAddHeightMapInstruction(heightMap, xPointsPerSide, yPointsPerSide, appearance, transform);
+      Graphics3DAddHeightMapInstruction instruction = new Graphics3DAddHeightMapInstruction(heightMap, xPointsPerSide, yPointsPerSide, appearance);
       graphics3DInstructions.add(instruction);
       return instruction;
    }
