@@ -345,10 +345,15 @@ public abstract class MomentumBasedController implements RobotController
       groundReactionForceCheck.set(groundReactionWrenchCheck.getLinearPartCopy());
 
       inverseDynamicsCalculator.compute();
+      
+      doAdditionalTorqueControl();
+      
       if (processedOutputs != null)
          fullRobotModel.setTorques(processedOutputs);
       updateYoVariables();
    }
+
+   protected abstract void doAdditionalTorqueControl();
 
    private void callUpdatables()
    {

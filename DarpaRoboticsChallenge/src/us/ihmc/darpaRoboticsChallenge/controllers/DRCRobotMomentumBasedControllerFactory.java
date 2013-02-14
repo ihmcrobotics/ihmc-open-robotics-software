@@ -3,6 +3,7 @@ package us.ihmc.darpaRoboticsChallenge.controllers;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.RectangularContactableBody;
 import us.ihmc.commonWalkingControlModules.controllers.ControllerFactory;
+import us.ihmc.commonWalkingControlModules.controllers.HandControllerInterface;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelHumanoidControllerFactory;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
@@ -37,7 +38,7 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
 
    public RobotController getController(FullRobotModel fullRobotModel, CommonWalkingReferenceFrames referenceFrames, double controlDT, DoubleYoVariable yoTime,
            DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, GUISetterUpperRegistry guiSetterUpperRegistry, TwistCalculator twistCalculator,
-           CenterOfMassJacobian centerOfMassJacobian, SideDependentList<FootSwitchInterface> footSwitches)
+           CenterOfMassJacobian centerOfMassJacobian, SideDependentList<FootSwitchInterface> footSwitches, SideDependentList<HandControllerInterface> handControllers)
    {
       double footForward = DRCRobotParameters.DRC_ROBOT_FOOT_FORWARD;
       double footBack = DRCRobotParameters.DRC_ROBOT_FOOT_BACK;
@@ -58,14 +59,17 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
 
          ContactablePlaneBody foot = new RectangularContactableBody(footBody, soleFrame, footForward, -footBack, left, right);
          bipedFeet.put(robotSide, foot);
+         
+         specificRegistry.addChild(handControllers.get(robotSide).getYoVariableRegistry());
       }
 
       double gravityZ = 9.81;
 
       RobotController highLevelHumanoidController = highLevelHumanoidControllerFactory.create(fullRobotModel, referenceFrames, null, yoTime, gravityZ,
-                                                       twistCalculator, centerOfMassJacobian, bipedFeet, controlDT, footSwitches,
+                                                       twistCalculator, centerOfMassJacobian, bipedFeet, controlDT, footSwitches, handControllers,
                                                        dynamicGraphicObjectsListRegistry, specificRegistry, guiSetterUpperRegistry, null);
       highLevelHumanoidController.getYoVariableRegistry().addChild(specificRegistry);
+
 
       return highLevelHumanoidController;
    }

@@ -110,10 +110,10 @@ public class DRCRobotJointMap implements SDFJointNameMap, RobotSpecificJointName
             }
 
             // add wrist joint contact point on finger-facing side of palm
-            double wcx = DRCRobotParameters.sandiaWristContactPointOffsets[0];
-            double wcy = DRCRobotParameters.sandiaWristContactPointOffsets[1] * ((robotSide == RobotSide.RIGHT) ? -1 : 1);
-            double wcz = DRCRobotParameters.sandiaWristContactPointOffsets[2];
-            handGroundContactPoints.get(robotSide).add(new Pair<String, Vector3d>(getNameOfJointBeforeHand(robotSide), new Vector3d(wcx, wcy, wcz)));
+            for(Vector3d offset : DRCRobotParameters.sandiaWristContactPointOffsets.get(robotSide))
+            {
+               handGroundContactPoints.get(robotSide).add(new Pair<String, Vector3d>(getNameOfJointBeforeHand(robotSide), offset));
+            }
          }
          else if (selectedModel == DRCRobotModel.ATLAS_IROBOT_HANDS)
          {
@@ -135,10 +135,10 @@ public class DRCRobotJointMap implements SDFJointNameMap, RobotSpecificJointName
             }
 
             // add wrist joint contact point on finger-facing side of palm
-            double wcx = DRCRobotParameters.irobotWristContactPointOffsets[0];
-            double wcy = DRCRobotParameters.irobotWristContactPointOffsets[1] * ((robotSide == RobotSide.RIGHT) ? -1 : 1);
-            double wcz = DRCRobotParameters.irobotWristContactPointOffsets[2];
-            handGroundContactPoints.get(robotSide).add(new Pair<String, Vector3d>(getNameOfJointBeforeHand(robotSide), new Vector3d(wcx, wcy, wcz)));
+            for(Vector3d offset : DRCRobotParameters.irobotWristContactPointOffsets.get(robotSide))
+            {
+               handGroundContactPoints.get(robotSide).add(new Pair<String, Vector3d>(getNameOfJointBeforeHand(robotSide), offset));
+            }
          }
          else if (selectedModel == DRCRobotModel.ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS)
          {

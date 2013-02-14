@@ -5,8 +5,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
-import org.ejml.data.DenseMatrix64F;
-
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.controlModules.ChestOrientationControlModule;
@@ -34,7 +32,6 @@ import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTools;
-import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
@@ -211,5 +208,11 @@ public class MultiContactTestHumanoidController extends MomentumBasedController
       }
       else
          contactState.set(new ArrayList<FramePoint2d>(), coefficientOfFriction);
+   }
+
+   protected void doAdditionalTorqueControl()
+   {
+      // TODO Auto-generated method stub
+      
    }
 }
