@@ -25,6 +25,7 @@ public class DRCRobotJointMap implements SDFJointNameMap, RobotSpecificJointName
    private final String chestName = "utorso";
    private final String pelvisName = "pelvis";
    private final String headName = "head";
+   private final String lidarJointName = "hokuyo_joint";
    private final double ankleHeight = DRCRobotParameters.DRC_ROBOT_ANKLE_HEIGHT;
 
    private final LegJointName[] legJoints =
@@ -310,5 +311,10 @@ public class DRCRobotJointMap implements SDFJointNameMap, RobotSpecificJointName
    public DRCRobotModel getSelectedModel()
    {
       return selectedModel;
+   }
+
+   public String getLidarJointName()
+   {
+      return lidarJointName;
    }
 }

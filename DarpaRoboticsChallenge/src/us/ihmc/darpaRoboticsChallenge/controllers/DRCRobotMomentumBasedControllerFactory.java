@@ -16,6 +16,7 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.remote.DataObjectServer;
 import us.ihmc.utilities.remote.serialization.JointConfigurationDataSender;
 import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
+import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 
@@ -38,7 +39,7 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
 
    public RobotController getController(FullRobotModel fullRobotModel, CommonWalkingReferenceFrames referenceFrames, double controlDT, DoubleYoVariable yoTime,
            DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, GUISetterUpperRegistry guiSetterUpperRegistry, TwistCalculator twistCalculator,
-           CenterOfMassJacobian centerOfMassJacobian, SideDependentList<FootSwitchInterface> footSwitches, SideDependentList<HandControllerInterface> handControllers)
+           CenterOfMassJacobian centerOfMassJacobian, SideDependentList<FootSwitchInterface> footSwitches, SideDependentList<HandControllerInterface> handControllers, OneDoFJoint lidarJoint)
    {
       double footForward = DRCRobotParameters.DRC_ROBOT_FOOT_FORWARD;
       double footBack = DRCRobotParameters.DRC_ROBOT_FOOT_BACK;
@@ -69,7 +70,7 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
       double gravityZ = 9.81;
 
       RobotController highLevelHumanoidController = highLevelHumanoidControllerFactory.create(fullRobotModel, referenceFrames, null, yoTime, gravityZ,
-                                                       twistCalculator, centerOfMassJacobian, bipedFeet, controlDT, footSwitches, handControllers,
+                                                       twistCalculator, centerOfMassJacobian, bipedFeet, controlDT, footSwitches, handControllers, lidarJoint,
                                                        dynamicGraphicObjectsListRegistry, specificRegistry, guiSetterUpperRegistry, null);
       highLevelHumanoidController.getYoVariableRegistry().addChild(specificRegistry);
 

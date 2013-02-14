@@ -23,6 +23,7 @@ import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
+import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTools;
 import us.ihmc.utilities.screwTheory.TotalMassCalculator;
@@ -56,7 +57,7 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
    public RobotController create(FullRobotModel fullRobotModel, CommonWalkingReferenceFrames referenceFrames, FingerForceSensors fingerForceSensors,
                                  DoubleYoVariable yoTime, double gravityZ, TwistCalculator twistCalculator, CenterOfMassJacobian centerOfMassJacobian,
                                  SideDependentList<ContactablePlaneBody> feet, double controlDT, SideDependentList<FootSwitchInterface> footSwitches,
-                                 SideDependentList<HandControllerInterface> handControllers, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
+                                 SideDependentList<HandControllerInterface> handControllers, OneDoFJoint lidarJoint, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
                                  YoVariableRegistry registry, GUISetterUpperRegistry guiSetterUpperRegistry, ProcessedOutputsInterface processedOutputs)
    {
       HashMap<ContactablePlaneBody, RigidBody> contactablePlaneBodiesAndBases = new HashMap<ContactablePlaneBody, RigidBody>();

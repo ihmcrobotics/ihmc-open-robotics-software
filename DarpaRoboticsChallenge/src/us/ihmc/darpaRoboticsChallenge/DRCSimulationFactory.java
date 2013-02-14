@@ -24,6 +24,7 @@ import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
+import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 
 import com.yobotics.simulationconstructionset.gui.GUISetterUpperRegistry;
@@ -68,7 +69,7 @@ public class DRCSimulationFactory
       }
       
       SideDependentList<HandControllerInterface> handControllers = null;
-      if(jointMap.getSelectedModel() == DRCRobotModel.ATLAS_SANDIA_HANDS)
+      if (jointMap.getSelectedModel() == DRCRobotModel.ATLAS_SANDIA_HANDS)
       {
          handControllers = new SideDependentList<HandControllerInterface>();
          for (RobotSide robotSide : RobotSide.values())
@@ -86,11 +87,12 @@ public class DRCSimulationFactory
 
       SDFPerfectSimulatedSensorReaderAndWriter sensorReaderAndOutputWriter = new SDFPerfectSimulatedSensorReaderAndWriter(simulatedRobot,
                                                                                 fullRobotModelForController, referenceFramesForController);
-      
+
+      OneDoFJoint lidarJoint = fullRobotModelForController.getOneDoFJointByName(jointMap.getLidarJointName());
 
       RobotController robotController = controllerFactory.getController(fullRobotModelForController, referenceFramesForController, controlDT,
                                            simulatedRobot.getYoTime(), dynamicGraphicObjectsListRegistry, guiSetterUpperRegistry, twistCalculator,
-                                           centerOfMassJacobian, footSwitches, handControllers);
+                                           centerOfMassJacobian, footSwitches, handControllers, lidarJoint);
 
       ModularRobotController modularRobotController = new ModularRobotController("ModularRobotController");
       modularRobotController.setRawSensorReader(sensorReaderAndOutputWriter);
