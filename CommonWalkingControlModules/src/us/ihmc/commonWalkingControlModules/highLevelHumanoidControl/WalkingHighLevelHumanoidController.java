@@ -86,6 +86,7 @@ import com.yobotics.simulationconstructionset.util.PDController;
 import com.yobotics.simulationconstructionset.util.graphics.BagOfBalls;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameOrientation;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFramePose;
 import com.yobotics.simulationconstructionset.util.statemachines.State;
 import com.yobotics.simulationconstructionset.util.statemachines.StateMachine;
 import com.yobotics.simulationconstructionset.util.statemachines.StateTransition;
@@ -159,6 +160,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
    private final DoubleYoVariable swingAboveSupportAnkle = new DoubleYoVariable("swingAboveSupportAnkle", registry);
 
    private Footstep nextFootstep = null;
+   private final YoFramePose nextFootstepPose = new YoFramePose("nextFootstep", "", worldFrame, registry);
    private final FootstepProvider footstepProvider;
    private final InstantaneousCapturePointTrajectory icpTrajectoryGenerator;
    private final SideDependentList<SettableOrientationProvider> finalFootOrientationProviders = new SideDependentList<SettableOrientationProvider>();
@@ -175,6 +177,9 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
    private final YoFrameOrientation desiredPelvisOrientation = new YoFrameOrientation("desiredPelvis", worldFrame, registry);
 
    private final DoubleYoVariable coefficientOfFriction = new DoubleYoVariable("coefficientOfFriction", registry);
+   private final OneDoFJoint lidarJoint;
+   private final DoubleYoVariable kdLidar = new DoubleYoVariable("kdLidar", registry);
+   private final DoubleYoVariable desiredLidarVelocity = new DoubleYoVariable("desiredLidarVelocity", registry);
 
    public WalkingHighLevelHumanoidController(FullRobotModel fullRobotModel, CommonWalkingReferenceFrames referenceFrames, TwistCalculator twistCalculator,
            CenterOfMassJacobian centerOfMassJacobian, SideDependentList<? extends ContactablePlaneBody> bipedFeet, BipedSupportPolygons bipedSupportPolygons,
@@ -185,7 +190,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
            DoubleProvider swingTimeProvider, YoPositionProvider finalPositionProvider, boolean stayOntoes, double desiredPelvisPitch, double trailingFootPitch,
            ArrayList<Updatable> updatables, ProcessedOutputsInterface processedOutputs, WalkingControllerParameters walkingControllerParameters,
            ICPBasedMomentumRateOfChangeControlModule momentumRateOfChangeControlModule, RootJointAccelerationControlModule rootJointAccelerationControlModule,
-           ControlFlowInputPort<OrientationTrajectoryData> desiredPelvisOrientationTrajectoryInputPort)
+           ControlFlowInputPort<OrientationTrajectoryData> desiredPelvisOrientationTrajectoryInputPort, OneDoFJoint lidarJoint)
    {
       super(fullRobotModel, centerOfMassJacobian, referenceFrames, yoTime, gravityZ, twistCalculator, bipedFeet, bipedSupportPolygons, controlDT,
             processedOutputs, groundReactionWrenchDistributor, updatables, momentumRateOfChangeControlModule, rootJointAccelerationControlModule, walkingControllerParameters.getGroundReactionWrenchBreakFrequencyHertz(),
@@ -288,6 +293,8 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       this.trailingFootPitch.set(trailingFootPitch);
       kUpperBody.set(100.0);
       zetaUpperBody.set(1.0);
+      kdLidar.set(50.0);
+      desiredLidarVelocity.set(10.0);
 
       double initialLeadingFootPitch = 0.05;
 
@@ -388,6 +395,12 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
          RigidBody foot = fullRobotModel.getFoot(robotSide);
          InverseDynamicsJoint[] legJoints = ScrewTools.createJointPath(pelvis, foot);
          unconstrainedJoints.removeAll(Arrays.asList(legJoints));
+      }
+      
+      this.lidarJoint = lidarJoint;
+      if (lidarJoint != null)
+      {
+         unconstrainedJoints.remove(lidarJoint);
       }
 
       unconstrainedJoints.removeAll(Arrays.asList(headOrientationControlJoints));
@@ -520,6 +533,8 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
          if (nextFootstep == null)
          {
             nextFootstep = footstepProvider.poll();
+            if (nextFootstep != null)
+               nextFootstepPose.set(nextFootstep.getPose());
          }
 
          doFootcontrol();
@@ -988,6 +1003,13 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       doArmControl();
 
       setICPBasedMomentumRateOfChangeControlModuleInputs();
+      
+      doLidarControl();
+   }
+
+   private void doLidarControl()
+   {
+      doPDControl(lidarJoint, 0.0, kdLidar.getDoubleValue(), 0.0, desiredLidarVelocity.getDoubleValue());
    }
 
    // TODO: connect ports instead
