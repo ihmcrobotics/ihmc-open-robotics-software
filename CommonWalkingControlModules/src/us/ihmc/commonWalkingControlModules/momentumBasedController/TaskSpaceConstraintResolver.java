@@ -134,6 +134,7 @@ public class TaskSpaceConstraintResolver
       {
          nullspaceCalculator.setMatrix(sJ, nullity);
          nullspaceCalculator.removeNullspaceComponent(sJInverse);
+         assert(isNullspaceComponentZero(sJInverse, nullspaceCalculator.getNullspace()));
       }
 
       // Phi
@@ -264,7 +265,7 @@ public class TaskSpaceConstraintResolver
       CommonOps.multTransA(nullspace, matrixToTest, nullspaceCheck);
       boolean nullspaceComponentZero = MatrixFeatures.isConstantVal(nullspaceCheck, 0.0, 1e-7);
       if (!nullspaceComponentZero)
-         System.out.println("nullspace component not zero");
+         System.out.println("nullspace component not zero!");
       return nullspaceComponentZero;
    }
 

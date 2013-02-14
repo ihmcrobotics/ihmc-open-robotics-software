@@ -71,12 +71,12 @@ public class MultiContactTestHumanoidController extends MomentumBasedController
            HashMap<ContactablePlaneBody, RigidBody> contactablePlaneBodiesAndBases, double controlDT, ProcessedOutputsInterface processedOutputs,
            GroundReactionWrenchDistributor groundReactionWrenchDistributor, ArrayList<Updatable> updatables,
            MomentumRateOfChangeControlModule momentumRateOfChangeControlModule, RootJointAccelerationControlModule rootJointAccelerationControlModule,
-           ControlFlowInputPort<FramePoint> desiredCoMPositionPort, ControlFlowInputPort<OrientationTrajectoryData> desiredPelvisOrientationPort,
-           DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+           double groundReactionWrenchBreakFrequencyHertz, ControlFlowInputPort<FramePoint> desiredCoMPositionPort,
+           ControlFlowInputPort<OrientationTrajectoryData> desiredPelvisOrientationPort, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       super(fullRobotModel, centerOfMassJacobian, referenceFrames, yoTime, gravityZ, twistCalculator, contactablePlaneBodiesAndBases.keySet(), controlDT,
             processedOutputs, groundReactionWrenchDistributor, updatables, momentumRateOfChangeControlModule, rootJointAccelerationControlModule,
-            dynamicGraphicObjectsListRegistry);
+            groundReactionWrenchBreakFrequencyHertz, dynamicGraphicObjectsListRegistry);
       this.desiredCoMPositionPort = desiredCoMPositionPort;
       this.desiredPelvisOrientationPort = desiredPelvisOrientationPort;
 
@@ -166,7 +166,6 @@ public class MultiContactTestHumanoidController extends MomentumBasedController
    {
       for (ContactablePlaneBody contactablePlaneBody : endEffectorControlModules.keySet())
       {
-
          EndEffectorControlModule endEffectorControlModule = endEffectorControlModules.get(contactablePlaneBody);
          endEffectorControlModule.setContactPoints(contactStates.get(contactablePlaneBody).getContactPoints2d());
          endEffectorControlModule.setCenterOfPressure(centersOfPressure2d.get(contactablePlaneBody).getFramePoint2dCopy());

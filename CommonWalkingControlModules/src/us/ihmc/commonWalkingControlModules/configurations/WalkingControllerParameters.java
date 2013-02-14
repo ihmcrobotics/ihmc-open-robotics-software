@@ -21,4 +21,6 @@ public interface WalkingControllerParameters
    public abstract double nominalHeightAboveGround();
 
    public abstract double initialHeightAboveGround();
+
+   public abstract double getGroundReactionWrenchBreakFrequencyHertz();
 }

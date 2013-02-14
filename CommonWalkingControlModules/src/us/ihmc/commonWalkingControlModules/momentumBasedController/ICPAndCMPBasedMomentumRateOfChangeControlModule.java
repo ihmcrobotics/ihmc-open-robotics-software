@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController;
 
+import javax.media.j3d.Transform3D;
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
@@ -19,6 +20,7 @@ import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.math.geometry.RotationFunctions;
 import us.ihmc.utilities.screwTheory.Momentum;
 import us.ihmc.utilities.screwTheory.MomentumCalculator;
 import us.ihmc.utilities.screwTheory.SpatialForceVector;
@@ -209,6 +211,46 @@ public class ICPAndCMPBasedMomentumRateOfChangeControlModule implements ICPBased
       }
 
       return desiredDeltaCMP.toFrameVector2d();
+
+//      ReferenceFrame frame = ReferenceFrame.getWorldFrame();
+//      
+//      desiredPelvisOrientation.changeFrame(frame);
+//      double[] yawPitchRoll = desiredPelvisOrientation.getYawPitchRoll();
+//      double desiredPelvisPitch = yawPitchRoll[1];
+//      double desiredPelvisRoll = yawPitchRoll[2];
+//
+//      FrameVector zUnitVector = new FrameVector(frame, 0.0, 0.0, 1.0);
+//      momentum.changeFrame(centerOfMassFrame);
+//      FrameVector angularMomentum = momentum.getAngularPartAsFrameVectorCopy();
+//      angularMomentum.changeFrame(worldFrame);
+//      FrameVector desiredDeltaCMP = new FrameVector(frame);
+//      desiredDeltaCMP.cross(angularMomentum, zUnitVector);
+//      desiredDeltaCMP.scale(-kAngularMomentumXY.getDoubleValue());
+//
+//      Transform3D pelvisToWorld = pelvisFrame.getTransformToDesiredFrame(frame);
+//      Matrix3d pelvisToDesiredPelvis = new Matrix3d();
+//      pelvisToWorld.get(pelvisToDesiredPelvis);
+//
+//      Matrix3d desiredPelvisToWorldRotation = new Matrix3d();
+//      RotationFunctions.setYawPitchRoll(desiredPelvisToWorldRotation, 0.0, desiredPelvisPitch, desiredPelvisRoll);
+//      pelvisToDesiredPelvis.mulTransposeLeft(desiredPelvisToWorldRotation, pelvisToDesiredPelvis);
+//
+//      AxisAngle4d pelvisToWorldAxisAngle = new AxisAngle4d();
+//      pelvisToWorldAxisAngle.set(pelvisToDesiredPelvis);
+//      FrameVector proportionalPart = new FrameVector(frame, pelvisToWorldAxisAngle.getX(), pelvisToWorldAxisAngle.getY(), 0.0);
+//      proportionalPart.scale(pelvisToWorldAxisAngle.getAngle());
+//      proportionalPart.cross(proportionalPart, zUnitVector);
+//      proportionalPart.scale(-kPelvisAxisAngle.getDoubleValue());
+//      desiredDeltaCMP.add(proportionalPart);
+//      
+//      double maxDeltaDesiredCMP = 0.02;
+//      if (desiredDeltaCMP.length() > maxDeltaDesiredCMP)
+//      {
+//         desiredDeltaCMP.normalize();
+//         desiredDeltaCMP.scale(maxDeltaDesiredCMP);
+//      }
+//
+//      return desiredDeltaCMP.toFrameVector2d();
    }
 
    public void waitUntilComputationIsDone()

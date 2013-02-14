@@ -115,10 +115,11 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
       rootJointAccelerationControlModule.setProportionalGains(100.0, 100.0, 100.0);
       rootJointAccelerationControlModule.setDerivativeGains(20.0, 20.0, 20.0);
 
+      double groundReactionWrenchBreakFrequencyHertz = 7.0;
       MultiContactTestHumanoidController ret = new MultiContactTestHumanoidController(fullRobotModel, centerOfMassJacobian, referenceFrames, yoTime, gravityZ,
                                                   twistCalculator, contactablePlaneBodiesAndBases, controlDT, processedOutputs,
                                                   groundReactionWrenchDistributor, null, momentumRateOfChangeControlModule, rootJointAccelerationControlModule,
-                                                  momentumRateOfChangeControlModule.getDesiredCoMPositionInputPort(),
+                                                  groundReactionWrenchBreakFrequencyHertz, momentumRateOfChangeControlModule.getDesiredCoMPositionInputPort(),
                                                   rootJointAccelerationControlModule.getDesiredPelvisOrientationTrajectoryInputPort(),
                                                   dynamicGraphicObjectsListRegistry);
 

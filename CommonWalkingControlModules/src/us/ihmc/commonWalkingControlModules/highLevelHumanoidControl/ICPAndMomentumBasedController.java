@@ -54,11 +54,11 @@ public abstract class ICPAndMomentumBasedController extends MomentumBasedControl
            BipedSupportPolygons bipedSupportPolygons, double controlDT, ProcessedOutputsInterface processedOutputs,
            GroundReactionWrenchDistributor groundReactionWrenchDistributor, ArrayList<Updatable> updatables,
            MomentumRateOfChangeControlModule momentumRateOfChangeControlModule, RootJointAccelerationControlModule rootJointAccelerationControlModule,
-           DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+           double groundReactionWrenchBreakFrequencyHertz, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       super(fullRobotModel, centerOfMassJacobian, referenceFrames, yoTime, gravityZ, twistCalculator, bipedFeet.values(), controlDT, processedOutputs,
             groundReactionWrenchDistributor, updatables, momentumRateOfChangeControlModule, rootJointAccelerationControlModule,
-            dynamicGraphicObjectsListRegistry);
+            groundReactionWrenchBreakFrequencyHertz, dynamicGraphicObjectsListRegistry);
 
       double totalMass = TotalMassCalculator.computeSubTreeMass(fullRobotModel.getElevator());
       this.omega0Calculator = new Omega0Calculator(centerOfMassFrame, totalMass);
@@ -80,7 +80,7 @@ public abstract class ICPAndMomentumBasedController extends MomentumBasedControl
 
       DynamicGraphicPosition capturePointViz = capturePoint.createDynamicGraphicPosition("Capture Point", 0.01, YoAppearance.Blue(), GraphicType.ROTATED_CROSS);
       dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("Capture Point", capturePointViz);
-      dynamicGraphicObjectsListRegistry.registerArtifact("Capture Point", capturePointViz.createArtifact());      
+      dynamicGraphicObjectsListRegistry.registerArtifact("Capture Point", capturePointViz.createArtifact());
    }
 
    @Override
@@ -147,9 +147,9 @@ public abstract class ICPAndMomentumBasedController extends MomentumBasedControl
          FrameVector torque = admissibleDesiredGroundReactionTorque.getFrameVectorCopy();
          torque.changeFrame(admissibleGroundReactionWrench.getExpressedInFrame());
          admissibleGroundReactionWrench.setAngularPart(torque.getVector());
-         
+
          if (admissibleGroundReactionWrench.getLinearPartCopy().getZ() == 0.0)
-            admissibleGroundReactionWrench.set(gravitationalWrench); // FIXME: hack to resolve circularity
+            admissibleGroundReactionWrench.set(gravitationalWrench);    // FIXME: hack to resolve circularity
 
          omega0.set(omega0Calculator.computeOmega0(cops, admissibleGroundReactionWrench));
       }
@@ -163,6 +163,7 @@ public abstract class ICPAndMomentumBasedController extends MomentumBasedControl
          updateBipedSupportPolygons(bipedSupportPolygons);
       }
    }
+
 
    private class CapturePointUpdater implements Updatable
    {
