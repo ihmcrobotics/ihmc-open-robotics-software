@@ -2,11 +2,9 @@ package us.ihmc.darpaRoboticsChallenge;
 
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.ControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.FlatGroundWalkingHighLevelHumanoidControllerFactory;
 import us.ihmc.commonWalkingControlModules.terrain.TerrainType;
-import us.ihmc.commonWalkingControlModules.trajectories.NewestCoMHeightTrajectoryGenerator;
 import us.ihmc.darpaRoboticsChallenge.controllers.DRCRobotMomentumBasedControllerFactory;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.SquaredUpDRCRobotInitialSetup;
@@ -47,9 +45,7 @@ public class DRCFlatGroundWalkingTrack
 
       if (cheatWithGroundHeightAtForFootstep)
       {
-         //TODO: Clean up the stepping stuff. Make it consistent whether it is the location of the ankle or the sole.
-         double ankleHeightAboveGround = NewestCoMHeightTrajectoryGenerator.DISTANCE_FROM_SOLE_TO_ANKLE;
-         highLevelHumanoidControllerFactory.setupForCheatingUsingGroundHeightAtForFootstepProvider(scsInitialSetup.getGroundProfile(), ankleHeightAboveGround);
+         highLevelHumanoidControllerFactory.setupForCheatingUsingGroundHeightAtForFootstepProvider(scsInitialSetup.getGroundProfile());
       }
       
       DRCRobotJointMap jointMap = new DRCRobotJointMap(DRCRobotModel.getDefaultRobotModel());
