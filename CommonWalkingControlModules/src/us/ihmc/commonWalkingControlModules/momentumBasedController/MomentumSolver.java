@@ -81,7 +81,7 @@ public class MomentumSolver
       this.jointsInOrderList = Collections.unmodifiableList(Arrays.asList(jointsInOrder));
 
       int size = Momentum.SIZE;
-      this.nullspaceCalculator = new NullspaceCalculator(size);
+      this.nullspaceCalculator = new NullspaceCalculator(size, true);
       this.rootJointSolver = new RootJointSolver();
       this.jointSpaceConstraintResolver = new JointSpaceConstraintResolver();
       this.taskSpaceConstraintResolver = new TaskSpaceConstraintResolver(jointsInOrder, nullspaceCalculator, jacobianSolver);

@@ -68,4 +68,9 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
    {
       this.initialHeightAboveGround = initialHeightAboveGround;
    }
+
+   public double getGroundReactionWrenchBreakFrequencyHertz()
+   {
+      return 7.0;
+   }
 }

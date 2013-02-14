@@ -120,7 +120,7 @@ public abstract class MomentumBasedController implements RobotController
          DoubleYoVariable yoTime, double gravityZ, TwistCalculator twistCalculator, Collection<? extends ContactablePlaneBody> contactablePlaneBodies,
          double controlDT, ProcessedOutputsInterface processedOutputs, GroundReactionWrenchDistributor groundReactionWrenchDistributor,
          ArrayList<Updatable> updatables, MomentumRateOfChangeControlModule momentumRateOfChangeControlModule,
-         RootJointAccelerationControlModule rootJointAccelerationControlModule, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+         RootJointAccelerationControlModule rootJointAccelerationControlModule, double groundReactionWrenchBreakFrequencyHertz, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
       SixDoFJoint rootJoint = fullRobotModel.getRootJoint();
@@ -157,7 +157,7 @@ public abstract class MomentumBasedController implements RobotController
       this.unfilteredDesiredGroundReactionTorque = new YoFrameVector("unfilteredDesiredGroundReactionTorque", centerOfMassFrame, registry);
       this.unfilteredDesiredGroundReactionForce = new YoFrameVector("unfilteredDesiredGroundReactionForce", centerOfMassFrame, registry);
 
-      alphaGroundReactionWrench.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(7.0, controlDT));    // FIXME: use setter
+      alphaGroundReactionWrench.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(groundReactionWrenchBreakFrequencyHertz, controlDT));
 
       this.desiredGroundReactionTorque = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector("desiredGroundReactionTorque", "", registry,
               alphaGroundReactionWrench, unfilteredDesiredGroundReactionTorque);

@@ -682,7 +682,7 @@ public class MomentumSolverTest
       solver.compute();
       solver.solve(desiredMomentumRate);
 
-      NullspaceCalculator nullspaceCalculator = new NullspaceCalculator(jacobian.getNumberOfColumns());
+      NullspaceCalculator nullspaceCalculator = new NullspaceCalculator(jacobian.getNumberOfColumns(), true);
       nullspaceCalculator.setMatrix(jacobian.getJacobianMatrix(), nullity);
       DenseMatrix64F nullspace = nullspaceCalculator.getNullspace();
 

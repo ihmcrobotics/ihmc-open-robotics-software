@@ -188,7 +188,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
            ControlFlowInputPort<OrientationTrajectoryData> desiredPelvisOrientationTrajectoryInputPort)
    {
       super(fullRobotModel, centerOfMassJacobian, referenceFrames, yoTime, gravityZ, twistCalculator, bipedFeet, bipedSupportPolygons, controlDT,
-            processedOutputs, groundReactionWrenchDistributor, updatables, momentumRateOfChangeControlModule, rootJointAccelerationControlModule,
+            processedOutputs, groundReactionWrenchDistributor, updatables, momentumRateOfChangeControlModule, rootJointAccelerationControlModule, walkingControllerParameters.getGroundReactionWrenchBreakFrequencyHertz(),
             dynamicGraphicObjectsListRegistry);
 
       this.icpBasedMomentumRateOfChangeControlModule = momentumRateOfChangeControlModule;
@@ -265,7 +265,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
          EndEffectorControlModule endEffectorControlModule = new EndEffectorControlModule(bipedFoot, jacobian, swingPositionTrajectoryGenerator,
                                                                 swingOrientationTrajectoryGenerator, onToesPitchTrajectoryGenerator, yoTime, twistCalculator,
                                                                 registry);
-//         endEffectorControlModule.setParameters(3e-2, 500.0);
+         endEffectorControlModule.setParameters(3e-2, 500.0);
          endEffectorControlModules.put(bipedFoot, endEffectorControlModule);
 
       }
