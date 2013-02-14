@@ -16,7 +16,7 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 public class DesiredFootstepCalculatorTools
 {
-   public static double computeMinZWithRespectToAnkleInWorldFrame(Matrix3d footToWorldRotation, ContactablePlaneBody contactableBody)
+      public static double computeMinZWithRespectToAnkleInWorldFrame(Matrix3d footToWorldRotation, ContactablePlaneBody contactableBody)
    {
       List<FramePoint> footPoints = contactableBody.getContactPoints();
       double minZ = Double.POSITIVE_INFINITY;

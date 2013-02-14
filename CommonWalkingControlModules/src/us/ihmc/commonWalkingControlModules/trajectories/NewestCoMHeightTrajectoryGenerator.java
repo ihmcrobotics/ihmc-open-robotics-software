@@ -22,7 +22,7 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 
 public class NewestCoMHeightTrajectoryGenerator implements CoMHeightTrajectoryGenerator
 {
-   public static final double DISTANCE_FROM_SOLE_TO_ANKLE = 0.08;
+   public static final double DISTANCE_FROM_SOLE_TO_ANKLE = 0.08; // FIXME: this is extremely evil and needs to be deleted
    private static final boolean DEBUG = false; 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
