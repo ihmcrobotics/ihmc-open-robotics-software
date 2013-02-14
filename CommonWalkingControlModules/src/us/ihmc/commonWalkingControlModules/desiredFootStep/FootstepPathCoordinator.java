@@ -60,6 +60,11 @@ public class FootstepPathCoordinator implements FootstepProvider
       }
       return stepInProgress;
    }
+   
+   public Footstep peek()
+   {
+      return footstepQueue.peek();
+   }
 
    private void notifyConsumersOfStatus(Footstep footstep, FootstepStatus.Status status)
    {

@@ -17,6 +17,8 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public class CoMHeightTimeDerivativesSmoother
 {
+   private static final boolean DEBUG = false;
+
    private final double dt;
    
 //   private final double maximumAcceleration = 10.0;
@@ -105,17 +107,20 @@ public class CoMHeightTimeDerivativesSmoother
       eigenValueThreeImag.set(eigenvalues[2].imag());
       
       
-      ArrayList<SingleRealMode> realModes = eigenvalueDecomposer.getRealModes();
-      ArrayList<ComplexConjugateMode> complexConjugateModes = eigenvalueDecomposer.getComplexConjugateModes();
-     
-      for (SingleRealMode realMode : realModes)
+      if (DEBUG)
       {
-         System.out.println(realMode);
-      }
-      
-      for (ComplexConjugateMode complexConjugateMode : complexConjugateModes)
-      {
-         System.out.println(complexConjugateMode);
+         ArrayList<SingleRealMode> realModes = eigenvalueDecomposer.getRealModes();
+         ArrayList<ComplexConjugateMode> complexConjugateModes = eigenvalueDecomposer.getComplexConjugateModes();
+
+         for (SingleRealMode realMode : realModes)
+         {
+            System.out.println(realMode);
+         }
+
+         for (ComplexConjugateMode complexConjugateMode : complexConjugateModes)
+         {
+            System.out.println(complexConjugateMode);
+         }
       }
    }
    
