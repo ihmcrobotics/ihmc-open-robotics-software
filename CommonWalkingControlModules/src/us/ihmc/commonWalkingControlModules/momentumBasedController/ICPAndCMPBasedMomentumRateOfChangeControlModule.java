@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController;
 
-import javax.media.j3d.Transform3D;
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
@@ -20,7 +19,6 @@ import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.math.geometry.RotationFunctions;
 import us.ihmc.utilities.screwTheory.Momentum;
 import us.ihmc.utilities.screwTheory.MomentumCalculator;
 import us.ihmc.utilities.screwTheory.SpatialForceVector;
@@ -169,11 +167,11 @@ public class ICPAndCMPBasedMomentumRateOfChangeControlModule implements ICPBased
       return ret;
    }
 
-   public void setGains(double kAngularMomentumXY, double kPelvisAxisAngle, double captureKp, double filterBreakFrequencyHertz)
+   public void setGains(double kAngularMomentumXY, double kPelvisAxisAngle, double captureKpParallelToMotion, double captureKpOrthogonalToMotion, double filterBreakFrequencyHertz)
    {
       this.kAngularMomentumXY.set(kAngularMomentumXY);
       this.kPelvisAxisAngle.set(kPelvisAxisAngle);
-      this.icpProportionalController.setGains(captureKp, filterBreakFrequencyHertz);
+      this.icpProportionalController.setGains(captureKpParallelToMotion, captureKpOrthogonalToMotion, filterBreakFrequencyHertz);
    }
 
    private FrameVector2d determineDesiredDeltaCMP(FrameOrientation desiredPelvisOrientation, Momentum momentum)

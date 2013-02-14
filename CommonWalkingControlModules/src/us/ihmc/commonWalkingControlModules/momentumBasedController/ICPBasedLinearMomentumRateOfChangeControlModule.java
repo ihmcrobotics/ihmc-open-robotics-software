@@ -59,6 +59,9 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule implements ICPBased
       this.momentumRateOfChangeData = new MomentumRateOfChangeData(centerOfMassFrame);
       parentRegistry.addChild(registry);
       momentumRateOfChangeOutputPort.setData(momentumRateOfChangeData);
+
+      // hide CoP since we won't be calculating it explicitly in this class
+      visualizer.setDesiredCoP(new FramePoint2d(desiredCMP.getReferenceFrame(), Double.NaN, Double.NaN));
    }
 
    public void startComputation()
@@ -112,9 +115,9 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule implements ICPBased
       return ret;
    }
 
-   public void setGains(double captureKp, double filterBreakFrequencyHertz)
+   public void setGains(double captureKpParallelToMotion, double captureKpOrthogonalToMotion, double filterBreakFrequencyHertz)
    {
-      this.icpProportionalController.setGains(captureKp, filterBreakFrequencyHertz);
+      this.icpProportionalController.setGains(captureKpParallelToMotion, captureKpOrthogonalToMotion, filterBreakFrequencyHertz);
    }
 
    public void waitUntilComputationIsDone()
