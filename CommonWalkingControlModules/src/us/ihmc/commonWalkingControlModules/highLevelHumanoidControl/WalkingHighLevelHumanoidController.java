@@ -83,6 +83,7 @@ import us.ihmc.utilities.screwTheory.TwistCalculator;
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.util.PDController;
+import com.yobotics.simulationconstructionset.util.PIDController;
 import com.yobotics.simulationconstructionset.util.graphics.BagOfBalls;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameOrientation;
@@ -183,8 +184,9 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 
    private final DoubleYoVariable coefficientOfFriction = new DoubleYoVariable("coefficientOfFriction", registry);
    private final OneDoFJoint lidarJoint;
-   private final DoubleYoVariable kdLidar = new DoubleYoVariable("kdLidar", registry);
+   private final PIDController lidarJointVelocityController = new PIDController("lidar", registry);
    private final DoubleYoVariable desiredLidarVelocity = new DoubleYoVariable("desiredLidarVelocity", registry);
+
 
    public WalkingHighLevelHumanoidController(FullRobotModel fullRobotModel, CommonWalkingReferenceFrames referenceFrames, TwistCalculator twistCalculator,
            CenterOfMassJacobian centerOfMassJacobian, SideDependentList<? extends ContactablePlaneBody> bipedFeet, BipedSupportPolygons bipedSupportPolygons,
@@ -299,7 +301,8 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       this.trailingFootPitch.set(trailingFootPitch);
       kUpperBody.set(100.0);
       zetaUpperBody.set(1.0);
-      kdLidar.set(50.0);
+      lidarJointVelocityController.setIntegralGain(0.01);
+      lidarJointVelocityController.setProportionalGain(0.01); // proportional gain corresponds to velocity, derivative corresponds to acceleration
       desiredLidarVelocity.set(10.0);
 
       double initialLeadingFootPitch = 0.05;
@@ -1010,13 +1013,8 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 
       setICPBasedMomentumRateOfChangeControlModuleInputs();
 
-      doLidarControl();
-   }
-
-   private void doLidarControl()
-   {
       if (lidarJoint != null)
-         doPDControl(lidarJoint, 0.0, kdLidar.getDoubleValue(), 0.0, desiredLidarVelocity.getDoubleValue());
+         setOneDoFJointAcceleration(lidarJoint, 0.0);
    }
 
    // TODO: connect ports instead
@@ -1233,7 +1231,10 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 
    protected void doAdditionalTorqueControl()
    {
-      // TODO Auto-generated method stub
-
+      if (lidarJoint != null)
+      {
+         double lidarJointTau = lidarJointVelocityController.compute(lidarJoint.getQd(), desiredLidarVelocity.getDoubleValue(), 0.0, 0.0, controlDT);
+         lidarJoint.setTau(lidarJoint.getTau() + lidarJointTau);
+      }
    }
 }

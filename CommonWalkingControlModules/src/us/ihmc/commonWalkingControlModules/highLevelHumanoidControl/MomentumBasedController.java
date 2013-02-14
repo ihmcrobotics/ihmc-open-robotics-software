@@ -385,6 +385,11 @@ public abstract class MomentumBasedController implements RobotController
    protected void doPDControl(OneDoFJoint joint, double k, double d, double desiredPosition, double desiredVelocity)
    {
       double desiredAcceleration = computeDesiredAcceleration(k, d, desiredPosition, desiredVelocity, joint);
+      setOneDoFJointAcceleration(joint, desiredAcceleration);
+   }
+
+   protected void setOneDoFJointAcceleration(OneDoFJoint joint, double desiredAcceleration)
+   {
       DenseMatrix64F jointAcceleration = new DenseMatrix64F(joint.getDegreesOfFreedom(), 1);
       jointAcceleration.set(0, 0, desiredAcceleration);
       solver.setDesiredJointAcceleration(joint, jointAcceleration);
