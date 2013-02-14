@@ -16,7 +16,7 @@ import java.util.Collection;
  */
 public class FootstepPathConsumer extends AbstractStreamingDataConsumer<ArrayList>
 {
-   private boolean DEBUG = true;
+   private boolean DEBUG = false;
    private FootstepPathCoordinator footstepPathCoordinator;
    private final Collection<? extends ContactablePlaneBody> rigidBodyList;
 

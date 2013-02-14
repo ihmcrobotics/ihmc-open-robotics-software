@@ -1009,7 +1009,8 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 
    private void doLidarControl()
    {
-      doPDControl(lidarJoint, 0.0, kdLidar.getDoubleValue(), 0.0, desiredLidarVelocity.getDoubleValue());
+      if (lidarJoint != null)
+         doPDControl(lidarJoint, 0.0, kdLidar.getDoubleValue(), 0.0, desiredLidarVelocity.getDoubleValue());
    }
 
    // TODO: connect ports instead
