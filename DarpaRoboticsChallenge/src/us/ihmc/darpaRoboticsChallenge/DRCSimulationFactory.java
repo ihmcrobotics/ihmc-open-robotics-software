@@ -27,6 +27,7 @@ import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 
+import com.yobotics.simulationconstructionset.InverseDynamicsMechanismReferenceFrameVisualizer;
 import com.yobotics.simulationconstructionset.gui.GUISetterUpperRegistry;
 import com.yobotics.simulationconstructionset.robotController.ModularRobotController;
 import com.yobotics.simulationconstructionset.robotController.ModularSensorProcessor;
@@ -36,6 +37,7 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject
 
 public class DRCSimulationFactory
 {
+   private static final boolean SHOW_REFERENCE_FRAMES = false;
    public static boolean SHOW_INERTIA_ELLIPSOIDS = false;
 
    public static HumanoidRobotSimulation<SDFRobot> createSimulation(DRCRobotJointMap jointMap, ControllerFactory controllerFactory,
@@ -105,10 +107,15 @@ public class DRCSimulationFactory
                  dynamicGraphicObjectsListRegistry));
       }
 
+      if(SHOW_REFERENCE_FRAMES)
+      {
+         modularRobotController.addRobotController(new InverseDynamicsMechanismReferenceFrameVisualizer(fullRobotModelForSimulation.getElevator(), dynamicGraphicObjectsListRegistry, 0.1));
+      }
+      
       modularRobotController.setRawOutputWriter(sensorReaderAndOutputWriter);
 
       return new HumanoidRobotSimulation<SDFRobot>(simulatedRobot, modularRobotController, simulationTicksPerControlTick, fullRobotModelForSimulation,
-                                         commonAvatarEnvironmentInterface, simulatedRobot.getAllGroundContactPoints(), robotInitialSetup, scsInitialSetup,
+                                         commonAvatarEnvironmentInterface, simulatedRobot.getAllExternalForcePoints(), robotInitialSetup, scsInitialSetup,
                                          guiInitialSetup, guiSetterUpperRegistry, dynamicGraphicObjectsListRegistry);
    }
 
