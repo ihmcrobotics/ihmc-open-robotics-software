@@ -3,7 +3,10 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
+import us.ihmc.utilities.math.geometry.FrameVector;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
+import us.ihmc.utilities.screwTheory.SpatialMotionVector;
 
 public class TaskspaceConstraintData
 {
@@ -24,6 +27,27 @@ public class TaskspaceConstraintData
       this.spatialAcceleration.set(spatialAcceleration);
       this.nullspaceMultipliers.setReshape(nullspaceMultipliers);
       this.selectionMatrix.setReshape(selectionMatrix);
+   }
+
+   public void set(SpatialAccelerationVector spatialAcceleration, DenseMatrix64F nullspaceMultipliers)
+   {
+      this.spatialAcceleration.set(spatialAcceleration);
+      this.nullspaceMultipliers.setReshape(nullspaceMultipliers);
+      this.selectionMatrix.reshape(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
+      CommonOps.setIdentity(selectionMatrix);      
+   }
+   
+   public void set(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, FrameVector desiredAngularAcceleration, DenseMatrix64F nullspaceMultipliers)
+   {
+      this.spatialAcceleration.setToZero(bodyFrame, baseFrame, desiredAngularAcceleration.getReferenceFrame());
+      this.spatialAcceleration.setAngularPart(desiredAngularAcceleration.getVector());
+
+      this.nullspaceMultipliers.setReshape(nullspaceMultipliers);
+      
+      this.selectionMatrix.reshape(3, SpatialMotionVector.SIZE);
+      this.selectionMatrix.set(0, 0, 1.0);
+      this.selectionMatrix.set(1, 1, 1.0);
+      this.selectionMatrix.set(2, 2, 1.0);
    }
 
    public SpatialAccelerationVector getSpatialAcceleration()

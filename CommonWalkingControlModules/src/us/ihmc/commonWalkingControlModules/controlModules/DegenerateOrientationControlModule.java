@@ -6,6 +6,7 @@ import org.apache.commons.lang.ArrayUtils;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
+import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
 import us.ihmc.utilities.FormattingTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -28,6 +29,7 @@ public abstract class DegenerateOrientationControlModule
    private final RigidBodyOrientationControlModule[] rigidBodyOrientationControlModules;
    private final RigidBody[] bases;
    private final IntegerYoVariable baseIndex;
+   private final DenseMatrix64F nullspaceMultipliers = new DenseMatrix64F(0, 1);
 
    public DegenerateOrientationControlModule(String namePrefix, RigidBody[] bases, RigidBody endEffector, GeometricJacobian jacobian,
            TwistCalculator twistCalculator, YoVariableRegistry parentRegistry)
@@ -73,14 +75,11 @@ public abstract class DegenerateOrientationControlModule
       computeSelectionMatrix(jacobian, selectionMatrix);
    }
 
-   public SpatialAccelerationVector getSpatialAcceleration()
+   public TaskspaceConstraintData getTaskspaceConstraintData()
    {
-      return spatialAcceleration;
-   }
-
-   public DenseMatrix64F getSelectionMatrix()
-   {
-      return selectionMatrix;
+      TaskspaceConstraintData taskspaceConstraintData = new TaskspaceConstraintData();
+      taskspaceConstraintData.set(spatialAcceleration, nullspaceMultipliers, selectionMatrix);
+      return taskspaceConstraintData;
    }
 
    public GeometricJacobian getJacobian()

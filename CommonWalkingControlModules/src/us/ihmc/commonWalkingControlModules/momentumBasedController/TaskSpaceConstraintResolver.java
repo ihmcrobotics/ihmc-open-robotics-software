@@ -64,8 +64,12 @@ public class TaskSpaceConstraintResolver
    }
 
    public void handleTaskSpaceAccelerations(HashMap<InverseDynamicsJoint, DenseMatrix64F> aHats, DenseMatrix64F bHat, DenseMatrix64F centroidalMomentumMatrix,
-           GeometricJacobian jacobian, SpatialAccelerationVector taskSpaceAcceleration, DenseMatrix64F nullspaceMultiplier, DenseMatrix64F selectionMatrix)
+           GeometricJacobian jacobian, TaskspaceConstraintData taskspaceConstraintData)
    {
+      SpatialAccelerationVector taskSpaceAcceleration = taskspaceConstraintData.getSpatialAcceleration();
+      DenseMatrix64F nullspaceMultiplier = taskspaceConstraintData.getNullspaceMultipliers();
+      DenseMatrix64F selectionMatrix = taskspaceConstraintData.getSelectionMatrix();
+      
       if (selectionMatrix.getNumCols() != SpatialAccelerationVector.SIZE)
       {
          throw new RuntimeException("selectionMatrix.getNumCols() != SpatialAccelerationVector.SIZE");
@@ -259,6 +263,8 @@ public class TaskSpaceConstraintResolver
       DenseMatrix64F nullspaceCheck = new DenseMatrix64F(nullspace.getNumCols(), matrixToTest.getNumCols());
       CommonOps.multTransA(nullspace, matrixToTest, nullspaceCheck);
       boolean nullspaceComponentZero = MatrixFeatures.isConstantVal(nullspaceCheck, 0.0, 1e-7);
+      if (!nullspaceComponentZero)
+         System.out.println("nullspace component not zero");
       return nullspaceComponentZero;
    }
 
