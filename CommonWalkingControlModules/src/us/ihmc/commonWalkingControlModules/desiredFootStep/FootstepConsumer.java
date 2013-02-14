@@ -71,6 +71,11 @@ public class FootstepConsumer implements FootstepProvider, StreamingDataConsumer
    {
       return footstepQueue.poll();
    }
+   
+   public Footstep peek()
+   {
+      return footstepQueue.peek();
+   }
 
    public boolean isEmpty()
    {

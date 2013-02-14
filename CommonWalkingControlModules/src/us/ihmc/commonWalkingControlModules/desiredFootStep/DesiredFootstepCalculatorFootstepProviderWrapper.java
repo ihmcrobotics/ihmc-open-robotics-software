@@ -37,6 +37,11 @@ public class DesiredFootstepCalculatorFootstepProviderWrapper implements Footste
 
       return ret;
    }
+   
+   public Footstep peek()
+   {
+      return null;
+   }
 
    public boolean isEmpty()
    {
