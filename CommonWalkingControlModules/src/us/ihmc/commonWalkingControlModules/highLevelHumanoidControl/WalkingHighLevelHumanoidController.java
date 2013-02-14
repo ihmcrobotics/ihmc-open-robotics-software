@@ -1201,4 +1201,10 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 
       return footPolygon;
    }
+
+   protected void doAdditionalTorqueControl()
+   {
+      // TODO Auto-generated method stub
+      
+   }
 }

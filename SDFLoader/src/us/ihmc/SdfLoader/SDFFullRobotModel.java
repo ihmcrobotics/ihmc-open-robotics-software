@@ -350,4 +350,9 @@ public class SDFFullRobotModel implements FullRobotModel
       oneDoFJoints.values().toArray(oneDoFJointsAsArray);
       return oneDoFJointsAsArray;
    }
+   
+   public OneDoFJoint getOneDoFJointByName(String name)
+   {
+      return oneDoFJoints.get(name);
+   }
 }

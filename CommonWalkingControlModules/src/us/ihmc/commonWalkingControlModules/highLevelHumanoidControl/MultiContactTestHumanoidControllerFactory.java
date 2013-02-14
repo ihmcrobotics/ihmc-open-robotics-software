@@ -10,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlane
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ListOfPointsContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.calculators.GainCalculator;
 import us.ihmc.commonWalkingControlModules.controlModules.ContactPointGroundReactionWrenchDistributor;
+import us.ihmc.commonWalkingControlModules.controllers.HandControllerInterface;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.CoMBasedMomentumRateOfChangeControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.RootJointAngularAccelerationControlModule;
@@ -55,8 +56,8 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
    public RobotController create(FullRobotModel fullRobotModel, CommonWalkingReferenceFrames referenceFrames, FingerForceSensors fingerForceSensors,
                                  DoubleYoVariable yoTime, double gravityZ, TwistCalculator twistCalculator, CenterOfMassJacobian centerOfMassJacobian,
                                  SideDependentList<ContactablePlaneBody> feet, double controlDT, SideDependentList<FootSwitchInterface> footSwitches,
-                                 DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry registry,
-                                 GUISetterUpperRegistry guiSetterUpperRegistry, ProcessedOutputsInterface processedOutputs)
+                                 SideDependentList<HandControllerInterface> handControllers, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
+                                 YoVariableRegistry registry, GUISetterUpperRegistry guiSetterUpperRegistry, ProcessedOutputsInterface processedOutputs)
    {
       HashMap<ContactablePlaneBody, RigidBody> contactablePlaneBodiesAndBases = new HashMap<ContactablePlaneBody, RigidBody>();
 

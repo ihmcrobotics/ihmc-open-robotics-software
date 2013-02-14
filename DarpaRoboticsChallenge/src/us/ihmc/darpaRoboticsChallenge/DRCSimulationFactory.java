@@ -1,11 +1,12 @@
 package us.ihmc.darpaRoboticsChallenge;
 
 import us.ihmc.SdfLoader.JaxbSDFLoader;
+import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFPerfectSimulatedSensorReaderAndWriter;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonAvatarInterfaces.CommonAvatarEnvironmentInterface;
 import us.ihmc.commonWalkingControlModules.controllers.ControllerFactory;
-import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
+import us.ihmc.commonWalkingControlModules.controllers.HandControllerInterface;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.CenterOfMassJacobianUpdater;
@@ -13,6 +14,8 @@ import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.sensors.TwistUpdater;
 import us.ihmc.commonWalkingControlModules.visualizer.CommonInertiaElipsoidsVisualizer;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
+import us.ihmc.darpaRoboticsChallenge.handControl.SandiaHandModel;
+import us.ihmc.darpaRoboticsChallenge.handControl.SimulatedUnderactuatedSandiaHandController;
 import us.ihmc.darpaRoboticsChallenge.sensors.PerfectFootswitch;
 import us.ihmc.projectM.R2Sim02.initialSetup.GuiInitialSetup;
 import us.ihmc.projectM.R2Sim02.initialSetup.RobotInitialSetup;
@@ -47,20 +50,26 @@ public class DRCSimulationFactory
 
       JaxbSDFLoader jaxbSDFLoader = DRCRobotSDFLoader.loadDRCRobot(jointMap);
       SDFRobot simulatedRobot = jaxbSDFLoader.getRobot();
-      FullRobotModel fullRobotModelForSimulation = jaxbSDFLoader.getFullRobotModel();
+      SDFFullRobotModel fullRobotModelForSimulation = jaxbSDFLoader.getFullRobotModel();
 
 //    drcRobotSDFLoader = new DRCRobotSDFLoader(robotModel);
 //    jaxbSDFLoader = drcRobotSDFLoader.loadDRCRobot();
 //    FullRobotModel fullRobotModelForController = new FullRobotModelWithUncertainty(jaxbSDFLoader.getFullRobotModel());
 //    CommonWalkingReferenceFrames referenceFramesForController = jaxbSDFLoader.getReferenceFrames();
 
-      FullRobotModel fullRobotModelForController = fullRobotModelForSimulation;
+      SDFFullRobotModel fullRobotModelForController = fullRobotModelForSimulation;
       CommonWalkingReferenceFrames referenceFramesForController = new ReferenceFrames(fullRobotModelForSimulation, jointMap, jointMap.getAnkleHeight());
 
       SideDependentList<FootSwitchInterface> footSwitches = new SideDependentList<FootSwitchInterface>();
+      SideDependentList<HandControllerInterface> handControllers = new SideDependentList<HandControllerInterface>();
       for (RobotSide robotSide : RobotSide.values())
       {
          footSwitches.put(robotSide, new PerfectFootswitch(simulatedRobot, robotSide));
+         
+         SandiaHandModel handModel = new SandiaHandModel(fullRobotModelForController, robotSide);
+         SimulatedUnderactuatedSandiaHandController simulatedUnderactuatedSandiaHandController = new SimulatedUnderactuatedSandiaHandController(handModel);
+         handControllers.put(robotSide, simulatedUnderactuatedSandiaHandController);
+         
       }
 
       TwistCalculator twistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), fullRobotModelForController.getElevator());
@@ -68,10 +77,11 @@ public class DRCSimulationFactory
 
       SDFPerfectSimulatedSensorReaderAndWriter sensorReaderAndOutputWriter = new SDFPerfectSimulatedSensorReaderAndWriter(simulatedRobot,
                                                                                 fullRobotModelForController, referenceFramesForController);
+      
 
       RobotController robotController = controllerFactory.getController(fullRobotModelForController, referenceFramesForController, controlDT,
                                            simulatedRobot.getYoTime(), dynamicGraphicObjectsListRegistry, guiSetterUpperRegistry, twistCalculator,
-                                           centerOfMassJacobian, footSwitches);
+                                           centerOfMassJacobian, footSwitches, handControllers);
 
       ModularRobotController modularRobotController = new ModularRobotController("ModularRobotController");
       modularRobotController.setRawSensorReader(sensorReaderAndOutputWriter);
