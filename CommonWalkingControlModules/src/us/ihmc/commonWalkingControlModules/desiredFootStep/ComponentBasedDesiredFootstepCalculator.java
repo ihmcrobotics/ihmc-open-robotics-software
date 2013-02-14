@@ -199,26 +199,6 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractAdjustableD
       footstepPositions.get(swingLegSide).set(translation);
    }
 
-   public void setupParametersForM2V2()
-   {
-      setInPlaceWidth(0.25);
-
-      setMaxStepLength(0.4);
-
-      setMinStepWidth(0.2);
-      setMaxStepWidth(0.4);
-   }
-
-   public void setupParametersForR2()
-   {
-      setInPlaceWidth(0.4);
-
-      setMaxStepLength(0.6);
-
-      setMinStepWidth(0.25);
-      setMaxStepWidth(0.5);
-   }
-
    public void setInPlaceWidth(double inPlaceWidth)
    {
       this.inPlaceWidth.set(inPlaceWidth);
