@@ -60,7 +60,10 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
          ContactablePlaneBody foot = new RectangularContactableBody(footBody, soleFrame, footForward, -footBack, left, right);
          bipedFeet.put(robotSide, foot);
          
-         specificRegistry.addChild(handControllers.get(robotSide).getYoVariableRegistry());
+         if(handControllers != null)
+         {
+            specificRegistry.addChild(handControllers.get(robotSide).getYoVariableRegistry());
+         }
       }
 
       double gravityZ = 9.81;
