@@ -61,15 +61,24 @@ public class DRCSimulationFactory
       CommonWalkingReferenceFrames referenceFramesForController = new ReferenceFrames(fullRobotModelForSimulation, jointMap, jointMap.getAnkleHeight());
 
       SideDependentList<FootSwitchInterface> footSwitches = new SideDependentList<FootSwitchInterface>();
-      SideDependentList<HandControllerInterface> handControllers = new SideDependentList<HandControllerInterface>();
       for (RobotSide robotSide : RobotSide.values())
       {
          footSwitches.put(robotSide, new PerfectFootswitch(simulatedRobot, robotSide));
          
-         SandiaHandModel handModel = new SandiaHandModel(fullRobotModelForController, robotSide);
-         SimulatedUnderactuatedSandiaHandController simulatedUnderactuatedSandiaHandController = new SimulatedUnderactuatedSandiaHandController(handModel);
-         handControllers.put(robotSide, simulatedUnderactuatedSandiaHandController);
-         
+      }
+      
+      SideDependentList<HandControllerInterface> handControllers = null;
+      if(jointMap.getSelectedModel() == DRCRobotModel.ATLAS_SANDIA_HANDS)
+      {
+         handControllers = new SideDependentList<HandControllerInterface>();
+         for (RobotSide robotSide : RobotSide.values())
+         {
+            
+            SandiaHandModel handModel = new SandiaHandModel(fullRobotModelForController, robotSide);
+            SimulatedUnderactuatedSandiaHandController simulatedUnderactuatedSandiaHandController = new SimulatedUnderactuatedSandiaHandController(handModel);
+            handControllers.put(robotSide, simulatedUnderactuatedSandiaHandController);
+            
+         }
       }
 
       TwistCalculator twistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), fullRobotModelForController.getElevator());
