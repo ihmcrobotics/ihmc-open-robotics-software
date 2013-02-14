@@ -67,10 +67,9 @@ public class MomentumSolver
    private final LinkedHashMap<InverseDynamicsJoint, Boolean> jointAccelerationValidMap = new LinkedHashMap<InverseDynamicsJoint, Boolean>();
    private final LinkedHashMap<InverseDynamicsJoint, DenseMatrix64F> aHats = new LinkedHashMap<InverseDynamicsJoint, DenseMatrix64F>();
    private final LinkedHashMap<InverseDynamicsJoint, DenseMatrix64F> jointSpaceAccelerations = new LinkedHashMap<InverseDynamicsJoint, DenseMatrix64F>();
-   private final LinkedHashMap<GeometricJacobian, SpatialAccelerationVector> spatialAccelerations = new LinkedHashMap<GeometricJacobian,
-                                                                                                       SpatialAccelerationVector>();
-   private final LinkedHashMap<GeometricJacobian, DenseMatrix64F> nullspaceMultipliers = new LinkedHashMap<GeometricJacobian, DenseMatrix64F>();
-   private final LinkedHashMap<GeometricJacobian, DenseMatrix64F> taskSpaceSelectionMatrices = new LinkedHashMap<GeometricJacobian, DenseMatrix64F>();
+   private final LinkedHashMap<GeometricJacobian, TaskspaceConstraintData> taskspaceConstraintData = new LinkedHashMap<GeometricJacobian,
+                                                                                                        TaskspaceConstraintData>();
+
 
    private final List<InverseDynamicsJoint> unconstrainedJoints = new ArrayList<InverseDynamicsJoint>();
 
@@ -130,9 +129,7 @@ public class MomentumSolver
    public void reset()
    {
       jointSpaceAccelerations.clear();
-      spatialAccelerations.clear();
-      nullspaceMultipliers.clear();
-      taskSpaceSelectionMatrices.clear();
+      taskspaceConstraintData.clear();
       taskSpaceConstraintResolver.reset();
       unconstrainedJoints.clear();
       unconstrainedJoints.addAll(jointsInOrderList);
@@ -150,62 +147,24 @@ public class MomentumSolver
       jointSpaceAccelerations.put(joint, jointAcceleration);
    }
 
-   public void setDesiredSpatialAcceleration(GeometricJacobian jacobian, SpatialAccelerationVector spatialAcceleration, DenseMatrix64F nullspaceMultipliers)
+   public void setDesiredSpatialAcceleration(GeometricJacobian jacobian, TaskspaceConstraintData taskspaceConstraintData)
    {
       InverseDynamicsJoint[] constrainedJoints = jacobian.getJointsInOrder();
-      setDesiredSpatialAcceleration(constrainedJoints, jacobian, spatialAcceleration, nullspaceMultipliers);
+      setDesiredSpatialAcceleration(constrainedJoints, jacobian, taskspaceConstraintData);
    }
 
    public void setDesiredSpatialAcceleration(InverseDynamicsJoint[] constrainedJoints, GeometricJacobian jacobian,
-           SpatialAccelerationVector spatialAcceleration, DenseMatrix64F nullspaceMultipliers)
+           TaskspaceConstraintData taskspaceConstraintData)
    {
-      int size = SpatialAccelerationVector.SIZE;
-      DenseMatrix64F selectionMatrix = new DenseMatrix64F(size, size);    // TODO: garbage
-      CommonOps.setIdentity(selectionMatrix);
-      setDesiredSpatialAcceleration(constrainedJoints, jacobian, spatialAcceleration, nullspaceMultipliers, selectionMatrix);
-   }
-
-   public void setDesiredAngularAcceleration(GeometricJacobian jacobian, ReferenceFrame baseFrame, FrameVector desiredAngularAcceleration,
-           DenseMatrix64F nullspaceMultiplier)
-   {
-      InverseDynamicsJoint[] constrainedJoints = jacobian.getJointsInOrder();
-      setDesiredAngularAcceleration(constrainedJoints, jacobian, baseFrame, desiredAngularAcceleration, nullspaceMultiplier);
-   }
-
-   public void setDesiredAngularAcceleration(InverseDynamicsJoint[] constrainedJoints, GeometricJacobian jacobian, ReferenceFrame baseFrame,
-           FrameVector desiredAngularAcceleration, DenseMatrix64F nullspaceMultiplier)
-   {
-      SpatialAccelerationVector spatialAcceleration = new SpatialAccelerationVector(jacobian.getEndEffector().getBodyFixedFrame(), baseFrame,
-                                                         desiredAngularAcceleration.getReferenceFrame());
-      spatialAcceleration.setAngularPart(desiredAngularAcceleration.getVector());
-
-      DenseMatrix64F selectionMatrix = new DenseMatrix64F(3, SpatialMotionVector.SIZE);    // TODO: garbage
-      selectionMatrix.set(0, 0, 1.0);
-      selectionMatrix.set(1, 1, 1.0);
-      selectionMatrix.set(2, 2, 1.0);
-
-      setDesiredSpatialAcceleration(constrainedJoints, jacobian, spatialAcceleration, nullspaceMultiplier, selectionMatrix);
-   }
-
-   public void setDesiredSpatialAcceleration(GeometricJacobian jacobian, SpatialAccelerationVector spatialAcceleration, DenseMatrix64F nullspaceMultipliers,
-           DenseMatrix64F selectionMatrix)
-   {
-      InverseDynamicsJoint[] constrainedJoints = jacobian.getJointsInOrder();
-      setDesiredSpatialAcceleration(constrainedJoints, jacobian, spatialAcceleration, nullspaceMultipliers, selectionMatrix);
-   }
-
-   public void setDesiredSpatialAcceleration(InverseDynamicsJoint[] constrainedJoints, GeometricJacobian jacobian,
-           SpatialAccelerationVector spatialAcceleration, DenseMatrix64F nullspaceMultipliers, DenseMatrix64F selectionMatrix)
-   {
-      checkNullspaceDimensions(jacobian, nullspaceMultipliers);
-      checkSelectionMatrixHasSameNumberOfRowsAsConstrainedJoints(selectionMatrix, constrainedJoints);
+      checkNullspaceDimensions(jacobian, taskspaceConstraintData.getNullspaceMultipliers());
+      checkSelectionMatrixHasSameNumberOfRowsAsConstrainedJoints(taskspaceConstraintData.getSelectionMatrix(), constrainedJoints);
 
       for (InverseDynamicsJoint joint : constrainedJoints)
       {
          checkAndRegisterConstraint(joint, jacobian);
       }
 
-      ReferenceFrame baseFrame = spatialAcceleration.getBaseFrame();
+      ReferenceFrame baseFrame = taskspaceConstraintData.getSpatialAcceleration().getBaseFrame();
       if (baseFrame == jacobian.getBaseFrame())
       {
          /*
@@ -213,14 +172,13 @@ public class MomentumSolver
           * but the results are currently different for some unknown reason, which causes R2StairClimbing to fail.
           */
 
-         taskSpaceConstraintResolver.convertInternalSpatialAccelerationToJointSpace(jointSpaceAccelerations, jacobian, spatialAcceleration,
-                 nullspaceMultipliers, selectionMatrix);
+         taskSpaceConstraintResolver.convertInternalSpatialAccelerationToJointSpace(jointSpaceAccelerations, jacobian,
+                 taskspaceConstraintData.getSpatialAcceleration(), taskspaceConstraintData.getNullspaceMultipliers(),
+                 taskspaceConstraintData.getSelectionMatrix());
       }
       else
       {
-         this.spatialAccelerations.put(jacobian, spatialAcceleration);
-         this.nullspaceMultipliers.put(jacobian, nullspaceMultipliers);
-         this.taskSpaceSelectionMatrices.put(jacobian, selectionMatrix);
+         this.taskspaceConstraintData.put(jacobian, taskspaceConstraintData);
       }
    }
 
@@ -254,13 +212,10 @@ public class MomentumSolver
       initializeAHats(aHats, centroidalMomentumMatrix.getMatrix());
       initializeB(b, centroidalMomentumMatrixDerivative, jointsInOrder);
 
-      for (GeometricJacobian jacobian : spatialAccelerations.keySet())
+      for (GeometricJacobian jacobian : taskspaceConstraintData.keySet())
       {
-         SpatialAccelerationVector taskSpaceAcceleration = spatialAccelerations.get(jacobian);
-         DenseMatrix64F nullspaceMultiplier = nullspaceMultipliers.get(jacobian);
-         DenseMatrix64F selectionMatrix = taskSpaceSelectionMatrices.get(jacobian);
-         taskSpaceConstraintResolver.handleTaskSpaceAccelerations(aHats, b, centroidalMomentumMatrix.getMatrix(), jacobian, taskSpaceAcceleration,
-                 nullspaceMultiplier, selectionMatrix);
+         TaskspaceConstraintData taskspaceConstraintData = this.taskspaceConstraintData.get(jacobian);
+         taskSpaceConstraintResolver.handleTaskSpaceAccelerations(aHats, b, centroidalMomentumMatrix.getMatrix(), jacobian, taskspaceConstraintData);
       }
 
       for (InverseDynamicsJoint joint : jointSpaceAccelerations.keySet())
@@ -368,10 +323,5 @@ public class MomentumSolver
       CheckTools.checkEquals(nullspaceMultipliers.getNumCols(), 1);
       if (nullspaceMultipliers.getNumRows() > jacobian.getNumberOfColumns())
          throw new RuntimeException("nullspaceMultipliers dimension too large");
-   }
-
-   public SpatialAccelerationVector getSpatialAcceleration(GeometricJacobian jacobian)
-   {
-      return spatialAccelerations.get(jacobian);
    }
 }

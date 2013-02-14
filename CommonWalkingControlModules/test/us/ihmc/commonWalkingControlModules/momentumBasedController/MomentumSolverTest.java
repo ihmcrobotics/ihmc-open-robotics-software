@@ -204,7 +204,10 @@ public class MomentumSolverTest
 //    InverseDynamicsJoint[] contrainedJoints = extractJoints(jacobian.getJointsInOrder(), 1);
       InverseDynamicsJoint[] contrainedJoints = jacobian.getJointsInOrder();
 
-      solver.setDesiredSpatialAcceleration(contrainedJoints, jacobian, spatialAcceleration, nullspaceMultiplier);
+      TaskspaceConstraintData taskspaceConstraintData = new TaskspaceConstraintData();
+      taskspaceConstraintData.set(spatialAcceleration, nullspaceMultiplier);
+
+      solver.setDesiredSpatialAcceleration(contrainedJoints, jacobian, taskspaceConstraintData);
 
       solver.compute();
 
@@ -257,7 +260,10 @@ public class MomentumSolverTest
                                                            endEffector.getBodyFixedFrame(), RandomTools.generateRandomVector(random),
                                                            RandomTools.generateRandomVector(random));
       DenseMatrix64F nullspaceMultiplier = new DenseMatrix64F(0, 1);
-      solver.setDesiredSpatialAcceleration(jacobian, taskSpaceAcceleration, nullspaceMultiplier);
+      
+      TaskspaceConstraintData taskspaceConstraintData = new TaskspaceConstraintData();
+      taskspaceConstraintData.set(taskSpaceAcceleration, nullspaceMultiplier);
+      solver.setDesiredSpatialAcceleration(jacobian, taskspaceConstraintData);
 
       DenseMatrix64F firstJointAcceleration = new DenseMatrix64F(1, 1);
       firstJointAcceleration.set(0, 0, random.nextDouble());
@@ -309,7 +315,9 @@ public class MomentumSolverTest
                                                           RandomTools.generateRandomVector(random));
       DenseMatrix64F nullspaceMultiplier = new DenseMatrix64F(0, 1);
 
-      solver.setDesiredSpatialAcceleration(jacobian, internalAcceleration, nullspaceMultiplier);
+      TaskspaceConstraintData taskspaceConstraintData = new TaskspaceConstraintData();
+      taskspaceConstraintData.set(internalAcceleration, nullspaceMultiplier);
+      solver.setDesiredSpatialAcceleration(jacobian, taskspaceConstraintData);
 
       solver.compute();
       solver.solve(desiredMomentumRate);
@@ -357,7 +365,11 @@ public class MomentumSolverTest
                                                              endEffectorOne.getBodyFixedFrame(), RandomTools.generateRandomVector(random),
                                                              RandomTools.generateRandomVector(random));
       DenseMatrix64F nullspaceMultiplierOne = new DenseMatrix64F(0, 1);
-      solver.setDesiredSpatialAcceleration(jacobianOne, internalAccelerationOne, nullspaceMultiplierOne);
+
+      TaskspaceConstraintData taskspaceConstraintData = new TaskspaceConstraintData();
+
+      taskspaceConstraintData.set(internalAccelerationOne, nullspaceMultiplierOne);
+      solver.setDesiredSpatialAcceleration(jacobianOne, taskspaceConstraintData);
 
       RigidBody endEffectorTwo = revoluteJoints.get(revoluteJoints.size() - 1).getSuccessor();
       GeometricJacobian jacobianTwo = new GeometricJacobian(endEffectorOne, endEffectorTwo, endEffectorOne.getBodyFixedFrame());
@@ -372,7 +384,10 @@ public class MomentumSolverTest
       selectionMatrixTwo.set(1, 4, 1.0);
       selectionMatrixTwo.set(1, 5, 1.0);
       selectionMatrixTwo.set(2, 5, 1.0);
-      solver.setDesiredSpatialAcceleration(jacobianTwo, internalAccelerationTwo, nullspaceMultiplierTwo, selectionMatrixTwo);
+      
+      taskspaceConstraintData.set(internalAccelerationTwo, nullspaceMultiplierTwo, selectionMatrixTwo);
+      
+      solver.setDesiredSpatialAcceleration(jacobianTwo, taskspaceConstraintData);
 
       solver.compute();
       solver.solve(desiredMomentumRate);
@@ -446,8 +461,12 @@ public class MomentumSolverTest
 
 
       InverseDynamicsJoint[] pelvisToChestConstrainedJoints = new InverseDynamicsJoint[] {back_mby, back_ubx};
-      solver.setDesiredSpatialAcceleration(pelvisToChestConstrainedJoints, pelvisToChestJacobian, pelvisToChestInternalAcceleration,
-              pelvisToChestNullspaceMultiplier, pelvisToChestSelectionMatrix);
+      
+      TaskspaceConstraintData taskspaceConstraintData = new TaskspaceConstraintData();
+      taskspaceConstraintData.set(pelvisToChestInternalAcceleration,
+            pelvisToChestNullspaceMultiplier, pelvisToChestSelectionMatrix);
+
+      solver.setDesiredSpatialAcceleration(pelvisToChestConstrainedJoints, pelvisToChestJacobian, taskspaceConstraintData);
 
       // Constrain pitch and yaw acceleration of the head with respect to the elevator
       // using neck_ay and back_lbz
@@ -462,8 +481,10 @@ public class MomentumSolverTest
       elevatorToHeadSelectionMatrix.set(1, 2, 1.0);    // wz (yaw of head)
 
       InverseDynamicsJoint[] elevatorToHeadConstrainedJoints = new InverseDynamicsJoint[] {back_lbz, neck_ay};
-      solver.setDesiredSpatialAcceleration(elevatorToHeadConstrainedJoints, elevatorToHeadJacobian, elevatorToHeadInternalAcceleration,
-              elevatorToHeadNullspaceMultiplier, elevatorToHeadSelectionMatrix);
+      
+      taskspaceConstraintData.set(elevatorToHeadInternalAcceleration,
+            elevatorToHeadNullspaceMultiplier, elevatorToHeadSelectionMatrix);
+      solver.setDesiredSpatialAcceleration(elevatorToHeadConstrainedJoints, elevatorToHeadJacobian, taskspaceConstraintData);
 
       solver.compute();
       solver.solve(desiredMomentumRate);
@@ -506,7 +527,9 @@ public class MomentumSolverTest
                                                          RandomTools.generateRandomVector(random));
 
       DenseMatrix64F nullspaceMultiplier = new DenseMatrix64F(0, 1);
-      solver.setDesiredSpatialAcceleration(jacobian, spatialAcceleration, nullspaceMultiplier);
+      TaskspaceConstraintData taskspaceConstraintData = new TaskspaceConstraintData();
+      taskspaceConstraintData.set(spatialAcceleration, nullspaceMultiplier);
+      solver.setDesiredSpatialAcceleration(jacobian, taskspaceConstraintData);
 
       solver.compute();
 
@@ -581,8 +604,11 @@ public class MomentumSolverTest
       GeometricJacobian jacobian = new GeometricJacobian(base, endEffector, endEffector.getBodyFixedFrame());
       FrameVector endEffectorAngularAcceleration = new FrameVector(endEffector.getBodyFixedFrame(), RandomTools.generateRandomVector(random));
       DenseMatrix64F nullspaceMultiplier = new DenseMatrix64F(0, 1);
+      
+      TaskspaceConstraintData taskspaceConstraintData = new TaskspaceConstraintData();
+      taskspaceConstraintData.set(jacobian.getEndEffector().getBodyFixedFrame(), elevator.getBodyFixedFrame(), endEffectorAngularAcceleration, nullspaceMultiplier);
 
-      solver.setDesiredAngularAcceleration(jacobian, elevator.getBodyFixedFrame(), endEffectorAngularAcceleration, nullspaceMultiplier);
+      solver.setDesiredSpatialAcceleration(jacobian, taskspaceConstraintData);
 
       solver.compute();
       solver.solve(desiredMomentumRate);
@@ -648,8 +674,10 @@ public class MomentumSolverTest
       DenseMatrix64F nullspaceMultipliers = new DenseMatrix64F(nullity, 1);
       CommonOps.fill(nullspaceMultipliers, 0.0);
       RandomMatrices.setRandom(nullspaceMultipliers, random);
-
-      solver.setDesiredSpatialAcceleration(jacobian, taskSpaceAcceleration, nullspaceMultipliers);
+      
+      TaskspaceConstraintData taskspaceConstraintData = new TaskspaceConstraintData();
+      taskspaceConstraintData.set(taskSpaceAcceleration, nullspaceMultipliers);
+      solver.setDesiredSpatialAcceleration(jacobian, taskspaceConstraintData);
 
       solver.compute();
       solver.solve(desiredMomentumRate);

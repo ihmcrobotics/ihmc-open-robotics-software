@@ -162,10 +162,7 @@ public class MultiContactTestHumanoidController extends MomentumBasedController
    private void doChestcontrol()
    {
       chestOrientationControlModule.compute();
-      SpatialAccelerationVector chestAcceleration = chestOrientationControlModule.getSpatialAcceleration();
-      DenseMatrix64F nullspaceMultipliers = new DenseMatrix64F(0, 1);
-      DenseMatrix64F selectionMatrix = chestOrientationControlModule.getSelectionMatrix();
-      solver.setDesiredSpatialAcceleration(spineJacobian, chestAcceleration, nullspaceMultipliers, selectionMatrix);
+      solver.setDesiredSpatialAcceleration(spineJacobian, chestOrientationControlModule.getTaskspaceConstraintData());
    }
 
    private void doEndEffectorControl()
@@ -179,12 +176,8 @@ public class MultiContactTestHumanoidController extends MomentumBasedController
          endEffectorControlModule.startComputation();
          endEffectorControlModule.waitUntilComputationIsDone();
          TaskspaceConstraintData taskspaceConstraintData = endEffectorControlModule.getTaskSpaceConstraintOutputPort().getData();
-
-         SpatialAccelerationVector acceleration = taskspaceConstraintData.getSpatialAcceleration();
-         DenseMatrix64F nullspaceMultipliers = taskspaceConstraintData.getNullspaceMultipliers();
-         DenseMatrix64F selectionMatrix = taskspaceConstraintData.getSelectionMatrix();
          GeometricJacobian jacobian = endEffectorControlModule.getJacobian();
-         solver.setDesiredSpatialAcceleration(jacobian, acceleration, nullspaceMultipliers, selectionMatrix);
+         solver.setDesiredSpatialAcceleration(jacobian, taskspaceConstraintData);
       }
    }
 
