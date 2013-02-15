@@ -1,6 +1,9 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
 import org.junit.Test;
+
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBodyTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -211,6 +214,8 @@ public class FootstepPathCoordinatorTest
       for (int footstepNumber = 0; footstepNumber < numberToTest; footstepNumber++)
       {
          RigidBody endEffector = new RigidBody("rigid_" + footstepNumber, ReferenceFrame.getWorldFrame());
+         ContactablePlaneBody contactablePlaneBody = ContactablePlaneBodyTools.createRandomContactablePlaneBodyForTests(random, endEffector);
+
          FramePose pose = new FramePose(ReferenceFrame.getWorldFrame(), new Point3d(footstepNumber, 0.0, 0.0), new Quat4d(random.nextDouble(), random.nextDouble(), random.nextDouble(), random.nextDouble()));
          ArrayList<FramePoint> expectedContactPoints = new ArrayList<FramePoint>();
          for (int i = 0; i < 3; i++)
@@ -220,7 +225,7 @@ public class FootstepPathCoordinatorTest
          }
 
          boolean trustHeight = true;
-         Footstep footstep = new Footstep(endEffector, pose, expectedContactPoints, trustHeight);
+         Footstep footstep = new Footstep(contactablePlaneBody, pose, expectedContactPoints, trustHeight);
          footsteps.add(footstep);
       }
       return footsteps;

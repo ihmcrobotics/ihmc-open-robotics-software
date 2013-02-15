@@ -28,6 +28,11 @@ public class ListOfPointsContactablePlaneBody implements ContactablePlaneBody
    {
       return rigidBody;
    }
+   
+   public String getName()
+   {
+      return rigidBody.getName();
+   }
 
    public List<FramePoint> getContactPoints()
    {

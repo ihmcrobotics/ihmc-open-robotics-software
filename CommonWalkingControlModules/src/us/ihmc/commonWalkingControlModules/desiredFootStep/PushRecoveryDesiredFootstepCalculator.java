@@ -65,7 +65,7 @@ public class PushRecoveryDesiredFootstepCalculator implements DesiredFootstepCal
       ContactablePlaneBody foot = contactableBodies.get(swingSide);
       
       boolean trustHeight = false;
-      Footstep desiredFootstep = new Footstep(foot.getRigidBody(), footstepPose, foot.getContactPoints(), trustHeight);
+      Footstep desiredFootstep = new Footstep(foot, footstepPose, foot.getContactPoints(), trustHeight);
       return desiredFootstep;
    }
 

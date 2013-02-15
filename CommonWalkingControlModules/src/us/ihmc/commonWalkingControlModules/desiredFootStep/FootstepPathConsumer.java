@@ -41,7 +41,7 @@ public class FootstepPathConsumer extends AbstractStreamingDataConsumer<ArrayLis
             FramePoint framePoint = new FramePoint(contactableBody.getBodyFrame(), point3d);
             expectedContactPoints.add(framePoint);
          }
-         Footstep footstep = new Footstep(footstepData.getId(), contactableBody.getRigidBody(), new FramePose(ReferenceFrame.getWorldFrame(), footstepData.getLocation(), footstepData.getOrientation()), expectedContactPoints, footstepData.getTrustHeight());
+         Footstep footstep = new Footstep(footstepData.getId(), contactableBody, new FramePose(ReferenceFrame.getWorldFrame(), footstepData.getLocation(), footstepData.getOrientation()), expectedContactPoints, footstepData.getTrustHeight());
          footsteps.add(footstep);
          if (DEBUG)
          {

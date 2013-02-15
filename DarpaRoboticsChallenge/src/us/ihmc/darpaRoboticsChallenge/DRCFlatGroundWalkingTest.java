@@ -100,7 +100,7 @@ public class DRCFlatGroundWalkingTest
       NothingChangedVerifier nothingChangedVerifier = null;
       if (checkNothingChanged)
       {
-         nothingChangedVerifier = new NothingChangedVerifier("R2FlatGroundWalkingTest", scs);
+         nothingChangedVerifier = new NothingChangedVerifier("DRCOverShallowRampTest", scs);
       }
       
       BooleanYoVariable walk = (BooleanYoVariable) scs.getVariable("walk");
