@@ -6,7 +6,10 @@ import javax.vecmath.Vector3d;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.FrameEllipsoid3d;
 import us.ihmc.utilities.math.geometry.FramePoint;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.RigidBody;
+
+import com.jme3.math.Vector3f;
 
 public class RangeOfStep3d extends FrameEllipsoid3d
 {
@@ -40,5 +43,10 @@ public class RangeOfStep3d extends FrameEllipsoid3d
          return false;
       
       return this.isInsideOrOnSurface(pointToCheck);
+   }
+   
+   public boolean containsPointInWorld(Vector3f mouseLocationInWorld)
+   {
+      return contains(new FramePoint(ReferenceFrame.getWorldFrame(), mouseLocationInWorld.getX(), mouseLocationInWorld.getY(), mouseLocationInWorld.getZ()));
    }
 }
