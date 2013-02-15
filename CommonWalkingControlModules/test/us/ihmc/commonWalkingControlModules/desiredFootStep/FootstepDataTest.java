@@ -10,6 +10,9 @@ import javax.vecmath.Quat4d;
 
 import org.junit.Test;
 
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBodyTools;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.RectangularContactableBody;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.io.streamingData.AbstractStreamingDataConsumer;
 import us.ihmc.utilities.io.streamingData.QueueBasedStreamingDataProducer;
@@ -35,6 +38,8 @@ public class FootstepDataTest
    public void testFootstepDataSerialization()
    {
       RigidBody endEffector = new RigidBody("rigid", ReferenceFrame.getWorldFrame());
+      ContactablePlaneBody contactablePlaneBody = ContactablePlaneBodyTools.createTypicalContactablePlaneBodyForTests(endEffector);
+      
       FramePose pose = new FramePose(ReferenceFrame.getWorldFrame());
       ArrayList<FramePoint> expectedContactPoints = new ArrayList<FramePoint>();
       for (int i = 0; i < 3; i++)
@@ -44,7 +49,7 @@ public class FootstepDataTest
       }
 
       boolean trustHeight = true;
-      Footstep footstep = new Footstep(endEffector, pose, expectedContactPoints, trustHeight);
+      Footstep footstep = new Footstep(contactablePlaneBody, pose, expectedContactPoints, trustHeight);
       FootstepData footstepData = new FootstepData(footstep);
       JUnitTools.assertSerializable(footstepData);
    }
@@ -291,6 +296,8 @@ public class FootstepDataTest
       for (int footstepNumber = 0; footstepNumber < number; footstepNumber++)
       {
          RigidBody endEffector = new RigidBody("rigid_" + footstepNumber, ReferenceFrame.getWorldFrame());
+         ContactablePlaneBody contactablePlaneBody = ContactablePlaneBodyTools.createRandomContactablePlaneBodyForTests(random, endEffector);
+
          FramePose pose = new FramePose(ReferenceFrame.getWorldFrame(), new Point3d(footstepNumber, 0.0, 0.0),
                                         new Quat4d(random.nextDouble(), random.nextDouble(), random.nextDouble(), random.nextDouble()));
          ArrayList<FramePoint> expectedContactPoints = new ArrayList<FramePoint>();
@@ -301,7 +308,7 @@ public class FootstepDataTest
          }
 
          boolean trustHeight = true;
-         Footstep footstep = new Footstep(endEffector, pose, expectedContactPoints, trustHeight);
+         Footstep footstep = new Footstep(contactablePlaneBody, pose, expectedContactPoints, trustHeight);
          footsteps.add(footstep);
       }
 
@@ -364,6 +371,9 @@ public class FootstepDataTest
       protected void processPacket(FootstepData packet)
       {
          RigidBody endEffector = new RigidBody(packet.getRigidBodyName(), ReferenceFrame.getWorldFrame());
+         ContactablePlaneBody contactablePlaneBody = ContactablePlaneBodyTools.createTypicalContactablePlaneBodyForTests(endEffector);
+
+         
          FramePose pose = new FramePose(ReferenceFrame.getWorldFrame(), packet.getLocation(), packet.getOrientation());
          ArrayList<FramePoint> expectedContactPoints = new ArrayList<FramePoint>();
          for (Point3d point : packet.getExpectedContactPoints())
@@ -373,7 +383,7 @@ public class FootstepDataTest
          }
 
          boolean trustHeight = true;
-         Footstep footstep = new Footstep(endEffector, pose, expectedContactPoints, trustHeight);
+         Footstep footstep = new Footstep(contactablePlaneBody, pose, expectedContactPoints, trustHeight);
          reconstructedFootsteps.add(footstep);
       }
 
@@ -398,6 +408,8 @@ public class FootstepDataTest
          for (FootstepData footstepData : packet)
          {
             RigidBody endEffector = new RigidBody(footstepData.getRigidBodyName(), ReferenceFrame.getWorldFrame());
+            ContactablePlaneBody contactablePlaneBody = ContactablePlaneBodyTools.createTypicalContactablePlaneBodyForTests(endEffector);
+
             FramePose pose = new FramePose(ReferenceFrame.getWorldFrame(), footstepData.getLocation(), footstepData.getOrientation());
             ArrayList<FramePoint> expectedContactPoints = new ArrayList<FramePoint>();
             for (Point3d point : footstepData.getExpectedContactPoints())
@@ -407,7 +419,7 @@ public class FootstepDataTest
             }
 
             boolean trustHeight = true;
-            Footstep footstep = new Footstep(endEffector, pose, expectedContactPoints, trustHeight);
+            Footstep footstep = new Footstep(contactablePlaneBody, pose, expectedContactPoints, trustHeight);
             reconstructedFootstepPath.add(footstep);
          }
       }

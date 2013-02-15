@@ -150,10 +150,10 @@ public class FootstepGeneratorTest
       SideDependentList<Footstep> currentFootLocations = new SideDependentList<Footstep>();
       for (RobotSide side : RobotSide.values)
       {
-         currentFootLocations.put(side, FootstepUtils.generateStandingFootstep(side, fullRobotModel, referenceFrames, bipedFeet));
+         currentFootLocations.put(side, FootstepUtils.generateStandingFootstep(side, bipedFeet));
       }
 
-      boolean firstStepIsLeft = footSteps.get(0).getBody() == fullRobotModel.getFoot(RobotSide.LEFT);
+      boolean firstStepIsLeft = footSteps.get(0).getBody().getRigidBody() == fullRobotModel.getFoot(RobotSide.LEFT);
       RobotSide firstStepSide = firstStepIsLeft ? RobotSide.LEFT : RobotSide.RIGHT;
       ArrayList<Footstep> footstepQueue = new ArrayList<Footstep>();
       footstepQueue.add(currentFootLocations.get(firstStepSide));

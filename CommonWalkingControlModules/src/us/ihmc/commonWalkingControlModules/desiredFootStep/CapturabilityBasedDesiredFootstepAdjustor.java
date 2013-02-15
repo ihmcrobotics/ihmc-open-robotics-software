@@ -82,7 +82,7 @@ public class CapturabilityBasedDesiredFootstepAdjustor implements DesiredFootste
       RobotSide swingLegSide = null;
       for (RobotSide robotSide : RobotSide.values())
       {
-         if (baseSwingFootstep.getBody() == feet.get(robotSide).getRigidBody())
+         if (baseSwingFootstep.getBody() == feet.get(robotSide))
             swingLegSide = robotSide;
       }
 

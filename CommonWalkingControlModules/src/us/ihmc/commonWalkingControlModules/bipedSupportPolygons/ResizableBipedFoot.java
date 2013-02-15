@@ -139,6 +139,11 @@ public class ResizableBipedFoot implements BipedFootInterface
       }
    }
 
+   public String getName()
+   {
+      return body.getName();
+   }
+
    private static double determineFootLength(ArrayList<Point3d> clockwiseToePoints, ArrayList<Point3d> clockwiseHeelPoints)
    {
       double maxX = Double.NEGATIVE_INFINITY;

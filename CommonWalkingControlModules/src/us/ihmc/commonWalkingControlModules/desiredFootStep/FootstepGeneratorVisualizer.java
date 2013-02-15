@@ -89,10 +89,9 @@ public class FootstepGeneratorVisualizer
    {
       printIfDebug("Adding footstep " + footstep);
       
-      RigidBody rigidBody = footstep.getBody();
       FramePose footstepPose = footstep.getPoseCopy();
       
-      String name = rigidBody.getName();
+      String name = footstep.getBody().getName();
       YoFramePose contactPose = contactPosesHashMap.get(name);
       YoFrameConvexPolygon2d contactPolygon = contactPolygonsHashMap.get(name);
       
@@ -185,12 +184,12 @@ public class FootstepGeneratorVisualizer
       ContactablePlaneBody rightFoot = bipedFeet.get(RobotSide.RIGHT);
       
       boolean trustHeight = false;
-      Footstep startSwingFootstep = new Footstep(rightFoot.getRigidBody(), startSwingFootPose, rightFoot.getContactPoints(), trustHeight);
+      Footstep startSwingFootstep = new Footstep(rightFoot, startSwingFootPose, rightFoot.getContactPoints(), trustHeight);
 //      generator.setSwingStart(startSwingFootstep);
       OverheadPath footstepPath = generateSimpleOverheadPath();
       generator.setFootstepPath(footstepPath);
       ContactablePlaneBody leftFoot = bipedFeet.get(RobotSide.LEFT);
-      Footstep startStanceFootstep = new Footstep(leftFoot.getRigidBody(), startStanceFootPose, leftFoot.getContactPoints(), trustHeight);
+      Footstep startStanceFootstep = new Footstep(leftFoot, startStanceFootPose, leftFoot.getContactPoints(), trustHeight);
       generator.setStanceStart(startStanceFootstep);
       List<Footstep> footsteps = generator.generateDesiredFootstepList();
       return footsteps;

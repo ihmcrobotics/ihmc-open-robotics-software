@@ -740,7 +740,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
          {
             boolean doubleSupportTimeHasPassed = stateMachine.timeInCurrentState() > doubleSupportTimeProvider.getValue();
             RobotSide upcomingSwingSide = transferToSide.getOppositeSide();
-            boolean transferringToThisRobotSide = nextFootstep.getBody() == fullRobotModel.getFoot(upcomingSwingSide);
+            boolean transferringToThisRobotSide = nextFootstep.getBody().getRigidBody() == fullRobotModel.getFoot(upcomingSwingSide);
 
             return transferringToThisRobotSide && doubleSupportTimeHasPassed;
          }

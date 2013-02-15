@@ -282,12 +282,11 @@ public class DesiredFootstepVisualizer
       RobotSide initialStanceSide = RobotSide.LEFT;
       RobotSide swingLegSide = initialStanceSide.getOppositeSide();
       
-      RigidBody endEffector = bipedFeet.get(initialStanceSide).getRigidBody();
       FramePose pose = new FramePose(ReferenceFrame.getWorldFrame());
       List<FramePoint> expectedContactPoints = bipedFeet.get(initialStanceSide).getContactPoints();
       
       boolean trustHeight = false;
-      Footstep initialStanceFootstep = new Footstep(endEffector , pose, expectedContactPoints, trustHeight);
+      Footstep initialStanceFootstep = new Footstep(bipedFeet.get(initialStanceSide), pose, expectedContactPoints, trustHeight);
       footstepGenerator.setStepLength(0.2);
       footstepGenerator.setStepWidth(0.1);
       footstepGenerator.setStanceStart(initialStanceFootstep);
