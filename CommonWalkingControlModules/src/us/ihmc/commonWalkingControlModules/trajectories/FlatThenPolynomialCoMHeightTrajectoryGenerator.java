@@ -245,7 +245,7 @@ public class FlatThenPolynomialCoMHeightTrajectoryGenerator implements CoMHeight
 
    private double findMaxXOfGroundContactPoints(Footstep footstep, RobotSide swingSide)
    {
-      FramePose footstepPose = footstep.getPose();
+      FramePose footstepPose = footstep.getPoseCopy();
       Transform3D desiredFootToDesiredHeading = new Transform3D();
       footstepPose.getTransformFromPoseToFrame(desiredFootToDesiredHeading);
 
