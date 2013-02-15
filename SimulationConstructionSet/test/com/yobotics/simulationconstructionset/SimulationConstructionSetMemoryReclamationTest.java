@@ -6,12 +6,14 @@ import java.awt.Frame;
 
 import org.junit.Test;
 
+import us.ihmc.utilities.MemoryTools;
+
 public class SimulationConstructionSetMemoryReclamationTest
 {
    @Test
    public void testMemoryReclamationForSCSWithARobot()
    {
-      int usedMemoryMBAtStart = printMemoryUsageAndReturnUsedMemoryInMB();
+      int usedMemoryMBAtStart = MemoryTools.getCurrentMemoryUsageInMB();
       int usedMemoryMBAtEnd = testOneAndReturnUsedMemoryMB(true, 1);
       
       int usedMemoryMB = usedMemoryMBAtEnd - usedMemoryMBAtStart;
@@ -38,7 +40,7 @@ public class SimulationConstructionSetMemoryReclamationTest
    @Test
    public void testMemoryReclamationForSCSWithoutARobot()
    {
-      int usedMemoryMBAtStart = printMemoryUsageAndReturnUsedMemoryInMB();
+      int usedMemoryMBAtStart = MemoryTools.getCurrentMemoryUsageInMB();
       int usedMemoryMBAtEnd = testOneAndReturnUsedMemoryMB(false, 2);
       
       int usedMemoryMB = usedMemoryMBAtEnd - usedMemoryMBAtStart;
@@ -54,7 +56,7 @@ public class SimulationConstructionSetMemoryReclamationTest
 
    private int testOneAndReturnUsedMemoryMB(boolean useARobot, int numberOfTests)
    {
-      printMemoryUsageAndReturnUsedMemoryInMB();
+      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB("testOneAndReturnUsedMemoryMB start:");
 
       for (int i = 0; i < numberOfTests; i++)
       {
@@ -64,7 +66,7 @@ public class SimulationConstructionSetMemoryReclamationTest
 
          scs.closeAndDispose();
 
-         printMemoryUsageAndReturnUsedMemoryInMB();
+         MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB("testOneAndReturnUsedMemoryMB final: ");
 
       }
 
@@ -72,7 +74,7 @@ public class SimulationConstructionSetMemoryReclamationTest
 
       System.out.println("Created and disposed of " + numberOfTests + " SCSs. Should be garbage collected now...");
       sleep(2000);
-      int usedMemoryMB = printMemoryUsageAndReturnUsedMemoryInMB();
+      int usedMemoryMB = MemoryTools.getCurrentMemoryUsageInMB();
       return usedMemoryMB;
    }
 
@@ -108,24 +110,7 @@ public class SimulationConstructionSetMemoryReclamationTest
       }
       
       return scs;
-   }
-
-   private int printMemoryUsageAndReturnUsedMemoryInMB()
-   {
-      Runtime runtime = Runtime.getRuntime();
-
-      System.gc();
-      sleep(100);
-      
-      long freeMemory = runtime.freeMemory();
-      long totalMemory = runtime.totalMemory();
-      long usedMemory = totalMemory - freeMemory;
-
-      int usedMemoryMB = (int) (usedMemory / 1000000);
-      System.out.println("freeMemory = " + freeMemory / 1000000 + "MB, totalMemory = " + totalMemory / 1000000 + "MB, usedMemory = " + usedMemoryMB + "MB");
-
-      return usedMemoryMB;
-   }
+   } 
 
    private void sleep(long sleepMillis)
    {
