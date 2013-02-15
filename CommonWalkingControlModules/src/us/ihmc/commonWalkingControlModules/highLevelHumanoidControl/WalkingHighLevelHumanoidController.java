@@ -544,7 +544,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
          {
             nextFootstep = footstepProvider.poll();
             if (nextFootstep != null)
-               nextFootstepPose.set(nextFootstep.getPose());
+               nextFootstepPose.set(nextFootstep.getPoseCopy());
          }
          else if (nextNextFootstep == null)
          {

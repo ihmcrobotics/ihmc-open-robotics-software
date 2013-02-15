@@ -323,7 +323,7 @@ public class FootstepDataTest
          Footstep receivedFootstep = receivedFootsteps.get(i);
 
          assertTrue(sentFootstep.getBody().getName().equals(receivedFootstep.getBody().getName()));
-         assertTrue(sentFootstep.getPose().epsilonEquals(receivedFootstep.getPose(), 0.0001));
+         assertTrue(sentFootstep.getPoseCopy().epsilonEquals(receivedFootstep.getPoseCopy(), 0.0001));
 
          for (int j = 0; j < sentFootstep.getExpectedContactPoints().size(); j++)
          {

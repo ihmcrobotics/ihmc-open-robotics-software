@@ -114,7 +114,7 @@ public class FootstepGeneratorTest
    private static void assertLastStepIsPointingCorrectly(Footstep footstep, Point3d destination)
    {
       Vector3d footstepOrientation = SIDESTEP ? new Vector3d(0.0, -1.0, 0.0) : new Vector3d(1.0, 0.0, 0.0);
-      footstep.getPose().getOrientationMatrix3d().transform(footstepOrientation);
+      footstep.getPoseCopy().getOrientationMatrix3d().transform(footstepOrientation);
       footstepOrientation.normalize();
       Vector3d pathOrientation = new Vector3d(destination);
       pathOrientation.normalize();
@@ -141,7 +141,7 @@ public class FootstepGeneratorTest
    {
       for (Footstep footstep : footSteps)
       {
-         assertEquals(DRCRobotParameters.DRC_ROBOT_ANKLE_HEIGHT, footstep.getPose().getZ(), eps);
+         assertEquals(DRCRobotParameters.DRC_ROBOT_ANKLE_HEIGHT, footstep.getPoseCopy().getZ(), eps);
       }
    }
 

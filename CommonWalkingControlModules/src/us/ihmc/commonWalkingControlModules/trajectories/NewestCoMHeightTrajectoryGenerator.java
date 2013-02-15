@@ -149,7 +149,7 @@ public class NewestCoMHeightTrajectoryGenerator implements CoMHeightTrajectoryGe
       else
       {
          //TODO: Garbage
-         FramePose contactPointPose = nextFootstep.getPose();
+         FramePose contactPointPose = nextFootstep.getPoseCopy();
          PoseReferenceFrame poseFrame = new PoseReferenceFrame("Temp", contactPointPose.getReferenceFrame());
          poseFrame.updatePose(contactPointPose);
          poseFrame.update();
