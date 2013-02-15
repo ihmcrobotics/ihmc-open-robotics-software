@@ -38,7 +38,7 @@ public class FootstepDataTest
    public void testFootstepDataSerialization()
    {
       RigidBody endEffector = new RigidBody("rigid", ReferenceFrame.getWorldFrame());
-      ContactablePlaneBody contactablePlaneBody = ContactablePlaneBodyTools.createTypicalContactablePlaneBodyForTests(endEffector);
+      ContactablePlaneBody contactablePlaneBody = ContactablePlaneBodyTools.createTypicalContactablePlaneBodyForTests(endEffector, ReferenceFrame.getWorldFrame());
       
       FramePose pose = new FramePose(ReferenceFrame.getWorldFrame());
       ArrayList<FramePoint> expectedContactPoints = new ArrayList<FramePoint>();
@@ -371,7 +371,7 @@ public class FootstepDataTest
       protected void processPacket(FootstepData packet)
       {
          RigidBody endEffector = new RigidBody(packet.getRigidBodyName(), ReferenceFrame.getWorldFrame());
-         ContactablePlaneBody contactablePlaneBody = ContactablePlaneBodyTools.createTypicalContactablePlaneBodyForTests(endEffector);
+         ContactablePlaneBody contactablePlaneBody = ContactablePlaneBodyTools.createTypicalContactablePlaneBodyForTests(endEffector, ReferenceFrame.getWorldFrame());
 
          
          FramePose pose = new FramePose(ReferenceFrame.getWorldFrame(), packet.getLocation(), packet.getOrientation());
@@ -408,7 +408,7 @@ public class FootstepDataTest
          for (FootstepData footstepData : packet)
          {
             RigidBody endEffector = new RigidBody(footstepData.getRigidBodyName(), ReferenceFrame.getWorldFrame());
-            ContactablePlaneBody contactablePlaneBody = ContactablePlaneBodyTools.createTypicalContactablePlaneBodyForTests(endEffector);
+            ContactablePlaneBody contactablePlaneBody = ContactablePlaneBodyTools.createTypicalContactablePlaneBodyForTests(endEffector, ReferenceFrame.getWorldFrame());
 
             FramePose pose = new FramePose(ReferenceFrame.getWorldFrame(), footstepData.getLocation(), footstepData.getOrientation());
             ArrayList<FramePoint> expectedContactPoints = new ArrayList<FramePoint>();

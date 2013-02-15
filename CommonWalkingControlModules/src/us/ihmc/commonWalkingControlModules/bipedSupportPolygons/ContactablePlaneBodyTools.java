@@ -11,10 +11,9 @@ import us.ihmc.utilities.screwTheory.RigidBody;
 
 public class ContactablePlaneBodyTools
 {
-   public static RectangularContactableBody createTypicalContactablePlaneBodyForTests(RigidBody rigidBody)
-   {
-      ReferenceFrame endEffectorFrame = rigidBody.getParentJoint().getFrameAfterJoint();
-      
+   
+   public static RectangularContactableBody createTypicalContactablePlaneBodyForTests(RigidBody rigidBody, ReferenceFrame endEffectorFrame)
+   {      
       Transform3D transform3D = new Transform3D();
       transform3D.setTranslation(new Vector3d(0.1, 0.2, -0.5));
       transform3D.rotY(Math.PI/2.0);
@@ -32,7 +31,8 @@ public class ContactablePlaneBodyTools
    
    public static RectangularContactableBody createRandomContactablePlaneBodyForTests(Random random, RigidBody rigidBody)
    {
-      ReferenceFrame endEffectorFrame = rigidBody.getParentJoint().getFrameAfterJoint();
+      //TODO: Use a better frame than just world here.
+      ReferenceFrame endEffectorFrame = ReferenceFrame.getWorldFrame(); //rigidBody.getParentJoint().getFrameAfterJoint();
       
       Transform3D transform3D = RandomTools.generateRandomTransform(random);
       
