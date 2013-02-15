@@ -32,7 +32,7 @@ public class RangeOfStep3d extends FrameEllipsoid3d
       this.offset = robotSide.negateIfRightSide(offset);
    }
    
-   public boolean contains(FramePoint pointToCheck)
+   public boolean containsPoint(FramePoint pointToCheck)
    {
       this.changeFrame(rigidBody.getBodyFixedFrame());
       
@@ -47,6 +47,6 @@ public class RangeOfStep3d extends FrameEllipsoid3d
    
    public boolean containsPointInWorld(Vector3f mouseLocationInWorld)
    {
-      return contains(new FramePoint(ReferenceFrame.getWorldFrame(), mouseLocationInWorld.getX(), mouseLocationInWorld.getY(), mouseLocationInWorld.getZ()));
+      return containsPoint(new FramePoint(ReferenceFrame.getWorldFrame(), mouseLocationInWorld.getX(), mouseLocationInWorld.getY(), mouseLocationInWorld.getZ()));
    }
 }
