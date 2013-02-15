@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.calculators.EquivalentConstantCoPCalculator;
-import us.ihmc.utilities.math.MathTools;
+import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
@@ -17,33 +17,31 @@ public class ConstantCoPInstantaneousCapturePointTrajectory implements Instantan
 {
    private final YoVariableRegistry registry;
    private final BipedSupportPolygons bipedSupportPolygons;
-   private final double gravity;
    private final double deltaT;
    private final YoFramePoint2d initialDesiredICP;
    private final YoFramePoint2d finalDesiredICP;
    private final DoubleYoVariable moveTime;
    private final DoubleYoVariable currentTime;
 
-   public ConstantCoPInstantaneousCapturePointTrajectory(BipedSupportPolygons bipedSupportPolygons, double gravity, double deltaT,
+   public ConstantCoPInstantaneousCapturePointTrajectory(String namePrefix, BipedSupportPolygons bipedSupportPolygons, double deltaT,
            YoVariableRegistry parentRegistry)
    {
       this.bipedSupportPolygons = bipedSupportPolygons;
-      this.gravity = gravity;
+      this.registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
       this.deltaT = deltaT;
-      this.registry = new YoVariableRegistry(getClass().getSimpleName());
 
       ReferenceFrame referenceFrame = ReferenceFrame.getWorldFrame();
-      initialDesiredICP = new YoFramePoint2d("initialDesiredICP", "", referenceFrame, registry);
-      finalDesiredICP = new YoFramePoint2d("finalDesiredICP", "", referenceFrame, registry);
+      initialDesiredICP = new YoFramePoint2d(namePrefix + "InitialDesiredICP", "", referenceFrame, registry);
+      finalDesiredICP = new YoFramePoint2d(namePrefix + "FinalDesiredICP", "", referenceFrame, registry);
 
-      moveTime = new DoubleYoVariable("icpTrajectoryMoveTime", registry);
-      currentTime = new DoubleYoVariable("icpTrajectoryCurrentTime", registry);
+      moveTime = new DoubleYoVariable(namePrefix + "ICPTrajectoryMoveTime", registry);
+      currentTime = new DoubleYoVariable(namePrefix + "ICPTrajectoryCurrentTime", registry);
 
       parentRegistry.addChild(registry);
       reset();
    }
 
-   public void initialize(FramePoint2d initialDesiredICP, FramePoint2d finalDesiredICP, double moveTime, double omega0, double amountToBeInside)
+   public void initialize(FramePoint2d initialDesiredICP, FramePoint2d finalDesiredICP, double moveTime, double omega0, double amountToBeInside, RobotSide supportSide)
    {
       initialDesiredICP.changeFrame(this.initialDesiredICP.getReferenceFrame());
       finalDesiredICP.changeFrame(this.finalDesiredICP.getReferenceFrame());
@@ -56,9 +54,8 @@ public class ConstantCoPInstantaneousCapturePointTrajectory implements Instantan
       if (!initialDesiredICP.epsilonEquals(finalDesiredICP, epsilon))
       {
          // make sure it is feasible by adjusting move time
-         double comHeight = gravity / MathTools.square(omega0);
          FramePoint2d equivalentConstantCoP = EquivalentConstantCoPCalculator.computeEquivalentConstantCoP(initialDesiredICP, finalDesiredICP, moveTime,
-                                                 comHeight, gravity);
+                                                 omega0);
 
          FrameConvexPolygon2d supportPolygon = bipedSupportPolygons.getSupportPolygonInMidFeetZUp();    // bipedSupportPolygons.getFootPolygonInAnkleZUp(supportSide);
 
@@ -68,8 +65,9 @@ public class ConstantCoPInstantaneousCapturePointTrajectory implements Instantan
          GeometryTools.movePointInsidePolygonAlongVector(equivalentConstantCoP, vector, supportPolygon, amountToBeInside);
 
          equivalentConstantCoP.changeFrame(initialDesiredICP.getReferenceFrame());
-         moveTime = EquivalentConstantCoPCalculator.computeMoveTime(initialDesiredICP, finalDesiredICP, equivalentConstantCoP, comHeight, gravity);
+         moveTime = EquivalentConstantCoPCalculator.computeMoveTime(initialDesiredICP, finalDesiredICP, equivalentConstantCoP, omega0);
       }
+
       if (Double.isInfinite(moveTime))
          throw new RuntimeException();
 

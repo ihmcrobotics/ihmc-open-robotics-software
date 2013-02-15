@@ -187,7 +187,6 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
    private final PIDController lidarJointVelocityController = new PIDController("lidar", registry);
    private final DoubleYoVariable desiredLidarVelocity = new DoubleYoVariable("desiredLidarVelocity", registry);
 
-
    public WalkingHighLevelHumanoidController(FullRobotModel fullRobotModel, CommonWalkingReferenceFrames referenceFrames, TwistCalculator twistCalculator,
            CenterOfMassJacobian centerOfMassJacobian, SideDependentList<? extends ContactablePlaneBody> bipedFeet, BipedSupportPolygons bipedSupportPolygons,
            SideDependentList<FootSwitchInterface> footSwitches, double gravityZ, DoubleYoVariable yoTime, double controlDT,
@@ -218,7 +217,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       centerOfMassHeightController.setDerivativeGain(2.0 * zeta * Math.sqrt(centerOfMassHeightController.getProportionalGain()));
 
       String namePrefix = "walking";
-      icpTrajectoryGenerator = new ConstantCoPInstantaneousCapturePointTrajectory(bipedSupportPolygons, gravity, controlDT, registry);
+      icpTrajectoryGenerator = new ConstantCoPInstantaneousCapturePointTrajectory(namePrefix, bipedSupportPolygons, controlDT, registry);
 
 //    doubleSupportICPTrajectoryGenerator = new ParabolicVelocityInstantaneousCapturePointTrajectory(namePrefix,
 //          bipedSupportPolygons, controlDT, registry);
@@ -614,7 +613,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 
          finalDesiredICP.changeFrame(desiredICP.getReferenceFrame());
          icpTrajectoryGenerator.initialize(desiredICP.getFramePoint2dCopy(), finalDesiredICP, doubleSupportTimeProvider.getValue(), getOmega0(),
-                                           amountToBeInsideDoubleSupport.getDoubleValue());
+                                           amountToBeInsideDoubleSupport.getDoubleValue(), getSupportLeg());
 
          centerOfMassHeightTrajectoryGenerator.initialize(getSupportLeg(), null, getContactStatesList());
       }
@@ -978,7 +977,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       updateBipedSupportPolygons(bipedSupportPolygons);
 
       icpTrajectoryGenerator.initialize(desiredICP.getFramePoint2dCopy(), finalDesiredICP, swingTimeProvider.getValue(), omega0,
-                                        amountToBeInsideSingleSupport.getDoubleValue());
+                                        amountToBeInsideSingleSupport.getDoubleValue(), getSupportLeg());
       centerOfMassHeightTrajectoryGenerator.initialize(getSupportLeg(), nextFootstep, getContactStatesList());
    }
 
