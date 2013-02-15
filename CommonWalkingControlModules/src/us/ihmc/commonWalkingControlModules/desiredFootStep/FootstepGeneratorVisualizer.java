@@ -123,7 +123,7 @@ public class FootstepGeneratorVisualizer
       }
       
       FramePose footstepPoseInWorld = footstepPose.changeFrameCopy(worldFrame);
-      FramePoint position = footstepPoseInWorld.getPosition();
+      FramePoint position = footstepPoseInWorld.getPostionCopy();
       position.setZ(position.getZ() + 0.0005);
       footstepPoseInWorld.setPosition(position);
       
@@ -201,7 +201,7 @@ public class FootstepGeneratorVisualizer
       FramePose startStanceFootPose = new FramePose(worldFrame, new Point3d(0.0, 0.2, 0.0), new Quat4d());
       soleFrames.get(RobotSide.LEFT).updatePose(startStanceFootPose);
       soleFrames.get(RobotSide.LEFT).update();
-      Point3d stanceAnklePosition = startStanceFootPose.getPosition().getPointCopy();
+      Point3d stanceAnklePosition = startStanceFootPose.getPostionCopy().getPointCopy();
       sixDoFJoints.get(RobotSide.LEFT).setPosition(stanceAnklePosition);
       return startStanceFootPose;
    }
@@ -212,7 +212,7 @@ public class FootstepGeneratorVisualizer
       FramePose startSwingFootPose = new FramePose(worldFrame, new Point3d(0.0, -0.2, 0.0), new Quat4d());
       soleFrames.get(RobotSide.RIGHT).updatePose(startSwingFootPose);
       soleFrames.get(RobotSide.RIGHT).update();
-      Point3d swingAnklePosition = startSwingFootPose.getPosition().getPointCopy();
+      Point3d swingAnklePosition = startSwingFootPose.getPostionCopy().getPointCopy();
       sixDoFJoints.get(RobotSide.RIGHT).setPosition(swingAnklePosition);
       return startSwingFootPose;
    }

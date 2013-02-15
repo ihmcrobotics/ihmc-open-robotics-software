@@ -1065,7 +1065,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
          FrameVector desiredAngularVelocity = new FrameVector(chestFrame);
          FrameVector desiredLinearAccelerationOfOrigin = new FrameVector(chestFrame);
          FrameVector desiredAngularAcceleration = new FrameVector(chestFrame);
-         handControlModules.get(robotSide).doPositionControl(desiredHandPose.getPosition(), desiredHandPose.getOrientation(), desiredLinearVelocityOfOrigin,
+         handControlModules.get(robotSide).doPositionControl(desiredHandPose.getPostionCopy(), desiredHandPose.getOrientationCopy(), desiredLinearVelocityOfOrigin,
                                 desiredAngularVelocity, desiredLinearAccelerationOfOrigin, desiredAngularAcceleration, base);
 
          SpatialAccelerationVector handAcceleration = new SpatialAccelerationVector();
