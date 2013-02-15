@@ -243,12 +243,12 @@ public class YoAppearance
 
    public static AppearanceDefinition DarkGray()
    {
-      return RGBColorFromHex(0xA9A9A9);
+      return RGBColorFromHex(0x424242);
    }
 
    public static AppearanceDefinition DarkGrey()
    {
-      return RGBColorFromHex(0xA9A9A9);
+      return RGBColorFromHex(0x424242);
    }
 
    public static AppearanceDefinition DarkGreen()
