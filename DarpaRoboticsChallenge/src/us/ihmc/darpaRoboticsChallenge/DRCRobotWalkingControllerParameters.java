@@ -73,4 +73,9 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
    {
       return 7.0;
    }
+
+   public boolean resetDesiredICPToCurrentAtStartOfSwing()
+   {
+      return false;
+   }
 }
