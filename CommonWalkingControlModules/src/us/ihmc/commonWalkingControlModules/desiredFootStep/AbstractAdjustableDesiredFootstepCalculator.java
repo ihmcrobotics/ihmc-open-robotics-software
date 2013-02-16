@@ -5,6 +5,7 @@ import java.util.List;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
+import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
@@ -50,6 +51,8 @@ public abstract class AbstractAdjustableDesiredFootstepCalculator implements Des
 
       FramePose footstepPose = new FramePose(footstepPositions.get(swingLegSide).getFramePointCopy(),
                                   footstepOrientations.get(swingLegSide).getFrameOrientationCopy());
+      footstepPose.changeFrame(ReferenceFrame.getWorldFrame());
+      
       PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("poseReferenceFrame", footstepPose);
 
       ContactablePlaneBody foot = contactableBodies.get(swingLegSide);
@@ -62,14 +65,22 @@ public abstract class AbstractAdjustableDesiredFootstepCalculator implements Des
          ContactablePlaneBody stanceFoot = contactableBodies.get(supportLegSide);
          RigidBody stanceFootBody = stanceFoot.getRigidBody();
          FramePose stanceFootPose = new FramePose(stanceFootBody.getBodyFixedFrame());
+         stanceFootPose.changeFrame(ReferenceFrame.getWorldFrame());
+         
          PoseReferenceFrame stanceFootPoseFrame = new PoseReferenceFrame("desiredFootstep", stanceFootPose);
          
          Footstep stanceFootstep = new Footstep(stanceFoot, stanceFootPoseFrame, stanceFoot.getContactPoints(), trustHeight);
          desiredFootstep = desiredFootstepAdjustor.adjustDesiredFootstep(stanceFootstep, desiredFootstep);
 
          desiredFootstep.getPose(footstepPose);
-         footstepPositions.get(swingLegSide).set(footstepPose.getPostionCopy());
-         footstepOrientations.get(swingLegSide).set(footstepPose.getOrientationCopy());
+         YoFramePoint yoFramePoint = footstepPositions.get(swingLegSide);
+         FramePoint footstepPosition = footstepPose.getPostionCopy();
+         footstepPosition.changeFrame(yoFramePoint.getReferenceFrame());
+         yoFramePoint.set(footstepPosition);
+         YoFrameOrientation yoFrameOrientation = footstepOrientations.get(swingLegSide);
+         FrameOrientation footstepOrientation = footstepPose.getOrientationCopy();
+         footstepOrientation.changeFrame(yoFrameOrientation.getReferenceFrame());
+         yoFrameOrientation.set(footstepOrientation);
       }
 
       return desiredFootstep;
