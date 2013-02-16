@@ -7,6 +7,7 @@ import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
+import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.RigidBody;
 
@@ -49,17 +50,21 @@ public abstract class AbstractAdjustableDesiredFootstepCalculator implements Des
 
       FramePose footstepPose = new FramePose(footstepPositions.get(swingLegSide).getFramePointCopy(),
                                   footstepOrientations.get(swingLegSide).getFrameOrientationCopy());
+      PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("poseReferenceFrame", footstepPose);
+
       ContactablePlaneBody foot = contactableBodies.get(swingLegSide);
       
       boolean trustHeight = true;
-      Footstep desiredFootstep = new Footstep(foot, footstepPose, getContactPoints(swingLegSide), trustHeight);
+      Footstep desiredFootstep = new Footstep(foot, poseReferenceFrame, getContactPoints(swingLegSide), trustHeight);
 
       if (desiredFootstepAdjustor != null)
       {
          ContactablePlaneBody stanceFoot = contactableBodies.get(supportLegSide);
          RigidBody stanceFootBody = stanceFoot.getRigidBody();
          FramePose stanceFootPose = new FramePose(stanceFootBody.getBodyFixedFrame());
-         Footstep stanceFootstep = new Footstep(stanceFoot, stanceFootPose, stanceFoot.getContactPoints(), trustHeight);
+         PoseReferenceFrame stanceFootPoseFrame = new PoseReferenceFrame("desiredFootstep", stanceFootPose);
+         
+         Footstep stanceFootstep = new Footstep(stanceFoot, stanceFootPoseFrame, stanceFoot.getContactPoints(), trustHeight);
          desiredFootstep = desiredFootstepAdjustor.adjustDesiredFootstep(stanceFootstep, desiredFootstep);
 
          desiredFootstep.getPose(footstepPose);

@@ -10,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlane
 import us.ihmc.utilities.io.streamingData.StreamingDataConsumer;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
+import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 public class FootstepConsumer implements FootstepProvider, StreamingDataConsumer
@@ -49,7 +50,10 @@ public class FootstepConsumer implements FootstepProvider, StreamingDataConsumer
       
       boolean trustHeight = footstepData.getTrustHeight();
       String id = footstepData.getId();
-      Footstep footstep = new Footstep(id, contactableBody, new FramePose(ReferenceFrame.getWorldFrame(), footstepData.getLocation(), footstepData.getOrientation()), expectedContactPoints, trustHeight);
+      FramePose framePose = new FramePose(ReferenceFrame.getWorldFrame(), footstepData.getLocation(), footstepData.getOrientation());
+      PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("poseReferenceFrame", framePose);
+      
+      Footstep footstep = new Footstep(id, contactableBody, poseReferenceFrame, expectedContactPoints, trustHeight);
       System.out.println("footstep = " + footstep);
       footstepQueue.add(footstep);
    }

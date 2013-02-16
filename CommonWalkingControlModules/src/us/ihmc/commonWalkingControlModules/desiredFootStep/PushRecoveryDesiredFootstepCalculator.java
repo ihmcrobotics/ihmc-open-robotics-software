@@ -8,6 +8,7 @@ import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
+import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
@@ -65,7 +66,10 @@ public class PushRecoveryDesiredFootstepCalculator implements DesiredFootstepCal
       ContactablePlaneBody foot = contactableBodies.get(swingSide);
       
       boolean trustHeight = false;
-      Footstep desiredFootstep = new Footstep(foot, footstepPose, foot.getContactPoints(), trustHeight);
+      
+      PoseReferenceFrame footstepPoseFrame = new PoseReferenceFrame("footstepPoseFrame", footstepPose);
+
+      Footstep desiredFootstep = new Footstep(foot, footstepPoseFrame, foot.getContactPoints(), trustHeight);
       return desiredFootstep;
    }
 

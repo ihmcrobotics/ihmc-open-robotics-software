@@ -18,6 +18,7 @@ import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
+import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
@@ -160,10 +161,12 @@ public class SteppingStonesDesiredFootstepCalculator implements DesiredFootstepC
 
          // Create a foot Step Pose from Position and Orientation
          FramePose footstepPose = new FramePose(nominalLocation, footstepOrientation);
+         PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("poseReferenceFrame", footstepPose);
+
          ContactablePlaneBody foot = contactableBodies.get(supportLegSide.getOppositeSide());
          
          boolean trustHeight = false;
-         desiredFootstep = new Footstep(foot, footstepPose, foot.getContactPoints(), trustHeight);
+         desiredFootstep = new Footstep(foot, poseReferenceFrame, foot.getContactPoints(), trustHeight);
       }
 
       captureRegion = captureRegion.changeFrameCopy(ReferenceFrame.getWorldFrame());
@@ -204,10 +207,12 @@ public class SteppingStonesDesiredFootstepCalculator implements DesiredFootstepC
 
       // Create a foot Step Pose from Position and Orientation
       FramePose footstepPose = new FramePose(locationToReturn, footstepOrientation);
+      PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("poseReferenceFrame", footstepPose);
+
       ContactablePlaneBody foot = contactableBodies.get(supportLegSide.getOppositeSide());
       
       boolean trustHeight = false;
-      desiredFootstep = new Footstep(foot, footstepPose, foot.getContactPoints(), trustHeight);
+      desiredFootstep = new Footstep(foot, poseReferenceFrame, foot.getContactPoints(), trustHeight);
 
       return desiredFootstep;
    }
