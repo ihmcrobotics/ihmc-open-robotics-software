@@ -70,6 +70,8 @@ public class ConstantCoPInstantaneousCapturePointTrajectory implements Instantan
 
       if (Double.isInfinite(moveTime))
          throw new RuntimeException();
+      if (moveTime < 0.0)
+         throw new MoveTimeNegativeException(moveTime);
 
       this.moveTime.set(moveTime);
    }
@@ -123,5 +125,14 @@ public class ConstantCoPInstantaneousCapturePointTrajectory implements Instantan
    public void reset()
    {
       currentTime.set(Double.POSITIVE_INFINITY);
+   }
+
+   public class MoveTimeNegativeException extends RuntimeException
+   {
+      private static final long serialVersionUID = 356745581088808113L;
+      public MoveTimeNegativeException(double moveTime)
+      {
+         super("Move time negative. moveTime = " + moveTime);
+      }
    }
 }
