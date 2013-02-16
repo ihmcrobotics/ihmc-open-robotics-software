@@ -26,6 +26,7 @@ import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FramePose2d;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
+import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.ZUpFrame;
 import us.ihmc.utilities.math.overheadPath.OverheadPath;
@@ -283,10 +284,12 @@ public class DesiredFootstepVisualizer
       RobotSide swingLegSide = initialStanceSide.getOppositeSide();
       
       FramePose pose = new FramePose(ReferenceFrame.getWorldFrame());
+      PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("visualizePathBasedFootstepListCreator", pose);
+      
       List<FramePoint> expectedContactPoints = bipedFeet.get(initialStanceSide).getContactPoints();
       
       boolean trustHeight = false;
-      Footstep initialStanceFootstep = new Footstep(bipedFeet.get(initialStanceSide), pose, expectedContactPoints, trustHeight);
+      Footstep initialStanceFootstep = new Footstep(bipedFeet.get(initialStanceSide), poseReferenceFrame, expectedContactPoints, trustHeight);
       footstepGenerator.setStepLength(0.2);
       footstepGenerator.setStepWidth(0.1);
       footstepGenerator.setStanceStart(initialStanceFootstep);

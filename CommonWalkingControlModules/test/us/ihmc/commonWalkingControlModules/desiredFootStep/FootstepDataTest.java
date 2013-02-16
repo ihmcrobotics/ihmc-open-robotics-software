@@ -12,7 +12,6 @@ import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBodyTools;
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.RectangularContactableBody;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.io.streamingData.AbstractStreamingDataConsumer;
 import us.ihmc.utilities.io.streamingData.QueueBasedStreamingDataProducer;
@@ -21,6 +20,7 @@ import us.ihmc.utilities.io.streamingData.StreamingDataTCPClient;
 import us.ihmc.utilities.io.streamingData.StreamingDataTCPServer;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
+import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.test.JUnitTools;
@@ -41,6 +41,8 @@ public class FootstepDataTest
       ContactablePlaneBody contactablePlaneBody = ContactablePlaneBodyTools.createTypicalContactablePlaneBodyForTests(endEffector, ReferenceFrame.getWorldFrame());
       
       FramePose pose = new FramePose(ReferenceFrame.getWorldFrame());
+      PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", pose);
+      
       ArrayList<FramePoint> expectedContactPoints = new ArrayList<FramePoint>();
       for (int i = 0; i < 3; i++)
       {
@@ -49,7 +51,7 @@ public class FootstepDataTest
       }
 
       boolean trustHeight = true;
-      Footstep footstep = new Footstep(contactablePlaneBody, pose, expectedContactPoints, trustHeight);
+      Footstep footstep = new Footstep(contactablePlaneBody, poseReferenceFrame, expectedContactPoints, trustHeight);
       FootstepData footstepData = new FootstepData(footstep);
       JUnitTools.assertSerializable(footstepData);
    }
@@ -85,6 +87,7 @@ public class FootstepDataTest
 
       // verify received correctly
       ArrayList<Footstep> receivedFootsteps = footstepDataConsumer.getReconstructedFootsteps();
+      
       compareFootstepsSentWithReceived(sentFootsteps, receivedFootsteps);
    }
 
@@ -300,6 +303,11 @@ public class FootstepDataTest
 
          FramePose pose = new FramePose(ReferenceFrame.getWorldFrame(), new Point3d(footstepNumber, 0.0, 0.0),
                                         new Quat4d(random.nextDouble(), random.nextDouble(), random.nextDouble(), random.nextDouble()));
+         
+         
+         PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", pose);
+
+         
          ArrayList<FramePoint> expectedContactPoints = new ArrayList<FramePoint>();
          for (int i = 0; i < 3; i++)
          {
@@ -308,7 +316,7 @@ public class FootstepDataTest
          }
 
          boolean trustHeight = true;
-         Footstep footstep = new Footstep(contactablePlaneBody, pose, expectedContactPoints, trustHeight);
+         Footstep footstep = new Footstep(contactablePlaneBody, poseReferenceFrame, expectedContactPoints, trustHeight);
          footsteps.add(footstep);
       }
 
@@ -323,7 +331,14 @@ public class FootstepDataTest
          Footstep receivedFootstep = receivedFootsteps.get(i);
 
          assertTrue(sentFootstep.getBody().getName().equals(receivedFootstep.getBody().getName()));
-         assertTrue(sentFootstep.getPoseCopy().epsilonEquals(receivedFootstep.getPoseCopy(), 0.0001));
+         
+         
+         FramePose sentPose = sentFootstep.getPoseCopy();
+         FramePose receivedPose = receivedFootstep.getPoseCopy();
+         
+         System.out.println("sentPose = " + sentPose);
+         System.out.println("receivedPose = " + receivedPose);
+         assertTrue(sentPose.epsilonEquals(receivedPose, 0.0001));
 
          for (int j = 0; j < sentFootstep.getExpectedContactPoints().size(); j++)
          {
@@ -375,6 +390,8 @@ public class FootstepDataTest
 
          
          FramePose pose = new FramePose(ReferenceFrame.getWorldFrame(), packet.getLocation(), packet.getOrientation());
+         PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", pose);
+
          ArrayList<FramePoint> expectedContactPoints = new ArrayList<FramePoint>();
          for (Point3d point : packet.getExpectedContactPoints())
          {
@@ -383,7 +400,7 @@ public class FootstepDataTest
          }
 
          boolean trustHeight = true;
-         Footstep footstep = new Footstep(contactablePlaneBody, pose, expectedContactPoints, trustHeight);
+         Footstep footstep = new Footstep(contactablePlaneBody, poseReferenceFrame, expectedContactPoints, trustHeight);
          reconstructedFootsteps.add(footstep);
       }
 
@@ -411,6 +428,9 @@ public class FootstepDataTest
             ContactablePlaneBody contactablePlaneBody = ContactablePlaneBodyTools.createTypicalContactablePlaneBodyForTests(endEffector, ReferenceFrame.getWorldFrame());
 
             FramePose pose = new FramePose(ReferenceFrame.getWorldFrame(), footstepData.getLocation(), footstepData.getOrientation());
+            PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", pose);
+
+            
             ArrayList<FramePoint> expectedContactPoints = new ArrayList<FramePoint>();
             for (Point3d point : footstepData.getExpectedContactPoints())
             {
@@ -419,7 +439,7 @@ public class FootstepDataTest
             }
 
             boolean trustHeight = true;
-            Footstep footstep = new Footstep(contactablePlaneBody, pose, expectedContactPoints, trustHeight);
+            Footstep footstep = new Footstep(contactablePlaneBody, poseReferenceFrame, expectedContactPoints, trustHeight);
             reconstructedFootstepPath.add(footstep);
          }
       }

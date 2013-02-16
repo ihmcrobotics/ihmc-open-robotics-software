@@ -11,6 +11,7 @@ import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
+import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
@@ -68,10 +69,12 @@ public class SimpleDesiredFootstepCalculator implements DesiredFootstepCalculato
       
       // Create a foot Step Pose from Position and Orientation
       FramePose footstepPose = new FramePose(footstepPosition, footstepOrientation);
+      PoseReferenceFrame footstepPoseFrame = new PoseReferenceFrame("footstepPoseFrame", footstepPose);
+
       ContactablePlaneBody foot = contactableBodies.get(swingLegSide);
       
       boolean trustHeight = false;
-      Footstep desiredFootstep = new Footstep(foot, footstepPose, foot.getContactPoints(), trustHeight);
+      Footstep desiredFootstep = new Footstep(foot, footstepPoseFrame, foot.getContactPoints(), trustHeight);
       
       return desiredFootstep;
    }

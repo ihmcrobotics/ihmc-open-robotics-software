@@ -8,6 +8,7 @@ import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
+import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
@@ -100,10 +101,12 @@ public class SuspendedRobotDesiredFootStepCalculator implements DesiredFootstepC
 
       // Create a foot Step Pose from Position and Orientation
       FramePose footstepPose = new FramePose(footstepPosition, footstepOrientation);
+      PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("poseReferenceFrame", footstepPose);
+
       ContactablePlaneBody contactableBody = contactableBodies.get(swingLegSide);
       
       boolean trustHeight = false;
-      Footstep desiredFootstep = new Footstep(contactableBody, footstepPose, contactableBody.getContactPoints(), trustHeight);
+      Footstep desiredFootstep = new Footstep(contactableBody, poseReferenceFrame, contactableBody.getContactPoints(), trustHeight);
 
       return desiredFootstep;
    }

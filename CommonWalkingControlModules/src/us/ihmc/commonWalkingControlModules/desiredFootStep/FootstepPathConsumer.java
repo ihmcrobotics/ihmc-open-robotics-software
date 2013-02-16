@@ -4,6 +4,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlane
 import us.ihmc.utilities.io.streamingData.AbstractStreamingDataConsumer;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
+import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import javax.vecmath.Point3d;
@@ -41,7 +42,11 @@ public class FootstepPathConsumer extends AbstractStreamingDataConsumer<ArrayLis
             FramePoint framePoint = new FramePoint(contactableBody.getBodyFrame(), point3d);
             expectedContactPoints.add(framePoint);
          }
-         Footstep footstep = new Footstep(footstepData.getId(), contactableBody, new FramePose(ReferenceFrame.getWorldFrame(), footstepData.getLocation(), footstepData.getOrientation()), expectedContactPoints, footstepData.getTrustHeight());
+         
+         FramePose footstepPose = new FramePose(ReferenceFrame.getWorldFrame(), footstepData.getLocation(), footstepData.getOrientation());
+         PoseReferenceFrame footstepPoseFrame = new PoseReferenceFrame("footstepPoseFrame", footstepPose);
+
+         Footstep footstep = new Footstep(footstepData.getId(), contactableBody, footstepPoseFrame, expectedContactPoints, footstepData.getTrustHeight());
          footsteps.add(footstep);
          if (DEBUG)
          {
