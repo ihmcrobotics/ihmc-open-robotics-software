@@ -69,6 +69,7 @@ public class SimpleDesiredFootstepCalculator implements DesiredFootstepCalculato
       
       // Create a foot Step Pose from Position and Orientation
       FramePose footstepPose = new FramePose(footstepPosition, footstepOrientation);
+      footstepPose.changeFrame(ReferenceFrame.getWorldFrame());
       PoseReferenceFrame footstepPoseFrame = new PoseReferenceFrame("footstepPoseFrame", footstepPose);
 
       ContactablePlaneBody foot = contactableBodies.get(swingLegSide);
