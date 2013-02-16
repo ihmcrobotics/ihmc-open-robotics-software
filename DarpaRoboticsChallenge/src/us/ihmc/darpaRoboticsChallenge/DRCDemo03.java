@@ -13,7 +13,6 @@ import us.ihmc.darpaRoboticsChallenge.controllers.DRCRobotMomentumBasedControlle
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotParameters;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DrivingDRCRobotInitialSetup;
-import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.projectM.R2Sim02.initialSetup.RobotInitialSetup;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
@@ -78,6 +77,8 @@ public class DRCDemo03
 
 //      showSeatGraphics(simulationConstructionSet);
 
+      setUpJoyStick(simulationConstructionSet);
+      
       if (automaticSimulationRunner != null)
       {
          drcSimulation.start(automaticSimulationRunner);
@@ -87,16 +88,28 @@ public class DRCDemo03
          drcSimulation.start(null);
       }
    }
-
-   private void showSeatGraphics(SimulationConstructionSet sim)
+   
+   private void setUpJoyStick(SimulationConstructionSet simulationConstructionSet)
    {
-      Graphics3DObject seatGraphics = new Graphics3DObject();
-      seatGraphics.scale(0.25);
-      seatGraphics.translate(-1.25, 0, 3.25);
-      seatGraphics.rotate(Math.toRadians(90), Graphics3DObject.Z);
-      seatGraphics.addModelFile(DRCDemo03.class.getResource("models/seat.3DS"));
-      sim.addStaticLinkGraphics(seatGraphics);
+      try
+      {
+         new DRCRobotSteeringWheelJoystickController(simulationConstructionSet);
+      }
+      catch(Exception e)
+      {
+         System.out.println("Could not connect to joystick");
+      }
    }
+
+//   private void showSeatGraphics(SimulationConstructionSet sim)
+//   {
+//      Graphics3DObject seatGraphics = new Graphics3DObject();
+//      seatGraphics.scale(0.25);
+//      seatGraphics.translate(-1.25, 0, 3.25);
+//      seatGraphics.rotate(Math.toRadians(90), Graphics3DObject.Z);
+//      seatGraphics.addModelFile(DRCDemo03.class.getResource("models/seat.3DS"));
+//      sim.addStaticLinkGraphics(seatGraphics);
+//   }
 
    public static void main(String[] args) throws JSAPException
    {

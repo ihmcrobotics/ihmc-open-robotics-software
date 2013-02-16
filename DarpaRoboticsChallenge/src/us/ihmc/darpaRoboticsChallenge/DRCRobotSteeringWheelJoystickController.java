@@ -11,21 +11,18 @@ import com.yobotics.simulationconstructionset.joystick.DoubleYoVariableJoystickE
 import com.yobotics.simulationconstructionset.joystick.JoystickUpdater;
 
 
-public class DRCJoystickController
+public class DRCRobotSteeringWheelJoystickController
 {
    private double deadZone = 0.05;
 
-   private double maxPitch = Math.toRadians(20.0);
-   private double maxRoll = Math.toRadians(20.0);
-   private double maxYaw = Math.toRadians(30.0);
-   private double maxHeight = 1.3;
-   private double minHeight = 0.5;
+   private double maxSteeringAngle = Math.toRadians(45.0);
+   
    private final int pollIntervalMillis = 20;
 
    private final JoystickUpdater joystickUpdater;
    private final Controller joystickController;
 
-   public DRCJoystickController(YoVariableHolder holder)
+   public DRCRobotSteeringWheelJoystickController(YoVariableHolder holder)
    {
       joystickController = findController();
 
@@ -41,21 +38,11 @@ public class DRCJoystickController
       thread.setPriority(Thread.NORM_PRIORITY);
       thread.start();
 
-      DoubleYoVariable desiredCenterOfMassHeight = (DoubleYoVariable) holder.getVariable("desiredCenterOfMassHeight");
-      joystickUpdater.addListener(new DoubleYoVariableJoystickEventListener(desiredCenterOfMassHeight, findComponent(Component.Identifier.Axis.SLIDER),
-              minHeight, maxHeight, deadZone, true));
 
-      DoubleYoVariable desiredPelvisRoll = (DoubleYoVariable) holder.getVariable("desiredPelvisRoll");
-      joystickUpdater.addListener(new DoubleYoVariableJoystickEventListener(desiredPelvisRoll, findComponent(Component.Identifier.Axis.X), -maxRoll, maxRoll,
+      DoubleYoVariable desiredSteeringWheelAngle = (DoubleYoVariable) holder.getVariable("desiredSteeringWheelAngle");
+      joystickUpdater.addListener(new DoubleYoVariableJoystickEventListener(desiredSteeringWheelAngle, findComponent(Component.Identifier.Axis.X), -maxSteeringAngle, maxSteeringAngle,
               deadZone, false));
 
-      DoubleYoVariable desiredPelvisPitch = (DoubleYoVariable) holder.getVariable("desiredPelvisPitch");
-      joystickUpdater.addListener(new DoubleYoVariableJoystickEventListener(desiredPelvisPitch, findComponent(Component.Identifier.Axis.Y), -maxPitch,
-              maxPitch, deadZone, true));
-
-      DoubleYoVariable desiredHeadingFinal = (DoubleYoVariable) holder.getVariable("desiredHeadingFinal");
-      joystickUpdater.addListener(new DoubleYoVariableJoystickEventListener(desiredHeadingFinal, findComponent(Component.Identifier.Axis.RZ), -maxYaw, maxYaw,
-              deadZone, true));
    }
 
    /**
