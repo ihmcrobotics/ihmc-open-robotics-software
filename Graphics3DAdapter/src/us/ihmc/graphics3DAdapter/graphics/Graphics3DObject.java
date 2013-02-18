@@ -10,18 +10,18 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
 import us.ihmc.graphics3DAdapter.HeightMap;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DAddHeightMapInstruction;
 import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DAddMeshDataInstruction;
 import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DAddModelFileInstruction;
-import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DAddTeaPotInstruction;
 import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DAddTextInstruction;
 import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DIdentityInstruction;
 import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DInstruction;
 import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DPrimitiveInstruction;
-import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DRotateMatrixInstruction;
+import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DRotateInstruction;
 import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DScaleInstruction;
 import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DTranslateInstruction;
 import us.ihmc.graphics3DAdapter.input.ModifierKeyInterface;
@@ -183,7 +183,7 @@ public class Graphics3DObject
     */
    public void rotate(Matrix3d rot)
    {
-      graphics3DInstructions.add(new Graphics3DRotateMatrixInstruction(rot));
+      graphics3DInstructions.add(new Graphics3DRotateInstruction(rot));
    }
 
    /**
@@ -271,12 +271,13 @@ public class Graphics3DObject
    }
 
    /**
-    * Adds the specified 3DS Max file to the center of the current coordinate system
-    * with a default appearance.  3DS Max is a 3D modeling program that allows the creation
-    * of detailed models and animations.  This function only imports the model allowing the use
-    * of more complicated and detailed system representations in simulations.
+    * Adds the specified model file to the center of the current coordinate system
+    * with a default appearance.  Supported model files are .stl, .obj, .dae, .vrml and .3ds.
+    *
+    * Appearances of model files can only be changed at runtime if an appearance is given while loading the model
     *
     * @param fileName File path of the desired 3ds file.
+    * @return void
     */
    public void addModelFile(String fileName)
    {
@@ -284,10 +285,10 @@ public class Graphics3DObject
    }
 
    /**
-    * Adds the specified 3DS Max file to the center of the current coordinate system
-    * with the given appearance.  3DS Max is a 3D modeling program that allows the creation
-    * of detailed models and animations.  This function only imports the model allowing the use
-    * of more complicated and detailed system representations in simulations.
+    * Adds the specified model file to the center of the current coordinate system
+    * with the given appearance.    Supported model files are .stl, .obj, .dae, .vrml and .3ds.
+    *
+    * Appearances of model files can only be changed at runtime if an appearance is given while loading the model
     *
     * @param fileName File path to the desired 3ds file.
     * @param app Appearance to use with the model once imported.
@@ -295,10 +296,14 @@ public class Graphics3DObject
    /**
    * @param fileName
    * @param app
+    * @return 
    */
-   public void addModelFile(String fileName, AppearanceDefinition app)
+   public Graphics3DAddModelFileInstruction addModelFile(String fileName, AppearanceDefinition app)
    {
-      graphics3DInstructions.add(new Graphics3DAddModelFileInstruction(fileName, app));
+      
+      Graphics3DAddModelFileInstruction graphics3dAddModelFileInstruction = new Graphics3DAddModelFileInstruction(fileName, app);
+      graphics3DInstructions.add(graphics3dAddModelFileInstruction);
+      return graphics3dAddModelFileInstruction;
    }
 
    public void addCoordinateSystem(double length)
@@ -335,7 +340,6 @@ public class Graphics3DObject
    public void addCoordinateSystem(double length, AppearanceDefinition xAxisAppearance, AppearanceDefinition yAxisAppearance, AppearanceDefinition zAxisAppearance, AppearanceDefinition arrowAppearance)
    {
       AppearanceDefinition headAppearance = YoAppearance.Gray();
-
       
       rotate(Math.PI/2.0, Y);
       addArrow(length, YoAppearance.Red(), headAppearance);
@@ -344,7 +348,6 @@ public class Graphics3DObject
       addArrow(length, YoAppearance.White(), headAppearance);
       rotate(Math.PI/2.0, X);
       addArrow(length, YoAppearance.Blue(), headAppearance);
-      
    }
 
    /**
@@ -383,12 +386,15 @@ public class Graphics3DObject
     * @param ly length of the cube in the y direction.
     * @param lz length of the cube in the z direction.
     * @param cubeApp Appearance of the cube.  See {@link YoAppearance YoAppearance} for implementations.
+    * @return 
     */
-   public void addCube(double lx, double ly, double lz, AppearanceDefinition cubeApp)
+   public Graphics3DInstruction addCube(double lx, double ly, double lz, AppearanceDefinition cubeApp)
    {
       MeshDataHolder meshData = MeshDataGenerator.Cube(lx, ly, lz);
       
-      graphics3DInstructions.add(new Graphics3DAddMeshDataInstruction(meshData, cubeApp));
+      Graphics3DAddMeshDataInstruction graphics3dAddMeshDataInstruction = new Graphics3DAddMeshDataInstruction(meshData, cubeApp);
+      graphics3DInstructions.add(graphics3dAddMeshDataInstruction);
+      return graphics3dAddMeshDataInstruction;
    }
 
    /**
@@ -450,9 +456,9 @@ public class Graphics3DObject
     *
     * @param radius radius of the new sphere in meters.
     */
-   public void addSphere(double radius)
+   public Graphics3DAddMeshDataInstruction addSphere(double radius)
    {
-      addSphere(radius, YoAppearance.Black());
+      return addSphere(radius, YoAppearance.Black());
    }
 
    /**
@@ -898,11 +904,9 @@ public class Graphics3DObject
    }
 
    
-   public Graphics3DAddTeaPotInstruction addTeaPot(AppearanceDefinition appearance)
+   public Graphics3DInstruction addTeaPot(AppearanceDefinition appearance)
    {
-      Graphics3DAddTeaPotInstruction graphics3DAddTeaPot = new Graphics3DAddTeaPotInstruction(appearance);
-      graphics3DInstructions.add(graphics3DAddTeaPot);
-      return graphics3DAddTeaPot;
+      return addModelFile(Graphics3DAdapter.class.getResource("Models/Teapot.obj").getPath(), appearance);
    }
    
    public Graphics3DInstruction addHeightMap(HeightMap heightMap, int xPointsPerSide, int yPointsPerSide, AppearanceDefinition appearance)

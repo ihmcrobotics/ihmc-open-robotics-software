@@ -2,10 +2,10 @@ package us.ihmc.graphics3DAdapter.graphics.instructions;
 
 import javax.vecmath.Matrix3d;
 
-public class Graphics3DRotateMatrixInstruction implements Graphics3DPrimitiveInstruction
+public class Graphics3DRotateInstruction implements Graphics3DPrimitiveInstruction
 {
    private Matrix3d rot;
-   public Graphics3DRotateMatrixInstruction(Matrix3d rot)
+   public Graphics3DRotateInstruction(Matrix3d rot)
    {
       this.rot = rot;
    }

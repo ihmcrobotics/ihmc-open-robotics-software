@@ -887,7 +887,7 @@ public class MeshDataGenerator
    {
       TexCoord2f[] textPoints = new TexCoord2f[numPoints];
       
-      double distanceBetweenPoints = 4.0/((double)numPoints); 
+      double distanceBetweenPoints = 4.0/(numPoints); 
       float[] xSides = {0.0f, 0.0f, 1.0f, 1.0f};
       float[] ySides = {0.0f, 1.0f, 1.0f, 0.0f};
       float positionAlongPerimeter;

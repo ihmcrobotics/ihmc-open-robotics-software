@@ -1,6 +1,16 @@
-package us.ihmc.graphics3DAdapter.graphics.instructions;
+package us.ihmc.graphics3DAdapter.graphics;
 
 import java.util.ArrayList;
+
+import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DAddHeightMapInstruction;
+import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DAddMeshDataInstruction;
+import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DAddModelFileInstruction;
+import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DAddTextInstruction;
+import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DIdentityInstruction;
+import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DPrimitiveInstruction;
+import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DRotateInstruction;
+import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DScaleInstruction;
+import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DTranslateInstruction;
 
 
 
@@ -31,10 +41,10 @@ public abstract class Graphics3DInstructionExecutor
          {
             doIdentityInstruction();
          }
-         else if (instruction instanceof Graphics3DRotateMatrixInstruction)
+         else if (instruction instanceof Graphics3DRotateInstruction)
          {
-            Graphics3DRotateMatrixInstruction graphics3DRotateMatrix = (Graphics3DRotateMatrixInstruction) instruction;
-            doRotateMatrixInstruction(graphics3DRotateMatrix);
+            Graphics3DRotateInstruction graphics3DRotateMatrix = (Graphics3DRotateInstruction) instruction;
+            doRotateInstruction(graphics3DRotateMatrix);
          }
          else if (instruction instanceof Graphics3DScaleInstruction)
          {
@@ -50,11 +60,6 @@ public abstract class Graphics3DInstructionExecutor
          {
             Graphics3DAddTextInstruction graphics3DAddText = (Graphics3DAddTextInstruction) instruction;
             doAddTextInstruction(graphics3DAddText);
-         }
-         else if (instruction instanceof Graphics3DAddTeaPotInstruction)
-         {
-            Graphics3DAddTeaPotInstruction graphics3DAddTeaPot = (Graphics3DAddTeaPotInstruction) instruction;
-            doAddTeaPotInstruction(graphics3DAddTeaPot);
          }
          else if (instruction instanceof Graphics3DAddHeightMapInstruction)
          {
@@ -72,8 +77,6 @@ public abstract class Graphics3DInstructionExecutor
 
    protected abstract void doAddMeshDataInstruction(Graphics3DAddMeshDataInstruction graphics3DAddMeshData);
 
-   protected abstract void doAddTeaPotInstruction(Graphics3DAddTeaPotInstruction graphics3DAddTeaPot);
-
    protected abstract void doAddHeightMapInstruction(Graphics3DAddHeightMapInstruction graphics3DAddHeightMap);
 
    protected abstract void doAddTextInstruction(Graphics3DAddTextInstruction graphics3DAddText);
@@ -82,10 +85,9 @@ public abstract class Graphics3DInstructionExecutor
 
    protected abstract void doIdentityInstruction();
 
-   protected abstract void doRotateMatrixInstruction(Graphics3DRotateMatrixInstruction graphics3DRotateMatrix);
+   protected abstract void doRotateInstruction(Graphics3DRotateInstruction graphics3DRotateMatrix);
 
    protected abstract void doScaleInstruction(Graphics3DScaleInstruction graphics3DScale);
 
    protected abstract void doTranslateInstruction(Graphics3DTranslateInstruction graphics3DTranslate);
-
 }
