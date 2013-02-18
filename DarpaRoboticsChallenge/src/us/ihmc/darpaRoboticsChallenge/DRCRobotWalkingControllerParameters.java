@@ -99,4 +99,9 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
    {
       return DRCRobotParameters.DRC_ROBOT_HEAD_ROLL_LIMIT;
    }
+
+   public String getJointNameForExtendedPitchRange()
+   {
+      return "back_mby";
+   }
 }

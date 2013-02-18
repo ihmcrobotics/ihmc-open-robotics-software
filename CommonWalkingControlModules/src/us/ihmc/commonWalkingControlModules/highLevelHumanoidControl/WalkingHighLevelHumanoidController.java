@@ -175,7 +175,10 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
    private final SideDependentList<FramePose> desiredHandPoses = new SideDependentList<FramePose>();
 
    private final OneDoFJoint[] positionControlJoints;
+   
+   private final OneDoFJoint jointForExtendedNeckPitchRange;
    private final HeadOrientationControlModule headOrientationControlModule;
+   private final DesiredHeadOrientationProvider desiredHeadOrientationProvider;
 
    private final boolean checkOrbitalCondition;
    private final SideDependentList<EnumMap<LimbName, GeometricJacobian>> jacobians = SideDependentList.createListOfEnumMaps(LimbName.class);
@@ -351,6 +354,9 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
          handJoints.put(robotSide, allSideHandJoints.toArray(new OneDoFJoint[allSideHandJoints.size()]));
       }
 
+
+      this.desiredHeadOrientationProvider = desiredHeadOrientationProvider;
+      
       String[] headOrientationControlJointNames = walkingControllerParameters.getHeadOrientationControlJointNames();
       String[] chestOrientationControlJointNames = walkingControllerParameters.getChestOrientationControlJointNames();
 
@@ -384,6 +390,24 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       else
       {
          headOrientationControlModule = null;
+      }
+      
+      if(walkingControllerParameters.getJointNameForExtendedPitchRange() != null)
+      {
+         InverseDynamicsJoint[] inverseDynamicsJointForExtendedNeckPitchControl = ScrewTools.findJointsWithNames(allJoints, walkingControllerParameters.getJointNameForExtendedPitchRange());
+         OneDoFJoint[] jointForExtendedNeckPitchControl = ScrewTools.filterJoints(inverseDynamicsJointForExtendedNeckPitchControl, OneDoFJoint.class);
+         if(jointForExtendedNeckPitchControl.length == 1)
+         {
+            this.jointForExtendedNeckPitchRange = jointForExtendedNeckPitchControl[0];
+         }
+         else
+         {
+            this.jointForExtendedNeckPitchRange = null;
+         }
+      }
+      else
+      {
+         this.jointForExtendedNeckPitchRange = null;
       }
 
       if (chestOrientationControlJoints.length > 0)
@@ -420,6 +444,10 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 
       unconstrainedJoints.removeAll(Arrays.asList(headOrientationControlJoints));
       unconstrainedJoints.removeAll(Arrays.asList(chestOrientationControlJoints));
+      if(jointForExtendedNeckPitchRange != null)
+      {
+         unconstrainedJoints.remove(jointForExtendedNeckPitchRange);
+      }
       unconstrainedJoints.remove(fullRobotModel.getRootJoint());
       InverseDynamicsJoint[] unconstrainedJointsArray = new InverseDynamicsJoint[unconstrainedJoints.size()];
       unconstrainedJoints.toArray(unconstrainedJointsArray);
@@ -1119,6 +1147,19 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
    {
       headOrientationControlModule.compute();
       solver.setDesiredSpatialAcceleration(headOrientationControlModule.getJacobian(), headOrientationControlModule.getTaskspaceConstraintData());
+     
+      
+      if(jointForExtendedNeckPitchRange != null)
+      {
+         double kUpperBody = this.kUpperBody.getDoubleValue();
+         double dUpperBody = GainCalculator.computeDerivativeGain(kUpperBody, zetaUpperBody.getDoubleValue());         
+         double angle = 0.0;
+         if(desiredHeadOrientationProvider != null)
+         {
+            desiredHeadOrientationProvider.getDesiredExtendedNeckPitchJointAngle();
+         }
+         doPDControl(jointForExtendedNeckPitchRange, kUpperBody, dUpperBody, angle, 0.0);
+      }
    }
 
    public void doArmControl()
