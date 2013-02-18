@@ -126,6 +126,10 @@ public class DRCFlatGroundWalkingTest
          
          if (Math.abs(comError.getDoubleValue()) > 0.05)
          {
+            if (KEEP_SCS_UP)
+            {
+               BambooTools.sleepForever();
+            }
             fail("comError = " + Math.abs(comError.getDoubleValue()));
          }
          
@@ -188,6 +192,10 @@ public class DRCFlatGroundWalkingTest
          
          if (Math.abs(comError.getDoubleValue()) > 0.01)
          {
+            if (KEEP_SCS_UP)
+            {
+               BambooTools.sleepForever();
+            }
             fail("Math.abs(comError.getDoubleValue()) > 0.01: " + comError.getDoubleValue() + " at t = " + scs.getTime());
          }
       }
@@ -213,7 +221,6 @@ public class DRCFlatGroundWalkingTest
       {
          BambooTools.createMovieAndDataWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(scs, 1);
       }
-
       if (KEEP_SCS_UP)
       {
          BambooTools.sleepForever();
