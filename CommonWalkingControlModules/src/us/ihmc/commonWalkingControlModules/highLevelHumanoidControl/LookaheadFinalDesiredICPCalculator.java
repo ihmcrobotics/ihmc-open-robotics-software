@@ -14,6 +14,7 @@ import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
+import com.yobotics.simulationconstructionset.EnumYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicCoordinateSystem;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
@@ -24,6 +25,8 @@ public class LookaheadFinalDesiredICPCalculator
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
+   private final EnumYoVariable<DesiredICPCalculatorMethod> desiredICPCalculatorMethod = new EnumYoVariable<DesiredICPCalculatorMethod>("desiredICPCalculatorMethod", registry, DesiredICPCalculatorMethod.class);
+  
    private final DynamicGraphicPosition finalDesiredICP;
    private final DynamicGraphicCoordinateSystem nextStepPose, nextNextStepPose;
    
@@ -42,11 +45,31 @@ public class LookaheadFinalDesiredICPCalculator
       nextStepPose = new DynamicGraphicCoordinateSystem("nextStepPose", "", registry, 0.2);
       nextNextStepPose = new DynamicGraphicCoordinateSystem("nextNextStepPose", "", registry, 0.2);
       
+      desiredICPCalculatorMethod.set(DesiredICPCalculatorMethod.STANDARD);
+      
       parentRegistry.addChild(registry);
    }
    
-   
    public FramePoint2d getDoubleSupportFinalDesiredICPForWalking(TransferToAndNextFootstepsData transferToAndNextFootstepsData)
+   {
+      switch (desiredICPCalculatorMethod.getEnumValue())
+      {
+      case STANDARD:
+      {
+         return getDoubleSupportFinalDesiredICPForWalkingStandard(transferToAndNextFootstepsData);
+      }
+      case NEW:
+      {
+         return getDoubleSupportFinalDesiredICPForWalkingStandard(transferToAndNextFootstepsData);
+      }
+      default:
+      {
+         throw new RuntimeException("Should not get here!"); 
+      }
+      }
+   }
+   
+   public FramePoint2d getDoubleSupportFinalDesiredICPForWalkingStandard(TransferToAndNextFootstepsData transferToAndNextFootstepsData)
    {
       Footstep transferToFootstep = transferToAndNextFootstepsData.getTransferToFootstep();
       
@@ -102,5 +125,8 @@ public class LookaheadFinalDesiredICPCalculator
       framePose.getTransformFromPoseToFrame(poseToWorldTransformToPack);
    }
 
-   
+   private static enum DesiredICPCalculatorMethod
+   {
+         STANDARD, NEW;
+   }
 }
