@@ -246,7 +246,7 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
     		setUpWall(-15.5f, 0.5f, 2.0f, 1.0f, rampHeight, 0, color);
     		setUpRamp(-17.5f, 0.5f, 2.0f, 3.0f, rampHeight, color);	
         } else {
-    		setUpRamp(-11.5f, 0.0f, 3.0f, 3.0f, rampHeight, color);	  	
+    		setUpRamp(-12.5f, 0.0f, 3.0f, 3.0f, rampHeight, color);	  	
         }
 
 		// Do this for a long ramp for testing:
