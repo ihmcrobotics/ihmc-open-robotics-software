@@ -20,7 +20,7 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 
-public class NewestCoMHeightTrajectoryGenerator implements CoMHeightTrajectoryGenerator
+public class SplineBasedHeightTrajectoryGenerator implements CoMHeightTrajectoryGenerator
 {
    public static final double DISTANCE_FROM_SOLE_TO_ANKLE = 0.08; // FIXME: this is extremely evil and needs to be deleted
    private static final boolean DEBUG = false; 
@@ -37,7 +37,7 @@ public class NewestCoMHeightTrajectoryGenerator implements CoMHeightTrajectoryGe
 //   private final DynamicGraphicCoordinateSystem contactFrameZero = new DynamicGraphicCoordinateSystem("contactFrame0", "", registry, 1.0);
 //   private final DynamicGraphicCoordinateSystem contactFrameOne = new DynamicGraphicCoordinateSystem("contactFrame1", "", registry, 1.0);
    
-   public NewestCoMHeightTrajectoryGenerator(double nominalHeightAboveGround, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
+   public SplineBasedHeightTrajectoryGenerator(double nominalHeightAboveGround, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
    {
       this.nominalHeightAboveGround.set(nominalHeightAboveGround);
       parentRegistry.addChild(registry);

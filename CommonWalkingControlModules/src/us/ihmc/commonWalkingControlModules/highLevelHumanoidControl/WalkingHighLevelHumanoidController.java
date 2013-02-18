@@ -672,14 +672,13 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 
             points.add(finalDesiredICP);
             FrameConvexPolygon2d onToesTriangle = new FrameConvexPolygon2d(points);
-            if (onToesTriangle.isPointInside(desiredICP.getFramePoint2dCopy()))
+            toeOff.set(onToesTriangle.isPointInside(desiredICP.getFramePoint2dCopy()));
+            if (toeOff.getBooleanValue())
             {
-               toeOff.set(true);
                setOnToesContactState(supportFoot);
             }
             else
             {
-               toeOff.set(false);
                setFlatFootContactState(supportFoot);
             }
          }
@@ -960,7 +959,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       FramePoint2d toeOffPoint2d = toeOffPoint.toFramePoint2d();
 
       FramePoint2d desiredToeOffCoP = new FramePoint2d(worldFrame);
-      double toeOffPointToFinalDesiredFactor = 0.5;
+      double toeOffPointToFinalDesiredFactor = 0.8;
       desiredToeOffCoP.interpolate(toeOffPoint2d, finalDesiredICP, toeOffPointToFinalDesiredFactor);
 
       FramePoint2d icpWayPoint = EquivalentConstantCoPCalculator.computeICPMotionWithConstantCMP(finalDesiredICP, desiredToeOffCoP,
