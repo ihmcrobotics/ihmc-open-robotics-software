@@ -126,6 +126,7 @@ public class HeadOrientationControlModule extends DegenerateOrientationControlMo
    {
       yawLimit.set(headOrientationControllerParameters.getHeadYawLimit());
       pitchUpperLimit.set(headOrientationControllerParameters.getUpperNeckPitchLimit());
+      pitchLowerLimit.set(headOrientationControllerParameters.getLowerNeckPitchLimit());
       rollLimit.set(headOrientationControllerParameters.getHeadRollLimit());
 
 //    yawLimit.set(0.0);
