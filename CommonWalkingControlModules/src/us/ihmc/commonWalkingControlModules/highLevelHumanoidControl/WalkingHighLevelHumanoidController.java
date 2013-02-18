@@ -242,7 +242,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       bases.put(LimbName.LEG, fullRobotModel.getPelvis());
       bases.put(LimbName.ARM, fullRobotModel.getChest());
 
-      coefficientOfFriction.set(0.7);
+      coefficientOfFriction.set(0.6); //TODO: Make DRCFlatGroundWalkingTest work with this at 0.7
 
       for (RobotSide robotSide : RobotSide.values())
       {
