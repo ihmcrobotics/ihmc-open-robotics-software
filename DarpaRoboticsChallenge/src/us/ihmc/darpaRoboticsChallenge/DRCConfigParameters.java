@@ -34,6 +34,9 @@ public class DRCConfigParameters
    public static final int HEAD_ORIENTATION_PORT_NUMBER = 6666;
    public static final long HEAD_ORIENTATION_DATA_IDENTIFIER = 6666L;
 
+   public static final int PELVIS_ORIENTATION_PORT_NUMBER = 8888;
+   public static final long PELVIS_ORIENTATION_DATA_IDENTIFIER = 8888L;
+
    public static final int LIDAR_DATA_PORT_NUMBER = 4697;
    public static final long LIDAR_DATA_IDENTIFIER = 4697L;
    public static final int LIDAR_X_RESOLUTION_OVERRIDE = 50;
