@@ -79,8 +79,8 @@ public class ConstantCoPInstantaneousCapturePointTrajectory implements Instantan
    public void pack(FramePoint2d desiredPosition, FrameVector2d desiredVelocity, double omega0)
    {
 //    double currentTime = isDone() ? moveTime.getDoubleValue() : this.currentTime.getDoubleValue();
-      if (moveTime.getDoubleValue() > 0.0)
-      {
+//      if (moveTime.getDoubleValue() > 0.0)
+//      {
          double currentTime = this.currentTime.getDoubleValue();
 
          double expT = Math.exp(omega0 * currentTime);
@@ -102,12 +102,12 @@ public class ConstantCoPInstantaneousCapturePointTrajectory implements Instantan
          desiredICPVelocityLocal.scale(parameterd);
          desiredICPVelocityLocal.changeFrame(desiredVelocity.getReferenceFrame());
          desiredVelocity.set(desiredICPVelocityLocal);
-      }
-      else
-      {
-         finalDesiredICP.getFramePoint2dAndChangeFrame(desiredPosition);
-         desiredVelocity.set(finalDesiredICP.getReferenceFrame(), 0.0, 0.0);
-      }
+//      }
+//      else
+//      {
+//         finalDesiredICP.getFramePoint2dAndChangeFrame(desiredPosition);
+//         desiredVelocity.set(finalDesiredICP.getReferenceFrame(), 0.0, 0.0);
+//      }
 
       this.currentTime.add(deltaT);
    }
