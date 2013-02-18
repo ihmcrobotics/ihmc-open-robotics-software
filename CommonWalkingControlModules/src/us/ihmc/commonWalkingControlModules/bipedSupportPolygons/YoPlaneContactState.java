@@ -16,18 +16,20 @@ public class YoPlaneContactState implements PlaneContactState
 {
    private final String namePrefix;
    private final YoVariableRegistry registry;
-   private final ReferenceFrame referenceFrame;
+   private final ReferenceFrame frameAfterJoint;
+   private final ReferenceFrame planeFrame;
    private final List<YoFramePoint2d> contactPoints = new ArrayList<YoFramePoint2d>();
    private final BooleanYoVariable inContact;
    private final DoubleYoVariable coefficientOfFriction;
 
-   public YoPlaneContactState(String namePrefix, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry)
+   public YoPlaneContactState(String namePrefix, ReferenceFrame frameAfterJoint, ReferenceFrame planeFrame, YoVariableRegistry parentRegistry)
    {
       this.namePrefix = namePrefix;
       this.registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
       this.inContact = new BooleanYoVariable(namePrefix + "InContact", registry);
       this.coefficientOfFriction = new DoubleYoVariable(namePrefix + "CoefficientOfFriction", registry);
-      this.referenceFrame = referenceFrame;
+      this.frameAfterJoint = frameAfterJoint;
+      this.planeFrame = planeFrame;
       parentRegistry.addChild(registry);
    }
 
@@ -35,7 +37,7 @@ public class YoPlaneContactState implements PlaneContactState
    {
       createYoFramePoints(contactPoints);
 
-      FramePoint2d temp = new FramePoint2d(referenceFrame);
+      FramePoint2d temp = new FramePoint2d(planeFrame);
       inContact.set(false);
 
       for (int i = 0; i < this.contactPoints.size(); i++)
@@ -44,7 +46,7 @@ public class YoPlaneContactState implements PlaneContactState
          {
             FramePoint2d point = contactPoints.get(i);
             temp.setAndChangeFrame(point);
-            temp.changeFrame(referenceFrame);
+            temp.changeFrame(planeFrame);
             this.contactPoints.get(i).set(temp);
             inContact.set(true);
          }
@@ -73,7 +75,7 @@ public class YoPlaneContactState implements PlaneContactState
 
    public ReferenceFrame getBodyFrame()
    {
-      return getPlaneFrame();
+      return frameAfterJoint;
    }
 
    private void createYoFramePoints(List<? extends FramePoint2d> contactPoints)
@@ -82,7 +84,7 @@ public class YoPlaneContactState implements PlaneContactState
       int newSize = contactPoints.size();
       for (int i = oldSize; i < newSize; i++)
       {
-         this.contactPoints.add(new YoFramePoint2d(namePrefix + "Contact" + i, "", referenceFrame, registry));
+         this.contactPoints.add(new YoFramePoint2d(namePrefix + "Contact" + i, "", planeFrame, registry));
       }
    }
 
@@ -102,7 +104,7 @@ public class YoPlaneContactState implements PlaneContactState
 
    public ReferenceFrame getPlaneFrame()
    {
-      return referenceFrame;
+      return planeFrame;
    }
 
    public boolean inContact()

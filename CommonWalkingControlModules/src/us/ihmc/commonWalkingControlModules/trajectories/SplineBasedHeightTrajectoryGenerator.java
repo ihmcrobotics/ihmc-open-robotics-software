@@ -9,9 +9,7 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.FramePoint;
-import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.LineSegment2d;
-import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
@@ -22,7 +20,6 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 
 public class SplineBasedHeightTrajectoryGenerator implements CoMHeightTrajectoryGenerator
 {
-   public static final double DISTANCE_FROM_SOLE_TO_ANKLE = 0.08; // FIXME: this is extremely evil and needs to be deleted
    private static final boolean DEBUG = false; 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -148,14 +145,7 @@ public class SplineBasedHeightTrajectoryGenerator implements CoMHeightTrajectory
       }
       else
       {
-         //TODO: Garbage
-         FramePose contactPointPose = nextFootstep.getPoseCopy();
-         PoseReferenceFrame poseFrame = new PoseReferenceFrame("Temp", contactPointPose.getReferenceFrame());
-         poseFrame.updatePose(contactPointPose);
-         poseFrame.update();
-//         contactFrameOne.setToReferenceFrame(poseFrame);
-
-         contactFramePosition1 = new FramePoint(poseFrame, 0.0, 0.0, -DISTANCE_FROM_SOLE_TO_ANKLE); //TODO: Horrible hack and magic number
+         contactFramePosition1 = new FramePoint(nextFootstep.getPoseReferenceFrame());
          contactFramePosition1.changeFrame(worldFrame);
       }
       if (DEBUG)

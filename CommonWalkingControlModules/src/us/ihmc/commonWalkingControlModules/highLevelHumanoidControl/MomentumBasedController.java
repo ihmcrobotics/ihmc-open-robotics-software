@@ -200,7 +200,7 @@ public abstract class MomentumBasedController implements RobotController
       for (ContactablePlaneBody contactablePlaneBody : contactablePlaneBodies)
       {
          RigidBody rigidBody = contactablePlaneBody.getRigidBody();
-         YoPlaneContactState contactState = new YoPlaneContactState(rigidBody.getName(), contactablePlaneBody.getPlaneFrame(), registry);
+         YoPlaneContactState contactState = new YoPlaneContactState(rigidBody.getName(), contactablePlaneBody.getBodyFrame(), contactablePlaneBody.getPlaneFrame(), registry);
          double coefficientOfFriction = 1.0; // TODO: magic number...
          contactState.set(contactablePlaneBody.getContactPoints2d(), coefficientOfFriction);    // initialize with flat 'feet'
          contactStates.put(contactablePlaneBody, contactState);

@@ -37,7 +37,7 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject
 
 public class DRCSimulationFactory
 {
-   private static final boolean SHOW_REFERENCE_FRAMES = true;
+   private static final boolean SHOW_REFERENCE_FRAMES = false;
    public static boolean SHOW_INERTIA_ELLIPSOIDS = false;
 
    public static HumanoidRobotSimulation<SDFRobot> createSimulation(DRCRobotJointMap jointMap, ControllerFactory controllerFactory,
