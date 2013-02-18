@@ -26,9 +26,9 @@ import us.ihmc.utilities.math.geometry.TranslationReferenceFrame;
 
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
-public class NewestCoMHeightTrajectoryGeneratorTest
+public class SplineBasedCoMHeightTrajectoryGeneratorTest
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry("NewestCoMHeightTrajectoryGeneratorTest");
+   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final FootstepPoseFinder poseFinder = new FootstepPoseFinder();
    
@@ -37,7 +37,7 @@ public class NewestCoMHeightTrajectoryGeneratorTest
    {
       double nominalCoMHeightAboveSole = 1.0;
       double contactAnkleZ = 1.5;
-      double supportFootSoleZ = contactAnkleZ - NewestCoMHeightTrajectoryGenerator.DISTANCE_FROM_SOLE_TO_ANKLE;
+      double supportFootSoleZ = contactAnkleZ - SplineBasedHeightTrajectoryGenerator.DISTANCE_FROM_SOLE_TO_ANKLE;
       
       Point3d supportFootSolePosition = new Point3d(0.0, 0.0, supportFootSoleZ);
       Point3d swingFootAnklePosition = new Point3d(1.0, 1.0, contactAnkleZ);
@@ -90,7 +90,7 @@ public class NewestCoMHeightTrajectoryGeneratorTest
       double slope = 1.17;
       
       Point3d supportFootSolePosition = new Point3d(0.0, 0.0, contactSoleZ);
-      Point3d swingFootAnklePosition = new Point3d(swingX, 0.0, contactSoleZ  + swingX * slope + NewestCoMHeightTrajectoryGenerator.DISTANCE_FROM_SOLE_TO_ANKLE);
+      Point3d swingFootAnklePosition = new Point3d(swingX, 0.0, contactSoleZ  + swingX * slope + SplineBasedHeightTrajectoryGenerator.DISTANCE_FROM_SOLE_TO_ANKLE);
       boolean doubleSupport = false;
       
       Point3d point1 = new Point3d(-0.5, -0.5, 0.0);
@@ -163,7 +163,7 @@ public class NewestCoMHeightTrajectoryGeneratorTest
       
       centerOfMassHeightInputData.set(null, null, nextFootstep, contactStates);
       
-      CoMHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator = new NewestCoMHeightTrajectoryGenerator(nominalCoMHeight, null, registry);
+      CoMHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator = new SplineBasedHeightTrajectoryGenerator(nominalCoMHeight, null, registry);
       centerOfMassHeightTrajectoryGenerator.initialize(null, nextFootstep, contactStates);
       
       FramePoint centerOfMassHeightPoint = new FramePoint(ReferenceFrame.getWorldFrame());

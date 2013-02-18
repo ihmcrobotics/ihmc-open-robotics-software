@@ -19,6 +19,7 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicCoordinateSystem;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition.GraphicType;
 
 public class LookaheadFinalDesiredICPCalculator
 {
@@ -33,7 +34,7 @@ public class LookaheadFinalDesiredICPCalculator
    public LookaheadFinalDesiredICPCalculator(YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
 
-      finalDesiredICP = new DynamicGraphicPosition("finalDesiredIPC", "", registry, 0.03, YoAppearance.Beige());
+      finalDesiredICP = new DynamicGraphicPosition("finalDesiredIPC", "", registry, 0.005, YoAppearance.Yellow(), GraphicType.CROSS);
       dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("FinalDesiredICP", finalDesiredICP);
       dynamicGraphicObjectsListRegistry.registerArtifact("FinalDesiredICP", finalDesiredICP.createArtifact());
       
