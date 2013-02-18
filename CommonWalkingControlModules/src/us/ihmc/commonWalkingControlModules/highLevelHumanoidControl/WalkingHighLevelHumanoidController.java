@@ -543,6 +543,9 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       desiredPelvisOrientation.set(initialDesiredPelvisOrientation);
       finalPelvisOrientationProvider.setOrientation(initialDesiredPelvisOrientation);    // yes, final. To make sure that the first swing phase has the right initial
 
+      computeCapturePoint();
+      desiredICP.set(capturePoint.getFramePoint2dCopy());
+
       stateMachine.setCurrentState(WalkingState.DOUBLE_SUPPORT);
    }
 
