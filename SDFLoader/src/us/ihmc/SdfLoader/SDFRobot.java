@@ -48,7 +48,7 @@ import com.yobotics.simulationconstructionset.simulatedSensors.SimulatedLIDARSen
 
 public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRobot    // TODO: make an SDFHumanoidRobot
 {
-   private static final boolean DEBUG = true;
+   private static final boolean DEBUG = false;
    private static final boolean SHOW_CONTACT_POINTS = true;
    private static final boolean USE_POLAR_LIDAR_MODEL = true;
    private static final boolean SHOW_COM_REFERENCE_FRAMES = false;

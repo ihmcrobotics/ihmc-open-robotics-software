@@ -31,40 +31,40 @@ public class SplineBasedCoMHeightTrajectoryGeneratorTest
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final FootstepPoseFinder poseFinder = new FootstepPoseFinder();
-   
+
    @Test
    public void raisedFlatSingleSupportCoMHeightTrajectoryTest()
    {
-      double nominalCoMHeightAboveSole = 1.0;
+      double nominalCoMHeightAboveAnkle = 1.0;
       double contactAnkleZ = 1.5;
-      double supportFootSoleZ = contactAnkleZ - SplineBasedHeightTrajectoryGenerator.DISTANCE_FROM_SOLE_TO_ANKLE;
-      
-      Point3d supportFootSolePosition = new Point3d(0.0, 0.0, supportFootSoleZ);
+      Point3d supportFootAnklePosition = new Point3d(0.0, 0.0, contactAnkleZ);
+
       Point3d swingFootAnklePosition = new Point3d(1.0, 1.0, contactAnkleZ);
       boolean doubleSupport = false;
-      
+
       Point3d point1 = new Point3d(-0.5, -0.5, 0.0);
       Point3d point2 = new Point3d(0.0, 0.0, 1.0);
       Point3d point3 = new Point3d(0.5, 5.0, 1.0);
       Point3d point4 = new Point3d(1.0, 2.0, 0.0);
       Point3d point5 = new Point3d(1.5, -0.5, 5.0);
-      
-      Point3d[] coMQueries = new Point3d[]{point1, point2, point3, point4, point5};
-      
-      double expectedHeight = supportFootSoleZ + nominalCoMHeightAboveSole;
-      double[] expectedHeights = new double[]{expectedHeight, expectedHeight, expectedHeight, expectedHeight, expectedHeight};
-      
-      allExpectedPartialDerivativesZeroCoMHeightTrajectoryTest(nominalCoMHeightAboveSole, supportFootSolePosition, swingFootAnklePosition, doubleSupport, coMQueries, expectedHeights, 1e-7);
+
+      Point3d[] coMQueries = new Point3d[] {point1, point2, point3, point4, point5};
+
+      double expectedHeight = contactAnkleZ + nominalCoMHeightAboveAnkle;
+      double[] expectedHeights = new double[] {expectedHeight, expectedHeight, expectedHeight, expectedHeight, expectedHeight};
+
+      allExpectedPartialDerivativesZeroCoMHeightTrajectoryTest(nominalCoMHeightAboveAnkle, supportFootAnklePosition, swingFootAnklePosition, doubleSupport,
+              coMQueries, expectedHeights, 1e-7);
    }
-   
+
    @Test
    public void raisedFlatDoubleSupportCoMHeightTrajectoryTest()
    {
-      double nominalCoMHeightAboveSole = 1.0;
-      double contactSoleZ = 0.5;
+      double nominalCoMHeightAboveAnkle = 1.0;
+      double contactAnkleZ = 0.5;
 
-      Point3d supportFootSolePosition0 = new Point3d(0.0, 0.0, contactSoleZ);
-      Point3d supportFootSolePosition1 = new Point3d(1.0, 0.0, contactSoleZ);
+      Point3d supportFootAnklePosition0 = new Point3d(0.0, 0.0, contactAnkleZ);
+      Point3d supportFootAnklePosition1 = new Point3d(1.0, 0.0, contactAnkleZ);
       boolean doubleSupport = true;
 
       Point3d point1 = new Point3d(-0.5, -0.5, 0.0);
@@ -72,107 +72,115 @@ public class SplineBasedCoMHeightTrajectoryGeneratorTest
       Point3d point3 = new Point3d(0.5, 5.0, 1.0);
       Point3d point4 = new Point3d(1.0, 2.0, 0.0);
       Point3d point5 = new Point3d(1.5, -0.5, 5.0);
-      
-      Point3d[] coMQueries = new Point3d[]{point1, point2, point3, point4, point5};
-      
-      double expectedHeight = contactSoleZ  + nominalCoMHeightAboveSole;
-      double[] expectedHeights = new double[]{expectedHeight, expectedHeight, expectedHeight, expectedHeight, expectedHeight};
-      
-      allExpectedPartialDerivativesZeroCoMHeightTrajectoryTest(nominalCoMHeightAboveSole, supportFootSolePosition0, supportFootSolePosition1, doubleSupport, coMQueries, expectedHeights, 1e-7);
+
+      Point3d[] coMQueries = new Point3d[] {point1, point2, point3, point4, point5};
+
+      double expectedHeight = contactAnkleZ + nominalCoMHeightAboveAnkle;
+      double[] expectedHeights = new double[] {expectedHeight, expectedHeight, expectedHeight, expectedHeight, expectedHeight};
+
+      allExpectedPartialDerivativesZeroCoMHeightTrajectoryTest(nominalCoMHeightAboveAnkle, supportFootAnklePosition0, supportFootAnklePosition1, doubleSupport,
+              coMQueries, expectedHeights, 1e-7);
    }
-   
+
    @Test
    public void raisedSlopedSingleSupportCoMHeightTrajectoryTest()
    {
-      double nominalCoMHeightAboveSupportSole = 1.0;
-      double contactSoleZ = 0.5;
+      double nominalCoMHeightAboveSupportAnkle = 1.0;
+      double contactAnkleZ = 0.5;
       double swingX = 1.31;
       double slope = 1.17;
-      
-      Point3d supportFootSolePosition = new Point3d(0.0, 0.0, contactSoleZ);
-      Point3d swingFootAnklePosition = new Point3d(swingX, 0.0, contactSoleZ  + swingX * slope + SplineBasedHeightTrajectoryGenerator.DISTANCE_FROM_SOLE_TO_ANKLE);
+
+      Point3d supportFootAnklePosition = new Point3d(0.0, 0.0, contactAnkleZ);
+      Point3d swingFootAnklePosition = new Point3d(swingX, 0.0, contactAnkleZ + swingX * slope);
       boolean doubleSupport = false;
-      
+
       Point3d point1 = new Point3d(-0.5, -0.5, 0.0);
       Point3d point2 = new Point3d(0.0, 0.0, 1.0);
       Point3d point3 = new Point3d(swingX, 0.5, 0.0);
       Point3d point4 = new Point3d(swingX + 0.5, 2.0, 5.0);
-      
-      Point3d[] coMQueries = new Point3d[]{point1, point2, point3, point4};
-      
-      double expectedCoMHeightAtSupport = contactSoleZ + nominalCoMHeightAboveSupportSole;
-      double expectedCoMHeightAtSwing = contactSoleZ + nominalCoMHeightAboveSupportSole + swingX * slope;
-      
-      double[] expectedHeights = new double[]{expectedCoMHeightAtSupport, expectedCoMHeightAtSupport, expectedCoMHeightAtSwing, expectedCoMHeightAtSwing};
-      
-      allExpectedPartialDerivativesZeroCoMHeightTrajectoryTest(nominalCoMHeightAboveSupportSole, supportFootSolePosition, swingFootAnklePosition, doubleSupport, coMQueries, expectedHeights, 1e-7);
+
+      Point3d[] coMQueries = new Point3d[] {point1, point2, point3, point4};
+
+      double expectedCoMHeightAtSupport = contactAnkleZ + nominalCoMHeightAboveSupportAnkle;
+      double expectedCoMHeightAtSwing = contactAnkleZ + nominalCoMHeightAboveSupportAnkle + swingX * slope;
+
+      double[] expectedHeights = new double[] {expectedCoMHeightAtSupport, expectedCoMHeightAtSupport, expectedCoMHeightAtSwing, expectedCoMHeightAtSwing};
+
+      allExpectedPartialDerivativesZeroCoMHeightTrajectoryTest(nominalCoMHeightAboveSupportAnkle, supportFootAnklePosition, swingFootAnklePosition,
+              doubleSupport, coMQueries, expectedHeights, 1e-7);
    }
-   
+
    @Test
    public void raisedSlopedDoubleSupportCoMHeightTrajectoryTest()
    {
-      double nominalCoMHeightAboveSole = 1.0;
-      Point3d supportFootSolePosition0 = new Point3d(0.0, 0.0, 0.5);
-      Point3d supportFootSolePosition1 = new Point3d(1.0, 1.0, 1.5);
+      double nominalCoMHeightAboveAnkle = 1.0;
+      Point3d supportFootAnklePosition0 = new Point3d(0.0, 0.0, 0.5);
+      Point3d supportFootAnklePosition1 = new Point3d(1.0, 1.0, 1.5);
       boolean doubleSupport = true;
-      
+
       Point3d point1 = new Point3d(-0.5, -0.5, 0.0);
       Point3d point2 = new Point3d(0.0, 0.0, 1.0);
       Point3d point3 = new Point3d(1.5, 0.5, 0.0);
       Point3d point4 = new Point3d(1.5, 2.0, 5.0);
-      
-      Point3d[] coMQueries = new Point3d[]{point1, point2, point3, point4};
-      
-      double[] expectedHeights = new double[]{1.5, 1.5, 2.5, 2.5};
-      
-      allExpectedPartialDerivativesZeroCoMHeightTrajectoryTest(nominalCoMHeightAboveSole, supportFootSolePosition0, supportFootSolePosition1, doubleSupport, coMQueries, expectedHeights, 1e-7);
+
+      Point3d[] coMQueries = new Point3d[] {point1, point2, point3, point4};
+
+      double[] expectedHeights = new double[] {1.5, 1.5, 2.5, 2.5};
+
+      allExpectedPartialDerivativesZeroCoMHeightTrajectoryTest(nominalCoMHeightAboveAnkle, supportFootAnklePosition0, supportFootAnklePosition1, doubleSupport,
+              coMQueries, expectedHeights, 1e-7);
    }
-   
-   public void allExpectedPartialDerivativesZeroCoMHeightTrajectoryTest(double nominalCoMHeight, Point3d contactFramePosition0, Point3d contactFramePosition1, boolean doubleSupport, Point3d[] coMQueries, double[] expectedHeights, double epsilon)
+
+   public void allExpectedPartialDerivativesZeroCoMHeightTrajectoryTest(double nominalCoMHeight, Point3d bodyFramePosition0, Point3d bodyFramePosition1,
+           boolean doubleSupport, Point3d[] coMQueries, double[] expectedHeights, double epsilon)
    {
       double[][] expectedOutputs = new double[expectedHeights.length][6];
       for (int i = 0; i < expectedHeights.length; i++)
       {
          expectedOutputs[i][0] = expectedHeights[i];
+
          for (int j = 1; j < 6; j++)
          {
             expectedOutputs[i][j] = 0.0;
          }
       }
-      generalCoMHeightTrajectoryTest(nominalCoMHeight, contactFramePosition0, contactFramePosition1, doubleSupport, coMQueries, expectedOutputs, epsilon);
+
+      generalCoMHeightTrajectoryTest(nominalCoMHeight, bodyFramePosition0, bodyFramePosition1, doubleSupport, coMQueries, expectedOutputs, epsilon);
    }
-   
-   public void generalCoMHeightTrajectoryTest(double nominalCoMHeight, Point3d contactFramePosition0, Point3d contactFramePosition1, boolean doubleSupport, Point3d[] coMQueries, double[][] expectedOutputs, double epsilon)
-   {      
+
+   public void generalCoMHeightTrajectoryTest(double nominalCoMHeight, Point3d contactFramePosition0, Point3d contactFramePosition1, boolean doubleSupport,
+           Point3d[] coMQueries, double[][] expectedOutputs, double epsilon)
+   {
       List<PlaneContactState> contactStates = new ArrayList<PlaneContactState>();
       Footstep nextFootstep = null;
       contactStates.add(new NonFlatGroundPlaneContactState(0.2, 0.1, contactFramePosition0, new Vector3d(0.0, 0.0, 1.0), 1e-7));
-      
+
       if (doubleSupport)
       {
-         //leave nextFootstep as null
+         // leave nextFootstep as null
          contactStates.add(new NonFlatGroundPlaneContactState(0.2, 0.1, contactFramePosition1, new Vector3d(0.0, 0.0, 1.0), 1e-7));
       }
-      else {
-         //do not add a second element to contactStates
+      else
+      {
+         // do not add a second element to contactStates
          nextFootstep = getFootstep(contactFramePosition1);
       }
-      
+
       CoMHeightPartialDerivativesData coMHeightPartialDerivativesData = new CoMHeightPartialDerivativesData();
       ContactStatesAndUpcomingFootstepData centerOfMassHeightInputData = new ContactStatesAndUpcomingFootstepData();
-      
+
       centerOfMassHeightInputData.set(null, null, nextFootstep, contactStates);
-      
+
       CoMHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator = new SplineBasedHeightTrajectoryGenerator(nominalCoMHeight, null, registry);
       centerOfMassHeightTrajectoryGenerator.initialize(null, nextFootstep, contactStates);
-      
+
       FramePoint centerOfMassHeightPoint = new FramePoint(ReferenceFrame.getWorldFrame());
 
       for (int i = 0; i < coMQueries.length; i++)
       {
          centerOfMassHeightInputData.setCenterOfMassFrame(createCenterOfMassFrame(coMQueries[i]));
          centerOfMassHeightTrajectoryGenerator.solve(coMHeightPartialDerivativesData, centerOfMassHeightInputData);
-         
+
          coMHeightPartialDerivativesData.getCoMHeight(centerOfMassHeightPoint);
          assertEquals(expectedOutputs[i][0], centerOfMassHeightPoint.getZ(), epsilon);
          assertEquals(expectedOutputs[i][1], coMHeightPartialDerivativesData.getPartialDzDx(), epsilon);
@@ -190,16 +198,17 @@ public class SplineBasedCoMHeightTrajectoryGeneratorTest
       FramePose2d footstepPose = new FramePose2d(new FramePoint2d(worldFrame, contactFrameCenter.getX(), contactFrameCenter.getY()), footstepOrientation);
       ContactablePlaneBody foot = new FootSpoof("foot", 0.0, 0.0, 0.0, 1.0, -1.0, 1.0, 0.0);
       nextFootstep = poseFinder.generateFootstep(footstepPose, foot, contactFrameCenter.getZ(), new Vector3d(0.0, 0.0, 1.0));
+
       return nextFootstep;
    }
-   
+
    private ReferenceFrame createCenterOfMassFrame(Point3d centerOfMassLocation)
    {
       TranslationReferenceFrame centerOfMassFrame = new TranslationReferenceFrame("centerOfMass", worldFrame);
-      
+
       centerOfMassFrame.updateTranslation(new FrameVector(worldFrame, centerOfMassLocation));
       centerOfMassFrame.update();
-      
+
       return centerOfMassFrame;
    }
 }

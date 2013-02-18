@@ -49,28 +49,16 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
       return false;
    }
 
-   double nominalHeightAboveGround = 0.86;
+   double nominalHeightAboveGround = 0.79;
    
-   public double nominalHeightAboveGround()
+   public double nominalHeightAboveAnkle()
    {
       return nominalHeightAboveGround;
    }
-   
-   public void setNominalHeightAboveGround(double nominalHeightAboveGround)
-   {
-      this.nominalHeightAboveGround = nominalHeightAboveGround;
-   }
 
-   private double initialHeightAboveGround = 0.86;
-   
-   public double initialHeightAboveGround()
+   public void setNominalHeightAboveAnkle(double nominalHeightAboveAnkle)
    {
-      return initialHeightAboveGround;
-   }
-   
-   public void setInitialHeightAboveGround(double initialHeightAboveGround)
-   {
-      this.initialHeightAboveGround = initialHeightAboveGround;
+      this.nominalHeightAboveGround = nominalHeightAboveAnkle;
    }
 
    public double getGroundReactionWrenchBreakFrequencyHertz()

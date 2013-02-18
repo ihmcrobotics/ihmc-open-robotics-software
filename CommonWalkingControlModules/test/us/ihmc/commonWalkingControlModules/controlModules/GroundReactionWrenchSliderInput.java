@@ -78,7 +78,7 @@ public class GroundReactionWrenchSliderInput
          planeFrame.updateTranslation(contactTranslation.getFrameVectorCopy());
          planeFrame.update();
          
-         YoPlaneContactState yoPlaneContactState = new YoPlaneContactState("contact" + i, planeFrame, registry);
+         YoPlaneContactState yoPlaneContactState = new YoPlaneContactState("contact" + i, planeFrame, planeFrame, registry);
          
          List<FramePoint2d> contactPoints = new ArrayList<FramePoint2d>();
          contactPoints.add(new FramePoint2d(planeFrame, footLength/2.0, footWidth/2.0));

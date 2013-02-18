@@ -14,14 +14,9 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
 
    public abstract boolean checkOrbitalCondition();
 
-   public abstract double nominalHeightAboveGround();
-
-   public abstract double initialHeightAboveGround();
-
    public abstract double getGroundReactionWrenchBreakFrequencyHertz();
 
    public abstract boolean resetDesiredICPToCurrentAtStartOfSwing();
-
-
    
+   public abstract double nominalHeightAboveAnkle();
 }
