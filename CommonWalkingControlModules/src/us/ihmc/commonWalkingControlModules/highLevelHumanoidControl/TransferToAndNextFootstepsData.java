@@ -21,9 +21,9 @@ public class TransferToAndNextFootstepsData
       return transferToFootstep.getBody();
    }
    
-   public FramePose getTransferToFootstepAnklePose()
+   public Footstep getTransferToFootstep()
    {
-      return transferToFootstep.getPoseCopy();
+      return transferToFootstep;
    }
    
    public void setTransferToFootstep(Footstep transferToFootstep)
