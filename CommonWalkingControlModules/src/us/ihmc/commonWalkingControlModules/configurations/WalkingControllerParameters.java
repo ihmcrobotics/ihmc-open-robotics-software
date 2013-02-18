@@ -8,8 +8,6 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
 {
    public abstract SideDependentList<Transform3D> getDesiredHandPosesWithRespectToChestFrame();
 
-   public abstract double getDesiredCoMHeight();
-
    public abstract boolean doStrictPelvisControl();
       
    public abstract String[] getChestOrientationControlJointNames();
@@ -23,6 +21,7 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
    public abstract double getGroundReactionWrenchBreakFrequencyHertz();
 
    public abstract boolean resetDesiredICPToCurrentAtStartOfSwing();
+
 
    
 }

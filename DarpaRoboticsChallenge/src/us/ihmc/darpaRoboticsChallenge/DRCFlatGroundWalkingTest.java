@@ -90,7 +90,7 @@ public class DRCFlatGroundWalkingTest
       combinedTerrainObject.addBox(rampXStart0-2.0, rampYStart, rampEndX+2.0, rampYEnd, -0.05, 0.0);
 
       DRCRobotWalkingControllerParameters drcControlParameters = new DRCRobotWalkingControllerParameters();
-      drcControlParameters.setInitialHeightAboveGround(drcControlParameters.initialHeightAboveGround() - 0.01); // Need to do this or the leg goes straight and the robot falls.
+      drcControlParameters.setNominalHeightAboveGround(drcControlParameters.nominalHeightAboveGround() - 0.02); // Need to do this or the leg goes straight and the robot falls.
       
       SimulationConstructionSet scs = setupScs(drcControlParameters, combinedTerrainObject, useVelocityAndHeadingScript, cheatWithGroundHeightAtForFootstep);
       scs.setGroundVisible(false);
