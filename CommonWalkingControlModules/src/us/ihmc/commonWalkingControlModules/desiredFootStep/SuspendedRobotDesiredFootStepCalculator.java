@@ -106,7 +106,8 @@ public class SuspendedRobotDesiredFootStepCalculator implements DesiredFootstepC
       ContactablePlaneBody contactableBody = contactableBodies.get(swingLegSide);
       
       boolean trustHeight = false;
-      Footstep desiredFootstep = new Footstep(contactableBody, poseReferenceFrame, contactableBody.getContactPoints(), trustHeight);
+      ReferenceFrame soleFrame = FootstepUtils.createSoleFrame(poseReferenceFrame, contactableBody); 
+      Footstep desiredFootstep = new Footstep(contactableBody, poseReferenceFrame, soleFrame, contactableBody.getContactPoints(), trustHeight);
 
       return desiredFootstep;
    }

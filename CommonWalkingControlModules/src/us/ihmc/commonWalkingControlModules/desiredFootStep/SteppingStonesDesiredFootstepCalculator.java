@@ -166,7 +166,8 @@ public class SteppingStonesDesiredFootstepCalculator implements DesiredFootstepC
          ContactablePlaneBody foot = contactableBodies.get(supportLegSide.getOppositeSide());
          
          boolean trustHeight = false;
-         desiredFootstep = new Footstep(foot, poseReferenceFrame, foot.getContactPoints(), trustHeight);
+         ReferenceFrame soleFrame = FootstepUtils.createSoleFrame(poseReferenceFrame, foot); 
+         desiredFootstep = new Footstep(foot, poseReferenceFrame, soleFrame, foot.getContactPoints(), trustHeight);
       }
 
       captureRegion = captureRegion.changeFrameCopy(ReferenceFrame.getWorldFrame());
@@ -212,7 +213,8 @@ public class SteppingStonesDesiredFootstepCalculator implements DesiredFootstepC
       ContactablePlaneBody foot = contactableBodies.get(supportLegSide.getOppositeSide());
       
       boolean trustHeight = false;
-      desiredFootstep = new Footstep(foot, poseReferenceFrame, foot.getContactPoints(), trustHeight);
+      ReferenceFrame soleReferenceFrame = FootstepUtils.createSoleFrame(poseReferenceFrame, foot); 
+      desiredFootstep = new Footstep(foot, poseReferenceFrame, soleReferenceFrame, foot.getContactPoints(), trustHeight);
 
       return desiredFootstep;
    }

@@ -75,7 +75,8 @@ public class SimpleDesiredFootstepCalculator implements DesiredFootstepCalculato
       ContactablePlaneBody foot = contactableBodies.get(swingLegSide);
       
       boolean trustHeight = false;
-      Footstep desiredFootstep = new Footstep(foot, footstepPoseFrame, foot.getContactPoints(), trustHeight);
+      ReferenceFrame soleFrame = FootstepUtils.createSoleFrame(footstepPoseFrame, foot); 
+      Footstep desiredFootstep = new Footstep(foot, footstepPoseFrame, soleFrame, foot.getContactPoints(), trustHeight);
       
       return desiredFootstep;
    }
