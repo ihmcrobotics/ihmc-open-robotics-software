@@ -40,19 +40,22 @@ public class FootstepConsumer implements FootstepProvider, StreamingDataConsumer
       System.out.println("FootstepConsumer: consume: "+(++j)+" footsteps received, Ah Ah Ah!");
       FootstepData footstepData = (FootstepData) object;
       ContactablePlaneBody contactableBody = findContactableBodyByName(footstepData.getRigidBodyName());
-      ArrayList<FramePoint> expectedContactPoints = new ArrayList<FramePoint>();
-      for (int i = 0; i < footstepData.getExpectedContactPoints().size(); i++)
-      {
-         Point3d point3d = footstepData.getExpectedContactPoints().get(i);
-         FramePoint framePoint = new FramePoint(contactableBody.getBodyFrame(), point3d);
-         expectedContactPoints.add(framePoint);
-      }
       
       boolean trustHeight = footstepData.getTrustHeight();
       String id = footstepData.getId();
       FramePose framePose = new FramePose(ReferenceFrame.getWorldFrame(), footstepData.getLocation(), footstepData.getOrientation());
       PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("poseReferenceFrame", framePose);
       ReferenceFrame soleReferenceFrame = FootstepUtils.createSoleFrame(poseReferenceFrame, contactableBody); 
+      
+      ArrayList<FramePoint> expectedContactPoints = new ArrayList<FramePoint>();
+      for (int i = 0; i < footstepData.getExpectedContactPoints().size(); i++)
+      {
+         Point3d point3d = footstepData.getExpectedContactPoints().get(i);
+         FramePoint framePoint = new FramePoint(soleReferenceFrame, point3d);
+         expectedContactPoints.add(framePoint);
+      }
+      
+      
       Footstep footstep = new Footstep(id, contactableBody, poseReferenceFrame, soleReferenceFrame, expectedContactPoints, trustHeight);
 //      System.out.println("footstep = " + footstep);
       footstepQueue.add(footstep);

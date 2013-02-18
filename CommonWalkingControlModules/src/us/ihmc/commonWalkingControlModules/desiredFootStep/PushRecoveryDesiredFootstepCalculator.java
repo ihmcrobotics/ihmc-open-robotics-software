@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
+import java.util.List;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
@@ -69,7 +71,9 @@ public class PushRecoveryDesiredFootstepCalculator implements DesiredFootstepCal
       
       PoseReferenceFrame footstepPoseFrame = new PoseReferenceFrame("footstepPoseFrame", footstepPose);
       ReferenceFrame soleFrame = FootstepUtils.createSoleFrame(footstepPoseFrame, foot); 
-      Footstep desiredFootstep = new Footstep(foot, footstepPoseFrame, soleFrame, foot.getContactPoints(), trustHeight);
+      List<FramePoint> expectedContactPoints = FootstepUtils.getContactPointsInFrame(foot, soleFrame);
+
+      Footstep desiredFootstep = new Footstep(foot, footstepPoseFrame, soleFrame, expectedContactPoints, trustHeight);
       return desiredFootstep;
    }
 

@@ -219,16 +219,17 @@ public class FootstepPathCoordinatorTest
 
          FramePose pose = new FramePose(ReferenceFrame.getWorldFrame(), new Point3d(footstepNumber, 0.0, 0.0), new Quat4d(random.nextDouble(), random.nextDouble(), random.nextDouble(), random.nextDouble()));
          PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", pose);
+
+         boolean trustHeight = true;
+         ReferenceFrame soleFrame = FootstepUtils.createSoleFrame(poseReferenceFrame, contactablePlaneBody); 
          
          ArrayList<FramePoint> expectedContactPoints = new ArrayList<FramePoint>();
          for (int i = 0; i < 3; i++)
          {
-            FramePoint framePoint = new FramePoint(ReferenceFrame.getWorldFrame(), footstepNumber, i, 0.0);
+            FramePoint framePoint = new FramePoint(soleFrame, footstepNumber, i, 0.0);
             expectedContactPoints.add(framePoint);
          }
-
-         boolean trustHeight = true;
-         ReferenceFrame soleFrame = FootstepUtils.createSoleFrame(poseReferenceFrame, contactablePlaneBody); 
+         
          Footstep footstep = new Footstep(contactablePlaneBody, poseReferenceFrame, soleFrame, expectedContactPoints, trustHeight);
          footsteps.add(footstep);
       }

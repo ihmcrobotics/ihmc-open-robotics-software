@@ -3,6 +3,8 @@
 
 package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
+import java.util.List;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredHeadingControlModule;
 import us.ihmc.robotSide.RobotSide;
@@ -76,7 +78,9 @@ public class SimpleDesiredFootstepCalculator implements DesiredFootstepCalculato
       
       boolean trustHeight = false;
       ReferenceFrame soleFrame = FootstepUtils.createSoleFrame(footstepPoseFrame, foot); 
-      Footstep desiredFootstep = new Footstep(foot, footstepPoseFrame, soleFrame, foot.getContactPoints(), trustHeight);
+      List<FramePoint> expectedContactPoints = FootstepUtils.getContactPointsInFrame(foot, soleFrame);
+
+      Footstep desiredFootstep = new Footstep(foot, footstepPoseFrame, soleFrame, expectedContactPoints, trustHeight);
       
       return desiredFootstep;
    }
