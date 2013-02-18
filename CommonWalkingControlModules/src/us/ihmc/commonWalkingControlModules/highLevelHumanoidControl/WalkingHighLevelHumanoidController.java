@@ -1153,7 +1153,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
          double angle = 0.0;
          if(desiredHeadOrientationProvider != null)
          {
-            desiredHeadOrientationProvider.getDesiredExtendedNeckPitchJointAngle();
+            angle = desiredHeadOrientationProvider.getDesiredExtendedNeckPitchJointAngle();
          }
          doPDControl(jointForExtendedNeckPitchRange, kUpperBody, dUpperBody, angle, 0.0);
       }

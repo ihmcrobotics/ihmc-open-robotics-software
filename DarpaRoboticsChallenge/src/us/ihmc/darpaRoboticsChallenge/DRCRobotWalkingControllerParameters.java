@@ -73,12 +73,12 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
 
    public double getUpperNeckPitchLimit()
    {
-      return DRCRobotParameters.DRC_ROBOT_UPPER_NECK_PITCH_LIMIT;
+      return DRCRobotParameters.DRC_ROBOT_NECK_PITCH_UPPER_LIMIT;
    }
 
    public double getLowerNeckPitchLimit()
    {
-      return DRCRobotParameters.DRC_ROBOT_LOWER_NECK_PITCH_LIMIT;
+      return DRCRobotParameters.DRC_ROBOT_NECK_PITCH_LOWER_LIMIT;
    }
 
    public double getHeadYawLimit()
