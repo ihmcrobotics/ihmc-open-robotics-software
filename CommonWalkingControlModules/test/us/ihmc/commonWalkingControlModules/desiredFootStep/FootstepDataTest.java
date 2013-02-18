@@ -51,7 +51,8 @@ public class FootstepDataTest
       }
 
       boolean trustHeight = true;
-      Footstep footstep = new Footstep(contactablePlaneBody, poseReferenceFrame, expectedContactPoints, trustHeight);
+      ReferenceFrame soleFrame = FootstepUtils.createSoleFrame(poseReferenceFrame, contactablePlaneBody); 
+      Footstep footstep = new Footstep(contactablePlaneBody, poseReferenceFrame, soleFrame, expectedContactPoints, trustHeight);
       FootstepData footstepData = new FootstepData(footstep);
       JUnitTools.assertSerializable(footstepData);
    }
@@ -316,7 +317,8 @@ public class FootstepDataTest
          }
 
          boolean trustHeight = true;
-         Footstep footstep = new Footstep(contactablePlaneBody, poseReferenceFrame, expectedContactPoints, trustHeight);
+         ReferenceFrame soleFrame = FootstepUtils.createSoleFrame(poseReferenceFrame, contactablePlaneBody); 
+         Footstep footstep = new Footstep(contactablePlaneBody, poseReferenceFrame, soleFrame, expectedContactPoints, trustHeight);
          footsteps.add(footstep);
       }
 
@@ -400,7 +402,8 @@ public class FootstepDataTest
          }
 
          boolean trustHeight = true;
-         Footstep footstep = new Footstep(contactablePlaneBody, poseReferenceFrame, expectedContactPoints, trustHeight);
+         ReferenceFrame soleFrame = FootstepUtils.createSoleFrame(poseReferenceFrame, contactablePlaneBody); 
+         Footstep footstep = new Footstep(contactablePlaneBody, poseReferenceFrame, soleFrame, expectedContactPoints, trustHeight);
          reconstructedFootsteps.add(footstep);
       }
 
@@ -439,7 +442,8 @@ public class FootstepDataTest
             }
 
             boolean trustHeight = true;
-            Footstep footstep = new Footstep(contactablePlaneBody, poseReferenceFrame, expectedContactPoints, trustHeight);
+            ReferenceFrame soleFrame = FootstepUtils.createSoleFrame(poseReferenceFrame, contactablePlaneBody); 
+            Footstep footstep = new Footstep(contactablePlaneBody, poseReferenceFrame, soleFrame, expectedContactPoints, trustHeight);
             reconstructedFootstepPath.add(footstep);
          }
       }

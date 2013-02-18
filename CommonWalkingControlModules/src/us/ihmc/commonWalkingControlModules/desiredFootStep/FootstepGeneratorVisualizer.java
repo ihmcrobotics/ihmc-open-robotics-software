@@ -184,12 +184,14 @@ public class FootstepGeneratorVisualizer
       ContactablePlaneBody rightFoot = bipedFeet.get(RobotSide.RIGHT);
       
       boolean trustHeight = false;
-      Footstep startSwingFootstep = new Footstep(rightFoot, startSwingPoseFrame, rightFoot.getContactPoints(), trustHeight);
+      ReferenceFrame startSwingSoleFrame = FootstepUtils.createSoleFrame(startSwingPoseFrame, rightFoot); 
+      Footstep startSwingFootstep = new Footstep(rightFoot, startSwingPoseFrame, startSwingSoleFrame, rightFoot.getContactPoints(), trustHeight);
 //      generator.setSwingStart(startSwingFootstep);
       OverheadPath footstepPath = generateSimpleOverheadPath();
       generator.setFootstepPath(footstepPath);
       ContactablePlaneBody leftFoot = bipedFeet.get(RobotSide.LEFT);
-      Footstep startStanceFootstep = new Footstep(leftFoot, startStancePoseFrame, leftFoot.getContactPoints(), trustHeight);
+      ReferenceFrame startStanceSoleFrame = FootstepUtils.createSoleFrame(startStancePoseFrame, leftFoot); 
+      Footstep startStanceFootstep = new Footstep(leftFoot, startStancePoseFrame, startStanceSoleFrame, leftFoot.getContactPoints(), trustHeight);
       generator.setStanceStart(startStanceFootstep);
       List<Footstep> footsteps = generator.generateDesiredFootstepList();
       return footsteps;

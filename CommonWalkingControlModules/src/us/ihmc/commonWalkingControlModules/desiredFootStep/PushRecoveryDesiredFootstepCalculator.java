@@ -68,8 +68,8 @@ public class PushRecoveryDesiredFootstepCalculator implements DesiredFootstepCal
       boolean trustHeight = false;
       
       PoseReferenceFrame footstepPoseFrame = new PoseReferenceFrame("footstepPoseFrame", footstepPose);
-
-      Footstep desiredFootstep = new Footstep(foot, footstepPoseFrame, foot.getContactPoints(), trustHeight);
+      ReferenceFrame soleFrame = FootstepUtils.createSoleFrame(footstepPoseFrame, foot); 
+      Footstep desiredFootstep = new Footstep(foot, footstepPoseFrame, soleFrame, foot.getContactPoints(), trustHeight);
       return desiredFootstep;
    }
 
