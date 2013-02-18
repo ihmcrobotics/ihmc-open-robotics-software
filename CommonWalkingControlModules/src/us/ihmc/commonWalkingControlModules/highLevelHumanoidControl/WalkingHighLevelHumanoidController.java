@@ -242,7 +242,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       bases.put(LimbName.LEG, fullRobotModel.getPelvis());
       bases.put(LimbName.ARM, fullRobotModel.getChest());
 
-      coefficientOfFriction.set(1.0);
+      coefficientOfFriction.set(0.7);
 
       for (RobotSide robotSide : RobotSide.values())
       {
@@ -597,11 +597,6 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
          if (DEBUG)
             System.out.println("WalkingHighLevelHumanoidController: enteringDoubleSupportState");
          setSupportLeg(null);    // TODO: check if necessary
-
-
-         computeCapturePoint();    // TODO: check if necessary
-         desiredICP.checkReferenceFrameMatch(capturePoint.getReferenceFrame());
-         desiredICP.set(capturePoint.getX(), capturePoint.getY());
 
          // TODO: simplify the following
          if (transferToSide != null)
