@@ -35,18 +35,19 @@ public class FootstepPathConsumer extends AbstractStreamingDataConsumer<ArrayLis
       {
          FootstepData footstepData = (FootstepData) footstepObject;
          ContactablePlaneBody contactableBody = findContactableBodyByName(footstepData.getRigidBodyName());
-         ArrayList<FramePoint> expectedContactPoints = new ArrayList<FramePoint>();
-         for (int i = 0; i < footstepData.getExpectedContactPoints().size(); i++)
-         {
-            Point3d point3d = footstepData.getExpectedContactPoints().get(i);
-            FramePoint framePoint = new FramePoint(contactableBody.getBodyFrame(), point3d);
-            expectedContactPoints.add(framePoint);
-         }
          
          FramePose footstepPose = new FramePose(ReferenceFrame.getWorldFrame(), footstepData.getLocation(), footstepData.getOrientation());
          PoseReferenceFrame footstepPoseFrame = new PoseReferenceFrame("footstepPoseFrame", footstepPose);
          ReferenceFrame soleReferenceFrame = FootstepUtils.createSoleFrame(footstepPoseFrame, contactableBody); 
 
+         ArrayList<FramePoint> expectedContactPoints = new ArrayList<FramePoint>();
+         for (int i = 0; i < footstepData.getExpectedContactPoints().size(); i++)
+         {
+            Point3d point3d = footstepData.getExpectedContactPoints().get(i);
+            FramePoint framePoint = new FramePoint(soleReferenceFrame, point3d);
+            expectedContactPoints.add(framePoint);
+         }
+         
          Footstep footstep = new Footstep(footstepData.getId(), contactableBody, footstepPoseFrame, soleReferenceFrame, expectedContactPoints, footstepData.getTrustHeight());
          footsteps.add(footstep);
          if (DEBUG)

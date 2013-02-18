@@ -290,8 +290,8 @@ public class DesiredFootstepVisualizer
       ContactablePlaneBody contactablePlaneBody = bipedFeet.get(initialStanceSide);
       ReferenceFrame soleFrame = FootstepUtils.createSoleFrame(poseReferenceFrame, contactablePlaneBody); 
       
-      List<FramePoint> expectedContactPoints = contactablePlaneBody.getContactPoints();
-      
+      List<FramePoint> expectedContactPoints = FootstepUtils.getContactPointsInFrame(contactablePlaneBody, soleFrame);
+
       boolean trustHeight = false;
       Footstep initialStanceFootstep = new Footstep(contactablePlaneBody, poseReferenceFrame, soleFrame, expectedContactPoints, trustHeight);
       footstepGenerator.setStepLength(0.2);

@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
+import java.util.List;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredHeadingControlModule;
 import us.ihmc.robotSide.RobotSide;
@@ -106,8 +108,10 @@ public class SuspendedRobotDesiredFootStepCalculator implements DesiredFootstepC
       ContactablePlaneBody contactableBody = contactableBodies.get(swingLegSide);
       
       boolean trustHeight = false;
-      ReferenceFrame soleFrame = FootstepUtils.createSoleFrame(poseReferenceFrame, contactableBody); 
-      Footstep desiredFootstep = new Footstep(contactableBody, poseReferenceFrame, soleFrame, contactableBody.getContactPoints(), trustHeight);
+      ReferenceFrame soleFrame = FootstepUtils.createSoleFrame(poseReferenceFrame, contactableBody);
+      List<FramePoint> expectedContactPoints = FootstepUtils.getContactPointsInFrame(contactableBody, soleFrame);
+
+      Footstep desiredFootstep = new Footstep(contactableBody, poseReferenceFrame, soleFrame, expectedContactPoints, trustHeight);
 
       return desiredFootstep;
    }
