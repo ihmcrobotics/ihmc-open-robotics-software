@@ -26,12 +26,8 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
       
       return handPoseWithRespectToChestFrame;
    }
+  
    
-   public double getDesiredCoMHeight()
-   {
-      return 0.88;
-   }
-
    public boolean doStrictPelvisControl()
    {
       return true;
@@ -53,9 +49,16 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
       return false;
    }
 
+   double nominalHeightAboveGround = 0.86;
+   
    public double nominalHeightAboveGround()
    {
-      return 0.9;
+      return nominalHeightAboveGround;
+   }
+   
+   public void setNominalHeightAboveGround(double nominalHeightAboveGround)
+   {
+      this.nominalHeightAboveGround = nominalHeightAboveGround;
    }
 
    private double initialHeightAboveGround = 0.86;
@@ -104,4 +107,6 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
    {
       return "back_mby";
    }
+
+
 }
