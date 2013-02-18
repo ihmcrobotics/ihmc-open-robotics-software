@@ -12,7 +12,6 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
-import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
@@ -26,7 +25,6 @@ public class LookaheadFinalDesiredICPCalculator
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final DynamicGraphicPosition finalDesiredICP;
-//   private final DynamicGraphicPolygon nextStepPolygon, nextNextStepPolygon;
    private final DynamicGraphicCoordinateSystem nextStepPose, nextNextStepPose;
    
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -50,7 +48,9 @@ public class LookaheadFinalDesiredICPCalculator
    
    public FramePoint2d getDoubleSupportFinalDesiredICPForWalking(TransferToAndNextFootstepsData transferToAndNextFootstepsData)
    {
-      FramePose transferToFootstepAnklePose = transferToAndNextFootstepsData.getTransferToFootstepAnklePose();;
+      Footstep transferToFootstep = transferToAndNextFootstepsData.getTransferToFootstep();
+      
+      FramePose transferToFootstepAnklePose = transferToFootstep.getPoseCopy();
       ContactablePlaneBody transferToFootContactablePlaneBody = transferToAndNextFootstepsData.getTransferToFootContactablePlaneBody();
       FrameConvexPolygon2d transferToFootPolygonInSoleFrame = transferToAndNextFootstepsData.getTransferToFootPolygonInSoleFrame();
       RobotSide transferToSide = transferToAndNextFootstepsData.getTransferToSide();
@@ -94,39 +94,6 @@ public class LookaheadFinalDesiredICPCalculator
       return ret;
    }
 
-   
-   
-   public FramePoint2d getDoubleSupportFinalDesiredICPForWalkingOld(ReferenceFrame ankleZUpFrame, ReferenceFrame footFrame, ContactablePlaneBody transferToFootContactablePlaneBody, FramePose footstepPose, FrameConvexPolygon2d footPolygonInSoleFrame, RobotSide transferToSide)
-   {
-//      if (footPolygonInSoleFrame.getReferenceFrame() != referenceFrames.getSoleFrame(transferToSide))
-//      {
-//         throw new RuntimeException("not in sole frame");
-//      }
-
-      footstepPose.changeFrame(ankleZUpFrame);
-
-      Transform3D footstepTransform = new Transform3D();
-      footstepPose.getTransformFromPoseToFrame(footstepTransform);
-
-      FramePoint2d centroid2d = footPolygonInSoleFrame.getCentroidCopy();
-      FramePoint centroid = centroid2d.toFramePoint();
-      
-      centroid.changeFrame(footFrame);
-      centroid.changeFrameUsingTransform(ankleZUpFrame, footstepTransform);
-      FramePoint2d ret = centroid.toFramePoint2d();
-
-      double extraX = 0.0;    // 0.02
-      double extraY = transferToSide.negateIfLeftSide(0.04);
-      FrameVector2d offset = new FrameVector2d(ankleZUpFrame, extraX, extraY);
-      offset.changeFrame(ret.getReferenceFrame());
-      ret.add(offset);
-
-      finalDesiredICP.setPosition(ret.toFramePoint().changeFrameCopy(worldFrame));
-
-      return ret;
-   }
-   
-   
    
    private static void getTransformFromPoseToWorld(Transform3D poseToWorldTransformToPack, FramePose framePose)
    {
