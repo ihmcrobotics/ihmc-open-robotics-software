@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.head;
 
 import org.apache.commons.lang.ArrayUtils;
 
+import us.ihmc.commonWalkingControlModules.configurations.HeadOrientationControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.DegenerateOrientationControlModule;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
@@ -41,7 +42,8 @@ public class HeadOrientationControlModule extends DegenerateOrientationControlMo
    private final DoubleYoVariable rollLimit = new DoubleYoVariable("rollLimit", registry);
    
    public HeadOrientationControlModule(GeometricJacobian neckJacobian, RigidBody pelvis, RigidBody elevator, TwistCalculator twistCalculator,
-           ReferenceFrame[] availableHeadOrientationControlFrames, YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+         ReferenceFrame[] availableHeadOrientationControlFrames, HeadOrientationControllerParameters headOrientationControllerParameters, YoVariableRegistry parentRegistry,
+         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       super("head", new RigidBody[] {elevator, pelvis}, neckJacobian.getEndEffector(), neckJacobian, twistCalculator, parentRegistry);
 
@@ -64,7 +66,7 @@ public class HeadOrientationControlModule extends DegenerateOrientationControlMo
          pointTrackingFrameFiz = null;
       }
 
-      setHeadOrientationLimits();
+      setHeadOrientationLimits(headOrientationControllerParameters);
    }
 
    @Override
@@ -120,12 +122,11 @@ public class HeadOrientationControlModule extends DegenerateOrientationControlMo
       orientation.changeFrame(initialReferenceFrame);
    }
 
-   private void setHeadOrientationLimits()
+   private void setHeadOrientationLimits(HeadOrientationControllerParameters headOrientationControllerParameters)
    {
-      yawLimit.set(Math.PI / 2);
-      pitchLowerLimit.set(-Math.PI / 3);
-      pitchUpperLimit.set(Math.PI / 4);
-      rollLimit.set(Math.PI / 4);
+      yawLimit.set(headOrientationControllerParameters.getHeadYawLimit());
+      pitchUpperLimit.set(headOrientationControllerParameters.getUpperNeckPitchLimit());
+      rollLimit.set(headOrientationControllerParameters.getHeadRollLimit());
 
 //    yawLimit.set(0.0);
 //    pitchLowerLimit.set(0.0);
