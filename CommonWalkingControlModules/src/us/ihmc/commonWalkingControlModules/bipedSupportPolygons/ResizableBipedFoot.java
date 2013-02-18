@@ -100,14 +100,22 @@ public class ResizableBipedFoot implements BipedFootInterface
       this.toePoints = new ArrayList<FramePoint>(clockwiseToePoints.size());
       this.heelPoints = new ArrayList<FramePoint>(clockwiseHeelPoints.size());
 
+      
+      if (soleFrame.getParent() != footFrame)
+      {
+         throw new RuntimeException("soleFrame.getParent() != footFrame");
+      }
+      
       for (Point3d toePoint : clockwiseToePoints)
       {
-         this.toePoints.add(new FramePoint(footFrame, toePoint));
+         Point3d toePointProjected = new Point3d(toePoint.getX(), toePoint.getY(), 0.0);
+         this.toePoints.add(new FramePoint(soleFrame, toePointProjected));
       }
 
       for (Point3d heelPoint : clockwiseHeelPoints)
       {
-         this.heelPoints.add(new FramePoint(footFrame, heelPoint));
+         Point3d heelPointProjected = new Point3d(heelPoint.getX(), heelPoint.getY(), 0.0);
+         this.heelPoints.add(new FramePoint(soleFrame, heelPointProjected));
       }
 
 
