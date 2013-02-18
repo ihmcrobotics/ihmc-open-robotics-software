@@ -228,7 +228,8 @@ public class Graphics3DObject
    /**
     * Adds the specified 3DS Max file to the center of the current coordinate system
     * with a default appearance.  3DS Max is a 3D modeling program that allows the creation
-    * of detailed models and animations.  This function only imports the model allowing the use
+    * of detailed models and animations.  This function 
+    * only imports the model allowing the use
     * of more complicated and detailed system representations in simulations.
     *
     * @param fileURL URL pointing to the desired 3ds file.

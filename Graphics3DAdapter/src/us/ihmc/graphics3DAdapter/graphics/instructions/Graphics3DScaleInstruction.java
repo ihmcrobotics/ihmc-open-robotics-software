@@ -2,10 +2,12 @@ package us.ihmc.graphics3DAdapter.graphics.instructions;
 
 import javax.vecmath.Vector3d;
 
+import us.ihmc.graphics3DAdapter.graphics.ScaleChangedListener;
+
 public class Graphics3DScaleInstruction implements Graphics3DPrimitiveInstruction
 {
    private Vector3d scaleFactor;
-   private boolean changed = false;
+   private ScaleChangedListener scaleChangedListener = null;
 
    public Graphics3DScaleInstruction(double scale)
    {
@@ -20,22 +22,15 @@ public class Graphics3DScaleInstruction implements Graphics3DPrimitiveInstructio
    public void setScale(Vector3d scale)
    {
       scaleFactor = scale;
-      changed = true;
+      if(scaleChangedListener != null)
+      {
+         scaleChangedListener.setScale(scale);
+      }
    }
    
    public void setScale(double scale)
    {
       setScale(new Vector3d(scale, scale, scale));
-   }
-   
-   public boolean hasChanged()
-   {
-      return changed;
-   }
-   
-   public void reset()
-   {
-      changed = false;
    }
 
    public Vector3d getScaleFactor()
@@ -43,14 +38,15 @@ public class Graphics3DScaleInstruction implements Graphics3DPrimitiveInstructio
       return scaleFactor;
    }
 
+   @Override
    public String toString()
    {
 
       return "\t\t\t<Scale>"+scaleFactor+"</Scale>\n";
    }
 
-   public boolean hasChangedSinceLastCalled()
+   public void addChangeScaleListener(ScaleChangedListener scaleChangedListener)
    {
-      return false;
+      this.scaleChangedListener = scaleChangedListener;
    }
 }
