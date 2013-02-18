@@ -23,6 +23,8 @@ public class DesiredHeadOrientationProvider
    private AbstractStreamingDataConsumer<HeadOrientationPacket> headOrientationPacketConsumer;
    private final HashMap<String, ReferenceFrame> availableHeadControlFrames = new HashMap<String, ReferenceFrame>();
    private final HashMap<String, RigidBody> availableBases = new HashMap<String, RigidBody>();
+   
+   private double desiredJointForExtendedNeckPitchRangeAngle = 0.0;
 
    public DesiredHeadOrientationProvider(long headOrientationControlIdentifier)
    {
@@ -90,9 +92,16 @@ public class DesiredHeadOrientationProvider
                FramePoint pointToTrack = new FramePoint(frame, point);
                headOrientationControlModule.setPointToTrack(pointToTrack, base);
             }
+            
+            desiredJointForExtendedNeckPitchRangeAngle = packet.getDesiredJointForExtendedNeckPitchRangeAngle();
 
             assert hasBeenSet;
          }
       }
+   }
+
+   public double getDesiredExtendedNeckPitchJointAngle()
+   {
+      return desiredJointForExtendedNeckPitchRangeAngle;
    }
 }
