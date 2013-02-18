@@ -8,9 +8,9 @@ import us.ihmc.utilities.math.geometry.FramePose;
 
 public class TransferToAndNextFootstepsData
 {
-   private ContactablePlaneBody transferToFootContactablePlaneBody;
-   private FramePose transferToFootstepAnklePose;
    private FrameConvexPolygon2d transferToFootPolygonInSoleFrame;
+   
+   private Footstep transferToFootstep;
    private RobotSide transferToSide;
    
    private Footstep nextFootstep;
@@ -18,22 +18,17 @@ public class TransferToAndNextFootstepsData
    
    public ContactablePlaneBody getTransferToFootContactablePlaneBody()
    {
-      return transferToFootContactablePlaneBody;
-   }
-   
-   public void setTransferToFootContactablePlaneBody(ContactablePlaneBody transferToFootContactablePlaneBody)
-   {
-      this.transferToFootContactablePlaneBody = transferToFootContactablePlaneBody;
+      return transferToFootstep.getBody();
    }
    
    public FramePose getTransferToFootstepAnklePose()
    {
-      return transferToFootstepAnklePose;
+      return transferToFootstep.getPoseCopy();
    }
    
-   public void setTransferToFootstepAnklePose(FramePose transferToFootstepAnklePose)
+   public void setTransferToFootstep(Footstep transferToFootstep)
    {
-      this.transferToFootstepAnklePose = transferToFootstepAnklePose;
+      this.transferToFootstep = transferToFootstep;
    }
    
    public FrameConvexPolygon2d getTransferToFootPolygonInSoleFrame()

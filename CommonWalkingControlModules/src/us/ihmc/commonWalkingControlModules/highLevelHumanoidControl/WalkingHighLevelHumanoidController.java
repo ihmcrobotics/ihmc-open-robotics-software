@@ -30,6 +30,7 @@ import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.Updata
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorTools;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepProvider;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepUtils;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.CapturePointCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.CapturePointData;
@@ -71,6 +72,7 @@ import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
+import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
 import us.ihmc.utilities.screwTheory.GeometricJacobian;
@@ -638,13 +640,21 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
          else
          {
             FramePose currentFramePose = new FramePose(referenceFrames.getFootFrame(transferToSide));
+            currentFramePose.changeFrame(worldFrame);
+            
             FrameConvexPolygon2d footPolygon = computeFootPolygon(transferToSide, referenceFrames.getSoleFrame(transferToSide));
+            PoseReferenceFrame currentPoseReferenceFrame = new PoseReferenceFrame("currentPose", currentFramePose);
 
             ContactablePlaneBody contactablePlaneBody = bipedFeet.get(transferToSide);
+            ReferenceFrame soleReferenceFrame = FootstepUtils.createSoleFrame(currentPoseReferenceFrame, contactablePlaneBody);
+            List<FramePoint> expectedContactPoints = FootstepUtils.getContactPointsInFrame(contactablePlaneBody, soleReferenceFrame);
+            boolean trustHeight = true;
+            
+            Footstep transferToFootstep = new Footstep(contactablePlaneBody, currentPoseReferenceFrame, soleReferenceFrame, expectedContactPoints, trustHeight);
+            
 
             TransferToAndNextFootstepsData transferToAndNextFootstepsData = new TransferToAndNextFootstepsData();
-            transferToAndNextFootstepsData.setTransferToFootContactablePlaneBody(contactablePlaneBody);
-            transferToAndNextFootstepsData.setTransferToFootstepAnklePose(currentFramePose);
+            transferToAndNextFootstepsData.setTransferToFootstep(transferToFootstep);
             transferToAndNextFootstepsData.setTransferToFootPolygonInSoleFrame(footPolygon);
             transferToAndNextFootstepsData.setTransferToSide(transferToSide);
             transferToAndNextFootstepsData.setNextFootstep(nextFootstep);
@@ -939,8 +949,9 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       }
 
       TransferToAndNextFootstepsData transferToAndNextFootstepsData = new TransferToAndNextFootstepsData();
-      transferToAndNextFootstepsData.setTransferToFootContactablePlaneBody(contactableBody);
-      transferToAndNextFootstepsData.setTransferToFootstepAnklePose(desiredFootstep.getPoseCopy());
+      
+      transferToAndNextFootstepsData.setTransferToFootstep(desiredFootstep);
+
       transferToAndNextFootstepsData.setTransferToFootPolygonInSoleFrame(footPolygon);
       transferToAndNextFootstepsData.setTransferToSide(swingSide);
       transferToAndNextFootstepsData.setNextFootstep(footstepAfterThisOne);
