@@ -111,6 +111,10 @@ public class LookaheadFinalDesiredICPCalculator implements FinalDesiredICPCalcul
       {
          return getFinalDesiredICPCentroidToCentroid(transferToAndNextFootstepsData);
       }
+      case CENTROID_TO_CENTROID_WITH_CALCULATED_SCALAR:
+      {
+         return getFinalDesiredICPCentroidToCentroidWithCalculatedScalar(transferToAndNextFootstepsData);
+      }
       default:
       {
          throw new RuntimeException("Should not get here!"); 
@@ -142,6 +146,45 @@ public class LookaheadFinalDesiredICPCalculator implements FinalDesiredICPCalcul
       vectorFromTransferToNext.sub(transferToCentroid);
       vectorFromTransferToNext.normalize();
       vectorFromTransferToNext.scale(icpDistanceAlongCentroidSegment.getDoubleValue());
+      
+      FramePoint2d finalDesiredICP = new FramePoint2d(transferToCentroid);
+      finalDesiredICP.add(vectorFromTransferToNext);
+      
+      visualizeFinalDesiredICP(finalDesiredICP);
+      
+      return finalDesiredICP;  
+   }
+   
+   private FramePoint2d getFinalDesiredICPCentroidToCentroidWithCalculatedScalar(TransferToAndNextFootstepsData transferToAndNextFootstepsData)
+   {
+      visualizeFootsteps(transferToAndNextFootstepsData);
+
+      Footstep transferToFootstep = transferToAndNextFootstepsData.getTransferToFootstep();
+      Footstep nextFootstep = transferToAndNextFootstepsData.getNextFootstep();
+//      Footstep nextNextFootstep = transferToAndNextFootstepsData.getNextNextFootstep();
+            
+      FrameConvexPolygon2d transferToFootPolygon = FootstepUtils.getProjectedFootPolygonInFrame(transferToFootstep, worldFrame);
+
+      FramePoint2d transferToCentroid = transferToFootPolygon.getCentroidCopy();
+
+      if (nextFootstep == null)
+      {
+         return transferToCentroid;
+      }
+ 
+      FrameConvexPolygon2d nextFootPolygon = FootstepUtils.getProjectedFootPolygonInFrame(nextFootstep, worldFrame);
+      FramePoint2d nextCentroid = nextFootPolygon.getCentroidCopy();
+            
+      FrameVector2d vectorFromTransferToNext = new FrameVector2d(nextCentroid);
+      vectorFromTransferToNext.sub(transferToCentroid);
+      
+      double sf = vectorFromTransferToNext.length();
+      double w0 = transferToAndNextFootstepsData.getW0();
+      double estimatedStepTime = transferToAndNextFootstepsData.getEstimatedStepTime();
+      double s0 = sf / (Math.exp(w0) * estimatedStepTime);
+      
+      vectorFromTransferToNext.normalize();
+      vectorFromTransferToNext.scale(s0);
       
       FramePoint2d finalDesiredICP = new FramePoint2d(transferToCentroid);
       finalDesiredICP.add(vectorFromTransferToNext);
@@ -184,6 +227,6 @@ public class LookaheadFinalDesiredICPCalculator implements FinalDesiredICPCalcul
 
    private static enum DesiredICPCalculatorMethod
    {
-         SHIFT_INSIDE, CENTROID_TO_CENTROID;
+         SHIFT_INSIDE, CENTROID_TO_CENTROID, CENTROID_TO_CENTROID_WITH_CALCULATED_SCALAR;
    }
 }
