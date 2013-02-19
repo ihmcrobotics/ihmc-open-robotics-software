@@ -122,23 +122,17 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractAdjustableD
    }
 
 
-   /**
-    * @param swingLegSide
-    * @param supportAnkleZUpFrame
-    * @param desiredOffsetFromAnkle
-    * @param swingFootToWorldRotation
-    * @return
-    */
-   private FramePoint computeDesiredFootPosition(RobotSide swingLegSide, ReferenceFrame supportAnkleZUpFrame, FrameVector2d desiredOffsetFromAnkle,
-           Matrix3d swingFootToWorldRotation)
+   private FramePoint computeDesiredFootPosition(RobotSide upcomingSwingLegSide, ReferenceFrame upcomingSupportAnkleZUpFrame,
+           FrameVector2d desiredOffsetFromAnkle, Matrix3d swingFootToWorldRotation)
    {
-      RobotSide supportLegSide = swingLegSide.getOppositeSide();
-      desiredOffsetFromAnkle.changeFrame(supportAnkleZUpFrame);
+      ContactablePlaneBody upcomingSwingFoot = contactableBodies.get(upcomingSwingLegSide);
+      ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-      FramePoint footstepPosition = new FramePoint(supportAnkleZUpFrame, desiredOffsetFromAnkle.getX(), desiredOffsetFromAnkle.getY(), 0.0);
+      desiredOffsetFromAnkle.changeFrame(upcomingSupportAnkleZUpFrame);
+      FramePoint footstepPosition = new FramePoint(upcomingSupportAnkleZUpFrame, desiredOffsetFromAnkle.getX(), desiredOffsetFromAnkle.getY(), 0.0);
+      footstepPosition.changeFrame(worldFrame);
 
-      ContactablePlaneBody supportFoot = contactableBodies.get(supportLegSide);
-      ContactablePlaneBody swingFoot = contactableBodies.get(swingLegSide);
+      double footstepMinZ = DesiredFootstepCalculatorTools.computeMinZPointWithRespectToAnkleInWorldFrame(swingFootToWorldRotation, upcomingSwingFoot);
 
       if (groundProfile == null)
       {
@@ -146,43 +140,48 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractAdjustableD
           * Assume that the ground height is constant.
           *
           * Specifically, if we assume that:
-          * 1) the lowest contact point on the stance foot is in contact with the ground
-          * 2) the ground height at the lowest stance foot contact point is the same as the ground height at the
+          * 1) the lowest contact point on the upcoming swing foot is in contact with the ground
+          * 2) the ground height at the lowest upcoming swing foot contact point is the same as the ground height at the
           *    lowest swing foot contact point
           *
           * then the following holds:
           *
-          * let stanceMinZ be the z coordinate of the vector (expressed in world frame) from stance ankle to the lowest contact point on
+          * let upcomingSwingMinZ be the z coordinate of the vector (expressed in world frame) from upcoming swing ankle to the lowest contact point on
           * the stance foot (compared in world frame). Current foot orientation is used to determine this value.
           *
-          * let swingMinZ be the z coordinate of the vector (expressed in world frame) from swing ankle to the lowest contact point on
-          * the swing foot (compared in world frame). Planned foot orientation is used to determine this value
+          * let footstepMinZ be the z coordinate of the vector (expressed in world frame) from planned swing ankle to the lowest contact point on
+          * the planned swing foot (compared in world frame). Planned foot orientation is used to determine this value
           *
-          * let zStance be the z coordinate of the stance ankle, expressed in world frame.
-          * let zSwing be the z coordinate of the swing ankle, expressed in world frame (this is what we're after)
+          * let zUpcomingSwing be the z coordinate of the upcoming swing ankle, expressed in world frame.
+          * let zFootstep be the z coordinate of the footstep, expressed in world frame (this is what we're after)
           * let zGround be the z coordinate of the lowest point on the stance foot i.e. of the ground
-          * zStance = zGround - stanceMinZ
-          * zSwing = zGround - swingMinZ
-          *        = zStance + stanceMinZ - swingMinZ
+          * zUpcomingSwing = zGround - upcomingSwingMinZ
+          * zFootstep      = zGround - footstepMinZ
+          *                = zUpcomingSwing + upcomingSwingMinZ - footstepMinZ
           */
-         FrameVector searchDirection = new FrameVector(supportAnkleZUpFrame, 0.0, 0.0, -1.0);
-         FramePoint stanceMinZPoint = DesiredFootstepCalculatorTools.computeMaximumPointsInDirection(supportFoot.getContactPoints(),
-                                         searchDirection, 1).get(0);
-         stanceMinZPoint.changeFrame(supportAnkleZUpFrame);
-         double stanceMinZ = stanceMinZPoint.getZ();
-         double swingMinZ = DesiredFootstepCalculatorTools.computeMinZWithRespectToAnkleInWorldFrame(swingFootToWorldRotation, swingFoot);
-         footstepPosition.setZ(footstepPosition.getZ() + stanceMinZ - swingMinZ);
-         footstepPosition.changeFrame(ReferenceFrame.getWorldFrame());
+
+         FramePoint upcomingSwingAnkle = new FramePoint(upcomingSwingFoot.getBodyFrame());
+         upcomingSwingAnkle.changeFrame(worldFrame);
+         double zUpcomingSwing = upcomingSwingAnkle.getZ();
+
+         FrameVector searchDirection = new FrameVector(upcomingSupportAnkleZUpFrame, 0.0, 0.0, -1.0);
+         FramePoint upcomingSwingMinZPoint = DesiredFootstepCalculatorTools.computeMaximumPointsInDirection(upcomingSwingFoot.getContactPoints(),
+                                                searchDirection, 1).get(0);
+         upcomingSwingMinZPoint.changeFrame(ankleZUpFrames.get(upcomingSwingLegSide));
+         double upcomingSwingMinZ = upcomingSwingMinZPoint.getZ();
+
+         double zFootstep = zUpcomingSwing + upcomingSwingMinZ - footstepMinZ;
+         footstepPosition.setZ(zFootstep);
       }
       else
       {
          /*
           * use ground profile to determine height at the planned foot position
           */
-         
+
          footstepPosition.changeFrame(ReferenceFrame.getWorldFrame());
          double groundZ = groundProfile.heightAt(footstepPosition.getX(), footstepPosition.getY(), 0.0);
-         double ankleHeight = FootstepUtils.getSoleToAnkleHeight(swingFoot);
+         double ankleHeight = FootstepUtils.getSoleToAnkleHeight(upcomingSwingFoot);
          double ankleZ = groundZ + ankleHeight;
 
          footstepPosition.setZ(ankleZ);

@@ -24,10 +24,14 @@ public class ShiftInsideFinalDesiredICPCalculator implements FinalDesiredICPCalc
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   private final double extraX;
+   private final double extraY;
 
-   public ShiftInsideFinalDesiredICPCalculator(YoVariableRegistry parentRegistry)
+   public ShiftInsideFinalDesiredICPCalculator(YoVariableRegistry parentRegistry, double extraX, double extraY)
    {
       parentRegistry.addChild(registry);
+      this.extraX = extraX;
+      this.extraY = extraY;
    }
 
    public FramePoint2d getFinalDesiredICPForWalking(TransferToAndNextFootstepsData transferToAndNextFootstepsData)
@@ -52,8 +56,7 @@ public class ShiftInsideFinalDesiredICPCalculator implements FinalDesiredICPCalc
 
       FramePoint pointOffsetFromCentroid = new FramePoint(centroid);
 
-      double extraX = 0.0;    // 0.02
-      double extraY = transferToSide.negateIfLeftSide(0.04);
+      double extraY = transferToSide.negateIfLeftSide(this.extraY);
       FrameVector offset = new FrameVector(null, extraX, extraY, 0.0);
       offset.changeFrameUsingTransform(worldFrame, footstepAnkleToWorldTransform);
 

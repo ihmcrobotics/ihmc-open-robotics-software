@@ -79,7 +79,7 @@ public class VaryingStairDesiredFootstepCalculator extends SimpleWorldDesiredFoo
       footstepOrientations.get(swingLegSide).setYawPitchRoll(swingFootYaw, swingFootPitch, swingFootRoll);
       Matrix3d footToWorldRotation = new Matrix3d();
       footstepOrientations.get(swingLegSide).getMatrix3d(footToWorldRotation);
-      double swingMinZWithRespectToAnkle = DesiredFootstepCalculatorTools.computeMinZWithRespectToAnkleInWorldFrame(footToWorldRotation,
+      double swingMinZWithRespectToAnkle = DesiredFootstepCalculatorTools.computeMinZPointWithRespectToAnkleInWorldFrame(footToWorldRotation,
                                               bipedFeet.get(swingLegSide));
       double swingMaxXWithRespectToAnkle = DesiredFootstepCalculatorTools.computeMaxXWithRespectToAnkleInFrame(footToWorldRotation,
                                               bipedFeet.get(swingLegSide), desiredHeadingControlModule.getDesiredHeadingFrame());

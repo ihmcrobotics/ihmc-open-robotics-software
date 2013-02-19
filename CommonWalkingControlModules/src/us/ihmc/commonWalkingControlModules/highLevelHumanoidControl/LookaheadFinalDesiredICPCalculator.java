@@ -35,7 +35,7 @@ public class LookaheadFinalDesiredICPCalculator implements FinalDesiredICPCalcul
    
    private final YoFrameConvexPolygon2d transferToPolygon, nextStepPolygon, nextNextStepPolygon;
       
-   private final ShiftInsideFinalDesiredICPCalculator shiftInsideFinalDesiredICPCalculator = new ShiftInsideFinalDesiredICPCalculator(registry);
+   private final ShiftInsideFinalDesiredICPCalculator shiftInsideFinalDesiredICPCalculator = new ShiftInsideFinalDesiredICPCalculator(registry, 0.0, 0.04);
    
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 

@@ -68,7 +68,7 @@ public class SimpleWorldDesiredFootstepCalculator extends AbstractAdjustableDesi
 
       Matrix3d footToWorldRotation = new Matrix3d();
       footstepOrientations.get(supportLegSide).getMatrix3d(footToWorldRotation);
-      double stanceMinZWithRespectToAnkle = DesiredFootstepCalculatorTools.computeMinZWithRespectToAnkleInWorldFrame(footToWorldRotation,
+      double stanceMinZWithRespectToAnkle = DesiredFootstepCalculatorTools.computeMinZPointWithRespectToAnkleInWorldFrame(footToWorldRotation,
                                                bipedFeet.get(supportLegSide));
       double maxStanceX = DesiredFootstepCalculatorTools.computeMaxXWithRespectToAnkleInFrame(footToWorldRotation,
                              bipedFeet.get(supportLegSide), desiredHeadingControlModule.getDesiredHeadingFrame());
@@ -79,7 +79,7 @@ public class SimpleWorldDesiredFootstepCalculator extends AbstractAdjustableDesi
       double swingFootRoll = stepRoll.getDoubleValue();
       footstepOrientations.get(swingLegSide).setYawPitchRoll(swingFootYaw, swingFootPitch, swingFootRoll);
       footstepOrientations.get(swingLegSide).getMatrix3d(footToWorldRotation);
-      double swingMinZWithRespectToAnkle = DesiredFootstepCalculatorTools.computeMinZWithRespectToAnkleInWorldFrame(footToWorldRotation,
+      double swingMinZWithRespectToAnkle = DesiredFootstepCalculatorTools.computeMinZPointWithRespectToAnkleInWorldFrame(footToWorldRotation,
                                               bipedFeet.get(swingLegSide));
       double maxSwingX = DesiredFootstepCalculatorTools.computeMaxXWithRespectToAnkleInFrame(footToWorldRotation, bipedFeet.get(swingLegSide),
                             desiredHeadingControlModule.getDesiredHeadingFrame());

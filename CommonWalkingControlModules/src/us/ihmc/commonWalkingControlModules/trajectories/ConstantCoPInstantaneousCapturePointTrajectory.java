@@ -78,36 +78,27 @@ public class ConstantCoPInstantaneousCapturePointTrajectory implements Instantan
 
    public void pack(FramePoint2d desiredPosition, FrameVector2d desiredVelocity, double omega0)
    {
-//    double currentTime = isDone() ? moveTime.getDoubleValue() : this.currentTime.getDoubleValue();
-//      if (moveTime.getDoubleValue() > 0.0)
-//      {
-         double currentTime = this.currentTime.getDoubleValue();
+      double currentTime = this.currentTime.getDoubleValue();
 
-         double expT = Math.exp(omega0 * currentTime);
-         double expTf = Math.exp(omega0 * moveTime.getDoubleValue());
-         double parameter = (expT - 1.0) / (expTf - 1.0);
-         double parameterd = omega0 * expT / (expTf - 1.0);
+      double expT = Math.exp(omega0 * currentTime);
+      double expTf = Math.exp(omega0 * moveTime.getDoubleValue());
+      double parameter = (expT - 1.0) / (expTf - 1.0);
+      double parameterd = omega0 * expT / (expTf - 1.0);
 
-         FrameVector2d initialToFinal = new FrameVector2d(finalDesiredICP.getFramePoint2dCopy());
-         initialToFinal.sub(initialDesiredICP.getFramePoint2dCopy());
+      FrameVector2d initialToFinal = new FrameVector2d(finalDesiredICP.getFramePoint2dCopy());
+      initialToFinal.sub(initialDesiredICP.getFramePoint2dCopy());
 
-         FrameVector2d offset = new FrameVector2d(initialToFinal);
-         offset.scale(parameter);
-         FramePoint2d desiredICPLocal = initialDesiredICP.getFramePoint2dCopy();
-         desiredICPLocal.add(offset);
-         desiredICPLocal.changeFrame(desiredPosition.getReferenceFrame());
-         desiredPosition.set(desiredICPLocal);
+      FrameVector2d offset = new FrameVector2d(initialToFinal);
+      offset.scale(parameter);
+      FramePoint2d desiredICPLocal = initialDesiredICP.getFramePoint2dCopy();
+      desiredICPLocal.add(offset);
+      desiredICPLocal.changeFrame(desiredPosition.getReferenceFrame());
+      desiredPosition.set(desiredICPLocal);
 
-         FrameVector2d desiredICPVelocityLocal = new FrameVector2d(initialToFinal);
-         desiredICPVelocityLocal.scale(parameterd);
-         desiredICPVelocityLocal.changeFrame(desiredVelocity.getReferenceFrame());
-         desiredVelocity.set(desiredICPVelocityLocal);
-//      }
-//      else
-//      {
-//         finalDesiredICP.getFramePoint2dAndChangeFrame(desiredPosition);
-//         desiredVelocity.set(finalDesiredICP.getReferenceFrame(), 0.0, 0.0);
-//      }
+      FrameVector2d desiredICPVelocityLocal = new FrameVector2d(initialToFinal);
+      desiredICPVelocityLocal.scale(parameterd);
+      desiredICPVelocityLocal.changeFrame(desiredVelocity.getReferenceFrame());
+      desiredVelocity.set(desiredICPVelocityLocal);
 
       this.currentTime.add(deltaT);
    }
