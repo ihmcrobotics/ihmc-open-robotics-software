@@ -77,4 +77,6 @@ public class DRCConfigParameters
 
    public static final double GRID_RESOLUTION = 0.01;// 1 centimeter resolution
 
+   public static final double LIDAR_BLINDNESS_CYLINDAR_SQUARED_RADIUS = 0.3;
+
 }
