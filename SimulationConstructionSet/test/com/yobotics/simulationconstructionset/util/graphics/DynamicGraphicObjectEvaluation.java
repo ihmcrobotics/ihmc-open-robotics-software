@@ -22,13 +22,45 @@ public class DynamicGraphicObjectEvaluation
 {
    public static void main(String[] args)
    {
-      Graphics3DAdapter jmeGraphics3dAdapter = new JMEGraphics3dAdapter();
+      debugPolygonStuff();
+      
+//      Graphics3DAdapter jmeGraphics3dAdapter = new JMEGraphics3dAdapter();
 
 //    Graphics3DAdapter java3DGraphicsAdapter = new Java3DGraphicsAdapter();
 
-      evaluate(jmeGraphics3dAdapter);
+//      evaluate(jmeGraphics3dAdapter);
 
 //    evaluate(java3DGraphicsAdapter);
+   }
+   
+   public static void debugPolygonStuff()
+   {
+      SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("Debug"));
+      ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+      int maxNumberOfVertices = 6;
+      YoVariableRegistry registry = new YoVariableRegistry("Debug");
+
+      YoFrameConvexPolygon2d transferToPolygon = new YoFrameConvexPolygon2d("transferToPolygon", "", worldFrame, maxNumberOfVertices , registry);
+      
+      double[][] pointList = new double[][]{{0.0, 0.0}, {0.0, 1.0}, {1.0, 1.0}, {1.0, 0.0}};
+      ConvexPolygon2d convexPolygon = new ConvexPolygon2d(pointList);
+      transferToPolygon.setConvexPolygon2d(convexPolygon);
+      
+      double polygonVizScale = 1.0;
+      DynamicGraphicYoFramePolygon transferToPolygonViz = new DynamicGraphicYoFramePolygon("transferToPolygon", transferToPolygon, "transferToPolygon", "", registry, polygonVizScale, YoAppearance.Bisque());
+      transferToPolygonViz.setPosition(0.0, 0.0, 0.1);
+      
+      DynamicGraphicObjectsList dynamicGraphicObjectsList = new DynamicGraphicObjectsList("FinalDesiredICPCalculator");
+
+      dynamicGraphicObjectsList.add(transferToPolygonViz);
+
+      DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
+      dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectsList);
+      
+      dynamicGraphicObjectsListRegistry.addDynamicGraphicsObjectListsToSimulationConstructionSet(scs);
+      
+      scs.startOnAThread();
+
    }
 
    public static void evaluate(Graphics3DAdapter graphicsAdapter)

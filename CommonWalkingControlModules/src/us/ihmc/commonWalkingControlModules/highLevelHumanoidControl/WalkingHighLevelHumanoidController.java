@@ -126,7 +126,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 
    private final DoubleYoVariable singleSupportICPGlideScaleFactor = new DoubleYoVariable("singleSupportICPGlideScaleFactor", registry);
 
-   private final LookaheadFinalDesiredICPCalculator lookaheadFinalDesiredICPCalculator;
+   private final FinalDesiredICPCalculator finalDesiredICPCalculator;
 
    protected final SideDependentList<FootSwitchInterface> footSwitches;
 
@@ -204,13 +204,13 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
            DoubleProvider swingTimeProvider, YoPositionProvider finalPositionProvider, boolean stayOntoes, double desiredPelvisPitch, double trailingFootPitch,
            ArrayList<Updatable> updatables, ProcessedOutputsInterface processedOutputs, WalkingControllerParameters walkingControllerParameters,
            ICPBasedMomentumRateOfChangeControlModule momentumRateOfChangeControlModule, RootJointAccelerationControlModule rootJointAccelerationControlModule,
-           ControlFlowInputPort<OrientationTrajectoryData> desiredPelvisOrientationTrajectoryInputPort, OneDoFJoint lidarJoint)
+           ControlFlowInputPort<OrientationTrajectoryData> desiredPelvisOrientationTrajectoryInputPort, OneDoFJoint lidarJoint, FinalDesiredICPCalculator finalDesiredICPCalculator)
    {
       super(fullRobotModel, centerOfMassJacobian, referenceFrames, yoTime, gravityZ, twistCalculator, bipedFeet, bipedSupportPolygons, controlDT,
             processedOutputs, groundReactionWrenchDistributor, updatables, momentumRateOfChangeControlModule, rootJointAccelerationControlModule,
             walkingControllerParameters.getGroundReactionWrenchBreakFrequencyHertz(), dynamicGraphicObjectsListRegistry);
 
-      this.lookaheadFinalDesiredICPCalculator = new LookaheadFinalDesiredICPCalculator(registry, dynamicGraphicObjectsListRegistry);
+      this.finalDesiredICPCalculator = finalDesiredICPCalculator;
       this.icpBasedMomentumRateOfChangeControlModule = momentumRateOfChangeControlModule;
       this.desiredPelvisOrientationTrajectoryInputPort = desiredPelvisOrientationTrajectoryInputPort;
       this.centerOfMassJacobian = centerOfMassJacobian;
@@ -660,7 +660,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
             transferToAndNextFootstepsData.setNextFootstep(nextFootstep);
             transferToAndNextFootstepsData.setNextNextFootstep(nextNextFootstep);
 
-            finalDesiredICP = lookaheadFinalDesiredICPCalculator.getDoubleSupportFinalDesiredICPForWalking(transferToAndNextFootstepsData);
+            finalDesiredICP = finalDesiredICPCalculator.getDoubleSupportFinalDesiredICPForWalking(transferToAndNextFootstepsData);
          }
 
          finalDesiredICP.changeFrame(desiredICP.getReferenceFrame());
@@ -957,7 +957,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       transferToAndNextFootstepsData.setNextFootstep(footstepAfterThisOne);
       transferToAndNextFootstepsData.setNextNextFootstep(null);
 
-      FramePoint2d finalDesiredICP = lookaheadFinalDesiredICPCalculator.getDoubleSupportFinalDesiredICPForWalking(transferToAndNextFootstepsData);
+      FramePoint2d finalDesiredICP = finalDesiredICPCalculator.getDoubleSupportFinalDesiredICPForWalking(transferToAndNextFootstepsData);
 
       finalDesiredICP.changeFrame(referenceFrame);
 
