@@ -135,7 +135,7 @@ public abstract class ICPAndMomentumBasedController extends MomentumBasedControl
          List<FramePoint2d> cops = new ArrayList<FramePoint2d>();
          for (ContactablePlaneBody foot : bipedFeet.values())
          {
-            cops.add(centersOfPressure2d.get(foot).getFramePoint2dCopy());
+            cops.add(getCoP(foot));
          }
 
          SpatialForceVector admissibleGroundReactionWrench = new SpatialForceVector(centerOfMassFrame);
