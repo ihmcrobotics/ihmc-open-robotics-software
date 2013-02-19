@@ -26,6 +26,9 @@ public class LookaheadFinalDesiredICPCalculator implements FinalDesiredICPCalcul
    
    private final EnumYoVariable<DesiredICPCalculatorMethod> desiredICPCalculatorMethod = new EnumYoVariable<DesiredICPCalculatorMethod>("desiredICPCalculatorMethod", registry, DesiredICPCalculatorMethod.class);
    private final DoubleYoVariable icpDistanceAlongCentroidSegment = new DoubleYoVariable("icpDistanceAlongCentroidSegment", registry);
+   private final DoubleYoVariable w0ForICPGenerator = new DoubleYoVariable("w0ForICPGenerator", registry);
+   private final DoubleYoVariable estimatedStepTimeForICPGenerator = new DoubleYoVariable("estimatedStepTimeForICPGenerator", registry);
+   private final DoubleYoVariable scaleFactorForICPGenerator = new DoubleYoVariable("scaleFactorForICPGenerator", registry);
    
    private final DynamicGraphicPosition finalDesiredICPGraphicPosition;
    private final DynamicGraphicCoordinateSystem transferToCoordinateSystem, nextStepCoordinateSystem, nextNextStepCoordinateSystem;
@@ -180,8 +183,11 @@ public class LookaheadFinalDesiredICPCalculator implements FinalDesiredICPCalcul
       
       double sf = vectorFromTransferToNext.length();
       double w0 = transferToAndNextFootstepsData.getW0();
+      w0ForICPGenerator.set(w0);
       double estimatedStepTime = transferToAndNextFootstepsData.getEstimatedStepTime();
-      double s0 = sf / (Math.exp(w0) * estimatedStepTime);
+      estimatedStepTimeForICPGenerator.set(estimatedStepTime);
+      double s0 = sf / (Math.exp(w0 * estimatedStepTime));
+      scaleFactorForICPGenerator.set(s0);
       
       vectorFromTransferToNext.normalize();
       vectorFromTransferToNext.scale(s0);
