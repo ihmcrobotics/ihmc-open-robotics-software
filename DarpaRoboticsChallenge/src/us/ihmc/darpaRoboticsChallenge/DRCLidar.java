@@ -2,7 +2,6 @@ package us.ihmc.darpaRoboticsChallenge;
 
 import java.util.ArrayList;
 
-
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
 import us.ihmc.utilities.polarLidarGeometry.LIDARScanDefinition;
