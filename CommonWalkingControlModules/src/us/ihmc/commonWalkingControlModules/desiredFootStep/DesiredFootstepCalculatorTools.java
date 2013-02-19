@@ -16,7 +16,7 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 public class DesiredFootstepCalculatorTools
 {
-      public static double computeMinZWithRespectToAnkleInWorldFrame(Matrix3d footToWorldRotation, ContactablePlaneBody contactableBody)
+   public static double computeMinZPointWithRespectToAnkleInWorldFrame(Matrix3d footToWorldRotation, ContactablePlaneBody contactableBody)
    {
       List<FramePoint> footPoints = contactableBody.getContactPoints();
       double minZ = Double.POSITIVE_INFINITY;
@@ -33,6 +33,29 @@ public class DesiredFootstepCalculatorTools
       }
 
       return minZ;
+   }
+
+   public static FramePoint computeMinZWithRespectToAnkleInWorldFramePoint(Matrix3d footToWorldRotation, ContactablePlaneBody contactableBody)
+   {
+      List<FramePoint> footPoints = contactableBody.getContactPoints();
+      double minZ = Double.POSITIVE_INFINITY;
+      FramePoint tempFramePoint = new FramePoint(ReferenceFrame.getWorldFrame());
+      FramePoint minZPoint = new FramePoint(ReferenceFrame.getWorldFrame());
+      Vector3d tempVector = new Vector3d();
+      for (FramePoint footPoint : footPoints)
+      {
+         tempFramePoint.setAndChangeFrame(footPoint);
+         tempFramePoint.changeFrame(contactableBody.getBodyFrame());
+         tempVector.set(tempFramePoint.getPoint());
+         footToWorldRotation.transform(tempVector);
+         if (tempVector.getZ() < minZ)
+         {
+            minZPoint.setAndChangeFrame(tempFramePoint);
+            minZ = tempVector.getZ();
+         }
+      }
+
+      return minZPoint;
    }
 
    public static double computeMaxXWithRespectToAnkleInFrame(Matrix3d footToWorldRotation, ContactablePlaneBody contactableBody, ReferenceFrame frame)
