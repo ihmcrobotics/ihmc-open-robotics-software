@@ -72,7 +72,9 @@ public class DRCConfigParameters
    public static final float LIDAR_SCAN_MAX_PITCH = 0.2f; // tilting the lidar down towards the ground
 
    public static final float LDIAR_SCAN_MIN_PITCH = -0.1f;
+   
+   public static final int KERNAL_SIZE = 34; // 34 centimeters square
 
-   public static final double GRID_RESOLUTION = 0.05;// 5 centimeter resolution
+   public static final double GRID_RESOLUTION = 0.01;// 1 centimeter resolution
 
 }
