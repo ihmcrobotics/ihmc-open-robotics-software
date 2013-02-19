@@ -1,17 +1,10 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl;
 
-import javax.media.j3d.Transform3D;
-
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepUtils;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
-import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
-import us.ihmc.utilities.math.geometry.FramePose;
-import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
@@ -39,6 +32,8 @@ public class LookaheadFinalDesiredICPCalculator implements FinalDesiredICPCalcul
    
    private final YoFrameConvexPolygon2d transferToPolygon, nextStepPolygon, nextNextStepPolygon;
       
+   private final ShiftInsideFinalDesiredICPCalculator shiftInsideFinalDesiredICPCalculator = new ShiftInsideFinalDesiredICPCalculator(registry);
+   
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    public LookaheadFinalDesiredICPCalculator(YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
@@ -98,23 +93,23 @@ public class LookaheadFinalDesiredICPCalculator implements FinalDesiredICPCalcul
          finalDesiredICPGraphicPosition = null;
       }
 
-      desiredICPCalculatorMethod.set(DesiredICPCalculatorMethod.STANDARD);
+      desiredICPCalculatorMethod.set(DesiredICPCalculatorMethod.SHIFT_INSIDE);
       icpDistanceAlongCentroidSegment.set(0.04);
       
       parentRegistry.addChild(registry);
    }
    
-   public FramePoint2d getDoubleSupportFinalDesiredICPForWalking(TransferToAndNextFootstepsData transferToAndNextFootstepsData)
+   public FramePoint2d getFinalDesiredICPForWalking(TransferToAndNextFootstepsData transferToAndNextFootstepsData)
    {
       switch (desiredICPCalculatorMethod.getEnumValue())
       {
-      case STANDARD:
+      case SHIFT_INSIDE:
       {
-         return getDoubleSupportFinalDesiredICPForWalkingStandard(transferToAndNextFootstepsData);
+         return shiftInsideFinalDesiredICPCalculator.getFinalDesiredICPForWalking(transferToAndNextFootstepsData);
       }
-      case NEW:
+      case CENTROID_TO_CENTROID:
       {
-         return getDoubleSupportFinalDesiredICPForWalkingNew(transferToAndNextFootstepsData);
+         return getFinalDesiredICPCentroidToCentroid(transferToAndNextFootstepsData);
       }
       default:
       {
@@ -123,46 +118,7 @@ public class LookaheadFinalDesiredICPCalculator implements FinalDesiredICPCalcul
       }
    }
    
-   public FramePoint2d getDoubleSupportFinalDesiredICPForWalkingStandard(TransferToAndNextFootstepsData transferToAndNextFootstepsData)
-   {
-      visualizeFootsteps(transferToAndNextFootstepsData);
-      
-      Footstep transferToFootstep = transferToAndNextFootstepsData.getTransferToFootstep();
-      
-      FramePose transferToFootstepAnklePose = transferToFootstep.getPoseCopy();
-      ContactablePlaneBody transferToFootContactablePlaneBody = transferToAndNextFootstepsData.getTransferToFootContactablePlaneBody();
-      FrameConvexPolygon2d transferToFootPolygonInSoleFrame = transferToAndNextFootstepsData.getTransferToFootPolygonInSoleFrame();
-      RobotSide transferToSide = transferToAndNextFootstepsData.getTransferToSide();
-            
-      Transform3D footstepAnkleToWorldTransform = new Transform3D();
-      getTransformFromPoseToWorld(footstepAnkleToWorldTransform, transferToFootstepAnklePose);
-      
-      Transform3D ankleToSoleTransform = FootstepUtils.getAnkleToSoleTransform(transferToFootContactablePlaneBody);
-      ankleToSoleTransform.invert();
-      
-      FramePoint2d centroid2d = transferToFootPolygonInSoleFrame.getCentroidCopy();
-      FramePoint centroid = centroid2d.toFramePoint();      
-      centroid.changeFrameUsingTransform(null, ankleToSoleTransform);
-      centroid.changeFrameUsingTransform(worldFrame, footstepAnkleToWorldTransform);
-      
-      FramePoint pointOffsetFromCentroid = new FramePoint(centroid);
-
-      double extraX = 0.0;    // 0.02
-      double extraY = transferToSide.negateIfLeftSide(0.04);
-      FrameVector offset = new FrameVector(null, extraX, extraY, 0.0);
-      offset.changeFrameUsingTransform(worldFrame, footstepAnkleToWorldTransform);
-
-      pointOffsetFromCentroid.changeFrame(offset.getReferenceFrame());
-      pointOffsetFromCentroid.add(offset);
-
-      visualizeFinalDesiredICP(pointOffsetFromCentroid);
-      
-      FramePoint2d ret = pointOffsetFromCentroid.toFramePoint2d();
-      return ret;
-   }
-
-   
-   public FramePoint2d getDoubleSupportFinalDesiredICPForWalkingNew(TransferToAndNextFootstepsData transferToAndNextFootstepsData)
+   private FramePoint2d getFinalDesiredICPCentroidToCentroid(TransferToAndNextFootstepsData transferToAndNextFootstepsData)
    {
       visualizeFootsteps(transferToAndNextFootstepsData);
 
@@ -193,15 +149,6 @@ public class LookaheadFinalDesiredICPCalculator implements FinalDesiredICPCalcul
       visualizeFinalDesiredICP(finalDesiredICP);
       
       return finalDesiredICP;  
-   }
-
-   private void visualizeFinalDesiredICP(FramePoint finalDesiredICP)
-   {
-      if (VISUALIZE)
-      {
-         finalDesiredICPGraphicPosition.setPosition(finalDesiredICP.changeFrameCopy(worldFrame));
-      }
-
    }
    
    private void visualizeFinalDesiredICP(FramePoint2d finalDesiredICP)
@@ -234,15 +181,9 @@ public class LookaheadFinalDesiredICPCalculator implements FinalDesiredICPCalcul
       }
    }
    
-   private static void getTransformFromPoseToWorld(Transform3D poseToWorldTransformToPack, FramePose framePose)
-   {
-      ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-      framePose.changeFrame(worldFrame);
-      framePose.getTransformFromPoseToFrame(poseToWorldTransformToPack);
-   }
 
    private static enum DesiredICPCalculatorMethod
    {
-         STANDARD, NEW;
+         SHIFT_INSIDE, CENTROID_TO_CENTROID;
    }
 }
