@@ -597,7 +597,6 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
                   transferToAndNextFootstepsData.setTransferToSide(transferToSide);
                   transferToAndNextFootstepsData.setNextFootstep(nextFootstep);
                   transferToAndNextFootstepsData.setNextNextFootstep(nextNextFootstep);
-                  //TODO: use real values for w0 and estimatedStepTime:
                   transferToAndNextFootstepsData.setEstimatedStepTime(swingTimeProvider.getValue() + doubleSupportTimeProvider.getValue());
                   transferToAndNextFootstepsData.setW0(getOmega0());
 
