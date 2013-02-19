@@ -1,7 +1,7 @@
 package us.ihmc.graphics3DAdapter.graphics.instructions;
 
-import us.ihmc.graphics3DAdapter.graphics.AppearanceChangedListener;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
+import us.ihmc.graphics3DAdapter.graphics.instructions.listeners.AppearanceChangedListener;
 
 public abstract class Graphics3DInstruction implements Graphics3DPrimitiveInstruction
 {

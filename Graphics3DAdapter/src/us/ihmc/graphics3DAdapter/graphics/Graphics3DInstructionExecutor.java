@@ -5,12 +5,12 @@ import java.util.ArrayList;
 import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DAddHeightMapInstruction;
 import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DAddMeshDataInstruction;
 import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DAddModelFileInstruction;
-import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DAddTextInstruction;
-import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DIdentityInstruction;
+import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DAddExtusionInstruction;
 import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DPrimitiveInstruction;
-import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DRotateInstruction;
-import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DScaleInstruction;
-import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DTranslateInstruction;
+import us.ihmc.graphics3DAdapter.graphics.instructions.primitives.Graphics3DIdentityInstruction;
+import us.ihmc.graphics3DAdapter.graphics.instructions.primitives.Graphics3DRotateInstruction;
+import us.ihmc.graphics3DAdapter.graphics.instructions.primitives.Graphics3DScaleInstruction;
+import us.ihmc.graphics3DAdapter.graphics.instructions.primitives.Graphics3DTranslateInstruction;
 
 
 
@@ -56,10 +56,10 @@ public abstract class Graphics3DInstructionExecutor
             Graphics3DTranslateInstruction graphics3DTranslate = (Graphics3DTranslateInstruction) instruction;
             doTranslateInstruction(graphics3DTranslate);
          }
-         else if (instruction instanceof Graphics3DAddTextInstruction)
+         else if (instruction instanceof Graphics3DAddExtusionInstruction)
          {
-            Graphics3DAddTextInstruction graphics3DAddText = (Graphics3DAddTextInstruction) instruction;
-            doAddTextInstruction(graphics3DAddText);
+            Graphics3DAddExtusionInstruction graphics3DAddExtrusion = (Graphics3DAddExtusionInstruction) instruction;
+            doAddExtrusionInstruction(graphics3DAddExtrusion);
          }
          else if (instruction instanceof Graphics3DAddHeightMapInstruction)
          {
@@ -79,7 +79,7 @@ public abstract class Graphics3DInstructionExecutor
 
    protected abstract void doAddHeightMapInstruction(Graphics3DAddHeightMapInstruction graphics3DAddHeightMap);
 
-   protected abstract void doAddTextInstruction(Graphics3DAddTextInstruction graphics3DAddText);
+   protected abstract void doAddExtrusionInstruction(Graphics3DAddExtusionInstruction graphics3DAddText);
 
    protected abstract void doAddModelFileInstruction(Graphics3DAddModelFileInstruction graphics3DAddModelFile);
 

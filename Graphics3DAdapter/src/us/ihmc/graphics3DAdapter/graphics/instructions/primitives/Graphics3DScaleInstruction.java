@@ -1,8 +1,9 @@
-package us.ihmc.graphics3DAdapter.graphics.instructions;
+package us.ihmc.graphics3DAdapter.graphics.instructions.primitives;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.graphics3DAdapter.graphics.ScaleChangedListener;
+import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DPrimitiveInstruction;
+import us.ihmc.graphics3DAdapter.graphics.instructions.listeners.ScaleChangedListener;
 
 public class Graphics3DScaleInstruction implements Graphics3DPrimitiveInstruction
 {
