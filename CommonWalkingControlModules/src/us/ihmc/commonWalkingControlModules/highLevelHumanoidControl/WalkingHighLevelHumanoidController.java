@@ -660,8 +660,8 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
             transferToAndNextFootstepsData.setNextFootstep(nextFootstep);
             transferToAndNextFootstepsData.setNextNextFootstep(nextNextFootstep);
             //TODO: use real values for w0 and estimatedStepTime:
-            transferToAndNextFootstepsData.setEstimatedStepTime(0.3);
-            transferToAndNextFootstepsData.setW0(3.0);
+            transferToAndNextFootstepsData.setEstimatedStepTime(swingTimeProvider.getValue() + doubleSupportTimeProvider.getValue());
+            transferToAndNextFootstepsData.setW0(getOmega0());
 
             finalDesiredICP = finalDesiredICPCalculator.getFinalDesiredICPForWalking(transferToAndNextFootstepsData);
          }
@@ -960,8 +960,8 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       transferToAndNextFootstepsData.setNextFootstep(footstepAfterThisOne);
       transferToAndNextFootstepsData.setNextNextFootstep(null);
       //TODO: use real values for w0 and estimatedStepTime:
-      transferToAndNextFootstepsData.setEstimatedStepTime(0.3);
-      transferToAndNextFootstepsData.setW0(3.0);
+      transferToAndNextFootstepsData.setEstimatedStepTime(swingTimeProvider.getValue() + doubleSupportTimeProvider.getValue());
+      transferToAndNextFootstepsData.setW0(getOmega0());
 
       FramePoint2d finalDesiredICP = finalDesiredICPCalculator.getFinalDesiredICPForWalking(transferToAndNextFootstepsData);
 
