@@ -1,5 +1,6 @@
 package us.ihmc.graphics3DAdapter.graphics;
 
+import java.awt.image.BufferedImage;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,16 +15,16 @@ import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
 import us.ihmc.graphics3DAdapter.HeightMap;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DAddExtusionInstruction;
 import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DAddHeightMapInstruction;
 import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DAddMeshDataInstruction;
 import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DAddModelFileInstruction;
-import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DAddTextInstruction;
-import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DIdentityInstruction;
 import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DInstruction;
 import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DPrimitiveInstruction;
-import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DRotateInstruction;
-import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DScaleInstruction;
-import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DTranslateInstruction;
+import us.ihmc.graphics3DAdapter.graphics.instructions.primitives.Graphics3DIdentityInstruction;
+import us.ihmc.graphics3DAdapter.graphics.instructions.primitives.Graphics3DRotateInstruction;
+import us.ihmc.graphics3DAdapter.graphics.instructions.primitives.Graphics3DScaleInstruction;
+import us.ihmc.graphics3DAdapter.graphics.instructions.primitives.Graphics3DTranslateInstruction;
 import us.ihmc.graphics3DAdapter.input.ModifierKeyInterface;
 import us.ihmc.graphics3DAdapter.input.SelectedListener;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
@@ -37,7 +38,7 @@ public class Graphics3DObject
       X, Y, Z
    }
    
-   private static final int RESOLUTION = 15;
+   private static final int RESOLUTION = 25;
    
    public static final Axis X = Axis.X;
    public static final Axis Y = Axis.Y;
@@ -46,6 +47,8 @@ public class Graphics3DObject
    private ArrayList<Graphics3DPrimitiveInstruction> graphics3DInstructions;
    
    private final ArrayList<SelectedListener> selectedListeners = new ArrayList<SelectedListener>();
+   
+   private boolean changeable = false;
 
    public Graphics3DObject(ArrayList<Graphics3DPrimitiveInstruction> graphics3DInstructions)
    {
@@ -884,10 +887,25 @@ public class Graphics3DObject
       
       return addMeshData(meshData, appearance);
    }
-
-   public Graphics3DAddTextInstruction addText(String text, AppearanceDefinition yoAppearance)
+   
+   /**
+    * Create an extrusion of a BufferedImage. Black pixels of the image are extruded. 
+    * A pixel is considered black when (red+green+blue)/3 < 60
+    * 
+    * @param bufferedImageToExtrude    BufferedImage to extrude
+    * @param thickness Thinkness of extrusion
+    * @param appearance Appearance
+    */
+   public Graphics3DAddExtusionInstruction addExtrusion(BufferedImage bufferedImageToExtrude, double thickness, AppearanceDefinition appearance)
    {
-      Graphics3DAddTextInstruction instruction = new Graphics3DAddTextInstruction(text, yoAppearance);
+      Graphics3DAddExtusionInstruction instruction = new Graphics3DAddExtusionInstruction(bufferedImageToExtrude, thickness, appearance);
+      graphics3DInstructions.add(instruction);
+      return instruction;
+   }
+   
+   public Graphics3DAddExtusionInstruction addText(String text, double thickness, AppearanceDefinition yoAppearance)
+   {
+      Graphics3DAddExtusionInstruction instruction = new Graphics3DAddExtusionInstruction(text, thickness, yoAppearance);
       graphics3DInstructions.add(instruction);
       return instruction;
    }
@@ -925,6 +943,16 @@ public class Graphics3DObject
    public void registerSelectedListener(SelectedListener selectedListener)
    {
       selectedListeners.add(selectedListener);
+   }
+
+   public boolean isChangeable()
+   {
+      return changeable;
+   }
+
+   public void setChangeable(boolean changeable)
+   {
+      this.changeable = changeable;
    }
 }
 

@@ -2,10 +2,12 @@ package us.ihmc.graphics3DAdapter.graphics.instructions;
 
 import us.ihmc.graphics3DAdapter.graphics.MeshDataHolder;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
+import us.ihmc.graphics3DAdapter.graphics.instructions.listeners.MeshChangedListener;
 
 public class Graphics3DAddMeshDataInstruction extends Graphics3DInstruction
 {
-   private final MeshDataHolder meshData;
+   private MeshDataHolder meshData;
+   private MeshChangedListener meshChangedListener;
    
    public Graphics3DAddMeshDataInstruction(MeshDataHolder meshData, AppearanceDefinition appearance)
    {
@@ -18,14 +20,18 @@ public class Graphics3DAddMeshDataInstruction extends Graphics3DInstruction
       return meshData;
    }
 
-   public String toString()
+   public void setMeshChangedListener(MeshChangedListener meshChangedListener)
    {
-    String ret = "\t\t\t<AddMeshData>\n";
-    ret += "\t\t\t\t<MeshData>"+ meshData +"</MeshData>\n";
-    if (getAppearance() != null)
-       ret += getAppearance().toString();
-    ret += "\t\t\t</AddMeshData>\n";
-    return ret;
+      this.meshChangedListener = meshChangedListener;
+   }
+   
+   public void setMesh(MeshDataHolder newMesh)
+   {
+      this.meshData = newMesh;
+      if(meshChangedListener != null)
+      {
+         meshChangedListener.meshChanged(newMesh);
+      }
    }
 }
 

@@ -1,6 +1,8 @@
-package us.ihmc.graphics3DAdapter.graphics.instructions;
+package us.ihmc.graphics3DAdapter.graphics.instructions.primitives;
 
 import javax.vecmath.Vector3d;
+
+import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DPrimitiveInstruction;
 
 public class Graphics3DTranslateInstruction implements Graphics3DPrimitiveInstruction
 {

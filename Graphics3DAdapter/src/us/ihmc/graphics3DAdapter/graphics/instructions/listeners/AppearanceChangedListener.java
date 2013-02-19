@@ -1,4 +1,4 @@
-package us.ihmc.graphics3DAdapter.graphics;
+package us.ihmc.graphics3DAdapter.graphics.instructions.listeners;
 
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 
