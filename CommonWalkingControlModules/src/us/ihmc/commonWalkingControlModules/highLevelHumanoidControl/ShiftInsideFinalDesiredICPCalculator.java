@@ -30,7 +30,7 @@ public class ShiftInsideFinalDesiredICPCalculator implements FinalDesiredICPCalc
       parentRegistry.addChild(registry);
    }
 
-   public FramePoint2d getDoubleSupportFinalDesiredICPForWalking(TransferToAndNextFootstepsData transferToAndNextFootstepsData)
+   public FramePoint2d getFinalDesiredICPForWalking(TransferToAndNextFootstepsData transferToAndNextFootstepsData)
    {
       Footstep transferToFootstep = transferToAndNextFootstepsData.getTransferToFootstep();
 
