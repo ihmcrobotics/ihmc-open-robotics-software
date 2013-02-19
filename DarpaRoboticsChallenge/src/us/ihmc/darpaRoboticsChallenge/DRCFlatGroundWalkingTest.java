@@ -149,7 +149,6 @@ public class DRCFlatGroundWalkingTest
 
       double standingTimeDuration = 1.0;
       double walkingTimeDuration = 89.0; // 90.0 TODO: com height failure at 91 seconds...
-      double epsilonHeading = Math.PI / 4.0;
 
       boolean useVelocityAndHeadingScript = true;
       boolean cheatWithGroundHeightAtForFootstep = true;

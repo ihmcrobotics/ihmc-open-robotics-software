@@ -1,7 +1,8 @@
 package us.ihmc.darpaRoboticsChallenge.controllers;
 
-import javax.swing.*;
 import java.util.ArrayList;
+
+import javax.swing.JMenuItem;
 
 public interface MenuItemGenerator
 {
