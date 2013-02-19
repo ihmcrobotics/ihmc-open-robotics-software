@@ -1122,7 +1122,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       for (ContactablePlaneBody contactablePlaneBody : endEffectorControlModules.keySet())
       {
          EndEffectorControlModule endEffectorControlModule = endEffectorControlModules.get(contactablePlaneBody);
-         FramePoint2d cop = centersOfPressure2d.get(contactablePlaneBody).getFramePoint2dCopy();
+         FramePoint2d cop = getCoP(contactablePlaneBody);
          endEffectorControlModule.setCenterOfPressure(cop);
       }
 

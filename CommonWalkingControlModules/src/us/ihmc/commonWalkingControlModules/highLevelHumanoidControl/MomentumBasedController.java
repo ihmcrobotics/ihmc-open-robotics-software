@@ -58,6 +58,7 @@ import com.yobotics.simulationconstructionset.robotController.RobotController;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition.GraphicType;
+import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoFramePoint2d;
 import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoFrameVector;
 import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoVariable;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
@@ -81,8 +82,10 @@ public abstract class MomentumBasedController implements RobotController
    protected final TwistCalculator twistCalculator;
    protected final SpatialAccelerationCalculator spatialAccelerationCalculator;
    protected final List<ContactablePlaneBody> contactablePlaneBodies;
-   protected final HashMap<ContactablePlaneBody, YoFramePoint> centersOfPressure = new HashMap<ContactablePlaneBody, YoFramePoint>();
-   protected final HashMap<ContactablePlaneBody, YoFramePoint2d> centersOfPressure2d = new HashMap<ContactablePlaneBody, YoFramePoint2d>();
+   protected final HashMap<ContactablePlaneBody, YoFramePoint> filteredCentersOfPressureWorld = new HashMap<ContactablePlaneBody, YoFramePoint>();
+   private final HashMap<ContactablePlaneBody, YoFramePoint2d> unfilteredCentersOfPressure2d = new HashMap<ContactablePlaneBody, YoFramePoint2d>();
+   private final HashMap<ContactablePlaneBody, AlphaFilteredYoFramePoint2d> filteredCentersOfPressure2d = new HashMap<ContactablePlaneBody, AlphaFilteredYoFramePoint2d>();
+   private final DoubleYoVariable alphaCoP = new DoubleYoVariable("alphaCoP", registry);
    protected final LinkedHashMap<ContactablePlaneBody, YoPlaneContactState> contactStates = new LinkedHashMap<ContactablePlaneBody, YoPlaneContactState>();
    protected final ArrayList<Updatable> updatables = new ArrayList<Updatable>();
    protected final DoubleYoVariable yoTime;
@@ -116,6 +119,7 @@ public abstract class MomentumBasedController implements RobotController
 
    protected final EnumYoVariable<RobotSide> upcomingSupportLeg; // FIXME: not general enough; this should not be here
 
+
    public MomentumBasedController(FullRobotModel fullRobotModel, CenterOfMassJacobian centerOfMassJacobian, CommonWalkingReferenceFrames referenceFrames,
          DoubleYoVariable yoTime, double gravityZ, TwistCalculator twistCalculator, Collection<? extends ContactablePlaneBody> contactablePlaneBodies,
          double controlDT, ProcessedOutputsInterface processedOutputs, GroundReactionWrenchDistributor groundReactionWrenchDistributor,
@@ -144,7 +148,6 @@ public abstract class MomentumBasedController implements RobotController
 
       this.processedOutputs = processedOutputs;
       this.inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, gravityZ);
-
 
       this.groundReactionWrenchDistributor = groundReactionWrenchDistributor;
 
@@ -175,11 +178,14 @@ public abstract class MomentumBasedController implements RobotController
          String copName = contactableBody.getRigidBody().getName() + "CoP";
          String listName = "cops";
 
-         YoFramePoint cop = new YoFramePoint(copName, worldFrame, registry);
-         centersOfPressure.put(contactableBody, cop);
-
          YoFramePoint2d cop2d = new YoFramePoint2d(copName + "2d", "", contactableBody.getPlaneFrame(), registry);
-         centersOfPressure2d.put(contactableBody, cop2d);
+         unfilteredCentersOfPressure2d.put(contactableBody, cop2d);
+
+         AlphaFilteredYoFramePoint2d filteredCoP2d = AlphaFilteredYoFramePoint2d.createAlphaFilteredYoFramePoint2d(copName + "2dFilt", "", registry, alphaCoP, cop2d);
+         filteredCentersOfPressure2d.put(contactableBody, filteredCoP2d);
+
+         YoFramePoint cop = new YoFramePoint(copName, worldFrame, registry);
+         filteredCentersOfPressureWorld.put(contactableBody, cop);
 
          if (dynamicGraphicObjectsListRegistry != null)
          {            
@@ -312,12 +318,17 @@ public abstract class MomentumBasedController implements RobotController
             FramePoint2d cop = distributedWrenches.getCenterOfPressure(contactState);
             double normalTorque = distributedWrenches.getNormalTorque(contactState);
 
-            centersOfPressure2d.get(contactablePlaneBody).set(cop);
+            unfilteredCentersOfPressure2d.get(contactablePlaneBody).set(cop);
+
+            AlphaFilteredYoFramePoint2d filteredCoP2d = filteredCentersOfPressure2d.get(contactablePlaneBody);
+            filteredCoP2d.update();
+            filteredCoP2d.getFramePoint2d(cop);
 
             cops.add(cop);
             FramePoint cop3d = cop.toFramePoint();
             cop3d.changeFrame(worldFrame);
-            centersOfPressure.get(contactablePlaneBody).set(cop3d);
+            filteredCentersOfPressureWorld.get(contactablePlaneBody).set(cop3d);
+
             Wrench groundReactionWrench = new Wrench(rigidBody.getBodyFixedFrame(), contactState.getPlaneFrame());
             WrenchDistributorTools.computeWrench(groundReactionWrench, force, cop, normalTorque);
             groundReactionWrench.changeFrame(rigidBody.getBodyFixedFrame());
@@ -326,7 +337,7 @@ public abstract class MomentumBasedController implements RobotController
          }
          else
          {
-            centersOfPressure.get(contactablePlaneBody).setToNaN();
+            filteredCentersOfPressureWorld.get(contactablePlaneBody).setToNaN();
          }
       }
 
@@ -439,4 +450,8 @@ public abstract class MomentumBasedController implements RobotController
       return getName();
    }
 
+   protected FramePoint2d getCoP(ContactablePlaneBody contactablePlaneBody)
+   {
+      return filteredCentersOfPressure2d.get(contactablePlaneBody).getFramePoint2dCopy();
+   }
 }

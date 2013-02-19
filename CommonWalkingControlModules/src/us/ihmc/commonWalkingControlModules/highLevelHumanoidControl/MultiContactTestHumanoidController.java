@@ -168,7 +168,7 @@ public class MultiContactTestHumanoidController extends MomentumBasedController
       {
          EndEffectorControlModule endEffectorControlModule = endEffectorControlModules.get(contactablePlaneBody);
          endEffectorControlModule.setContactPoints(contactStates.get(contactablePlaneBody).getContactPoints2d());
-         endEffectorControlModule.setCenterOfPressure(centersOfPressure2d.get(contactablePlaneBody).getFramePoint2dCopy());
+         endEffectorControlModule.setCenterOfPressure(getCoP(contactablePlaneBody));
          endEffectorControlModule.startComputation();
          endEffectorControlModule.waitUntilComputationIsDone();
          TaskspaceConstraintData taskspaceConstraintData = endEffectorControlModule.getTaskSpaceConstraintOutputPort().getData();
