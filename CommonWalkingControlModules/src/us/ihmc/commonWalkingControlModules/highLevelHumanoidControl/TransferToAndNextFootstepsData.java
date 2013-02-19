@@ -4,7 +4,6 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlane
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
-import us.ihmc.utilities.math.geometry.FramePose;
 
 public class TransferToAndNextFootstepsData
 {
@@ -15,6 +14,9 @@ public class TransferToAndNextFootstepsData
    
    private Footstep nextFootstep;
    private Footstep nextNextFootstep;
+
+   private double w0;
+   private double estimatedStepTime;
    
    public ContactablePlaneBody getTransferToFootContactablePlaneBody()
    {
@@ -71,4 +73,23 @@ public class TransferToAndNextFootstepsData
       this.nextNextFootstep = nextNextFootstep;
    }
    
+   public double getW0()
+   {
+      return w0;
+   }
+
+   public void setW0(double w0)
+   {
+      this.w0 = w0;
+   }
+
+   public double getEstimatedStepTime()
+   {
+      return estimatedStepTime;
+   }
+
+   public void setEstimatedStepTime(double estimatedStepTime)
+   {
+      this.estimatedStepTime = estimatedStepTime;
+   }
 }
