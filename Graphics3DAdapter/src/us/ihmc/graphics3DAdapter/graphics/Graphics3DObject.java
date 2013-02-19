@@ -885,9 +885,9 @@ public class Graphics3DObject
       return addMeshData(meshData, appearance);
    }
 
-   public Graphics3DInstruction addText(String text, AppearanceDefinition yoAppearance)
+   public Graphics3DAddTextInstruction addText(String text, AppearanceDefinition yoAppearance)
    {
-      Graphics3DInstruction instruction = new Graphics3DAddTextInstruction(text, yoAppearance);
+      Graphics3DAddTextInstruction instruction = new Graphics3DAddTextInstruction(text, yoAppearance);
       graphics3DInstructions.add(instruction);
       return instruction;
    }
