@@ -297,7 +297,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 
       minOrbitalEnergyForSingleSupport.set(0.007);    // 0.008
       amountToBeInsideSingleSupport.set(0.0);
-      amountToBeInsideDoubleSupport.set(0.03); // 0.02);    // TODO: necessary for stairs...
+      amountToBeInsideDoubleSupport.set(0.03);    // 0.02);    // TODO: necessary for stairs...
       doubleSupportTimeProvider.set(0.2);    // 0.5);    // 0.2);    // 0.6;    // 0.3
       this.userDesiredPelvisPitch.set(desiredPelvisPitch);
       this.stayOnToes.set(stayOntoes);
@@ -567,6 +567,9 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       @Override
       public void doAction()
       {
+         // note: this has to be done before the ICP trajectory generator is initialized, since it is using nextFootstep
+         checkForFootsteps();
+
          if (icpTrajectoryGenerator.isDone())
          {
             if (!icpTrajectoryHasBeenInitialized.getBooleanValue())
@@ -653,21 +656,6 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
             desiredICPVelocity.set(desiredICPVelocityLocal);
          }
 
-         if (nextFootstep == null)
-         {
-            nextFootstep = footstepProvider.poll();
-
-            if (nextFootstep != null)
-            {
-               upcomingSupportLeg.set(getRobotSide(nextFootstep.getBody(), bipedFeet).getOppositeSide());
-               nextFootstepPose.set(nextFootstep.getPoseCopy());
-            }
-         }
-         else if (nextNextFootstep == null)
-         {
-            nextNextFootstep = footstepProvider.peek();
-         }
-
          doFootcontrol();
       }
 
@@ -721,6 +709,24 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
          if (DEBUG)
             System.out.println("WalkingHighLevelHumanoidController: leavingDoubleSupportState");
          desiredICPVelocity.set(0.0, 0.0);
+      }
+
+      private void checkForFootsteps()
+      {
+         if (nextFootstep == null)
+         {
+            nextFootstep = footstepProvider.poll();
+
+            if (nextFootstep != null)
+            {
+               upcomingSupportLeg.set(getRobotSide(nextFootstep.getBody(), bipedFeet).getOppositeSide());
+               nextFootstepPose.set(nextFootstep.getPoseCopy());
+            }
+         }
+         else if (nextNextFootstep == null)
+         {
+            nextNextFootstep = footstepProvider.peek();
+         }
       }
    }
 
@@ -983,7 +989,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       finalDesiredICP.changeFrame(referenceFrame);
 
       ContactablePlaneBody supportFoot = bipedFeet.get(swingSide.getOppositeSide());
-      
+
       FramePoint2d icpWayPoint;
       if (doToeOffIfPossible.getBooleanValue())
       {
@@ -995,7 +1001,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
          double toeOffPointToFinalDesiredFactor = 0.2;
          desiredToeOffCoP.interpolate(toeOffPoint2d, finalDesiredICP, toeOffPointToFinalDesiredFactor);
          icpWayPoint = EquivalentConstantCoPCalculator.computeICPMotionWithConstantCMP(finalDesiredICP, desiredToeOffCoP,
-               -doubleSupportTimeProvider.getValue(), getOmega0());
+                 -doubleSupportTimeProvider.getValue(), getOmega0());
       }
       else
       {
