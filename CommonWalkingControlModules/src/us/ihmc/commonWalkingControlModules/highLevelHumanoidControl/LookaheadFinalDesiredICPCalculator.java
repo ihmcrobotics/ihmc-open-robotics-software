@@ -102,6 +102,11 @@ public class LookaheadFinalDesiredICPCalculator implements FinalDesiredICPCalcul
       parentRegistry.addChild(registry);
    }
    
+   public void setMethod(DesiredICPCalculatorMethod method)
+   {
+      desiredICPCalculatorMethod.set(method);
+   }
+
    public FramePoint2d getFinalDesiredICPForWalking(TransferToAndNextFootstepsData transferToAndNextFootstepsData)
    {
       switch (desiredICPCalculatorMethod.getEnumValue())
@@ -231,7 +236,7 @@ public class LookaheadFinalDesiredICPCalculator implements FinalDesiredICPCalcul
    }
    
 
-   private static enum DesiredICPCalculatorMethod
+   public static enum DesiredICPCalculatorMethod
    {
          SHIFT_INSIDE, CENTROID_TO_CENTROID, CENTROID_TO_CENTROID_WITH_CALCULATED_SCALAR;
    }
