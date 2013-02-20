@@ -236,21 +236,10 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       this.footPositionTrajectoryGenerators = footPositionTrajectoryGenerators;
       this.icpTrajectoryHasBeenInitialized = new BooleanYoVariable("icpTrajectoryHasBeenInitialized", registry);
 
-      EnumMap<LimbName, RigidBody> bases = new EnumMap<LimbName, RigidBody>(LimbName.class);
-      bases.put(LimbName.LEG, fullRobotModel.getPelvis());
-      bases.put(LimbName.ARM, fullRobotModel.getChest());
 
       coefficientOfFriction.set(0.6);    // TODO: Make DRCFlatGroundWalkingTest work with this at 0.7
-
-      for (RobotSide robotSide : RobotSide.values())
-      {
-         for (LimbName limbName : LimbName.values())
-         {
-            RigidBody endEffector = fullRobotModel.getEndEffector(robotSide, limbName);
-            GeometricJacobian jacobian = new GeometricJacobian(bases.get(limbName), endEffector, endEffector.getBodyFixedFrame());
-            jacobians.get(robotSide).put(limbName, jacobian);
-         }
-      }
+      
+      setupLimbJacobians(fullRobotModel);
 
       for (RobotSide robotSide : RobotSide.values())
       {
@@ -459,6 +448,23 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       unconstrainedJoints.removeAll(Arrays.asList(positionControlJoints));
       if (unconstrainedJoints.size() > 0)
          throw new RuntimeException("Joints unconstrained: " + unconstrainedJoints);
+   }
+
+   public void setupLimbJacobians(FullRobotModel fullRobotModel)
+   {
+      EnumMap<LimbName, RigidBody> bases = new EnumMap<LimbName, RigidBody>(LimbName.class);
+      bases.put(LimbName.LEG, fullRobotModel.getPelvis());
+      bases.put(LimbName.ARM, fullRobotModel.getChest());
+
+      for (RobotSide robotSide : RobotSide.values())
+      {
+         for (LimbName limbName : LimbName.values())
+         {
+            RigidBody endEffector = fullRobotModel.getEndEffector(robotSide, limbName);
+            GeometricJacobian jacobian = new GeometricJacobian(bases.get(limbName), endEffector, endEffector.getBodyFixedFrame());
+            jacobians.get(robotSide).put(limbName, jacobian);
+         }
+      }
    }
 
    private void createHandJoints(RobotSide side, InverseDynamicsJoint parentJoint, HashSet<OneDoFJoint> allSideHandJoints)
