@@ -52,13 +52,13 @@ public abstract class AbstractAdjustableDesiredFootstepCalculator implements Des
       FramePose footstepPose = new FramePose(footstepPositions.get(swingLegSide).getFramePointCopy(),
                                   footstepOrientations.get(swingLegSide).getFrameOrientationCopy());
       footstepPose.changeFrame(ReferenceFrame.getWorldFrame());
-      
+
       PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("poseReferenceFrame", footstepPose);
 
       ContactablePlaneBody foot = contactableBodies.get(swingLegSide);
-      
+
       boolean trustHeight = true;
-      ReferenceFrame soleFrame = FootstepUtils.createSoleFrame(poseReferenceFrame, foot); 
+      ReferenceFrame soleFrame = FootstepUtils.createSoleFrame(poseReferenceFrame, foot);
       List<FramePoint> contactPoints = FootstepUtils.getContactPointsInFrame(getContactPoints(swingLegSide), soleFrame);
       Footstep desiredFootstep = new Footstep(foot, poseReferenceFrame, soleFrame, contactPoints, trustHeight);
 
@@ -68,10 +68,10 @@ public abstract class AbstractAdjustableDesiredFootstepCalculator implements Des
          RigidBody stanceFootBody = stanceFoot.getRigidBody();
          FramePose stanceFootPose = new FramePose(stanceFootBody.getBodyFixedFrame());
          stanceFootPose.changeFrame(ReferenceFrame.getWorldFrame());
-         
+
          PoseReferenceFrame stanceFootPoseFrame = new PoseReferenceFrame("desiredFootstep", stanceFootPose);
-         
-         ReferenceFrame stanceFootSoleFrame = FootstepUtils.createSoleFrame(stanceFootPoseFrame, stanceFoot); 
+
+         ReferenceFrame stanceFootSoleFrame = FootstepUtils.createSoleFrame(stanceFootPoseFrame, stanceFoot);
          List<FramePoint> stanceContactPoints = FootstepUtils.getContactPointsInFrame(stanceFoot.getContactPoints(), stanceFootSoleFrame);
          Footstep stanceFootstep = new Footstep(stanceFoot, stanceFootPoseFrame, stanceFootSoleFrame, stanceContactPoints, trustHeight);
          desiredFootstep = desiredFootstepAdjustor.adjustDesiredFootstep(stanceFootstep, desiredFootstep);

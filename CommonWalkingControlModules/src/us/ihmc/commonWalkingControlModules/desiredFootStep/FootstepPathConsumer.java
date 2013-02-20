@@ -1,15 +1,16 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
+import javax.vecmath.Point3d;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.utilities.io.streamingData.AbstractStreamingDataConsumer;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-
-import javax.vecmath.Point3d;
-import java.util.ArrayList;
-import java.util.Collection;
 
 /**
  * User: Matt
@@ -35,10 +36,10 @@ public class FootstepPathConsumer extends AbstractStreamingDataConsumer<ArrayLis
       {
          FootstepData footstepData = (FootstepData) footstepObject;
          ContactablePlaneBody contactableBody = findContactableBodyByName(footstepData.getRigidBodyName());
-         
+
          FramePose footstepPose = new FramePose(ReferenceFrame.getWorldFrame(), footstepData.getLocation(), footstepData.getOrientation());
          PoseReferenceFrame footstepPoseFrame = new PoseReferenceFrame("footstepPoseFrame", footstepPose);
-         ReferenceFrame soleReferenceFrame = FootstepUtils.createSoleFrame(footstepPoseFrame, contactableBody); 
+         ReferenceFrame soleReferenceFrame = FootstepUtils.createSoleFrame(footstepPoseFrame, contactableBody);
 
          ArrayList<FramePoint> expectedContactPoints = new ArrayList<FramePoint>();
          for (int i = 0; i < footstepData.getExpectedContactPoints().size(); i++)
@@ -47,14 +48,17 @@ public class FootstepPathConsumer extends AbstractStreamingDataConsumer<ArrayLis
             FramePoint framePoint = new FramePoint(soleReferenceFrame, point3d);
             expectedContactPoints.add(framePoint);
          }
-         
-         Footstep footstep = new Footstep(footstepData.getId(), contactableBody, footstepPoseFrame, soleReferenceFrame, expectedContactPoints, footstepData.getTrustHeight());
+
+         Footstep footstep = new Footstep(footstepData.getId(), contactableBody, footstepPoseFrame, soleReferenceFrame, expectedContactPoints,
+                                          footstepData.getTrustHeight());
          footsteps.add(footstep);
+
          if (DEBUG)
          {
             System.out.println("FootstepPathConsumer received " + footstep);
          }
       }
+
       footstepPathCoordinator.updatePath(footsteps);
    }
 

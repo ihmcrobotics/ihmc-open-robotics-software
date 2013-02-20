@@ -106,7 +106,7 @@ public class SuspendedRobotDesiredFootStepCalculator implements DesiredFootstepC
       PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("poseReferenceFrame", footstepPose);
 
       ContactablePlaneBody contactableBody = contactableBodies.get(swingLegSide);
-      
+
       boolean trustHeight = false;
       ReferenceFrame soleFrame = FootstepUtils.createSoleFrame(poseReferenceFrame, contactableBody);
       List<FramePoint> expectedContactPoints = FootstepUtils.getContactPointsInFrame(contactableBody, soleFrame);

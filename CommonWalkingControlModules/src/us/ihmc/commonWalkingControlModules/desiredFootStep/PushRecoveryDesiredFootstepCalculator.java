@@ -31,21 +31,22 @@ public class PushRecoveryDesiredFootstepCalculator implements DesiredFootstepCal
 
    private final SideDependentList<? extends ContactablePlaneBody> contactableBodies;
 
-   public PushRecoveryDesiredFootstepCalculator(SideDependentList<? extends ContactablePlaneBody> contactableBodies, CommonWalkingReferenceFrames referenceFrames, CouplingRegistry couplingRegistry,
-           YoVariableRegistry parentRegistry)
+   public PushRecoveryDesiredFootstepCalculator(SideDependentList<? extends ContactablePlaneBody> contactableBodies,
+           CommonWalkingReferenceFrames referenceFrames, CouplingRegistry couplingRegistry, YoVariableRegistry parentRegistry)
    {
       this.contactableBodies = contactableBodies;
       this.referenceFrames = referenceFrames;
       this.couplingRegistry = couplingRegistry;
-      
+
       for (RobotSide swingSide : RobotSide.values())
       {
          RobotSide supportSide = swingSide.getOppositeSide();
          ReferenceFrame ankleZUpFrame = referenceFrames.getAnkleZUpFrame(supportSide);
          stepPositions.put(swingSide, new YoFramePoint(swingSide.getCamelCaseNameForStartOfExpression() + "StepPosition", "", ankleZUpFrame, registry));
-         stepOrientations.put(swingSide, new YoFrameOrientation(swingSide.getCamelCaseNameForStartOfExpression() + "StepOrientation", "", ankleZUpFrame, registry));
+         stepOrientations.put(swingSide,
+                              new YoFrameOrientation(swingSide.getCamelCaseNameForStartOfExpression() + "StepOrientation", "", ankleZUpFrame, registry));
       }
-      
+
       parentRegistry.addChild(registry);
    }
 
@@ -57,23 +58,24 @@ public class PushRecoveryDesiredFootstepCalculator implements DesiredFootstepCal
 
    public Footstep updateAndGetDesiredFootstep(RobotSide supportLegSide)
    {
-//      double estimatedSwingTimeRemaining = couplingRegistry.getEstimatedSwingTimeRemaining();
-//      if (estimatedSwingTimeRemaining > 0.1)
-//      {
-//         computeInitialDesiredFootstep(supportLegSide);
-//      }
+//    double estimatedSwingTimeRemaining = couplingRegistry.getEstimatedSwingTimeRemaining();
+//    if (estimatedSwingTimeRemaining > 0.1)
+//    {
+//       computeInitialDesiredFootstep(supportLegSide);
+//    }
 
       RobotSide swingSide = supportLegSide.getOppositeSide();
       FramePose footstepPose = new FramePose(stepPositions.get(swingSide).getFramePointCopy(), stepOrientations.get(swingSide).getFrameOrientationCopy());
       ContactablePlaneBody foot = contactableBodies.get(swingSide);
-      
+
       boolean trustHeight = false;
-      
+
       PoseReferenceFrame footstepPoseFrame = new PoseReferenceFrame("footstepPoseFrame", footstepPose);
-      ReferenceFrame soleFrame = FootstepUtils.createSoleFrame(footstepPoseFrame, foot); 
+      ReferenceFrame soleFrame = FootstepUtils.createSoleFrame(footstepPoseFrame, foot);
       List<FramePoint> expectedContactPoints = FootstepUtils.getContactPointsInFrame(foot, soleFrame);
 
       Footstep desiredFootstep = new Footstep(foot, footstepPoseFrame, soleFrame, expectedContactPoints, trustHeight);
+
       return desiredFootstep;
    }
 
@@ -83,13 +85,13 @@ public class PushRecoveryDesiredFootstepCalculator implements DesiredFootstepCal
       if (couplingRegistry.getCaptureRegion() == null)
       {
          // ICP probably went outside the foot on the wrong side; no capture region. Can't handle this currently.
-//         System.out.println("supportLegForWalkingCtrlr: " + couplingRegistry.getSupportLeg());
-//         throw new RuntimeException("capture region is null! supportLegForWalkingCtrlr: " + couplingRegistry.getSupportLeg());
+//       System.out.println("supportLegForWalkingCtrlr: " + couplingRegistry.getSupportLeg());
+//       throw new RuntimeException("capture region is null! supportLegForWalkingCtrlr: " + couplingRegistry.getSupportLeg());
          return;
       }
-      
+
       ReferenceFrame supportFootFrame = referenceFrames.getAnkleZUpFrame(supportLegSide);
-      
+
       FramePoint captureRegionCentroid = couplingRegistry.getCaptureRegion().getCentroidCopy().toFramePoint();
       captureRegionCentroid.changeFrame(supportFootFrame);
       FramePoint sweetSpot = couplingRegistry.getBipedSupportPolygons().getSweetSpotCopy(supportLegSide).toFramePoint();
@@ -115,6 +117,6 @@ public class PushRecoveryDesiredFootstepCalculator implements DesiredFootstepCal
    }
 
    public void setupParametersForR2()
-   {      
+   {
    }
 }

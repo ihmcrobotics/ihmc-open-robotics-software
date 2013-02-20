@@ -34,7 +34,7 @@ public class AdjustableDesiredFootstepCalculator extends AbstractAdjustableDesir
 
    private double stepWidthSlopeProfile;
    private double stepWidthYInterceptProfile;
- 
+
    // Footstep parameters
    private final DoubleYoVariable stepLength = new DoubleYoVariable("stepLength", "step length. [m]", registry);
    private final DoubleYoVariable stepWidth = new DoubleYoVariable("stepWidth", "step width. [m]", registry);
@@ -100,8 +100,7 @@ public class AdjustableDesiredFootstepCalculator extends AbstractAdjustableDesir
 
       // Create the desired footstep position using the parameters previously computed
       ReferenceFrame supportLegAnkleZUpFrame = ankleZUpFrames.get(supportLegSide);
-      footstepPositions.get(swingLegSide).set(supportLegAnkleZUpFrame, stepLength.getDoubleValue(), stepWidth.getDoubleValue(),
-                                   stepHeight.getDoubleValue());
+      footstepPositions.get(swingLegSide).set(supportLegAnkleZUpFrame, stepLength.getDoubleValue(), stepWidth.getDoubleValue(), stepHeight.getDoubleValue());
 
 //    desiredFootstepPosition.changeFrame(supportLegAnkleZUpFrame);
    }
@@ -117,7 +116,7 @@ public class AdjustableDesiredFootstepCalculator extends AbstractAdjustableDesir
 
    private void computeStepLength()
    {
-      double swingDuration = couplingRegistry.getSingleSupportDuration(); // EVIL: single support duration should be computed based on desired velocity and step length, not the other way around
+      double swingDuration = couplingRegistry.getSingleSupportDuration();    // EVIL: single support duration should be computed based on desired velocity and step length, not the other way around
       double stanceDuration = couplingRegistry.getDoubleSupportDuration();
       double totalDuration = swingDuration + stanceDuration;
 
@@ -145,9 +144,11 @@ public class AdjustableDesiredFootstepCalculator extends AbstractAdjustableDesir
       // This is where we want to adjust the width depending on "inside" or "outside" foot
       FrameVector2d desiredHeading = new FrameVector2d(desiredHeadingFrame, 1.0, 0.0);
       FrameVector2d finalHeading = desiredHeadingControlModule.getFinalHeadingTarget().changeFrameCopy(desiredHeadingFrame);
-//      FrameVector2d crossVector = new FrameVector2d(desiredHeading);
+
+//    FrameVector2d crossVector = new FrameVector2d(desiredHeading);
       double magCrossProductFromDesiredToFinalHeading = desiredHeading.cross(finalHeading);
-//      double magCrossProductFromDesiredToFinalHeading = crossVector.getZ();
+
+//    double magCrossProductFromDesiredToFinalHeading = crossVector.getZ();
       headingCross.set(magCrossProductFromDesiredToFinalHeading);
 
       double thresholdForStepWidthAdjustment = 0.00;
@@ -184,21 +185,21 @@ public class AdjustableDesiredFootstepCalculator extends AbstractAdjustableDesir
       // Create the desired footstep orientation using the parameters previously computed
 //    desiredFootstepOrientation = new Orientation(desiredFootstepPosition.getReferenceFrame(), stepYaw.getDoubleValue(), stepPitch.getDoubleValue(), stepRoll.getDoubleValue());
       FrameOrientation desiredFootstepOrientation = new FrameOrientation(desiredHeadingFrame, stepYaw.getDoubleValue(), stepPitch.getDoubleValue(),
-                                                  stepRoll.getDoubleValue());
+                                                       stepRoll.getDoubleValue());
       desiredFootstepOrientation.changeFrame(footstepOrientations.get(swingLegSide).getReferenceFrame());
 
       footstepOrientations.get(swingLegSide).set(desiredFootstepOrientation);
    }
 
-//   private void computeFootstepYaw(RobotSide swingSide, ReferenceFrame desiredHeadingFrame)
-//   {
-//      // Compute the difference between the desired Heading frame and the frame of the adjusted footstep position (yaw should be w.r.t. this frame!).
-//      ReferenceFrame footstepPositionFrame = desiredFootstepPositions.get(swingSide).getReferenceFrame();
-//      Transform3D headingToFootstepPositionTransform = desiredHeadingFrame.getTransformToDesiredFrame(footstepPositionFrame);
-//      Matrix3d headingToSwingRotation = new Matrix3d();
-//      headingToFootstepPositionTransform.get(headingToSwingRotation);
-//      stepYaw.set(RotationFunctions.getYaw(headingToSwingRotation));
-//   }
+// private void computeFootstepYaw(RobotSide swingSide, ReferenceFrame desiredHeadingFrame)
+// {
+//    // Compute the difference between the desired Heading frame and the frame of the adjusted footstep position (yaw should be w.r.t. this frame!).
+//    ReferenceFrame footstepPositionFrame = desiredFootstepPositions.get(swingSide).getReferenceFrame();
+//    Transform3D headingToFootstepPositionTransform = desiredHeadingFrame.getTransformToDesiredFrame(footstepPositionFrame);
+//    Matrix3d headingToSwingRotation = new Matrix3d();
+//    headingToFootstepPositionTransform.get(headingToSwingRotation);
+//    stepYaw.set(RotationFunctions.getYaw(headingToSwingRotation));
+// }
 
 
    private void computeFootstepPitch()
@@ -213,7 +214,7 @@ public class AdjustableDesiredFootstepCalculator extends AbstractAdjustableDesir
    public void setupParametersForR2()
    {
       goodStandingStepWidth = (0.1016 + 0.09) * 2.0;
-      goodWalkingStepWidth = 0.2; // 0.35;    // 0.3272;    // 0.3272 =  minimum metabolic cost @ 0.12*Leg Length(1.245) + 2*half foot width (17.78)
+      goodWalkingStepWidth = 0.2;    // 0.35;    // 0.3272;    // 0.3272 =  minimum metabolic cost @ 0.12*Leg Length(1.245) + 2*half foot width (17.78)
 
       robotMaxVelocity = 0.60;
       robotMinVelocity = 0.10;
@@ -226,7 +227,7 @@ public class AdjustableDesiredFootstepCalculator extends AbstractAdjustableDesir
 
       insideStepAdjustmentForTurning = 0.0;
       outsideStepAdjustmentForTurning = 0.0;
-      
+
       kpStepLength.set(0.5);
       KpStepYaw.set(1.0);
    }
@@ -258,7 +259,7 @@ public class AdjustableDesiredFootstepCalculator extends AbstractAdjustableDesir
 
    private static SideDependentList<ReferenceFrame> getFramesToSaveFootstepIn(SideDependentList<ReferenceFrame> ankleZUpFrames)
    {
-      return new SideDependentList<ReferenceFrame>(ankleZUpFrames.get(RobotSide.RIGHT), ankleZUpFrames.get(RobotSide.LEFT)); // switch
+      return new SideDependentList<ReferenceFrame>(ankleZUpFrames.get(RobotSide.RIGHT), ankleZUpFrames.get(RobotSide.LEFT));    // switch
    }
 
    protected List<FramePoint> getContactPoints(RobotSide swingSide)

@@ -1,12 +1,13 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
-import com.yobotics.simulationconstructionset.BooleanYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import java.util.ArrayList;
+import java.util.concurrent.ConcurrentLinkedQueue;
+
 import us.ihmc.utilities.io.streamingData.QueueBasedStreamingDataProducer;
 import us.ihmc.utilities.io.streamingData.StreamingDataTCPServer;
 
-import java.util.ArrayList;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import com.yobotics.simulationconstructionset.BooleanYoVariable;
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 /**
  * User: Matt
@@ -56,11 +57,13 @@ public class FootstepPathCoordinator implements FootstepProvider
          {
             System.out.println("stepInProgress= " + stepInProgress);
          }
+
          notifyConsumersOfStatus(stepInProgress, FootstepStatus.Status.STARTED);
       }
+
       return stepInProgress;
    }
-   
+
    public Footstep peek()
    {
       return footstepQueue.peek();
@@ -91,8 +94,10 @@ public class FootstepPathCoordinator implements FootstepProvider
       {
          System.out.println("clearing queue\n" + footstepQueue);
       }
+
       footstepQueue.clear();
       footstepQueue.addAll(footsteps);
+
       if (DEBUG)
       {
          System.out.println("new queue\n" + footstepQueue);
@@ -109,6 +114,7 @@ public class FootstepPathCoordinator implements FootstepProvider
       }
 
       this.isPaused.set(isPaused);
+
       if (DEBUG)
       {
          System.out.println("FootstepPathCoordinator: isPaused = " + isPaused);
