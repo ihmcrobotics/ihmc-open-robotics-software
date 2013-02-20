@@ -450,7 +450,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
          throw new RuntimeException("Joints unconstrained: " + unconstrainedJoints);
    }
 
-   public void setupLimbJacobians(FullRobotModel fullRobotModel)
+   private void setupLimbJacobians(FullRobotModel fullRobotModel)
    {
       EnumMap<LimbName, RigidBody> bases = new EnumMap<LimbName, RigidBody>(LimbName.class);
       bases.put(LimbName.LEG, fullRobotModel.getPelvis());
