@@ -56,10 +56,10 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRo
    private static final long serialVersionUID = 5864358637898048080L;
 
    private final ArrayList<String> resourceDirectories;
-   
+
    private final HashMap<String, OneDegreeOfFreedomJoint> oneDoFJoints = new HashMap<String, OneDegreeOfFreedomJoint>();
    private final HashMap<String, Transform3D> jointTransforms = new HashMap<String, Transform3D>();
-   
+
 
    private final FloatingJoint rootJoint;
 
@@ -82,7 +82,7 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRo
       }
 
       SDFLinkHolder rootLink = rootLinks.get(0);
-      
+
       Vector3d offset = new Vector3d();
       generalizedSDFRobotModel.getTransformToRoot().get(offset);
       rootJoint = new FloatingJoint(rootLink.getName(), offset, this);
@@ -116,14 +116,14 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRo
 
             Vector3d gcOffset = jointContactPoint.second();
             jointTransforms.get(jointName).transform(gcOffset);
-            
-            
-            GroundContactPoint groundContactPoint = new GroundContactPoint("gc_" + SDFJointHolder.createValidVariableName(jointName) + "_" + count++,
-                  gcOffset, this);
-            
-            ExternalForcePoint externalForcePoint = new ExternalForcePoint("ef_" + SDFJointHolder.createValidVariableName(jointName) + "_" + count++,
-                  gcOffset, this);
-            
+
+
+            GroundContactPoint groundContactPoint = new GroundContactPoint("gc_" + SDFJointHolder.createValidVariableName(jointName) + "_" + count++, gcOffset,
+                                                       this);
+
+            ExternalForcePoint externalForcePoint = new ExternalForcePoint("ef_" + SDFJointHolder.createValidVariableName(jointName) + "_" + count++, gcOffset,
+                                                       this);
+
             oneDoFJoints.get(jointName).addGroundContactPoint(groundContactPoint);
             oneDoFJoints.get(jointName).addExternalForcePoint(externalForcePoint);
 
@@ -182,71 +182,77 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRo
       Matrix3d chainRotation = new Matrix3d(chainRotationIn);
       chainRotation.mul(rotation);
 
-    
+
       Transform3D rotationTransform = new Transform3D();
       rotationTransform.setRotation(chainRotationIn);
       rotationTransform.transform(offset);
 
-      
-      
+
+
       Transform3D jointTransform = new Transform3D();
       jointTransform.setRotation(chainRotation);
       jointTransforms.put(joint.getName(), jointTransform);
-      
-      
-      
+
+
+
       String sanitizedJointName = SDFConversionsHelper.sanitizeJointName(joint.getName());
-      
+
       Joint scsJoint;
       switch (joint.getType())
       {
-      case REVOLUTE:
-         PinJoint pinJoint = new PinJoint(sanitizedJointName, offset, this, jointAxis);
-         if(joint.hasLimits())
-         {
-            if ((joint.getContactKd() == 0.0) && (joint.getContactKp() == 0.0))
+         case REVOLUTE :
+            PinJoint pinJoint = new PinJoint(sanitizedJointName, offset, this, jointAxis);
+            if (joint.hasLimits())
             {
-               if (pinJoint.getName().contains("f0") || pinJoint.getName().contains("f1") || pinJoint.getName().contains("f2") || pinJoint.getName().contains("f3"))
+               if ((joint.getContactKd() == 0.0) && (joint.getContactKp() == 0.0))
                {
-                  pinJoint.setLimitStops(joint.getLowerLimit(), joint.getUpperLimit(), 10.0, 2.5);
+                  if (pinJoint.getName().contains("f0") || pinJoint.getName().contains("f1") || pinJoint.getName().contains("f2")
+                          || pinJoint.getName().contains("f3"))
+                  {
+                     pinJoint.setLimitStops(joint.getLowerLimit(), joint.getUpperLimit(), 10.0, 2.5);
+                  }
+                  else
+                  {
+                     pinJoint.setLimitStops(joint.getLowerLimit(), joint.getUpperLimit(), 100.0, 20.0);
+                  }
                }
                else
                {
-                  pinJoint.setLimitStops(joint.getLowerLimit(), joint.getUpperLimit(), 100.0, 20.0);
+                  pinJoint.setLimitStops(joint.getLowerLimit(), joint.getUpperLimit(), 0.0001 * joint.getContactKp(), joint.getContactKd());
                }
             }
-            else
+
+            pinJoint.setDamping(joint.getDamping());
+
+            oneDoFJoints.put(joint.getName(), pinJoint);
+            scsJoint = pinJoint;
+
+            break;
+
+         case PRISMATIC :
+            SliderJoint sliderJoint = new SliderJoint(sanitizedJointName, offset, this, jointAxis);
+            if (joint.hasLimits())
             {
-               pinJoint.setLimitStops(joint.getLowerLimit(), joint.getUpperLimit(), 0.0001 * joint.getContactKp(), joint.getContactKd());
+               if ((joint.getContactKd() == 0.0) && (joint.getContactKp() == 0.0))
+               {
+                  sliderJoint.setLimitStops(joint.getLowerLimit(), joint.getUpperLimit(), 100.0, 20.0);
+               }
+               else
+               {
+                  sliderJoint.setLimitStops(joint.getLowerLimit(), joint.getUpperLimit(), 0.0001 * joint.getContactKp(), joint.getContactKd());
+               }
             }
-         }
-         
-         pinJoint.setDamping(joint.getDamping());
-         
-         oneDoFJoints.put(joint.getName(), pinJoint);
-         scsJoint = pinJoint;
-         break;
-      case PRISMATIC:
-         SliderJoint sliderJoint = new SliderJoint(sanitizedJointName, offset, this, jointAxis);
-         if(joint.hasLimits())
-         {
-            if ((joint.getContactKd() == 0.0) && (joint.getContactKp() == 0.0))
-            {
-               sliderJoint.setLimitStops(joint.getLowerLimit(), joint.getUpperLimit(), 100.0, 20.0);
-            }
-            else
-            {
-               sliderJoint.setLimitStops(joint.getLowerLimit(), joint.getUpperLimit(), 0.0001 * joint.getContactKp(), joint.getContactKd());
-            }
-         }
-         sliderJoint.setDamping(joint.getDamping());
-         oneDoFJoints.put(joint.getName(), sliderJoint);
-         scsJoint = sliderJoint;
-         break;
-      default:
-         throw new RuntimeException("Joint type not implemented: " + joint.getType());
+
+            sliderJoint.setDamping(joint.getDamping());
+            oneDoFJoints.put(joint.getName(), sliderJoint);
+            scsJoint = sliderJoint;
+
+            break;
+
+         default :
+            throw new RuntimeException("Joint type not implemented: " + joint.getType());
       }
-      
+
       scsJoint.setLink(createLink(joint.getChild(), rotationTransform));
       scsParentJoint.addJoint(scsJoint);
 
@@ -256,9 +262,9 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRo
 
       addCameraMounts(scsJoint, joint.getChild());
       addLidarMounts(scsJoint, joint.getChild());
-      
 
-      
+
+
 
       for (SDFJointHolder child : joint.getChild().getChildren())
       {
@@ -351,6 +357,11 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRo
                   LIDARScanDefinition lidarScanDefinition = LIDARScanDefinition.PlanarSweep(sdfMaxAngle - sdfMinAngle, sdfSamples);
                   Transform3D transform3d = SDFConversionsHelper.poseToTransform(sensor.getPose());
 
+                  // the laser does not come out of the center of the scanner. having it come from the center causes rings.
+                  Vector3d offset = new Vector3d();
+                  transform3d.get(offset);
+                  offset.setZ(offset.getZ() + 0.05);
+                  transform3d.setTranslation(offset);
                   SimulatedLIDARSensorNoiseParameters noiseParameters = new SimulatedLIDARSensorNoiseParameters();
                   noiseParameters.setGaussianNoiseStandardDeviation(sdfGaussianNoise);
 
@@ -391,35 +402,37 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRo
 
    private Link createLink(SDFLinkHolder link, Transform3D rotationTransform)
    {
-
       Link scsLink = new Link(link.getName());
-      if(link.getVisuals() != null)
+      if (link.getVisuals() != null)
       {
          SDFGraphics3DObject linkGraphics = new SDFGraphics3DObject(link.getVisuals(), resourceDirectories, rotationTransform);
          scsLink.setLinkGraphics(linkGraphics);
       }
-      
-      
-      
+
+
+
       double mass = link.getMass();
       Matrix3d inertia = link.getInertia();
       Vector3d CoMOffset = link.getCoMOffset();
-      
-      
+
+
       RigidBodyInertia rigidBodyInertia = new RigidBodyInertia(ReferenceFrame.getWorldFrame(), inertia, mass);
-      ReferenceFrame jointFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("toroidFrame", ReferenceFrame.getWorldFrame(), rotationTransform);
+      ReferenceFrame jointFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("toroidFrame", ReferenceFrame.getWorldFrame(),
+                                     rotationTransform);
       rigidBodyInertia.changeFrame(jointFrame);
-      
+
       rotationTransform.transform(CoMOffset);
 
-      
+
       scsLink.setComOffset(CoMOffset);
       scsLink.setMass(mass);
       scsLink.setMomentOfInertia(rigidBodyInertia.getMassMomentOfInertiaPartCopy());
-      if(SHOW_COM_REFERENCE_FRAMES)
+
+      if (SHOW_COM_REFERENCE_FRAMES)
       {
          scsLink.addCoordinateSystemToCOM(0.1);
       }
+
       return scsLink;
 
    }
