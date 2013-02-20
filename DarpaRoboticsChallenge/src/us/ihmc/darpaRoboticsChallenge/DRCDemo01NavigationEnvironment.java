@@ -217,15 +217,13 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
 		setUpWall(-7.0f, 0.0f, 3.0f, 1.0f, rampHeight, 0, color);
 		
 		// simple stepping stones, centered at x=-0.75m
-		setUpWall(-7.65f, -0.5f, 0.5f, 0.3f, rampHeight, 0, color);
-		setUpWall(-7.85f, -1.0f, 0.5f, 0.5f, rampHeight, 0, color);
-		setUpWall(-8.15f, -0.5f, 0.5f, 0.5f, rampHeight, 0, color);
-		setUpWall(-8.45f, -1.0f, 0.5f, 0.5f, rampHeight, 0, color);
+		setUpWall(-7.75f, -0.5f, 0.5f, 0.5f, rampHeight, 0, color);
+		setUpWall(-8.25f, -1.0f, 0.5f, 0.5f, rampHeight, 0, color);
 		setUpWall(-8.75f, -0.5f, 0.5f, 0.5f, rampHeight, 0, color);
-		setUpWall(-9.05f, -1.0f, 0.5f, 0.5f, rampHeight, 0, color);
-		setUpWall(-9.35f, -0.5f, 0.5f, 0.5f, rampHeight, 0, color);
-		setUpWall(-9.65f, -1.0f, 0.5f, 0.5f, rampHeight, 0, color);
-		setUpWall(-9.85f, -0.5f, 0.5f, 0.3f, rampHeight, 0, color);
+		setUpWall(-9.25f, -1.0f, 0.5f, 0.5f, rampHeight, 0, color);
+		setUpWall(-8.75f, -0.5f, 0.5f, 0.5f, rampHeight, 0, color);
+		setUpWall(-9.25f, -1.0f, 0.5f, 0.5f, rampHeight, 0, color);
+		setUpWall(-9.75f, -0.5f, 0.5f, 0.5f, rampHeight, 0, color);
 		
 		// qualification stepping stones, centered along x=0.75m
 		setUpWall(-8.0f, 1.0f, 0.5f, 0.5f, rampHeight, 0, color);
