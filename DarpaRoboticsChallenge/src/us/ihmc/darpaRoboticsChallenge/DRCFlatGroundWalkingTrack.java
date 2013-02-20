@@ -36,7 +36,7 @@ public class DRCFlatGroundWalkingTrack
       YoVariableRegistry registry = new YoVariableRegistry("adjustableParabolicTrajectoryDemoSimRegistry");
 
       double inPlaceWidth = 0.25;
-      double maxStepLength = 0.45;
+      double maxStepLength = 0.35;
       double minStepWidth = 0.15;
       double maxStepWidth = 0.4;
       double stepPitch = 0.0;
