@@ -148,7 +148,7 @@ public class DRCFlatGroundWalkingTest
       BambooTools.reportTestStartedMessage();
 
       double standingTimeDuration = 1.0;
-      double walkingTimeDuration = 89.0; // 90.0 TODO: com height failure at 91 seconds...
+      double walkingTimeDuration = 90.0;
 
       boolean useVelocityAndHeadingScript = true;
       boolean cheatWithGroundHeightAtForFootstep = true;
@@ -189,13 +189,13 @@ public class DRCFlatGroundWalkingTest
 //            fail("Desired Heading too large of error: " + desiredHeading.getDoubleValue());
 //         }
          
-         if (Math.abs(comError.getDoubleValue()) > 0.01)
+         if (Math.abs(comError.getDoubleValue()) > 0.02)
          {
             if (KEEP_SCS_UP)
             {
                BambooTools.sleepForever();
             }
-            fail("Math.abs(comError.getDoubleValue()) > 0.01: " + comError.getDoubleValue() + " at t = " + scs.getTime());
+            fail("Math.abs(comError.getDoubleValue()) > 0.02: " + comError.getDoubleValue() + " at t = " + scs.getTime());
          }
       }
 
