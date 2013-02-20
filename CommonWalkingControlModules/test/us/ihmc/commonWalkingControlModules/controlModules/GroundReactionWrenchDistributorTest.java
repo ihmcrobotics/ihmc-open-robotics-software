@@ -88,8 +88,7 @@ public class GroundReactionWrenchDistributorTest
       double epsilonRho = 0.0;
       distributor.setWeights(diagonalCWeights, epsilonRho);
 
-      double[] minimumNormalForces = new double[] {0.0, 0.0};
-      distributor.setMinimumNormalForces(minimumNormalForces);
+      distributor.setMinimumNormalForce(0.0);
 
       return distributor;
    }
