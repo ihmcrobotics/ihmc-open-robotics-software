@@ -1341,6 +1341,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 
       contactState.set(contactPoints2d, coefficientOfFriction.getDoubleValue());
       updateEndEffectorControlModule(contactableBody, contactState);
+      resetCoPFilter(contactableBody);
    }
 
    private void setFlatFootContactState(ContactablePlaneBody contactableBody)

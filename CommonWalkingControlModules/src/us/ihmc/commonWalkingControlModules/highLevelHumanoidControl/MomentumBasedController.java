@@ -337,6 +337,7 @@ public abstract class MomentumBasedController implements RobotController
          }
          else
          {
+            resetCoPFilter(contactablePlaneBody);
             filteredCentersOfPressureWorld.get(contactablePlaneBody).setToNaN();
          }
       }
@@ -362,6 +363,11 @@ public abstract class MomentumBasedController implements RobotController
       if (processedOutputs != null)
          fullRobotModel.setTorques(processedOutputs);
       updateYoVariables();
+   }
+
+   protected void resetCoPFilter(ContactablePlaneBody contactableBody)
+   {
+      filteredCentersOfPressure2d.get(contactableBody).reset();
    }
 
    protected abstract void doAdditionalTorqueControl();
