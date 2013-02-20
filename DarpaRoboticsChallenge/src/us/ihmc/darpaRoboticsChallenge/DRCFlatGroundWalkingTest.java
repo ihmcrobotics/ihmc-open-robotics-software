@@ -120,24 +120,31 @@ public class DRCFlatGroundWalkingTest
       
       double timeIncrement = 1.0;
       boolean done = false;
-      while (!done)
+      try
       {
-         blockingSimulationRunner.simulateAndBlock(timeIncrement);
-         
-         if (Math.abs(comError.getDoubleValue()) > 0.05)
+         while (!done)
          {
-            if (KEEP_SCS_UP)
+            blockingSimulationRunner.simulateAndBlock(timeIncrement);
+            
+            if (Math.abs(comError.getDoubleValue()) > 0.05)
             {
-               BambooTools.sleepForever();
+               
+               fail("comError = " + Math.abs(comError.getDoubleValue()));
             }
-            fail("comError = " + Math.abs(comError.getDoubleValue()));
+            
+            if (scs.getTime() > standingTimeDuration + maximumWalkTime) done = true;
+            if (q_x.getDoubleValue() > rampEndX) done = true;
          }
          
-         if (scs.getTime() > standingTimeDuration + maximumWalkTime) done = true;
-         if (q_x.getDoubleValue() > rampEndX) done = true;
+         if (checkNothingChanged) checkNothingChanged(nothingChangedVerifier);         
       }
-
-      if (checkNothingChanged) checkNothingChanged(nothingChangedVerifier);
+      finally
+      {
+         if (KEEP_SCS_UP)
+         {
+            BambooTools.sleepForever();
+         }
+      }
 
       createMovie(scs);
    }
@@ -179,27 +186,33 @@ public class DRCFlatGroundWalkingTest
       
       double timeIncrement = 1.0;
 
-      while (scs.getTime() - standingTimeDuration < walkingTimeDuration)
+      try
       {
-         blockingSimulationRunner.simulateAndBlock(timeIncrement);
-         
-         //TODO: Put test for heading back in here.
+         while (scs.getTime() - standingTimeDuration < walkingTimeDuration)
+         {
+            blockingSimulationRunner.simulateAndBlock(timeIncrement);
+            
+            //TODO: Put test for heading back in here.
 //         if (!MathTools.epsilonEquals(desiredHeading.getDoubleValue(), pelvisYaw.getDoubleValue(), epsilonHeading))
 //         {
 //            fail("Desired Heading too large of error: " + desiredHeading.getDoubleValue());
 //         }
-         
-         if (Math.abs(comError.getDoubleValue()) > 0.02)
-         {
-            if (KEEP_SCS_UP)
+            
+            if (Math.abs(comError.getDoubleValue()) > 0.02)
             {
-               BambooTools.sleepForever();
+               fail("Math.abs(comError.getDoubleValue()) > 0.02: " + comError.getDoubleValue() + " at t = " + scs.getTime());
             }
-            fail("Math.abs(comError.getDoubleValue()) > 0.02: " + comError.getDoubleValue() + " at t = " + scs.getTime());
+         }
+         
+         if (checkNothingChanged) checkNothingChanged(nothingChangedVerifier);         
+      }
+      finally
+      {
+         if (KEEP_SCS_UP)
+         {
+            BambooTools.sleepForever();
          }
       }
-
-      if (checkNothingChanged) checkNothingChanged(nothingChangedVerifier);
       
       createMovie(scs);
       BambooTools.reportTestFinishedMessage();
