@@ -29,9 +29,9 @@ public class RootJointAngularAccelerationControlModule implements RootJointAccel
    {
       this.rootJoint = rootJoint;
       registry = new YoVariableRegistry(getClass().getSimpleName());
-      rootJointOrientationControlModule = new RigidBodyOrientationControlModule("rootJoint", rootJoint.getPredecessor(), rootJoint.getSuccessor(),
+      rootJointOrientationControlModule = new RigidBodyOrientationControlModule(rootJoint.getName(), rootJoint.getPredecessor(), rootJoint.getSuccessor(),
               twistCalculator, registry);
-      this.desiredPelvisAngularAcceleration = new YoFrameVector("desiredPelvisAngularAcceleration", rootJoint.getFrameAfterJoint(), registry);
+      this.desiredPelvisAngularAcceleration = new YoFrameVector("desired" + rootJoint.getName() + "AngularAcceleration", rootJoint.getFrameAfterJoint(), registry);
       rootJointAccelerationData = new RootJointAccelerationData(rootJoint.getSuccessor().getBodyFixedFrame(), rootJoint.getPredecessor().getBodyFixedFrame(),
               rootJoint.getFrameAfterJoint());
       rootJointAccelerationOutputPort.setData(rootJointAccelerationData);
