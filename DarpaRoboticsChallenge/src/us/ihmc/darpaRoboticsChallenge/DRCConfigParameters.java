@@ -73,7 +73,7 @@ public class DRCConfigParameters
 
    public static final float LDIAR_SCAN_MIN_PITCH = -0.3f;
    
-   public static final int KERNAL_SIZE = 34; // 34 centimeters square
+   public static final int KERNEL_SIZE = 34; // 34 centimeters square
 
    public static final double GRID_RESOLUTION = 0.01;// 1 centimeter resolution
 
