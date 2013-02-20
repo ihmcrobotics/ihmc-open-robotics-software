@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.ejml.data.DenseMatrix64F;
@@ -19,6 +20,7 @@ import us.ihmc.utilities.screwTheory.SpatialForceVector;
 import us.ihmc.utilities.screwTheory.Wrench;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public class ContactPointGroundReactionWrenchDistributor implements GroundReactionWrenchDistributor
@@ -61,6 +63,7 @@ public class ContactPointGroundReactionWrenchDistributor implements GroundReacti
 
    private final BooleanYoVariable converged = new BooleanYoVariable("converged", registry);
    private final BooleanYoVariable hasNotConvergedInPast = new BooleanYoVariable("hasNotConvergedInPast", registry);
+   private final DoubleYoVariable minimumNormalForce = new DoubleYoVariable("minimumNormalForce", registry);
 
    public ContactPointGroundReactionWrenchDistributor(ReferenceFrame centerOfMassFrame, YoVariableRegistry parentRegistry)
    {
@@ -84,12 +87,9 @@ public class ContactPointGroundReactionWrenchDistributor implements GroundReacti
       this.epsilonRho = epsilonRho;
    }
 
-   public void setMinimumNormalForces(double[] minimumNormalForces)
+   public void setMinimumNormalForce(double minimumNormalForce)
    {
-      for (int i = 0; i < minimumNormalForces.length; i++)
-      {
-         this.minimumNormalForces[i] = minimumNormalForces[i];
-      }
+      this.minimumNormalForce.set(minimumNormalForce);
    }
 
    public void solve(GroundReactionWrenchDistributorOutputData distributedWrench, GroundReactionWrenchDistributorInputData inputData)
@@ -103,6 +103,7 @@ public class ContactPointGroundReactionWrenchDistributor implements GroundReacti
 
       aMatrix.zero();
       normalForceSelectorBMatrix.zero();
+      Arrays.fill(minimumNormalForces, 0.0);
 
       ArrayList<PlaneContactState> contactStates = inputData.getContactStates();
 
@@ -118,6 +119,9 @@ public class ContactPointGroundReactionWrenchDistributor implements GroundReacti
          WrenchDistributorTools.computeSupportVectorMatrixBlock(supportVectorMatrixVBlock, normalizedSupportVectors, contactState.getPlaneFrame());
          placeBBlock(normalForceSelectorBMatrix, supportVectorMatrixVBlock, contactNumber, nContactPoints);
 
+         // fMin
+         minimumNormalForces[contactNumber] = minimumNormalForce.getDoubleValue();
+         
          // force part of A
          WrenchDistributorTools.computeSupportVectorMatrixBlock(supportVectorMatrixVBlock, normalizedSupportVectors, centerOfMassFrame);
          placeAForceBlock(aMatrix, supportVectorMatrixVBlock, contactNumber, nContactPoints);
