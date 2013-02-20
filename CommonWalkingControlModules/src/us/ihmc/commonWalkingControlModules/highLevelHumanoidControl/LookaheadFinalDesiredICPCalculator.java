@@ -47,7 +47,7 @@ public class LookaheadFinalDesiredICPCalculator implements FinalDesiredICPCalcul
       {
          DynamicGraphicObjectsList dynamicGraphicObjectsList = new DynamicGraphicObjectsList("FinalDesiredICPCalculator");
 
-         double finalDesiredGraphicScale = 0.05;
+         double finalDesiredGraphicScale = 0.005;
          finalDesiredICPGraphicPosition = new DynamicGraphicPosition("finalDesiredICP", "", registry, finalDesiredGraphicScale, YoAppearance.Yellow(), GraphicType.CROSS);
          dynamicGraphicObjectsList.add(finalDesiredICPGraphicPosition);
          dynamicGraphicObjectsListRegistry.registerArtifact("FinalDesiredICP", finalDesiredICPGraphicPosition.createArtifact());
