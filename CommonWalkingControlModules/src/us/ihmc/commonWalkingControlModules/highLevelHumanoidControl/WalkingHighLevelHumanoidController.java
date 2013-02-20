@@ -898,7 +898,8 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
          double minimumSwingTime = swingTimeProvider.getValue() * minimumSwingFraction;
          boolean footHitGround = (stateMachine.timeInCurrentState() > minimumSwingTime) && footSwitches.get(swingSide).hasFootHitGround();
 
-         boolean trajectoryDone = endEffectorControlModule.isTrajectoryDone();
+         // transferring out of single support once the ICP trajectory is done guarantees that we never reach the zero velocity desired
+         boolean trajectoryDone = icpTrajectoryGenerator.isDone(); // endEffectorControlModule.isTrajectoryDone();
 
          return trajectoryDone || footHitGround;
       }
