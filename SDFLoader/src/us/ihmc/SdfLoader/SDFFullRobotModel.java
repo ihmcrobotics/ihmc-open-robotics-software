@@ -67,7 +67,6 @@ public class SDFFullRobotModel implements FullRobotModel
       ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new Transform3D());
       elevator = new RigidBody("elevator", elevatorFrame);
       rootJoint = new SixDoFJoint(rootLink.getName(), elevator, elevatorFrame);
-
       if (!rootLink.getName().equals(sdfJointNameMap.getPelvisName()))
       {
          throw new RuntimeException("Pelvis joint is assumed to be the root joint");

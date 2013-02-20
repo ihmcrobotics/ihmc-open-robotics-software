@@ -50,8 +50,8 @@ public class ProcessedSensorsReadWrite implements ProcessedIMUSensorsReadOnlyInt
    public void setRotation(Matrix3d rotationMatrix, int imuIndex)
    {
       Quat4d q = new Quat4d();
-      
       RotationFunctions.setQuaternionBasedOnMatrix3d(q, rotationMatrix);
+      RotationFunctions.assertQuaternionNormalized(q, "ProcessedSensors rotation as set by rotation matrix ");
 
       // DON'T USE THIS: the method in Quat4d is flawed and doesn't work for some rotation matrices!
 //      q.set(rotationMatrix);
