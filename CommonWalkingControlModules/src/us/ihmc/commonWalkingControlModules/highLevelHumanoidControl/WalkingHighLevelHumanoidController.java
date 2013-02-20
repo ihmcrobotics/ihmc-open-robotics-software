@@ -319,7 +319,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 
          final RigidBodySpatialAccelerationControlModule rigidBodySpatialAccelerationControlModule =
             new RigidBodySpatialAccelerationControlModule(robotSide.getCamelCaseNameForStartOfExpression() + "HandControlModule", twistCalculator, hand,
-               hand.getBodyFixedFrame(), registry);
+               hand.getParentJoint().getFrameAfterJoint(), registry);
          rigidBodySpatialAccelerationControlModule.setPositionProportionalGains(100.0, 100.0, 100.0);
          rigidBodySpatialAccelerationControlModule.setPositionDerivativeGains(20.0, 20.0, 20.0);
          rigidBodySpatialAccelerationControlModule.setOrientationProportionalGains(100.0, 100.0, 100.0);
