@@ -18,7 +18,7 @@ public class FootstepConsumer implements FootstepProvider, StreamingDataConsumer
    private final ConcurrentLinkedQueue<Footstep> footstepQueue = new ConcurrentLinkedQueue<Footstep>();
    private final long dataIdentifier;
    private final Collection<? extends ContactablePlaneBody> rigidBodyList;
-   int j=0;
+   int j = 0;
 
    public FootstepConsumer(long dataIdentifier, Collection<? extends ContactablePlaneBody> rigidBodyList)
    {
@@ -37,16 +37,17 @@ public class FootstepConsumer implements FootstepProvider, StreamingDataConsumer
       {
          throw new RuntimeException("Wrong data identifier: " + dataIdentifier + ". Expected: " + this.dataIdentifier);
       }
-      System.out.println("FootstepConsumer: consume: "+(++j)+" footsteps received, Ah Ah Ah!");
+
+      System.out.println("FootstepConsumer: consume: " + (++j) + " footsteps received, Ah Ah Ah!");
       FootstepData footstepData = (FootstepData) object;
       ContactablePlaneBody contactableBody = findContactableBodyByName(footstepData.getRigidBodyName());
-      
+
       boolean trustHeight = footstepData.getTrustHeight();
       String id = footstepData.getId();
       FramePose framePose = new FramePose(ReferenceFrame.getWorldFrame(), footstepData.getLocation(), footstepData.getOrientation());
       PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("poseReferenceFrame", framePose);
-      ReferenceFrame soleReferenceFrame = FootstepUtils.createSoleFrame(poseReferenceFrame, contactableBody); 
-      
+      ReferenceFrame soleReferenceFrame = FootstepUtils.createSoleFrame(poseReferenceFrame, contactableBody);
+
       ArrayList<FramePoint> expectedContactPoints = new ArrayList<FramePoint>();
       for (int i = 0; i < footstepData.getExpectedContactPoints().size(); i++)
       {
@@ -54,10 +55,11 @@ public class FootstepConsumer implements FootstepProvider, StreamingDataConsumer
          FramePoint framePoint = new FramePoint(soleReferenceFrame, point3d);
          expectedContactPoints.add(framePoint);
       }
-      
-      
+
+
       Footstep footstep = new Footstep(id, contactableBody, poseReferenceFrame, soleReferenceFrame, expectedContactPoints, trustHeight);
-//      System.out.println("footstep = " + footstep);
+
+//    System.out.println("footstep = " + footstep);
       footstepQueue.add(footstep);
    }
 
@@ -78,7 +80,7 @@ public class FootstepConsumer implements FootstepProvider, StreamingDataConsumer
    {
       return footstepQueue.poll();
    }
-   
+
    public Footstep peek()
    {
       return footstepQueue.peek();

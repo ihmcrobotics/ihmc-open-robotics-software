@@ -70,8 +70,8 @@ public class SimpleWorldDesiredFootstepCalculator extends AbstractAdjustableDesi
       footstepOrientations.get(supportLegSide).getMatrix3d(footToWorldRotation);
       double stanceMinZWithRespectToAnkle = DesiredFootstepCalculatorTools.computeMinZPointWithRespectToAnkleInWorldFrame(footToWorldRotation,
                                                bipedFeet.get(supportLegSide));
-      double maxStanceX = DesiredFootstepCalculatorTools.computeMaxXWithRespectToAnkleInFrame(footToWorldRotation,
-                             bipedFeet.get(supportLegSide), desiredHeadingControlModule.getDesiredHeadingFrame());
+      double maxStanceX = DesiredFootstepCalculatorTools.computeMaxXWithRespectToAnkleInFrame(footToWorldRotation, bipedFeet.get(supportLegSide),
+                             desiredHeadingControlModule.getDesiredHeadingFrame());
 
       // roll and pitch with respect to world, yaw with respect to other foot's yaw
       double swingFootYaw = footstepOrientations.get(supportLegSide).getYaw().getDoubleValue() + stepYaw.getDoubleValue();

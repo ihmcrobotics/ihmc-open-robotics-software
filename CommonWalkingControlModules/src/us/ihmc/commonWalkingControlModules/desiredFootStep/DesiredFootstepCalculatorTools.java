@@ -48,6 +48,7 @@ public class DesiredFootstepCalculatorTools
          tempFramePoint.changeFrame(contactableBody.getBodyFrame());
          tempVector.set(tempFramePoint.getPoint());
          footToWorldRotation.transform(tempVector);
+
          if (tempVector.getZ() < minZ)
          {
             minZPoint.setAndChangeFrame(tempFramePoint);
@@ -82,13 +83,14 @@ public class DesiredFootstepCalculatorTools
    public static FramePoint computeMinZPointInFrame(Transform3D footToWorldTransform, ContactablePlaneBody contactableBody, ReferenceFrame frame)
    {
       List<FramePoint> footPoints = contactableBody.getContactPoints();
-      
+
       ReferenceFrame bodyFrame = contactableBody.getBodyFrame();
-      
+
       return computeMinZPointInFrame(footToWorldTransform, footPoints, bodyFrame, frame);
    }
-      
-   public static FramePoint computeMinZPointInFrame(Transform3D footToWorldTransform, List<FramePoint> footPoints, ReferenceFrame bodyFrame, ReferenceFrame frame)
+
+   public static FramePoint computeMinZPointInFrame(Transform3D footToWorldTransform, List<FramePoint> footPoints, ReferenceFrame bodyFrame,
+           ReferenceFrame frame)
    {
       FramePoint minFramePoint = new FramePoint(frame);
       minFramePoint.setZ(Double.POSITIVE_INFINITY);
@@ -157,7 +159,7 @@ public class DesiredFootstepCalculatorTools
       return ret;
    }
 
-   
+
    public static List<FramePoint> fixTwoPointsAndCopy(List<FramePoint> contactPoints)
    {
       // FIXME: terrible, we need to make it so that ConvexPolygons can consist of fewer than 3 points
@@ -170,17 +172,17 @@ public class DesiredFootstepCalculatorTools
       if (contactPointsCopy.size() == 2)
       {
          ReferenceFrame referenceFrame = contactPoints.get(0).getReferenceFrame();
-         
+
          FrameVector pointToPoint = new FrameVector(contactPoints.get(1));
          pointToPoint.sub(contactPoints.get(0));
-         
+
          FrameVector z = new FrameVector(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 1.0);
          z.changeFrame(referenceFrame);
          FrameVector cross = new FrameVector(referenceFrame);
          cross.cross(pointToPoint, z);
          cross.normalize();
          cross.scale(1e-5);
-         
+
          for (int i = 0; i < 2; i++)
          {
             FramePoint extraPoint = new FramePoint(contactPoints.get(i));
@@ -189,9 +191,10 @@ public class DesiredFootstepCalculatorTools
          }
 
       }
+
       return contactPointsCopy;
    }
-   
+
    private static class SearchDirectionFramePointComparator implements Comparator<FramePoint>
    {
       private final FrameVector searchDirection;

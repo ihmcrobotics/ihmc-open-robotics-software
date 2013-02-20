@@ -37,7 +37,7 @@ public class DesiredFootstepCalculatorFootstepProviderWrapper implements Footste
 
       return ret;
    }
-   
+
    public Footstep peek()
    {
       return null;
@@ -50,7 +50,7 @@ public class DesiredFootstepCalculatorFootstepProviderWrapper implements Footste
 
    public void notifyComplete()
    {
-//      System.out.println("DesiredFootstepCalculatorFootstepProviderWrapper: notifyComplete not implemented in DesiredFootstepCalculatorFootstepProviderWrapper");
+//    System.out.println("DesiredFootstepCalculatorFootstepProviderWrapper: notifyComplete not implemented in DesiredFootstepCalculatorFootstepProviderWrapper");
    }
 
    public void setWalk(boolean walk)
