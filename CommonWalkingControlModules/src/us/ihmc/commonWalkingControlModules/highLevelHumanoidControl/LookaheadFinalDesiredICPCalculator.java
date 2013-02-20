@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl;
 
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepUtils;
+import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
@@ -58,17 +59,25 @@ public class LookaheadFinalDesiredICPCalculator implements FinalDesiredICPCalcul
          nextNextStepPolygon = new YoFrameConvexPolygon2d("nextNextStepPolygon", "", worldFrame, maxNumberOfVertices , registry);
 
          double polygonVizScale = 1.0;
-         DynamicGraphicYoFramePolygon transferToPolygonViz = new DynamicGraphicYoFramePolygon("transferToPolygon", transferToPolygon, "transferToPolygon", "", registry, polygonVizScale, YoAppearance.Black());
-         DynamicGraphicYoFramePolygon nextStepPolygonViz = new DynamicGraphicYoFramePolygon("nextStepPolygon", nextStepPolygon, "nextStepPolygon", "", registry, polygonVizScale, YoAppearance.Blue());
-         DynamicGraphicYoFramePolygon nextNextStepPolygonViz = new DynamicGraphicYoFramePolygon("nextNextStepPolygon", nextNextStepPolygon, "nextNextStepPolygon", "", registry, polygonVizScale, YoAppearance.Brown());
+
+         // ooh, colors!
+         AppearanceDefinition transferToPolygonAppearance = YoAppearance.MidnightBlue();
+         YoAppearance.makeTransparent(transferToPolygonAppearance, 0.5);
+         AppearanceDefinition nextFootstepPolygonAppearance = YoAppearance.IndianRed();
+         YoAppearance.makeTransparent(nextFootstepPolygonAppearance, 0.5);
+         AppearanceDefinition nextNextFootstepPolygonAppearance = YoAppearance.Lavender();
+
+         DynamicGraphicYoFramePolygon transferToPolygonViz = new DynamicGraphicYoFramePolygon("transferToPolygon", transferToPolygon, "transferToPolygon", "", registry, polygonVizScale, transferToPolygonAppearance);
+         DynamicGraphicYoFramePolygon nextStepPolygonViz = new DynamicGraphicYoFramePolygon("nextStepPolygon", nextStepPolygon, "nextStepPolygon", "", registry, polygonVizScale, nextFootstepPolygonAppearance);
+         DynamicGraphicYoFramePolygon nextNextStepPolygonViz = new DynamicGraphicYoFramePolygon("nextNextStepPolygon", nextNextStepPolygon, "nextNextStepPolygon", "", registry, polygonVizScale, nextNextFootstepPolygonAppearance);
 
          transferToPolygonViz.setPosition(0.0, 0.0, 0.001);
          nextStepPolygonViz.setPosition(0.0, 0.0, 0.001);
          nextNextStepPolygonViz.setPosition(0.0, 0.0, 0.001);
          
          dynamicGraphicObjectsList.add(transferToPolygonViz);
-         dynamicGraphicObjectsList.add(nextStepPolygonViz);
-         dynamicGraphicObjectsList.add(nextNextStepPolygonViz);
+//         dynamicGraphicObjectsList.add(nextStepPolygonViz);
+//         dynamicGraphicObjectsList.add(nextNextStepPolygonViz);
 
 
          transferToCoordinateSystem = new DynamicGraphicCoordinateSystem("transferToPose", "", registry, 0.2);
