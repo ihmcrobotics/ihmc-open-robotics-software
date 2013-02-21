@@ -18,7 +18,7 @@ import com.yobotics.simulationconstructionset.ExternalForcePoint;
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.util.environments.SelectableObjectListener;
 import com.yobotics.simulationconstructionset.util.ground.CombinedTerrainObject;
-import com.yobotics.simulationconstructionset.util.ground.RotatableBoxTerrainObject;
+import com.yobotics.simulationconstructionset.util.ground.YawableBoxTerrainObject;
 import com.yobotics.simulationconstructionset.util.ground.RotatableConvexPolygonTerrainObject;
 import com.yobotics.simulationconstructionset.util.ground.TerrainObject;
 
@@ -297,9 +297,9 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       Transform3D location = new Transform3D();
       location.setTranslation(new Vector3d(0, 0, -0.5));
 
-      RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(location, 45, 45, 1, texture);
+      YawableBoxTerrainObject newBox = new YawableBoxTerrainObject(location, 45, 45, 1, texture);
       combinedTerrainObject.addTerrainObject(newBox);
-      RotatableBoxTerrainObject newBox2 = new RotatableBoxTerrainObject(location, 200, 200, 0.75, YoAppearance.DarkGray());
+      YawableBoxTerrainObject newBox2 = new YawableBoxTerrainObject(location, 200, 200, 0.75, YoAppearance.DarkGray());
       combinedTerrainObject.addTerrainObject(newBox2);
 
    }
@@ -386,7 +386,7 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       location.rotZ(Math.toRadians(yawDegrees));
 
       location.setTranslation(new Vector3d(x, y, height / 2));
-      RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(location, length, width, height, app);
+      YawableBoxTerrainObject newBox = new YawableBoxTerrainObject(location, length, width, height, app);
       combinedTerrainObject.addTerrainObject(newBox);
    }
 
