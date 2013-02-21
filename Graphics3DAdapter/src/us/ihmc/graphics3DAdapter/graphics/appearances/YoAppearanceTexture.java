@@ -1,28 +1,35 @@
 package us.ihmc.graphics3DAdapter.graphics.appearances;
 
-import java.awt.Component;
+import java.awt.image.BufferedImage;
 import java.net.URL;
 
 public class YoAppearanceTexture extends YoAppearanceTransparency
 {
    private final URL fileURL;
-   private final Component component;
+   private final BufferedImage bufferedImage;
 
-   public YoAppearanceTexture(URL fileURL, Component component)
+   public YoAppearanceTexture(URL fileURL)
    {
       super();
       this.fileURL = fileURL;
-      this.component = component;
+      this.bufferedImage = null;
+   }
+
+   public YoAppearanceTexture(BufferedImage bufferedImage)
+   {
+      super();
+      this.fileURL = null;
+      this.bufferedImage = bufferedImage;
    }
 
    public URL getFileURL()
    {
       return fileURL;
    }
-
-   public Component getComponent()
+   
+   public BufferedImage getBufferedImage()
    {
-      return component;
+      return bufferedImage;
    }
 
 }

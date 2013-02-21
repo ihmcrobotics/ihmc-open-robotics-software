@@ -2,8 +2,9 @@ package us.ihmc.graphics3DAdapter.graphics.instructions;
 
 import java.awt.Color;
 import java.awt.Font;
-import java.awt.FontMetrics;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.font.FontRenderContext;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 
@@ -18,17 +19,26 @@ public class Graphics3DAddExtusionInstruction extends Graphics3DInstruction
    private ExtrusionChangedListener extrusionChangedListener;
 
    // Text3D stuff
-   private final Font font = new Font("SansSerif", Font.PLAIN, 40);
-   private final BufferedImage measurementImage = new BufferedImage(1, 1, BufferedImage.TYPE_3BYTE_BGR);
-   private final Graphics measurementGraphics = measurementImage.getGraphics();
-   private final FontMetrics metrics = measurementGraphics.getFontMetrics(font);
+   private final Font font = new Font("Lucida Sans", Font.PLAIN, 40);
+   
+   private final FontRenderContext fontRenderContext;
 
-   public Graphics3DAddExtusionInstruction(String text, double thickness, AppearanceDefinition appearance)
+   private Graphics3DAddExtusionInstruction()
    {
       super();
+      BufferedImage measurementImage = new BufferedImage(1, 1, BufferedImage.TYPE_3BYTE_BGR);
+      Graphics2D measurementGraphics = measurementImage.createGraphics();
+      fontRenderContext = measurementGraphics.getFontRenderContext();
+      
+   }
+   
+   public Graphics3DAddExtusionInstruction(String text, double thickness, AppearanceDefinition appearance)
+   {
+      this();
       this.thickness = thickness;
       this.setText(text);
       this.setAppearance(appearance);
+      
    }
 
    /**
@@ -41,7 +51,8 @@ public class Graphics3DAddExtusionInstruction extends Graphics3DInstruction
     */
    public Graphics3DAddExtusionInstruction(BufferedImage bufferedImageToExtrude, double thickness, AppearanceDefinition appearance)
    {
-      super();
+      this();
+      this.thickness = thickness;
       this.setBufferedImage(bufferedImageToExtrude);
       this.setAppearance(appearance);
    }
@@ -65,7 +76,7 @@ public class Graphics3DAddExtusionInstruction extends Graphics3DInstruction
 
    public void setText(String text)
    {
-      Rectangle2D bounds = metrics.getStringBounds(text, measurementGraphics);
+      Rectangle2D bounds = font.getStringBounds(text, fontRenderContext);
 
       int width = (int) bounds.getWidth();
       int height = (int) bounds.getHeight();

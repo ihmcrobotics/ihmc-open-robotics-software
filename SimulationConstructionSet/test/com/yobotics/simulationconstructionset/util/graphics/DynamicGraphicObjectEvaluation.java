@@ -82,7 +82,7 @@ public class DynamicGraphicObjectEvaluation
       ConvexPolygon2d polygon = new ConvexPolygon2d(pointList);
 
       AppearanceDefinition appearance = YoAppearance.Red();
-      appearance.setTransparancy(0.8);
+      appearance.setTransparency(0.8);
 
       final DynamicGraphicPolygon dynamicGraphicPolygon = new DynamicGraphicPolygon("Polygon", polygon, "polygon", "", registry, 3.0, appearance);
       dynamicGraphicPolygon.setPosition(0.1, 0.2, 1.0);

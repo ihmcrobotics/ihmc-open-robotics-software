@@ -292,7 +292,7 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       //  setUpCone(0, 0, 10, 12, 0.005, YoAppearance.Brown());
 
       URL fileURL = DRCDemo01NavigationEnvironment.class.getResource("Textures/ground2.png");
-      YoAppearanceTexture texture = new YoAppearanceTexture(fileURL, null);
+      YoAppearanceTexture texture = new YoAppearanceTexture(fileURL);
 
       Transform3D location = new Transform3D();
       location.setTranslation(new Vector3d(0, 0, -0.5));
