@@ -89,7 +89,9 @@ import com.yobotics.simulationconstructionset.util.PDController;
 import com.yobotics.simulationconstructionset.util.PIDController;
 import com.yobotics.simulationconstructionset.util.graphics.BagOfBalls;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameOrientation;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePose;
 import com.yobotics.simulationconstructionset.util.statemachines.State;
 import com.yobotics.simulationconstructionset.util.statemachines.StateMachine;
@@ -1007,19 +1009,19 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       FramePoint2d icpWayPoint;
       if (doToeOffIfPossible.getBooleanValue())
       {
-         FramePoint2d desiredToeOffCoP = new FramePoint2d(worldFrame);
          FramePoint toeOffPoint = new FramePoint(worldFrame);
          List<FramePoint> toePoints = getToePoints(supportFoot);
          toeOffPoint.interpolate(toePoints.get(0), toePoints.get(1), 0.5);
          FramePoint2d toeOffPoint2d = toeOffPoint.toFramePoint2d();
-         double toeOffPointToFinalDesiredFactor = 0.2;
+         double toeOffPointToFinalDesiredFactor = 0.2; // TODO: magic number
+         FramePoint2d desiredToeOffCoP = new FramePoint2d(worldFrame);
          desiredToeOffCoP.interpolate(toeOffPoint2d, finalDesiredICP, toeOffPointToFinalDesiredFactor);
          icpWayPoint = EquivalentConstantCoPCalculator.computeICPMotionWithConstantCMP(finalDesiredICP, desiredToeOffCoP, -transferTimeProvider.getValue(),
                  getOmega0());
       }
       else
       {
-         double glideFactor = 0.9;
+         double glideFactor = 0.9; // TODO: magic number
          icpWayPoint = new FramePoint2d(worldFrame);
          icpWayPoint.interpolate(desiredICP.getFramePoint2dCopy(), finalDesiredICP, glideFactor);
       }
@@ -1356,6 +1358,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       contactState.set(contactPoints2d, coefficientOfFriction.getDoubleValue());
       updateEndEffectorControlModule(contactableBody, contactState);
       resetCoPFilter(contactableBody);
+      resetGroundReactionWrenchFilter();
    }
 
    private void setFlatFootContactState(ContactablePlaneBody contactableBody)
