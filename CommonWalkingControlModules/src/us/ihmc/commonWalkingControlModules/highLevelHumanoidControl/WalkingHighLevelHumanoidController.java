@@ -1374,6 +1374,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       contactState.set(new ArrayList<FramePoint2d>(), coefficientOfFriction.getDoubleValue());
       endEffectorControlModules.get(contactableBody).doSingularityEscapeBeforeTransitionToNextState();
       updateEndEffectorControlModule(contactableBody, contactState);
+      resetGroundReactionWrenchFilter();
    }
 
    private List<FramePoint> getContactPointsForWalkingOnToes(ContactablePlaneBody contactableBody)
