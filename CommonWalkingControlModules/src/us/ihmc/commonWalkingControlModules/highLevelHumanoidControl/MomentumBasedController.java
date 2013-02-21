@@ -51,6 +51,7 @@ import us.ihmc.utilities.screwTheory.TotalWrenchCalculator;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 import us.ihmc.utilities.screwTheory.Wrench;
 
+import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.EnumYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
@@ -86,6 +87,7 @@ public abstract class MomentumBasedController implements RobotController
    private final HashMap<ContactablePlaneBody, YoFramePoint2d> unfilteredCentersOfPressure2d = new HashMap<ContactablePlaneBody, YoFramePoint2d>();
    private final HashMap<ContactablePlaneBody, AlphaFilteredYoFramePoint2d> filteredCentersOfPressure2d = new HashMap<ContactablePlaneBody, AlphaFilteredYoFramePoint2d>();
    private final DoubleYoVariable alphaCoP = new DoubleYoVariable("alphaCoP", registry);
+   private final HashMap<ContactablePlaneBody, BooleanYoVariable> copFilterResetRequests = new HashMap<ContactablePlaneBody, BooleanYoVariable>();
    protected final LinkedHashMap<ContactablePlaneBody, YoPlaneContactState> contactStates = new LinkedHashMap<ContactablePlaneBody, YoPlaneContactState>();
    protected final ArrayList<Updatable> updatables = new ArrayList<Updatable>();
    protected final DoubleYoVariable yoTime;
@@ -98,6 +100,8 @@ public abstract class MomentumBasedController implements RobotController
    protected final YoFrameVector desiredPelvisTorque;
 
    protected final DoubleYoVariable alphaGroundReactionWrench = new DoubleYoVariable("alphaGroundReactionWrench", registry);
+   private final BooleanYoVariable groundReactionWrenchFilterResetRequest = new BooleanYoVariable("groundReactionWrenchFilterResetRequest", registry);
+   
    protected final YoFrameVector unfilteredDesiredGroundReactionTorque;
    protected final YoFrameVector unfilteredDesiredGroundReactionForce;
    protected final AlphaFilteredYoFrameVector desiredGroundReactionTorque;
@@ -177,6 +181,8 @@ public abstract class MomentumBasedController implements RobotController
       {
          String copName = contactableBody.getRigidBody().getName() + "CoP";
          String listName = "cops";
+
+         copFilterResetRequests.put(contactableBody, new BooleanYoVariable(copName + "FilterResetRequest", registry));
 
          YoFramePoint2d cop2d = new YoFramePoint2d(copName + "2d", "", contactableBody.getPlaneFrame(), registry);
          unfilteredCentersOfPressure2d.put(contactableBody, cop2d);
@@ -277,6 +283,14 @@ public abstract class MomentumBasedController implements RobotController
 
       unfilteredDesiredGroundReactionTorque.set(totalGroundReactionWrench.getAngularPartCopy());
       unfilteredDesiredGroundReactionForce.set(totalGroundReactionWrench.getLinearPartCopy());
+
+      if (groundReactionWrenchFilterResetRequest.getBooleanValue())
+      {
+         desiredGroundReactionTorque.reset();
+         desiredGroundReactionForce.reset();
+         groundReactionWrenchFilterResetRequest.set(false);
+      }
+
       desiredGroundReactionTorque.update();
       desiredGroundReactionForce.update();
       totalGroundReactionWrench.setAngularPart(desiredGroundReactionTorque.getFrameVectorCopy().getVector());
@@ -321,6 +335,12 @@ public abstract class MomentumBasedController implements RobotController
             unfilteredCentersOfPressure2d.get(contactablePlaneBody).set(cop);
 
             AlphaFilteredYoFramePoint2d filteredCoP2d = filteredCentersOfPressure2d.get(contactablePlaneBody);
+            BooleanYoVariable copFilterResetRequest = copFilterResetRequests.get(contactablePlaneBody);
+            if (copFilterResetRequest.getBooleanValue())
+            {
+               filteredCoP2d.reset();
+               copFilterResetRequest.set(false);
+            }
             filteredCoP2d.update();
             filteredCoP2d.getFramePoint2d(cop);
 
@@ -365,9 +385,14 @@ public abstract class MomentumBasedController implements RobotController
       updateYoVariables();
    }
 
+   protected void resetGroundReactionWrenchFilter()
+   {
+      groundReactionWrenchFilterResetRequest.set(true);
+   }
+   
    protected void resetCoPFilter(ContactablePlaneBody contactableBody)
    {
-      filteredCentersOfPressure2d.get(contactableBody).reset();
+      copFilterResetRequests.get(contactableBody).set(true);
    }
 
    protected abstract void doAdditionalTorqueControl();
