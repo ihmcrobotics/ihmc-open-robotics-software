@@ -256,7 +256,7 @@ public class GraphicsDemoTools
 
          Color3f color = new Color3f((float) Math.random(), (float) Math.random(), (float) Math.random());
          YoAppearanceRGBColor appearance = new YoAppearanceRGBColor(color, 0.0);
-         appearance.setTransparancy(transparency);
+         appearance.setTransparency(transparency);
          instruction.setAppearance(appearance);
       }
 

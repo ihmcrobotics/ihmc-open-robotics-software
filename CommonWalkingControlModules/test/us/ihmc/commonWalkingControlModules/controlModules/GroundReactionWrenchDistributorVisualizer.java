@@ -89,10 +89,10 @@ public class GroundReactionWrenchDistributorVisualizer
       }
 
       AppearanceDefinition desiredForceAppearance = YoAppearance.Yellow();
-      desiredForceAppearance.setTransparancy(0.9);
+      desiredForceAppearance.setTransparency(0.9);
       
       AppearanceDefinition desiredMomentAppearance = YoAppearance.Purple();
-      desiredMomentAppearance.setTransparancy(0.9);
+      desiredMomentAppearance.setTransparency(0.9);
       
       DynamicGraphicPosition centerOfMassWorldViz = new DynamicGraphicPosition("centerOfMassViz", centerOfMassWorld, COM_VIZ_RADIUS, YoAppearance.Purple(), GraphicType.BALL_WITH_CROSS);
       DynamicGraphicVector desiredForceWorldViz = new DynamicGraphicVector("desiredForceViz", centerOfMassWorld, desiredForceWorld, FORCE_VECTOR_SCALE, desiredForceAppearance);

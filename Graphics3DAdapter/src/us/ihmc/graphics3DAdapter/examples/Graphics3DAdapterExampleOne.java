@@ -37,6 +37,7 @@ public class Graphics3DAdapterExampleOne
    {
       Graphics3DNode teapotAndSphereNode = new Graphics3DNode("teaPot", Graphics3DNodeType.JOINT);
       Graphics3DObject teapotObject = new Graphics3DObject();
+      teapotObject.setChangeable(true);
       Graphics3DInstruction teapotAppearanceHolder = teapotObject.addTeaPot(YoAppearance.Red());
       teapotAndSphereNode.setGraphicsObject(teapotObject);
       graphics3DAdapter.addRootNode(teapotAndSphereNode);
@@ -210,7 +211,7 @@ public class Graphics3DAdapterExampleOne
          
          Color3f color = new Color3f((float) Math.random(), (float) Math.random(), (float) Math.random());
          YoAppearanceRGBColor appearance = new YoAppearanceRGBColor(color, 0.0);
-         appearance.setTransparancy(transparency);
+         appearance.setTransparency(transparency);
          instruction.setAppearance(appearance);
       }
    

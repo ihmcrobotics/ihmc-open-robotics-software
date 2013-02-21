@@ -1,7 +1,7 @@
 package us.ihmc.graphics3DAdapter.graphics.appearances;
 
 import java.awt.Color;
-import java.awt.Component;
+import java.awt.image.BufferedImage;
 import java.net.URL;
 
 import javax.vecmath.Color3f;
@@ -14,32 +14,37 @@ import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
 
 public class YoAppearance
 {
-   public static AppearanceDefinition YoboticsTexture(Component comp)
+   public static AppearanceDefinition YoboticsTexture()
    {
       URL fileURL = Graphics3DAdapter.class.getResource("images/yobotics.jpg");
 
-      return Texture(fileURL, comp);
+      return Texture(fileURL);
    }
 
-   public static AppearanceDefinition Texture(URL fileURL, Component comp)
+   public static AppearanceDefinition Texture(URL fileURL)
    {
-      return new YoAppearanceTexture(fileURL, comp);
+      return new YoAppearanceTexture(fileURL);
 
    }
+   
+   public static AppearanceDefinition Texture(BufferedImage bufferedImage)
+   {
+      return new YoAppearanceTexture(bufferedImage);
+   }
 
-   public static AppearanceDefinition EarthTexture(Component comp)
+   public static AppearanceDefinition EarthTexture()
    {
       URL fileURL = Graphics3DAdapter.class.getResource("images/earth.jpg");
 
-      return Texture(fileURL, comp);
+      return Texture(fileURL);
 
    }
 
-   public static AppearanceDefinition StoneTexture(Component comp)
+   public static AppearanceDefinition StoneTexture()
    {
       URL fileURL = Graphics3DAdapter.class.getResource("images/stone.jpg");
 
-      return Texture(fileURL, comp);
+      return Texture(fileURL);
    }
 
    public static AppearanceDefinition PlaneMaterial()
@@ -866,7 +871,7 @@ public class YoAppearance
 
    public static void makeTransparent(AppearanceDefinition appearance, double f)
    {
-      appearance.setTransparancy(f);
+      appearance.setTransparency(f);
    }
 
    // public static void makeTransparent(YoAppearanceDefinition app, float transparency)
