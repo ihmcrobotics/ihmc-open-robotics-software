@@ -29,7 +29,6 @@ import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.ZUpFrame;
-import us.ihmc.utilities.math.overheadPath.OverheadPath;
 import us.ihmc.utilities.math.overheadPath.TurnThenStraightOverheadPath;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTools;
@@ -277,9 +276,9 @@ public class DesiredFootstepVisualizer
       DesiredFootstepVisualizer desiredFootstepVisualizer = new DesiredFootstepVisualizer(parentRegistry, dynamicGraphicObjectsListRegistry);
 
       SideDependentList<? extends ContactablePlaneBody> bipedFeet = desiredFootstepVisualizer.getBipedFeet();
-      FootstepGenerator footstepGenerator = new FootstepGenerator(bipedFeet);
+      TurningThenStraightFootstepGenerator footstepGenerator = new TurningThenStraightFootstepGenerator(bipedFeet);
 
-      OverheadPath footstepPath = new TurnThenStraightOverheadPath(new FramePose2d(ReferenceFrame.getWorldFrame()),
+      TurnThenStraightOverheadPath footstepPath = new TurnThenStraightOverheadPath(new FramePose2d(ReferenceFrame.getWorldFrame()),
                                      new FramePoint2d(ReferenceFrame.getWorldFrame(), 10.0, 0.0), 0.0);
 
       footstepGenerator.setFootstepPath(footstepPath);
@@ -297,8 +296,8 @@ public class DesiredFootstepVisualizer
 
       boolean trustHeight = false;
       Footstep initialStanceFootstep = new Footstep(contactablePlaneBody, poseReferenceFrame, soleFrame, expectedContactPoints, trustHeight);
-      footstepGenerator.setStepLength(0.2);
-      footstepGenerator.setStepWidth(0.1);
+      footstepGenerator.setStraightWalkingStepLength(0.2);
+      footstepGenerator.setStraightWalkingStepWidth(0.1);
       footstepGenerator.setStanceStart(initialStanceFootstep);
       List<Footstep> footsteps = footstepGenerator.generateDesiredFootstepList();
 

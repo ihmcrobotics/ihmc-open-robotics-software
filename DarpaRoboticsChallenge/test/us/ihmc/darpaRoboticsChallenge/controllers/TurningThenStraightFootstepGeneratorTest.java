@@ -14,11 +14,11 @@ import org.junit.Test;
 import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepGenerator;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepGeneratorVisualizer;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepUtils;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepValidityMetric;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.SemiCircularStepValidityMetric;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.TurningThenStraightFootstepGenerator;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotModel;
@@ -32,12 +32,11 @@ import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FramePose2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.math.overheadPath.OverheadPath;
 import us.ihmc.utilities.math.overheadPath.TurnThenStraightOverheadPath;
 
 import com.yobotics.simulationconstructionset.Robot;
 
-public class FootstepGeneratorTest
+public class TurningThenStraightFootstepGeneratorTest
 {
    private static final double eps = 1e-7;
    private final static boolean VISUALIZE = false;
@@ -75,7 +74,7 @@ public class FootstepGeneratorTest
    private void testPathToDestination(Point3d destination)
    {
       setupRobotParameters();
-      OverheadPath pathToDestination = new TurnThenStraightOverheadPath(new FramePose2d(WORLD_FRAME),
+      TurnThenStraightOverheadPath pathToDestination = new TurnThenStraightOverheadPath(new FramePose2d(WORLD_FRAME),
                                           new FramePoint2d(WORLD_FRAME, destination.x, destination.y), SIDESTEP ? Math.PI / 2 : 0.0);
       if (DEBUG_S_PARAM)
          System.out.println("FootstepGeneratorTest: startPose=" + pathToDestination.getPoseAtS(0.0).toString());
@@ -88,7 +87,7 @@ public class FootstepGeneratorTest
       if (DEBUG_S_PARAM)
          System.out.println("FootstepGeneratorTest: endPose=" + pathToDestination.getPoseAtS(1.0).toString());
       generateFootstepsUsingPath(pathToDestination);
-      FootstepValidityMetric footstepValidityMetric = new SemiCircularStepValidityMetric(fullRobotModel.getFoot(RobotSide.LEFT), 0.08, 0.8, 0.8);
+      FootstepValidityMetric footstepValidityMetric = new SemiCircularStepValidityMetric(fullRobotModel.getFoot(RobotSide.LEFT), 0.00, 1.2, 1.5);
       assertAllStepsLevelAndZeroHeight();
       assertAllStepsValid(footstepValidityMetric);
       assertLastStepIsPointingCorrectly(footSteps.get(footSteps.size() - 1), destination);
@@ -98,13 +97,14 @@ public class FootstepGeneratorTest
          ThreadTools.sleepForever();
    }
 
-   public void generateFootstepsUsingPath(OverheadPath pathToDestination)
+   public void generateFootstepsUsingPath(TurnThenStraightOverheadPath pathToDestination)
    {
-      FootstepGenerator footstepGenerator = new FootstepGenerator(bipedFeet);
+      TurningThenStraightFootstepGenerator footstepGenerator = new TurningThenStraightFootstepGenerator(bipedFeet);
       footstepGenerator.setFootstepPath(pathToDestination);
-      footstepGenerator.setStepAngle(Math.PI / 6);
-      footstepGenerator.setStepLength(0.4);
-      footstepGenerator.setStepWidth(0.2);
+      footstepGenerator.setTurningStepsStepAngle(Math.PI / 6);
+      footstepGenerator.setStraightWalkingStepLength(0.4);
+      footstepGenerator.setStraightWalkingStepWidth(0.2);
+      footstepGenerator.setTurningStepsStepWidth(0.35);
       Footstep stanceStart = FootstepUtils.getCurrentFootstep(RobotSide.RIGHT, referenceFrames, bipedFeet);
 
       footstepGenerator.setStanceStart(stanceStart);
