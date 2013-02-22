@@ -12,6 +12,7 @@ public class DesiredFootstepCalculatorFootstepProviderWrapper implements Footste
    private final DesiredFootstepCalculator desiredFootstepCalculator;
    private final EnumYoVariable<RobotSide> nextSwingLeg = EnumYoVariable.create("nextSwingLeg", RobotSide.class, registry);
    private final BooleanYoVariable walk = new BooleanYoVariable("walk", registry);
+   private Footstep lastPolledFootstep;
 
    public DesiredFootstepCalculatorFootstepProviderWrapper(DesiredFootstepCalculator desiredFootstepCalculator, YoVariableRegistry parentRegistry)
    {
@@ -35,12 +36,14 @@ public class DesiredFootstepCalculatorFootstepProviderWrapper implements Footste
          nextSwingLeg.set(supportLeg);
       }
 
+      lastPolledFootstep = ret;
+
       return ret;
    }
 
    public Footstep peek()
    {
-      return null;
+      return desiredFootstepCalculator.predictFootstepAfterDesiredFootstep(nextSwingLeg.getEnumValue(), lastPolledFootstep);
    }
 
    public boolean isEmpty()

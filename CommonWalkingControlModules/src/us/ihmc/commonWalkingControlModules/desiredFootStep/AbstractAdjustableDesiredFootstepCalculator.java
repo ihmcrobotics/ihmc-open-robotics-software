@@ -89,6 +89,11 @@ public abstract class AbstractAdjustableDesiredFootstepCalculator implements Des
 
       return desiredFootstep;
    }
+   
+   public Footstep predictFootstepAfterDesiredFootstep(RobotSide supportLegSide, Footstep desiredFootstep)
+   {
+      return null;
+   }
 
    public void setDesiredFootstepAdjustor(DesiredFootstepAdjustor desiredFootstepAdjustor)
    {

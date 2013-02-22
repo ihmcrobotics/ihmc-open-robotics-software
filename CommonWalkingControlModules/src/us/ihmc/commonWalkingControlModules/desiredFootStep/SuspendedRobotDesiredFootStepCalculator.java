@@ -128,4 +128,9 @@ public class SuspendedRobotDesiredFootStepCalculator implements DesiredFootstepC
 
    }
 
+   public Footstep predictFootstepAfterDesiredFootstep(RobotSide supportLegSide, Footstep desiredFootstep)
+   {
+      return null;
+   }
+
 }

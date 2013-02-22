@@ -313,6 +313,11 @@ public class SteppingStonesDesiredFootstepCalculator implements DesiredFootstepC
    {
    }
 
+   public Footstep predictFootstepAfterDesiredFootstep(RobotSide supportLegSide, Footstep desiredFootstep)
+   {
+      return null;
+   }
+
 
 
 

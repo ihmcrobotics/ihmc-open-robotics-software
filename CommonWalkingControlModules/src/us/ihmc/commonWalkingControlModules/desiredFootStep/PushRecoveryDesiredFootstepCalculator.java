@@ -55,6 +55,11 @@ public class PushRecoveryDesiredFootstepCalculator implements DesiredFootstepCal
    {
       computeInitialDesiredFootstep(supportLegSide);
    }
+   
+   public Footstep predictFootstepAfterDesiredFootstep(RobotSide supportLegSide, Footstep desiredFootstep)
+   {
+      return null;
+   }
 
    public Footstep updateAndGetDesiredFootstep(RobotSide supportLegSide)
    {
