@@ -16,6 +16,7 @@ import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.projectM.R2Sim02.initialSetup.RobotInitialSetup;
+import us.ihmc.utilities.ThreadTools;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
@@ -38,10 +39,15 @@ public class DRCFlatGroundWalkingTest
    private static final boolean SHOW_GUI = ALWAYS_SHOW_GUI || checkNothingChanged || CREATE_MOVIE;
 
    private BlockingSimulationRunner blockingSimulationRunner;
-   
+
    @After
    public void destroySimulationAndRecycleMemory()
    {
+      if (KEEP_SCS_UP)
+      {
+         ThreadTools.sleepForever();
+      }
+
       // Do this here in case a test fails. That way the memory will be recycled.
       if (blockingSimulationRunner != null)
       {
@@ -66,12 +72,12 @@ public class DRCFlatGroundWalkingTest
 
       double rampSlopeUp = 0.1;
       double rampSlopeDown = 0.08;
-      
+
       double rampXStart0 = 0.5;
       double rampXLength0 = 2.0;
       double landingHeight = rampSlopeUp * rampXLength0;
       double landingLength = 1.0;
-      double rampXLength1 = landingHeight/rampSlopeDown;
+      double rampXLength1 = landingHeight / rampSlopeDown;
 
       double rampYStart = -2.0;
       double rampYEnd = 6.0;
@@ -79,35 +85,36 @@ public class DRCFlatGroundWalkingTest
       double landingStartX = rampXStart0 + rampXLength0;
       double landingEndX = landingStartX + landingLength;
       double rampEndX = landingEndX + rampXLength1;
-      
+
       CombinedTerrainObject combinedTerrainObject = new CombinedTerrainObject("JustARamp");
-     
+
       AppearanceDefinition appearance = YoAppearance.Green();
       combinedTerrainObject.addRamp(rampXStart0, rampYStart, landingStartX, rampYEnd, landingHeight, appearance);
       combinedTerrainObject.addBox(landingStartX, rampYStart, landingEndX, rampYEnd, 0.0, landingHeight, YoAppearance.Gray());
-      combinedTerrainObject.addRamp(rampEndX, rampYStart, landingEndX, rampYEnd, landingHeight, appearance);      
-      
-      combinedTerrainObject.addBox(rampXStart0-2.0, rampYStart, rampEndX+2.0, rampYEnd, -0.05, 0.0);
+      combinedTerrainObject.addRamp(rampEndX, rampYStart, landingEndX, rampYEnd, landingHeight, appearance);
+
+      combinedTerrainObject.addBox(rampXStart0 - 2.0, rampYStart, rampEndX + 2.0, rampYEnd, -0.05, 0.0);
 
       DRCRobotWalkingControllerParameters drcControlParameters = new DRCRobotWalkingControllerParameters();
-      drcControlParameters.setNominalHeightAboveAnkle(drcControlParameters.nominalHeightAboveAnkle() - 0.03); // Need to do this or the leg goes straight and the robot falls.
-      
+      drcControlParameters.setNominalHeightAboveAnkle(drcControlParameters.nominalHeightAboveAnkle() - 0.03);    // Need to do this or the leg goes straight and the robot falls.
+
       SimulationConstructionSet scs = setupScs(drcControlParameters, combinedTerrainObject, useVelocityAndHeadingScript, cheatWithGroundHeightAtForFootstep);
       scs.setGroundVisible(false);
       scs.addStaticLinkGraphics(combinedTerrainObject.getLinkGraphics());
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
-      
+
       NothingChangedVerifier nothingChangedVerifier = null;
       if (checkNothingChanged)
       {
          nothingChangedVerifier = new NothingChangedVerifier("DRCOverShallowRampTest", scs);
       }
-      
+
       BooleanYoVariable walk = (BooleanYoVariable) scs.getVariable("walk");
       DoubleYoVariable q_x = (DoubleYoVariable) scs.getVariable("q_x");
       DoubleYoVariable desiredSpeed = (DoubleYoVariable) scs.getVariable("desiredVelocityX");
       DoubleYoVariable desiredHeading = (DoubleYoVariable) scs.getVariable("desiredHeading");
-//      DoubleYoVariable centerOfMassHeight = (DoubleYoVariable) scs.getVariable("ProcessedSensors.comPositionz");
+
+//    DoubleYoVariable centerOfMassHeight = (DoubleYoVariable) scs.getVariable("ProcessedSensors.comPositionz");
       DoubleYoVariable comError = (DoubleYoVariable) scs.getVariable("positionError_comHeight");
       DoubleYoVariable leftFootHeight = (DoubleYoVariable) scs.getVariable("p_leftFootPositionZ");
       DoubleYoVariable rightFootHeight = (DoubleYoVariable) scs.getVariable("p_rightFootPositionZ");
@@ -116,35 +123,27 @@ public class DRCFlatGroundWalkingTest
       desiredSpeed.set(desiredVelocityValue);
       desiredHeading.set(desiredHeadingValue);
 
-//      ThreadTools.sleepForever();
-      
+//    ThreadTools.sleepForever();
+
       double timeIncrement = 1.0;
       boolean done = false;
-      try
+      while (!done)
       {
-         while (!done)
+         blockingSimulationRunner.simulateAndBlock(timeIncrement);
+
+         if (Math.abs(comError.getDoubleValue()) > 0.05)
          {
-            blockingSimulationRunner.simulateAndBlock(timeIncrement);
-            
-            if (Math.abs(comError.getDoubleValue()) > 0.05)
-            {
-               
-               fail("comError = " + Math.abs(comError.getDoubleValue()));
-            }
-            
-            if (scs.getTime() > standingTimeDuration + maximumWalkTime) done = true;
-            if (q_x.getDoubleValue() > rampEndX) done = true;
+            fail("comError = " + Math.abs(comError.getDoubleValue()));
          }
-         
-         if (checkNothingChanged) checkNothingChanged(nothingChangedVerifier);         
+
+         if (scs.getTime() > standingTimeDuration + maximumWalkTime)
+            done = true;
+         if (q_x.getDoubleValue() > rampEndX)
+            done = true;
       }
-      finally
-      {
-         if (KEEP_SCS_UP)
-         {
-            BambooTools.sleepForever();
-         }
-      }
+
+      if (checkNothingChanged)
+         checkNothingChanged(nothingChangedVerifier);
 
       createMovie(scs);
    }
@@ -159,10 +158,10 @@ public class DRCFlatGroundWalkingTest
 
       boolean useVelocityAndHeadingScript = true;
       boolean cheatWithGroundHeightAtForFootstep = true;
-      
+
       GroundProfile groundProfile = new FlatGroundProfile();
 
-      DRCRobotWalkingControllerParameters drcControlParameters = new DRCRobotWalkingControllerParameters();      
+      DRCRobotWalkingControllerParameters drcControlParameters = new DRCRobotWalkingControllerParameters();
       SimulationConstructionSet scs = setupScs(drcControlParameters, groundProfile, useVelocityAndHeadingScript, cheatWithGroundHeightAtForFootstep);
 
       NothingChangedVerifier nothingChangedVerifier = null;
@@ -175,45 +174,37 @@ public class DRCFlatGroundWalkingTest
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
 
       BooleanYoVariable walk = (BooleanYoVariable) scs.getVariable("walk");
-//      DoubleYoVariable desiredHeading = (DoubleYoVariable) scs.getVariable("desiredHeading");
-//      DoubleYoVariable pelvisYaw = (DoubleYoVariable) scs.getVariable("q_yaw");
+
+//    DoubleYoVariable desiredHeading = (DoubleYoVariable) scs.getVariable("desiredHeading");
+//    DoubleYoVariable pelvisYaw = (DoubleYoVariable) scs.getVariable("q_yaw");
 //    DoubleYoVariable centerOfMassHeight = (DoubleYoVariable) scs.getVariable("ProcessedSensors.comPositionz");
       DoubleYoVariable comError = (DoubleYoVariable) scs.getVariable("positionError_comHeight");
-    
+
       initiateMotion(standingTimeDuration, blockingSimulationRunner, walk);
 
-//      ThreadTools.sleepForever();
-      
+//    ThreadTools.sleepForever();
+
       double timeIncrement = 1.0;
 
-      try
+      while (scs.getTime() - standingTimeDuration < walkingTimeDuration)
       {
-         while (scs.getTime() - standingTimeDuration < walkingTimeDuration)
+         blockingSimulationRunner.simulateAndBlock(timeIncrement);
+
+         // TODO: Put test for heading back in here.
+//       if (!MathTools.epsilonEquals(desiredHeading.getDoubleValue(), pelvisYaw.getDoubleValue(), epsilonHeading))
+//       {
+//          fail("Desired Heading too large of error: " + desiredHeading.getDoubleValue());
+//       }
+
+         if (Math.abs(comError.getDoubleValue()) > 0.02)
          {
-            blockingSimulationRunner.simulateAndBlock(timeIncrement);
-            
-            //TODO: Put test for heading back in here.
-//         if (!MathTools.epsilonEquals(desiredHeading.getDoubleValue(), pelvisYaw.getDoubleValue(), epsilonHeading))
-//         {
-//            fail("Desired Heading too large of error: " + desiredHeading.getDoubleValue());
-//         }
-            
-            if (Math.abs(comError.getDoubleValue()) > 0.02)
-            {
-               fail("Math.abs(comError.getDoubleValue()) > 0.02: " + comError.getDoubleValue() + " at t = " + scs.getTime());
-            }
-         }
-         
-         if (checkNothingChanged) checkNothingChanged(nothingChangedVerifier);         
-      }
-      finally
-      {
-         if (KEEP_SCS_UP)
-         {
-            BambooTools.sleepForever();
+            fail("Math.abs(comError.getDoubleValue()) > 0.02: " + comError.getDoubleValue() + " at t = " + scs.getTime());
          }
       }
-      
+
+      if (checkNothingChanged)
+         checkNothingChanged(nothingChangedVerifier);
+
       createMovie(scs);
       BambooTools.reportTestFinishedMessage();
 
@@ -233,30 +224,30 @@ public class DRCFlatGroundWalkingTest
       {
          BambooTools.createMovieAndDataWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(scs, 1);
       }
-      if (KEEP_SCS_UP)
-      {
-         BambooTools.sleepForever();
-      }
    }
+
    boolean setupForCheatingUsingGroundHeightAtForFootstepProvider = false;
 
-   private SimulationConstructionSet setupScs(DRCRobotWalkingControllerParameters drcControlParameters, GroundProfile groundProfile, boolean useVelocityAndHeadingScript, boolean cheatWithGroundHeightAtForFootstep)
+   private SimulationConstructionSet setupScs(DRCRobotWalkingControllerParameters drcControlParameters, GroundProfile groundProfile,
+           boolean useVelocityAndHeadingScript, boolean cheatWithGroundHeightAtForFootstep)
    {
       AutomaticSimulationRunner automaticSimulationRunner = null;
       DRCGuiInitialSetup guiInitialSetup = createGUIInitialSetup();
-   
+
       DRCRobotModel robotModel = DRCRobotModel.getDefaultRobotModel();
       double timePerRecordTick = 0.005;
       int simulationDataBufferSize = 16000;
       boolean doChestOrientationControl = true;
-      
+
       RobotInitialSetup<SDFRobot> robotInitialSetup = new SquaredUpDRCRobotInitialSetup(0.0);
       DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(groundProfile);
-      
-      DRCFlatGroundWalkingTrack drcFlatGroundWalkingTrack =  new DRCFlatGroundWalkingTrack(drcControlParameters, robotModel, robotInitialSetup, guiInitialSetup, scsInitialSetup, useVelocityAndHeadingScript, automaticSimulationRunner, timePerRecordTick, simulationDataBufferSize, doChestOrientationControl, cheatWithGroundHeightAtForFootstep);
-      
+
+      DRCFlatGroundWalkingTrack drcFlatGroundWalkingTrack = new DRCFlatGroundWalkingTrack(drcControlParameters, robotModel, robotInitialSetup, guiInitialSetup,
+                                                               scsInitialSetup, useVelocityAndHeadingScript, automaticSimulationRunner, timePerRecordTick,
+                                                               simulationDataBufferSize, doChestOrientationControl, cheatWithGroundHeightAtForFootstep);
+
       SimulationConstructionSet scs = drcFlatGroundWalkingTrack.getSimulationConstructionSet();
-      
+
       setupCameraForUnitTest(scs);
 
       return scs;
@@ -267,19 +258,19 @@ public class DRCFlatGroundWalkingTest
       ArrayList<String> stringsToIgnore = new ArrayList<String>();
       stringsToIgnore.add("nano");
       stringsToIgnore.add("milli");
-      
+
       boolean writeNewBaseFile = nothingChangedVerifier.getWriteNewBaseFile();
-      
+
       double maxPercentDifference = 0.001;
       nothingChangedVerifier.verifySameResultsAsPreviously(maxPercentDifference, stringsToIgnore);
       assertFalse("Had to write new base file. On next run nothing should change", writeNewBaseFile);
    }
-   
+
    private DRCGuiInitialSetup createGUIInitialSetup()
    {
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true);
       guiInitialSetup.setIsGuiShown(SHOW_GUI);
-      
+
       return guiInitialSetup;
    }
 
