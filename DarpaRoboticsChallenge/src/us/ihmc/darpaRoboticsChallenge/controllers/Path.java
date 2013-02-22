@@ -14,4 +14,6 @@ public interface Path
 
    public void activateGraphics(PathActivationLevel activationLevel);
 
+   public void removeFootStep(Footstep footstep);
+
 }
