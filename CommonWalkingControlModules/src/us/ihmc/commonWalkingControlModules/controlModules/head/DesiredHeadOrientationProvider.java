@@ -5,10 +5,10 @@ import java.util.HashMap;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
-import us.ihmc.utilities.io.streamingData.AbstractStreamingDataConsumer;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.net.ObjectConsumer;
 import us.ihmc.utilities.screwTheory.RigidBody;
 
 /**
@@ -17,21 +17,20 @@ import us.ihmc.utilities.screwTheory.RigidBody;
  */
 public class DesiredHeadOrientationProvider
 {
-   private static final boolean DEBUG = false;
    private HeadOrientationControlModule headOrientationControlModule;
 
-   private AbstractStreamingDataConsumer<HeadOrientationPacket> headOrientationPacketConsumer;
+   private ObjectConsumer<HeadOrientationPacket> headOrientationPacketConsumer;
    private final HashMap<String, ReferenceFrame> availableHeadControlFrames = new HashMap<String, ReferenceFrame>();
    private final HashMap<String, RigidBody> availableBases = new HashMap<String, RigidBody>();
    
    private double desiredJointForExtendedNeckPitchRangeAngle = 0.0;
 
-   public DesiredHeadOrientationProvider(long headOrientationControlIdentifier)
+   public DesiredHeadOrientationProvider()
    {
-      headOrientationPacketConsumer = new HeadOrientationPacketConsumer(headOrientationControlIdentifier);
+      headOrientationPacketConsumer = new HeadOrientationPacketConsumer();
    }
 
-   public AbstractStreamingDataConsumer<HeadOrientationPacket> getHeadOrientationPacketConsumer()
+   public ObjectConsumer<HeadOrientationPacket> getHeadOrientationPacketConsumer()
    {
       return headOrientationPacketConsumer;
    }
@@ -51,20 +50,10 @@ public class DesiredHeadOrientationProvider
       }
    }
 
-   private class HeadOrientationPacketConsumer extends AbstractStreamingDataConsumer<HeadOrientationPacket>
+   private class HeadOrientationPacketConsumer implements ObjectConsumer<HeadOrientationPacket>
    {
-      public HeadOrientationPacketConsumer(long objectIdentifier)
+      public void consumeObject(HeadOrientationPacket packet)
       {
-         super(objectIdentifier, HeadOrientationPacket.class);
-      }
-
-      protected void processPacket(HeadOrientationPacket packet)
-      {
-         if (DEBUG)
-         {
-            System.out.println(packet);
-         }
-
          if (headOrientationControlModule != null)
          {
             ReferenceFrame frame = availableHeadControlFrames.get(packet.getFrameName());

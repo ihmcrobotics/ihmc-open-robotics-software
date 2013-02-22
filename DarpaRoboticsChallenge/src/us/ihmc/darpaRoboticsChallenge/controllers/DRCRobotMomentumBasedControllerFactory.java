@@ -13,7 +13,7 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotParameters;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.remote.DataObjectServer;
+import us.ihmc.utilities.net.ObjectCommunicator;
 import us.ihmc.utilities.remote.serialization.JointConfigurationDataSender;
 import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
@@ -29,12 +29,17 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject
 public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
 {
    private final HighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory;
-   private final boolean setUpServer;
+   private final ObjectCommunicator server;
 
-   public DRCRobotMomentumBasedControllerFactory(HighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory, boolean setUpServer)
+   
+   public DRCRobotMomentumBasedControllerFactory(HighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory)
+   {
+      this(highLevelHumanoidControllerFactory, null);
+   }
+   public DRCRobotMomentumBasedControllerFactory(HighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory, ObjectCommunicator server)
    {
       this.highLevelHumanoidControllerFactory = highLevelHumanoidControllerFactory;
-      this.setUpServer = setUpServer;
+      this.server = server;
    }
 
    public RobotController getController(FullRobotModel fullRobotModel, CommonWalkingReferenceFrames referenceFrames, double controlDT, DoubleYoVariable yoTime,
@@ -47,7 +52,7 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
 
       YoVariableRegistry specificRegistry = new YoVariableRegistry("specific");
 
-      if (setUpServer)
+      if (server != null)
          createJointPositionServer(fullRobotModel);
 
       SideDependentList<ContactablePlaneBody> bipedFeet = new SideDependentList<ContactablePlaneBody>();
@@ -80,12 +85,9 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
 
    private void createJointPositionServer(FullRobotModel fullRobotModel)
    {
-      int port = DRCConfigParameters.ROBOT_DATA_RECEIVER_PORT_NUMBER;
-      long identifier = DRCConfigParameters.JOINT_DATA_IDENTIFIER;
       long updatePeriodInMilliseconds = DRCConfigParameters.ROBOT_JOINT_SERVER_UPDATE_MILLIS;
-      DataObjectServer server = new DataObjectServer(port);
-      JointConfigurationDataSender jointConfigurationDataSender = new JointConfigurationDataSender(identifier, fullRobotModel.getElevator());
-      jointConfigurationDataSender.registerConsumer(server);
+      JointConfigurationDataSender jointConfigurationDataSender = new JointConfigurationDataSender(fullRobotModel.getElevator());
+      jointConfigurationDataSender.addConsumer(server);
       jointConfigurationDataSender.startUpdateThread(updatePeriodInMilliseconds);
    }
 

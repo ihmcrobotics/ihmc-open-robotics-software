@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
+import us.ihmc.utilities.net.ObjectCommunicator;
 import us.ihmc.utilities.polarLidarGeometry.LIDARScanDefinition;
 import us.ihmc.utilities.polarLidarGeometry.PolarLidarScanDefinition;
 
@@ -20,8 +21,11 @@ public class DRCLidar
          System.out.println("DRCLidar: PolarLidar is ON. This lidar passes less data, and also includes the transforms from when the data was produced.");
    }
 
-   static void setupDRCRobotLidar(HumanoidRobotSimulation<SDFRobot> sdfRobotSimulation)
+   static void setupDRCRobotLidar(HumanoidRobotSimulation<SDFRobot> sdfRobotSimulation, ObjectCommunicator objectCommunicator)
    {
+      Graphics3DAdapter graphics3dAdapter = sdfRobotSimulation.getSimulationConstructionSet().getGraphics3dAdapter();
+      SimulatedLIDARSensorUpdateParameters updateParameters = new SimulatedLIDARSensorUpdateParameters();
+      updateParameters.setTransponderSettings(objectCommunicator);
       if (DRCConfigParameters.STREAM_VANILLA_LIDAR)
       {
          System.out.println("Streaming Lidar");
@@ -32,9 +36,6 @@ public class DRCLidar
          {
             if (lidarSensors.size() >=2)
                System.err.println("DRCLidar: Only one LIDAR unit is supported at this time. Found "+lidarSensors.size() +" LIDAR units. Will use only the first.");
-            Graphics3DAdapter graphics3dAdapter = sdfRobotSimulation.getSimulationConstructionSet().getGraphics3dAdapter();
-            SimulatedLIDARSensorUpdateParameters updateParameters = new SimulatedLIDARSensorUpdateParameters();
-            updateParameters.setTransponderSettings(DRCConfigParameters.LIDAR_DATA_PORT_NUMBER, DRCConfigParameters.LIDAR_DATA_IDENTIFIER);
             RayTraceLIDARSensor rayTraceLIDARSensor = lidarSensors.get(0); // the only one.
             rayTraceLIDARSensor.setWorld(graphics3dAdapter);
             if (DRCConfigParameters.OVERRIDE_DRC_LIDAR_CONFIG)
@@ -59,9 +60,6 @@ public class DRCLidar
          {
             if (lidarSensors.size() >=2)
                System.err.println("DRCLidar: Only one LIDAR unit is supported at this time. Found "+lidarSensors.size() +" LIDAR units. Will use only the first.");
-            Graphics3DAdapter graphics3dAdapter = sdfRobotSimulation.getSimulationConstructionSet().getGraphics3dAdapter();
-            SimulatedLIDARSensorUpdateParameters updateParameters = new SimulatedLIDARSensorUpdateParameters();
-            updateParameters.setTransponderSettings(DRCConfigParameters.LIDAR_DATA_PORT_NUMBER, DRCConfigParameters.LIDAR_DATA_IDENTIFIER);
             FastPolarRayCastLIDAR polarLidar = lidarSensors.get(0); // the only one.
             polarLidar.setWorld(graphics3dAdapter);
             if (DRCConfigParameters.OVERRIDE_DRC_LIDAR_CONFIG)

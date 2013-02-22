@@ -1,12 +1,10 @@
 package us.ihmc.graphics3DAdapter.camera;
 
 import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.net.Socket;
-import java.net.UnknownHostException;
 
-import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.net.ObjectConsumer;
+import us.ihmc.utilities.net.NetStateListener;
+import us.ihmc.utilities.net.ObjectCommunicator;
 
 import com.xuggle.ferry.IBuffer;
 import com.xuggle.xuggler.IPacket;
@@ -16,49 +14,69 @@ import com.xuggle.xuggler.IVideoPicture;
 import com.xuggle.xuggler.video.ConverterFactory;
 import com.xuggle.xuggler.video.IConverter;
 
-public class CompressedVideoDataClient implements Runnable
+public class CompressedVideoDataClient implements ObjectConsumer<VideoPacket>, NetStateListener
 {
-   private final String host;
-   private final int port;
-   private final VideoSettings settings;
    private final VideoStreamer videoStreamer;
+   private final VideoSettings settings;
    
-   public CompressedVideoDataClient(VideoSettings settings, String host, int port, VideoStreamer videoStreamer)
+   private IStreamCoder inputStreamCoder;
+   private final IVideoPicture pictureIn;
+   private final IConverter converter;
+   
+   public CompressedVideoDataClient(VideoSettings settings, ObjectCommunicator objectCommunicator, VideoStreamer videoStreamer)
    {
-      this.settings = settings;
-      this.host = host;
-      this.port = port;
       this.videoStreamer = videoStreamer;
+      this.settings = settings;
+      
+      objectCommunicator.attachStateListener(this);
+      objectCommunicator.attachListener(VideoPacket.class, this);
+      if(objectCommunicator.isConnected())
+      {
+         throw new RuntimeException("Do not connect the ObjectCommunicator before the video server is live");
+      }
+      
+      pictureIn = IVideoPicture.make(settings.getColorSpace(), settings.getWidth(), settings.getHeight());
+      
+      BufferedImage bufferedImage = new BufferedImage(settings.getWidth(), settings.getHeight(), BufferedImage.TYPE_3BYTE_BGR);
+      converter = ConverterFactory.createConverter(bufferedImage, settings.getColorSpace());
    }
    
-   public void run()
-   {
-      
-      
-      Socket clientSocket;
-      ObjectInputStream input;
-      do
-      {
-         try
-         {
-            clientSocket = new Socket(host, port);
-            input = new ObjectInputStream(clientSocket.getInputStream());
-            break;
-         }
-         catch (UnknownHostException e)
-         {
-            throw new RuntimeException("Cannot find host " + host);
-         }
-         catch (IOException e)
-         {
-            ThreadTools.sleep(1000);
-            continue;
-         }
-      }while(true);
-      System.out.println("Connected videoDataClient");
-      
 
-      IStreamCoder inputStreamCoder = IStreamCoder.make(Direction.DECODING, settings.getCodec());
+   @Override
+   public synchronized void consumeObject(VideoPacket packetData)
+   {
+      if(inputStreamCoder != null)
+      {
+         IPacket packet = IPacket.make(IBuffer.make(null, packetData.getData(), 0, packetData.getData().length));
+         inputStreamCoder.decodeVideo(pictureIn, packet, 0);
+         if(pictureIn.isComplete())
+         {
+            videoStreamer.updateImage(converter.toImage(pictureIn), packetData.getPosition(), packetData.getOrientation(), packetData.getFieldOfView());
+         }
+         else
+         {
+            System.out.println("Video packet is not complete");
+         }
+      }
+   }
+
+   public synchronized void close()
+   {
+      if(inputStreamCoder != null)
+      {
+         inputStreamCoder.close();
+         inputStreamCoder = null;
+      }
+   }
+
+   public synchronized void connected()
+   {
+      if(inputStreamCoder != null)
+      {
+         inputStreamCoder.close();
+      }
+      
+      inputStreamCoder = IStreamCoder.make(Direction.DECODING, settings.getCodec());
       inputStreamCoder.setNumPicturesInGroupOfPictures(settings.getNumberOfPicturesInGroupOfPictures());
       inputStreamCoder.setWidth(settings.getWidth());
       inputStreamCoder.setHeight(settings.getHeight());
@@ -68,43 +86,11 @@ public class CompressedVideoDataClient implements Runnable
       inputStreamCoder.setTimeBase(settings.getTimeBase());
 
       inputStreamCoder.open(null, null);
-      
-      
-      
-      
-      IVideoPicture pictureIn = IVideoPicture.make(settings.getColorSpace(), settings.getWidth(), settings.getHeight());
-      
-      BufferedImage bufferedImage = new BufferedImage(settings.getWidth(), settings.getHeight(), BufferedImage.TYPE_3BYTE_BGR);
-      IConverter converter = ConverterFactory.createConverter(bufferedImage, settings.getColorSpace());
+   }
 
-      
-      while(true)
-      {
-         try
-         {
-            VideoPacket packetData = (VideoPacket) input.readObject();
-            IPacket packet = IPacket.make(IBuffer.make(null, packetData.getData(), 0, packetData.getData().length));
-            inputStreamCoder.decodeVideo(pictureIn, packet, 0);
-            
-            if(pictureIn.isComplete())
-            {
-               videoStreamer.updateImage(converter.toImage(pictureIn), packetData.getPosition(), packetData.getOrientation(), packetData.getFieldOfView());
-            }
-            else
-            {
-               System.out.println("Video packet is not complete");
-            }
-         }
-         catch(IOException e)
-         {
-            System.err.println("Connection lost");
-            break;
-         }
-         catch (ClassNotFoundException e)
-         {
-            System.err.println(e.getMessage());
-         }
-      }
+   public void disconnected()
+   {
+      close();
    }
    
 }

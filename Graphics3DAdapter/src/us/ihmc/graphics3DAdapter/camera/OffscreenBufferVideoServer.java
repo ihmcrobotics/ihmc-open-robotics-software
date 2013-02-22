@@ -7,6 +7,7 @@ import javax.vecmath.Quat4d;
 
 import us.ihmc.graphics3DAdapter.CameraAdapter;
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
+import us.ihmc.utilities.net.ObjectCommunicator;
 
 public class OffscreenBufferVideoServer
 {
@@ -17,7 +18,7 @@ public class OffscreenBufferVideoServer
 
 
    public OffscreenBufferVideoServer(Graphics3DAdapter adapter, CameraMountList mountList, CameraConfiguration cameraConfiguration,
-         CameraTrackingAndDollyPositionHolder cameraTrackingAndDollyPositionHolder, VideoSettings settings, int port)
+         CameraTrackingAndDollyPositionHolder cameraTrackingAndDollyPositionHolder, VideoSettings settings, ObjectCommunicator networkServer)
    {
       ViewportAdapter viewport = adapter.createNewViewport(null, false, true);
       camera = viewport.getCamera();
@@ -28,7 +29,7 @@ public class OffscreenBufferVideoServer
       viewport.setCameraController(cameraController);
 
       CameraUpdater cameraUpdater = new CameraUpdater();
-      compressedVideoDataServer = new CompressedVideoDataServer(settings, port);
+      compressedVideoDataServer = new CompressedVideoDataServer(settings, networkServer);
       
 
       viewport.getCaptureDevice().streamTo(cameraUpdater, 25);
