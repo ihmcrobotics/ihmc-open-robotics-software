@@ -6,35 +6,35 @@ import java.util.Collection;
 import javax.vecmath.Point3d;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.utilities.io.streamingData.AbstractStreamingDataConsumer;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepData;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataList;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.net.ObjectConsumer;
 
 /**
  * User: Matt
  * Date: 1/18/13
  */
-public class FootstepPathConsumer extends AbstractStreamingDataConsumer<ArrayList>
+public class FootstepPathConsumer implements ObjectConsumer<FootstepDataList>
 {
    private boolean DEBUG = false;
    private FootstepPathCoordinator footstepPathCoordinator;
    private final Collection<? extends ContactablePlaneBody> rigidBodyList;
 
-   public FootstepPathConsumer(long dataIdentifier, Collection<? extends ContactablePlaneBody> rigidBodyList, FootstepPathCoordinator footstepPathCoordinator)
+   public FootstepPathConsumer(Collection<? extends ContactablePlaneBody> rigidBodyList, FootstepPathCoordinator footstepPathCoordinator)
    {
-      super(dataIdentifier, ArrayList.class);
       this.footstepPathCoordinator = footstepPathCoordinator;
       this.rigidBodyList = rigidBodyList;
    }
 
-   protected void processPacket(ArrayList footstepList)
+   public void consumeObject(FootstepDataList footstepList)
    {
       ArrayList<Footstep> footsteps = new ArrayList<Footstep>();
-      for (Object footstepObject : footstepList)
+      for (FootstepData footstepData : footstepList)
       {
-         FootstepData footstepData = (FootstepData) footstepObject;
          ContactablePlaneBody contactableBody = findContactableBodyByName(footstepData.getRigidBodyName());
 
          FramePose footstepPose = new FramePose(ReferenceFrame.getWorldFrame(), footstepData.getLocation(), footstepData.getOrientation());
@@ -59,7 +59,7 @@ public class FootstepPathConsumer extends AbstractStreamingDataConsumer<ArrayLis
          }
       }
 
-      footstepPathCoordinator.updatePath(footsteps);
+      footstepPathCoordinator.updatePath(footsteps); 
    }
 
    private ContactablePlaneBody findContactableBodyByName(String rigidBodyName)
@@ -74,4 +74,5 @@ public class FootstepPathConsumer extends AbstractStreamingDataConsumer<ArrayLis
 
       throw new RuntimeException("Rigid body not found: " + rigidBodyName);
    }
+
 }

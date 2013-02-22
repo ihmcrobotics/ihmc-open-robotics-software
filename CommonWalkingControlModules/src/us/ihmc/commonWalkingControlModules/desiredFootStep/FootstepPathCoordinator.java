@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import us.ihmc.utilities.io.streamingData.QueueBasedStreamingDataProducer;
-import us.ihmc.utilities.io.streamingData.StreamingDataTCPServer;
+import us.ihmc.utilities.net.ObjectCommunicator;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
@@ -21,24 +21,30 @@ public class FootstepPathCoordinator implements FootstepProvider
    private final BooleanYoVariable walk = new BooleanYoVariable("walk", registry);
    private final BooleanYoVariable isPaused = new BooleanYoVariable("isPaused", registry);
    private final QueueBasedStreamingDataProducer<FootstepStatus> footstepStatusDataProducer;
-   private final StreamingDataTCPServer streamingDataTCPServer;
    private Footstep stepInProgress = null;
 
+   
    public FootstepPathCoordinator()
+   {
+      this(null);
+   }
+   
+   public FootstepPathCoordinator(ObjectCommunicator objectCommunicator)
    {
       setPaused(false);
       setWalk(true);
 
-      footstepStatusDataProducer = new QueueBasedStreamingDataProducer<FootstepStatus>(4444L);
-      streamingDataTCPServer = new StreamingDataTCPServer(4444);
-      streamingDataTCPServer.registerStreamingDataProducer(footstepStatusDataProducer);
-      streamingDataTCPServer.startOnAThread();
+      footstepStatusDataProducer = new QueueBasedStreamingDataProducer<FootstepStatus>();
+      if(objectCommunicator != null)
+      {
+         footstepStatusDataProducer.addConsumer(objectCommunicator);
+      }
       footstepStatusDataProducer.startProducingData();
    }
 
-   public FootstepPathCoordinator(YoVariableRegistry parentRegistry)
+   public FootstepPathCoordinator(ObjectCommunicator objectCommunicator, YoVariableRegistry parentRegistry)
    {
-      this();
+      this(objectCommunicator);
       parentRegistry.addChild(registry);
    }
 
@@ -128,6 +134,5 @@ public class FootstepPathCoordinator implements FootstepProvider
 
    public void close()
    {
-      streamingDataTCPServer.close();
    }
 }

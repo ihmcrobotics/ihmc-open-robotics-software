@@ -1,27 +1,23 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
-import us.ihmc.utilities.io.streamingData.AbstractStreamingDataConsumer;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.PauseCommand;
+import us.ihmc.utilities.net.ObjectConsumer;
 
 /**
  * User: Matt
  * Date: 1/18/13
  */
-public class PauseCommandConsumer extends AbstractStreamingDataConsumer<Boolean>
+public class PauseCommandConsumer implements ObjectConsumer<PauseCommand>
 {
-   private static final boolean DEBUG = false;
    private FootstepPathCoordinator footstepPathCoordinator;
 
-   public PauseCommandConsumer(long dataIdentifier, FootstepPathCoordinator footstepPathCoordinator)
+   public PauseCommandConsumer(FootstepPathCoordinator footstepPathCoordinator)
    {
-      super(dataIdentifier, Boolean.class);
       this.footstepPathCoordinator = footstepPathCoordinator;
    }
 
-   protected void processPacket(Boolean packet)
+   public void consumeObject(PauseCommand object)
    {
-      if (DEBUG)
-         System.out.println("PauseCommandConsumer: processPacket");
-      Boolean isPaused = (Boolean) packet;
-      footstepPathCoordinator.setPaused(isPaused);
+      footstepPathCoordinator.setPaused(object.isPaused());
    }
 }
