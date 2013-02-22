@@ -74,10 +74,9 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractAdjustableD
       setYoVariables(swingLegSide, footToWorldRotation, footstepPosition.getVectorCopy());
    }
    
-   //TODO: integrate this and make sure it works
-   public Footstep predictFootstepAfterDesiredFootstep(RobotSide supportLegSide)
+   @Override
+   public Footstep predictFootstepAfterDesiredFootstep(RobotSide supportLegSide, Footstep desiredFootstep)
    {
-      Footstep desiredFootstep = updateAndGetDesiredFootstep(supportLegSide);
       RobotSide futureSwingLegSide = supportLegSide;
       ReferenceFrame futureSupportAnkleZUpFrame = desiredFootstep.getPoseReferenceFrame();
       ReferenceFrame desiredHeadingFrame = desiredHeadingControlModule.getDesiredHeadingFrame();

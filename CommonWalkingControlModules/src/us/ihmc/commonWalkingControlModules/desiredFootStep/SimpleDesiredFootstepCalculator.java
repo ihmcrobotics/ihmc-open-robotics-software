@@ -129,4 +129,9 @@ public class SimpleDesiredFootstepCalculator implements DesiredFootstepCalculato
 //    stepPitch.set(0.0);
 //    stepRoll.set(0.0);
    }
+
+   public Footstep predictFootstepAfterDesiredFootstep(RobotSide supportLegSide, Footstep desiredFootstep)
+   {
+      return null;
+   }
 }

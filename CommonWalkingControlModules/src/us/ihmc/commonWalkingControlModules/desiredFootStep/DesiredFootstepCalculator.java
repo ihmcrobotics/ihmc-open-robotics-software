@@ -7,4 +7,6 @@ public interface DesiredFootstepCalculator
    public abstract Footstep updateAndGetDesiredFootstep(RobotSide supportLegSide);
 
    public abstract void initializeDesiredFootstep(RobotSide supportLegSide);
+   
+   public abstract Footstep predictFootstepAfterDesiredFootstep(RobotSide supportLegSide, Footstep desiredFootstep);
 }
