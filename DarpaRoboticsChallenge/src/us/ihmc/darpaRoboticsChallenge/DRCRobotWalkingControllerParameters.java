@@ -57,7 +57,7 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
       };
    }
 
-   public boolean checkOrbitalCondition()
+   public boolean checkOrbitalEnergyCondition()
    {
       return false;
    }
