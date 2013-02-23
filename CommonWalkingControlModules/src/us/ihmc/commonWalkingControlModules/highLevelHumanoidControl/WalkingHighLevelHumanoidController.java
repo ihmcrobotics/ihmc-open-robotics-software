@@ -89,9 +89,7 @@ import com.yobotics.simulationconstructionset.util.PDController;
 import com.yobotics.simulationconstructionset.util.PIDController;
 import com.yobotics.simulationconstructionset.util.graphics.BagOfBalls;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameOrientation;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePose;
 import com.yobotics.simulationconstructionset.util.statemachines.State;
 import com.yobotics.simulationconstructionset.util.statemachines.StateMachine;
@@ -183,7 +181,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
    private final HeadOrientationControlModule headOrientationControlModule;
    private final DesiredHeadOrientationProvider desiredHeadOrientationProvider;
 
-   private final boolean checkOrbitalCondition;
+   private final boolean checkOrbitalEnergyCondition;
    private final SideDependentList<EnumMap<LimbName, GeometricJacobian>> jacobians = SideDependentList.createListOfEnumMaps(LimbName.class);
    private final ControlFlowInputPort<OrientationTrajectoryData> desiredPelvisOrientationTrajectoryInputPort;
    private final ICPBasedMomentumRateOfChangeControlModule icpBasedMomentumRateOfChangeControlModule;
@@ -312,7 +310,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       RobotSide trailingLeg = leadingLeg.getOppositeSide();
       onEdgeInitialAngleProviders.get(trailingLeg).set(this.trailingFootPitch.getDoubleValue());
 
-      this.checkOrbitalCondition = walkingControllerParameters.checkOrbitalCondition();
+      this.checkOrbitalEnergyCondition = walkingControllerParameters.checkOrbitalEnergyCondition();
 
       for (RobotSide robotSide : RobotSide.values())
       {
@@ -866,7 +864,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
    {
       public boolean checkCondition()
       {
-         if (checkOrbitalCondition)
+         if (checkOrbitalEnergyCondition)
          {
             // TODO: not really nice, but it'll do:
             FlatThenPolynomialCoMHeightTrajectoryGenerator flatThenPolynomialCoMHeightTrajectoryGenerator =

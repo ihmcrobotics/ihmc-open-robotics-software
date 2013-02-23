@@ -12,7 +12,7 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
       
    public abstract String[] getChestOrientationControlJointNames();
 
-   public abstract boolean checkOrbitalCondition();
+   public abstract boolean checkOrbitalEnergyCondition();
 
    public abstract double getGroundReactionWrenchBreakFrequencyHertz();
 
