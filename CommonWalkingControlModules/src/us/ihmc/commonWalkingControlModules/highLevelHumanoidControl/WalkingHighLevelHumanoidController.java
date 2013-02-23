@@ -1115,7 +1115,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       double footHeight = DesiredFootstepCalculatorTools.computeMinZPointInFrame(footToWorldTransform, supportFoot, worldFrame).getZ();
       double comHeight = centerOfMass.getZ() - footHeight;
       double omega0 = CapturePointCalculator.computeOmega0ConstantHeight(gravity, comHeight);
-      this.omega0.set(omega0);
+      setOmega0(omega0);
       computeCapturePoint();
 
       if (resetDesiredICPToCurrentAtStartOfSwing)
@@ -1177,7 +1177,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       icpBasedMomentumRateOfChangeControlModule.getBipedSupportPolygonsInputPort().setData(bipedSupportPolygons);
 
       CapturePointData capturePointData = new CapturePointData();
-      capturePointData.set(capturePoint.getFramePoint2dCopy(), omega0.getDoubleValue());
+      capturePointData.set(capturePoint.getFramePoint2dCopy(), getOmega0());
       icpBasedMomentumRateOfChangeControlModule.getCapturePointInputPort().setData(capturePointData);
 
       CapturePointTrajectoryData capturePointTrajectoryData = new CapturePointTrajectoryData();

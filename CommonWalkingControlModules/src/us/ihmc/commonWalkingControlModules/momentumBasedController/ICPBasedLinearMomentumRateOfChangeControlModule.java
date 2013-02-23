@@ -101,6 +101,9 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule implements ICPBased
       FrameVector linearMomentumRateOfChange = computeGroundReactionForce(desiredCMP, fZ);
       linearMomentumRateOfChange.changeFrame(centerOfMassFrame);
       linearMomentumRateOfChange.setZ(linearMomentumRateOfChange.getZ() - totalMass * gravityZ);
+      
+      if (linearMomentumRateOfChange.containsNaN())
+         throw new RuntimeException("linearMomentumRateOfChange = " + linearMomentumRateOfChange);
 
       momentumRateOfChangeData.setLinearMomentumRateOfChange(linearMomentumRateOfChange);
    }

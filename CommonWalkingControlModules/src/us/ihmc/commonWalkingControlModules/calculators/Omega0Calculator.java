@@ -55,7 +55,10 @@ public class Omega0Calculator
          deltaZ = -pseudoCoP.getZ();
       }
 
-      return Math.sqrt(fz / (totalMass * deltaZ));
+      double omega0 = Math.sqrt(fz / (totalMass * deltaZ));
+      if (Double.isNaN(omega0))
+         throw new RuntimeException("omega0 is NaN");
+      return omega0;
    }
 
 }
