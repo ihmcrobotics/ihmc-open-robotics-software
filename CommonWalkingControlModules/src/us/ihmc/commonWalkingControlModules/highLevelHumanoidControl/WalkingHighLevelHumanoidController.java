@@ -123,7 +123,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
                                                                          WalkingState.TRANSFER_TO_RIGHT_SUPPORT);
 
    private final YoVariableDoubleProvider transferTimeProvider = new YoVariableDoubleProvider("transferTime", registry);
-   private final DoubleYoVariable doubleSupportTime = new DoubleYoVariable("doubleSupportTime", registry);
+   private final DoubleYoVariable stopInDoubleSupporTrajectoryTime = new DoubleYoVariable("doubleSupportTime", registry);
 
    private final FinalDesiredICPCalculator finalDesiredICPCalculator;
 
@@ -289,7 +289,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       amountToBeInsideSingleSupport.set(0.0);
       amountToBeInsideDoubleSupport.set(0.03);    // 0.02);    // TODO: necessary for stairs...
       transferTimeProvider.set(0.2);    // 0.5);    // 0.2);    // 0.6;    // 0.3
-      doubleSupportTime.set(0.5);
+      stopInDoubleSupporTrajectoryTime.set(0.5);
       this.userDesiredPelvisPitch.set(desiredPelvisPitch);
       this.stayOnToes.set(stayOntoes);
       this.trailingFootPitch.set(trailingFootPitch);
@@ -587,7 +587,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
                if (transferToSide == null)
                {
                   finalDesiredICP = getDoubleSupportFinalDesiredICPForDoubleSupportStance();
-                  trajectoryTime = doubleSupportTime.getDoubleValue();
+                  trajectoryTime = stopInDoubleSupporTrajectoryTime.getDoubleValue();
                }
                else
                {
