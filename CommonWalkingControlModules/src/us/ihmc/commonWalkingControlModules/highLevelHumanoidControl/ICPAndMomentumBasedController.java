@@ -46,7 +46,7 @@ public abstract class ICPAndMomentumBasedController extends MomentumBasedControl
    protected final EnumYoVariable<RobotSide> supportLeg;
    protected final DoubleYoVariable desiredCoMHeightAcceleration;
    protected final YoFramePoint capturePoint;
-   protected final DoubleYoVariable omega0;
+   private final DoubleYoVariable omega0;
    private final Omega0Calculator omega0Calculator;
 
    public ICPAndMomentumBasedController(FullRobotModel fullRobotModel, CenterOfMassJacobian centerOfMassJacobian, CommonWalkingReferenceFrames referenceFrames,
@@ -94,11 +94,18 @@ public abstract class ICPAndMomentumBasedController extends MomentumBasedControl
       return omega0.getDoubleValue();
    }
 
+   protected void setOmega0(double omega0)
+   {
+      if (Double.isNaN(omega0))
+         throw new RuntimeException("omega0 is NaN");
+      this.omega0.set(omega0);
+   }
+   
    protected void computeCapturePoint()
    {
       FramePoint centerOfMass = computeCenterOfMass();
       FrameVector centerOfMassVelocity = computeCenterOfMassVelocity();
-      FramePoint2d capturePoint = CapturePointCalculator.computeCapturePoint(centerOfMass, centerOfMassVelocity, omega0.getDoubleValue());
+      FramePoint2d capturePoint = CapturePointCalculator.computeCapturePoint(centerOfMass, centerOfMassVelocity, getOmega0());
       capturePoint.changeFrame(this.capturePoint.getReferenceFrame());
       this.capturePoint.set(capturePoint.getX(), capturePoint.getY(), 0.0);
    }
@@ -151,7 +158,7 @@ public abstract class ICPAndMomentumBasedController extends MomentumBasedControl
          if (admissibleGroundReactionWrench.getLinearPartCopy().getZ() == 0.0)
             admissibleGroundReactionWrench.set(gravitationalWrench);    // FIXME: hack to resolve circularity
 
-         omega0.set(omega0Calculator.computeOmega0(cops, admissibleGroundReactionWrench));
+         setOmega0(omega0Calculator.computeOmega0(cops, admissibleGroundReactionWrench));
       }
    }
 

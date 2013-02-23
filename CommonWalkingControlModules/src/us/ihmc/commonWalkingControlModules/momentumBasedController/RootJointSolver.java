@@ -96,7 +96,7 @@ public class RootJointSolver
       CommonOps.subEquals(check, hdot);
       CommonOps.subEquals(check, b);
       if (!MatrixFeatures.isConstantVal(check, 0.0, 1e-7))
-         throw new RuntimeException();
+         throw new RuntimeException("Check not zero. Check = " + check);
 
       rootJoint.setDesiredAcceleration(vdotRoot, 0);
       jointAccelerationValidMap.put(rootJoint, true);
