@@ -9,8 +9,8 @@ import us.ihmc.projectM.R2Sim02.initialSetup.RobotInitialSetup;
 public class SquaredUpDRCRobotInitialSetup implements RobotInitialSetup<SDFRobot>
 {
    private final double groundZ;
-   Transform3D rootToWorld = new Transform3D();
-   Vector3d offset = new Vector3d();
+   private Transform3D rootToWorld = new Transform3D();
+   protected Vector3d offset = new Vector3d();
    
    public SquaredUpDRCRobotInitialSetup()
    {
