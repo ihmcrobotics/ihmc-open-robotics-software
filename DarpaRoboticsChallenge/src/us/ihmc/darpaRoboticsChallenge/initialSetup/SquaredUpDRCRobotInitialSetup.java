@@ -9,6 +9,8 @@ import us.ihmc.projectM.R2Sim02.initialSetup.RobotInitialSetup;
 public class SquaredUpDRCRobotInitialSetup implements RobotInitialSetup<SDFRobot>
 {
    private final double groundZ;
+   Transform3D rootToWorld = new Transform3D();
+   Vector3d offset = new Vector3d();
    
    public SquaredUpDRCRobotInitialSetup()
    {
@@ -41,11 +43,9 @@ public class SquaredUpDRCRobotInitialSetup implements RobotInitialSetup<SDFRobot
       robot.getOneDoFJoint("r_leg_uay").setQ(-0.4);
       
       
-      Transform3D rootToWorld = new Transform3D();
       robot.getRootJointToWorldTransform(rootToWorld);
-      Vector3d offset = new Vector3d();
-      rootToWorld.get(offset);
       
+      rootToWorld.get(offset);
       offset.setZ(offset.getZ() - 0.04 + groundZ); //TODO: What is this 0.04 magic number? Name it a variable.
       
       robot.setPositionInWorld(offset);
