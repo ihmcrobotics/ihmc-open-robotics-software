@@ -36,7 +36,7 @@ import us.ihmc.utilities.math.overheadPath.TurnThenStraightOverheadPath;
 
 import com.yobotics.simulationconstructionset.Robot;
 
-public class TurningThenStraightFootstepGeneratorTest
+public class DRCRobotBasedFootstepGeneratorTest
 {
    private static final double eps = 1e-7;
    private final static boolean VISUALIZE = false;
@@ -47,7 +47,6 @@ public class TurningThenStraightFootstepGeneratorTest
    FullRobotModel fullRobotModel;
    ReferenceFrames referenceFrames;
    SideDependentList<ContactablePlaneBody> bipedFeet;
-
 
 
    @Test
@@ -101,7 +100,7 @@ public class TurningThenStraightFootstepGeneratorTest
    {
       TurningThenStraightFootstepGenerator footstepGenerator = new TurningThenStraightFootstepGenerator(bipedFeet);
       footstepGenerator.setFootstepPath(pathToDestination);
-      footstepGenerator.setTurningStepsStepAngle(Math.PI / 6);
+      footstepGenerator.setTurningStepsHipOpeningStepAngle(Math.PI / 6);
       footstepGenerator.setStraightWalkingStepLength(0.4);
       footstepGenerator.setStraightWalkingStepWidth(0.2);
       footstepGenerator.setTurningStepsStepWidth(0.35);

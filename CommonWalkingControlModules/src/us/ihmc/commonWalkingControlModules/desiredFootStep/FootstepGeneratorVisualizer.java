@@ -22,7 +22,6 @@ import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FramePose2d;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.math.overheadPath.OverheadPath;
 import us.ihmc.utilities.math.overheadPath.TurnThenStraightOverheadPath;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTestTools;
@@ -43,7 +42,7 @@ public class FootstepGeneratorVisualizer
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private static final boolean DEBUG = true;
+   private static final boolean DEBUG = false;
 
    private final ArrayList<YoFramePose> contactPoses = new ArrayList<YoFramePose>();
    private final ArrayList<YoFrameConvexPolygon2d> contactPolygonsWorld = new ArrayList<YoFrameConvexPolygon2d>();
@@ -167,10 +166,10 @@ public class FootstepGeneratorVisualizer
          sixDoFJoints.set(robotSide, sixDoFJoint);
 
          RigidBody rigidBody = ScrewTestTools.addRandomRigidBody(robotSide.getCamelCaseNameForStartOfExpression() + "Foot", random, sixDoFJoint);
-         double forward = 0.2;
-         double back = -0.2;
-         double left = 0.1;
-         double right = -0.1;
+         double forward = 0.12;
+         double back = -0.07;
+         double left = 0.06;
+         double right = -0.06;
          RectangularContactableBody contactableBody = new RectangularContactableBody(rigidBody, soleFrame, forward, back, left, right);
 
          bipedFeet.set(robotSide, contactableBody);
@@ -252,8 +251,8 @@ public class FootstepGeneratorVisualizer
 
    public static TurnThenStraightOverheadPath generateSimpleOverheadPath()
    {
-      FramePose2d startPoint = new FramePose2d(worldFrame, new Point2d(0.0, 0.0), 0.0);
-      FramePoint2d endPoint = new FramePoint2d(worldFrame, new Point2d(-5.0, 0.0));
+      FramePose2d startPoint = new FramePose2d(worldFrame, new Point2d(0.0, 0.0), Math.PI);
+      FramePoint2d endPoint = new FramePoint2d(worldFrame, new Point2d(0.0, -3.0));
       TurnThenStraightOverheadPath footstepPath = new TurnThenStraightOverheadPath(startPoint, endPoint, 0.0);
 
       return footstepPath;
