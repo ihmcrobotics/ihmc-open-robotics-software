@@ -16,8 +16,8 @@ public class DRCConfigParameters
 
    // Networking
    public static final String SCS_MACHINE_IP_ADDRESS = "localhost"; //"10.100.0.37";
-   public static final int NETWORK_TCP_PORT = 4242;
-   public static final int NETWORK_UDP_PORT = 4243;
+   public static final int NETWORK_TCP_PORT = 4893;
+   public static final int NETWORK_UDP_PORT = NETWORK_TCP_PORT + 1;
    
    public static final String OPERATOR_INTERFACE_IP_ADDRESS = "localhost"; //"10.4.8.1";
    
