@@ -47,7 +47,7 @@ public class FootstepDataTest
    public void testPassingFootstepData() throws IOException
    {
       // setup comms
-      int port = 7777;
+      int port = 8833;
       QueueBasedStreamingDataProducer<FootstepData> queueBasedStreamingDataProducer = new QueueBasedStreamingDataProducer<FootstepData>();
       ObjectCommunicator tcpServer = createAndStartStreamingDataTCPServer(queueBasedStreamingDataProducer, port);
       FootstepDataConsumer footstepDataConsumer = new FootstepDataConsumer();
@@ -78,7 +78,7 @@ public class FootstepDataTest
    public void testPassingFootstepPath() throws IOException
    {
       // setup comms
-      int port = 2222;
+      int port = 8833;
       QueueBasedStreamingDataProducer<FootstepDataList> queueBasedStreamingDataProducer = new QueueBasedStreamingDataProducer<FootstepDataList>();
       ObjectCommunicator tcpServer = createAndStartStreamingDataTCPServer(queueBasedStreamingDataProducer, port);
 
@@ -106,7 +106,7 @@ public class FootstepDataTest
    public void testPassingPauseCommand() throws IOException
    {
       // setup comms
-      int port = 3333;
+      int port = 8833;
       QueueBasedStreamingDataProducer<PauseCommand> queueBasedStreamingDataProducer = new QueueBasedStreamingDataProducer<PauseCommand>();
       ObjectCommunicator tcpServer = createAndStartStreamingDataTCPServer(queueBasedStreamingDataProducer, port);
 
@@ -145,7 +145,7 @@ public class FootstepDataTest
    public void testPassingFootstepPathAndPauseCommands() throws IOException
    {
       // Create one server for two types of data
-      int pathPort = 2222;
+      int pathPort = 8833;
 
       QueueBasedStreamingDataProducer<FootstepDataList> pathQueueBasedStreamingDataProducer = new QueueBasedStreamingDataProducer<FootstepDataList>();
 
@@ -215,7 +215,7 @@ public class FootstepDataTest
    public void testPassingFootstepStatus() throws IOException
    {
       // setup comms
-      int port = 7777;
+      int port = 8833;
       QueueBasedStreamingDataProducer<FootstepData> queueBasedStreamingDataProducer = new QueueBasedStreamingDataProducer<FootstepData>();
       ObjectCommunicator tcpServer = createAndStartStreamingDataTCPServer(queueBasedStreamingDataProducer, port);
 
