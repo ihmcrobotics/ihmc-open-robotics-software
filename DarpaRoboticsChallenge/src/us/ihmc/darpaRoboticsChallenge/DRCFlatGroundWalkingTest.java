@@ -16,6 +16,7 @@ import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.projectM.R2Sim02.initialSetup.RobotInitialSetup;
+import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
@@ -54,6 +55,8 @@ public class DRCFlatGroundWalkingTest
          blockingSimulationRunner.destroySimulation();
          blockingSimulationRunner = null;
       }
+      
+      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
 
