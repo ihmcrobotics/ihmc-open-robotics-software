@@ -32,20 +32,24 @@ public class YoKalmanFilter implements KalmanFilter
 {
    private final YoVariableRegistry registry;
 
-   // dynamics
+   // Dynamics (x = F x + G u + w; y = H x + v)
+   // x is the state, u is the input, w is process noise.
+   // v is sensor noise.
    private final DenseMatrix64F F;
    private final DenseMatrix64F G;
    private final DenseMatrix64F H;
 
-   // noise model
+   // Noise model 
+   // Q is the covariance matrix for the process noise.
+   // R is the covariance matrix for the sensor noise.
    private final DenseMatrix64F Q;
    private final DenseMatrix64F R;
 
-   // sytem state estimate
+   // System state estimate (x is state, P is state noise covariance matrix) 
    private final DenseMatrix64F x;
    private final DenseMatrix64F P;
 
-   // these are predeclared for efficiency reasons
+   // These are pre-declared for efficiency reasons
    private final DenseMatrix64F a, b;
    private final DenseMatrix64F r, S, S_inv, c, d;
    private final DenseMatrix64F K;
