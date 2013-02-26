@@ -6,6 +6,7 @@ import static org.junit.Assert.fail;
 import java.util.ArrayList;
 
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.SdfLoader.SDFRobot;
@@ -41,6 +42,12 @@ public class DRCFlatGroundWalkingTest
 
    private BlockingSimulationRunner blockingSimulationRunner;
 
+   @Before
+   public void showMemoryUsageBeforeTest()
+   {
+      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
+   }
+   
    @After
    public void destroySimulationAndRecycleMemory()
    {
