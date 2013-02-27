@@ -12,7 +12,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.MultiContact
 import us.ihmc.darpaRoboticsChallenge.controllers.DRCRobotMomentumBasedControllerFactory;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotParameters;
-import us.ihmc.darpaRoboticsChallenge.initialSetup.PushUpDRCRobotInitialSetup;
+import us.ihmc.darpaRoboticsChallenge.initialSetup.MultiContactDRCRobotInitialSetup;
 import us.ihmc.projectM.R2Sim02.initialSetup.RobotInitialSetup;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
@@ -33,13 +33,13 @@ public class DRCMultiContact
       DRCSCSInitialSetup scsInitialSetup;
 
 
-//    RobotSide[] footContactSides = RobotSide.values();
-//    RobotSide[] handContactSides = new RobotSide[]{RobotSide.LEFT};
-//    RobotInitialSetup<SDFRobot> robotInitialSetup = new MultiContactDRCRobotInitialSetup();
-
       RobotSide[] footContactSides = RobotSide.values();
-      RobotSide[] handContactSides = RobotSide.values();
-      RobotInitialSetup<SDFRobot> robotInitialSetup = new PushUpDRCRobotInitialSetup();
+      RobotSide[] handContactSides = new RobotSide[]{RobotSide.LEFT};
+      RobotInitialSetup<SDFRobot> robotInitialSetup = new MultiContactDRCRobotInitialSetup();
+
+//      RobotSide[] footContactSides = RobotSide.values();
+//      RobotSide[] handContactSides = RobotSide.values();
+//      RobotInitialSetup<SDFRobot> robotInitialSetup = new PushUpDRCRobotInitialSetup();
 
       DRCRobotJointMap jointMap = new DRCRobotJointMap(robotModel);
 
