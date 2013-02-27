@@ -14,10 +14,10 @@ public class MultiContactDRCRobotInitialSetup implements RobotInitialSetup<SDFRo
       robot.getOneDoFJoint("r_arm_elx").setQ(-1.6);
       
       // left arm
-      robot.getOneDoFJoint("l_arm_usy").setQ(-1.2);
-      robot.getOneDoFJoint("l_arm_shx").setQ(-0.9);
-      robot.getOneDoFJoint("l_arm_ely").setQ(1.0);
-      robot.getOneDoFJoint("l_arm_elx").setQ(1.3);
+      robot.getOneDoFJoint("l_arm_usy").setQ(-0.4);
+      robot.getOneDoFJoint("l_arm_shx").setQ(-0.7);
+      robot.getOneDoFJoint("l_arm_ely").setQ(1.8);
+      robot.getOneDoFJoint("l_arm_elx").setQ(1.4);
       robot.getOneDoFJoint("l_arm_mwx").setQ(0.5);
      
       // left leg
