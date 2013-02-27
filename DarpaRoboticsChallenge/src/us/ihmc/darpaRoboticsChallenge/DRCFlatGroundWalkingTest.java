@@ -278,7 +278,7 @@ public class DRCFlatGroundWalkingTest
 
    private DRCGuiInitialSetup createGUIInitialSetup()
    {
-      DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true);
+      DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false);
       guiInitialSetup.setIsGuiShown(SHOW_GUI);
 
       return guiInitialSetup;

@@ -108,7 +108,7 @@ public class DRCMultiContact
    {
       AutomaticSimulationRunner automaticSimulationRunner = null;
 
-      DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(false);
+      DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(false, true);
 
       double timePerRecordTick = 0.005;
       int simulationDataBufferSize = 16000;

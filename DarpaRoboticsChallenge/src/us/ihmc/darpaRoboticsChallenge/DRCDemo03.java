@@ -115,7 +115,7 @@ public class DRCDemo03
    {
       AutomaticSimulationRunner automaticSimulationRunner = null;
 
-      DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(false);
+      DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(false, false);
 
       double timePerRecordTick = 0.005;
       int simulationDataBufferSize = 16000;
