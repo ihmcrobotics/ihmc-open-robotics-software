@@ -7,8 +7,8 @@ state.bHat = [0; 0; 0];
 % initial noise covariances
 pQ = 1e-3;
 pOmega = 1e-3;
-pOmegaB = 0; %1e-3;
-pB = 1e-3;
+pOmegaB = 1e-3; % 10 (can be used to make bias estimation faster)
+pB = 1e-3; % 10 (can be used to make bias estimation faster)
 PQ = pQ * eye(3);
 POmegaB = [pOmega * eye(3), -pOmegaB * eye(3);
            -pOmegaB * eye(3), pB * eye(3)];
@@ -23,8 +23,8 @@ b0 = [0; -0.05; 0.05];
 qPhi = 0;
 qOmega = 1e-2;
 qB = 1;
-rPhi = 1e-1;
-rOmega = 1e-1;
+rPhi = 1e-2;
+rOmega = 1e-2;
 
 covariances.QPhi = qPhi * eye(3);
 covariances.QB = qB * eye(3);
@@ -44,6 +44,7 @@ qHat = zeros(4, n);
 omegaHat = zeros(3, n);
 bHat = zeros(3, n);
 
+tic
 for i = 1 : n
     % input
     input.omegad = data.omegad(:, i);
@@ -60,6 +61,10 @@ for i = 1 : n
     omegaHat(:, i) = state.omegaHat;
     bHat(:, i) = state.bHat;
 end
+filteringTime = toc;
+timePerStep = filteringTime / length(data.t);
+msPerStep = timePerStep * 1e3;
+disp(['filtering time = ' num2str(filteringTime) ' [s], time per step = ' num2str(msPerStep) ' [ms]'])
 
 % data processing
 yawPitchRollActual = zeros(3, n);
@@ -123,7 +128,7 @@ end
 
 function data = createSimulatedData(dt, tMax, qB, qOmega, rPhi, rOmega, q0, omega0, b0)
 
-randn('seed', 623);
+randn('seed', 13);
 
 t = 0 : dt : tMax;
 n = length(t);
