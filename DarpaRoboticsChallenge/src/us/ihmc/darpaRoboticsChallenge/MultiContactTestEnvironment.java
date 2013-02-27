@@ -91,7 +91,7 @@ public class MultiContactTestEnvironment implements CommonAvatarEnvironmentInter
       transformToWorld.get(centroid);
 
       int nPoints = 5;
-      double radius = 0.3;
+      double radius = 0.23;
       ConvexPolygon2d convexPolygon = createContactPolygon(centroid, nPoints, radius);
 
       TerrainObject contact = new RotatableConvexPolygonTerrainObject(normal, convexPolygon, centroid.getZ(), YoAppearance.DarkGray());
