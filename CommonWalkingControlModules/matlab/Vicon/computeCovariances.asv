@@ -1,0 +1,6 @@
+
+
+
+viconCovariance = (cov(throwAwayRepeated(p_x)) + cov(throwAwayRepeated(p_y)) + cov(throwAwayRepeated(p_z))) / 3;
+accelerationCovariance = (cov(pdd_x_world) + cov(pdd_y_world) + cov(pdd_z_world)) / 3;
+orientationCovariance = (cov(p_yaw) + cov(p_pitch) + cov(p_roll)) / 3;
