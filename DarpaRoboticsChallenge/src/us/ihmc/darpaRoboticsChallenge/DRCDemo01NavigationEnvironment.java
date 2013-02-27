@@ -44,6 +44,8 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
    private static final int ROCKS_PER_ROW = 4;
    private static final boolean DIFFICULT_STEPPING_STONES = false;    // for path 8, if true creates an extension to the path with harder steps
 
+   private boolean addLimboBar = false;
+
 // private static final double FLOOR_THICKNESS = 0.001;
 
    public DRCDemo01NavigationEnvironment()
@@ -60,6 +62,27 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
 
       // addRocks();
       setUpGround();
+
+      if (addLimboBar)
+      {
+         double height = 1;
+         double width = 1.5;
+         AppearanceDefinition color = YoAppearance.DarkGray();
+
+         setUpWall(1, width / 2, 0.125, 0.125, height, 0, color);
+         YawableBoxTerrainObject object = setUpWall(1, -width / 2, 0.125, 0.125, height, 0, color);
+         Transform3D transform3d = new Transform3D();
+         transform3d.setTranslation(new Vector3d(0, 0, 1));
+         object.applyTransform(transform3d);
+
+
+         combinedTerrainObject.getLinkGraphics().translate(0, width / 2, height);
+         combinedTerrainObject.getLinkGraphics().addCube(0.125, width, 0.125, color);
+
+         // object.
+
+//       object.getLinkGraphics().add
+      }
    }
 
    private void setUpPath1()
@@ -102,8 +125,10 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       AppearanceDefinition color = YoAppearance.DarkGray();
 
       createCoursePath(8, 0);
-//      float rampHeight = 0.3f;
-      float rampHeight = 0.625f;
+
+      //float rampHeight = 0.3f;
+
+       float rampHeight = 0.625f;
 
       setUpRamp(5.0f, 0.0f, 2.0f, 3.0f, rampHeight, color);
       setUpWall(7.0f, 0.0f, .5f, 1.0f, rampHeight, 0, color);
@@ -405,7 +430,7 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       this.combinedTerrainObject.addTerrainObject(rock);
    }
 
-   private void setUpWall(double x, double y, double width, double length, double height, double yawDegrees, AppearanceDefinition app)
+   private YawableBoxTerrainObject setUpWall(double x, double y, double width, double length, double height, double yawDegrees, AppearanceDefinition app)
    {
       Transform3D location = new Transform3D();
       location.rotZ(Math.toRadians(yawDegrees));
@@ -413,6 +438,9 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       location.setTranslation(new Vector3d(x, y, height / 2));
       YawableBoxTerrainObject newBox = new YawableBoxTerrainObject(location, length, width, height, app);
       combinedTerrainObject.addTerrainObject(newBox);
+
+      return newBox;
+
    }
 
    private void setUpCone(double x, double y, double bottomWidth, double topWidth, double height, AppearanceDefinition app)
