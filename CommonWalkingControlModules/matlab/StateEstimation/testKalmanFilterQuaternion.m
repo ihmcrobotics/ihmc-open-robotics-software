@@ -20,11 +20,11 @@ omega0 = [0.1; -0.1; 0.05];
 b0 = [0; -0.05; 0.05];
 
 % noise parameters
-qPhi = 1e-3;
-qOmega = 1e-3;
-qB = 1e-5;
-rPhi = 1e-5;
-rOmega = 1e-3;
+qPhi = 0;
+qOmega = 1e-2;
+qB = 1;
+rPhi = 1e-1;
+rOmega = 1e-1;
 
 covariances.QPhi = qPhi * eye(3);
 covariances.QB = qB * eye(3);
@@ -34,7 +34,7 @@ covariances.ROmega = rOmega * eye(3);
 
 % simulated data
 dt = 1e-3;
-tMax = 15;
+tMax = 45;
 data = createSimulatedData(dt, tMax, qB, qOmega, rPhi, rOmega, q0, omega0, b0);
 
 n = length(data.t);
