@@ -36,4 +36,6 @@ public interface TrackingDollyCameraController extends CameraController, CameraP
    public void setKeyFrameTime(int index);
 
    public void setUseCameraKeyPoints(boolean b);
+   
+   public void copyPositionTrackingDollyConfiguration(TrackingDollyCameraController otherCamera);
 }

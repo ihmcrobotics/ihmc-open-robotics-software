@@ -1350,4 +1350,34 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
    {
       clipDistanceFar = far;
    }
+
+   public void copyPositionTrackingDollyConfiguration(TrackingDollyCameraController otherCamera)
+   {
+      setTracking(otherCamera.isTracking(), otherCamera.isTrackingX(), otherCamera.isTrackingY(), otherCamera.isTrackingZ());
+      setDolly(otherCamera.isDolly(), otherCamera.isDollyX(), otherCamera.isDollyY(), otherCamera.isDollyZ());
+      
+      setCameraPosition(otherCamera.getCamX(), otherCamera.getCamY(), otherCamera.getCamZ());
+      
+      setFixPosition(otherCamera.getFixX(), otherCamera.getFixY(), otherCamera.getFixZ());
+      
+      setDollyOffsets(otherCamera.getDollyXOffset(), otherCamera.getDollyYOffset(), otherCamera.getDollyZOffset());
+      setTrackingOffsets(otherCamera.getTrackingXOffset(), otherCamera.getTrackingYOffset(), otherCamera.getTrackingZOffset());
+      
+      
+      if (otherCamera instanceof ClassicCameraController)
+      {
+         ClassicCameraController classicOtherCamera = (ClassicCameraController) otherCamera;
+         
+         keyFrameCamPos = classicOtherCamera.keyFrameCamPos;
+         keyFrameFixPos = classicOtherCamera.keyFrameFixPos;
+         keyFrameTimes  = classicOtherCamera.keyFrameTimes ;
+
+         toggleCameraKeyPoints = classicOtherCamera.toggleCameraKeyPoints;
+         cameraKeyPointIndex = classicOtherCamera.cameraKeyPointIndex;
+         cameraKeyPoints = classicOtherCamera.cameraKeyPoints;
+         
+         System.out.println("Copying camera keys");
+      }
+      
+   }
 }
