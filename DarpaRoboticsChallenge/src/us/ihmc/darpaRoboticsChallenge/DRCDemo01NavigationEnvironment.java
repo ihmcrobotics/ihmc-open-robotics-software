@@ -102,7 +102,9 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       AppearanceDefinition color = YoAppearance.DarkGray();
 
       createCoursePath(8, 0);
-      float rampHeight = 0.3f;
+//      float rampHeight = 0.3f;
+      float rampHeight = 0.625f;
+
       setUpRamp(5.0f, 0.0f, 2.0f, 3.0f, rampHeight, color);
       setUpWall(7.0f, 0.0f, .5f, 1.0f, rampHeight, 0, color);
 
@@ -163,10 +165,10 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
 
       // angled Door
       // door1
-      setUpWall(0.859f, -9.335f, 0.973f, 0.157f, 2.5f, -115.0f, color);
+      setUpWall(0.769f, -9.293f, 0.973f, 0.157f, 2.5f, -115.0f, color);
 
       // door2
-      setUpWall(-0.842f, -8.542f, 0.973f, 0.157f, 2.54f, -115.0f, color);
+      setUpWall(-.642f, -8.635f, 0.973f, 0.157f, 2.54f, -115.0f, color);
 
       // box2
       setUpWall(-0.485f, -6.573f, 0.5f, 0.5f, 1.0f, -45, color);
@@ -199,10 +201,10 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       AppearanceDefinition color = YoAppearance.DarkGray();
       double courseAngle = 135;
       createCoursePath(8, courseAngle);
-      int numberOfSteps = 8;
-      double rise = 0.2032;
+      int numberOfSteps = 3;
+      double rise = 0.2;
       double startDistance = 4.0;
-      double run = 0.2286;
+      double run = 0.4;
 
       for (int i = 0; i < numberOfSteps; i++)
       {
