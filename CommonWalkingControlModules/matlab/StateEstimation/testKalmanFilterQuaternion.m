@@ -1,16 +1,28 @@
 function testKalmanFilterQuaternion()
-% initial state
-% state.qHat = [0; 0; 0; 1];
-state.qHat = [0.6726; 0.0671; -0.0205; 0.7367];
-state.qHat = normalizeQuaternion(state.qHat);
+% initial estimated state
+state.qHat = [0; 0; 0; 1];
 state.omegaHat = [0; 0; 0];
-state.bHat = [0; 0; 1e-3];
-state.P = blkdiag(1e-5 * eye(3), 1e-5 * eye(3), 1e-1 * eye(3));
+state.bHat = [0; 0; 0];
+
+% initial noise covariances
+pQ = 1e-3;
+pOmega = 1e-3;
+pOmegaB = 0; %1e-3;
+pB = 1e-3;
+PQ = pQ * eye(3);
+POmegaB = [pOmega * eye(3), -pOmegaB * eye(3);
+           -pOmegaB * eye(3), pB * eye(3)];
+state.P = blkdiag(PQ, POmegaB);
+
+% initial real state
+q0 = normalizeQuaternion([0.6726; 0.0671; -0.0205; 0.7367]);
+omega0 = [0.1; -0.1; 0.05];
+b0 = [0; -0.05; 0.05];
 
 % noise parameters
 qPhi = 1e-3;
 qOmega = 1e-3;
-qB = 1;
+qB = 1e-5;
 rPhi = 1e-5;
 rOmega = 1e-3;
 
@@ -23,7 +35,7 @@ covariances.ROmega = rOmega * eye(3);
 % simulated data
 dt = 1e-3;
 tMax = 15;
-data = createSimulatedData(dt, tMax, qB, qOmega, rPhi, rOmega, state.qHat, state.omegaHat, state.bHat);
+data = createSimulatedData(dt, tMax, qB, qOmega, rPhi, rOmega, q0, omega0, b0);
 
 n = length(data.t);
 
