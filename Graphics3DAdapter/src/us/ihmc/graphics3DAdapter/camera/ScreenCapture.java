@@ -11,8 +11,6 @@ import javax.imageio.ImageIO;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
-import sun.awt.image.ImageFormatException;
-
 
 public class ScreenCapture implements Serializable
 {
@@ -39,10 +37,6 @@ public class ScreenCapture implements Serializable
       try
       {
          bytesOut = bufferedImageToByteArray(bufferedImage);
-      }
-      catch (ImageFormatException e)
-      {
-         e.printStackTrace();
       }
       catch (IOException e)
       {
@@ -71,7 +65,7 @@ public class ScreenCapture implements Serializable
       return fov;
    }
    
-   public static byte[] bufferedImageToByteArray(BufferedImage image) throws ImageFormatException, IOException
+   public static byte[] bufferedImageToByteArray(BufferedImage image) throws IOException
    {
       ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
