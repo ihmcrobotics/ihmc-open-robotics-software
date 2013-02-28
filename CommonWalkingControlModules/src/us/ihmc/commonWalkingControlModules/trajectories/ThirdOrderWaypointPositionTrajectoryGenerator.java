@@ -205,7 +205,7 @@ public class ThirdOrderWaypointPositionTrajectoryGenerator implements PositionTr
             }
          }
 
-         TreeMap<Pair<Double, Double>, EnumMap<Direction, YoPolynomial>> splineMap = new TreeMap<Pair<Double, Double>, EnumMap<Direction, YoPolynomial>>();
+         TreeMap<Pair<Double, Double>, EnumMap<Direction, YoPolynomial>> splineMap = new TreeMap<Pair<Double, Double>, EnumMap<Direction, YoPolynomial>>(ConcatenatedSplines.getComparatorForTreeMap());
          splineMap.put(new Pair<Double, Double>(0.0, stepTime / 3.0), spaceSplines.get(0));
          splineMap.put(new Pair<Double, Double>(stepTime / 3.0, (2.0 * stepTime) / 3.0), spaceSplines.get(1));
          splineMap.put(new Pair<Double, Double>((2.0 * stepTime) / 3.0, stepTime), spaceSplines.get(2));
