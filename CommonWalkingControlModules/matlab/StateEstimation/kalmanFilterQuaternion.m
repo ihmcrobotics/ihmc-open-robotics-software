@@ -21,7 +21,7 @@ ROmega = covariances.ROmega;
 QContinuous = blkdiag(QPhi, QOmega, QB);
 RContinuous = blkdiag(RPhi, ROmega);
 BW = eye(9);
-[F, G, Q, R] = discretize2(A, B, BW, QContinuous, RContinuous, dt);
+[F, G, Q, R] = discretize(A, B, BW, QContinuous, RContinuous, dt);
 H = [eye(3), zeros(3, 6);
      zeros(3, 3), eye(3), eye(3)];
 
@@ -96,7 +96,10 @@ end
 
 
 function [A, B] = createContinuousTimeSystem(omegaHat)
-A = [-tilde(omegaHat), eye(3), zeros(3, 3);
+% A = [-tilde(omegaHat), eye(3), zeros(3, 3);
+%      zeros(3, 9);
+%      zeros(3, 9)];
+A = [-1/2 * tilde(omegaHat), 1/2 * eye(3), zeros(3, 3);
      zeros(3, 9);
      zeros(3, 9)];
 B = [zeros(3, 3);
