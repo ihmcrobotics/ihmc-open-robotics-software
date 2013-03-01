@@ -173,16 +173,32 @@ public class ThirdOrderWaypointPositionTrajectoryGenerator implements PositionTr
       }
 
       timeIntoStep.set(0.0);
+      
+      double[] distances = new double[4];
+      double[] times = new double[4];
+      double totalDist = 0;
+      
+      distances[0] = 0.0;
+      for(int i = 1; i < 4; i++)
+      {
+    	  double distInc = positions[i - 1].distance(positions[i]);
+    	  totalDist += distInc;
+    	  distances[i] = totalDist;
+      }
+      
+      for(int i = 0; i < 4; i++)
+      {
+    	  times[i] = distances[i] * stepTime / totalDist;
+      }
 
       for (Direction direction : Direction.values())
       {
-         double[] sValues = new double[] {0.0, 1.0 / 3.0, 2.0 / 3.0, 1.0};
 
          int[] cubicSplines = new int[] {0, 2, 1};
          for (int i : cubicSplines)
          {
-            double s0 = sValues[i];
-            double sf = sValues[i + 1];
+            double t0 = times[i];
+            double tf = times[i + 1];
             double z0 = positions[i].get(direction);
             double zd0 = velocities[i].get(direction);
             double zf = positions[i + 1].get(direction);
@@ -190,23 +206,24 @@ public class ThirdOrderWaypointPositionTrajectoryGenerator implements PositionTr
             YoPolynomial spaceSpline = spaceSplines.get(i).get(direction);
             if ((i == 0) || (i == 2))
             {
-               spaceSpline.setCubic(s0, sf, z0, zd0, zf, zdf);
+               spaceSpline.setCubic(t0, tf, z0, zd0, zf, zdf);
             }
             else if (i == 1)
             {
-               spaceSplines.get(0).get(direction).compute(s0);
+               spaceSplines.get(0).get(direction).compute(t0);
                double zdd0 = spaceSplines.get(0).get(direction).getAcceleration();
-               spaceSplines.get(2).get(direction).compute(sf);
+               spaceSplines.get(2).get(direction).compute(tf);
                double zddf = spaceSplines.get(2).get(direction).getAcceleration();
 
-               spaceSpline.setQuintic(s0, sf, z0, zd0, zdd0, zf, zdf, zddf);
+               spaceSpline.setQuintic(t0, tf, z0, zd0, zdd0, zf, zdf, zddf);
             }
          }
 
          TreeMap<Pair<Double, Double>, EnumMap<Direction, YoPolynomial>> splineMap = new TreeMap<Pair<Double, Double>, EnumMap<Direction, YoPolynomial>>(ConcatenatedSplines.getComparatorForTreeMap());
-         splineMap.put(new Pair<Double, Double>(0.0, stepTime / 3.0), spaceSplines.get(0));
-         splineMap.put(new Pair<Double, Double>(stepTime / 3.0, (2.0 * stepTime) / 3.0), spaceSplines.get(1));
-         splineMap.put(new Pair<Double, Double>((2.0 * stepTime) / 3.0, stepTime), spaceSplines.get(2));
+         for(int i = 0; i < 3; i++)
+         {
+        	 splineMap.put(new Pair<Double, Double>(times[i], times[i + 1]), spaceSplines.get(i));
+         }
 
          concatenatedSplines = new ConcatenatedSplines(splineMap, referenceFrame, arcLengthPrecisionRating);
          concatenatedSplines = new ConcatenatedSplines(concatenatedSplines, desiredNumberOfSplines, arcLengthPrecisionRating);
@@ -218,3 +235,15 @@ public class ThirdOrderWaypointPositionTrajectoryGenerator implements PositionTr
       return timeIntoStep.getDoubleValue() >= stepTime.getDoubleValue();
    }
 }
+
+
+
+
+
+
+
+
+
+
+
+
