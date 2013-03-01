@@ -41,7 +41,6 @@ public class ThirdOrderWaypointPositionTrajectoryGenerator implements PositionTr
    private final ReferenceFrame referenceFrame;
 
    private final int desiredNumberOfSplines;
-   private final double allowedPercentDifferenceBetweenDesiredAndActualArcLengths;
    private final int arcLengthPrecisionRating;
 
    private ConcatenatedSplines concatenatedSplines;
@@ -49,7 +48,7 @@ public class ThirdOrderWaypointPositionTrajectoryGenerator implements PositionTr
    public ThirdOrderWaypointPositionTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, DoubleProvider stepTimeProvider,
            PositionProvider initialPositionProvider, VectorProvider initalVelocityProvider, PositionProvider finalPositionProvider,
            VectorProvider finalDesiredVelocityProvider, YoVariableRegistry parentRegistry, PositionProvider firstIntermediatePosition,
-           PositionProvider secondIntermediatePosition, int desiredNumberOfSplines, double allowedPercentDifferenceBetweenDesiredAndActualArcLengths, int arcLengthPrecisionRating)
+           PositionProvider secondIntermediatePosition, int desiredNumberOfSplines, int arcLengthPrecisionRating)
    {
       this.registry = new YoVariableRegistry(namePrefix + namePostFix);
 
@@ -86,7 +85,6 @@ public class ThirdOrderWaypointPositionTrajectoryGenerator implements PositionTr
       parentRegistry.addChild(registry);
 
       this.desiredNumberOfSplines = desiredNumberOfSplines;
-      this.allowedPercentDifferenceBetweenDesiredAndActualArcLengths = allowedPercentDifferenceBetweenDesiredAndActualArcLengths;
       this.arcLengthPrecisionRating = arcLengthPrecisionRating;
    }
 
@@ -211,7 +209,7 @@ public class ThirdOrderWaypointPositionTrajectoryGenerator implements PositionTr
          splineMap.put(new Pair<Double, Double>((2.0 * stepTime) / 3.0, stepTime), spaceSplines.get(2));
 
          concatenatedSplines = new ConcatenatedSplines(splineMap, referenceFrame, arcLengthPrecisionRating);
-         concatenatedSplines = new ConcatenatedSplines(concatenatedSplines, desiredNumberOfSplines, allowedPercentDifferenceBetweenDesiredAndActualArcLengths, arcLengthPrecisionRating);
+         concatenatedSplines = new ConcatenatedSplines(concatenatedSplines, desiredNumberOfSplines, arcLengthPrecisionRating);
       }
    }
 
