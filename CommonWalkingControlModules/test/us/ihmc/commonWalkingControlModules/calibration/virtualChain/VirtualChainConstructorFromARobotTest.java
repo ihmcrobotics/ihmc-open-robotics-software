@@ -13,6 +13,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -21,14 +22,17 @@ import us.ihmc.utilities.math.geometry.ZUpFrame;
 public class VirtualChainConstructorFromARobotTest
 {
    @Before
-   public void setUp() throws Exception
+   public void showMemoryUsageBeforeTest()
    {
+      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
    }
-
+   
    @After
-   public void tearDown() throws Exception
+   public void showMemoryUsageAfterTest()
    {
+      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
+   
 
    @Test
    public void testOneAtZero()

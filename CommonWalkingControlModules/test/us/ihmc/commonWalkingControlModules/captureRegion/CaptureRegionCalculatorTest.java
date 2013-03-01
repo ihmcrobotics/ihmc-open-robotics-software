@@ -16,6 +16,7 @@ import org.junit.Test;
 
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
+import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
@@ -33,14 +34,17 @@ public class CaptureRegionCalculatorTest
    private final boolean SHOW_GUI = false;
    
    @Before
-   public void setUp() throws Exception
+   public void showMemoryUsageBeforeTest()
    {
+      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
    }
-
+   
    @After
-   public void tearDown() throws Exception
+   public void showMemoryUsageAfterTest()
    {
+      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
+   
    
    @Test
    public void testOne()

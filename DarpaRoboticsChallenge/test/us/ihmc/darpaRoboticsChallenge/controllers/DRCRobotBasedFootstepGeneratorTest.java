@@ -9,6 +9,8 @@ import java.util.List;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.SdfLoader.JaxbSDFLoader;
@@ -28,6 +30,7 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotParameters;
 import us.ihmc.darpaRoboticsChallenge.userInterface.DRCOperatorUserInterface;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
+import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FramePose2d;
@@ -43,11 +46,24 @@ public class DRCRobotBasedFootstepGeneratorTest
    private final static boolean SIDESTEP = false;
    private final static boolean DEBUG_S_PARAM = false;
    public static final ReferenceFrame WORLD_FRAME = ReferenceFrames.getWorldFrame();
-   List<Footstep> footSteps = new ArrayList<Footstep>();
-   FullRobotModel fullRobotModel;
-   ReferenceFrames referenceFrames;
-   SideDependentList<ContactablePlaneBody> bipedFeet;
+   private List<Footstep> footSteps = new ArrayList<Footstep>();
+   private FullRobotModel fullRobotModel;
+   private ReferenceFrames referenceFrames;
+   private SideDependentList<ContactablePlaneBody> bipedFeet;
 
+   
+   @Before
+   public void showMemoryUsageBeforeTest()
+   {
+      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
+   }
+   
+   @After
+   public void showMemoryUsageAfterTest()
+   {
+      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
+   }
+   
 
    @Test
    public void testStraightLinePath()
