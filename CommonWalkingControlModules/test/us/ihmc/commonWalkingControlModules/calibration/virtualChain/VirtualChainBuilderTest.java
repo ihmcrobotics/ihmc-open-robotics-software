@@ -12,6 +12,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -25,14 +26,17 @@ public class VirtualChainBuilderTest
    private static Random random = new Random(105L);
 
    @Before
-   public void setUp() throws Exception
+   public void showMemoryUsageBeforeTest()
    {
+      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
    }
-
+   
    @After
-   public void tearDown() throws Exception
+   public void showMemoryUsageAfterTest()
    {
+      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
+   
 
    @Test
    public void testOne()

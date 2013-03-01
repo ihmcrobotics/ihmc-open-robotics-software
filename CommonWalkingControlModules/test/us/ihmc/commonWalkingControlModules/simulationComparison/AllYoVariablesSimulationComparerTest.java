@@ -8,8 +8,11 @@ import java.util.ArrayList;
 
 import javax.vecmath.Vector3d;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import us.ihmc.utilities.MemoryTools;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.Joint;
@@ -36,11 +39,17 @@ public class AllYoVariablesSimulationComparerTest
 	
 	DoubleYoVariable doubleYoVariableA12;
 
-	
-	public AllYoVariablesSimulationComparerTest()
-	{
-		
-	}
+	 @Before
+	   public void showMemoryUsageBeforeTest()
+	   {
+	      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
+	   }
+	   
+	   @After
+	   public void showMemoryUsageAfterTest()
+	   {
+	      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
+	   }
 	
 	@Before
 	public void setUp()

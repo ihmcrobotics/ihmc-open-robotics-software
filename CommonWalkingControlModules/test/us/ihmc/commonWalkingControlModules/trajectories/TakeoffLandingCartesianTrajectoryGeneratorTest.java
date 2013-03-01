@@ -7,8 +7,11 @@ import static org.junit.Assert.fail;
 import java.util.ArrayList;
 import java.util.EnumMap;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.math.Differentiator;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.Direction;
@@ -20,6 +23,18 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public class TakeoffLandingCartesianTrajectoryGeneratorTest
 {
+   @Before
+   public void showMemoryUsageBeforeTest()
+   {
+      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
+   }
+   
+   @After
+   public void showMemoryUsageAfterTest()
+   {
+      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
+   }
+   
    @Test
    public void testOne()
    {

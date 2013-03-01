@@ -10,8 +10,11 @@ import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -26,6 +29,18 @@ import us.ihmc.utilities.test.JUnitTools;
 public class CenterOfPressureResolverTest
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   
+   @Before
+   public void showMemoryUsageBeforeTest()
+   {
+      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
+   }
+   
+   @After
+   public void showMemoryUsageAfterTest()
+   {
+      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
+   }
    
    @Test
    public void testCenterOfPressureResolverSimpleCaseWithNoTorque()

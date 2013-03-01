@@ -13,6 +13,8 @@ import javax.vecmath.Quat4d;
 import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.WrenchDistributorTools;
@@ -20,6 +22,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.FlatGroundPlaneC
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNodeType;
+import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
@@ -41,6 +44,18 @@ public class GroundReactionWrenchDistributorTest
    private static final boolean VISUALIZE = false;
    private static boolean DEBUG = false;
 
+   @Before
+   public void showMemoryUsageBeforeTest()
+   {
+      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
+   }
+   
+   @After
+   public void showMemoryUsageAfterTest()
+   {
+      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
+   }
+   
    @Test
    public void testSimpleWrenchDistributionWithGeometricFlatGroundDistributor()
    {

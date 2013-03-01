@@ -2,11 +2,26 @@ package us.ihmc.commonWalkingControlModules.terrain;
 
 import static org.junit.Assert.assertEquals;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
+
+import us.ihmc.utilities.MemoryTools;
 
 public class VaryingStairGroundProfileTest
 {
-
+   @Before
+   public void showMemoryUsageBeforeTest()
+   {
+      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
+   }
+   
+   @After
+   public void showMemoryUsageAfterTest()
+   {
+      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
+   }
+   
    @Test
    public void test()
    {

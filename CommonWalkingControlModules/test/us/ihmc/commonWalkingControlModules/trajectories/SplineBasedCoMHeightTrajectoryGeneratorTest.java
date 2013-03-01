@@ -8,6 +8,8 @@ import java.util.List;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
@@ -16,6 +18,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.NonFlatGroundPlaneCont
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootSpoof;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepPoseFinder;
+import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
@@ -32,6 +35,18 @@ public class SplineBasedCoMHeightTrajectoryGeneratorTest
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final FootstepPoseFinder poseFinder = new FootstepPoseFinder();
 
+   @Before
+   public void showMemoryUsageBeforeTest()
+   {
+      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
+   }
+   
+   @After
+   public void showMemoryUsageAfterTest()
+   {
+      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
+   }
+   
    @Test
    public void raisedFlatSingleSupportCoMHeightTrajectoryTest()
    {

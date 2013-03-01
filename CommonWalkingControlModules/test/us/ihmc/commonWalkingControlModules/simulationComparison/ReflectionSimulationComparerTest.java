@@ -9,7 +9,11 @@ import java.util.Collection;
 
 import javax.vecmath.Vector3d;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
+
+import us.ihmc.utilities.MemoryTools;
 
 import com.yobotics.simulationconstructionset.FloatingJoint;
 import com.yobotics.simulationconstructionset.IntegerYoVariable;
@@ -26,7 +30,18 @@ import com.yobotics.simulationconstructionset.util.simulationTesting.SimulationC
 public class ReflectionSimulationComparerTest
 {
 
-  
+   @Before
+   public void showMemoryUsageBeforeTest()
+   {
+      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
+   }
+   
+   @After
+   public void showMemoryUsageAfterTest()
+   {
+      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
+   }
+   
    @Test
    public void testTwoEmptySimulations()
    {
