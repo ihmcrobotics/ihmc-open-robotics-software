@@ -25,10 +25,14 @@ public class ViconClient
    private String myIP;
    private int myPort = 4444;
 
-   private ViconClient(String ip) throws Exception
+   public static final String DEFAULT_VICON_HOST_MACHINE_ADDRESS = "10.4.1.100";
+   public static final int DEFAULT_VICON_HOST_MACHINE_PORT = 7777;
+
+
+   private ViconClient(String ip, int port) throws Exception
    {
       viconServer = new RemoteConnection();
-      viconServer.connect(ip);
+      viconServer.connect(ip, port);
 
       ArrayList<String> availableModels = getAvailableModels();
       System.out.println("available models = " + availableModels);
@@ -52,7 +56,7 @@ public class ViconClient
    {
       if (viconSingleton == null)
       {
-         viconSingleton = new ViconClient("10.4.1.100");
+         viconSingleton = new ViconClient(DEFAULT_VICON_HOST_MACHINE_ADDRESS, DEFAULT_VICON_HOST_MACHINE_PORT);
       }
 
       return viconSingleton;
@@ -62,7 +66,7 @@ public class ViconClient
    {
       if (viconSingleton == null)
       {
-         viconSingleton = new ViconClient(ip);
+         viconSingleton = new ViconClient(ip, DEFAULT_VICON_HOST_MACHINE_PORT);
       }
 
       return viconSingleton;
@@ -303,7 +307,7 @@ public class ViconClient
 
       try
       {
-         ViconClient client = new ViconClient(ip);
+         ViconClient client = new ViconClient(ip,  DEFAULT_VICON_HOST_MACHINE_PORT);
          ArrayList<String> availableModels = client.getAvailableModels();
          String modelName = availableModels.get(0);
          long startTime = System.currentTimeMillis();
