@@ -48,7 +48,7 @@ public class DRCConfigParameters
 
    public static final long ROBOT_JOINT_SERVER_UPDATE_MILLIS = 100;
 
-   public static final boolean STREAM_VANILLA_LIDAR = false;
+//   public static final boolean STREAM_VANILLA_LIDAR = false;  getting rid of the vanilla lidar.
    public static final boolean STREAM_POLAR_LIDAR = true;
 
    public static final VideoSettings VIDEOSETTINGS = new VideoSettingsH264LowLatency(800, 600, Quality.MEDIUM);
@@ -56,9 +56,9 @@ public class DRCConfigParameters
 
    static final int LIDAR_UPDATE_RATE_OVERRIDE = 3;
 
-   static final double LIDAR_VERTICAL_SCAN_ANGLE = 0.9;
+//   static final double LIDAR_VERTICAL_SCAN_ANGLE = 0.9;
 
-   static final double LIDAR_HORIZONTAL_SCAN_ANGLE = 0.1;
+//   static final double LIDAR_HORIZONTAL_SCAN_ANGLE = 0.1;
 
    static final int LIDAR_SWEEPS_PER_SCAN = 6;//1
 
@@ -74,9 +74,9 @@ public class DRCConfigParameters
 
    public static final float LIDAR_SWEEP_MIN_YAW = -0.8f;
 
-   public static final float LIDAR_SCAN_MAX_PITCH = 0.4f; // rolling the lidar to simulated a faster update rate
+   public static final float LIDAR_SCAN_MAX_ROLL = 0.4f; // rolling the lidar to simulated a faster update rate
 
-   public static final float LDIAR_SCAN_MIN_PITCH = -0.3f;
+   public static final float LDIAR_SCAN_MIN_ROLL = -0.3f;
    
    public static final int KERNEL_SIZE = 34; // 34 centimeters square
 
