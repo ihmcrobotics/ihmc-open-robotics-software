@@ -1,13 +1,9 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.List;
 import java.util.TreeMap;
 
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.math.MathTools;
-import us.ihmc.utilities.math.geometry.Direction;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -20,13 +16,12 @@ import com.yobotics.simulationconstructionset.util.trajectory.DoubleProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.PositionProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.PositionTrajectoryGenerator;
 import com.yobotics.simulationconstructionset.util.trajectory.VectorProvider;
-import com.yobotics.simulationconstructionset.util.trajectory.YoPolynomial;
 
 public class ThirdOrderWaypointPositionTrajectoryGenerator implements PositionTrajectoryGenerator
 {
    private final String namePostFix = getClass().getSimpleName();
    private final YoVariableRegistry registry;
-   private final List<EnumMap<Direction, YoPolynomial>> spaceSplines = new ArrayList<EnumMap<Direction, YoPolynomial>>();
+   private final Spline3D[] spaceSplines = new Spline3D[3];
 
    private final DoubleProvider stepTimeProvider;
    private final PositionProvider[] positionSource = new PositionProvider[4];
@@ -48,18 +43,15 @@ public class ThirdOrderWaypointPositionTrajectoryGenerator implements PositionTr
    public ThirdOrderWaypointPositionTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, DoubleProvider stepTimeProvider,
            PositionProvider initialPositionProvider, VectorProvider initalVelocityProvider, PositionProvider finalPositionProvider,
            VectorProvider finalDesiredVelocityProvider, YoVariableRegistry parentRegistry, PositionProvider firstIntermediatePosition,
-           PositionProvider secondIntermediatePosition, int desiredNumberOfSplines, int arcLengthPrecisionRating)
+           PositionProvider secondIntermediatePosition, int desiredNumberOfSplines, int arcLengthCalculatorDivisions)
    {
       this.registry = new YoVariableRegistry(namePrefix + namePostFix);
 
+      int[] numberOfCoefficientsForSplines = new int[] {4, 6, 4};
+
       for (int i = 0; i < 3; i++)
       {
-         spaceSplines.set(i, new EnumMap<Direction, YoPolynomial>(Direction.class));
-
-         for (Direction direction : Direction.values())
-         {
-            spaceSplines.get(i).put(direction, new YoPolynomial(namePrefix + direction + i, 3, registry));
-         }
+         spaceSplines[i] = new Spline3D(numberOfCoefficientsForSplines[i], arcLengthCalculatorDivisions, referenceFrame);
       }
 
       this.stepTimeProvider = stepTimeProvider;
@@ -68,7 +60,7 @@ public class ThirdOrderWaypointPositionTrajectoryGenerator implements PositionTr
       this.positionSource[1] = firstIntermediatePosition;
       this.positionSource[2] = secondIntermediatePosition;
       this.positionSource[3] = finalPositionProvider;
-      
+
       this.velocitySource[0] = initalVelocityProvider;
       this.velocitySource[3] = finalDesiredVelocityProvider;
       this.velocitySource[1] = getFirstIntermediateVelocityProvider();
@@ -85,10 +77,10 @@ public class ThirdOrderWaypointPositionTrajectoryGenerator implements PositionTr
       parentRegistry.addChild(registry);
 
       this.desiredNumberOfSplines = desiredNumberOfSplines;
-      this.arcLengthPrecisionRating = arcLengthPrecisionRating;
+      this.arcLengthPrecisionRating = arcLengthCalculatorDivisions;
    }
 
-   //TODO smarter method
+   // TODO smarter method
    private VectorProvider getFirstIntermediateVelocityProvider()
    {
       FramePoint initialPosition = new FramePoint(referenceFrame);
@@ -97,16 +89,16 @@ public class ThirdOrderWaypointPositionTrajectoryGenerator implements PositionTr
       positionSource[0].get(initialPosition);
       positionSource[1].get(firstWayPoint);
       velocitySource[0].get(initialVelocity);
-      
+
       FrameVector firstWayPointVelocity = new FrameVector(firstWayPoint);
       firstWayPointVelocity.sub(initialPosition);
       firstWayPointVelocity.normalize();
       firstWayPointVelocity.scale(initialVelocity.length());
-      
+
       return new ConstantVectorProvider(firstWayPointVelocity);
    }
-   
-   //TODO smarter method
+
+   // TODO smarter method
    private VectorProvider getSecondIntermediateVelocityProvider()
    {
       FramePoint secondWayPoint = new FramePoint(referenceFrame);
@@ -115,12 +107,12 @@ public class ThirdOrderWaypointPositionTrajectoryGenerator implements PositionTr
       positionSource[2].get(secondWayPoint);
       positionSource[3].get(finalPosition);
       velocitySource[3].get(finalVelocity);
-      
+
       FrameVector secondWayPointVelocity = new FrameVector(finalPosition);
       secondWayPointVelocity.sub(secondWayPoint);
       secondWayPointVelocity.normalize();
       secondWayPointVelocity.scale(finalVelocity.length());
-      
+
       return new ConstantVectorProvider(secondWayPointVelocity);
    }
 
@@ -173,61 +165,58 @@ public class ThirdOrderWaypointPositionTrajectoryGenerator implements PositionTr
       }
 
       timeIntoStep.set(0.0);
-      
+
       double[] distances = new double[4];
       double[] times = new double[4];
       double totalDist = 0;
-      
+
       distances[0] = 0.0;
-      for(int i = 1; i < 4; i++)
+
+      for (int i = 1; i < 4; i++)
       {
-    	  double distInc = positions[i - 1].distance(positions[i]);
-    	  totalDist += distInc;
-    	  distances[i] = totalDist;
-      }
-      
-      for(int i = 0; i < 4; i++)
-      {
-    	  times[i] = distances[i] * stepTime / totalDist;
+         double distInc = positions[i - 1].distance(positions[i]);
+         totalDist += distInc;
+         distances[i] = totalDist;
       }
 
-      for (Direction direction : Direction.values())
+      for (int i = 0; i < 4; i++)
       {
+         times[i] = distances[i] * stepTime / totalDist;
+      }
 
-         int[] cubicSplines = new int[] {0, 2, 1};
-         for (int i : cubicSplines)
+      int[] cubicSplines = new int[] {0, 2, 1};
+      for (int i : cubicSplines)
+      {
+         double t0 = times[i];
+         double tf = times[i + 1];
+         FramePoint z0 = positions[i];
+         FrameVector zd0 = velocities[i];
+         FramePoint zf = positions[i + 1];
+         FrameVector zdf = velocities[i + 1];
+         Spline3D spaceSpline = spaceSplines[i];
+         if ((i == 0) || (i == 2))
          {
-            double t0 = times[i];
-            double tf = times[i + 1];
-            double z0 = positions[i].get(direction);
-            double zd0 = velocities[i].get(direction);
-            double zf = positions[i + 1].get(direction);
-            double zdf = velocities[i + 1].get(direction);
-            YoPolynomial spaceSpline = spaceSplines.get(i).get(direction);
-            if ((i == 0) || (i == 2))
-            {
-               spaceSpline.setCubic(t0, tf, z0, zd0, zf, zdf);
-            }
-            else if (i == 1)
-            {
-               spaceSplines.get(0).get(direction).compute(t0);
-               double zdd0 = spaceSplines.get(0).get(direction).getAcceleration();
-               spaceSplines.get(2).get(direction).compute(tf);
-               double zddf = spaceSplines.get(2).get(direction).getAcceleration();
-
-               spaceSpline.setQuintic(t0, tf, z0, zd0, zdd0, zf, zdf, zddf);
-            }
+            spaceSpline.setCubic(t0, tf, z0, zd0, zf, zdf);
          }
-
-         TreeMap<Pair<Double, Double>, EnumMap<Direction, YoPolynomial>> splineMap = new TreeMap<Pair<Double, Double>, EnumMap<Direction, YoPolynomial>>(ConcatenatedSplines.getComparatorForTreeMap());
-         for(int i = 0; i < 3; i++)
+         else if (i == 1)
          {
-        	 splineMap.put(new Pair<Double, Double>(times[i], times[i + 1]), spaceSplines.get(i));
-         }
+            spaceSplines[0].compute(t0);
+            FrameVector zdd0 = spaceSplines[0].getAcceleration();
+            spaceSplines[2].compute(tf);
+            FrameVector zddf = spaceSplines[2].getAcceleration();
 
-         concatenatedSplines = new ConcatenatedSplines(splineMap, referenceFrame, arcLengthPrecisionRating);
-         concatenatedSplines = new ConcatenatedSplines(concatenatedSplines, desiredNumberOfSplines, arcLengthPrecisionRating);
+            spaceSpline.setQuintic(t0, tf, z0, zd0, zdd0, zf, zdf, zddf);
+         }
       }
+
+      TreeMap<Pair<Double, Double>, Spline3D> splineMap = new TreeMap<Pair<Double, Double>, Spline3D>(ConcatenatedSplines.getComparatorForTreeMap());
+      for (int i = 0; i < 3; i++)
+      {
+         splineMap.put(new Pair<Double, Double>(times[i], times[i + 1]), spaceSplines[i]);
+      }
+
+      concatenatedSplines = new ConcatenatedSplines(splineMap, referenceFrame, arcLengthPrecisionRating);
+      concatenatedSplines = new ConcatenatedSplines(concatenatedSplines, desiredNumberOfSplines, arcLengthPrecisionRating);
    }
 
    public boolean isDone()
@@ -235,15 +224,3 @@ public class ThirdOrderWaypointPositionTrajectoryGenerator implements PositionTr
       return timeIntoStep.getDoubleValue() >= stepTime.getDoubleValue();
    }
 }
-
-
-
-
-
-
-
-
-
-
-
-
