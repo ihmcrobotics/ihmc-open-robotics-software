@@ -7,6 +7,7 @@ import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
 import us.ihmc.utilities.net.ObjectCommunicator;
 import us.ihmc.utilities.polarLidarGeometry.LIDARScanDefinition;
 import us.ihmc.utilities.polarLidarGeometry.PolarLidarScanDefinition;
+import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
 import com.yobotics.simulationconstructionset.simulatedSensors.FastPolarRayCastLIDAR;
 import com.yobotics.simulationconstructionset.simulatedSensors.RayTraceLIDARSensor;
@@ -21,7 +22,7 @@ public class DRCLidar
          System.out.println("DRCLidar: PolarLidar is ON. This lidar passes less data, and also includes the transforms from when the data was produced.");
    }
 
-   static void setupDRCRobotLidar(HumanoidRobotSimulation<SDFRobot> sdfRobotSimulation, ObjectCommunicator objectCommunicator)
+   static void setupDRCRobotLidar(HumanoidRobotSimulation<SDFRobot> sdfRobotSimulation, ObjectCommunicator objectCommunicator, OneDoFJoint lidarJoint)
    {
       Graphics3DAdapter graphics3dAdapter = sdfRobotSimulation.getSimulationConstructionSet().getGraphics3dAdapter();
       SimulatedLIDARSensorUpdateParameters updateParameters = new SimulatedLIDARSensorUpdateParameters();
