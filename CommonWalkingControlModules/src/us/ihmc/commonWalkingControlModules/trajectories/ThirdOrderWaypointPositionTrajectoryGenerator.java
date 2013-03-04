@@ -39,6 +39,7 @@ public class ThirdOrderWaypointPositionTrajectoryGenerator implements PositionTr
    private final int arcLengthCalculatorDivisions;
 
    private ConcatenatedSplines concatenatedSplines;
+//   private final ConcatenatedSplines reparameterizedConcatenatedSplines;
 
    public ThirdOrderWaypointPositionTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, DoubleProvider stepTimeProvider,
            PositionProvider initialPositionProvider, VectorProvider initalVelocityProvider, PositionProvider finalPositionProvider,
@@ -213,7 +214,7 @@ public class ThirdOrderWaypointPositionTrajectoryGenerator implements PositionTr
          splineMap.put(new Pair<Double, Double>(times[i], times[i + 1]), splines[i]);
       }
 
-      concatenatedSplines = new ConcatenatedSplines(splineMap, referenceFrame, arcLengthCalculatorDivisions);
+//      concatenatedSplines = new ConcatenatedSplines(splineMap, referenceFrame, arcLengthCalculatorDivisions);
       concatenatedSplines = new ConcatenatedSplines(concatenatedSplines, desiredNumberOfSplines, arcLengthCalculatorDivisions);
    }
 
