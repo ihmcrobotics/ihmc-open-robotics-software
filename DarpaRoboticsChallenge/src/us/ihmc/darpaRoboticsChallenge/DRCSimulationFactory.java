@@ -30,6 +30,8 @@ import us.ihmc.utilities.screwTheory.TwistCalculator;
 
 import com.yobotics.simulationconstructionset.InverseDynamicsMechanismReferenceFrameVisualizer;
 import com.yobotics.simulationconstructionset.gui.GUISetterUpperRegistry;
+import com.yobotics.simulationconstructionset.robotController.AbstractModularRobotController;
+import com.yobotics.simulationconstructionset.robotController.DelayedThreadedModularRobotController;
 import com.yobotics.simulationconstructionset.robotController.ModularRobotController;
 import com.yobotics.simulationconstructionset.robotController.ModularSensorProcessor;
 import com.yobotics.simulationconstructionset.robotController.RobotController;
@@ -97,7 +99,17 @@ public class DRCSimulationFactory
                                            simulatedRobot.getYoTime(), dynamicGraphicObjectsListRegistry, guiSetterUpperRegistry, twistCalculator,
                                            centerOfMassJacobian, footSwitches, handControllers, lidarJoint);
 
-      ModularRobotController modularRobotController = new ModularRobotController("ModularRobotController");
+      AbstractModularRobotController modularRobotController;
+      
+      if(DRCConfigParameters.SIMULATE_DELAY)
+      {
+         modularRobotController = new DelayedThreadedModularRobotController("ModularRobotController");
+      }
+      else
+      {
+         modularRobotController = new ModularRobotController("ModularRobotController");
+      }
+      
       modularRobotController.setRawSensorReader(sensorReaderAndOutputWriter);
       modularRobotController.setSensorProcessor(createSensorProcessor(twistCalculator, centerOfMassJacobian));
       modularRobotController.addRobotController(robotController);
