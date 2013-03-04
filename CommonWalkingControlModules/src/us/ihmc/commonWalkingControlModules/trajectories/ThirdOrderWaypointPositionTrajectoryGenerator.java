@@ -21,7 +21,7 @@ public class ThirdOrderWaypointPositionTrajectoryGenerator implements PositionTr
 {
    private final String namePostFix = getClass().getSimpleName();
    private final YoVariableRegistry registry;
-   private final Spline3D[] spaceSplines = new Spline3D[3];
+   private final Spline3D[] splines = new Spline3D[3];
 
    private final DoubleProvider stepTimeProvider;
    private final PositionProvider[] positionSource = new PositionProvider[4];
@@ -36,7 +36,7 @@ public class ThirdOrderWaypointPositionTrajectoryGenerator implements PositionTr
    private final ReferenceFrame referenceFrame;
 
    private final int desiredNumberOfSplines;
-   private final int arcLengthPrecisionRating;
+   private final int arcLengthCalculatorDivisions;
 
    private ConcatenatedSplines concatenatedSplines;
 
@@ -46,12 +46,13 @@ public class ThirdOrderWaypointPositionTrajectoryGenerator implements PositionTr
            PositionProvider secondIntermediatePosition, int desiredNumberOfSplines, int arcLengthCalculatorDivisions)
    {
       this.registry = new YoVariableRegistry(namePrefix + namePostFix);
+      parentRegistry.addChild(registry);
 
       int[] numberOfCoefficientsForSplines = new int[] {4, 6, 4};
 
       for (int i = 0; i < 3; i++)
       {
-         spaceSplines[i] = new Spline3D(numberOfCoefficientsForSplines[i], arcLengthCalculatorDivisions, referenceFrame);
+         splines[i] = new Spline3D(numberOfCoefficientsForSplines[i], arcLengthCalculatorDivisions, referenceFrame);
       }
 
       this.stepTimeProvider = stepTimeProvider;
@@ -74,10 +75,9 @@ public class ThirdOrderWaypointPositionTrajectoryGenerator implements PositionTr
       this.desiredAcceleration = new YoFrameVector("desiredAcceleration", referenceFrame, registry);
 
       this.referenceFrame = referenceFrame;
-      parentRegistry.addChild(registry);
 
       this.desiredNumberOfSplines = desiredNumberOfSplines;
-      this.arcLengthPrecisionRating = arcLengthCalculatorDivisions;
+      this.arcLengthCalculatorDivisions = arcLengthCalculatorDivisions;
    }
 
    // TODO smarter method
@@ -120,7 +120,7 @@ public class ThirdOrderWaypointPositionTrajectoryGenerator implements PositionTr
    {
       timeIntoStep.set(time);
 
-      double totalTime = this.stepTime.getDoubleValue();
+      double totalTime = stepTime.getDoubleValue();
       if (time > totalTime)
          time = totalTime;
 
@@ -193,30 +193,28 @@ public class ThirdOrderWaypointPositionTrajectoryGenerator implements PositionTr
          FrameVector zd0 = velocities[i];
          FramePoint zf = positions[i + 1];
          FrameVector zdf = velocities[i + 1];
-         Spline3D spaceSpline = spaceSplines[i];
+         Spline3D spline = splines[i];
          if ((i == 0) || (i == 2))
          {
-            spaceSpline.setCubic(t0, tf, z0, zd0, zf, zdf);
+            spline.setCubic(t0, tf, z0, zd0, zf, zdf);
          }
          else if (i == 1)
          {
-            spaceSplines[0].compute(t0);
-            FrameVector zdd0 = spaceSplines[0].getAcceleration();
-            spaceSplines[2].compute(tf);
-            FrameVector zddf = spaceSplines[2].getAcceleration();
+            FrameVector zdd0 = splines[0].getAcceleration(t0);
+            FrameVector zddf = splines[2].getAcceleration(tf);
 
-            spaceSpline.setQuintic(t0, tf, z0, zd0, zdd0, zf, zdf, zddf);
+            spline.setQuintic(t0, tf, z0, zd0, zdd0, zf, zdf, zddf);
          }
       }
 
       TreeMap<Pair<Double, Double>, Spline3D> splineMap = new TreeMap<Pair<Double, Double>, Spline3D>(ConcatenatedSplines.getComparatorForTreeMap());
       for (int i = 0; i < 3; i++)
       {
-         splineMap.put(new Pair<Double, Double>(times[i], times[i + 1]), spaceSplines[i]);
+         splineMap.put(new Pair<Double, Double>(times[i], times[i + 1]), splines[i]);
       }
 
-      concatenatedSplines = new ConcatenatedSplines(splineMap, referenceFrame, arcLengthPrecisionRating);
-      concatenatedSplines = new ConcatenatedSplines(concatenatedSplines, desiredNumberOfSplines, arcLengthPrecisionRating);
+      concatenatedSplines = new ConcatenatedSplines(splineMap, referenceFrame, arcLengthCalculatorDivisions);
+      concatenatedSplines = new ConcatenatedSplines(concatenatedSplines, desiredNumberOfSplines, arcLengthCalculatorDivisions);
    }
 
    public boolean isDone()
