@@ -20,19 +20,7 @@ public class TwoWaypointPositionTrajectoryGeneratorTest {
 	public void testSimplePlanarTrajectory()
 	{
 		
-		DoubleProvider stepTimeProvider = new ConstantDoubleProvider(1.0);
-		PositionProvider initialPositionProvider = 
-		VectorProvider initialVelocityProvider = new ConstantVectorProvider(new FrameVector(worldFrame, new double[]{0.0, 0.0, 0.0}));
-		
-		PositionProvider firstIntermediatePositionProvider = new FrameBasedPositionSource(worldFrame);
-		PositionProvider secondIntermediatePositionProvider = new FrameBasedPositionSource(worldFrame);
-		
-		int numDesiredSplines = 3;
-		int arcLengthCalculatorDivisions = 100;
-		
-		TwoWaypointPositionTrajectoryGenerator trajectory = new TwoWaypointPositionTrajectoryGenerator("", worldFrame, stepTimeProvider, 
-				initialPositionProvider, initialVelocityProvider, secondIntermediatePositionProvider, initialVelocityProvider, new YoVariableRegistry(""), firstIntermediatePositionProvider, 
-				secondIntermediatePositionProvider, numDesiredSplines, arcLengthCalculatorDivisions);
+
 	}
 	
 }
