@@ -1,27 +1,9 @@
-/*
- * Copyright (c) 2011-2013, Peter Abeles. All Rights Reserved.
- *
- * This file is part of BoofCV (http://boofcv.org).
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 
 
 
 package us.ihmc.imageProcessing;
 
 import georegression.struct.line.LineParametric2D_F32;
-import georegression.struct.line.LineSegment2D_F32;
 
 import java.awt.GridLayout;
 import java.awt.image.BufferedImage;
@@ -34,9 +16,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import us.ihmc.imageProcessing.ImageFilters.BoxBlurFilter;
-
 import boofcv.abst.feature.detect.line.DetectLineHoughPolar;
-import boofcv.abst.feature.detect.line.DetectLineSegmentsGridRansac;
 import boofcv.alg.filter.binary.ThresholdImageOps;
 import boofcv.core.image.ConvertBufferedImage;
 import boofcv.factory.feature.detect.line.FactoryDetectLineAlgs;
@@ -49,11 +29,6 @@ import boofcv.struct.image.ImageSInt16;
 import boofcv.struct.image.ImageSingleBand;
 import boofcv.struct.image.ImageUInt8;
 
-/**
- * Demonstrates simple examples for detecting lines and line segments.
- *
- * @author Peter Abeles
- */
 public class DRCRoadDetectionTest
 {
    // adjusts edge threshold for identifying pixels belonging to a line
@@ -67,6 +42,14 @@ public class DRCRoadDetectionTest
    private float edgeThreshold = 11;
    float mean = 58;    // (float)ImageStatistics.mean(input);
 
+
+   public DRCRoadDetectionTest()
+   {
+      setUpJFrame();
+      process();
+   }
+
+
    /**
     * Detects lines inside the image using different types of Hough detectors
     *
@@ -74,7 +57,7 @@ public class DRCRoadDetectionTest
     * @param imageType Type of image processed by line detector.
     * @param derivType Type of image derivative.
     */
-   public <T extends ImageSingleBand, D extends ImageSingleBand> ArrayList<LineParametric2D_F32> detectLines(BufferedImage image, Class<T> imageType,
+   public <T extends ImageSingleBand<?>, D extends ImageSingleBand<?>> ArrayList<LineParametric2D_F32> detectLines(BufferedImage image, Class<T> imageType,
            Class<D> derivType)
    {
       // convert the line into a single band image
@@ -103,26 +86,7 @@ public class DRCRoadDetectionTest
       return finalList;
    }
 
-   /**
-    * Detects segments inside the image
-    *
-    * @param image Input image.
-    * @param imageType Type of image processed by line detector.
-    * @param derivType Type of image derivative.
-    */
-   public <T extends ImageSingleBand, D extends ImageSingleBand> void detectLineSegments(BufferedImage image, Class<T> imageType, Class<D> derivType)
-   {
-      // convert the line into a single band image
-      T input = ConvertBufferedImage.convertFromSingle(image, null, imageType);
 
-      // Comment/uncomment to try a different type of line detector
-      DetectLineSegmentsGridRansac<T, D> detector = FactoryDetectLineAlgs.lineRansac(40, 30, 2.36, true, imageType, derivType);
-
-      List<LineSegment2D_F32> found = detector.detect(input);
-
-      // display the results
-
-   }
 
    public BufferedImage filterbinaryExample(BufferedImage image)
    {
@@ -144,23 +108,11 @@ public class DRCRoadDetectionTest
    }
 
 
-   public DRCRoadDetectionTest()
-   {
-      showJFrame();
-
-      process();
-
-   }
 
    private void process()
    {
       BufferedImage input = UtilImageIO.loadImage(DRCRoadDetectionTest.class.getResource("exampleVideo/DrivingTaskRoad.jpg").getFile());
-      gui.setBackground(input);
       BufferedImage inputCopy = new BufferedImage(input.getWidth(), input.getHeight(), BufferedImage.TYPE_INT_RGB);
-      ImageUInt8 gray = ConvertBufferedImage.convertFrom(input, (ImageUInt8) null);
-      ImageUInt8 grayBlurred = new ImageUInt8(gray.width, gray.height);
-
-      // BlurImageOps.gaussian(gray, grayBlurred, -1, 10, null);
 
       BoxBlurFilter boxBlur = new BoxBlurFilter(5, 5, 1);
       boxBlur.filter(input, inputCopy);
@@ -168,16 +120,16 @@ public class DRCRoadDetectionTest
       input = filterbinaryExample(input);
 
       ArrayList<LineParametric2D_F32> list = detectLines(input, ImageUInt8.class, ImageSInt16.class);
+      gui.setBackground(input);
 
+      
       gui.setLines(list);
       gui.repaint();
    }
 
-   JFrame tmp;
-
-   public void showJFrame()
+   public void setUpJFrame()
    {
-      tmp = new JFrame();
+      JFrame tmp = new JFrame();
       tmp.getContentPane().setLayout(new GridLayout(1, 6));
 
       {
@@ -304,6 +256,7 @@ public class DRCRoadDetectionTest
 
 
       tmp.pack();
+
       tmp.setVisible(true);
       tmp.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -320,8 +273,5 @@ public class DRCRoadDetectionTest
    public static void main(String args[])
    {
       new DRCRoadDetectionTest();
-
-      // line segment detection is still under development and only works for F32 images right now
-      // detectLineSegments(input, ImageFloat32.class, ImageFloat32.class);
    }
 }
