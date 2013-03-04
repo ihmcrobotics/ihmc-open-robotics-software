@@ -22,7 +22,7 @@ public class DRCLidar
    {
       Graphics3DAdapter graphics3dAdapter = sdfRobotSimulation.getSimulationConstructionSet().getGraphics3dAdapter();
       SimulatedLIDARSensorUpdateParameters updateParameters = new SimulatedLIDARSensorUpdateParameters();
-      updateParameters.setTransponderSettings(objectCommunicator);
+      updateParameters.setObjectCommunicator(objectCommunicator);
       if (DRCConfigParameters.STREAM_POLAR_LIDAR)
       {
          System.out.println("Streaming Lidar");
@@ -49,7 +49,7 @@ public class DRCLidar
                polarLidar.setScan(largeScan);
                updateParameters.setUpdateRate(DRCConfigParameters.LIDAR_UPDATE_RATE_OVERRIDE);
             }
-            
+            polarLidar.setLidarJoint(lidarJoint);
             polarLidar.setLidarDaemonParameters(updateParameters);            
             polarLidar.startLidarDaemonThread();
          }
