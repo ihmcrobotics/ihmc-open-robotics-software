@@ -67,8 +67,8 @@
 \begin_layout Standard
 The kinematics of the quaternion 
 \begin_inset Formula $q=\left(\begin{array}{c}
-q_{v}\\
-q_{s}
+q_{s}\\
+q_{v}
 \end{array}\right)$
 \end_inset
 
@@ -85,8 +85,8 @@ q_{s}
 
 where 
 \begin_inset Formula $\omega_{q}=\left(\begin{array}{c}
-\omega\\
-0
+0\\
+\omega
 \end{array}\right)$
 \end_inset
 
@@ -95,11 +95,11 @@ where
 \begin_inset Formula 
 \begin{equation}
 \left(\begin{array}{c}
-\dot{q}_{v}\\
-\dot{q}_{s}
+\dot{q}_{s}\\
+\dot{q}_{v}
 \end{array}\right)=\frac{1}{2}\left(\begin{array}{c}
-q_{s}\omega+q_{v}\times\omega\\
--q_{v}\cdot\omega
+-q_{v}\cdot\omega\\
+q_{s}\omega+q_{v}\times\omega
 \end{array}\right)\label{eq:quaternion-derivative}
 \end{equation}
 
@@ -120,8 +120,8 @@ We now express the quaternion in terms of the rotation vector
 \begin_inset Formula 
 \[
 q=\left(\begin{array}{c}
-\sin\frac{\left\Vert \phi\right\Vert }{2}\phi\\
-\cos\frac{\left\Vert \phi\right\Vert }{2}
+\cos\frac{\left\Vert \phi\right\Vert }{2}\\
+\sin\frac{\left\Vert \phi\right\Vert }{2}\frac{\phi}{\left\Vert \phi\right\Vert }
 \end{array}\right)
 \]
 
@@ -141,9 +141,9 @@ reference "eq:quaternion-derivative"
 , we get:
 \begin_inset Formula 
 \begin{equation}
-\dot{q}=\frac{1}{2}\left(\begin{array}{c}
-\cos\frac{\left\Vert \phi\right\Vert }{2}\omega+\sin\frac{\left\Vert \phi\right\Vert }{2}\phi\times\omega\\
--\sin\frac{\left\Vert \phi\right\Vert }{2}\phi\cdot\omega
+\dot{q}=\left(\begin{array}{c}
+-\frac{1}{2}\sin\frac{\left\Vert \phi\right\Vert }{2}\frac{\phi\cdot\omega}{\left\Vert \phi\right\Vert }\\
+\frac{1}{2}\cos\frac{\left\Vert \phi\right\Vert }{2}\omega+\frac{1}{2}\sin\frac{\left\Vert \phi\right\Vert }{2}\frac{\phi\times\omega}{\left\Vert \phi\right\Vert }
 \end{array}\right)\label{eq:qd-axis-angle}
 \end{equation}
 
@@ -164,8 +164,8 @@ But the derivative can also be written in terms of
 \begin_inset Formula 
 \begin{equation}
 \dot{q}=\left(\begin{array}{c}
-\dot{\phi}\sin\frac{\left\Vert \phi\right\Vert }{2}+\phi\frac{1}{2}\cos\frac{\left\Vert \phi\right\Vert }{2}\frac{d\left\Vert \phi\right\Vert }{dt}\\
--\frac{1}{2}\sin\frac{\left\Vert \phi\right\Vert }{2}\frac{d\left\Vert \phi\right\Vert }{dt}
+-\frac{1}{2}\sin\frac{\left\Vert \phi\right\Vert }{2}\frac{d\left\Vert \phi\right\Vert }{dt}\\
+\frac{1}{2}\cos\frac{\left\Vert \phi\right\Vert }{2}\frac{\phi}{\left\Vert \phi\right\Vert }\frac{d\left\Vert \phi\right\Vert }{dt}+\sin\frac{\left\Vert \phi\right\Vert }{2}\frac{\dot{\phi}}{\left\Vert \phi\right\Vert }-\sin\frac{\left\Vert \phi\right\Vert }{2}\frac{\phi}{\left\Vert \phi\right\Vert ^{2}}\frac{d\left\Vert \phi\right\Vert }{dt}
 \end{array}\right)\label{eq:qd-axis-angle-2}
 \end{equation}
 
@@ -175,14 +175,14 @@ But the derivative can also be written in terms of
 \end_layout
 
 \begin_layout Standard
-Comparing the last row of 
+Comparing the first row of 
 \begin_inset CommandInset ref
 LatexCommand eqref
 reference "eq:qd-axis-angle"
 
 \end_inset
 
- to the last row of 
+ to the first row of 
 \begin_inset CommandInset ref
 LatexCommand eqref
 reference "eq:qd-axis-angle-2"
@@ -195,7 +195,7 @@ reference "eq:qd-axis-angle-2"
 \begin_layout Standard
 \begin_inset Formula 
 \begin{equation}
-\frac{d\left\Vert \phi\right\Vert }{dt}=\phi\cdot\omega\label{eq:dPhiNormDt}
+\frac{d\left\Vert \phi\right\Vert }{dt}=\frac{\phi\cdot\omega}{\left\Vert \phi\right\Vert }\label{eq:dPhiNormDt}
 \end{equation}
 
 \end_inset
@@ -204,36 +204,14 @@ reference "eq:qd-axis-angle-2"
 \end_layout
 
 \begin_layout Standard
-Subsequently, we can solve the first three rows for 
+Subsequently, we can solve the last three rows for 
 \begin_inset Formula $\dot{\phi}$
-\end_inset
-
-:
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula 
-\begin{align*}
-\dot{\phi} & =\frac{\dot{q}_{v}-\phi\frac{1}{2}\cos\frac{\left\Vert \phi\right\Vert }{2}\frac{d\left\Vert \phi\right\Vert }{dt}}{\sin\frac{\left\Vert \phi\right\Vert }{2}}
-\end{align*}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-Plug in 
-\begin_inset CommandInset ref
-LatexCommand eqref
-reference "eq:dPhiNormDt"
-
 \end_inset
 
 :
 \begin_inset Formula 
 \[
-\dot{\phi}=\frac{\dot{q}_{v}}{\sin\frac{\left\Vert \phi\right\Vert }{2}}-\frac{\phi\cdot\omega}{2\tan\frac{\left\Vert \phi\right\Vert }{2}}\phi
+\dot{\phi}=\frac{\left\Vert \phi\right\Vert }{\sin\frac{\left\Vert \phi\right\Vert }{2}}\dot{q}_{v}-\frac{1}{2}\cot\frac{\left\Vert \phi\right\Vert }{2}\frac{d\left\Vert \phi\right\Vert }{dt}\phi+\frac{\phi}{\left\Vert \phi\right\Vert }\frac{d\left\Vert \phi\right\Vert }{dt}
 \]
 
 \end_inset
@@ -242,11 +220,11 @@ reference "eq:dPhiNormDt"
 \end_layout
 
 \begin_layout Standard
-Now plug in 
+Plug in 
 \begin_inset Formula $\dot{q}_{v}$
 \end_inset
 
- from the first three rows of 
+ from the last three rows of 
 \begin_inset CommandInset ref
 LatexCommand eqref
 reference "eq:qd-axis-angle"
@@ -256,9 +234,28 @@ reference "eq:qd-axis-angle"
 :
 \begin_inset Formula 
 \begin{align*}
-\dot{\phi} & =\frac{\cos\frac{\left\Vert \phi\right\Vert }{2}\omega+\sin\frac{\left\Vert \phi\right\Vert }{2}\phi\times\omega}{2\sin\frac{\left\Vert \phi\right\Vert }{2}}-\frac{\phi\cdot\omega}{2\tan\frac{\left\Vert \phi\right\Vert }{2}}\phi\\
- & =\frac{1}{2\tan\frac{\left\Vert \phi\right\Vert }{2}}\omega-\frac{1}{2}\tilde{\omega}\phi-\frac{\phi\cdot\omega}{2\tan\frac{\left\Vert \phi\right\Vert }{2}}\phi
+\dot{\phi} & =\frac{\left\Vert \phi\right\Vert }{2}\cot\frac{\left\Vert \phi\right\Vert }{2}\omega+\frac{\phi\times\omega}{2}-\frac{1}{2}\cot\frac{\left\Vert \phi\right\Vert }{2}\frac{d\left\Vert \phi\right\Vert }{dt}\phi+\frac{\phi}{\left\Vert \phi\right\Vert }\frac{d\left\Vert \phi\right\Vert }{dt}\\
+ & =\frac{1}{2}\cot\frac{\left\Vert \phi\right\Vert }{2}\left(\left\Vert \phi\right\Vert \omega-\frac{d\left\Vert \phi\right\Vert }{dt}\phi\right)+\frac{\phi\times\omega}{2}+\frac{\phi}{\left\Vert \phi\right\Vert }\frac{d\left\Vert \phi\right\Vert }{dt}
 \end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Now plug in 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:dPhiNormDt"
+
+\end_inset
+
+:
+\begin_inset Formula 
+\[
+\dot{\phi}=\frac{1}{2}\cot\frac{\left\Vert \phi\right\Vert }{2}\left(\left\Vert \phi\right\Vert \omega-\frac{\phi\cdot\omega}{\left\Vert \phi\right\Vert }\phi\right)+\frac{\phi\times\omega}{2}+\frac{\phi\cdot\omega}{\left\Vert \phi\right\Vert ^{2}}\phi
+\]
 
 \end_inset
 

@@ -99,7 +99,8 @@ function [A, B] = createContinuousTimeSystem(omegaHat)
 % A = [-tilde(omegaHat), eye(3), zeros(3, 3);
 %      zeros(3, 9);
 %      zeros(3, 9)];
-A = [-1/2 * tilde(omegaHat), 1/2 * eye(3), zeros(3, 3);
+
+A = [-1/2 * tilde(omegaHat), eye(3), zeros(3, 3);
      zeros(3, 9);
      zeros(3, 9)];
 B = [zeros(3, 3);
