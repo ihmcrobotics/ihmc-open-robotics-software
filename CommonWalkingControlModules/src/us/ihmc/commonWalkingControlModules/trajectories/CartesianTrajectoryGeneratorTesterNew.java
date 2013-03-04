@@ -19,7 +19,6 @@ public class CartesianTrajectoryGeneratorTesterNew
    private static final class TrajectoryEvaluatorController implements RobotController
    {
       private final double dt;
-      private static final long serialVersionUID = 1L;
       private final String name = "test";
       private final YoVariableRegistry registry = new YoVariableRegistry(name);
       private final ReferenceFrame referenceFrame = ReferenceFrame.getWorldFrame();

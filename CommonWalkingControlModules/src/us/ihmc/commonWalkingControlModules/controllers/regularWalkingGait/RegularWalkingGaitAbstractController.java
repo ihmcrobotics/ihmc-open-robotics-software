@@ -35,7 +35,6 @@ import com.yobotics.simulationconstructionset.util.statemachines.StateTransition
 
 public abstract class RegularWalkingGaitAbstractController implements RobotController
 {
-   private static final long serialVersionUID = 4878248771959357905L;
    public static boolean DO_FORWARD_BACKWARD_SWING_ON_ONE_LEG = false;
    
    protected final RobotSpecificJointNames robotJointNames;

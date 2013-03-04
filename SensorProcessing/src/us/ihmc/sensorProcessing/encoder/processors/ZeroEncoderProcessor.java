@@ -4,7 +4,6 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public class ZeroEncoderProcessor implements EncoderProcessor
 {
-   private static final long serialVersionUID = 7520403547942205332L;
    private final  String name;
    
    public ZeroEncoderProcessor(String name)

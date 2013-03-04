@@ -20,7 +20,6 @@ import com.yobotics.simulationconstructionset.robotController.RawSensorReader;
 
 public class SDFPerfectSimulatedSensorReaderAndWriter implements RawSensorReader, RawOutputWriter
 {
-   private static final long serialVersionUID = 7667765732502448400L;
    private final String name;
    private final SDFRobot robot;
    private final FullRobotModel fullRobotModel;

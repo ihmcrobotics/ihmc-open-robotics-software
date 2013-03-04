@@ -7,7 +7,6 @@ import com.yobotics.simulationconstructionset.robotController.SensorProcessor;
 
 public class TwistUpdater implements SensorProcessor
 {
-   private static final long serialVersionUID = -4141102690274454009L;
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
    private final TwistCalculator twistCalculator;

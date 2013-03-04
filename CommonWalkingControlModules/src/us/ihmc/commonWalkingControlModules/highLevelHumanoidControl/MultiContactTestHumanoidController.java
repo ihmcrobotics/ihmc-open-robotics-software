@@ -41,8 +41,6 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 
 public class MultiContactTestHumanoidController extends MomentumBasedController
 {
-   private static final long serialVersionUID = 8199779680768038690L;
-
    private final ControlFlowInputPort<FramePoint> desiredCoMPositionPort;
    private final YoFramePoint desiredCoMPosition = new YoFramePoint("desiredCoM", worldFrame, registry);
 

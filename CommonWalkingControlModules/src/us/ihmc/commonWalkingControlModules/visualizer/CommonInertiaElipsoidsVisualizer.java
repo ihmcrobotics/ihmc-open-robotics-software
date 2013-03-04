@@ -30,8 +30,6 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 
 public class CommonInertiaElipsoidsVisualizer implements Updatable, RobotController
 {
-   private static final long serialVersionUID = 4388684010468926404L;
-
    private final String name = getClass().getSimpleName();
 
    private final YoVariableRegistry registry = new YoVariableRegistry(name);

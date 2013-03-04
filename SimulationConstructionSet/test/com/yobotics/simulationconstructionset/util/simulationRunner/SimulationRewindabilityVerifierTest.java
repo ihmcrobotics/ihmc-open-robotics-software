@@ -171,8 +171,6 @@ public class SimulationRewindabilityVerifierTest
 
    private static class RewindableController implements RobotController
    {
-      private static final long serialVersionUID = 6565031436102328625L;
-
       protected final YoVariableRegistry registry = new YoVariableRegistry("controller");
       
       protected final DoubleYoVariable variableOne = new DoubleYoVariable("variableOne", registry);
@@ -219,7 +217,6 @@ public class SimulationRewindabilityVerifierTest
    
    private static class EasilyDetectableNonRewindableController extends RewindableController
    {
-      private static final long serialVersionUID = -5546057396938409986L;
       private double nonRegisteredVariable;
       
       public EasilyDetectableNonRewindableController(Robot robot)
@@ -242,7 +239,6 @@ public class SimulationRewindabilityVerifierTest
    
    private static class DifficultToDetectNonRewindableController extends RewindableController
    {
-      private static final long serialVersionUID = -5546057396938409986L;
       private double nonRegisteredVariable = 5;
      
       private double lastTimeChanged;

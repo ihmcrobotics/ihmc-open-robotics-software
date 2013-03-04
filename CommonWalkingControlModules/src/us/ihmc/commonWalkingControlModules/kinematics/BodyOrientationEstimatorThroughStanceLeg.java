@@ -15,7 +15,6 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFrameOrientatio
 
 public class BodyOrientationEstimatorThroughStanceLeg implements SensorProcessor
 {
-   private static final long serialVersionUID = 6956573285575545414L;
    private final String name;
    private final YoVariableRegistry registry;
    private final RobotSide robotSide;

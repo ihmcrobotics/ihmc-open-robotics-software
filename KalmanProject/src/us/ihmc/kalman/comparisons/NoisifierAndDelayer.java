@@ -10,8 +10,6 @@ import com.yobotics.simulationconstructionset.robotController.RobotController;
 
 public class NoisifierAndDelayer implements RobotController, ExampleFunctionController
 {
-   private static final long serialVersionUID = -5019421072327878613L;
-
    private final YoVariableRegistry registry = new YoVariableRegistry("Noisifier");
    private final String name;
    private final ExampleFunctionController function;

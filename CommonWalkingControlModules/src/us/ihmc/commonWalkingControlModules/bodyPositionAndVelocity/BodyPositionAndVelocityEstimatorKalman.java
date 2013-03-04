@@ -27,7 +27,6 @@ import com.yobotics.simulationconstructionset.robotController.SensorProcessor;
 
 public class BodyPositionAndVelocityEstimatorKalman implements BodyPositionAndVelocityEstimator
 {
-   private static final long serialVersionUID = 8046292566723501829L;
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
    private final ReferenceFrame world = ReferenceFrame.getWorldFrame();

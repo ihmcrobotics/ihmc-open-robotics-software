@@ -9,8 +9,6 @@ import com.yobotics.simulationconstructionset.robotController.RobotController;
 
 public class ImuAsInputKalmanSetup implements RobotController
 {
-   private static final long serialVersionUID = -6606700485982131157L;
-
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
 

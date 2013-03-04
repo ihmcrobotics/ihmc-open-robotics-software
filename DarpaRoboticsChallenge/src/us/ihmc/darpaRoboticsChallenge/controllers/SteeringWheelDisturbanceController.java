@@ -8,8 +8,6 @@ import com.yobotics.simulationconstructionset.util.math.functionGenerator.YoFunc
 
 public class SteeringWheelDisturbanceController implements RobotController
 {  
-   private static final long serialVersionUID = 576013637252679245L;
-   
    private final String NAME = "SteeringWheelDisturbanceController";
    private final ContactableToroidRobot robot;
    

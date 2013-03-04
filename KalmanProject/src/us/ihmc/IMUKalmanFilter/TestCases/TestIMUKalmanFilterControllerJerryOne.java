@@ -15,10 +15,6 @@ import com.yobotics.simulationconstructionset.robotController.RobotController;
 
 public class TestIMUKalmanFilterControllerJerryOne implements RobotController
 {
-   /**
-    *
-    */
-   private static final long serialVersionUID = 537073527850173163L;
    private final YoVariableRegistry registry = new YoVariableRegistry("TestIMUKalmanFilterControllerJerryOne");
    @SuppressWarnings("unused")
    private static final boolean USING_FAST_QUAT = true;

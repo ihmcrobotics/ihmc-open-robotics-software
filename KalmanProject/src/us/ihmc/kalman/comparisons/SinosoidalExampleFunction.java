@@ -7,8 +7,6 @@ import com.yobotics.simulationconstructionset.robotController.RobotController;
 
 public class SinosoidalExampleFunction  implements RobotController, ExampleFunctionController
 {
-   private static final long serialVersionUID = 2549121298779692673L;
-   
    private final YoVariableRegistry registry = new YoVariableRegistry("SinosoidalExampleFunction");
    private final String name;
    private final Robot robot;

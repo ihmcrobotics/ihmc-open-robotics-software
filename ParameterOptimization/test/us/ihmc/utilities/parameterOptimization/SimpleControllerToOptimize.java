@@ -9,8 +9,6 @@ import com.yobotics.simulationconstructionset.robotController.RobotController;
 
 public class SimpleControllerToOptimize implements RobotController
 {
-   private static final long serialVersionUID = -4500294743640952142L;
-
    private final YoVariableRegistry registry = new YoVariableRegistry("SimpleControllerToOptimize");
    
    private final DoubleYoVariable parameterOne = new DoubleYoVariable("parameterOne", registry);
