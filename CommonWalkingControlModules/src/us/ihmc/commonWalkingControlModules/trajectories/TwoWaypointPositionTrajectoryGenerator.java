@@ -1,8 +1,5 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
-import java.util.TreeMap;
-
-import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -17,11 +14,10 @@ import com.yobotics.simulationconstructionset.util.trajectory.PositionProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.PositionTrajectoryGenerator;
 import com.yobotics.simulationconstructionset.util.trajectory.VectorProvider;
 
-public class ThirdOrderWaypointPositionTrajectoryGenerator implements PositionTrajectoryGenerator
+public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajectoryGenerator
 {
    private final String namePostFix = getClass().getSimpleName();
    private final YoVariableRegistry registry;
-   private final Spline3D[] splines = new Spline3D[3];
 
    private final DoubleProvider stepTimeProvider;
    private final PositionProvider[] positionSource = new PositionProvider[4];
@@ -35,32 +31,24 @@ public class ThirdOrderWaypointPositionTrajectoryGenerator implements PositionTr
    private final YoFrameVector desiredAcceleration;
    private final ReferenceFrame referenceFrame;
 
+   private final ConcatenatedSplines origianlConcatenatedSplines;
+   private final ConcatenatedSplines respacedConcatenatedSplines;
+
    private final int desiredNumberOfSplines;
-   private final int arcLengthCalculatorDivisions;
 
-   private ConcatenatedSplines concatenatedSplines;
-//   private final ConcatenatedSplines reparameterizedConcatenatedSplines;
-
-   public ThirdOrderWaypointPositionTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, DoubleProvider stepTimeProvider,
+   public TwoWaypointPositionTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, DoubleProvider stepTimeProvider,
            PositionProvider initialPositionProvider, VectorProvider initalVelocityProvider, PositionProvider finalPositionProvider,
-           VectorProvider finalDesiredVelocityProvider, YoVariableRegistry parentRegistry, PositionProvider firstIntermediatePosition,
-           PositionProvider secondIntermediatePosition, int desiredNumberOfSplines, int arcLengthCalculatorDivisions)
+           VectorProvider finalDesiredVelocityProvider, YoVariableRegistry parentRegistry, PositionProvider firstIntermediatePositionProvider,
+           PositionProvider secondIntermediatePositionProvider, int desiredNumberOfSplines, int arcLengthCalculatorDivisions)
    {
       this.registry = new YoVariableRegistry(namePrefix + namePostFix);
       parentRegistry.addChild(registry);
 
-      int[] numberOfCoefficientsForSplines = new int[] {4, 6, 4};
-
-      for (int i = 0; i < 3; i++)
-      {
-         splines[i] = new Spline3D(numberOfCoefficientsForSplines[i], arcLengthCalculatorDivisions, referenceFrame);
-      }
-
       this.stepTimeProvider = stepTimeProvider;
 
       this.positionSource[0] = initialPositionProvider;
-      this.positionSource[1] = firstIntermediatePosition;
-      this.positionSource[2] = secondIntermediatePosition;
+      this.positionSource[1] = firstIntermediatePositionProvider;
+      this.positionSource[2] = secondIntermediatePositionProvider;
       this.positionSource[3] = finalPositionProvider;
 
       this.velocitySource[0] = initalVelocityProvider;
@@ -77,8 +65,18 @@ public class ThirdOrderWaypointPositionTrajectoryGenerator implements PositionTr
 
       this.referenceFrame = referenceFrame;
 
+      this.origianlConcatenatedSplines = new ConcatenatedSplines(new int[] {4, 6, 4}, referenceFrame, arcLengthCalculatorDivisions);
+
+      int[] reparameterizedNumberOfCoefficientsPerPolynomial = new int[desiredNumberOfSplines];
+      for (int i = 0; i < reparameterizedNumberOfCoefficientsPerPolynomial.length; i++)
+      {
+         reparameterizedNumberOfCoefficientsPerPolynomial[i] = 6;
+      }
+
+      this.respacedConcatenatedSplines = new ConcatenatedSplines(reparameterizedNumberOfCoefficientsPerPolynomial, referenceFrame,
+              arcLengthCalculatorDivisions);
+
       this.desiredNumberOfSplines = desiredNumberOfSplines;
-      this.arcLengthCalculatorDivisions = arcLengthCalculatorDivisions;
    }
 
    // TODO smarter method
@@ -125,10 +123,10 @@ public class ThirdOrderWaypointPositionTrajectoryGenerator implements PositionTr
       if (time > totalTime)
          time = totalTime;
 
-      concatenatedSplines.compute(time);
-      desiredPosition.set(concatenatedSplines.getPosition());
-      desiredVelocity.set(concatenatedSplines.getVelocity());
-      desiredAcceleration.set(concatenatedSplines.getAcceleration());
+      respacedConcatenatedSplines.compute(time);
+      desiredPosition.set(respacedConcatenatedSplines.getPosition());
+      desiredVelocity.set(respacedConcatenatedSplines.getVelocity());
+      desiredAcceleration.set(respacedConcatenatedSplines.getAcceleration());
    }
 
    public void get(FramePoint positionToPack)
@@ -151,9 +149,26 @@ public class ThirdOrderWaypointPositionTrajectoryGenerator implements PositionTr
       double stepTime = stepTimeProvider.getValue();
       MathTools.checkIfInRange(stepTime, 0.0, Double.POSITIVE_INFINITY);
       this.stepTime.set(stepTime);
+      timeIntoStep.set(0.0);
 
+      setOriginalConcatenatedSplines();
+
+      if (desiredNumberOfSplines == 3)
+      {
+         respaceSplineRangesProportionalToCurrentArcLengths();
+      }
+      else
+      {
+         respaceSplineRangesWithEqualArcLengths();
+      }
+   }
+
+   private void setOriginalConcatenatedSplines()
+   {
+      double[] times = new double[4];
       FramePoint[] positions = new FramePoint[4];
       FrameVector[] velocities = new FrameVector[4];
+      
       for (int i = 0; i < 4; i++)
       {
          positions[i] = new FramePoint(referenceFrame);
@@ -165,57 +180,84 @@ public class ThirdOrderWaypointPositionTrajectoryGenerator implements PositionTr
          velocities[i].changeFrame(referenceFrame);
       }
 
-      timeIntoStep.set(0.0);
-
       double[] distances = new double[4];
-      double[] times = new double[4];
-      double totalDist = 0;
-
+      double deltaDistance;
+      
       distances[0] = 0.0;
-
+      
       for (int i = 1; i < 4; i++)
       {
-         double distInc = positions[i - 1].distance(positions[i]);
-         totalDist += distInc;
-         distances[i] = totalDist;
+         deltaDistance = positions[i - 1].distance(positions[i]);
+         distances[i] = distances[i - 1] + deltaDistance;
       }
+      
+      double totalDistance = distances[3];
 
       for (int i = 0; i < 4; i++)
       {
-         times[i] = distances[i] * stepTime / totalDist;
+         times[i] = distances[i] * stepTime.getDoubleValue() / totalDistance;
       }
 
-      int[] cubicSplines = new int[] {0, 2, 1};
-      for (int i : cubicSplines)
+      origianlConcatenatedSplines.setCubicQuinticCubic(times, positions, velocities);
+   }
+
+   public void respaceSplineRangesProportionalToCurrentArcLengths()
+   {
+      double[] oldTimes = new double[desiredNumberOfSplines + 1];
+      double[] newTimes = new double[desiredNumberOfSplines + 1];
+
+      double t0 = origianlConcatenatedSplines.getT0();
+      double tf = origianlConcatenatedSplines.getTf();
+      double totalTime = tf - t0;
+
+      double totalArcLength = origianlConcatenatedSplines.getArcLength();
+      double cumulativeArcLength = 0.0;
+      Spline3D oldSpline;
+
+      oldTimes[0] = t0;
+      newTimes[0] = t0;
+
+      for (int i = 1; i < oldTimes.length - 1; i++)
       {
-         double t0 = times[i];
-         double tf = times[i + 1];
-         FramePoint z0 = positions[i];
-         FrameVector zd0 = velocities[i];
-         FramePoint zf = positions[i + 1];
-         FrameVector zdf = velocities[i + 1];
-         Spline3D spline = splines[i];
-         if ((i == 0) || (i == 2))
-         {
-            spline.setCubic(t0, tf, z0, zd0, zf, zdf);
-         }
-         else if (i == 1)
-         {
-            FrameVector zdd0 = splines[0].getAcceleration(t0);
-            FrameVector zddf = splines[2].getAcceleration(tf);
-
-            spline.setQuintic(t0, tf, z0, zd0, zdd0, zf, zdf, zddf);
-         }
+         oldSpline = origianlConcatenatedSplines.getSplineByIndex(i);
+         oldTimes[i] = oldSpline.getT0();
+         newTimes[i] = t0 + totalTime * cumulativeArcLength / totalArcLength;
+         cumulativeArcLength += oldSpline.getArcLength();
       }
 
-      TreeMap<Pair<Double, Double>, Spline3D> splineMap = new TreeMap<Pair<Double, Double>, Spline3D>(ConcatenatedSplines.getComparatorForTreeMap());
-      for (int i = 0; i < 3; i++)
+      oldTimes[oldTimes.length - 1] = tf;
+      newTimes[newTimes.length - 1] = tf;
+
+      respacedConcatenatedSplines.setQuintics(origianlConcatenatedSplines, oldTimes, newTimes);
+   }
+
+   public void respaceSplineRangesWithEqualArcLengths()
+   {
+      int desiredNumberOfSplines = respacedConcatenatedSplines.getNumberOfSplines();
+
+      double[] oldTimes = new double[desiredNumberOfSplines + 1];
+      double[] newTimes = new double[desiredNumberOfSplines + 1];
+
+      double t0 = origianlConcatenatedSplines.getT0();
+      double tf = origianlConcatenatedSplines.getTf();
+      double totalTime = tf - t0;
+
+      double totalArcLength = origianlConcatenatedSplines.getArcLength();
+      double desiredIndividualArcLength = totalArcLength / (double) desiredNumberOfSplines;
+
+      oldTimes[0] = t0;
+      newTimes[0] = t0;
+
+      for (int i = 1; i < oldTimes.length - 1; i++)
       {
-         splineMap.put(new Pair<Double, Double>(times[i], times[i + 1]), splines[i]);
+         oldTimes[i] = origianlConcatenatedSplines.approximateTimeFromArcLength((double) i * desiredIndividualArcLength);
+         newTimes[i] = t0 + totalTime * ((double) i) / ((double) desiredNumberOfSplines);
       }
 
-//      concatenatedSplines = new ConcatenatedSplines(splineMap, referenceFrame, arcLengthCalculatorDivisions);
-      concatenatedSplines = new ConcatenatedSplines(concatenatedSplines, desiredNumberOfSplines, arcLengthCalculatorDivisions);
+      oldTimes[oldTimes.length - 1] = tf;
+      newTimes[newTimes.length - 1] = tf;
+
+      respacedConcatenatedSplines.setQuintics(origianlConcatenatedSplines, null, null);
    }
 
    public boolean isDone()
