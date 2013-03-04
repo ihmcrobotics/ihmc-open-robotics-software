@@ -68,8 +68,6 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 
 public abstract class MomentumBasedController implements RobotController
 {
-   private static final long serialVersionUID = -7013956504623280825L;
-
    private final String name = getClass().getSimpleName();
    protected final YoVariableRegistry registry = new YoVariableRegistry(name);
 

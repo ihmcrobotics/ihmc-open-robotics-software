@@ -17,7 +17,6 @@ import com.yobotics.simulationconstructionset.util.statemachines.StateMachine;
 
 public class SuspendedSwingTestController implements RobotController
 {
-   private static final long serialVersionUID = 3407390552915533457L;
    private final String name = getClass().getSimpleName();
 
    protected final RobotSpecificJointNames robotJointNames;

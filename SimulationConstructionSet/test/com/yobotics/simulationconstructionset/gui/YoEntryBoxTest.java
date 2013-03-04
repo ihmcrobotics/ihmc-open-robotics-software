@@ -32,7 +32,6 @@ public class YoEntryBoxTest
 
    private class SimpleController implements RobotControllerWithAttachRobot
    {
-      private static final long serialVersionUID = -4163260281627030963L;
       private YoVariableRegistry registry;
       private EnumYoVariable<BadGreekEnum> badGreekVariable;
       private EnumYoVariable<LargeEnum> largeEnumVariable;

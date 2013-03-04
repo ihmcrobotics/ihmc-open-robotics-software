@@ -13,8 +13,6 @@ import com.yobotics.simulationconstructionset.robotController.SensorProcessor;
 
 public class PerfectIMUSensorProcessor implements SensorProcessor
 {
-   private static final long serialVersionUID = 8284409690502983889L;
-   
    private final String name;
    private final YoVariableRegistry registry;
    

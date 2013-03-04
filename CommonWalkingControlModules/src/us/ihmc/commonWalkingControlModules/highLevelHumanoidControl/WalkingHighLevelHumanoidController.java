@@ -105,8 +105,6 @@ import com.yobotics.simulationconstructionset.util.trajectory.YoPositionProvider
 
 public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedController
 {
-   private static final long serialVersionUID = 7436158470125024491L;
-
    private static enum WalkingState {LEFT_SUPPORT, RIGHT_SUPPORT, TRANSFER_TO_LEFT_SUPPORT, TRANSFER_TO_RIGHT_SUPPORT, DOUBLE_SUPPORT}
 
    private final static boolean DEBUG = false;

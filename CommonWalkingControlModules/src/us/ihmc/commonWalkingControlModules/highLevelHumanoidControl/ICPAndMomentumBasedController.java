@@ -38,7 +38,6 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector2d;
 
 public abstract class ICPAndMomentumBasedController extends MomentumBasedController
 {
-   private static final long serialVersionUID = 2217752950143553902L;
    protected final SideDependentList<? extends ContactablePlaneBody> bipedFeet;
    protected final BipedSupportPolygons bipedSupportPolygons;
    protected final YoFramePoint2d desiredICP;

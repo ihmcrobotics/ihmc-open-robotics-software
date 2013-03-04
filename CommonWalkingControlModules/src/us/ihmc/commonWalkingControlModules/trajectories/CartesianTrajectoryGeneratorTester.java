@@ -140,10 +140,6 @@ public class CartesianTrajectoryGeneratorTester
 
    private class CartesianTrajectoryGeneratorTesterController implements RobotController
    {
-      /**
-       *
-       */
-      private static final long serialVersionUID = 3995994529267385194L;
       private final YoVariableRegistry registry = new YoVariableRegistry("CartesianTrajectoryGeneratorTesterController");
       private final CartesianTrajectoryGenerator cartesianTrajectoryGenerator;
       private final BagOfBalls bagOfBalls;

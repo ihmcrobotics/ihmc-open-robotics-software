@@ -135,8 +135,6 @@ public class ReflectionSimulationComparerTest
    
    private class RewindableOrNotRewindableController implements RobotController
    {
-      private static final long serialVersionUID = 506502350533889577L;
-      
       private final YoVariableRegistry registry = new YoVariableRegistry("RewindableObject");
       
       private final IntegerYoVariable counter = new IntegerYoVariable("counter", registry);

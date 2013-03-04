@@ -13,7 +13,6 @@ import com.yobotics.simulationconstructionset.rawSensors.RawIMUSensorsInterface;
 
 public class DigitalIMUSensorProcessor implements IMUSensorProcessor
 {
-   private static final long serialVersionUID = 4205927753616151441L;
    private final String name = getClass().getSimpleName();
    private final RawIMUSensorsInterface rawIMUSensors;
    private final ProcessedIMUSensorsWriteOnlyInterface processedSensors;

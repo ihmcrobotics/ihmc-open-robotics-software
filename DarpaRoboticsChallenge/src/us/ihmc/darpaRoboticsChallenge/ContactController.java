@@ -10,8 +10,6 @@ import com.yobotics.simulationconstructionset.util.ground.SimpleStickSlipContact
 
 public class ContactController implements RobotController
 {
-   private static final long serialVersionUID = 1463656383530512645L;
-
    private final YoVariableRegistry registry = new YoVariableRegistry("ContactController");
 
    private final SimpleStickSlipContactModel contactModel;
