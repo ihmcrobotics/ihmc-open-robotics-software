@@ -50,7 +50,7 @@ public class DRCFlatGroundWalkingTrack
       
       DRCRobotJointMap jointMap = new DRCRobotJointMap(DRCRobotModel.getDefaultRobotModel());
       ControllerFactory controllerFactory = new DRCRobotMomentumBasedControllerFactory(highLevelHumanoidControllerFactory);
-      drcSimulation = DRCSimulationFactory.createSimulation(jointMap, controllerFactory, null, robotInitialSetup, scsInitialSetup, guiInitialSetup);
+      drcSimulation = DRCSimulationFactory.createSimulation(jointMap, controllerFactory, null, robotInitialSetup, scsInitialSetup, guiInitialSetup, null);
 
       // add other registries
       drcSimulation.addAdditionalDynamicGraphicObjectsListRegistries(dynamicGraphicObjectsListRegistry);

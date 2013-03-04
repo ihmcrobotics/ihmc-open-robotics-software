@@ -23,6 +23,7 @@ import us.ihmc.projectM.R2Sim02.initialSetup.ScsInitialSetup;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.net.KryoObjectServer;
 import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
@@ -42,7 +43,7 @@ public class DRCSimulationFactory
 
    public static HumanoidRobotSimulation<SDFRobot> createSimulation(DRCRobotJointMap jointMap, ControllerFactory controllerFactory,
            CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, RobotInitialSetup<SDFRobot> robotInitialSetup, ScsInitialSetup scsInitialSetup,
-           GuiInitialSetup guiInitialSetup)
+           GuiInitialSetup guiInitialSetup, KryoObjectServer networkServer)
    {
       GUISetterUpperRegistry guiSetterUpperRegistry = new GUISetterUpperRegistry();
       DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
@@ -91,7 +92,7 @@ public class DRCSimulationFactory
                                                                                 fullRobotModelForController, referenceFramesForController);
 
       OneDoFJoint lidarJoint = fullRobotModelForController.getOneDoFJointByName(jointMap.getLidarJointName());
-
+      // PathTODO: Build LIDAR here
       RobotController robotController = controllerFactory.getController(fullRobotModelForController, referenceFramesForController, controlDT,
                                            simulatedRobot.getYoTime(), dynamicGraphicObjectsListRegistry, guiSetterUpperRegistry, twistCalculator,
                                            centerOfMassJacobian, footSwitches, handControllers, lidarJoint);
@@ -114,9 +115,12 @@ public class DRCSimulationFactory
       
       modularRobotController.setRawOutputWriter(sensorReaderAndOutputWriter);
 
-      return new HumanoidRobotSimulation<SDFRobot>(simulatedRobot, modularRobotController, simulationTicksPerControlTick, fullRobotModelForSimulation,
+      HumanoidRobotSimulation<SDFRobot> humanoidRobotSimulation = new HumanoidRobotSimulation<SDFRobot>(simulatedRobot, modularRobotController, simulationTicksPerControlTick, fullRobotModelForSimulation,
                                          commonAvatarEnvironmentInterface, simulatedRobot.getAllExternalForcePoints(), robotInitialSetup, scsInitialSetup,
                                          guiInitialSetup, guiSetterUpperRegistry, dynamicGraphicObjectsListRegistry);
+      if (networkServer!=null)
+         DRCLidar.setupDRCRobotLidar(humanoidRobotSimulation, networkServer, lidarJoint);
+      return humanoidRobotSimulation;
    }
 
    private static SensorProcessor createSensorProcessor(TwistCalculator twistCalculator, CenterOfMassJacobian centerOfMassJacobian)
