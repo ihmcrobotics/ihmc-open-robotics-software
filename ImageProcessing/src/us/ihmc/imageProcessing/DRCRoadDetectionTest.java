@@ -3,48 +3,59 @@
 
 package us.ihmc.imageProcessing;
 
-import georegression.struct.line.LineParametric2D_F32;
-
-import java.awt.GridLayout;
-import java.awt.image.BufferedImage;
-import java.util.List;
-
-import javax.swing.JFrame;
-import javax.swing.JSlider;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-
-import jxl.format.RGB;
-import us.ihmc.imageProcessing.ImageFilters.BoxBlurFilter;
-import us.ihmc.imageProcessing.ImageFilters.ColorFilter;
-import us.ihmc.imageProcessing.ImageFilters.CropFilter;
-import us.ihmc.imageProcessing.utilities.VideoPlayer;
-import us.ihmc.utilities.camera.VideoListener;
 import boofcv.abst.feature.detect.line.DetectLineHoughPolar;
 import boofcv.alg.filter.binary.ThresholdImageOps;
 import boofcv.core.image.ConvertBufferedImage;
 import boofcv.factory.feature.detect.line.FactoryDetectLineAlgs;
 import boofcv.gui.binary.VisualizeBinaryData;
-import boofcv.gui.feature.ImageLinePanel;
-import boofcv.gui.image.ShowImages;
 import boofcv.struct.image.ImageFloat32;
 import boofcv.struct.image.ImageSInt16;
 import boofcv.struct.image.ImageSingleBand;
 import boofcv.struct.image.ImageUInt8;
+import georegression.struct.line.LineParametric2D_F32;
+import georegression.struct.point.Point2D_F32;
+import jxl.format.RGB;
+import us.ihmc.imageProcessing.ImageFilters.ColorFilter;
+import us.ihmc.imageProcessing.ImageFilters.CropFilter;
+import us.ihmc.imageProcessing.utilities.LinePainter;
+import us.ihmc.imageProcessing.utilities.PaintableImageViewer;
+import us.ihmc.imageProcessing.utilities.VideoPlayer;
+import us.ihmc.utilities.camera.VideoListener;
+import us.ihmc.utilities.math.geometry.Line2d;
 
-public class DRCRoadDetectionTest implements VideoListener
+import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.vecmath.Point2d;
+import java.awt.*;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.List;
+
+public class DRCRoadDetectionTest implements VideoListener, KeyListener
 {
+   boolean PAUSE = false;
+
+   PaintableImageViewer imageViewer = new PaintableImageViewer();
+   LinePainter linePainter = new LinePainter(4.0f);
+
+   JFrame f;
    // adjusts edge threshold for identifying pixels belonging to a line
 
    // adjust the maximum number of found lines in the image
-   private int maxLines = 30;
-   private int localMaxRadius = 2;
-   private int minCounts = 112;
+   private int maxLines = 8;
+   private int localMaxRadius = 5;
+   private int minCounts = 22;
    private double resolutionRange = 1;
    private double resolutionAngle = Math.toRadians(1);
-   private float edgeThreshold = 73;
-   float mean = 65;    // (float)ImageStatistics.mean(input);
-   ColorFilter filter;
+   private float edgeThreshold = 11;
+   float mean = 58;    // (float)ImageStatistics.mean(input);
+
+   private ColorFilter filter;
 
    public DRCRoadDetectionTest()
    {
@@ -57,6 +68,7 @@ public class DRCRoadDetectionTest implements VideoListener
       filter.addColorToLookFor(new RGB(71, 72, 67));
 
 
+      imageViewer.addPostProcessor(linePainter);
       setUpJFrame();
 
       // process();
@@ -70,15 +82,13 @@ public class DRCRoadDetectionTest implements VideoListener
     * @param imageType Type of image processed by line detector.
     * @param derivType Type of image derivative.
     */
-   public <T extends ImageSingleBand<?>, D extends ImageSingleBand<?>> List<LineParametric2D_F32> detectLines(BufferedImage image, Class<T> imageType,
-           Class<D> derivType)
+   public <T extends ImageSingleBand<?>, D extends ImageSingleBand<?>> List<LineParametric2D_F32> detectLines(BufferedImage image, Class<T> imageType, Class<D> derivType)
    {
       // convert the line into a single band image
       T input = ConvertBufferedImage.convertFromSingle(image, null, imageType);
 
       // Comment/uncomment to try a different type of line detector
-      DetectLineHoughPolar<T, D> detector = FactoryDetectLineAlgs.houghPolar(localMaxRadius, minCounts, resolutionRange, resolutionAngle, edgeThreshold,
-                                               maxLines, imageType, derivType);
+      DetectLineHoughPolar<T, D> detector = FactoryDetectLineAlgs.houghPolar(localMaxRadius, minCounts, resolutionRange, resolutionAngle, edgeThreshold, maxLines, imageType, derivType);
 
       // DetectLineHoughFoot<T,D> detector = FactoryDetectLineAlgs.houghFoot(3, 8, 5, edgeThreshold,
       // maxLines, imageType, derivType);
@@ -117,39 +127,57 @@ public class DRCRoadDetectionTest implements VideoListener
       // Render the binary image for output and display it in a window
       BufferedImage visualBinary = VisualizeBinaryData.renderBinary(binary, null);
 
-      // ShowImages.showWindow(visualBinary,"Binary Image");
+      //    ShowImages.showWindow(visualBinary,"Binary Image");
       return visualBinary;
    }
 
    public void updateImage(BufferedImage bufferedImage)
    {
-      // BufferedImage input = UtilImageIO.loadImage(DRCRoadDetectionTest.class.getResource("exampleVideo/DrivingTaskRoad.jpg").getFile());
-//
-      // process(input);
-
       process(bufferedImage);
-
-
    }
 
    private void process(BufferedImage input)
    {
-      CropFilter cropFilter = new CropFilter(0, 0, input.getWidth(), input.getHeight() - input.getHeight() / 5);
-      BufferedImage croppedImage = new BufferedImage(input.getWidth(), input.getHeight() - input.getHeight() / 5, BufferedImage.TYPE_INT_RGB);
-      cropFilter.filter(input, croppedImage);
-      filter.filter(croppedImage, croppedImage);
+      if (!PAUSE)
+      {
+         CropFilter cropFilter = new CropFilter(0, 0, input.getWidth(), input.getHeight() - input.getHeight() / 5);
+         BufferedImage croppedImage = new BufferedImage(input.getWidth(), input.getHeight() - input.getHeight() / 5, BufferedImage.TYPE_INT_RGB);
+         cropFilter.filter(input, croppedImage);
+         filter.filter(croppedImage, croppedImage);
 
-      // BoxBlurFilter boxBlur = new BoxBlurFilter(5, 5, 1);
-      // boxBlur.filter(input, input);
+         // BoxBlurFilter boxBlur = new BoxBlurFilter(5, 5, 1);
+         // boxBlur.filter(input, input);
 
-      // input = filterbinaryExample(input);
+         // input = filterbinaryExample(input);
 
-      List<LineParametric2D_F32> list = detectLines(croppedImage, ImageUInt8.class, ImageSInt16.class);
-      gui.setBackground(croppedImage);
+         List<LineParametric2D_F32> list = detectLines(croppedImage, ImageUInt8.class, ImageSInt16.class);
+         ArrayList<Line2d> lines = new ArrayList<Line2d>();
+         for (LineParametric2D_F32 lineParametric2D_f32 : list)
+         {
+            Point2D_F32 pointOnLine1 = lineParametric2D_f32.getPointOnLine(0.0f);
+            Point2d p1 = new Point2d(pointOnLine1.getX(), pointOnLine1.getY());
+            Point2D_F32 pointOnLine2 = lineParametric2D_f32.getPointOnLine(1.0f);
+            Point2d p2 = new Point2d(pointOnLine2.getX(), pointOnLine2.getY());
 
+            Line2d line2d = new Line2d(p1, p2);
+            lines.add(line2d);
+         }
+         linePainter.setLines(lines);
 
-      gui.setLines(list);
-      gui.repaint();
+         repackIfImageSizeChanges(croppedImage.getWidth(), croppedImage.getHeight());
+         imageViewer.updateImage(croppedImage);
+      }
+   }
+
+   private void repackIfImageSizeChanges(int width, int height)
+   {
+      if (imageViewer.getWidth() < width || imageViewer.getHeight() < height)
+      {
+         Dimension dimension = new Dimension(width, height);
+         imageViewer.setPreferredSize(dimension);
+         linePainter.setImageHeight(height);
+         f.pack();
+      }
    }
 
    public void setUpJFrame()
@@ -169,8 +197,7 @@ public class DRCRoadDetectionTest implements VideoListener
 
 
                System.out.println("localMaxRadius: " + localMaxRadius);
-
-               // process();
+               //               process();
 
             }
          });
@@ -191,8 +218,7 @@ public class DRCRoadDetectionTest implements VideoListener
 
 
                System.out.println("minCounts: " + minCounts);
-
-               // process();
+               //               process();
 
             }
          });
@@ -212,8 +238,7 @@ public class DRCRoadDetectionTest implements VideoListener
 
 
                System.out.println("resolutionRange: " + resolutionRange);
-
-               // process();
+               //               process();
 
             }
          });
@@ -233,8 +258,7 @@ public class DRCRoadDetectionTest implements VideoListener
 
 
                System.out.println("edgeThreshold: " + edgeThreshold);
-
-               // process();
+               //               process();
 
             }
          });
@@ -254,8 +278,7 @@ public class DRCRoadDetectionTest implements VideoListener
 
 
                System.out.println("mean: " + mean);
-
-               // process();
+               //               process();
 
             }
          });
@@ -277,8 +300,6 @@ public class DRCRoadDetectionTest implements VideoListener
 
                System.out.println("filter threshold: " + filter.getThreshold());
 
-               // process();
-
             }
          });
 
@@ -291,35 +312,44 @@ public class DRCRoadDetectionTest implements VideoListener
       tmp.setVisible(true);
       tmp.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
+      f = new JFrame("Driving Algorithm Test");
+      f.addWindowListener(new WindowAdapter()
+      {
+         public void windowClosing(WindowEvent e)
+         {
+            System.exit(0);
+         }
+      });
+      f.addKeyListener(this);
 
-      gui = new ImageLinePanel();
-
-
-      ShowImages.showWindow(gui, "Found Line Segments");
+      f.getContentPane().add(imageViewer, BorderLayout.CENTER);
+      f.pack();
+      f.setVisible(true);
 
    }
-
-   ImageLinePanel gui;
 
    public static void main(String args[])
    {
       DRCRoadDetectionTest drcRoadDetectionTest = new DRCRoadDetectionTest();
       final VideoPlayer videoPlayer = new VideoPlayer("./media/videos/run1.mov", drcRoadDetectionTest, true);
-
-//    JFrame jFrame = new JFrame("Video Player Test");
-//    jFrame.addWindowListener(new WindowAdapter()
-//    {
-//       public void windowClosing(WindowEvent e)
-//       {
-//          videoPlayer.close();
-//          System.exit(0);
-//       }
-//    });
-//
-//    jFrame.getContentPane().add(imageViewer, BorderLayout.CENTER);
-//    jFrame.pack();
-//    jFrame.setVisible(true);
-
       videoPlayer.start();
+   }
+
+   public void keyTyped(KeyEvent e)
+   {
+
+   }
+
+   public void keyPressed(KeyEvent e)
+   {
+      if (e.getKeyCode() == KeyEvent.VK_SPACE)
+      {
+         PAUSE = !PAUSE;
+      }
+   }
+
+   public void keyReleased(KeyEvent e)
+   {
+
    }
 }
