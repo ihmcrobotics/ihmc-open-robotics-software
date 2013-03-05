@@ -46,6 +46,8 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
 
       this.stepTimeProvider = stepTimeProvider;
 
+      this.referenceFrame = referenceFrame;
+      
       this.positionSource[0] = initialPositionProvider;
       this.positionSource[1] = firstIntermediatePositionProvider;
       this.positionSource[2] = secondIntermediatePositionProvider;
@@ -62,8 +64,6 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       this.desiredPosition = new YoFramePoint("desiredPosition", referenceFrame, registry);
       this.desiredVelocity = new YoFrameVector("desiredVelocity", referenceFrame, registry);
       this.desiredAcceleration = new YoFrameVector("desiredAcceleration", referenceFrame, registry);
-
-      this.referenceFrame = referenceFrame;
 
       this.origianlConcatenatedSplines = new ConcatenatedSplines(new int[] {4, 6, 4}, referenceFrame, arcLengthCalculatorDivisions);
 
