@@ -3,6 +3,22 @@
 
 package us.ihmc.imageProcessing;
 
+import georegression.struct.line.LineParametric2D_F32;
+
+import java.awt.GridLayout;
+import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.swing.JFrame;
+import javax.swing.JSlider;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+
+import jxl.format.RGB;
+import us.ihmc.imageProcessing.ImageFilters.ColorFilter;
+import us.ihmc.imageProcessing.utilities.VideoPlayer;
+import us.ihmc.utilities.camera.VideoListener;
 import boofcv.abst.feature.detect.line.DetectLineHoughPolar;
 import boofcv.alg.filter.binary.ThresholdImageOps;
 import boofcv.core.image.ConvertBufferedImage;
@@ -10,22 +26,11 @@ import boofcv.factory.feature.detect.line.FactoryDetectLineAlgs;
 import boofcv.gui.binary.VisualizeBinaryData;
 import boofcv.gui.feature.ImageLinePanel;
 import boofcv.gui.image.ShowImages;
+import boofcv.io.image.UtilImageIO;
 import boofcv.struct.image.ImageFloat32;
 import boofcv.struct.image.ImageSInt16;
 import boofcv.struct.image.ImageSingleBand;
 import boofcv.struct.image.ImageUInt8;
-import georegression.struct.line.LineParametric2D_F32;
-import us.ihmc.imageProcessing.ImageFilters.BoxBlurFilter;
-import us.ihmc.imageProcessing.utilities.VideoPlayer;
-import us.ihmc.utilities.camera.VideoListener;
-
-import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.util.ArrayList;
-import java.util.List;
 
 public class DRCRoadDetectionTest implements VideoListener
 {
@@ -39,12 +44,22 @@ public class DRCRoadDetectionTest implements VideoListener
    private double resolutionAngle = Math.toRadians(1);
    private float edgeThreshold = 11;
    float mean = 58;    // (float)ImageStatistics.mean(input);
-
+   ColorFilter filter;
 
    public DRCRoadDetectionTest()
    {
+      filter = new ColorFilter();
+      filter.addColorToLookFor(new RGB(48, 48, 46));
+      filter.addColorToLookFor(new RGB(50, 50, 50));
+      filter.addColorToLookFor(new RGB(55, 56, 50));
+
+      filter.addColorToLookFor(new RGB(68, 68, 66));
+      filter.addColorToLookFor(new RGB(71, 72, 67));
+
+
       setUpJFrame();
-      //      process();
+
+      // process();
    }
 
 
@@ -55,13 +70,15 @@ public class DRCRoadDetectionTest implements VideoListener
     * @param imageType Type of image processed by line detector.
     * @param derivType Type of image derivative.
     */
-   public <T extends ImageSingleBand<?>, D extends ImageSingleBand<?>> ArrayList<LineParametric2D_F32> detectLines(BufferedImage image, Class<T> imageType, Class<D> derivType)
+   public <T extends ImageSingleBand<?>, D extends ImageSingleBand<?>> ArrayList<LineParametric2D_F32> detectLines(BufferedImage image, Class<T> imageType,
+           Class<D> derivType)
    {
       // convert the line into a single band image
       T input = ConvertBufferedImage.convertFromSingle(image, null, imageType);
 
       // Comment/uncomment to try a different type of line detector
-      DetectLineHoughPolar<T, D> detector = FactoryDetectLineAlgs.houghPolar(localMaxRadius, minCounts, resolutionRange, resolutionAngle, edgeThreshold, maxLines, imageType, derivType);
+      DetectLineHoughPolar<T, D> detector = FactoryDetectLineAlgs.houghPolar(localMaxRadius, minCounts, resolutionRange, resolutionAngle, edgeThreshold,
+                                               maxLines, imageType, derivType);
 
       // DetectLineHoughFoot<T,D> detector = FactoryDetectLineAlgs.houghFoot(3, 8, 5, edgeThreshold,
       // maxLines, imageType, derivType);
@@ -72,7 +89,6 @@ public class DRCRoadDetectionTest implements VideoListener
       ArrayList<LineParametric2D_F32> finalList = new ArrayList<LineParametric2D_F32>();
       for (LineParametric2D_F32 checkLine : found)
       {
-         System.out.println(checkLine.getSlopeY() / checkLine.getSlopeX());
          if ((checkLine.getSlopeY() / checkLine.getSlopeX()) > 0.1 || (checkLine.getSlopeY() / checkLine.getSlopeX()) < -0.1)
          {
             finalList.add(checkLine);
@@ -100,24 +116,29 @@ public class DRCRoadDetectionTest implements VideoListener
       // Render the binary image for output and display it in a window
       BufferedImage visualBinary = VisualizeBinaryData.renderBinary(binary, null);
 
-      //    ShowImages.showWindow(visualBinary,"Binary Image");
+      // ShowImages.showWindow(visualBinary,"Binary Image");
       return visualBinary;
    }
 
    public void updateImage(BufferedImage bufferedImage)
    {
-      process(bufferedImage);
+    //  BufferedImage input = UtilImageIO.loadImage(DRCRoadDetectionTest.class.getResource("exampleVideo/DrivingTaskRoad.jpg").getFile());
+//
+     // process(input);
+
+    process(bufferedImage);
+
+
    }
 
    private void process(BufferedImage input)
    {
-      //      BufferedImage input = UtilImageIO.loadImage(DRCRoadDetectionTest.class.getResource("exampleVideo/DrivingTaskRoad.jpg").getFile());
-      BufferedImage inputCopy = new BufferedImage(input.getWidth(), input.getHeight(), BufferedImage.TYPE_INT_RGB);
+       filter.filter(input, input);
 
-      BoxBlurFilter boxBlur = new BoxBlurFilter(5, 5, 1);
-      boxBlur.filter(input, inputCopy);
+      // BoxBlurFilter boxBlur = new BoxBlurFilter(5, 5, 1);
+      // boxBlur.filter(input, input);
 
-      input = filterbinaryExample(input);
+      // input = filterbinaryExample(input);
 
       ArrayList<LineParametric2D_F32> list = detectLines(input, ImageUInt8.class, ImageSInt16.class);
       gui.setBackground(input);
@@ -144,7 +165,8 @@ public class DRCRoadDetectionTest implements VideoListener
 
 
                System.out.println("localMaxRadius: " + localMaxRadius);
-               //               process();
+
+               // process();
 
             }
          });
@@ -165,7 +187,8 @@ public class DRCRoadDetectionTest implements VideoListener
 
 
                System.out.println("minCounts: " + minCounts);
-               //               process();
+
+               // process();
 
             }
          });
@@ -185,7 +208,8 @@ public class DRCRoadDetectionTest implements VideoListener
 
 
                System.out.println("resolutionRange: " + resolutionRange);
-               //               process();
+
+               // process();
 
             }
          });
@@ -205,7 +229,8 @@ public class DRCRoadDetectionTest implements VideoListener
 
 
                System.out.println("edgeThreshold: " + edgeThreshold);
-               //               process();
+
+               // process();
 
             }
          });
@@ -225,7 +250,8 @@ public class DRCRoadDetectionTest implements VideoListener
 
 
                System.out.println("mean: " + mean);
-               //               process();
+
+               // process();
 
             }
          });
@@ -235,18 +261,19 @@ public class DRCRoadDetectionTest implements VideoListener
 
 
       {
-         final JSlider slider = new JSlider(1, 90, 1);
+         final JSlider slider = new JSlider(0, 500, new Double(filter.getThreshold()).intValue());
          slider.setOrientation(JSlider.VERTICAL);
          slider.addChangeListener(new ChangeListener()
          {
             @Override
             public void stateChanged(ChangeEvent arg0)
             {
-               resolutionAngle = Math.toRadians(new Double(slider.getValue()));
+               filter.setThreshold(new Double(slider.getValue()));
 
 
-               System.out.println("resolutionAngle: " + resolutionAngle);
-               //               process();
+               System.out.println("filter threshold: " + filter.getThreshold());
+
+               // process();
 
             }
          });
@@ -272,22 +299,22 @@ public class DRCRoadDetectionTest implements VideoListener
 
    public static void main(String args[])
    {
-      DRCRoadDetectionTest drcRoadDetectionTest= new DRCRoadDetectionTest();
+      DRCRoadDetectionTest drcRoadDetectionTest = new DRCRoadDetectionTest();
       final VideoPlayer videoPlayer = new VideoPlayer("./media/videos/run1.mov", drcRoadDetectionTest, true);
 
-//      JFrame jFrame = new JFrame("Video Player Test");
-//      jFrame.addWindowListener(new WindowAdapter()
-//      {
-//         public void windowClosing(WindowEvent e)
-//         {
-//            videoPlayer.close();
-//            System.exit(0);
-//         }
-//      });
+//    JFrame jFrame = new JFrame("Video Player Test");
+//    jFrame.addWindowListener(new WindowAdapter()
+//    {
+//       public void windowClosing(WindowEvent e)
+//       {
+//          videoPlayer.close();
+//          System.exit(0);
+//       }
+//    });
 //
-//      jFrame.getContentPane().add(imageViewer, BorderLayout.CENTER);
-//      jFrame.pack();
-//      jFrame.setVisible(true);
+//    jFrame.getContentPane().add(imageViewer, BorderLayout.CENTER);
+//    jFrame.pack();
+//    jFrame.setVisible(true);
 
       videoPlayer.start();
    }
