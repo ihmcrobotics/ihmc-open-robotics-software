@@ -230,7 +230,7 @@ public class VideoPlayer
    public static void main(String[] args)
    {
       ImageViewer imageViewer = new ImageViewer();
-      final VideoPlayer videoPlayer = new VideoPlayer("./media/videos/LaneDetectionVideo.mp4", imageViewer, true);
+      final VideoPlayer videoPlayer = new VideoPlayer("./media/videos/run1.mov", imageViewer, true);
 
       JFrame jFrame = new JFrame("Video Player Test");
       jFrame.addWindowListener(new WindowAdapter()
