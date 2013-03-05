@@ -10,7 +10,7 @@ public class ColorFilter extends PointFilter
 {
    private ArrayList<RGB> colorsToLookFor = new ArrayList<RGB>();
 
-   double threshold = 70;
+   double threshold = 37;
 
    public double getThreshold()
    {
