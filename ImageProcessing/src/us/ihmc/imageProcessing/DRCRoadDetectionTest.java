@@ -7,7 +7,6 @@ import georegression.struct.line.LineParametric2D_F32;
 
 import java.awt.GridLayout;
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JFrame;
@@ -16,7 +15,9 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import jxl.format.RGB;
+import us.ihmc.imageProcessing.ImageFilters.BoxBlurFilter;
 import us.ihmc.imageProcessing.ImageFilters.ColorFilter;
+import us.ihmc.imageProcessing.ImageFilters.CropFilter;
 import us.ihmc.imageProcessing.utilities.VideoPlayer;
 import us.ihmc.utilities.camera.VideoListener;
 import boofcv.abst.feature.detect.line.DetectLineHoughPolar;
@@ -26,7 +27,6 @@ import boofcv.factory.feature.detect.line.FactoryDetectLineAlgs;
 import boofcv.gui.binary.VisualizeBinaryData;
 import boofcv.gui.feature.ImageLinePanel;
 import boofcv.gui.image.ShowImages;
-import boofcv.io.image.UtilImageIO;
 import boofcv.struct.image.ImageFloat32;
 import boofcv.struct.image.ImageSInt16;
 import boofcv.struct.image.ImageSingleBand;
@@ -37,13 +37,13 @@ public class DRCRoadDetectionTest implements VideoListener
    // adjusts edge threshold for identifying pixels belonging to a line
 
    // adjust the maximum number of found lines in the image
-   private int maxLines = 8;
-   private int localMaxRadius = 5;
-   private int minCounts = 22;
+   private int maxLines = 30;
+   private int localMaxRadius = 2;
+   private int minCounts = 112;
    private double resolutionRange = 1;
    private double resolutionAngle = Math.toRadians(1);
-   private float edgeThreshold = 11;
-   float mean = 58;    // (float)ImageStatistics.mean(input);
+   private float edgeThreshold = 73;
+   float mean = 65;    // (float)ImageStatistics.mean(input);
    ColorFilter filter;
 
    public DRCRoadDetectionTest()
@@ -70,7 +70,7 @@ public class DRCRoadDetectionTest implements VideoListener
     * @param imageType Type of image processed by line detector.
     * @param derivType Type of image derivative.
     */
-   public <T extends ImageSingleBand<?>, D extends ImageSingleBand<?>> ArrayList<LineParametric2D_F32> detectLines(BufferedImage image, Class<T> imageType,
+   public <T extends ImageSingleBand<?>, D extends ImageSingleBand<?>> List<LineParametric2D_F32> detectLines(BufferedImage image, Class<T> imageType,
            Class<D> derivType)
    {
       // convert the line into a single band image
@@ -86,18 +86,19 @@ public class DRCRoadDetectionTest implements VideoListener
       // maxLines, 2, 2, imageType, derivType);
 
       List<LineParametric2D_F32> found = detector.detect(input);
-      ArrayList<LineParametric2D_F32> finalList = new ArrayList<LineParametric2D_F32>();
-      for (LineParametric2D_F32 checkLine : found)
-      {
-         if ((checkLine.getSlopeY() / checkLine.getSlopeX()) > 0.1 || (checkLine.getSlopeY() / checkLine.getSlopeX()) < -0.1)
-         {
-            finalList.add(checkLine);
-         }
 
-      }
+      // ArrayList<LineParametric2D_F32> finalList = new ArrayList<LineParametric2D_F32>();
+      // for (LineParametric2D_F32 checkLine : found)
+      // {
+      // if ((checkLine.getSlopeY() / checkLine.getSlopeX()) > 0.1 || (checkLine.getSlopeY() / checkLine.getSlopeX()) < -0.1)
+      // {
+      // finalList.add(checkLine);
+      // }
+
+      // }
 
 
-      return finalList;
+      return found;
    }
 
 
@@ -122,26 +123,29 @@ public class DRCRoadDetectionTest implements VideoListener
 
    public void updateImage(BufferedImage bufferedImage)
    {
-    //  BufferedImage input = UtilImageIO.loadImage(DRCRoadDetectionTest.class.getResource("exampleVideo/DrivingTaskRoad.jpg").getFile());
+      // BufferedImage input = UtilImageIO.loadImage(DRCRoadDetectionTest.class.getResource("exampleVideo/DrivingTaskRoad.jpg").getFile());
 //
-     // process(input);
+      // process(input);
 
-    process(bufferedImage);
+      process(bufferedImage);
 
 
    }
 
    private void process(BufferedImage input)
    {
-       filter.filter(input, input);
+      CropFilter cropFilter = new CropFilter(0, 0, input.getWidth(), input.getHeight() - input.getHeight() / 5);
+      BufferedImage croppedImage = new BufferedImage(input.getWidth(), input.getHeight() - input.getHeight() / 5, BufferedImage.TYPE_INT_RGB);
+      cropFilter.filter(input, croppedImage);
+      filter.filter(croppedImage, croppedImage);
 
       // BoxBlurFilter boxBlur = new BoxBlurFilter(5, 5, 1);
       // boxBlur.filter(input, input);
 
       // input = filterbinaryExample(input);
 
-      ArrayList<LineParametric2D_F32> list = detectLines(input, ImageUInt8.class, ImageSInt16.class);
-      gui.setBackground(input);
+      List<LineParametric2D_F32> list = detectLines(croppedImage, ImageUInt8.class, ImageSInt16.class);
+      gui.setBackground(croppedImage);
 
 
       gui.setLines(list);
