@@ -55,8 +55,8 @@ public class DRCSimulationFactory
       double controlDT = simulateDT * simulationTicksPerControlTick;
 
       JaxbSDFLoader jaxbSDFLoader = DRCRobotSDFLoader.loadDRCRobot(jointMap);
-      SDFRobot simulatedRobot = jaxbSDFLoader.getRobot();
-      SDFFullRobotModel fullRobotModelForSimulation = jaxbSDFLoader.getFullRobotModel();
+      SDFRobot simulatedRobot = jaxbSDFLoader.createRobot();
+      SDFFullRobotModel fullRobotModelForSimulation = jaxbSDFLoader.createFullRobotModel();
 
 //    drcRobotSDFLoader = new DRCRobotSDFLoader(robotModel);
 //    jaxbSDFLoader = drcRobotSDFLoader.loadDRCRobot();

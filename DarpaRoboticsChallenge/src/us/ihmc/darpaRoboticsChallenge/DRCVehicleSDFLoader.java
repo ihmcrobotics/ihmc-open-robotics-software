@@ -47,7 +47,7 @@ public class DRCVehicleSDFLoader
    public static void main(String argv[]) throws FileNotFoundException, JAXBException, MalformedURLException
    {
       JaxbSDFLoader loader = loadDRCVehicle();
-      Robot robot = loader.getRobot();
+      Robot robot = loader.createRobot();
       
       
       SimulationConstructionSet scs = new SimulationConstructionSet(robot);

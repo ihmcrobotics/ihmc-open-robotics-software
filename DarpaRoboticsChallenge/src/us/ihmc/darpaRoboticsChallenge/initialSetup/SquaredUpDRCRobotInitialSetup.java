@@ -47,7 +47,7 @@ public class SquaredUpDRCRobotInitialSetup implements RobotInitialSetup<SDFRobot
       
       rootToWorld.get(offset);
       offset.setZ(offset.getZ() - 0.04 + groundZ); //TODO: What is this 0.04 magic number? Name it a variable.
-      
+      offset.add(robot.getPositionInWorld());
       robot.setPositionInWorld(offset);
       
    }
