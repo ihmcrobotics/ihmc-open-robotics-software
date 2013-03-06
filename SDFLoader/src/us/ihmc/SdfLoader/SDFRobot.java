@@ -7,6 +7,8 @@ import java.util.List;
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
+import javax.vecmath.Quat4d;
+import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor;
@@ -85,7 +87,8 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRo
 
       Vector3d offset = new Vector3d();
       generalizedSDFRobotModel.getTransformToRoot().get(offset);
-      rootJoint = new FloatingJoint(rootLink.getName(), offset, this);
+      rootJoint = new FloatingJoint(rootLink.getName(), new Vector3d(), this);
+      setPositionInWorld(offset);
       Link scsRootLink = createLink(rootLink, new Transform3D());
       rootJoint.setLink(scsRootLink);
       addRootJoint(rootJoint);
@@ -167,6 +170,11 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRo
       rootJoint.setYawPitchRoll(yaw, pitch, roll);
    }
 
+   public void setOrientation(Quat4d quaternion)
+   {
+      rootJoint.setQuaternion(quaternion);
+   }
+   
    public OneDegreeOfFreedomJoint getOneDoFJoint(String name)
    {
       return oneDoFJoints.get(name);
@@ -470,5 +478,12 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRo
    public List<GroundContactPoint> getFootGroundContactPoints(RobotSide robotSide)
    {
       return footGroundContactPoints.get(robotSide);
+   }
+
+   public Vector3d getPositionInWorld()
+   {
+      Vector3d position = new Vector3d();
+      rootJoint.getPosition(position);
+      return position;
    }
 }

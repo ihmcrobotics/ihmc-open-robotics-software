@@ -14,7 +14,7 @@ public class TestPrimitiveLoader
    public static void main(String argv[]) throws FileNotFoundException, JAXBException, MalformedURLException
    {
       JaxbSDFLoader loader = new JaxbSDFLoader(new File("Models/unitBox.sdf"), "unit_box_1", "Models/", null);
-      Robot robot = loader.getRobot();
+      Robot robot = loader.createRobot();
       
       
       SimulationConstructionSet scs = new SimulationConstructionSet(robot);

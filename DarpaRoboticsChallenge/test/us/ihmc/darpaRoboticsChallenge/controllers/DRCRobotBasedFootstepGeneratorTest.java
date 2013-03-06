@@ -182,7 +182,7 @@ public class DRCRobotBasedFootstepGeneratorTest
    {
       DRCRobotJointMap jointMap = new DRCRobotJointMap(DRCRobotModel.getDefaultRobotModel());
       JaxbSDFLoader jaxbSDFLoader = DRCRobotSDFLoader.loadDRCRobot(jointMap);
-      fullRobotModel = jaxbSDFLoader.getFullRobotModel();
+      fullRobotModel = jaxbSDFLoader.createFullRobotModel();
       referenceFrames = new ReferenceFrames(fullRobotModel, jointMap, jointMap.getAnkleHeight());
       bipedFeet = DRCOperatorUserInterface.setupBipedFeet(referenceFrames, fullRobotModel);
    }

@@ -15,8 +15,9 @@ import us.ihmc.SdfLoader.xmlDescription.SDFRoot;
 
 public class JaxbSDFLoader
 {
-   private final SDFRobot robot;
-   private final SDFFullRobotModel fullRobotModel;
+   private final GeneralizedSDFRobotModel generalizedSDFRobotModel;
+   private final SDFJointNameMap sdfJointNameMap;
+   
 
    private static ArrayList<String> createArrayListOfOneURL(String oneURL)
    {
@@ -58,55 +59,32 @@ public class JaxbSDFLoader
       {
          throw new RuntimeException(modelName + " not found");
       }
+      generalizedSDFRobotModel = new GeneralizedSDFRobotModel(modelName, model, resourceDirectories);
+      this.sdfJointNameMap = sdfJointNameMap;
+      
+      
+     
+   }
+   
+   public GeneralizedSDFRobotModel getGeneralizedSDFRobotModel()
+   {
+      return generalizedSDFRobotModel;
+   }
 
-      GeneralizedSDFRobotModel generalizedSDFRobotModel = new GeneralizedSDFRobotModel(modelName, model, resourceDirectories);
+   public SDFRobot createRobot()
+   {
+      return new SDFRobot(generalizedSDFRobotModel, sdfJointNameMap);
+   }
 
-      robot = new SDFRobot(generalizedSDFRobotModel, sdfJointNameMap);
+   public SDFFullRobotModel createFullRobotModel()
+   {
       if(sdfJointNameMap != null)
       {
-         fullRobotModel = new SDFFullRobotModel(generalizedSDFRobotModel.getRootLinks().get(0), sdfJointNameMap);
+         return new SDFFullRobotModel(generalizedSDFRobotModel.getRootLinks().get(0), sdfJointNameMap);
       }
       else
       {
-         fullRobotModel = null;
+         throw new RuntimeException("Cannot make a fullrobotmodel without a sdfJointNameMap");
       }
    }
-
-   public SDFRobot getRobot()
-   {
-      return robot;
-   }
-
-   public SDFFullRobotModel getFullRobotModel()
-   {
-      return fullRobotModel;
-   }
-   
-   
-
-   //   public static void main(String[] args) throws FileNotFoundException, JAXBException
-   //   {
-   //     JaxbSDFLoader jaxbSDFLoader = new JaxbSDFLoader();
-   //     DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
-   //     RobotController controller = new AllAnglesController(jaxbSDFLoader.fullRobotModel, dynamicGraphicObjectsListRegistry);
-   //     
-   //     ModularRobotController modularRobotController = new ModularRobotController("jaxbController");
-   //     SDFPerfectSimulatedSensorReaderAndWriter sensorReaderAndOutputWriter = new SDFPerfectSimulatedSensorReaderAndWriter(jaxbSDFLoader.robot, jaxbSDFLoader.fullRobotModel);
-   //     modularRobotController.setRawSensorReader(sensorReaderAndOutputWriter);
-   //     modularRobotController.addRobotController(controller);
-   //     modularRobotController.setRawOutputWriter(sensorReaderAndOutputWriter);
-   //
-   //     
-   //     jaxbSDFLoader.robot.setController(modularRobotController);
-   //     
-   //     
-   //     SimulationConstructionSet scs = new SimulationConstructionSet(jaxbSDFLoader.robot);
-   //     scs.setMaxBufferSize(65536);
-   //     LinearGroundContactModel linearGroundContactModel = new LinearGroundContactModel(jaxbSDFLoader.robot, 150.0, 50.0, 25000.0, 1000.0, scs.getRootRegistry());
-   //     jaxbSDFLoader.robot.setGroundContactModel(linearGroundContactModel);
-   //     dynamicGraphicObjectsListRegistry.addDynamicGraphicsObjectListsToSimulationConstructionSet(scs);
-   //     
-   //     Thread thread = new Thread(scs);
-   //     thread.start();
-   //   }
 }
