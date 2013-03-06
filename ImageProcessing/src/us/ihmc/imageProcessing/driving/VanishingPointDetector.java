@@ -50,7 +50,7 @@ public class VanishingPointDetector implements PostProcessor
       // current aim point
       g2d.setStroke(new BasicStroke(2));
       graphics.setColor(Color.red);
-      int width = (int) screenDimension.getWidth() / 2;
+      int width = 20 + (int) screenDimension.getWidth() / 2;
       int height = (int) screenDimension.getHeight() / 2;
       graphics.drawLine(width - (markerDiameter / 2), height, width + (markerDiameter / 2), height);
       graphics.drawLine(width, height - (markerDiameter / 2), width, height + (markerDiameter / 2));
