@@ -7,7 +7,7 @@ import us.ihmc.graphics3DAdapter.camera.VideoSettingsH264LowLatency;
 public class DRCConfigParameters
 {
    // Set to simulate one tick delay between, as it will be in Gazebo. This will also run the controller in a different thread!
-   public static final boolean SIMULATE_DELAY = true;
+   public static final boolean SIMULATE_DELAY = false;
    
    
    // Set whether or not to use GFE Robot Model
