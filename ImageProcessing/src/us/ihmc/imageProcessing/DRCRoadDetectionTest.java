@@ -42,7 +42,7 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
 {
    boolean PAUSE = false;
 
-   private ImageViewer rawImageViewer = new ImageViewer();
+   private PaintableImageViewer rawImageViewer = new PaintableImageViewer();
    private PaintableImageViewer analyzedImageViewer = new PaintableImageViewer();
    private LinePainter linePainter = new LinePainter(4.0f);
    private VanishingPointDetector vanishingPointDetector = new VanishingPointDetector(Color.cyan, 20);
@@ -74,6 +74,7 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
 
       analyzedImageViewer.addPostProcessor(linePainter);
       analyzedImageViewer.addPostProcessor(vanishingPointDetector);
+      rawImageViewer.addPostProcessor(vanishingPointDetector);
       setUpJFrame();
 
       // process();
@@ -167,6 +168,8 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
             Line2d line2d = new Line2d(p1, p2);
             lines.add(line2d);
          }
+
+         lines = removeBadLines(lines);
          linePainter.setLines(lines);
          vanishingPointDetector.setLines(lines);
 
@@ -175,6 +178,20 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
          repackRawIfImageSizeChanges(input.getWidth(), input.getHeight());
          rawImageViewer.updateImage(input);
       }
+   }
+
+   private ArrayList<Line2d> removeBadLines(ArrayList<Line2d> lines)
+   {
+      ArrayList<Line2d> cleanedLines = new ArrayList<Line2d>();
+      for (Line2d line : lines)
+      {
+         if(line.getSlope() < 3.0 && Math.abs(line.getSlope()) > 0.01)
+         {
+            cleanedLines.add(line);
+         }
+      }
+
+      return cleanedLines;
    }
 
    private void repackIfImageSizeChanges(int width, int height)
