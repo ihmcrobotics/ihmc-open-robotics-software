@@ -44,16 +44,37 @@ public class VanishingPointDetector implements PostProcessor
    public void paint(Graphics graphics)
    {
       Color originalGraphicsColor = graphics.getColor();
-      graphics.setColor(color);
       Graphics2D g2d = (Graphics2D) graphics;
       Stroke originalStroke = g2d.getStroke();
-      g2d.setStroke(new BasicStroke(2));
 
+      // current aim point
+      g2d.setStroke(new BasicStroke(2));
+      graphics.setColor(Color.red);
+      int width = (int) screenDimension.getWidth() / 2;
+      int height = (int) screenDimension.getHeight() / 2;
+      graphics.drawLine(width - (markerDiameter / 2), height, width + (markerDiameter / 2), height);
+      graphics.drawLine(width, height - (markerDiameter / 2), width, height + (markerDiameter / 2));
+
+      // vanishing point (desired aim point)
+      graphics.setColor(color);
       Point2d point = getBestIntersection();
       if (point != null)
       {
          graphics.drawLine((int) point.getX() - markerDiameter / 2, (int) point.getY(), (int) point.getX() + markerDiameter / 2, (int) point.getY());
          graphics.drawLine((int) point.getX(), (int) point.getY() - markerDiameter / 2, (int) point.getX(), (int) point.getY() + markerDiameter / 2);
+      }
+
+      // steering wheel
+      g2d.setStroke(new BasicStroke(4));
+      graphics.setColor(Color.red);
+      graphics.drawOval(195, (int) (screenDimension.getHeight() / 2) + 130, 220, 220);
+
+      // steering input
+      if (point != null)
+      {
+         graphics.setColor(Color.cyan);
+         double angle = -Math.atan2((point.getX() - width), height);
+         graphics.drawArc(195, (int) (screenDimension.getHeight() / 2) + 130, 220, 220, 90,  (int) Math.toDegrees(angle));
       }
 
       graphics.setColor(originalGraphicsColor);
