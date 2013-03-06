@@ -17,9 +17,11 @@ import georegression.struct.point.Point2D_F32;
 import jxl.format.RGB;
 import us.ihmc.imageProcessing.ImageFilters.ColorFilter;
 import us.ihmc.imageProcessing.ImageFilters.CropFilter;
+import us.ihmc.imageProcessing.driving.VanishingPointDetector;
 import us.ihmc.imageProcessing.utilities.LinePainter;
 import us.ihmc.imageProcessing.utilities.PaintableImageViewer;
 import us.ihmc.imageProcessing.utilities.VideoPlayer;
+import us.ihmc.utilities.camera.ImageViewer;
 import us.ihmc.utilities.camera.VideoListener;
 import us.ihmc.utilities.math.geometry.Line2d;
 
@@ -40,8 +42,10 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
 {
    boolean PAUSE = false;
 
-   PaintableImageViewer imageViewer = new PaintableImageViewer();
-   LinePainter linePainter = new LinePainter(4.0f);
+   private ImageViewer rawImageViewer = new ImageViewer();
+   private PaintableImageViewer analyzedImageViewer = new PaintableImageViewer();
+   private LinePainter linePainter = new LinePainter(4.0f);
+   private VanishingPointDetector vanishingPointDetector = new VanishingPointDetector(Color.cyan, 20);
 
    JFrame f;
    // adjusts edge threshold for identifying pixels belonging to a line
@@ -68,7 +72,8 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
       filter.addColorToLookFor(new RGB(71, 72, 67));
 
 
-      imageViewer.addPostProcessor(linePainter);
+      analyzedImageViewer.addPostProcessor(linePainter);
+      analyzedImageViewer.addPostProcessor(vanishingPointDetector);
       setUpJFrame();
 
       // process();
@@ -163,19 +168,32 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
             lines.add(line2d);
          }
          linePainter.setLines(lines);
+         vanishingPointDetector.setLines(lines);
 
          repackIfImageSizeChanges(croppedImage.getWidth(), croppedImage.getHeight());
-         imageViewer.updateImage(croppedImage);
+         analyzedImageViewer.updateImage(croppedImage);
+         repackRawIfImageSizeChanges(input.getWidth(), input.getHeight());
+         rawImageViewer.updateImage(input);
       }
    }
 
    private void repackIfImageSizeChanges(int width, int height)
    {
-      if (imageViewer.getWidth() < width || imageViewer.getHeight() < height)
+      if (analyzedImageViewer.getWidth() < width || analyzedImageViewer.getHeight() < height)
       {
          Dimension dimension = new Dimension(width, height);
-         imageViewer.setPreferredSize(dimension);
+         analyzedImageViewer.setPreferredSize(dimension);
          linePainter.setImageHeight(height);
+         f.pack();
+      }
+   }
+
+   private void repackRawIfImageSizeChanges(int width, int height)
+   {
+      if (rawImageViewer.getWidth() < width || rawImageViewer.getHeight() < height)
+      {
+         Dimension dimension = new Dimension(width, height);
+         rawImageViewer.setPreferredSize(dimension);
          f.pack();
       }
    }
@@ -322,7 +340,8 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
       });
       f.addKeyListener(this);
 
-      f.getContentPane().add(imageViewer, BorderLayout.CENTER);
+      f.getContentPane().add(rawImageViewer, BorderLayout.WEST);
+      f.getContentPane().add(analyzedImageViewer, BorderLayout.EAST);
       f.pack();
       f.setVisible(true);
 
