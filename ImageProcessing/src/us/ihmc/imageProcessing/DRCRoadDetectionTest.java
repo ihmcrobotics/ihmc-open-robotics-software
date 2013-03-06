@@ -3,33 +3,14 @@
 
 package us.ihmc.imageProcessing;
 
-import boofcv.abst.feature.detect.line.DetectLineHoughPolar;
-import boofcv.alg.filter.binary.ThresholdImageOps;
-import boofcv.core.image.ConvertBufferedImage;
-import boofcv.factory.feature.detect.line.FactoryDetectLineAlgs;
-import boofcv.gui.binary.VisualizeBinaryData;
-import boofcv.struct.image.ImageFloat32;
-import boofcv.struct.image.ImageSInt16;
-import boofcv.struct.image.ImageSingleBand;
-import boofcv.struct.image.ImageUInt8;
 import georegression.struct.line.LineParametric2D_F32;
 import georegression.struct.point.Point2D_F32;
-import jxl.format.RGB;
-import us.ihmc.imageProcessing.ImageFilters.ColorFilter;
-import us.ihmc.imageProcessing.ImageFilters.CropFilter;
-import us.ihmc.imageProcessing.driving.VanishingPointDetector;
-import us.ihmc.imageProcessing.utilities.LinePainter;
-import us.ihmc.imageProcessing.utilities.PaintableImageViewer;
-import us.ihmc.imageProcessing.utilities.VideoPlayer;
-import us.ihmc.utilities.camera.ImageViewer;
-import us.ihmc.utilities.camera.VideoListener;
-import us.ihmc.utilities.math.geometry.Line2d;
+import georegression.struct.point.Point2D_I32;
 
-import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-import javax.vecmath.Point2d;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.GridLayout;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.WindowAdapter;
@@ -37,6 +18,31 @@ import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
+
+import javax.swing.JFrame;
+import javax.swing.JSlider;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.vecmath.Point2d;
+
+import jxl.format.RGB;
+import us.ihmc.imageProcessing.ImageFilters.ColorFilter;
+import us.ihmc.imageProcessing.ImageFilters.CropFilter;
+import us.ihmc.imageProcessing.driving.VanishingPointDetector;
+import us.ihmc.imageProcessing.utilities.LinePainter;
+import us.ihmc.imageProcessing.utilities.PaintableImageViewer;
+import us.ihmc.imageProcessing.utilities.VideoPlayer;
+import us.ihmc.utilities.camera.VideoListener;
+import us.ihmc.utilities.math.geometry.Line2d;
+import boofcv.abst.feature.detect.edge.DetectEdgeContour;
+import boofcv.abst.feature.detect.line.DetectLineHoughPolar;
+import boofcv.core.image.ConvertBufferedImage;
+import boofcv.factory.feature.detect.edge.FactoryDetectEdgeContour;
+import boofcv.factory.feature.detect.line.FactoryDetectLineAlgs;
+import boofcv.struct.image.ImageSInt16;
+import boofcv.struct.image.ImageSingleBand;
+import boofcv.struct.image.ImageUInt8;
 
 public class DRCRoadDetectionTest implements VideoListener, KeyListener
 {
@@ -48,28 +54,63 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
    private VanishingPointDetector vanishingPointDetector = new VanishingPointDetector(Color.cyan, 20);
 
    JFrame f;
+
    // adjusts edge threshold for identifying pixels belonging to a line
 
    // adjust the maximum number of found lines in the image
-   private int maxLines = 8;
-   private int localMaxRadius = 5;
-   private int minCounts = 22;
+
+
+   private int maxLines = 10;
+   private int localMaxRadius = 3;
+   private int minCounts = 100;
    private double resolutionRange = 1;
-   private double resolutionAngle = Math.toRadians(1);
-   private float edgeThreshold = 11;
+   private double resolutionAngle = Math.PI / 180;
+   private float edgeThreshold = 25;
    float mean = 58;    // (float)ImageStatistics.mean(input);
+
+
+   private double lowThresh = 0.01;
+   private double highThresh = 0.15;
 
    private ColorFilter filter;
 
    public DRCRoadDetectionTest()
    {
       filter = new ColorFilter();
-      filter.addColorToLookFor(new RGB(48, 48, 46));
-      filter.addColorToLookFor(new RGB(50, 50, 50));
-      filter.addColorToLookFor(new RGB(55, 56, 50));
 
-      filter.addColorToLookFor(new RGB(68, 68, 66));
-      filter.addColorToLookFor(new RGB(71, 72, 67));
+      // middle line
+      // filter.addColorToLookFor(new RGB(152, 128, 32));
+      // filter.addColorToLookFor(new RGB(152, 128, 30));
+      // filter.addColorToLookFor(new RGB(135, 113, 37));
+      // filter.addColorToLookFor(new RGB(69, 63, 41));
+      // filter.addColorToLookFor(new RGB(77, 67, 40));
+
+
+
+      // side lines
+      filter.addColorToLookFor(new RGB(148, 144, 135));
+      filter.addColorToLookFor(new RGB(180, 180, 172));
+      filter.addColorToLookFor(new RGB(151, 151, 143));
+      filter.addColorToLookFor(new RGB(181, 177, 168));
+
+      // road
+      // filter.addColorToLookFor(new RGB(55,56, 38));
+
+      // filter.addColorToLookFor(new RGB(64, 64, 56));
+      // /  filter.addColorToLookFor(new RGB(75, 70, 64));
+      // filter.addColorToLookFor(new RGB(97, 88, 81));
+      // filter.addColorToLookFor(new RGB(56, 47, 48));
+      // filter.addColorToLookFor(new RGB(87, 88, 72));
+
+
+
+      // tuned for new world
+//    filter.addColorToLookFor(new RGB(48, 48, 46));
+//    filter.addColorToLookFor(new RGB(50, 50, 50));
+//    filter.addColorToLookFor(new RGB(55, 56, 50));
+//
+//    filter.addColorToLookFor(new RGB(68, 68, 66));
+//    filter.addColorToLookFor(new RGB(71, 72, 67));
 
 
       analyzedImageViewer.addPostProcessor(linePainter);
@@ -81,6 +122,41 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
    }
 
 
+
+
+   /**
+    * Draws each edge in the image a different color
+    */
+   public BufferedImage canny(BufferedImage source)
+   {
+      DetectEdgeContour<ImageUInt8> contour = FactoryDetectEdgeContour.canny(lowThresh, highThresh, true, ImageUInt8.class, ImageSInt16.class);
+
+      ImageUInt8 gray = ConvertBufferedImage.convertFrom(source, (ImageUInt8) null);
+
+      contour.process(gray);
+
+      List<List<Point2D_I32>> edges = contour.getContours();
+
+      // draw each edge a different color
+      BufferedImage out = new BufferedImage(gray.width, gray.height, BufferedImage.TYPE_INT_BGR);
+
+      Random rand = new Random();
+      for (List<Point2D_I32> l : edges)
+      {
+         int rgb = rand.nextInt() | 0x101010;
+
+         for (Point2D_I32 p : l)
+         {
+            out.setRGB(p.x, p.y, rgb);
+         }
+      }
+
+      return out;
+   }
+
+
+
+
    /**
     * Detects lines inside the image using different types of Hough detectors
     *
@@ -88,13 +164,15 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
     * @param imageType Type of image processed by line detector.
     * @param derivType Type of image derivative.
     */
-   public <T extends ImageSingleBand<?>, D extends ImageSingleBand<?>> List<LineParametric2D_F32> detectLines(BufferedImage image, Class<T> imageType, Class<D> derivType)
+   public <T extends ImageSingleBand<?>, D extends ImageSingleBand<?>> List<LineParametric2D_F32> detectLines(BufferedImage image, Class<T> imageType,
+           Class<D> derivType)
    {
       // convert the line into a single band image
       T input = ConvertBufferedImage.convertFromSingle(image, null, imageType);
 
       // Comment/uncomment to try a different type of line detector
-      DetectLineHoughPolar<T, D> detector = FactoryDetectLineAlgs.houghPolar(localMaxRadius, minCounts, resolutionRange, resolutionAngle, edgeThreshold, maxLines, imageType, derivType);
+      DetectLineHoughPolar<T, D> detector = FactoryDetectLineAlgs.houghPolar(localMaxRadius, minCounts, resolutionRange, resolutionAngle, edgeThreshold,
+                                               maxLines, imageType, derivType);
 
       // DetectLineHoughFoot<T,D> detector = FactoryDetectLineAlgs.houghFoot(3, 8, 5, edgeThreshold,
       // maxLines, imageType, derivType);
@@ -118,25 +196,6 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
    }
 
 
-   public BufferedImage filterbinaryExample(BufferedImage image)
-   {
-      // convert into a usable format
-      ImageFloat32 input = ConvertBufferedImage.convertFromSingle(image, null, ImageFloat32.class);
-      ImageUInt8 binary = new ImageUInt8(input.width, input.height);
-
-      // the mean pixel value is often a reasonable threshold when creating a binary image
-
-
-      // create a binary image
-      ThresholdImageOps.threshold(input, binary, mean, true);
-
-      // Render the binary image for output and display it in a window
-      BufferedImage visualBinary = VisualizeBinaryData.renderBinary(binary, null);
-
-      //    ShowImages.showWindow(visualBinary,"Binary Image");
-      return visualBinary;
-   }
-
    public void updateImage(BufferedImage bufferedImage)
    {
       process(bufferedImage);
@@ -146,15 +205,18 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
    {
       if (!PAUSE)
       {
-         CropFilter cropFilter = new CropFilter(0, 0, input.getWidth(), input.getHeight() - input.getHeight() / 5);
-         BufferedImage croppedImage = new BufferedImage(input.getWidth(), input.getHeight() - input.getHeight() / 5, BufferedImage.TYPE_INT_RGB);
+         CropFilter cropFilter = new CropFilter(0, 0, input.getWidth(), input.getHeight() - input.getHeight() / 4);
+         BufferedImage croppedImage = new BufferedImage(input.getWidth(), input.getHeight() - input.getHeight() / 4, BufferedImage.TYPE_INT_RGB);
          cropFilter.filter(input, croppedImage);
+         filter.setHorizonYLocation(input.getHeight() / 2);
          filter.filter(croppedImage, croppedImage);
 
-         // BoxBlurFilter boxBlur = new BoxBlurFilter(5, 5, 1);
-         // boxBlur.filter(input, input);
+//       croppedImage = canny(croppedImage);
 
-         // input = filterbinaryExample(input);
+
+         // BoxBlurFilter boxBlur = new BoxBlurFilter(2, 2, 1);
+         // boxBlur.filter(croppedImage, croppedImage);
+
 
          List<LineParametric2D_F32> list = detectLines(croppedImage, ImageUInt8.class, ImageSInt16.class);
          ArrayList<Line2d> lines = new ArrayList<Line2d>();
@@ -185,7 +247,7 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
       ArrayList<Line2d> cleanedLines = new ArrayList<Line2d>();
       for (Line2d line : lines)
       {
-         if(line.getSlope() < 3.0 && Math.abs(line.getSlope()) > 0.01)
+         if ((line.getSlope() < 3.0) && (Math.abs(line.getSlope()) > 0.01))
          {
             cleanedLines.add(line);
          }
@@ -196,7 +258,7 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
 
    private void repackIfImageSizeChanges(int width, int height)
    {
-      if (analyzedImageViewer.getWidth() < width || analyzedImageViewer.getHeight() < height)
+      if ((analyzedImageViewer.getWidth() < width) || (analyzedImageViewer.getHeight() < height))
       {
          Dimension dimension = new Dimension(width, height);
          analyzedImageViewer.setPreferredSize(dimension);
@@ -207,7 +269,7 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
 
    private void repackRawIfImageSizeChanges(int width, int height)
    {
-      if (rawImageViewer.getWidth() < width || rawImageViewer.getHeight() < height)
+      if ((rawImageViewer.getWidth() < width) || (rawImageViewer.getHeight() < height))
       {
          Dimension dimension = new Dimension(width, height);
          rawImageViewer.setPreferredSize(dimension);
@@ -232,7 +294,8 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
 
 
                System.out.println("localMaxRadius: " + localMaxRadius);
-               //               process();
+
+               // process();
 
             }
          });
@@ -253,7 +316,8 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
 
 
                System.out.println("minCounts: " + minCounts);
-               //               process();
+
+               // process();
 
             }
          });
@@ -273,7 +337,8 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
 
 
                System.out.println("resolutionRange: " + resolutionRange);
-               //               process();
+
+               // process();
 
             }
          });
@@ -282,18 +347,19 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
       }
 
       {
-         final JSlider slider = new JSlider(1, 200, new Double(edgeThreshold).intValue());
+         final JSlider slider = new JSlider(1, 200, new Double(lowThresh * 1000).intValue());
          slider.setOrientation(JSlider.VERTICAL);
          slider.addChangeListener(new ChangeListener()
          {
             @Override
             public void stateChanged(ChangeEvent arg0)
             {
-               edgeThreshold = new Float(slider.getValue());
+               lowThresh = new Float(slider.getValue()) / 1000;
 
 
-               System.out.println("edgeThreshold: " + edgeThreshold);
-               //               process();
+               System.out.println("lowThresh: " + lowThresh);
+
+               // process();
 
             }
          });
@@ -302,18 +368,19 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
       }
 
       {
-         final JSlider slider = new JSlider(1, 200, new Float(mean).intValue());
+         final JSlider slider = new JSlider(1, 200, new Float(highThresh * 1000).intValue());
          slider.setOrientation(JSlider.VERTICAL);
          slider.addChangeListener(new ChangeListener()
          {
             @Override
             public void stateChanged(ChangeEvent arg0)
             {
-               mean = new Float(slider.getValue());
+               highThresh = new Float(slider.getValue()) / 1000;
 
 
-               System.out.println("mean: " + mean);
-               //               process();
+               System.out.println("highThresh: " + highThresh);
+
+               // process();
 
             }
          });
@@ -373,7 +440,6 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
 
    public void keyTyped(KeyEvent e)
    {
-
    }
 
    public void keyPressed(KeyEvent e)
@@ -386,6 +452,5 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
 
    public void keyReleased(KeyEvent e)
    {
-
    }
 }
