@@ -1,6 +1,8 @@
 package us.ihmc.imageProcessing.ImageFilters;
 
 import java.awt.Color;
+import java.awt.image.BufferedImage;
+import java.awt.image.WritableRaster;
 import java.util.ArrayList;
 
 import jxl.format.RGB;
@@ -10,7 +12,14 @@ public class ColorFilter extends PointFilter
 {
    private ArrayList<RGB> colorsToLookFor = new ArrayList<RGB>();
 
-   double threshold = 37;
+   double threshold = 100;
+   private int horizon = 400;
+   boolean filterHorizon = true;
+
+   public void setHorizonYLocation(int y)
+   {
+      horizon = y;
+   }
 
    public double getThreshold()
    {
@@ -48,7 +57,6 @@ public class ColorFilter extends PointFilter
 
    public int filterRGB(int x, int y, int rgb)
    {
-
 //    int a = rgb & 0xff000000;
 
       for (RGB c : colorsToLookFor)
@@ -63,6 +71,59 @@ public class ColorFilter extends PointFilter
       return 16777215;
    }
 
+   public BufferedImage filter(BufferedImage src, BufferedImage dst)
+   {
+      int width = src.getWidth();
+      int height = src.getHeight();
+      int type = src.getType();
+      WritableRaster srcRaster = src.getRaster();
+
+      if (dst == null)
+         dst = createCompatibleDestImage(src, null);
+      WritableRaster dstRaster = dst.getRaster();
+
+      setDimensions(width, height);
+
+      int[] inPixels = new int[width];
+      for (int y = 0; y < height; y++)
+      {
+         // We try to avoid calling getRGB on images as it causes them to become unmanaged, causing horrible performance problems.
+         if (type == BufferedImage.TYPE_INT_ARGB)
+         {
+            srcRaster.getDataElements(0, y, width, 1, inPixels);
+
+            for (int x = 0; x < width; x++)
+            {
+               if (y < horizon)
+               {
+                  inPixels[x] = 16777215;
+               }
+               else
+                  inPixels[x] = filterRGB(x, y, inPixels[x]);
+            }
+
+            dstRaster.setDataElements(0, y, width, 1, inPixels);
+         }
+         else
+         {
+            src.getRGB(0, y, width, 1, inPixels, 0, width);
+
+            for (int x = 0; x < width; x++)
+            {
+               if (y < horizon)
+               {
+                  inPixels[x] = 16777215;
+               }
+               else
+                  inPixels[x] = filterRGB(x, y, inPixels[x]);
+            }
+
+            dst.setRGB(0, y, width, 1, inPixels, 0, width);
+         }
+      }
+
+      return dst;
+   }
 
    double colorDist(int r1, int g1, int b1, int r2, int g2, int b2)
    {
