@@ -1,7 +1,5 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
-import static org.junit.Assert.*;
-
 import org.junit.Test;
 
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -26,7 +24,7 @@ public class TwoWaypointPositionTrajectoryGeneratorTest {
 		PositionProvider initialPositionProvider = new ConstantPositionProvider(new FramePoint(worldFrame, new double[]{0.0, 0.0, 0.0}));
 		VectorProvider initialVelocityProvider = new ConstantVectorProvider(new FrameVector(worldFrame, new double[]{1.0, 1.0, 1.0}));
 		
-		PositionProvider firstIntermediatePositionProvider = new ConstantPositionProvider(new FramePoint(worldFrame, new double[]{-1.0, 1.0, 1.0}));
+		PositionProvider firstIntermediatePositionProvider = new ConstantPositionProvider(new FramePoint(worldFrame, new double[]{1.0, 1.0, 1.0}));
 		PositionProvider secondIntermediatePositionProvider = new ConstantPositionProvider(new FramePoint(worldFrame, new double[]{2.0, 2.0, 2.0}));
 		
 		PositionProvider finalPositionProvider = new ConstantPositionProvider(new FramePoint(worldFrame, new double[]{3.0, 3.0, 3.0}));
@@ -36,9 +34,9 @@ public class TwoWaypointPositionTrajectoryGeneratorTest {
 		int arcLengthCalculatorDivisions = 100;
 		TwoWaypointPositionTrajectoryGenerator trajectory = new TwoWaypointPositionTrajectoryGenerator("", worldFrame, stepTimeProvider, 
 				initialPositionProvider, initialVelocityProvider, finalPositionProvider, finalVelocityProvider, new YoVariableRegistry(""), firstIntermediatePositionProvider, 
-				secondIntermediatePositionProvider, numDesiredSplines, arcLengthCalculatorDivisions);
+				secondIntermediatePositionProvider, numDesiredSplines, arcLengthCalculatorDivisions, null);
 		
-	//	trajectory.initialize();
+		trajectory.initialize();
 		trajectory.compute(0.0);
 		FramePoint actual = new FramePoint(worldFrame);
 		trajectory.get(actual);
