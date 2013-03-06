@@ -45,16 +45,19 @@ public class VanishingPointDetector implements PostProcessor
    {
       Color originalGraphicsColor = graphics.getColor();
       graphics.setColor(color);
-
-      graphics.fillOval(10, 30, markerDiameter / 2, markerDiameter / 2);
+      Graphics2D g2d = (Graphics2D) graphics;
+      Stroke originalStroke = g2d.getStroke();
+      g2d.setStroke(new BasicStroke(2));
 
       Point2d point = getBestIntersection();
       if (point != null)
       {
-         graphics.fillOval((int) point.getX(), (int) point.getY(), markerDiameter, markerDiameter);
+         graphics.drawLine((int) point.getX() - markerDiameter / 2, (int) point.getY(), (int) point.getX() + markerDiameter / 2, (int) point.getY());
+         graphics.drawLine((int) point.getX(), (int) point.getY() - markerDiameter / 2, (int) point.getX(), (int) point.getY() + markerDiameter / 2);
       }
 
       graphics.setColor(originalGraphicsColor);
+      g2d.setStroke(originalStroke);
    }
 
    private Point2d getBestIntersection()
