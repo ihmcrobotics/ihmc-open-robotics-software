@@ -5,17 +5,22 @@ package us.ihmc.imageProcessing;
 
 import georegression.struct.line.LineParametric2D_F32;
 import georegression.struct.point.Point2D_F32;
+import georegression.struct.point.Point2D_F64;
 import georegression.struct.point.Point2D_I32;
 
+import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Graphics2D;
 import java.awt.GridLayout;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
+import java.awt.image.WritableRaster;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -25,22 +30,38 @@ import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.vecmath.Point2d;
+import javax.vecmath.Vector3d;
 
 import jxl.format.RGB;
 import us.ihmc.imageProcessing.ImageFilters.ColorFilter;
 import us.ihmc.imageProcessing.ImageFilters.CropFilter;
 import us.ihmc.imageProcessing.driving.VanishingPointDetector;
+import us.ihmc.imageProcessing.utilities.CirclePainter;
 import us.ihmc.imageProcessing.utilities.LinePainter;
 import us.ihmc.imageProcessing.utilities.PaintableImageViewer;
 import us.ihmc.imageProcessing.utilities.VideoPlayer;
 import us.ihmc.utilities.camera.VideoListener;
 import us.ihmc.utilities.math.geometry.Line2d;
 import boofcv.abst.feature.detect.edge.DetectEdgeContour;
+import boofcv.abst.feature.detect.interest.ConfigFastHessian;
+import boofcv.abst.feature.detect.interest.InterestPointDetector;
 import boofcv.abst.feature.detect.line.DetectLineHoughPolar;
+import boofcv.alg.filter.binary.BinaryImageOps;
+import boofcv.alg.filter.binary.ThresholdImageOps;
+import boofcv.alg.misc.ImageStatistics;
 import boofcv.core.image.ConvertBufferedImage;
 import boofcv.factory.feature.detect.edge.FactoryDetectEdgeContour;
+import boofcv.factory.feature.detect.interest.FactoryInterestPoint;
 import boofcv.factory.feature.detect.line.FactoryDetectLineAlgs;
+import boofcv.gui.binary.VisualizeBinaryData;
+import boofcv.gui.feature.FancyInterestPointRender;
+import boofcv.gui.feature.FancyInterestPointRender.Circle;
+import boofcv.gui.image.ShowImages;
+import boofcv.io.image.UtilImageIO;
+import boofcv.struct.BoofDefaults;
+import boofcv.struct.image.ImageFloat32;
 import boofcv.struct.image.ImageSInt16;
+import boofcv.struct.image.ImageSInt32;
 import boofcv.struct.image.ImageSingleBand;
 import boofcv.struct.image.ImageUInt8;
 
@@ -51,6 +72,8 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
    private PaintableImageViewer rawImageViewer = new PaintableImageViewer();
    private PaintableImageViewer analyzedImageViewer = new PaintableImageViewer();
    private LinePainter linePainter = new LinePainter(4.0f);
+   private CirclePainter circlePainter = new CirclePainter(4.0f);
+
    private VanishingPointDetector vanishingPointDetector = new VanishingPointDetector(Color.cyan, 20);
 
    JFrame f;
@@ -76,7 +99,16 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
 
    public DRCRoadDetectionTest()
    {
+      filterCone.setThreshold(25);
+      filterCone.filterHorizon(false);
+      filterCone.addColorToLookFor(new RGB(84, 51, 46));
+      filterCone.addColorToLookFor(new RGB(63, 28, 22));
+      filterCone.addColorToLookFor(new RGB(161, 91, 91));
+      filterCone.addColorToLookFor(new RGB(69, 41, 29));
+
+
       filter = new ColorFilter();
+      filter.filterHorizon(true);
 
       // middle line
       // filter.addColorToLookFor(new RGB(152, 128, 32));
@@ -114,6 +146,8 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
 
 
       analyzedImageViewer.addPostProcessor(linePainter);
+      analyzedImageViewer.addPostProcessor(circlePainter);
+
       analyzedImageViewer.addPostProcessor(vanishingPointDetector);
       rawImageViewer.addPostProcessor(vanishingPointDetector);
       setUpJFrame();
@@ -198,20 +232,71 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
 
    public void updateImage(BufferedImage bufferedImage)
    {
+      // bufferedImage = UtilImageIO.loadImage(DRCRoadDetectionTest.class.getResource("exampleVideo/coneFinder.jpg").getFile());
       process(bufferedImage);
    }
+
+   static BufferedImage deepCopy(BufferedImage bi)
+   {
+      ColorModel cm = bi.getColorModel();
+      boolean isAlphaPremultiplied = cm.isAlphaPremultiplied();
+      WritableRaster raster = bi.copyData(null);
+
+      return new BufferedImage(cm, raster, isAlphaPremultiplied, null);
+   }
+
+   ColorFilter filterCone = new ColorFilter();
+
+   public InterestPointDetector<ImageFloat32> countConeBlobs(BufferedImage image)
+   {
+      filterCone.filter(image, image);
+      ImageFloat32 input = ConvertBufferedImage.convertFromSingle(image, null, ImageFloat32.class);
+      ImageUInt8 binary = new ImageUInt8(input.width, input.height);
+      ImageSInt32 blobs = new ImageSInt32(input.width, input.height);
+
+      // the mean pixel value is often a reasonable threshold when creating a binary image
+      double mean = 10;    //
+
+      // create a binary image
+      ThresholdImageOps.threshold(input, binary, (float) mean, true);
+
+      // remove small blobs through erosion and dilation
+      // The null in the input indicates that it should internally declare the work image it needs
+      // this is less efficient, but easier to code.
+      binary = BinaryImageOps.erode8(binary, null);
+      binary = BinaryImageOps.erode8(binary, null);
+
+      // binary = BinaryImageOps.erode8(binary, null);
+
+      binary = BinaryImageOps.dilate8(binary, null);
+      binary = BinaryImageOps.dilate8(binary, null);
+
+      // Detect blobs inside the binary image and assign labels to them
+      int numBlobs = BinaryImageOps.labelBlobs4(binary, blobs);
+
+      BufferedImage visualized = VisualizeBinaryData.renderLabeled(blobs, numBlobs, null);
+
+      return detect(visualized);
+   }
+
+   int show = 0;
+
+
+
 
    private void process(BufferedImage input)
    {
       if (!PAUSE)
       {
+         InterestPointDetector<ImageFloat32> cones = countConeBlobs(deepCopy(input));
+         System.out.println(cones.getNumberOfFeatures());
          CropFilter cropFilter = new CropFilter(0, 0, input.getWidth(), input.getHeight() - input.getHeight() / 4);
          BufferedImage croppedImage = new BufferedImage(input.getWidth(), input.getHeight() - input.getHeight() / 4, BufferedImage.TYPE_INT_RGB);
          cropFilter.filter(input, croppedImage);
          filter.setHorizonYLocation(input.getHeight() / 2);
          filter.filter(croppedImage, croppedImage);
 
-//       croppedImage = canny(croppedImage);
+         // croppedImage = canny(croppedImage);
 
 
          // BoxBlurFilter boxBlur = new BoxBlurFilter(2, 2, 1);
@@ -219,7 +304,28 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
 
 
          List<LineParametric2D_F32> list = detectLines(croppedImage, ImageUInt8.class, ImageSInt16.class);
+
          ArrayList<Line2d> lines = new ArrayList<Line2d>();
+
+         ArrayList<Vector3d> circles = new ArrayList<Vector3d>();
+
+         for (int i = 0; i < cones.getNumberOfFeatures(); i++)
+         {
+            Point2D_F64 pt = cones.getLocation(i);
+
+            // note how it checks the capabilities of the detector
+            double scale = cones.getScale(i);
+            int radius = (int) (scale * BoofDefaults.SCALE_SPACE_CANONICAL_RADIUS);
+            Vector3d tmp = new Vector3d(pt.x, pt.y, radius);
+            circles.add(tmp);
+
+//          circles.add(new Ci)render.addCircle((int)pt.x,(int)pt.y,radius);
+
+
+         }
+
+         circlePainter.setCircles(circles);
+
          for (LineParametric2D_F32 lineParametric2D_f32 : list)
          {
             Point2D_F32 pointOnLine1 = lineParametric2D_f32.getPointOnLine(0.0f);
@@ -263,6 +369,7 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
          Dimension dimension = new Dimension(width, height);
          analyzedImageViewer.setPreferredSize(dimension);
          linePainter.setImageHeight(height);
+         circlePainter.setImageHeight(height);
          f.pack();
       }
    }
@@ -429,6 +536,52 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
       f.pack();
       f.setVisible(true);
 
+   }
+
+   public InterestPointDetector<ImageFloat32> detect(BufferedImage image)
+   {
+      ImageFloat32 input = ConvertBufferedImage.convertFromSingle(image, null, ImageFloat32.class);
+
+      // Create a Fast Hessian detector from the SURF paper.
+      // Other detectors can be used in this example too.
+      InterestPointDetector<ImageFloat32> detector = FactoryInterestPoint.fastHessian(new ConfigFastHessian(10, 2, 100, 2, 9, 3, 4));
+
+      // find interest points in the image
+      detector.detect(input);
+
+      // Show the features
+      return detector;
+   }
+
+   private static <T extends ImageSingleBand> void displayResults(BufferedImage image, InterestPointDetector<T> detector)
+   {
+      Graphics2D g2 = image.createGraphics();
+      FancyInterestPointRender render = new FancyInterestPointRender();
+
+
+      for (int i = 0; i < detector.getNumberOfFeatures(); i++)
+      {
+         Point2D_F64 pt = detector.getLocation(i);
+
+         // note how it checks the capabilities of the detector
+         if (detector.hasScale())
+         {
+            double scale = detector.getScale(i);
+            int radius = (int) (scale * BoofDefaults.SCALE_SPACE_CANONICAL_RADIUS);
+            render.addCircle((int) pt.x, (int) pt.y, radius);
+         }
+         else
+         {
+            render.addPoint((int) pt.x, (int) pt.y);
+         }
+      }
+
+      // make the circle's thicker
+      g2.setStroke(new BasicStroke(3));
+
+      // just draw the features onto the input image
+      render.draw(g2);
+      ShowImages.showWindow(image, "Detected Features");
    }
 
    public static void main(String args[])

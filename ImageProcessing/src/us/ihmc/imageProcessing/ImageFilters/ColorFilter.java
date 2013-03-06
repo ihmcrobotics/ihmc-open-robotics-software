@@ -14,7 +14,7 @@ public class ColorFilter extends PointFilter
 
    double threshold = 100;
    private int horizon = 400;
-   boolean filterHorizon = true;
+   boolean filterHorizon = false;
 
    public void setHorizonYLocation(int y)
    {
@@ -94,7 +94,7 @@ public class ColorFilter extends PointFilter
 
             for (int x = 0; x < width; x++)
             {
-               if (y < horizon)
+               if (filterHorizon && y < horizon)
                {
                   inPixels[x] = 16777215;
                }
@@ -110,7 +110,7 @@ public class ColorFilter extends PointFilter
 
             for (int x = 0; x < width; x++)
             {
-               if (y < horizon)
+               if (filterHorizon && y < horizon)
                {
                   inPixels[x] = 16777215;
                }
@@ -141,6 +141,11 @@ public class ColorFilter extends PointFilter
    public String toString()
    {
       return "Colors/Lookup...";
+   }
+
+   public void filterHorizon(boolean filterHorizon)
+   {
+      this.filterHorizon = filterHorizon;
    }
 
 }
