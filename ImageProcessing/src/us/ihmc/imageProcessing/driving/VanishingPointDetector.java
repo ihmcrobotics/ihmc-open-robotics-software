@@ -2,6 +2,7 @@ package us.ihmc.imageProcessing.driving;
 
 import us.ihmc.imageProcessing.utilities.PostProcessor;
 import us.ihmc.utilities.math.geometry.BoundingBox2d;
+import us.ihmc.utilities.math.geometry.GeometryTools;
 import us.ihmc.utilities.math.geometry.Line2d;
 
 import javax.vecmath.Point2d;
@@ -45,6 +46,8 @@ public class VanishingPointDetector implements PostProcessor
       Color originalGraphicsColor = graphics.getColor();
       graphics.setColor(color);
 
+      graphics.fillOval(10, 30, markerDiameter / 2, markerDiameter / 2);
+
       Point2d point = getBestIntersection();
       if (point != null)
       {
@@ -58,47 +61,7 @@ public class VanishingPointDetector implements PostProcessor
    {
       ArrayList<Point2d> intersections = getAllIntersections();
       ArrayList<Point2d> intersectionsOnScreen = filterOutOffscreenIntersections(intersections);
-      Point2d bestIntersection = getMinDistancePoint(intersectionsOnScreen);
-
-
-      return bestIntersection;
-   }
-
-   private Point2d getMinDistancePoint(ArrayList<Point2d> intersectionsOnScreen)
-   {
-      Point2d bestPoint = null;
-      int maxCounter = 0;
-      for (Point2d point2d : intersectionsOnScreen)
-      {
-         int count = 0;
-         System.out.println("for " + point2d);
-         for (Point2d point2d1 : intersectionsOnScreen)
-         {
-            double distance = point2d.distance(point2d1);
-            System.out.println("distance = " + distance);
-            if(distance < markerDiameter * 2)
-            {
-                count++;
-            }
-         }
-         System.out.println("count = " + count);
-
-         if (bestPoint == null)
-         {
-            bestPoint = point2d;
-            maxCounter = count;
-         }
-         else
-         {
-            if (count < maxCounter)
-            {
-               bestPoint = point2d;
-               maxCounter = count;
-            }
-         }
-      }
-
-      return bestPoint;
+      return GeometryTools.averagePoint2ds(intersectionsOnScreen);
    }
 
    private ArrayList<Point2d> filterOutOffscreenIntersections(ArrayList<Point2d> intersections)
@@ -118,11 +81,15 @@ public class VanishingPointDetector implements PostProcessor
    private ArrayList<Point2d> getAllIntersections()
    {
       ArrayList<Point2d> intersections = new ArrayList<Point2d>();
+      ArrayList<Line2d> linesCopy = new ArrayList<Line2d>(lines);
 
       for (Line2d line : lines)
       {
-         for (Line2d line2d : lines)
+         int count = 0;
+         linesCopy.remove(line);
+         for (Line2d line2d : linesCopy)
          {
+            count++;
             Point2d intersection = line.intersectionWith(line2d);
             if (intersection != null)
             {
