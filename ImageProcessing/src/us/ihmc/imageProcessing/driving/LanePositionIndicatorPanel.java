@@ -16,6 +16,9 @@ public class LanePositionIndicatorPanel extends JPanel
    private BufferedImage vehicleImage;
    private double offset = 0.0;
 
+   private double roadWidth = 7.34;
+   private double carWidth = 1.5;
+
    public LanePositionIndicatorPanel(String fileName)
    {
       this.setBackground(Color.gray);
@@ -41,9 +44,17 @@ public class LanePositionIndicatorPanel extends JPanel
 
       double vehicleWidth = vehicleImage.getWidth();
       double panelWidth = this.getWidth();
-      double rangeOfMotion = panelWidth - vehicleWidth;
       double midPoint = panelWidth / 2.0;
 
+      double scaledWidth = vehicleWidth / (carWidth / roadWidth);
+      double remainderWidth = panelWidth - scaledWidth;
+      Color originalColor = g.getColor();
+      g.setColor(new Color(20,125,57));
+      g.fillRect(0, 0, (int) (remainderWidth / 2.0), this.getHeight());
+      g.fillRect((int) (panelWidth - (remainderWidth / 2.0)), 0, (int) (remainderWidth / 2.0), this.getHeight());
+      g.setColor(originalColor);
+
+      double rangeOfMotion = panelWidth - vehicleWidth - remainderWidth;
       double vehiclePosition = midPoint - (vehicleWidth / 2.0) + (offset * rangeOfMotion / 2.0);
       g.drawImage(vehicleImage, (int) vehiclePosition, 0, null);
    }
