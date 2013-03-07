@@ -7,19 +7,22 @@ import georegression.struct.line.LineParametric2D_F32;
 import georegression.struct.point.Point2D_F32;
 import georegression.struct.point.Point2D_F64;
 
-
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.GridLayout;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.awt.image.WritableRaster;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.*;
+import javax.swing.JFrame;
+import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.vecmath.Point2d;
@@ -46,8 +49,6 @@ import boofcv.core.image.ConvertBufferedImage;
 import boofcv.factory.feature.detect.interest.FactoryInterestPoint;
 import boofcv.factory.feature.detect.line.FactoryDetectLineAlgs;
 import boofcv.gui.binary.VisualizeBinaryData;
-import boofcv.gui.feature.FancyInterestPointRender;
-import boofcv.gui.image.ShowImages;
 import boofcv.struct.BoofDefaults;
 import boofcv.struct.image.ImageFloat32;
 import boofcv.struct.image.ImageSInt16;
@@ -57,7 +58,7 @@ import boofcv.struct.image.ImageUInt8;
 
 public class DRCRoadDetectionTest implements VideoListener, KeyListener
 {
-   boolean PAUSE = false;
+   private boolean PAUSE = false;
 
    private PaintableImageViewer rawImageViewer = new PaintableImageViewer();
    private PaintableImageViewer analyzedImageViewer = new PaintableImageViewer();
@@ -68,75 +69,74 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
 
    private JFrame mainFrame;
    private LanePositionIndicatorPanel vehicleRoadPositionPanel;
+   private double offset = 0.0;
+   private double increment = 0.01;
 
-   // adjusts edge threshold for identifying pixels belonging to a line
-
-   // adjust the maximum number of found lines in the image
-
-
+   private ColorFilter coneColorFilter;
+   private ColorFilter roadColorfilter;
    private int maxLines = 10;
    private int localMaxRadius = 3;
    private int minCounts = 100;
    private double resolutionRange = 1;
    private double resolutionAngle = Math.PI / 180;
    private float edgeThreshold = 25;
-   float mean = 58;    // (float)ImageStatistics.mean(input);
 
 
    private double lowThresh = 0.01;
    private double highThresh = 0.15;
 
-   private ColorFilter filter;
+
 
    public DRCRoadDetectionTest()
    {
-      filterCone.setThreshold(25);
+      setUpFilters();
 
-      filterCone.filterHorizon(true);
-      filterCone.addColorToLookFor(new RGB(84, 51, 46));
-      filterCone.addColorToLookFor(new RGB(63, 28, 22));
-      filterCone.addColorToLookFor(new RGB(161, 91, 91));
-      filterCone.addColorToLookFor(new RGB(69, 41, 29));
+      setUpImageViewerPostProcessors();
 
+      setUpJFrame();
 
-      filter = new ColorFilter();
-      filter.filterHorizon(true);
-
-      filter.addColorToLookFor(new RGB(152, 128, 32));
-      filter.addColorToLookFor(new RGB(128, 110, 34));
-
-      filter.addColorToLookFor(new RGB(124, 107, 38));
-
-      filter.addColorToLookFor(new RGB(92, 78, 41));
+      createMainWindow();
 
 
-      // road
-      filter.addColorToLookFor(new RGB(56, 47, 48));
-      filter.addColorToLookFor(new RGB(64, 64, 56));
+   }
 
-      filter.addColorToLookFor(new RGB(80, 80, 72));
-      filter.addColorToLookFor(new RGB(87, 88, 72));
-
-      filter.addColorToLookFor(new RGB(97,88, 38));
-      //extras
-//      filter.addColorToLookFor(new RGB(112, 80, 16));
-//      filter.addColorToLookFor(new RGB(121, 85, 24));
-
-
-
-      filter.setThreshold(50);
-
-
+   private void setUpImageViewerPostProcessors()
+   {
       analyzedImageViewer.addPostProcessor(linePainter);
       analyzedImageViewer.addPostProcessor(circlePainter);
 
       analyzedImageViewer.addPostProcessor(vanishingPointDetector);
       rawImageViewer.addPostProcessor(vanishingPointDetector);
-      setUpJFrame();
-      createMainWindow();
+   }
+
+   private void setUpFilters()
+   {
+      coneColorFilter = new ColorFilter();
+      coneColorFilter.setThreshold(25);
+      coneColorFilter.filterHorizon(true);
+      coneColorFilter.addColorToLookFor(new RGB(84, 51, 46));
+      coneColorFilter.addColorToLookFor(new RGB(63, 28, 22));
+      coneColorFilter.addColorToLookFor(new RGB(161, 91, 91));
+      coneColorFilter.addColorToLookFor(new RGB(69, 41, 29));
 
 
-      // process();
+      roadColorfilter = new ColorFilter();
+      roadColorfilter.setThreshold(50);
+
+      roadColorfilter.filterHorizon(true);
+      roadColorfilter.addColorToLookFor(new RGB(152, 128, 32));
+      roadColorfilter.addColorToLookFor(new RGB(128, 110, 34));
+      roadColorfilter.addColorToLookFor(new RGB(124, 107, 38));
+      roadColorfilter.addColorToLookFor(new RGB(92, 78, 41));
+
+
+      // road
+      roadColorfilter.addColorToLookFor(new RGB(56, 47, 48));
+      roadColorfilter.addColorToLookFor(new RGB(64, 64, 56));
+      roadColorfilter.addColorToLookFor(new RGB(80, 80, 72));
+      roadColorfilter.addColorToLookFor(new RGB(87, 88, 72));
+      roadColorfilter.addColorToLookFor(new RGB(97, 88, 38));
+
    }
 
 
@@ -152,30 +152,10 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
    public <T extends ImageSingleBand<?>, D extends ImageSingleBand<?>> List<LineParametric2D_F32> detectLines(BufferedImage image, Class<T> imageType,
            Class<D> derivType)
    {
-      // convert the line into a single band image
       T input = ConvertBufferedImage.convertFromSingle(image, null, imageType);
-
-      // Comment/uncomment to try a different type of line detector
       DetectLineHoughPolar<T, D> detector = FactoryDetectLineAlgs.houghPolar(localMaxRadius, minCounts, resolutionRange, resolutionAngle, edgeThreshold,
                                                maxLines, imageType, derivType);
-
-      // DetectLineHoughFoot<T,D> detector = FactoryDetectLineAlgs.houghFoot(3, 8, 5, edgeThreshold,
-      // maxLines, imageType, derivType);
-      // DetectLineHoughFootSubimage<T,D> detector = FactoryDetectLineAlgs.houghFootSub(3, 8, 5, edgeThreshold,
-      // maxLines, 2, 2, imageType, derivType);
-
       List<LineParametric2D_F32> found = detector.detect(input);
-
-      // ArrayList<LineParametric2D_F32> finalList = new ArrayList<LineParametric2D_F32>();
-      // for (LineParametric2D_F32 checkLine : found)
-      // {
-      // if ((checkLine.getSlopeY() / checkLine.getSlopeX()) > 0.1 || (checkLine.getSlopeY() / checkLine.getSlopeX()) < -0.1)
-      // {
-      // finalList.add(checkLine);
-      // }
-
-      // }
-
 
       return found;
    }
@@ -183,11 +163,10 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
 
    public void updateImage(BufferedImage bufferedImage)
    {
-      // bufferedImage = UtilImageIO.loadImage(DRCRoadDetectionTest.class.getResource("exampleVideo/coneFinder.jpg").getFile());
       process(bufferedImage);
    }
 
-   static BufferedImage deepCopy(BufferedImage bi)
+   private BufferedImage deepCopy(BufferedImage bi)
    {
       ColorModel cm = bi.getColorModel();
       boolean isAlphaPremultiplied = cm.isAlphaPremultiplied();
@@ -196,17 +175,15 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
       return new BufferedImage(cm, raster, isAlphaPremultiplied, null);
    }
 
-   ColorFilter filterCone = new ColorFilter();
 
    public InterestPointDetector<ImageFloat32> countConeBlobs(BufferedImage image)
    {
-      filterCone.filter(image, image);
+      coneColorFilter.filter(image, image);
       ImageFloat32 input = ConvertBufferedImage.convertFromSingle(image, null, ImageFloat32.class);
       ImageUInt8 binary = new ImageUInt8(input.width, input.height);
       ImageSInt32 blobs = new ImageSInt32(input.width, input.height);
 
-      // the mean pixel value is often a reasonable threshold when creating a binary image
-      double mean = 10;    //
+      double mean = 10;
 
       // create a binary image
       ThresholdImageOps.threshold(input, binary, (float) mean, true);
@@ -230,13 +207,11 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
       return detect(visualized);
    }
 
-   int show = 0;
-
    /**
     * Set the value of any blob which does not touches the top or bottom image border to zero.  Then
     * relabel the binary image.
     */
-   private int filterTouchEdge(ImageSInt32 labeled, int numLabels)
+   private int filterBlobsNotTouchingEdges(ImageSInt32 labeled, int numLabels)
    {
       int value[] = new int[numLabels + 1];
       for (int i = 0; i < value.length; i++)
@@ -244,20 +219,10 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
          value[i] = 0;
       }
 
-//    for (int y = 0; y < labeled.height; y++)
-//    {
-//       int row = labeled.startIndex + labeled.stride * y;
-//       int rowEnd = row + labeled.width - 1;
-//
-//       value[labeled.data[row]] = labeled.data[row];
-//       value[labeled.data[rowEnd]] = labeled.data[rowEnd];
-//    }
-
       for (int x = 0; x < labeled.width; x++)
       {
          int top = labeled.startIndex + x;
          int bottom = labeled.startIndex + labeled.stride * (labeled.height - 1) + x;
-
          value[labeled.data[top]] = labeled.data[top];
          value[labeled.data[bottom]] = labeled.data[bottom];
       }
@@ -296,18 +261,15 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
       binary = BinaryImageOps.erode8(binary, null);
       binary = BinaryImageOps.erode8(binary, null);
 
-
       binary = BinaryImageOps.dilate8(binary, null);
       binary = BinaryImageOps.dilate8(binary, null);
       binary = BinaryImageOps.dilate8(binary, null);
-
-
 
 
       // Detect blobs inside the binary image and assign labels to them
       int numBlobs = BinaryImageOps.labelBlobs4(binary, blobs);
 
-      numBlobs = filterTouchEdge(blobs, numBlobs);
+      numBlobs = filterBlobsNotTouchingEdges(blobs, numBlobs);
 
       // Render the binary image for output and display it in a window
       BufferedImage visualized = VisualizeBinaryData.renderLabeled(blobs, numBlobs, null);
@@ -332,23 +294,18 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
                @Override
                public void run()
                {
-                  filterCone.setHorizonYLocation(input.getHeight() / 2 - 20);
+                  coneColorFilter.setHorizonYLocation(input.getHeight() / 2 - 20);
                   InterestPointDetector<ImageFloat32> cones = countConeBlobs(deepCopy(input));
 
-                  if (cones.getNumberOfFeatures() > 0)
-                     System.out.println("I SEE A CONE");
+//                if (cones.getNumberOfFeatures() > 0)
+//                   System.out.println("I SEE A CONE");
                   CropFilter cropFilter = new CropFilter(0, 0, input.getWidth(), input.getHeight() - input.getHeight() / 4);
                   BufferedImage croppedImage = new BufferedImage(input.getWidth(), input.getHeight() - input.getHeight() / 4, BufferedImage.TYPE_INT_RGB);
                   cropFilter.filter(input, croppedImage);
-                  filter.setHorizonYLocation(input.getHeight() / 2 - 20);
+                  roadColorfilter.setHorizonYLocation(input.getHeight() / 2 - 20);
 
-
-
-
-                  filter.filter(croppedImage, croppedImage);
+                  roadColorfilter.filter(croppedImage, croppedImage);
                   croppedImage = findRoad(croppedImage);
-
-
 
                   List<LineParametric2D_F32> list = detectLines(croppedImage, ImageUInt8.class, ImageSInt16.class);
 
@@ -359,16 +316,10 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
                   for (int i = 0; i < cones.getNumberOfFeatures(); i++)
                   {
                      Point2D_F64 pt = cones.getLocation(i);
-
-                     // note how it checks the capabilities of the detector
                      double scale = cones.getScale(i);
                      int radius = (int) (scale * BoofDefaults.SCALE_SPACE_CANONICAL_RADIUS);
                      Vector3d tmp = new Vector3d(pt.x, pt.y, radius);
                      circles.add(tmp);
-
-//                   circles.add(new Ci)render.addCircle((int)pt.x,(int)pt.y,radius);
-
-
                   }
 
                   circlePainter.setCircles(circles);
@@ -386,16 +337,14 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
 
                   lines = removeBadLines(lines);
 
-                  if (lines.size() > 2)
-                     System.out.println("TURN APPROACHING");
+//                if (lines.size() > 2)
+//                   System.out.println("TURN APPROACHING");
                   linePainter.setLines(lines);
                   vanishingPointDetector.setLines(lines);
 
                   repackIfImageSizeChanges(croppedImage.getWidth(), croppedImage.getHeight());
                   analyzedImageViewer.updateImage(croppedImage);
                   repackRawIfImageSizeChanges(input.getWidth(), input.getHeight());
-
-                  // TODO Auto-generated method stub
 
                }
             });
@@ -408,12 +357,13 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
       }
    }
 
-   double offset = 0.0;
-   double increment = 0.01;
+
+
    private void drawCarPosition()
    {
       offset += increment;
-      if(offset <= -1.0 || offset >= 1.0)
+
+      if ((offset <= -1.0) || (offset >= 1.0))
       {
          increment = -increment;
       }
@@ -449,7 +399,7 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
 
    private void repackRawIfImageSizeChanges(int width, int height)
    {
-//      System.out.println("width = " + width +":" + height);
+//    System.out.println("width = " + width +":" + height);
       if ((rawImageViewer.getWidth() < width) || (rawImageViewer.getHeight() < height))
       {
          Dimension dimension = new Dimension(width, height);
@@ -571,17 +521,17 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
 
 
       {
-         final JSlider slider = new JSlider(0, 500, new Double(filter.getThreshold()).intValue());
+         final JSlider slider = new JSlider(0, 500, new Double(roadColorfilter.getThreshold()).intValue());
          slider.setOrientation(JSlider.VERTICAL);
          slider.addChangeListener(new ChangeListener()
          {
             @Override
             public void stateChanged(ChangeEvent arg0)
             {
-               filter.setThreshold(new Double(slider.getValue()));
+               roadColorfilter.setThreshold(new Double(slider.getValue()));
 
 
-               System.out.println("filter threshold: " + filter.getThreshold());
+               System.out.println("filter threshold: " + roadColorfilter.getThreshold());
 
             }
          });
@@ -646,36 +596,6 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
       return detector;
    }
 
-   private static <T extends ImageSingleBand> void displayResults(BufferedImage image, InterestPointDetector<T> detector)
-   {
-      Graphics2D g2 = image.createGraphics();
-      FancyInterestPointRender render = new FancyInterestPointRender();
-
-
-      for (int i = 0; i < detector.getNumberOfFeatures(); i++)
-      {
-         Point2D_F64 pt = detector.getLocation(i);
-
-         // note how it checks the capabilities of the detector
-         if (detector.hasScale())
-         {
-            double scale = detector.getScale(i);
-            int radius = (int) (scale * BoofDefaults.SCALE_SPACE_CANONICAL_RADIUS);
-            render.addCircle((int) pt.x, (int) pt.y, radius);
-         }
-         else
-         {
-            render.addPoint((int) pt.x, (int) pt.y);
-         }
-      }
-
-      // make the circle's thicker
-      g2.setStroke(new BasicStroke(3));
-
-      // just draw the features onto the input image
-      render.draw(g2);
-      ShowImages.showWindow(image, "Detected Features");
-   }
 
    public static void main(String args[])
    {
