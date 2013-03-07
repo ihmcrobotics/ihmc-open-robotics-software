@@ -32,18 +32,18 @@ public class TwoWaypointPositionTrajectoryGeneratorTest {
 		PositionProvider initialPositionProvider = new ConstantPositionProvider(new FramePoint(worldFrame, new double[]{-0.1, 2.3, 0.0}));
 		VectorProvider initialVelocityProvider = new ConstantVectorProvider(new FrameVector(worldFrame, new double[]{0.2, 0.0, -0.05}));
 		
-		PositionProvider firstIntermediatePositionProvider = new ConstantPositionProvider(new FramePoint(worldFrame, new double[]{0.12, 2.4, 0.2}));
-		PositionProvider secondIntermediatePositionProvider = new ConstantPositionProvider(new FramePoint(worldFrame, new double[]{0.16, 2.3, 0.15}));
+		FramePoint firstIntermediatePosition = new FramePoint(worldFrame, new double[]{0.12, 2.4, 0.2});
+		FramePoint secondIntermediatePosition = new FramePoint(worldFrame, new double[]{0.16, 2.3, 0.15});
 		
 		PositionProvider finalPositionProvider = new ConstantPositionProvider(new FramePoint(worldFrame, new double[]{0.2, 2.35, 0.03}));
 		VectorProvider finalVelocityProvider = new ConstantVectorProvider(new FrameVector(worldFrame, new double[]{0.1, 0.01, -0.02}));
 		
 		int arcLengthCalculatorDivisions = 100;
 		TwoWaypointPositionTrajectoryGenerator trajectory = new TwoWaypointPositionTrajectoryGenerator("", worldFrame, stepTimeProvider, 
-				initialPositionProvider, initialVelocityProvider, finalPositionProvider, finalVelocityProvider, new YoVariableRegistry(""), firstIntermediatePositionProvider, 
-				secondIntermediatePositionProvider, numDesiredSplines, arcLengthCalculatorDivisions, null);
+				initialPositionProvider, initialVelocityProvider, finalPositionProvider, finalVelocityProvider, new YoVariableRegistry(""), 0.2,
+				numDesiredSplines, arcLengthCalculatorDivisions, null);
 		
-		trajectory.initialize();
+		trajectory.initialize(new FramePoint[]{firstIntermediatePosition, secondIntermediatePosition});
 		trajectory.compute(0.0);
 		FramePoint actual = new FramePoint(worldFrame);
 		FramePoint expected = new FramePoint(worldFrame);
