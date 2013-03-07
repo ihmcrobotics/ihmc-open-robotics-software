@@ -121,7 +121,7 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
 
 
       roadColorfilter = new ColorFilter();
-      roadColorfilter.setThreshold(50);
+      roadColorfilter.setThreshold(35);
 
       roadColorfilter.filterHorizon(true);
       roadColorfilter.addColorToLookFor(new RGB(152, 128, 32));
