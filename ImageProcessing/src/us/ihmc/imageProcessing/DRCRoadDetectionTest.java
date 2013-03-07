@@ -6,7 +6,6 @@ package us.ihmc.imageProcessing;
 import georegression.struct.line.LineParametric2D_F32;
 import georegression.struct.point.Point2D_F32;
 import georegression.struct.point.Point2D_F64;
-import georegression.struct.point.Point2D_I32;
 
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
@@ -23,7 +22,6 @@ import java.awt.image.ColorModel;
 import java.awt.image.WritableRaster;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 import javax.swing.JFrame;
 import javax.swing.JSlider;
@@ -42,7 +40,6 @@ import us.ihmc.imageProcessing.utilities.PaintableImageViewer;
 import us.ihmc.imageProcessing.utilities.VideoPlayer;
 import us.ihmc.utilities.camera.VideoListener;
 import us.ihmc.utilities.math.geometry.Line2d;
-import boofcv.abst.feature.detect.edge.DetectEdgeContour;
 import boofcv.abst.feature.detect.interest.ConfigFastHessian;
 import boofcv.abst.feature.detect.interest.InterestPointDetector;
 import boofcv.abst.feature.detect.line.DetectLineHoughPolar;
@@ -50,14 +47,11 @@ import boofcv.alg.filter.binary.BinaryImageOps;
 import boofcv.alg.filter.binary.ThresholdImageOps;
 import boofcv.alg.misc.ImageStatistics;
 import boofcv.core.image.ConvertBufferedImage;
-import boofcv.factory.feature.detect.edge.FactoryDetectEdgeContour;
 import boofcv.factory.feature.detect.interest.FactoryInterestPoint;
 import boofcv.factory.feature.detect.line.FactoryDetectLineAlgs;
 import boofcv.gui.binary.VisualizeBinaryData;
 import boofcv.gui.feature.FancyInterestPointRender;
-import boofcv.gui.feature.FancyInterestPointRender.Circle;
 import boofcv.gui.image.ShowImages;
-import boofcv.io.image.UtilImageIO;
 import boofcv.struct.BoofDefaults;
 import boofcv.struct.image.ImageFloat32;
 import boofcv.struct.image.ImageSInt16;
@@ -100,7 +94,8 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
    public DRCRoadDetectionTest()
    {
       filterCone.setThreshold(25);
-      filterCone.filterHorizon(false);
+
+      filterCone.filterHorizon(true);
       filterCone.addColorToLookFor(new RGB(84, 51, 46));
       filterCone.addColorToLookFor(new RGB(63, 28, 22));
       filterCone.addColorToLookFor(new RGB(161, 91, 91));
@@ -110,39 +105,29 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
       filter = new ColorFilter();
       filter.filterHorizon(true);
 
-      // middle line
-      // filter.addColorToLookFor(new RGB(152, 128, 32));
-      // filter.addColorToLookFor(new RGB(152, 128, 30));
-      // filter.addColorToLookFor(new RGB(135, 113, 37));
-      // filter.addColorToLookFor(new RGB(69, 63, 41));
-      // filter.addColorToLookFor(new RGB(77, 67, 40));
+      filter.addColorToLookFor(new RGB(152, 128, 32));
+      filter.addColorToLookFor(new RGB(128, 110, 34));
 
+      filter.addColorToLookFor(new RGB(124, 107, 38));
 
+      filter.addColorToLookFor(new RGB(92, 78, 41));
 
-      // side lines
-      filter.addColorToLookFor(new RGB(148, 144, 135));
-      filter.addColorToLookFor(new RGB(180, 180, 172));
-      filter.addColorToLookFor(new RGB(151, 151, 143));
-      filter.addColorToLookFor(new RGB(181, 177, 168));
 
       // road
-      // filter.addColorToLookFor(new RGB(55,56, 38));
+      filter.addColorToLookFor(new RGB(56, 47, 48));
+      filter.addColorToLookFor(new RGB(64, 64, 56));
 
-      // filter.addColorToLookFor(new RGB(64, 64, 56));
-      // /  filter.addColorToLookFor(new RGB(75, 70, 64));
-      // filter.addColorToLookFor(new RGB(97, 88, 81));
-      // filter.addColorToLookFor(new RGB(56, 47, 48));
-      // filter.addColorToLookFor(new RGB(87, 88, 72));
+      filter.addColorToLookFor(new RGB(80, 80, 72));
+      filter.addColorToLookFor(new RGB(87, 88, 72));
+
+      filter.addColorToLookFor(new RGB(97,88, 38));
+      //extras
+//      filter.addColorToLookFor(new RGB(112, 80, 16));
+//      filter.addColorToLookFor(new RGB(121, 85, 24));
 
 
 
-      // tuned for new world
-//    filter.addColorToLookFor(new RGB(48, 48, 46));
-//    filter.addColorToLookFor(new RGB(50, 50, 50));
-//    filter.addColorToLookFor(new RGB(55, 56, 50));
-//
-//    filter.addColorToLookFor(new RGB(68, 68, 66));
-//    filter.addColorToLookFor(new RGB(71, 72, 67));
+      filter.setThreshold(50);
 
 
       analyzedImageViewer.addPostProcessor(linePainter);
@@ -153,39 +138,6 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
       setUpJFrame();
 
       // process();
-   }
-
-
-
-
-   /**
-    * Draws each edge in the image a different color
-    */
-   public BufferedImage canny(BufferedImage source)
-   {
-      DetectEdgeContour<ImageUInt8> contour = FactoryDetectEdgeContour.canny(lowThresh, highThresh, true, ImageUInt8.class, ImageSInt16.class);
-
-      ImageUInt8 gray = ConvertBufferedImage.convertFrom(source, (ImageUInt8) null);
-
-      contour.process(gray);
-
-      List<List<Point2D_I32>> edges = contour.getContours();
-
-      // draw each edge a different color
-      BufferedImage out = new BufferedImage(gray.width, gray.height, BufferedImage.TYPE_INT_BGR);
-
-      Random rand = new Random();
-      for (List<Point2D_I32> l : edges)
-      {
-         int rgb = rand.nextInt() | 0x101010;
-
-         for (Point2D_I32 p : l)
-         {
-            out.setRGB(p.x, p.y, rgb);
-         }
-      }
-
-      return out;
    }
 
 
@@ -281,69 +233,176 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
 
    int show = 0;
 
+   /**
+    * Set the value of any blob which does not touches the top or bottom image border to zero.  Then
+    * relabel the binary image.
+    */
+   private int filterTouchEdge(ImageSInt32 labeled, int numLabels)
+   {
+      int value[] = new int[numLabels + 1];
+      for (int i = 0; i < value.length; i++)
+      {
+         value[i] = 0;
+      }
+
+//    for (int y = 0; y < labeled.height; y++)
+//    {
+//       int row = labeled.startIndex + labeled.stride * y;
+//       int rowEnd = row + labeled.width - 1;
+//
+//       value[labeled.data[row]] = labeled.data[row];
+//       value[labeled.data[rowEnd]] = labeled.data[rowEnd];
+//    }
+
+      for (int x = 0; x < labeled.width; x++)
+      {
+         int top = labeled.startIndex + x;
+         int bottom = labeled.startIndex + labeled.stride * (labeled.height - 1) + x;
+
+         value[labeled.data[top]] = labeled.data[top];
+         value[labeled.data[bottom]] = labeled.data[bottom];
+      }
+
+      int count = 1;
+      for (int i = 0; i < value.length; i++)
+      {
+         if (value[i] != 0)
+         {
+            value[i] = count++;
+         }
+      }
+
+      // relabel the image to remove blobs with holes inside
+      BinaryImageOps.relabel(labeled, value);
+
+      return count - 1;
+   }
+
+   public BufferedImage findRoad(BufferedImage image)
+   {
+      // convert into a usable format
+      ImageFloat32 input = ConvertBufferedImage.convertFromSingle(image, null, ImageFloat32.class);
+      ImageUInt8 binary = new ImageUInt8(input.width, input.height);
+      ImageSInt32 blobs = new ImageSInt32(input.width, input.height);
+
+      // the mean pixel value is often a reasonable threshold when creating a binary image
+      double mean = ImageStatistics.mean(input);
+
+      // create a binary image
+      ThresholdImageOps.threshold(input, binary, (float) mean, true);
+
+      // remove small blobs through erosion and dilation
+      // The null in the input indicates that it should internally declare the work image it needs
+      // this is less efficient, but easier to code.
+      binary = BinaryImageOps.erode8(binary, null);
+      binary = BinaryImageOps.erode8(binary, null);
+
+
+      binary = BinaryImageOps.dilate8(binary, null);
+      binary = BinaryImageOps.dilate8(binary, null);
+      binary = BinaryImageOps.dilate8(binary, null);
 
 
 
-   private void process(BufferedImage input)
+
+      // Detect blobs inside the binary image and assign labels to them
+      int numBlobs = BinaryImageOps.labelBlobs4(binary, blobs);
+
+      numBlobs = filterTouchEdge(blobs, numBlobs);
+
+      // Render the binary image for output and display it in a window
+      BufferedImage visualized = VisualizeBinaryData.renderLabeled(blobs, numBlobs, null);
+
+      return visualized;
+
+   }
+
+   int tick = 0;
+
+   private void process(final BufferedImage input)
    {
       if (!PAUSE)
       {
-         InterestPointDetector<ImageFloat32> cones = countConeBlobs(deepCopy(input));
-         System.out.println(cones.getNumberOfFeatures());
-         CropFilter cropFilter = new CropFilter(0, 0, input.getWidth(), input.getHeight() - input.getHeight() / 4);
-         BufferedImage croppedImage = new BufferedImage(input.getWidth(), input.getHeight() - input.getHeight() / 4, BufferedImage.TYPE_INT_RGB);
-         cropFilter.filter(input, croppedImage);
-         filter.setHorizonYLocation(input.getHeight() / 2);
-         filter.filter(croppedImage, croppedImage);
+         tick++;
 
-         // croppedImage = canny(croppedImage);
-
-
-         // BoxBlurFilter boxBlur = new BoxBlurFilter(2, 2, 1);
-         // boxBlur.filter(croppedImage, croppedImage);
-
-
-         List<LineParametric2D_F32> list = detectLines(croppedImage, ImageUInt8.class, ImageSInt16.class);
-
-         ArrayList<Line2d> lines = new ArrayList<Line2d>();
-
-         ArrayList<Vector3d> circles = new ArrayList<Vector3d>();
-
-         for (int i = 0; i < cones.getNumberOfFeatures(); i++)
+         if (tick % 3 == 0)
          {
-            Point2D_F64 pt = cones.getLocation(i);
+            tick = 0;
+            Thread tmp = new Thread(new Runnable()
+            {
+               @Override
+               public void run()
+               {
+                  filterCone.setHorizonYLocation(input.getHeight() / 2 - 20);
+                  InterestPointDetector<ImageFloat32> cones = countConeBlobs(deepCopy(input));
 
-            // note how it checks the capabilities of the detector
-            double scale = cones.getScale(i);
-            int radius = (int) (scale * BoofDefaults.SCALE_SPACE_CANONICAL_RADIUS);
-            Vector3d tmp = new Vector3d(pt.x, pt.y, radius);
-            circles.add(tmp);
+                  if (cones.getNumberOfFeatures() > 0)
+                     System.out.println("I SEE A CONE");
+                  CropFilter cropFilter = new CropFilter(0, 0, input.getWidth(), input.getHeight() - input.getHeight() / 4);
+                  BufferedImage croppedImage = new BufferedImage(input.getWidth(), input.getHeight() - input.getHeight() / 4, BufferedImage.TYPE_INT_RGB);
+                  cropFilter.filter(input, croppedImage);
+                  filter.setHorizonYLocation(input.getHeight() / 2 - 20);
 
-//          circles.add(new Ci)render.addCircle((int)pt.x,(int)pt.y,radius);
 
 
+
+                  filter.filter(croppedImage, croppedImage);
+                  croppedImage = findRoad(croppedImage);
+
+
+
+                  List<LineParametric2D_F32> list = detectLines(croppedImage, ImageUInt8.class, ImageSInt16.class);
+
+                  ArrayList<Line2d> lines = new ArrayList<Line2d>();
+
+                  ArrayList<Vector3d> circles = new ArrayList<Vector3d>();
+
+                  for (int i = 0; i < cones.getNumberOfFeatures(); i++)
+                  {
+                     Point2D_F64 pt = cones.getLocation(i);
+
+                     // note how it checks the capabilities of the detector
+                     double scale = cones.getScale(i);
+                     int radius = (int) (scale * BoofDefaults.SCALE_SPACE_CANONICAL_RADIUS);
+                     Vector3d tmp = new Vector3d(pt.x, pt.y, radius);
+                     circles.add(tmp);
+
+//                   circles.add(new Ci)render.addCircle((int)pt.x,(int)pt.y,radius);
+
+
+                  }
+
+                  circlePainter.setCircles(circles);
+
+                  for (LineParametric2D_F32 lineParametric2D_f32 : list)
+                  {
+                     Point2D_F32 pointOnLine1 = lineParametric2D_f32.getPointOnLine(0.0f);
+                     Point2d p1 = new Point2d(pointOnLine1.getX(), pointOnLine1.getY());
+                     Point2D_F32 pointOnLine2 = lineParametric2D_f32.getPointOnLine(1.0f);
+                     Point2d p2 = new Point2d(pointOnLine2.getX(), pointOnLine2.getY());
+
+                     Line2d line2d = new Line2d(p1, p2);
+                     lines.add(line2d);
+                  }
+
+                  lines = removeBadLines(lines);
+
+                  if (lines.size() > 2)
+                     System.out.println("TURN APPROACHING");
+                  linePainter.setLines(lines);
+                  vanishingPointDetector.setLines(lines);
+
+                  repackIfImageSizeChanges(croppedImage.getWidth(), croppedImage.getHeight());
+                  analyzedImageViewer.updateImage(croppedImage);
+                  repackRawIfImageSizeChanges(input.getWidth(), input.getHeight());
+
+                  // TODO Auto-generated method stub
+
+               }
+            });
+            tmp.start();
          }
 
-         circlePainter.setCircles(circles);
-
-         for (LineParametric2D_F32 lineParametric2D_f32 : list)
-         {
-            Point2D_F32 pointOnLine1 = lineParametric2D_f32.getPointOnLine(0.0f);
-            Point2d p1 = new Point2d(pointOnLine1.getX(), pointOnLine1.getY());
-            Point2D_F32 pointOnLine2 = lineParametric2D_f32.getPointOnLine(1.0f);
-            Point2d p2 = new Point2d(pointOnLine2.getX(), pointOnLine2.getY());
-
-            Line2d line2d = new Line2d(p1, p2);
-            lines.add(line2d);
-         }
-
-         lines = removeBadLines(lines);
-         linePainter.setLines(lines);
-         vanishingPointDetector.setLines(lines);
-
-         repackIfImageSizeChanges(croppedImage.getWidth(), croppedImage.getHeight());
-         analyzedImageViewer.updateImage(croppedImage);
-         repackRawIfImageSizeChanges(input.getWidth(), input.getHeight());
          rawImageViewer.updateImage(input);
       }
    }
@@ -353,7 +412,7 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
       ArrayList<Line2d> cleanedLines = new ArrayList<Line2d>();
       for (Line2d line : lines)
       {
-         if ((line.getSlope() < 3.0) && (Math.abs(line.getSlope()) > 0.01))
+         if ((line.getSlope() < 3.0))
          {
             cleanedLines.add(line);
          }
