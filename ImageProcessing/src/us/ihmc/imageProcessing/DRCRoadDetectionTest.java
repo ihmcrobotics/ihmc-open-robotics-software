@@ -7,12 +7,8 @@ import georegression.struct.line.LineParametric2D_F32;
 import georegression.struct.point.Point2D_F32;
 import georegression.struct.point.Point2D_F64;
 
-import java.awt.BasicStroke;
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics2D;
-import java.awt.GridLayout;
+
+import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.WindowAdapter;
@@ -23,8 +19,7 @@ import java.awt.image.WritableRaster;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.JFrame;
-import javax.swing.JSlider;
+import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.vecmath.Point2d;
@@ -33,6 +28,7 @@ import javax.vecmath.Vector3d;
 import jxl.format.RGB;
 import us.ihmc.imageProcessing.ImageFilters.ColorFilter;
 import us.ihmc.imageProcessing.ImageFilters.CropFilter;
+import us.ihmc.imageProcessing.driving.LanePositionIndicatorPanel;
 import us.ihmc.imageProcessing.driving.VanishingPointDetector;
 import us.ihmc.imageProcessing.utilities.CirclePainter;
 import us.ihmc.imageProcessing.utilities.LinePainter;
@@ -70,7 +66,8 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
 
    private VanishingPointDetector vanishingPointDetector = new VanishingPointDetector(Color.cyan, 20);
 
-   JFrame f;
+   private JFrame mainFrame;
+   private LanePositionIndicatorPanel vehicleRoadPositionPanel;
 
    // adjusts edge threshold for identifying pixels belonging to a line
 
@@ -136,6 +133,8 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
       analyzedImageViewer.addPostProcessor(vanishingPointDetector);
       rawImageViewer.addPostProcessor(vanishingPointDetector);
       setUpJFrame();
+      createMainWindow();
+
 
       // process();
    }
@@ -404,7 +403,22 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
          }
 
          rawImageViewer.updateImage(input);
+
+         drawCarPosition();
       }
+   }
+
+   double offset = 0.0;
+   double increment = 0.01;
+   private void drawCarPosition()
+   {
+      offset += increment;
+      if(offset <= -1.0 || offset >= 1.0)
+      {
+         increment = -increment;
+      }
+
+      vehicleRoadPositionPanel.setOffset(offset);
    }
 
    private ArrayList<Line2d> removeBadLines(ArrayList<Line2d> lines)
@@ -429,17 +443,18 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
          analyzedImageViewer.setPreferredSize(dimension);
          linePainter.setImageHeight(height);
          circlePainter.setImageHeight(height);
-         f.pack();
+         mainFrame.pack();
       }
    }
 
    private void repackRawIfImageSizeChanges(int width, int height)
    {
+//      System.out.println("width = " + width +":" + height);
       if ((rawImageViewer.getWidth() < width) || (rawImageViewer.getHeight() < height))
       {
          Dimension dimension = new Dimension(width, height);
          rawImageViewer.setPreferredSize(dimension);
-         f.pack();
+         mainFrame.pack();
       }
    }
 
@@ -579,22 +594,41 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
 
       tmp.setVisible(true);
       tmp.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+   }
 
-      f = new JFrame("Driving Algorithm Test");
-      f.addWindowListener(new WindowAdapter()
-      {
-         public void windowClosing(WindowEvent e)
-         {
-            System.exit(0);
-         }
-      });
-      f.addKeyListener(this);
+   private void createMainWindow()
+   {
+      mainFrame = new JFrame("Driving Algorithm Test");
+      mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+      mainFrame.setResizable(false);
+      mainFrame.addKeyListener(this);
 
-      f.getContentPane().add(rawImageViewer, BorderLayout.WEST);
-      f.getContentPane().add(analyzedImageViewer, BorderLayout.EAST);
-      f.pack();
-      f.setVisible(true);
+      Container mainContainer = mainFrame.getContentPane();
+      mainContainer.setLayout(new GridBagLayout());
+      GridBagConstraints gbc = new GridBagConstraints();
+      gbc.fill = GridBagConstraints.BOTH;
+      gbc.gridx = 0;
+      gbc.gridy = 0;
+      gbc.weightx = 1.0;
+      gbc.weighty = 1.0;
 
+      mainContainer.add(rawImageViewer, gbc);
+      gbc.gridx++;
+      gbc.gridheight = 2;
+      mainContainer.add(analyzedImageViewer, gbc);
+      gbc.gridheight = 1;
+
+      vehicleRoadPositionPanel = new LanePositionIndicatorPanel("./media/images/CarIcon.png");
+      vehicleRoadPositionPanel.setPreferredSize(new Dimension(1, 43));
+      gbc.gridx = 0;
+      gbc.gridy++;
+      gbc.weightx = 1.0;
+      gbc.weighty = 0.0;
+      mainContainer.add(vehicleRoadPositionPanel, gbc);
+
+
+      mainFrame.pack();
+      mainFrame.setVisible(true);
    }
 
    public InterestPointDetector<ImageFloat32> detect(BufferedImage image)
