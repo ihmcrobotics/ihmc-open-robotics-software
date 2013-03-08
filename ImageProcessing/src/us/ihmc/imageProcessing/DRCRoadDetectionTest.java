@@ -39,6 +39,7 @@ import us.ihmc.imageProcessing.utilities.CirclePainter;
 import us.ihmc.imageProcessing.utilities.LinePainter;
 import us.ihmc.imageProcessing.utilities.PaintableImageViewer;
 import us.ihmc.imageProcessing.utilities.VideoPlayer;
+import us.ihmc.utilities.camera.ImageViewer;
 import us.ihmc.utilities.camera.VideoListener;
 import us.ihmc.utilities.math.geometry.Line2d;
 import boofcv.abst.feature.detect.interest.ConfigFastHessian;
@@ -64,6 +65,7 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
 
    private PaintableImageViewer rawImageViewer = new PaintableImageViewer();
    private PaintableImageViewer analyzedImageViewer = new PaintableImageViewer();
+   private ImageViewer blobDetectionViewer = new ImageViewer();
    private LinePainter linePainter = new LinePainter(4.0f);
    private CirclePainter circlePainter = new CirclePainter(4.0f);
 
@@ -574,6 +576,8 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
       gbc.gridx++;
       gbc.gridheight = 2;
       mainContainer.add(analyzedImageViewer, gbc);
+      gbc.gridx++;
+      mainContainer.add(blobDetectionViewer, gbc);
       gbc.gridheight = 1;
 
       lanePositionIndicatorPanel = new LanePositionIndicatorPanel("./media/images/CarIcon.png");
