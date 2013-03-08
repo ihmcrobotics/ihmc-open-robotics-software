@@ -13,18 +13,26 @@ import java.io.IOException;
  */
 public class LanePositionIndicatorPanel extends JPanel
 {
-   private BufferedImage vehicleImage;
+   private BufferedImage carImage;
    private double offset = 0.0;
 
-   private double roadWidth = 7.34;
-   private double carWidth = 1.5;
+   private double roadWidthInMeters = 7.34;
+   private double carWidthInMeters = 1.5;
+   private double steeringWheelOffsetInMeters = 0.3;
+
+   private double carWidthInPixels;
+   private double pixelsPerMeter;
+
+   private int steeringWheelXInImagePixels = 195;
 
    public LanePositionIndicatorPanel(String fileName)
    {
       this.setBackground(Color.gray);
       try
       {
-         vehicleImage = ImageIO.read(new File(fileName));
+         carImage = ImageIO.read(new File(fileName));
+         carWidthInPixels = carImage.getWidth();
+         pixelsPerMeter = carWidthInPixels / carWidthInMeters;
       }
       catch (IOException e)
       {
@@ -42,20 +50,40 @@ public class LanePositionIndicatorPanel extends JPanel
    {
       super.paint(g);
 
-      double vehicleWidth = vehicleImage.getWidth();
-      double panelWidth = this.getWidth();
-      double midPoint = panelWidth / 2.0;
-
-      double scaledWidth = vehicleWidth / (carWidth / roadWidth);
-      double remainderWidth = panelWidth - scaledWidth;
+      // save original settings for resetting
       Color originalColor = g.getColor();
-      g.setColor(new Color(20,125,57));
-      g.fillRect(0, 0, (int) (remainderWidth / 2.0), this.getHeight());
-      g.fillRect((int) (panelWidth - (remainderWidth / 2.0)), 0, (int) (remainderWidth / 2.0), this.getHeight());
-      g.setColor(originalColor);
+      Graphics2D g2d = (Graphics2D) g;
+      Stroke originalStroke = g2d.getStroke();
 
-      double rangeOfMotion = panelWidth - vehicleWidth - remainderWidth;
-      double vehiclePosition = midPoint - (vehicleWidth / 2.0) + (offset * rangeOfMotion / 2.0);
-      g.drawImage(vehicleImage, (int) vehiclePosition, 0, null);
+      // determine relative sizes
+      double carWidthInPixels = carImage.getWidth();
+      double panelWidthInPixels = this.getWidth();
+      double roadWidthInPixels = convertToPixels(roadWidthInMeters);
+      double remainderWidthInPixels = panelWidthInPixels - roadWidthInPixels;
+
+      // draw grass edges to get proper scaling
+      g.setColor(new Color(20, 125, 57));
+      g.fillRect(0, 0, (int) (remainderWidthInPixels / 2.0), this.getHeight());
+      g.fillRect((int) (panelWidthInPixels - (remainderWidthInPixels / 2.0)), 0, (int) (remainderWidthInPixels / 2.0), this.getHeight());
+
+      // draw center line
+      g.setColor(Color.yellow);
+      g2d.setStroke(new BasicStroke(2));
+      g.drawLine((int) (panelWidthInPixels / 2.0), 0, (int) (panelWidthInPixels / 2.0), getHeight());
+
+      // draw vehicle at proper location
+      double midPointOfPanelInPixels = panelWidthInPixels / 2.0;
+      double rangeOfMotionInPixels = panelWidthInPixels - carWidthInPixels - remainderWidthInPixels;
+      double steeringWheelOffsetInPixels = convertToPixels(steeringWheelOffsetInMeters);
+      double carPositionInPixels = midPointOfPanelInPixels - (carWidthInPixels / 2.0) + steeringWheelOffsetInPixels + (offset * rangeOfMotionInPixels / 2.0);
+      g.drawImage(carImage, (int) carPositionInPixels, 0, null);
+
+      g.setColor(originalColor);
+      ((Graphics2D) g).setStroke(originalStroke);
+   }
+
+   private double convertToPixels(double valueInMeters)
+   {
+      return valueInMeters * pixelsPerMeter;
    }
 }

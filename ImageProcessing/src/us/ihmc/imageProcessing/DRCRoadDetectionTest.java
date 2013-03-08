@@ -31,7 +31,9 @@ import javax.vecmath.Vector3d;
 import jxl.format.RGB;
 import us.ihmc.imageProcessing.ImageFilters.ColorFilter;
 import us.ihmc.imageProcessing.ImageFilters.CropFilter;
+import us.ihmc.imageProcessing.driving.LanePositionEstimator;
 import us.ihmc.imageProcessing.driving.LanePositionIndicatorPanel;
+import us.ihmc.imageProcessing.driving.SteeringInputEstimator;
 import us.ihmc.imageProcessing.driving.VanishingPointDetector;
 import us.ihmc.imageProcessing.utilities.CirclePainter;
 import us.ihmc.imageProcessing.utilities.LinePainter;
@@ -67,8 +69,11 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
 
    private VanishingPointDetector vanishingPointDetector = new VanishingPointDetector(Color.cyan, 20);
 
+   private LanePositionEstimator lanePositionEstimator;
+   private SteeringInputEstimator steeringInputEstimator = new SteeringInputEstimator();
+
    private JFrame mainFrame;
-   private LanePositionIndicatorPanel vehicleRoadPositionPanel;
+   private LanePositionIndicatorPanel lanePositionIndicatorPanel;
    private double offset = 0.0;
    private double increment = 0.01;
 
@@ -107,6 +112,7 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
 
       analyzedImageViewer.addPostProcessor(vanishingPointDetector);
       rawImageViewer.addPostProcessor(vanishingPointDetector);
+      rawImageViewer.addPostProcessor(steeringInputEstimator);
    }
 
    private void setUpFilters()
@@ -153,8 +159,7 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
            Class<D> derivType)
    {
       T input = ConvertBufferedImage.convertFromSingle(image, null, imageType);
-      DetectLineHoughPolar<T, D> detector = FactoryDetectLineAlgs.houghPolar(localMaxRadius, minCounts, resolutionRange, resolutionAngle, edgeThreshold,
-                                               maxLines, imageType, derivType);
+      DetectLineHoughPolar<T, D> detector = FactoryDetectLineAlgs.houghPolar(localMaxRadius, minCounts, resolutionRange, resolutionAngle, edgeThreshold, maxLines, imageType, derivType);
       List<LineParametric2D_F32> found = detector.detect(input);
 
       return found;
@@ -341,6 +346,7 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
 //                   System.out.println("TURN APPROACHING");
                   linePainter.setLines(lines);
                   vanishingPointDetector.setLines(lines);
+                  lanePositionEstimator.setLines(lines);
 
                   repackIfImageSizeChanges(croppedImage.getWidth(), croppedImage.getHeight());
                   analyzedImageViewer.updateImage(croppedImage);
@@ -353,7 +359,7 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
 
          rawImageViewer.updateImage(input);
 
-         drawCarPosition();
+//         drawCarPosition();
       }
    }
 
@@ -368,7 +374,7 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
          increment = -increment;
       }
 
-      vehicleRoadPositionPanel.setOffset(offset);
+      lanePositionIndicatorPanel.setOffset(offset);
    }
 
    private ArrayList<Line2d> removeBadLines(ArrayList<Line2d> lines)
@@ -404,6 +410,8 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
       {
          Dimension dimension = new Dimension(width, height);
          rawImageViewer.setPreferredSize(dimension);
+         lanePositionEstimator.setScreenDimension(dimension);
+         steeringInputEstimator.setScreenDimension(dimension);
          mainFrame.pack();
       }
    }
@@ -568,14 +576,14 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
       mainContainer.add(analyzedImageViewer, gbc);
       gbc.gridheight = 1;
 
-      vehicleRoadPositionPanel = new LanePositionIndicatorPanel("./media/images/CarIcon.png");
-      vehicleRoadPositionPanel.setPreferredSize(new Dimension(1, 43));
+      lanePositionIndicatorPanel = new LanePositionIndicatorPanel("./media/images/CarIcon.png");
+      lanePositionIndicatorPanel.setPreferredSize(new Dimension(1, 43));
       gbc.gridx = 0;
       gbc.gridy++;
       gbc.weightx = 1.0;
       gbc.weighty = 0.0;
-      mainContainer.add(vehicleRoadPositionPanel, gbc);
-
+      mainContainer.add(lanePositionIndicatorPanel, gbc);
+      lanePositionEstimator = new LanePositionEstimator(lanePositionIndicatorPanel, steeringInputEstimator);
 
       mainFrame.pack();
       mainFrame.setVisible(true);
