@@ -322,6 +322,18 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
          }
       }
 
+      // add buffer zone
+
+      double bufferPercent = 0.5; 
+      for (int i = 0; i < numLabels; i++)
+      {
+         int[] bounds = boundingBoxes.get(i);
+         double width = bounds[2] - bounds[0];
+         int calcBuffer = new Double(width * bufferPercent).intValue();
+         bounds[0] -= calcBuffer;
+         bounds[2] += calcBuffer;
+      }
+
       return boundingBoxes;
    }
 
