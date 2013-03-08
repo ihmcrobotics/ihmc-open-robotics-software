@@ -1,6 +1,8 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
@@ -9,11 +11,11 @@ import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.util.trajectory.ConstantDoubleProvider;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.trajectory.ConstantPositionProvider;
-import com.yobotics.simulationconstructionset.util.trajectory.DoubleProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.PositionProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.VectorProvider;
+import com.yobotics.simulationconstructionset.util.trajectory.YoPositionProvider;
 
 public class TwoWaypointPositionTrajectoryGeneratorTest {
 
@@ -28,14 +30,17 @@ public class TwoWaypointPositionTrajectoryGeneratorTest {
 	
 	private void testSimpleTrajectory(int numDesiredSplines)
 	{
-		DoubleProvider stepTimeProvider = new ConstantDoubleProvider(0.8);
+		YoVariableDoubleProvider stepTimeProvider = new YoVariableDoubleProvider("", new YoVariableRegistry(""));
+		stepTimeProvider.set(0.8);
 		PositionProvider initialPositionProvider = new ConstantPositionProvider(new FramePoint(worldFrame, new double[]{-0.1, 2.3, 0.0}));
 		VectorProvider initialVelocityProvider = new ConstantVectorProvider(new FrameVector(worldFrame, new double[]{0.2, 0.0, -0.05}));
 		
 		FramePoint firstIntermediatePosition = new FramePoint(worldFrame, new double[]{0.12, 2.4, 0.2});
 		FramePoint secondIntermediatePosition = new FramePoint(worldFrame, new double[]{0.16, 2.3, 0.15});
 		
-		PositionProvider finalPositionProvider = new ConstantPositionProvider(new FramePoint(worldFrame, new double[]{0.2, 2.35, 0.03}));
+		YoFramePoint finalPosition = new YoFramePoint("", worldFrame, new YoVariableRegistry(""));
+		finalPosition.set(new FramePoint(worldFrame, new double[]{0.2, 2.35, 0.03}));
+		YoPositionProvider finalPositionProvider = new YoPositionProvider(finalPosition);
 		VectorProvider finalVelocityProvider = new ConstantVectorProvider(new FrameVector(worldFrame, new double[]{0.1, 0.01, -0.02}));
 		
 		int arcLengthCalculatorDivisions = 100;

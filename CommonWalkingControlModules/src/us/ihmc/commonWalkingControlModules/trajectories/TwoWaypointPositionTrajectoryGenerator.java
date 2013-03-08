@@ -16,10 +16,11 @@ import com.yobotics.simulationconstructionset.util.trajectory.DoubleProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.PositionProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.PositionTrajectoryGenerator;
 import com.yobotics.simulationconstructionset.util.trajectory.VectorProvider;
+import com.yobotics.simulationconstructionset.util.trajectory.YoPositionProvider;
 
 public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajectoryGenerator
 {
-   private final static double[] DESIRED_PROPORTIONS_THROUGH_TRAJECTORY_FOR_GROUND_CLEARANCE = new double[] {1.0 / 3.0, 2.0 / 3.0};
+   private final static double[] DESIRED_PROPORTIONS_THROUGH_TRAJECTORY_FOR_GROUND_CLEARANCE = new double[] {1.0 / 5.0, 4.0 / 5.0};
 
    private final double groundClearance;
 
@@ -52,8 +53,8 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
 
    private final int desiredNumberOfSplines;
 
-   public TwoWaypointPositionTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, DoubleProvider stepTimeProvider,
-           PositionProvider initialPositionProvider, VectorProvider initalVelocityProvider, PositionProvider finalPositionProvider,
+   public TwoWaypointPositionTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, YoVariableDoubleProvider stepTimeProvider,
+           PositionProvider initialPositionProvider, VectorProvider initalVelocityProvider, YoPositionProvider finalPositionProvider,
            VectorProvider finalDesiredVelocityProvider, YoVariableRegistry parentRegistry, double groundClearance, int desiredNumberOfSplines,
            int arcLengthCalculatorDivisions, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
@@ -76,19 +77,19 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       this.stepTime = new DoubleYoVariable("stepTime", registry);
       this.timeIntoStep = new DoubleYoVariable("timeIntoStep", registry);
 
-      this.desiredPosition = new YoFramePoint("desiredPosition", referenceFrame, registry);
-      this.desiredVelocity = new YoFrameVector("desiredVelocity", referenceFrame, registry);
-      this.desiredAcceleration = new YoFrameVector("desiredAcceleration", referenceFrame, registry);
+      this.desiredPosition = new YoFramePoint(namePrefix + "DesiredPosition", referenceFrame, registry);
+      this.desiredVelocity = new YoFrameVector(namePrefix + "DesiredVelocity", referenceFrame, registry);
+      this.desiredAcceleration = new YoFrameVector(namePrefix + "DesiredAcceleration", referenceFrame, registry);
 
       this.groundClearance = groundClearance;
 
       for (int i = 0; i < 4; i++)
       {
-         fixedPointPositions[i] = new YoFramePoint("fixedPosition" + i, referenceFrame, registry);
-         fixedPointVelocities[i] = new YoFrameVector("fixedVelocity" + i, referenceFrame, registry);
+         fixedPointPositions[i] = new YoFramePoint(namePrefix + "FixedPointPosition" + i, referenceFrame, registry);
+         fixedPointVelocities[i] = new YoFrameVector(namePrefix + "FixedPointVelocity" + i, referenceFrame, registry);
       }
 
-      this.origianlConcatenatedSplines = new YoConcatenatedSplines(new int[] {4, 6, 4}, referenceFrame, arcLengthCalculatorDivisions, registry, "original");
+      this.origianlConcatenatedSplines = new YoConcatenatedSplines(new int[] {4, 6, 4}, referenceFrame, arcLengthCalculatorDivisions, registry, namePrefix + "OriginalConcatenatedSplines");
 
       int[] reparameterizedNumberOfCoefficientsPerPolynomial = new int[desiredNumberOfSplines];
       for (int i = 0; i < reparameterizedNumberOfCoefficientsPerPolynomial.length; i++)
@@ -96,7 +97,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
          reparameterizedNumberOfCoefficientsPerPolynomial[i] = 6;
       }
 
-      this.respacedConcatenatedSplines = new YoConcatenatedSplines(reparameterizedNumberOfCoefficientsPerPolynomial, referenceFrame, 2, registry, "respaced");
+      this.respacedConcatenatedSplines = new YoConcatenatedSplines(reparameterizedNumberOfCoefficientsPerPolynomial, referenceFrame, 2, registry, namePrefix + "RespacedConcatenatedSplines");
 
       this.desiredNumberOfSplines = desiredNumberOfSplines;
    }
@@ -134,7 +135,39 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
    {
       setInitialAndFinalPositionsAndVelocities();
       setWaypointPositionsAndVelocities(waypoints);
-      initialize();
+      
+      setStepTime();
+
+      setOriginalConcatenatedSplines();
+
+      if (desiredNumberOfSplines == 3)
+      {
+         respaceSplineRangesProportionalToCurrentArcLengths(origianlConcatenatedSplines, respacedConcatenatedSplines);
+      }
+      else
+      {
+         respaceSplineRangesWithEqualArcLengths(origianlConcatenatedSplines, respacedConcatenatedSplines);
+      }
+
+      if (VISUALIZE)
+      {
+         visualizeSpline();
+      }
+   }
+
+   private void setStepTime()
+   {
+      double stepTime = stepTimeProvider.getValue();
+      MathTools.checkIfInRange(stepTime, 0.0, Double.POSITIVE_INFINITY);
+      this.stepTime.set(stepTime);
+      timeIntoStep.set(0.0);
+   }
+   
+   public void initialize()
+   {
+      double t = System.nanoTime();
+      initialize(null);
+      System.out.println(System.nanoTime() - t);
    }
 
    private void setInitialAndFinalPositionsAndVelocities()
@@ -202,7 +235,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
 
    private void setWaypointVelocities()
    {
-      double[] waypointSpeeds = new double[] {fixedPointVelocities[0].length(), fixedPointVelocities[3].length()};
+      double[] waypointSpeeds = new double[] {2.0, 2.0};
       FrameVector[] waypointVelocities = new FrameVector[2];
       for (int i = 0; i < 2; i++)
       {
@@ -212,30 +245,6 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
          waypointVelocities[i].normalize();
          waypointVelocities[i].scale(waypointSpeeds[i]);
          fixedPointVelocities[i + 1].set(waypointVelocities[i]);
-      }
-   }
-
-   public void initialize()
-   {
-      double stepTime = stepTimeProvider.getValue();
-      MathTools.checkIfInRange(stepTime, 0.0, Double.POSITIVE_INFINITY);
-      this.stepTime.set(stepTime);
-      timeIntoStep.set(0.0);
-
-      setOriginalConcatenatedSplines();
-
-      if (desiredNumberOfSplines == 3)
-      {
-         respaceSplineRangesProportionalToCurrentArcLengths(origianlConcatenatedSplines, respacedConcatenatedSplines);
-      }
-      else
-      {
-         respaceSplineRangesWithEqualArcLengths(origianlConcatenatedSplines, respacedConcatenatedSplines);
-      }
-
-      if (VISUALIZE)
-      {
-         visualizeSpline();
       }
    }
 
@@ -261,7 +270,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       {
          times[i] = distances[i] * stepTime.getDoubleValue() / totalDistance;
          positions[i] = fixedPointPositions[i].getFramePointCopy();
-         velocities[i] = fixedPointPositions[i].getFrameVectorCopy();
+         velocities[i] = fixedPointVelocities[i].getFrameVectorCopy();
       }
 
       origianlConcatenatedSplines.setCubicQuinticCubic(times, positions, velocities);
@@ -337,13 +346,9 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
          trajectoryBagOfBalls.setBall(desiredPosition.getFramePointCopy(), i);
       }
 
-      FramePoint[] temp = new FramePoint[positionSources.length];
-      for (int i = 0; i < positionSources.length; i++)
+      for (int i = 0; i < fixedPointPositions.length; i++)
       {
-         temp[i] = new FramePoint(referenceFrame);
-         positionSources[i].get(temp[i]);
-         temp[i].changeFrame(referenceFrame);
-         waypointBagOfBalls.setBall(temp[i], YoAppearance.AliceBlue(), i);
+         waypointBagOfBalls.setBall(fixedPointPositions[i].getFramePointCopy(), YoAppearance.AliceBlue(), i);
       }
    }
 
