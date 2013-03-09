@@ -8,6 +8,7 @@ import us.ihmc.commonWalkingControlModules.terrain.TerrainType;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.projectM.R2Sim02.initialSetup.ScsInitialSetup;
 
+import com.yobotics.simulationconstructionset.DynamicIntegrationMethod;
 import com.yobotics.simulationconstructionset.GroundProfile;
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
@@ -26,7 +27,8 @@ public class DRCSCSInitialSetup implements ScsInitialSetup
    private double gravity = -9.81;
    private final CommonTerrain commonTerrain;
 
-
+   private DynamicIntegrationMethod dynamicIntegrationMethod = DynamicIntegrationMethod.RUNGE_KUTTA_FOURTH_ORDER;
+   
    public DRCSCSInitialSetup(TerrainType terrainType)
    {
       System.out.println("terrainType = " + terrainType);
@@ -78,6 +80,16 @@ public class DRCSCSInitialSetup implements ScsInitialSetup
       robot.setGroundContactModel(groundContactModel);
    }
 
+   public DynamicIntegrationMethod getDynamicIntegrationMethod()
+   {
+      return dynamicIntegrationMethod;
+   }
+   
+   public void setDynamicIntegrationMethod(DynamicIntegrationMethod dynamicIntegrationMethod)
+   {
+      this.dynamicIntegrationMethod = dynamicIntegrationMethod;
+   }
+   
    public double getDT()
    {
       return simulateDT;
