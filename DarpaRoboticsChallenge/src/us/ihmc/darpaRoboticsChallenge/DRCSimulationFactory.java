@@ -86,6 +86,9 @@ public class DRCSimulationFactory
          controlDT = simulateDT * simulationTicksPerControlTick;
       }
       
+      
+      simulatedRobot.setDynamicIntegrationMethod(scsInitialSetup.getDynamicIntegrationMethod());
+      
       SDFFullRobotModel fullRobotModelForSimulation = jaxbSDFLoader.createFullRobotModel();
 
 //    drcRobotSDFLoader = new DRCRobotSDFLoader(robotModel);
