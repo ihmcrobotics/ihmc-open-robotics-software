@@ -6,6 +6,10 @@ import us.ihmc.graphics3DAdapter.camera.VideoSettingsH264LowLatency;
 
 public class DRCConfigParameters
 {
+   public static final boolean USE_GAZEBO_PHYSICS = false;
+   public static final String GAZEBO_HOST = "localhost";
+   
+   
    // Set to simulate one tick delay between, as it will be in Gazebo. This will also run the controller in a different thread!
    public static final boolean SIMULATE_DELAY = false;
    
@@ -62,5 +66,7 @@ public class DRCConfigParameters
    public static final double GRID_RESOLUTION = 0.01;// 1 centimeter resolution
 
    public static final double LIDAR_BLINDNESS_CYLINDAR_SQUARED_RADIUS = 0.3;
+
+
 
 }

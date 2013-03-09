@@ -1,5 +1,8 @@
 package us.ihmc.darpaRoboticsChallenge;
 
+import java.io.IOException;
+
+import us.ihmc.GazeboStateCommunicator.GazeboRobot;
 import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFPerfectSimulatedSensorReaderAndWriter;
@@ -50,12 +53,39 @@ public class DRCSimulationFactory
       GUISetterUpperRegistry guiSetterUpperRegistry = new GUISetterUpperRegistry();
       DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
 
+
+      JaxbSDFLoader jaxbSDFLoader = DRCRobotSDFLoader.loadDRCRobot(jointMap);
+      SDFRobot simulatedRobot;
+
       double simulateDT = scsInitialSetup.getDT();
       int simulationTicksPerControlTick = controllerFactory.getSimulationTicksPerControlTick();
       double controlDT = simulateDT * simulationTicksPerControlTick;
+      if(DRCConfigParameters.USE_GAZEBO_PHYSICS)
+      {
+         try
+         {
+            GazeboRobot gazeboRobot = new GazeboRobot("localhost", jaxbSDFLoader.getGeneralizedSDFRobotModel());
+            
+            simulationTicksPerControlTick = 1;
+            simulateDT = gazeboRobot.getDT();
+            controlDT = simulateDT;
+            
+            simulatedRobot = gazeboRobot;
+         }
+         catch (IOException e)
+         {
+            throw new RuntimeException(e);
+         }
+      }
+      else
+      {
+         simulatedRobot = jaxbSDFLoader.createRobot();
 
-      JaxbSDFLoader jaxbSDFLoader = DRCRobotSDFLoader.loadDRCRobot(jointMap);
-      SDFRobot simulatedRobot = jaxbSDFLoader.createRobot();
+         simulationTicksPerControlTick = controllerFactory.getSimulationTicksPerControlTick();
+         simulateDT = scsInitialSetup.getDT();
+         controlDT = simulateDT * simulationTicksPerControlTick;
+      }
+      
       SDFFullRobotModel fullRobotModelForSimulation = jaxbSDFLoader.createFullRobotModel();
 
 //    drcRobotSDFLoader = new DRCRobotSDFLoader(robotModel);
@@ -101,7 +131,10 @@ public class DRCSimulationFactory
 
       AbstractModularRobotController modularRobotController;
       
-      if(DRCConfigParameters.SIMULATE_DELAY)
+      
+      boolean checkForDelay = DRCConfigParameters.SIMULATE_DELAY;
+      checkForDelay = checkForDelay && !DRCConfigParameters.USE_GAZEBO_PHYSICS;
+      if(checkForDelay)
       {
          modularRobotController = new DelayedThreadedModularRobotController("ModularRobotController");
       }
@@ -132,6 +165,12 @@ public class DRCSimulationFactory
                                          guiInitialSetup, guiSetterUpperRegistry, dynamicGraphicObjectsListRegistry);
       if (networkServer!=null)
          DRCLidar.setupDRCRobotLidar(humanoidRobotSimulation, networkServer, lidarJoint);
+      
+      
+      if(simulatedRobot instanceof GazeboRobot)
+      {
+         ((GazeboRobot) simulatedRobot).registerWithSCS(humanoidRobotSimulation.getSimulationConstructionSet());
+      }
       return humanoidRobotSimulation;
    }
 
