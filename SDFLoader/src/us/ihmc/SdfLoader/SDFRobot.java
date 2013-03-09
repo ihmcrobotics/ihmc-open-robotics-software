@@ -1,6 +1,7 @@
 package us.ihmc.SdfLoader;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
@@ -8,7 +9,6 @@ import javax.media.j3d.Transform3D;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
-import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor;
@@ -175,11 +175,26 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRo
       rootJoint.setQuaternion(quaternion);
    }
    
+   public void setAngularVelocity(Vector3d velocity)
+   {
+      rootJoint.setAngularVelocityInBody(velocity);
+   }
+   
+   public void setLinearVelocity(Vector3d velocity)
+   {
+      rootJoint.setVelocity(velocity);
+   }
+   
    public OneDegreeOfFreedomJoint getOneDoFJoint(String name)
    {
       return oneDoFJoints.get(name);
    }
 
+   public Collection<OneDegreeOfFreedomJoint> getOneDoFJoints()
+   {
+      return oneDoFJoints.values();
+   }
+   
    private void addJointsRecursively(SDFJointHolder joint, Joint scsParentJoint, Matrix3d chainRotationIn)
    {
       Matrix3d rotation = new Matrix3d();
@@ -479,11 +494,31 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRo
    {
       return footGroundContactPoints.get(robotSide);
    }
-
+   
    public Vector3d getPositionInWorld()
    {
       Vector3d position = new Vector3d();
-      rootJoint.getPosition(position);
+      getPositionInWorld(position);
       return position;
+   }
+
+   public void getPositionInWorld(Vector3d vectorToPack)
+   {
+      rootJoint.getPosition(vectorToPack);
+   }
+   
+   public void getVelocityInWorld(Vector3d vectorToPack)
+   {
+      rootJoint.getVelocity(vectorToPack);
+   }
+   
+   public void getOrientationInWorld(Quat4d quaternionToPack)
+   {
+      rootJoint.getQuaternion(quaternionToPack);
+   }
+   
+   public void getAngularVelocityInBody(Vector3d vectorToPack)
+   {
+      rootJoint.getAngularVelocityInBody(vectorToPack);
    }
 }
