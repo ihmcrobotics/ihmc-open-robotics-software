@@ -1,5 +1,7 @@
 package us.ihmc.sensorProcessing.simulatedSensors;
 
+import javax.vecmath.Vector3d;
+
 import us.ihmc.controlFlow.ControlFlowElement;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.sensorProcessing.signalCorruption.SignalCorruptorHolder;
@@ -12,14 +14,15 @@ import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.utilities.screwTheory.Twist;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 
-public class SimulatedLinearAccelerationSensor extends SignalCorruptorHolder<FrameVector> implements ControlFlowElement
+public class SimulatedLinearAccelerationSensor extends SignalCorruptorHolder<Vector3d> implements ControlFlowElement
 {
    private final RigidBody rigidBody;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final FramePoint imuFramePoint = new FramePoint(worldFrame);
 
-   private final FrameVector linearAcceleration = new FrameVector(worldFrame);
+   private final FrameVector linearAccelerationFrameVector = new FrameVector(worldFrame);
+   private final Vector3d linearAcceleration = new Vector3d();
    private final Twist twist = new Twist();
    private final SpatialAccelerationVector spatialAcceleration = new SpatialAccelerationVector();
 
@@ -28,7 +31,7 @@ public class SimulatedLinearAccelerationSensor extends SignalCorruptorHolder<Fra
    private final SpatialAccelerationCalculator spatialAccelerationCalculator;
 
 
-   private final ControlFlowOutputPort<FrameVector> linearAccelerationOutputPort = new ControlFlowOutputPort<FrameVector>(this);
+   private final ControlFlowOutputPort<Vector3d> linearAccelerationOutputPort = new ControlFlowOutputPort<Vector3d>(this);
 
    public SimulatedLinearAccelerationSensor(RigidBody rigidBody, ReferenceFrame measurementFrame, TwistCalculator twistCalculator,
            SpatialAccelerationCalculator spatialAccelerationCalculator)
@@ -48,8 +51,9 @@ public class SimulatedLinearAccelerationSensor extends SignalCorruptorHolder<Fra
       twist.changeFrame(worldFrame);
       imuFramePoint.setToZero(measurementFrame);
       imuFramePoint.changeFrame(worldFrame);
-      spatialAcceleration.packAccelerationOfPointFixedInBodyFrame(twist, imuFramePoint, linearAcceleration);
-      linearAcceleration.changeFrame(measurementFrame);
+      spatialAcceleration.packAccelerationOfPointFixedInBodyFrame(twist, imuFramePoint, linearAccelerationFrameVector);
+      linearAccelerationFrameVector.changeFrame(measurementFrame);
+      linearAccelerationFrameVector.getVector(linearAcceleration);
 
       corrupt(linearAcceleration);
 
@@ -61,7 +65,7 @@ public class SimulatedLinearAccelerationSensor extends SignalCorruptorHolder<Fra
       // empty
    }
 
-   public ControlFlowOutputPort<FrameVector> getLinearAccelerationOutputPort()
+   public ControlFlowOutputPort<Vector3d> getLinearAccelerationOutputPort()
    {
       return linearAccelerationOutputPort;
    }
