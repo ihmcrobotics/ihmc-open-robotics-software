@@ -1,0 +1,1353 @@
+#LyX 2.0 created this file. For more info see http://www.lyx.org/
+\lyxformat 413
+\begin_document
+\begin_header
+\textclass article
+\begin_preamble
+\DeclareMathOperator{\Ad}{Ad}
+\DeclareMathOperator{\ad}{ad}
+\end_preamble
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_amsmath 2
+\use_esint 1
+\use_mhchem 1
+\use_mathdots 1
+\cite_engine basic
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\use_refstyle 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Section
+Process model
+\end_layout
+
+\begin_layout Subsection
+Global model
+\end_layout
+
+\begin_layout Standard
+Let the orientation estimation link be the link whose orientation and angular
+ velocity will be part of the state vector.
+\end_layout
+
+\begin_layout Standard
+State:
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $r$
+\end_inset
+
+: CoM position in world frame
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\dot{r}$
+\end_inset
+
+: CoM velocity in world frame
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $q$
+\end_inset
+
+: quaternion describing the orientation of orientation estimation link
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\omega$
+\end_inset
+
+: angular velocity of orientation estimation link, expressed in body frame
+\end_layout
+
+\begin_layout Itemize
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+\begin_inset Formula $b_{\dot{v}_{i}}$
+\end_inset
+
+: acceleration bias of IMU 
+\begin_inset Formula $i$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $b_{\omega_{i}}$
+\end_inset
+
+: gyro bias of IMU 
+\begin_inset Formula $i$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Inputs:
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\ddot{r}_{d}$
+\end_inset
+
+: desired CoM acceleration
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\dot{\omega}_{d}$
+\end_inset
+
+: desired angular acceleration of orientation estimation link
+\end_layout
+
+\begin_layout Standard
+Process noise:
+\end_layout
+
+\begin_layout Itemize
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+\begin_inset Formula $w_{\ddot{r}}\sim\mathcal{N}\left(0,Q_{\ddot{r}}\right)$
+\end_inset
+
+: CoM acceleration noise
+\end_layout
+
+\begin_layout Itemize
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+\begin_inset Formula $w_{\dot{\omega}}\sim\mathcal{N}\left(0,Q_{\dot{\omega}}\right)$
+\end_inset
+
+: angular acceleration noise
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $w_{b_{\dot{v},i}}\sim\mathcal{N}\left(0,Q_{b_{\dot{v},i}}\right)$
+\end_inset
+
+: acceleration bias noise for IMU 
+\begin_inset Formula $i$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $w_{b_{\omega,i}}\sim\mathcal{N}\left(0,Q_{b_{\omega,i}}\right)$
+\end_inset
+
+: gyro bias noise for IMU 
+\begin_inset Formula $i$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Dynamics:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\dot{r} & =\dot{r}\\
+\ddot{r} & =\ddot{r}_{d}+w_{\ddot{r}}\\
+\dot{q} & =\frac{1}{2}q\otimes\omega_{q}\\
+\dot{\omega} & =\dot{\omega}_{d}+w_{\dot{\omega}}\\
+\dot{b}_{a,i} & =w_{b_{a,i}}\quad i\in\left\{ 1,2,\dotsc,n\right\} \\
+\dot{b}_{\omega,i} & =w_{b_{\omega,i}}\quad i\in\left\{ 1,2,\dotsc,n\right\} 
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Linearized error model
+\end_layout
+
+\begin_layout Standard
+Only the orientation part of the process model is nonlinear.
+ A problem that arises with the use of Euler parameters (i.e.
+ unit quaternions) is that the unit norm constraint needs to be preserved.
+\end_layout
+
+\begin_layout Standard
+A simple way to enforce this constraint is to convert errors to a local,
+ minimal description (i.e.
+ using three numbers), compute a correction in terms of this minimal description
+, convert the correction to a quaternion, and then perform quaternion multiplica
+tion, which preserves norm.
+ We will use a local description in terms of the error rotation vector 
+\begin_inset Formula $\phi$
+\end_inset
+
+, where 
+\begin_inset Formula $k=\frac{\phi}{\left\Vert \phi\right\Vert }$
+\end_inset
+
+ is the axis of rotation, and 
+\begin_inset Formula $\left\Vert \phi\right\Vert $
+\end_inset
+
+ is the rotation angle about 
+\begin_inset Formula $k$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+The equation describing the rotational kinematics in terms of 
+\begin_inset Formula $\phi$
+\end_inset
+
+ is derived in the appendix.
+ We can rewrite this as
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\dot{\phi}=\underbrace{\frac{\partial\dot{\phi}}{\partial\phi}}_{J_{\phi}}\phi+c\left(\phi,\omega\right)
+\]
+
+\end_inset
+
+where both 
+\begin_inset Formula $c\left(\phi,\omega\right)$
+\end_inset
+
+ and 
+\begin_inset Formula $J_{\phi}$
+\end_inset
+
+ are nonlinear in 
+\begin_inset Formula $\phi$
+\end_inset
+
+ and 
+\begin_inset Formula $\omega$
+\end_inset
+
+.
+ Since we assume 
+\begin_inset Formula $\phi$
+\end_inset
+
+ to be small, a first order approximation of these terms should be sufficient.
+ Hence, we take the limit as 
+\begin_inset Formula $\phi\rightarrow0$
+\end_inset
+
+: 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+TODO: existence of limit, direction independence
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\lim_{\phi\rightarrow0}c\left(\phi,\omega\right) & =\omega\\
+\lim_{\phi\rightarrow0}J_{\phi} & =-\frac{1}{2}\tilde{\omega}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The final linearized error orientation dynamics then become
+\begin_inset Formula 
+\[
+\dot{\phi}\approx I\omega-\frac{1}{2}\tilde{\omega}\phi
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+To use this as our process model for orientation, we need to be able to
+ convert a corrective term 
+\begin_inset Formula $\Delta\phi$
+\end_inset
+
+, obtained by running the Kalman filter using this model, to the global
+ description in terms of quaternions.
+ This is done using the conversion
+\begin_inset Formula 
+\[
+\Delta q=\zeta\left(\Delta\phi\right)
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula 
+\[
+\zeta:k\mapsto\zeta\left(k\right)=\left(\begin{array}{c}
+\sin\left(\frac{1}{2}\left\Vert k\right\Vert \frac{k}{\left\Vert k\right\Vert }\right)\\
+\cos\left(\frac{1}{2}\left\Vert k\right\Vert \right)
+\end{array}\right)
+\]
+
+\end_inset
+
+so that the update equation becomes
+\begin_inset Formula 
+\[
+\hat{q}\leftarrow\hat{q}\otimes\Delta q
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We can now construct the continuous time state space model describing the
+ error dynamics:
+\begin_inset Formula 
+\[
+\dot{x}=Ax+Bu+w_{x}
+\]
+
+\end_inset
+
+with
+\begin_inset Formula 
+\begin{align*}
+x & =\left(r,\dot{r},\phi,\omega,b_{\dot{v},1},\dotsc,b_{a,n},b_{\dot{v},1},\dotsc,b_{\omega,n}\right)\\
+u & =\left(\ddot{r}_{d},\dot{\omega}_{d}\right)\\
+w_{x} & =\left(0,w_{\ddot{r}},0,w_{\dot{\omega}},w_{b_{\dot{v},1}},\dotsc,w_{b_{\dot{v},n}},w_{b_{\omega,1}},\dotsc,w_{b_{\omega,n}}\right)\sim\mathcal{N}\left(0,Q\right)
+\end{align*}
+
+\end_inset
+
+where
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+A & =\left(\begin{array}{ccc}
+A_{r} & 0 & 0\\
+0 & A_{\phi} & 0\\
+0 & 0 & 0
+\end{array}\right)\in\mathbb{R}^{12+6n_{\text{imu}}}\\
+A_{r} & =\left(\begin{array}{cc}
+0 & I_{3}\\
+0 & 0
+\end{array}\right)\in\mathbb{R}^{6\times6}\\
+A_{\phi} & =\left(\begin{array}{cc}
+-\frac{1}{2}\tilde{\omega} & I_{3}\\
+0 & 0
+\end{array}\right)\in\mathbb{R}^{6\times6}
+\end{align*}
+
+\end_inset
+
+and
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+B & =\left(\begin{array}{c}
+B_{r}\\
+B_{\phi}\\
+0
+\end{array}\right)\in\mathbb{R}^{12+6n_{\text{imu}}\times3}\\
+B_{r} & =\left(\begin{array}{c}
+0\\
+I_{3}
+\end{array}\right)\in\mathbb{R}^{6\times3}\\
+B_{\phi} & =\left(\begin{array}{c}
+0\\
+I_{3}
+\end{array}\right)\in\mathbb{R}^{6\times3}
+\end{align*}
+
+\end_inset
+
+and
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+Q & =\left(\begin{array}{ccc}
+Q_{r} & 0 & 0\\
+0 & Q_{\phi} & 0\\
+0 & 0 & Q_{b}
+\end{array}\right)\in\mathbb{R}^{12+6n_{\text{imu}}}\\
+Q_{r} & =\left(\begin{array}{cc}
+0 & 0\\
+0 & Q_{\ddot{r}}
+\end{array}\right)\in\mathbb{R}^{6\times6}\\
+Q_{\phi} & =\left(\begin{array}{cc}
+0 & 0\\
+0 & Q_{\dot{\omega}}
+\end{array}\right)\in\mathbb{R}^{6\times6}\\
+Q_{b} & =\left(\begin{array}{cccc}
+Q_{b_{\dot{v},1}} & 0 & 0 & 0\\
+0 & \ddots & 0 & 0\\
+0 & 0 & Q_{b_{\omega,1}} & 0\\
+0 & 0 & 0 & \ddots
+\end{array}\right)\in\mathbb{R}^{6n_{\text{imu}}\times6n_{\text{imu}}}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Note that the state matrix depends on 
+\begin_inset Formula $\omega$
+\end_inset
+
+ and is hence not constant.
+\end_layout
+
+\begin_layout Subsection
+Discretization
+\end_layout
+
+\begin_layout Standard
+We now approximate the continuous time error dynamics using a discrete time
+ system:
+\begin_inset Formula 
+\begin{align*}
+x_{n+1} & =A_{d}x_{n}+B_{d}u_{n}+w_{n}\\
+w_{n} & \sim\mathcal{N}\left(0,Q_{d}\right)
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+With a first-order hold approximation, we can write
+\begin_inset Formula 
+\begin{align*}
+A_{d} & =e^{A\Delta t}\\
+B_{d} & =\int_{0}^{\Delta t}e^{A\tau}d\tau B\\
+Q_{d} & =\int_{0}^{\Delta t}e^{A\tau}Qe^{A^{T}\tau}d\tau
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Van Loan 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "VanLoan1978"
+
+\end_inset
+
+ shows that if we define
+\begin_inset Formula 
+\[
+M=\left(\begin{array}{ccc}
+-A^{T} & Q & 0\\
+0 & A & B\\
+0 & 0 & 0
+\end{array}\right)
+\]
+
+\end_inset
+
+and
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+e^{M\Delta t}=\left(\begin{array}{ccc}
+F_{2} & G_{2} & H_{2}\\
+0 & F_{3} & G_{3}\\
+0 & 0 & F_{4}
+\end{array}\right)
+\]
+
+\end_inset
+
+then we have
+\begin_inset Formula 
+\begin{align*}
+A_{d} & =F_{3}\\
+B_{d} & =G_{3}\\
+Q_{d} & =F_{3}{}^{T}G_{2}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Measurements
+\end_layout
+
+\begin_layout Standard
+TODO:
+\end_layout
+
+\begin_layout Standard
+Let 
+\begin_inset Formula $\hat{\cdot}$
+\end_inset
+
+ denote the estimated value of 
+\begin_inset Formula $\cdot$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Let
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+R_{d}=\frac{1}{\Delta t}R
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+IMU angular velocity
+\end_layout
+
+\begin_layout Standard
+Let 
+\begin_inset Formula $\omega_{i}^{i,w}$
+\end_inset
+
+ be the angular velocity of IMU 
+\begin_inset Formula $i$
+\end_inset
+
+ with respect to the world 
+\begin_inset Formula $w$
+\end_inset
+
+, expressed in body frame.
+ The measurement model for angular velocity can be described in the following
+ way.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\omega_{i}^{i,w}=S_{\omega}T_{i}^{i,w}
+\]
+
+\end_inset
+
+with 
+\begin_inset Formula $T_{i}^{i,w}$
+\end_inset
+
+ the twist of measurement link 
+\begin_inset Formula $i$
+\end_inset
+
+ with respect to the world 
+\begin_inset Formula $w$
+\end_inset
+
+, expressed in body-fixed frame, and with the selection matrix 
+\begin_inset Formula 
+\[
+S_{\omega}=\left(\begin{array}{cc}
+I_{3} & 0_{3\times3}\end{array}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Let 
+\begin_inset Formula $p$
+\end_inset
+
+ denote the orientation estimation link.
+ The twist 
+\begin_inset Formula $T_{i}^{i,w}$
+\end_inset
+
+ can be written as
+\begin_inset Formula 
+\[
+T_{i}^{i,w}=T_{p}^{i,w}+T_{i}^{i,p}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The twist 
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+
+\begin_inset Formula $T_{i}^{i,p}$
+\end_inset
+
+ depends only on the joint velocities for the joints on the path between
+ 
+\begin_inset Formula $p$
+\end_inset
+
+ and 
+\begin_inset Formula $i$
+\end_inset
+
+ and can be written as
+\begin_inset Formula 
+\[
+T_{i}^{i,p}=J_{i}^{i,p}v_{i}^{p}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+The twist 
+\begin_inset Formula $T_{p}^{i,w}$
+\end_inset
+
+ can be written as
+\begin_inset Formula 
+\[
+T_{p}^{i,w}=\Ad_{H_{p}^{i}}T_{p}^{p,w}
+\]
+
+\end_inset
+
+
+\family default
+\series default
+\shape default
+\size default
+\emph default
+\bar default
+\strikeout default
+\uuline default
+\uwave default
+\noun default
+\color inherit
+where
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\Ad_{H}=\left(\begin{array}{cc}
+R & 0\\
+\tilde{p}R & R
+\end{array}\right)\quad\text{for}\quad H=\left(\begin{array}{cc}
+R & p\\
+0 & 1
+\end{array}\right)\label{eq:def-Ad}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Combining all of the above, we obtain
+\begin_inset Formula 
+\begin{align*}
+\omega_{i}^{i,w} & =R_{p}^{i}\omega_{p}^{p,w}+\omega_{i}^{i,p}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Note that 
+\begin_inset Formula $\omega_{p}^{p,w}=\omega$
+\end_inset
+
+.
+ Define the measurement output matrix 
+\begin_inset Formula $H_{\omega,i}$
+\end_inset
+
+:
+\begin_inset Formula 
+\[
+H_{\omega,i}=R_{p}^{i}
+\]
+
+\end_inset
+
+and define the measurement
+\begin_inset Formula 
+\[
+z_{\omega,i}=\omega_{i}^{i,w}-\omega_{i}^{i,p}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Denote by 
+\begin_inset Formula $z_{\omega,i}$
+\end_inset
+
+ the measured value of 
+\begin_inset Formula $\omega_{i}^{i,w}$
+\end_inset
+
+.
+ The measurement residual will then be
+\begin_inset Formula 
+\[
+y_{\omega}=z_{\omega,i}-H_{\omega,i}\mbox{\hat{\omega}}
+\]
+
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Subsection
+IMU linear acceleration
+\end_layout
+
+\begin_layout Standard
+Let 
+\begin_inset Formula $\dot{v}_{i}^{i,w}$
+\end_inset
+
+ be the linear acceleration of IMU 
+\begin_inset Formula $i$
+\end_inset
+
+ with respect to the world 
+\begin_inset Formula $w$
+\end_inset
+
+, expressed in body frame.
+\begin_inset Formula 
+\[
+\dot{v}_{i}^{i,w}=S_{v}\dot{T}_{i}^{i,w}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+S_{v}=\left(\begin{array}{cc}
+0_{3\times3} & I_{3}\end{array}\right)
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+T_{i}^{i,w}=T_{p}^{i,w}+T_{i}^{i,p}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\dot{T}_{i}^{i,w}=\dot{T}_{p}^{i,w}+\dot{T}_{i}^{i,p}
+\]
+
+\end_inset
+
+where 
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+
+\begin_inset Formula $\dot{T}_{i}^{i,p}$
+\end_inset
+
+ only depends on the joint velocities and accelerations for the joints on
+ the path between 
+\begin_inset Formula $p$
+\end_inset
+
+ and 
+\begin_inset Formula $i$
+\end_inset
+
+ and can be written as
+\begin_inset Formula 
+\[
+\dot{T}_{i}^{i,p}=\dot{J}_{i}^{i,p}v_{i}^{p}+J_{i}^{i,p}\dot{v}_{i}^{p}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Furthermore,
+\end_layout
+
+\begin_layout Standard
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+\begin_inset Formula 
+\[
+\dot{T}_{p}^{i,w}=\Ad_{H_{p}^{i}}\left(\ad_{T_{p}^{p,i}}T_{p}^{p,w}+\dot{T}_{p}^{p,w}\right)
+\]
+
+\end_inset
+
+
+\family default
+\series default
+\shape default
+\size default
+\emph default
+\bar default
+\strikeout default
+\uuline default
+\uwave default
+\noun default
+\color inherit
+where
+\begin_inset Formula 
+\begin{equation}
+\ad_{T}=\left(\begin{array}{cc}
+\tilde{\omega} & 0\\
+\tilde{v} & \tilde{\omega}
+\end{array}\right)\quad\text{for}\quad T=\left(\begin{array}{c}
+\omega\\
+v
+\end{array}\right)\label{eq:def-ad}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Combining the above, we get
+\begin_inset Formula 
+\begin{align*}
+\dot{v}_{i}^{i,w} & =\left(\begin{array}{cc}
+0_{3\times3} & I_{3}\end{array}\right)\left(\left(\begin{array}{cc}
+R_{p}^{i} & 0\\
+\tilde{p}_{p}^{i}R_{p}^{i} & R_{p}^{i}
+\end{array}\right)\left(\left(\begin{array}{cc}
+\tilde{\omega}_{p}^{p,i} & 0\\
+\tilde{v}_{p}^{p,i} & \tilde{\omega}_{p}^{p,i}
+\end{array}\right)\left(\begin{array}{c}
+\omega_{p}^{p,w}\\
+v_{p}^{p,w}
+\end{array}\right)+\left(\begin{array}{c}
+\dot{\omega}_{p}^{p,w}\\
+\dot{v}_{p}^{p,w}
+\end{array}\right)\right)+\left(\begin{array}{c}
+\dot{\omega}_{i}^{i,p}\\
+\dot{v}_{i}^{i,p}
+\end{array}\right)\right)\\
+ & =\left(\begin{array}{cc}
+0_{3\times3} & I_{3}\end{array}\right)\left(\left(\begin{array}{cc}
+R_{p}^{i} & 0\\
+\tilde{p}_{p}^{i}R_{p}^{i} & R_{p}^{i}
+\end{array}\right)\left(\begin{array}{c}
+\tilde{\omega}_{p}^{p,i}\omega_{p}^{p,w}+\dot{\omega}_{p}^{p,w}\\
+\tilde{v}_{p}^{p,i}\omega_{p}^{p,w}+\tilde{\omega}_{p}^{p,i}v_{p}^{p,w}+\dot{v}_{p}^{p,w}
+\end{array}\right)+\left(\begin{array}{c}
+\dot{\omega}_{i}^{i,p}\\
+\dot{v}_{i}^{i,p}
+\end{array}\right)\right)\\
+ & =\left(\begin{array}{cc}
+\tilde{p}_{p}^{i}R_{p}^{i} & R_{p}^{i}\end{array}\right)\left(\begin{array}{c}
+\tilde{\omega}_{p}^{p,i}\omega_{p}^{p,w}+\dot{\omega}_{p}^{p,w}\\
+\tilde{v}_{p}^{p,i}\omega_{p}^{p,w}+\tilde{\omega}_{p}^{p,i}v_{p}^{p,w}+\dot{v}_{p}^{p,w}
+\end{array}\right)+\dot{v}_{i}^{i,p}\\
+ & =R_{p}^{i}\left(\tilde{p}_{p}^{i}\left(\tilde{\omega}_{p}^{p,i}\omega_{p}^{p,w}+\dot{\omega}_{p}^{p,w}\right)+\tilde{v}_{p}^{p,i}\omega_{p}^{p,w}+\tilde{\omega}_{p}^{p,i}v_{p}^{p,w}+\dot{v}_{p}^{p,w}\right)+\dot{v}_{i}^{i,p}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Note that 
+\begin_inset Formula $\omega_{p}^{p,w}=\omega$
+\end_inset
+
+, and 
+\begin_inset Formula $v_{p}^{p,w}=v$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+TODO: derive linearized measurement model
+\end_layout
+
+\begin_layout Subsection
+IMU orientation
+\end_layout
+
+\begin_layout Standard
+For the orientation measurements of the IMUs, we first need to convert the
+ measured quaternion to a rotation vector error.
+\end_layout
+
+\begin_layout Standard
+The quaternion 
+\begin_inset Formula $q_{i}^{w}$
+\end_inset
+
+ is directly measured by the cheating IMU.
+ Note that
+\begin_inset Formula 
+\[
+q=q_{p}^{w}=q_{i}^{w}\otimes q_{p}^{i}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Hence, define the measurement
+\begin_inset Formula 
+\[
+z_{q,i}=q_{i}^{w}\otimes q_{p}^{i}
+\]
+
+\end_inset
+
+and the measurement residual
+\begin_inset Formula 
+\[
+y_{q,i}=\hat{q}^{-1}\otimes z_{q,i}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This quaternion measurement residual can be converted into a rotation vector
+ measurement residual using
+\begin_inset Formula 
+\[
+y_{\phi,i}=\chi\left(y_{q,i}\right)
+\]
+
+\end_inset
+
+where
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\chi:q=\left(\begin{array}{c}
+q_{v}\\
+q_{s}
+\end{array}\right)\mapsto\chi\left(q\right)=\begin{cases}
+2\arctan\left(\left\Vert q_{v}\right\Vert ,q_{s}\right)\frac{q_{v}}{\left\Vert q_{v}\right\Vert } & \left\Vert q_{v}\right\Vert \neq0\\
+0 & \left\Vert q_{v}\right\Vert =0
+\end{cases}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Position through kinematics
+\end_layout
+
+\begin_layout Section
+Appendix: rotation vector kinematics
+\end_layout
+
+\begin_layout Standard
+The kinematics of the quaternion 
+\begin_inset Formula $q=\left(\begin{array}{c}
+q_{s}\\
+q_{v}
+\end{array}\right)$
+\end_inset
+
+ are described by
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\dot{q}=\frac{1}{2}q\otimes\omega_{q}
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $\omega_{q}=\left(\begin{array}{c}
+0\\
+\omega
+\end{array}\right)$
+\end_inset
+
+ is the angular velocity quaternion expressed in body frame.
+ Expanding the quaternion product, we obtain
+\begin_inset Formula 
+\begin{equation}
+\left(\begin{array}{c}
+\dot{q}_{s}\\
+\dot{q}_{v}
+\end{array}\right)=\frac{1}{2}\left(\begin{array}{c}
+-q_{v}\cdot\omega\\
+q_{s}\omega+q_{v}\times\omega
+\end{array}\right)\label{eq:quaternion-derivative}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We now express the quaternion in terms of the rotation vector 
+\begin_inset Formula $\phi$
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+q=\left(\begin{array}{c}
+\cos\frac{\left\Vert \phi\right\Vert }{2}\\
+\sin\frac{\left\Vert \phi\right\Vert }{2}\frac{\phi}{\left\Vert \phi\right\Vert }
+\end{array}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Plugging this into 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:quaternion-derivative"
+
+\end_inset
+
+, we get:
+\begin_inset Formula 
+\begin{equation}
+\dot{q}=\left(\begin{array}{c}
+-\frac{1}{2}\sin\frac{\left\Vert \phi\right\Vert }{2}\frac{\phi\cdot\omega}{\left\Vert \phi\right\Vert }\\
+\frac{1}{2}\cos\frac{\left\Vert \phi\right\Vert }{2}\omega+\frac{1}{2}\sin\frac{\left\Vert \phi\right\Vert }{2}\frac{\phi\times\omega}{\left\Vert \phi\right\Vert }
+\end{array}\right)\label{eq:qd-axis-angle}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+But the derivative can also be written in terms of 
+\begin_inset Formula $\dot{\phi}$
+\end_inset
+
+ as:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\dot{q}=\left(\begin{array}{c}
+-\frac{1}{2}\sin\frac{\left\Vert \phi\right\Vert }{2}\frac{d\left\Vert \phi\right\Vert }{dt}\\
+\frac{1}{2}\cos\frac{\left\Vert \phi\right\Vert }{2}\frac{\phi}{\left\Vert \phi\right\Vert }\frac{d\left\Vert \phi\right\Vert }{dt}+\sin\frac{\left\Vert \phi\right\Vert }{2}\frac{\dot{\phi}}{\left\Vert \phi\right\Vert }-\sin\frac{\left\Vert \phi\right\Vert }{2}\frac{\phi}{\left\Vert \phi\right\Vert ^{2}}\frac{d\left\Vert \phi\right\Vert }{dt}
+\end{array}\right)\label{eq:qd-axis-angle-2}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Comparing the first row of 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:qd-axis-angle"
+
+\end_inset
+
+ to the first row of 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:qd-axis-angle-2"
+
+\end_inset
+
+, we see that
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\frac{d\left\Vert \phi\right\Vert }{dt}=\frac{\phi\cdot\omega}{\left\Vert \phi\right\Vert }\label{eq:dPhiNormDt}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Subsequently, we can solve the last three rows for 
+\begin_inset Formula $\dot{\phi}$
+\end_inset
+
+:
+\begin_inset Formula 
+\[
+\dot{\phi}=\frac{\left\Vert \phi\right\Vert }{\sin\frac{\left\Vert \phi\right\Vert }{2}}\dot{q}_{v}-\frac{1}{2}\cot\frac{\left\Vert \phi\right\Vert }{2}\frac{d\left\Vert \phi\right\Vert }{dt}\phi+\frac{\phi}{\left\Vert \phi\right\Vert }\frac{d\left\Vert \phi\right\Vert }{dt}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Plug in 
+\begin_inset Formula $\dot{q}_{v}$
+\end_inset
+
+ from the last three rows of 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:qd-axis-angle"
+
+\end_inset
+
+:
+\begin_inset Formula 
+\begin{align*}
+\dot{\phi} & =\frac{\left\Vert \phi\right\Vert }{2}\cot\frac{\left\Vert \phi\right\Vert }{2}\omega+\frac{\phi\times\omega}{2}-\frac{1}{2}\cot\frac{\left\Vert \phi\right\Vert }{2}\frac{d\left\Vert \phi\right\Vert }{dt}\phi+\frac{\phi}{\left\Vert \phi\right\Vert }\frac{d\left\Vert \phi\right\Vert }{dt}\\
+ & =\frac{1}{2}\cot\frac{\left\Vert \phi\right\Vert }{2}\left(\left\Vert \phi\right\Vert \omega-\frac{d\left\Vert \phi\right\Vert }{dt}\phi\right)+\frac{\phi\times\omega}{2}+\frac{\phi}{\left\Vert \phi\right\Vert }\frac{d\left\Vert \phi\right\Vert }{dt}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Now plug in 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:dPhiNormDt"
+
+\end_inset
+
+:
+\begin_inset Formula 
+\[
+\dot{\phi}=\frac{1}{2}\cot\frac{\left\Vert \phi\right\Vert }{2}\left(\left\Vert \phi\right\Vert \omega-\frac{\phi\cdot\omega}{\left\Vert \phi\right\Vert }\phi\right)+\frac{\phi\times\omega}{2}+\frac{\phi\cdot\omega}{\left\Vert \phi\right\Vert ^{2}}\phi
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset bibtex
+LatexCommand bibtex
+bibfiles "IEEEabrv,stateEstimation"
+options "plain"
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document

@@ -22,7 +22,7 @@ b0 = [0; -0.05; 0.05];
 % noise parameters
 qPhi = 0;
 qOmega = 1e-2;
-qB = 0;%1;
+qB = 1;
 rPhi = 1e-2;
 rOmega = 1e-2;
 
