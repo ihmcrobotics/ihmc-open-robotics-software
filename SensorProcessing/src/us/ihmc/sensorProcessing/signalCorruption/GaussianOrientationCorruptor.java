@@ -8,17 +8,15 @@ import javax.vecmath.Matrix3d;
 import org.apache.commons.math3.util.FastMath;
 
 import us.ihmc.utilities.math.MathTools;
-import us.ihmc.utilities.math.geometry.FrameOrientation;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
-public class GaussianOrientationCorruptor implements SignalCorruptor<FrameOrientation>
+public class GaussianOrientationCorruptor implements SignalCorruptor<Matrix3d>
 {
    private final YoVariableRegistry registry;
    private final AxisAngle4d noiseAxisAngle = new AxisAngle4d();
    private final Matrix3d noiseRotationMatrix = new Matrix3d();
-   private final Matrix3d rotationMatrix = new Matrix3d();
    private final Random random;
    private final DoubleYoVariable standardDeviation;
 
@@ -35,13 +33,11 @@ public class GaussianOrientationCorruptor implements SignalCorruptor<FrameOrient
       this.standardDeviation.set(standardDeviation);
    }
 
-   public void corrupt(FrameOrientation signal)
+   public void corrupt(Matrix3d signal)
    {
       generateGaussianRotation(noiseAxisAngle, random, standardDeviation.getDoubleValue());
       noiseRotationMatrix.set(noiseAxisAngle);
-      signal.getMatrix3d(rotationMatrix);
-      rotationMatrix.mul(noiseRotationMatrix);
-      signal.set(signal.getReferenceFrame(), rotationMatrix);
+      signal.mul(noiseRotationMatrix);
    }
 
    private static void generateGaussianRotation(AxisAngle4d axisAngleToPack, Random random, double standardDeviation)
