@@ -49,18 +49,10 @@ JNIEXPORT jobject JNICALL Java_us_ihmc_commonWalkingControlModules_controlModule
 
 /*
  * Class:     us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_ContactPointWrenchOptimizerNative
- * Method:    getBBuffer
+ * Method:    getRhoMinBuffer
  * Signature: ()Ljava/nio/ByteBuffer;
  */
-JNIEXPORT jobject JNICALL Java_us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_ContactPointWrenchOptimizerNative_getBBuffer
-  (JNIEnv *, jclass);
-
-/*
- * Class:     us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_ContactPointWrenchOptimizerNative
- * Method:    getFminBuffer
- * Signature: ()Ljava/nio/ByteBuffer;
- */
-JNIEXPORT jobject JNICALL Java_us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_ContactPointWrenchOptimizerNative_getFminBuffer
+JNIEXPORT jobject JNICALL Java_us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_ContactPointWrenchOptimizerNative_getRhoMinBuffer
   (JNIEnv *, jclass);
 
 /*

@@ -39,11 +39,11 @@ public class ContactPointGroundReactionWrenchDistributor implements GroundReacti
    private final DenseMatrix64F aMatrix = new DenseMatrix64F(Wrench.SIZE, rhoDimension);
    private final DenseMatrix64F normalForceSelectorBMatrix = new DenseMatrix64F(ContactPointWrenchOptimizerNative.MAX_NUMBER_OF_CONTACTS, rhoDimension);
    private final DenseMatrix64F rho = new DenseMatrix64F(rhoDimension, 1);
-   private final double[] minimumNormalForces = new double[ContactPointWrenchOptimizerNative.MAX_NUMBER_OF_CONTACTS];
 
    private final double[] aMatrixAsDoubleArray = new double[aMatrix.getNumElements()];
    private final double[] normalForceSelectorBMatrixAsDoubleArray = new double[normalForceSelectorBMatrix.getNumElements()];
    private final double[] desiredWrenchAsDoubleArray = new double[desiredWrench.getNumElements()];
+   private final double[] rhoMinArray = new double[rhoDimension];
 
    // intermediate result storage:
    private final ArrayList<FrameVector> normalizedSupportVectors = new ArrayList<FrameVector>(ContactPointWrenchOptimizerNative.NUMBER_OF_SUPPORT_VECTORS);
@@ -63,7 +63,7 @@ public class ContactPointGroundReactionWrenchDistributor implements GroundReacti
 
    private final BooleanYoVariable converged = new BooleanYoVariable("converged", registry);
    private final BooleanYoVariable hasNotConvergedInPast = new BooleanYoVariable("hasNotConvergedInPast", registry);
-   private final DoubleYoVariable minimumNormalForce = new DoubleYoVariable("minimumNormalForce", registry);
+   private final DoubleYoVariable rhoMin = new DoubleYoVariable("rhoMin", registry);
 
    public ContactPointGroundReactionWrenchDistributor(ReferenceFrame centerOfMassFrame, YoVariableRegistry parentRegistry)
    {
@@ -77,19 +77,15 @@ public class ContactPointGroundReactionWrenchDistributor implements GroundReacti
       parentRegistry.addChild(registry);
    }
 
-   public void setWeights(double[] diagonalCWeights, double epsilonRho)
+   public void setWeights(double[] diagonalCWeights, double rhoMin, double epsilonRho)
    {
       for (int i = 0; i < diagonalCWeights.length; i++)
       {
          this.diagonalCWeights[i] = diagonalCWeights[i];
       }
 
+      this.rhoMin.set(rhoMin);
       this.epsilonRho = epsilonRho;
-   }
-
-   public void setMinimumNormalForce(double minimumNormalForce)
-   {
-      this.minimumNormalForce.set(minimumNormalForce);
    }
 
    public void solve(GroundReactionWrenchDistributorOutputData distributedWrench, GroundReactionWrenchDistributorInputData inputData)
@@ -103,11 +99,12 @@ public class ContactPointGroundReactionWrenchDistributor implements GroundReacti
 
       aMatrix.zero();
       normalForceSelectorBMatrix.zero();
-      Arrays.fill(minimumNormalForces, 0.0);
+      Arrays.fill(rhoMinArray, 0.0);
 
       ArrayList<PlaneContactState> contactStates = inputData.getContactStates();
 
       int contactNumber = 0;
+      int basisVectorNumber = 0;
       for (PlaneContactState contactState : contactStates)
       {
          List<FramePoint2d> contactPoints2d = contactState.getContactPoints2d();
@@ -119,9 +116,7 @@ public class ContactPointGroundReactionWrenchDistributor implements GroundReacti
          WrenchDistributorTools.computeSupportVectorMatrixBlock(supportVectorMatrixVBlock, normalizedSupportVectors, contactState.getPlaneFrame());
          placeBBlock(normalForceSelectorBMatrix, supportVectorMatrixVBlock, contactNumber, nContactPoints);
 
-         // fMin
-         minimumNormalForces[contactNumber] = minimumNormalForce.getDoubleValue();
-         
+
          // force part of A
          WrenchDistributorTools.computeSupportVectorMatrixBlock(supportVectorMatrixVBlock, normalizedSupportVectors, centerOfMassFrame);
          placeAForceBlock(aMatrix, supportVectorMatrixVBlock, contactNumber, nContactPoints);
@@ -139,6 +134,11 @@ public class ContactPointGroundReactionWrenchDistributor implements GroundReacti
                tempVector.setToZero(centerOfMassFrame);
                tempVector.cross(tempContactPoint, supportVector);
                placeATorqueBlock(aMatrix, tempVector, aTorquePartColumn++);
+
+               // rhoMin
+               rhoMinArray[basisVectorNumber] = rhoMin.getDoubleValue();
+
+               basisVectorNumber++;
             }
          }
 
@@ -151,8 +151,7 @@ public class ContactPointGroundReactionWrenchDistributor implements GroundReacti
 
       try
       {
-         contactPointWrenchOptimizerNative.solve(aMatrixAsDoubleArray, diagonalCWeights, normalForceSelectorBMatrixAsDoubleArray, desiredWrenchAsDoubleArray,
-                 minimumNormalForces, epsilonRho);
+         contactPointWrenchOptimizerNative.solve(aMatrixAsDoubleArray, diagonalCWeights, desiredWrenchAsDoubleArray, rhoMinArray, epsilonRho);
          converged.set(true);
       }
       catch (NoConvergenceException e)
@@ -161,8 +160,9 @@ public class ContactPointGroundReactionWrenchDistributor implements GroundReacti
          {
             e.printStackTrace();
             System.err.println("WARNING: Only showing the stack trace of the first " + e.getClass().getSimpleName()
-                  + ". This may be happening more than once. See value of YoVariable " + converged.getName() + ".");            
+                               + ". This may be happening more than once. See value of YoVariable " + converged.getName() + ".");
          }
+
          converged.set(false);
          hasNotConvergedInPast.set(true);
       }

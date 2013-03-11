@@ -95,9 +95,7 @@ public class ContactPointWrenchDistributorSliderInput implements VariableChanged
 
       double[] diagonalCWeights = new double[]{torqueXYWeight.getDoubleValue(), torqueXYWeight.getDoubleValue(), torqueZWeight.getDoubleValue(), 
             forceXYWeight.getDoubleValue(), forceXYWeight.getDoubleValue(), forceZWeight.getDoubleValue()};
-      distributor.setWeights(diagonalCWeights, epsilonRho.getDoubleValue());
-
-      distributor.setMinimumNormalForce(minimumNormalForce.getDoubleValue());
+      distributor.setWeights(diagonalCWeights, 1.0, epsilonRho.getDoubleValue());
    }
 
    private void printIfDebug(String string)
