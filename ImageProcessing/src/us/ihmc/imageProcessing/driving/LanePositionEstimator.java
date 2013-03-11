@@ -1,11 +1,13 @@
 package us.ihmc.imageProcessing.driving;
 
+import us.ihmc.utilities.math.geometry.BoundingBox2d;
 import us.ihmc.utilities.math.geometry.Line2d;
 
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * User: Matt
@@ -76,4 +78,5 @@ public class LanePositionEstimator
       imageSize = screenDimension;
       axis = new Line2d(new Point2d(0, screenDimension.getHeight()), new Vector2d(1.0, 0.0));
    }
+
 }
