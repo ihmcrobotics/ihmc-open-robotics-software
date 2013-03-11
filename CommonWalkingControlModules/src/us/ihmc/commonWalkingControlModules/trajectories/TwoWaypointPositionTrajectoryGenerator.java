@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
+import static org.ejml.ops.CommonOps.solve;
+
 import java.util.Arrays;
 
 import org.ejml.data.DenseMatrix64F;
@@ -50,6 +52,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
    private final YoFrameVector desiredAcceleration;
    private final ReferenceFrame referenceFrame;
 
+   private final DoubleYoVariable[] fixedPointTimes = new DoubleYoVariable[4];
    private final YoFramePoint[] fixedPointPositions = new YoFramePoint[4];
    private final YoFrameVector[] fixedPointVelocities = new YoFrameVector[4];
 
@@ -398,20 +401,26 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       }
    }
    
-   private double getWaypointVelocity(double[] times, int index0, int index1)
+   private FrameVector getWaypointVelocity(int indexInitialOrFinal, int indexOfWaypoint)
    {
-      double waypointVelocity0 = 0.0;
-      double waypointVelocity1 = 0.0;
+	  FrameVector waypointVelocity = new FrameVector(referenceFrame);
       DenseMatrix64F constraintsMatrix = new DenseMatrix64F(3, 3);
       DenseMatrix64F constraintsVector = new DenseMatrix64F(3, 1);
       DenseMatrix64F coefficientsVector = new DenseMatrix64F(3, 1);
       
-      double t0 = times[index0];
-      double t1 = times[index1];
+      double footstepTime = fixedPointTimes[indexInitialOrFinal].getDoubleValue();
+      double wayPointTime = fixedPointTimes[indexOfWaypoint].getDoubleValue();
+      constraintsMatrix.setData(new double[]{footstepTime*footstepTime, footstepTime, 1, wayPointTime*wayPointTime, wayPointTime, 1, 2*footstepTime, 1, 0});
       
-      constraintsMatrix.setData(new double[]{t0*t0, t0, 1, t1*t1, t1, 1, 2*t0, 1, 0});
-
-      return 0.0;
+      for(Direction d : Direction.values())
+      {
+          constraintsVector.setData(new double[]{fixedPointPositions[indexInitialOrFinal].get(d), fixedPointPositions[indexOfWaypoint].get(d), fixedPointVelocities[indexInitialOrFinal].get(d)});
+          solve(constraintsMatrix, constraintsVector, coefficientsVector);
+          double velocity = 2 * coefficientsVector.get(0) + coefficientsVector.get(0);
+          waypointVelocity.set(d, velocity);
+      }
+      
+      return waypointVelocity;
    }
    
 //   private void resetWaypointVelocities()
