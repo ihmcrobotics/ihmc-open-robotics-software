@@ -26,7 +26,6 @@ import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.vecmath.Point2d;
-import javax.vecmath.Vector3d;
 
 import jxl.format.RGB;
 import us.ihmc.imageProcessing.ImageFilters.ColorFilter;
@@ -324,7 +323,7 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
 
       // add buffer zone
 
-      double bufferPercent = 0.5; 
+      double bufferPercent = 0.5;
       for (int i = 0; i < numLabels; i++)
       {
          int[] bounds = boundingBoxes.get(i);
@@ -646,7 +645,7 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
    public static void main(String args[])
    {
       DRCRoadDetectionTest drcRoadDetectionTest = new DRCRoadDetectionTest();
-      final VideoPlayer videoPlayer = new VideoPlayer("./media/videos/Sequence 01_1.mpeg", drcRoadDetectionTest, true);
+      final VideoPlayer videoPlayer = new VideoPlayer("./media/videos/run1.mov", drcRoadDetectionTest, true);
       videoPlayer.start();
    }
 
