@@ -22,7 +22,7 @@ QContinuous = blkdiag(QPhi, QOmega, QB);
 RContinuous = blkdiag(RPhi, ROmega);
 BW = eye(9);
 [F, G, Q, R] = discretize(A, B, BW, QContinuous, RContinuous, dt);
-H = [eye(3), zeros(3, 6);
+H = [-eye(3), zeros(3, 6);
      zeros(3, 3), eye(3), eye(3)];
 
 % a priori state
@@ -51,7 +51,7 @@ P = F * P * F' + Q;
 % hence, the error term yQ needs to be a correction in body frame: 
 % yQ = q^OB_M
 % q^OB_M = q^OB_W * q^W_M = (q^W_OB)^-1 * zQ
-yQ = quaternionProduct(quaternionInverse(qHat), zQ);
+yQ = quaternionProduct(quaternionInverse(zQ), qHat);
 yPhi = deltaQToDeltaPhi(yQ);
 yOmega = zOmega - (omegaHat + bHat);
 y = [yPhi; yOmega];
