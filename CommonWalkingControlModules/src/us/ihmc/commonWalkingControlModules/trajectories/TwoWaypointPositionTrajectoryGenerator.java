@@ -10,6 +10,8 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
+import cern.colt.Arrays;
+
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.BagOfBalls;
@@ -222,11 +224,10 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       int timeVelocityIterations = 1;
 
       double[] distances = new double[4];
-      distances[0] = 0.0;
 
-      for (int i = 1; i < 4; i++)
+      for (int i = 0; i < fixedPointPositions.length - 1; i++)
       {
-         distances[i] = distances[i - 1] + fixedPointPositions[i - 1].distance(fixedPointPositions[i]);
+         distances[i] = fixedPointPositions[i].distance(fixedPointPositions[i + 1]);
       }
 
       for (int i = 0; i < 4; i++)
@@ -311,7 +312,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       for (int i = 1; i < fixedPointTimes.length; i++)
       {
          fixedPointTimes[i].set(fixedPointTimes[i - 1].getDoubleValue()
-                                + distances[i - 1] * (fixedPointVelocities[i - 1].length() + fixedPointVelocities[i].length()) / 2);
+                                + distances[i - 1] / (fixedPointVelocities[i - 1].length() + fixedPointVelocities[i].length()) / 2);
       }
 
       double totalTime = fixedPointTimes[fixedPointTimes.length - 1].getDoubleValue();
