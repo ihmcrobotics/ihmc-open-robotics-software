@@ -101,9 +101,7 @@ public class GroundReactionWrenchDistributorTest
          1.0, 1.0, 1.0, 1.0, 1.0, 1.0
       };
       double epsilonRho = 0.0;
-      distributor.setWeights(diagonalCWeights, epsilonRho);
-
-      distributor.setMinimumNormalForce(0.0);
+      distributor.setWeights(diagonalCWeights, 0.0, epsilonRho);
 
       return distributor;
    }

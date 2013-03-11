@@ -29,9 +29,8 @@ Settings settings;
 jobject aByteBuffer;
 jobject wByteBuffer;
 jobject cByteBuffer;
-jobject bByteBuffer;
-jobject fMinByteBuffer;
 jobject rhoByteBuffer;
+jobject rhoMinByteBuffer;
 
 JNIEXPORT void JNICALL Java_us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_ContactPointWrenchOptimizerNative_initialize
   (JNIEnv * env, jclass jClass)
@@ -43,8 +42,7 @@ JNIEXPORT void JNICALL Java_us_ihmc_commonWalkingControlModules_controlModules_n
 	aByteBuffer = (*env)->NewDirectByteBuffer(env, params.A, sizeof(double) * aSize);
 	wByteBuffer = (*env)->NewDirectByteBuffer(env, params.W, sizeof(double) * wSize);
 	cByteBuffer = (*env)->NewDirectByteBuffer(env, params.C, sizeof(double) * cSize);
-	bByteBuffer = (*env)->NewDirectByteBuffer(env, params.B, sizeof(double) * bSize);
-	fMinByteBuffer = (*env)->NewDirectByteBuffer(env, params.fmin, sizeof(double) * fMinSize);
+	rhoMinByteBuffer = (*env)->NewDirectByteBuffer(env, params.rhomin, sizeof(double) * rhoSize);
 	rhoByteBuffer = (*env)->NewDirectByteBuffer(env, vars.rho, sizeof(double) * rhoSize);
 }
 
@@ -66,16 +64,10 @@ JNIEXPORT jobject JNICALL Java_us_ihmc_commonWalkingControlModules_controlModule
 	return cByteBuffer;
 }
 
-JNIEXPORT jobject JNICALL Java_us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_ContactPointWrenchOptimizerNative_getBBuffer
+JNIEXPORT jobject JNICALL Java_us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_ContactPointWrenchOptimizerNative_getRhoMinBuffer
   (JNIEnv * env, jclass jClass)
 {
-	return bByteBuffer;
-}
-
-JNIEXPORT jobject JNICALL Java_us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_ContactPointWrenchOptimizerNative_getFminBuffer
-  (JNIEnv * env, jclass jClass)
-{
-	return fMinByteBuffer;
+	return rhoMinByteBuffer;
 }
 
 JNIEXPORT jobject JNICALL Java_us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_ContactPointWrenchOptimizerNative_getRhoBuffer
@@ -88,7 +80,6 @@ JNIEXPORT jint JNICALL Java_us_ihmc_commonWalkingControlModules_controlModules_n
   (JNIEnv * env, jclass jClass, jdouble epsilon)
 {
 	int numberOfIterations;
-
 
 	params.epsilon[0] = epsilon;
 	numberOfIterations = solve();
