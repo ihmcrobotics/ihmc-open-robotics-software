@@ -30,10 +30,7 @@ import javax.vecmath.Point2d;
 import jxl.format.RGB;
 import us.ihmc.imageProcessing.ImageFilters.ColorFilter;
 import us.ihmc.imageProcessing.ImageFilters.CropFilter;
-import us.ihmc.imageProcessing.driving.LanePositionEstimator;
-import us.ihmc.imageProcessing.driving.LanePositionIndicatorPanel;
-import us.ihmc.imageProcessing.driving.SteeringInputEstimator;
-import us.ihmc.imageProcessing.driving.VanishingPointDetector;
+import us.ihmc.imageProcessing.driving.*;
 import us.ihmc.imageProcessing.utilities.BoundsPainter;
 import us.ihmc.imageProcessing.utilities.LinePainter;
 import us.ihmc.imageProcessing.utilities.PaintableImageViewer;
@@ -63,7 +60,7 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
 
    private PaintableImageViewer rawImageViewer = new PaintableImageViewer();
    private PaintableImageViewer analyzedImageViewer = new PaintableImageViewer();
-   private PaintableImageViewer blobDetectionViewer = new PaintableImageViewer();
+//   private PaintableImageViewer blobDetectionViewer = new PaintableImageViewer();
    private LinePainter linePainter = new LinePainter(4.0f);
    private BoundsPainter boundsPainter = new BoundsPainter(4.0f);
 
@@ -71,6 +68,7 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
 
    private LanePositionEstimator lanePositionEstimator;
    private SteeringInputEstimator steeringInputEstimator = new SteeringInputEstimator();
+   private ObstaclePositionEstimator obstaclePositionEstimator;
 
    private JFrame mainFrame;
    private LanePositionIndicatorPanel lanePositionIndicatorPanel;
@@ -228,7 +226,7 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
 
 
       BufferedImage visualized = VisualizeBinaryData.renderLabeled(blobs, numBlobs, null);
-      blobDetectionViewer.updateImage(visualized);
+//      blobDetectionViewer.updateImage(visualized);
       repackConeBlobImageSizeChanges(visualized.getWidth(), visualized.getHeight());
 
 
@@ -432,15 +430,17 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
                   linePainter.setLines(lines);
                   vanishingPointDetector.setLines(lines);
                   lanePositionEstimator.setLines(lines);
+                  obstaclePositionEstimator.setLines(lines);
+                  if (boundingBoxes != null)
+                  {
+                     boundsPainter.setBoundingBoxes(boundingBoxes);
+                     obstaclePositionEstimator.setBoundingBoxes(boundingBoxes);
+                  }
 
                   repackIfImageSizeChanges(croppedImage.getWidth(), croppedImage.getHeight());
                   analyzedImageViewer.updateImage(croppedImage);
                   repackRawIfImageSizeChanges(input.getWidth(), input.getHeight());
 
-                  if (boundingBoxes != null)
-                  {
-                     boundsPainter.setBoundingBoxes(boundingBoxes);
-                  }
                }
             });
             tmp.start();
@@ -508,12 +508,12 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
    private void repackConeBlobImageSizeChanges(int width, int height)
    {
 //    System.out.println("width = " + width +":" + height);
-      if ((blobDetectionViewer.getWidth() < width) || (blobDetectionViewer.getHeight() < height))
-      {
-         Dimension dimension = new Dimension(width, height);
-         blobDetectionViewer.setPreferredSize(dimension);
-         mainFrame.pack();
-      }
+//      if ((blobDetectionViewer.getWidth() < width) || (blobDetectionViewer.getHeight() < height))
+//      {
+//         Dimension dimension = new Dimension(width, height);
+//         blobDetectionViewer.setPreferredSize(dimension);
+//         mainFrame.pack();
+//      }
    }
 
    public void setUpJFrame()
@@ -610,8 +610,8 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
       gbc.gridheight = 2;
       mainContainer.add(analyzedImageViewer, gbc);
       gbc.gridx++;
-      mainContainer.add(blobDetectionViewer, gbc);
-      gbc.gridheight = 1;
+//      mainContainer.add(blobDetectionViewer, gbc);
+//      gbc.gridheight = 1;
 
       lanePositionIndicatorPanel = new LanePositionIndicatorPanel("./media/images/CarIcon.png");
       lanePositionIndicatorPanel.setPreferredSize(new Dimension(1, 43));
@@ -621,6 +621,7 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
       gbc.weighty = 0.0;
       mainContainer.add(lanePositionIndicatorPanel, gbc);
       lanePositionEstimator = new LanePositionEstimator(lanePositionIndicatorPanel, steeringInputEstimator);
+      obstaclePositionEstimator = new ObstaclePositionEstimator(lanePositionIndicatorPanel);
 
       mainFrame.pack();
       mainFrame.setVisible(true);

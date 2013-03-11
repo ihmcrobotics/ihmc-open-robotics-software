@@ -1,10 +1,6 @@
 package us.ihmc.imageProcessing.utilities;
 
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Stroke;
+import java.awt.*;
 import java.util.HashMap;
 
 /**
@@ -52,6 +48,8 @@ public class BoundsPainter implements PostProcessor
          int width = boundingBox[2] - boundingBox[0];
          int height = boundingBox[3] - boundingBox[1];
          graphics.drawRect(x, y, width, height);
+         graphics.setColor(Color.cyan);
+         graphics.fillOval(x, y, 5, 5);
       }
 
       graphics.setColor(originalGraphicsColor);

@@ -1,11 +1,14 @@
 package us.ihmc.imageProcessing.driving;
 
+import us.ihmc.utilities.math.geometry.BoundingBox2d;
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 
 /**
  * User: Matt
@@ -23,7 +26,7 @@ public class LanePositionIndicatorPanel extends JPanel
    private double carWidthInPixels;
    private double pixelsPerMeter;
 
-   private int steeringWheelXInImagePixels = 195;
+   private ArrayList<BoundingBox2d> obstacles = new ArrayList<BoundingBox2d>();
 
    public LanePositionIndicatorPanel(String fileName)
    {
@@ -46,6 +49,11 @@ public class LanePositionIndicatorPanel extends JPanel
       repaint();
    }
 
+   public void setObstacles(ArrayList<BoundingBox2d> obstacles)
+   {
+      this.obstacles = obstacles;
+   }
+
    public void paint(Graphics g)
    {
       super.paint(g);
@@ -60,6 +68,8 @@ public class LanePositionIndicatorPanel extends JPanel
       double panelWidthInPixels = this.getWidth();
       double roadWidthInPixels = convertToPixels(roadWidthInMeters);
       double remainderWidthInPixels = panelWidthInPixels - roadWidthInPixels;
+      double midPointOfPanelInPixels = panelWidthInPixels / 2.0;
+      double rangeOfMotionInPixels = panelWidthInPixels - carWidthInPixels - remainderWidthInPixels;
 
       // draw grass edges to get proper scaling
       g.setColor(new Color(20, 125, 57));
@@ -71,9 +81,22 @@ public class LanePositionIndicatorPanel extends JPanel
       g2d.setStroke(new BasicStroke(2));
       g.drawLine((int) (panelWidthInPixels / 2.0), 0, (int) (panelWidthInPixels / 2.0), getHeight());
 
+      // draw obstacles
+//      System.out.println("drawing " + obstacles.size());
+      for (BoundingBox2d obstacle : obstacles)
+      {
+         double xPercentageOfRoad = obstacle.getMinPoint().getX();
+         double boxWidthPercentageOfRoad = obstacle.getMaxPoint().getX() - xPercentageOfRoad;
+         int insetPixels = 2;
+         double obstaclePositionInPixels = midPointOfPanelInPixels + (xPercentageOfRoad * rangeOfMotionInPixels / 2.0);
+         double obstacleWidthInPixels = boxWidthPercentageOfRoad * (rangeOfMotionInPixels / 2.0);
+
+//         System.out.println("min = " + minX + ": " + maxX + ": " + width + ": " + obstaclePositionInPixels);
+         g.setColor(new Color(255, 125, 20));
+         g.fillRect((int) obstaclePositionInPixels, insetPixels, (int) obstacleWidthInPixels, this.getHeight() - insetPixels);
+      }
+
       // draw vehicle at proper location
-      double midPointOfPanelInPixels = panelWidthInPixels / 2.0;
-      double rangeOfMotionInPixels = panelWidthInPixels - carWidthInPixels - remainderWidthInPixels;
       double steeringWheelOffsetInPixels = convertToPixels(steeringWheelOffsetInMeters);
       double carPositionInPixels = midPointOfPanelInPixels - (carWidthInPixels / 2.0) + steeringWheelOffsetInPixels + (offset * rangeOfMotionInPixels / 2.0);
       g.drawImage(carImage, (int) carPositionInPixels, 0, null);
