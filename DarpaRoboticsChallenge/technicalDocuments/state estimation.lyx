@@ -73,8 +73,8 @@ Global model
 \end_layout
 
 \begin_layout Standard
-Let the orientation estimation link be the link whose orientation and angular
- velocity will be part of the state vector.
+Define the orientation estimation link as the link for which the orientation
+ and angular velocity will be part of the state vector.
 \end_layout
 
 \begin_layout Standard
@@ -242,7 +242,26 @@ Dynamics:
 
 \end_inset
 
+where 
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
 
+\begin_inset Formula $\omega_{q}=\left(\begin{array}{c}
+\omega\\
+0
+\end{array}\right)$
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Subsection
@@ -259,8 +278,8 @@ Only the orientation part of the process model is nonlinear.
 A simple way to enforce this constraint is to convert errors to a local,
  minimal description (i.e.
  using three numbers), compute a correction in terms of this minimal description
-, convert the correction to a quaternion, and then perform quaternion multiplica
-tion, which preserves norm.
+, convert the correction back to a quaternion, and then perform quaternion
+ multiplication to correct the estimate.
  We will use a local description in terms of the error rotation vector 
 \begin_inset Formula $\phi$
 \end_inset
@@ -285,8 +304,19 @@ The equation describing the rotational kinematics in terms of
 \begin_inset Formula $\phi$
 \end_inset
 
- is derived in the appendix.
- We can rewrite this as
+ is derived in the appendix, and reads
+\begin_inset Formula 
+\[
+\dot{\phi}=\frac{1}{2}\cot\frac{\left\Vert \phi\right\Vert }{2}\left(\left\Vert \phi\right\Vert \omega-\frac{\phi\cdot\omega}{\left\Vert \phi\right\Vert }\phi\right)+\frac{\phi\times\omega}{2}+\frac{\phi\cdot\omega}{\left\Vert \phi\right\Vert ^{2}}\phi
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We can rewrite this as
 \end_layout
 
 \begin_layout Standard
@@ -328,7 +358,7 @@ where both
 status open
 
 \begin_layout Plain Layout
-TODO: existence of limit, direction independence
+TODO: derivations, existence of limit, direction independence
 \end_layout
 
 \end_inset
@@ -366,8 +396,8 @@ To use this as our process model for orientation, we need to be able to
 \begin_inset Formula $\Delta\phi$
 \end_inset
 
-, obtained by running the Kalman filter using this model, to the global
- description in terms of quaternions.
+, obtained in the correction step of the Kalman filter based on this model,
+ to the global description in terms of quaternions.
  This is done using the conversion
 \begin_inset Formula 
 \[
@@ -418,7 +448,7 @@ w_{x} & =\left(0,w_{\ddot{r}},0,w_{\dot{\omega}},w_{b_{\dot{v},1}},\dotsc,w_{b_{
 
 \end_inset
 
-where
+with the state matrix
 \end_layout
 
 \begin_layout Standard
@@ -441,7 +471,7 @@ A_{\phi} & =\left(\begin{array}{cc}
 
 \end_inset
 
-and
+and the input matrix
 \end_layout
 
 \begin_layout Standard
@@ -464,7 +494,7 @@ I_{3}
 
 \end_inset
 
-and
+and where the noise covariance is
 \end_layout
 
 \begin_layout Standard
@@ -578,6 +608,30 @@ A_{d} & =F_{3}\\
 B_{d} & =G_{3}\\
 Q_{d} & =F_{3}{}^{T}G_{2}
 \end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The matrix exponential can be approximated in a number of ways, such as
+ using a truncated version of the power series definition or using a Padé
+ approximant 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "VanLoan1978"
+
+\end_inset
+
+.
+ 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+TODO: investigate exploiting sparsity
+\end_layout
 
 \end_inset
 
@@ -774,12 +828,12 @@ where
 \begin_layout Standard
 \begin_inset Formula 
 \begin{equation}
-\Ad_{H}=\left(\begin{array}{cc}
-R & 0\\
-\tilde{p}R & R
-\end{array}\right)\quad\text{for}\quad H=\left(\begin{array}{cc}
+\Ad_{H}:H=\left(\begin{array}{cc}
 R & p\\
 0 & 1
+\end{array}\right)\mapsto\Ad_{H}=\left(\begin{array}{cc}
+R & 0\\
+\tilde{p}R & R
 \end{array}\right)\label{eq:def-Ad}
 \end{equation}
 
@@ -818,14 +872,6 @@ H_{\omega,i}=R_{p}^{i}
 
 \end_inset
 
-and define the measurement
-\begin_inset Formula 
-\[
-z_{\omega,i}=\omega_{i}^{i,w}-\omega_{i}^{i,p}
-\]
-
-\end_inset
-
 
 \end_layout
 
@@ -835,7 +881,7 @@ Denote by
 \end_inset
 
  the measured value of 
-\begin_inset Formula $\omega_{i}^{i,w}$
+\begin_inset Formula $\omega_{i}^{i,w}-\omega_{i}^{i,p}$
 \end_inset
 
 .
@@ -868,6 +914,7 @@ Let
 \end_inset
 
 , expressed in body frame.
+ The measurement model for linear acceleration is:
 \begin_inset Formula 
 \[
 \dot{v}_{i}^{i,w}=S_{v}\dot{T}_{i}^{i,w}
@@ -875,7 +922,7 @@ Let
 
 \end_inset
 
-
+with the selection matrix
 \end_layout
 
 \begin_layout Standard
@@ -888,6 +935,17 @@ S_{v}=\left(\begin{array}{cc}
 \end_inset
 
 
+\end_layout
+
+\begin_layout Standard
+The twist 
+\begin_inset Formula $T_{i}^{i,w}$
+\end_inset
+
+ can be written as
+\end_layout
+
+\begin_layout Standard
 \begin_inset Formula 
 \[
 T_{i}^{i,w}=T_{p}^{i,w}+T_{i}^{i,p}
@@ -896,6 +954,10 @@ T_{i}^{i,w}=T_{p}^{i,w}+T_{i}^{i,p}
 \end_inset
 
 
+\end_layout
+
+\begin_layout Standard
+Differentiating results in
 \end_layout
 
 \begin_layout Standard
@@ -981,12 +1043,12 @@ Furthermore,
 where
 \begin_inset Formula 
 \begin{equation}
-\ad_{T}=\left(\begin{array}{cc}
-\tilde{\omega} & 0\\
-\tilde{v} & \tilde{\omega}
-\end{array}\right)\quad\text{for}\quad T=\left(\begin{array}{c}
+\ad_{T}:T=\left(\begin{array}{c}
 \omega\\
 v
+\end{array}\right)\mapsto\ad_{T}=\left(\begin{array}{cc}
+\tilde{\omega} & 0\\
+\tilde{v} & \tilde{\omega}
 \end{array}\right)\label{eq:def-ad}
 \end{equation}
 
@@ -1032,7 +1094,7 @@ R_{p}^{i} & 0\\
 \tilde{\omega}_{p}^{p,i}\omega_{p}^{p,w}+\dot{\omega}_{p}^{p,w}\\
 \tilde{v}_{p}^{p,i}\omega_{p}^{p,w}+\tilde{\omega}_{p}^{p,i}v_{p}^{p,w}+\dot{v}_{p}^{p,w}
 \end{array}\right)+\dot{v}_{i}^{i,p}\\
- & =R_{p}^{i}\left(\tilde{p}_{p}^{i}\left(\tilde{\omega}_{p}^{p,i}\omega_{p}^{p,w}+\dot{\omega}_{p}^{p,w}\right)+\tilde{v}_{p}^{p,i}\omega_{p}^{p,w}+\tilde{\omega}_{p}^{p,i}v_{p}^{p,w}+\dot{v}_{p}^{p,w}\right)+\dot{v}_{i}^{i,p}
+ & =\tilde{p}_{p}^{i}R_{p}^{i}\left(\tilde{\omega}_{p}^{p,i}\omega_{p}^{p,w}+\dot{\omega}_{p}^{p,w}\right)+R_{p}^{i}\left(\tilde{v}_{p}^{p,i}\omega_{p}^{p,w}+\tilde{\omega}_{p}^{p,i}v_{p}^{p,w}+\dot{v}_{p}^{p,w}\right)+\dot{v}_{i}^{i,p}
 \end{align*}
 
 \end_inset
@@ -1046,6 +1108,7 @@ Note that
 \end_inset
 
 .
+ 
 \end_layout
 
 \begin_layout Standard
@@ -1218,11 +1281,14 @@ Let point
 \end_inset
 
 , so that the augmented coordinate vector 
-\begin_inset Formula $p_{i}^{i}\in\mathbb{R}^{4}$
+\begin_inset Formula $\bar{p}_{i}^{i}=\left(\begin{array}{c}
+p_{i}^{i}\\
+1
+\end{array}\right)\in\mathbb{R}^{4}$
 \end_inset
 
  is constant.
- The point 
+ The position of point 
 \begin_inset Formula $p_{i}$
 \end_inset
 
@@ -1236,7 +1302,7 @@ Let point
 \begin_layout Standard
 \begin_inset Formula 
 \[
-p_{i}^{w}=H_{p}^{w}H_{i}^{p}p_{i}^{i}
+\bar{p}_{i}^{w}=H_{p}^{w}H_{i}^{p}\bar{p}_{i}^{i}
 \]
 
 \end_inset
@@ -1248,9 +1314,9 @@ p_{i}^{w}=H_{p}^{w}H_{i}^{p}p_{i}^{i}
 Its velocity is
 \begin_inset Formula 
 \begin{eqnarray}
-\dot{p}_{i}^{w} & = & \dot{H}_{p}^{w}H_{i}^{p}p_{i}^{i}+H_{p}^{w}\dot{H}_{i}^{p}p_{i}^{i}\nonumber \\
- & = & H_{p}^{w}\left(H_{w}^{p}\dot{H}_{p}^{w}+\dot{H}_{i}^{p}H_{p}^{i}\right)p_{i}^{p}\nonumber \\
- & = & H_{p}^{w}\left(\tilde{T}_{p}^{p,w}+\tilde{T}_{i}^{p,p}\right)p_{i}^{p}\label{eq:body-fixed-point-velocity}
+\dot{\bar{p}}_{i}^{w} & = & \dot{H}_{p}^{w}H_{i}^{p}\bar{p}_{i}^{i}+H_{p}^{w}\dot{H}_{i}^{p}\bar{p}_{i}^{i}\nonumber \\
+ & = & H_{p}^{w}\left(H_{w}^{p}\dot{H}_{p}^{w}+\dot{H}_{i}^{p}H_{p}^{i}\right)\bar{p}_{i}^{p}\nonumber \\
+ & = & H_{p}^{w}\left(\tilde{T}_{p}^{p,w}+\tilde{T}_{i}^{p,p}\right)\bar{p}_{i}^{p}\label{eq:body-fixed-point-velocity}
 \end{eqnarray}
 
 \end_inset
@@ -1293,7 +1359,7 @@ reference "eq:body-fixed-point-velocity"
 \begin_layout Standard
 \begin_inset Formula 
 \begin{align*}
-\dot{p}_{i}^{w} & =\left(\begin{array}{cc}
+\dot{\bar{p}}_{i}^{w} & =\left(\begin{array}{cc}
 R_{p}^{w} & p_{p}^{w}\\
 0 & 1
 \end{array}\right)\left(\begin{array}{cc}
@@ -1302,17 +1368,6 @@ R_{p}^{w} & p_{p}^{w}\\
 \end{array}\right)\left(\begin{array}{c}
 p_{i}^{p}\\
 1
-\end{array}\right)\\
- & =\left(\begin{array}{cc}
-R_{p}^{w} & p_{p}^{w}\\
-0 & 1
-\end{array}\right)\left(\begin{array}{c}
-\left(\tilde{\omega}_{p}^{p,w}+\tilde{\omega}_{i}^{p,p}\right)p_{i}^{p}+v_{p}^{p,w}+v_{i}^{p,p}\\
-0
-\end{array}\right)\\
- & =\left(\begin{array}{c}
-R_{p}^{w}\left(\tilde{\omega}_{p}^{p,w}+\tilde{\omega}_{i}^{p,p}\right)p_{i}^{p}+R_{p}^{w}\left(v_{p}^{p,w}+v_{i}^{p,p}\right)\\
-0
 \end{array}\right)
 \end{align*}
 
@@ -1322,52 +1377,160 @@ R_{p}^{w}\left(\tilde{\omega}_{p}^{p,w}+\tilde{\omega}_{i}^{p,p}\right)p_{i}^{p}
 \end_layout
 
 \begin_layout Standard
-Here, 
-\begin_inset Formula $R_{p}^{w}$
+\begin_inset Formula 
+\[
+\dot{p}_{i}^{w}=R_{p}^{w}\left[\left(\tilde{\omega}_{p}^{p,w}+\tilde{\omega}_{i}^{p,p}\right)p_{i}^{p}+v_{p}^{p,w}+v_{i}^{p,p}\right]
+\]
+
 \end_inset
 
-, 
-\begin_inset Formula $\tilde{\omega}_{p}^{p,w}$
-\end_inset
 
-, 
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\uuline off
-\uwave off
-\noun off
-\color none
-and 
-\begin_inset Formula $v_{p}^{p,w}$
-\end_inset
-
- are estimated, and 
-\begin_inset Formula $\tilde{\omega}_{i}^{p,p}$
-\end_inset
-
-, 
-\begin_inset Formula $v_{i}^{p,p}$
-\end_inset
-
- and 
-\begin_inset Formula $p_{i}^{p}$
-\end_inset
-
- are known, given the kinematics.
 \end_layout
 
 \begin_layout Standard
+Using 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:rootjoint-linear-vel"
+
+\end_inset
+
+ from the appendix and noting that 
+\begin_inset Formula $\omega_{p}^{p,w}=\omega$
+\end_inset
+
+, we can write this in terms of CoM velocity as
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\dot{p}_{i}^{w} & =R_{p}^{w}\left[\left(\tilde{\omega}_{p}^{p,w}+\tilde{\omega}_{i}^{p,p}\right)p_{i}^{p}+R_{w}^{p}\dot{r}-\tilde{\omega}_{p}^{p,w}r^{p}-\frac{d}{dt}\left(r^{p}\right)+v_{i}^{p,p}\right]\\
+ & =\dot{r}+R_{p}^{w}v_{i}'
+\end{align*}
+
+\end_inset
+
+with
+\begin_inset Formula 
+\[
+v_{i}'=\widetilde{r^{p}-p_{i}^{p}}\omega+v_{i}^{p,p}+\tilde{\omega}_{i}^{p,p}p_{i}^{p}-\frac{d}{dt}\left(r^{p}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The partial derivatives with respect to 
+\begin_inset Formula $\dot{r}$
+\end_inset
+
+ and 
+\begin_inset Formula $\omega$
+\end_inset
+
+ are easily found as
+\begin_inset Formula 
+\[
+\frac{\partial\dot{p}_{i}^{w}}{\partial\dot{r}}=I
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\frac{\partial\dot{p}_{i}^{w}}{\partial\omega}=R_{p}^{w}\widetilde{r^{p}-p_{i}^{p}}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We also need to find the partial derivative with respect to a perturbation
+ rotation vector 
+\begin_inset Formula $\phi$
+\end_inset
+
+.
+ To this end, let
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+R_{p}^{w}\leftarrow R_{p}^{w}R_{\phi}
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $R_{\phi}$
+\end_inset
+
+ is the rotation matrix associated with the small perturbation 
+\begin_inset Formula $\phi$
+\end_inset
+
+.
+ We first note that for any 
+\begin_inset Formula $x\in\mathbb{R}^{3}$
+\end_inset
+
+,
 \begin_inset Note Note
-status open
+status collapsed
 
 \begin_layout Plain Layout
-TODO: linearize, write in terms of CoM.
+TODO: make an appendix with the derivations or cite something
 \end_layout
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\lim_{\phi\rightarrow0}\frac{\partial}{\partial\phi}\left[R_{\phi}x\right]=-\tilde{x}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Hence, the partial derivative with respect to 
+\begin_inset Formula $\phi$
+\end_inset
+
+ is 
+\begin_inset Formula 
+\[
+\frac{\partial\dot{p}_{i}^{w}}{\partial\phi}=-R_{p}^{w}\tilde{v}_{i}'
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+In summary, the linearized measurement output matrix reads
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+H_{\dot{p}_{i}}=\frac{\partial\dot{p}_{i}^{w}}{\partial\left(\dot{r},\phi,\omega\right)}=\left(\begin{array}{ccc}
+I & R_{p}^{w}\left(\tilde{r}_{p}-\tilde{p}_{i}^{p}\right) & -R_{p}^{w}\tilde{v}_{i}'\end{array}\right)
+\]
 
 \end_inset
 
@@ -1584,7 +1747,10 @@ Appendix: linear velocity of estimation link given CoM velocity
 The position of the CoM can be written in world frame as
 \begin_inset Formula 
 \[
-r^{w}=H_{p}^{w}r^{p}\in\mathbb{R}^{4}
+\bar{r}^{w}=\left(\begin{array}{c}
+r^{w}\\
+1
+\end{array}\right)=H_{p}^{w}\bar{r}^{p}\in\mathbb{R}^{4}
 \]
 
 \end_inset
@@ -1596,9 +1762,9 @@ r^{w}=H_{p}^{w}r^{p}\in\mathbb{R}^{4}
 The CoM velocity can be written as
 \begin_inset Formula 
 \begin{align}
-\dot{r}^{w} & =\dot{H}_{p}^{w}r^{p}+H_{p}^{w}\frac{d}{dt}r^{p}\nonumber \\
- & =H_{p}^{w}\left(H_{w}^{p}\dot{H}_{p}^{w}r^{p}+\frac{d}{dt}r^{p}\right)\nonumber \\
- & =H_{p}^{w}\left(\tilde{T}_{p}^{p,w}r^{p}+\frac{d}{dt}r^{p}\right)\label{eq:com-velocity}
+\dot{\bar{r}}^{w} & =\dot{H}_{p}^{w}\bar{r}^{p}+H_{p}^{w}\frac{d}{dt}\left(\bar{r}^{p}\right)\nonumber \\
+ & =H_{p}^{w}\left(H_{w}^{p}\dot{H}_{p}^{w}\bar{r}^{p}+\frac{d}{dt}\left(\bar{r}^{p}\right)\right)\nonumber \\
+ & =H_{p}^{w}\left(\tilde{T}_{p}^{p,w}\bar{r}^{p}+\frac{d}{dt}\left(\bar{r}^{p}\right)\right)\label{eq:com-velocity}
 \end{align}
 
 \end_inset
@@ -1606,7 +1772,7 @@ The CoM velocity can be written as
 where
 \begin_inset Formula 
 \[
-\dot{r}^{p}=J_{\text{CoM}}^{p}v_{J}
+\frac{d}{dt}\left(\bar{r}^{p}\right)=J_{\text{CoM},J}^{p}v_{J}
 \]
 
 \end_inset
@@ -1629,7 +1795,7 @@ where
 \noun off
 \color none
 
-\begin_inset Formula $\dot{r}^{p}$
+\begin_inset Formula $\frac{d}{dt}\left(\bar{r}^{p}\right)$
 \end_inset
 
 ,
@@ -1653,24 +1819,7 @@ where
 \end_layout
 
 \begin_layout Standard
-Let 
-\begin_inset Formula $r\in\mathbb{R}^{3}$
-\end_inset
-
- be the non-augmented version of 
-\begin_inset Formula $r^{w}$
-\end_inset
-
- and let 
-\begin_inset Formula $r_{p}\in\mathbb{R}^{3}$
-\end_inset
-
- be the non-augmented version of 
-\begin_inset Formula $r^{p}$
-\end_inset
-
-.
- Expanding 
+Expanding 
 \begin_inset CommandInset ref
 LatexCommand eqref
 reference "eq:com-velocity"
@@ -1680,7 +1829,7 @@ reference "eq:com-velocity"
 , we obtain
 \begin_inset Formula 
 \[
-\dot{r}=R_{p}^{w}\left(\tilde{\omega}_{p}^{p,w}r_{p}+v_{p}^{p,w}+\dot{r}_{p}\right)
+\dot{r}=\dot{r}^{w}=R_{p}^{w}\left(\tilde{\omega}_{p}^{p,w}r^{p}+v_{p}^{p,w}+\frac{d}{dt}\left(r^{p}\right)\right)
 \]
 
 \end_inset
@@ -1689,10 +1838,14 @@ reference "eq:com-velocity"
 \end_layout
 
 \begin_layout Standard
+We can solve for the linear velocity of the estimation link:
+\end_layout
+
+\begin_layout Standard
 \begin_inset Formula 
-\begin{align*}
-v_{p}^{p,w} & =R_{w}^{p}\dot{r}-\tilde{\omega}_{p}^{p,w}r_{p}-\dot{r}_{p}
-\end{align*}
+\begin{equation}
+v_{p}^{p,w}=R_{w}^{p}\dot{r}-\tilde{\omega}_{p}^{p,w}r_{p}-\frac{d}{dt}\left(r^{p}\right)\label{eq:rootjoint-linear-vel}
+\end{equation}
 
 \end_inset
 
@@ -1700,12 +1853,13 @@ v_{p}^{p,w} & =R_{w}^{p}\dot{r}-\tilde{\omega}_{p}^{p,w}r_{p}-\dot{r}_{p}
 \end_layout
 
 \begin_layout Standard
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-TODO: ugly notation in switching between augmented and non-augmented
-\end_layout
+To find the linear acceleration of the estimation link, we differentiate
+ this equation:
+\begin_inset Formula 
+\begin{align*}
+\dot{v}_{p}^{p,w} & =\dot{R}_{w}^{p}\dot{r}+R_{w}^{p}\ddot{r}-\tilde{\dot{\omega}}_{p}^{p,w}r_{p}-\tilde{\omega}_{p}^{p,w}\frac{d}{dt}\left(r^{p}\right)-\frac{d^{2}}{dt^{2}}\left(r^{p}\right)\\
+ & =\tilde{\omega}_{w}^{p,w}R_{w}^{p}\dot{r}+R_{w}^{p}\ddot{r}-\tilde{\dot{\omega}}_{p}^{p,w}r_{p}-\tilde{\omega}_{p}^{p,w}\frac{d}{dt}\left(r^{p}\right)-\frac{d^{2}}{dt^{2}}\left(r^{p}\right)
+\end{align*}
 
 \end_inset
 
