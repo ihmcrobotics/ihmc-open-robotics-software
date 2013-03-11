@@ -1045,19 +1045,37 @@ Note that
 \begin_inset Formula $\omega_{p}^{p,w}=\omega$
 \end_inset
 
-, and 
-\begin_inset Formula $v_{p}^{p,w}=v$
-\end_inset
-
 .
 \end_layout
 
 \begin_layout Standard
-TODO: derive linearized measurement model
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+TODO: write in terms of CoM, derive linearized measurement model
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Subsection
 IMU orientation
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+TODO: order of rotations, sign of output matrix
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -1091,10 +1109,28 @@ z_{q,i}=q_{i}^{w}\otimes q_{p}^{i}
 
 \end_inset
 
-and the measurement residual
+Note that if the joint angle measurements that are needed to find 
+\begin_inset Formula $q_{p}^{i}$
+\end_inset
+
+ are noisy, their covariances will have to be factored into the measurement
+ through the Jacobian between 
+\begin_inset Formula $i$
+\end_inset
+
+ and 
+\begin_inset Formula $p$
+\end_inset
+
+.
+ For the VRC, these joint angle measurements are perfect however.
+\end_layout
+
+\begin_layout Standard
+Also define the measurement residual
 \begin_inset Formula 
 \[
-y_{q,i}=\hat{q}^{-1}\otimes z_{q,i}
+y_{q,i}=z_{q,i}^{-1}\otimes\hat{q}
 \]
 
 \end_inset
@@ -1119,8 +1155,8 @@ where
 \begin_inset Formula 
 \[
 \chi:q=\left(\begin{array}{c}
-q_{v}\\
-q_{s}
+q_{s}\\
+q_{v}
 \end{array}\right)\mapsto\chi\left(q\right)=\begin{cases}
 2\arctan\left(\left\Vert q_{v}\right\Vert ,q_{s}\right)\frac{q_{v}}{\left\Vert q_{v}\right\Vert } & \left\Vert q_{v}\right\Vert \neq0\\
 0 & \left\Vert q_{v}\right\Vert =0
@@ -1132,8 +1168,210 @@ q_{s}
 
 \end_layout
 
+\begin_layout Standard
+In canonical form, the measurement residual can be written in terms of the
+ rotation vector error 
+\begin_inset Formula $\hat{\phi}$
+\end_inset
+
+ as 
+\begin_inset Formula 
+\[
+y_{\phi,i}=z_{\phi,i}-H_{\phi,i}\hat{\phi}
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $\hat{\phi}=\chi\left(y_{q,i}\right)$
+\end_inset
+
+, 
+\begin_inset Formula $z_{\phi,i}=0$
+\end_inset
+
+ and 
+\begin_inset Formula $H_{\phi,i}=-I_{3}$
+\end_inset
+
+.
+\end_layout
+
 \begin_layout Subsection
-Position through kinematics
+Stationary points
+\end_layout
+
+\begin_layout Standard
+If a certain point fixed to one of the links is known to have zero velocity
+ with respect to the world (e.g.
+ because it is in non-slipping contact with the stationary world), then
+ this information can be used for state estimation.
+\end_layout
+
+\begin_layout Standard
+Let point 
+\begin_inset Formula $p_{i}$
+\end_inset
+
+ be fixed in frame 
+\begin_inset Formula $i$
+\end_inset
+
+, so that the augmented coordinate vector 
+\begin_inset Formula $p_{i}^{i}\in\mathbb{R}^{4}$
+\end_inset
+
+ is constant.
+ The point 
+\begin_inset Formula $p_{i}$
+\end_inset
+
+ can be expressed in 
+\begin_inset Formula $w$
+\end_inset
+
+ using
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+p_{i}^{w}=H_{p}^{w}H_{i}^{p}p_{i}^{i}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Its velocity is
+\begin_inset Formula 
+\begin{eqnarray}
+\dot{p}_{i}^{w} & = & \dot{H}_{p}^{w}H_{i}^{p}p_{i}^{i}+H_{p}^{w}\dot{H}_{i}^{p}p_{i}^{i}\nonumber \\
+ & = & H_{p}^{w}\left(H_{w}^{p}\dot{H}_{p}^{w}+\dot{H}_{i}^{p}H_{p}^{i}\right)p_{i}^{p}\nonumber \\
+ & = & H_{p}^{w}\left(\tilde{T}_{p}^{p,w}+\tilde{T}_{i}^{p,p}\right)p_{i}^{p}\label{eq:body-fixed-point-velocity}
+\end{eqnarray}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The twist
+\begin_inset Formula 
+\[
+T_{i}^{p,p}=J_{i}^{p,p}v_{i}^{p}
+\]
+
+\end_inset
+
+is known, given the joint velocities for the joints on the path between
+ 
+\begin_inset Formula $p$
+\end_inset
+
+ and 
+\begin_inset Formula $i$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Expanding 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:body-fixed-point-velocity"
+
+\end_inset
+
+, we get
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\dot{p}_{i}^{w} & =\left(\begin{array}{cc}
+R_{p}^{w} & p_{p}^{w}\\
+0 & 1
+\end{array}\right)\left(\begin{array}{cc}
+\tilde{\omega}_{p}^{p,w}+\tilde{\omega}_{i}^{p,p} & v_{p}^{p,w}+v_{i}^{p,p}\\
+0 & 0
+\end{array}\right)\left(\begin{array}{c}
+p_{i}^{p}\\
+1
+\end{array}\right)\\
+ & =\left(\begin{array}{cc}
+R_{p}^{w} & p_{p}^{w}\\
+0 & 1
+\end{array}\right)\left(\begin{array}{c}
+\left(\tilde{\omega}_{p}^{p,w}+\tilde{\omega}_{i}^{p,p}\right)p_{i}^{p}+v_{p}^{p,w}+v_{i}^{p,p}\\
+0
+\end{array}\right)\\
+ & =\left(\begin{array}{c}
+R_{p}^{w}\left(\tilde{\omega}_{p}^{p,w}+\tilde{\omega}_{i}^{p,p}\right)p_{i}^{p}+R_{p}^{w}\left(v_{p}^{p,w}+v_{i}^{p,p}\right)\\
+0
+\end{array}\right)
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Here, 
+\begin_inset Formula $R_{p}^{w}$
+\end_inset
+
+, 
+\begin_inset Formula $\tilde{\omega}_{p}^{p,w}$
+\end_inset
+
+, 
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+and 
+\begin_inset Formula $v_{p}^{p,w}$
+\end_inset
+
+ are estimated, and 
+\begin_inset Formula $\tilde{\omega}_{i}^{p,p}$
+\end_inset
+
+, 
+\begin_inset Formula $v_{i}^{p,p}$
+\end_inset
+
+ and 
+\begin_inset Formula $p_{i}^{p}$
+\end_inset
+
+ are known, given the kinematics.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+TODO: linearize, write in terms of CoM.
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Section
@@ -1332,6 +1570,142 @@ reference "eq:dPhiNormDt"
 \[
 \dot{\phi}=\frac{1}{2}\cot\frac{\left\Vert \phi\right\Vert }{2}\left(\left\Vert \phi\right\Vert \omega-\frac{\phi\cdot\omega}{\left\Vert \phi\right\Vert }\phi\right)+\frac{\phi\times\omega}{2}+\frac{\phi\cdot\omega}{\left\Vert \phi\right\Vert ^{2}}\phi
 \]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Appendix: linear velocity of estimation link given CoM velocity
+\end_layout
+
+\begin_layout Standard
+The position of the CoM can be written in world frame as
+\begin_inset Formula 
+\[
+r^{w}=H_{p}^{w}r^{p}\in\mathbb{R}^{4}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The CoM velocity can be written as
+\begin_inset Formula 
+\begin{align}
+\dot{r}^{w} & =\dot{H}_{p}^{w}r^{p}+H_{p}^{w}\frac{d}{dt}r^{p}\nonumber \\
+ & =H_{p}^{w}\left(H_{w}^{p}\dot{H}_{p}^{w}r^{p}+\frac{d}{dt}r^{p}\right)\nonumber \\
+ & =H_{p}^{w}\left(\tilde{T}_{p}^{p,w}r^{p}+\frac{d}{dt}r^{p}\right)\label{eq:com-velocity}
+\end{align}
+
+\end_inset
+
+where
+\begin_inset Formula 
+\[
+\dot{r}^{p}=J_{\text{CoM}}^{p}v_{J}
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $J$
+\end_inset
+
+ is the set of all joints, not including the 6-DoF joint.
+ To compute 
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+
+\begin_inset Formula $\dot{r}^{p}$
+\end_inset
+
+,
+\family default
+\series default
+\shape default
+\size default
+\emph default
+\bar default
+\strikeout default
+\uuline default
+\uwave default
+\noun default
+\color inherit
+ we only need to know the joint positions and velocities of all of the joints
+ in 
+\begin_inset Formula $J$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Let 
+\begin_inset Formula $r\in\mathbb{R}^{3}$
+\end_inset
+
+ be the non-augmented version of 
+\begin_inset Formula $r^{w}$
+\end_inset
+
+ and let 
+\begin_inset Formula $r_{p}\in\mathbb{R}^{3}$
+\end_inset
+
+ be the non-augmented version of 
+\begin_inset Formula $r^{p}$
+\end_inset
+
+.
+ Expanding 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:com-velocity"
+
+\end_inset
+
+, we obtain
+\begin_inset Formula 
+\[
+\dot{r}=R_{p}^{w}\left(\tilde{\omega}_{p}^{p,w}r_{p}+v_{p}^{p,w}+\dot{r}_{p}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+v_{p}^{p,w} & =R_{w}^{p}\dot{r}-\tilde{\omega}_{p}^{p,w}r_{p}-\dot{r}_{p}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+TODO: ugly notation in switching between augmented and non-augmented
+\end_layout
 
 \end_inset
 
