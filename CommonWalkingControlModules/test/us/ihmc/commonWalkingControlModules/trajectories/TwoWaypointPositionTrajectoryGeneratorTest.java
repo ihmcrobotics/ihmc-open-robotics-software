@@ -45,7 +45,7 @@ public class TwoWaypointPositionTrajectoryGeneratorTest {
 		
 		int arcLengthCalculatorDivisions = 100;
 		TwoWaypointPositionTrajectoryGenerator trajectory = new TwoWaypointPositionTrajectoryGenerator("", worldFrame, stepTimeProvider, 
-				initialPositionProvider, initialVelocityProvider, finalPositionProvider, finalVelocityProvider, new YoVariableRegistry(""), 0.2,
+				initialPositionProvider, initialVelocityProvider, finalPositionProvider, finalVelocityProvider, new YoVariableRegistry(""), 0.2, 20,
 				null);
 		
 		trajectory.initialize(new FramePoint[]{firstIntermediatePosition, secondIntermediatePosition});
