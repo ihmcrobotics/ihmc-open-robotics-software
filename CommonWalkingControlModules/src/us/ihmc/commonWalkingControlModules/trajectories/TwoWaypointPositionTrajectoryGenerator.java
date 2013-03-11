@@ -1,6 +1,8 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
-import org.apache.batik.dom.xbl.OriginalEvent;
+import java.util.Arrays;
+
+import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.math.MathTools;
@@ -8,8 +10,6 @@ import us.ihmc.utilities.math.geometry.Direction;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-
-import cern.colt.Arrays;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
@@ -53,11 +53,9 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
    private final YoFramePoint[] fixedPointPositions = new YoFramePoint[4];
    private final YoFrameVector[] fixedPointVelocities = new YoFrameVector[4];
 
+   private final YoConcatenatedSplines parabolicConcatenatedSplines;
    private final YoConcatenatedSplines origianlConcatenatedSplines;
    private final YoConcatenatedSplines respacedConcatenatedSplines;
-   
-   private double[] timesFor3Splines = new double[4];
-   private double[] timesForArcLengthSplines;
 
    private final int desiredNumberOfSplines;
 
@@ -97,6 +95,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
          fixedPointVelocities[i] = new YoFrameVector(namePrefix + "FixedPointVelocity" + i, referenceFrame, registry);
       }
 
+      this.parabolicConcatenatedSplines = new YoConcatenatedSplines(new int[] {3, 6, 3}, referenceFrame, arcLengthCalculatorDivisions, registry, namePrefix + "ParabolicConcatenatedSplines");
       this.origianlConcatenatedSplines = new YoConcatenatedSplines(new int[] {4, 6, 4}, referenceFrame, arcLengthCalculatorDivisions, registry, namePrefix + "OriginalConcatenatedSplines");
 
       int[] reparameterizedNumberOfCoefficientsPerPolynomial = new int[desiredNumberOfSplines];
@@ -108,7 +107,6 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       this.respacedConcatenatedSplines = new YoConcatenatedSplines(reparameterizedNumberOfCoefficientsPerPolynomial, referenceFrame, 2, registry, namePrefix + "RespacedConcatenatedSplines");
 
       this.desiredNumberOfSplines = desiredNumberOfSplines;
-      this.timesForArcLengthSplines = new double[desiredNumberOfSplines + 1];
    }
 
    public void compute(double time)
@@ -140,32 +138,6 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       desiredAcceleration.getFrameVectorAndChangeFrameOfPackedVector(accelerationToPack);
    }
 
-   public void initialize(FramePoint[] waypoints)
-   {
-      setInitialAndFinalPositionsAndVelocities();
-      setWaypointPositionsAndVelocities(waypoints);
-      
-      setStepTime();
-
-      setOriginalConcatenatedSplines();
-
-      if (desiredNumberOfSplines == 3)
-      {
-         respaceSplineRangesProportionalToCurrentArcLengths(origianlConcatenatedSplines, respacedConcatenatedSplines);
-     //    resetWaypointVelocities();
-     //    respaceSplineTemp(respacedConcatenatedSplines);
-      }
-      else
-      {
-         respaceSplineRangesWithEqualArcLengths(origianlConcatenatedSplines, respacedConcatenatedSplines);
-      }
-
-      if (VISUALIZE)
-      {
-         visualizeSpline();
-      }
-   }
-
    private void setStepTime()
    {
       double stepTime = stepTimeProvider.getValue();
@@ -179,6 +151,31 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       double t = System.nanoTime();
       initialize(null);
       System.out.println(System.nanoTime() - t);
+   }
+   
+   public void initialize(FramePoint[] waypoints)
+   {
+      setStepTime();
+      
+      setInitialAndFinalPositionsAndVelocities();
+
+      setWaypointPositionsAndVelocities(waypoints);
+      
+      setOriginalConcatenatedSplines();
+
+      if (desiredNumberOfSplines == 3)
+      {
+         respaceSplineRangesProportionalToCurrentArcLengths(origianlConcatenatedSplines, respacedConcatenatedSplines);
+      }
+      else
+      {
+         respaceSplineRangesWithEqualArcLengths(origianlConcatenatedSplines, respacedConcatenatedSplines);
+      }
+
+      if (VISUALIZE)
+      {
+         visualizeSpline();
+      }
    }
 
    private void setInitialAndFinalPositionsAndVelocities()
@@ -201,6 +198,9 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
    private void setWaypointPositionsAndVelocities(FramePoint[] waypoints)
    {
       setWaypointPositions(waypoints);
+      
+      setParabolicConcatenatedSplines();
+      
       setWaypointVelocities();
    }
 
@@ -224,7 +224,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
             waypoints[i].sub(initialPosition);
             waypoints[i].scale(DESIRED_PROPORTIONS_THROUGH_TRAJECTORY_FOR_GROUND_CLEARANCE[i]);
             waypoints[i].add(initialPosition);
-            waypoints[i].setZ(waypoints[i].getZ() + groundClearance);    //TODO z from lidar?
+            waypoints[i].setZ(waypoints[i].getZ() + groundClearance);
          }
 
          fixedPointPositions[1].set(waypoints[0]);
@@ -246,7 +246,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
 
    private void setWaypointVelocities()
    {
-      double[] waypointSpeeds = new double[] {2.0, 2.0};
+//      double[] waypointSpeeds = new double[] {speed0, speed1};
       FrameVector[] waypointVelocities = new FrameVector[2];
       for (int i = 0; i < 2; i++)
       {
@@ -254,63 +254,44 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
          waypointVelocities[i].set(fixedPointPositions[i + 2].getFramePointCopy());
          waypointVelocities[i].sub(fixedPointPositions[i].getFramePointCopy());
          waypointVelocities[i].normalize();
-         waypointVelocities[i].scale(waypointSpeeds[i]);
+         
+         parabolicConcatenatedSplines.compute(parabolicConcatenatedSplines.getSplineByIndex(i + 1).getT0());
+         double speed = parabolicConcatenatedSplines.getVelocity().dot(waypointVelocities[i]);
+         
+         waypointVelocities[i].scale(speed);
          fixedPointVelocities[i + 1].set(waypointVelocities[i]);
       }
    }
    
-   private void resetWaypointVelocities()
+   private void setParabolicConcatenatedSplines()
    {
-	      FrameVector[] waypointVelocities = new FrameVector[2];
-	      double[] timesTemp = new double[4];
-	      timesTemp[0] = 0.0;
-	      timesTemp[3] = stepTime.getDoubleValue();
-	      double d1 = fixedPointPositions[1].distance(fixedPointPositions[0]);
-	      double d2 = fixedPointPositions[2].distance(fixedPointPositions[1]);
-	      double d3 = fixedPointPositions[3].distance(fixedPointPositions[2]);
-	      double totalD = d1+d2+d3;
-	      timesTemp[1] = (d1/totalD)*stepTime.getDoubleValue();
-	      timesTemp[2] = ((d1+d2)/totalD)*stepTime.getDoubleValue();
-	      System.out.println("timesTemp = " + Arrays.toString(timesTemp));
-	      for (int i = 0; i < 1; i++)
-	      {
-	         waypointVelocities[i] = new FrameVector(referenceFrame);
-	         waypointVelocities[i].set(fixedPointPositions[i + 2].getFramePointCopy());
-	         waypointVelocities[i].sub(fixedPointPositions[i].getFramePointCopy());
-	         waypointVelocities[i].normalize();
-	         double scaleFactor = 0.0;
-	         
-	         for(Direction d : Direction.values())
-	         {
-	        	 double invTime = 1 / (timesFor3Splines[i] - timesFor3Splines[i+1]);
-	        	 double a = invTime * (-invTime*fixedPointPositions[i].get(d) + invTime*fixedPointPositions[i+1].get(d) + fixedPointVelocities[i].get(d));
-	        	 double b = invTime * (2 * timesFor3Splines[i] * invTime * (fixedPointPositions[i].get(d) - fixedPointPositions[i+1].get(d)) - (timesFor3Splines[i+1] + timesFor3Splines[i])*fixedPointVelocities[i].get(d));
-	        	 scaleFactor += waypointVelocities[i].get(d)*(2*a*timesFor3Splines[i+1] + b);
-	         }
-	         System.out.println("scale factor = " + scaleFactor);
-	         waypointVelocities[i].scale(scaleFactor);
-	         fixedPointVelocities[i + 1].set(waypointVelocities[i]);
-	      }
+      double[] times = new double[4];
+      FramePoint[] positions = new FramePoint[4];
+      FrameVector initialVelocity;
+      FrameVector finalVelocity;
+      double[] distances = new double[4];
+      double deltaDistance;
 
-	      for (int i = 1; i < 2; i++)
-	      {
-	         waypointVelocities[i] = new FrameVector(referenceFrame);
-	         waypointVelocities[i].set(fixedPointPositions[i + 2].getFramePointCopy());
-	         waypointVelocities[i].sub(fixedPointPositions[i].getFramePointCopy());
-	         waypointVelocities[i].normalize();
-	         double scaleFactor = 0.0;
-	         
-	         for(Direction d : Direction.values())
-	         {
-	        	 double invTime = 1 / (timesFor3Splines[i+2] - timesFor3Splines[i+1]);
-	        	 double a = invTime * (-invTime*fixedPointPositions[i+2].get(d) + invTime*fixedPointPositions[i+1].get(d) + fixedPointVelocities[i+2].get(d));
-	        	 double b = invTime * (2 * timesFor3Splines[i+2] * invTime * (fixedPointPositions[i+2].get(d) - fixedPointPositions[i+1].get(d)) - (timesFor3Splines[i+1] + timesFor3Splines[i+2])*fixedPointVelocities[i+2].get(d));
-	        	 scaleFactor += waypointVelocities[i].get(d)*(2*a*timesFor3Splines[i+1] + b);
-	         }
-	         System.out.println("scale factor = " + scaleFactor);
-	         waypointVelocities[i].scale(scaleFactor);
-	         fixedPointVelocities[i + 1].set(waypointVelocities[i]);
-	      }
+      distances[0] = 0.0;
+
+      for (int i = 1; i < 4; i++)
+      {
+         deltaDistance = fixedPointPositions[i - 1].distance(fixedPointPositions[i]);
+         distances[i] = distances[i - 1] + deltaDistance;
+      }
+
+      double totalDistance = distances[3];
+
+      for (int i = 0; i < 4; i++)
+      {
+         times[i] = distances[i] * stepTime.getDoubleValue() / totalDistance;
+         positions[i] = fixedPointPositions[i].getFramePointCopy();
+      }
+      
+      initialVelocity = fixedPointVelocities[0].getFrameVectorCopy();
+      finalVelocity = fixedPointVelocities[3].getFrameVectorCopy();
+      
+      parabolicConcatenatedSplines.setQuadraticQuinticQuadratic(times, positions, initialVelocity, finalVelocity);
    }
 
    private void setOriginalConcatenatedSplines()
@@ -339,8 +320,6 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       }
 
       origianlConcatenatedSplines.setCubicQuinticCubic(times, positions, velocities);
-      System.out.println("times = " + Arrays.toString(times));
-      this.timesFor3Splines = times;
    }
 
    public void respaceSplineRangesProportionalToCurrentArcLengths(YoConcatenatedSplines oldSplines, YoConcatenatedSplines newSplines)
@@ -371,22 +350,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       newTimes[newTimes.length - 1] = tf;
 
       newSplines.setQuintics(oldSplines, oldTimes, newTimes);
-      this.timesForArcLengthSplines = newTimes;
    }
-   
-//   public void respaceSplineTemp(YoConcatenatedSplines newSplines)
-//   {
-//	   FrameVector[] accelerations = new FrameVector[4];
-//	   origianlConcatenatedSplines.compute(timesFor3Splines[0]);
-//	   accelerations[0] = origianlConcatenatedSplines.getAcceleration();
-//	   origianlConcatenatedSplines.compute(timesFor3Splines[1]);
-//	   accelerations[1] = origianlConcatenatedSplines.getAcceleration();
-//	   origianlConcatenatedSplines.compute(timesFor3Splines[2]);
-//	   accelerations[2] = origianlConcatenatedSplines.getAcceleration();
-//	   origianlConcatenatedSplines.compute(timesFor3Splines[3]);
-//	   accelerations[3] = origianlConcatenatedSplines.getAcceleration();	 
-//	   newSplines.setQuintics(timesFor3Splines, fixedPointPositions, fixedPointVelocities, accelerations);
-//   }
 
    public void respaceSplineRangesWithEqualArcLengths(YoConcatenatedSplines oldSplines, YoConcatenatedSplines newSplines)
    {
@@ -432,6 +396,97 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       {
          waypointBagOfBalls.setBall(fixedPointPositions[i].getFramePointCopy(), YoAppearance.AliceBlue(), i);
       }
+   }
+   
+   private double getWaypointVelocity(double[] times, int index0, int index1)
+   {
+      double waypointVelocity0 = 0.0;
+      double waypointVelocity1 = 0.0;
+      DenseMatrix64F constraintsMatrix = new DenseMatrix64F(3, 3);
+      DenseMatrix64F constraintsVector = new DenseMatrix64F(3, 1);
+      DenseMatrix64F coefficientsVector = new DenseMatrix64F(3, 1);
+      
+      double t0 = times[index0];
+      double t1 = times[index1];
+      
+      constraintsMatrix.setData(new double[]{t0*t0, t0, 1, t1*t1, t1, 1, 2*t0, 1, 0});
+
+      return 0.0;
+   }
+   
+//   private void resetWaypointVelocities()
+//   {
+//         FrameVector[] waypointVelocities = new FrameVector[2];
+//         double[] timesTemp = new double[4];
+//         timesTemp[0] = 0.0;
+//         timesTemp[3] = stepTime.getDoubleValue();
+//         double d1 = fixedPointPositions[1].distance(fixedPointPositions[0]);
+//         double d2 = fixedPointPositions[2].distance(fixedPointPositions[1]);
+//         double d3 = fixedPointPositions[3].distance(fixedPointPositions[2]);
+//         double totalD = d1+d2+d3;
+//         timesTemp[1] = (d1/totalD)*stepTime.getDoubleValue();
+//         timesTemp[2] = ((d1+d2)/totalD)*stepTime.getDoubleValue();
+//         System.out.println("timesTemp = " + Arrays.toString(timesTemp));
+//         for (int i = 0; i < 1; i++)
+//         {
+//            waypointVelocities[i] = new FrameVector(referenceFrame);
+//            waypointVelocities[i].set(fixedPointPositions[i + 2].getFramePointCopy());
+//            waypointVelocities[i].sub(fixedPointPositions[i].getFramePointCopy());
+//            waypointVelocities[i].normalize();
+//            double scaleFactor = 0.0;
+//            
+//            for(Direction d : Direction.values())
+//            {
+//             double invTime = 1 / (timesFor3Splines[i] - timesFor3Splines[i+1]);
+//             double a = invTime * (-invTime*fixedPointPositions[i].get(d) + invTime*fixedPointPositions[i+1].get(d) + fixedPointVelocities[i].get(d));
+//             double b = invTime * (2 * timesFor3Splines[i] * invTime * (fixedPointPositions[i].get(d) - fixedPointPositions[i+1].get(d)) - (timesFor3Splines[i+1] + timesFor3Splines[i])*fixedPointVelocities[i].get(d));
+//             scaleFactor += waypointVelocities[i].get(d)*(2*a*timesFor3Splines[i+1] + b);
+//            }
+//            System.out.println("scale factor = " + scaleFactor);
+//            waypointVelocities[i].scale(scaleFactor);
+//            fixedPointVelocities[i + 1].set(waypointVelocities[i]);
+//         }
+//
+//         for (int i = 1; i < 2; i++)
+//         {
+//            waypointVelocities[i] = new FrameVector(referenceFrame);
+//            waypointVelocities[i].set(fixedPointPositions[i + 2].getFramePointCopy());
+//            waypointVelocities[i].sub(fixedPointPositions[i].getFramePointCopy());
+//            waypointVelocities[i].normalize();
+//            double scaleFactor = 0.0;
+//            
+//            for(Direction d : Direction.values())
+//            {
+//             double invTime = 1 / (timesFor3Splines[i+2] - timesFor3Splines[i+1]);
+//             double a = invTime * (-invTime*fixedPointPositions[i+2].get(d) + invTime*fixedPointPositions[i+1].get(d) + fixedPointVelocities[i+2].get(d));
+//             double b = invTime * (2 * timesFor3Splines[i+2] * invTime * (fixedPointPositions[i+2].get(d) - fixedPointPositions[i+1].get(d)) - (timesFor3Splines[i+1] + timesFor3Splines[i+2])*fixedPointVelocities[i+2].get(d));
+//             scaleFactor += waypointVelocities[i].get(d)*(2*a*timesFor3Splines[i+1] + b);
+//            }
+//            System.out.println("scale factor = " + scaleFactor);
+//            waypointVelocities[i].scale(scaleFactor);
+//            fixedPointVelocities[i + 1].set(waypointVelocities[i]);
+//         }
+//   }
+   
+   private double[] getTimes(double[] velocities, double[] distances)
+   {
+      double times[] = new double[4];
+      times[0] = 0.0;
+      
+      for (int i = 1; i < times.length; i++)
+      {
+         times[i] = times[i - 1] + distances[i - 1] * (velocities[i - 1] + velocities[i]) / 2;
+      }
+      
+      double totalTime = times[times.length - 1];
+      double scaleFactor = stepTime.getDoubleValue() / totalTime;
+      
+      for (int i = 0; i < times.length; i++)
+      {
+         times[i] *= scaleFactor;
+      }
+      
+      return times;
    }
 
    public boolean isDone()
