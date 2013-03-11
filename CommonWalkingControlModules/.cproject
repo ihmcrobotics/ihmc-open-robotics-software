@@ -97,7 +97,7 @@
 			</target>
 			<target name="CMake (Windows)" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>cmake</buildCommand>
-				<buildArguments>-E chdir ${ProjDirPath}/build/ cmake -G "Visual Studio 11 Win64"</buildArguments>
+				<buildArguments>-E chdir ${ProjDirPath}/build/ cmake -G "Visual Studio 11 Win64" -DCMAKE_INSTALL_PREFIX=..</buildArguments>
 				<buildTarget>..</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>false</useDefaultCommand>
