@@ -165,6 +165,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
 
       setStepTime();
 
+	  setInitialAndFinalPositionsAndVelocities();
       setWaypointPositions(waypoints);
 
       arcLengths = getArcLengthsApproximatedByDistance();
@@ -186,7 +187,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
 //	   FramePoint[] waypoints = getWaypointsForSphere(sphere3d);
 //	   initialize(waypoints);
 //   }
-   
+//   
 //   private FramePoint[] getWaypointsForSphere(Sphere3d sphere3d)
 //   {
 //	   Point3d sphereCenter = new Point3d();
