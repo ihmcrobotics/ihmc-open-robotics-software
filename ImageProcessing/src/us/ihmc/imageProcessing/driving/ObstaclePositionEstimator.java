@@ -9,7 +9,6 @@ import javax.vecmath.Vector2d;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 
 /**
  * User: Matt
@@ -85,7 +84,7 @@ public class ObstaclePositionEstimator implements PostProcessor
       Collections.reverse(boundingBoxes);
       ArrayList<BoundingBox2d> obstacles = new ArrayList<BoundingBox2d>();
 
-//    System.out.println("updateObstacles");
+      //    System.out.println("updateObstacles");
       //      System.out.println("updateObstacles");
       ArrayList<int[]> coveredRanges = new ArrayList<int[]>();
       for (BoundingBox2d values : boundingBoxes)
@@ -101,61 +100,64 @@ public class ObstaclePositionEstimator implements PostProcessor
 
             double leftXInPixels = leftEdgeOfRoad.intersectionWith(axis).getX();
             double rightXInPixels = rightEdgeOfRoad.intersectionWith(axis).getX();
-            double rangeInPixels = rightXInPixels - leftXInPixels;
-            double midPointInPixels = leftXInPixels + (rangeInPixels / 2.0);
-            double offsetPercentageOfRoad = (minX - midPointInPixels) / (rangeInPixels / 2.0);
-            double boxWidthPercentageOfRoad = (maxX - minX) / (rangeInPixels / 2.0);
-
-            // System.out.println(leftXInPixels + ": " + midPointInPixels + ": " + rightXInPixels + " - range " + rangeInPixels + " - offset = " + offsetPercentageOfRoad + " - width = " + boxWidthPercentageOfRoad);
-//          System.out.println("offset = " + offsetPercentageOfRoad + " - width = " + boxWidthPercentageOfRoad);
-
-            BoundingBox2d boundingBox2d = new BoundingBox2d(new Point2d(offsetPercentageOfRoad, 0.0), new Point2d(offsetPercentageOfRoad + boxWidthPercentageOfRoad, 1.0));
-            obstacles.add(boundingBox2d);
-
-            coveredRanges.add(new int[]{minX, maxX});
-
-            double roadWidthInPixels = rightXInPixels - leftXInPixels;
-            double carWidthInPixels = roadWidthInPixels * carPercentageOfRoad;
-            double leftOpeningInPixels = (minX - leftXInPixels);
-            double rightOpeningInPixels = (rightXInPixels - maxX);
-            Color color = Color.green;
-
-            if (leftOpeningInPixels > carWidthInPixels)
+            if (rightXInPixels > leftXInPixels)
             {
-               if (leftOpeningInPixels > rightOpeningInPixels)
+               double rangeInPixels = rightXInPixels - leftXInPixels;
+               double midPointInPixels = leftXInPixels + (rangeInPixels / 2.0);
+               double offsetPercentageOfRoad = (minX - midPointInPixels) / (rangeInPixels / 2.0);
+               double boxWidthPercentageOfRoad = (maxX - minX) / (rangeInPixels / 2.0);
+
+               // System.out.println(leftXInPixels + ": " + midPointInPixels + ": " + rightXInPixels + " - range " + rangeInPixels + " - offset = " + offsetPercentageOfRoad + " - width = " + boxWidthPercentageOfRoad);
+               //          System.out.println("offset = " + offsetPercentageOfRoad + " - width = " + boxWidthPercentageOfRoad);
+
+               BoundingBox2d boundingBox2d = new BoundingBox2d(new Point2d(offsetPercentageOfRoad, 0.0), new Point2d(offsetPercentageOfRoad + boxWidthPercentageOfRoad, 1.0));
+               obstacles.add(boundingBox2d);
+
+               coveredRanges.add(new int[]{minX, maxX});
+
+               double roadWidthInPixels = rightXInPixels - leftXInPixels;
+               double carWidthInPixels = roadWidthInPixels * carPercentageOfRoad;
+               double leftOpeningInPixels = (minX - leftXInPixels);
+               double rightOpeningInPixels = (rightXInPixels - maxX);
+               Color color = Color.green;
+
+               if (leftOpeningInPixels > carWidthInPixels)
                {
-                  color = Color.green;
+                  if (leftOpeningInPixels > rightOpeningInPixels)
+                  {
+                     color = Color.green;
+                  }
+                  else
+                  {
+                     color = Color.yellow;
+                  }
                }
                else
                {
-                  color = Color.yellow;
+                  color = Color.red;
                }
-            }
-            else
-            {
-               color = Color.red;
-            }
 
-            ColoredLine coloredLine = new ColoredLine(color, (int) leftXInPixels, minY, minX, minY);
-            coloredLines.add(coloredLine);
+               ColoredLine coloredLine = new ColoredLine(color, (int) leftXInPixels, minY, minX, minY);
+               coloredLines.add(coloredLine);
 
-            if (rightOpeningInPixels > carWidthInPixels)
-            {
-               if (rightOpeningInPixels >= leftOpeningInPixels)
+               if (rightOpeningInPixels > carWidthInPixels)
                {
-                  color = Color.green;
+                  if (rightOpeningInPixels >= leftOpeningInPixels)
+                  {
+                     color = Color.green;
+                  }
+                  else
+                  {
+                     color = Color.yellow;
+                  }
                }
                else
                {
-                  color = Color.yellow;
+                  color = Color.red;
                }
+               coloredLine = new ColoredLine(color, maxX, minY, (int) rightXInPixels, minY);
+               coloredLines.add(coloredLine);
             }
-            else
-            {
-               color = Color.red;
-            }
-            coloredLine = new ColoredLine(color, maxX, minY, (int) rightXInPixels, minY);
-            coloredLines.add(coloredLine);
          }
          else
          {
