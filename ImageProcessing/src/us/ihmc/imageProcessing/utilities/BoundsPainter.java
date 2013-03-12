@@ -1,7 +1,14 @@
 package us.ihmc.imageProcessing.utilities;
 
-import java.awt.*;
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Stroke;
+import java.util.ArrayList;
 import java.util.HashMap;
+
+import us.ihmc.utilities.math.geometry.BoundingBox2d;
 
 /**
  * User: Matt
@@ -9,9 +16,9 @@ import java.util.HashMap;
  */
 public class BoundsPainter implements PostProcessor
 {
-   private HashMap<Integer, int[]> boundingBoxes = new HashMap<Integer, int[]>();
+   private ArrayList<BoundingBox2d> boundingBoxes = new ArrayList<BoundingBox2d>();
    private float lineThickness = 1.0f;
-   private int imageHeight = 480;
+   private int imageHeight = 544;
 
    public BoundsPainter(float lineThickness)
    {
@@ -23,7 +30,7 @@ public class BoundsPainter implements PostProcessor
       this.imageHeight = imageHeight;
    }
 
-   public void setBoundingBoxes(HashMap<Integer, int[]> boundingBoxes)
+   public void setBoundingBoxes(ArrayList<BoundingBox2d> boundingBoxes)
    {
       this.boundingBoxes = boundingBoxes;
    }
@@ -41,12 +48,12 @@ public class BoundsPainter implements PostProcessor
       Stroke originalStroke = g2d.getStroke();
       g2d.setStroke(new BasicStroke(lineThickness));
 
-      for (int[] boundingBox : boundingBoxes.values())
+      for (BoundingBox2d boundingBox : boundingBoxes)
       {
-         int x = boundingBox[0];
-         int y = boundingBox[1];
-         int width = boundingBox[2] - boundingBox[0];
-         int height = boundingBox[3] - boundingBox[1];
+         int x = new Double(boundingBox.getMinPoint().x).intValue();
+         int y = new Double(boundingBox.getMinPoint().y).intValue();
+         int width = new Double(boundingBox.getMaxPoint().x - boundingBox.getMinPoint().x).intValue();
+         int height = new Double(boundingBox.getMaxPoint().y - boundingBox.getMinPoint().y).intValue();
          graphics.drawRect(x, y, width, height);
          graphics.setColor(Color.cyan);
          graphics.fillOval(x, y, 5, 5);
