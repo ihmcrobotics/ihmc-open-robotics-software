@@ -10,7 +10,6 @@ import us.ihmc.utilities.math.geometry.Direction;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-
 import cern.colt.Arrays;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
@@ -90,7 +89,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       desiredVelocity = new YoFrameVector(namePrefix + "DesiredVelocity", referenceFrame, registry);
       desiredAcceleration = new YoFrameVector(namePrefix + "DesiredAcceleration", referenceFrame, registry);
 
-      this.groundClearance = groundClearance;
+      this.groundClearance = .3;
 
       for (int i = 0; i < 4; i++)
       {
@@ -269,6 +268,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       double t0 = fixedPointTimes[indexOfInitialOrFinal].getDoubleValue();
       double t1 = accelerateEndpointTimes[indexOfWaypoint - 1].getDoubleValue();
       double t2 = fixedPointTimes[indexOfWaypoint].getDoubleValue();
+      
       FramePoint z0 = fixedPointPositions[indexOfInitialOrFinal].getFramePointCopy();
       FrameVector zd0 = fixedPointVelocities[indexOfInitialOrFinal].getFrameVectorCopy();
       FramePoint z2 = fixedPointPositions[indexOfWaypoint].getFramePointCopy();
@@ -288,11 +288,14 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       {
          constraintsVector.setData(new double[] {z0.get(d), zd0.get(d), 0.0, z2.get(d), 0.0});
          solve(constraintsMatrix, constraintsVector, coefficientsVector);
-         double velocityComponent = coefficientsVector.get(3) * t1 + coefficientsVector.get(4);
+         double velocityComponent = coefficientsVector.get(3);
          velocity.set(d, velocityComponent);
       }
 
       fixedPointVelocities[indexOfWaypoint].set(velocity);
+      
+      System.out.println(Arrays.toString(fixedPointPositions));
+      System.out.println(Arrays.toString(fixedPointVelocities));
    }
 
 
