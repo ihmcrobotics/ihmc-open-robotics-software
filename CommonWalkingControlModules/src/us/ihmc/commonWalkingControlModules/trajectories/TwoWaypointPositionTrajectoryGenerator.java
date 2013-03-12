@@ -2,6 +2,8 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 
 import static org.ejml.ops.CommonOps.solve;
 
+import javax.vecmath.Point3d;
+
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
@@ -10,7 +12,7 @@ import us.ihmc.utilities.math.geometry.Direction;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-
+import us.ihmc.utilities.math.geometry.Sphere3d;
 import cern.colt.Arrays;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
@@ -153,18 +155,17 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
 
    public void initialize()
    {
+	  setInitialAndFinalPositionsAndVelocities();
       initialize(null);
    }
 
-
    public void initialize(FramePoint[] waypoints)
    {
+      double[] arcLengths;
+
       setStepTime();
 
-      setInitialAndFinalPositionsAndVelocities();
       setWaypointPositions(waypoints);
-
-      double[] arcLengths;
 
       arcLengths = getArcLengthsApproximatedByDistance();
       setFixedPointTimesAndWaypointVelocities(arcLengths);
@@ -179,6 +180,30 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
          visualizeSpline();
       }
    }
+   
+//   public void initializeUsingSphere(Sphere3d sphere3d)
+//   {
+//	   FramePoint[] waypoints = getWaypointsForSphere(sphere3d);
+//	   initialize(waypoints);
+//   }
+   
+//   private FramePoint[] getWaypointsForSphere(Sphere3d sphere3d)
+//   {
+//	   Point3d sphereCenter = new Point3d();
+//	   sphere3d.getCenter(sphereCenter);
+//	   double radius = sphere3d.getRadius();
+//	   Point3d wayPoint = new Point3d();
+////	   boolean isIn
+//	   
+//	   setWaypointsToDefault();
+//	   for(int i = 0; i < 2; i++)
+//	   {
+//		   wayPoint.set(fixedPointPositions[i].getX(), fixedPointPositions[i].getY(), fixedPointPositions[i].getZ());
+//	//	   if()
+//	   }
+//	   
+//	   return waypoints;
+//   }
 
    private double[] getArcLengthsApproximatedByDistance()
    {
@@ -285,6 +310,34 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       fixedPointVelocities[indexOfWaypoint].set(velocity);
    }
 
+
+// private FrameVector getWaypointVelocity(int indexInitialOrFinal, int indexOfWaypoint)
+// {
+//    FrameVector waypointVelocity = new FrameVector(referenceFrame);
+//    DenseMatrix64F constraintsMatrix = new DenseMatrix64F(3, 3);
+//    DenseMatrix64F constraintsVector = new DenseMatrix64F(3, 1);
+//    DenseMatrix64F coefficientsVector = new DenseMatrix64F(3, 1);
+//
+//    double footstepTime = fixedPointTimes[indexInitialOrFinal].getDoubleValue();
+//    double wayPointTime = fixedPointTimes[indexOfWaypoint].getDoubleValue();
+//    constraintsMatrix.setData(new double[]
+//    {
+//       footstepTime * footstepTime, footstepTime, 1, wayPointTime * wayPointTime, wayPointTime, 1, 2 * footstepTime, 1, 0
+//    });
+//
+//    for (Direction d : Direction.values())
+//    {
+//       constraintsVector.setData(new double[] {fixedPointPositions[indexInitialOrFinal].get(d), fixedPointPositions[indexOfWaypoint].get(d),
+//               fixedPointVelocities[indexInitialOrFinal].get(d)});
+//       solve(constraintsMatrix, constraintsVector, coefficientsVector);
+//       double velocity = 2 * coefficientsVector.get(0) * fixedPointTimes[indexOfWaypoint].getDoubleValue() + coefficientsVector.get(1);
+//       waypointVelocity.set(d, velocity);
+//    }
+//
+//    return waypointVelocity;
+// }
+
+
    private void setInitialAndFinalPositionsAndVelocities()
    {
       int[] sourceIndicies = new int[] {0, 1};
@@ -306,40 +359,44 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
    {
       if (waypoints == null)
       {
-         FramePoint initialPosition = fixedPointPositions[0].getFramePointCopy();
-         FramePoint finalPosition = fixedPointPositions[3].getFramePointCopy();
-         waypoints = new FramePoint[2];
-         waypoints[0] = new FramePoint(referenceFrame);
-         waypoints[1] = new FramePoint(referenceFrame);
-         positionSources[0].get(initialPosition);
-         positionSources[1].get(finalPosition);
-         initialPosition.changeFrame(referenceFrame);
-         finalPosition.changeFrame(referenceFrame);
-
-         for (int i = 0; i < 2; i++)
-         {
-            waypoints[i].set(finalPosition);
-            waypoints[i].sub(initialPosition);
-            waypoints[i].scale(DESIRED_PROPORTIONS_THROUGH_TRAJECTORY_FOR_GROUND_CLEARANCE[i]);
-            waypoints[i].add(initialPosition);
-            waypoints[i].setZ(waypoints[i].getZ() + groundClearance);
-         }
-
-         fixedPointPositions[1].set(waypoints[0]);
-         fixedPointPositions[2].set(waypoints[1]);
+    	  setWaypointsToDefault();
       }
       else if (waypoints.length == 2)
       {
          waypoints[0].changeFrame(referenceFrame);
          waypoints[1].changeFrame(referenceFrame);
+         fixedPointPositions[1].set(waypoints[0]);
+         fixedPointPositions[2].set(waypoints[1]);
       }
       else
       {
          throw new RuntimeException("TwoWaypointPositionTrajectoryGenerator only supports trajectory generation for two waypoints.");
       }
+   }
+   
+   private void setWaypointsToDefault()
+   {
+       FramePoint initialPosition = fixedPointPositions[0].getFramePointCopy();
+       FramePoint finalPosition = fixedPointPositions[3].getFramePointCopy();
+       FramePoint[] waypoints = new FramePoint[2];
+       waypoints[0] = new FramePoint(referenceFrame);
+       waypoints[1] = new FramePoint(referenceFrame);
+       positionSources[0].get(initialPosition);
+       positionSources[1].get(finalPosition);
+       initialPosition.changeFrame(referenceFrame);
+       finalPosition.changeFrame(referenceFrame);
 
-      fixedPointPositions[1].set(waypoints[0]);
-      fixedPointPositions[2].set(waypoints[1]);
+       for (int i = 0; i < 2; i++)
+       {
+          waypoints[i].set(finalPosition);
+          waypoints[i].sub(initialPosition);
+          waypoints[i].scale(DESIRED_PROPORTIONS_THROUGH_TRAJECTORY_FOR_GROUND_CLEARANCE[i]);
+          waypoints[i].add(initialPosition);
+          waypoints[i].setZ(waypoints[i].getZ() + groundClearance);
+       }
+
+       fixedPointPositions[1].set(waypoints[0]);
+       fixedPointPositions[2].set(waypoints[1]);	   
    }
 
    private void setFixedPointTimesAndWaypointVelocities(double[] arcLengths)
