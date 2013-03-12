@@ -8,4 +8,18 @@ public enum DRCRobotModel
    {
       return ATLAS_NO_HANDS;
    }
+   
+   public String getModelName()
+   {
+      switch(this)
+      {
+      case ATLAS_NO_HANDS:
+      case ATLAS_IROBOT_HANDS:
+      case ATLAS_SANDIA_HANDS:
+      case ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS:
+         return "atlas";
+      default:
+         throw new RuntimeException("Unkown model");
+      }
+   }
 }

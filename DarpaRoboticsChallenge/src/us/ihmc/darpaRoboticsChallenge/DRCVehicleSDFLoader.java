@@ -22,13 +22,13 @@ public class DRCVehicleSDFLoader
       
       URL fileURL = myClass.getResource("models/polaris_ranger_ev/model-1_3.sdf");
       resourceDirectories.add(myClass.getResource("models/").getFile());
-      String modelName = "polaris_ranger_ev";
+      
       
 
       JaxbSDFLoader jaxbSDFLoader;
       try
       {
-         jaxbSDFLoader = new JaxbSDFLoader(new File(fileURL.getFile()), modelName, resourceDirectories, null);
+         jaxbSDFLoader = new JaxbSDFLoader(new File(fileURL.getFile()), resourceDirectories);
       }
       catch (FileNotFoundException e)
       {
@@ -46,8 +46,9 @@ public class DRCVehicleSDFLoader
    
    public static void main(String argv[]) throws FileNotFoundException, JAXBException, MalformedURLException
    {
+      String modelName = "polaris_ranger_ev";
       JaxbSDFLoader loader = loadDRCVehicle();
-      Robot robot = loader.createRobot();
+      Robot robot = loader.createRobot(modelName);
       
       
       SimulationConstructionSet scs = new SimulationConstructionSet(robot);

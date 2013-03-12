@@ -41,9 +41,19 @@ public class SDFLinkHolder
    {
      name = SDFJointHolder.createValidVariableName(sdfLink.getName());
      transformToModelReferenceFrame = SDFConversionsHelper.poseToTransform(sdfLink.getPose());
-     mass = Double.parseDouble(sdfLink.getInertial().getMass());
-     inertialFrameWithRespectToLinkFrame = SDFConversionsHelper.poseToTransform(sdfLink.getInertial().getPose());
-     inertia = SDFConversionsHelper.sdfInertiaToMatrix3d(sdfLink.getInertial().getInertia());
+     
+     if(sdfLink.getInertial() != null)
+     {
+        inertialFrameWithRespectToLinkFrame = SDFConversionsHelper.poseToTransform(sdfLink.getInertial().getPose());
+        mass = Double.parseDouble(sdfLink.getInertial().getMass());
+        inertia = SDFConversionsHelper.sdfInertiaToMatrix3d(sdfLink.getInertial().getInertia());        
+     }
+     else
+     {
+        inertialFrameWithRespectToLinkFrame = new Transform3D();
+        mass = 0.0;
+        inertia = new Matrix3d();
+     }
      visuals = sdfLink.getVisuals();
      sensors = sdfLink.getSensors();
      if(sdfLink.getCollision() != null)

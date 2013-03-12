@@ -6,7 +6,7 @@ public class CameraConfiguration
 {
    public static final double DEFAULT_FIELD_OF_VIEW = Math.PI/4.0;
    public static final double DEFAULT_CLIP_DISTANCE_NEAR = 0.1;
-   public static final double DEFAULT_CLIP_DISTANCE_FAR = 100.0;
+   public static final double DEFAULT_CLIP_DISTANCE_FAR = 1000.0;
    
    protected String name;
 

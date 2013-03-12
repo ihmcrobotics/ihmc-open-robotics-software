@@ -317,4 +317,9 @@ public class DRCRobotJointMap implements SDFJointNameMap, RobotSpecificJointName
    {
       return lidarJointName;
    }
+
+   public String getModelName()
+   {
+      return selectedModel.getModelName();
+   }
 }

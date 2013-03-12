@@ -1,9 +1,8 @@
 package us.ihmc.SdfLoader;
 
-import java.util.Arrays;
-
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Matrix3d;
+import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.xmlDescription.SDFInertia;
@@ -16,15 +15,28 @@ public class SDFConversionsHelper
       return dirtyName.replace(".", "_");
    }
 
-   public static Vector3d stringToAxis(String xyz)
-   
+   public static Vector3d stringToNormalizedVector3d(String vector)
    {
-      String[] vecString = xyz.split("\\s");
+      Vector3d vector3d = stringToVector3d(vector);
+      vector3d.normalize();
+      return vector3d;
+
+   }
    
-      Vector3d axis = new Vector3d(Double.parseDouble(vecString[0]), Double.parseDouble(vecString[1]), Double.parseDouble(vecString[2]));
-      axis.normalize();
+
+   public static Vector3d stringToVector3d(String vector)
+   {
+      String[] vecString = vector.split("\\s+");
+      Vector3d vector3d = new Vector3d(Double.parseDouble(vecString[0]), Double.parseDouble(vecString[1]), Double.parseDouble(vecString[2]));
+      return vector3d;
+   }
    
-      return axis;
+   public static Vector2d stringToVector2d(String xy)
+   {
+      String[] vecString = xy.split("\\s+");
+   
+      Vector2d vector = new Vector2d(Double.parseDouble(vecString[0]), Double.parseDouble(vecString[1]));
+      return vector;
    
    }
 
@@ -81,4 +93,5 @@ public class SDFConversionsHelper
       }
       return inertia;
    }
+
 }

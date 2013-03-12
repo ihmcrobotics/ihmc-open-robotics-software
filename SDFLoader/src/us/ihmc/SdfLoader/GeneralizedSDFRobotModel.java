@@ -22,7 +22,6 @@ public class GeneralizedSDFRobotModel
    {
       this.name = name;
       this.resourceDirectories = resourceDirectories;
-      
       List<SDFLink> sdfLinks = model.getLinks();
       List<SDFJoint> sdfJoints = model.getJoints();
       
