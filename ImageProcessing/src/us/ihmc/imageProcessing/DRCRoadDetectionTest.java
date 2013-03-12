@@ -617,15 +617,16 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
 //      mainContainer.add(blobDetectionViewer, gbc);
 //      gbc.gridheight = 1;
 
-      lanePositionIndicatorPanel = new LanePositionIndicatorPanel("./media/images/CarIcon.png");
+      lanePositionIndicatorPanel = new LanePositionIndicatorPanel("./media/images/CarIcon.png", steeringInputEstimator);
       lanePositionIndicatorPanel.setPreferredSize(new Dimension(1, 43));
       gbc.gridx = 0;
       gbc.gridy++;
       gbc.weightx = 1.0;
       gbc.weighty = 0.0;
       mainContainer.add(lanePositionIndicatorPanel, gbc);
-      lanePositionEstimator = new LanePositionEstimator(lanePositionIndicatorPanel, steeringInputEstimator);
+      lanePositionEstimator = new LanePositionEstimator(lanePositionIndicatorPanel);
       obstaclePositionEstimator = new ObstaclePositionEstimator(lanePositionIndicatorPanel);
+      rawImageViewer.addPostProcessor(obstaclePositionEstimator);
 
       mainFrame.pack();
       mainFrame.setVisible(true);
