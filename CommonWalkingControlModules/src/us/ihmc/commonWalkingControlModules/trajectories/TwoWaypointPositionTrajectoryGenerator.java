@@ -2,6 +2,8 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 
 import static org.ejml.ops.CommonOps.solve;
 
+import javax.vecmath.Point3d;
+
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
@@ -10,8 +12,7 @@ import us.ihmc.utilities.math.geometry.Direction;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-
-import cern.colt.Arrays;
+import us.ihmc.utilities.math.geometry.Sphere3d;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
@@ -29,6 +30,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
 {
    private final static double[] DESIRED_PROPORTIONS_THROUGH_TRAJECTORY_FOR_GROUND_CLEARANCE = new double[] {1.0 / 3.0, 2.0 / 3.0};
    private final static double FRACTION_OF_TIME_TO_OR_FROM_WAYPOINT_FOR_SPEED_UP_OR_SLOW_DOWN = .6;
+   private final static double SPHERE_EDGE_TO_WAYPOINT_DISTANCE = 0.1;
 
    private final double groundClearance;
 
@@ -180,29 +182,53 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       }
    }
    
-// public void initializeUsingSphere(Sphere3d sphere3d)
-// {
-//  FramePoint[] waypoints = getWaypointsForSphere(sphere3d);
-//  initialize(waypoints);
-// }
-// 
-// private FramePoint[] getWaypointsForSphere(Sphere3d sphere3d)
-// {
-//  Point3d sphereCenter = new Point3d();
-//  sphere3d.getCenter(sphereCenter);
-//  double radius = sphere3d.getRadius();
-//  Point3d wayPoint = new Point3d();
-////   boolean isIn
-//  
-//  setWaypointsToDefault();
-//  for(int i = 0; i < 2; i++)
-//  {
-//     wayPoint.set(fixedPointPositions[i].getX(), fixedPointPositions[i].getY(), fixedPointPositions[i].getZ());
-////    if()
-//  }
-//  
-//  return waypoints;
-// }
+   public void initializeUsingSphere(Sphere3d sphere3d)
+   {
+	   FramePoint[] waypoints = getWaypointsForSphere(sphere3d);
+	   initialize(waypoints);
+   }
+   
+   private FramePoint[] getWaypointsForSphere(Sphere3d sphere3d)
+   {
+	   FramePoint[] wayPoints = new FramePoint[2];
+	   Point3d sphereCenterPoint3d = new Point3d();
+	   sphere3d.getCenter(sphereCenterPoint3d);
+	   FramePoint sphereCenterFramePoint = new FramePoint(referenceFrame, sphereCenterPoint3d.getX(), sphereCenterPoint3d.getY(), sphereCenterPoint3d.getZ());
+	   double radius = sphere3d.getRadius();
+	   boolean areDefaultWaypointsOutsideSphere = true;
+	   
+	   FramePoint tempPositions = new FramePoint(referenceFrame);
+	   for (int i = 0; i < 2; i++)
+	   {
+	      positionSources[i].get(tempPositions);
+	      tempPositions.changeFrame(referenceFrame);
+	      fixedPointPositions[3*i].set(tempPositions);
+	   }
+	   
+	   setWaypointsToDefault();
+	   double[] sphereWaypointDistances = new double[2];
+	   for(int i = 0; i < 2; i++)
+	   {
+		   sphereWaypointDistances[i] = wayPoints[i].distance(sphereCenterFramePoint);
+		   wayPoints[i].set(fixedPointPositions[i].getX(), fixedPointPositions[i].getY(), fixedPointPositions[i].getZ());
+		   areDefaultWaypointsOutsideSphere = areDefaultWaypointsOutsideSphere && (sphereWaypointDistances[i] < radius);
+	   }
+	   
+	   if(!areDefaultWaypointsOutsideSphere)
+	   {
+		   FrameVector waypointToSphereSurface = new FrameVector(referenceFrame);
+		   for(int i = 0; i < 2; i++)
+		   {
+			   waypointToSphereSurface.sub(wayPoints[i], sphereCenterFramePoint);
+			   waypointToSphereSurface.normalize();
+			   double distanceToMoveWaypoint = radius - sphereWaypointDistances[i] + SPHERE_EDGE_TO_WAYPOINT_DISTANCE;
+			   waypointToSphereSurface.scale(distanceToMoveWaypoint);
+			   wayPoints[i].add(waypointToSphereSurface);
+		   }
+	   }
+	   
+	   return wayPoints;
+   }
 
    private double[] getArcLengthsApproximatedByDistance()
    {
