@@ -265,6 +265,63 @@ where
 .
 \end_layout
 
+\begin_layout Standard
+
+\end_layout
+
+\begin_layout Standard
+Measurements:
+\end_layout
+
+\begin_layout Itemize
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+\begin_inset Formula $z_{\omega,i}$
+\end_inset
+
+: Measured angular velocity of IMU i in body frame.
+ Includes bias and noise.
+ 
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $z_{\dot{v,}i}:$
+\end_inset
+
+Measured acceleration of IMU i in body frame.
+ Includes bias and noise.
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $z_{q,i}$
+\end_inset
+
+: Measured orientation of IMU i with respect to world.
+ Includes noise.
+ May include bias.
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $z_{\dot{p},i}$
+\end_inset
+
+: Measured velocity of stationary point 
+\begin_inset Formula $p_{i}$
+\end_inset
+
+
+\end_layout
+
 \begin_layout Subsection
 Linearized error model
 \end_layout
