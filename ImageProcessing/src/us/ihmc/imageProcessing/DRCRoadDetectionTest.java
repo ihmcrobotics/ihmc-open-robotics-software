@@ -205,10 +205,12 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
    }
 
 
-   public BufferedImage countConeBlobs(BufferedImage image)
+   public BufferedImage countConeBlobs(BufferedImage inputImage)
    {
-      coneColorFilter.filter(image, image);
-      ImageFloat32 input = ConvertBufferedImage.convertFromSingle(image, null, ImageFloat32.class);
+      BufferedImage croppedImage = new BufferedImage(inputImage.getWidth(), inputImage.getHeight(), BufferedImage.TYPE_INT_RGB);
+
+      coneColorFilter.filter(inputImage, croppedImage);
+      ImageFloat32 input = ConvertBufferedImage.convertFromSingle(croppedImage, null, ImageFloat32.class);
       ImageUInt8 binary = new ImageUInt8(input.width, input.height);
       ImageSInt32 blobs = new ImageSInt32(input.width, input.height);
 
@@ -348,11 +350,10 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
    }
 
 
-
-   public BufferedImage findRoad(BufferedImage image)
+   public BufferedImage findRoad(BufferedImage src)
    {
       // convert into a usable format
-      ImageFloat32 input = ConvertBufferedImage.convertFromSingle(image, null, ImageFloat32.class);
+      ImageFloat32 input = ConvertBufferedImage.convertFromSingle(src, null, ImageFloat32.class);
       ImageUInt8 binary = new ImageUInt8(input.width, input.height);
       ImageSInt32 blobs = new ImageSInt32(input.width, input.height);
 
@@ -383,85 +384,101 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
       numBlobs = filterBlobsNotTouchingEdges(blobs, numBlobs);
 
       // Render the binary image for output and display it in a window
-      BufferedImage visualized = VisualizeBinaryData.renderLabeled(blobs, numBlobs, null);
+      BufferedImage dst = VisualizeBinaryData.renderLabeled(blobs, numBlobs, null);
 
-      return visualized;
+      return dst;
 
    }
 
+   int tick = 4;
 
    private void process(final BufferedImage input)
    {
       if (!PAUSE)
       {
-         Thread tmp = new Thread(new Runnable()
-         {
-            @Override
-            public void run()
-            {
-               repackRawIfImageSizeChanges(input.getWidth(), input.getHeight());
-               rawImageViewer.updateImage(input);
+         repackRawIfImageSizeChanges(input.getWidth(), input.getHeight());
 
-//             if (cones.getNumberOfFeatures() > 0)
-//                System.out.println("I SEE A CONE");
-               // CropFilter cropFilter = new CropFilter(0, 0, input.getWidth(), input.getHeight() - input.getHeight() / 4);
-               BufferedImage croppedImage = new BufferedImage(input.getWidth(), input.getHeight() - input.getHeight() / 4, BufferedImage.TYPE_INT_RGB);
+         rawImageViewer.updateImage(input);
 
-//             cropFilter.filter(input, croppedImage);
-               croppedImage = input;
+         
 
-               coneColorFilter.setHorizonYLocation(input.getHeight() / 2 - 20);
+//            Thread tmp = new Thread(new Runnable()
+//            {
+//               @Override
+//               public void run()
+//               {
+//                if (cones.getNumberOfFeatures() > 0)
+//                   System.out.println("I SEE A CONE");
+                  // CropFilter cropFilter = new CropFilter(0, 0, input.getWidth(), input.getHeight() - input.getHeight() / 4);
+                  // BufferedImage copiedImage = new BufferedImage(input.getWidth(), input.getHeight(), BufferedImage.TYPE_INT_RGB);
 
-               // BufferedImage coneBlobs = countConeBlobs(deepCopy(croppedImage));
-               // ArrayList<ConvexPolygon2d> coneboxes = detectConeLocations(coneBlobs);
+//                cropFilter.filter(input, croppedImage);
+//                  copiedImage = input;
+
+                 // if (tick % 5 == 0)
+                 // {
+                  //   tick = 0;
+                  coneColorFilter.setHorizonYLocation(input.getHeight() / 2 - 20);
+
+                  BufferedImage coneBlobs = countConeBlobs(input);
+//                  }
+//                  else
+//                  {
+//                     tick++;
+//                  }
+                  roadColorfilter.setHorizonYLocation(input.getHeight() / 2 - 20);
+                  BufferedImage roadFilteredByColor = new BufferedImage(input.getWidth(), input.getHeight(), BufferedImage.TYPE_INT_RGB);
+                  roadColorfilter.filter(input, roadFilteredByColor);
+                  BufferedImage roadblobs = findRoad(roadFilteredByColor);
+
+                  List<LineParametric2D_F32> list = detectLines(roadblobs, ImageUInt8.class, ImageSInt16.class);
+
+                  ArrayList<Line2d> lines = new ArrayList<Line2d>();
 
 
-               roadColorfilter.setHorizonYLocation(input.getHeight() / 2 - 20);
-
-               roadColorfilter.filter(croppedImage, croppedImage);
-               croppedImage = findRoad(croppedImage);
-
-               List<LineParametric2D_F32> list = detectLines(croppedImage, ImageUInt8.class, ImageSInt16.class);
-
-               ArrayList<Line2d> lines = new ArrayList<Line2d>();
 
 
+                  for (LineParametric2D_F32 lineParametric2D_f32 : list)
+                  {
+                     Point2D_F32 pointOnLine1 = lineParametric2D_f32.getPointOnLine(0.0f);
+                     Point2d p1 = new Point2d(pointOnLine1.getX(), pointOnLine1.getY());
+                     Point2D_F32 pointOnLine2 = lineParametric2D_f32.getPointOnLine(1.0f);
+                     Point2d p2 = new Point2d(pointOnLine2.getX(), pointOnLine2.getY());
 
+                     Line2d line2d = new Line2d(p1, p2);
+                     lines.add(line2d);
+                  }
 
-               for (LineParametric2D_F32 lineParametric2D_f32 : list)
-               {
-                  Point2D_F32 pointOnLine1 = lineParametric2D_f32.getPointOnLine(0.0f);
-                  Point2d p1 = new Point2d(pointOnLine1.getX(), pointOnLine1.getY());
-                  Point2D_F32 pointOnLine2 = lineParametric2D_f32.getPointOnLine(1.0f);
-                  Point2d p2 = new Point2d(pointOnLine2.getX(), pointOnLine2.getY());
+                  lines = removeBadLines(lines);
 
-                  Line2d line2d = new Line2d(p1, p2);
-                  lines.add(line2d);
-               }
+//                if (lines.size() > 2)
+//                   System.out.println("TURN APPROACHING");
+                  linePainter.setLines(lines);
+                  vanishingPointDetector.setLines(lines);
+                  lanePositionEstimator.setLines(lines);
+                  obstaclePositionEstimator.setLines(lines);
 
-               lines = removeBadLines(lines);
+                  if (boundingBoxes != null)
+                  {
+                     boundsPainter.setBoundingBoxes(boundingBoxes);
+                     obstaclePositionEstimator.setBoundingBoxes(boundingBoxes);
+                  }
 
-//             if (lines.size() > 2)
-//                System.out.println("TURN APPROACHING");
-               linePainter.setLines(lines);
-               vanishingPointDetector.setLines(lines);
-               lanePositionEstimator.setLines(lines);
-               obstaclePositionEstimator.setLines(lines);
+                  repackIfImageSizeChanges(roadblobs.getWidth(), roadblobs.getHeight());
+                  analyzedImageViewer.updateImage(roadblobs);
 
-               if (boundingBoxes != null)
-               {
-                  boundsPainter.setBoundingBoxes(boundingBoxes);
-                  obstaclePositionEstimator.setBoundingBoxes(boundingBoxes);
-               }
+               //}
 
-               repackIfImageSizeChanges(croppedImage.getWidth(), croppedImage.getHeight());
-               analyzedImageViewer.updateImage(croppedImage);
-            }
-         });
-         tmp.start();
+//
+//            });
+//            tmp.start();
+         
+        
       }
 
 
+
+//    drawCarPosition();
    }
 
 
@@ -497,7 +514,6 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
    {
       if ((analyzedImageViewer.getWidth() < width) || (analyzedImageViewer.getHeight() < height))
       {
-//         System.out.println("repack image width = " + width +":" + height);
          Dimension dimension = new Dimension(width, height);
          analyzedImageViewer.setPreferredSize(dimension);
          boundsPainter.setImageHeight(height);
@@ -508,9 +524,9 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
 
    private void repackRawIfImageSizeChanges(int width, int height)
    {
+//    System.out.println("width = " + width +":" + height);
       if ((rawImageViewer.getWidth() < width) || (rawImageViewer.getHeight() < height))
       {
-//         System.out.println("repack raw image width = " + width +":" + height);
          Dimension dimension = new Dimension(width, height);
          rawImageViewer.setPreferredSize(dimension);
          lanePositionEstimator.setScreenDimension(dimension);
@@ -663,8 +679,6 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
    {
       DRCRoadDetectionTest drcRoadDetectionTest = new DRCRoadDetectionTest();
       final VideoPlayer videoPlayer = new VideoPlayer("./media/videos/rightEye.mp4", drcRoadDetectionTest, true);
-//      final VideoPlayer videoPlayer = new VideoPlayer("./media/videos/rightEyeLaneChanging.mov", drcRoadDetectionTest, true);
-//      final VideoPlayer videoPlayer = new VideoPlayer("./media/videos/rightEyeStraightaway.mov", drcRoadDetectionTest, true);
       videoPlayer.start();
    }
 
