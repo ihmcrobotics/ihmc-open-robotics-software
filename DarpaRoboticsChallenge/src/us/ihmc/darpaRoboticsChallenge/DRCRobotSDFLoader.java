@@ -15,7 +15,6 @@ public class DRCRobotSDFLoader
    public static JaxbSDFLoader loadDRCRobot(DRCRobotJointMap jointMap)
    {
       URL fileURL;
-      String modelName;
       ArrayList<String> resourceDirectories = new ArrayList<String>();
       Class<DRCRobotSDFLoader> myClass = DRCRobotSDFLoader.class;
       DRCRobotModel selectedModel = jointMap.getSelectedModel();
@@ -28,19 +27,16 @@ public class DRCRobotSDFLoader
          case ATLAS_NO_HANDS :
          case ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS :
             fileURL = myClass.getResource("models/GFE/atlas.sdf");
-            modelName = "atlas";
             
             break;
 
          case ATLAS_IROBOT_HANDS :
             fileURL = myClass.getResource("models/GFE/atlas_irobot_hands.sdf");
             resourceDirectories.add(myClass.getResource("models/GFE/gazebo_models/irobot_hand_description").getFile());
-            modelName = "atlas";
             break;
 
          case ATLAS_SANDIA_HANDS :
             fileURL = myClass.getResource("models/GFE/atlas_sandia_hands.sdf");
-            modelName = "atlas";
 
             break;
          default:
@@ -50,7 +46,7 @@ public class DRCRobotSDFLoader
       JaxbSDFLoader jaxbSDFLoader;
       try
       {
-         jaxbSDFLoader = new JaxbSDFLoader(new File(fileURL.getFile()), modelName, resourceDirectories, jointMap);
+         jaxbSDFLoader = new JaxbSDFLoader(new File(fileURL.getFile()), resourceDirectories);
       }
       catch (FileNotFoundException e)
       {

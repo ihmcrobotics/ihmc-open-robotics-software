@@ -49,7 +49,7 @@ public class SDFJointHolder
          throw new RuntimeException("Joint type " + typeString + " not implemented yet");
       }
 
-      axis = SDFConversionsHelper.stringToAxis(sdfJoint.getAxis().getXyz());
+      axis = SDFConversionsHelper.stringToNormalizedVector3d(sdfJoint.getAxis().getXyz());
       
       if(sdfJoint.getAxis().getLimit() != null)
       {

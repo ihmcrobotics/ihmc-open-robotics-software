@@ -7,15 +7,23 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.media.j3d.Transform3D;
+import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;
+import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
 
+import org.apache.commons.lang.builder.ToStringBuilder;
+
+import us.ihmc.SdfLoader.xmlDescription.SDFGeometry.HeightMap.Blend;
+import us.ihmc.SdfLoader.xmlDescription.SDFGeometry.HeightMap.Texture;
 import us.ihmc.SdfLoader.xmlDescription.SDFVisual;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.ModelFileType;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
+import us.ihmc.graphics3DAdapter.graphics.appearances.HeightBasedTerrainBlend;
 import us.ihmc.graphics3DAdapter.graphics.appearances.SDFAppearance;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.utilities.math.geometry.GeometryTools;
 
 
 public class SDFGraphics3DObject extends Graphics3DObject
@@ -50,14 +58,12 @@ public class SDFGraphics3DObject extends Graphics3DObject
             addCoordinateSystem(0.1);         
          }
          translate(modelOffset);
-         rotate(modelRotation);       
-         
+         rotate(modelRotation);     
          AppearanceDefinition appearance = null;
          if(sdfVisual.getMaterial() != null)
          {
             if(sdfVisual.getMaterial().getScript() != null)
             {
-               System.out.println("Loading SDF Material");
                ArrayList<String> paths = new ArrayList<String>();
                
                if(sdfVisual.getMaterial().getScript().getUri() != null)
@@ -71,14 +77,19 @@ public class SDFGraphics3DObject extends Graphics3DObject
                
                String name = sdfVisual.getMaterial().getScript().getName();
                
-               appearance = new SDFAppearance(paths, name);
+               appearance = new SDFAppearance(paths, name, resourceDirectories);
             }
          }
          
          if(sdfVisual.getGeometry().getMesh() != null)
          {
             String uri = convertToFullPath(resourceDirectories, sdfVisual.getGeometry().getMesh().getUri());
-            addMesh(uri, visualPose, appearance);
+            if(sdfVisual.getGeometry().getMesh().getScale() != null)
+            {
+               Vector3d scale = SDFConversionsHelper.stringToVector3d(sdfVisual.getGeometry().getMesh().getScale());
+               scale(scale);
+            }
+            addMesh(uri, visualPose, appearance, resourceDirectories);
          }
          else if(sdfVisual.getGeometry().getCylinder() != null)
          {
@@ -101,9 +112,49 @@ public class SDFGraphics3DObject extends Graphics3DObject
             double radius = Double.parseDouble(sdfVisual.getGeometry().getSphere().getRadius());
             addSphere(radius, getDefaultAppearanceIfNull(appearance));
          }
+         else if(sdfVisual.getGeometry().getPlane() != null)
+         {
+            Vector3d normal = SDFConversionsHelper.stringToNormalizedVector3d(sdfVisual.getGeometry().getPlane().getNormal());
+            Vector2d size = SDFConversionsHelper.stringToVector2d(sdfVisual.getGeometry().getPlane().getSize());
+            
+            AxisAngle4d planeRotation = GeometryTools.getRotationBasedOnNormal(normal);
+            rotate(planeRotation);
+            addCube(size.x, size.y, 0.005, getDefaultAppearanceIfNull(appearance));
+         }
+         else if(sdfVisual.getGeometry().getHeightMap() != null)
+         {
+            String URI = convertToFullPath(resourceDirectories, sdfVisual.getGeometry().getHeightMap().getUri());
+            SDFHeightMap heightMap = new SDFHeightMap(URI, sdfVisual.getGeometry().getHeightMap());
+            
+            
+            AppearanceDefinition app = DEFAULT_APPEARANCE;
+            if(sdfVisual.getGeometry().getHeightMap().getTextures() != null)
+            {
+               double width = heightMap.getXMax() - heightMap.getXMin();
+               HeightBasedTerrainBlend sdfTerrainBlend = new HeightBasedTerrainBlend(heightMap);
+               for(Texture text : sdfVisual.getGeometry().getHeightMap().getTextures())
+               {
+                  double size = Double.parseDouble(text.getSize());
+                  double scale = width/size;
+                  sdfTerrainBlend.addTexture(scale, convertToFullPath(resourceDirectories, text.getDiffuse()),
+                        convertToFullPath(resourceDirectories, text.getNormal()));
+               }
+               
+               for(Blend blend : sdfVisual.getGeometry().getHeightMap().getBlends())
+               {
+                  sdfTerrainBlend.addBlend(Double.parseDouble(blend.getMinHeight()), Double.parseDouble(blend.getFadeDist()));
+               }
+               
+               app = sdfTerrainBlend;
+            }
+            translate(heightMap.getOffset());
+            addHeightMap(heightMap, 1000, 1000, app);
+         }
          else
          {
             System.err.println("Visual for " + sdfVisual.getName() + " not implemented yet");
+            System.err.println("Defined visual" + ToStringBuilder.reflectionToString(sdfVisual.getGeometry()));
+            
          }
 
          
@@ -122,7 +173,7 @@ public class SDFGraphics3DObject extends Graphics3DObject
       }
    }
    
-   private void addMesh(String mesh, Transform3D visualPose, AppearanceDefinition appearance)
+   private void addMesh(String mesh, Transform3D visualPose, AppearanceDefinition appearance, ArrayList<String> resourceDirectories)
    {
 
       // STL files do not have appearances
@@ -132,7 +183,7 @@ public class SDFGraphics3DObject extends Graphics3DObject
       }
       
 
-      addModelFile(mesh, appearance);
+      addModelFile(mesh, resourceDirectories, appearance);
 
    }
 

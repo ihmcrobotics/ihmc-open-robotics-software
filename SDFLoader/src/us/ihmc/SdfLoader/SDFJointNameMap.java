@@ -20,6 +20,8 @@ public interface SDFJointNameMap extends RobotSpecificJointNames
          LEG, ARM, SPINE, NECK
       }
    
+   public String getModelName();
+   
    public JointRole getJointRole(String jointName);
    public Pair<RobotSide, LegJointName> getLegJointName(String jointName);
    public Pair<RobotSide, ArmJointName> getArmJointName(String jointName);

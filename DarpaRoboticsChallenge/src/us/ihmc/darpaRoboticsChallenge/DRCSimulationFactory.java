@@ -64,7 +64,7 @@ public class DRCSimulationFactory
       {
          try
          {
-            GazeboRobot gazeboRobot = new GazeboRobot("localhost", jaxbSDFLoader.getGeneralizedSDFRobotModel());
+            GazeboRobot gazeboRobot = new GazeboRobot("localhost", jaxbSDFLoader.getGeneralizedSDFRobotModel(jointMap.getModelName()));
             
             simulationTicksPerControlTick = 1;
             simulateDT = gazeboRobot.getDT();
@@ -79,7 +79,7 @@ public class DRCSimulationFactory
       }
       else
       {
-         simulatedRobot = jaxbSDFLoader.createRobot();
+         simulatedRobot = jaxbSDFLoader.createRobot(jointMap);
 
          simulationTicksPerControlTick = controllerFactory.getSimulationTicksPerControlTick();
          simulateDT = scsInitialSetup.getDT();
@@ -89,7 +89,7 @@ public class DRCSimulationFactory
       
       simulatedRobot.setDynamicIntegrationMethod(scsInitialSetup.getDynamicIntegrationMethod());
       
-      SDFFullRobotModel fullRobotModelForSimulation = jaxbSDFLoader.createFullRobotModel();
+      SDFFullRobotModel fullRobotModelForSimulation = jaxbSDFLoader.createFullRobotModel(jointMap);
 
 //    drcRobotSDFLoader = new DRCRobotSDFLoader(robotModel);
 //    jaxbSDFLoader = drcRobotSDFLoader.loadDRCRobot();

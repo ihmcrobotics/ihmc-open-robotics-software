@@ -1,5 +1,7 @@
 package us.ihmc.SdfLoader.xmlDescription;
 
+import java.util.List;
+
 import javax.xml.bind.annotation.XmlElement;
 
 public class SDFGeometry
@@ -277,8 +279,8 @@ public class SDFGeometry
       private String size;
       private String pos;
 
-      private Texture texture;
-      private Blend blend;
+      private List<Texture> textures;
+      private List<Blend> blends;
 
       public String getUri()
       {
@@ -313,26 +315,26 @@ public class SDFGeometry
          this.pos = pos;
       }
 
-      public Texture getTexture()
+      public List<Texture> getTextures()
       {
-         return texture;
+         return textures;
       }
 
       @XmlElement(name="texture")
-      public void setTexture(Texture texture)
+      public void setTextures(List<Texture> textures)
       {
-         this.texture = texture;
+         this.textures = textures;
       }
 
-      public Blend getBlend()
+      public List<Blend> getBlends()
       {
-         return blend;
+         return blends;
       }
 
       @XmlElement(name="blend")
-      public void setBlend(Blend blend)
+      public void setBlends(List<Blend> blends)
       {
-         this.blend = blend;
+         this.blends = blends;
       }
 
       public static class Texture

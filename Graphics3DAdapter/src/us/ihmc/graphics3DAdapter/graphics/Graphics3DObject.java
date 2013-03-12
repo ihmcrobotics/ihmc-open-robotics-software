@@ -5,6 +5,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
@@ -188,6 +189,13 @@ public class Graphics3DObject
    {
       graphics3DInstructions.add(new Graphics3DRotateInstruction(rot));
    }
+   
+   public void rotate(AxisAngle4d rot)
+   {
+      Matrix3d rotation = new Matrix3d();
+      rotation.set(rot);
+      rotate(rotation);
+   }
 
    /**
     * Scales the coordinate system by the specified scale factor. This does not scale existing
@@ -306,6 +314,14 @@ public class Graphics3DObject
    {
       
       Graphics3DAddModelFileInstruction graphics3dAddModelFileInstruction = new Graphics3DAddModelFileInstruction(fileName, app);
+      graphics3DInstructions.add(graphics3dAddModelFileInstruction);
+      return graphics3dAddModelFileInstruction;
+   }
+   
+   public Graphics3DAddModelFileInstruction addModelFile(String fileName, ArrayList<String> resourceDirectories, AppearanceDefinition app)
+   {
+      
+      Graphics3DAddModelFileInstruction graphics3dAddModelFileInstruction = new Graphics3DAddModelFileInstruction(fileName, app, resourceDirectories);
       graphics3DInstructions.add(graphics3dAddModelFileInstruction);
       return graphics3dAddModelFileInstruction;
    }
@@ -873,6 +889,11 @@ public class Graphics3DObject
       MeshDataHolder meshData = MeshDataGenerator.Polygon(polygonPoints);
       
       return addMeshData(meshData, yoAppearance);
+   }
+   
+   public Graphics3DAddMeshDataInstruction addPolygon(AppearanceDefinition yoAppearance, Point3d... polygonPoints)
+   {
+      return addPolygon(polygonPoints, yoAppearance);
    }
    
    
