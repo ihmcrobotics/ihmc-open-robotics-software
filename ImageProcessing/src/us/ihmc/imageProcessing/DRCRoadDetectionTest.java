@@ -36,6 +36,7 @@ import us.ihmc.imageProcessing.utilities.LinePainter;
 import us.ihmc.imageProcessing.utilities.PaintableImageViewer;
 import us.ihmc.imageProcessing.utilities.VideoPlayer;
 import us.ihmc.utilities.camera.VideoListener;
+import us.ihmc.utilities.math.geometry.BoundingBox2d;
 import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.Line2d;
 import boofcv.abst.feature.detect.interest.ConfigFastHessian;
@@ -60,7 +61,8 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
 
    private PaintableImageViewer rawImageViewer = new PaintableImageViewer();
    private PaintableImageViewer analyzedImageViewer = new PaintableImageViewer();
-//   private PaintableImageViewer blobDetectionViewer = new PaintableImageViewer();
+
+// private PaintableImageViewer blobDetectionViewer = new PaintableImageViewer();
    private LinePainter linePainter = new LinePainter(4.0f);
    private BoundsPainter boundsPainter = new BoundsPainter(4.0f);
 
@@ -88,7 +90,7 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
    private int erodeCount = 2;
    private int dilateCount = 2;
 
-   HashMap<Integer, int[]> boundingBoxes = null;
+   ArrayList<BoundingBox2d> boundingBoxes = new ArrayList<BoundingBox2d>();
 
 
 
@@ -131,10 +133,9 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
       coneColorFilter.addColorToLookFor(new RGB(131, 49, 4));
       coneColorFilter.addColorToLookFor(new RGB(129, 47, 2));
       coneColorFilter.addColorToLookFor(new RGB(95, 51, 0));
-      
+
       coneColorFilter.addColorToLookFor(new RGB(120, 52, 14));
       coneColorFilter.addColorToLookFor(new RGB(164, 63, 7));
-
 
 
 
@@ -230,7 +231,8 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
 
 
       BufferedImage visualized = VisualizeBinaryData.renderLabeled(blobs, numBlobs, null);
-//      blobDetectionViewer.updateImage(visualized);
+
+//    blobDetectionViewer.updateImage(visualized);
       repackConeBlobImageSizeChanges(visualized.getWidth(), visualized.getHeight());
 
 
@@ -275,20 +277,9 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
 
 
 
-   private HashMap<Integer, int[]> findBlobBoundingBoxes(ImageSInt32 labeled, int numLabels)
+   private ArrayList<BoundingBox2d> findBlobBoundingBoxes(ImageSInt32 labeled, int numLabels)
    {
-      HashMap<Integer, int[]> boundingBoxes = new HashMap<Integer, int[]>();
-
-      for (int i = 0; i < numLabels; i++)
-      {
-         int[] bounds = new int[4];
-         bounds[0] = Integer.MAX_VALUE;
-         bounds[1] = Integer.MAX_VALUE;
-         bounds[2] = Integer.MIN_VALUE;
-         bounds[3] = Integer.MIN_VALUE;
-
-         boundingBoxes.put(i, bounds);
-      }
+      HashMap<Integer, BoundingBox2d> boundingBoxes = new HashMap<Integer, BoundingBox2d>();
 
 
       for (int y = 0; y < labeled.height; y++)
@@ -299,25 +290,30 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
             int blobID = labeled.data[index];
             if (blobID != 0)
             {
-               int[] currentBounds = boundingBoxes.get(blobID - 1);
-
-               if (currentBounds[0] > x)
+               BoundingBox2d currentBounds = boundingBoxes.get(blobID - 1);
+               if (currentBounds == null)
                {
-                  currentBounds[0] = x;
-               }
-               else if (currentBounds[2] < x)
-               {
-                  currentBounds[2] = x;
+                  currentBounds = new BoundingBox2d(new Point2d(x, y), new Point2d(x, y));
+                  boundingBoxes.put(blobID - 1, currentBounds);
                }
 
-               if (currentBounds[1] > y)
+               if (currentBounds.getMinPoint().x > x)
                {
-                  currentBounds[1] = y;
+                  currentBounds.getMinPoint().x = x;
+               }
+               else if (currentBounds.getMaxPoint().x < x)
+               {
+                  currentBounds.getMaxPoint().x = x;
                }
 
-               else if (currentBounds[3] < y)
+               if (currentBounds.getMinPoint().y > y)
                {
-                  currentBounds[3] = y;
+                  currentBounds.getMinPoint().y = y;
+               }
+
+               else if (currentBounds.getMaxPoint().y < y)
+               {
+                  currentBounds.getMaxPoint().y = y;
                }
             }
          }
@@ -326,16 +322,19 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
       // add buffer zone
 
       double bufferPercent = 0.5;
+      ArrayList<BoundingBox2d> finalBoxes = new ArrayList<BoundingBox2d>();
       for (int i = 0; i < numLabels; i++)
       {
-         int[] bounds = boundingBoxes.get(i);
-         double width = bounds[2] - bounds[0];
-         int calcBuffer = new Double(width * bufferPercent).intValue();
-         bounds[0] -= calcBuffer;
-         bounds[2] += calcBuffer;
+         BoundingBox2d bounds = boundingBoxes.get(i);
+//         double width = bounds.getMaxPoint().x - bounds.getMinPoint().x;
+//         int calcBuffer = new Double(width * bufferPercent).intValue();
+//         bounds.getMinPoint().x -= calcBuffer;
+//         bounds.getMaxPoint().x += calcBuffer;
+         finalBoxes.add(bounds);
       }
 
-      return boundingBoxes;
+
+      return finalBoxes;
    }
 
 
@@ -435,6 +434,7 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
                   vanishingPointDetector.setLines(lines);
                   lanePositionEstimator.setLines(lines);
                   obstaclePositionEstimator.setLines(lines);
+
                   if (boundingBoxes != null)
                   {
                      boundsPainter.setBoundingBoxes(boundingBoxes);
@@ -614,8 +614,9 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
       gbc.gridheight = 2;
       mainContainer.add(analyzedImageViewer, gbc);
       gbc.gridx++;
-//      mainContainer.add(blobDetectionViewer, gbc);
-//      gbc.gridheight = 1;
+
+//    mainContainer.add(blobDetectionViewer, gbc);
+//    gbc.gridheight = 1;
 
       lanePositionIndicatorPanel = new LanePositionIndicatorPanel("./media/images/CarIcon.png", steeringInputEstimator);
       lanePositionIndicatorPanel.setPreferredSize(new Dimension(1, 43));

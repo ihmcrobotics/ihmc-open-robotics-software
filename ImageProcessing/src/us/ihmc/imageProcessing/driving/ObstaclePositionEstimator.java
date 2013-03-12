@@ -21,7 +21,7 @@ public class ObstaclePositionEstimator implements PostProcessor
    private LanePositionIndicatorPanel lanePositionIndicatorPanel;
    private Dimension imageSize = new Dimension(640, 480);
    private Line2d axis = new Line2d(new Point2d(0, 320), new Vector2d(1.0, 0.0));
-   private HashMap<Integer, int[]> boundingBoxes = new HashMap<Integer, int[]>();
+   private ArrayList<BoundingBox2d> boundingBoxes = new ArrayList<BoundingBox2d>();
    private ArrayList<ColoredLine> coloredLines = new ArrayList<ColoredLine>();
    private double roadWidthInMeters = 7.34;
    private double carWidthInMeters = 1.5;
@@ -37,7 +37,7 @@ public class ObstaclePositionEstimator implements PostProcessor
       this.lines = lines;
    }
 
-   public void setBoundingBoxes(HashMap<Integer, int[]> boundingBoxes)
+   public void setBoundingBoxes(ArrayList<BoundingBox2d> boundingBoxes)
    {
       this.boundingBoxes = boundingBoxes;
       updateLanePositionEstimate();
@@ -49,7 +49,7 @@ public class ObstaclePositionEstimator implements PostProcessor
       Line2d rightEdgeOfRoad = null;
       for (Line2d line : lines)
       {
-         if (leftEdgeOfRoad == null && rightEdgeOfRoad == null)
+         if ((leftEdgeOfRoad == null) && (rightEdgeOfRoad == null))
          {
             leftEdgeOfRoad = line;
             rightEdgeOfRoad = line;
@@ -60,6 +60,7 @@ public class ObstaclePositionEstimator implements PostProcessor
             {
                leftEdgeOfRoad = line;
             }
+
             if (line.getSlope() > rightEdgeOfRoad.getSlope())
             {
                rightEdgeOfRoad = line;
@@ -81,17 +82,18 @@ public class ObstaclePositionEstimator implements PostProcessor
    {
       coloredLines.clear();
 
-      ArrayList<int[]> boundingBoxValues = new ArrayList<int[]>(boundingBoxes.values());
-      Collections.reverse(boundingBoxValues);
+      Collections.reverse(boundingBoxes);
       ArrayList<BoundingBox2d> obstacles = new ArrayList<BoundingBox2d>();
+
+//    System.out.println("updateObstacles");
       //      System.out.println("updateObstacles");
       ArrayList<int[]> coveredRanges = new ArrayList<int[]>();
-      for (int[] values : boundingBoxValues)
+      for (BoundingBox2d values : boundingBoxes)
       {
-         int minX = values[0];
-         int minY = values[1];
-         int maxX = values[2];
-         int maxY = values[3];
+         int minX = new Double(values.getMinPoint().x).intValue();
+         int minY = new Double(values.getMinPoint().y).intValue();
+         int maxX = new Double(values.getMaxPoint().x).intValue();
+         int maxY = new Double(values.getMaxPoint().y).intValue();
 
          if (!isCovered(minX, coveredRanges))
          {
@@ -104,8 +106,8 @@ public class ObstaclePositionEstimator implements PostProcessor
             double offsetPercentageOfRoad = (minX - midPointInPixels) / (rangeInPixels / 2.0);
             double boxWidthPercentageOfRoad = (maxX - minX) / (rangeInPixels / 2.0);
 
-            //         System.out.println(leftXInPixels + ": " + midPointInPixels + ": " + rightXInPixels + " - range " + rangeInPixels + " - offset = " + offsetPercentageOfRoad + " - width = " + boxWidthPercentageOfRoad);
-            //            System.out.println("offset = " + offsetPercentageOfRoad + " - width = " + boxWidthPercentageOfRoad);
+            // System.out.println(leftXInPixels + ": " + midPointInPixels + ": " + rightXInPixels + " - range " + rangeInPixels + " - offset = " + offsetPercentageOfRoad + " - width = " + boxWidthPercentageOfRoad);
+//          System.out.println("offset = " + offsetPercentageOfRoad + " - width = " + boxWidthPercentageOfRoad);
 
             BoundingBox2d boundingBox2d = new BoundingBox2d(new Point2d(offsetPercentageOfRoad, 0.0), new Point2d(offsetPercentageOfRoad + boxWidthPercentageOfRoad, 1.0));
             obstacles.add(boundingBox2d);
@@ -184,7 +186,7 @@ public class ObstaclePositionEstimator implements PostProcessor
    {
       for (int[] range : coveredRanges)
       {
-         if (range[0] <= minX && range[1] >= minX)
+         if ((range[0] <= minX) && (range[1] >= minX))
          {
             return true;
          }
@@ -197,17 +199,18 @@ public class ObstaclePositionEstimator implements PostProcessor
    {
       Point2d closestObstacle = new Point2d(0.0, 0.0);
       System.out.println("boundingBox.size() = " + boundingBoxes.size());
-      for (int[] values : boundingBoxes.values())
+
+      for (BoundingBox2d values : boundingBoxes)
       {
-         int minX = values[0];
-         int minY = values[0];
-         int maxX = values[0];
-         int maxY = values[0];
+         int minX = new Double(values.getMinPoint().x).intValue();
+         int minY = new Double(values.getMinPoint().y).intValue();
+
          if (minY > closestObstacle.getY())
          {
             closestObstacle = new Point2d(minX, minY);
          }
       }
+
       System.out.println("closestObstacle = " + closestObstacle);
 
       return closestObstacle;
