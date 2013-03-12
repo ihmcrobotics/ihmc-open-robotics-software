@@ -99,7 +99,8 @@ State:
 \begin_inset Formula $q$
 \end_inset
 
-: quaternion describing the orientation of orientation estimation link
+: quaternion describing the orientation of orientation estimation link with
+ respect to the world frame
 \end_layout
 
 \begin_layout Itemize
@@ -236,7 +237,7 @@ Dynamics:
 \ddot{r} & =\ddot{r}_{d}+w_{\ddot{r}}\\
 \dot{q} & =\frac{1}{2}q\otimes\omega_{q}\\
 \dot{\omega} & =\dot{\omega}_{d}+w_{\dot{\omega}}\\
-\dot{b}_{a,i} & =w_{b_{a,i}}\quad i\in\left\{ 1,2,\dotsc,n\right\} \\
+\dot{b}_{\dot{v},i} & =w_{b_{\dot{v},i}}\quad i\in\left\{ 1,2,\dotsc,n\right\} \\
 \dot{b}_{\omega,i} & =w_{b_{\omega,i}}\quad i\in\left\{ 1,2,\dotsc,n\right\} 
 \end{align*}
 
@@ -876,19 +877,52 @@ H_{\omega,i}=R_{p}^{i}
 \end_layout
 
 \begin_layout Standard
-Denote by 
+Let 
 \begin_inset Formula $z_{\omega,i}$
 \end_inset
 
- the measured value of 
-\begin_inset Formula $\omega_{i}^{i,w}-\omega_{i}^{i,p}$
+ be the measured value of 
+\begin_inset Formula $\omega_{i}^{i,w}$
 \end_inset
 
 .
- The measurement residual will then be
+ This will include the bias and the noise:
+\end_layout
+
+\begin_layout Standard
 \begin_inset Formula 
 \[
-y_{\omega}=z_{\omega,i}-H_{\omega,i}\mbox{\hat{\omega}}
+z_{\omega,i}=R_{p}^{i}\omega+\omega_{i}^{i,p}+b_{\omega_{i}}+v_{\omega_{i}}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The estimated measurement will be
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\hat{z}_{\omega,i}=\hat{R}_{p}^{i}\hat{\omega}+\hat{\omega}_{i}^{i,p}+\hat{b}_{\omega_{i}}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+and the measurement residual will be
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+y_{\omega}=z_{\omega,i}-\hat{z}_{\omega,i}
 \]
 
 \end_inset
