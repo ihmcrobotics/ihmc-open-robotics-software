@@ -117,7 +117,7 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
    private void setUpFilters()
    {
       coneColorFilter = new ColorFilter();
-      coneColorFilter.setThreshold(25);
+      coneColorFilter.setThreshold(50);
       coneColorFilter.filterHorizon(true);
 
 //    coneColorFilter.addColorToLookFor(new RGB(172, 117, 96));
@@ -125,14 +125,18 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
 //    coneColorFilter.addColorToLookFor(new RGB(168, 121, 105));
 //    coneColorFilter.addColorToLookFor(new RGB(148, 102, 89));
 
-      coneColorFilter.addColorToLookFor(new RGB(118, 81, 72));
-      coneColorFilter.addColorToLookFor(new RGB(96, 66, 55));
+      coneColorFilter.addColorToLookFor(new RGB(9, 9, 8));
+      coneColorFilter.addColorToLookFor(new RGB(95, 44, 15));
+      coneColorFilter.addColorToLookFor(new RGB(122, 45, 0));
+      coneColorFilter.addColorToLookFor(new RGB(131, 49, 4));
+      coneColorFilter.addColorToLookFor(new RGB(129, 47, 2));
+      coneColorFilter.addColorToLookFor(new RGB(95, 51, 0));
+      
+      coneColorFilter.addColorToLookFor(new RGB(120, 52, 14));
+      coneColorFilter.addColorToLookFor(new RGB(164, 63, 7));
 
-//
-      coneColorFilter.addColorToLookFor(new RGB(84, 51, 46));
-      coneColorFilter.addColorToLookFor(new RGB(63, 28, 22));
-      coneColorFilter.addColorToLookFor(new RGB(161, 91, 91));
-      coneColorFilter.addColorToLookFor(new RGB(69, 41, 29));
+
+
 
 
       roadColorfilter = new ColorFilter();
@@ -646,7 +650,7 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
    public static void main(String args[])
    {
       DRCRoadDetectionTest drcRoadDetectionTest = new DRCRoadDetectionTest();
-      final VideoPlayer videoPlayer = new VideoPlayer("./media/videos/run1.mov", drcRoadDetectionTest, true);
+      final VideoPlayer videoPlayer = new VideoPlayer("./media/videos/rightEye.mp4", drcRoadDetectionTest, true);
       videoPlayer.start();
    }
 
