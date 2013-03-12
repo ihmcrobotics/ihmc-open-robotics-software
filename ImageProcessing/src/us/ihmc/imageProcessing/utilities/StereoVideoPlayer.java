@@ -1,17 +1,25 @@
 package us.ihmc.imageProcessing.utilities;
 
-import com.xuggle.xuggler.*;
-
-import us.ihmc.utilities.camera.ImageViewer;
-import us.ihmc.utilities.camera.StereoImageViewer;
-import us.ihmc.utilities.camera.StereoVideoListener;
-import us.ihmc.utilities.camera.VideoListener;
-
-import javax.swing.*;
-import java.awt.*;
+import java.awt.BorderLayout;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
+
+import javax.swing.JFrame;
+
+import us.ihmc.utilities.camera.StereoImageViewer;
+import us.ihmc.utilities.camera.StereoVideoListener;
+
+import com.xuggle.xuggler.Global;
+import com.xuggle.xuggler.ICodec;
+import com.xuggle.xuggler.IContainer;
+import com.xuggle.xuggler.IPacket;
+import com.xuggle.xuggler.IPixelFormat;
+import com.xuggle.xuggler.IStream;
+import com.xuggle.xuggler.IStreamCoder;
+import com.xuggle.xuggler.IVideoPicture;
+import com.xuggle.xuggler.IVideoResampler;
+import com.xuggle.xuggler.Utils;
 
 /**
  * User: Matt
@@ -208,41 +216,41 @@ public class StereoVideoPlayer
             BufferedImage leftEye = Utils.videoPictureToImage(leftEyePicture);
             BufferedImage rightEye = Utils.videoPictureToImage(rightEyePicture);
 
-          if (firstTimestampInStream == Global.NO_PTS)
-          {
-             // This is our first time through
-             firstTimestampInStream = leftEyePicture.getTimeStamp();
+            if (firstTimestampInStream == Global.NO_PTS)
+            {
+               // This is our first time through
+               firstTimestampInStream = leftEyePicture.getTimeStamp();
 
-             // get the starting clock time so we can hold up frames until the right time.
-             systemClockStartTime = System.currentTimeMillis();
-          }
-          else
-          {
-             long systemClockCurrentTime = System.currentTimeMillis();
-             long millisecondsClockTimeSinceStartofVideo = systemClockCurrentTime - systemClockStartTime;
+               // get the starting clock time so we can hold up frames until the right time.
+               systemClockStartTime = System.currentTimeMillis();
+            }
+            else
+            {
+               long systemClockCurrentTime = System.currentTimeMillis();
+               long millisecondsClockTimeSinceStartofVideo = systemClockCurrentTime - systemClockStartTime;
 
-             // compute how long for this frame since the first frame in the stream.
-             // remember that IVideoPicture and IAudioSamples timestamps are always in MICROSECONDS,
-             // so we divide by 1000 to get milliseconds.
-             long millisecondsStreamTimeSinceStartOfVideo = (leftEyePicture.getTimeStamp() - firstTimestampInStream) / 1000;
-             final long millisecondsTolerance = 50;    // and we give ourselves 50 ms of tolerance
-             final long millisecondsToSleep = (millisecondsStreamTimeSinceStartOfVideo - (millisecondsClockTimeSinceStartofVideo + millisecondsTolerance));
-             if (millisecondsToSleep > 0)
-             {
-                try
-                {
-                   Thread.sleep(millisecondsToSleep);
-                }
-                catch (InterruptedException e)
-                {
-                   // we might get this when the user closes the dialog box, so just return from the method.
-                   return;
-                }
-             }
-          }
+               // compute how long for this frame since the first frame in the stream.
+               // remember that IVideoPicture and IAudioSamples timestamps are always in MICROSECONDS,
+               // so we divide by 1000 to get milliseconds.
+               long millisecondsStreamTimeSinceStartOfVideo = (leftEyePicture.getTimeStamp() - firstTimestampInStream) / 1000;
+               final long millisecondsTolerance = 50;    // and we give ourselves 50 ms of tolerance
+               final long millisecondsToSleep = (millisecondsStreamTimeSinceStartOfVideo - (millisecondsClockTimeSinceStartofVideo + millisecondsTolerance));
+               if (millisecondsToSleep > 0)
+               {
+                  try
+                  {
+                     Thread.sleep(millisecondsToSleep);
+                  }
+                  catch (InterruptedException e)
+                  {
+                     // we might get this when the user closes the dialog box, so just return from the method.
+                     return;
+                  }
+               }
+            }
 
 
-          
+
 
             videoListener.updateImage(leftEye, rightEye);
          }
