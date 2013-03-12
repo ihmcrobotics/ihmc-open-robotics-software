@@ -1,6 +1,5 @@
 package us.ihmc.imageProcessing.ImageFilters;
 
-import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
 import java.util.ArrayList;
@@ -71,6 +70,8 @@ public class ColorFilter extends PointFilter
       return 16777215;
    }
 
+  
+
    public BufferedImage filter(BufferedImage src, BufferedImage dst)
    {
       int width = src.getWidth();
@@ -94,7 +95,7 @@ public class ColorFilter extends PointFilter
 
             for (int x = 0; x < width; x++)
             {
-               if (filterHorizon && y < horizon)
+               if (filterHorizon && (y < horizon))
                {
                   inPixels[x] = 16777215;
                }
@@ -110,7 +111,7 @@ public class ColorFilter extends PointFilter
 
             for (int x = 0; x < width; x++)
             {
-               if (filterHorizon && y < horizon)
+               if (filterHorizon && (y < horizon))
                {
                   inPixels[x] = 16777215;
                }
