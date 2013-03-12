@@ -164,19 +164,28 @@ public class YoKalmanFilter implements KalmanFilter
       getFromYoVariables(x, yoX);
       getFromYoVariablesSymmetric(P, yoP);
 
+      updateAPrioriState(x, u);
+      updateAPrioriCovariance();
+
+      storeInYoVariables(x, yoX);
+      storeInYoVariablesSymmetric(P, yoP);
+   }
+
+   protected void updateAPrioriState(DenseMatrix64F x, DenseMatrix64F u)
+   {
       // x = F x + G u
       MatrixVectorMult.mult(F, x, a);
       x.set(a);
       MatrixVectorMult.mult(G, u, a);
       addEquals(x, a);
+   }
 
+   private void updateAPrioriCovariance()
+   {
       // P = F P F' + Q
       MatrixMatrixMult.mult_small(F, P, b);
       MatrixMatrixMult.multTransB(b, F, P);
       addEquals(P, Q);
-
-      storeInYoVariables(x, yoX);
-      storeInYoVariablesSymmetric(P, yoP);
    }
 
    public void update(DenseMatrix64F y)
@@ -192,9 +201,7 @@ public class YoKalmanFilter implements KalmanFilter
       getFromYoVariables(x, yoX);
       getFromYoVariablesSymmetric(P, yoP);
 
-      // r = y - H x
-      MatrixVectorMult.mult(H, x, r);
-      sub(y, r, r);
+      computeMeasurementResidual(r, y);
 
       // S = H P H' + R
       MatrixMatrixMult.mult_small(H, P, c);
@@ -208,9 +215,7 @@ public class YoKalmanFilter implements KalmanFilter
       MatrixMatrixMult.multTransA_small(H, S_inv, d);
       MatrixMatrixMult.mult_small(P, d, K);
 
-      // x = x + Kr
-      MatrixVectorMult.mult(K, r, a);
-      addEquals(x, a);
+      updateAPosterioriState(x);
 
       // P = (I-KH)P = P - (KH)P = P-K(HP)
       MatrixMatrixMult.mult_small(H, P, c);
@@ -219,6 +224,20 @@ public class YoKalmanFilter implements KalmanFilter
 
       storeInYoVariables(x, yoX);
       storeInYoVariablesSymmetric(P, yoP);
+   }
+
+   protected void computeMeasurementResidual(DenseMatrix64F r, DenseMatrix64F y)
+   {
+      // r = y - H x
+      MatrixVectorMult.mult(H, x, r);
+      sub(y, r, r);
+   }
+
+   protected void updateAPosterioriState(DenseMatrix64F x)
+   {
+      // x = x + Kr
+      MatrixVectorMult.mult(K, r, a);
+      addEquals(x, a);
    }
 
    public DenseMatrix64F getState()
