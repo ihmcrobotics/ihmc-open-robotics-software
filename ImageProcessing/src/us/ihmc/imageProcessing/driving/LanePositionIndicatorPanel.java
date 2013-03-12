@@ -83,17 +83,20 @@ public class LanePositionIndicatorPanel extends JPanel
 
       // draw obstacles
 //      System.out.println("drawing " + obstacles.size());
+      Color orange = new Color(255, 125, 20);
+      Color color = orange;
       for (BoundingBox2d obstacle : obstacles)
       {
          double xPercentageOfRoad = obstacle.getMinPoint().getX();
          double boxWidthPercentageOfRoad = obstacle.getMaxPoint().getX() - xPercentageOfRoad;
-         int insetPixels = 2;
+         int insetPixels = 8;
          double obstaclePositionInPixels = midPointOfPanelInPixels + (xPercentageOfRoad * rangeOfMotionInPixels / 2.0);
          double obstacleWidthInPixels = boxWidthPercentageOfRoad * (rangeOfMotionInPixels / 2.0);
 
 //         System.out.println("min = " + minX + ": " + maxX + ": " + width + ": " + obstaclePositionInPixels);
-         g.setColor(new Color(255, 125, 20));
-         g.fillRect((int) obstaclePositionInPixels, insetPixels, (int) obstacleWidthInPixels, this.getHeight() - insetPixels);
+         g.setColor(color);
+         g.fillRect((int) obstaclePositionInPixels, insetPixels, (int) obstacleWidthInPixels, this.getHeight() - (insetPixels*2));
+         color = color.darker();
       }
 
       // draw vehicle at proper location
