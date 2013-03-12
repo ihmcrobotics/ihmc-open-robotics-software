@@ -87,7 +87,7 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
    private float edgeThreshold = 25;
 
 
-   private int erodeCount = 2;
+   private int erodeCount = 1;
    private int dilateCount = 2;
 
    ArrayList<BoundingBox2d> boundingBoxes = new ArrayList<BoundingBox2d>();
@@ -141,7 +141,7 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
 
 
       roadColorfilter = new ColorFilter();
-      roadColorfilter.setThreshold(45);
+      roadColorfilter.setThreshold(34);
 
       roadColorfilter.filterHorizon(true);
       roadColorfilter.addColorToLookFor(new RGB(68, 63, 69));
@@ -152,6 +152,16 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
       roadColorfilter.addColorToLookFor(new RGB(78, 73, 77));
       roadColorfilter.addColorToLookFor(new RGB(78, 73, 77));
       roadColorfilter.addColorToLookFor(new RGB(54, 52, 53));
+      roadColorfilter.addColorToLookFor(new RGB(51, 51, 51));
+
+      roadColorfilter.addColorToLookFor(new RGB(40, 40, 40));
+      roadColorfilter.addColorToLookFor(new RGB(45, 45, 45));
+      roadColorfilter.addColorToLookFor(new RGB(50, 50, 50));
+      roadColorfilter.addColorToLookFor(new RGB(55, 55, 55));
+      roadColorfilter.addColorToLookFor(new RGB(60, 60, 60));
+
+
+      roadColorfilter.addColorToLookFor(new RGB(44, 44, 44));
 
 
 
@@ -213,12 +223,12 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
       // binary = BinaryImageOps.erode8(binary, null);
       // binary = BinaryImageOps.erode8(binary, null);
 
-      for (int i = 0; i < erodeCount; i++)
+      for (int i = 0; i < 2; i++)
       {
          binary = BinaryImageOps.erode8(binary, null);
       }
 
-      for (int i = 0; i < dilateCount; i++)
+      for (int i = 0; i < 2; i++)
       {
          binary = BinaryImageOps.dilate8(binary, null);
       }
@@ -355,12 +365,16 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
       // remove small blobs through erosion and dilation
       // The null in the input indicates that it should internally declare the work image it needs
       // this is less efficient, but easier to code.
-      binary = BinaryImageOps.erode8(binary, null);
-      binary = BinaryImageOps.erode8(binary, null);
 
-      binary = BinaryImageOps.dilate8(binary, null);
-      binary = BinaryImageOps.dilate8(binary, null);
-      binary = BinaryImageOps.dilate8(binary, null);
+      for (int i = 0; i < erodeCount; i++)
+      {
+         binary = BinaryImageOps.erode8(binary, null);
+      }
+
+      for (int i = 0; i < dilateCount; i++)
+      {
+         binary = BinaryImageOps.dilate8(binary, null);
+      }
 
 
       // Detect blobs inside the binary image and assign labels to them
@@ -387,14 +401,16 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
             {
 //             if (cones.getNumberOfFeatures() > 0)
 //                System.out.println("I SEE A CONE");
-               CropFilter cropFilter = new CropFilter(0, 0, input.getWidth(), input.getHeight() - input.getHeight() / 4);
+               // CropFilter cropFilter = new CropFilter(0, 0, input.getWidth(), input.getHeight() - input.getHeight() / 4);
                BufferedImage croppedImage = new BufferedImage(input.getWidth(), input.getHeight() - input.getHeight() / 4, BufferedImage.TYPE_INT_RGB);
-               cropFilter.filter(input, croppedImage);
 
+//             cropFilter.filter(input, croppedImage);
+               croppedImage = input;
 
                coneColorFilter.setHorizonYLocation(input.getHeight() / 2 - 20);
-               BufferedImage coneBlobs = countConeBlobs(deepCopy(croppedImage));
-               ArrayList<ConvexPolygon2d> coneboxes = detectConeLocations(coneBlobs);
+
+               // BufferedImage coneBlobs = countConeBlobs(deepCopy(croppedImage));
+               // ArrayList<ConvexPolygon2d> coneboxes = detectConeLocations(coneBlobs);
 
 
                roadColorfilter.setHorizonYLocation(input.getHeight() / 2 - 20);
@@ -520,17 +536,17 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
       tmp.getContentPane().setLayout(new GridLayout(1, 6));
 
       {
-         final JSlider slider = new JSlider(1, 200, new Double(coneColorFilter.getThreshold()).intValue());
+         final JSlider slider = new JSlider(1, 200, new Double(roadColorfilter.getThreshold()).intValue());
          slider.setOrientation(JSlider.VERTICAL);
          slider.addChangeListener(new ChangeListener()
          {
             @Override
             public void stateChanged(ChangeEvent arg0)
             {
-               coneColorFilter.setThreshold(new Double(slider.getValue()));
+               roadColorfilter.setThreshold(new Double(slider.getValue()));
 
 
-               System.out.println("coneColorFilter Threshold: " + coneColorFilter.getThreshold());
+               System.out.println("roadColorfilter Threshold: " + roadColorfilter.getThreshold());
 
                // process();
 
