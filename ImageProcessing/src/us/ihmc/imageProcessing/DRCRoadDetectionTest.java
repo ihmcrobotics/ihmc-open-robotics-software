@@ -144,18 +144,17 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
       roadColorfilter.setThreshold(45);
 
       roadColorfilter.filterHorizon(true);
-      roadColorfilter.addColorToLookFor(new RGB(152, 128, 32));
-      roadColorfilter.addColorToLookFor(new RGB(128, 110, 34));
-      roadColorfilter.addColorToLookFor(new RGB(124, 107, 38));
-      roadColorfilter.addColorToLookFor(new RGB(92, 78, 41));
+      roadColorfilter.addColorToLookFor(new RGB(68, 63, 69));
+      roadColorfilter.addColorToLookFor(new RGB(63, 59, 60));
+      roadColorfilter.addColorToLookFor(new RGB(63, 58, 62));
+      roadColorfilter.addColorToLookFor(new RGB(76, 72, 73));
+      roadColorfilter.addColorToLookFor(new RGB(79, 74, 78));
+      roadColorfilter.addColorToLookFor(new RGB(78, 73, 77));
+      roadColorfilter.addColorToLookFor(new RGB(78, 73, 77));
+      roadColorfilter.addColorToLookFor(new RGB(54, 52, 53));
 
 
-      // road
-      roadColorfilter.addColorToLookFor(new RGB(56, 47, 48));
-      roadColorfilter.addColorToLookFor(new RGB(64, 64, 56));
-      roadColorfilter.addColorToLookFor(new RGB(80, 80, 72));
-      roadColorfilter.addColorToLookFor(new RGB(87, 88, 72));
-      roadColorfilter.addColorToLookFor(new RGB(97, 88, 38));
+
 
    }
 
@@ -326,10 +325,11 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
       for (int i = 0; i < numLabels; i++)
       {
          BoundingBox2d bounds = boundingBoxes.get(i);
-//         double width = bounds.getMaxPoint().x - bounds.getMinPoint().x;
-//         int calcBuffer = new Double(width * bufferPercent).intValue();
-//         bounds.getMinPoint().x -= calcBuffer;
-//         bounds.getMaxPoint().x += calcBuffer;
+
+//       double width = bounds.getMaxPoint().x - bounds.getMinPoint().x;
+//       int calcBuffer = new Double(width * bufferPercent).intValue();
+//       bounds.getMinPoint().x -= calcBuffer;
+//       bounds.getMaxPoint().x += calcBuffer;
          finalBoxes.add(bounds);
       }
 
@@ -375,86 +375,80 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
 
    }
 
-   int tick = 0;
 
    private void process(final BufferedImage input)
    {
       if (!PAUSE)
       {
-         tick++;
-
-         if (tick % 3 == 0)
+         Thread tmp = new Thread(new Runnable()
          {
-            tick = 0;
-            Thread tmp = new Thread(new Runnable()
+            @Override
+            public void run()
             {
-               @Override
-               public void run()
+//             if (cones.getNumberOfFeatures() > 0)
+//                System.out.println("I SEE A CONE");
+               CropFilter cropFilter = new CropFilter(0, 0, input.getWidth(), input.getHeight() - input.getHeight() / 4);
+               BufferedImage croppedImage = new BufferedImage(input.getWidth(), input.getHeight() - input.getHeight() / 4, BufferedImage.TYPE_INT_RGB);
+               cropFilter.filter(input, croppedImage);
+
+
+               coneColorFilter.setHorizonYLocation(input.getHeight() / 2 - 20);
+               BufferedImage coneBlobs = countConeBlobs(deepCopy(croppedImage));
+               ArrayList<ConvexPolygon2d> coneboxes = detectConeLocations(coneBlobs);
+
+
+               roadColorfilter.setHorizonYLocation(input.getHeight() / 2 - 20);
+
+               roadColorfilter.filter(croppedImage, croppedImage);
+               croppedImage = findRoad(croppedImage);
+
+               List<LineParametric2D_F32> list = detectLines(croppedImage, ImageUInt8.class, ImageSInt16.class);
+
+               ArrayList<Line2d> lines = new ArrayList<Line2d>();
+
+
+
+
+               for (LineParametric2D_F32 lineParametric2D_f32 : list)
                {
-//                if (cones.getNumberOfFeatures() > 0)
-//                   System.out.println("I SEE A CONE");
-                  CropFilter cropFilter = new CropFilter(0, 0, input.getWidth(), input.getHeight() - input.getHeight() / 4);
-                  BufferedImage croppedImage = new BufferedImage(input.getWidth(), input.getHeight() - input.getHeight() / 4, BufferedImage.TYPE_INT_RGB);
-                  cropFilter.filter(input, croppedImage);
+                  Point2D_F32 pointOnLine1 = lineParametric2D_f32.getPointOnLine(0.0f);
+                  Point2d p1 = new Point2d(pointOnLine1.getX(), pointOnLine1.getY());
+                  Point2D_F32 pointOnLine2 = lineParametric2D_f32.getPointOnLine(1.0f);
+                  Point2d p2 = new Point2d(pointOnLine2.getX(), pointOnLine2.getY());
 
-
-                  coneColorFilter.setHorizonYLocation(input.getHeight() / 2 - 20);
-                  BufferedImage coneBlobs = countConeBlobs(deepCopy(croppedImage));
-                  ArrayList<ConvexPolygon2d> coneboxes = detectConeLocations(coneBlobs);
-
-
-                  roadColorfilter.setHorizonYLocation(input.getHeight() / 2 - 20);
-
-                  roadColorfilter.filter(croppedImage, croppedImage);
-                  croppedImage = findRoad(croppedImage);
-
-                  List<LineParametric2D_F32> list = detectLines(croppedImage, ImageUInt8.class, ImageSInt16.class);
-
-                  ArrayList<Line2d> lines = new ArrayList<Line2d>();
-
-
-
-
-                  for (LineParametric2D_F32 lineParametric2D_f32 : list)
-                  {
-                     Point2D_F32 pointOnLine1 = lineParametric2D_f32.getPointOnLine(0.0f);
-                     Point2d p1 = new Point2d(pointOnLine1.getX(), pointOnLine1.getY());
-                     Point2D_F32 pointOnLine2 = lineParametric2D_f32.getPointOnLine(1.0f);
-                     Point2d p2 = new Point2d(pointOnLine2.getX(), pointOnLine2.getY());
-
-                     Line2d line2d = new Line2d(p1, p2);
-                     lines.add(line2d);
-                  }
-
-                  lines = removeBadLines(lines);
-
-//                if (lines.size() > 2)
-//                   System.out.println("TURN APPROACHING");
-                  linePainter.setLines(lines);
-                  vanishingPointDetector.setLines(lines);
-                  lanePositionEstimator.setLines(lines);
-                  obstaclePositionEstimator.setLines(lines);
-
-                  if (boundingBoxes != null)
-                  {
-                     boundsPainter.setBoundingBoxes(boundingBoxes);
-                     obstaclePositionEstimator.setBoundingBoxes(boundingBoxes);
-                  }
-
-                  repackIfImageSizeChanges(croppedImage.getWidth(), croppedImage.getHeight());
-                  analyzedImageViewer.updateImage(croppedImage);
-                  repackRawIfImageSizeChanges(input.getWidth(), input.getHeight());
-
+                  Line2d line2d = new Line2d(p1, p2);
+                  lines.add(line2d);
                }
-            });
-            tmp.start();
-         }
 
-         rawImageViewer.updateImage(input);
+               lines = removeBadLines(lines);
 
-//       drawCarPosition();
+//             if (lines.size() > 2)
+//                System.out.println("TURN APPROACHING");
+               linePainter.setLines(lines);
+               vanishingPointDetector.setLines(lines);
+               lanePositionEstimator.setLines(lines);
+               obstaclePositionEstimator.setLines(lines);
+
+               if (boundingBoxes != null)
+               {
+                  boundsPainter.setBoundingBoxes(boundingBoxes);
+                  obstaclePositionEstimator.setBoundingBoxes(boundingBoxes);
+               }
+
+               repackIfImageSizeChanges(croppedImage.getWidth(), croppedImage.getHeight());
+               analyzedImageViewer.updateImage(croppedImage);
+               repackRawIfImageSizeChanges(input.getWidth(), input.getHeight());
+
+            }
+         });
+         tmp.start();
       }
+
+      rawImageViewer.updateImage(input);
+
+//    drawCarPosition();
    }
+
 
 
 
