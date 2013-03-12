@@ -399,6 +399,9 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
             @Override
             public void run()
             {
+               repackRawIfImageSizeChanges(input.getWidth(), input.getHeight());
+               rawImageViewer.updateImage(input);
+
 //             if (cones.getNumberOfFeatures() > 0)
 //                System.out.println("I SEE A CONE");
                // CropFilter cropFilter = new CropFilter(0, 0, input.getWidth(), input.getHeight() - input.getHeight() / 4);
@@ -453,16 +456,12 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
 
                repackIfImageSizeChanges(croppedImage.getWidth(), croppedImage.getHeight());
                analyzedImageViewer.updateImage(croppedImage);
-               repackRawIfImageSizeChanges(input.getWidth(), input.getHeight());
-
             }
          });
          tmp.start();
       }
 
-      rawImageViewer.updateImage(input);
 
-//    drawCarPosition();
    }
 
 
@@ -498,6 +497,7 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
    {
       if ((analyzedImageViewer.getWidth() < width) || (analyzedImageViewer.getHeight() < height))
       {
+//         System.out.println("repack image width = " + width +":" + height);
          Dimension dimension = new Dimension(width, height);
          analyzedImageViewer.setPreferredSize(dimension);
          boundsPainter.setImageHeight(height);
@@ -508,9 +508,9 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
 
    private void repackRawIfImageSizeChanges(int width, int height)
    {
-//    System.out.println("width = " + width +":" + height);
       if ((rawImageViewer.getWidth() < width) || (rawImageViewer.getHeight() < height))
       {
+//         System.out.println("repack raw image width = " + width +":" + height);
          Dimension dimension = new Dimension(width, height);
          rawImageViewer.setPreferredSize(dimension);
          lanePositionEstimator.setScreenDimension(dimension);
@@ -663,6 +663,8 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
    {
       DRCRoadDetectionTest drcRoadDetectionTest = new DRCRoadDetectionTest();
       final VideoPlayer videoPlayer = new VideoPlayer("./media/videos/rightEye.mp4", drcRoadDetectionTest, true);
+//      final VideoPlayer videoPlayer = new VideoPlayer("./media/videos/rightEyeLaneChanging.mov", drcRoadDetectionTest, true);
+//      final VideoPlayer videoPlayer = new VideoPlayer("./media/videos/rightEyeStraightaway.mov", drcRoadDetectionTest, true);
       videoPlayer.start();
    }
 
