@@ -17,15 +17,12 @@ public class LanePositionEstimator
 {
    private ArrayList<Line2d> lines = new ArrayList<Line2d>();
    private LanePositionIndicatorPanel lanePositionIndicatorPanel;
-   private SteeringInputEstimator steeringInputEstimator;
    private Dimension imageSize = new Dimension(640, 480);
    private Line2d axis = new Line2d(new Point2d(0, 320), new Vector2d(1.0, 0.0));
-   private double maxAngle = 90.0;
 
-   public LanePositionEstimator(LanePositionIndicatorPanel lanePositionIndicatorPanel, SteeringInputEstimator steeringInputEstimator)
+   public LanePositionEstimator(LanePositionIndicatorPanel lanePositionIndicatorPanel)
    {
       this.lanePositionIndicatorPanel = lanePositionIndicatorPanel;
-      this.steeringInputEstimator = steeringInputEstimator;
    }
 
    public void setLines(ArrayList<Line2d> lines)
@@ -70,7 +67,6 @@ public class LanePositionEstimator
       double offset = (carX - midPoint) / (range / 2.0);
 
       lanePositionIndicatorPanel.setOffset(offset);
-      steeringInputEstimator.setAngleInDegrees(maxAngle * offset);
    }
 
    public void setScreenDimension(Dimension screenDimension)

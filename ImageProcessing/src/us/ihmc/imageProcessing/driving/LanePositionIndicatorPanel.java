@@ -22,15 +22,18 @@ public class LanePositionIndicatorPanel extends JPanel
    private double roadWidthInMeters = 7.34;
    private double carWidthInMeters = 1.5;
    private double steeringWheelOffsetInMeters = 0.3;
+   private SteeringInputEstimator steeringInputEstimator;
+   private double maxAngle = 90.0;
 
    private double carWidthInPixels;
    private double pixelsPerMeter;
 
    private ArrayList<BoundingBox2d> obstacles = new ArrayList<BoundingBox2d>();
 
-   public LanePositionIndicatorPanel(String fileName)
+   public LanePositionIndicatorPanel(String fileName, SteeringInputEstimator steeringInputEstimator)
    {
       this.setBackground(Color.gray);
+      this.steeringInputEstimator = steeringInputEstimator;
       try
       {
          carImage = ImageIO.read(new File(fileName));
@@ -104,12 +107,29 @@ public class LanePositionIndicatorPanel extends JPanel
       double carPositionInPixels = midPointOfPanelInPixels - (carWidthInPixels / 2.0) + steeringWheelOffsetInPixels + (offset * rangeOfMotionInPixels / 2.0);
       g.drawImage(carImage, (int) carPositionInPixels, 0, null);
 
+      // steering wheel input
+      double steeringAngle = determineSteeringAngle();
+      steeringInputEstimator.setAngleInDegrees(maxAngle * steeringAngle);
+
       g.setColor(originalColor);
       ((Graphics2D) g).setStroke(originalStroke);
+   }
+
+   private double determineSteeringAngle()
+   {
+      double steeringAngle = offset;
+
+//      if(obstacles.size()> 0)
+//      {
+//         BoundingBox2d boundingBox2d = obstacles.get(0);
+//      }
+
+      return steeringAngle;
    }
 
    private double convertToPixels(double valueInMeters)
    {
       return valueInMeters * pixelsPerMeter;
    }
+
 }

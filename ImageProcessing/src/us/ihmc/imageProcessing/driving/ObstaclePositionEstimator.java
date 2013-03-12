@@ -1,5 +1,6 @@
 package us.ihmc.imageProcessing.driving;
 
+import us.ihmc.imageProcessing.utilities.PostProcessor;
 import us.ihmc.utilities.math.geometry.BoundingBox2d;
 import us.ihmc.utilities.math.geometry.Line2d;
 
@@ -14,13 +15,17 @@ import java.util.HashMap;
  * User: Matt
  * Date: 3/8/13
  */
-public class ObstaclePositionEstimator
+public class ObstaclePositionEstimator implements PostProcessor
 {
    private ArrayList<Line2d> lines = new ArrayList<Line2d>();
    private LanePositionIndicatorPanel lanePositionIndicatorPanel;
    private Dimension imageSize = new Dimension(640, 480);
    private Line2d axis = new Line2d(new Point2d(0, 320), new Vector2d(1.0, 0.0));
    private HashMap<Integer, int[]> boundingBoxes = new HashMap<Integer, int[]>();
+   private ArrayList<ColoredLine> coloredLines = new ArrayList<ColoredLine>();
+   private double roadWidthInMeters = 7.34;
+   private double carWidthInMeters = 1.5;
+   private double carPercentageOfRoad = carWidthInMeters / roadWidthInMeters;
 
    public ObstaclePositionEstimator(LanePositionIndicatorPanel lanePositionIndicatorPanel)
    {
@@ -74,10 +79,12 @@ public class ObstaclePositionEstimator
 
    private ArrayList<BoundingBox2d> updateObstacles(Line2d leftEdgeOfRoad, Line2d rightEdgeOfRoad)
    {
+      coloredLines.clear();
+
       ArrayList<int[]> boundingBoxValues = new ArrayList<int[]>(boundingBoxes.values());
       Collections.reverse(boundingBoxValues);
       ArrayList<BoundingBox2d> obstacles = new ArrayList<BoundingBox2d>();
-//      System.out.println("updateObstacles");
+      //      System.out.println("updateObstacles");
       ArrayList<int[]> coveredRanges = new ArrayList<int[]>();
       for (int[] values : boundingBoxValues)
       {
@@ -98,20 +105,79 @@ public class ObstaclePositionEstimator
             double boxWidthPercentageOfRoad = (maxX - minX) / (rangeInPixels / 2.0);
 
             //         System.out.println(leftXInPixels + ": " + midPointInPixels + ": " + rightXInPixels + " - range " + rangeInPixels + " - offset = " + offsetPercentageOfRoad + " - width = " + boxWidthPercentageOfRoad);
-//            System.out.println("offset = " + offsetPercentageOfRoad + " - width = " + boxWidthPercentageOfRoad);
+            //            System.out.println("offset = " + offsetPercentageOfRoad + " - width = " + boxWidthPercentageOfRoad);
 
             BoundingBox2d boundingBox2d = new BoundingBox2d(new Point2d(offsetPercentageOfRoad, 0.0), new Point2d(offsetPercentageOfRoad + boxWidthPercentageOfRoad, 1.0));
             obstacles.add(boundingBox2d);
 
-            coveredRanges.add(new int[]{minX,  maxX});
+            coveredRanges.add(new int[]{minX, maxX});
+
+            double roadWidthInPixels = rightXInPixels - leftXInPixels;
+            double carWidthInPixels = roadWidthInPixels * carPercentageOfRoad;
+            double leftOpeningInPixels = (minX - leftXInPixels);
+            double rightOpeningInPixels = (rightXInPixels - maxX);
+            Color color = Color.green;
+
+            if (leftOpeningInPixels > carWidthInPixels)
+            {
+               if (leftOpeningInPixels > rightOpeningInPixels)
+               {
+                  color = Color.green;
+               }
+               else
+               {
+                  color = Color.yellow;
+               }
+            }
+            else
+            {
+               color = Color.red;
+            }
+
+            ColoredLine coloredLine = new ColoredLine(color, (int) leftXInPixels, minY, minX, minY);
+            coloredLines.add(coloredLine);
+
+            if (rightOpeningInPixels > carWidthInPixels)
+            {
+               if (rightOpeningInPixels >= leftOpeningInPixels)
+               {
+                  color = Color.green;
+               }
+               else
+               {
+                  color = Color.yellow;
+               }
+            }
+            else
+            {
+               color = Color.red;
+            }
+            coloredLine = new ColoredLine(color, maxX, minY, (int) rightXInPixels, minY);
+            coloredLines.add(coloredLine);
          }
          else
          {
-//            System.out.println("covered");
+            //            System.out.println("covered");
          }
       }
 
       return obstacles;
+   }
+
+   public void paint(Graphics graphics)
+   {
+      Color originalColor = graphics.getColor();
+      Graphics2D g2d = (Graphics2D) graphics;
+      Stroke originalStroke = g2d.getStroke();
+      g2d.setStroke(new BasicStroke(3));
+
+      for (ColoredLine coloredLine : coloredLines)
+      {
+         graphics.setColor(coloredLine.color);
+         graphics.drawLine(coloredLine.x1, coloredLine.y1, coloredLine.x2, coloredLine.y2);
+      }
+      graphics.setColor(originalColor);
+      g2d.setStroke(originalStroke);
    }
 
    private boolean isCovered(int minX, ArrayList<int[]> coveredRanges)
@@ -152,4 +218,23 @@ public class ObstaclePositionEstimator
       imageSize = screenDimension;
       axis = new Line2d(new Point2d(0, screenDimension.getHeight()), new Vector2d(1.0, 0.0));
    }
+
+   private class ColoredLine
+   {
+      int x1;
+      int y1;
+      int x2;
+      int y2;
+      Color color;
+
+      private ColoredLine(Color color, int x1, int y1, int x2, int y2)
+      {
+         this.color = color;
+         this.x1 = x1;
+         this.x2 = x2;
+         this.y1 = y1;
+         this.y2 = y2;
+      }
+   }
+
 }
