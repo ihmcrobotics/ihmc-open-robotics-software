@@ -60,11 +60,12 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
    private YoFramePoint[] fixedPointPositions = new YoFramePoint[4];
    private YoFrameVector[] fixedPointVelocities = new YoFrameVector[4];
 
-   private DoubleYoVariable[] accelerateEndpointTimes = new DoubleYoVariable[2];
+   private DoubleYoVariable[] accelerationEndpointTimes = new DoubleYoVariable[2];
+   private YoFrameVector[] accelerationEndpointVelocities = new YoFrameVector[2];
 
-   private final DenseMatrix64F constraintsMatrix = new DenseMatrix64F(5, 5);
-   private final DenseMatrix64F constraintsVector = new DenseMatrix64F(5, 1);
-   private final DenseMatrix64F coefficientsVector = new DenseMatrix64F(5, 1);
+   private final DenseMatrix64F constraintsMatrix = new DenseMatrix64F(6, 6);
+   private final DenseMatrix64F constraintsVector = new DenseMatrix64F(6, 1);
+   private final DenseMatrix64F coefficientsVector = new DenseMatrix64F(6, 1);
 
    private final YoConcatenatedSplines concatenatedSplinesWithArcLengthApproximatedByDistance;
    private final YoConcatenatedSplines concatenatedSplinesWithArcLengthCalculatedIteratively;
@@ -108,17 +109,20 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
 
       for (int i = 0; i < 2; i++)
       {
-         accelerateEndpointTimes[i] = new DoubleYoVariable(namePrefix + "AccelerateToPointTimes" + i, registry);
+         accelerationEndpointTimes[i] = new DoubleYoVariable(namePrefix + "AccelerationEndpointTimes" + i, registry);
+         accelerationEndpointVelocities[i] = new YoFrameVector(namePrefix + "AccelerationEndpointVelocities" + i, referenceFrame, registry);
       }
 
-      concatenatedSplinesWithArcLengthApproximatedByDistance = new YoConcatenatedSplines(new int[] {5, 6, 5}, referenceFrame,
+      concatenatedSplinesWithArcLengthApproximatedByDistance = new YoConcatenatedSplines(new int[] {6, 6, 6}, referenceFrame,
               arcLengthCalculatorDivisionsPerPolynomial, registry, namePrefix + "ConcatenatedSplinesWithArcLengthApproximatedByDistance");
-      concatenatedSplinesWithArcLengthCalculatedIteratively = new YoConcatenatedSplines(new int[] {5, 6, 5}, referenceFrame, 2, registry,
+      concatenatedSplinesWithArcLengthCalculatedIteratively = new YoConcatenatedSplines(new int[] {6, 6, 6}, referenceFrame, 2, registry,
               namePrefix + "ConcatenatedSplinesWithArcLengthCalculatedIteratively");
    }
 
    public void compute(double time)
    {
+      System.out.println(time);
+      
       timeIntoStep.set(time);
 
       double totalTime = stepTime.getDoubleValue();
@@ -259,11 +263,11 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
    {
       double[] arcLengthsOutsideOfAccelerationPeriod = new double[3];
       arcLengthsOutsideOfAccelerationPeriod[0] = arcLengths[0]
-              - accelerateEndpointTimes[0].getDoubleValue() * ((fixedPointVelocities[0].length() + fixedPointVelocities[1].length()) / 2.0);
+              - accelerationEndpointTimes[0].getDoubleValue() * ((fixedPointVelocities[0].length() + accelerationEndpointVelocities[0].length()) / 2.0);
       arcLengthsOutsideOfAccelerationPeriod[1] = arcLengths[1];
       arcLengthsOutsideOfAccelerationPeriod[2] = arcLengths[2]
-              - (fixedPointTimes[3].getDoubleValue() - accelerateEndpointTimes[1].getDoubleValue())
-                * ((fixedPointVelocities[2].length() + fixedPointVelocities[3].length()) / 2.0);
+              - (fixedPointTimes[3].getDoubleValue() - accelerationEndpointTimes[1].getDoubleValue())
+                * ((accelerationEndpointVelocities[1].length() + fixedPointVelocities[3].length()) / 2.0);
       
       double totalArcLengthOutsideOfAccelerationPeriod = 0.0;
       for (int i = 0; i < arcLengthsOutsideOfAccelerationPeriod.length; i++)
@@ -271,7 +275,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
          totalArcLengthOutsideOfAccelerationPeriod += arcLengthsOutsideOfAccelerationPeriod[i];
       }
       
-      double scaleFactor = (accelerateEndpointTimes[1].getDoubleValue() - accelerateEndpointTimes[0].getDoubleValue()) / totalArcLengthOutsideOfAccelerationPeriod;
+      double scaleFactor = (accelerationEndpointTimes[1].getDoubleValue() - accelerationEndpointTimes[0].getDoubleValue()) / totalArcLengthOutsideOfAccelerationPeriod;
       
       double[] timeDifferencesOutsideOfAccelerationPeriod = new double[3];
       for (int i = 0; i < timeDifferencesOutsideOfAccelerationPeriod.length; i++)
@@ -282,8 +286,8 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       fixedPointTimes[1].set(timeDifferencesOutsideOfAccelerationPeriod[0] / (1 - FRACTION_OF_TIME_TO_OR_FROM_WAYPOINT_FOR_SPEED_UP_OR_SLOW_DOWN));
       fixedPointTimes[2].set(fixedPointTimes[1].getDoubleValue() + timeDifferencesOutsideOfAccelerationPeriod[1]);
 
-      accelerateEndpointTimes[0].set(FRACTION_OF_TIME_TO_OR_FROM_WAYPOINT_FOR_SPEED_UP_OR_SLOW_DOWN * fixedPointTimes[1].getDoubleValue());
-      accelerateEndpointTimes[1].set(fixedPointTimes[3].getDoubleValue()
+      accelerationEndpointTimes[0].set(FRACTION_OF_TIME_TO_OR_FROM_WAYPOINT_FOR_SPEED_UP_OR_SLOW_DOWN * fixedPointTimes[1].getDoubleValue());
+      accelerationEndpointTimes[1].set(fixedPointTimes[3].getDoubleValue()
                                      - FRACTION_OF_TIME_TO_OR_FROM_WAYPOINT_FOR_SPEED_UP_OR_SLOW_DOWN
                                        * (fixedPointTimes[3].getDoubleValue() - fixedPointTimes[2].getDoubleValue()));
    }
@@ -297,7 +301,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
    private void setWaypointVelocity(int indexOfInitialOrFinal, int indexOfWaypoint)
    {
       double t0 = fixedPointTimes[indexOfInitialOrFinal].getDoubleValue();
-      double t1 = accelerateEndpointTimes[indexOfWaypoint - 1].getDoubleValue();
+      double t1 = accelerationEndpointTimes[indexOfWaypoint - 1].getDoubleValue();
       double t2 = fixedPointTimes[indexOfWaypoint].getDoubleValue();
 
       FramePoint z0 = fixedPointPositions[indexOfInitialOrFinal].getFramePointCopy();
@@ -306,20 +310,33 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
 
       constraintsMatrix.setData(new double[]
       {
-         t0 * t0, t0, 1.0, 0.0, 0.0, 2 * t0, 1.0, 0.0, 0.0, 0.0, t1 * t1, t1, 1, -t1, -1.0, 0.0, 0.0, 0.0, t2, 1, 2 * t1, 1.0, 0.0, -1.0, 0.0
+         t0 * t0 * t0, t0 * t0, t0, 1.0, 0.0, 0.0, 
+         3.0 * t0 * t0, 2.0 * t0, 1.0, 0.0, 0.0, 0.0, 
+         t1 * t1 * t1, t1 * t1, t1, 1.0, -t1, -1.0, 
+         0.0, 0.0, 0.0, 0.0, t2, 1.0, 
+         3.0 * t1 * t1, 2.0 * t1, 1.0, 0.0, -1.0, 0.0,
+         6.0 * t1, 2.0, 0.0, 0.0, 0.0, 0.0
       });
 
       FrameVector velocity = new FrameVector(referenceFrame);
 
       for (Direction d : Direction.values())
       {
-         constraintsVector.setData(new double[] {z0.get(d), zd0.get(d), 0.0, z2.get(d), 0.0});
+         constraintsVector.setData(new double[] {z0.get(d), zd0.get(d), 0.0, z2.get(d), 0.0, 0.0});
          solve(constraintsMatrix, constraintsVector, coefficientsVector);
-         double velocityComponent = coefficientsVector.get(3);
+         double velocityComponent = coefficientsVector.get(4);
          velocity.set(d, velocityComponent);
       }
-
+      
+      accelerationEndpointVelocities[indexOfWaypoint - 1].set(velocity);
       fixedPointVelocities[indexOfWaypoint].set(velocity);
+    
+//      FrameVector initialOrFinalToWaypoint = new FrameVector(referenceFrame);
+//      initialOrFinalToWaypoint.sub(fixedPointPositions[indexOfWaypoint + 1].getFramePointCopy(), fixedPointPositions[indexOfWaypoint - 1].getFramePointCopy());
+//      initialOrFinalToWaypoint.normalize();
+//      double magnitudeOfProjection = velocity.dot(initialOrFinalToWaypoint);
+//      initialOrFinalToWaypoint.scale(magnitudeOfProjection);
+//      fixedPointVelocities[indexOfWaypoint].set(initialOrFinalToWaypoint);
    }
 
    private void setInitialAndFinalPositionsAndVelocities()
@@ -385,7 +402,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
 
    private void setFixedPointTimesAndWaypointVelocities(double[] arcLengths)
    {
-      int timeVelocityIterations = 5;
+      int timeVelocityIterations = 10;
 
       setInitialFixedPointTimes();
 
@@ -405,8 +422,8 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
          fixedPointTimes[i].set(stepTime.getDoubleValue() * ((double) i / 3.0));
       }
 
-      accelerateEndpointTimes[0].set(FRACTION_OF_TIME_TO_OR_FROM_WAYPOINT_FOR_SPEED_UP_OR_SLOW_DOWN * fixedPointTimes[1].getDoubleValue());
-      accelerateEndpointTimes[1].set(fixedPointTimes[3].getDoubleValue()
+      accelerationEndpointTimes[0].set(FRACTION_OF_TIME_TO_OR_FROM_WAYPOINT_FOR_SPEED_UP_OR_SLOW_DOWN * fixedPointTimes[1].getDoubleValue());
+      accelerationEndpointTimes[1].set(fixedPointTimes[3].getDoubleValue()
                                      - FRACTION_OF_TIME_TO_OR_FROM_WAYPOINT_FOR_SPEED_UP_OR_SLOW_DOWN
                                        * (fixedPointTimes[3].getDoubleValue() - fixedPointTimes[2].getDoubleValue()));
    }
@@ -418,6 +435,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       FramePoint[] positions = new FramePoint[4];
       FrameVector[] velocities = new FrameVector[4];
       FrameVector[] intermediateVelocities = new FrameVector[2];
+      FrameVector[] intermediateAccelerations = new FrameVector[2];
 
       for (int i = 0; i < 4; i++)
       {
@@ -426,12 +444,14 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
          velocities[i] = fixedPointVelocities[i].getFrameVectorCopy();
       }
 
-      intermediateTimes[0] = accelerateEndpointTimes[0].getDoubleValue();
-      intermediateTimes[1] = accelerateEndpointTimes[1].getDoubleValue();
-      intermediateVelocities[0] = velocities[1];
-      intermediateVelocities[1] = velocities[2];
+      for (int i = 0; i < 2; i++)
+      {
+         intermediateTimes[i] = accelerationEndpointTimes[i].getDoubleValue();
+         intermediateVelocities[i] = accelerationEndpointVelocities[i].getFrameVectorCopy();
+         intermediateAccelerations[i] = new FrameVector(referenceFrame, 0.0, 0.0, 0.0);
+      }
 
-      concatenatedSplines.setQuarticQuinticQuartic(times, positions, velocities, intermediateTimes, intermediateVelocities);
+      concatenatedSplines.setQuinticsUsingIntermediateAccelerations(times, positions, velocities, intermediateTimes, intermediateVelocities, intermediateAccelerations);
    }
 
    private void visualizeSpline()
