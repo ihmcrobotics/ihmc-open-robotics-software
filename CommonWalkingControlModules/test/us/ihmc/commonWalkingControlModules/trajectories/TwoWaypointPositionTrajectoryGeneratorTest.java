@@ -43,7 +43,6 @@ public class TwoWaypointPositionTrajectoryGeneratorTest {
 		YoPositionProvider finalPositionProvider = new YoPositionProvider(finalPosition);
 		VectorProvider finalVelocityProvider = new ConstantVectorProvider(new FrameVector(worldFrame, new double[]{0.1, 0.01, -0.02}));
 		
-		int arcLengthCalculatorDivisions = 100;
 		TwoWaypointPositionTrajectoryGenerator trajectory = new TwoWaypointPositionTrajectoryGenerator("", worldFrame, stepTimeProvider, 
 				initialPositionProvider, initialVelocityProvider, finalPositionProvider, finalVelocityProvider, new YoVariableRegistry(""), 0.2, 20,
 				null);
