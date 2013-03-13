@@ -11,4 +11,6 @@ public interface HeightMap
    
    public abstract double getXTiles();
    public abstract double getYTiles();
+   
+   
 }

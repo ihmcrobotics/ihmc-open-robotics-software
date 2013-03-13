@@ -4,7 +4,8 @@ package us.ihmc.commonWalkingControlModules.terrain;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
-import com.yobotics.simulationconstructionset.GroundProfile;
+import us.ihmc.graphics3DAdapter.GroundProfile;
+
 
 public class StepUpGroundProfile implements GroundProfile
 {

@@ -5,10 +5,10 @@ import java.util.Arrays;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.graphics3DAdapter.GroundProfile;
 import us.ihmc.utilities.CheckTools;
 import us.ihmc.utilities.math.MathTools;
 
-import com.yobotics.simulationconstructionset.GroundProfile;
 
 public class VaryingStairGroundProfile implements GroundProfile
 {

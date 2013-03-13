@@ -233,10 +233,12 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRo
                           || pinJoint.getName().contains("f3"))
                   {
                      pinJoint.setLimitStops(joint.getLowerLimit(), joint.getUpperLimit(), 10.0, 2.5);
+                     // Ignore damping
                   }
                   else
                   {
                      pinJoint.setLimitStops(joint.getLowerLimit(), joint.getUpperLimit(), 100.0, 20.0);
+                     pinJoint.setDamping(joint.getDamping());
                   }
                }
                else
@@ -245,7 +247,6 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRo
                }
             }
 
-            pinJoint.setDamping(joint.getDamping());
 
             oneDoFJoints.put(joint.getName(), pinJoint);
             scsJoint = pinJoint;
