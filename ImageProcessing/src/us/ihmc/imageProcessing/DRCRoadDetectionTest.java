@@ -43,6 +43,7 @@ import boofcv.abst.feature.detect.interest.ConfigFastHessian;
 import boofcv.abst.feature.detect.interest.InterestPointDetector;
 import boofcv.abst.feature.detect.line.DetectLineHoughPolar;
 import boofcv.alg.filter.binary.BinaryImageOps;
+import boofcv.alg.filter.binary.Contour;
 import boofcv.alg.filter.binary.ThresholdImageOps;
 import boofcv.alg.misc.ImageStatistics;
 import boofcv.core.image.ConvertBufferedImage;
@@ -240,19 +241,18 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
       }
 
       // Detect blobs inside the binary image and assign labels to them
-//      int numBlobs = BinaryImageOps.labelBlobs4(binary, blobs);
-//
-//      boundingBoxes = findBlobBoundingBoxes(blobs, numBlobs);
-//
-//
-//      BufferedImage visualized = VisualizeBinaryData.renderLabeled(blobs, numBlobs, null);
-//
-////    blobDetectionViewer.updateImage(visualized);
-//      repackConeBlobImageSizeChanges(visualized.getWidth(), visualized.getHeight());
-//
-//
-//      return visualized;
-      throw new RuntimeException("Update for new BoofCV");
+      List<Contour> blobContours = BinaryImageOps.contour(binary, 4, blobs);
+
+      boundingBoxes = findBlobBoundingBoxes(blobs, blobContours.size());
+
+
+      BufferedImage visualized = VisualizeBinaryData.renderLabeled(blobs, blobContours.size(), null);
+
+//    blobDetectionViewer.updateImage(visualized);
+      repackConeBlobImageSizeChanges(visualized.getWidth(), visualized.getHeight());
+
+
+      return visualized;
    }
 
    /**
@@ -383,16 +383,15 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
       }
 
 
-//      // Detect blobs inside the binary image and assign labels to them
-//      int numBlobs = BinaryImageOps.labelBlobs4(binary, blobs);
-//
-//      numBlobs = filterBlobsNotTouchingEdges(blobs, numBlobs);
-//
-//      // Render the binary image for output and display it in a window
-//      BufferedImage dst = VisualizeBinaryData.renderLabeled(blobs, numBlobs, null);
-//
-//      return dst;
-      throw new RuntimeException("Update for new BoofCV");
+      // Detect blobs inside the binary image and assign labels to them
+      List<Contour> blobContours = BinaryImageOps.contour(binary, 4, blobs);
+
+      int numBlobs = filterBlobsNotTouchingEdges(blobs, blobContours.size());
+
+      // Render the binary image for output and display it in a window
+      BufferedImage dst = VisualizeBinaryData.renderLabeled(blobs, numBlobs, null);
+
+      return dst;
 
    }
 
@@ -456,10 +455,10 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
             lines.add(line2d);
          }
 
-//         lines = removeBadLines(lines);
+//       lines = removeBadLines(lines);
 
 //       if (lines.size() > 2)
-//          System.out.println("TURN APPROACHING");
+//        System.out.println("TURN APPROACHING");
          linePainter.setLines(lines);
          vanishingPointDetector.setLines(lines);
          lanePositionEstimator.setLines(lines);
