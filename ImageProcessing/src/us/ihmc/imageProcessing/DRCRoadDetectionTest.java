@@ -240,18 +240,19 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
       }
 
       // Detect blobs inside the binary image and assign labels to them
-      int numBlobs = BinaryImageOps.labelBlobs4(binary, blobs);
-
-      boundingBoxes = findBlobBoundingBoxes(blobs, numBlobs);
-
-
-      BufferedImage visualized = VisualizeBinaryData.renderLabeled(blobs, numBlobs, null);
-
-//    blobDetectionViewer.updateImage(visualized);
-      repackConeBlobImageSizeChanges(visualized.getWidth(), visualized.getHeight());
-
-
-      return visualized;
+//      int numBlobs = BinaryImageOps.labelBlobs4(binary, blobs);
+//
+//      boundingBoxes = findBlobBoundingBoxes(blobs, numBlobs);
+//
+//
+//      BufferedImage visualized = VisualizeBinaryData.renderLabeled(blobs, numBlobs, null);
+//
+////    blobDetectionViewer.updateImage(visualized);
+//      repackConeBlobImageSizeChanges(visualized.getWidth(), visualized.getHeight());
+//
+//
+//      return visualized;
+      throw new RuntimeException("Update for new BoofCV");
    }
 
    /**
@@ -382,15 +383,16 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
       }
 
 
-      // Detect blobs inside the binary image and assign labels to them
-      int numBlobs = BinaryImageOps.labelBlobs4(binary, blobs);
-
-      numBlobs = filterBlobsNotTouchingEdges(blobs, numBlobs);
-
-      // Render the binary image for output and display it in a window
-      BufferedImage dst = VisualizeBinaryData.renderLabeled(blobs, numBlobs, null);
-
-      return dst;
+//      // Detect blobs inside the binary image and assign labels to them
+//      int numBlobs = BinaryImageOps.labelBlobs4(binary, blobs);
+//
+//      numBlobs = filterBlobsNotTouchingEdges(blobs, numBlobs);
+//
+//      // Render the binary image for output and display it in a window
+//      BufferedImage dst = VisualizeBinaryData.renderLabeled(blobs, numBlobs, null);
+//
+//      return dst;
+      throw new RuntimeException("Update for new BoofCV");
 
    }
 
