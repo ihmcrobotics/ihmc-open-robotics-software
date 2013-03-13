@@ -17,7 +17,7 @@ public class TestPrimitiveLoader
       SDFWorldLoader loader = new SDFWorldLoader(new File("Models/unitBox.sdf"), "Models/");
       
       SimulationConstructionSet scs = new SimulationConstructionSet();
-      loader.addStaticGraphicsToSCS(scs);
+      scs.addStaticLinkGraphics(loader.createGraphics3dObject());
       
       
       Thread thread = new Thread(scs);

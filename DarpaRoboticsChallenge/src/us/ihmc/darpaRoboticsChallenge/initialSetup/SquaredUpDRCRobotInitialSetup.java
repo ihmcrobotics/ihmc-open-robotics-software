@@ -3,8 +3,11 @@ package us.ihmc.darpaRoboticsChallenge.initialSetup;
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Vector3d;
 
+import com.yobotics.simulationconstructionset.GroundContactPoint;
+
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.projectM.R2Sim02.initialSetup.RobotInitialSetup;
+import us.ihmc.robotSide.RobotSide;
 
 public class SquaredUpDRCRobotInitialSetup implements RobotInitialSetup<SDFRobot>
 {
@@ -44,9 +47,12 @@ public class SquaredUpDRCRobotInitialSetup implements RobotInitialSetup<SDFRobot
       
       
       robot.getRootJointToWorldTransform(rootToWorld);
+      robot.update();
+      
+      GroundContactPoint gc1 = robot.getFootGroundContactPoints(RobotSide.LEFT).get(0);
       
       rootToWorld.get(offset);
-      offset.setZ(offset.getZ() - 0.04 + groundZ); //TODO: What is this 0.04 magic number? Name it a variable.
+      offset.setZ(offset.getZ() - gc1.getPositionPoint().getZ() + groundZ); //TODO: What is this 0.04 magic number? Name it a variable.
       offset.add(robot.getPositionInWorld());
       robot.setPositionInWorld(offset);
       

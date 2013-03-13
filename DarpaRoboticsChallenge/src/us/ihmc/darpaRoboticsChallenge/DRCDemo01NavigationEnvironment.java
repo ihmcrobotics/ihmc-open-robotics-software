@@ -18,9 +18,9 @@ import com.yobotics.simulationconstructionset.ExternalForcePoint;
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.util.environments.SelectableObjectListener;
 import com.yobotics.simulationconstructionset.util.ground.CombinedTerrainObject;
+import com.yobotics.simulationconstructionset.util.ground.TerrainObject;
 import com.yobotics.simulationconstructionset.util.ground.YawableBoxTerrainObject;
 import com.yobotics.simulationconstructionset.util.ground.RotatableConvexPolygonTerrainObject;
-import com.yobotics.simulationconstructionset.util.ground.TerrainObject;
 
 public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentInterface
 {

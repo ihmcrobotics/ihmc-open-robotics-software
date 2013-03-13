@@ -5,11 +5,11 @@ import java.util.ArrayList;
 import us.ihmc.commonAvatarInterfaces.CommonAvatarEnvironmentInterface;
 import us.ihmc.commonWalkingControlModules.terrain.CommonTerrain;
 import us.ihmc.commonWalkingControlModules.terrain.TerrainType;
+import us.ihmc.graphics3DAdapter.GroundProfile;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.projectM.R2Sim02.initialSetup.ScsInitialSetup;
 
 import com.yobotics.simulationconstructionset.DynamicIntegrationMethod;
-import com.yobotics.simulationconstructionset.GroundProfile;
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.util.LinearGroundContactModel;

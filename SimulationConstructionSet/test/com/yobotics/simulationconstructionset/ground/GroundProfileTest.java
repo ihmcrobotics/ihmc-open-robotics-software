@@ -2,8 +2,9 @@ package com.yobotics.simulationconstructionset.ground;
 
 import javax.vecmath.Vector3d;
 import org.junit.Test;
+
+import us.ihmc.graphics3DAdapter.GroundProfile;
 import us.ihmc.utilities.test.JUnitTools;
-import com.yobotics.simulationconstructionset.GroundProfile;
 
 public abstract class GroundProfileTest
 {

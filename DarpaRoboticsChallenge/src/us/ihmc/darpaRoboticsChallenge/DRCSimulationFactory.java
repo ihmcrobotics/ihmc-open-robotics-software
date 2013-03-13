@@ -1,9 +1,6 @@
 package us.ihmc.darpaRoboticsChallenge;
 
-import java.io.IOException;
-
 import us.ihmc.GazeboStateCommunicator.GazeboRobot;
-import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFPerfectSimulatedSensorReaderAndWriter;
 import us.ihmc.SdfLoader.SDFRobot;
@@ -46,55 +43,26 @@ public class DRCSimulationFactory
    private static final boolean SHOW_REFERENCE_FRAMES = false;
    public static boolean SHOW_INERTIA_ELLIPSOIDS = false;
 
-   public static HumanoidRobotSimulation<SDFRobot> createSimulation(DRCRobotJointMap jointMap, ControllerFactory controllerFactory,
-           CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, RobotInitialSetup<SDFRobot> robotInitialSetup, ScsInitialSetup scsInitialSetup,
-           GuiInitialSetup guiInitialSetup, KryoObjectServer networkServer)
+   public static HumanoidRobotSimulation<SDFRobot> createSimulation(ControllerFactory controllerFactory,
+         CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, DRCRobotInterface robotInterface, RobotInitialSetup<SDFRobot> robotInitialSetup,
+         ScsInitialSetup scsInitialSetup, GuiInitialSetup guiInitialSetup, KryoObjectServer networkServer)
    {
       GUISetterUpperRegistry guiSetterUpperRegistry = new GUISetterUpperRegistry();
       DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
 
-
-      JaxbSDFLoader jaxbSDFLoader = DRCRobotSDFLoader.loadDRCRobot(jointMap);
-      SDFRobot simulatedRobot;
+      DRCRobotJointMap jointMap = robotInterface.getJointMap();
 
       double simulateDT = scsInitialSetup.getDT();
       int simulationTicksPerControlTick = controllerFactory.getSimulationTicksPerControlTick();
       double controlDT = simulateDT * simulationTicksPerControlTick;
-      if(DRCConfigParameters.USE_GAZEBO_PHYSICS)
-      {
-         try
-         {
-            GazeboRobot gazeboRobot = new GazeboRobot("localhost", jaxbSDFLoader.getGeneralizedSDFRobotModel(jointMap.getModelName()));
-            
-            simulationTicksPerControlTick = 1;
-            simulateDT = gazeboRobot.getDT();
-            controlDT = simulateDT;
-            
-            simulatedRobot = gazeboRobot;
-         }
-         catch (IOException e)
-         {
-            throw new RuntimeException(e);
-         }
-      }
-      else
-      {
-         simulatedRobot = jaxbSDFLoader.createRobot(jointMap);
-
-         simulationTicksPerControlTick = controllerFactory.getSimulationTicksPerControlTick();
-         simulateDT = scsInitialSetup.getDT();
-         controlDT = simulateDT * simulationTicksPerControlTick;
-      }
+      
+      SDFRobot simulatedRobot = robotInterface.getRobot();
       
       
       simulatedRobot.setDynamicIntegrationMethod(scsInitialSetup.getDynamicIntegrationMethod());
       
-      SDFFullRobotModel fullRobotModelForSimulation = jaxbSDFLoader.createFullRobotModel(jointMap);
+      SDFFullRobotModel fullRobotModelForSimulation = robotInterface.getFullRobotModel();
 
-//    drcRobotSDFLoader = new DRCRobotSDFLoader(robotModel);
-//    jaxbSDFLoader = drcRobotSDFLoader.loadDRCRobot();
-//    FullRobotModel fullRobotModelForController = new FullRobotModelWithUncertainty(jaxbSDFLoader.getFullRobotModel());
-//    CommonWalkingReferenceFrames referenceFramesForController = jaxbSDFLoader.getReferenceFrames();
 
       SDFFullRobotModel fullRobotModelForController = fullRobotModelForSimulation;
       CommonWalkingReferenceFrames referenceFramesForController = new ReferenceFrames(fullRobotModelForSimulation, jointMap, jointMap.getAnkleHeight());

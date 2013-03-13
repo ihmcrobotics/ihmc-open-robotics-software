@@ -9,11 +9,11 @@ import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.vecmath.Point2d;
 
+import us.ihmc.graphics3DAdapter.GroundProfile;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
 
-import com.yobotics.simulationconstructionset.GroundProfile;
 import com.yobotics.simulationconstructionset.util.FlatGroundProfile;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.ground.AlternatingSlopesGroundProfile;
