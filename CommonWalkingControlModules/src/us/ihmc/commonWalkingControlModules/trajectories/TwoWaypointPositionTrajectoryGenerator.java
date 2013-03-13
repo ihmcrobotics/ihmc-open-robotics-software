@@ -30,7 +30,7 @@ import com.yobotics.simulationconstructionset.util.trajectory.YoPositionProvider
 public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajectoryGenerator
 {
    private final static double[] DESIRED_PROPORTIONS_THROUGH_TRAJECTORY_FOR_GROUND_CLEARANCE = new double[] {1.0 / 3.0, 2.0 / 3.0};
-   private final static double FRACTION_OF_TIME_TO_OR_FROM_WAYPOINT_FOR_SPEED_UP_OR_SLOW_DOWN = .6;
+   private final static double FRACTION_OF_TIME_TO_OR_FROM_WAYPOINT_FOR_SPEED_UP_OR_SLOW_DOWN = .8;
    private final static double SPHERE_EDGE_TO_WAYPOINT_DISTANCE = 0.1;
 
    private final double groundClearance;
@@ -327,16 +327,28 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
          double velocityComponent = coefficientsVector.get(4);
          velocity.set(d, velocityComponent);
       }
-      
+
       accelerationEndpointVelocities[indexOfWaypoint - 1].set(velocity);
       fixedPointVelocities[indexOfWaypoint].set(velocity);
     
-//      FrameVector initialOrFinalToWaypoint = new FrameVector(referenceFrame);
-//      initialOrFinalToWaypoint.sub(fixedPointPositions[indexOfWaypoint + 1].getFramePointCopy(), fixedPointPositions[indexOfWaypoint - 1].getFramePointCopy());
-//      initialOrFinalToWaypoint.normalize();
-//      double magnitudeOfProjection = velocity.dot(initialOrFinalToWaypoint);
-//      initialOrFinalToWaypoint.scale(magnitudeOfProjection);
-//      fixedPointVelocities[indexOfWaypoint].set(initialOrFinalToWaypoint);
+      FrameVector initialOrFinalToWaypoint = new FrameVector(referenceFrame);
+      FrameVector projectedVelocity = new FrameVector(referenceFrame);
+      initialOrFinalToWaypoint.sub(fixedPointPositions[indexOfWaypoint + 1].getFramePointCopy(), fixedPointPositions[indexOfWaypoint - 1].getFramePointCopy());
+      initialOrFinalToWaypoint.normalize();
+      projectedVelocity.set(initialOrFinalToWaypoint);
+      double magnitudeOfProjection = velocity.dot(initialOrFinalToWaypoint);
+      projectedVelocity.scale(magnitudeOfProjection);
+      fixedPointVelocities[indexOfWaypoint].set(projectedVelocity);
+      
+      FrameVector projectedIntermediateVelocity = new FrameVector(referenceFrame);
+      FrameVector velocityComponent = new FrameVector(velocity);
+      velocityComponent.scale(1-FRACTION_OF_TIME_TO_OR_FROM_WAYPOINT_FOR_SPEED_UP_OR_SLOW_DOWN);
+      FrameVector projectedComponent = new FrameVector(referenceFrame);
+      projectedComponent.scale(FRACTION_OF_TIME_TO_OR_FROM_WAYPOINT_FOR_SPEED_UP_OR_SLOW_DOWN);
+      projectedIntermediateVelocity.add(velocityComponent, projectedComponent);
+      projectedIntermediateVelocity.normalize();
+      projectedIntermediateVelocity.scale(projectedVelocity.length());
+      accelerationEndpointVelocities[indexOfWaypoint - 1].set(projectedIntermediateVelocity);
    }
 
    private void setInitialAndFinalPositionsAndVelocities()
