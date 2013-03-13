@@ -24,6 +24,7 @@ import com.yobotics.simulationconstructionset.util.trajectory.DoubleProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.PositionProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.PositionTrajectoryGenerator;
 import com.yobotics.simulationconstructionset.util.trajectory.VectorProvider;
+import com.yobotics.simulationconstructionset.util.trajectory.YoConcatenatedSplines;
 import com.yobotics.simulationconstructionset.util.trajectory.YoPositionProvider;
 
 public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajectoryGenerator
