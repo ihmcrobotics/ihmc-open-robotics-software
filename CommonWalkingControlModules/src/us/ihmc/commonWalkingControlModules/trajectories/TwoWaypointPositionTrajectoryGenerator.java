@@ -26,11 +26,12 @@ import com.yobotics.simulationconstructionset.util.trajectory.PositionTrajectory
 import com.yobotics.simulationconstructionset.util.trajectory.VectorProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.YoConcatenatedSplines;
 import com.yobotics.simulationconstructionset.util.trajectory.YoPositionProvider;
+import com.yobotics.simulationconstructionset.util.trajectory.YoSpline3D;
 
 public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajectoryGenerator
 {
-   private final static double[] DESIRED_PROPORTIONS_THROUGH_TRAJECTORY_FOR_GROUND_CLEARANCE = new double[] {1.0 / 3.0, 2.0 / 3.0};
-   private final static double FRACTION_OF_TIME_TO_OR_FROM_WAYPOINT_FOR_SPEED_UP_OR_SLOW_DOWN = .8;
+   private final static double[] DESIRED_PROPORTIONS_THROUGH_TRAJECTORY_FOR_GROUND_CLEARANCE = new double[] {1.0 / 5.0, 4.0 / 5.0};
+   private final static double FRACTION_OF_TIME_TO_OR_FROM_WAYPOINT_FOR_SPEED_UP_OR_SLOW_DOWN = .6;
    private final static double SPHERE_EDGE_TO_WAYPOINT_DISTANCE = 0.1;
 
    private final double groundClearance;
@@ -62,10 +63,14 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
 
    private DoubleYoVariable[] accelerationEndpointTimes = new DoubleYoVariable[2];
    private YoFrameVector[] accelerationEndpointVelocities = new YoFrameVector[2];
-
+   
+   private final double[] arcLengthsOfAccelerationPeriods = new double[2];
+   
    private final DenseMatrix64F constraintsMatrix = new DenseMatrix64F(6, 6);
    private final DenseMatrix64F constraintsVector = new DenseMatrix64F(6, 1);
    private final DenseMatrix64F coefficientsVector = new DenseMatrix64F(6, 1);
+   
+   private final YoSpline3D accelerationPeriod;
 
    private final YoConcatenatedSplines concatenatedSplinesWithArcLengthApproximatedByDistance;
    private final YoConcatenatedSplines concatenatedSplinesWithArcLengthCalculatedIteratively;
@@ -112,16 +117,23 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
          accelerationEndpointTimes[i] = new DoubleYoVariable(namePrefix + "AccelerationEndpointTimes" + i, registry);
          accelerationEndpointVelocities[i] = new YoFrameVector(namePrefix + "AccelerationEndpointVelocities" + i, referenceFrame, registry);
       }
+      
+      accelerationPeriod = new YoSpline3D(4, 20, referenceFrame, registry, "accelerationPeriod");
 
       concatenatedSplinesWithArcLengthApproximatedByDistance = new YoConcatenatedSplines(new int[] {6, 6, 6}, referenceFrame,
               arcLengthCalculatorDivisionsPerPolynomial, registry, namePrefix + "ConcatenatedSplinesWithArcLengthApproximatedByDistance");
       concatenatedSplinesWithArcLengthCalculatedIteratively = new YoConcatenatedSplines(new int[] {6, 6, 6}, referenceFrame, 2, registry,
               namePrefix + "ConcatenatedSplinesWithArcLengthCalculatedIteratively");
    }
-
+   
    public void compute(double time)
    {
-      System.out.println(time);
+	   compute(time, true);
+   }
+
+   public void compute(double time, boolean printtime)
+   {
+      if(printtime) System.out.println(time);
       
       timeIntoStep.set(time);
 
@@ -262,12 +274,16 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
    private void setWaypointTimes(double[] arcLengths)
    {
       double[] arcLengthsOutsideOfAccelerationPeriod = new double[3];
-      arcLengthsOutsideOfAccelerationPeriod[0] = arcLengths[0]
-              - accelerationEndpointTimes[0].getDoubleValue() * ((fixedPointVelocities[0].length() + accelerationEndpointVelocities[0].length()) / 2.0);
+
+      arcLengthsOutsideOfAccelerationPeriod[0] = arcLengths[0]- arcLengthsOfAccelerationPeriods[0];
       arcLengthsOutsideOfAccelerationPeriod[1] = arcLengths[1];
-      arcLengthsOutsideOfAccelerationPeriod[2] = arcLengths[2]
-              - (fixedPointTimes[3].getDoubleValue() - accelerationEndpointTimes[1].getDoubleValue())
-                * ((accelerationEndpointVelocities[1].length() + fixedPointVelocities[3].length()) / 2.0);
+      arcLengthsOutsideOfAccelerationPeriod[2] = arcLengths[2] - arcLengthsOfAccelerationPeriods[1];
+      
+      System.out.println("accel 1 period : " + arcLengthsOfAccelerationPeriods[0]);
+      System.out.println("rest of 1 	 : " + arcLengthsOutsideOfAccelerationPeriod[0]);
+      System.out.println("2			 	 : " + arcLengthsOutsideOfAccelerationPeriod[1]);
+      System.out.println("beginning of 2 : " + arcLengthsOutsideOfAccelerationPeriod[2]);
+      System.out.println("accel 2 period : " + arcLengthsOfAccelerationPeriods[1] +"\n\n");
       
       double totalArcLengthOutsideOfAccelerationPeriod = 0.0;
       for (int i = 0; i < arcLengthsOutsideOfAccelerationPeriod.length; i++)
@@ -319,14 +335,21 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       });
 
       FrameVector velocity = new FrameVector(referenceFrame);
+      FramePoint z1 = new FramePoint(referenceFrame);
+      FrameVector zd1 = new FrameVector(referenceFrame);
 
       for (Direction d : Direction.values())
       {
          constraintsVector.setData(new double[] {z0.get(d), zd0.get(d), 0.0, z2.get(d), 0.0, 0.0});
          solve(constraintsMatrix, constraintsVector, coefficientsVector);
          double velocityComponent = coefficientsVector.get(4);
+         z1.set(d, coefficientsVector.get(0)*t1*t1*t1+coefficientsVector.get(1)*t1*t1+coefficientsVector.get(2)*t1+coefficientsVector.get(3));
+         zd1.set(d, 3*coefficientsVector.get(0)*t1*t1+2*coefficientsVector.get(1)*t1+coefficientsVector.get(2));
          velocity.set(d, velocityComponent);
       }
+      
+      accelerationPeriod.setCubic(t0, t1, z0, zd0, z1, zd1);
+      arcLengthsOfAccelerationPeriods[indexOfWaypoint - 1] = accelerationPeriod.getArcLength(t0, t1);
 
       accelerationEndpointVelocities[indexOfWaypoint - 1].set(velocity);
       fixedPointVelocities[indexOfWaypoint].set(velocity);
@@ -343,7 +366,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       FrameVector projectedIntermediateVelocity = new FrameVector(referenceFrame);
       FrameVector velocityComponent = new FrameVector(velocity);
       velocityComponent.scale(1-FRACTION_OF_TIME_TO_OR_FROM_WAYPOINT_FOR_SPEED_UP_OR_SLOW_DOWN);
-      FrameVector projectedComponent = new FrameVector(referenceFrame);
+      FrameVector projectedComponent = new FrameVector(referenceFrame); // TODO fix
       projectedComponent.scale(FRACTION_OF_TIME_TO_OR_FROM_WAYPOINT_FOR_SPEED_UP_OR_SLOW_DOWN);
       projectedIntermediateVelocity.add(velocityComponent, projectedComponent);
       projectedIntermediateVelocity.normalize();
@@ -473,7 +496,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
          double t0 = concatenatedSplinesWithArcLengthCalculatedIteratively.getT0();
          double tf = concatenatedSplinesWithArcLengthCalculatedIteratively.getTf();
          double t = t0 + (double) i / (double) (numberOfVisualizationMarkers) * (tf - t0);
-         compute(t);
+         compute(t, false);
          trajectoryBagOfBalls.setBall(desiredPosition.getFramePointCopy(), i);
       }
 
