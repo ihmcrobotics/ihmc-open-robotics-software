@@ -269,59 +269,6 @@ where
 
 \end_layout
 
-\begin_layout Standard
-Measurements:
-\end_layout
-
-\begin_layout Itemize
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\uuline off
-\uwave off
-\noun off
-\color none
-\begin_inset Formula $z_{\omega,i}$
-\end_inset
-
-: Measured angular velocity of IMU i in body frame.
- Includes bias and noise.
- 
-\end_layout
-
-\begin_layout Itemize
-\begin_inset Formula $z_{\dot{v,}i}:$
-\end_inset
-
-Measured acceleration of IMU i in body frame.
- Includes bias and noise.
-\end_layout
-
-\begin_layout Itemize
-\begin_inset Formula $z_{q,i}$
-\end_inset
-
-: Measured orientation of IMU i with respect to world.
- Includes noise.
- May include bias.
-\end_layout
-
-\begin_layout Itemize
-\begin_inset Formula $z_{\dot{p},i}$
-\end_inset
-
-: Measured velocity of stationary point 
-\begin_inset Formula $p_{i}$
-\end_inset
-
-
-\end_layout
-
 \begin_layout Subsection
 Linearized error model
 \end_layout
@@ -705,6 +652,59 @@ TODO:
 \end_layout
 
 \begin_layout Standard
+Measurements:
+\end_layout
+
+\begin_layout Itemize
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+\begin_inset Formula $z_{\omega,i}$
+\end_inset
+
+: Measured angular velocity of IMU i in body frame.
+ Includes bias and noise.
+ 
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $z_{\dot{v,}i}:$
+\end_inset
+
+Measured acceleration of IMU i in body frame.
+ Includes bias and noise.
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $z_{q,i}$
+\end_inset
+
+: Measured orientation of IMU i with respect to world.
+ Includes noise.
+ May include bias.
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $z_{\dot{p},i}$
+\end_inset
+
+: Measured velocity of stationary point 
+\begin_inset Formula $p_{i}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
 Let 
 \begin_inset Formula $\hat{\cdot}$
 \end_inset
@@ -918,19 +918,7 @@ Note that
 \end_inset
 
 .
- Define the measurement output matrix 
-\begin_inset Formula $H_{\omega,i}$
-\end_inset
-
-:
-\begin_inset Formula 
-\[
-H_{\omega,i}=R_{p}^{i}
-\]
-
-\end_inset
-
-
+ 
 \end_layout
 
 \begin_layout Standard
@@ -949,7 +937,7 @@ Let
 \begin_layout Standard
 \begin_inset Formula 
 \[
-z_{\omega,i}=R_{p}^{i}\omega+\omega_{i}^{i,p}+b_{\omega_{i}}+v_{\omega_{i}}
+z_{\omega,i}=R_{p}^{i}\omega+\omega_{i}^{i,p}+b_{\omega_{i}}+v_{\omega,i}
 \]
 
 \end_inset
@@ -964,7 +952,7 @@ The estimated measurement will be
 \begin_layout Standard
 \begin_inset Formula 
 \[
-\hat{z}_{\omega,i}=\hat{R}_{p}^{i}\hat{\omega}+\hat{\omega}_{i}^{i,p}+\hat{b}_{\omega_{i}}
+\hat{z}_{\omega,i}=\hat{R}_{p}^{i}\hat{\omega}+\hat{\omega}_{i}^{i,p}+\hat{b}_{\omega,i}
 \]
 
 \end_inset
@@ -984,7 +972,19 @@ y_{\omega}=z_{\omega,i}-\hat{z}_{\omega,i}
 
 \end_inset
 
- 
+
+\end_layout
+
+\begin_layout Standard
+TODO:
+\begin_inset Formula 
+\[
+H_{\omega,i}=\frac{\partial\hat{z}_{\omega,i}}{\partial\left(\phi,\omega,b_{\omega,i}\right)}
+\]
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Subsection
