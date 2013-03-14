@@ -9,6 +9,7 @@ import javax.vecmath.Vector2d;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 /**
  * User: Matt
@@ -20,8 +21,8 @@ public class ObstaclePositionEstimator implements PostProcessor
    private LanePositionIndicatorPanel lanePositionIndicatorPanel;
    private Dimension imageSize = new Dimension(640, 480);
    private Line2d axis = new Line2d(new Point2d(0, 320), new Vector2d(1.0, 0.0));
-   private ArrayList<BoundingBox2d> boundingBoxes = new ArrayList<BoundingBox2d>();
-   private ArrayList<ColoredLine> coloredLines = new ArrayList<ColoredLine>();
+   private List<BoundingBox2d> boundingBoxes = new ArrayList<BoundingBox2d>();
+   private List<ColoredLine> coloredLines = new ArrayList<ColoredLine>();
    private double roadWidthInMeters = 7.34;
    private double carWidthInMeters = 1.5;
    private double carPercentageOfRoad = carWidthInMeters / roadWidthInMeters;
@@ -36,7 +37,7 @@ public class ObstaclePositionEstimator implements PostProcessor
       this.lines = lines;
    }
 
-   public void setBoundingBoxes(ArrayList<BoundingBox2d> boundingBoxes)
+   public void setBoundingBoxes(List<BoundingBox2d> boundingBoxes)
    {
       this.boundingBoxes = boundingBoxes;
       updateLanePositionEstimate();

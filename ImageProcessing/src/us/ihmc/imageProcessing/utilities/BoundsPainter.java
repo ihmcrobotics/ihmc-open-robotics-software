@@ -1,14 +1,10 @@
 package us.ihmc.imageProcessing.utilities;
 
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Stroke;
-import java.util.ArrayList;
-import java.util.HashMap;
-
 import us.ihmc.utilities.math.geometry.BoundingBox2d;
+
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * User: Matt
@@ -16,7 +12,7 @@ import us.ihmc.utilities.math.geometry.BoundingBox2d;
  */
 public class BoundsPainter implements PostProcessor
 {
-   private ArrayList<BoundingBox2d> boundingBoxes = new ArrayList<BoundingBox2d>();
+   private List<BoundingBox2d> boundingBoxes = new ArrayList<BoundingBox2d>();
    private float lineThickness = 1.0f;
    private int imageHeight = 544;
 
@@ -30,7 +26,7 @@ public class BoundsPainter implements PostProcessor
       this.imageHeight = imageHeight;
    }
 
-   public void setBoundingBoxes(ArrayList<BoundingBox2d> boundingBoxes)
+   public void setBoundingBoxes(List<BoundingBox2d> boundingBoxes)
    {
       this.boundingBoxes = boundingBoxes;
    }
