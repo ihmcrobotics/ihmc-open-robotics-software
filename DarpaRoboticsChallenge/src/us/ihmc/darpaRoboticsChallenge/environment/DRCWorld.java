@@ -13,8 +13,8 @@ import com.yobotics.simulationconstructionset.util.environments.SelectableObject
 
 public abstract class DRCWorld implements CommonAvatarEnvironmentInterface, DRCRobotInterface
 {
+   private static final Class<DRCRobotSDFLoader> myClass = DRCRobotSDFLoader.class;
    protected final ArrayList<String> resourceDirectories = new ArrayList<String>();
-   protected final Class<DRCRobotSDFLoader> myClass = DRCRobotSDFLoader.class;
    
    public DRCWorld()
    {

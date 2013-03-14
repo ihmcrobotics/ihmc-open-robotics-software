@@ -10,7 +10,6 @@ import javax.xml.bind.JAXBException;
 
 import us.ihmc.SdfLoader.xmlDescription.SDFWorld.Road;
 import us.ihmc.graphics3DAdapter.GroundProfile;
-import us.ihmc.graphics3DAdapter.HeightMap;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.jme.JMEGeneratedHeightMap;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
@@ -43,7 +42,7 @@ public class SDFWorldLoader
       }
    }
 
-   public GroundProfile getGroundProfile(GroundProfileObjectFilter groundProfileObjectFilter)
+   public GroundProfile getGroundProfile(GroundProfileObjectFilter groundProfileObjectFilter, int resolution)
    {
       ArrayList<Graphics3DNode> nodes = new ArrayList<Graphics3DNode>();
       for (Entry<String, Graphics3DObject> visual : visuals.entrySet())
@@ -55,7 +54,7 @@ public class SDFWorldLoader
             nodes.add(node);
          }
       }
-      GroundProfile groundProfile = new JMEGeneratedHeightMap(nodes);
+      GroundProfile groundProfile = new JMEGeneratedHeightMap(nodes, resolution);
 
       return groundProfile;
    }
