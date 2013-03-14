@@ -3,42 +3,6 @@
 
 package us.ihmc.imageProcessing;
 
-import georegression.struct.line.LineParametric2D_F32;
-import georegression.struct.point.Point2D_F32;
-
-import java.awt.Color;
-import java.awt.Container;
-import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.GridLayout;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.image.BufferedImage;
-import java.awt.image.ColorModel;
-import java.awt.image.WritableRaster;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-
-import javax.swing.JFrame;
-import javax.swing.JSlider;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-import javax.vecmath.Point2d;
-
-import jxl.format.RGB;
-import us.ihmc.imageProcessing.ImageFilters.ColorFilter;
-import us.ihmc.imageProcessing.ImageFilters.CropFilter;
-import us.ihmc.imageProcessing.driving.*;
-import us.ihmc.imageProcessing.utilities.BoundsPainter;
-import us.ihmc.imageProcessing.utilities.LinePainter;
-import us.ihmc.imageProcessing.utilities.PaintableImageViewer;
-import us.ihmc.imageProcessing.utilities.VideoPlayer;
-import us.ihmc.utilities.camera.VideoListener;
-import us.ihmc.utilities.math.geometry.BoundingBox2d;
-import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
-import us.ihmc.utilities.math.geometry.Line2d;
 import boofcv.abst.feature.detect.interest.ConfigFastHessian;
 import boofcv.abst.feature.detect.interest.InterestPointDetector;
 import boofcv.abst.feature.detect.line.DetectLineHoughPolar;
@@ -50,11 +14,34 @@ import boofcv.core.image.ConvertBufferedImage;
 import boofcv.factory.feature.detect.interest.FactoryInterestPoint;
 import boofcv.factory.feature.detect.line.FactoryDetectLineAlgs;
 import boofcv.gui.binary.VisualizeBinaryData;
-import boofcv.struct.image.ImageFloat32;
-import boofcv.struct.image.ImageSInt16;
-import boofcv.struct.image.ImageSInt32;
-import boofcv.struct.image.ImageSingleBand;
-import boofcv.struct.image.ImageUInt8;
+import boofcv.struct.image.*;
+import georegression.struct.line.LineParametric2D_F32;
+import georegression.struct.point.Point2D_F32;
+import georegression.struct.point.Point2D_I32;
+import jxl.format.RGB;
+import us.ihmc.imageProcessing.ImageFilters.ColorFilter;
+import us.ihmc.imageProcessing.driving.*;
+import us.ihmc.imageProcessing.utilities.BoundsPainter;
+import us.ihmc.imageProcessing.utilities.LinePainter;
+import us.ihmc.imageProcessing.utilities.PaintableImageViewer;
+import us.ihmc.imageProcessing.utilities.VideoPlayer;
+import us.ihmc.utilities.camera.VideoListener;
+import us.ihmc.utilities.math.geometry.BoundingBox2d;
+import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
+import us.ihmc.utilities.math.geometry.Line2d;
+
+import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.vecmath.Point2d;
+import java.awt.*;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
+import java.awt.image.WritableRaster;
+import java.util.ArrayList;
+import java.util.List;
 
 public class DRCRoadDetectionTest implements VideoListener, KeyListener
 {
@@ -63,7 +50,7 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
    private PaintableImageViewer rawImageViewer = new PaintableImageViewer();
    private PaintableImageViewer analyzedImageViewer = new PaintableImageViewer();
 
-// private PaintableImageViewer blobDetectionViewer = new PaintableImageViewer();
+   // private PaintableImageViewer blobDetectionViewer = new PaintableImageViewer();
    private LinePainter linePainter = new LinePainter(4.0f);
    private BoundsPainter boundsPainter = new BoundsPainter(4.0f);
 
@@ -91,7 +78,7 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
    private int erodeCount = 1;
    private int dilateCount = 3;
 
-   ArrayList<BoundingBox2d> boundingBoxes = new ArrayList<BoundingBox2d>();
+   List<BoundingBox2d> boundingBoxes = new ArrayList<BoundingBox2d>();
 
 
 
@@ -188,7 +175,7 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
    {
       T input = ConvertBufferedImage.convertFromSingle(image, null, imageType);
       DetectLineHoughPolar<T, D> detector = FactoryDetectLineAlgs.houghPolar(localMaxRadius, minCounts, resolutionRange, resolutionAngle, edgeThreshold,
-                                               maxLines, imageType, derivType);
+              maxLines, imageType, derivType);
       List<LineParametric2D_F32> found = detector.detect(input);
 
       return found;
@@ -243,7 +230,7 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
       // Detect blobs inside the binary image and assign labels to them
       List<Contour> blobContours = BinaryImageOps.contour(binary, 4, blobs);
 
-      boundingBoxes = findBlobBoundingBoxes(blobs, blobContours.size());
+      boundingBoxes = findBlobBoundingBoxes(blobContours);
 
 
       BufferedImage visualized = VisualizeBinaryData.renderLabeled(blobs, blobContours.size(), null);
@@ -291,69 +278,64 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
    }
 
 
-
-
-   private ArrayList<BoundingBox2d> findBlobBoundingBoxes(ImageSInt32 labeled, int numLabels)
+   /**
+    * Uses external contour to find the bounding box around each found blob.
+    */
+   private List<BoundingBox2d> findBlobBoundingBoxes(List<Contour> blobContours )
    {
-      HashMap<Integer, BoundingBox2d> boundingBoxes = new HashMap<Integer, BoundingBox2d>();
+      List<BoundingBox2d> boundingBoxes = new ArrayList<BoundingBox2d>();
 
+      for( Contour c : blobContours ) {
 
-      for (int y = 0; y < labeled.height; y++)
-      {
-         for (int x = 0; x < labeled.width; x++)
-         {
-            int index = (labeled.startIndex + labeled.stride * y) + (labeled.startIndex + x);
-            int blobID = labeled.data[index];
-            if (blobID != 0)
-            {
-               BoundingBox2d currentBounds = boundingBoxes.get(blobID - 1);
-               if (currentBounds == null)
-               {
-                  currentBounds = new BoundingBox2d(new Point2d(x, y), new Point2d(x, y));
-                  boundingBoxes.put(blobID - 1, currentBounds);
-               }
+         List<Point2D_I32> external = c.external;
 
-               if (currentBounds.getMinPoint().x > x)
-               {
-                  currentBounds.getMinPoint().x = x;
-               }
-               else if (currentBounds.getMaxPoint().x < x)
-               {
-                  currentBounds.getMaxPoint().x = x;
-               }
+         Point2D_I32 p = external.get(0);
 
-               if (currentBounds.getMinPoint().y > y)
-               {
-                  currentBounds.getMinPoint().y = y;
-               }
+         int x0 = p.x; int y0 = p.y;
+         int x1 = p.x; int y1 = p.y;
 
-               else if (currentBounds.getMaxPoint().y < y)
-               {
-                  currentBounds.getMaxPoint().y = y;
-               }
+         for( int i = 1; i < external.size(); i++ ) {
+            p = external.get(i);
+            if( p.x < x0 ) {
+               x0 = p.x;
+            } else if( p.x > x1 ) {
+               x1 = p.x;
+            }
+            if( p.y < y0 ) {
+               y0 = p.y;
+            } else if( p.y > y1 ) {
+               y1 = p.y;
             }
          }
+
+         BoundingBox2d bounds = new BoundingBox2d(new Point2d(x0, y0), new Point2d(x1, y1));
+         boundingBoxes.add(bounds);
       }
 
-      // add buffer zone
-
-      double bufferPercent = 0.5;
-      ArrayList<BoundingBox2d> finalBoxes = new ArrayList<BoundingBox2d>();
-      for (int i = 0; i < numLabels; i++)
-      {
-         BoundingBox2d bounds = boundingBoxes.get(i);
-
-//       double width = bounds.getMaxPoint().x - bounds.getMinPoint().x;
-//       int calcBuffer = new Double(width * bufferPercent).intValue();
-//       bounds.getMinPoint().x -= calcBuffer;
-//       bounds.getMaxPoint().x += calcBuffer;
-         finalBoxes.add(bounds);
-      }
+      return boundingBoxes;
 
 
-      return finalBoxes;
+      // PA:  If you need to add a buffer zone it can be added above.  If this code isn't being used then we could
+      //      just delete it
+
+//      // add buffer zone
+//
+//      double bufferPercent = 0.5;
+//      ArrayList<BoundingBox2d> finalBoxes = new ArrayList<BoundingBox2d>();
+//      for (int i = 0; i < numLabels; i++)
+//      {
+//         BoundingBox2d bounds = boundingBoxes.get(i);
+//
+////       double width = bounds.getMaxPoint().x - bounds.getMinPoint().x;
+////       int calcBuffer = new Double(width * bufferPercent).intValue();
+////       bounds.getMinPoint().x -= calcBuffer;
+////       bounds.getMaxPoint().x += calcBuffer;
+//         finalBoxes.add(bounds);
+//      }
+//
+//
+//      return finalBoxes;
    }
-
 
    public BufferedImage findRoad(BufferedImage src)
    {
