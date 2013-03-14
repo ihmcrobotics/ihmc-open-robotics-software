@@ -30,7 +30,7 @@ import com.yobotics.simulationconstructionset.util.MatrixYoVariableConversionToo
  */
 public class YoKalmanFilter implements KalmanFilter
 {
-   private final YoVariableRegistry registry;
+   protected final YoVariableRegistry registry;
 
    // Dynamics (x = F x + G u + w; y = H x + v)
    // x is the state, u is the input, w is process noise.
@@ -154,7 +154,7 @@ public class YoKalmanFilter implements KalmanFilter
    {
       if (doChecks)
       {
-         if (MatrixFeatures.hasNaN(u))
+         if (u != null && MatrixFeatures.hasNaN(u))
             throw new RuntimeException("u contains NaN: " + u);
       }
 
@@ -178,8 +178,10 @@ public class YoKalmanFilter implements KalmanFilter
       x.set(a);
       
       if (u.getNumRows() > 0)
+      {
          MatrixVectorMult.mult(G, u, a);
-      addEquals(x, a);
+         addEquals(x, a);         
+      }
    }
 
    private void updateAPrioriCovariance()
@@ -194,16 +196,16 @@ public class YoKalmanFilter implements KalmanFilter
    {
       if (doChecks)
       {
-         if (MatrixFeatures.hasNaN(y))
+         if (y != null && MatrixFeatures.hasNaN(y))
+         {
             throw new RuntimeException("y contains NaN: " + y);
+         }
       }
 
       getFromYoVariables(H, yoH);
       getFromYoVariablesSymmetric(R, yoR);
       getFromYoVariables(x, yoX);
       getFromYoVariablesSymmetric(P, yoP);
-
-      computeMeasurementResidual(r, y);
 
       // S = H P H' + R
       MatrixMatrixMult.mult_small(H, P, c);
@@ -217,7 +219,7 @@ public class YoKalmanFilter implements KalmanFilter
       MatrixMatrixMult.multTransA_small(H, S_inv, d);
       MatrixMatrixMult.mult_small(P, d, K);
 
-      updateAPosterioriState(x);
+      updateAPosterioriState(x, y, K);
 
       // P = (I-KH)P = P - (KH)P = P-K(HP)
       MatrixMatrixMult.mult_small(H, P, c);
@@ -228,15 +230,12 @@ public class YoKalmanFilter implements KalmanFilter
       storeInYoVariablesSymmetric(P, yoP);
    }
 
-   protected void computeMeasurementResidual(DenseMatrix64F r, DenseMatrix64F y)
+   protected void updateAPosterioriState(DenseMatrix64F x, DenseMatrix64F y, DenseMatrix64F K)
    {
       // r = y - H x
       MatrixVectorMult.mult(H, x, r);
       sub(y, r, r);
-   }
 
-   protected void updateAPosterioriState(DenseMatrix64F x)
-   {
       // x = x + Kr
       MatrixVectorMult.mult(K, r, a);
       addEquals(x, a);
@@ -270,5 +269,20 @@ public class YoKalmanFilter implements KalmanFilter
       MatrixYoVariableConversionTools.populateYoVariablesSymmetric(yoR, "R", nMeasurements, registry);
       MatrixYoVariableConversionTools.populateYoVariables(yoX, "x", registry);
       MatrixYoVariableConversionTools.populateYoVariablesSymmetric(yoP, "P", nStates, registry);
+   }
+   
+   public int getNumberOfStates()
+   {
+      return a.getNumRows();
+   }
+   
+   public int getNumberOfInputs()
+   {
+      return b.getNumCols();
+   }
+   
+   public int getNumberOfMeasurements()
+   {
+      return c.getNumRows();
    }
 }
