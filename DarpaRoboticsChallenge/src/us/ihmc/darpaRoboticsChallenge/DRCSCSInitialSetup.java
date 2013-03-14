@@ -27,7 +27,7 @@ public class DRCSCSInitialSetup implements ScsInitialSetup
    private double gravity = -9.81;
    private final CommonTerrain commonTerrain;
 
-   private DynamicIntegrationMethod dynamicIntegrationMethod = DynamicIntegrationMethod.RUNGE_KUTTA_FOURTH_ORDER;
+   private DynamicIntegrationMethod dynamicIntegrationMethod = DynamicIntegrationMethod.EULER_DOUBLE_STEPS;
    
    public DRCSCSInitialSetup(TerrainType terrainType)
    {
