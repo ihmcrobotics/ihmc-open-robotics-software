@@ -176,7 +176,9 @@ public class YoKalmanFilter implements KalmanFilter
       // x = F x + G u
       MatrixVectorMult.mult(F, x, a);
       x.set(a);
-      MatrixVectorMult.mult(G, u, a);
+      
+      if (u.getNumRows() > 0)
+         MatrixVectorMult.mult(G, u, a);
       addEquals(x, a);
    }
 
