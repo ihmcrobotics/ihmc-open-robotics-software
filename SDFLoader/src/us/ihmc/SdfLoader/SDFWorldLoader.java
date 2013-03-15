@@ -61,17 +61,27 @@ public class SDFWorldLoader
 
    public Pair<SDFRobot, SDFFullRobotModel> createRobotAndRemoveFromWorld(SDFJointNameMap sdfJointNameMap)
    {
-      if (!visuals.containsKey(sdfJointNameMap.getModelName()))
-      {
-         throw new RuntimeException("Unkown robot");
-      }
+      removeVisualFromWorld(sdfJointNameMap.getModelName());
 
       Pair<SDFRobot, SDFFullRobotModel> ret = new Pair<SDFRobot, SDFFullRobotModel>(jaxbSDFLoader.createRobot(sdfJointNameMap),
             jaxbSDFLoader.createFullRobotModel(sdfJointNameMap));
 
-      visuals.remove(sdfJointNameMap.getModelName());
-
       return ret;
+   }
+
+   private void removeVisualFromWorld(String modelName)
+   {
+      if (!visuals.containsKey(modelName))
+      {
+         throw new RuntimeException("Unkown robot");
+      }
+      visuals.remove(modelName);
+   }
+   
+   public GeneralizedSDFRobotModel getGeneralizedRobotModelAndRemoveFromWorld(String modelName)
+   {
+      removeVisualFromWorld(modelName);
+      return jaxbSDFLoader.getGeneralizedSDFRobotModel(modelName);
    }
 
    public Graphics3DObject createGraphics3dObject()
