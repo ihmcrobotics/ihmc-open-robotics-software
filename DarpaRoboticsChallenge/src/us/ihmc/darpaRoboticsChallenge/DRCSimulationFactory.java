@@ -16,7 +16,6 @@ import us.ihmc.commonWalkingControlModules.visualizer.CommonInertiaElipsoidsVisu
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.handControl.SandiaHandModel;
 import us.ihmc.darpaRoboticsChallenge.handControl.SimulatedUnderactuatedSandiaHandController;
-import us.ihmc.darpaRoboticsChallenge.sensors.PerfectFootswitch;
 import us.ihmc.projectM.R2Sim02.initialSetup.GuiInitialSetup;
 import us.ihmc.projectM.R2Sim02.initialSetup.RobotInitialSetup;
 import us.ihmc.projectM.R2Sim02.initialSetup.ScsInitialSetup;
@@ -67,12 +66,7 @@ public class DRCSimulationFactory
       SDFFullRobotModel fullRobotModelForController = fullRobotModelForSimulation;
       CommonWalkingReferenceFrames referenceFramesForController = new ReferenceFrames(fullRobotModelForSimulation, jointMap, jointMap.getAnkleHeight());
 
-      SideDependentList<FootSwitchInterface> footSwitches = new SideDependentList<FootSwitchInterface>();
-      for (RobotSide robotSide : RobotSide.values())
-      {
-         footSwitches.put(robotSide, new PerfectFootswitch(simulatedRobot, robotSide));
-         
-      }
+      SideDependentList<FootSwitchInterface> footSwitches = robotInterface.getFootSwitches();
       
       SideDependentList<HandControllerInterface> handControllers = null;
       if (jointMap.getSelectedModel() == DRCRobotModel.ATLAS_SANDIA_HANDS)

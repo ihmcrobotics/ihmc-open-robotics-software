@@ -6,7 +6,7 @@ import us.ihmc.graphics3DAdapter.camera.VideoSettingsH264LowLatency;
 
 public class DRCConfigParameters
 {
-   public static final boolean USE_GAZEBO_PHYSICS = false;
+   public static final boolean USE_GAZEBO_PHYSICS = true;
    public static final String GAZEBO_HOST = "localhost";
    
    
