@@ -1585,21 +1585,7 @@ where
 \end_inset
 
 .
- We first note that for any 
-\begin_inset Formula $x\in\mathbb{R}^{3}$
-\end_inset
-
-,
-\begin_inset Note Note
-status collapsed
-
-\begin_layout Plain Layout
-TODO: make an appendix with the derivations or cite something
-\end_layout
-
-\end_inset
-
-
+ In the appendix, it is shown that
 \begin_inset Formula 
 \[
 \lim_{\phi\rightarrow0}\frac{\partial}{\partial\phi}\left[R_{\phi}x\right]=-\tilde{x}
@@ -1644,6 +1630,11 @@ I & R_{p}^{w}\left(\tilde{r}_{p}-\tilde{p}_{i}^{p}\right) & -R_{p}^{w}\tilde{v}_
 
 \begin_layout Section
 Appendix: rotation vector kinematics
+\end_layout
+
+\begin_layout Standard
+TODO: apparently this is called the Bortz equation.
+ Mention that and add a reference.
 \end_layout
 
 \begin_layout Standard
@@ -1837,6 +1828,133 @@ reference "eq:dPhiNormDt"
 \begin_inset Formula 
 \[
 \dot{\phi}=\frac{1}{2}\cot\frac{\left\Vert \phi\right\Vert }{2}\left(\left\Vert \phi\right\Vert \omega-\frac{\phi\cdot\omega}{\left\Vert \phi\right\Vert }\phi\right)+\frac{\phi\times\omega}{2}+\frac{\phi\cdot\omega}{\left\Vert \phi\right\Vert ^{2}}\phi
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Appendix: small rotation derivative
+\end_layout
+
+\begin_layout Standard
+TODO
+\end_layout
+
+\begin_layout Standard
+Let 
+\begin_inset Formula $\phi\in\mathbb{R}^{3}$
+\end_inset
+
+ be a rotation vector, whose direction represents an axis of rotation and
+ whose magnitude represents the angle of rotation about that axis.
+ The corresponding rotation matrix is
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Murray1994"
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+R_{\phi}=e^{\tilde{\phi}}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Using Rodrigues' formula, we can write this as
+\begin_inset Formula 
+\[
+e^{\tilde{\phi}}=I+\frac{\tilde{\phi}}{\left\Vert \phi\right\Vert }\sin\left(\left\Vert \phi\right\Vert \right)+\frac{\tilde{\phi}^{2}}{\left\Vert \phi\right\Vert ^{2}}\left(1-\cos\left(\left\Vert \phi\right\Vert \right)\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Let
+\begin_inset Formula 
+\begin{align*}
+x' & =R_{\phi}x\\
+ & =x-\frac{\sin\left(\left\Vert \phi\right\Vert \right)}{\left\Vert \phi\right\Vert }\tilde{x}\phi+\frac{\tilde{\phi}^{2}}{\left\Vert \phi\right\Vert ^{2}}\left(1-\cos\left(\left\Vert \phi\right\Vert \right)\right)x
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Using the definition of the matrix exponential, we can rewrite this as
+\begin_inset Formula 
+\begin{align*}
+x' & =x+\tilde{\phi}x+\frac{1}{2}\tilde{\phi}^{2}x+\frac{1}{6}\tilde{\phi}^{3}x+\dotsb\\
+ & =x-\tilde{x}\phi+
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The derivative of 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\tilde{\phi}^{k}x & =\tilde{\phi}^{k-1}\tilde{\phi}x\\
+ & =-\tilde{\phi}^{k-1}\tilde{x}\phi
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+With this substitution, we can write the derivative 
+\begin_inset Formula $\frac{\partial x'}{\partial\phi}$
+\end_inset
+
+ as 
+\begin_inset Formula 
+\[
+\frac{\partial x'}{\partial\phi}=-\sum_{k=0}^{\infty}\frac{1}{k!}\frac{\partial}{\partial\phi}\left(\tilde{\phi}^{k-1}\right)\tilde{x}\phi-\sum_{k=0}^{\infty}\frac{1}{k!}\tilde{\phi}^{k-1}\tilde{x}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+For small 
+\begin_inset Formula $\phi$
+\end_inset
+
+, the first term disappears since every term of the summation is multiplied
+ by 
+\begin_inset Formula $\phi$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\lim_{\phi\rightarrow0}\frac{\partial}{\partial\phi}\left[R_{\phi}x\right]=-\tilde{x}
 \]
 
 \end_inset
