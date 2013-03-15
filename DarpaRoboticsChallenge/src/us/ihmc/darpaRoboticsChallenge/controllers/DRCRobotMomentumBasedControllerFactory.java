@@ -91,8 +91,8 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
       jointConfigurationDataSender.startUpdateThread(updatePeriodInMilliseconds);
    }
 
-   public int getSimulationTicksPerControlTick()
+   public double getControlDT()
    {
-      return 50;
+      return 0.005;
    }
 }

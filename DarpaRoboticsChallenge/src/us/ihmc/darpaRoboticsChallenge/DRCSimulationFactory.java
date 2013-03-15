@@ -52,9 +52,9 @@ public class DRCSimulationFactory
 
       DRCRobotJointMap jointMap = robotInterface.getJointMap();
 
-      double simulateDT = scsInitialSetup.getDT();
-      int simulationTicksPerControlTick = controllerFactory.getSimulationTicksPerControlTick();
-      double controlDT = simulateDT * simulationTicksPerControlTick;
+      double simulateDT = robotInterface.getSimulateDT();
+      double controlDT = controllerFactory.getControlDT();
+      int simulationTicksPerControlTick = (int) (controlDT / simulateDT);
       
       SDFRobot simulatedRobot = robotInterface.getRobot();
       

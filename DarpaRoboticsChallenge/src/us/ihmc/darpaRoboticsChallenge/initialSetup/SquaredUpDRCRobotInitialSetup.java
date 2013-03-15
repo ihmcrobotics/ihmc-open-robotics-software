@@ -3,11 +3,8 @@ package us.ihmc.darpaRoboticsChallenge.initialSetup;
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Vector3d;
 
-import com.yobotics.simulationconstructionset.GroundContactPoint;
-
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.projectM.R2Sim02.initialSetup.RobotInitialSetup;
-import us.ihmc.robotSide.RobotSide;
 
 public class SquaredUpDRCRobotInitialSetup implements RobotInitialSetup<SDFRobot>
 {
@@ -46,14 +43,21 @@ public class SquaredUpDRCRobotInitialSetup implements RobotInitialSetup<SDFRobot
       robot.getOneDoFJoint("r_leg_uay").setQ(-0.4);
       
       
-      robot.getRootJointToWorldTransform(rootToWorld);
       robot.update();
-      
-      GroundContactPoint gc1 = robot.getFootGroundContactPoints(RobotSide.LEFT).get(0);
-      
+      robot.getRootJointToWorldTransform(rootToWorld);
       rootToWorld.get(offset);
-      offset.setZ(offset.getZ() - gc1.getPositionPoint().getZ() + groundZ); //TODO: What is this 0.04 magic number? Name it a variable.
-      offset.add(robot.getPositionInWorld());
+      
+      
+//      GroundContactPoint gc1 = robot.getFootGroundContactPoints(RobotSide.LEFT).get(0);
+//      double pelvisToFoot = offset.getZ() - gc1.getPositionPoint().getZ();
+//      System.out.println("Footheight: " + pelvisToFoot);
+      
+      // Hardcoded for gazebo integration
+      double pelvisToFoot = 0.887;
+      
+      
+      offset.setZ(groundZ + pelvisToFoot);
+//      offset.add(robot.getPositionInWorld());
       robot.setPositionInWorld(offset);
       
    }

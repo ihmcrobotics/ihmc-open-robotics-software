@@ -47,7 +47,8 @@ public class DRCMultiContact
       DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
 
       environment = new MultiContactTestEnvironment(robotInitialSetup, jointMap, dynamicGraphicObjectsListRegistry, footContactSides, handContactSides);
-      scsInitialSetup = new DRCSCSInitialSetup(environment);
+      final PlainDRCRobot robotInterface = new PlainDRCRobot(robotModel);
+      scsInitialSetup = new DRCSCSInitialSetup(environment, robotInterface.getSimulateDT());
       scsInitialSetup.setSimulationDataBufferSize(simulationDataBufferSize);
 
       double dt = scsInitialSetup.getDT();
@@ -71,7 +72,7 @@ public class DRCMultiContact
                                                                                         handContactPointTransforms, handContactPoints, footContactSides, handContactSides);
       ControllerFactory controllerFactory = new DRCRobotMomentumBasedControllerFactory(highLevelHumanoidControllerFactory);
 
-      drcSimulation = DRCSimulationFactory.createSimulation(controllerFactory, environment, new PlainDRCRobot(robotModel), robotInitialSetup, scsInitialSetup, guiInitialSetup, null);
+      drcSimulation = DRCSimulationFactory.createSimulation(controllerFactory, environment, robotInterface, robotInitialSetup, scsInitialSetup, guiInitialSetup, null);
 
       SimulationConstructionSet simulationConstructionSet = drcSimulation.getSimulationConstructionSet();
 

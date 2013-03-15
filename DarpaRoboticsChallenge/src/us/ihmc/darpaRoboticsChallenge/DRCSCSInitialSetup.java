@@ -19,7 +19,7 @@ import com.yobotics.simulationconstructionset.util.ground.steppingStones.Steppin
 public class DRCSCSInitialSetup implements ScsInitialSetup
 {
    private static final boolean SHOW_WORLD_COORDINATE_FRAME = false;
-   private double simulateDT = 0.0001;    // 0.00005; //
+   private final double simulateDT;// = 0.0001;    // 0.00005; //
    private int recordFrequency = 1;    // 10;
 
 
@@ -29,20 +29,22 @@ public class DRCSCSInitialSetup implements ScsInitialSetup
 
    private DynamicIntegrationMethod dynamicIntegrationMethod = DynamicIntegrationMethod.EULER_DOUBLE_STEPS;
    
-   public DRCSCSInitialSetup(TerrainType terrainType)
+   public DRCSCSInitialSetup(TerrainType terrainType, double simulateDT)
    {
       System.out.println("terrainType = " + terrainType);
       commonTerrain = new CommonTerrain(terrainType);
+      this.simulateDT = simulateDT;
    }
 
-   public DRCSCSInitialSetup(GroundProfile groundProfile)
+   public DRCSCSInitialSetup(GroundProfile groundProfile, double simulateDT)
    {
       commonTerrain = new CommonTerrain(groundProfile);
+      this.simulateDT = simulateDT;
    }
 
-   public DRCSCSInitialSetup(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface)
+   public DRCSCSInitialSetup(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, double simulateDT)
    {
-      this(commonAvatarEnvironmentInterface.getTerrainObject());
+      this(commonAvatarEnvironmentInterface.getTerrainObject(), simulateDT);
    }
 
    public void initializeRobot(Robot robot, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
