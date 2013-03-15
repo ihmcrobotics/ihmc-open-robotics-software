@@ -265,10 +265,6 @@ where
 .
 \end_layout
 
-\begin_layout Standard
-
-\end_layout
-
 \begin_layout Subsection
 Linearized error model
 \end_layout
@@ -976,10 +972,21 @@ y_{\omega}=z_{\omega,i}-\hat{z}_{\omega,i}
 \end_layout
 
 \begin_layout Standard
-TODO:
+Linearizing the IMU angular velocity measurement model we have
 \begin_inset Formula 
 \[
-H_{\omega,i}=\frac{\partial\hat{z}_{\omega,i}}{\partial\left(\phi,\omega,b_{\omega,i}\right)}
+H_{\omega,i}=\frac{\partial\hat{z}_{\omega,i}}{\partial\left(\hat{\phi},\hat{\omega},\hat{b}_{\omega,i}\right)}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\frac{\partial\hat{z}_{\omega,i}}{\partial\hat{\phi}}=0,\frac{\partial\hat{z}_{\omega,i}}{\partial\hat{\omega}}=\hat{R}_{p}^{i},\frac{\partial\hat{z}_{\omega,i}}{\partial\hat{b}_{\omega,i}}=I_{3}
 \]
 
 \end_inset
@@ -1224,7 +1231,8 @@ IMU orientation
 status open
 
 \begin_layout Plain Layout
-TODO: order of rotations, sign of output matrix
+TODO: order of rotations, sign of output matrix.
+ Add noise
 \end_layout
 
 \end_inset
@@ -1255,10 +1263,16 @@ q=q_{p}^{w}=q_{i}^{w}\otimes q_{p}^{i}
 \end_layout
 
 \begin_layout Standard
-Hence, define the measurement
+We are measuring the orientation of IMU i.
+ It will be a function of the orientation of the orientation frame and the
+ joint angles.
+ Hence, define the measurement
+\end_layout
+
+\begin_layout Standard
 \begin_inset Formula 
 \[
-z_{q,i}=q_{i}^{w}\otimes q_{p}^{i}
+z_{q,i}=q_{p}^{w}\otimes q_{i}^{p}
 \]
 
 \end_inset
