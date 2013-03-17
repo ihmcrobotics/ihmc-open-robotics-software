@@ -24,7 +24,7 @@ public class TwoWaypointPositionTrajectoryGeneratorTest {
 	@Test
 	public void testSimpleTrajectories()
 	{
-		testSimpleTrajectory(3);
+		testSimpleTrajectory(20);
 		testSimpleTrajectory(4);
 	}
 	
@@ -44,10 +44,11 @@ public class TwoWaypointPositionTrajectoryGeneratorTest {
 		VectorProvider finalVelocityProvider = new ConstantVectorProvider(new FrameVector(worldFrame, new double[]{0.1, 0.01, -0.02}));
 		
 		TwoWaypointPositionTrajectoryGenerator trajectory = new TwoWaypointPositionTrajectoryGenerator("", worldFrame, stepTimeProvider, 
-				initialPositionProvider, initialVelocityProvider, finalPositionProvider, finalVelocityProvider, new YoVariableRegistry(""), 0.2, 20,
+				initialPositionProvider, initialVelocityProvider, finalPositionProvider, finalVelocityProvider, new YoVariableRegistry(""), 0.2, numDesiredSplines,
 				null);
 		
 		trajectory.initialize(new FramePoint[]{firstIntermediatePosition, secondIntermediatePosition});
+
 		trajectory.compute(0.0);
 		FramePoint actual = new FramePoint(worldFrame);
 		FramePoint expected = new FramePoint(worldFrame);
