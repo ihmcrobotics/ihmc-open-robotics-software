@@ -16,6 +16,10 @@ public class SDFJointHolder
    private final double upperLimit;
    private final double lowerLimit;
    
+   private final double effortLimit;
+   private final double velocityLimit;
+   
+   
    private final Transform3D transformFromChildLink;
    private double damping = 0.0;
    private double friction = 0.0;
@@ -56,12 +60,33 @@ public class SDFJointHolder
          hasLimits = true;
          upperLimit = Double.parseDouble(sdfJoint.getAxis().getLimit().getUpper());
          lowerLimit = Double.parseDouble(sdfJoint.getAxis().getLimit().getLower());
+         
+         if(sdfJoint.getAxis().getLimit().getVelocity() != null)
+         {
+            velocityLimit = Double.parseDouble(sdfJoint.getAxis().getLimit().getVelocity());
+         }
+         else
+         {
+            velocityLimit = Double.NaN;
+         }
+         
+         if(sdfJoint.getAxis().getLimit().getEffort() != null)
+         {
+            effortLimit = Double.parseDouble(sdfJoint.getAxis().getLimit().getEffort());
+         }
+         else
+         {
+            effortLimit = Double.NaN;
+         }
       }
       else
       {
          hasLimits = false;
          upperLimit = Double.POSITIVE_INFINITY;
          lowerLimit = Double.NEGATIVE_INFINITY;
+         
+         velocityLimit = Double.NaN;
+         effortLimit = Double.NaN;
       }
       
       if(sdfJoint.getAxis().getDynamics() != null)
@@ -233,6 +258,16 @@ public class SDFJointHolder
    public double getFriction()
    {
       return friction;
+   }
+
+   public double getEffortLimit()
+   {
+      return effortLimit;
+   }
+
+   public double getVelocityLimit()
+   {
+      return velocityLimit;
    }
    
    

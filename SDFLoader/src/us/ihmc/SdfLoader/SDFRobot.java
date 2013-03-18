@@ -96,7 +96,7 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRo
 
       for (SDFJointHolder child : rootLink.getChildren())
       {
-         addJointsRecursively(child, rootJoint, MatrixTools.IDENTITY);
+         addJointsRecursively(child, rootJoint, MatrixTools.IDENTITY, sdfJointNameMap.enableTorqueVelocityLimits());
       }
 
       for (RobotSide robotSide : RobotSide.values())
@@ -195,7 +195,7 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRo
       return oneDoFJoints.values();
    }
    
-   private void addJointsRecursively(SDFJointHolder joint, Joint scsParentJoint, Matrix3d chainRotationIn)
+   private void addJointsRecursively(SDFJointHolder joint, Joint scsParentJoint, Matrix3d chainRotationIn, boolean enableTorqueVelocityLimits)
    {
       Matrix3d rotation = new Matrix3d();
       Vector3d offset = new Vector3d();
@@ -229,8 +229,7 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRo
             {
                if ((joint.getContactKd() == 0.0) && (joint.getContactKp() == 0.0))
                {
-                  if (pinJoint.getName().contains("f0") || pinJoint.getName().contains("f1") || pinJoint.getName().contains("f2")
-                          || pinJoint.getName().contains("f3"))
+                  if (isFinger(pinJoint))
                   {
                      pinJoint.setLimitStops(joint.getLowerLimit(), joint.getUpperLimit(), 10.0, 2.5);
                      // Ignore damping
@@ -245,7 +244,25 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRo
                {
                   pinJoint.setLimitStops(joint.getLowerLimit(), joint.getUpperLimit(), 0.0001 * joint.getContactKp(), joint.getContactKd());
                }
+               
+               if(enableTorqueVelocityLimits)
+               {
+                  if (!isFinger(pinJoint))
+                  {
+                     if(!Double.isNaN(joint.getEffortLimit()))
+                     {
+                        pinJoint.setTorqueLimits(joint.getEffortLimit());
+                     }
+                     
+                     if(!Double.isNaN(joint.getVelocityLimit()))
+                     {
+                        pinJoint.setVelocityLimits(joint.getVelocityLimit(), 500.0);
+                     }
+                  }                  
+               }
+               
             }
+            
 
 
             oneDoFJoints.put(joint.getName(), pinJoint);
@@ -292,9 +309,15 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRo
 
       for (SDFJointHolder child : joint.getChild().getChildren())
       {
-         addJointsRecursively(child, scsJoint, chainRotation);
+         addJointsRecursively(child, scsJoint, chainRotation, enableTorqueVelocityLimits);
       }
 
+   }
+
+   private boolean isFinger(PinJoint pinJoint)
+   {
+      return pinJoint.getName().contains("f0") || pinJoint.getName().contains("f1") || pinJoint.getName().contains("f2")
+              || pinJoint.getName().contains("f3");
    }
 
    private void addCameraMounts(Joint scsJoint, SDFLinkHolder child)

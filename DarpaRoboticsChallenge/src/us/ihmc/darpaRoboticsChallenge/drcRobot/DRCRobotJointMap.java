@@ -322,4 +322,9 @@ public class DRCRobotJointMap implements SDFJointNameMap, RobotSpecificJointName
    {
       return selectedModel.getModelName();
    }
+
+   public boolean enableTorqueVelocityLimits()
+   {
+      return DRCRobotParameters.ENABLE_JOINT_VELOCITY_TORQUE_LIMITS;
+   }
 }
