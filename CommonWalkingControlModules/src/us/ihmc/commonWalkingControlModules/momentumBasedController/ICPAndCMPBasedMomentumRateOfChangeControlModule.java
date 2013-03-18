@@ -8,6 +8,7 @@ import us.ihmc.commonWalkingControlModules.WrenchDistributorTools;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.controlModules.GroundReactionMomentControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.velocityViaCoP.CapturabilityBasedDesiredCoPVisualizer;
+import us.ihmc.controlFlow.AbstractControlFlowElement;
 import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.robotSide.RobotSide;
@@ -32,17 +33,16 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint2d;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector2d;
 
-public class ICPAndCMPBasedMomentumRateOfChangeControlModule implements ICPBasedMomentumRateOfChangeControlModule
+public class ICPAndCMPBasedMomentumRateOfChangeControlModule extends AbstractControlFlowElement implements ICPBasedMomentumRateOfChangeControlModule
 {
-   private final ControlFlowInputPort<Double> desiredCenterOfMassHeightAccelerationInputPort = new ControlFlowInputPort<Double>(this);
-   private final ControlFlowInputPort<BipedSupportPolygons> bipedSupportPolygonsInputPort = new ControlFlowInputPort<BipedSupportPolygons>(this);
-   private final ControlFlowInputPort<RobotSide> supportLegInputPort = new ControlFlowInputPort<RobotSide>(this);
-   private final ControlFlowInputPort<CapturePointData> capturePointInputPort = new ControlFlowInputPort<CapturePointData>(this);
-   private final ControlFlowInputPort<OrientationTrajectoryData> desiredPelvisOrientationInputPort = new ControlFlowInputPort<OrientationTrajectoryData>(this);
-   private final ControlFlowInputPort<CapturePointTrajectoryData> desiredCapturePointTrajectoryInputPort =
-      new ControlFlowInputPort<CapturePointTrajectoryData>(this);
+   private final ControlFlowInputPort<Double> desiredCenterOfMassHeightAccelerationInputPort = createInputPort();
+   private final ControlFlowInputPort<BipedSupportPolygons> bipedSupportPolygonsInputPort = createInputPort();
+   private final ControlFlowInputPort<RobotSide> supportLegInputPort = createInputPort();
+   private final ControlFlowInputPort<CapturePointData> capturePointInputPort = createInputPort();
+   private final ControlFlowInputPort<OrientationTrajectoryData> desiredPelvisOrientationInputPort = createInputPort();
+   private final ControlFlowInputPort<CapturePointTrajectoryData> desiredCapturePointTrajectoryInputPort = createInputPort();
 
-   private final ControlFlowOutputPort<MomentumRateOfChangeData> momentumRateOfChangeOutputPort = new ControlFlowOutputPort<MomentumRateOfChangeData>(this);
+   private final ControlFlowOutputPort<MomentumRateOfChangeData> momentumRateOfChangeOutputPort = createOutputPort();
    private final MomentumRateOfChangeData momentumRateOfChangeData;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());

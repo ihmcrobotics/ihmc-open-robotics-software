@@ -1,10 +1,11 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController;
 
+import us.ihmc.controlFlow.AbstractControlFlowElement;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 
-public class NullMomentumRateOfChangeControlModule implements MomentumRateOfChangeControlModule
+public class NullMomentumRateOfChangeControlModule extends AbstractControlFlowElement implements MomentumRateOfChangeControlModule
 {
-   private final ControlFlowOutputPort<MomentumRateOfChangeData> momentumRateOfChangeOutputPort = new ControlFlowOutputPort<MomentumRateOfChangeData>(this);
+   private final ControlFlowOutputPort<MomentumRateOfChangeData> momentumRateOfChangeOutputPort = createOutputPort();
 
    public NullMomentumRateOfChangeControlModule()
    {
