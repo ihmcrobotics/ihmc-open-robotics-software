@@ -26,9 +26,10 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
 {
    private final static double[] DESIRED_PROPORTIONS_THROUGH_TRAJECTORY_FOR_GROUND_CLEARANCE = new double[] {1.0 / 3.0, 2.0 / 3.0};
    private final static double SPHERE_EDGE_TO_WAYPOINT_DISTANCE = 0.1;
-   private final static double LINEAR_SPLINE_LENGTH_FACTOR = 0.8;
+   private final static double LINEAR_SPLINE_LENGTH_FACTOR = 0.4;
    private final static double EPSILON = 1e-3;
-
+   private final static int numberOfTimeIntervals = 40;
+   
    private final DoubleYoVariable groundClearance;
 
    private final String namePostFix = getClass().getSimpleName();
@@ -121,6 +122,17 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       desiredPosition.set(concatenatedSplinesWithArcLengthCalculatedIteratively.getPosition());
       desiredVelocity.set(concatenatedSplinesWithArcLengthCalculatedIteratively.getVelocity());
       desiredAcceleration.set(concatenatedSplinesWithArcLengthCalculatedIteratively.getAcceleration());
+      
+//      concatenatedSplinesWithArcLengthCalculatedIteratively.compute(time - stepTime.getDoubleValue() / (double) numberOfTimeIntervals);
+//      FrameVector previousVelocity = concatenatedSplinesWithArcLengthCalculatedIteratively.getVelocity();
+//
+//      concatenatedSplinesWithArcLengthCalculatedIteratively.compute(time + stepTime.getDoubleValue() / (double) numberOfTimeIntervals);
+//      FrameVector nextVelocity = concatenatedSplinesWithArcLengthCalculatedIteratively.getVelocity();
+//      
+//      desiredAcceleration.set(nextVelocity);
+//      desiredAcceleration.sub(previousVelocity);
+//      desiredAcceleration.scale(0.5 * (double) numberOfTimeIntervals / stepTime.getDoubleValue());
+
    }
 
    public void get(FramePoint positionToPack)
@@ -246,6 +258,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
 
          double scaleFactor = waypointToEndpoint.dot(oppositeWaypointToEndpoint) / oppositeWaypointToEndpoint.length() * LINEAR_SPLINE_LENGTH_FACTOR;
 
+		 oppositeWaypointToEndpoint.normalize();
          oppositeWaypointToEndpoint.scale(scaleFactor);
 
          allPositions[accelerationEndpointIndices[i]].set(allPositions[waypointIndices[i]].getFramePointCopy());
