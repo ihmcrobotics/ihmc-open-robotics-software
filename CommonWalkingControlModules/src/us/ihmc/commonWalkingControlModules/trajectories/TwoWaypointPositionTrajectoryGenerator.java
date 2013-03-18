@@ -4,13 +4,11 @@ import javax.vecmath.Point3d;
 
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.math.MathTools;
-import us.ihmc.utilities.math.geometry.Direction;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.Sphere3d;
 
-import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.BagOfBalls;
@@ -28,9 +26,8 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
 {
    private final static double[] DESIRED_PROPORTIONS_THROUGH_TRAJECTORY_FOR_GROUND_CLEARANCE = new double[] {1.0 / 3.0, 2.0 / 3.0};
    private final static double SPHERE_EDGE_TO_WAYPOINT_DISTANCE = 0.1;
-   private final static double LINEAR_SPLINE_LENGTH_FACTOR = 0.2;
+   private final static double LINEAR_SPLINE_LENGTH_FACTOR = 0.8;
    private final static double EPSILON = 1e-3;
-   private final static boolean[] defaultFullyConstrainDirection = new boolean[]{false, false, false};
 
    private final DoubleYoVariable groundClearance;
 
@@ -58,8 +55,6 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
    private DoubleYoVariable[] allTimes = new DoubleYoVariable[6];
    private YoFramePoint[] allPositions = new YoFramePoint[6];
    private YoFrameVector[] allVelocities = new YoFrameVector[6];
-   
-   private BooleanYoVariable[] fullyConstrainDirection = new BooleanYoVariable[3];
 
    private static final int[] endpointIndices = new int[] {0, 5};
    private static final int[] waypointIndices = new int[] {2, 3};
@@ -107,16 +102,10 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
          allPositions[i] = new YoFramePoint(namePrefix + "FixedPointPosition" + i, referenceFrame, registry);
          allVelocities[i] = new YoFrameVector(namePrefix + "FixedPointVelocity" + i, referenceFrame, registry);
       }
-      
-      for (Direction direction : Direction.values())
-      {
-         fullyConstrainDirection[direction.getIndex()] = new BooleanYoVariable(namePrefix + "fullyConstainDirection" + direction, registry);
-         fullyConstrainDirection[direction.getIndex()].set(defaultFullyConstrainDirection[direction.getIndex()]);
-      }
 
-      concatenatedSplinesWithArcLengthApproximatedByDistance = new YoConcatenatedSplines(new int[] {6, 2, 6, 2, 6}, fullyConstrainDirection, referenceFrame,
+      concatenatedSplinesWithArcLengthApproximatedByDistance = new YoConcatenatedSplines(new int[] {4, 2, 6, 2, 4}, referenceFrame,
               arcLengthCalculatorDivisionsPerPolynomial, registry, namePrefix + "ConcatenatedSplinesWithArcLengthApproximatedByDistance");
-      concatenatedSplinesWithArcLengthCalculatedIteratively = new YoConcatenatedSplines(new int[] {6, 2, 6, 2, 6}, fullyConstrainDirection, referenceFrame, 2, registry,
+      concatenatedSplinesWithArcLengthCalculatedIteratively = new YoConcatenatedSplines(new int[] {4, 2, 6, 2, 4}, referenceFrame, 2, registry,
               namePrefix + "ConcatenatedSplinesWithArcLengthCalculatedIteratively");
    }
 
@@ -376,7 +365,6 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       double[] accelerationEndpointTimes = new double[2];
       FramePoint[] nonAccelerationEndpointPositions = new FramePoint[4];
       FrameVector[] nonAccelerationEndpointVelocities = new FrameVector[4];
-      FrameVector[] endpointAccelerations = new FrameVector[2];
 
       for (int i = 0; i < 4; i++)
       {
@@ -388,11 +376,10 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       for (int i = 0; i < 2; i++)
       {
          accelerationEndpointTimes[i] = allTimes[accelerationEndpointIndices[i]].getDoubleValue();
-         endpointAccelerations[i] = new FrameVector(referenceFrame, 0.0, 0.0, 0.0);
       }
       
-      concatenatedSplines.setQuinticLinearQuinticLinearQuintic(nonAccelerationEndpointTimes, nonAccelerationEndpointPositions,
-              nonAccelerationEndpointVelocities, accelerationEndpointTimes, endpointAccelerations);
+      concatenatedSplines.setCubicLinearQuinticLinearCubic(nonAccelerationEndpointTimes, nonAccelerationEndpointPositions,
+              nonAccelerationEndpointVelocities, accelerationEndpointTimes);
    }
 
    private void visualizeSpline()
