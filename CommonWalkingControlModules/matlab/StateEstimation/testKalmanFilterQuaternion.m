@@ -21,9 +21,9 @@ b0 = [0; -0.05; 0.05];
 
 % noise parameters
 qPhi = 0;
-qOmega = 1e-2;
+qOmega = 1;%1e-2;
 qB = 1;
-rPhi = 1e-2;
+rPhi = 1e-1; %1e-2;
 rOmega = 1e-2;
 
 covariances.QPhi = qPhi * eye(3);
@@ -35,7 +35,8 @@ covariances.ROmega = rOmega * eye(3);
 % simulated data
 dt = 1e-3;
 tMax = 45;
-data = createSimulatedData(dt, tMax, qB, qOmega, rPhi, rOmega, q0, omega0, b0);
+%data = createSimulatedData(dt, tMax, qB, qOmega, rPhi, rOmega, q0, omega0, b0);
+data = createSimulatedConingData(dt, tMax, qB, qOmega, rPhi, rOmega, b0);
 
 n = length(data.t);
 
@@ -191,6 +192,92 @@ for i = 1 : length(t)
     deltaQ = deltaPhiToDeltaQ(deltaPhi);
     zQ(:, i) = quaternionProduct(deltaQ, q(:, i));
     zOmega(:, i) = omega(:, i) + b(:, i) + wOmega(:, i);
+end
+
+data.t = t;
+data.omegad = omegad;
+data.zQ = zQ;
+data.zOmega = zOmega;
+data.q = q;
+data.omega = omega;
+data.b = b;
+
+end
+
+function data = createSimulatedConingData(dt, tMax, qB, qOmega, rPhi, rOmega, b0)
+
+randn('seed', 126);
+t = 0 : dt : tMax;
+n = length(t);
+
+% process noise
+wB = sqrt(qB) * randn(3, n);
+
+% coning trajectory settings
+eps = 1; % coning half-angle
+frequencyRad = 5;
+eX = [1; 0; 0];
+eY = [0; 1; 0];
+eZ = [0; 0; 1];
+
+% precomputation
+sinEps = sin(eps);
+sinEps2 = sin(eps / 2);
+
+% q
+q = zeros(4, n);
+qs = cos(eps / 2);
+for i = 1 : n
+    ti = t(i);
+    qvi = sinEps2 * (sin(frequencyRad * ti) * eX + cos(frequencyRad * ti) * eY);
+    qi = packQuaternion(qvi, qs);
+    q(:, i) = qi;
+end
+
+% omega
+omega = zeros(3, n);
+for i = 1 : n
+    ti = t(i);
+    omegai = frequencyRad * (...
+        sinEps * cos(frequencyRad * ti) * eX - ...
+        sinEps * sin(frequencyRad * ti) * eY + ...
+        2 * sinEps2^2 * eZ);
+    omega(:, i) = omegai;
+end
+
+% omegad
+omegad = zeros(3, n);
+for i = 1 : n
+    ti = t(i);
+    omegadi = frequencyRad^2 * (...
+        -sinEps * sin(frequencyRad * ti) * eX - ...
+        sinEps * cos(frequencyRad * ti) * eY);
+    omegad(:, i) = omegadi;
+end
+wOmegad = sqrt(qOmega) * randn(3, n);
+omegad = omegad + wOmegad;
+
+% b
+b = zeros(3, length(t));
+b(:, 1) = b0;
+for i = 1 : length(t) - 1
+    bPrev = b(:, i);
+    bNew = bPrev + wB(:, i) * dt;
+    b(:, i + 1) = bNew;
+end
+
+% measurement noise
+vPhi = sqrt(rPhi) * randn(3, n);
+vOmega = sqrt(rOmega) * randn(3, n);
+
+% measurements
+zQ = zeros(4, length(t));
+zOmega = zeros(3, length(t));
+for i = 1 : length(t)
+    deltaPhi = vPhi(:, i);
+    deltaQ = deltaPhiToDeltaQ(deltaPhi);
+    zQ(:, i) = quaternionProduct(deltaQ, q(:, i));
+    zOmega(:, i) = omega(:, i) + b(:, i) + vOmega(:, i);
 end
 
 data.t = t;
