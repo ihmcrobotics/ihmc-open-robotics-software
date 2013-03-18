@@ -21,7 +21,7 @@ ROmega = covariances.ROmega;
 QContinuous = blkdiag(QPhi, QOmega, QB);
 RContinuous = blkdiag(RPhi, ROmega);
 BW = eye(9);
-[F, G, Q, R] = discretize(A, B, BW, QContinuous, RContinuous, dt);
+[F, G, Q, R] = discretize2(A, B, BW, QContinuous, RContinuous, dt);
 H = [-eye(3), zeros(3, 6);
      zeros(3, 3), eye(3), eye(3)];
 
@@ -34,7 +34,7 @@ H = [-eye(3), zeros(3, 6);
 % q^W_NB = q^W_OB * q^OB_NB
 % q^W_OB = qHat
 % q^OB_NB = deltaPhiToDeltaQ(omegaHat * dt)
-qHat = quaternionProduct(qHat, deltaPhiToDeltaQ(omegaHat * dt)); % + omegad * dt^2 / 2)); 
+qHat = quaternionProduct(qHat, deltaPhiToDeltaQ(omegaHat * dt));% + omegad * dt^2 / 2)); 
 omegaHat = omegaHat + omegad * dt;
 
 % a priori covariance
@@ -96,13 +96,21 @@ end
 
 
 function [A, B] = createContinuousTimeSystem(omegaHat)
+% no cross product
+% A = [zeros(3, 3), eye(3), zeros(3, 3);
+%      zeros(3, 9);
+%      zeros(3, 9)];
+
+% cross product coefficient 1
 % A = [-tilde(omegaHat), eye(3), zeros(3, 3);
 %      zeros(3, 9);
 %      zeros(3, 9)];
 
+% cross product coefficient 1/2
 A = [-1/2 * tilde(omegaHat), eye(3), zeros(3, 3);
      zeros(3, 9);
      zeros(3, 9)];
+
 B = [zeros(3, 3);
      eye(3);
      zeros(3, 3)];
@@ -153,9 +161,9 @@ C = [-A', Q, zeros(n, m);
      zeros(n, n), A, B;
      zeros(m, n), zeros(m, n), zeros(m, m)];
 
-% expC = expm(C * deltaT);
-nApprox = 3;
-expC = expmApprox(C * deltaT, nApprox);
+expC = expm(C * deltaT);
+% nApprox = 3;
+% expC = expmApprox(C * deltaT, nApprox);
 F3 = expC(n + 1 : 2 * n, n + 1 : 2 * n);
 G2 = expC(1 : n, n + 1 : 2 * n);
 G3 = expC(n + 1 : 2 * n, 2 * n + 1 : end);
