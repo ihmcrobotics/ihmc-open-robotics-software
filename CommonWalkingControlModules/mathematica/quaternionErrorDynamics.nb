@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       157,          7]
-NotebookDataLength[     28636,        827]
-NotebookOptionsPosition[     27335,        782]
-NotebookOutlinePosition[     27691,        798]
-CellTagsIndexPosition[     27648,        795]
+NotebookDataLength[    126103,       3381]
+NotebookOptionsPosition[    124333,       3320]
+NotebookOutlinePosition[    124688,       3336]
+CellTagsIndexPosition[    124645,       3333]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -76,6 +76,13 @@ Cell[BoxData[{
      RowBox[{"{", 
       RowBox[{"i", ",", "3"}], "}"}]}], "]"}]}], ";"}], "\[IndentingNewLine]", 
  RowBox[{
+  RowBox[{"omegad", "=", 
+   RowBox[{"Table", "[", 
+    RowBox[{
+     SubscriptBox["\[Omega]d", "i"], ",", 
+     RowBox[{"{", 
+      RowBox[{"i", ",", "3"}], "}"}]}], "]"}]}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
   RowBox[{"\[Phi]Mag", "=", 
    RowBox[{"Simplify", "[", 
     RowBox[{
@@ -105,7 +112,7 @@ Cell[BoxData[{
   3.571299676740575*^9, 3.5712996798781347`*^9}, {3.571359431492795*^9, 
   3.571359449025268*^9}, {3.57135949553749*^9, 3.571359521432098*^9}, {
   3.571360068024303*^9, 3.57136010814043*^9}, {3.571361567166359*^9, 
-  3.571361569589491*^9}}],
+  3.571361569589491*^9}, {3.572407141021885*^9, 3.572407161870059*^9}}],
 
 Cell[BoxData[{
  RowBox[{
@@ -182,71 +189,18 @@ Cell[BoxData[
 
 Cell[BoxData[
  RowBox[{
-  RowBox[{
-   RowBox[{"dPhiNormDt", "=", 
-    RowBox[{
-     RowBox[{"Dot", "[", 
-      RowBox[{"phi", ",", "omega"}], "]"}], "/", "\[Phi]Mag"}]}], ";"}], 
-  "\[IndentingNewLine]"}]], "Input",
+  RowBox[{"dPhiNormDt", "=", 
+   RowBox[{
+    RowBox[{"Dot", "[", 
+     RowBox[{"phi", ",", "omega"}], "]"}], "/", "\[Phi]Mag"}]}], 
+  ";"}]], "Input",
  CellChangeTimes->{{3.571358815952979*^9, 3.5713588416706467`*^9}, 
    3.5713589223914747`*^9, {3.571359559777906*^9, 3.57135956705581*^9}, {
    3.571360829557582*^9, 3.571360836238371*^9}, {3.571361029328537*^9, 
-   3.571361030873025*^9}}],
+   3.571361030873025*^9}, 3.572397361895377*^9}],
 
 Cell[BoxData[
- RowBox[{"(*", "\[IndentingNewLine]", 
-  RowBox[{
-   RowBox[{"qdv", "=", 
-    RowBox[{"{", 
-     RowBox[{
-      RowBox[{"qd", "[", 
-       RowBox[{"[", "2", "]"}], "]"}], ",", 
-      RowBox[{"qd", "[", 
-       RowBox[{"[", "3", "]"}], "]"}], ",", 
-      RowBox[{"qd", "[", 
-       RowBox[{"[", "4", "]"}], "]"}]}], "}"}]}], ";", "\[IndentingNewLine]", 
-   
-   RowBox[{"phid", "=", 
-    RowBox[{"FullSimplify", "[", 
-     RowBox[{
-      RowBox[{
-       RowBox[{"(", 
-        RowBox[{"\[Phi]Mag", "/", 
-         RowBox[{"Sin", "[", 
-          RowBox[{"\[Phi]Mag", "/", "2"}], "]"}]}], ")"}], "*", "qdv"}], "-", 
-      
-      RowBox[{
-       RowBox[{"1", "/", "2"}], 
-       RowBox[{"Cot", "[", 
-        RowBox[{"\[Phi]Mag", "/", "2"}], "]"}], "*", "dPhiNormDt", "*", 
-       "phi"}], "+", 
-      RowBox[{
-       RowBox[{"phi", "/", "\[Phi]Mag"}], "*", "dPhiNormDt"}]}], "]"}]}]}], 
-  "\[IndentingNewLine]", "*)"}]], "Input",
- CellChangeTimes->{{3.571361045408451*^9, 3.571361055598946*^9}}],
-
-Cell[BoxData[
- RowBox[{"\[IndentingNewLine]", 
-  RowBox[{"(*", 
-   RowBox[{
-    RowBox[{"phid", "=", 
-     RowBox[{"Simplify", "[", 
-      RowBox[{
-       RowBox[{
-        RowBox[{"1", "/", "2"}], "*", 
-        RowBox[{"Cot", "[", 
-         RowBox[{"\[Phi]Mag", "/", "2"}], "]"}], "*", 
-        RowBox[{"(", 
-         RowBox[{
-          RowBox[{"\[Phi]Mag", "*", "omega"}], "-", 
-          RowBox[{"dPhiNormDt", "*", "phi"}]}], ")"}]}], "+", 
-       RowBox[{
-        RowBox[{"1", "/", "2"}], "*", 
-        RowBox[{"Cross", "[", 
-         RowBox[{"phi", ",", "omega"}], "]"}]}], "+", 
-       RowBox[{
-        RowBox[{"phi", "/", "\[Phi]Mag"}], "*", "dPhiNormDt"}]}], "]"}]}], 
-    ";"}], "*)"}], "\[IndentingNewLine]", 
+ RowBox[{"(*", 
   RowBox[{
    RowBox[{"phid", "=", 
     RowBox[{"Simplify", "[", 
@@ -284,45 +238,38 @@ Cell[BoxData[
    3.571360615630002*^9, 3.5713607342566013`*^9}, 3.571361027826585*^9, {
    3.571361584554419*^9, 3.571361592592911*^9}, 3.571362219297226*^9, {
    3.571362471178092*^9, 3.5713625450888443`*^9}, {3.5713727125075827`*^9, 
-   3.5713727274884453`*^9}, {3.571372845328952*^9, 3.571372872756967*^9}}],
+   3.5713727274884453`*^9}, {3.571372845328952*^9, 3.571372872756967*^9}, {
+   3.572397354568742*^9, 3.572397379248069*^9}, {3.572608504351886*^9, 
+   3.572608505892432*^9}}],
 
 Cell[BoxData[
- RowBox[{"(*", 
-  RowBox[{
-   RowBox[{"qd2v", "=", 
-    RowBox[{"Simplify", "[", 
+ RowBox[{
+  RowBox[{"phid", "=", 
+   RowBox[{"Simplify", "[", 
+    RowBox[{"omega", "+", 
      RowBox[{
-      RowBox[{
-       RowBox[{"1", "/", "2"}], "*", 
-       RowBox[{"Cos", "[", 
-        RowBox[{"\[Phi]Mag", "/", "2"}], "]"}], "*", 
-       RowBox[{"phi", "/", "\[Phi]Mag"}], "*", "dPhiNormDt"}], "+", 
-      RowBox[{
-       RowBox[{"Sin", "[", 
-        RowBox[{"\[Phi]Mag", "/", "2"}], "]"}], "*", 
-       RowBox[{"phid", "/", "\[Phi]Mag"}]}], "-", 
-      RowBox[{
-       RowBox[{"Sin", "[", 
-        RowBox[{"\[Phi]Mag", "/", "2"}], "]"}], "*", 
-       RowBox[{"phi", "/", 
-        RowBox[{"\[Phi]Mag", "^", "2"}]}], "*", "dPhiNormDt"}]}], "]"}]}], 
-   ";", "\[IndentingNewLine]", 
-   RowBox[{"qd2s", "=", 
-    RowBox[{"Simplify", "[", 
+      RowBox[{"Cross", "[", 
+       RowBox[{"phi", ",", "omega"}], "]"}], "/", "2"}], "+", 
      RowBox[{
-      RowBox[{
-       RowBox[{"-", "1"}], "/", "2"}], "*", 
-      RowBox[{"Sin", "[", 
-       RowBox[{"\[Phi]Mag", "/", "2"}], "]"}], "*", "dPhiNormDt"}], "]"}]}], 
-   ";"}], "*)"}]], "Input",
- CellChangeTimes->{{3.571080207585348*^9, 3.5710803608594007`*^9}, {
-  3.57108042275812*^9, 3.571080433295568*^9}, {3.571080594194972*^9, 
-  3.571080606383151*^9}, {3.571087561560473*^9, 3.5710876179430733`*^9}, {
-  3.5710876953616123`*^9, 3.571087700409799*^9}, {3.571358963498702*^9, 
-  3.571359103258288*^9}, {3.571359228141737*^9, 3.571359229245707*^9}, {
-  3.5713592896972322`*^9, 3.571359291471326*^9}, {3.571359632566025*^9, 
-  3.571359645888682*^9}, {3.571359739615999*^9, 3.5713597703974943`*^9}, {
-  3.571362090678125*^9, 3.571362100134643*^9}}],
+      RowBox[{"1", "/", 
+       RowBox[{"\[Phi]Mag", "^", "2"}]}], "*", 
+      RowBox[{"(", 
+       RowBox[{"1", "-", 
+        RowBox[{"\[Phi]Mag", "*", 
+         RowBox[{
+          RowBox[{"Sin", "[", "\[Phi]Mag", "]"}], "/", 
+          RowBox[{"(", 
+           RowBox[{"2", "*", 
+            RowBox[{"(", 
+             RowBox[{"1", "-", 
+              RowBox[{"Cos", "[", "\[Phi]Mag", "]"}]}], ")"}]}], ")"}]}]}]}], 
+       ")"}], "*", 
+      RowBox[{"Cross", "[", 
+       RowBox[{"phi", ",", 
+        RowBox[{"Cross", "[", 
+         RowBox[{"phi", ",", "omega"}], "]"}]}], "]"}]}]}], "]"}]}], 
+  ";"}]], "Input",
+ CellChangeTimes->{{3.5726085248407793`*^9, 3.5726086640390797`*^9}}],
 
 Cell[BoxData[{
  RowBox[{
@@ -395,7 +342,9 @@ Cell[BoxData[
    3.5713622583731117`*^9, {3.57136231192135*^9, 3.571362335267118*^9}, 
    3.5713624164728727`*^9, 3.571362550103483*^9, 3.571372754027433*^9, 
    3.5713727842016373`*^9, 3.571372877734651*^9, 3.5716663434868813`*^9, 
-   3.571682676265645*^9}]
+   3.571682676265645*^9, 3.5723970839797153`*^9, 3.572397382509509*^9, 
+   3.572407077495644*^9, 3.572407167206917*^9, {3.5726086462068167`*^9, 
+   3.572608667158599*^9}}]
 }, Open  ]],
 
 Cell[BoxData[{
@@ -473,7 +422,8 @@ Cell[BoxData[
   Function[BoxForm`e$, 
    MatrixForm[BoxForm`e$]]]], "Output",
  CellChangeTimes->{3.571677146949687*^9, 3.571677255139584*^9, 
-  3.571682713644339*^9}]
+  3.571682713644339*^9, 3.572397125761487*^9, 3.572397422129653*^9, 
+  3.572407116322319*^9, 3.572407202899294*^9}]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -523,7 +473,8 @@ Cell[BoxData[
   Function[BoxForm`e$, 
    MatrixForm[BoxForm`e$]]]], "Output",
  CellChangeTimes->{{3.571677156154646*^9, 3.57167716973631*^9}, 
-   3.571677261462479*^9, 3.571682714656776*^9}]
+   3.571677261462479*^9, 3.571682714656776*^9, 3.572397125862987*^9, 
+   3.572407117801014*^9, 3.572407203806487*^9}]
 }, Open  ]],
 
 Cell[BoxData[
@@ -773,15 +724,2602 @@ Cell[BoxData[
  CellChangeTimes->{{3.5713782230684967`*^9, 3.571378242588416*^9}, {
    3.571378286536875*^9, 3.571378315582923*^9}, 3.5716663439059277`*^9, {
    3.5716772067532797`*^9, 3.571677220111844*^9}, {3.571677278853868*^9, 
-   3.5716773300938597`*^9}, 3.571682714868327*^9}]
+   3.5716773300938597`*^9}, 3.571682714868327*^9, 3.572397125910239*^9, 
+   3.572407117901696*^9, 3.5724072038606453`*^9}]
 }, Open  ]],
 
 Cell[BoxData[""], "Input",
  CellChangeTimes->{{3.571677546405046*^9, 3.571677550512347*^9}, 
-   3.571682395805833*^9}]
+   3.571682395805833*^9}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"n", "=", "1"}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{"phidSeries", "=", 
+  RowBox[{"Series", "[", 
+   RowBox[{"phid", ",", 
+    RowBox[{"{", 
+     RowBox[{
+      SubscriptBox["\[Phi]", "1"], ",", "0", ",", "n"}], "}"}], ",", 
+    RowBox[{"{", 
+     RowBox[{
+      SubscriptBox["\[Phi]", "2"], ",", "0", ",", "n"}], "}"}], ",", 
+    RowBox[{"{", 
+     RowBox[{
+      SubscriptBox["\[Phi]", "3"], ",", "0", ",", "n"}], "}"}]}], 
+   "]"}]}]}], "Input",
+ CellChangeTimes->{{3.5723971469851093`*^9, 3.572397249520812*^9}, {
+  3.572397303177106*^9, 3.5723973262090178`*^9}, {3.572397535535684*^9, 
+  3.5723975614694767`*^9}, {3.572397780220595*^9, 3.5723978019300823`*^9}, {
+  3.572397934511932*^9, 3.572397969446384*^9}, {3.572398031895629*^9, 
+  3.572398044078867*^9}}],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{
+   InterpretationBox[
+    RowBox[{
+     RowBox[{"(", 
+      InterpretationBox[
+       RowBox[{
+        RowBox[{"(", 
+         InterpretationBox[
+          RowBox[{
+           SubscriptBox["\[Omega]", "1"], "-", 
+           FractionBox[
+            RowBox[{
+             SubscriptBox["\[Omega]", "2"], " ", 
+             SubscriptBox["\[Phi]", "3"]}], "2"], "+", 
+           InterpretationBox[
+            SuperscriptBox[
+             RowBox[{"O", "[", 
+              SubscriptBox["\[Phi]", "3"], "]"}], "2"],
+            SeriesData[
+             Subscript[$CellContext`\[Phi], 3], 0, {}, 0, 2, 1],
+            Editable->False]}],
+          SeriesData[
+           Subscript[$CellContext`\[Phi], 3], 0, {
+            Subscript[$CellContext`\[Omega], 1], Rational[-1, 2] 
+            Subscript[$CellContext`\[Omega], 2]}, 0, 2, 1],
+          Editable->False], ")"}], "+", 
+        FractionBox[
+         RowBox[{
+          SubscriptBox["\[Omega]", "3"], " ", 
+          SubscriptBox["\[Phi]", "2"]}], "2"], "+", 
+        InterpretationBox[
+         SuperscriptBox[
+          RowBox[{"O", "[", 
+           SubscriptBox["\[Phi]", "2"], "]"}], "2"],
+         SeriesData[
+          Subscript[$CellContext`\[Phi], 2], 0, {}, 0, 2, 1],
+         Editable->False]}],
+       SeriesData[
+        Subscript[$CellContext`\[Phi], 2], 0, {
+         SeriesData[
+          Subscript[$CellContext`\[Phi], 3], 0, {
+           Subscript[$CellContext`\[Omega], 1], Rational[-1, 2] 
+           Subscript[$CellContext`\[Omega], 2]}, 0, 2, 1], Rational[1, 2] 
+         Subscript[$CellContext`\[Omega], 3]}, 0, 2, 1],
+       Editable->False], ")"}], "+", 
+     RowBox[{
+      RowBox[{"(", 
+       InterpretationBox[
+        RowBox[{
+         RowBox[{"(", 
+          InterpretationBox[
+           RowBox[{
+            FractionBox[
+             RowBox[{
+              SubscriptBox["\[Omega]", "3"], " ", 
+              SubscriptBox["\[Phi]", "3"]}], "12"], "+", 
+            InterpretationBox[
+             SuperscriptBox[
+              RowBox[{"O", "[", 
+               SubscriptBox["\[Phi]", "3"], "]"}], "2"],
+             SeriesData[
+              Subscript[$CellContext`\[Phi], 3], 0, {}, 1, 2, 1],
+             Editable->False]}],
+           SeriesData[
+            Subscript[$CellContext`\[Phi], 3], 0, {
+            Rational[1, 12] Subscript[$CellContext`\[Omega], 3]}, 1, 2, 1],
+           Editable->False], ")"}], "+", 
+         RowBox[{
+          RowBox[{"(", 
+           InterpretationBox[
+            RowBox[{
+             FractionBox[
+              SubscriptBox["\[Omega]", "2"], "12"], "+", 
+             InterpretationBox[
+              SuperscriptBox[
+               RowBox[{"O", "[", 
+                SubscriptBox["\[Phi]", "3"], "]"}], "2"],
+              SeriesData[
+               Subscript[$CellContext`\[Phi], 3], 0, {}, 0, 2, 1],
+              Editable->False]}],
+            SeriesData[
+             Subscript[$CellContext`\[Phi], 3], 0, {
+             Rational[1, 12] Subscript[$CellContext`\[Omega], 2]}, 0, 2, 1],
+            Editable->False], ")"}], " ", 
+          SubscriptBox["\[Phi]", "2"]}], "+", 
+         InterpretationBox[
+          SuperscriptBox[
+           RowBox[{"O", "[", 
+            SubscriptBox["\[Phi]", "2"], "]"}], "2"],
+          SeriesData[
+           Subscript[$CellContext`\[Phi], 2], 0, {}, 0, 2, 1],
+          Editable->False]}],
+        SeriesData[
+         Subscript[$CellContext`\[Phi], 2], 0, {
+          SeriesData[
+           Subscript[$CellContext`\[Phi], 3], 0, {
+           Rational[1, 12] Subscript[$CellContext`\[Omega], 3]}, 1, 2, 1], 
+          SeriesData[
+           Subscript[$CellContext`\[Phi], 3], 0, {
+           Rational[1, 12] Subscript[$CellContext`\[Omega], 2]}, 0, 2, 1]}, 0,
+          2, 1],
+        Editable->False], ")"}], " ", 
+      SubscriptBox["\[Phi]", "1"]}], "+", 
+     InterpretationBox[
+      SuperscriptBox[
+       RowBox[{"O", "[", 
+        SubscriptBox["\[Phi]", "1"], "]"}], "2"],
+      SeriesData[
+       Subscript[$CellContext`\[Phi], 1], 0, {}, 0, 2, 1],
+      Editable->False]}],
+    SeriesData[
+     Subscript[$CellContext`\[Phi], 1], 0, {
+      SeriesData[
+       Subscript[$CellContext`\[Phi], 2], 0, {
+        SeriesData[
+         Subscript[$CellContext`\[Phi], 3], 0, {
+          Subscript[$CellContext`\[Omega], 1], Rational[-1, 2] 
+          Subscript[$CellContext`\[Omega], 2]}, 0, 2, 1], Rational[1, 2] 
+        Subscript[$CellContext`\[Omega], 3]}, 0, 2, 1], 
+      SeriesData[
+       Subscript[$CellContext`\[Phi], 2], 0, {
+        SeriesData[
+         Subscript[$CellContext`\[Phi], 3], 0, {
+         Rational[1, 12] Subscript[$CellContext`\[Omega], 3]}, 1, 2, 1], 
+        SeriesData[
+         Subscript[$CellContext`\[Phi], 3], 0, {
+         Rational[1, 12] Subscript[$CellContext`\[Omega], 2]}, 0, 2, 1]}, 0, 
+       2, 1]}, 0, 2, 1],
+    Editable->False], ",", 
+   InterpretationBox[
+    RowBox[{
+     RowBox[{"(", 
+      InterpretationBox[
+       RowBox[{
+        RowBox[{"(", 
+         InterpretationBox[
+          RowBox[{
+           SubscriptBox["\[Omega]", "2"], "+", 
+           FractionBox[
+            RowBox[{
+             SubscriptBox["\[Omega]", "1"], " ", 
+             SubscriptBox["\[Phi]", "3"]}], "2"], "+", 
+           InterpretationBox[
+            SuperscriptBox[
+             RowBox[{"O", "[", 
+              SubscriptBox["\[Phi]", "3"], "]"}], "2"],
+            SeriesData[
+             Subscript[$CellContext`\[Phi], 3], 0, {}, 0, 2, 1],
+            Editable->False]}],
+          SeriesData[
+           Subscript[$CellContext`\[Phi], 3], 0, {
+            Subscript[$CellContext`\[Omega], 2], Rational[1, 2] 
+            Subscript[$CellContext`\[Omega], 1]}, 0, 2, 1],
+          Editable->False], ")"}], "+", 
+        RowBox[{
+         RowBox[{"(", 
+          InterpretationBox[
+           RowBox[{
+            FractionBox[
+             RowBox[{
+              SubscriptBox["\[Omega]", "3"], " ", 
+              SubscriptBox["\[Phi]", "3"]}], "12"], "+", 
+            InterpretationBox[
+             SuperscriptBox[
+              RowBox[{"O", "[", 
+               SubscriptBox["\[Phi]", "3"], "]"}], "2"],
+             SeriesData[
+              Subscript[$CellContext`\[Phi], 3], 0, {}, 1, 2, 1],
+             Editable->False]}],
+           SeriesData[
+            Subscript[$CellContext`\[Phi], 3], 0, {
+            Rational[1, 12] Subscript[$CellContext`\[Omega], 3]}, 1, 2, 1],
+           Editable->False], ")"}], " ", 
+         SubscriptBox["\[Phi]", "2"]}], "+", 
+        InterpretationBox[
+         SuperscriptBox[
+          RowBox[{"O", "[", 
+           SubscriptBox["\[Phi]", "2"], "]"}], "2"],
+         SeriesData[
+          Subscript[$CellContext`\[Phi], 2], 0, {}, 0, 2, 1],
+         Editable->False]}],
+       SeriesData[
+        Subscript[$CellContext`\[Phi], 2], 0, {
+         SeriesData[
+          Subscript[$CellContext`\[Phi], 3], 0, {
+           Subscript[$CellContext`\[Omega], 2], Rational[1, 2] 
+           Subscript[$CellContext`\[Omega], 1]}, 0, 2, 1], 
+         SeriesData[
+          Subscript[$CellContext`\[Phi], 3], 0, {
+          Rational[1, 12] Subscript[$CellContext`\[Omega], 3]}, 1, 2, 1]}, 0, 
+        2, 1],
+       Editable->False], ")"}], "+", 
+     RowBox[{
+      RowBox[{"(", 
+       InterpretationBox[
+        RowBox[{
+         RowBox[{"-", 
+          FractionBox[
+           SubscriptBox["\[Omega]", "3"], "2"]}], "+", 
+         RowBox[{
+          RowBox[{"(", 
+           InterpretationBox[
+            RowBox[{
+             FractionBox[
+              SubscriptBox["\[Omega]", "1"], "12"], "+", 
+             InterpretationBox[
+              SuperscriptBox[
+               RowBox[{"O", "[", 
+                SubscriptBox["\[Phi]", "3"], "]"}], "2"],
+              SeriesData[
+               Subscript[$CellContext`\[Phi], 3], 0, {}, 0, 2, 1],
+              Editable->False]}],
+            SeriesData[
+             Subscript[$CellContext`\[Phi], 3], 0, {
+             Rational[1, 12] Subscript[$CellContext`\[Omega], 1]}, 0, 2, 1],
+            Editable->False], ")"}], " ", 
+          SubscriptBox["\[Phi]", "2"]}], "+", 
+         InterpretationBox[
+          SuperscriptBox[
+           RowBox[{"O", "[", 
+            SubscriptBox["\[Phi]", "2"], "]"}], "2"],
+          SeriesData[
+           Subscript[$CellContext`\[Phi], 2], 0, {}, 0, 2, 1],
+          Editable->False]}],
+        SeriesData[
+         Subscript[$CellContext`\[Phi], 2], 0, {
+         Rational[-1, 2] Subscript[$CellContext`\[Omega], 3], 
+          SeriesData[
+           Subscript[$CellContext`\[Phi], 3], 0, {
+           Rational[1, 12] Subscript[$CellContext`\[Omega], 1]}, 0, 2, 1]}, 0,
+          2, 1],
+        Editable->False], ")"}], " ", 
+      SubscriptBox["\[Phi]", "1"]}], "+", 
+     InterpretationBox[
+      SuperscriptBox[
+       RowBox[{"O", "[", 
+        SubscriptBox["\[Phi]", "1"], "]"}], "2"],
+      SeriesData[
+       Subscript[$CellContext`\[Phi], 1], 0, {}, 0, 2, 1],
+      Editable->False]}],
+    SeriesData[
+     Subscript[$CellContext`\[Phi], 1], 0, {
+      SeriesData[
+       Subscript[$CellContext`\[Phi], 2], 0, {
+        SeriesData[
+         Subscript[$CellContext`\[Phi], 3], 0, {
+          Subscript[$CellContext`\[Omega], 2], Rational[1, 2] 
+          Subscript[$CellContext`\[Omega], 1]}, 0, 2, 1], 
+        SeriesData[
+         Subscript[$CellContext`\[Phi], 3], 0, {
+         Rational[1, 12] Subscript[$CellContext`\[Omega], 3]}, 1, 2, 1]}, 0, 
+       2, 1], 
+      SeriesData[
+       Subscript[$CellContext`\[Phi], 2], 0, {
+       Rational[-1, 2] Subscript[$CellContext`\[Omega], 3], 
+        SeriesData[
+         Subscript[$CellContext`\[Phi], 3], 0, {
+         Rational[1, 12] Subscript[$CellContext`\[Omega], 1]}, 0, 2, 1]}, 0, 
+       2, 1]}, 0, 2, 1],
+    Editable->False], ",", 
+   InterpretationBox[
+    RowBox[{
+     RowBox[{"(", 
+      InterpretationBox[
+       RowBox[{
+        SubscriptBox["\[Omega]", "3"], "+", 
+        RowBox[{
+         RowBox[{"(", 
+          InterpretationBox[
+           RowBox[{
+            RowBox[{"-", 
+             FractionBox[
+              SubscriptBox["\[Omega]", "1"], "2"]}], "+", 
+            FractionBox[
+             RowBox[{
+              SubscriptBox["\[Omega]", "2"], " ", 
+              SubscriptBox["\[Phi]", "3"]}], "12"], "+", 
+            InterpretationBox[
+             SuperscriptBox[
+              RowBox[{"O", "[", 
+               SubscriptBox["\[Phi]", "3"], "]"}], "2"],
+             SeriesData[
+              Subscript[$CellContext`\[Phi], 3], 0, {}, 0, 2, 1],
+             Editable->False]}],
+           SeriesData[
+            Subscript[$CellContext`\[Phi], 3], 0, {
+            Rational[-1, 2] Subscript[$CellContext`\[Omega], 1], 
+             Rational[1, 12] Subscript[$CellContext`\[Omega], 2]}, 0, 2, 1],
+           Editable->False], ")"}], " ", 
+         SubscriptBox["\[Phi]", "2"]}], "+", 
+        InterpretationBox[
+         SuperscriptBox[
+          RowBox[{"O", "[", 
+           SubscriptBox["\[Phi]", "2"], "]"}], "2"],
+         SeriesData[
+          Subscript[$CellContext`\[Phi], 2], 0, {}, 0, 2, 1],
+         Editable->False]}],
+       SeriesData[
+        Subscript[$CellContext`\[Phi], 2], 0, {
+         Subscript[$CellContext`\[Omega], 3], 
+         SeriesData[
+          Subscript[$CellContext`\[Phi], 3], 0, {
+          Rational[-1, 2] Subscript[$CellContext`\[Omega], 1], 
+           Rational[1, 12] Subscript[$CellContext`\[Omega], 2]}, 0, 2, 1]}, 0,
+         2, 1],
+       Editable->False], ")"}], "+", 
+     RowBox[{
+      RowBox[{"(", 
+       InterpretationBox[
+        RowBox[{
+         RowBox[{"(", 
+          InterpretationBox[
+           RowBox[{
+            FractionBox[
+             SubscriptBox["\[Omega]", "2"], "2"], "+", 
+            FractionBox[
+             RowBox[{
+              SubscriptBox["\[Omega]", "1"], " ", 
+              SubscriptBox["\[Phi]", "3"]}], "12"], "+", 
+            InterpretationBox[
+             SuperscriptBox[
+              RowBox[{"O", "[", 
+               SubscriptBox["\[Phi]", "3"], "]"}], "2"],
+             SeriesData[
+              Subscript[$CellContext`\[Phi], 3], 0, {}, 0, 2, 1],
+             Editable->False]}],
+           SeriesData[
+            Subscript[$CellContext`\[Phi], 3], 0, {
+            Rational[1, 2] Subscript[$CellContext`\[Omega], 2], 
+             Rational[1, 12] Subscript[$CellContext`\[Omega], 1]}, 0, 2, 1],
+           Editable->False], ")"}], "+", 
+         InterpretationBox[
+          SuperscriptBox[
+           RowBox[{"O", "[", 
+            SubscriptBox["\[Phi]", "2"], "]"}], "2"],
+          SeriesData[
+           Subscript[$CellContext`\[Phi], 2], 0, {}, 0, 2, 1],
+          Editable->False]}],
+        SeriesData[
+         Subscript[$CellContext`\[Phi], 2], 0, {
+          SeriesData[
+           Subscript[$CellContext`\[Phi], 3], 0, {
+           Rational[1, 2] Subscript[$CellContext`\[Omega], 2], 
+            Rational[1, 12] Subscript[$CellContext`\[Omega], 1]}, 0, 2, 1]}, 
+         0, 2, 1],
+        Editable->False], ")"}], " ", 
+      SubscriptBox["\[Phi]", "1"]}], "+", 
+     InterpretationBox[
+      SuperscriptBox[
+       RowBox[{"O", "[", 
+        SubscriptBox["\[Phi]", "1"], "]"}], "2"],
+      SeriesData[
+       Subscript[$CellContext`\[Phi], 1], 0, {}, 0, 2, 1],
+      Editable->False]}],
+    SeriesData[
+     Subscript[$CellContext`\[Phi], 1], 0, {
+      SeriesData[
+       Subscript[$CellContext`\[Phi], 2], 0, {
+        Subscript[$CellContext`\[Omega], 3], 
+        SeriesData[
+         Subscript[$CellContext`\[Phi], 3], 0, {
+         Rational[-1, 2] Subscript[$CellContext`\[Omega], 1], Rational[1, 12] 
+          Subscript[$CellContext`\[Omega], 2]}, 0, 2, 1]}, 0, 2, 1], 
+      SeriesData[
+       Subscript[$CellContext`\[Phi], 2], 0, {
+        SeriesData[
+         Subscript[$CellContext`\[Phi], 3], 0, {
+         Rational[1, 2] Subscript[$CellContext`\[Omega], 2], Rational[1, 12] 
+          Subscript[$CellContext`\[Omega], 1]}, 0, 2, 1]}, 0, 2, 1]}, 0, 2, 1],
+    Editable->False]}], "}"}]], "Output",
+ CellChangeTimes->{
+  3.572397969821136*^9, {3.572398035148365*^9, 3.572398044597166*^9}, 
+   3.5724071182925673`*^9, 3.572407203935725*^9}]
+}, Open  ]],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"phidSeriesSavage", "=", 
+   RowBox[{"omega", "+", 
+    RowBox[{
+     RowBox[{"1", "/", "2"}], "*", 
+     RowBox[{"Cross", "[", 
+      RowBox[{"phi", ",", "omega"}], "]"}]}], "+", 
+    RowBox[{
+     RowBox[{"1", "/", "12"}], "*", 
+     RowBox[{"Cross", "[", 
+      RowBox[{"phi", ",", 
+       RowBox[{"Cross", "[", 
+        RowBox[{"phi", ",", "omega"}], "]"}]}], "]"}]}]}]}], ";"}]], "Input",
+ CellChangeTimes->{{3.5723978115821667`*^9, 3.572397894060672*^9}, {
+  3.572398009963765*^9, 3.5723980199323483`*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"phidSeriesCheck", "=", 
+  RowBox[{"Normal", "[", 
+   RowBox[{"Simplify", "[", 
+    RowBox[{"phidSeries", "-", "phidSeriesSavage"}], "]"}], "]"}]}]], "Input",\
+
+ CellChangeTimes->{{3.572397897242127*^9, 3.572397913938446*^9}, {
+  3.572398074719977*^9, 3.5723980921601877`*^9}}],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{"0", ",", "0", ",", "0"}], "}"}]], "Output",
+ CellChangeTimes->{{3.57239791434412*^9, 3.5723979516657333`*^9}, 
+   3.57239803750963*^9, {3.5723980774328337`*^9, 3.5723980925507603`*^9}, 
+   3.5724071183497353`*^9, 3.572407204059328*^9}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"phidd", "=", 
+  RowBox[{"Simplify", "[", 
+   RowBox[{
+    RowBox[{
+     RowBox[{"D", "[", 
+      RowBox[{"phid", ",", 
+       RowBox[{"{", "omega", "}"}]}], "]"}], ".", "omegad"}], "+", 
+    RowBox[{
+     RowBox[{"D", "[", 
+      RowBox[{"phid", ",", 
+       RowBox[{"{", "phi", "}"}]}], "]"}], ".", "phid"}]}], "]"}]}]], "Input",\
+
+ CellChangeTimes->{{3.5724070885111647`*^9, 3.5724071299799137`*^9}, {
+  3.572407253518132*^9, 3.572407257958296*^9}}],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{
+   RowBox[{
+    FractionBox["1", "4"], " ", 
+    RowBox[{"(", 
+     RowBox[{
+      RowBox[{
+       RowBox[{"(", 
+        RowBox[{
+         RowBox[{
+          RowBox[{"-", 
+           SubscriptBox["\[Phi]", "3"]}], " ", 
+          SubscriptBox["\[Omega]", "2"]}], "+", 
+         RowBox[{
+          SubscriptBox["\[Phi]", "2"], " ", 
+          SubscriptBox["\[Omega]", "3"]}], "+", 
+         FractionBox[
+          RowBox[{"2", " ", 
+           SubscriptBox["\[Phi]", "1"], " ", 
+           RowBox[{"(", 
+            RowBox[{
+             RowBox[{
+              SubscriptBox["\[Phi]", "1"], " ", 
+              SubscriptBox["\[Omega]", "1"]}], "+", 
+             RowBox[{
+              SubscriptBox["\[Phi]", "2"], " ", 
+              SubscriptBox["\[Omega]", "2"]}], "+", 
+             RowBox[{
+              SubscriptBox["\[Phi]", "3"], " ", 
+              SubscriptBox["\[Omega]", "3"]}]}], ")"}]}], 
+          RowBox[{
+           SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+           SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+           SubsuperscriptBox["\[Phi]", "3", "2"]}]], "+", 
+         FractionBox[
+          RowBox[{
+           RowBox[{"Cot", "[", 
+            RowBox[{
+             FractionBox["1", "2"], " ", 
+             SqrtBox[
+              RowBox[{
+               SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+               SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+               SubsuperscriptBox["\[Phi]", "3", "2"]}]]}], "]"}], " ", 
+           RowBox[{"(", 
+            RowBox[{
+             RowBox[{
+              SubsuperscriptBox["\[Phi]", "2", "2"], " ", 
+              SubscriptBox["\[Omega]", "1"]}], "-", 
+             RowBox[{
+              SubscriptBox["\[Phi]", "1"], " ", 
+              SubscriptBox["\[Phi]", "2"], " ", 
+              SubscriptBox["\[Omega]", "2"]}], "+", 
+             RowBox[{
+              SubscriptBox["\[Phi]", "3"], " ", 
+              RowBox[{"(", 
+               RowBox[{
+                RowBox[{
+                 SubscriptBox["\[Phi]", "3"], " ", 
+                 SubscriptBox["\[Omega]", "1"]}], "-", 
+                RowBox[{
+                 SubscriptBox["\[Phi]", "1"], " ", 
+                 SubscriptBox["\[Omega]", "3"]}]}], ")"}]}]}], ")"}]}], 
+          SqrtBox[
+           RowBox[{
+            SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+            SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+            SubsuperscriptBox["\[Phi]", "3", "2"]}]]]}], ")"}], " ", 
+       RowBox[{"(", 
+        RowBox[{
+         FractionBox[
+          RowBox[{"2", " ", 
+           SubscriptBox["\[Phi]", "1"], " ", 
+           SubscriptBox["\[Omega]", "1"]}], 
+          RowBox[{
+           SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+           SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+           SubsuperscriptBox["\[Phi]", "3", "2"]}]], "-", 
+         FractionBox[
+          RowBox[{
+           RowBox[{"Cot", "[", 
+            RowBox[{
+             FractionBox["1", "2"], " ", 
+             SqrtBox[
+              RowBox[{
+               SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+               SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+               SubsuperscriptBox["\[Phi]", "3", "2"]}]]}], "]"}], " ", 
+           RowBox[{"(", 
+            RowBox[{
+             RowBox[{
+              SubscriptBox["\[Phi]", "2"], " ", 
+              SubscriptBox["\[Omega]", "2"]}], "+", 
+             RowBox[{
+              SubscriptBox["\[Phi]", "3"], " ", 
+              SubscriptBox["\[Omega]", "3"]}]}], ")"}]}], 
+          SqrtBox[
+           RowBox[{
+            SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+            SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+            SubsuperscriptBox["\[Phi]", "3", "2"]}]]], "-", 
+         FractionBox[
+          RowBox[{"4", " ", 
+           SubsuperscriptBox["\[Phi]", "1", "2"], " ", 
+           RowBox[{"(", 
+            RowBox[{
+             RowBox[{
+              SubscriptBox["\[Phi]", "1"], " ", 
+              SubscriptBox["\[Omega]", "1"]}], "+", 
+             RowBox[{
+              SubscriptBox["\[Phi]", "2"], " ", 
+              SubscriptBox["\[Omega]", "2"]}], "+", 
+             RowBox[{
+              SubscriptBox["\[Phi]", "3"], " ", 
+              SubscriptBox["\[Omega]", "3"]}]}], ")"}]}], 
+          SuperscriptBox[
+           RowBox[{"(", 
+            RowBox[{
+             SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+             SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+             SubsuperscriptBox["\[Phi]", "3", "2"]}], ")"}], "2"]], "+", 
+         FractionBox[
+          RowBox[{"2", " ", 
+           RowBox[{"(", 
+            RowBox[{
+             RowBox[{
+              SubscriptBox["\[Phi]", "1"], " ", 
+              SubscriptBox["\[Omega]", "1"]}], "+", 
+             RowBox[{
+              SubscriptBox["\[Phi]", "2"], " ", 
+              SubscriptBox["\[Omega]", "2"]}], "+", 
+             RowBox[{
+              SubscriptBox["\[Phi]", "3"], " ", 
+              SubscriptBox["\[Omega]", "3"]}]}], ")"}]}], 
+          RowBox[{
+           SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+           SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+           SubsuperscriptBox["\[Phi]", "3", "2"]}]], "+", 
+         FractionBox[
+          RowBox[{
+           RowBox[{"Cot", "[", 
+            RowBox[{
+             FractionBox["1", "2"], " ", 
+             SqrtBox[
+              RowBox[{
+               SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+               SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+               SubsuperscriptBox["\[Phi]", "3", "2"]}]]}], "]"}], " ", 
+           SubscriptBox["\[Phi]", "1"], " ", 
+           RowBox[{"(", 
+            RowBox[{
+             RowBox[{
+              RowBox[{"-", 
+               SubsuperscriptBox["\[Phi]", "2", "2"]}], " ", 
+              SubscriptBox["\[Omega]", "1"]}], "+", 
+             RowBox[{
+              SubscriptBox["\[Phi]", "1"], " ", 
+              SubscriptBox["\[Phi]", "2"], " ", 
+              SubscriptBox["\[Omega]", "2"]}], "+", 
+             RowBox[{
+              SubscriptBox["\[Phi]", "3"], " ", 
+              RowBox[{"(", 
+               RowBox[{
+                RowBox[{
+                 RowBox[{"-", 
+                  SubscriptBox["\[Phi]", "3"]}], " ", 
+                 SubscriptBox["\[Omega]", "1"]}], "+", 
+                RowBox[{
+                 SubscriptBox["\[Phi]", "1"], " ", 
+                 SubscriptBox["\[Omega]", "3"]}]}], ")"}]}]}], ")"}]}], 
+          SuperscriptBox[
+           RowBox[{"(", 
+            RowBox[{
+             SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+             SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+             SubsuperscriptBox["\[Phi]", "3", "2"]}], ")"}], 
+           RowBox[{"3", "/", "2"}]]], "+", 
+         FractionBox[
+          RowBox[{
+           SuperscriptBox[
+            RowBox[{"Csc", "[", 
+             RowBox[{
+              FractionBox["1", "2"], " ", 
+              SqrtBox[
+               RowBox[{
+                SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+                SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+                SubsuperscriptBox["\[Phi]", "3", "2"]}]]}], "]"}], "2"], " ", 
+           
+           SubscriptBox["\[Phi]", "1"], " ", 
+           RowBox[{"(", 
+            RowBox[{
+             RowBox[{
+              RowBox[{"-", 
+               SubsuperscriptBox["\[Phi]", "2", "2"]}], " ", 
+              SubscriptBox["\[Omega]", "1"]}], "+", 
+             RowBox[{
+              SubscriptBox["\[Phi]", "1"], " ", 
+              SubscriptBox["\[Phi]", "2"], " ", 
+              SubscriptBox["\[Omega]", "2"]}], "+", 
+             RowBox[{
+              SubscriptBox["\[Phi]", "3"], " ", 
+              RowBox[{"(", 
+               RowBox[{
+                RowBox[{
+                 RowBox[{"-", 
+                  SubscriptBox["\[Phi]", "3"]}], " ", 
+                 SubscriptBox["\[Omega]", "1"]}], "+", 
+                RowBox[{
+                 SubscriptBox["\[Phi]", "1"], " ", 
+                 SubscriptBox["\[Omega]", "3"]}]}], ")"}]}]}], ")"}]}], 
+          RowBox[{"2", " ", 
+           RowBox[{"(", 
+            RowBox[{
+             SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+             SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+             SubsuperscriptBox["\[Phi]", "3", "2"]}], ")"}]}]]}], ")"}]}], 
+      "+", 
+      RowBox[{
+       RowBox[{"(", 
+        RowBox[{
+         FractionBox[
+          RowBox[{"2", " ", 
+           SubscriptBox["\[Phi]", "1"], " ", 
+           SubscriptBox["\[Omega]", "2"]}], 
+          RowBox[{
+           SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+           SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+           SubsuperscriptBox["\[Phi]", "3", "2"]}]], "+", 
+         FractionBox[
+          RowBox[{
+           RowBox[{"Cot", "[", 
+            RowBox[{
+             FractionBox["1", "2"], " ", 
+             SqrtBox[
+              RowBox[{
+               SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+               SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+               SubsuperscriptBox["\[Phi]", "3", "2"]}]]}], "]"}], " ", 
+           RowBox[{"(", 
+            RowBox[{
+             RowBox[{"2", " ", 
+              SubscriptBox["\[Phi]", "2"], " ", 
+              SubscriptBox["\[Omega]", "1"]}], "-", 
+             RowBox[{
+              SubscriptBox["\[Phi]", "1"], " ", 
+              SubscriptBox["\[Omega]", "2"]}]}], ")"}]}], 
+          SqrtBox[
+           RowBox[{
+            SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+            SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+            SubsuperscriptBox["\[Phi]", "3", "2"]}]]], "+", 
+         SubscriptBox["\[Omega]", "3"], "-", 
+         FractionBox[
+          RowBox[{"4", " ", 
+           SubscriptBox["\[Phi]", "1"], " ", 
+           SubscriptBox["\[Phi]", "2"], " ", 
+           RowBox[{"(", 
+            RowBox[{
+             RowBox[{
+              SubscriptBox["\[Phi]", "1"], " ", 
+              SubscriptBox["\[Omega]", "1"]}], "+", 
+             RowBox[{
+              SubscriptBox["\[Phi]", "2"], " ", 
+              SubscriptBox["\[Omega]", "2"]}], "+", 
+             RowBox[{
+              SubscriptBox["\[Phi]", "3"], " ", 
+              SubscriptBox["\[Omega]", "3"]}]}], ")"}]}], 
+          SuperscriptBox[
+           RowBox[{"(", 
+            RowBox[{
+             SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+             SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+             SubsuperscriptBox["\[Phi]", "3", "2"]}], ")"}], "2"]], "-", 
+         FractionBox[
+          RowBox[{
+           SuperscriptBox[
+            RowBox[{"Csc", "[", 
+             RowBox[{
+              FractionBox["1", "2"], " ", 
+              SqrtBox[
+               RowBox[{
+                SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+                SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+                SubsuperscriptBox["\[Phi]", "3", "2"]}]]}], "]"}], "2"], " ", 
+           
+           SubscriptBox["\[Phi]", "2"], " ", 
+           RowBox[{"(", 
+            RowBox[{
+             RowBox[{
+              SubsuperscriptBox["\[Phi]", "2", "2"], " ", 
+              SubscriptBox["\[Omega]", "1"]}], "-", 
+             RowBox[{
+              SubscriptBox["\[Phi]", "1"], " ", 
+              SubscriptBox["\[Phi]", "2"], " ", 
+              SubscriptBox["\[Omega]", "2"]}], "+", 
+             RowBox[{
+              SubscriptBox["\[Phi]", "3"], " ", 
+              RowBox[{"(", 
+               RowBox[{
+                RowBox[{
+                 SubscriptBox["\[Phi]", "3"], " ", 
+                 SubscriptBox["\[Omega]", "1"]}], "-", 
+                RowBox[{
+                 SubscriptBox["\[Phi]", "1"], " ", 
+                 SubscriptBox["\[Omega]", "3"]}]}], ")"}]}]}], ")"}]}], 
+          RowBox[{"2", " ", 
+           RowBox[{"(", 
+            RowBox[{
+             SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+             SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+             SubsuperscriptBox["\[Phi]", "3", "2"]}], ")"}]}]], "+", 
+         FractionBox[
+          RowBox[{
+           RowBox[{"Cot", "[", 
+            RowBox[{
+             FractionBox["1", "2"], " ", 
+             SqrtBox[
+              RowBox[{
+               SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+               SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+               SubsuperscriptBox["\[Phi]", "3", "2"]}]]}], "]"}], " ", 
+           SubscriptBox["\[Phi]", "2"], " ", 
+           RowBox[{"(", 
+            RowBox[{
+             RowBox[{
+              RowBox[{"-", 
+               SubsuperscriptBox["\[Phi]", "2", "2"]}], " ", 
+              SubscriptBox["\[Omega]", "1"]}], "+", 
+             RowBox[{
+              SubscriptBox["\[Phi]", "1"], " ", 
+              SubscriptBox["\[Phi]", "2"], " ", 
+              SubscriptBox["\[Omega]", "2"]}], "+", 
+             RowBox[{
+              SubscriptBox["\[Phi]", "3"], " ", 
+              RowBox[{"(", 
+               RowBox[{
+                RowBox[{
+                 RowBox[{"-", 
+                  SubscriptBox["\[Phi]", "3"]}], " ", 
+                 SubscriptBox["\[Omega]", "1"]}], "+", 
+                RowBox[{
+                 SubscriptBox["\[Phi]", "1"], " ", 
+                 SubscriptBox["\[Omega]", "3"]}]}], ")"}]}]}], ")"}]}], 
+          SuperscriptBox[
+           RowBox[{"(", 
+            RowBox[{
+             SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+             SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+             SubsuperscriptBox["\[Phi]", "3", "2"]}], ")"}], 
+           RowBox[{"3", "/", "2"}]]]}], ")"}], " ", 
+       RowBox[{"(", 
+        RowBox[{
+         RowBox[{
+          SubscriptBox["\[Phi]", "3"], " ", 
+          SubscriptBox["\[Omega]", "1"]}], "-", 
+         RowBox[{
+          SubscriptBox["\[Phi]", "1"], " ", 
+          SubscriptBox["\[Omega]", "3"]}], "+", 
+         FractionBox[
+          RowBox[{"2", " ", 
+           SubscriptBox["\[Phi]", "2"], " ", 
+           RowBox[{"(", 
+            RowBox[{
+             RowBox[{
+              SubscriptBox["\[Phi]", "1"], " ", 
+              SubscriptBox["\[Omega]", "1"]}], "+", 
+             RowBox[{
+              SubscriptBox["\[Phi]", "2"], " ", 
+              SubscriptBox["\[Omega]", "2"]}], "+", 
+             RowBox[{
+              SubscriptBox["\[Phi]", "3"], " ", 
+              SubscriptBox["\[Omega]", "3"]}]}], ")"}]}], 
+          RowBox[{
+           SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+           SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+           SubsuperscriptBox["\[Phi]", "3", "2"]}]], "+", 
+         FractionBox[
+          RowBox[{
+           RowBox[{"Cot", "[", 
+            RowBox[{
+             FractionBox["1", "2"], " ", 
+             SqrtBox[
+              RowBox[{
+               SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+               SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+               SubsuperscriptBox["\[Phi]", "3", "2"]}]]}], "]"}], " ", 
+           RowBox[{"(", 
+            RowBox[{
+             RowBox[{
+              RowBox[{"-", 
+               SubscriptBox["\[Phi]", "1"]}], " ", 
+              SubscriptBox["\[Phi]", "2"], " ", 
+              SubscriptBox["\[Omega]", "1"]}], "+", 
+             RowBox[{
+              SubsuperscriptBox["\[Phi]", "1", "2"], " ", 
+              SubscriptBox["\[Omega]", "2"]}], "+", 
+             RowBox[{
+              SubscriptBox["\[Phi]", "3"], " ", 
+              RowBox[{"(", 
+               RowBox[{
+                RowBox[{
+                 SubscriptBox["\[Phi]", "3"], " ", 
+                 SubscriptBox["\[Omega]", "2"]}], "-", 
+                RowBox[{
+                 SubscriptBox["\[Phi]", "2"], " ", 
+                 SubscriptBox["\[Omega]", "3"]}]}], ")"}]}]}], ")"}]}], 
+          SqrtBox[
+           RowBox[{
+            SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+            SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+            SubsuperscriptBox["\[Phi]", "3", "2"]}]]]}], ")"}]}], "+", 
+      RowBox[{
+       RowBox[{"(", 
+        RowBox[{
+         RowBox[{"-", 
+          SubscriptBox["\[Omega]", "2"]}], "+", 
+         FractionBox[
+          RowBox[{"2", " ", 
+           SubscriptBox["\[Phi]", "1"], " ", 
+           SubscriptBox["\[Omega]", "3"]}], 
+          RowBox[{
+           SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+           SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+           SubsuperscriptBox["\[Phi]", "3", "2"]}]], "+", 
+         FractionBox[
+          RowBox[{
+           RowBox[{"Cot", "[", 
+            RowBox[{
+             FractionBox["1", "2"], " ", 
+             SqrtBox[
+              RowBox[{
+               SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+               SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+               SubsuperscriptBox["\[Phi]", "3", "2"]}]]}], "]"}], " ", 
+           RowBox[{"(", 
+            RowBox[{
+             RowBox[{"2", " ", 
+              SubscriptBox["\[Phi]", "3"], " ", 
+              SubscriptBox["\[Omega]", "1"]}], "-", 
+             RowBox[{
+              SubscriptBox["\[Phi]", "1"], " ", 
+              SubscriptBox["\[Omega]", "3"]}]}], ")"}]}], 
+          SqrtBox[
+           RowBox[{
+            SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+            SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+            SubsuperscriptBox["\[Phi]", "3", "2"]}]]], "-", 
+         FractionBox[
+          RowBox[{"4", " ", 
+           SubscriptBox["\[Phi]", "1"], " ", 
+           SubscriptBox["\[Phi]", "3"], " ", 
+           RowBox[{"(", 
+            RowBox[{
+             RowBox[{
+              SubscriptBox["\[Phi]", "1"], " ", 
+              SubscriptBox["\[Omega]", "1"]}], "+", 
+             RowBox[{
+              SubscriptBox["\[Phi]", "2"], " ", 
+              SubscriptBox["\[Omega]", "2"]}], "+", 
+             RowBox[{
+              SubscriptBox["\[Phi]", "3"], " ", 
+              SubscriptBox["\[Omega]", "3"]}]}], ")"}]}], 
+          SuperscriptBox[
+           RowBox[{"(", 
+            RowBox[{
+             SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+             SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+             SubsuperscriptBox["\[Phi]", "3", "2"]}], ")"}], "2"]], "-", 
+         FractionBox[
+          RowBox[{
+           SuperscriptBox[
+            RowBox[{"Csc", "[", 
+             RowBox[{
+              FractionBox["1", "2"], " ", 
+              SqrtBox[
+               RowBox[{
+                SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+                SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+                SubsuperscriptBox["\[Phi]", "3", "2"]}]]}], "]"}], "2"], " ", 
+           
+           SubscriptBox["\[Phi]", "3"], " ", 
+           RowBox[{"(", 
+            RowBox[{
+             RowBox[{
+              SubsuperscriptBox["\[Phi]", "2", "2"], " ", 
+              SubscriptBox["\[Omega]", "1"]}], "-", 
+             RowBox[{
+              SubscriptBox["\[Phi]", "1"], " ", 
+              SubscriptBox["\[Phi]", "2"], " ", 
+              SubscriptBox["\[Omega]", "2"]}], "+", 
+             RowBox[{
+              SubscriptBox["\[Phi]", "3"], " ", 
+              RowBox[{"(", 
+               RowBox[{
+                RowBox[{
+                 SubscriptBox["\[Phi]", "3"], " ", 
+                 SubscriptBox["\[Omega]", "1"]}], "-", 
+                RowBox[{
+                 SubscriptBox["\[Phi]", "1"], " ", 
+                 SubscriptBox["\[Omega]", "3"]}]}], ")"}]}]}], ")"}]}], 
+          RowBox[{"2", " ", 
+           RowBox[{"(", 
+            RowBox[{
+             SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+             SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+             SubsuperscriptBox["\[Phi]", "3", "2"]}], ")"}]}]], "+", 
+         FractionBox[
+          RowBox[{
+           RowBox[{"Cot", "[", 
+            RowBox[{
+             FractionBox["1", "2"], " ", 
+             SqrtBox[
+              RowBox[{
+               SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+               SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+               SubsuperscriptBox["\[Phi]", "3", "2"]}]]}], "]"}], " ", 
+           SubscriptBox["\[Phi]", "3"], " ", 
+           RowBox[{"(", 
+            RowBox[{
+             RowBox[{
+              RowBox[{"-", 
+               SubsuperscriptBox["\[Phi]", "2", "2"]}], " ", 
+              SubscriptBox["\[Omega]", "1"]}], "+", 
+             RowBox[{
+              SubscriptBox["\[Phi]", "1"], " ", 
+              SubscriptBox["\[Phi]", "2"], " ", 
+              SubscriptBox["\[Omega]", "2"]}], "+", 
+             RowBox[{
+              SubscriptBox["\[Phi]", "3"], " ", 
+              RowBox[{"(", 
+               RowBox[{
+                RowBox[{
+                 RowBox[{"-", 
+                  SubscriptBox["\[Phi]", "3"]}], " ", 
+                 SubscriptBox["\[Omega]", "1"]}], "+", 
+                RowBox[{
+                 SubscriptBox["\[Phi]", "1"], " ", 
+                 SubscriptBox["\[Omega]", "3"]}]}], ")"}]}]}], ")"}]}], 
+          SuperscriptBox[
+           RowBox[{"(", 
+            RowBox[{
+             SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+             SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+             SubsuperscriptBox["\[Phi]", "3", "2"]}], ")"}], 
+           RowBox[{"3", "/", "2"}]]]}], ")"}], " ", 
+       RowBox[{"(", 
+        RowBox[{
+         RowBox[{
+          RowBox[{"-", 
+           SubscriptBox["\[Phi]", "2"]}], " ", 
+          SubscriptBox["\[Omega]", "1"]}], "+", 
+         RowBox[{
+          SubscriptBox["\[Phi]", "1"], " ", 
+          SubscriptBox["\[Omega]", "2"]}], "+", 
+         FractionBox[
+          RowBox[{"2", " ", 
+           SubscriptBox["\[Phi]", "3"], " ", 
+           RowBox[{"(", 
+            RowBox[{
+             RowBox[{
+              SubscriptBox["\[Phi]", "1"], " ", 
+              SubscriptBox["\[Omega]", "1"]}], "+", 
+             RowBox[{
+              SubscriptBox["\[Phi]", "2"], " ", 
+              SubscriptBox["\[Omega]", "2"]}], "+", 
+             RowBox[{
+              SubscriptBox["\[Phi]", "3"], " ", 
+              SubscriptBox["\[Omega]", "3"]}]}], ")"}]}], 
+          RowBox[{
+           SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+           SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+           SubsuperscriptBox["\[Phi]", "3", "2"]}]], "+", 
+         FractionBox[
+          RowBox[{
+           RowBox[{"Cot", "[", 
+            RowBox[{
+             FractionBox["1", "2"], " ", 
+             SqrtBox[
+              RowBox[{
+               SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+               SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+               SubsuperscriptBox["\[Phi]", "3", "2"]}]]}], "]"}], " ", 
+           RowBox[{"(", 
+            RowBox[{
+             RowBox[{
+              RowBox[{"-", 
+               SubscriptBox["\[Phi]", "1"]}], " ", 
+              SubscriptBox["\[Phi]", "3"], " ", 
+              SubscriptBox["\[Omega]", "1"]}], "+", 
+             RowBox[{
+              SubsuperscriptBox["\[Phi]", "1", "2"], " ", 
+              SubscriptBox["\[Omega]", "3"]}], "+", 
+             RowBox[{
+              SubscriptBox["\[Phi]", "2"], " ", 
+              RowBox[{"(", 
+               RowBox[{
+                RowBox[{
+                 RowBox[{"-", 
+                  SubscriptBox["\[Phi]", "3"]}], " ", 
+                 SubscriptBox["\[Omega]", "2"]}], "+", 
+                RowBox[{
+                 SubscriptBox["\[Phi]", "2"], " ", 
+                 SubscriptBox["\[Omega]", "3"]}]}], ")"}]}]}], ")"}]}], 
+          SqrtBox[
+           RowBox[{
+            SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+            SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+            SubsuperscriptBox["\[Phi]", "3", "2"]}]]]}], ")"}]}], "+", 
+      RowBox[{"2", " ", 
+       RowBox[{"(", 
+        RowBox[{
+         FractionBox[
+          RowBox[{"2", " ", 
+           SubsuperscriptBox["\[Phi]", "1", "2"]}], 
+          RowBox[{
+           SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+           SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+           SubsuperscriptBox["\[Phi]", "3", "2"]}]], "+", 
+         FractionBox[
+          RowBox[{
+           RowBox[{"Cot", "[", 
+            RowBox[{
+             FractionBox["1", "2"], " ", 
+             SqrtBox[
+              RowBox[{
+               SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+               SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+               SubsuperscriptBox["\[Phi]", "3", "2"]}]]}], "]"}], " ", 
+           RowBox[{"(", 
+            RowBox[{
+             SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+             SubsuperscriptBox["\[Phi]", "3", "2"]}], ")"}]}], 
+          SqrtBox[
+           RowBox[{
+            SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+            SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+            SubsuperscriptBox["\[Phi]", "3", "2"]}]]]}], ")"}], " ", 
+       SubscriptBox["\[Omega]d", "1"]}], "+", 
+      RowBox[{"2", " ", 
+       RowBox[{"(", 
+        RowBox[{
+         RowBox[{"-", 
+          SubscriptBox["\[Phi]", "3"]}], "+", 
+         RowBox[{
+          SubscriptBox["\[Phi]", "1"], " ", 
+          SubscriptBox["\[Phi]", "2"], " ", 
+          RowBox[{"(", 
+           RowBox[{
+            FractionBox["2", 
+             RowBox[{
+              SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+              SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+              SubsuperscriptBox["\[Phi]", "3", "2"]}]], "-", 
+            FractionBox[
+             RowBox[{"Cot", "[", 
+              RowBox[{
+               FractionBox["1", "2"], " ", 
+               SqrtBox[
+                RowBox[{
+                 SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+                 SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+                 SubsuperscriptBox["\[Phi]", "3", "2"]}]]}], "]"}], 
+             SqrtBox[
+              RowBox[{
+               SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+               SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+               SubsuperscriptBox["\[Phi]", "3", "2"]}]]]}], ")"}]}]}], ")"}], 
+       " ", 
+       SubscriptBox["\[Omega]d", "2"]}], "+", 
+      RowBox[{"2", " ", 
+       RowBox[{"(", 
+        RowBox[{
+         SubscriptBox["\[Phi]", "2"], "+", 
+         RowBox[{
+          SubscriptBox["\[Phi]", "1"], " ", 
+          SubscriptBox["\[Phi]", "3"], " ", 
+          RowBox[{"(", 
+           RowBox[{
+            FractionBox["2", 
+             RowBox[{
+              SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+              SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+              SubsuperscriptBox["\[Phi]", "3", "2"]}]], "-", 
+            FractionBox[
+             RowBox[{"Cot", "[", 
+              RowBox[{
+               FractionBox["1", "2"], " ", 
+               SqrtBox[
+                RowBox[{
+                 SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+                 SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+                 SubsuperscriptBox["\[Phi]", "3", "2"]}]]}], "]"}], 
+             SqrtBox[
+              RowBox[{
+               SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+               SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+               SubsuperscriptBox["\[Phi]", "3", "2"]}]]]}], ")"}]}]}], ")"}], 
+       " ", 
+       SubscriptBox["\[Omega]d", "3"]}]}], ")"}]}], ",", 
+   RowBox[{
+    FractionBox["1", "4"], " ", 
+    RowBox[{"(", 
+     RowBox[{
+      RowBox[{
+       RowBox[{"(", 
+        RowBox[{
+         RowBox[{
+          RowBox[{"-", 
+           SubscriptBox["\[Phi]", "3"]}], " ", 
+          SubscriptBox["\[Omega]", "2"]}], "+", 
+         RowBox[{
+          SubscriptBox["\[Phi]", "2"], " ", 
+          SubscriptBox["\[Omega]", "3"]}], "+", 
+         FractionBox[
+          RowBox[{"2", " ", 
+           SubscriptBox["\[Phi]", "1"], " ", 
+           RowBox[{"(", 
+            RowBox[{
+             RowBox[{
+              SubscriptBox["\[Phi]", "1"], " ", 
+              SubscriptBox["\[Omega]", "1"]}], "+", 
+             RowBox[{
+              SubscriptBox["\[Phi]", "2"], " ", 
+              SubscriptBox["\[Omega]", "2"]}], "+", 
+             RowBox[{
+              SubscriptBox["\[Phi]", "3"], " ", 
+              SubscriptBox["\[Omega]", "3"]}]}], ")"}]}], 
+          RowBox[{
+           SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+           SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+           SubsuperscriptBox["\[Phi]", "3", "2"]}]], "+", 
+         FractionBox[
+          RowBox[{
+           RowBox[{"Cot", "[", 
+            RowBox[{
+             FractionBox["1", "2"], " ", 
+             SqrtBox[
+              RowBox[{
+               SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+               SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+               SubsuperscriptBox["\[Phi]", "3", "2"]}]]}], "]"}], " ", 
+           RowBox[{"(", 
+            RowBox[{
+             RowBox[{
+              SubsuperscriptBox["\[Phi]", "2", "2"], " ", 
+              SubscriptBox["\[Omega]", "1"]}], "-", 
+             RowBox[{
+              SubscriptBox["\[Phi]", "1"], " ", 
+              SubscriptBox["\[Phi]", "2"], " ", 
+              SubscriptBox["\[Omega]", "2"]}], "+", 
+             RowBox[{
+              SubscriptBox["\[Phi]", "3"], " ", 
+              RowBox[{"(", 
+               RowBox[{
+                RowBox[{
+                 SubscriptBox["\[Phi]", "3"], " ", 
+                 SubscriptBox["\[Omega]", "1"]}], "-", 
+                RowBox[{
+                 SubscriptBox["\[Phi]", "1"], " ", 
+                 SubscriptBox["\[Omega]", "3"]}]}], ")"}]}]}], ")"}]}], 
+          SqrtBox[
+           RowBox[{
+            SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+            SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+            SubsuperscriptBox["\[Phi]", "3", "2"]}]]]}], ")"}], " ", 
+       RowBox[{"(", 
+        RowBox[{
+         FractionBox[
+          RowBox[{"2", " ", 
+           SubscriptBox["\[Phi]", "2"], " ", 
+           SubscriptBox["\[Omega]", "1"]}], 
+          RowBox[{
+           SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+           SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+           SubsuperscriptBox["\[Phi]", "3", "2"]}]], "+", 
+         FractionBox[
+          RowBox[{
+           RowBox[{"Cot", "[", 
+            RowBox[{
+             FractionBox["1", "2"], " ", 
+             SqrtBox[
+              RowBox[{
+               SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+               SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+               SubsuperscriptBox["\[Phi]", "3", "2"]}]]}], "]"}], " ", 
+           RowBox[{"(", 
+            RowBox[{
+             RowBox[{
+              RowBox[{"-", 
+               SubscriptBox["\[Phi]", "2"]}], " ", 
+              SubscriptBox["\[Omega]", "1"]}], "+", 
+             RowBox[{"2", " ", 
+              SubscriptBox["\[Phi]", "1"], " ", 
+              SubscriptBox["\[Omega]", "2"]}]}], ")"}]}], 
+          SqrtBox[
+           RowBox[{
+            SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+            SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+            SubsuperscriptBox["\[Phi]", "3", "2"]}]]], "-", 
+         SubscriptBox["\[Omega]", "3"], "-", 
+         FractionBox[
+          RowBox[{"4", " ", 
+           SubscriptBox["\[Phi]", "1"], " ", 
+           SubscriptBox["\[Phi]", "2"], " ", 
+           RowBox[{"(", 
+            RowBox[{
+             RowBox[{
+              SubscriptBox["\[Phi]", "1"], " ", 
+              SubscriptBox["\[Omega]", "1"]}], "+", 
+             RowBox[{
+              SubscriptBox["\[Phi]", "2"], " ", 
+              SubscriptBox["\[Omega]", "2"]}], "+", 
+             RowBox[{
+              SubscriptBox["\[Phi]", "3"], " ", 
+              SubscriptBox["\[Omega]", "3"]}]}], ")"}]}], 
+          SuperscriptBox[
+           RowBox[{"(", 
+            RowBox[{
+             SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+             SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+             SubsuperscriptBox["\[Phi]", "3", "2"]}], ")"}], "2"]], "-", 
+         FractionBox[
+          RowBox[{
+           RowBox[{"Cot", "[", 
+            RowBox[{
+             FractionBox["1", "2"], " ", 
+             SqrtBox[
+              RowBox[{
+               SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+               SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+               SubsuperscriptBox["\[Phi]", "3", "2"]}]]}], "]"}], " ", 
+           SubscriptBox["\[Phi]", "1"], " ", 
+           RowBox[{"(", 
+            RowBox[{
+             RowBox[{
+              RowBox[{"-", 
+               SubscriptBox["\[Phi]", "1"]}], " ", 
+              SubscriptBox["\[Phi]", "2"], " ", 
+              SubscriptBox["\[Omega]", "1"]}], "+", 
+             RowBox[{
+              SubsuperscriptBox["\[Phi]", "1", "2"], " ", 
+              SubscriptBox["\[Omega]", "2"]}], "+", 
+             RowBox[{
+              SubscriptBox["\[Phi]", "3"], " ", 
+              RowBox[{"(", 
+               RowBox[{
+                RowBox[{
+                 SubscriptBox["\[Phi]", "3"], " ", 
+                 SubscriptBox["\[Omega]", "2"]}], "-", 
+                RowBox[{
+                 SubscriptBox["\[Phi]", "2"], " ", 
+                 SubscriptBox["\[Omega]", "3"]}]}], ")"}]}]}], ")"}]}], 
+          SuperscriptBox[
+           RowBox[{"(", 
+            RowBox[{
+             SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+             SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+             SubsuperscriptBox["\[Phi]", "3", "2"]}], ")"}], 
+           RowBox[{"3", "/", "2"}]]], "-", 
+         FractionBox[
+          RowBox[{
+           SuperscriptBox[
+            RowBox[{"Csc", "[", 
+             RowBox[{
+              FractionBox["1", "2"], " ", 
+              SqrtBox[
+               RowBox[{
+                SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+                SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+                SubsuperscriptBox["\[Phi]", "3", "2"]}]]}], "]"}], "2"], " ", 
+           
+           SubscriptBox["\[Phi]", "1"], " ", 
+           RowBox[{"(", 
+            RowBox[{
+             RowBox[{
+              RowBox[{"-", 
+               SubscriptBox["\[Phi]", "1"]}], " ", 
+              SubscriptBox["\[Phi]", "2"], " ", 
+              SubscriptBox["\[Omega]", "1"]}], "+", 
+             RowBox[{
+              SubsuperscriptBox["\[Phi]", "1", "2"], " ", 
+              SubscriptBox["\[Omega]", "2"]}], "+", 
+             RowBox[{
+              SubscriptBox["\[Phi]", "3"], " ", 
+              RowBox[{"(", 
+               RowBox[{
+                RowBox[{
+                 SubscriptBox["\[Phi]", "3"], " ", 
+                 SubscriptBox["\[Omega]", "2"]}], "-", 
+                RowBox[{
+                 SubscriptBox["\[Phi]", "2"], " ", 
+                 SubscriptBox["\[Omega]", "3"]}]}], ")"}]}]}], ")"}]}], 
+          RowBox[{"2", " ", 
+           RowBox[{"(", 
+            RowBox[{
+             SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+             SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+             SubsuperscriptBox["\[Phi]", "3", "2"]}], ")"}]}]]}], ")"}]}], 
+      "+", 
+      RowBox[{
+       RowBox[{"(", 
+        RowBox[{
+         SubscriptBox["\[Omega]", "1"], "+", 
+         FractionBox[
+          RowBox[{"2", " ", 
+           SubscriptBox["\[Phi]", "2"], " ", 
+           SubscriptBox["\[Omega]", "3"]}], 
+          RowBox[{
+           SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+           SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+           SubsuperscriptBox["\[Phi]", "3", "2"]}]], "+", 
+         FractionBox[
+          RowBox[{
+           RowBox[{"Cot", "[", 
+            RowBox[{
+             FractionBox["1", "2"], " ", 
+             SqrtBox[
+              RowBox[{
+               SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+               SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+               SubsuperscriptBox["\[Phi]", "3", "2"]}]]}], "]"}], " ", 
+           RowBox[{"(", 
+            RowBox[{
+             RowBox[{"2", " ", 
+              SubscriptBox["\[Phi]", "3"], " ", 
+              SubscriptBox["\[Omega]", "2"]}], "-", 
+             RowBox[{
+              SubscriptBox["\[Phi]", "2"], " ", 
+              SubscriptBox["\[Omega]", "3"]}]}], ")"}]}], 
+          SqrtBox[
+           RowBox[{
+            SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+            SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+            SubsuperscriptBox["\[Phi]", "3", "2"]}]]], "-", 
+         FractionBox[
+          RowBox[{"4", " ", 
+           SubscriptBox["\[Phi]", "2"], " ", 
+           SubscriptBox["\[Phi]", "3"], " ", 
+           RowBox[{"(", 
+            RowBox[{
+             RowBox[{
+              SubscriptBox["\[Phi]", "1"], " ", 
+              SubscriptBox["\[Omega]", "1"]}], "+", 
+             RowBox[{
+              SubscriptBox["\[Phi]", "2"], " ", 
+              SubscriptBox["\[Omega]", "2"]}], "+", 
+             RowBox[{
+              SubscriptBox["\[Phi]", "3"], " ", 
+              SubscriptBox["\[Omega]", "3"]}]}], ")"}]}], 
+          SuperscriptBox[
+           RowBox[{"(", 
+            RowBox[{
+             SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+             SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+             SubsuperscriptBox["\[Phi]", "3", "2"]}], ")"}], "2"]], "-", 
+         FractionBox[
+          RowBox[{
+           RowBox[{"Cot", "[", 
+            RowBox[{
+             FractionBox["1", "2"], " ", 
+             SqrtBox[
+              RowBox[{
+               SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+               SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+               SubsuperscriptBox["\[Phi]", "3", "2"]}]]}], "]"}], " ", 
+           SubscriptBox["\[Phi]", "3"], " ", 
+           RowBox[{"(", 
+            RowBox[{
+             RowBox[{
+              RowBox[{"-", 
+               SubscriptBox["\[Phi]", "1"]}], " ", 
+              SubscriptBox["\[Phi]", "2"], " ", 
+              SubscriptBox["\[Omega]", "1"]}], "+", 
+             RowBox[{
+              SubsuperscriptBox["\[Phi]", "1", "2"], " ", 
+              SubscriptBox["\[Omega]", "2"]}], "+", 
+             RowBox[{
+              SubscriptBox["\[Phi]", "3"], " ", 
+              RowBox[{"(", 
+               RowBox[{
+                RowBox[{
+                 SubscriptBox["\[Phi]", "3"], " ", 
+                 SubscriptBox["\[Omega]", "2"]}], "-", 
+                RowBox[{
+                 SubscriptBox["\[Phi]", "2"], " ", 
+                 SubscriptBox["\[Omega]", "3"]}]}], ")"}]}]}], ")"}]}], 
+          SuperscriptBox[
+           RowBox[{"(", 
+            RowBox[{
+             SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+             SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+             SubsuperscriptBox["\[Phi]", "3", "2"]}], ")"}], 
+           RowBox[{"3", "/", "2"}]]], "-", 
+         FractionBox[
+          RowBox[{
+           SuperscriptBox[
+            RowBox[{"Csc", "[", 
+             RowBox[{
+              FractionBox["1", "2"], " ", 
+              SqrtBox[
+               RowBox[{
+                SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+                SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+                SubsuperscriptBox["\[Phi]", "3", "2"]}]]}], "]"}], "2"], " ", 
+           
+           SubscriptBox["\[Phi]", "3"], " ", 
+           RowBox[{"(", 
+            RowBox[{
+             RowBox[{
+              RowBox[{"-", 
+               SubscriptBox["\[Phi]", "1"]}], " ", 
+              SubscriptBox["\[Phi]", "2"], " ", 
+              SubscriptBox["\[Omega]", "1"]}], "+", 
+             RowBox[{
+              SubsuperscriptBox["\[Phi]", "1", "2"], " ", 
+              SubscriptBox["\[Omega]", "2"]}], "+", 
+             RowBox[{
+              SubscriptBox["\[Phi]", "3"], " ", 
+              RowBox[{"(", 
+               RowBox[{
+                RowBox[{
+                 SubscriptBox["\[Phi]", "3"], " ", 
+                 SubscriptBox["\[Omega]", "2"]}], "-", 
+                RowBox[{
+                 SubscriptBox["\[Phi]", "2"], " ", 
+                 SubscriptBox["\[Omega]", "3"]}]}], ")"}]}]}], ")"}]}], 
+          RowBox[{"2", " ", 
+           RowBox[{"(", 
+            RowBox[{
+             SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+             SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+             SubsuperscriptBox["\[Phi]", "3", "2"]}], ")"}]}]]}], ")"}], " ", 
+       
+       RowBox[{"(", 
+        RowBox[{
+         RowBox[{
+          RowBox[{"-", 
+           SubscriptBox["\[Phi]", "2"]}], " ", 
+          SubscriptBox["\[Omega]", "1"]}], "+", 
+         RowBox[{
+          SubscriptBox["\[Phi]", "1"], " ", 
+          SubscriptBox["\[Omega]", "2"]}], "+", 
+         FractionBox[
+          RowBox[{"2", " ", 
+           SubscriptBox["\[Phi]", "3"], " ", 
+           RowBox[{"(", 
+            RowBox[{
+             RowBox[{
+              SubscriptBox["\[Phi]", "1"], " ", 
+              SubscriptBox["\[Omega]", "1"]}], "+", 
+             RowBox[{
+              SubscriptBox["\[Phi]", "2"], " ", 
+              SubscriptBox["\[Omega]", "2"]}], "+", 
+             RowBox[{
+              SubscriptBox["\[Phi]", "3"], " ", 
+              SubscriptBox["\[Omega]", "3"]}]}], ")"}]}], 
+          RowBox[{
+           SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+           SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+           SubsuperscriptBox["\[Phi]", "3", "2"]}]], "+", 
+         FractionBox[
+          RowBox[{
+           RowBox[{"Cot", "[", 
+            RowBox[{
+             FractionBox["1", "2"], " ", 
+             SqrtBox[
+              RowBox[{
+               SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+               SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+               SubsuperscriptBox["\[Phi]", "3", "2"]}]]}], "]"}], " ", 
+           RowBox[{"(", 
+            RowBox[{
+             RowBox[{
+              RowBox[{"-", 
+               SubscriptBox["\[Phi]", "1"]}], " ", 
+              SubscriptBox["\[Phi]", "3"], " ", 
+              SubscriptBox["\[Omega]", "1"]}], "+", 
+             RowBox[{
+              SubsuperscriptBox["\[Phi]", "1", "2"], " ", 
+              SubscriptBox["\[Omega]", "3"]}], "+", 
+             RowBox[{
+              SubscriptBox["\[Phi]", "2"], " ", 
+              RowBox[{"(", 
+               RowBox[{
+                RowBox[{
+                 RowBox[{"-", 
+                  SubscriptBox["\[Phi]", "3"]}], " ", 
+                 SubscriptBox["\[Omega]", "2"]}], "+", 
+                RowBox[{
+                 SubscriptBox["\[Phi]", "2"], " ", 
+                 SubscriptBox["\[Omega]", "3"]}]}], ")"}]}]}], ")"}]}], 
+          SqrtBox[
+           RowBox[{
+            SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+            SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+            SubsuperscriptBox["\[Phi]", "3", "2"]}]]]}], ")"}]}], "+", 
+      RowBox[{
+       RowBox[{"(", 
+        RowBox[{
+         RowBox[{
+          SubscriptBox["\[Phi]", "3"], " ", 
+          SubscriptBox["\[Omega]", "1"]}], "-", 
+         RowBox[{
+          SubscriptBox["\[Phi]", "1"], " ", 
+          SubscriptBox["\[Omega]", "3"]}], "+", 
+         FractionBox[
+          RowBox[{"2", " ", 
+           SubscriptBox["\[Phi]", "2"], " ", 
+           RowBox[{"(", 
+            RowBox[{
+             RowBox[{
+              SubscriptBox["\[Phi]", "1"], " ", 
+              SubscriptBox["\[Omega]", "1"]}], "+", 
+             RowBox[{
+              SubscriptBox["\[Phi]", "2"], " ", 
+              SubscriptBox["\[Omega]", "2"]}], "+", 
+             RowBox[{
+              SubscriptBox["\[Phi]", "3"], " ", 
+              SubscriptBox["\[Omega]", "3"]}]}], ")"}]}], 
+          RowBox[{
+           SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+           SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+           SubsuperscriptBox["\[Phi]", "3", "2"]}]], "+", 
+         FractionBox[
+          RowBox[{
+           RowBox[{"Cot", "[", 
+            RowBox[{
+             FractionBox["1", "2"], " ", 
+             SqrtBox[
+              RowBox[{
+               SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+               SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+               SubsuperscriptBox["\[Phi]", "3", "2"]}]]}], "]"}], " ", 
+           RowBox[{"(", 
+            RowBox[{
+             RowBox[{
+              RowBox[{"-", 
+               SubscriptBox["\[Phi]", "1"]}], " ", 
+              SubscriptBox["\[Phi]", "2"], " ", 
+              SubscriptBox["\[Omega]", "1"]}], "+", 
+             RowBox[{
+              SubsuperscriptBox["\[Phi]", "1", "2"], " ", 
+              SubscriptBox["\[Omega]", "2"]}], "+", 
+             RowBox[{
+              SubscriptBox["\[Phi]", "3"], " ", 
+              RowBox[{"(", 
+               RowBox[{
+                RowBox[{
+                 SubscriptBox["\[Phi]", "3"], " ", 
+                 SubscriptBox["\[Omega]", "2"]}], "-", 
+                RowBox[{
+                 SubscriptBox["\[Phi]", "2"], " ", 
+                 SubscriptBox["\[Omega]", "3"]}]}], ")"}]}]}], ")"}]}], 
+          SqrtBox[
+           RowBox[{
+            SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+            SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+            SubsuperscriptBox["\[Phi]", "3", "2"]}]]]}], ")"}], " ", 
+       RowBox[{"(", 
+        RowBox[{
+         FractionBox[
+          RowBox[{"2", " ", 
+           SubscriptBox["\[Phi]", "2"], " ", 
+           SubscriptBox["\[Omega]", "2"]}], 
+          RowBox[{
+           SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+           SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+           SubsuperscriptBox["\[Phi]", "3", "2"]}]], "-", 
+         FractionBox[
+          RowBox[{
+           RowBox[{"Cot", "[", 
+            RowBox[{
+             FractionBox["1", "2"], " ", 
+             SqrtBox[
+              RowBox[{
+               SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+               SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+               SubsuperscriptBox["\[Phi]", "3", "2"]}]]}], "]"}], " ", 
+           RowBox[{"(", 
+            RowBox[{
+             RowBox[{
+              SubscriptBox["\[Phi]", "1"], " ", 
+              SubscriptBox["\[Omega]", "1"]}], "+", 
+             RowBox[{
+              SubscriptBox["\[Phi]", "3"], " ", 
+              SubscriptBox["\[Omega]", "3"]}]}], ")"}]}], 
+          SqrtBox[
+           RowBox[{
+            SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+            SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+            SubsuperscriptBox["\[Phi]", "3", "2"]}]]], "-", 
+         FractionBox[
+          RowBox[{"4", " ", 
+           SubsuperscriptBox["\[Phi]", "2", "2"], " ", 
+           RowBox[{"(", 
+            RowBox[{
+             RowBox[{
+              SubscriptBox["\[Phi]", "1"], " ", 
+              SubscriptBox["\[Omega]", "1"]}], "+", 
+             RowBox[{
+              SubscriptBox["\[Phi]", "2"], " ", 
+              SubscriptBox["\[Omega]", "2"]}], "+", 
+             RowBox[{
+              SubscriptBox["\[Phi]", "3"], " ", 
+              SubscriptBox["\[Omega]", "3"]}]}], ")"}]}], 
+          SuperscriptBox[
+           RowBox[{"(", 
+            RowBox[{
+             SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+             SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+             SubsuperscriptBox["\[Phi]", "3", "2"]}], ")"}], "2"]], "+", 
+         FractionBox[
+          RowBox[{"2", " ", 
+           RowBox[{"(", 
+            RowBox[{
+             RowBox[{
+              SubscriptBox["\[Phi]", "1"], " ", 
+              SubscriptBox["\[Omega]", "1"]}], "+", 
+             RowBox[{
+              SubscriptBox["\[Phi]", "2"], " ", 
+              SubscriptBox["\[Omega]", "2"]}], "+", 
+             RowBox[{
+              SubscriptBox["\[Phi]", "3"], " ", 
+              SubscriptBox["\[Omega]", "3"]}]}], ")"}]}], 
+          RowBox[{
+           SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+           SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+           SubsuperscriptBox["\[Phi]", "3", "2"]}]], "+", 
+         FractionBox[
+          RowBox[{
+           RowBox[{"Cot", "[", 
+            RowBox[{
+             FractionBox["1", "2"], " ", 
+             SqrtBox[
+              RowBox[{
+               SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+               SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+               SubsuperscriptBox["\[Phi]", "3", "2"]}]]}], "]"}], " ", 
+           SubscriptBox["\[Phi]", "2"], " ", 
+           RowBox[{"(", 
+            RowBox[{
+             RowBox[{
+              SubscriptBox["\[Phi]", "1"], " ", 
+              SubscriptBox["\[Phi]", "2"], " ", 
+              SubscriptBox["\[Omega]", "1"]}], "-", 
+             RowBox[{
+              SubsuperscriptBox["\[Phi]", "1", "2"], " ", 
+              SubscriptBox["\[Omega]", "2"]}], "+", 
+             RowBox[{
+              SubscriptBox["\[Phi]", "3"], " ", 
+              RowBox[{"(", 
+               RowBox[{
+                RowBox[{
+                 RowBox[{"-", 
+                  SubscriptBox["\[Phi]", "3"]}], " ", 
+                 SubscriptBox["\[Omega]", "2"]}], "+", 
+                RowBox[{
+                 SubscriptBox["\[Phi]", "2"], " ", 
+                 SubscriptBox["\[Omega]", "3"]}]}], ")"}]}]}], ")"}]}], 
+          SuperscriptBox[
+           RowBox[{"(", 
+            RowBox[{
+             SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+             SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+             SubsuperscriptBox["\[Phi]", "3", "2"]}], ")"}], 
+           RowBox[{"3", "/", "2"}]]], "+", 
+         FractionBox[
+          RowBox[{
+           SuperscriptBox[
+            RowBox[{"Csc", "[", 
+             RowBox[{
+              FractionBox["1", "2"], " ", 
+              SqrtBox[
+               RowBox[{
+                SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+                SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+                SubsuperscriptBox["\[Phi]", "3", "2"]}]]}], "]"}], "2"], " ", 
+           
+           SubscriptBox["\[Phi]", "2"], " ", 
+           RowBox[{"(", 
+            RowBox[{
+             RowBox[{
+              SubscriptBox["\[Phi]", "1"], " ", 
+              SubscriptBox["\[Phi]", "2"], " ", 
+              SubscriptBox["\[Omega]", "1"]}], "-", 
+             RowBox[{
+              SubsuperscriptBox["\[Phi]", "1", "2"], " ", 
+              SubscriptBox["\[Omega]", "2"]}], "+", 
+             RowBox[{
+              SubscriptBox["\[Phi]", "3"], " ", 
+              RowBox[{"(", 
+               RowBox[{
+                RowBox[{
+                 RowBox[{"-", 
+                  SubscriptBox["\[Phi]", "3"]}], " ", 
+                 SubscriptBox["\[Omega]", "2"]}], "+", 
+                RowBox[{
+                 SubscriptBox["\[Phi]", "2"], " ", 
+                 SubscriptBox["\[Omega]", "3"]}]}], ")"}]}]}], ")"}]}], 
+          RowBox[{"2", " ", 
+           RowBox[{"(", 
+            RowBox[{
+             SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+             SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+             SubsuperscriptBox["\[Phi]", "3", "2"]}], ")"}]}]]}], ")"}]}], 
+      "+", 
+      RowBox[{"2", " ", 
+       RowBox[{"(", 
+        RowBox[{
+         SubscriptBox["\[Phi]", "3"], "+", 
+         RowBox[{
+          SubscriptBox["\[Phi]", "1"], " ", 
+          SubscriptBox["\[Phi]", "2"], " ", 
+          RowBox[{"(", 
+           RowBox[{
+            FractionBox["2", 
+             RowBox[{
+              SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+              SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+              SubsuperscriptBox["\[Phi]", "3", "2"]}]], "-", 
+            FractionBox[
+             RowBox[{"Cot", "[", 
+              RowBox[{
+               FractionBox["1", "2"], " ", 
+               SqrtBox[
+                RowBox[{
+                 SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+                 SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+                 SubsuperscriptBox["\[Phi]", "3", "2"]}]]}], "]"}], 
+             SqrtBox[
+              RowBox[{
+               SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+               SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+               SubsuperscriptBox["\[Phi]", "3", "2"]}]]]}], ")"}]}]}], ")"}], 
+       " ", 
+       SubscriptBox["\[Omega]d", "1"]}], "+", 
+      RowBox[{"2", " ", 
+       RowBox[{"(", 
+        RowBox[{
+         FractionBox[
+          RowBox[{"2", " ", 
+           SubsuperscriptBox["\[Phi]", "2", "2"]}], 
+          RowBox[{
+           SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+           SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+           SubsuperscriptBox["\[Phi]", "3", "2"]}]], "+", 
+         FractionBox[
+          RowBox[{
+           RowBox[{"Cot", "[", 
+            RowBox[{
+             FractionBox["1", "2"], " ", 
+             SqrtBox[
+              RowBox[{
+               SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+               SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+               SubsuperscriptBox["\[Phi]", "3", "2"]}]]}], "]"}], " ", 
+           RowBox[{"(", 
+            RowBox[{
+             SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+             SubsuperscriptBox["\[Phi]", "3", "2"]}], ")"}]}], 
+          SqrtBox[
+           RowBox[{
+            SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+            SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+            SubsuperscriptBox["\[Phi]", "3", "2"]}]]]}], ")"}], " ", 
+       SubscriptBox["\[Omega]d", "2"]}], "+", 
+      RowBox[{"2", " ", 
+       RowBox[{"(", 
+        RowBox[{
+         RowBox[{"-", 
+          SubscriptBox["\[Phi]", "1"]}], "+", 
+         RowBox[{
+          SubscriptBox["\[Phi]", "2"], " ", 
+          SubscriptBox["\[Phi]", "3"], " ", 
+          RowBox[{"(", 
+           RowBox[{
+            FractionBox["2", 
+             RowBox[{
+              SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+              SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+              SubsuperscriptBox["\[Phi]", "3", "2"]}]], "-", 
+            FractionBox[
+             RowBox[{"Cot", "[", 
+              RowBox[{
+               FractionBox["1", "2"], " ", 
+               SqrtBox[
+                RowBox[{
+                 SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+                 SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+                 SubsuperscriptBox["\[Phi]", "3", "2"]}]]}], "]"}], 
+             SqrtBox[
+              RowBox[{
+               SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+               SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+               SubsuperscriptBox["\[Phi]", "3", "2"]}]]]}], ")"}]}]}], ")"}], 
+       " ", 
+       SubscriptBox["\[Omega]d", "3"]}]}], ")"}]}], ",", 
+   RowBox[{
+    FractionBox["1", "4"], " ", 
+    RowBox[{"(", 
+     RowBox[{
+      RowBox[{
+       RowBox[{"(", 
+        RowBox[{
+         RowBox[{
+          RowBox[{"-", 
+           SubscriptBox["\[Phi]", "3"]}], " ", 
+          SubscriptBox["\[Omega]", "2"]}], "+", 
+         RowBox[{
+          SubscriptBox["\[Phi]", "2"], " ", 
+          SubscriptBox["\[Omega]", "3"]}], "+", 
+         FractionBox[
+          RowBox[{"2", " ", 
+           SubscriptBox["\[Phi]", "1"], " ", 
+           RowBox[{"(", 
+            RowBox[{
+             RowBox[{
+              SubscriptBox["\[Phi]", "1"], " ", 
+              SubscriptBox["\[Omega]", "1"]}], "+", 
+             RowBox[{
+              SubscriptBox["\[Phi]", "2"], " ", 
+              SubscriptBox["\[Omega]", "2"]}], "+", 
+             RowBox[{
+              SubscriptBox["\[Phi]", "3"], " ", 
+              SubscriptBox["\[Omega]", "3"]}]}], ")"}]}], 
+          RowBox[{
+           SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+           SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+           SubsuperscriptBox["\[Phi]", "3", "2"]}]], "+", 
+         FractionBox[
+          RowBox[{
+           RowBox[{"Cot", "[", 
+            RowBox[{
+             FractionBox["1", "2"], " ", 
+             SqrtBox[
+              RowBox[{
+               SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+               SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+               SubsuperscriptBox["\[Phi]", "3", "2"]}]]}], "]"}], " ", 
+           RowBox[{"(", 
+            RowBox[{
+             RowBox[{
+              SubsuperscriptBox["\[Phi]", "2", "2"], " ", 
+              SubscriptBox["\[Omega]", "1"]}], "-", 
+             RowBox[{
+              SubscriptBox["\[Phi]", "1"], " ", 
+              SubscriptBox["\[Phi]", "2"], " ", 
+              SubscriptBox["\[Omega]", "2"]}], "+", 
+             RowBox[{
+              SubscriptBox["\[Phi]", "3"], " ", 
+              RowBox[{"(", 
+               RowBox[{
+                RowBox[{
+                 SubscriptBox["\[Phi]", "3"], " ", 
+                 SubscriptBox["\[Omega]", "1"]}], "-", 
+                RowBox[{
+                 SubscriptBox["\[Phi]", "1"], " ", 
+                 SubscriptBox["\[Omega]", "3"]}]}], ")"}]}]}], ")"}]}], 
+          SqrtBox[
+           RowBox[{
+            SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+            SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+            SubsuperscriptBox["\[Phi]", "3", "2"]}]]]}], ")"}], " ", 
+       RowBox[{"(", 
+        RowBox[{
+         FractionBox[
+          RowBox[{"2", " ", 
+           SubscriptBox["\[Phi]", "3"], " ", 
+           SubscriptBox["\[Omega]", "1"]}], 
+          RowBox[{
+           SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+           SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+           SubsuperscriptBox["\[Phi]", "3", "2"]}]], "+", 
+         SubscriptBox["\[Omega]", "2"], "+", 
+         FractionBox[
+          RowBox[{
+           RowBox[{"Cot", "[", 
+            RowBox[{
+             FractionBox["1", "2"], " ", 
+             SqrtBox[
+              RowBox[{
+               SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+               SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+               SubsuperscriptBox["\[Phi]", "3", "2"]}]]}], "]"}], " ", 
+           RowBox[{"(", 
+            RowBox[{
+             RowBox[{
+              RowBox[{"-", 
+               SubscriptBox["\[Phi]", "3"]}], " ", 
+              SubscriptBox["\[Omega]", "1"]}], "+", 
+             RowBox[{"2", " ", 
+              SubscriptBox["\[Phi]", "1"], " ", 
+              SubscriptBox["\[Omega]", "3"]}]}], ")"}]}], 
+          SqrtBox[
+           RowBox[{
+            SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+            SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+            SubsuperscriptBox["\[Phi]", "3", "2"]}]]], "-", 
+         FractionBox[
+          RowBox[{"4", " ", 
+           SubscriptBox["\[Phi]", "1"], " ", 
+           SubscriptBox["\[Phi]", "3"], " ", 
+           RowBox[{"(", 
+            RowBox[{
+             RowBox[{
+              SubscriptBox["\[Phi]", "1"], " ", 
+              SubscriptBox["\[Omega]", "1"]}], "+", 
+             RowBox[{
+              SubscriptBox["\[Phi]", "2"], " ", 
+              SubscriptBox["\[Omega]", "2"]}], "+", 
+             RowBox[{
+              SubscriptBox["\[Phi]", "3"], " ", 
+              SubscriptBox["\[Omega]", "3"]}]}], ")"}]}], 
+          SuperscriptBox[
+           RowBox[{"(", 
+            RowBox[{
+             SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+             SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+             SubsuperscriptBox["\[Phi]", "3", "2"]}], ")"}], "2"]], "-", 
+         FractionBox[
+          RowBox[{
+           RowBox[{"Cot", "[", 
+            RowBox[{
+             FractionBox["1", "2"], " ", 
+             SqrtBox[
+              RowBox[{
+               SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+               SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+               SubsuperscriptBox["\[Phi]", "3", "2"]}]]}], "]"}], " ", 
+           SubscriptBox["\[Phi]", "1"], " ", 
+           RowBox[{"(", 
+            RowBox[{
+             RowBox[{
+              RowBox[{"-", 
+               SubscriptBox["\[Phi]", "1"]}], " ", 
+              SubscriptBox["\[Phi]", "3"], " ", 
+              SubscriptBox["\[Omega]", "1"]}], "+", 
+             RowBox[{
+              SubsuperscriptBox["\[Phi]", "1", "2"], " ", 
+              SubscriptBox["\[Omega]", "3"]}], "+", 
+             RowBox[{
+              SubscriptBox["\[Phi]", "2"], " ", 
+              RowBox[{"(", 
+               RowBox[{
+                RowBox[{
+                 RowBox[{"-", 
+                  SubscriptBox["\[Phi]", "3"]}], " ", 
+                 SubscriptBox["\[Omega]", "2"]}], "+", 
+                RowBox[{
+                 SubscriptBox["\[Phi]", "2"], " ", 
+                 SubscriptBox["\[Omega]", "3"]}]}], ")"}]}]}], ")"}]}], 
+          SuperscriptBox[
+           RowBox[{"(", 
+            RowBox[{
+             SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+             SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+             SubsuperscriptBox["\[Phi]", "3", "2"]}], ")"}], 
+           RowBox[{"3", "/", "2"}]]], "-", 
+         FractionBox[
+          RowBox[{
+           SuperscriptBox[
+            RowBox[{"Csc", "[", 
+             RowBox[{
+              FractionBox["1", "2"], " ", 
+              SqrtBox[
+               RowBox[{
+                SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+                SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+                SubsuperscriptBox["\[Phi]", "3", "2"]}]]}], "]"}], "2"], " ", 
+           
+           SubscriptBox["\[Phi]", "1"], " ", 
+           RowBox[{"(", 
+            RowBox[{
+             RowBox[{
+              RowBox[{"-", 
+               SubscriptBox["\[Phi]", "1"]}], " ", 
+              SubscriptBox["\[Phi]", "3"], " ", 
+              SubscriptBox["\[Omega]", "1"]}], "+", 
+             RowBox[{
+              SubsuperscriptBox["\[Phi]", "1", "2"], " ", 
+              SubscriptBox["\[Omega]", "3"]}], "+", 
+             RowBox[{
+              SubscriptBox["\[Phi]", "2"], " ", 
+              RowBox[{"(", 
+               RowBox[{
+                RowBox[{
+                 RowBox[{"-", 
+                  SubscriptBox["\[Phi]", "3"]}], " ", 
+                 SubscriptBox["\[Omega]", "2"]}], "+", 
+                RowBox[{
+                 SubscriptBox["\[Phi]", "2"], " ", 
+                 SubscriptBox["\[Omega]", "3"]}]}], ")"}]}]}], ")"}]}], 
+          RowBox[{"2", " ", 
+           RowBox[{"(", 
+            RowBox[{
+             SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+             SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+             SubsuperscriptBox["\[Phi]", "3", "2"]}], ")"}]}]]}], ")"}]}], 
+      "+", 
+      RowBox[{
+       RowBox[{"(", 
+        RowBox[{
+         RowBox[{
+          SubscriptBox["\[Phi]", "3"], " ", 
+          SubscriptBox["\[Omega]", "1"]}], "-", 
+         RowBox[{
+          SubscriptBox["\[Phi]", "1"], " ", 
+          SubscriptBox["\[Omega]", "3"]}], "+", 
+         FractionBox[
+          RowBox[{"2", " ", 
+           SubscriptBox["\[Phi]", "2"], " ", 
+           RowBox[{"(", 
+            RowBox[{
+             RowBox[{
+              SubscriptBox["\[Phi]", "1"], " ", 
+              SubscriptBox["\[Omega]", "1"]}], "+", 
+             RowBox[{
+              SubscriptBox["\[Phi]", "2"], " ", 
+              SubscriptBox["\[Omega]", "2"]}], "+", 
+             RowBox[{
+              SubscriptBox["\[Phi]", "3"], " ", 
+              SubscriptBox["\[Omega]", "3"]}]}], ")"}]}], 
+          RowBox[{
+           SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+           SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+           SubsuperscriptBox["\[Phi]", "3", "2"]}]], "+", 
+         FractionBox[
+          RowBox[{
+           RowBox[{"Cot", "[", 
+            RowBox[{
+             FractionBox["1", "2"], " ", 
+             SqrtBox[
+              RowBox[{
+               SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+               SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+               SubsuperscriptBox["\[Phi]", "3", "2"]}]]}], "]"}], " ", 
+           RowBox[{"(", 
+            RowBox[{
+             RowBox[{
+              RowBox[{"-", 
+               SubscriptBox["\[Phi]", "1"]}], " ", 
+              SubscriptBox["\[Phi]", "2"], " ", 
+              SubscriptBox["\[Omega]", "1"]}], "+", 
+             RowBox[{
+              SubsuperscriptBox["\[Phi]", "1", "2"], " ", 
+              SubscriptBox["\[Omega]", "2"]}], "+", 
+             RowBox[{
+              SubscriptBox["\[Phi]", "3"], " ", 
+              RowBox[{"(", 
+               RowBox[{
+                RowBox[{
+                 SubscriptBox["\[Phi]", "3"], " ", 
+                 SubscriptBox["\[Omega]", "2"]}], "-", 
+                RowBox[{
+                 SubscriptBox["\[Phi]", "2"], " ", 
+                 SubscriptBox["\[Omega]", "3"]}]}], ")"}]}]}], ")"}]}], 
+          SqrtBox[
+           RowBox[{
+            SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+            SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+            SubsuperscriptBox["\[Phi]", "3", "2"]}]]]}], ")"}], " ", 
+       RowBox[{"(", 
+        RowBox[{
+         RowBox[{"-", 
+          SubscriptBox["\[Omega]", "1"]}], "+", 
+         FractionBox[
+          RowBox[{"2", " ", 
+           SubscriptBox["\[Phi]", "3"], " ", 
+           SubscriptBox["\[Omega]", "2"]}], 
+          RowBox[{
+           SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+           SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+           SubsuperscriptBox["\[Phi]", "3", "2"]}]], "+", 
+         FractionBox[
+          RowBox[{
+           RowBox[{"Cot", "[", 
+            RowBox[{
+             FractionBox["1", "2"], " ", 
+             SqrtBox[
+              RowBox[{
+               SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+               SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+               SubsuperscriptBox["\[Phi]", "3", "2"]}]]}], "]"}], " ", 
+           RowBox[{"(", 
+            RowBox[{
+             RowBox[{
+              RowBox[{"-", 
+               SubscriptBox["\[Phi]", "3"]}], " ", 
+              SubscriptBox["\[Omega]", "2"]}], "+", 
+             RowBox[{"2", " ", 
+              SubscriptBox["\[Phi]", "2"], " ", 
+              SubscriptBox["\[Omega]", "3"]}]}], ")"}]}], 
+          SqrtBox[
+           RowBox[{
+            SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+            SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+            SubsuperscriptBox["\[Phi]", "3", "2"]}]]], "-", 
+         FractionBox[
+          RowBox[{"4", " ", 
+           SubscriptBox["\[Phi]", "2"], " ", 
+           SubscriptBox["\[Phi]", "3"], " ", 
+           RowBox[{"(", 
+            RowBox[{
+             RowBox[{
+              SubscriptBox["\[Phi]", "1"], " ", 
+              SubscriptBox["\[Omega]", "1"]}], "+", 
+             RowBox[{
+              SubscriptBox["\[Phi]", "2"], " ", 
+              SubscriptBox["\[Omega]", "2"]}], "+", 
+             RowBox[{
+              SubscriptBox["\[Phi]", "3"], " ", 
+              SubscriptBox["\[Omega]", "3"]}]}], ")"}]}], 
+          SuperscriptBox[
+           RowBox[{"(", 
+            RowBox[{
+             SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+             SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+             SubsuperscriptBox["\[Phi]", "3", "2"]}], ")"}], "2"]], "-", 
+         FractionBox[
+          RowBox[{
+           RowBox[{"Cot", "[", 
+            RowBox[{
+             FractionBox["1", "2"], " ", 
+             SqrtBox[
+              RowBox[{
+               SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+               SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+               SubsuperscriptBox["\[Phi]", "3", "2"]}]]}], "]"}], " ", 
+           SubscriptBox["\[Phi]", "2"], " ", 
+           RowBox[{"(", 
+            RowBox[{
+             RowBox[{
+              RowBox[{"-", 
+               SubscriptBox["\[Phi]", "1"]}], " ", 
+              SubscriptBox["\[Phi]", "3"], " ", 
+              SubscriptBox["\[Omega]", "1"]}], "+", 
+             RowBox[{
+              SubsuperscriptBox["\[Phi]", "1", "2"], " ", 
+              SubscriptBox["\[Omega]", "3"]}], "+", 
+             RowBox[{
+              SubscriptBox["\[Phi]", "2"], " ", 
+              RowBox[{"(", 
+               RowBox[{
+                RowBox[{
+                 RowBox[{"-", 
+                  SubscriptBox["\[Phi]", "3"]}], " ", 
+                 SubscriptBox["\[Omega]", "2"]}], "+", 
+                RowBox[{
+                 SubscriptBox["\[Phi]", "2"], " ", 
+                 SubscriptBox["\[Omega]", "3"]}]}], ")"}]}]}], ")"}]}], 
+          SuperscriptBox[
+           RowBox[{"(", 
+            RowBox[{
+             SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+             SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+             SubsuperscriptBox["\[Phi]", "3", "2"]}], ")"}], 
+           RowBox[{"3", "/", "2"}]]], "-", 
+         FractionBox[
+          RowBox[{
+           SuperscriptBox[
+            RowBox[{"Csc", "[", 
+             RowBox[{
+              FractionBox["1", "2"], " ", 
+              SqrtBox[
+               RowBox[{
+                SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+                SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+                SubsuperscriptBox["\[Phi]", "3", "2"]}]]}], "]"}], "2"], " ", 
+           
+           SubscriptBox["\[Phi]", "2"], " ", 
+           RowBox[{"(", 
+            RowBox[{
+             RowBox[{
+              RowBox[{"-", 
+               SubscriptBox["\[Phi]", "1"]}], " ", 
+              SubscriptBox["\[Phi]", "3"], " ", 
+              SubscriptBox["\[Omega]", "1"]}], "+", 
+             RowBox[{
+              SubsuperscriptBox["\[Phi]", "1", "2"], " ", 
+              SubscriptBox["\[Omega]", "3"]}], "+", 
+             RowBox[{
+              SubscriptBox["\[Phi]", "2"], " ", 
+              RowBox[{"(", 
+               RowBox[{
+                RowBox[{
+                 RowBox[{"-", 
+                  SubscriptBox["\[Phi]", "3"]}], " ", 
+                 SubscriptBox["\[Omega]", "2"]}], "+", 
+                RowBox[{
+                 SubscriptBox["\[Phi]", "2"], " ", 
+                 SubscriptBox["\[Omega]", "3"]}]}], ")"}]}]}], ")"}]}], 
+          RowBox[{"2", " ", 
+           RowBox[{"(", 
+            RowBox[{
+             SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+             SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+             SubsuperscriptBox["\[Phi]", "3", "2"]}], ")"}]}]]}], ")"}]}], 
+      "+", 
+      RowBox[{
+       RowBox[{"(", 
+        RowBox[{
+         RowBox[{"-", 
+          FractionBox[
+           RowBox[{
+            RowBox[{"Cot", "[", 
+             RowBox[{
+              FractionBox["1", "2"], " ", 
+              SqrtBox[
+               RowBox[{
+                SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+                SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+                SubsuperscriptBox["\[Phi]", "3", "2"]}]]}], "]"}], " ", 
+            RowBox[{"(", 
+             RowBox[{
+              RowBox[{
+               SubscriptBox["\[Phi]", "1"], " ", 
+               SubscriptBox["\[Omega]", "1"]}], "+", 
+              RowBox[{
+               SubscriptBox["\[Phi]", "2"], " ", 
+               SubscriptBox["\[Omega]", "2"]}]}], ")"}]}], 
+           SqrtBox[
+            RowBox[{
+             SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+             SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+             SubsuperscriptBox["\[Phi]", "3", "2"]}]]]}], "+", 
+         FractionBox[
+          RowBox[{"2", " ", 
+           SubscriptBox["\[Phi]", "3"], " ", 
+           SubscriptBox["\[Omega]", "3"]}], 
+          RowBox[{
+           SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+           SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+           SubsuperscriptBox["\[Phi]", "3", "2"]}]], "-", 
+         FractionBox[
+          RowBox[{"4", " ", 
+           SubsuperscriptBox["\[Phi]", "3", "2"], " ", 
+           RowBox[{"(", 
+            RowBox[{
+             RowBox[{
+              SubscriptBox["\[Phi]", "1"], " ", 
+              SubscriptBox["\[Omega]", "1"]}], "+", 
+             RowBox[{
+              SubscriptBox["\[Phi]", "2"], " ", 
+              SubscriptBox["\[Omega]", "2"]}], "+", 
+             RowBox[{
+              SubscriptBox["\[Phi]", "3"], " ", 
+              SubscriptBox["\[Omega]", "3"]}]}], ")"}]}], 
+          SuperscriptBox[
+           RowBox[{"(", 
+            RowBox[{
+             SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+             SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+             SubsuperscriptBox["\[Phi]", "3", "2"]}], ")"}], "2"]], "+", 
+         FractionBox[
+          RowBox[{"2", " ", 
+           RowBox[{"(", 
+            RowBox[{
+             RowBox[{
+              SubscriptBox["\[Phi]", "1"], " ", 
+              SubscriptBox["\[Omega]", "1"]}], "+", 
+             RowBox[{
+              SubscriptBox["\[Phi]", "2"], " ", 
+              SubscriptBox["\[Omega]", "2"]}], "+", 
+             RowBox[{
+              SubscriptBox["\[Phi]", "3"], " ", 
+              SubscriptBox["\[Omega]", "3"]}]}], ")"}]}], 
+          RowBox[{
+           SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+           SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+           SubsuperscriptBox["\[Phi]", "3", "2"]}]], "+", 
+         FractionBox[
+          RowBox[{
+           RowBox[{"Cot", "[", 
+            RowBox[{
+             FractionBox["1", "2"], " ", 
+             SqrtBox[
+              RowBox[{
+               SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+               SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+               SubsuperscriptBox["\[Phi]", "3", "2"]}]]}], "]"}], " ", 
+           SubscriptBox["\[Phi]", "3"], " ", 
+           RowBox[{"(", 
+            RowBox[{
+             RowBox[{
+              SubscriptBox["\[Phi]", "1"], " ", 
+              SubscriptBox["\[Phi]", "3"], " ", 
+              SubscriptBox["\[Omega]", "1"]}], "-", 
+             RowBox[{
+              SubsuperscriptBox["\[Phi]", "1", "2"], " ", 
+              SubscriptBox["\[Omega]", "3"]}], "+", 
+             RowBox[{
+              SubscriptBox["\[Phi]", "2"], " ", 
+              RowBox[{"(", 
+               RowBox[{
+                RowBox[{
+                 SubscriptBox["\[Phi]", "3"], " ", 
+                 SubscriptBox["\[Omega]", "2"]}], "-", 
+                RowBox[{
+                 SubscriptBox["\[Phi]", "2"], " ", 
+                 SubscriptBox["\[Omega]", "3"]}]}], ")"}]}]}], ")"}]}], 
+          SuperscriptBox[
+           RowBox[{"(", 
+            RowBox[{
+             SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+             SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+             SubsuperscriptBox["\[Phi]", "3", "2"]}], ")"}], 
+           RowBox[{"3", "/", "2"}]]], "+", 
+         FractionBox[
+          RowBox[{
+           SuperscriptBox[
+            RowBox[{"Csc", "[", 
+             RowBox[{
+              FractionBox["1", "2"], " ", 
+              SqrtBox[
+               RowBox[{
+                SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+                SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+                SubsuperscriptBox["\[Phi]", "3", "2"]}]]}], "]"}], "2"], " ", 
+           
+           SubscriptBox["\[Phi]", "3"], " ", 
+           RowBox[{"(", 
+            RowBox[{
+             RowBox[{
+              SubscriptBox["\[Phi]", "1"], " ", 
+              SubscriptBox["\[Phi]", "3"], " ", 
+              SubscriptBox["\[Omega]", "1"]}], "-", 
+             RowBox[{
+              SubsuperscriptBox["\[Phi]", "1", "2"], " ", 
+              SubscriptBox["\[Omega]", "3"]}], "+", 
+             RowBox[{
+              SubscriptBox["\[Phi]", "2"], " ", 
+              RowBox[{"(", 
+               RowBox[{
+                RowBox[{
+                 SubscriptBox["\[Phi]", "3"], " ", 
+                 SubscriptBox["\[Omega]", "2"]}], "-", 
+                RowBox[{
+                 SubscriptBox["\[Phi]", "2"], " ", 
+                 SubscriptBox["\[Omega]", "3"]}]}], ")"}]}]}], ")"}]}], 
+          RowBox[{"2", " ", 
+           RowBox[{"(", 
+            RowBox[{
+             SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+             SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+             SubsuperscriptBox["\[Phi]", "3", "2"]}], ")"}]}]]}], ")"}], " ", 
+       
+       RowBox[{"(", 
+        RowBox[{
+         RowBox[{
+          RowBox[{"-", 
+           SubscriptBox["\[Phi]", "2"]}], " ", 
+          SubscriptBox["\[Omega]", "1"]}], "+", 
+         RowBox[{
+          SubscriptBox["\[Phi]", "1"], " ", 
+          SubscriptBox["\[Omega]", "2"]}], "+", 
+         FractionBox[
+          RowBox[{"2", " ", 
+           SubscriptBox["\[Phi]", "3"], " ", 
+           RowBox[{"(", 
+            RowBox[{
+             RowBox[{
+              SubscriptBox["\[Phi]", "1"], " ", 
+              SubscriptBox["\[Omega]", "1"]}], "+", 
+             RowBox[{
+              SubscriptBox["\[Phi]", "2"], " ", 
+              SubscriptBox["\[Omega]", "2"]}], "+", 
+             RowBox[{
+              SubscriptBox["\[Phi]", "3"], " ", 
+              SubscriptBox["\[Omega]", "3"]}]}], ")"}]}], 
+          RowBox[{
+           SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+           SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+           SubsuperscriptBox["\[Phi]", "3", "2"]}]], "+", 
+         FractionBox[
+          RowBox[{
+           RowBox[{"Cot", "[", 
+            RowBox[{
+             FractionBox["1", "2"], " ", 
+             SqrtBox[
+              RowBox[{
+               SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+               SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+               SubsuperscriptBox["\[Phi]", "3", "2"]}]]}], "]"}], " ", 
+           RowBox[{"(", 
+            RowBox[{
+             RowBox[{
+              RowBox[{"-", 
+               SubscriptBox["\[Phi]", "1"]}], " ", 
+              SubscriptBox["\[Phi]", "3"], " ", 
+              SubscriptBox["\[Omega]", "1"]}], "+", 
+             RowBox[{
+              SubsuperscriptBox["\[Phi]", "1", "2"], " ", 
+              SubscriptBox["\[Omega]", "3"]}], "+", 
+             RowBox[{
+              SubscriptBox["\[Phi]", "2"], " ", 
+              RowBox[{"(", 
+               RowBox[{
+                RowBox[{
+                 RowBox[{"-", 
+                  SubscriptBox["\[Phi]", "3"]}], " ", 
+                 SubscriptBox["\[Omega]", "2"]}], "+", 
+                RowBox[{
+                 SubscriptBox["\[Phi]", "2"], " ", 
+                 SubscriptBox["\[Omega]", "3"]}]}], ")"}]}]}], ")"}]}], 
+          SqrtBox[
+           RowBox[{
+            SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+            SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+            SubsuperscriptBox["\[Phi]", "3", "2"]}]]]}], ")"}]}], "+", 
+      RowBox[{"2", " ", 
+       RowBox[{"(", 
+        RowBox[{
+         RowBox[{"-", 
+          SubscriptBox["\[Phi]", "2"]}], "+", 
+         RowBox[{
+          SubscriptBox["\[Phi]", "1"], " ", 
+          SubscriptBox["\[Phi]", "3"], " ", 
+          RowBox[{"(", 
+           RowBox[{
+            FractionBox["2", 
+             RowBox[{
+              SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+              SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+              SubsuperscriptBox["\[Phi]", "3", "2"]}]], "-", 
+            FractionBox[
+             RowBox[{"Cot", "[", 
+              RowBox[{
+               FractionBox["1", "2"], " ", 
+               SqrtBox[
+                RowBox[{
+                 SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+                 SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+                 SubsuperscriptBox["\[Phi]", "3", "2"]}]]}], "]"}], 
+             SqrtBox[
+              RowBox[{
+               SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+               SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+               SubsuperscriptBox["\[Phi]", "3", "2"]}]]]}], ")"}]}]}], ")"}], 
+       " ", 
+       SubscriptBox["\[Omega]d", "1"]}], "+", 
+      RowBox[{"2", " ", 
+       RowBox[{"(", 
+        RowBox[{
+         SubscriptBox["\[Phi]", "1"], "+", 
+         RowBox[{
+          SubscriptBox["\[Phi]", "2"], " ", 
+          SubscriptBox["\[Phi]", "3"], " ", 
+          RowBox[{"(", 
+           RowBox[{
+            FractionBox["2", 
+             RowBox[{
+              SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+              SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+              SubsuperscriptBox["\[Phi]", "3", "2"]}]], "-", 
+            FractionBox[
+             RowBox[{"Cot", "[", 
+              RowBox[{
+               FractionBox["1", "2"], " ", 
+               SqrtBox[
+                RowBox[{
+                 SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+                 SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+                 SubsuperscriptBox["\[Phi]", "3", "2"]}]]}], "]"}], 
+             SqrtBox[
+              RowBox[{
+               SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+               SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+               SubsuperscriptBox["\[Phi]", "3", "2"]}]]]}], ")"}]}]}], ")"}], 
+       " ", 
+       SubscriptBox["\[Omega]d", "2"]}], "+", 
+      RowBox[{"2", " ", 
+       RowBox[{"(", 
+        RowBox[{
+         FractionBox[
+          RowBox[{"2", " ", 
+           SubsuperscriptBox["\[Phi]", "3", "2"]}], 
+          RowBox[{
+           SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+           SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+           SubsuperscriptBox["\[Phi]", "3", "2"]}]], "+", 
+         FractionBox[
+          RowBox[{
+           RowBox[{"Cot", "[", 
+            RowBox[{
+             FractionBox["1", "2"], " ", 
+             SqrtBox[
+              RowBox[{
+               SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+               SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+               SubsuperscriptBox["\[Phi]", "3", "2"]}]]}], "]"}], " ", 
+           RowBox[{"(", 
+            RowBox[{
+             SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+             SubsuperscriptBox["\[Phi]", "2", "2"]}], ")"}]}], 
+          SqrtBox[
+           RowBox[{
+            SubsuperscriptBox["\[Phi]", "1", "2"], "+", 
+            SubsuperscriptBox["\[Phi]", "2", "2"], "+", 
+            SubsuperscriptBox["\[Phi]", "3", "2"]}]]]}], ")"}], " ", 
+       SubscriptBox["\[Omega]d", "3"]}]}], ")"}]}]}], "}"}]], "Output",
+ CellChangeTimes->{3.572407204106484*^9, 3.572407287883057*^9}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"Limit", "[", 
+  RowBox[{
+   RowBox[{"Limit", "[", 
+    RowBox[{
+     RowBox[{"Limit", "[", 
+      RowBox[{"phidd", ",", 
+       RowBox[{
+        SubscriptBox["\[Phi]", "1"], "\[Rule]", "0"}]}], "]"}], ",", 
+     RowBox[{
+      SubscriptBox["\[Phi]", "2"], "\[Rule]", "0"}]}], "]"}], ",", 
+   RowBox[{
+    SubscriptBox["\[Phi]", "3"], "\[Rule]", "0"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.5724073325113287`*^9, 3.572407380454969*^9}}],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{
+   SubscriptBox["\[Omega]d", "1"], ",", 
+   SubscriptBox["\[Omega]d", "2"], ",", 
+   SubscriptBox["\[Omega]d", "3"]}], "}"}]], "Output",
+ CellChangeTimes->{3.572407381050787*^9}]
+}, Open  ]]
 },
-WindowSize->{1440, 768},
-WindowMargins->{{0, Automatic}, {Automatic, 0}},
+WindowSize->{720, 768},
+WindowMargins->{{Automatic, 0}, {Automatic, 0}},
 FrontEndVersion->"8.0 for Mac OS X x86 (32-bit, 64-bit Kernel) (February 23, \
 2011)",
 StyleDefinitions->"Default.nb"
@@ -799,36 +3337,52 @@ CellTagsIndex->{}
 Notebook[{
 Cell[557, 20, 158, 3, 43, "Input"],
 Cell[718, 25, 875, 28, 27, "Input"],
-Cell[1596, 55, 1900, 52, 103, "Input"],
-Cell[3499, 109, 1091, 29, 43, "Input"],
-Cell[4593, 140, 222, 4, 27, "Input"],
-Cell[4818, 146, 885, 23, 43, "Input"],
-Cell[5706, 171, 392, 9, 27, "Input"],
-Cell[6101, 182, 456, 11, 43, "Input"],
-Cell[6560, 195, 1002, 30, 73, "Input"],
-Cell[7565, 227, 2388, 59, 58, "Input"],
-Cell[9956, 288, 1512, 36, 43, "Input"],
-Cell[11471, 326, 599, 18, 43, "Input"],
-Cell[12073, 346, 693, 15, 27, "Input"],
+Cell[1596, 55, 2163, 59, 118, "Input"],
+Cell[3762, 116, 1091, 29, 43, "Input"],
+Cell[4856, 147, 222, 4, 27, "Input"],
+Cell[5081, 153, 885, 23, 43, "Input"],
+Cell[5969, 178, 392, 9, 27, "Input"],
+Cell[6364, 189, 438, 10, 27, "Input"],
+Cell[6805, 201, 1799, 41, 43, "Input"],
+Cell[8607, 244, 909, 27, 58, "Input"],
+Cell[9519, 273, 599, 18, 43, "Input"],
+Cell[10121, 293, 693, 15, 27, "Input"],
 Cell[CellGroupData[{
-Cell[12791, 365, 622, 11, 43, "Input"],
-Cell[13416, 378, 1089, 19, 39, "Output"]
+Cell[10839, 312, 622, 11, 43, "Input"],
+Cell[11464, 325, 1235, 21, 39, "Output"]
 }, Open  ]],
-Cell[14520, 400, 582, 17, 58, "Input"],
+Cell[12714, 349, 582, 17, 58, "Input"],
 Cell[CellGroupData[{
-Cell[15127, 421, 610, 17, 43, "Input"],
-Cell[15740, 440, 1132, 35, 99, "Output"]
+Cell[13321, 370, 610, 17, 43, "Input"],
+Cell[13934, 389, 1223, 36, 87, "Output"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[16909, 480, 659, 18, 43, "Input"],
-Cell[17571, 500, 855, 25, 73, "Output"]
+Cell[15194, 430, 659, 18, 43, "Input"],
+Cell[15856, 450, 925, 26, 61, "Output"]
 }, Open  ]],
-Cell[18441, 528, 362, 8, 27, "Input"],
+Cell[16796, 479, 362, 8, 27, "Input"],
 Cell[CellGroupData[{
-Cell[18828, 540, 178, 3, 27, "Input"],
-Cell[19009, 545, 8189, 230, 199, "Output"]
+Cell[17183, 491, 178, 3, 27, "Input"],
+Cell[17364, 496, 8261, 231, 388, "Output"]
 }, Open  ]],
-Cell[27213, 778, 118, 2, 27, "Input"]
+Cell[25640, 730, 118, 2, 27, "Input"],
+Cell[CellGroupData[{
+Cell[25783, 736, 804, 20, 43, "Input"],
+Cell[26590, 758, 14122, 374, 151, "Output"]
+}, Open  ]],
+Cell[40727, 1135, 546, 15, 27, "Input"],
+Cell[CellGroupData[{
+Cell[41298, 1154, 300, 7, 27, "Input"],
+Cell[41601, 1163, 275, 5, 27, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[41913, 1173, 475, 14, 27, "Input"],
+Cell[42391, 1189, 81206, 2102, 3284, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[123634, 3296, 462, 13, 27, "Input"],
+Cell[124099, 3311, 218, 6, 27, "Output"]
+}, Open  ]]
 }
 ]
 *)
