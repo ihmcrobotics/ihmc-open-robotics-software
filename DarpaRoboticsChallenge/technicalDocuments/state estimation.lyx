@@ -1633,11 +1633,6 @@ Appendix: rotation vector kinematics
 \end_layout
 
 \begin_layout Standard
-TODO: apparently this is called the Bortz equation.
- Mention that and add a reference.
-\end_layout
-
-\begin_layout Standard
 The kinematics of the quaternion 
 \begin_inset Formula $q=\left(\begin{array}{c}
 q_{s}\\
@@ -1826,13 +1821,56 @@ reference "eq:dPhiNormDt"
 
 :
 \begin_inset Formula 
+\begin{align*}
+\dot{\phi} & =\frac{1}{2}\cot\frac{\left\Vert \phi\right\Vert }{2}\left(\left\Vert \phi\right\Vert \omega-\frac{\phi\cdot\omega}{\left\Vert \phi\right\Vert }\phi\right)+\frac{\phi\times\omega}{2}+\frac{\phi\cdot\omega}{\left\Vert \phi\right\Vert ^{2}}\phi\\
+ & =\frac{1}{2\left\Vert \phi\right\Vert }\cot\frac{\left\Vert \phi\right\Vert }{2}\left[\omega\left(\phi\cdot\phi\right)-\phi\left(\phi\cdot\omega\right)\right]+\frac{\phi\times\omega}{2}+\frac{\phi\cdot\omega}{\left\Vert \phi\right\Vert ^{2}}\phi
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Using the vector triple product identity,
+\begin_inset Formula 
 \[
-\dot{\phi}=\frac{1}{2}\cot\frac{\left\Vert \phi\right\Vert }{2}\left(\left\Vert \phi\right\Vert \omega-\frac{\phi\cdot\omega}{\left\Vert \phi\right\Vert }\phi\right)+\frac{\phi\times\omega}{2}+\frac{\phi\cdot\omega}{\left\Vert \phi\right\Vert ^{2}}\phi
+\phi\left(\phi\cdot\omega\right)-\omega\left(\phi\cdot\phi\right)=\phi\times\left(\phi\times\omega\right)
+\]
+
+\end_inset
+
+this can be rewritten as
+\begin_inset Formula 
+\begin{align*}
+\dot{\phi} & =-\frac{1}{2\left\Vert \phi\right\Vert }\cot\frac{\left\Vert \phi\right\Vert }{2}\phi\times\left(\phi\times\omega\right)+\frac{\phi\times\omega}{2}+\frac{1}{\left\Vert \phi\right\Vert ^{2}}\left[\phi\times\left(\phi\times\omega\right)+\omega\left\Vert \phi\right\Vert ^{2}\right]\\
+ & =\omega+\frac{\phi\times\omega}{2}+\frac{1}{\left\Vert \phi\right\Vert ^{2}}\left[1-\frac{1}{2\left\Vert \phi\right\Vert }\cot\frac{\left\Vert \phi\right\Vert }{2}\right]\phi\times\left(\phi\times\omega\right)
+\end{align*}
+
+\end_inset
+
+ and using the half-angle formula
+\begin_inset Formula 
+\[
+\cot\frac{\left\Vert \phi\right\Vert }{2}=\frac{\sin\left\Vert \phi\right\Vert }{1-\cos\left\Vert \phi\right\Vert }
+\]
+
+\end_inset
+
+this finally becomes
+\begin_inset Formula 
+\[
+\dot{\phi}=\omega+\frac{\phi\times\omega}{2}+\frac{1}{\left\Vert \phi\right\Vert ^{2}}\left[1-\frac{\left\Vert \phi\right\Vert \sin\left\Vert \phi\right\Vert }{2\left(1-\cos\left\Vert \phi\right\Vert \right)}\right]\phi\times\left(\phi\times\omega\right)
 \]
 
 \end_inset
 
 
+\end_layout
+
+\begin_layout Standard
+This is known as the Bortz equation.
+ TODO: reference
 \end_layout
 
 \begin_layout Section
