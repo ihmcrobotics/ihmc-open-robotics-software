@@ -7,18 +7,17 @@ public class SDFJoint
 {
    private String name;
    private String type;
-   
+
    private String child;
    private String parent;
    private String pose;
-   
+
    private String threadPitch;
-   
 
    private Axis axis;
    private Axis axis2;
-   
-   @XmlAttribute(name="name")
+
+   @XmlAttribute(name = "name")
    public String getName()
    {
       return name;
@@ -29,7 +28,7 @@ public class SDFJoint
       this.name = name;
    }
 
-   @XmlAttribute(name="type")
+   @XmlAttribute(name = "type")
    public String getType()
    {
       return type;
@@ -45,7 +44,7 @@ public class SDFJoint
       return parent;
    }
 
-   @XmlElement(name="parent")
+   @XmlElement(name = "parent")
    public void setParent(String parent)
    {
       this.parent = parent;
@@ -56,7 +55,7 @@ public class SDFJoint
       return pose;
    }
 
-   @XmlElement(name="pose")
+   @XmlElement(name = "pose")
    public void setPose(String pose)
    {
       this.pose = pose;
@@ -67,7 +66,7 @@ public class SDFJoint
       return threadPitch;
    }
 
-   @XmlElement(name="thread_pitch")
+   @XmlElement(name = "thread_pitch")
    public void setThreadPitch(String threadPitch)
    {
       this.threadPitch = threadPitch;
@@ -78,7 +77,7 @@ public class SDFJoint
       return axis;
    }
 
-   @XmlElement(name="axis")
+   @XmlElement(name = "axis")
    public void setAxis(Axis axis)
    {
       this.axis = axis;
@@ -89,28 +88,25 @@ public class SDFJoint
       return axis2;
    }
 
-   @XmlElement(name="axis2")
+   @XmlElement(name = "axis2")
    public void setAxis2(Axis axis2)
    {
       this.axis2 = axis2;
    }
 
-   
    public static class Axis
    {
       private String xyz;
-      
+
       private Dynamics dynamics;
       private Limit limit;
-      
-      
-      
+
       public String getXyz()
       {
          return xyz;
       }
 
-      @XmlElement(name="xyz")
+      @XmlElement(name = "xyz")
       public void setXyz(String xyz)
       {
          this.xyz = xyz;
@@ -121,7 +117,7 @@ public class SDFJoint
          return dynamics;
       }
 
-      @XmlElement(name="dynamics")
+      @XmlElement(name = "dynamics")
       public void setDynamics(Dynamics dynamics)
       {
          this.dynamics = dynamics;
@@ -132,7 +128,7 @@ public class SDFJoint
          return limit;
       }
 
-      @XmlElement(name="limit")
+      @XmlElement(name = "limit")
       public void setLimit(Limit limit)
       {
          this.limit = limit;
@@ -142,56 +138,85 @@ public class SDFJoint
       {
          private String damping;
          private String friction;
+
          public String getDamping()
          {
             return damping;
          }
-         
-         @XmlElement(name="damping")
+
+         @XmlElement(name = "damping")
          public void setDamping(String damping)
          {
             this.damping = damping;
          }
+
          public String getFriction()
          {
             return friction;
          }
-         
-         @XmlElement(name="friction")
+
+         @XmlElement(name = "friction")
          public void setFriction(String friction)
          {
             this.friction = friction;
          }
-         
-         
+
       }
-      
+
       public static class Limit
       {
          private String lower;
          private String upper;
+
+         private String effort;
+         private String velocity;
+
          public String getLower()
          {
             return lower;
          }
-         
-         @XmlElement(name="lower")
+
+         @XmlElement(name = "lower")
          public void setLower(String lower)
          {
             this.lower = lower;
          }
+
          public String getUpper()
          {
             return upper;
          }
-         
-         @XmlElement(name="upper")
+
+         @XmlElement(name = "upper")
          public void setUpper(String upper)
          {
             this.upper = upper;
          }
+
+         public String getEffort()
+         {
+            return effort;
+         }
+         
+         @XmlElement(name = "effort")
+         public void setEffort(String effort)
+         {
+            this.effort = effort;
+         }
+
+         public String getVelocity()
+         {
+            return velocity;
+         }
+
+         @XmlElement(name = "velocity")
+         public void setVelocity(String velocity)
+         {
+            this.velocity = velocity;
+         }
       }
    }
+
    public String toString()
    {
       return name;
@@ -202,7 +227,7 @@ public class SDFJoint
       return child;
    }
 
-   @XmlElement(name="child")
+   @XmlElement(name = "child")
    public void setChild(String child)
    {
       this.child = child;
