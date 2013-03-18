@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController;
 
+import us.ihmc.controlFlow.AbstractControlFlowElement;
 import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -10,11 +11,11 @@ import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.EuclideanPositionController;
 
-public class CoMBasedMomentumRateOfChangeControlModule implements MomentumRateOfChangeControlModule
+public class CoMBasedMomentumRateOfChangeControlModule extends AbstractControlFlowElement implements MomentumRateOfChangeControlModule
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final ControlFlowInputPort<FramePoint> desiredCenterOfMassInputPort = new ControlFlowInputPort<FramePoint>(this);
-   private final ControlFlowOutputPort<MomentumRateOfChangeData> momentumRateOfChangeOutputPort = new ControlFlowOutputPort<MomentumRateOfChangeData>(this);
+   private final ControlFlowInputPort<FramePoint> desiredCenterOfMassInputPort = createInputPort();
+   private final ControlFlowOutputPort<MomentumRateOfChangeData> momentumRateOfChangeOutputPort = createOutputPort();
    private final MomentumRateOfChangeData momentumRateOfChangeData;
    private final ReferenceFrame centerOfMassFrame;
    private final CenterOfMassJacobian centerOfMassJacobian;

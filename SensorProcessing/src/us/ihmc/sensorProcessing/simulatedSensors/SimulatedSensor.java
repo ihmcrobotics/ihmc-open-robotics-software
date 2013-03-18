@@ -1,9 +1,13 @@
-package us.ihmc.sensorProcessing.signalCorruption;
+package us.ihmc.sensorProcessing.simulatedSensors;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class SignalCorruptorHolder<T>
+import us.ihmc.controlFlow.AbstractControlFlowElement;
+import us.ihmc.sensorProcessing.signalCorruption.SignalCorruptionTools;
+import us.ihmc.sensorProcessing.signalCorruption.SignalCorruptor;
+
+public abstract class SimulatedSensor<T> extends AbstractControlFlowElement
 {
    private final List<SignalCorruptor<T>> signalCorruptors = new ArrayList<SignalCorruptor<T>>();
 
@@ -11,7 +15,7 @@ public class SignalCorruptorHolder<T>
    {
       signalCorruptors.add(signalCorruptor);
    }
-   
+
    protected final void corrupt(T signal)
    {
       SignalCorruptionTools.corrupt(signal, signalCorruptors);

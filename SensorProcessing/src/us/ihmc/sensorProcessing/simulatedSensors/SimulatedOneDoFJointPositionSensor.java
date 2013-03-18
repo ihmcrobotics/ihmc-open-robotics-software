@@ -2,14 +2,12 @@ package us.ihmc.sensorProcessing.simulatedSensors;
 
 import org.apache.commons.lang.mutable.MutableDouble;
 
-import us.ihmc.controlFlow.ControlFlowElement;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
-import us.ihmc.sensorProcessing.signalCorruption.SignalCorruptorHolder;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
-public class SimulatedOneDoFJointPositionSensor extends SignalCorruptorHolder<MutableDouble> implements ControlFlowElement
+public class SimulatedOneDoFJointPositionSensor extends SimulatedSensor<MutableDouble>
 {
-   private final ControlFlowOutputPort<Double> jointPositionOutputPort = new ControlFlowOutputPort<Double>(this);
+   private final ControlFlowOutputPort<Double> jointPositionOutputPort = createOutputPort();
    private final OneDoFJoint joint;
    private final MutableDouble jointPosition = new MutableDouble();
 

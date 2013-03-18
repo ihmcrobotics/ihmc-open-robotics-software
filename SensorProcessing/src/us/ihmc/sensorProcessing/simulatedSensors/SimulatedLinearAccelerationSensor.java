@@ -2,9 +2,7 @@ package us.ihmc.sensorProcessing.simulatedSensors;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.controlFlow.ControlFlowElement;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
-import us.ihmc.sensorProcessing.signalCorruption.SignalCorruptorHolder;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -14,7 +12,7 @@ import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.utilities.screwTheory.Twist;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 
-public class SimulatedLinearAccelerationSensor extends SignalCorruptorHolder<Vector3d> implements ControlFlowElement
+public class SimulatedLinearAccelerationSensor extends SimulatedSensor<Vector3d>
 {
    private final RigidBody rigidBody;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -30,8 +28,7 @@ public class SimulatedLinearAccelerationSensor extends SignalCorruptorHolder<Vec
    private final TwistCalculator twistCalculator;
    private final SpatialAccelerationCalculator spatialAccelerationCalculator;
 
-
-   private final ControlFlowOutputPort<Vector3d> linearAccelerationOutputPort = new ControlFlowOutputPort<Vector3d>(this);
+   private final ControlFlowOutputPort<Vector3d> linearAccelerationOutputPort = createOutputPort();
 
    public SimulatedLinearAccelerationSensor(RigidBody rigidBody, ReferenceFrame measurementFrame, TwistCalculator twistCalculator,
            SpatialAccelerationCalculator spatialAccelerationCalculator)

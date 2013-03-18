@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController;
 
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodyOrientationControlModule;
+import us.ihmc.controlFlow.AbstractControlFlowElement;
 import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -10,14 +11,13 @@ import us.ihmc.utilities.screwTheory.TwistCalculator;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 
-public class RootJointAngularAccelerationControlModule implements RootJointAccelerationControlModule
+public class RootJointAngularAccelerationControlModule extends AbstractControlFlowElement implements RootJointAccelerationControlModule
 {
    private final YoVariableRegistry registry;
 
-   private final ControlFlowInputPort<OrientationTrajectoryData> desiredPelvisOrientationTrajectoryInputPort =
-      new ControlFlowInputPort<OrientationTrajectoryData>(this);
+   private final ControlFlowInputPort<OrientationTrajectoryData> desiredPelvisOrientationTrajectoryInputPort = createInputPort();
+   private final ControlFlowOutputPort<RootJointAccelerationData> rootJointAccelerationOutputPort = createOutputPort();
 
-   private final ControlFlowOutputPort<RootJointAccelerationData> rootJointAccelerationOutputPort = new ControlFlowOutputPort<RootJointAccelerationData>(this);
    private final RigidBodyOrientationControlModule rootJointOrientationControlModule;
 
    private final YoFrameVector desiredPelvisAngularAcceleration;
@@ -31,7 +31,8 @@ public class RootJointAngularAccelerationControlModule implements RootJointAccel
       registry = new YoVariableRegistry(getClass().getSimpleName());
       rootJointOrientationControlModule = new RigidBodyOrientationControlModule(rootJoint.getName(), rootJoint.getPredecessor(), rootJoint.getSuccessor(),
               twistCalculator, registry);
-      this.desiredPelvisAngularAcceleration = new YoFrameVector("desired" + rootJoint.getName() + "AngularAcceleration", rootJoint.getFrameAfterJoint(), registry);
+      this.desiredPelvisAngularAcceleration = new YoFrameVector("desired" + rootJoint.getName() + "AngularAcceleration", rootJoint.getFrameAfterJoint(),
+              registry);
       rootJointAccelerationData = new RootJointAccelerationData(rootJoint.getSuccessor().getBodyFixedFrame(), rootJoint.getPredecessor().getBodyFixedFrame(),
               rootJoint.getFrameAfterJoint());
       rootJointAccelerationOutputPort.setData(rootJointAccelerationData);
