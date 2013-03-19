@@ -134,7 +134,7 @@ public class QuaternionOrientationEstimatorEvaluator
          ReferenceFrame estimationFrame = bodyFixedFrame;
 
          ArrayList<SimulatedOrientationSensor> orientationSensors = new ArrayList<SimulatedOrientationSensor>();
-         SimulatedOrientationSensor sensor = new SimulatedOrientationSensor("imu1Orientation", bodyFixedFrame);
+         SimulatedOrientationSensor sensor = new SimulatedOrientationSensor("imu1Orientation", bodyFixedFrame, registry);
          GaussianOrientationCorruptor orientationCorruptor = new GaussianOrientationCorruptor("gaussianOrientation", 12345L, registry);
          orientationCorruptor.setStandardDeviation(orientationStandardDeviation);
          sensor.addSignalCorruptor(orientationCorruptor);
@@ -144,8 +144,7 @@ public class QuaternionOrientationEstimatorEvaluator
 
          ArrayList<SimulatedAngularVelocitySensor> angularVelocitySensors = new ArrayList<SimulatedAngularVelocitySensor>();
          twistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), body);
-         SimulatedAngularVelocitySensor angularVelocitySensor = new SimulatedAngularVelocitySensor("imu1AngularVelocity", twistCalculator, body,
-                                                                   bodyFixedFrame);
+         SimulatedAngularVelocitySensor angularVelocitySensor = new SimulatedAngularVelocitySensor("imu1AngularVelocity", twistCalculator, body, bodyFixedFrame, registry);
          GaussianVectorCorruptor angularVelocityCorruptor = new GaussianVectorCorruptor(1235L, "gaussianAngularVelocity", registry);
          angularVelocityCorruptor.setStandardDeviation(angularVelocityStandardDeviation);
          angularVelocitySensor.addSignalCorruptor(angularVelocityCorruptor);
