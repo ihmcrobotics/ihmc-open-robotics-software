@@ -308,7 +308,7 @@ The equation describing the rotational kinematics in terms of
  is derived in the appendix, and reads
 \begin_inset Formula 
 \[
-\dot{\phi}=\frac{1}{2}\cot\frac{\left\Vert \phi\right\Vert }{2}\left(\left\Vert \phi\right\Vert \omega-\frac{\phi\cdot\omega}{\left\Vert \phi\right\Vert }\phi\right)+\frac{\phi\times\omega}{2}+\frac{\phi\cdot\omega}{\left\Vert \phi\right\Vert ^{2}}\phi
+\dot{\phi}=\omega+\frac{\phi\times\omega}{2}+\frac{1}{\left\Vert \phi\right\Vert ^{2}}\left[1-\frac{\left\Vert \phi\right\Vert \sin\left\Vert \phi\right\Vert }{2\left(1-\cos\left\Vert \phi\right\Vert \right)}\right]\phi\times\left(\phi\times\omega\right)
 \]
 
 \end_inset
@@ -644,10 +644,6 @@ Measurements
 \end_layout
 
 \begin_layout Standard
-TODO:
-\end_layout
-
-\begin_layout Standard
 Measurements:
 \end_layout
 
@@ -698,6 +694,10 @@ Measured acceleration of IMU i in body frame.
 \end_inset
 
 
+\end_layout
+
+\begin_layout Standard
+TODO:
 \end_layout
 
 \begin_layout Standard
@@ -953,10 +953,6 @@ The estimated measurement will be
 
 \end_inset
 
-
-\end_layout
-
-\begin_layout Standard
 and the measurement residual will be
 \end_layout
 
@@ -972,22 +968,14 @@ y_{\omega}=z_{\omega,i}-\hat{z}_{\omega,i}
 \end_layout
 
 \begin_layout Standard
-Linearizing the IMU angular velocity measurement model we have
-\begin_inset Formula 
-\[
-H_{\omega,i}=\frac{\partial\hat{z}_{\omega,i}}{\partial\left(\hat{\phi},\hat{\omega},\hat{b}_{\omega,i}\right)}
-\]
-
-\end_inset
-
-
+The partial derivatives with respect to the state variables are
 \end_layout
 
 \begin_layout Standard
 \begin_inset Formula 
-\[
-\frac{\partial\hat{z}_{\omega,i}}{\partial\hat{\phi}}=0,\frac{\partial\hat{z}_{\omega,i}}{\partial\hat{\omega}}=\hat{R}_{p}^{i},\frac{\partial\hat{z}_{\omega,i}}{\partial\hat{b}_{\omega,i}}=I_{3}
-\]
+\begin{align*}
+\frac{\partial\hat{z}_{\omega,i}}{\partial\hat{\phi}} & =0 & \frac{\partial\hat{z}_{\omega,i}}{\partial\hat{\omega}} & =\hat{R}_{p}^{i} & \frac{\partial\hat{z}_{\omega,i}}{\partial\hat{b}_{\omega,i}} & =I_{3}
+\end{align*}
 
 \end_inset
 
@@ -1158,7 +1146,7 @@ v
 \begin_layout Standard
 Combining the above, we get
 \begin_inset Formula 
-\begin{align*}
+\begin{align}
 \dot{v}_{i}^{i,w} & =\left(\begin{array}{cc}
 0_{3\times3} & I_{3}\end{array}\right)\left(\left(\begin{array}{cc}
 R_{p}^{i} & 0\\
@@ -1175,7 +1163,7 @@ v_{p}^{p,w}
 \end{array}\right)\right)+\left(\begin{array}{c}
 \dot{\omega}_{i}^{i,p}\\
 \dot{v}_{i}^{i,p}
-\end{array}\right)\right)\\
+\end{array}\right)\right)\nonumber \\
  & =\left(\begin{array}{cc}
 0_{3\times3} & I_{3}\end{array}\right)\left(\left(\begin{array}{cc}
 R_{p}^{i} & 0\\
@@ -1186,13 +1174,88 @@ R_{p}^{i} & 0\\
 \end{array}\right)+\left(\begin{array}{c}
 \dot{\omega}_{i}^{i,p}\\
 \dot{v}_{i}^{i,p}
-\end{array}\right)\right)\\
+\end{array}\right)\right)\nonumber \\
  & =\left(\begin{array}{cc}
 \tilde{p}_{p}^{i}R_{p}^{i} & R_{p}^{i}\end{array}\right)\left(\begin{array}{c}
 \tilde{\omega}_{p}^{p,i}\omega_{p}^{p,w}+\dot{\omega}_{p}^{p,w}\\
 \tilde{v}_{p}^{p,i}\omega_{p}^{p,w}+\tilde{\omega}_{p}^{p,i}v_{p}^{p,w}+\dot{v}_{p}^{p,w}
-\end{array}\right)+\dot{v}_{i}^{i,p}\\
- & =\tilde{p}_{p}^{i}R_{p}^{i}\left(\tilde{\omega}_{p}^{p,i}\omega_{p}^{p,w}+\dot{\omega}_{p}^{p,w}\right)+R_{p}^{i}\left(\tilde{v}_{p}^{p,i}\omega_{p}^{p,w}+\tilde{\omega}_{p}^{p,i}v_{p}^{p,w}+\dot{v}_{p}^{p,w}\right)+\dot{v}_{i}^{i,p}
+\end{array}\right)+\dot{v}_{i}^{i,p}\nonumber \\
+ & =\tilde{p}_{p}^{i}R_{p}^{i}\left(\tilde{\omega}_{p}^{p,i}\omega_{p}^{p,w}+\dot{\omega}_{p}^{p,w}\right)+R_{p}^{i}\left(\tilde{v}_{p}^{p,i}\omega_{p}^{p,w}+\tilde{\omega}_{p}^{p,i}v_{p}^{p,w}+\dot{v}_{p}^{p,w}\right)+\dot{v}_{i}^{i,p}\nonumber \\
+ & =\tilde{p}_{p}^{i}R_{p}^{i}\left(\tilde{\omega}_{p}^{p,i}\omega+\dot{\omega}\right)+R_{p}^{i}\left(\tilde{v}_{p}^{p,i}\omega+\tilde{\omega}_{p}^{p,i}v_{p}^{p,w}+\dot{v}_{p}^{p,w}\right)+\dot{v}_{i}^{i,p}\label{eq:imu-accel-1}
+\end{align}
+
+\end_inset
+
+where the last line follows from the definition 
+\begin_inset Formula $\omega_{p}^{p,w}=\omega$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+This equation is written in terms of the linear velocity and acceleration
+ of the orientation estimation link, 
+\begin_inset Formula $v_{p}^{p,w}$
+\end_inset
+
+ and 
+\begin_inset Formula $\dot{v}_{p}^{p,w}$
+\end_inset
+
+.
+ Equations 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:rootjoint-linear-vel"
+
+\end_inset
+
+ and 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:eq:rootjoint-linear-acc"
+
+\end_inset
+
+ in the appendix relate these quantities to center of mass velocity and
+ acceleration.
+ These formulas are repeated here for convenience:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+v_{p}^{p,w} & =R_{w}^{p}\dot{r}-v_{r/p}\\
+\dot{v}_{p}^{p,w} & =R_{w}^{p}\ddot{r}-\tilde{\omega}R_{w}^{p}\dot{r}-\dot{v}_{r/p}
+\end{align*}
+
+\end_inset
+
+where
+\begin_inset Formula 
+\[
+v_{r/p}=\tilde{\omega}r^{p}+\dot{r}^{p}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Substituting these equations into 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:imu-accel-1"
+
+\end_inset
+
+ and expanding, we obtain
+\begin_inset Formula 
+\begin{align*}
+\dot{v}_{i}^{i,w} & =\tilde{p}_{p}^{i}R_{p}^{i}\tilde{\omega}_{p}^{p,i}\omega+\tilde{p}_{p}^{i}R_{p}^{i}\dot{\omega}+R_{p}^{i}\tilde{v}_{p}^{p,i}\omega+R_{p}^{i}\tilde{\omega}_{p}^{p,i}R_{w}^{p}\dot{r}-R_{p}^{i}\tilde{\omega}_{p}^{p,i}\tilde{\omega}r^{p}-R_{p}^{i}\tilde{\omega}_{p}^{p,i}\dot{r}^{p}\\
+ & +R_{p}^{i}R_{w}^{p}\ddot{r}-R_{p}^{i}\tilde{\omega}R_{w}^{p}\dot{r}-R_{p}^{i}\tilde{\dot{\omega}}r^{p}-R_{p}^{i}\tilde{\omega}\dot{r}^{p}-R_{p}^{i}\ddot{r}^{p}+\dot{v}_{i}^{i,p}
 \end{align*}
 
 \end_inset
@@ -1201,21 +1264,174 @@ R_{p}^{i} & 0\\
 \end_layout
 
 \begin_layout Standard
-Note that 
-\begin_inset Formula $\omega_{p}^{p,w}=\omega$
+The partial derivatives are:
+\begin_inset Formula 
+\[
+\frac{\partial\dot{v}_{i}^{i,w}}{\partial\ddot{r}}=R_{p}^{i}R_{w}^{p}
+\]
+
 \end_inset
 
-.
- 
+
 \end_layout
 
 \begin_layout Standard
-\begin_inset Note Note
-status open
+\begin_inset Formula 
+\[
+\frac{\partial\dot{v}_{i}^{i,w}}{\partial\dot{\omega}}=\tilde{p}_{p}^{i}R_{p}^{i}+R_{p}^{i}\tilde{r}^{p}
+\]
 
-\begin_layout Plain Layout
-TODO: write in terms of CoM, derive linearized measurement model
+\end_inset
+
+
 \end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\frac{\partial\dot{v}_{i}^{i,w}}{\partial\omega}=\tilde{p}_{p}^{i}R_{p}^{i}\tilde{\omega}_{p}^{p,i}+R_{p}^{i}\tilde{v}_{p}^{p,i}+R_{p}^{i}\tilde{\omega}_{p}^{p,i}\tilde{r}^{p}+R_{p}^{i}\widetilde{R_{w}^{p}\dot{r}}+R_{p}^{i}\tilde{\dot{r}}^{p}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+These expressions can be simplified using the following substitutions:
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $R_{p}^{i}R_{w}^{p}=R_{w}^{i}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $p_{p}^{i}=-R_{p}^{i}p_{i}^{p}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\widetilde{Rx}=R\tilde{x}R^{T}$
+\end_inset
+
+ for all 
+\begin_inset Formula $x\in\mathbb{R}^{3}$
+\end_inset
+
+, 
+\begin_inset Formula $R\in SO\left(3\right)$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+resulting in
+\begin_inset Formula 
+\[
+\frac{\partial\dot{v}_{i}^{i,w}}{\partial\ddot{r}}=R_{w}^{i}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\frac{\partial\dot{v}_{i}^{i,w}}{\partial\dot{\omega}}=R_{p}^{i}\widetilde{r^{p}-p_{i}^{p}}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\frac{\partial\dot{v}_{i}^{i,w}}{\partial\omega}=R_{p}^{i}\left(-\tilde{p}_{i}^{p}\tilde{\omega}_{p}^{p,i}+\tilde{v}_{p}^{p,i}+\tilde{\omega}_{p}^{p,i}\tilde{r}^{p}+\widetilde{R_{w}^{p}\dot{r}}+\tilde{\dot{r}}^{p}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We also need to find the partial derivative with respect to a perturbation
+ rotation vector 
+\begin_inset Formula $\phi$
+\end_inset
+
+.
+ To this end, let
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+R_{p}^{w}=\bar{R}_{p}^{w}R_{\phi}
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $R_{\phi}=e^{\tilde{\phi}}$
+\end_inset
+
+.
+ Inverting, we obtain
+\begin_inset Formula 
+\[
+R_{w}^{p}=R_{\phi}^{T}\bar{R}_{w}^{p}=e^{-\tilde{\phi}}\bar{R}_{w}^{p}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+For small 
+\begin_inset Formula $\phi$
+\end_inset
+
+, 
+\begin_inset Formula $e^{-\tilde{\phi}}\approx I-\tilde{\phi}$
+\end_inset
+
+.
+ Using this approximation, we get
+\begin_inset Formula 
+\begin{align*}
+\dot{v}_{i}^{i,w} & \approx\tilde{p}_{p}^{i}R_{p}^{i}\tilde{\omega}_{p}^{p,i}\omega+\tilde{p}_{p}^{i}R_{p}^{i}\dot{\omega}+R_{p}^{i}\tilde{v}_{p}^{p,i}\omega+R_{p}^{i}\tilde{\omega}_{p}^{p,i}\left(I-\tilde{\phi}\right)\bar{R}_{w}^{p}\dot{r}-R_{p}^{i}\tilde{\omega}_{p}^{p,i}\tilde{\omega}r^{p}-R_{p}^{i}\tilde{\omega}_{p}^{p,i}\dot{r}^{p}\\
+ & +R_{p}^{i}\left(I-\tilde{\phi}\right)\bar{R}_{w}^{p}\ddot{r}-R_{p}^{i}\tilde{\omega}\left(I-\tilde{\phi}\right)\bar{R}_{w}^{p}\dot{r}-R_{p}^{i}\tilde{\dot{\omega}}r^{p}-R_{p}^{i}\tilde{\omega}\dot{r}^{p}-R_{p}^{i}\ddot{r}^{p}+\dot{v}_{i}^{i,p}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Using this approximation, we can write the partial derivative with respect
+ to 
+\begin_inset Formula $\phi$
+\end_inset
+
+ as
+\begin_inset Formula 
+\begin{align*}
+\frac{\partial\dot{v}_{i}^{i,w}}{\partial\phi} & \approx R_{p}^{i}\tilde{\omega}_{p}^{p,i}\widetilde{\bar{R}_{w}^{p}\dot{r}}+R_{p}^{i}\widetilde{\bar{R}_{w}^{p}\ddot{r}}-R_{p}^{i}\tilde{\omega}\widetilde{\bar{R}_{w}^{p}\dot{r}}\\
+ & =R_{p}^{i}\left(\widetilde{\bar{R}_{w}^{p}\ddot{r}}-\widetilde{\omega+\omega_{i}^{p,p}}\widetilde{\bar{R}_{w}^{p}\dot{r}}\right)
+\end{align*}
 
 \end_inset
 
@@ -1241,8 +1457,8 @@ TODO: order of rotations, sign of output matrix.
 \end_layout
 
 \begin_layout Standard
-For the orientation measurements of the IMUs, we first need to convert the
- measured quaternion to a rotation vector error.
+For the orientation measurements, we first need to convert the measured
+ quaternion to a rotation vector error.
 \end_layout
 
 \begin_layout Standard
@@ -1250,7 +1466,11 @@ The quaternion
 \begin_inset Formula $q_{i}^{w}$
 \end_inset
 
- is directly measured by the cheating IMU.
+ is directly measured by orientation sensor 
+\begin_inset Formula $i$
+\end_inset
+
+.
  Note that
 \begin_inset Formula 
 \[
@@ -1263,7 +1483,11 @@ q=q_{p}^{w}=q_{i}^{w}\otimes q_{p}^{i}
 \end_layout
 
 \begin_layout Standard
-We are measuring the orientation of IMU i.
+We are measuring the orientation of IMU 
+\begin_inset Formula $i$
+\end_inset
+
+.
  It will be a function of the orientation of the orientation frame and the
  joint angles.
  Hence, define the measurement
@@ -1869,8 +2093,14 @@ this finally becomes
 \end_layout
 
 \begin_layout Standard
-This is known as the Bortz equation.
- TODO: reference
+This is known as the Bortz equation 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Bortz1971"
+
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Section
@@ -2005,7 +2235,15 @@ Appendix: linear velocity of estimation link given CoM velocity
 \end_layout
 
 \begin_layout Standard
-The position of the CoM can be written in world frame as
+The position of the CoM in frame 
+\begin_inset Formula $w$
+\end_inset
+
+ can be related to the CoM position in frame 
+\begin_inset Formula $p$
+\end_inset
+
+ as
 \begin_inset Formula 
 \[
 \bar{r}^{w}=\left(\begin{array}{c}
@@ -2090,23 +2328,37 @@ reference "eq:com-velocity"
 , we obtain
 \begin_inset Formula 
 \[
-\dot{r}=\dot{r}^{w}=R_{p}^{w}\left(\tilde{\omega}_{p}^{p,w}r^{p}+v_{p}^{p,w}+\frac{d}{dt}\left(r^{p}\right)\right)
+\dot{r}=\dot{r}^{w}=R_{p}^{w}\left(\tilde{\omega}r^{p}+v_{p}^{p,w}+\dot{r}^{p}\right)
 \]
 
 \end_inset
 
+with 
+\begin_inset Formula $\omega=\omega_{p}^{p,w}$
+\end_inset
 
-\end_layout
+.
+ Note that 
+\begin_inset Formula $\dot{r}^{p}=\frac{d}{dt}\left(r^{p}\right)\neq R_{w}^{p}\frac{d}{dt}\left(r^{w}\right)$
+\end_inset
 
-\begin_layout Standard
-We can solve for the linear velocity of the estimation link:
+.
+ We can solve for the linear velocity of the estimation link:
 \end_layout
 
 \begin_layout Standard
 \begin_inset Formula 
 \begin{equation}
-v_{p}^{p,w}=R_{w}^{p}\dot{r}-\tilde{\omega}_{p}^{p,w}r_{p}-\frac{d}{dt}\left(r^{p}\right)\label{eq:rootjoint-linear-vel}
+v_{p}^{p,w}=R_{w}^{p}\dot{r}-v_{r/p}\label{eq:rootjoint-linear-vel}
 \end{equation}
+
+\end_inset
+
+where
+\begin_inset Formula 
+\[
+v_{r/p}=\tilde{\omega}r^{p}+\dot{r}^{p}
+\]
 
 \end_inset
 
@@ -2117,10 +2369,23 @@ v_{p}^{p,w}=R_{w}^{p}\dot{r}-\tilde{\omega}_{p}^{p,w}r_{p}-\frac{d}{dt}\left(r^{
 To find the linear acceleration of the estimation link, we differentiate
  this equation:
 \begin_inset Formula 
-\begin{align*}
-\dot{v}_{p}^{p,w} & =\dot{R}_{w}^{p}\dot{r}+R_{w}^{p}\ddot{r}-\tilde{\dot{\omega}}_{p}^{p,w}r_{p}-\tilde{\omega}_{p}^{p,w}\frac{d}{dt}\left(r^{p}\right)-\frac{d^{2}}{dt^{2}}\left(r^{p}\right)\\
- & =\tilde{\omega}_{w}^{p,w}R_{w}^{p}\dot{r}+R_{w}^{p}\ddot{r}-\tilde{\dot{\omega}}_{p}^{p,w}r_{p}-\tilde{\omega}_{p}^{p,w}\frac{d}{dt}\left(r^{p}\right)-\frac{d^{2}}{dt^{2}}\left(r^{p}\right)
-\end{align*}
+\begin{align}
+\dot{v}_{p}^{p,w} & =R_{w}^{p}\ddot{r}+\dot{R}_{w}^{p}\dot{r}-\dot{v}_{r/p}\nonumber \\
+ & =R_{w}^{p}\ddot{r}+\dot{R}_{w}^{p}R_{p}^{w}R_{w}^{p}\dot{r}-\dot{v}_{r/p}\nonumber \\
+ & =R_{w}^{p}\ddot{r}-\tilde{\omega}R_{w}^{p}\dot{r}-\dot{v}_{r/p}\label{eq:eq:rootjoint-linear-acc}
+\end{align}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+where
+\begin_inset Formula 
+\[
+\dot{v}_{r/p}=\tilde{\dot{\omega}}r^{p}+\tilde{\omega}\dot{r}^{p}+\ddot{r}^{p}
+\]
 
 \end_inset
 
