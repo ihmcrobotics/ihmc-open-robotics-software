@@ -152,17 +152,9 @@ public class YoKalmanFilter implements KalmanFilter
 
    public void predict(DenseMatrix64F u)
    {
-      if (doChecks)
-      {
-         if (u != null && MatrixFeatures.hasNaN(u))
-            throw new RuntimeException("u contains NaN: " + u);
-      }
+      checkForNaN(u);
 
-      getFromYoVariables(F, yoF);
-      getFromYoVariables(G, yoG);
-      getFromYoVariablesSymmetric(Q, yoQ);
-      getFromYoVariables(x, yoX);
-      getFromYoVariablesSymmetric(P, yoP);
+      getVariablesForPredictFromYoVariables();
 
       updateAPrioriState(x, u);
       updateAPrioriCovariance();
@@ -194,19 +186,49 @@ public class YoKalmanFilter implements KalmanFilter
 
    public void update(DenseMatrix64F y)
    {
-      if (doChecks)
-      {
-         if (y != null && MatrixFeatures.hasNaN(y))
-         {
-            throw new RuntimeException("y contains NaN: " + y);
-         }
-      }
+      checkForNaN(y);
 
+      getVariablesForUpdateFromYoVariables();
+      
+      updateKalmanGainMatrixK();
+
+      updateAPosterioriState(x, y, K);
+      updateAPosterioriStateCovariance();
+
+      storeInYoVariables(x, yoX);
+      storeInYoVariablesSymmetric(P, yoP);
+   }
+
+   private void getVariablesForPredictFromYoVariables()
+   {
+      getFromYoVariables(F, yoF);
+      getFromYoVariables(G, yoG);
+      getFromYoVariablesSymmetric(Q, yoQ);
+      getFromYoVariables(x, yoX);
+      getFromYoVariablesSymmetric(P, yoP);
+   }
+   
+   private void getVariablesForUpdateFromYoVariables()
+   {
       getFromYoVariables(H, yoH);
       getFromYoVariablesSymmetric(R, yoR);
       getFromYoVariables(x, yoX);
       getFromYoVariablesSymmetric(P, yoP);
+   }
 
+   private void checkForNaN(DenseMatrix64F matrix)
+   {
+      if (doChecks)
+      {
+         if (matrix != null && MatrixFeatures.hasNaN(matrix))
+         {
+            throw new RuntimeException("Matrix contains NaN: " + matrix);
+         }
+      }
+   }
+
+   private void updateKalmanGainMatrixK()
+   {
       // S = H P H' + R
       MatrixMatrixMult.mult_small(H, P, c);
       MatrixMatrixMult.multTransB(c, H, S);
@@ -218,16 +240,14 @@ public class YoKalmanFilter implements KalmanFilter
       solver.invert(S_inv);
       MatrixMatrixMult.multTransA_small(H, S_inv, d);
       MatrixMatrixMult.mult_small(P, d, K);
+   }
 
-      updateAPosterioriState(x, y, K);
-
+   private void updateAPosterioriStateCovariance()
+   {
       // P = (I-KH)P = P - (KH)P = P-K(HP)
       MatrixMatrixMult.mult_small(H, P, c);
       MatrixMatrixMult.mult_small(K, c, b);
       subEquals(P, b);
-
-      storeInYoVariables(x, yoX);
-      storeInYoVariablesSymmetric(P, yoP);
    }
 
    protected void updateAPosterioriState(DenseMatrix64F x, DenseMatrix64F y, DenseMatrix64F K)
@@ -289,6 +309,22 @@ public class YoKalmanFilter implements KalmanFilter
    public int getNumberOfMeasurements()
    {
       return H.getNumRows();
+   }
+   
+   // Iteratively computes the K Matrix. Assumes the process and measurement covariances are already set.
+   public void computeKMatrixIteratively(int numberOfIterations)
+   {
+      getVariablesForPredictFromYoVariables();
+      getVariablesForUpdateFromYoVariables();
+
+      for (int i=0; i<numberOfIterations; i++)
+      {
+         updateAPrioriCovariance();
+         updateKalmanGainMatrixK();
+         updateAPosterioriStateCovariance();
+      }
+
+      storeInYoVariablesSymmetric(P, yoP);
    }
    
 }
