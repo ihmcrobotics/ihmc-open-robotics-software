@@ -214,7 +214,7 @@ public class YoKalmanFilter implements KalmanFilter
 
       // K = PH'S^(-1)
       if (!solver.setA(S))
-         throw new RuntimeException("Invert failed");
+         throw new RuntimeException("Invert failed S = " + S);
       solver.invert(S_inv);
       MatrixMatrixMult.multTransA_small(H, S_inv, d);
       MatrixMatrixMult.mult_small(P, d, K);
@@ -254,6 +254,11 @@ public class YoKalmanFilter implements KalmanFilter
 
       return P;
    }
+   
+   public DenseMatrix64F getKGain()
+   {
+      return K;
+   }
 
    public void setDoChecks(boolean doChecks)
    {
@@ -285,4 +290,5 @@ public class YoKalmanFilter implements KalmanFilter
    {
       return H.getNumRows();
    }
+   
 }
