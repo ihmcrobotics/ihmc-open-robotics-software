@@ -2,7 +2,7 @@ package us.ihmc.darpaRoboticsChallenge.controllers;
 
 public enum StraightLinePathType
 {
-   STRAIGHT, REVERSE, LEFT_SHUFFLE, RIGHT_SHUFFLE;
+   STRAIGHT, REVERSE, LEFT_SHUFFLE, RIGHT_SHUFFLE, STEP_OVER_OBSTACLE;
 
    private static final String STRAIGHT_PATH_NAME = "Forward Path";
    private static final double STRAIGHT_STEP_LENGTH = 0.4;
@@ -13,6 +13,7 @@ public enum StraightLinePathType
    private static final double REVERSE_STEP_WIDTH = 0.2;
    private static final String RIGHT_SHUFFLE_PATH_NAME = "Right Shuffle Path";
    private static final String LEFT_SHUFFLE_PATH_NAME = "Left Shuffle Path";
+   private static final String STEP_OVER_OBSTACLE_NAME = "Step Over Obstacle";
    private static final double SHUFFLE_STEP_LENGTH = 0.15;
    private static final double SHUFFLE_STEP_WIDTH = 0.3;
    private static final double LEFT_SHUFFLE_ANGLE = -Math.PI / 2;
@@ -42,6 +43,9 @@ public enum StraightLinePathType
             name = STRAIGHT_PATH_NAME;
 
             break;
+            
+         case STEP_OVER_OBSTACLE :
+        	 name = STEP_OVER_OBSTACLE_NAME;
 
          default :
             break;
@@ -72,6 +76,7 @@ public enum StraightLinePathType
             break;
 
          case STRAIGHT :
+         case STEP_OVER_OBSTACLE:
             angle = 0.0;
 
             break;
