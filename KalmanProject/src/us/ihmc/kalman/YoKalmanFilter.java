@@ -133,7 +133,7 @@ public class YoKalmanFilter implements KalmanFilter
       storeInYoVariablesSymmetric(Q, yoQ);
    }
 
-   public void setMeasurementNoiseCovariance(DenseMatrix64F R)    // not checking for positive definiteness
+   public void setMeasurementNoiseCovariance(DenseMatrix64F R)
    {
       if (doChecks)
       {
