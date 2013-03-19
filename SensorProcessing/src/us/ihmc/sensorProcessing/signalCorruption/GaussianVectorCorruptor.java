@@ -19,7 +19,7 @@ public class GaussianVectorCorruptor implements SignalCorruptor<Vector3d>
       this.random = new Random(seed);
       this.registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
       this.standardDeviation = new DoubleYoVariable(namePrefix + "StdDev", parentRegistry);
-      
+
       parentRegistry.addChild(registry);
    }
 
@@ -33,4 +33,8 @@ public class GaussianVectorCorruptor implements SignalCorruptor<Vector3d>
       signal.add(noise);
    }
 
+   public void setStandardDeviation(double standardDeviation)
+   {
+      this.standardDeviation.set(standardDeviation);
+   }
 }
