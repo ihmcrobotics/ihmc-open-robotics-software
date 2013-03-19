@@ -18,11 +18,13 @@ import us.ihmc.sensorProcessing.signalCorruption.GaussianVectorCorruptor;
 import us.ihmc.sensorProcessing.simulatedSensors.SimulatedAngularVelocitySensor;
 import us.ihmc.sensorProcessing.simulatedSensors.SimulatedOrientationSensor;
 import us.ihmc.utilities.math.MathTools;
+import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.RigidBodyInertia;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
+import us.ihmc.utilities.screwTheory.Twist;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 
 import com.yobotics.simulationconstructionset.FloatingJoint;
@@ -64,12 +66,13 @@ public class QuaternionOrientationEstimatorEvaluator
    {
       private static final long serialVersionUID = 2647791981594204134L;
       private final Link bodyLink;
+      private final FloatingJoint rootJoint;
 
       public QuaternionOrientationEstimatorEvaluatorRobot()
       {
          super("QuaternionOrientationEstimatorEvaluatorRobot");
 
-         FloatingJoint rootJoint = new FloatingJoint("root", new Vector3d(), this);
+         rootJoint = new FloatingJoint("root", new Vector3d(), this);
 
          bodyLink = new Link("body");
          bodyLink.setMassAndRadiiOfGyration(10.0, 0.1, 0.2, 0.3);
@@ -91,17 +94,25 @@ public class QuaternionOrientationEstimatorEvaluator
       {
          return bodyLink;
       }
+
+      public FloatingJoint getRootJoint()
+      {
+         return rootJoint;
+      }
    }
 
 
    private class QuaternionOrientationEstimatorEvaluatorController implements RobotController
    {
       private final YoVariableRegistry registry = new YoVariableRegistry("QuaternionOrientationEstimatorEvaluatorController");
-      private final QuaternionOrientationEstimator estimator;
+
+//    private final QuaternionOrientationEstimator estimator;
       private final QuaternionOrientationEstimatorEvaluatorRobot robot;
 
       private final ControlFlowGraph controlFlowGraph;
-      private TwistCalculator twistCalculator;
+      private final TwistCalculator twistCalculator;
+      private final RigidBody elevator;
+      private final SixDoFJoint rootInverseDynamicsJoint;
 
       public QuaternionOrientationEstimatorEvaluatorController(QuaternionOrientationEstimatorEvaluatorRobot robot, double controlDT)
       {
@@ -109,9 +120,9 @@ public class QuaternionOrientationEstimatorEvaluator
 
          ReferenceFrame inertialFrame = ReferenceFrame.getWorldFrame();
          ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", inertialFrame, new Transform3D());
-         RigidBody elevator = new RigidBody("elevator", elevatorFrame);
+         elevator = new RigidBody("elevator", elevatorFrame);
 
-         SixDoFJoint rootInverseDynamicsJoint = new SixDoFJoint("root", elevator, elevatorFrame);
+         rootInverseDynamicsJoint = new SixDoFJoint("root", elevator, elevatorFrame);
          RigidBody body = copyLinkAsRigidBody(robot.getBodyLink(), rootInverseDynamicsJoint, "body");
 
          elevator.updateFramesRecursively();
@@ -137,12 +148,11 @@ public class QuaternionOrientationEstimatorEvaluator
          angularVelocitySensor.addSignalCorruptor(angularVelocityCorruptor);
          DenseMatrix64F angularVelocityCovarianceMatrix = createDiagonalCovarianceMatrix(angularVelocityStandardDeviation, 3);
          angularVelocitySensor.setCovarianceMatrix(angularVelocityCovarianceMatrix);
-         
+
          angularVelocitySensors.add(angularVelocitySensor);
 
          controlFlowGraph = new ControlFlowGraph();
-         estimator = new QuaternionOrientationEstimator(controlFlowGraph, name, orientationSensors, angularVelocitySensors, estimationFrame, controlDT,
-                 registry);
+         new QuaternionOrientationEstimator(controlFlowGraph, name, orientationSensors, angularVelocitySensors, estimationFrame, controlDT, registry);
          controlFlowGraph.initializeAfterConnections();
       }
 
@@ -192,6 +202,7 @@ public class QuaternionOrientationEstimatorEvaluator
       public void doControl()
       {
          // FIXME: update joint configurations and velocities based on real robot
+         updateConfigurationAndVelocity();
          twistCalculator.compute();
          controlFlowGraph.startComputation();
          controlFlowGraph.waitUntilComputationIsDone();
@@ -200,13 +211,38 @@ public class QuaternionOrientationEstimatorEvaluator
 //       estimator.waitUntilComputationIsDone();
       }
 
+      private void updateConfigurationAndVelocity()
+      {
+         Transform3D temporaryRootToWorldTransform = new Transform3D();
+         robot.getRootJoint().getTransformToWorld(temporaryRootToWorldTransform);
+         rootInverseDynamicsJoint.setPositionAndRotation(temporaryRootToWorldTransform);
+         elevator.updateFramesRecursively();
+
+         ReferenceFrame elevatorFrame = rootInverseDynamicsJoint.getFrameBeforeJoint();
+         ReferenceFrame bodyFrame = rootInverseDynamicsJoint.getFrameAfterJoint();
+
+         Vector3d linearVelocity = new Vector3d();
+         robot.getRootJoint().getVelocity(linearVelocity);
+         FrameVector linearVelocityFrameVector = new FrameVector(ReferenceFrame.getWorldFrame(), linearVelocity);
+         linearVelocityFrameVector.changeFrame(bodyFrame);
+
+         Vector3d angularVelocity = new Vector3d();
+         robot.getRootJoint().getAngularVelocityInBody(angularVelocity);
+         FrameVector angularVelocityFrameVector = new FrameVector(bodyFrame, angularVelocity);
+         angularVelocityFrameVector.changeFrame(bodyFrame);
+
+         Twist bodyTwist = new Twist(bodyFrame, elevatorFrame, bodyFrame, linearVelocityFrameVector.getVector(), angularVelocityFrameVector.getVector());
+         rootInverseDynamicsJoint.setJointTwist(bodyTwist);
+      }
    }
+
 
    private static DenseMatrix64F createDiagonalCovarianceMatrix(double standardDeviation, int size)
    {
       DenseMatrix64F orientationCovarianceMatrix = new DenseMatrix64F(size, size);
       CommonOps.setIdentity(orientationCovarianceMatrix);
       CommonOps.scale(MathTools.square(standardDeviation), orientationCovarianceMatrix);
+
       return orientationCovarianceMatrix;
    }
 
