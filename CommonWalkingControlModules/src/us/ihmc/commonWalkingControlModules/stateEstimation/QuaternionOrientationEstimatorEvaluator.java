@@ -18,6 +18,7 @@ import us.ihmc.sensorProcessing.signalCorruption.GaussianVectorCorruptor;
 import us.ihmc.sensorProcessing.simulatedSensors.SimulatedAngularVelocitySensor;
 import us.ihmc.sensorProcessing.simulatedSensors.SimulatedOrientationSensor;
 import us.ihmc.utilities.math.MathTools;
+import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
@@ -114,6 +115,8 @@ public class QuaternionOrientationEstimatorEvaluator
       private final RigidBody elevator;
       private final SixDoFJoint rootInverseDynamicsJoint;
 
+      private final QuaternionOrientationEstimator quaternionOrientationEstimator;
+
       public QuaternionOrientationEstimatorEvaluatorController(QuaternionOrientationEstimatorEvaluatorRobot robot, double controlDT)
       {
          this.robot = robot;
@@ -152,7 +155,8 @@ public class QuaternionOrientationEstimatorEvaluator
          angularVelocitySensors.add(angularVelocitySensor);
 
          controlFlowGraph = new ControlFlowGraph();
-         new QuaternionOrientationEstimator(controlFlowGraph, name, orientationSensors, angularVelocitySensors, estimationFrame, controlDT, registry);
+         quaternionOrientationEstimator = new QuaternionOrientationEstimator(controlFlowGraph, name, orientationSensors, angularVelocitySensors,
+                 estimationFrame, controlDT, registry);
          controlFlowGraph.initializeAfterConnections();
       }
 
@@ -213,25 +217,21 @@ public class QuaternionOrientationEstimatorEvaluator
 
       private void updateConfigurationAndVelocity()
       {
+         FrameOrientation estimatedOrientation = quaternionOrientationEstimator.getOrientationOutputPort().getData();
+
          Transform3D temporaryRootToWorldTransform = new Transform3D();
          robot.getRootJoint().getTransformToWorld(temporaryRootToWorldTransform);
-         rootInverseDynamicsJoint.setPositionAndRotation(temporaryRootToWorldTransform);
+         rootInverseDynamicsJoint.setRotation(estimatedOrientation.getQuaternion());
          elevator.updateFramesRecursively();
 
          ReferenceFrame elevatorFrame = rootInverseDynamicsJoint.getFrameBeforeJoint();
          ReferenceFrame bodyFrame = rootInverseDynamicsJoint.getFrameAfterJoint();
 
-         Vector3d linearVelocity = new Vector3d();
-         robot.getRootJoint().getVelocity(linearVelocity);
-         FrameVector linearVelocityFrameVector = new FrameVector(ReferenceFrame.getWorldFrame(), linearVelocity);
-         linearVelocityFrameVector.changeFrame(bodyFrame);
+         FrameVector angularVelocity = quaternionOrientationEstimator.getAngularVelocityOutputPort().getData();
+         angularVelocity.changeFrame(bodyFrame);
 
-         Vector3d angularVelocity = new Vector3d();
-         robot.getRootJoint().getAngularVelocityInBody(angularVelocity);
-         FrameVector angularVelocityFrameVector = new FrameVector(bodyFrame, angularVelocity);
-         angularVelocityFrameVector.changeFrame(bodyFrame);
-
-         Twist bodyTwist = new Twist(bodyFrame, elevatorFrame, bodyFrame, linearVelocityFrameVector.getVector(), angularVelocityFrameVector.getVector());
+         Twist bodyTwist = new Twist(bodyFrame, elevatorFrame, bodyFrame);
+         bodyTwist.setAngularPart(angularVelocity.getVector());
          rootInverseDynamicsJoint.setJointTwist(bodyTwist);
       }
    }
