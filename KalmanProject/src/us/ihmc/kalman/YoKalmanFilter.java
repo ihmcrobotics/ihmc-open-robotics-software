@@ -18,6 +18,7 @@ import org.ejml.factory.LinearSolver;
 import org.ejml.factory.LinearSolverFactory;
 import org.ejml.ops.MatrixFeatures;
 
+import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.MatrixYoVariableConversionTools;
@@ -65,6 +66,8 @@ public class YoKalmanFilter implements KalmanFilter
    private final DoubleYoVariable[] yoX;
    private final DoubleYoVariable[] yoP;
 
+   private final BooleanYoVariable updateCovarianceAndGain;
+   
    private boolean doChecks = false;
 
    public YoKalmanFilter(String name, int nStates, int nInputs, int nMeasurements, YoVariableRegistry parentRegistry)
@@ -104,10 +107,18 @@ public class YoKalmanFilter implements KalmanFilter
       yoX = new DoubleYoVariable[x.getNumRows()];
       yoP = new DoubleYoVariable[getNumberOfElementsForSymmetricMatrix(P.getNumRows())];
 
+      updateCovarianceAndGain = new BooleanYoVariable(name + "UpdateCovarianceAndGain", "Whether or not to update the state covariance matrix and the kalman gain K matrix each update", registry);
+      updateCovarianceAndGain.set(true);
+      
       populateYoVariables(nStates, nMeasurements);
       parentRegistry.addChild(registry);
    }
 
+   public void setUpdateCovarianceAndKalmanGain(boolean propagateCovariance)
+   {
+      this.updateCovarianceAndGain.set(propagateCovariance);
+   }
+   
    public void configure(DenseMatrix64F F, DenseMatrix64F G, DenseMatrix64F H)
    {
       if (doChecks)
@@ -157,10 +168,13 @@ public class YoKalmanFilter implements KalmanFilter
       getVariablesForPredictFromYoVariables();
 
       updateAPrioriState(x, u);
-      updateAPrioriCovariance();
-
       storeInYoVariables(x, yoX);
-      storeInYoVariablesSymmetric(P, yoP);
+      
+      if (updateCovarianceAndGain.getBooleanValue()) 
+      {
+         updateAPrioriCovariance();
+         storeInYoVariablesSymmetric(P, yoP);
+      }
    }
 
    protected void updateAPrioriState(DenseMatrix64F x, DenseMatrix64F u)
@@ -190,13 +204,19 @@ public class YoKalmanFilter implements KalmanFilter
 
       getVariablesForUpdateFromYoVariables();
       
-      updateKalmanGainMatrixK();
-
+      if (updateCovarianceAndGain.getBooleanValue()) 
+      {
+         updateKalmanGainMatrixK();
+      }
+      
       updateAPosterioriState(x, y, K);
-      updateAPosterioriStateCovariance();
-
       storeInYoVariables(x, yoX);
-      storeInYoVariablesSymmetric(P, yoP);
+
+      if (updateCovarianceAndGain.getBooleanValue()) 
+      {
+         updateAPosterioriStateCovariance();
+         storeInYoVariablesSymmetric(P, yoP);
+      }
    }
 
    private void getVariablesForPredictFromYoVariables()
