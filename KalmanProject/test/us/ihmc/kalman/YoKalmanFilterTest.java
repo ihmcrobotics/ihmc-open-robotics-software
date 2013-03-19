@@ -461,7 +461,6 @@ public class YoKalmanFilterTest
          printIfDebug("K = " + K);
          printIfDebug("H = " + H);
 
-         
          DenseMatrix64F KH = new DenseMatrix64F(nStates, nStates);
          CommonOps.mult(K, H, KH);
 
@@ -480,6 +479,25 @@ public class YoKalmanFilterTest
          EjmlUnitTests.assertEquals(P, convergedP, 1e-6);
       }
 
+      {
+         // Do it again using the built in method:
+
+         DenseMatrix64F covariance = kalmanFilter.getCovariance();
+         DenseMatrix64F kMatrix = kalmanFilter.getKGain();
+
+         x = RandomMatrices.createRandom(nStates, 1, random);
+         P = RandomMatrices.createSymmPosDef(nStates, random);
+
+         kalmanFilter.setState(x, P);
+
+         kalmanFilter.computeKMatrixIteratively(1000);
+
+         DenseMatrix64F convergedCovarianceAgain = kalmanFilter.getCovariance();
+         DenseMatrix64F convergedKAgain = kalmanFilter.getKGain();
+
+         EjmlUnitTests.assertEquals(covariance, convergedCovarianceAgain, 1e-6);
+         EjmlUnitTests.assertEquals(kMatrix, convergedKAgain, 1e-6);
+      }
    }
 
    private void createRandomParameters(int nStates, int nInputs, int nMeasurements)
