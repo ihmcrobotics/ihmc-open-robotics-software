@@ -41,8 +41,11 @@ public class QuaternionOrientationEstimatorEvaluator
 // private static final Vector3d Y = new Vector3d(0.0, 1.0, 0.0);
 // private static final Vector3d Z = new Vector3d(0.0, 0.0, 1.0);
 
-   private final double orientationStandardDeviation = 1e-3;
-   private final double angularVelocityStandardDeviation = 1e-3;
+   private final double orientationStandardDeviation = 1e-1;
+   private final double angularVelocityStandardDeviation = 1e-2;
+   private final double angularAccelerationNoiseStandardDeviation = 1.0;
+   private final double angularVelocityBiasNoiseStandardDeviation = 1.0;
+
 
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
@@ -156,6 +159,14 @@ public class QuaternionOrientationEstimatorEvaluator
          controlFlowGraph = new ControlFlowGraph();
          quaternionOrientationEstimator = new QuaternionOrientationEstimator(controlFlowGraph, name, orientationSensors, angularVelocitySensors,
                  estimationFrame, controlDT, registry);
+         DenseMatrix64F angularAccelerationNoiseCovariance = createDiagonalCovarianceMatrix(angularAccelerationNoiseStandardDeviation, 3);
+         quaternionOrientationEstimator.setAngularAccelerationNoiseCovariance(angularAccelerationNoiseCovariance);
+         for (SimulatedAngularVelocitySensor simulatedAngularVelocitySensor : angularVelocitySensors)
+         {            
+            DenseMatrix64F angularVelocityBiasNoiseCovariance = createDiagonalCovarianceMatrix(angularVelocityBiasNoiseStandardDeviation, 3);
+            quaternionOrientationEstimator.setAngularVelocityBiasNoiseCovariance(simulatedAngularVelocitySensor, angularVelocityBiasNoiseCovariance);
+         }
+         
          controlFlowGraph.initializeAfterConnections();
       }
 
