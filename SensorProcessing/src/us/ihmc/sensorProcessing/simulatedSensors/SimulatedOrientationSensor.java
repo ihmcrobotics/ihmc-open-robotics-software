@@ -14,8 +14,9 @@ public class SimulatedOrientationSensor extends SimulatedSensor<Matrix3d>
 
    private final ControlFlowOutputPort<Matrix3d> orientationOutputPort = createOutputPort();
 
-   public SimulatedOrientationSensor(ReferenceFrame measurementFrame)
+   public SimulatedOrientationSensor(String name, ReferenceFrame measurementFrame)
    {
+      super(name, 3);
       this.measurementFrame = measurementFrame;
    }
 
@@ -34,5 +35,10 @@ public class SimulatedOrientationSensor extends SimulatedSensor<Matrix3d>
    public ControlFlowOutputPort<Matrix3d> getOrientationOutputPort()
    {
       return orientationOutputPort;
+   }
+   
+   public ReferenceFrame getMeasurementFrame()
+   {
+      return measurementFrame;
    }
 }

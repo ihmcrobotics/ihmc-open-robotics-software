@@ -273,16 +273,16 @@ public class YoKalmanFilter implements KalmanFilter
    
    public int getNumberOfStates()
    {
-      return a.getNumRows();
+      return F.getNumRows();
    }
    
    public int getNumberOfInputs()
    {
-      return b.getNumCols();
+      return G.getNumCols();
    }
    
    public int getNumberOfMeasurements()
    {
-      return c.getNumRows();
+      return H.getNumRows();
    }
 }

@@ -11,8 +11,9 @@ public class SimulatedOneDoFJointPositionSensor extends SimulatedSensor<MutableD
    private final OneDoFJoint joint;
    private final MutableDouble jointPosition = new MutableDouble();
 
-   public SimulatedOneDoFJointPositionSensor(OneDoFJoint joint)
+   public SimulatedOneDoFJointPositionSensor(String name, OneDoFJoint joint)
    {
+      super(name, 1);
       this.joint = joint;
    }
 

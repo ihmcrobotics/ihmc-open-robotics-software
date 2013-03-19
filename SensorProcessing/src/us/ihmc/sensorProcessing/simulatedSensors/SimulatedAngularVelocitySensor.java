@@ -17,8 +17,9 @@ public class SimulatedAngularVelocitySensor extends SimulatedSensor<Vector3d>
    private final Vector3d angularVelocity = new Vector3d();
    private final ControlFlowOutputPort<Vector3d> angularVelocityOutputPort = createOutputPort();
 
-   public SimulatedAngularVelocitySensor(TwistCalculator twistCalculator, RigidBody rigidBody, ReferenceFrame measurementFrame)
+   public SimulatedAngularVelocitySensor(String name, TwistCalculator twistCalculator, RigidBody rigidBody, ReferenceFrame measurementFrame)
    {
+      super(name, 3);
       this.twistCalculator = twistCalculator;
       this.rigidBody = rigidBody;
       this.measurementFrame = measurementFrame;
@@ -43,5 +44,10 @@ public class SimulatedAngularVelocitySensor extends SimulatedSensor<Vector3d>
    public ControlFlowOutputPort<Vector3d> getAngularVelocityOutputPort()
    {
       return angularVelocityOutputPort;
+   }
+   
+   public ReferenceFrame getMeasurementFrame()
+   {
+      return measurementFrame;
    }
 }
