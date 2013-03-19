@@ -30,9 +30,10 @@ public class SimulatedLinearAccelerationSensor extends SimulatedSensor<Vector3d>
 
    private final ControlFlowOutputPort<Vector3d> linearAccelerationOutputPort = createOutputPort();
 
-   public SimulatedLinearAccelerationSensor(RigidBody rigidBody, ReferenceFrame measurementFrame, TwistCalculator twistCalculator,
+   public SimulatedLinearAccelerationSensor(String name, RigidBody rigidBody, ReferenceFrame measurementFrame, TwistCalculator twistCalculator,
            SpatialAccelerationCalculator spatialAccelerationCalculator)
    {
+      super(name, 3);
       this.rigidBody = rigidBody;
       this.measurementFrame = measurementFrame;
       this.twistCalculator = twistCalculator;
