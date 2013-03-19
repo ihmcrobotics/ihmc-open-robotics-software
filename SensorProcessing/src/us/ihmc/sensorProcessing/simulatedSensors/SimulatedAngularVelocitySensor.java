@@ -8,21 +8,30 @@ import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.Twist;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
+
 public class SimulatedAngularVelocitySensor extends SimulatedSensor<Vector3d>
 {
    private final TwistCalculator twistCalculator;
    private final RigidBody rigidBody;
    private final ReferenceFrame measurementFrame;
    private final Twist twist = new Twist();
+   
    private final Vector3d angularVelocity = new Vector3d();
+   private final YoFrameVector yoFrameVectorPerfect, yoFrameVectorNoisy;
+   
    private final ControlFlowOutputPort<Vector3d> angularVelocityOutputPort = createOutputPort();
 
-   public SimulatedAngularVelocitySensor(String name, TwistCalculator twistCalculator, RigidBody rigidBody, ReferenceFrame measurementFrame)
+   public SimulatedAngularVelocitySensor(String name, TwistCalculator twistCalculator, RigidBody rigidBody, ReferenceFrame measurementFrame, YoVariableRegistry registry)
    {
       super(name, 3);
       this.twistCalculator = twistCalculator;
       this.rigidBody = rigidBody;
       this.measurementFrame = measurementFrame;
+      
+      this.yoFrameVectorPerfect = new YoFrameVector(name + "Perfect", measurementFrame, registry);
+      this.yoFrameVectorNoisy = new YoFrameVector(name + "Noisy", measurementFrame, registry);
    }
 
    public void startComputation()
@@ -31,7 +40,10 @@ public class SimulatedAngularVelocitySensor extends SimulatedSensor<Vector3d>
 
       twist.changeFrame(measurementFrame);
       twist.packAngularPart(angularVelocity);
+      yoFrameVectorPerfect.set(angularVelocity);
+      
       corrupt(angularVelocity);
+      yoFrameVectorNoisy.set(angularVelocity);
 
       angularVelocityOutputPort.setData(angularVelocity);
    }
