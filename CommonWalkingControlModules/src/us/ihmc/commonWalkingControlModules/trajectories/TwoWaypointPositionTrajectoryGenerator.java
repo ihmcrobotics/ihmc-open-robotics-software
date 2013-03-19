@@ -366,29 +366,37 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
    {
       FramePoint initialPosition = allPositions[0].getFramePointCopy();
       FramePoint finalPosition = allPositions[3].getFramePointCopy();
-      FramePoint[] waypoints = new FramePoint[2];
-      waypoints[0] = new FramePoint(referenceFrame);
-      waypoints[1] = new FramePoint(referenceFrame);
       positionSources[0].get(initialPosition);
       positionSources[1].get(finalPosition);
       initialPosition.changeFrame(referenceFrame);
       finalPosition.changeFrame(referenceFrame);
 
-      for (int i = 0; i < 2; i++)
-      {
-         waypoints[i].set(finalPosition);
-         waypoints[i].sub(initialPosition);
-         waypoints[i].scale(DESIRED_PROPORTIONS_THROUGH_TRAJECTORY_FOR_GROUND_CLEARANCE[i]);
-         waypoints[i].add(initialPosition);
-         waypoints[i].setZ(waypoints[i].getZ() + groundClearance.getDoubleValue());
-      }
-
-//    waypoints[0].setX(waypoints[0].getX() + .03);
-//    waypoints[1].setX(waypoints[1].getX() + .03);
-//    waypoints[0].setY(waypoints[0].getY() + .05);
-//    waypoints[1].setY(waypoints[1].getY() - .05);
+      FramePoint[] waypoints = getDefaultWaypoints(initialPosition, finalPosition, groundClearance.getDoubleValue());
+      
+//      waypoints[0].setX(waypoints[0].getX() + .03);
+//      waypoints[1].setX(waypoints[1].getX() + .03);
+//      waypoints[0].setY(waypoints[0].getY() + .05);
+//      waypoints[1].setY(waypoints[1].getY() - .05);
 
       return waypoints;
+   }
+   
+   public static FramePoint[] getDefaultWaypoints(FramePoint initialPosition, FramePoint finalPosition, double groundClearance)
+   {
+	   FramePoint[] waypoints = new FramePoint[2];
+	   waypoints[0] = new FramePoint(initialPosition.getReferenceFrame());
+	   waypoints[1] = new FramePoint(initialPosition.getReferenceFrame());
+	   
+	   for (int i = 0; i < 2; i++)
+	   {
+	      waypoints[i].set(finalPosition);
+	      waypoints[i].sub(initialPosition);
+	      waypoints[i].scale(DESIRED_PROPORTIONS_THROUGH_TRAJECTORY_FOR_GROUND_CLEARANCE[i]);
+	      waypoints[i].add(initialPosition);
+	      waypoints[i].setZ(waypoints[i].getZ() + groundClearance);
+	   }
+	      
+	   return waypoints;
    }
 
    private void setConcatenatedSplines(YoConcatenatedSplines concatenatedSplines)
