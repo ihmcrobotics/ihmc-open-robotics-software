@@ -157,7 +157,7 @@ public class QuaternionOrientationEstimatorEvaluator
          angularVelocitySensors.add(angularVelocitySensor);
 
          controlFlowGraph = new ControlFlowGraph();
-         quaternionOrientationEstimator = new QuaternionOrientationEstimator(controlFlowGraph, name, orientationSensors, angularVelocitySensors,
+         quaternionOrientationEstimator = new QuaternionOrientationEstimator(controlFlowGraph, "orientationEstimator", orientationSensors, angularVelocitySensors,
                  estimationFrame, controlDT, registry);
          DenseMatrix64F angularAccelerationNoiseCovariance = createDiagonalCovarianceMatrix(angularAccelerationNoiseStandardDeviation, 3);
          quaternionOrientationEstimator.setAngularAccelerationNoiseCovariance(angularAccelerationNoiseCovariance);
