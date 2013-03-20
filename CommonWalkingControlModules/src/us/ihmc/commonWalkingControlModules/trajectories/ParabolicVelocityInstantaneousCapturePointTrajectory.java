@@ -92,7 +92,7 @@ public class ParabolicVelocityInstantaneousCapturePointTrajectory implements Ins
       }
       
       parameterGenerator.setTrajectoryTime(moveTime);
-      parameterGenerator.initialize();
+      parameterGenerator.initialize(null);
       
       this.trajectoryTime.set(moveTime);
       this.currentTime.set(0.0);

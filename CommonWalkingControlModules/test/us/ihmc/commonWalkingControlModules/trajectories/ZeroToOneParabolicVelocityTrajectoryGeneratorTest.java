@@ -35,7 +35,7 @@ public class ZeroToOneParabolicVelocityTrajectoryGeneratorTest
    {
       trajectoryTime = 1.0;
       trajectoryGenerator = new ZeroToOneParabolicVelocityTrajectoryGenerator("", trajectoryTime, new YoVariableRegistry("test"));
-      trajectoryGenerator.initialize();
+      trajectoryGenerator.initialize(null);
       epsilon = 1e-7;
    }
 

@@ -19,6 +19,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlane
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepData;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataList;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.PauseCommand;
+import us.ihmc.commonWalkingControlModules.trajectories.TrajectoryWaypointGenerationMethod;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.io.streamingData.QueueBasedStreamingDataProducer;
@@ -278,6 +279,7 @@ public class FootstepDataTest
       netClassList.addType(Point3d.class);
       netClassList.addType(Quat4d.class);
       netClassList.addType(FootstepStatus.Status.class);
+      netClassList.addType(TrajectoryWaypointGenerationMethod.class);
       
       return netClassList;
    }

@@ -1,15 +1,13 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
-import javax.vecmath.Point3d;
+import java.util.ArrayList;
+import java.util.List;
 
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.math.geometry.Sphere3d;
-
-import cern.colt.Arrays;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
@@ -20,15 +18,14 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 import com.yobotics.simulationconstructionset.util.trajectory.DoubleProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.PositionProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.PositionTrajectoryGenerator;
+import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryParameters;
 import com.yobotics.simulationconstructionset.util.trajectory.VectorProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.YoConcatenatedSplines;
 import com.yobotics.simulationconstructionset.util.trajectory.YoPositionProvider;
 
 public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajectoryGenerator
 {
-   private final static double[] DESIRED_PROPORTIONS_THROUGH_TRAJECTORY_FOR_GROUND_CLEARANCE = new double[] {1.0 / 3.0, 2.0 / 3.0};
-   private final static double SPHERE_EDGE_TO_WAYPOINT_DISTANCE = 0.1;
-   private final static double MINIMUM_DESIRED_PROPORTION_OF_ARC_LENGTH_TAKEN_AT_CONSTANT_SPEED = 0.3;
+// private final static double SPHERE_EDGE_TO_WAYPOINT_DISTANCE = 0.1;
    private final static double EPSILON = 1e-3;
 
    private final DoubleYoVariable groundClearance;
@@ -55,9 +52,11 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
    private final YoFrameVector desiredAcceleration;
    private final ReferenceFrame referenceFrame;
 
-   private DoubleYoVariable[] allTimes = new DoubleYoVariable[6];
-   private YoFramePoint[] allPositions = new YoFramePoint[6];
-   private YoFrameVector[] allVelocities = new YoFrameVector[6];
+   private final DoubleYoVariable[] allTimes = new DoubleYoVariable[6];
+   private final YoFramePoint[] allPositions = new YoFramePoint[6];
+   private final YoFrameVector[] allVelocities = new YoFrameVector[6];
+
+   private TwoWaypointTrajectoryParameters trajectoryParameters;
 
    private static final int[] endpointIndices = new int[] {0, 5};
    private static final int[] waypointIndices = new int[] {2, 3};
@@ -100,7 +99,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       desiredVelocity = new YoFrameVector(namePrefix + "DesiredVelocity", referenceFrame, registry);
       desiredAcceleration = new YoFrameVector(namePrefix + "DesiredAcceleration", referenceFrame, registry);
 
-      this.linearSplineLengthFactor = new DoubleYoVariable(namePrefix + "LinearSplineLengthFactor", registry);
+      linearSplineLengthFactor = new DoubleYoVariable(namePrefix + "LinearSplineLengthFactor", registry);
 
       this.groundClearance = new DoubleYoVariable(namePrefix + "GroundClearance", registry);
       this.groundClearance.set(groundClearance);
@@ -166,18 +165,26 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       timeIntoStep.set(0.0);
    }
 
-   public void initialize()
+   public void initialize(TrajectoryParameters trajectoryParameters)
    {
-      initialize(null);
-   }
+      if (trajectoryParameters instanceof TwoWaypointTrajectoryParameters)
+      {
+         this.trajectoryParameters = (TwoWaypointTrajectoryParameters) trajectoryParameters;
+      }
+      else if (trajectoryParameters == null)
+      {
+         this.trajectoryParameters = new TwoWaypointTrajectoryParameters();
+      }
+      else
+      {
+         throw new RuntimeException(
+             "trajectoryParameters must be an instance of TwoWaypointTrajectoryParameters when passed into TwoWaypointPositionTrajectoryGenerator's initialize method.");
+      }
 
-
-   public void initialize(FramePoint[] waypoints)
-   {
       setStepTime();
 
       setInitialAndFinalTimesPositionsAndVelocities();
-      setWaypointPositions(waypoints);
+      setWaypointPositions();
 
       double[] arcLengthsIgnoringAccelerationEndpointPositions = getArcLengthsApproximatedByDistance(nonAccelerationEndpointIndices);
       setLinearSplineLengthFactor(arcLengthsIgnoringAccelerationEndpointPositions);
@@ -198,12 +205,13 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
          visualizeSpline();
       }
    }
-   
+
    private void setLinearSplineLengthFactor(double[] arcLengths)
    {
       double portionOfArcLengthInMiddleSpline = arcLengths[1] / (arcLengths[0] + arcLengths[1] + arcLengths[2]);
-      System.out.println(Arrays.toString(arcLengths));
-      linearSplineLengthFactor.set(Math.max(MINIMUM_DESIRED_PROPORTION_OF_ARC_LENGTH_TAKEN_AT_CONSTANT_SPEED - portionOfArcLengthInMiddleSpline, 0.0));
+      linearSplineLengthFactor.set(2.0
+                                   * Math.max(TwoWaypointTrajectoryParameters.getMinimumDesiredProportionOfArcLengthTakenAtConstantSpeed()
+                                      - portionOfArcLengthInMiddleSpline, 0.0) * (1 / (1 - portionOfArcLengthInMiddleSpline)));
    }
 
    private void setWaypointAndAccelerationEndpointTimesAndVelocities(double[] arcLengths)
@@ -343,26 +351,32 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       allTimes[endpointIndices[1]].set(stepTime.getDoubleValue());
    }
 
-   private void setWaypointPositions(FramePoint[] waypoints)
+   private void setWaypointPositions()
    {
-      if (waypoints == null)
+      List<FramePoint> waypoints = null;
+
+      if (trajectoryParameters.getWaypointGenerationMethod().equals(TrajectoryWaypointGenerationMethod.BY_POINTS))
       {
-         waypoints = getDefaultWaypoints();
+         waypoints = new ArrayList<FramePoint>();
+         for (int i = 0; i < 2; i++)
+         {
+            waypoints.add(new FramePoint(ReferenceFrame.getWorldFrame(), trajectoryParameters.getWaypoints().get(i)));
+         }
       }
 
-      else if (waypoints.length != 2)
+      else
       {
-         throw new RuntimeException("TwoWaypointPositionTrajectoryGenerator only supports trajectory generation for two waypoints.");
+         waypoints = getWaypointsAtGroundClearance(trajectoryParameters.getWaypointGroundClearance());
       }
 
       for (int i = 0; i < 2; i++)
       {
-         waypoints[i].changeFrame(referenceFrame);
-         allPositions[waypointIndices[i]].set(waypoints[i]);
+         waypoints.get(i).changeFrame(referenceFrame);
+         allPositions[waypointIndices[i]].set(waypoints.get(i));
       }
    }
 
-   private FramePoint[] getDefaultWaypoints()
+   private List<FramePoint> getWaypointsAtGroundClearance(double groundClearance)
    {
       FramePoint initialPosition = allPositions[0].getFramePointCopy();
       FramePoint finalPosition = allPositions[3].getFramePointCopy();
@@ -371,32 +385,27 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       initialPosition.changeFrame(referenceFrame);
       finalPosition.changeFrame(referenceFrame);
 
-      FramePoint[] waypoints = getDefaultWaypoints(initialPosition, finalPosition, groundClearance.getDoubleValue());
-      
-//      waypoints[0].setX(waypoints[0].getX() + .03);
-//      waypoints[1].setX(waypoints[1].getX() + .03);
-//      waypoints[0].setY(waypoints[0].getY() + .05);
-//      waypoints[1].setY(waypoints[1].getY() - .05);
+      List<FramePoint> waypoints = getWaypointsAtGroundClearance(initialPosition, finalPosition, groundClearance);
 
       return waypoints;
    }
-   
-   public static FramePoint[] getDefaultWaypoints(FramePoint initialPosition, FramePoint finalPosition, double groundClearance)
+
+   public static List<FramePoint> getWaypointsAtGroundClearance(FramePoint initialPosition, FramePoint finalPosition, double groundClearance)
    {
-	   FramePoint[] waypoints = new FramePoint[2];
-	   waypoints[0] = new FramePoint(initialPosition.getReferenceFrame());
-	   waypoints[1] = new FramePoint(initialPosition.getReferenceFrame());
-	   
-	   for (int i = 0; i < 2; i++)
-	   {
-	      waypoints[i].set(finalPosition);
-	      waypoints[i].sub(initialPosition);
-	      waypoints[i].scale(DESIRED_PROPORTIONS_THROUGH_TRAJECTORY_FOR_GROUND_CLEARANCE[i]);
-	      waypoints[i].add(initialPosition);
-	      waypoints[i].setZ(waypoints[i].getZ() + groundClearance);
-	   }
-	      
-	   return waypoints;
+      List<FramePoint> waypoints = new ArrayList<FramePoint>();
+      waypoints.add(new FramePoint(initialPosition.getReferenceFrame()));
+      waypoints.add(new FramePoint(initialPosition.getReferenceFrame()));
+
+      for (int i = 0; i < 2; i++)
+      {
+         waypoints.get(i).set(finalPosition);
+         waypoints.get(i).sub(initialPosition);
+         waypoints.get(i).scale(TwoWaypointTrajectoryParameters.getDesiredProportionsThroughTrajectoryForGroundClearance()[i]);
+         waypoints.get(i).add(initialPosition);
+         waypoints.get(i).setZ(waypoints.get(i).getZ() + groundClearance);
+      }
+
+      return waypoints;
    }
 
    private void setConcatenatedSplines(YoConcatenatedSplines concatenatedSplines)
@@ -439,56 +448,56 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       }
    }
 
-   public void initializeUsingSphere(Sphere3d sphere3d)
-   {
-      FramePoint[] waypoints = getWaypointsForSphere(sphere3d);
-      initialize(waypoints);
-   }
-
-   private FramePoint[] getWaypointsForSphere(Sphere3d sphere3d)
-   {
-      FramePoint[] wayPoints = new FramePoint[2];
-      Point3d sphereCenterPoint3d = new Point3d();
-      sphere3d.getCenter(sphereCenterPoint3d);
-      FramePoint sphereCenterFramePoint = new FramePoint(referenceFrame, sphereCenterPoint3d.getX(), sphereCenterPoint3d.getY(), sphereCenterPoint3d.getZ());
-      double radius = sphere3d.getRadius();
-      boolean areDefaultWaypointsOutsideSphere = true;
-
-      FramePoint tempPositions = new FramePoint(referenceFrame);
-      for (int i = 0; i < 2; i++)
-      {
-         positionSources[i].get(tempPositions);
-         tempPositions.changeFrame(referenceFrame);
-         allPositions[3 * i].set(tempPositions);
-      }
-
-      // setWaypointsToDefault();
-      double[] sphereWaypointDistances = new double[2];
-      for (int i = 0; i < 2; i++)
-      {
-         sphereWaypointDistances[i] = wayPoints[i].distance(sphereCenterFramePoint);
-         wayPoints[i].set(allPositions[i].getX(), allPositions[i].getY(), allPositions[i].getZ());
-         areDefaultWaypointsOutsideSphere = areDefaultWaypointsOutsideSphere && (sphereWaypointDistances[i] < radius);
-      }
-
-      if (!areDefaultWaypointsOutsideSphere)
-      {
-         FrameVector waypointToSphereSurface = new FrameVector(referenceFrame);
-         for (int i = 0; i < 2; i++)
-         {
-            waypointToSphereSurface.sub(wayPoints[i], sphereCenterFramePoint);
-            waypointToSphereSurface.normalize();
-            double distanceToMoveWaypoint = radius - sphereWaypointDistances[i] + SPHERE_EDGE_TO_WAYPOINT_DISTANCE;
-            waypointToSphereSurface.scale(distanceToMoveWaypoint);
-            wayPoints[i].add(waypointToSphereSurface);
-         }
-      }
-
-      return wayPoints;
-   }
-
    public boolean isDone()
    {
       return timeIntoStep.getDoubleValue() >= stepTime.getDoubleValue();
    }
+
+// public void initializeUsingSphere(Sphere3d sphere3d)
+// {
+//    FramePoint[] waypoints = getWaypointsForSphere(sphere3d);
+//    initialize(waypoints);
+// }
+//
+// private FramePoint[] getWaypointsForSphere(Sphere3d sphere3d)
+// {
+//    FramePoint[] wayPoints = new FramePoint[2];
+//    Point3d sphereCenterPoint3d = new Point3d();
+//    sphere3d.getCenter(sphereCenterPoint3d);
+//    FramePoint sphereCenterFramePoint = new FramePoint(referenceFrame, sphereCenterPoint3d.getX(), sphereCenterPoint3d.getY(), sphereCenterPoint3d.getZ());
+//    double radius = sphere3d.getRadius();
+//    boolean areDefaultWaypointsOutsideSphere = true;
+//
+//    FramePoint tempPositions = new FramePoint(referenceFrame);
+//    for (int i = 0; i < 2; i++)
+//    {
+//       positionSources[i].get(tempPositions);
+//       tempPositions.changeFrame(referenceFrame);
+//       allPositions[3 * i].set(tempPositions);
+//    }
+//
+//    // setWaypointsToDefault();
+//    double[] sphereWaypointDistances = new double[2];
+//    for (int i = 0; i < 2; i++)
+//    {
+//       sphereWaypointDistances[i] = wayPoints[i].distance(sphereCenterFramePoint);
+//       wayPoints[i].set(allPositions[i].getX(), allPositions[i].getY(), allPositions[i].getZ());
+//       areDefaultWaypointsOutsideSphere = areDefaultWaypointsOutsideSphere && (sphereWaypointDistances[i] < radius);
+//    }
+//
+//    if (!areDefaultWaypointsOutsideSphere)
+//    {
+//       FrameVector waypointToSphereSurface = new FrameVector(referenceFrame);
+//       for (int i = 0; i < 2; i++)
+//       {
+//          waypointToSphereSurface.sub(wayPoints[i], sphereCenterFramePoint);
+//          waypointToSphereSurface.normalize();
+//          double distanceToMoveWaypoint = radius - sphereWaypointDistances[i] + SPHERE_EDGE_TO_WAYPOINT_DISTANCE;
+//          waypointToSphereSurface.scale(distanceToMoveWaypoint);
+//          wayPoints[i].add(waypointToSphereSurface);
+//       }
+//    }
+//
+//    return wayPoints;
+// }
 }

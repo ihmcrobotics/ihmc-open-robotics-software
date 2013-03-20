@@ -107,7 +107,7 @@ public class ParabolicPositionTrajectoryGenerator implements PositionTrajectoryG
       accelerationToPack.add(tempVector);
    }
 
-   public void initialize()
+   public void initialize(TrajectoryParameters trajectoryParameters)
    {
       timeIntoStep.set(0.0);
       this.stepTime.set(stepTimeProvider.getValue());
