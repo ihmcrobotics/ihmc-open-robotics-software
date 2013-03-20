@@ -174,20 +174,25 @@ public class QuaternionOrientationEstimatorEvaluator
       private final YoVariableRegistry registry = new YoVariableRegistry("QuaternionOrientationEstimatorEvaluatorController");
 
       private final QuaternionOrientationEstimatorEvaluatorRobot robot;
+
       private final QuaternionOrientationEstimatorEvaluatorFullRobotModel perfectFullRobotModel;
+      private final TwistCalculator perfectTwistCalculator;
+
       private final QuaternionOrientationEstimatorEvaluatorFullRobotModel estimatedFullRobotModel;
+      private final TwistCalculator estimatedTwistCalculator;
 
       private final ControlFlowGraph controlFlowGraph;
-      private final TwistCalculator twistCalculator;
       private final QuaternionOrientationEstimator quaternionOrientationEstimator;
+
 
       public QuaternionOrientationEstimatorEvaluatorController(QuaternionOrientationEstimatorEvaluatorRobot robot, double controlDT)
       {
          this.robot = robot;
 
          perfectFullRobotModel = new QuaternionOrientationEstimatorEvaluatorFullRobotModel(robot);
+         perfectTwistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), perfectFullRobotModel.getBody());
          estimatedFullRobotModel = new QuaternionOrientationEstimatorEvaluatorFullRobotModel(robot);
-         twistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), perfectFullRobotModel.getBody());
+         estimatedTwistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), estimatedFullRobotModel.getBody());
 
          OrientationSensorConfiguration<ControlFlowOutputPort<Matrix3d>> orientationSensors = createOrientationSensors(perfectFullRobotModel,
                                                                                                  estimatedFullRobotModel);
@@ -196,8 +201,9 @@ public class QuaternionOrientationEstimatorEvaluator
 
          controlFlowGraph = new ControlFlowGraph();
          ReferenceFrame estimationFrame = estimatedFullRobotModel.getRootInverseDynamicsJoint().getFrameAfterJoint();
+         RigidBody estimationLink = estimatedFullRobotModel.getBody();
          quaternionOrientationEstimator = new QuaternionOrientationEstimator(controlFlowGraph, "orientationEstimator", orientationSensors,
-                 angularVelocitySensors, estimationFrame, controlDT, registry);
+                 angularVelocitySensors, estimationLink, estimationFrame, estimatedTwistCalculator, controlDT, registry);
          DenseMatrix64F angularAccelerationNoiseCovariance = createDiagonalCovarianceMatrix(angularAccelerationNoiseStandardDeviation, 3);
          quaternionOrientationEstimator.setAngularAccelerationNoiseCovariance(angularAccelerationNoiseCovariance);
 
@@ -212,7 +218,7 @@ public class QuaternionOrientationEstimatorEvaluator
             new AngularVelocitySensorConfiguration<ControlFlowOutputPort<Vector3d>>();
 
          ReferenceFrame frameUsedForPerfectMeasurement = perfectFullRobotModel.getRootInverseDynamicsJoint().getFrameAfterJoint();
-         SimulatedAngularVelocitySensor angularVelocitySensor = new SimulatedAngularVelocitySensor("imu1AngularVelocity", twistCalculator,
+         SimulatedAngularVelocitySensor angularVelocitySensor = new SimulatedAngularVelocitySensor("imu1AngularVelocity", perfectTwistCalculator,
                                                                    perfectFullRobotModel.getBody(), frameUsedForPerfectMeasurement, registry);
          GaussianVectorCorruptor angularVelocityCorruptor = new GaussianVectorCorruptor(1235L, "gaussianAngularVelocity", registry);
          angularVelocityCorruptor.setStandardDeviation(angularVelocityMeasurementStandardDeviation);
@@ -270,10 +276,12 @@ public class QuaternionOrientationEstimatorEvaluator
       public void doControl()
       {
          perfectFullRobotModel.updateBasedOnRobot(robot);
-         twistCalculator.compute();
+         perfectTwistCalculator.compute();
          controlFlowGraph.startComputation();
          controlFlowGraph.waitUntilComputationIsDone();
          estimatedFullRobotModel.updateBasedOnEstimator(quaternionOrientationEstimator);
+         // TODO: set revolute joint positions and velocities
+         estimatedTwistCalculator.compute();
       }
    }
 
