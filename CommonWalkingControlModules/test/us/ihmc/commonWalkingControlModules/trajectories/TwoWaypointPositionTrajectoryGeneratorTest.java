@@ -4,6 +4,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.vecmath.Point3d;
+
 import org.junit.Test;
 
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -35,8 +40,8 @@ public class TwoWaypointPositionTrajectoryGeneratorTest {
 		PositionProvider initialPositionProvider = new ConstantPositionProvider(new FramePoint(worldFrame, new double[]{-0.1, 2.3, 0.0}));
 		VectorProvider initialVelocityProvider = new ConstantVectorProvider(new FrameVector(worldFrame, new double[]{0.2, 0.0, -0.05}));
 		
-		FramePoint firstIntermediatePosition = new FramePoint(worldFrame, new double[]{0.12, 2.4, 0.2});
-		FramePoint secondIntermediatePosition = new FramePoint(worldFrame, new double[]{0.16, 2.3, 0.15});
+		Point3d firstIntermediatePosition = new Point3d(new double[]{0.12, 2.4, 0.2});
+		Point3d secondIntermediatePosition = new Point3d(new double[]{0.16, 2.3, 0.15});
 		
 		YoFramePoint finalPosition = new YoFramePoint("", worldFrame, new YoVariableRegistry(""));
 		finalPosition.set(new FramePoint(worldFrame, new double[]{0.2, 2.35, 0.03}));
@@ -47,7 +52,10 @@ public class TwoWaypointPositionTrajectoryGeneratorTest {
 				initialPositionProvider, initialVelocityProvider, finalPositionProvider, finalVelocityProvider, new YoVariableRegistry(""), 0.2, 20,
 				null);
 		
-		trajectory.initialize(new FramePoint[]{firstIntermediatePosition, secondIntermediatePosition});
+		List<Point3d> points = new ArrayList<Point3d>();
+		points.add(firstIntermediatePosition);
+		points.add(secondIntermediatePosition);
+		trajectory.initialize(new TwoWaypointTrajectoryParameters(points));
 		trajectory.compute(0.0);
 		FramePoint actual = new FramePoint(worldFrame);
 		FramePoint expected = new FramePoint(worldFrame);

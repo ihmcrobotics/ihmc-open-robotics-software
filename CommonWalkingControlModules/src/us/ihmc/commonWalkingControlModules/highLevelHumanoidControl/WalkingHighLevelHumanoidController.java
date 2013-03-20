@@ -1132,7 +1132,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       FrameOrientation finalPelvisOrientation = nextFootstep.getOrientationInFrame(worldFrame);
       finalPelvisOrientation.setYawPitchRoll(finalPelvisOrientation.getYawPitchRoll()[0], userDesiredPelvisPitch.getDoubleValue(), 0.0);
       finalPelvisOrientationProvider.setOrientation(finalPelvisOrientation);
-      pelvisOrientationTrajectoryGenerator.initialize();
+      pelvisOrientationTrajectoryGenerator.initialize(null);
 
       FramePoint finalDesiredStepLocation = nextFootstep.getPositionInFrame(trajectoryGeneratorFrame);
       finalDesiredStepLocation.setZ(finalDesiredStepLocation.getZ());
