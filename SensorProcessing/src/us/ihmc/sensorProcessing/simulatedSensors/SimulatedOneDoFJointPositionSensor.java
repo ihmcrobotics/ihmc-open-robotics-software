@@ -13,7 +13,6 @@ public class SimulatedOneDoFJointPositionSensor extends SimulatedSensor<MutableD
 
    public SimulatedOneDoFJointPositionSensor(String name, OneDoFJoint joint)
    {
-      super(name, 1);
       this.joint = joint;
    }
 
