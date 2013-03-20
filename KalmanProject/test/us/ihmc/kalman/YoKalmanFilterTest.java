@@ -490,7 +490,7 @@ public class YoKalmanFilterTest
 
          kalmanFilter.setState(x, P);
 
-         kalmanFilter.computeKMatrixIteratively(1000);
+         kalmanFilter.computeSteadyStateGainAndCovariance(1000);
 
          DenseMatrix64F convergedCovarianceAgain = kalmanFilter.getCovariance();
          DenseMatrix64F convergedKAgain = kalmanFilter.getKGain();
