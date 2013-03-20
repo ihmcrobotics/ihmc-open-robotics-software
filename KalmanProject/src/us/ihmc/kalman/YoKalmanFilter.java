@@ -40,13 +40,13 @@ public class YoKalmanFilter implements KalmanFilter
    private final DenseMatrix64F G;
    private final DenseMatrix64F H;
 
-   // Noise model 
+   // Noise model
    // Q is the covariance matrix for the process noise.
    // R is the covariance matrix for the sensor noise.
    private final DenseMatrix64F Q;
    private final DenseMatrix64F R;
 
-   // System state estimate (x is state, P is state noise covariance matrix) 
+   // System state estimate (x is state, P is state noise covariance matrix)
    private final DenseMatrix64F x;
    private final DenseMatrix64F P;
 
@@ -67,7 +67,7 @@ public class YoKalmanFilter implements KalmanFilter
    private final DoubleYoVariable[] yoP;
 
    private final BooleanYoVariable updateCovarianceAndGain;
-   
+
    private boolean doChecks = false;
 
    public YoKalmanFilter(String name, int nStates, int nInputs, int nMeasurements, YoVariableRegistry parentRegistry)
@@ -107,9 +107,10 @@ public class YoKalmanFilter implements KalmanFilter
       yoX = new DoubleYoVariable[x.getNumRows()];
       yoP = new DoubleYoVariable[getNumberOfElementsForSymmetricMatrix(P.getNumRows())];
 
-      updateCovarianceAndGain = new BooleanYoVariable(name + "UpdateCovarianceAndGain", "Whether or not to update the state covariance matrix and the kalman gain K matrix each update", registry);
+      updateCovarianceAndGain = new BooleanYoVariable(name + "UpdateCovarianceAndGain",
+              "Whether or not to update the state covariance matrix and the kalman gain K matrix each update", registry);
       updateCovarianceAndGain.set(true);
-      
+
       populateYoVariables(nStates, nMeasurements);
       parentRegistry.addChild(registry);
    }
@@ -118,7 +119,7 @@ public class YoKalmanFilter implements KalmanFilter
    {
       this.updateCovarianceAndGain.set(propagateCovariance);
    }
-   
+
    public void configure(DenseMatrix64F F, DenseMatrix64F G, DenseMatrix64F H)
    {
       if (doChecks)
@@ -169,8 +170,8 @@ public class YoKalmanFilter implements KalmanFilter
 
       updateAPrioriState(x, u);
       storeInYoVariables(x, yoX);
-      
-      if (updateCovarianceAndGain.getBooleanValue()) 
+
+      if (updateCovarianceAndGain.getBooleanValue())
       {
          updateAPrioriCovariance();
          storeInYoVariablesSymmetric(P, yoP);
@@ -182,11 +183,11 @@ public class YoKalmanFilter implements KalmanFilter
       // x = F x + G u
       MatrixVectorMult.mult(F, x, a);
       x.set(a);
-      
+
       if (u.getNumRows() > 0)
       {
          MatrixVectorMult.mult(G, u, a);
-         addEquals(x, a);         
+         addEquals(x, a);
       }
    }
 
@@ -203,16 +204,16 @@ public class YoKalmanFilter implements KalmanFilter
       checkForNaN(y);
 
       getVariablesForUpdateFromYoVariables();
-      
-      if (updateCovarianceAndGain.getBooleanValue()) 
+
+      if (updateCovarianceAndGain.getBooleanValue())
       {
          updateKalmanGainMatrixK();
       }
-      
+
       updateAPosterioriState(x, y, K);
       storeInYoVariables(x, yoX);
 
-      if (updateCovarianceAndGain.getBooleanValue()) 
+      if (updateCovarianceAndGain.getBooleanValue())
       {
          updateAPosterioriStateCovariance();
          storeInYoVariablesSymmetric(P, yoP);
@@ -227,7 +228,7 @@ public class YoKalmanFilter implements KalmanFilter
       getFromYoVariables(x, yoX);
       getFromYoVariablesSymmetric(P, yoP);
    }
-   
+
    private void getVariablesForUpdateFromYoVariables()
    {
       getFromYoVariables(H, yoH);
@@ -240,7 +241,7 @@ public class YoKalmanFilter implements KalmanFilter
    {
       if (doChecks)
       {
-         if (matrix != null && MatrixFeatures.hasNaN(matrix))
+         if ((matrix != null) && MatrixFeatures.hasNaN(matrix))
          {
             throw new RuntimeException("Matrix contains NaN: " + matrix);
          }
@@ -294,7 +295,7 @@ public class YoKalmanFilter implements KalmanFilter
 
       return P;
    }
-   
+
    public DenseMatrix64F getKGain()
    {
       return K;
@@ -315,29 +316,29 @@ public class YoKalmanFilter implements KalmanFilter
       MatrixYoVariableConversionTools.populateYoVariables(yoX, "x", registry);
       MatrixYoVariableConversionTools.populateYoVariablesSymmetric(yoP, "P", nStates, registry);
    }
-   
+
    public int getNumberOfStates()
    {
       return F.getNumRows();
    }
-   
+
    public int getNumberOfInputs()
    {
       return G.getNumCols();
    }
-   
+
    public int getNumberOfMeasurements()
    {
       return H.getNumRows();
    }
-   
+
    // Iteratively computes the K Matrix. Assumes the process and measurement covariances are already set.
-   public void computeKMatrixIteratively(int numberOfIterations)
+   public void computeSteadyStateGainAndCovariance(int numberOfIterations)
    {
       getVariablesForPredictFromYoVariables();
       getVariablesForUpdateFromYoVariables();
 
-      for (int i=0; i<numberOfIterations; i++)
+      for (int i = 0; i < numberOfIterations; i++)
       {
          updateAPrioriCovariance();
          updateKalmanGainMatrixK();
@@ -346,5 +347,5 @@ public class YoKalmanFilter implements KalmanFilter
 
       storeInYoVariablesSymmetric(P, yoP);
    }
-   
+
 }
