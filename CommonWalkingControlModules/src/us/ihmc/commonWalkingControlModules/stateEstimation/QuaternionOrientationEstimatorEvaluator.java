@@ -90,7 +90,7 @@ public class QuaternionOrientationEstimatorEvaluator
          this.setGravity(0.0);
 
          rootJoint.setPosition(new Point3d(0.0, 0.0, 0.4));
-         rootJoint.setAngularVelocityInBody(new Vector3d(0.0, 0.0, 0.1));
+         rootJoint.setAngularVelocityInBody(new Vector3d(0.3, 0.6, 0.1));
       }
 
       public Link getBodyLink()
