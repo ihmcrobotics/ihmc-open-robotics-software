@@ -4,10 +4,17 @@ state.qHat = [0; 0; 0; 1];
 state.omegaHat = [0; 0; 0];
 state.bHat = [0; 0; 0];
 
+% noise parameters
+qPhi = 0;
+qOmega = 1;%1e-2;
+qB = 1;
+rPhi = 1e-1; %1e-2;
+rOmega = 1e-2;
+
 % initial noise covariances
-pQ = 1e-3;
-pOmega = 1e-3;
-pOmegaB = 1e-3; % 10 (can be used to make bias estimation faster)
+pQ = 1e-1;
+pOmega = rOmega;
+pOmegaB = 0; %1e-3; % 10 (can be used to make bias estimation faster)
 pB = 1e-3; % 10 (can be used to make bias estimation faster)
 PQ = pQ * eye(3);
 POmegaB = [pOmega * eye(3), -pOmegaB * eye(3);
@@ -19,12 +26,7 @@ q0 = normalizeQuaternion([0.6726; 0.0671; -0.0205; 0.7367]);
 omega0 = [0.1; -0.1; 0.05];
 b0 = [0; -0.05; 0.05];
 
-% noise parameters
-qPhi = 0;
-qOmega = 1;%1e-2;
-qB = 1;
-rPhi = 1e-1; %1e-2;
-rOmega = 1e-2;
+
 
 covariances.QPhi = qPhi * eye(3);
 covariances.QB = qB * eye(3);
@@ -33,10 +35,10 @@ covariances.RPhi = rPhi * eye(3);
 covariances.ROmega = rOmega * eye(3);
 
 % simulated data
-dt = 1e-3;
+dt = 5e-3;
 tMax = 45;
-%data = createSimulatedData(dt, tMax, qB, qOmega, rPhi, rOmega, q0, omega0, b0);
-data = createSimulatedConingData(dt, tMax, qB, qOmega, rPhi, rOmega, b0);
+data = createSimulatedData(dt, tMax, qB, qOmega, rPhi, rOmega, q0, omega0, b0);
+% data = createSimulatedConingData(dt, tMax, qB, qOmega, rPhi, rOmega, b0);
 
 n = length(data.t);
 
