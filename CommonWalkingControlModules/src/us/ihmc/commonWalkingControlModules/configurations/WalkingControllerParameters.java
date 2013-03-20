@@ -19,4 +19,6 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
    public abstract boolean resetDesiredICPToCurrentAtStartOfSwing();
    
    public abstract double nominalHeightAboveAnkle();
+   
+   public abstract SideDependentList<Transform3D> getHandControlFramesWithRespectToFrameAfterWrist();
 }

@@ -12,29 +12,52 @@ import us.ihmc.utilities.math.geometry.RotationFunctions;
 
 public class DRCRobotWalkingControllerParameters implements WalkingControllerParameters
 {
-   public SideDependentList<Transform3D> getDesiredHandPosesWithRespectToChestFrame()
+   private final SideDependentList<Transform3D> handControlFramesWithRespectToFrameAfterWrist = new SideDependentList<Transform3D>();
+   private final SideDependentList<Transform3D> handPosesWithRespectToChestFrame = new SideDependentList<Transform3D>();
+   public DRCRobotWalkingControllerParameters()
    {
-      SideDependentList<Transform3D> handPosesWithRespectToChestFrame = new SideDependentList<Transform3D>();
-
+      for(RobotSide robotSide : RobotSide.values)
+      {
+         Transform3D rotationPart = new Transform3D();
+         double yaw = robotSide.negateIfRightSide(Math.PI / 2.0);
+         double pitch = 0.32;
+         double roll = 0.0;
+         rotationPart.setEuler(new Vector3d(roll, pitch, yaw));
+   
+         Transform3D translationPart = new Transform3D();
+         double x = 0.2;
+         double y = robotSide.negateIfRightSide(-0.03);
+         double z = 0.04;
+         translationPart.setTranslation(new Vector3d(x, y, z));
+   
+         Transform3D transform = new Transform3D();
+         transform.mul(rotationPart, translationPart);
+         handControlFramesWithRespectToFrameAfterWrist.put(robotSide, transform);
+      }
+      
+      
       for (RobotSide robotSide : RobotSide.values())
       {
          Transform3D transform = new Transform3D();
 
-         double x = 0.15;
-         double y = robotSide.negateIfRightSide(0.35);
-         double z = -0.35;
+         double x = 0.25;
+         double y = robotSide.negateIfRightSide(0.30);
+         double z = -0.40;
          transform.setTranslation(new Vector3d(x, y, z));
 
          Matrix3d rotation = new Matrix3d();
-         double yaw = robotSide.negateIfRightSide(-1.7);
-         double pitch = 0.1;
-         double roll = robotSide.negateIfRightSide(-0.8);
+         double yaw = 0.0;//robotSide.negateIfRightSide(-1.7);
+         double pitch = 0.7;
+         double roll = 0.0;//robotSide.negateIfRightSide(-0.8);
          RotationFunctions.setYawPitchRoll(rotation, yaw, pitch, roll);
          transform.setRotation(rotation);
 
          handPosesWithRespectToChestFrame.put(robotSide, transform);
       }
-
+   }
+   
+   public SideDependentList<Transform3D> getDesiredHandPosesWithRespectToChestFrame()
+   {
       return handPosesWithRespectToChestFrame;
    }
 
@@ -107,6 +130,12 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
    public String getJointNameForExtendedPitchRange()
    {
       return "back_mby";
+   }
+
+
+   public SideDependentList<Transform3D> getHandControlFramesWithRespectToFrameAfterWrist()
+   {
+      return handControlFramesWithRespectToFrameAfterWrist;
    }
 
 

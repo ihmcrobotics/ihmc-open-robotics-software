@@ -86,9 +86,11 @@ public class SDFRobot extends Robot implements GraphicsObjectsHolder, HumanoidRo
       SDFLinkHolder rootLink = rootLinks.get(0);
 
       Vector3d offset = new Vector3d();
-      generalizedSDFRobotModel.getTransformToRoot().get(offset);
+      Quat4d orientation = new Quat4d();
+      generalizedSDFRobotModel.getTransformToRoot().get(orientation, offset);
       rootJoint = new FloatingJoint(rootLink.getName(), new Vector3d(), this);
       setPositionInWorld(offset);
+      setOrientation(orientation);
       Link scsRootLink = createLink(rootLink, new Transform3D());
       rootJoint.setLink(scsRootLink);
       addRootJoint(rootJoint);
