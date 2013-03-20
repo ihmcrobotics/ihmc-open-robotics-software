@@ -43,8 +43,8 @@ public class QuaternionOrientationEstimatorEvaluator
    private final double orientationMeasurementStandardDeviation = Math.sqrt(1e-1);
    private final double angularVelocityMeasurementStandardDeviation = Math.sqrt(1e-2);
 
-   private final double angularAccelerationNoiseStandardDeviation = 1.0;
-   private final double angularVelocityBiasNoiseStandardDeviation = 1.0;
+   private final double angularAccelerationNoiseStandardDeviation = Math.sqrt(1.0);
+   private final double angularVelocityBiasNoiseStandardDeviation = Math.sqrt(1.0);
 
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
@@ -57,11 +57,11 @@ public class QuaternionOrientationEstimatorEvaluator
       QuaternionOrientationEstimatorEvaluatorController controller = new QuaternionOrientationEstimatorEvaluatorController(robot, controlDT);
       robot.setController(controller);
 
-      SimulationConstructionSet scs = new SimulationConstructionSet(robot);
+      SimulationConstructionSet scs = new SimulationConstructionSet(robot, 32000);
       scs.addYoVariableRegistry(registry);
 
       scs.setDT(controlDT, 1);
-      scs.setSimulateDuration(10.0);
+      scs.setSimulateDuration(45.0);
       scs.startOnAThread();
    }
 
@@ -139,7 +139,7 @@ public class QuaternionOrientationEstimatorEvaluator
          SimulatedOrientationSensor sensor = new SimulatedOrientationSensor("imu1Orientation", bodyFixedFrame, registry);
          GaussianOrientationCorruptor orientationCorruptor = new GaussianOrientationCorruptor("gaussianOrientation", 12345L, registry);
          orientationCorruptor.setStandardDeviation(orientationMeasurementStandardDeviation);
-         sensor.addSignalCorruptor(orientationCorruptor);
+//         sensor.addSignalCorruptor(orientationCorruptor);
          DenseMatrix64F orientationCovarianceMatrix = createDiagonalCovarianceMatrix(orientationMeasurementStandardDeviation, 3);
          sensor.setCovarianceMatrix(orientationCovarianceMatrix);
          orientationSensors.add(sensor);
@@ -150,7 +150,7 @@ public class QuaternionOrientationEstimatorEvaluator
                                                                    bodyFixedFrame, registry);
          GaussianVectorCorruptor angularVelocityCorruptor = new GaussianVectorCorruptor(1235L, "gaussianAngularVelocity", registry);
          angularVelocityCorruptor.setStandardDeviation(angularVelocityMeasurementStandardDeviation);
-         angularVelocitySensor.addSignalCorruptor(angularVelocityCorruptor);
+//         angularVelocitySensor.addSignalCorruptor(angularVelocityCorruptor);
          DenseMatrix64F angularVelocityCovarianceMatrix = createDiagonalCovarianceMatrix(angularVelocityMeasurementStandardDeviation, 3);
          angularVelocitySensor.setCovarianceMatrix(angularVelocityCovarianceMatrix);
 
