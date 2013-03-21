@@ -9,9 +9,11 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.UnreasonableAccelerationException;
 import com.yobotics.simulationconstructionset.util.FlatGroundProfile;
+import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import com.yobotics.simulationconstructionset.util.simulationRunner.SimulationRewindabilityVerifier;
 import com.yobotics.simulationconstructionset.util.simulationRunner.VariableDifference;
 import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
@@ -26,161 +28,175 @@ import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
 import us.ihmc.projectM.R2Sim02.initialSetup.RobotInitialSetup;
 import us.ihmc.utilities.MemoryTools;
 
-public class DRCFlatGroundRewindabilityTest {
-	
-	private static final boolean SHOW_GUI = true;
-	private static final double totalTimeToTest = 3.0; //0.6; //3.0;
-	private static final double timeToTickAhead = 1.5;
-	private static final double timePerTick = 0.1;
-	   
-	@Before
-	public void setUp() throws Exception
-	{
-	      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");		
-	}
-	
-	@After
-	public void showMemoryUsageAfterTest()
-	{
-	   MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
-	}
-	
-	@Ignore
-	@Test
-	public void testCanRewindAndGoForward() throws UnreasonableAccelerationException
-	{
-		BambooTools.reportTestStartedMessage();
-		
-		int numberOfSteps = 100;
-		
-		SimulationConstructionSet scs = setupScs();
-		
-		for (int i = 0; i < numberOfSteps; i++) 
-		{
-			scs.simulateOneRecordStepNow();
-			scs.simulateOneRecordStepNow();
-			scs.stepBackwardNow();
-		}
+public class DRCFlatGroundRewindabilityTest
+{
+   private static final boolean SHOW_GUI = true;
+   private static final double totalTimeToTest = 10.0;
+   private static final double timeToTickAhead = 1.5;
+   private static final double timePerTick = 0.01;
 
-		scs.closeAndDispose();
+   @Before
+   public void setUp() throws Exception
+   {
+      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
+   }
 
-		BambooTools.reportTestFinishedMessage();
-	}
-	
-	@Test
-	public void testRewindability() throws UnreasonableAccelerationException, SimulationExceededMaximumTimeException
-	{
-		BambooTools.reportTestStartedMessage();
-		
-        int numTicksToTest = (int) Math.round(totalTimeToTest / timePerTick);
-        if (numTicksToTest < 1)
-           numTicksToTest = 1;
-        
-        int numTicksToSimulateAhead = (int) Math.round(timeToTickAhead / timePerTick);
-        if (numTicksToSimulateAhead < 1)
-           numTicksToSimulateAhead = 1;
-        
-        SimulationConstructionSet scs1 = setupScs(); // createTheSimulation(ticksForDataBuffer);
-        SimulationConstructionSet scs2 = setupScs(); // createTheSimulation(ticksForDataBuffer);
-        
-        try
-        {
-           Thread.sleep(1000); // Weird random failures sometimes if we don't sleep a little...
-        } 
-        catch (InterruptedException e)
-        {
-        }
+   @After
+   public void showMemoryUsageAfterTest()
+   {
+      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
+   }
 
-        ArrayList<String> exceptions = new ArrayList<String>();
-        exceptions.add("gc_");
-        exceptions.add("ef_");
-        exceptions.add("kp_");
-        exceptions.add("TimeNano");
-        exceptions.add("DurationMilli");
-        SimulationRewindabilityVerifier checker = new SimulationRewindabilityVerifier(scs1, scs2, exceptions);
-        
-        double maxDifferenceAllowed = 1e-7;
-        ArrayList<VariableDifference> variableDifferences;
+   @Ignore
+   @Test
+   public void testCanRewindAndGoForward() throws UnreasonableAccelerationException
+   {
+      BambooTools.reportTestStartedMessage();
 
-        variableDifferences = checker.checkRewindabilityWithSimpleMethod(numTicksToTest, maxDifferenceAllowed);
+      int numberOfSteps = 100;
 
-		if (!variableDifferences.isEmpty()) {
-			System.err.println("variableDifferences: " + VariableDifference.allVariableDifferencesToString(variableDifferences));
-			if (SHOW_GUI)
-				sleepForever();
-			fail("Found Variable Differences!");
-		}
+      SimulationConstructionSet scs = setupScs();
 
-		// sleepForever();
+      for (int i = 0; i < numberOfSteps; i++)
+      {
+         scs.simulateOneRecordStepNow();
+         scs.simulateOneRecordStepNow();
+         scs.stepBackwardNow();
+      }
 
-		scs1.closeAndDispose();
-		scs2.closeAndDispose();
+      scs.closeAndDispose();
 
-		BambooTools.reportTestFinishedMessage();
-	}
-	
-	private SimulationConstructionSet setupScs() 
-	{
-		boolean useVelocityAndHeadingScript = true;
-	    boolean cheatWithGroundHeightAtForFootstep = true;
+      BambooTools.reportTestFinishedMessage();
+   }
 
-	    GroundProfile groundProfile = new FlatGroundProfile();
+   @Test
+   public void testRewindability() throws UnreasonableAccelerationException, SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage();
 
-	    DRCRobotWalkingControllerParameters drcControlParameters = new DRCRobotWalkingControllerParameters();
-			    
-		AutomaticSimulationRunner automaticSimulationRunner = null;
-		DRCGuiInitialSetup guiInitialSetup = createGUIInitialSetup();
+      double standingTimeDuration = 1.0;
+      
+      int numTicksToTest = (int) Math.round(totalTimeToTest / timePerTick);
+      if (numTicksToTest < 1)
+         numTicksToTest = 1;
 
-		DRCRobotModel robotModel = DRCRobotModel.getDefaultRobotModel();
-		double timePerRecordTick = 0.005;
-		int simulationDataBufferSize = 16000;
-		boolean doChestOrientationControl = true;
+      int numTicksToSimulateAhead = (int) Math.round(timeToTickAhead / timePerTick);
+      if (numTicksToSimulateAhead < 1)
+         numTicksToSimulateAhead = 1;
 
-		RobotInitialSetup<SDFRobot> robotInitialSetup = new SquaredUpDRCRobotInitialSetup(0.0);
-		DRCRobotInterface robotInterface = new PlainDRCRobot(robotModel);
-		DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(groundProfile, robotInterface.getSimulateDT());
+      SimulationConstructionSet scs1 = setupScs();    // createTheSimulation(ticksForDataBuffer);
+      SimulationConstructionSet scs2 = setupScs();    // createTheSimulation(ticksForDataBuffer);
+      
+      BlockingSimulationRunner blockingSimulationRunner1 = new BlockingSimulationRunner(scs1, 1000.0);
+      BlockingSimulationRunner blockingSimulationRunner2 = new BlockingSimulationRunner(scs2, 1000.0);
+      
+      BooleanYoVariable walk1 = (BooleanYoVariable) scs1.getVariable("walk");
+      BooleanYoVariable walk2 = (BooleanYoVariable) scs2.getVariable("walk");
+      
+      initiateMotion(standingTimeDuration, blockingSimulationRunner1, walk1);
+      initiateMotion(standingTimeDuration, blockingSimulationRunner2, walk2);
 
-		DRCFlatGroundWalkingTrack drcFlatGroundWalkingTrack = new DRCFlatGroundWalkingTrack(drcControlParameters, robotInterface, robotInitialSetup, guiInitialSetup, scsInitialSetup, useVelocityAndHeadingScript,
-				automaticSimulationRunner, timePerRecordTick,simulationDataBufferSize, doChestOrientationControl, cheatWithGroundHeightAtForFootstep);
+      ArrayList<String> exceptions = new ArrayList<String>();
+      exceptions.add("gc_");
+      exceptions.add("ef_");
+      exceptions.add("kp_");
+      exceptions.add("TimeNano");
+      exceptions.add("DurationMilli");
+      SimulationRewindabilityVerifier checker = new SimulationRewindabilityVerifier(scs1, scs2, exceptions);
 
-		SimulationConstructionSet scs = drcFlatGroundWalkingTrack.getSimulationConstructionSet();
+      double maxDifferenceAllowed = 1e-7;
+      ArrayList<VariableDifference> variableDifferences;
 
-		setupCameraForUnitTest(scs);
+      variableDifferences = checker.checkRewindabilityWithSimpleMethod(numTicksToTest, maxDifferenceAllowed);
 
-		return scs;
-	}
-	
-	private void setupCameraForUnitTest(SimulationConstructionSet scs) 
-	{
-		CameraConfiguration cameraConfiguration = new CameraConfiguration("testCamera");
-		cameraConfiguration.setCameraFix(0.6, 0.4, 1.1);
-		cameraConfiguration.setCameraPosition(-0.15, 10.0, 3.0);
-		cameraConfiguration.setCameraTracking(true, true, true, false);
-		cameraConfiguration.setCameraDolly(true, true, true, false);
-		scs.setupCamera(cameraConfiguration);
-		scs.selectCamera("testCamera");
-	}
+      if (!variableDifferences.isEmpty())
+      {
+         System.err.println("variableDifferences: " + VariableDifference.allVariableDifferencesToString(variableDifferences));
+         if (SHOW_GUI)
+            sleepForever();
+         fail("Found Variable Differences!");
+      }
 
-	private DRCGuiInitialSetup createGUIInitialSetup() 
-	{
-		DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false);
-		guiInitialSetup.setIsGuiShown(SHOW_GUI);
+      // sleepForever();
 
-		return guiInitialSetup;
-	}
-	
-	private void sleepForever() 
-	{
-		while (true) 
-		{
-			try 
-			{
-				Thread.sleep(1000);
-			} 
-			catch (InterruptedException e) 
-			{
-			}
+      scs1.closeAndDispose();
+      scs2.closeAndDispose();
 
-		}
-	}
+      BambooTools.reportTestFinishedMessage();
+   }
+
+   private SimulationConstructionSet setupScs()
+   {
+      boolean useVelocityAndHeadingScript = true;
+      boolean cheatWithGroundHeightAtForFootstep = true;
+
+      GroundProfile groundProfile = new FlatGroundProfile();
+
+      DRCRobotWalkingControllerParameters drcControlParameters = new DRCRobotWalkingControllerParameters();
+
+      AutomaticSimulationRunner automaticSimulationRunner = null;
+      DRCGuiInitialSetup guiInitialSetup = createGUIInitialSetup();
+
+      DRCRobotModel robotModel = DRCRobotModel.getDefaultRobotModel();
+      double timePerRecordTick = 0.005;
+      int simulationDataBufferSize = 16000;
+      boolean doChestOrientationControl = true;
+
+      RobotInitialSetup<SDFRobot> robotInitialSetup = new SquaredUpDRCRobotInitialSetup(0.0);
+      DRCRobotInterface robotInterface = new PlainDRCRobot(robotModel);
+      DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(groundProfile, robotInterface.getSimulateDT());
+
+      DRCFlatGroundWalkingTrack drcFlatGroundWalkingTrack = new DRCFlatGroundWalkingTrack(drcControlParameters, robotInterface, robotInitialSetup,
+                                                               guiInitialSetup, scsInitialSetup, useVelocityAndHeadingScript, automaticSimulationRunner,
+                                                               timePerRecordTick, simulationDataBufferSize, doChestOrientationControl,
+                                                               cheatWithGroundHeightAtForFootstep);
+
+      SimulationConstructionSet scs = drcFlatGroundWalkingTrack.getSimulationConstructionSet();
+
+      setupCameraForUnitTest(scs);
+
+      return scs;
+   }
+
+   private void setupCameraForUnitTest(SimulationConstructionSet scs)
+   {
+      CameraConfiguration cameraConfiguration = new CameraConfiguration("testCamera");
+      cameraConfiguration.setCameraFix(0.6, 0.4, 1.1);
+      cameraConfiguration.setCameraPosition(-0.15, 10.0, 3.0);
+      cameraConfiguration.setCameraTracking(true, true, true, false);
+      cameraConfiguration.setCameraDolly(true, true, true, false);
+      scs.setupCamera(cameraConfiguration);
+      scs.selectCamera("testCamera");
+   }
+
+   private DRCGuiInitialSetup createGUIInitialSetup()
+   {
+      DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false);
+      guiInitialSetup.setIsGuiShown(SHOW_GUI);
+
+      return guiInitialSetup;
+   }
+
+   private void initiateMotion(double standingTimeDuration, BlockingSimulationRunner runner, BooleanYoVariable walk)
+           throws SimulationExceededMaximumTimeException
+   {
+      walk.set(false);
+      runner.simulateAndBlock(standingTimeDuration);
+      walk.set(true);
+   }
+
+   private void sleepForever()
+   {
+      while (true)
+      {
+         try
+         {
+            Thread.sleep(1000);
+         }
+         catch (InterruptedException e)
+         {
+         }
+
+      }
+   }
 }
