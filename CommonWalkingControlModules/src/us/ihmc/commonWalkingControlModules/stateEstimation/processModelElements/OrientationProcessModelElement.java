@@ -9,14 +9,13 @@ import javax.vecmath.Vector3d;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
-import us.ihmc.commonWalkingControlModules.stateEstimation.ProcessModelElement;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.RotationFunctions;
 
-public class OrientationProcessModelElement extends AbstractProcessModelElement implements ProcessModelElement
+public class OrientationProcessModelElement extends AbstractProcessModelElement
 {
    static final int SIZE = 3;
    private final ControlFlowOutputPort<FrameVector> angularVelocityPort;
