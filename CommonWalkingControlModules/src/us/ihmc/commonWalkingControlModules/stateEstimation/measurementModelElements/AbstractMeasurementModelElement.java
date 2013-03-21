@@ -10,15 +10,23 @@ import us.ihmc.commonWalkingControlModules.stateEstimation.MeasurementModelEleme
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.utilities.math.MathTools;
 
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
+
 public abstract class AbstractMeasurementModelElement implements MeasurementModelElement
 {
    protected final Map<ControlFlowOutputPort<?>, DenseMatrix64F> outputMatrixBlocks;
    private final DenseMatrix64F measurementCovarianceMatrixBlock;
+   private final DenseMatrix64F scaledMeasurementCovarianceMatrixBlock;
+   private final DoubleYoVariable covarianceMatrixScaling;
 
-   public AbstractMeasurementModelElement(int covarianceMatrixSize, int numberOfOutputMatrixBlocks)
+   public AbstractMeasurementModelElement(int covarianceMatrixSize, int numberOfOutputMatrixBlocks, String name, YoVariableRegistry registry)
    {
       measurementCovarianceMatrixBlock = new DenseMatrix64F(covarianceMatrixSize, covarianceMatrixSize);
+      scaledMeasurementCovarianceMatrixBlock = new DenseMatrix64F(covarianceMatrixSize, covarianceMatrixSize);
       outputMatrixBlocks = new HashMap<ControlFlowOutputPort<?>, DenseMatrix64F>(numberOfOutputMatrixBlocks);
+      covarianceMatrixScaling = new DoubleYoVariable(name + "CovScaling", registry);
+      covarianceMatrixScaling.set(1.0);
    }
 
    public DenseMatrix64F getOutputMatrixBlock(ControlFlowOutputPort<?> statePort)
@@ -28,7 +36,10 @@ public abstract class AbstractMeasurementModelElement implements MeasurementMode
 
    public DenseMatrix64F getMeasurementCovarianceMatrixBlock()
    {
-      return measurementCovarianceMatrixBlock;
+      scaledMeasurementCovarianceMatrixBlock.set(measurementCovarianceMatrixBlock);
+      CommonOps.scale(covarianceMatrixScaling.getDoubleValue(), scaledMeasurementCovarianceMatrixBlock);
+
+      return scaledMeasurementCovarianceMatrixBlock;
    }
 
    public void setNoiseStandardDeviation(double standardDeviation)

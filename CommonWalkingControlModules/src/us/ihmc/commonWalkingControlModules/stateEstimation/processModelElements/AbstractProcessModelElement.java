@@ -10,17 +10,25 @@ import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.utilities.math.MathTools;
 
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
+
 public abstract class AbstractProcessModelElement implements ProcessModelElement
 {
    protected final HashMap<ControlFlowOutputPort<?>, DenseMatrix64F> stateMatrixBlocks;
-   private final DenseMatrix64F processNoiseCovarianceBlock;
    protected final HashMap<ControlFlowInputPort<?>, DenseMatrix64F> inputMatrixBlocks;
+   private final DenseMatrix64F processNoiseCovarianceBlock;
+   private final DenseMatrix64F scaledProcessNoiseCovarianceMatrixBlock;
+   private final DoubleYoVariable covarianceMatrixScaling;
 
-   public AbstractProcessModelElement(int covarianceMatrixSize, int nStateMatrixBlocks, int nInputMatrixBlocks)
+   public AbstractProcessModelElement(int covarianceMatrixSize, int nStateMatrixBlocks, int nInputMatrixBlocks, String name, YoVariableRegistry registry)
    {
-      processNoiseCovarianceBlock = new DenseMatrix64F(covarianceMatrixSize, covarianceMatrixSize);
       stateMatrixBlocks = new HashMap<ControlFlowOutputPort<?>, DenseMatrix64F>(nStateMatrixBlocks);
       inputMatrixBlocks = new HashMap<ControlFlowInputPort<?>, DenseMatrix64F>(nInputMatrixBlocks);
+      processNoiseCovarianceBlock = new DenseMatrix64F(covarianceMatrixSize, covarianceMatrixSize);
+      scaledProcessNoiseCovarianceMatrixBlock = new DenseMatrix64F(covarianceMatrixSize, covarianceMatrixSize);
+      covarianceMatrixScaling = new DoubleYoVariable(name + "CovScaling", registry);
+      covarianceMatrixScaling.set(1.0);
    }
 
    public DenseMatrix64F getStateMatrixBlock(ControlFlowOutputPort<?> statePort)
@@ -35,7 +43,10 @@ public abstract class AbstractProcessModelElement implements ProcessModelElement
 
    public DenseMatrix64F getProcessCovarianceMatrixBlock()
    {
-      return processNoiseCovarianceBlock;
+      scaledProcessNoiseCovarianceMatrixBlock.set(processNoiseCovarianceBlock);
+      CommonOps.scale(covarianceMatrixScaling.getDoubleValue(), scaledProcessNoiseCovarianceMatrixBlock);
+
+      return scaledProcessNoiseCovarianceMatrixBlock;
    }
 
    public void setNoiseStandardDeviation(double standardDeviation)
