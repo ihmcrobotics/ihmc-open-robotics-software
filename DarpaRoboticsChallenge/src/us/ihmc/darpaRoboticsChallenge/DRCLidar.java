@@ -8,11 +8,14 @@ import us.ihmc.utilities.net.ObjectCommunicator;
 import us.ihmc.utilities.polarLidarGeometry.PolarLidarScanDefinition;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
+import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJoint;
 import com.yobotics.simulationconstructionset.simulatedSensors.FastPolarRayCastLIDAR;
 import com.yobotics.simulationconstructionset.simulatedSensors.SimulatedLIDARSensorUpdateParameters;
 
 public class DRCLidar
 {
+   private static final boolean PRINT_ALL_POSSIBLE_JOINT_NAMES = false;
+
    static {
       if(DRCConfigParameters.STREAM_POLAR_LIDAR)
          System.out.println("DRCLidar: PolarLidar is ON. This lidar passes less data, and also includes the transforms from when the data was produced.");
@@ -49,7 +52,11 @@ public class DRCLidar
                polarLidar.setScan(largeScan);
                updateParameters.setUpdateRate(DRCConfigParameters.LIDAR_UPDATE_RATE_OVERRIDE);
             }
-            polarLidar.setLidarJoint(lidarJoint);
+            if (PRINT_ALL_POSSIBLE_JOINT_NAMES)
+               System.out.println("DRCLidar availiable joints: "+sdfRobotSimulation.getRobot().getOneDoFJoints());
+            OneDegreeOfFreedomJoint neckJoint = sdfRobotSimulation.getRobot().getOneDoFJoint("neck_ay");
+            polarLidar.setControllerLidarJoint(lidarJoint);
+            polarLidar.setSimulationNeckJoint(neckJoint);
             polarLidar.setLidarDaemonParameters(updateParameters);            
             polarLidar.startLidarDaemonThread();
          }
