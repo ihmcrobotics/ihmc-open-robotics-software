@@ -11,6 +11,7 @@ public interface ProcessModelElement
    public abstract DenseMatrix64F getStateMatrixBlock(ControlFlowOutputPort<?> statePort);
    public abstract DenseMatrix64F getInputMatrixBlock(ControlFlowInputPort<?> inputPort);
    public abstract DenseMatrix64F getProcessCovarianceMatrixBlock();
-   public abstract void propagateState();
+   public abstract void propagateState(double dt);
    public abstract void correctState(DenseMatrix64F correction);
+   public abstract int getCovarianceMatrixSize();
 }

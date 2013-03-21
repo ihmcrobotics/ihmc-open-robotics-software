@@ -201,7 +201,7 @@ public class ComposableStateEstimator extends AbstractControlFlowElement
       {
          for (ProcessModelElement processModelElement : processModelElements.values())
          {
-            processModelElement.propagateState();    // should update what's in the output ports
+            processModelElement.propagateState(controlDT);    // should update what's in the output ports
          }
       }
 
