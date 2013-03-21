@@ -20,6 +20,7 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.projectM.R2Sim02.initialSetup.RobotInitialSetup;
 import us.ihmc.utilities.MemoryTools;
+import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.ThreadTools;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
@@ -33,8 +34,8 @@ import com.yobotics.simulationconstructionset.util.simulationTesting.NothingChan
 
 public class DRCFlatGroundWalkingTest
 {
-   private static final boolean ALWAYS_SHOW_GUI = false;
-   private static final boolean KEEP_SCS_UP = false;
+   private static final boolean ALWAYS_SHOW_GUI = true;
+   private static final boolean KEEP_SCS_UP = true;
 
    private static final boolean CREATE_MOVIE = BambooTools.doMovieCreation();
    private static final boolean checkNothingChanged = BambooTools.getCheckNothingChanged();
@@ -81,37 +82,18 @@ public class DRCFlatGroundWalkingTest
       boolean useVelocityAndHeadingScript = false;
       boolean cheatWithGroundHeightAtForFootstep = true;
 
-      double rampSlopeUp = 0.1;
-      double rampSlopeDown = 0.08;
-
-      double rampXStart0 = 0.5;
-      double rampXLength0 = 2.0;
-      double landingHeight = rampSlopeUp * rampXLength0;
-      double landingLength = 1.0;
-      double rampXLength1 = landingHeight / rampSlopeDown;
-
-      double rampYStart = -2.0;
-      double rampYEnd = 6.0;
-
-      double landingStartX = rampXStart0 + rampXLength0;
-      double landingEndX = landingStartX + landingLength;
-      double rampEndX = landingEndX + rampXLength1;
-
-      CombinedTerrainObject combinedTerrainObject = new CombinedTerrainObject("JustARamp");
-
-      AppearanceDefinition appearance = YoAppearance.Green();
-      combinedTerrainObject.addRamp(rampXStart0, rampYStart, landingStartX, rampYEnd, landingHeight, appearance);
-      combinedTerrainObject.addBox(landingStartX, rampYStart, landingEndX, rampYEnd, 0.0, landingHeight, YoAppearance.Gray());
-      combinedTerrainObject.addRamp(rampEndX, rampYStart, landingEndX, rampYEnd, landingHeight, appearance);
-
-      combinedTerrainObject.addBox(rampXStart0 - 2.0, rampYStart, rampEndX + 2.0, rampYEnd, -0.05, 0.0);
-
       DRCRobotWalkingControllerParameters drcControlParameters = new DRCRobotWalkingControllerParameters();
       drcControlParameters.setNominalHeightAboveAnkle(drcControlParameters.nominalHeightAboveAnkle() - 0.03);    // Need to do this or the leg goes straight and the robot falls.
 
+      Pair<CombinedTerrainObject, Double> combinedTerrainObjectAndRampEndX = createRamp();
+      CombinedTerrainObject combinedTerrainObject = combinedTerrainObjectAndRampEndX.first();
+      double rampEndX = combinedTerrainObjectAndRampEndX.second();
+      
       SimulationConstructionSet scs = setupScs(drcControlParameters, combinedTerrainObject, useVelocityAndHeadingScript, cheatWithGroundHeightAtForFootstep);
       scs.setGroundVisible(false);
       scs.addStaticLinkGraphics(combinedTerrainObject.getLinkGraphics());
+      
+      
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
 
       NothingChangedVerifier nothingChangedVerifier = null;
@@ -157,6 +139,36 @@ public class DRCFlatGroundWalkingTest
          checkNothingChanged(nothingChangedVerifier);
 
       createMovie(scs);
+   }
+   
+   private Pair<CombinedTerrainObject, Double> createRamp()
+   {
+      double rampSlopeUp = 0.1;
+      double rampSlopeDown = 0.08;
+
+      double rampXStart0 = 0.5;
+      double rampXLength0 = 2.0;
+      double landingHeight = rampSlopeUp * rampXLength0;
+      double landingLength = 1.0;
+      double rampXLength1 = landingHeight / rampSlopeDown;
+
+      double rampYStart = -2.0;
+      double rampYEnd = 6.0;
+
+      double landingStartX = rampXStart0 + rampXLength0;
+      double landingEndX = landingStartX + landingLength;
+      double rampEndX = landingEndX + rampXLength1;
+
+      CombinedTerrainObject combinedTerrainObject = new CombinedTerrainObject("JustARamp");
+
+      AppearanceDefinition appearance = YoAppearance.Green();
+      combinedTerrainObject.addRamp(rampXStart0, rampYStart, landingStartX, rampYEnd, landingHeight, appearance);
+      combinedTerrainObject.addBox(landingStartX, rampYStart, landingEndX, rampYEnd, 0.0, landingHeight, YoAppearance.Gray());
+      combinedTerrainObject.addRamp(rampEndX, rampYStart, landingEndX, rampYEnd, landingHeight, appearance);
+
+      combinedTerrainObject.addBox(rampXStart0 - 2.0, rampYStart, rampEndX + 2.0, rampYEnd, -0.05, 0.0);
+      
+      return new Pair<CombinedTerrainObject, Double>(combinedTerrainObject, rampEndX);
    }
 
    @Test
