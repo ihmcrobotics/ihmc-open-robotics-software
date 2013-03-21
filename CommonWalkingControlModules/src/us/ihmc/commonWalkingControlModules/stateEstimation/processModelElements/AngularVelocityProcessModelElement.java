@@ -19,22 +19,20 @@ public class AngularVelocityProcessModelElement extends AbstractProcessModelElem
    private final ControlFlowOutputPort<FrameVector> angularVelocityPort;
    private final ControlFlowInputPort<FrameVector> angularAccelerationPort;
 
-   private final DenseMatrix64F covarianceMatrix = new DenseMatrix64F(SIZE, SIZE);
-
    // temp stuff
    private final Vector3d angularVelocity = new Vector3d();
    private final Vector3d angularVelocityDelta = new Vector3d();
 
    public AngularVelocityProcessModelElement(ReferenceFrame estimationFrame, ControlFlowOutputPort<FrameVector> angularVelocityPort,
-         ControlFlowInputPort<FrameVector> angularAccelerationPort)
+           ControlFlowInputPort<FrameVector> angularAccelerationPort)
    {
       super(SIZE, 0, 1);
       this.estimationFrame = estimationFrame;
       this.angularVelocityPort = angularVelocityPort;
       this.angularAccelerationPort = angularAccelerationPort;
-      
+
       inputMatrixBlocks.put(angularAccelerationPort, new DenseMatrix64F(SIZE, SIZE));
-      
+
       computeAngularAccelerationInputMatrixBlock();
    }
 
@@ -46,16 +44,6 @@ public class AngularVelocityProcessModelElement extends AbstractProcessModelElem
    public void computeMatrixBlocks()
    {
       // empty
-   }
-
-   public DenseMatrix64F getStateMatrixBlock(ControlFlowOutputPort<?> statePort)
-   {
-      return null;
-   }
-
-   public DenseMatrix64F getProcessCovarianceMatrixBlock()
-   {
-      return covarianceMatrix;
    }
 
    public void propagateState(double dt)

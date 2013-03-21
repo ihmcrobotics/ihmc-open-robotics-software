@@ -4,43 +4,26 @@ import javax.vecmath.Vector3d;
 
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.commonWalkingControlModules.stateEstimation.ProcessModelElement;
-import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.geometry.FrameVector;
 
-public class BiasProcessModelElement implements ProcessModelElement
+public class BiasProcessModelElement extends AbstractProcessModelElement
 {
+   private static final int SIZE = 3;
    private final ControlFlowOutputPort<FrameVector> biasPort;
-   private final DenseMatrix64F covarianceMatrix;
    private final Vector3d bias = new Vector3d();
    private final Vector3d biasDelta = new Vector3d();
 
-   public BiasProcessModelElement(ControlFlowOutputPort<FrameVector> statePort, int size)
+   public BiasProcessModelElement(ControlFlowOutputPort<FrameVector> statePort)
    {
+      super(SIZE, 0, 0);
       this.biasPort = statePort;
-      covarianceMatrix = new DenseMatrix64F(size);
    }
 
    public void computeMatrixBlocks()
    {
       // empty
-   }
-
-   public DenseMatrix64F getStateMatrixBlock(ControlFlowOutputPort<?> statePort)
-   {
-      return null;
-   }
-
-   public DenseMatrix64F getInputMatrixBlock(ControlFlowInputPort<?> inputPort)
-   {
-      return null;
-   }
-
-   public DenseMatrix64F getProcessCovarianceMatrixBlock()
-   {
-      return covarianceMatrix;
    }
 
    public void propagateState(double dt)
