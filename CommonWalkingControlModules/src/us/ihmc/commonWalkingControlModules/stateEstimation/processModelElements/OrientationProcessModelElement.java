@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.stateEstimation.processModelElements;
 
-import java.util.HashMap;
 
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;
@@ -11,21 +10,17 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.stateEstimation.ProcessModelElement;
-import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.RotationFunctions;
 
-public class OrientationProcessModelElement implements ProcessModelElement
+public class OrientationProcessModelElement extends AbstractProcessModelElement implements ProcessModelElement
 {
-   private static final int SIZE = 3;
+   static final int SIZE = 3;
    private final ControlFlowOutputPort<FrameVector> angularVelocityPort;
    private final ControlFlowOutputPort<FrameOrientation> orientationPort;
-
-   private final HashMap<ControlFlowOutputPort<?>, DenseMatrix64F> stateMatrixBlocks = new HashMap<ControlFlowOutputPort<?>, DenseMatrix64F>(2);
-   private final DenseMatrix64F covarianceMatrix = new DenseMatrix64F(SIZE, SIZE);
 
    private final Vector3d angularVelocity = new Vector3d();
    private final Vector3d tempRotationVector = new Vector3d();
@@ -37,6 +32,7 @@ public class OrientationProcessModelElement implements ProcessModelElement
 
    public OrientationProcessModelElement(ControlFlowOutputPort<FrameVector> angularVelocityPort, ControlFlowOutputPort<FrameOrientation> orientationPort)
    {
+      super(SIZE, 2, 1);
       this.angularVelocityPort = angularVelocityPort;
       this.orientationPort = orientationPort;
 
@@ -62,21 +58,6 @@ public class OrientationProcessModelElement implements ProcessModelElement
    private void computeAngularVelocityStateMatrixBlock()
    {
       CommonOps.setIdentity(stateMatrixBlocks.get(angularVelocityPort));
-   }
-
-   public DenseMatrix64F getStateMatrixBlock(ControlFlowOutputPort<?> statePort)
-   {
-      return stateMatrixBlocks.get(statePort);
-   }
-
-   public DenseMatrix64F getInputMatrixBlock(ControlFlowInputPort<?> inputPort)
-   {
-      return null;
-   }
-
-   public DenseMatrix64F getProcessCovarianceMatrixBlock()
-   {
-      return covarianceMatrix;
    }
 
    public void propagateState(double dt)
