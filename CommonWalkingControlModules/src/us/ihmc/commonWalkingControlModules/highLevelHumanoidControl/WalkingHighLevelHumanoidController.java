@@ -132,8 +132,8 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
    protected final SideDependentList<FootSwitchInterface> footSwitches;
 
    // FIXME: reimplement and improve com trajectory visualization
-//   private final BagOfBalls comTrajectoryBagOfBalls;
-//   private int comTrajectoryCounter = 0;
+// private final BagOfBalls comTrajectoryBagOfBalls;
+// private int comTrajectoryCounter = 0;
 
    // private final BooleanYoVariable transferICPTrajectoryDone = new BooleanYoVariable("transferICPTrajectoryDone", registry);
    private final DoubleYoVariable minOrbitalEnergyForSingleSupport = new DoubleYoVariable("minOrbitalEnergyForSingleSupport", registry);
@@ -149,15 +149,17 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 
    private final HashMap<ContactablePlaneBody, EndEffectorControlModule> endEffectorControlModules = new HashMap<ContactablePlaneBody,
                                                                                                         EndEffectorControlModule>();
-//   private final SideDependentList<PositionTrajectoryGenerator> footPositionTrajectoryGenerators;
+
+// private final SideDependentList<PositionTrajectoryGenerator> footPositionTrajectoryGenerators;
    private final DoubleProvider swingTimeProvider;
    private final TrajectoryParametersProvider trajectoryParametersProvider;
    private final SideDependentList<YoVariableDoubleProvider> onEdgeInitialAngleProviders = new SideDependentList<YoVariableDoubleProvider>();
    private final SideDependentList<YoVariableDoubleProvider> onEdgeFinalAngleProviders = new SideDependentList<YoVariableDoubleProvider>();
    private final BooleanYoVariable stayOnToes = new BooleanYoVariable("stayOnToes", registry);
    private final DoubleYoVariable trailingFootPitch = new DoubleYoVariable("trailingFootPitch", registry);
-//   private final SideDependentList<OneDoFJoint[]> armJoints = new SideDependentList<OneDoFJoint[]>();
-//   private final SideDependentList<OneDoFJoint[]> handJoints = new SideDependentList<OneDoFJoint[]>();
+
+// private final SideDependentList<OneDoFJoint[]> armJoints = new SideDependentList<OneDoFJoint[]>();
+// private final SideDependentList<OneDoFJoint[]> handJoints = new SideDependentList<OneDoFJoint[]>();
 
    private final DoubleYoVariable kUpperBody = new DoubleYoVariable("kUpperBody", registry);
    private final DoubleYoVariable zetaUpperBody = new DoubleYoVariable("zetaUpperBody", registry);
@@ -236,7 +238,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 
       this.finalPositionProvider = finalPositionProvider;
 
-//      this.footPositionTrajectoryGenerators = footPositionTrajectoryGenerators;
+//    this.footPositionTrajectoryGenerators = footPositionTrajectoryGenerators;
       this.icpTrajectoryHasBeenInitialized = new BooleanYoVariable("icpTrajectoryHasBeenInitialized", registry);
 
       rememberFinalICPFromSingleSupport.set(true);
@@ -286,7 +288,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       this.pelvisOrientationTrajectoryGenerator = new OrientationInterpolationTrajectoryGenerator("pelvis", worldFrame, swingTimeProvider,
               initialPelvisOrientationProvider, finalPelvisOrientationProvider, registry);
 
-//      comTrajectoryBagOfBalls = new BagOfBalls(500, 0.01, "comBagOfBalls", YoAppearance.Red(), registry, dynamicGraphicObjectsListRegistry);
+//    comTrajectoryBagOfBalls = new BagOfBalls(500, 0.01, "comBagOfBalls", YoAppearance.Red(), registry, dynamicGraphicObjectsListRegistry);
 
       setUpStateMachine(swingTimeProvider);
 
@@ -319,8 +321,9 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 
       for (RobotSide robotSide : RobotSide.values())
       {
-         manipulationStateMachines.put(robotSide, new ManipulationStateMachine(yoTime, robotSide, fullRobotModel, twistCalculator, walkingControllerParameters,
-               handPoseProvider, dynamicGraphicObjectsListRegistry, registry));
+         manipulationStateMachines.put(robotSide,
+                                       new ManipulationStateMachine(yoTime, robotSide, fullRobotModel, twistCalculator, walkingControllerParameters,
+                                          handPoseProvider, dynamicGraphicObjectsListRegistry, registry));
       }
 
 
@@ -1076,7 +1079,8 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 //      initialAcceleration.setToZero(trajectoryGeneratorFrame);    // TODO
 
       finalPositionProvider.set(nextFootstep.getPositionInFrame(worldFrame));
-//      trajectoryParametersProvider.set(mapFromFootstepsToTrajectoryParameters.containsKey(nextFootstep) ? mapFromFootstepsToTrajectoryParameters.get(nextFootstep) : null); //TODO fix
+
+      trajectoryParametersProvider.set(mapFromFootstepsToTrajectoryParameters.get(nextFootstep));
       finalFootOrientationProviders.get(swingSide).setOrientation(nextFootstep.getOrientationInFrame(worldFrame));
 
       FrameOrientation initialPelvisOrientation = new FrameOrientation(worldFrame);
@@ -1211,15 +1215,13 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 
    public void doArmControl()
    {
-      
       for (RobotSide robotSide : RobotSide.values())
       {
-         
          GeometricJacobian jacobian = jacobians.get(robotSide).get(LimbName.ARM);
 
          manipulationStateMachines.get(robotSide).startComputation();
          manipulationStateMachines.get(robotSide).waitUntilComputationIsDone();
-         
+
          TaskspaceConstraintData taskspaceConstraintData = manipulationStateMachines.get(robotSide).getTaskspaceConstraintData();
          solver.setDesiredSpatialAcceleration(jacobian, taskspaceConstraintData);
       }
