@@ -1,27 +1,23 @@
 package us.ihmc.commonWalkingControlModules.stateEstimation.processModelElements;
 
-import java.util.HashMap;
 
 import javax.vecmath.Vector3d;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
-import us.ihmc.commonWalkingControlModules.stateEstimation.ProcessModelElement;
 import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
-public class AngularVelocityProcessModelElement implements ProcessModelElement
+public class AngularVelocityProcessModelElement extends AbstractProcessModelElement
 {
    private static final int SIZE = 3;
    private final ReferenceFrame estimationFrame;
    private final ControlFlowOutputPort<FrameVector> angularVelocityPort;
    private final ControlFlowInputPort<FrameVector> angularAccelerationPort;
-
-   private final HashMap<ControlFlowInputPort<?>, DenseMatrix64F> inputMatrixBlocks = new HashMap<ControlFlowInputPort<?>, DenseMatrix64F>(1);
 
    private final DenseMatrix64F covarianceMatrix = new DenseMatrix64F(SIZE, SIZE);
 
@@ -32,6 +28,7 @@ public class AngularVelocityProcessModelElement implements ProcessModelElement
    public AngularVelocityProcessModelElement(ReferenceFrame estimationFrame, ControlFlowOutputPort<FrameVector> angularVelocityPort,
          ControlFlowInputPort<FrameVector> angularAccelerationPort)
    {
+      super(SIZE, 0, 1);
       this.estimationFrame = estimationFrame;
       this.angularVelocityPort = angularVelocityPort;
       this.angularAccelerationPort = angularAccelerationPort;
@@ -54,11 +51,6 @@ public class AngularVelocityProcessModelElement implements ProcessModelElement
    public DenseMatrix64F getStateMatrixBlock(ControlFlowOutputPort<?> statePort)
    {
       return null;
-   }
-
-   public DenseMatrix64F getInputMatrixBlock(ControlFlowInputPort<?> inputPort)
-   {
-      return inputMatrixBlocks.get(inputPort);
    }
 
    public DenseMatrix64F getProcessCovarianceMatrixBlock()

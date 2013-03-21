@@ -1,14 +1,11 @@
 package us.ihmc.commonWalkingControlModules.stateEstimation.measurementModelElements;
 
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.vecmath.Vector3d;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
-import us.ihmc.commonWalkingControlModules.stateEstimation.MeasurementModelElement;
 import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.utilities.math.MatrixTools;
@@ -18,22 +15,18 @@ import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.Twist;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 
-public class AngularVelocityMeasurementModelElement implements MeasurementModelElement
+public class AngularVelocityMeasurementModelElement extends AbstractMeasurementModelElement
 {
-   private static final int SIZE = 3;
+   static final int SIZE = 3;
    private final ControlFlowOutputPort<FrameVector> angularVelocityStatePort;
    private final ControlFlowOutputPort<FrameVector> biasStatePort;
    private final ControlFlowInputPort<Vector3d> angularVelocityMeasurementInputPort;
-   private final Map<ControlFlowOutputPort<?>, DenseMatrix64F> outputMatrixBlocks = new HashMap<ControlFlowOutputPort<?>, DenseMatrix64F>(2);
-
    private final RigidBody orientationEstimationLink;
    private final RigidBody measurementLink;
    private final ReferenceFrame measurementFrame;
 
    private final TwistCalculator twistCalculator;
    private final DenseMatrix64F residual = new DenseMatrix64F(SIZE, 1);
-   private final DenseMatrix64F measurementCovarianceMatrixBlock = new DenseMatrix64F(SIZE, SIZE);
-
    // temp stuff
    private final Twist tempTwist = new Twist();
    private final FrameVector relativeAngularVelocity = new FrameVector(ReferenceFrame.getWorldFrame());
@@ -43,6 +36,7 @@ public class AngularVelocityMeasurementModelElement implements MeasurementModelE
            ControlFlowInputPort<Vector3d> angularVelocityMeasurementInputPort, RigidBody orientationEstimationLink, RigidBody measurementLink,
            ReferenceFrame measurementFrame, TwistCalculator twistCalculator)
    {
+      super(SIZE, 2);
       this.angularVelocityStatePort = angularVelocityStatePort;
       this.biasStatePort = biasStatePort;
       this.angularVelocityMeasurementInputPort = angularVelocityMeasurementInputPort;
@@ -72,16 +66,6 @@ public class AngularVelocityMeasurementModelElement implements MeasurementModelE
    public void computeMatrixBlocks()
    {
       // empty
-   }
-
-   public DenseMatrix64F getOutputMatrixBlock(ControlFlowOutputPort<?> statePort)
-   {
-      return outputMatrixBlocks.get(statePort);
-   }
-
-   public DenseMatrix64F getMeasurementCovarianceMatrixBlock()
-   {
-      return measurementCovarianceMatrixBlock;
    }
 
    public DenseMatrix64F computeResidual()
