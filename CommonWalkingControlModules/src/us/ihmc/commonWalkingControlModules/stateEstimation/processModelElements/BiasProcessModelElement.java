@@ -4,6 +4,8 @@ import javax.vecmath.Vector3d;
 
 import org.ejml.data.DenseMatrix64F;
 
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
+
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -15,9 +17,9 @@ public class BiasProcessModelElement extends AbstractProcessModelElement
    private final Vector3d bias = new Vector3d();
    private final Vector3d biasDelta = new Vector3d();
 
-   public BiasProcessModelElement(ControlFlowOutputPort<FrameVector> statePort)
+   public BiasProcessModelElement(ControlFlowOutputPort<FrameVector> statePort, String name, YoVariableRegistry registry)
    {
-      super(SIZE, 0, 0);
+      super(SIZE, 0, 0, name, registry);
       this.biasPort = statePort;
    }
 

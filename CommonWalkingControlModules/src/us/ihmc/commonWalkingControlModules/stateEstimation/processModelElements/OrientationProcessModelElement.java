@@ -15,6 +15,8 @@ import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.RotationFunctions;
 
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
+
 public class OrientationProcessModelElement extends AbstractProcessModelElement
 {
    static final int SIZE = 3;
@@ -29,9 +31,10 @@ public class OrientationProcessModelElement extends AbstractProcessModelElement
    private final Quat4d quaternionDelta = new Quat4d();
    private final Quat4d quaternion = new Quat4d();
 
-   public OrientationProcessModelElement(ControlFlowOutputPort<FrameVector> angularVelocityPort, ControlFlowOutputPort<FrameOrientation> orientationPort)
+   public OrientationProcessModelElement(ControlFlowOutputPort<FrameVector> angularVelocityPort, ControlFlowOutputPort<FrameOrientation> orientationPort,
+           String name, YoVariableRegistry registry)
    {
-      super(SIZE, 2, 1);
+      super(SIZE, 2, 1, name, registry);
       this.angularVelocityPort = angularVelocityPort;
       this.orientationPort = orientationPort;
 

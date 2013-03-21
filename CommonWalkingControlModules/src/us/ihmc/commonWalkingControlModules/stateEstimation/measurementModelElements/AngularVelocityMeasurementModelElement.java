@@ -6,6 +6,8 @@ import javax.vecmath.Vector3d;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
+
 import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.utilities.math.MatrixTools;
@@ -27,6 +29,7 @@ public class AngularVelocityMeasurementModelElement extends AbstractMeasurementM
 
    private final TwistCalculator twistCalculator;
    private final DenseMatrix64F residual = new DenseMatrix64F(SIZE, 1);
+
    // temp stuff
    private final Twist tempTwist = new Twist();
    private final FrameVector relativeAngularVelocity = new FrameVector(ReferenceFrame.getWorldFrame());
@@ -34,9 +37,9 @@ public class AngularVelocityMeasurementModelElement extends AbstractMeasurementM
 
    public AngularVelocityMeasurementModelElement(ControlFlowOutputPort<FrameVector> angularVelocityStatePort, ControlFlowOutputPort<FrameVector> biasStatePort,
            ControlFlowInputPort<Vector3d> angularVelocityMeasurementInputPort, RigidBody orientationEstimationLink, RigidBody measurementLink,
-           ReferenceFrame measurementFrame, TwistCalculator twistCalculator)
+           ReferenceFrame measurementFrame, TwistCalculator twistCalculator, String name, YoVariableRegistry registry)
    {
-      super(SIZE, 2);
+      super(SIZE, 2, name, registry);
       this.angularVelocityStatePort = angularVelocityStatePort;
       this.biasStatePort = biasStatePort;
       this.angularVelocityMeasurementInputPort = angularVelocityMeasurementInputPort;

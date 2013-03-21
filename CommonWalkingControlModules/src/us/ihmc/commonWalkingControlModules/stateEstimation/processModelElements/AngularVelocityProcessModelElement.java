@@ -6,6 +6,8 @@ import javax.vecmath.Vector3d;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
+
 import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.utilities.math.MatrixTools;
@@ -24,9 +26,9 @@ public class AngularVelocityProcessModelElement extends AbstractProcessModelElem
    private final Vector3d angularVelocityDelta = new Vector3d();
 
    public AngularVelocityProcessModelElement(ReferenceFrame estimationFrame, ControlFlowOutputPort<FrameVector> angularVelocityPort,
-           ControlFlowInputPort<FrameVector> angularAccelerationPort)
+           ControlFlowInputPort<FrameVector> angularAccelerationPort, String name, YoVariableRegistry registry)
    {
-      super(SIZE, 0, 1);
+      super(SIZE, 0, 1, name, registry);
       this.estimationFrame = estimationFrame;
       this.angularVelocityPort = angularVelocityPort;
       this.angularAccelerationPort = angularAccelerationPort;

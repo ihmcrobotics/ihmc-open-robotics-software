@@ -7,6 +7,8 @@ import javax.vecmath.Vector3d;
 
 import org.ejml.data.DenseMatrix64F;
 
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
+
 import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.utilities.math.MatrixTools;
@@ -33,10 +35,11 @@ public class OrientationMeasurementModelElement extends AbstractMeasurementModel
    private final AxisAngle4d tempAxisAngle = new AxisAngle4d();
    private final Vector3d rotationVectorResidual = new Vector3d();
 
-   public OrientationMeasurementModelElement(ControlFlowOutputPort<FrameOrientation> orientationStatePort, ControlFlowInputPort<Matrix3d> orientationMeasurementInputPort,
-         ReferenceFrame estimationFrame, ReferenceFrame measurementFrame)
+   public OrientationMeasurementModelElement(ControlFlowOutputPort<FrameOrientation> orientationStatePort,
+           ControlFlowInputPort<Matrix3d> orientationMeasurementInputPort, ReferenceFrame estimationFrame, ReferenceFrame measurementFrame, String name,
+           YoVariableRegistry registry)
    {
-      super(SIZE, 1);
+      super(SIZE, 1, name, registry);
       this.orientationStatePort = orientationStatePort;
       this.orientationMeasurementInputPort = orientationMeasurementInputPort;
       this.estimationFrame = estimationFrame;
