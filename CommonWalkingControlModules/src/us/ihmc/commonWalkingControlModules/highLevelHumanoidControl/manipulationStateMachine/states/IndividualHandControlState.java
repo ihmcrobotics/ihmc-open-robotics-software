@@ -138,8 +138,8 @@ public class IndividualHandControlState<T extends Enum<T>> extends IndividualMan
    @Override
    public void doTransitionIntoAction()
    {
-      positionTrajectoryGenerator.initialize(null);
-      orientationTrajectoryGenerator.initialize(null);
+      positionTrajectoryGenerator.initialize();
+      orientationTrajectoryGenerator.initialize();
    }
 
    @Override

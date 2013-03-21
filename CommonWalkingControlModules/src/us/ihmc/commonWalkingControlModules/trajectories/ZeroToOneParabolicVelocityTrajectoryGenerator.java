@@ -5,7 +5,6 @@ import us.ihmc.utilities.math.MathTools;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.trajectory.DoubleTrajectoryGenerator;
-import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryParameters;
 
 public class ZeroToOneParabolicVelocityTrajectoryGenerator implements DoubleTrajectoryGenerator
 {
@@ -32,7 +31,7 @@ public class ZeroToOneParabolicVelocityTrajectoryGenerator implements DoubleTraj
       parentRegistry.addChild(registry);
    }
    
-   public void initialize(TrajectoryParameters trajectoryParameters)
+   public void initialize()
    {
       currentTime.set(0.0);
       currentValue.set(0.0);

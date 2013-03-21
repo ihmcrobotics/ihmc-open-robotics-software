@@ -19,6 +19,7 @@ import com.yobotics.simulationconstructionset.util.trajectory.DoubleProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.PositionProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.PositionTrajectoryGenerator;
 import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryParameters;
+import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryParametersProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.VectorProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.YoConcatenatedSplines;
 import com.yobotics.simulationconstructionset.util.trajectory.YoPositionProvider;
@@ -56,6 +57,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
    private final YoFramePoint[] allPositions = new YoFramePoint[6];
    private final YoFrameVector[] allVelocities = new YoFrameVector[6];
 
+   private final TrajectoryParametersProvider trajectoryParametersProvider;
    private TwoWaypointTrajectoryParameters trajectoryParameters;
 
    private static final int[] endpointIndices = new int[] {0, 5};
@@ -73,7 +75,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
 
    public TwoWaypointPositionTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, YoVariableDoubleProvider stepTimeProvider,
            PositionProvider initialPositionProvider, VectorProvider initalVelocityProvider, YoPositionProvider finalPositionProvider,
-           VectorProvider finalDesiredVelocityProvider, YoVariableRegistry parentRegistry, double groundClearance,
+           VectorProvider finalDesiredVelocityProvider, TrajectoryParametersProvider trajectoryParametersProvider, YoVariableRegistry parentRegistry, double groundClearance,
            int arcLengthCalculatorDivisionsPerPolynomial, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       registry = new YoVariableRegistry(namePrefix + namePostFix);
@@ -103,6 +105,8 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
 
       this.groundClearance = new DoubleYoVariable(namePrefix + "GroundClearance", registry);
       this.groundClearance.set(groundClearance);
+      
+      this.trajectoryParametersProvider = trajectoryParametersProvider;
 
       for (int i = 0; i < 6; i++)
       {
@@ -165,21 +169,9 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       timeIntoStep.set(0.0);
    }
 
-   public void initialize(TrajectoryParameters trajectoryParameters)
+   public void initialize()
    {
-      if (trajectoryParameters instanceof TwoWaypointTrajectoryParameters)
-      {
-         this.trajectoryParameters = (TwoWaypointTrajectoryParameters) trajectoryParameters;
-      }
-      else if (trajectoryParameters == null)
-      {
-         this.trajectoryParameters = new TwoWaypointTrajectoryParameters();
-      }
-      else
-      {
-         throw new RuntimeException(
-             "trajectoryParameters must be an instance of TwoWaypointTrajectoryParameters when passed into TwoWaypointPositionTrajectoryGenerator's initialize method.");
-      }
+      setTrajectoryParameters();
 
       setStepTime();
 
@@ -203,6 +195,25 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       if (VISUALIZE)
       {
          visualizeSpline();
+      }
+   }
+
+   private void setTrajectoryParameters()
+   {
+      TrajectoryParameters trajectoryParameters = trajectoryParametersProvider.getTrajectoryParameters();
+      
+      if (trajectoryParameters instanceof TwoWaypointTrajectoryParameters)
+      {
+         this.trajectoryParameters = (TwoWaypointTrajectoryParameters) trajectoryParameters;
+      }
+      else if (trajectoryParameters == null)
+      {
+         this.trajectoryParameters = new TwoWaypointTrajectoryParameters();
+      }
+      else
+      {
+         throw new RuntimeException(
+             "trajectoryParametersProvider must provide null or an instance of TwoWaypointTrajectoryParameters.");
       }
    }
 

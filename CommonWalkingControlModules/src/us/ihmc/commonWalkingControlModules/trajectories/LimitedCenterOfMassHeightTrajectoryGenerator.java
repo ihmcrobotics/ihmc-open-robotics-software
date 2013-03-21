@@ -5,7 +5,6 @@ import us.ihmc.utilities.math.MathTools;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.trajectory.DoubleTrajectoryGenerator;
-import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryParameters;
 
 public class LimitedCenterOfMassHeightTrajectoryGenerator implements DoubleTrajectoryGenerator
 {
@@ -55,7 +54,7 @@ public class LimitedCenterOfMassHeightTrajectoryGenerator implements DoubleTraje
       minCenterOfMassHeight.set(minHeight);
    }
 
-   public void initialize(TrajectoryParameters trajectoryParameters)
+   public void initialize()
    {
       // empty
    }
