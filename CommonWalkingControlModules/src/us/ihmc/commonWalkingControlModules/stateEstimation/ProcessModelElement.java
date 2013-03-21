@@ -13,5 +13,4 @@ public interface ProcessModelElement
    public abstract DenseMatrix64F getProcessCovarianceMatrixBlock();
    public abstract void propagateState(double dt);
    public abstract void correctState(DenseMatrix64F correction);
-   public abstract int getCovarianceMatrixSize();
 }

@@ -8,6 +8,7 @@ import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.stateEstimation.ProcessModelElement;
 import us.ihmc.controlFlow.ControlFlowInputPort;
@@ -39,6 +40,9 @@ public class OrientationProcessModelElement implements ProcessModelElement
       this.angularVelocityPort = angularVelocityPort;
       this.orientationPort = orientationPort;
 
+      stateMatrixBlocks.put(angularVelocityPort, new DenseMatrix64F(SIZE, SIZE));
+      stateMatrixBlocks.put(orientationPort, new DenseMatrix64F(SIZE, SIZE));
+
       computeAngularVelocityStateMatrixBlock();
    }
 
@@ -57,8 +61,7 @@ public class OrientationProcessModelElement implements ProcessModelElement
 
    private void computeAngularVelocityStateMatrixBlock()
    {
-      tempMatrix3d.setIdentity();
-      MatrixTools.setDenseMatrixFromMatrix3d(0, 0, tempMatrix3d, stateMatrixBlocks.get(angularVelocityPort));
+      CommonOps.setIdentity(stateMatrixBlocks.get(angularVelocityPort));
    }
 
    public DenseMatrix64F getStateMatrixBlock(ControlFlowOutputPort<?> statePort)
@@ -100,10 +103,5 @@ public class OrientationProcessModelElement implements ProcessModelElement
       quaternionDelta.set(tempAxisAngle);
       quaternion.mul(quaternionDelta);
       orientationPort.getData().set(quaternion);
-   }
-
-   public int getCovarianceMatrixSize()
-   {
-      return SIZE;
    }
 }
