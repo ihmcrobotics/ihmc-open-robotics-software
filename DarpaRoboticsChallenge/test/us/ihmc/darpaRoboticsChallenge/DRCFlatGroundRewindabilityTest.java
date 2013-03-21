@@ -73,8 +73,6 @@ public class DRCFlatGroundRewindabilityTest
    public void testRewindability() throws UnreasonableAccelerationException, SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
-
-      double standingTimeDuration = 1.0;
       
       int numTicksToTest = (int) Math.round(totalTimeToTest / timePerTick);
       if (numTicksToTest < 1)
@@ -93,28 +91,30 @@ public class DRCFlatGroundRewindabilityTest
       BooleanYoVariable walk1 = (BooleanYoVariable) scs1.getVariable("walk");
       BooleanYoVariable walk2 = (BooleanYoVariable) scs2.getVariable("walk");
       
-      initiateMotion(standingTimeDuration, blockingSimulationRunner1, walk1);
-      initiateMotion(standingTimeDuration, blockingSimulationRunner2, walk2);
+      double standingTimeDuration = 5.0;
+      double walkingTimeDuration = 2.0;
+      initiateMotion(standingTimeDuration, walkingTimeDuration, blockingSimulationRunner1, walk1);      
+      initiateMotion(standingTimeDuration, walkingTimeDuration, blockingSimulationRunner2, walk2);
 
       ArrayList<String> exceptions = new ArrayList<String>();
       exceptions.add("gc_");
+      exceptions.add("toolFrame");
       exceptions.add("ef_");
       exceptions.add("kp_");
       exceptions.add("TimeNano");
       exceptions.add("DurationMilli");
       SimulationRewindabilityVerifier checker = new SimulationRewindabilityVerifier(scs1, scs2, exceptions);
 
+      // TODO velocityMagnitudeInHeading usually differs by 0.00125
       double maxDifferenceAllowed = 1e-7;
-      ArrayList<VariableDifference> variableDifferences;
-
+      ArrayList<VariableDifference> variableDifferences;getClass();
       variableDifferences = checker.checkRewindabilityWithSimpleMethod(numTicksToTest, maxDifferenceAllowed);
-
       if (!variableDifferences.isEmpty())
       {
-         System.err.println("variableDifferences: " + VariableDifference.allVariableDifferencesToString(variableDifferences));
+         System.err.println("variableDifferences: \n" + VariableDifference.allVariableDifferencesToString(variableDifferences));
+         fail("Found Variable Differences!\n variableDifferences: " + VariableDifference.allVariableDifferencesToString(variableDifferences));
          if (SHOW_GUI)
             sleepForever();
-         fail("Found Variable Differences!");
       }
 
       // sleepForever();
@@ -177,12 +177,13 @@ public class DRCFlatGroundRewindabilityTest
       return guiInitialSetup;
    }
 
-   private void initiateMotion(double standingTimeDuration, BlockingSimulationRunner runner, BooleanYoVariable walk)
+   private void initiateMotion(double standingTimeDuration, double walkingTimeDuration, BlockingSimulationRunner runner, BooleanYoVariable walk)
            throws SimulationExceededMaximumTimeException
    {
       walk.set(false);
       runner.simulateAndBlock(standingTimeDuration);
       walk.set(true);
+      runner.simulateAndBlock(walkingTimeDuration);
    }
 
    private void sleepForever()
