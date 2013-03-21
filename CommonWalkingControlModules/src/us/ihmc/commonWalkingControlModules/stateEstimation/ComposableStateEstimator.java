@@ -16,20 +16,19 @@ import us.ihmc.controlFlow.ControlFlowPort;
 import us.ihmc.kalman.YoKalmanFilter;
 import us.ihmc.utilities.linearDynamicSystems.StateSpaceSystemDiscretizer;
 
-import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public class ComposableStateEstimator extends AbstractControlFlowElement
 {
    private final String name;
    private final YoVariableRegistry registry;
-   private final BooleanYoVariable hasBeenInitialized;
-
    private ComposableStateEstimatorKalmanFilter kalmanFilter;
+   private final double controlDT;
 
    // model elements
    private final Map<ControlFlowOutputPort<?>, ProcessModelElement> processModelElements = new HashMap<ControlFlowOutputPort<?>, ProcessModelElement>();
-   private final Map<ControlFlowInputPort<?>, MeasurementModelElement> measurementModelElements = new HashMap<ControlFlowInputPort<?>, MeasurementModelElement>();
+   private final Map<ControlFlowInputPort<?>, MeasurementModelElement> measurementModelElements = new HashMap<ControlFlowInputPort<?>,
+                                                                                                     MeasurementModelElement>();
 
    // states
    private final List<ControlFlowOutputPort<?>> statePorts = new ArrayList<ControlFlowOutputPort<?>>();
@@ -46,33 +45,59 @@ public class ComposableStateEstimator extends AbstractControlFlowElement
    private final Map<ControlFlowInputPort<?>, Integer> processInputStartIndices = new HashMap<ControlFlowInputPort<?>, Integer>();
    private final Map<ControlFlowInputPort<?>, Integer> processInputSizes = new HashMap<ControlFlowInputPort<?>, Integer>();
 
-   // discretization
-   private final double controlDT;
-
 
    public ComposableStateEstimator(String name, double controlDT)
    {
       this.name = name;
       this.registry = new YoVariableRegistry(name);
-      this.hasBeenInitialized = new BooleanYoVariable("hasBeenInitialized", registry);
       this.controlDT = controlDT;
    }
 
    public void startComputation()
    {
       kalmanFilter.configure();
-
-      if (!hasBeenInitialized.getBooleanValue())
-      {
-         initialize();
-         hasBeenInitialized.set(true);
-      }
-
       kalmanFilter.predict(null);
       kalmanFilter.update(null);
    }
 
-   private void initialize()
+   public <T> ControlFlowOutputPort<T> createStatePort(int size)
+   {
+      ControlFlowOutputPort<T> statePort = createOutputPort();
+      statePorts.add(statePort);
+      stateSizes.put(statePort, size);
+
+      return statePort;
+   }
+
+   public <T> ControlFlowInputPort<T> createProcessInputPort(int size)
+   {
+      ControlFlowInputPort<T> processInputPort = createInputPort();
+      processInputPorts.add(processInputPort);
+      processInputSizes.put(processInputPort, size);
+
+      return processInputPort;
+   }
+
+   public <T> ControlFlowInputPort<T> createMeasurementInputPort(int size)
+   {
+      ControlFlowInputPort<T> measurementInputPort = createInputPort();
+      measurementInputPorts.add(measurementInputPort);
+      measurementSizes.put(measurementInputPort, size);
+
+      return measurementInputPort;
+   }
+
+   public void addProcessModelElement(ControlFlowOutputPort<?> statePort, ProcessModelElement processModelElement)
+   {
+      processModelElements.put(statePort, processModelElement);
+   }
+
+   public void addMeasurementModelElement(ControlFlowInputPort<?> measurementPort, MeasurementModelElement measurementModelElement)
+   {
+      measurementModelElements.put(measurementPort, measurementModelElement);
+   }
+
+   public void initialize()
    {
       int stateSize = computeIndicesIntoVector(statePorts, stateStartIndices, stateSizes);
       int inputSize = computeIndicesIntoVector(processInputPorts, processInputStartIndices, processInputSizes);
@@ -81,7 +106,7 @@ public class ComposableStateEstimator extends AbstractControlFlowElement
       kalmanFilter = new ComposableStateEstimatorKalmanFilter(stateSize, inputSize, measurementSize);
       initializeState();
    }
-
+   
    private void initializeState()
    {
       // TODO Auto-generated method stub
@@ -139,7 +164,7 @@ public class ComposableStateEstimator extends AbstractControlFlowElement
       private final DenseMatrix64F residual;
       private final DenseMatrix64F correction;
       private final DenseMatrix64F correctionBlock = new DenseMatrix64F(1, 1);
-      
+
       // discretization
       private final StateSpaceSystemDiscretizer discretizer;
       private final DenseMatrix64F F;
@@ -153,7 +178,7 @@ public class ComposableStateEstimator extends AbstractControlFlowElement
          super(name, stateSize, inputSize, measurementSize, ComposableStateEstimator.this.registry);
          this.correction = new DenseMatrix64F(stateSize, 1);
          this.residual = new DenseMatrix64F(measurementSize, 1);
-         
+
          this.discretizer = new StateSpaceSystemDiscretizer(stateSize, inputSize);
          this.F = new DenseMatrix64F(stateSize, stateSize);
          this.G = new DenseMatrix64F(stateSize, inputSize);
@@ -170,7 +195,7 @@ public class ComposableStateEstimator extends AbstractControlFlowElement
          setProcessNoiseCovariance(Q);
          setMeasurementNoiseCovariance(R);
       }
-      
+
       @Override
       protected void updateAPrioriState(DenseMatrix64F x, DenseMatrix64F u)
       {
@@ -202,7 +227,7 @@ public class ComposableStateEstimator extends AbstractControlFlowElement
             processModelElement.correctState(correctionBlock);
          }
       }
-      
+
       private void updateContinuousTimeModel()
       {
          updateProcessModel();
@@ -251,7 +276,8 @@ public class ComposableStateEstimator extends AbstractControlFlowElement
             }
 
             DenseMatrix64F measurementCovarianceMatrixBlock = measurementModelElement.getMeasurementCovarianceMatrixBlock();
-            insertMatrixBlock(R, measurementCovarianceMatrixBlock, measurementInputPort, measurementStartIndices, measurementInputPort, measurementStartIndices);
+            insertMatrixBlock(R, measurementCovarianceMatrixBlock, measurementInputPort, measurementStartIndices, measurementInputPort,
+                              measurementStartIndices);
          }
       }
    }
