@@ -1,8 +1,11 @@
 package us.ihmc.SdfLoader;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 import javax.media.j3d.Transform3D;
+import javax.vecmath.Quat4d;
+import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
@@ -20,6 +23,12 @@ import com.yobotics.simulationconstructionset.robotController.RawSensorReader;
 
 public class SDFPerfectSimulatedSensorReaderAndWriter implements RawSensorReader, RawOutputWriter
 {
+   
+   private static final double FILTERING_ALPHA = 1e-1;
+   private static final boolean FILTER_GAUSSIAN_POSITION_NOISE = false;
+   private static final double STD_DEVIATION_OF_UNNORMALIZED_QUATERNION_DISTURBANCE = 0.01;
+   private static final double STD_DEVIATION_OF_POSITION_DISTURBANCE = 0.01;
+   private static final boolean ADD_GAUSSIAN_POSITION_NOISE = false;
    private final String name;
    private final SDFRobot robot;
    private final FullRobotModel fullRobotModel;
@@ -69,6 +78,13 @@ public class SDFPerfectSimulatedSensorReaderAndWriter implements RawSensorReader
 
    private Transform3D temporaryRootToWorldTransform = new Transform3D();
 
+   private Random rand = new Random(124381L);
+   private Quat4d rotationError = new Quat4d();
+   private Vector3d positionError = new Vector3d();
+
+   private Quat4d rotationFilter = new Quat4d();
+   private Vector3d positionFilter = new Vector3d();
+   
    public void read()
    {
       for (Pair<OneDegreeOfFreedomJoint, OneDoFJoint> jointPair : revoluteJoints)
@@ -84,6 +100,40 @@ public class SDFPerfectSimulatedSensorReaderAndWriter implements RawSensorReader
 
       SixDoFJoint rootJoint = fullRobotModel.getRootJoint();
       robot.getRootJointToWorldTransform(temporaryRootToWorldTransform);
+      
+      if(ADD_GAUSSIAN_POSITION_NOISE)
+      {
+         rotationError.w = 1;
+         rotationError.x = rand.nextGaussian()*STD_DEVIATION_OF_UNNORMALIZED_QUATERNION_DISTURBANCE;
+         rotationError.y = rand.nextGaussian()*STD_DEVIATION_OF_UNNORMALIZED_QUATERNION_DISTURBANCE;
+         rotationError.z = rand.nextGaussian()*STD_DEVIATION_OF_UNNORMALIZED_QUATERNION_DISTURBANCE;
+         rotationError.normalize();
+         
+         positionError.x = rand.nextGaussian()*STD_DEVIATION_OF_POSITION_DISTURBANCE;
+         positionError.y = rand.nextGaussian()*STD_DEVIATION_OF_POSITION_DISTURBANCE;
+         positionError.z = rand.nextGaussian()*STD_DEVIATION_OF_POSITION_DISTURBANCE;
+         
+         Transform3D disturbanceTransform = new Transform3D();
+         if (FILTER_GAUSSIAN_POSITION_NOISE)
+         {
+            double alpha = FILTERING_ALPHA;
+            rotationFilter.scale(1-alpha);
+            rotationError.scale(alpha);
+            rotationFilter.add(rotationError);
+            rotationFilter.normalize();
+            
+            positionFilter.scale(1-alpha);
+            positionError.scale(alpha);
+            positionFilter.add(positionError);
+            disturbanceTransform.set(rotationFilter, positionFilter, 1.0);
+         }
+         else
+         {
+            disturbanceTransform.set(rotationError, positionError, 1.0);
+         }
+         temporaryRootToWorldTransform.mul(disturbanceTransform);
+      }
+      
       rootJoint.setPositionAndRotation(temporaryRootToWorldTransform);
 
       referenceFrames.updateFrames();
