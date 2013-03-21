@@ -15,7 +15,6 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 import com.yobotics.simulationconstructionset.util.trajectory.DoubleProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.PositionProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.PositionTrajectoryGenerator;
-import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryParameters;
 import com.yobotics.simulationconstructionset.util.trajectory.VectorProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.YoPolynomial;
 
@@ -160,7 +159,7 @@ public class FifthOrderWaypointPositionTrajectoryGenerator implements PositionTr
       desiredAcceleration.getFrameVectorAndChangeFrameOfPackedVector(accelerationToPack);
    }
 
-   public void initialize(TrajectoryParameters trajectoryParameters)
+   public void initialize()
    {
       double stepTime = stepTimeProvider.getValue();
       MathTools.checkIfInRange(stepTime, 0.0, Double.POSITIVE_INFINITY);

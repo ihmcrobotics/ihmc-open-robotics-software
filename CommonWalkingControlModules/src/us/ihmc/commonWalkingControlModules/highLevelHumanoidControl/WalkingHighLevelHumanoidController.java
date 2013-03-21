@@ -97,6 +97,8 @@ import com.yobotics.simulationconstructionset.util.statemachines.StateTransition
 import com.yobotics.simulationconstructionset.util.trajectory.DoubleProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.DoubleTrajectoryGenerator;
 import com.yobotics.simulationconstructionset.util.trajectory.PositionTrajectoryGenerator;
+import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryParameters;
+import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryParametersProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.YoPositionProvider;
 
 public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedController
@@ -123,7 +125,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
    private final DoubleYoVariable stopInDoubleSupporTrajectoryTime = new DoubleYoVariable("stopInDoubleSupporTrajectoryTime", registry);
 
    private final FinalDesiredICPCalculator finalDesiredICPCalculator;
-  
+
    private final BooleanYoVariable rememberFinalICPFromSingleSupport = new BooleanYoVariable("rememberFinalICPFromSingleSupport", registry);
    private final YoFramePoint2d finalDesiredICPInWorld = new YoFramePoint2d("finalDesiredICPInWorld", "", worldFrame, registry);
 
@@ -149,6 +151,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
                                                                                                         EndEffectorControlModule>();
 //   private final SideDependentList<PositionTrajectoryGenerator> footPositionTrajectoryGenerators;
    private final DoubleProvider swingTimeProvider;
+   private final TrajectoryParametersProvider trajectoryParametersProvider;
    private final SideDependentList<YoVariableDoubleProvider> onEdgeInitialAngleProviders = new SideDependentList<YoVariableDoubleProvider>();
    private final SideDependentList<YoVariableDoubleProvider> onEdgeFinalAngleProviders = new SideDependentList<YoVariableDoubleProvider>();
    private final BooleanYoVariable stayOnToes = new BooleanYoVariable("stayOnToes", registry);
@@ -167,6 +170,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
    private Footstep nextNextFootstep = null;
 
    private final FootstepProvider footstepProvider;
+   private final HashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters;
    private final InstantaneousCapturePointTrajectory icpTrajectoryGenerator;
    private final SideDependentList<SettableOrientationProvider> finalFootOrientationProviders = new SideDependentList<SettableOrientationProvider>();
 
@@ -195,11 +199,13 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
            CenterOfMassJacobian centerOfMassJacobian, SideDependentList<? extends ContactablePlaneBody> bipedFeet, BipedSupportPolygons bipedSupportPolygons,
            SideDependentList<FootSwitchInterface> footSwitches, double gravityZ, DoubleYoVariable yoTime, double controlDT,
            DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, FootstepProvider footstepProvider, DesiredHandPoseProvider handPoseProvider,
-           DesiredHeadOrientationProvider desiredHeadOrientationProvider, CoMHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator,
-           GroundReactionWrenchDistributor groundReactionWrenchDistributor, SideDependentList<PositionTrajectoryGenerator> footPositionTrajectoryGenerators,
-           DoubleProvider swingTimeProvider, YoPositionProvider finalPositionProvider, boolean stayOntoes, double desiredPelvisPitch, double trailingFootPitch,
-           ArrayList<Updatable> updatables, ProcessedOutputsInterface processedOutputs, WalkingControllerParameters walkingControllerParameters,
-           ICPBasedMomentumRateOfChangeControlModule momentumRateOfChangeControlModule, RootJointAccelerationControlModule rootJointAccelerationControlModule,
+           HashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters, DesiredHeadOrientationProvider desiredHeadOrientationProvider,
+           CoMHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator, GroundReactionWrenchDistributor groundReactionWrenchDistributor,
+           SideDependentList<PositionTrajectoryGenerator> footPositionTrajectoryGenerators, DoubleProvider swingTimeProvider,
+           YoPositionProvider finalPositionProvider, TrajectoryParametersProvider trajectoryParametersProvider, boolean stayOntoes, double desiredPelvisPitch,
+           double trailingFootPitch, ArrayList<Updatable> updatables, ProcessedOutputsInterface processedOutputs,
+           WalkingControllerParameters walkingControllerParameters, ICPBasedMomentumRateOfChangeControlModule momentumRateOfChangeControlModule,
+           RootJointAccelerationControlModule rootJointAccelerationControlModule,
            ControlFlowInputPort<OrientationTrajectoryData> desiredPelvisOrientationTrajectoryInputPort, OneDoFJoint lidarJoint,
            FinalDesiredICPCalculator finalDesiredICPCalculator)
    {
@@ -213,7 +219,9 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       this.centerOfMassJacobian = centerOfMassJacobian;
       this.centerOfMassHeightTrajectoryGenerator = centerOfMassHeightTrajectoryGenerator;
       this.swingTimeProvider = swingTimeProvider;
+      this.trajectoryParametersProvider = trajectoryParametersProvider;
       this.footstepProvider = footstepProvider;
+      this.mapFromFootstepsToTrajectoryParameters = mapFromFootstepsToTrajectoryParameters;
       this.footSwitches = footSwitches;
 
       this.centerOfMassHeightController = new PDController("comHeight", registry);
@@ -233,9 +241,9 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 
       rememberFinalICPFromSingleSupport.set(true);
       finalDesiredICPInWorld.set(Double.NaN, Double.NaN);
-      
+
       coefficientOfFriction.set(0.6);    // TODO: Make DRCFlatGroundWalkingTest work with this at 0.7
-      
+
       setupLimbJacobians(fullRobotModel);
 
       for (RobotSide robotSide : RobotSide.values())
@@ -537,12 +545,11 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
          {
             if (!icpTrajectoryHasBeenInitialized.getBooleanValue())
             {
-               
                Pair<FramePoint2d, Double> finalDesiredICPAndTrajectoryTime = computeFinalDesiredICPAndTrajectoryTime();
 
                FramePoint2d finalDesiredICP = finalDesiredICPAndTrajectoryTime.first();
                double trajectoryTime = finalDesiredICPAndTrajectoryTime.second();
-               
+
                finalDesiredICP.changeFrame(desiredICP.getReferenceFrame());
 
                if (!stayOnToes.getBooleanValue() && (transferToSide != null))    // the only case left for determining the contact state of the trailing foot
@@ -599,26 +606,26 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       private Pair<FramePoint2d, Double> computeFinalDesiredICPAndTrajectoryTime()
       {
          Pair<FramePoint2d, Double> finalDesiredICPAndTrajectoryTime;
-         
-         
+
+
          if (transferToSide == null)
          {
             FramePoint2d finalDesiredICP = getDoubleSupportFinalDesiredICPForDoubleSupportStance();
             double trajectoryTime = stopInDoubleSupporTrajectoryTime.getDoubleValue();
-            
+
             finalDesiredICPInWorld.set(Double.NaN, Double.NaN);
-            
+
             finalDesiredICPAndTrajectoryTime = new Pair<FramePoint2d, Double>(finalDesiredICP, trajectoryTime);
          }
-         
-         else if (rememberFinalICPFromSingleSupport.getBooleanValue() && !finalDesiredICPInWorld.containsNaN())
+
+         else if (rememberFinalICPFromSingleSupport.getBooleanValue() &&!finalDesiredICPInWorld.containsNaN())
          {
             FramePoint2d finalDesiredICP = finalDesiredICPInWorld.getFramePoint2dCopy();
             double trajectoryTime = transferTimeProvider.getValue();
-            
+
             finalDesiredICPAndTrajectoryTime = new Pair<FramePoint2d, Double>(finalDesiredICP, trajectoryTime);
          }
-         
+
          else
          {
             FramePose currentFramePose = new FramePose(referenceFrames.getFootFrame(transferToSide));
@@ -632,8 +639,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
             List<FramePoint> expectedContactPoints = FootstepUtils.getContactPointsInFrame(contactablePlaneBody, soleReferenceFrame);
             boolean trustHeight = true;
 
-            Footstep transferToFootstep = new Footstep(contactablePlaneBody, currentPoseReferenceFrame, soleReferenceFrame, expectedContactPoints,
-                                             trustHeight);
+            Footstep transferToFootstep = new Footstep(contactablePlaneBody, currentPoseReferenceFrame, soleReferenceFrame, expectedContactPoints, trustHeight);
 
 
             TransferToAndNextFootstepsData transferToAndNextFootstepsData = new TransferToAndNextFootstepsData();
@@ -647,10 +653,11 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 
             FramePoint2d finalDesiredICP = finalDesiredICPCalculator.getFinalDesiredICPForWalking(transferToAndNextFootstepsData);
             double trajectoryTime = transferTimeProvider.getValue();
-            
+
             finalDesiredICPInWorld.set(finalDesiredICP.changeFrameCopy(worldFrame));
             finalDesiredICPAndTrajectoryTime = new Pair<FramePoint2d, Double>(finalDesiredICP, trajectoryTime);
          }
+
          return finalDesiredICPAndTrajectoryTime;
       }
 
@@ -878,7 +885,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
          boolean footHitGround = (stateMachine.timeInCurrentState() > minimumSwingTime) && footSwitches.get(swingSide).hasFootHitGround();
 
          // transferring out of single support once the ICP trajectory is done guarantees that we never reach the zero velocity desired
-         boolean trajectoryDone = icpTrajectoryGenerator.isDone(); // endEffectorControlModule.isTrajectoryDone();
+         boolean trajectoryDone = icpTrajectoryGenerator.isDone();    // endEffectorControlModule.isTrajectoryDone();
 
          return trajectoryDone || footHitGround;
       }
@@ -991,7 +998,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
          List<FramePoint> toePoints = getToePoints(supportFoot);
          toeOffPoint.interpolate(toePoints.get(0), toePoints.get(1), 0.5);
          FramePoint2d toeOffPoint2d = toeOffPoint.toFramePoint2d();
-         double toeOffPointToFinalDesiredFactor = 0.2; // TODO: magic number
+         double toeOffPointToFinalDesiredFactor = 0.2;    // TODO: magic number
          FramePoint2d desiredToeOffCoP = new FramePoint2d(worldFrame);
          desiredToeOffCoP.interpolate(toeOffPoint2d, finalDesiredICP, toeOffPointToFinalDesiredFactor);
          icpWayPoint = EquivalentConstantCoPCalculator.computeICPMotionWithConstantCMP(finalDesiredICP, desiredToeOffCoP, -transferTimeProvider.getValue(),
@@ -999,7 +1006,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       }
       else
       {
-         double glideFactor = 0.9; // TODO: magic number
+         double glideFactor = 0.9;    // TODO: magic number
          icpWayPoint = new FramePoint2d(worldFrame);
          icpWayPoint.interpolate(desiredICP.getFramePoint2dCopy(), finalDesiredICP, glideFactor);
       }
@@ -1069,6 +1076,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 //      initialAcceleration.setToZero(trajectoryGeneratorFrame);    // TODO
 
       finalPositionProvider.set(nextFootstep.getPositionInFrame(worldFrame));
+//      trajectoryParametersProvider.set(mapFromFootstepsToTrajectoryParameters.containsKey(nextFootstep) ? mapFromFootstepsToTrajectoryParameters.get(nextFootstep) : null); //TODO fix
       finalFootOrientationProviders.get(swingSide).setOrientation(nextFootstep.getOrientationInFrame(worldFrame));
 
       FrameOrientation initialPelvisOrientation = new FrameOrientation(worldFrame);
@@ -1079,7 +1087,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       FrameOrientation finalPelvisOrientation = nextFootstep.getOrientationInFrame(worldFrame);
       finalPelvisOrientation.setYawPitchRoll(finalPelvisOrientation.getYawPitchRoll()[0], userDesiredPelvisPitch.getDoubleValue(), 0.0);
       finalPelvisOrientationProvider.setOrientation(finalPelvisOrientation);
-      pelvisOrientationTrajectoryGenerator.initialize(null);
+      pelvisOrientationTrajectoryGenerator.initialize();
 
       FramePoint finalDesiredStepLocation = nextFootstep.getPositionInFrame(trajectoryGeneratorFrame);
       finalDesiredStepLocation.setZ(finalDesiredStepLocation.getZ());
