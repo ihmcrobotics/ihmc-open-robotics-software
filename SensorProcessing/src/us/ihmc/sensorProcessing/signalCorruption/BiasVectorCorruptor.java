@@ -14,7 +14,6 @@ public class BiasVectorCorruptor implements SignalCorruptor<Vector3d>
 {
    private final YoVariableRegistry registry;
    private final Random random;
-   private final Vector3d biasUpdate = new Vector3d();
    private final Vector3d biasVector = new Vector3d();
    private final DoubleYoVariable standardDeviation;
    private final YoFrameVector biasYoFrameVector;
@@ -38,7 +37,6 @@ public class BiasVectorCorruptor implements SignalCorruptor<Vector3d>
       double biasUpdateX = std * random.nextGaussian() * updateDT;
       double biasUpdateY = std * random.nextGaussian() * updateDT;
       double biasUpdateZ = std * random.nextGaussian() * updateDT;
-      biasUpdate.set(biasUpdateX, biasUpdateY, biasUpdateZ);
       
       biasYoFrameVector.add(biasUpdateX, biasUpdateY, biasUpdateZ);
       biasYoFrameVector.get(biasVector);
