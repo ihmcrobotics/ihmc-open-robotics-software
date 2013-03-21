@@ -347,5 +347,4 @@ public class YoKalmanFilter implements KalmanFilter
 
       storeInYoVariablesSymmetric(P, yoP);
    }
-
 }
