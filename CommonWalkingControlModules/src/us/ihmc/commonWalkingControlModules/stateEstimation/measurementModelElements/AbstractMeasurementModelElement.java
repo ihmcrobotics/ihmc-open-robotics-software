@@ -48,7 +48,7 @@ public abstract class AbstractMeasurementModelElement implements MeasurementMode
       CommonOps.setIdentity(measurementCovarianceMatrixBlock);
       CommonOps.scale(variance, measurementCovarianceMatrixBlock);
    }
-   
+
    public void setNoiseCovariance(DenseMatrix64F measurementNoiseCovariance)
    {
       measurementCovarianceMatrixBlock.set(measurementNoiseCovariance);

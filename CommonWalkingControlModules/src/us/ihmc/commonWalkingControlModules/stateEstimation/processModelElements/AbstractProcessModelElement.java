@@ -30,7 +30,7 @@ public abstract class AbstractProcessModelElement implements ProcessModelElement
       covarianceMatrixScaling = new DoubleYoVariable(name + "CovScaling", registry);
       covarianceMatrixScaling.set(1.0);
    }
-   
+
    public DenseMatrix64F getStateMatrixBlock(ControlFlowOutputPort<?> statePort)
    {
       return stateMatrixBlocks.get(statePort);
@@ -48,7 +48,7 @@ public abstract class AbstractProcessModelElement implements ProcessModelElement
 
       return scaledProcessNoiseCovarianceMatrixBlock;
    }
-   
+
    public void setProcessNoiseCovarianceBlock(DenseMatrix64F processNoiseCovarianceBlock)
    {
       this.processNoiseCovarianceBlock.set(processNoiseCovarianceBlock);

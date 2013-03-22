@@ -106,7 +106,7 @@ public class ComposableStateEstimator extends AbstractControlFlowElement
       kalmanFilter = new ComposableStateEstimatorKalmanFilter(stateSize, inputSize, measurementSize);
       initializeState();
    }
-   
+
    private void initializeState()
    {
       // TODO Auto-generated method stub
