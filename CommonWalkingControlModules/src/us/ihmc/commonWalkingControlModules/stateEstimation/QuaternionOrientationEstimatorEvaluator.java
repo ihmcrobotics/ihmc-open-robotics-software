@@ -50,7 +50,10 @@ public class QuaternionOrientationEstimatorEvaluator
    private final double angularAccelerationProcessNoiseStandardDeviation = Math.sqrt(1.0);
    private final double angularVelocityBiasProcessNoiseStandardDeviation = Math.sqrt(1e-2);
 
-   private final double controlDT = 0.005;
+   private final double simDT = 1e-3;
+   private final int simTicksPerControlDT = 5;
+   private final double controlDT = simDT * simTicksPerControlDT;
+   private final int simTicksPerRecord = simTicksPerControlDT;
 
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
@@ -59,12 +62,12 @@ public class QuaternionOrientationEstimatorEvaluator
    {
       QuaternionOrientationEstimatorEvaluatorRobot robot = new QuaternionOrientationEstimatorEvaluatorRobot();
       QuaternionOrientationEstimatorEvaluatorController controller = new QuaternionOrientationEstimatorEvaluatorController(robot, controlDT);
-      robot.setController(controller);
+      robot.setController(controller, simTicksPerControlDT);
 
       SimulationConstructionSet scs = new SimulationConstructionSet(robot, 32000);
       scs.addYoVariableRegistry(registry);
 
-      scs.setDT(controlDT, 1);
+      scs.setDT(simDT, simTicksPerRecord);
       scs.setSimulateDuration(45.0);
       scs.startOnAThread();
    }
