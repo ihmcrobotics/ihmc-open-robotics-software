@@ -45,7 +45,7 @@ public class OrientationMeasurementModelElement extends AbstractMeasurementModel
       this.orientationMeasurementInputPort = orientationMeasurementInputPort;
       this.estimationFrame = estimationFrame;
       this.measurementFrame = measurementFrame;
-      
+
       outputMatrixBlocks.put(orientationStatePort, new DenseMatrix64F(SIZE, SIZE));
       computeOrientationStateOutputBlock();
    }

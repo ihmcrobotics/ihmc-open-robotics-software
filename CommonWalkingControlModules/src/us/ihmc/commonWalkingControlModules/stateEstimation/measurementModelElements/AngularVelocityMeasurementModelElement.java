@@ -33,7 +33,7 @@ public class AngularVelocityMeasurementModelElement extends AbstractMeasurementM
    // temp stuff
    private final Twist tempTwist = new Twist();
    private final FrameVector relativeAngularVelocity = new FrameVector(ReferenceFrame.getWorldFrame());
-   private final Vector3d angularVelocityResidual = new Vector3d();
+   private final FrameVector angularVelocityResidual;
 
    public AngularVelocityMeasurementModelElement(ControlFlowOutputPort<FrameVector> angularVelocityStatePort, ControlFlowOutputPort<FrameVector> biasStatePort,
            ControlFlowInputPort<Vector3d> angularVelocityMeasurementInputPort, RigidBody orientationEstimationLink, RigidBody measurementLink,
@@ -47,6 +47,7 @@ public class AngularVelocityMeasurementModelElement extends AbstractMeasurementM
       this.measurementLink = measurementLink;
       this.measurementFrame = measurementFrame;
       this.twistCalculator = twistCalculator;
+      this.angularVelocityResidual = new FrameVector(measurementFrame);
 
       outputMatrixBlocks.put(angularVelocityStatePort, new DenseMatrix64F(SIZE, SIZE));
       outputMatrixBlocks.put(biasStatePort, new DenseMatrix64F(SIZE, SIZE));
@@ -84,9 +85,9 @@ public class AngularVelocityMeasurementModelElement extends AbstractMeasurementM
       predictedAngularVelocityMeasurement.add(relativeAngularVelocity);
       predictedAngularVelocityMeasurement.add(biasStatePort.getData());
 
-      angularVelocityResidual.set(measuredAngularVelocityVector3d);
-      angularVelocityResidual.sub(predictedAngularVelocityMeasurement.getVector());
-      MatrixTools.insertTuple3dIntoEJMLVector(measuredAngularVelocityVector3d, residual, 0);
+      angularVelocityResidual.set(measurementFrame, measuredAngularVelocityVector3d);
+      angularVelocityResidual.sub(predictedAngularVelocityMeasurement);
+      MatrixTools.insertTuple3dIntoEJMLVector(angularVelocityResidual.getVector(), residual, 0);
 
       return residual;
    }
