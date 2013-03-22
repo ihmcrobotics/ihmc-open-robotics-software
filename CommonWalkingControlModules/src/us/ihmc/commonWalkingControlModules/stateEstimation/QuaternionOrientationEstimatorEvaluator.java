@@ -252,9 +252,9 @@ public class QuaternionOrientationEstimatorEvaluator
          estimatedFullRobotModel = new QuaternionOrientationEstimatorEvaluatorFullRobotModel(robot);
          estimatedTwistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), estimatedFullRobotModel.getBody());
 
-         OrientationSensorConfiguration<ControlFlowOutputPort<Matrix3d>> orientationSensors = createOrientationSensors(perfectFullRobotModel,
+         OldOrientationSensorConfiguration<ControlFlowOutputPort<Matrix3d>> orientationSensors = createOrientationSensors(perfectFullRobotModel,
                                                                                                  estimatedFullRobotModel);
-         AngularVelocitySensorConfiguration<ControlFlowOutputPort<Vector3d>> angularVelocitySensors = createAngularVelocitySensors(perfectFullRobotModel,
+         OldAngularVelocitySensorConfiguration<ControlFlowOutputPort<Vector3d>> angularVelocitySensors = createAngularVelocitySensors(perfectFullRobotModel,
                                                                                                          estimatedFullRobotModel);
 
          controlFlowGraph = new ControlFlowGraph();
@@ -294,12 +294,12 @@ public class QuaternionOrientationEstimatorEvaluator
 
       }
 
-      private AngularVelocitySensorConfiguration<ControlFlowOutputPort<Vector3d>> createAngularVelocitySensors(
+      private OldAngularVelocitySensorConfiguration<ControlFlowOutputPort<Vector3d>> createAngularVelocitySensors(
               QuaternionOrientationEstimatorEvaluatorFullRobotModel perfectFullRobotModel,
               QuaternionOrientationEstimatorEvaluatorFullRobotModel estimatedFullRobotModel)
       {
-         AngularVelocitySensorConfiguration<ControlFlowOutputPort<Vector3d>> angularVelocitySensorConfiguration =
-            new AngularVelocitySensorConfiguration<ControlFlowOutputPort<Vector3d>>();
+         OldAngularVelocitySensorConfiguration<ControlFlowOutputPort<Vector3d>> angularVelocitySensorConfiguration =
+            new OldAngularVelocitySensorConfiguration<ControlFlowOutputPort<Vector3d>>();
 
          if (CREATE_ANGULAR_VELOCITY_SENSOR)
          {
@@ -327,12 +327,12 @@ public class QuaternionOrientationEstimatorEvaluator
          return angularVelocitySensorConfiguration;
       }
 
-      private OrientationSensorConfiguration<ControlFlowOutputPort<Matrix3d>> createOrientationSensors(
+      private OldOrientationSensorConfiguration<ControlFlowOutputPort<Matrix3d>> createOrientationSensors(
               QuaternionOrientationEstimatorEvaluatorFullRobotModel perfectFullRobotModel,
               QuaternionOrientationEstimatorEvaluatorFullRobotModel estimatedFullRobotModel)
       {
-         OrientationSensorConfiguration<ControlFlowOutputPort<Matrix3d>> orientationSensorConfiguration =
-            new OrientationSensorConfiguration<ControlFlowOutputPort<Matrix3d>>();
+         OldOrientationSensorConfiguration<ControlFlowOutputPort<Matrix3d>> orientationSensorConfiguration =
+            new OldOrientationSensorConfiguration<ControlFlowOutputPort<Matrix3d>>();
 
          if (CREATE_ORIENTATION_SENSOR)
          {

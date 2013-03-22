@@ -1,57 +1,46 @@
 package us.ihmc.commonWalkingControlModules.stateEstimation;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-
 import javax.vecmath.Matrix3d;
 
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.controlFlow.ControlFlowOutputPort;
-import us.ihmc.controlFlow.ControlFlowPort;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
-public class OrientationSensorConfiguration<PortType extends ControlFlowPort<Matrix3d>> extends SensorConfiguration<Matrix3d, PortType>
+public class OrientationSensorConfiguration
 {
-   private static final int ROTATION_VECTOR_LENGTH = 3;
+   private final ControlFlowOutputPort<Matrix3d> outputPort;
 
-   private final Map<PortType, ReferenceFrame> measurementFrames = new HashMap<PortType, ReferenceFrame>();
+   private final String name;
+   private final ReferenceFrame measurementFrame;
+   private final DenseMatrix64F orientationNoiseCovariance;
 
-   public OrientationSensorConfiguration()
+   public OrientationSensorConfiguration(ControlFlowOutputPort<Matrix3d> outputPort, String name, ReferenceFrame measurementFrame,
+           DenseMatrix64F orientationNoiseCovariance)
    {
-      super(ROTATION_VECTOR_LENGTH);
+      this.outputPort = outputPort;
+      this.name = name;
+      this.measurementFrame = measurementFrame;
+      this.orientationNoiseCovariance = orientationNoiseCovariance;
    }
 
-   public void addSensor(PortType measurementPort, ReferenceFrame measurementFrame, String sensorName, DenseMatrix64F covariance)
+   public ReferenceFrame getMeasurementFrame()
    {
-      measurementPorts.add(measurementPort);
-      measurementFrames.put(measurementPort, measurementFrame);
-      sensorNames.put(measurementPort, sensorName);
-      covariances.put(measurementPort, covariance);
+      return measurementFrame;
    }
 
-   public ReferenceFrame getReferenceFrame(PortType port)
+   public String getName()
    {
-      return measurementFrames.get(port);
+      return name;
    }
 
-   public ArrayList<NewOrientationSensorConfiguration> getNewOrientationSensorConfiguration()
+   public ControlFlowOutputPort<Matrix3d> getOutputPort()
    {
-      ArrayList<NewOrientationSensorConfiguration> ret = new ArrayList<NewOrientationSensorConfiguration>();
+      return outputPort;
+   }
 
-      for (PortType measurementPort : measurementPorts)
-      {
-         ControlFlowOutputPort<Matrix3d> outputPort = (ControlFlowOutputPort<Matrix3d>) measurementPort;
-         String name = sensorNames.get(measurementPort);
-         ReferenceFrame measurementFrame = measurementFrames.get(measurementPort);
-         DenseMatrix64F orientationNoiseCovariance = covariances.get(measurementPort);
-         NewOrientationSensorConfiguration newOrientationSensorConfiguration = new NewOrientationSensorConfiguration(outputPort, name, measurementFrame,
-                                                                                  orientationNoiseCovariance);
-
-         ret.add(newOrientationSensorConfiguration);
-      }
-
-      return ret;
+   public DenseMatrix64F getOrientationNoiseCovariance()
+   {
+      return orientationNoiseCovariance;
    }
 }
