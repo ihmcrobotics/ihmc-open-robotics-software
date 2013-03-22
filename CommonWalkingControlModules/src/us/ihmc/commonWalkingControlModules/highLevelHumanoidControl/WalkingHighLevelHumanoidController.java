@@ -23,6 +23,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.GroundReactionWrenchDi
 import us.ihmc.commonWalkingControlModules.controlModules.head.DesiredHeadOrientationProvider;
 import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationControlModule;
 import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.Updatable;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorFootstepProviderWrapper;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorTools;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepProvider;
@@ -727,6 +728,11 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       {
          if (nextFootstep == null || (simulationRewoundListener != null && simulationRewoundListener.wasRewound(2)))
          {
+            if (footstepProvider instanceof DesiredFootstepCalculatorFootstepProviderWrapper && nextFootstep != null)
+            {
+               ((DesiredFootstepCalculatorFootstepProviderWrapper) footstepProvider).setNextSwingLeg(upcomingSupportLeg.getEnumValue().getOppositeSide());
+            }
+            
             nextFootstep = footstepProvider.poll();
             
             if (nextFootstep != null)
