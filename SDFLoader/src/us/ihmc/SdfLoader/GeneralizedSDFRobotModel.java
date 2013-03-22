@@ -10,14 +10,20 @@ import javax.media.j3d.Transform3D;
 import us.ihmc.SdfLoader.xmlDescription.SDFJoint;
 import us.ihmc.SdfLoader.xmlDescription.SDFLink;
 import us.ihmc.SdfLoader.xmlDescription.SDFModel;
+import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 
-public class GeneralizedSDFRobotModel
+import com.yobotics.simulationconstructionset.graphics.GraphicsObjectsHolder;
+
+public class GeneralizedSDFRobotModel implements GraphicsObjectsHolder
 {
    private final String name;
    private final ArrayList<String> resourceDirectories;
    private final ArrayList<SDFLinkHolder> rootLinks = new ArrayList<SDFLinkHolder>();
    private final Transform3D transformToRoot;
-
+   private final HashMap<String, SDFJointHolder> joints = new HashMap<String, SDFJointHolder>();
+   private final HashMap<String, SDFLinkHolder> links = new HashMap<String, SDFLinkHolder>();
+   
+   
    public GeneralizedSDFRobotModel(String name, SDFModel model, ArrayList<String> resourceDirectories)
    {
       this.name = name;
@@ -25,8 +31,7 @@ public class GeneralizedSDFRobotModel
       List<SDFLink> sdfLinks = model.getLinks();
       List<SDFJoint> sdfJoints = model.getJoints();
       
-      HashMap<String, SDFJointHolder> joints = new HashMap<String, SDFJointHolder>();
-      HashMap<String, SDFLinkHolder> links = new HashMap<String, SDFLinkHolder>();
+      
 
       // Populate maps
       for (SDFLink sdfLink : sdfLinks)
@@ -89,6 +94,20 @@ public class GeneralizedSDFRobotModel
    public ArrayList<String> getResourceDirectories()
    {
       return resourceDirectories;
+   }
+
+   public Graphics3DObject getGraphicsObject(String name)
+   {
+      
+      for(SDFLinkHolder linkHolder : rootLinks)
+      {
+         if(linkHolder.getName().equals(name))
+         {
+            return new SDFGraphics3DObject(linkHolder.getVisuals(), resourceDirectories);
+         }
+      }
+      
+      return new SDFGraphics3DObject(joints.get(name).getChild().getVisuals(), resourceDirectories);
    }
 
 }
