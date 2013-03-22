@@ -13,6 +13,7 @@ import us.ihmc.controlFlow.ControlFlowElement;
 import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.controlFlow.NullControlFlowElement;
+import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.geometry.Direction;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -61,7 +62,7 @@ public class AngularVelocityMeasurementModelElementTest
       twistCalculator.compute();
 
       FrameVector measuredAngularVelocity = getAngularVelocity(twistCalculator, measurementLink, measurementFrame);
-      FrameVector bias = new FrameVector(measurementFrame);    // new FrameVector(measurementFrame, RandomTools.generateRandomVector(random));
+      FrameVector bias = new FrameVector(measurementFrame, RandomTools.generateRandomVector(random));
       measuredAngularVelocity.add(bias);
       angularVelocityMeasurementInputPort.setData(measuredAngularVelocity.getVectorCopy());
 
