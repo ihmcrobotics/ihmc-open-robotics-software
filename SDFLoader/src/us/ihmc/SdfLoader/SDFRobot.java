@@ -94,10 +94,15 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
       rootJoint.setLink(scsRootLink);
       addRootJoint(rootJoint);
 
+      boolean enableTorqueVelocityLimits = false;
+      if(sdfJointNameMap != null)
+      {
+    	  enableTorqueVelocityLimits = sdfJointNameMap.enableTorqueVelocityLimits();
+      }
 
       for (SDFJointHolder child : rootLink.getChildren())
       {
-         addJointsRecursively(child, rootJoint, MatrixTools.IDENTITY, sdfJointNameMap.enableTorqueVelocityLimits());
+         addJointsRecursively(child, rootJoint, MatrixTools.IDENTITY, enableTorqueVelocityLimits);
       }
 
       for (RobotSide robotSide : RobotSide.values())
