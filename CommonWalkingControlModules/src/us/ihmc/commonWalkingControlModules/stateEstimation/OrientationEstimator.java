@@ -2,7 +2,6 @@ package us.ihmc.commonWalkingControlModules.stateEstimation;
 
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FrameVector;
 
@@ -11,8 +10,6 @@ public interface OrientationEstimator
    public abstract FrameOrientation getEstimatedOrientation();
 
    public abstract FrameVector getEstimatedAngularVelocity();
-
-   public abstract ControlFlowInputPort<FrameVector> getAngularAccelerationInputPort();
 
    public abstract DenseMatrix64F getCovariance();
 

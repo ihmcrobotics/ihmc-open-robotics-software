@@ -110,7 +110,7 @@ public class ComposableStateEstimator extends AbstractControlFlowElement
       int measurementSize = computeIndicesIntoVector(measurementInputPorts, measurementStartIndices, measurementSizes);
 
       kalmanFilter = new ComposableStateEstimatorKalmanFilter(stateSize, inputSize, measurementSize);
-      
+
       kalmanFilter.configure();
       initializeState();
    }
@@ -207,6 +207,10 @@ public class ComposableStateEstimator extends AbstractControlFlowElement
 
       private void updateProcessModel()
       {
+         F.zero();
+         G.zero();
+         Q.zero();
+
          for (ProcessModelElement processModelElement : processModelElements.values())
          {
             processModelElement.computeMatrixBlocks();
@@ -235,6 +239,9 @@ public class ComposableStateEstimator extends AbstractControlFlowElement
 
       private void updateMeasurementModel()
       {
+         H.zero();
+         R.zero();
+
          for (ControlFlowInputPort<?> measurementInputPort : measurementInputPorts)
          {
             MeasurementModelElement measurementModelElement = measurementModelElements.get(measurementInputPort);

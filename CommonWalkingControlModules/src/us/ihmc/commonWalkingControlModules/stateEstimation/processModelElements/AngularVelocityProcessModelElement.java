@@ -33,9 +33,11 @@ public class AngularVelocityProcessModelElement extends AbstractProcessModelElem
       this.angularVelocity = new FrameVector(estimationFrame);
       this.angularVelocityDelta = new FrameVector(estimationFrame);
 
-      inputMatrixBlocks.put(angularAccelerationPort, new DenseMatrix64F(SIZE, SIZE));
-
-      computeAngularAccelerationInputMatrixBlock();
+      if (angularAccelerationPort != null)
+      {
+         inputMatrixBlocks.put(angularAccelerationPort, new DenseMatrix64F(SIZE, SIZE));
+         computeAngularAccelerationInputMatrixBlock();
+      }
    }
 
    private void computeAngularAccelerationInputMatrixBlock()
