@@ -1,6 +1,9 @@
 package us.ihmc.sensorProcessing.encoder.processors;
 
-import com.mathworks.jama.Matrix;
+import org.ejml.data.DenseMatrix64F;
+import org.ejml.factory.LinearSolver;
+import org.ejml.factory.LinearSolverFactory;
+
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.IntegerYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
@@ -19,9 +22,10 @@ public class PolynomialFittingEncoderProcessor extends AbstractEncoderProcessor
    private final IntegerYoVariable[] positions;    // ordered from oldest to newest
    private final DoubleYoVariable[] timestamps;
 
-   private final Matrix a;
-   private Matrix p;
-   private final Matrix b;
+   private final DenseMatrix64F a;
+   private final DenseMatrix64F p;
+   private final DenseMatrix64F b;
+   private final LinearSolver<DenseMatrix64F> solver;
 
    private int skipIndex = 0;
    private double timespan = Double.NaN;
@@ -47,8 +51,10 @@ public class PolynomialFittingEncoderProcessor extends AbstractEncoderProcessor
          timestamps[i] = new DoubleYoVariable(name + "Time" + i, registry);
       }
 
-      a = new Matrix(nEncoderEvents, fitOrder + 1);
-      b = new Matrix(nEncoderEvents, 1);
+      a = new DenseMatrix64F(nEncoderEvents, fitOrder + 1);
+      b = new DenseMatrix64F(a.getNumRows(), 1);
+      p = new DenseMatrix64F(a.getNumCols(), 1);
+      solver = LinearSolverFactory.leastSquares(a.getNumRows(), a.getNumCols());
    }
    
    /**
@@ -156,7 +162,8 @@ public class PolynomialFittingEncoderProcessor extends AbstractEncoderProcessor
          b.set(i, 0, positions[i].getIntegerValue());
       }
 
-      p = a.solve(b);
+      solver.setA(a);
+      solver.solve(b, p);
 
       // TODO: can probably make this more efficient by using the structure of the matrix a...
    }
