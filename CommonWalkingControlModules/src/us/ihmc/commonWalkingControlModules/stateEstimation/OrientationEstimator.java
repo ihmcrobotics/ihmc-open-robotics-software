@@ -16,6 +16,4 @@ public interface OrientationEstimator
    public abstract DenseMatrix64F getState();
 
    public abstract void setState(DenseMatrix64F x, DenseMatrix64F covariance);
-
-   public abstract void setAngularAccelerationNoiseCovariance(DenseMatrix64F angularAccelerationNoiseCovariance);
 }
