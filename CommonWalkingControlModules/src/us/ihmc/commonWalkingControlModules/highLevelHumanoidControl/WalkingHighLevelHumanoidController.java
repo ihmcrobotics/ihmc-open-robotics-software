@@ -728,11 +728,11 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       {
          if ((simulationRewoundListener != null && simulationRewoundListener.wasRewound(2)) || nextFootstep == null)
          {
-        	 if(stateMachine.getCurrentStateEnum().equals(WalkingState.TRANSFER_TO_LEFT_SUPPORT))
+        	 if(footstepProvider instanceof DesiredFootstepCalculatorFootstepProviderWrapper && stateMachine.getCurrentStateEnum().equals(WalkingState.TRANSFER_TO_LEFT_SUPPORT))
         	 {
                  ((DesiredFootstepCalculatorFootstepProviderWrapper) footstepProvider).setNextSwingLeg(RobotSide.RIGHT);        		 
         	 }
-        	 else if(stateMachine.getCurrentStateEnum().equals(WalkingState.TRANSFER_TO_RIGHT_SUPPORT))
+        	 else if(footstepProvider instanceof DesiredFootstepCalculatorFootstepProviderWrapper && stateMachine.getCurrentStateEnum().equals(WalkingState.TRANSFER_TO_RIGHT_SUPPORT))
         	 {
                  ((DesiredFootstepCalculatorFootstepProviderWrapper) footstepProvider).setNextSwingLeg(RobotSide.LEFT);        		         		 
         	 }       	 
