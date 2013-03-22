@@ -726,22 +726,26 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 
       private void checkForFootsteps()
       {
-         if (nextFootstep == null || (simulationRewoundListener != null && simulationRewoundListener.wasRewound(2)))
+         if ((simulationRewoundListener != null && simulationRewoundListener.wasRewound(2)) || nextFootstep == null)
          {
-            if (footstepProvider instanceof DesiredFootstepCalculatorFootstepProviderWrapper && nextFootstep != null)
-            {
-               ((DesiredFootstepCalculatorFootstepProviderWrapper) footstepProvider).setNextSwingLeg(upcomingSupportLeg.getEnumValue().getOppositeSide());
-            }
-            
+        	 if(stateMachine.getCurrentStateEnum().equals(WalkingState.TRANSFER_TO_LEFT_SUPPORT))
+        	 {
+                 ((DesiredFootstepCalculatorFootstepProviderWrapper) footstepProvider).setNextSwingLeg(RobotSide.RIGHT);        		 
+        	 }
+        	 else if(stateMachine.getCurrentStateEnum().equals(WalkingState.TRANSFER_TO_RIGHT_SUPPORT))
+        	 {
+                 ((DesiredFootstepCalculatorFootstepProviderWrapper) footstepProvider).setNextSwingLeg(RobotSide.LEFT);        		         		 
+        	 }       	 
+        	 
             nextFootstep = footstepProvider.poll();
             
-            if (nextFootstep != null)
+            if (nextFootstep != null) //&& !comingFromDS)
             {
                upcomingSupportLeg.set(getRobotSide(nextFootstep.getBody(), bipedFeet).getOppositeSide());
                nextFootstepPose.set(nextFootstep.getPoseCopy());
             }
          }
-         else if (nextNextFootstep == null || (simulationRewoundListener != null && simulationRewoundListener.wasRewound(2)))
+         else if (nextNextFootstep == null || (simulationRewoundListener != null && simulationRewoundListener.wasRewound(1)))
          {
             nextNextFootstep = footstepProvider.peek();
          }
