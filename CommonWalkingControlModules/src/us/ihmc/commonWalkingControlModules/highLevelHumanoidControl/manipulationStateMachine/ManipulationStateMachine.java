@@ -7,6 +7,7 @@ import java.util.EnumMap;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
+import us.ihmc.commonWalkingControlModules.controllers.HandControllerInterface;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.states.IndividualHandControlState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.states.IndividualManipulationState;
@@ -40,17 +41,15 @@ public class ManipulationStateMachine extends AbstractControlFlowElement
 {
    private enum ManipulationState
    {
-      MOVE_HAND_TO_POSITION_IN_CHESTFRAME,
-      MOVE_HAND_TO_POSITION_IN_WORLDFRAME
+      MOVE_HAND_TO_POSITION_IN_CHESTFRAME, MOVE_HAND_TO_POSITION_IN_WORLDFRAME
    };
 
    private final YoVariableRegistry registry;
 
    private final RobotSide robotSide;
-   
+
    private final Collection<DynamicGraphicReferenceFrame> dynamicGraphicReferenceFrames = new ArrayList<DynamicGraphicReferenceFrame>();
 
-   
    private final TaskspaceConstraintData taskspaceConstraintData = new TaskspaceConstraintData();
    private final StateMachine<ManipulationState> stateMachine;
    private final EnumMap<ManipulationState, IndividualManipulationState<ManipulationState>> manipulationStateMap = new EnumMap<ManipulationState, IndividualManipulationState<ManipulationState>>(
@@ -58,25 +57,26 @@ public class ManipulationStateMachine extends AbstractControlFlowElement
 
    private final RigidBodySpatialAccelerationControlModule handSpatialAccelerationControlModule;
 
+   private final HandControllerInterface handController;
+
    public ManipulationStateMachine(final DoubleYoVariable simulationTime, final RobotSide robotSide, final FullRobotModel fullRobotModel,
-         final TwistCalculator twistCalculator, final WalkingControllerParameters walkingControllerParameters,
-         final DesiredHandPoseProvider handPoseProvider, final DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
+         final TwistCalculator twistCalculator, final WalkingControllerParameters walkingControllerParameters, final DesiredHandPoseProvider handPoseProvider,
+         final DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, HandControllerInterface handController,
          final YoVariableRegistry parentRegistry)
    {
       String name = robotSide.getCamelCaseNameForStartOfExpression() + getClass().getSimpleName();
       registry = new YoVariableRegistry(name);
       stateMachine = new StateMachine<ManipulationState>(name, name + "SwitchTime", ManipulationState.class, simulationTime, registry);
       this.robotSide = robotSide;
-      
+
       String frameName = robotSide.getCamelCaseNameForStartOfExpression() + "HandPositionControlFrame";
       final ReferenceFrame frameAfterJoint = fullRobotModel.getHand(robotSide).getParentJoint().getFrameAfterJoint();
-      ReferenceFrame endEffectorFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(frameName,
-            frameAfterJoint, walkingControllerParameters.getHandControlFramesWithRespectToFrameAfterWrist().get(robotSide));
-      
-      
+      ReferenceFrame endEffectorFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(frameName, frameAfterJoint,
+            walkingControllerParameters.getHandControlFramesWithRespectToFrameAfterWrist().get(robotSide));
+
       RigidBody hand = fullRobotModel.getHand(robotSide);
       handSpatialAccelerationControlModule = new RigidBodySpatialAccelerationControlModule(hand.getName(), twistCalculator, hand, endEffectorFrame, registry);
-      
+
       handSpatialAccelerationControlModule.setPositionProportionalGains(100.0, 100.0, 100.0);
       handSpatialAccelerationControlModule.setPositionDerivativeGains(20.0, 20.0, 20.0);
       handSpatialAccelerationControlModule.setOrientationProportionalGains(100.0, 100.0, 100.0);
@@ -88,10 +88,10 @@ public class ManipulationStateMachine extends AbstractControlFlowElement
       IndividualHandControlState<ManipulationState> moveRelativeToChestState = createIndividualHandControlState(1.0,
             ManipulationState.MOVE_HAND_TO_POSITION_IN_CHESTFRAME, fullRobotModel.getChest().getBodyFixedFrame(), fullRobotModel.getChest(),
             currentConfigurationProvider, desiredConfigurationProvider, dynamicGraphicObjectsListRegistry);
-      
+
       IndividualHandControlState<ManipulationState> moveRelativeToWorldState = createIndividualHandControlState(1.0,
-            ManipulationState.MOVE_HAND_TO_POSITION_IN_WORLDFRAME, ReferenceFrame.getWorldFrame(), fullRobotModel.getChest(),
-            currentConfigurationProvider, desiredConfigurationProvider, dynamicGraphicObjectsListRegistry);
+            ManipulationState.MOVE_HAND_TO_POSITION_IN_WORLDFRAME, ReferenceFrame.getWorldFrame(), fullRobotModel.getChest(), currentConfigurationProvider,
+            desiredConfigurationProvider, dynamicGraphicObjectsListRegistry);
 
       StateTransitionCondition toNextChestPosition = new StateTransitionCondition()
       {
@@ -100,7 +100,7 @@ public class ManipulationStateMachine extends AbstractControlFlowElement
             return handPoseProvider.checkForNewPose(robotSide) && !handPoseProvider.isRelativeToWorld();
          }
       };
-      
+
       StateTransitionCondition toNextWorldPosition = new StateTransitionCondition()
       {
          public boolean checkCondition()
@@ -129,21 +129,23 @@ public class ManipulationStateMachine extends AbstractControlFlowElement
          }
       };
 
-      final StateTransition<ManipulationState> toRelativeToChestPositionTransition = new StateTransition<ManipulationStateMachine.ManipulationState>(ManipulationState.MOVE_HAND_TO_POSITION_IN_CHESTFRAME,
-            toNextChestPosition, Arrays.asList(setCurrentPoseBasedOnPreviousDesired, setDesiredPoseBasedOnProvider));
-      final StateTransition<ManipulationState> toRelativeToWorldPositionTransition = new StateTransition<ManipulationStateMachine.ManipulationState>(ManipulationState.MOVE_HAND_TO_POSITION_IN_WORLDFRAME,
-            toNextWorldPosition, Arrays.asList(setCurrentPoseBasedOnPreviousDesired, setDesiredPoseBasedOnProvider));
-      
+      final StateTransition<ManipulationState> toRelativeToChestPositionTransition = new StateTransition<ManipulationStateMachine.ManipulationState>(
+            ManipulationState.MOVE_HAND_TO_POSITION_IN_CHESTFRAME, toNextChestPosition, Arrays.asList(setCurrentPoseBasedOnPreviousDesired,
+                  setDesiredPoseBasedOnProvider));
+      final StateTransition<ManipulationState> toRelativeToWorldPositionTransition = new StateTransition<ManipulationStateMachine.ManipulationState>(
+            ManipulationState.MOVE_HAND_TO_POSITION_IN_WORLDFRAME, toNextWorldPosition, Arrays.asList(setCurrentPoseBasedOnPreviousDesired,
+                  setDesiredPoseBasedOnProvider));
+
       moveRelativeToChestState.addStateTransition(toRelativeToChestPositionTransition);
       moveRelativeToChestState.addStateTransition(toRelativeToWorldPositionTransition);
-      
+
       moveRelativeToWorldState.addStateTransition(toRelativeToChestPositionTransition);
       moveRelativeToWorldState.addStateTransition(toRelativeToWorldPositionTransition);
 
       addState(moveRelativeToChestState);
       addState(moveRelativeToWorldState);
 
-      if(handPoseProvider.isRelativeToWorld())
+      if (handPoseProvider.isRelativeToWorld())
       {
          stateMachine.setCurrentState(ManipulationState.MOVE_HAND_TO_POSITION_IN_WORLDFRAME);
       }
@@ -166,7 +168,9 @@ public class ManipulationStateMachine extends AbstractControlFlowElement
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(list);
          list.hideDynamicGraphicObjects();
       }
-      
+
+      this.handController = handController;
+
       parentRegistry.addChild(registry);
    }
 
@@ -178,9 +182,14 @@ public class ManipulationStateMachine extends AbstractControlFlowElement
 
       taskspaceConstraintData.set(manipulationState.getDesiredHandAcceleration());
 
-      for(DynamicGraphicReferenceFrame frame : dynamicGraphicReferenceFrames)
+      for (DynamicGraphicReferenceFrame frame : dynamicGraphicReferenceFrames)
       {
          frame.update();
+      }
+
+      if (handController != null)
+      {
+         handController.doControl();
       }
    }
 
@@ -245,9 +254,17 @@ public class ManipulationStateMachine extends AbstractControlFlowElement
       }
 
    }
-   
+
    public TaskspaceConstraintData getTaskspaceConstraintData()
    {
       return taskspaceConstraintData;
+   }
+
+   public void doAdditionalTorqueControl()
+   {
+      if (handController != null)
+      {
+         handController.doAdditionalTorqueControl();
+      }
    }
 }

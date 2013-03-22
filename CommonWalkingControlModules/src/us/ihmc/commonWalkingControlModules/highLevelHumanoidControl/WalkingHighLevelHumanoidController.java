@@ -22,6 +22,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.EndEffectorControlModu
 import us.ihmc.commonWalkingControlModules.controlModules.GroundReactionWrenchDistributor;
 import us.ihmc.commonWalkingControlModules.controlModules.head.DesiredHeadOrientationProvider;
 import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationControlModule;
+import us.ihmc.commonWalkingControlModules.controllers.HandControllerInterface;
 import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorTools;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
@@ -207,7 +208,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
    private final boolean resetDesiredICPToCurrentAtStartOfSwing;
    private final BooleanYoVariable icpTrajectoryHasBeenInitialized;
    private final BooleanYoVariable doToeOffIfPossible = new BooleanYoVariable("doToeOffIfPossible", registry);
-   private TwoAcknowledgementSimulationRewoundListener simulationRewoundListener;
+//   private TwoAcknowledgementSimulationRewoundListener simulationRewoundListener;
 
    public WalkingHighLevelHumanoidController(FullRobotModel fullRobotModel, CommonWalkingReferenceFrames referenceFrames, TwistCalculator twistCalculator,
          CenterOfMassJacobian centerOfMassJacobian, SideDependentList<? extends ContactablePlaneBody> bipedFeet, BipedSupportPolygons bipedSupportPolygons,
@@ -221,7 +222,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
          WalkingControllerParameters walkingControllerParameters, ICPBasedMomentumRateOfChangeControlModule momentumRateOfChangeControlModule,
          RootJointAccelerationControlModule rootJointAccelerationControlModule,
          ControlFlowInputPort<OrientationTrajectoryData> desiredPelvisOrientationTrajectoryInputPort, OneDoFJoint lidarJoint,
-         FinalDesiredICPCalculator finalDesiredICPCalculator)
+         FinalDesiredICPCalculator finalDesiredICPCalculator, SideDependentList<HandControllerInterface> handControllers)
    {
       super(fullRobotModel, centerOfMassJacobian, referenceFrames, yoTime, gravityZ, twistCalculator, bipedFeet, bipedSupportPolygons, controlDT,
             processedOutputs, groundReactionWrenchDistributor, updatables, momentumRateOfChangeControlModule, rootJointAccelerationControlModule,
@@ -330,8 +331,15 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 
       for (RobotSide robotSide : RobotSide.values())
       {
+         HandControllerInterface handControllerInterface = null;
+         if(handControllers != null)
+         {
+            handControllerInterface = handControllers.get(robotSide);
+            handControllerInterface.setMomentumSolver(solver);
+
+         }
          manipulationStateMachines.put(robotSide, new ManipulationStateMachine(yoTime, robotSide, fullRobotModel, twistCalculator, walkingControllerParameters,
-               handPoseProvider, dynamicGraphicObjectsListRegistry, registry));
+               handPoseProvider, dynamicGraphicObjectsListRegistry, handControllerInterface, registry));
       }
 
       this.desiredHeadOrientationProvider = desiredHeadOrientationProvider;
@@ -413,6 +421,14 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
          RigidBody foot = fullRobotModel.getFoot(robotSide);
          InverseDynamicsJoint[] legJoints = ScrewTools.createJointPath(pelvis, foot);
          unconstrainedJoints.removeAll(Arrays.asList(legJoints));
+         
+         InverseDynamicsJoint[] handJoints = ScrewTools.computeJointsInOrder(hand);
+         OneDoFJoint[] handJointsArray = new OneDoFJoint[ScrewTools.computeNumberOfJointsOfType(OneDoFJoint.class, handJoints)];
+         ScrewTools.filterJoints(handJoints, handJointsArray, OneDoFJoint.class);
+         
+         List<OneDoFJoint> handJointsList = Arrays.asList(handJointsArray);
+         
+         unconstrainedJoints.removeAll(handJointsList);
       }
 
       this.lidarJoint = lidarJoint;
@@ -465,7 +481,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 
    public void setRewoundListener(TwoAcknowledgementSimulationRewoundListener simulationRewoundListener)
    {
-      this.simulationRewoundListener = simulationRewoundListener;
+//      this.simulationRewoundListener = simulationRewoundListener;
    }
 
    private RobotSide getUpcomingSupportLeg()
@@ -1404,6 +1420,11 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       {
          double lidarJointTau = lidarJointVelocityController.compute(lidarJoint.getQd(), desiredLidarVelocity.getDoubleValue(), 0.0, 0.0, controlDT);
          lidarJoint.setTau(lidarJoint.getTau() + lidarJointTau);
+      }
+      
+      for(RobotSide robotSide : RobotSide.values)
+      {
+         manipulationStateMachines.get(robotSide).doAdditionalTorqueControl();
       }
    }
 
