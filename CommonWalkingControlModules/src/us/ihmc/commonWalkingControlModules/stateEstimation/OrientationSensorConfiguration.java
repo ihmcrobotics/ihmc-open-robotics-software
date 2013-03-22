@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.stateEstimation;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -7,6 +8,7 @@ import javax.vecmath.Matrix3d;
 
 import org.ejml.data.DenseMatrix64F;
 
+import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.controlFlow.ControlFlowPort;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
@@ -32,5 +34,23 @@ public class OrientationSensorConfiguration<PortType extends ControlFlowPort<Mat
    public ReferenceFrame getReferenceFrame(PortType port)
    {
       return measurementFrames.get(port);
+   }
+   
+   public ArrayList<NewOrientationSensorConfiguration> getNewOrientationSensorConfiguration()
+   {
+      ArrayList<NewOrientationSensorConfiguration> ret = new ArrayList<NewOrientationSensorConfiguration>();
+      
+      for (PortType measurementPort : measurementPorts)
+      {
+         ControlFlowOutputPort<Matrix3d> outputPort = (ControlFlowOutputPort<Matrix3d>) measurementPort;
+         String name = sensorNames.get(measurementPort);
+         ReferenceFrame measurementFrame = measurementFrames.get(measurementPort);
+         DenseMatrix64F orientationNoiseCovariance = covariances.get(measurementPort);
+         NewOrientationSensorConfiguration newOrientationSensorConfiguration = new NewOrientationSensorConfiguration(outputPort, name, measurementFrame, orientationNoiseCovariance);
+
+         ret.add(newOrientationSensorConfiguration);
+      }
+      
+      return ret;
    }
 }
