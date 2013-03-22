@@ -27,6 +27,7 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 public class ComposableOrientationEstimatorCreator
 {
    private static final int VECTOR3D_LENGTH = 3;
+
    private final RigidBody orientationEstimationLink;
    private final TwistCalculator twistCalculator;
 
@@ -104,7 +105,7 @@ public class ComposableOrientationEstimatorCreator
 
          for (AngularVelocitySensorConfiguration angularVelocitySensorConfiguration : angularVelocitySensorConfigurations)
          {
-            addAngularVelocitySensor(controlFlowGraph, angularVelocitySensorConfiguration);
+            addAngularVelocitySensor(estimationFrame, controlFlowGraph, angularVelocitySensorConfiguration);
          }
 
          initialize();
@@ -151,7 +152,7 @@ public class ComposableOrientationEstimatorCreator
          controlFlowGraph.connectElements(orientationSensorConfiguration.getOutputPort(), orientationMeasurementPort);
       }
 
-      private void addAngularVelocitySensor(ControlFlowGraph controlFlowGraph, AngularVelocitySensorConfiguration angularVelocitySensorConfiguration)
+      private void addAngularVelocitySensor(ReferenceFrame estimationFrame, ControlFlowGraph controlFlowGraph, AngularVelocitySensorConfiguration angularVelocitySensorConfiguration)
       {
          String biasName = angularVelocitySensorConfiguration.getName() + "BiasEstimate";
          ReferenceFrame measurementFrame = angularVelocitySensorConfiguration.getMeasurementFrame();
@@ -169,7 +170,7 @@ public class ComposableOrientationEstimatorCreator
          DenseMatrix64F angularVelocityNoiseCovariance = angularVelocitySensorConfiguration.getAngularVelocityNoiseCovariance();
 
          AngularVelocityMeasurementModelElement angularVelocityMeasurementModel = new AngularVelocityMeasurementModelElement(angularVelocityPort, biasPort,
-                                                                                     angularVelocityMeasurementPort, orientationEstimationLink,
+                                                                                     angularVelocityMeasurementPort, orientationEstimationLink, estimationFrame,
                                                                                      measurementLink, measurementFrame, twistCalculator, name, registry);
          angularVelocityMeasurementModel.setNoiseCovariance(angularVelocityNoiseCovariance);
 
