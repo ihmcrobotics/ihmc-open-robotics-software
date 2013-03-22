@@ -7,6 +7,7 @@ import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonAvatarInterfaces.CommonAvatarEnvironmentInterface;
 import us.ihmc.commonWalkingControlModules.controllers.ControllerFactory;
 import us.ihmc.commonWalkingControlModules.controllers.HandControllerInterface;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.HandStatePacket;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.CenterOfMassJacobianUpdater;
@@ -76,8 +77,13 @@ public class DRCSimulationFactory
          {
             
             SandiaHandModel handModel = new SandiaHandModel(fullRobotModelForController, robotSide);
-            SimulatedUnderactuatedSandiaHandController simulatedUnderactuatedSandiaHandController = new SimulatedUnderactuatedSandiaHandController(handModel);
+            SimulatedUnderactuatedSandiaHandController simulatedUnderactuatedSandiaHandController = new SimulatedUnderactuatedSandiaHandController(
+                  simulatedRobot.getYoTime(), handModel);
             handControllers.put(robotSide, simulatedUnderactuatedSandiaHandController);
+            if(networkServer != null)
+            {
+               networkServer.attachListener(HandStatePacket.class, simulatedUnderactuatedSandiaHandController);
+            }
             
          }
       }

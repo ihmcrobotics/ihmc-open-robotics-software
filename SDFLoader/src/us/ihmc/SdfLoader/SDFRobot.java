@@ -235,7 +235,7 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
             {
                if ((joint.getContactKd() == 0.0) && (joint.getContactKp() == 0.0))
                {
-                  if (isFinger(pinJoint))
+                  if (isFinger(joint))
                   {
                      pinJoint.setLimitStops(joint.getLowerLimit(), joint.getUpperLimit(), 10.0, 2.5);
                      // Ignore damping
@@ -253,7 +253,7 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
                
                if(enableTorqueVelocityLimits)
                {
-                  if (!isFinger(pinJoint))
+                  if (!isFinger(joint))
                   {
                      if(!Double.isNaN(joint.getEffortLimit()))
                      {
@@ -262,7 +262,10 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
                      
                      if(!Double.isNaN(joint.getVelocityLimit()))
                      {
-                        pinJoint.setVelocityLimits(joint.getVelocityLimit(), 500.0);
+                        if(!isFinger(joint))
+                        {
+                           pinJoint.setVelocityLimits(joint.getVelocityLimit(), 500.0);
+                        }
                      }
                   }                  
                }
@@ -320,7 +323,7 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
 
    }
 
-   private boolean isFinger(PinJoint pinJoint)
+   private boolean isFinger(SDFJointHolder pinJoint)
    {
       return pinJoint.getName().contains("f0") || pinJoint.getName().contains("f1") || pinJoint.getName().contains("f2")
               || pinJoint.getName().contains("f3");

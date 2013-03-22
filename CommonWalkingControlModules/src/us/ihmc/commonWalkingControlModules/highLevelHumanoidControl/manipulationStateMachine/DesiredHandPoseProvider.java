@@ -51,7 +51,6 @@ public class DesiredHandPoseProvider implements ObjectConsumer<HandPosePacket>
 
    public void consumeObject(HandPosePacket object)
    {
-      System.out.println("Received hand pose data");
       RobotSide robotSide = object.getRobotSide();
       hasNewPose.put(robotSide, true);
       
