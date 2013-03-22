@@ -5,7 +5,6 @@ import java.util.Random;
 import javax.vecmath.Vector3d;
 
 import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
 import org.ejml.ops.EjmlUnitTests;
 import org.junit.Test;
 
@@ -19,7 +18,6 @@ import us.ihmc.utilities.math.geometry.Direction;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.RigidBody;
-import us.ihmc.utilities.screwTheory.ScrewTestTools;
 import us.ihmc.utilities.screwTheory.ScrewTestTools.RandomFloatingChain;
 import us.ihmc.utilities.screwTheory.Twist;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
@@ -58,7 +56,7 @@ public class AngularVelocityMeasurementModelElementTest
                                                                angularVelocityMeasurementInputPort, estimationLink, estimationFrame, measurementLink,
                                                                measurementFrame, twistCalculator, name, registry);
 
-      setRandomPositionsAndVelocities(random, randomFloatingChain);
+      randomFloatingChain.setRandomPositionsAndVelocities(random);
       twistCalculator.compute();
 
       FrameVector measuredAngularVelocity = getAngularVelocity(twistCalculator, measurementLink, measurementFrame);
@@ -93,8 +91,9 @@ public class AngularVelocityMeasurementModelElementTest
          perturbedBias.add(perturbationVector);
          biasStatePort.setData(perturbedBias);
 
-         assertResidualCorrect(modelElement, biasOutputMatrixBlock, tol, perturbationEjmlVector);
+         MeasurementModelTestTools.assertDeltaResidualCorrect(modelElement, biasOutputMatrixBlock, perturbationEjmlVector, tol);
       }
+
       biasStatePort.setData(bias);
 
       // angular velocity perturbations
@@ -111,34 +110,8 @@ public class AngularVelocityMeasurementModelElementTest
          perturbedAngularVelocity.add(perturbationVector);
          angularVelocityStatePort.setData(perturbedAngularVelocity);
 
-         assertResidualCorrect(modelElement, angularVelocityOutputMatrixBlock, tol, perturbationEjmlVector);
+         MeasurementModelTestTools.assertDeltaResidualCorrect(modelElement, angularVelocityOutputMatrixBlock, perturbationEjmlVector, tol);
       }
-   }
-
-   private void assertResidualCorrect(AngularVelocityMeasurementModelElement modelElement, DenseMatrix64F biasOutputMatrixBlock, double tol,
-         DenseMatrix64F perturbationEjmlVector)
-   {
-      DenseMatrix64F residual = modelElement.computeResidual();
-      DenseMatrix64F residualFromOutputMatrix = computeResidualFromOutputMatrix(biasOutputMatrixBlock, perturbationEjmlVector);
-      EjmlUnitTests.assertEquals(residual, residualFromOutputMatrix, tol);
-   }
-
-   private DenseMatrix64F computeResidualFromOutputMatrix(DenseMatrix64F biasOutputMatrixBlock, DenseMatrix64F perturbationEjmlVector)
-   {
-      DenseMatrix64F residualFromOutputMatrix = new DenseMatrix64F(3, 1);
-      CommonOps.mult(biasOutputMatrixBlock, perturbationEjmlVector, residualFromOutputMatrix);
-      CommonOps.scale(-1.0, residualFromOutputMatrix);
-
-      return residualFromOutputMatrix;
-   }
-
-   private void setRandomPositionsAndVelocities(Random random, RandomFloatingChain randomFloatingChain)
-   {
-      ScrewTestTools.setRandomPositionAndOrientation(randomFloatingChain.getRootJoint(), random);
-      ScrewTestTools.setRandomVelocity(randomFloatingChain.getRootJoint(), random);
-      ScrewTestTools.setRandomPositions(randomFloatingChain.getRevoluteJoints(), random);
-      ScrewTestTools.setRandomVelocities(randomFloatingChain.getRevoluteJoints(), random);
-      randomFloatingChain.getElevator().updateFramesRecursively();
    }
 
    private FrameVector getAngularVelocity(TwistCalculator twistCalculator, RigidBody rigidBody, ReferenceFrame referenceFrame)
