@@ -108,7 +108,11 @@ public class ComposableStateEstimator extends AbstractControlFlowElement
 
    private void initializeState()
    {
-      // FIXME: fill this in
+      DenseMatrix64F x = kalmanFilter.getState();
+      kalmanFilter.computeSteadyStateGainAndCovariance(50);    // TODO: magic number
+      DenseMatrix64F P = kalmanFilter.getCovariance();
+      CommonOps.scale(10.0, P);    // TODO: magic number
+      kalmanFilter.setState(x, P);
    }
 
    public void waitUntilComputationIsDone()
