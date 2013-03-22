@@ -7,7 +7,10 @@ import us.ihmc.controlFlow.ControlFlowOutputPort;
 public interface MeasurementModelElement
 {
    public abstract void computeMatrixBlocks();
+
    public abstract DenseMatrix64F getOutputMatrixBlock(ControlFlowOutputPort<?> statePort);
+
    public abstract DenseMatrix64F getMeasurementCovarianceMatrixBlock();
+
    public abstract DenseMatrix64F computeResidual();
 }

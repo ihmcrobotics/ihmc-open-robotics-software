@@ -165,15 +165,15 @@ public class QuaternionOrientationEstimatorEvaluator
          rootInverseDynamicsJoint.setJointTwist(bodyTwist);
       }
 
-      
+
       public void updateBasedOnEstimator(OrientationEstimator estimator)
       {
          FrameOrientation estimatedOrientation = estimator.getEstimatedOrientation();
          FrameVector estimatedAngularVelocity = estimator.getEstimatedAngularVelocity();
-         
+
          updateBasedOnEstimator(estimatedOrientation, estimatedAngularVelocity);
       }
-      
+
       public void updateBasedOnEstimator(FrameOrientation estimatedOrientation, FrameVector estimatedAngularVelocity)
       {
          rootInverseDynamicsJoint.setRotation(estimatedOrientation.getQuaternion());
@@ -258,25 +258,24 @@ public class QuaternionOrientationEstimatorEvaluator
          RigidBody estimationLink = estimatedFullRobotModel.getBody();
          DenseMatrix64F angularAccelerationNoiseCovariance = createDiagonalCovarianceMatrix(angularAccelerationProcessNoiseStandardDeviation, 3);
 
-         //TODO: Try using this. Use boolean to select whether to use this or QuaternionOrientationEstimator:
-//         OrientationEstimatorCreator orientationEstimatorCreator = new OrientationEstimatorCreator(angularAccelerationNoiseCovariance, estimationLink, estimatedTwistCalculator);
-//         orientationEstimatorCreator.addOrientationSensorConfigurations(orientationSensors);
-//         orientationEstimatorCreator.addAngularVelocitySensorConfigurations(angularVelocitySensors);
-//         orientationEstimatorCreator.createOrientationEstimator(controlFlowGraph, controlDT, estimationFrame, registry);
-//         orientationEstimator = orientationEstimatorCreator;
-         
-         orientationEstimator = new QuaternionOrientationEstimator(controlFlowGraph, "orientationEstimator", orientationSensors,
-                 angularVelocitySensors, estimationLink, estimationFrame, estimatedTwistCalculator, controlDT, registry);
-         
-         
+         // TODO: Try using this. Use boolean to select whether to use this or QuaternionOrientationEstimator:
+//       OrientationEstimatorCreator orientationEstimatorCreator = new OrientationEstimatorCreator(angularAccelerationNoiseCovariance, estimationLink, estimatedTwistCalculator);
+//       orientationEstimatorCreator.addOrientationSensorConfigurations(orientationSensors);
+//       orientationEstimatorCreator.addAngularVelocitySensorConfigurations(angularVelocitySensors);
+//       orientationEstimatorCreator.createOrientationEstimator(controlFlowGraph, controlDT, estimationFrame, registry);
+//       orientationEstimator = orientationEstimatorCreator;
+
+         orientationEstimator = new QuaternionOrientationEstimator(controlFlowGraph, "orientationEstimator", orientationSensors, angularVelocitySensors,
+                 estimationLink, estimationFrame, estimatedTwistCalculator, controlDT, registry);
+
+
          orientationEstimator.setAngularAccelerationNoiseCovariance(angularAccelerationNoiseCovariance);
-         
+
          if (USE_ANGULAR_ACCELERATION_INPUT)
          {
             AngularAccelerationFromRobotStealer angularAccelerationFromRobotStealer = new AngularAccelerationFromRobotStealer(robot, estimationFrame);
 
-            controlFlowGraph.connectElements(angularAccelerationFromRobotStealer.getOutputPort(),
-                                             orientationEstimator.getAngularAccelerationInputPort());
+            controlFlowGraph.connectElements(angularAccelerationFromRobotStealer.getOutputPort(), orientationEstimator.getAngularAccelerationInputPort());
          }
 
          controlFlowGraph.initializeAfterConnections();
@@ -288,7 +287,7 @@ public class QuaternionOrientationEstimatorEvaluator
             MatrixTools.insertTuple3dIntoEJMLVector(robot.getRootJoint().getAngularVelocityInBody(), x, 3);
             orientationEstimator.setState(x, orientationEstimator.getCovariance());
          }
-         
+
       }
 
       private AngularVelocitySensorConfiguration<ControlFlowOutputPort<Vector3d>> createAngularVelocitySensors(
@@ -302,23 +301,23 @@ public class QuaternionOrientationEstimatorEvaluator
          {
             ReferenceFrame frameUsedForPerfectMeasurement = perfectFullRobotModel.getRootInverseDynamicsJoint().getFrameAfterJoint();
             SimulatedAngularVelocitySensor angularVelocitySensor = new SimulatedAngularVelocitySensor("imu1AngularVelocity", perfectTwistCalculator,
-                  perfectFullRobotModel.getBody(), frameUsedForPerfectMeasurement, registry);
+                                                                      perfectFullRobotModel.getBody(), frameUsedForPerfectMeasurement, registry);
             GaussianVectorCorruptor angularVelocityCorruptor = new GaussianVectorCorruptor(1235L, "gaussianAngularVelocity", registry);
             angularVelocityCorruptor.setStandardDeviation(angularVelocityMeasurementStandardDeviation);
             angularVelocitySensor.addSignalCorruptor(angularVelocityCorruptor);
-            
+
             BiasVectorCorruptor biasVectorCorruptor = new BiasVectorCorruptor(1236L, "angularVelocityBiasCorruptor", controlDT, registry);
             biasVectorCorruptor.setStandardDeviation(angularVelocityBiasProcessNoiseStandardDeviation);
             biasVectorCorruptor.setBias(new Vector3d(0.0, 0.0, 0.0));
             angularVelocitySensor.addSignalCorruptor(biasVectorCorruptor);
-            
-            
+
+
             DenseMatrix64F angularVelocityCovarianceMatrix = createDiagonalCovarianceMatrix(angularVelocityMeasurementStandardDeviation, 3);
             DenseMatrix64F angularVelocityBiasNoiseCovariance = createDiagonalCovarianceMatrix(angularVelocityBiasProcessNoiseStandardDeviation, 3);
             ReferenceFrame measurementFrame = estimatedFullRobotModel.getRootInverseDynamicsJoint().getFrameAfterJoint();
             RigidBody estimatedBody = estimatedFullRobotModel.getBody();
             angularVelocitySensorConfiguration.addSensor(angularVelocitySensor.getAngularVelocityOutputPort(), measurementFrame, estimatedBody,
-                  "imu1AngularVelocity", angularVelocityCovarianceMatrix, angularVelocityBiasNoiseCovariance);
+                    "imu1AngularVelocity", angularVelocityCovarianceMatrix, angularVelocityBiasNoiseCovariance);
          }
 
          return angularVelocitySensorConfiguration;

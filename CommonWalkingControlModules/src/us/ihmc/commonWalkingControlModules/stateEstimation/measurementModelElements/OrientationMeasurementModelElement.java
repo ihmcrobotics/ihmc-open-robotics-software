@@ -74,7 +74,4 @@ public class OrientationMeasurementModelElement extends AbstractMeasurementModel
 
       return residual;
    }
-
-  
-
 }

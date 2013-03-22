@@ -22,7 +22,7 @@ public class OrientationSensorConfiguration<PortType extends ControlFlowPort<Mat
    {
       super(ROTATION_VECTOR_LENGTH);
    }
-   
+
    public void addSensor(PortType measurementPort, ReferenceFrame measurementFrame, String sensorName, DenseMatrix64F covariance)
    {
       measurementPorts.add(measurementPort);
@@ -35,22 +35,23 @@ public class OrientationSensorConfiguration<PortType extends ControlFlowPort<Mat
    {
       return measurementFrames.get(port);
    }
-   
+
    public ArrayList<NewOrientationSensorConfiguration> getNewOrientationSensorConfiguration()
    {
       ArrayList<NewOrientationSensorConfiguration> ret = new ArrayList<NewOrientationSensorConfiguration>();
-      
+
       for (PortType measurementPort : measurementPorts)
       {
          ControlFlowOutputPort<Matrix3d> outputPort = (ControlFlowOutputPort<Matrix3d>) measurementPort;
          String name = sensorNames.get(measurementPort);
          ReferenceFrame measurementFrame = measurementFrames.get(measurementPort);
          DenseMatrix64F orientationNoiseCovariance = covariances.get(measurementPort);
-         NewOrientationSensorConfiguration newOrientationSensorConfiguration = new NewOrientationSensorConfiguration(outputPort, name, measurementFrame, orientationNoiseCovariance);
+         NewOrientationSensorConfiguration newOrientationSensorConfiguration = new NewOrientationSensorConfiguration(outputPort, name, measurementFrame,
+                                                                                  orientationNoiseCovariance);
 
          ret.add(newOrientationSensorConfiguration);
       }
-      
+
       return ret;
    }
 }
