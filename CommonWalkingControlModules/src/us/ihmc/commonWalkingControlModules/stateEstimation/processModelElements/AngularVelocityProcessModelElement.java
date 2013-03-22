@@ -1,18 +1,16 @@
 package us.ihmc.commonWalkingControlModules.stateEstimation.processModelElements;
 
 
-import javax.vecmath.Vector3d;
-
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
-
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public class AngularVelocityProcessModelElement extends AbstractProcessModelElement
 {
@@ -22,8 +20,8 @@ public class AngularVelocityProcessModelElement extends AbstractProcessModelElem
    private final ControlFlowInputPort<FrameVector> angularAccelerationPort;
 
    // temp stuff
-   private final Vector3d angularVelocity = new Vector3d();
-   private final Vector3d angularVelocityDelta = new Vector3d();
+   private final FrameVector angularVelocity;
+   private final FrameVector angularVelocityDelta;
 
    public AngularVelocityProcessModelElement(ReferenceFrame estimationFrame, ControlFlowOutputPort<FrameVector> angularVelocityPort,
            ControlFlowInputPort<FrameVector> angularAccelerationPort, String name, YoVariableRegistry registry)
@@ -32,6 +30,8 @@ public class AngularVelocityProcessModelElement extends AbstractProcessModelElem
       this.estimationFrame = estimationFrame;
       this.angularVelocityPort = angularVelocityPort;
       this.angularAccelerationPort = angularAccelerationPort;
+      this.angularVelocity = new FrameVector(estimationFrame);
+      this.angularVelocityDelta = new FrameVector(estimationFrame);
 
       inputMatrixBlocks.put(angularAccelerationPort, new DenseMatrix64F(SIZE, SIZE));
 
@@ -54,7 +54,7 @@ public class AngularVelocityProcessModelElement extends AbstractProcessModelElem
       {
          FrameVector angularAcceleration = angularAccelerationPort.getData();
          angularAcceleration.changeFrame(estimationFrame);
-         angularAcceleration.getVector(angularVelocityDelta);
+         angularVelocityDelta.set(angularAcceleration);
          angularVelocityDelta.scale(dt);
 
          updateAngularVelocity(angularVelocityDelta);
@@ -63,15 +63,14 @@ public class AngularVelocityProcessModelElement extends AbstractProcessModelElem
 
    public void correctState(DenseMatrix64F correction)
    {
-      MatrixTools.extractTuple3dFromEJMLVector(angularVelocityDelta, correction, 0);
+      MatrixTools.extractTuple3dFromEJMLVector(angularVelocityDelta.getVector(), correction, 0);
       updateAngularVelocity(angularVelocityDelta);
    }
 
-   private void updateAngularVelocity(Vector3d angularVelocityDelta)
+   private void updateAngularVelocity(FrameVector angularVelocityDelta)
    {
-      angularVelocityPort.getData().checkReferenceFrameMatch(estimationFrame);
-      angularVelocityPort.getData().getVector(angularVelocity);
+      angularVelocity.set(angularVelocityPort.getData());
       angularVelocity.add(angularVelocityDelta);
-      angularVelocityPort.getData().set(angularVelocity);
+      angularVelocityPort.setData(angularVelocity);
    }
 }
