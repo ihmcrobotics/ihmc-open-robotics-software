@@ -29,10 +29,6 @@ public class OrientationEstimatorCreator
    private final RigidBody orientationEstimationLink;
    private final TwistCalculator twistCalculator;
 
-   // TODO: Set angularVelocityProcessNoiseStandardDeviation
-   // private final double angularVelocityProcessNoiseStandardDeviation;
-
-   // TODO: Do something with angularAccelerationNoiseCovariance;
    private final DenseMatrix64F angularAccelerationNoiseCovariance;
 
    private final List<NewOrientationSensorConfiguration> orientationSensorConfigurations = new ArrayList<NewOrientationSensorConfiguration>();
@@ -41,16 +37,12 @@ public class OrientationEstimatorCreator
    private final List<ControlFlowInputPort<Vector3d>> angularVelocityMeasurementPorts = new ArrayList<ControlFlowInputPort<Vector3d>>();
    private final List<ControlFlowInputPort<Matrix3d>> orientationMeasurementPorts = new ArrayList<ControlFlowInputPort<Matrix3d>>();
 
-// public OrientationEstimatorCreator(double angularVelocityProcessNoiseStandardDeviation, RigidBody orientationEstimationLink, TwistCalculator twistCalculator)
    public OrientationEstimatorCreator(DenseMatrix64F angularAccelerationNoiseCovariance, RigidBody orientationEstimationLink, TwistCalculator twistCalculator)
    {
       this.angularAccelerationNoiseCovariance = angularAccelerationNoiseCovariance;
-
-//    this.angularVelocityProcessNoiseStandardDeviation = angularVelocityProcessNoiseStandardDeviation;
       this.orientationEstimationLink = orientationEstimationLink;
       this.twistCalculator = twistCalculator;
    }
-
 
    public void addOrientationSensorConfigurations(OrientationSensorConfiguration<?> orientationSensorConfigurations)
    {
@@ -101,7 +93,7 @@ public class OrientationEstimatorCreator
       AngularVelocityProcessModelElement angularVelocityProcessModelElement = new AngularVelocityProcessModelElement(estimationFrame, angularVelocityPort,
                                                                                  angularAccelerationPort, "angularVelocity", registry);
 
-//    angularVelocityProcessModelElement.setProcessNoiseStandardDeviation(angularVelocityProcessNoiseStandardDeviation);
+      angularVelocityProcessModelElement.setProcessNoiseCovarianceBlock(angularAccelerationNoiseCovariance);
       ret.addProcessModelElement(angularVelocityPort, angularVelocityProcessModelElement);
 
 
