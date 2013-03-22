@@ -13,6 +13,7 @@ import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FrameVector;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RotationFunctions;
 
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
@@ -30,6 +31,7 @@ public class OrientationProcessModelElement extends AbstractProcessModelElement
 
    private final Quat4d quaternionDelta = new Quat4d();
    private final Quat4d quaternion = new Quat4d();
+   private final FrameOrientation orientation = new FrameOrientation(ReferenceFrame.getWorldFrame());
 
    public OrientationProcessModelElement(ControlFlowOutputPort<FrameVector> angularVelocityPort, ControlFlowOutputPort<FrameOrientation> orientationPort,
            String name, YoVariableRegistry registry)
@@ -75,7 +77,8 @@ public class OrientationProcessModelElement extends AbstractProcessModelElement
       quaternionDelta.set(tempAxisAngle);
       quaternion.mul(quaternionDelta);
       quaternion.normalize();    // the previous operation should preserve norm, so this might not be necessary every step
-      orientationPort.getData().set(quaternion);
+      orientation.set(quaternion);
+      orientationPort.setData(orientation);
    }
 
    public void correctState(DenseMatrix64F correction)
@@ -85,6 +88,7 @@ public class OrientationProcessModelElement extends AbstractProcessModelElement
       RotationFunctions.setAxisAngleBasedOnRotationVector(tempAxisAngle, tempRotationVector);
       quaternionDelta.set(tempAxisAngle);
       quaternion.mul(quaternionDelta);
-      orientationPort.getData().set(quaternion);
+      orientation.set(quaternion);
+      orientationPort.setData(orientation);
    }
 }

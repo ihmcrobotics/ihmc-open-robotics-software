@@ -1,26 +1,27 @@
 package us.ihmc.commonWalkingControlModules.stateEstimation.processModelElements;
 
-import javax.vecmath.Vector3d;
-
 import org.ejml.data.DenseMatrix64F;
-
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.geometry.FrameVector;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
+
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public class BiasProcessModelElement extends AbstractProcessModelElement
 {
    private static final int SIZE = 3;
    private final ControlFlowOutputPort<FrameVector> biasPort;
-   private final Vector3d bias = new Vector3d();
-   private final Vector3d biasDelta = new Vector3d();
+   private final FrameVector bias;
+   private final FrameVector biasDelta;
 
-   public BiasProcessModelElement(ControlFlowOutputPort<FrameVector> statePort, String name, YoVariableRegistry registry)
+   public BiasProcessModelElement(ControlFlowOutputPort<FrameVector> statePort, ReferenceFrame frame, String name, YoVariableRegistry registry)
    {
       super(SIZE, 0, 0, name, registry);
       this.biasPort = statePort;
+      this.bias = new FrameVector(frame);
+      this.biasDelta = new FrameVector(frame);
    }
 
    public void computeMatrixBlocks()
@@ -35,14 +36,14 @@ public class BiasProcessModelElement extends AbstractProcessModelElement
 
    public void correctState(DenseMatrix64F correction)
    {
-      MatrixTools.extractTuple3dFromEJMLVector(biasDelta, correction, 0);
+      MatrixTools.extractTuple3dFromEJMLVector(biasDelta.getVector(), correction, 0);
       updateBias(biasDelta);
    }
 
-   private void updateBias(Vector3d biasDelta)
+   private void updateBias(FrameVector biasDelta)
    {
-      biasPort.getData().getVector(bias);
+      bias.set(biasPort.getData());
       bias.add(biasDelta);
-      biasPort.getData().set(bias);
+      biasPort.setData(bias);
    }
 }

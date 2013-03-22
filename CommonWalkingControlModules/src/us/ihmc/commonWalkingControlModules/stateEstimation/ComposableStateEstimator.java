@@ -68,6 +68,13 @@ public class ComposableStateEstimator extends AbstractControlFlowElement
       return statePort;
    }
 
+   public <T> void addStatePort(ControlFlowOutputPort<T> statePort, int size)
+   {
+      statePorts.add(statePort);
+      stateSizes.put(statePort, size);
+      addOutputPort(statePort);
+   }
+
    public <T> ControlFlowInputPort<T> createProcessInputPort(int size)
    {
       ControlFlowInputPort<T> processInputPort = createInputPort();

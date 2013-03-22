@@ -81,8 +81,8 @@ public class OrientationEstimatorCreator
 
    private class ComposableOrientationEstimator extends ComposableStateEstimator implements OrientationEstimator
    {
-      private final ControlFlowOutputPort<FrameOrientation> orientationPort = createStatePort(3);
-      private final ControlFlowOutputPort<FrameVector> angularVelocityPort = createStatePort(3);
+      private final ControlFlowOutputPort<FrameOrientation> orientationPort;
+      private final ControlFlowOutputPort<FrameVector> angularVelocityPort;
       private final ControlFlowInputPort<FrameVector> angularAccelerationPort = createProcessInputPort(3);
       private final AngularVelocityProcessModelElement angularVelocityProcessModelElement;
 
@@ -91,10 +91,11 @@ public class OrientationEstimatorCreator
       {
          super(name, controlDT, parentRegistry);
 
-         // TODO: I hope we can get rid of this at some point:
-         orientationPort.setData(new FrameOrientation(ReferenceFrame.getWorldFrame()));
-         angularVelocityPort.setData(new FrameVector(estimationFrame));
-
+         orientationPort = new YoFrameQuaternionControlFlowOutputPort(this, "orientationEstimate", ReferenceFrame.getWorldFrame(), parentRegistry);
+         
+         angularVelocityPort = new YoFrameVectorControlFlowOutputPort(this, "omegaEstimate", estimationFrame, registry);
+         addStatePort(angularVelocityPort, 3);
+         
          // process model
          ProcessModelElement orientationProcessModelElement = new OrientationProcessModelElement(angularVelocityPort, orientationPort, "orientation", registry);
          addProcessModelElement(orientationPort, orientationProcessModelElement);
@@ -125,13 +126,16 @@ public class OrientationEstimatorCreator
 
          for (NewAngularVelocitySensorConfiguration angularVelocitySensorConfiguration : angularVelocitySensorConfigurations)
          {
-            ControlFlowOutputPort<FrameVector> biasPort = createStatePort(3);
+            String biasName = angularVelocitySensorConfiguration.getName() + "Bias";
             ReferenceFrame measurementFrame = angularVelocitySensorConfiguration.getMeasurementFrame();
             RigidBody measurementLink = angularVelocitySensorConfiguration.getAngularVelocityMeasurementLink();
             ControlFlowInputPort<Vector3d> angularVelocityMeasurementPort = createMeasurementInputPort(3);
 
+            ControlFlowOutputPort<FrameVector> biasPort = new YoFrameVectorControlFlowOutputPort(this, biasName, measurementFrame, registry);
+            addStatePort(biasPort, 3);
+
             biasPort.setData(new FrameVector(measurementFrame));
-            BiasProcessModelElement biasProcessModelElement = new BiasProcessModelElement(biasPort, angularVelocitySensorConfiguration.getName() + "Bias",
+            BiasProcessModelElement biasProcessModelElement = new BiasProcessModelElement(biasPort, measurementFrame, biasName,
                                                                  registry);
             DenseMatrix64F biasProcessNoiseCovariance = angularVelocitySensorConfiguration.getBiasProcessNoiseCovariance();
             biasProcessModelElement.setProcessNoiseCovarianceBlock(biasProcessNoiseCovariance);
@@ -188,4 +192,6 @@ public class OrientationEstimatorCreator
          angularVelocityProcessModelElement.setProcessNoiseCovarianceBlock(angularAccelerationNoiseCovariance);
       }
    }
+
+
 }

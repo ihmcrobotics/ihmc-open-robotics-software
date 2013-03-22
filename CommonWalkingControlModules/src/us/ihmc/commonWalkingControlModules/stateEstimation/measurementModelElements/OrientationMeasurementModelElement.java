@@ -6,8 +6,7 @@ import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import org.ejml.data.DenseMatrix64F;
-
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import org.ejml.ops.CommonOps;
 
 import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
@@ -15,6 +14,8 @@ import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.geometry.AngleTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public class OrientationMeasurementModelElement extends AbstractMeasurementModelElement
 {
@@ -44,6 +45,16 @@ public class OrientationMeasurementModelElement extends AbstractMeasurementModel
       this.orientationMeasurementInputPort = orientationMeasurementInputPort;
       this.estimationFrame = estimationFrame;
       this.measurementFrame = measurementFrame;
+      
+      outputMatrixBlocks.put(orientationStatePort, new DenseMatrix64F(SIZE, SIZE));
+      computeOrientationStateOutputBlock();
+   }
+
+   private void computeOrientationStateOutputBlock()
+   {
+      DenseMatrix64F orientationStateOutputBlock = outputMatrixBlocks.get(orientationStatePort);
+      CommonOps.setIdentity(orientationStateOutputBlock);
+      CommonOps.scale(-1.0, orientationStateOutputBlock);
    }
 
    public void computeMatrixBlocks()
