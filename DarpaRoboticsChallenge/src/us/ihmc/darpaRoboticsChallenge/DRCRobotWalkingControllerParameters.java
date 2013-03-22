@@ -20,18 +20,22 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
       {
          Transform3D rotationPart = new Transform3D();
          double yaw = robotSide.negateIfRightSide(Math.PI / 2.0);
-         double pitch = 0.32;
+         double pitch = 0.0;
          double roll = 0.0;
          rotationPart.setEuler(new Vector3d(roll, pitch, yaw));
    
-         Transform3D translationPart = new Transform3D();
-         double x = 0.2;
-         double y = robotSide.negateIfRightSide(-0.03);
-         double z = 0.04;
-         translationPart.setTranslation(new Vector3d(x, y, z));
+         Transform3D toHand = new Transform3D();
+//         double x = 0.2;
+//         double y = robotSide.negateIfRightSide(-0.03);
+//         double z = 0.04;
+         double x = 0.1;
+         double y = 0.0;
+         double z = 0.0;
+         toHand.setTranslation(new Vector3d(x, y, z));
    
          Transform3D transform = new Transform3D();
-         transform.mul(rotationPart, translationPart);
+         transform.mul(rotationPart, toHand);
+         
          handControlFramesWithRespectToFrameAfterWrist.put(robotSide, transform);
       }
       
@@ -40,7 +44,7 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
       {
          Transform3D transform = new Transform3D();
 
-         double x = 0.25;
+         double x = 0.20;
          double y = robotSide.negateIfRightSide(0.30);
          double z = -0.40;
          transform.setTranslation(new Vector3d(x, y, z));

@@ -23,4 +23,4 @@ gzsdf print $modelPath/worlds/qual_task_2.world > $modelPath/qualTask2World.sdf
 gzsdf print $modelPath/worlds/qual_task_3.world > $modelPath/qualTask3World.sdf
 gzsdf print $modelPath/worlds/qual_task_4.world > $modelPath/qualTask4World.sdf
 
-
+./createRobotHands.sh
