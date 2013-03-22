@@ -83,6 +83,7 @@ import us.ihmc.utilities.screwTheory.TwistCalculator;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.TwoAcknowledgementSimulationRewoundListener;
 import com.yobotics.simulationconstructionset.util.PDController;
 import com.yobotics.simulationconstructionset.util.PIDController;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
@@ -196,6 +197,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
    private final boolean resetDesiredICPToCurrentAtStartOfSwing;
    private final BooleanYoVariable icpTrajectoryHasBeenInitialized;
    private final BooleanYoVariable doToeOffIfPossible = new BooleanYoVariable("doToeOffIfPossible", registry);
+   private TwoAcknowledgementSimulationRewoundListener simulationRewoundListener;
 
    public WalkingHighLevelHumanoidController(FullRobotModel fullRobotModel, CommonWalkingReferenceFrames referenceFrames, TwistCalculator twistCalculator,
            CenterOfMassJacobian centerOfMassJacobian, SideDependentList<? extends ContactablePlaneBody> bipedFeet, BipedSupportPolygons bipedSupportPolygons,
@@ -454,6 +456,11 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
    public void setDoToeOffIfPossible(boolean doToeOffIfPossible)
    {
       this.doToeOffIfPossible.set(doToeOffIfPossible);
+   }
+   
+   public void setRewoundListener(TwoAcknowledgementSimulationRewoundListener simulationRewoundListener)
+   {
+      this.simulationRewoundListener = simulationRewoundListener;
    }
 
    private RobotSide getUpcomingSupportLeg()
@@ -718,19 +725,20 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 
       private void checkForFootsteps()
       {
-         if (nextFootstep == null)
+         if (nextFootstep == null ||  simulationRewoundListener.wasRewound(2))
          {
             nextFootstep = footstepProvider.poll();
-
+            
             if (nextFootstep != null)
             {
                upcomingSupportLeg.set(getRobotSide(nextFootstep.getBody(), bipedFeet).getOppositeSide());
                nextFootstepPose.set(nextFootstep.getPoseCopy());
             }
          }
-         else if (nextNextFootstep == null)
+         else if (nextNextFootstep == null || simulationRewoundListener.wasRewound(1))
          {
             nextNextFootstep = footstepProvider.peek();
+            System.out.println(nextNextFootstep);
          }
       }
    }
