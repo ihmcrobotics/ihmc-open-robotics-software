@@ -9,15 +9,6 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import com.yobotics.simulationconstructionset.BooleanYoVariable;
-import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.UnreasonableAccelerationException;
-import com.yobotics.simulationconstructionset.util.FlatGroundProfile;
-import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
-import com.yobotics.simulationconstructionset.util.simulationRunner.SimulationRewindabilityVerifier;
-import com.yobotics.simulationconstructionset.util.simulationRunner.VariableDifference;
-import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
@@ -27,6 +18,16 @@ import us.ihmc.graphics3DAdapter.GroundProfile;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
 import us.ihmc.projectM.R2Sim02.initialSetup.RobotInitialSetup;
 import us.ihmc.utilities.MemoryTools;
+import us.ihmc.utilities.ThreadTools;
+
+import com.yobotics.simulationconstructionset.BooleanYoVariable;
+import com.yobotics.simulationconstructionset.SimulationConstructionSet;
+import com.yobotics.simulationconstructionset.UnreasonableAccelerationException;
+import com.yobotics.simulationconstructionset.util.FlatGroundProfile;
+import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
+import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import com.yobotics.simulationconstructionset.util.simulationRunner.SimulationRewindabilityVerifier;
+import com.yobotics.simulationconstructionset.util.simulationRunner.VariableDifference;
 
 public class DRCFlatGroundRewindabilityTest
 {
@@ -47,6 +48,7 @@ public class DRCFlatGroundRewindabilityTest
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
+   
    @Ignore
    @Test
    public void testCanRewindAndGoForward() throws UnreasonableAccelerationException
@@ -91,11 +93,14 @@ public class DRCFlatGroundRewindabilityTest
       BooleanYoVariable walk1 = (BooleanYoVariable) scs1.getVariable("walk");
       BooleanYoVariable walk2 = (BooleanYoVariable) scs2.getVariable("walk");
       
-      double standingTimeDuration = 5.0;
-      double walkingTimeDuration = 2.0;
-      initiateMotion(standingTimeDuration, walkingTimeDuration, blockingSimulationRunner1, walk1);      
-      initiateMotion(standingTimeDuration, walkingTimeDuration, blockingSimulationRunner2, walk2);
+//      double standingTimeDuration = 1.0;
+//      double walkingTimeDuration = 1.0;
+//      initiateMotion(standingTimeDuration, walkingTimeDuration, blockingSimulationRunner1, walk1);      
+//      initiateMotion(standingTimeDuration, walkingTimeDuration, blockingSimulationRunner2, walk2);
 
+      walk1.set(true);
+      walk2.set(true);
+      
       ArrayList<String> exceptions = new ArrayList<String>();
       exceptions.add("gc_");
       exceptions.add("toolFrame");
@@ -112,9 +117,9 @@ public class DRCFlatGroundRewindabilityTest
       if (!variableDifferences.isEmpty())
       {
          System.err.println("variableDifferences: \n" + VariableDifference.allVariableDifferencesToString(variableDifferences));
-         fail("Found Variable Differences!\n variableDifferences: " + VariableDifference.allVariableDifferencesToString(variableDifferences));
          if (SHOW_GUI)
             sleepForever();
+         fail("Found Variable Differences!\n variableDifferences: \n" + VariableDifference.allVariableDifferencesToString(variableDifferences));
       }
 
       // sleepForever();
@@ -154,7 +159,7 @@ public class DRCFlatGroundRewindabilityTest
       SimulationConstructionSet scs = drcFlatGroundWalkingTrack.getSimulationConstructionSet();
 
       setupCameraForUnitTest(scs);
-
+      
       return scs;
    }
 
@@ -183,7 +188,7 @@ public class DRCFlatGroundRewindabilityTest
       walk.set(false);
       runner.simulateAndBlock(standingTimeDuration);
       walk.set(true);
-      runner.simulateAndBlock(walkingTimeDuration);
+//      runner.simulateAndBlock(walkingTimeDuration);
    }
 
    private void sleepForever()
