@@ -165,21 +165,27 @@ public class QuaternionOrientationEstimatorEvaluator
          rootInverseDynamicsJoint.setJointTwist(bodyTwist);
       }
 
-      public void updateBasedOnEstimator(QuaternionOrientationEstimator estimator)
+      
+      public void updateBasedOnEstimator(OrientationEstimator estimator)
       {
-         FrameOrientation estimatedOrientation = estimator.getOrientationOutputPort().getData();
-
+         FrameOrientation estimatedOrientation = estimator.getEstimatedOrientation();
+         FrameVector estimatedAngularVelocity = estimator.getEstimatedAngularVelocity();
+         
+         updateBasedOnEstimator(estimatedOrientation, estimatedAngularVelocity);
+      }
+      
+      public void updateBasedOnEstimator(FrameOrientation estimatedOrientation, FrameVector estimatedAngularVelocity)
+      {
          rootInverseDynamicsJoint.setRotation(estimatedOrientation.getQuaternion());
          elevator.updateFramesRecursively();
 
          ReferenceFrame elevatorFrame = rootInverseDynamicsJoint.getFrameBeforeJoint();
          ReferenceFrame bodyFrame = rootInverseDynamicsJoint.getFrameAfterJoint();
 
-         FrameVector angularVelocity = estimator.getAngularVelocityOutputPort().getData();
-         angularVelocity.changeFrame(bodyFrame);
+         estimatedAngularVelocity.changeFrame(bodyFrame);
 
          Twist bodyTwist = new Twist(bodyFrame, elevatorFrame, bodyFrame);
-         bodyTwist.setAngularPart(angularVelocity.getVector());
+         bodyTwist.setAngularPart(estimatedAngularVelocity.getVector());
          rootInverseDynamicsJoint.setJointTwist(bodyTwist);
       }
    }
@@ -231,7 +237,7 @@ public class QuaternionOrientationEstimatorEvaluator
       private final TwistCalculator estimatedTwistCalculator;
 
       private final ControlFlowGraph controlFlowGraph;
-      private final QuaternionOrientationEstimator quaternionOrientationEstimator;
+      private final OrientationEstimator orientationEstimator;
 
       public QuaternionOrientationEstimatorEvaluatorController(QuaternionOrientationEstimatorEvaluatorRobot robot, double controlDT)
       {
@@ -250,17 +256,27 @@ public class QuaternionOrientationEstimatorEvaluator
          controlFlowGraph = new ControlFlowGraph();
          ReferenceFrame estimationFrame = estimatedFullRobotModel.getRootInverseDynamicsJoint().getFrameAfterJoint();
          RigidBody estimationLink = estimatedFullRobotModel.getBody();
-         quaternionOrientationEstimator = new QuaternionOrientationEstimator(controlFlowGraph, "orientationEstimator", orientationSensors,
-                 angularVelocitySensors, estimationLink, estimationFrame, estimatedTwistCalculator, controlDT, registry);
          DenseMatrix64F angularAccelerationNoiseCovariance = createDiagonalCovarianceMatrix(angularAccelerationProcessNoiseStandardDeviation, 3);
-         quaternionOrientationEstimator.setAngularAccelerationNoiseCovariance(angularAccelerationNoiseCovariance);
 
+         //TODO: Try using this. Use boolean to select whether to use this or QuaternionOrientationEstimator:
+//         OrientationEstimatorCreator orientationEstimatorCreator = new OrientationEstimatorCreator(angularAccelerationNoiseCovariance, estimationLink, estimatedTwistCalculator);
+//         orientationEstimatorCreator.addOrientationSensorConfigurations(orientationSensors);
+//         orientationEstimatorCreator.addAngularVelocitySensorConfigurations(angularVelocitySensors);
+//         orientationEstimatorCreator.createOrientationEstimator(controlFlowGraph, controlDT, estimationFrame, registry);
+//         orientationEstimator = orientationEstimatorCreator;
+         
+         orientationEstimator = new QuaternionOrientationEstimator(controlFlowGraph, "orientationEstimator", orientationSensors,
+                 angularVelocitySensors, estimationLink, estimationFrame, estimatedTwistCalculator, controlDT, registry);
+         
+         
+         orientationEstimator.setAngularAccelerationNoiseCovariance(angularAccelerationNoiseCovariance);
+         
          if (USE_ANGULAR_ACCELERATION_INPUT)
          {
             AngularAccelerationFromRobotStealer angularAccelerationFromRobotStealer = new AngularAccelerationFromRobotStealer(robot, estimationFrame);
 
             controlFlowGraph.connectElements(angularAccelerationFromRobotStealer.getOutputPort(),
-                                             quaternionOrientationEstimator.getAngularAccelerationInputPort());
+                                             orientationEstimator.getAngularAccelerationInputPort());
          }
 
          controlFlowGraph.initializeAfterConnections();
@@ -268,10 +284,11 @@ public class QuaternionOrientationEstimatorEvaluator
 
          if (INITIALIZE_ANGULAR_VELOCITY_ESTIMATE_TO_ACTUAL)
          {
-            DenseMatrix64F x = quaternionOrientationEstimator.getState();
+            DenseMatrix64F x = orientationEstimator.getState();
             MatrixTools.insertTuple3dIntoEJMLVector(robot.getRootJoint().getAngularVelocityInBody(), x, 3);
-            quaternionOrientationEstimator.setState(x, quaternionOrientationEstimator.getCovariance());
+            orientationEstimator.setState(x, orientationEstimator.getCovariance());
          }
+         
       }
 
       private AngularVelocitySensorConfiguration<ControlFlowOutputPort<Vector3d>> createAngularVelocitySensors(
@@ -356,7 +373,7 @@ public class QuaternionOrientationEstimatorEvaluator
          perfectTwistCalculator.compute();
          controlFlowGraph.startComputation();
          controlFlowGraph.waitUntilComputationIsDone();
-         estimatedFullRobotModel.updateBasedOnEstimator(quaternionOrientationEstimator);
+         estimatedFullRobotModel.updateBasedOnEstimator(orientationEstimator);
 
          // TODO: set revolute joint positions and velocities
          estimatedTwistCalculator.compute();
