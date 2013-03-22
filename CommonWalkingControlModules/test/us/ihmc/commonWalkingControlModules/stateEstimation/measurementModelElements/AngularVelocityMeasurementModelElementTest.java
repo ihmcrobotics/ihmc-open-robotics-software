@@ -75,9 +75,10 @@ public class AngularVelocityMeasurementModelElementTest
       DenseMatrix64F zeroVector = new DenseMatrix64F(3, 1);
       EjmlUnitTests.assertEquals(zeroVector, zeroResidual, 1e-12);
 
-      // bias perturbations
       double perturbation = 1e-5;
       double tol = 1e-12;
+
+      // bias perturbations
       DenseMatrix64F biasOutputMatrixBlock = modelElement.getOutputMatrixBlock(biasStatePort);
       for (Direction direction : Direction.values())
       {
