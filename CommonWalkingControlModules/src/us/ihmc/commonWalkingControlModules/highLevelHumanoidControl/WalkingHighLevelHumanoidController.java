@@ -725,7 +725,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 
       private void checkForFootsteps()
       {
-         if (nextFootstep == null ||  simulationRewoundListener.wasRewound(2))
+         if (nextFootstep == null || (simulationRewoundListener != null && simulationRewoundListener.wasRewound(2)))
          {
             nextFootstep = footstepProvider.poll();
             
@@ -735,10 +735,9 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
                nextFootstepPose.set(nextFootstep.getPoseCopy());
             }
          }
-         else if (nextNextFootstep == null || simulationRewoundListener.wasRewound(1))
+         else if (nextNextFootstep == null || (simulationRewoundListener != null && simulationRewoundListener.wasRewound(2)))
          {
             nextNextFootstep = footstepProvider.peek();
-            System.out.println(nextNextFootstep);
          }
       }
    }
