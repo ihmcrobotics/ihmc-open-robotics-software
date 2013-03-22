@@ -535,110 +535,6 @@ Note that the state matrix depends on
  and is hence not constant.
 \end_layout
 
-\begin_layout Subsection
-Discretization
-\end_layout
-
-\begin_layout Standard
-We now approximate the continuous time error dynamics using a discrete time
- system:
-\begin_inset Formula 
-\begin{align*}
-x_{n+1} & =A_{d}x_{n}+B_{d}u_{n}+w_{n}\\
-w_{n} & \sim\mathcal{N}\left(0,Q_{d}\right)
-\end{align*}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-With a first-order hold approximation, we can write
-\begin_inset Formula 
-\begin{align*}
-A_{d} & =e^{A\Delta t}\\
-B_{d} & =\int_{0}^{\Delta t}e^{A\tau}d\tau B\\
-Q_{d} & =\int_{0}^{\Delta t}e^{A\tau}Qe^{A^{T}\tau}d\tau
-\end{align*}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-Van Loan 
-\begin_inset CommandInset citation
-LatexCommand cite
-key "VanLoan1978"
-
-\end_inset
-
- shows that if we define
-\begin_inset Formula 
-\[
-M=\left(\begin{array}{ccc}
--A^{T} & Q & 0\\
-0 & A & B\\
-0 & 0 & 0
-\end{array}\right)
-\]
-
-\end_inset
-
-and
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula 
-\[
-e^{M\Delta t}=\left(\begin{array}{ccc}
-F_{2} & G_{2} & H_{2}\\
-0 & F_{3} & G_{3}\\
-0 & 0 & F_{4}
-\end{array}\right)
-\]
-
-\end_inset
-
-then we have
-\begin_inset Formula 
-\begin{align*}
-A_{d} & =F_{3}\\
-B_{d} & =G_{3}\\
-Q_{d} & =F_{3}{}^{T}G_{2}
-\end{align*}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-The matrix exponential can be approximated in a number of ways, such as
- using a truncated version of the power series definition or using a Padé
- approximant 
-\begin_inset CommandInset citation
-LatexCommand cite
-key "VanLoan1978"
-
-\end_inset
-
-.
- 
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-TODO: investigate exploiting sparsity
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
 \begin_layout Section
 Measurements
 \end_layout
@@ -710,21 +606,6 @@ Let
 \end_inset
 
 .
-\end_layout
-
-\begin_layout Standard
-Let
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula 
-\[
-R_{d}=\frac{1}{\Delta t}R
-\]
-
-\end_inset
-
-
 \end_layout
 
 \begin_layout Subsection
@@ -1846,6 +1727,113 @@ In summary, the linearized measurement output matrix reads
 H_{\dot{p}_{i}}=\frac{\partial\dot{p}_{i}^{w}}{\partial\left(\dot{r},\phi,\omega\right)}=\left(\begin{array}{ccc}
 I & R_{p}^{w}\left(\tilde{r}_{p}-\tilde{p}_{i}^{p}\right) & -R_{p}^{w}\tilde{v}_{i}'\end{array}\right)
 \]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Discretization
+\end_layout
+
+\begin_layout Standard
+We approximate the continuous time error dynamics using a discrete time
+ system:
+\begin_inset Formula 
+\begin{align*}
+x_{n+1} & =A_{d}x_{n}+B_{d}u_{n}+w_{n}\\
+y_{n} & =Cx_{n}+v_{n}\\
+w_{n} & \sim\mathcal{N}\left(0,Q_{d}\right)\\
+v_{n} & \sim\mathcal{N}\left(0,R_{d}\right)
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+With a first-order hold approximation, we can write
+\begin_inset Formula 
+\begin{align*}
+A_{d} & =e^{A\Delta t}\\
+B_{d} & =\int_{0}^{\Delta t}e^{A\tau}d\tau B\\
+Q_{d} & =\int_{0}^{\Delta t}e^{A\tau}Qe^{A^{T}\tau}d\tau\\
+R_{d} & =\frac{1}{\Delta t}R
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Van Loan 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "VanLoan1978"
+
+\end_inset
+
+ shows that if we define
+\begin_inset Formula 
+\[
+M=\left(\begin{array}{ccc}
+-A^{T} & Q & 0\\
+0 & A & B\\
+0 & 0 & 0
+\end{array}\right)
+\]
+
+\end_inset
+
+and
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+e^{M\Delta t}=\left(\begin{array}{ccc}
+F_{2} & G_{2} & H_{2}\\
+0 & F_{3} & G_{3}\\
+0 & 0 & F_{4}
+\end{array}\right)
+\]
+
+\end_inset
+
+then we have
+\begin_inset Formula 
+\begin{align*}
+A_{d} & =F_{3}\\
+B_{d} & =G_{3}\\
+Q_{d} & =F_{3}{}^{T}G_{2}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The matrix exponential can be approximated in a number of ways, such as
+ using a truncated version of the power series definition or using a Padé
+ approximant 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "VanLoan1978"
+
+\end_inset
+
+.
+ 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+TODO: investigate exploiting sparsity
+\end_layout
 
 \end_inset
 
