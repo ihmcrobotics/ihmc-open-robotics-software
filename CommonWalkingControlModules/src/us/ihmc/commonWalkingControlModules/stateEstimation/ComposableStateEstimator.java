@@ -20,9 +20,8 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public class ComposableStateEstimator extends AbstractControlFlowElement
 {
-   private final String name;
-   private final YoVariableRegistry registry;
-   private ComposableStateEstimatorKalmanFilter kalmanFilter;
+   protected final YoVariableRegistry registry;
+   protected ComposableStateEstimatorKalmanFilter kalmanFilter;
    private final double controlDT;
 
    // model elements
@@ -46,11 +45,11 @@ public class ComposableStateEstimator extends AbstractControlFlowElement
    private final Map<ControlFlowInputPort<?>, Integer> processInputSizes = new HashMap<ControlFlowInputPort<?>, Integer>();
 
 
-   public ComposableStateEstimator(String name, double controlDT)
+   public ComposableStateEstimator(String name, double controlDT, YoVariableRegistry parentRegistry)
    {
-      this.name = name;
       this.registry = new YoVariableRegistry(name);
       this.controlDT = controlDT;
+      parentRegistry.addChild(registry);
    }
 
    public void startComputation()
@@ -109,7 +108,7 @@ public class ComposableStateEstimator extends AbstractControlFlowElement
 
    private void initializeState()
    {
-      // TODO Auto-generated method stub
+      // FIXME: fill this in
    }
 
    public void waitUntilComputationIsDone()
@@ -117,48 +116,7 @@ public class ComposableStateEstimator extends AbstractControlFlowElement
       // empty
    }
 
-   private static void insertMatrixBlock(DenseMatrix64F bigMatrix, DenseMatrix64F matrixBlock, ControlFlowPort<?> rowPort,
-           Map<? extends ControlFlowPort<?>, Integer> rowStartIndices, ControlFlowPort<?> columnPort,
-           Map<? extends ControlFlowPort<?>, Integer> columnStartIndices)
-   {
-      if (matrixBlock != null)
-      {
-         int rowStartIndex = rowStartIndices.get(rowPort);
-         int columnStartIndex = columnStartIndices.get(columnPort);
-         CommonOps.insert(matrixBlock, bigMatrix, rowStartIndex, columnStartIndex);
-      }
-   }
-
-   private void insertStateVectorBlock(DenseMatrix64F bigVector, DenseMatrix64F vectorBlock, ControlFlowPort<?> rowPort)
-   {
-      if (vectorBlock != null)
-      {
-         int rowStartIndex = stateStartIndices.get(rowPort);
-         CommonOps.insert(vectorBlock, bigVector, rowStartIndex, 0);
-      }
-   }
-
-   private void extractStateVectorBlock(DenseMatrix64F vectorBlockToPack, DenseMatrix64F bigVector, ControlFlowOutputPort<?> rowPort)
-   {
-      int rowStartIndex = stateStartIndices.get(rowPort);
-      int stateSize = stateSizes.get(rowPort);
-      CommonOps.extract(bigVector, rowStartIndex, rowStartIndex + stateSize, 0, 1, vectorBlockToPack, 0, 0);
-   }
-
-   private static <T extends ControlFlowPort<?>> int computeIndicesIntoVector(List<T> ports, Map<T, Integer> indices, Map<T, Integer> sizes)
-   {
-      int stateStartIndex = 0;
-
-      for (T port : ports)
-      {
-         indices.put(port, stateStartIndex);
-         stateStartIndex += sizes.get(port);
-      }
-
-      return stateStartIndex;
-   }
-
-   private class ComposableStateEstimatorKalmanFilter extends YoKalmanFilter
+   protected class ComposableStateEstimatorKalmanFilter extends YoKalmanFilter
    {
       // correction
       private final DenseMatrix64F residual;
@@ -175,7 +133,7 @@ public class ComposableStateEstimator extends AbstractControlFlowElement
 
       public ComposableStateEstimatorKalmanFilter(int stateSize, int inputSize, int measurementSize)
       {
-         super(name, stateSize, inputSize, measurementSize, ComposableStateEstimator.this.registry);
+         super(ComposableStateEstimatorKalmanFilter.class.getSimpleName(), stateSize, inputSize, measurementSize, ComposableStateEstimator.this.registry);
          this.correction = new DenseMatrix64F(stateSize, 1);
          this.residual = new DenseMatrix64F(measurementSize, 1);
 
@@ -213,7 +171,7 @@ public class ComposableStateEstimator extends AbstractControlFlowElement
             MeasurementModelElement measurementModelElement = measurementModelElements.get(measurementInputPort);
 
             DenseMatrix64F residualBlock = measurementModelElement.computeResidual();
-            insertStateVectorBlock(residual, residualBlock, measurementInputPort);
+            insertVectorBlock(residual, residualBlock, measurementInputPort, measurementStartIndices);
          }
 
          if (residual.getNumRows() > 0)
@@ -222,7 +180,7 @@ public class ComposableStateEstimator extends AbstractControlFlowElement
          for (ControlFlowOutputPort<?> statePort : statePorts)
          {
             ProcessModelElement processModelElement = processModelElements.get(statePort);
-            extractStateVectorBlock(correctionBlock, correction, statePort);
+            extractVectorBlock(correctionBlock, correction, statePort, stateStartIndices, stateSizes);
 
             processModelElement.correctState(correctionBlock);
          }
@@ -282,4 +240,48 @@ public class ComposableStateEstimator extends AbstractControlFlowElement
       }
    }
 
+
+   private static void insertMatrixBlock(DenseMatrix64F bigMatrix, DenseMatrix64F matrixBlock, ControlFlowPort<?> rowPort,
+           Map<? extends ControlFlowPort<?>, Integer> rowStartIndices, ControlFlowPort<?> columnPort,
+           Map<? extends ControlFlowPort<?>, Integer> columnStartIndices)
+   {
+      if (matrixBlock != null)
+      {
+         int rowStartIndex = rowStartIndices.get(rowPort);
+         int columnStartIndex = columnStartIndices.get(columnPort);
+         CommonOps.insert(matrixBlock, bigMatrix, rowStartIndex, columnStartIndex);
+      }
+   }
+
+   private static void insertVectorBlock(DenseMatrix64F bigVector, DenseMatrix64F vectorBlock, ControlFlowPort<?> rowPort,
+           Map<? extends ControlFlowPort<?>, Integer> startIndices)
+   {
+      if (vectorBlock != null)
+      {
+         int rowStartIndex = startIndices.get(rowPort);
+         CommonOps.insert(vectorBlock, bigVector, rowStartIndex, 0);
+      }
+   }
+
+   private static void extractVectorBlock(DenseMatrix64F vectorBlockToPack, DenseMatrix64F bigVector, ControlFlowPort<?> rowPort,
+           Map<? extends ControlFlowPort<?>, Integer> startIndices, Map<? extends ControlFlowPort<?>, Integer> sizes)
+   {
+      int rowStartIndex = startIndices.get(rowPort);
+      int stateSize = sizes.get(rowPort);
+      vectorBlockToPack.reshape(stateSize, 1);
+      CommonOps.extract(bigVector, rowStartIndex, rowStartIndex + stateSize, 0, 1, vectorBlockToPack, 0, 0);
+   }
+
+   private static <T extends ControlFlowPort<?>> int computeIndicesIntoVector(List<T> ports, Map<T, Integer> indices, Map<T, Integer> sizes)
+   {
+      int stateStartIndex = 0;
+
+      for (T port : ports)
+      {
+         indices.put(port, stateStartIndex);
+         stateStartIndex += sizes.get(port);
+      }
+
+      return stateStartIndex;
+   }
 }

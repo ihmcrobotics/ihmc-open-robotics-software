@@ -43,6 +43,7 @@ public class QuaternionOrientationEstimatorEvaluator
    private static final boolean USE_ANGULAR_ACCELERATION_INPUT = true;
    private static final boolean CREATE_ORIENTATION_SENSOR = true;
    private static final boolean CREATE_ANGULAR_VELOCITY_SENSOR = true;
+   private static final boolean USE_COMPOSABLE_ESTIMATOR = true;
 
    private final double orientationMeasurementStandardDeviation = Math.sqrt(1e-1);    // 1e0); //1e-1);
    private final double angularVelocityMeasurementStandardDeviation = Math.sqrt(1e-1);    // 1e-2);
@@ -258,16 +259,18 @@ public class QuaternionOrientationEstimatorEvaluator
          RigidBody estimationLink = estimatedFullRobotModel.getBody();
          DenseMatrix64F angularAccelerationNoiseCovariance = createDiagonalCovarianceMatrix(angularAccelerationProcessNoiseStandardDeviation, 3);
 
-         // TODO: Try using this. Use boolean to select whether to use this or QuaternionOrientationEstimator:
-//       OrientationEstimatorCreator orientationEstimatorCreator = new OrientationEstimatorCreator(angularAccelerationNoiseCovariance, estimationLink, estimatedTwistCalculator);
-//       orientationEstimatorCreator.addOrientationSensorConfigurations(orientationSensors);
-//       orientationEstimatorCreator.addAngularVelocitySensorConfigurations(angularVelocitySensors);
-//       orientationEstimatorCreator.createOrientationEstimator(controlFlowGraph, controlDT, estimationFrame, registry);
-//       orientationEstimator = orientationEstimatorCreator;
-
-         orientationEstimator = new QuaternionOrientationEstimator(controlFlowGraph, "orientationEstimator", orientationSensors, angularVelocitySensors,
-                 estimationLink, estimationFrame, estimatedTwistCalculator, controlDT, registry);
-
+         if (USE_COMPOSABLE_ESTIMATOR)
+         {
+            OrientationEstimatorCreator orientationEstimatorCreator = new OrientationEstimatorCreator(angularAccelerationNoiseCovariance, estimationLink, estimatedTwistCalculator);
+            orientationEstimatorCreator.addOrientationSensorConfigurations(orientationSensors);
+            orientationEstimatorCreator.addAngularVelocitySensorConfigurations(angularVelocitySensors);
+            orientationEstimator = orientationEstimatorCreator.createOrientationEstimator(controlFlowGraph, controlDT, estimationFrame, registry);
+         }
+         else
+         {
+            orientationEstimator = new QuaternionOrientationEstimator(controlFlowGraph, "orientationEstimator", orientationSensors, angularVelocitySensors,
+                  estimationLink, estimationFrame, estimatedTwistCalculator, controlDT, registry);            
+         }
 
          orientationEstimator.setAngularAccelerationNoiseCovariance(angularAccelerationNoiseCovariance);
 
