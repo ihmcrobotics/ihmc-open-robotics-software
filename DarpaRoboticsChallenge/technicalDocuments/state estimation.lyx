@@ -2219,7 +2219,7 @@ For small
 \end_layout
 
 \begin_layout Section
-Appendix: linear velocity of estimation link given CoM velocity
+Appendix: position and velocity of estimation link given CoM velocity
 \end_layout
 
 \begin_layout Standard
@@ -2242,11 +2242,34 @@ r^{w}\\
 
 \end_inset
 
+or in terms of non-homogeneous 3D vectors
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+r^{w}=R_{p}^{w}r^{p}+p_{p}^{w}
+\]
+
+\end_inset
+
+so that the position of the origin of the frame attached to the estimation
+ link is
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+p_{p}^{w}=r^{w}-R_{p}^{w}r^{p}
+\]
+
+\end_inset
+
 
 \end_layout
 
 \begin_layout Standard
-The CoM velocity can be written as
+The CoM velocity can be written in homogeneous coordinates as
 \begin_inset Formula 
 \begin{align}
 \dot{\bar{r}}^{w} & =\dot{H}_{p}^{w}\bar{r}^{p}+H_{p}^{w}\frac{d}{dt}\left(\bar{r}^{p}\right)\nonumber \\
@@ -2259,16 +2282,16 @@ The CoM velocity can be written as
 where
 \begin_inset Formula 
 \[
-\frac{d}{dt}\left(\bar{r}^{p}\right)=J_{\text{CoM},J}^{p}v_{J}
+\frac{d}{dt}\left(\bar{r}^{p}\right)=J_{\text{CoM},B}^{p}v_{B}
 \]
 
 \end_inset
 
 where 
-\begin_inset Formula $J$
+\begin_inset Formula $B$
 \end_inset
 
- is the set of all joints, not including the 6-DoF joint.
+ is the set of all joints excluding the 6-DoF joint.
  To compute 
 \family roman
 \series medium
@@ -2299,7 +2322,7 @@ where
 \color inherit
  we only need to know the joint positions and velocities of all of the joints
  in 
-\begin_inset Formula $J$
+\begin_inset Formula $B$
 \end_inset
 
 .
