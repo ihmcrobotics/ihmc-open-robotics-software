@@ -92,8 +92,13 @@ public class DRCSimulationFactory
       CenterOfMassJacobian centerOfMassJacobian = new CenterOfMassJacobian(fullRobotModelForController.getElevator());
 
       SDFPerfectSimulatedSensorReaderAndWriter sensorReaderAndOutputWriter = new SDFPerfectSimulatedSensorReaderAndWriter(simulatedRobot,
-                                                                                fullRobotModelForController, referenceFramesForController);
+                                                                                fullRobotModelForController, referenceFramesForController, DRCConfigParameters.INTRODUCE_FILTERED_GAUSSIAN_POSITIONING_ERROR);
+      sensorReaderAndOutputWriter.setNoiseFilterAlpha(DRCConfigParameters.NOISE_FILTER_ALPHA);
+      sensorReaderAndOutputWriter.setPositionNoiseStd(DRCConfigParameters.POSITION_NOISE_STD);
+      sensorReaderAndOutputWriter.setQuaternionNoiseStd(DRCConfigParameters.QUATERNION_NOISE_STD);
 
+      
+      
       OneDoFJoint lidarJoint = fullRobotModelForController.getOneDoFJointByName(jointMap.getLidarJointName());
       // PathTODO: Build LIDAR here
       RobotController robotController = controllerFactory.getController(fullRobotModelForController, referenceFramesForController, controlDT,

@@ -66,6 +66,11 @@ public class DRCConfigParameters
    public static final double GRID_RESOLUTION = 0.01;// 1 centimeter resolution
 
    public static final double LIDAR_BLINDNESS_CYLINDAR_SQUARED_RADIUS = 0.1;
+   
+   public static final boolean INTRODUCE_FILTERED_GAUSSIAN_POSITIONING_ERROR = false;
+   public static final double NOISE_FILTER_ALPHA = 1e-1;
+   public static final double POSITION_NOISE_STD = 0.01;
+   public static final double QUATERNION_NOISE_STD = 0.01;
 
 
 

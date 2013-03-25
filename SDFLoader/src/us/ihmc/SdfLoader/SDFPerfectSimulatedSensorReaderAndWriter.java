@@ -24,11 +24,11 @@ import com.yobotics.simulationconstructionset.robotController.RawSensorReader;
 public class SDFPerfectSimulatedSensorReaderAndWriter implements RawSensorReader, RawOutputWriter
 {
    
-   private static final double FILTERING_ALPHA = 1e-1;
-   private static final boolean FILTER_GAUSSIAN_POSITION_NOISE = false;
-   private static final double STD_DEVIATION_OF_UNNORMALIZED_QUATERNION_DISTURBANCE = 0.01;
-   private static final double STD_DEVIATION_OF_POSITION_DISTURBANCE = 0.01;
-   private static final boolean ADD_GAUSSIAN_POSITION_NOISE = false;
+   private double noiseFilterAlpha = 1e-1;
+   private final boolean addNoiseFiltering;
+   private double quaternionNoiseStd = 0.01;
+   private double positionNoiseStd = 0.01;
+   private final boolean addGaussianNoise;
    private final String name;
    private final SDFRobot robot;
    private final FullRobotModel fullRobotModel;
@@ -36,13 +36,14 @@ public class SDFPerfectSimulatedSensorReaderAndWriter implements RawSensorReader
 
    private final ArrayList<Pair<OneDegreeOfFreedomJoint,OneDoFJoint>> revoluteJoints = new ArrayList<Pair<OneDegreeOfFreedomJoint, OneDoFJoint>>();
 
-   public SDFPerfectSimulatedSensorReaderAndWriter(SDFRobot robot, FullRobotModel fullRobotModel, CommonWalkingReferenceFrames referenceFrames)
+   public SDFPerfectSimulatedSensorReaderAndWriter(SDFRobot robot, FullRobotModel fullRobotModel, CommonWalkingReferenceFrames referenceFrames, boolean addFilteredNoise)
    {
       this.name = robot.getName() + "SimulatedSensorReader";
       this.robot = robot;
       this.fullRobotModel = fullRobotModel;
       this.referenceFrames = referenceFrames;
-
+      this.addGaussianNoise=addFilteredNoise;
+      this.addNoiseFiltering=addFilteredNoise;
       OneDoFJoint[] revoluteJointsArray = fullRobotModel.getOneDoFJoints();
 
       for (OneDoFJoint revoluteJoint : revoluteJointsArray)
@@ -54,6 +55,21 @@ public class SDFPerfectSimulatedSensorReaderAndWriter implements RawSensorReader
          this.revoluteJoints.add(jointPair);
       }
 
+   }
+
+   public void setNoiseFilterAlpha(double noiseFilterAlpha)
+   {
+      this.noiseFilterAlpha = noiseFilterAlpha;
+   }
+
+   public void setQuaternionNoiseStd(double quaternionNoiseStd)
+   {
+      this.quaternionNoiseStd = quaternionNoiseStd;
+   }
+
+   public void setPositionNoiseStd(double positionNoiseStd)
+   {
+      this.positionNoiseStd = positionNoiseStd;
    }
 
    public void initialize()
@@ -101,22 +117,22 @@ public class SDFPerfectSimulatedSensorReaderAndWriter implements RawSensorReader
       SixDoFJoint rootJoint = fullRobotModel.getRootJoint();
       robot.getRootJointToWorldTransform(temporaryRootToWorldTransform);
       
-      if(ADD_GAUSSIAN_POSITION_NOISE)
+      if(addGaussianNoise)
       {
          rotationError.w = 1;
-         rotationError.x = rand.nextGaussian()*STD_DEVIATION_OF_UNNORMALIZED_QUATERNION_DISTURBANCE;
-         rotationError.y = rand.nextGaussian()*STD_DEVIATION_OF_UNNORMALIZED_QUATERNION_DISTURBANCE;
-         rotationError.z = rand.nextGaussian()*STD_DEVIATION_OF_UNNORMALIZED_QUATERNION_DISTURBANCE;
+         rotationError.x = rand.nextGaussian()*quaternionNoiseStd;
+         rotationError.y = rand.nextGaussian()*quaternionNoiseStd;
+         rotationError.z = rand.nextGaussian()*quaternionNoiseStd;
          rotationError.normalize();
          
-         positionError.x = rand.nextGaussian()*STD_DEVIATION_OF_POSITION_DISTURBANCE;
-         positionError.y = rand.nextGaussian()*STD_DEVIATION_OF_POSITION_DISTURBANCE;
-         positionError.z = rand.nextGaussian()*STD_DEVIATION_OF_POSITION_DISTURBANCE;
+         positionError.x = rand.nextGaussian()*positionNoiseStd;
+         positionError.y = rand.nextGaussian()*positionNoiseStd;
+         positionError.z = rand.nextGaussian()*positionNoiseStd;
          
          Transform3D disturbanceTransform = new Transform3D();
-         if (FILTER_GAUSSIAN_POSITION_NOISE)
+         if (addNoiseFiltering)
          {
-            double alpha = FILTERING_ALPHA;
+            double alpha = noiseFilterAlpha;
             rotationFilter.scale(1-alpha);
             rotationError.scale(alpha);
             rotationFilter.add(rotationError);
