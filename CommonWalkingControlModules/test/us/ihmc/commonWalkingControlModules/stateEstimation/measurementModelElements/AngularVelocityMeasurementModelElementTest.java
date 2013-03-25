@@ -13,8 +13,6 @@ import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.controlFlow.NullControlFlowElement;
 import us.ihmc.utilities.RandomTools;
-import us.ihmc.utilities.math.MatrixTools;
-import us.ihmc.utilities.math.geometry.Direction;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.RigidBody;
@@ -78,40 +76,11 @@ public class AngularVelocityMeasurementModelElementTest
       double tol = 1e-12;
 
       // bias perturbations
-      DenseMatrix64F biasOutputMatrixBlock = modelElement.getOutputMatrixBlock(biasStatePort);
-      for (Direction direction : Direction.values())
-      {
-         FrameVector perturbationVector = new FrameVector(measurementFrame);
-         perturbationVector.set(direction, perturbation);
-
-         DenseMatrix64F perturbationEjmlVector = new DenseMatrix64F(3, 1);
-         MatrixTools.setDenseMatrixFromTuple3d(perturbationEjmlVector, perturbationVector.getVector(), 0, 0);
-
-         FrameVector perturbedBias = new FrameVector(bias);
-         perturbedBias.add(perturbationVector);
-         biasStatePort.setData(perturbedBias);
-
-         MeasurementModelTestTools.assertDeltaResidualCorrect(modelElement, biasOutputMatrixBlock, perturbationEjmlVector, tol);
-      }
-
-      biasStatePort.setData(bias);
+      MeasurementModelTestTools.assertOutputMatrixCorrectUsingPerturbation(biasStatePort, modelElement, bias, perturbation, tol, null);
 
       // angular velocity perturbations
-      DenseMatrix64F angularVelocityOutputMatrixBlock = modelElement.getOutputMatrixBlock(angularVelocityStatePort);
-      for (Direction direction : Direction.values())
-      {
-         FrameVector perturbationVector = new FrameVector(estimationFrame);
-         perturbationVector.set(direction, perturbation);
-
-         DenseMatrix64F perturbationEjmlVector = new DenseMatrix64F(3, 1);
-         MatrixTools.setDenseMatrixFromTuple3d(perturbationEjmlVector, perturbationVector.getVector(), 0, 0);
-
-         FrameVector perturbedAngularVelocity = new FrameVector(angularVelocityOfEstimationLink);
-         perturbedAngularVelocity.add(perturbationVector);
-         angularVelocityStatePort.setData(perturbedAngularVelocity);
-
-         MeasurementModelTestTools.assertDeltaResidualCorrect(modelElement, angularVelocityOutputMatrixBlock, perturbationEjmlVector, tol);
-      }
+      MeasurementModelTestTools.assertOutputMatrixCorrectUsingPerturbation(angularVelocityStatePort, modelElement, angularVelocityOfEstimationLink,
+              perturbation, tol, null);
    }
 
    private FrameVector getAngularVelocity(TwistCalculator twistCalculator, RigidBody rigidBody, ReferenceFrame referenceFrame)
