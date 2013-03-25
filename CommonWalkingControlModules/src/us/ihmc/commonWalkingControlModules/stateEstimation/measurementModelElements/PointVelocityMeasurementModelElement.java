@@ -91,7 +91,7 @@ public class PointVelocityMeasurementModelElement extends AbstractMeasurementMod
       FramePoint centerOfMassPosition = new FramePoint(centerOfMassPositionPort.getData());
       centerOfMassPosition.changeFrame(estimationFrame);
 
-      tempFramePoint.set(stationaryPoint);
+      tempFramePoint.setAndChangeFrame(stationaryPoint);
       tempFramePoint.changeFrame(estimationFrame);
       tempFramePoint.sub(centerOfMassPosition);
       tempFramePoint.scale(-1.0);

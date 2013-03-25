@@ -4,6 +4,7 @@ package us.ihmc.commonWalkingControlModules.stateEstimation.measurementModelElem
 
 import java.util.Random;
 
+import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
 import org.ejml.data.DenseMatrix64F;
@@ -20,8 +21,6 @@ import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.CenterOfMassCalculator;
-import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTestTools.RandomFloatingChain;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
@@ -53,8 +52,6 @@ public class PointVelocityMeasurementModelElementTest
       ControlFlowElement controlFlowElement = new NullControlFlowElement();
 
       TwistCalculator twistCalculator = new TwistCalculator(elevator.getBodyFixedFrame(), randomFloatingChain.getElevator());
-      CenterOfMassCalculator centerOfMassCalculator = new CenterOfMassCalculator(elevator, ReferenceFrame.getWorldFrame());
-      CenterOfMassJacobian centerOfMassJacobian = new CenterOfMassJacobian(elevator);
 
       String name = "test";
       YoVariableRegistry registry = new YoVariableRegistry(name);
@@ -74,10 +71,18 @@ public class PointVelocityMeasurementModelElementTest
       randomFloatingChain.setRandomPositionsAndVelocities(random);
       twistCalculator.compute();
 
-      setCenterOfMassToActual(centerOfMassCalculator, centerOfMassPositionPort);
-      setCenterOfMassVelocityToActual(centerOfMassJacobian, centerOfMassVelocityPort);
-      setOrientationToActual(estimationFrame, orientationPort);
-      setAngularVelocityToActual(estimationLink, estimationFrame, twistCalculator, angularVelocityPort);
+      Runnable updater = new CenterOfMassBasedFullRobotModelUpdater(twistCalculator, centerOfMassPositionPort, centerOfMassVelocityPort, orientationPort,
+            angularVelocityPort, estimationLink, estimationFrame, rootJoint);
+
+      centerOfMassPositionPort.setData(new FramePoint(ReferenceFrame.getWorldFrame(), RandomTools.generateRandomVector(random)));
+      centerOfMassVelocityPort.setData(new FrameVector(ReferenceFrame.getWorldFrame(), RandomTools.generateRandomVector(random)));
+      Matrix3d orientation = new Matrix3d();
+      orientation.set(RandomTools.generateRandomRotation(random));
+      orientationPort.setData(new FrameOrientation(ReferenceFrame.getWorldFrame(), orientation));
+      angularVelocityPort.setData(new FrameVector(estimationFrame, RandomTools.generateRandomVector(random)));
+
+      updater.run();
+      
       setMeasuredPointVelocityToActual(twistCalculator, stationaryPointLink, stationaryPoint, pointVelocityMeasurementInputPort);
 
       DenseMatrix64F zeroResidual = modelElement.computeResidual();
@@ -86,8 +91,6 @@ public class PointVelocityMeasurementModelElementTest
 
       double perturbation = 1e-6;
       double tol = 1e-12;
-      Runnable updater = new CenterOfMassBasedFullRobotModelUpdater(twistCalculator, centerOfMassPositionPort, centerOfMassVelocityPort, orientationPort,
-                            angularVelocityPort, estimationLink, estimationFrame, rootJoint);
       modelElement.computeMatrixBlocks();
 
       // CoM velocity perturbations
@@ -103,46 +106,13 @@ public class PointVelocityMeasurementModelElementTest
             perturbation, tol, updater);
    }
 
-   private void setAngularVelocityToActual(RigidBody estimationLink, ReferenceFrame estimationFrame, TwistCalculator twistCalculator,
-           ControlFlowOutputPort<FrameVector> angularVelocityPort)
-   {
-      Twist estimationLinkTwist = new Twist();
-      twistCalculator.packTwistOfBody(estimationLinkTwist, estimationLink);
-      FrameVector angularVelocity = new FrameVector(estimationLinkTwist.getExpressedInFrame());
-      estimationLinkTwist.packAngularPart(angularVelocity);
-      angularVelocity.changeFrame(estimationFrame);
-      angularVelocityPort.setData(angularVelocity);
-   }
-
-   private void setOrientationToActual(ReferenceFrame estimationFrame, ControlFlowOutputPort<FrameOrientation> orientationPort)
-   {
-      FrameOrientation orientation = new FrameOrientation(estimationFrame);
-      orientation.changeFrame(ReferenceFrame.getWorldFrame());
-      orientationPort.setData(orientation);
-   }
-
-   private void setCenterOfMassVelocityToActual(CenterOfMassJacobian centerOfMassJacobian, ControlFlowOutputPort<FrameVector> centerOfMassVelocityPort)
-   {
-      centerOfMassJacobian.compute();
-      FrameVector centerOfMassVelocity = new FrameVector(ReferenceFrame.getWorldFrame());
-      centerOfMassJacobian.packCenterOfMassVelocity(centerOfMassVelocity);
-      centerOfMassVelocityPort.setData(centerOfMassVelocity);
-   }
-
-   private void setCenterOfMassToActual(CenterOfMassCalculator centerOfMassCalculator, ControlFlowOutputPort<FramePoint> centerOfMassPositionPort)
-   {
-      centerOfMassCalculator.compute();
-      FramePoint centerOfMass = centerOfMassCalculator.getCenterOfMass();
-      centerOfMassPositionPort.setData(centerOfMass);
-   }
-
    private void setMeasuredPointVelocityToActual(TwistCalculator twistCalculator, RigidBody stationaryPointLink, FramePoint point,
            ControlFlowInputPort<FrameVector> pointVelocityMeasurementInputPort)
    {
       Twist twist = new Twist();
       twistCalculator.packTwistOfBody(twist, stationaryPointLink);
       twist.changeFrame(twist.getBaseFrame());
-      point.changeFrame(twist.getBaseFrame());
+      point = point.changeFrameCopy(twist.getBaseFrame());
       FrameVector pointVelocity = new FrameVector(twist.getBaseFrame());
       twist.packVelocityOfPointFixedInBodyFrame(pointVelocity, point);
       pointVelocity.changeFrame(ReferenceFrame.getWorldFrame());
