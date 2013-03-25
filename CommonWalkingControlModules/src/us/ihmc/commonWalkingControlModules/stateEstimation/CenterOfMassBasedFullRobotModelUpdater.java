@@ -17,8 +17,8 @@ import us.ihmc.utilities.screwTheory.SixDoFJoint;
 import us.ihmc.utilities.screwTheory.Twist;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 
-// TODO: efficiency
-// currently assumes that twist calculator has already been updated with joint positions and velocities
+//TODO: efficiency
+//currently assumes that twist calculator has already been updated with joint positions and velocities
 public class CenterOfMassBasedFullRobotModelUpdater implements Runnable
 {
    private final TwistCalculator twistCalculator;
@@ -34,9 +34,8 @@ public class CenterOfMassBasedFullRobotModelUpdater implements Runnable
    private final RigidBody estimationLink;
 
    public CenterOfMassBasedFullRobotModelUpdater(TwistCalculator twistCalculator, ControlFlowOutputPort<FramePoint> centerOfMassPositionPort,
-                                ControlFlowOutputPort<FrameVector> centerOfMassVelocityPort, ControlFlowOutputPort<FrameOrientation> orientationPort,
-                                ControlFlowOutputPort<FrameVector> angularVelocityPort, RigidBody estimationLink, ReferenceFrame estimationFrame,
-                                SixDoFJoint rootJoint)
+           ControlFlowOutputPort<FrameVector> centerOfMassVelocityPort, ControlFlowOutputPort<FrameOrientation> orientationPort,
+           ControlFlowOutputPort<FrameVector> angularVelocityPort, RigidBody estimationLink, ReferenceFrame estimationFrame, SixDoFJoint rootJoint)
    {
       this.twistCalculator = twistCalculator;
       this.centerOfMassPositionPort = centerOfMassPositionPort;
@@ -47,9 +46,9 @@ public class CenterOfMassBasedFullRobotModelUpdater implements Runnable
       this.estimationFrame = estimationFrame;
 
       RigidBody elevator = rootJoint.getPredecessor();
-      this.centerOfMassCalculator = new CenterOfMassCalculator(elevator, estimationFrame);
+      this.centerOfMassCalculator = new CenterOfMassCalculator(elevator, rootJoint.getFrameAfterJoint());
       this.centerOfMassJacobianBody = new CenterOfMassJacobian(ScrewTools.computeRigidBodiesInOrder(elevator),
-              ScrewTools.computeJointsInOrder(rootJoint.getSuccessor()), estimationFrame);
+              ScrewTools.computeJointsInOrder(rootJoint.getSuccessor()), rootJoint.getFrameAfterJoint());
       this.rootJoint = rootJoint;
    }
 
@@ -62,69 +61,74 @@ public class CenterOfMassBasedFullRobotModelUpdater implements Runnable
 
    private void updateRootJointTwist()
    {
-      FrameVector centerOfMassVelocityWorld = centerOfMassVelocityPort.getData();
-      FrameVector estimationLinkAngularVelocity = angularVelocityPort.getData();
+      FrameVector centerOfMassVelocityWorld = new FrameVector(centerOfMassVelocityPort.getData());
+      FrameVector estimationLinkAngularVelocity = new FrameVector(angularVelocityPort.getData());
 
-      FrameVector estimationLinkLinearVelocity = computeEstimationLinkLinearVelocity(centerOfMassVelocityWorld, estimationLinkAngularVelocity);
-      Twist estimationLinkTwist = computeEstimationLinkTwist(estimationLinkAngularVelocity, estimationLinkLinearVelocity);
-      Twist rootJointTwist = computeRootJointTwist(estimationLinkTwist);
+      FrameVector rootJointAngularVelocity = computeRootJointAngularVelocity(estimationLinkAngularVelocity);
+      FrameVector rootJointLinearVelocity = computeRootJointLinearVelocity(centerOfMassVelocityWorld, rootJointAngularVelocity);
+
+      Twist rootJointTwist = computeRootJointTwist(rootJointAngularVelocity, rootJointLinearVelocity);
       rootJoint.setJointTwist(rootJointTwist);
    }
 
-   private FrameVector computeEstimationLinkLinearVelocity(FrameVector centerOfMassVelocityWorld, FrameVector angularVelocityOfEstimationLink)
-   {
-      // \dot{r}^{estimation}
-      FrameVector comVelocityBody = new FrameVector(estimationFrame);
-      centerOfMassJacobianBody.packCenterOfMassVelocity(comVelocityBody);
-      comVelocityBody.changeFrame(rootJoint.getFrameAfterJoint());
-
-      // \tilde{\omega} r^{estimation}
-      centerOfMassCalculator.compute();
-      FramePoint centerOfMassBody = new FramePoint(estimationFrame);
-      centerOfMassCalculator.packCenterOfMass(centerOfMassBody);
-      FrameVector crossPart = new FrameVector(estimationFrame);
-      crossPart.cross(angularVelocityOfEstimationLink, centerOfMassBody);
-
-      // v_{r/p}= \tilde{\omega} r^{estimation} + \dot{r}^{estimation}
-      FrameVector centerOfMassVelocityOffset = new FrameVector(estimationFrame);
-      centerOfMassVelocityOffset.add(crossPart, comVelocityBody);
-
-      // v_{estimation}^{p,w} = R_{w}^{estimation} \dot{r} - v_{r/p}
-      FrameVector estimationLinkVelocity = new FrameVector(estimationFrame);
-      estimationLinkVelocity.setAndChangeFrame(centerOfMassVelocityWorld);
-      estimationLinkVelocity.changeFrame(estimationFrame);
-      estimationLinkVelocity.sub(centerOfMassVelocityOffset);
-
-      return estimationLinkVelocity;
-   }
-
-   private Twist computeEstimationLinkTwist(FrameVector estimationLinkAngularVelocity, FrameVector estimationLinkLinearVelocity)
-   {
-      Twist ret = new Twist(estimationLink.getBodyFixedFrame(), rootJoint.getFrameBeforeJoint(), estimationFrame);
-      estimationLinkLinearVelocity.changeFrame(ret.getExpressedInFrame());
-      ret.setLinearPart(estimationLinkLinearVelocity.getVector());
-      estimationLinkAngularVelocity.changeFrame(ret.getExpressedInFrame());
-      ret.setAngularPart(estimationLinkAngularVelocity.getVector());
-      
-      return ret;
-   }
-
-   private Twist computeRootJointTwist(Twist estimationLinkTwist)
+   private FrameVector computeRootJointAngularVelocity(FrameVector estimationLinkAngularVelocity)
    {
       // T_{root}^{root, estimation}
       Twist rootToEstimationTwist = new Twist();
-      twistCalculator.packRelativeTwist(rootToEstimationTwist, rootJoint.getSuccessor(), estimationLink);
+      twistCalculator.packRelativeTwist(rootToEstimationTwist, estimationLink, rootJoint.getSuccessor());
       rootToEstimationTwist.changeFrame(rootJoint.getFrameAfterJoint());
-      rootToEstimationTwist.changeBodyFrameNoRelativeTwist(rootJoint.getFrameAfterJoint());
+      
+      // omega_{root}^{root, estimation}
+      FrameVector rootToEstimationAngularVelocity = new FrameVector(rootJoint.getFrameAfterJoint());
+      rootToEstimationTwist.packAngularPart(rootToEstimationAngularVelocity);
+      
+      // omega_{estimation}^{root, world}
+      estimationLinkAngularVelocity.changeFrame(rootJoint.getFrameAfterJoint());
+      
+      // omega_{root}^{root, world} = omega_{estimation}^{root, world} + omega_{root}^{root, estimation}
+      FrameVector ret = new FrameVector(rootJoint.getFrameAfterJoint());
+      ret.add(estimationLinkAngularVelocity, rootToEstimationAngularVelocity);
+      return ret;
+   }
 
-      // T_{estimation}^{root, w}
-      estimationLinkTwist.changeFrame(rootJoint.getFrameAfterJoint());
+   private FrameVector computeRootJointLinearVelocity(FrameVector centerOfMassVelocityWorld, FrameVector rootJointAngularVelocity)
+   {
+      ReferenceFrame rootJointFrame = rootJoint.getFrameAfterJoint();
+      
+      // \dot{r}^{root}
+      centerOfMassJacobianBody.compute();
+      FrameVector comVelocityBody = new FrameVector(rootJointFrame);
+      centerOfMassJacobianBody.packCenterOfMassVelocity(comVelocityBody);
+      comVelocityBody.changeFrame(rootJointFrame);
 
-      // T_{root}^{root, w} = T_{estimation}^{root, w} + T_{root}^{root, estimation}
-      Twist rootJointTwist = new Twist(estimationLinkTwist);
-      rootJointTwist.add(rootToEstimationTwist);
+      // \tilde{\omega} r^{root}
+      centerOfMassCalculator.compute();
+      FramePoint centerOfMassBody = new FramePoint(rootJointFrame);
+      centerOfMassCalculator.packCenterOfMass(centerOfMassBody);
+      centerOfMassBody.changeFrame(rootJointFrame);
+      FrameVector crossPart = new FrameVector(rootJointFrame);
+      crossPart.cross(rootJointAngularVelocity, centerOfMassBody);
 
-      return rootJointTwist;
+      // v_{r/p}= \tilde{\omega} r^{root} + \dot{r}^{root}
+      FrameVector centerOfMassVelocityOffset = new FrameVector(rootJointFrame);
+      centerOfMassVelocityOffset.add(crossPart, comVelocityBody);
+
+      // v_{root}^{p,w} = R_{w}^{root} \dot{r} - v_{r/p}
+      FrameVector rootJointVelocity = new FrameVector(rootJointFrame);
+      rootJointVelocity.setAndChangeFrame(centerOfMassVelocityWorld);
+      rootJointVelocity.changeFrame(rootJointFrame);
+      rootJointVelocity.sub(centerOfMassVelocityOffset);
+      
+      return rootJointVelocity;
+   }
+
+   private Twist computeRootJointTwist(FrameVector rootJointAngularVelocity, FrameVector rootJointLinearVelocity)
+   {
+      Twist ret = new Twist(rootJoint.getFrameAfterJoint(), rootJoint.getFrameBeforeJoint(), rootJoint.getFrameAfterJoint());
+      ret.setLinearPart(rootJointLinearVelocity.getVector());
+      ret.setAngularPart(rootJointAngularVelocity.getVector());
+
+      return ret;
    }
 
    private void updateRootJointConfiguration()
