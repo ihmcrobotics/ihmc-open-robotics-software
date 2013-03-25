@@ -85,7 +85,6 @@ import us.ihmc.utilities.screwTheory.TwistCalculator;
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.IntegerYoVariable;
-import com.yobotics.simulationconstructionset.TwoAcknowledgementSimulationRewoundListener;
 import com.yobotics.simulationconstructionset.util.PDController;
 import com.yobotics.simulationconstructionset.util.PIDController;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
@@ -208,7 +207,6 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
    private final boolean resetDesiredICPToCurrentAtStartOfSwing;
    private final BooleanYoVariable icpTrajectoryHasBeenInitialized;
    private final BooleanYoVariable doToeOffIfPossible = new BooleanYoVariable("doToeOffIfPossible", registry);
-//   private TwoAcknowledgementSimulationRewoundListener simulationRewoundListener;
 
    public WalkingHighLevelHumanoidController(FullRobotModel fullRobotModel, CommonWalkingReferenceFrames referenceFrames, TwistCalculator twistCalculator,
          CenterOfMassJacobian centerOfMassJacobian, SideDependentList<? extends ContactablePlaneBody> bipedFeet, BipedSupportPolygons bipedSupportPolygons,
@@ -477,11 +475,6 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
    public void setDoToeOffIfPossible(boolean doToeOffIfPossible)
    {
       this.doToeOffIfPossible.set(doToeOffIfPossible);
-   }
-
-   public void setRewoundListener(TwoAcknowledgementSimulationRewoundListener simulationRewoundListener)
-   {
-//      this.simulationRewoundListener = simulationRewoundListener;
    }
 
    private RobotSide getUpcomingSupportLeg()
