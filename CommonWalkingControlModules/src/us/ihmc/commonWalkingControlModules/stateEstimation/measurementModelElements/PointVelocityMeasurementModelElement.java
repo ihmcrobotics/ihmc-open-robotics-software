@@ -87,21 +87,6 @@ public class PointVelocityMeasurementModelElement extends AbstractMeasurementMod
 
    private void computeAngularVelocityStateOutputBlock(Matrix3d rotationFromPelvisToWorld)
    {
-      computeVelocityOfStationaryPoint(tempFrameVector);
-      tempFrameVector.changeFrame(estimationFrame);
-
-      // TODO: garbage
-      FrameVector centerOfMassVelocity = new FrameVector(centerOfMassVelocityPort.getData());
-      tempFrameVector.sub(centerOfMassVelocity);
-      tempFrameVector.scale(-1.0);
-
-      MatrixTools.toTildeForm(tempMatrix, tempFramePoint.getPoint());
-      tempMatrix.mul(rotationFromPelvisToWorld, tempMatrix);
-      MatrixTools.setDenseMatrixFromMatrix3d(0, 0, tempMatrix, outputMatrixBlocks.get(angularVelocityPort));
-   }
-
-   private void computeOrientationStateOutputBlock(Matrix3d rotationFromPelvisToWorld)
-   {
       // TODO: garbage
       FramePoint centerOfMassPosition = new FramePoint(centerOfMassPositionPort.getData());
       centerOfMassPosition.changeFrame(estimationFrame);
@@ -112,6 +97,22 @@ public class PointVelocityMeasurementModelElement extends AbstractMeasurementMod
       tempFramePoint.scale(-1.0);
 
       MatrixTools.toTildeForm(tempMatrix, tempFramePoint.getPoint());
+      tempMatrix.mul(rotationFromPelvisToWorld, tempMatrix);
+      MatrixTools.setDenseMatrixFromMatrix3d(0, 0, tempMatrix, outputMatrixBlocks.get(angularVelocityPort));
+   }
+
+   private void computeOrientationStateOutputBlock(Matrix3d rotationFromPelvisToWorld)
+   {
+      computeVelocityOfStationaryPoint(tempFrameVector);
+      tempFrameVector.changeFrame(estimationFrame);
+
+      // TODO: garbage
+      FrameVector centerOfMassVelocity = new FrameVector(centerOfMassVelocityPort.getData());
+      centerOfMassVelocity.changeFrame(estimationFrame);
+      tempFrameVector.sub(centerOfMassVelocity);
+      tempFrameVector.scale(-1.0);
+
+      MatrixTools.toTildeForm(tempMatrix, tempFrameVector.getVector());
       tempMatrix.mul(rotationFromPelvisToWorld, tempMatrix);
       MatrixTools.setDenseMatrixFromMatrix3d(0, 0, tempMatrix, outputMatrixBlocks.get(orientationPort));
    }

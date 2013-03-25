@@ -75,7 +75,7 @@ public class PointVelocityMeasurementModelElementTest
       twistCalculator.compute();
 
       setCenterOfMassToActual(centerOfMassCalculator, centerOfMassPositionPort);
-      FrameVector centerOfMassVelocity = setCenterOfMassVelocityToActual(centerOfMassJacobian, centerOfMassVelocityPort);
+      setCenterOfMassVelocityToActual(centerOfMassJacobian, centerOfMassVelocityPort);
       setOrientationToActual(estimationFrame, orientationPort);
       setAngularVelocityToActual(estimationLink, estimationFrame, twistCalculator, angularVelocityPort);
       setMeasuredPointVelocityToActual(twistCalculator, stationaryPointLink, stationaryPoint, pointVelocityMeasurementInputPort);
@@ -84,16 +84,23 @@ public class PointVelocityMeasurementModelElementTest
       DenseMatrix64F zeroVector = new DenseMatrix64F(3, 1);
       EjmlUnitTests.assertEquals(zeroVector, zeroResidual, 1e-12);
 
-      double perturbation = 1e-5;
+      double perturbation = 1e-6;
       double tol = 1e-12;
-      Runnable updater = new CenterOfMassBasedFullRobotModelUpdater(twistCalculator, centerOfMassPositionPort, centerOfMassVelocityPort, orientationPort, angularVelocityPort,
-                            estimationLink, estimationFrame, rootJoint);
+      Runnable updater = new CenterOfMassBasedFullRobotModelUpdater(twistCalculator, centerOfMassPositionPort, centerOfMassVelocityPort, orientationPort,
+                            angularVelocityPort, estimationLink, estimationFrame, rootJoint);
+      modelElement.computeMatrixBlocks();
+
+      // CoM velocity perturbations
+      MeasurementModelTestTools.assertOutputMatrixCorrectUsingPerturbation(centerOfMassVelocityPort, modelElement,
+              new FrameVector(centerOfMassVelocityPort.getData()), perturbation, tol, updater);
 
       // angular velocity perturbations
-      MeasurementModelTestTools.assertOutputMatrixCorrectUsingPerturbation(centerOfMassVelocityPort, modelElement, centerOfMassVelocity, perturbation, tol,
-              updater);
-
-//    MeasurementModelTestTools.assertOutputMatrixCorrectUsingPerturbation(centerOfMassVelocityPort, modelElement, centerOfMassVelocity, perturbation, tol);
+      MeasurementModelTestTools.assertOutputMatrixCorrectUsingPerturbation(angularVelocityPort, modelElement, new FrameVector(angularVelocityPort.getData()),
+              perturbation, tol, updater);
+      
+      // orientation perturbations
+      MeasurementModelTestTools.assertOutputMatrixCorrectUsingPerturbation(orientationPort, modelElement, new FrameOrientation(orientationPort.getData()),
+            perturbation, tol, updater);
    }
 
    private void setAngularVelocityToActual(RigidBody estimationLink, ReferenceFrame estimationFrame, TwistCalculator twistCalculator,
@@ -114,14 +121,12 @@ public class PointVelocityMeasurementModelElementTest
       orientationPort.setData(orientation);
    }
 
-   private FrameVector setCenterOfMassVelocityToActual(CenterOfMassJacobian centerOfMassJacobian, ControlFlowOutputPort<FrameVector> centerOfMassVelocityPort)
+   private void setCenterOfMassVelocityToActual(CenterOfMassJacobian centerOfMassJacobian, ControlFlowOutputPort<FrameVector> centerOfMassVelocityPort)
    {
       centerOfMassJacobian.compute();
       FrameVector centerOfMassVelocity = new FrameVector(ReferenceFrame.getWorldFrame());
       centerOfMassJacobian.packCenterOfMassVelocity(centerOfMassVelocity);
       centerOfMassVelocityPort.setData(centerOfMassVelocity);
-
-      return centerOfMassVelocity;
    }
 
    private void setCenterOfMassToActual(CenterOfMassCalculator centerOfMassCalculator, ControlFlowOutputPort<FramePoint> centerOfMassPositionPort)
