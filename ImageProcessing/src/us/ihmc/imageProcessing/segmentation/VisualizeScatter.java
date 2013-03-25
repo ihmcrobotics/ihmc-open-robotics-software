@@ -21,40 +21,64 @@ import java.awt.*;
  */
 public class VisualizeScatter extends JPanel {
 
-   XYSeriesCollection dataset = new XYSeriesCollection();
+   ChartInfo chartHS;
+   ChartInfo chartVS;
 
-   public VisualizeScatter() {
-      super( new BorderLayout() );
+   public VisualizeScatter( String name0, String name1 , String name2 , double max0 , double max1 , double max2 ) {
+      GridLayout experimentLayout = new GridLayout(2,1);
 
-      setPreferredSize(new java.awt.Dimension(250, 250));
-      setMinimumSize(getPreferredSize());
-      setMaximumSize(getPreferredSize());
+      setLayout(experimentLayout);
+
+      chartHS = createPlot(name0, name1, max0, max1);
+      chartVS = createPlot(name2, name1, max2, max1);
+
+      add(chartHS.panel);
+      add(chartVS.panel);
+   }
+
+   private ChartInfo createPlot(String labelX, String labelY, double maxX, double maxY) {
+
+      ChartInfo ret = new ChartInfo();
 
       JFreeChart chart = ChartFactory.createScatterPlot(
               null,
-              "H", "S",
-              dataset,
+              labelX, labelY,
+              ret.dataset,
               PlotOrientation.VERTICAL,
               false,false,false);
 
       NumberAxis domainAxis = (NumberAxis) chart.getXYPlot().getDomainAxis();
-      domainAxis.setRange(0,2*Math.PI);
+      domainAxis.setRange(0,maxX);
       NumberAxis rangeAxis = (NumberAxis) chart.getXYPlot().getRangeAxis();
-      rangeAxis.setRange(0,1);
+      rangeAxis.setRange(0,maxY);
 
-      ChartPanel chartPanel = new ChartPanel(chart);
+      ChartPanel panel = new ChartPanel(chart);
 
-      add(chartPanel, BorderLayout.CENTER);
+      panel.setPreferredSize(new Dimension(250, 250));
+      panel.setMinimumSize(getPreferredSize());
+      panel.setMaximumSize(getPreferredSize());
+
+      ret.chart = chart;
+      ret.panel = panel;
+
+      return ret;
    }
 
 
    public void update( MultiSpectral<ImageFloat32> color , ImageUInt8 binary ) {
-      dataset.removeAllSeries();
+      // this is supposed to speed it up.  not sure if it does
+      chartHS.chart.setNotify(false);
+      chartVS.chart.setNotify(false);
 
-      XYSeries series = new XYSeries("Hue-Sat");
+      chartHS.dataset.removeAllSeries();
+      chartVS.dataset.removeAllSeries();
+
+      XYSeries seriesHS = new XYSeries("1");
+      XYSeries seriesVS = new XYSeries("2");
 
       ImageFloat32 H = color.getBand(0);
       ImageFloat32 S = color.getBand(1);
+      ImageFloat32 V = color.getBand(2);
 
       for( int y = 0; y < binary.height; y++ ) {
          int index = binary.startIndex + y*binary.stride;
@@ -62,16 +86,29 @@ public class VisualizeScatter extends JPanel {
          for( int x = 0; x < binary.width; x++ ) {
            if( binary.data[index++] == 1 ) {
               float h = H.unsafe_get(x,y);
-              float v = S.unsafe_get(x,y);
+              float s = S.unsafe_get(x,y);
+              float v = V.unsafe_get(x,y);
 
-              series.add(h,v);
+              seriesHS.add(h, s);
+              seriesVS.add(v, s);
            }
          }
       }
 
-      dataset.addSeries(series);
+      chartHS.dataset.addSeries(seriesHS);
+      chartVS.dataset.addSeries(seriesVS);
+
+      chartHS.chart.setNotify(true);
+      chartVS.chart.setNotify(true);
 
       repaint();
+   }
+
+   private static class ChartInfo
+   {
+      JFreeChart chart;
+      XYSeriesCollection dataset = new XYSeriesCollection();
+      ChartPanel panel;
    }
 
 }

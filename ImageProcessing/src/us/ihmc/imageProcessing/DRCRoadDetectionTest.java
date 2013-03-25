@@ -441,7 +441,7 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
 
 //       if (lines.size() > 2)
 //        System.out.println("TURN APPROACHING");
-         linePainter.setLines(lines);
+//         linePainter.setLines(lines);
          vanishingPointDetector.setLines(lines);
          lanePositionEstimator.setLines(lines);
          obstaclePositionEstimator.setLines(lines);
@@ -666,7 +666,7 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
    public static void main(String args[])
    {
       DRCRoadDetectionTest drcRoadDetectionTest = new DRCRoadDetectionTest();
-      final VideoPlayer videoPlayer = new VideoPlayer("./media/videos/rightEye.mp4", drcRoadDetectionTest, true);
+      final VideoPlayer videoPlayer = new VideoPlayer("./media/videos/leftEye.mp4", drcRoadDetectionTest, true);
       videoPlayer.start();
    }
 
