@@ -1755,17 +1755,47 @@ v_{n} & \sim\mathcal{N}\left(0,R_{d}\right)
 
 \begin_layout Standard
 With a first-order hold approximation, we can write
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+TODO: cite
+\end_layout
+
+\end_inset
+
+
 \begin_inset Formula 
 \begin{align*}
 A_{d} & =e^{A\Delta t}\\
 B_{d} & =\int_{0}^{\Delta t}e^{A\tau}d\tau B\\
 Q_{d} & =\int_{0}^{\Delta t}e^{A\tau}Qe^{A^{T}\tau}d\tau\\
-R_{d} & =\frac{1}{\Delta t}R
+R_{d} & =R
 \end{align*}
 
 \end_inset
 
 
+\end_layout
+
+\begin_layout Standard
+Note that the Matlab documentation for the `kalmd' function states that
+ 
+\begin_inset Formula $R_{d}$
+\end_inset
+
+ should be 
+\begin_inset Formula $\frac{1}{\Delta t}R$
+\end_inset
+
+.
+ We think this assumes that the measurement in the discretized model is
+ the average of a continuous stream of measurements taken throughout the
+ discretization time step, thereby averaging out the zero-mean noise and
+ resulting in a reduced noise covariance with increased measurement time.
+ We think this is not a good assumption, and instead assume that the continuous-
+time measurement noise is sampled only once per discretization time step,
+ resulting in an unaltered covariance.
 \end_layout
 
 \begin_layout Standard
