@@ -759,6 +759,11 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 
                readyToGrabNextFootstep.set(false);
             }
+            
+            else {
+               nextFootstepList.clear();
+               nextFootstepIndex.set(0);
+            }
          }
 
          //    	  else if (nextNextFootstep == null)
