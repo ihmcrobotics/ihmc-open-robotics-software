@@ -8,6 +8,7 @@ public class DRCConfigParameters
 {
    public static final boolean USE_GAZEBO_PHYSICS = false;
    public static final String GAZEBO_HOST = "localhost";
+   public static final boolean SHOW_BANDWIDTH_DIALOG = false;
    
    
    // Set to simulate one tick delay between, as it will be in Gazebo. This will also run the controller in a different thread!
