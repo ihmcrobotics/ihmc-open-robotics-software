@@ -37,7 +37,7 @@ public class PointVelocityMeasurementModelElement extends AbstractMeasurementMod
    private final RigidBody stationaryPointLink;
    private final DenseMatrix64F residual = new DenseMatrix64F(SIZE, 1);
 
-   private final Matrix3d rotationFromPelvisToWorld = new Matrix3d();
+   private final Matrix3d rotationFromEstimationToWorld = new Matrix3d();
    private final Transform3D tempTransform = new Transform3D();
    private final Matrix3d tempMatrix = new Matrix3d();
    private final FramePoint tempFramePoint = new FramePoint(ReferenceFrame.getWorldFrame());
@@ -51,7 +51,7 @@ public class PointVelocityMeasurementModelElement extends AbstractMeasurementMod
            ControlFlowOutputPort<FrameOrientation> orientationPort, ControlFlowOutputPort<FrameVector> angularVelocityPort, ReferenceFrame estimationFrame,
            RigidBody stationaryPointLink, FramePoint stationaryPoint, TwistCalculator twistCalculator, YoVariableRegistry registry)
    {
-      super(SIZE, 3, name, registry);
+      super(SIZE, name, registry);
 
       this.centerOfMassPositionPort = centerOfMassPositionPort;
       this.centerOfMassVelocityPort = centerOfMassVelocityPort;
@@ -75,9 +75,9 @@ public class PointVelocityMeasurementModelElement extends AbstractMeasurementMod
    public void computeMatrixBlocks()
    {
       estimationFrame.getTransformToDesiredFrame(tempTransform, ReferenceFrame.getWorldFrame());
-      tempTransform.get(rotationFromPelvisToWorld);
-      computeOrientationStateOutputBlock(rotationFromPelvisToWorld);
-      computeAngularVelocityStateOutputBlock(rotationFromPelvisToWorld);
+      tempTransform.get(rotationFromEstimationToWorld);
+      computeOrientationStateOutputBlock(rotationFromEstimationToWorld);
+      computeAngularVelocityStateOutputBlock(rotationFromEstimationToWorld);
    }
 
    private void computeCenterOfMassVelocityStateOutputBlock()

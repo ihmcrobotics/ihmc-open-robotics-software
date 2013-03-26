@@ -20,11 +20,11 @@ public abstract class AbstractMeasurementModelElement implements MeasurementMode
    private final DenseMatrix64F scaledMeasurementCovarianceMatrixBlock;
    private final DoubleYoVariable covarianceMatrixScaling;
 
-   public AbstractMeasurementModelElement(int covarianceMatrixSize, int numberOfOutputMatrixBlocks, String name, YoVariableRegistry registry)
+   public AbstractMeasurementModelElement(int covarianceMatrixSize, String name, YoVariableRegistry registry)
    {
       measurementCovarianceMatrixBlock = new DenseMatrix64F(covarianceMatrixSize, covarianceMatrixSize);
       scaledMeasurementCovarianceMatrixBlock = new DenseMatrix64F(covarianceMatrixSize, covarianceMatrixSize);
-      outputMatrixBlocks = new HashMap<ControlFlowOutputPort<?>, DenseMatrix64F>(numberOfOutputMatrixBlocks);
+      outputMatrixBlocks = new HashMap<ControlFlowOutputPort<?>, DenseMatrix64F>();
       covarianceMatrixScaling = new DoubleYoVariable(name + "CovScaling", registry);
       covarianceMatrixScaling.set(1.0);
    }
