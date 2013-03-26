@@ -1,5 +1,11 @@
 package us.ihmc.darpaRoboticsChallenge;
 
+import com.yobotics.simulationconstructionset.InverseDynamicsMechanismReferenceFrameVisualizer;
+import com.yobotics.simulationconstructionset.PlaybackListener;
+import com.yobotics.simulationconstructionset.SimulationRewoundListener;
+import com.yobotics.simulationconstructionset.gui.GUISetterUpperRegistry;
+import com.yobotics.simulationconstructionset.robotController.*;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import us.ihmc.GazeboStateCommunicator.GazeboRobot;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFPerfectSimulatedSensorReaderAndWriter;
@@ -28,24 +34,12 @@ import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 
-import com.yobotics.simulationconstructionset.InverseDynamicsMechanismReferenceFrameVisualizer;
-import com.yobotics.simulationconstructionset.gui.GUISetterUpperRegistry;
-import com.yobotics.simulationconstructionset.robotController.AbstractModularRobotController;
-import com.yobotics.simulationconstructionset.robotController.DelayedThreadedModularRobotController;
-import com.yobotics.simulationconstructionset.robotController.ModularRobotController;
-import com.yobotics.simulationconstructionset.robotController.ModularSensorProcessor;
-import com.yobotics.simulationconstructionset.robotController.RobotController;
-import com.yobotics.simulationconstructionset.robotController.SensorProcessor;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-
 public class DRCSimulationFactory
 {
    private static final boolean SHOW_REFERENCE_FRAMES = false;
    public static boolean SHOW_INERTIA_ELLIPSOIDS = false;
 
-   public static HumanoidRobotSimulation<SDFRobot> createSimulation(ControllerFactory controllerFactory,
-         CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, DRCRobotInterface robotInterface, RobotInitialSetup<SDFRobot> robotInitialSetup,
-         ScsInitialSetup scsInitialSetup, GuiInitialSetup guiInitialSetup, KryoObjectServer networkServer)
+   public static HumanoidRobotSimulation<SDFRobot> createSimulation(ControllerFactory controllerFactory, CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, DRCRobotInterface robotInterface, RobotInitialSetup<SDFRobot> robotInitialSetup, ScsInitialSetup scsInitialSetup, GuiInitialSetup guiInitialSetup, KryoObjectServer networkServer)
    {
       GUISetterUpperRegistry guiSetterUpperRegistry = new GUISetterUpperRegistry();
       DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
@@ -55,12 +49,12 @@ public class DRCSimulationFactory
       double simulateDT = robotInterface.getSimulateDT();
       double controlDT = controllerFactory.getControlDT();
       int simulationTicksPerControlTick = (int) (controlDT / simulateDT);
-      
+
       SDFRobot simulatedRobot = robotInterface.getRobot();
-      
-      
+
+
       simulatedRobot.setDynamicIntegrationMethod(scsInitialSetup.getDynamicIntegrationMethod());
-      
+
       SDFFullRobotModel fullRobotModelForSimulation = robotInterface.getFullRobotModel();
 
 
@@ -68,49 +62,44 @@ public class DRCSimulationFactory
       CommonWalkingReferenceFrames referenceFramesForController = new ReferenceFrames(fullRobotModelForSimulation, jointMap, jointMap.getAnkleHeight());
 
       SideDependentList<FootSwitchInterface> footSwitches = robotInterface.getFootSwitches();
-      
+
       SideDependentList<HandControllerInterface> handControllers = null;
       if (jointMap.getSelectedModel() == DRCRobotModel.ATLAS_SANDIA_HANDS)
       {
          handControllers = new SideDependentList<HandControllerInterface>();
          for (RobotSide robotSide : RobotSide.values())
          {
-            
+
             SandiaHandModel handModel = new SandiaHandModel(fullRobotModelForController, robotSide);
-            SimulatedUnderactuatedSandiaHandController simulatedUnderactuatedSandiaHandController = new SimulatedUnderactuatedSandiaHandController(
-                  simulatedRobot.getYoTime(), handModel);
+            SimulatedUnderactuatedSandiaHandController simulatedUnderactuatedSandiaHandController = new SimulatedUnderactuatedSandiaHandController(simulatedRobot.getYoTime(), handModel);
             handControllers.put(robotSide, simulatedUnderactuatedSandiaHandController);
-            if(networkServer != null)
+            if (networkServer != null)
             {
                networkServer.attachListener(HandStatePacket.class, simulatedUnderactuatedSandiaHandController);
             }
-            
+
          }
       }
 
       TwistCalculator twistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), fullRobotModelForController.getElevator());
       CenterOfMassJacobian centerOfMassJacobian = new CenterOfMassJacobian(fullRobotModelForController.getElevator());
 
-      SDFPerfectSimulatedSensorReaderAndWriter sensorReaderAndOutputWriter = new SDFPerfectSimulatedSensorReaderAndWriter(simulatedRobot,
-                                                                                fullRobotModelForController, referenceFramesForController, DRCConfigParameters.INTRODUCE_FILTERED_GAUSSIAN_POSITIONING_ERROR);
+      SDFPerfectSimulatedSensorReaderAndWriter sensorReaderAndOutputWriter = new SDFPerfectSimulatedSensorReaderAndWriter(simulatedRobot, fullRobotModelForController, referenceFramesForController, DRCConfigParameters.INTRODUCE_FILTERED_GAUSSIAN_POSITIONING_ERROR);
       sensorReaderAndOutputWriter.setNoiseFilterAlpha(DRCConfigParameters.NOISE_FILTER_ALPHA);
       sensorReaderAndOutputWriter.setPositionNoiseStd(DRCConfigParameters.POSITION_NOISE_STD);
       sensorReaderAndOutputWriter.setQuaternionNoiseStd(DRCConfigParameters.QUATERNION_NOISE_STD);
 
-      
-      
+
       OneDoFJoint lidarJoint = fullRobotModelForController.getOneDoFJointByName(jointMap.getLidarJointName());
       // PathTODO: Build LIDAR here
-      RobotController robotController = controllerFactory.getController(fullRobotModelForController, referenceFramesForController, controlDT,
-                                           simulatedRobot.getYoTime(), dynamicGraphicObjectsListRegistry, guiSetterUpperRegistry, twistCalculator,
-                                           centerOfMassJacobian, footSwitches, handControllers, lidarJoint);
+      RobotController robotController = controllerFactory.getController(fullRobotModelForController, referenceFramesForController, controlDT, simulatedRobot.getYoTime(), dynamicGraphicObjectsListRegistry, guiSetterUpperRegistry, twistCalculator, centerOfMassJacobian, footSwitches, handControllers, lidarJoint);
 
       AbstractModularRobotController modularRobotController;
-      
-      
+
+
       boolean checkForDelay = DRCConfigParameters.SIMULATE_DELAY;
       checkForDelay = checkForDelay && !DRCConfigParameters.USE_GAZEBO_PHYSICS;
-      if(checkForDelay)
+      if (checkForDelay)
       {
          modularRobotController = new DelayedThreadedModularRobotController("ModularRobotController");
       }
@@ -118,36 +107,41 @@ public class DRCSimulationFactory
       {
          modularRobotController = new ModularRobotController("ModularRobotController");
       }
-      
+
       modularRobotController.setRawSensorReader(sensorReaderAndOutputWriter);
       modularRobotController.setSensorProcessor(createSensorProcessor(twistCalculator, centerOfMassJacobian));
       modularRobotController.addRobotController(robotController);
 
       if (SHOW_INERTIA_ELLIPSOIDS)
       {
-         modularRobotController.addRobotController(new CommonInertiaElipsoidsVisualizer(fullRobotModelForSimulation.getElevator(),
-                 dynamicGraphicObjectsListRegistry));
+         modularRobotController.addRobotController(new CommonInertiaElipsoidsVisualizer(fullRobotModelForSimulation.getElevator(), dynamicGraphicObjectsListRegistry));
       }
 
-      if(SHOW_REFERENCE_FRAMES)
+      if (SHOW_REFERENCE_FRAMES)
       {
          modularRobotController.addRobotController(new InverseDynamicsMechanismReferenceFrameVisualizer(fullRobotModelForSimulation.getElevator(), dynamicGraphicObjectsListRegistry, 0.1));
       }
-      
+
       modularRobotController.setRawOutputWriter(sensorReaderAndOutputWriter);
 
-      HumanoidRobotSimulation<SDFRobot> humanoidRobotSimulation = new HumanoidRobotSimulation<SDFRobot>(simulatedRobot, modularRobotController, simulationTicksPerControlTick, fullRobotModelForSimulation,
-                                         commonAvatarEnvironmentInterface, simulatedRobot.getAllExternalForcePoints(), robotInitialSetup, scsInitialSetup,
-                                         guiInitialSetup, guiSetterUpperRegistry, dynamicGraphicObjectsListRegistry);
-      if (networkServer!=null)
+      HumanoidRobotSimulation<SDFRobot> humanoidRobotSimulation = new HumanoidRobotSimulation<SDFRobot>(simulatedRobot, modularRobotController, simulationTicksPerControlTick, fullRobotModelForSimulation, commonAvatarEnvironmentInterface, simulatedRobot.getAllExternalForcePoints(), robotInitialSetup, scsInitialSetup, guiInitialSetup, guiSetterUpperRegistry, dynamicGraphicObjectsListRegistry);
+      if (networkServer != null)
+      {
          DRCLidar.setupDRCRobotLidar(humanoidRobotSimulation, networkServer, lidarJoint);
-      
-      
-      if(simulatedRobot instanceof GazeboRobot)
+         setUpRemoteSCSListening(humanoidRobotSimulation, networkServer);
+      }
+
+      if (simulatedRobot instanceof GazeboRobot)
       {
          ((GazeboRobot) simulatedRobot).registerWithSCS(humanoidRobotSimulation.getSimulationConstructionSet());
       }
       return humanoidRobotSimulation;
+   }
+
+   private static void setUpRemoteSCSListening(HumanoidRobotSimulation<SDFRobot> humanoidRobotSimulation, KryoObjectServer networkServer)
+   {
+      PlaybackListener playbackListener = new SCSPlaybackListener(networkServer);
+      humanoidRobotSimulation.getSimulationConstructionSet().attachPlaybackListener(playbackListener);
    }
 
    private static SensorProcessor createSensorProcessor(TwistCalculator twistCalculator, CenterOfMassJacobian centerOfMassJacobian)
