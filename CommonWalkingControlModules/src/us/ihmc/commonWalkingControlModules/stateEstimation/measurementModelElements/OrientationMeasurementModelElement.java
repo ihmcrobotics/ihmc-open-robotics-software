@@ -40,7 +40,7 @@ public class OrientationMeasurementModelElement extends AbstractMeasurementModel
            ControlFlowInputPort<Matrix3d> orientationMeasurementInputPort, ReferenceFrame estimationFrame, ReferenceFrame measurementFrame, String name,
            YoVariableRegistry registry)
    {
-      super(SIZE, 1, name, registry);
+      super(SIZE, name, registry);
       this.orientationStatePort = orientationStatePort;
       this.orientationMeasurementInputPort = orientationMeasurementInputPort;
       this.estimationFrame = estimationFrame;
