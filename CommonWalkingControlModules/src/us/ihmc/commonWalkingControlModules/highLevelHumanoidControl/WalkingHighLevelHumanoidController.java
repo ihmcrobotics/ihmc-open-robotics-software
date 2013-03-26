@@ -171,16 +171,16 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 
    // private Footstep nextFootstep = null;
    private final YoFramePose nextFootstepPose = new YoFramePose("nextFootstep", "", worldFrame, registry);
-   private Footstep nextNextFootstep = null;
+
+// private Footstep nextNextFootstep = null;
 
    private final BooleanYoVariable readyToGrabNextFootstep = new BooleanYoVariable("readyToGrabNextFootstep", registry);
 
    private final IntegerYoVariable nextFootstepIndex = new IntegerYoVariable("nextFootstepIndex", registry);
+   private final IntegerYoVariable nextNextFootstepIndex = new IntegerYoVariable("nextNextFootstepIndex", registry);
 
-   // private final IntegerYoVariable nextNextFootstepIndex = new IntegerYoVariable("nextNextFootstepIndex", registry);
    private final List<Footstep> nextFootstepList = new ArrayList<Footstep>();
-
-   // private final ArrayList<Footstep> nextNextFootstepList = new ArrayList<Footstep>();
+   private final ArrayList<Footstep> nextNextFootstepList = new ArrayList<Footstep>();
 
    private final FootstepProvider footstepProvider;
    private final HashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters;
@@ -670,6 +670,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
             Footstep transferToFootstep = new Footstep(contactablePlaneBody, currentPoseReferenceFrame, soleReferenceFrame, expectedContactPoints, trustHeight);
 
             Footstep nextFootstep = getNextFootstep();
+            Footstep nextNextFootstep = getNextNextFootstep();
 
             TransferToAndNextFootstepsData transferToAndNextFootstepsData = new TransferToAndNextFootstepsData();
             transferToAndNextFootstepsData.setTransferToFootstep(transferToFootstep);
@@ -750,11 +751,18 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
             {
                nextFootstepList.remove(i);
             }
+            
+            for (int i = nextNextFootstepList.size() - 1; i > nextNextFootstepIndex.getIntegerValue(); i--)
+            {
+               nextNextFootstepList.remove(i);
+            }
 
             Footstep nextFootstep = footstepProvider.poll();
 
             if (nextFootstep != null)
             {
+               Footstep nextNextFootstep = footstepProvider.peek();
+               
                nextFootstepList.add(nextFootstep);
                nextFootstepIndex.set(nextFootstepList.size() - 1);
 
@@ -762,18 +770,25 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
                nextFootstepPose.set(nextFootstep.getPoseCopy());
 
                readyToGrabNextFootstep.set(false);
+               
+               if (nextNextFootstep != null)
+               {
+                  nextNextFootstepList.add(nextNextFootstep);
+                  nextNextFootstepIndex.set(nextNextFootstepList.size() - 1);
+               }
+               else 
+               {
+                  nextNextFootstepIndex.increment();
+               }
             }
 
             else
             {
                nextFootstepList.clear();
                nextFootstepIndex.set(0);
+               nextNextFootstepList.clear();
+               nextNextFootstepIndex.set(0);
             }
-         }
-
-         else if (nextNextFootstep == null)
-         {
-            nextNextFootstep = footstepProvider.peek();
          }
       }
    }
@@ -853,7 +868,6 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
          if (DEBUG)
             System.out.println("WalkingHighLevelHumanoidController: nextFootstep will change now!");
          readyToGrabNextFootstep.set(true);
-         nextNextFootstep = null;
       }
 
       @Override
@@ -1159,6 +1173,8 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
          desiredICP.set(capturePoint.getFramePoint2dCopy());    // TODO: currently necessary for stairs because of the omega0 jump, but should get rid of this
       }
 
+      Footstep nextNextFootstep = getNextNextFootstep();
+      
       FramePoint2d finalDesiredICP = getSingleSupportFinalDesiredICPForWalking(nextFootstep, nextNextFootstep, swingSide);
 
       ContactablePlaneBody swingFoot = bipedFeet.get(swingSide);
@@ -1453,5 +1469,14 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       Footstep nextFootstep = nextFootstepList.get(nextFootstepIndex.getIntegerValue());
 
       return nextFootstep;
+   }
+   
+   private Footstep getNextNextFootstep()
+   {
+      if (nextNextFootstepIndex.getIntegerValue() >= nextNextFootstepList.size())
+         return null;
+      Footstep nextNextFootstep = nextNextFootstepList.get(nextNextFootstepIndex.getIntegerValue());
+      
+      return nextNextFootstep;
    }
 }
