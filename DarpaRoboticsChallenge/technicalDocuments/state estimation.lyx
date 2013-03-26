@@ -905,17 +905,28 @@ S_{v}=\left(\begin{array}{cc}
 \end_layout
 
 \begin_layout Standard
-The twist 
-\begin_inset Formula $T_{i}^{i,w}$
+We now introduce a fictitious `elevator' body, denoted 
+\begin_inset Formula $e$
 \end_inset
 
- can be written as
-\end_layout
+, which accelerates linearly with respect to the world at a constant rate
+ of 
+\begin_inset Formula $-g$
+\end_inset
 
-\begin_layout Standard
+, where 
+\begin_inset Formula $g$
+\end_inset
+
+ is gravitational acceleration.
+ This allows us to write the spatial acceleration 
+\begin_inset Formula $\dot{T}_{i}^{i,w}$
+\end_inset
+
+ as
 \begin_inset Formula 
 \[
-T_{i}^{i,w}=T_{p}^{i,w}+T_{i}^{i,p}
+\dot{T}_{i}^{i,w}=\dot{T}_{e}^{i,w}+\dot{T}_{p}^{i,e}+\dot{T}_{i}^{i,p}
 \]
 
 \end_inset
@@ -924,55 +935,53 @@ T_{i}^{i,w}=T_{p}^{i,w}+T_{i}^{i,p}
 \end_layout
 
 \begin_layout Standard
-Differentiating results in
-\end_layout
-
-\begin_layout Standard
+The acceleration of the elevator with respect to the world is expressed
+ in world frame as 
 \begin_inset Formula 
 \[
-\dot{T}_{i}^{i,w}=\dot{T}_{p}^{i,w}+\dot{T}_{i}^{i,p}
+\dot{T}_{e}^{w,w}=\left(\begin{array}{c}
+0\\
+-g
+\end{array}\right)
 \]
 
 \end_inset
 
-where 
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\uuline off
-\uwave off
-\noun off
-\color none
-
-\begin_inset Formula $\dot{T}_{i}^{i,p}$
-\end_inset
-
- only depends on the joint velocities and accelerations for the joints on
- the path between 
-\begin_inset Formula $p$
-\end_inset
-
- and 
+and can be written in frame 
 \begin_inset Formula $i$
 \end_inset
 
- and can be written as
+ as
 \begin_inset Formula 
 \[
-\dot{T}_{i}^{i,p}=\dot{J}_{i}^{i,p}v_{i}^{p}+J_{i}^{i,p}\dot{v}_{i}^{p}
+\dot{T}_{e}^{i,w}=\Ad_{H_{w}^{i}}\dot{T}_{e}^{w,w}
 \]
 
 \end_inset
 
+The linear component of the elevator acceleration, 
+\begin_inset Formula $\dot{v}_{e}^{i,w}$
+\end_inset
 
-\end_layout
+, can then be written as
+\begin_inset Formula 
+\begin{align*}
+\dot{v}_{e}^{i,w} & =S_{v}\dot{T}_{e}^{i,w}\\
+ & =\left(\begin{array}{cc}
+0_{3\times3} & I_{3}\end{array}\right)\left(\begin{array}{cc}
+R_{w}^{i} & 0\\
+\tilde{p}_{w}^{i}R_{w}^{i} & R_{w}^{i}
+\end{array}\right)\left(\begin{array}{c}
+0\\
+-g
+\end{array}\right)\\
+ & =-R_{w}^{i}g\\
+ & =-R_{p}^{i}R_{w}^{p}g
+\end{align*}
 
-\begin_layout Standard
-Furthermore,
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -988,9 +997,15 @@ Furthermore,
 \uwave off
 \noun off
 \color none
+The acceleration of the estimation link with respect to the world can be
+ written in frame 
+\begin_inset Formula $i$
+\end_inset
+
+ as
 \begin_inset Formula 
 \[
-\dot{T}_{p}^{i,w}=\Ad_{H_{p}^{i}}\left(\ad_{T_{p}^{p,i}}T_{p}^{p,w}+\dot{T}_{p}^{p,w}\right)
+\dot{T}_{p}^{i,e}=\Ad_{H_{p}^{i}}\left(\ad_{T_{p}^{p,i}}T_{p}^{p,e}+\dot{T}_{p}^{p,e}\right)
 \]
 
 \end_inset
@@ -1021,67 +1036,133 @@ v
 
 \end_inset
 
+Its linear component, 
+\begin_inset Formula $\dot{v}_{p}^{i,e}$
+\end_inset
 
-\end_layout
-
-\begin_layout Standard
-Combining the above, we get
+, is written as
 \begin_inset Formula 
-\begin{align}
-\dot{v}_{i}^{i,w} & =\left(\begin{array}{cc}
-0_{3\times3} & I_{3}\end{array}\right)\left(\left(\begin{array}{cc}
+\begin{align*}
+\dot{v}_{p}^{i,e} & =S_{v}\dot{T}_{p}^{i,e}\\
+ & =\left(\begin{array}{cc}
+0_{3\times3} & I_{3}\end{array}\right)\left(\begin{array}{cc}
 R_{p}^{i} & 0\\
 \tilde{p}_{p}^{i}R_{p}^{i} & R_{p}^{i}
 \end{array}\right)\left(\left(\begin{array}{cc}
 \tilde{\omega}_{p}^{p,i} & 0\\
 \tilde{v}_{p}^{p,i} & \tilde{\omega}_{p}^{p,i}
 \end{array}\right)\left(\begin{array}{c}
-\omega_{p}^{p,w}\\
-v_{p}^{p,w}
+\omega_{p}^{p,e}\\
+v_{p}^{p,e}
 \end{array}\right)+\left(\begin{array}{c}
-\dot{\omega}_{p}^{p,w}\\
-\dot{v}_{p}^{p,w}
-\end{array}\right)\right)+\left(\begin{array}{c}
-\dot{\omega}_{i}^{i,p}\\
-\dot{v}_{i}^{i,p}
-\end{array}\right)\right)\nonumber \\
- & =\left(\begin{array}{cc}
-0_{3\times3} & I_{3}\end{array}\right)\left(\left(\begin{array}{cc}
-R_{p}^{i} & 0\\
-\tilde{p}_{p}^{i}R_{p}^{i} & R_{p}^{i}
-\end{array}\right)\left(\begin{array}{c}
-\tilde{\omega}_{p}^{p,i}\omega_{p}^{p,w}+\dot{\omega}_{p}^{p,w}\\
-\tilde{v}_{p}^{p,i}\omega_{p}^{p,w}+\tilde{\omega}_{p}^{p,i}v_{p}^{p,w}+\dot{v}_{p}^{p,w}
-\end{array}\right)+\left(\begin{array}{c}
-\dot{\omega}_{i}^{i,p}\\
-\dot{v}_{i}^{i,p}
-\end{array}\right)\right)\nonumber \\
+\dot{\omega}_{p}^{p,e}\\
+\dot{v}_{p}^{p,e}
+\end{array}\right)\right)\\
  & =\left(\begin{array}{cc}
 \tilde{p}_{p}^{i}R_{p}^{i} & R_{p}^{i}\end{array}\right)\left(\begin{array}{c}
-\tilde{\omega}_{p}^{p,i}\omega_{p}^{p,w}+\dot{\omega}_{p}^{p,w}\\
-\tilde{v}_{p}^{p,i}\omega_{p}^{p,w}+\tilde{\omega}_{p}^{p,i}v_{p}^{p,w}+\dot{v}_{p}^{p,w}
-\end{array}\right)+\dot{v}_{i}^{i,p}\nonumber \\
- & =\tilde{p}_{p}^{i}R_{p}^{i}\left(\tilde{\omega}_{p}^{p,i}\omega_{p}^{p,w}+\dot{\omega}_{p}^{p,w}\right)+R_{p}^{i}\left(\tilde{v}_{p}^{p,i}\omega_{p}^{p,w}+\tilde{\omega}_{p}^{p,i}v_{p}^{p,w}+\dot{v}_{p}^{p,w}\right)+\dot{v}_{i}^{i,p}\nonumber \\
- & =\tilde{p}_{p}^{i}R_{p}^{i}\left(\tilde{\omega}_{p}^{p,i}\omega+\dot{\omega}\right)+R_{p}^{i}\left(\tilde{v}_{p}^{p,i}\omega+\tilde{\omega}_{p}^{p,i}v_{p}^{p,w}+\dot{v}_{p}^{p,w}\right)+\dot{v}_{i}^{i,p}\label{eq:imu-accel-1}
-\end{align}
+\tilde{\omega}_{p}^{p,i}\omega_{p}^{p,e}+\dot{\omega}_{p}^{p,e}\\
+\tilde{v}_{p}^{p,i}\omega_{p}^{p,e}+\tilde{\omega}_{p}^{p,i}v_{p}^{p,e}+\dot{v}_{p}^{p,e}
+\end{array}\right)\\
+ & =\tilde{p}_{p}^{i}R_{p}^{i}\left(\tilde{\omega}_{p}^{p,i}\omega_{p}^{p,e}+\dot{\omega}_{p}^{p,e}\right)+R_{p}^{i}\left(\tilde{v}_{p}^{p,i}\omega_{p}^{p,e}+\tilde{\omega}_{p}^{p,i}v_{p}^{p,e}+\dot{v}_{p}^{p,e}\right)\\
+ & =\tilde{p}_{p}^{i}R_{p}^{i}\left(\tilde{\omega}_{p}^{p,i}\omega+\dot{\omega}\right)+R_{p}^{i}\left(\tilde{v}_{p}^{p,i}\omega+\tilde{\omega}_{p}^{p,i}v_{p}^{p,e}+\dot{v}_{p}^{p,e}\right)
+\end{align*}
 
 \end_inset
 
 where the last line follows from the definition 
-\begin_inset Formula $\omega_{p}^{p,w}=\omega$
+\begin_inset Formula $\omega_{p}^{p,e}=\omega_{p}^{p,w}=\omega$
 \end_inset
 
 .
 \end_layout
 
 \begin_layout Standard
-This equation is written in terms of the linear velocity and acceleration
- of the orientation estimation link, 
-\begin_inset Formula $v_{p}^{p,w}$
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+The spatial acceleration of 
+\begin_inset Formula $i$
+\end_inset
+
+ with respect to 
+\begin_inset Formula $p$
+\end_inset
+
+, 
+\begin_inset Formula $\dot{T}_{i}^{i,p}$
+\end_inset
+
+, only depends on the joint velocities and accelerations for the joints
+ on the path between 
+\begin_inset Formula $p$
 \end_inset
 
  and 
-\begin_inset Formula $\dot{v}_{p}^{p,w}$
+\begin_inset Formula $i$
+\end_inset
+
+, and can be written as
+\begin_inset Formula 
+\[
+\dot{T}_{i}^{i,p}=\dot{J}_{i}^{i,p}v_{i}^{p}+J_{i}^{i,p}\dot{v}_{i}^{p}
+\]
+
+\end_inset
+
+
+\family default
+\series default
+\shape default
+\size default
+\emph default
+\bar default
+\strikeout default
+\uuline default
+\uwave default
+\noun default
+\color inherit
+Since this acceleration does not depend on the state of the estimator, we
+ will simply refer to it as 
+\begin_inset Formula $\dot{T}_{i}^{i,p}$
+\end_inset
+
+, and to its linear component as 
+\begin_inset Formula $\dot{v}_{i}^{i,p}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Combining the above, we get
+\begin_inset Formula 
+\begin{align}
+\dot{v}_{i}^{i,w} & =-R_{w}^{i}g+\tilde{p}_{p}^{i}R_{p}^{i}\left(\tilde{\omega}_{p}^{p,i}\omega+\dot{\omega}\right)\nonumber \\
+ & +R_{p}^{i}\left(\tilde{v}_{p}^{p,i}\omega+\tilde{\omega}_{p}^{p,i}v_{p}^{p,e}+\dot{v}_{p}^{p,e}\right)+\dot{v}_{i}^{i,p}\label{eq:imu-accel-1}
+\end{align}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This equation is written in terms of the linear velocity and acceleration
+ of the orientation estimation link, 
+\begin_inset Formula $v_{p}^{p,e}$
+\end_inset
+
+ and 
+\begin_inset Formula $\dot{v}_{p}^{p,e}$
 \end_inset
 
 .
@@ -1107,8 +1188,8 @@ reference "eq:eq:rootjoint-linear-acc"
 \begin_layout Standard
 \begin_inset Formula 
 \begin{align*}
-v_{p}^{p,w} & =R_{w}^{p}\dot{r}-v_{r/p}\\
-\dot{v}_{p}^{p,w} & =R_{w}^{p}\ddot{r}-\tilde{\omega}R_{w}^{p}\dot{r}-\dot{v}_{r/p}
+v_{p}^{p,e} & =R_{w}^{p}\dot{r}-v_{r/p}\\
+\dot{v}_{p}^{p,e} & =R_{w}^{p}\ddot{r}-\tilde{\omega}R_{w}^{p}\dot{r}-\dot{v}_{r/p}
 \end{align*}
 
 \end_inset
@@ -1133,9 +1214,12 @@ reference "eq:imu-accel-1"
 \end_inset
 
  and expanding, we obtain
+\end_layout
+
+\begin_layout Standard
 \begin_inset Formula 
 \begin{align*}
-\dot{v}_{i}^{i,w} & =\tilde{p}_{p}^{i}R_{p}^{i}\tilde{\omega}_{p}^{p,i}\omega+\tilde{p}_{p}^{i}R_{p}^{i}\dot{\omega}+R_{p}^{i}\tilde{v}_{p}^{p,i}\omega+R_{p}^{i}\tilde{\omega}_{p}^{p,i}R_{w}^{p}\dot{r}-R_{p}^{i}\tilde{\omega}_{p}^{p,i}\tilde{\omega}r^{p}-R_{p}^{i}\tilde{\omega}_{p}^{p,i}\dot{r}^{p}\\
+\dot{v}_{i}^{i,w} & =-R_{p}^{i}R_{w}^{p}g+\tilde{p}_{p}^{i}R_{p}^{i}\tilde{\omega}_{p}^{p,i}\omega+\tilde{p}_{p}^{i}R_{p}^{i}\dot{\omega}+R_{p}^{i}\tilde{v}_{p}^{p,i}\omega+R_{p}^{i}\tilde{\omega}_{p}^{p,i}R_{w}^{p}\dot{r}-R_{p}^{i}\tilde{\omega}_{p}^{p,i}\tilde{\omega}r^{p}-R_{p}^{i}\tilde{\omega}_{p}^{p,i}\dot{r}^{p}\\
  & +R_{p}^{i}R_{w}^{p}\ddot{r}-R_{p}^{i}\tilde{\omega}R_{w}^{p}\dot{r}-R_{p}^{i}\tilde{\dot{\omega}}r^{p}-R_{p}^{i}\tilde{\omega}\dot{r}^{p}-R_{p}^{i}\ddot{r}^{p}+\dot{v}_{i}^{i,p}
 \end{align*}
 
@@ -1160,6 +1244,17 @@ The partial derivatives are:
 \begin_inset Formula 
 \[
 \frac{\partial\dot{v}_{i}^{i,w}}{\partial\dot{\omega}}=\tilde{p}_{p}^{i}R_{p}^{i}+R_{p}^{i}\tilde{r}^{p}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\frac{\partial\dot{v}_{i}^{i,w}}{\partial\dot{r}}=R_{p}^{i}\tilde{\omega}_{p}^{p,i}R_{w}^{p}-R_{p}^{i}\tilde{\omega}R_{w}^{p}
 \]
 
 \end_inset
@@ -1211,6 +1306,13 @@ These expressions can be simplified using the following substitutions:
 
 \end_layout
 
+\begin_layout Itemize
+\begin_inset Formula $\omega_{p}^{p,i}=-\omega_{i}^{p,p}$
+\end_inset
+
+
+\end_layout
+
 \begin_layout Standard
 resulting in
 \begin_inset Formula 
@@ -1237,7 +1339,18 @@ resulting in
 \begin_layout Standard
 \begin_inset Formula 
 \[
-\frac{\partial\dot{v}_{i}^{i,w}}{\partial\omega}=R_{p}^{i}\left(-\tilde{p}_{i}^{p}\tilde{\omega}_{p}^{p,i}+\tilde{v}_{p}^{p,i}+\tilde{\omega}_{p}^{p,i}\tilde{r}^{p}+\widetilde{R_{w}^{p}\dot{r}}+\tilde{\dot{r}}^{p}\right)
+\frac{\partial\dot{v}_{i}^{i,w}}{\partial\dot{r}}=-R_{p}^{i}\widetilde{\omega+\omega_{i}^{p,p}}R_{w}^{p}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\frac{\partial\dot{v}_{i}^{i,w}}{\partial\omega}=R_{p}^{i}\left(\tilde{p}_{i}^{p}\tilde{\omega}_{i}^{p,p}-\tilde{v}_{i}^{p,p}-\tilde{\omega}_{i}^{p,p}\tilde{r}^{p}+\widetilde{R_{w}^{p}\dot{r}}+\tilde{\dot{r}}^{p}\right)
 \]
 
 \end_inset
@@ -1276,10 +1389,6 @@ R_{w}^{p}=R_{\phi}^{T}\bar{R}_{w}^{p}=e^{-\tilde{\phi}}\bar{R}_{w}^{p}
 
 \end_inset
 
-
-\end_layout
-
-\begin_layout Standard
 For small 
 \begin_inset Formula $\phi$
 \end_inset
@@ -1288,30 +1397,33 @@ For small
 \begin_inset Formula $e^{-\tilde{\phi}}\approx I-\tilde{\phi}$
 \end_inset
 
+ and 
+\begin_inset Formula $\bar{R}_{w}^{p}=R_{w}^{p}$
+\end_inset
+
 .
  Using this approximation, we get
+\end_layout
+
+\begin_layout Standard
 \begin_inset Formula 
 \begin{align*}
-\dot{v}_{i}^{i,w} & \approx\tilde{p}_{p}^{i}R_{p}^{i}\tilde{\omega}_{p}^{p,i}\omega+\tilde{p}_{p}^{i}R_{p}^{i}\dot{\omega}+R_{p}^{i}\tilde{v}_{p}^{p,i}\omega+R_{p}^{i}\tilde{\omega}_{p}^{p,i}\left(I-\tilde{\phi}\right)\bar{R}_{w}^{p}\dot{r}-R_{p}^{i}\tilde{\omega}_{p}^{p,i}\tilde{\omega}r^{p}-R_{p}^{i}\tilde{\omega}_{p}^{p,i}\dot{r}^{p}\\
- & +R_{p}^{i}\left(I-\tilde{\phi}\right)\bar{R}_{w}^{p}\ddot{r}-R_{p}^{i}\tilde{\omega}\left(I-\tilde{\phi}\right)\bar{R}_{w}^{p}\dot{r}-R_{p}^{i}\tilde{\dot{\omega}}r^{p}-R_{p}^{i}\tilde{\omega}\dot{r}^{p}-R_{p}^{i}\ddot{r}^{p}+\dot{v}_{i}^{i,p}
+\dot{v}_{i}^{i,w} & \approx-R_{p}^{i}\left(I-\tilde{\phi}\right)R_{w}^{p}g+\tilde{p}_{p}^{i}R_{p}^{i}\tilde{\omega}_{p}^{p,i}\omega+\tilde{p}_{p}^{i}R_{p}^{i}\dot{\omega}+R_{p}^{i}\tilde{v}_{p}^{p,i}\omega+R_{p}^{i}\tilde{\omega}_{p}^{p,i}\left(I-\tilde{\phi}\right)R_{w}^{p}\dot{r}-R_{p}^{i}\tilde{\omega}_{p}^{p,i}\tilde{\omega}r^{p}-R_{p}^{i}\tilde{\omega}_{p}^{p,i}\dot{r}^{p}\\
+ & +R_{p}^{i}\left(I-\tilde{\phi}\right)R_{w}^{p}\ddot{r}-R_{p}^{i}\tilde{\omega}\left(I-\tilde{\phi}\right)R_{w}^{p}\dot{r}-R_{p}^{i}\tilde{\dot{\omega}}r^{p}-R_{p}^{i}\tilde{\omega}\dot{r}^{p}-R_{p}^{i}\ddot{r}^{p}+\dot{v}_{i}^{i,p}
 \end{align*}
 
 \end_inset
 
-
-\end_layout
-
-\begin_layout Standard
-Using this approximation, we can write the partial derivative with respect
- to 
+Based on this expression, we can approximate the partial derivative with
+ respect to 
 \begin_inset Formula $\phi$
 \end_inset
 
  as
 \begin_inset Formula 
 \begin{align*}
-\frac{\partial\dot{v}_{i}^{i,w}}{\partial\phi} & \approx R_{p}^{i}\tilde{\omega}_{p}^{p,i}\widetilde{\bar{R}_{w}^{p}\dot{r}}+R_{p}^{i}\widetilde{\bar{R}_{w}^{p}\ddot{r}}-R_{p}^{i}\tilde{\omega}\widetilde{\bar{R}_{w}^{p}\dot{r}}\\
- & =R_{p}^{i}\left(\widetilde{\bar{R}_{w}^{p}\ddot{r}}-\widetilde{\omega+\omega_{i}^{p,p}}\widetilde{\bar{R}_{w}^{p}\dot{r}}\right)
+\frac{\partial\dot{v}_{i}^{i,w}}{\partial\phi} & \approx R_{p}^{i}\tilde{\omega}_{p}^{p,i}\widetilde{R_{w}^{p}\dot{r}}+R_{p}^{i}\widetilde{R_{w}^{p}\left(\ddot{r}-g\right)}-R_{p}^{i}\tilde{\omega}\widetilde{R_{w}^{p}\dot{r}}\\
+ & =R_{p}^{i}\left(\widetilde{R_{w}^{p}\left(\ddot{r}-g\right)}-\widetilde{\omega+\omega_{i}^{p,p}}\widetilde{R_{w}^{p}\dot{r}}\right)
 \end{align*}
 
 \end_inset
@@ -1471,12 +1583,12 @@ where
 \end_layout
 
 \begin_layout Subsection
-Stationary points
+Point velocity measurements
 \end_layout
 
 \begin_layout Standard
-If a certain point fixed to one of the links is known to have zero velocity
- with respect to the world (e.g.
+If the linear velocity of a certain point fixed to one of the links with
+ respect to the world is known (e.g.
  because it is in non-slipping contact with the stationary world), then
  this information can be used for state estimation.
 \end_layout
