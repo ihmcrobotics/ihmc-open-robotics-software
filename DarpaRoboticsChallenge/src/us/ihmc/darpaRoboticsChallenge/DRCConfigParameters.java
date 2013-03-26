@@ -12,7 +12,7 @@ public class DRCConfigParameters
    
    
    // Set to simulate one tick delay between, as it will be in Gazebo. This will also run the controller in a different thread!
-   public static final boolean SIMULATE_DELAY = false;
+   public static final boolean SIMULATE_DELAY = true;
    
    
    // Set whether or not to use GFE Robot Model
