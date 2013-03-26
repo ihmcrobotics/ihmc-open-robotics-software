@@ -60,7 +60,7 @@ public class CenterOfMassBasedFullRobotModelUpdater implements Runnable
       twistCalculator.compute();
    }
 
-   private final Twist rootJointTwist = new Twist();
+   private final Twist tempRootJointTwist = new Twist();
    private final FrameVector tempCenterOfMassVelocityWorld = new FrameVector(ReferenceFrame.getWorldFrame());
    private final FrameVector tempEstimationLinkAngularVelocity = new FrameVector(ReferenceFrame.getWorldFrame());
    private final FrameVector tempRootJointAngularVelocity = new FrameVector(ReferenceFrame.getWorldFrame());
@@ -74,28 +74,35 @@ public class CenterOfMassBasedFullRobotModelUpdater implements Runnable
       computeRootJointAngularVelocity(tempRootJointAngularVelocity, tempEstimationLinkAngularVelocity);
       computeRootJointLinearVelocity(tempRootJointLinearVelocity, tempCenterOfMassVelocityWorld, tempRootJointAngularVelocity);
 
-      computeRootJointTwist(rootJointTwist, tempRootJointAngularVelocity, tempRootJointLinearVelocity);
-      rootJoint.setJointTwist(rootJointTwist);
+      computeRootJointTwist(tempRootJointTwist, tempRootJointAngularVelocity, tempRootJointLinearVelocity);
+      rootJoint.setJointTwist(tempRootJointTwist);
    }
+
+   private final Twist tempRootToEstimationTwist = new Twist();
+   private final FrameVector tempRootToEstimationAngularVelocity = new FrameVector(ReferenceFrame.getWorldFrame());
 
    private void computeRootJointAngularVelocity(FrameVector rootJointAngularVelocityToPack, FrameVector estimationLinkAngularVelocity)
    {
       // T_{root}^{root, estimation}
-      Twist rootToEstimationTwist = new Twist();
-      twistCalculator.packRelativeTwist(rootToEstimationTwist, estimationLink, rootJoint.getSuccessor());
-      rootToEstimationTwist.changeFrame(rootJoint.getFrameAfterJoint());
+      twistCalculator.packRelativeTwist(tempRootToEstimationTwist, estimationLink, rootJoint.getSuccessor());
+      tempRootToEstimationTwist.changeFrame(rootJoint.getFrameAfterJoint());
       
       // omega_{root}^{root, estimation}
-      FrameVector rootToEstimationAngularVelocity = new FrameVector(rootJoint.getFrameAfterJoint());
-      rootToEstimationTwist.packAngularPart(rootToEstimationAngularVelocity);
+      tempRootToEstimationAngularVelocity.setToZero(rootJoint.getFrameAfterJoint());
+      tempRootToEstimationTwist.packAngularPart(tempRootToEstimationAngularVelocity);
       
       // omega_{estimation}^{root, world}
       estimationLinkAngularVelocity.changeFrame(rootJoint.getFrameAfterJoint());
       
       // omega_{root}^{root, world} = omega_{estimation}^{root, world} + omega_{root}^{root, estimation}
       rootJointAngularVelocityToPack.setToZero(rootJoint.getFrameAfterJoint());
-      rootJointAngularVelocityToPack.add(estimationLinkAngularVelocity, rootToEstimationAngularVelocity);
+      rootJointAngularVelocityToPack.add(estimationLinkAngularVelocity, tempRootToEstimationAngularVelocity);
    }
+
+   private final FrameVector tempComVelocityBody = new FrameVector();
+   private final FramePoint tempComBody = new FramePoint();
+   private final FrameVector tempCenterOfMassVelocityOffset = new FrameVector();
+   private final FrameVector tempCrossPart = new FrameVector();
 
    private void computeRootJointLinearVelocity(FrameVector rootJointVelocityToPack, FrameVector centerOfMassVelocityWorld, FrameVector rootJointAngularVelocity)
    {
@@ -103,25 +110,25 @@ public class CenterOfMassBasedFullRobotModelUpdater implements Runnable
       
       // \dot{r}^{root}
       centerOfMassJacobianBody.compute();
-      FrameVector comVelocityBody = new FrameVector(rootJointFrame);
-      centerOfMassJacobianBody.packCenterOfMassVelocity(comVelocityBody);
-      comVelocityBody.changeFrame(rootJointFrame);
+      tempComVelocityBody.setToZero(rootJointFrame);
+      centerOfMassJacobianBody.packCenterOfMassVelocity(tempComVelocityBody);
+      tempComVelocityBody.changeFrame(rootJointFrame);
 
       // \tilde{\omega} r^{root}
-      FramePoint centerOfMassBody = new FramePoint(rootJointFrame);
-      centerOfMassCalculator.packCenterOfMass(centerOfMassBody);
-      centerOfMassBody.changeFrame(rootJointFrame);
-      FrameVector crossPart = new FrameVector(rootJointFrame);
-      crossPart.cross(rootJointAngularVelocity, centerOfMassBody);
+      tempComBody.setToZero(rootJointFrame);
+      centerOfMassCalculator.packCenterOfMass(tempComBody);
+      tempComBody.changeFrame(rootJointFrame);
+      tempCrossPart.setToZero(rootJointFrame);
+      tempCrossPart.cross(rootJointAngularVelocity, tempComBody);
 
       // v_{r/p}= \tilde{\omega} r^{root} + \dot{r}^{root}
-      FrameVector centerOfMassVelocityOffset = new FrameVector(rootJointFrame);
-      centerOfMassVelocityOffset.add(crossPart, comVelocityBody);
+      tempCenterOfMassVelocityOffset.setToZero(rootJointFrame);
+      tempCenterOfMassVelocityOffset.add(tempCrossPart, tempComVelocityBody);
 
       // v_{root}^{p,w} = R_{w}^{root} \dot{r} - v_{r/p}
       rootJointVelocityToPack.setAndChangeFrame(centerOfMassVelocityWorld);
       rootJointVelocityToPack.changeFrame(rootJointFrame);
-      rootJointVelocityToPack.sub(centerOfMassVelocityOffset);
+      rootJointVelocityToPack.sub(tempCenterOfMassVelocityOffset);
    }
 
    private void computeRootJointTwist(Twist rootJointTwistToPack, FrameVector rootJointAngularVelocity, FrameVector rootJointLinearVelocity)
@@ -129,59 +136,61 @@ public class CenterOfMassBasedFullRobotModelUpdater implements Runnable
       rootJointTwistToPack.set(rootJoint.getFrameAfterJoint(), rootJoint.getFrameBeforeJoint(), rootJoint.getFrameAfterJoint(), rootJointLinearVelocity.getVector(), rootJointAngularVelocity.getVector());
    }
 
+   private final FramePoint tempCenterOfMassPositionState = new FramePoint(ReferenceFrame.getWorldFrame());
+   private final FrameOrientation tempOrientationState = new FrameOrientation(ReferenceFrame.getWorldFrame());
+   private final Transform3D tempEstimationLinkToWorld = new Transform3D();
+   private final Transform3D tempRootJointToWorld = new Transform3D();
+   
    private void updateRootJointConfiguration()
    {
-      FramePoint centerOfMassPositionState = centerOfMassPositionPort.getData();
-      FrameOrientation orientationState = orientationPort.getData();
+      tempCenterOfMassPositionState.setAndChangeFrame(centerOfMassPositionPort.getData());
+      tempOrientationState.setAndChangeFrame(orientationPort.getData());
 
-      Transform3D estimationLinkToWorld = computeEstimationLinkTransform(centerOfMassPositionState, orientationState);
-      Transform3D rootJointToWorld = computeRootJointTransform(estimationLinkToWorld);
-      rootJoint.setPositionAndRotation(rootJointToWorld);
+      computeEstimationLinkTransform(tempEstimationLinkToWorld, tempCenterOfMassPositionState, tempOrientationState);
+      computeRootJointTransform(tempRootJointToWorld, tempEstimationLinkToWorld);
+      rootJoint.setPositionAndRotation(tempRootJointToWorld);
       rootJoint.getFrameAfterJoint().update();
    }
 
-   private Transform3D computeEstimationLinkTransform(FramePoint centerOfMassWorld, FrameOrientation estimationLinkOrientation)
+   private final FramePoint tempCenterOfMassBody = new FramePoint(ReferenceFrame.getWorldFrame());
+   private final Vector3d tempCenterOfMassBodyVector3d = new Vector3d();
+   private final Point3d tempEstimationLinkPosition = new Point3d();
+   private final Vector3d tempEstimationLinkPositionVector3d = new Vector3d();
+
+   private void computeEstimationLinkTransform(Transform3D estimationLinkToWorldToPack, FramePoint centerOfMassWorld, FrameOrientation estimationLinkOrientation)
    {
       // r^{estimation}
-      FramePoint centerOfMassBody = new FramePoint(estimationFrame);
-      centerOfMassCalculator.packCenterOfMass(centerOfMassBody);
-      centerOfMassBody.changeFrame(estimationFrame);
+      tempCenterOfMassBody.setToZero(estimationFrame);
+      centerOfMassCalculator.packCenterOfMass(tempCenterOfMassBody);
+      tempCenterOfMassBody.changeFrame(estimationFrame);
 
       // R_{estimation}^{w}
       estimationLinkOrientation.changeFrame(worldFrame);
-      Transform3D estimationLinkToWorld = new Transform3D();
-      estimationLinkOrientation.getTransform3D(estimationLinkToWorld);
+      estimationLinkOrientation.getTransform3D(estimationLinkToWorldToPack);
 
       // R_{estimation}^{w} * r^{estimation}
-      Vector3d centerOfMassBodyVector3d = new Vector3d();
-      centerOfMassBody.getVector(centerOfMassBodyVector3d);
-      estimationLinkToWorld.transform(centerOfMassBodyVector3d);
+      tempCenterOfMassBody.getVector(tempCenterOfMassBodyVector3d);
+      estimationLinkToWorldToPack.transform(tempCenterOfMassBodyVector3d);
 
       // p_{estimation}^{w} = r^{w} - R_{estimation}^{w} r^{estimation}
-      Point3d estimationLinkPosition = new Point3d();
-      centerOfMassWorld.getPoint(estimationLinkPosition);
-      estimationLinkPosition.sub(centerOfMassBodyVector3d);
+      centerOfMassWorld.getPoint(tempEstimationLinkPosition);
+      tempEstimationLinkPosition.sub(tempCenterOfMassBodyVector3d);
 
       // H_{estimation}^{w}
-      Vector3d estimationLinkPositionVector3d = new Vector3d();
-      estimationLinkPositionVector3d.set(estimationLinkPosition);
-      estimationLinkToWorld.setTranslation(estimationLinkPositionVector3d);
-
-      return estimationLinkToWorld;
+      tempEstimationLinkPositionVector3d.set(tempEstimationLinkPosition);
+      estimationLinkToWorldToPack.setTranslation(tempEstimationLinkPositionVector3d);
    }
 
+   private final Transform3D tempRootJointFrameToEstimationFrame = new Transform3D();
 
-   private Transform3D computeRootJointTransform(Transform3D estimationLinkTransform)
+   private void computeRootJointTransform(Transform3D rootJointToWorldToPack, Transform3D estimationLinkTransform)
    {
       // H_{root}^{estimation}
-      Transform3D rootJointFrameToEstimationFrame = new Transform3D();
-      rootJoint.getFrameAfterJoint().getTransformToDesiredFrame(rootJointFrameToEstimationFrame, estimationFrame);
+      rootJoint.getFrameAfterJoint().getTransformToDesiredFrame(tempRootJointFrameToEstimationFrame, estimationFrame);
 
       // H_{root}^{w} = H_{estimation}^{w} * H_{root}^{estimation}
-      Transform3D rootJointToWorld = new Transform3D(estimationLinkTransform);
-      rootJointToWorld.mul(rootJointFrameToEstimationFrame);
-
-      return rootJointToWorld;
+      rootJointToWorldToPack.set(estimationLinkTransform);
+      rootJointToWorldToPack.mul(tempRootJointFrameToEstimationFrame);
    }
 
 }
