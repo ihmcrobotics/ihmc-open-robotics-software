@@ -1,0 +1,5 @@
+<launch>
+  <node pkg="rosjava" type="composite_publisher.py" name="node0" />
+  <node pkg="rosjava" type="PassthroughTestNode" name="rosjava_node" />
+  <test pkg="rosjava" type="test_composite_passthrough.py" test-name="composite_passthrough" />
+</launch>
