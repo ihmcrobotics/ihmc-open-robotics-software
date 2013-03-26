@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.stateEstimation;
 
 import static org.junit.Assert.assertTrue;
 
+import java.util.ArrayList;
 import java.util.Random;
 
 import javax.vecmath.Matrix3d;
@@ -28,12 +29,14 @@ import us.ihmc.utilities.test.JUnitTools;
 
 public class CenterOfMassBasedFullRobotModelUpdaterTest
 {
+   private static final boolean TEST_EFFICIENCY = true;
+   
    private static final Vector3d X = new Vector3d(1.0, 0.0, 0.0);
    private static final Vector3d Y = new Vector3d(0.0, 1.0, 0.0);
    private static final Vector3d Z = new Vector3d(0.0, 0.0, 1.0);
 
    @Test
-   public void test()
+   public void testModelUpdatorWithRandomFloatingChain()
    {
       Random random = new Random(1235L);
       Vector3d[] jointAxes = new Vector3d[] {X, Y, Z};
@@ -83,6 +86,30 @@ public class CenterOfMassBasedFullRobotModelUpdaterTest
          compareOrientation(estimationFrame, orientationPort, epsilon);
          compareCenterOfMassVelocity(elevator, centerOfMassVelocityPort, epsilon);
          compareAngularVelocity(estimationLink, estimationFrame, twistCalculator, angularVelocityPort, epsilon);
+      }
+      
+      
+      // Test efficiency:
+      if (TEST_EFFICIENCY)
+      {
+         long startTime = System.currentTimeMillis();
+         nTests = 10000;
+//         nTests = 100000000; 
+         
+         ArrayList<Object> garbageCan = new ArrayList<Object>();
+         
+         for (int i = 0; i < nTests; i++)
+         {
+            String garbage = new String("garbage");
+            String garbageToo = garbage + "too";
+//            garbageCan.add(new String("G"));
+            fullRobotModelUpdater.run();
+         }
+         long endTime = System.currentTimeMillis();
+         double millisecondsPerCall = ((endTime - startTime))/((double) nTests);
+
+         System.out.println("millisecondsPerCall = " + millisecondsPerCall);
+//         assertTrue("Not efficient! millisecondsPerCall = " + millisecondsPerCall, millisecondsPerCall < 0.01);
       }
    }
 
