@@ -17,6 +17,7 @@ import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.screwTheory.CenterOfMassAccelerationCalculator;
 import us.ihmc.utilities.screwTheory.CenterOfMassCalculator;
 import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
 import us.ihmc.utilities.screwTheory.RigidBody;
@@ -78,12 +79,14 @@ public class CenterOfMassBasedFullRobotModelUpdaterTest
 
          centerOfMassPositionPort.setData(new FramePoint(ReferenceFrame.getWorldFrame(), RandomTools.generateRandomVector(random)));
          centerOfMassVelocityPort.setData(new FrameVector(ReferenceFrame.getWorldFrame(), RandomTools.generateRandomVector(random)));
-         centerOfMassAccelerationPort.setData(new FrameVector(estimationFrame, RandomTools.generateRandomVector(random)));
+         centerOfMassAccelerationPort.setData(new FrameVector(ReferenceFrame.getWorldFrame(), RandomTools.generateRandomVector(random)));
          Matrix3d orientation = new Matrix3d();
          orientation.set(RandomTools.generateRandomRotation(random));
          orientationPort.setData(new FrameOrientation(ReferenceFrame.getWorldFrame(), orientation));
          angularVelocityPort.setData(new FrameVector(estimationFrame, RandomTools.generateRandomVector(random)));
          angularAccelerationPort.setData(new FrameVector(estimationFrame, RandomTools.generateRandomVector(random)));
+//         angularAccelerationPort.setData(new FrameVector(estimationFrame));
+
 
          // update full robot model
          fullRobotModelUpdater.run();
@@ -94,8 +97,9 @@ public class CenterOfMassBasedFullRobotModelUpdaterTest
          // compare with ports
          double epsilon = 1e-12;
          compareCenterOfMass(elevator, centerOfMassPositionPort, epsilon);
-         compareOrientation(estimationFrame, orientationPort, epsilon);
          compareCenterOfMassVelocity(elevator, centerOfMassVelocityPort, epsilon);
+         compareCenterOfMassAcceleration(elevator, spatialAccelerationCalculator, centerOfMassAccelerationPort, epsilon);
+         compareOrientation(estimationFrame, orientationPort, epsilon);
          compareAngularVelocity(estimationLink, estimationFrame, twistCalculator, angularVelocityPort, epsilon);
          compareAngularAcceleration(estimationLink, estimationFrame, spatialAccelerationCalculator, angularAccelerationPort, epsilon);
       }
@@ -148,6 +152,16 @@ public class CenterOfMassBasedFullRobotModelUpdaterTest
       JUnitTools.assertFrameVectorEquals(centerOfMassVelocity, centerOfMassVelocityBack, epsilon);
    }
 
+   private void compareCenterOfMassAcceleration(RigidBody elevator, SpatialAccelerationCalculator spatialAccelerationCalculator, ControlFlowOutputPort<FrameVector> centerOfMassAccelerationPort, double epsilon)
+   {
+      CenterOfMassAccelerationCalculator centerOfMassAccelerationCalculator = new CenterOfMassAccelerationCalculator(elevator, spatialAccelerationCalculator);
+      FrameVector centerOfMassAccelerationBack = new FrameVector();
+      centerOfMassAccelerationCalculator.packCoMAcceleration(centerOfMassAccelerationBack);
+      centerOfMassAccelerationBack.changeFrame(ReferenceFrame.getWorldFrame());
+      FrameVector centerOfMassAcceleration = centerOfMassAccelerationPort.getData();
+      JUnitTools.assertFrameVectorEquals(centerOfMassAcceleration, centerOfMassAccelerationBack, epsilon);
+   }
+   
    private void compareAngularVelocity(RigidBody estimationLink, ReferenceFrame estimationFrame, TwistCalculator twistCalculator,
            ControlFlowOutputPort<FrameVector> angularVelocityPort, double epsilon)
    {
