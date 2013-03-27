@@ -997,8 +997,8 @@ R_{w}^{i} & 0\\
 \uwave off
 \noun off
 \color none
-The acceleration of the estimation link with respect to the world can be
- written in frame 
+The acceleration of the estimation link with respect to the elevator can
+ be written in frame 
 \begin_inset Formula $i$
 \end_inset
 
@@ -1408,7 +1408,8 @@ For small
 \begin_layout Standard
 \begin_inset Formula 
 \begin{align*}
-\dot{v}_{i}^{i,w} & \approx-R_{p}^{i}\left(I-\tilde{\phi}\right)R_{w}^{p}g+\tilde{p}_{p}^{i}R_{p}^{i}\tilde{\omega}_{p}^{p,i}\omega+\tilde{p}_{p}^{i}R_{p}^{i}\dot{\omega}+R_{p}^{i}\tilde{v}_{p}^{p,i}\omega+R_{p}^{i}\tilde{\omega}_{p}^{p,i}\left(I-\tilde{\phi}\right)R_{w}^{p}\dot{r}-R_{p}^{i}\tilde{\omega}_{p}^{p,i}\tilde{\omega}r^{p}-R_{p}^{i}\tilde{\omega}_{p}^{p,i}\dot{r}^{p}\\
+\dot{v}_{i}^{i,w} & \approx-R_{p}^{i}\left(I-\tilde{\phi}\right)R_{w}^{p}g+\tilde{p}_{p}^{i}R_{p}^{i}\tilde{\omega}_{p}^{p,i}\omega+\tilde{p}_{p}^{i}R_{p}^{i}\dot{\omega}+R_{p}^{i}\tilde{v}_{p}^{p,i}\omega\\
+ & +R_{p}^{i}\tilde{\omega}_{p}^{p,i}\left(I-\tilde{\phi}\right)R_{w}^{p}\dot{r}-R_{p}^{i}\tilde{\omega}_{p}^{p,i}\tilde{\omega}r^{p}-R_{p}^{i}\tilde{\omega}_{p}^{p,i}\dot{r}^{p}\\
  & +R_{p}^{i}\left(I-\tilde{\phi}\right)R_{w}^{p}\ddot{r}-R_{p}^{i}\tilde{\omega}\left(I-\tilde{\phi}\right)R_{w}^{p}\dot{r}-R_{p}^{i}\tilde{\dot{\omega}}r^{p}-R_{p}^{i}\tilde{\omega}\dot{r}^{p}-R_{p}^{i}\ddot{r}^{p}+\dot{v}_{i}^{i,p}
 \end{align*}
 
