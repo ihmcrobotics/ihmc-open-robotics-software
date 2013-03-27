@@ -75,7 +75,7 @@ public class FootstepPathConsumer implements ObjectConsumer<FootstepDataList>
                   break;
             }
          }
-
+         
          footsteps.add(footstep);
          mapFromFootstepsToTrajectoryParameters.put(footstep, trajectoryParameters);
 
