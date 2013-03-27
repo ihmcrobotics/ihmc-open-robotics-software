@@ -29,10 +29,13 @@ public class OrientationMeasurementModelElement extends AbstractMeasurementModel
    private final DenseMatrix64F residual = new DenseMatrix64F(SIZE, 1);
 
    // temp stuff:
-   private final FrameOrientation orientationOfEstimationInMeasurementFrame = new FrameOrientation(ReferenceFrame.getWorldFrame());
-   private final Quat4d quaternion = new Quat4d();
-   private final Quat4d estimationFrameToMeasurementFrame = new Quat4d();
+   private final FrameOrientation orientationOfMeasurementFrameInEstimationFrame = new FrameOrientation(ReferenceFrame.getWorldFrame());
+   private final Quat4d estimatedOrientationQuaternion = new Quat4d();
+   private final Quat4d measurmentFrameToEstimationFrame = new Quat4d();
+   
    private final Quat4d orientationResidual = new Quat4d();
+   private final Quat4d measuredOrientation = new Quat4d();
+   private final Quat4d estimatedOrientationMeasurement = new Quat4d();
    private final AxisAngle4d tempAxisAngle = new AxisAngle4d();
    private final Vector3d rotationVectorResidual = new Vector3d();
 
@@ -54,7 +57,6 @@ public class OrientationMeasurementModelElement extends AbstractMeasurementModel
    {
       DenseMatrix64F orientationStateOutputBlock = outputMatrixBlocks.get(orientationStatePort);
       CommonOps.setIdentity(orientationStateOutputBlock);
-      CommonOps.scale(-1.0, orientationStateOutputBlock);
    }
 
    public void computeMatrixBlocks()
@@ -64,18 +66,27 @@ public class OrientationMeasurementModelElement extends AbstractMeasurementModel
 
    public DenseMatrix64F computeResidual()
    {
-      orientationStatePort.getData().getQuaternion(quaternion);
+      orientationStatePort.getData().getQuaternion(estimatedOrientationQuaternion);
 
-      orientationOfEstimationInMeasurementFrame.set(estimationFrame);
-      orientationOfEstimationInMeasurementFrame.changeFrame(measurementFrame);
-      orientationOfEstimationInMeasurementFrame.getQuaternion(estimationFrameToMeasurementFrame);
-
+      orientationOfMeasurementFrameInEstimationFrame.set(measurementFrame);
+      orientationOfMeasurementFrameInEstimationFrame.changeFrame(estimationFrame);
+      orientationOfMeasurementFrameInEstimationFrame.getQuaternion(measurmentFrameToEstimationFrame);
+      
       // TODO: garbage generation
-      FrameOrientation measuredOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame(), orientationMeasurementInputPort.getData());
-      measuredOrientation.getQuaternion(orientationResidual);
-      orientationResidual.mul(estimationFrameToMeasurementFrame);
-      orientationResidual.inverse();    // conjugate();
-      orientationResidual.mul(quaternion);
+      // Compute orientationResidual as a quaternion
+      FrameOrientation measuredOrientationFrameOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame(), orientationMeasurementInputPort.getData());
+      measuredOrientationFrameOrientation.getQuaternion(measuredOrientation);
+     
+      // Compute the estimated measurement
+      estimatedOrientationMeasurement.set(estimatedOrientationQuaternion);
+      estimatedOrientationMeasurement.mul(measurmentFrameToEstimationFrame);
+      
+      // Compare the estimated and actual measurement to get the residual as a quaternion.
+      orientationResidual.set(estimatedOrientationMeasurement);
+      orientationResidual.inverse();
+      orientationResidual.mul(measuredOrientation);
+       
+      // Convert to rotationVectorResidual
       tempAxisAngle.set(0.0, 0.0, 0.0, 0.0);    // necessary because set(Quat4d) may not actually set anything if magnitude is small!
       tempAxisAngle.set(orientationResidual);
       rotationVectorResidual.set(tempAxisAngle.getX(), tempAxisAngle.getY(), tempAxisAngle.getZ());

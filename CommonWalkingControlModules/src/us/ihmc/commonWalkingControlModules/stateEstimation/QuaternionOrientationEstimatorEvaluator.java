@@ -1,8 +1,10 @@
 package us.ihmc.commonWalkingControlModules.stateEstimation;
 
 import javax.media.j3d.Transform3D;
+import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
+import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import org.ejml.data.DenseMatrix64F;
@@ -30,6 +32,7 @@ import us.ihmc.utilities.screwTheory.SixDoFJoint;
 import us.ihmc.utilities.screwTheory.Twist;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.FloatingJoint;
 import com.yobotics.simulationconstructionset.Link;
 import com.yobotics.simulationconstructionset.Robot;
@@ -40,13 +43,13 @@ import com.yobotics.simulationconstructionset.robotController.RobotController;
 public class QuaternionOrientationEstimatorEvaluator
 {
    private static final boolean INITIALIZE_ANGULAR_VELOCITY_ESTIMATE_TO_ACTUAL = false;
-   private static final boolean USE_ANGULAR_ACCELERATION_INPUT = true;
+   private static final boolean USE_ANGULAR_ACCELERATION_INPUT = true; 
    private static final boolean CREATE_ORIENTATION_SENSOR = true;
    private static final boolean CREATE_ANGULAR_VELOCITY_SENSOR = true;
    private static final boolean USE_COMPOSABLE_ESTIMATOR = true;
 
-   private final double orientationMeasurementStandardDeviation = Math.sqrt(1e-1);    // 1e0); //1e-1);
-   private final double angularVelocityMeasurementStandardDeviation = Math.sqrt(1e-1);    // 1e-2);
+   private final double orientationMeasurementStandardDeviation = Math.sqrt(1e-1);    
+   private final double angularVelocityMeasurementStandardDeviation = Math.sqrt(1e-1);   
    private final double angularAccelerationProcessNoiseStandardDeviation = Math.sqrt(1.0);
    private final double angularVelocityBiasProcessNoiseStandardDeviation = Math.sqrt(1e-2);
 
@@ -115,6 +118,11 @@ public class QuaternionOrientationEstimatorEvaluator
       public Vector3d getActualAngularAccelerationInBodyFrame()
       {
          return rootJoint.getAngularAccelerationInBody();
+      }
+      
+      public Quat4d getActualOrientation()
+      {
+         return rootJoint.getQuaternion();
       }
    }
 
@@ -232,6 +240,8 @@ public class QuaternionOrientationEstimatorEvaluator
    {
       private final YoVariableRegistry registry = new YoVariableRegistry("QuaternionOrientationEstimatorEvaluatorController");
 
+      private final DoubleYoVariable orientationErrorAngle = new DoubleYoVariable("orientationErrorAngle", registry);
+      
       private final QuaternionOrientationEstimatorEvaluatorRobot robot;
 
       private final QuaternionOrientationEstimatorEvaluatorFullRobotModel perfectFullRobotModel;
@@ -380,6 +390,27 @@ public class QuaternionOrientationEstimatorEvaluator
 
          // TODO: set revolute joint positions and velocities
          estimatedTwistCalculator.compute();
+         
+         computeOrientationErrorAngle();
+      }
+
+      private void computeOrientationErrorAngle()
+      {
+         FrameOrientation estimatedOrientation = orientationEstimator.getEstimatedOrientation();
+         Quat4d estimatedOrientationQuat4d = new Quat4d();
+         estimatedOrientation.getQuaternion(estimatedOrientationQuat4d);
+         
+         Quat4d orientationErrorQuat4d = new Quat4d(robot.getActualOrientation());
+         orientationErrorQuat4d.mulInverse(estimatedOrientationQuat4d);
+         
+         AxisAngle4d orientationErrorAxisAngle = new AxisAngle4d();
+         orientationErrorAxisAngle.set(orientationErrorQuat4d);
+         
+         double errorAngle = orientationErrorAxisAngle.getAngle();
+         if (errorAngle > Math.PI) errorAngle = errorAngle - 2.0 * Math.PI;
+         if (errorAngle < -Math.PI) errorAngle = errorAngle + 2.0 * Math.PI;
+         
+         orientationErrorAngle.set(errorAngle);
       }
    }
 
