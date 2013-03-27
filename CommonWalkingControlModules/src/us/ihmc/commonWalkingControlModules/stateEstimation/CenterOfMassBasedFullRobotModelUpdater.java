@@ -44,8 +44,6 @@ public class CenterOfMassBasedFullRobotModelUpdater implements Runnable
    private final SixDoFJoint rootJoint;
    private final RigidBody estimationLink;
 
-   private final SpatialAccelerationVector jointAcceleration;
-
    public CenterOfMassBasedFullRobotModelUpdater(TwistCalculator twistCalculator, SpatialAccelerationCalculator spatialAccelerationCalculator,
            ControlFlowOutputPort<FramePoint> centerOfMassPositionPort, ControlFlowOutputPort<FrameVector> centerOfMassVelocityPort,
            ControlFlowOutputPort<FrameVector> centerOfMassAccelerationPort, ControlFlowOutputPort<FrameOrientation> orientationPort,
@@ -72,9 +70,6 @@ public class CenterOfMassBasedFullRobotModelUpdater implements Runnable
               ScrewTools.computeJointsInOrder(rootJoint.getSuccessor()), rootJoint.getFrameAfterJoint());
       this.centerOfMassAccelerationCalculator = new CenterOfMassAccelerationCalculator(rootJoint.getSuccessor(), ScrewTools.computeRigidBodiesInOrder(elevator), spatialAccelerationCalculator);
       this.rootJoint = rootJoint;
-
-      this.jointAcceleration = new SpatialAccelerationVector(rootJoint.getFrameAfterJoint(), rootJoint.getPredecessor().getBodyFixedFrame(),
-              rootJoint.getFrameAfterJoint());
    }
 
    public void run()
@@ -139,20 +134,22 @@ public class CenterOfMassBasedFullRobotModelUpdater implements Runnable
       rootJointAngularVelocityToPack.add(estimationLinkAngularVelocity, tempRootToEstimationAngularVelocity);
 
       // R_{estimation}^{root} ( \omega_{estimation}^{estimation, root} \times \omega_{estimation}^{estimation, world} )
+      tempRootToEstimationAngularVelocity.negate();
       tempRootToEstimationAngularVelocity.changeFrame(estimationFrame);
       estimationLinkAngularVelocity.changeFrame(estimationFrame);
       tempCrossTerm.setToZero(estimationFrame);
       tempCrossTerm.cross(tempRootToEstimationAngularVelocity, estimationLinkAngularVelocity);
 
       // \omega_{root}^{root, estimation}
-      spatialAccelerationCalculator.packRelativeAcceleration(tempRootToEstimationAcceleration, rootJoint.getSuccessor(), estimationLink);
+      spatialAccelerationCalculator.packRelativeAcceleration(tempRootToEstimationAcceleration, estimationLink, rootJoint.getSuccessor());
+      tempRootToEstimationAcceleration.changeFrameNoRelativeMotion(rootJoint.getFrameAfterJoint());
       tempRootToEstimationAcceleration.packAngularPart(tempRootToEstimationAngularAcceleration);
-      tempRootToEstimationAngularAcceleration.changeFrame(rootJoint.getFrameAfterJoint());
+      tempRootToEstimationAngularAcceleration.changeFrame(estimationFrame);
 
       rootJointAngularAccelerationToPack.setAndChangeFrame(angularAccelerationPort.getData());
-      rootJointAngularAccelerationToPack.sub(tempCrossTerm);
-      rootJointAngularAccelerationToPack.changeFrame(rootJoint.getFrameAfterJoint());
+      rootJointAngularAccelerationToPack.add(tempCrossTerm);
       rootJointAngularAccelerationToPack.add(tempRootToEstimationAngularAcceleration);
+      rootJointAngularAccelerationToPack.changeFrame(rootJoint.getFrameAfterJoint());
    }
 
    private final FramePoint tempComBody = new FramePoint();

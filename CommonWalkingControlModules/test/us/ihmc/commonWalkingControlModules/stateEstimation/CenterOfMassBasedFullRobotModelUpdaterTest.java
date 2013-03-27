@@ -46,8 +46,8 @@ public class CenterOfMassBasedFullRobotModelUpdaterTest
       RigidBody elevator = randomFloatingChain.getElevator();
       SixDoFJoint rootJoint = randomFloatingChain.getRootJoint();
 
-      RigidBody estimationLink = randomFloatingChain.getRevoluteJoints().get(0).getSuccessor();    // some link in the middle of the chain
-      ReferenceFrame estimationFrame = estimationLink.getParentJoint().getFrameAfterJoint();
+      RigidBody estimationLink = randomFloatingChain.getRevoluteJoints().get(1).getSuccessor();    // some link in the middle of the chain
+      ReferenceFrame estimationFrame = estimationLink.getBodyFixedFrame();
 
       ControlFlowElement controlFlowElement = new NullControlFlowElement();
 
@@ -67,16 +67,14 @@ public class CenterOfMassBasedFullRobotModelUpdaterTest
                                                                         orientationPort, angularVelocityPort, angularAccelerationPort, estimationLink,
                                                                         estimationFrame, rootJoint);
 
-      // TODO: test linear acceleration
+      randomFloatingChain.setRandomPositionsAndVelocities(random);     
+      randomFloatingChain.getElevator().updateFramesRecursively();
+      twistCalculator.compute();
+      spatialAccelerationCalculator.compute();
 
       int nTests = 100;
       for (int i = 0; i < nTests; i++)
       {
-         randomFloatingChain.setRandomPositionsAndVelocities(random);
-         randomFloatingChain.getElevator().updateFramesRecursively();
-         twistCalculator.compute();
-         spatialAccelerationCalculator.compute();
-
          centerOfMassPositionPort.setData(new FramePoint(ReferenceFrame.getWorldFrame(), RandomTools.generateRandomVector(random)));
          centerOfMassVelocityPort.setData(new FrameVector(ReferenceFrame.getWorldFrame(), RandomTools.generateRandomVector(random)));
          centerOfMassAccelerationPort.setData(new FrameVector(ReferenceFrame.getWorldFrame(), RandomTools.generateRandomVector(random)));
@@ -85,14 +83,9 @@ public class CenterOfMassBasedFullRobotModelUpdaterTest
          orientationPort.setData(new FrameOrientation(ReferenceFrame.getWorldFrame(), orientation));
          angularVelocityPort.setData(new FrameVector(estimationFrame, RandomTools.generateRandomVector(random)));
          angularAccelerationPort.setData(new FrameVector(estimationFrame, RandomTools.generateRandomVector(random)));
-//         angularAccelerationPort.setData(new FrameVector(estimationFrame));
-
 
          // update full robot model
          fullRobotModelUpdater.run();
-         Twist tempTwist = new Twist();
-         twistCalculator.packTwistOfBody(tempTwist, randomFloatingChain.getRevoluteJoints().get(0).getSuccessor());
-         tempTwist.changeFrame(randomFloatingChain.getRevoluteJoints().get(0).getFrameAfterJoint());
 
          // compare with ports
          double epsilon = 1e-12;
@@ -178,10 +171,9 @@ public class CenterOfMassBasedFullRobotModelUpdaterTest
    {
       SpatialAccelerationVector estimationLinkAcceleration = new SpatialAccelerationVector();
       spatialAccelerationCalculator.packAccelerationOfBody(estimationLinkAcceleration, estimationLink);
+      estimationLinkAcceleration.changeFrameNoRelativeMotion(estimationFrame);
       FrameVector angularAccelerationBack = new FrameVector(estimationFrame);
       estimationLinkAcceleration.packAngularPart(angularAccelerationBack);
-      angularAccelerationBack.changeFrame(estimationFrame);
       JUnitTools.assertFrameVectorEquals(angularAccelerationBack, angularAccelerationPort.getData(), epsilon);
-
    }
 }
