@@ -6,7 +6,7 @@ public enum DRCRobotModel
    
    public static DRCRobotModel getDefaultRobotModel()
    {
-      return ATLAS_NO_HANDS;
+      return ATLAS_SANDIA_HANDS;
    }
    
    public String getModelName()
