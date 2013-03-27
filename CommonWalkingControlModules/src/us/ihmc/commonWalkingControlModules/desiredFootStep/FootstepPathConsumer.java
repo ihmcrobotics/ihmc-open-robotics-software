@@ -6,8 +6,6 @@ import java.util.HashMap;
 
 import javax.vecmath.Point3d;
 
-import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryParameters;
-
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepData;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataList;
@@ -17,6 +15,8 @@ import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.net.ObjectConsumer;
+
+import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryParameters;
 
 /**
  * User: Matt
@@ -60,16 +60,19 @@ public class FootstepPathConsumer implements ObjectConsumer<FootstepDataList>
                                           footstepData.getTrustHeight());
          TrajectoryParameters trajectoryParameters = null;
 
-         if (footstepData.getTrajectoryWaypointGenerationMethod() != null) //TODO messy
+         if (footstepData.getTrajectoryWaypointGenerationMethod() != null)
          {
             switch (footstepData.getTrajectoryWaypointGenerationMethod())
             {
                case BY_GROUND_CLEARANCE :
                   trajectoryParameters = new TwoWaypointTrajectoryParameters(footstepData.getTrajectoryWaypointGroundClearance());
+                  break;
                case BY_POINTS :
                   trajectoryParameters = new TwoWaypointTrajectoryParameters(footstepData.getTrajectoryWaypoints());
+                  break;
                case DEFAULT :
-                  trajectoryParameters = new TrajectoryParameters();
+                  trajectoryParameters = new TwoWaypointTrajectoryParameters();
+                  break;
             }
          }
 

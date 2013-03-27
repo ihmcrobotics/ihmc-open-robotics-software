@@ -18,7 +18,6 @@ import us.ihmc.graphics3DAdapter.GroundProfile;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
 import us.ihmc.projectM.R2Sim02.initialSetup.RobotInitialSetup;
 import us.ihmc.utilities.MemoryTools;
-import us.ihmc.utilities.ThreadTools;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
@@ -31,7 +30,7 @@ import com.yobotics.simulationconstructionset.util.simulationRunner.VariableDiff
 
 public class DRCFlatGroundRewindabilityTest
 {
-   private static final boolean SHOW_GUI = true;
+   private static final boolean SHOW_GUI = false;
    private static final double totalTimeToTest = 10.0;
    private static final double timeToTickAhead = 1.5;
    private static final double timePerTick = 0.01;
