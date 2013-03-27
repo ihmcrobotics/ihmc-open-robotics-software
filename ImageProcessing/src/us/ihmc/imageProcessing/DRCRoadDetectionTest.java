@@ -437,11 +437,11 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
             lines.add(line2d);
          }
 
-//       lines = removeBadLines(lines);
+       lines = removeBadLines(lines);
 
-//       if (lines.size() > 2)
-//        System.out.println("TURN APPROACHING");
-//         linePainter.setLines(lines);
+       if (lines.size() > 2)
+        System.out.println("TURN APPROACHING");
+         linePainter.setLines(lines);
          vanishingPointDetector.setLines(lines);
          lanePositionEstimator.setLines(lines);
          obstaclePositionEstimator.setLines(lines);
