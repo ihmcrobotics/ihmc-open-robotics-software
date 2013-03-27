@@ -1,11 +1,5 @@
 package us.ihmc.darpaRoboticsChallenge;
 
-import com.yobotics.simulationconstructionset.InverseDynamicsMechanismReferenceFrameVisualizer;
-import com.yobotics.simulationconstructionset.PlaybackListener;
-import com.yobotics.simulationconstructionset.SimulationRewoundListener;
-import com.yobotics.simulationconstructionset.gui.GUISetterUpperRegistry;
-import com.yobotics.simulationconstructionset.robotController.*;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import us.ihmc.GazeboStateCommunicator.GazeboRobot;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFPerfectSimulatedSensorReaderAndWriter;
@@ -33,6 +27,17 @@ import us.ihmc.utilities.net.KryoObjectServer;
 import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
+
+import com.yobotics.simulationconstructionset.InverseDynamicsMechanismReferenceFrameVisualizer;
+import com.yobotics.simulationconstructionset.PlaybackListener;
+import com.yobotics.simulationconstructionset.gui.GUISetterUpperRegistry;
+import com.yobotics.simulationconstructionset.robotController.AbstractModularRobotController;
+import com.yobotics.simulationconstructionset.robotController.DelayedThreadedModularRobotController;
+import com.yobotics.simulationconstructionset.robotController.ModularRobotController;
+import com.yobotics.simulationconstructionset.robotController.ModularSensorProcessor;
+import com.yobotics.simulationconstructionset.robotController.RobotController;
+import com.yobotics.simulationconstructionset.robotController.SensorProcessor;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class DRCSimulationFactory
 {
@@ -97,10 +102,9 @@ public class DRCSimulationFactory
       AbstractModularRobotController modularRobotController;
 
 
-      boolean checkForDelay = DRCConfigParameters.SIMULATE_DELAY;
-      checkForDelay = checkForDelay && !DRCConfigParameters.USE_GAZEBO_PHYSICS;
-      if (checkForDelay)
+      if (robotInterface.simulateDelay())
       {
+         System.err.println("INFO: Creating controller with simulated delay");
          modularRobotController = new DelayedThreadedModularRobotController("ModularRobotController");
       }
       else
