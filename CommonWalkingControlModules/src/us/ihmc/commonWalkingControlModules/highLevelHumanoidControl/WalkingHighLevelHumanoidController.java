@@ -846,7 +846,9 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
             supportAnklePosition.changeFrame(nextFootstep.getReferenceFrame());
             double newHeight = supportAnklePosition.getZ() + swingAboveSupportAnkle.getDoubleValue();
 
-            nextFootstep = Footstep.copyButChangeHeight(nextFootstep, newHeight);
+            Footstep newNextFootstep = Footstep.copyButChangeHeight(nextFootstep, newHeight);
+            switchTrajectoryParametersMapping(nextFootstep, newNextFootstep);
+            nextFootstep = newNextFootstep;
          }
 
          if (DEBUG)
@@ -868,6 +870,12 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
          if (DEBUG)
             System.out.println("WalkingHighLevelHumanoidController: nextFootstep will change now!");
          readyToGrabNextFootstep.set(true);
+      }
+
+      private void switchTrajectoryParametersMapping(Footstep oldFootstep, Footstep newFootstep)
+      {
+         mapFromFootstepsToTrajectoryParameters.put(newFootstep, mapFromFootstepsToTrajectoryParameters.get(oldFootstep));
+         mapFromFootstepsToTrajectoryParameters.remove(oldFootstep);
       }
 
       @Override

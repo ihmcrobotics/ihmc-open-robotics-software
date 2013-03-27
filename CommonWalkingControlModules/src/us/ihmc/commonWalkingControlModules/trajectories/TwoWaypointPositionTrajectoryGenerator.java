@@ -75,8 +75,8 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
 
    public TwoWaypointPositionTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, YoVariableDoubleProvider stepTimeProvider,
            PositionProvider initialPositionProvider, VectorProvider initalVelocityProvider, YoPositionProvider finalPositionProvider,
-           VectorProvider finalDesiredVelocityProvider, TrajectoryParametersProvider trajectoryParametersProvider, YoVariableRegistry parentRegistry, double groundClearance,
-           int arcLengthCalculatorDivisionsPerPolynomial, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+           VectorProvider finalDesiredVelocityProvider, TrajectoryParametersProvider trajectoryParametersProvider, YoVariableRegistry parentRegistry,
+           double groundClearance, int arcLengthCalculatorDivisionsPerPolynomial, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       registry = new YoVariableRegistry(namePrefix + namePostFix);
       parentRegistry.addChild(registry);
@@ -105,7 +105,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
 
       this.groundClearance = new DoubleYoVariable(namePrefix + "GroundClearance", registry);
       this.groundClearance.set(groundClearance);
-      
+
       this.trajectoryParametersProvider = trajectoryParametersProvider;
 
       for (int i = 0; i < 6; i++)
@@ -175,8 +175,8 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
 
       setStepTime();
 
-      setInitialAndFinalTimesPositionsAndVelocities();
       setWaypointPositions();
+      setInitialAndFinalTimesPositionsAndVelocities();
 
       double[] arcLengthsIgnoringAccelerationEndpointPositions = getArcLengthsApproximatedByDistance(nonAccelerationEndpointIndices);
       setLinearSplineLengthFactor(arcLengthsIgnoringAccelerationEndpointPositions);
@@ -201,17 +201,17 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
    private void setTrajectoryParameters()
    {
       TrajectoryParameters trajectoryParameters = trajectoryParametersProvider.getTrajectoryParameters();
-      
+
       if (trajectoryParameters instanceof TwoWaypointTrajectoryParameters)
       {
          this.trajectoryParameters = (TwoWaypointTrajectoryParameters) trajectoryParameters;
       }
-      
+
       else if (trajectoryParameters == null)
       {
          this.trajectoryParameters = new TwoWaypointTrajectoryParameters();
       }
-         
+
       else
       {
          throw new RuntimeException(
@@ -371,6 +371,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       if (trajectoryParameters.getWaypointGenerationMethod().equals(TrajectoryWaypointGenerationMethod.BY_POINTS))
       {
          waypoints = new ArrayList<FramePoint>();
+
          for (int i = 0; i < 2; i++)
          {
             waypoints.add(new FramePoint(ReferenceFrame.getWorldFrame(), trajectoryParameters.getWaypoints().get(i)));
@@ -381,7 +382,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       {
          waypoints = getWaypointsAtGroundClearance(trajectoryParameters.getWaypointGroundClearance());
       }
-      
+
       else if (trajectoryParameters.getWaypointGenerationMethod().equals(TrajectoryWaypointGenerationMethod.DEFAULT))
       {
          waypoints = getWaypointsAtGroundClearance(TwoWaypointTrajectoryParameters.getDefaultGroundClearance());
