@@ -1,7 +1,5 @@
 package us.ihmc.commonWalkingControlModules.stateEstimation.measurementModelElements;
 
-
-
 import java.util.Random;
 
 import javax.vecmath.Matrix3d;
@@ -21,25 +19,27 @@ import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.screwTheory.CenterOfMassAccelerationCalculator;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTestTools.RandomFloatingChain;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationCalculator;
-import us.ihmc.utilities.screwTheory.Twist;
+import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
-public class PointVelocityMeasurementModelElementTest
+public class LinearAccelerationMeasurementModelElementTest
 {
    private static final Vector3d X = new Vector3d(1.0, 0.0, 0.0);
    private static final Vector3d Y = new Vector3d(0.0, 1.0, 0.0);
    private static final Vector3d Z = new Vector3d(0.0, 0.0, 1.0);
 
+   // TODO: test internal accelerations
    @Test
    public void test()
    {
-      Random random = new Random(1235L);
+      Random random = new Random(125125523L);
       Vector3d[] jointAxes = new Vector3d[] {X, Y, Z};
       RandomFloatingChain randomFloatingChain = new RandomFloatingChain(random, jointAxes);
       RigidBody elevator = randomFloatingChain.getElevator();
@@ -47,7 +47,7 @@ public class PointVelocityMeasurementModelElementTest
 
       RigidBody estimationLink = randomFloatingChain.getRootJoint().getSuccessor();
       ReferenceFrame estimationFrame = randomFloatingChain.getRootJoint().getFrameAfterJoint();
-      RigidBody measurementLink = randomFloatingChain.getRevoluteJoints().get(jointAxes.length - 1).getSuccessor();
+      RigidBody measurementLink = estimationLink;    // randomFloatingChain.getRevoluteJoints().get(jointAxes.length - 1).getSuccessor();
       ReferenceFrame measurementFrame = measurementLink.getBodyFixedFrame();
 
       ControlFlowElement controlFlowElement = new NullControlFlowElement();
@@ -58,8 +58,6 @@ public class PointVelocityMeasurementModelElementTest
       String name = "test";
       YoVariableRegistry registry = new YoVariableRegistry(name);
 
-      ControlFlowInputPort<FrameVector> pointVelocityMeasurementInputPort = new ControlFlowInputPort<FrameVector>(controlFlowElement);
-
       ControlFlowOutputPort<FramePoint> centerOfMassPositionPort = new ControlFlowOutputPort<FramePoint>(controlFlowElement);
       ControlFlowOutputPort<FrameVector> centerOfMassVelocityPort = new ControlFlowOutputPort<FrameVector>(controlFlowElement);
       ControlFlowOutputPort<FrameVector> centerOfMassAccelerationPort = new ControlFlowOutputPort<FrameVector>(controlFlowElement);
@@ -68,11 +66,14 @@ public class PointVelocityMeasurementModelElementTest
       ControlFlowOutputPort<FrameVector> angularVelocityPort = new ControlFlowOutputPort<FrameVector>(controlFlowElement);
       ControlFlowOutputPort<FrameVector> angularAccelerationPort = new ControlFlowOutputPort<FrameVector>(controlFlowElement);
 
-      RigidBody stationaryPointLink = measurementLink;
-      FramePoint stationaryPoint = new FramePoint(measurementFrame, RandomTools.generateRandomPoint(random, 1.0, 1.0, 1.0));
-      PointVelocityMeasurementModelElement modelElement = new PointVelocityMeasurementModelElement(name, pointVelocityMeasurementInputPort,
-                                                             centerOfMassPositionPort, centerOfMassVelocityPort, orientationPort, angularVelocityPort,
-                                                             estimationFrame, stationaryPointLink, stationaryPoint, twistCalculator, registry);
+      ControlFlowInputPort<Vector3d> linearAccelerationMeasurementInputPort = new ControlFlowInputPort<Vector3d>(controlFlowElement);
+      double gZ = 9.81;
+
+      LinearAccelerationMeasurementModelElement modelElement = new LinearAccelerationMeasurementModelElement(name, registry, centerOfMassPositionPort,
+                                                                  centerOfMassVelocityPort, centerOfMassAccelerationPort, orientationPort, angularVelocityPort,
+                                                                  angularAccelerationPort, linearAccelerationMeasurementInputPort, twistCalculator,
+                                                                  spatialAccelerationCalculator, measurementLink, measurementFrame, estimationLink,
+                                                                  estimationFrame, gZ);
 
       randomFloatingChain.setRandomPositionsAndVelocities(random);
       twistCalculator.compute();
@@ -92,8 +93,10 @@ public class PointVelocityMeasurementModelElementTest
       angularAccelerationPort.setData(new FrameVector(estimationFrame, RandomTools.generateRandomVector(random)));
 
       updater.run();
-
-      setMeasuredPointVelocityToActual(twistCalculator, stationaryPointLink, stationaryPoint, pointVelocityMeasurementInputPort);
+      spatialAccelerationCalculator.compute();
+      setMeasuredLinearAccelerationToActual(spatialAccelerationCalculator, measurementLink, measurementFrame, linearAccelerationMeasurementInputPort);
+      setCenterOfMassAccelerationToActual(elevator, centerOfMassAccelerationPort);
+      setAngularAccelerationToActual(spatialAccelerationCalculator, estimationLink, estimationFrame, angularAccelerationPort);
 
       DenseMatrix64F zeroResidual = modelElement.computeResidual();
       DenseMatrix64F zeroVector = new DenseMatrix64F(3, 1);
@@ -103,29 +106,56 @@ public class PointVelocityMeasurementModelElementTest
       double tol = 1e-12;
       modelElement.computeMatrixBlocks();
 
+      // CoM acceleration perturbations
+      MeasurementModelTestTools.assertOutputMatrixCorrectUsingPerturbation(centerOfMassAccelerationPort, modelElement,
+              new FrameVector(centerOfMassAccelerationPort.getData()), perturbation, tol, updater);
+
       // CoM velocity perturbations
       MeasurementModelTestTools.assertOutputMatrixCorrectUsingPerturbation(centerOfMassVelocityPort, modelElement,
               new FrameVector(centerOfMassVelocityPort.getData()), perturbation, tol, updater);
+
+      // orientation perturbations
+      MeasurementModelTestTools.assertOutputMatrixCorrectUsingPerturbation(orientationPort, modelElement, new FrameOrientation(orientationPort.getData()),
+              perturbation, tol, updater);
 
       // angular velocity perturbations
       MeasurementModelTestTools.assertOutputMatrixCorrectUsingPerturbation(angularVelocityPort, modelElement, new FrameVector(angularVelocityPort.getData()),
               perturbation, tol, updater);
 
-      // orientation perturbations
-      MeasurementModelTestTools.assertOutputMatrixCorrectUsingPerturbation(orientationPort, modelElement, new FrameOrientation(orientationPort.getData()),
-              perturbation, tol, updater);
+      // angular acceleration perturbations
+      MeasurementModelTestTools.assertOutputMatrixCorrectUsingPerturbation(angularAccelerationPort, modelElement,
+              new FrameVector(angularAccelerationPort.getData()), perturbation, tol, updater);
+
    }
 
-   private void setMeasuredPointVelocityToActual(TwistCalculator twistCalculator, RigidBody stationaryPointLink, FramePoint point,
-           ControlFlowInputPort<FrameVector> pointVelocityMeasurementInputPort)
+   private static void setCenterOfMassAccelerationToActual(RigidBody elevator, ControlFlowOutputPort<FrameVector> centerOfMassAccelerationPort)
    {
-      Twist twist = new Twist();
-      twistCalculator.packTwistOfBody(twist, stationaryPointLink);
-      twist.changeFrame(twist.getBaseFrame());
-      point = point.changeFrameCopy(twist.getBaseFrame());
-      FrameVector pointVelocity = new FrameVector(twist.getBaseFrame());
-      twist.packVelocityOfPointFixedInBodyFrame(pointVelocity, point);
-      pointVelocity.changeFrame(ReferenceFrame.getWorldFrame());
-      pointVelocityMeasurementInputPort.setData(pointVelocity);
+      ReferenceFrame rootFrame = elevator.getBodyFixedFrame();
+      SpatialAccelerationVector rootAcceleration = new SpatialAccelerationVector(rootFrame, rootFrame, rootFrame);
+      CenterOfMassAccelerationCalculator centerOfMassAccelerationCalculator = new CenterOfMassAccelerationCalculator(elevator, rootAcceleration, false);
+      FrameVector comAcceleration = new FrameVector(ReferenceFrame.getWorldFrame());
+      centerOfMassAccelerationCalculator.packCoMAcceleration(comAcceleration);
+      centerOfMassAccelerationPort.setData(comAcceleration);
+   }
+
+   private static void setMeasuredLinearAccelerationToActual(SpatialAccelerationCalculator spatialAccelerationCalculator, RigidBody measurementLink,
+           ReferenceFrame measurementFrame, ControlFlowInputPort<Vector3d> linearAccelerationMeasurementInputPort)
+   {
+      FramePoint measurementPoint = new FramePoint(measurementFrame);
+      FrameVector linearAcceleration = new FrameVector(measurementFrame);
+      spatialAccelerationCalculator.packLinearAccelerationOfBodyFixedPoint(linearAcceleration, measurementLink, measurementPoint);
+      linearAcceleration.changeFrame(measurementFrame);
+      linearAccelerationMeasurementInputPort.setData(linearAcceleration.getVectorCopy());
+   }
+
+   private static void setAngularAccelerationToActual(SpatialAccelerationCalculator spatialAccelerationCalculator, RigidBody estimationLink,
+           ReferenceFrame estimationFrame, ControlFlowOutputPort<FrameVector> angularAccelerationPort)
+   {
+      SpatialAccelerationVector estimationLinkAcceleration = new SpatialAccelerationVector();
+      spatialAccelerationCalculator.packAccelerationOfBody(estimationLinkAcceleration, estimationLink);
+      FrameVector angularAcceleration = new FrameVector(ReferenceFrame.getWorldFrame());
+      estimationLinkAcceleration.packAngularPart(angularAcceleration);
+      angularAcceleration.changeFrame(estimationFrame);
+      angularAccelerationPort.setData(angularAcceleration);
    }
 }

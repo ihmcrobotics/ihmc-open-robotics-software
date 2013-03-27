@@ -67,7 +67,7 @@ public class LinearAccelerationMeasurementModelElement extends AbstractMeasureme
            ReferenceFrame measurementFrame, RigidBody estimationLink, ReferenceFrame estimationFrame, double gZ)
    {
       super(SIZE, name, registry);
-      MathTools.checkIfInRange(gZ, 0.0, Double.NEGATIVE_INFINITY);
+      MathTools.checkIfInRange(gZ, 0.0, Double.POSITIVE_INFINITY);
 
       this.centerOfMassPositionPort = centerOfMassPositionPort;
       this.centerOfMassVelocityPort = centerOfMassVelocityPort;
@@ -87,7 +87,7 @@ public class LinearAccelerationMeasurementModelElement extends AbstractMeasureme
       this.estimationLink = estimationLink;
       this.estimationFrame = estimationFrame;
 
-      gravitationalAcceleration.setZ(gZ);
+      gravitationalAcceleration.setZ(-gZ);
 
       outputMatrixBlocks.put(centerOfMassVelocityPort, new DenseMatrix64F(SIZE, SIZE));
       outputMatrixBlocks.put(centerOfMassAccelerationPort, new DenseMatrix64F(SIZE, SIZE));
@@ -106,10 +106,10 @@ public class LinearAccelerationMeasurementModelElement extends AbstractMeasureme
       estimationFrame.getTransformToDesiredFrame(tempTransform, measurementFrame);
       tempTransform.get(rotationFromEstimationToMeasurement);
 
-      // \omega_{i}^{p,p}
+      // T_{i}^{p,p}
       twistCalculator.packRelativeTwist(twistOfMeasurementFrameWithRespectToEstimation, estimationLink, measurementLink);
+      twistOfMeasurementFrameWithRespectToEstimation.changeFrame(estimationFrame);
       twistOfMeasurementFrameWithRespectToEstimation.packAngularPart(angularVelocityOfMeasurementWithRespectToEstimation);
-      angularVelocityOfMeasurementWithRespectToEstimation.changeFrame(estimationFrame);
 
       computeCenterOfMassVelocityBlock(rotationFromEstimationToMeasurement, rotationFromWorldToEstimation, angularVelocityOfMeasurementWithRespectToEstimation);
       computeCenterOfMassAccelerationBlock();
@@ -197,6 +197,7 @@ public class LinearAccelerationMeasurementModelElement extends AbstractMeasureme
       MatrixTools.setDenseMatrixFromMatrix3d(0, 0, tempMatrix, outputMatrixBlocks.get(angularVelocityPort));
    }
 
+   // TODO: why no negate?
    private void computeCenterOfMassVelocityBlock(Matrix3d rotationFromEstimationToMeasurement, Matrix3d rotationFromWorldToEstimation,
            FrameVector angularVelocityOfMeasurementFrameWithRespectToEstimation)
    {
@@ -207,7 +208,7 @@ public class LinearAccelerationMeasurementModelElement extends AbstractMeasureme
       tempVector.add(angularVelocityOfMeasurementFrameWithRespectToEstimation.getVector());
 
       // -\tilde{\omega + \omega_{i}^{p,p}}
-      tempVector.negate();
+//      tempVector.negate();
       MatrixTools.toTildeForm(tempMatrix, tempVector);
 
       // -R_{p}^{i} \tilde{\omega + \omega_{i}^{p,p}}

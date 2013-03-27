@@ -22,6 +22,8 @@ import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTestTools.RandomFloatingChain;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
+import us.ihmc.utilities.screwTheory.SpatialAccelerationCalculator;
+import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.utilities.screwTheory.Twist;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 import us.ihmc.utilities.test.JUnitTools;
@@ -29,7 +31,7 @@ import us.ihmc.utilities.test.JUnitTools;
 public class CenterOfMassBasedFullRobotModelUpdaterTest
 {
    private static final boolean TEST_EFFICIENCY = false;
-   
+
    private static final Vector3d X = new Vector3d(1.0, 0.0, 0.0);
    private static final Vector3d Y = new Vector3d(0.0, 1.0, 0.0);
    private static final Vector3d Z = new Vector3d(0.0, 0.0, 1.0);
@@ -43,51 +45,62 @@ public class CenterOfMassBasedFullRobotModelUpdaterTest
       RigidBody elevator = randomFloatingChain.getElevator();
       SixDoFJoint rootJoint = randomFloatingChain.getRootJoint();
 
-      RigidBody estimationLink = randomFloatingChain.getRevoluteJoints().get(1).getSuccessor();    // some link in the middle of the chain
+      RigidBody estimationLink = randomFloatingChain.getRevoluteJoints().get(0).getSuccessor();    // some link in the middle of the chain
       ReferenceFrame estimationFrame = estimationLink.getParentJoint().getFrameAfterJoint();
 
       ControlFlowElement controlFlowElement = new NullControlFlowElement();
 
-      TwistCalculator twistCalculator = new TwistCalculator(elevator.getBodyFixedFrame(), randomFloatingChain.getElevator());
+      TwistCalculator twistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), elevator);
 
       ControlFlowOutputPort<FramePoint> centerOfMassPositionPort = new ControlFlowOutputPort<FramePoint>(controlFlowElement);
       ControlFlowOutputPort<FrameVector> centerOfMassVelocityPort = new ControlFlowOutputPort<FrameVector>(controlFlowElement);
+      ControlFlowOutputPort<FrameVector> centerOfMassAccelerationPort = new ControlFlowOutputPort<FrameVector>(controlFlowElement);
+
       ControlFlowOutputPort<FrameOrientation> orientationPort = new ControlFlowOutputPort<FrameOrientation>(controlFlowElement);
       ControlFlowOutputPort<FrameVector> angularVelocityPort = new ControlFlowOutputPort<FrameVector>(controlFlowElement);
+      ControlFlowOutputPort<FrameVector> angularAccelerationPort = new ControlFlowOutputPort<FrameVector>(controlFlowElement);
 
-      CenterOfMassBasedFullRobotModelUpdater fullRobotModelUpdater = new CenterOfMassBasedFullRobotModelUpdater(twistCalculator, centerOfMassPositionPort,
-                                                                        centerOfMassVelocityPort, orientationPort, angularVelocityPort, estimationLink,
+      SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(elevator, twistCalculator, 0.0, false);
+      CenterOfMassBasedFullRobotModelUpdater fullRobotModelUpdater = new CenterOfMassBasedFullRobotModelUpdater(twistCalculator, spatialAccelerationCalculator,
+                                                                        centerOfMassPositionPort, centerOfMassVelocityPort, centerOfMassAccelerationPort,
+                                                                        orientationPort, angularVelocityPort, angularAccelerationPort, estimationLink,
                                                                         estimationFrame, rootJoint);
+
+      // TODO: test linear acceleration
 
       int nTests = 100;
       for (int i = 0; i < nTests; i++)
-      {         
+      {
          randomFloatingChain.setRandomPositionsAndVelocities(random);
          randomFloatingChain.getElevator().updateFramesRecursively();
          twistCalculator.compute();
-         
+         spatialAccelerationCalculator.compute();
+
          centerOfMassPositionPort.setData(new FramePoint(ReferenceFrame.getWorldFrame(), RandomTools.generateRandomVector(random)));
          centerOfMassVelocityPort.setData(new FrameVector(ReferenceFrame.getWorldFrame(), RandomTools.generateRandomVector(random)));
+         centerOfMassAccelerationPort.setData(new FrameVector(estimationFrame, RandomTools.generateRandomVector(random)));
          Matrix3d orientation = new Matrix3d();
          orientation.set(RandomTools.generateRandomRotation(random));
          orientationPort.setData(new FrameOrientation(ReferenceFrame.getWorldFrame(), orientation));
          angularVelocityPort.setData(new FrameVector(estimationFrame, RandomTools.generateRandomVector(random)));
-         
+         angularAccelerationPort.setData(new FrameVector(estimationFrame, RandomTools.generateRandomVector(random)));
+
          // update full robot model
          fullRobotModelUpdater.run();
          Twist tempTwist = new Twist();
          twistCalculator.packTwistOfBody(tempTwist, randomFloatingChain.getRevoluteJoints().get(0).getSuccessor());
          tempTwist.changeFrame(randomFloatingChain.getRevoluteJoints().get(0).getFrameAfterJoint());
-         
+
          // compare with ports
          double epsilon = 1e-12;
          compareCenterOfMass(elevator, centerOfMassPositionPort, epsilon);
          compareOrientation(estimationFrame, orientationPort, epsilon);
          compareCenterOfMassVelocity(elevator, centerOfMassVelocityPort, epsilon);
          compareAngularVelocity(estimationLink, estimationFrame, twistCalculator, angularVelocityPort, epsilon);
+         compareAngularAcceleration(estimationLink, estimationFrame, spatialAccelerationCalculator, angularAccelerationPort, epsilon);
       }
-      
-      
+
+
       // Test efficiency:
       if (TEST_EFFICIENCY)
       {
@@ -144,5 +157,17 @@ public class CenterOfMassBasedFullRobotModelUpdaterTest
       FrameVector angularVelocityBack = new FrameVector(estimationFrame);
       estimationLinkTwist.packAngularPart(angularVelocityBack);
       JUnitTools.assertFrameVectorEquals(angularVelocityBack, angularVelocityPort.getData(), epsilon);
+   }
+
+   private void compareAngularAcceleration(RigidBody estimationLink, ReferenceFrame estimationFrame,
+           SpatialAccelerationCalculator spatialAccelerationCalculator, ControlFlowOutputPort<FrameVector> angularAccelerationPort, double epsilon)
+   {
+      SpatialAccelerationVector estimationLinkAcceleration = new SpatialAccelerationVector();
+      spatialAccelerationCalculator.packAccelerationOfBody(estimationLinkAcceleration, estimationLink);
+      FrameVector angularAccelerationBack = new FrameVector(estimationFrame);
+      estimationLinkAcceleration.packAngularPart(angularAccelerationBack);
+      angularAccelerationBack.changeFrame(estimationFrame);
+      JUnitTools.assertFrameVectorEquals(angularAccelerationBack, angularAccelerationPort.getData(), epsilon);
+
    }
 }
