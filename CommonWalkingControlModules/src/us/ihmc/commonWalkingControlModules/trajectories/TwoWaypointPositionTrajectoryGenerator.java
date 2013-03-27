@@ -20,6 +20,7 @@ import com.yobotics.simulationconstructionset.util.trajectory.PositionProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.PositionTrajectoryGenerator;
 import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryParameters;
 import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryParametersProvider;
+import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryWaypointGenerationMethod;
 import com.yobotics.simulationconstructionset.util.trajectory.VectorProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.YoConcatenatedSplines;
 import com.yobotics.simulationconstructionset.util.trajectory.YoPositionProvider;
@@ -28,14 +29,13 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
 {
 // private final static double SPHERE_EDGE_TO_WAYPOINT_DISTANCE = 0.1;
    private final static double EPSILON = 1e-3;
+   private final static boolean VISUALIZE = true;
 
    private final DoubleYoVariable groundClearance;
    private final DoubleYoVariable linearSplineLengthFactor;
 
    private final String namePostFix = getClass().getSimpleName();
    private final YoVariableRegistry registry;
-
-   private boolean VISUALIZE = true;
    private final int numberOfVisualizationMarkers = 50;
 
    private final BagOfBalls trajectoryBagOfBalls;
@@ -206,14 +206,16 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       {
          this.trajectoryParameters = (TwoWaypointTrajectoryParameters) trajectoryParameters;
       }
+      
       else if (trajectoryParameters == null)
       {
          this.trajectoryParameters = new TwoWaypointTrajectoryParameters();
       }
+         
       else
       {
          throw new RuntimeException(
-             "trajectoryParametersProvider must provide null or an instance of TwoWaypointTrajectoryParameters.");
+             "trajectoryParametersProvider must provide TwoWaypointPositionTrajectoryGenerator with an instance of TwoWaypointTrajectoryParameters.");
       }
    }
 
@@ -375,9 +377,14 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
          }
       }
 
-      else
+      else if (trajectoryParameters.getWaypointGenerationMethod().equals(TrajectoryWaypointGenerationMethod.BY_GROUND_CLEARANCE))
       {
          waypoints = getWaypointsAtGroundClearance(trajectoryParameters.getWaypointGroundClearance());
+      }
+      
+      else if (trajectoryParameters.getWaypointGenerationMethod().equals(TrajectoryWaypointGenerationMethod.DEFAULT))
+      {
+         waypoints = getWaypointsAtGroundClearance(TwoWaypointTrajectoryParameters.getDefaultGroundClearance());
       }
 
       for (int i = 0; i < 2; i++)
@@ -453,9 +460,9 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
          trajectoryBagOfBalls.setBall(desiredPosition.getFramePointCopy(), i);
       }
 
-      for (int i = 0; i < allPositions.length; i++)
+      for (int i = 0; i < nonAccelerationEndpointIndices.length; i++)
       {
-         waypointBagOfBalls.setBall(allPositions[i].getFramePointCopy(), YoAppearance.AliceBlue(), i);
+         waypointBagOfBalls.setBall(allPositions[nonAccelerationEndpointIndices[i]].getFramePointCopy(), YoAppearance.AliceBlue(), i);
       }
    }
 

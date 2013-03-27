@@ -14,12 +14,13 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryWaypointGenerationMethod;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBodyTools;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepData;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataList;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.PauseCommand;
-import us.ihmc.commonWalkingControlModules.trajectories.TrajectoryWaypointGenerationMethod;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.io.streamingData.QueueBasedStreamingDataProducer;
