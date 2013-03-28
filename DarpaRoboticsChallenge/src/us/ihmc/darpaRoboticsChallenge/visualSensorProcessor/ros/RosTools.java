@@ -9,12 +9,9 @@ import java.awt.image.SampleModel;
 import java.awt.image.WritableRaster;
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.InterfaceAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
+import java.net.Socket;
 import java.net.URI;
 import java.net.UnknownHostException;
-import java.util.Enumeration;
 
 import org.ros.address.InetAddressFactory;
 import org.ros.node.NodeConfiguration;
@@ -50,45 +47,45 @@ public class RosTools
          }
          else
          {
-            // Find first local address the master host is reachable from
-            final Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
+            Socket testSocket = new Socket(master.getHost(), master.getPort());
+            listenAddress = testSocket.getLocalAddress();
+            testSocket.close();
+/*
+*       At first the following code looks like a better solution, however InetAddress.isReachable does not work without being a super user.
+*/
             
-            while(networkInterfaces.hasMoreElements()) {
-               NetworkInterface iface = networkInterfaces.nextElement();
-               
-               if(iface.isLoopback())
-               {
-                  continue;
-               }
-               
-               if(inetAddress.isReachable(iface, 0, 100))
-               {
-                  for(InterfaceAddress ifaceAddr : iface.getInterfaceAddresses())
-                  {
-                     if(ifaceAddr.getAddress().getAddress().length == 4)
-                     {
-                        listenAddress = ifaceAddr.getAddress();
-                     }
-                  }
-               }
-             }
-         }
-         if(listenAddress == null)
-         {
-            throw new UnknownHostException("Cannot reach master from any local IPv4 address");
+//            // Find first local address the master host is reachable from
+//            final Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
+//            
+//            while(networkInterfaces.hasMoreElements()) {
+//               NetworkInterface iface = networkInterfaces.nextElement();
+//               
+//               if(iface.isLoopback())
+//               {
+//                  continue;
+//               }
+//               
+//               if(inetAddress.isReachable(iface, 0, 100))
+//               {
+//                  for(InterfaceAddress ifaceAddr : iface.getInterfaceAddresses())
+//                  {
+//                     if(ifaceAddr.getAddress().getAddress().length == 4)
+//                     {
+//                        listenAddress = ifaceAddr.getAddress();
+//                     }
+//                  }
+//               }
+//             }
+            
          }
       }
       catch (UnknownHostException e)
       {
          throw new RuntimeException("Invalid hostname: " + master.getHost());
       }
-      catch (SocketException e)
-      {
-         throw new RuntimeException(e);
-      }
       catch (IOException e)
       {
-         throw new RuntimeException(e);
+         throw new RuntimeException("Cannot connect to ROS\n" + e.getMessage());
       }
       
       NodeConfiguration nodeConfiguration = NodeConfiguration.newPublic(listenAddress.getHostAddress(), master);
