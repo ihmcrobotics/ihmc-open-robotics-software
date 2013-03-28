@@ -12,8 +12,9 @@ import javax.vecmath.Vector3d;
 import org.junit.Test;
 
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
+import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.utilities.Axis;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.math.RotationalInertiaCalculator;
 import us.ihmc.utilities.test.JUnitTools;
@@ -42,7 +43,7 @@ public class RobotTest
       Vector3d offset = new Vector3d(0.0, 0.0, l1);
 
 //    Vector3d offset = new Vector3d();
-      PinJoint pin1 = new PinJoint("pin1", offset, robot1, Joint.Y);
+      PinJoint pin1 = new PinJoint("pin1", offset, robot1, Axis.Y);
       root1.addJoint(pin1);
       Link link21 = link21(random, l2, r2);
       pin1.setLink(link21);
@@ -279,7 +280,7 @@ public class RobotTest
       FloatingJoint floatingJoint1 = new FloatingJoint("joint1", new Vector3d(), robot1);
       robot1.addRootJoint(floatingJoint1);
       floatingJoint1.setLink(randomBodyNoYCoMOffset(random));
-      PinJoint pin1 = new PinJoint("pin1", offset, robot1, Joint.Y);
+      PinJoint pin1 = new PinJoint("pin1", offset, robot1, Axis.Y);
       floatingJoint1.addJoint(pin1);
       pin1.setLink(randomBodyNoYCoMOffset(random));
 
@@ -287,7 +288,7 @@ public class RobotTest
       FloatingPlanarJoint floatingJoint2 = new FloatingPlanarJoint("joint2", robot2);
       robot2.addRootJoint(floatingJoint2);
       floatingJoint2.setLink(new Link(floatingJoint1.getLink()));
-      PinJoint pin2 = new PinJoint("pin2", offset, robot2, Joint.Y);
+      PinJoint pin2 = new PinJoint("pin2", offset, robot2, Axis.Y);
       floatingJoint2.addJoint(pin2);
       pin2.setLink(new Link(pin1.getLink()));
 
