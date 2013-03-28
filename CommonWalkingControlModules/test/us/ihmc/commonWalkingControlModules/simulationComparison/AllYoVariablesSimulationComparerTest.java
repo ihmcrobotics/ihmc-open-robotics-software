@@ -12,6 +12,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.utilities.Axis;
 import us.ihmc.utilities.MemoryTools;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
@@ -78,7 +79,7 @@ public class AllYoVariablesSimulationComparerTest
 	{
 		Robot robot = new Robot(name);
 
-		PinJoint joint1 = new PinJoint("joint", new Vector3d(0.0, 0.0, 0.0), robot, Joint.Y);
+		PinJoint joint1 = new PinJoint("joint", new Vector3d(0.0, 0.0, 0.0), robot, Axis.Y);
 		Link link1 = link1();
 		joint1.setLink(link1);
 		robot.addRootJoint(joint1);
@@ -92,7 +93,7 @@ public class AllYoVariablesSimulationComparerTest
 	{
 		Robot robot = new Robot(name);
 
-		PinJoint joint2 = new PinJoint("joint", new Vector3d(0.0, 0.0, 0.0), robot, Joint.Y);
+		PinJoint joint2 = new PinJoint("joint", new Vector3d(0.0, 0.0, 0.0), robot, Axis.Y);
 		Link link2 = link2();
 		joint2.setLink(link2);
 		robot.addRootJoint(joint2);

@@ -3,6 +3,7 @@ package us.ihmc.graphics3DAdapter.graphics.appearances;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.net.URL;
+import java.util.Random;
 
 import javax.vecmath.Color3f;
 
@@ -872,6 +873,14 @@ public class YoAppearance
    public static void makeTransparent(AppearanceDefinition appearance, double f)
    {
       appearance.setTransparency(f);
+   }
+
+   public static AppearanceDefinition randomColor(Random random)
+   {
+      double red = random.nextDouble();
+      double green = random.nextDouble();
+      double blue = random.nextDouble();
+      return YoAppearance.RGBColor(red, green, blue);
    }
 
    // public static void makeTransparent(YoAppearanceDefinition app, float transparency)

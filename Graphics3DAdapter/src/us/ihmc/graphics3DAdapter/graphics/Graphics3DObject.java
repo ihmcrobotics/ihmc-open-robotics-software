@@ -29,16 +29,11 @@ import us.ihmc.graphics3DAdapter.graphics.instructions.primitives.Graphics3DTran
 import us.ihmc.graphics3DAdapter.input.ModifierKeyInterface;
 import us.ihmc.graphics3DAdapter.input.SelectedListener;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
+import us.ihmc.utilities.Axis;
 import us.ihmc.utilities.InertiaTools;
-
 
 public class Graphics3DObject
 {
-   private enum Axis
-   {
-      X, Y, Z
-   }
-   
    private static final int RESOLUTION = 25;
    
    public static final Axis X = Axis.X;
@@ -123,20 +118,17 @@ public class Graphics3DObject
     * as described by the translations and rotations applied since its creation at the joint
     * origin.
     *
-    * @param rotAng the angle to rotate around the specified axis in radians.
-    * @param rotAxis Axis around which to rotate. Either Link.X, Link.Y or Link.Z
+    * @param rotationAngle the angle to rotate around the specified axis in radians.
+    * @param rotationAxis Axis around which to rotate. Either Link.X, Link.Y or Link.Z
     */
-   public void rotate(double rotAng, int rotAxis)
+   public void rotate(double rotationAngle, int rotationAxis)
    {
-      Vector3d axis = new Vector3d();
-      if(rotAxis == 0)
-         axis.setX(1.0);
-      else if(rotAxis == 1)
-         axis.setY(1.0);
-      else if(rotAxis == 2)
-         axis.setZ(1.0);
-      
-      rotate(rotAng, axis);
+      if(rotationAxis == 0)
+         rotate(rotationAngle, Axis.X);
+      else if(rotationAxis == 1)
+         rotate(rotationAngle, Axis.Y);
+      else if(rotationAxis == 2)
+         rotate(rotationAngle, Axis.Z);
    }
    
    public void rotate(double rotAng, Axis rotAxis)
