@@ -131,17 +131,18 @@ public class Graphics3DObject
          rotate(rotationAngle, Axis.Z);
    }
    
-   public void rotate(double rotAng, Axis rotAxis)
+   public void rotate(double rotationAngle, Axis rotationAxis)
    {
-      Vector3d axis = new Vector3d();
-      if(rotAxis == Axis.X)
-         axis.setX(1.0);
-      else if(rotAxis == Axis.Y)
-         axis.setY(1.0);
-      else if(rotAxis == Axis.Z)
-         axis.setZ(1.0);
-      
-      rotate(rotAng, axis);
+      Matrix3d rot = new Matrix3d();
+
+      if(rotationAxis == Axis.X)
+         rot.rotX(rotationAngle);
+      else if(rotationAxis == Axis.Y)
+         rot.rotY(rotationAngle);
+      else if(rotationAxis == Axis.Z)
+         rot.rotZ(rotationAngle);
+
+      rotate(rot);  
    }
 
    /**
