@@ -21,11 +21,15 @@ public class JPanelCameraStreamer extends JPanel implements VideoStreamer, Camer
       super();
    }
 
-   
-   public synchronized void updateImage(BufferedImage bufferedImage, Point3d cameraPosition, Quat4d cameraOrientation, double fov)
+   public synchronized void updateImage(BufferedImage bufferedImage)
    {
       this.bufferedImage = bufferedImage;
       repaint();
+   }
+   
+   public synchronized void updateImage(BufferedImage bufferedImage, Point3d cameraPosition, Quat4d cameraOrientation, double fov)
+   {
+      updateImage(bufferedImage);
    }
 
    protected synchronized void paintComponent(Graphics g)
@@ -36,7 +40,7 @@ public class JPanelCameraStreamer extends JPanel implements VideoStreamer, Camer
       }
    }
 
-   public void createAndDisplayInNewWindow(String name, int xLocation, int yLocation)
+   public void createAndDisplayInNewWindow(String name)
    {
       JPanel panel = new JPanel(new BorderLayout());
       panel.add("Center", this);
@@ -48,9 +52,9 @@ public class JPanelCameraStreamer extends JPanel implements VideoStreamer, Camer
       contentPane.add("Center", panel);
 
       jFrame.pack();
+      jFrame.setLocationByPlatform(true); 
       jFrame.setVisible(true);
       jFrame.setSize(800, 600);
-      jFrame.setLocation(xLocation, yLocation); 
    }
 
 
