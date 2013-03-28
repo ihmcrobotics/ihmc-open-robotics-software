@@ -9,6 +9,7 @@ import javax.vecmath.Vector3d;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.utilities.Axis;
 import us.ihmc.utilities.test.JUnitTools;
 
 
@@ -29,7 +30,7 @@ public class KinematicPointTest
 	@Test
 	public void testGetAndSetParentJoint() 
 	{
-		PinJoint joint = new PinJoint("joint", new Vector3d(0.0, 0.0, 0.0), robot, Joint.X);
+		PinJoint joint = new PinJoint("joint", new Vector3d(0.0, 0.0, 0.0), robot, Axis.X);
 		robot.addRootJoint(joint);
 		kinematicPoint.setParentJoint(joint);
 		assertTrue(joint == kinematicPoint.getParentJoint());
