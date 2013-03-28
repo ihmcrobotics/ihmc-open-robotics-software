@@ -20,6 +20,7 @@ import us.ihmc.sensorProcessing.signalCorruption.GaussianOrientationCorruptor;
 import us.ihmc.sensorProcessing.signalCorruption.GaussianVectorCorruptor;
 import us.ihmc.sensorProcessing.simulatedSensors.SimulatedAngularVelocitySensor;
 import us.ihmc.sensorProcessing.simulatedSensors.SimulatedOrientationSensor;
+import us.ihmc.utilities.Axis;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
@@ -35,6 +36,7 @@ import us.ihmc.utilities.screwTheory.TwistCalculator;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.FloatingJoint;
 import com.yobotics.simulationconstructionset.Link;
+import com.yobotics.simulationconstructionset.PinJoint;
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
@@ -47,6 +49,7 @@ public class QuaternionOrientationEstimatorEvaluator
    private static final boolean CREATE_ORIENTATION_SENSOR = true;
    private static final boolean CREATE_ANGULAR_VELOCITY_SENSOR = true;
    private static final boolean USE_COMPOSABLE_ESTIMATOR = true;
+   private static final boolean ADD_ARM_LINKS = true;
 
    private final double orientationMeasurementStandardDeviation = Math.sqrt(1e-1);    
    private final double angularVelocityMeasurementStandardDeviation = Math.sqrt(1e-1);   
@@ -81,6 +84,7 @@ public class QuaternionOrientationEstimatorEvaluator
       private final Link bodyLink;
       private final FloatingJoint rootJoint;
 
+      
       public QuaternionOrientationEstimatorEvaluatorRobot()
       {
          super("QuaternionOrientationEstimatorEvaluatorRobot");
@@ -98,6 +102,42 @@ public class QuaternionOrientationEstimatorEvaluator
 
          this.addRootJoint(rootJoint);
 
+         
+         if (ADD_ARM_LINKS)
+         {
+            PinJoint pinJoint1 = new PinJoint("pinJoint1", new Vector3d(), this, Axis.X);
+            Link armLink1 = new Link("armLink1");
+            armLink1.setMassAndRadiiOfGyration(0.3, 0.1, 0.1, 0.1);
+            armLink1.setComOffset(new Vector3d(0.0, 0.0, 0.5));
+            
+            Graphics3DObject armLink1Graphics = new Graphics3DObject();
+//            armLink1Graphics.rotate(-Math.PI/2.0, Graphics3DObject.X);
+            armLink1Graphics.addCylinder(1.0, 0.02, YoAppearance.Green());
+            armLink1.setLinkGraphics(armLink1Graphics);
+            pinJoint1.setLink(armLink1);
+            
+            rootJoint.addJoint(pinJoint1);
+            
+            PinJoint pinJoint2 = new PinJoint("pinJoint2", new Vector3d(0.0, 0.0, 1.0), this, Axis.Z);
+            Link armLink2 = new Link("armLink2");
+            armLink2.setMassAndRadiiOfGyration(0.2, 0.1, 0.1, 0.1);
+            armLink2.setComOffset(new Vector3d(0.5, 0.0, 0.0));
+
+            Graphics3DObject armLink2Graphics = new Graphics3DObject();
+            armLink2Graphics.rotate(Math.PI/2.0, Graphics3DObject.Y);
+            armLink2Graphics.addCylinder(1.0, 0.02, YoAppearance.Blue());
+            armLink2.setLinkGraphics(armLink2Graphics);
+            
+            pinJoint2.setLink(armLink2);
+
+            pinJoint1.addJoint(pinJoint2);
+            
+            pinJoint1.setQ(0.2);
+            pinJoint2.setQ(0.3);
+            rootJoint.setVelocity(new Vector3d(-0.03, 0.0, 0.03));
+         }
+         
+         
          this.setGravity(0.0);
 
          rootJoint.setPosition(new Point3d(0.0, 0.0, 0.4));
