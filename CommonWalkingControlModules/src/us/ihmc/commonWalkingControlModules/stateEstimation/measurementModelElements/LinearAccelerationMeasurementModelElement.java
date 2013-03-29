@@ -197,25 +197,10 @@ public class LinearAccelerationMeasurementModelElement extends AbstractMeasureme
       MatrixTools.setDenseMatrixFromMatrix3d(0, 0, tempMatrix, outputMatrixBlocks.get(angularVelocityPort));
    }
 
-   // TODO: why no negate?
    private void computeCenterOfMassVelocityBlock(Matrix3d rotationFromEstimationToMeasurement, Matrix3d rotationFromWorldToEstimation,
            FrameVector angularVelocityOfMeasurementFrameWithRespectToEstimation)
    {
-      // \omega + \omega_{i}^{p,p}
-      angularVelocityPort.getData().checkReferenceFrameMatch(estimationFrame);
-      angularVelocityOfMeasurementFrameWithRespectToEstimation.checkReferenceFrameMatch(estimationFrame);
-      angularVelocityPort.getData().getVector(tempVector);
-      tempVector.add(angularVelocityOfMeasurementFrameWithRespectToEstimation.getVector());
-
-      // -\tilde{\omega + \omega_{i}^{p,p}}
-//      tempVector.negate();
-      MatrixTools.toTildeForm(tempMatrix, tempVector);
-
-      // -R_{p}^{i} \tilde{\omega + \omega_{i}^{p,p}}
-      tempMatrix.mul(rotationFromEstimationToMeasurement, tempMatrix);
-
-      // -R_{p}^{i} \tilde{\omega + \omega_{i}^{p,p}} R_{w}^{p}
-      tempMatrix.mul(tempMatrix, rotationFromWorldToEstimation);
+      tempMatrix.setZero();
       MatrixTools.setDenseMatrixFromMatrix3d(0, 0, tempMatrix, outputMatrixBlocks.get(centerOfMassVelocityPort));
    }
 
