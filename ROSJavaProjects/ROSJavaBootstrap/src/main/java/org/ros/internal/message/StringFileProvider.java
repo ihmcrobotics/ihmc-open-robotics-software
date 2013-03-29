@@ -39,92 +39,123 @@ import java.util.Set;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class StringFileProvider {
+public class StringFileProvider
+{
 
-  private final Collection<File> directories;
-  private final Map<File, String> strings;
-  private final StringFileDirectoryWalker stringFileDirectoryWalker;
+   private final Collection<File> directories;
+   private final Map<File, String> strings;
+   private final StringFileDirectoryWalker stringFileDirectoryWalker;
 
-  private final class StringFileDirectoryWalker extends DirectoryWalker {
-    
-    private final Set<File> directories;
+   private final class StringFileDirectoryWalker extends DirectoryWalker
+   {
 
-    private StringFileDirectoryWalker(FileFilter filter, int depthLimit) {
-      super(filter, depthLimit);
-      directories = Sets.newHashSet();
-    }
-    
-    // TODO(damonkohler): Update Apache Commons IO to the latest version.
-    @SuppressWarnings("rawtypes")
-    @Override
-    protected boolean handleDirectory(File directory, int depth, Collection results)
-        throws IOException {
-      File canonicalDirectory = directory.getCanonicalFile();
-      if (directories.contains(canonicalDirectory)) {
-        return false;
+      private final Set<File> directories;
+
+      private StringFileDirectoryWalker(FileFilter filter, int depthLimit)
+      {
+         super(filter, depthLimit);
+         directories = Sets.newHashSet();
       }
-      directories.add(canonicalDirectory);
-      return true;
-    }
 
-    @SuppressWarnings("rawtypes")
-    @Override
-    protected void handleFile(File file, int depth, Collection results) {
-      String content;
-      try {
-        content = FileUtils.readFileToString(file, "US-ASCII");
-      } catch (IOException e) {
-        throw new RosRuntimeException(e);
+      // TODO(damonkohler): Update Apache Commons IO to the latest version.
+      @SuppressWarnings("rawtypes")
+      @Override
+      protected boolean handleDirectory(File directory, int depth, Collection results) throws IOException
+      {
+         File canonicalDirectory = directory.getCanonicalFile();
+         if (directories.contains(canonicalDirectory))
+         {
+            return false;
+         }
+         directories.add(canonicalDirectory);
+         return true;
       }
-      strings.put(file, content);
-    }
 
-    public void update(File directory) {
-      try {
-        walk(directory, null);
-      } catch (IOException e) {
-        throw new RosRuntimeException(e);
+      @SuppressWarnings("rawtypes")
+      @Override
+      protected void handleFile(File file, int depth, Collection results)
+      {
+         String content;
+         try
+         {
+            content = FileUtils.readFileToString(file, "US-ASCII");
+         }
+         catch (IOException e)
+         {
+            throw new RosRuntimeException(e);
+         }
+         strings.put(file, content);
       }
-    }
-  }
 
-  public StringFileProvider(IOFileFilter ioFileFilter) {
-    directories = Lists.newArrayList();
-    strings = Maps.newConcurrentMap();
-    IOFileFilter directoryFilter = FileFilterUtils.directoryFileFilter();
-    FileFilter fileFilter = FileFilterUtils.orFileFilter(directoryFilter, ioFileFilter);
-    stringFileDirectoryWalker = new StringFileDirectoryWalker(fileFilter, -1);
-  }
+      public void update(File directory)
+      {
+         try
+         {
+            walk(directory, null);
+         }
+         catch (IOException e)
+         {
+            throw new RosRuntimeException(e);
+         }
+      }
+   }
 
-  public void update() {
-    for (File directory : directories) {
-      stringFileDirectoryWalker.update(directory);
-    }
-  }
+   public StringFileProvider(IOFileFilter ioFileFilter)
+   {
+      directories = Lists.newArrayList();
+      strings = Maps.newConcurrentMap();
+      IOFileFilter directoryFilter = FileFilterUtils.directoryFileFilter();
+      FileFilter fileFilter = FileFilterUtils.orFileFilter(directoryFilter, ioFileFilter);
+      stringFileDirectoryWalker = new StringFileDirectoryWalker(fileFilter, -1);
+   }
 
-  /**
-   * Adds a new directory to be scanned for topic definition files.
-   * 
-   * @param directory
-   *          the directory to add
-   */
-  public void addDirectory(File directory) {
-    Preconditions.checkArgument(directory.isDirectory());
-    directories.add(directory);
-  }
+   public void update()
+   {
+      for (File directory : directories)
+      {
+         stringFileDirectoryWalker.update(directory);
+      }
+   }
 
-  public Map<File, String> getStrings() {
-    return ImmutableMap.copyOf(strings);
-  }
+   /**
+    * Adds a new directory to be scanned for topic definition files.
+    * 
+    * @param directory
+    *          the directory to add
+    */
+   public void addDirectory(File directory)
+   {
+      if (!directory.isDirectory())
+      {
+         try
+         {
+            System.out.println("StringFileProvider: directory is not a directory :" + directory.getAbsoluteFile().getCanonicalFile());
+         }
+         catch (IOException e)
+         {
+            e.printStackTrace();
+         }
+      }
+      Preconditions.checkArgument(directory.isDirectory());
+      directories.add(directory);
+   }
 
-  public String get(File file) {
-    if (!has(file)) {
-      throw new NoSuchElementException("File does not exist: " + file);
-    }
-    return strings.get(file);
-  }
+   public Map<File, String> getStrings()
+   {
+      return ImmutableMap.copyOf(strings);
+   }
 
-  public boolean has(File file) {
-    return strings.containsKey(file);
-  }
+   public String get(File file)
+   {
+      if (!has(file))
+      {
+         throw new NoSuchElementException("File does not exist: " + file);
+      }
+      return strings.get(file);
+   }
+
+   public boolean has(File file)
+   {
+      return strings.containsKey(file);
+   }
 }

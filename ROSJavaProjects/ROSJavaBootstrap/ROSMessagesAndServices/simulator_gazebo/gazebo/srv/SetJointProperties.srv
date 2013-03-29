@@ -1,0 +1,7 @@
+#This message is deprecated.  Please use the version in gazebo_msgs instead.
+
+string joint_name                               # name of joint
+gazebo/ODEJointProperties ode_joint_config # access to ODE joint dynamics properties
+---
+bool success                                    # return true if get successful
+string status_message                           # comments if available
