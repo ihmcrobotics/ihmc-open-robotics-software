@@ -31,6 +31,7 @@ public class DRCNetworkProcessor
    {
       this();
 
+      System.out.println("Connecting to ROS");
       RosMainNode rosMainNode;
       rosMainNode = new RosMainNode(rosMaster);
 
@@ -39,6 +40,7 @@ public class DRCNetworkProcessor
 
       new GazeboCameraReceiver(robotPoseBuffer, DRCConfigParameters.VIDEOSETTINGS, timeProvider, rosMainNode, teamComputerServer);
 
+      rosMainNode.execute();
       connect();
    }
    

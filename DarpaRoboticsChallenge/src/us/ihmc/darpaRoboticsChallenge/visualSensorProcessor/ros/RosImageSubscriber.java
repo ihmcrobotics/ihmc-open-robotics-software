@@ -14,6 +14,7 @@ import us.ihmc.graphics3DAdapter.camera.JPanelCameraStreamer;
 public abstract class RosImageSubscriber extends RosTopicSubscriber<sensor_msgs.Image>
 {
    private final ColorModel colorModel;
+   
 
    public RosImageSubscriber()
    {

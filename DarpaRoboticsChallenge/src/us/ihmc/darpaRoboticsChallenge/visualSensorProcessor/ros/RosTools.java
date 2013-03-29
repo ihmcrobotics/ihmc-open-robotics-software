@@ -25,7 +25,7 @@ public class RosTools
       int height = imageMessage.getHeight();
    
       byte[] payload = imageMessage.getData().array();
-      BufferedImage ret = new BufferedImage(width, height, BufferedImage.TYPE_INT_BGR);
+      BufferedImage ret = new BufferedImage(width, height, BufferedImage.TYPE_3BYTE_BGR);
       DataBuffer dataBuffer = new DataBufferByte(payload, payload.length, imageMessage.getData().arrayOffset());
       SampleModel sampleModel = colorModel.createCompatibleSampleModel(width, height);
    
