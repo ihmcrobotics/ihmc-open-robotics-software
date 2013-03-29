@@ -565,10 +565,10 @@ Measurements:
 \end_layout
 
 \begin_layout Itemize
-\begin_inset Formula $z_{\dot{v,}i}:$
+\begin_inset Formula $z_{\dot{v,}i}$
 \end_inset
 
-Measured acceleration of IMU i in body frame.
+: Measured acceleration of IMU i in body frame.
  Includes bias and noise.
 \end_layout
 
@@ -867,287 +867,163 @@ The partial derivatives with respect to the state variables are
 IMU linear acceleration
 \end_layout
 
+\begin_layout Subsubsection
+Measurement model
+\end_layout
+
 \begin_layout Standard
 Let 
-\begin_inset Formula $\dot{v}_{i}^{i,w}$
+\begin_inset Formula $p_{i}$
 \end_inset
 
- be the linear acceleration of IMU 
+ be the position of IMU 
 \begin_inset Formula $i$
 \end_inset
 
- with respect to the world 
-\begin_inset Formula $w$
+.
+ The point 
+\begin_inset Formula $p_{i}$
 \end_inset
 
-, expressed in body frame.
- The measurement model for linear acceleration is:
-\begin_inset Formula 
-\[
-\dot{v}_{i}^{i,w}=S_{v}\dot{T}_{i}^{i,w}
-\]
-
+ is fixed with respect to body 
+\begin_inset Formula $m$
 \end_inset
 
-with the selection matrix
+.
+ Its acceleration with respect to the world, expressed in world frame can
+ be written as
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula 
-\[
-S_{v}=\left(\begin{array}{cc}
-0_{3\times3} & I_{3}\end{array}\right)
-\]
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-We now introduce a fictitious `elevator' body, denoted 
-\begin_inset Formula $e$
-\end_inset
-
-, which accelerates linearly with respect to the world at a constant rate
- of 
-\begin_inset Formula $-g$
-\end_inset
-
-, where 
-\begin_inset Formula $g$
-\end_inset
-
- is gravitational acceleration.
- This allows us to write the spatial acceleration 
-\begin_inset Formula $\dot{T}_{i}^{i,w}$
-\end_inset
-
- as
-\begin_inset Formula 
-\[
-\dot{T}_{i}^{i,w}=\dot{T}_{e}^{i,w}+\dot{T}_{p}^{i,e}+\dot{T}_{i}^{i,p}
-\]
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-The acceleration of the elevator with respect to the world is expressed
- in world frame as 
-\begin_inset Formula 
-\[
-\dot{T}_{e}^{w,w}=\left(\begin{array}{c}
-0\\
--g
-\end{array}\right)
-\]
-
-\end_inset
-
-and can be written in frame 
-\begin_inset Formula $i$
-\end_inset
-
- as
-\begin_inset Formula 
-\[
-\dot{T}_{e}^{i,w}=\Ad_{H_{w}^{i}}\dot{T}_{e}^{w,w}
-\]
-
-\end_inset
-
-The linear component of the elevator acceleration, 
-\begin_inset Formula $\dot{v}_{e}^{i,w}$
-\end_inset
-
-, can then be written as
-\begin_inset Formula 
-\begin{align*}
-\dot{v}_{e}^{i,w} & =S_{v}\dot{T}_{e}^{i,w}\\
- & =\left(\begin{array}{cc}
-0_{3\times3} & I_{3}\end{array}\right)\left(\begin{array}{cc}
-R_{w}^{i} & 0\\
-\tilde{p}_{w}^{i}R_{w}^{i} & R_{w}^{i}
-\end{array}\right)\left(\begin{array}{c}
-0\\
--g
-\end{array}\right)\\
- & =-R_{w}^{i}g\\
- & =-R_{p}^{i}R_{w}^{p}g
-\end{align*}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\uuline off
-\uwave off
-\noun off
-\color none
-The acceleration of the estimation link with respect to the elevator can
- be written in frame 
-\begin_inset Formula $i$
-\end_inset
-
- as
-\begin_inset Formula 
-\[
-\dot{T}_{p}^{i,e}=\Ad_{H_{p}^{i}}\left(\ad_{T_{p}^{p,i}}T_{p}^{p,e}+\dot{T}_{p}^{p,e}\right)
-\]
-
-\end_inset
-
-
-\family default
-\series default
-\shape default
-\size default
-\emph default
-\bar default
-\strikeout default
-\uuline default
-\uwave default
-\noun default
-\color inherit
-where
 \begin_inset Formula 
 \begin{equation}
-\ad_{T}:T=\left(\begin{array}{c}
-\omega\\
-v
-\end{array}\right)\mapsto\ad_{T}=\left(\begin{array}{cc}
-\tilde{\omega} & 0\\
-\tilde{v} & \tilde{\omega}
-\end{array}\right)\label{eq:def-ad}
+\ddot{p}_{i}^{w}=\dot{\omega}_{m}^{w,w}\times p_{i}^{w}+\dot{v}_{m}^{w,w}+\omega_{m}^{w,w}\times\left(\omega_{m}^{w,w}\times p_{i}^{w}+v_{m}^{w,w}\right)\label{eq:acceleration-of-point}
 \end{equation}
 
 \end_inset
 
-Its linear component, 
-\begin_inset Formula $\dot{v}_{p}^{i,e}$
-\end_inset
 
-, is written as
-\begin_inset Formula 
-\begin{align*}
-\dot{v}_{p}^{i,e} & =S_{v}\dot{T}_{p}^{i,e}\\
- & =\left(\begin{array}{cc}
-0_{3\times3} & I_{3}\end{array}\right)\left(\begin{array}{cc}
-R_{p}^{i} & 0\\
-\tilde{p}_{p}^{i}R_{p}^{i} & R_{p}^{i}
-\end{array}\right)\left(\left(\begin{array}{cc}
-\tilde{\omega}_{p}^{p,i} & 0\\
-\tilde{v}_{p}^{p,i} & \tilde{\omega}_{p}^{p,i}
-\end{array}\right)\left(\begin{array}{c}
-\omega_{p}^{p,e}\\
-v_{p}^{p,e}
-\end{array}\right)+\left(\begin{array}{c}
-\dot{\omega}_{p}^{p,e}\\
-\dot{v}_{p}^{p,e}
-\end{array}\right)\right)\\
- & =\left(\begin{array}{cc}
-\tilde{p}_{p}^{i}R_{p}^{i} & R_{p}^{i}\end{array}\right)\left(\begin{array}{c}
-\tilde{\omega}_{p}^{p,i}\omega_{p}^{p,e}+\dot{\omega}_{p}^{p,e}\\
-\tilde{v}_{p}^{p,i}\omega_{p}^{p,e}+\tilde{\omega}_{p}^{p,i}v_{p}^{p,e}+\dot{v}_{p}^{p,e}
-\end{array}\right)\\
- & =\tilde{p}_{p}^{i}R_{p}^{i}\left(\tilde{\omega}_{p}^{p,i}\omega_{p}^{p,e}+\dot{\omega}_{p}^{p,e}\right)+R_{p}^{i}\left(\tilde{v}_{p}^{p,i}\omega_{p}^{p,e}+\tilde{\omega}_{p}^{p,i}v_{p}^{p,e}+\dot{v}_{p}^{p,e}\right)\\
- & =\tilde{p}_{p}^{i}R_{p}^{i}\left(\tilde{\omega}_{p}^{p,i}\omega+\dot{\omega}\right)+R_{p}^{i}\left(\tilde{v}_{p}^{p,i}\omega+\tilde{\omega}_{p}^{p,i}v_{p}^{p,e}+\dot{v}_{p}^{p,e}\right)
-\end{align*}
-
-\end_inset
-
-where the last line follows from the definition 
-\begin_inset Formula $\omega_{p}^{p,e}=\omega_{p}^{p,w}=\omega$
-\end_inset
-
-.
 \end_layout
 
 \begin_layout Standard
+The measurement model for linear acceleration is
+\begin_inset Formula 
+\begin{equation}
+z_{\dot{v},i}=R_{w}^{m}\left(\ddot{p}_{i}^{w}+g\right)\label{eq:linear-acceleration-measurement}
+\end{equation}
 
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\uuline off
-\uwave off
-\noun off
-\color none
-The spatial acceleration of 
-\begin_inset Formula $i$
 \end_inset
 
- with respect to 
-\begin_inset Formula $p$
+where 
+\begin_inset Formula $g$
 \end_inset
 
-, 
-\begin_inset Formula $\dot{T}_{i}^{i,p}$
+ is gravitational acceleration.
+\end_layout
+
+\begin_layout Subsubsection
+State variable Jacobians
+\end_layout
+
+\begin_layout Standard
+The Jacobian of 
+\begin_inset Formula $z_{\dot{v},i}$
 \end_inset
 
-, only depends on the joint velocities and accelerations for the joints
- on the path between 
-\begin_inset Formula $p$
+ with respect to some state variable 
+\begin_inset Formula $\alpha$
 \end_inset
 
- and 
-\begin_inset Formula $i$
+ can be written as
+\begin_inset Formula 
+\begin{equation}
+\frac{\partial z_{\dot{v},i}}{\partial\alpha}=R_{p}^{m}\frac{\partial}{\partial\alpha}\left[R_{w}^{p}\left(\ddot{p}_{i}^{w}+g\right)\right]\label{eq:linear-acceleration-jacobian}
+\end{equation}
+
 \end_inset
 
-, and can be written as
+since 
+\begin_inset Formula $R_{p}^{m}$
+\end_inset
+
+ does not depend on the estimator state.
+\end_layout
+
+\begin_layout Standard
+The only dependence of the rotation matrix 
+\begin_inset Formula $R_{w}^{p}$
+\end_inset
+
+ on the estimator state is through the perturbation rotation vector 
+\begin_inset Formula $\phi$
+\end_inset
+
+, which is defined by
 \begin_inset Formula 
 \[
-\dot{T}_{i}^{i,p}=\dot{J}_{i}^{i,p}v_{i}^{p}+J_{i}^{i,p}\dot{v}_{i}^{p}
+R_{p}^{w}=\bar{R}_{p}^{w}R_{\phi}
 \]
 
 \end_inset
 
 
-\family default
-\series default
-\shape default
-\size default
-\emph default
-\bar default
-\strikeout default
-\uuline default
-\uwave default
-\noun default
-\color inherit
-Since this acceleration does not depend on the state of the estimator, we
- will simply refer to it as 
-\begin_inset Formula $\dot{T}_{i}^{i,p}$
-\end_inset
-
-, and to its linear component as 
-\begin_inset Formula $\dot{v}_{i}^{i,p}$
-\end_inset
-
-.
 \end_layout
 
 \begin_layout Standard
-Combining the above, we get
+Applying 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:phi-jacobian-transpose"
+
+\end_inset
+
+ from the appendix with 
+\begin_inset Formula $x=\ddot{p}_{i}^{w}+g$
+\end_inset
+
+ allows us to evalute 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:linear-acceleration-jacobian"
+
+\end_inset
+
+ around 
+\begin_inset Formula $\phi=0$
+\end_inset
+
+ as
+\end_layout
+
+\begin_layout Standard
 \begin_inset Formula 
 \begin{align}
-\dot{v}_{i}^{i,w} & =-R_{w}^{i}g+\tilde{p}_{p}^{i}R_{p}^{i}\left(\tilde{\omega}_{p}^{p,i}\omega+\dot{\omega}\right)\nonumber \\
- & +R_{p}^{i}\left(\tilde{v}_{p}^{p,i}\omega+\tilde{\omega}_{p}^{p,i}v_{p}^{p,e}+\dot{v}_{p}^{p,e}\right)+\dot{v}_{i}^{i,p}\label{eq:imu-accel-1}
+\frac{\partial z_{\dot{v},i}}{\partial\alpha} & =R_{p}^{m}\left(R_{w}^{p}\frac{\partial}{\partial\alpha}\left(\ddot{p}_{i}^{w}+g\right)+\left[R_{w}^{p}\left(\ddot{p}_{i}^{w}+g\right)\right]\times\frac{\partial\phi}{\partial\alpha}\right)\nonumber \\
+ & =R_{w}^{m}\frac{\partial\ddot{p}_{i}^{w}}{\partial\alpha}+\tilde{z}_{\dot{v},i}R_{p}^{w}\frac{\partial\phi}{\partial\alpha}\label{eq:linear-acceleration-jacobian-approx}
+\end{align}
+
+\end_inset
+
+where we have made use of the fact that 
+\begin_inset Formula $g$
+\end_inset
+
+ does not depend on the estimator state.
+\end_layout
+
+\begin_layout Standard
+Substituting 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:acceleration-of-point"
+
+\end_inset
+
+, the Jacobian that appears in the first term can be written as
+\begin_inset Formula 
+\begin{align}
+\frac{\partial\ddot{p}_{i}^{w}}{\partial\alpha} & =\frac{\partial}{\partial\alpha}\left[\dot{\omega}_{m}^{w,w}\times p_{i}^{w}+\dot{v}_{m}^{w,w}+\omega_{m}^{w,w}\times\left(\omega_{m}^{w,w}\times p_{i}^{w}+v_{m}^{w,w}\right)\right]\nonumber \\
+ & =\frac{\partial}{\partial\alpha}\left(\dot{\omega}_{m}^{w,w}\times p_{i}^{w}\right)+\frac{\partial\dot{v}_{m}^{w,w}}{\partial\alpha}+\frac{\partial}{\partial\alpha}\underbrace{\omega_{m}^{w,w}\times\left(\omega_{m}^{w,w}\times p_{i}^{w}+v_{m}^{w,w}\right)}_{k}\label{eq:point-acceleration-jacobian}
 \end{align}
 
 \end_inset
@@ -1156,48 +1032,558 @@ Combining the above, we get
 \end_layout
 
 \begin_layout Standard
-This equation is written in terms of the linear velocity and acceleration
- of the orientation estimation link, 
-\begin_inset Formula $v_{p}^{p,e}$
+Next, we can expand the partial derivatives of the cross product terms using
+ 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:cross-product-jacobian"
+
 \end_inset
 
- and 
-\begin_inset Formula $\dot{v}_{p}^{p,e}$
+ from the appendix:
+\begin_inset Formula 
+\[
+\frac{\partial}{\partial\alpha}\left(\dot{\omega}_{m}^{w,w}\times p_{i}^{w}\right)=\tilde{\dot{\omega}}_{m}^{w,w}\frac{\partial p_{i}^{w}}{\partial\alpha}-\tilde{p}_{i}^{w}\frac{\partial\dot{\omega}_{m}^{w,w}}{\partial\alpha}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\frac{\partial k}{\partial\alpha} & =\tilde{\omega}_{m}^{w,w}\frac{\partial}{\partial\alpha}\left(\tilde{\omega}_{m}^{w,w}p_{i}^{w}+v_{m}^{w,w}\right)-\left(\widetilde{\tilde{\omega}_{m}^{w,w}p_{i}^{w}}+\tilde{v}_{m}^{w,w}\right)\frac{\partial\omega_{m}^{w,w}}{\partial\alpha}\\
+ & =\tilde{\omega}_{m}^{w,w}\tilde{\omega}_{m}^{w,w}\frac{\partial p_{i}^{w}}{\partial\alpha}-\tilde{\omega}_{m}^{w,w}\tilde{p}_{i}^{w}\frac{\partial\omega_{m}^{w,w}}{\partial\alpha}+\tilde{\omega}_{m}^{w,w}\frac{\partial v_{m}^{w,w}}{\partial\alpha}\\
+ & -\left(\tilde{\omega}_{m}^{w,w}\tilde{p}_{i}^{w}-\tilde{p}_{i}^{w}\tilde{\omega}_{m}^{w,w}+\tilde{v}_{m}^{w,w}\right)\frac{\partial\omega_{m}^{w,w}}{\partial\alpha}\\
+ & =\tilde{\omega}_{m}^{w,w}\tilde{\omega}_{m}^{w,w}\frac{\partial p_{i}^{w}}{\partial\alpha}+\tilde{\omega}_{m}^{w,w}\frac{\partial v_{m}^{w,w}}{\partial\alpha}-\left(2\tilde{\omega}_{m}^{w,w}\tilde{p}_{i}^{w}-\tilde{p}_{i}^{w}\tilde{\omega}_{m}^{w,w}+\tilde{v}_{m}^{w,w}\right)\frac{\partial\omega_{m}^{w,w}}{\partial\alpha}
+\end{align*}
+
+\end_inset
+
+where we have applied 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:jacobi-identity-tilde"
+
+\end_inset
+
+ from the appendix.
+\end_layout
+
+\begin_layout Standard
+Plugging this back into 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:point-acceleration-jacobian"
+
+\end_inset
+
+, we get
+\begin_inset Formula 
+\begin{align*}
+\frac{\partial\ddot{p}_{i}^{w}}{\partial\alpha} & =\left(\tilde{\dot{\omega}}_{m}^{w,w}+\tilde{\omega}_{m}^{w,w}\tilde{\omega}_{m}^{w,w}\right)\frac{\partial p_{i}^{w}}{\partial\alpha}-\left(2\tilde{\omega}_{m}^{w,w}\tilde{p}_{i}^{w}-\tilde{p}_{i}^{w}\tilde{\omega}_{m}^{w,w}+\tilde{v}_{m}^{w,w}\right)\frac{\partial\omega_{m}^{w,w}}{\partial\alpha}\\
+ & +\tilde{\omega}_{m}^{w,w}\frac{\partial v_{m}^{w,w}}{\partial\alpha}-\tilde{p}_{i}^{w}\frac{\partial\dot{\omega}_{m}^{w,w}}{\partial\alpha}+\frac{\partial\dot{v}_{m}^{w,w}}{\partial\alpha}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Plugging this back into 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:linear-acceleration-jacobian-approx"
+
+\end_inset
+
+, we get
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align}
+\frac{\partial z_{\dot{v},i}}{\partial\alpha} & =R_{w}^{m}\left(\tilde{\dot{\omega}}_{m}^{w,w}+\tilde{\omega}_{m}^{w,w}\tilde{\omega}_{m}^{w,w}\right)\frac{\partial p_{i}^{w}}{\partial\alpha}\nonumber \\
+ & -R_{w}^{m}\left(2\tilde{\omega}_{m}^{w,w}\tilde{p}_{i}^{w}-\tilde{p}_{i}^{w}\tilde{\omega}_{m}^{w,w}+\tilde{v}_{m}^{w,w}\right)\frac{\partial\omega_{m}^{w,w}}{\partial\alpha}+R_{w}^{m}\tilde{\omega}_{m}^{w,w}\frac{\partial v_{m}^{w,w}}{\partial\alpha}\nonumber \\
+ & -R_{w}^{m}\tilde{p}_{i}^{w}\frac{\partial\dot{\omega}_{m}^{w,w}}{\partial\alpha}+R_{w}^{m}\frac{\partial\dot{v}_{m}^{w,w}}{\partial\alpha}+\tilde{z}_{\dot{v},i}R_{p}^{w}\frac{\partial\phi}{\partial\alpha}\label{eq:linear-acceleration-jacobian-assembly}
+\end{align}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This equation shows that the job of finding the Jacobian 
+\begin_inset Formula $\frac{\partial z_{\dot{v},i}}{\partial\alpha}$
+\end_inset
+
+ is now reduced to finding the Jacobians
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{flalign*}
+\frac{\partial\phi}{\partial\alpha} &  & \frac{\partial\omega_{m}^{w,w}}{\partial\alpha} &  & \frac{\partial v_{m}^{w,w}}{\partial\alpha} &  & \frac{\partial\dot{\omega}_{m}^{w,w}}{\partial\alpha} &  & \frac{\partial\dot{v}_{m}^{w,w}}{\partial\alpha} &  & \frac{\partial p_{i}^{w}}{\partial\alpha}
+\end{flalign*}
+
+\end_inset
+
+for each state variable 
+\begin_inset Formula $\alpha$
 \end_inset
 
 .
- Equations 
+ Evaluating these Jacobians requires us to write each of these variables
+ in terms of the state variables.
+ This derivation is done in the following subsections.
+\end_layout
+
+\begin_layout Subsubsection
+Orientation
+\end_layout
+
+\begin_layout Standard
+The Jacobian 
+\begin_inset Formula $\frac{\partial\phi}{\partial\alpha}$
+\end_inset
+
+ can simply be written as
+\begin_inset Formula 
+\[
+\frac{\partial\phi}{\partial\alpha}=\begin{cases}
+I & \alpha=\phi\\
+0 & \text{otherwise}
+\end{cases}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+Twist
+\end_layout
+
+\begin_layout Standard
+Evaluating the Jacobians 
+\begin_inset Formula $\frac{\partial\omega_{m}^{w,w}}{\partial\alpha}$
+\end_inset
+
+ and 
+\begin_inset Formula $\frac{\partial v_{m}^{w,w}}{\partial\alpha}$
+\end_inset
+
+ requires the twist 
+\begin_inset Formula 
+\[
+T_{m}^{w,w}=\left(\begin{array}{c}
+\omega_{m}^{w,w}\\
+v_{m}^{w,w}
+\end{array}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This twist can be written as
+\begin_inset Formula 
+\begin{align}
+T_{m}^{w,w} & =\Ad_{H_{p}^{w}}\left(T_{p}^{p,w}+T_{m}^{p,p}\right)\label{eq:measurement-link-twist}
+\end{align}
+
+\end_inset
+
+where the twist of the measurement link with respect to the estimation link,
+ 
+\begin_inset Formula $T_{m}^{p,p}$
+\end_inset
+
+, is completely independent of the state of the estimator.
+\end_layout
+
+\begin_layout Standard
+Expanding 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:measurement-link-twist"
+
+\end_inset
+
+, we obtain
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+T_{m}^{w,w} & =\left(\begin{array}{cc}
+R_{p}^{w} & 0\\
+\tilde{p}_{p}^{w}R_{p}^{w} & R_{p}^{w}
+\end{array}\right)\left(\begin{array}{c}
+\omega_{p}^{p,w}+\omega_{m}^{p,p}\\
+v_{p}^{p,w}+v_{m}^{p,p}
+\end{array}\right)\\
+ & =\left(\begin{array}{c}
+R_{p}^{w}\left(\omega_{p}^{p,w}+\omega_{m}^{p,p}\right)\\
+\tilde{p}_{p}^{w}R_{p}^{w}\left(\omega_{p}^{p,w}+\omega_{m}^{p,p}\right)+R_{p}^{w}\left(v_{p}^{p,w}+v_{m}^{p,p}\right)
+\end{array}\right)
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This can be rewritten in terms of the state of the estimator by noting that
+ 
+\begin_inset Formula $\omega_{p}^{p,w}=\omega$
+\end_inset
+
+ and using 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:rootjoint-position"
+
+\end_inset
+
+ and 
 \begin_inset CommandInset ref
 LatexCommand eqref
 reference "eq:rootjoint-linear-vel"
 
 \end_inset
 
+ from the appendix:
+\begin_inset Formula 
+\begin{align*}
+\omega_{m}^{w,w} & =R_{p}^{w}\left(\omega+\omega_{m}^{p,p}\right)\\
+v_{m}^{w,w} & =\tilde{r}R_{p}^{w}\left(\omega+\omega_{m}^{p,p}\right)+R_{p}^{w}\left(v_{m}^{p,p}-\dot{r}^{p}-\tilde{r}^{p}\omega_{m}^{p,p}\right)+\dot{r}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The Jacobians of 
+\begin_inset Formula $\omega_{m}^{w,w}$
+\end_inset
+
+ with respect to the state variables become
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\frac{\partial\omega_{m}^{w,w}}{\partial r} & =0 & \frac{\partial\omega_{m}^{w,w}}{\partial\phi} & =-\tilde{\omega}_{m}^{w,w}R_{w}^{p}\\
+\frac{\partial\omega_{m}^{w,w}}{\partial\dot{r}} & =0 & \frac{\partial\omega_{m}^{w,w}}{\partial\omega} & =R_{p}^{w}\\
+\frac{\partial\omega_{m}^{w,w}}{\partial\ddot{r}} & =0 & \frac{\partial\omega_{m}^{w,w}}{\partial\dot{\omega}} & =0
+\end{align*}
+
+\end_inset
+
+where the Jacobian with respect to 
+\begin_inset Formula $\phi$
+\end_inset
+
+ follows from 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:phi-jacobian"
+
+\end_inset
+
+ in the appendix.
+\end_layout
+
+\begin_layout Standard
+The Jacobians of 
+\begin_inset Formula $v_{m}^{w,w}$
+\end_inset
+
+ with respect to the state variables are
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\frac{\partial v_{m}^{w,w}}{\partial r} & =-\tilde{\omega}_{m}^{w,w}\\
+\frac{\partial v_{m}^{w,w}}{\partial\dot{r}} & =I & \frac{\partial v_{m}^{w,w}}{\partial\omega} & =\tilde{r}R_{p}^{w}\\
+\frac{\partial v_{m}^{w,w}}{\partial\ddot{r}} & =0 & \frac{\partial v_{m}^{w,w}}{\partial\dot{\omega}} & =0
+\end{align*}
+
+\end_inset
+
+The Jacobian with respect to 
+\begin_inset Formula $\phi$
+\end_inset
+
+ is
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\frac{\partial v_{m}^{w,w}}{\partial\phi}=-\tilde{r}\tilde{\omega}_{m}^{w,w}R_{w}^{p}-R_{p}^{w}\left(\tilde{v}_{m}^{p,p}-\tilde{\dot{r}}^{p}-\widetilde{\tilde{r}^{p}\omega_{m}^{p,p}}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+Spatial acceleration
+\end_layout
+
+\begin_layout Standard
+Evaluating the Jacobians 
+\begin_inset Formula $\frac{\partial\dot{\omega}_{m}^{w,w}}{\partial\alpha}$
+\end_inset
+
  and 
+\begin_inset Formula $\frac{\partial\dot{v}_{m}^{w,w}}{\partial\alpha}$
+\end_inset
+
+ requires the spatial acceleration 
+\begin_inset Formula 
+\[
+\dot{T}_{m}^{w,w}=\left(\begin{array}{c}
+\dot{\omega}_{m}^{w,w}\\
+\dot{v}_{m}^{w,w}
+\end{array}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The spatial acceleration can be written as
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\dot{T}_{m}^{w,w}=\Ad_{H_{p}^{w}}\left(\ad_{T_{p}^{p,w}}T_{m}^{p,w}+\dot{T}_{m}^{p,w}\right)\label{eq:measurement-link-acceleration}
+\end{equation}
+
+\end_inset
+
+where
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+T_{m}^{p,w} & =T_{p}^{p,w}+T_{m}^{p,p}\\
+\dot{T}_{m}^{p,w} & =\dot{T}_{p}^{p,w}+\dot{T}_{m}^{p,p}
+\end{align*}
+
+\end_inset
+
+with 
+\begin_inset Formula $T_{m}^{p,p}$
+\end_inset
+
+ and 
+\begin_inset Formula $\dot{T}_{m}^{p,p}$
+\end_inset
+
+ independent of the state of the estimator.
+ Substituting this into 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:measurement-link-acceleration"
+
+\end_inset
+
+ and expanding, we obtain
+\begin_inset Formula 
+\begin{align*}
+\dot{T}_{m}^{w,w} & =\Ad_{H_{p}^{w}}\left(\ad_{T_{p}^{p,w}}\left(T_{p}^{p,w}+T_{m}^{p,p}\right)+\dot{T}_{p}^{p,w}+\dot{T}_{m}^{p,p}\right)\\
+ & =\left(\begin{array}{cc}
+R_{p}^{w} & 0\\
+\tilde{p}_{p}^{w}R_{p}^{w} & R_{p}^{w}
+\end{array}\right)\left(\left(\begin{array}{cc}
+\tilde{\omega}_{p}^{p,w} & 0\\
+\tilde{v}_{p}^{p,w} & \tilde{\omega}_{p}^{p,w}
+\end{array}\right)\left(\begin{array}{c}
+\omega_{p}^{p,w}+\omega_{m}^{p,p}\\
+v_{p}^{p,w}+v_{m}^{p,p}
+\end{array}\right)+\left(\begin{array}{c}
+\dot{\omega}_{p}^{p,w}+\dot{\omega}_{m}^{p,p}\\
+\dot{v}_{p}^{p,w}+\dot{v}_{m}^{p,p}
+\end{array}\right)\right)\\
+ & =\left(\begin{array}{cc}
+R_{p}^{w} & 0\\
+\tilde{p}_{p}^{w}R_{p}^{w} & R_{p}^{w}
+\end{array}\right)\left(\begin{array}{c}
+\tilde{\omega}_{p}^{p,w}\omega_{m}^{p,p}+\dot{\omega}_{p}^{p,w}+\dot{\omega}_{m}^{p,p}\\
+\tilde{v}_{p}^{p,w}\omega_{m}^{p,p}+\tilde{\omega}_{p}^{p,w}v_{m}^{p,p}+\dot{v}_{p}^{p,w}+\dot{v}_{m}^{p,p}
+\end{array}\right)\\
+ & =\left(\begin{array}{c}
+R_{p}^{w}\left(\tilde{\omega}_{p}^{p,w}\omega_{m}^{p,p}+\dot{\omega}_{p}^{p,w}+\dot{\omega}_{m}^{p,p}\right)\\
+\tilde{p}_{p}^{w}\dot{\omega}_{m}^{w,w}+R_{p}^{w}\left(\dot{v}_{p}^{p,w}+\dot{v}_{m}^{p,p}-\tilde{\omega}_{m}^{p,p}v_{p}^{p,w}-\tilde{v}_{m}^{p,p}\omega_{p}^{p,w}\right)
+\end{array}\right)
+\end{align*}
+
+\end_inset
+
+where we have used the fact that 
+\begin_inset Formula $\tilde{x}x=x\times x=0$
+\end_inset
+
+ and 
+\begin_inset Formula $\tilde{x}y+\tilde{y}x=x\times y+y\times x=0$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+The angular acceleration can be written in terms of the state vector using
+ 
+\begin_inset Formula $\omega_{p}^{p,w}=\omega$
+\end_inset
+
+, 
+\begin_inset Formula $\dot{\omega}_{p}^{p,w}=\dot{\omega}$
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\dot{\omega}_{m}^{w,w}=R_{p}^{w}\left(\dot{\omega}+\dot{\omega}_{m}^{p,p}-\tilde{\omega}_{m}^{p,p}\omega\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The Jacobians of 
+\begin_inset Formula $\dot{\omega}_{m}^{w,w}$
+\end_inset
+
+ with respect to the state variables are
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\frac{\partial\dot{\omega}_{m}^{w,w}}{\partial r} & =0 & \frac{\partial\dot{\omega}_{m}^{w,w}}{\partial\phi} & \approx-\tilde{\dot{\omega}}_{m}^{w,w}R_{w}^{p}\\
+\frac{\partial\dot{\omega}_{m}^{w,w}}{\partial\dot{r}} & =0 & \frac{\partial\dot{\omega}_{m}^{w,w}}{\partial\omega} & =-R_{p}^{w}\tilde{\omega}_{m}^{p,p}\\
+\frac{\partial\dot{\omega}_{m}^{w,w}}{\partial\ddot{r}} & =0 & \frac{\partial\dot{\omega}_{m}^{w,w}}{\partial\dot{\omega}} & =R_{p}^{w}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The linear acceleration can be written in terms of the state vector using
+ 
+\begin_inset Formula $\omega_{p}^{p,w}=\omega$
+\end_inset
+
+, 
+\begin_inset Formula $\dot{\omega}_{p}^{p,w}=\dot{\omega}$
+\end_inset
+
+ and 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:rootjoint-position"
+
+\end_inset
+
+, 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:rootjoint-linear-vel"
+
+\end_inset
+
+, and 
 \begin_inset CommandInset ref
 LatexCommand eqref
 reference "eq:eq:rootjoint-linear-acc"
 
 \end_inset
 
- in the appendix relate these quantities to center of mass velocity and
- acceleration.
- These formulas are repeated here for convenience:
+ from the appendix as
+\begin_inset Formula 
+\begin{align*}
+\dot{v}_{m}^{w,w} & =\left(\tilde{r}-\widetilde{R_{p}^{w}r^{p}}\right)\dot{\omega}_{m}^{w,w}\\
+ & +R_{p}^{w}\left(R_{w}^{p}\ddot{r}-\tilde{\omega}R_{w}^{p}\dot{r}-\tilde{\dot{\omega}}r^{p}-\tilde{\omega}\dot{r}^{p}-\ddot{r}^{p}+\dot{v}_{m}^{p,p}-\tilde{\omega}_{m}^{p,p}\left(R_{w}^{p}\dot{r}-\tilde{\omega}r^{p}-\dot{r}^{p}\right)-\tilde{v}_{m}^{p,p}\omega\right)\\
+ & =\tilde{r}R_{p}^{w}\dot{\omega}+\tilde{r}R_{p}^{w}\dot{\omega}_{m}^{p,p}-\tilde{r}R_{p}^{w}\tilde{\omega}_{m}^{p,p}\omega-R_{p}^{w}\tilde{r}^{p}\dot{\omega}_{m}^{p,p}+R_{p}^{w}\tilde{r}^{p}\tilde{\omega}_{m}^{p,p}\omega\\
+ & +\ddot{r}-R_{p}^{w}\tilde{\omega}R_{w}^{p}\dot{r}-R_{p}^{w}\tilde{\omega}\dot{r}^{p}-R_{p}^{w}\ddot{r}^{p}+R_{p}^{w}\dot{v}_{m}^{p,p}\\
+ & +R_{p}^{w}\tilde{\omega}_{m}^{p,p}\tilde{\omega}r^{p}+R_{p}^{w}\tilde{\omega}_{m}^{p,p}\dot{r}^{p}-R_{p}^{w}\tilde{\omega}_{m}^{p,p}R_{w}^{p}\dot{r}-R_{p}^{w}\tilde{v}_{m}^{p,p}\omega
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The Jacobians of 
+\begin_inset Formula $\dot{v}_{m}^{w,w}$
+\end_inset
+
+ with respect to the state variables are
 \end_layout
 
 \begin_layout Standard
 \begin_inset Formula 
 \begin{align*}
-v_{p}^{p,e} & =R_{w}^{p}\dot{r}-v_{r/p}\\
-\dot{v}_{p}^{p,e} & =R_{w}^{p}\ddot{r}-\tilde{\omega}R_{w}^{p}\dot{r}-\dot{v}_{r/p}
+\frac{\partial\dot{v}_{m}^{w,w}}{\partial r} & =-\tilde{\dot{\omega}}_{m}^{w,w}\\
+\frac{\partial\dot{v}_{m}^{w,w}}{\partial\dot{r}} & =-\tilde{\omega}_{m}^{w,w}\\
+\frac{\partial\dot{v}_{m}^{w,w}}{\partial\ddot{r}} & =I & \frac{\partial\dot{v}_{m}^{w,w}}{\partial\dot{\omega}} & =\tilde{r}R_{p}^{w}
 \end{align*}
 
 \end_inset
 
-where
+The Jacobian with respect to 
+\begin_inset Formula $\phi$
+\end_inset
+
+ is
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\frac{\partial}{\partial\phi}\dot{v}_{m}^{w,w} & =\frac{\partial}{\partial\phi}\left[\tilde{r}R_{p}^{w}\left(\tilde{\omega}\omega_{m}^{p,p}+\dot{\omega}+\dot{\omega}_{m}^{p,p}\right)-R_{p}^{w}\tilde{r}^{p}\left(\tilde{\omega}\omega_{m}^{p,p}+\dot{\omega}+\dot{\omega}_{m}^{p,p}\right)\right]\\
+ & +\frac{\partial}{\partial\phi}\left[R_{p}^{w}\left(-\tilde{\dot{\omega}}r^{p}-\tilde{\omega}\dot{r}^{p}-\ddot{r}^{p}+\dot{v}_{m}^{p,p}+\tilde{\omega}_{m}^{p,p}\tilde{\omega}r^{p}+\tilde{\omega}_{m}^{p,p}\dot{r}^{p}-\tilde{v}_{m}^{p,p}\omega\right)\right]\\
+ & +\frac{\partial}{\partial\phi}\left[\tilde{\dot{r}}R_{p}^{w}\left(\omega+\omega_{m}^{p,p}\right)\right]\\
+ & =-\tilde{r}R_{p}^{w}\left(\widetilde{\tilde{\omega}\omega_{m}^{p,p}}+\tilde{\dot{\omega}}+\tilde{\dot{\omega}}_{m}^{p,p}\right)-\tilde{\dot{r}}R_{p}^{w}\left(\tilde{\omega}+\tilde{\omega}_{m}^{p,p}\right)\\
+ & +R_{p}^{w}\left(\widetilde{\tilde{r}^{p}\tilde{\omega}\omega_{m}^{p,p}}+\widetilde{\tilde{r}^{p}\dot{\omega}_{m}^{p,p}}+\widetilde{\tilde{\omega}\dot{r}^{p}}+\tilde{\ddot{r}}^{p}-\tilde{\dot{v}}_{m}^{p,p}-\widetilde{\tilde{\omega}_{m}^{p,p}\tilde{\omega}r^{p}}-\widetilde{\tilde{\omega}_{m}^{p,p}\dot{r}^{p}}+\widetilde{\tilde{v}_{m}^{p,p}\omega}\right)\\
+ & =-\left(\tilde{r}\dot{\omega}_{m}^{w,w}+\tilde{\dot{r}}\omega_{m}^{w,w}\right)R_{w}^{p}+R_{p}^{w}\tilde{s}
+\end{align*}
+
+\end_inset
+
+with
 \begin_inset Formula 
 \[
-v_{r/p}=\tilde{\omega}r^{p}+\dot{r}^{p}
+s=\tilde{\omega}\dot{r}^{p}+\ddot{r}^{p}-\dot{v}_{m}^{p,p}-\tilde{\omega}_{m}^{p,p}\dot{r}^{p}+\tilde{v}_{m}^{p,p}\omega-\left(\tilde{\omega}\tilde{\omega}_{m}^{p,p}+\tilde{\dot{\omega}}_{m}^{p,p}\right)r^{p}
 \]
 
 \end_inset
@@ -1206,21 +1592,47 @@ v_{r/p}=\tilde{\omega}r^{p}+\dot{r}^{p}
 \end_layout
 
 \begin_layout Standard
-Substituting these equations into 
+The Jacobian with respect to 
+\begin_inset Formula $\omega$
+\end_inset
+
+ is
+\begin_inset Formula 
+\[
+\frac{\partial\dot{v}_{m}^{w,w}}{\partial\omega}=\tilde{\dot{r}}R_{p}^{w}-\tilde{r}R_{p}^{w}\tilde{\omega}_{m}^{p,p}+R_{p}^{w}\left(\tilde{r}^{p}\tilde{\omega}_{m}^{p,p}+\tilde{\dot{r}}^{p}-\tilde{\omega}_{m}^{p,p}\tilde{r}^{p}-\tilde{v}_{m}^{p,p}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+IMU position
+\end_layout
+
+\begin_layout Standard
+To evaluate 
+\begin_inset Formula $\frac{\partial p_{i}^{w}}{\partial\alpha}$
+\end_inset
+
+ , the position of the IMU in the world, 
+\begin_inset Formula $p_{i}^{w}$
+\end_inset
+
+, needs to be written in terms of the state of the estimator.
+ Using 
 \begin_inset CommandInset ref
 LatexCommand eqref
-reference "eq:imu-accel-1"
+reference "eq:rootjoint-position"
 
 \end_inset
 
- and expanding, we obtain
-\end_layout
-
-\begin_layout Standard
+ from the appendix, we obtain
 \begin_inset Formula 
 \begin{align*}
-\dot{v}_{i}^{i,w} & =-R_{p}^{i}R_{w}^{p}g+\tilde{p}_{p}^{i}R_{p}^{i}\tilde{\omega}_{p}^{p,i}\omega+\tilde{p}_{p}^{i}R_{p}^{i}\dot{\omega}+R_{p}^{i}\tilde{v}_{p}^{p,i}\omega+R_{p}^{i}\tilde{\omega}_{p}^{p,i}R_{w}^{p}\dot{r}-R_{p}^{i}\tilde{\omega}_{p}^{p,i}\tilde{\omega}r^{p}-R_{p}^{i}\tilde{\omega}_{p}^{p,i}\dot{r}^{p}\\
- & +R_{p}^{i}R_{w}^{p}\ddot{r}-R_{p}^{i}\tilde{\omega}R_{w}^{p}\dot{r}-R_{p}^{i}\tilde{\dot{\omega}}r^{p}-R_{p}^{i}\tilde{\omega}\dot{r}^{p}-R_{p}^{i}\ddot{r}^{p}+\dot{v}_{i}^{i,p}
+p_{i}^{w} & =R_{p}^{w}p_{i}^{p}+p_{p}^{w}\\
+ & =R_{p}^{w}\left(p_{i}^{p}-r^{p}\right)+r
 \end{align*}
 
 \end_inset
@@ -1229,203 +1641,299 @@ reference "eq:imu-accel-1"
 \end_layout
 
 \begin_layout Standard
-The partial derivatives are:
+The Jacobians can be written as
 \begin_inset Formula 
-\[
-\frac{\partial\dot{v}_{i}^{i,w}}{\partial\ddot{r}}=R_{p}^{i}R_{w}^{p}
-\]
+\begin{align*}
+\frac{\partial p_{i}^{w}}{\partial r} & =I & \frac{\partial p_{i}^{w}}{\partial\phi} & \approx R_{p}^{w}\left(\tilde{r}^{p}-\tilde{p}_{i}^{p}\right)\\
+\frac{\partial p_{i}^{w}}{\partial\dot{r}} & =0 & \frac{\partial p_{i}^{w}}{\partial\omega} & =0\\
+\frac{\partial p_{i}^{w}}{\partial\ddot{r}} & =0 & \frac{\partial p_{i}^{w}}{\partial\dot{\omega}} & =0
+\end{align*}
 
 \end_inset
 
 
+\end_layout
+
+\begin_layout Subsubsection
+Assembling the Jacobians
+\end_layout
+
+\begin_layout Standard
+We now insert the computed intermediate Jacobians into 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:linear-acceleration-jacobian-assembly"
+
+\end_inset
+
+ to find 
+\begin_inset Formula $\frac{\partial z_{\dot{v},i}}{\partial\alpha}$
+\end_inset
+
+ for each state variable 
+\begin_inset Formula $\alpha\in\left\{ r,\dot{r},\ddot{r},\phi,\omega,\dot{\omega}\right\} $
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Paragraph
+CoM position
+\end_layout
+
+\begin_layout Standard
+The nonzero intermediate Jacobians are
 \end_layout
 
 \begin_layout Standard
 \begin_inset Formula 
-\[
-\frac{\partial\dot{v}_{i}^{i,w}}{\partial\dot{\omega}}=\tilde{p}_{p}^{i}R_{p}^{i}+R_{p}^{i}\tilde{r}^{p}
-\]
+\begin{align*}
+\frac{\partial v_{m}^{w,w}}{\partial r} & =-\tilde{\omega}_{m}^{w,w} & \frac{\partial\dot{v}_{m}^{w,w}}{\partial r} & =-\tilde{\dot{\omega}}_{m}^{w,w} & \frac{\partial p_{i}^{w}}{\partial r} & =I
+\end{align*}
 
 \end_inset
 
+so that the Jacobian with respect to 
+\begin_inset Formula $r$
+\end_inset
 
+ simply becomes
 \end_layout
 
 \begin_layout Standard
 \begin_inset Formula 
-\[
-\frac{\partial\dot{v}_{i}^{i,w}}{\partial\dot{r}}=R_{p}^{i}\tilde{\omega}_{p}^{p,i}R_{w}^{p}-R_{p}^{i}\tilde{\omega}R_{w}^{p}
-\]
+\begin{align*}
+\frac{\partial z_{\dot{v},i}}{\partial r} & =R_{w}^{m}\left(\tilde{\dot{\omega}}_{m}^{w,w}+\tilde{\omega}_{m}^{w,w}\tilde{\omega}_{m}^{w,w}\right)-R_{w}^{m}\tilde{\omega}_{m}^{w,w}\tilde{\omega}_{m}^{w,w}-R_{w}^{m}\tilde{\dot{\omega}}_{m}^{w,w}\\
+ & =0
+\end{align*}
 
 \end_inset
 
 
+\end_layout
+
+\begin_layout Paragraph
+CoM velocity
+\end_layout
+
+\begin_layout Standard
+The nonzero intermediate Jacobians are
 \end_layout
 
 \begin_layout Standard
 \begin_inset Formula 
-\[
-\frac{\partial\dot{v}_{i}^{i,w}}{\partial\omega}=\tilde{p}_{p}^{i}R_{p}^{i}\tilde{\omega}_{p}^{p,i}+R_{p}^{i}\tilde{v}_{p}^{p,i}+R_{p}^{i}\tilde{\omega}_{p}^{p,i}\tilde{r}^{p}+R_{p}^{i}\widetilde{R_{w}^{p}\dot{r}}+R_{p}^{i}\tilde{\dot{r}}^{p}
-\]
+\begin{align*}
+\frac{\partial v_{m}^{w,w}}{\partial\dot{r}} & =I & \frac{\partial\dot{v}_{m}^{w,w}}{\partial\dot{r}} & =-\tilde{\omega}_{m}^{w,w}
+\end{align*}
 
 \end_inset
 
-
-\end_layout
-
-\begin_layout Standard
-These expressions can be simplified using the following substitutions:
-\end_layout
-
-\begin_layout Itemize
-\begin_inset Formula $R_{p}^{i}R_{w}^{p}=R_{w}^{i}$
-\end_inset
-
-
-\end_layout
-
-\begin_layout Itemize
-\begin_inset Formula $p_{p}^{i}=-R_{p}^{i}p_{i}^{p}$
-\end_inset
-
-
-\end_layout
-
-\begin_layout Itemize
-\begin_inset Formula $\widetilde{Rx}=R\tilde{x}R^{T}$
-\end_inset
-
- for all 
-\begin_inset Formula $x\in\mathbb{R}^{3}$
-\end_inset
-
-, 
-\begin_inset Formula $R\in SO\left(3\right)$
-\end_inset
-
-
-\end_layout
-
-\begin_layout Itemize
-\begin_inset Formula $\omega_{p}^{p,i}=-\omega_{i}^{p,p}$
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
 resulting in
-\begin_inset Formula 
-\[
-\frac{\partial\dot{v}_{i}^{i,w}}{\partial\ddot{r}}=R_{w}^{i}
-\]
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula 
-\[
-\frac{\partial\dot{v}_{i}^{i,w}}{\partial\dot{\omega}}=R_{p}^{i}\widetilde{r^{p}-p_{i}^{p}}
-\]
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula 
-\[
-\frac{\partial\dot{v}_{i}^{i,w}}{\partial\dot{r}}=-R_{p}^{i}\widetilde{\omega+\omega_{i}^{p,p}}R_{w}^{p}
-\]
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula 
-\[
-\frac{\partial\dot{v}_{i}^{i,w}}{\partial\omega}=R_{p}^{i}\left(\tilde{p}_{i}^{p}\tilde{\omega}_{i}^{p,p}-\tilde{v}_{i}^{p,p}-\tilde{\omega}_{i}^{p,p}\tilde{r}^{p}+\widetilde{R_{w}^{p}\dot{r}}+\tilde{\dot{r}}^{p}\right)
-\]
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-We also need to find the partial derivative with respect to a perturbation
- rotation vector 
-\begin_inset Formula $\phi$
-\end_inset
-
-.
- To this end, let
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula 
-\[
-R_{p}^{w}=\bar{R}_{p}^{w}R_{\phi}
-\]
-
-\end_inset
-
-where 
-\begin_inset Formula $R_{\phi}=e^{\tilde{\phi}}$
-\end_inset
-
-.
- Inverting, we obtain
-\begin_inset Formula 
-\[
-R_{w}^{p}=R_{\phi}^{T}\bar{R}_{w}^{p}=e^{-\tilde{\phi}}\bar{R}_{w}^{p}
-\]
-
-\end_inset
-
-For small 
-\begin_inset Formula $\phi$
-\end_inset
-
-, 
-\begin_inset Formula $e^{-\tilde{\phi}}\approx I-\tilde{\phi}$
-\end_inset
-
- and 
-\begin_inset Formula $\bar{R}_{w}^{p}=R_{w}^{p}$
-\end_inset
-
-.
- Using this approximation, we get
 \end_layout
 
 \begin_layout Standard
 \begin_inset Formula 
 \begin{align*}
-\dot{v}_{i}^{i,w} & \approx-R_{p}^{i}\left(I-\tilde{\phi}\right)R_{w}^{p}g+\tilde{p}_{p}^{i}R_{p}^{i}\tilde{\omega}_{p}^{p,i}\omega+\tilde{p}_{p}^{i}R_{p}^{i}\dot{\omega}+R_{p}^{i}\tilde{v}_{p}^{p,i}\omega\\
- & +R_{p}^{i}\tilde{\omega}_{p}^{p,i}\left(I-\tilde{\phi}\right)R_{w}^{p}\dot{r}-R_{p}^{i}\tilde{\omega}_{p}^{p,i}\tilde{\omega}r^{p}-R_{p}^{i}\tilde{\omega}_{p}^{p,i}\dot{r}^{p}\\
- & +R_{p}^{i}\left(I-\tilde{\phi}\right)R_{w}^{p}\ddot{r}-R_{p}^{i}\tilde{\omega}\left(I-\tilde{\phi}\right)R_{w}^{p}\dot{r}-R_{p}^{i}\tilde{\dot{\omega}}r^{p}-R_{p}^{i}\tilde{\omega}\dot{r}^{p}-R_{p}^{i}\ddot{r}^{p}+\dot{v}_{i}^{i,p}
+\frac{\partial z_{\dot{v},i}}{\partial\dot{r}} & =R_{w}^{m}\tilde{\omega}_{m}^{w,w}-R_{w}^{m}\tilde{\omega}_{m}^{w,w}\\
+ & =0
 \end{align*}
 
 \end_inset
 
-Based on this expression, we can approximate the partial derivative with
- respect to 
-\begin_inset Formula $\phi$
+
+\end_layout
+
+\begin_layout Paragraph
+CoM acceleration
+\end_layout
+
+\begin_layout Standard
+The only nonzero intermediate Jacobian is
+\begin_inset Formula 
+\[
+\frac{\partial\dot{v}_{m}^{w,w}}{\partial\ddot{r}}=I
+\]
+
 \end_inset
 
- as
+so that the final Jacobian becomes:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\frac{\partial z_{\dot{v},i}}{\partial\ddot{r}}=R_{w}^{m}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Paragraph
+Orientation perturbation
+\end_layout
+
+\begin_layout Standard
+All of the intermediate Jacobians are nonzero and nothing seems to obviously
+ cancel out, so we will compute each of the intermediate blocks numerically
+ and then use 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:linear-acceleration-jacobian-assembly"
+
+\end_inset
+
+ numerically to assemble 
+\begin_inset Formula $\frac{\partial z_{\dot{v},i}}{\partial\phi}$
+\end_inset
+
+.
+ The intermediate Jacobian blocks are repeated here for convenience.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\frac{\partial\phi}{\partial\phi}=I
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\frac{\partial\omega_{m}^{w,w}}{\partial\phi}=-\tilde{\omega}_{m}^{w,w}R_{w}^{p}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\frac{\partial v_{m}^{w,w}}{\partial\phi}=-\tilde{r}\tilde{\omega}_{m}^{w,w}R_{w}^{p}-R_{p}^{w}\left(\tilde{v}_{m}^{p,p}-\tilde{\dot{r}}^{p}-\widetilde{\tilde{r}^{p}\omega_{m}^{p,p}}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\frac{\partial\dot{\omega}_{m}^{w,w}}{\partial\phi}=-\tilde{\omega}_{m}^{w,w}R_{w}^{p}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\frac{\partial\dot{v}_{m}^{w,w}}{\partial\phi}=-\left(\tilde{r}\dot{\omega}_{m}^{w,w}+\tilde{\dot{r}}\omega_{m}^{w,w}\right)R_{w}^{p}+R_{p}^{w}\tilde{s}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\frac{\partial p_{i}^{w}}{\partial\phi}=R_{p}^{w}\left(\tilde{r}^{p}-\tilde{p}_{i}^{p}\right)
+\]
+
+\end_inset
+
+with
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+s=\tilde{\omega}\dot{r}^{p}+\ddot{r}^{p}-\dot{v}_{m}^{p,p}-\tilde{\omega}_{m}^{p,p}\dot{r}^{p}+\tilde{v}_{m}^{p,p}\omega-\left(\tilde{\omega}\tilde{\omega}_{m}^{p,p}+\tilde{\dot{\omega}}_{m}^{p,p}\right)r^{p}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Paragraph
+Angular velocity
+\end_layout
+
+\begin_layout Standard
+Since again many of the intermediate Jacobian blocks are nonzero, we will
+ just use 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:linear-acceleration-jacobian-assembly"
+
+\end_inset
+
+ numerically to assemble 
+\begin_inset Formula $\frac{\partial z_{\dot{v},i}}{\partial\omega}$
+\end_inset
+
+.
+ The intermediate Jacobians are repeated here for convenience:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{flalign*}
+\frac{\partial\phi}{\partial\omega} & =0 & \frac{\partial\omega_{m}^{w,w}}{\partial\omega} & =R_{p}^{w} & \frac{\partial v_{m}^{w,w}}{\partial\omega} & =\tilde{r}R_{p}^{w}\\
+\frac{\partial\dot{\omega}_{m}^{w,w}}{\partial\omega} & =-R_{p}^{w}\tilde{\omega}_{m}^{p,p} & \frac{\partial p_{i}^{w}}{\partial\omega} & =0
+\end{flalign*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\frac{\partial\dot{v}_{m}^{w,w}}{\partial\omega}=\tilde{\dot{r}}R_{p}^{w}-\tilde{r}R_{p}^{w}\tilde{\omega}_{m}^{p,p}+R_{p}^{w}\left(\tilde{r}^{p}\tilde{\omega}_{m}^{p,p}+\tilde{\dot{r}}^{p}-\tilde{\omega}_{m}^{p,p}\tilde{r}^{p}-\tilde{v}_{m}^{p,p}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Paragraph
+Angular acceleration
+\end_layout
+
+\begin_layout Standard
+The nonzero intermediate Jacobians are
+\end_layout
+
+\begin_layout Standard
 \begin_inset Formula 
 \begin{align*}
-\frac{\partial\dot{v}_{i}^{i,w}}{\partial\phi} & \approx R_{p}^{i}\tilde{\omega}_{p}^{p,i}\widetilde{R_{w}^{p}\dot{r}}+R_{p}^{i}\widetilde{R_{w}^{p}\left(\ddot{r}-g\right)}-R_{p}^{i}\tilde{\omega}\widetilde{R_{w}^{p}\dot{r}}\\
- & =R_{p}^{i}\left(\widetilde{R_{w}^{p}\left(\ddot{r}-g\right)}-\widetilde{\omega+\omega_{i}^{p,p}}\widetilde{R_{w}^{p}\dot{r}}\right)
+\frac{\partial\dot{\omega}_{m}^{w,w}}{\partial\dot{\omega}} & =R_{p}^{w} & \frac{\partial\dot{v}_{m}^{w,w}}{\partial\dot{\omega}} & =\tilde{r}R_{p}^{w}
 \end{align*}
+
+\end_inset
+
+resulting in:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\frac{\partial z_{\dot{v},i}}{\partial\dot{\omega}}=R_{w}^{m}\widetilde{r-p_{i}^{w}}R_{p}^{w}
+\]
 
 \end_inset
 
@@ -1433,7 +1941,7 @@ Based on this expression, we can approximate the partial derivative with
 \end_layout
 
 \begin_layout Subsection
-IMU orientation
+Orientation measurements
 \end_layout
 
 \begin_layout Standard
@@ -2239,121 +2747,35 @@ Appendix: small rotation derivative
 \end_layout
 
 \begin_layout Standard
-TODO
-\end_layout
-
-\begin_layout Standard
-Let 
-\begin_inset Formula $\phi\in\mathbb{R}^{3}$
-\end_inset
-
- be a rotation vector, whose direction represents an axis of rotation and
- whose magnitude represents the angle of rotation about that axis.
- The corresponding rotation matrix is
-\begin_inset CommandInset citation
-LatexCommand cite
-key "Murray1994"
-
-\end_inset
-
-
-\begin_inset Formula 
-\[
-R_{\phi}=e^{\tilde{\phi}}
-\]
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-Using Rodrigues' formula, we can write this as
-\begin_inset Formula 
-\[
-e^{\tilde{\phi}}=I+\frac{\tilde{\phi}}{\left\Vert \phi\right\Vert }\sin\left(\left\Vert \phi\right\Vert \right)+\frac{\tilde{\phi}^{2}}{\left\Vert \phi\right\Vert ^{2}}\left(1-\cos\left(\left\Vert \phi\right\Vert \right)\right)
-\]
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
 Let
-\begin_inset Formula 
-\begin{align*}
-x' & =R_{\phi}x\\
- & =x-\frac{\sin\left(\left\Vert \phi\right\Vert \right)}{\left\Vert \phi\right\Vert }\tilde{x}\phi+\frac{\tilde{\phi}^{2}}{\left\Vert \phi\right\Vert ^{2}}\left(1-\cos\left(\left\Vert \phi\right\Vert \right)\right)x
-\end{align*}
-
-\end_inset
-
-
 \end_layout
 
 \begin_layout Standard
-Using the definition of the matrix exponential, we can rewrite this as
-\begin_inset Formula 
-\begin{align*}
-x' & =x+\tilde{\phi}x+\frac{1}{2}\tilde{\phi}^{2}x+\frac{1}{6}\tilde{\phi}^{3}x+\dotsb\\
- & =x-\tilde{x}\phi+
-\end{align*}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-The derivative of 
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula 
-\begin{align*}
-\tilde{\phi}^{k}x & =\tilde{\phi}^{k-1}\tilde{\phi}x\\
- & =-\tilde{\phi}^{k-1}\tilde{x}\phi
-\end{align*}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-With this substitution, we can write the derivative 
-\begin_inset Formula $\frac{\partial x'}{\partial\phi}$
-\end_inset
-
- as 
 \begin_inset Formula 
 \[
-\frac{\partial x'}{\partial\phi}=-\sum_{k=0}^{\infty}\frac{1}{k!}\frac{\partial}{\partial\phi}\left(\tilde{\phi}^{k-1}\right)\tilde{x}\phi-\sum_{k=0}^{\infty}\frac{1}{k!}\tilde{\phi}^{k-1}\tilde{x}
+R=\bar{R}R_{\phi}
 \]
 
 \end_inset
 
-
-\end_layout
-
-\begin_layout Standard
-For small 
-\begin_inset Formula $\phi$
-\end_inset
-
-, the first term disappears since every term of the summation is multiplied
- by 
-\begin_inset Formula $\phi$
+where 
+\begin_inset Formula $R_{\phi}=e^{\tilde{\phi}}$
 \end_inset
 
 .
-\end_layout
+ For small 
+\begin_inset Formula $\phi$
+\end_inset
 
-\begin_layout Standard
+, 
+\begin_inset Formula $e^{\tilde{\phi}}\approx I+\tilde{\phi}$
+\end_inset
+
+.
+ Hence
 \begin_inset Formula 
 \[
-\lim_{\phi\rightarrow0}\frac{\partial}{\partial\phi}\left[R_{\phi}x\right]=-\tilde{x}
+R\approx\bar{R}_{p}^{w}\left(I+\tilde{\phi}\right)
 \]
 
 \end_inset
@@ -2361,8 +2783,113 @@ For small
 
 \end_layout
 
+\begin_layout Standard
+Now let 
+\begin_inset Formula $x$
+\end_inset
+
+ be a vector in 
+\begin_inset Formula $\mathbb{R}^{3}$
+\end_inset
+
+.
+ The Jacobian of 
+\begin_inset Formula $Rx$
+\end_inset
+
+ with respect to some variable 
+\begin_inset Formula $\alpha\in\mathbb{R}^{3}$
+\end_inset
+
+ is
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\frac{\partial Rx}{\partial\alpha} & \approx\frac{\partial}{\partial\alpha}\left(\bar{R}x+\bar{R}\tilde{\phi}x\right)\\
+ & =\bar{R}\left(\frac{\partial x}{\partial\alpha}+\frac{\partial}{\partial\alpha}\left[\tilde{\phi}x\right]\right)\\
+ & =\bar{R}\left(\frac{\partial x}{\partial\alpha}+\tilde{\phi}\frac{\partial x}{\partial\alpha}-\tilde{x}\frac{\partial\phi}{\partial\alpha}\right)
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Where we have used 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:cross-product-jacobian"
+
+\end_inset
+
+ from the appendix to evaluate the Jacobian of the cross product with respect
+ to 
+\begin_inset Formula $\alpha$
+\end_inset
+
+.
+ Since 
+\begin_inset Formula $\phi$
+\end_inset
+
+ is small, we have 
+\begin_inset Formula $\tilde{\phi}\approx0$
+\end_inset
+
+ and 
+\begin_inset Formula $\bar{R}\approx R$
+\end_inset
+
+, so that
+\begin_inset Formula 
+\begin{equation}
+\frac{\partial Rx}{\partial\alpha}=R\left(\frac{\partial x}{\partial\alpha}-\tilde{x}\frac{\partial\phi}{\partial\alpha}\right)\label{eq:phi-jacobian}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Analogously, we have
+\begin_inset Formula 
+\begin{align*}
+R^{T} & =R_{\phi}^{T}\bar{R}^{T}\\
+ & =e^{-\tilde{\phi}}\bar{R}^{T}\\
+ & \approx\left(I-\tilde{\phi}\right)\bar{R}^{T}
+\end{align*}
+
+\end_inset
+
+so that the Jacobian 
+\begin_inset Formula $\frac{\partial R^{T}x}{\partial\alpha}$
+\end_inset
+
+ can be evaluated at small 
+\begin_inset Formula $\phi$
+\end_inset
+
+ as
+\begin_inset Formula 
+\begin{align}
+\frac{\partial R^{T}x}{\partial\alpha} & \approx\frac{\partial}{\partial\alpha}\left[\bar{R}^{T}x-\tilde{\phi}\bar{R}^{T}x\right]\nonumber \\
+ & =\bar{R}^{T}\frac{\partial x}{\partial\alpha}-\frac{\partial}{\partial\alpha}\left[\tilde{\phi}\bar{R}^{T}x\right]\nonumber \\
+ & =\bar{R}^{T}\frac{\partial x}{\partial\alpha}-\left(\tilde{\phi}\bar{R}^{T}\frac{\partial x}{\partial\alpha}-\widetilde{\bar{R}^{T}x}\frac{\partial\phi}{\partial\alpha}\right)\nonumber \\
+ & =R^{T}\frac{\partial x}{\partial\alpha}+\widetilde{R^{T}x}\frac{\partial\phi}{\partial\alpha}\label{eq:phi-jacobian-transpose}
+\end{align}
+
+\end_inset
+
+ 
+\end_layout
+
 \begin_layout Section
-Appendix: position and velocity of estimation link given CoM velocity
+Appendix: position, velocity, and acceleration of estimation link given
+ CoM velocity
 \end_layout
 
 \begin_layout Standard
@@ -2378,7 +2905,7 @@ The position of the CoM in frame
 \begin_inset Formula 
 \[
 \bar{r}^{w}=\left(\begin{array}{c}
-r^{w}\\
+r\\
 1
 \end{array}\right)=H_{p}^{w}\bar{r}^{p}\in\mathbb{R}^{4}
 \]
@@ -2391,7 +2918,7 @@ or in terms of non-homogeneous 3D vectors
 \begin_layout Standard
 \begin_inset Formula 
 \[
-r^{w}=R_{p}^{w}r^{p}+p_{p}^{w}
+r=R_{p}^{w}r^{p}+p_{p}^{w}
 \]
 
 \end_inset
@@ -2402,9 +2929,9 @@ so that the position of the origin of the frame attached to the estimation
 
 \begin_layout Standard
 \begin_inset Formula 
-\[
-p_{p}^{w}=r^{w}-R_{p}^{w}r^{p}
-\]
+\begin{equation}
+p_{p}^{w}=r-R_{p}^{w}r^{p}\label{eq:rootjoint-position}
+\end{equation}
 
 \end_inset
 
@@ -2482,7 +3009,7 @@ reference "eq:com-velocity"
 , we obtain
 \begin_inset Formula 
 \[
-\dot{r}=\dot{r}^{w}=R_{p}^{w}\left(\tilde{\omega}r^{p}+v_{p}^{p,w}+\dot{r}^{p}\right)
+\dot{r}=R_{p}^{w}\left(\tilde{\omega}r^{p}+v_{p}^{p,w}+\dot{r}^{p}\right)
 \]
 
 \end_inset
@@ -2503,16 +3030,8 @@ with
 \begin_layout Standard
 \begin_inset Formula 
 \begin{equation}
-v_{p}^{p,w}=R_{w}^{p}\dot{r}-v_{r/p}\label{eq:rootjoint-linear-vel}
+v_{p}^{p,w}=R_{w}^{p}\dot{r}-\tilde{\omega}r^{p}-\dot{r}^{p}\label{eq:rootjoint-linear-vel}
 \end{equation}
-
-\end_inset
-
-where
-\begin_inset Formula 
-\[
-v_{r/p}=\tilde{\omega}r^{p}+\dot{r}^{p}
-\]
 
 \end_inset
 
@@ -2524,9 +3043,9 @@ To find the linear acceleration of the estimation link, we differentiate
  this equation:
 \begin_inset Formula 
 \begin{align}
-\dot{v}_{p}^{p,w} & =R_{w}^{p}\ddot{r}+\dot{R}_{w}^{p}\dot{r}-\dot{v}_{r/p}\nonumber \\
- & =R_{w}^{p}\ddot{r}+\dot{R}_{w}^{p}R_{p}^{w}R_{w}^{p}\dot{r}-\dot{v}_{r/p}\nonumber \\
- & =R_{w}^{p}\ddot{r}-\tilde{\omega}R_{w}^{p}\dot{r}-\dot{v}_{r/p}\label{eq:eq:rootjoint-linear-acc}
+\dot{v}_{p}^{p,w} & =R_{w}^{p}\ddot{r}+\dot{R}_{w}^{p}\dot{r}-\tilde{\dot{\omega}}r^{p}-\tilde{\omega}\dot{r}^{p}-\ddot{r}^{p}\nonumber \\
+ & =R_{w}^{p}\ddot{r}+\dot{R}_{w}^{p}R_{p}^{w}R_{w}^{p}\dot{r}-\tilde{\dot{\omega}}r^{p}-\tilde{\omega}\dot{r}^{p}-\ddot{r}^{p}\nonumber \\
+ & =R_{w}^{p}\ddot{r}-\tilde{\omega}R_{w}^{p}\dot{r}-\tilde{\dot{\omega}}r^{p}-\tilde{\omega}\dot{r}^{p}-\ddot{r}^{p}\label{eq:eq:rootjoint-linear-acc}
 \end{align}
 
 \end_inset
@@ -2534,12 +3053,158 @@ To find the linear acceleration of the estimation link, we differentiate
 
 \end_layout
 
+\begin_layout Section
+Appendix: computing the Jacobian of a cross product with respect to a vector
+\end_layout
+
 \begin_layout Standard
-where
+Let 
+\begin_inset Formula $x\in\mathbb{R}^{3}$
+\end_inset
+
+ and 
+\begin_inset Formula $y\in\mathbb{R}^{3}$
+\end_inset
+
+ each be dependent on 
+\begin_inset Formula $\alpha\in\mathbb{R}^{3}$
+\end_inset
+
+.
+ We can exploit the bilinear property of the cross product to find the Jacobian
+ of the cross product of 
+\begin_inset Formula $x$
+\end_inset
+
+ and 
+\begin_inset Formula $y$
+\end_inset
+
+ with respect to 
+\begin_inset Formula $\alpha$
+\end_inset
+
+.
+ This Jacobian can be written as 
+\end_layout
+
+\begin_layout Standard
 \begin_inset Formula 
 \[
-\dot{v}_{r/p}=\tilde{\dot{\omega}}r^{p}+\tilde{\omega}\dot{r}^{p}+\ddot{r}^{p}
+\frac{\partial}{\partial\alpha}\left(x\times y\right)=\frac{\partial}{\partial x}\left(x\times y\right)\frac{\partial x}{\partial\alpha}+\frac{\partial}{\partial y}\left(x\times y\right)\frac{\partial y}{\partial\alpha}
 \]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Now we note that
+\begin_inset Formula 
+\[
+x\times y=\tilde{x}y
+\]
+
+\end_inset
+
+so that
+\begin_inset Formula 
+\[
+\frac{\partial}{\partial y}\left(x\times y\right)=\tilde{x}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Note also that
+\begin_inset Formula 
+\[
+x\times y=-y\times x=-\tilde{y}x
+\]
+
+\end_inset
+
+so that
+\begin_inset Formula 
+\[
+\frac{\partial}{\partial x}\left(x\times y\right)=-\tilde{y}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The Jacobian can hence be written as
+\begin_inset Formula 
+\begin{equation}
+\frac{\partial}{\partial\alpha}\left(x\times y\right)=\tilde{x}\frac{\partial y}{\partial\alpha}-\tilde{y}\frac{\partial x}{\partial\alpha}\label{eq:cross-product-jacobian}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Appendix: Jacobi identity
+\end_layout
+
+\begin_layout Standard
+Let 
+\begin_inset Formula $a,b,c\in\mathbb{R}^{3}$
+\end_inset
+
+.
+ The Jacobi identity states that
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+a\times\left(b\times c\right)+c\times\left(a\times b\right)+b\times\left(c\times a\right)=0
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This can also be written as
+\begin_inset Formula 
+\[
+\left(a\times b\right)\times c=a\times\left(b\times c\right)-b\times\left(a\times c\right)
+\]
+
+\end_inset
+
+or
+\begin_inset Formula 
+\[
+\widetilde{\tilde{a}b}c=\tilde{a}\tilde{b}c-\tilde{b}\tilde{a}c
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Since this must hold for all vectors 
+\begin_inset Formula $c\in\mathbb{R}^{3}$
+\end_inset
+
+, we have
+\begin_inset Formula 
+\begin{equation}
+\widetilde{\tilde{a}b}=\tilde{a}\tilde{b}-\tilde{b}\tilde{a}\label{eq:jacobi-identity-tilde}
+\end{equation}
 
 \end_inset
 
