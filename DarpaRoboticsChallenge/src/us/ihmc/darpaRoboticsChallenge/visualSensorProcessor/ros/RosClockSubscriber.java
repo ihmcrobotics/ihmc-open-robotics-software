@@ -1,8 +1,8 @@
 package us.ihmc.darpaRoboticsChallenge.visualSensorProcessor.ros;
 
-import com.yobotics.simulationconstructionset.time.TimeProvider;
+import us.ihmc.utilities.net.TimeStampProvider;
 
-public class RosClockSubscriber extends RosTopicSubscriber<rosgraph_msgs.Clock> implements TimeProvider
+public class RosClockSubscriber extends RosTopicSubscriber<rosgraph_msgs.Clock> implements TimeStampProvider
 {
    private long timeStamp = 0;
    

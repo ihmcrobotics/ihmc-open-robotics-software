@@ -38,7 +38,6 @@ import com.yobotics.simulationconstructionset.robotController.DelayedThreadedMod
 import com.yobotics.simulationconstructionset.robotController.ModularRobotController;
 import com.yobotics.simulationconstructionset.robotController.ModularSensorProcessor;
 import com.yobotics.simulationconstructionset.robotController.RobotController;
-import com.yobotics.simulationconstructionset.time.TimeProvider;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class DRCSimulationFactory
@@ -133,36 +132,22 @@ public class DRCSimulationFactory
 
       modularRobotController.setRawOutputWriter(sensorReaderAndOutputWriter);
 
-      HumanoidRobotSimulation<SDFRobot> humanoidRobotSimulation = new HumanoidRobotSimulation<SDFRobot>(simulatedRobot, modularRobotController, simulationTicksPerControlTick, fullRobotModelForSimulation, commonAvatarEnvironmentInterface, simulatedRobot.getAllExternalForcePoints(), robotInitialSetup, scsInitialSetup, guiInitialSetup, guiSetterUpperRegistry, dynamicGraphicObjectsListRegistry);
+      final HumanoidRobotSimulation<SDFRobot> humanoidRobotSimulation = new HumanoidRobotSimulation<SDFRobot>(simulatedRobot, modularRobotController, simulationTicksPerControlTick, fullRobotModelForSimulation, commonAvatarEnvironmentInterface, simulatedRobot.getAllExternalForcePoints(), robotInitialSetup, scsInitialSetup, guiInitialSetup, guiSetterUpperRegistry, dynamicGraphicObjectsListRegistry);
       if (networkServer != null)
       {
          DRCLidar.setupDRCRobotLidar(humanoidRobotSimulation, networkServer, lidarJoint);
          setUpRemoteSCSListening(humanoidRobotSimulation, networkServer);
       }
 
-      TimeProvider timeProvider;
       if (simulatedRobot instanceof GazeboRobot)
       {
          ((GazeboRobot) simulatedRobot).registerWithSCS(humanoidRobotSimulation.getSimulationConstructionSet());
-         timeProvider = (TimeProvider) simulatedRobot;
-      }
-      else
-      {
-         timeProvider = new TimeProvider()
-         {
-            
-            public long getTimeStamp()
-            {
-               return System.nanoTime();
-            }
-         };
-      }
-      
+      }      
       
       
       if(networkProccesorCommunicator != null)
       {
-         sensorProcessor.addSensorProcessor(new DRCPerfectPoseEstimator(simulatedRobot, networkProccesorCommunicator, timeProvider));
+         sensorProcessor.addSensorProcessor(new DRCPerfectPoseEstimator(simulatedRobot, networkProccesorCommunicator, robotInterface.getTimeStampProvider()));
       }
       return humanoidRobotSimulation;
    }
