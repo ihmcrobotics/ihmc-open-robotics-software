@@ -19,12 +19,10 @@ import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.CenterOfMassAccelerationCalculator;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTestTools.RandomFloatingChain;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationCalculator;
-import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
@@ -84,18 +82,18 @@ public class LinearAccelerationMeasurementModelElementTest
                             estimationLink, estimationFrame, rootJoint);
 
       centerOfMassPositionPort.setData(new FramePoint(ReferenceFrame.getWorldFrame(), RandomTools.generateRandomVector(random)));
-//      centerOfMassVelocityPort.setData(new FrameVector(ReferenceFrame.getWorldFrame())); // new FrameVector(ReferenceFrame.getWorldFrame(), RandomTools.generateRandomVector(random)));
+//      centerOfMassVelocityPort.setData(new FrameVector(ReferenceFrame.getWorldFrame()));
       centerOfMassVelocityPort.setData(new FrameVector(ReferenceFrame.getWorldFrame(), RandomTools.generateRandomVector(random)));
       centerOfMassAccelerationPort.setData(new FrameVector(ReferenceFrame.getWorldFrame(), RandomTools.generateRandomVector(random)));
       Matrix3d orientation = new Matrix3d();
-//      orientation.set(RandomTools.generateRandomRotation(random));
-      orientation.setIdentity();
+      orientation.set(RandomTools.generateRandomRotation(random));
+//      orientation.setIdentity();
       orientationPort.setData(new FrameOrientation(ReferenceFrame.getWorldFrame(), orientation));
       angularVelocityPort.setData(new FrameVector(estimationFrame, RandomTools.generateRandomVector(random)));
       angularAccelerationPort.setData(new FrameVector(estimationFrame, RandomTools.generateRandomVector(random)));
 
       updater.run();
-      setMeasuredLinearAccelerationToActual(spatialAccelerationCalculator, measurementLink, measurementFrame, linearAccelerationMeasurementInputPort);
+      setMeasuredLinearAccelerationToActual(spatialAccelerationCalculator, measurementLink, measurementFrame, linearAccelerationMeasurementInputPort, gZ);
 //      setCenterOfMassAccelerationToActual(elevator, spatialAccelerationCalculator, centerOfMassAccelerationPort);
 //      setAngularAccelerationToActual(spatialAccelerationCalculator, estimationLink, estimationFrame, angularAccelerationPort);
 
@@ -111,30 +109,32 @@ public class LinearAccelerationMeasurementModelElementTest
       MeasurementModelTestTools.assertOutputMatrixCorrectUsingPerturbation(centerOfMassVelocityPort, modelElement,
             new FrameVector(centerOfMassVelocityPort.getData()), perturbation, tol, updater);
 
-//      // CoM acceleration perturbations
-//      MeasurementModelTestTools.assertOutputMatrixCorrectUsingPerturbation(centerOfMassAccelerationPort, modelElement,
-//              new FrameVector(centerOfMassAccelerationPort.getData()), perturbation, tol, updater);
-//
-//      // orientation perturbations
+      // CoM acceleration perturbations
+      MeasurementModelTestTools.assertOutputMatrixCorrectUsingPerturbation(centerOfMassAccelerationPort, modelElement,
+              new FrameVector(centerOfMassAccelerationPort.getData()), perturbation, tol, updater);
+
+      // orientation perturbations
 //      MeasurementModelTestTools.assertOutputMatrixCorrectUsingPerturbation(orientationPort, modelElement, new FrameOrientation(orientationPort.getData()),
 //              perturbation, tol, updater);
-//
-//      // angular velocity perturbations
-//      MeasurementModelTestTools.assertOutputMatrixCorrectUsingPerturbation(angularVelocityPort, modelElement, new FrameVector(angularVelocityPort.getData()),
-//              perturbation, tol, updater);
-//
-//      // angular acceleration perturbations
-//      MeasurementModelTestTools.assertOutputMatrixCorrectUsingPerturbation(angularAccelerationPort, modelElement,
-//              new FrameVector(angularAccelerationPort.getData()), perturbation, tol, updater);
+
+      // angular velocity perturbations
+      MeasurementModelTestTools.assertOutputMatrixCorrectUsingPerturbation(angularVelocityPort, modelElement, new FrameVector(angularVelocityPort.getData()),
+              perturbation, tol, updater);
+
+      // angular acceleration perturbations
+      MeasurementModelTestTools.assertOutputMatrixCorrectUsingPerturbation(angularAccelerationPort, modelElement,
+            new FrameVector(angularAccelerationPort.getData()), perturbation, tol, updater);
 
    }
 
    private static void setMeasuredLinearAccelerationToActual(SpatialAccelerationCalculator spatialAccelerationCalculator, RigidBody measurementLink,
-           ReferenceFrame measurementFrame, ControlFlowInputPort<Vector3d> linearAccelerationMeasurementInputPort)
+           ReferenceFrame measurementFrame, ControlFlowInputPort<Vector3d> linearAccelerationMeasurementInputPort, double gZ)
    {
       FramePoint measurementPoint = new FramePoint(measurementFrame);
       FrameVector linearAcceleration = new FrameVector(measurementFrame);
       spatialAccelerationCalculator.packLinearAccelerationOfBodyFixedPoint(linearAcceleration, measurementLink, measurementPoint);
+      linearAcceleration.changeFrame(ReferenceFrame.getWorldFrame());
+      linearAcceleration.setZ(linearAcceleration.getZ() - gZ);
       linearAcceleration.changeFrame(measurementFrame);
       linearAccelerationMeasurementInputPort.setData(linearAcceleration.getVectorCopy());
    }
