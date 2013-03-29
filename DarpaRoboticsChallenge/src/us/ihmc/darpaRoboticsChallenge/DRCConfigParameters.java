@@ -8,6 +8,10 @@ public class DRCConfigParameters
 {
    public static final boolean USE_GAZEBO_PHYSICS = false;
    public static final String GAZEBO_HOST = "localhost"; //"10.4.42.2";//"localhost";
+   
+
+   public static final String ROS_MASTER_URI = "http://" + GAZEBO_HOST + ":11311";
+   
    public static final boolean SHOW_BANDWIDTH_DIALOG = false;
    
    
