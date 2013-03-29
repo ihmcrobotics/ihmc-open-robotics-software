@@ -17,6 +17,7 @@ import us.ihmc.commonWalkingControlModules.visualizer.CommonInertiaElipsoidsVisu
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.handControl.SandiaHandModel;
 import us.ihmc.darpaRoboticsChallenge.handControl.SimulatedUnderactuatedSandiaHandController;
+import us.ihmc.darpaRoboticsChallenge.sensors.DRCPerfectPoseEstimator;
 import us.ihmc.projectM.R2Sim02.initialSetup.GuiInitialSetup;
 import us.ihmc.projectM.R2Sim02.initialSetup.RobotInitialSetup;
 import us.ihmc.projectM.R2Sim02.initialSetup.ScsInitialSetup;
@@ -24,6 +25,7 @@ import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.net.KryoObjectServer;
+import us.ihmc.utilities.net.ObjectCommunicator;
 import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
@@ -36,7 +38,7 @@ import com.yobotics.simulationconstructionset.robotController.DelayedThreadedMod
 import com.yobotics.simulationconstructionset.robotController.ModularRobotController;
 import com.yobotics.simulationconstructionset.robotController.ModularSensorProcessor;
 import com.yobotics.simulationconstructionset.robotController.RobotController;
-import com.yobotics.simulationconstructionset.robotController.SensorProcessor;
+import com.yobotics.simulationconstructionset.time.TimeProvider;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class DRCSimulationFactory
@@ -44,7 +46,9 @@ public class DRCSimulationFactory
    private static final boolean SHOW_REFERENCE_FRAMES = false;
    public static boolean SHOW_INERTIA_ELLIPSOIDS = false;
 
-   public static HumanoidRobotSimulation<SDFRobot> createSimulation(ControllerFactory controllerFactory, CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, DRCRobotInterface robotInterface, RobotInitialSetup<SDFRobot> robotInitialSetup, ScsInitialSetup scsInitialSetup, GuiInitialSetup guiInitialSetup, KryoObjectServer networkServer)
+   public static HumanoidRobotSimulation<SDFRobot> createSimulation(ControllerFactory controllerFactory,
+         CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, DRCRobotInterface robotInterface, RobotInitialSetup<SDFRobot> robotInitialSetup,
+         ScsInitialSetup scsInitialSetup, GuiInitialSetup guiInitialSetup, KryoObjectServer networkServer, ObjectCommunicator networkProccesorCommunicator)
    {
       GUISetterUpperRegistry guiSetterUpperRegistry = new GUISetterUpperRegistry();
       DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
@@ -112,8 +116,9 @@ public class DRCSimulationFactory
          modularRobotController = new ModularRobotController("ModularRobotController");
       }
 
+      final ModularSensorProcessor sensorProcessor = createSensorProcessor(twistCalculator, centerOfMassJacobian);
       modularRobotController.setRawSensorReader(sensorReaderAndOutputWriter);
-      modularRobotController.setSensorProcessor(createSensorProcessor(twistCalculator, centerOfMassJacobian));
+      modularRobotController.setSensorProcessor(sensorProcessor);
       modularRobotController.addRobotController(robotController);
 
       if (SHOW_INERTIA_ELLIPSOIDS)
@@ -135,9 +140,29 @@ public class DRCSimulationFactory
          setUpRemoteSCSListening(humanoidRobotSimulation, networkServer);
       }
 
+      TimeProvider timeProvider;
       if (simulatedRobot instanceof GazeboRobot)
       {
          ((GazeboRobot) simulatedRobot).registerWithSCS(humanoidRobotSimulation.getSimulationConstructionSet());
+         timeProvider = (TimeProvider) simulatedRobot;
+      }
+      else
+      {
+         timeProvider = new TimeProvider()
+         {
+            
+            public long getTimeStamp()
+            {
+               return System.nanoTime();
+            }
+         };
+      }
+      
+      
+      
+      if(networkProccesorCommunicator != null)
+      {
+         sensorProcessor.addSensorProcessor(new DRCPerfectPoseEstimator(simulatedRobot, networkProccesorCommunicator, timeProvider));
       }
       return humanoidRobotSimulation;
    }
@@ -148,12 +173,11 @@ public class DRCSimulationFactory
       humanoidRobotSimulation.getSimulationConstructionSet().attachPlaybackListener(playbackListener);
    }
 
-   private static SensorProcessor createSensorProcessor(TwistCalculator twistCalculator, CenterOfMassJacobian centerOfMassJacobian)
+   private static ModularSensorProcessor createSensorProcessor(TwistCalculator twistCalculator, CenterOfMassJacobian centerOfMassJacobian)
    {
       ModularSensorProcessor modularSensorProcessor = new ModularSensorProcessor("ModularSensorProcessor", "");
       modularSensorProcessor.addSensorProcessor(new TwistUpdater(twistCalculator));
       modularSensorProcessor.addSensorProcessor(new CenterOfMassJacobianUpdater(centerOfMassJacobian));
-
       return modularSensorProcessor;
    }
 }

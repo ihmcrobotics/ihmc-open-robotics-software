@@ -24,6 +24,7 @@ public abstract class RosImageReceiver extends RosTopicSubscriber<sensor_msgs.Im
    
    public void onNewMessage(sensor_msgs.Image message)
    {
+      
        imageReceived(RosTools.bufferedImageFromRosMessage(colorModel, message));
    }
    
@@ -59,7 +60,7 @@ public abstract class RosImageReceiver extends RosTopicSubscriber<sensor_msgs.Im
       };
             
 
-      RosMainNode rosMainNode = new RosMainNode(new URI("http://10.4.42.2:11311"));
+      RosMainNode rosMainNode = new RosMainNode(new URI("http://localhost:11311"));
       rosMainNode.attachSubscriber("/multisense_sl/camera/left/image_rect_color", leftImageReceiver);
       rosMainNode.attachSubscriber("/multisense_sl/camera/right/image_rect_color", rightImageReceiver);
       rosMainNode.execute();
