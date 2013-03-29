@@ -7,18 +7,17 @@ import javax.vecmath.Quat4d;
 
 import us.ihmc.graphics3DAdapter.CameraAdapter;
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
-import us.ihmc.utilities.net.ObjectCommunicator;
 
 public class OffscreenBufferVideoServer
 {
 
-   private final CompressedVideoDataServer compressedVideoDataServer;
+   private final VideoDataServer videoDataServer;
 
    private final CameraAdapter camera;
 
 
    public OffscreenBufferVideoServer(Graphics3DAdapter adapter, CameraMountList mountList, CameraConfiguration cameraConfiguration,
-         CameraTrackingAndDollyPositionHolder cameraTrackingAndDollyPositionHolder, VideoSettings settings, ObjectCommunicator networkServer)
+         CameraTrackingAndDollyPositionHolder cameraTrackingAndDollyPositionHolder, VideoSettings settings, VideoDataServer videoDataServer)
    {
       ViewportAdapter viewport = adapter.createNewViewport(null, false, true);
       camera = viewport.getCamera();
@@ -29,7 +28,7 @@ public class OffscreenBufferVideoServer
       viewport.setCameraController(cameraController);
 
       CameraUpdater cameraUpdater = new CameraUpdater();
-      compressedVideoDataServer = new CompressedVideoDataServer(settings, networkServer);
+      this.videoDataServer = videoDataServer;
       
 
       viewport.getCaptureDevice().streamTo(cameraUpdater, 25);
@@ -38,15 +37,15 @@ public class OffscreenBufferVideoServer
 
    public void close()
    {
-      compressedVideoDataServer.close();
+      videoDataServer.close();
    }
 
    private class CameraUpdater implements CameraStreamer
    {
 
-      public void updateImage(BufferedImage bufferedImage, Point3d cameraPosition, Quat4d cameraOrientation, double fov)
+      public void updateImage(BufferedImage bufferedImage, long timeStamp, Point3d cameraPosition, Quat4d cameraOrientation, double fov)
       {
-         compressedVideoDataServer.updateImage(bufferedImage, cameraPosition, cameraOrientation, fov);
+         videoDataServer.updateImage(bufferedImage, timeStamp, cameraPosition, cameraOrientation, fov);
       }
 
       public Point3d getCameraPosition()
@@ -66,7 +65,12 @@ public class OffscreenBufferVideoServer
 
       public boolean isReadyForNewData()
       {
-         return compressedVideoDataServer.isConnected();
+         return videoDataServer.isConnected();
+      }
+
+      public long getTimeStamp()
+      {
+         return System.nanoTime();
       }
       
       
