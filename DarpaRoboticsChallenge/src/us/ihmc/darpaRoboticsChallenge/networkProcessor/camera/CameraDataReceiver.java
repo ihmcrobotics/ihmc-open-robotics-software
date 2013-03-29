@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.visualSensorProcessor.camera;
+package us.ihmc.darpaRoboticsChallenge.networkProcessor.camera;
 
 import java.awt.image.BufferedImage;
 
@@ -6,8 +6,8 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.darpaRoboticsChallenge.visualSensorProcessor.messages.controller.RobotPoseData;
-import us.ihmc.darpaRoboticsChallenge.visualSensorProcessor.state.RobotPoseBuffer;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.messages.controller.RobotPoseData;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.state.RobotPoseBuffer;
 import us.ihmc.graphics3DAdapter.camera.CompressedVideoDataServer;
 import us.ihmc.graphics3DAdapter.camera.VideoSettings;
 import us.ihmc.utilities.net.KryoObjectServer;

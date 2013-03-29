@@ -1,15 +1,18 @@
-package us.ihmc.darpaRoboticsChallenge.visualSensorProcessor;
+package us.ihmc.darpaRoboticsChallenge.networkProcessor;
 
 import java.io.IOException;
 import java.net.URI;
 
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.configuration.DRCNetClassList;
-import us.ihmc.darpaRoboticsChallenge.visualSensorProcessor.camera.GazeboCameraReceiver;
-import us.ihmc.darpaRoboticsChallenge.visualSensorProcessor.camera.SCSCameraDataReceiver;
-import us.ihmc.darpaRoboticsChallenge.visualSensorProcessor.ros.RosClockSubscriber;
-import us.ihmc.darpaRoboticsChallenge.visualSensorProcessor.ros.RosMainNode;
-import us.ihmc.darpaRoboticsChallenge.visualSensorProcessor.state.RobotPoseBuffer;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCSensorParameters;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.GazeboCameraReceiver;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.SCSCameraDataReceiver;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.lidar.GazeboLidarDataReceiver;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.lidar.SCSLidarDataReceiver;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.ros.RosClockSubscriber;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.ros.RosMainNode;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.state.RobotPoseBuffer;
 import us.ihmc.utilities.net.KryoObjectClient;
 import us.ihmc.utilities.net.KryoObjectServer;
 import us.ihmc.utilities.net.LocalObjectCommunicator;
@@ -38,8 +41,8 @@ public class DRCNetworkProcessor
       RosClockSubscriber timeProvider = new RosClockSubscriber();
       rosMainNode.attachSubscriber("/clock", timeProvider);
 
-      new GazeboCameraReceiver(robotPoseBuffer, DRCConfigParameters.VIDEOSETTINGS, timeProvider, rosMainNode, teamComputerServer);
-
+      new GazeboCameraReceiver(robotPoseBuffer, DRCConfigParameters.VIDEOSETTINGS, timeProvider, rosMainNode, teamComputerServer, DRCSensorParameters.FIELD_OF_VIEW);
+      new GazeboLidarDataReceiver(timeProvider, rosMainNode, robotPoseBuffer, teamComputerServer);
       rosMainNode.execute();
       connect();
    }
@@ -48,6 +51,7 @@ public class DRCNetworkProcessor
    {
       this();
       new SCSCameraDataReceiver(robotPoseBuffer, DRCConfigParameters.VIDEOSETTINGS, scsCommunicator, teamComputerServer);
+      new SCSLidarDataReceiver(robotPoseBuffer, scsCommunicator, teamComputerServer);
       connect();
    }
 

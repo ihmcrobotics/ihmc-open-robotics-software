@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.visualSensorProcessor.ros;
+package us.ihmc.darpaRoboticsChallenge.networkProcessor.ros;
 
 import java.net.URI;
 import java.util.HashMap;
