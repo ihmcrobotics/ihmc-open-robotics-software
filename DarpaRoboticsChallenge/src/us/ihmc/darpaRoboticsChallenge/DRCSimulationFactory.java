@@ -31,7 +31,6 @@ import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 
 import com.yobotics.simulationconstructionset.InverseDynamicsMechanismReferenceFrameVisualizer;
-import com.yobotics.simulationconstructionset.PlaybackListener;
 import com.yobotics.simulationconstructionset.gui.GUISetterUpperRegistry;
 import com.yobotics.simulationconstructionset.robotController.AbstractModularRobotController;
 import com.yobotics.simulationconstructionset.robotController.DelayedThreadedModularRobotController;
@@ -98,8 +97,8 @@ public class DRCSimulationFactory
       sensorReaderAndOutputWriter.setQuaternionNoiseStd(DRCConfigParameters.QUATERNION_NOISE_STD);
 
 
-      OneDoFJoint lidarJoint = fullRobotModelForController.getOneDoFJointByName(jointMap.getLidarJointName());
       // PathTODO: Build LIDAR here
+      OneDoFJoint lidarJoint = fullRobotModelForController.getOneDoFJointByName(jointMap.getLidarJointName());
       RobotController robotController = controllerFactory.getController(fullRobotModelForController, referenceFramesForController, controlDT, simulatedRobot.getYoTime(), dynamicGraphicObjectsListRegistry, guiSetterUpperRegistry, twistCalculator, centerOfMassJacobian, footSwitches, handControllers, lidarJoint);
 
       AbstractModularRobotController modularRobotController;
@@ -133,16 +132,11 @@ public class DRCSimulationFactory
       modularRobotController.setRawOutputWriter(sensorReaderAndOutputWriter);
 
       final HumanoidRobotSimulation<SDFRobot> humanoidRobotSimulation = new HumanoidRobotSimulation<SDFRobot>(simulatedRobot, modularRobotController, simulationTicksPerControlTick, fullRobotModelForSimulation, commonAvatarEnvironmentInterface, simulatedRobot.getAllExternalForcePoints(), robotInitialSetup, scsInitialSetup, guiInitialSetup, guiSetterUpperRegistry, dynamicGraphicObjectsListRegistry);
-      if (networkServer != null)
-      {
-         DRCLidar.setupDRCRobotLidar(humanoidRobotSimulation, networkServer, lidarJoint);
-         setUpRemoteSCSListening(humanoidRobotSimulation, networkServer);
-      }
 
       if (simulatedRobot instanceof GazeboRobot)
       {
          ((GazeboRobot) simulatedRobot).registerWithSCS(humanoidRobotSimulation.getSimulationConstructionSet());
-      }      
+      }
       
       
       if(networkProccesorCommunicator != null)
@@ -152,11 +146,6 @@ public class DRCSimulationFactory
       return humanoidRobotSimulation;
    }
 
-   private static void setUpRemoteSCSListening(HumanoidRobotSimulation<SDFRobot> humanoidRobotSimulation, KryoObjectServer networkServer)
-   {
-      PlaybackListener playbackListener = new SCSPlaybackListener(networkServer);
-      humanoidRobotSimulation.getSimulationConstructionSet().attachPlaybackListener(playbackListener);
-   }
 
    private static ModularSensorProcessor createSensorProcessor(TwistCalculator twistCalculator, CenterOfMassJacobian centerOfMassJacobian)
    {

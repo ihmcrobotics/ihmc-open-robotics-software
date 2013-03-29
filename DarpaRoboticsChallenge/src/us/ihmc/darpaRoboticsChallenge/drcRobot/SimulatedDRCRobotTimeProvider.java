@@ -3,9 +3,9 @@ package us.ihmc.darpaRoboticsChallenge.drcRobot;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.robotController.RobotController;
 
-import us.ihmc.utilities.net.TimeStampProvider;
+import us.ihmc.utilities.net.TimestampProvider;
 
-public class SimulatedDRCRobotTimeProvider implements TimeStampProvider, RobotController
+public class SimulatedDRCRobotTimeProvider implements TimestampProvider, RobotController
 {
    
    private long timeStamp = 0;
@@ -35,7 +35,7 @@ public class SimulatedDRCRobotTimeProvider implements TimeStampProvider, RobotCo
       timeStamp++;
    }
 
-   public long getTimeStamp()
+   public long getTimestamp()
    {
       return timeStamp;
    }

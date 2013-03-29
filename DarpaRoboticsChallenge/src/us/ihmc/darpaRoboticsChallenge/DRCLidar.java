@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
 import us.ihmc.utilities.net.ObjectCommunicator;
+import us.ihmc.utilities.net.TimestampProvider;
 import us.ihmc.utilities.polarLidarGeometry.PolarLidarScanDefinition;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
@@ -20,8 +21,24 @@ public class DRCLidar
       if(DRCConfigParameters.STREAM_POLAR_LIDAR)
          System.out.println("DRCLidar: PolarLidar is ON. This lidar passes less data, and also includes the transforms from when the data was produced.");
    }
+   
+   public static FastPolarRayCastLIDAR getLidarSensor(SDFRobot robot)
+   {
+      ArrayList<FastPolarRayCastLIDAR> lidarSensors = robot.getSensors(FastPolarRayCastLIDAR.class);
+      if (lidarSensors.size() == 0)
+      {
+         System.err.println("DRCLidar: No LIDAR units found on SDF Robot.");
+         return null;
+      }
+      else
+      {
+         if (lidarSensors.size() >=2)
+            System.err.println("DRCLidar: Only one LIDAR unit is supported at this time. Found "+lidarSensors.size() +" LIDAR units. Will use only the first.");
+         return lidarSensors.get(0); // the only one.
+      }
+   }
 
-   static void setupDRCRobotLidar(HumanoidRobotSimulation<SDFRobot> sdfRobotSimulation, ObjectCommunicator objectCommunicator, OneDoFJoint lidarJoint)
+   static void setupDRCRobotLidar(HumanoidRobotSimulation<SDFRobot> sdfRobotSimulation, ObjectCommunicator objectCommunicator, OneDoFJoint lidarJoint, TimestampProvider timestampProvider)
    {
       Graphics3DAdapter graphics3dAdapter = sdfRobotSimulation.getSimulationConstructionSet().getGraphics3dAdapter();
       SimulatedLIDARSensorUpdateParameters updateParameters = new SimulatedLIDARSensorUpdateParameters();
@@ -29,36 +46,26 @@ public class DRCLidar
       if (DRCConfigParameters.STREAM_POLAR_LIDAR)
       {
          System.out.println("Streaming Lidar");
-         ArrayList<FastPolarRayCastLIDAR> lidarSensors = sdfRobotSimulation.getRobot().getSensors(FastPolarRayCastLIDAR.class);
-         if (lidarSensors.size() == 0)
-            System.err.println("DRCLidar: No LIDAR units found on SDF Robot.");
-         else
+
+         FastPolarRayCastLIDAR polarLidar = getLidarSensor(sdfRobotSimulation.getRobot());
+         if(polarLidar != null)
          {
-            if (lidarSensors.size() >=2)
-               System.err.println("DRCLidar: Only one LIDAR unit is supported at this time. Found "+lidarSensors.size() +" LIDAR units. Will use only the first.");
-            FastPolarRayCastLIDAR polarLidar = lidarSensors.get(0); // the only one.
             polarLidar.setWorld(graphics3dAdapter);
             if (DRCConfigParameters.OVERRIDE_DRC_LIDAR_CONFIG)
             {
-               PolarLidarScanDefinition largeScan = new PolarLidarScanDefinition(
-                     DRCConfigParameters.LIDAR_POINTS_PER_SWEEP,
-                     DRCConfigParameters.LIDAR_SWEEPS_PER_SCAN,
-                     DRCConfigParameters.LIDAR_SWEEP_MAX_YAW,
-                     DRCConfigParameters.LIDAR_SWEEP_MIN_YAW,
-                     DRCConfigParameters.LIDAR_SCAN_MAX_ROLL,
-                     DRCConfigParameters.LDIAR_SCAN_MIN_ROLL,
-                     DRCConfigParameters.LIDAR_MIN_DISTANCE
-                     );
+               PolarLidarScanDefinition largeScan = new PolarLidarScanDefinition(DRCConfigParameters.LIDAR_POINTS_PER_SWEEP,
+                     DRCConfigParameters.LIDAR_SWEEPS_PER_SCAN, DRCConfigParameters.LIDAR_SWEEP_MAX_YAW, DRCConfigParameters.LIDAR_SWEEP_MIN_YAW,
+                     DRCConfigParameters.LIDAR_SCAN_MAX_ROLL, DRCConfigParameters.LDIAR_SCAN_MIN_ROLL, DRCConfigParameters.LIDAR_MIN_DISTANCE);
                polarLidar.setScan(largeScan);
                updateParameters.setUpdateRate(DRCConfigParameters.LIDAR_UPDATE_RATE_OVERRIDE);
             }
             if (PRINT_ALL_POSSIBLE_JOINT_NAMES)
-               System.out.println("DRCLidar availiable joints: "+sdfRobotSimulation.getRobot().getOneDoFJoints());
+               System.out.println("DRCLidar availiable joints: " + sdfRobotSimulation.getRobot().getOneDoFJoints());
             OneDegreeOfFreedomJoint neckJoint = sdfRobotSimulation.getRobot().getOneDoFJoint("neck_ay");
             polarLidar.setControllerLidarJoint(lidarJoint);
             polarLidar.setSimulationNeckJoint(neckJoint);
-            polarLidar.setLidarDaemonParameters(updateParameters);            
-            polarLidar.startLidarDaemonThread();
+            polarLidar.setLidarDaemonParameters(updateParameters);
+            polarLidar.startLidarDaemonThread(timestampProvider);
          }
       }
       

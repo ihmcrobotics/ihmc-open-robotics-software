@@ -1,8 +1,8 @@
-package us.ihmc.darpaRoboticsChallenge.visualSensorProcessor.ros;
+package us.ihmc.darpaRoboticsChallenge.networkProcessor.ros;
 
-import us.ihmc.utilities.net.TimeStampProvider;
+import us.ihmc.utilities.net.TimestampProvider;
 
-public class RosClockSubscriber extends RosTopicSubscriber<rosgraph_msgs.Clock> implements TimeStampProvider
+public class RosClockSubscriber extends RosTopicSubscriber<rosgraph_msgs.Clock> implements TimestampProvider
 {
    private long timeStamp = 0;
    
@@ -16,7 +16,7 @@ public class RosClockSubscriber extends RosTopicSubscriber<rosgraph_msgs.Clock> 
       timeStamp = message.getClock().totalNsecs();
    }
 
-   public synchronized long getTimeStamp()
+   public synchronized long getTimestamp()
    {
       return timeStamp;
    }
