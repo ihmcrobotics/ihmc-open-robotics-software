@@ -1,0 +1,4 @@
+osrf_msgs/JointCommands joint_commands
+---
+bool success
+string status_message

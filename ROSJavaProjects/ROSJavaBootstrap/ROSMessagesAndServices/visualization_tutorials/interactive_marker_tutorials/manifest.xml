@@ -1,0 +1,20 @@
+<package>
+  <description brief="marker_tutorials">
+
+     interactive_marker_tutorials
+
+  </description>
+  <author>David Gossow</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/marker_tutorials</url>
+  <depend package="roscpp"/>
+  <depend package="visualization_msgs"/>
+  <depend package="interactive_markers"/>
+
+  <platform os="ubuntu" version="9.04"/>
+  <platform os="ubuntu" version="9.10"/>
+  <platform os="ubuntu" version="10.04"/>
+</package>
+
+

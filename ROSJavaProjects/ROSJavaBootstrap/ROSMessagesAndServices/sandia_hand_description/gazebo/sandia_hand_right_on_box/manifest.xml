@@ -1,0 +1,11 @@
+<?xml version='1.0'?>
+<model>
+  <name>sandia_hand_right_on_box</name>
+  <description>sandia_hand_right_on_box</description>
+  <version>5.0.0</version>
+  <sdf>sandia_hand_right_on_box.urdf</sdf>
+  <author>
+    <name>Morgan Quigley</name>
+    <email>morgan@osrfoundation.org</email>
+  </author>
+</model>

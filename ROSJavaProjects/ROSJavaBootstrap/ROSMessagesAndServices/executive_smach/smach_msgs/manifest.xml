@@ -1,0 +1,16 @@
+<package>
+  <description brief="smach_msgs">
+    This package contains a set of messages that are used in the
+    internal debugging interface of a SMACH state
+    machine. The <a href="http://www.ros.org/wiki/smach_viewer">smach
+    viewer</a> uses this debugging interface to visualize complete
+    hierarchical state machines.
+  </description>
+  <author>Jonathan Bohren</author>
+  <license>BSD</license>
+  <review status="Doc reviewed" notes=""/>
+  <url>http://ros.org/wiki/smach_msgs</url>
+
+</package>
+
+

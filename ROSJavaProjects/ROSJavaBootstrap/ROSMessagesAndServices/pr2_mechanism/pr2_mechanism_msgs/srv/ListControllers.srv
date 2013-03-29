@@ -1,0 +1,7 @@
+# The ListControllers service returns a list of controller names that are spawned
+# inside pr2_mechanism_control, and their corresponding stats. The state is either
+# running or stopped.
+
+---
+string[] controllers
+string[] state
