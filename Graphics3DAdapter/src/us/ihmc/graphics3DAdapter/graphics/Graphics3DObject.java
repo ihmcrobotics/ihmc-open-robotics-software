@@ -152,21 +152,14 @@ public class Graphics3DObject
     * as described by the translations and rotations applied since its creation at the joint
     * origin.
     *
-    * @param rotAng the angle to rotate around the specified axis in radians.
-    * @param rotAxis Vector3d describing the axis of rotation.
+    * @param roationAngle the angle to rotate around the specified axis in radians.
+    * @param rotationAxis Vector3d describing the axis of rotation.
     */
-   public void rotate(double rotAng, Vector3d rotAxis)
+   public void rotate(double rotationAngle, Vector3d rotationAxis)
    {
-      Matrix3d rot = new Matrix3d();
-      
-      if(rotAxis.getX() == 1.0)
-         rot.rotX(rotAng);
-      else if(rotAxis.getY() == 1.0)
-         rot.rotY(rotAng);
-      else if(rotAxis.getZ() == 1.0)
-         rot.rotZ(rotAng);
-      
-      rotate(rot);
+      AxisAngle4d rotationAxisAngle = new AxisAngle4d(rotationAxis, rotationAngle);
+
+      rotate(rotationAxisAngle);
    }
 
    /**
@@ -176,17 +169,17 @@ public class Graphics3DObject
     * as described by the translations and rotations applied since its creation at the joint
     * origin.
     *
-    * @param rot Matrix3d describing the rotation to be applied.
+    * @param rotationMatrix Matrix3d describing the rotation to be applied.
     */
-   public void rotate(Matrix3d rot)
+   public void rotate(Matrix3d rotationMatrix)
    {
-      graphics3DInstructions.add(new Graphics3DRotateInstruction(rot));
+      graphics3DInstructions.add(new Graphics3DRotateInstruction(rotationMatrix));
    }
    
-   public void rotate(AxisAngle4d rot)
+   public void rotate(AxisAngle4d rotationAxisAngle)
    {
       Matrix3d rotation = new Matrix3d();
-      rotation.set(rot);
+      rotation.set(rotationAxisAngle);
       rotate(rotation);
    }
 
