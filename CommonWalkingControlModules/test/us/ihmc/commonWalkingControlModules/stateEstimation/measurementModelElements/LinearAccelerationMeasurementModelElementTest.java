@@ -45,7 +45,7 @@ public class LinearAccelerationMeasurementModelElementTest
 
       RigidBody estimationLink = randomFloatingChain.getRootJoint().getSuccessor();
       ReferenceFrame estimationFrame = randomFloatingChain.getRootJoint().getFrameAfterJoint();
-      RigidBody measurementLink = estimationLink;    // randomFloatingChain.getRevoluteJoints().get(jointAxes.length - 1).getSuccessor();
+      RigidBody measurementLink = randomFloatingChain.getRevoluteJoints().get(jointAxes.length - 1).getSuccessor();
       ReferenceFrame measurementFrame = measurementLink.getParentJoint().getFrameAfterJoint(); // measurementLink.getBodyFixedFrame();
 
       ControlFlowElement controlFlowElement = new NullControlFlowElement();
@@ -74,6 +74,7 @@ public class LinearAccelerationMeasurementModelElementTest
                                                                   estimationFrame, gZ);
 
       randomFloatingChain.setRandomPositionsAndVelocities(random);
+      elevator.updateFramesRecursively();
       twistCalculator.compute();
       spatialAccelerationCalculator.compute();
 
@@ -82,27 +83,24 @@ public class LinearAccelerationMeasurementModelElementTest
                             estimationLink, estimationFrame, rootJoint);
 
       centerOfMassPositionPort.setData(new FramePoint(ReferenceFrame.getWorldFrame(), RandomTools.generateRandomVector(random)));
-//      centerOfMassVelocityPort.setData(new FrameVector(ReferenceFrame.getWorldFrame()));
       centerOfMassVelocityPort.setData(new FrameVector(ReferenceFrame.getWorldFrame(), RandomTools.generateRandomVector(random)));
       centerOfMassAccelerationPort.setData(new FrameVector(ReferenceFrame.getWorldFrame(), RandomTools.generateRandomVector(random)));
       Matrix3d orientation = new Matrix3d();
       orientation.set(RandomTools.generateRandomRotation(random));
-//      orientation.setIdentity();
       orientationPort.setData(new FrameOrientation(ReferenceFrame.getWorldFrame(), orientation));
       angularVelocityPort.setData(new FrameVector(estimationFrame, RandomTools.generateRandomVector(random)));
       angularAccelerationPort.setData(new FrameVector(estimationFrame, RandomTools.generateRandomVector(random)));
 
+
       updater.run();
       setMeasuredLinearAccelerationToActual(spatialAccelerationCalculator, measurementLink, measurementFrame, linearAccelerationMeasurementInputPort, gZ);
-//      setCenterOfMassAccelerationToActual(elevator, spatialAccelerationCalculator, centerOfMassAccelerationPort);
-//      setAngularAccelerationToActual(spatialAccelerationCalculator, estimationLink, estimationFrame, angularAccelerationPort);
 
       DenseMatrix64F zeroResidual = modelElement.computeResidual();
       DenseMatrix64F zeroVector = new DenseMatrix64F(3, 1);
       EjmlUnitTests.assertEquals(zeroVector, zeroResidual, 1e-12);
 
       double perturbation = 1e-6;
-      double tol = 1e-12;
+      double tol = 1e-11;
       modelElement.computeMatrixBlocks();
 
       // CoM velocity perturbations
@@ -114,8 +112,8 @@ public class LinearAccelerationMeasurementModelElementTest
               new FrameVector(centerOfMassAccelerationPort.getData()), perturbation, tol, updater);
 
       // orientation perturbations
-//      MeasurementModelTestTools.assertOutputMatrixCorrectUsingPerturbation(orientationPort, modelElement, new FrameOrientation(orientationPort.getData()),
-//              perturbation, tol, updater);
+      MeasurementModelTestTools.assertOutputMatrixCorrectUsingPerturbation(orientationPort, modelElement, new FrameOrientation(orientationPort.getData()),
+              perturbation, tol, updater);
 
       // angular velocity perturbations
       MeasurementModelTestTools.assertOutputMatrixCorrectUsingPerturbation(angularVelocityPort, modelElement, new FrameVector(angularVelocityPort.getData()),

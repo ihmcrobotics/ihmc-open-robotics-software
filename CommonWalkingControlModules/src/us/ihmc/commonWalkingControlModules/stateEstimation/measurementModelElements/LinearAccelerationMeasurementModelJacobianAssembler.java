@@ -28,7 +28,7 @@ public class LinearAccelerationMeasurementModelJacobianAssembler
    private final Matrix3d vTilde = new Matrix3d();
    private final Matrix3d pTilde = new Matrix3d();
    private final Matrix3d omegadTilde = new Matrix3d();
-   private final Matrix3d zTildeRWP = new Matrix3d();
+   private final Matrix3d zTildeRMP = new Matrix3d();
 
    private final Vector3d omega = new Vector3d();
    private final Vector3d v = new Vector3d();
@@ -54,13 +54,12 @@ public class LinearAccelerationMeasurementModelJacobianAssembler
 
    public void preCompute(Vector3d estimatedMeasurement)
    {
-      ReferenceFrame elevatorFrame = spatialAccelerationCalculator.getRootBody().getBodyFixedFrame();
+      RigidBody elevator = spatialAccelerationCalculator.getRootBody();
+      ReferenceFrame elevatorFrame = elevator.getBodyFixedFrame();
 
       // T, Td
-      twistCalculator.packTwistOfBody(twistOfMeasurementLink, measurementLink);
-      spatialAccelerationCalculator.packAccelerationOfBody(spatialAccelerationOfMeasurementLink, measurementLink);
-      twistOfMeasurementLink.changeBaseFrameNoRelativeTwist(elevatorFrame);
-      spatialAccelerationOfMeasurementLink.changeBaseFrameNoRelativeAcceleration(elevatorFrame);
+      twistCalculator.packRelativeTwist(twistOfMeasurementLink, elevator, measurementLink);
+      spatialAccelerationCalculator.packRelativeAcceleration(spatialAccelerationOfMeasurementLink, elevator, measurementLink);
       spatialAccelerationOfMeasurementLink.changeFrame(elevatorFrame, twistOfMeasurementLink, twistOfMeasurementLink);
       twistOfMeasurementLink.changeFrame(elevatorFrame);
 
@@ -84,10 +83,10 @@ public class LinearAccelerationMeasurementModelJacobianAssembler
       tempTransform.get(rotationFromWorldToMeasurement);
 
       // z
-      estimationFrame.getTransformToDesiredFrame(tempTransform, elevatorFrame);
+      estimationFrame.getTransformToDesiredFrame(tempTransform, measurementFrame);
       tempTransform.get(tempMatrix);
-      MatrixTools.toTildeForm(zTildeRWP, estimatedMeasurement);
-      zTildeRWP.mul(tempMatrix);
+      MatrixTools.toTildeForm(zTildeRMP, estimatedMeasurement);
+      zTildeRMP.mul(tempMatrix);
    }
 
    public void assembleMeasurementJacobian(Matrix3d ret, Matrix3d jPhi, Matrix3d jOmega, Matrix3d jV, Matrix3d jOmegad, Matrix3d jVd, Matrix3d jP)
@@ -134,7 +133,7 @@ public class LinearAccelerationMeasurementModelJacobianAssembler
 
       if (jPhi != null)
       {
-         tempMatrix.mul(zTildeRWP, jPhi);
+         tempMatrix.mul(zTildeRMP, jPhi);
          ret.add(tempMatrix);
       }
    }

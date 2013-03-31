@@ -999,7 +999,7 @@ reference "eq:linear-acceleration-jacobian"
 \begin_inset Formula 
 \begin{align}
 \frac{\partial z_{\dot{v},i}}{\partial\alpha} & =R_{p}^{m}\left(R_{w}^{p}\frac{\partial}{\partial\alpha}\left(\ddot{p}_{i}^{w}+g\right)+\left[R_{w}^{p}\left(\ddot{p}_{i}^{w}+g\right)\right]\times\frac{\partial\phi}{\partial\alpha}\right)\nonumber \\
- & =R_{w}^{m}\frac{\partial\ddot{p}_{i}^{w}}{\partial\alpha}+\tilde{z}_{\dot{v},i}R_{p}^{w}\frac{\partial\phi}{\partial\alpha}\label{eq:linear-acceleration-jacobian-approx}
+ & =R_{w}^{m}\frac{\partial\ddot{p}_{i}^{w}}{\partial\alpha}+\tilde{z}_{\dot{v},i}R_{p}^{m}\frac{\partial\phi}{\partial\alpha}\label{eq:linear-acceleration-jacobian-approx}
 \end{align}
 
 \end_inset
@@ -1284,7 +1284,7 @@ The Jacobians of
 \begin_layout Standard
 \begin_inset Formula 
 \begin{align*}
-\frac{\partial\omega_{m}^{w,w}}{\partial r} & =0 & \frac{\partial\omega_{m}^{w,w}}{\partial\phi} & =-\tilde{\omega}_{m}^{w,w}R_{w}^{p}\\
+\frac{\partial\omega_{m}^{w,w}}{\partial r} & =0 & \frac{\partial\omega_{m}^{w,w}}{\partial\phi} & =-\tilde{\omega}_{m}^{w,w}R_{p}^{w}\\
 \frac{\partial\omega_{m}^{w,w}}{\partial\dot{r}} & =0 & \frac{\partial\omega_{m}^{w,w}}{\partial\omega} & =R_{p}^{w}\\
 \frac{\partial\omega_{m}^{w,w}}{\partial\ddot{r}} & =0 & \frac{\partial\omega_{m}^{w,w}}{\partial\dot{\omega}} & =0
 \end{align*}
@@ -1333,12 +1333,19 @@ The Jacobian with respect to
 \begin_layout Standard
 \begin_inset Formula 
 \[
-\frac{\partial v_{m}^{w,w}}{\partial\phi}=-\tilde{r}\tilde{\omega}_{m}^{w,w}R_{w}^{p}-R_{p}^{w}\left(\tilde{v}_{m}^{p,p}-\tilde{\dot{r}}^{p}-\widetilde{\tilde{r}^{p}\omega_{m}^{p,p}}\right)
+\frac{\partial v_{m}^{w,w}}{\partial\phi}=-\tilde{r}\tilde{\omega}_{m}^{w,w}R_{p}^{w}-R_{p}^{w}\left(\tilde{v}_{m}^{p,p}-\tilde{\dot{r}}^{p}-\widetilde{\tilde{r}^{p}\omega_{m}^{p,p}}\right)
 \]
 
 \end_inset
 
+where we have used 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:rootjoint-linear-vel"
 
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Subsubsection
@@ -1486,7 +1493,7 @@ The Jacobians of
 \begin_layout Standard
 \begin_inset Formula 
 \begin{align*}
-\frac{\partial\dot{\omega}_{m}^{w,w}}{\partial r} & =0 & \frac{\partial\dot{\omega}_{m}^{w,w}}{\partial\phi} & \approx-\tilde{\dot{\omega}}_{m}^{w,w}R_{w}^{p}\\
+\frac{\partial\dot{\omega}_{m}^{w,w}}{\partial r} & =0 & \frac{\partial\dot{\omega}_{m}^{w,w}}{\partial\phi} & =-\tilde{\dot{\omega}}_{m}^{w,w}R_{p}^{w}\\
 \frac{\partial\dot{\omega}_{m}^{w,w}}{\partial\dot{r}} & =0 & \frac{\partial\dot{\omega}_{m}^{w,w}}{\partial\omega} & =-R_{p}^{w}\tilde{\omega}_{m}^{p,p}\\
 \frac{\partial\dot{\omega}_{m}^{w,w}}{\partial\ddot{r}} & =0 & \frac{\partial\dot{\omega}_{m}^{w,w}}{\partial\dot{\omega}} & =R_{p}^{w}
 \end{align*}
@@ -1575,20 +1582,37 @@ The Jacobian with respect to
  & +\frac{\partial}{\partial\phi}\left[\tilde{\dot{r}}R_{p}^{w}\left(\omega+\omega_{m}^{p,p}\right)\right]\\
  & =-\tilde{r}R_{p}^{w}\left(\widetilde{\tilde{\omega}\omega_{m}^{p,p}}+\tilde{\dot{\omega}}+\tilde{\dot{\omega}}_{m}^{p,p}\right)-\tilde{\dot{r}}R_{p}^{w}\left(\tilde{\omega}+\tilde{\omega}_{m}^{p,p}\right)\\
  & +R_{p}^{w}\left(\widetilde{\tilde{r}^{p}\tilde{\omega}\omega_{m}^{p,p}}+\widetilde{\tilde{r}^{p}\dot{\omega}_{m}^{p,p}}+\widetilde{\tilde{\omega}\dot{r}^{p}}+\tilde{\ddot{r}}^{p}-\tilde{\dot{v}}_{m}^{p,p}-\widetilde{\tilde{\omega}_{m}^{p,p}\tilde{\omega}r^{p}}-\widetilde{\tilde{\omega}_{m}^{p,p}\dot{r}^{p}}+\widetilde{\tilde{v}_{m}^{p,p}\omega}\right)\\
- & =-\left(\tilde{r}\dot{\omega}_{m}^{w,w}+\tilde{\dot{r}}\omega_{m}^{w,w}\right)R_{w}^{p}+R_{p}^{w}\tilde{s}
+ & =\left(\tilde{\ddot{r}}-\tilde{r}\tilde{\dot{\omega}}_{m}^{w,w}-\tilde{\dot{r}}\tilde{\omega}_{m}^{w,w}-\tilde{s}\right)R_{p}^{w}
 \end{align*}
 
 \end_inset
 
 with
+\end_layout
+
+\begin_layout Standard
 \begin_inset Formula 
-\[
-s=\tilde{\omega}\dot{r}^{p}+\ddot{r}^{p}-\dot{v}_{m}^{p,p}-\tilde{\omega}_{m}^{p,p}\dot{r}^{p}+\tilde{v}_{m}^{p,p}\omega-\left(\tilde{\omega}\tilde{\omega}_{m}^{p,p}+\tilde{\dot{\omega}}_{m}^{p,p}\right)r^{p}
-\]
+\begin{align*}
+s & =R_{p}^{w}\left(\tilde{\dot{\omega}}_{m}^{p,w}r^{p}+\dot{v}_{m}^{p,w}+\tilde{\omega}_{m}^{p,w}\dot{r}^{p}+\tilde{\omega}v_{m}^{p,w}+\tilde{\omega}\tilde{\omega}_{m}^{p,w}r^{p}\right)
+\end{align*}
 
 \end_inset
 
+where we have used 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:rootjoint-linear-vel"
 
+\end_inset
+
+ and 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:eq:rootjoint-linear-acc"
+
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Standard
@@ -1803,7 +1827,7 @@ reference "eq:linear-acceleration-jacobian-assembly"
 
 \begin_inset Formula 
 \[
-\frac{\partial\omega_{m}^{w,w}}{\partial\phi}=-\tilde{\omega}_{m}^{w,w}R_{w}^{p}
+\frac{\partial\omega_{m}^{w,w}}{\partial\phi}=-\tilde{\omega}_{m}^{w,w}R_{p}^{w}
 \]
 
 \end_inset
@@ -1814,7 +1838,7 @@ reference "eq:linear-acceleration-jacobian-assembly"
 \begin_layout Standard
 \begin_inset Formula 
 \[
-\frac{\partial v_{m}^{w,w}}{\partial\phi}=-\tilde{r}\tilde{\omega}_{m}^{w,w}R_{w}^{p}-R_{p}^{w}\left(\tilde{v}_{m}^{p,p}-\tilde{\dot{r}}^{p}-\widetilde{\tilde{r}^{p}\omega_{m}^{p,p}}\right)
+\frac{\partial v_{m}^{w,w}}{\partial\phi}=-\tilde{r}\tilde{\omega}_{m}^{w,w}R_{p}^{w}-R_{p}^{w}\left(\tilde{v}_{m}^{p,p}-\tilde{\dot{r}}^{p}-\widetilde{\tilde{r}^{p}\omega_{m}^{p,p}}\right)
 \]
 
 \end_inset
@@ -1825,7 +1849,7 @@ reference "eq:linear-acceleration-jacobian-assembly"
 \begin_layout Standard
 \begin_inset Formula 
 \[
-\frac{\partial\dot{\omega}_{m}^{w,w}}{\partial\phi}=-\tilde{\omega}_{m}^{w,w}R_{w}^{p}
+\frac{\partial\dot{\omega}_{m}^{w,w}}{\partial\phi}=-\tilde{\dot{\omega}}_{m}^{w,w}R_{p}^{w}
 \]
 
 \end_inset
@@ -1836,7 +1860,7 @@ reference "eq:linear-acceleration-jacobian-assembly"
 \begin_layout Standard
 \begin_inset Formula 
 \[
-\frac{\partial\dot{v}_{m}^{w,w}}{\partial\phi}=-\left(\tilde{r}\dot{\omega}_{m}^{w,w}+\tilde{\dot{r}}\omega_{m}^{w,w}\right)R_{w}^{p}+R_{p}^{w}\tilde{s}
+\frac{\partial\dot{v}_{m}^{w,w}}{\partial\phi}=\left(\tilde{\ddot{r}}-\tilde{r}\tilde{\dot{\omega}}_{m}^{w,w}-\tilde{\dot{r}}\tilde{\omega}_{m}^{w,w}-\tilde{s}\right)R_{p}^{w}
 \]
 
 \end_inset
@@ -1858,7 +1882,7 @@ with
 \begin_layout Standard
 \begin_inset Formula 
 \[
-s=\tilde{\omega}\dot{r}^{p}+\ddot{r}^{p}-\dot{v}_{m}^{p,p}-\tilde{\omega}_{m}^{p,p}\dot{r}^{p}+\tilde{v}_{m}^{p,p}\omega-\left(\tilde{\omega}\tilde{\omega}_{m}^{p,p}+\tilde{\dot{\omega}}_{m}^{p,p}\right)r^{p}
+s=R_{p}^{w}\left(\tilde{\dot{\omega}}_{m}^{p,w}r^{p}+\dot{v}_{m}^{p,w}+\tilde{\omega}_{m}^{p,w}\dot{r}^{p}+\tilde{\omega}v_{m}^{p,w}+\tilde{\omega}\tilde{\omega}_{m}^{p,w}r^{p}\right)
 \]
 
 \end_inset
