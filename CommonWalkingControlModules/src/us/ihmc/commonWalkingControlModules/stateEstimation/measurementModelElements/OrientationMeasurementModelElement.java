@@ -30,11 +30,13 @@ public class OrientationMeasurementModelElement extends AbstractMeasurementModel
 
    // temp stuff:
    private final FrameOrientation orientationOfMeasurementFrameInEstimationFrame = new FrameOrientation(ReferenceFrame.getWorldFrame());
+   private final Matrix3d tempMatrix3d = new Matrix3d();
+   
    private final Quat4d estimatedOrientationQuaternion = new Quat4d();
    private final Quat4d measurmentFrameToEstimationFrame = new Quat4d();
    
    private final Quat4d orientationResidual = new Quat4d();
-   private final Quat4d measuredOrientation = new Quat4d();
+   private final Quat4d actualOrientationMeasurement = new Quat4d();
    private final Quat4d estimatedOrientationMeasurement = new Quat4d();
    private final AxisAngle4d tempAxisAngle = new AxisAngle4d();
    private final Vector3d rotationVectorResidual = new Vector3d();
@@ -61,7 +63,13 @@ public class OrientationMeasurementModelElement extends AbstractMeasurementModel
 
    public void computeMatrixBlocks()
    {
-      // empty
+      orientationOfMeasurementFrameInEstimationFrame.set(measurementFrame);
+      orientationOfMeasurementFrameInEstimationFrame.changeFrame(estimationFrame);
+      orientationOfMeasurementFrameInEstimationFrame.getMatrix3d(tempMatrix3d);
+      tempMatrix3d.transpose();
+      
+      DenseMatrix64F orientationStateOutputBlock = outputMatrixBlocks.get(orientationStatePort);  
+      MatrixTools.setDenseMatrixFromMatrix3d(0, 0, tempMatrix3d, orientationStateOutputBlock);
    }
 
    public DenseMatrix64F computeResidual()
@@ -75,7 +83,7 @@ public class OrientationMeasurementModelElement extends AbstractMeasurementModel
       // TODO: garbage generation
       // Compute orientationResidual as a quaternion
       FrameOrientation measuredOrientationFrameOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame(), orientationMeasurementInputPort.getData());
-      measuredOrientationFrameOrientation.getQuaternion(measuredOrientation);
+      measuredOrientationFrameOrientation.getQuaternion(actualOrientationMeasurement);
      
       // Compute the estimated measurement
       estimatedOrientationMeasurement.set(estimatedOrientationQuaternion);
@@ -84,7 +92,7 @@ public class OrientationMeasurementModelElement extends AbstractMeasurementModel
       // Compare the estimated and actual measurement to get the residual as a quaternion.
       orientationResidual.set(estimatedOrientationMeasurement);
       orientationResidual.inverse();
-      orientationResidual.mul(measuredOrientation);
+      orientationResidual.mul(actualOrientationMeasurement);
        
       // Convert to rotationVectorResidual
       tempAxisAngle.set(0.0, 0.0, 0.0, 0.0);    // necessary because set(Quat4d) may not actually set anything if magnitude is small!
