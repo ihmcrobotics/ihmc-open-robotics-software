@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.stateEstimation.measurementModelElements;
 
+import javax.media.j3d.Transform3D;
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Quat4d;
@@ -31,6 +32,7 @@ public class OrientationMeasurementModelElement extends AbstractMeasurementModel
    // temp stuff:
    private final FrameOrientation orientationOfMeasurementFrameInEstimationFrame = new FrameOrientation(ReferenceFrame.getWorldFrame());
    private final Matrix3d tempMatrix3d = new Matrix3d();
+   private final Transform3D tempTransform = new Transform3D();
    
    private final Quat4d estimatedOrientationQuaternion = new Quat4d();
    private final Quat4d measurmentFrameToEstimationFrame = new Quat4d();
@@ -63,10 +65,8 @@ public class OrientationMeasurementModelElement extends AbstractMeasurementModel
 
    public void computeMatrixBlocks()
    {
-      orientationOfMeasurementFrameInEstimationFrame.set(measurementFrame);
-      orientationOfMeasurementFrameInEstimationFrame.changeFrame(estimationFrame);
-      orientationOfMeasurementFrameInEstimationFrame.getMatrix3d(tempMatrix3d);
-      tempMatrix3d.transpose();
+      estimationFrame.getTransformToDesiredFrame(tempTransform, measurementFrame);
+      tempTransform.get(tempMatrix3d);
       
       DenseMatrix64F orientationStateOutputBlock = outputMatrixBlocks.get(orientationStatePort);  
       MatrixTools.setDenseMatrixFromMatrix3d(0, 0, tempMatrix3d, orientationStateOutputBlock);
