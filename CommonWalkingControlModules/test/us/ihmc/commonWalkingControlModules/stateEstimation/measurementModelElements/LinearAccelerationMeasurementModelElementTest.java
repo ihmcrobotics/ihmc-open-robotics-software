@@ -14,6 +14,7 @@ import us.ihmc.controlFlow.ControlFlowElement;
 import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.controlFlow.NullControlFlowElement;
+import us.ihmc.sensorProcessing.simulatedSensors.SimulatedLinearAccelerationSensor;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -33,7 +34,6 @@ public class LinearAccelerationMeasurementModelElementTest
    private static final Vector3d Y = new Vector3d(0.0, 1.0, 0.0);
    private static final Vector3d Z = new Vector3d(0.0, 0.0, 1.0);
 
-   // TODO: test internal accelerations
    @Test
    public void test()
    {
@@ -66,7 +66,10 @@ public class LinearAccelerationMeasurementModelElementTest
 
       ControlFlowInputPort<Vector3d> linearAccelerationMeasurementInputPort = new ControlFlowInputPort<Vector3d>(controlFlowElement);
       double gZ = 9.81;
+      Vector3d gravitationalAcceleration = new Vector3d(0.0, 0.0, -gZ);
 
+      SimulatedLinearAccelerationSensor sensor = new SimulatedLinearAccelerationSensor("test", measurementLink, measurementFrame, spatialAccelerationCalculator, gravitationalAcceleration);
+      
       LinearAccelerationMeasurementModelElement modelElement = new LinearAccelerationMeasurementModelElement(name, registry, centerOfMassPositionPort,
                                                                   centerOfMassVelocityPort, centerOfMassAccelerationPort, orientationPort, angularVelocityPort,
                                                                   angularAccelerationPort, linearAccelerationMeasurementInputPort, twistCalculator,
@@ -74,6 +77,7 @@ public class LinearAccelerationMeasurementModelElementTest
                                                                   estimationFrame, gZ);
 
       randomFloatingChain.setRandomPositionsAndVelocities(random);
+      randomFloatingChain.setRandomAccelerations(random);
       elevator.updateFramesRecursively();
       twistCalculator.compute();
       spatialAccelerationCalculator.compute();
@@ -93,7 +97,8 @@ public class LinearAccelerationMeasurementModelElementTest
 
 
       updater.run();
-      setMeasuredLinearAccelerationToActual(spatialAccelerationCalculator, measurementLink, measurementFrame, linearAccelerationMeasurementInputPort, gZ);
+      sensor.startComputation();
+      linearAccelerationMeasurementInputPort.setData(sensor.getLinearAccelerationOutputPort().getData());
 
       DenseMatrix64F zeroResidual = modelElement.computeResidual();
       DenseMatrix64F zeroVector = new DenseMatrix64F(3, 1);
@@ -123,17 +128,5 @@ public class LinearAccelerationMeasurementModelElementTest
       MeasurementModelTestTools.assertOutputMatrixCorrectUsingPerturbation(angularAccelerationPort, modelElement,
             new FrameVector(angularAccelerationPort.getData()), perturbation, tol, updater);
 
-   }
-
-   private static void setMeasuredLinearAccelerationToActual(SpatialAccelerationCalculator spatialAccelerationCalculator, RigidBody measurementLink,
-           ReferenceFrame measurementFrame, ControlFlowInputPort<Vector3d> linearAccelerationMeasurementInputPort, double gZ)
-   {
-      FramePoint measurementPoint = new FramePoint(measurementFrame);
-      FrameVector linearAcceleration = new FrameVector(measurementFrame);
-      spatialAccelerationCalculator.packLinearAccelerationOfBodyFixedPoint(linearAcceleration, measurementLink, measurementPoint);
-      linearAcceleration.changeFrame(ReferenceFrame.getWorldFrame());
-      linearAcceleration.setZ(linearAcceleration.getZ() - gZ);
-      linearAcceleration.changeFrame(measurementFrame);
-      linearAccelerationMeasurementInputPort.setData(linearAcceleration.getVectorCopy());
    }
 }
