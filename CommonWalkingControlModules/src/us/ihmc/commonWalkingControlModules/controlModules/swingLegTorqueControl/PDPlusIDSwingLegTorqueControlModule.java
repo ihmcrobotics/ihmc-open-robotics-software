@@ -210,6 +210,9 @@ public class PDPlusIDSwingLegTorqueControlModule implements SwingLegTorqueContro
 
    private SpatialAccelerationVector computeDesiredSwingFootSpatialAcceleration(ReferenceFrame elevatorFrame, ReferenceFrame footFrame, FrameVector desiredSwingFootAcceleration, FrameVector desiredSwingFootAngularAcceleration)
    {
+      //TODO: Error below. Can't just changeFrame. The accelerations will be different and depend on rotational velocity.
+      // Maybe use a SixDoFJointSpatialAccelerationCalculator...
+
       desiredSwingFootAcceleration.changeFrame(footFrame);
       desiredSwingFootAngularAcceleration.changeFrame(footFrame);
       SpatialAccelerationVector desiredAccelerationOfSwingFootWithRespectToWorld = new SpatialAccelerationVector(footFrame, elevatorFrame, footFrame,
