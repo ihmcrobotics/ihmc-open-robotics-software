@@ -187,6 +187,16 @@ public class ComposableOrientationEstimatorCreator
       {
          return angularVelocityPort.getData();
       }
+      
+      public void setEstimatedOrientation(FrameOrientation orientation)
+      {
+         orientationPort.setData(orientation);
+      }
+      
+      public void setEstimatedAngularVelocity(FrameVector angularVelocity)
+      {
+         angularVelocityPort.setData(angularVelocity);
+      }
 
       public DenseMatrix64F getCovariance()
       {
