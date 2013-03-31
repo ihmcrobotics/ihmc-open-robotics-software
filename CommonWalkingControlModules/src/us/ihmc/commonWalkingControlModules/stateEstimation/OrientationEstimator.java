@@ -8,8 +8,12 @@ import us.ihmc.utilities.math.geometry.FrameVector;
 public interface OrientationEstimator
 {
    public abstract FrameOrientation getEstimatedOrientation();
+   
+   public abstract void setEstimatedOrientation(FrameOrientation estimatedOrientation);
 
    public abstract FrameVector getEstimatedAngularVelocity();
+
+   public abstract void setEstimatedAngularVelocity(FrameVector estimatedAngularVelocity);
 
    public abstract DenseMatrix64F getCovariance();
 
