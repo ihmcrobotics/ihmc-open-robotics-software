@@ -23,19 +23,23 @@ public class SimulatedLinearAccelerationSensor extends SimulatedSensor<Vector3d>
    private final SpatialAccelerationCalculator spatialAccelerationCalculator;
 
    private final ControlFlowOutputPort<Vector3d> linearAccelerationOutputPort = createOutputPort();
+   private final FrameVector gravitationalAcceleration;
 
    public SimulatedLinearAccelerationSensor(String name, RigidBody rigidBody, ReferenceFrame measurementFrame,
-           SpatialAccelerationCalculator spatialAccelerationCalculator)
+           SpatialAccelerationCalculator spatialAccelerationCalculator, Vector3d gravitationalAcceleration)
    {
       this.rigidBody = rigidBody;
       this.measurementFrame = measurementFrame;
       this.spatialAccelerationCalculator = spatialAccelerationCalculator;
+      this.gravitationalAcceleration = new FrameVector(ReferenceFrame.getWorldFrame(), gravitationalAcceleration);
    }
 
    public void startComputation()
    {
       imuFramePoint.setToZero(measurementFrame);
       spatialAccelerationCalculator.packLinearAccelerationOfBodyFixedPoint(linearAccelerationFrameVector, rigidBody, imuFramePoint);
+      linearAccelerationFrameVector.changeFrame(gravitationalAcceleration.getReferenceFrame());
+      linearAccelerationFrameVector.add(gravitationalAcceleration);
       linearAccelerationFrameVector.changeFrame(measurementFrame);
       linearAccelerationFrameVector.getVector(linearAcceleration);
       linearAccelerationOutputPort.setData(linearAcceleration);
