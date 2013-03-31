@@ -75,8 +75,9 @@ public class InverseDynamicsCalculatorTest
       RigidBody body = copyLinkAsRigidBody(link, rootInverseDynamicsJoint, "body");
 
       setRandomPosition(rootJoint, rootInverseDynamicsJoint);
-
       elevator.updateFramesRecursively();
+
+      setRandomVelocity(rootJoint, rootInverseDynamicsJoint);
 
       ReferenceFrame bodyFixedFrame = body.getBodyFixedFrame();
       ExternalForcePoint externalForcePoint = new ExternalForcePoint("rootExternalForcePoint", comOffset, robot);
@@ -463,28 +464,47 @@ public class InverseDynamicsCalculatorTest
       sixDoFJoint.setPosition(rootPosition);
       sixDoFJoint.setRotation(yaw, pitch, roll);
    }
-
-   private void copyAccelerationFromForwardToInverse(FloatingJoint floatingJoint, SixDoFJoint sixDoFJoint) // THIS IS WHERE THE PROBLEM IS. ACCELERATIONS DON'T WORK THIS WAY
+   
+   private final FrameVector linearVelocityFrameVector = new FrameVector();
+   private final FrameVector angularVelocityFrameVector = new FrameVector();
+   
+   private void setRandomVelocity(FloatingJoint floatingJoint, SixDoFJoint sixDoFJoint)
    {
-      ReferenceFrame frameBeforeJoint = sixDoFJoint.getFrameBeforeJoint();
-      ReferenceFrame frameAfterJoint = sixDoFJoint.getFrameAfterJoint();
+      Vector3d linearVelocity = RandomTools.generateRandomVector(random, 1.0);
+      Vector3d angularVelocity = RandomTools.generateRandomVector(random, 1.0);
 
-      double linearAccelerationX = floatingJoint.getQddx().getDoubleValue();
-      double linearAccelerationY = floatingJoint.getQddy().getDoubleValue();
-      double linearAccelerationZ = floatingJoint.getQddz().getDoubleValue();
+      floatingJoint.setVelocity(linearVelocity);
+      floatingJoint.setAngularVelocityInBody(angularVelocity);
 
-      FrameVector linearAcceleration = new FrameVector(frameBeforeJoint, linearAccelerationX, linearAccelerationY, linearAccelerationZ);
-      linearAcceleration = linearAcceleration.changeFrameCopy(frameAfterJoint);
+      ReferenceFrame elevatorFrame = sixDoFJoint.getFrameBeforeJoint();
+      ReferenceFrame bodyFrame = sixDoFJoint.getFrameAfterJoint();
 
-      double angularAccelerationX = floatingJoint.getAngularAccelerationX().getDoubleValue();
-      double angularAccelerationY = floatingJoint.getAngularAccelerationY().getDoubleValue();
-      double angularAccelerationZ = floatingJoint.getAngularAccelerationZ().getDoubleValue();
-      FrameVector angularAcceleration = new FrameVector(frameAfterJoint, angularAccelerationX, angularAccelerationY, angularAccelerationZ);
+      floatingJoint.getVelocity(linearVelocityFrameVector);
+      linearVelocityFrameVector.changeFrame(bodyFrame);
 
-      SpatialAccelerationVector jointAcceleration = new SpatialAccelerationVector(frameAfterJoint, frameBeforeJoint, frameAfterJoint,
-                                                       linearAcceleration.getVector(), angularAcceleration.getVector());
+      floatingJoint.getAngularVelocity(angularVelocityFrameVector, bodyFrame);
 
-      sixDoFJoint.setDesiredAcceleration(jointAcceleration);
+      Twist bodyTwist = new Twist(bodyFrame, elevatorFrame, bodyFrame, linearVelocityFrameVector.getVector(), angularVelocityFrameVector.getVector());
+      sixDoFJoint.setJointTwist(bodyTwist);
+   }
+
+   
+   private void copyAccelerationFromForwardToInverse(FloatingJoint floatingJoint, SixDoFJoint sixDoFJoint)
+   {
+      // Note: To get the acceleration, you can't just changeFrame on the acceleration provided by SCS. Use a  SixDoFJointSpatialAccelerationCalculator instead.
+      // TODO: Get this to work when the FloatingJoint has an offset.
+      
+      SixDoFJointSpatialAccelerationCalculator sixDoFJointSpatialAccelerationCalculator = new SixDoFJointSpatialAccelerationCalculator();
+
+      Vector3d linearAcceleration = new Vector3d();
+      Vector3d angularAcceleration = new Vector3d();
+
+      floatingJoint.getLinearAccelerationInWorld(linearAcceleration);
+      floatingJoint.getAngularAccelerationInBody(angularAcceleration);
+
+      SpatialAccelerationVector spatialAccelerationVector = new SpatialAccelerationVector();
+      sixDoFJointSpatialAccelerationCalculator.computeSpatialAccelerationInBodyFrame(spatialAccelerationVector , sixDoFJoint, linearAcceleration, angularAcceleration);
+      sixDoFJoint.setDesiredAcceleration(spatialAccelerationVector);
    }
 
    private static ReferenceFrame createOffsetFrame(InverseDynamicsJoint currentInverseDynamicsJoint, Vector3d offset, String frameName)
