@@ -36,7 +36,7 @@ import com.yobotics.simulationconstructionset.Joint;
 import com.yobotics.simulationconstructionset.Link;
 import com.yobotics.simulationconstructionset.PinJoint;
 import com.yobotics.simulationconstructionset.Robot;
-import com.yobotics.simulationconstructionset.RobotTestTools;
+import com.yobotics.simulationconstructionset.RandomRobotGenerator;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.UnreasonableAccelerationException;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
@@ -211,9 +211,9 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
       int numberOfJoints = 10;
 
       boolean startWithFloatingJoint = true;
-      Robot robot = RobotTestTools.generateRandomLinearChainRobot("TestLinearChainRobot", startWithFloatingJoint , numberOfJoints, random);
-      RobotTestTools.setRandomJointPositions(robot, random);
-      RobotTestTools.setRandomJointVelocities(robot, random);
+      Robot robot = RandomRobotGenerator.generateRandomLinearChainRobot("TestLinearChainRobot", startWithFloatingJoint , numberOfJoints, random);
+      RandomRobotGenerator.setRandomJointPositions(robot, random);
+      RandomRobotGenerator.setRandomJointVelocities(robot, random);
       robot.setGravity(0.05);
 
       final InverseDynamicsJointsFromSCSRobotGenerator generator = new InverseDynamicsJointsFromSCSRobotGenerator(robot);
