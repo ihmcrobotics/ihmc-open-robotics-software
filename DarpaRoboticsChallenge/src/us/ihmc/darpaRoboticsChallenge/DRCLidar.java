@@ -17,11 +17,12 @@ public class DRCLidar
 {
    private static final boolean PRINT_ALL_POSSIBLE_JOINT_NAMES = false;
 
-   static {
-      if(DRCConfigParameters.STREAM_POLAR_LIDAR)
+   static
+   {
+      if (DRCConfigParameters.STREAM_POLAR_LIDAR)
          System.out.println("DRCLidar: PolarLidar is ON. This lidar passes less data, and also includes the transforms from when the data was produced.");
    }
-   
+
    public static FastPolarRayCastLIDAR getLidarSensor(SDFRobot robot)
    {
       ArrayList<FastPolarRayCastLIDAR> lidarSensors = robot.getSensors(FastPolarRayCastLIDAR.class);
@@ -32,23 +33,24 @@ public class DRCLidar
       }
       else
       {
-         if (lidarSensors.size() >=2)
-            System.err.println("DRCLidar: Only one LIDAR unit is supported at this time. Found "+lidarSensors.size() +" LIDAR units. Will use only the first.");
+         if (lidarSensors.size() >= 2)
+            System.err.println("DRCLidar: Only one LIDAR unit is supported at this time. Found " + lidarSensors.size()
+                  + " LIDAR units. Will use only the first.");
          return lidarSensors.get(0); // the only one.
       }
    }
 
-   static void setupDRCRobotLidar(HumanoidRobotSimulation<SDFRobot> sdfRobotSimulation, ObjectCommunicator objectCommunicator, OneDoFJoint lidarJoint, TimestampProvider timestampProvider)
+   static void setupDRCRobotLidar(HumanoidRobotSimulation<SDFRobot> sdfRobotSimulation, ObjectCommunicator objectCommunicator, OneDoFJoint lidarJoint,
+         TimestampProvider timestampProvider, boolean startLidar)
    {
       Graphics3DAdapter graphics3dAdapter = sdfRobotSimulation.getSimulationConstructionSet().getGraphics3dAdapter();
       SimulatedLIDARSensorUpdateParameters updateParameters = new SimulatedLIDARSensorUpdateParameters();
       updateParameters.setObjectCommunicator(objectCommunicator);
       if (DRCConfigParameters.STREAM_POLAR_LIDAR)
       {
-         System.out.println("Streaming Lidar");
-
+         System.out.println("DRCLidar: Setting up lidar.");
          FastPolarRayCastLIDAR polarLidar = getLidarSensor(sdfRobotSimulation.getRobot());
-         if(polarLidar != null)
+         if (polarLidar != null)
          {
             polarLidar.setWorld(graphics3dAdapter);
             if (DRCConfigParameters.OVERRIDE_DRC_LIDAR_CONFIG)
@@ -65,10 +67,14 @@ public class DRCLidar
             polarLidar.setControllerLidarJoint(lidarJoint);
             polarLidar.setSimulationNeckJoint(neckJoint);
             polarLidar.setLidarDaemonParameters(updateParameters);
-            polarLidar.startLidarDaemonThread(timestampProvider);
+            if (startLidar)
+            {
+               System.out.println("Streaming Lidar");
+               polarLidar.startLidarDaemonThread(timestampProvider);
+            }
          }
       }
-      
+
    }
 
 }

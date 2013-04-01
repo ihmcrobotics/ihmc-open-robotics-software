@@ -30,13 +30,13 @@ public class DRCNetworkProcessor
     * NOT pass in objects shared with the DRC simulation!
     */
    
-   public DRCNetworkProcessor(URI rosMaster)
+   public DRCNetworkProcessor(URI rosCoreURI)
    {
       this();
 
       System.out.println("Connecting to ROS");
       RosMainNode rosMainNode;
-      rosMainNode = new RosMainNode(rosMaster);
+      rosMainNode = new RosMainNode(rosCoreURI);
 
       RosClockSubscriber timeProvider = new RosClockSubscriber();
       rosMainNode.attachSubscriber("/clock", timeProvider);
@@ -63,8 +63,8 @@ public class DRCNetworkProcessor
 
       teamComputerServer = new KryoObjectServer(DRCConfigParameters.NETWORK_PROCESSOR_TO_UI_TCP_PORT, DRCConfigParameters.NETWORK_PROCESSOR_TO_UI_UDP_PORT,
             new DRCNetClassList());
-
       robotPoseBuffer = new RobotPoseBuffer(fieldComputerClient, 1000);
+      
    }
 
    private void connect()
