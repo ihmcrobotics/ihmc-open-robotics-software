@@ -82,6 +82,7 @@ public class DRCConfigParameters
    public static final double NOISE_FILTER_ALPHA = 1e-1;
    public static final double POSITION_NOISE_STD = 0.01;
    public static final double QUATERNION_NOISE_STD = 0.01;
+   public static final boolean DEBUG_GAZEBO_LIDAR = false;
 
 
 
