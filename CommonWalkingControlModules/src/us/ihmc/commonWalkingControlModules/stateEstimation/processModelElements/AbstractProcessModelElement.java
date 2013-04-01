@@ -6,6 +6,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.stateEstimation.ProcessModelElement;
+import us.ihmc.commonWalkingControlModules.stateEstimation.TimeDomain;
 import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.utilities.math.MathTools;
@@ -20,15 +21,17 @@ public abstract class AbstractProcessModelElement implements ProcessModelElement
    private final DenseMatrix64F processNoiseCovarianceBlock;
    private final DenseMatrix64F scaledProcessNoiseCovarianceMatrixBlock;
    private final DoubleYoVariable covarianceMatrixScaling;
+   private final TimeDomain timeDomain;
 
-   public AbstractProcessModelElement(int covarianceMatrixSize, int nStateMatrixBlocks, int nInputMatrixBlocks, String name, YoVariableRegistry registry)
+   public AbstractProcessModelElement(TimeDomain timeDomain, int covarianceMatrixSize, String name, YoVariableRegistry registry)
    {
-      stateMatrixBlocks = new HashMap<ControlFlowOutputPort<?>, DenseMatrix64F>(nStateMatrixBlocks);
-      inputMatrixBlocks = new HashMap<ControlFlowInputPort<?>, DenseMatrix64F>(nInputMatrixBlocks);
+      stateMatrixBlocks = new HashMap<ControlFlowOutputPort<?>, DenseMatrix64F>();
+      inputMatrixBlocks = new HashMap<ControlFlowInputPort<?>, DenseMatrix64F>();
       processNoiseCovarianceBlock = new DenseMatrix64F(covarianceMatrixSize, covarianceMatrixSize);
       scaledProcessNoiseCovarianceMatrixBlock = new DenseMatrix64F(covarianceMatrixSize, covarianceMatrixSize);
       covarianceMatrixScaling = new DoubleYoVariable(name + "CovScaling", registry);
       covarianceMatrixScaling.set(1.0);
+      this.timeDomain = timeDomain;
    }
 
    public DenseMatrix64F getStateMatrixBlock(ControlFlowOutputPort<?> statePort)
@@ -59,5 +62,10 @@ public abstract class AbstractProcessModelElement implements ProcessModelElement
       double variance = MathTools.square(standardDeviation);
       CommonOps.setIdentity(processNoiseCovarianceBlock);
       CommonOps.scale(variance, processNoiseCovarianceBlock);
+   }
+
+   public TimeDomain getTimeDomain()
+   {
+      return timeDomain;
    }
 }

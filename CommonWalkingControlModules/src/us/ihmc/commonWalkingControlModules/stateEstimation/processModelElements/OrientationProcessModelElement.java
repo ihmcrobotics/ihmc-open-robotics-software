@@ -9,6 +9,7 @@ import javax.vecmath.Vector3d;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
+import us.ihmc.commonWalkingControlModules.stateEstimation.TimeDomain;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
@@ -36,7 +37,7 @@ public class OrientationProcessModelElement extends AbstractProcessModelElement
    public OrientationProcessModelElement(ControlFlowOutputPort<FrameVector> angularVelocityPort, ControlFlowOutputPort<FrameOrientation> orientationPort,
            String name, YoVariableRegistry registry)
    {
-      super(SIZE, 2, 1, name, registry);
+      super(TimeDomain.CONTINUOUS, SIZE, name, registry);
       this.angularVelocityPort = angularVelocityPort;
       this.orientationPort = orientationPort;
 

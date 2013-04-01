@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.stateEstimation.processModelElements
 
 import org.ejml.data.DenseMatrix64F;
 
+import us.ihmc.commonWalkingControlModules.stateEstimation.TimeDomain;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -18,7 +19,7 @@ public class BiasProcessModelElement extends AbstractProcessModelElement
 
    public BiasProcessModelElement(ControlFlowOutputPort<FrameVector> statePort, ReferenceFrame frame, String name, YoVariableRegistry registry)
    {
-      super(SIZE, 0, 0, name, registry);
+      super(TimeDomain.CONTINUOUS, SIZE, name, registry);
       this.biasPort = statePort;
       this.bias = new FrameVector(frame);
       this.biasDelta = new FrameVector(frame);

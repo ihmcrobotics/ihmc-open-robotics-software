@@ -4,6 +4,7 @@ package us.ihmc.commonWalkingControlModules.stateEstimation.processModelElements
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
+import us.ihmc.commonWalkingControlModules.stateEstimation.TimeDomain;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -26,7 +27,7 @@ public class CenterOfMassPositionProcessModelElement extends AbstractProcessMode
    public CenterOfMassPositionProcessModelElement(ControlFlowOutputPort<FramePoint> centerOfMassPositionPort,
            ControlFlowOutputPort<FrameVector> angularVelocityPort, String name, YoVariableRegistry registry)
    {
-      super(SIZE, 1, 0, name, registry);
+      super(TimeDomain.CONTINUOUS, SIZE, name, registry);
       this.centerOfMassPositionPort = centerOfMassPositionPort;
       this.centerOfMassVelocityPort = angularVelocityPort;
       this.centerOfMassPosition = new FramePoint(worldFrame);

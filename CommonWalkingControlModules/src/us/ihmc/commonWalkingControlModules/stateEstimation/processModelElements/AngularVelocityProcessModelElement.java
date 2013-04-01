@@ -4,6 +4,7 @@ package us.ihmc.commonWalkingControlModules.stateEstimation.processModelElements
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
+import us.ihmc.commonWalkingControlModules.stateEstimation.TimeDomain;
 import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.utilities.math.MatrixTools;
@@ -26,7 +27,7 @@ public class AngularVelocityProcessModelElement extends AbstractProcessModelElem
    public AngularVelocityProcessModelElement(ReferenceFrame estimationFrame, ControlFlowOutputPort<FrameVector> angularVelocityPort,
            ControlFlowInputPort<FrameVector> angularAccelerationPort, String name, YoVariableRegistry registry)
    {
-      super(SIZE, 0, 1, name, registry);
+      super(TimeDomain.CONTINUOUS, SIZE, name, registry);
       this.estimationFrame = estimationFrame;
       this.angularVelocityPort = angularVelocityPort;
       this.angularAccelerationPort = angularAccelerationPort;
