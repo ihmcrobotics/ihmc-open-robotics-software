@@ -52,7 +52,7 @@ public class LinearAccelerationMeasurementModelJacobianAssembler
       this.estimationFrame = estimationFrame;
    }
 
-   public void preCompute(Vector3d estimatedMeasurement)
+   public void preCompute(Vector3d unbiasedEstimatedMeasurement)
    {
       RigidBody elevator = spatialAccelerationCalculator.getRootBody();
       ReferenceFrame elevatorFrame = elevator.getBodyFixedFrame();
@@ -85,7 +85,7 @@ public class LinearAccelerationMeasurementModelJacobianAssembler
       // z
       estimationFrame.getTransformToDesiredFrame(tempTransform, measurementFrame);
       tempTransform.get(tempMatrix);
-      MatrixTools.toTildeForm(zTildeRMP, estimatedMeasurement);
+      MatrixTools.toTildeForm(zTildeRMP, unbiasedEstimatedMeasurement);
       zTildeRMP.mul(tempMatrix);
    }
 
