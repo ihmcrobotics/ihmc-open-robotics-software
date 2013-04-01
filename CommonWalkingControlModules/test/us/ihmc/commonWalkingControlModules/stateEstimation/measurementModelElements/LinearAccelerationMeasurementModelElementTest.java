@@ -70,7 +70,7 @@ public class LinearAccelerationMeasurementModelElementTest
       double gZ = 9.81;
       Vector3d gravitationalAcceleration = new Vector3d(0.0, 0.0, -gZ);
 
-      SimulatedLinearAccelerationSensor sensor = new SimulatedLinearAccelerationSensor("test", measurementLink, measurementFrame, spatialAccelerationCalculator, gravitationalAcceleration);
+      SimulatedLinearAccelerationSensor sensor = new SimulatedLinearAccelerationSensor("test", measurementLink, measurementFrame, spatialAccelerationCalculator, gravitationalAcceleration, registry);
       
       LinearAccelerationMeasurementModelElement modelElement = new LinearAccelerationMeasurementModelElement(name, registry, centerOfMassPositionPort,
                                                                   centerOfMassVelocityPort, centerOfMassAccelerationPort, orientationPort, angularVelocityPort,
