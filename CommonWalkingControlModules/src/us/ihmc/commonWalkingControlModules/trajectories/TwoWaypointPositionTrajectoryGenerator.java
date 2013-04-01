@@ -3,12 +3,19 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.media.j3d.Transform3D;
+import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
+
+import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.math.MathTools;
+import us.ihmc.utilities.math.geometry.Box3d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
+import com.jme3.math.Vector3f;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.BagOfBalls;
@@ -27,9 +34,9 @@ import com.yobotics.simulationconstructionset.util.trajectory.YoPositionProvider
 
 public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajectoryGenerator
 {
-// private final static double SPHERE_EDGE_TO_WAYPOINT_DISTANCE = 0.1;
    private final static double EPSILON = 1e-3;
    private final static boolean VISUALIZE = true;
+   private final static boolean VISUALIZE_WAYPOINTS_OVER_BOX = false;
 
    private final DoubleYoVariable groundClearance;
    private final DoubleYoVariable linearSplineLengthFactor;
@@ -478,51 +485,87 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       return timeIntoStep.getDoubleValue() >= stepTime.getDoubleValue();
    }
 
-// public void initializeUsingSphere(Sphere3d sphere3d)
-// {
-//    FramePoint[] waypoints = getWaypointsForSphere(sphere3d);
-//    initialize(waypoints);
-// }
-//
-// private FramePoint[] getWaypointsForSphere(Sphere3d sphere3d)
-// {
-//    FramePoint[] wayPoints = new FramePoint[2];
-//    Point3d sphereCenterPoint3d = new Point3d();
-//    sphere3d.getCenter(sphereCenterPoint3d);
-//    FramePoint sphereCenterFramePoint = new FramePoint(referenceFrame, sphereCenterPoint3d.getX(), sphereCenterPoint3d.getY(), sphereCenterPoint3d.getZ());
-//    double radius = sphere3d.getRadius();
-//    boolean areDefaultWaypointsOutsideSphere = true;
-//
-//    FramePoint tempPositions = new FramePoint(referenceFrame);
-//    for (int i = 0; i < 2; i++)
-//    {
-//       positionSources[i].get(tempPositions);
-//       tempPositions.changeFrame(referenceFrame);
-//       allPositions[3 * i].set(tempPositions);
-//    }
-//
-//    // setWaypointsToDefault();
-//    double[] sphereWaypointDistances = new double[2];
-//    for (int i = 0; i < 2; i++)
-//    {
-//       sphereWaypointDistances[i] = wayPoints[i].distance(sphereCenterFramePoint);
-//       wayPoints[i].set(allPositions[i].getX(), allPositions[i].getY(), allPositions[i].getZ());
-//       areDefaultWaypointsOutsideSphere = areDefaultWaypointsOutsideSphere && (sphereWaypointDistances[i] < radius);
-//    }
-//
-//    if (!areDefaultWaypointsOutsideSphere)
-//    {
-//       FrameVector waypointToSphereSurface = new FrameVector(referenceFrame);
-//       for (int i = 0; i < 2; i++)
-//       {
-//          waypointToSphereSurface.sub(wayPoints[i], sphereCenterFramePoint);
-//          waypointToSphereSurface.normalize();
-//          double distanceToMoveWaypoint = radius - sphereWaypointDistances[i] + SPHERE_EDGE_TO_WAYPOINT_DISTANCE;
-//          waypointToSphereSurface.scale(distanceToMoveWaypoint);
-//          wayPoints[i].add(waypointToSphereSurface);
-//       }
-//    }
-//
-//    return wayPoints;
-// }
+   // TODO consider incorporating initial velocity to waypoint placement
+   private TwoWaypointTrajectoryParameters createWaypointsFromABox(Box3d box, FramePoint initialPosition, FramePoint finalPosition)
+   {
+      Vector3d halfSideLengths = new Vector3d(box.getWidth(), box.getLength(), box.getHeight());
+      Transform3D boxTransform = box.getTransformCopy();  
+      Transform3D inverseBoxTransform = new Transform3D();
+      boxTransform.invert(inverseBoxTransform);
+      
+      Point3d boxFrameInitialPosition = initialPosition.getPointCopy();
+      Point3d boxFrameFinalPosition = finalPosition.getPointCopy();
+      inverseBoxTransform.transform(boxFrameInitialPosition);
+      inverseBoxTransform.transform(boxFrameFinalPosition);
+      
+      Point3d[] xyPlaneBoxIntersections = new Point3d[2];
+      int index = 0;
+      double a = (boxFrameFinalPosition.y - boxFrameInitialPosition.y) / (boxFrameFinalPosition.x - boxFrameInitialPosition.x);
+      double b = boxFrameInitialPosition.y - a * boxFrameInitialPosition.x;
+      
+      // TODO get ankle height
+      double ankleHeight = 0.0; //DRCRobotParameters.DRC_ROBOT_ANKLE_HEIGHT;
+      double zVal = 2.0f * halfSideLengths.z + ankleHeight + TwoWaypointTrajectoryParameters.VERTICAL_CLEARANCE_OVER_BOX;
+
+      for(double sign : new double[]{-1.0, 1.0})
+      {
+         double xVal = sign * halfSideLengths.x;
+         double yVal = sign * halfSideLengths.y;
+         double xGuess = (yVal - b) / a;
+         double yGuess = a * xVal + b;
+         
+         if(Math.abs(yGuess) <= halfSideLengths.y && index < 2)
+         {
+            xyPlaneBoxIntersections[index] = new Point3d(xVal + halfSideLengths.x, yGuess + halfSideLengths.y, zVal);
+            index++;
+         }
+         
+         if(Math.abs(xGuess) <= halfSideLengths.x && index < 2)
+         {
+            xyPlaneBoxIntersections[index] = new Point3d(xGuess + halfSideLengths.x, yVal + halfSideLengths.y, zVal);
+            index++;
+         }
+      }
+
+      if(index != 2)
+      {
+         return new TwoWaypointTrajectoryParameters(zVal);
+      }
+
+      if(xyPlaneBoxIntersections[0].distance(boxFrameInitialPosition) > xyPlaneBoxIntersections[1].distance(boxFrameInitialPosition))
+      {
+         Point3d tempVec = xyPlaneBoxIntersections[1];
+         xyPlaneBoxIntersections[1] = xyPlaneBoxIntersections[0];
+         xyPlaneBoxIntersections[0] = tempVec;
+      }
+           
+      List<Point3d> waypoints = new ArrayList<Point3d>();
+      for(Point3d intersectionPoint : xyPlaneBoxIntersections)
+      {
+         boxTransform.transform(intersectionPoint);
+         waypoints.add(intersectionPoint);
+      }
+
+      Vector3d directionOfFootstep = new Vector3d();
+      directionOfFootstep.sub(finalPosition.getVectorCopy(), initialPosition.getVectorCopy());
+      directionOfFootstep.normalize();
+      // TODO get foot forward and backward
+      double[] waypointShiftsToAvoidFootCollision = new double[]{0.0, 0.0};
+      for(int i = 0; i < 2; i++)
+      {
+         Vector3d waypointShift = new Vector3d(directionOfFootstep);
+         waypointShift.scale(waypointShiftsToAvoidFootCollision[i]);
+         waypoints.get(i).add(waypointShift);
+      }      
+      
+      if(VISUALIZE_WAYPOINTS_OVER_BOX)
+      {
+         for(int i = 0; i < 2; i++)
+         {
+            waypointBagOfBalls.setBall(new FramePoint(ReferenceFrame.getWorldFrame(), waypoints.get(i)), YoAppearance.Chocolate(), i);
+         }  
+      }
+      
+      return new TwoWaypointTrajectoryParameters(waypoints);
+   }
 }
