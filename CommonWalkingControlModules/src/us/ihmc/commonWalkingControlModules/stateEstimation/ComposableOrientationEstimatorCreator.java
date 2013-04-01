@@ -87,10 +87,10 @@ public class ComposableOrientationEstimatorCreator
          super(name, controlDT, parentRegistry);
 
          orientationPort = new YoFrameQuaternionControlFlowOutputPort(this, name, ReferenceFrame.getWorldFrame(), parentRegistry);
-         addStatePort(orientationPort, VECTOR3D_LENGTH);
+         registerStatePort(orientationPort, VECTOR3D_LENGTH);
 
          angularVelocityPort = new YoFrameVectorControlFlowOutputPort(this, name + "Omega", estimationFrame, registry);
-         addStatePort(angularVelocityPort, VECTOR3D_LENGTH);
+         registerStatePort(angularVelocityPort, VECTOR3D_LENGTH);
 
          addOrientationProcessModelElement();
          addAngularVelocityProcessModelElement(estimationFrame, controlFlowGraph, angularAccelerationOutputPort);
@@ -158,7 +158,7 @@ public class ComposableOrientationEstimatorCreator
          ControlFlowInputPort<Vector3d> angularVelocityMeasurementPort = createMeasurementInputPort(VECTOR3D_LENGTH);
 
          ControlFlowOutputPort<FrameVector> biasPort = new YoFrameVectorControlFlowOutputPort(this, biasName, measurementFrame, registry);
-         addStatePort(biasPort, VECTOR3D_LENGTH);
+         registerStatePort(biasPort, VECTOR3D_LENGTH);
 
          BiasProcessModelElement biasProcessModelElement = new BiasProcessModelElement(biasPort, measurementFrame, biasName, registry);
          DenseMatrix64F biasProcessNoiseCovariance = angularVelocitySensorConfiguration.getBiasProcessNoiseCovariance();
