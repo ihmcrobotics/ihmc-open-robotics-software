@@ -909,7 +909,7 @@ Let
 The measurement model for linear acceleration is
 \begin_inset Formula 
 \begin{equation}
-z_{\dot{v},i}=R_{w}^{m}\left(\ddot{p}_{i}^{w}+g\right)\label{eq:linear-acceleration-measurement}
+z_{\dot{v},i}=R_{w}^{m}\left(\ddot{p}_{i}^{w}+g\right)+b_{\dot{v},i}\label{eq:linear-acceleration-measurement}
 \end{equation}
 
 \end_inset
@@ -937,7 +937,7 @@ The Jacobian of
  can be written as
 \begin_inset Formula 
 \begin{equation}
-\frac{\partial z_{\dot{v},i}}{\partial\alpha}=R_{p}^{m}\frac{\partial}{\partial\alpha}\left[R_{w}^{p}\left(\ddot{p}_{i}^{w}+g\right)\right]\label{eq:linear-acceleration-jacobian}
+\frac{\partial z_{\dot{v},i}}{\partial\alpha}=R_{p}^{m}\frac{\partial}{\partial\alpha}\left[R_{w}^{p}\left(\ddot{p}_{i}^{w}+g\right)\right]+\frac{\partial b_{\dot{v},i}}{\partial\alpha}\label{eq:linear-acceleration-jacobian}
 \end{equation}
 
 \end_inset
@@ -981,7 +981,7 @@ reference "eq:phi-jacobian-transpose"
 \begin_inset Formula $x=\ddot{p}_{i}^{w}+g$
 \end_inset
 
- allows us to evalute 
+ allows us to evaluate 
 \begin_inset CommandInset ref
 LatexCommand eqref
 reference "eq:linear-acceleration-jacobian"
@@ -998,8 +998,8 @@ reference "eq:linear-acceleration-jacobian"
 \begin_layout Standard
 \begin_inset Formula 
 \begin{align}
-\frac{\partial z_{\dot{v},i}}{\partial\alpha} & =R_{p}^{m}\left(R_{w}^{p}\frac{\partial}{\partial\alpha}\left(\ddot{p}_{i}^{w}+g\right)+\left[R_{w}^{p}\left(\ddot{p}_{i}^{w}+g\right)\right]\times\frac{\partial\phi}{\partial\alpha}\right)\nonumber \\
- & =R_{w}^{m}\frac{\partial\ddot{p}_{i}^{w}}{\partial\alpha}+\tilde{z}_{\dot{v},i}R_{p}^{m}\frac{\partial\phi}{\partial\alpha}\label{eq:linear-acceleration-jacobian-approx}
+\frac{\partial z_{\dot{v},i}}{\partial\alpha} & =R_{p}^{m}\left(R_{w}^{p}\frac{\partial}{\partial\alpha}\left(\ddot{p}_{i}^{w}+g\right)+\left[R_{w}^{p}\left(\ddot{p}_{i}^{w}+g\right)\right]\times\frac{\partial\phi}{\partial\alpha}\right)+\frac{\partial b_{\dot{v},i}}{\partial\alpha}\nonumber \\
+ & =R_{w}^{m}\frac{\partial\ddot{p}_{i}^{w}}{\partial\alpha}+\left(z_{\dot{v},i}-b_{\dot{v},i}\right)\times R_{p}^{m}\frac{\partial\phi}{\partial\alpha}+\frac{\partial b_{\dot{v},i}}{\partial\alpha}\label{eq:linear-acceleration-jacobian-approx}
 \end{align}
 
 \end_inset
@@ -1044,6 +1044,17 @@ reference "eq:cross-product-jacobian"
 \begin_inset Formula 
 \[
 \frac{\partial}{\partial\alpha}\left(\dot{\omega}_{m}^{w,w}\times p_{i}^{w}\right)=\tilde{\dot{\omega}}_{m}^{w,w}\frac{\partial p_{i}^{w}}{\partial\alpha}-\tilde{p}_{i}^{w}\frac{\partial\dot{\omega}_{m}^{w,w}}{\partial\alpha}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\widetilde{\tilde{a}b}=\tilde{a}\tilde{b}-\tilde{b}\tilde{a}
 \]
 
 \end_inset
@@ -1108,7 +1119,7 @@ reference "eq:linear-acceleration-jacobian-approx"
 \begin{align}
 \frac{\partial z_{\dot{v},i}}{\partial\alpha} & =R_{w}^{m}\left(\tilde{\dot{\omega}}_{m}^{w,w}+\tilde{\omega}_{m}^{w,w}\tilde{\omega}_{m}^{w,w}\right)\frac{\partial p_{i}^{w}}{\partial\alpha}\nonumber \\
  & -R_{w}^{m}\left(2\tilde{\omega}_{m}^{w,w}\tilde{p}_{i}^{w}-\tilde{p}_{i}^{w}\tilde{\omega}_{m}^{w,w}+\tilde{v}_{m}^{w,w}\right)\frac{\partial\omega_{m}^{w,w}}{\partial\alpha}+R_{w}^{m}\tilde{\omega}_{m}^{w,w}\frac{\partial v_{m}^{w,w}}{\partial\alpha}\nonumber \\
- & -R_{w}^{m}\tilde{p}_{i}^{w}\frac{\partial\dot{\omega}_{m}^{w,w}}{\partial\alpha}+R_{w}^{m}\frac{\partial\dot{v}_{m}^{w,w}}{\partial\alpha}+\tilde{z}_{\dot{v},i}R_{p}^{w}\frac{\partial\phi}{\partial\alpha}\label{eq:linear-acceleration-jacobian-assembly}
+ & -R_{w}^{m}\tilde{p}_{i}^{w}\frac{\partial\dot{\omega}_{m}^{w,w}}{\partial\alpha}+R_{w}^{m}\frac{\partial\dot{v}_{m}^{w,w}}{\partial\alpha}+\left(z_{\dot{v},i}-b_{\dot{v},i}\right)\times R_{p}^{w}\frac{\partial\phi}{\partial\alpha}+\frac{\partial b_{\dot{v},i}}{\partial\alpha}\label{eq:linear-acceleration-jacobian-assembly}
 \end{align}
 
 \end_inset
@@ -1127,7 +1138,7 @@ This equation shows that the job of finding the Jacobian
 \begin_layout Standard
 \begin_inset Formula 
 \begin{flalign*}
-\frac{\partial\phi}{\partial\alpha} &  & \frac{\partial\omega_{m}^{w,w}}{\partial\alpha} &  & \frac{\partial v_{m}^{w,w}}{\partial\alpha} &  & \frac{\partial\dot{\omega}_{m}^{w,w}}{\partial\alpha} &  & \frac{\partial\dot{v}_{m}^{w,w}}{\partial\alpha} &  & \frac{\partial p_{i}^{w}}{\partial\alpha}
+\frac{\partial\phi}{\partial\alpha} &  & \frac{\partial\omega_{m}^{w,w}}{\partial\alpha} &  & \frac{\partial v_{m}^{w,w}}{\partial\alpha} &  & \frac{\partial\dot{\omega}_{m}^{w,w}}{\partial\alpha} &  & \frac{\partial\dot{v}_{m}^{w,w}}{\partial\alpha} &  & \frac{\partial p_{i}^{w}}{\partial\alpha} &  & \frac{\partial b_{\dot{v},i}}{\partial\alpha}
 \end{flalign*}
 
 \end_inset
@@ -1143,7 +1154,7 @@ for each state variable
 \end_layout
 
 \begin_layout Subsubsection
-Orientation
+Orientation perturbation and bias
 \end_layout
 
 \begin_layout Standard
@@ -1156,6 +1167,25 @@ The Jacobian
 \[
 \frac{\partial\phi}{\partial\alpha}=\begin{cases}
 I & \alpha=\phi\\
+0 & \text{otherwise}
+\end{cases}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Likewise, the Jacobian 
+\begin_inset Formula $\frac{\partial b_{\dot{v},i}}{\partial\alpha}$
+\end_inset
+
+ is
+\begin_inset Formula 
+\[
+\frac{\partial b_{\dot{v},i}}{\partial\alpha}=\begin{cases}
+I & \alpha=b_{\dot{v},i}\\
 0 & \text{otherwise}
 \end{cases}
 \]
@@ -3056,6 +3086,29 @@ with
 \begin{equation}
 v_{p}^{p,w}=R_{w}^{p}\dot{r}-\tilde{\omega}r^{p}-\dot{r}^{p}\label{eq:rootjoint-linear-vel}
 \end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+\begin_inset Formula 
+\[
+\dot{r}^{p}=R_{w}^{p}\dot{r}-\tilde{\omega}r^{p}-v_{p}^{p,w}
+\]
 
 \end_inset
 
