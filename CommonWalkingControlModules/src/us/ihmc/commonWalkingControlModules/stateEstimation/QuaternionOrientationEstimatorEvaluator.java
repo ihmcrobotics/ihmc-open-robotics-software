@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.stateEstimation;
 
+import java.util.ArrayList;
+
 import javax.media.j3d.Transform3D;
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;
@@ -35,6 +37,7 @@ import us.ihmc.utilities.screwTheory.TwistCalculator;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.FloatingJoint;
+import com.yobotics.simulationconstructionset.IMUMount;
 import com.yobotics.simulationconstructionset.Joint;
 import com.yobotics.simulationconstructionset.Link;
 import com.yobotics.simulationconstructionset.PinJoint;
@@ -84,7 +87,7 @@ public class QuaternionOrientationEstimatorEvaluator
       private static final long serialVersionUID = 2647791981594204134L;
       private final Link bodyLink;
       private final FloatingJoint rootJoint;
-      private final Joint imuJoint;
+      private final ArrayList<IMUMount> imuMounts = new ArrayList<IMUMount>();
       
       public QuaternionOrientationEstimatorEvaluatorRobot()
       {
@@ -101,8 +104,11 @@ public class QuaternionOrientationEstimatorEvaluator
          bodyLink.setLinkGraphics(bodyLinkGraphics);
          rootJoint.setLink(bodyLink);
 
+         Transform3D imu0Offset = new Transform3D();
+         IMUMount imuMount0 = new IMUMount("imuMount0", imu0Offset, this);
+         rootJoint.addIMUMount(imuMount0);
+         
          this.addRootJoint(rootJoint);
-
          
          if (ADD_ARM_LINKS)
          {
@@ -117,6 +123,10 @@ public class QuaternionOrientationEstimatorEvaluator
             armLink1.setLinkGraphics(armLink1Graphics);
             pinJoint1.setLink(armLink1);
             
+            Transform3D imu1Offset = new Transform3D();
+            IMUMount imuMount1 = new IMUMount("imuMount1", imu1Offset, this);
+            pinJoint1.addIMUMount(imuMount1);
+            
             rootJoint.addJoint(pinJoint1);
             
             PinJoint pinJoint2 = new PinJoint("pinJoint2", new Vector3d(0.0, 0.0, 1.0), this, Axis.Z);
@@ -130,6 +140,12 @@ public class QuaternionOrientationEstimatorEvaluator
             armLink2.setLinkGraphics(armLink2Graphics);
             pinJoint2.setLink(armLink2);
 
+            Transform3D imu2Offset = new Transform3D();
+            imu2Offset.rotY(Math.PI/8.0);
+            imu2Offset.setTranslation(new Vector3d(0.0, 0.0, 0.1));
+            IMUMount imuMount2 = new IMUMount("imuMount2", imu2Offset, this);
+            pinJoint2.addIMUMount(imuMount2);
+            
             pinJoint1.addJoint(pinJoint2);
             
             pinJoint1.setQ(1.2); 
@@ -137,15 +153,15 @@ public class QuaternionOrientationEstimatorEvaluator
             
             pinJoint1.setQd(-0.5); 
             pinJoint2.setQd(0.77); 
-            
-//            imuJoint = rootJoint;
-//            imuJoint = pinJoint1;
-            imuJoint = pinJoint2;
+
+            imuMounts.add(imuMount0);
+            imuMounts.add(imuMount1);
+            imuMounts.add(imuMount2);
          }            
          
          else
          {
-            imuJoint = rootJoint;
+            imuMounts.add(imuMount0);
          }
          
          this.setGravity(0.0);
@@ -169,19 +185,19 @@ public class QuaternionOrientationEstimatorEvaluator
          update();
       }
 
-      public Link getBodyLink()
-      {
-         return bodyLink;
-      }
+//      public Link getBodyLink()
+//      {
+//         return bodyLink;
+//      }
 
       public FloatingJoint getRootJoint()
       {
          return rootJoint;
       }
       
-      public Joint getIMUJoint()
+      public ArrayList<IMUMount> getIMUMounts()
       {
-         return imuJoint;
+         return imuMounts;
       }
 
       public Vector3d getActualAngularAccelerationInBodyFrame()
@@ -204,7 +220,7 @@ public class QuaternionOrientationEstimatorEvaluator
       private final SixDoFJoint rootInverseDynamicsJoint;
       private final RigidBody rootBody;
       
-      private final RigidBody imuBody;
+      private final ArrayList<IMUMount> imuMounts;
 
       public QuaternionOrientationEstimatorEvaluatorFullRobotModel(QuaternionOrientationEstimatorEvaluatorRobot robot)
       {
@@ -214,8 +230,7 @@ public class QuaternionOrientationEstimatorEvaluator
          rootInverseDynamicsJoint = generator.getRootSixDoFJoint();
          rootBody = generator.getRootBody();
          
-         Joint imuJoint = robot.getIMUJoint();
-         imuBody = generator.getRigidBody(imuJoint);
+         imuMounts = robot.getIMUMounts();
       }
 
       public SixDoFJoint getRootInverseDynamicsJoint()
@@ -228,9 +243,14 @@ public class QuaternionOrientationEstimatorEvaluator
          return rootBody;
       }
       
-      public RigidBody getIMUBody()
+      public ArrayList<IMUMount> getIMUMounts()
       {
-         return imuBody;
+         return imuMounts;
+      }
+      
+      public RigidBody getIMUBody(IMUMount imuMount)
+      {
+         return generator.getRigidBody(imuMount.getParentJoint());
       }
 
       public void updateBasedOnRobot(QuaternionOrientationEstimatorEvaluatorRobot robot)
@@ -396,29 +416,34 @@ public class QuaternionOrientationEstimatorEvaluator
 
          if (CREATE_ANGULAR_VELOCITY_SENSOR)
          {
-            RigidBody perfectBody = perfectFullRobotModel.getIMUBody();
-            ReferenceFrame frameUsedForPerfectMeasurement = perfectBody.getParentJoint().getFrameAfterJoint();
+            for (IMUMount imuMount : perfectFullRobotModel.getIMUMounts())
+            {
+               RigidBody perfectBody = perfectFullRobotModel.getIMUBody(imuMount);
+               RigidBody estimatedBody = estimatedFullRobotModel.getIMUBody(imuMount);
+               
+               ReferenceFrame frameUsedForPerfectMeasurement = perfectBody.getParentJoint().getFrameAfterJoint();
+               String sensorName = imuMount.getName() + "AngularVelocity";
+                     
+               SimulatedAngularVelocitySensor angularVelocitySensor = new SimulatedAngularVelocitySensor(sensorName, perfectTwistCalculator,
+                     perfectBody, frameUsedForPerfectMeasurement, registry);
+               GaussianVectorCorruptor angularVelocityCorruptor = new GaussianVectorCorruptor(1235L, sensorName, registry);
+               angularVelocityCorruptor.setStandardDeviation(angularVelocityMeasurementStandardDeviation);
+               angularVelocitySensor.addSignalCorruptor(angularVelocityCorruptor);
 
-            SimulatedAngularVelocitySensor angularVelocitySensor = new SimulatedAngularVelocitySensor("imu1AngularVelocity", perfectTwistCalculator,
-                                                                      perfectBody, frameUsedForPerfectMeasurement, registry);
-            GaussianVectorCorruptor angularVelocityCorruptor = new GaussianVectorCorruptor(1235L, "gaussianAngularVelocity", registry);
-            angularVelocityCorruptor.setStandardDeviation(angularVelocityMeasurementStandardDeviation);
-            angularVelocitySensor.addSignalCorruptor(angularVelocityCorruptor);
-
-            BiasVectorCorruptor biasVectorCorruptor = new BiasVectorCorruptor(1236L, "angularVelocityBiasCorruptor", controlDT, registry);
-            biasVectorCorruptor.setStandardDeviation(angularVelocityBiasProcessNoiseStandardDeviation);
-            biasVectorCorruptor.setBias(new Vector3d(0.0, 0.0, 0.0));
-            angularVelocitySensor.addSignalCorruptor(biasVectorCorruptor);
+               BiasVectorCorruptor biasVectorCorruptor = new BiasVectorCorruptor(1236L, sensorName, controlDT, registry);
+               biasVectorCorruptor.setStandardDeviation(angularVelocityBiasProcessNoiseStandardDeviation);
+               biasVectorCorruptor.setBias(new Vector3d(0.0, 0.0, 0.0));
+               angularVelocitySensor.addSignalCorruptor(biasVectorCorruptor);
 
 
-            DenseMatrix64F angularVelocityCovarianceMatrix = createDiagonalCovarianceMatrix(angularVelocityMeasurementStandardDeviation, 3);
-            DenseMatrix64F angularVelocityBiasNoiseCovariance = createDiagonalCovarianceMatrix(angularVelocityBiasProcessNoiseStandardDeviation, 3);
+               DenseMatrix64F angularVelocityCovarianceMatrix = createDiagonalCovarianceMatrix(angularVelocityMeasurementStandardDeviation, 3);
+               DenseMatrix64F angularVelocityBiasNoiseCovariance = createDiagonalCovarianceMatrix(angularVelocityBiasProcessNoiseStandardDeviation, 3);
 
-            RigidBody estimatedBody = estimatedFullRobotModel.getIMUBody();
-            ReferenceFrame measurementFrame = estimatedBody.getParentJoint().getFrameAfterJoint();
+               ReferenceFrame measurementFrame = estimatedBody.getParentJoint().getFrameAfterJoint();
 
-            angularVelocitySensorConfiguration.addSensor(angularVelocitySensor.getAngularVelocityOutputPort(), measurementFrame, estimatedBody,
-                    "imu1AngularVelocity", angularVelocityCovarianceMatrix, angularVelocityBiasNoiseCovariance);
+               angularVelocitySensorConfiguration.addSensor(angularVelocitySensor.getAngularVelocityOutputPort(), measurementFrame, estimatedBody,
+                     sensorName, angularVelocityCovarianceMatrix, angularVelocityBiasNoiseCovariance);
+            }
          }
 
          return angularVelocitySensorConfiguration;
@@ -433,20 +458,25 @@ public class QuaternionOrientationEstimatorEvaluator
 
          if (CREATE_ORIENTATION_SENSOR)
          {
-            RigidBody perfectBody = perfectFullRobotModel.getIMUBody();
-            ReferenceFrame frameUsedForPerfectMeasurement = perfectBody.getParentJoint().getFrameAfterJoint();
-            
-            SimulatedOrientationSensor sensor = new SimulatedOrientationSensor("imu1Orientation", frameUsedForPerfectMeasurement, registry);
-            GaussianOrientationCorruptor orientationCorruptor = new GaussianOrientationCorruptor("gaussianOrientation", 12345L, registry);
-            orientationCorruptor.setStandardDeviation(orientationMeasurementStandardDeviation);
-            sensor.addSignalCorruptor(orientationCorruptor);
+            for (IMUMount imuMount : perfectFullRobotModel.getIMUMounts())
+            {
+               RigidBody perfectBody = perfectFullRobotModel.getIMUBody(imuMount);
+               RigidBody estimatedBody = estimatedFullRobotModel.getIMUBody(imuMount);
 
-            DenseMatrix64F orientationCovarianceMatrix = createDiagonalCovarianceMatrix(orientationMeasurementStandardDeviation, 3);
-            
-            RigidBody estimatedBody = estimatedFullRobotModel.getIMUBody();
-            ReferenceFrame measurementFrame = estimatedBody.getParentJoint().getFrameAfterJoint();
-            
-            orientationSensorConfiguration.addSensor(sensor.getOrientationOutputPort(), measurementFrame, "imu1Orientation", orientationCovarianceMatrix);
+               ReferenceFrame frameUsedForPerfectMeasurement = perfectBody.getParentJoint().getFrameAfterJoint();
+               String sensorName = imuMount.getName() + "Orientation";
+
+               SimulatedOrientationSensor sensor = new SimulatedOrientationSensor(sensorName, frameUsedForPerfectMeasurement, registry);
+               GaussianOrientationCorruptor orientationCorruptor = new GaussianOrientationCorruptor(sensorName, 12345L, registry);
+               orientationCorruptor.setStandardDeviation(orientationMeasurementStandardDeviation);
+               sensor.addSignalCorruptor(orientationCorruptor);
+
+               DenseMatrix64F orientationCovarianceMatrix = createDiagonalCovarianceMatrix(orientationMeasurementStandardDeviation, 3);
+
+               ReferenceFrame measurementFrame = estimatedBody.getParentJoint().getFrameAfterJoint();
+
+               orientationSensorConfiguration.addSensor(sensor.getOrientationOutputPort(), measurementFrame, sensorName, orientationCovarianceMatrix);
+            }
          }
 
          return orientationSensorConfiguration;
@@ -515,30 +545,6 @@ public class QuaternionOrientationEstimatorEvaluator
       CommonOps.scale(MathTools.square(standardDeviation), orientationCovarianceMatrix);
 
       return orientationCovarianceMatrix;
-   }
-
-   private static RigidBody copyLinkAsRigidBody(Link link, InverseDynamicsJoint currentInverseDynamicsJoint, String bodyName)
-   {
-      Vector3d comOffset = new Vector3d();
-      link.getComOffset(comOffset);
-      Matrix3d momentOfInertia = new Matrix3d();
-      link.getMomentOfInertia(momentOfInertia);
-      ReferenceFrame nextFrame = createOffsetFrame(currentInverseDynamicsJoint, comOffset, bodyName);
-      nextFrame.update();
-      RigidBodyInertia inertia = new RigidBodyInertia(nextFrame, momentOfInertia, link.getMass());
-      RigidBody rigidBody = new RigidBody(bodyName, inertia, currentInverseDynamicsJoint);
-
-      return rigidBody;
-   }
-
-   private static ReferenceFrame createOffsetFrame(InverseDynamicsJoint currentInverseDynamicsJoint, Vector3d offset, String frameName)
-   {
-      ReferenceFrame parentFrame = currentInverseDynamicsJoint.getFrameAfterJoint();
-      Transform3D transformToParent = new Transform3D();
-      transformToParent.set(offset);
-      ReferenceFrame beforeJointFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(frameName, parentFrame, transformToParent);
-
-      return beforeJointFrame;
    }
 
    public static void main(String[] args)

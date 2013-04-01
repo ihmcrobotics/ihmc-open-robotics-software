@@ -123,6 +123,7 @@ public class ComposableOrientationEstimatorCreator
          ControlFlowInputPort<FrameVector> angularAccelerationPort;
          if (angularAccelerationOutputPort != null)
          {
+            //TODO: Huh. I don't understand why this is here...
             angularAccelerationPort = createProcessInputPort(VECTOR3D_LENGTH);
             controlFlowGraph.connectElements(angularAccelerationOutputPort, angularAccelerationPort);
          }
