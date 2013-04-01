@@ -142,5 +142,13 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
       return handControlFramesWithRespectToFrameAfterWrist;
    }
 
+   public double getFootForwardOffset()
+   {
+      return DRCRobotParameters.DRC_ROBOT_FOOT_FORWARD;
+   }
 
+   public double getFootBackwardOffset()
+   {
+      return DRCRobotParameters.DRC_ROBOT_FOOT_BACK;
+   }
 }
