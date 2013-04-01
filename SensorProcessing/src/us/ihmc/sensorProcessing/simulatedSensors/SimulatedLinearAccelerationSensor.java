@@ -2,6 +2,9 @@ package us.ihmc.sensorProcessing.simulatedSensors;
 
 import javax.vecmath.Vector3d;
 
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
+
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -18,6 +21,7 @@ public class SimulatedLinearAccelerationSensor extends SimulatedSensor<Vector3d>
 
    private final FrameVector linearAccelerationFrameVector = new FrameVector(worldFrame);
    private final Vector3d linearAcceleration = new Vector3d();
+   private final YoFrameVector yoFrameVectorPerfect, yoFrameVectorNoisy;
 
    private final ReferenceFrame measurementFrame;
    private final SpatialAccelerationCalculator spatialAccelerationCalculator;
@@ -26,12 +30,15 @@ public class SimulatedLinearAccelerationSensor extends SimulatedSensor<Vector3d>
    private final FrameVector gravitationalAcceleration;
 
    public SimulatedLinearAccelerationSensor(String name, RigidBody rigidBody, ReferenceFrame measurementFrame,
-           SpatialAccelerationCalculator spatialAccelerationCalculator, Vector3d gravitationalAcceleration)
+           SpatialAccelerationCalculator spatialAccelerationCalculator, Vector3d gravitationalAcceleration, YoVariableRegistry registry)
    {
       this.rigidBody = rigidBody;
       this.measurementFrame = measurementFrame;
       this.spatialAccelerationCalculator = spatialAccelerationCalculator;
       this.gravitationalAcceleration = new FrameVector(ReferenceFrame.getWorldFrame(), gravitationalAcceleration);
+      
+      this.yoFrameVectorPerfect = new YoFrameVector(name + "Perfect", measurementFrame, registry);
+      this.yoFrameVectorNoisy = new YoFrameVector(name + "Noisy", measurementFrame, registry);
    }
 
    public void startComputation()
@@ -42,6 +49,11 @@ public class SimulatedLinearAccelerationSensor extends SimulatedSensor<Vector3d>
       linearAccelerationFrameVector.add(gravitationalAcceleration);
       linearAccelerationFrameVector.changeFrame(measurementFrame);
       linearAccelerationFrameVector.getVector(linearAcceleration);
+      yoFrameVectorPerfect.set(linearAcceleration);
+
+      corrupt(linearAcceleration);
+      yoFrameVectorNoisy.set(linearAcceleration);
+
       linearAccelerationOutputPort.setData(linearAcceleration);
    }
 
