@@ -18,4 +18,6 @@ public interface ProcessModelElement
    public abstract void propagateState(double dt);
 
    public abstract void correctState(DenseMatrix64F correction);
+
+   public abstract TimeDomain getTimeDomain();
 }
