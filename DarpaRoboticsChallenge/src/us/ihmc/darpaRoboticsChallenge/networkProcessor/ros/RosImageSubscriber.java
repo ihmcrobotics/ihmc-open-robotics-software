@@ -25,10 +25,11 @@ public abstract class RosImageSubscriber extends RosTopicSubscriber<sensor_msgs.
 
    public void onNewMessage(sensor_msgs.Image message)
    {
-      imageReceived(RosTools.bufferedImageFromRosMessage(colorModel, message));
+      long timeStamp = message.getHeader().getStamp().totalNsecs();
+      imageReceived(timeStamp, RosTools.bufferedImageFromRosMessage(colorModel, message));
    }
 
-   protected abstract void imageReceived(BufferedImage image);
+   protected abstract void imageReceived(long timeStamp, BufferedImage image);
 
    public static void main(String[] args) throws URISyntaxException
    {
@@ -43,7 +44,7 @@ public abstract class RosImageSubscriber extends RosTopicSubscriber<sensor_msgs.
       {
 
          @Override
-         protected void imageReceived(BufferedImage image)
+         protected void imageReceived(long timeStamp, BufferedImage image)
          {
             leftCameraStreamer.updateImage(image);
          }
@@ -53,7 +54,7 @@ public abstract class RosImageSubscriber extends RosTopicSubscriber<sensor_msgs.
       {
 
          @Override
-         protected void imageReceived(BufferedImage image)
+         protected void imageReceived(long timeStamp, BufferedImage image)
          {
             rightCameraStreamer.updateImage(image);
          }

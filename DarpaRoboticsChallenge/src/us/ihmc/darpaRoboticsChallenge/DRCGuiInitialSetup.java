@@ -1,7 +1,10 @@
 package us.ihmc.darpaRoboticsChallenge;
 
+import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
+import us.ihmc.graphics3DAdapter.NullGraphics3DAdapter;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
+import us.ihmc.graphics3DAdapter.jme.JMEGraphics3dAdapter;
 import us.ihmc.projectM.R2Sim02.initialSetup.GuiInitialSetup;
 
 import com.yobotics.simulationconstructionset.Robot;
@@ -11,6 +14,7 @@ import com.yobotics.simulationconstructionset.util.FlatGroundProfile;
 public class DRCGuiInitialSetup implements GuiInitialSetup
 {
    private boolean isGuiShown = true;
+   private boolean is3dGraphicsShown = true;
    private final boolean groundProfileVisible;
    private final boolean drawPlaneAtZ0;
    
@@ -45,6 +49,11 @@ public class DRCGuiInitialSetup implements GuiInitialSetup
          planeAtZ0.addHeightMap(new FlatGroundProfile(), 100, 100, null);
          scs.addStaticLinkGraphics(planeAtZ0);
       }
+      
+      if(!is3dGraphicsShown)
+      {
+         scs.hideViewport();
+      }
    }
 
    public boolean isGuiShown()
@@ -55,5 +64,26 @@ public class DRCGuiInitialSetup implements GuiInitialSetup
    public void setIsGuiShown(boolean isGuiShown)
    {
       this.isGuiShown = isGuiShown;
+   }
+
+   public Graphics3DAdapter getGraphics3DAdapter()
+   {
+      if(isGuiShown && is3dGraphicsShown)
+      {
+         return new JMEGraphics3dAdapter();
+      }
+      else if(isGuiShown)
+      {
+         return new NullGraphics3DAdapter();
+      }
+      else
+      {
+         return null;
+      }
+   }
+
+   public void setIs3dGraphicsShown(boolean is3dGraphicsShown)
+   {
+      this.is3dGraphicsShown = is3dGraphicsShown;
    }
 }

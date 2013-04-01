@@ -12,28 +12,44 @@ import org.ros.node.Node;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMain;
 import org.ros.node.NodeMainExecutor;
+import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
 
 public class RosMainNode implements NodeMain
 {
    private final HashMap<String, RosTopicSubscriber<? extends Message>> subscribers = new HashMap<String, RosTopicSubscriber<? extends Message>>();
-   private final URI master;
+   private final HashMap<String, RosTopicPublisher<? extends Message>> publishers = new HashMap<String, RosTopicPublisher<? extends Message>>();
+   
+   private final URI masterURI;
    private boolean isStarted = false;
    
    
-   public RosMainNode(URI master)
+   public RosMainNode(URI masterURI)
    {
-      this.master = master;
+      this.masterURI = masterURI;
+   }
+   
+   public void attachPublisher(String topicName, RosTopicPublisher<? extends Message> publisher)
+   {
+      checkNotStarted();
+      
+      publishers.put(topicName, publisher);
+      
    }
    
    public void attachSubscriber(String topicName, RosTopicSubscriber<? extends Message> subscriber)
    {
-      if(isStarted)
-      {
-         throw new RuntimeException("Cannot attach new subscribers after execution started");
-      }
+      checkNotStarted();
       
       subscribers.put(topicName, subscriber);
+   }
+
+   private void checkNotStarted()
+   {
+      if(isStarted)
+      {
+         throw new RuntimeException("Cannot attach new subscribers or publishers after execution started");
+      }
    }
 
    @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -46,6 +62,16 @@ public class RosMainNode implements NodeMain
          final RosTopicSubscriber rosTopicSubscriber = entry.getValue();
          Subscriber<? extends Message> subscriber = connectedNode.newSubscriber(entry.getKey(), rosTopicSubscriber.getMessageType());
          subscriber.addMessageListener(rosTopicSubscriber);
+         rosTopicSubscriber.connected();
+      }
+      
+      
+      for(Entry<String, RosTopicPublisher<? extends Message>> entry : publishers.entrySet())
+      {
+         final RosTopicPublisher rosTopicPublisher = entry.getValue();
+         Publisher<? extends Message> publisher = connectedNode.newPublisher(entry.getKey(), rosTopicPublisher.getMessageType());
+         rosTopicPublisher.setPublisher(publisher);
+         rosTopicPublisher.connected();
       }
    }
 
@@ -68,7 +94,7 @@ public class RosMainNode implements NodeMain
    
    public void execute()
    {
-      NodeConfiguration nodeConfiguration = RosTools.createNodeConfiguration(master);
+      NodeConfiguration nodeConfiguration = RosTools.createNodeConfiguration(masterURI);
       NodeMainExecutor nodeMainExecutor = DefaultNodeMainExecutor.newDefault();
       nodeMainExecutor.execute(this, nodeConfiguration);
    }

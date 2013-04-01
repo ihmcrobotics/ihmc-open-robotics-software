@@ -98,7 +98,15 @@ public class DRCSimulationFactory
 
 
       // PathTODO: Build LIDAR here
-      OneDoFJoint lidarJoint = fullRobotModelForController.getOneDoFJointByName(jointMap.getLidarJointName());
+      OneDoFJoint lidarJoint;
+      if (simulatedRobot instanceof GazeboRobot)
+      {
+         lidarJoint = null;
+      }
+      else
+      {
+         lidarJoint = fullRobotModelForController.getOneDoFJointByName(jointMap.getLidarJointName());
+      }
       RobotController robotController = controllerFactory.getController(fullRobotModelForController, referenceFramesForController, controlDT, simulatedRobot.getYoTime(), dynamicGraphicObjectsListRegistry, guiSetterUpperRegistry, twistCalculator, centerOfMassJacobian, footSwitches, handControllers, lidarJoint);
 
       AbstractModularRobotController modularRobotController;
