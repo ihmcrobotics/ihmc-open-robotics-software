@@ -8,7 +8,7 @@ public class DRCConfigParameters
 {
    public static final boolean USE_GAZEBO_PHYSICS = false;
    public static final String GAZEBO_HOST = "localhost"; //"10.4.42.2";//"localhost";
-   
+   public static final String[] JOINTS_TO_IGNORE_FOR_GAZEBO = { "hokuyo_joint" };
 
    public static final String ROS_MASTER_URI = "http://" + GAZEBO_HOST + ":11311";
    
@@ -47,6 +47,9 @@ public class DRCConfigParameters
 
    public static final VideoSettings VIDEOSETTINGS = new VideoSettingsH264LowLatency(800, 600, Quality.MEDIUM);
    //   public static final VideoSettings VIDEOSETTINGS = new VideoSettingsH264LowLatency(200, 150, Quality.LOW);
+   
+   
+   public static final double LIDAR_SPINDLE_VELOCITY = 5.0;
 
    static final int LIDAR_UPDATE_RATE_OVERRIDE = 3;
 

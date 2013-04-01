@@ -41,8 +41,8 @@ public class DRCNetworkProcessor
       RosClockSubscriber timeProvider = new RosClockSubscriber();
       rosMainNode.attachSubscriber("/clock", timeProvider);
 
-      new GazeboCameraReceiver(robotPoseBuffer, DRCConfigParameters.VIDEOSETTINGS, timeProvider, rosMainNode, teamComputerServer, DRCSensorParameters.FIELD_OF_VIEW);
-      new GazeboLidarDataReceiver(timeProvider, rosMainNode, robotPoseBuffer, teamComputerServer);
+      new GazeboCameraReceiver(robotPoseBuffer, DRCConfigParameters.VIDEOSETTINGS, rosMainNode, teamComputerServer, DRCSensorParameters.FIELD_OF_VIEW);
+      new GazeboLidarDataReceiver(rosMainNode, robotPoseBuffer, teamComputerServer);
       rosMainNode.execute();
       connect();
    }
@@ -63,8 +63,8 @@ public class DRCNetworkProcessor
 
       teamComputerServer = new KryoObjectServer(DRCConfigParameters.NETWORK_PROCESSOR_TO_UI_TCP_PORT, DRCConfigParameters.NETWORK_PROCESSOR_TO_UI_UDP_PORT,
             new DRCNetClassList());
+
       robotPoseBuffer = new RobotPoseBuffer(fieldComputerClient, 1000);
-      
    }
 
    private void connect()

@@ -14,4 +14,9 @@ public abstract class RosTopicSubscriber<T> implements MessageListener<T>
    {
       return messageType;
    }
+   
+   public void connected()
+   {
+      
+   }
 }
