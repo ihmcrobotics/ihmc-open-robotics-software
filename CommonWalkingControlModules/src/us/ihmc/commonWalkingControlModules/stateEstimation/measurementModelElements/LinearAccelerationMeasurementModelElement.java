@@ -5,6 +5,7 @@ import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
 import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
 
 import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
@@ -32,6 +33,7 @@ public class LinearAccelerationMeasurementModelElement extends AbstractMeasureme
    private final ControlFlowOutputPort<FrameOrientation> orientationPort;
    private final ControlFlowOutputPort<FrameVector> angularVelocityPort;
    private final ControlFlowOutputPort<FrameVector> angularAccelerationPort;
+   private final ControlFlowOutputPort<FrameVector> biasPort;
 
    private final ControlFlowInputPort<Vector3d> linearAccelerationMeasurementInputPort;
 
@@ -83,7 +85,7 @@ public class LinearAccelerationMeasurementModelElement extends AbstractMeasureme
    public LinearAccelerationMeasurementModelElement(String name, YoVariableRegistry registry, ControlFlowOutputPort<FramePoint> centerOfMassPositionPort,
            ControlFlowOutputPort<FrameVector> centerOfMassVelocityPort, ControlFlowOutputPort<FrameVector> centerOfMassAccelerationPort,
            ControlFlowOutputPort<FrameOrientation> orientationPort, ControlFlowOutputPort<FrameVector> angularVelocityPort,
-           ControlFlowOutputPort<FrameVector> angularAccelerationPort, ControlFlowInputPort<Vector3d> linearAccelerationMeasurementInputPort,
+           ControlFlowOutputPort<FrameVector> angularAccelerationPort, ControlFlowOutputPort<FrameVector> biasPort, ControlFlowInputPort<Vector3d> linearAccelerationMeasurementInputPort,
            TwistCalculator twistCalculator, SpatialAccelerationCalculator spatialAccelerationCalculator, RigidBody measurementLink,
            ReferenceFrame measurementFrame, RigidBody estimationLink, ReferenceFrame estimationFrame, double gZ)
    {
@@ -96,6 +98,7 @@ public class LinearAccelerationMeasurementModelElement extends AbstractMeasureme
       this.orientationPort = orientationPort;
       this.angularVelocityPort = angularVelocityPort;
       this.angularAccelerationPort = angularAccelerationPort;
+      this.biasPort = biasPort;
 
       this.linearAccelerationMeasurementInputPort = linearAccelerationMeasurementInputPort;
 
@@ -117,11 +120,14 @@ public class LinearAccelerationMeasurementModelElement extends AbstractMeasureme
       outputMatrixBlocks.put(orientationPort, new DenseMatrix64F(SIZE, SIZE));
       outputMatrixBlocks.put(angularVelocityPort, new DenseMatrix64F(SIZE, SIZE));
       outputMatrixBlocks.put(angularAccelerationPort, new DenseMatrix64F(SIZE, SIZE));
+      outputMatrixBlocks.put(biasPort, new DenseMatrix64F(SIZE, SIZE));
+
+      computeBiasBlock();
    }
 
    public void computeMatrixBlocks()
    {
-      computeEstimatedMeasurement(estimatedMeasurement);
+      computeUnbiasedEstimatedMeasurement(estimatedMeasurement);
 
       // R_{w}^{p}
       estimationFrame.getTransformToDesiredFrame(tempTransform, ReferenceFrame.getWorldFrame());
@@ -365,9 +371,14 @@ public class LinearAccelerationMeasurementModelElement extends AbstractMeasureme
       MatrixTools.setDenseMatrixFromMatrix3d(0, 0, tempMatrix, outputMatrixBlocks.get(angularAccelerationPort));
    }
 
+   private void computeBiasBlock()
+   {
+      CommonOps.setIdentity(outputMatrixBlocks.get(biasPort));
+   }
+   
    public DenseMatrix64F computeResidual()
    {
-      computeEstimatedMeasurement(estimatedMeasurement);    // TODO: repeated computation
+      computeBiasedEstimatedMeasurement(estimatedMeasurement);    // TODO: repeated computation
       tempVector.set(linearAccelerationMeasurementInputPort.getData());
       tempVector.sub(estimatedMeasurement.getVector());
 
@@ -376,7 +387,13 @@ public class LinearAccelerationMeasurementModelElement extends AbstractMeasureme
       return residual;
    }
 
-   private void computeEstimatedMeasurement(FrameVector estimatedMeasurement)
+   private void computeBiasedEstimatedMeasurement(FrameVector estimatedMeasurement)
+   {
+      computeUnbiasedEstimatedMeasurement(estimatedMeasurement);
+      estimatedMeasurement.add(biasPort.getData());
+   }
+
+   private void computeUnbiasedEstimatedMeasurement(FrameVector estimatedMeasurement)
    {
       tempFramePoint.setToZero(measurementFrame);
       spatialAccelerationCalculator.packLinearAccelerationOfBodyFixedPoint(estimatedMeasurement, measurementLink, tempFramePoint);

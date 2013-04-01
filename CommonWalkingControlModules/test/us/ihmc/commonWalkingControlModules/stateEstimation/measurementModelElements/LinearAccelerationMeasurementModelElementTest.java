@@ -64,6 +64,8 @@ public class LinearAccelerationMeasurementModelElementTest
       ControlFlowOutputPort<FrameVector> angularVelocityPort = new ControlFlowOutputPort<FrameVector>(controlFlowElement);
       ControlFlowOutputPort<FrameVector> angularAccelerationPort = new ControlFlowOutputPort<FrameVector>(controlFlowElement);
 
+      ControlFlowOutputPort<FrameVector> biasPort = new ControlFlowOutputPort<FrameVector>(controlFlowElement);
+
       ControlFlowInputPort<Vector3d> linearAccelerationMeasurementInputPort = new ControlFlowInputPort<Vector3d>(controlFlowElement);
       double gZ = 9.81;
       Vector3d gravitationalAcceleration = new Vector3d(0.0, 0.0, -gZ);
@@ -72,7 +74,7 @@ public class LinearAccelerationMeasurementModelElementTest
       
       LinearAccelerationMeasurementModelElement modelElement = new LinearAccelerationMeasurementModelElement(name, registry, centerOfMassPositionPort,
                                                                   centerOfMassVelocityPort, centerOfMassAccelerationPort, orientationPort, angularVelocityPort,
-                                                                  angularAccelerationPort, linearAccelerationMeasurementInputPort, twistCalculator,
+                                                                  angularAccelerationPort, biasPort, linearAccelerationMeasurementInputPort, twistCalculator,
                                                                   spatialAccelerationCalculator, measurementLink, measurementFrame, estimationLink,
                                                                   estimationFrame, gZ);
 
@@ -94,11 +96,14 @@ public class LinearAccelerationMeasurementModelElementTest
       orientationPort.setData(new FrameOrientation(ReferenceFrame.getWorldFrame(), orientation));
       angularVelocityPort.setData(new FrameVector(estimationFrame, RandomTools.generateRandomVector(random)));
       angularAccelerationPort.setData(new FrameVector(estimationFrame, RandomTools.generateRandomVector(random)));
+      biasPort.setData(new FrameVector(measurementFrame, RandomTools.generateRandomVector(random)));
 
 
       updater.run();
       sensor.startComputation();
-      linearAccelerationMeasurementInputPort.setData(sensor.getLinearAccelerationOutputPort().getData());
+      Vector3d measurement = sensor.getLinearAccelerationOutputPort().getData();
+      measurement.add(biasPort.getData().getVector());
+      linearAccelerationMeasurementInputPort.setData(measurement);
 
       DenseMatrix64F zeroResidual = modelElement.computeResidual();
       DenseMatrix64F zeroVector = new DenseMatrix64F(3, 1);
@@ -128,5 +133,8 @@ public class LinearAccelerationMeasurementModelElementTest
       MeasurementModelTestTools.assertOutputMatrixCorrectUsingPerturbation(angularAccelerationPort, modelElement,
             new FrameVector(angularAccelerationPort.getData()), perturbation, tol, updater);
 
+      // bias perturbations
+      MeasurementModelTestTools.assertOutputMatrixCorrectUsingPerturbation(biasPort, modelElement,
+            new FrameVector(biasPort.getData()), perturbation, tol, updater);
    }
 }
