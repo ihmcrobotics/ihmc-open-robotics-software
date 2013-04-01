@@ -44,20 +44,17 @@ public class ComposableOrientationEstimatorCreator
       this.twistCalculator = twistCalculator;
    }
 
-   public void addOrientationSensorConfigurations(OldOrientationSensorConfiguration<?> orientationSensorConfigurations)
+   public void addOrientationSensorConfigurations(ArrayList<OrientationSensorConfiguration> orientationSensorConfigurations)
    {
-      ArrayList<OrientationSensorConfiguration> newOrientationSensorConfigurations = orientationSensorConfigurations.getNewOrientationSensorConfiguration();
-      for (OrientationSensorConfiguration orientationSensorConfiguration : newOrientationSensorConfigurations)
+      for (OrientationSensorConfiguration orientationSensorConfiguration : orientationSensorConfigurations)
       {
          this.addOrientationSensorConfiguration(orientationSensorConfiguration);
       }
    }
 
-   public void addAngularVelocitySensorConfigurations(OldAngularVelocitySensorConfiguration<?> angularVelocitySensorConfigurations)
+   public void addAngularVelocitySensorConfigurations(ArrayList<AngularVelocitySensorConfiguration> angularVelocitySensorConfigurations)
    {
-      ArrayList<AngularVelocitySensorConfiguration> newAngularVelocitySensorConfigurations =
-         angularVelocitySensorConfigurations.getNewAngularVelocitySensorConfiguration();
-      for (AngularVelocitySensorConfiguration angularVelocitySensorConfiguration : newAngularVelocitySensorConfigurations)
+      for (AngularVelocitySensorConfiguration angularVelocitySensorConfiguration : angularVelocitySensorConfigurations)
       {
          addAngularVelocitySensorConfiguration(angularVelocitySensorConfiguration);
       }
