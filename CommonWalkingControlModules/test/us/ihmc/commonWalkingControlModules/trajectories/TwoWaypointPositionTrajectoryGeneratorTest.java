@@ -19,6 +19,8 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.trajectory.ConstantPositionProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.PositionProvider;
+import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryParameters;
+import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryParametersProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.VectorProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.YoPositionProvider;
 
@@ -42,14 +44,20 @@ public class TwoWaypointPositionTrajectoryGeneratorTest {
 		
 		Point3d firstIntermediatePosition = new Point3d(new double[]{0.12, 2.4, 0.2});
 		Point3d secondIntermediatePosition = new Point3d(new double[]{0.16, 2.3, 0.15});
+		ArrayList<Point3d> waypoints = new ArrayList<Point3d>();
+		waypoints.add(firstIntermediatePosition);
+		waypoints.add(secondIntermediatePosition);
 		
 		YoFramePoint finalPosition = new YoFramePoint("", worldFrame, new YoVariableRegistry(""));
 		finalPosition.set(new FramePoint(worldFrame, new double[]{0.2, 2.35, 0.03}));
 		YoPositionProvider finalPositionProvider = new YoPositionProvider(finalPosition);
 		VectorProvider finalVelocityProvider = new ConstantVectorProvider(new FrameVector(worldFrame, new double[]{0.1, 0.01, -0.02}));
 		
+		TrajectoryParameters trajectoryParameters = new TwoWaypointTrajectoryParameters(waypoints);
+		TrajectoryParametersProvider trajectoryParametersProvider = new TrajectoryParametersProvider(trajectoryParameters);
+		
 		TwoWaypointPositionTrajectoryGenerator trajectory = new TwoWaypointPositionTrajectoryGenerator("", worldFrame, stepTimeProvider, 
-				initialPositionProvider, initialVelocityProvider, finalPositionProvider, finalVelocityProvider, null, new YoVariableRegistry(""), 0.2, 20,
+				initialPositionProvider, initialVelocityProvider, finalPositionProvider, finalVelocityProvider, trajectoryParametersProvider, new YoVariableRegistry(""), 0.2, 20,
 				null);
 		
 		List<Point3d> points = new ArrayList<Point3d>();
