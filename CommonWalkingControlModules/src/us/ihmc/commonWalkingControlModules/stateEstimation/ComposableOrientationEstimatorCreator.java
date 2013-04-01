@@ -87,10 +87,7 @@ public class ComposableOrientationEstimatorCreator
          super(name, controlDT, parentRegistry);
 
          orientationPort = new YoFrameQuaternionControlFlowOutputPort(this, name, ReferenceFrame.getWorldFrame(), parentRegistry);
-         registerStatePort(orientationPort, VECTOR3D_LENGTH);
-
          angularVelocityPort = new YoFrameVectorControlFlowOutputPort(this, name + "Omega", estimationFrame, registry);
-         registerStatePort(angularVelocityPort, VECTOR3D_LENGTH);
 
          addOrientationProcessModelElement();
          addAngularVelocityProcessModelElement(estimationFrame, controlFlowGraph, angularAccelerationOutputPort);
@@ -111,7 +108,7 @@ public class ComposableOrientationEstimatorCreator
       private void addOrientationProcessModelElement()
       {
          ProcessModelElement orientationProcessModelElement = new OrientationProcessModelElement(angularVelocityPort, orientationPort, "orientation", registry);
-         addProcessModelElement(orientationPort, orientationProcessModelElement);
+         addProcessModelElement(orientationPort, orientationProcessModelElement, VECTOR3D_LENGTH);
       }
 
       private void addAngularVelocityProcessModelElement(ReferenceFrame estimationFrame, ControlFlowGraph controlFlowGraph,
@@ -131,7 +128,7 @@ public class ComposableOrientationEstimatorCreator
                                                                                     angularAccelerationPort, "angularVelocity", registry);
 
          angularVelocityProcessModelElement.setProcessNoiseCovarianceBlock(angularAccelerationNoiseCovariance);
-         addProcessModelElement(angularVelocityPort, angularVelocityProcessModelElement);
+         addProcessModelElement(angularVelocityPort, angularVelocityProcessModelElement, VECTOR3D_LENGTH);
       }
 
       private void addOrientationSensor(ReferenceFrame estimationFrame, ControlFlowGraph controlFlowGraph,
@@ -158,12 +155,10 @@ public class ComposableOrientationEstimatorCreator
          ControlFlowInputPort<Vector3d> angularVelocityMeasurementPort = createMeasurementInputPort(VECTOR3D_LENGTH);
 
          ControlFlowOutputPort<FrameVector> biasPort = new YoFrameVectorControlFlowOutputPort(this, biasName, measurementFrame, registry);
-         registerStatePort(biasPort, VECTOR3D_LENGTH);
-
          BiasProcessModelElement biasProcessModelElement = new BiasProcessModelElement(biasPort, measurementFrame, biasName, registry);
          DenseMatrix64F biasProcessNoiseCovariance = angularVelocitySensorConfiguration.getBiasProcessNoiseCovariance();
          biasProcessModelElement.setProcessNoiseCovarianceBlock(biasProcessNoiseCovariance);
-         addProcessModelElement(biasPort, biasProcessModelElement);
+         addProcessModelElement(biasPort, biasProcessModelElement, VECTOR3D_LENGTH);
          String name = angularVelocitySensorConfiguration.getName();
          DenseMatrix64F angularVelocityNoiseCovariance = angularVelocitySensorConfiguration.getAngularVelocityNoiseCovariance();
 
