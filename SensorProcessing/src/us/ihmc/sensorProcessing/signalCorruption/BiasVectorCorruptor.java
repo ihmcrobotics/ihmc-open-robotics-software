@@ -23,8 +23,8 @@ public class BiasVectorCorruptor implements SignalCorruptor<Vector3d>
    {
       this.random = new Random(seed);
       this.registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
-      this.standardDeviation = new DoubleYoVariable(namePrefix + "StdDev", parentRegistry);
-      this.biasYoFrameVector = new YoFrameVector(namePrefix + "Bias", ReferenceFrame.getWorldFrame(), parentRegistry);
+      this.standardDeviation = new DoubleYoVariable(namePrefix + "StdDev", registry);
+      this.biasYoFrameVector = new YoFrameVector(namePrefix + "Bias", ReferenceFrame.getWorldFrame(), registry);
 
       this.updateDT = updateDT;
       
