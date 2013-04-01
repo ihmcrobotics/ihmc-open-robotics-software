@@ -30,7 +30,7 @@ import us.ihmc.darpaRoboticsChallenge.configuration.DRCLocalCloudConfig.LocalClo
 
 public class DRCDashboard
 {
-   private static final boolean JREBEL = true;
+   private static final boolean JREBEL = false;
 
    private static DRCDashboard instance;
    private String ROS_HOSTNAME;
@@ -71,6 +71,7 @@ public class DRCDashboard
    private JLabel rosUriLabel;
    private JTextField rosCorePortField;
    private JButton modifyRosNetworkConfigsButton;
+   private JButton launchGazeboSimButton;
 
    public DRCDashboard()
    {
@@ -186,7 +187,8 @@ public class DRCDashboard
       taskPanel.add(taskLabel, c);
    
       c.gridy = 1;
-      taskCombo = new JComboBox(new String[] { "One", "Two", "Three", "Four" });
+//      taskCombo = new JComboBox(new String[] { "One", "Two", "Three", "Four" });
+      taskCombo = new JComboBox(DRCDashboardTypes.DRCTask.values());
       taskPanel.add(taskCombo, c);
    }
 
@@ -210,7 +212,8 @@ public class DRCDashboard
       robotModelSelectionPanel = new JPanel(new GridLayout(2, 1));
       leftPanel.add(robotModelSelectionPanel, c);
       robotModelSelectionLabel = new JLabel("Select Robot Model: ", JLabel.LEFT);
-      robotModelSelectionCombo = new JComboBox(new String[] { "One", "Two" });
+//      robotModelSelectionCombo = new JComboBox(new String[] { "One", "Two" });
+      robotModelSelectionCombo = new JComboBox(DRCDashboardTypes.RobotModel.values());
       robotModelSelectionPanel.add(robotModelSelectionLabel);
       robotModelSelectionPanel.add(robotModelSelectionCombo);
    }
@@ -226,7 +229,7 @@ public class DRCDashboard
       cloudMachineSelectionPanel.add(cloudMachineSelectionCombo);
       
       cloudMachineSelectionCombo.addActionListener(new ActionListener()
-      {         
+      {
          public void actionPerformed(ActionEvent e)
          {            
             cloudMachineHostnameLabel.setText(updatedCloudHostnameString());
@@ -262,6 +265,8 @@ public class DRCDashboard
    
       setupNetworkInfoPanel();
    
+      setupLaunchButton();
+      
       setupEditInfoButton();
    }
 
@@ -328,6 +333,24 @@ public class DRCDashboard
       networkInfoPanel.add(rosCorePortField, c);
    }
 
+   private void setupLaunchButton()
+   {
+	   c.gridy = 3;
+	   c.gridx = 0;
+	   c.gridwidth = 1;
+	   c.anchor = GridBagConstraints.LAST_LINE_START;
+	   launchGazeboSimButton = new JButton("Launch");
+	   networkInfoPanel.add(launchGazeboSimButton, c);
+	   
+	   launchGazeboSimButton.addActionListener(new ActionListener()
+	      {
+	         public void actionPerformed(ActionEvent e)
+	         {
+	        	 new GazeboSimLauncher((LocalCloudMachines)cloudMachineSelectionCombo.getSelectedItem(), (DRCDashboardTypes.DRCTask)taskCombo.getSelectedItem());
+	         }
+	      });
+   }
+   
    private void setupEditInfoButton()
    {
       c.gridy = 3;
