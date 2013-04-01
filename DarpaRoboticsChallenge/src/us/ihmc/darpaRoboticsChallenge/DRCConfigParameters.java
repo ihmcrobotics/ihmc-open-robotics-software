@@ -83,6 +83,8 @@ public class DRCConfigParameters
    public static final double POSITION_NOISE_STD = 0.01;
    public static final double QUATERNION_NOISE_STD = 0.01;
    public static final boolean DEBUG_GAZEBO_LIDAR = false;
+   public static final double LIDAR_NOISE_LEVEL_OVERRIDE = 0.005; // DRCGazebo will simulate with: 0.005 
+   
 
 
 

@@ -11,6 +11,7 @@ import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
 import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJoint;
 import com.yobotics.simulationconstructionset.simulatedSensors.FastPolarRayCastLIDAR;
+import com.yobotics.simulationconstructionset.simulatedSensors.SimulatedLIDARSensorNoiseParameters;
 import com.yobotics.simulationconstructionset.simulatedSensors.SimulatedLIDARSensorUpdateParameters;
 
 public class DRCLidar
@@ -67,6 +68,9 @@ public class DRCLidar
             polarLidar.setControllerLidarJoint(lidarJoint);
             polarLidar.setSimulationNeckJoint(neckJoint);
             polarLidar.setLidarDaemonParameters(updateParameters);
+            SimulatedLIDARSensorNoiseParameters noiseParameters = new SimulatedLIDARSensorNoiseParameters();
+            noiseParameters.setGaussianNoiseStandardDeviation(DRCConfigParameters.LIDAR_NOISE_LEVEL_OVERRIDE);
+            polarLidar.setNoiseParameters(noiseParameters);
             if (startLidar)
             {
                System.out.println("Streaming Lidar");
