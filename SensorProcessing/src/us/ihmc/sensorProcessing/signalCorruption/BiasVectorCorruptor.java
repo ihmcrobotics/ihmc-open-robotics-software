@@ -17,7 +17,7 @@ public class BiasVectorCorruptor implements SignalCorruptor<Vector3d>
    private final Vector3d biasVector = new Vector3d();
    private final DoubleYoVariable standardDeviation;
    private final YoFrameVector biasYoFrameVector;
-   private final double updateDT;
+   private final double squareRootOfUpdateDT;
    
    public BiasVectorCorruptor(long seed, String namePrefix, double updateDT, YoVariableRegistry parentRegistry)
    {
@@ -26,7 +26,7 @@ public class BiasVectorCorruptor implements SignalCorruptor<Vector3d>
       this.standardDeviation = new DoubleYoVariable(namePrefix + "StdDev", registry);
       this.biasYoFrameVector = new YoFrameVector(namePrefix + "Bias", ReferenceFrame.getWorldFrame(), registry);
 
-      this.updateDT = updateDT;
+      this.squareRootOfUpdateDT = Math.sqrt(updateDT);
       
       parentRegistry.addChild(registry);
    }
@@ -34,13 +34,13 @@ public class BiasVectorCorruptor implements SignalCorruptor<Vector3d>
    public void corrupt(Vector3d signal)
    {
       double std = standardDeviation.getDoubleValue();
-      double biasUpdateX = std * random.nextGaussian() * updateDT;
-      double biasUpdateY = std * random.nextGaussian() * updateDT;
-      double biasUpdateZ = std * random.nextGaussian() * updateDT;
-      
+      double biasUpdateX = std * random.nextGaussian() * squareRootOfUpdateDT;
+      double biasUpdateY = std * random.nextGaussian() * squareRootOfUpdateDT;
+      double biasUpdateZ = std * random.nextGaussian() * squareRootOfUpdateDT;
+
       biasYoFrameVector.add(biasUpdateX, biasUpdateY, biasUpdateZ);
       biasYoFrameVector.get(biasVector);
-      
+
       signal.add(biasVector);
    }
 

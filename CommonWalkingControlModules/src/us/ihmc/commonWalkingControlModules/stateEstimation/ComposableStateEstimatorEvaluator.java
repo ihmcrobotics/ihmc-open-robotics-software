@@ -26,6 +26,7 @@ import us.ihmc.sensorProcessing.simulatedSensors.SimulatedLinearAccelerationSens
 import us.ihmc.sensorProcessing.simulatedSensors.SimulatedOrientationSensor;
 import us.ihmc.utilities.Axis;
 import us.ihmc.utilities.math.MathTools;
+import us.ihmc.utilities.math.geometry.AngleTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -59,11 +60,12 @@ public class ComposableStateEstimatorEvaluator
    private static final boolean ESTIMATE_COM = true;
    private static final boolean ADD_ARM_LINKS = true;
 
-   private final double orientationMeasurementStandardDeviation = Math.sqrt(1e-1);
-   private final double angularVelocityMeasurementStandardDeviation = Math.sqrt(1e-1);
-   private final double linearAccelerationMeasurementStandardDeviation = Math.sqrt(1e-1);
+   private final double orientationMeasurementStandardDeviation = Math.sqrt(1e-2);
+   private final double angularVelocityMeasurementStandardDeviation = Math.sqrt(1e-2);
+   private final double linearAccelerationMeasurementStandardDeviation = Math.sqrt(1e-2);
 
-   private final double angularAccelerationProcessNoiseStandardDeviation = Math.sqrt(1.0);
+   private final double angularAccelerationProcessNoiseStandardDeviation = Math.sqrt(1e-1);
+   private final double comAccelerationProcessNoiseStandardDeviation = Math.sqrt(1e-1);
    private final double angularVelocityBiasProcessNoiseStandardDeviation = Math.sqrt(1e-2);
    private final double linearAccelerationBiasProcessNoiseStandardDeviation = Math.sqrt(1e-2);
 
@@ -104,7 +106,7 @@ public class ComposableStateEstimatorEvaluator
 
          bodyLink = new Link("body");
          bodyLink.setMassAndRadiiOfGyration(10.0, 0.1, 0.2, 0.3);
-         
+
          ExternalForcePoint externalForcePoint = new ExternalForcePoint("ef_rootJoint", this);
          rootJoint.addExternalForcePoint(externalForcePoint);
 
@@ -298,18 +300,19 @@ public class ComposableStateEstimatorEvaluator
       private final StateEstimatorEstimatorEvaluatorRobot robot;
       private final ControlFlowOutputPort<FrameVector> outputPort = createOutputPort();
       private final FrameVector desiredAngularAcceleration;
+      private final GaussianVectorCorruptor signalCorruptor = new GaussianVectorCorruptor(123412L, getClass().getSimpleName() + "Corruptor", registry);
 
-      public AngularAccelerationFromRobotStealer(StateEstimatorEstimatorEvaluatorRobot robot, ReferenceFrame referenceFrame)
+      public AngularAccelerationFromRobotStealer(StateEstimatorEstimatorEvaluatorRobot robot, ReferenceFrame referenceFrame, double standardDeviation)
       {
          this.robot = robot;
-
          this.desiredAngularAcceleration = new FrameVector(referenceFrame);
+         signalCorruptor.setStandardDeviation(standardDeviation);
       }
 
       public void startComputation()
       {
          desiredAngularAcceleration.set(robot.getActualAngularAccelerationInBodyFrame());
-
+         signalCorruptor.corrupt(desiredAngularAcceleration.getVector());
          outputPort.setData(desiredAngularAcceleration);
       }
 
@@ -329,10 +332,13 @@ public class ComposableStateEstimatorEvaluator
       private final CenterOfMassAccelerationCalculator centerOfMassAccelerationCalculator;
       private final FrameVector comAcceleration = new FrameVector(ReferenceFrame.getWorldFrame());
       private final ControlFlowOutputPort<FrameVector> outputPort = createOutputPort();
+      private final GaussianVectorCorruptor signalCorruptor = new GaussianVectorCorruptor(123412L, getClass().getSimpleName() + "Corruptor", registry);
 
-      public CenterOfMassAccelerationFromFullRobotModelStealer(RigidBody rootBody, SpatialAccelerationCalculator spatialAccelerationCalculator)
+      public CenterOfMassAccelerationFromFullRobotModelStealer(RigidBody rootBody, SpatialAccelerationCalculator spatialAccelerationCalculator,
+            double standardDeviation)
       {
          this.centerOfMassAccelerationCalculator = new CenterOfMassAccelerationCalculator(rootBody, spatialAccelerationCalculator);
+         signalCorruptor.setStandardDeviation(standardDeviation);
       }
 
       public ControlFlowOutputPort<FrameVector> getOutputPort()
@@ -344,13 +350,13 @@ public class ComposableStateEstimatorEvaluator
       {
          centerOfMassAccelerationCalculator.packCoMAcceleration(comAcceleration);
          comAcceleration.changeFrame(ReferenceFrame.getWorldFrame());
+         signalCorruptor.corrupt(comAcceleration.getVector());
          outputPort.setData(comAcceleration);
       }
 
       public void waitUntilComputationIsDone()
       {
       }
-
    }
 
    private class QuaternionOrientationEstimatorEvaluatorController implements RobotController
@@ -379,15 +385,12 @@ public class ComposableStateEstimatorEvaluator
          perfectFullRobotModel = new StateEstimatorEvaluatorFullRobotModel(robot);
          perfectTwistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), perfectFullRobotModel.elevator);
 
-         // TODO: What does useDesireds do?
-         boolean useDesireds = false;
          double gravity = robot.getGravityZ();
-         perfectSpatialAccelerationCalculator = new SpatialAccelerationCalculator(perfectFullRobotModel.elevator, perfectTwistCalculator, gravity,
-               useDesireds);
+         perfectSpatialAccelerationCalculator = new SpatialAccelerationCalculator(perfectFullRobotModel.elevator, perfectTwistCalculator, gravity, false);
          estimatedFullRobotModel = new StateEstimatorEvaluatorFullRobotModel(robot);
          estimatedTwistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), estimatedFullRobotModel.elevator);
          estimatedSpatialAccelerationCalculator = new SpatialAccelerationCalculator(estimatedFullRobotModel.elevator, estimatedTwistCalculator, gravity,
-               useDesireds);
+               false);
 
          ArrayList<OrientationSensorConfiguration> orientationSensorConfigurations = createOrientationSensors(perfectFullRobotModel, estimatedFullRobotModel);
          ArrayList<AngularVelocitySensorConfiguration> angularVelocitySensorConfigurations = createAngularVelocitySensors(perfectFullRobotModel,
@@ -402,23 +405,24 @@ public class ComposableStateEstimatorEvaluator
          DenseMatrix64F angularAccelerationNoiseCovariance = createDiagonalCovarianceMatrix(angularAccelerationProcessNoiseStandardDeviation, 3);
 
          ControlFlowOutputPort<FrameVector> desiredAngularAccelerationOutputPort = null;
-         if (USE_ANGULAR_ACCELERATION_INPUT)
+         if (ESTIMATE_COM || USE_ANGULAR_ACCELERATION_INPUT)
          {
-            AngularAccelerationFromRobotStealer angularAccelerationFromRobotStealer = new AngularAccelerationFromRobotStealer(robot, estimationFrame);
+            AngularAccelerationFromRobotStealer angularAccelerationFromRobotStealer = new AngularAccelerationFromRobotStealer(robot, estimationFrame,
+                  angularAccelerationProcessNoiseStandardDeviation);
             desiredAngularAccelerationOutputPort = angularAccelerationFromRobotStealer.getOutputPort();
          }
 
          if (ESTIMATE_COM)
          {
-            AngularAccelerationFromRobotStealer angularAccelerationFromRobotStealer = new AngularAccelerationFromRobotStealer(robot, estimationFrame);
-            desiredAngularAccelerationOutputPort = angularAccelerationFromRobotStealer.getOutputPort();
-
             CenterOfMassAccelerationFromFullRobotModelStealer centerOfMassAccelerationFromFullRobotModelStealer = new CenterOfMassAccelerationFromFullRobotModelStealer(
-                  perfectFullRobotModel.elevator, perfectSpatialAccelerationCalculator);
+                  perfectFullRobotModel.elevator, perfectSpatialAccelerationCalculator, comAccelerationProcessNoiseStandardDeviation);
             ControlFlowOutputPort<FrameVector> desiredCenterOfMassAccelerationOutputPort = centerOfMassAccelerationFromFullRobotModelStealer.getOutputPort();
 
+            DenseMatrix64F comAccelerationNoiseCovariance = createDiagonalCovarianceMatrix(comAccelerationProcessNoiseStandardDeviation, 3);
+
             ComposableOrientationAndCoMEstimatorCreator orientationEstimatorCreator = new ComposableOrientationAndCoMEstimatorCreator(
-                  angularAccelerationNoiseCovariance, estimationLink, estimatedTwistCalculator, estimatedSpatialAccelerationCalculator);
+                  angularAccelerationNoiseCovariance, comAccelerationNoiseCovariance, estimationLink, estimatedTwistCalculator,
+                  estimatedSpatialAccelerationCalculator);
             orientationEstimatorCreator.addOrientationSensorConfigurations(orientationSensorConfigurations);
             orientationEstimatorCreator.addAngularVelocitySensorConfigurations(angularVelocitySensorConfigurations);
             orientationEstimatorCreator.addLinearAccelerationSensorConfigurations(linearAccelerationSensorConfigurations);
@@ -469,8 +473,7 @@ public class ComposableStateEstimatorEvaluator
 
       }
 
-      private ArrayList<AngularVelocitySensorConfiguration> createAngularVelocitySensors(
-            StateEstimatorEvaluatorFullRobotModel perfectFullRobotModel,
+      private ArrayList<AngularVelocitySensorConfiguration> createAngularVelocitySensors(StateEstimatorEvaluatorFullRobotModel perfectFullRobotModel,
             StateEstimatorEvaluatorFullRobotModel estimatedFullRobotModel)
       {
          ArrayList<AngularVelocitySensorConfiguration> angularVelocitySensorConfigurations = new ArrayList<AngularVelocitySensorConfiguration>();
@@ -511,8 +514,7 @@ public class ComposableStateEstimatorEvaluator
          return angularVelocitySensorConfigurations;
       }
 
-      private ArrayList<LinearAccelerationSensorConfiguration> createLinearAccelerationSensors(
-            StateEstimatorEvaluatorFullRobotModel perfectFullRobotModel,
+      private ArrayList<LinearAccelerationSensorConfiguration> createLinearAccelerationSensors(StateEstimatorEvaluatorFullRobotModel perfectFullRobotModel,
             StateEstimatorEvaluatorFullRobotModel estimatedFullRobotModel)
       {
          ArrayList<LinearAccelerationSensorConfiguration> linearAccelerationSensorConfigurations = new ArrayList<LinearAccelerationSensorConfiguration>();
@@ -615,7 +617,7 @@ public class ComposableStateEstimatorEvaluator
          perfectFullRobotModel.updateBasedOnRobot(robot, true);
          perfectTwistCalculator.compute();
          perfectSpatialAccelerationCalculator.compute();
-         
+
          updateInternalState();
 
          controlFlowGraph.startComputation();
@@ -632,8 +634,9 @@ public class ComposableStateEstimatorEvaluator
       private void updateInternalState()
       {
          /*
-          * supersense joint positions and velocities and update twist calculator and spatial accel calculator based on this data
-          * TODO: need a class that does this based on sensors
+          * supersense joint positions and velocities and update twist
+          * calculator and spatial accel calculator based on this data TODO:
+          * need a class that does this based on sensors
           */
          estimatedFullRobotModel.updateBasedOnRobot(robot, false);
          estimatedTwistCalculator.compute();
@@ -652,13 +655,9 @@ public class ComposableStateEstimatorEvaluator
          AxisAngle4d orientationErrorAxisAngle = new AxisAngle4d();
          orientationErrorAxisAngle.set(orientationErrorQuat4d);
 
-         double errorAngle = orientationErrorAxisAngle.getAngle();
-         if (errorAngle > Math.PI)
-            errorAngle = errorAngle - 2.0 * Math.PI;
-         if (errorAngle < -Math.PI)
-            errorAngle = errorAngle + 2.0 * Math.PI;
+         double errorAngle = AngleTools.trimAngleMinusPiToPi(orientationErrorAxisAngle.getAngle());
 
-         orientationErrorAngle.set(errorAngle);
+         orientationErrorAngle.set(Math.abs(errorAngle));
       }
    }
 
