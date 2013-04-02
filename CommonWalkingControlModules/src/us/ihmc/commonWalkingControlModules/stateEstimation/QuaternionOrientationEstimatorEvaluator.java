@@ -37,6 +37,7 @@ import us.ihmc.utilities.screwTheory.Twist;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.ExternalForcePoint;
 import com.yobotics.simulationconstructionset.FloatingJoint;
 import com.yobotics.simulationconstructionset.IMUMount;
 import com.yobotics.simulationconstructionset.Link;
@@ -103,6 +104,9 @@ public class QuaternionOrientationEstimatorEvaluator
 
          bodyLink = new Link("body");
          bodyLink.setMassAndRadiiOfGyration(10.0, 0.1, 0.2, 0.3);
+         
+         ExternalForcePoint externalForcePoint = new ExternalForcePoint("ef_rootJoint", this);
+         rootJoint.addExternalForcePoint(externalForcePoint);
 
          Graphics3DObject bodyLinkGraphics = new Graphics3DObject();
          bodyLinkGraphics.translate(0.0, 0.0, -0.15);
