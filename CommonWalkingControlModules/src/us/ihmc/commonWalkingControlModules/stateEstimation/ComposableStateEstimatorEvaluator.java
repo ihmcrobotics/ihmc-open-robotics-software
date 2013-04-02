@@ -302,11 +302,12 @@ public class ComposableStateEstimatorEvaluator
       private final FrameVector desiredAngularAcceleration;
       private final GaussianVectorCorruptor signalCorruptor = new GaussianVectorCorruptor(123412L, getClass().getSimpleName() + "Corruptor", registry);
 
-      public AngularAccelerationFromRobotStealer(StateEstimatorEstimatorEvaluatorRobot robot, ReferenceFrame referenceFrame, double standardDeviation)
+      public AngularAccelerationFromRobotStealer(StateEstimatorEstimatorEvaluatorRobot robot, ReferenceFrame referenceFrame)
       {
          this.robot = robot;
          this.desiredAngularAcceleration = new FrameVector(referenceFrame);
-         signalCorruptor.setStandardDeviation(standardDeviation);
+         double discreteStdDev = convertStandardDeviationToDiscreteTime(angularAccelerationProcessNoiseStandardDeviation);
+         signalCorruptor.setStandardDeviation(discreteStdDev);
       }
 
       public void startComputation()
@@ -334,11 +335,12 @@ public class ComposableStateEstimatorEvaluator
       private final ControlFlowOutputPort<FrameVector> outputPort = createOutputPort();
       private final GaussianVectorCorruptor signalCorruptor = new GaussianVectorCorruptor(123412L, getClass().getSimpleName() + "Corruptor", registry);
 
-      public CenterOfMassAccelerationFromFullRobotModelStealer(RigidBody rootBody, SpatialAccelerationCalculator spatialAccelerationCalculator,
-            double standardDeviation)
+      public CenterOfMassAccelerationFromFullRobotModelStealer(RigidBody rootBody, SpatialAccelerationCalculator spatialAccelerationCalculator)
       {
          this.centerOfMassAccelerationCalculator = new CenterOfMassAccelerationCalculator(rootBody, spatialAccelerationCalculator);
-         signalCorruptor.setStandardDeviation(standardDeviation);
+
+         double discreteStdDev = convertStandardDeviationToDiscreteTime(comAccelerationProcessNoiseStandardDeviation);
+         signalCorruptor.setStandardDeviation(discreteStdDev);
       }
 
       public ControlFlowOutputPort<FrameVector> getOutputPort()
@@ -389,8 +391,7 @@ public class ComposableStateEstimatorEvaluator
          perfectSpatialAccelerationCalculator = new SpatialAccelerationCalculator(perfectFullRobotModel.elevator, perfectTwistCalculator, gravity, false);
          estimatedFullRobotModel = new StateEstimatorEvaluatorFullRobotModel(robot);
          estimatedTwistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), estimatedFullRobotModel.elevator);
-         estimatedSpatialAccelerationCalculator = new SpatialAccelerationCalculator(estimatedFullRobotModel.elevator, estimatedTwistCalculator, gravity,
-               false);
+         estimatedSpatialAccelerationCalculator = new SpatialAccelerationCalculator(estimatedFullRobotModel.elevator, estimatedTwistCalculator, gravity, false);
 
          ArrayList<OrientationSensorConfiguration> orientationSensorConfigurations = createOrientationSensors(perfectFullRobotModel, estimatedFullRobotModel);
          ArrayList<AngularVelocitySensorConfiguration> angularVelocitySensorConfigurations = createAngularVelocitySensors(perfectFullRobotModel,
@@ -407,15 +408,14 @@ public class ComposableStateEstimatorEvaluator
          ControlFlowOutputPort<FrameVector> desiredAngularAccelerationOutputPort = null;
          if (ESTIMATE_COM || USE_ANGULAR_ACCELERATION_INPUT)
          {
-            AngularAccelerationFromRobotStealer angularAccelerationFromRobotStealer = new AngularAccelerationFromRobotStealer(robot, estimationFrame,
-                  angularAccelerationProcessNoiseStandardDeviation);
+            AngularAccelerationFromRobotStealer angularAccelerationFromRobotStealer = new AngularAccelerationFromRobotStealer(robot, estimationFrame);
             desiredAngularAccelerationOutputPort = angularAccelerationFromRobotStealer.getOutputPort();
          }
 
          if (ESTIMATE_COM)
          {
             CenterOfMassAccelerationFromFullRobotModelStealer centerOfMassAccelerationFromFullRobotModelStealer = new CenterOfMassAccelerationFromFullRobotModelStealer(
-                  perfectFullRobotModel.elevator, perfectSpatialAccelerationCalculator, comAccelerationProcessNoiseStandardDeviation);
+                  perfectFullRobotModel.elevator, perfectSpatialAccelerationCalculator);
             ControlFlowOutputPort<FrameVector> desiredCenterOfMassAccelerationOutputPort = centerOfMassAccelerationFromFullRobotModelStealer.getOutputPort();
 
             DenseMatrix64F comAccelerationNoiseCovariance = createDiagonalCovarianceMatrix(comAccelerationProcessNoiseStandardDeviation, 3);
@@ -673,5 +673,13 @@ public class ComposableStateEstimatorEvaluator
    public static void main(String[] args)
    {
       new ComposableStateEstimatorEvaluator();
+   }
+
+   private double convertStandardDeviationToDiscreteTime(double continuousStdDev)
+   {
+      double continuousVariance = MathTools.square(continuousStdDev);
+      double discreteVariance = continuousVariance * controlDT;
+      double discreteStdDev = Math.sqrt(discreteVariance);
+      return discreteStdDev;
    }
 }
