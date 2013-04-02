@@ -1994,6 +1994,34 @@ resulting in:
 
 \end_layout
 
+\begin_layout Paragraph
+Bias
+\end_layout
+
+\begin_layout Standard
+The only nonzero intermediate Jacobian is
+\begin_inset Formula 
+\[
+\frac{\partial b_{\dot{v},i}}{\partial b_{\dot{v},i}}=I
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+resulting in
+\begin_inset Formula 
+\[
+\frac{\partial z_{\dot{v},i}}{\partial b_{\dot{v},i}}=I
+\]
+
+\end_inset
+
+
+\end_layout
+
 \begin_layout Subsection
 Orientation measurements
 \end_layout
