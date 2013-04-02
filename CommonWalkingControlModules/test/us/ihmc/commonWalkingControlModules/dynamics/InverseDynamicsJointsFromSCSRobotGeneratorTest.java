@@ -343,7 +343,7 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
          }
          
          // Then update the generators state based on the robot's state. This will also set the desired accelerations to the actual accelerations:
-         generator.updateInverseDynamicsRobotModelFromRobot(true);
+         generator.updateInverseDynamicsRobotModelFromRobot(true, true);
          
          // Compute the inverse dynamics:
          twistCalculator.compute();

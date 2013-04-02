@@ -171,7 +171,7 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
    
    private final Transform3D positionAndRotation = new Transform3D();
 
-   public void updateInverseDynamicsRobotModelFromRobot(boolean updateRootJoints)
+   public void updateInverseDynamicsRobotModelFromRobot(boolean updateRootJoints, boolean updateDesireds)
    {
       // First update joint angles:
       Set<PinJoint> pinJoints = pinToRevoluteJointMap.keySet();
@@ -186,7 +186,11 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
             double jointAcceleration = pinJoint.getQDD().getDoubleValue();
             revoluteJoint.setQ(jointPosition);
             revoluteJoint.setQd(jointVelocity);
-            revoluteJoint.setQddDesired(jointAcceleration);
+
+            if (updateDesireds)
+               revoluteJoint.setQddDesired(jointAcceleration);
+            else
+               revoluteJoint.setQdd(jointAcceleration);
          }
       }
       
@@ -232,7 +236,10 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
             floatingJoint.getAngularAccelerationInBody(angularAcceleration);
 
             sixDoFJointSpatialAccelerationCalculator.computeSpatialAccelerationInBodyFrame(spatialAccelerationVector, sixDoFJoint, linearAcceleration, angularAcceleration);
-            sixDoFJoint.setDesiredAcceleration(spatialAccelerationVector);
+            if (updateDesireds)
+               sixDoFJoint.setDesiredAcceleration(spatialAccelerationVector);
+            else
+               sixDoFJoint.setAcceleration(spatialAccelerationVector);
          }
       }
    }

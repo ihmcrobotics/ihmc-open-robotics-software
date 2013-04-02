@@ -23,6 +23,7 @@ public class ComposableStateEstimator extends AbstractControlFlowElement
    protected final YoVariableRegistry registry;
    protected ComposableStateEstimatorKalmanFilter kalmanFilter;
    private final double controlDT;
+   private final List<Runnable> postStateChangeRunnables = new ArrayList<Runnable>();
 
    // model elements
    private final Map<ControlFlowOutputPort<?>, ProcessModelElement> processModelElements = new HashMap<ControlFlowOutputPort<?>, ProcessModelElement>();
@@ -93,6 +94,7 @@ public class ComposableStateEstimator extends AbstractControlFlowElement
 
       case DISCRETE:
          discreteStatePorts.add(statePort);
+         break;
 
       default:
          throw new RuntimeException("Time domain not recognized: " + processModelElement.getTimeDomain());
@@ -107,6 +109,11 @@ public class ComposableStateEstimator extends AbstractControlFlowElement
       measurementModelElements.put(measurementPort, measurementModelElement);
    }
 
+   public void addPostStateChangeRunnable(Runnable runnable)
+   {
+      this.postStateChangeRunnables.add(runnable);
+   }
+   
    public void initialize()
    {
       int continuousStateSize = MatrixTools.computeIndicesIntoVector(continuousStatePorts, continuousStateStartIndices, stateSizes);
@@ -121,11 +128,14 @@ public class ComposableStateEstimator extends AbstractControlFlowElement
 
       kalmanFilter = new ComposableStateEstimatorKalmanFilter(continuousStateSize, discreteStateSize, inputSize, measurementSize);
 
+      for (Runnable runnable : postStateChangeRunnables)
+         runnable.run();
+
       kalmanFilter.configure();
-      initializeState();
+      initializeCovariance();
    }
 
-   private void initializeState()
+   private void initializeCovariance()
    {
       DenseMatrix64F x = kalmanFilter.getState();
       kalmanFilter.computeSteadyStateGainAndCovariance(50); // TODO: magic number
@@ -168,10 +178,8 @@ public class ComposableStateEstimator extends AbstractControlFlowElement
 
       public ComposableStateEstimatorKalmanFilter(int continuousStateSize, int discreteStateSize, int inputSize, int measurementSize)
       {
-         super(ComposableStateEstimatorKalmanFilter.class.getSimpleName(), continuousStateSize, inputSize, measurementSize,
+         super(ComposableStateEstimatorKalmanFilter.class.getSimpleName(), continuousStateSize + discreteStateSize, inputSize, measurementSize,
                ComposableStateEstimator.this.registry);
-         this.correction = new DenseMatrix64F(continuousStateSize, 1);
-         this.residual = new DenseMatrix64F(measurementSize, 1);
 
          this.discretizer = new StateSpaceSystemDiscretizer(continuousStateSize, inputSize);
          this.FContinuous = new DenseMatrix64F(continuousStateSize, continuousStateSize);
@@ -187,8 +195,11 @@ public class ComposableStateEstimator extends AbstractControlFlowElement
          this.G = new DenseMatrix64F(stateSize, inputSize);
          this.Q = new DenseMatrix64F(stateSize, stateSize);
 
-         this.H = new DenseMatrix64F(measurementSize, continuousStateSize);
+         this.H = new DenseMatrix64F(measurementSize, stateSize);
          this.R = new DenseMatrix64F(measurementSize, measurementSize);
+         
+         this.correction = new DenseMatrix64F(stateSize, 1);
+         this.residual = new DenseMatrix64F(measurementSize, 1);
       }
 
       protected void configure()
@@ -206,6 +217,11 @@ public class ComposableStateEstimator extends AbstractControlFlowElement
          for (ProcessModelElement processModelElement : processModelElements.values())
          {
             processModelElement.propagateState(controlDT); // should update what's in the output ports
+         }
+
+         for (Runnable runnable : postStateChangeRunnables)
+         {
+            runnable.run();
          }
       }
 
@@ -229,6 +245,11 @@ public class ComposableStateEstimator extends AbstractControlFlowElement
             MatrixTools.extractVectorBlock(correctionBlock, correction, statePort, allStateStartIndices, stateSizes);
 
             processModelElement.correctState(correctionBlock);
+         }
+
+         for (Runnable runnable : postStateChangeRunnables)
+         {
+            runnable.run();
          }
       }
 

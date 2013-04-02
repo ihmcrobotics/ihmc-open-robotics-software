@@ -25,11 +25,11 @@ public class CenterOfMassPositionProcessModelElement extends AbstractProcessMode
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    public CenterOfMassPositionProcessModelElement(ControlFlowOutputPort<FramePoint> centerOfMassPositionPort,
-           ControlFlowOutputPort<FrameVector> angularVelocityPort, String name, YoVariableRegistry registry)
+           ControlFlowOutputPort<FrameVector> centerOfMassVelocity, String name, YoVariableRegistry registry)
    {
       super(TimeDomain.CONTINUOUS, SIZE, name, registry);
       this.centerOfMassPositionPort = centerOfMassPositionPort;
-      this.centerOfMassVelocityPort = angularVelocityPort;
+      this.centerOfMassVelocityPort = centerOfMassVelocity;
       this.centerOfMassPosition = new FramePoint(worldFrame);
       this.centerOfMassPositionDelta = new FrameVector(ReferenceFrame.getWorldFrame());
 

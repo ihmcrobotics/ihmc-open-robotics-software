@@ -17,15 +17,16 @@ public class AngularAccelerationProcessModelElement extends AbstractProcessModel
    private static final int SIZE = 3;
    private final ControlFlowOutputPort<FrameVector> angularAccelerationStatePort;
    private final ControlFlowInputPort<FrameVector> angularAccelerationInputPort;
-   private final FrameVector angularAcceleration = new FrameVector(ReferenceFrame.getWorldFrame());
-   private final FrameVector angularAccelerationDelta = new FrameVector(ReferenceFrame.getWorldFrame());
+   private final FrameVector angularAcceleration;
+   private final FrameVector angularAccelerationDelta;
 
-   public AngularAccelerationProcessModelElement(String name, YoVariableRegistry registry, ControlFlowOutputPort<FrameVector> angularAccelerationStatePort, ControlFlowInputPort<FrameVector> angularAccelerationInputPort)
+   public AngularAccelerationProcessModelElement(String name, ReferenceFrame estimationFrame, YoVariableRegistry registry, ControlFlowOutputPort<FrameVector> angularAccelerationStatePort, ControlFlowInputPort<FrameVector> angularAccelerationInputPort)
    {
       super(TimeDomain.DISCRETE, SIZE, name, registry);
       this.angularAccelerationStatePort = angularAccelerationStatePort;
       this.angularAccelerationInputPort = angularAccelerationInputPort;
-      
+      this.angularAcceleration = new FrameVector(estimationFrame);
+      this.angularAccelerationDelta = new FrameVector(estimationFrame);
       computeAngularAccelerationInputMatrixBlock();
    }
 
