@@ -36,7 +36,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
 {
    private final static double EPSILON = 1e-3;
    private final static boolean VISUALIZE = true;
-   private final static boolean VISUALIZE_WAYPOINTS_OVER_BOX = false;
+   private final static boolean VISUALIZE_WAYPOINTS_OVER_BOX = true;
 
    private final DoubleYoVariable groundClearance;
    private final DoubleYoVariable linearSplineLengthFactor;
@@ -393,6 +393,11 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       {
          waypoints = getWaypointsAtGroundClearance(TwoWaypointTrajectoryParameters.getDefaultGroundClearance());
       }
+      
+      else if (trajectoryParameters.getWaypointGenerationMethod().equals(TrajectoryWaypointGenerationMethod.BY_BOX))
+      {
+         waypoints = getWaypointsFromABox(trajectoryParameters.getBox());
+      }
 
       for (int i = 0; i < 2; i++)
       {
@@ -486,9 +491,12 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
    }
 
    // TODO consider incorporating initial velocity to waypoint placement
-   private TwoWaypointTrajectoryParameters createWaypointsFromABox(Box3d box, FramePoint initialPosition, FramePoint finalPosition)
+   private List<FramePoint> getWaypointsFromABox(Box3d box)
    {
-      Vector3d halfSideLengths = new Vector3d(box.getWidth(), box.getLength(), box.getHeight());
+      FramePoint initialPosition = allPositions[endpointIndices[0]].getFramePointCopy();
+      FramePoint finalPosition = allPositions[endpointIndices[1]].getFramePointCopy();
+      
+      Vector3d halfSideLengths = new Vector3d(0.5 * box.getWidth(), 0.5 * box.getLength(), 0.5 * box.getHeight());
       Transform3D boxTransform = box.getTransformCopy();  
       Transform3D inverseBoxTransform = new Transform3D();
       boxTransform.invert(inverseBoxTransform);
@@ -529,7 +537,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
 
       if(index != 2)
       {
-         return new TwoWaypointTrajectoryParameters(zVal);
+         return getWaypointsAtGroundClearance(zVal);
       }
 
       if(xyPlaneBoxIntersections[0].distance(boxFrameInitialPosition) > xyPlaneBoxIntersections[1].distance(boxFrameInitialPosition))
@@ -539,11 +547,11 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
          xyPlaneBoxIntersections[0] = tempVec;
       }
            
-      List<Point3d> waypoints = new ArrayList<Point3d>();
+      List<FramePoint> waypoints = new ArrayList<FramePoint>();
       for(Point3d intersectionPoint : xyPlaneBoxIntersections)
       {
          boxTransform.transform(intersectionPoint);
-         waypoints.add(intersectionPoint);
+         waypoints.add(new FramePoint(referenceFrame, intersectionPoint));
       }
 
       Vector3d directionOfFootstep = new Vector3d();
@@ -553,7 +561,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       double[] waypointShiftsToAvoidFootCollision = new double[]{0.0, 0.0};
       for(int i = 0; i < 2; i++)
       {
-         Vector3d waypointShift = new Vector3d(directionOfFootstep);
+         FramePoint waypointShift = new FramePoint(referenceFrame, directionOfFootstep);
          waypointShift.scale(waypointShiftsToAvoidFootCollision[i]);
          waypoints.get(i).add(waypointShift);
       }      
@@ -562,10 +570,10 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       {
          for(int i = 0; i < 2; i++)
          {
-            waypointBagOfBalls.setBall(new FramePoint(ReferenceFrame.getWorldFrame(), waypoints.get(i)), YoAppearance.Chocolate(), i);
-         }  
+            waypointBagOfBalls.setBall(waypoints.get(i), YoAppearance.Chocolate(), i);
+         }
       }
       
-      return new TwoWaypointTrajectoryParameters(waypoints);
+      return waypoints;
    }
 }
