@@ -28,9 +28,12 @@ import us.ihmc.utilities.Axis;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.AngleTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
+import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.CenterOfMassAccelerationCalculator;
+import us.ihmc.utilities.screwTheory.CenterOfMassCalculator;
+import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationCalculator;
@@ -47,6 +50,8 @@ import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.robotController.RobotController;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 
 public class ComposableStateEstimatorEvaluator
 {
@@ -377,6 +382,14 @@ public class ComposableStateEstimatorEvaluator
       private final TwistCalculator estimatedTwistCalculator;
       private final SpatialAccelerationCalculator estimatedSpatialAccelerationCalculator;
 
+      private final CenterOfMassCalculator perfectCenterOfMassCalculator;
+      private final CenterOfMassJacobian perfectCenterOfMassJacobian;
+      private final CenterOfMassAccelerationCalculator perfectCenterOfMassAccelerationCalculator;
+      
+      private final YoFramePoint perfectCoM = new YoFramePoint("perfectCoM", ReferenceFrame.getWorldFrame(), registry);
+      private final YoFrameVector perfectCoMd = new YoFrameVector("perfectCoMd", ReferenceFrame.getWorldFrame(), registry);
+      private final YoFrameVector perfectCoMdd = new YoFrameVector("perfectCoMdd", ReferenceFrame.getWorldFrame(), registry);
+      
       private final ControlFlowGraph controlFlowGraph;
       private final OrientationEstimator orientationEstimator;
 
@@ -392,6 +405,10 @@ public class ComposableStateEstimatorEvaluator
          estimatedFullRobotModel = new StateEstimatorEvaluatorFullRobotModel(robot);
          estimatedTwistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), estimatedFullRobotModel.elevator);
          estimatedSpatialAccelerationCalculator = new SpatialAccelerationCalculator(estimatedFullRobotModel.elevator, estimatedTwistCalculator, gravity, false);
+
+         perfectCenterOfMassCalculator = new CenterOfMassCalculator(perfectFullRobotModel.elevator, ReferenceFrame.getWorldFrame());
+         perfectCenterOfMassJacobian = new CenterOfMassJacobian(perfectFullRobotModel.elevator);
+         perfectCenterOfMassAccelerationCalculator = new CenterOfMassAccelerationCalculator(perfectFullRobotModel.elevator, perfectSpatialAccelerationCalculator);
 
          ArrayList<OrientationSensorConfiguration> orientationSensorConfigurations = createOrientationSensors(perfectFullRobotModel, estimatedFullRobotModel);
          ArrayList<AngularVelocitySensorConfiguration> angularVelocitySensorConfigurations = createAngularVelocitySensors(perfectFullRobotModel,
@@ -534,11 +551,11 @@ public class ComposableStateEstimatorEvaluator
                SimulatedLinearAccelerationSensor linearAccelerationSensor = new SimulatedLinearAccelerationSensor(sensorName, perfectMeasurmentBody,
                      frameUsedForPerfectMeasurement, perfectSpatialAccelerationCalculator, gravitationalAcceleration, registry);
 
-               GaussianVectorCorruptor linearAccelerationCorruptor = new GaussianVectorCorruptor(1235L, sensorName, registry);
+               GaussianVectorCorruptor linearAccelerationCorruptor = new GaussianVectorCorruptor(1237L, sensorName, registry);
                linearAccelerationCorruptor.setStandardDeviation(linearAccelerationMeasurementStandardDeviation);
                linearAccelerationSensor.addSignalCorruptor(linearAccelerationCorruptor);
 
-               BiasVectorCorruptor biasVectorCorruptor = new BiasVectorCorruptor(1236L, sensorName, controlDT, registry);
+               BiasVectorCorruptor biasVectorCorruptor = new BiasVectorCorruptor(1286L, sensorName, controlDT, registry);
                biasVectorCorruptor.setStandardDeviation(linearAccelerationBiasProcessNoiseStandardDeviation);
                biasVectorCorruptor.setBias(new Vector3d(0.0, 0.0, 0.0));
                linearAccelerationSensor.addSignalCorruptor(biasVectorCorruptor);
@@ -576,7 +593,7 @@ public class ComposableStateEstimatorEvaluator
                String sensorName = imuMount.getName() + "Orientation";
 
                SimulatedOrientationSensor sensor = new SimulatedOrientationSensor(sensorName, frameUsedForPerfectMeasurement, registry);
-               GaussianOrientationCorruptor orientationCorruptor = new GaussianOrientationCorruptor(sensorName, 12345L, registry);
+               GaussianOrientationCorruptor orientationCorruptor = new GaussianOrientationCorruptor(sensorName, 12334255L, registry);
                orientationCorruptor.setStandardDeviation(orientationMeasurementStandardDeviation);
                sensor.addSignalCorruptor(orientationCorruptor);
 
@@ -619,6 +636,7 @@ public class ComposableStateEstimatorEvaluator
          perfectSpatialAccelerationCalculator.compute();
 
          updateInternalState();
+         updateGroundTruth();
 
          controlFlowGraph.startComputation();
          controlFlowGraph.waitUntilComputationIsDone();
@@ -629,6 +647,25 @@ public class ComposableStateEstimatorEvaluator
          estimatedTwistCalculator.compute();
 
          computeOrientationErrorAngle();
+      }
+
+      private void updateGroundTruth()
+      {
+         FramePoint com = new FramePoint();
+         perfectCenterOfMassCalculator.compute();
+         perfectCenterOfMassCalculator.packCenterOfMass(com);
+         perfectCoM.set(com);
+         
+         FrameVector comd = new FrameVector();
+         perfectCenterOfMassJacobian.compute();
+         perfectCenterOfMassJacobian.packCenterOfMassVelocity(comd);
+         comd.changeFrame(ReferenceFrame.getWorldFrame());
+         perfectCoMd.set(comd);
+         
+         FrameVector comdd = new FrameVector();
+         perfectCenterOfMassAccelerationCalculator.packCoMAcceleration(comdd);
+         comdd.changeFrame(ReferenceFrame.getWorldFrame());
+         perfectCoMdd.set(comdd);
       }
 
       private void updateInternalState()
