@@ -1,8 +1,5 @@
 package us.ihmc.darpaRoboticsChallenge.driving;
 
-import com.xuggle.mediatool.IMediaWriter;
-import com.xuggle.mediatool.ToolFactory;
-import com.xuggle.xuggler.IRational;
 import org.ros.RosRun;
 import org.ros.message.MessageListener;
 import org.ros.namespace.GraphName;
@@ -18,16 +15,14 @@ import us.ihmc.utilities.keyboardAndMouse.RepeatingReleasedEventsFixer;
 import java.awt.*;
 import java.awt.color.ColorSpace;
 import java.awt.image.*;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.TimeUnit;
+import java.net.URISyntaxException;
 
 /**
  * Modified from {@link us.ihmc.darpaRoboticsChallenge.DRCGazeboDrivingInterface}.
  *
  * @author Peter Abeles
  */
-public class GazeboDrivingBase extends AbstractNodeMain
+public abstract class GazeboDrivingBase extends AbstractNodeMain
 {
 	private static final boolean COLOR_IMAGE = true;
 	private static final String STEREO_NAMESPACE = "/multisense_sl/camera/";
@@ -50,13 +45,9 @@ public class GazeboDrivingBase extends AbstractNodeMain
 	private ColorSpace colorSpace;
 	private ColorModel colorModel;
 
-	private BackgroundVideoExporter leftEyeVideoExporter;
-	private BackgroundVideoExporter rightEyeVideoExporter;
-
 	private ConnectedNode connectedNode;
-	private long recordingStartTime;
 
-	private double desiredSteering, desiredSpeed, desiredHandBrake, desiredFootBrake;
+	private double desiredHandBrake, desiredFootBrake;
 
 	public GazeboDrivingBase()
 	{
@@ -64,8 +55,6 @@ public class GazeboDrivingBase extends AbstractNodeMain
 
 		colorSpace = (COLOR_IMAGE ? ColorSpace.getInstance(ColorSpace.CS_sRGB) : ColorSpace.getInstance(ColorSpace.CS_GRAY));
 		colorModel = new ComponentColorModel(colorSpace, false, false, Transparency.OPAQUE, DataBuffer.TYPE_BYTE);
-
-		desiredSpeed = desiredSteering = 0;
 	}
 
 	public GraphName getDefaultNodeName()
@@ -90,20 +79,21 @@ public class GazeboDrivingBase extends AbstractNodeMain
 		setUpVehicleStateSubscriberListeners();
 	}
 
+	protected abstract void handleStateSteeringWheel( Float64 message );
+	protected abstract void handleStateBreak( Float64 message );
+	protected abstract void handleStateGasPedal( Float64 message );
+	protected abstract void handleStateBreakPedal( Float64 message );
+
+	protected abstract void handleImageLeft( Image message );
+	protected abstract void handleImageRight( Image message );
+
 	private void setUpVehicleStateSubscriberListeners()
 	{
 		steeringWheelStateSubscriber.addMessageListener(new MessageListener<Float64>()
 		{
-			int first = 1;
-
 			public void onNewMessage(Float64 message)
 			{
-				System.out.println("Steering Wheel State (-pi to pi): " + message.getData());
-				if (first > 0)
-				{
-					desiredSteering = message.getData();
-					first--;
-				}
+				handleStateSteeringWheel(message);
 			}
 		});
 
@@ -112,7 +102,7 @@ public class GazeboDrivingBase extends AbstractNodeMain
 
 			public void onNewMessage(Float64 message)
 			{
-				System.out.println("Hand Brake state (0.0 to 1.0): " + message.getData());
+				handleStateBreak(message);
 			}
 		});
 
@@ -120,7 +110,7 @@ public class GazeboDrivingBase extends AbstractNodeMain
 		{
 			public void onNewMessage(Float64 message)
 			{
-				System.out.println("Gas Pedal state (0.0 to 1.0): " + message.getData());
+				handleStateGasPedal(message);
 			}
 		});
 
@@ -128,7 +118,7 @@ public class GazeboDrivingBase extends AbstractNodeMain
 		{
 			public void onNewMessage(Float64 message)
 			{
-				System.out.println("Brake Pedal state (0.0 to 1.0): " + message.getData());
+				handleStateBreakPedal(message);
 			}
 		});
 	}
@@ -140,10 +130,7 @@ public class GazeboDrivingBase extends AbstractNodeMain
 		{
 			public void onNewMessage(Image message)
 			{
-				System.out.println("left eye  "+message.getHeader().getStamp().totalNsecs());
-				leftEyeImage = bufferedImageFromRosMessage(message);
-				if (RECORD)
-					leftEyeVideoExporter.pushImage(bufferedImageFromRosMessage(message), connectedNode.getCurrentTime().totalNsecs());
+				handleImageLeft(message);
 			}
 		});
 
@@ -151,10 +138,7 @@ public class GazeboDrivingBase extends AbstractNodeMain
 		{
 			public void onNewMessage(Image message)
 			{
-				System.out.println("right eye "+message.getHeader().getStamp().totalNsecs());
-				rightEyeImage = bufferedImageFromRosMessage(message);
-				if (RECORD)
-					rightEyeVideoExporter.pushImage(bufferedImageFromRosMessage(message), connectedNode.getCurrentTime().totalNsecs());
+				handleImageRight(message);
 			}
 		});
 	}
@@ -256,34 +240,6 @@ public class GazeboDrivingBase extends AbstractNodeMain
 		ThreadTools.sleep(3000);
 	}
 
-	protected void stopTurning()
-	{
-		if (desiredSteering < 0)
-		{
-			while (desiredSteering != 0)
-			{
-				desiredSteering += 0.00002;
-				if (desiredSteering > 0)
-					desiredSteering = 0;
-
-				steeringWheelCommand.setData(desiredSteering);
-				steeringWheelCommandPublisher.publish(steeringWheelCommand);
-			}
-		}
-
-		if (desiredSteering > 0)
-		{
-			while (desiredSteering != 0)
-			{
-				desiredSteering -= 0.00002;
-				if (desiredSteering < 0)
-					desiredSteering = 0;
-
-				steeringWheelCommand.setData(desiredSteering);
-				steeringWheelCommandPublisher.publish(steeringWheelCommand);
-			}
-		}
-	}
 
 	protected void processHandBreak( boolean engaged ) {
 
@@ -299,44 +255,25 @@ public class GazeboDrivingBase extends AbstractNodeMain
 		brakePedalCommandPublisher.publish(brakePedalCommand);
 	}
 
-	protected void processLeftTurn()
+	protected void processSteeringAngle( double angle )
 	{
-		desiredSteering += 0.09;
-		if (desiredSteering > Math.PI)
-			desiredSteering = Math.PI;
+		if (angle > Math.PI)
+         angle = Math.PI;
+      else if( angle < -Math.PI )
+         angle = -Math.PI;
 
-		steeringWheelCommand.setData(desiredSteering);
+		steeringWheelCommand.setData(angle);
 		steeringWheelCommandPublisher.publish(steeringWheelCommand);
 	}
 
-	protected void processRightTurn()
+	protected void processSpeed( double speed )
 	{
-		desiredSteering -= 0.09;
-		if (desiredSteering < -Math.PI)
-			desiredSteering = -Math.PI;
-
-		steeringWheelCommand.setData(desiredSteering);
-		steeringWheelCommandPublisher.publish(steeringWheelCommand);
-	}
-
-	protected void processAccelerate()
-	{
-		desiredSpeed = 1;
-
-		gasPedalCommand.setData(desiredSpeed);
-		gasPedalCommandPublisher.publish(gasPedalCommand);
-	}
-
-	protected void processDecelerate()
-	{
-		desiredSpeed = 0;
-
-		gasPedalCommand.setData(desiredSpeed);
+		gasPedalCommand.setData(speed);
 		gasPedalCommandPublisher.publish(gasPedalCommand);
 	}
 
 
-	private BufferedImage bufferedImageFromRosMessage(Image imageMessage)
+	protected BufferedImage bufferedImageFromRosMessage(Image imageMessage)
 	{
 		int width = imageMessage.getWidth();
 		int height = imageMessage.getHeight();
@@ -354,8 +291,7 @@ public class GazeboDrivingBase extends AbstractNodeMain
 		return ret;
 	}
 
-	public static void main(String[] args)
-	{
+	public static void main(String[] args) throws URISyntaxException {
 		try
 		{
 			RosRun.main(new String[]{"us.ihmc.darpaRoboticsChallenge.DRCGazeboDrivingInterface"});
@@ -363,105 +299,6 @@ public class GazeboDrivingBase extends AbstractNodeMain
 		catch (Exception e)
 		{
 			e.printStackTrace();
-		}
-	}
-
-	public class BackgroundVideoExporter extends Thread
-	{
-		private ConcurrentLinkedQueue<TimeStampedImage> imageQueue = new ConcurrentLinkedQueue<TimeStampedImage>();
-		private String fileName;
-		private boolean shouldFinish = false;
-
-		private Semaphore sem = new Semaphore(1, true);
-
-		public BackgroundVideoExporter(String fileName)
-		{
-			this.fileName = fileName;
-		}
-
-		public void run()
-		{
-			this.processImageQueueToVideo();
-		}
-
-		private void processImageQueueToVideo()
-		{
-			sem.tryAcquire();
-			double frameRate = 30.0;
-			double playbackRate = 1.0;
-
-			IRational FRAME_RATE = IRational.make((int) frameRate);
-			final IMediaWriter writer = ToolFactory.makeWriter(fileName + ".mp4");
-
-			while (imageQueue.isEmpty() && !shouldFinish)
-				;
-
-			BufferedImage firstImage = convertBufferedImageToSuitableFormat(imageQueue.poll().getImage());
-			writer.addVideoStream(0, 0, FRAME_RATE, firstImage.getWidth(), firstImage.getHeight());
-
-			while (!shouldFinish)
-			{
-				while (imageQueue.isEmpty() && !shouldFinish)
-					;
-				if (!shouldFinish)
-				{
-					TimeStampedImage nextImage = imageQueue.poll();
-					double timeSinceStart = nextImage.getTimestamp() - recordingStartTime;
-					long timeStamp = new Double((timeSinceStart) * (1.0 / playbackRate)).longValue();
-					writer.encodeVideo(0, convertBufferedImageToSuitableFormat(nextImage.getImage()), timeStamp, TimeUnit.NANOSECONDS);
-				}
-			}
-			imageQueue.clear();
-			writer.flush();
-			writer.close();
-			sem.release();
-		}
-
-		public void pushImage(BufferedImage image, long timeStamp)
-		{
-			imageQueue.add(new TimeStampedImage(image, timeStamp));
-		}
-
-		private BufferedImage convertBufferedImageToSuitableFormat(BufferedImage image)
-		{
-			int newWidth = (image.getWidth() / 2) * 2;
-			int newHeight = (image.getHeight() / 2) * 2;
-
-			BufferedImage out = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_3BYTE_BGR);
-			out.getGraphics().drawImage(image, 0, 0, newWidth, newHeight, 0, 0, newWidth, newHeight, null);
-			return out;
-		}
-
-		public void finish()
-		{
-			shouldFinish = true;
-		}
-
-		public boolean isFinished()
-		{
-			return sem.availablePermits() == 1;
-		}
-
-		class TimeStampedImage
-		{
-			private BufferedImage image;
-			private long timeStamp;
-
-			public TimeStampedImage(BufferedImage image, long timeStamp)
-			{
-				this.image = image;
-				this.timeStamp = timeStamp;
-			}
-
-			public BufferedImage getImage()
-			{
-				return image;
-			}
-
-			public long getTimestamp()
-			{
-				return timeStamp;
-			}
 		}
 	}
 }
