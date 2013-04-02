@@ -21,6 +21,7 @@ import us.ihmc.graphics3DAdapter.input.MouseListener;
 import us.ihmc.graphics3DAdapter.input.SelectedListener;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
 import us.ihmc.utilities.math.geometry.Ray3d;
+import us.ihmc.utilities.net.TimestampProvider;
 
 public class NullGraphics3DAdapter implements Graphics3DAdapter
 {
@@ -206,9 +207,9 @@ public class NullGraphics3DAdapter implements Graphics3DAdapter
    {
       return new MultiRayTracer()
       {
-         public double[] scan(ArrayList<Ray3d> rays)
+         public long scan(TimestampProvider timestampProvider, ArrayList<Ray3d> rays, double[] doubleToPack)
          {
-            return new double[rays.size()];
+            return 0;
          }
       };
    }
