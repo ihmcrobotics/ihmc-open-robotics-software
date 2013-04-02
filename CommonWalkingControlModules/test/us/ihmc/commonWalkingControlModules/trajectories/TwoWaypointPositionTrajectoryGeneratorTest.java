@@ -56,9 +56,10 @@ public class TwoWaypointPositionTrajectoryGeneratorTest {
 		TrajectoryParameters trajectoryParameters = new TwoWaypointTrajectoryParameters(waypoints);
 		TrajectoryParametersProvider trajectoryParametersProvider = new TrajectoryParametersProvider(trajectoryParameters);
 		
+		//TODO: Fix me! And stop checking in code that doesn't compile!!!!!!!
 		TwoWaypointPositionTrajectoryGenerator trajectory = new TwoWaypointPositionTrajectoryGenerator("", worldFrame, stepTimeProvider, 
 				initialPositionProvider, initialVelocityProvider, finalPositionProvider, finalVelocityProvider, trajectoryParametersProvider, new YoVariableRegistry(""), 0.2, 20,
-				null);
+				null, null);
 		
 		List<Point3d> points = new ArrayList<Point3d>();
 		points.add(firstIntermediatePosition);
