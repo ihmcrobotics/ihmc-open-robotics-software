@@ -2,14 +2,10 @@ package us.ihmc.imageProcessing.segmentation;
 
 import boofcv.alg.filter.binary.Contour;
 import boofcv.alg.misc.ImageMiscOps;
-import boofcv.misc.BoofMiscOps;
 import boofcv.struct.FastQueue;
-import boofcv.struct.ImageRectangle;
-import boofcv.struct.image.Color3_F32;
 import boofcv.struct.image.ImageFloat32;
 import boofcv.struct.image.ImageUInt8;
 import boofcv.struct.image.MultiSpectral;
-import georegression.geometry.UtilPoint3D_F32;
 import georegression.struct.point.Point2D_I32;
 
 import java.util.List;
@@ -54,14 +50,14 @@ public class LocalGaussianClassifyContour {
       change.reset();
       for( Contour c : contours ) {
          growMembers(c.external);
-         System.out.println("  total internal "+c.internal.size()+"  num change "+change.size);
+//         System.out.println("  total internal "+c.internal.size()+"  num change "+change.size);
          for( List<Point2D_I32> i : c.internal ) {
             growMembers(i);
-            System.out.println("  -- internal " + change.size);
+//            System.out.println("  -- internal " + change.size);
          }
       }
 
-      System.out.println("total changed "+change.size);
+//      System.out.println("total changed "+change.size);
       for( int i = 0; i < maxIterations && change.size != 0 ; i++ ) {
          applyChanges();
          FastQueue<ChangeInfo> tmp = change;
@@ -69,7 +65,7 @@ public class LocalGaussianClassifyContour {
          changeOld = tmp;
          change.reset();
          examineChanges();
-         System.out.println("  changes = "+change.size);
+//         System.out.println("  changes = "+change.size);
       }
    }
 
