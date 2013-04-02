@@ -151,4 +151,9 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
    {
       return DRCRobotParameters.DRC_ROBOT_FOOT_BACK;
    }
+   
+   public double getAnkleHeight()
+   {
+      return DRCRobotParameters.DRC_ROBOT_ANKLE_HEIGHT;
+   }
 }

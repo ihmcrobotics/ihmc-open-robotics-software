@@ -22,6 +22,8 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
    
    public abstract double getFootBackwardOffset();
    
+   public abstract double getAnkleHeight();
+   
    public abstract double nominalHeightAboveAnkle();
    
    public abstract SideDependentList<Transform3D> getHandControlFramesWithRespectToFrameAfterWrist();
