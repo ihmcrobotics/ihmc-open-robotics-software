@@ -20,9 +20,9 @@ public class CenterOfMassVelocityProcessModelElement extends AbstractProcessMode
    private final ControlFlowInputPort<FrameVector> centerOfMassAccelerationPort;
 
    // temp stuff
-   private final FrameVector centerOfMassVelocity;
-   private final FrameVector centerOfMassVelocityDelta;
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   private final FrameVector centerOfMassVelocity = new FrameVector(worldFrame);
+   private final FrameVector centerOfMassVelocityDelta = new FrameVector(ReferenceFrame.getWorldFrame());
 
    public CenterOfMassVelocityProcessModelElement(ControlFlowOutputPort<FrameVector> centerOfMassVelocityPort,
            ControlFlowInputPort<FrameVector> centerOfMassAccelerationPort, String name, YoVariableRegistry registry)
@@ -30,8 +30,6 @@ public class CenterOfMassVelocityProcessModelElement extends AbstractProcessMode
       super(TimeDomain.CONTINUOUS, SIZE, name, registry);
       this.centerOfMassVelocityPort = centerOfMassVelocityPort;
       this.centerOfMassAccelerationPort = centerOfMassAccelerationPort;
-      this.centerOfMassVelocity = new FrameVector(worldFrame);
-      this.centerOfMassVelocityDelta = new FrameVector(ReferenceFrame.getWorldFrame());
 
       if (centerOfMassAccelerationPort != null)
       {
@@ -54,9 +52,7 @@ public class CenterOfMassVelocityProcessModelElement extends AbstractProcessMode
    {
       if (centerOfMassAccelerationPort != null)
       {
-         FrameVector centerOfMassAcceleration = centerOfMassAccelerationPort.getData();
-         centerOfMassAcceleration.changeFrame(worldFrame);
-         centerOfMassVelocityDelta.set(centerOfMassAcceleration);
+         centerOfMassVelocityDelta.set(centerOfMassAccelerationPort.getData());
          centerOfMassVelocityDelta.scale(dt);
 
          updateCenterOfMassVelocity(centerOfMassVelocityDelta);

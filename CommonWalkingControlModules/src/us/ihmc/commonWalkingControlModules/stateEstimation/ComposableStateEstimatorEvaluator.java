@@ -77,11 +77,11 @@ public class ComposableStateEstimatorEvaluator
 
    public ComposableStateEstimatorEvaluator()
    {
-      QuaternionOrientationEstimatorEvaluatorRobot robot = new QuaternionOrientationEstimatorEvaluatorRobot();
+      StateEstimatorEstimatorEvaluatorRobot robot = new StateEstimatorEstimatorEvaluatorRobot();
       QuaternionOrientationEstimatorEvaluatorController controller = new QuaternionOrientationEstimatorEvaluatorController(robot, controlDT);
       robot.setController(controller, simTicksPerControlDT);
 
-      SimulationConstructionSet scs = new SimulationConstructionSet(robot, 32000);
+      SimulationConstructionSet scs = new SimulationConstructionSet(robot, true, 32000);
       scs.addYoVariableRegistry(registry);
 
       scs.setDT(simDT, simTicksPerRecord);
@@ -89,16 +89,16 @@ public class ComposableStateEstimatorEvaluator
       scs.startOnAThread();
    }
 
-   private class QuaternionOrientationEstimatorEvaluatorRobot extends Robot
+   private class StateEstimatorEstimatorEvaluatorRobot extends Robot
    {
       private static final long serialVersionUID = 2647791981594204134L;
       private final Link bodyLink;
       private final FloatingJoint rootJoint;
       private final ArrayList<IMUMount> imuMounts = new ArrayList<IMUMount>();
 
-      public QuaternionOrientationEstimatorEvaluatorRobot()
+      public StateEstimatorEstimatorEvaluatorRobot()
       {
-         super("QuaternionOrientationEstimatorEvaluatorRobot");
+         super(StateEstimatorEstimatorEvaluatorRobot.class.getSimpleName());
 
          rootJoint = new FloatingJoint("root", new Vector3d(), this);
 
@@ -221,7 +221,7 @@ public class ComposableStateEstimatorEvaluator
       }
    }
 
-   private class QuaternionOrientationEstimatorEvaluatorFullRobotModel
+   private class StateEstimatorEvaluatorFullRobotModel
    {
       private final InverseDynamicsJointsFromSCSRobotGenerator generator;
 
@@ -231,7 +231,7 @@ public class ComposableStateEstimatorEvaluator
 
       private final ArrayList<IMUMount> imuMounts;
 
-      public QuaternionOrientationEstimatorEvaluatorFullRobotModel(QuaternionOrientationEstimatorEvaluatorRobot robot)
+      public StateEstimatorEvaluatorFullRobotModel(StateEstimatorEstimatorEvaluatorRobot robot)
       {
          generator = new InverseDynamicsJointsFromSCSRobotGenerator(robot);
          elevator = generator.getElevator();
@@ -262,7 +262,7 @@ public class ComposableStateEstimatorEvaluator
          return generator.getRigidBody(imuMount.getParentJoint());
       }
 
-      public void updateBasedOnRobot(QuaternionOrientationEstimatorEvaluatorRobot robot, boolean updateRootJoints)
+      public void updateBasedOnRobot(StateEstimatorEstimatorEvaluatorRobot robot, boolean updateRootJoints)
       {
          generator.updateInverseDynamicsRobotModelFromRobot(updateRootJoints, false);
       }
@@ -295,16 +295,15 @@ public class ComposableStateEstimatorEvaluator
 
    private class AngularAccelerationFromRobotStealer extends AbstractControlFlowElement
    {
-      private final QuaternionOrientationEstimatorEvaluatorRobot robot;
-      private final ControlFlowOutputPort<FrameVector> outputPort;
+      private final StateEstimatorEstimatorEvaluatorRobot robot;
+      private final ControlFlowOutputPort<FrameVector> outputPort = createOutputPort();
       private final FrameVector desiredAngularAcceleration;
 
-      public AngularAccelerationFromRobotStealer(QuaternionOrientationEstimatorEvaluatorRobot robot, ReferenceFrame referenceFrame)
+      public AngularAccelerationFromRobotStealer(StateEstimatorEstimatorEvaluatorRobot robot, ReferenceFrame referenceFrame)
       {
          this.robot = robot;
 
          this.desiredAngularAcceleration = new FrameVector(referenceFrame);
-         this.outputPort = createOutputPort();
       }
 
       public void startComputation()
@@ -360,24 +359,24 @@ public class ComposableStateEstimatorEvaluator
 
       private final DoubleYoVariable orientationErrorAngle = new DoubleYoVariable("orientationErrorAngle", registry);
 
-      private final QuaternionOrientationEstimatorEvaluatorRobot robot;
+      private final StateEstimatorEstimatorEvaluatorRobot robot;
 
-      private final QuaternionOrientationEstimatorEvaluatorFullRobotModel perfectFullRobotModel;
+      private final StateEstimatorEvaluatorFullRobotModel perfectFullRobotModel;
       private final TwistCalculator perfectTwistCalculator;
       private final SpatialAccelerationCalculator perfectSpatialAccelerationCalculator;
 
-      private final QuaternionOrientationEstimatorEvaluatorFullRobotModel estimatedFullRobotModel;
+      private final StateEstimatorEvaluatorFullRobotModel estimatedFullRobotModel;
       private final TwistCalculator estimatedTwistCalculator;
       private final SpatialAccelerationCalculator estimatedSpatialAccelerationCalculator;
 
       private final ControlFlowGraph controlFlowGraph;
       private final OrientationEstimator orientationEstimator;
 
-      public QuaternionOrientationEstimatorEvaluatorController(QuaternionOrientationEstimatorEvaluatorRobot robot, double controlDT)
+      public QuaternionOrientationEstimatorEvaluatorController(StateEstimatorEstimatorEvaluatorRobot robot, double controlDT)
       {
          this.robot = robot;
 
-         perfectFullRobotModel = new QuaternionOrientationEstimatorEvaluatorFullRobotModel(robot);
+         perfectFullRobotModel = new StateEstimatorEvaluatorFullRobotModel(robot);
          perfectTwistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), perfectFullRobotModel.elevator);
 
          // TODO: What does useDesireds do?
@@ -385,7 +384,7 @@ public class ComposableStateEstimatorEvaluator
          double gravity = robot.getGravityZ();
          perfectSpatialAccelerationCalculator = new SpatialAccelerationCalculator(perfectFullRobotModel.elevator, perfectTwistCalculator, gravity,
                useDesireds);
-         estimatedFullRobotModel = new QuaternionOrientationEstimatorEvaluatorFullRobotModel(robot);
+         estimatedFullRobotModel = new StateEstimatorEvaluatorFullRobotModel(robot);
          estimatedTwistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), estimatedFullRobotModel.elevator);
          estimatedSpatialAccelerationCalculator = new SpatialAccelerationCalculator(estimatedFullRobotModel.elevator, estimatedTwistCalculator, gravity,
                useDesireds);
@@ -471,8 +470,8 @@ public class ComposableStateEstimatorEvaluator
       }
 
       private ArrayList<AngularVelocitySensorConfiguration> createAngularVelocitySensors(
-            QuaternionOrientationEstimatorEvaluatorFullRobotModel perfectFullRobotModel,
-            QuaternionOrientationEstimatorEvaluatorFullRobotModel estimatedFullRobotModel)
+            StateEstimatorEvaluatorFullRobotModel perfectFullRobotModel,
+            StateEstimatorEvaluatorFullRobotModel estimatedFullRobotModel)
       {
          ArrayList<AngularVelocitySensorConfiguration> angularVelocitySensorConfigurations = new ArrayList<AngularVelocitySensorConfiguration>();
 
@@ -513,8 +512,8 @@ public class ComposableStateEstimatorEvaluator
       }
 
       private ArrayList<LinearAccelerationSensorConfiguration> createLinearAccelerationSensors(
-            QuaternionOrientationEstimatorEvaluatorFullRobotModel perfectFullRobotModel,
-            QuaternionOrientationEstimatorEvaluatorFullRobotModel estimatedFullRobotModel)
+            StateEstimatorEvaluatorFullRobotModel perfectFullRobotModel,
+            StateEstimatorEvaluatorFullRobotModel estimatedFullRobotModel)
       {
          ArrayList<LinearAccelerationSensorConfiguration> linearAccelerationSensorConfigurations = new ArrayList<LinearAccelerationSensorConfiguration>();
 
@@ -559,8 +558,8 @@ public class ComposableStateEstimatorEvaluator
          return linearAccelerationSensorConfigurations;
       }
 
-      private ArrayList<OrientationSensorConfiguration> createOrientationSensors(QuaternionOrientationEstimatorEvaluatorFullRobotModel perfectFullRobotModel,
-            QuaternionOrientationEstimatorEvaluatorFullRobotModel estimatedFullRobotModel)
+      private ArrayList<OrientationSensorConfiguration> createOrientationSensors(StateEstimatorEvaluatorFullRobotModel perfectFullRobotModel,
+            StateEstimatorEvaluatorFullRobotModel estimatedFullRobotModel)
       {
          ArrayList<OrientationSensorConfiguration> orientationSensorConfigurations = new ArrayList<OrientationSensorConfiguration>();
 
