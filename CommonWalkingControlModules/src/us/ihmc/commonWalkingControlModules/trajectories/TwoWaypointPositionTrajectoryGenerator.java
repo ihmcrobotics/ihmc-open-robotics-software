@@ -519,13 +519,16 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       Vector3d halfSideLengthsXY = new Vector3d(0.5 * box.getLength(), 0.5 * box.getWidth(), 0.0);
       Transform3D boxTransform = box.getTransformCopy();  
       Transform3D inverseBoxTransform = new Transform3D();
-      boxTransform.invert(inverseBoxTransform);
+      inverseBoxTransform.invert(boxTransform);
 
       Vector3d[] posNegHalfSideLengthsXY = new Vector3d[]{new Vector3d(0.5 * box.getLength(), 0.5 * box.getWidth(), 0.0), new Vector3d(- 0.5 * box.getLength(), - 0.5 * box.getWidth(), 0.0)};
       
       if(DEBUG_SETTING_WAYPOINTS_FROM_BOX)
       {
-         debugBagOfBalls.setBall(new FramePoint(referenceFrame, translation), YoAppearance.GoldenRod(), 0);
+         Point3d translat = new Point3d();
+         boxTransform.transform(translat);
+         
+         debugBagOfBalls.setBall(new FramePoint(referenceFrame, translat), YoAppearance.Brown(), 0);
 
          Vector3d tempVec = new Vector3d();
          Point3d tempPoint = new Point3d();
@@ -533,10 +536,8 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
          for(int i = 0; i < 2; i++)
          {
             rotation.transform(posNegHalfSideLengthsXY[i], tempVec);
-            
-            tempPoint.add(translation, tempVec);
-
-            debugBagOfBalls.setBall(new FramePoint(referenceFrame, tempPoint), YoAppearance.GoldenRod(), i + 1);
+            tempPoint.add(translation, tempVec); 
+            debugBagOfBalls.setBall(new FramePoint(referenceFrame, tempPoint), YoAppearance.Brown(), i + 1);
          }
       }
       
@@ -558,7 +559,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       {
          for(int i = 0; i < 20; i++)
          {
-            double x = ((double) i) / 30.0;
+            double x = ((double) i) / 30.0 - 1.0 / 3.0;
             Point3d tempPoint = new Point3d(x, a*x+b, zVal);
             boxTransform.transform(tempPoint);
             
@@ -594,17 +595,6 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
          // TODO add box height
          return getWaypointsAtGroundClearance(zVal);
       }
-      
-      if(DEBUG_SETTING_WAYPOINTS_FROM_BOX)
-      {
-         for(int i = 0; i < 2; i++)
-         {
-            Point3d tempPoint = new Point3d(xyPlaneBoxIntersections[i]);
-            boxTransform.transform(tempPoint);
-            
-            debugWaypoints.setBall(new FramePoint(referenceFrame, tempPoint), YoAppearance.Tomato());
-         }
-      }
 
       if(xyPlaneBoxIntersections[0].distance(boxFrameInitialPosition) > xyPlaneBoxIntersections[1].distance(boxFrameInitialPosition))
       {
@@ -617,8 +607,17 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       for(Point3d intersectionPoint : xyPlaneBoxIntersections)
       {
          Point3d tempPoint = new Point3d(intersectionPoint);
-         boxTransform.transform(tempPoint);
+         rotation.transform(intersectionPoint);
+         intersectionPoint.add(translation);
          waypoints.add(new FramePoint(referenceFrame, tempPoint));
+      }
+      
+      if(DEBUG_SETTING_WAYPOINTS_FROM_BOX)
+      {
+         for(int i = 0; i < 2; i++)
+         {
+            debugWaypoints.setBall(waypoints.get(i), YoAppearance.Tomato());
+         }
       }
 
 //      Vector3d directionOfFootstep = new Vector3d();
