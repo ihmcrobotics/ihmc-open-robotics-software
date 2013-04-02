@@ -5,10 +5,8 @@ import boofcv.alg.feature.shapes.SplitMergeLineFitLoop;
 import boofcv.alg.filter.binary.Contour;
 import boofcv.struct.FastQueue;
 import boofcv.struct.PointIndex_I32;
-import boofcv.struct.image.ImageSInt16;
 import boofcv.struct.image.ImageSInt32;
 import georegression.geometry.UtilLine2D_F64;
-import georegression.geometry.UtilLine2D_I32;
 import georegression.metric.UtilAngle;
 import georegression.struct.line.LineParametric2D_F64;
 import georegression.struct.line.LinePolar2D_F64;
@@ -38,12 +36,14 @@ public class ClassifyRoadLines {
    LineSegment2D_I32 left;
    LineSegment2D_I32 right;
 
+   Contour largest;
+
    public boolean process( ImageSInt32 labeled , List<Contour> contours ) {
 
       this.labeled = labeled;
 
       int largestCount = 0;
-      Contour largest = null;
+      largest = null;
       for( Contour c : contours ) {
          if( c.external.size() > largestCount ) {
             largestCount = c.external.size();
@@ -248,5 +248,13 @@ public class ClassifyRoadLines {
 
    public FastQueue<LineSegment2D_I32> getCandidates() {
       return candidates;
+   }
+
+   public Contour getLargest() {
+      return largest;
+   }
+
+   public SplitMergeLineFitLoop getPolygonFit() {
+      return polygonFit;
    }
 }
