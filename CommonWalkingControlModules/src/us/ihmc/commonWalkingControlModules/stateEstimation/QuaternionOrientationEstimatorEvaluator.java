@@ -340,6 +340,7 @@ public class QuaternionOrientationEstimatorEvaluator
       public void startComputation()
       {
          centerOfMassAccelerationCalculator.packCoMAcceleration(comAcceleration);
+         comAcceleration.changeFrame(ReferenceFrame.getWorldFrame());
          outputPort.setData(comAcceleration);
       }
 
