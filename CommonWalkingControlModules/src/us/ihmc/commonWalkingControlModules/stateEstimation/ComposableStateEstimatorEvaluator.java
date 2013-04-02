@@ -47,7 +47,7 @@ import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.robotController.RobotController;
 
-public class QuaternionOrientationEstimatorEvaluator
+public class ComposableStateEstimatorEvaluator
 {
    private static final boolean INITIALIZE_ANGULAR_VELOCITY_ESTIMATE_TO_ACTUAL = true; //false;
    private static final boolean USE_ANGULAR_ACCELERATION_INPUT = true;
@@ -75,7 +75,7 @@ public class QuaternionOrientationEstimatorEvaluator
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
 
-   public QuaternionOrientationEstimatorEvaluator()
+   public ComposableStateEstimatorEvaluator()
    {
       QuaternionOrientationEstimatorEvaluatorRobot robot = new QuaternionOrientationEstimatorEvaluatorRobot();
       QuaternionOrientationEstimatorEvaluatorController controller = new QuaternionOrientationEstimatorEvaluatorController(robot, controlDT);
@@ -674,6 +674,6 @@ public class QuaternionOrientationEstimatorEvaluator
 
    public static void main(String[] args)
    {
-      new QuaternionOrientationEstimatorEvaluator();
+      new ComposableStateEstimatorEvaluator();
    }
 }
