@@ -67,42 +67,40 @@ public class ComposableStateEstimatorEvaluator
    private static final boolean ESTIMATE_COM = true;
    private static final boolean ADD_ARM_LINKS = true;
 
-   /*
-    * from a recent pull request:
-    * https://bitbucket.org/osrf/drcsim/pull-request/172/add-noise-model-to-sensors-gazebo-16/diff
-    * <noise>
-    *     <type>gaussian</type>
-    *     <!-- Noise parameters from Boston Dynamics
-    *          (http://gazebosim.org/wiki/Sensor_noise):
-    *            rates (rad/s): mean=0, stddev=2e-4
-    *            accels (m/s/s): mean=0, stddev=1.7e-2
-    *            rate bias (rad/s): 5e-6 - 1e-5
-    *            accel bias (m/s/s): 1e-1
-    *          Experimentally, simulation provide rates with noise of
-    *          about 1e-3 rad/s and accels with noise of about 1e-1 m/s/s.
-    *          So we don't expect to see the noise unless number of inner iterations
-    *          are increased.
-    *
-    *          We will add bias.  In this model, bias is sampled once for rates
-    *          and once for accels at startup; the sign (negative or positive)
-    *          of each bias is then switched with equal probability.  Thereafter,
-    *          the biases are fixed additive offsets.  We choose
-    *          bias means and stddevs to produce biases close to the provided
-    *          data. -->
-    *     <rate>
-    *       <mean>0.0</mean>
-    *       <stddev>2e-4</stddev>
-    *       <bias_mean>0.0000075</bias_mean>
-    *       <bias_stddev>0.0000008</bias_stddev>
-    *     </rate>
-    *     <accel>
-    *       <mean>0.0</mean>
-    *       <stddev>1.7e-2</stddev>
-    *       <bias_mean>0.1</bias_mean>
-    *       <bias_stddev>0.001</bias_stddev>
-    *     </accel>
-    * </noise>
-    */
+   //    from a recent pull request:
+   //    https://bitbucket.org/osrf/drcsim/pull-request/172/add-noise-model-to-sensors-gazebo-16/diff
+   //    <noise>
+   //        <type>gaussian</type>
+   //        <!-- Noise parameters from Boston Dynamics
+   //             (http://gazebosim.org/wiki/Sensor_noise):
+   //               rates (rad/s): mean=0, stddev=2e-4
+   //               accels (m/s/s): mean=0, stddev=1.7e-2
+   //               rate bias (rad/s): 5e-6 - 1e-5
+   //               accel bias (m/s/s): 1e-1
+   //             Experimentally, simulation provide rates with noise of
+   //             about 1e-3 rad/s and accels with noise of about 1e-1 m/s/s.
+   //             So we don't expect to see the noise unless number of inner iterations
+   //             are increased.
+   //   
+   //             We will add bias.  In this model, bias is sampled once for rates
+   //             and once for accels at startup; the sign (negative or positive)
+   //             of each bias is then switched with equal probability.  Thereafter,
+   //             the biases are fixed additive offsets.  We choose
+   //             bias means and stddevs to produce biases close to the provided
+   //             data. -->
+   //        <rate>
+   //          <mean>0.0</mean>
+   //          <stddev>2e-4</stddev>
+   //          <bias_mean>0.0000075</bias_mean>
+   //          <bias_stddev>0.0000008</bias_stddev>
+   //        </rate>
+   //        <accel>
+   //          <mean>0.0</mean>
+   //          <stddev>1.7e-2</stddev>
+   //          <bias_mean>0.1</bias_mean>
+   //          <bias_stddev>0.001</bias_stddev>
+   //        </accel>
+   //    </noise>
 
    private final double orientationMeasurementStandardDeviation = Math.sqrt(1e-2);
    private final double angularVelocityMeasurementStandardDeviation = 1e-3; // 2e-4;
@@ -118,10 +116,10 @@ public class ComposableStateEstimatorEvaluator
 
    private final double gazeboAngularVelocityBiasMean = 0.0000075;
    private final double gazeboLinearAccelerationBiasMean = 0.1;
-   
+
    private final Vector3d gravitationalAccelerationForSimulation = new Vector3d(0.0, 0.0, 0.0);
    private final Vector3d gravitationalAccelerationForSensors = new Vector3d(0.0, 0.0, -9.81);
-   
+
    private final double simDT = 1e-3;
    private final int simTicksPerControlDT = 5;
    private final double controlDT = simDT * simTicksPerControlDT;
@@ -435,14 +433,13 @@ public class ComposableStateEstimatorEvaluator
       private final CenterOfMassCalculator perfectCenterOfMassCalculator;
       private final CenterOfMassJacobian perfectCenterOfMassJacobian;
       private final CenterOfMassAccelerationCalculator perfectCenterOfMassAccelerationCalculator;
-      
+
       private final YoFramePoint perfectCoM = new YoFramePoint("perfectCoM", ReferenceFrame.getWorldFrame(), registry);
       private final YoFrameVector perfectCoMd = new YoFrameVector("perfectCoMd", ReferenceFrame.getWorldFrame(), registry);
       private final YoFrameVector perfectCoMdd = new YoFrameVector("perfectCoMdd", ReferenceFrame.getWorldFrame(), registry);
-      
+
       private final ControlFlowGraph controlFlowGraph;
       private final OrientationEstimator orientationEstimator;
-
 
       public QuaternionOrientationEstimatorEvaluatorController(StateEstimatorEstimatorEvaluatorRobot robot, double controlDT)
       {
@@ -458,7 +455,8 @@ public class ComposableStateEstimatorEvaluator
 
          perfectCenterOfMassCalculator = new CenterOfMassCalculator(perfectFullRobotModel.elevator, ReferenceFrame.getWorldFrame());
          perfectCenterOfMassJacobian = new CenterOfMassJacobian(perfectFullRobotModel.elevator);
-         perfectCenterOfMassAccelerationCalculator = new CenterOfMassAccelerationCalculator(perfectFullRobotModel.elevator, perfectSpatialAccelerationCalculator);
+         perfectCenterOfMassAccelerationCalculator = new CenterOfMassAccelerationCalculator(perfectFullRobotModel.elevator,
+               perfectSpatialAccelerationCalculator);
 
          ArrayList<OrientationSensorConfiguration> orientationSensorConfigurations = createOrientationSensors(perfectFullRobotModel, estimatedFullRobotModel);
          ArrayList<AngularVelocitySensorConfiguration> angularVelocitySensorConfigurations = createAngularVelocitySensors(perfectFullRobotModel,
@@ -562,7 +560,7 @@ public class ComposableStateEstimatorEvaluator
                angularVelocitySensor.addSignalCorruptor(angularVelocityCorruptor);
 
                RandomWalkBiasVectorCorruptor biasVectorCorruptor = new RandomWalkBiasVectorCorruptor(1236L, sensorName, controlDT, registry);
-//               biasVectorCorruptor.setStandardDeviation(angularVelocityBiasProcessNoiseStandardDeviation);
+               //               biasVectorCorruptor.setStandardDeviation(angularVelocityBiasProcessNoiseStandardDeviation);
                biasVectorCorruptor.setBias(computeGazeboBiasVector(gazeboAngularVelocityBiasMean, gazeboAngularVelocityBiasStandardDeviation, random)); // new Vector3d(0.0, 0.0, 0.0));
                angularVelocitySensor.addSignalCorruptor(biasVectorCorruptor);
 
@@ -604,7 +602,7 @@ public class ComposableStateEstimatorEvaluator
                linearAccelerationSensor.addSignalCorruptor(linearAccelerationCorruptor);
 
                RandomWalkBiasVectorCorruptor biasVectorCorruptor = new RandomWalkBiasVectorCorruptor(1286L, sensorName, controlDT, registry);
-//               biasVectorCorruptor.setStandardDeviation(linearAccelerationBiasProcessNoiseStandardDeviation);
+               //               biasVectorCorruptor.setStandardDeviation(linearAccelerationBiasProcessNoiseStandardDeviation);
                biasVectorCorruptor.setBias(computeGazeboBiasVector(gazeboLinearAccelerationBiasMean, gazeboLinearAccelerationBiasStandardDeviation, random)); // new Vector3d(0.0, 0.0, 0.0));
                linearAccelerationSensor.addSignalCorruptor(biasVectorCorruptor);
 
@@ -615,8 +613,8 @@ public class ComposableStateEstimatorEvaluator
                ReferenceFrame measurementFrame = estimatedMeasurementBody.getParentJoint().getFrameAfterJoint();
 
                LinearAccelerationSensorConfiguration linearAccelerationSensorConfiguration = new LinearAccelerationSensorConfiguration(
-                     linearAccelerationSensor.getLinearAccelerationOutputPort(), sensorName, estimatedMeasurementBody, measurementFrame, -gravitationalAccelerationForSensors.getZ(),
-                     linearAccelerationNoiseCovariance, linearAccelerationBiasProcessNoiseCovariance);
+                     linearAccelerationSensor.getLinearAccelerationOutputPort(), sensorName, estimatedMeasurementBody, measurementFrame,
+                     -gravitationalAccelerationForSensors.getZ(), linearAccelerationNoiseCovariance, linearAccelerationBiasProcessNoiseCovariance);
 
                linearAccelerationSensorConfigurations.add(linearAccelerationSensorConfiguration);
             }
@@ -703,13 +701,13 @@ public class ComposableStateEstimatorEvaluator
          perfectCenterOfMassCalculator.compute();
          perfectCenterOfMassCalculator.packCenterOfMass(com);
          perfectCoM.set(com);
-         
+
          FrameVector comd = new FrameVector();
          perfectCenterOfMassJacobian.compute();
          perfectCenterOfMassJacobian.packCenterOfMassVelocity(comd);
          comd.changeFrame(ReferenceFrame.getWorldFrame());
          perfectCoMd.set(comd);
-         
+
          FrameVector comdd = new FrameVector();
          perfectCenterOfMassAccelerationCalculator.packCoMAcceleration(comdd);
          comdd.changeFrame(ReferenceFrame.getWorldFrame());
@@ -767,7 +765,7 @@ public class ComposableStateEstimatorEvaluator
       double discreteStdDev = Math.sqrt(discreteVariance);
       return discreteStdDev;
    }
-   
+
    private Vector3d computeGazeboBiasVector(double mean, double standardDeviation, Random random)
    {
       Vector3d ret = new Vector3d();
@@ -777,7 +775,19 @@ public class ComposableStateEstimatorEvaluator
       }
       return ret;
    }
-   
+
+   //     Pull request
+   //     https://bitbucket.org/osrf/gazebo/pull-request/421/added-noise-to-rates-and-accels-with-test/diff
+   //     
+   //              // Sample the bias that we'll use later
+   //        this->accelBias = math::Rand::GetDblNormal(accelBiasMean,
+   //                                                   accelBiasStddev);
+   //        // With equal probability, we pick a negative bias (by convention,
+   //        // accelBiasMean should be positive, though it would work fine if
+   //        // negative).
+   //        if (math::Rand::GetDblUniform() < 0.5)
+   //          this->accelBias = -this->accelBias;
+
    private double computeGazeboBias(double mean, double standardDeviation, Random random)
    {
       double ret = standardDeviation * random.nextGaussian() + mean;
