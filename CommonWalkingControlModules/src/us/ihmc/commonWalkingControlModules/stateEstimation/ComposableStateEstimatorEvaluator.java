@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.stateEstimation;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 import javax.media.j3d.Transform3D;
 import javax.vecmath.AxisAngle4d;
@@ -18,15 +19,16 @@ import us.ihmc.controlFlow.ControlFlowGraph;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.sensorProcessing.signalCorruption.BiasVectorCorruptor;
 import us.ihmc.sensorProcessing.signalCorruption.GaussianOrientationCorruptor;
 import us.ihmc.sensorProcessing.signalCorruption.GaussianVectorCorruptor;
+import us.ihmc.sensorProcessing.signalCorruption.RandomWalkBiasVectorCorruptor;
 import us.ihmc.sensorProcessing.simulatedSensors.SimulatedAngularVelocitySensor;
 import us.ihmc.sensorProcessing.simulatedSensors.SimulatedLinearAccelerationSensor;
 import us.ihmc.sensorProcessing.simulatedSensors.SimulatedOrientationSensor;
 import us.ihmc.utilities.Axis;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.AngleTools;
+import us.ihmc.utilities.math.geometry.Direction;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -65,15 +67,58 @@ public class ComposableStateEstimatorEvaluator
    private static final boolean ESTIMATE_COM = true;
    private static final boolean ADD_ARM_LINKS = true;
 
+   /*
+    * from a recent pull request:
+    * https://bitbucket.org/osrf/drcsim/pull-request/172/add-noise-model-to-sensors-gazebo-16/diff
+    * <noise>
+    *     <type>gaussian</type>
+    *     <!-- Noise parameters from Boston Dynamics
+    *          (http://gazebosim.org/wiki/Sensor_noise):
+    *            rates (rad/s): mean=0, stddev=2e-4
+    *            accels (m/s/s): mean=0, stddev=1.7e-2
+    *            rate bias (rad/s): 5e-6 - 1e-5
+    *            accel bias (m/s/s): 1e-1
+    *          Experimentally, simulation provide rates with noise of
+    *          about 1e-3 rad/s and accels with noise of about 1e-1 m/s/s.
+    *          So we don't expect to see the noise unless number of inner iterations
+    *          are increased.
+    *
+    *          We will add bias.  In this model, bias is sampled once for rates
+    *          and once for accels at startup; the sign (negative or positive)
+    *          of each bias is then switched with equal probability.  Thereafter,
+    *          the biases are fixed additive offsets.  We choose
+    *          bias means and stddevs to produce biases close to the provided
+    *          data. -->
+    *     <rate>
+    *       <mean>0.0</mean>
+    *       <stddev>2e-4</stddev>
+    *       <bias_mean>0.0000075</bias_mean>
+    *       <bias_stddev>0.0000008</bias_stddev>
+    *     </rate>
+    *     <accel>
+    *       <mean>0.0</mean>
+    *       <stddev>1.7e-2</stddev>
+    *       <bias_mean>0.1</bias_mean>
+    *       <bias_stddev>0.001</bias_stddev>
+    *     </accel>
+    * </noise>
+    */
+
    private final double orientationMeasurementStandardDeviation = Math.sqrt(1e-2);
-   private final double angularVelocityMeasurementStandardDeviation = Math.sqrt(1e-5);
-   private final double linearAccelerationMeasurementStandardDeviation = Math.sqrt(1e-2);
+   private final double angularVelocityMeasurementStandardDeviation = 1e-3; // 2e-4;
+   private final double linearAccelerationMeasurementStandardDeviation = 1e-1; // 1.7e-2;
 
    private final double angularAccelerationProcessNoiseStandardDeviation = Math.sqrt(1e-1);
    private final double comAccelerationProcessNoiseStandardDeviation = Math.sqrt(1e-1);
-   private final double angularVelocityBiasProcessNoiseStandardDeviation = Math.sqrt(1e-4);
+   private final double angularVelocityBiasProcessNoiseStandardDeviation = Math.sqrt(1e-5);
    private final double linearAccelerationBiasProcessNoiseStandardDeviation = Math.sqrt(1e-4);
 
+   private final double gazeboAngularVelocityBiasStandardDeviation = 0.0000008;
+   private final double gazeboLinearAccelerationBiasStandardDeviation = 0.001;
+
+   private final double gazeboAngularVelocityBiasMean = 0.0000075;
+   private final double gazeboLinearAccelerationBiasMean = 0.1;
+   
    private final Vector3d gravitationalAccelerationForSimulation = new Vector3d(0.0, 0.0, 0.0);
    private final Vector3d gravitationalAccelerationForSensors = new Vector3d(0.0, 0.0, -9.81);
    
@@ -84,6 +129,7 @@ public class ComposableStateEstimatorEvaluator
 
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
+   private final Random random = new Random(12512352L);
 
    public ComposableStateEstimatorEvaluator()
    {
@@ -397,6 +443,7 @@ public class ComposableStateEstimatorEvaluator
       private final ControlFlowGraph controlFlowGraph;
       private final OrientationEstimator orientationEstimator;
 
+
       public QuaternionOrientationEstimatorEvaluatorController(StateEstimatorEstimatorEvaluatorRobot robot, double controlDT)
       {
          this.robot = robot;
@@ -514,9 +561,9 @@ public class ComposableStateEstimatorEvaluator
                angularVelocityCorruptor.setStandardDeviation(angularVelocityMeasurementStandardDeviation);
                angularVelocitySensor.addSignalCorruptor(angularVelocityCorruptor);
 
-               BiasVectorCorruptor biasVectorCorruptor = new BiasVectorCorruptor(1236L, sensorName, controlDT, registry);
-               biasVectorCorruptor.setStandardDeviation(angularVelocityBiasProcessNoiseStandardDeviation);
-               biasVectorCorruptor.setBias(new Vector3d(0.0, 0.0, 0.0));
+               RandomWalkBiasVectorCorruptor biasVectorCorruptor = new RandomWalkBiasVectorCorruptor(1236L, sensorName, controlDT, registry);
+//               biasVectorCorruptor.setStandardDeviation(angularVelocityBiasProcessNoiseStandardDeviation);
+               biasVectorCorruptor.setBias(computeGazeboBiasVector(gazeboAngularVelocityBiasMean, gazeboAngularVelocityBiasStandardDeviation, random)); // new Vector3d(0.0, 0.0, 0.0));
                angularVelocitySensor.addSignalCorruptor(biasVectorCorruptor);
 
                DenseMatrix64F angularVelocityNoiseCovariance = createDiagonalCovarianceMatrix(angularVelocityMeasurementStandardDeviation, 3);
@@ -556,9 +603,9 @@ public class ComposableStateEstimatorEvaluator
                linearAccelerationCorruptor.setStandardDeviation(linearAccelerationMeasurementStandardDeviation);
                linearAccelerationSensor.addSignalCorruptor(linearAccelerationCorruptor);
 
-               BiasVectorCorruptor biasVectorCorruptor = new BiasVectorCorruptor(1286L, sensorName, controlDT, registry);
-               biasVectorCorruptor.setStandardDeviation(linearAccelerationBiasProcessNoiseStandardDeviation);
-               biasVectorCorruptor.setBias(new Vector3d(0.0, 0.0, 0.0));
+               RandomWalkBiasVectorCorruptor biasVectorCorruptor = new RandomWalkBiasVectorCorruptor(1286L, sensorName, controlDT, registry);
+//               biasVectorCorruptor.setStandardDeviation(linearAccelerationBiasProcessNoiseStandardDeviation);
+               biasVectorCorruptor.setBias(computeGazeboBiasVector(gazeboLinearAccelerationBiasMean, gazeboLinearAccelerationBiasStandardDeviation, random)); // new Vector3d(0.0, 0.0, 0.0));
                linearAccelerationSensor.addSignalCorruptor(biasVectorCorruptor);
 
                DenseMatrix64F linearAccelerationNoiseCovariance = createDiagonalCovarianceMatrix(linearAccelerationMeasurementStandardDeviation, 3);
@@ -719,5 +766,23 @@ public class ComposableStateEstimatorEvaluator
       double discreteVariance = continuousVariance * controlDT;
       double discreteStdDev = Math.sqrt(discreteVariance);
       return discreteStdDev;
+   }
+   
+   private Vector3d computeGazeboBiasVector(double mean, double standardDeviation, Random random)
+   {
+      Vector3d ret = new Vector3d();
+      for (Direction direction : Direction.values())
+      {
+         MathTools.set(ret, direction, computeGazeboBias(mean, standardDeviation, random));
+      }
+      return ret;
+   }
+   
+   private double computeGazeboBias(double mean, double standardDeviation, Random random)
+   {
+      double ret = standardDeviation * random.nextGaussian() + mean;
+      if (random.nextBoolean())
+         ret = -ret;
+      return ret;
    }
 }
