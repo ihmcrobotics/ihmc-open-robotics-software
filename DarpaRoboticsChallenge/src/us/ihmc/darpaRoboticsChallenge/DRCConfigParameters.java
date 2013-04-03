@@ -77,7 +77,7 @@ public class DRCConfigParameters
    
    public static final int KERNEL_SIZE = 34; // 34 centimeters square
 
-   public static final double GRID_RESOLUTION = 0.01;// 1 centimeter resolution
+   public static final double GRID_RESOLUTION = 0.05;// 5 centimeter resolution
 
    public static final double LIDAR_BLINDNESS_CYLINDAR_SQUARED_RADIUS = 0.1;
    
