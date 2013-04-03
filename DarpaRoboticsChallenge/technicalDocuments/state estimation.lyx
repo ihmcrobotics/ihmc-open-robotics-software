@@ -64,21 +64,185 @@
 
 \begin_body
 
+\begin_layout Title
+A state estimator for legged robots
+\end_layout
+
+\begin_layout Author
+Twan Koolen, Jerry Pratt
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset toc
+LatexCommand tableofcontents
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Overall estimator design
+\end_layout
+
+\begin_layout Standard
+TODO:
+\end_layout
+
+\begin_layout Itemize
+Extended Kalman filter
+\end_layout
+
+\begin_layout Itemize
+Globally valid description of orientation
+\end_layout
+
+\begin_layout Itemize
+Consistent description of robot state
+\end_layout
+
+\begin_layout Itemize
+IMU linear acceleration as measurement, not as input
+\end_layout
+
+\begin_layout Itemize
+Can handle multiple IMUs, attached to different links
+\end_layout
+
+\begin_layout Itemize
+Can handle information concerning the velocity of certain points with respect
+ to the world (e.g.
+ when a point on the foot is known to be in non-slipping contact with the
+ ground)
+\end_layout
+
+\begin_layout Itemize
+Trusting that joint positions, velocities, and accelerations are already
+ known / estimated
+\end_layout
+
 \begin_layout Section
 Process model
 \end_layout
 
+\begin_layout Standard
+The discrete time extended Kalman filter requires a process model of the
+ form
+\begin_inset Formula 
+\[
+x_{n+1}=Fx_{n}+Gu_{n}+w_{n}
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $w_{n}\sim\mathcal{N}\left(0,Q\right)$
+\end_inset
+
+ is the process noise.
+ The matrices 
+\begin_inset Formula $F$
+\end_inset
+
+, 
+\begin_inset Formula $G$
+\end_inset
+
+, and 
+\begin_inset Formula $Q$
+\end_inset
+
+ vary from update to update.
+\end_layout
+
+\begin_layout Standard
+Most of our process model will be more naturally described in continuous
+ time.
+ We will derive this continuous-time part of the process model in section
+ 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:Continuous-time-part"
+
+\end_inset
+
+.
+ The the continuous-time part of the process model will be nonlinear.
+ Section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:Linearized-error-model"
+
+\end_inset
+
+ derives a continuous-time linearized error model.
+ This linearized continuous-time model will then be discretized in section
+ 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:Discretization"
+
+\end_inset
+
+ with a zero-order hold assumption.
+\end_layout
+
+\begin_layout Standard
+In addition to the continuous-time part, our process model will also incorporate
+ a part that is more naturally described using a linear, discrete-time state
+ space model.
+ This part does not need to be linearized or discretized, and will simply
+ be appended to the discretized version of the continuous time part of the
+ process model to obtain the final model 
+\begin_inset Formula $\left(F,G,Q\right)$
+\end_inset
+
+ used by the estimator.
+ This part of the process model is described in section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:Discrete-time-part"
+
+\end_inset
+
+.
+\end_layout
+
 \begin_layout Subsection
-Global model
+Continuous time part of dynamics
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:Continuous-time-part"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
-Define the orientation estimation link as the link for which the orientation
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+TODO: using CoM since that's what we're directly trying to control, and
+ it's what moves the least.
+ Also, force measurements could easily be incorporated.
+ No link needs to be special here.
+ Unfortunately, there is no angular equivalent of the CoM, so we need to
+ pick a link.
+ We define the orientation estimation link as the link for which the orientation
  and angular velocity will be part of the state vector.
+ In addition to CoM position and velocity, and orientation and angular velocity
+ of the estimation link, we will also estimate biases for the gyros and
+ accelerometers, so these biases also need to be incorporated into the state
+ vector.
+ The state vector for the continuous part of the dynamics hence consists
+ of
 \end_layout
 
-\begin_layout Standard
-State:
+\end_inset
+
+
 \end_layout
 
 \begin_layout Itemize
@@ -99,15 +263,16 @@ State:
 \begin_inset Formula $q$
 \end_inset
 
-: quaternion describing the orientation of orientation estimation link with
- respect to the world frame
+: unit quaternion describing the orientation of the orientation estimation
+ link with respect to the world frame
 \end_layout
 
 \begin_layout Itemize
 \begin_inset Formula $\omega$
 \end_inset
 
-: angular velocity of orientation estimation link, expressed in body frame
+: angular velocity of the orientation estimation link, expressed in body
+ frame
 \end_layout
 
 \begin_layout Itemize
@@ -145,7 +310,9 @@ State:
 \end_layout
 
 \begin_layout Standard
-Inputs:
+The inputs to the continuous time part of the dynamics consist of desired
+ accelerations computed by the controller.
+ The input vector consists of
 \end_layout
 
 \begin_layout Itemize
@@ -163,7 +330,51 @@ Inputs:
 \end_layout
 
 \begin_layout Standard
-Process noise:
+The dynamics are described in state space form as
+\begin_inset Formula 
+\begin{align*}
+\dot{r} & =\dot{r}\\
+\ddot{r} & =\ddot{r}_{d}+w_{\ddot{r}}\\
+\dot{q} & =\frac{1}{2}q\otimes\omega_{q}\\
+\dot{\omega} & =\dot{\omega}_{d}+w_{\dot{\omega}}\\
+\dot{b}_{\dot{v},i} & =w_{b_{\dot{v},i}}\quad i\in\left\{ 1,2,\dotsc,n\right\} \\
+\dot{b}_{\omega,i} & =w_{b_{\omega,i}}\quad i\in\left\{ 1,2,\dotsc,n\right\} 
+\end{align*}
+
+\end_inset
+
+where 
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+
+\begin_inset Formula $\omega_{q}=\left(\begin{array}{c}
+\omega\\
+0
+\end{array}\right)$
+\end_inset
+
+
+\family default
+\series default
+\shape default
+\size default
+\emph default
+\bar default
+\strikeout default
+\uuline default
+\uwave default
+\noun default
+\color inherit
+, and where the process noise vectors are
 \end_layout
 
 \begin_layout Itemize
@@ -208,7 +419,7 @@ Process noise:
 \begin_inset Formula $w_{b_{\dot{v},i}}\sim\mathcal{N}\left(0,Q_{b_{\dot{v},i}}\right)$
 \end_inset
 
-: acceleration bias noise for IMU 
+: acceleration bias random walk noise for IMU 
 \begin_inset Formula $i$
 \end_inset
 
@@ -219,31 +430,169 @@ Process noise:
 \begin_inset Formula $w_{b_{\omega,i}}\sim\mathcal{N}\left(0,Q_{b_{\omega,i}}\right)$
 \end_inset
 
-: gyro bias noise for IMU 
+: gyro bias random walk noise for IMU 
 \begin_inset Formula $i$
 \end_inset
 
 
 \end_layout
 
-\begin_layout Standard
-Dynamics:
+\begin_layout Subsection
+Linearized error model
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:Linearized-error-model"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
+The only part of the conntinuous-time dynamics that is nonlinear is the
+ kinematic equation describing how the unit quaternion 
+\begin_inset Formula $q$
+\end_inset
+
+ changes in time.
+ A problem that arises with the use of unit quaternions is that the unit
+ norm constraint needs to be preserved.
+ The update steps in the Kalman filter itself do not know about this constraint
+ and will in general not enforce it.
+\end_layout
+
+\begin_layout Standard
+A simple way to enforce this constraint is to convert differences with respect
+ to the current estimate to a local, minimal description (i.e.
+ using three numbers), compute a correction in terms of this minimal description
+, convert the correction back to a quaternion, and then perform quaternion
+ multiplication to correct the estimate.
+ We will use a local description in terms of an error rotation vector 
+\begin_inset Formula $\phi\in\mathbb{R}^{3}$
+\end_inset
+
+, where 
+\begin_inset Formula $\frac{\phi}{\left\Vert \phi\right\Vert }$
+\end_inset
+
+ is the axis of rotation, and 
+\begin_inset Formula $\left\Vert \phi\right\Vert $
+\end_inset
+
+ is the rotation angle about the axis of rotation.
+\end_layout
+
+\begin_layout Standard
+The equation describing the rotational kinematics in terms of 
+\begin_inset Formula $\phi$
+\end_inset
+
+ is derived in the appendix (section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:Appendix:-rotation-vector"
+
+\end_inset
+
+), and reads
 \begin_inset Formula 
-\begin{align*}
-\dot{r} & =\dot{r}\\
-\ddot{r} & =\ddot{r}_{d}+w_{\ddot{r}}\\
-\dot{q} & =\frac{1}{2}q\otimes\omega_{q}\\
-\dot{\omega} & =\dot{\omega}_{d}+w_{\dot{\omega}}\\
-\dot{b}_{\dot{v},i} & =w_{b_{\dot{v},i}}\quad i\in\left\{ 1,2,\dotsc,n\right\} \\
-\dot{b}_{\omega,i} & =w_{b_{\omega,i}}\quad i\in\left\{ 1,2,\dotsc,n\right\} 
-\end{align*}
+\begin{equation}
+\dot{\phi}=\omega+\frac{\phi\times\omega}{2}+\underbrace{\frac{1}{\left\Vert \phi\right\Vert ^{2}}\left[1-\frac{\left\Vert \phi\right\Vert \sin\left\Vert \phi\right\Vert }{2\left(1-\cos\left\Vert \phi\right\Vert \right)}\right]\phi\times\left(\phi\times\omega\right)}_{c}\label{eq:bortz}
+\end{equation}
+
+\end_inset
+
+Note the singularity at 
+\begin_inset Formula $\left\Vert \phi\right\Vert =n2\pi$
+\end_inset
+
+, with 
+\begin_inset Formula $n\in\mathbb{Z}\neq0$
+\end_inset
+
+, which is the reason for only using these dynamics locally around the current
+ orientation estimate.
+\end_layout
+
+\begin_layout Standard
+Next, we derive a linearization of 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:bortz"
+
+\end_inset
+
+, written as
+\begin_inset Formula 
+\[
+\dot{\phi}\approx\frac{\partial\dot{\phi}}{\partial\phi}\phi+\frac{\partial\dot{\phi}}{\partial\omega}\omega
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The derivative with respect to 
+\begin_inset Formula $\phi$
+\end_inset
+
+ is 
+\begin_inset Formula 
+\[
+\frac{\partial\dot{\phi}}{\partial\phi}=-\frac{1}{2}\tilde{\omega}+\frac{\partial c}{\partial\phi}
+\]
 
 \end_inset
 
 where 
+\begin_inset Formula $\tilde{x}\in so\left(3\right)$
+\end_inset
+
+ represents the skew-symmetric matrix such that 
+\begin_inset Formula $\tilde{x}y=x\times y$
+\end_inset
+
+ for all 
+\begin_inset Formula $y\in\mathbb{R}^{3}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+The derivative with respect to 
+\begin_inset Formula $\omega$
+\end_inset
+
+ is
+\begin_inset Formula 
+\[
+\frac{\partial\dot{\phi}}{\partial\omega}=I+\frac{1}{2}\tilde{\phi}+\frac{\partial c}{\partial\omega}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Since we linearize around 
+\begin_inset Formula $\phi=0$
+\end_inset
+
+, we can simplify these derivatives.
+ Using Mathematica, we have shown that 
+\begin_inset Formula $\lim_{\phi\rightarrow0}\frac{\partial c}{\partial\phi}$
+\end_inset
+
+ and 
+\begin_inset Formula $\lim_{\phi\rightarrow0}\frac{\partial c}{\partial\omega}$
+\end_inset
+
+ exist and are zero.
+ Furthermore, the term in the expression for 
 \family roman
 \series medium
 \shape up
@@ -256,131 +605,26 @@ where
 \noun off
 \color none
 
-\begin_inset Formula $\omega_{q}=\left(\begin{array}{c}
-\omega\\
-0
-\end{array}\right)$
-\end_inset
-
-.
-\end_layout
-
-\begin_layout Subsection
-Linearized error model
-\end_layout
-
-\begin_layout Standard
-Only the orientation part of the process model is nonlinear.
- A problem that arises with the use of Euler parameters (i.e.
- unit quaternions) is that the unit norm constraint needs to be preserved.
-\end_layout
-
-\begin_layout Standard
-A simple way to enforce this constraint is to convert errors to a local,
- minimal description (i.e.
- using three numbers), compute a correction in terms of this minimal description
-, convert the correction back to a quaternion, and then perform quaternion
- multiplication to correct the estimate.
- We will use a local description in terms of the error rotation vector 
-\begin_inset Formula $\phi$
-\end_inset
-
-, where 
-\begin_inset Formula $k=\frac{\phi}{\left\Vert \phi\right\Vert }$
-\end_inset
-
- is the axis of rotation, and 
-\begin_inset Formula $\left\Vert \phi\right\Vert $
-\end_inset
-
- is the rotation angle about 
-\begin_inset Formula $k$
-\end_inset
-
-.
-\end_layout
-
-\begin_layout Standard
-The equation describing the rotational kinematics in terms of 
-\begin_inset Formula $\phi$
-\end_inset
-
- is derived in the appendix, and reads
-\begin_inset Formula 
-\[
-\dot{\phi}=\omega+\frac{\phi\times\omega}{2}+\frac{1}{\left\Vert \phi\right\Vert ^{2}}\left[1-\frac{\left\Vert \phi\right\Vert \sin\left\Vert \phi\right\Vert }{2\left(1-\cos\left\Vert \phi\right\Vert \right)}\right]\phi\times\left(\phi\times\omega\right)
-\]
-
+\begin_inset Formula $\frac{\partial\dot{\phi}}{\partial\omega}$
 \end_inset
 
 
-\end_layout
-
-\begin_layout Standard
-We can rewrite this as
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula 
-\[
-\dot{\phi}=\underbrace{\frac{\partial\dot{\phi}}{\partial\phi}}_{J_{\phi}}\phi+c\left(\phi,\omega\right)
-\]
-
+\family default
+\series default
+\shape default
+\size default
+\emph default
+\bar default
+\strikeout default
+\uuline default
+\uwave default
+\noun default
+\color inherit
+ that is linear in 
+\begin_inset Formula $\tilde{\phi}$
 \end_inset
 
-where both 
-\begin_inset Formula $c\left(\phi,\omega\right)$
-\end_inset
-
- and 
-\begin_inset Formula $J_{\phi}$
-\end_inset
-
- are nonlinear in 
-\begin_inset Formula $\phi$
-\end_inset
-
- and 
-\begin_inset Formula $\omega$
-\end_inset
-
-.
- Since we assume 
-\begin_inset Formula $\phi$
-\end_inset
-
- to be small, a first order approximation of these terms should be sufficient.
- Hence, we take the limit as 
-\begin_inset Formula $\phi\rightarrow0$
-\end_inset
-
-: 
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-TODO: derivations, existence of limit, direction independence
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula 
-\begin{align*}
-\lim_{\phi\rightarrow0}c\left(\phi,\omega\right) & =\omega\\
-\lim_{\phi\rightarrow0}J_{\phi} & =-\frac{1}{2}\tilde{\omega}
-\end{align*}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-The final linearized error orientation dynamics then become
+ also disappears, finally resulting in
 \begin_inset Formula 
 \[
 \dot{\phi}\approx I\omega-\frac{1}{2}\tilde{\omega}\phi
@@ -418,10 +662,10 @@ where
 
 \end_inset
 
-so that the update equation becomes
+so that the update equation for orientation becomes
 \begin_inset Formula 
 \[
-\hat{q}\leftarrow\hat{q}\otimes\Delta q
+\hat{q}_{n+1}^{+}=\hat{q}_{n+1}^{-}\otimes\Delta q
 \]
 
 \end_inset
@@ -430,11 +674,11 @@ so that the update equation becomes
 \end_layout
 
 \begin_layout Standard
-We can now construct the continuous time state space model describing the
+We can now construct the continuous-time state space model describing the
  error dynamics:
 \begin_inset Formula 
 \[
-\dot{x}=Ax+Bu+w_{x}
+\dot{x}^{c}=Ax^{c}+Bu+w^{c}
 \]
 
 \end_inset
@@ -442,9 +686,9 @@ We can now construct the continuous time state space model describing the
 with
 \begin_inset Formula 
 \begin{align*}
-x & =\left(r,\dot{r},\phi,\omega,b_{\dot{v},1},\dotsc,b_{a,n},b_{\dot{v},1},\dotsc,b_{\omega,n}\right)\\
+x^{c} & =\left(r,\dot{r},\phi,\omega,b_{\dot{v},1},\dotsc,b_{a,n},b_{\dot{v},1},\dotsc,b_{\omega,n}\right)\\
 u & =\left(\ddot{r}_{d},\dot{\omega}_{d}\right)\\
-w_{x} & =\left(0,w_{\ddot{r}},0,w_{\dot{\omega}},w_{b_{\dot{v},1}},\dotsc,w_{b_{\dot{v},n}},w_{b_{\omega,1}},\dotsc,w_{b_{\omega,n}}\right)\sim\mathcal{N}\left(0,Q\right)
+w^{c} & =\left(0,w_{\ddot{r}},0,w_{\dot{\omega}},w_{b_{\dot{v},1}},\dotsc,w_{b_{\dot{v},n}},w_{b_{\omega,1}},\dotsc,w_{b_{\omega,n}}\right)\sim\mathcal{N}\left(0,Q^{c}\right)
 \end{align*}
 
 \end_inset
@@ -501,7 +745,7 @@ and where the noise covariance is
 \begin_layout Standard
 \begin_inset Formula 
 \begin{align*}
-Q & =\left(\begin{array}{ccc}
+Q^{c} & =\left(\begin{array}{ccc}
 Q_{r} & 0 & 0\\
 0 & Q_{\phi} & 0\\
 0 & 0 & Q_{b}
@@ -532,7 +776,240 @@ Note that the state matrix depends on
 \begin_inset Formula $\omega$
 \end_inset
 
- and is hence not constant.
+ and is hence time-variant.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+TODO: talk about propagating the orientation state
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Discretization
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:Discretization"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The continuous time error dynamics can be approximated using a discrete
+ time system as:
+\begin_inset Formula 
+\begin{align*}
+x_{n+1}^{c} & =F^{c}x_{n}^{c}+G^{c}u_{n}+w_{n}^{c}\\
+w_{n}^{c} & \sim\mathcal{N}\left(0,Q_{d}^{c}\right)
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+With a first-order hold approximation, we can write
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+TODO: cite
+\end_layout
+
+\end_inset
+
+
+\begin_inset Formula 
+\begin{align*}
+F^{c} & =e^{A\Delta t}\\
+G^{c} & =\int_{0}^{\Delta t}e^{A\tau}d\tau B\\
+Q_{d}^{c} & =\int_{0}^{\Delta t}e^{A\tau}Q^{c}e^{A^{T}\tau}d\tau
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Note that the Matlab documentation for the `kalmd' function additionally
+ states that the measurement noise covariance matrix 
+\begin_inset Formula $R$
+\end_inset
+
+ should become 
+\begin_inset Formula $\frac{1}{\Delta t}R$
+\end_inset
+
+ when the model is discretized.
+ We think this assumes that the measurement in the discretized model is
+ the average of a continuous stream of measurements taken throughout the
+ discretization time step, thereby averaging out the zero-mean noise and
+ resulting in a reduced noise covariance with increased measurement time.
+ We think this is not a good assumption, and instead assume that the original
+ continuous-time measurement noise is just sampled once per discretization
+ time step, resulting in an unaltered covariance.
+\end_layout
+
+\begin_layout Standard
+Van Loan 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "VanLoan1978"
+
+\end_inset
+
+ shows that if we define
+\begin_inset Formula 
+\[
+M=\left(\begin{array}{ccc}
+-A^{T} & Q^{c} & 0\\
+0 & A & B\\
+0 & 0 & 0
+\end{array}\right)
+\]
+
+\end_inset
+
+and
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+e^{M\Delta t}=\left(\begin{array}{ccc}
+F_{2} & G_{2} & H_{2}\\
+0 & F_{3} & G_{3}\\
+0 & 0 & F_{4}
+\end{array}\right)
+\]
+
+\end_inset
+
+then we have
+\begin_inset Formula 
+\begin{align*}
+F^{c} & =F_{3}\\
+G^{c} & =G_{3}\\
+Q_{d}^{c} & =F_{3}{}^{T}G_{2}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The matrix exponentials can be approximated in a number of ways, such as
+ using a truncated version of the power series definition or using a Padé
+ approximant 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "VanLoan1978"
+
+\end_inset
+
+.
+ 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+TODO: investigate exploiting sparsity
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Discrete time part of dynamics
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:Discrete-time-part"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This section describes the part of the process model dynamics that is most
+ naturally described directly in terms of a discrete-time difference equation.
+\end_layout
+
+\begin_layout Standard
+In the extended Kalman filter framework, measurements can only refer to
+ states, not to inputs.
+ Since the accelerometers in the IMUs will provide measurements of the linear
+ acceleration, we need to have accelerations as part of the state vector.
+ In addition, a difference between the input accelerations and the estimated
+ accelerations, which also take the linear acceleration measurements into
+ account, may be useful in control, e.g.
+ to estimate the magnitude of unmodeled external forces applied to the robot.
+\end_layout
+
+\begin_layout Standard
+To this end, we introduce the discrete-time states 
+\begin_inset Formula $\ddot{r}_{n}$
+\end_inset
+
+ and 
+\begin_inset Formula $\dot{\omega}_{n}$
+\end_inset
+
+, with dynamics described by
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\ddot{r}_{n+1} & =\ddot{r}_{d}+w_{\ddot{r}}\\
+\dot{\omega}_{n+1} & =\dot{\omega}_{d}+w_{\dot{\omega}}
+\end{align*}
+
+\end_inset
+
+Note that the noise terms 
+\begin_inset Formula $w_{\ddot{r}}$
+\end_inset
+
+ and 
+\begin_inset Formula $w_{\dot{\omega}}$
+\end_inset
+
+ are the same as for the continuous time dynamics of 
+\begin_inset Formula $\dot{r}$
+\end_inset
+
+ and 
+\begin_inset Formula $\omega$
+\end_inset
+
+, respectively.
+\end_layout
+
+\begin_layout Standard
+In canonical state space form, we can write the dynamics as
+\begin_inset Formula 
+\[
+x_{d,n+1}=F^{d}x_{d,n}+G^{d}u_{n}+w^{d}
+\]
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Section
@@ -540,7 +1017,7 @@ Measurements
 \end_layout
 
 \begin_layout Standard
-Measurements:
+We define the following measurements:
 \end_layout
 
 \begin_layout Itemize
@@ -559,45 +1036,76 @@ Measurements:
 \begin_inset Formula $z_{\omega,i}$
 \end_inset
 
-: Measured angular velocity of IMU i in body frame.
- Includes bias and noise.
- 
+: angular velocity measured by gyro 
+\begin_inset Formula $i$
+\end_inset
+
+ in body frame, includes bias and noise (section 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "sub:IMU-angular-velocity"
+
+\end_inset
+
+).
 \end_layout
 
 \begin_layout Itemize
 \begin_inset Formula $z_{\dot{v,}i}$
 \end_inset
 
-: Measured acceleration of IMU i in body frame.
- Includes bias and noise.
+: linear acceleration measured by accelerometer 
+\begin_inset Formula $i$
+\end_inset
+
+ in body frame, including bias and noise (section 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "sub:IMU-linear-acceleration"
+
+\end_inset
+
+).
 \end_layout
 
 \begin_layout Itemize
 \begin_inset Formula $z_{q,i}$
 \end_inset
 
-: Measured orientation of IMU i with respect to world.
- Includes noise.
- May include bias.
+: orientation of orientation sensor 
+\begin_inset Formula $i$
+\end_inset
+
+ with respect to world, including noise (section 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "sub:Orientation-measurements"
+
+\end_inset
+
+).
 \end_layout
 
 \begin_layout Itemize
 \begin_inset Formula $z_{\dot{p},i}$
 \end_inset
 
-: Measured velocity of stationary point 
+: velocity of a body-fixed point 
 \begin_inset Formula $p_{i}$
 \end_inset
 
+ with respect to world, expressed in world frame (section 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "sub:Point-velocity-measurements"
 
+\end_inset
+
+).
 \end_layout
 
 \begin_layout Standard
-TODO:
-\end_layout
-
-\begin_layout Standard
-Let 
+In what follows, let 
 \begin_inset Formula $\hat{\cdot}$
 \end_inset
 
@@ -609,7 +1117,14 @@ Let
 \end_layout
 
 \begin_layout Subsection
-IMU angular velocity
+Angular velocity measurements
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:IMU-angular-velocity"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -864,7 +1379,14 @@ The partial derivatives with respect to the state variables are
 \end_layout
 
 \begin_layout Subsection
-IMU linear acceleration
+Linear acceleration measurements
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:IMU-linear-acceleration"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Subsubsection
@@ -2024,6 +2546,13 @@ resulting in
 
 \begin_layout Subsection
 Orientation measurements
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:Orientation-measurements"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -2175,6 +2704,13 @@ where
 
 \begin_layout Subsection
 Point velocity measurements
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:Point-velocity-measurements"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -2437,144 +2973,14 @@ I & R_{p}^{w}\left(\tilde{r}_{p}-\tilde{p}_{i}^{p}\right) & -R_{p}^{w}\tilde{v}_
 \end_layout
 
 \begin_layout Section
-Discretization
-\end_layout
-
-\begin_layout Standard
-We approximate the continuous time error dynamics using a discrete time
- system:
-\begin_inset Formula 
-\begin{align*}
-x_{n+1} & =A_{d}x_{n}+B_{d}u_{n}+w_{n}\\
-y_{n} & =Cx_{n}+v_{n}\\
-w_{n} & \sim\mathcal{N}\left(0,Q_{d}\right)\\
-v_{n} & \sim\mathcal{N}\left(0,R_{d}\right)
-\end{align*}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-With a first-order hold approximation, we can write
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-TODO: cite
-\end_layout
-
-\end_inset
-
-
-\begin_inset Formula 
-\begin{align*}
-A_{d} & =e^{A\Delta t}\\
-B_{d} & =\int_{0}^{\Delta t}e^{A\tau}d\tau B\\
-Q_{d} & =\int_{0}^{\Delta t}e^{A\tau}Qe^{A^{T}\tau}d\tau\\
-R_{d} & =R
-\end{align*}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-Note that the Matlab documentation for the `kalmd' function states that
- 
-\begin_inset Formula $R_{d}$
-\end_inset
-
- should be 
-\begin_inset Formula $\frac{1}{\Delta t}R$
-\end_inset
-
-.
- We think this assumes that the measurement in the discretized model is
- the average of a continuous stream of measurements taken throughout the
- discretization time step, thereby averaging out the zero-mean noise and
- resulting in a reduced noise covariance with increased measurement time.
- We think this is not a good assumption, and instead assume that the continuous-
-time measurement noise is sampled only once per discretization time step,
- resulting in an unaltered covariance.
-\end_layout
-
-\begin_layout Standard
-Van Loan 
-\begin_inset CommandInset citation
-LatexCommand cite
-key "VanLoan1978"
-
-\end_inset
-
- shows that if we define
-\begin_inset Formula 
-\[
-M=\left(\begin{array}{ccc}
--A^{T} & Q & 0\\
-0 & A & B\\
-0 & 0 & 0
-\end{array}\right)
-\]
-
-\end_inset
-
-and
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula 
-\[
-e^{M\Delta t}=\left(\begin{array}{ccc}
-F_{2} & G_{2} & H_{2}\\
-0 & F_{3} & G_{3}\\
-0 & 0 & F_{4}
-\end{array}\right)
-\]
-
-\end_inset
-
-then we have
-\begin_inset Formula 
-\begin{align*}
-A_{d} & =F_{3}\\
-B_{d} & =G_{3}\\
-Q_{d} & =F_{3}{}^{T}G_{2}
-\end{align*}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-The matrix exponential can be approximated in a number of ways, such as
- using a truncated version of the power series definition or using a Padé
- approximant 
-\begin_inset CommandInset citation
-LatexCommand cite
-key "VanLoan1978"
-
-\end_inset
-
-.
- 
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-TODO: investigate exploiting sparsity
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Section
 Appendix: rotation vector kinematics
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:Appendix:-rotation-vector"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
