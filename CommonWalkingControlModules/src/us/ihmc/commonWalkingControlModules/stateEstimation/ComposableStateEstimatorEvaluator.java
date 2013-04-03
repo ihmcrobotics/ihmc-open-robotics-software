@@ -46,6 +46,7 @@ import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.ExternalForcePoint;
 import com.yobotics.simulationconstructionset.FloatingJoint;
 import com.yobotics.simulationconstructionset.IMUMount;
+import com.yobotics.simulationconstructionset.KinematicPoint;
 import com.yobotics.simulationconstructionset.Link;
 import com.yobotics.simulationconstructionset.PinJoint;
 import com.yobotics.simulationconstructionset.Robot;
@@ -57,6 +58,8 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 
 public class ComposableStateEstimatorEvaluator
 {
+   private static final boolean SHOW_GUI = true;
+
    private static final boolean INITIALIZE_ANGULAR_VELOCITY_ESTIMATE_TO_ACTUAL = true; //false;
    private static final boolean USE_ANGULAR_ACCELERATION_INPUT = true;
 
@@ -66,7 +69,9 @@ public class ComposableStateEstimatorEvaluator
 
    private static final boolean ESTIMATE_COM = true;
    private static final boolean ADD_ARM_LINKS = true;
-
+   private static final boolean OFFSET_FRAMES = false;
+   private static final boolean ROTATE_FRAMES = false;
+   
    //    from a recent pull request:
    //    https://bitbucket.org/osrf/drcsim/pull-request/172/add-noise-model-to-sensors-gazebo-16/diff
    //    <noise>
@@ -118,7 +123,7 @@ public class ComposableStateEstimatorEvaluator
    private final double gazeboLinearAccelerationBiasMean = 0.1;
 
    private final Vector3d gravitationalAccelerationForSimulation = new Vector3d(0.0, 0.0, 0.0);
-   private final Vector3d gravitationalAccelerationForSensors = new Vector3d(0.0, 0.0, -9.81);
+   private final Vector3d gravitationalAccelerationForSensors = new Vector3d(); //0.0, 0.0, -9.81);
 
    private final double simDT = 1e-3;
    private final int simTicksPerControlDT = 5;
@@ -135,7 +140,7 @@ public class ComposableStateEstimatorEvaluator
       QuaternionOrientationEstimatorEvaluatorController controller = new QuaternionOrientationEstimatorEvaluatorController(robot, controlDT);
       robot.setController(controller, simTicksPerControlDT);
 
-      SimulationConstructionSet scs = new SimulationConstructionSet(robot, true, 32000);
+      SimulationConstructionSet scs = new SimulationConstructionSet(robot, SHOW_GUI, 32000);
       scs.addYoVariableRegistry(registry);
 
       scs.setDT(simDT, simTicksPerRecord);
@@ -170,7 +175,12 @@ public class ComposableStateEstimatorEvaluator
          rootJoint.setLink(bodyLink);
 
          Transform3D imu0Offset = new Transform3D();
+         Vector3d offsetVector0 = new Vector3d();
+         imu0Offset.setTranslation(offsetVector0);
+         
          IMUMount imuMount0 = new IMUMount("imuMount0", imu0Offset, this);
+         KinematicPoint kinematicPoint0 = new KinematicPoint("kp0", offsetVector0, this);
+         rootJoint.addKinematicPoint(kinematicPoint0);
          rootJoint.addIMUMount(imuMount0);
 
          this.addRootJoint(rootJoint);
@@ -189,6 +199,19 @@ public class ComposableStateEstimatorEvaluator
             pinJoint1.setLink(armLink1);
 
             Transform3D imu1Offset = new Transform3D();
+            if (ROTATE_FRAMES)
+            {
+               imu1Offset.rotX(Math.PI / 7.0);
+            }
+            Vector3d offsetVector1 = new Vector3d();
+            if (OFFSET_FRAMES)
+            {
+               offsetVector1.set(0.1, 0.2, 0.3);
+            }
+            imu1Offset.setTranslation(offsetVector1);
+
+            KinematicPoint kinematicPoint1 = new KinematicPoint("kp1", offsetVector1, this);
+            pinJoint1.addKinematicPoint(kinematicPoint1);
             IMUMount imuMount1 = new IMUMount("imuMount1", imu1Offset, this);
             pinJoint1.addIMUMount(imuMount1);
 
@@ -197,7 +220,7 @@ public class ComposableStateEstimatorEvaluator
             PinJoint pinJoint2 = new PinJoint("pinJoint2", new Vector3d(0.0, 0.0, 1.0), this, Axis.Z);
             Link armLink2 = new Link("armLink2");
             armLink2.setMassAndRadiiOfGyration(0.2, 0.1, 0.1, 0.1);
-            armLink2.setComOffset(new Vector3d(0.5, 0.0, 0.0));
+            armLink2.setComOffset(new Vector3d(0.2, 0.0, 0.0));
 
             Graphics3DObject armLink2Graphics = new Graphics3DObject();
             armLink2Graphics.rotate(Math.PI / 2.0, Graphics3DObject.Y);
@@ -206,8 +229,19 @@ public class ComposableStateEstimatorEvaluator
             pinJoint2.setLink(armLink2);
 
             Transform3D imu2Offset = new Transform3D();
-            imu2Offset.rotY(Math.PI / 8.0);
-            imu2Offset.setTranslation(new Vector3d(0.0, 0.0, 0.1));
+            if (ROTATE_FRAMES)
+            {
+               imu2Offset.rotY(Math.PI / 8.0);
+            }
+            Vector3d offsetVector2 = new Vector3d();
+            if (OFFSET_FRAMES)
+            {
+               offsetVector2.set(0.1, 0.03, 0.007);
+            }
+            imu2Offset.setTranslation(offsetVector2);
+
+            KinematicPoint kinematicPoint2 = new KinematicPoint("kp2", offsetVector2, this);
+            pinJoint2.addKinematicPoint(kinematicPoint2);
             IMUMount imuMount2 = new IMUMount("imuMount2", imu2Offset, this);
             pinJoint2.addIMUMount(imuMount2);
 
@@ -246,7 +280,13 @@ public class ComposableStateEstimatorEvaluator
             rootJoint.setPosition(new Point3d(0.0, 0.0, 0.4));
             rootJoint.setAngularVelocityInBody(new Vector3d(0.2, 2.5, 0.0));
          }
-
+         
+         Vector3d externalForceVector = new Vector3d(gravitationalAccelerationForSimulation);
+         Point3d comPoint = new Point3d();
+         double mass = this.computeCenterOfMass(comPoint);
+         externalForceVector.scale(-mass);
+         externalForcePoint.setForce(externalForceVector);
+         
          update();
       }
 
