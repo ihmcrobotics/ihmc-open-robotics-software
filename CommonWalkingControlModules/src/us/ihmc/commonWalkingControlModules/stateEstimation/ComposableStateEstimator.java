@@ -281,7 +281,6 @@ public class ComposableStateEstimator extends AbstractControlFlowElement
          long tFinal = System.currentTimeMillis();
          double discretizationTimeMillis = (double) (tFinal - tInitial);
          statistics.addValue(discretizationTimeMillis);
-         System.out.println(statistics.getMean());
 
          assembleProcessModel(F, G, Q, FContinuous, GContinuous, QContinuous, FDiscrete, GDiscrete, QDiscrete);
       }
