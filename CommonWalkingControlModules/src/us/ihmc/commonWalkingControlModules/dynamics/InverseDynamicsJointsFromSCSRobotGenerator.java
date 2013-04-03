@@ -16,7 +16,6 @@ import us.ihmc.utilities.screwTheory.RevoluteJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTools;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
-import us.ihmc.utilities.screwTheory.SixDoFJointSpatialAccelerationCalculator;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.utilities.screwTheory.Twist;
 
@@ -160,14 +159,13 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
       }   
    }
 
-   private final SixDoFJointSpatialAccelerationCalculator sixDoFJointSpatialAccelerationCalculator = new SixDoFJointSpatialAccelerationCalculator();
    private final SpatialAccelerationVector spatialAccelerationVector = new SpatialAccelerationVector();
    
    private final FrameVector linearVelocity = new FrameVector(ReferenceFrame.getWorldFrame());
    private final FrameVector angularVelocity = new FrameVector(ReferenceFrame.getWorldFrame());
      
-   private final Vector3d linearAcceleration = new Vector3d();
-   private final Vector3d angularAcceleration = new Vector3d();
+   private final FrameVector originAcceleration = new FrameVector();
+   private final FrameVector angularAcceleration = new FrameVector();
    
    private final Transform3D positionAndRotation = new Transform3D();
 
@@ -232,10 +230,16 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
             // Acceleration:
             //Note: To get the acceleration, you can't just changeFrame on the acceleration provided by SCS. Use a  SixDoFJointSpatialAccelerationCalculator instead.
 
-            floatingJoint.getLinearAccelerationInWorld(linearAcceleration);
-            floatingJoint.getAngularAccelerationInBody(angularAcceleration);
+            originAcceleration.setToZero(sixDoFJoint.getFrameBeforeJoint());
+            angularAcceleration.setToZero(sixDoFJoint.getFrameAfterJoint());
+            
+            floatingJoint.getLinearAccelerationInWorld(originAcceleration.getVector());
+            floatingJoint.getAngularAccelerationInBody(angularAcceleration.getVector());
+            originAcceleration.changeFrame(sixDoFJoint.getFrameBeforeJoint());
 
-            sixDoFJointSpatialAccelerationCalculator.computeSpatialAccelerationInBodyFrame(spatialAccelerationVector, sixDoFJoint, linearAcceleration, angularAcceleration);
+            spatialAccelerationVector.setToZero(sixDoFJoint.getFrameAfterJoint(), sixDoFJoint.getFrameBeforeJoint(), sixDoFJoint.getFrameAfterJoint());
+            spatialAccelerationVector.setBasedOnOriginAcceleration(angularAcceleration, originAcceleration, bodyTwist);
+            
             if (updateDesireds)
                sixDoFJoint.setDesiredAcceleration(spatialAccelerationVector);
             else

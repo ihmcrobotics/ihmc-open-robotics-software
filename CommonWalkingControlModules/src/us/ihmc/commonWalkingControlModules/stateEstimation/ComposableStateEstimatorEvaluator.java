@@ -66,14 +66,17 @@ public class ComposableStateEstimatorEvaluator
    private static final boolean ADD_ARM_LINKS = true;
 
    private final double orientationMeasurementStandardDeviation = Math.sqrt(1e-2);
-   private final double angularVelocityMeasurementStandardDeviation = Math.sqrt(1e-2);
+   private final double angularVelocityMeasurementStandardDeviation = Math.sqrt(1e-5);
    private final double linearAccelerationMeasurementStandardDeviation = Math.sqrt(1e-2);
 
    private final double angularAccelerationProcessNoiseStandardDeviation = Math.sqrt(1e-1);
    private final double comAccelerationProcessNoiseStandardDeviation = Math.sqrt(1e-1);
-   private final double angularVelocityBiasProcessNoiseStandardDeviation = Math.sqrt(1e-2);
-   private final double linearAccelerationBiasProcessNoiseStandardDeviation = Math.sqrt(1e-2);
+   private final double angularVelocityBiasProcessNoiseStandardDeviation = Math.sqrt(1e-4);
+   private final double linearAccelerationBiasProcessNoiseStandardDeviation = Math.sqrt(1e-4);
 
+   private final Vector3d gravitationalAccelerationForSimulation = new Vector3d(0.0, 0.0, 0.0);
+   private final Vector3d gravitationalAccelerationForSensors = new Vector3d(0.0, 0.0, -9.81);
+   
    private final double simDT = 1e-3;
    private final int simTicksPerControlDT = 5;
    private final double controlDT = simDT * simTicksPerControlDT;
@@ -88,12 +91,13 @@ public class ComposableStateEstimatorEvaluator
       QuaternionOrientationEstimatorEvaluatorController controller = new QuaternionOrientationEstimatorEvaluatorController(robot, controlDT);
       robot.setController(controller, simTicksPerControlDT);
 
-      SimulationConstructionSet scs = new SimulationConstructionSet(robot, true, 32000);
+      SimulationConstructionSet scs = new SimulationConstructionSet(robot, false, 32000);
       scs.addYoVariableRegistry(registry);
 
       scs.setDT(simDT, simTicksPerRecord);
       scs.setSimulateDuration(45.0);
       scs.startOnAThread();
+      scs.simulate();
    }
 
    private class StateEstimatorEstimatorEvaluatorRobot extends Robot
@@ -181,7 +185,7 @@ public class ComposableStateEstimatorEvaluator
             imuMounts.add(imuMount0);
          }
 
-         this.setGravity(0.0);
+         this.setGravity(gravitationalAccelerationForSimulation);
 
          if (ADD_ARM_LINKS)
          {
@@ -400,11 +404,10 @@ public class ComposableStateEstimatorEvaluator
          perfectFullRobotModel = new StateEstimatorEvaluatorFullRobotModel(robot);
          perfectTwistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), perfectFullRobotModel.elevator);
 
-         double gravity = robot.getGravityZ();
-         perfectSpatialAccelerationCalculator = new SpatialAccelerationCalculator(perfectFullRobotModel.elevator, perfectTwistCalculator, gravity, false);
+         perfectSpatialAccelerationCalculator = new SpatialAccelerationCalculator(perfectFullRobotModel.elevator, perfectTwistCalculator, 0.0, false);
          estimatedFullRobotModel = new StateEstimatorEvaluatorFullRobotModel(robot);
          estimatedTwistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), estimatedFullRobotModel.elevator);
-         estimatedSpatialAccelerationCalculator = new SpatialAccelerationCalculator(estimatedFullRobotModel.elevator, estimatedTwistCalculator, gravity, false);
+         estimatedSpatialAccelerationCalculator = new SpatialAccelerationCalculator(estimatedFullRobotModel.elevator, estimatedTwistCalculator, 0.0, false);
 
          perfectCenterOfMassCalculator = new CenterOfMassCalculator(perfectFullRobotModel.elevator, ReferenceFrame.getWorldFrame());
          perfectCenterOfMassJacobian = new CenterOfMassJacobian(perfectFullRobotModel.elevator);
@@ -546,10 +549,8 @@ public class ComposableStateEstimatorEvaluator
                ReferenceFrame frameUsedForPerfectMeasurement = perfectMeasurmentBody.getParentJoint().getFrameAfterJoint();
                String sensorName = imuMount.getName() + "LinearAcceleration";
 
-               Vector3d gravitationalAcceleration = new Vector3d();
-               robot.getGravity(gravitationalAcceleration);
                SimulatedLinearAccelerationSensor linearAccelerationSensor = new SimulatedLinearAccelerationSensor(sensorName, perfectMeasurmentBody,
-                     frameUsedForPerfectMeasurement, perfectSpatialAccelerationCalculator, gravitationalAcceleration, registry);
+                     frameUsedForPerfectMeasurement, perfectSpatialAccelerationCalculator, gravitationalAccelerationForSensors, registry);
 
                GaussianVectorCorruptor linearAccelerationCorruptor = new GaussianVectorCorruptor(1237L, sensorName, registry);
                linearAccelerationCorruptor.setStandardDeviation(linearAccelerationMeasurementStandardDeviation);
@@ -567,7 +568,7 @@ public class ComposableStateEstimatorEvaluator
                ReferenceFrame measurementFrame = estimatedMeasurementBody.getParentJoint().getFrameAfterJoint();
 
                LinearAccelerationSensorConfiguration linearAccelerationSensorConfiguration = new LinearAccelerationSensorConfiguration(
-                     linearAccelerationSensor.getLinearAccelerationOutputPort(), sensorName, estimatedMeasurementBody, measurementFrame, robot.getGravityZ(),
+                     linearAccelerationSensor.getLinearAccelerationOutputPort(), sensorName, estimatedMeasurementBody, measurementFrame, -gravitationalAccelerationForSensors.getZ(),
                      linearAccelerationNoiseCovariance, linearAccelerationBiasProcessNoiseCovariance);
 
                linearAccelerationSensorConfigurations.add(linearAccelerationSensorConfiguration);

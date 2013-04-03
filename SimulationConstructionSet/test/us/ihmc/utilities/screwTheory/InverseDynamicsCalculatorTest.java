@@ -491,19 +491,22 @@ public class InverseDynamicsCalculatorTest
    
    private void copyAccelerationFromForwardToInverse(FloatingJoint floatingJoint, SixDoFJoint sixDoFJoint)
    {
-      // Note: To get the acceleration, you can't just changeFrame on the acceleration provided by SCS. Use a  SixDoFJointSpatialAccelerationCalculator instead.
+      // Note: To get the acceleration, you can't just changeFrame on the acceleration provided by SCS. Use setBasedOnOriginAcceleration instead.
       // TODO: Get this to work when the FloatingJoint has an offset.
+
+      Twist bodyTwist = new Twist();
+      sixDoFJoint.packJointTwist(bodyTwist);
+
+      FrameVector originAcceleration = new FrameVector(sixDoFJoint.getFrameBeforeJoint());
+      FrameVector angularAcceleration = new FrameVector(sixDoFJoint.getFrameAfterJoint());
+
+      floatingJoint.getLinearAccelerationInWorld(originAcceleration.getVector());
+      floatingJoint.getAngularAccelerationInBody(angularAcceleration.getVector());
+      originAcceleration.changeFrame(sixDoFJoint.getFrameBeforeJoint());
+
+      SpatialAccelerationVector spatialAccelerationVector = new SpatialAccelerationVector(sixDoFJoint.getFrameAfterJoint(), sixDoFJoint.getFrameBeforeJoint(), sixDoFJoint.getFrameAfterJoint());
       
-      SixDoFJointSpatialAccelerationCalculator sixDoFJointSpatialAccelerationCalculator = new SixDoFJointSpatialAccelerationCalculator();
-
-      Vector3d linearAcceleration = new Vector3d();
-      Vector3d angularAcceleration = new Vector3d();
-
-      floatingJoint.getLinearAccelerationInWorld(linearAcceleration);
-      floatingJoint.getAngularAccelerationInBody(angularAcceleration);
-
-      SpatialAccelerationVector spatialAccelerationVector = new SpatialAccelerationVector();
-      sixDoFJointSpatialAccelerationCalculator.computeSpatialAccelerationInBodyFrame(spatialAccelerationVector , sixDoFJoint, linearAcceleration, angularAcceleration);
+      spatialAccelerationVector.setBasedOnOriginAcceleration(angularAcceleration, originAcceleration, bodyTwist);
       sixDoFJoint.setDesiredAcceleration(spatialAccelerationVector);
    }
 
