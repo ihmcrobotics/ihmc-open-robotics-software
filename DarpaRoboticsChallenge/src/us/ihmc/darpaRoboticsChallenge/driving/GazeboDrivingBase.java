@@ -262,6 +262,7 @@ public abstract class GazeboDrivingBase extends AbstractNodeMain
       else if( angle < -Math.PI )
          angle = -Math.PI;
 
+      System.out.println("  requesting steering angle "+angle);
 		steeringWheelCommand.setData(angle);
 		steeringWheelCommandPublisher.publish(steeringWheelCommand);
 	}
