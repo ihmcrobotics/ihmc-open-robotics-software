@@ -373,10 +373,13 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
                   Vector3d pinJointCoMLinearVelocityInBody = new Vector3d();
 
                   pinJoint.getAngularVelocityInBody(pinJointAngularVelocityInBody);
-                  pinJoint.getLinearVelocityInBody(pinJointCoMLinearVelocityInBody);
+                  Vector3d comOffset = new Vector3d();
+                  pinJoint.getLink().getComOffset(comOffset);
+                  pinJoint.getLinearVelocityInBody(pinJointCoMLinearVelocityInBody, comOffset);
 
-                  FramePoint comOffset = new FramePoint();
-                  revoluteJoint.getSuccessor().packCoMOffset(comOffset);
+                  FramePoint comOffsetCheck = new FramePoint();
+                  revoluteJoint.getSuccessor().packCoMOffset(comOffsetCheck);
+                  JUnitTools.assertTuple3dEquals(comOffset, comOffsetCheck.getVectorCopy(), 1e-7);
 
                   Twist revoluteJointTwist = new Twist();
                   twistCalculator.packTwistOfBody(revoluteJointTwist, revoluteJoint.getSuccessor());
