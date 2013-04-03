@@ -10,7 +10,7 @@ import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 
-public class BiasVectorCorruptor implements SignalCorruptor<Vector3d>
+public class RandomWalkBiasVectorCorruptor implements SignalCorruptor<Vector3d>
 {
    private final YoVariableRegistry registry;
    private final Random random;
@@ -19,7 +19,7 @@ public class BiasVectorCorruptor implements SignalCorruptor<Vector3d>
    private final YoFrameVector biasYoFrameVector;
    private final double squareRootOfUpdateDT;
    
-   public BiasVectorCorruptor(long seed, String namePrefix, double updateDT, YoVariableRegistry parentRegistry)
+   public RandomWalkBiasVectorCorruptor(long seed, String namePrefix, double updateDT, YoVariableRegistry parentRegistry)
    {
       this.random = new Random(seed);
       this.registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
