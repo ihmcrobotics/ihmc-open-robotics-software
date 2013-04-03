@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.ejml.alg.dense.mult.MatrixVectorMult;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
@@ -13,6 +14,7 @@ import us.ihmc.controlFlow.AbstractControlFlowElement;
 import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.kalman.YoKalmanFilter;
+import us.ihmc.utilities.linearDynamicSystems.SingleMatrixExponentialStateSpaceSystemDiscretizer;
 import us.ihmc.utilities.linearDynamicSystems.StateSpaceSystemDiscretizer;
 import us.ihmc.utilities.math.MatrixTools;
 
@@ -51,6 +53,8 @@ public class ComposableStateEstimator extends AbstractControlFlowElement
    private final Map<ControlFlowInputPort<?>, Integer> processInputStartIndices = new HashMap<ControlFlowInputPort<?>, Integer>();
    private final Map<ControlFlowInputPort<?>, Integer> processInputSizes = new HashMap<ControlFlowInputPort<?>, Integer>();
 
+   private final SummaryStatistics statistics = new SummaryStatistics();
+   
    public ComposableStateEstimator(String name, double controlDT, YoVariableRegistry parentRegistry)
    {
       this.registry = new YoVariableRegistry(name);
@@ -189,7 +193,8 @@ public class ComposableStateEstimator extends AbstractControlFlowElement
          super(ComposableStateEstimatorKalmanFilter.class.getSimpleName(), continuousStateSize + discreteStateSize, inputSize, measurementSize,
                ComposableStateEstimator.this.registry);
 
-         this.discretizer = new StateSpaceSystemDiscretizer(continuousStateSize, inputSize);
+         this.discretizer = new SingleMatrixExponentialStateSpaceSystemDiscretizer(continuousStateSize, inputSize);
+//         this.discretizer = new SplitUpMatrixExponentialStateSpaceSystemDiscretizer(continuousStateSize, inputSize);
          this.FContinuous = new DenseMatrix64F(continuousStateSize, continuousStateSize);
          this.GContinuous = new DenseMatrix64F(continuousStateSize, inputSize);
          this.QContinuous = new DenseMatrix64F(continuousStateSize, continuousStateSize);
@@ -271,7 +276,12 @@ public class ComposableStateEstimator extends AbstractControlFlowElement
          updateProcessModelBlock(FContinuous, GContinuous, QContinuous, continuousStateStartIndices, continuousStatePorts);
          updateProcessModelBlock(FDiscrete, GDiscrete, QDiscrete, discreteStateStartIndices, discreteStatePorts);
 
+         long tInitial = System.currentTimeMillis();
          discretizer.discretize(FContinuous, GContinuous, QContinuous, controlDT);
+         long tFinal = System.currentTimeMillis();
+         double discretizationTimeMillis = (double) (tFinal - tInitial);
+         statistics.addValue(discretizationTimeMillis);
+         System.out.println(statistics.getMean());
 
          assembleProcessModel(F, G, Q, FContinuous, GContinuous, QContinuous, FDiscrete, GDiscrete, QDiscrete);
       }

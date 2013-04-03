@@ -91,7 +91,7 @@ public class ComposableStateEstimatorEvaluator
       QuaternionOrientationEstimatorEvaluatorController controller = new QuaternionOrientationEstimatorEvaluatorController(robot, controlDT);
       robot.setController(controller, simTicksPerControlDT);
 
-      SimulationConstructionSet scs = new SimulationConstructionSet(robot, false, 32000);
+      SimulationConstructionSet scs = new SimulationConstructionSet(robot, true, 32000);
       scs.addYoVariableRegistry(registry);
 
       scs.setDT(simDT, simTicksPerRecord);
