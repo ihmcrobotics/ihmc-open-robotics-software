@@ -10,10 +10,9 @@ import us.ihmc.projectM.R2Sim02.initialSetup.RobotInitialSetup;
 import com.martiansoftware.jsap.JSAPException;
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.util.SingleStepGroundProfile;
+import com.yobotics.simulationconstructionset.util.DoubleStepGroundProfile;
 
-
-public class DRCSingleElevationChangeSimulation
+public class DRCDoubleElevationChangeSimulation
 {   
    public static void main(String[] args) throws JSAPException
    {
@@ -28,7 +27,7 @@ public class DRCSingleElevationChangeSimulation
       double elevationChange = 0.0;
       if(stepUp) elevationChange = Math.abs(stepHeight);
       else elevationChange = - Math.abs(stepHeight);
-      DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(new SingleStepGroundProfile(0.0, 5.0, -2.0, 2.0, 0.53, elevationChange), robotInterface.getSimulateDT());    //(new FlatGroundProfile(groundHeight), robotInterface.getSimulateDT());
+      DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(new DoubleStepGroundProfile(-2.0, 2.0, 0.53, 0.9, elevationChange, 0.0), robotInterface.getSimulateDT());    //(new FlatGroundProfile(groundHeight), robotInterface.getSimulateDT());
       RobotInitialSetup<SDFRobot> robotInitialSetup = new SquaredUpDRCRobotInitialSetup(groundHeight);
 
       boolean useVelocityAndHeadingScript = false;
