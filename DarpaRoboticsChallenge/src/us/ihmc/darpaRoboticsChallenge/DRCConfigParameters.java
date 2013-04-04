@@ -1,5 +1,6 @@
 package us.ihmc.darpaRoboticsChallenge;
 
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotParameters;
 import us.ihmc.graphics3DAdapter.camera.VideoSettings;
 import us.ihmc.graphics3DAdapter.camera.VideoSettings.Quality;
 import us.ihmc.graphics3DAdapter.camera.VideoSettingsH264LowLatency;
@@ -74,8 +75,6 @@ public class DRCConfigParameters
    public static final float LIDAR_SCAN_MAX_ROLL = 0.4f; // rolling the lidar to simulated a faster update rate
 
    public static final float LDIAR_SCAN_MIN_ROLL = -0.3f;
-   
-   public static final int KERNEL_SIZE = 34; // 34 centimeters square
 
    public static final double GRID_RESOLUTION = 0.05;// 5 centimeter resolution
 
@@ -87,6 +86,10 @@ public class DRCConfigParameters
    public static final double QUATERNION_NOISE_STD = 0.01;
    public static final boolean DEBUG_GAZEBO_LIDAR = false;
    public static final double LIDAR_NOISE_LEVEL_OVERRIDE = 0.005; // DRCGazebo will simulate with: 0.005 
+   public static final double BOUNDING_BOX_FOR_FOOTSTEP_HEIGHT_FINDING_SIDE_LENGTH = (1 + 0.3)
+   * 2
+   * Math.sqrt(DRCRobotParameters.DRC_ROBOT_FOOT_FORWARD * DRCRobotParameters.DRC_ROBOT_FOOT_FORWARD + 0.25 * DRCRobotParameters.DRC_ROBOT_FOOT_WIDTH
+         * DRCRobotParameters.DRC_ROBOT_FOOT_WIDTH);
    
 
 
