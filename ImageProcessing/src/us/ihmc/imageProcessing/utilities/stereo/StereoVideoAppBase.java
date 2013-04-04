@@ -21,6 +21,7 @@ package us.ihmc.imageProcessing.utilities.stereo;
 import boofcv.io.image.SimpleImageSequence;
 import boofcv.misc.BoofMiscOps;
 import boofcv.struct.calib.StereoParameters;
+import boofcv.struct.image.ImageDataType;
 import boofcv.struct.image.ImageSingleBand;
 
 import javax.swing.*;
@@ -111,8 +112,8 @@ public abstract class StereoVideoAppBase <I extends ImageSingleBand>
 				line2 = path+"/"+line2;
 
 			config = BoofMiscOps.loadXML(media.openFile(lineConfig));
-			SimpleImageSequence<I> video1 = media.openVideo(line1,imageType);
-			SimpleImageSequence<I> video2 = media.openVideo(line2,imageType);
+			SimpleImageSequence<I> video1 = media.openVideo(line1, ImageDataType.single(imageType));
+			SimpleImageSequence<I> video2 = media.openVideo(line2,ImageDataType.single(imageType));
 
 			process(video1,video2);
 		} catch (IOException e) {
@@ -193,7 +194,6 @@ public abstract class StereoVideoAppBase <I extends ImageSingleBand>
 	 */
 	abstract protected void handleRunningStatus( int status );
 
-	@Override
 	public void mouseClicked(MouseEvent e) {
 		if( !isRunning )
 			return;
@@ -206,19 +206,11 @@ public abstract class StereoVideoAppBase <I extends ImageSingleBand>
 			handleRunningStatus(0);
 	}
 
-	@Override
 	public void mousePressed(MouseEvent e) {}
-
-	@Override
 	public void mouseReleased(MouseEvent e) {}
-
-	@Override
 	public void mouseEntered(MouseEvent e) {}
-
-	@Override
 	public void mouseExited(MouseEvent e) {}
 
-	@Override
 	public void stateChanged(ChangeEvent e) {
 		if( e.getSource() == periodSpinner ) {
 			framePeriod = ((Number)periodSpinner.getValue()).intValue();
