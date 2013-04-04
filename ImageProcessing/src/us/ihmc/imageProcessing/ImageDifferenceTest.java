@@ -13,10 +13,7 @@ import boofcv.io.wrapper.xuggler.XugglerSimplified;
 import boofcv.misc.BoofMiscOps;
 import boofcv.struct.FastQueue;
 import boofcv.struct.GrowQueue_I32;
-import boofcv.struct.image.ImageFloat32;
-import boofcv.struct.image.ImageSInt32;
-import boofcv.struct.image.ImageUInt8;
-import boofcv.struct.image.MultiSpectral;
+import boofcv.struct.image.*;
 import georegression.struct.line.LineSegment2D_I32;
 import georegression.struct.point.Point2D_I32;
 import us.ihmc.imageProcessing.segmentation.*;
@@ -93,27 +90,18 @@ public class ImageDifferenceTest implements MouseListener {
       }
    }
 
-   @Override
    public void mouseClicked(MouseEvent e) {
       paused = !paused;
    }
-
-   @Override
    public void mousePressed(MouseEvent e) {}
-
-   @Override
    public void mouseReleased(MouseEvent e) {}
-
-   @Override
    public void mouseEntered(MouseEvent e) {}
-
-   @Override
    public void mouseExited(MouseEvent e) {}
 
    public static void main( String args[] ) {
       String videoFile = "../ImageProcessing/media/videos/leftEye.mp4";
 
-      XugglerSimplified<ImageFloat32> xuggler = new XugglerSimplified<ImageFloat32>(videoFile,ImageFloat32.class);
+      XugglerSimplified<ImageFloat32> xuggler = new XugglerSimplified<ImageFloat32>(videoFile, ImageDataType.single(ImageFloat32.class));
 
       ImageDifferenceTest app = new ImageDifferenceTest(xuggler);
       app.process();
