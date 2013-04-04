@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.stateEstimation.measurementModelElem
 
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Matrix3d;
+import javax.vecmath.Vector3d;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
@@ -28,7 +29,7 @@ public class PointVelocityMeasurementModelElement extends AbstractMeasurementMod
    private final ControlFlowOutputPort<FrameOrientation> orientationPort;
    private final ControlFlowOutputPort<FrameVector> angularVelocityPort;
 
-   private final ControlFlowInputPort<FrameVector> pointVelocityMeasurementInputPort;
+   private final ControlFlowInputPort<Vector3d> pointVelocityMeasurementInputPort;
 
    private final ReferenceFrame estimationFrame;
    private final TwistCalculator twistCalculator;
@@ -46,7 +47,7 @@ public class PointVelocityMeasurementModelElement extends AbstractMeasurementMod
    private final FrameVector residualVector = new FrameVector(ReferenceFrame.getWorldFrame());
 
 
-   public PointVelocityMeasurementModelElement(String name, ControlFlowInputPort<FrameVector> pointVelocityMeasurementInputPort,
+   public PointVelocityMeasurementModelElement(String name, ControlFlowInputPort<Vector3d> pointVelocityMeasurementInputPort,
            ControlFlowOutputPort<FramePoint> centerOfMassPositionPort, ControlFlowOutputPort<FrameVector> centerOfMassVelocityPort,
            ControlFlowOutputPort<FrameOrientation> orientationPort, ControlFlowOutputPort<FrameVector> angularVelocityPort, ReferenceFrame estimationFrame,
            RigidBody stationaryPointLink, FramePoint stationaryPoint, TwistCalculator twistCalculator, YoVariableRegistry registry)

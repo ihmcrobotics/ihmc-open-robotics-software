@@ -58,7 +58,7 @@ public class PointVelocityMeasurementModelElementTest
       String name = "test";
       YoVariableRegistry registry = new YoVariableRegistry(name);
 
-      ControlFlowInputPort<FrameVector> pointVelocityMeasurementInputPort = new ControlFlowInputPort<FrameVector>(controlFlowElement);
+      ControlFlowInputPort<Vector3d> pointVelocityMeasurementInputPort = new ControlFlowInputPort<Vector3d>(controlFlowElement);
 
       ControlFlowOutputPort<FramePoint> centerOfMassPositionPort = new ControlFlowOutputPort<FramePoint>(controlFlowElement);
       ControlFlowOutputPort<FrameVector> centerOfMassVelocityPort = new ControlFlowOutputPort<FrameVector>(controlFlowElement);
@@ -117,7 +117,7 @@ public class PointVelocityMeasurementModelElementTest
    }
 
    private void setMeasuredPointVelocityToActual(TwistCalculator twistCalculator, RigidBody stationaryPointLink, FramePoint point,
-           ControlFlowInputPort<FrameVector> pointVelocityMeasurementInputPort)
+           ControlFlowInputPort<Vector3d> pointVelocityMeasurementInputPort)
    {
       Twist twist = new Twist();
       twistCalculator.packTwistOfBody(twist, stationaryPointLink);
@@ -126,6 +126,6 @@ public class PointVelocityMeasurementModelElementTest
       FrameVector pointVelocity = new FrameVector(twist.getBaseFrame());
       twist.packVelocityOfPointFixedInBodyFrame(pointVelocity, point);
       pointVelocity.changeFrame(ReferenceFrame.getWorldFrame());
-      pointVelocityMeasurementInputPort.setData(pointVelocity);
+      pointVelocityMeasurementInputPort.setData(pointVelocity.getVectorCopy());
    }
 }
