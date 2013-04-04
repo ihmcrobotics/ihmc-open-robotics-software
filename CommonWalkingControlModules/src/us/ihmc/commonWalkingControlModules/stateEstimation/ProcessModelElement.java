@@ -30,6 +30,4 @@ public interface ProcessModelElement
    public abstract Set<ControlFlowInputPort<?>> getInputs();
 
    public abstract boolean isTimeVariant();
-   
-   public abstract int getSize();
 }

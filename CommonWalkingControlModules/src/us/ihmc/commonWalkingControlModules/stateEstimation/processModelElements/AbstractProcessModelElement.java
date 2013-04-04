@@ -25,9 +25,9 @@ public abstract class AbstractProcessModelElement implements ProcessModelElement
    private final TimeDomain timeDomain;
    private final boolean isTimeVariant;
    private final ControlFlowOutputPort<?> outputState;
-   private final int size;
 
-   public AbstractProcessModelElement(ControlFlowOutputPort<?> outputState, TimeDomain timeDomain, boolean isTimeVariant, int size, String name, YoVariableRegistry registry)
+   public AbstractProcessModelElement(ControlFlowOutputPort<?> outputState, TimeDomain timeDomain, boolean isTimeVariant, int size, String name,
+         YoVariableRegistry registry)
    {
       this.outputState = outputState;
       this.stateMatrixBlocks = new HashMap<ControlFlowOutputPort<?>, DenseMatrix64F>();
@@ -38,7 +38,6 @@ public abstract class AbstractProcessModelElement implements ProcessModelElement
       this.covarianceMatrixScaling.set(1.0);
       this.timeDomain = timeDomain;
       this.isTimeVariant = isTimeVariant;
-      this.size = size;
    }
 
    public DenseMatrix64F getStateMatrixBlock(ControlFlowOutputPort<?> statePort)
@@ -90,14 +89,9 @@ public abstract class AbstractProcessModelElement implements ProcessModelElement
    {
       return isTimeVariant;
    }
-   
+
    public ControlFlowOutputPort<?> getOutputState()
    {
       return outputState;
-   }
-   
-   public int getSize()
-   {
-      return size;
    }
 }
