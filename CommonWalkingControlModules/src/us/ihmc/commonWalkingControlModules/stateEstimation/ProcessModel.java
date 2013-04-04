@@ -18,6 +18,7 @@ public class ProcessModel
    private final Map<ControlFlowOutputPort<?>, Integer> stateStartIndices = new HashMap<ControlFlowOutputPort<?>, Integer>();
    private final DenseMatrix64F correctionBlock = new DenseMatrix64F(1, 1);
    private final int stateMatrixSize;
+   private final int inputMatrixSize;
 
    public ProcessModel(List<ProcessModelElementGroup> processModelElementGroups)
    {
@@ -26,16 +27,17 @@ public class ProcessModel
       int inputMatrixSize = 0;
       for (ProcessModelElementGroup processModelElementGroup : processModelElementGroups)
       {
-         stateMatrixSize += processModelElementGroup.getStateMatrixSize();
-         inputMatrixSize += processModelElementGroup.getInputMatrixSize();
-
          Map<ControlFlowOutputPort<?>, Integer> groupStateStartIndices = processModelElementGroup.getStateStartIndices();
          for (ControlFlowOutputPort<?> statePort : groupStateStartIndices.keySet())
          {
             stateStartIndices.put(statePort, groupStateStartIndices.get(statePort) + stateMatrixSize);
          }
+
+         stateMatrixSize += processModelElementGroup.getStateMatrixSize();
+         inputMatrixSize += processModelElementGroup.getInputMatrixSize();
       }
       this.stateMatrixSize = stateMatrixSize;
+      this.inputMatrixSize = inputMatrixSize;
 
       this.F = new DenseMatrix64F(stateMatrixSize, stateMatrixSize);
       this.G = new DenseMatrix64F(stateMatrixSize, inputMatrixSize);
@@ -109,5 +111,10 @@ public class ProcessModel
    public int getStateMatrixSize()
    {
       return stateMatrixSize;
+   }
+
+   public int getInputMatrixSize()
+   {
+      return inputMatrixSize;
    }
 }

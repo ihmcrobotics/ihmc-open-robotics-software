@@ -22,6 +22,8 @@ public class MeasurementModel
    private final DenseMatrix64F R;
    private final DenseMatrix64F residual;
 
+   private final int measurementOutputMatrixSize;
+
    public MeasurementModel(List<MeasurementModelElement> measurementModelElements, Map<ControlFlowOutputPort<?>, Integer> stateStartIndices, int stateMatrixSize)
    {
       this.measurementModelElements = measurementModelElements;
@@ -30,13 +32,13 @@ public class MeasurementModel
       MatrixTools.computeIndicesIntoVector(measurementModelElements, measurementStartIndices, measurementSizes);
 
       this.stateStartIndices = stateStartIndices;
-      int measurementOutputMatrixSize = computeTotalSize(measurementSizes.values());
+      measurementOutputMatrixSize = computeTotalSize(measurementSizes.values());
       this.H = new DenseMatrix64F(measurementOutputMatrixSize, stateMatrixSize);
       this.R = new DenseMatrix64F(measurementOutputMatrixSize, measurementOutputMatrixSize);
-      this.residual = new DenseMatrix64F(measurementOutputMatrixSize, measurementOutputMatrixSize);
+      this.residual = new DenseMatrix64F(measurementOutputMatrixSize, 1);
    }
 
-   public void updateMatrixBlocks()
+   public void updateMatrices()
    {
       // TODO: check if necessary:
       H.zero();
@@ -113,5 +115,10 @@ public class MeasurementModel
       {
          throw new RuntimeException("State matrix size is ambiguous");
       }
+   }
+
+   public int getOutputMatrixSize()
+   {
+      return measurementOutputMatrixSize;
    }
 }

@@ -108,7 +108,7 @@ public class ComposableOrientationEstimatorCreator
       private void addOrientationProcessModelElement()
       {
          ProcessModelElement orientationProcessModelElement = new OrientationProcessModelElement(angularVelocityPort, orientationPort, "orientation", registry);
-         addProcessModelElement(orientationPort, orientationProcessModelElement, VECTOR3D_LENGTH);
+         addProcessModelElement(orientationPort, orientationProcessModelElement);
       }
 
       private void addAngularVelocityProcessModelElement(ReferenceFrame estimationFrame, ControlFlowGraph controlFlowGraph,
@@ -128,7 +128,7 @@ public class ComposableOrientationEstimatorCreator
                angularAccelerationPort, "angularVelocity", registry);
 
          angularVelocityProcessModelElement.setProcessNoiseCovarianceBlock(angularAccelerationNoiseCovariance);
-         addProcessModelElement(angularVelocityPort, angularVelocityProcessModelElement, VECTOR3D_LENGTH);
+         addProcessModelElement(angularVelocityPort, angularVelocityProcessModelElement);
       }
 
       private void addOrientationSensor(ReferenceFrame estimationFrame, ControlFlowGraph controlFlowGraph,
@@ -143,7 +143,7 @@ public class ComposableOrientationEstimatorCreator
                estimationFrame, measurementFrame, name, registry);
          orientationMeasurementModel.setNoiseCovariance(orientationNoiseCovariance);
 
-         addMeasurementModelElement(orientationMeasurementPort, orientationMeasurementModel);
+         addMeasurementModelElement(orientationMeasurementModel);
          controlFlowGraph.connectElements(orientationSensorConfiguration.getOutputPort(), orientationMeasurementPort);
       }
 
@@ -159,7 +159,7 @@ public class ComposableOrientationEstimatorCreator
          BiasProcessModelElement biasProcessModelElement = new BiasProcessModelElement(biasPort, measurementFrame, biasName, registry);
          DenseMatrix64F biasProcessNoiseCovariance = angularVelocitySensorConfiguration.getBiasProcessNoiseCovariance();
          biasProcessModelElement.setProcessNoiseCovarianceBlock(biasProcessNoiseCovariance);
-         addProcessModelElement(biasPort, biasProcessModelElement, VECTOR3D_LENGTH);
+         addProcessModelElement(biasPort, biasProcessModelElement);
          String name = angularVelocitySensorConfiguration.getName();
          DenseMatrix64F angularVelocityNoiseCovariance = angularVelocitySensorConfiguration.getAngularVelocityNoiseCovariance();
 
@@ -167,7 +167,7 @@ public class ComposableOrientationEstimatorCreator
                angularVelocityMeasurementPort, orientationEstimationLink, estimationFrame, measurementLink, measurementFrame, twistCalculator, name, registry);
          angularVelocityMeasurementModel.setNoiseCovariance(angularVelocityNoiseCovariance);
 
-         addMeasurementModelElement(angularVelocityMeasurementPort, angularVelocityMeasurementModel);
+         addMeasurementModelElement(angularVelocityMeasurementModel);
          controlFlowGraph.connectElements(angularVelocitySensorConfiguration.getOutputPort(), angularVelocityMeasurementPort);
       }
 
