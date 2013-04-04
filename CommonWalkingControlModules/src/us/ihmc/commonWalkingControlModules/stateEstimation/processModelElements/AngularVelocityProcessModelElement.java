@@ -27,7 +27,7 @@ public class AngularVelocityProcessModelElement extends AbstractProcessModelElem
    public AngularVelocityProcessModelElement(ReferenceFrame estimationFrame, ControlFlowOutputPort<FrameVector> angularVelocityPort,
            ControlFlowInputPort<FrameVector> angularAccelerationPort, String name, YoVariableRegistry registry)
    {
-      super(TimeDomain.CONTINUOUS, SIZE, name, registry);
+      super(angularVelocityPort, TimeDomain.CONTINUOUS, false, SIZE, name, registry);
       this.estimationFrame = estimationFrame;
       this.angularVelocityPort = angularVelocityPort;
       this.angularAccelerationPort = angularAccelerationPort;

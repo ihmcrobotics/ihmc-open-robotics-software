@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.ejml.alg.dense.mult.MatrixVectorMult;
@@ -26,10 +27,15 @@ public class ComposableStateEstimator extends AbstractControlFlowElement
    protected ComposableStateEstimatorKalmanFilter kalmanFilter;
    private final double controlDT;
    private final List<Runnable> postStateChangeRunnables = new ArrayList<Runnable>();
+   private final ProcessModelAssembler processModelAssembler = new ProcessModelAssembler();
 
    // model elements
-   private final Map<ControlFlowOutputPort<?>, ProcessModelElement> processModelElements = new HashMap<ControlFlowOutputPort<?>, ProcessModelElement>();
+   private final Map<ProcessModelElement, ControlFlowOutputPort<?>> processModelElementToStateMap = new HashMap<ProcessModelElement, ControlFlowOutputPort<?>>();
+   private final Map<ControlFlowOutputPort<?>, ProcessModelElement> stateToProcessModelElementMap = new HashMap<ControlFlowOutputPort<?>, ProcessModelElement>();
    private final Map<ControlFlowInputPort<?>, MeasurementModelElement> measurementModelElements = new HashMap<ControlFlowInputPort<?>, MeasurementModelElement>();
+
+   private final List<Set<ProcessModelElement>> timeVariantProcessModelGroups = new ArrayList<Set<ProcessModelElement>>();
+   private final List<Set<ProcessModelElement>> timeInvariantProcessModelGroups = new ArrayList<Set<ProcessModelElement>>();
 
    // states
    private final List<ControlFlowOutputPort<?>> continuousStatePorts = new ArrayList<ControlFlowOutputPort<?>>();
@@ -54,7 +60,7 @@ public class ComposableStateEstimator extends AbstractControlFlowElement
    private final Map<ControlFlowInputPort<?>, Integer> processInputSizes = new HashMap<ControlFlowInputPort<?>, Integer>();
 
    private final SummaryStatistics statistics = new SummaryStatistics();
-   
+
    public ComposableStateEstimator(String name, double controlDT, YoVariableRegistry parentRegistry)
    {
       this.registry = new YoVariableRegistry(name);
@@ -84,8 +90,7 @@ public class ComposableStateEstimator extends AbstractControlFlowElement
       processInputPorts.add(processInputPort);
       processInputSizes.put(processInputPort, size);
    }
-   
-   
+
    public <T> ControlFlowInputPort<T> createMeasurementInputPort(int size)
    {
       ControlFlowInputPort<T> measurementInputPort = createInputPort();
@@ -97,7 +102,12 @@ public class ComposableStateEstimator extends AbstractControlFlowElement
 
    public void addProcessModelElement(ControlFlowOutputPort<?> statePort, ProcessModelElement processModelElement, int stateSize)
    {
-      processModelElements.put(statePort, processModelElement);
+      processModelElementToStateMap.put(processModelElement, statePort);
+      stateToProcessModelElementMap.put(statePort, processModelElement);
+
+      processModelAssembler.addProcessModelElement(processModelElement, statePort);
+      
+      // TODO: get rid of this here:
       switch (processModelElement.getTimeDomain())
       {
       case CONTINUOUS:
@@ -125,7 +135,7 @@ public class ComposableStateEstimator extends AbstractControlFlowElement
    {
       this.postStateChangeRunnables.add(runnable);
    }
-   
+
    public void initialize()
    {
       int continuousStateSize = MatrixTools.computeIndicesIntoVector(continuousStatePorts, continuousStateStartIndices, stateSizes);
@@ -134,6 +144,8 @@ public class ComposableStateEstimator extends AbstractControlFlowElement
       allStatePorts.addAll(continuousStatePorts);
       allStatePorts.addAll(discreteStatePorts);
       MatrixTools.computeIndicesIntoVector(allStatePorts, allStateStartIndices, stateSizes);
+
+      ProcessModel processModel = processModelAssembler.getProcessModel();
 
       int inputSize = MatrixTools.computeIndicesIntoVector(processInputPorts, processInputStartIndices, processInputSizes);
       int measurementSize = MatrixTools.computeIndicesIntoVector(measurementInputPorts, measurementStartIndices, measurementSizes);
@@ -194,7 +206,7 @@ public class ComposableStateEstimator extends AbstractControlFlowElement
                ComposableStateEstimator.this.registry);
 
          this.discretizer = new SingleMatrixExponentialStateSpaceSystemDiscretizer(continuousStateSize, inputSize);
-//         this.discretizer = new SplitUpMatrixExponentialStateSpaceSystemDiscretizer(continuousStateSize, inputSize);
+         //         this.discretizer = new SplitUpMatrixExponentialStateSpaceSystemDiscretizer(continuousStateSize, inputSize);
          this.FContinuous = new DenseMatrix64F(continuousStateSize, continuousStateSize);
          this.GContinuous = new DenseMatrix64F(continuousStateSize, inputSize);
          this.QContinuous = new DenseMatrix64F(continuousStateSize, continuousStateSize);
@@ -210,7 +222,7 @@ public class ComposableStateEstimator extends AbstractControlFlowElement
 
          this.H = new DenseMatrix64F(measurementSize, stateSize);
          this.R = new DenseMatrix64F(measurementSize, measurementSize);
-         
+
          this.correction = new DenseMatrix64F(stateSize, 1);
          this.residual = new DenseMatrix64F(measurementSize, 1);
       }
@@ -227,7 +239,7 @@ public class ComposableStateEstimator extends AbstractControlFlowElement
       @Override
       protected void updateAPrioriState(DenseMatrix64F x, DenseMatrix64F u)
       {
-         for (ProcessModelElement processModelElement : processModelElements.values())
+         for (ProcessModelElement processModelElement : processModelElementToStateMap.keySet())
          {
             processModelElement.propagateState(controlDT); // should update what's in the output ports
          }
@@ -252,9 +264,9 @@ public class ComposableStateEstimator extends AbstractControlFlowElement
          if (residual.getNumRows() > 0)
             MatrixVectorMult.mult(K, residual, correction);
 
-         for (ControlFlowOutputPort<?> statePort : allStatePorts)
+         for (ProcessModelElement processModelElement : processModelElementToStateMap.keySet())
          {
-            ProcessModelElement processModelElement = processModelElements.get(statePort);
+            ControlFlowOutputPort<?> statePort = processModelElementToStateMap.get(processModelElement);
             MatrixTools.extractVectorBlock(correctionBlock, correction, statePort, allStateStartIndices, stateSizes);
 
             processModelElement.correctState(correctionBlock);
@@ -268,7 +280,7 @@ public class ComposableStateEstimator extends AbstractControlFlowElement
 
       private void updateProcessModel(DenseMatrix64F F, DenseMatrix64F G, DenseMatrix64F Q)
       {
-         for (ProcessModelElement processModelElement : processModelElements.values())
+         for (ProcessModelElement processModelElement : processModelElementToStateMap.keySet())
          {
             processModelElement.computeMatrixBlocks();
          }
@@ -292,10 +304,9 @@ public class ComposableStateEstimator extends AbstractControlFlowElement
          G.zero();
          Q.zero();
 
-         for (ControlFlowOutputPort<?> rowPort : stateStartIndices.keySet())
+         for (ControlFlowOutputPort<?> rowPort : statePorts)
          {
-            ProcessModelElement processModelElement = processModelElements.get(rowPort);
-
+            ProcessModelElement processModelElement = stateToProcessModelElementMap.get(rowPort);
             for (ControlFlowOutputPort<?> columnPort : statePorts)
             {
                DenseMatrix64F stateMatrixBlock = processModelElement.getStateMatrixBlock(columnPort);

@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.stateEstimation;
 
+import java.util.Set;
+
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.controlFlow.ControlFlowInputPort;
@@ -20,4 +22,14 @@ public interface ProcessModelElement
    public abstract void correctState(DenseMatrix64F correction);
 
    public abstract TimeDomain getTimeDomain();
+
+   public abstract Set<ControlFlowOutputPort<?>> getInputStates();
+   
+   public abstract ControlFlowOutputPort<?> getOutputState();
+
+   public abstract Set<ControlFlowInputPort<?>> getInputs();
+
+   public abstract boolean isTimeVariant();
+   
+   public abstract int getSize();
 }

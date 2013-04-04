@@ -19,7 +19,7 @@ public class BiasProcessModelElement extends AbstractProcessModelElement
 
    public BiasProcessModelElement(ControlFlowOutputPort<FrameVector> statePort, ReferenceFrame frame, String name, YoVariableRegistry registry)
    {
-      super(TimeDomain.CONTINUOUS, SIZE, name, registry);
+      super(statePort, TimeDomain.CONTINUOUS, false, SIZE, name, registry);
       this.biasPort = statePort;
       this.bias = new FrameVector(frame);
       this.biasDelta = new FrameVector(frame);

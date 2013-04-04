@@ -37,7 +37,7 @@ public class OrientationProcessModelElement extends AbstractProcessModelElement
    public OrientationProcessModelElement(ControlFlowOutputPort<FrameVector> angularVelocityPort, ControlFlowOutputPort<FrameOrientation> orientationPort,
            String name, YoVariableRegistry registry)
    {
-      super(TimeDomain.CONTINUOUS, SIZE, name, registry);
+      super(orientationPort, TimeDomain.CONTINUOUS, true, SIZE, name, registry);
       this.angularVelocityPort = angularVelocityPort;
       this.orientationPort = orientationPort;
 
