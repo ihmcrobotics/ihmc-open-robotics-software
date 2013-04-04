@@ -46,7 +46,7 @@ public class AngularVelocityMeasurementModelElement extends AbstractMeasurementM
            ControlFlowInputPort<Vector3d> angularVelocityMeasurementInputPort, RigidBody orientationEstimationLink, ReferenceFrame estimationFrame,
            RigidBody measurementLink, ReferenceFrame measurementFrame, TwistCalculator twistCalculator, String name, YoVariableRegistry registry)
    {
-      super(SIZE, name, registry);
+      super(angularVelocityMeasurementInputPort, SIZE, name, registry);
       this.angularVelocityStatePort = angularVelocityStatePort;
       this.biasStatePort = biasStatePort;
       this.angularVelocityMeasurementInputPort = angularVelocityMeasurementInputPort;

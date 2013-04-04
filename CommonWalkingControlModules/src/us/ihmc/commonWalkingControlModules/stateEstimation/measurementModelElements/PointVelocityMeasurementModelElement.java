@@ -52,7 +52,7 @@ public class PointVelocityMeasurementModelElement extends AbstractMeasurementMod
            ControlFlowOutputPort<FrameOrientation> orientationPort, ControlFlowOutputPort<FrameVector> angularVelocityPort, ReferenceFrame estimationFrame,
            RigidBody stationaryPointLink, FramePoint stationaryPoint, TwistCalculator twistCalculator, YoVariableRegistry registry)
    {
-      super(SIZE, name, registry);
+      super(pointVelocityMeasurementInputPort, SIZE, name, registry);
 
       this.centerOfMassPositionPort = centerOfMassPositionPort;
       this.centerOfMassVelocityPort = centerOfMassVelocityPort;

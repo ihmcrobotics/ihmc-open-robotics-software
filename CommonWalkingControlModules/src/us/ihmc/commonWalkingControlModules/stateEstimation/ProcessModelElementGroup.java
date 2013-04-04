@@ -104,7 +104,7 @@ public class ProcessModelElementGroup
       update(true);
    }
 
-   public void update()
+   public void updateMatrixBlocks()
    {
       update(false);
    }
@@ -124,6 +124,30 @@ public class ProcessModelElementGroup
       return Q;
    }
 
+   public void propagateState()
+   {
+      for (ProcessModelElement processModelElement : continuousTimeProcessModelElements)
+      {
+         processModelElement.propagateState(controlDT);
+      }
+   
+      for (ProcessModelElement processModelElement : discreteTimeProcessModelElements)
+      {
+         processModelElement.propagateState(controlDT);
+      }
+   }
+
+   public void correctState(DenseMatrix64F correction)
+   {
+      for (ControlFlowOutputPort<?> statePort : stateToProcessModelElementMap.keySet())
+      {
+         ProcessModelElement processModelElement = stateToProcessModelElementMap.get(statePort);
+         MatrixTools.extractVectorBlock(correctionBlock, correction, statePort, allStateStartIndices, stateSizes);
+   
+         processModelElement.correctState(correctionBlock);
+      }
+   }
+
    public int getStateMatrixSize()
    {
       return stateMatrixSize;
@@ -134,33 +158,9 @@ public class ProcessModelElementGroup
       return inputMatrixSize;
    }
 
-   public void propagateState(double dt)
+   public Map<ControlFlowOutputPort<?>, Integer> getStateStartIndices()
    {
-      for (ProcessModelElement processModelElement : continuousTimeProcessModelElements)
-      {
-         processModelElement.propagateState(dt);
-      }
-
-      for (ProcessModelElement processModelElement : discreteTimeProcessModelElements)
-      {
-         processModelElement.propagateState(dt);
-      }
-   }
-
-   public void correctState(DenseMatrix64F correction)
-   {
-      for (ControlFlowOutputPort<?> statePort : stateToProcessModelElementMap.keySet())
-      {
-         ProcessModelElement processModelElement = stateToProcessModelElementMap.get(statePort);
-         MatrixTools.extractVectorBlock(correctionBlock, correction, statePort, allStateStartIndices, stateSizes);
-
-         processModelElement.correctState(correctionBlock);
-      }
-   }
-
-   public List<ControlFlowOutputPort<?>> getStates()
-   {
-      return allStates;
+      return allStateStartIndices;
    }
 
    private void update(boolean initialize)

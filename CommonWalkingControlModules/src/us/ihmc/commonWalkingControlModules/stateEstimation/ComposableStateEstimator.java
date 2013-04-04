@@ -227,7 +227,7 @@ public class ComposableStateEstimator extends AbstractControlFlowElement
 
       protected void configure()
       {
-         processModel.update();
+         processModel.updateMatrices();
          updateProcessModel(F, G, Q);
          updateMeasurementModel(H, R);
          super.configure(F, G, H);

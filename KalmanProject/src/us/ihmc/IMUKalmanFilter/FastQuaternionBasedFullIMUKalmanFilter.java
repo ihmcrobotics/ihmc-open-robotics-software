@@ -122,7 +122,7 @@ public class FastQuaternionBasedFullIMUKalmanFilter
       {
          {0, -p, -q, -r}, {p, 0, r, -q}, {q, -r, 0, p}, {r, q, -p, 0}
       };
-      MatrixTools.setArray(m, Wxq);
+      KalmanMatrixTools.setArray(m, Wxq);
    }
 
    void makeAMatrix(double[][] pqr)
@@ -164,30 +164,30 @@ public class FastQuaternionBasedFullIMUKalmanFilter
          }
       };
 
-      MatrixTools.setArray(m, A);
+      KalmanMatrixTools.setArray(m, A);
    }
 
    void Kalman(double[][] P)
    {
       // E = C*P*Ct+R
-      MatrixTools.transpose(C, Ct);
-      MatrixTools.mul(C, P, temp47);
-      MatrixTools.mul(temp47, Ct, temp44);
-      MatrixTools.add(temp44, R, E);
+      KalmanMatrixTools.transpose(C, Ct);
+      KalmanMatrixTools.mul(C, P, temp47);
+      KalmanMatrixTools.mul(temp47, Ct, temp44);
+      KalmanMatrixTools.add(temp44, R, E);
 
       // K = P*Ct*inv(E)
-      MatrixTools.mul(P, Ct, temp74);
-      MatrixTools.inverse44(E, inverseE);
-      MatrixTools.mul(temp74, inverseE, K);
+      KalmanMatrixTools.mul(P, Ct, temp74);
+      KalmanMatrixTools.inverse44(E, inverseE);
+      KalmanMatrixTools.mul(temp74, inverseE, K);
 
       // X += K*err;
-      MatrixTools.mul(K, quatError, temp71);
-      MatrixTools.add(X, temp71, X);
+      KalmanMatrixTools.mul(K, quatError, temp71);
+      KalmanMatrixTools.add(X, temp71, X);
 
       // P -= K*C*P;
-      MatrixTools.mul(K, C, temp77a);
-      MatrixTools.mul(temp77a, P, temp77b);
-      MatrixTools.sub(P, temp77b, P);
+      KalmanMatrixTools.mul(K, C, temp77a);
+      KalmanMatrixTools.mul(temp77a, P, temp77b);
+      KalmanMatrixTools.sub(P, temp77b, P);
    }
 
    void doKalman()
@@ -198,7 +198,7 @@ public class FastQuaternionBasedFullIMUKalmanFilter
        * the compass.  The other states are all zero.
        */
 
-      MatrixTools.identity(C);
+      KalmanMatrixTools.identity(C);
       X[0][0] = Quat[0][0];
       X[1][0] = Quat[1][0];
       X[2][0] = Quat[2][0];
@@ -217,7 +217,7 @@ public class FastQuaternionBasedFullIMUKalmanFilter
       bias[0][0] = X[4][0];
       bias[1][0] = X[5][0];
       bias[2][0] = X[6][0];
-      MatrixTools.normalize(Quat);
+      KalmanMatrixTools.normalize(Quat);
    }
 
    // http://www.euclideanspace.com/maths/geometry/rotations/conversions/angleToQuaternion/index.htm
@@ -228,9 +228,9 @@ public class FastQuaternionBasedFullIMUKalmanFilter
    public double[] axis2quat(double[][] axis, double heading)
    {
       @SuppressWarnings("unused")
-      double mag = MatrixTools.mag(axis);
+      double mag = KalmanMatrixTools.mag(axis);
       double temp[][] = new double[3][1];
-      MatrixTools.normalize(axis, temp);
+      KalmanMatrixTools.normalize(axis, temp);
       double s = Math.sin(heading / 2);
       double x = temp[0][0] * s;
       double y = temp[1][0] * s;
@@ -246,8 +246,8 @@ public class FastQuaternionBasedFullIMUKalmanFilter
     */
    public double[] accelerometers2quat(double[][] accel, double heading)
    {
-      double mag = MatrixTools.mag(accel);
-      MatrixTools.normalize(accel);
+      double mag = KalmanMatrixTools.mag(accel);
+      KalmanMatrixTools.normalize(accel);
       double x = accel[0][0];
       double y = accel[1][0];
       double z = accel[2][0];
@@ -275,7 +275,7 @@ public class FastQuaternionBasedFullIMUKalmanFilter
    public double[] accel2quat(double[][] accel, double heading)
    {
       // Accel to euler, then euler to quaternions:
-      double mag = MatrixTools.mag(accel);
+      double mag = KalmanMatrixTools.mag(accel);
       double[] euler = {-Math.atan2(accel[1][0], -accel[2][0]), Math.asin(accel[0][0] / mag), heading};
       double[] quaternions = new double[4];
       QuaternionTools.rollPitchYawToQuaternions(euler, quaternions);
@@ -351,8 +351,8 @@ public class FastQuaternionBasedFullIMUKalmanFilter
 
    public void setNoiseParameters(double q_noise, double r_noise)
    {
-      MatrixTools.zero(Q);
-      MatrixTools.zero(R);
+      KalmanMatrixTools.zero(Q);
+      KalmanMatrixTools.zero(R);
 
       Q[4][4] = q_noise * q_noise;
       Q[5][5] = q_noise * q_noise;
@@ -392,9 +392,9 @@ public class FastQuaternionBasedFullIMUKalmanFilter
       quatW(pqr);    // constructs quaternion W matrix in Wxq
 
       // q = q + W*q*dt;
-      MatrixTools.mulScalarMul(Wxq, Quat, temp41, dt);
-      MatrixTools.add(Quat, temp41, Quat);
-      MatrixTools.normalize(Quat);
+      KalmanMatrixTools.mulScalarMul(Wxq, Quat, temp41, dt);
+      KalmanMatrixTools.add(Quat, temp41, Quat);
+      KalmanMatrixTools.normalize(Quat);
 
       // Keep copy up-to-date...
       unpackQuaternion(Quat);
@@ -403,21 +403,21 @@ public class FastQuaternionBasedFullIMUKalmanFilter
    void propagateCovariance(double[][] a)
    {
       // Pdot = A*P+Q;
-      MatrixTools.setArray(Q, Pdot);
-      MatrixTools.mul(a, P, temp77a);
-      MatrixTools.add(Pdot, temp77a, Pdot);
+      KalmanMatrixTools.setArray(Q, Pdot);
+      KalmanMatrixTools.mul(a, P, temp77a);
+      KalmanMatrixTools.add(Pdot, temp77a, Pdot);
 
       // Pdot = P*At + A*P+Q;
-      MatrixTools.transpose(a, At);
-      MatrixTools.mul(P, At, temp77a);
-      MatrixTools.add(Pdot, temp77a, Pdot);
+      KalmanMatrixTools.transpose(a, At);
+      KalmanMatrixTools.mul(P, At, temp77a);
+      KalmanMatrixTools.add(Pdot, temp77a, Pdot);
 
       // Pdot = (P*At + A*P+Q)*dt;
-      MatrixTools.mul(Pdot, dt, Pdot);
+      KalmanMatrixTools.mul(Pdot, dt, Pdot);
 
       // P = P + Pdot;
-      MatrixTools.add(P, Pdot, P);
-      trace = MatrixTools.trace(P);
+      KalmanMatrixTools.add(P, Pdot, P);
+      trace = KalmanMatrixTools.trace(P);
    }
 
    /**
@@ -427,7 +427,7 @@ public class FastQuaternionBasedFullIMUKalmanFilter
     */
    public void imuUpdate(double[][] PQR)
    {
-      MatrixTools.sub(PQR, bias, PQR);
+      KalmanMatrixTools.sub(PQR, bias, PQR);
       makeAMatrix(PQR);
       propagateState(PQR);
       propagateCovariance(A);
@@ -444,7 +444,7 @@ public class FastQuaternionBasedFullIMUKalmanFilter
     */
    public void initialize(double[][] Accel, double[][] PQR, double heading)
    {
-      MatrixTools.setArray(PQR, bias);
+      KalmanMatrixTools.setArray(PQR, bias);
       double[] quaternions = accel2quat(Accel, heading);
       Quat[0][0] = quaternions[0];
       Quat[1][0] = quaternions[1];
@@ -462,9 +462,9 @@ public class FastQuaternionBasedFullIMUKalmanFilter
       double q_noise = 5.0;    // 5.0; //0.05; //1.0; //10.0; //250.0;
       double r_noise = 1.0;    // 100.0; //10.0; //25.0; //2.5; //25.0; //100.0; //10.0;
 
-      MatrixTools.identity(P);
-      MatrixTools.zero(Q);
-      MatrixTools.zero(R);
+      KalmanMatrixTools.identity(P);
+      KalmanMatrixTools.zero(Q);
+      KalmanMatrixTools.zero(R);
 
       Q[4][4] = q_noise * q_noise;
       Q[5][5] = q_noise * q_noise;
