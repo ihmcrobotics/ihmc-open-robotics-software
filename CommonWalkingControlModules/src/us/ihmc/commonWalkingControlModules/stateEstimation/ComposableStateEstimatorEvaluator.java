@@ -66,6 +66,7 @@ public class ComposableStateEstimatorEvaluator
    private static final boolean CREATE_ORIENTATION_SENSOR = true;
    private static final boolean CREATE_ANGULAR_VELOCITY_SENSOR = true;
    private static final boolean CREATE_LINEAR_ACCELERATION_SENSOR = true;
+//   private static final boolean CREATE_KINEMATIC_POINT_VELOCITY_SENSOR = true;
 
    private static final boolean ESTIMATE_COM = true;
    private static final boolean ADD_ARM_LINKS = true;
@@ -122,8 +123,8 @@ public class ComposableStateEstimatorEvaluator
    private final double gazeboAngularVelocityBiasMean = 0.0000075;
    private final double gazeboLinearAccelerationBiasMean = 0.1;
 
-   private final Vector3d gravitationalAccelerationForSimulation = new Vector3d(0.0, 0.0, 0.0);
-   private final Vector3d gravitationalAccelerationForSensors = new Vector3d(); //0.0, 0.0, -9.81);
+   private final Vector3d gravitationalAccelerationForSimulation = new Vector3d(0.0, 0.0, -9.81);
+   private final Vector3d gravitationalAccelerationForSensors = new Vector3d(0.0, 0.0, -9.81);
 
    private final double simDT = 1e-3;
    private final int simTicksPerControlDT = 5;
