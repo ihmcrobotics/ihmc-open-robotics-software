@@ -20,9 +20,10 @@ public class AngularAccelerationProcessModelElement extends AbstractProcessModel
    private final FrameVector angularAcceleration;
    private final FrameVector angularAccelerationDelta;
 
-   public AngularAccelerationProcessModelElement(String name, ReferenceFrame estimationFrame, YoVariableRegistry registry, ControlFlowOutputPort<FrameVector> angularAccelerationStatePort, ControlFlowInputPort<FrameVector> angularAccelerationInputPort)
+   public AngularAccelerationProcessModelElement(String name, ReferenceFrame estimationFrame, YoVariableRegistry registry,
+         ControlFlowOutputPort<FrameVector> angularAccelerationStatePort, ControlFlowInputPort<FrameVector> angularAccelerationInputPort)
    {
-      super(TimeDomain.DISCRETE, SIZE, name, registry);
+      super(angularAccelerationStatePort, TimeDomain.DISCRETE, false, SIZE, name, registry);
       this.angularAccelerationStatePort = angularAccelerationStatePort;
       this.angularAccelerationInputPort = angularAccelerationInputPort;
       this.angularAcceleration = new FrameVector(estimationFrame);

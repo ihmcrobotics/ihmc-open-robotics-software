@@ -22,7 +22,7 @@ public class CenterOfMassAccelerationProcessModelElement extends AbstractProcess
 
    public CenterOfMassAccelerationProcessModelElement(String name, YoVariableRegistry registry, ControlFlowOutputPort<FrameVector> centerOfMassAccelerationStatePort, ControlFlowInputPort<FrameVector> centerOfMassAccelerationInputPort)
    {
-      super(TimeDomain.DISCRETE, SIZE, name, registry);
+      super(centerOfMassAccelerationStatePort, TimeDomain.DISCRETE, false, SIZE, name, registry);
       this.centerOfMassAccelerationStatePort = centerOfMassAccelerationStatePort;
       this.centerOfMassAccelerationInputPort = centerOfMassAccelerationInputPort;
       

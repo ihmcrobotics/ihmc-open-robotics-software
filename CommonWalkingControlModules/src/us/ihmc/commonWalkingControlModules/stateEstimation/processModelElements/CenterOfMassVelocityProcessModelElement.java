@@ -27,7 +27,7 @@ public class CenterOfMassVelocityProcessModelElement extends AbstractProcessMode
    public CenterOfMassVelocityProcessModelElement(ControlFlowOutputPort<FrameVector> centerOfMassVelocityPort,
            ControlFlowInputPort<FrameVector> centerOfMassAccelerationPort, String name, YoVariableRegistry registry)
    {
-      super(TimeDomain.CONTINUOUS, SIZE, name, registry);
+      super(centerOfMassVelocityPort, TimeDomain.CONTINUOUS, false, SIZE, name, registry);
       this.centerOfMassVelocityPort = centerOfMassVelocityPort;
       this.centerOfMassAccelerationPort = centerOfMassAccelerationPort;
 
