@@ -76,7 +76,7 @@ public class DRCConfigParameters
 
    public static final float LDIAR_SCAN_MIN_ROLL = -0.3f;
 
-   public static final double GRID_RESOLUTION = 0.05;// 5 centimeter resolution
+   public static final double GRID_RESOLUTION = 0.01;// 5 centimeter resolution
 
    public static final double LIDAR_BLINDNESS_CYLINDAR_SQUARED_RADIUS = 0.1;
    
