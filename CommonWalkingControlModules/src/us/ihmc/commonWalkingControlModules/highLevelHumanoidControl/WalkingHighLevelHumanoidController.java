@@ -316,7 +316,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       zetaUpperBody.set(1.0);
       lidarJointVelocityController.setIntegralGain(0.01);
       lidarJointVelocityController.setProportionalGain(0.01);    // proportional gain corresponds to velocity, derivative corresponds to acceleration
-      desiredLidarVelocity.set(10.0);
+      desiredLidarVelocity.set(0.5);
       this.resetDesiredICPToCurrentAtStartOfSwing = walkingControllerParameters.resetDesiredICPToCurrentAtStartOfSwing();
 
       double initialLeadingFootPitch = 0.05;
