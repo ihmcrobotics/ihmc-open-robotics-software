@@ -74,6 +74,8 @@ public class ComposableStateEstimatorEvaluator
    private static final boolean OFFSET_IMU_FRAMES = true;
    private static final boolean ROTATE_IMU_FRAMES = true;
 
+   private static final boolean CORRUPT_SIMULATED_SENSORS = false;
+
    // from a recent pull request:
    // https://bitbucket.org/osrf/drcsim/pull-request/172/add-noise-model-to-sensors-gazebo-16/diff
    // <noise>
@@ -187,7 +189,7 @@ public class ComposableStateEstimatorEvaluator
          rootJoint.addKinematicPoint(kinematicPoint0);
          rootJoint.addIMUMount(imuMount0);
 
-         Vector3d velocityPointOffsetVector0 = new Vector3d(0.1, 0.2, 0.3);
+         Vector3d velocityPointOffsetVector0 = new Vector3d(); //0.1, 0.2, 0.3);
          KinematicPoint velocityPoint0 = new KinematicPoint("vp0", velocityPointOffsetVector0, this);
          rootJoint.addKinematicPoint(velocityPoint0);
          
@@ -278,14 +280,15 @@ public class ComposableStateEstimatorEvaluator
             imuMounts.add(imuMount1);
             imuMounts.add(imuMount2);
 
-//            velocityPoints.add(velocityPoint0);
-            velocityPoints.add(velocityPoint2);
+            velocityPoints.add(velocityPoint0);
+//            velocityPoints.add(velocityPoint2);
 //            velocityPoints.add(velocityPoint2A);
          }
 
          else
          {
             imuMounts.add(imuMount0);
+            velocityPoints.add(velocityPoint0);
          }
 
          this.setGravity(gravitationalAccelerationForSimulation);
@@ -451,7 +454,7 @@ public class ComposableStateEstimatorEvaluator
       public void startComputation()
       {
          desiredAngularAcceleration.set(robot.getActualAngularAccelerationInBodyFrame());
-         signalCorruptor.corrupt(desiredAngularAcceleration.getVector());
+         if (CORRUPT_SIMULATED_SENSORS) signalCorruptor.corrupt(desiredAngularAcceleration.getVector());
          outputPort.setData(desiredAngularAcceleration);
       }
 
@@ -491,7 +494,7 @@ public class ComposableStateEstimatorEvaluator
       {
          centerOfMassAccelerationCalculator.packCoMAcceleration(comAcceleration);
          comAcceleration.changeFrame(ReferenceFrame.getWorldFrame());
-         signalCorruptor.corrupt(comAcceleration.getVector());
+         if (CORRUPT_SIMULATED_SENSORS) signalCorruptor.corrupt(comAcceleration.getVector());
          outputPort.setData(comAcceleration);
       }
 
@@ -646,7 +649,7 @@ public class ComposableStateEstimatorEvaluator
                                                                          perfectMeasurmentBody, perfectMeasurementFrame, registry);
                GaussianVectorCorruptor angularVelocityCorruptor = new GaussianVectorCorruptor(1235L, sensorName, registry);
                angularVelocityCorruptor.setStandardDeviation(angularVelocityMeasurementStandardDeviation);
-               angularVelocitySensor.addSignalCorruptor(angularVelocityCorruptor);
+               if (CORRUPT_SIMULATED_SENSORS) angularVelocitySensor.addSignalCorruptor(angularVelocityCorruptor);
 
                RandomWalkBiasVectorCorruptor biasVectorCorruptor = new RandomWalkBiasVectorCorruptor(1236L, sensorName, controlDT, registry);
 
@@ -690,7 +693,7 @@ public class ComposableStateEstimatorEvaluator
 
                GaussianVectorCorruptor linearAccelerationCorruptor = new GaussianVectorCorruptor(1237L, sensorName, registry);
                linearAccelerationCorruptor.setStandardDeviation(linearAccelerationMeasurementStandardDeviation);
-               linearAccelerationSensor.addSignalCorruptor(linearAccelerationCorruptor);
+               if (CORRUPT_SIMULATED_SENSORS) linearAccelerationSensor.addSignalCorruptor(linearAccelerationCorruptor);
 
                RandomWalkBiasVectorCorruptor biasVectorCorruptor = new RandomWalkBiasVectorCorruptor(1286L, sensorName, controlDT, registry);
 
@@ -737,7 +740,7 @@ public class ComposableStateEstimatorEvaluator
 
                GaussianVectorCorruptor pointVelocityCorruptor = new GaussianVectorCorruptor(1257L, sensorName, registry);
                pointVelocityCorruptor.setStandardDeviation(pointVelocityMeasurementStandardDeviation);
-               pointVelocitySensor.addSignalCorruptor(pointVelocityCorruptor);
+               if (CORRUPT_SIMULATED_SENSORS) pointVelocitySensor.addSignalCorruptor(pointVelocityCorruptor);
 
                DenseMatrix64F pointVelocityNoiseCovariance = createDiagonalCovarianceMatrix(pointVelocityMeasurementStandardDeviation, 3);
 
@@ -774,7 +777,7 @@ public class ComposableStateEstimatorEvaluator
                SimulatedOrientationSensor sensor = new SimulatedOrientationSensor(sensorName, perfectMeasurementFrame, registry);
                GaussianOrientationCorruptor orientationCorruptor = new GaussianOrientationCorruptor(sensorName, 12334255L, registry);
                orientationCorruptor.setStandardDeviation(orientationMeasurementStandardDeviation);
-               sensor.addSignalCorruptor(orientationCorruptor);
+               if (CORRUPT_SIMULATED_SENSORS) sensor.addSignalCorruptor(orientationCorruptor);
 
                DenseMatrix64F orientationNoiseCovariance = createDiagonalCovarianceMatrix(orientationMeasurementStandardDeviation, 3);
 
