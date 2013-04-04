@@ -24,9 +24,12 @@ public class ProcessModelElementGroup
    private final List<ControlFlowInputPort<?>> allInputs;
    private final Map<ControlFlowInputPort<?>, Integer> processInputStartIndices = new HashMap<ControlFlowInputPort<?>, Integer>();
 
+   private final List<ControlFlowOutputPort<?>> allStates = new ArrayList<ControlFlowOutputPort<?>>();
    private final Map<ControlFlowOutputPort<?>, Integer> allStateStartIndices = new HashMap<ControlFlowOutputPort<?>, Integer>();
    private final Map<ControlFlowOutputPort<?>, Integer> stateSizes = new HashMap<ControlFlowOutputPort<?>, Integer>();
    private final Map<ControlFlowInputPort<?>, Integer> inputSizes = new HashMap<ControlFlowInputPort<?>, Integer>();
+   private final int inputMatrixSize;
+   private final int stateMatrixSize;
 
    // continuous time process model (requires discretization)
    private final List<ProcessModelElement> continuousTimeProcessModelElements = new ArrayList<ProcessModelElement>();
@@ -62,7 +65,7 @@ public class ProcessModelElementGroup
       classifyProcessModelElements(continuousTimeProcessModelElements, discreteTimeProcessModelElements, processModelElements);
       determineSizes(stateSizes, inputSizes, stateToProcessModelElementMap);
       allInputs = determineInputList(processModelElements);
-      int inputMatrixSize = computeSize(inputSizes, allInputs);
+      inputMatrixSize = computeSize(inputSizes, allInputs);
       MatrixTools.computeIndicesIntoVector(allInputs, processInputStartIndices, inputSizes);
 
       continuousTimeStates = determineStateList(continuousTimeProcessModelElements);
@@ -75,24 +78,22 @@ public class ProcessModelElementGroup
       this.isContinuousTimeModelTimeVariant = determineTimeVariant(continuousTimeProcessModelElements);
 
       discreteTimeStates = determineStateList(discreteTimeProcessModelElements);
-      int discreteStateMatrixSize = computeSize(stateSizes, continuousTimeStates);
+      int discreteStateMatrixSize = computeSize(stateSizes, discreteTimeStates);
       FDiscrete = new DenseMatrix64F(discreteStateMatrixSize, discreteStateMatrixSize);
       GDiscrete = new DenseMatrix64F(discreteStateMatrixSize, inputMatrixSize);
       QDiscrete = new DenseMatrix64F(discreteStateMatrixSize, discreteStateMatrixSize);
       MatrixTools.computeIndicesIntoVector(discreteTimeStates, discreteStateStartIndices, stateSizes);
       this.isDiscreteTimeModelTimeVariant = determineTimeVariant(discreteTimeProcessModelElements);
 
-
       if (CollectionUtils.intersection(continuousTimeStates, discreteTimeStates).size() > 0)
       {
-         throw new RuntimeException("States are shared between continuous time model and discrete time model. This is currently not handled");
+         throw new RuntimeException("States are shared between continuous time model and discrete time model. This is currently not handled.");
       }
-      List<ControlFlowOutputPort<?>> allStates = new ArrayList<ControlFlowOutputPort<?>>();
       allStates.addAll(continuousTimeStates);
       allStates.addAll(discreteTimeStates);
       MatrixTools.computeIndicesIntoVector(allStates, allStateStartIndices, stateSizes);
 
-      int stateMatrixSize = continuousStateMatrixSize + discreteStateMatrixSize;
+      stateMatrixSize = continuousStateMatrixSize + discreteStateMatrixSize;
 
       F = new DenseMatrix64F(stateMatrixSize, stateMatrixSize);
       G = new DenseMatrix64F(stateMatrixSize, inputMatrixSize);
@@ -123,6 +124,16 @@ public class ProcessModelElementGroup
       return Q;
    }
 
+   public int getStateMatrixSize()
+   {
+      return stateMatrixSize;
+   }
+
+   public int getInputMatrixSize()
+   {
+      return inputMatrixSize;
+   }
+
    public void propagateState(double dt)
    {
       for (ProcessModelElement processModelElement : continuousTimeProcessModelElements)
@@ -145,6 +156,11 @@ public class ProcessModelElementGroup
 
          processModelElement.correctState(correctionBlock);
       }
+   }
+
+   public List<ControlFlowOutputPort<?>> getStates()
+   {
+      return allStates;
    }
 
    private void update(boolean initialize)
