@@ -25,6 +25,7 @@ import us.ihmc.sensorProcessing.signalCorruption.RandomWalkBiasVectorCorruptor;
 import us.ihmc.sensorProcessing.simulatedSensors.SimulatedAngularVelocitySensor;
 import us.ihmc.sensorProcessing.simulatedSensors.SimulatedLinearAccelerationSensor;
 import us.ihmc.sensorProcessing.simulatedSensors.SimulatedOrientationSensor;
+import us.ihmc.sensorProcessing.simulatedSensors.SimulatedPointVelocitySensor;
 import us.ihmc.utilities.Axis;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.AngleTools;
@@ -60,57 +61,58 @@ public class ComposableStateEstimatorEvaluator
 {
    private static final boolean SHOW_GUI = true;
 
-   private static final boolean INITIALIZE_ANGULAR_VELOCITY_ESTIMATE_TO_ACTUAL = true; //false;
+   private static final boolean INITIALIZE_ANGULAR_VELOCITY_ESTIMATE_TO_ACTUAL = true;    // false;
    private static final boolean USE_ANGULAR_ACCELERATION_INPUT = true;
 
    private static final boolean CREATE_ORIENTATION_SENSOR = true;
    private static final boolean CREATE_ANGULAR_VELOCITY_SENSOR = true;
    private static final boolean CREATE_LINEAR_ACCELERATION_SENSOR = true;
-//   private static final boolean CREATE_KINEMATIC_POINT_VELOCITY_SENSOR = true;
+   private static final boolean CREATE_POINT_VELOCITY_SENSOR = true;
 
    private static final boolean ESTIMATE_COM = true;
    private static final boolean ADD_ARM_LINKS = true;
-   private static final boolean OFFSET_FRAMES = true;
-   private static final boolean ROTATE_FRAMES = true;
-   
-   //    from a recent pull request:
-   //    https://bitbucket.org/osrf/drcsim/pull-request/172/add-noise-model-to-sensors-gazebo-16/diff
-   //    <noise>
-   //        <type>gaussian</type>
-   //        <!-- Noise parameters from Boston Dynamics
-   //             (http://gazebosim.org/wiki/Sensor_noise):
-   //               rates (rad/s): mean=0, stddev=2e-4
-   //               accels (m/s/s): mean=0, stddev=1.7e-2
-   //               rate bias (rad/s): 5e-6 - 1e-5
-   //               accel bias (m/s/s): 1e-1
-   //             Experimentally, simulation provide rates with noise of
-   //             about 1e-3 rad/s and accels with noise of about 1e-1 m/s/s.
-   //             So we don't expect to see the noise unless number of inner iterations
-   //             are increased.
-   //   
-   //             We will add bias.  In this model, bias is sampled once for rates
-   //             and once for accels at startup; the sign (negative or positive)
-   //             of each bias is then switched with equal probability.  Thereafter,
-   //             the biases are fixed additive offsets.  We choose
-   //             bias means and stddevs to produce biases close to the provided
-   //             data. -->
-   //        <rate>
-   //          <mean>0.0</mean>
-   //          <stddev>2e-4</stddev>
-   //          <bias_mean>0.0000075</bias_mean>
-   //          <bias_stddev>0.0000008</bias_stddev>
-   //        </rate>
-   //        <accel>
-   //          <mean>0.0</mean>
-   //          <stddev>1.7e-2</stddev>
-   //          <bias_mean>0.1</bias_mean>
-   //          <bias_stddev>0.001</bias_stddev>
-   //        </accel>
-   //    </noise>
+   private static final boolean OFFSET_IMU_FRAMES = true;
+   private static final boolean ROTATE_IMU_FRAMES = true;
+
+   // from a recent pull request:
+   // https://bitbucket.org/osrf/drcsim/pull-request/172/add-noise-model-to-sensors-gazebo-16/diff
+   // <noise>
+   // <type>gaussian</type>
+   // <!-- Noise parameters from Boston Dynamics
+   // (http://gazebosim.org/wiki/Sensor_noise):
+   // rates (rad/s): mean=0, stddev=2e-4
+   // accels (m/s/s): mean=0, stddev=1.7e-2
+   // rate bias (rad/s): 5e-6 - 1e-5
+   // accel bias (m/s/s): 1e-1
+   // Experimentally, simulation provide rates with noise of
+   // about 1e-3 rad/s and accels with noise of about 1e-1 m/s/s.
+   // So we don't expect to see the noise unless number of inner iterations
+   // are increased.
+   //
+   // We will add bias.  In this model, bias is sampled once for rates
+   // and once for accels at startup; the sign (negative or positive)
+   // of each bias is then switched with equal probability.  Thereafter,
+   // the biases are fixed additive offsets.  We choose
+   // bias means and stddevs to produce biases close to the provided
+   // data. -->
+   // <rate>
+   // <mean>0.0</mean>
+   // <stddev>2e-4</stddev>
+   // <bias_mean>0.0000075</bias_mean>
+   // <bias_stddev>0.0000008</bias_stddev>
+   // </rate>
+   // <accel>
+   // <mean>0.0</mean>
+   // <stddev>1.7e-2</stddev>
+   // <bias_mean>0.1</bias_mean>
+   // <bias_stddev>0.001</bias_stddev>
+   // </accel>
+   // </noise>
 
    private final double orientationMeasurementStandardDeviation = Math.sqrt(1e-2);
-   private final double angularVelocityMeasurementStandardDeviation = 1e-3; // 2e-4;
-   private final double linearAccelerationMeasurementStandardDeviation = 1e-1; // 1.7e-2;
+   private final double angularVelocityMeasurementStandardDeviation = 1e-3;    // 2e-4;
+   private final double linearAccelerationMeasurementStandardDeviation = 1e-1;    // 1.7e-2;
+   private final double pointVelocityMeasurementStandardDeviation = 1e-10; //1e-1;    // 1.7e-2;
 
    private final double angularAccelerationProcessNoiseStandardDeviation = Math.sqrt(1e-1);
    private final double comAccelerationProcessNoiseStandardDeviation = Math.sqrt(1e-1);
@@ -156,6 +158,7 @@ public class ComposableStateEstimatorEvaluator
       private final Link bodyLink;
       private final FloatingJoint rootJoint;
       private final ArrayList<IMUMount> imuMounts = new ArrayList<IMUMount>();
+      private final ArrayList<KinematicPoint> velocityPoints = new ArrayList<KinematicPoint>();
 
       public StateEstimatorEstimatorEvaluatorRobot()
       {
@@ -178,12 +181,16 @@ public class ComposableStateEstimatorEvaluator
          Transform3D imu0Offset = new Transform3D();
          Vector3d offsetVector0 = new Vector3d();
          imu0Offset.setTranslation(offsetVector0);
-         
+
          IMUMount imuMount0 = new IMUMount("imuMount0", imu0Offset, this);
          KinematicPoint kinematicPoint0 = new KinematicPoint("kp0", offsetVector0, this);
          rootJoint.addKinematicPoint(kinematicPoint0);
          rootJoint.addIMUMount(imuMount0);
 
+         Vector3d velocityPointOffsetVector0 = new Vector3d(0.1, 0.2, 0.3);
+         KinematicPoint velocityPoint0 = new KinematicPoint("vp0", velocityPointOffsetVector0, this);
+         rootJoint.addKinematicPoint(velocityPoint0);
+         
          this.addRootJoint(rootJoint);
 
          if (ADD_ARM_LINKS)
@@ -194,21 +201,24 @@ public class ComposableStateEstimatorEvaluator
             armLink1.setComOffset(new Vector3d(0.0, 0.0, 0.5));
 
             Graphics3DObject armLink1Graphics = new Graphics3DObject();
-            //            armLink1Graphics.rotate(-Math.PI/2.0, Graphics3DObject.X);
+
+            // armLink1Graphics.rotate(-Math.PI/2.0, Graphics3DObject.X);
             armLink1Graphics.addCylinder(1.0, 0.02, YoAppearance.Green());
             armLink1.setLinkGraphics(armLink1Graphics);
             pinJoint1.setLink(armLink1);
 
             Transform3D imu1Offset = new Transform3D();
-            if (ROTATE_FRAMES)
+            if (ROTATE_IMU_FRAMES)
             {
                imu1Offset.rotX(Math.PI / 7.0);
             }
+
             Vector3d offsetVector1 = new Vector3d();
-            if (OFFSET_FRAMES)
+            if (OFFSET_IMU_FRAMES)
             {
                offsetVector1.set(0.1, 0.2, 0.3);
             }
+
             imu1Offset.setTranslation(offsetVector1);
 
             KinematicPoint kinematicPoint1 = new KinematicPoint("kp1", offsetVector1, this);
@@ -230,21 +240,31 @@ public class ComposableStateEstimatorEvaluator
             pinJoint2.setLink(armLink2);
 
             Transform3D imu2Offset = new Transform3D();
-            if (ROTATE_FRAMES)
+            if (ROTATE_IMU_FRAMES)
             {
                imu2Offset.rotY(Math.PI / 8.0);
             }
+
             Vector3d offsetVector2 = new Vector3d();
-            if (OFFSET_FRAMES)
+            if (OFFSET_IMU_FRAMES)
             {
                offsetVector2.set(0.1, 0.03, 0.007);
             }
+
             imu2Offset.setTranslation(offsetVector2);
 
             KinematicPoint kinematicPoint2 = new KinematicPoint("kp2", offsetVector2, this);
             pinJoint2.addKinematicPoint(kinematicPoint2);
             IMUMount imuMount2 = new IMUMount("imuMount2", imu2Offset, this);
             pinJoint2.addIMUMount(imuMount2);
+
+            Vector3d velocityPointOffsetVector2 = new Vector3d(); //0.1, 0.2, 0.3);
+            KinematicPoint velocityPoint2 = new KinematicPoint("vp2", velocityPointOffsetVector2, this);
+            pinJoint2.addKinematicPoint(velocityPoint2);
+            
+//            Vector3d velocityPointOffsetVector2A = new Vector3d(0.0, 0.3, 0.0);
+//            KinematicPoint velocityPoint2A = new KinematicPoint("vp2A", velocityPointOffsetVector2A, this);
+//            pinJoint2.addKinematicPoint(velocityPoint2A);
 
             pinJoint1.addJoint(pinJoint2);
 
@@ -257,6 +277,10 @@ public class ComposableStateEstimatorEvaluator
             imuMounts.add(imuMount0);
             imuMounts.add(imuMount1);
             imuMounts.add(imuMount2);
+
+//            velocityPoints.add(velocityPoint0);
+            velocityPoints.add(velocityPoint2);
+//            velocityPoints.add(velocityPoint2A);
          }
 
          else
@@ -281,20 +305,20 @@ public class ComposableStateEstimatorEvaluator
             rootJoint.setPosition(new Point3d(0.0, 0.0, 0.4));
             rootJoint.setAngularVelocityInBody(new Vector3d(0.2, 2.5, 0.0));
          }
-         
+
          Vector3d externalForceVector = new Vector3d(gravitationalAccelerationForSimulation);
          Point3d comPoint = new Point3d();
          double mass = this.computeCenterOfMass(comPoint);
          externalForceVector.scale(-mass);
          externalForcePoint.setForce(externalForceVector);
-         
+
          update();
       }
 
-      //      public Link getBodyLink()
-      //      {
-      //         return bodyLink;
-      //      }
+      // public Link getBodyLink()
+      // {
+      // return bodyLink;
+      // }
 
       public FloatingJoint getRootJoint()
       {
@@ -304,6 +328,11 @@ public class ComposableStateEstimatorEvaluator
       public ArrayList<IMUMount> getIMUMounts()
       {
          return imuMounts;
+      }
+
+      public ArrayList<KinematicPoint> getVelocityPoints()
+      {
+         return velocityPoints;
       }
 
       public Vector3d getActualAngularAccelerationInBodyFrame()
@@ -317,6 +346,7 @@ public class ComposableStateEstimatorEvaluator
       }
    }
 
+
    private class StateEstimatorEvaluatorFullRobotModel
    {
       private final InverseDynamicsJointsFromSCSRobotGenerator generator;
@@ -326,6 +356,7 @@ public class ComposableStateEstimatorEvaluator
       private final RigidBody rootBody;
 
       private final ArrayList<IMUMount> imuMounts;
+      private final ArrayList<KinematicPoint> velocityPoints;
 
       public StateEstimatorEvaluatorFullRobotModel(StateEstimatorEstimatorEvaluatorRobot robot)
       {
@@ -336,6 +367,7 @@ public class ComposableStateEstimatorEvaluator
          rootBody = generator.getRootBody();
 
          imuMounts = robot.getIMUMounts();
+         velocityPoints = robot.getVelocityPoints();
       }
 
       public SixDoFJoint getRootInverseDynamicsJoint()
@@ -353,9 +385,19 @@ public class ComposableStateEstimatorEvaluator
          return imuMounts;
       }
 
+      public ArrayList<KinematicPoint> getVelocityPoints()
+      {
+         return velocityPoints;
+      }
+
       public RigidBody getIMUBody(IMUMount imuMount)
       {
          return generator.getRigidBody(imuMount.getParentJoint());
+      }
+
+      public RigidBody getVelocityPointBody(KinematicPoint kinematicPoint)
+      {
+         return generator.getRigidBody(kinematicPoint.getParentJoint());
       }
 
       public void updateBasedOnRobot(StateEstimatorEstimatorEvaluatorRobot robot, boolean updateRootJoints)
@@ -387,7 +429,9 @@ public class ComposableStateEstimatorEvaluator
          bodyTwist.setAngularPart(estimatedAngularVelocity.getVector());
          rootInverseDynamicsJoint.setJointTwist(bodyTwist);
       }
+
    }
+
 
    private class AngularAccelerationFromRobotStealer extends AbstractControlFlowElement
    {
@@ -422,6 +466,7 @@ public class ComposableStateEstimatorEvaluator
 
    }
 
+
    private class CenterOfMassAccelerationFromFullRobotModelStealer extends AbstractControlFlowElement
    {
       private final CenterOfMassAccelerationCalculator centerOfMassAccelerationCalculator;
@@ -454,6 +499,7 @@ public class ComposableStateEstimatorEvaluator
       {
       }
    }
+
 
    private class QuaternionOrientationEstimatorEvaluatorController implements RobotController
    {
@@ -497,13 +543,15 @@ public class ComposableStateEstimatorEvaluator
          perfectCenterOfMassCalculator = new CenterOfMassCalculator(perfectFullRobotModel.elevator, ReferenceFrame.getWorldFrame());
          perfectCenterOfMassJacobian = new CenterOfMassJacobian(perfectFullRobotModel.elevator);
          perfectCenterOfMassAccelerationCalculator = new CenterOfMassAccelerationCalculator(perfectFullRobotModel.elevator,
-               perfectSpatialAccelerationCalculator);
+                 perfectSpatialAccelerationCalculator);
 
          ArrayList<OrientationSensorConfiguration> orientationSensorConfigurations = createOrientationSensors(perfectFullRobotModel, estimatedFullRobotModel);
          ArrayList<AngularVelocitySensorConfiguration> angularVelocitySensorConfigurations = createAngularVelocitySensors(perfectFullRobotModel,
-               estimatedFullRobotModel);
+                                                                                                estimatedFullRobotModel);
          ArrayList<LinearAccelerationSensorConfiguration> linearAccelerationSensorConfigurations = createLinearAccelerationSensors(perfectFullRobotModel,
-               estimatedFullRobotModel);
+                                                                                                      estimatedFullRobotModel);
+
+         ArrayList<PointVelocitySensorConfiguration> pointVelocitySensorConfigurations = createPointVelocitySensors(perfectFullRobotModel, estimatedFullRobotModel);
 
          controlFlowGraph = new ControlFlowGraph();
          RigidBody estimationLink = estimatedFullRobotModel.getRootBody();
@@ -520,33 +568,34 @@ public class ComposableStateEstimatorEvaluator
 
          if (ESTIMATE_COM)
          {
-            CenterOfMassAccelerationFromFullRobotModelStealer centerOfMassAccelerationFromFullRobotModelStealer = new CenterOfMassAccelerationFromFullRobotModelStealer(
-                  perfectFullRobotModel.elevator, perfectSpatialAccelerationCalculator);
+            CenterOfMassAccelerationFromFullRobotModelStealer centerOfMassAccelerationFromFullRobotModelStealer =
+               new CenterOfMassAccelerationFromFullRobotModelStealer(perfectFullRobotModel.elevator, perfectSpatialAccelerationCalculator);
             ControlFlowOutputPort<FrameVector> desiredCenterOfMassAccelerationOutputPort = centerOfMassAccelerationFromFullRobotModelStealer.getOutputPort();
 
             DenseMatrix64F comAccelerationNoiseCovariance = createDiagonalCovarianceMatrix(comAccelerationProcessNoiseStandardDeviation, 3);
 
-            ComposableOrientationAndCoMEstimatorCreator orientationEstimatorCreator = new ComposableOrientationAndCoMEstimatorCreator(
-                  angularAccelerationNoiseCovariance, comAccelerationNoiseCovariance, estimationLink, estimatedTwistCalculator,
-                  estimatedSpatialAccelerationCalculator);
+            ComposableOrientationAndCoMEstimatorCreator orientationEstimatorCreator =
+               new ComposableOrientationAndCoMEstimatorCreator(angularAccelerationNoiseCovariance, comAccelerationNoiseCovariance, estimationLink,
+                  estimatedTwistCalculator, estimatedSpatialAccelerationCalculator);
             orientationEstimatorCreator.addOrientationSensorConfigurations(orientationSensorConfigurations);
             orientationEstimatorCreator.addAngularVelocitySensorConfigurations(angularVelocitySensorConfigurations);
             orientationEstimatorCreator.addLinearAccelerationSensorConfigurations(linearAccelerationSensorConfigurations);
+            orientationEstimatorCreator.addPointVelocitySensorConfigurations(pointVelocitySensorConfigurations);
 
             updateInternalState();
             orientationEstimator = orientationEstimatorCreator.createOrientationEstimator(controlFlowGraph, controlDT,
-                  estimatedFullRobotModel.getRootInverseDynamicsJoint(), estimationLink, estimationFrame, desiredAngularAccelerationOutputPort,
-                  desiredCenterOfMassAccelerationOutputPort, registry);
+                    estimatedFullRobotModel.getRootInverseDynamicsJoint(), estimationLink, estimationFrame, desiredAngularAccelerationOutputPort,
+                    desiredCenterOfMassAccelerationOutputPort, registry);
          }
          else
          {
             ComposableOrientationEstimatorCreator orientationEstimatorCreator = new ComposableOrientationEstimatorCreator(angularAccelerationNoiseCovariance,
-                  estimationLink, estimatedTwistCalculator);
+                                                                                   estimationLink, estimatedTwistCalculator);
             orientationEstimatorCreator.addOrientationSensorConfigurations(orientationSensorConfigurations);
             orientationEstimatorCreator.addAngularVelocitySensorConfigurations(angularVelocitySensorConfigurations);
 
             orientationEstimator = orientationEstimatorCreator.createOrientationEstimator(controlFlowGraph, controlDT, estimationFrame,
-                  desiredAngularAccelerationOutputPort, registry);
+                    desiredAngularAccelerationOutputPort, registry);
          }
 
          controlFlowGraph.initializeAfterConnections();
@@ -568,10 +617,10 @@ public class ComposableStateEstimatorEvaluator
             estimatedAngularVelocity.set(angularVelocityInBody);
             orientationEstimator.setEstimatedAngularVelocity(estimatedAngularVelocity);
 
-            //TODO: This wasn't doing anything. 
-            //            DenseMatrix64F x = orientationEstimator.getState();
-            //            MatrixTools.insertTuple3dIntoEJMLVector(angularVelocityInBody, x, 3);
-            //            orientationEstimator.setState(x, orientationEstimator.getCovariance());
+            // TODO: This wasn't doing anything.
+            // DenseMatrix64F x = orientationEstimator.getState();
+            // MatrixTools.insertTuple3dIntoEJMLVector(angularVelocityInBody, x, 3);
+            // orientationEstimator.setState(x, orientationEstimator.getCovariance());
 
             System.out.println("Estimated orientation = " + orientationEstimator.getEstimatedOrientation());
             System.out.println("Estimated angular velocity = " + estimatedAngularVelocity);
@@ -580,7 +629,7 @@ public class ComposableStateEstimatorEvaluator
       }
 
       private ArrayList<AngularVelocitySensorConfiguration> createAngularVelocitySensors(StateEstimatorEvaluatorFullRobotModel perfectFullRobotModel,
-            StateEstimatorEvaluatorFullRobotModel estimatedFullRobotModel)
+              StateEstimatorEvaluatorFullRobotModel estimatedFullRobotModel)
       {
          ArrayList<AngularVelocitySensorConfiguration> angularVelocitySensorConfigurations = new ArrayList<AngularVelocitySensorConfiguration>();
 
@@ -600,16 +649,16 @@ public class ComposableStateEstimatorEvaluator
                angularVelocitySensor.addSignalCorruptor(angularVelocityCorruptor);
 
                RandomWalkBiasVectorCorruptor biasVectorCorruptor = new RandomWalkBiasVectorCorruptor(1236L, sensorName, controlDT, registry);
-               //               biasVectorCorruptor.setStandardDeviation(angularVelocityBiasProcessNoiseStandardDeviation);
-               biasVectorCorruptor.setBias(computeGazeboBiasVector(gazeboAngularVelocityBiasMean, gazeboAngularVelocityBiasStandardDeviation, random)); // new Vector3d(0.0, 0.0, 0.0));
+
+               // biasVectorCorruptor.setStandardDeviation(angularVelocityBiasProcessNoiseStandardDeviation);
+               biasVectorCorruptor.setBias(computeGazeboBiasVector(gazeboAngularVelocityBiasMean, gazeboAngularVelocityBiasStandardDeviation, random));    // new Vector3d(0.0, 0.0, 0.0));
                angularVelocitySensor.addSignalCorruptor(biasVectorCorruptor);
 
                DenseMatrix64F angularVelocityNoiseCovariance = createDiagonalCovarianceMatrix(angularVelocityMeasurementStandardDeviation, 3);
                DenseMatrix64F angularVelocityBiasProcessNoiseCovariance = createDiagonalCovarianceMatrix(angularVelocityBiasProcessNoiseStandardDeviation, 3);
 
                RigidBody estimatedMeasurementBody = estimatedFullRobotModel.getIMUBody(imuMount);
-               ReferenceFrame estimatedMeasurementFrame = createMeasurementFrame(sensorName, "EstimatedMeasurementFrame", imuMount,
-                     estimatedMeasurementBody);
+               ReferenceFrame estimatedMeasurementFrame = createMeasurementFrame(sensorName, "EstimatedMeasurementFrame", imuMount, estimatedMeasurementBody);
 
                AngularVelocitySensorConfiguration angularVelocitySensorConfiguration =
                   new AngularVelocitySensorConfiguration(angularVelocitySensor.getAngularVelocityOutputPort(), sensorName, estimatedMeasurementBody,
@@ -644,8 +693,9 @@ public class ComposableStateEstimatorEvaluator
                linearAccelerationSensor.addSignalCorruptor(linearAccelerationCorruptor);
 
                RandomWalkBiasVectorCorruptor biasVectorCorruptor = new RandomWalkBiasVectorCorruptor(1286L, sensorName, controlDT, registry);
-               //               biasVectorCorruptor.setStandardDeviation(linearAccelerationBiasProcessNoiseStandardDeviation);
-               biasVectorCorruptor.setBias(computeGazeboBiasVector(gazeboLinearAccelerationBiasMean, gazeboLinearAccelerationBiasStandardDeviation, random)); // new Vector3d(0.0, 0.0, 0.0));
+
+               // biasVectorCorruptor.setStandardDeviation(linearAccelerationBiasProcessNoiseStandardDeviation);
+               biasVectorCorruptor.setBias(computeGazeboBiasVector(gazeboLinearAccelerationBiasMean, gazeboLinearAccelerationBiasStandardDeviation, random));    // new Vector3d(0.0, 0.0, 0.0));
                linearAccelerationSensor.addSignalCorruptor(biasVectorCorruptor);
 
                DenseMatrix64F linearAccelerationNoiseCovariance = createDiagonalCovarianceMatrix(linearAccelerationMeasurementStandardDeviation, 3);
@@ -653,8 +703,7 @@ public class ComposableStateEstimatorEvaluator
                   createDiagonalCovarianceMatrix(linearAccelerationBiasProcessNoiseStandardDeviation, 3);
 
                RigidBody estimatedMeasurementBody = estimatedFullRobotModel.getIMUBody(imuMount);
-               ReferenceFrame estimatedMeasurementFrame = createMeasurementFrame(sensorName, "EstimatedMeasurementFrame", imuMount,
-                                                             estimatedMeasurementBody);
+               ReferenceFrame estimatedMeasurementFrame = createMeasurementFrame(sensorName, "EstimatedMeasurementFrame", imuMount, estimatedMeasurementBody);
 
                LinearAccelerationSensorConfiguration linearAccelerationSensorConfiguration =
                   new LinearAccelerationSensorConfiguration(linearAccelerationSensor.getLinearAccelerationOutputPort(), sensorName, estimatedMeasurementBody,
@@ -666,6 +715,46 @@ public class ComposableStateEstimatorEvaluator
          }
 
          return linearAccelerationSensorConfigurations;
+      }
+
+      private ArrayList<PointVelocitySensorConfiguration> createPointVelocitySensors(StateEstimatorEvaluatorFullRobotModel perfectFullRobotModel,
+              StateEstimatorEvaluatorFullRobotModel estimatedFullRobotModel)
+      {
+         ArrayList<PointVelocitySensorConfiguration> pointVelocitySensorConfigurations = new ArrayList<PointVelocitySensorConfiguration>();
+
+         if (CREATE_POINT_VELOCITY_SENSOR)
+         {
+            for (KinematicPoint kinematicPoint : perfectFullRobotModel.getVelocityPoints())
+            {
+               String sensorName = kinematicPoint.getName() + "PointVelocity";
+
+               RigidBody perfectMeasurementBody = perfectFullRobotModel.getVelocityPointBody(kinematicPoint);
+               ReferenceFrame perfectFrameAfterJoint = perfectMeasurementBody.getParentJoint().getFrameAfterJoint();
+               FramePoint perfectVelocityPoint = new FramePoint(perfectFrameAfterJoint, kinematicPoint.getOffsetCopy());
+               
+               SimulatedPointVelocitySensor pointVelocitySensor = new SimulatedPointVelocitySensor(sensorName, perfectMeasurementBody, perfectVelocityPoint,
+                                                                     perfectTwistCalculator, registry);
+
+               GaussianVectorCorruptor pointVelocityCorruptor = new GaussianVectorCorruptor(1257L, sensorName, registry);
+               pointVelocityCorruptor.setStandardDeviation(pointVelocityMeasurementStandardDeviation);
+               pointVelocitySensor.addSignalCorruptor(pointVelocityCorruptor);
+
+               DenseMatrix64F pointVelocityNoiseCovariance = createDiagonalCovarianceMatrix(pointVelocityMeasurementStandardDeviation, 3);
+
+               RigidBody estimatedMeasurementBody = estimatedFullRobotModel.getVelocityPointBody(kinematicPoint);
+               ReferenceFrame estimatedFrameAfterJoint = estimatedMeasurementBody.getParentJoint().getFrameAfterJoint();
+               FramePoint estimatedVelocityPoint = new FramePoint(estimatedFrameAfterJoint, kinematicPoint.getOffsetCopy());
+               
+               PointVelocitySensorConfiguration pointVelocitySensorConfiguration =
+                  new PointVelocitySensorConfiguration(pointVelocitySensor.getPointVelocityOutputPort(), sensorName, estimatedMeasurementBody,
+                     estimatedVelocityPoint, angularAccelerationProcessNoiseStandardDeviation, pointVelocityNoiseCovariance,
+                     pointVelocityNoiseCovariance);
+
+               pointVelocitySensorConfigurations.add(pointVelocitySensorConfiguration);
+            }
+         }
+
+         return pointVelocitySensorConfigurations;
       }
 
       private ArrayList<OrientationSensorConfiguration> createOrientationSensors(StateEstimatorEvaluatorFullRobotModel perfectFullRobotModel,
@@ -690,8 +779,7 @@ public class ComposableStateEstimatorEvaluator
                DenseMatrix64F orientationNoiseCovariance = createDiagonalCovarianceMatrix(orientationMeasurementStandardDeviation, 3);
 
                RigidBody estimatedMeasurementBody = estimatedFullRobotModel.getIMUBody(imuMount);
-               ReferenceFrame estimatedMeasurementFrame = createMeasurementFrame(sensorName, "EstimatedMeasurementFrame", imuMount,
-                     estimatedMeasurementBody);
+               ReferenceFrame estimatedMeasurementFrame = createMeasurementFrame(sensorName, "EstimatedMeasurementFrame", imuMount, estimatedMeasurementBody);
 
                OrientationSensorConfiguration orientationSensorConfiguration = new OrientationSensorConfiguration(sensor.getOrientationOutputPort(),
                                                                                   sensorName, estimatedMeasurementFrame, orientationNoiseCovariance);
@@ -707,11 +795,11 @@ public class ComposableStateEstimatorEvaluator
       {
          ReferenceFrame perfectFrameAfterJoint = perfectMeasurmentBody.getParentJoint().getFrameAfterJoint();
 
-         if (!OFFSET_FRAMES && !ROTATE_FRAMES)
+         if (!OFFSET_IMU_FRAMES &&!ROTATE_IMU_FRAMES)
          {
             return perfectFrameAfterJoint;
          }
-         
+
          Transform3D transformFromMountToJoint = new Transform3D();
          imuMount.getTransformFromMountToJoint(transformFromMountToJoint);
 
@@ -720,6 +808,19 @@ public class ComposableStateEstimatorEvaluator
 
          return perfectMeasurementFrame;
       }
+
+//      public ReferenceFrame createMeasurementFrame(String sensorName, String frameName, KinematicPoint kinematicPoint, RigidBody perfectMeasurementBody)
+//      {
+//         ReferenceFrame perfectFrameAfterJoint = perfectMeasurementBody.getParentJoint().getFrameAfterJoint();
+//
+//         Transform3D transformFromMountToJoint = new Transform3D();
+//         transformFromMountToJoint.setTranslation(kinematicPoint.getOffsetCopy());
+//
+//         ReferenceFrame perfectMeasurementFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(sensorName + frameName,
+//                                                     perfectFrameAfterJoint, transformFromMountToJoint);
+//
+//         return perfectMeasurementFrame;
+//      }
 
       public void initialize()
       {
@@ -753,9 +854,10 @@ public class ComposableStateEstimatorEvaluator
          controlFlowGraph.waitUntilComputationIsDone();
 
          if (!ESTIMATE_COM)    // this is being done inside the state estimator for the CoM estimator
+         {
             estimatedFullRobotModel.updateBasedOnEstimator(orientationEstimator);
-
-         estimatedTwistCalculator.compute();
+            estimatedTwistCalculator.compute();            
+         }
 
          computeOrientationErrorAngle();
       }
@@ -809,6 +911,7 @@ public class ComposableStateEstimatorEvaluator
       }
    }
 
+
    private static DenseMatrix64F createDiagonalCovarianceMatrix(double standardDeviation, int size)
    {
       DenseMatrix64F orientationCovarianceMatrix = new DenseMatrix64F(size, size);
@@ -828,6 +931,7 @@ public class ComposableStateEstimatorEvaluator
       double continuousVariance = MathTools.square(continuousStdDev);
       double discreteVariance = continuousVariance * controlDT;
       double discreteStdDev = Math.sqrt(discreteVariance);
+
       return discreteStdDev;
    }
 
@@ -838,26 +942,28 @@ public class ComposableStateEstimatorEvaluator
       {
          MathTools.set(ret, direction, computeGazeboBias(mean, standardDeviation, random));
       }
+
       return ret;
    }
 
-   //     Pull request
-   //     https://bitbucket.org/osrf/gazebo/pull-request/421/added-noise-to-rates-and-accels-with-test/diff
-   //     
-   //              // Sample the bias that we'll use later
-   //        this->accelBias = math::Rand::GetDblNormal(accelBiasMean,
-   //                                                   accelBiasStddev);
-   //        // With equal probability, we pick a negative bias (by convention,
-   //        // accelBiasMean should be positive, though it would work fine if
-   //        // negative).
-   //        if (math::Rand::GetDblUniform() < 0.5)
-   //          this->accelBias = -this->accelBias;
+   // Pull request
+   // https://bitbucket.org/osrf/gazebo/pull-request/421/added-noise-to-rates-and-accels-with-test/diff
+   //
+   //// Sample the bias that we'll use later
+   // this->accelBias = math::Rand::GetDblNormal(accelBiasMean,
+   // accelBiasStddev);
+   //// With equal probability, we pick a negative bias (by convention,
+   //// accelBiasMean should be positive, though it would work fine if
+   //// negative).
+   // if (math::Rand::GetDblUniform() < 0.5)
+   // this->accelBias = -this->accelBias;
 
    private double computeGazeboBias(double mean, double standardDeviation, Random random)
    {
       double ret = standardDeviation * random.nextGaussian() + mean;
       if (random.nextBoolean())
          ret = -ret;
+
       return ret;
    }
 }

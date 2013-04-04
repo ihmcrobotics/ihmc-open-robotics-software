@@ -11,6 +11,7 @@ import org.ejml.data.DenseMatrix64F;
 import us.ihmc.commonWalkingControlModules.stateEstimation.measurementModelElements.AngularVelocityMeasurementModelElement;
 import us.ihmc.commonWalkingControlModules.stateEstimation.measurementModelElements.LinearAccelerationMeasurementModelElement;
 import us.ihmc.commonWalkingControlModules.stateEstimation.measurementModelElements.OrientationMeasurementModelElement;
+import us.ihmc.commonWalkingControlModules.stateEstimation.measurementModelElements.PointVelocityMeasurementModelElement;
 import us.ihmc.commonWalkingControlModules.stateEstimation.processModelElements.AngularAccelerationProcessModelElement;
 import us.ihmc.commonWalkingControlModules.stateEstimation.processModelElements.AngularVelocityProcessModelElement;
 import us.ihmc.commonWalkingControlModules.stateEstimation.processModelElements.BiasProcessModelElement;
@@ -46,6 +47,7 @@ public class ComposableOrientationAndCoMEstimatorCreator
    private final List<OrientationSensorConfiguration> orientationSensorConfigurations = new ArrayList<OrientationSensorConfiguration>();
    private final List<AngularVelocitySensorConfiguration> angularVelocitySensorConfigurations = new ArrayList<AngularVelocitySensorConfiguration>();
    private final List<LinearAccelerationSensorConfiguration> linearAccelerationSensorConfigurations = new ArrayList<LinearAccelerationSensorConfiguration>();
+   private final List<PointVelocitySensorConfiguration> pointVelocitySensorConfigurations = new ArrayList<PointVelocitySensorConfiguration>();
 
    public ComposableOrientationAndCoMEstimatorCreator(DenseMatrix64F angularAccelerationNoiseCovariance, DenseMatrix64F comAccelerationNoiseCovariance,
          RigidBody orientationEstimationLink, TwistCalculator twistCalculator, SpatialAccelerationCalculator spatialAccelerationCalculator)
@@ -96,6 +98,19 @@ public class ComposableOrientationAndCoMEstimatorCreator
       this.linearAccelerationSensorConfigurations.add(linearAccelerationSensorConfiguration);
    }
 
+   public void addPointVelocitySensorConfigurations(ArrayList<PointVelocitySensorConfiguration> pointVelocitySensorConfigurations)
+   {
+      for (PointVelocitySensorConfiguration pointVelocitySensorConfiguration : pointVelocitySensorConfigurations)
+      {
+         this.addPointVelocitySensorConfiguration(pointVelocitySensorConfiguration);
+      }
+   }
+   
+   public void addPointVelocitySensorConfiguration(PointVelocitySensorConfiguration pointVelocitySensorConfiguration)
+   {
+      this.pointVelocitySensorConfigurations.add(pointVelocitySensorConfiguration);      
+   }
+   
    public OrientationEstimator createOrientationEstimator(ControlFlowGraph controlFlowGraph, double controlDT, SixDoFJoint rootJoint, RigidBody estimationLink,
          ReferenceFrame estimationFrame, ControlFlowOutputPort<FrameVector> desiredAngularAccelerationOutputPort,
          ControlFlowOutputPort<FrameVector> desiredCenterOfMassAccelerationOutputPort, YoVariableRegistry registry)
@@ -153,6 +168,11 @@ public class ComposableOrientationAndCoMEstimatorCreator
          for (LinearAccelerationSensorConfiguration linearAccelerationSensorConfiguration : linearAccelerationSensorConfigurations)
          {
             addLinearAccelerationSensor(estimationFrame, controlFlowGraph, linearAccelerationSensorConfiguration);
+         }
+         
+         for (PointVelocitySensorConfiguration pointVelocitySensorConfiguration : pointVelocitySensorConfigurations)
+         {
+            addPointVelocitySensor(estimationFrame, controlFlowGraph, pointVelocitySensorConfiguration);
          }
 
          CenterOfMassBasedFullRobotModelUpdater centerOfMassBasedFullRobotModelUpdater = new CenterOfMassBasedFullRobotModelUpdater(twistCalculator,
@@ -280,6 +300,31 @@ public class ComposableOrientationAndCoMEstimatorCreator
 
          addMeasurementModelElement(linearAccelerationMeasurementInputPort, linearAccelerationMeasurementModel);
          controlFlowGraph.connectElements(linearAccelerationSensorConfiguration.getOutputPort(), linearAccelerationMeasurementInputPort);
+      }
+      
+      private void addPointVelocitySensor(ReferenceFrame estimationFrame, ControlFlowGraph controlFlowGraph,
+            PointVelocitySensorConfiguration pointVelocitySensorConfiguration)
+      {
+         RigidBody measurementLink = pointVelocitySensorConfiguration.getPointVelocityMeasurementLink();
+         FramePoint stationaryPoint = pointVelocitySensorConfiguration.getPointVelocityMeasurementPoint();
+
+         ControlFlowInputPort<Vector3d> pointVelocityMeasurementInputPort = createMeasurementInputPort(VECTOR3D_LENGTH);
+
+         String name = pointVelocitySensorConfiguration.getName();
+
+         DenseMatrix64F pointVelocityNoiseCovariance = pointVelocitySensorConfiguration.getPointVelocityNoiseCovariance();
+
+
+         PointVelocityMeasurementModelElement pointVelocityMeasurementModelElement = new PointVelocityMeasurementModelElement(
+               name, pointVelocityMeasurementInputPort, 
+               centerOfMassPositionStatePort, centerOfMassVelocityStatePort, orientationStatePort, 
+               angularVelocityStatePort, estimationFrame, 
+               measurementLink, stationaryPoint, twistCalculator, registry);
+
+         pointVelocityMeasurementModelElement.setNoiseCovariance(pointVelocityNoiseCovariance);
+
+         addMeasurementModelElement(pointVelocityMeasurementInputPort, pointVelocityMeasurementModelElement);
+         controlFlowGraph.connectElements(pointVelocitySensorConfiguration.getOutputPort(), pointVelocityMeasurementInputPort);
       }
 
       public FrameOrientation getEstimatedOrientation()
