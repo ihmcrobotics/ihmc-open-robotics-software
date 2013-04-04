@@ -2,11 +2,13 @@ package us.ihmc.commonWalkingControlModules.stateEstimation.measurementModelElem
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.stateEstimation.MeasurementModelElement;
+import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.utilities.math.MathTools;
 
@@ -19,9 +21,11 @@ public abstract class AbstractMeasurementModelElement implements MeasurementMode
    private final DenseMatrix64F measurementCovarianceMatrixBlock;
    private final DenseMatrix64F scaledMeasurementCovarianceMatrixBlock;
    private final DoubleYoVariable covarianceMatrixScaling;
+   private final ControlFlowInputPort<?> measurementPort;
 
-   public AbstractMeasurementModelElement(int covarianceMatrixSize, String name, YoVariableRegistry registry)
+   public AbstractMeasurementModelElement(ControlFlowInputPort<?> measurementPort, int covarianceMatrixSize, String name, YoVariableRegistry registry)
    {
+      this.measurementPort = measurementPort;
       measurementCovarianceMatrixBlock = new DenseMatrix64F(covarianceMatrixSize, covarianceMatrixSize);
       scaledMeasurementCovarianceMatrixBlock = new DenseMatrix64F(covarianceMatrixSize, covarianceMatrixSize);
       outputMatrixBlocks = new HashMap<ControlFlowOutputPort<?>, DenseMatrix64F>();
@@ -52,5 +56,15 @@ public abstract class AbstractMeasurementModelElement implements MeasurementMode
    public void setNoiseCovariance(DenseMatrix64F measurementNoiseCovariance)
    {
       measurementCovarianceMatrixBlock.set(measurementNoiseCovariance);
+   }
+
+   public Set<ControlFlowOutputPort<?>> getStatePorts()
+   {
+      return outputMatrixBlocks.keySet();
+   }
+   
+   public ControlFlowInputPort<?> getMeasurementPort()
+   {
+      return measurementPort;
    }
 }

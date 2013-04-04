@@ -89,7 +89,7 @@ public class LinearAccelerationMeasurementModelElement extends AbstractMeasureme
            TwistCalculator twistCalculator, SpatialAccelerationCalculator spatialAccelerationCalculator, RigidBody measurementLink,
            ReferenceFrame measurementFrame, RigidBody estimationLink, ReferenceFrame estimationFrame, double gZ)
    {
-      super(SIZE, name, registry);
+      super(linearAccelerationMeasurementInputPort, SIZE, name, registry);
       MathTools.checkIfInRange(gZ, 0.0, Double.POSITIVE_INFINITY);
 
       this.centerOfMassPositionPort = centerOfMassPositionPort;

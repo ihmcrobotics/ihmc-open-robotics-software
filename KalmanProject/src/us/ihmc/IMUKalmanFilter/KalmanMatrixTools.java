@@ -12,7 +12,7 @@ package us.ihmc.IMUKalmanFilter;
  * @author not attributable
  * @version 1.0
  */
-public class MatrixTools
+public class KalmanMatrixTools
 {
    /**
     * setArray: copies a array to dest, returns nothing
