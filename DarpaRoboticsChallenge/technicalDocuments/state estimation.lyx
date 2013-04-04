@@ -722,11 +722,11 @@ and the input matrix
 \begin_layout Standard
 \begin_inset Formula 
 \begin{align*}
-B & =\left(\begin{array}{c}
-B_{r}\\
-B_{\phi}\\
-0
-\end{array}\right)\in\mathbb{R}^{12+6n_{\text{imu}}\times3}\\
+B & =\left(\begin{array}{cc}
+B_{r} & 0\\
+0 & B_{\phi}\\
+0 & 0
+\end{array}\right)\in\mathbb{R}^{12+6n_{\text{imu}}\times6}\\
 B_{r} & =\left(\begin{array}{c}
 0\\
 I_{3}
