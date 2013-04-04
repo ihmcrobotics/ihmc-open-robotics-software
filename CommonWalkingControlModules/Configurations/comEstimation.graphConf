@@ -4,7 +4,7 @@
 	<Graph>
 		<Variables>root.StateEstimatorEstimatorEvaluatorRobot.QuaternionOrientationEstimatorEvaluatorController.orientationEstimator.orientationEstimatorCoMPositionX,root.StateEstimatorEstimatorEvaluatorRobot.QuaternionOrientationEstimatorEvaluatorController.perfectCoMX</Variables>
 		<GraphConfiguration>
-			<Name>config1</Name>
+			<Name>config38</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -16,7 +16,7 @@
 	<Graph>
 		<Variables>root.StateEstimatorEstimatorEvaluatorRobot.QuaternionOrientationEstimatorEvaluatorController.orientationEstimator.orientationEstimatorCoMPositionY,root.StateEstimatorEstimatorEvaluatorRobot.QuaternionOrientationEstimatorEvaluatorController.perfectCoMY</Variables>
 		<GraphConfiguration>
-			<Name>config2</Name>
+			<Name>config39</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -28,7 +28,7 @@
 	<Graph>
 		<Variables>root.StateEstimatorEstimatorEvaluatorRobot.QuaternionOrientationEstimatorEvaluatorController.orientationEstimator.orientationEstimatorCoMPositionZ,root.StateEstimatorEstimatorEvaluatorRobot.QuaternionOrientationEstimatorEvaluatorController.perfectCoMZ</Variables>
 		<GraphConfiguration>
-			<Name>config3</Name>
+			<Name>config40</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -40,7 +40,7 @@
 	<Graph>
 		<Variables>root.StateEstimatorEstimatorEvaluatorRobot.QuaternionOrientationEstimatorEvaluatorController.orientationEstimator.orientationEstimatorCoMVelocityX,root.StateEstimatorEstimatorEvaluatorRobot.QuaternionOrientationEstimatorEvaluatorController.perfectCoMdX</Variables>
 		<GraphConfiguration>
-			<Name>config4</Name>
+			<Name>config41</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -52,7 +52,7 @@
 	<Graph>
 		<Variables>root.StateEstimatorEstimatorEvaluatorRobot.QuaternionOrientationEstimatorEvaluatorController.orientationEstimator.orientationEstimatorCoMVelocityY,root.StateEstimatorEstimatorEvaluatorRobot.QuaternionOrientationEstimatorEvaluatorController.perfectCoMdY</Variables>
 		<GraphConfiguration>
-			<Name>config5</Name>
+			<Name>config42</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -64,7 +64,7 @@
 	<Graph>
 		<Variables>root.StateEstimatorEstimatorEvaluatorRobot.QuaternionOrientationEstimatorEvaluatorController.orientationEstimator.orientationEstimatorCoMVelocityZ,root.StateEstimatorEstimatorEvaluatorRobot.QuaternionOrientationEstimatorEvaluatorController.perfectCoMdZ</Variables>
 		<GraphConfiguration>
-			<Name>config6</Name>
+			<Name>config43</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -76,7 +76,7 @@
 	<Graph>
 		<Variables>root.StateEstimatorEstimatorEvaluatorRobot.QuaternionOrientationEstimatorEvaluatorController.orientationEstimator.orientationEstimatorCoMAccelerationX</Variables>
 		<GraphConfiguration>
-			<Name>config7</Name>
+			<Name>config44</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -88,7 +88,7 @@
 	<Graph>
 		<Variables>root.StateEstimatorEstimatorEvaluatorRobot.QuaternionOrientationEstimatorEvaluatorController.orientationEstimator.orientationEstimatorCoMAccelerationY</Variables>
 		<GraphConfiguration>
-			<Name>config8</Name>
+			<Name>config45</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -100,7 +100,7 @@
 	<Graph>
 		<Variables>root.StateEstimatorEstimatorEvaluatorRobot.QuaternionOrientationEstimatorEvaluatorController.orientationEstimator.orientationEstimatorCoMAccelerationZ</Variables>
 		<GraphConfiguration>
-			<Name>config9</Name>
+			<Name>config46</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>

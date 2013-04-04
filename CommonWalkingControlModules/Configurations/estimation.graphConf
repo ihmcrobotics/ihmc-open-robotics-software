@@ -4,7 +4,7 @@
 	<Graph>
 		<Variables>root.StateEstimatorEstimatorEvaluatorRobot.QuaternionOrientationEstimatorEvaluatorController.orientationEstimatorQx,root.StateEstimatorEstimatorEvaluatorRobot.q_qx</Variables>
 		<GraphConfiguration>
-			<Name>config1</Name>
+			<Name>config22</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -16,7 +16,7 @@
 	<Graph>
 		<Variables>root.StateEstimatorEstimatorEvaluatorRobot.QuaternionOrientationEstimatorEvaluatorController.orientationEstimatorQy,root.StateEstimatorEstimatorEvaluatorRobot.q_qy</Variables>
 		<GraphConfiguration>
-			<Name>config2</Name>
+			<Name>config23</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -28,7 +28,7 @@
 	<Graph>
 		<Variables>root.StateEstimatorEstimatorEvaluatorRobot.QuaternionOrientationEstimatorEvaluatorController.orientationEstimatorQz,root.StateEstimatorEstimatorEvaluatorRobot.q_qz</Variables>
 		<GraphConfiguration>
-			<Name>config3</Name>
+			<Name>config24</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -40,7 +40,7 @@
 	<Graph>
 		<Variables>root.StateEstimatorEstimatorEvaluatorRobot.QuaternionOrientationEstimatorEvaluatorController.orientationEstimatorQs,root.StateEstimatorEstimatorEvaluatorRobot.q_qs</Variables>
 		<GraphConfiguration>
-			<Name>config4</Name>
+			<Name>config25</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -52,7 +52,7 @@
 	<Graph>
 		<Variables>root.StateEstimatorEstimatorEvaluatorRobot.QuaternionOrientationEstimatorEvaluatorController.orientationEstimator.orientationEstimatorOmegaX,root.StateEstimatorEstimatorEvaluatorRobot.qd_wx</Variables>
 		<GraphConfiguration>
-			<Name>config5</Name>
+			<Name>config26</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -64,7 +64,7 @@
 	<Graph>
 		<Variables>root.StateEstimatorEstimatorEvaluatorRobot.QuaternionOrientationEstimatorEvaluatorController.orientationEstimator.orientationEstimatorOmegaY,root.StateEstimatorEstimatorEvaluatorRobot.qd_wy</Variables>
 		<GraphConfiguration>
-			<Name>config6</Name>
+			<Name>config27</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -76,7 +76,7 @@
 	<Graph>
 		<Variables>root.StateEstimatorEstimatorEvaluatorRobot.QuaternionOrientationEstimatorEvaluatorController.orientationEstimator.orientationEstimatorOmegaZ,root.StateEstimatorEstimatorEvaluatorRobot.qd_wz</Variables>
 		<GraphConfiguration>
-			<Name>config7</Name>
+			<Name>config28</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -88,7 +88,7 @@
 	<Graph>
 		<Variables>root.StateEstimatorEstimatorEvaluatorRobot.QuaternionOrientationEstimatorEvaluatorController.orientationErrorAngle</Variables>
 		<GraphConfiguration>
-			<Name>config8</Name>
+			<Name>config29</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -98,9 +98,9 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.StateEstimatorEstimatorEvaluatorRobot.QuaternionOrientationEstimatorEvaluatorController.orientationEstimator.orientationEstimatorCoMPositionX</Variables>
+		<Variables>root.StateEstimatorEstimatorEvaluatorRobot.QuaternionOrientationEstimatorEvaluatorController.orientationEstimator.imuMount0AngularVelocityBiasEstimateX,root.StateEstimatorEstimatorEvaluatorRobot.QuaternionOrientationEstimatorEvaluatorController.imuMount0AngularVelocityRandomWalkBiasVectorCorruptor.imuMount0AngularVelocityBiasX</Variables>
 		<GraphConfiguration>
-			<Name>config9</Name>
+			<Name>config30</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -110,9 +110,9 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.StateEstimatorEstimatorEvaluatorRobot.QuaternionOrientationEstimatorEvaluatorController.orientationEstimator.orientationEstimatorCoMPositionY</Variables>
+		<Variables>root.StateEstimatorEstimatorEvaluatorRobot.QuaternionOrientationEstimatorEvaluatorController.orientationEstimator.imuMount0AngularVelocityBiasEstimateY,root.StateEstimatorEstimatorEvaluatorRobot.QuaternionOrientationEstimatorEvaluatorController.imuMount0AngularVelocityRandomWalkBiasVectorCorruptor.imuMount0AngularVelocityBiasY</Variables>
 		<GraphConfiguration>
-			<Name>config10</Name>
+			<Name>config31</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -122,57 +122,9 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.StateEstimatorEstimatorEvaluatorRobot.QuaternionOrientationEstimatorEvaluatorController.orientationEstimator.orientationEstimatorCoMPositionZ</Variables>
+		<Variables>root.StateEstimatorEstimatorEvaluatorRobot.QuaternionOrientationEstimatorEvaluatorController.orientationEstimator.imuMount0AngularVelocityBiasEstimateZ,root.StateEstimatorEstimatorEvaluatorRobot.QuaternionOrientationEstimatorEvaluatorController.imuMount0AngularVelocityRandomWalkBiasVectorCorruptor.imuMount0AngularVelocityBiasZ</Variables>
 		<GraphConfiguration>
-			<Name>config11</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.StateEstimatorEstimatorEvaluatorRobot.t</Variables>
-		<GraphConfiguration>
-			<Name>config12</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.StateEstimatorEstimatorEvaluatorRobot.QuaternionOrientationEstimatorEvaluatorController.orientationEstimator.orientationEstimatorCoMVelocityX</Variables>
-		<GraphConfiguration>
-			<Name>config13</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.StateEstimatorEstimatorEvaluatorRobot.QuaternionOrientationEstimatorEvaluatorController.orientationEstimator.orientationEstimatorCoMVelocityY</Variables>
-		<GraphConfiguration>
-			<Name>config14</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.StateEstimatorEstimatorEvaluatorRobot.QuaternionOrientationEstimatorEvaluatorController.orientationEstimator.orientationEstimatorCoMVelocityZ</Variables>
-		<GraphConfiguration>
-			<Name>config15</Name>
+			<Name>config32</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -184,7 +136,7 @@
 	<Graph>
 		<Variables>root.StateEstimatorEstimatorEvaluatorRobot.t</Variables>
 		<GraphConfiguration>
-			<Name>config16</Name>
+			<Name>config33</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -194,9 +146,9 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.StateEstimatorEstimatorEvaluatorRobot.QuaternionOrientationEstimatorEvaluatorController.orientationEstimator.orientationEstimatorCoMAccelerationX</Variables>
+		<Variables>root.StateEstimatorEstimatorEvaluatorRobot.QuaternionOrientationEstimatorEvaluatorController.orientationEstimator.imuMount0LinearAccelerationBiasEstimateX,root.StateEstimatorEstimatorEvaluatorRobot.QuaternionOrientationEstimatorEvaluatorController.imuMount0LinearAccelerationRandomWalkBiasVectorCorruptor.imuMount0LinearAccelerationBiasX</Variables>
 		<GraphConfiguration>
-			<Name>config17</Name>
+			<Name>config34</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -206,9 +158,9 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.StateEstimatorEstimatorEvaluatorRobot.QuaternionOrientationEstimatorEvaluatorController.orientationEstimator.orientationEstimatorCoMAccelerationY</Variables>
+		<Variables>root.StateEstimatorEstimatorEvaluatorRobot.QuaternionOrientationEstimatorEvaluatorController.orientationEstimator.imuMount0LinearAccelerationBiasEstimateY,root.StateEstimatorEstimatorEvaluatorRobot.QuaternionOrientationEstimatorEvaluatorController.imuMount0LinearAccelerationRandomWalkBiasVectorCorruptor.imuMount0LinearAccelerationBiasY</Variables>
 		<GraphConfiguration>
-			<Name>config18</Name>
+			<Name>config35</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -218,9 +170,9 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.StateEstimatorEstimatorEvaluatorRobot.QuaternionOrientationEstimatorEvaluatorController.orientationEstimator.orientationEstimatorCoMAccelerationZ</Variables>
+		<Variables>root.StateEstimatorEstimatorEvaluatorRobot.QuaternionOrientationEstimatorEvaluatorController.orientationEstimator.imuMount0LinearAccelerationBiasEstimateZ,root.StateEstimatorEstimatorEvaluatorRobot.QuaternionOrientationEstimatorEvaluatorController.imuMount0LinearAccelerationRandomWalkBiasVectorCorruptor.imuMount0LinearAccelerationBiasZ</Variables>
 		<GraphConfiguration>
-			<Name>config19</Name>
+			<Name>config36</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -230,57 +182,9 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.StateEstimatorEstimatorEvaluatorRobot.t</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
-			<Name>config20</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.StateEstimatorEstimatorEvaluatorRobot.QuaternionOrientationEstimatorEvaluatorController.orientationEstimator.imuMount0AngularVelocityBiasEstimateX</Variables>
-		<GraphConfiguration>
-			<Name>config21</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.StateEstimatorEstimatorEvaluatorRobot.QuaternionOrientationEstimatorEvaluatorController.orientationEstimator.imuMount0AngularVelocityBiasEstimateY</Variables>
-		<GraphConfiguration>
-			<Name>config22</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.StateEstimatorEstimatorEvaluatorRobot.QuaternionOrientationEstimatorEvaluatorController.orientationEstimator.imuMount0AngularVelocityBiasEstimateZ</Variables>
-		<GraphConfiguration>
-			<Name>config23</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.StateEstimatorEstimatorEvaluatorRobot.t</Variables>
-		<GraphConfiguration>
-			<Name>config24</Name>
+			<Name>config37</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
