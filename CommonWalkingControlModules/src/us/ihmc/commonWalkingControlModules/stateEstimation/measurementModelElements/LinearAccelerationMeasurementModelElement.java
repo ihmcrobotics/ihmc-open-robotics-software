@@ -90,7 +90,7 @@ public class LinearAccelerationMeasurementModelElement extends AbstractMeasureme
            ReferenceFrame measurementFrame, RigidBody estimationLink, ReferenceFrame estimationFrame, double gZ)
    {
       super(linearAccelerationMeasurementInputPort, SIZE, name, registry);
-      MathTools.checkIfInRange(gZ, 0.0, Double.POSITIVE_INFINITY);
+      MathTools.checkIfInRange(gZ, Double.NEGATIVE_INFINITY, 0.0);
 
       this.centerOfMassPositionPort = centerOfMassPositionPort;
       this.centerOfMassVelocityPort = centerOfMassVelocityPort;
@@ -113,7 +113,7 @@ public class LinearAccelerationMeasurementModelElement extends AbstractMeasureme
       this.jacobianAssembler = new LinearAccelerationMeasurementModelJacobianAssembler(twistCalculator, spatialAccelerationCalculator, measurementLink,
               measurementFrame, estimationFrame);
 
-      gravitationalAcceleration.setZ(-gZ);
+      gravitationalAcceleration.setZ(gZ);
 
       outputMatrixBlocks.put(centerOfMassVelocityPort, new DenseMatrix64F(SIZE, SIZE));
       outputMatrixBlocks.put(centerOfMassAccelerationPort, new DenseMatrix64F(SIZE, SIZE));

@@ -1,5 +1,7 @@
 package us.ihmc.darpaRoboticsChallenge;
 
+import java.util.ArrayList;
+
 import us.ihmc.GazeboStateCommunicator.GazeboRobot;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFNoisySimulatedSensorReaderAndWriter;
@@ -14,6 +16,7 @@ import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.CenterOfMassJacobianUpdater;
 import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.sensors.TwistUpdater;
+import us.ihmc.commonWalkingControlModules.stateEstimation.HumanoidStateEstimatorController;
 import us.ihmc.commonWalkingControlModules.visualizer.CommonInertiaElipsoidsVisualizer;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.handControl.SandiaHandModel;
@@ -45,7 +48,8 @@ public class DRCSimulationFactory
 {
    private static final boolean SHOW_REFERENCE_FRAMES = false;
    public static boolean SHOW_INERTIA_ELLIPSOIDS = false;
-
+   private static final boolean CREATE_STATE_ESTIMATOR = true;
+   
    public static HumanoidRobotSimulation<SDFRobot> createSimulation(ControllerFactory controllerFactory,
          CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, DRCRobotInterface robotInterface, RobotInitialSetup<SDFRobot> robotInitialSetup,
          ScsInitialSetup scsInitialSetup, GuiInitialSetup guiInitialSetup, KryoObjectServer networkServer, ObjectCommunicator networkProccesorCommunicator)
@@ -153,7 +157,19 @@ public class DRCSimulationFactory
 
       RobotControllerAndParameters modularRobotControllerAndParameters = new RobotControllerAndParameters(modularRobotController, simulationTicksPerControlTick);
       
-      final HumanoidRobotSimulation<SDFRobot> humanoidRobotSimulation = new HumanoidRobotSimulation<SDFRobot>(simulatedRobot, modularRobotControllerAndParameters, fullRobotModelForSimulation, commonAvatarEnvironmentInterface, simulatedRobot.getAllExternalForcePoints(), robotInitialSetup, scsInitialSetup, guiInitialSetup, guiSetterUpperRegistry, dynamicGraphicObjectsListRegistry);
+      ArrayList<RobotControllerAndParameters> robotControllersAndParameters = new ArrayList<RobotControllerAndParameters>();
+      robotControllersAndParameters.add(modularRobotControllerAndParameters);
+      
+      if (CREATE_STATE_ESTIMATOR)
+      {
+         double simulationDT = scsInitialSetup.getDT();
+         double desiredEstimatorDT = 0.001;
+         HumanoidStateEstimatorController humanoidStateEstimatorController = new HumanoidStateEstimatorController(simulationDT, desiredEstimatorDT);
+         RobotControllerAndParameters humanoidStateEstimatorControllerAndParameters = humanoidStateEstimatorController.createRobotControllerAndParameters();
+         robotControllersAndParameters.add(humanoidStateEstimatorControllerAndParameters);
+      }
+      
+      final HumanoidRobotSimulation<SDFRobot> humanoidRobotSimulation = new HumanoidRobotSimulation<SDFRobot>(simulatedRobot, robotControllersAndParameters, fullRobotModelForSimulation, commonAvatarEnvironmentInterface, simulatedRobot.getAllExternalForcePoints(), robotInitialSetup, scsInitialSetup, guiInitialSetup, guiSetterUpperRegistry, dynamicGraphicObjectsListRegistry);
 
       if (simulatedRobot instanceof GazeboRobot)
       {
