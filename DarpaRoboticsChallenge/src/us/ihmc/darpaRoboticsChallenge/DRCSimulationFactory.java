@@ -2,6 +2,7 @@ package us.ihmc.darpaRoboticsChallenge;
 
 import us.ihmc.GazeboStateCommunicator.GazeboRobot;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFNoisySimulatedSensorReaderAndWriter;
 import us.ihmc.SdfLoader.SDFPerfectSimulatedSensorReaderAndWriter;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonAvatarInterfaces.CommonAvatarEnvironmentInterface;
@@ -78,7 +79,7 @@ public class DRCSimulationFactory
          {
 
             SandiaHandModel handModel = new SandiaHandModel(fullRobotModelForController, robotSide);
-            SimulatedUnderactuatedSandiaHandController simulatedUnderactuatedSandiaHandController = new SimulatedUnderactuatedSandiaHandController(simulatedRobot.getYoTime(), handModel);
+            SimulatedUnderactuatedSandiaHandController simulatedUnderactuatedSandiaHandController = new SimulatedUnderactuatedSandiaHandController(simulatedRobot.getYoTime(), handModel, controlDT);
             handControllers.put(robotSide, simulatedUnderactuatedSandiaHandController);
             if (networkServer != null)
             {
@@ -91,11 +92,21 @@ public class DRCSimulationFactory
       TwistCalculator twistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), fullRobotModelForController.getElevator());
       CenterOfMassJacobian centerOfMassJacobian = new CenterOfMassJacobian(fullRobotModelForController.getElevator());
 
-      SDFPerfectSimulatedSensorReaderAndWriter sensorReaderAndOutputWriter = new SDFPerfectSimulatedSensorReaderAndWriter(simulatedRobot, fullRobotModelForController, referenceFramesForController, DRCConfigParameters.INTRODUCE_FILTERED_GAUSSIAN_POSITIONING_ERROR);
-      sensorReaderAndOutputWriter.setNoiseFilterAlpha(DRCConfigParameters.NOISE_FILTER_ALPHA);
-      sensorReaderAndOutputWriter.setPositionNoiseStd(DRCConfigParameters.POSITION_NOISE_STD);
-      sensorReaderAndOutputWriter.setQuaternionNoiseStd(DRCConfigParameters.QUATERNION_NOISE_STD);
-
+      
+      SDFPerfectSimulatedSensorReaderAndWriter sensorReaderAndOutputWriter;
+      
+      if(DRCConfigParameters.INTRODUCE_FILTERED_GAUSSIAN_POSITIONING_ERROR)
+      {
+         SDFNoisySimulatedSensorReaderAndWriter noisySimulatedSensorReaderAndWriter = new SDFNoisySimulatedSensorReaderAndWriter(simulatedRobot, fullRobotModelForController, referenceFramesForController);
+         noisySimulatedSensorReaderAndWriter.setNoiseFilterAlpha(DRCConfigParameters.NOISE_FILTER_ALPHA);
+         noisySimulatedSensorReaderAndWriter.setPositionNoiseStd(DRCConfigParameters.POSITION_NOISE_STD);
+         noisySimulatedSensorReaderAndWriter.setQuaternionNoiseStd(DRCConfigParameters.QUATERNION_NOISE_STD);
+         sensorReaderAndOutputWriter = noisySimulatedSensorReaderAndWriter;
+      }
+      else
+      {
+         sensorReaderAndOutputWriter = new SDFPerfectSimulatedSensorReaderAndWriter(simulatedRobot, fullRobotModelForController, referenceFramesForController);
+      }
 
       // PathTODO: Build LIDAR here
       OneDoFJoint lidarJoint;

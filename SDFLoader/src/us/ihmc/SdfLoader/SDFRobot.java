@@ -238,7 +238,7 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
                   if (isFinger(joint))
                   {
                      pinJoint.setLimitStops(joint.getLowerLimit(), joint.getUpperLimit(), 10.0, 2.5);
-                     // Ignore damping
+                     pinJoint.setDamping(0.1);
                   }
                   else
                   {
@@ -471,6 +471,13 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
       Matrix3d inertia = link.getInertia();
       Vector3d CoMOffset = link.getCoMOffset();
 
+      if(link.getJoint() != null)
+      {
+         if(isFinger(link.getJoint()))
+         {
+            inertia.mul(100.0);
+         }
+      }
 
       RigidBodyInertia rigidBodyInertia = new RigidBodyInertia(ReferenceFrame.getWorldFrame(), inertia, mass);
       ReferenceFrame jointFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("toroidFrame", ReferenceFrame.getWorldFrame(),

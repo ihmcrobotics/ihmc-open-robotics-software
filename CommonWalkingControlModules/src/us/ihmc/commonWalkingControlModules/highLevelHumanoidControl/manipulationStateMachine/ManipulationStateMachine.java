@@ -264,7 +264,7 @@ public class ManipulationStateMachine extends AbstractControlFlowElement
    {
       if (handController != null)
       {
-         handController.doAdditionalTorqueControl();
+         handController.doTorqueControl();
       }
    }
 }
