@@ -52,7 +52,6 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
    private final PositionProvider[] positionSources = new PositionProvider[2];
    private final VectorProvider[] velocitySources = new VectorProvider[2];
 
-   private final DoubleYoVariable stepTime;
    private final DoubleYoVariable timeIntoStep;
 
    private final YoFramePoint desiredPosition;
@@ -103,7 +102,6 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       velocitySources[0] = initalVelocityProvider;
       velocitySources[1] = finalDesiredVelocityProvider;
 
-      stepTime = new DoubleYoVariable("stepTime", registry);
       timeIntoStep = new DoubleYoVariable("timeIntoStep", registry);
 
       desiredPosition = new YoFramePoint(namePrefix + "DesiredPosition", referenceFrame, registry);
@@ -134,7 +132,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
    {
       timeIntoStep.set(time);
 
-      double totalTime = stepTime.getDoubleValue();
+      double totalTime = stepTimeProvider.getValue();
       if (time > totalTime)
          time = totalTime;
 
@@ -170,11 +168,9 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       desiredAcceleration.getFrameVectorAndChangeFrameOfPackedVector(accelerationToPack);
    }
 
-   private void setStepTime()
+   private void setupStepTime()
    {
-      double stepTime = stepTimeProvider.getValue();
-      MathTools.checkIfInRange(stepTime, 0.0, Double.POSITIVE_INFINITY);
-      this.stepTime.set(stepTime);
+      MathTools.checkIfInRange(stepTimeProvider.getValue(), 0.0, Double.POSITIVE_INFINITY);
       timeIntoStep.set(0.0);
    }
 
@@ -182,7 +178,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
    {
       setTrajectoryParameters();
 
-      setStepTime();
+      setupStepTime();
 
       setInitialAndFinalTimesPositionsAndVelocities();
       setWaypointPositions();
@@ -258,7 +254,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
    {
       double lowerBound = 0.0;
       double upperBound = 10.0;
-      while (getStepTimeGivenWaypointSpeed(upperBound, arcLengths) > stepTime.getDoubleValue() + EPSILON)
+      while (getStepTimeGivenWaypointSpeed(upperBound, arcLengths) > stepTimeProvider.getValue() + EPSILON)
       {
          upperBound *= 2.0;
       }
@@ -271,15 +267,15 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
          waypointSpeed = (upperBound + lowerBound) / 2.0;
          resultingStepTime = getStepTimeGivenWaypointSpeed(waypointSpeed, arcLengths);
 
-         if (MathTools.epsilonEquals(resultingStepTime, stepTime.getDoubleValue(), EPSILON))
+         if (MathTools.epsilonEquals(resultingStepTime, stepTimeProvider.getValue(), EPSILON))
          {
             return waypointSpeed;
          }
-         else if (resultingStepTime > stepTime.getDoubleValue())
+         else if (resultingStepTime > stepTimeProvider.getValue())
          {
             lowerBound = waypointSpeed;
          }
-         else if (resultingStepTime < stepTime.getDoubleValue())
+         else if (resultingStepTime < stepTimeProvider.getValue())
          {
             upperBound = waypointSpeed;
          }
@@ -370,7 +366,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       }
 
       allTimes[endpointIndices[0]].set(0.0);
-      allTimes[endpointIndices[1]].set(stepTime.getDoubleValue());
+      allTimes[endpointIndices[1]].set(stepTimeProvider.getValue());
    }
 
    private void setWaypointPositions()
@@ -489,7 +485,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
 
    public boolean isDone()
    {
-      return timeIntoStep.getDoubleValue() >= stepTime.getDoubleValue();
+      return timeIntoStep.getDoubleValue() >= stepTimeProvider.getValue();
    }
 
    // TODO consider incorporating initial velocity to waypoint placement
