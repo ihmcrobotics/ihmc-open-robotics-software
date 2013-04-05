@@ -50,16 +50,9 @@ public class ComposableStateEstimatorEvaluatorController implements RobotControl
    private static final boolean INITIALIZE_ANGULAR_VELOCITY_ESTIMATE_TO_ACTUAL = true;    // false;
    private static final boolean USE_ANGULAR_ACCELERATION_INPUT = true;
 
-   private static final boolean CREATE_ORIENTATION_SENSOR = true;
-   private static final boolean CREATE_ANGULAR_VELOCITY_SENSOR = true;
-   private static final boolean CREATE_LINEAR_ACCELERATION_SENSOR = true;
-   private static final boolean CREATE_POINT_VELOCITY_SENSOR = true;
-
-   private static final boolean ALLOW_CHANGING_BIASES = true;
-
    private static final boolean ESTIMATE_COM = true;
 
-   private static final boolean CORRUPT_SIMULATED_SENSORS = true;
+   private static final boolean CORRUPT_DESIRED_ACCELERATIONS = true;
 
    // from a recent pull request:
    // https://bitbucket.org/osrf/drcsim/pull-request/172/add-noise-model-to-sensors-gazebo-16/diff
@@ -106,12 +99,6 @@ public class ComposableStateEstimatorEvaluatorController implements RobotControl
    private final double angularVelocityBiasProcessNoiseStandardDeviation = Math.sqrt(1e-5);
    private final double linearAccelerationBiasProcessNoiseStandardDeviation = Math.sqrt(1e-4);
 
-   private final double gazeboAngularVelocityBiasStandardDeviation = 0.0000008;
-   private final double gazeboLinearAccelerationBiasStandardDeviation = 0.001;
-
-   private final double gazeboAngularVelocityBiasMean = 0.0000075;
-   private final double gazeboLinearAccelerationBiasMean = 0.1;
-
    private final Vector3d gravitationalAcceleration;
 
    private final YoVariableRegistry registry = new YoVariableRegistry("QuaternionOrientationEstimatorEvaluatorController");
@@ -143,8 +130,6 @@ public class ComposableStateEstimatorEvaluatorController implements RobotControl
    private final ControlFlowGraph controlFlowGraph;
    private final OrientationEstimator orientationEstimator;
 
-   private final Random random = new Random(1779L);
-
    public ComposableStateEstimatorEvaluatorController(StateEstimatorEstimatorEvaluatorRobot robot, double controlDT)
    {
       this.robot = robot;
@@ -166,10 +151,14 @@ public class ComposableStateEstimatorEvaluatorController implements RobotControl
               perfectSpatialAccelerationCalculator);
 
       // Simulated sensors:
-      ArrayList<ControlFlowOutputPort<Matrix3d>> orientationOutputPorts = createOrientationSensors(perfectFullRobotModel);
-      ArrayList<ControlFlowOutputPort<Vector3d>> angularVelocityOutputPorts = createAngularVelocitySensors(perfectFullRobotModel);
-      ArrayList<ControlFlowOutputPort<Vector3d>> linearAccelerationOutputPorts = createLinearAccelerationSensors(perfectFullRobotModel);
-      ArrayList<ControlFlowOutputPort<Vector3d>> pointVelocitySensors = createPointVelocitySensors(perfectFullRobotModel);
+      HumanoidSimulatedSensorsFactory humanoidSimulatedSensorsFactory = new HumanoidSimulatedSensorsFactory(perfectFullRobotModel, 
+            perfectTwistCalculator, perfectSpatialAccelerationCalculator,
+            registry, controlDT);
+      
+      ArrayList<ControlFlowOutputPort<Matrix3d>> orientationOutputPorts = humanoidSimulatedSensorsFactory.createOrientationSensors();
+      ArrayList<ControlFlowOutputPort<Vector3d>> angularVelocityOutputPorts = humanoidSimulatedSensorsFactory.createAngularVelocitySensors();
+      ArrayList<ControlFlowOutputPort<Vector3d>> linearAccelerationOutputPorts = humanoidSimulatedSensorsFactory.createLinearAccelerationSensors();
+      ArrayList<ControlFlowOutputPort<Vector3d>> pointVelocitySensors = humanoidSimulatedSensorsFactory.createPointVelocitySensors();
 
       // Sensor configurations for estimator
       ArrayList<OrientationSensorConfiguration> orientationSensorConfigurations = createOrientationSensorConfigurations(estimatedFullRobotModel,
@@ -258,36 +247,6 @@ public class ComposableStateEstimatorEvaluatorController implements RobotControl
 
    }
 
-   private ArrayList<ControlFlowOutputPort<Matrix3d>> createOrientationSensors(StateEstimatorEvaluatorFullRobotModel perfectFullRobotModel)
-   {
-      ArrayList<ControlFlowOutputPort<Matrix3d>> orientationOutputPorts = new ArrayList<ControlFlowOutputPort<Matrix3d>>();
-
-      if (CREATE_ORIENTATION_SENSOR)
-      {
-         ArrayList<IMUDefinition> perfectIMUDefinitions = perfectFullRobotModel.getIMUDefinitions();
-         for (IMUDefinition perfectIMUDefinition : perfectIMUDefinitions)
-         {
-            String sensorName = perfectIMUDefinition.getName() + "Orientation";
-
-            RigidBody perfectMeasurementBody = perfectIMUDefinition.getRigidBody();
-            ReferenceFrame perfectMeasurementFrame = createMeasurementFrame(sensorName, "PerfectMeasurementFrame", perfectIMUDefinition,
-                                                        perfectMeasurementBody);
-
-            SimulatedOrientationSensor sensor = new SimulatedOrientationSensor(sensorName, perfectMeasurementFrame, registry);
-            GaussianOrientationCorruptor orientationCorruptor = new GaussianOrientationCorruptor(sensorName, 12334255L, registry);
-            orientationCorruptor.setStandardDeviation(orientationMeasurementStandardDeviation);
-            if (CORRUPT_SIMULATED_SENSORS)
-               sensor.addSignalCorruptor(orientationCorruptor);
-
-            orientationOutputPorts.add(sensor.getOrientationOutputPort());
-         }
-
-      }
-
-      return orientationOutputPorts;
-   }
-
-
    private ArrayList<OrientationSensorConfiguration> createOrientationSensorConfigurations(StateEstimatorEvaluatorFullRobotModel estimatedFullRobotModel,
            ArrayList<ControlFlowOutputPort<Matrix3d>> orientationOutputPorts)
    {
@@ -302,7 +261,7 @@ public class ComposableStateEstimatorEvaluatorController implements RobotControl
          DenseMatrix64F orientationNoiseCovariance = createDiagonalCovarianceMatrix(orientationMeasurementStandardDeviation, 3);
 
          RigidBody estimatedMeasurementBody = estimatedIMUDefinition.getRigidBody();
-         ReferenceFrame estimatedMeasurementFrame = createMeasurementFrame(sensorName, "EstimatedMeasurementFrame", estimatedIMUDefinition,
+         ReferenceFrame estimatedMeasurementFrame = HumanoidSimulatedSensorsFactory.createMeasurementFrame(sensorName, "EstimatedMeasurementFrame", estimatedIMUDefinition,
                                                        estimatedMeasurementBody);
 
          OrientationSensorConfiguration orientationSensorConfiguration = new OrientationSensorConfiguration(orientationOutputPorts.get(i), sensorName,
@@ -312,43 +271,6 @@ public class ComposableStateEstimatorEvaluatorController implements RobotControl
 
 
       return orientationSensorConfigurations;
-   }
-
-   private ArrayList<ControlFlowOutputPort<Vector3d>> createAngularVelocitySensors(StateEstimatorEvaluatorFullRobotModel perfectFullRobotModel)
-   {
-      ArrayList<ControlFlowOutputPort<Vector3d>> angularVelocityOutputPorts = new ArrayList<ControlFlowOutputPort<Vector3d>>();
-
-      if (CREATE_ANGULAR_VELOCITY_SENSOR)
-      {
-         ArrayList<IMUDefinition> perfectIMUDefinitions = perfectFullRobotModel.getIMUDefinitions();
-         for (IMUDefinition perfectIMUDefinition : perfectIMUDefinitions)
-         {
-            String sensorName = perfectIMUDefinition.getName() + "AngularVelocity";
-
-            RigidBody perfectMeasurmentBody = perfectIMUDefinition.getRigidBody();
-            ReferenceFrame perfectMeasurementFrame = createMeasurementFrame(sensorName, "PerfectMeasurementFrame", perfectIMUDefinition, perfectMeasurmentBody);
-
-            SimulatedAngularVelocitySensor angularVelocitySensor = new SimulatedAngularVelocitySensor(sensorName, perfectTwistCalculator,
-                                                                      perfectMeasurmentBody, perfectMeasurementFrame, registry);
-            GaussianVectorCorruptor angularVelocityCorruptor = new GaussianVectorCorruptor(1235L, sensorName, registry);
-            angularVelocityCorruptor.setStandardDeviation(angularVelocityMeasurementStandardDeviation);
-            if (CORRUPT_SIMULATED_SENSORS)
-               angularVelocitySensor.addSignalCorruptor(angularVelocityCorruptor);
-
-            RandomWalkBiasVectorCorruptor biasVectorCorruptor = new RandomWalkBiasVectorCorruptor(1236L, sensorName, controlDT, registry);
-            biasVectorCorruptor.setBias(computeGazeboBiasVector(gazeboAngularVelocityBiasMean, gazeboAngularVelocityBiasStandardDeviation, random));
-
-            if (ALLOW_CHANGING_BIASES)
-            {
-               biasVectorCorruptor.setStandardDeviation(angularVelocityBiasProcessNoiseStandardDeviation);
-            }
-
-            angularVelocitySensor.addSignalCorruptor(biasVectorCorruptor);
-            angularVelocityOutputPorts.add(angularVelocitySensor.getAngularVelocityOutputPort());
-         }
-      }
-
-      return angularVelocityOutputPorts;
    }
 
    private ArrayList<AngularVelocitySensorConfiguration> createAngularVelocitySensorConfigurations(
@@ -366,7 +288,7 @@ public class ComposableStateEstimatorEvaluatorController implements RobotControl
          DenseMatrix64F angularVelocityBiasProcessNoiseCovariance = createDiagonalCovarianceMatrix(angularVelocityBiasProcessNoiseStandardDeviation, 3);
 
          RigidBody estimatedMeasurementBody = estimatedIMUDefinition.getRigidBody();
-         ReferenceFrame estimatedMeasurementFrame = createMeasurementFrame(sensorName, "EstimatedMeasurementFrame", estimatedIMUDefinition,
+         ReferenceFrame estimatedMeasurementFrame = HumanoidSimulatedSensorsFactory.createMeasurementFrame(sensorName, "EstimatedMeasurementFrame", estimatedIMUDefinition,
                                                        estimatedMeasurementBody);
 
          AngularVelocitySensorConfiguration angularVelocitySensorConfiguration = new AngularVelocitySensorConfiguration(angularVelocityOutputPorts.get(i),
@@ -379,45 +301,6 @@ public class ComposableStateEstimatorEvaluatorController implements RobotControl
       return angularVelocitySensorConfigurations;
    }
 
-   private ArrayList<ControlFlowOutputPort<Vector3d>> createLinearAccelerationSensors(StateEstimatorEvaluatorFullRobotModel perfectFullRobotModel)
-   {
-      ArrayList<ControlFlowOutputPort<Vector3d>> linearAccelerationOutputPorts = new ArrayList<ControlFlowOutputPort<Vector3d>>();
-
-      if (CREATE_LINEAR_ACCELERATION_SENSOR)
-      {
-         ArrayList<IMUDefinition> perfectIMUDefinitions = perfectFullRobotModel.getIMUDefinitions();
-         for (IMUDefinition perfectIMUDefinition : perfectIMUDefinitions)
-         {
-            String sensorName = perfectIMUDefinition.getName() + "LinearAcceleration";
-
-            RigidBody perfectMeasurementBody = perfectIMUDefinition.getRigidBody();
-            ReferenceFrame perfectMeasurementFrame = createMeasurementFrame(sensorName, "PerfectMeasurementFrame", perfectIMUDefinition,
-                                                        perfectMeasurementBody);
-
-            SimulatedLinearAccelerationSensor linearAccelerationSensor = new SimulatedLinearAccelerationSensor(sensorName, perfectMeasurementBody,
-                                                                            perfectMeasurementFrame, perfectSpatialAccelerationCalculator,
-                                                                            gravitationalAcceleration, registry);
-
-            GaussianVectorCorruptor linearAccelerationCorruptor = new GaussianVectorCorruptor(1237L, sensorName, registry);
-            linearAccelerationCorruptor.setStandardDeviation(linearAccelerationMeasurementStandardDeviation);
-            if (CORRUPT_SIMULATED_SENSORS)
-               linearAccelerationSensor.addSignalCorruptor(linearAccelerationCorruptor);
-
-            RandomWalkBiasVectorCorruptor biasVectorCorruptor = new RandomWalkBiasVectorCorruptor(1286L, sensorName, controlDT, registry);
-            biasVectorCorruptor.setBias(computeGazeboBiasVector(gazeboLinearAccelerationBiasMean, gazeboLinearAccelerationBiasStandardDeviation, random));    // new Vector3d(0.0, 0.0, 0.0));
-
-            if (ALLOW_CHANGING_BIASES)
-            {
-               biasVectorCorruptor.setStandardDeviation(linearAccelerationBiasProcessNoiseStandardDeviation);
-            }
-
-            linearAccelerationSensor.addSignalCorruptor(biasVectorCorruptor);
-            linearAccelerationOutputPorts.add(linearAccelerationSensor.getLinearAccelerationOutputPort());
-         }
-      }
-
-      return linearAccelerationOutputPorts;
-   }
 
    private ArrayList<LinearAccelerationSensorConfiguration> createLinearAccelerationSensorConfigurations(
            StateEstimatorEvaluatorFullRobotModel estimatedFullRobotModel, ArrayList<ControlFlowOutputPort<Vector3d>> linearAccelerationOutputPorts)
@@ -434,7 +317,7 @@ public class ComposableStateEstimatorEvaluatorController implements RobotControl
          DenseMatrix64F linearAccelerationBiasProcessNoiseCovariance = createDiagonalCovarianceMatrix(linearAccelerationBiasProcessNoiseStandardDeviation, 3);
 
          RigidBody estimatedMeasurementBody = estimatedIMUDefinition.getRigidBody();
-         ReferenceFrame estimatedMeasurementFrame = createMeasurementFrame(sensorName, "EstimatedMeasurementFrame", estimatedIMUDefinition,
+         ReferenceFrame estimatedMeasurementFrame = HumanoidSimulatedSensorsFactory.createMeasurementFrame(sensorName, "EstimatedMeasurementFrame", estimatedIMUDefinition,
                                                        estimatedMeasurementBody);
 
          LinearAccelerationSensorConfiguration linearAccelerationSensorConfiguration =
@@ -445,39 +328,6 @@ public class ComposableStateEstimatorEvaluatorController implements RobotControl
       }
 
       return linearAccelerationSensorConfigurations;
-   }
-
-   private ArrayList<ControlFlowOutputPort<Vector3d>> createPointVelocitySensors(StateEstimatorEvaluatorFullRobotModel perfectFullRobotModel)
-   {
-      ArrayList<ControlFlowOutputPort<Vector3d>> pointVelocityOutputPorts = new ArrayList<ControlFlowOutputPort<Vector3d>>();
-
-      if (CREATE_POINT_VELOCITY_SENSOR)
-      {
-         ArrayList<PointVelocitySensorDefinition> pointVelocitySensorDefinitions = perfectFullRobotModel.getPointVelocitySensorDefinitions();
-         for (PointVelocitySensorDefinition kinematicPoint : pointVelocitySensorDefinitions)
-         {
-            String sensorName = kinematicPoint.getName() + "PointVelocity";
-
-            RigidBody perfectMeasurementBody = kinematicPoint.getRigidBody();
-            ReferenceFrame perfectFrameAfterJoint = perfectMeasurementBody.getParentJoint().getFrameAfterJoint();
-
-            Vector3d offset = new Vector3d();
-            kinematicPoint.getOffset(offset);
-            FramePoint perfectVelocityPoint = new FramePoint(perfectFrameAfterJoint, offset);
-
-            SimulatedPointVelocitySensor pointVelocitySensor = new SimulatedPointVelocitySensor(sensorName, perfectMeasurementBody, perfectVelocityPoint,
-                                                                  perfectTwistCalculator, registry);
-
-            GaussianVectorCorruptor pointVelocityCorruptor = new GaussianVectorCorruptor(1257L, sensorName, registry);
-            pointVelocityCorruptor.setStandardDeviation(pointVelocityMeasurementStandardDeviation);
-            if (CORRUPT_SIMULATED_SENSORS)
-               pointVelocitySensor.addSignalCorruptor(pointVelocityCorruptor);
-
-            pointVelocityOutputPorts.add(pointVelocitySensor.getPointVelocityOutputPort());
-         }
-      }
-
-      return pointVelocityOutputPorts;
    }
 
 
@@ -512,25 +362,6 @@ public class ComposableStateEstimatorEvaluatorController implements RobotControl
       }
 
       return pointVelocitySensorConfigurations;
-   }
-
-
-   public ReferenceFrame createMeasurementFrame(String sensorName, String frameName, IMUDefinition imuMount, RigidBody perfectMeasurmentBody)
-   {
-      Transform3D transformFromIMUToJoint = new Transform3D();
-      imuMount.getTransformFromIMUToJoint(transformFromIMUToJoint);
-
-      ReferenceFrame perfectFrameAfterJoint = perfectMeasurmentBody.getParentJoint().getFrameAfterJoint();
-
-      if (transformFromIMUToJoint.epsilonEquals(new Transform3D(), 1e-10))
-      {
-         return perfectFrameAfterJoint;
-      }
-
-      ReferenceFrame perfectMeasurementFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(sensorName + frameName, perfectFrameAfterJoint,
-                                                  transformFromIMUToJoint);
-
-      return perfectMeasurementFrame;
    }
 
    public void initialize()
@@ -682,7 +513,7 @@ public class ComposableStateEstimatorEvaluatorController implements RobotControl
       public void startComputation()
       {
          desiredAngularAcceleration.set(robot.getActualAngularAccelerationInBodyFrame());
-         if (CORRUPT_SIMULATED_SENSORS)
+         if (CORRUPT_DESIRED_ACCELERATIONS)
             signalCorruptor.corrupt(desiredAngularAcceleration.getVector());
          outputPort.setData(desiredAngularAcceleration);
       }
@@ -723,7 +554,7 @@ public class ComposableStateEstimatorEvaluatorController implements RobotControl
       {
          centerOfMassAccelerationCalculator.packCoMAcceleration(comAcceleration);
          comAcceleration.changeFrame(ReferenceFrame.getWorldFrame());
-         if (CORRUPT_SIMULATED_SENSORS)
+         if (CORRUPT_DESIRED_ACCELERATIONS)
             signalCorruptor.corrupt(comAcceleration.getVector());
          outputPort.setData(comAcceleration);
       }
@@ -751,38 +582,6 @@ public class ComposableStateEstimatorEvaluatorController implements RobotControl
       double discreteStdDev = Math.sqrt(discreteVariance);
 
       return discreteStdDev;
-   }
-
-   private Vector3d computeGazeboBiasVector(double mean, double standardDeviation, Random random)
-   {
-      Vector3d ret = new Vector3d();
-      for (Direction direction : Direction.values())
-      {
-         MathTools.set(ret, direction, computeGazeboBias(mean, standardDeviation, random));
-      }
-
-      return ret;
-   }
-
-   // Pull request
-   // https://bitbucket.org/osrf/gazebo/pull-request/421/added-noise-to-rates-and-accels-with-test/diff
-   //
-   //// Sample the bias that we'll use later
-   // this->accelBias = math::Rand::GetDblNormal(accelBiasMean,
-   // accelBiasStddev);
-   //// With equal probability, we pick a negative bias (by convention,
-   //// accelBiasMean should be positive, though it would work fine if
-   //// negative).
-   // if (math::Rand::GetDblUniform() < 0.5)
-   // this->accelBias = -this->accelBias;
-
-   private double computeGazeboBias(double mean, double standardDeviation, Random random)
-   {
-      double ret = standardDeviation * random.nextGaussian() + mean;
-      if (random.nextBoolean())
-         ret = -ret;
-
-      return ret;
    }
 
 }
