@@ -337,6 +337,16 @@ public class ComposableOrientationAndCoMEstimatorCreator
          return angularVelocityStatePort.getData();
       }
 
+      public FramePoint getEstimatedCoMPosition()
+      {
+         return centerOfMassPositionStatePort.getData();
+      }
+      
+      public FrameVector getEstimatedCoMVelocity()
+      {
+         return centerOfMassVelocityStatePort.getData();
+      }
+
       public void setEstimatedOrientation(FrameOrientation orientation)
       {
          orientationStatePort.setData(orientation);
@@ -345,6 +355,16 @@ public class ComposableOrientationAndCoMEstimatorCreator
       public void setEstimatedAngularVelocity(FrameVector angularVelocity)
       {
          angularVelocityStatePort.setData(angularVelocity);
+      }
+      
+      public void setEstimatedCoMPosition(FramePoint estimatedCoMPosition)
+      {
+         centerOfMassPositionStatePort.setData(estimatedCoMPosition);
+      }
+      
+      public void setEstimatedCoMVelocity(FrameVector estimatedCoMVelocity)
+      {
+         centerOfMassVelocityStatePort.setData(estimatedCoMVelocity);
       }
 
       public DenseMatrix64F getCovariance()
@@ -361,5 +381,6 @@ public class ComposableOrientationAndCoMEstimatorCreator
       {
          kalmanFilter.setState(x, covariance);
       }
+
    }
 }
