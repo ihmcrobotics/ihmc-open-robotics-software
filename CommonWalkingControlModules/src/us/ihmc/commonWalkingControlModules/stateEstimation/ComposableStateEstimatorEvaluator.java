@@ -69,12 +69,14 @@ public class ComposableStateEstimatorEvaluator
    private static final boolean CREATE_LINEAR_ACCELERATION_SENSOR = true;
    private static final boolean CREATE_POINT_VELOCITY_SENSOR = true;
 
+   private static final boolean ALLOW_CHANGING_BIASES = true;
+
    private static final boolean ESTIMATE_COM = true;
    private static final boolean ADD_ARM_LINKS = true;
    private static final boolean OFFSET_IMU_FRAMES = true;
    private static final boolean ROTATE_IMU_FRAMES = true;
 
-   private static final boolean CORRUPT_SIMULATED_SENSORS = false;
+   private static final boolean CORRUPT_SIMULATED_SENSORS = true;
 
    // from a recent pull request:
    // https://bitbucket.org/osrf/drcsim/pull-request/172/add-noise-model-to-sensors-gazebo-16/diff
@@ -112,9 +114,9 @@ public class ComposableStateEstimatorEvaluator
    // </noise>
 
    private final double orientationMeasurementStandardDeviation = Math.sqrt(1e-2);
-   private final double angularVelocityMeasurementStandardDeviation = 1e-3;    // 2e-4;
-   private final double linearAccelerationMeasurementStandardDeviation = 1e-1;    // 1.7e-2;
-   private final double pointVelocityMeasurementStandardDeviation = 1e-10; //1e-1;    // 1.7e-2;
+   private final double angularVelocityMeasurementStandardDeviation = 1e-1; //1e-3;    // 2e-4;
+   private final double linearAccelerationMeasurementStandardDeviation = 1e0; //1e-1;    // 1.7e-2;
+   private final double pointVelocityMeasurementStandardDeviation = 1e-1; //1e0; //1e1; //1e-1; //1e-10; //1e-1;    // 1.7e-2;
 
    private final double angularAccelerationProcessNoiseStandardDeviation = Math.sqrt(1e-1);
    private final double comAccelerationProcessNoiseStandardDeviation = Math.sqrt(1e-1);
@@ -189,7 +191,7 @@ public class ComposableStateEstimatorEvaluator
          rootJoint.addKinematicPoint(kinematicPoint0);
          rootJoint.addIMUMount(imuMount0);
 
-         Vector3d velocityPointOffsetVector0 = new Vector3d(); //0.1, 0.2, 0.3);
+         Vector3d velocityPointOffsetVector0 = new Vector3d(0.0, 0.0, 0.2);
          KinematicPoint velocityPoint0 = new KinematicPoint("vp0", velocityPointOffsetVector0, this);
          rootJoint.addKinematicPoint(velocityPoint0);
          
@@ -260,7 +262,7 @@ public class ComposableStateEstimatorEvaluator
             IMUMount imuMount2 = new IMUMount("imuMount2", imu2Offset, this);
             pinJoint2.addIMUMount(imuMount2);
 
-            Vector3d velocityPointOffsetVector2 = new Vector3d(); //0.1, 0.2, 0.3);
+            Vector3d velocityPointOffsetVector2 = new Vector3d(0.1, 0.2, 0.3);
             KinematicPoint velocityPoint2 = new KinematicPoint("vp2", velocityPointOffsetVector2, this);
             pinJoint2.addKinematicPoint(velocityPoint2);
             
@@ -273,20 +275,27 @@ public class ComposableStateEstimatorEvaluator
             pinJoint1.setQ(1.2);
             pinJoint2.setQ(0.8);
 
-            pinJoint1.setQd(-0.5);
-            pinJoint2.setQd(0.77);
+//            pinJoint1.setQd(-0.5);
+//            pinJoint2.setQd(0.77);
 
             imuMounts.add(imuMount0);
             imuMounts.add(imuMount1);
             imuMounts.add(imuMount2);
 
             velocityPoints.add(velocityPoint0);
-//            velocityPoints.add(velocityPoint2);
-//            velocityPoints.add(velocityPoint2A);
+            velocityPoints.add(velocityPoint2);
          }
 
          else
          {
+            //TODO: Temp since get an exception if there are no pin joints right now...
+            PinJoint pinJoint1 = new PinJoint("pinJoint1", new Vector3d(), this, Axis.X);
+            Link armLink1 = new Link("armLink1");
+            armLink1.setMassAndRadiiOfGyration(0.001, 0.1, 0.1, 0.1);
+            armLink1.setComOffset(new Vector3d(0.0, 0.0, 0.0));
+            pinJoint1.setLink(armLink1);
+            rootJoint.addJoint(pinJoint1);
+            
             imuMounts.add(imuMount0);
             velocityPoints.add(velocityPoint0);
          }
@@ -300,13 +309,19 @@ public class ComposableStateEstimatorEvaluator
             rotationMatrix.rotX(0.6);
             rootJoint.setRotation(rotationMatrix);
 
-            rootJoint.setAngularVelocityInBody(new Vector3d(0.2, 2.2, 0.3));
+            rootJoint.setAngularVelocityInBody(new Vector3d(0.1, 0.2, 0.07));
+//            rootJoint.setAngularVelocityInBody(new Vector3d(0.2, 2.2, 0.3));
          }
 
          else
          {
-            rootJoint.setPosition(new Point3d(0.0, 0.0, 0.4));
-            rootJoint.setAngularVelocityInBody(new Vector3d(0.2, 2.5, 0.0));
+            Transform3D rootJointPostionAndRotation = new Transform3D();
+            rootJointPostionAndRotation.rotY(Math.PI*0.9);
+            rootJointPostionAndRotation.setTranslation(new Vector3d(0.0, 0.0, 0.4));
+            rootJoint.setRotationAndTranslation(rootJointPostionAndRotation);
+            
+            rootJoint.setVelocity(new Vector3d());
+//            rootJoint.setAngularVelocityInBody(new Vector3d(0.2, 2.5, 0.0));
          }
 
          Vector3d externalForceVector = new Vector3d(gravitationalAccelerationForSimulation);
@@ -346,6 +361,11 @@ public class ComposableStateEstimatorEvaluator
       public Quat4d getActualOrientation()
       {
          return rootJoint.getQuaternion();
+      }
+      
+      public Vector3d getActualAngularVelocity()
+      {
+         return rootJoint.getAngularVelocityInBody();
       }
    }
 
@@ -508,10 +528,13 @@ public class ComposableStateEstimatorEvaluator
    {
       private final YoVariableRegistry registry = new YoVariableRegistry("QuaternionOrientationEstimatorEvaluatorController");
 
-      private final DoubleYoVariable orientationErrorAngle = new DoubleYoVariable("orientationErrorAngle", registry);
+      private final DoubleYoVariable orientationError = new DoubleYoVariable("orientationError", registry);
+      private final DoubleYoVariable angularVelocityError = new DoubleYoVariable("angularVelocityError", registry);
+      private final DoubleYoVariable comPositionError = new DoubleYoVariable("comPositionError", registry);
+      private final DoubleYoVariable comVelocityError = new DoubleYoVariable("comVelocityError", registry);
 
       private final StateEstimatorEstimatorEvaluatorRobot robot;
-
+      
       private final StateEstimatorEvaluatorFullRobotModel perfectFullRobotModel;
       private final TwistCalculator perfectTwistCalculator;
       private final SpatialAccelerationCalculator perfectSpatialAccelerationCalculator;
@@ -534,7 +557,7 @@ public class ComposableStateEstimatorEvaluator
       public QuaternionOrientationEstimatorEvaluatorController(StateEstimatorEstimatorEvaluatorRobot robot, double controlDT)
       {
          this.robot = robot;
-
+         
          perfectFullRobotModel = new StateEstimatorEvaluatorFullRobotModel(robot);
          perfectTwistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), perfectFullRobotModel.elevator);
 
@@ -652,9 +675,13 @@ public class ComposableStateEstimatorEvaluator
                if (CORRUPT_SIMULATED_SENSORS) angularVelocitySensor.addSignalCorruptor(angularVelocityCorruptor);
 
                RandomWalkBiasVectorCorruptor biasVectorCorruptor = new RandomWalkBiasVectorCorruptor(1236L, sensorName, controlDT, registry);
-
-               // biasVectorCorruptor.setStandardDeviation(angularVelocityBiasProcessNoiseStandardDeviation);
                biasVectorCorruptor.setBias(computeGazeboBiasVector(gazeboAngularVelocityBiasMean, gazeboAngularVelocityBiasStandardDeviation, random));    // new Vector3d(0.0, 0.0, 0.0));
+
+               if (ALLOW_CHANGING_BIASES)
+               {
+                  biasVectorCorruptor.setStandardDeviation(angularVelocityBiasProcessNoiseStandardDeviation);
+               }
+
                angularVelocitySensor.addSignalCorruptor(biasVectorCorruptor);
 
                DenseMatrix64F angularVelocityNoiseCovariance = createDiagonalCovarianceMatrix(angularVelocityMeasurementStandardDeviation, 3);
@@ -696,9 +723,13 @@ public class ComposableStateEstimatorEvaluator
                if (CORRUPT_SIMULATED_SENSORS) linearAccelerationSensor.addSignalCorruptor(linearAccelerationCorruptor);
 
                RandomWalkBiasVectorCorruptor biasVectorCorruptor = new RandomWalkBiasVectorCorruptor(1286L, sensorName, controlDT, registry);
-
-               // biasVectorCorruptor.setStandardDeviation(linearAccelerationBiasProcessNoiseStandardDeviation);
                biasVectorCorruptor.setBias(computeGazeboBiasVector(gazeboLinearAccelerationBiasMean, gazeboLinearAccelerationBiasStandardDeviation, random));    // new Vector3d(0.0, 0.0, 0.0));
+
+               if (ALLOW_CHANGING_BIASES)
+               {
+                  biasVectorCorruptor.setStandardDeviation(linearAccelerationBiasProcessNoiseStandardDeviation);
+               }
+               
                linearAccelerationSensor.addSignalCorruptor(biasVectorCorruptor);
 
                DenseMatrix64F linearAccelerationNoiseCovariance = createDiagonalCovarianceMatrix(linearAccelerationMeasurementStandardDeviation, 3);
@@ -862,7 +893,10 @@ public class ComposableStateEstimatorEvaluator
             estimatedTwistCalculator.compute();            
          }
 
-         computeOrientationErrorAngle();
+         computeOrientationError();
+         computeAngularVelocityError();
+         computeCoMPositionError();
+         computeCoMVelocityError();
       }
 
       private void updateGroundTruth()
@@ -896,7 +930,7 @@ public class ComposableStateEstimatorEvaluator
          estimatedSpatialAccelerationCalculator.compute();
       }
 
-      private void computeOrientationErrorAngle()
+      private void computeOrientationError()
       {
          FrameOrientation estimatedOrientation = orientationEstimator.getEstimatedOrientation();
          Quat4d estimatedOrientationQuat4d = new Quat4d();
@@ -910,8 +944,48 @@ public class ComposableStateEstimatorEvaluator
 
          double errorAngle = AngleTools.trimAngleMinusPiToPi(orientationErrorAxisAngle.getAngle());
 
-         orientationErrorAngle.set(Math.abs(errorAngle));
+         orientationError.set(Math.abs(errorAngle));
       }
+      
+      private void computeAngularVelocityError()
+      {
+         Vector3d estimatedAngularVelocity = orientationEstimator.getEstimatedAngularVelocity().getVectorCopy();
+         Vector3d actualAngularVelocity = robot.getActualAngularVelocity();
+         
+         actualAngularVelocity.sub(estimatedAngularVelocity);
+         angularVelocityError.set(actualAngularVelocity.length());
+      }
+      
+      private void computeCoMPositionError()
+      {
+         Point3d comPoint = new Point3d();
+         Vector3d linearVelocity = new Vector3d();
+         Vector3d angularMomentum = new Vector3d();
+         
+         robot.computeCOMMomentum(comPoint, linearVelocity, angularMomentum);
+       
+         Vector3d comError = new Vector3d();
+         comError.set(orientationEstimator.getEstimatedCoMPosition().getPointCopy());
+         comError.sub(comPoint);
+
+         comPositionError.set(comError.length());
+      }
+      
+      private void computeCoMVelocityError()
+      {
+         Point3d comPoint = new Point3d();
+         Vector3d linearVelocity = new Vector3d();
+         Vector3d angularMomentum = new Vector3d();
+         
+         double mass = robot.computeCOMMomentum(comPoint, linearVelocity, angularMomentum);
+         linearVelocity.scale(1.0/mass);
+       
+         Vector3d estimatedCoMVelocity = orientationEstimator.getEstimatedCoMVelocity().getVectorCopy();
+         
+         estimatedCoMVelocity.sub(linearVelocity);
+         comVelocityError.set(estimatedCoMVelocity.length());
+      }
+
    }
 
 

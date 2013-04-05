@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.stateEstimation;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.utilities.math.geometry.FrameOrientation;
+import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 
 public interface OrientationEstimator
@@ -14,6 +15,14 @@ public interface OrientationEstimator
    public abstract FrameVector getEstimatedAngularVelocity();
 
    public abstract void setEstimatedAngularVelocity(FrameVector estimatedAngularVelocity);
+   
+   public abstract FramePoint getEstimatedCoMPosition();
+
+   public abstract void setEstimatedCoMPosition(FramePoint estimatedCoMPosition);
+
+   public abstract FrameVector getEstimatedCoMVelocity();
+
+   public abstract void setEstimatedCoMVelocity(FrameVector estimatedCoMVelocity);
 
    public abstract DenseMatrix64F getCovariance();
 
