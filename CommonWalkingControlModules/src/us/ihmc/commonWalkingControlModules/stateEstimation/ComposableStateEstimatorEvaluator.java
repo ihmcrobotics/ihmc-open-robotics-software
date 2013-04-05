@@ -843,19 +843,6 @@ public class ComposableStateEstimatorEvaluator
          return perfectMeasurementFrame;
       }
 
-//      public ReferenceFrame createMeasurementFrame(String sensorName, String frameName, KinematicPoint kinematicPoint, RigidBody perfectMeasurementBody)
-//      {
-//         ReferenceFrame perfectFrameAfterJoint = perfectMeasurementBody.getParentJoint().getFrameAfterJoint();
-//
-//         Transform3D transformFromMountToJoint = new Transform3D();
-//         transformFromMountToJoint.setTranslation(kinematicPoint.getOffsetCopy());
-//
-//         ReferenceFrame perfectMeasurementFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(sensorName + frameName,
-//                                                     perfectFrameAfterJoint, transformFromMountToJoint);
-//
-//         return perfectMeasurementFrame;
-//      }
-
       public void initialize()
       {
       }
