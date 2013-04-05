@@ -32,6 +32,7 @@ import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 
 import com.yobotics.simulationconstructionset.InverseDynamicsMechanismReferenceFrameVisualizer;
+import com.yobotics.simulationconstructionset.RobotControllerAndParameters;
 import com.yobotics.simulationconstructionset.gui.GUISetterUpperRegistry;
 import com.yobotics.simulationconstructionset.robotController.AbstractModularRobotController;
 import com.yobotics.simulationconstructionset.robotController.DelayedThreadedModularRobotController;
@@ -150,7 +151,9 @@ public class DRCSimulationFactory
 
       modularRobotController.setRawOutputWriter(sensorReaderAndOutputWriter);
 
-      final HumanoidRobotSimulation<SDFRobot> humanoidRobotSimulation = new HumanoidRobotSimulation<SDFRobot>(simulatedRobot, modularRobotController, simulationTicksPerControlTick, fullRobotModelForSimulation, commonAvatarEnvironmentInterface, simulatedRobot.getAllExternalForcePoints(), robotInitialSetup, scsInitialSetup, guiInitialSetup, guiSetterUpperRegistry, dynamicGraphicObjectsListRegistry);
+      RobotControllerAndParameters modularRobotControllerAndParameters = new RobotControllerAndParameters(modularRobotController, simulationTicksPerControlTick);
+      
+      final HumanoidRobotSimulation<SDFRobot> humanoidRobotSimulation = new HumanoidRobotSimulation<SDFRobot>(simulatedRobot, modularRobotControllerAndParameters, fullRobotModelForSimulation, commonAvatarEnvironmentInterface, simulatedRobot.getAllExternalForcePoints(), robotInitialSetup, scsInitialSetup, guiInitialSetup, guiSetterUpperRegistry, dynamicGraphicObjectsListRegistry);
 
       if (simulatedRobot instanceof GazeboRobot)
       {
