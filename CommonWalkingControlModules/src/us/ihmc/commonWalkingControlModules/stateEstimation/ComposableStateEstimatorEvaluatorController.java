@@ -13,6 +13,8 @@ import javax.vecmath.Vector3d;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
+import us.ihmc.commonWalkingControlModules.sensors.IMUDefinition;
+import us.ihmc.commonWalkingControlModules.sensors.PointVelocitySensorDefinition;
 import us.ihmc.controlFlow.AbstractControlFlowElement;
 import us.ihmc.controlFlow.ControlFlowGraph;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
@@ -38,8 +40,6 @@ import us.ihmc.utilities.screwTheory.SpatialAccelerationCalculator;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.IMUMount;
-import com.yobotics.simulationconstructionset.KinematicPoint;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.robotController.RobotController;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
@@ -165,14 +165,23 @@ public class ComposableStateEstimatorEvaluatorController implements RobotControl
       perfectCenterOfMassAccelerationCalculator = new CenterOfMassAccelerationCalculator(perfectFullRobotModel.getElevator(),
               perfectSpatialAccelerationCalculator);
 
-      ArrayList<OrientationSensorConfiguration> orientationSensorConfigurations = createOrientationSensors(perfectFullRobotModel, estimatedFullRobotModel);
-      ArrayList<AngularVelocitySensorConfiguration> angularVelocitySensorConfigurations = createAngularVelocitySensors(perfectFullRobotModel,
-                                                                                             estimatedFullRobotModel);
-      ArrayList<LinearAccelerationSensorConfiguration> linearAccelerationSensorConfigurations = createLinearAccelerationSensors(perfectFullRobotModel,
-                                                                                                   estimatedFullRobotModel);
+      // Simulated sensors:
+      ArrayList<ControlFlowOutputPort<Matrix3d>> orientationOutputPorts = createOrientationSensors(perfectFullRobotModel);
+      ArrayList<ControlFlowOutputPort<Vector3d>> angularVelocityOutputPorts = createAngularVelocitySensors(perfectFullRobotModel);
+      ArrayList<ControlFlowOutputPort<Vector3d>> linearAccelerationOutputPorts = createLinearAccelerationSensors(perfectFullRobotModel);
+      ArrayList<ControlFlowOutputPort<Vector3d>> pointVelocitySensors = createPointVelocitySensors(perfectFullRobotModel);
 
-      ArrayList<PointVelocitySensorConfiguration> pointVelocitySensorConfigurations = createPointVelocitySensors(perfectFullRobotModel,
-                                                                                         estimatedFullRobotModel);
+      // Sensor configurations for estimator
+      ArrayList<OrientationSensorConfiguration> orientationSensorConfigurations = createOrientationSensorConfigurations(estimatedFullRobotModel,
+                                                                                     orientationOutputPorts);
+      
+      ArrayList<AngularVelocitySensorConfiguration> angularVelocitySensorConfigurations = createAngularVelocitySensorConfigurations(estimatedFullRobotModel,
+                                                                                             angularVelocityOutputPorts);
+      
+      ArrayList<LinearAccelerationSensorConfiguration> linearAccelerationSensorConfigurations =
+         createLinearAccelerationSensorConfigurations(estimatedFullRobotModel, linearAccelerationOutputPorts);
+      
+      ArrayList<PointVelocitySensorConfiguration> pointVelocitySensorConfigurations = createPointVelocitySensorConfigurations(estimatedFullRobotModel, pointVelocitySensors);
 
       controlFlowGraph = new ControlFlowGraph();
       RigidBody estimationLink = estimatedFullRobotModel.getRootBody();
@@ -249,19 +258,75 @@ public class ComposableStateEstimatorEvaluatorController implements RobotControl
 
    }
 
-   private ArrayList<AngularVelocitySensorConfiguration> createAngularVelocitySensors(StateEstimatorEvaluatorFullRobotModel perfectFullRobotModel,
-           StateEstimatorEvaluatorFullRobotModel estimatedFullRobotModel)
+   private ArrayList<ControlFlowOutputPort<Matrix3d>> createOrientationSensors(StateEstimatorEvaluatorFullRobotModel perfectFullRobotModel)
    {
-      ArrayList<AngularVelocitySensorConfiguration> angularVelocitySensorConfigurations = new ArrayList<AngularVelocitySensorConfiguration>();
+      ArrayList<ControlFlowOutputPort<Matrix3d>> orientationOutputPorts = new ArrayList<ControlFlowOutputPort<Matrix3d>>();
+
+      if (CREATE_ORIENTATION_SENSOR)
+      {
+         ArrayList<IMUDefinition> perfectIMUDefinitions = perfectFullRobotModel.getIMUDefinitions();
+         for (IMUDefinition perfectIMUDefinition : perfectIMUDefinitions)
+         {
+            String sensorName = perfectIMUDefinition.getName() + "Orientation";
+
+            RigidBody perfectMeasurementBody = perfectIMUDefinition.getRigidBody();
+            ReferenceFrame perfectMeasurementFrame = createMeasurementFrame(sensorName, "PerfectMeasurementFrame", perfectIMUDefinition,
+                                                        perfectMeasurementBody);
+
+            SimulatedOrientationSensor sensor = new SimulatedOrientationSensor(sensorName, perfectMeasurementFrame, registry);
+            GaussianOrientationCorruptor orientationCorruptor = new GaussianOrientationCorruptor(sensorName, 12334255L, registry);
+            orientationCorruptor.setStandardDeviation(orientationMeasurementStandardDeviation);
+            if (CORRUPT_SIMULATED_SENSORS)
+               sensor.addSignalCorruptor(orientationCorruptor);
+
+            orientationOutputPorts.add(sensor.getOrientationOutputPort());
+         }
+
+      }
+
+      return orientationOutputPorts;
+   }
+
+
+   private ArrayList<OrientationSensorConfiguration> createOrientationSensorConfigurations(StateEstimatorEvaluatorFullRobotModel estimatedFullRobotModel,
+           ArrayList<ControlFlowOutputPort<Matrix3d>> orientationOutputPorts)
+   {
+      ArrayList<OrientationSensorConfiguration> orientationSensorConfigurations = new ArrayList<OrientationSensorConfiguration>();
+
+      ArrayList<IMUDefinition> estimatedIMUDefinitions = estimatedFullRobotModel.getIMUDefinitions();
+      for (int i = 0; i < estimatedIMUDefinitions.size(); i++)
+      {
+         IMUDefinition estimatedIMUDefinition = estimatedIMUDefinitions.get(i);
+         String sensorName = estimatedIMUDefinition.getName() + "Orientation";
+
+         DenseMatrix64F orientationNoiseCovariance = createDiagonalCovarianceMatrix(orientationMeasurementStandardDeviation, 3);
+
+         RigidBody estimatedMeasurementBody = estimatedIMUDefinition.getRigidBody();
+         ReferenceFrame estimatedMeasurementFrame = createMeasurementFrame(sensorName, "EstimatedMeasurementFrame", estimatedIMUDefinition,
+                                                       estimatedMeasurementBody);
+
+         OrientationSensorConfiguration orientationSensorConfiguration = new OrientationSensorConfiguration(orientationOutputPorts.get(i), sensorName,
+                                                                            estimatedMeasurementFrame, orientationNoiseCovariance);
+         orientationSensorConfigurations.add(orientationSensorConfiguration);
+      }
+
+
+      return orientationSensorConfigurations;
+   }
+
+   private ArrayList<ControlFlowOutputPort<Vector3d>> createAngularVelocitySensors(StateEstimatorEvaluatorFullRobotModel perfectFullRobotModel)
+   {
+      ArrayList<ControlFlowOutputPort<Vector3d>> angularVelocityOutputPorts = new ArrayList<ControlFlowOutputPort<Vector3d>>();
 
       if (CREATE_ANGULAR_VELOCITY_SENSOR)
       {
-         for (IMUMount imuMount : perfectFullRobotModel.getIMUMounts())
+         ArrayList<IMUDefinition> perfectIMUDefinitions = perfectFullRobotModel.getIMUDefinitions();
+         for (IMUDefinition perfectIMUDefinition : perfectIMUDefinitions)
          {
-            String sensorName = imuMount.getName() + "AngularVelocity";
+            String sensorName = perfectIMUDefinition.getName() + "AngularVelocity";
 
-            RigidBody perfectMeasurmentBody = perfectFullRobotModel.getIMUBody(imuMount);
-            ReferenceFrame perfectMeasurementFrame = createMeasurementFrame(sensorName, "PerfectMeasurementFrame", imuMount, perfectMeasurmentBody);
+            RigidBody perfectMeasurmentBody = perfectIMUDefinition.getRigidBody();
+            ReferenceFrame perfectMeasurementFrame = createMeasurementFrame(sensorName, "PerfectMeasurementFrame", perfectIMUDefinition, perfectMeasurmentBody);
 
             SimulatedAngularVelocitySensor angularVelocitySensor = new SimulatedAngularVelocitySensor(sensorName, perfectTwistCalculator,
                                                                       perfectMeasurmentBody, perfectMeasurementFrame, registry);
@@ -271,7 +336,7 @@ public class ComposableStateEstimatorEvaluatorController implements RobotControl
                angularVelocitySensor.addSignalCorruptor(angularVelocityCorruptor);
 
             RandomWalkBiasVectorCorruptor biasVectorCorruptor = new RandomWalkBiasVectorCorruptor(1236L, sensorName, controlDT, registry);
-            biasVectorCorruptor.setBias(computeGazeboBiasVector(gazeboAngularVelocityBiasMean, gazeboAngularVelocityBiasStandardDeviation, random));    // new Vector3d(0.0, 0.0, 0.0));
+            biasVectorCorruptor.setBias(computeGazeboBiasVector(gazeboAngularVelocityBiasMean, gazeboAngularVelocityBiasStandardDeviation, random));
 
             if (ALLOW_CHANGING_BIASES)
             {
@@ -279,36 +344,55 @@ public class ComposableStateEstimatorEvaluatorController implements RobotControl
             }
 
             angularVelocitySensor.addSignalCorruptor(biasVectorCorruptor);
-
-            DenseMatrix64F angularVelocityNoiseCovariance = createDiagonalCovarianceMatrix(angularVelocityMeasurementStandardDeviation, 3);
-            DenseMatrix64F angularVelocityBiasProcessNoiseCovariance = createDiagonalCovarianceMatrix(angularVelocityBiasProcessNoiseStandardDeviation, 3);
-
-            RigidBody estimatedMeasurementBody = estimatedFullRobotModel.getIMUBody(imuMount);
-            ReferenceFrame estimatedMeasurementFrame = createMeasurementFrame(sensorName, "EstimatedMeasurementFrame", imuMount, estimatedMeasurementBody);
-
-            AngularVelocitySensorConfiguration angularVelocitySensorConfiguration =
-               new AngularVelocitySensorConfiguration(angularVelocitySensor.getAngularVelocityOutputPort(), sensorName, estimatedMeasurementBody,
-                  estimatedMeasurementFrame, angularVelocityNoiseCovariance, angularVelocityBiasProcessNoiseCovariance);
-            angularVelocitySensorConfigurations.add(angularVelocitySensorConfiguration);
+            angularVelocityOutputPorts.add(angularVelocitySensor.getAngularVelocityOutputPort());
          }
       }
+
+      return angularVelocityOutputPorts;
+   }
+
+   private ArrayList<AngularVelocitySensorConfiguration> createAngularVelocitySensorConfigurations(
+           StateEstimatorEvaluatorFullRobotModel estimatedFullRobotModel, ArrayList<ControlFlowOutputPort<Vector3d>> angularVelocityOutputPorts)
+   {
+      ArrayList<AngularVelocitySensorConfiguration> angularVelocitySensorConfigurations = new ArrayList<AngularVelocitySensorConfiguration>();
+
+      ArrayList<IMUDefinition> estimatedIMUDefinitions = estimatedFullRobotModel.getIMUDefinitions();
+      for (int i = 0; i < estimatedIMUDefinitions.size(); i++)
+      {
+         IMUDefinition estimatedIMUDefinition = estimatedIMUDefinitions.get(i);
+         String sensorName = estimatedIMUDefinition.getName() + "AngularVelocity";
+
+         DenseMatrix64F angularVelocityNoiseCovariance = createDiagonalCovarianceMatrix(angularVelocityMeasurementStandardDeviation, 3);
+         DenseMatrix64F angularVelocityBiasProcessNoiseCovariance = createDiagonalCovarianceMatrix(angularVelocityBiasProcessNoiseStandardDeviation, 3);
+
+         RigidBody estimatedMeasurementBody = estimatedIMUDefinition.getRigidBody();
+         ReferenceFrame estimatedMeasurementFrame = createMeasurementFrame(sensorName, "EstimatedMeasurementFrame", estimatedIMUDefinition,
+                                                       estimatedMeasurementBody);
+
+         AngularVelocitySensorConfiguration angularVelocitySensorConfiguration = new AngularVelocitySensorConfiguration(angularVelocityOutputPorts.get(i),
+                                                                                    sensorName, estimatedMeasurementBody, estimatedMeasurementFrame,
+                                                                                    angularVelocityNoiseCovariance, angularVelocityBiasProcessNoiseCovariance);
+         angularVelocitySensorConfigurations.add(angularVelocitySensorConfiguration);
+      }
+
 
       return angularVelocitySensorConfigurations;
    }
 
-   private ArrayList<LinearAccelerationSensorConfiguration> createLinearAccelerationSensors(StateEstimatorEvaluatorFullRobotModel perfectFullRobotModel,
-           StateEstimatorEvaluatorFullRobotModel estimatedFullRobotModel)
+   private ArrayList<ControlFlowOutputPort<Vector3d>> createLinearAccelerationSensors(StateEstimatorEvaluatorFullRobotModel perfectFullRobotModel)
    {
-      ArrayList<LinearAccelerationSensorConfiguration> linearAccelerationSensorConfigurations = new ArrayList<LinearAccelerationSensorConfiguration>();
+      ArrayList<ControlFlowOutputPort<Vector3d>> linearAccelerationOutputPorts = new ArrayList<ControlFlowOutputPort<Vector3d>>();
 
       if (CREATE_LINEAR_ACCELERATION_SENSOR)
       {
-         for (IMUMount imuMount : perfectFullRobotModel.getIMUMounts())
+         ArrayList<IMUDefinition> perfectIMUDefinitions = perfectFullRobotModel.getIMUDefinitions();
+         for (IMUDefinition perfectIMUDefinition : perfectIMUDefinitions)
          {
-            String sensorName = imuMount.getName() + "LinearAcceleration";
+            String sensorName = perfectIMUDefinition.getName() + "LinearAcceleration";
 
-            RigidBody perfectMeasurementBody = perfectFullRobotModel.getIMUBody(imuMount);
-            ReferenceFrame perfectMeasurementFrame = createMeasurementFrame(sensorName, "PerfectMeasurementFrame", imuMount, perfectMeasurementBody);
+            RigidBody perfectMeasurementBody = perfectIMUDefinition.getRigidBody();
+            ReferenceFrame perfectMeasurementFrame = createMeasurementFrame(sensorName, "PerfectMeasurementFrame", perfectIMUDefinition,
+                                                        perfectMeasurementBody);
 
             SimulatedLinearAccelerationSensor linearAccelerationSensor = new SimulatedLinearAccelerationSensor(sensorName, perfectMeasurementBody,
                                                                             perfectMeasurementFrame, perfectSpatialAccelerationCalculator,
@@ -328,39 +412,58 @@ public class ComposableStateEstimatorEvaluatorController implements RobotControl
             }
 
             linearAccelerationSensor.addSignalCorruptor(biasVectorCorruptor);
-
-            DenseMatrix64F linearAccelerationNoiseCovariance = createDiagonalCovarianceMatrix(linearAccelerationMeasurementStandardDeviation, 3);
-            DenseMatrix64F linearAccelerationBiasProcessNoiseCovariance = createDiagonalCovarianceMatrix(linearAccelerationBiasProcessNoiseStandardDeviation,
-                                                                             3);
-
-            RigidBody estimatedMeasurementBody = estimatedFullRobotModel.getIMUBody(imuMount);
-            ReferenceFrame estimatedMeasurementFrame = createMeasurementFrame(sensorName, "EstimatedMeasurementFrame", imuMount, estimatedMeasurementBody);
-
-            LinearAccelerationSensorConfiguration linearAccelerationSensorConfiguration =
-               new LinearAccelerationSensorConfiguration(linearAccelerationSensor.getLinearAccelerationOutputPort(), sensorName, estimatedMeasurementBody,
-                  estimatedMeasurementFrame, gravitationalAcceleration.getZ(), linearAccelerationNoiseCovariance, linearAccelerationBiasProcessNoiseCovariance);
-
-            linearAccelerationSensorConfigurations.add(linearAccelerationSensorConfiguration);
+            linearAccelerationOutputPorts.add(linearAccelerationSensor.getLinearAccelerationOutputPort());
          }
+      }
+
+      return linearAccelerationOutputPorts;
+   }
+
+   private ArrayList<LinearAccelerationSensorConfiguration> createLinearAccelerationSensorConfigurations(
+           StateEstimatorEvaluatorFullRobotModel estimatedFullRobotModel, ArrayList<ControlFlowOutputPort<Vector3d>> linearAccelerationOutputPorts)
+   {
+      ArrayList<LinearAccelerationSensorConfiguration> linearAccelerationSensorConfigurations = new ArrayList<LinearAccelerationSensorConfiguration>();
+
+      ArrayList<IMUDefinition> estimatedIMUDefinitions = estimatedFullRobotModel.getIMUDefinitions();
+      for (int i = 0; i < estimatedIMUDefinitions.size(); i++)
+      {
+         IMUDefinition estimatedIMUDefinition = estimatedIMUDefinitions.get(i);
+         String sensorName = estimatedIMUDefinition.getName() + "LinearAcceleration";
+
+         DenseMatrix64F linearAccelerationNoiseCovariance = createDiagonalCovarianceMatrix(linearAccelerationMeasurementStandardDeviation, 3);
+         DenseMatrix64F linearAccelerationBiasProcessNoiseCovariance = createDiagonalCovarianceMatrix(linearAccelerationBiasProcessNoiseStandardDeviation, 3);
+
+         RigidBody estimatedMeasurementBody = estimatedIMUDefinition.getRigidBody();
+         ReferenceFrame estimatedMeasurementFrame = createMeasurementFrame(sensorName, "EstimatedMeasurementFrame", estimatedIMUDefinition,
+                                                       estimatedMeasurementBody);
+
+         LinearAccelerationSensorConfiguration linearAccelerationSensorConfiguration =
+            new LinearAccelerationSensorConfiguration(linearAccelerationOutputPorts.get(i), sensorName, estimatedMeasurementBody, estimatedMeasurementFrame,
+               gravitationalAcceleration.getZ(), linearAccelerationNoiseCovariance, linearAccelerationBiasProcessNoiseCovariance);
+
+         linearAccelerationSensorConfigurations.add(linearAccelerationSensorConfiguration);
       }
 
       return linearAccelerationSensorConfigurations;
    }
 
-   private ArrayList<PointVelocitySensorConfiguration> createPointVelocitySensors(StateEstimatorEvaluatorFullRobotModel perfectFullRobotModel,
-           StateEstimatorEvaluatorFullRobotModel estimatedFullRobotModel)
+   private ArrayList<ControlFlowOutputPort<Vector3d>> createPointVelocitySensors(StateEstimatorEvaluatorFullRobotModel perfectFullRobotModel)
    {
-      ArrayList<PointVelocitySensorConfiguration> pointVelocitySensorConfigurations = new ArrayList<PointVelocitySensorConfiguration>();
+      ArrayList<ControlFlowOutputPort<Vector3d>> pointVelocityOutputPorts = new ArrayList<ControlFlowOutputPort<Vector3d>>();
 
       if (CREATE_POINT_VELOCITY_SENSOR)
       {
-         for (KinematicPoint kinematicPoint : perfectFullRobotModel.getVelocityPoints())
+         ArrayList<PointVelocitySensorDefinition> pointVelocitySensorDefinitions = perfectFullRobotModel.getPointVelocitySensorDefinitions();
+         for (PointVelocitySensorDefinition kinematicPoint : pointVelocitySensorDefinitions)
          {
             String sensorName = kinematicPoint.getName() + "PointVelocity";
 
-            RigidBody perfectMeasurementBody = perfectFullRobotModel.getVelocityPointBody(kinematicPoint);
+            RigidBody perfectMeasurementBody = kinematicPoint.getRigidBody();
             ReferenceFrame perfectFrameAfterJoint = perfectMeasurementBody.getParentJoint().getFrameAfterJoint();
-            FramePoint perfectVelocityPoint = new FramePoint(perfectFrameAfterJoint, kinematicPoint.getOffsetCopy());
+
+            Vector3d offset = new Vector3d();
+            kinematicPoint.getOffset(offset);
+            FramePoint perfectVelocityPoint = new FramePoint(perfectFrameAfterJoint, offset);
 
             SimulatedPointVelocitySensor pointVelocitySensor = new SimulatedPointVelocitySensor(sensorName, perfectMeasurementBody, perfectVelocityPoint,
                                                                   perfectTwistCalculator, registry);
@@ -370,72 +473,62 @@ public class ComposableStateEstimatorEvaluatorController implements RobotControl
             if (CORRUPT_SIMULATED_SENSORS)
                pointVelocitySensor.addSignalCorruptor(pointVelocityCorruptor);
 
-            DenseMatrix64F pointVelocityNoiseCovariance = createDiagonalCovarianceMatrix(pointVelocityMeasurementStandardDeviation, 3);
-
-            RigidBody estimatedMeasurementBody = estimatedFullRobotModel.getVelocityPointBody(kinematicPoint);
-            ReferenceFrame estimatedFrameAfterJoint = estimatedMeasurementBody.getParentJoint().getFrameAfterJoint();
-            FramePoint estimatedVelocityPoint = new FramePoint(estimatedFrameAfterJoint, kinematicPoint.getOffsetCopy());
-
-            PointVelocitySensorConfiguration pointVelocitySensorConfiguration =
-               new PointVelocitySensorConfiguration(pointVelocitySensor.getPointVelocityOutputPort(), sensorName, estimatedMeasurementBody,
-                  estimatedVelocityPoint, angularAccelerationProcessNoiseStandardDeviation, pointVelocityNoiseCovariance, pointVelocityNoiseCovariance);
-
-            pointVelocitySensorConfigurations.add(pointVelocitySensorConfiguration);
+            pointVelocityOutputPorts.add(pointVelocitySensor.getPointVelocityOutputPort());
          }
+      }
+
+      return pointVelocityOutputPorts;
+   }
+
+
+   private ArrayList<PointVelocitySensorConfiguration> createPointVelocitySensorConfigurations(StateEstimatorEvaluatorFullRobotModel estimatedFullRobotModel,
+           ArrayList<ControlFlowOutputPort<Vector3d>> pointVelocityOutputPorts)
+   {
+      ArrayList<PointVelocitySensorConfiguration> pointVelocitySensorConfigurations = new ArrayList<PointVelocitySensorConfiguration>();
+
+
+      ArrayList<PointVelocitySensorDefinition> pointVelocitySensorDefinitions = estimatedFullRobotModel.getPointVelocitySensorDefinitions();
+
+      for (int i = 0; i < pointVelocitySensorDefinitions.size(); i++)
+      {
+         PointVelocitySensorDefinition pointVelocitySensorDefinition = pointVelocitySensorDefinitions.get(i);
+         String sensorName = pointVelocitySensorDefinition.getName() + "PointVelocity";
+
+         DenseMatrix64F pointVelocityNoiseCovariance = createDiagonalCovarianceMatrix(pointVelocityMeasurementStandardDeviation, 3);
+
+         RigidBody estimatedMeasurementBody = pointVelocitySensorDefinition.getRigidBody();
+         ReferenceFrame estimatedFrameAfterJoint = estimatedMeasurementBody.getParentJoint().getFrameAfterJoint();
+
+         Vector3d offset = new Vector3d();
+         pointVelocitySensorDefinition.getOffset(offset);
+         FramePoint estimatedVelocityPoint = new FramePoint(estimatedFrameAfterJoint, offset);
+
+         PointVelocitySensorConfiguration pointVelocitySensorConfiguration = new PointVelocitySensorConfiguration(pointVelocityOutputPorts.get(i), sensorName,
+                                                                                estimatedMeasurementBody, estimatedVelocityPoint,
+                                                                                angularAccelerationProcessNoiseStandardDeviation, pointVelocityNoiseCovariance,
+                                                                                pointVelocityNoiseCovariance);
+
+         pointVelocitySensorConfigurations.add(pointVelocitySensorConfiguration);
       }
 
       return pointVelocitySensorConfigurations;
    }
 
-   private ArrayList<OrientationSensorConfiguration> createOrientationSensors(StateEstimatorEvaluatorFullRobotModel perfectFullRobotModel,
-           StateEstimatorEvaluatorFullRobotModel estimatedFullRobotModel)
+
+   public ReferenceFrame createMeasurementFrame(String sensorName, String frameName, IMUDefinition imuMount, RigidBody perfectMeasurmentBody)
    {
-      ArrayList<OrientationSensorConfiguration> orientationSensorConfigurations = new ArrayList<OrientationSensorConfiguration>();
-
-      if (CREATE_ORIENTATION_SENSOR)
-      {
-         for (IMUMount imuMount : perfectFullRobotModel.getIMUMounts())
-         {
-            String sensorName = imuMount.getName() + "Orientation";
-
-            RigidBody perfectMeasurementBody = perfectFullRobotModel.getIMUBody(imuMount);
-            ReferenceFrame perfectMeasurementFrame = createMeasurementFrame(sensorName, "PerfectMeasurementFrame", imuMount, perfectMeasurementBody);
-
-            SimulatedOrientationSensor sensor = new SimulatedOrientationSensor(sensorName, perfectMeasurementFrame, registry);
-            GaussianOrientationCorruptor orientationCorruptor = new GaussianOrientationCorruptor(sensorName, 12334255L, registry);
-            orientationCorruptor.setStandardDeviation(orientationMeasurementStandardDeviation);
-            if (CORRUPT_SIMULATED_SENSORS)
-               sensor.addSignalCorruptor(orientationCorruptor);
-
-            DenseMatrix64F orientationNoiseCovariance = createDiagonalCovarianceMatrix(orientationMeasurementStandardDeviation, 3);
-
-            RigidBody estimatedMeasurementBody = estimatedFullRobotModel.getIMUBody(imuMount);
-            ReferenceFrame estimatedMeasurementFrame = createMeasurementFrame(sensorName, "EstimatedMeasurementFrame", imuMount, estimatedMeasurementBody);
-
-            OrientationSensorConfiguration orientationSensorConfiguration = new OrientationSensorConfiguration(sensor.getOrientationOutputPort(), sensorName,
-                                                                               estimatedMeasurementFrame, orientationNoiseCovariance);
-            orientationSensorConfigurations.add(orientationSensorConfiguration);
-         }
-      }
-
-      return orientationSensorConfigurations;
-   }
-
-
-   public ReferenceFrame createMeasurementFrame(String sensorName, String frameName, IMUMount imuMount, RigidBody perfectMeasurmentBody)
-   {
-      Transform3D transformFromMountToJoint = new Transform3D();
-      imuMount.getTransformFromMountToJoint(transformFromMountToJoint);
+      Transform3D transformFromIMUToJoint = new Transform3D();
+      imuMount.getTransformFromIMUToJoint(transformFromIMUToJoint);
 
       ReferenceFrame perfectFrameAfterJoint = perfectMeasurmentBody.getParentJoint().getFrameAfterJoint();
 
-      if (transformFromMountToJoint.epsilonEquals(new Transform3D(), 1e-10))
+      if (transformFromIMUToJoint.epsilonEquals(new Transform3D(), 1e-10))
       {
          return perfectFrameAfterJoint;
       }
 
       ReferenceFrame perfectMeasurementFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(sensorName + frameName, perfectFrameAfterJoint,
-                                                  transformFromMountToJoint);
+                                                  transformFromIMUToJoint);
 
       return perfectMeasurementFrame;
    }
