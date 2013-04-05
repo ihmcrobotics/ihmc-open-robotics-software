@@ -201,6 +201,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 
    private final DoubleYoVariable coefficientOfFriction = new DoubleYoVariable("coefficientOfFriction", registry);
    private final OneDoFJoint lidarJoint;
+   private final List<OneDoFJoint> torqueControlJoints = new ArrayList<OneDoFJoint>();
    private final PIDController lidarJointVelocityController = new PIDController("lidar", registry);
    private final DoubleYoVariable desiredLidarVelocity = new DoubleYoVariable("desiredLidarVelocity", registry);
    private final BooleanYoVariable toeOff = new BooleanYoVariable("toeOff", registry);
@@ -336,7 +337,6 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
          if (handControllers != null)
          {
             handControllerInterface = handControllers.get(robotSide);
-            handControllerInterface.setMomentumSolver(solver);
 
          }
 
@@ -432,6 +432,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
          List<OneDoFJoint> handJointsList = Arrays.asList(handJointsArray);
 
          unconstrainedJoints.removeAll(handJointsList);
+         torqueControlJoints.addAll(handJointsList);
       }
 
       this.lidarJoint = lidarJoint;
@@ -439,6 +440,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       if (lidarJoint != null)
       {
          unconstrainedJoints.remove(lidarJoint);
+         torqueControlJoints.add(lidarJoint);
       }
 
       unconstrainedJoints.removeAll(Arrays.asList(headOrientationControlJoints));
@@ -1227,8 +1229,15 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 
       setICPBasedMomentumRateOfChangeControlModuleInputs();
 
-      if (lidarJoint != null)
-         setOneDoFJointAcceleration(lidarJoint, 0.0);
+      setTorqueControlJointsToZeroDersiredAcceleration();
+   }
+   
+   private void setTorqueControlJointsToZeroDersiredAcceleration()
+   {
+      for(OneDoFJoint joint : torqueControlJoints)
+      {
+         setOneDoFJointAcceleration(joint, 0.0);
+      }
    }
 
    // TODO: connect ports instead

@@ -48,7 +48,7 @@ public class MultiContactTestEnvironment implements CommonAvatarEnvironmentInter
 
       CommonWalkingReferenceFrames referenceFramesForEnvironmentSetup = new ReferenceFrames(fullRobotModelForEnvironmentSetup, jointMap, jointMap.getAnkleHeight());
       SDFPerfectSimulatedSensorReaderAndWriter sensorReaderAndOutputWriter = new SDFPerfectSimulatedSensorReaderAndWriter(robotForEnvironmentSetup,
-                                                                                fullRobotModelForEnvironmentSetup, referenceFramesForEnvironmentSetup, false);
+                                                                                fullRobotModelForEnvironmentSetup, referenceFramesForEnvironmentSetup);
       sensorReaderAndOutputWriter.read();
       
       this.footContactSides = footContactSides;
