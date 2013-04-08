@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.stateEstimation.processModelElements;
 
+import javax.vecmath.Vector3d;
+
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
@@ -19,15 +21,19 @@ public class AngularAccelerationProcessModelElement extends AbstractProcessModel
    private final ControlFlowInputPort<FrameVector> angularAccelerationInputPort;
    private final FrameVector angularAcceleration;
    private final FrameVector angularAccelerationDelta;
+   private final ReferenceFrame estimationFrame;
+   private final Vector3d angularAccelerationVector3d = new Vector3d();
 
    public AngularAccelerationProcessModelElement(String name, ReferenceFrame estimationFrame, YoVariableRegistry registry,
-         ControlFlowOutputPort<FrameVector> angularAccelerationStatePort, ControlFlowInputPort<FrameVector> angularAccelerationInputPort)
+           ControlFlowOutputPort<FrameVector> angularAccelerationStatePort, ControlFlowInputPort<FrameVector> angularAccelerationInputPort)
    {
       super(angularAccelerationStatePort, TimeDomain.DISCRETE, false, SIZE, name, registry);
       this.angularAccelerationStatePort = angularAccelerationStatePort;
       this.angularAccelerationInputPort = angularAccelerationInputPort;
       this.angularAcceleration = new FrameVector(estimationFrame);
       this.angularAccelerationDelta = new FrameVector(estimationFrame);
+
+      this.estimationFrame = estimationFrame;
       computeAngularAccelerationInputMatrixBlock();
    }
 
@@ -45,7 +51,20 @@ public class AngularAccelerationProcessModelElement extends AbstractProcessModel
 
    public void propagateState(double dt)
    {
-      angularAcceleration.set(angularAccelerationInputPort.getData());
+      FrameVector angularAccelerationInputData = angularAccelerationInputPort.getData();
+
+      // TODO: Figure out how to deal best with ReferenceFrames here.
+      // Upon generation, the generator might not know what the estimation frame will
+      // be. So here we're just making sure that the frame is null if it's not
+      // the estimation frame.
+
+      if (angularAccelerationInputData.getReferenceFrame() != null)
+      {
+         angularAccelerationInputData.checkReferenceFrameMatch(estimationFrame);
+      }
+
+      angularAccelerationInputData.getVector(angularAccelerationVector3d);
+      angularAcceleration.set(estimationFrame, angularAccelerationVector3d);
       angularAccelerationStatePort.setData(angularAcceleration);
    }
 
