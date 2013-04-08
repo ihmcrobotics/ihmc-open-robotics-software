@@ -12,6 +12,7 @@ import us.ihmc.controlFlow.AbstractControlFlowElement;
 import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.kalman.YoKalmanFilter;
+import us.ihmc.sensorProcessing.stateEstimation.measurmentModelElements.MeasurementModelElement;
 
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 

@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.stateEstimation.measurementModelElements;
+package us.ihmc.sensorProcessing.stateEstimation.measurmentModelElements;
 
 import javax.media.j3d.Transform3D;
 import javax.vecmath.AxisAngle4d;
