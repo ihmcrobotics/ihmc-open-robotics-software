@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.dynamics;
+package us.ihmc.sensorProcessing.simulatedSensors;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -36,6 +36,7 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
    private final Robot robot;
    private final RigidBody elevator;
    
+   //TODO: Add SliderJoints
    public InverseDynamicsJointsFromSCSRobotGenerator(Robot robot)
    {
       this.robot = robot;
