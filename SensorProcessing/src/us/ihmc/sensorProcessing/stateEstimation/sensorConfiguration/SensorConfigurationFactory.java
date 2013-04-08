@@ -1,6 +1,7 @@
 package us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
@@ -41,7 +42,7 @@ public class SensorConfigurationFactory
    {
       ArrayList<OrientationSensorConfiguration> orientationSensorConfigurations = new ArrayList<OrientationSensorConfiguration>();
 
-      ArrayList<IMUDefinition> estimatedIMUDefinitions = sensorDefinitionHolder.getIMUDefinitions();
+      List<IMUDefinition> estimatedIMUDefinitions = sensorDefinitionHolder.getIMUDefinitions();
       for (int i = 0; i < estimatedIMUDefinitions.size(); i++)
       {
          IMUDefinition estimatedIMUDefinition = estimatedIMUDefinitions.get(i);
@@ -67,7 +68,7 @@ public class SensorConfigurationFactory
    {
       ArrayList<AngularVelocitySensorConfiguration> angularVelocitySensorConfigurations = new ArrayList<AngularVelocitySensorConfiguration>();
 
-      ArrayList<IMUDefinition> estimatedIMUDefinitions = sensorDefinitionHolder.getIMUDefinitions();
+      List<IMUDefinition> estimatedIMUDefinitions = sensorDefinitionHolder.getIMUDefinitions();
       for (int i = 0; i < estimatedIMUDefinitions.size(); i++)
       {
          IMUDefinition estimatedIMUDefinition = estimatedIMUDefinitions.get(i);
@@ -96,7 +97,7 @@ public class SensorConfigurationFactory
    {
       ArrayList<LinearAccelerationSensorConfiguration> linearAccelerationSensorConfigurations = new ArrayList<LinearAccelerationSensorConfiguration>();
 
-      ArrayList<IMUDefinition> estimatedIMUDefinitions = sensorDefinitionHolder.getIMUDefinitions();
+      List<IMUDefinition> estimatedIMUDefinitions = sensorDefinitionHolder.getIMUDefinitions();
       for (int i = 0; i < estimatedIMUDefinitions.size(); i++)
       {
          IMUDefinition estimatedIMUDefinition = estimatedIMUDefinitions.get(i);
@@ -126,7 +127,7 @@ public class SensorConfigurationFactory
       ArrayList<PointVelocitySensorConfiguration> pointVelocitySensorConfigurations = new ArrayList<PointVelocitySensorConfiguration>();
 
 
-      ArrayList<PointVelocitySensorDefinition> pointVelocitySensorDefinitions = sensorDefinitionHolder.getPointVelocitySensorDefinitions();
+      List<PointVelocitySensorDefinition> pointVelocitySensorDefinitions = sensorDefinitionHolder.getPointVelocitySensorDefinitions();
 
       for (int i = 0; i < pointVelocitySensorDefinitions.size(); i++)
       {
