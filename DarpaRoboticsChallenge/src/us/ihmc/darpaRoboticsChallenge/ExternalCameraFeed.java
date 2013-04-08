@@ -22,7 +22,6 @@ import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMainExecutor;
 import org.ros.node.topic.Subscriber;
 
-import us.ihmc.darpaRoboticsChallenge.DRCGazeboDrivingInterface.BackgroundVideoExporter;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.ros.RosTools;
 import us.ihmc.utilities.keyboardAndMouse.RepeatingReleasedEventsFixer;
 
@@ -30,14 +29,14 @@ class ExternalCameraFeed extends AbstractNodeMain
 {
 	public static final boolean COLOR_IMAGE = true;
 	
-	private static boolean RECORD = false;
+//	private static boolean RECORD = false;
 	
 	private Subscriber<sensor_msgs.CompressedImage> cameraSubscriber;
 	private BufferedImage cameraImage;
 	private String cameraName, topicName;
 	private JFrame cameraFrame;
 	private JPanel cameraPanel;
-	private BackgroundVideoExporter cameraVideoExporter;
+//	private ConcurrentBackgroundVideoExporter cameraVideoExporter;
 
 	private ColorSpace colorSpace;
 	private ColorModel colorModel;
@@ -80,8 +79,8 @@ class ExternalCameraFeed extends AbstractNodeMain
 				if (cameraFrame.isVisible())
 				{
 					cameraImage = RosTools.bufferedImageFromRosMessageJpeg(colorModel, message);
-					if (RECORD)
-						cameraVideoExporter.pushImage(RosTools.bufferedImageFromRosMessageJpeg(colorModel, message), message.getHeader().getStamp().totalNsecs());
+//					if (RECORD)
+//						cameraVideoExporter.pushImage(RosTools.bufferedImageFromRosMessageJpeg(colorModel, message), message.getHeader().getStamp().totalNsecs());
 					cameraPanel.getGraphics().drawImage(cameraImage.getScaledInstance(cameraImage.getWidth(), cameraImage.getHeight(), 0), 0, 0, null);
 				}
 			}
