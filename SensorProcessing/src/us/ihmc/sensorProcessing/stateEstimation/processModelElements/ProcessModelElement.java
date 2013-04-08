@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.stateEstimation;
+package us.ihmc.sensorProcessing.stateEstimation.processModelElements;
 
 import java.util.Set;
 
@@ -6,6 +6,7 @@ import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
+import us.ihmc.sensorProcessing.stateEstimation.TimeDomain;
 
 public interface ProcessModelElement
 {

@@ -1,11 +1,11 @@
-package us.ihmc.commonWalkingControlModules.stateEstimation.processModelElements;
+package us.ihmc.sensorProcessing.stateEstimation.processModelElements;
 
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
-import us.ihmc.commonWalkingControlModules.stateEstimation.TimeDomain;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
+import us.ihmc.sensorProcessing.stateEstimation.TimeDomain;
 import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
