@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.dynamics;
+package us.ihmc.sensorProcessing.simulatedSensors;
 
 import static org.junit.Assert.assertEquals;
 
@@ -14,6 +14,7 @@ import org.junit.Test;
 
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.sensorProcessing.simulatedSensors.InverseDynamicsJointsFromSCSRobotGenerator;
 import us.ihmc.utilities.Axis;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
@@ -128,7 +129,7 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
       link1.setLinkGraphics(linkGraphics);
       joint1.setLink(link1);
       
-//      joint1.setQ(0.5);
+      joint1.setQ(0.5);
       joint1.setQd(1.0);
 
       robot.addRootJoint(joint1);
@@ -145,8 +146,8 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
       link2.setLinkGraphics(linkGraphics2);
       joint2.setLink(link2);
       
-//      joint2.setQ(0.6);
-      //joint2.setQd(1.2);
+      joint2.setQ(0.6);
+      joint2.setQd(1.2);
       
       joint1.addJoint(joint2);
       

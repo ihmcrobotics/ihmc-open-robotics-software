@@ -11,10 +11,10 @@ import javax.vecmath.Vector3d;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
-import us.ihmc.commonWalkingControlModules.sensors.IMUDefinition;
-import us.ihmc.commonWalkingControlModules.sensors.PointVelocitySensorDefinition;
 import us.ihmc.controlFlow.ControlFlowGraph;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
+import us.ihmc.sensorProcessing.simulatedSensors.IMUDefinition;
+import us.ihmc.sensorProcessing.simulatedSensors.PointVelocitySensorDefinition;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.AngleTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
@@ -151,9 +151,6 @@ public class ComposableStateEstimatorEvaluatorController implements RobotControl
          // DenseMatrix64F x = orientationEstimator.getState();
          // MatrixTools.insertTuple3dIntoEJMLVector(angularVelocityInBody, x, 3);
          // orientationEstimator.setState(x, orientationEstimator.getCovariance());
-
-         System.out.println("Estimated orientation = " + orientationEstimator.getEstimatedOrientation());
-         System.out.println("Estimated angular velocity = " + estimatedAngularVelocity);
       }
 
    }
@@ -381,7 +378,6 @@ public class ComposableStateEstimatorEvaluatorController implements RobotControl
       comVelocityError.set(estimatedCoMVelocity.length());
    }
 
-
    private static DenseMatrix64F createDiagonalCovarianceMatrix(double standardDeviation, int size)
    {
       DenseMatrix64F orientationCovarianceMatrix = new DenseMatrix64F(size, size);
@@ -389,16 +385,6 @@ public class ComposableStateEstimatorEvaluatorController implements RobotControl
       CommonOps.scale(MathTools.square(standardDeviation), orientationCovarianceMatrix);
 
       return orientationCovarianceMatrix;
-   }
-
-
-   private double convertStandardDeviationToDiscreteTime(double continuousStdDev)
-   {
-      double continuousVariance = MathTools.square(continuousStdDev);
-      double discreteVariance = continuousVariance * controlDT;
-      double discreteStdDev = Math.sqrt(discreteVariance);
-
-      return discreteStdDev;
    }
 
 }
