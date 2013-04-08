@@ -30,6 +30,7 @@ public class FifthOrderWaypointPositionTrajectoryGenerator implements PositionTr
    private final VectorProvider initialVelocitySource;
    private final VectorProvider initialAccelerationSource;
    private final PositionProvider finalDesiredPositionSource;
+   private final DoubleProvider finalPositionZOffsetProvider;
    private final VectorProvider finalDesiredVelocitySource;
 
    private final DoubleYoVariable waypointHeight;
@@ -45,7 +46,7 @@ public class FifthOrderWaypointPositionTrajectoryGenerator implements PositionTr
 
    public FifthOrderWaypointPositionTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, DoubleProvider stepTimeProvider,
            PositionProvider initialPositionProvider, VectorProvider initalVelocityProvider, VectorProvider initialAccelerationProvider,
-           PositionProvider finalPositionProvider, VectorProvider finalDesiredVelocityProvider, double groundClearance, YoVariableRegistry parentRegistry)
+           PositionProvider finalPositionProvider, DoubleProvider finalPositionZOffsetProvider, VectorProvider finalDesiredVelocityProvider, double groundClearance, YoVariableRegistry parentRegistry)
    {
       this.registry = new YoVariableRegistry(namePrefix + namePostFix);
 
@@ -61,6 +62,7 @@ public class FifthOrderWaypointPositionTrajectoryGenerator implements PositionTr
       this.initialVelocitySource = initalVelocityProvider;
       this.initialAccelerationSource = initialAccelerationProvider;
       this.finalDesiredPositionSource = finalPositionProvider;
+      this.finalPositionZOffsetProvider = finalPositionZOffsetProvider;
       this.finalDesiredVelocitySource = finalDesiredVelocityProvider;
 
       this.waypointHeight = new DoubleYoVariable("waypointHeight", registry);
@@ -182,13 +184,14 @@ public class FifthOrderWaypointPositionTrajectoryGenerator implements PositionTr
       initialAcceleration.changeFrame(referenceFrame);
       finalDesiredPosition.changeFrame(referenceFrame);
       finalDesiredVelocity.changeFrame(referenceFrame);
-
-
+      
       FramePoint intermediatePosition = new FramePoint(initialPosition);
 
 //    FramePoint intermediatePosition = new FramePoint(referenceFrame);
 //    intermediatePosition.interpolate(initialPosition, finalDesiredPosition, 0.1);
       intermediatePosition.setZ(Math.max(initialPosition.getZ(), finalDesiredPosition.getZ()) + waypointHeight.getDoubleValue());
+      
+      finalDesiredPosition.setZ(finalDesiredPosition.getZ() + finalPositionZOffsetProvider.getValue());
 
       timeIntoStep.set(0.0);
 
