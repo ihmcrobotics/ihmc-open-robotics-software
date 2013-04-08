@@ -13,6 +13,7 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.controlFlow.ControlFlowGraph;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
+import us.ihmc.sensorProcessing.simulatedSensors.SimulatedSensorsFactory;
 import us.ihmc.sensorProcessing.simulatedSensors.IMUDefinition;
 import us.ihmc.sensorProcessing.simulatedSensors.PointVelocitySensorDefinition;
 import us.ihmc.utilities.math.MathTools;
@@ -74,7 +75,7 @@ public class ComposableStateEstimatorEvaluatorController implements RobotControl
       this.gravitationalAcceleration = new Vector3d();
       robot.getGravity(gravitationalAcceleration);
 
-      estimatedFullRobotModel = new StateEstimatorEvaluatorFullRobotModel(robot);
+      estimatedFullRobotModel = new StateEstimatorEvaluatorFullRobotModel(robot, robot.getIMUMounts(), robot.getVelocityPoints());
       estimatedTwistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), estimatedFullRobotModel.getElevator());
       estimatedSpatialAccelerationCalculator = new SpatialAccelerationCalculator(estimatedFullRobotModel.getElevator(), estimatedTwistCalculator, 0.0, false);
 
@@ -169,7 +170,7 @@ public class ComposableStateEstimatorEvaluatorController implements RobotControl
          DenseMatrix64F orientationNoiseCovariance = createDiagonalCovarianceMatrix(orientationMeasurementStandardDeviation, 3);
 
          RigidBody estimatedMeasurementBody = estimatedIMUDefinition.getRigidBody();
-         ReferenceFrame estimatedMeasurementFrame = HumanoidSimulatedSensorsFactory.createMeasurementFrame(sensorName, "EstimatedMeasurementFrame",
+         ReferenceFrame estimatedMeasurementFrame = SimulatedSensorsFactory.createMeasurementFrame(sensorName, "EstimatedMeasurementFrame",
                                                        estimatedIMUDefinition, estimatedMeasurementBody);
 
          OrientationSensorConfiguration orientationSensorConfiguration = new OrientationSensorConfiguration(orientationOutputPorts.get(i), sensorName,
@@ -196,7 +197,7 @@ public class ComposableStateEstimatorEvaluatorController implements RobotControl
          DenseMatrix64F angularVelocityBiasProcessNoiseCovariance = createDiagonalCovarianceMatrix(angularVelocityBiasProcessNoiseStandardDeviation, 3);
 
          RigidBody estimatedMeasurementBody = estimatedIMUDefinition.getRigidBody();
-         ReferenceFrame estimatedMeasurementFrame = HumanoidSimulatedSensorsFactory.createMeasurementFrame(sensorName, "EstimatedMeasurementFrame",
+         ReferenceFrame estimatedMeasurementFrame = SimulatedSensorsFactory.createMeasurementFrame(sensorName, "EstimatedMeasurementFrame",
                                                        estimatedIMUDefinition, estimatedMeasurementBody);
 
          AngularVelocitySensorConfiguration angularVelocitySensorConfiguration = new AngularVelocitySensorConfiguration(angularVelocityOutputPorts.get(i),
@@ -225,7 +226,7 @@ public class ComposableStateEstimatorEvaluatorController implements RobotControl
          DenseMatrix64F linearAccelerationBiasProcessNoiseCovariance = createDiagonalCovarianceMatrix(linearAccelerationBiasProcessNoiseStandardDeviation, 3);
 
          RigidBody estimatedMeasurementBody = estimatedIMUDefinition.getRigidBody();
-         ReferenceFrame estimatedMeasurementFrame = HumanoidSimulatedSensorsFactory.createMeasurementFrame(sensorName, "EstimatedMeasurementFrame",
+         ReferenceFrame estimatedMeasurementFrame = SimulatedSensorsFactory.createMeasurementFrame(sensorName, "EstimatedMeasurementFrame",
                                                        estimatedIMUDefinition, estimatedMeasurementBody);
 
          LinearAccelerationSensorConfiguration linearAccelerationSensorConfiguration =
