@@ -9,7 +9,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.net.InetAddress;
-import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 
 import javax.swing.BorderFactory;
@@ -22,7 +21,6 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
-import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
@@ -77,7 +75,7 @@ public class DRCDashboard
    private JButton launchGazeboSimButton;
 //   private JButton launchDrivingInterfaceButton;
    
-   private SimpleProcessSpawner spawner = new SimpleProcessSpawner();
+   private SimpleProcessSpawner spawner = new SimpleProcessSpawner(true);
 
    public DRCDashboard()
    {
