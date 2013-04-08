@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.stateEstimation;
+package us.ihmc.sensorProcessing.stateEstimation;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,7 +11,9 @@ import org.ejml.data.DenseMatrix64F;
 import us.ihmc.controlFlow.ControlFlowGraph;
 import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
-import us.ihmc.sensorProcessing.stateEstimation.CenterOfMassBasedFullRobotModelUpdater;
+import us.ihmc.sensorProcessing.controlFlowPorts.YoFramePointControlFlowOutputPort;
+import us.ihmc.sensorProcessing.controlFlowPorts.YoFrameQuaternionControlFlowOutputPort;
+import us.ihmc.sensorProcessing.controlFlowPorts.YoFrameVectorControlFlowOutputPort;
 import us.ihmc.sensorProcessing.stateEstimation.measurmentModelElements.AngularVelocityMeasurementModelElement;
 import us.ihmc.sensorProcessing.stateEstimation.measurmentModelElements.LinearAccelerationMeasurementModelElement;
 import us.ihmc.sensorProcessing.stateEstimation.measurmentModelElements.OrientationMeasurementModelElement;
@@ -24,6 +26,10 @@ import us.ihmc.sensorProcessing.stateEstimation.processModelElements.CenterOfMas
 import us.ihmc.sensorProcessing.stateEstimation.processModelElements.CenterOfMassVelocityProcessModelElement;
 import us.ihmc.sensorProcessing.stateEstimation.processModelElements.OrientationProcessModelElement;
 import us.ihmc.sensorProcessing.stateEstimation.processModelElements.ProcessModelElement;
+import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.AngularVelocitySensorConfiguration;
+import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.LinearAccelerationSensorConfiguration;
+import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.OrientationSensorConfiguration;
+import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.PointVelocitySensorConfiguration;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;

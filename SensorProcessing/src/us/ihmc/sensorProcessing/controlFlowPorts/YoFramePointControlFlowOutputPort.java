@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.stateEstimation;
+package us.ihmc.sensorProcessing.controlFlowPorts;
 
 import us.ihmc.controlFlow.ControlFlowElement;
 import us.ihmc.controlFlow.ControlFlowOutputPort;

@@ -1,4 +1,6 @@
-package us.ihmc.commonWalkingControlModules.stateEstimation;
+package us.ihmc.sensorProcessing.stateEstimation.evaluation;
+
+import us.ihmc.sensorProcessing.stateEstimation.SimulatedSensorController;
 
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
@@ -17,7 +19,7 @@ public class ComposableStateEstimatorEvaluator
 
    public ComposableStateEstimatorEvaluator()
    {
-      StateEstimatorEstimatorEvaluatorRobot robot = new StateEstimatorEstimatorEvaluatorRobot();
+      StateEstimatorEvaluatorRobot robot = new StateEstimatorEvaluatorRobot();
       
       SimulatedSensorController simulatedSensorController = new SimulatedSensorController(robot, controlDT);
       

@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.stateEstimation;
+package us.ihmc.sensorProcessing.stateEstimation.evaluation;
 
 import java.util.ArrayList;
 
@@ -20,7 +20,7 @@ import com.yobotics.simulationconstructionset.Link;
 import com.yobotics.simulationconstructionset.PinJoint;
 import com.yobotics.simulationconstructionset.Robot;
 
-public class StateEstimatorEstimatorEvaluatorRobot extends Robot
+public class StateEstimatorEvaluatorRobot extends Robot
 {
    private static final boolean ADD_ARM_LINKS = true;
    private static final boolean OFFSET_IMU_FRAMES = true;
@@ -37,9 +37,9 @@ public class StateEstimatorEstimatorEvaluatorRobot extends Robot
 
    private final Vector3d gravitationalAcceleration = new Vector3d(0.0, 0.0, -9.81);
    
-   public StateEstimatorEstimatorEvaluatorRobot()
+   public StateEstimatorEvaluatorRobot()
    {
-      super(StateEstimatorEstimatorEvaluatorRobot.class.getSimpleName());
+      super(StateEstimatorEvaluatorRobot.class.getSimpleName());
 
       rootJoint = new FloatingJoint("root", new Vector3d(), this);
 
@@ -155,8 +155,8 @@ public class StateEstimatorEstimatorEvaluatorRobot extends Robot
          }
          
          imuMounts.add(imuMount0);
-//         imuMounts.add(imuMount1);
-//         imuMounts.add(imuMount2);
+         imuMounts.add(imuMount1);
+         imuMounts.add(imuMount2);
 
 //         velocityPoints.add(velocityPoint0);
          velocityPoints.add(velocityPoint2);

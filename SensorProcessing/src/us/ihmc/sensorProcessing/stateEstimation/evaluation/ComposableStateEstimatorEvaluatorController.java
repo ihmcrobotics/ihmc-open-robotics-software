@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.stateEstimation;
+package us.ihmc.sensorProcessing.stateEstimation.evaluation;
 
 import java.util.ArrayList;
 
@@ -16,6 +16,15 @@ import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.sensorProcessing.simulatedSensors.SimulatedSensorsFactory;
 import us.ihmc.sensorProcessing.simulatedSensors.IMUDefinition;
 import us.ihmc.sensorProcessing.simulatedSensors.PointVelocitySensorDefinition;
+import us.ihmc.sensorProcessing.stateEstimation.ComposableOrientationAndCoMEstimatorCreator;
+import us.ihmc.sensorProcessing.stateEstimation.ComposableOrientationEstimatorCreator;
+import us.ihmc.sensorProcessing.stateEstimation.DesiredCoMAndAngularAccelerationOutputPortsHolder;
+import us.ihmc.sensorProcessing.stateEstimation.OrientationEstimator;
+import us.ihmc.sensorProcessing.stateEstimation.SensorOutputPortsHolder;
+import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.AngularVelocitySensorConfiguration;
+import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.LinearAccelerationSensorConfiguration;
+import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.OrientationSensorConfiguration;
+import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.PointVelocitySensorConfiguration;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.AngleTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
@@ -56,7 +65,7 @@ public class ComposableStateEstimatorEvaluatorController implements RobotControl
    private final DoubleYoVariable comPositionError = new DoubleYoVariable("comPositionError", registry);
    private final DoubleYoVariable comVelocityError = new DoubleYoVariable("comVelocityError", registry);
 
-   private final StateEstimatorEstimatorEvaluatorRobot robot;
+   private final StateEstimatorEvaluatorRobot robot;
    private final double controlDT;
 
    private final StateEstimatorEvaluatorFullRobotModel estimatedFullRobotModel;
@@ -66,7 +75,7 @@ public class ComposableStateEstimatorEvaluatorController implements RobotControl
    private final ControlFlowGraph controlFlowGraph;
    private final OrientationEstimator orientationEstimator;
 
-   public ComposableStateEstimatorEvaluatorController(StateEstimatorEstimatorEvaluatorRobot robot, double controlDT,
+   public ComposableStateEstimatorEvaluatorController(StateEstimatorEvaluatorRobot robot, double controlDT,
            SensorOutputPortsHolder sensorOutputPortsHolder, 
            DesiredCoMAndAngularAccelerationOutputPortsHolder desiredCoMAndAngularAccelerationOutputPortsHolder)
    {

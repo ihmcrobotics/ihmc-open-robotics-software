@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.stateEstimation;
+package us.ihmc.sensorProcessing.stateEstimation;
 
 import java.util.HashMap;
 import java.util.List;
