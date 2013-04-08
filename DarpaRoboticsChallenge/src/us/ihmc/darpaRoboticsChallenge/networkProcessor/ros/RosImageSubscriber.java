@@ -11,7 +11,7 @@ import java.net.URISyntaxException;
 
 import us.ihmc.graphics3DAdapter.camera.JPanelCameraStreamer;
 
-public abstract class RosImageSubscriber extends RosTopicSubscriber<sensor_msgs.Image>
+public abstract class RosImageSubscriber extends RosTopicSubscriber<sensor_msgs.CompressedImage>
 {
    private final ColorModel colorModel;
    
@@ -23,10 +23,10 @@ public abstract class RosImageSubscriber extends RosTopicSubscriber<sensor_msgs.
       this.colorModel = new ComponentColorModel(colorSpace, false, false, Transparency.OPAQUE, DataBuffer.TYPE_BYTE);
    }
 
-   public void onNewMessage(sensor_msgs.Image message)
+   public void onNewMessage(sensor_msgs.CompressedImage message)
    {
       long timeStamp = message.getHeader().getStamp().totalNsecs();
-      imageReceived(timeStamp, RosTools.bufferedImageFromRosMessage(colorModel, message));
+      imageReceived(timeStamp, RosTools.bufferedImageFromRosMessageJpeg(colorModel, message));
    }
 
    protected abstract void imageReceived(long timeStamp, BufferedImage image);

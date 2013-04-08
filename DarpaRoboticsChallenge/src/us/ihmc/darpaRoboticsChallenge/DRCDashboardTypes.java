@@ -9,7 +9,7 @@ public class DRCDashboardTypes {
 		QUAL1, QUAL2, QUAL3, QUAL4, VRC1, VRC2, VRC3, DRIVING_TASK1, DRIVING_TEST_TRACK;
 	}
 	
-	private static final HashMap<DRCTask, String> tasks = new HashMap<DRCTask, String>()
+	private static final HashMap<DRCTask, String> taskPath = new HashMap<DRCTask, String>()
 	{
 		private static final long serialVersionUID = 7295926598139266176L;
 
@@ -26,9 +26,9 @@ public class DRCDashboardTypes {
 		}
 	};
 	
-	public static String getDRCTask(DRCTask drcTask)
+	public static String getDRCTaskLaunchScriptPath(DRCTask drcTask)
 	{
-		return tasks.get(drcTask);
+		return taskPath.get(drcTask);
 	}
 	
 	public enum RobotModel

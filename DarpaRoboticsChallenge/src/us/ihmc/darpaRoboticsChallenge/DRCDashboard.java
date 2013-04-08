@@ -6,7 +6,10 @@ import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.net.InetAddress;
+import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 
 import javax.swing.BorderFactory;
@@ -61,7 +64,7 @@ public class DRCDashboard
    private JPanel rightPanel;
    private JLabel gazeboProcessListLabel;
    private JList gazeboProcessList;
-   private ListModel gazeboProcessListModel;
+   private DefaultListModel gazeboProcessListModel;
 
    private JScrollPane gazeboProcessListScroller;
 
@@ -72,6 +75,9 @@ public class DRCDashboard
    private JTextField rosCorePortField;
    private JButton modifyRosNetworkConfigsButton;
    private JButton launchGazeboSimButton;
+//   private JButton launchDrivingInterfaceButton;
+   
+   private SimpleProcessSpawner spawner = new SimpleProcessSpawner();
 
    public DRCDashboard()
    {
@@ -187,8 +193,19 @@ public class DRCDashboard
       taskPanel.add(taskLabel, c);
    
       c.gridy = 1;
-//      taskCombo = new JComboBox(new String[] { "One", "Two", "Three", "Four" });
       taskCombo = new JComboBox(DRCDashboardTypes.DRCTask.values());
+      taskCombo.addActionListener(new ActionListener()
+      {
+		public void actionPerformed(ActionEvent e)
+		{
+			gazeboProcessListModel.clear();
+			if(taskCombo.getSelectedItem().toString().contains("DRIVING"))
+			{
+				gazeboProcessListModel.addElement("Topview Camera");
+				gazeboProcessListModel.addElement("Rearview Camera");
+			}
+		}
+      });
       taskPanel.add(taskCombo, c);
    }
 
@@ -212,7 +229,6 @@ public class DRCDashboard
       robotModelSelectionPanel = new JPanel(new GridLayout(2, 1));
       leftPanel.add(robotModelSelectionPanel, c);
       robotModelSelectionLabel = new JLabel("Select Robot Model: ", JLabel.LEFT);
-//      robotModelSelectionCombo = new JComboBox(new String[] { "One", "Two" });
       robotModelSelectionCombo = new JComboBox(DRCDashboardTypes.RobotModel.values());
       robotModelSelectionPanel.add(robotModelSelectionLabel);
       robotModelSelectionPanel.add(robotModelSelectionCombo);
@@ -267,6 +283,8 @@ public class DRCDashboard
    
       setupLaunchButton();
       
+//      setupInterfaceButton();
+      
       setupEditInfoButton();
    }
 
@@ -292,6 +310,36 @@ public class DRCDashboard
       c.insets = new Insets(10, 35, 10, 35);
       gazeboProcessListModel = new DefaultListModel();
       gazeboProcessList = new JList(gazeboProcessListModel);
+      gazeboProcessList.addMouseListener(new MouseListener()
+      {		
+
+      public void mouseClicked(MouseEvent e) {
+			if(e.getClickCount() == 2)
+			{
+			   
+				if(gazeboProcessList.getSelectedValue().toString() == "Topview Camera")
+				{
+					String[] arguments = new String[] {ROS_MASTER_URI,"topviewCam","/topview/compressed"};
+		        	spawner.spawn(ExternalCameraFeed.class, arguments);
+				}
+				
+				if(gazeboProcessList.getSelectedValue().toString() == "Rearview Camera")
+				{
+		        	String[] arguments = new String[] {ROS_MASTER_URI,"rearviewCam","/rearview/compressed"};
+		        	spawner.spawn(ExternalCameraFeed.class, arguments);
+				}
+			}
+		}
+
+		public void mousePressed(MouseEvent e) {}
+
+		public void mouseReleased(MouseEvent e) {}
+
+		public void mouseEntered(MouseEvent e) {}
+
+		public void mouseExited(MouseEvent e) {}
+		
+      });
       gazeboProcessList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
       gazeboProcessList.setLayoutOrientation(JList.VERTICAL);
       gazeboProcessListScroller = new JScrollPane(gazeboProcessList);
@@ -339,17 +387,40 @@ public class DRCDashboard
 	   c.gridx = 0;
 	   c.gridwidth = 1;
 	   c.anchor = GridBagConstraints.LAST_LINE_START;
-	   launchGazeboSimButton = new JButton("Launch");
+	   launchGazeboSimButton = new JButton("Launch Sim");
 	   networkInfoPanel.add(launchGazeboSimButton, c);
 	   
 	   launchGazeboSimButton.addActionListener(new ActionListener()
-	      {
-	         public void actionPerformed(ActionEvent e)
-	         {
-	        	 new GazeboSimLauncher((LocalCloudMachines)cloudMachineSelectionCombo.getSelectedItem(), (DRCDashboardTypes.DRCTask)taskCombo.getSelectedItem());
-	         }
-	      });
+	   {
+		   public void actionPerformed(ActionEvent e)
+	       {
+			   new GazeboSimLauncher((LocalCloudMachines)cloudMachineSelectionCombo.getSelectedItem(), (DRCDashboardTypes.DRCTask)taskCombo.getSelectedItem());
+	       }
+	   });
    }
+   
+//   private void setupInterfaceButton()
+//   {
+//	   c.gridy = 3;
+//	   c.gridx = 1;
+//	   c.gridwidth = 1;
+//	   c.anchor = GridBagConstraints.LAST_LINE_START;
+//	   launchDrivingInterfaceButton = new JButton("Driving UI");
+//	   networkInfoPanel.add(launchDrivingInterfaceButton, c);
+//	   
+//	   launchDrivingInterfaceButton.addActionListener(new ActionListener()
+//	   {
+//		   public void actionPerformed(ActionEvent e)
+//		   {
+//			   String[] arguments = new String[] {"http://" + cloudMachineSelectionCombo.getSelectedItem().toString() + ":11311"};
+//			   try {
+//				DRCGazeboDrivingInterface.main(arguments);
+//			} catch (URISyntaxException e1) {
+//				e1.printStackTrace();
+//			}
+//		   }
+//	   });
+//   }
    
    private void setupEditInfoButton()
    {
@@ -391,7 +462,7 @@ public class DRCDashboard
    private void updateRosMasterURI()
    {
       ROS_MASTER_URI = "http://" + DRCLocalCloudConfig.getIPAddress((LocalCloudMachines) cloudMachineSelectionCombo.getSelectedItem());
-      if(rosCorePortField != null) ROS_MASTER_URI += " :" + rosCorePortField.getText();
+      if(rosCorePortField != null) ROS_MASTER_URI += ":" + rosCorePortField.getText();
       else ROS_MASTER_URI += DRCLocalCloudConfig.DEFAULT_ROSCORE_PORT;
       rosUriLabel.setText("ROS Master URI: " + ROS_MASTER_URI.substring(0, ROS_MASTER_URI.lastIndexOf(':') + 1));
    }
