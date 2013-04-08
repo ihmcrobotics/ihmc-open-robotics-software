@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.stateEstimation;
+package us.ihmc.sensorProcessing.stateEstimation;
 
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Point3d;

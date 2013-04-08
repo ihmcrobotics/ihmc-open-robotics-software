@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.stateEstimation.measurementModelElements;
+package us.ihmc.sensorProcessing.stateEstimation.measurmentModelElements;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -7,7 +7,6 @@ import java.util.Set;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
-import us.ihmc.commonWalkingControlModules.stateEstimation.MeasurementModelElement;
 import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.utilities.math.MathTools;

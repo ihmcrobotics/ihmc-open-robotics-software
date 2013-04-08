@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.stateEstimation.measurementModelElements;
+package us.ihmc.sensorProcessing.stateEstimation.measurementModelElements;
 
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Quat4d;
@@ -8,8 +8,8 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.EjmlUnitTests;
 
-import us.ihmc.commonWalkingControlModules.stateEstimation.MeasurementModelElement;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
+import us.ihmc.sensorProcessing.stateEstimation.measurmentModelElements.MeasurementModelElement;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.geometry.Direction;

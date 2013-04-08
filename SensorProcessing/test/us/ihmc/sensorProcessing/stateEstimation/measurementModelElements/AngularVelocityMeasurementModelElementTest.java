@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.stateEstimation.measurementModelElements;
+package us.ihmc.sensorProcessing.stateEstimation.measurementModelElements;
 
 import java.util.Random;
 
@@ -12,6 +12,7 @@ import us.ihmc.controlFlow.ControlFlowElement;
 import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.controlFlow.NullControlFlowElement;
+import us.ihmc.sensorProcessing.stateEstimation.measurmentModelElements.AngularVelocityMeasurementModelElement;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;

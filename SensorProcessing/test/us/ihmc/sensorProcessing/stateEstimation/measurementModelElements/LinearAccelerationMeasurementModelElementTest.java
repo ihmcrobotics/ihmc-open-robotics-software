@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.stateEstimation.measurementModelElements;
+package us.ihmc.sensorProcessing.stateEstimation.measurementModelElements;
 
 import java.util.Random;
 
@@ -9,12 +9,13 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.EjmlUnitTests;
 import org.junit.Test;
 
-import us.ihmc.commonWalkingControlModules.stateEstimation.CenterOfMassBasedFullRobotModelUpdater;
 import us.ihmc.controlFlow.ControlFlowElement;
 import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.controlFlow.NullControlFlowElement;
 import us.ihmc.sensorProcessing.simulatedSensors.SimulatedLinearAccelerationSensor;
+import us.ihmc.sensorProcessing.stateEstimation.CenterOfMassBasedFullRobotModelUpdater;
+import us.ihmc.sensorProcessing.stateEstimation.measurmentModelElements.LinearAccelerationMeasurementModelElement;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
