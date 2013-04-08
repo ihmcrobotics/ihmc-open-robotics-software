@@ -11,6 +11,7 @@ import org.jgrapht.graph.SimpleGraph;
 
 import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
+import us.ihmc.sensorProcessing.stateEstimation.processModelElements.ProcessModelElement;
 
 public class ProcessModelAssembler
 {
