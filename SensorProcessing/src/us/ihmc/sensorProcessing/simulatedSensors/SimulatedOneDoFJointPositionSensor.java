@@ -3,22 +3,23 @@ package us.ihmc.sensorProcessing.simulatedSensors;
 import org.apache.commons.lang.mutable.MutableDouble;
 
 import us.ihmc.controlFlow.ControlFlowOutputPort;
-import us.ihmc.utilities.screwTheory.OneDoFJoint;
+
+import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJoint;
 
 public class SimulatedOneDoFJointPositionSensor extends SimulatedSensor<MutableDouble>
 {
    private final ControlFlowOutputPort<Double> jointPositionOutputPort = createOutputPort();
-   private final OneDoFJoint joint;
+   private final OneDegreeOfFreedomJoint joint;
    private final MutableDouble jointPosition = new MutableDouble();
 
-   public SimulatedOneDoFJointPositionSensor(String name, OneDoFJoint joint)
+   public SimulatedOneDoFJointPositionSensor(String name, OneDegreeOfFreedomJoint joint)
    {
       this.joint = joint;
    }
 
    public void startComputation()
    {
-      jointPosition.setValue(joint.getQ());
+      jointPosition.setValue(joint.getQ().getDoubleValue());
       corrupt(jointPosition);
       jointPositionOutputPort.setData(jointPosition.toDouble());
    }
