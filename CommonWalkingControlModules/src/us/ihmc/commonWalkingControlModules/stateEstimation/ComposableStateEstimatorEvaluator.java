@@ -18,8 +18,12 @@ public class ComposableStateEstimatorEvaluator
    public ComposableStateEstimatorEvaluator()
    {
       StateEstimatorEstimatorEvaluatorRobot robot = new StateEstimatorEstimatorEvaluatorRobot();
-      ComposableStateEstimatorEvaluatorController controller = new ComposableStateEstimatorEvaluatorController(robot, controlDT);
-      robot.setController(controller, simTicksPerControlDT);
+      
+      SimulatedSensorController simulatedSensorController = new SimulatedSensorController(robot, controlDT);
+      
+      ComposableStateEstimatorEvaluatorController composableStateEstimatorEvaluatorController = new ComposableStateEstimatorEvaluatorController(robot, controlDT, simulatedSensorController, simulatedSensorController);
+      robot.setController(simulatedSensorController, simTicksPerControlDT);
+      robot.setController(composableStateEstimatorEvaluatorController, simTicksPerControlDT);
 
       SimulationConstructionSet scs = new SimulationConstructionSet(robot, SHOW_GUI, 32000);
       scs.addYoVariableRegistry(registry);

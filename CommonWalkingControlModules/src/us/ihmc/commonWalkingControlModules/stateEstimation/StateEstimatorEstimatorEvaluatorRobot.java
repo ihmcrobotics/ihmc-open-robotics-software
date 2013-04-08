@@ -26,6 +26,9 @@ public class StateEstimatorEstimatorEvaluatorRobot extends Robot
    private static final boolean OFFSET_IMU_FRAMES = true;
    private static final boolean ROTATE_IMU_FRAMES = true;
    
+   private static final boolean SET_INITIAL_POSITIONS = true;
+   private static final boolean SET_INITIAL_VELOCITIES = true;
+   
    private static final long serialVersionUID = 2647791981594204134L;
    private final Link bodyLink;
    private final FloatingJoint rootJoint;
@@ -136,23 +139,26 @@ public class StateEstimatorEstimatorEvaluatorRobot extends Robot
          KinematicPoint velocityPoint2 = new KinematicPoint("vp2", velocityPointOffsetVector2, this);
          pinJoint2.addKinematicPoint(velocityPoint2);
          
-//         Vector3d velocityPointOffsetVector2A = new Vector3d(0.0, 0.3, 0.0);
-//         KinematicPoint velocityPoint2A = new KinematicPoint("vp2A", velocityPointOffsetVector2A, this);
-//         pinJoint2.addKinematicPoint(velocityPoint2A);
 
          pinJoint1.addJoint(pinJoint2);
 
-         pinJoint1.setQ(1.2);
-         pinJoint2.setQ(0.8);
-
-//         pinJoint1.setQd(-0.5);
-//         pinJoint2.setQd(0.77);
-
+         if (SET_INITIAL_POSITIONS)
+         {
+            pinJoint1.setQ(1.2);
+            pinJoint2.setQ(0.8);
+         }
+         
+         if (SET_INITIAL_VELOCITIES)
+         {
+            pinJoint1.setQd(-0.5);
+            pinJoint2.setQd(0.77);
+         }
+         
          imuMounts.add(imuMount0);
-         imuMounts.add(imuMount1);
-         imuMounts.add(imuMount2);
+//         imuMounts.add(imuMount1);
+//         imuMounts.add(imuMount2);
 
-         velocityPoints.add(velocityPoint0);
+//         velocityPoints.add(velocityPoint0);
          velocityPoints.add(velocityPoint2);
       }
 
@@ -174,13 +180,19 @@ public class StateEstimatorEstimatorEvaluatorRobot extends Robot
 
       if (ADD_ARM_LINKS)
       {
+         if (SET_INITIAL_POSITIONS)
+         {
          rootJoint.setPosition(new Point3d(0.0, 0.0, 0.4));
          Matrix3d rotationMatrix = new Matrix3d();
          rotationMatrix.rotX(0.6);
          rootJoint.setRotation(rotationMatrix);
-
-         rootJoint.setAngularVelocityInBody(new Vector3d(0.1, 0.2, 0.07));
-//         rootJoint.setAngularVelocityInBody(new Vector3d(0.2, 2.2, 0.3));
+         }
+         
+         if (SET_INITIAL_VELOCITIES)
+         {
+            rootJoint.setAngularVelocityInBody(new Vector3d(0.1, 0.2, 0.07));
+            //         rootJoint.setAngularVelocityInBody(new Vector3d(0.2, 2.2, 0.3));
+         }
       }
 
       else
@@ -190,8 +202,11 @@ public class StateEstimatorEstimatorEvaluatorRobot extends Robot
          rootJointPostionAndRotation.setTranslation(new Vector3d(0.0, 0.0, 0.4));
          rootJoint.setRotationAndTranslation(rootJointPostionAndRotation);
          
-         rootJoint.setVelocity(new Vector3d());
-//         rootJoint.setAngularVelocityInBody(new Vector3d(0.2, 2.5, 0.0));
+         if (SET_INITIAL_VELOCITIES)
+         {
+            rootJoint.setVelocity(new Vector3d());
+            //         rootJoint.setAngularVelocityInBody(new Vector3d(0.2, 2.5, 0.0));
+         }
       }
 
       Vector3d externalForceVector = new Vector3d(gravitationalAcceleration);
