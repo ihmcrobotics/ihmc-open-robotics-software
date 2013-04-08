@@ -1,0 +1,132 @@
+package us.ihmc.darpaRoboticsChallenge;
+
+import java.awt.Dimension;
+import java.awt.Transparency;
+import java.awt.color.ColorSpace;
+import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
+import java.awt.image.ComponentColorModel;
+import java.awt.image.DataBuffer;
+import java.net.URI;
+import java.net.URISyntaxException;
+
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+
+import org.ros.message.MessageListener;
+import org.ros.namespace.GraphName;
+import org.ros.node.AbstractNodeMain;
+import org.ros.node.ConnectedNode;
+import org.ros.node.DefaultNodeMainExecutor;
+import org.ros.node.NodeConfiguration;
+import org.ros.node.NodeMainExecutor;
+import org.ros.node.topic.Subscriber;
+
+import us.ihmc.darpaRoboticsChallenge.DRCGazeboDrivingInterface.BackgroundVideoExporter;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.ros.RosTools;
+import us.ihmc.utilities.keyboardAndMouse.RepeatingReleasedEventsFixer;
+
+class ExternalCameraFeed extends AbstractNodeMain
+{
+	public static final boolean COLOR_IMAGE = true;
+	
+	private static boolean RECORD = false;
+	
+	private Subscriber<sensor_msgs.CompressedImage> cameraSubscriber;
+	private BufferedImage cameraImage;
+	private String cameraName, topicName;
+	private JFrame cameraFrame;
+	private JPanel cameraPanel;
+	private BackgroundVideoExporter cameraVideoExporter;
+
+	private ColorSpace colorSpace;
+	private ColorModel colorModel;
+	
+//	private ConnectedNode connectedNode;
+	
+	public ExternalCameraFeed(String cameraName, String topicName)
+	{
+		new RepeatingReleasedEventsFixer().install();
+		
+		this.cameraName = cameraName;
+		this.topicName = topicName;
+		
+		colorSpace = (COLOR_IMAGE ? ColorSpace.getInstance(ColorSpace.CS_sRGB) : ColorSpace.getInstance(ColorSpace.CS_GRAY));
+		colorModel = new ComponentColorModel(colorSpace, false, false, Transparency.OPAQUE, DataBuffer.TYPE_BYTE);
+	}
+	
+	public GraphName getDefaultNodeName() {
+		return GraphName.of("darpaRoboticsChallenge/ExternalCameraFeed/" + cameraName);
+	}
+	
+	public void onStart(ConnectedNode connectedNode)
+	{
+//		this.connectedNode = connectedNode;
+		
+		setupJFrame();
+		
+		setupSubscriber(connectedNode);
+		
+		setupCameraSubscriberListener();
+	}
+	
+	private void setupCameraSubscriberListener()
+	{
+		cameraSubscriber.addMessageListener(new MessageListener<sensor_msgs.CompressedImage>()
+		{
+
+			public void onNewMessage(sensor_msgs.CompressedImage message)
+			{
+				if (cameraFrame.isVisible())
+				{
+					cameraImage = RosTools.bufferedImageFromRosMessageJpeg(colorModel, message);
+					if (RECORD)
+						cameraVideoExporter.pushImage(RosTools.bufferedImageFromRosMessageJpeg(colorModel, message), message.getHeader().getStamp().totalNsecs());
+					cameraPanel.getGraphics().drawImage(cameraImage.getScaledInstance(cameraImage.getWidth(), cameraImage.getHeight(), 0), 0, 0, null);
+				}
+			}
+			
+		});
+	}
+	
+	private void setupSubscriber(ConnectedNode connectedNode)
+	{
+		cameraSubscriber = connectedNode.newSubscriber(topicName, sensor_msgs.CompressedImage._TYPE);
+	}
+	
+	private void setupJFrame()
+	{
+		cameraFrame = new JFrame(topicName);
+		cameraFrame.setMinimumSize(new Dimension(1024, 544));
+		
+		cameraPanel = new JPanel();
+		
+		cameraFrame.add(cameraPanel);
+		cameraFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		
+		cameraFrame.setVisible(true);
+	}
+	
+	public static void main(String[] args) throws URISyntaxException
+	{
+		if (args.length < 3)
+		{
+			System.err.println("Insufficient arguments provided. Please provide IP of MASTER, camera name, and topic name.");
+			args = new String[] {"I'm going ", "to break ", "your camera."};
+		}
+		
+		URI master = new URI(args[0]);
+		
+		try
+		{
+			ExternalCameraFeed externalCamera = new ExternalCameraFeed(args[1], args[2]);
+			NodeConfiguration nodeConfiguration = RosTools.createNodeConfiguration(master);
+			NodeMainExecutor nodeMainExecutor = DefaultNodeMainExecutor.newDefault();
+			nodeMainExecutor.execute(externalCamera, nodeConfiguration);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
+}
