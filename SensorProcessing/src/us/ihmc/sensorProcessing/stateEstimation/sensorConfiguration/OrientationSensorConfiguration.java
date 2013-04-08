@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.stateEstimation;
+package us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration;
 
 import javax.vecmath.Matrix3d;
 
