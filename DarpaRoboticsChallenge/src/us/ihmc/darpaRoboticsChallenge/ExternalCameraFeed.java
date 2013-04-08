@@ -102,7 +102,7 @@ class ExternalCameraFeed extends AbstractNodeMain
 		cameraPanel = new JPanel();
 		
 		cameraFrame.add(cameraPanel);
-		cameraFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		cameraFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
 		cameraFrame.setVisible(true);
 	}
