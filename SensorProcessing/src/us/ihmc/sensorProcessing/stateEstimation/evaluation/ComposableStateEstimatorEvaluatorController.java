@@ -59,22 +59,22 @@ public class ComposableStateEstimatorEvaluatorController implements RobotControl
 
    private final ComposableStateEstimatorEvaluatorErrorCalculator composableStateEstimatorEvaluatorErrorCalculator;
    
-   public ComposableStateEstimatorEvaluatorController(StateEstimatorEvaluatorRobot robot, double controlDT,
-           SensorOutputPortsHolder sensorOutputPortsHolder, 
+   public ComposableStateEstimatorEvaluatorController(StateEstimatorEvaluatorRobot robot, 
+         StateEstimatorEvaluatorFullRobotModel estimatedFullRobotModel,
+         double controlDT,
+         SensorMap sensorMap, 
            DesiredCoMAndAngularAccelerationOutputPortsHolder desiredCoMAndAngularAccelerationOutputPortsHolder)
    {
       this.gravitationalAcceleration = new Vector3d();
       robot.getGravity(gravitationalAcceleration);
 
-      estimatedFullRobotModel = new StateEstimatorEvaluatorFullRobotModel(robot, robot.getIMUMounts(), robot.getVelocityPoints());
+      this.estimatedFullRobotModel = estimatedFullRobotModel;
       estimatedTwistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), estimatedFullRobotModel.getElevator());
       estimatedSpatialAccelerationCalculator = new SpatialAccelerationCalculator(estimatedFullRobotModel.getElevator(), estimatedTwistCalculator, 0.0, false);
 
       SensorConfigurationFactory SensorConfigurationFactory = new SensorConfigurationFactory(gravitationalAcceleration);
       
       // Sensor configurations for estimator
-      SensorMap sensorMap = createSensorMap(estimatedFullRobotModel, sensorOutputPortsHolder);
-      
       Collection<OrientationSensorConfiguration> orientationSensorConfigurations = SensorConfigurationFactory.createOrientationSensorConfigurations(sensorMap.getOrientationSensors());
 
       Collection<AngularVelocitySensorConfiguration> angularVelocitySensorConfigurations = SensorConfigurationFactory.createAngularVelocitySensorConfigurations(sensorMap.getAngularVelocitySensors());
@@ -83,7 +83,6 @@ public class ComposableStateEstimatorEvaluatorController implements RobotControl
             SensorConfigurationFactory.createLinearAccelerationSensorConfigurations(sensorMap.getLinearAccelerationSensors());
 
       Collection<PointVelocitySensorConfiguration> pointVelocitySensorConfigurations = SensorConfigurationFactory.createPointVelocitySensorConfigurations(sensorMap.getPointVelocitySensors());
-
 
       controlFlowGraph = new ControlFlowGraph();
       RigidBody estimationLink = estimatedFullRobotModel.getRootBody();
@@ -206,36 +205,4 @@ public class ComposableStateEstimatorEvaluatorController implements RobotControl
       return orientationCovarianceMatrix;
    }
    
-   public static SensorMap createSensorMap(SensorDefinitionHolder sensorDefinitionHolder, SensorOutputPortsHolder sensorOutputPortsHolder)
- {
-    SensorMap sensorMap = new SensorMap();
-
-    ArrayList<ControlFlowOutputPort<Matrix3d>> orientationOutputPorts = sensorOutputPortsHolder.getOrientationOutputPorts();
-    ArrayList<ControlFlowOutputPort<Vector3d>> angularVelocityOutputPorts = sensorOutputPortsHolder.getAngularVelocityOutputPorts();
-    ArrayList<ControlFlowOutputPort<Vector3d>> linearAccelerationOutputPorts = sensorOutputPortsHolder.getLinearAccelerationOutputPorts(); 
-    ArrayList<ControlFlowOutputPort<Vector3d>> pointVelocityOutputPorts = sensorOutputPortsHolder.getPointVelocitySensorOutputPorts();
-    
-    List<IMUDefinition> imuDefinitions = sensorDefinitionHolder.getIMUDefinitions();
-
-    for (int i = 0; i < imuDefinitions.size(); i++)
-    {
-       IMUDefinition imuDefinition = imuDefinitions.get(i);
-
-       sensorMap.addOrientationSensorPort(imuDefinition, orientationOutputPorts.get(i));
-       sensorMap.addAngularVelocitySensorPort(imuDefinition, angularVelocityOutputPorts.get(i));
-       sensorMap.addLinearAccelerationSensorPort(imuDefinition, linearAccelerationOutputPorts.get(i));
-    }
-
-    List<PointVelocitySensorDefinition> pointVelocitySensorDefinitions = sensorDefinitionHolder.getPointVelocitySensorDefinitions();
-    for (int i = 0; i < pointVelocitySensorDefinitions.size(); i++)
-    {
-       PointVelocitySensorDefinition pointVelocitySensorDefinition = pointVelocitySensorDefinitions.get(i);
-
-       sensorMap.addPointVelocitySensorPort(pointVelocitySensorDefinition, pointVelocityOutputPorts.get(i));
-    }
-
-    return sensorMap;
- }
-
-
 }
