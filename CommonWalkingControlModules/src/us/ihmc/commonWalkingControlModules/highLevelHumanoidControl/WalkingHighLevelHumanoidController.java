@@ -133,11 +133,6 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 
    protected final SideDependentList<FootSwitchInterface> footSwitches;
 
-   // FIXME: reimplement and improve com trajectory visualization
-   // private final BagOfBalls comTrajectoryBagOfBalls;
-   // private int comTrajectoryCounter = 0;
-
-   // private final BooleanYoVariable transferICPTrajectoryDone = new BooleanYoVariable("transferICPTrajectoryDone", registry);
    private final DoubleYoVariable minOrbitalEnergyForSingleSupport = new DoubleYoVariable("minOrbitalEnergyForSingleSupport", registry);
    private final DoubleYoVariable amountToBeInsideSingleSupport = new DoubleYoVariable("amountToBeInsideSingleSupport", registry);
    private final DoubleYoVariable amountToBeInsideDoubleSupport = new DoubleYoVariable("amountToBeInsideDoubleSupport", registry);
@@ -152,7 +147,6 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
    private final HashMap<ContactablePlaneBody, EndEffectorControlModule> endEffectorControlModules = new HashMap<ContactablePlaneBody,
                                                                                                         EndEffectorControlModule>();
 
-   // private final SideDependentList<PositionTrajectoryGenerator> footPositionTrajectoryGenerators;
    private final DoubleProvider swingTimeProvider;
    private final TrajectoryParametersProvider trajectoryParametersProvider;
    private final SideDependentList<YoVariableDoubleProvider> onEdgeInitialAngleProviders = new SideDependentList<YoVariableDoubleProvider>();
@@ -160,19 +154,13 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
    private final BooleanYoVariable stayOnToes = new BooleanYoVariable("stayOnToes", registry);
    private final DoubleYoVariable trailingFootPitch = new DoubleYoVariable("trailingFootPitch", registry);
 
-   // private final SideDependentList<OneDoFJoint[]> armJoints = new SideDependentList<OneDoFJoint[]>();
-   // private final SideDependentList<OneDoFJoint[]> handJoints = new SideDependentList<OneDoFJoint[]>();
-
    private final DoubleYoVariable kUpperBody = new DoubleYoVariable("kUpperBody", registry);
    private final DoubleYoVariable zetaUpperBody = new DoubleYoVariable("zetaUpperBody", registry);
    private final YoPositionProvider finalPositionProvider;
 
    private final DoubleYoVariable swingAboveSupportAnkle = new DoubleYoVariable("swingAboveSupportAnkle", registry);
 
-   // private Footstep nextFootstep = null;
    private final YoFramePose nextFootstepPose = new YoFramePose("nextFootstep", "", worldFrame, registry);
-
-// private Footstep nextNextFootstep = null;
 
    private final BooleanYoVariable readyToGrabNextFootstep = new BooleanYoVariable("readyToGrabNextFootstep", registry);
 
@@ -250,13 +238,12 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 
       this.finalPositionProvider = finalPositionProvider;
 
-      // this.footPositionTrajectoryGenerators = footPositionTrajectoryGenerators;
       this.icpTrajectoryHasBeenInitialized = new BooleanYoVariable("icpTrajectoryHasBeenInitialized", registry);
 
       rememberFinalICPFromSingleSupport.set(true);
       finalDesiredICPInWorld.set(Double.NaN, Double.NaN);
 
-      coefficientOfFriction.set(0.6);    // TODO: Make DRCFlatGroundWalkingTest work with this at 0.7
+      coefficientOfFriction.set(0.6);    // TODO: tune?
 
       setupLimbJacobians(fullRobotModel);
 
@@ -299,8 +286,6 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       finalPelvisOrientationProvider = new SettableOrientationProvider("finalPelvis", worldFrame, registry);
       this.pelvisOrientationTrajectoryGenerator = new OrientationInterpolationTrajectoryGenerator("pelvis", worldFrame, swingTimeProvider,
               initialPelvisOrientationProvider, finalPelvisOrientationProvider, registry);
-
-      // comTrajectoryBagOfBalls = new BagOfBalls(500, 0.01, "comBagOfBalls", YoAppearance.Red(), registry, dynamicGraphicObjectsListRegistry);
 
       setUpStateMachine(swingTimeProvider);
       readyToGrabNextFootstep.set(true);
