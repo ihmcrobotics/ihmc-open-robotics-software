@@ -65,7 +65,7 @@
 \begin_body
 
 \begin_layout Title
-A state estimator for legged robots
+A novel state estimator for floating base robots
 \end_layout
 
 \begin_layout Author
@@ -355,7 +355,7 @@ we conjecture that the CoM on average has smaller variations in its acceleration
 \begin_layout Itemize
 since IMUs are presumed to be mounted to any number of different links,
  there is no compelling argument to make any link be special by putting
- its position, velocity in the state vector.
+ its position and velocity in the state vector.
 \end_layout
 
 \begin_layout Itemize
@@ -1296,7 +1296,7 @@ In canonical state space form, we can write the dynamics as
 \begin_inset Formula 
 \begin{align}
 x_{d,n+1} & =F_{d}x_{d,n}+G_{d}u_{n}+w_{d,n}\nonumber \\
-w_{d} & \sim Q_{d}\label{eq:state-space-discrete}
+w_{d} & \sim\mathcal{N}\left(0,Q_{d}\right)\label{eq:state-space-discrete}
 \end{align}
 
 \end_inset
@@ -1392,7 +1392,8 @@ name "sec:Measurements"
 \end_layout
 
 \begin_layout Standard
-We define the following measurements:
+This section describes the measurement model used in our state estimator.
+ We define the following measurements:
 \end_layout
 
 \begin_layout Itemize
@@ -1415,7 +1416,7 @@ We define the following measurements:
 \begin_inset Formula $i$
 \end_inset
 
- in body frame, includes bias and noise (section 
+ in body frame, including bias and noise (section 
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "sub:IMU-angular-velocity"
@@ -1473,6 +1474,23 @@ reference "sub:Orientation-measurements"
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "sub:Point-velocity-measurements"
+
+\end_inset
+
+).
+\end_layout
+
+\begin_layout Standard
+The last entry can be used when a point is known to be in non-slipping contact
+ with the ground, for example.
+\end_layout
+
+\begin_layout Standard
+This section makes heavy use of twists and spatial acceleration vectors.
+ A primer on these concepts is provided in the appendix (section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:Appendix:-Primer-on"
 
 \end_inset
 
@@ -1717,6 +1735,14 @@ z_{\omega,i}=R_{p}^{i}\omega+\omega_{i}^{i,p}+b_{\omega_{i}}+v_{\omega,i}
 
 \end_inset
 
+where
+\begin_inset Formula 
+\[
+v_{\omega,i}\sim\mathcal{N}\left(0,R_{\omega,i}\right)
+\]
+
+\end_inset
+
 
 \end_layout
 
@@ -1814,7 +1840,7 @@ Let
 The measurement model for linear acceleration is
 \begin_inset Formula 
 \begin{equation}
-z_{\dot{v},i}=R_{w}^{m}\left(\ddot{p}_{i}^{w}+g\right)+b_{\dot{v},i}\label{eq:linear-acceleration-measurement}
+z_{\dot{v},i}=R_{w}^{m}\left(\ddot{p}_{i}^{w}+g\right)+b_{\dot{v},i}+v_{\dot{v},i}\label{eq:linear-acceleration-measurement}
 \end{equation}
 
 \end_inset
@@ -1823,7 +1849,15 @@ where
 \begin_inset Formula $g$
 \end_inset
 
- is gravitational acceleration.
+ is gravitational acceleration, and where
+\begin_inset Formula 
+\[
+v_{\dot{v},i}\sim\mathcal{N}\left(0,R_{\dot{v},i}\right)
+\]
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Subsubsection
@@ -2939,86 +2973,109 @@ name "sub:Orientation-measurements"
 \end_layout
 
 \begin_layout Standard
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-TODO: order of rotations, sign of output matrix.
- Add noise
-\end_layout
-
+Orientation sensor 
+\begin_inset Formula $i$
 \end_inset
 
-
-\end_layout
-
-\begin_layout Standard
-For the orientation measurements, we first need to convert the measured
- quaternion to a rotation vector error.
-\end_layout
-
-\begin_layout Standard
-The quaternion 
+ measures the quaternion 
 \begin_inset Formula $q_{i}^{w}$
 \end_inset
 
- is directly measured by orientation sensor 
+, describing the orientation of orientation measurement frame 
 \begin_inset Formula $i$
 \end_inset
 
+ with respect to the world 
+\begin_inset Formula $w$
+\end_inset
+
 .
- Note that
+ This quaternion can be written as
 \begin_inset Formula 
 \[
-q=q_{p}^{w}=q_{i}^{w}\otimes q_{p}^{i}
+q_{i}^{w}=q_{p}^{w}\otimes q_{i}^{p}
 \]
 
 \end_inset
 
+i.e.
+ the measured quaternion is a function of the orientation of the orientation
+ estimation frame 
+\begin_inset Formula $p$
+\end_inset
 
-\end_layout
+ with respect to the world 
+\begin_inset Formula $w$
+\end_inset
 
-\begin_layout Standard
-We are measuring the orientation of IMU 
+, and of the joint angles of the joints between frames 
+\begin_inset Formula $p$
+\end_inset
+
+ and 
 \begin_inset Formula $i$
 \end_inset
 
 .
- It will be a function of the orientation of the orientation frame and the
- joint angles.
- Hence, define the measurement
+ Noting that 
+\begin_inset Formula $q_{p}^{w}=q$
+\end_inset
+
+ and posmultiplying a noise quaternion 
+\begin_inset Formula $w_{q}$
+\end_inset
+
+, we obtain our measurement model
 \end_layout
 
 \begin_layout Standard
 \begin_inset Formula 
 \[
-z_{q,i}=q_{p}^{w}\otimes q_{i}^{p}
+z_{q,i}=q\otimes q_{i}^{p}\otimes w_{q}
 \]
 
 \end_inset
 
-Note that if the joint angle measurements that are needed to find 
-\begin_inset Formula $q_{p}^{i}$
+Note that the noise quaternion 
+\begin_inset Formula $w_{q}$
+\end_inset
+
+ has to satisfy the constraint that it has unit length.
+ It is therefore not the case that each of the components of this noise
+ quaternion has an independent Gaussian distribution.
+ Note also that if the joint angle measurements that are needed to find
+ 
+\begin_inset Formula $q_{i}^{p}$
 \end_inset
 
  are noisy, their covariances will have to be factored into the measurement
  through the Jacobian between 
-\begin_inset Formula $i$
-\end_inset
-
- and 
 \begin_inset Formula $p$
 \end_inset
 
+ and 
+\begin_inset Formula $i$
+\end_inset
+
 .
- For the VRC, these joint angle measurements are perfect however.
 \end_layout
 
 \begin_layout Standard
-Also define the measurement residual
+The predicted measurement is written as
 \begin_inset Formula 
 \[
-y_{q,i}=z_{q,i}^{-1}\otimes\hat{q}
+\hat{z}_{q,i}=\hat{q}\otimes q_{i}^{p}
+\]
+
+\end_inset
+
+and we define the measurement residual as
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+y_{q,i}=\hat{z}_{q,i}^{-1}\otimes z_{q,i}
 \]
 
 \end_inset
@@ -3043,12 +3100,61 @@ where
 \begin_inset Formula 
 \[
 \chi:q=\left(\begin{array}{c}
-q_{s}\\
-q_{v}
+q_{v}\\
+q_{s}
 \end{array}\right)\mapsto\chi\left(q\right)=\begin{cases}
 2\arctan\left(\left\Vert q_{v}\right\Vert ,q_{s}\right)\frac{q_{v}}{\left\Vert q_{v}\right\Vert } & \left\Vert q_{v}\right\Vert \neq0\\
 0 & \left\Vert q_{v}\right\Vert =0
 \end{cases}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The measurement residual can also 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\hat{R}_{p}^{w}=R_{p}^{w}R_{\phi}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\hat{R}_{i}^{w}=\hat{R}_{p}^{w}R_{i}^{p}=R_{p}^{w}R_{\phi}R_{i}^{p}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\left(\hat{R}_{i}^{w}\right)^{-1}R_{i}^{w} & =R_{p}^{i}R_{\phi}^{-1}R_{w}^{p}R_{p}^{w}R_{i}^{p}\\
+ & =R_{p}^{i}R_{\phi}^{-1}R_{i}^{p}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\hat{z}_{R_{i}^{w}}
 \]
 
 \end_inset
@@ -3065,7 +3171,7 @@ In canonical form, the measurement residual can be written in terms of the
  as 
 \begin_inset Formula 
 \[
-y_{\phi,i}=z_{\phi,i}-H_{\phi,i}\hat{\phi}
+y_{\phi,i}=H_{\phi,i}\hat{\phi}
 \]
 
 \end_inset
@@ -3079,7 +3185,7 @@ where
 \end_inset
 
  and 
-\begin_inset Formula $H_{\phi,i}=-I_{3}$
+\begin_inset Formula $H_{\phi,i}=I_{3}$
 \end_inset
 
 .
@@ -3357,6 +3463,13 @@ I & R_{p}^{w}\left(\tilde{r}_{p}-\tilde{p}_{i}^{p}\right) & -R_{p}^{w}\tilde{v}_
 
 \begin_layout Section
 Appendix: Primer on using screw theory for kinematics
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:Appendix:-Primer-on"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
