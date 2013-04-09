@@ -73,6 +73,13 @@ Twan Koolen, Jerry Pratt
 \end_layout
 
 \begin_layout Standard
+\begin_inset Newpage clearpage
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
 \begin_inset CommandInset toc
 LatexCommand tableofcontents
 
@@ -81,48 +88,156 @@ LatexCommand tableofcontents
 
 \end_layout
 
+\begin_layout Standard
+\begin_inset Newpage clearpage
+\end_inset
+
+
+\end_layout
+
 \begin_layout Section
-Overall estimator design
+Introduction and overall estimator design
 \end_layout
 
 \begin_layout Standard
-TODO:
+This document describes the design of a novel state estimator for use in
+ legged robots.
+ The goal of the estimator is to determine the robot's position and orientation
+ in the world, as well as its linear and angular velocity and linear and
+ angular acceleration, given noisy measurements.
+ Joint positions, velocities, and accelerations are assumed to be known
+ or estimated separately, leaving only the task of localization with respect
+ to the world to the presented estimator.
+ Its design can be used with any number of angular velocity, linear acceleration
+, and orientation sensors, attached to any link of the robot.
+ In addition, any number of body-fixed point velocity measurements can be
+ incorporated.
+ This latter type of measurement can be used for example when it is known
+ that certain points on the robot's feet are in nonslipping contact with
+ the ground.
+ The estimator also incorporates information about the desired accelerations
+ of the robot's links, as supplied e.g.
+ by an inverse-dynamics-based controller, which may give it an advantage
+ over other estimation approaches used thus far.
+\end_layout
+
+\begin_layout Standard
+Since our process model is nonlinear, a simple Kalman filter will not do.
+ The main options for nonlinear process models are the extended Kalman filter,
+ the unscented Kalman filter, and the particle filter.
+ In the extended Kalman filter, the process model and measurement model
+ are linearized about the current state estimate, and a regular (time-variant)
+ Kalman filter is applied to the linearized model.
+ In an unscented Kalman filter, a finite set of sample points are chosen
+ and propagated through the nonlinear dynamics, from which the mean and
+ covariance of the estimate are determined, to be used in the Kalman filter
+ update equations.
+ The particle filter is a fully nonlinear filter, that can be considered
+ a statistical, brute-force approach to estimation that often works well
+ for problems that are difficult for the conventional Kalman filter 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Simon2006"
+
+\end_inset
+
+.
+ We have chosen to use the extended Kalman filter approach, because the
+ dynamics are not highly nonlinear, and it has been shown that the performance
+ of an unscented Kalman filter is about the same as that of an extended
+ Kalman filter in this type of application 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Laviola2003"
+
+\end_inset
+
+, making the reduced computational load of the extended Kalman filter the
+ tie breaker.
+\end_layout
+
+\begin_layout Standard
+We have chosen to make the state vector as small as possible, and to have
+ it represent the configuration, velocity, and acceleration of the robot
+ in a consistent and unambiguous manner.
+ The state vector consists of CoM position, velocity, and acceleration,
+ orientation, angular velocity and angular acceleration of one of the robot's
+ links, and bias estimates for each angular velocity sensor and each linear
+ acceleration sensor.
+\end_layout
+
+\begin_layout Standard
+Part of the goal of the presented state estimator is to estimate the orientation
+ of one of the robot's links.
+ Hence, we need to decide on the parameterization of orientation we use.
+ We have chosen to use a unit quaternion to parameterize the global orientation
+ state estimate
+\end_layout
+
+\begin_layout Standard
+The presented estimator is largely based on the work presented in 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Bloesch2012"
+
+\end_inset
+
+.
+ The main differences between their approach and ours are:
 \end_layout
 
 \begin_layout Itemize
-Extended Kalman filter
+we treat IMU linear acceleration measurements as measurements, and not as
+ inputs to the model.
+ Instead, we incorporate accelerations into our state vector;
 \end_layout
 
 \begin_layout Itemize
-Globally valid description of orientation
+we incorporate information concerning desired accelerations, as provided
+ by our controller, into the estimator's process model;
 \end_layout
 
 \begin_layout Itemize
-Consistent description of robot state
+our estimator can handle any number of IMUs, whereas theirs can only handle
+ one;
 \end_layout
 
 \begin_layout Itemize
-IMU linear acceleration as measurement, not as input
+we do not incorporate the position of contact points into our state vector,
+ as this information is redundant
 \end_layout
 
-\begin_layout Itemize
-Can handle multiple IMUs, attached to different links
-\end_layout
+\begin_layout Standard
+The remainder of this document is structured as follows.
+ In section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:Process-model"
 
-\begin_layout Itemize
-Can handle information concerning the velocity of certain points with respect
- to the world (e.g.
- when a point on the foot is known to be in non-slipping contact with the
- ground)
-\end_layout
+\end_inset
 
-\begin_layout Itemize
-Trusting that joint positions, velocities, and accelerations are already
- known / estimated
+, we derive the process model used in the extended Kalman filter.
+ Section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:Measurements"
+
+\end_inset
+
+ presents the measurement model.
+ The appendices contain derivations used throughout the derivations in the
+ two main sections.
 \end_layout
 
 \begin_layout Section
 Process model
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:Process-model"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -167,7 +282,7 @@ reference "sub:Continuous-time-part"
 \end_inset
 
 .
- The the continuous-time part of the process model will be nonlinear.
+ The continuous-time part of the process model will be nonlinear.
  Section 
 \begin_inset CommandInset ref
 LatexCommand ref
@@ -220,43 +335,69 @@ name "sub:Continuous-time-part"
 \end_layout
 
 \begin_layout Standard
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-TODO: using CoM since that's what we're directly trying to control, and
- it's what moves the least.
- Also, force measurements could easily be incorporated.
- No link needs to be special here.
- Unfortunately, there is no angular equivalent of the CoM, so we need to
- pick a link.
- We define the orientation estimation link as the link for which the orientation
- and angular velocity will be part of the state vector.
- In addition to CoM position and velocity, and orientation and angular velocity
- of the estimation link, we will also estimate biases for the gyros and
- accelerometers, so these biases also need to be incorporated into the state
- vector.
- The state vector for the continuous part of the dynamics hence consists
- of
+This section describes the part of the process model that is most naturally
+ described in continuous time.
 \end_layout
 
-\end_inset
+\begin_layout Standard
+We use CoM position and velocity in our state vector.
+ The motivations for this choice are the following:
+\end_layout
 
+\begin_layout Itemize
+we conjecture that the CoM on average has smaller variations in its acceleration
+ than any fixed point on the robot, as the CoM is a mass-weighted average
+ of the positions of the robot's link CoMs.
+ Estimating a low bandwidth signal is easier than estimating a high bandwidth
+ signal in the presence of a noisy process and noisy measurements.
+\end_layout
 
+\begin_layout Itemize
+since IMUs are presumed to be mounted to any number of different links,
+ there is no compelling argument to make any link be special by putting
+ its position, velocity in the state vector.
+\end_layout
+
+\begin_layout Itemize
+force measurements could easily be incorporated if desired, since the sum
+ of external forces is directly related to CoM acceleration.
+ We have not yet incorporated a description of these measurements in this
+ document however.
+\end_layout
+
+\begin_layout Standard
+Unfortunately, there is no angular equivalent of the CoM, so we need to
+ pick an 
+\emph on
+orientation estimation link
+\emph default
+, i.e.
+ a link for which the orientation and angular velocity will be part of the
+ state vector.
+\end_layout
+
+\begin_layout Standard
+In addition, we will also estimate biases for the gyros and accelerometers,
+ so these biases also need to be incorporated into the state vector.
+\end_layout
+
+\begin_layout Standard
+In summary, the state vector for this part of the dynamics consists of the
+ following entries:
 \end_layout
 
 \begin_layout Itemize
 \begin_inset Formula $r$
 \end_inset
 
-: CoM position in world frame
+: CoM position in world frame;
 \end_layout
 
 \begin_layout Itemize
 \begin_inset Formula $\dot{r}$
 \end_inset
 
-: CoM velocity in world frame
+: CoM velocity in world frame;
 \end_layout
 
 \begin_layout Itemize
@@ -264,7 +405,7 @@ TODO: using CoM since that's what we're directly trying to control, and
 \end_inset
 
 : unit quaternion describing the orientation of the orientation estimation
- link with respect to the world frame
+ link with respect to the world frame;
 \end_layout
 
 \begin_layout Itemize
@@ -272,7 +413,7 @@ TODO: using CoM since that's what we're directly trying to control, and
 \end_inset
 
 : angular velocity of the orientation estimation link, expressed in body
- frame
+ frame;
 \end_layout
 
 \begin_layout Itemize
@@ -291,22 +432,22 @@ TODO: using CoM since that's what we're directly trying to control, and
 \begin_inset Formula $b_{\dot{v}_{i}}$
 \end_inset
 
-: acceleration bias of IMU 
+: acceleration bias of linear acceleration sensor 
 \begin_inset Formula $i$
 \end_inset
 
-
+;
 \end_layout
 
 \begin_layout Itemize
 \begin_inset Formula $b_{\omega_{i}}$
 \end_inset
 
-: gyro bias of IMU 
+: gyro bias of angular velocity sensor 
 \begin_inset Formula $i$
 \end_inset
 
-
+.
 \end_layout
 
 \begin_layout Standard
@@ -319,14 +460,14 @@ The inputs to the continuous time part of the dynamics consist of desired
 \begin_inset Formula $\ddot{r}_{d}$
 \end_inset
 
-: desired CoM acceleration
+: desired CoM acceleration;
 \end_layout
 
 \begin_layout Itemize
 \begin_inset Formula $\dot{\omega}_{d}$
 \end_inset
 
-: desired angular acceleration of orientation estimation link
+: desired angular acceleration of the orientation estimation link.
 \end_layout
 
 \begin_layout Standard
@@ -374,7 +515,12 @@ where
 \uwave default
 \noun default
 \color inherit
-, and where the process noise vectors are
+, 
+\begin_inset Formula $\otimes$
+\end_inset
+
+ represents the standard quaternion product, and where the process noise
+ vectors are
 \end_layout
 
 \begin_layout Itemize
@@ -412,7 +558,7 @@ where
 \begin_inset Formula $w_{\dot{\omega}}\sim\mathcal{N}\left(0,Q_{\dot{\omega}}\right)$
 \end_inset
 
-: angular acceleration noise
+: orientation link angular acceleration noise
 \end_layout
 
 \begin_layout Itemize
@@ -449,14 +595,20 @@ name "sub:Linearized-error-model"
 \end_layout
 
 \begin_layout Standard
-The only part of the conntinuous-time dynamics that is nonlinear is the
- kinematic equation describing how the unit quaternion 
+This section describes the linearization of the nonlinear process model
+ presented in the previous section.
+\end_layout
+
+\begin_layout Standard
+The only part of the continuous-time dynamics that is nonlinear is the kinematic
+ equation describing how the unit quaternion 
 \begin_inset Formula $q$
 \end_inset
 
  changes in time.
- A problem that arises with the use of unit quaternions is that the unit
- norm constraint needs to be preserved.
+ In addition to this equation being nonlinear, a problem that arises with
+ the use of unit quaternions is that the unit norm constraint needs to be
+ preserved.
  The update steps in the Kalman filter itself do not know about this constraint
  and will in general not enforce it.
 \end_layout
@@ -480,10 +632,26 @@ A simple way to enforce this constraint is to convert differences with respect
 \end_inset
 
  is the rotation angle about the axis of rotation.
+ This approach was introduced in 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Pittelkau2003"
+
+\end_inset
+
+, and also applied in 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Bloesch2012"
+
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Standard
-The equation describing the rotational kinematics in terms of 
+The equation describing the rotational kinematics in terms of the rotation
+ vector 
 \begin_inset Formula $\phi$
 \end_inset
 
@@ -507,7 +675,7 @@ Note the singularity at
 \end_inset
 
 , with 
-\begin_inset Formula $n\in\mathbb{Z}\neq0$
+\begin_inset Formula $n\in\mathbb{Z}\backslash0$
 \end_inset
 
 , which is the reason for only using these dynamics locally around the current
@@ -624,7 +792,12 @@ Since we linearize around
 \begin_inset Formula $\tilde{\phi}$
 \end_inset
 
- also disappears, finally resulting in
+ also disappears due to 
+\begin_inset Formula $\phi$
+\end_inset
+
+ being assumed negligably small, finally resulting in the linearized rotation
+ vector kinematics
 \begin_inset Formula 
 \[
 \dot{\phi}\approx I\omega-\frac{1}{2}\tilde{\omega}\phi
@@ -662,10 +835,22 @@ where
 
 \end_inset
 
-so that the update equation for orientation becomes
+so that the correction equation for orientation becomes
 \begin_inset Formula 
 \[
 \hat{q}_{n+1}^{+}=\hat{q}_{n+1}^{-}\otimes\Delta q
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The propagation equation is simply
+\begin_inset Formula 
+\[
+\hat{q}_{n+1}^{-}=\hat{q}_{n}^{+}\otimes\zeta\left(\hat{\omega}\Delta t\right)
 \]
 
 \end_inset
@@ -686,14 +871,46 @@ We can now construct the continuous-time state space model describing the
 with
 \begin_inset Formula 
 \begin{align*}
-x^{c} & =\left(r,\dot{r},\phi,\omega,b_{\dot{v},1},\dotsc,b_{a,n},b_{\dot{v},1},\dotsc,b_{\omega,n}\right)\\
+x^{c} & =\left(r,\dot{r},\phi,\omega,b_{\dot{v},1},\dotsc,b_{a,n},b_{\dot{v},1},\dotsc,b_{\omega,n}\right)\in\mathbb{R}^{n}\\
 u & =\left(\ddot{r}_{d},\dot{\omega}_{d}\right)\\
 w^{c} & =\left(0,w_{\ddot{r}},0,w_{\dot{\omega}},w_{b_{\dot{v},1}},\dotsc,w_{b_{\dot{v},n}},w_{b_{\omega,1}},\dotsc,w_{b_{\omega,n}}\right)\sim\mathcal{N}\left(0,Q^{c}\right)
 \end{align*}
 
 \end_inset
 
-with the state matrix
+where we have defined the dimension 
+\begin_inset Formula 
+\[
+n=12+3n_{b}
+\]
+
+\end_inset
+
+with the number of bias estimate entries defined as
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+n_{b}=n_{\omega}+n_{\dot{v}}
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $n_{\omega}$
+\end_inset
+
+ the number of angular velocity sensors and 
+\begin_inset Formula $n_{\dot{v}}$
+\end_inset
+
+ the number of linear acceleration measurements.
+ 
+\end_layout
+
+\begin_layout Standard
+The state matrix is
 \end_layout
 
 \begin_layout Standard
@@ -703,7 +920,7 @@ A & =\left(\begin{array}{ccc}
 A_{r} & 0 & 0\\
 0 & A_{\phi} & 0\\
 0 & 0 & 0
-\end{array}\right)\in\mathbb{R}^{12+6n_{\text{imu}}}\\
+\end{array}\right)\in\mathbb{R}^{n\times n}\\
 A_{r} & =\left(\begin{array}{cc}
 0 & I_{3}\\
 0 & 0
@@ -716,7 +933,7 @@ A_{\phi} & =\left(\begin{array}{cc}
 
 \end_inset
 
-and the input matrix
+the input matrix is
 \end_layout
 
 \begin_layout Standard
@@ -726,7 +943,7 @@ B & =\left(\begin{array}{cc}
 B_{r} & 0\\
 0 & B_{\phi}\\
 0 & 0
-\end{array}\right)\in\mathbb{R}^{12+6n_{\text{imu}}\times6}\\
+\end{array}\right)\in\mathbb{R}^{n\times6}\\
 B_{r} & =\left(\begin{array}{c}
 0\\
 I_{3}
@@ -739,7 +956,7 @@ I_{3}
 
 \end_inset
 
-and where the noise covariance is
+and the noise covariance matrix is
 \end_layout
 
 \begin_layout Standard
@@ -749,7 +966,7 @@ Q^{c} & =\left(\begin{array}{ccc}
 Q_{r} & 0 & 0\\
 0 & Q_{\phi} & 0\\
 0 & 0 & Q_{b}
-\end{array}\right)\in\mathbb{R}^{12+6n_{\text{imu}}}\\
+\end{array}\right)\in\mathbb{R}^{n\times n}\\
 Q_{r} & =\left(\begin{array}{cc}
 0 & 0\\
 0 & Q_{\ddot{r}}
@@ -763,7 +980,7 @@ Q_{b_{\dot{v},1}} & 0 & 0 & 0\\
 0 & \ddots & 0 & 0\\
 0 & 0 & Q_{b_{\omega,1}} & 0\\
 0 & 0 & 0 & \ddots
-\end{array}\right)\in\mathbb{R}^{6n_{\text{imu}}\times6n_{\text{imu}}}
+\end{array}\right)\in\mathbb{R}^{3n_{b}\times3n_{b}}
 \end{align*}
 
 \end_inset
@@ -777,19 +994,6 @@ Note that the state matrix depends on
 \end_inset
 
  and is hence time-variant.
-\end_layout
-
-\begin_layout Standard
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-TODO: talk about propagating the orientation state
-\end_layout
-
-\end_inset
-
-
 \end_layout
 
 \begin_layout Subsection
@@ -807,10 +1011,10 @@ name "sub:Discretization"
 The continuous time error dynamics can be approximated using a discrete
  time system as:
 \begin_inset Formula 
-\begin{align*}
-x_{n+1}^{c} & =F^{c}x_{n}^{c}+G^{c}u_{n}+w_{n}^{c}\\
-w_{n}^{c} & \sim\mathcal{N}\left(0,Q_{d}^{c}\right)
-\end{align*}
+\begin{align}
+x_{c,n+1} & =F_{c}x_{c,n}+G_{c}u_{n}+w_{c,n}\label{eq:state-space-continuous}\\
+w_{c,n} & \sim\mathcal{N}\left(0,Q_{c,d}\right)\nonumber 
+\end{align}
 
 \end_inset
 
@@ -831,9 +1035,9 @@ TODO: cite
 
 \begin_inset Formula 
 \begin{align*}
-F^{c} & =e^{A\Delta t}\\
-G^{c} & =\int_{0}^{\Delta t}e^{A\tau}d\tau B\\
-Q_{d}^{c} & =\int_{0}^{\Delta t}e^{A\tau}Q^{c}e^{A^{T}\tau}d\tau
+F_{c} & =e^{A\Delta t}\\
+G_{c} & =\int_{0}^{\Delta t}e^{A\tau}d\tau B\\
+Q_{c,d} & =\int_{0}^{\Delta t}e^{A\tau}Q^{c}e^{A^{T}\tau}d\tau
 \end{align*}
 
 \end_inset
@@ -873,7 +1077,7 @@ key "VanLoan1978"
 \begin_inset Formula 
 \[
 M=\left(\begin{array}{ccc}
--A^{T} & Q^{c} & 0\\
+-A^{T} & Q_{c} & 0\\
 0 & A & B\\
 0 & 0 & 0
 \end{array}\right)
@@ -899,9 +1103,9 @@ F_{2} & G_{2} & H_{2}\\
 then we have
 \begin_inset Formula 
 \begin{align*}
-F^{c} & =F_{3}\\
-G^{c} & =G_{3}\\
-Q_{d}^{c} & =F_{3}{}^{T}G_{2}
+F_{c} & =F_{3}\\
+G_{c} & =G_{3}\\
+Q_{c,d} & =F_{3}{}^{T}G_{2}
 \end{align*}
 
 \end_inset
@@ -910,7 +1114,68 @@ Q_{d}^{c} & =F_{3}{}^{T}G_{2}
 \end_layout
 
 \begin_layout Standard
-The matrix exponentials can be approximated in a number of ways, such as
+Alternatively, if we define
+\begin_inset Formula 
+\[
+M_{1}=\left(\begin{array}{cc}
+A & B\\
+0 & 0
+\end{array}\right),\quad M_{2}=\left(\begin{array}{cc}
+-A^{T} & Q\\
+0 & A
+\end{array}\right)
+\]
+
+\end_inset
+
+and
+\begin_inset Formula 
+\[
+e^{M_{1}\Delta t}=\left(\begin{array}{cc}
+F_{3} & G_{3}\\
+0 & F_{4}
+\end{array}\right),\quad e^{M_{2}\Delta t}=\left(\begin{array}{cc}
+F_{2} & G_{2}\\
+0 & F_{3}
+\end{array}\right)
+\]
+
+\end_inset
+
+then we can apply the same formulas to find 
+\begin_inset Formula $F_{c}$
+\end_inset
+
+, 
+\begin_inset Formula $G_{c}$
+\end_inset
+
+, and 
+\begin_inset Formula $Q_{c,d}$
+\end_inset
+
+.
+ Although two matrix exponentials are required in this alternative approach,
+ the arguments of the matrix exponential have smaller dimensions in both
+ cases.
+ Since approximating the exponential of an 
+\begin_inset Formula $m\times m$
+\end_inset
+
+ matrix usually requires a fixed number of 
+\begin_inset Formula $m\times m$
+\end_inset
+
+ matrix products, which have complexity 
+\begin_inset Formula $\mathcal{O}\left(n^{3}\right)$
+\end_inset
+
+ using a schoolbook matrix multiplication method, this alternative approach
+ may be more efficient.
+\end_layout
+
+\begin_layout Standard
+The matrix exponential can be approximated in a number of ways, such as
  using a truncated version of the power series definition or using a Padé
  approximant 
 \begin_inset CommandInset citation
@@ -920,17 +1185,43 @@ key "VanLoan1978"
 \end_inset
 
 .
- 
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-TODO: investigate exploiting sparsity
-\end_layout
+ The Padé approximant method is generally considered much more numerically
+ stable than using the power series definition 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Moler2003"
 
 \end_inset
 
+, so we have implemented this approach.
+\end_layout
 
+\begin_layout Standard
+Finally, we note that it is unnecessary to discretize the entire continuous-time
+ state space model as a whole every time step.
+ Since the CoM dynamics, the orientation estimation link dynamics, and the
+ bias dynamics are all completely independent of eachother (i.e.
+ they don't share any states or inputs), their process models can also be
+ discretized independently, resulting in even smaller dimensions of the
+ matrices that need to be exponentiated.
+ Furthermore, since only the orientation estimation link dynamics are time-varia
+nt, this is is the only part of the dynamics that requires discretization
+ at every timestep; the other parts of the dynamics need only be discretized
+ once at startup.
+ This reduces the computational load for discretization to either a single
+ 
+\begin_inset Formula $15\times15$
+\end_inset
+
+ matrix exponential, or alternatively one 
+\begin_inset Formula $9\times9$
+\end_inset
+
+ and one 
+\begin_inset Formula $12\times12$
+\end_inset
+
+ matrix exponential per time step.
 \end_layout
 
 \begin_layout Subsection
@@ -1003,8 +1294,85 @@ Note that the noise terms
 \begin_layout Standard
 In canonical state space form, we can write the dynamics as
 \begin_inset Formula 
+\begin{align}
+x_{d,n+1} & =F_{d}x_{d,n}+G_{d}u_{n}+w_{d,n}\nonumber \\
+w_{d} & \sim Q_{d}\label{eq:state-space-discrete}
+\end{align}
+
+\end_inset
+
+with 
+\begin_inset Formula 
+\begin{align*}
+x_{d,n} & =\left(\ddot{r}_{n},\dot{\omega}_{n}\right)\\
+w_{d,n} & =\left(w_{\ddot{r}},w_{\dot{\omega}}\right)\\
+F_{d} & =0\\
+G_{d} & =I_{6}\\
+Q_{d} & =\left(\begin{smallmatrix}Q_{\ddot{r}} & 0\\
+0 & Q_{\dot{\omega}}
+\end{smallmatrix}\right)
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Combined state space model
+\end_layout
+
+\begin_layout Standard
+Combining 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:state-space-continuous"
+
+\end_inset
+
+ and 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:state-space-discrete"
+
+\end_inset
+
+, we obtain as our final process model 
+\begin_inset Formula 
 \[
-x_{d,n+1}=F^{d}x_{d,n}+G^{d}u_{n}+w^{d}
+\left(\begin{array}{c}
+x_{c}\\
+x_{d}
+\end{array}\right)_{n+1}=\left(\begin{array}{cc}
+F_{c} & 0\\
+0 & F_{d}
+\end{array}\right)\left(\begin{array}{c}
+x_{c}\\
+x_{d}
+\end{array}\right)_{n}+\left(\begin{array}{c}
+G_{c}\\
+G_{d}
+\end{array}\right)u_{n}+\left(\begin{array}{c}
+w_{c,d}\\
+w_{d}
+\end{array}\right)_{n}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+with
+\begin_inset Formula 
+\[
+\left(\begin{array}{c}
+w_{c,d}\\
+w_{d}
+\end{array}\right)_{n}\sim\mathcal{N}\left(0,\left(\begin{smallmatrix}Q_{c,d} & 0\\
+0 & Q_{d}
+\end{smallmatrix}\right)\right)
 \]
 
 \end_inset
@@ -1014,6 +1382,13 @@ x_{d,n+1}=F^{d}x_{d,n}+G^{d}u_{n}+w^{d}
 
 \begin_layout Section
 Measurements
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:Measurements"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -1042,7 +1417,7 @@ We define the following measurements:
 
  in body frame, includes bias and noise (section 
 \begin_inset CommandInset ref
-LatexCommand eqref
+LatexCommand ref
 reference "sub:IMU-angular-velocity"
 
 \end_inset
@@ -1060,7 +1435,7 @@ reference "sub:IMU-angular-velocity"
 
  in body frame, including bias and noise (section 
 \begin_inset CommandInset ref
-LatexCommand eqref
+LatexCommand ref
 reference "sub:IMU-linear-acceleration"
 
 \end_inset
@@ -1078,7 +1453,7 @@ reference "sub:IMU-linear-acceleration"
 
  with respect to world, including noise (section 
 \begin_inset CommandInset ref
-LatexCommand eqref
+LatexCommand ref
 reference "sub:Orientation-measurements"
 
 \end_inset
@@ -1096,7 +1471,7 @@ reference "sub:Orientation-measurements"
 
  with respect to world, expressed in world frame (section 
 \begin_inset CommandInset ref
-LatexCommand eqref
+LatexCommand ref
 reference "sub:Point-velocity-measurements"
 
 \end_inset
@@ -1106,11 +1481,11 @@ reference "sub:Point-velocity-measurements"
 
 \begin_layout Standard
 In what follows, let 
-\begin_inset Formula $\hat{\cdot}$
+\begin_inset Formula $\hat{\alpha}$
 \end_inset
 
- denote the estimated value of 
-\begin_inset Formula $\cdot$
+ denote the estimated value of a state variable 
+\begin_inset Formula $\alpha$
 \end_inset
 
 .
@@ -1140,7 +1515,11 @@ Let
 \begin_inset Formula $w$
 \end_inset
 
-, expressed in body frame.
+, expressed in a frame fixed to IMU 
+\begin_inset Formula $i$
+\end_inset
+
+.
  The measurement model for angular velocity can be described in the following
  way.
 \end_layout
@@ -1165,7 +1544,11 @@ with
 \begin_inset Formula $w$
 \end_inset
 
-, expressed in body-fixed frame, and with the selection matrix 
+, expressed in the frame fixed to IMU 
+\begin_inset Formula $i$
+\end_inset
+
+, and with the selection matrix 
 \begin_inset Formula 
 \[
 S_{\omega}=\left(\begin{array}{cc}
@@ -2966,6 +3349,980 @@ In summary, the linearized measurement output matrix reads
 H_{\dot{p}_{i}}=\frac{\partial\dot{p}_{i}^{w}}{\partial\left(\dot{r},\phi,\omega\right)}=\left(\begin{array}{ccc}
 I & R_{p}^{w}\left(\tilde{r}_{p}-\tilde{p}_{i}^{p}\right) & -R_{p}^{w}\tilde{v}_{i}'\end{array}\right)
 \]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Appendix: Primer on using screw theory for kinematics
+\end_layout
+
+\begin_layout Standard
+This appendix gives a brief introduction to the use of screw theory for
+ kinematics.
+ For a more in-depth introduction to this topic, see 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Duindam2006,Featherstone2008,Murray1994"
+
+\end_inset
+
+.
+ Our notation is taken from 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Duindam2006"
+
+\end_inset
+
+, and it is very explicit in describing motions in terms of describing 
+\emph on
+what body
+\emph default
+ is moving with respect to 
+\emph on
+what base
+\emph default
+, and 
+\emph on
+in which frame is the motion expressed
+\emph default
+.
+ This makes it easy to work with relative velocities and accelerations.
+\end_layout
+
+\begin_layout Standard
+This appendix is structured as follows.
+ Section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:Configuration"
+
+\end_inset
+
+ describes how configurations are represented.
+ Section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:Velocity"
+
+\end_inset
+
+ discusses the description of velocities using twists, and section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:Acceleration"
+
+\end_inset
+
+ describes the use of spatial acceleration vectors to describe acceleration.
+\end_layout
+
+\begin_layout Subsection
+Configuration
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:Configuration"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The configuration of a frame 
+\begin_inset Formula $j$
+\end_inset
+
+ with respect to a frame 
+\begin_inset Formula $i$
+\end_inset
+
+ can be described using the homogeneous transformation matrix
+\begin_inset Formula 
+\[
+H_{j}^{i}=\left(\begin{array}{cc}
+R_{j}^{i} & p_{j}^{i}\\
+0_{1\times3} & 1
+\end{array}\right)\in\mathbb{R}^{4}
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $R_{j}^{i}\in\mathbb{R}^{3}$
+\end_inset
+
+ represents the orientation of frame 
+\begin_inset Formula $j$
+\end_inset
+
+ with respect to frame 
+\begin_inset Formula $i$
+\end_inset
+
+ using a rotation matrix whose columns are the unit vectors of frame 
+\begin_inset Formula $j$
+\end_inset
+
+ expressed in 
+\begin_inset Formula $i$
+\end_inset
+
+, and 
+\begin_inset Formula $p_{j}^{i}$
+\end_inset
+
+ represents the position of the origin of frame 
+\begin_inset Formula $j$
+\end_inset
+
+, expressed in frame 
+\begin_inset Formula $i$
+\end_inset
+
+.
+ The representation of configuration using a homogeneous transform is highly
+ redundant, but has the advantage that it is globally valid.
+ There is no three number parameterization of rotation that has no singularities.
+\end_layout
+
+\begin_layout Standard
+The homogeneous transformation matrix 
+\begin_inset Formula $H_{j}^{i}$
+\end_inset
+
+ can be used to transform an augmented position vector expressed in frame
+ 
+\begin_inset Formula $j$
+\end_inset
+
+ to frame 
+\begin_inset Formula $i$
+\end_inset
+
+:
+\begin_inset Formula 
+\[
+\left(\begin{array}{c}
+p^{i}\\
+1
+\end{array}\right)=H_{j}^{i}\left(\begin{array}{c}
+p^{j}\\
+1
+\end{array}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Because the transformation matrix 
+\begin_inset Formula $H_{j}^{i}$
+\end_inset
+
+ transforms vectors from frame 
+\begin_inset Formula $j$
+\end_inset
+
+ to frame 
+\begin_inset Formula $i$
+\end_inset
+
+, we will use the convention of calling 
+\begin_inset Formula $H_{j}^{i}$
+\end_inset
+
+ the transformation 
+\emph on
+from frame 
+\begin_inset Formula $i$
+\end_inset
+
+ to frame 
+\begin_inset Formula $j$
+\end_inset
+
+
+\emph default
+.
+\end_layout
+
+\begin_layout Standard
+Transformation matrices can be concatenated using simple matrix multiplication:
+\begin_inset Formula 
+\[
+H_{k}^{i}=H_{j}^{i}H_{k}^{j}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Velocity
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:Velocity"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We start by the usual derivation of angular velocity.
+ Let 
+\begin_inset Formula $R_{j}^{i}\left(t\right)$
+\end_inset
+
+ be a time-variant rotation matrix.
+ Its derivative, 
+\begin_inset Formula $\dot{R}_{j}^{i}\left(t\right)$
+\end_inset
+
+, is constrained by the fact that 
+\begin_inset Formula $R_{j}^{i}$
+\end_inset
+
+ must be a rotation matrix at all times.
+ We can exploit the orthogonality property by noting that since 
+\begin_inset Formula $R_{j}^{i}R_{i}^{j}=I$
+\end_inset
+
+, we have
+\begin_inset Formula 
+\[
+\frac{d}{dt}\left(R_{j}^{i}R_{i}^{j}\right)=\dot{R}_{j}^{i}R_{i}^{j}+R_{j}^{i}\dot{R}_{i}^{j}=0
+\]
+
+\end_inset
+
+and since 
+\begin_inset Formula $\dot{R}_{j}^{i}R_{i}^{j}=\left(R_{j}^{i}\dot{R}_{i}^{j}\right)^{T}$
+\end_inset
+
+, we obtain
+\begin_inset Formula 
+\[
+\dot{R}_{j}^{i}R_{i}^{j}=-\left(\dot{R}_{j}^{i}R_{i}^{j}\right)^{T}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+which means that 
+\begin_inset Formula $\dot{R}_{j}^{i}R_{i}^{j}$
+\end_inset
+
+ is a skew-symmetric matrix, and can be written as 
+\begin_inset Formula 
+\begin{equation}
+\dot{R}_{j}^{i}R_{i}^{j}=\left(\begin{array}{ccc}
+0 & -a_{z} & a_{y}\\
+a_{z} & 0 & -a_{x}\\
+-a_{y} & a_{x} & 0
+\end{array}\right)=:\tilde{a},\quad\text{for }a=\left(\begin{array}{c}
+a_{x}\\
+a_{y}\\
+a_{z}
+\end{array}\right)\label{eq:skew-symmetric}
+\end{equation}
+
+\end_inset
+
+The vector 
+\begin_inset Formula $a$
+\end_inset
+
+ is the angular velocity expressed in the base frame 
+\begin_inset Formula $i$
+\end_inset
+
+ (also called the instantaneous spatial angular velocity 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Murray1994"
+
+\end_inset
+
+), and 
+\begin_inset Formula $\tilde{a}$
+\end_inset
+
+ can be called the angular velocity in tilde form 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Duindam2006"
+
+\end_inset
+
+.
+ Switching back and forth between tilde form and 3D vector form is an important
+ operation.
+\end_layout
+
+\begin_layout Standard
+This angular velocity vector 
+\begin_inset Formula $a$
+\end_inset
+
+ may be rotated to any other frame 
+\begin_inset Formula $k$
+\end_inset
+
+ using
+\begin_inset Formula 
+\[
+b=R_{i}^{k}a
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Now we note a special property concerning rotation matrices and skew-symmetric
+ matrices.
+ For any vector 
+\begin_inset Formula $x\in\mathbb{R}^{3}$
+\end_inset
+
+, we have 
+\begin_inset Formula 
+\begin{align*}
+\tilde{b}x & =\widetilde{R_{i}^{k}a}x\\
+ & =\left(R_{i}^{k}a\right)\times x\\
+ & =R_{i}^{k}R_{k}^{i}\left(\left(R_{i}^{k}a\right)\times x\right)\\
+ & =R_{i}^{k}\left(R_{k}^{i}\left(R_{i}^{k}a\right)\times\left(R_{k}^{i}x\right)\right)\\
+ & =R_{i}^{k}\left(a\times\left(R_{k}^{i}x\right)\right)\\
+ & =R_{i}^{k}\tilde{a}R_{k}^{i}x
+\end{align*}
+
+\end_inset
+
+Since this result must hold for all vectors 
+\begin_inset Formula $x\in\mathbb{R}^{3}$
+\end_inset
+
+, we must have
+\begin_inset Formula 
+\[
+\tilde{b}=\widetilde{R_{i}^{k}a}=R_{i}^{k}\tilde{a}R_{k}^{i}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Substituting 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:skew-symmetric"
+
+\end_inset
+
+ into this equation, we obtain
+\begin_inset Formula 
+\begin{align*}
+\tilde{b} & =R_{i}^{k}\dot{R}_{j}^{i}R_{i}^{j}R_{k}^{i}\\
+ & =R_{i}^{k}\dot{R}_{j}^{i}R_{k}^{j}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This equation gives us a way of changing the frame of an angular velocity
+ when it is expressed in tilde form.
+ Since 
+\begin_inset Formula $b$
+\end_inset
+
+ denotes the angular velocity of the body frame 
+\begin_inset Formula $j$
+\end_inset
+
+, with respect to base frame 
+\begin_inset Formula $i$
+\end_inset
+
+, expressed in (i.e.
+ rotated to) frame 
+\begin_inset Formula $k$
+\end_inset
+
+, we introduce the very explicit notation 
+\begin_inset Formula 
+\begin{equation}
+\tilde{\omega}_{j}^{k,i}:=R_{i}^{k}\dot{R}_{j}^{i}R_{k}^{j}\label{eq:angular-velocity}
+\end{equation}
+
+\end_inset
+
+i.e.
+ the first superscript denotes the frame in which the angular velocity is
+ expressed, the second superscript denotes the base frame, and the subscript
+ denotes the body frame.
+\end_layout
+
+\begin_layout Standard
+We now extend these results from 
+\begin_inset Formula $SO\left(3\right)$
+\end_inset
+
+ to 
+\begin_inset Formula $SE\left(3\right)$
+\end_inset
+
+.
+ Generalizing 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:angular-velocity"
+
+\end_inset
+
+, the velocity of frame 
+\begin_inset Formula $j$
+\end_inset
+
+ with respect to frame 
+\begin_inset Formula $i$
+\end_inset
+
+ (both linear and angular) can be expressed in a third frame 
+\begin_inset Formula $k$
+\end_inset
+
+ using
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{eqnarray}
+\tilde{T}_{j}^{k,i} & = & H_{i}^{k}\dot{H}_{j}^{i}H_{k}^{j}\nonumber \\
+ & = & \left(\begin{array}{cc}
+R_{i}^{k} & p_{i}^{k}\\
+0 & 1
+\end{array}\right)\left(\begin{array}{cc}
+\dot{R}_{j}^{i} & \dot{p}_{j}^{i}\\
+0 & 0
+\end{array}\right)\left(\begin{array}{cc}
+R_{k}^{j} & p_{k}^{j}\\
+0 & 1
+\end{array}\right)\nonumber \\
+ & = & \left(\begin{array}{cc}
+R_{i}^{k}\dot{R}_{j}^{i}R_{k}^{j} & R_{i}^{k}\left(\dot{R}_{j}^{i}p_{k}^{j}+\dot{p}_{j}^{i}\right)\\
+0 & 0
+\end{array}\right)\nonumber \\
+ & = & \left(\begin{array}{cc}
+\tilde{\omega}_{j}^{k,i} & v_{j}^{k,i}\\
+0 & 0
+\end{array}\right)\label{eq:twist-def}
+\end{eqnarray}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Notice that the angular velocity vector in tilde form, 
+\begin_inset Formula $\tilde{\omega}_{j}^{k,i}$
+\end_inset
+
+, reappears in this equation.
+ The linear part, 
+\begin_inset Formula $v_{j}^{k,i}$
+\end_inset
+
+, can be interpreted as the `stream velocity' of points that are instantaneously
+ coincident with the origin of frame 
+\begin_inset Formula $i$
+\end_inset
+
+ but fixed in frame 
+\begin_inset Formula $j$
+\end_inset
+
+, rotated to frame 
+\begin_inset Formula $k$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Analogously to 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:skew-symmetric"
+
+\end_inset
+
+, the description of the velocity of a rigid body in 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:twist-def"
+
+\end_inset
+
+ can be called the twist in tilde form 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Duindam2006"
+
+\end_inset
+
+.
+ The information contained in this 
+\begin_inset Formula $4\times4$
+\end_inset
+
+ matrix can be summarized concisely using a 
+\begin_inset Formula $6$
+\end_inset
+
+-D vector:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+T_{j}^{k,i}=\left(\begin{array}{c}
+\omega_{j}^{k,i}\\
+v_{j}^{k,i}
+\end{array}\right)\in\mathbb{R}^{6}
+\]
+
+\end_inset
+
+called the twist of frame 
+\begin_inset Formula $j$
+\end_inset
+
+ with respect to frame 
+\begin_inset Formula $i$
+\end_inset
+
+, expressed in frame 
+\begin_inset Formula $k$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Twists have several useful properties.
+ If frames 
+\begin_inset Formula $i$
+\end_inset
+
+ and 
+\begin_inset Formula $j$
+\end_inset
+
+ are not moving with respect to eachother (e.g.
+ because they are attached to the same rigid body), we have
+\begin_inset Formula 
+\begin{equation}
+T_{j}^{m,i}=0\label{eq:no-motion}
+\end{equation}
+
+\end_inset
+
+In addition,
+\begin_inset Formula 
+\begin{align}
+\tilde{T}_{j}^{m,k} & =H_{i}^{m}\tilde{T}_{j}^{i,k}H_{m}^{i}\label{eq:change-frame-tilde}\\
+T_{j}^{m,k} & =\Ad_{H_{i}^{m}}T_{j}^{i,k}\text{ with }\Ad_{H}:=\left(\begin{array}{cc}
+R & 0\\
+\tilde{p}R & R
+\end{array}\right)\text{ for }H=\left(\begin{array}{cc}
+R & p\\
+0 & 1
+\end{array}\right)\label{eq:change-frame}\\
+T_{j}^{i,k} & =-T_{k}^{i,j}\label{eq:invert}\\
+T_{j}^{m,k} & =T_{i}^{m,k}+T_{j}^{m,i}\label{eq:add}\\
+\frac{d}{dt}\Ad_{H_{i}^{k}} & =\Ad_{H_{i}^{k}}\ad_{T_{i}^{i,k}}\text{ with }\ad_{T}:=\left(\begin{array}{cc}
+\tilde{\omega} & 0\\
+\tilde{v} & \tilde{\omega}
+\end{array}\right)\text{ for }T=\left(\begin{array}{c}
+\omega\\
+v
+\end{array}\right)\label{eq:adjoint-deriv}
+\end{align}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Properties 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:change-frame-tilde"
+
+\end_inset
+
+ and 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:change-frame"
+
+\end_inset
+
+ provide a way to change frames, in tilde form and in using the concise
+ notation, respectively.
+ Property 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:invert"
+
+\end_inset
+
+ shows that the inversion of body and base frame results in a negated twist.
+ Property 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:add"
+
+\end_inset
+
+ shows that an absolute twist can be obtained by simply adding relative
+ twists together if the body frame of the first is the same as the base
+ frame of the second, and both twists are expressed in the same frame.
+ Finally, 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:adjoint-deriv"
+
+\end_inset
+
+ will be useful to change the frame of a spatial acceleration vector in
+ the next section.
+ Proofs for these properties are provided in 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Duindam2006"
+
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+TODO: velocity of a point
+\end_layout
+
+\begin_layout Subsection
+Acceleration
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:Acceleration"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The derivative of a twist is a spatial acceleration (terminology taken from
+ 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Featherstone2008"
+
+\end_inset
+
+), that is, the spatial acceleration of frame 
+\begin_inset Formula $j$
+\end_inset
+
+ with respect to frame 
+\begin_inset Formula $i$
+\end_inset
+
+, expressed in frame 
+\begin_inset Formula $k$
+\end_inset
+
+ is written as
+\begin_inset Formula 
+\[
+\dot{T}_{j}^{k,i}=\left(\begin{array}{c}
+\dot{\omega}_{j}^{k,i}\\
+\dot{v}_{j}^{k,i}
+\end{array}\right)\in\mathbb{R}^{6}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Properties 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:invert"
+
+\end_inset
+
+ and 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:add"
+
+\end_inset
+
+ for twists have direct analogues for spatial accelerations, as shown simply
+ by differentiating.
+\end_layout
+
+\begin_layout Standard
+Changing frames is somewhat more involved.
+ Taking the derivative of property 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:change-frame"
+
+\end_inset
+
+,
+\begin_inset Formula 
+\begin{eqnarray}
+\dot{T}_{j}^{m,k} & = & \frac{d}{dt}\left(\Ad_{H_{i}^{m}}T_{j}^{i,k}\right)\nonumber \\
+ & = & \frac{d}{dt}\left(\Ad_{H_{i}^{m}}\right)T_{j}^{i,k}+\Ad_{H_{i}^{m}}\dot{T}_{j}^{i,k}\label{eq:spatial-accel-change-frame-1}
+\end{eqnarray}
+
+\end_inset
+
+Using property 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:adjoint-deriv"
+
+\end_inset
+
+, this can be written as
+\begin_inset Formula 
+\begin{equation}
+\dot{T}_{j}^{m,k}=\Ad_{H_{i}^{m}}\left(\ad_{T_{i}^{i,m}}T_{j}^{i,k}+\dot{T}_{j}^{i,k}\right)\label{eq:spatial-acceleration-coordinate-change}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Note that if either 
+\begin_inset Formula $T_{i}^{i,m}=0$
+\end_inset
+
+ or 
+\begin_inset Formula $T_{j}^{i,k}=0$
+\end_inset
+
+, or if both 
+\begin_inset Formula $m=j$
+\end_inset
+
+ and 
+\begin_inset Formula $k=i$
+\end_inset
+
+, 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:spatial-acceleration-coordinate-change"
+
+\end_inset
+
+ reduces to
+\begin_inset Formula 
+\[
+\dot{T}_{j}^{m,k}=\Ad_{H_{i}^{m}}\dot{T}_{j}^{i,k}\quad\text{(special case)}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Appendix: velocity and acceleration of a point fixed in body frame
+\end_layout
+
+\begin_layout Standard
+Let 
+\begin_inset Formula $p$
+\end_inset
+
+ be fixed in frame 
+\begin_inset Formula $i$
+\end_inset
+
+.
+ Point 
+\begin_inset Formula $p$
+\end_inset
+
+ can be expressed in frame 
+\begin_inset Formula $j$
+\end_inset
+
+ using the augmented coordinate vector
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+P^{j}=H_{i}^{j}P^{i}\in\mathbb{R}^{4}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Its velocity, as seen from frame 
+\begin_inset Formula $j$
+\end_inset
+
+, is
+\begin_inset Formula 
+\begin{eqnarray}
+\dot{P}^{j} & = & \dot{H}_{i}^{j}P^{i}\nonumber \\
+ & = & \dot{H}_{i}^{j}H_{j}^{i}P^{j}\nonumber \\
+ & = & \tilde{T}_{i}^{j,j}P^{j}\label{eq:rotating-point}
+\end{eqnarray}
+
+\end_inset
+
+or in terms of 3D vectors:
+\begin_inset Formula 
+\begin{equation}
+\dot{p}^{j}=\omega_{i}^{j,j}\times p^{j}+v_{i}^{j,j}\in\mathbb{R}^{3}\label{eq:rotating-point-3d}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Note that 
+\begin_inset Formula $v_{i}^{j,j}$
+\end_inset
+
+ is not the velocity of the origin of frame 
+\begin_inset Formula $i$
+\end_inset
+
+! It is the velocity at which a point instantaneously fixed in frame 
+\begin_inset Formula $i$
+\end_inset
+
+ flows through the origin of frame 
+\begin_inset Formula $j$
+\end_inset
+
+, expressed in frame 
+\begin_inset Formula $j$
+\end_inset
+
+'s coordinates.
+ Using 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:twist-def"
+
+\end_inset
+
+, it can be written as
+\begin_inset Formula 
+\begin{eqnarray}
+v_{i}^{j,j} & = & \dot{R}_{i}^{j}p_{j}^{i}+\dot{p}_{i}^{j}\nonumber \\
+ & = & \dot{p}_{i}^{j}-\dot{R}_{i}^{j}R_{j}^{i}p_{i}^{j}\nonumber \\
+ & = & \dot{p}_{i}^{j}-\omega_{i}^{j,j}\times p_{i}^{j}\label{eq:linear-velocity}
+\end{eqnarray}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Combining 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:linear-velocity"
+
+\end_inset
+
+ with 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:rotating-point-3d"
+
+\end_inset
+
+ results in
+\begin_inset Formula 
+\[
+\dot{p}^{j}=\dot{p}_{i}^{j}+\omega_{i}^{j,j}\times\left(p^{j}-p_{i}^{j}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Now for the acceleration.
+ Differentiating 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:rotating-point"
+
+\end_inset
+
+ gives
+\begin_inset Formula 
+\begin{eqnarray*}
+\ddot{P}^{j} & = & \dot{\tilde{T}}_{i}^{j,j}P^{j}+\tilde{T}_{i}^{j,j}\dot{P}^{j}\\
+ & = & \dot{\tilde{T}}_{i}^{j,j}P^{j}+\tilde{T}_{i}^{j,j}\tilde{T}_{i}^{j,j}P^{j}
+\end{eqnarray*}
+
+\end_inset
+
+or in terms of 3D vectors:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\ddot{p}^{j}=\dot{\omega}_{i}^{j,j}\times p^{j}+\dot{v}_{i}^{j,j}+\omega_{i}^{j,j}\times\left(\omega_{i}^{j,j}\times p^{j}+v_{i}^{j,j}\right)\label{eq:rotating-point-acceleration}
+\end{equation}
 
 \end_inset
 
