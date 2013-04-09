@@ -1,5 +1,7 @@
 package us.ihmc.sensorProcessing.stateEstimation.evaluation;
 
+import us.ihmc.sensorProcessing.simulatedSensors.InverseDynamicsJointsFromSCSRobotGenerator;
+import us.ihmc.sensorProcessing.simulatedSensors.SensorMap;
 import us.ihmc.sensorProcessing.stateEstimation.SimulatedSensorController;
 
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
@@ -20,10 +22,21 @@ public class ComposableStateEstimatorEvaluator
    public ComposableStateEstimatorEvaluator()
    {
       StateEstimatorEvaluatorRobot robot = new StateEstimatorEvaluatorRobot();
-      
-      SimulatedSensorController simulatedSensorController = new SimulatedSensorController(robot, controlDT);
-      
-      ComposableStateEstimatorEvaluatorController composableStateEstimatorEvaluatorController = new ComposableStateEstimatorEvaluatorController(robot, controlDT, simulatedSensorController, simulatedSensorController);
+
+      InverseDynamicsJointsFromSCSRobotGenerator generator = new InverseDynamicsJointsFromSCSRobotGenerator(robot);
+      StateEstimatorEvaluatorFullRobotModel perfectFullRobotModel = new StateEstimatorEvaluatorFullRobotModel(generator, robot, robot.getIMUMounts(),
+                                                                       robot.getVelocityPoints());
+
+      SimulatedSensorController simulatedSensorController = new SimulatedSensorController(perfectFullRobotModel, generator, robot,
+                                                                                 controlDT);
+
+      StateEstimatorEvaluatorFullRobotModel estimatedFullRobotModel = simulatedSensorController.getStateEstimatorEvaluatorFullRobotModel();
+
+      SensorMap sensorMap = simulatedSensorController.getSensorMap();
+
+      ComposableStateEstimatorEvaluatorController composableStateEstimatorEvaluatorController = new ComposableStateEstimatorEvaluatorController(robot,
+                                                                                                   estimatedFullRobotModel, controlDT, sensorMap,
+                                                                                                   simulatedSensorController);
       robot.setController(simulatedSensorController, simTicksPerControlDT);
       robot.setController(composableStateEstimatorEvaluatorController, simTicksPerControlDT);
 
