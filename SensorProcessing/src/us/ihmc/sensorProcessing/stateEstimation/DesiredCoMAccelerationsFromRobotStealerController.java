@@ -1,0 +1,239 @@
+package us.ihmc.sensorProcessing.stateEstimation;
+
+import javax.vecmath.Vector3d;
+
+import us.ihmc.controlFlow.AbstractControlFlowElement;
+import us.ihmc.controlFlow.ControlFlowOutputPort;
+import us.ihmc.sensorProcessing.signalCorruption.GaussianVectorCorruptor;
+import us.ihmc.sensorProcessing.simulatedSensors.InverseDynamicsJointsFromSCSRobotGenerator;
+import us.ihmc.sensorProcessing.stateEstimation.evaluation.StateEstimatorEvaluatorFullRobotModel;
+import us.ihmc.sensorProcessing.stateEstimation.evaluation.StateEstimatorEvaluatorRobot;
+import us.ihmc.utilities.math.MathTools;
+import us.ihmc.utilities.math.geometry.FramePoint;
+import us.ihmc.utilities.math.geometry.FrameVector;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.screwTheory.CenterOfMassAccelerationCalculator;
+import us.ihmc.utilities.screwTheory.CenterOfMassCalculator;
+import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
+import us.ihmc.utilities.screwTheory.RigidBody;
+import us.ihmc.utilities.screwTheory.SpatialAccelerationCalculator;
+import us.ihmc.utilities.screwTheory.TwistCalculator;
+
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.robotController.RobotController;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
+
+public class DesiredCoMAccelerationsFromRobotStealerController implements RobotController, DesiredCoMAndAngularAccelerationOutputPortsHolder
+{
+   private static final boolean CORRUPT_DESIRED_ACCELERATIONS = true;
+
+   // TODO: Name these something else or make same as estimator.
+   private final double comAccelerationProcessNoiseStandardDeviation = Math.sqrt(1e-1);
+   private final double angularAccelerationProcessNoiseStandardDeviation = Math.sqrt(1e-1);
+
+   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+
+   private final YoFramePoint perfectCoM = new YoFramePoint("perfectCoM", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector perfectCoMd = new YoFrameVector("perfectCoMd", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector perfectCoMdd = new YoFrameVector("perfectCoMdd", ReferenceFrame.getWorldFrame(), registry);
+
+   private final StateEstimatorEvaluatorFullRobotModel perfectFullRobotModel;
+   private final TwistCalculator perfectTwistCalculator;
+   private final SpatialAccelerationCalculator perfectSpatialAccelerationCalculator;
+
+   private final CenterOfMassCalculator perfectCenterOfMassCalculator;
+   private final CenterOfMassJacobian perfectCenterOfMassJacobian;
+   private final CenterOfMassAccelerationCalculator perfectCenterOfMassAccelerationCalculator;
+
+   private final double controlDT;
+
+   private final ControlFlowOutputPort<FrameVector> desiredCenterOfMassAccelerationOutputPort;
+   private final ControlFlowOutputPort<FrameVector> desiredAngularAccelerationOutputPort;
+
+   public DesiredCoMAccelerationsFromRobotStealerController(StateEstimatorEvaluatorFullRobotModel perfectFullRobotModel, InverseDynamicsJointsFromSCSRobotGenerator generator,
+                                    StateEstimatorEvaluatorRobot robot, double controlDT)
+   {
+      this.controlDT = controlDT;
+
+      this.perfectFullRobotModel = perfectFullRobotModel;
+      perfectTwistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), perfectFullRobotModel.getElevator());
+      perfectSpatialAccelerationCalculator = new SpatialAccelerationCalculator(perfectFullRobotModel.getElevator(), perfectTwistCalculator, 0.0, false);
+
+      perfectCenterOfMassCalculator = new CenterOfMassCalculator(perfectFullRobotModel.getElevator(), ReferenceFrame.getWorldFrame());
+      perfectCenterOfMassJacobian = new CenterOfMassJacobian(perfectFullRobotModel.getElevator());
+      perfectCenterOfMassAccelerationCalculator = new CenterOfMassAccelerationCalculator(perfectFullRobotModel.getElevator(),
+              perfectSpatialAccelerationCalculator);
+
+      CenterOfMassAccelerationFromFullRobotModelStealer centerOfMassAccelerationFromFullRobotModelStealer =
+         new CenterOfMassAccelerationFromFullRobotModelStealer(perfectFullRobotModel.getElevator(), perfectSpatialAccelerationCalculator);
+      desiredCenterOfMassAccelerationOutputPort = centerOfMassAccelerationFromFullRobotModelStealer.getOutputPort();
+
+      AngularAccelerationFromRobotStealer angularAccelerationFromRobotStealer = new AngularAccelerationFromRobotStealer(robot);
+      desiredAngularAccelerationOutputPort = angularAccelerationFromRobotStealer.getOutputPort();
+
+      robot.update();
+   }
+
+
+   public ControlFlowOutputPort<FrameVector> getDesiredCenterOfMassAccelerationOutputPort()
+   {
+      return desiredCenterOfMassAccelerationOutputPort;
+   }
+
+   public ControlFlowOutputPort<FrameVector> getDesiredAngularAccelerationOutputPort()
+   {
+      return desiredAngularAccelerationOutputPort;
+   }
+
+   public void doControl()
+   {
+      perfectFullRobotModel.updateBasedOnRobot(true);
+      perfectTwistCalculator.compute();
+      perfectSpatialAccelerationCalculator.compute();
+
+      updateGroundTruth();
+   }
+
+   private void updateGroundTruth()
+   {
+      FramePoint com = new FramePoint();
+      perfectCenterOfMassCalculator.compute();
+      perfectCenterOfMassCalculator.packCenterOfMass(com);
+      perfectCoM.set(com);
+
+      FrameVector comd = new FrameVector();
+      perfectCenterOfMassJacobian.compute();
+      perfectCenterOfMassJacobian.packCenterOfMassVelocity(comd);
+      comd.changeFrame(ReferenceFrame.getWorldFrame());
+      perfectCoMd.set(comd);
+
+      FrameVector comdd = new FrameVector();
+      perfectCenterOfMassAccelerationCalculator.packCoMAcceleration(comdd);
+      comdd.changeFrame(ReferenceFrame.getWorldFrame());
+      perfectCoMdd.set(comdd);
+   }
+
+
+   private class CenterOfMassAccelerationFromFullRobotModelStealer extends AbstractControlFlowElement
+   {
+      private final CenterOfMassAccelerationCalculator centerOfMassAccelerationCalculator;
+      private final FrameVector comAccelerationFrameVector = new FrameVector(ReferenceFrame.getWorldFrame());
+      private final Vector3d comAcceleration = new Vector3d();
+
+      private final ControlFlowOutputPort<FrameVector> outputPort = createOutputPort();
+      private final GaussianVectorCorruptor signalCorruptor = new GaussianVectorCorruptor(123412L, getClass().getSimpleName() + "Corruptor", registry);
+
+      public CenterOfMassAccelerationFromFullRobotModelStealer(RigidBody rootBody, SpatialAccelerationCalculator spatialAccelerationCalculator)
+      {
+         this.centerOfMassAccelerationCalculator = new CenterOfMassAccelerationCalculator(rootBody, spatialAccelerationCalculator);
+
+         double discreteStdDev = convertStandardDeviationToDiscreteTime(comAccelerationProcessNoiseStandardDeviation);
+         signalCorruptor.setStandardDeviation(discreteStdDev);
+      }
+
+      public ControlFlowOutputPort<FrameVector> getOutputPort()
+      {
+         return outputPort;
+      }
+
+      public void startComputation()
+      {
+         centerOfMassAccelerationCalculator.packCoMAcceleration(comAccelerationFrameVector);
+         comAccelerationFrameVector.changeFrame(ReferenceFrame.getWorldFrame());
+         comAccelerationFrameVector.getVector(comAcceleration);
+
+         if (CORRUPT_DESIRED_ACCELERATIONS)
+            signalCorruptor.corrupt(comAcceleration);
+
+         comAccelerationFrameVector.set(comAcceleration);
+         outputPort.setData(comAccelerationFrameVector);
+      }
+
+      public void waitUntilComputationIsDone()
+      {
+      }
+   }
+
+
+
+   private class AngularAccelerationFromRobotStealer extends AbstractControlFlowElement
+   {
+      private final StateEstimatorEvaluatorRobot robot;
+      private final ControlFlowOutputPort<FrameVector> outputPort = createOutputPort();
+
+      // Note: Null reference frame!
+      // TODO: This should probably just have a Vector3d port rather than a FrameVector port. Since we don't
+      // know the frame that the user will want it in. It should be implied to be a body frame.
+      // Or that frame should be passed in somehow.
+      private final FrameVector desiredAngularAccelerationFrameVector = new FrameVector((ReferenceFrame) null);
+      private final Vector3d desiredAngularAcceleration = new Vector3d();
+
+      private final GaussianVectorCorruptor signalCorruptor = new GaussianVectorCorruptor(123412L, getClass().getSimpleName() + "Corruptor", registry);
+
+      public AngularAccelerationFromRobotStealer(StateEstimatorEvaluatorRobot robot)
+      {
+         this.robot = robot;
+         double discreteStdDev = convertStandardDeviationToDiscreteTime(angularAccelerationProcessNoiseStandardDeviation);
+         signalCorruptor.setStandardDeviation(discreteStdDev);
+      }
+
+      public void startComputation()
+      {
+         desiredAngularAcceleration.set(robot.getActualAngularAccelerationInBodyFrame());
+         if (CORRUPT_DESIRED_ACCELERATIONS)
+            signalCorruptor.corrupt(desiredAngularAcceleration);
+
+         // TODO: Null frame?
+         desiredAngularAccelerationFrameVector.set(null, desiredAngularAcceleration);
+         outputPort.setData(desiredAngularAccelerationFrameVector);
+      }
+
+      public ControlFlowOutputPort<FrameVector> getOutputPort()
+      {
+         return outputPort;
+      }
+
+      public void waitUntilComputationIsDone()
+      {
+      }
+
+   }
+
+
+   private double convertStandardDeviationToDiscreteTime(double continuousStdDev)
+   {
+      double continuousVariance = MathTools.square(continuousStdDev);
+      double discreteVariance = continuousVariance * controlDT;
+      double discreteStdDev = Math.sqrt(discreteVariance);
+
+      return discreteStdDev;
+   }
+
+   public void initialize()
+   {
+      // Do nothing.
+   }
+
+   public YoVariableRegistry getYoVariableRegistry()
+   {
+      return registry;
+   }
+
+   public String getName()
+   {
+      return registry.getName();
+   }
+
+   public String getDescription()
+   {
+      return getName();
+   }
+
+   public StateEstimatorEvaluatorFullRobotModel getStateEstimatorEvaluatorFullRobotModel()
+   {
+      return perfectFullRobotModel;
+   }
+
+}
+

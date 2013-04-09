@@ -1,8 +1,6 @@
 package us.ihmc.sensorProcessing.stateEstimation.evaluation;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
@@ -11,16 +9,11 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.controlFlow.ControlFlowGraph;
-import us.ihmc.controlFlow.ControlFlowOutputPort;
-import us.ihmc.sensorProcessing.simulatedSensors.IMUDefinition;
-import us.ihmc.sensorProcessing.simulatedSensors.PointVelocitySensorDefinition;
-import us.ihmc.sensorProcessing.simulatedSensors.SensorDefinitionHolder;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorMap;
 import us.ihmc.sensorProcessing.stateEstimation.ComposableOrientationAndCoMEstimatorCreator;
 import us.ihmc.sensorProcessing.stateEstimation.ComposableOrientationEstimatorCreator;
 import us.ihmc.sensorProcessing.stateEstimation.DesiredCoMAndAngularAccelerationOutputPortsHolder;
 import us.ihmc.sensorProcessing.stateEstimation.OrientationEstimator;
-import us.ihmc.sensorProcessing.stateEstimation.SensorOutputPortsHolder;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.AngularVelocitySensorConfiguration;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.LinearAccelerationSensorConfiguration;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.OrientationSensorConfiguration;
