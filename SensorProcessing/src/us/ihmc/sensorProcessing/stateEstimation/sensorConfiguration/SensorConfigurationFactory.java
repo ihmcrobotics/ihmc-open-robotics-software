@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
+import javax.media.j3d.Transform3D;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
@@ -14,7 +15,6 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.sensorProcessing.simulatedSensors.IMUDefinition;
 import us.ihmc.sensorProcessing.simulatedSensors.PointVelocitySensorDefinition;
-import us.ihmc.sensorProcessing.simulatedSensors.SimulatedSensorsFactory;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -51,7 +51,7 @@ public class SensorConfigurationFactory
          DenseMatrix64F orientationNoiseCovariance = createDiagonalCovarianceMatrix(orientationMeasurementStandardDeviation, 3);
 
          RigidBody estimatedMeasurementBody = estimatedIMUDefinition.getRigidBody();
-         ReferenceFrame estimatedMeasurementFrame = SimulatedSensorsFactory.createMeasurementFrame(sensorName, "EstimatedMeasurementFrame",
+         ReferenceFrame estimatedMeasurementFrame = createMeasurementFrame(sensorName, "EstimatedMeasurementFrame",
                                                        estimatedIMUDefinition, estimatedMeasurementBody);
 
          ControlFlowOutputPort<Matrix3d> outputPort = orientationSensors.get(estimatedIMUDefinition);
@@ -79,7 +79,7 @@ public class SensorConfigurationFactory
          DenseMatrix64F angularVelocityBiasProcessNoiseCovariance = createDiagonalCovarianceMatrix(angularVelocityBiasProcessNoiseStandardDeviation, 3);
 
          RigidBody estimatedMeasurementBody = estimatedIMUDefinition.getRigidBody();
-         ReferenceFrame estimatedMeasurementFrame = SimulatedSensorsFactory.createMeasurementFrame(sensorName, "EstimatedMeasurementFrame",
+         ReferenceFrame estimatedMeasurementFrame = createMeasurementFrame(sensorName, "EstimatedMeasurementFrame",
                                                        estimatedIMUDefinition, estimatedMeasurementBody);
 
          ControlFlowOutputPort<Vector3d> outputPort = angularVelocitySensors.get(estimatedIMUDefinition);
@@ -109,7 +109,7 @@ public class SensorConfigurationFactory
          DenseMatrix64F linearAccelerationBiasProcessNoiseCovariance = createDiagonalCovarianceMatrix(linearAccelerationBiasProcessNoiseStandardDeviation, 3);
 
          RigidBody estimatedMeasurementBody = estimatedIMUDefinition.getRigidBody();
-         ReferenceFrame estimatedMeasurementFrame = SimulatedSensorsFactory.createMeasurementFrame(sensorName, "EstimatedMeasurementFrame",
+         ReferenceFrame estimatedMeasurementFrame = createMeasurementFrame(sensorName, "EstimatedMeasurementFrame",
                                                        estimatedIMUDefinition, estimatedMeasurementBody);
 
          ControlFlowOutputPort<Vector3d> outputPort = linearAccelerationSensors.get(estimatedIMUDefinition);
@@ -163,5 +163,23 @@ public class SensorConfigurationFactory
       CommonOps.scale(MathTools.square(standardDeviation), orientationCovarianceMatrix);
 
       return orientationCovarianceMatrix;
+   }
+   
+   public static ReferenceFrame createMeasurementFrame(String sensorName, String frameName, IMUDefinition imuDefinition, RigidBody measurementBody)
+   {
+      Transform3D transformFromIMUToJoint = new Transform3D();
+      imuDefinition.getTransformFromIMUToJoint(transformFromIMUToJoint);
+
+      ReferenceFrame perfectFrameAfterJoint = measurementBody.getParentJoint().getFrameAfterJoint();
+
+      if (transformFromIMUToJoint.epsilonEquals(new Transform3D(), 1e-10))
+      {
+         return perfectFrameAfterJoint;
+      }
+
+      ReferenceFrame perfectMeasurementFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(sensorName + frameName, perfectFrameAfterJoint,
+                                                  transformFromIMUToJoint);
+
+      return perfectMeasurementFrame;
    }
 }
