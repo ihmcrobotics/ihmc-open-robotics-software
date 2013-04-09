@@ -12,6 +12,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.RevoluteJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTools;
@@ -22,6 +23,7 @@ import us.ihmc.utilities.screwTheory.Twist;
 import com.yobotics.simulationconstructionset.FloatingJoint;
 import com.yobotics.simulationconstructionset.Joint;
 import com.yobotics.simulationconstructionset.Link;
+import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJoint;
 import com.yobotics.simulationconstructionset.PinJoint;
 import com.yobotics.simulationconstructionset.Robot;
 
@@ -258,7 +260,7 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
    {
       return pinToRevoluteJointMap.keySet();
    }
-
+   
    public SixDoFJoint getInverseDynamicsSixDoFJoint(FloatingJoint floatingJoint)
    {
       return floatingToSixDofToJointMap.get(floatingJoint);
@@ -267,6 +269,21 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
    public Collection<? extends FloatingJoint> getFloatingJoints()
    {
       return floatingToSixDofToJointMap.keySet();
+   }
+
+
+   public OneDoFJoint getOneDoFJoint(OneDegreeOfFreedomJoint oneDegreeOfFreedomJoint)
+   {
+      if (oneDegreeOfFreedomJoint instanceof PinJoint)
+      {
+         return getInverseDynamicsRevoluteJoint((PinJoint) oneDegreeOfFreedomJoint);
+      }
+      
+      else
+      {
+         throw new RuntimeException("Not implemented for SliderJoints yet!");
+      }
+      
    }
 
 }
