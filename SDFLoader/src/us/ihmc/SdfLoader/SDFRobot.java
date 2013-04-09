@@ -70,6 +70,11 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
 
    public SDFRobot(GeneralizedSDFRobotModel generalizedSDFRobotModel, SDFJointNameMap sdfJointNameMap)
    {
+      this(generalizedSDFRobotModel, sdfJointNameMap, true);
+   }
+   
+   protected SDFRobot(GeneralizedSDFRobotModel generalizedSDFRobotModel, SDFJointNameMap sdfJointNameMap, boolean enableDamping)
+   {
       super(generalizedSDFRobotModel.getName());
       this.resourceDirectories = generalizedSDFRobotModel.getResourceDirectories();
 
@@ -102,7 +107,7 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
 
       for (SDFJointHolder child : rootLink.getChildren())
       {
-         addJointsRecursively(child, rootJoint, MatrixTools.IDENTITY, enableTorqueVelocityLimits);
+         addJointsRecursively(child, rootJoint, MatrixTools.IDENTITY, enableTorqueVelocityLimits, enableDamping);
       }
 
       for (RobotSide robotSide : RobotSide.values())
@@ -201,7 +206,7 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
       return oneDoFJoints.values();
    }
    
-   private void addJointsRecursively(SDFJointHolder joint, Joint scsParentJoint, Matrix3d chainRotationIn, boolean enableTorqueVelocityLimits)
+   private void addJointsRecursively(SDFJointHolder joint, Joint scsParentJoint, Matrix3d chainRotationIn, boolean enableTorqueVelocityLimits, boolean enableDamping)
    {
       Matrix3d rotation = new Matrix3d();
       Vector3d offset = new Vector3d();
@@ -238,12 +243,14 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
                   if (isFinger(joint))
                   {
                      pinJoint.setLimitStops(joint.getLowerLimit(), joint.getUpperLimit(), 10.0, 2.5);
-                     pinJoint.setDamping(0.1);
+                     if (enableDamping)
+                        pinJoint.setDamping(0.1);
                   }
                   else
                   {
                      pinJoint.setLimitStops(joint.getLowerLimit(), joint.getUpperLimit(), 100.0, 20.0);
-                     pinJoint.setDamping(joint.getDamping());
+                     if (enableDamping)
+                        pinJoint.setDamping(joint.getDamping());
                   }
                }
                else
@@ -292,9 +299,12 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
                   sliderJoint.setLimitStops(joint.getLowerLimit(), joint.getUpperLimit(), 0.0001 * joint.getContactKp(), joint.getContactKd());
                }
             }
-
-            sliderJoint.setDamping(joint.getDamping());
-            oneDoFJoints.put(joint.getName(), sliderJoint);
+            
+            if (enableDamping)
+            {
+               sliderJoint.setDamping(joint.getDamping());
+               oneDoFJoints.put(joint.getName(), sliderJoint);
+            }
             scsJoint = sliderJoint;
 
             break;
@@ -318,7 +328,7 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
 
       for (SDFJointHolder child : joint.getChild().getChildren())
       {
-         addJointsRecursively(child, scsJoint, chainRotation, enableTorqueVelocityLimits);
+         addJointsRecursively(child, scsJoint, chainRotation, enableTorqueVelocityLimits, enableDamping);
       }
 
    }
