@@ -123,7 +123,9 @@ public class DRCSimulationFactory
       {
          lidarJoint = fullRobotModelForController.getOneDoFJointByName(jointMap.getLidarJointName());
       }
-      RobotController robotController = controllerFactory.getController(fullRobotModelForController, referenceFramesForController, controlDT, simulatedRobot.getYoTime(), dynamicGraphicObjectsListRegistry, guiSetterUpperRegistry, twistCalculator, centerOfMassJacobian, footSwitches, handControllers, lidarJoint);
+      RobotController robotController = controllerFactory.getController(fullRobotModelForController, referenceFramesForController, controlDT,
+            simulatedRobot.getYoTime(), dynamicGraphicObjectsListRegistry, guiSetterUpperRegistry, twistCalculator, centerOfMassJacobian, footSwitches,
+            handControllers, lidarJoint);
 
       AbstractModularRobotController modularRobotController;
 
