@@ -1,6 +1,7 @@
 package us.ihmc.sensorProcessing.stateEstimation;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import javax.vecmath.Matrix3d;
@@ -50,7 +51,7 @@ public class ComposableOrientationEstimatorCreator
       this.twistCalculator = twistCalculator;
    }
 
-   public void addOrientationSensorConfigurations(ArrayList<OrientationSensorConfiguration> orientationSensorConfigurations)
+   public void addOrientationSensorConfigurations(Collection<OrientationSensorConfiguration> orientationSensorConfigurations)
    {
       for (OrientationSensorConfiguration orientationSensorConfiguration : orientationSensorConfigurations)
       {
@@ -58,7 +59,7 @@ public class ComposableOrientationEstimatorCreator
       }
    }
 
-   public void addAngularVelocitySensorConfigurations(ArrayList<AngularVelocitySensorConfiguration> angularVelocitySensorConfigurations)
+   public void addAngularVelocitySensorConfigurations(Collection<AngularVelocitySensorConfiguration> angularVelocitySensorConfigurations)
    {
       for (AngularVelocitySensorConfiguration angularVelocitySensorConfiguration : angularVelocitySensorConfigurations)
       {

@@ -1,6 +1,7 @@
 package us.ihmc.sensorProcessing.stateEstimation;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import javax.vecmath.Matrix3d;
@@ -67,7 +68,7 @@ public class ComposableOrientationAndCoMEstimatorCreator
       this.spatialAccelerationCalculator = spatialAccelerationCalculator;
    }
 
-   public void addOrientationSensorConfigurations(ArrayList<OrientationSensorConfiguration> orientationSensorConfigurations)
+   public void addOrientationSensorConfigurations(Collection<OrientationSensorConfiguration> orientationSensorConfigurations)
    {
       for (OrientationSensorConfiguration orientationSensorConfiguration : orientationSensorConfigurations)
       {
@@ -80,7 +81,7 @@ public class ComposableOrientationAndCoMEstimatorCreator
       orientationSensorConfigurations.add(orientationSensorConfiguration);
    }
 
-   public void addAngularVelocitySensorConfigurations(ArrayList<AngularVelocitySensorConfiguration> angularVelocitySensorConfigurations)
+   public void addAngularVelocitySensorConfigurations(Collection<AngularVelocitySensorConfiguration> angularVelocitySensorConfigurations)
    {
       for (AngularVelocitySensorConfiguration angularVelocitySensorConfiguration : angularVelocitySensorConfigurations)
       {
@@ -93,7 +94,7 @@ public class ComposableOrientationAndCoMEstimatorCreator
       this.angularVelocitySensorConfigurations.add(angularVelocitySensorConfiguration);
    }
 
-   public void addLinearAccelerationSensorConfigurations(ArrayList<LinearAccelerationSensorConfiguration> linearAccelerationSensorConfigurations)
+   public void addLinearAccelerationSensorConfigurations(Collection<LinearAccelerationSensorConfiguration> linearAccelerationSensorConfigurations)
    {
       for (LinearAccelerationSensorConfiguration linearAccelerationSensorConfiguration : linearAccelerationSensorConfigurations)
       {
@@ -106,7 +107,7 @@ public class ComposableOrientationAndCoMEstimatorCreator
       this.linearAccelerationSensorConfigurations.add(linearAccelerationSensorConfiguration);
    }
 
-   public void addPointVelocitySensorConfigurations(ArrayList<PointVelocitySensorConfiguration> pointVelocitySensorConfigurations)
+   public void addPointVelocitySensorConfigurations(Collection<PointVelocitySensorConfiguration> pointVelocitySensorConfigurations)
    {
       for (PointVelocitySensorConfiguration pointVelocitySensorConfiguration : pointVelocitySensorConfigurations)
       {
