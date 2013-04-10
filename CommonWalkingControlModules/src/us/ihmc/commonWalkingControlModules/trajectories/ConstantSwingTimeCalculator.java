@@ -10,12 +10,10 @@ public class ConstantSwingTimeCalculator implements SwingTimeCalculator
       this.swingTime = swingTime;
    }
    
-   @Override
    public void setSwingTime(double stepLength)
    {
    }
 
-   @Override
    public double getSwingTime()
    {
       return swingTime;
