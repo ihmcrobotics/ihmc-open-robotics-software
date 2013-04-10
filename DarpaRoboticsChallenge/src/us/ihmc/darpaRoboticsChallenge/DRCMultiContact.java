@@ -31,6 +31,8 @@ public class DRCMultiContact
    public DRCMultiContact(DRCRobotModel robotModel, DRCGuiInitialSetup guiInitialSetup, AutomaticSimulationRunner automaticSimulationRunner,
                           double timePerRecordTick, int simulationDataBufferSize, String ipAddress, int portNumber)
    {
+       DRCRobotParameters.ENABLE_JOINT_VELOCITY_TORQUE_LIMITS = false; // doesn't work with joint torque limits
+
       DRCSCSInitialSetup scsInitialSetup;
 
 
