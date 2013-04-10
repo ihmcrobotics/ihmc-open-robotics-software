@@ -409,7 +409,7 @@ public class DRCDashboard
       {
          public void actionPerformed(ActionEvent e)
          {
-            sshSimLauncher.launchSim((LocalCloudMachines) cloudMachineSelectionCombo.getSelectedItem(), (DRCDashboardTypes.DRCTask) taskCombo.getSelectedItem());
+            sshSimLauncher.launchSim((DRCDashboardTypes.DRCTask) taskCombo.getSelectedItem(), (LocalCloudMachines) cloudMachineSelectionCombo.getSelectedItem());
          }
       });
    }
