@@ -27,10 +27,10 @@ public class MeasurementModelTestTools
       EjmlUnitTests.assertEquals(residual, residualFromOutputMatrix, tol);
    }
 
-   public static DenseMatrix64F computeDeltaResidualFromOutputMatrix(DenseMatrix64F biasOutputMatrixBlock, DenseMatrix64F perturbationEjmlVector)
+   public static DenseMatrix64F computeDeltaResidualFromOutputMatrix(DenseMatrix64F outputMatrixBlock, DenseMatrix64F perturbationEjmlVector)
    {
       DenseMatrix64F residualFromOutputMatrix = new DenseMatrix64F(3, 1);
-      CommonOps.mult(biasOutputMatrixBlock, perturbationEjmlVector, residualFromOutputMatrix);
+      CommonOps.mult(outputMatrixBlock, perturbationEjmlVector, residualFromOutputMatrix);
       CommonOps.scale(-1.0, residualFromOutputMatrix);
 
       return residualFromOutputMatrix;
