@@ -171,7 +171,7 @@ Part of the goal of the presented state estimator is to estimate the orientation
  of one of the robot's links.
  Hence, we need to decide on the parameterization of orientation we use.
  We have chosen to use a unit quaternion to parameterize the global orientation
- state estimate
+ state estimate.
 \end_layout
 
 \begin_layout Standard
@@ -2977,11 +2977,11 @@ Orientation sensor
 \begin_inset Formula $i$
 \end_inset
 
- measures the quaternion 
-\begin_inset Formula $q_{i}^{w}$
+ measures the rotation matrix 
+\begin_inset Formula $R_{i}^{w}$
 \end_inset
 
-, describing the orientation of orientation measurement frame 
+, describing the orientation of measurement frame 
 \begin_inset Formula $i$
 \end_inset
 
@@ -2990,10 +2990,10 @@ Orientation sensor
 \end_inset
 
 .
- This quaternion can be written as
+ This rotation matrix can be written as
 \begin_inset Formula 
 \[
-q_{i}^{w}=q_{p}^{w}\otimes q_{i}^{p}
+R_{i}^{w}=R_{p}^{w}R_{i}^{p}
 \]
 
 \end_inset
@@ -3017,12 +3017,8 @@ i.e.
 \end_inset
 
 .
- Noting that 
-\begin_inset Formula $q_{p}^{w}=q$
-\end_inset
-
- and posmultiplying a noise quaternion 
-\begin_inset Formula $w_{q}$
+ Postmultiplying a noise rotation matrix 
+\begin_inset Formula $R_{v}$
 \end_inset
 
 , we obtain our measurement model
@@ -3031,21 +3027,165 @@ i.e.
 \begin_layout Standard
 \begin_inset Formula 
 \[
-z_{q,i}=q\otimes q_{i}^{p}\otimes w_{q}
+z_{R,i}=R_{p}^{w}R_{i}^{p}R_{v}
 \]
 
 \end_inset
 
-Note that the noise quaternion 
-\begin_inset Formula $w_{q}$
+Note that the noise rotation matrix 
+\begin_inset Formula $R_{v}$
 \end_inset
 
- has to satisfy the constraint that it has unit length.
- It is therefore not the case that each of the components of this noise
- quaternion has an independent Gaussian distribution.
- Note also that if the joint angle measurements that are needed to find
+ has to satisfy the constraint that it is orthonormal.
+ It is therefore not the case that each of the elements of this noise rotation
+ matrix has an independent Gaussian distribution.
  
-\begin_inset Formula $q_{i}^{p}$
+\end_layout
+
+\begin_layout Standard
+The estimated orientation of the orientation estimation link can be written
+ as
+\begin_inset Formula 
+\[
+\hat{R}_{p}^{w}=R_{p}^{w}R_{\phi}
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $R_{\phi}$
+\end_inset
+
+ is the rotation matrix associated with the estimation error rotation vector
+ 
+\begin_inset Formula $\phi\in\mathbb{R}^{3}$
+\end_inset
+
+.
+ The predicted measurement can be hence written as
+\begin_inset Formula 
+\[
+\hat{z}_{R,i}=\hat{R}_{p}^{w}R_{i}^{p}=R_{p}^{w}R_{\phi}R_{i}^{p}
+\]
+
+\end_inset
+
+so that the measurement residual can be written in rotation matrix form
+ as
+\begin_inset Formula 
+\begin{align*}
+y_{R,i} & =\hat{z}_{R,i}^{-1}z_{R,i}\\
+ & =R_{p}^{i}R_{\phi}^{-1}R_{w}^{p}R_{p}^{w}R_{i}^{p}R_{v}\\
+ & =R_{p}^{i}R_{\phi}^{-1}R_{i}^{p}R_{v}
+\end{align*}
+
+\end_inset
+
+assuming that 
+\begin_inset Formula $\left\Vert \phi\right\Vert $
+\end_inset
+
+ is small, we can use the first order approximation 
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+
+\begin_inset Formula 
+\[
+R_{\phi}^{-1}=e^{-\tilde{\phi}}\approx I-\tilde{\phi}
+\]
+
+\end_inset
+
+
+\family default
+\series default
+\shape default
+\size default
+\emph default
+\bar default
+\strikeout default
+\uuline default
+\uwave default
+\noun default
+\color inherit
+so that 
+\begin_inset Formula 
+\begin{align*}
+y_{R,i} & \approx R_{p}^{i}\left(I-\tilde{\phi}\right)R_{i}^{p}R_{v}\\
+ & =\left(I-R_{p}^{i}\tilde{\phi}R_{i}^{p}\right)R_{v}\\
+ & =\left(I-\widetilde{R_{p}^{i}\phi}\right)R_{v}
+\end{align*}
+
+\end_inset
+
+where we have used 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:tilde-rotation-property"
+
+\end_inset
+
+ from the appendix.
+ For small 
+\begin_inset Formula $\phi$
+\end_inset
+
+, the approximate rotation matrix 
+\begin_inset Formula $I-\widetilde{R_{p}^{i}\phi}$
+\end_inset
+
+ can be identified with the rotation vector 
+\begin_inset Formula $-R_{p}^{i}\phi$
+\end_inset
+
+.
+ It is in terms of this rotation vector form that we model the noise on
+ the measurement (and hence the residual) as Gaussian, i.e.
+ 
+\begin_inset Formula 
+\begin{align*}
+y_{\phi,i} & =-R_{p}^{i}\phi+v_{\phi}\\
+v_{\phi} & \sim\mathcal{N}\left(0,Q_{\phi}\right)
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We can finally rewrite this rotation vector measurement residual in the
+ canonical form
+\begin_inset Formula 
+\[
+y_{\phi,i}=z_{\phi,i}-H_{\phi,i}\phi
+\]
+
+\end_inset
+
+with 
+\begin_inset Formula $z_{\phi,i}=v_{\phi}$
+\end_inset
+
+ and 
+\begin_inset Formula $H_{\phi,i}=R_{p}^{i}$
+\end_inset
+
+, the measurement output matrix.
+\end_layout
+
+\begin_layout Standard
+Note also that if the joint angle measurements that are needed to find 
+\begin_inset Formula $R_{i}^{p}$
 \end_inset
 
  are noisy, their covariances will have to be factored into the measurement
@@ -3058,137 +3198,7 @@ Note that the noise quaternion
 \end_inset
 
 .
-\end_layout
-
-\begin_layout Standard
-The predicted measurement is written as
-\begin_inset Formula 
-\[
-\hat{z}_{q,i}=\hat{q}\otimes q_{i}^{p}
-\]
-
-\end_inset
-
-and we define the measurement residual as
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula 
-\[
-y_{q,i}=\hat{z}_{q,i}^{-1}\otimes z_{q,i}
-\]
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-This quaternion measurement residual can be converted into a rotation vector
- measurement residual using
-\begin_inset Formula 
-\[
-y_{\phi,i}=\chi\left(y_{q,i}\right)
-\]
-
-\end_inset
-
-where
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula 
-\[
-\chi:q=\left(\begin{array}{c}
-q_{v}\\
-q_{s}
-\end{array}\right)\mapsto\chi\left(q\right)=\begin{cases}
-2\arctan\left(\left\Vert q_{v}\right\Vert ,q_{s}\right)\frac{q_{v}}{\left\Vert q_{v}\right\Vert } & \left\Vert q_{v}\right\Vert \neq0\\
-0 & \left\Vert q_{v}\right\Vert =0
-\end{cases}
-\]
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-The measurement residual can also 
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula 
-\[
-\hat{R}_{p}^{w}=R_{p}^{w}R_{\phi}
-\]
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula 
-\[
-\hat{R}_{i}^{w}=\hat{R}_{p}^{w}R_{i}^{p}=R_{p}^{w}R_{\phi}R_{i}^{p}
-\]
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula 
-\begin{align*}
-\left(\hat{R}_{i}^{w}\right)^{-1}R_{i}^{w} & =R_{p}^{i}R_{\phi}^{-1}R_{w}^{p}R_{p}^{w}R_{i}^{p}\\
- & =R_{p}^{i}R_{\phi}^{-1}R_{i}^{p}
-\end{align*}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula 
-\[
-\hat{z}_{R_{i}^{w}}
-\]
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-In canonical form, the measurement residual can be written in terms of the
- rotation vector error 
-\begin_inset Formula $\hat{\phi}$
-\end_inset
-
- as 
-\begin_inset Formula 
-\[
-y_{\phi,i}=H_{\phi,i}\hat{\phi}
-\]
-
-\end_inset
-
-where 
-\begin_inset Formula $\hat{\phi}=\chi\left(y_{q,i}\right)$
-\end_inset
-
-, 
-\begin_inset Formula $z_{\phi,i}=0$
-\end_inset
-
- and 
-\begin_inset Formula $H_{\phi,i}=I_{3}$
-\end_inset
-
-.
+ This is currently not taken into account.
 \end_layout
 
 \begin_layout Subsection
@@ -3829,9 +3839,9 @@ Since this result must hold for all vectors
 
 , we must have
 \begin_inset Formula 
-\[
-\tilde{b}=\widetilde{R_{i}^{k}a}=R_{i}^{k}\tilde{a}R_{k}^{i}
-\]
+\begin{equation}
+\tilde{b}=\widetilde{R_{i}^{k}a}=R_{i}^{k}\tilde{a}R_{k}^{i}\label{eq:tilde-rotation-property}
+\end{equation}
 
 \end_inset
 
