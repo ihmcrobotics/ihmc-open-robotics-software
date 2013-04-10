@@ -2,7 +2,6 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 
 public class ConstantSwingTimeCalculator implements SwingTimeCalculator
 {
-
    private final double swingTime;
    
    public ConstantSwingTimeCalculator(double swingTime)
@@ -10,11 +9,7 @@ public class ConstantSwingTimeCalculator implements SwingTimeCalculator
       this.swingTime = swingTime;
    }
    
-   public void setSwingTime(double stepLength)
-   {
-   }
-
-   public double getSwingTime()
+   public double getSwingTime(double stepLength)
    {
       return swingTime;
    }
