@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import javax.media.j3d.Transform3D;
+import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
@@ -1134,8 +1135,19 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 
       finalPositionProvider.set(nextFootstep.getPositionInFrame(worldFrame));
       
-      double stepDistance = 0.0;
-      // TODO calculate stepDistance
+      SideDependentList<Transform3D> footToWorldTransform = new SideDependentList<Transform3D>();
+      for(RobotSide robotSide : RobotSide.values)
+      {
+         Transform3D transform = bipedFeet.get(robotSide).getBodyFrame().getTransformToDesiredFrame(worldFrame);
+         footToWorldTransform.set(robotSide, transform);
+      }
+      
+      Vector3d initialVectorPosition = new Vector3d();
+      footToWorldTransform.get(supportSide.getOppositeSide()).get(initialVectorPosition);
+      FramePoint initialFramePosition = new FramePoint(worldFrame, initialVectorPosition);
+      FramePoint finalPosition = new FramePoint(worldFrame);
+      finalPositionProvider.get(finalPosition);
+      double stepDistance = initialFramePosition.distance(finalPosition);
       swingTimeCalculationProvider.setSwingTime(stepDistance);
 
       trajectoryParametersProvider.set(mapFromFootstepsToTrajectoryParameters.get(nextFootstep));
@@ -1161,8 +1173,8 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       FramePoint centerOfMass = new FramePoint(referenceFrames.getCenterOfMassFrame());
       centerOfMass.changeFrame(worldFrame);
       ContactablePlaneBody supportFoot = bipedFeet.get(supportSide);
-      Transform3D footToWorldTransform = supportFoot.getBodyFrame().getTransformToDesiredFrame(worldFrame);
-      double footHeight = DesiredFootstepCalculatorTools.computeMinZPointInFrame(footToWorldTransform, supportFoot, worldFrame).getZ();
+      Transform3D supportFootToWorldTransform = footToWorldTransform.get(supportSide);
+      double footHeight = DesiredFootstepCalculatorTools.computeMinZPointInFrame(supportFootToWorldTransform, supportFoot, worldFrame).getZ();
       double comHeight = centerOfMass.getZ() - footHeight;
       double omega0 = CapturePointCalculator.computeOmega0ConstantHeight(gravity, comHeight);
       setOmega0(omega0);
