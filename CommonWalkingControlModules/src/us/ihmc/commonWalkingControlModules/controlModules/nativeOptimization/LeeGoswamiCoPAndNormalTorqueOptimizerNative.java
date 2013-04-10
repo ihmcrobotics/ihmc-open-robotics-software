@@ -4,8 +4,6 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.DoubleBuffer;
 
-import cern.colt.Arrays;
-
 import us.ihmc.utilities.exeptions.NoConvergenceException;
 
 public class LeeGoswamiCoPAndNormalTorqueOptimizerNative
@@ -141,7 +139,7 @@ public class LeeGoswamiCoPAndNormalTorqueOptimizerNative
          if (i % 10000 == 0)
          {
             System.out.println("10000 iterations took " + (System.nanoTime() - time) / 1e9 + " seconds");
-            System.out.println(Arrays.toString(leeGoswamiCoPAndNormalTorqueOptimizerNative.getEta()));
+//            System.out.println(Arrays.toString(leeGoswamiCoPAndNormalTorqueOptimizerNative.getEta()));
             time = System.nanoTime();
          }
          
