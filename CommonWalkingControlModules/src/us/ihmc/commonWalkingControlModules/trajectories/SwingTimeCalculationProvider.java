@@ -2,11 +2,11 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 
 import com.yobotics.simulationconstructionset.util.trajectory.DoubleProvider;
 
-public class SwingTimeCalculatorProvider implements DoubleProvider
+public class SwingTimeCalculationProvider implements DoubleProvider
 {
    private final SwingTimeCalculator swingTimeCalculator;
 
-   public SwingTimeCalculatorProvider(SwingTimeCalculator swingTimeCalculator)
+   public SwingTimeCalculationProvider(SwingTimeCalculator swingTimeCalculator)
    {
       this.swingTimeCalculator = swingTimeCalculator;
    }
@@ -16,9 +16,9 @@ public class SwingTimeCalculatorProvider implements DoubleProvider
       return swingTimeCalculator.getSwingTime();
    }
    
-   public SwingTimeCalculator getSwingTimeCalculator()
+   public void setSwingTime(double stepLength)
    {
-      return swingTimeCalculator;
+      swingTimeCalculator.setSwingTime(stepLength);
    }
    
 }
