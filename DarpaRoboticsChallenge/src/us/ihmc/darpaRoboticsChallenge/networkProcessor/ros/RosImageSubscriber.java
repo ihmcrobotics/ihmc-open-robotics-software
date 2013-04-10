@@ -18,7 +18,7 @@ public abstract class RosImageSubscriber extends RosTopicSubscriber<sensor_msgs.
 
    public RosImageSubscriber()
    {
-      super(sensor_msgs.Image._TYPE);
+      super(sensor_msgs.CompressedImage._TYPE);
       ColorSpace colorSpace = ColorSpace.getInstance(ColorSpace.CS_sRGB);
       this.colorModel = new ComponentColorModel(colorSpace, false, false, Transparency.OPAQUE, DataBuffer.TYPE_BYTE);
    }
@@ -62,8 +62,8 @@ public abstract class RosImageSubscriber extends RosTopicSubscriber<sensor_msgs.
       };
 
       RosMainNode rosMainNode = new RosMainNode(new URI("http://localhost:11311"));
-      rosMainNode.attachSubscriber("/multisense_sl/camera/left/image_rect_color", leftImageReceiver);
-      rosMainNode.attachSubscriber("/multisense_sl/camera/right/image_rect_color", rightImageReceiver);
+      rosMainNode.attachSubscriber("/multisense_sl/camera/left/image_rect_color/compressed", leftImageReceiver);
+      rosMainNode.attachSubscriber("/multisense_sl/camera/right/image_rect_color/compressed", rightImageReceiver);
       rosMainNode.execute();
 
    }
