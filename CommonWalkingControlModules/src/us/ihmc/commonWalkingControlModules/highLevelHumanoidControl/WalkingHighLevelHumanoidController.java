@@ -58,7 +58,7 @@ import us.ihmc.commonWalkingControlModules.trajectories.OrientationInterpolation
 import us.ihmc.commonWalkingControlModules.trajectories.OrientationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.OrientationTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.SettableOrientationProvider;
-import us.ihmc.commonWalkingControlModules.trajectories.SwingTimeCalculatorProvider;
+import us.ihmc.commonWalkingControlModules.trajectories.SwingTimeCalculationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.YoVariableDoubleProvider;
 import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.robotSide.RobotSide;
@@ -148,7 +148,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
    private final HashMap<ContactablePlaneBody, EndEffectorControlModule> endEffectorControlModules = new HashMap<ContactablePlaneBody,
                                                                                                         EndEffectorControlModule>();
 
-   private final SwingTimeCalculatorProvider swingTimeCalculatorProvider;
+   private final SwingTimeCalculationProvider swingTimeCalculationProvider;
    private final TrajectoryParametersProvider trajectoryParametersProvider;
    private final SideDependentList<YoVariableDoubleProvider> onEdgeInitialAngleProviders = new SideDependentList<YoVariableDoubleProvider>();
    private final SideDependentList<YoVariableDoubleProvider> onEdgeFinalAngleProviders = new SideDependentList<YoVariableDoubleProvider>();
@@ -204,7 +204,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
            DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, FootstepProvider footstepProvider, DesiredHandPoseProvider handPoseProvider,
            HashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters, DesiredHeadOrientationProvider desiredHeadOrientationProvider,
            CoMHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator, GroundReactionWrenchDistributor groundReactionWrenchDistributor,
-           SideDependentList<PositionTrajectoryGenerator> footPositionTrajectoryGenerators, SwingTimeCalculatorProvider swingTimeCalculatorProvider,
+           SideDependentList<PositionTrajectoryGenerator> footPositionTrajectoryGenerators, SwingTimeCalculationProvider swingTimeCalculationProvider,
            YoPositionProvider finalPositionProvider, TrajectoryParametersProvider trajectoryParametersProvider, boolean stayOntoes, double desiredPelvisPitch,
            double trailingFootPitch, ArrayList<Updatable> updatables, ProcessedOutputsInterface processedOutputs,
            WalkingControllerParameters walkingControllerParameters, ICPBasedMomentumRateOfChangeControlModule momentumRateOfChangeControlModule,
@@ -221,7 +221,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       this.desiredPelvisOrientationTrajectoryInputPort = desiredPelvisOrientationTrajectoryInputPort;
       this.centerOfMassJacobian = centerOfMassJacobian;
       this.centerOfMassHeightTrajectoryGenerator = centerOfMassHeightTrajectoryGenerator;
-      this.swingTimeCalculatorProvider = swingTimeCalculatorProvider;
+      this.swingTimeCalculationProvider = swingTimeCalculationProvider;
       this.trajectoryParametersProvider = trajectoryParametersProvider;
       this.footstepProvider = footstepProvider;
       this.mapFromFootstepsToTrajectoryParameters = mapFromFootstepsToTrajectoryParameters;
@@ -261,7 +261,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
          finalFootOrientationProviders.put(robotSide, finalFootOrientationProvider);
 
          OrientationTrajectoryGenerator swingOrientationTrajectoryGenerator = new OrientationInterpolationTrajectoryGenerator(sideString
-                                                                                 + "SwingFootOrientation", worldFrame, swingTimeCalculatorProvider,
+                                                                                 + "SwingFootOrientation", worldFrame, swingTimeCalculationProvider,
                                                                                     initialOrientationProvider, finalFootOrientationProvider, registry);
 
          YoVariableDoubleProvider onEdgeInitialPitchProvider = new YoVariableDoubleProvider(sideString + "OnToesInitialPitch", registry);
@@ -285,7 +285,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 
       initialPelvisOrientationProvider = new SettableOrientationProvider("initialPelvis", worldFrame, registry);
       finalPelvisOrientationProvider = new SettableOrientationProvider("finalPelvis", worldFrame, registry);
-      this.pelvisOrientationTrajectoryGenerator = new OrientationInterpolationTrajectoryGenerator("pelvis", worldFrame, swingTimeCalculatorProvider,
+      this.pelvisOrientationTrajectoryGenerator = new OrientationInterpolationTrajectoryGenerator("pelvis", worldFrame, swingTimeCalculationProvider,
               initialPelvisOrientationProvider, finalPelvisOrientationProvider, registry);
 
       setUpStateMachine();
@@ -666,7 +666,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
             transferToAndNextFootstepsData.setTransferToSide(transferToSide);
             transferToAndNextFootstepsData.setNextFootstep(nextFootstep);
             transferToAndNextFootstepsData.setNextNextFootstep(nextNextFootstep);
-            transferToAndNextFootstepsData.setEstimatedStepTime(swingTimeCalculatorProvider.getValue() + transferTimeProvider.getValue());
+            transferToAndNextFootstepsData.setEstimatedStepTime(swingTimeCalculationProvider.getValue() + transferTimeProvider.getValue());
             transferToAndNextFootstepsData.setW0(getOmega0());
 
             FramePoint2d finalDesiredICP = finalDesiredICPCalculator.getFinalDesiredICPForWalking(transferToAndNextFootstepsData);
@@ -938,7 +938,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       {
          RobotSide swingSide = getSupportLeg().getOppositeSide();
          double minimumSwingFraction = 0.5;
-         double minimumSwingTime = swingTimeCalculatorProvider.getValue() * minimumSwingFraction;
+         double minimumSwingTime = swingTimeCalculationProvider.getValue() * minimumSwingFraction;
          boolean footHitGround = (stateMachine.timeInCurrentState() > minimumSwingTime) && footSwitches.get(swingSide).hasFootHitGround();
 
          // transferring out of single support once the ICP trajectory is done guarantees that we never reach the zero velocity desired
@@ -1038,7 +1038,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       transferToAndNextFootstepsData.setTransferToSide(swingSide);
       transferToAndNextFootstepsData.setNextFootstep(footstepAfterThisOne);
       transferToAndNextFootstepsData.setNextNextFootstep(null);
-      transferToAndNextFootstepsData.setEstimatedStepTime(swingTimeCalculatorProvider.getValue() + transferTimeProvider.getValue());
+      transferToAndNextFootstepsData.setEstimatedStepTime(swingTimeCalculationProvider.getValue() + transferTimeProvider.getValue());
       transferToAndNextFootstepsData.setW0(getOmega0());
 
       FramePoint2d finalDesiredICP = finalDesiredICPCalculator.getFinalDesiredICPForWalking(transferToAndNextFootstepsData);
@@ -1136,7 +1136,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       
       double stepDistance = 0.0;
       // TODO calculate stepDistance
-      swingTimeCalculatorProvider.getSwingTimeCalculator().setSwingTime(stepDistance);
+      swingTimeCalculationProvider.setSwingTime(stepDistance);
 
       trajectoryParametersProvider.set(mapFromFootstepsToTrajectoryParameters.get(nextFootstep));
       finalFootOrientationProviders.get(swingSide).setOrientation(nextFootstep.getOrientationInFrame(worldFrame));
@@ -1182,7 +1182,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       setSupportLeg(supportSide);
       updateBipedSupportPolygons(bipedSupportPolygons);
 
-      icpTrajectoryGenerator.initialize(desiredICP.getFramePoint2dCopy(), finalDesiredICP, swingTimeCalculatorProvider.getValue(), omega0,
+      icpTrajectoryGenerator.initialize(desiredICP.getFramePoint2dCopy(), finalDesiredICP, swingTimeCalculationProvider.getValue(), omega0,
                                         amountToBeInsideSingleSupport.getDoubleValue(), getSupportLeg());
 
       centerOfMassHeightTrajectoryGenerator.initialize(getSupportLeg(), nextFootstep, getContactStatesList());
