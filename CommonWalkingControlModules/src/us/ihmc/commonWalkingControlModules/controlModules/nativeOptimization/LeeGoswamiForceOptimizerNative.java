@@ -5,7 +5,6 @@ import java.nio.ByteOrder;
 import java.nio.DoubleBuffer;
 
 import us.ihmc.utilities.exeptions.NoConvergenceException;
-import cern.colt.Arrays;
 
 public class LeeGoswamiForceOptimizerNative
 {
@@ -119,7 +118,7 @@ public class LeeGoswamiForceOptimizerNative
          if (i % 10000 == 0)
          {
             System.out.println("10000 iterations took " + (System.nanoTime() - time) / 1e9 + " seconds");
-            System.out.println(Arrays.toString(leeGoswamiForceOptimizerNative.getRho()));
+//            System.out.println(Arrays.toString(leeGoswamiForceOptimizerNative.getRho()));
             time = System.nanoTime();
          }
          leeGoswamiForceOptimizerNative.solve(phi, xi, epsilon_f[0]);

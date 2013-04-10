@@ -5,7 +5,6 @@ import java.nio.ByteOrder;
 import java.nio.DoubleBuffer;
 
 import us.ihmc.utilities.exeptions.NoConvergenceException;
-import cern.colt.Arrays;
 
 public class ContactPointWrenchOptimizerNative
 {
@@ -124,7 +123,7 @@ public class ContactPointWrenchOptimizerNative
          {
             System.out.println("10000 iterations took " + (System.nanoTime() - time) / 1e9 + " seconds");
 
-            System.out.println(Arrays.toString(contactPointWrenchOptimizerNative.getRho()));
+//            System.out.println(Arrays.toString(contactPointWrenchOptimizerNative.getRho()));
 
             time = System.nanoTime();
          }
