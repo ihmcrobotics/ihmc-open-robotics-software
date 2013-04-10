@@ -11,7 +11,6 @@ public class SwingTimeCalculatorProvider implements DoubleProvider
       this.swingTimeCalculator = swingTimeCalculator;
    }
    
-   @Override
    public double getValue()
    {
       return swingTimeCalculator.getSwingTime();
