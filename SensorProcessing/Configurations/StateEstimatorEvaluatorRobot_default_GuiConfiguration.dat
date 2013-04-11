@@ -72,7 +72,7 @@
 <GraphGroup>
 	<Cols>3</Cols>
 	<Graph>
-		<Variables>root.StateEstimatorEvaluatorRobot.q_qx,root.StateEstimatorEvaluatorRobot.ComposableStateEstimatorEvaluatorController.orientationEstimatorQx</Variables>
+		<Variables>root.StateEstimatorEvaluatorRobot.q_qx</Variables>
 		<GraphConfiguration>
 			<Name>config6</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -84,7 +84,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.StateEstimatorEvaluatorRobot.q_qy,root.StateEstimatorEvaluatorRobot.ComposableStateEstimatorEvaluatorController.orientationEstimatorQy</Variables>
+		<Variables>root.StateEstimatorEvaluatorRobot.q_qy</Variables>
 		<GraphConfiguration>
 			<Name>config7</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -96,7 +96,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.StateEstimatorEvaluatorRobot.q_qz,root.StateEstimatorEvaluatorRobot.ComposableStateEstimatorEvaluatorController.orientationEstimatorQz</Variables>
+		<Variables>root.StateEstimatorEvaluatorRobot.q_qz</Variables>
 		<GraphConfiguration>
 			<Name>config8</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -108,7 +108,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.StateEstimatorEvaluatorRobot.qd_wx,root.StateEstimatorEvaluatorRobot.ComposableStateEstimatorEvaluatorController.orientationEstimator.orientationEstimatorOmegaX</Variables>
+		<Variables>root.StateEstimatorEvaluatorRobot.qd_wx</Variables>
 		<GraphConfiguration>
 			<Name>config9</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -120,7 +120,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.StateEstimatorEvaluatorRobot.qd_wy,root.StateEstimatorEvaluatorRobot.ComposableStateEstimatorEvaluatorController.orientationEstimator.orientationEstimatorOmegaY</Variables>
+		<Variables>root.StateEstimatorEvaluatorRobot.qd_wy</Variables>
 		<GraphConfiguration>
 			<Name>config10</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -132,7 +132,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.StateEstimatorEvaluatorRobot.qd_wz,root.StateEstimatorEvaluatorRobot.ComposableStateEstimatorEvaluatorController.orientationEstimator.orientationEstimatorOmegaZ</Variables>
+		<Variables>root.StateEstimatorEvaluatorRobot.qd_wz</Variables>
 		<GraphConfiguration>
 			<Name>config11</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -144,7 +144,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.StateEstimatorEvaluatorRobot.ComposableStateEstimatorEvaluatorController.orientationEstimator.orientationEstimatorCoMVelocityX,root.StateEstimatorEvaluatorRobot.DesiredCoMAccelerationsFromRobotStealerController.perfectCoMdX</Variables>
+		<Variables>root.StateEstimatorEvaluatorRobot.DesiredCoMAccelerationsFromRobotStealerController.perfectCoMdX</Variables>
 		<GraphConfiguration>
 			<Name>config12</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -156,7 +156,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.StateEstimatorEvaluatorRobot.ComposableStateEstimatorEvaluatorController.orientationEstimator.orientationEstimatorCoMVelocityY,root.StateEstimatorEvaluatorRobot.DesiredCoMAccelerationsFromRobotStealerController.perfectCoMdY</Variables>
+		<Variables>root.StateEstimatorEvaluatorRobot.DesiredCoMAccelerationsFromRobotStealerController.perfectCoMdY</Variables>
 		<GraphConfiguration>
 			<Name>config13</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -168,7 +168,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.StateEstimatorEvaluatorRobot.ComposableStateEstimatorEvaluatorController.orientationEstimator.orientationEstimatorCoMVelocityZ,root.StateEstimatorEvaluatorRobot.DesiredCoMAccelerationsFromRobotStealerController.perfectCoMdZ</Variables>
+		<Variables>root.StateEstimatorEvaluatorRobot.DesiredCoMAccelerationsFromRobotStealerController.perfectCoMdZ</Variables>
 		<GraphConfiguration>
 			<Name>config14</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -180,7 +180,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.StateEstimatorEvaluatorRobot.ComposableStateEstimatorEvaluatorController.orientationEstimator.orientationEstimatorCoMAccelerationX,root.StateEstimatorEvaluatorRobot.DesiredCoMAccelerationsFromRobotStealerController.perfectCoMddX</Variables>
+		<Variables>root.StateEstimatorEvaluatorRobot.DesiredCoMAccelerationsFromRobotStealerController.perfectCoMddX</Variables>
 		<GraphConfiguration>
 			<Name>config15</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -192,7 +192,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.StateEstimatorEvaluatorRobot.ComposableStateEstimatorEvaluatorController.orientationEstimator.orientationEstimatorCoMAccelerationY,root.StateEstimatorEvaluatorRobot.DesiredCoMAccelerationsFromRobotStealerController.perfectCoMddY</Variables>
+		<Variables>root.StateEstimatorEvaluatorRobot.DesiredCoMAccelerationsFromRobotStealerController.perfectCoMddY</Variables>
 		<GraphConfiguration>
 			<Name>config16</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -204,7 +204,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.StateEstimatorEvaluatorRobot.ComposableStateEstimatorEvaluatorController.orientationEstimator.orientationEstimatorCoMAccelerationZ,root.StateEstimatorEvaluatorRobot.DesiredCoMAccelerationsFromRobotStealerController.perfectCoMddZ</Variables>
+		<Variables>root.StateEstimatorEvaluatorRobot.DesiredCoMAccelerationsFromRobotStealerController.perfectCoMddZ</Variables>
 		<GraphConfiguration>
 			<Name>config17</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -216,7 +216,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.StateEstimatorEvaluatorRobot.qdd_wx,root.StateEstimatorEvaluatorRobot.ComposableStateEstimatorEvaluatorController.orientationEstimator.orientationEstimatorAngularAccelerationY</Variables>
+		<Variables>root.StateEstimatorEvaluatorRobot.qdd_wx</Variables>
 		<GraphConfiguration>
 			<Name>config18</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -228,7 +228,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.StateEstimatorEvaluatorRobot.qdd_wy,root.StateEstimatorEvaluatorRobot.ComposableStateEstimatorEvaluatorController.orientationEstimator.orientationEstimatorAngularAccelerationY</Variables>
+		<Variables>root.StateEstimatorEvaluatorRobot.qdd_wy</Variables>
 		<GraphConfiguration>
 			<Name>config19</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -240,7 +240,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.StateEstimatorEvaluatorRobot.qdd_wz,root.StateEstimatorEvaluatorRobot.ComposableStateEstimatorEvaluatorController.orientationEstimator.orientationEstimatorAngularAccelerationZ</Variables>
+		<Variables>root.StateEstimatorEvaluatorRobot.qdd_wz</Variables>
 		<GraphConfiguration>
 			<Name>config20</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -624,7 +624,7 @@
 <GraphGroup>
 	<Cols>3</Cols>
 	<Graph>
-		<Variables>root.StateEstimatorEvaluatorRobot.imuMount2OrientationQx,root.StateEstimatorEvaluatorRobot.SimulatedSensorControllerFromRobot.imuMount2OrientationPerfectQx</Variables>
+		<Variables>root.StateEstimatorEvaluatorRobot.imuMount2OrientationQx</Variables>
 		<GraphConfiguration>
 			<Name>config51</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -636,7 +636,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.StateEstimatorEvaluatorRobot.imuMount2OrientationQy,root.StateEstimatorEvaluatorRobot.SimulatedSensorControllerFromRobot.imuMount2OrientationPerfectQy</Variables>
+		<Variables>root.StateEstimatorEvaluatorRobot.imuMount2OrientationQy</Variables>
 		<GraphConfiguration>
 			<Name>config52</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -648,7 +648,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.StateEstimatorEvaluatorRobot.imuMount2OrientationQz,root.StateEstimatorEvaluatorRobot.SimulatedSensorControllerFromRobot.imuMount2OrientationPerfectQz</Variables>
+		<Variables>root.StateEstimatorEvaluatorRobot.imuMount2OrientationQz</Variables>
 		<GraphConfiguration>
 			<Name>config53</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -660,7 +660,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.StateEstimatorEvaluatorRobot.imuMount2AngularVelocityX,root.StateEstimatorEvaluatorRobot.SimulatedSensorControllerFromRobot.imuMount2AngularVelocityNoisyX</Variables>
+		<Variables>root.StateEstimatorEvaluatorRobot.imuMount2AngularVelocityX</Variables>
 		<GraphConfiguration>
 			<Name>config54</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -672,7 +672,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.StateEstimatorEvaluatorRobot.imuMount2AngularVelocityY,root.StateEstimatorEvaluatorRobot.SimulatedSensorControllerFromRobot.imuMount2AngularVelocityNoisyY</Variables>
+		<Variables>root.StateEstimatorEvaluatorRobot.imuMount2AngularVelocityY</Variables>
 		<GraphConfiguration>
 			<Name>config55</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -684,7 +684,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.StateEstimatorEvaluatorRobot.imuMount2AngularVelocityZ,root.StateEstimatorEvaluatorRobot.SimulatedSensorControllerFromRobot.imuMount2AngularVelocityNoisyZ</Variables>
+		<Variables>root.StateEstimatorEvaluatorRobot.imuMount2AngularVelocityZ</Variables>
 		<GraphConfiguration>
 			<Name>config56</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -696,7 +696,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.StateEstimatorEvaluatorRobot.imuMount2LinearAccelerationX,root.StateEstimatorEvaluatorRobot.SimulatedSensorControllerFromRobot.imuMount2LinearAccelerationNoisyX</Variables>
+		<Variables>root.StateEstimatorEvaluatorRobot.imuMount2LinearAccelerationX</Variables>
 		<GraphConfiguration>
 			<Name>config57</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -708,7 +708,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.StateEstimatorEvaluatorRobot.imuMount2LinearAccelerationY,root.StateEstimatorEvaluatorRobot.SimulatedSensorControllerFromRobot.imuMount2LinearAccelerationNoisyY</Variables>
+		<Variables>root.StateEstimatorEvaluatorRobot.imuMount2LinearAccelerationY</Variables>
 		<GraphConfiguration>
 			<Name>config58</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -720,7 +720,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.StateEstimatorEvaluatorRobot.imuMount2LinearAccelerationZ,root.StateEstimatorEvaluatorRobot.SimulatedSensorControllerFromRobot.imuMount2LinearAccelerationNoisyZ</Variables>
+		<Variables>root.StateEstimatorEvaluatorRobot.imuMount2LinearAccelerationZ</Variables>
 		<GraphConfiguration>
 			<Name>config59</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -732,7 +732,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.StateEstimatorEvaluatorRobot.ComposableStateEstimatorEvaluatorController.orientationEstimator.imuMount2AngularVelocityBiasEstimateX,root.StateEstimatorEvaluatorRobot.SimulatedSensorControllerFromRobot.imuMount2AngularVelocityRandomWalkBiasVectorCorruptor.imuMount2AngularVelocityBiasX</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config60</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -744,7 +744,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.StateEstimatorEvaluatorRobot.ComposableStateEstimatorEvaluatorController.orientationEstimator.imuMount2AngularVelocityBiasEstimateY,root.StateEstimatorEvaluatorRobot.SimulatedSensorControllerFromRobot.imuMount2AngularVelocityRandomWalkBiasVectorCorruptor.imuMount2AngularVelocityBiasY</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config61</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -756,7 +756,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.StateEstimatorEvaluatorRobot.ComposableStateEstimatorEvaluatorController.orientationEstimator.imuMount2AngularVelocityBiasEstimateZ,root.StateEstimatorEvaluatorRobot.SimulatedSensorControllerFromRobot.imuMount2AngularVelocityRandomWalkBiasVectorCorruptor.imuMount2AngularVelocityBiasZ</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config62</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -768,7 +768,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.StateEstimatorEvaluatorRobot.ComposableStateEstimatorEvaluatorController.orientationEstimator.imuMount2LinearAccelerationBiasEstimateX,root.StateEstimatorEvaluatorRobot.SimulatedSensorControllerFromRobot.imuMount2LinearAccelerationRandomWalkBiasVectorCorruptor.imuMount2LinearAccelerationBiasX</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config63</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -780,7 +780,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.StateEstimatorEvaluatorRobot.ComposableStateEstimatorEvaluatorController.orientationEstimator.imuMount2LinearAccelerationBiasEstimateY,root.StateEstimatorEvaluatorRobot.SimulatedSensorControllerFromRobot.imuMount2LinearAccelerationRandomWalkBiasVectorCorruptor.imuMount2LinearAccelerationBiasY</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config64</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -792,7 +792,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.StateEstimatorEvaluatorRobot.ComposableStateEstimatorEvaluatorController.orientationEstimator.imuMount2LinearAccelerationBiasEstimateZ,root.StateEstimatorEvaluatorRobot.SimulatedSensorControllerFromRobot.imuMount2LinearAccelerationRandomWalkBiasVectorCorruptor.imuMount2LinearAccelerationBiasZ</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config65</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -808,7 +808,7 @@
 <GraphGroup>
 	<Cols>3</Cols>
 	<Graph>
-		<Variables>root.StateEstimatorEvaluatorRobot.ComposableStateEstimatorEvaluatorController.orientationEstimator.orientationEstimatorCoMPositionX,root.StateEstimatorEvaluatorRobot.DesiredCoMAccelerationsFromRobotStealerController.perfectCoMX</Variables>
+		<Variables>root.StateEstimatorEvaluatorRobot.DesiredCoMAccelerationsFromRobotStealerController.perfectCoMX</Variables>
 		<GraphConfiguration>
 			<Name>config66</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -820,7 +820,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.StateEstimatorEvaluatorRobot.ComposableStateEstimatorEvaluatorController.orientationEstimator.orientationEstimatorCoMPositionY,root.StateEstimatorEvaluatorRobot.DesiredCoMAccelerationsFromRobotStealerController.perfectCoMY</Variables>
+		<Variables>root.StateEstimatorEvaluatorRobot.DesiredCoMAccelerationsFromRobotStealerController.perfectCoMY</Variables>
 		<GraphConfiguration>
 			<Name>config67</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -832,7 +832,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.StateEstimatorEvaluatorRobot.ComposableStateEstimatorEvaluatorController.orientationEstimator.orientationEstimatorCoMPositionZ,root.StateEstimatorEvaluatorRobot.DesiredCoMAccelerationsFromRobotStealerController.perfectCoMZ</Variables>
+		<Variables>root.StateEstimatorEvaluatorRobot.DesiredCoMAccelerationsFromRobotStealerController.perfectCoMZ</Variables>
 		<GraphConfiguration>
 			<Name>config68</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -844,7 +844,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.StateEstimatorEvaluatorRobot.ComposableStateEstimatorEvaluatorController.orientationEstimator.orientationEstimatorCoMVelocityX,root.StateEstimatorEvaluatorRobot.DesiredCoMAccelerationsFromRobotStealerController.perfectCoMdX</Variables>
+		<Variables>root.StateEstimatorEvaluatorRobot.DesiredCoMAccelerationsFromRobotStealerController.perfectCoMdX</Variables>
 		<GraphConfiguration>
 			<Name>config69</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -856,7 +856,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.StateEstimatorEvaluatorRobot.ComposableStateEstimatorEvaluatorController.orientationEstimator.orientationEstimatorCoMVelocityY,root.StateEstimatorEvaluatorRobot.DesiredCoMAccelerationsFromRobotStealerController.perfectCoMdY</Variables>
+		<Variables>root.StateEstimatorEvaluatorRobot.DesiredCoMAccelerationsFromRobotStealerController.perfectCoMdY</Variables>
 		<GraphConfiguration>
 			<Name>config70</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -868,7 +868,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.StateEstimatorEvaluatorRobot.ComposableStateEstimatorEvaluatorController.orientationEstimator.orientationEstimatorCoMVelocityZ,root.StateEstimatorEvaluatorRobot.DesiredCoMAccelerationsFromRobotStealerController.perfectCoMdZ</Variables>
+		<Variables>root.StateEstimatorEvaluatorRobot.DesiredCoMAccelerationsFromRobotStealerController.perfectCoMdZ</Variables>
 		<GraphConfiguration>
 			<Name>config71</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -880,7 +880,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.StateEstimatorEvaluatorRobot.ComposableStateEstimatorEvaluatorController.orientationEstimator.orientationEstimatorCoMAccelerationX,root.StateEstimatorEvaluatorRobot.DesiredCoMAccelerationsFromRobotStealerController.perfectCoMddX</Variables>
+		<Variables>root.StateEstimatorEvaluatorRobot.DesiredCoMAccelerationsFromRobotStealerController.perfectCoMddX</Variables>
 		<GraphConfiguration>
 			<Name>config72</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -892,7 +892,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.StateEstimatorEvaluatorRobot.ComposableStateEstimatorEvaluatorController.orientationEstimator.orientationEstimatorCoMAccelerationY,root.StateEstimatorEvaluatorRobot.DesiredCoMAccelerationsFromRobotStealerController.perfectCoMddY</Variables>
+		<Variables>root.StateEstimatorEvaluatorRobot.DesiredCoMAccelerationsFromRobotStealerController.perfectCoMddY</Variables>
 		<GraphConfiguration>
 			<Name>config73</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -904,7 +904,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.StateEstimatorEvaluatorRobot.ComposableStateEstimatorEvaluatorController.orientationEstimator.orientationEstimatorCoMAccelerationZ,root.StateEstimatorEvaluatorRobot.DesiredCoMAccelerationsFromRobotStealerController.perfectCoMddZ</Variables>
+		<Variables>root.StateEstimatorEvaluatorRobot.DesiredCoMAccelerationsFromRobotStealerController.perfectCoMddZ</Variables>
 		<GraphConfiguration>
 			<Name>config74</Name>
 			<ScalingMethod>1</ScalingMethod>
