@@ -116,4 +116,9 @@ public class YoPlaneContactState implements PlaneContactState
    {
       return coefficientOfFriction.getDoubleValue();
    }
+
+   public int getNumberOfContactPoints()
+   {
+      return contactPoints.size();
+   }
 }

@@ -122,4 +122,9 @@ public class FlatGroundPlaneContactState implements PlaneContactState
       return coefficientOfFriction;
    }
 
+   public int getNumberOfContactPoints()
+   {
+      return contactPoints2d.size();
+   }
+
 }
