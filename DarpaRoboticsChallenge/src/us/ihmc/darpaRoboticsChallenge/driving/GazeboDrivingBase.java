@@ -33,10 +33,10 @@ public abstract class GazeboDrivingBase extends AbstractNodeMain
 	private Subscriber<Image> leftEyeImageSubscriber, rightEyeImageSubscriber;
 	private BufferedImage leftEyeImage, rightEyeImage;
 
-	private Subscriber<Float64> steeringWheelStateSubscriber, handBrakeStateSubscriber, gasPedalStateSubscriber, brakePedalStateSubscriber;
+	private Subscriber<std_msgs.Float64> steeringWheelStateSubscriber, handBrakeStateSubscriber, gasPedalStateSubscriber, brakePedalStateSubscriber;
 
-	private Publisher<Float64> steeringWheelCommandPublisher, gasPedalCommandPublisher, brakePedalCommandPublisher, handBrakeCommandPublisher;
-	private Float64 steeringWheelCommand, gasPedalCommand, brakePedalCommand, handBrakeCommand;
+	private Publisher<std_msgs.Float64> steeringWheelCommandPublisher, gasPedalCommandPublisher, brakePedalCommandPublisher, handBrakeCommandPublisher;
+	private std_msgs.Float64 steeringWheelCommand, gasPedalCommand, brakePedalCommand, handBrakeCommand;
 
 	private Publisher<geometry_msgs.Pose> teleportInToCarPublisher, teleportOutOfCarPublisher;
 	private geometry_msgs.Pose teleportInToCarPose, teleportOutOfCarPose;
@@ -79,44 +79,44 @@ public abstract class GazeboDrivingBase extends AbstractNodeMain
 		setUpVehicleStateSubscriberListeners();
 	}
 
-	protected abstract void handleStateSteeringWheel( Float64 message );
-	protected abstract void handleStateBreak( Float64 message );
-	protected abstract void handleStateGasPedal( Float64 message );
-	protected abstract void handleStateBreakPedal( Float64 message );
+	protected abstract void handleStateSteeringWheel( std_msgs.Float64 message );
+	protected abstract void handleStateBreak( std_msgs.Float64 message );
+	protected abstract void handleStateGasPedal( std_msgs.Float64 message );
+	protected abstract void handleStateBreakPedal( std_msgs.Float64 message );
 
 	protected abstract void handleImageLeft( Image message );
 	protected abstract void handleImageRight( Image message );
 
 	private void setUpVehicleStateSubscriberListeners()
 	{
-		steeringWheelStateSubscriber.addMessageListener(new MessageListener<Float64>()
+		steeringWheelStateSubscriber.addMessageListener(new MessageListener<std_msgs.Float64>()
 		{
-			public void onNewMessage(Float64 message)
+			public void onNewMessage(std_msgs.Float64 message)
 			{
 				handleStateSteeringWheel(message);
 			}
 		});
 
-		handBrakeStateSubscriber.addMessageListener(new MessageListener<Float64>()
+		handBrakeStateSubscriber.addMessageListener(new MessageListener<std_msgs.Float64>()
 		{
 
-			public void onNewMessage(Float64 message)
+			public void onNewMessage(std_msgs.Float64 message)
 			{
 				handleStateBreak(message);
 			}
 		});
 
-		gasPedalStateSubscriber.addMessageListener(new MessageListener<Float64>()
+		gasPedalStateSubscriber.addMessageListener(new MessageListener<std_msgs.Float64>()
 		{
-			public void onNewMessage(Float64 message)
+			public void onNewMessage(std_msgs.Float64 message)
 			{
 				handleStateGasPedal(message);
 			}
 		});
 
-		brakePedalStateSubscriber.addMessageListener(new MessageListener<Float64>()
+		brakePedalStateSubscriber.addMessageListener(new MessageListener<std_msgs.Float64>()
 		{
-			public void onNewMessage(Float64 message)
+			public void onNewMessage(std_msgs.Float64 message)
 			{
 				handleStateBreakPedal(message);
 			}
@@ -145,10 +145,10 @@ public abstract class GazeboDrivingBase extends AbstractNodeMain
 
 	private void setupPublishers(ConnectedNode connectedNode)
 	{
-		steeringWheelCommandPublisher = connectedNode.newPublisher("/drc_vehicle/hand_wheel/cmd", Float64._TYPE);
-		handBrakeCommandPublisher = connectedNode.newPublisher("/drc_vehicle/hand_brake/cmd", Float64._TYPE);
-		gasPedalCommandPublisher = connectedNode.newPublisher("/drc_vehicle/gas_pedal/cmd", Float64._TYPE);
-		brakePedalCommandPublisher = connectedNode.newPublisher("/drc_vehicle/brake_pedal/cmd", Float64._TYPE);
+		steeringWheelCommandPublisher = connectedNode.newPublisher("/drc_vehicle/hand_wheel/cmd", std_msgs.Float64._TYPE);
+		handBrakeCommandPublisher = connectedNode.newPublisher("/drc_vehicle/hand_brake/cmd", std_msgs.Float64._TYPE);
+		gasPedalCommandPublisher = connectedNode.newPublisher("/drc_vehicle/gas_pedal/cmd", std_msgs.Float64._TYPE);
+		brakePedalCommandPublisher = connectedNode.newPublisher("/drc_vehicle/brake_pedal/cmd", std_msgs.Float64._TYPE);
 
 		teleportInToCarPublisher = connectedNode.newPublisher("/drc_world/robot_enter_car", geometry_msgs.Pose._TYPE);
 		teleportOutOfCarPublisher = connectedNode.newPublisher("/drc_world/robot_exit_car", geometry_msgs.Pose._TYPE);
@@ -159,10 +159,10 @@ public abstract class GazeboDrivingBase extends AbstractNodeMain
 		leftEyeImageSubscriber = connectedNode.newSubscriber(STEREO_NAMESPACE + "left/" + IMAGE, Image._TYPE);
 		rightEyeImageSubscriber = connectedNode.newSubscriber(STEREO_NAMESPACE + "right/" + IMAGE, Image._TYPE);
 
-		steeringWheelStateSubscriber = connectedNode.newSubscriber("/drc_vehicle/hand_wheel/state", Float64._TYPE);
-		handBrakeStateSubscriber = connectedNode.newSubscriber("/drc_vehicle/hand_brake/state", Float64._TYPE);
-		gasPedalStateSubscriber = connectedNode.newSubscriber("/drc_vehicle/gas_pedal/state", Float64._TYPE);
-		brakePedalStateSubscriber = connectedNode.newSubscriber("/drc_vehicle/brake_pedal/state", Float64._TYPE);
+		steeringWheelStateSubscriber = connectedNode.newSubscriber("/drc_vehicle/hand_wheel/state", std_msgs.Float64._TYPE);
+		handBrakeStateSubscriber = connectedNode.newSubscriber("/drc_vehicle/hand_brake/state", std_msgs.Float64._TYPE);
+		gasPedalStateSubscriber = connectedNode.newSubscriber("/drc_vehicle/gas_pedal/state", std_msgs.Float64._TYPE);
+		brakePedalStateSubscriber = connectedNode.newSubscriber("/drc_vehicle/brake_pedal/state", std_msgs.Float64._TYPE);
 	}
 
 	private void setupMessages()
