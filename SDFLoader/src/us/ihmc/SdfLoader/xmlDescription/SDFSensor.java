@@ -11,7 +11,7 @@ public class SDFSensor
    private String pose;
    private Camera camera;
    private Ray ray;
-
+   private IMU imu;
 
    public String getName()
    {
@@ -74,13 +74,21 @@ public class SDFSensor
       this.ray = ray;
    }
 
-
    public Ray getRay()
    {
       return ray;
    }
 
+   public IMU getImu()
+   {
+      return imu;
+   }
 
+   @XmlElement(name = "imu")
+   public void setImu(IMU imu)
+   {
+      this.imu = imu;
+   }
 
    public static class Ray
    {
@@ -243,10 +251,8 @@ public class SDFSensor
 
          }
 
-         
-
       }
-      
+
       public static class Noise
       {
          //            <noise>
@@ -412,6 +418,133 @@ public class SDFSensor
          {
             this.far = far;
          }
+      }
+   }
+
+   public static class IMU
+   {
+      //      <imu>
+      //      <noise>
+      //        <type>gaussian</type>
+      //        <rate>
+      //          <mean>0.000000</mean>
+      //          <stddev>0.000200</stddev>
+      //          <bias_mean>0.000008</bias_mean>
+      //          <bias_stddev>0.000001</bias_stddev>
+      //        </rate>
+      //        <accel>
+      //          <mean>0.000000</mean>
+      //          <stddev>0.017000</stddev>
+      //          <bias_mean>0.100000</bias_mean>
+      //          <bias_stddev>0.001000</bias_stddev>
+      //        </accel>
+      //      </noise>
+      //    </imu>
+
+      private IMUNoise noise;
+
+      public static class IMUNoise
+      {
+         private String type;
+         private NoiseParameters rate;
+         private NoiseParameters accel;
+
+         public String getType()
+         {
+            return type;
+         }
+
+         public NoiseParameters getRate()
+         {
+            return rate;
+         }
+
+         public NoiseParameters getAccel()
+         {
+            return accel;
+         }
+
+         @XmlElement(name = "type")
+         public void setType(String type)
+         {
+            this.type = type;
+         }
+
+         @XmlElement(name = "rate")
+         public void setRate(NoiseParameters rate)
+         {
+            this.rate = rate;
+         }
+
+         @XmlElement(name = "accel")
+         public void setAccel(NoiseParameters accel)
+         {
+            this.accel = accel;
+         }
+
+         public static class NoiseParameters
+         {
+            private String mean;
+            private String stddev;
+            private String bias_mean;
+            private String bias_stddev;
+
+            public String getMean()
+            {
+               return mean;
+            }
+
+            public String getStddev()
+            {
+               return stddev;
+            }
+
+            public String getBias_mean()
+            {
+               return bias_mean;
+            }
+
+            public String getBias_stddev()
+            {
+               return bias_stddev;
+            }
+
+            @XmlElement(name = "mean")
+            public void setMean(String mean)
+            {
+               this.mean = mean;
+            }
+
+            @XmlElement(name = "stddev")
+            public void setStddev(String stddev)
+            {
+               this.stddev = stddev;
+            }
+
+            @XmlElement(name = "bias_mean")
+            public void setBias_mean(String bias_mean)
+            {
+               this.bias_mean = bias_mean;
+            }
+
+            @XmlElement(name = "bias_stddev")
+            public void setBias_stddev(String bias_stddev)
+            {
+               this.bias_stddev = bias_stddev;
+            }
+         }
+
+      }
+
+      public IMUNoise getNoise()
+      {
+         return noise;
+      }
+
+      @XmlElement(name = "noise")
+      public void setNoise(IMUNoise noise)
+      {
+         this.noise = noise;
       }
    }
 }
