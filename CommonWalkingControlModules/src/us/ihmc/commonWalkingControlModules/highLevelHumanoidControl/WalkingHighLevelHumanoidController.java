@@ -281,7 +281,6 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
                                                                 registry);
          endEffectorControlModule.setParameters(3e-2, 500.0);
          endEffectorControlModules.put(bipedFoot, endEffectorControlModule);
-
       }
 
       initialPelvisOrientationProvider = new SettableOrientationProvider("initialPelvis", worldFrame, registry);
@@ -1163,9 +1162,6 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       finalPelvisOrientationProvider.setOrientation(finalPelvisOrientation);
       pelvisOrientationTrajectoryGenerator.initialize();
 
-      FramePoint finalDesiredStepLocation = nextFootstep.getPositionInFrame(trajectoryGeneratorFrame);
-      finalDesiredStepLocation.setZ(finalDesiredStepLocation.getZ());
-
       double stepPitch = nextFootstep.getOrientationInFrame(worldFrame).getYawPitchRoll()[1];
       onEdgeInitialAngleProviders.get(swingSide).set(stepPitch);
       onEdgeFinalAngleProviders.get(swingSide).set(stepPitch);
@@ -1401,35 +1397,48 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 
    private void setOnToesContactState(ContactablePlaneBody contactableBody)
    {
-      YoPlaneContactState contactState = contactStates.get(contactableBody);
       List<FramePoint> contactPoints = getContactPointsForWalkingOnToes(contactableBody);
+      List<FramePoint2d> contactPoints2d = getContactPoints2d(contactableBody, contactPoints);
+      setContactState(contactableBody, contactPoints2d);
+   }
+
+   private List<FramePoint2d> getContactPoints2d(ContactablePlaneBody contactableBody, List<FramePoint> contactPoints)
+   {
       List<FramePoint2d> contactPoints2d = new ArrayList<FramePoint2d>(contactPoints.size());
       for (FramePoint contactPoint : contactPoints)
       {
          contactPoint.changeFrame(contactableBody.getPlaneFrame());
          contactPoints2d.add(contactPoint.toFramePoint2d());
       }
-
-      contactState.set(contactPoints2d, coefficientOfFriction.getDoubleValue());
-      updateEndEffectorControlModule(contactableBody, contactState);
-      resetCoPFilter(contactableBody);
-      resetGroundReactionWrenchFilter();
+      return contactPoints2d;
    }
 
    private void setFlatFootContactState(ContactablePlaneBody contactableBody)
    {
+      setContactState(contactableBody, contactableBody.getContactPoints2d());
+   }
+
+   private void setContactState(ContactablePlaneBody contactableBody, List<FramePoint2d> contactPoints)
+   {
+      if (contactPoints.size() == 0)
+      {
+         endEffectorControlModules.get(contactableBody).doSingularityEscapeBeforeTransitionToNextState();
+      }
+
       YoPlaneContactState contactState = contactStates.get(contactableBody);
-      contactState.set(contactableBody.getContactPoints2d(), coefficientOfFriction.getDoubleValue());
+      int oldNumberOfContactPoints = contactState.getNumberOfContactPoints();
+      contactState.set(contactPoints, coefficientOfFriction.getDoubleValue());
       updateEndEffectorControlModule(contactableBody, contactState);
+      if (contactPoints.size() < oldNumberOfContactPoints)
+      {
+         resetCoPFilter(contactableBody);
+         resetGroundReactionWrenchFilter(); // so that we don't end up with CoPs outside of the base of support
+      }
    }
 
    private void setContactStateForSwing(ContactablePlaneBody contactableBody)
    {
-      YoPlaneContactState contactState = contactStates.get(contactableBody);
-      contactState.set(new ArrayList<FramePoint2d>(), coefficientOfFriction.getDoubleValue());
-      endEffectorControlModules.get(contactableBody).doSingularityEscapeBeforeTransitionToNextState();
-      updateEndEffectorControlModule(contactableBody, contactState);
-      resetGroundReactionWrenchFilter();
+      setContactState(contactableBody, new ArrayList<FramePoint2d>());
    }
 
    private List<FramePoint> getContactPointsForWalkingOnToes(ContactablePlaneBody contactableBody)

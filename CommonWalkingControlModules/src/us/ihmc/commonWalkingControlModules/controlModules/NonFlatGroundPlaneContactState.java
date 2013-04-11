@@ -91,4 +91,9 @@ public class NonFlatGroundPlaneContactState implements PlaneContactState
    {
       return coefficientOfFriction;
    }
+
+   public int getNumberOfContactPoints()
+   {
+      return contactPoints.size();
+   }
 }

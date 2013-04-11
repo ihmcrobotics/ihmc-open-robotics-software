@@ -14,4 +14,5 @@ public interface PlaneContactState
    public abstract ReferenceFrame getPlaneFrame();
    public abstract List<FramePoint2d> getContactPoints2d();
    public abstract double getCoefficientOfFriction();
+   public abstract int getNumberOfContactPoints();
 }
