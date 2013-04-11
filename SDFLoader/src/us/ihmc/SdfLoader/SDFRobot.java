@@ -13,7 +13,10 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor;
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor.Camera;
+import us.ihmc.SdfLoader.xmlDescription.SDFSensor.IMU;
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor.Ray;
+import us.ihmc.SdfLoader.xmlDescription.SDFSensor.IMU.IMUNoise;
+import us.ihmc.SdfLoader.xmlDescription.SDFSensor.IMU.IMUNoise.NoiseParameters;
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor.Ray.Noise;
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor.Ray.Range;
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor.Ray.Scan;
@@ -35,6 +38,7 @@ import com.yobotics.simulationconstructionset.CameraMount;
 import com.yobotics.simulationconstructionset.ExternalForcePoint;
 import com.yobotics.simulationconstructionset.FloatingJoint;
 import com.yobotics.simulationconstructionset.GroundContactPoint;
+import com.yobotics.simulationconstructionset.IMUMount;
 import com.yobotics.simulationconstructionset.Joint;
 import com.yobotics.simulationconstructionset.Link;
 import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJoint;
@@ -95,8 +99,12 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
       rootJoint = new FloatingJoint(rootLink.getName(), new Vector3d(), this);
       setPositionInWorld(offset);
       setOrientation(orientation);
+      
+      addSensors(rootJoint, rootLink);
+      
       Link scsRootLink = createLink(rootLink, new Transform3D());
       rootJoint.setLink(scsRootLink);
+      
       addRootJoint(rootJoint);
 
       boolean enableTorqueVelocityLimits = false;
@@ -320,8 +328,7 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
          if ("hokuyo_joint".equals(scsJoint.getName()))
             System.out.println("hokuyo joint's parent is : " + scsParentJoint.getName());
 
-      addCameraMounts(scsJoint, joint.getChild());
-      addLidarMounts(scsJoint, joint.getChild());
+      addSensors(scsJoint, joint.getChild());
 
 
 
@@ -339,6 +346,14 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
               || pinJoint.getName().contains("f3");
    }
 
+   
+   private void addSensors(Joint scsJoint, SDFLinkHolder child)
+   {
+      addCameraMounts(scsJoint, child);
+      addLidarMounts(scsJoint, child);
+      addIMUMounts(scsJoint, child);
+   }
+   
    private void addCameraMounts(Joint scsJoint, SDFLinkHolder child)
    {
       if (child.getSensors() != null)
@@ -372,6 +387,59 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
       }
    }
 
+   private void addIMUMounts(Joint scsJoint, SDFLinkHolder child)
+   {
+      if (child.getSensors() != null)
+      {
+         for (SDFSensor sensor : child.getSensors())
+         {
+            if ("imu".equals(sensor.getType()))
+            {
+               // TODO: handle left and right sides of multicamera
+               final IMU imu = sensor.getImu();
+
+               if (imu != null)
+               {
+                  Transform3D pose = SDFConversionsHelper.poseToTransform(sensor.getPose());
+                     
+                  IMUMount imuMount = new IMUMount(sensor.getName(), pose, this);
+                  
+                  IMUNoise noise = imu.getNoise();
+                  if(noise != null)
+                  {
+                     if("gaussian".equals(noise.getType()))
+                     {
+                        NoiseParameters accelerationNoise = noise.getAccel();
+                        NoiseParameters angularVelocityNoise = noise.getRate();
+                        
+                        
+                        imuMount.setAccelerationNoiseParameters(Double.parseDouble(accelerationNoise.getMean()), Double.parseDouble(accelerationNoise.getStddev()));
+                        imuMount.setAccelerationBiasParameters(Double.parseDouble(accelerationNoise.getBias_mean()), Double.parseDouble(accelerationNoise.getBias_stddev()));
+                        
+                        
+                        imuMount.setAngularVelocityNoiseParameters(Double.parseDouble(angularVelocityNoise.getMean()), Double.parseDouble(angularVelocityNoise.getStddev()));
+                        imuMount.setAngularVelocityBiasParameters(Double.parseDouble(angularVelocityNoise.getBias_mean()), Double.parseDouble(angularVelocityNoise.getBias_stddev()));
+                        
+                     }
+                     else
+                     {
+                        throw new RuntimeException("Unknown IMU noise model: " + noise.getType());
+                     }
+                  }
+                  
+                  scsJoint.addIMUMount(imuMount);
+               }
+               else
+               {
+                  System.err.println("JAXB loader: No imu section defined for imu sensor " + sensor.getName() + ", ignoring sensor.");
+               }
+            }
+
+         }
+      }
+   }
+
+   
    private void addLidarMounts(Joint scsJoint, SDFLinkHolder child)
    {
       if (child.getSensors() != null)
@@ -472,6 +540,8 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
          }
       }
    }
+   
+   
 
    private Link createLink(SDFLinkHolder link, Transform3D rotationTransform)
    {
