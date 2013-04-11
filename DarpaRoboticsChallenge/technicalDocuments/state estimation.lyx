@@ -1822,7 +1822,14 @@ Let
 
 .
  Its acceleration with respect to the world, expressed in world frame can
- be written as
+ be written as (see 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:rotating-point-acceleration"
+
+\end_inset
+
+ in the appendix) 
 \end_layout
 
 \begin_layout Standard
@@ -4148,10 +4155,6 @@ key "Duindam2006"
 
 .
  
-\end_layout
-
-\begin_layout Standard
-TODO: velocity of a point
 \end_layout
 
 \begin_layout Subsection
