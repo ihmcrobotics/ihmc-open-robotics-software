@@ -12,7 +12,6 @@ public class SDFSensor
    private Camera camera;
    private Ray ray;
 
-   private Plugin plugin;
 
    public String getName()
    {
@@ -75,143 +74,28 @@ public class SDFSensor
       this.ray = ray;
    }
 
-   @XmlElement(name = "plugin")
-   public void setPlugin(Plugin plugin)
-   {
-      this.plugin = plugin;
-   }
 
    public Ray getRay()
    {
       return ray;
    }
 
-   public Plugin getPlugin()
-   {
-      return plugin;
-   }
-
-   public static class Plugin
-   {
-      /*
-       * <plugin name='gazebo_ros_head_hokuyo_controller' filename='libgazebo_ros_laser.so'>
-       *    <gaussianNoise>0.005</gaussianNoise>
-       *    <alwaysOn>1</alwaysOn>
-       *    <updateRate>40</updateRate>
-       *    <topicName>/multisense_sl/scan</topicName>
-       *    <frameName>head_hokuyo_frame</frameName>
-       * </plugin>
-       */
-      private String gaussianNoise;
-      private String alwaysOn;
-      private String updateRate;
-      private String topicName;
-      private String frameName;
-      private String name;
-      private String filename;
-
-      public String getGaussianNoise()
-      {
-         return gaussianNoise;
-      }
-
-      @XmlElement(name = "gaussianNoise")
-      public void setGaussianNoise(String gaussianNoise)
-      {
-         this.gaussianNoise = gaussianNoise;
-      }
-
-      public String getAlwaysOn()
-      {
-         return alwaysOn;
-      }
-
-      @XmlElement(name = "alwaysOn")
-      public void setAlwaysOn(String alwaysOn)
-      {
-         this.alwaysOn = alwaysOn;
-      }
-
-      public String getUpdateRate()
-      {
-         return updateRate;
-      }
-
-      @XmlElement(name = "updateRate")
-      public void setUpdateRate(String updateRate)
-      {
-         this.updateRate = updateRate;
-      }
-
-      public String getTopicName()
-      {
-         return topicName;
-      }
-
-      @XmlElement(name = "topicName")
-      public void setTopicName(String topicName)
-      {
-         this.topicName = topicName;
-      }
-
-      public String getFrameName()
-      {
-         return frameName;
-      }
-
-      @XmlElement(name = "frameName")
-      public void setFrameName(String frameName)
-      {
-         this.frameName = frameName;
-      }
-
-      public String getName()
-      {
-         return name;
-      }
-
-      @XmlElement(name = "name")
-      public void setName(String name)
-      {
-         this.name = name;
-      }
-
-      public String getFilename()
-      {
-         return filename;
-      }
-
-      @XmlElement(name = "filename")
-      public void setFilename(String filename)
-      {
-         this.filename = filename;
-      }
-
-   }
 
 
    public static class Ray
    {
       /*
-       *  <ray>
-       *    <scan>
-       *      <horizontal>
-       *        <samples>720</samples>
-       *        <resolution>1.000000</resolution>
-       *        <min_angle>-1.570796</min_angle>
-       *        <max_angle>1.570796</max_angle>
-       *      </horizontal>
-       *    </scan>
-       *    <range>
-       *      <min>0.100000</min>
-       *      <max>30.000000</max>
-       *      <resolution>0.010000</resolution>
-       *    </range>
-       *  </ray>
+       * <ray> <scan> <horizontal> <samples>720</samples>
+       * <resolution>1.000000</resolution> <min_angle>-1.570796</min_angle>
+       * <max_angle>1.570796</max_angle> </horizontal> </scan> <range>
+       * <min>0.100000</min> <max>30.000000</max>
+       * <resolution>0.010000</resolution> </range> </ray>
        */
       private Range range;
 
       private Scan scan;
+
+      private Noise noise;
 
       @XmlElement(name = "range")
       public void setRange(Range range)
@@ -233,6 +117,17 @@ public class SDFSensor
       public Scan getScan()
       {
          return scan;
+      }
+
+      public Noise getNoise()
+      {
+         return noise;
+      }
+
+      @XmlElement(name = "noise")
+      public void setNoise(Noise noise)
+      {
+         this.noise = noise;
       }
 
       public static class Range
@@ -276,7 +171,6 @@ public class SDFSensor
             return resolution;
          }
       }
-
 
       public static class Scan
       {
@@ -349,9 +243,57 @@ public class SDFSensor
 
          }
 
+         
+
+      }
+      
+      public static class Noise
+      {
+         //            <noise>
+         //            <type>gaussian</type>
+         //            <mean>0.000000</mean>
+         //            <stddev>0.010000</stddev>
+         //          </noise>
+
+         private String type;
+         private String mean;
+         private String stddev;
+
+         @XmlElement(name = "type")
+         public void setType(String type)
+         {
+            this.type = type;
+         }
+
+         @XmlElement(name = "mean")
+         public void setMean(String mean)
+         {
+            this.mean = mean;
+         }
+
+         @XmlElement(name = "stddev")
+         public void setStddev(String stddev)
+         {
+            this.stddev = stddev;
+         }
+
+         public String getType()
+         {
+            return type;
+         }
+
+         public String getMean()
+         {
+            return mean;
+         }
+
+         public String getStddev()
+         {
+            return stddev;
+         }
+
       }
    }
-
 
    public static class Camera
    {
@@ -443,7 +385,6 @@ public class SDFSensor
             this.format = format;
          }
       }
-
 
       public static class Clip
       {

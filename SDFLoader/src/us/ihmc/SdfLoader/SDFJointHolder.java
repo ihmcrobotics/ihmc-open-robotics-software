@@ -105,7 +105,7 @@ public class SDFJointHolder
 
       if(parent == null || child == null)
       {
-         throw new RuntimeException("Cannot make joint with null parent or child links");
+         throw new RuntimeException("Cannot make joint with null parent or child links, joint name is " + sdfJoint.getName());
       }
       
       this.parent = parent;
