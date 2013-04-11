@@ -9,6 +9,7 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
+import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
@@ -37,8 +38,7 @@ public class LinearAccelerationMeasurementModelElement extends AbstractMeasureme
 
    private final ControlFlowInputPort<Vector3d> linearAccelerationMeasurementInputPort;
 
-   private final ControlFlowInputPort<TwistCalculator> twistCalculatorInputPort;
-   private final ControlFlowInputPort<SpatialAccelerationCalculator> spatialAccelerationCalculatorInputPort;
+   private final ControlFlowInputPort<FullInverseDynamicsStructure> inverseDynamicsStructureInputPort;
 
    private final RigidBody measurementLink;
    private final ReferenceFrame measurementFrame;
@@ -86,7 +86,7 @@ public class LinearAccelerationMeasurementModelElement extends AbstractMeasureme
            ControlFlowOutputPort<FrameVector> centerOfMassVelocityPort, ControlFlowOutputPort<FrameVector> centerOfMassAccelerationPort,
            ControlFlowOutputPort<FrameOrientation> orientationPort, ControlFlowOutputPort<FrameVector> angularVelocityPort,
            ControlFlowOutputPort<FrameVector> angularAccelerationPort, ControlFlowOutputPort<FrameVector> biasPort, ControlFlowInputPort<Vector3d> linearAccelerationMeasurementInputPort,
-           ControlFlowInputPort<TwistCalculator> twistCalculatorInputPort, ControlFlowInputPort<SpatialAccelerationCalculator> spatialAccelerationCalculatorInputPort, 
+           ControlFlowInputPort<FullInverseDynamicsStructure> inverseDynamicsStructureInputPort, 
            RigidBody measurementLink,
            ReferenceFrame measurementFrame, RigidBody estimationLink, ReferenceFrame estimationFrame, double gZ)
    {
@@ -103,15 +103,14 @@ public class LinearAccelerationMeasurementModelElement extends AbstractMeasureme
 
       this.linearAccelerationMeasurementInputPort = linearAccelerationMeasurementInputPort;
 
-      this.twistCalculatorInputPort = twistCalculatorInputPort;
-      this.spatialAccelerationCalculatorInputPort = spatialAccelerationCalculatorInputPort;
+      this.inverseDynamicsStructureInputPort = inverseDynamicsStructureInputPort;
 
       this.measurementLink = measurementLink;
       this.measurementFrame = measurementFrame;
 
       this.estimationLink = estimationLink;
       this.estimationFrame = estimationFrame;
-      this.jacobianAssembler = new LinearAccelerationMeasurementModelJacobianAssembler(twistCalculatorInputPort, spatialAccelerationCalculatorInputPort, measurementLink,
+      this.jacobianAssembler = new LinearAccelerationMeasurementModelJacobianAssembler(inverseDynamicsStructureInputPort, measurementLink,
               measurementFrame, estimationFrame);
 
       gravitationalAcceleration.setZ(gZ);
@@ -128,8 +127,9 @@ public class LinearAccelerationMeasurementModelElement extends AbstractMeasureme
 
    public void computeMatrixBlocks()
    {
-      TwistCalculator twistCalculator = twistCalculatorInputPort.getData();
-      SpatialAccelerationCalculator spatialAccelerationCalculator = spatialAccelerationCalculatorInputPort.getData();
+      FullInverseDynamicsStructure inverseDynamicsStructure = inverseDynamicsStructureInputPort.getData();
+      TwistCalculator twistCalculator = inverseDynamicsStructure.getTwistCalculator();
+      SpatialAccelerationCalculator spatialAccelerationCalculator = inverseDynamicsStructure.getSpatialAccelerationCalculator();
       
       computeUnbiasedEstimatedMeasurement(spatialAccelerationCalculator, estimatedMeasurement);
 
@@ -383,7 +383,9 @@ public class LinearAccelerationMeasurementModelElement extends AbstractMeasureme
    
    public DenseMatrix64F computeResidual()
    {
-      computeBiasedEstimatedMeasurement(spatialAccelerationCalculatorInputPort.getData(), estimatedMeasurement);    // TODO: repeated computation
+      FullInverseDynamicsStructure inverseDynamicsStructure = inverseDynamicsStructureInputPort.getData();
+      
+      computeBiasedEstimatedMeasurement(inverseDynamicsStructure.getSpatialAccelerationCalculator(), estimatedMeasurement);    // TODO: repeated computation
       tempVector.set(linearAccelerationMeasurementInputPort.getData());
       tempVector.sub(estimatedMeasurement.getVector());
 

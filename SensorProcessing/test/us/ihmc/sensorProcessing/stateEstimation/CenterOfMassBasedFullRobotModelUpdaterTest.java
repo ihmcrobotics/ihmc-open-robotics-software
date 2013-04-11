@@ -13,6 +13,7 @@ import us.ihmc.controlFlow.ControlFlowElement;
 import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.controlFlow.NullControlFlowElement;
+import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -60,23 +61,21 @@ public class CenterOfMassBasedFullRobotModelUpdaterTest
       ControlFlowOutputPort<FrameVector> angularVelocityPort = new ControlFlowOutputPort<FrameVector>(controlFlowElement);
       ControlFlowOutputPort<FrameVector> angularAccelerationPort = new ControlFlowOutputPort<FrameVector>(controlFlowElement);
 
-      TwistCalculator twistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), elevator);
-      ControlFlowInputPort<TwistCalculator> twistCalculatorInputPort = new ControlFlowInputPort<TwistCalculator>(controlFlowElement);
-      twistCalculatorInputPort.setData(twistCalculator);
-      
-      SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(elevator, twistCalculator, 0.0, false);
-      ControlFlowInputPort<SpatialAccelerationCalculator> spatialAccelerationCalculatorInputPort = new ControlFlowInputPort<SpatialAccelerationCalculator>(controlFlowElement);
-      spatialAccelerationCalculatorInputPort.setData(spatialAccelerationCalculator);
-      
-      CenterOfMassBasedFullRobotModelUpdater fullRobotModelUpdater = new CenterOfMassBasedFullRobotModelUpdater(twistCalculatorInputPort, spatialAccelerationCalculatorInputPort,
-                                                                        centerOfMassPositionPort, centerOfMassVelocityPort, centerOfMassAccelerationPort,
-                                                                        orientationPort, angularVelocityPort, angularAccelerationPort, estimationLink,
-                                                                        estimationFrame, rootJoint);
+      FullInverseDynamicsStructure inverseDynamicsStructure = new FullInverseDynamicsStructure(elevator, estimationLink, rootJoint);
+      ControlFlowInputPort<FullInverseDynamicsStructure> inverseDynamicsStructureInputPort =
+         new ControlFlowInputPort<FullInverseDynamicsStructure>(controlFlowElement);
+      inverseDynamicsStructureInputPort.setData(inverseDynamicsStructure);
 
-      randomFloatingChain.setRandomPositionsAndVelocities(random);     
+      TwistCalculator twistCalculator = inverseDynamicsStructure.getTwistCalculator();
+      SpatialAccelerationCalculator spatialAccelerationCalculator = inverseDynamicsStructure.getSpatialAccelerationCalculator();
+
+      CenterOfMassBasedFullRobotModelUpdater fullRobotModelUpdater = new CenterOfMassBasedFullRobotModelUpdater(inverseDynamicsStructureInputPort,
+                                                                        centerOfMassPositionPort, centerOfMassVelocityPort, centerOfMassAccelerationPort,
+                                                                        orientationPort, angularVelocityPort, angularAccelerationPort);
+
+      randomFloatingChain.setRandomPositionsAndVelocities(random);
       randomFloatingChain.getElevator().updateFramesRecursively();
-      twistCalculator.compute();
-      spatialAccelerationCalculator.compute();
+      inverseDynamicsStructure.updateInternalState();
 
       int nTests = 100;
       for (int i = 0; i < nTests; i++)
@@ -109,13 +108,14 @@ public class CenterOfMassBasedFullRobotModelUpdaterTest
       {
          long startTime = System.currentTimeMillis();
          nTests = 100000;
-                  
+
          for (int i = 0; i < nTests; i++)
          {
             fullRobotModelUpdater.run();
          }
+
          long endTime = System.currentTimeMillis();
-         double millisecondsPerCall = ((endTime - startTime))/((double) nTests);
+         double millisecondsPerCall = ((endTime - startTime)) / ((double) nTests);
 
          System.out.println("millisecondsPerCall = " + millisecondsPerCall);
          assertTrue("Not efficient! millisecondsPerCall = " + millisecondsPerCall, millisecondsPerCall < 0.03);
@@ -151,7 +151,8 @@ public class CenterOfMassBasedFullRobotModelUpdaterTest
       JUnitTools.assertFrameVectorEquals(centerOfMassVelocity, centerOfMassVelocityBack, epsilon);
    }
 
-   private void compareCenterOfMassAcceleration(RigidBody elevator, SpatialAccelerationCalculator spatialAccelerationCalculator, ControlFlowOutputPort<FrameVector> centerOfMassAccelerationPort, double epsilon)
+   private void compareCenterOfMassAcceleration(RigidBody elevator, SpatialAccelerationCalculator spatialAccelerationCalculator,
+           ControlFlowOutputPort<FrameVector> centerOfMassAccelerationPort, double epsilon)
    {
       CenterOfMassAccelerationCalculator centerOfMassAccelerationCalculator = new CenterOfMassAccelerationCalculator(elevator, spatialAccelerationCalculator);
       FrameVector centerOfMassAccelerationBack = new FrameVector();
@@ -160,7 +161,7 @@ public class CenterOfMassBasedFullRobotModelUpdaterTest
       FrameVector centerOfMassAcceleration = centerOfMassAccelerationPort.getData();
       JUnitTools.assertFrameVectorEquals(centerOfMassAcceleration, centerOfMassAccelerationBack, epsilon);
    }
-   
+
    private void compareAngularVelocity(RigidBody estimationLink, ReferenceFrame estimationFrame, TwistCalculator twistCalculator,
            ControlFlowOutputPort<FrameVector> angularVelocityPort, double epsilon)
    {

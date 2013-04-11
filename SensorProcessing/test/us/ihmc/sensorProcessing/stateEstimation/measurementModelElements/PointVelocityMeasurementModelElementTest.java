@@ -16,6 +16,7 @@ import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.controlFlow.NullControlFlowElement;
 import us.ihmc.sensorProcessing.stateEstimation.CenterOfMassBasedFullRobotModelUpdater;
+import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.sensorProcessing.stateEstimation.measurmentModelElements.PointVelocityMeasurementModelElement;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
@@ -53,15 +54,14 @@ public class PointVelocityMeasurementModelElementTest
 
       ControlFlowElement controlFlowElement = new NullControlFlowElement();
 
-      TwistCalculator twistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), elevator);
-      ControlFlowInputPort<TwistCalculator> twistCalculatorInputPort = new ControlFlowInputPort<TwistCalculator>(controlFlowElement);
-      twistCalculatorInputPort.setData(twistCalculator);
-      
-      SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(elevator, twistCalculator, 0.0, false);
-      ControlFlowInputPort<SpatialAccelerationCalculator> spatialAccelerationCalculatorInputPort = new ControlFlowInputPort<SpatialAccelerationCalculator>(controlFlowElement);
-      spatialAccelerationCalculatorInputPort.setData(spatialAccelerationCalculator);
-      
-      
+      FullInverseDynamicsStructure inverseDynamicsStructure = new FullInverseDynamicsStructure(elevator, estimationLink, rootJoint);
+      ControlFlowInputPort<FullInverseDynamicsStructure> inverseDynamicsStructureInputPort =
+         new ControlFlowInputPort<FullInverseDynamicsStructure>(controlFlowElement);
+      inverseDynamicsStructureInputPort.setData(inverseDynamicsStructure);
+
+      TwistCalculator twistCalculator = inverseDynamicsStructure.getTwistCalculator();
+      SpatialAccelerationCalculator spatialAccelerationCalculator = inverseDynamicsStructure.getSpatialAccelerationCalculator();
+
       String name = "test";
       YoVariableRegistry registry = new YoVariableRegistry(name);
 
@@ -79,15 +79,15 @@ public class PointVelocityMeasurementModelElementTest
       FramePoint stationaryPoint = new FramePoint(measurementFrame, RandomTools.generateRandomPoint(random, 1.0, 1.0, 1.0));
       PointVelocityMeasurementModelElement modelElement = new PointVelocityMeasurementModelElement(name, pointVelocityMeasurementInputPort,
                                                              centerOfMassPositionPort, centerOfMassVelocityPort, orientationPort, angularVelocityPort,
-                                                             estimationFrame, stationaryPointLink, stationaryPoint, twistCalculatorInputPort, registry);
+                                                             estimationFrame, stationaryPointLink, stationaryPoint, inverseDynamicsStructureInputPort,
+                                                             registry);
 
       randomFloatingChain.setRandomPositionsAndVelocities(random);
       twistCalculator.compute();
       spatialAccelerationCalculator.compute();
 
-      Runnable updater = new CenterOfMassBasedFullRobotModelUpdater(twistCalculatorInputPort, spatialAccelerationCalculatorInputPort, centerOfMassPositionPort,
-                            centerOfMassVelocityPort, centerOfMassAccelerationPort, orientationPort, angularVelocityPort, angularAccelerationPort,
-                            estimationLink, estimationFrame, rootJoint);
+      Runnable updater = new CenterOfMassBasedFullRobotModelUpdater(inverseDynamicsStructureInputPort, centerOfMassPositionPort, centerOfMassVelocityPort,
+                            centerOfMassAccelerationPort, orientationPort, angularVelocityPort, angularAccelerationPort);
 
       centerOfMassPositionPort.setData(new FramePoint(ReferenceFrame.getWorldFrame(), RandomTools.generateRandomVector(random)));
       centerOfMassVelocityPort.setData(new FrameVector(ReferenceFrame.getWorldFrame(), RandomTools.generateRandomVector(random)));

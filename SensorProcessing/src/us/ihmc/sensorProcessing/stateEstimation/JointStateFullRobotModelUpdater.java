@@ -8,6 +8,7 @@ import us.ihmc.controlFlow.ControlFlowGraph;
 import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorMap;
+import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.ScrewTools;
@@ -21,26 +22,21 @@ public class JointStateFullRobotModelUpdater extends AbstractControlFlowElement
    private final Map<OneDoFJoint, ControlFlowInputPort<Double>> positionSensorInputPorts = new LinkedHashMap<OneDoFJoint, ControlFlowInputPort<Double>>();
    private final Map<OneDoFJoint, ControlFlowInputPort<Double>> velocitySensorInputPorts = new LinkedHashMap<OneDoFJoint, ControlFlowInputPort<Double>>();
 
-   private final ControlFlowOutputPort<TwistCalculator> twistCalculatorOutputPort;
-   private final ControlFlowOutputPort<SpatialAccelerationCalculator> spatialAccelerationCalculatorOutputPort;
+   private final ControlFlowOutputPort<FullInverseDynamicsStructure> inverseDynamicsStructureOutputPort;
 
-   public JointStateFullRobotModelUpdater(ControlFlowGraph controlFlowGraph, SensorMap sensorMap, TwistCalculator twistCalculator,
-           SpatialAccelerationCalculator spatialAccelerationCalculator)
+   public JointStateFullRobotModelUpdater(ControlFlowGraph controlFlowGraph, SensorMap sensorMap, FullInverseDynamicsStructure inverseDynamicsStructure)
    {
-      this(controlFlowGraph, sensorMap.getJointPositionSensors(), sensorMap.getJointVelocitySensors(), twistCalculator, spatialAccelerationCalculator);
+      this(controlFlowGraph, sensorMap.getJointPositionSensors(), sensorMap.getJointVelocitySensors(), inverseDynamicsStructure);
    }
 
    public JointStateFullRobotModelUpdater(ControlFlowGraph controlFlowGraph, Map<OneDoFJoint, ControlFlowOutputPort<Double>> positionSensorPorts,
-           Map<OneDoFJoint, ControlFlowOutputPort<Double>> velocitySensorPorts, TwistCalculator twistCalculator,
-           SpatialAccelerationCalculator spatialAccelerationCalculator)
+           Map<OneDoFJoint, ControlFlowOutputPort<Double>> velocitySensorPorts, FullInverseDynamicsStructure inverseDynamicsStructure)
    {
-      InverseDynamicsJoint[] joints = ScrewTools.computeJointsInOrder(twistCalculator.getRootBody());
+      InverseDynamicsJoint[] joints = ScrewTools.computeJointsInOrder(inverseDynamicsStructure.getTwistCalculator().getRootBody());
       this.oneDoFJoints = ScrewTools.filterJoints(joints, OneDoFJoint.class);
 
-      this.twistCalculatorOutputPort = createOutputPort();
-      this.spatialAccelerationCalculatorOutputPort = createOutputPort();
-      twistCalculatorOutputPort.setData(twistCalculator);
-      spatialAccelerationCalculatorOutputPort.setData(spatialAccelerationCalculator);
+      this.inverseDynamicsStructureOutputPort = createOutputPort();
+      inverseDynamicsStructureOutputPort.setData(inverseDynamicsStructure);
 
       for (OneDoFJoint oneDoFJoint : oneDoFJoints)
       {
@@ -84,29 +80,25 @@ public class JointStateFullRobotModelUpdater extends AbstractControlFlowElement
       }
 
       // TODO: Does it make sense to do this yet if the orientation of the pelvis isn't known yet?
-      TwistCalculator twistCalculator = twistCalculatorOutputPort.getData();
-      SpatialAccelerationCalculator spatialAccelerationCalculator = spatialAccelerationCalculatorOutputPort.getData();
+      FullInverseDynamicsStructure inverseDynamicsStructure = inverseDynamicsStructureOutputPort.getData();
+            
+      TwistCalculator twistCalculator = inverseDynamicsStructure.getTwistCalculator();
+      SpatialAccelerationCalculator spatialAccelerationCalculator = inverseDynamicsStructure.getSpatialAccelerationCalculator();
 
       twistCalculator.getRootBody().updateFramesRecursively();
       twistCalculator.compute();
       spatialAccelerationCalculator.compute();
-
-      twistCalculatorOutputPort.setData(twistCalculator);
-      spatialAccelerationCalculatorOutputPort.setData(spatialAccelerationCalculator);
+      
+      inverseDynamicsStructureOutputPort.setData(inverseDynamicsStructure);
    }
 
    public void waitUntilComputationIsDone()
    {
    }
 
-   public ControlFlowOutputPort<TwistCalculator> getTwistCalculatorOutputPort()
+   public ControlFlowOutputPort<FullInverseDynamicsStructure> getInverseDynamicsStructureOutputPort()
    {
-      return twistCalculatorOutputPort;
-   }
-
-   public ControlFlowOutputPort<SpatialAccelerationCalculator> getSpatialAccelerationCalculatorOutputPort()
-   {
-      return spatialAccelerationCalculatorOutputPort;
+      return inverseDynamicsStructureOutputPort;
    }
 
 }

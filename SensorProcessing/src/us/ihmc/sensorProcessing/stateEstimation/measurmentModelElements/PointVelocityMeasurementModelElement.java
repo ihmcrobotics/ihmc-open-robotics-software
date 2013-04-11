@@ -9,6 +9,7 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
+import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -16,7 +17,6 @@ import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.Twist;
-import us.ihmc.utilities.screwTheory.TwistCalculator;
 
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
@@ -32,7 +32,7 @@ public class PointVelocityMeasurementModelElement extends AbstractMeasurementMod
    private final ControlFlowInputPort<Vector3d> pointVelocityMeasurementInputPort;
 
    private final ReferenceFrame estimationFrame;
-   private final ControlFlowInputPort<TwistCalculator> twistCalculatorInputPort;
+   private final ControlFlowInputPort<FullInverseDynamicsStructure> inverseDynamicsStructureInputPort;
    private final FramePoint stationaryPoint;
 
    private final RigidBody stationaryPointLink;
@@ -50,7 +50,8 @@ public class PointVelocityMeasurementModelElement extends AbstractMeasurementMod
    public PointVelocityMeasurementModelElement(String name, ControlFlowInputPort<Vector3d> pointVelocityMeasurementInputPort,
            ControlFlowOutputPort<FramePoint> centerOfMassPositionPort, ControlFlowOutputPort<FrameVector> centerOfMassVelocityPort,
            ControlFlowOutputPort<FrameOrientation> orientationPort, ControlFlowOutputPort<FrameVector> angularVelocityPort, ReferenceFrame estimationFrame,
-           RigidBody stationaryPointLink, FramePoint stationaryPoint, ControlFlowInputPort<TwistCalculator> twistCalculatorInputPort, YoVariableRegistry registry)
+           RigidBody stationaryPointLink, FramePoint stationaryPoint, ControlFlowInputPort<FullInverseDynamicsStructure> inverseDynamicsStructureInputPort,
+           YoVariableRegistry registry)
    {
       super(pointVelocityMeasurementInputPort, SIZE, name, registry);
 
@@ -64,7 +65,7 @@ public class PointVelocityMeasurementModelElement extends AbstractMeasurementMod
       this.estimationFrame = estimationFrame;
       this.stationaryPointLink = stationaryPointLink;
       this.stationaryPoint = stationaryPoint;
-      this.twistCalculatorInputPort = twistCalculatorInputPort;
+      this.inverseDynamicsStructureInputPort = inverseDynamicsStructureInputPort;
 
       outputMatrixBlocks.put(centerOfMassVelocityPort, new DenseMatrix64F(SIZE, SIZE));
       outputMatrixBlocks.put(orientationPort, new DenseMatrix64F(SIZE, SIZE));
@@ -133,7 +134,9 @@ public class PointVelocityMeasurementModelElement extends AbstractMeasurementMod
 
    private void computeVelocityOfStationaryPoint(FrameVector stationaryPointVelocityToPack)
    {
-      twistCalculatorInputPort.getData().packTwistOfBody(tempTwist, stationaryPointLink);
+      FullInverseDynamicsStructure inverseDynamicsStructure = inverseDynamicsStructureInputPort.getData();
+
+      inverseDynamicsStructure.getTwistCalculator().packTwistOfBody(tempTwist, stationaryPointLink);
       tempTwist.changeFrame(tempTwist.getBaseFrame());
       tempFramePoint.setAndChangeFrame(stationaryPoint);
       tempFramePoint.changeFrame(tempTwist.getBaseFrame());

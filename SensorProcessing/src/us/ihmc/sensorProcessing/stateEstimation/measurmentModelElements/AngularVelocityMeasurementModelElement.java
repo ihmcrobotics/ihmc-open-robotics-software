@@ -12,6 +12,7 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
+import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -32,7 +33,7 @@ public class AngularVelocityMeasurementModelElement extends AbstractMeasurementM
    private final RigidBody measurementLink;
    private final ReferenceFrame measurementFrame;
 
-   private final ControlFlowInputPort<TwistCalculator> twistCalculatorInputPort;
+   private final ControlFlowInputPort<FullInverseDynamicsStructure> inverseDynamicsStructureInputPort;
    private final DenseMatrix64F residual = new DenseMatrix64F(SIZE, 1);
 
    // temp stuff
@@ -44,7 +45,7 @@ public class AngularVelocityMeasurementModelElement extends AbstractMeasurementM
 
    public AngularVelocityMeasurementModelElement(ControlFlowOutputPort<FrameVector> angularVelocityStatePort, ControlFlowOutputPort<FrameVector> biasStatePort,
            ControlFlowInputPort<Vector3d> angularVelocityMeasurementInputPort, RigidBody orientationEstimationLink, ReferenceFrame estimationFrame,
-           RigidBody measurementLink, ReferenceFrame measurementFrame, ControlFlowInputPort<TwistCalculator> twistCalculatorInputPort, String name, YoVariableRegistry registry)
+           RigidBody measurementLink, ReferenceFrame measurementFrame, ControlFlowInputPort<FullInverseDynamicsStructure> inverseDynamicsStructureInputPort, String name, YoVariableRegistry registry)
    {
       super(angularVelocityMeasurementInputPort, SIZE, name, registry);
       this.angularVelocityStatePort = angularVelocityStatePort;
@@ -54,7 +55,7 @@ public class AngularVelocityMeasurementModelElement extends AbstractMeasurementM
       this.estimationFrame = estimationFrame;
       this.measurementLink = measurementLink;
       this.measurementFrame = measurementFrame;
-      this.twistCalculatorInputPort = twistCalculatorInputPort;
+      this.inverseDynamicsStructureInputPort = inverseDynamicsStructureInputPort;
       this.angularVelocityResidual = new FrameVector(measurementFrame);
 
       outputMatrixBlocks.put(angularVelocityStatePort, new DenseMatrix64F(SIZE, SIZE));
@@ -84,7 +85,7 @@ public class AngularVelocityMeasurementModelElement extends AbstractMeasurementM
    public DenseMatrix64F computeResidual()
    {
       Vector3d measuredAngularVelocityVector3d = angularVelocityMeasurementInputPort.getData();
-      TwistCalculator twistCalculator = twistCalculatorInputPort.getData();
+      TwistCalculator twistCalculator = inverseDynamicsStructureInputPort.getData().getTwistCalculator();
       
       twistCalculator.packRelativeTwist(tempTwist, orientationEstimationLink, measurementLink);
       tempTwist.packAngularPart(relativeAngularVelocity);

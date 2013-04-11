@@ -15,6 +15,7 @@ import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.controlFlow.NullControlFlowElement;
 import us.ihmc.sensorProcessing.simulatedSensors.SimulatedLinearAccelerationSensor;
 import us.ihmc.sensorProcessing.stateEstimation.CenterOfMassBasedFullRobotModelUpdater;
+import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.sensorProcessing.stateEstimation.measurmentModelElements.LinearAccelerationMeasurementModelElement;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
@@ -51,13 +52,17 @@ public class LinearAccelerationMeasurementModelElementTest
 
       ControlFlowElement controlFlowElement = new NullControlFlowElement();
 
-      TwistCalculator twistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), elevator);
-      ControlFlowInputPort<TwistCalculator> twistCalculatorInputPort = new ControlFlowInputPort<TwistCalculator>(controlFlowElement);
-      twistCalculatorInputPort.setData(twistCalculator);
+      FullInverseDynamicsStructure inverseDynamicsStructure = new FullInverseDynamicsStructure(elevator, estimationLink, rootJoint);
+      ControlFlowInputPort<FullInverseDynamicsStructure> inverseDynamicsStructureInputPort = new ControlFlowInputPort<FullInverseDynamicsStructure>(controlFlowElement);
+      inverseDynamicsStructureInputPort.setData(inverseDynamicsStructure);
       
-      SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(elevator, twistCalculator, 0.0, false);
-      ControlFlowInputPort<SpatialAccelerationCalculator> spatialAccelerationCalculatorInputPort = new ControlFlowInputPort<SpatialAccelerationCalculator>(controlFlowElement);
-      spatialAccelerationCalculatorInputPort.setData(spatialAccelerationCalculator);
+//      TwistCalculator twistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), elevator);
+//      ControlFlowInputPort<TwistCalculator> twistCalculatorInputPort = new ControlFlowInputPort<TwistCalculator>(controlFlowElement);
+//      twistCalculatorInputPort.setData(twistCalculator);
+//      
+//      SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(elevator, twistCalculator, 0.0, false);
+//      ControlFlowInputPort<SpatialAccelerationCalculator> spatialAccelerationCalculatorInputPort = new ControlFlowInputPort<SpatialAccelerationCalculator>(controlFlowElement);
+//      spatialAccelerationCalculatorInputPort.setData(spatialAccelerationCalculator);
       
       
       String name = "test";
@@ -77,23 +82,22 @@ public class LinearAccelerationMeasurementModelElementTest
       double gZ = -9.81;
       Vector3d gravitationalAcceleration = new Vector3d(0.0, 0.0, gZ);
 
-      SimulatedLinearAccelerationSensor sensor = new SimulatedLinearAccelerationSensor("test", measurementLink, measurementFrame, spatialAccelerationCalculator, gravitationalAcceleration, registry);
+      SimulatedLinearAccelerationSensor sensor = new SimulatedLinearAccelerationSensor("test", measurementLink, measurementFrame, inverseDynamicsStructure.getSpatialAccelerationCalculator(), gravitationalAcceleration, registry);
       
       LinearAccelerationMeasurementModelElement modelElement = new LinearAccelerationMeasurementModelElement(name, registry, centerOfMassPositionPort,
                                                                   centerOfMassVelocityPort, centerOfMassAccelerationPort, orientationPort, angularVelocityPort,
-                                                                  angularAccelerationPort, biasPort, linearAccelerationMeasurementInputPort, twistCalculatorInputPort,
-                                                                  spatialAccelerationCalculatorInputPort, measurementLink, measurementFrame, estimationLink,
+                                                                  angularAccelerationPort, biasPort, linearAccelerationMeasurementInputPort,
+                                                                  inverseDynamicsStructureInputPort, measurementLink, measurementFrame, estimationLink,
                                                                   estimationFrame, gZ);
 
       randomFloatingChain.setRandomPositionsAndVelocities(random);
       randomFloatingChain.setRandomAccelerations(random);
       elevator.updateFramesRecursively();
-      twistCalculator.compute();
-      spatialAccelerationCalculator.compute();
+      
+      inverseDynamicsStructure.updateInternalState();
 
-      Runnable updater = new CenterOfMassBasedFullRobotModelUpdater(twistCalculatorInputPort, spatialAccelerationCalculatorInputPort, centerOfMassPositionPort,
-                            centerOfMassVelocityPort, centerOfMassAccelerationPort, orientationPort, angularVelocityPort, angularAccelerationPort,
-                            estimationLink, estimationFrame, rootJoint);
+      Runnable updater = new CenterOfMassBasedFullRobotModelUpdater(inverseDynamicsStructureInputPort, centerOfMassPositionPort,
+                            centerOfMassVelocityPort, centerOfMassAccelerationPort, orientationPort, angularVelocityPort, angularAccelerationPort);
 
       centerOfMassPositionPort.setData(new FramePoint(ReferenceFrame.getWorldFrame(), RandomTools.generateRandomVector(random)));
       centerOfMassVelocityPort.setData(new FrameVector(ReferenceFrame.getWorldFrame(), RandomTools.generateRandomVector(random)));

@@ -12,6 +12,7 @@ import us.ihmc.controlFlow.ControlFlowElement;
 import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.controlFlow.NullControlFlowElement;
+import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.sensorProcessing.stateEstimation.measurmentModelElements.AngularVelocityMeasurementModelElement;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -47,16 +48,20 @@ public class AngularVelocityMeasurementModelElementTest
       ControlFlowOutputPort<FrameVector> angularVelocityStatePort = new ControlFlowOutputPort<FrameVector>(controlFlowElement);
       ControlFlowOutputPort<FrameVector> biasStatePort = new ControlFlowOutputPort<FrameVector>(controlFlowElement);
       ControlFlowInputPort<Vector3d> angularVelocityMeasurementInputPort = new ControlFlowInputPort<Vector3d>(controlFlowElement);
-      ControlFlowInputPort<TwistCalculator> twistCalculatorInputPort = new ControlFlowInputPort<TwistCalculator>(controlFlowElement);
-
-      TwistCalculator twistCalculator = new TwistCalculator(elevator.getBodyFixedFrame(), randomFloatingChain.getElevator());
-      twistCalculatorInputPort.setData(twistCalculator);
       
+      
+      ControlFlowInputPort<FullInverseDynamicsStructure> inverseDynamicsStructureInputPort = new ControlFlowInputPort<FullInverseDynamicsStructure>(controlFlowElement);
+      
+      FullInverseDynamicsStructure inverseDynamicsStructure = new FullInverseDynamicsStructure(elevator, randomFloatingChain.getRootJoint().getSuccessor(), randomFloatingChain.getRootJoint());
+      inverseDynamicsStructureInputPort.setData(inverseDynamicsStructure);
+      
+      TwistCalculator twistCalculator = inverseDynamicsStructure.getTwistCalculator(); 
+
       String name = "test";
       YoVariableRegistry registry = new YoVariableRegistry(name);
       AngularVelocityMeasurementModelElement modelElement = new AngularVelocityMeasurementModelElement(angularVelocityStatePort, biasStatePort,
                                                                angularVelocityMeasurementInputPort, estimationLink, estimationFrame, measurementLink,
-                                                               measurementFrame, twistCalculatorInputPort, name, registry);
+                                                               measurementFrame, inverseDynamicsStructureInputPort, name, registry);
 
       randomFloatingChain.setRandomPositionsAndVelocities(random);
       twistCalculator.compute();

@@ -23,8 +23,6 @@ import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.SensorConfig
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.RigidBody;
-import us.ihmc.utilities.screwTheory.SpatialAccelerationCalculator;
-import us.ihmc.utilities.screwTheory.TwistCalculator;
 
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
@@ -37,9 +35,6 @@ public class SensorAndEstimatorAssembler
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final TwistCalculator estimatedTwistCalculator;
-   private final SpatialAccelerationCalculator estimatedSpatialAccelerationCalculator;
-
    private final ControlFlowGraph controlFlowGraph;
    private final OrientationEstimator orientationEstimator;
 
@@ -47,9 +42,6 @@ public class SensorAndEstimatorAssembler
                                       SensorMap sensorMap, DesiredCoMAndAngularAccelerationOutputPortsHolder desiredCoMAndAngularAccelerationOutputPortsHolder,
                                       YoVariableRegistry parentRegistry)
    {
-      estimatedTwistCalculator = inverseDynamicsStructure.getTwistCalculator();
-      estimatedSpatialAccelerationCalculator = inverseDynamicsStructure.getSpatialAccelerationCalculator();
-
       SensorConfigurationFactory SensorConfigurationFactory = new SensorConfigurationFactory(gravitationalAcceleration);
 
       // Sensor configurations for estimator
@@ -67,11 +59,10 @@ public class SensorAndEstimatorAssembler
 
       controlFlowGraph = new ControlFlowGraph();
       JointStateFullRobotModelUpdater jointStateFullRobotModelUpdater = new JointStateFullRobotModelUpdater(controlFlowGraph, sensorMap,
-                                                                           estimatedTwistCalculator, estimatedSpatialAccelerationCalculator);
+                                                                           inverseDynamicsStructure);
 
-      ControlFlowOutputPort<TwistCalculator> twistCalculatorOutputPort = jointStateFullRobotModelUpdater.getTwistCalculatorOutputPort();
-      ControlFlowOutputPort<SpatialAccelerationCalculator> spatialAccelerationCalculatorOutputPort =
-         jointStateFullRobotModelUpdater.getSpatialAccelerationCalculatorOutputPort();
+      ControlFlowOutputPort<FullInverseDynamicsStructure> inverseDynamicsStructureOutputPort =
+         jointStateFullRobotModelUpdater.getInverseDynamicsStructureOutputPort();
 
       RigidBody estimationLink = inverseDynamicsStructure.getEstimationLink();
       ReferenceFrame estimationFrame = estimationLink.getParentJoint().getFrameAfterJoint();
@@ -84,7 +75,7 @@ public class SensorAndEstimatorAssembler
 
          ComposableOrientationAndCoMEstimatorCreator orientationEstimatorCreator =
             new ComposableOrientationAndCoMEstimatorCreator(angularAccelerationNoiseCovariance, comAccelerationNoiseCovariance, estimationLink,
-               twistCalculatorOutputPort, spatialAccelerationCalculatorOutputPort);
+               inverseDynamicsStructureOutputPort);
          orientationEstimatorCreator.addOrientationSensorConfigurations(orientationSensorConfigurations);
          orientationEstimatorCreator.addAngularVelocitySensorConfigurations(angularVelocitySensorConfigurations);
          orientationEstimatorCreator.addLinearAccelerationSensorConfigurations(linearAccelerationSensorConfigurations);
@@ -101,7 +92,7 @@ public class SensorAndEstimatorAssembler
       else
       {
          ComposableOrientationEstimatorCreator orientationEstimatorCreator = new ComposableOrientationEstimatorCreator(angularAccelerationNoiseCovariance,
-                                                                                estimationLink, twistCalculatorOutputPort);
+                                                                                estimationLink, inverseDynamicsStructureOutputPort);
          orientationEstimatorCreator.addOrientationSensorConfigurations(orientationSensorConfigurations);
          orientationEstimatorCreator.addAngularVelocitySensorConfigurations(angularVelocitySensorConfigurations);
 
