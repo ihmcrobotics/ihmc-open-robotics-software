@@ -15,6 +15,7 @@ import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenc
 import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.CenterOfMassJacobianUpdater;
 import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
+import us.ihmc.commonWalkingControlModules.sensors.ForceSensorInterface;
 import us.ihmc.commonWalkingControlModules.sensors.TwistUpdater;
 import us.ihmc.commonWalkingControlModules.stateEstimation.HumanoidStateEstimatorController;
 import us.ihmc.commonWalkingControlModules.visualizer.CommonInertiaElipsoidsVisualizer;
@@ -83,7 +84,9 @@ public class DRCSimulationFactory
          for (RobotSide robotSide : RobotSide.values())
          {
 
-            SandiaHandModel handModel = new SandiaHandModel(fullRobotModelForController, robotSide);
+            ForceSensorInterface wristForceSensor = robotInterface.getWristForceSensor(robotSide);
+            
+            SandiaHandModel handModel = new SandiaHandModel(fullRobotModelForController, wristForceSensor, robotSide);
             SimulatedUnderactuatedSandiaHandController simulatedUnderactuatedSandiaHandController = new SimulatedUnderactuatedSandiaHandController(simulatedRobot.getYoTime(), handModel, controlDT);
             handControllers.put(robotSide, simulatedUnderactuatedSandiaHandController);
             if (networkServer != null)
@@ -102,6 +105,7 @@ public class DRCSimulationFactory
       
       if(DRCConfigParameters.INTRODUCE_FILTERED_GAUSSIAN_POSITIONING_ERROR)
       {
+         System.err.println("Using noisy fullrobotmodel");
          SDFNoisySimulatedSensorReaderAndWriter noisySimulatedSensorReaderAndWriter = new SDFNoisySimulatedSensorReaderAndWriter(simulatedRobot, fullRobotModelForController, referenceFramesForController);
          noisySimulatedSensorReaderAndWriter.setNoiseFilterAlpha(DRCConfigParameters.NOISE_FILTER_ALPHA);
          noisySimulatedSensorReaderAndWriter.setPositionNoiseStd(DRCConfigParameters.POSITION_NOISE_STD);

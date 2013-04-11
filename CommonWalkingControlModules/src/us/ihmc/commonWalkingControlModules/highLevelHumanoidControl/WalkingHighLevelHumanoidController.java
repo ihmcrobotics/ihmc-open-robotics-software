@@ -328,7 +328,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 
          manipulationStateMachines.put(robotSide,
                                        new ManipulationStateMachine(yoTime, robotSide, fullRobotModel, twistCalculator, walkingControllerParameters,
-                                          handPoseProvider, dynamicGraphicObjectsListRegistry, handControllerInterface, registry));
+                                          handPoseProvider, dynamicGraphicObjectsListRegistry, handControllerInterface, gravityZ, registry));
       }
 
       this.desiredHeadOrientationProvider = desiredHeadOrientationProvider;
