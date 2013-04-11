@@ -49,7 +49,7 @@ public class CenterOfMassBasedFullRobotModelUpdaterTest
       SixDoFJoint rootJoint = randomFloatingChain.getRootJoint();
 
       RigidBody estimationLink = randomFloatingChain.getRevoluteJoints().get(1).getSuccessor();    // some link in the middle of the chain
-      ReferenceFrame estimationFrame = estimationLink.getBodyFixedFrame();
+      ReferenceFrame estimationFrame = estimationLink.getParentJoint().getFrameAfterJoint(); //.getBodyFixedFrame();
 
       ControlFlowElement controlFlowElement = new NullControlFlowElement();
 
