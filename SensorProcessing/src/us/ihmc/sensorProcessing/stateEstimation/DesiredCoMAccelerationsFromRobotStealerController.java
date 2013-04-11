@@ -7,7 +7,6 @@ import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.sensorProcessing.signalCorruption.GaussianVectorCorruptor;
 import us.ihmc.sensorProcessing.simulatedSensors.InverseDynamicsJointsFromSCSRobotGenerator;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.StateEstimatorEvaluatorFullRobotModel;
-import us.ihmc.sensorProcessing.stateEstimation.evaluation.StateEstimatorEvaluatorRobot;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -19,6 +18,7 @@ import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationCalculator;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 
+import com.yobotics.simulationconstructionset.Joint;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.robotController.RobotController;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
@@ -52,7 +52,7 @@ public class DesiredCoMAccelerationsFromRobotStealerController implements RobotC
    private final ControlFlowOutputPort<FrameVector> desiredAngularAccelerationOutputPort;
 
    public DesiredCoMAccelerationsFromRobotStealerController(StateEstimatorEvaluatorFullRobotModel perfectFullRobotModel, InverseDynamicsJointsFromSCSRobotGenerator generator,
-                                    StateEstimatorEvaluatorRobot robot, double controlDT)
+                                    Joint estimationJoint, double controlDT)
    {
       this.controlDT = controlDT;
 
@@ -69,10 +69,8 @@ public class DesiredCoMAccelerationsFromRobotStealerController implements RobotC
          new CenterOfMassAccelerationFromFullRobotModelStealer(perfectFullRobotModel.getElevator(), perfectSpatialAccelerationCalculator);
       desiredCenterOfMassAccelerationOutputPort = centerOfMassAccelerationFromFullRobotModelStealer.getOutputPort();
 
-      AngularAccelerationFromRobotStealer angularAccelerationFromRobotStealer = new AngularAccelerationFromRobotStealer(robot);
+      AngularAccelerationFromRobotStealer angularAccelerationFromRobotStealer = new AngularAccelerationFromRobotStealer(estimationJoint);
       desiredAngularAccelerationOutputPort = angularAccelerationFromRobotStealer.getOutputPort();
-
-      robot.update();
    }
 
 
@@ -159,7 +157,7 @@ public class DesiredCoMAccelerationsFromRobotStealerController implements RobotC
 
    private class AngularAccelerationFromRobotStealer extends AbstractControlFlowElement
    {
-      private final StateEstimatorEvaluatorRobot robot;
+      private final Joint estimationJoint;
       private final ControlFlowOutputPort<FrameVector> outputPort = createOutputPort();
 
       // Note: Null reference frame!
@@ -171,16 +169,17 @@ public class DesiredCoMAccelerationsFromRobotStealerController implements RobotC
 
       private final GaussianVectorCorruptor signalCorruptor = new GaussianVectorCorruptor(123412L, getClass().getSimpleName() + "Corruptor", registry);
 
-      public AngularAccelerationFromRobotStealer(StateEstimatorEvaluatorRobot robot)
+      public AngularAccelerationFromRobotStealer(Joint estimationJoint)
       {
-         this.robot = robot;
+         this.estimationJoint = estimationJoint;
          double discreteStdDev = convertStandardDeviationToDiscreteTime(angularAccelerationProcessNoiseStandardDeviation);
          signalCorruptor.setStandardDeviation(discreteStdDev);
       }
 
       public void startComputation()
       {
-         desiredAngularAcceleration.set(robot.getActualAngularAccelerationInBodyFrame());
+         estimationJoint.getAngularAccelerationsInBodyFrame(desiredAngularAcceleration);
+         
          if (CORRUPT_DESIRED_ACCELERATIONS)
             signalCorruptor.corrupt(desiredAngularAcceleration);
 

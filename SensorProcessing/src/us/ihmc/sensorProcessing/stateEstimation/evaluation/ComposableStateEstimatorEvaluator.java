@@ -1,5 +1,7 @@
 package us.ihmc.sensorProcessing.stateEstimation.evaluation;
 
+import java.util.ArrayList;
+
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
@@ -15,6 +17,8 @@ import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
 
+import com.yobotics.simulationconstructionset.IMUMount;
+import com.yobotics.simulationconstructionset.Joint;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
@@ -37,15 +41,22 @@ public class ComposableStateEstimatorEvaluator
       StateEstimatorEvaluatorRobot robot = new StateEstimatorEvaluatorRobot();
 
       InverseDynamicsJointsFromSCSRobotGenerator generator = new InverseDynamicsJointsFromSCSRobotGenerator(robot);
-      StateEstimatorEvaluatorFullRobotModel perfectFullRobotModel = new StateEstimatorEvaluatorFullRobotModel(generator, robot, robot.getIMUMounts(),
+      ArrayList<IMUMount> imuMounts = new ArrayList<IMUMount>();
+      robot.getIMUMounts(imuMounts);
+      StateEstimatorEvaluatorFullRobotModel perfectFullRobotModel = new StateEstimatorEvaluatorFullRobotModel(generator, robot, imuMounts,
                                                                        robot.getVelocityPoints());
 
-      SensorMapFromRobotFactory sensorMapFromRobotFactory = new SensorMapFromRobotFactory(generator, robot, controlDT, robot.getIMUMounts(),
+      SensorMapFromRobotFactory sensorMapFromRobotFactory = new SensorMapFromRobotFactory(generator, robot, controlDT, imuMounts,
                                                                robot.getVelocityPoints(), registry);
       SensorMap sensorMap = sensorMapFromRobotFactory.getSensorMap();
 
+      
+      
+      Joint estimationJoint = robot.getRootJoint();
       DesiredCoMAccelerationsFromRobotStealerController desiredCoMAccelerationsFromRobotStealerController =
-         new DesiredCoMAccelerationsFromRobotStealerController(perfectFullRobotModel, generator, robot, controlDT);
+         new DesiredCoMAccelerationsFromRobotStealerController(perfectFullRobotModel, generator, estimationJoint , controlDT);
+
+      robot.update();
 
       RigidBody estimationLink = perfectFullRobotModel.getRootBody();
       RigidBody elevator = perfectFullRobotModel.getElevator();
@@ -67,7 +78,7 @@ public class ComposableStateEstimatorEvaluator
       
       
       ComposableStateEstimatorEvaluatorController composableStateEstimatorEvaluatorController =
-         new ComposableStateEstimatorEvaluatorController(controlFlowGraph, orientationEstimator, robot, controlDT, sensorMap,
+         new ComposableStateEstimatorEvaluatorController(controlFlowGraph, orientationEstimator, robot, estimationJoint, controlDT, sensorMap,
             desiredCoMAccelerationsFromRobotStealerController);
       robot.setController(desiredCoMAccelerationsFromRobotStealerController, simTicksPerControlDT);
       robot.setController(composableStateEstimatorEvaluatorController, simTicksPerControlDT);
