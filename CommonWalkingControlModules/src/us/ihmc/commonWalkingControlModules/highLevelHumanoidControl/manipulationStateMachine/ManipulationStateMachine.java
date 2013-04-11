@@ -25,6 +25,7 @@ import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
+import us.ihmc.utilities.screwTheory.Wrench;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
@@ -59,9 +60,14 @@ public class ManipulationStateMachine extends AbstractControlFlowElement
 
    private final HandControllerInterface handController;
 
+//   private final MassMatrixEstimatingToolRigidBody toolBody;
+   private final Wrench measuredWristWrench = new Wrench();
+     
+
+
    public ManipulationStateMachine(final DoubleYoVariable simulationTime, final RobotSide robotSide, final FullRobotModel fullRobotModel,
-         final TwistCalculator twistCalculator, final WalkingControllerParameters walkingControllerParameters, final DesiredHandPoseProvider handPoseProvider,
-         final DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, HandControllerInterface handController,
+         final TwistCalculator twistCalculator, WalkingControllerParameters walkingControllerParameters, final DesiredHandPoseProvider handPoseProvider,
+         final DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, HandControllerInterface handController, double gravity,
          final YoVariableRegistry parentRegistry)
    {
       String name = robotSide.getCamelCaseNameForStartOfExpression() + getClass().getSimpleName();
@@ -169,13 +175,18 @@ public class ManipulationStateMachine extends AbstractControlFlowElement
          list.hideDynamicGraphicObjects();
       }
 
+      
+      
       this.handController = handController;
+//      this.toolBody = new MassMatrixEstimatingToolRigidBody(name + "Tool", handController.getWristJoint(), gravity, registry, dynamicGraphicObjectsListRegistry);
 
       parentRegistry.addChild(registry);
    }
 
    public void startComputation()
    {
+      estimateObjectWrench();
+      
       stateMachine.checkTransitionConditionsThoroughly();
       stateMachine.doAction();
       IndividualManipulationState<ManipulationState> manipulationState = manipulationStateMap.get(stateMachine.getCurrentStateEnum());
@@ -191,6 +202,13 @@ public class ManipulationStateMachine extends AbstractControlFlowElement
       {
          handController.doControl();
       }
+   }
+
+   private void estimateObjectWrench()
+   {
+      handController.packWristWrench(measuredWristWrench);
+//      toolBody.update(measuredWristWrench);
+      
    }
 
    public void waitUntilComputationIsDone()
