@@ -52,8 +52,14 @@ public class LinearAccelerationMeasurementModelElementTest
       ControlFlowElement controlFlowElement = new NullControlFlowElement();
 
       TwistCalculator twistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), elevator);
+      ControlFlowInputPort<TwistCalculator> twistCalculatorInputPort = new ControlFlowInputPort<TwistCalculator>(controlFlowElement);
+      twistCalculatorInputPort.setData(twistCalculator);
+      
       SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(elevator, twistCalculator, 0.0, false);
-
+      ControlFlowInputPort<SpatialAccelerationCalculator> spatialAccelerationCalculatorInputPort = new ControlFlowInputPort<SpatialAccelerationCalculator>(controlFlowElement);
+      spatialAccelerationCalculatorInputPort.setData(spatialAccelerationCalculator);
+      
+      
       String name = "test";
       YoVariableRegistry registry = new YoVariableRegistry(name);
 
@@ -75,8 +81,8 @@ public class LinearAccelerationMeasurementModelElementTest
       
       LinearAccelerationMeasurementModelElement modelElement = new LinearAccelerationMeasurementModelElement(name, registry, centerOfMassPositionPort,
                                                                   centerOfMassVelocityPort, centerOfMassAccelerationPort, orientationPort, angularVelocityPort,
-                                                                  angularAccelerationPort, biasPort, linearAccelerationMeasurementInputPort, twistCalculator,
-                                                                  spatialAccelerationCalculator, measurementLink, measurementFrame, estimationLink,
+                                                                  angularAccelerationPort, biasPort, linearAccelerationMeasurementInputPort, twistCalculatorInputPort,
+                                                                  spatialAccelerationCalculatorInputPort, measurementLink, measurementFrame, estimationLink,
                                                                   estimationFrame, gZ);
 
       randomFloatingChain.setRandomPositionsAndVelocities(random);
@@ -85,7 +91,7 @@ public class LinearAccelerationMeasurementModelElementTest
       twistCalculator.compute();
       spatialAccelerationCalculator.compute();
 
-      Runnable updater = new CenterOfMassBasedFullRobotModelUpdater(twistCalculator, spatialAccelerationCalculator, centerOfMassPositionPort,
+      Runnable updater = new CenterOfMassBasedFullRobotModelUpdater(twistCalculatorInputPort, spatialAccelerationCalculatorInputPort, centerOfMassPositionPort,
                             centerOfMassVelocityPort, centerOfMassAccelerationPort, orientationPort, angularVelocityPort, angularAccelerationPort,
                             estimationLink, estimationFrame, rootJoint);
 

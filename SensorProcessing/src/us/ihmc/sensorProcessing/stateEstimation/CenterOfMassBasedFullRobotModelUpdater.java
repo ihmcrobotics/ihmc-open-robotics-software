@@ -4,6 +4,7 @@ import javax.media.j3d.Transform3D;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -24,8 +25,8 @@ import us.ihmc.utilities.screwTheory.TwistCalculator;
 //TODO: update accelerations
 public class CenterOfMassBasedFullRobotModelUpdater implements Runnable
 {
-   private final TwistCalculator twistCalculator;
-   private final SpatialAccelerationCalculator spatialAccelerationCalculator;
+   private final ControlFlowInputPort<TwistCalculator> twistCalculatorInputPort;
+   private final ControlFlowInputPort<SpatialAccelerationCalculator> spatialAccelerationCalculatorInputPort;
 
    private final ControlFlowOutputPort<FramePoint> centerOfMassPositionPort;
    private final ControlFlowOutputPort<FrameVector> centerOfMassVelocityPort;
@@ -44,14 +45,15 @@ public class CenterOfMassBasedFullRobotModelUpdater implements Runnable
    private final SixDoFJoint rootJoint;
    private final RigidBody estimationLink;
 
-   public CenterOfMassBasedFullRobotModelUpdater(TwistCalculator twistCalculator, SpatialAccelerationCalculator spatialAccelerationCalculator,
+   public CenterOfMassBasedFullRobotModelUpdater(ControlFlowInputPort<TwistCalculator> twistCalculatorInputPort, 
+         ControlFlowInputPort<SpatialAccelerationCalculator> spatialAccelerationCalculatorInputPort,
            ControlFlowOutputPort<FramePoint> centerOfMassPositionPort, ControlFlowOutputPort<FrameVector> centerOfMassVelocityPort,
            ControlFlowOutputPort<FrameVector> centerOfMassAccelerationPort, ControlFlowOutputPort<FrameOrientation> orientationPort,
            ControlFlowOutputPort<FrameVector> angularVelocityPort, ControlFlowOutputPort<FrameVector> angularAccelerationPort, RigidBody estimationLink,
            ReferenceFrame estimationFrame, SixDoFJoint rootJoint)
    {
-      this.twistCalculator = twistCalculator;
-      this.spatialAccelerationCalculator = spatialAccelerationCalculator;
+      this.twistCalculatorInputPort = twistCalculatorInputPort;
+      this.spatialAccelerationCalculatorInputPort = spatialAccelerationCalculatorInputPort;
 
       this.centerOfMassPositionPort = centerOfMassPositionPort;
       this.centerOfMassVelocityPort = centerOfMassVelocityPort;
@@ -68,7 +70,9 @@ public class CenterOfMassBasedFullRobotModelUpdater implements Runnable
       this.centerOfMassCalculator = new CenterOfMassCalculator(elevator, rootJoint.getFrameAfterJoint());
       this.centerOfMassJacobianBody = new CenterOfMassJacobian(ScrewTools.computeRigidBodiesInOrder(elevator),
               ScrewTools.computeJointsInOrder(rootJoint.getSuccessor()), rootJoint.getFrameAfterJoint());
-      this.centerOfMassAccelerationCalculator = new CenterOfMassAccelerationCalculator(rootJoint.getSuccessor(), ScrewTools.computeRigidBodiesInOrder(elevator), spatialAccelerationCalculator);
+      
+      //TODO: Should pass the input port for the spatial acceleration calculator here too...
+      this.centerOfMassAccelerationCalculator = new CenterOfMassAccelerationCalculator(rootJoint.getSuccessor(), ScrewTools.computeRigidBodiesInOrder(elevator), spatialAccelerationCalculatorInputPort.getData());
       this.rootJoint = rootJoint;
    }
 
@@ -79,7 +83,10 @@ public class CenterOfMassBasedFullRobotModelUpdater implements Runnable
       updateRootJointConfiguration();
       rootJoint.getFrameAfterJoint().update();
 
-      updateRootJointTwistAndSpatialAcceleration();
+      TwistCalculator twistCalculator = twistCalculatorInputPort.getData();
+      SpatialAccelerationCalculator spatialAccelerationCalculator = spatialAccelerationCalculatorInputPort.getData();
+      
+      updateRootJointTwistAndSpatialAcceleration(twistCalculator, spatialAccelerationCalculator);
       twistCalculator.compute();
       spatialAccelerationCalculator.compute();
    }
@@ -91,9 +98,10 @@ public class CenterOfMassBasedFullRobotModelUpdater implements Runnable
    private final FrameVector tempRootJointLinearAcceleration = new FrameVector(ReferenceFrame.getWorldFrame());
    private final SpatialAccelerationVector tempRootJointAcceleration = new SpatialAccelerationVector();
 
-   private void updateRootJointTwistAndSpatialAcceleration()
+   private void updateRootJointTwistAndSpatialAcceleration(TwistCalculator twistCalculator, 
+         SpatialAccelerationCalculator spatialAccelerationCalculator)
    {
-      computeRootJointAngularVelocityAndAcceleration(tempRootJointAngularVelocity, tempRootJointAngularAcceleration);
+      computeRootJointAngularVelocityAndAcceleration(twistCalculator, spatialAccelerationCalculator, tempRootJointAngularVelocity, tempRootJointAngularAcceleration);
       computeRootJointLinearVelocityAndAcceleration(tempRootJointLinearVelocity, tempRootJointLinearAcceleration, tempRootJointAngularVelocity, tempRootJointAngularAcceleration);
 
       computeRootJointTwist(tempRootJointTwist, tempRootJointAngularVelocity, tempRootJointLinearVelocity);
@@ -110,7 +118,8 @@ public class CenterOfMassBasedFullRobotModelUpdater implements Runnable
    private final FrameVector tempCrossTerm = new FrameVector(ReferenceFrame.getWorldFrame());
    private final FrameVector tempEstimationLinkAngularVelocity = new FrameVector(ReferenceFrame.getWorldFrame());
 
-   private void computeRootJointAngularVelocityAndAcceleration(FrameVector rootJointAngularVelocityToPack, FrameVector rootJointAngularAccelerationToPack)
+   private void computeRootJointAngularVelocityAndAcceleration(TwistCalculator twistCalculator, 
+         SpatialAccelerationCalculator spatialAccelerationCalculator, FrameVector rootJointAngularVelocityToPack, FrameVector rootJointAngularAccelerationToPack)
    {
       tempEstimationLinkAngularVelocity.setAndChangeFrame(angularVelocityPort.getData());
       

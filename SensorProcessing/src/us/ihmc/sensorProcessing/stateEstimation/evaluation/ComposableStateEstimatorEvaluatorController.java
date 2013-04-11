@@ -9,10 +9,12 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.controlFlow.ControlFlowGraph;
+import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorMap;
 import us.ihmc.sensorProcessing.stateEstimation.ComposableOrientationAndCoMEstimatorCreator;
 import us.ihmc.sensorProcessing.stateEstimation.ComposableOrientationEstimatorCreator;
 import us.ihmc.sensorProcessing.stateEstimation.DesiredCoMAndAngularAccelerationOutputPortsHolder;
+import us.ihmc.sensorProcessing.stateEstimation.JointStateFullRobotModelUpdater;
 import us.ihmc.sensorProcessing.stateEstimation.OrientationEstimator;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.AngularVelocitySensorConfiguration;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.LinearAccelerationSensorConfiguration;
@@ -43,6 +45,8 @@ public class ComposableStateEstimatorEvaluatorController implements RobotControl
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
+   private final JointStateFullRobotModelUpdater jointStateFullRobotModelUpdater;
+   
    private final StateEstimatorEvaluatorFullRobotModel estimatedFullRobotModel;
    private final TwistCalculator estimatedTwistCalculator;
    private final SpatialAccelerationCalculator estimatedSpatialAccelerationCalculator;
@@ -51,16 +55,16 @@ public class ComposableStateEstimatorEvaluatorController implements RobotControl
    private final OrientationEstimator orientationEstimator;
 
    private final ComposableStateEstimatorEvaluatorErrorCalculator composableStateEstimatorEvaluatorErrorCalculator;
-   
+
    public ComposableStateEstimatorEvaluatorController(StateEstimatorEvaluatorRobot robot, 
          StateEstimatorEvaluatorFullRobotModel estimatedFullRobotModel,
          double controlDT,
          SensorMap sensorMap, 
-           DesiredCoMAndAngularAccelerationOutputPortsHolder desiredCoMAndAngularAccelerationOutputPortsHolder)
+         DesiredCoMAndAngularAccelerationOutputPortsHolder desiredCoMAndAngularAccelerationOutputPortsHolder)
    {
       this.gravitationalAcceleration = new Vector3d();
       robot.getGravity(gravitationalAcceleration);
-
+      
       this.estimatedFullRobotModel = estimatedFullRobotModel;
       estimatedTwistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), estimatedFullRobotModel.getElevator());
       estimatedSpatialAccelerationCalculator = new SpatialAccelerationCalculator(estimatedFullRobotModel.getElevator(), estimatedTwistCalculator, 0.0, false);
@@ -78,12 +82,15 @@ public class ComposableStateEstimatorEvaluatorController implements RobotControl
       Collection<PointVelocitySensorConfiguration> pointVelocitySensorConfigurations = SensorConfigurationFactory.createPointVelocitySensorConfigurations(sensorMap.getPointVelocitySensors());
 
       controlFlowGraph = new ControlFlowGraph();
+      jointStateFullRobotModelUpdater = new JointStateFullRobotModelUpdater(controlFlowGraph, sensorMap, estimatedTwistCalculator, estimatedSpatialAccelerationCalculator);
+      
+      ControlFlowOutputPort<TwistCalculator> twistCalculatorOutputPort = jointStateFullRobotModelUpdater.getTwistCalculatorOutputPort();
+      ControlFlowOutputPort<SpatialAccelerationCalculator> spatialAccelerationCalculatorOutputPort = jointStateFullRobotModelUpdater.getSpatialAccelerationCalculatorOutputPort();
+      
       RigidBody estimationLink = estimatedFullRobotModel.getRootBody();
       ReferenceFrame estimationFrame = estimationLink.getParentJoint().getFrameAfterJoint();
 
       DenseMatrix64F angularAccelerationNoiseCovariance = createDiagonalCovarianceMatrix(angularAccelerationProcessNoiseStandardDeviation, 3);
-
-
 
       if (ESTIMATE_COM)
       {
@@ -91,7 +98,7 @@ public class ComposableStateEstimatorEvaluatorController implements RobotControl
 
          ComposableOrientationAndCoMEstimatorCreator orientationEstimatorCreator =
             new ComposableOrientationAndCoMEstimatorCreator(angularAccelerationNoiseCovariance, comAccelerationNoiseCovariance, estimationLink,
-               estimatedTwistCalculator, estimatedSpatialAccelerationCalculator);
+                  twistCalculatorOutputPort, spatialAccelerationCalculatorOutputPort);
          orientationEstimatorCreator.addOrientationSensorConfigurations(orientationSensorConfigurations);
          orientationEstimatorCreator.addAngularVelocitySensorConfigurations(angularVelocitySensorConfigurations);
          orientationEstimatorCreator.addLinearAccelerationSensorConfigurations(linearAccelerationSensorConfigurations);
@@ -106,7 +113,7 @@ public class ComposableStateEstimatorEvaluatorController implements RobotControl
       else
       {
          ComposableOrientationEstimatorCreator orientationEstimatorCreator = new ComposableOrientationEstimatorCreator(angularAccelerationNoiseCovariance,
-                                                                                estimationLink, estimatedTwistCalculator);
+                                                                                estimationLink, twistCalculatorOutputPort);
          orientationEstimatorCreator.addOrientationSensorConfigurations(orientationSensorConfigurations);
          orientationEstimatorCreator.addAngularVelocitySensorConfigurations(angularVelocitySensorConfigurations);
 
@@ -139,6 +146,9 @@ public class ComposableStateEstimatorEvaluatorController implements RobotControl
       }
 
       this.composableStateEstimatorEvaluatorErrorCalculator = new ComposableStateEstimatorEvaluatorErrorCalculator(robot, orientationEstimator, registry);
+   
+      controlFlowGraph.visualize();
+   
    }
 
 
@@ -168,6 +178,16 @@ public class ComposableStateEstimatorEvaluatorController implements RobotControl
       controlFlowGraph.startComputation();
       controlFlowGraph.waitUntilComputationIsDone();
 
+      //TODO: Get jointStateFullRobotModelUpdater working!
+      
+      //+++ We want this to happen right after the joint angles and velocities are read. 
+      // But it has to happen after controlFlowGraph does it's computation.
+      // It really should be part of the controlFlowGraph.
+      // This is one example of where you want to do some of the controlFlowGraph, then
+      // run some stuff, then do the rest of the controlFlowGraph!
+      
+//      jointStateFullRobotModelUpdater.run();
+
       if (!ESTIMATE_COM)    // this is being done inside the state estimator for the CoM estimator
       {
          estimatedFullRobotModel.updateBasedOnEstimator(orientationEstimator);
@@ -183,8 +203,10 @@ public class ComposableStateEstimatorEvaluatorController implements RobotControl
        * supersense joint positions and velocities and update twist
        * calculator and spatial accel calculator based on this data TODO:
        * need a class that does this based on sensors
-       */
+       */      
       estimatedFullRobotModel.updateBasedOnRobot(false);
+      
+      //TODO: Not sure if the following two should be here...
       estimatedTwistCalculator.compute();
       estimatedSpatialAccelerationCalculator.compute();
    }

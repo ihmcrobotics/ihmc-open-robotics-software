@@ -54,8 +54,14 @@ public class PointVelocityMeasurementModelElementTest
       ControlFlowElement controlFlowElement = new NullControlFlowElement();
 
       TwistCalculator twistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), elevator);
+      ControlFlowInputPort<TwistCalculator> twistCalculatorInputPort = new ControlFlowInputPort<TwistCalculator>(controlFlowElement);
+      twistCalculatorInputPort.setData(twistCalculator);
+      
       SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(elevator, twistCalculator, 0.0, false);
-
+      ControlFlowInputPort<SpatialAccelerationCalculator> spatialAccelerationCalculatorInputPort = new ControlFlowInputPort<SpatialAccelerationCalculator>(controlFlowElement);
+      spatialAccelerationCalculatorInputPort.setData(spatialAccelerationCalculator);
+      
+      
       String name = "test";
       YoVariableRegistry registry = new YoVariableRegistry(name);
 
@@ -73,13 +79,13 @@ public class PointVelocityMeasurementModelElementTest
       FramePoint stationaryPoint = new FramePoint(measurementFrame, RandomTools.generateRandomPoint(random, 1.0, 1.0, 1.0));
       PointVelocityMeasurementModelElement modelElement = new PointVelocityMeasurementModelElement(name, pointVelocityMeasurementInputPort,
                                                              centerOfMassPositionPort, centerOfMassVelocityPort, orientationPort, angularVelocityPort,
-                                                             estimationFrame, stationaryPointLink, stationaryPoint, twistCalculator, registry);
+                                                             estimationFrame, stationaryPointLink, stationaryPoint, twistCalculatorInputPort, registry);
 
       randomFloatingChain.setRandomPositionsAndVelocities(random);
       twistCalculator.compute();
       spatialAccelerationCalculator.compute();
 
-      Runnable updater = new CenterOfMassBasedFullRobotModelUpdater(twistCalculator, spatialAccelerationCalculator, centerOfMassPositionPort,
+      Runnable updater = new CenterOfMassBasedFullRobotModelUpdater(twistCalculatorInputPort, spatialAccelerationCalculatorInputPort, centerOfMassPositionPort,
                             centerOfMassVelocityPort, centerOfMassAccelerationPort, orientationPort, angularVelocityPort, angularAccelerationPort,
                             estimationLink, estimationFrame, rootJoint);
 

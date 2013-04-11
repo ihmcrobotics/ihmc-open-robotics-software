@@ -32,7 +32,7 @@ public class PointVelocityMeasurementModelElement extends AbstractMeasurementMod
    private final ControlFlowInputPort<Vector3d> pointVelocityMeasurementInputPort;
 
    private final ReferenceFrame estimationFrame;
-   private final TwistCalculator twistCalculator;
+   private final ControlFlowInputPort<TwistCalculator> twistCalculatorInputPort;
    private final FramePoint stationaryPoint;
 
    private final RigidBody stationaryPointLink;
@@ -50,7 +50,7 @@ public class PointVelocityMeasurementModelElement extends AbstractMeasurementMod
    public PointVelocityMeasurementModelElement(String name, ControlFlowInputPort<Vector3d> pointVelocityMeasurementInputPort,
            ControlFlowOutputPort<FramePoint> centerOfMassPositionPort, ControlFlowOutputPort<FrameVector> centerOfMassVelocityPort,
            ControlFlowOutputPort<FrameOrientation> orientationPort, ControlFlowOutputPort<FrameVector> angularVelocityPort, ReferenceFrame estimationFrame,
-           RigidBody stationaryPointLink, FramePoint stationaryPoint, TwistCalculator twistCalculator, YoVariableRegistry registry)
+           RigidBody stationaryPointLink, FramePoint stationaryPoint, ControlFlowInputPort<TwistCalculator> twistCalculatorInputPort, YoVariableRegistry registry)
    {
       super(pointVelocityMeasurementInputPort, SIZE, name, registry);
 
@@ -64,7 +64,7 @@ public class PointVelocityMeasurementModelElement extends AbstractMeasurementMod
       this.estimationFrame = estimationFrame;
       this.stationaryPointLink = stationaryPointLink;
       this.stationaryPoint = stationaryPoint;
-      this.twistCalculator = twistCalculator;
+      this.twistCalculatorInputPort = twistCalculatorInputPort;
 
       outputMatrixBlocks.put(centerOfMassVelocityPort, new DenseMatrix64F(SIZE, SIZE));
       outputMatrixBlocks.put(orientationPort, new DenseMatrix64F(SIZE, SIZE));
@@ -133,7 +133,7 @@ public class PointVelocityMeasurementModelElement extends AbstractMeasurementMod
 
    private void computeVelocityOfStationaryPoint(FrameVector stationaryPointVelocityToPack)
    {
-      twistCalculator.packTwistOfBody(tempTwist, stationaryPointLink);
+      twistCalculatorInputPort.getData().packTwistOfBody(tempTwist, stationaryPointLink);
       tempTwist.changeFrame(tempTwist.getBaseFrame());
       tempFramePoint.setAndChangeFrame(stationaryPoint);
       tempFramePoint.changeFrame(tempTwist.getBaseFrame());

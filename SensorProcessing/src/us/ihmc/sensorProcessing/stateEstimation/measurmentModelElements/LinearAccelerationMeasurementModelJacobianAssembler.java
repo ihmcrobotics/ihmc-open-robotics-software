@@ -4,6 +4,7 @@ import javax.media.j3d.Transform3D;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -15,8 +16,8 @@ import us.ihmc.utilities.screwTheory.TwistCalculator;
 
 public class LinearAccelerationMeasurementModelJacobianAssembler
 {
-   private final TwistCalculator twistCalculator;
-   private final SpatialAccelerationCalculator spatialAccelerationCalculator;
+   private final ControlFlowInputPort<TwistCalculator> twistCalculatorInputPort;
+   private final ControlFlowInputPort<SpatialAccelerationCalculator> spatialAccelerationCalculatorInputPort;
 
    private final RigidBody measurementLink;
    private final ReferenceFrame measurementFrame;
@@ -42,11 +43,12 @@ public class LinearAccelerationMeasurementModelJacobianAssembler
    private final Matrix3d tempMatrix = new Matrix3d();
    private final Matrix3d tempMatrix2 = new Matrix3d();
 
-   public LinearAccelerationMeasurementModelJacobianAssembler(TwistCalculator twistCalculator, SpatialAccelerationCalculator spatialAccelerationCalculator,
+   public LinearAccelerationMeasurementModelJacobianAssembler(ControlFlowInputPort<TwistCalculator> twistCalculatorInputPort, 
+         ControlFlowInputPort<SpatialAccelerationCalculator> spatialAccelerationCalculatorInputPort,
            RigidBody measurementLink, ReferenceFrame measurementFrame, ReferenceFrame estimationFrame)
    {
-      this.twistCalculator = twistCalculator;
-      this.spatialAccelerationCalculator = spatialAccelerationCalculator;
+      this.twistCalculatorInputPort = twistCalculatorInputPort;
+      this.spatialAccelerationCalculatorInputPort = spatialAccelerationCalculatorInputPort;
       this.measurementLink = measurementLink;
       this.measurementFrame = measurementFrame;
       this.estimationFrame = estimationFrame;
@@ -54,6 +56,9 @@ public class LinearAccelerationMeasurementModelJacobianAssembler
 
    public void preCompute(Vector3d unbiasedEstimatedMeasurement)
    {
+      TwistCalculator twistCalculator = twistCalculatorInputPort.getData();
+      SpatialAccelerationCalculator spatialAccelerationCalculator = spatialAccelerationCalculatorInputPort.getData();
+      
       RigidBody elevator = spatialAccelerationCalculator.getRootBody();
       ReferenceFrame elevatorFrame = elevator.getBodyFixedFrame();
 
