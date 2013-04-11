@@ -8,6 +8,7 @@ import us.ihmc.sensorProcessing.stateEstimation.DesiredCoMAndAngularAcceleration
 import us.ihmc.sensorProcessing.stateEstimation.OrientationEstimator;
 
 import com.yobotics.simulationconstructionset.Joint;
+import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.robotController.RobotController;
 
@@ -22,7 +23,7 @@ public class ComposableStateEstimatorEvaluatorController implements RobotControl
    private final ComposableStateEstimatorEvaluatorErrorCalculator composableStateEstimatorEvaluatorErrorCalculator;
 
    public ComposableStateEstimatorEvaluatorController(ControlFlowGraph controlFlowGraph, OrientationEstimator orientationEstimator,
-           StateEstimatorEvaluatorRobot robot, Joint estimationJoint, double controlDT, SensorMap sensorMap,
+           Robot robot, Joint estimationJoint, double controlDT, SensorMap sensorMap,
            DesiredCoMAndAngularAccelerationOutputPortsHolder desiredCoMAndAngularAccelerationOutputPortsHolder)
    {
       this.gravitationalAcceleration = new Vector3d();
