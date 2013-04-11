@@ -3,7 +3,11 @@ package us.ihmc.sensorProcessing.stateEstimation.evaluation;
 import us.ihmc.sensorProcessing.simulatedSensors.InverseDynamicsJointsFromSCSRobotGenerator;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorMap;
 import us.ihmc.sensorProcessing.stateEstimation.DesiredCoMAccelerationsFromRobotStealerController;
+import us.ihmc.sensorProcessing.stateEstimation.JointStateFullRobotModelUpdater;
 import us.ihmc.sensorProcessing.stateEstimation.SimulatedSensorController;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.screwTheory.SpatialAccelerationCalculator;
+import us.ihmc.utilities.screwTheory.TwistCalculator;
 
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
@@ -28,17 +32,22 @@ public class ComposableStateEstimatorEvaluator
       StateEstimatorEvaluatorFullRobotModel perfectFullRobotModel = new StateEstimatorEvaluatorFullRobotModel(generator, robot, robot.getIMUMounts(),
                                                                        robot.getVelocityPoints());
 
-      SimulatedSensorController simulatedSensorController = new SimulatedSensorController(perfectFullRobotModel, generator, robot,
-                                                                                 controlDT);
-
-      DesiredCoMAccelerationsFromRobotStealerController desiredCoMAccelerationsFromRobotStealerController = new DesiredCoMAccelerationsFromRobotStealerController(perfectFullRobotModel, generator, robot, controlDT);
-      
-      StateEstimatorEvaluatorFullRobotModel estimatedFullRobotModel = simulatedSensorController.getStateEstimatorEvaluatorFullRobotModel();
-
+      SimulatedSensorController simulatedSensorController = new SimulatedSensorController(perfectFullRobotModel, generator, robot, controlDT);
       SensorMap sensorMap = simulatedSensorController.getSensorMap();
 
+//      TwistCalculator twistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), perfectFullRobotModel.getElevator());
+//      SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(perfectFullRobotModel.getElevator(), twistCalculator,
+//                                                                       0.0, false);
+
+
+      DesiredCoMAccelerationsFromRobotStealerController desiredCoMAccelerationsFromRobotStealerController =
+         new DesiredCoMAccelerationsFromRobotStealerController(perfectFullRobotModel, generator, robot, controlDT);
+
+      StateEstimatorEvaluatorFullRobotModel estimatedFullRobotModel = simulatedSensorController.getStateEstimatorEvaluatorFullRobotModel();
+
+
       ComposableStateEstimatorEvaluatorController composableStateEstimatorEvaluatorController = new ComposableStateEstimatorEvaluatorController(robot,
-                                                                                                   estimatedFullRobotModel, 
+                                                                                                   estimatedFullRobotModel,
                                                                                                    controlDT, sensorMap,
                                                                                                    desiredCoMAccelerationsFromRobotStealerController);
       robot.setController(simulatedSensorController, simTicksPerControlDT);

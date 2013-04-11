@@ -32,7 +32,7 @@ public class AngularVelocityMeasurementModelElement extends AbstractMeasurementM
    private final RigidBody measurementLink;
    private final ReferenceFrame measurementFrame;
 
-   private final TwistCalculator twistCalculator;
+   private final ControlFlowInputPort<TwistCalculator> twistCalculatorInputPort;
    private final DenseMatrix64F residual = new DenseMatrix64F(SIZE, 1);
 
    // temp stuff
@@ -44,7 +44,7 @@ public class AngularVelocityMeasurementModelElement extends AbstractMeasurementM
 
    public AngularVelocityMeasurementModelElement(ControlFlowOutputPort<FrameVector> angularVelocityStatePort, ControlFlowOutputPort<FrameVector> biasStatePort,
            ControlFlowInputPort<Vector3d> angularVelocityMeasurementInputPort, RigidBody orientationEstimationLink, ReferenceFrame estimationFrame,
-           RigidBody measurementLink, ReferenceFrame measurementFrame, TwistCalculator twistCalculator, String name, YoVariableRegistry registry)
+           RigidBody measurementLink, ReferenceFrame measurementFrame, ControlFlowInputPort<TwistCalculator> twistCalculatorInputPort, String name, YoVariableRegistry registry)
    {
       super(angularVelocityMeasurementInputPort, SIZE, name, registry);
       this.angularVelocityStatePort = angularVelocityStatePort;
@@ -54,7 +54,7 @@ public class AngularVelocityMeasurementModelElement extends AbstractMeasurementM
       this.estimationFrame = estimationFrame;
       this.measurementLink = measurementLink;
       this.measurementFrame = measurementFrame;
-      this.twistCalculator = twistCalculator;
+      this.twistCalculatorInputPort = twistCalculatorInputPort;
       this.angularVelocityResidual = new FrameVector(measurementFrame);
 
       outputMatrixBlocks.put(angularVelocityStatePort, new DenseMatrix64F(SIZE, SIZE));
@@ -84,6 +84,8 @@ public class AngularVelocityMeasurementModelElement extends AbstractMeasurementM
    public DenseMatrix64F computeResidual()
    {
       Vector3d measuredAngularVelocityVector3d = angularVelocityMeasurementInputPort.getData();
+      TwistCalculator twistCalculator = twistCalculatorInputPort.getData();
+      
       twistCalculator.packRelativeTwist(tempTwist, orientationEstimationLink, measurementLink);
       tempTwist.packAngularPart(relativeAngularVelocity);
       relativeAngularVelocity.changeFrame(measurementFrame);

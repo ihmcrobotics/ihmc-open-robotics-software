@@ -10,6 +10,7 @@ import javax.vecmath.Vector3d;
 import org.junit.Test;
 
 import us.ihmc.controlFlow.ControlFlowElement;
+import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.controlFlow.NullControlFlowElement;
 import us.ihmc.utilities.RandomTools;
@@ -51,8 +52,6 @@ public class CenterOfMassBasedFullRobotModelUpdaterTest
 
       ControlFlowElement controlFlowElement = new NullControlFlowElement();
 
-      TwistCalculator twistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), elevator);
-
       ControlFlowOutputPort<FramePoint> centerOfMassPositionPort = new ControlFlowOutputPort<FramePoint>(controlFlowElement);
       ControlFlowOutputPort<FrameVector> centerOfMassVelocityPort = new ControlFlowOutputPort<FrameVector>(controlFlowElement);
       ControlFlowOutputPort<FrameVector> centerOfMassAccelerationPort = new ControlFlowOutputPort<FrameVector>(controlFlowElement);
@@ -61,8 +60,15 @@ public class CenterOfMassBasedFullRobotModelUpdaterTest
       ControlFlowOutputPort<FrameVector> angularVelocityPort = new ControlFlowOutputPort<FrameVector>(controlFlowElement);
       ControlFlowOutputPort<FrameVector> angularAccelerationPort = new ControlFlowOutputPort<FrameVector>(controlFlowElement);
 
+      TwistCalculator twistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), elevator);
+      ControlFlowInputPort<TwistCalculator> twistCalculatorInputPort = new ControlFlowInputPort<TwistCalculator>(controlFlowElement);
+      twistCalculatorInputPort.setData(twistCalculator);
+      
       SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(elevator, twistCalculator, 0.0, false);
-      CenterOfMassBasedFullRobotModelUpdater fullRobotModelUpdater = new CenterOfMassBasedFullRobotModelUpdater(twistCalculator, spatialAccelerationCalculator,
+      ControlFlowInputPort<SpatialAccelerationCalculator> spatialAccelerationCalculatorInputPort = new ControlFlowInputPort<SpatialAccelerationCalculator>(controlFlowElement);
+      spatialAccelerationCalculatorInputPort.setData(spatialAccelerationCalculator);
+      
+      CenterOfMassBasedFullRobotModelUpdater fullRobotModelUpdater = new CenterOfMassBasedFullRobotModelUpdater(twistCalculatorInputPort, spatialAccelerationCalculatorInputPort,
                                                                         centerOfMassPositionPort, centerOfMassVelocityPort, centerOfMassAccelerationPort,
                                                                         orientationPort, angularVelocityPort, angularAccelerationPort, estimationLink,
                                                                         estimationFrame, rootJoint);

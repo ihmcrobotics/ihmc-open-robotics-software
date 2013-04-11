@@ -47,13 +47,16 @@ public class AngularVelocityMeasurementModelElementTest
       ControlFlowOutputPort<FrameVector> angularVelocityStatePort = new ControlFlowOutputPort<FrameVector>(controlFlowElement);
       ControlFlowOutputPort<FrameVector> biasStatePort = new ControlFlowOutputPort<FrameVector>(controlFlowElement);
       ControlFlowInputPort<Vector3d> angularVelocityMeasurementInputPort = new ControlFlowInputPort<Vector3d>(controlFlowElement);
+      ControlFlowInputPort<TwistCalculator> twistCalculatorInputPort = new ControlFlowInputPort<TwistCalculator>(controlFlowElement);
 
       TwistCalculator twistCalculator = new TwistCalculator(elevator.getBodyFixedFrame(), randomFloatingChain.getElevator());
+      twistCalculatorInputPort.setData(twistCalculator);
+      
       String name = "test";
       YoVariableRegistry registry = new YoVariableRegistry(name);
       AngularVelocityMeasurementModelElement modelElement = new AngularVelocityMeasurementModelElement(angularVelocityStatePort, biasStatePort,
                                                                angularVelocityMeasurementInputPort, estimationLink, estimationFrame, measurementLink,
-                                                               measurementFrame, twistCalculator, name, registry);
+                                                               measurementFrame, twistCalculatorInputPort, name, registry);
 
       randomFloatingChain.setRandomPositionsAndVelocities(random);
       twistCalculator.compute();
