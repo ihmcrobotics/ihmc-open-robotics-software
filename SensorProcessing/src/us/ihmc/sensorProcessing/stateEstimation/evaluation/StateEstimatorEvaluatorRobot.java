@@ -228,11 +228,6 @@ public class StateEstimatorEvaluatorRobot extends Robot
       return rootJoint;
    }
 
-   public ArrayList<IMUMount> getIMUMounts()
-   {
-      return imuMounts;
-   }
-
    public ArrayList<KinematicPoint> getVelocityPoints()
    {
       return velocityPoints;
