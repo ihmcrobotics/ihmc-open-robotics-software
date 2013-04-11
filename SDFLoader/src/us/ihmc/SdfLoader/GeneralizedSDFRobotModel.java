@@ -43,7 +43,10 @@ public class GeneralizedSDFRobotModel implements GraphicsObjectsHolder
       {
          for (SDFJoint sdfJoint : sdfJoints)
          {
-            joints.put(sdfJoint.getName(), new SDFJointHolder(sdfJoint, links.get(sdfJoint.getParent()), links.get(sdfJoint.getChild())));
+            String parent = sdfJoint.getParent().getLinkName();
+            String child = sdfJoint.getChild().getLinkName();
+            
+            joints.put(sdfJoint.getName(), new SDFJointHolder(sdfJoint, links.get(parent), links.get(child)));
          }
       }
 

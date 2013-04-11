@@ -15,7 +15,7 @@ public class DRCConfigParameters
    public static final String ROS_MASTER_URI = "http://" + GAZEBO_HOST + ":11311";
    
    public static final boolean SHOW_BANDWIDTH_DIALOG = false;
-   public static final boolean USE_QUAD_TREE = false;
+   public static final boolean USE_QUAD_TREE = true;
    
    
    // Set to simulate one tick delay between, as it will be in Gazebo. This will also run the controller in a different thread!

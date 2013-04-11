@@ -13,8 +13,8 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor;
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor.Camera;
-import us.ihmc.SdfLoader.xmlDescription.SDFSensor.Plugin;
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor.Ray;
+import us.ihmc.SdfLoader.xmlDescription.SDFSensor.Ray.Noise;
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor.Ray.Range;
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor.Ray.Scan;
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor.Ray.Scan.HorizontalScan;
@@ -403,19 +403,25 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
                   int sdfSamples = Integer.parseInt(sdfHorizontalScan.getSamples());
                   double sdfRangeResolution = Double.parseDouble(sdfRay.getRange().getResolution());
 
-                  double sdfGaussianNoise = 0.0;
+                  
                   boolean sdfAlwaysOn = true;
+                  
+                  double sdfGaussianStdDev = 0.0;
+                  double sdfGaussianMean = 0.0;
                   double sdfUpdateRate = Double.parseDouble(sensor.getUpdateRate());
-                  Plugin sdfLidarPlugin = sensor.getPlugin();
-                  if (sdfLidarPlugin != null)
+                  
+                  Noise sdfNoise = sdfRay.getNoise();
+                  if (sdfNoise != null)
                   {
-                     sdfGaussianNoise = Double.parseDouble(sdfLidarPlugin.getGaussianNoise());
-                     sdfAlwaysOn = Boolean.parseBoolean(sdfLidarPlugin.getAlwaysOn());
-                     sdfUpdateRate = Double.parseDouble(sdfLidarPlugin.getUpdateRate());
-                  }
-                  else
-                  {
-                     System.err.println("SDFRobot: lidar does not have associated plugin in sensor " + sensor.getName() + ". Assuming zero gaussian noise.");
+                     if("gaussian".equals(sdfNoise.getType()))
+                     {
+                        sdfGaussianStdDev = Double.parseDouble(sdfNoise.getStddev());
+                        sdfGaussianMean = Double.parseDouble(sdfNoise.getMean());
+                     }
+                     else
+                     {
+                        System.err.println("Unknown noise model: " + sdfNoise.getType());
+                     }
                   }
 
                   PolarLidarScanDefinition polarDefinition = new PolarLidarScanDefinition(sdfSamples, 1, (float) sdfMaxAngle, (float) sdfMinAngle, 0.0f, 0.0f,
@@ -429,7 +435,8 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
                   offset.setZ(offset.getZ() + 0.05);
                   transform3d.setTranslation(offset);
                   SimulatedLIDARSensorNoiseParameters noiseParameters = new SimulatedLIDARSensorNoiseParameters();
-                  noiseParameters.setGaussianNoiseStandardDeviation(sdfGaussianNoise);
+                  noiseParameters.setGaussianNoiseStandardDeviation(sdfGaussianStdDev);
+                  noiseParameters.setGaussianNoiseMean(sdfGaussianMean);
 
                   SimulatedLIDARSensorLimitationParameters limitationParameters = new SimulatedLIDARSensorLimitationParameters();
                   limitationParameters.setMaxRange(sdfMaxRange);

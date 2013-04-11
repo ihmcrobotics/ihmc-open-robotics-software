@@ -1,12 +1,15 @@
 #!/bin/sh
 
+drcsimPath=/usr/share/drcsim-2.3
+gazeboPath=/usr/share/gazebo-1.6
+
 modelPath=src/us/ihmc/darpaRoboticsChallenge/models/GFE/
-cp -r /usr/share/drcsim-2.2/gazebo_models/ $modelPath
-cp -r /usr/share/drcsim-2.2/worlds $modelPath
+cp -r $drcsimPath/gazebo_models/ $modelPath
+cp -r $drcsimPath/worlds $modelPath
 cp -r ~/.gazebo/models $modelPath
 
-cp -r /usr/share/gazebo-1.5/media $modelPath/gazebo
-cp -r /usr/share/drcsim-2.2/media $modelPath/drcsim
+cp -r $gazeboPath/media $modelPath/gazebo
+cp -r $drcsimPath/media $modelPath/drcsim
 
 cp $modelPath/gazebo/media/materials/textures/road1.jpg ../SDFLoader/src/us/ihmc/SdfLoader/models
 
