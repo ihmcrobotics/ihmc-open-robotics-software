@@ -2,7 +2,6 @@ package us.ihmc.sensorProcessing.stateEstimation.evaluation;
 
 import java.util.Collection;
 
-import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
 import org.ejml.data.DenseMatrix64F;
@@ -22,8 +21,6 @@ import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.OrientationS
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.PointVelocitySensorConfiguration;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.SensorConfigurationFactory;
 import us.ihmc.utilities.math.MathTools;
-import us.ihmc.utilities.math.geometry.FrameOrientation;
-import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationCalculator;
@@ -34,10 +31,8 @@ import com.yobotics.simulationconstructionset.robotController.RobotController;
 
 public class ComposableStateEstimatorEvaluatorController implements RobotController
 {
-   private static final boolean INITIALIZE_ANGULAR_VELOCITY_ESTIMATE_TO_ACTUAL = true;    // false;
-
    private static final boolean ESTIMATE_COM = true;
-   
+
    private final double comAccelerationProcessNoiseStandardDeviation = Math.sqrt(1e-1);
    private final double angularAccelerationProcessNoiseStandardDeviation = Math.sqrt(1e-1);
 
@@ -45,9 +40,6 @@ public class ComposableStateEstimatorEvaluatorController implements RobotControl
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final JointStateFullRobotModelUpdater jointStateFullRobotModelUpdater;
-   
-   private final StateEstimatorEvaluatorFullRobotModel estimatedFullRobotModel;
    private final TwistCalculator estimatedTwistCalculator;
    private final SpatialAccelerationCalculator estimatedSpatialAccelerationCalculator;
 
@@ -56,38 +48,39 @@ public class ComposableStateEstimatorEvaluatorController implements RobotControl
 
    private final ComposableStateEstimatorEvaluatorErrorCalculator composableStateEstimatorEvaluatorErrorCalculator;
 
-   public ComposableStateEstimatorEvaluatorController(StateEstimatorEvaluatorRobot robot, 
-         StateEstimatorEvaluatorFullRobotModel estimatedFullRobotModel,
-         double controlDT,
-         SensorMap sensorMap, 
-         DesiredCoMAndAngularAccelerationOutputPortsHolder desiredCoMAndAngularAccelerationOutputPortsHolder)
+   public ComposableStateEstimatorEvaluatorController(StateEstimatorEvaluatorRobot robot, FullInverseDynamicsStructure robotStuffToEstimate, double controlDT,
+           SensorMap sensorMap, DesiredCoMAndAngularAccelerationOutputPortsHolder desiredCoMAndAngularAccelerationOutputPortsHolder)
    {
       this.gravitationalAcceleration = new Vector3d();
       robot.getGravity(gravitationalAcceleration);
-      
-      this.estimatedFullRobotModel = estimatedFullRobotModel;
-      estimatedTwistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), estimatedFullRobotModel.getElevator());
-      estimatedSpatialAccelerationCalculator = new SpatialAccelerationCalculator(estimatedFullRobotModel.getElevator(), estimatedTwistCalculator, 0.0, false);
+
+      estimatedTwistCalculator = robotStuffToEstimate.getTwistCalculator();
+      estimatedSpatialAccelerationCalculator = robotStuffToEstimate.getSpatialAccelerationCalculator();
 
       SensorConfigurationFactory SensorConfigurationFactory = new SensorConfigurationFactory(gravitationalAcceleration);
-      
-      // Sensor configurations for estimator
-      Collection<OrientationSensorConfiguration> orientationSensorConfigurations = SensorConfigurationFactory.createOrientationSensorConfigurations(sensorMap.getOrientationSensors());
 
-      Collection<AngularVelocitySensorConfiguration> angularVelocitySensorConfigurations = SensorConfigurationFactory.createAngularVelocitySensorConfigurations(sensorMap.getAngularVelocitySensors());
+      // Sensor configurations for estimator
+      Collection<OrientationSensorConfiguration> orientationSensorConfigurations =
+         SensorConfigurationFactory.createOrientationSensorConfigurations(sensorMap.getOrientationSensors());
+
+      Collection<AngularVelocitySensorConfiguration> angularVelocitySensorConfigurations =
+         SensorConfigurationFactory.createAngularVelocitySensorConfigurations(sensorMap.getAngularVelocitySensors());
 
       Collection<LinearAccelerationSensorConfiguration> linearAccelerationSensorConfigurations =
-            SensorConfigurationFactory.createLinearAccelerationSensorConfigurations(sensorMap.getLinearAccelerationSensors());
+         SensorConfigurationFactory.createLinearAccelerationSensorConfigurations(sensorMap.getLinearAccelerationSensors());
 
-      Collection<PointVelocitySensorConfiguration> pointVelocitySensorConfigurations = SensorConfigurationFactory.createPointVelocitySensorConfigurations(sensorMap.getPointVelocitySensors());
+      Collection<PointVelocitySensorConfiguration> pointVelocitySensorConfigurations =
+         SensorConfigurationFactory.createPointVelocitySensorConfigurations(sensorMap.getPointVelocitySensors());
 
       controlFlowGraph = new ControlFlowGraph();
-      jointStateFullRobotModelUpdater = new JointStateFullRobotModelUpdater(controlFlowGraph, sensorMap, estimatedTwistCalculator, estimatedSpatialAccelerationCalculator);
-      
+      JointStateFullRobotModelUpdater jointStateFullRobotModelUpdater = new JointStateFullRobotModelUpdater(controlFlowGraph, sensorMap,
+                                                                           estimatedTwistCalculator, estimatedSpatialAccelerationCalculator);
+
       ControlFlowOutputPort<TwistCalculator> twistCalculatorOutputPort = jointStateFullRobotModelUpdater.getTwistCalculatorOutputPort();
-      ControlFlowOutputPort<SpatialAccelerationCalculator> spatialAccelerationCalculatorOutputPort = jointStateFullRobotModelUpdater.getSpatialAccelerationCalculatorOutputPort();
-      
-      RigidBody estimationLink = estimatedFullRobotModel.getRootBody();
+      ControlFlowOutputPort<SpatialAccelerationCalculator> spatialAccelerationCalculatorOutputPort =
+         jointStateFullRobotModelUpdater.getSpatialAccelerationCalculatorOutputPort();
+
+      RigidBody estimationLink = robotStuffToEstimate.getEstimationLink();
       ReferenceFrame estimationFrame = estimationLink.getParentJoint().getFrameAfterJoint();
 
       DenseMatrix64F angularAccelerationNoiseCovariance = createDiagonalCovarianceMatrix(angularAccelerationProcessNoiseStandardDeviation, 3);
@@ -98,7 +91,7 @@ public class ComposableStateEstimatorEvaluatorController implements RobotControl
 
          ComposableOrientationAndCoMEstimatorCreator orientationEstimatorCreator =
             new ComposableOrientationAndCoMEstimatorCreator(angularAccelerationNoiseCovariance, comAccelerationNoiseCovariance, estimationLink,
-                  twistCalculatorOutputPort, spatialAccelerationCalculatorOutputPort);
+               twistCalculatorOutputPort, spatialAccelerationCalculatorOutputPort);
          orientationEstimatorCreator.addOrientationSensorConfigurations(orientationSensorConfigurations);
          orientationEstimatorCreator.addAngularVelocitySensorConfigurations(angularVelocitySensorConfigurations);
          orientationEstimatorCreator.addLinearAccelerationSensorConfigurations(linearAccelerationSensorConfigurations);
@@ -106,7 +99,7 @@ public class ComposableStateEstimatorEvaluatorController implements RobotControl
 
          updateInternalState();
          orientationEstimator = orientationEstimatorCreator.createOrientationEstimator(controlFlowGraph, controlDT,
-                 estimatedFullRobotModel.getRootInverseDynamicsJoint(), estimationLink, estimationFrame, 
+                 robotStuffToEstimate.getRootInverseDynamicsJoint(), estimationLink, estimationFrame,
                  desiredCoMAndAngularAccelerationOutputPortsHolder.getDesiredAngularAccelerationOutputPort(),
                  desiredCoMAndAngularAccelerationOutputPortsHolder.getDesiredCenterOfMassAccelerationOutputPort(), registry);
       }
@@ -118,37 +111,15 @@ public class ComposableStateEstimatorEvaluatorController implements RobotControl
          orientationEstimatorCreator.addAngularVelocitySensorConfigurations(angularVelocitySensorConfigurations);
 
          orientationEstimator = orientationEstimatorCreator.createOrientationEstimator(controlFlowGraph, controlDT, estimationFrame,
-               desiredCoMAndAngularAccelerationOutputPortsHolder.getDesiredAngularAccelerationOutputPort(), registry);
+                 desiredCoMAndAngularAccelerationOutputPortsHolder.getDesiredAngularAccelerationOutputPort(), registry);
       }
 
       controlFlowGraph.initializeAfterConnections();
 
-      if (INITIALIZE_ANGULAR_VELOCITY_ESTIMATE_TO_ACTUAL)
-      {
-         estimatedFullRobotModel.updateBasedOnRobot(true);
-
-         Matrix3d rotationMatrix = new Matrix3d();
-         robot.getRootJoint().getRotationToWorld(rotationMatrix);
-         Vector3d angularVelocityInBody = robot.getRootJoint().getAngularVelocityInBody();
-
-         FrameOrientation estimatedOrientation = orientationEstimator.getEstimatedOrientation();
-         estimatedOrientation.set(rotationMatrix);
-         orientationEstimator.setEstimatedOrientation(estimatedOrientation);
-
-         FrameVector estimatedAngularVelocity = orientationEstimator.getEstimatedAngularVelocity();
-         estimatedAngularVelocity.set(angularVelocityInBody);
-         orientationEstimator.setEstimatedAngularVelocity(estimatedAngularVelocity);
-
-         // TODO: This wasn't doing anything.
-         // DenseMatrix64F x = orientationEstimator.getState();
-         // MatrixTools.insertTuple3dIntoEJMLVector(angularVelocityInBody, x, 3);
-         // orientationEstimator.setState(x, orientationEstimator.getCovariance());
-      }
-
       this.composableStateEstimatorEvaluatorErrorCalculator = new ComposableStateEstimatorEvaluatorErrorCalculator(robot, orientationEstimator, registry);
-   
+
       controlFlowGraph.visualize();
-   
+
    }
 
 
@@ -178,35 +149,12 @@ public class ComposableStateEstimatorEvaluatorController implements RobotControl
       controlFlowGraph.startComputation();
       controlFlowGraph.waitUntilComputationIsDone();
 
-      //TODO: Get jointStateFullRobotModelUpdater working!
-      
-      //+++ We want this to happen right after the joint angles and velocities are read. 
-      // But it has to happen after controlFlowGraph does it's computation.
-      // It really should be part of the controlFlowGraph.
-      // This is one example of where you want to do some of the controlFlowGraph, then
-      // run some stuff, then do the rest of the controlFlowGraph!
-      
-//      jointStateFullRobotModelUpdater.run();
-
-      if (!ESTIMATE_COM)    // this is being done inside the state estimator for the CoM estimator
-      {
-         estimatedFullRobotModel.updateBasedOnEstimator(orientationEstimator);
-         estimatedTwistCalculator.compute();
-      }
-
       composableStateEstimatorEvaluatorErrorCalculator.computeErrors();
    }
 
    private void updateInternalState()
    {
-      /*
-       * supersense joint positions and velocities and update twist
-       * calculator and spatial accel calculator based on this data TODO:
-       * need a class that does this based on sensors
-       */      
-      estimatedFullRobotModel.updateBasedOnRobot(false);
-      
-      //TODO: Not sure if the following two should be here...
+      // TODO: Not sure if the following two should be here...
       estimatedTwistCalculator.compute();
       estimatedSpatialAccelerationCalculator.compute();
    }
@@ -219,5 +167,11 @@ public class ComposableStateEstimatorEvaluatorController implements RobotControl
 
       return orientationCovarianceMatrix;
    }
-   
+
+
+   public OrientationEstimator getOrientationEstimator()
+   {
+      return orientationEstimator;      
+   }
+
 }
