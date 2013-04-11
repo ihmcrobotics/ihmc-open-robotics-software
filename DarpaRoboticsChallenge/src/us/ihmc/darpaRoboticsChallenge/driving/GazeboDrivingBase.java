@@ -241,9 +241,7 @@ public abstract class GazeboDrivingBase extends AbstractNodeMain
 	}
 
 
-	protected void processHandBreak( boolean engaged ) {
-
-		double val = engaged ? 1 : 0;
+	protected void processHandBreak( double val ) {
 		handBrakeCommand.setData(val);
 		handBrakeCommandPublisher.publish(handBrakeCommand);
 	}
