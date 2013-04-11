@@ -19,7 +19,7 @@ import us.ihmc.commonWalkingControlModules.calculators.GainCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.ChestOrientationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.DegenerateOrientationControlModule;
-import us.ihmc.commonWalkingControlModules.controlModules.EndEffectorControlModule;
+import us.ihmc.commonWalkingControlModules.controlModules.endEffector.EndEffectorControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.GroundReactionWrenchDistributor;
 import us.ihmc.commonWalkingControlModules.controlModules.head.DesiredHeadOrientationProvider;
 import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationControlModule;
@@ -1402,20 +1402,14 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       setContactState(contactableBody, contactPoints2d);
    }
 
-   private List<FramePoint2d> getContactPoints2d(ContactablePlaneBody contactableBody, List<FramePoint> contactPoints)
-   {
-      List<FramePoint2d> contactPoints2d = new ArrayList<FramePoint2d>(contactPoints.size());
-      for (FramePoint contactPoint : contactPoints)
-      {
-         contactPoint.changeFrame(contactableBody.getPlaneFrame());
-         contactPoints2d.add(contactPoint.toFramePoint2d());
-      }
-      return contactPoints2d;
-   }
-
    private void setFlatFootContactState(ContactablePlaneBody contactableBody)
    {
       setContactState(contactableBody, contactableBody.getContactPoints2d());
+   }
+
+   private void setContactStateForSwing(ContactablePlaneBody contactableBody)
+   {
+      setContactState(contactableBody, new ArrayList<FramePoint2d>());
    }
 
    private void setContactState(ContactablePlaneBody contactableBody, List<FramePoint2d> contactPoints)
@@ -1436,9 +1430,15 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       }
    }
 
-   private void setContactStateForSwing(ContactablePlaneBody contactableBody)
+   private List<FramePoint2d> getContactPoints2d(ContactablePlaneBody contactableBody, List<FramePoint> contactPoints)
    {
-      setContactState(contactableBody, new ArrayList<FramePoint2d>());
+      List<FramePoint2d> contactPoints2d = new ArrayList<FramePoint2d>(contactPoints.size());
+      for (FramePoint contactPoint : contactPoints)
+      {
+         contactPoint.changeFrame(contactableBody.getPlaneFrame());
+         contactPoints2d.add(contactPoint.toFramePoint2d());
+      }
+      return contactPoints2d;
    }
 
    private List<FramePoint> getContactPointsForWalkingOnToes(ContactablePlaneBody contactableBody)
