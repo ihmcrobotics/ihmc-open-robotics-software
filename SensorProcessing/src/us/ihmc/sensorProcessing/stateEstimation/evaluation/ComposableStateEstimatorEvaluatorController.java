@@ -16,23 +16,18 @@ public class ComposableStateEstimatorEvaluatorController implements RobotControl
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final FullInverseDynamicsStructure inverseDynamicsStructure;
-
    private final ControlFlowGraph controlFlowGraph;
 
    private final ComposableStateEstimatorEvaluatorErrorCalculator composableStateEstimatorEvaluatorErrorCalculator;
 
-   public ComposableStateEstimatorEvaluatorController(SensorAndEstimatorAssembler sensorAndEstimatorAssembler, StateEstimatorEvaluatorRobot robot,
-           FullInverseDynamicsStructure inverseDynamicsStructure, double controlDT, SensorMap sensorMap,
+   public ComposableStateEstimatorEvaluatorController(ControlFlowGraph controlFlowGraph, OrientationEstimator orientationEstimator,
+           StateEstimatorEvaluatorRobot robot, double controlDT, SensorMap sensorMap,
            DesiredCoMAndAngularAccelerationOutputPortsHolder desiredCoMAndAngularAccelerationOutputPortsHolder)
    {
       this.gravitationalAcceleration = new Vector3d();
       robot.getGravity(gravitationalAcceleration);
 
-      this.inverseDynamicsStructure = inverseDynamicsStructure;
-
-      this.controlFlowGraph = sensorAndEstimatorAssembler.getControlFlowGraph();
-      OrientationEstimator orientationEstimator = sensorAndEstimatorAssembler.getOrientationEstimator();
+      this.controlFlowGraph = controlFlowGraph;
 
       this.composableStateEstimatorEvaluatorErrorCalculator = new ComposableStateEstimatorEvaluatorErrorCalculator(robot, orientationEstimator, registry);
    }
@@ -59,9 +54,6 @@ public class ComposableStateEstimatorEvaluatorController implements RobotControl
 
    public void doControl()
    {
-      // TODO: Not sure if this should be done here or elsewhere...
-      inverseDynamicsStructure.updateInternalState();
-
       controlFlowGraph.startComputation();
       controlFlowGraph.waitUntilComputationIsDone();
 

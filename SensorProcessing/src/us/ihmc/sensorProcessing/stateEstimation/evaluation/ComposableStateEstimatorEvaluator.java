@@ -3,10 +3,12 @@ package us.ihmc.sensorProcessing.stateEstimation.evaluation;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.controlFlow.ControlFlowGraph;
 import us.ihmc.sensorProcessing.simulatedSensors.InverseDynamicsJointsFromSCSRobotGenerator;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorMap;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorMapFromRobotFactory;
 import us.ihmc.sensorProcessing.stateEstimation.DesiredCoMAccelerationsFromRobotStealerController;
+import us.ihmc.sensorProcessing.stateEstimation.DesiredCoMAndAngularAccelerationOutputPortsHolder;
 import us.ihmc.sensorProcessing.stateEstimation.OrientationEstimator;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -37,11 +39,11 @@ public class ComposableStateEstimatorEvaluator
       InverseDynamicsJointsFromSCSRobotGenerator generator = new InverseDynamicsJointsFromSCSRobotGenerator(robot);
       StateEstimatorEvaluatorFullRobotModel perfectFullRobotModel = new StateEstimatorEvaluatorFullRobotModel(generator, robot, robot.getIMUMounts(),
                                                                        robot.getVelocityPoints());
-      
+
       SensorMapFromRobotFactory sensorMapFromRobotFactory = new SensorMapFromRobotFactory(generator, robot, controlDT, robot.getIMUMounts(),
-            robot.getVelocityPoints(), registry);
+                                                               robot.getVelocityPoints(), registry);
       SensorMap sensorMap = sensorMapFromRobotFactory.getSensorMap();
-      
+
       DesiredCoMAccelerationsFromRobotStealerController desiredCoMAccelerationsFromRobotStealerController =
          new DesiredCoMAccelerationsFromRobotStealerController(perfectFullRobotModel, generator, robot, controlDT);
 
@@ -51,21 +53,24 @@ public class ComposableStateEstimatorEvaluator
 
       FullInverseDynamicsStructure inverseDynamicsStructure = new FullInverseDynamicsStructure(elevator, estimationLink, rootInverseDynamicsJoint);
 
-      
       Vector3d gravitationalAcceleration = new Vector3d();
       robot.getGravity(gravitationalAcceleration);
-      SensorAndEstimatorAssembler sensorAndEstimatorAssembler = new SensorAndEstimatorAssembler(gravitationalAcceleration , inverseDynamicsStructure, controlDT, sensorMap, desiredCoMAccelerationsFromRobotStealerController, registry);
-            
+      DesiredCoMAndAngularAccelerationOutputPortsHolder desiredCoMAndAngularAccelerationOutputPortsHolder = desiredCoMAccelerationsFromRobotStealerController;
+     
+      // The following few lines are what you need to do to get the state estimator working with a robot.
+      // You also need to either add the controlFlowGraph to another one, or make sure to run it's startComputation method at the right time:
+      SensorAndEstimatorAssembler sensorAndEstimatorAssembler = new SensorAndEstimatorAssembler(gravitationalAcceleration, inverseDynamicsStructure, controlDT,
+                                                                   sensorMap, desiredCoMAndAngularAccelerationOutputPortsHolder, registry);
+
+      ControlFlowGraph controlFlowGraph = sensorAndEstimatorAssembler.getControlFlowGraph();
+      OrientationEstimator orientationEstimator = sensorAndEstimatorAssembler.getOrientationEstimator();
       
-      ComposableStateEstimatorEvaluatorController composableStateEstimatorEvaluatorController = new ComposableStateEstimatorEvaluatorController(
-            sensorAndEstimatorAssembler,
-            robot,
-            inverseDynamicsStructure, controlDT, sensorMap,
-                                                                                                   desiredCoMAccelerationsFromRobotStealerController);
+      
+      ComposableStateEstimatorEvaluatorController composableStateEstimatorEvaluatorController =
+         new ComposableStateEstimatorEvaluatorController(controlFlowGraph, orientationEstimator, robot, controlDT, sensorMap,
+            desiredCoMAccelerationsFromRobotStealerController);
       robot.setController(desiredCoMAccelerationsFromRobotStealerController, simTicksPerControlDT);
       robot.setController(composableStateEstimatorEvaluatorController, simTicksPerControlDT);
-
-      OrientationEstimator orientationEstimator = sensorAndEstimatorAssembler.getOrientationEstimator();
 
       if (INITIALIZE_ANGULAR_VELOCITY_ESTIMATE_TO_ACTUAL)
       {

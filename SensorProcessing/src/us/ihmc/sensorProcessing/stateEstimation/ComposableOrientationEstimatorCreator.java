@@ -14,6 +14,7 @@ import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.sensorProcessing.controlFlowPorts.YoFrameQuaternionControlFlowOutputPort;
 import us.ihmc.sensorProcessing.controlFlowPorts.YoFrameVectorControlFlowOutputPort;
+import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.sensorProcessing.stateEstimation.measurmentModelElements.AngularVelocityMeasurementModelElement;
 import us.ihmc.sensorProcessing.stateEstimation.measurmentModelElements.OrientationMeasurementModelElement;
 import us.ihmc.sensorProcessing.stateEstimation.processModelElements.AngularVelocityProcessModelElement;
@@ -27,7 +28,6 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.RigidBody;
-import us.ihmc.utilities.screwTheory.TwistCalculator;
 
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
@@ -36,7 +36,7 @@ public class ComposableOrientationEstimatorCreator
    private static final int VECTOR3D_LENGTH = 3;
 
    private final RigidBody orientationEstimationLink;
-   private final ControlFlowOutputPort<TwistCalculator> twistCalculatorOutputPort;
+   private final ControlFlowOutputPort<FullInverseDynamicsStructure> inverseDynamicsStructureOutputPort;
 
    private final DenseMatrix64F angularAccelerationNoiseCovariance;
 
@@ -44,11 +44,11 @@ public class ComposableOrientationEstimatorCreator
    private final List<AngularVelocitySensorConfiguration> angularVelocitySensorConfigurations = new ArrayList<AngularVelocitySensorConfiguration>();
 
    public ComposableOrientationEstimatorCreator(DenseMatrix64F angularAccelerationNoiseCovariance, RigidBody orientationEstimationLink,
-           ControlFlowOutputPort<TwistCalculator> twistCalculatorOutputPort)
+           ControlFlowOutputPort<FullInverseDynamicsStructure> inverseDynamicsStructureOutputPort)
    {
       this.angularAccelerationNoiseCovariance = angularAccelerationNoiseCovariance;
       this.orientationEstimationLink = orientationEstimationLink;
-      this.twistCalculatorOutputPort = twistCalculatorOutputPort;
+      this.inverseDynamicsStructureOutputPort = inverseDynamicsStructureOutputPort;
    }
 
    public void addOrientationSensorConfigurations(Collection<OrientationSensorConfiguration> orientationSensorConfigurations)
@@ -88,8 +88,8 @@ public class ComposableOrientationEstimatorCreator
       private final ControlFlowOutputPort<FrameOrientation> orientationPort;
       private final ControlFlowOutputPort<FrameVector> angularVelocityPort;
 
-      private final ControlFlowInputPort<TwistCalculator> twistCalculatorInputPort;
- 
+      private final ControlFlowInputPort<FullInverseDynamicsStructure> inverseDynamicsStructureInputPort;
+
       public ComposableOrientationEstimator(String name, double controlDT, ReferenceFrame estimationFrame, ControlFlowGraph controlFlowGraph,
               ControlFlowOutputPort<FrameVector> angularAccelerationOutputPort, YoVariableRegistry parentRegistry)
       {
@@ -111,9 +111,9 @@ public class ComposableOrientationEstimatorCreator
             addAngularVelocitySensor(estimationFrame, controlFlowGraph, angularVelocitySensorConfiguration);
          }
 
-         this.twistCalculatorInputPort = createInputPort();
-         controlFlowGraph.connectElements(twistCalculatorOutputPort, twistCalculatorInputPort);
-         
+         this.inverseDynamicsStructureInputPort = createInputPort();
+         controlFlowGraph.connectElements(inverseDynamicsStructureOutputPort, inverseDynamicsStructureInputPort);
+
          initialize();
       }
 
@@ -176,8 +176,8 @@ public class ComposableOrientationEstimatorCreator
 
          AngularVelocityMeasurementModelElement angularVelocityMeasurementModel = new AngularVelocityMeasurementModelElement(angularVelocityPort, biasPort,
                                                                                      angularVelocityMeasurementPort, orientationEstimationLink,
-                                                                                     estimationFrame, measurementLink, measurementFrame, twistCalculatorInputPort, name,
-                                                                                     registry);
+                                                                                     estimationFrame, measurementLink, measurementFrame,
+                                                                                     inverseDynamicsStructureInputPort, name, registry);
          angularVelocityMeasurementModel.setNoiseCovariance(angularVelocityNoiseCovariance);
 
          addMeasurementModelElement(angularVelocityMeasurementModel);
