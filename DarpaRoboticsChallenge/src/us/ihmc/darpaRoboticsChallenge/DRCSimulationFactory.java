@@ -39,7 +39,6 @@ import us.ihmc.sensorProcessing.stateEstimation.OrientationEstimator;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.ComposableStateEstimatorEvaluatorController;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.SensorAndEstimatorAssembler;
-import us.ihmc.sensorProcessing.stateEstimation.evaluation.StateEstimatorEvaluatorFullRobotModel;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.net.KryoObjectServer;
 import us.ihmc.utilities.net.ObjectCommunicator;
@@ -230,15 +229,12 @@ public class DRCSimulationFactory
       ArrayList<IMUMount> imuMounts = new ArrayList<IMUMount>();
       simulatedRobot.getIMUMounts(imuMounts);
       ArrayList<KinematicPoint> velocityPoints = new ArrayList<KinematicPoint>(); //simulatedRobot.getVelocityPoints();
-      
-      StateEstimatorEvaluatorFullRobotModel perfectFullRobotModel = new StateEstimatorEvaluatorFullRobotModel(generator, simulatedRobot, imuMounts,
-            velocityPoints);
             
       SensorMapFromRobotFactory sensorMapFromRobotFactory = new SensorMapFromRobotFactory(generator, simulatedRobot, controlDT, imuMounts,
             velocityPoints, registry);
       SensorMap sensorMap = sensorMapFromRobotFactory.getSensorMap();
 
-      FullInverseDynamicsStructure inverseDynamicsStructure = perfectFullRobotModel.getInverseDynamicsStructure();
+      FullInverseDynamicsStructure inverseDynamicsStructure = generator.getInverseDynamicsStructure();
 
       Vector3d gravitationalAcceleration = new Vector3d();
       simulatedRobot.getGravity(gravitationalAcceleration);

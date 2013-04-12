@@ -43,8 +43,6 @@ public class ComposableStateEstimatorEvaluator
       InverseDynamicsJointsFromSCSRobotGenerator generator = new InverseDynamicsJointsFromSCSRobotGenerator(robot);
       ArrayList<IMUMount> imuMounts = new ArrayList<IMUMount>();
       robot.getIMUMounts(imuMounts);
-      StateEstimatorEvaluatorFullRobotModel perfectFullRobotModel = new StateEstimatorEvaluatorFullRobotModel(generator, robot, imuMounts,
-                                                                       robot.getVelocityPoints());
 
       SensorMapFromRobotFactory sensorMapFromRobotFactory = new SensorMapFromRobotFactory(generator, robot, controlDT, imuMounts,
                                                                robot.getVelocityPoints(), registry);
@@ -57,12 +55,7 @@ public class ComposableStateEstimatorEvaluator
          new DesiredCoMAccelerationsFromRobotStealerController(generator, estimationJoint , controlDT);
 
       robot.update();
-
-      RigidBody estimationLink = perfectFullRobotModel.getRootBody();
-      SixDoFJoint rootInverseDynamicsJoint = perfectFullRobotModel.getRootInverseDynamicsJoint();
-      RigidBody elevator = perfectFullRobotModel.getElevator();
-
-      FullInverseDynamicsStructure inverseDynamicsStructure = new FullInverseDynamicsStructure(elevator, estimationLink, rootInverseDynamicsJoint);
+      FullInverseDynamicsStructure inverseDynamicsStructure = generator.getInverseDynamicsStructure();
 
       Vector3d gravitationalAcceleration = new Vector3d();
       robot.getGravity(gravitationalAcceleration);
