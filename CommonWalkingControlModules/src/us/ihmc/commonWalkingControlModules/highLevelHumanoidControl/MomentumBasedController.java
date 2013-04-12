@@ -84,6 +84,7 @@ public abstract class MomentumBasedController implements RobotController
    protected final HashMap<ContactablePlaneBody, YoFramePoint> filteredCentersOfPressureWorld = new HashMap<ContactablePlaneBody, YoFramePoint>();
    private final HashMap<ContactablePlaneBody, YoFramePoint2d> unfilteredCentersOfPressure2d = new HashMap<ContactablePlaneBody, YoFramePoint2d>();
    private final HashMap<ContactablePlaneBody, AlphaFilteredYoFramePoint2d> filteredCentersOfPressure2d = new HashMap<ContactablePlaneBody, AlphaFilteredYoFramePoint2d>();
+   private final HashMap<ContactablePlaneBody, DoubleYoVariable> groundReactionForceMagnitudes = new HashMap<ContactablePlaneBody, DoubleYoVariable>();
    private final DoubleYoVariable alphaCoP = new DoubleYoVariable("alphaCoP", registry);
    private final HashMap<ContactablePlaneBody, BooleanYoVariable> copFilterResetRequests = new HashMap<ContactablePlaneBody, BooleanYoVariable>();
    protected final LinkedHashMap<ContactablePlaneBody, YoPlaneContactState> contactStates = new LinkedHashMap<ContactablePlaneBody, YoPlaneContactState>();
@@ -187,6 +188,9 @@ public abstract class MomentumBasedController implements RobotController
 
          AlphaFilteredYoFramePoint2d filteredCoP2d = AlphaFilteredYoFramePoint2d.createAlphaFilteredYoFramePoint2d(copName + "2dFilt", "", registry, alphaCoP, cop2d);
          filteredCentersOfPressure2d.put(contactableBody, filteredCoP2d);
+
+         DoubleYoVariable forceMagnitude = new DoubleYoVariable(contactableBody.getRigidBody().getName() + "ForceMagnitude", registry);
+         groundReactionForceMagnitudes.put(contactableBody, forceMagnitude);
 
          YoFramePoint cop = new YoFramePoint(copName, worldFrame, registry);
          filteredCentersOfPressureWorld.put(contactableBody, cop);
@@ -331,6 +335,7 @@ public abstract class MomentumBasedController implements RobotController
             double normalTorque = distributedWrenches.getNormalTorque(contactState);
 
             unfilteredCentersOfPressure2d.get(contactablePlaneBody).set(cop);
+            groundReactionForceMagnitudes.get(contactablePlaneBody).set(force.length());
 
             AlphaFilteredYoFramePoint2d filteredCoP2d = filteredCentersOfPressure2d.get(contactablePlaneBody);
             BooleanYoVariable copFilterResetRequest = copFilterResetRequests.get(contactablePlaneBody);
@@ -357,6 +362,7 @@ public abstract class MomentumBasedController implements RobotController
          {
             resetCoPFilter(contactablePlaneBody);
             filteredCentersOfPressureWorld.get(contactablePlaneBody).setToNaN();
+            groundReactionForceMagnitudes.get(contactablePlaneBody).set(0.0);
          }
       }
 

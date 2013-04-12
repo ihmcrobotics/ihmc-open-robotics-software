@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.calculators;
 
 import us.ihmc.utilities.math.geometry.FramePoint2d;
+import us.ihmc.utilities.math.geometry.FrameVector2d;
 
 public class EquivalentConstantCoPCalculator
 {
@@ -54,7 +55,22 @@ public class EquivalentConstantCoPCalculator
 
       return new FramePoint2d(icp.getReferenceFrame(), x, y);
    }
-   
+
+   public static FramePoint2d computeIntermediateICPWithConstantCMP(FramePoint2d icpInitial, FramePoint2d icpFinal, double totalTime, double intermediateTime, double omega0)
+   {
+      double expT = Math.exp(omega0 * intermediateTime);
+      double expTf = Math.exp(omega0 * totalTime);
+      double parameter = (expT - 1.0) / (expTf - 1.0);
+
+      FrameVector2d offset = new FrameVector2d(icpFinal);
+      offset.sub(icpInitial);
+
+      offset.scale(parameter);
+      FramePoint2d ret = new FramePoint2d(icpInitial);
+      ret.add(offset);
+      return ret;
+   }
+
    public static double computeICPMotionWithConstantCMP(double currentCapturePoint, double cop, double time, double omega0)
    {
       return (currentCapturePoint - cop) * Math.exp(omega0 * time) + cop;
