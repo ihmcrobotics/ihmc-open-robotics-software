@@ -6,7 +6,7 @@ public class DRCDashboardTypes {
 	
 	public enum DRCTask
 	{
-		QUAL1, QUAL2, QUAL3, QUAL4, VRC1, VRC2, VRC3, DRIVING_TASK1, DRIVING_TEST_TRACK;
+		QUAL1, QUAL2, QUAL3, QUAL4, VRC1, VRC2, VRC3, DRIVING_TASK1, DRIVING_TASK1_WITH_EXTERNAL_CAMS, DRIVING_TEST_TRACK_WITH_EXTERNAL_CAMS;
 	}
 	
 	private static final HashMap<DRCTask, String> taskPath = new HashMap<DRCTask, String>()
@@ -21,8 +21,9 @@ public class DRCDashboardTypes {
 			put(DRCTask.VRC1, "cd ~/workspace/GazeboStateCommunicator/launch/\n./task1.sh\n");
 			put(DRCTask.VRC2, "cd ~/workspace/GazeboStateCommunicator/launch/\n./task2.sh\n");
 			put(DRCTask.VRC3, "cd ~/workspace/GazeboStateCommunicator/launch/\n./task3.sh\n");
-			put(DRCTask.DRIVING_TASK1, "cd ~/workspace/GazeboStateCommunicator/launch/\n./drivingTask1.sh\n");
-			put(DRCTask.DRIVING_TEST_TRACK, "cd ~/workspace/GazeboStateCommunicator/launch/\n./drivingTestTrack.sh\n");
+			put(DRCTask.DRIVING_TASK1, "roslaunch atlas_utils vrc_task_1.launch\n");
+			put(DRCTask.DRIVING_TASK1_WITH_EXTERNAL_CAMS, "cd ~/workspace/GazeboStateCommunicator/launch/\n./drivingTask1.sh\n");
+			put(DRCTask.DRIVING_TEST_TRACK_WITH_EXTERNAL_CAMS, "cd ~/workspace/GazeboStateCommunicator/launch/\n./drivingTestTrack.sh\n");
 		}
 	};
 	

@@ -73,7 +73,6 @@ public class DRCDashboard
    private JTextField rosCorePortField;
    private JButton killSimButton;
    private JButton launchGazeboSimButton;
-   //   private JButton launchDrivingInterfaceButton;
 
    private SimpleProcessSpawner spawner = new SimpleProcessSpawner(true);
    private GazeboSimLauncher sshSimLauncher = new GazeboSimLauncher();
@@ -198,11 +197,16 @@ public class DRCDashboard
          public void actionPerformed(ActionEvent e)
          {
             gazeboProcessListModel.clear();
+            
             if (taskCombo.getSelectedItem().toString().contains("DRIVING"))
             {
-               gazeboProcessListModel.addElement("Topview Camera");
-               gazeboProcessListModel.addElement("Rearview Camera");
                gazeboProcessListModel.addElement("DRC Driving Interface");
+               
+               if (taskCombo.getSelectedItem().toString().contains("_WITH_EXTERNAL_CAMS"))
+               {
+                  gazeboProcessListModel.addElement("Topview Camera");
+                  gazeboProcessListModel.addElement("Rearview Camera");
+               }
             }
          }
       });
@@ -282,8 +286,6 @@ public class DRCDashboard
       setupNetworkInfoPanel();
 
       setupLaunchButton();
-
-      //      setupInterfaceButton();
 
       setupKillSimButton();
    }
@@ -413,29 +415,6 @@ public class DRCDashboard
          }
       });
    }
-
-   //   private void setupInterfaceButton()
-   //   {
-   //	   c.gridy = 3;
-   //	   c.gridx = 1;
-   //	   c.gridwidth = 1;
-   //	   c.anchor = GridBagConstraints.LAST_LINE_START;
-   //	   launchDrivingInterfaceButton = new JButton("Driving UI");
-   //	   networkInfoPanel.add(launchDrivingInterfaceButton, c);
-   //	   
-   //	   launchDrivingInterfaceButton.addActionListener(new ActionListener()
-   //	   {
-   //		   public void actionPerformed(ActionEvent e)
-   //		   {
-   //			   String[] arguments = new String[] {"http://" + cloudMachineSelectionCombo.getSelectedItem().toString() + ":11311"};
-   //			   try {
-   //				DRCGazeboDrivingInterface.main(arguments);
-   //			} catch (URISyntaxException e1) {
-   //				e1.printStackTrace();
-   //			}
-   //		   }
-   //	   });
-   //   }
 
    private void setupKillSimButton()
    {
