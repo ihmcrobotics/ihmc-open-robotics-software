@@ -10,6 +10,7 @@ import java.util.List;
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Vector3d;
 
+import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
@@ -107,6 +108,7 @@ import com.yobotics.simulationconstructionset.util.trajectory.YoPositionProvider
 
 public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedController
 {
+
    private static enum WalkingState {LEFT_SUPPORT, RIGHT_SUPPORT, TRANSFER_TO_LEFT_SUPPORT, TRANSFER_TO_RIGHT_SUPPORT, DOUBLE_SUPPORT}
 
    private final static boolean DEBUG = false;
@@ -188,6 +190,9 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
    private final ControlFlowInputPort<OrientationTrajectoryData> desiredPelvisOrientationTrajectoryInputPort;
    private final ICPBasedMomentumRateOfChangeControlModule icpBasedMomentumRateOfChangeControlModule;
    private final YoFrameOrientation desiredPelvisOrientation = new YoFrameOrientation("desiredPelvis", worldFrame, registry);
+   private final YoFrameVector desiredPelvisAngularVelocity;
+   private final YoFrameVector desiredPelvisAngularAcceleration;
+
 
    private final DoubleYoVariable coefficientOfFriction = new DoubleYoVariable("coefficientOfFriction", registry);
    private final OneDoFJoint lidarJoint;
@@ -446,6 +451,9 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       unconstrainedJoints.removeAll(Arrays.asList(positionControlJoints));
       if (unconstrainedJoints.size() > 0)
          throw new RuntimeException("Joints unconstrained: " + unconstrainedJoints);
+
+      this.desiredPelvisAngularVelocity = new YoFrameVector("desiredPelvisAngularVelocity", worldFrame, registry);
+      this.desiredPelvisAngularAcceleration = new YoFrameVector("desiredPelvisAngularAcceleration", worldFrame, registry);
    }
 
    private void setupLimbJacobians(FullRobotModel fullRobotModel)
@@ -617,6 +625,10 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
             desiredICPVelocity.set(desiredICPVelocityLocal);
          }
 
+         // keep desired pelvis orientation as it is
+         desiredPelvisAngularVelocity.set(0.0, 0.0, 0.0);
+         desiredPelvisAngularAcceleration.set(0.0, 0.0, 0.0);
+
          doFootcontrol();
       }
 
@@ -786,12 +798,16 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
    {
       private final RobotSide swingSide;
       private final FrameOrientation desiredPelvisOrientationToPack;
+      private final FrameVector desiredPelvisAngularVelocityToPack;
+      private final FrameVector desiredPelvisAngularAccelerationToPack;
 
       public SingleSupportState(RobotSide robotSide)
       {
          super(singleSupportStateEnums.get(robotSide));
          this.swingSide = robotSide.getOppositeSide();
          this.desiredPelvisOrientationToPack = new FrameOrientation(worldFrame);
+         this.desiredPelvisAngularVelocityToPack = new FrameVector(fullRobotModel.getRootJoint().getFrameAfterJoint());
+         this.desiredPelvisAngularAccelerationToPack = new FrameVector(fullRobotModel.getRootJoint().getFrameAfterJoint());
       }
 
       @Override
@@ -813,7 +829,11 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 
          pelvisOrientationTrajectoryGenerator.compute(stateMachine.timeInCurrentState());
          pelvisOrientationTrajectoryGenerator.get(desiredPelvisOrientationToPack);
+         pelvisOrientationTrajectoryGenerator.packAngularVelocity(desiredPelvisAngularVelocityToPack);
+         pelvisOrientationTrajectoryGenerator.packAngularAcceleration(desiredPelvisAngularAccelerationToPack);
          desiredPelvisOrientation.set(desiredPelvisOrientationToPack);
+         desiredPelvisAngularVelocity.set(desiredPelvisAngularVelocityToPack);
+         desiredPelvisAngularAcceleration.set(desiredPelvisAngularAccelerationToPack);
 
          doFootcontrol();
       }
@@ -1255,11 +1275,9 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 
       icpBasedMomentumRateOfChangeControlModule.getDesiredCenterOfMassHeightAccelerationInputPort().setData(desiredCoMHeightAcceleration.getDoubleValue());
 
-      // FIXME: use angular velocity, angular acceleration
       OrientationTrajectoryData desiredPelvisOrientationTrajectoryData = new OrientationTrajectoryData();
-      desiredPelvisOrientationTrajectoryData.set(desiredPelvisOrientation.getFrameOrientationCopy(), new FrameVector(worldFrame), new FrameVector(worldFrame));
+      desiredPelvisOrientationTrajectoryData.set(desiredPelvisOrientation.getFrameOrientationCopy(), desiredPelvisAngularVelocity.getFrameVectorCopy(), desiredPelvisAngularAcceleration.getFrameVectorCopy());
       desiredPelvisOrientationTrajectoryInputPort.setData(desiredPelvisOrientationTrajectoryData);
-
    }
 
    private void doChestControl()
