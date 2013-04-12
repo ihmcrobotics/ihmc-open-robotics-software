@@ -101,7 +101,7 @@ public class SensorAndEstimatorAssembler
       }
 
       controlFlowGraph.initializeAfterConnections();
-      controlFlowGraph.visualize();
+//      controlFlowGraph.visualize();
 
       parentRegistry.addChild(registry);
    }
