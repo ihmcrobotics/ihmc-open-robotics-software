@@ -3,7 +3,9 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController;
 import java.util.LinkedHashMap;
 
 import org.ejml.alg.dense.mult.MatrixDimensionException;
+import org.ejml.data.D1Matrix64F;
 import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.RowD1Matrix64F;
 import org.ejml.factory.LinearSolver;
 import org.ejml.factory.LinearSolverFactory;
 import org.ejml.ops.CommonOps;
@@ -90,16 +92,20 @@ public class RootJointSolver
       if (accelerationSubspaceRank > 0)    // handle EJML stupidity
          CommonOps.multAdd(T, beta2, hdot);
 
+      assert (areAccelerationsOK(aHatRoot, vdotRoot, b));
 
+      rootJoint.setDesiredAcceleration(vdotRoot, 0);
+      jointAccelerationValidMap.put(rootJoint, true);
+   }
+
+   private boolean areAccelerationsOK(RowD1Matrix64F aHatRoot, RowD1Matrix64F vdotRoot, D1Matrix64F b)
+   {
       DenseMatrix64F check = new DenseMatrix64F(6, 1);
       CommonOps.mult(aHatRoot, vdotRoot, check);
       CommonOps.subEquals(check, hdot);
       CommonOps.subEquals(check, b);
-      if (!MatrixFeatures.isConstantVal(check, 0.0, 1e-7))
-         throw new RuntimeException("Check not zero. Check = " + check);
-
-      rootJoint.setDesiredAcceleration(vdotRoot, 0);
-      jointAccelerationValidMap.put(rootJoint, true);
+      boolean ret = MatrixFeatures.isConstantVal(check, 0.0, 1e-7);
+      return ret;
    }
 
    public DenseMatrix64F getRateOfChangeOfMomentum()
