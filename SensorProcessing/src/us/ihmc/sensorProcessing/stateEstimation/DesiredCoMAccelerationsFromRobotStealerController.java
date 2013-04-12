@@ -38,7 +38,7 @@ public class DesiredCoMAccelerationsFromRobotStealerController implements RobotC
    private final YoFrameVector perfectCoMd = new YoFrameVector("perfectCoMd", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector perfectCoMdd = new YoFrameVector("perfectCoMdd", ReferenceFrame.getWorldFrame(), registry);
 
-   private final StateEstimatorEvaluatorFullRobotModel perfectFullRobotModel;
+   private final InverseDynamicsJointsFromSCSRobotGenerator generator;
    private final TwistCalculator perfectTwistCalculator;
    private final SpatialAccelerationCalculator perfectSpatialAccelerationCalculator;
 
@@ -51,22 +51,24 @@ public class DesiredCoMAccelerationsFromRobotStealerController implements RobotC
    private final ControlFlowOutputPort<FrameVector> desiredCenterOfMassAccelerationOutputPort;
    private final ControlFlowOutputPort<FrameVector> desiredAngularAccelerationOutputPort;
 
-   public DesiredCoMAccelerationsFromRobotStealerController(StateEstimatorEvaluatorFullRobotModel perfectFullRobotModel, InverseDynamicsJointsFromSCSRobotGenerator generator,
+   public DesiredCoMAccelerationsFromRobotStealerController(InverseDynamicsJointsFromSCSRobotGenerator generator,
                                     Joint estimationJoint, double controlDT)
    {
       this.controlDT = controlDT;
 
-      this.perfectFullRobotModel = perfectFullRobotModel;
-      perfectTwistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), perfectFullRobotModel.getElevator());
-      perfectSpatialAccelerationCalculator = new SpatialAccelerationCalculator(perfectFullRobotModel.getElevator(), perfectTwistCalculator, 0.0, false);
+      this.generator = generator;
+      RigidBody elevator = generator.getElevator();
+      
+      perfectTwistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), elevator);
+      perfectSpatialAccelerationCalculator = new SpatialAccelerationCalculator(elevator, perfectTwistCalculator, 0.0, false);
 
-      perfectCenterOfMassCalculator = new CenterOfMassCalculator(perfectFullRobotModel.getElevator(), ReferenceFrame.getWorldFrame());
-      perfectCenterOfMassJacobian = new CenterOfMassJacobian(perfectFullRobotModel.getElevator());
-      perfectCenterOfMassAccelerationCalculator = new CenterOfMassAccelerationCalculator(perfectFullRobotModel.getElevator(),
+      perfectCenterOfMassCalculator = new CenterOfMassCalculator(elevator, ReferenceFrame.getWorldFrame());
+      perfectCenterOfMassJacobian = new CenterOfMassJacobian(elevator);
+      perfectCenterOfMassAccelerationCalculator = new CenterOfMassAccelerationCalculator(elevator,
               perfectSpatialAccelerationCalculator);
 
       CenterOfMassAccelerationFromFullRobotModelStealer centerOfMassAccelerationFromFullRobotModelStealer =
-         new CenterOfMassAccelerationFromFullRobotModelStealer(perfectFullRobotModel.getElevator(), perfectSpatialAccelerationCalculator);
+         new CenterOfMassAccelerationFromFullRobotModelStealer(elevator, perfectSpatialAccelerationCalculator);
       desiredCenterOfMassAccelerationOutputPort = centerOfMassAccelerationFromFullRobotModelStealer.getOutputPort();
 
       AngularAccelerationFromRobotStealer angularAccelerationFromRobotStealer = new AngularAccelerationFromRobotStealer(estimationJoint);
@@ -86,7 +88,9 @@ public class DesiredCoMAccelerationsFromRobotStealerController implements RobotC
 
    public void doControl()
    {
-      perfectFullRobotModel.updateBasedOnRobot(true);
+      boolean updateRootJoints = true;
+      generator.updateInverseDynamicsRobotModelFromRobot(updateRootJoints , false);
+
       perfectTwistCalculator.compute();
       perfectSpatialAccelerationCalculator.compute();
 
@@ -227,11 +231,6 @@ public class DesiredCoMAccelerationsFromRobotStealerController implements RobotC
    public String getDescription()
    {
       return getName();
-   }
-
-   public StateEstimatorEvaluatorFullRobotModel getStateEstimatorEvaluatorFullRobotModel()
-   {
-      return perfectFullRobotModel;
    }
 
 }
