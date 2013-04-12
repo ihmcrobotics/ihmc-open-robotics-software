@@ -89,17 +89,6 @@ public class YoVariableHolderImplementationTest
    @Test
    public void testGetVariable()
    {
-      boolean testPass = true;
-      try
-      {
-         yoVariableHolderImplementation.getVariable("variableOne");
-         testPass = false;
-      } catch (RuntimeException e)
-      {
-      }
-
-      assert testPass;
-
       YoVariable variable = yoVariableHolderImplementation.getVariable("robot.registryA.variableOne");
       assertEquals(variable.getName(), "variableOne");
 
