@@ -10,6 +10,7 @@ import javax.media.j3d.Transform3D;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
@@ -285,5 +286,15 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
       }
       
    }
+   
+   public FullInverseDynamicsStructure getInverseDynamicsStructure()
+   {
+      RigidBody elevator = getElevator();
 
+      SixDoFJoint rootInverseDynamicsJoint = getRootSixDoFJoint();
+      RigidBody estimationLink = getRootBody();
+
+      return new FullInverseDynamicsStructure(elevator, estimationLink, rootInverseDynamicsJoint);
+   }
+   
 }

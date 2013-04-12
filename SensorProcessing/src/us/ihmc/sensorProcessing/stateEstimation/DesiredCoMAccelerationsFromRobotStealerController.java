@@ -6,7 +6,6 @@ import us.ihmc.controlFlow.AbstractControlFlowElement;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.sensorProcessing.signalCorruption.GaussianVectorCorruptor;
 import us.ihmc.sensorProcessing.simulatedSensors.InverseDynamicsJointsFromSCSRobotGenerator;
-import us.ihmc.sensorProcessing.stateEstimation.evaluation.StateEstimatorEvaluatorFullRobotModel;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -51,21 +50,19 @@ public class DesiredCoMAccelerationsFromRobotStealerController implements RobotC
    private final ControlFlowOutputPort<FrameVector> desiredCenterOfMassAccelerationOutputPort;
    private final ControlFlowOutputPort<FrameVector> desiredAngularAccelerationOutputPort;
 
-   public DesiredCoMAccelerationsFromRobotStealerController(InverseDynamicsJointsFromSCSRobotGenerator generator,
-                                    Joint estimationJoint, double controlDT)
+   public DesiredCoMAccelerationsFromRobotStealerController(InverseDynamicsJointsFromSCSRobotGenerator generator, Joint estimationJoint, double controlDT)
    {
       this.controlDT = controlDT;
 
       this.generator = generator;
       RigidBody elevator = generator.getElevator();
-      
+
       perfectTwistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), elevator);
       perfectSpatialAccelerationCalculator = new SpatialAccelerationCalculator(elevator, perfectTwistCalculator, 0.0, false);
 
       perfectCenterOfMassCalculator = new CenterOfMassCalculator(elevator, ReferenceFrame.getWorldFrame());
       perfectCenterOfMassJacobian = new CenterOfMassJacobian(elevator);
-      perfectCenterOfMassAccelerationCalculator = new CenterOfMassAccelerationCalculator(elevator,
-              perfectSpatialAccelerationCalculator);
+      perfectCenterOfMassAccelerationCalculator = new CenterOfMassAccelerationCalculator(elevator, perfectSpatialAccelerationCalculator);
 
       CenterOfMassAccelerationFromFullRobotModelStealer centerOfMassAccelerationFromFullRobotModelStealer =
          new CenterOfMassAccelerationFromFullRobotModelStealer(elevator, perfectSpatialAccelerationCalculator);
@@ -89,7 +86,7 @@ public class DesiredCoMAccelerationsFromRobotStealerController implements RobotC
    public void doControl()
    {
       boolean updateRootJoints = true;
-      generator.updateInverseDynamicsRobotModelFromRobot(updateRootJoints , false);
+      generator.updateInverseDynamicsRobotModelFromRobot(updateRootJoints, false);
 
       perfectTwistCalculator.compute();
       perfectSpatialAccelerationCalculator.compute();
@@ -183,7 +180,7 @@ public class DesiredCoMAccelerationsFromRobotStealerController implements RobotC
       public void startComputation()
       {
          estimationJoint.getAngularAccelerationsInBodyFrame(desiredAngularAcceleration);
-         
+
          if (CORRUPT_DESIRED_ACCELERATIONS)
             signalCorruptor.corrupt(desiredAngularAcceleration);
 
@@ -234,4 +231,3 @@ public class DesiredCoMAccelerationsFromRobotStealerController implements RobotC
    }
 
 }
-
