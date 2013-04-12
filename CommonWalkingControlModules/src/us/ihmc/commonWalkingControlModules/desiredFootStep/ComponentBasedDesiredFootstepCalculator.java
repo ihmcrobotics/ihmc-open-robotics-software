@@ -129,8 +129,6 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractAdjustableD
       FrameVector2d desiredOffsetFromAnkle = new FrameVector2d(desiredHeadingFrame, 0.0, swingLegSide.negateIfRightSide(inPlaceWidth.getDoubleValue()));    // desiredVelocityInHeadingFrame);
       desiredOffsetFromAnkle.add(desiredVelocityInHeadingFrame);
 
-      if (desiredOffsetFromAnkle.getX() > maxStepLength.getDoubleValue())
-         desiredOffsetFromAnkle.setX(maxStepLength.getDoubleValue());
 
       if (swingLegSide == RobotSide.LEFT)
       {
@@ -139,6 +137,12 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractAdjustableD
       else
       {
          desiredOffsetFromAnkle.setY(MathTools.clipToMinMax(desiredOffsetFromAnkle.getY(), -maxStepWidth.getDoubleValue(), -minStepWidth.getDoubleValue()));
+      }
+
+      double stepLength = desiredOffsetFromAnkle.length();
+      if (stepLength > maxStepLength.getDoubleValue())
+      {
+         desiredOffsetFromAnkle.scale(maxStepLength.getDoubleValue() / stepLength);
       }
 
       return desiredOffsetFromAnkle;
