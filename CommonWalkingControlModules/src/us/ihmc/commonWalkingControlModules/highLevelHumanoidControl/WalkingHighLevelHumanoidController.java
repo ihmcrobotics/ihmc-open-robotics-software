@@ -109,6 +109,8 @@ import com.yobotics.simulationconstructionset.util.trajectory.YoPositionProvider
 public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedController
 {
 
+   private final WalkingControllerParameters walkingControllerParameters;
+
    private static enum WalkingState {LEFT_SUPPORT, RIGHT_SUPPORT, TRANSFER_TO_LEFT_SUPPORT, TRANSFER_TO_RIGHT_SUPPORT, DOUBLE_SUPPORT}
 
    private final static boolean DEBUG = false;
@@ -185,7 +187,6 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
    private final HeadOrientationControlModule headOrientationControlModule;
    private final DesiredHeadOrientationProvider desiredHeadOrientationProvider;
 
-   private final boolean checkOrbitalEnergyCondition;
    private final SideDependentList<EnumMap<LimbName, GeometricJacobian>> jacobians = SideDependentList.createListOfEnumMaps(LimbName.class);
    private final ControlFlowInputPort<OrientationTrajectoryData> desiredPelvisOrientationTrajectoryInputPort;
    private final ICPBasedMomentumRateOfChangeControlModule icpBasedMomentumRateOfChangeControlModule;
@@ -200,7 +201,6 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
    private final PIDController lidarJointVelocityController = new PIDController("lidar", registry);
    private final DoubleYoVariable desiredLidarVelocity = new DoubleYoVariable("desiredLidarVelocity", registry);
    private final BooleanYoVariable toeOff = new BooleanYoVariable("toeOff", registry);
-   private final boolean resetDesiredICPToCurrentAtStartOfSwing;
    private final BooleanYoVariable icpTrajectoryHasBeenInitialized;
    private final BooleanYoVariable doToeOffIfPossible = new BooleanYoVariable("doToeOffIfPossible", registry);
 
@@ -309,7 +309,8 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       lidarJointVelocityController.setIntegralGain(0.01);
       lidarJointVelocityController.setProportionalGain(0.01);    // proportional gain corresponds to velocity, derivative corresponds to acceleration
       desiredLidarVelocity.set(0.5);
-      this.resetDesiredICPToCurrentAtStartOfSwing = walkingControllerParameters.resetDesiredICPToCurrentAtStartOfSwing();
+
+      this.walkingControllerParameters = walkingControllerParameters;
 
       double initialLeadingFootPitch = 0.05;
       upcomingSupportLeg.set(RobotSide.RIGHT);    // TODO: stairs hack, so that the following lines use the correct leading leg
@@ -320,7 +321,6 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       RobotSide trailingLeg = leadingLeg.getOppositeSide();
       onEdgeInitialAngleProviders.get(trailingLeg).set(this.trailingFootPitch.getDoubleValue());
 
-      this.checkOrbitalEnergyCondition = walkingControllerParameters.checkOrbitalEnergyCondition();
 
       for (RobotSide robotSide : RobotSide.values())
       {
@@ -930,7 +930,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
    {
       public boolean checkCondition()
       {
-         if (checkOrbitalEnergyCondition)
+         if (walkingControllerParameters.checkOrbitalEnergyCondition())
          {
             // TODO: not really nice, but it'll do:
             FlatThenPolynomialCoMHeightTrajectoryGenerator flatThenPolynomialCoMHeightTrajectoryGenerator =
@@ -961,10 +961,16 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
          double minimumSwingTime = swingTimeCalculationProvider.getValue() * minimumSwingFraction;
          boolean footHitGround = (stateMachine.timeInCurrentState() > minimumSwingTime) && footSwitches.get(swingSide).hasFootHitGround();
 
-         // transferring out of single support once the ICP trajectory is done guarantees that we never reach the zero velocity desired
-//         boolean trajectoryDone = icpTrajectoryGenerator.isDone();    // endEffectorControlModule.isTrajectoryDone();
 
-         return footHitGround; //trajectoryDone || footHitGround;
+         if (walkingControllerParameters.finishSwingWhenTrajectoryDone())
+         {
+            boolean trajectoryDone = icpTrajectoryGenerator.isDone();    // endEffectorControlModule.isTrajectoryDone();
+            return trajectoryDone || footHitGround;
+         }
+         else
+         {
+            return footHitGround;
+         }
       }
    }
 
@@ -1196,7 +1202,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       setOmega0(omega0);
       computeCapturePoint();
 
-      if (resetDesiredICPToCurrentAtStartOfSwing)
+      if (walkingControllerParameters.resetDesiredICPToCurrentAtStartOfSwing())
       {
          desiredICP.set(capturePoint.getFramePoint2dCopy());    // TODO: currently necessary for stairs because of the omega0 jump, but should get rid of this
       }
