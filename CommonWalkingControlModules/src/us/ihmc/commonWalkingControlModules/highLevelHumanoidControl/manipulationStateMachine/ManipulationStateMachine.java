@@ -206,7 +206,7 @@ public class ManipulationStateMachine extends AbstractControlFlowElement
 
    private void estimateObjectWrench()
    {
-      handController.packWristWrench(measuredWristWrench);
+//      handController.packWristWrench(measuredWristWrench); JESPER: FIX THIS!
 //      toolBody.update(measuredWristWrench);
       
    }
