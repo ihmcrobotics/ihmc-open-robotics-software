@@ -54,13 +54,13 @@ public class ComposableStateEstimatorEvaluator
       
       Joint estimationJoint = robot.getRootJoint();
       DesiredCoMAccelerationsFromRobotStealerController desiredCoMAccelerationsFromRobotStealerController =
-         new DesiredCoMAccelerationsFromRobotStealerController(perfectFullRobotModel, generator, estimationJoint , controlDT);
+         new DesiredCoMAccelerationsFromRobotStealerController(generator, estimationJoint , controlDT);
 
       robot.update();
 
       RigidBody estimationLink = perfectFullRobotModel.getRootBody();
-      RigidBody elevator = perfectFullRobotModel.getElevator();
       SixDoFJoint rootInverseDynamicsJoint = perfectFullRobotModel.getRootInverseDynamicsJoint();
+      RigidBody elevator = perfectFullRobotModel.getElevator();
 
       FullInverseDynamicsStructure inverseDynamicsStructure = new FullInverseDynamicsStructure(elevator, estimationLink, rootInverseDynamicsJoint);
 

@@ -46,7 +46,6 @@ import us.ihmc.utilities.net.ObjectCommunicator;
 import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
-import us.ihmc.utilities.screwTheory.SixDoFJoint;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 
 import com.yobotics.simulationconstructionset.IMUMount;
@@ -68,6 +67,8 @@ public class DRCSimulationFactory
    private static final boolean SHOW_REFERENCE_FRAMES = false;
    public static boolean SHOW_INERTIA_ELLIPSOIDS = false;
    private static final boolean CREATE_STATE_ESTIMATOR = true;
+   private static final boolean USE_STATE_ESTIMATOR = true;
+   private static final boolean STEAL_DESIRED_COM_ACCELERATIONS_FROM_ROBOT = true;
    
    public static HumanoidRobotSimulation<SDFRobot> createSimulation(ControllerFactory controllerFactory,
          CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, DRCRobotInterface robotInterface, RobotInitialSetup<SDFRobot> robotInitialSetup,
@@ -84,14 +85,32 @@ public class DRCSimulationFactory
 
       SDFRobot simulatedRobot = robotInterface.getRobot();
       YoVariableRegistry registry = simulatedRobot.getRobotsYoVariableRegistry();
-
-
       simulatedRobot.setDynamicIntegrationMethod(scsInitialSetup.getDynamicIntegrationMethod());
 
       SDFFullRobotModel fullRobotModelForSimulation = robotInterface.getFullRobotModel();
-
-
       SDFFullRobotModel fullRobotModelForController = fullRobotModelForSimulation;
+      
+      ArrayList<RobotControllerAndParameters> robotControllersAndParameters = new ArrayList<RobotControllerAndParameters>();
+
+      DesiredCoMAndAngularAccelerationOutputPortsHolder desiredCoMAndAngularAccelerationOutputPortsHolder = null;
+      if (STEAL_DESIRED_COM_ACCELERATIONS_FROM_ROBOT)
+      {
+         DesiredCoMAccelerationsFromRobotStealerController desiredCoMAccelerationsFromRobotStealerController = createAndAddDesiredCoMAccelerationFromRobotStealerController(
+               controlDT, simulationTicksPerControlTick, simulatedRobot, robotControllersAndParameters);
+         desiredCoMAndAngularAccelerationOutputPortsHolder = desiredCoMAccelerationsFromRobotStealerController;
+      }
+      
+      OrientationEstimator orientationEstimator = null;
+      if (CREATE_STATE_ESTIMATOR)
+      {
+         orientationEstimator = createStateEstimator(scsInitialSetup, controlDT, simulationTicksPerControlTick, simulatedRobot, registry, robotControllersAndParameters, desiredCoMAndAngularAccelerationOutputPortsHolder);
+
+         if (!USE_STATE_ESTIMATOR)
+         {
+            orientationEstimator = null;
+         }
+      }
+      
       CommonWalkingReferenceFrames referenceFramesForController = new ReferenceFrames(fullRobotModelForSimulation, jointMap, jointMap.getAnkleHeight());
 
       SideDependentList<FootSwitchInterface> footSwitches = robotInterface.getFootSwitches();
@@ -181,67 +200,7 @@ public class DRCSimulationFactory
       modularRobotController.setRawOutputWriter(sensorReaderAndOutputWriter);
 
       RobotControllerAndParameters modularRobotControllerAndParameters = new RobotControllerAndParameters(modularRobotController, simulationTicksPerControlTick);
-      
-      ArrayList<RobotControllerAndParameters> robotControllersAndParameters = new ArrayList<RobotControllerAndParameters>();
       robotControllersAndParameters.add(modularRobotControllerAndParameters);
-      
-      if (CREATE_STATE_ESTIMATOR)
-      {
-         double simulationDT = scsInitialSetup.getDT();
-         double desiredEstimatorDT = 0.001;
-         
-         //TODO: Get the IMU Mounts and Kinematic Points!
-         InverseDynamicsJointsFromSCSRobotGenerator generator = new InverseDynamicsJointsFromSCSRobotGenerator(simulatedRobot);
-         
-         ArrayList<IMUMount> imuMounts = new ArrayList<IMUMount>();
-         simulatedRobot.getIMUMounts(imuMounts);
-         ArrayList<KinematicPoint> velocityPoints = new ArrayList<KinematicPoint>(); //simulatedRobot.getVelocityPoints();
-         
-         StateEstimatorEvaluatorFullRobotModel perfectFullRobotModel = new StateEstimatorEvaluatorFullRobotModel(generator, simulatedRobot, imuMounts,
-               velocityPoints);
-         //TODO: Better way to get estimationJoint
-         Joint estimationJoint = simulatedRobot.getRootJoints().get(0);
-               
-         SensorMapFromRobotFactory sensorMapFromRobotFactory = new SensorMapFromRobotFactory(generator, simulatedRobot, controlDT, imuMounts,
-               velocityPoints, registry);
-         SensorMap sensorMap = sensorMapFromRobotFactory.getSensorMap();
-
-         DesiredCoMAccelerationsFromRobotStealerController desiredCoMAccelerationsFromRobotStealerController =
-            new DesiredCoMAccelerationsFromRobotStealerController(perfectFullRobotModel, generator, estimationJoint, controlDT);
-
-         RobotControllerAndParameters desiredCoMAccelerationsFromRobotStealerControllerAndParameters = new RobotControllerAndParameters(desiredCoMAccelerationsFromRobotStealerController, simulationTicksPerControlTick);
-         robotControllersAndParameters.add(desiredCoMAccelerationsFromRobotStealerControllerAndParameters);
-         
-         RigidBody estimationLink = perfectFullRobotModel.getRootBody();
-         RigidBody elevator = perfectFullRobotModel.getElevator();
-         SixDoFJoint rootInverseDynamicsJoint = perfectFullRobotModel.getRootInverseDynamicsJoint();
-
-         FullInverseDynamicsStructure inverseDynamicsStructure = new FullInverseDynamicsStructure(elevator, estimationLink, rootInverseDynamicsJoint);
-
-         Vector3d gravitationalAcceleration = new Vector3d();
-         simulatedRobot.getGravity(gravitationalAcceleration);
-         DesiredCoMAndAngularAccelerationOutputPortsHolder desiredCoMAndAngularAccelerationOutputPortsHolder = desiredCoMAccelerationsFromRobotStealerController;
-        
-         // The following few lines are what you need to do to get the state estimator working with a robot.
-         // You also need to either add the controlFlowGraph to another one, or make sure to run it's startComputation method at the right time:
-         SensorAndEstimatorAssembler sensorAndEstimatorAssembler = new SensorAndEstimatorAssembler(gravitationalAcceleration, inverseDynamicsStructure, controlDT,
-                                                                      sensorMap, desiredCoMAndAngularAccelerationOutputPortsHolder, registry);
-
-         ControlFlowGraph controlFlowGraph = sensorAndEstimatorAssembler.getControlFlowGraph();
-         OrientationEstimator orientationEstimator = sensorAndEstimatorAssembler.getOrientationEstimator();
-         
-         ComposableStateEstimatorEvaluatorController composableStateEstimatorEvaluatorController = new ComposableStateEstimatorEvaluatorController(controlFlowGraph, orientationEstimator, 
-               simulatedRobot, 
-               estimationJoint, controlDT, 
-               sensorMap, desiredCoMAndAngularAccelerationOutputPortsHolder);
-         
-         RobotControllerAndParameters humanoidStateEstimatorControllerAndParameters = new RobotControllerAndParameters(composableStateEstimatorEvaluatorController, simulationTicksPerControlTick);
-         robotControllersAndParameters.add(humanoidStateEstimatorControllerAndParameters);
-
-//         HumanoidStateEstimatorController humanoidStateEstimatorController = new HumanoidStateEstimatorController(simulationDT, desiredEstimatorDT);
-//         RobotControllerAndParameters humanoidStateEstimatorControllerAndParameters = humanoidStateEstimatorController.createRobotControllerAndParameters();
-//         robotControllersAndParameters.add(humanoidStateEstimatorControllerAndParameters);
-      }
       
       final HumanoidRobotSimulation<SDFRobot> humanoidRobotSimulation = new HumanoidRobotSimulation<SDFRobot>(simulatedRobot, robotControllersAndParameters, fullRobotModelForSimulation, commonAvatarEnvironmentInterface, simulatedRobot.getAllExternalForcePoints(), robotInitialSetup, scsInitialSetup, guiInitialSetup, guiSetterUpperRegistry, dynamicGraphicObjectsListRegistry);
 
@@ -256,6 +215,75 @@ public class DRCSimulationFactory
          sensorProcessor.addSensorProcessor(new DRCPerfectPoseEstimator(simulatedRobot, networkProccesorCommunicator, robotInterface.getTimeStampProvider()));
       }
       return humanoidRobotSimulation;
+   }
+
+
+   public static OrientationEstimator createStateEstimator(ScsInitialSetup scsInitialSetup, double controlDT, int simulationTicksPerControlTick, SDFRobot simulatedRobot,
+         YoVariableRegistry registry, ArrayList<RobotControllerAndParameters> robotControllersAndParameters, DesiredCoMAndAngularAccelerationOutputPortsHolder desiredCoMAndAngularAccelerationOutputPortsHolder)
+   {
+//      double simulationDT = scsInitialSetup.getDT();
+//      double desiredEstimatorDT = 0.001;
+      
+      //TODO: Get the IMU Mounts and Kinematic Points!
+      InverseDynamicsJointsFromSCSRobotGenerator generator = new InverseDynamicsJointsFromSCSRobotGenerator(simulatedRobot);
+      
+      ArrayList<IMUMount> imuMounts = new ArrayList<IMUMount>();
+      simulatedRobot.getIMUMounts(imuMounts);
+      ArrayList<KinematicPoint> velocityPoints = new ArrayList<KinematicPoint>(); //simulatedRobot.getVelocityPoints();
+      
+      StateEstimatorEvaluatorFullRobotModel perfectFullRobotModel = new StateEstimatorEvaluatorFullRobotModel(generator, simulatedRobot, imuMounts,
+            velocityPoints);
+            
+      SensorMapFromRobotFactory sensorMapFromRobotFactory = new SensorMapFromRobotFactory(generator, simulatedRobot, controlDT, imuMounts,
+            velocityPoints, registry);
+      SensorMap sensorMap = sensorMapFromRobotFactory.getSensorMap();
+
+      FullInverseDynamicsStructure inverseDynamicsStructure = perfectFullRobotModel.getInverseDynamicsStructure();
+
+      Vector3d gravitationalAcceleration = new Vector3d();
+      simulatedRobot.getGravity(gravitationalAcceleration);
+      
+      // The following few lines are what you need to do to get the state estimator working with a robot.
+      // You also need to either add the controlFlowGraph to another one, or make sure to run it's startComputation method at the right time:
+      SensorAndEstimatorAssembler sensorAndEstimatorAssembler = new SensorAndEstimatorAssembler(gravitationalAcceleration, inverseDynamicsStructure, controlDT,
+                                                                   sensorMap, desiredCoMAndAngularAccelerationOutputPortsHolder, registry);
+
+      ControlFlowGraph controlFlowGraph = sensorAndEstimatorAssembler.getControlFlowGraph();
+      OrientationEstimator orientationEstimator = sensorAndEstimatorAssembler.getOrientationEstimator();
+      
+      Joint estimationJoint2 = simulatedRobot.getRootJoints().get(0);
+      ComposableStateEstimatorEvaluatorController composableStateEstimatorEvaluatorController = new ComposableStateEstimatorEvaluatorController(
+            controlFlowGraph, orientationEstimator, 
+            simulatedRobot, 
+            estimationJoint2, controlDT, 
+            sensorMap, desiredCoMAndAngularAccelerationOutputPortsHolder);
+      
+      RobotControllerAndParameters humanoidStateEstimatorControllerAndParameters = new RobotControllerAndParameters(composableStateEstimatorEvaluatorController, simulationTicksPerControlTick);
+      robotControllersAndParameters.add(humanoidStateEstimatorControllerAndParameters);
+
+//         HumanoidStateEstimatorController humanoidStateEstimatorController = new HumanoidStateEstimatorController(simulationDT, desiredEstimatorDT);
+//         RobotControllerAndParameters humanoidStateEstimatorControllerAndParameters = humanoidStateEstimatorController.createRobotControllerAndParameters();
+//         robotControllersAndParameters.add(humanoidStateEstimatorControllerAndParameters);
+   
+      return orientationEstimator;
+   }
+
+
+   public static DesiredCoMAccelerationsFromRobotStealerController createAndAddDesiredCoMAccelerationFromRobotStealerController(double controlDT,
+         int simulationTicksPerControlTick, SDFRobot simulatedRobot, ArrayList<RobotControllerAndParameters> robotControllersAndParameters)
+   {
+      InverseDynamicsJointsFromSCSRobotGenerator generator = new InverseDynamicsJointsFromSCSRobotGenerator(simulatedRobot);
+
+      
+      RigidBody elevator = generator.getElevator();
+      //TODO: Better way to get estimationJoint
+      Joint estimationJoint = simulatedRobot.getRootJoints().get(0);
+      DesiredCoMAccelerationsFromRobotStealerController desiredCoMAccelerationsFromRobotStealerController =
+         new DesiredCoMAccelerationsFromRobotStealerController(generator, estimationJoint, controlDT);
+
+      RobotControllerAndParameters desiredCoMAccelerationsFromRobotStealerControllerAndParameters = new RobotControllerAndParameters(desiredCoMAccelerationsFromRobotStealerController, simulationTicksPerControlTick);
+      robotControllersAndParameters.add(desiredCoMAccelerationsFromRobotStealerControllerAndParameters);
+      return desiredCoMAccelerationsFromRobotStealerController;
    }
 
 

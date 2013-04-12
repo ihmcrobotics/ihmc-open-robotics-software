@@ -17,13 +17,13 @@ public class FullInverseDynamicsStructure
    private final RigidBody estimationLink;
    private final ReferenceFrame estimationFrame;
    private final RigidBody elevator;
-   private final SixDoFJoint rootInverseDynamicsJoint;
+   private final SixDoFJoint rootJoint;
 
    // TODO: What's a good name for this?
    public FullInverseDynamicsStructure(RigidBody elevator, RigidBody estimationLink, SixDoFJoint rootInverseDynamicsJoint)
    {
       this.elevator = elevator;
-      this.rootInverseDynamicsJoint = rootInverseDynamicsJoint;
+      this.rootJoint = rootInverseDynamicsJoint;
 
       twistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), elevator);
       spatialAccelerationCalculator = new SpatialAccelerationCalculator(elevator, twistCalculator, 0.0, false);
@@ -32,9 +32,9 @@ public class FullInverseDynamicsStructure
       estimationFrame = estimationLink.getParentJoint().getFrameAfterJoint();
    }
 
-   public SixDoFJoint getRootInverseDynamicsJoint()
+   public SixDoFJoint getRootJoint()
    {
-      return rootInverseDynamicsJoint;
+      return rootJoint;
    }
 
    public TwistCalculator getTwistCalculator()
@@ -78,18 +78,18 @@ public class FullInverseDynamicsStructure
 
    public void updateRootJointBasedOnEstimator(FrameOrientation estimatedOrientation, FrameVector estimatedAngularVelocity)
    {
-      rootInverseDynamicsJoint.setRotation(estimatedOrientation.getQuaternion());
+      rootJoint.setRotation(estimatedOrientation.getQuaternion());
 
       elevator.updateFramesRecursively();
 
-      ReferenceFrame elevatorFrame = rootInverseDynamicsJoint.getFrameBeforeJoint();
-      ReferenceFrame bodyFrame = rootInverseDynamicsJoint.getFrameAfterJoint();
+      ReferenceFrame elevatorFrame = rootJoint.getFrameBeforeJoint();
+      ReferenceFrame bodyFrame = rootJoint.getFrameAfterJoint();
 
       estimatedAngularVelocity.changeFrame(bodyFrame);
 
       Twist bodyTwist = new Twist(bodyFrame, elevatorFrame, bodyFrame);
       bodyTwist.setAngularPart(estimatedAngularVelocity.getVector());
-      rootInverseDynamicsJoint.setJointTwist(bodyTwist);
+      rootJoint.setJointTwist(bodyTwist);
    }
 
 
