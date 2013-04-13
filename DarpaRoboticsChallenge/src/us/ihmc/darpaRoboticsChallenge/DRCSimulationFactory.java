@@ -31,6 +31,7 @@ import us.ihmc.projectM.R2Sim02.initialSetup.ScsInitialSetup;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.simulatedSensors.InverseDynamicsJointsFromSCSRobotGenerator;
+import us.ihmc.sensorProcessing.simulatedSensors.SCSToInverseDynamicsJointMap;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorMap;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorMapFromRobotFactory;
 import us.ihmc.sensorProcessing.stateEstimation.DesiredCoMAccelerationsFromRobotStealerController;
@@ -77,7 +78,8 @@ public class DRCSimulationFactory
       DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
 
       DRCRobotJointMap jointMap = robotInterface.getJointMap();
-
+//      SCSToInverseDynamicsJointMap scsToInverseDynamicsJointMap = robotInterface.getSCSToInverseDynamicsJointMap();
+      
       double simulateDT = robotInterface.getSimulateDT();
       double controlDT = controllerFactory.getControlDT();
       int simulationTicksPerControlTick = (int) (controlDT / simulateDT);
@@ -102,7 +104,24 @@ public class DRCSimulationFactory
       OrientationEstimator orientationEstimator = null;
       if (CREATE_STATE_ESTIMATOR)
       {
-         orientationEstimator = createStateEstimator(scsInitialSetup, controlDT, simulationTicksPerControlTick, simulatedRobot, registry, robotControllersAndParameters, desiredCoMAndAngularAccelerationOutputPortsHolder);
+         //TODO: Get the Kinematic Points!
+         InverseDynamicsJointsFromSCSRobotGenerator generator = new InverseDynamicsJointsFromSCSRobotGenerator(simulatedRobot);
+         SCSToInverseDynamicsJointMap scsToInverseDynamicsJointMap = generator.getSCSToInverseDynamicsJointMap();
+         
+         //TODO: Get the inverse dynamics structure from the simulation.
+         FullInverseDynamicsStructure inverseDynamicsStructure = generator.getInverseDynamicsStructure();
+
+//         FullInverseDynamicsStructure inverseDynamicsStructure = fullRobotModelForController.getInverseDynamicsStructure();
+         
+         ArrayList<IMUMount> imuMounts = new ArrayList<IMUMount>();
+         simulatedRobot.getIMUMounts(imuMounts);
+         ArrayList<KinematicPoint> velocityPoints = new ArrayList<KinematicPoint>(); //simulatedRobot.getVelocityPoints();
+               
+         SensorMapFromRobotFactory sensorMapFromRobotFactory = new SensorMapFromRobotFactory(scsToInverseDynamicsJointMap, simulatedRobot, controlDT, imuMounts,
+               velocityPoints, registry);
+         SensorMap sensorMap = sensorMapFromRobotFactory.getSensorMap();
+         
+         orientationEstimator = createStateEstimator(sensorMap, inverseDynamicsStructure, controlDT, simulationTicksPerControlTick, simulatedRobot, registry, robotControllersAndParameters, desiredCoMAndAngularAccelerationOutputPortsHolder);
 
          if (!USE_STATE_ESTIMATOR)
          {
@@ -217,25 +236,12 @@ public class DRCSimulationFactory
    }
 
 
-   public static OrientationEstimator createStateEstimator(ScsInitialSetup scsInitialSetup, double controlDT, int simulationTicksPerControlTick, SDFRobot simulatedRobot,
-         YoVariableRegistry registry, ArrayList<RobotControllerAndParameters> robotControllersAndParameters, DesiredCoMAndAngularAccelerationOutputPortsHolder desiredCoMAndAngularAccelerationOutputPortsHolder)
+   public static OrientationEstimator createStateEstimator(SensorMap sensorMap, FullInverseDynamicsStructure inverseDynamicsStructure, double controlDT, int simulationTicksPerControlTick, 
+         SDFRobot simulatedRobot,
+         YoVariableRegistry registry, 
+         ArrayList<RobotControllerAndParameters> robotControllersAndParameters, 
+         DesiredCoMAndAngularAccelerationOutputPortsHolder desiredCoMAndAngularAccelerationOutputPortsHolder)
    {
-//      double simulationDT = scsInitialSetup.getDT();
-//      double desiredEstimatorDT = 0.001;
-      
-      //TODO: Get the IMU Mounts and Kinematic Points!
-      InverseDynamicsJointsFromSCSRobotGenerator generator = new InverseDynamicsJointsFromSCSRobotGenerator(simulatedRobot);
-      
-      ArrayList<IMUMount> imuMounts = new ArrayList<IMUMount>();
-      simulatedRobot.getIMUMounts(imuMounts);
-      ArrayList<KinematicPoint> velocityPoints = new ArrayList<KinematicPoint>(); //simulatedRobot.getVelocityPoints();
-            
-      SensorMapFromRobotFactory sensorMapFromRobotFactory = new SensorMapFromRobotFactory(generator, simulatedRobot, controlDT, imuMounts,
-            velocityPoints, registry);
-      SensorMap sensorMap = sensorMapFromRobotFactory.getSensorMap();
-
-      FullInverseDynamicsStructure inverseDynamicsStructure = generator.getInverseDynamicsStructure();
-
       Vector3d gravitationalAcceleration = new Vector3d();
       simulatedRobot.getGravity(gravitationalAcceleration);
       
@@ -247,11 +253,11 @@ public class DRCSimulationFactory
       ControlFlowGraph controlFlowGraph = sensorAndEstimatorAssembler.getControlFlowGraph();
       OrientationEstimator orientationEstimator = sensorAndEstimatorAssembler.getOrientationEstimator();
       
-      Joint estimationJoint2 = simulatedRobot.getRootJoints().get(0);
+      Joint estimationJoint = simulatedRobot.getRootJoints().get(0);
       ComposableStateEstimatorEvaluatorController composableStateEstimatorEvaluatorController = new ComposableStateEstimatorEvaluatorController(
             controlFlowGraph, orientationEstimator, 
             simulatedRobot, 
-            estimationJoint2, controlDT, 
+            estimationJoint, controlDT, 
             sensorMap, desiredCoMAndAngularAccelerationOutputPortsHolder);
       
       RobotControllerAndParameters humanoidStateEstimatorControllerAndParameters = new RobotControllerAndParameters(composableStateEstimatorEvaluatorController, simulationTicksPerControlTick);

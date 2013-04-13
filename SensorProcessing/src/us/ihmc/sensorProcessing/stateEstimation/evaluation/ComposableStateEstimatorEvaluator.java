@@ -7,6 +7,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.controlFlow.ControlFlowGraph;
 import us.ihmc.sensorProcessing.simulatedSensors.InverseDynamicsJointsFromSCSRobotGenerator;
+import us.ihmc.sensorProcessing.simulatedSensors.SCSToInverseDynamicsJointMap;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorMap;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorMapFromRobotFactory;
 import us.ihmc.sensorProcessing.stateEstimation.DesiredCoMAccelerationsFromRobotStealerController;
@@ -14,8 +15,6 @@ import us.ihmc.sensorProcessing.stateEstimation.DesiredCoMAndAngularAcceleration
 import us.ihmc.sensorProcessing.stateEstimation.OrientationEstimator;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FrameVector;
-import us.ihmc.utilities.screwTheory.RigidBody;
-import us.ihmc.utilities.screwTheory.SixDoFJoint;
 
 import com.yobotics.simulationconstructionset.IMUMount;
 import com.yobotics.simulationconstructionset.Joint;
@@ -44,7 +43,9 @@ public class ComposableStateEstimatorEvaluator
       ArrayList<IMUMount> imuMounts = new ArrayList<IMUMount>();
       robot.getIMUMounts(imuMounts);
 
-      SensorMapFromRobotFactory sensorMapFromRobotFactory = new SensorMapFromRobotFactory(generator, robot, controlDT, imuMounts,
+      SCSToInverseDynamicsJointMap scsToInverseDynamicsJointMap = generator.getSCSToInverseDynamicsJointMap();
+      
+      SensorMapFromRobotFactory sensorMapFromRobotFactory = new SensorMapFromRobotFactory(scsToInverseDynamicsJointMap, robot, controlDT, imuMounts,
                                                                robot.getVelocityPoints(), registry);
       SensorMap sensorMap = sensorMapFromRobotFactory.getSensorMap();
 
