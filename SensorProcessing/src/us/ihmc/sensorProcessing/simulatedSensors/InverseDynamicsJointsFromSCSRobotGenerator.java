@@ -11,6 +11,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.RevoluteJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTools;
@@ -21,6 +22,7 @@ import us.ihmc.utilities.screwTheory.Twist;
 import com.yobotics.simulationconstructionset.FloatingJoint;
 import com.yobotics.simulationconstructionset.Joint;
 import com.yobotics.simulationconstructionset.Link;
+import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJoint;
 import com.yobotics.simulationconstructionset.PinJoint;
 import com.yobotics.simulationconstructionset.Robot;
 
@@ -150,12 +152,12 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
    public void updateInverseDynamicsRobotModelFromRobot(boolean updateRootJoints, boolean updateDesireds)
    {
       // First update joint angles:
-      Collection<PinJoint> pinJoints = scsToInverseDynamicsJointMap.getPinJoints(); //pinToRevoluteJointMap.keySet();
-      for (PinJoint pinJoint : pinJoints)
+      Collection<OneDegreeOfFreedomJoint> pinJoints = scsToInverseDynamicsJointMap.getSCSOneDegreeOfFreedomJoints(); //pinToRevoluteJointMap.keySet();
+      for (OneDegreeOfFreedomJoint pinJoint : pinJoints)
       {
          if (updateRootJoints || (pinJoint.getParentJoint() != null))
          {
-            RevoluteJoint revoluteJoint = scsToInverseDynamicsJointMap.getInverseDynamicsRevoluteJoint(pinJoint); //pinToRevoluteJointMap.get(pinJoint);
+            OneDoFJoint revoluteJoint = scsToInverseDynamicsJointMap.getInverseDynamicsOneDoFJoint(pinJoint); //pinToRevoluteJointMap.get(pinJoint);
 
             double jointPosition = pinJoint.getQ().getDoubleValue();
             double jointVelocity = pinJoint.getQD().getDoubleValue();

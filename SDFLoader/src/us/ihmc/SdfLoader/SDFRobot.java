@@ -76,7 +76,7 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
    {
       this(generalizedSDFRobotModel, sdfJointNameMap, true);
    }
-   
+
    protected SDFRobot(GeneralizedSDFRobotModel generalizedSDFRobotModel, SDFJointNameMap sdfJointNameMap, boolean enableDamping)
    {
       super(generalizedSDFRobotModel.getName());
@@ -99,18 +99,18 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
       rootJoint = new FloatingJoint(rootLink.getName(), new Vector3d(), this);
       setPositionInWorld(offset);
       setOrientation(orientation);
-      
+
       addSensors(rootJoint, rootLink);
-      
+
       Link scsRootLink = createLink(rootLink, new Transform3D());
       rootJoint.setLink(scsRootLink);
-      
+
       addRootJoint(rootJoint);
 
       boolean enableTorqueVelocityLimits = false;
-      if(sdfJointNameMap != null)
+      if (sdfJointNameMap != null)
       {
-    	  enableTorqueVelocityLimits = sdfJointNameMap.enableTorqueVelocityLimits();
+         enableTorqueVelocityLimits = sdfJointNameMap.enableTorqueVelocityLimits();
       }
 
       for (SDFJointHolder child : rootLink.getChildren())
@@ -193,28 +193,34 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
    {
       rootJoint.setQuaternion(quaternion);
    }
-   
+
    public void setAngularVelocity(Vector3d velocity)
    {
       rootJoint.setAngularVelocityInBody(velocity);
    }
-   
+
    public void setLinearVelocity(Vector3d velocity)
    {
       rootJoint.setVelocity(velocity);
    }
-   
+
    public OneDegreeOfFreedomJoint getOneDoFJoint(String name)
    {
       return oneDoFJoints.get(name);
+   }
+
+   public FloatingJoint getRootJoint()
+   {
+      return rootJoint;
    }
 
    public Collection<OneDegreeOfFreedomJoint> getOneDoFJoints()
    {
       return oneDoFJoints.values();
    }
-   
-   private void addJointsRecursively(SDFJointHolder joint, Joint scsParentJoint, Matrix3d chainRotationIn, boolean enableTorqueVelocityLimits, boolean enableDamping)
+
+   private void addJointsRecursively(SDFJointHolder joint, Joint scsParentJoint, Matrix3d chainRotationIn, boolean enableTorqueVelocityLimits,
+                                     boolean enableDamping)
    {
       Matrix3d rotation = new Matrix3d();
       Vector3d offset = new Vector3d();
@@ -265,28 +271,28 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
                {
                   pinJoint.setLimitStops(joint.getLowerLimit(), joint.getUpperLimit(), 0.0001 * joint.getContactKp(), joint.getContactKd());
                }
-               
-               if(enableTorqueVelocityLimits)
+
+               if (enableTorqueVelocityLimits)
                {
                   if (!isFinger(joint))
                   {
-                     if(!Double.isNaN(joint.getEffortLimit()))
+                     if (!Double.isNaN(joint.getEffortLimit()))
                      {
                         pinJoint.setTorqueLimits(joint.getEffortLimit());
                      }
-                     
-                     if(!Double.isNaN(joint.getVelocityLimit()))
+
+                     if (!Double.isNaN(joint.getVelocityLimit()))
                      {
-                        if(!isFinger(joint))
+                        if (!isFinger(joint))
                         {
                            pinJoint.setVelocityLimits(joint.getVelocityLimit(), 500.0);
                         }
                      }
-                  }                  
+                  }
                }
-               
+
             }
-            
+
 
 
             oneDoFJoints.put(joint.getName(), pinJoint);
@@ -307,12 +313,13 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
                   sliderJoint.setLimitStops(joint.getLowerLimit(), joint.getUpperLimit(), 0.0001 * joint.getContactKp(), joint.getContactKd());
                }
             }
-            
+
             if (enableDamping)
             {
                sliderJoint.setDamping(joint.getDamping());
                oneDoFJoints.put(joint.getName(), sliderJoint);
             }
+
             scsJoint = sliderJoint;
 
             break;
@@ -342,18 +349,17 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
 
    private boolean isFinger(SDFJointHolder pinJoint)
    {
-      return pinJoint.getName().contains("f0") || pinJoint.getName().contains("f1") || pinJoint.getName().contains("f2")
-              || pinJoint.getName().contains("f3");
+      return pinJoint.getName().contains("f0") || pinJoint.getName().contains("f1") || pinJoint.getName().contains("f2") || pinJoint.getName().contains("f3");
    }
 
-   
+
    private void addSensors(Joint scsJoint, SDFLinkHolder child)
    {
       addCameraMounts(scsJoint, child);
       addLidarMounts(scsJoint, child);
       addIMUMounts(scsJoint, child);
    }
-   
+
    private void addCameraMounts(Joint scsJoint, SDFLinkHolder child)
    {
       if (child.getSensors() != null)
@@ -401,32 +407,36 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
                if (imu != null)
                {
                   Transform3D pose = SDFConversionsHelper.poseToTransform(sensor.getPose());
-                     
+
                   IMUMount imuMount = new IMUMount(sensor.getName(), pose, this);
-                  
+
                   IMUNoise noise = imu.getNoise();
-                  if(noise != null)
+                  if (noise != null)
                   {
-                     if("gaussian".equals(noise.getType()))
+                     if ("gaussian".equals(noise.getType()))
                      {
                         NoiseParameters accelerationNoise = noise.getAccel();
                         NoiseParameters angularVelocityNoise = noise.getRate();
-                        
-                        
-                        imuMount.setAccelerationNoiseParameters(Double.parseDouble(accelerationNoise.getMean()), Double.parseDouble(accelerationNoise.getStddev()));
-                        imuMount.setAccelerationBiasParameters(Double.parseDouble(accelerationNoise.getBias_mean()), Double.parseDouble(accelerationNoise.getBias_stddev()));
-                        
-                        
-                        imuMount.setAngularVelocityNoiseParameters(Double.parseDouble(angularVelocityNoise.getMean()), Double.parseDouble(angularVelocityNoise.getStddev()));
-                        imuMount.setAngularVelocityBiasParameters(Double.parseDouble(angularVelocityNoise.getBias_mean()), Double.parseDouble(angularVelocityNoise.getBias_stddev()));
-                        
+
+
+                        imuMount.setAccelerationNoiseParameters(Double.parseDouble(accelerationNoise.getMean()),
+                                Double.parseDouble(accelerationNoise.getStddev()));
+                        imuMount.setAccelerationBiasParameters(Double.parseDouble(accelerationNoise.getBias_mean()),
+                                Double.parseDouble(accelerationNoise.getBias_stddev()));
+
+
+                        imuMount.setAngularVelocityNoiseParameters(Double.parseDouble(angularVelocityNoise.getMean()),
+                                Double.parseDouble(angularVelocityNoise.getStddev()));
+                        imuMount.setAngularVelocityBiasParameters(Double.parseDouble(angularVelocityNoise.getBias_mean()),
+                                Double.parseDouble(angularVelocityNoise.getBias_stddev()));
+
                      }
                      else
                      {
                         throw new RuntimeException("Unknown IMU noise model: " + noise.getType());
                      }
                   }
-                  
+
                   scsJoint.addIMUMount(imuMount);
                }
                else
@@ -439,7 +449,7 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
       }
    }
 
-   
+
    private void addLidarMounts(Joint scsJoint, SDFLinkHolder child)
    {
       if (child.getSensors() != null)
@@ -471,17 +481,17 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
                   int sdfSamples = Integer.parseInt(sdfHorizontalScan.getSamples());
                   double sdfRangeResolution = Double.parseDouble(sdfRay.getRange().getResolution());
 
-                  
+
                   boolean sdfAlwaysOn = true;
-                  
+
                   double sdfGaussianStdDev = 0.0;
                   double sdfGaussianMean = 0.0;
                   double sdfUpdateRate = Double.parseDouble(sensor.getUpdateRate());
-                  
+
                   Noise sdfNoise = sdfRay.getNoise();
                   if (sdfNoise != null)
                   {
-                     if("gaussian".equals(sdfNoise.getType()))
+                     if ("gaussian".equals(sdfNoise.getType()))
                      {
                         sdfGaussianStdDev = Double.parseDouble(sdfNoise.getStddev());
                         sdfGaussianMean = Double.parseDouble(sdfNoise.getMean());
@@ -540,8 +550,8 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
          }
       }
    }
-   
-   
+
+
 
    private Link createLink(SDFLinkHolder link, Transform3D rotationTransform)
    {
@@ -558,9 +568,9 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
       Matrix3d inertia = link.getInertia();
       Vector3d CoMOffset = link.getCoMOffset();
 
-      if(link.getJoint() != null)
+      if (link.getJoint() != null)
       {
-         if(isFinger(link.getJoint()))
+         if (isFinger(link.getJoint()))
          {
             inertia.mul(100.0);
          }
@@ -621,11 +631,12 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
    {
       return footGroundContactPoints.get(robotSide);
    }
-   
+
    public Vector3d getPositionInWorld()
    {
       Vector3d position = new Vector3d();
       getPositionInWorld(position);
+
       return position;
    }
 
@@ -633,17 +644,17 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
    {
       rootJoint.getPosition(vectorToPack);
    }
-   
+
    public void getVelocityInWorld(Vector3d vectorToPack)
    {
       rootJoint.getVelocity(vectorToPack);
    }
-   
+
    public void getOrientationInWorld(Quat4d quaternionToPack)
    {
       rootJoint.getQuaternion(quaternionToPack);
    }
-   
+
    public void getAngularVelocityInBody(Vector3d vectorToPack)
    {
       rootJoint.getAngularVelocityInBody(vectorToPack);

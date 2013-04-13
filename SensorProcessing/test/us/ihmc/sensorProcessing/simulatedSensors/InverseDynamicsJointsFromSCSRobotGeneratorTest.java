@@ -14,7 +14,6 @@ import org.junit.Test;
 
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.sensorProcessing.simulatedSensors.InverseDynamicsJointsFromSCSRobotGenerator;
 import us.ihmc.utilities.Axis;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
@@ -23,7 +22,7 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
-import us.ihmc.utilities.screwTheory.RevoluteJoint;
+import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
 import us.ihmc.utilities.screwTheory.Twist;
@@ -35,9 +34,10 @@ import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.FloatingJoint;
 import com.yobotics.simulationconstructionset.Joint;
 import com.yobotics.simulationconstructionset.Link;
+import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJoint;
 import com.yobotics.simulationconstructionset.PinJoint;
-import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.RandomRobotGenerator;
+import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.UnreasonableAccelerationException;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
@@ -244,7 +244,7 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
       private final RigidBody elevator;
 
       private final ArrayList<FloatingJoint> floatingJoints = new ArrayList<FloatingJoint>();
-      private final ArrayList<PinJoint> pinJoints = new ArrayList<PinJoint>();
+      private final ArrayList<OneDegreeOfFreedomJoint> pinJoints = new ArrayList<OneDegreeOfFreedomJoint>();
 
       private final Joint lastJoint;
       private final InverseDynamicsJoint lastInverseDynamicsJoint;
@@ -274,7 +274,7 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
          scsToInverseDynamicsJointMap = generator.getSCSToInverseDynamicsJointMap();
          
          this.floatingJoints.addAll(scsToInverseDynamicsJointMap.getFloatingJoints());
-         this.pinJoints.addAll(scsToInverseDynamicsJointMap.getPinJoints());
+         this.pinJoints.addAll(scsToInverseDynamicsJointMap.getSCSOneDegreeOfFreedomJoints());
          
          this.twistCalculator = new TwistCalculator(inertialFrame, elevator);
          this.inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, -robot.getGravityZ());
@@ -288,7 +288,7 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
             wrenchAngularPartErrors.add(wrenchAngularPartError);
          }
 
-         for (PinJoint pinJoint : pinJoints)
+         for (OneDegreeOfFreedomJoint pinJoint : pinJoints)
          {
             DoubleYoVariable tauError = new DoubleYoVariable(pinJoint.getName() + "TauError", registry);
             tauErrors.add(tauError);
@@ -300,7 +300,7 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
          if (!pinJoints.isEmpty())
          {
             lastJoint = pinJoints.get(pinJoints.size() - 1);
-            lastInverseDynamicsJoint = scsToInverseDynamicsJointMap.getInverseDynamicsRevoluteJoint((PinJoint) lastJoint);
+            lastInverseDynamicsJoint = scsToInverseDynamicsJointMap.getInverseDynamicsOneDoFJoint((PinJoint) lastJoint);
          }
          else
          {
@@ -333,7 +333,7 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
          // First randomly generate torques:
          for (int i = 0; i < pinJoints.size(); i++)
          {
-            PinJoint pinJoint = pinJoints.get(i);
+            OneDegreeOfFreedomJoint pinJoint = pinJoints.get(i);
             double tau = random.nextGaussian() * 10.0;
             pinJoint.setTau(tau);
          }
@@ -358,10 +358,10 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
          // Next, extract the inverse dynamics torques and compare to the applied torques:
          for (int i = 0; i < pinJoints.size(); i++)
          {
-            PinJoint pinJoint = pinJoints.get(i);
+            OneDegreeOfFreedomJoint pinJoint = pinJoints.get(i);
             double appliedTau = pinJoint.getTau().getDoubleValue();
 
-            RevoluteJoint revoluteJoint = scsToInverseDynamicsJointMap.getInverseDynamicsRevoluteJoint(pinJoint);
+            OneDoFJoint revoluteJoint = scsToInverseDynamicsJointMap.getInverseDynamicsOneDoFJoint(pinJoint);
             DoubleYoVariable inverseDynamicsTau = inverseDynamicsTaus.get(i);
             inverseDynamicsTau.set(revoluteJoint.getTau());
 
