@@ -45,7 +45,6 @@ import us.ihmc.utilities.net.KryoObjectServer;
 import us.ihmc.utilities.net.ObjectCommunicator;
 import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
-import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 
 import com.yobotics.simulationconstructionset.IMUMount;
@@ -78,7 +77,7 @@ public class DRCSimulationFactory
       DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
 
       DRCRobotJointMap jointMap = robotInterface.getJointMap();
-//      SCSToInverseDynamicsJointMap scsToInverseDynamicsJointMap = robotInterface.getSCSToInverseDynamicsJointMap();
+      SCSToInverseDynamicsJointMap scsToInverseDynamicsJointMapTest = robotInterface.getSCSToInverseDynamicsJointMap();
       
       double simulateDT = robotInterface.getSimulateDT();
       double controlDT = controllerFactory.getControlDT();
@@ -276,8 +275,6 @@ public class DRCSimulationFactory
    {
       InverseDynamicsJointsFromSCSRobotGenerator generator = new InverseDynamicsJointsFromSCSRobotGenerator(simulatedRobot);
 
-      
-      RigidBody elevator = generator.getElevator();
       //TODO: Better way to get estimationJoint
       Joint estimationJoint = simulatedRobot.getRootJoints().get(0);
       DesiredCoMAccelerationsFromRobotStealerController desiredCoMAccelerationsFromRobotStealerController =
