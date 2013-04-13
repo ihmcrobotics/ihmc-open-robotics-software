@@ -234,6 +234,8 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
    private class VerifyGeneratorController implements RobotController
    {
       private final InverseDynamicsJointsFromSCSRobotGenerator generator;
+      private final SCSToInverseDynamicsJointMap scsToInverseDynamicsJointMap;
+      
       private final Robot robot;
       
       private final Random random = new Random(1984L);
@@ -268,8 +270,11 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
          this.generator = generator;
 
          this.elevator = generator.getElevator();
-         this.floatingJoints.addAll(generator.getFloatingJoints());
-         this.pinJoints.addAll(generator.getPinJoints());
+         
+         scsToInverseDynamicsJointMap = generator.getSCSToInverseDynamicsJointMap();
+         
+         this.floatingJoints.addAll(scsToInverseDynamicsJointMap.getFloatingJoints());
+         this.pinJoints.addAll(scsToInverseDynamicsJointMap.getPinJoints());
          
          this.twistCalculator = new TwistCalculator(inertialFrame, elevator);
          this.inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, -robot.getGravityZ());
@@ -295,12 +300,12 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
          if (!pinJoints.isEmpty())
          {
             lastJoint = pinJoints.get(pinJoints.size() - 1);
-            lastInverseDynamicsJoint = generator.getInverseDynamicsRevoluteJoint((PinJoint) lastJoint);
+            lastInverseDynamicsJoint = scsToInverseDynamicsJointMap.getInverseDynamicsRevoluteJoint((PinJoint) lastJoint);
          }
          else
          {
             lastJoint = floatingJoints.get(0);
-            lastInverseDynamicsJoint = generator.getInverseDynamicsSixDoFJoint((FloatingJoint) lastJoint);
+            lastInverseDynamicsJoint = scsToInverseDynamicsJointMap.getInverseDynamicsSixDoFJoint((FloatingJoint) lastJoint);
          }
       }
 
@@ -356,7 +361,7 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
             PinJoint pinJoint = pinJoints.get(i);
             double appliedTau = pinJoint.getTau().getDoubleValue();
 
-            RevoluteJoint revoluteJoint = generator.getInverseDynamicsRevoluteJoint(pinJoint);
+            RevoluteJoint revoluteJoint = scsToInverseDynamicsJointMap.getInverseDynamicsRevoluteJoint(pinJoint);
             DoubleYoVariable inverseDynamicsTau = inverseDynamicsTaus.get(i);
             inverseDynamicsTau.set(revoluteJoint.getTau());
 
@@ -400,7 +405,7 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
          {
             FloatingJoint floatingJoint = floatingJoints.get(i);
             
-            SixDoFJoint sixDoFJoint = generator.getInverseDynamicsSixDoFJoint(floatingJoint);
+            SixDoFJoint sixDoFJoint = scsToInverseDynamicsJointMap.getInverseDynamicsSixDoFJoint(floatingJoint);
             
             Wrench wrench = new Wrench();
             sixDoFJoint.packWrench(wrench);

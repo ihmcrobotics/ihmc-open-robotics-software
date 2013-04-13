@@ -2,8 +2,6 @@ package us.ihmc.sensorProcessing.simulatedSensors;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.media.j3d.Transform3D;
@@ -13,7 +11,6 @@ import javax.vecmath.Vector3d;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.RevoluteJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTools;
@@ -24,17 +21,12 @@ import us.ihmc.utilities.screwTheory.Twist;
 import com.yobotics.simulationconstructionset.FloatingJoint;
 import com.yobotics.simulationconstructionset.Joint;
 import com.yobotics.simulationconstructionset.Link;
-import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJoint;
 import com.yobotics.simulationconstructionset.PinJoint;
 import com.yobotics.simulationconstructionset.Robot;
 
 public class InverseDynamicsJointsFromSCSRobotGenerator
 {   
-   private final HashMap<SixDoFJoint, FloatingJoint> sixDofToFloatingJointMap = new HashMap<SixDoFJoint, FloatingJoint>();
-   private final HashMap<FloatingJoint, SixDoFJoint> floatingToSixDofToJointMap = new HashMap<FloatingJoint, SixDoFJoint>();
-   
-   private final HashMap<RevoluteJoint, PinJoint> revoluteToPinJointMap = new HashMap<RevoluteJoint, PinJoint>();
-   private final HashMap<PinJoint, RevoluteJoint> pinToRevoluteJointMap = new HashMap<PinJoint, RevoluteJoint>();
+   private final SCSToInverseDynamicsJointMap scsToInverseDynamicsJointMap = new SCSToInverseDynamicsJointMap();
    
    private final Robot robot;
    private final RigidBody elevator;
@@ -43,9 +35,7 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
    public InverseDynamicsJointsFromSCSRobotGenerator(Robot robot)
    {
       this.robot = robot;
-      
-      double gravity = robot.getGravityZ();
-      
+            
       ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", ReferenceFrame.getWorldFrame(), new Transform3D());
       elevator = new RigidBody("elevator", elevatorFrame);
 
@@ -76,8 +66,7 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
             SixDoFJoint currentIDJoint = new SixDoFJoint(currentJoint.getName(), elevator, ReferenceFrame.getWorldFrame());            
             ScrewTools.addRigidBody(currentJoint.getName(), currentIDJoint, momentOfInertia, mass, comOffset);
 
-            sixDofToFloatingJointMap.put(currentIDJoint, currentJoint);
-            floatingToSixDofToJointMap.put(currentJoint, currentIDJoint);
+            scsToInverseDynamicsJointMap.addLinkedJoints(currentJoint, currentIDJoint);
          }
          else if (polledJoint instanceof PinJoint)
          {
@@ -93,8 +82,7 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
             
             ScrewTools.addRigidBody(currentJoint.getName(), currentIDJoint, momentOfInertia, mass, comOffset);
 
-            revoluteToPinJointMap.put(currentIDJoint, currentJoint);
-            pinToRevoluteJointMap.put(currentJoint, currentIDJoint);
+            scsToInverseDynamicsJointMap.addLinkedJoints(currentJoint, currentIDJoint);
          }
          else
          {
@@ -109,6 +97,10 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
       elevator.updateFramesRecursively();
    }
    
+   public SCSToInverseDynamicsJointMap getSCSToInverseDynamicsJointMap()
+   {
+      return scsToInverseDynamicsJointMap;
+   }
    
    public RigidBody getElevator()
    {
@@ -116,24 +108,24 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
    }
    
    
-   public SixDoFJoint getRootSixDoFJoint()
+   private SixDoFJoint getRootSixDoFJoint()
    {
       ArrayList<Joint> rootJoints = robot.getRootJoints();
       if (rootJoints.size() > 1) throw new RuntimeException("Only works with one root joint");
       
-      Joint rootJoint = rootJoints.get(0);
+      FloatingJoint rootJoint = (FloatingJoint) rootJoints.get(0);
       
-      return floatingToSixDofToJointMap.get(rootJoint);
+      return scsToInverseDynamicsJointMap.getInverseDynamicsSixDoFJoint(rootJoint);
    }
    
-   public RigidBody getRootBody()
+   private RigidBody getRootBody()
    {
       ArrayList<Joint> rootJoints = robot.getRootJoints();
       if (rootJoints.size() > 1) throw new RuntimeException("Only works with one root joint");
       
       Joint rootJoint = rootJoints.get(0);
       
-      return getRigidBody(rootJoint);
+      return scsToInverseDynamicsJointMap.getRigidBody(rootJoint);
    }
   
    private RigidBody getParentIDBody(Joint polledJoint, RigidBody elevator)
@@ -142,25 +134,7 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
 
       if (parentJoint == null) return elevator;
       
-      return getRigidBody(parentJoint);
-   }
-   
-   public RigidBody getRigidBody(Joint joint)
-   {      
-      if (joint instanceof FloatingJoint)
-      {
-         SixDoFJoint parentSixDoFJoint = floatingToSixDofToJointMap.get(joint);
-         return parentSixDoFJoint.getSuccessor();
-      }
-      else if (joint instanceof PinJoint)
-      {
-         RevoluteJoint parentRevoluteJoint = pinToRevoluteJointMap.get(joint);
-         return parentRevoluteJoint.getSuccessor();
-      }
-      else
-      {
-         throw new RuntimeException();
-      }   
+      return scsToInverseDynamicsJointMap.getRigidBody(parentJoint);
    }
 
    private final SpatialAccelerationVector spatialAccelerationVector = new SpatialAccelerationVector();
@@ -176,12 +150,12 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
    public void updateInverseDynamicsRobotModelFromRobot(boolean updateRootJoints, boolean updateDesireds)
    {
       // First update joint angles:
-      Set<PinJoint> pinJoints = pinToRevoluteJointMap.keySet();
+      Collection<PinJoint> pinJoints = scsToInverseDynamicsJointMap.getPinJoints(); //pinToRevoluteJointMap.keySet();
       for (PinJoint pinJoint : pinJoints)
       {
          if (updateRootJoints || (pinJoint.getParentJoint() != null))
          {
-            RevoluteJoint revoluteJoint = pinToRevoluteJointMap.get(pinJoint);
+            RevoluteJoint revoluteJoint = scsToInverseDynamicsJointMap.getInverseDynamicsRevoluteJoint(pinJoint); //pinToRevoluteJointMap.get(pinJoint);
 
             double jointPosition = pinJoint.getQ().getDoubleValue();
             double jointVelocity = pinJoint.getQD().getDoubleValue();
@@ -198,10 +172,10 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
       
       if (updateRootJoints)
       {
-         Set<FloatingJoint> floatingJoints = floatingToSixDofToJointMap.keySet();
+         Collection<? extends FloatingJoint> floatingJoints = scsToInverseDynamicsJointMap.getFloatingJoints(); //floatingToSixDofToJointMap.keySet();
          for (FloatingJoint floatingJoint : floatingJoints)
          {
-            SixDoFJoint sixDoFJoint = floatingToSixDofToJointMap.get(floatingJoint);
+            SixDoFJoint sixDoFJoint = scsToInverseDynamicsJointMap.getInverseDynamicsSixDoFJoint(floatingJoint); //floatingToSixDofToJointMap.get(floatingJoint);
 
             floatingJoint.getTransformToWorld(positionAndRotation);
             sixDoFJoint.setPositionAndRotation(positionAndRotation);
@@ -214,10 +188,10 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
      
       if (updateRootJoints)
       {
-         Set<FloatingJoint> floatingJoints = floatingToSixDofToJointMap.keySet();
+         Collection<? extends FloatingJoint> floatingJoints = scsToInverseDynamicsJointMap.getFloatingJoints(); 
          for (FloatingJoint floatingJoint : floatingJoints)
          {
-            SixDoFJoint sixDoFJoint = floatingToSixDofToJointMap.get(floatingJoint);
+            SixDoFJoint sixDoFJoint = scsToInverseDynamicsJointMap.getInverseDynamicsSixDoFJoint(floatingJoint);
             //                     referenceFrames.updateFrames();
 
             ReferenceFrame elevatorFrame = sixDoFJoint.getFrameBeforeJoint();
@@ -250,41 +224,6 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
                sixDoFJoint.setAcceleration(spatialAccelerationVector);
          }
       }
-   }
-
-   public RevoluteJoint getInverseDynamicsRevoluteJoint(PinJoint pinJoint)
-   {
-      return pinToRevoluteJointMap.get(pinJoint);      
-   }
-
-   public Collection<PinJoint> getPinJoints()
-   {
-      return pinToRevoluteJointMap.keySet();
-   }
-   
-   public SixDoFJoint getInverseDynamicsSixDoFJoint(FloatingJoint floatingJoint)
-   {
-      return floatingToSixDofToJointMap.get(floatingJoint);
-   }
-
-   public Collection<? extends FloatingJoint> getFloatingJoints()
-   {
-      return floatingToSixDofToJointMap.keySet();
-   }
-
-
-   public OneDoFJoint getOneDoFJoint(OneDegreeOfFreedomJoint oneDegreeOfFreedomJoint)
-   {
-      if (oneDegreeOfFreedomJoint instanceof PinJoint)
-      {
-         return getInverseDynamicsRevoluteJoint((PinJoint) oneDegreeOfFreedomJoint);
-      }
-      
-      else
-      {
-         throw new RuntimeException("Not implemented for SliderJoints yet!");
-      }
-      
    }
    
    public FullInverseDynamicsStructure getInverseDynamicsStructure()
