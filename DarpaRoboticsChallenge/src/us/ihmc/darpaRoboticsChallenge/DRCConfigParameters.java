@@ -92,7 +92,7 @@ public class DRCConfigParameters
       (1 + 0.3) * 2
       * Math.sqrt(DRCRobotParameters.DRC_ROBOT_FOOT_FORWARD * DRCRobotParameters.DRC_ROBOT_FOOT_FORWARD
                   + 0.25 * DRCRobotParameters.DRC_ROBOT_FOOT_WIDTH * DRCRobotParameters.DRC_ROBOT_FOOT_WIDTH);
-   public static final boolean POPULATE_OCTREE = false;
+   public static final boolean POPULATE_OCTREE = true;
 
 
 
