@@ -9,7 +9,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 
-public class SDFNoisySimulatedSensorReaderAndWriter extends SDFPerfectSimulatedSensorReaderAndWriter
+public class SDFNoisySimulatedSensorReader extends SDFPerfectSimulatedSensorReader
 {
 
    private final boolean addNoiseFiltering = true;
@@ -23,7 +23,7 @@ public class SDFNoisySimulatedSensorReaderAndWriter extends SDFPerfectSimulatedS
    private final Quat4d rotationFilter = new Quat4d();
    private final Vector3d positionFilter = new Vector3d();
 
-   public SDFNoisySimulatedSensorReaderAndWriter(SDFRobot robot, FullRobotModel fullRobotModel, CommonWalkingReferenceFrames referenceFrames)
+   public SDFNoisySimulatedSensorReader(SDFRobot robot, FullRobotModel fullRobotModel, CommonWalkingReferenceFrames referenceFrames)
    {
       super(robot, fullRobotModel, referenceFrames);
    }

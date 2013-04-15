@@ -9,7 +9,7 @@ import javax.vecmath.Point2d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.JaxbSDFLoader;
-import us.ihmc.SdfLoader.SDFPerfectSimulatedSensorReaderAndWriter;
+import us.ihmc.SdfLoader.SDFPerfectSimulatedSensorReader;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonAvatarInterfaces.CommonAvatarEnvironmentInterface;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
@@ -47,7 +47,7 @@ public class MultiContactTestEnvironment implements CommonAvatarEnvironmentInter
       FullRobotModel fullRobotModelForEnvironmentSetup = jaxbSDFLoader.createFullRobotModel(jointMap);
 
       CommonWalkingReferenceFrames referenceFramesForEnvironmentSetup = new ReferenceFrames(fullRobotModelForEnvironmentSetup, jointMap, jointMap.getAnkleHeight());
-      SDFPerfectSimulatedSensorReaderAndWriter sensorReaderAndOutputWriter = new SDFPerfectSimulatedSensorReaderAndWriter(robotForEnvironmentSetup,
+      SDFPerfectSimulatedSensorReader sensorReaderAndOutputWriter = new SDFPerfectSimulatedSensorReader(robotForEnvironmentSetup,
                                                                                 fullRobotModelForEnvironmentSetup, referenceFramesForEnvironmentSetup);
       sensorReaderAndOutputWriter.read();
       
