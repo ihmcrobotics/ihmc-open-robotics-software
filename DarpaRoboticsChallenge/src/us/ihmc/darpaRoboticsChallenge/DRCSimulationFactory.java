@@ -13,11 +13,11 @@ import us.ihmc.commonAvatarInterfaces.CommonAvatarEnvironmentInterface;
 import us.ihmc.commonWalkingControlModules.controllers.ControllerFactory;
 import us.ihmc.commonWalkingControlModules.controllers.HandControllerInterface;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.HandStatePacket;
-import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.CenterOfMassJacobianUpdater;
 import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.sensors.ForceSensorInterface;
+import us.ihmc.commonWalkingControlModules.sensors.CommonWalkingReferenceFramesUpdater;
 import us.ihmc.commonWalkingControlModules.sensors.TwistUpdater;
 import us.ihmc.commonWalkingControlModules.visualizer.CommonInertiaElipsoidsVisualizer;
 import us.ihmc.controlFlow.ControlFlowGraph;
@@ -40,6 +40,7 @@ import us.ihmc.sensorProcessing.stateEstimation.OrientationEstimator;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.ComposableStateEstimatorEvaluatorController;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.SensorAndEstimatorAssembler;
+import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.net.KryoObjectServer;
 import us.ihmc.utilities.net.ObjectCommunicator;
 import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
@@ -48,6 +49,7 @@ import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 
+import com.yobotics.simulationconstructionset.GroundContactPoint;
 import com.yobotics.simulationconstructionset.IMUMount;
 import com.yobotics.simulationconstructionset.InverseDynamicsMechanismReferenceFrameVisualizer;
 import com.yobotics.simulationconstructionset.Joint;
@@ -108,10 +110,11 @@ public class DRCSimulationFactory
       TwistCalculator twistCalculator = inverseDynamicsStructure.getTwistCalculator();
       CenterOfMassJacobian centerOfMassJacobian = new CenterOfMassJacobian(fullRobotModelForController.getElevator());
 
+      ReferenceFrames referenceFramesForController = new ReferenceFrames(fullRobotModelForSimulation, jointMap, jointMap.getAnkleHeight());
+
       OrientationEstimator orientationEstimator = null;
       if (CREATE_STATE_ESTIMATOR)
       {
-         // TODO: Get the Kinematic Points!
          SCSToInverseDynamicsJointMap scsToInverseDynamicsJointMapForEstimator;
          FullInverseDynamicsStructure inverseDynamicsStructureForEstimator;
 
@@ -131,22 +134,35 @@ public class DRCSimulationFactory
          simulatedRobot.getIMUMounts(imuMounts);
          ArrayList<KinematicPoint> velocityPoints = new ArrayList<KinematicPoint>();    
          //TODO: Get the velocity points
-         // simulatedRobot.getVelocityPoints();
+         ArrayList<GroundContactPoint> allKinematicPoints = simulatedRobot.getAllGroundContactPoints();
+         
+         for (KinematicPoint kinematicPoint : allKinematicPoints)
+         {
+//            System.out.println("kinematicPoint.getName() = " + kinematicPoint.getName());
+            if (kinematicPoint.getName().equals("gc_l_leg_lax_0") || (kinematicPoint.getName().equals("gc_r_leg_lax_0")))
+            {
+               System.out.println("Adding VelocityPoint " + kinematicPoint.getName());
 
+               velocityPoints.add(kinematicPoint);
+            }
+         }
+         
          SensorMapFromRobotFactory sensorMapFromRobotFactory = new SensorMapFromRobotFactory(scsToInverseDynamicsJointMapForEstimator, simulatedRobot,
                                                                   controlDT, imuMounts, velocityPoints, registry);
          SensorMap sensorMap = sensorMapFromRobotFactory.getSensorMap();
 
          orientationEstimator = createStateEstimator(sensorMap, inverseDynamicsStructureForEstimator, controlDT, simulationTicksPerControlTick, simulatedRobot,
                  registry, robotControllersAndParameters, desiredCoMAndAngularAccelerationOutputPortsHolder);
-
+         
+         FramePoint estimatedCoMPosition = new FramePoint(orientationEstimator.getEstimatedCoMPosition());
+         estimatedCoMPosition.setZ(estimatedCoMPosition.getZ() + 1.2);
+         orientationEstimator.setEstimatedCoMPosition(estimatedCoMPosition);
+         
          if (!USE_STATE_ESTIMATOR)
          {
             orientationEstimator = null;
          }
       }
-
-      CommonWalkingReferenceFrames referenceFramesForController = new ReferenceFrames(fullRobotModelForSimulation, jointMap, jointMap.getAnkleHeight());
 
       SideDependentList<FootSwitchInterface> footSwitches = robotInterface.getFootSwitches();
 
@@ -217,9 +233,9 @@ public class DRCSimulationFactory
          modularRobotController = new ModularRobotController("ModularRobotController");
       }
 
-      final ModularSensorProcessor sensorProcessor = createSensorProcessor(twistCalculator, centerOfMassJacobian);
+      final ModularSensorProcessor sensorProcessor = createSensorProcessor(twistCalculator, centerOfMassJacobian, referenceFramesForController);
       
-//      if (!USE_STATE_ESTIMATOR)
+      if (!USE_STATE_ESTIMATOR)
       {
          modularRobotController.setRawSensorReader(sensorReaderAndOutputWriter);
       }
@@ -333,12 +349,14 @@ public class DRCSimulationFactory
    }
 
 
-   private static ModularSensorProcessor createSensorProcessor(TwistCalculator twistCalculator, CenterOfMassJacobian centerOfMassJacobian)
+   private static ModularSensorProcessor createSensorProcessor(TwistCalculator twistCalculator, CenterOfMassJacobian centerOfMassJacobian,       
+         ReferenceFrames referenceFrames)
    {
       ModularSensorProcessor modularSensorProcessor = new ModularSensorProcessor("ModularSensorProcessor", "");
       modularSensorProcessor.addSensorProcessor(new TwistUpdater(twistCalculator));
       modularSensorProcessor.addSensorProcessor(new CenterOfMassJacobianUpdater(centerOfMassJacobian));
-
+      modularSensorProcessor.addSensorProcessor(new CommonWalkingReferenceFramesUpdater(referenceFrames));
+      
       return modularSensorProcessor;
    }
 }
