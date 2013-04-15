@@ -87,13 +87,13 @@ public class DRCConfigParameters
    public static final double POSITION_NOISE_STD = 0.01;
    public static final double QUATERNION_NOISE_STD = 0.01;
    public static final boolean DEBUG_GAZEBO_LIDAR = false;
-   public static final double LIDAR_NOISE_LEVEL_OVERRIDE = 0.005; // DRCGazebo will simulate with: 0.005 
-   public static final double BOUNDING_BOX_FOR_FOOTSTEP_HEIGHT_FINDING_SIDE_LENGTH = (1 + 0.3)
-   * 2
-   * Math.sqrt(DRCRobotParameters.DRC_ROBOT_FOOT_FORWARD * DRCRobotParameters.DRC_ROBOT_FOOT_FORWARD + 0.25 * DRCRobotParameters.DRC_ROBOT_FOOT_WIDTH
-         * DRCRobotParameters.DRC_ROBOT_FOOT_WIDTH);
-   
-   
+   public static final double LIDAR_NOISE_LEVEL_OVERRIDE = 0.005;    // DRCGazebo will simulate with: 0.005
+   public static final double BOUNDING_BOX_FOR_FOOTSTEP_HEIGHT_FINDING_SIDE_LENGTH =
+      (1 + 0.3) * 2
+      * Math.sqrt(DRCRobotParameters.DRC_ROBOT_FOOT_FORWARD * DRCRobotParameters.DRC_ROBOT_FOOT_FORWARD
+                  + 0.25 * DRCRobotParameters.DRC_ROBOT_FOOT_WIDTH * DRCRobotParameters.DRC_ROBOT_FOOT_WIDTH);
+   public static final boolean POPULATE_OCTREE = false;
+
 
 
 
