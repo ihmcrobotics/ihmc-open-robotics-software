@@ -3,6 +3,8 @@ package us.ihmc.SdfLoader;
 import java.util.ArrayList;
 
 import javax.media.j3d.Transform3D;
+import javax.vecmath.Matrix3d;
+import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
@@ -22,7 +24,7 @@ public class SDFPerfectSimulatedSensorReaderAndWriter implements RawSensorReader
 {
    private final String name;
    private final SDFRobot robot;
-   private final FullRobotModel fullRobotModel;
+   private final SixDoFJoint rootJoint;
    private final CommonWalkingReferenceFrames referenceFrames;
 
    private final ArrayList<Pair<OneDegreeOfFreedomJoint,OneDoFJoint>> revoluteJoints = new ArrayList<Pair<OneDegreeOfFreedomJoint, OneDoFJoint>>();
@@ -31,9 +33,10 @@ public class SDFPerfectSimulatedSensorReaderAndWriter implements RawSensorReader
    {
       this.name = robot.getName() + "SimulatedSensorReader";
       this.robot = robot;
-      this.fullRobotModel = fullRobotModel;
       this.referenceFrames = referenceFrames;
 
+      rootJoint = fullRobotModel.getRootJoint();
+      
       OneDoFJoint[] revoluteJointsArray = fullRobotModel.getOneDoFJoints();
 
       for (OneDoFJoint revoluteJoint : revoluteJointsArray)
@@ -68,30 +71,20 @@ public class SDFPerfectSimulatedSensorReaderAndWriter implements RawSensorReader
    }
 
    private Transform3D temporaryRootToWorldTransform = new Transform3D();
+   private Vector3d temporaryRootToWorldTranslation = new Vector3d();
+   private Matrix3d temporaryRootToWorldRotation = new Matrix3d();
 
    public void read()
    {
-      for (Pair<OneDegreeOfFreedomJoint, OneDoFJoint> jointPair : revoluteJoints)
-      {
-         OneDegreeOfFreedomJoint pinJoint = jointPair.first();
-         OneDoFJoint revoluteJoint = jointPair.second();
+      // Think about adding root body acceleration to the fullrobotmodel
+      readAndUpdateOneDoFJointPositionsVelocitiesAndAccelerations();
+      readAndUpdateRootJointPositionAndOrientation();
+      updateReferenceFrames();
+      readAndUpdateRootJointAngularAndLinearVelocity();
+   }
 
-         revoluteJoint.setQ(pinJoint.getQ().getDoubleValue());
-         revoluteJoint.setQd(pinJoint.getQD().getDoubleValue());
-         revoluteJoint.setQdd(pinJoint.getQDD().getDoubleValue());
-
-      }
-
-      SixDoFJoint rootJoint = fullRobotModel.getRootJoint();      
-      packRootTransform(robot, temporaryRootToWorldTransform);
-      rootJoint.setPositionAndRotation(temporaryRootToWorldTransform);
-      
-      if(referenceFrames != null)
-      {
-         referenceFrames.updateFrames();         
-      }
-
-
+   private void readAndUpdateRootJointAngularAndLinearVelocity()
+   {
       ReferenceFrame elevatorFrame = rootJoint.getFrameBeforeJoint();
       ReferenceFrame pelvisFrame = rootJoint.getFrameAfterJoint();
 
@@ -103,9 +96,48 @@ public class SDFPerfectSimulatedSensorReaderAndWriter implements RawSensorReader
 
       Twist bodyTwist = new Twist(pelvisFrame, elevatorFrame, pelvisFrame, linearVelocity.getVector(), angularVelocity.getVector());
       rootJoint.setJointTwist(bodyTwist);
+   }
 
-      // Think about adding root body acceleration to the fullrobotmodel
+   private void updateReferenceFrames()
+   {
+      if(referenceFrames != null)
+      {
+         referenceFrames.updateFrames();         
+      }
+   }
 
+   private void readAndUpdateRootJointPositionAndOrientation()
+   {
+      readAndUpdateRootJointPosition();
+      readAndUpdateRootJointOrientation();
+   }
+   
+   private void readAndUpdateRootJointPosition()
+   {
+      packRootTransform(robot, temporaryRootToWorldTransform);
+      temporaryRootToWorldTransform.get(temporaryRootToWorldTranslation);
+      rootJoint.setPosition(temporaryRootToWorldTranslation);
+   }
+   
+   private void readAndUpdateRootJointOrientation()
+   {
+      packRootTransform(robot, temporaryRootToWorldTransform);
+      temporaryRootToWorldTransform.get(temporaryRootToWorldRotation);
+      rootJoint.setRotation(temporaryRootToWorldRotation);
+   }
+
+   private void readAndUpdateOneDoFJointPositionsVelocitiesAndAccelerations()
+   {
+      for (Pair<OneDegreeOfFreedomJoint, OneDoFJoint> jointPair : revoluteJoints)
+      {
+         OneDegreeOfFreedomJoint pinJoint = jointPair.first();
+         OneDoFJoint revoluteJoint = jointPair.second();
+
+         revoluteJoint.setQ(pinJoint.getQ().getDoubleValue());
+         revoluteJoint.setQd(pinJoint.getQD().getDoubleValue());
+         revoluteJoint.setQdd(pinJoint.getQDD().getDoubleValue());
+
+      }
    }
    
    protected void packRootTransform(SDFRobot robot, Transform3D transformToPack)
