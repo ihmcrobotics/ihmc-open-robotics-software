@@ -6,8 +6,9 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.GazeboStateCommunicator.GazeboRobot;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.SdfLoader.SDFNoisySimulatedSensorReaderAndWriter;
-import us.ihmc.SdfLoader.SDFPerfectSimulatedSensorReaderAndWriter;
+import us.ihmc.SdfLoader.SDFNoisySimulatedSensorReader;
+import us.ihmc.SdfLoader.SDFPerfectSimulatedOutputWriter;
+import us.ihmc.SdfLoader.SDFPerfectSimulatedSensorReader;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonAvatarInterfaces.CommonAvatarEnvironmentInterface;
 import us.ihmc.commonWalkingControlModules.controllers.ControllerFactory;
@@ -15,9 +16,9 @@ import us.ihmc.commonWalkingControlModules.controllers.HandControllerInterface;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.HandStatePacket;
 import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.CenterOfMassJacobianUpdater;
+import us.ihmc.commonWalkingControlModules.sensors.CommonWalkingReferenceFramesUpdater;
 import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.sensors.ForceSensorInterface;
-import us.ihmc.commonWalkingControlModules.sensors.CommonWalkingReferenceFramesUpdater;
 import us.ihmc.commonWalkingControlModules.sensors.TwistUpdater;
 import us.ihmc.commonWalkingControlModules.visualizer.CommonInertiaElipsoidsVisualizer;
 import us.ihmc.controlFlow.ControlFlowGraph;
@@ -188,22 +189,24 @@ public class DRCSimulationFactory
          }
       }
 
-      SDFPerfectSimulatedSensorReaderAndWriter sensorReaderAndOutputWriter;
+      SDFPerfectSimulatedSensorReader sensorReader;
 
       if (DRCConfigParameters.INTRODUCE_FILTERED_GAUSSIAN_POSITIONING_ERROR)
       {
          System.err.println("Using noisy fullrobotmodel");
-         SDFNoisySimulatedSensorReaderAndWriter noisySimulatedSensorReaderAndWriter = new SDFNoisySimulatedSensorReaderAndWriter(simulatedRobot,
+         SDFNoisySimulatedSensorReader noisySimulatedSensorReaderAndWriter = new SDFNoisySimulatedSensorReader(simulatedRobot,
                                                                                          fullRobotModelForController, referenceFramesForController);
          noisySimulatedSensorReaderAndWriter.setNoiseFilterAlpha(DRCConfigParameters.NOISE_FILTER_ALPHA);
          noisySimulatedSensorReaderAndWriter.setPositionNoiseStd(DRCConfigParameters.POSITION_NOISE_STD);
          noisySimulatedSensorReaderAndWriter.setQuaternionNoiseStd(DRCConfigParameters.QUATERNION_NOISE_STD);
-         sensorReaderAndOutputWriter = noisySimulatedSensorReaderAndWriter;
+         sensorReader = noisySimulatedSensorReaderAndWriter;
       }
       else
       {
-         sensorReaderAndOutputWriter = new SDFPerfectSimulatedSensorReaderAndWriter(simulatedRobot, fullRobotModelForController, referenceFramesForController);
+         sensorReader = new SDFPerfectSimulatedSensorReader(simulatedRobot, fullRobotModelForController, referenceFramesForController);
       }
+
+      SDFPerfectSimulatedOutputWriter outputWriter = new SDFPerfectSimulatedOutputWriter(simulatedRobot, fullRobotModelForController);
 
       // PathTODO: Build LIDAR here
       OneDoFJoint lidarJoint;
@@ -237,7 +240,7 @@ public class DRCSimulationFactory
       
       if (!USE_STATE_ESTIMATOR)
       {
-         modularRobotController.setRawSensorReader(sensorReaderAndOutputWriter);
+         modularRobotController.setRawSensorReader(sensorReader);
       }
       
       modularRobotController.setSensorProcessor(sensorProcessor);
@@ -255,7 +258,7 @@ public class DRCSimulationFactory
                  dynamicGraphicObjectsListRegistry, 0.1));
       }
 
-      modularRobotController.setRawOutputWriter(sensorReaderAndOutputWriter);
+      modularRobotController.setRawOutputWriter(outputWriter);
 
       RobotControllerAndParameters modularRobotControllerAndParameters = new RobotControllerAndParameters(modularRobotController,
                                                                             simulationTicksPerControlTick);
