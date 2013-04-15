@@ -138,7 +138,10 @@ public class ComposableOrientationAndCoMEstimatorCreator
       private final ControlFlowOutputPort<FrameVector> centerOfMassVelocityStatePort;
       private final ControlFlowOutputPort<FrameVector> centerOfMassAccelerationStatePort;
       private final ControlFlowOutputPort<FrameVector> angularAccelerationStatePort;
+      private final ControlFlowOutputPort<FullInverseDynamicsStructure> updatedInverseDynamicsStructureOutputPort;
 
+      private final CenterOfMassBasedFullRobotModelUpdater centerOfMassBasedFullRobotModelUpdater;
+      
       public ComposableOrientationAndCoMEstimator(String name, double controlDT, SixDoFJoint rootJoint, RigidBody estimationLink,
             ReferenceFrame estimationFrame, ControlFlowGraph controlFlowGraph, 
             ControlFlowOutputPort<FullInverseDynamicsStructure> inverseDynamicsStructureOutputPort,
@@ -146,7 +149,7 @@ public class ComposableOrientationAndCoMEstimatorCreator
             ControlFlowOutputPort<FrameVector> desiredCenterOfMassAccelerationOutputPort, YoVariableRegistry parentRegistry)
       {
          super(name, controlDT, parentRegistry);
-
+         
          this.inverseDynamicsStructureInputPort = createInputPort();
          controlFlowGraph.connectElements(inverseDynamicsStructureOutputPort, inverseDynamicsStructureInputPort);
          
@@ -158,7 +161,9 @@ public class ComposableOrientationAndCoMEstimatorCreator
          centerOfMassPositionStatePort = new YoFramePointControlFlowOutputPort(this, name + "CoMPosition", ReferenceFrame.getWorldFrame(), registry);
          centerOfMassVelocityStatePort = new YoFrameVectorControlFlowOutputPort(this, name + "CoMVelocity", ReferenceFrame.getWorldFrame(), registry);
          centerOfMassAccelerationStatePort = new YoFrameVectorControlFlowOutputPort(this, name + "CoMAcceleration", ReferenceFrame.getWorldFrame(), registry);
-
+         
+         this.updatedInverseDynamicsStructureOutputPort = createOutputPort();
+         
          ControlFlowInputPort<FrameVector> desiredAngularAccelerationInputPort = createProcessInputPort(VECTOR3D_LENGTH);
          controlFlowGraph.connectElements(desiredAngularAccelerationOutputPort, desiredAngularAccelerationInputPort);
 
@@ -193,16 +198,25 @@ public class ComposableOrientationAndCoMEstimatorCreator
             addPointVelocitySensor(estimationFrame, controlFlowGraph, pointVelocitySensorConfiguration);
          }
 
-         CenterOfMassBasedFullRobotModelUpdater centerOfMassBasedFullRobotModelUpdater = new CenterOfMassBasedFullRobotModelUpdater(
+         this.centerOfMassBasedFullRobotModelUpdater = new CenterOfMassBasedFullRobotModelUpdater(
                inverseDynamicsStructureInputPort, 
                centerOfMassPositionStatePort, centerOfMassVelocityStatePort, centerOfMassAccelerationStatePort,
                orientationStatePort, angularVelocityStatePort, angularAccelerationStatePort);
 
-         addPostStateChangeRunnable(centerOfMassBasedFullRobotModelUpdater);
+         Runnable runnable = new Runnable(){
 
+            public void run()
+            {
+               //TODO: Less magic at a distance communication here.
+               centerOfMassBasedFullRobotModelUpdater.run();
+               updatedInverseDynamicsStructureOutputPort.setData(inverseDynamicsStructureInputPort.getData());
+            }};
+
+            addPostStateChangeRunnable(runnable);
+         
          initialize();
       }
-
+      
       private void addOrientationProcessModelElement()
       {
          ProcessModelElement processModelElement = new OrientationProcessModelElement(angularVelocityStatePort, orientationStatePort, "orientation", registry);
@@ -370,21 +384,37 @@ public class ComposableOrientationAndCoMEstimatorCreator
       public void setEstimatedOrientation(FrameOrientation orientation)
       {
          orientationStatePort.setData(orientation);
+         centerOfMassBasedFullRobotModelUpdater.run();
+         FullInverseDynamicsStructure inverseDynamicsStructure = inverseDynamicsStructureInputPort.getData();
+         inverseDynamicsStructure.updateInternalState();
+         updatedInverseDynamicsStructureOutputPort.setData(inverseDynamicsStructure);
       }
 
       public void setEstimatedAngularVelocity(FrameVector angularVelocity)
       {
          angularVelocityStatePort.setData(angularVelocity);
+         centerOfMassBasedFullRobotModelUpdater.run();
+         FullInverseDynamicsStructure inverseDynamicsStructure = inverseDynamicsStructureInputPort.getData();
+         inverseDynamicsStructure.updateInternalState();
+         updatedInverseDynamicsStructureOutputPort.setData(inverseDynamicsStructure);
       }
       
       public void setEstimatedCoMPosition(FramePoint estimatedCoMPosition)
       {
          centerOfMassPositionStatePort.setData(estimatedCoMPosition);
+         centerOfMassBasedFullRobotModelUpdater.run();
+         FullInverseDynamicsStructure inverseDynamicsStructure = inverseDynamicsStructureInputPort.getData();
+         inverseDynamicsStructure.updateInternalState();
+         updatedInverseDynamicsStructureOutputPort.setData(inverseDynamicsStructure);
       }
       
       public void setEstimatedCoMVelocity(FrameVector estimatedCoMVelocity)
       {
          centerOfMassVelocityStatePort.setData(estimatedCoMVelocity);
+         centerOfMassBasedFullRobotModelUpdater.run();
+         FullInverseDynamicsStructure inverseDynamicsStructure = inverseDynamicsStructureInputPort.getData();
+         inverseDynamicsStructure.updateInternalState();
+         updatedInverseDynamicsStructureOutputPort.setData(inverseDynamicsStructure);
       }
 
       public DenseMatrix64F getCovariance()
