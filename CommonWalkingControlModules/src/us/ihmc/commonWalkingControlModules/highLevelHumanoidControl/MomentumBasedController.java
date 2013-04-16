@@ -27,8 +27,10 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.RootJointAcce
 import us.ihmc.commonWalkingControlModules.momentumBasedController.RootJointAccelerationData;
 import us.ihmc.commonWalkingControlModules.outputs.ProcessedOutputsInterface;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
+import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotSide.RobotSide;
+import us.ihmc.sensorProcessing.stateEstimation.DesiredCoMAndAngularAccelerationOutputPortsHolder;
 import us.ihmc.utilities.math.DampedLeastSquaresSolver;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -42,7 +44,6 @@ import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTools;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
-import us.ihmc.utilities.screwTheory.SpatialAccelerationCalculator;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.utilities.screwTheory.SpatialForceVector;
 import us.ihmc.utilities.screwTheory.SpatialMotionVector;
@@ -66,7 +67,7 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint2d;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 
-public abstract class MomentumBasedController implements RobotController
+public abstract class MomentumBasedController implements RobotController, DesiredCoMAndAngularAccelerationOutputPortsHolder
 {
    private final String name = getClass().getSimpleName();
    protected final YoVariableRegistry registry = new YoVariableRegistry(name);
@@ -79,7 +80,6 @@ public abstract class MomentumBasedController implements RobotController
    protected final CenterOfMassJacobian centerOfMassJacobian;
    protected final CommonWalkingReferenceFrames referenceFrames;
    protected final TwistCalculator twistCalculator;
-   protected final SpatialAccelerationCalculator spatialAccelerationCalculator;
    protected final List<ContactablePlaneBody> contactablePlaneBodies;
    protected final HashMap<ContactablePlaneBody, YoFramePoint> filteredCentersOfPressureWorld = new HashMap<ContactablePlaneBody, YoFramePoint>();
    private final HashMap<ContactablePlaneBody, YoFramePoint2d> unfilteredCentersOfPressure2d = new HashMap<ContactablePlaneBody, YoFramePoint2d>();
@@ -119,11 +119,12 @@ public abstract class MomentumBasedController implements RobotController
    protected final GroundReactionWrenchDistributor groundReactionWrenchDistributor;
    protected final MomentumSolver solver;
    protected final InverseDynamicsCalculator inverseDynamicsCalculator;
-
+   private final DesiredCoMAndAngularAccelerationGrabber desiredCoMAndAngularAccelerationGrabber;
+   
    protected final EnumYoVariable<RobotSide> upcomingSupportLeg; // FIXME: not general enough; this should not be here
 
 
-   public MomentumBasedController(FullRobotModel fullRobotModel, CenterOfMassJacobian centerOfMassJacobian, CommonWalkingReferenceFrames referenceFrames,
+   public MomentumBasedController(RigidBody estimationLink, ReferenceFrame estimationFrame, FullRobotModel fullRobotModel, CenterOfMassJacobian centerOfMassJacobian, CommonWalkingReferenceFrames referenceFrames,
          DoubleYoVariable yoTime, double gravityZ, TwistCalculator twistCalculator, Collection<? extends ContactablePlaneBody> contactablePlaneBodies,
          double controlDT, ProcessedOutputsInterface processedOutputs, GroundReactionWrenchDistributor groundReactionWrenchDistributor,
          ArrayList<Updatable> updatables, MomentumRateOfChangeControlModule momentumRateOfChangeControlModule,
@@ -147,11 +148,14 @@ public abstract class MomentumBasedController implements RobotController
       this.upcomingSupportLeg = EnumYoVariable.create("upcomingSupportLeg", "", RobotSide.class, registry, true);
 
       RigidBody elevator = fullRobotModel.getElevator();
-      this.spatialAccelerationCalculator = new SpatialAccelerationCalculator(elevator, twistCalculator, gravity, true);
 
       this.processedOutputs = processedOutputs;
       this.inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, gravityZ);
 
+      double totalMass = TotalMassCalculator.computeSubTreeMass(elevator);
+
+      this.desiredCoMAndAngularAccelerationGrabber = new DesiredCoMAndAngularAccelerationGrabber(estimationLink, estimationFrame, totalMass);
+      
       this.groundReactionWrenchDistributor = groundReactionWrenchDistributor;
 
       ReferenceFrame pelvisFrame = referenceFrames.getPelvisFrame();
@@ -232,9 +236,18 @@ public abstract class MomentumBasedController implements RobotController
       this.momentumRateOfChangeControlModule = momentumRateOfChangeControlModule;
       this.rootJointAccelerationControlModule = rootJointAccelerationControlModule;
 
-      double totalMass = TotalMassCalculator.computeSubTreeMass(elevator);
       gravitationalWrench = new SpatialForceVector(centerOfMassFrame, new Vector3d(0.0, 0.0, totalMass * gravityZ), new Vector3d());
 
+   }
+   
+   public ControlFlowOutputPort<FrameVector> getDesiredCenterOfMassAccelerationOutputPort()
+   {
+      return desiredCoMAndAngularAccelerationGrabber.getDesiredCenterOfMassAccelerationOutputPort();
+   }
+
+   public ControlFlowOutputPort<FrameVector> getDesiredAngularAccelerationOutputPort()
+   {
+      return desiredCoMAndAngularAccelerationGrabber.getDesiredAngularAccelerationOutputPort();
    }
    
    protected static LinearSolver<DenseMatrix64F> createJacobianSolver()
@@ -380,6 +393,8 @@ public abstract class MomentumBasedController implements RobotController
       groundReactionTorqueCheck.set(groundReactionWrenchCheck.getAngularPartCopy());
       groundReactionForceCheck.set(groundReactionWrenchCheck.getLinearPartCopy());
 
+      this.desiredCoMAndAngularAccelerationGrabber.set(inverseDynamicsCalculator.getSpatialAccelerationCalculator(), desiredCentroidalMomentumRate);
+      
       inverseDynamicsCalculator.compute();
       
       doAdditionalTorqueControl();
@@ -466,6 +481,7 @@ public abstract class MomentumBasedController implements RobotController
 
    public void initialize()
    {
+      inverseDynamicsCalculator.compute();
       solver.initialize();
       callUpdatables();
    }
