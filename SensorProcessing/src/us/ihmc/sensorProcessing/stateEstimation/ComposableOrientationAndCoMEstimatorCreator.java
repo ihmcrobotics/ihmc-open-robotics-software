@@ -118,7 +118,7 @@ public class ComposableOrientationAndCoMEstimatorCreator
       this.pointVelocitySensorConfigurations.add(pointVelocitySensorConfiguration);      
    }
    
-   public OrientationEstimator createOrientationEstimator(ControlFlowGraph controlFlowGraph, double controlDT, SixDoFJoint rootJoint, RigidBody estimationLink,
+   public OrientationEstimatorWithPorts createOrientationEstimator(ControlFlowGraph controlFlowGraph, double controlDT, SixDoFJoint rootJoint, RigidBody estimationLink,
          ReferenceFrame estimationFrame, ControlFlowOutputPort<FrameVector> desiredAngularAccelerationOutputPort,
          ControlFlowOutputPort<FrameVector> desiredCenterOfMassAccelerationOutputPort, YoVariableRegistry registry)
    {
@@ -128,9 +128,11 @@ public class ComposableOrientationAndCoMEstimatorCreator
             desiredAngularAccelerationOutputPort, desiredCenterOfMassAccelerationOutputPort, registry);
    }
 
-   private class ComposableOrientationAndCoMEstimator extends ComposableStateEstimator implements OrientationEstimator
+   private class ComposableOrientationAndCoMEstimator extends ComposableStateEstimator implements OrientationEstimatorWithPorts
    {
       private final ControlFlowInputPort<FullInverseDynamicsStructure> inverseDynamicsStructureInputPort;
+      private final ControlFlowInputPort<FrameVector> desiredCenterOfMassAccelerationInputPort;
+      private final ControlFlowInputPort<FrameVector> desiredAngularAccelerationInputPort;
       
       private final ControlFlowOutputPort<FrameOrientation> orientationStatePort;
       private final ControlFlowOutputPort<FrameVector> angularVelocityStatePort;
@@ -164,10 +166,10 @@ public class ComposableOrientationAndCoMEstimatorCreator
          
          this.updatedInverseDynamicsStructureOutputPort = createOutputPort();
          
-         ControlFlowInputPort<FrameVector> desiredAngularAccelerationInputPort = createProcessInputPort(VECTOR3D_LENGTH);
+         desiredAngularAccelerationInputPort = createProcessInputPort(VECTOR3D_LENGTH);
          controlFlowGraph.connectElements(desiredAngularAccelerationOutputPort, desiredAngularAccelerationInputPort);
 
-         ControlFlowInputPort<FrameVector> desiredCenterOfMassAccelerationInputPort = createProcessInputPort(VECTOR3D_LENGTH);
+         desiredCenterOfMassAccelerationInputPort = createProcessInputPort(VECTOR3D_LENGTH);
          controlFlowGraph.connectElements(desiredCenterOfMassAccelerationOutputPort, desiredCenterOfMassAccelerationInputPort);
 
          addOrientationProcessModelElement();
@@ -430,6 +432,16 @@ public class ComposableOrientationAndCoMEstimatorCreator
       public void setState(DenseMatrix64F x, DenseMatrix64F covariance)
       {
          kalmanFilter.setState(x, covariance);
+      }
+
+      public ControlFlowInputPort<FrameVector> getDesiredAngularAccelerationInputPort()
+      {
+         return desiredAngularAccelerationInputPort;
+      }
+
+      public ControlFlowInputPort<FrameVector> getDesiredCenterOfMassAccelerationInputPort()
+      {
+         return desiredCenterOfMassAccelerationInputPort;
       }
 
    }
