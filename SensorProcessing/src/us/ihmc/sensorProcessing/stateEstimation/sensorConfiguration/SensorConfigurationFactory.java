@@ -15,6 +15,7 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.sensorProcessing.simulatedSensors.IMUDefinition;
 import us.ihmc.sensorProcessing.simulatedSensors.PointVelocitySensorDefinition;
+import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -22,20 +23,14 @@ import us.ihmc.utilities.screwTheory.RigidBody;
 
 public class SensorConfigurationFactory
 {
-   private final double orientationMeasurementStandardDeviation = Math.sqrt(1e-2);
-   private final double angularVelocityMeasurementStandardDeviation = 1e-1;    // 1e-3;    // 2e-4;
-   private final double linearAccelerationMeasurementStandardDeviation = 1e0;    // 1e-1;    // 1.7e-2;
-   private final double pointVelocityMeasurementStandardDeviation = 1e-1;    // 1e0; //1e1; //1e-1; //1e-10; //1e-1;    // 1.7e-2;
-
-   private final double angularVelocityBiasProcessNoiseStandardDeviation = Math.sqrt(1e-5);
-   private final double linearAccelerationBiasProcessNoiseStandardDeviation = Math.sqrt(1e-4);
-
    private final Vector3d gravitationalAcceleration;
-
-   public SensorConfigurationFactory(Vector3d gravitationalAcceleration)
+   private final SensorNoiseParameters sensorNoiseParameters;
+   
+   public SensorConfigurationFactory(SensorNoiseParameters sensorNoiseParameters, Vector3d gravitationalAcceleration)
    {
       this.gravitationalAcceleration = new Vector3d();
       this.gravitationalAcceleration.set(gravitationalAcceleration);
+      this.sensorNoiseParameters = sensorNoiseParameters;
    }
 
    public Collection<OrientationSensorConfiguration> createOrientationSensorConfigurations(Map<IMUDefinition,
@@ -48,7 +43,8 @@ public class SensorConfigurationFactory
       {
          String sensorName = estimatedIMUDefinition.getName() + "Orientation";
 
-         DenseMatrix64F orientationNoiseCovariance = createDiagonalCovarianceMatrix(orientationMeasurementStandardDeviation, 3);
+         double orientationMeasurementStandardDeviation = sensorNoiseParameters.getOrientationMeasurementStandardDeviation();
+         DenseMatrix64F orientationNoiseCovariance = createDiagonalCovarianceMatrix(orientationMeasurementStandardDeviation , 3);
 
          RigidBody estimatedMeasurementBody = estimatedIMUDefinition.getRigidBody();
          ReferenceFrame estimatedMeasurementFrame = createMeasurementFrame(sensorName, "EstimatedMeasurementFrame",
@@ -75,8 +71,10 @@ public class SensorConfigurationFactory
       {
          String sensorName = estimatedIMUDefinition.getName() + "AngularVelocity";
 
-         DenseMatrix64F angularVelocityNoiseCovariance = createDiagonalCovarianceMatrix(angularVelocityMeasurementStandardDeviation, 3);
-         DenseMatrix64F angularVelocityBiasProcessNoiseCovariance = createDiagonalCovarianceMatrix(angularVelocityBiasProcessNoiseStandardDeviation, 3);
+         double angularVelocityMeasurementStandardDeviation = sensorNoiseParameters.getAngularVelocityMeasurementStandardDeviation();
+         DenseMatrix64F angularVelocityNoiseCovariance = createDiagonalCovarianceMatrix(angularVelocityMeasurementStandardDeviation , 3);
+         double angularVelocityBiasProcessNoiseStandardDeviation = sensorNoiseParameters.getAngularVelocityBiasProcessNoiseStandardDeviation();
+         DenseMatrix64F angularVelocityBiasProcessNoiseCovariance = createDiagonalCovarianceMatrix(angularVelocityBiasProcessNoiseStandardDeviation , 3);
 
          RigidBody estimatedMeasurementBody = estimatedIMUDefinition.getRigidBody();
          ReferenceFrame estimatedMeasurementFrame = createMeasurementFrame(sensorName, "EstimatedMeasurementFrame",
@@ -105,7 +103,9 @@ public class SensorConfigurationFactory
       {
          String sensorName = estimatedIMUDefinition.getName() + "LinearAcceleration";
 
+         double linearAccelerationMeasurementStandardDeviation = sensorNoiseParameters.getLinearAccelerationMeasurementStandardDeviation();
          DenseMatrix64F linearAccelerationNoiseCovariance = createDiagonalCovarianceMatrix(linearAccelerationMeasurementStandardDeviation, 3);
+         double linearAccelerationBiasProcessNoiseStandardDeviation = sensorNoiseParameters.getLinearAccelerationBiasProcessNoiseStandardDeviation();
          DenseMatrix64F linearAccelerationBiasProcessNoiseCovariance = createDiagonalCovarianceMatrix(linearAccelerationBiasProcessNoiseStandardDeviation, 3);
 
          RigidBody estimatedMeasurementBody = estimatedIMUDefinition.getRigidBody();
@@ -136,7 +136,8 @@ public class SensorConfigurationFactory
       {
          String sensorName = pointVelocitySensorDefinition.getName() + "PointVelocity";
 
-         DenseMatrix64F pointVelocityNoiseCovariance = createDiagonalCovarianceMatrix(pointVelocityMeasurementStandardDeviation, 3);
+         double pointVelocityMeasurementStandardDeviation = sensorNoiseParameters.getPointVelocityMeasurementStandardDeviation();
+         DenseMatrix64F pointVelocityNoiseCovariance = createDiagonalCovarianceMatrix(pointVelocityMeasurementStandardDeviation , 3);
 
          RigidBody estimatedMeasurementBody = pointVelocitySensorDefinition.getRigidBody();
          ReferenceFrame estimatedFrameAfterJoint = estimatedMeasurementBody.getParentJoint().getFrameAfterJoint();

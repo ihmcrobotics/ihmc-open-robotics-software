@@ -10,6 +10,7 @@ import us.ihmc.sensorProcessing.simulatedSensors.InverseDynamicsJointsFromSCSRob
 import us.ihmc.sensorProcessing.simulatedSensors.SCSToInverseDynamicsJointMap;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorMap;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorMapFromRobotFactory;
+import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.stateEstimation.DesiredCoMAccelerationsFromRobotStealerController;
 import us.ihmc.sensorProcessing.stateEstimation.DesiredCoMAndAngularAccelerationOutputPortsHolder;
 import us.ihmc.sensorProcessing.stateEstimation.OrientationEstimator;
@@ -44,16 +45,15 @@ public class ComposableStateEstimatorEvaluator
       robot.getIMUMounts(imuMounts);
 
       SCSToInverseDynamicsJointMap scsToInverseDynamicsJointMap = generator.getSCSToInverseDynamicsJointMap();
-      
-      SensorMapFromRobotFactory sensorMapFromRobotFactory = new SensorMapFromRobotFactory(scsToInverseDynamicsJointMap, robot, controlDT, imuMounts,
-                                                               robot.getVelocityPoints(), registry);
+
+      SensorNoiseParameters simulatedSensorNoiseParameters = SensorNoiseParametersForEvaluator.createSensorNoiseParameters();
+      SensorMapFromRobotFactory sensorMapFromRobotFactory = new SensorMapFromRobotFactory(scsToInverseDynamicsJointMap, robot, simulatedSensorNoiseParameters,
+                                                               controlDT, imuMounts, robot.getVelocityPoints(), registry);
       SensorMap sensorMap = sensorMapFromRobotFactory.getSensorMap();
 
-      
-      
       Joint estimationJoint = robot.getRootJoint();
       DesiredCoMAccelerationsFromRobotStealerController desiredCoMAccelerationsFromRobotStealerController =
-         new DesiredCoMAccelerationsFromRobotStealerController(generator, estimationJoint , controlDT);
+         new DesiredCoMAccelerationsFromRobotStealerController(generator, estimationJoint, controlDT);
 
       robot.update();
       FullInverseDynamicsStructure inverseDynamicsStructure = generator.getInverseDynamicsStructure();
@@ -61,16 +61,19 @@ public class ComposableStateEstimatorEvaluator
       Vector3d gravitationalAcceleration = new Vector3d();
       robot.getGravity(gravitationalAcceleration);
       DesiredCoMAndAngularAccelerationOutputPortsHolder desiredCoMAndAngularAccelerationOutputPortsHolder = desiredCoMAccelerationsFromRobotStealerController;
-     
+
       // The following few lines are what you need to do to get the state estimator working with a robot.
       // You also need to either add the controlFlowGraph to another one, or make sure to run it's startComputation method at the right time:
-      SensorAndEstimatorAssembler sensorAndEstimatorAssembler = new SensorAndEstimatorAssembler(gravitationalAcceleration, inverseDynamicsStructure, controlDT,
-                                                                   sensorMap, desiredCoMAndAngularAccelerationOutputPortsHolder, registry);
+      SensorNoiseParameters sensorNoiseParametersForEstimator = SensorNoiseParametersForEvaluator.createSensorNoiseParameters();
+      
+      SensorAndEstimatorAssembler sensorAndEstimatorAssembler = new SensorAndEstimatorAssembler(sensorNoiseParametersForEstimator, gravitationalAcceleration,
+                                                                   inverseDynamicsStructure, controlDT, sensorMap,
+                                                                   desiredCoMAndAngularAccelerationOutputPortsHolder, registry);
 
       ControlFlowGraph controlFlowGraph = sensorAndEstimatorAssembler.getControlFlowGraph();
       OrientationEstimator orientationEstimator = sensorAndEstimatorAssembler.getOrientationEstimator();
-      
-      
+
+
       ComposableStateEstimatorEvaluatorController composableStateEstimatorEvaluatorController =
          new ComposableStateEstimatorEvaluatorController(controlFlowGraph, orientationEstimator, robot, estimationJoint, controlDT, sensorMap,
             desiredCoMAccelerationsFromRobotStealerController);
