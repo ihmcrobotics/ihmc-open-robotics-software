@@ -8,6 +8,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.controlFlow.ControlFlowGraph;
+import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorMap;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
@@ -15,7 +16,6 @@ import us.ihmc.sensorProcessing.stateEstimation.ComposableOrientationAndCoMEstim
 import us.ihmc.sensorProcessing.stateEstimation.ComposableOrientationEstimatorCreator;
 import us.ihmc.sensorProcessing.stateEstimation.DesiredCoMAndAngularAccelerationOutputPortsHolder;
 import us.ihmc.sensorProcessing.stateEstimation.JointStateFullRobotModelUpdater;
-import us.ihmc.sensorProcessing.stateEstimation.OrientationEstimator;
 import us.ihmc.sensorProcessing.stateEstimation.OrientationEstimatorWithPorts;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.AngularVelocitySensorConfiguration;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.LinearAccelerationSensorConfiguration;
@@ -23,6 +23,7 @@ import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.OrientationS
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.PointVelocitySensorConfiguration;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.SensorConfigurationFactory;
 import us.ihmc.utilities.math.MathTools;
+import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.RigidBody;
 
@@ -87,9 +88,7 @@ public class SensorAndEstimatorAssembler
          inverseDynamicsStructure.updateInternalState();
 
          orientationEstimator = orientationEstimatorCreator.createOrientationEstimator(controlFlowGraph, controlDT,
-                 inverseDynamicsStructure.getRootJoint(), estimationLink, estimationFrame,
-                 desiredCoMAndAngularAccelerationOutputPortsHolder.getDesiredAngularAccelerationOutputPort(),
-                 desiredCoMAndAngularAccelerationOutputPortsHolder.getDesiredCenterOfMassAccelerationOutputPort(), registry);
+                 inverseDynamicsStructure.getRootJoint(), estimationLink, estimationFrame, registry);
       }
       else
       {
@@ -98,12 +97,14 @@ public class SensorAndEstimatorAssembler
          orientationEstimatorCreator.addOrientationSensorConfigurations(orientationSensorConfigurations);
          orientationEstimatorCreator.addAngularVelocitySensorConfigurations(angularVelocitySensorConfigurations);
 
-         orientationEstimator = orientationEstimatorCreator.createOrientationEstimator(controlFlowGraph, controlDT, estimationFrame,
-                 desiredCoMAndAngularAccelerationOutputPortsHolder.getDesiredAngularAccelerationOutputPort(), registry);
+         orientationEstimator = orientationEstimatorCreator.createOrientationEstimator(controlFlowGraph, controlDT, estimationFrame, registry);
       }
+      
+ 
+      connectDesiredAccelerationPorts(controlFlowGraph, orientationEstimator,
+            desiredCoMAndAngularAccelerationOutputPortsHolder);
 
       controlFlowGraph.initializeAfterConnections();
-//      controlFlowGraph.visualize();
 
       parentRegistry.addChild(registry);
    }
@@ -125,5 +126,25 @@ public class SensorAndEstimatorAssembler
    public OrientationEstimatorWithPorts getOrientationEstimator()
    {
       return orientationEstimator;
+   }
+   
+   public static void connectDesiredAccelerationPorts(ControlFlowGraph controlFlowGraph, OrientationEstimatorWithPorts orientationEstimatorWithPorts,
+         DesiredCoMAndAngularAccelerationOutputPortsHolder desiredCoMAndAngularAccelerationOutputPortsHolder)
+   {
+      ControlFlowOutputPort<FrameVector> desiredAngularAccelerationOutputPort = desiredCoMAndAngularAccelerationOutputPortsHolder.getDesiredAngularAccelerationOutputPort();
+      ControlFlowOutputPort<FrameVector> desiredCenterOfMassAccelerationOutputPort = desiredCoMAndAngularAccelerationOutputPortsHolder.getDesiredCenterOfMassAccelerationOutputPort();
+      
+      ControlFlowInputPort<FrameVector> desiredAngularAccelerationInputPort = orientationEstimatorWithPorts.getDesiredAngularAccelerationInputPort();
+      ControlFlowInputPort<FrameVector> desiredCenterOfMassAccelerationInputPort = orientationEstimatorWithPorts.getDesiredCenterOfMassAccelerationInputPort();
+
+      if (desiredAngularAccelerationOutputPort != null)
+      {
+         controlFlowGraph.connectElements(desiredAngularAccelerationOutputPort, desiredAngularAccelerationInputPort);
+      }
+
+      if (desiredCenterOfMassAccelerationOutputPort != null)
+      {
+         controlFlowGraph.connectElements(desiredCenterOfMassAccelerationOutputPort, desiredCenterOfMassAccelerationInputPort);
+      }
    }
 }
