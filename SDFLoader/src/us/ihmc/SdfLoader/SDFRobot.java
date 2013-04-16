@@ -252,25 +252,25 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
             PinJoint pinJoint = new PinJoint(sanitizedJointName, offset, this, jointAxis);
             if (joint.hasLimits())
             {
-//               if ((joint.getContactKd() == 0.0) && (joint.getContactKp() == 0.0))
-//               {
-//                  if (isFinger(joint))
-//                  {
-//                     pinJoint.setLimitStops(joint.getLowerLimit(), joint.getUpperLimit(), 10.0, 2.5);
-//                     if (enableDamping)
-//                        pinJoint.setDamping(0.1);
-//                  }
-//                  else
-//                  {
-//                     pinJoint.setLimitStops(joint.getLowerLimit(), joint.getUpperLimit(), 100.0, 20.0);
-//                     if (enableDamping)
-//                        pinJoint.setDamping(joint.getDamping());
-//                  }
-//               }
-//               else
-//               {
-//                  pinJoint.setLimitStops(joint.getLowerLimit(), joint.getUpperLimit(), 0.0001 * joint.getContactKp(), joint.getContactKd());
-//               }
+               if ((joint.getContactKd() == 0.0) && (joint.getContactKp() == 0.0))
+               {
+                  if (isFinger(joint))
+                  {
+                     pinJoint.setLimitStops(joint.getLowerLimit(), joint.getUpperLimit(), 10.0, 2.5);
+                     if (enableDamping)
+                        pinJoint.setDamping(0.1);
+                  }
+                  else
+                  {
+                     pinJoint.setLimitStops(joint.getLowerLimit(), joint.getUpperLimit(), 100.0, 20.0);
+                     if (enableDamping)
+                        pinJoint.setDamping(joint.getDamping());
+                  }
+               }
+               else
+               {
+                  pinJoint.setLimitStops(joint.getLowerLimit(), joint.getUpperLimit(), 0.0001 * joint.getContactKp(), joint.getContactKd());
+               }
 
                if (enableTorqueVelocityLimits)
                {
