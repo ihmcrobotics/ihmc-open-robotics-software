@@ -75,8 +75,7 @@ public class ComposableStateEstimatorEvaluator
 
 
       ComposableStateEstimatorEvaluatorController composableStateEstimatorEvaluatorController =
-         new ComposableStateEstimatorEvaluatorController(controlFlowGraph, orientationEstimator, robot, estimationJoint, controlDT, sensorMap,
-            desiredCoMAccelerationsFromRobotStealerController);
+         new ComposableStateEstimatorEvaluatorController(controlFlowGraph, orientationEstimator, robot, estimationJoint, controlDT, sensorMap);
       robot.setController(desiredCoMAccelerationsFromRobotStealerController, simTicksPerControlDT);
       robot.setController(composableStateEstimatorEvaluatorController, simTicksPerControlDT);
 

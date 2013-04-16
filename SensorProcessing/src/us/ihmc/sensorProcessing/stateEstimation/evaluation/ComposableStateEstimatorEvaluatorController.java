@@ -4,7 +4,6 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.controlFlow.ControlFlowGraph;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorMap;
-import us.ihmc.sensorProcessing.stateEstimation.DesiredCoMAndAngularAccelerationOutputPortsHolder;
 import us.ihmc.sensorProcessing.stateEstimation.OrientationEstimator;
 
 import com.yobotics.simulationconstructionset.Joint;
@@ -23,8 +22,7 @@ public class ComposableStateEstimatorEvaluatorController implements RobotControl
    private final ComposableStateEstimatorEvaluatorErrorCalculator composableStateEstimatorEvaluatorErrorCalculator;
 
    public ComposableStateEstimatorEvaluatorController(ControlFlowGraph controlFlowGraph, OrientationEstimator orientationEstimator,
-           Robot robot, Joint estimationJoint, double controlDT, SensorMap sensorMap,
-           DesiredCoMAndAngularAccelerationOutputPortsHolder desiredCoMAndAngularAccelerationOutputPortsHolder)
+           Robot robot, Joint estimationJoint, double controlDT, SensorMap sensorMap)
    {
       this.gravitationalAcceleration = new Vector3d();
       robot.getGravity(gravitationalAcceleration);

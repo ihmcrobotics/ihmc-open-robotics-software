@@ -54,7 +54,7 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
       this.handContactSides = handContactSides;
    }
 
-   public RobotController create(FullRobotModel fullRobotModel, CommonWalkingReferenceFrames referenceFrames, FingerForceSensors fingerForceSensors,
+   public MomentumBasedController create(RigidBody estimationLink, ReferenceFrame estimationFrame, FullRobotModel fullRobotModel, CommonWalkingReferenceFrames referenceFrames, FingerForceSensors fingerForceSensors,
                                  DoubleYoVariable yoTime, double gravityZ, TwistCalculator twistCalculator, CenterOfMassJacobian centerOfMassJacobian,
                                  SideDependentList<ContactablePlaneBody> feet, double controlDT, SideDependentList<FootSwitchInterface> footSwitches,
                                  SideDependentList<HandControllerInterface> handControllers, OneDoFJoint lidarJoint, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
@@ -115,7 +115,7 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
       rootJointAccelerationControlModule.setDerivativeGains(20.0, 20.0, 20.0);
 
       double groundReactionWrenchBreakFrequencyHertz = 7.0;
-      MultiContactTestHumanoidController ret = new MultiContactTestHumanoidController(fullRobotModel, centerOfMassJacobian, referenceFrames, yoTime, gravityZ,
+      MultiContactTestHumanoidController ret = new MultiContactTestHumanoidController(estimationLink, estimationFrame, fullRobotModel, centerOfMassJacobian, referenceFrames, yoTime, gravityZ,
                                                   twistCalculator, contactablePlaneBodiesAndBases, controlDT, processedOutputs,
                                                   groundReactionWrenchDistributor, null, momentumRateOfChangeControlModule, rootJointAccelerationControlModule,
                                                   groundReactionWrenchBreakFrequencyHertz, momentumRateOfChangeControlModule.getDesiredCoMPositionInputPort(),

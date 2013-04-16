@@ -226,9 +226,10 @@ public class DRCSimulationFactory
          lidarJoint = fullRobotModelForController.getOneDoFJointByName(jointMap.getLidarJointName());
       }
 
-      RobotController robotController = controllerFactory.getController(fullRobotModelForController, referenceFramesForController, controlDT,
-                                           simulatedRobot.getYoTime(), dynamicGraphicObjectsListRegistry, guiSetterUpperRegistry, twistCalculator,
-                                           centerOfMassJacobian, footSwitches, handControllers, lidarJoint);
+      RobotController robotController = controllerFactory.getController(inverseDynamicsStructure.getEstimationLink(),
+            inverseDynamicsStructure.getEstimationFrame(), fullRobotModelForController, referenceFramesForController, controlDT,
+            simulatedRobot.getYoTime(), dynamicGraphicObjectsListRegistry, guiSetterUpperRegistry, twistCalculator,
+            centerOfMassJacobian, footSwitches, handControllers, lidarJoint);
 
       AbstractModularRobotController modularRobotController;
 
@@ -334,8 +335,7 @@ public class DRCSimulationFactory
       
       Joint estimationJoint = simulatedRobot.getRootJoints().get(0);
       ComposableStateEstimatorEvaluatorController composableStateEstimatorEvaluatorController =
-         new ComposableStateEstimatorEvaluatorController(controlFlowGraph, orientationEstimator, simulatedRobot, estimationJoint, controlDT, sensorMap,
-            desiredCoMAndAngularAccelerationOutputPortsHolder);
+         new ComposableStateEstimatorEvaluatorController(controlFlowGraph, orientationEstimator, simulatedRobot, estimationJoint, controlDT, sensorMap);
 
       RobotControllerAndParameters humanoidStateEstimatorControllerAndParameters =
          new RobotControllerAndParameters(composableStateEstimatorEvaluatorController, simulationTicksPerControlTick);

@@ -64,7 +64,7 @@ public class MultiContactTestHumanoidController extends MomentumBasedController
       new HashMap<ContactablePlaneBody, FixedOrientationTrajectoryGenerator>();
 
 
-   public MultiContactTestHumanoidController(FullRobotModel fullRobotModel, CenterOfMassJacobian centerOfMassJacobian,
+   public MultiContactTestHumanoidController(RigidBody estimationLink, ReferenceFrame estimationFrame, FullRobotModel fullRobotModel, CenterOfMassJacobian centerOfMassJacobian,
            CommonWalkingReferenceFrames referenceFrames, DoubleYoVariable yoTime, double gravityZ, TwistCalculator twistCalculator,
            HashMap<ContactablePlaneBody, RigidBody> contactablePlaneBodiesAndBases, double controlDT, ProcessedOutputsInterface processedOutputs,
            GroundReactionWrenchDistributor groundReactionWrenchDistributor, ArrayList<Updatable> updatables,
@@ -72,7 +72,7 @@ public class MultiContactTestHumanoidController extends MomentumBasedController
            double groundReactionWrenchBreakFrequencyHertz, ControlFlowInputPort<FramePoint> desiredCoMPositionPort,
            ControlFlowInputPort<OrientationTrajectoryData> desiredPelvisOrientationPort, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
-      super(fullRobotModel, centerOfMassJacobian, referenceFrames, yoTime, gravityZ, twistCalculator, contactablePlaneBodiesAndBases.keySet(), controlDT,
+      super(estimationLink, estimationFrame, fullRobotModel, centerOfMassJacobian, referenceFrames, yoTime, gravityZ, twistCalculator, contactablePlaneBodiesAndBases.keySet(), controlDT,
             processedOutputs, groundReactionWrenchDistributor, updatables, momentumRateOfChangeControlModule, rootJointAccelerationControlModule,
             groundReactionWrenchBreakFrequencyHertz, dynamicGraphicObjectsListRegistry);
       this.desiredCoMPositionPort = desiredCoMPositionPort;
