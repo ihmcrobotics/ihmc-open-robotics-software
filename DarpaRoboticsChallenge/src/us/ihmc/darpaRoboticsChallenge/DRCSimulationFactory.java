@@ -35,6 +35,7 @@ import us.ihmc.sensorProcessing.simulatedSensors.InverseDynamicsJointsFromSCSRob
 import us.ihmc.sensorProcessing.simulatedSensors.SCSToInverseDynamicsJointMap;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorMap;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorMapFromRobotFactory;
+import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.stateEstimation.DesiredCoMAccelerationsFromRobotStealerController;
 import us.ihmc.sensorProcessing.stateEstimation.DesiredCoMAndAngularAccelerationOutputPortsHolder;
 import us.ihmc.sensorProcessing.stateEstimation.OrientationEstimator;
@@ -148,8 +149,12 @@ public class DRCSimulationFactory
             }
          }
          
-         SensorMapFromRobotFactory sensorMapFromRobotFactory = new SensorMapFromRobotFactory(scsToInverseDynamicsJointMapForEstimator, simulatedRobot,
-                                                                  controlDT, imuMounts, velocityPoints, registry);
+//         SensorNoiseParameters sensorNoiseParamters = DRCSimulatedSensorNoiseParameters.createSensorNoiseParametersALittleNoise();
+         SensorNoiseParameters sensorNoiseParamters = DRCSimulatedSensorNoiseParameters.createSensorNoiseParametersZeroNoise();
+
+         SensorMapFromRobotFactory sensorMapFromRobotFactory = new SensorMapFromRobotFactory(scsToInverseDynamicsJointMapForEstimator, 
+               simulatedRobot, sensorNoiseParamters,
+               controlDT, imuMounts, velocityPoints, registry);
          SensorMap sensorMap = sensorMapFromRobotFactory.getSensorMap();
 
          orientationEstimator = createStateEstimator(sensorMap, inverseDynamicsStructureForEstimator, controlDT, simulationTicksPerControlTick, simulatedRobot,
@@ -306,7 +311,9 @@ public class DRCSimulationFactory
 
       // The following few lines are what you need to do to get the state estimator working with a robot.
       // You also need to either add the controlFlowGraph to another one, or make sure to run it's startComputation method at the right time:
-      SensorAndEstimatorAssembler sensorAndEstimatorAssembler = new SensorAndEstimatorAssembler(gravitationalAcceleration, inverseDynamicsStructure, controlDT,
+      SensorNoiseParameters sensorNoiseParametersForEstimator = DRCSimulatedSensorNoiseParameters.createNoiseParametersForEstimator();
+      
+      SensorAndEstimatorAssembler sensorAndEstimatorAssembler = new SensorAndEstimatorAssembler(sensorNoiseParametersForEstimator, gravitationalAcceleration, inverseDynamicsStructure, controlDT,
                                                                    sensorMap, desiredCoMAndAngularAccelerationOutputPortsHolder, registry);
 
       ControlFlowGraph controlFlowGraph = sensorAndEstimatorAssembler.getControlFlowGraph();

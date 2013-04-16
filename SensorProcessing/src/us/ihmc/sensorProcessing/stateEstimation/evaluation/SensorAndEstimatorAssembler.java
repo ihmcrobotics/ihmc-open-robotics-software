@@ -10,6 +10,7 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.controlFlow.ControlFlowGraph;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorMap;
+import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.stateEstimation.ComposableOrientationAndCoMEstimatorCreator;
 import us.ihmc.sensorProcessing.stateEstimation.ComposableOrientationEstimatorCreator;
 import us.ihmc.sensorProcessing.stateEstimation.DesiredCoMAndAngularAccelerationOutputPortsHolder;
@@ -38,11 +39,11 @@ public class SensorAndEstimatorAssembler
    private final ControlFlowGraph controlFlowGraph;
    private final OrientationEstimator orientationEstimator;
 
-   public SensorAndEstimatorAssembler(Vector3d gravitationalAcceleration, FullInverseDynamicsStructure inverseDynamicsStructure, double controlDT,
+   public SensorAndEstimatorAssembler(SensorNoiseParameters sensorNoiseParametersForEstimator, Vector3d gravitationalAcceleration, FullInverseDynamicsStructure inverseDynamicsStructure, double controlDT,
                                       SensorMap sensorMap, DesiredCoMAndAngularAccelerationOutputPortsHolder desiredCoMAndAngularAccelerationOutputPortsHolder,
                                       YoVariableRegistry parentRegistry)
    {
-      SensorConfigurationFactory SensorConfigurationFactory = new SensorConfigurationFactory(gravitationalAcceleration);
+      SensorConfigurationFactory SensorConfigurationFactory = new SensorConfigurationFactory(sensorNoiseParametersForEstimator, gravitationalAcceleration);
 
       // Sensor configurations for estimator
       Collection<OrientationSensorConfiguration> orientationSensorConfigurations =
