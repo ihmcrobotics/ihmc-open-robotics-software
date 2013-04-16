@@ -9,6 +9,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlane
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.controlModules.ChestOrientationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.endEffector.EndEffectorControlModule;
+import us.ihmc.commonWalkingControlModules.controlModules.endEffector.EndEffectorControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controlModules.GroundReactionWrenchDistributor;
 import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.Updatable;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
@@ -165,7 +166,9 @@ public class MultiContactTestHumanoidController extends MomentumBasedController
       for (ContactablePlaneBody contactablePlaneBody : endEffectorControlModules.keySet())
       {
          EndEffectorControlModule endEffectorControlModule = endEffectorControlModules.get(contactablePlaneBody);
-         endEffectorControlModule.setContactPoints(contactStates.get(contactablePlaneBody).getContactPoints2d());
+         List<FramePoint2d> contactPoints = contactStates.get(contactablePlaneBody).getContactPoints2d();
+         ConstraintType constraintType = EndEffectorControlModule.getUnconstrainedForZeroAndFullyConstrainedForFourContactPoints(contactPoints.size());
+         endEffectorControlModule.setContactPoints(contactPoints, constraintType);
          endEffectorControlModule.setCenterOfPressure(getCoP(contactablePlaneBody));
          endEffectorControlModule.startComputation();
          endEffectorControlModule.waitUntilComputationIsDone();
