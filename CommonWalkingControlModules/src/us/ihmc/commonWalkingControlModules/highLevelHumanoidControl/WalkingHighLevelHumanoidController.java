@@ -21,6 +21,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controlModules.ChestOrientationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.DegenerateOrientationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.endEffector.EndEffectorControlModule;
+import us.ihmc.commonWalkingControlModules.controlModules.endEffector.EndEffectorControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controlModules.GroundReactionWrenchDistributor;
 import us.ihmc.commonWalkingControlModules.controlModules.head.DesiredHeadOrientationProvider;
 import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationControlModule;
@@ -1500,8 +1501,15 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 
    private void updateEndEffectorControlModule(ContactablePlaneBody contactablePlaneBody, PlaneContactState contactState)
    {
+      updateEndEffectorControlModuleGivenConstraintType(contactablePlaneBody, contactState);
+   }
+   
+   // TODO call this directly when setting up toe/heel state
+   private void updateEndEffectorControlModuleGivenConstraintType(ContactablePlaneBody contactablePlaneBody, PlaneContactState contactState)
+   {
       List<FramePoint2d> contactPoints = contactState.getContactPoints2d();
-      endEffectorControlModules.get(contactablePlaneBody).setContactPoints(contactPoints);
+      ConstraintType constraintType = EndEffectorControlModule.getUnconstrainedForZeroAndFullyConstrainedForFourContactPoints(contactPoints.size());
+      endEffectorControlModules.get(contactablePlaneBody).setContactPoints(contactPoints, constraintType);
    }
 
    // TODO: should probably precompute this somewhere else
