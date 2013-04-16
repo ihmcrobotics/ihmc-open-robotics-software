@@ -159,42 +159,6 @@ public class DesiredFootstepCalculatorTools
       return ret;
    }
 
-
-   public static List<FramePoint> fixTwoPointsAndCopy(List<FramePoint> contactPoints)
-   {
-      // FIXME: terrible, we need to make it so that ConvexPolygons can consist of fewer than 3 points
-      List<FramePoint> contactPointsCopy = new ArrayList<FramePoint>(contactPoints.size() + 2);
-      for (FramePoint framePoint : contactPoints)
-      {
-         contactPointsCopy.add(framePoint);
-      }
-
-      if (contactPointsCopy.size() == 2)
-      {
-         ReferenceFrame referenceFrame = contactPoints.get(0).getReferenceFrame();
-
-         FrameVector pointToPoint = new FrameVector(contactPoints.get(1));
-         pointToPoint.sub(contactPoints.get(0));
-
-         FrameVector z = new FrameVector(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 1.0);
-         z.changeFrame(referenceFrame);
-         FrameVector cross = new FrameVector(referenceFrame);
-         cross.cross(pointToPoint, z);
-         cross.normalize();
-         cross.scale(1e-5);
-
-         for (int i = 0; i < 2; i++)
-         {
-            FramePoint extraPoint = new FramePoint(contactPoints.get(i));
-            extraPoint.add(cross);
-            contactPointsCopy.add(extraPoint);
-         }
-
-      }
-
-      return contactPointsCopy;
-   }
-
    private static class SearchDirectionFramePointComparator implements Comparator<FramePoint>
    {
       private final FrameVector searchDirection;
