@@ -59,6 +59,7 @@ public class FootPolygonVisualizer implements Updatable
          if (yoFootPolygon != null)
          {
             List<FramePoint> contactPoints = contactState.getContactPoints();
+            contactPoints = DesiredFootstepCalculatorTools.fixTwoPointsAndCopy(contactPoints); // TODO: terrible
             if (contactPoints.size() > 0)
                yoFootPolygon.setFrameConvexPolygon2d(FrameConvexPolygon2d.constructByProjectionOntoXYPlane(contactPoints, yoFootPolygon.getReferenceFrame()));
             else
