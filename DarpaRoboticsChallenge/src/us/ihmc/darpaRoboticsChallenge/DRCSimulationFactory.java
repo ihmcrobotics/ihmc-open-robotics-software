@@ -22,6 +22,7 @@ import us.ihmc.commonWalkingControlModules.sensors.ForceSensorInterface;
 import us.ihmc.commonWalkingControlModules.sensors.TwistUpdater;
 import us.ihmc.commonWalkingControlModules.visualizer.CommonInertiaElipsoidsVisualizer;
 import us.ihmc.controlFlow.ControlFlowGraph;
+import us.ihmc.darpaRoboticsChallenge.controllers.ConstrainedCenterOfMassJacobianEvaluator;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.handControl.SandiaHandModel;
 import us.ihmc.darpaRoboticsChallenge.handControl.SimulatedUnderactuatedSandiaHandController;
@@ -68,8 +69,9 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject
 
 public class DRCSimulationFactory
 {
-   private static final boolean SHOW_REFERENCE_FRAMES = false;
    public static boolean SHOW_INERTIA_ELLIPSOIDS = false;
+   private static final boolean SHOW_REFERENCE_FRAMES = false;
+   private static final boolean CREATE_DYNAMICALLY_CONSISTENT_NULLSPACE_EVALUATOR = false;
    private static final boolean CREATE_STATE_ESTIMATOR = false;
    private static final boolean USE_STATE_ESTIMATOR = false;
    private static final boolean STEAL_DESIRED_COM_ACCELERATIONS_FROM_ROBOT = true;
@@ -268,6 +270,12 @@ public class DRCSimulationFactory
       RobotControllerAndParameters modularRobotControllerAndParameters = new RobotControllerAndParameters(modularRobotController,
                                                                             simulationTicksPerControlTick);
       robotControllersAndParameters.add(modularRobotControllerAndParameters);
+
+      if (CREATE_DYNAMICALLY_CONSISTENT_NULLSPACE_EVALUATOR)
+      {
+         RobotController dynamicallyConsistentNullspaceEvaluator = new ConstrainedCenterOfMassJacobianEvaluator(fullRobotModelForController);
+         robotControllersAndParameters.add(new RobotControllerAndParameters(dynamicallyConsistentNullspaceEvaluator, simulationTicksPerControlTick));
+      }
 
       final HumanoidRobotSimulation<SDFRobot> humanoidRobotSimulation = new HumanoidRobotSimulation<SDFRobot>(simulatedRobot, robotControllersAndParameters,
                                                                            fullRobotModelForSimulation, commonAvatarEnvironmentInterface,
