@@ -266,7 +266,7 @@ public class MomentumSolver
    {
       ScrewTools.packJointVelocitiesMatrix(jointsInOrder, v);
       CommonOps.mult(centroidalMomentumMatrixDerivative, v, b);
-      CommonOps.scale(-1.0, b);
+      CommonOps.changeSign(b);
    }
 
    private void checkFullyConstrained()
