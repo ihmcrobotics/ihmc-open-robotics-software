@@ -77,18 +77,19 @@ public class ComposableOrientationEstimatorCreator
       orientationSensorConfigurations.add(orientationSensorConfiguration);
    }
 
-   public OrientationEstimator createOrientationEstimator(ControlFlowGraph controlFlowGraph, double controlDT, ReferenceFrame estimationFrame,
+   public OrientationEstimatorWithPorts createOrientationEstimator(ControlFlowGraph controlFlowGraph, double controlDT, ReferenceFrame estimationFrame,
            ControlFlowOutputPort<FrameVector> angularAccelerationOutputPort, YoVariableRegistry registry)
    {
       return new ComposableOrientationEstimator("orientationEstimator", controlDT, estimationFrame, controlFlowGraph, angularAccelerationOutputPort, registry);
    }
 
-   private class ComposableOrientationEstimator extends ComposableStateEstimator implements OrientationEstimator
+   private class ComposableOrientationEstimator extends ComposableStateEstimator implements OrientationEstimatorWithPorts
    {
       private final ControlFlowOutputPort<FrameOrientation> orientationPort;
       private final ControlFlowOutputPort<FrameVector> angularVelocityPort;
 
       private final ControlFlowInputPort<FullInverseDynamicsStructure> inverseDynamicsStructureInputPort;
+      private final ControlFlowInputPort<FrameVector> desiredAngularAccelerationInputPort;
 
       public ComposableOrientationEstimator(String name, double controlDT, ReferenceFrame estimationFrame, ControlFlowGraph controlFlowGraph,
               ControlFlowOutputPort<FrameVector> angularAccelerationOutputPort, YoVariableRegistry parentRegistry)
@@ -98,8 +99,11 @@ public class ComposableOrientationEstimatorCreator
          orientationPort = new YoFrameQuaternionControlFlowOutputPort(this, name, ReferenceFrame.getWorldFrame(), parentRegistry);
          angularVelocityPort = new YoFrameVectorControlFlowOutputPort(this, name + "Omega", estimationFrame, registry);
 
+         this.inverseDynamicsStructureInputPort = createInputPort();
+         this.desiredAngularAccelerationInputPort = createInputPort();
+
          addOrientationProcessModelElement();
-         addAngularVelocityProcessModelElement(estimationFrame, controlFlowGraph, angularAccelerationOutputPort);
+         addAngularVelocityProcessModelElement(estimationFrame, controlFlowGraph);
 
          for (OrientationSensorConfiguration orientationSensorConfiguration : orientationSensorConfigurations)
          {
@@ -111,7 +115,7 @@ public class ComposableOrientationEstimatorCreator
             addAngularVelocitySensor(estimationFrame, controlFlowGraph, angularVelocitySensorConfiguration);
          }
 
-         this.inverseDynamicsStructureInputPort = createInputPort();
+         controlFlowGraph.connectElements(angularAccelerationOutputPort, desiredAngularAccelerationInputPort);
          controlFlowGraph.connectElements(inverseDynamicsStructureOutputPort, inverseDynamicsStructureInputPort);
 
          initialize();
@@ -123,20 +127,10 @@ public class ComposableOrientationEstimatorCreator
          addProcessModelElement(orientationPort, orientationProcessModelElement);
       }
 
-      private void addAngularVelocityProcessModelElement(ReferenceFrame estimationFrame, ControlFlowGraph controlFlowGraph,
-              ControlFlowOutputPort<FrameVector> angularAccelerationOutputPort)
+      private void addAngularVelocityProcessModelElement(ReferenceFrame estimationFrame, ControlFlowGraph controlFlowGraph)
       {
-         ControlFlowInputPort<FrameVector> angularAccelerationPort;
-         if (angularAccelerationOutputPort != null)
-         {
-            angularAccelerationPort = createProcessInputPort(VECTOR3D_LENGTH);
-            controlFlowGraph.connectElements(angularAccelerationOutputPort, angularAccelerationPort);
-         }
-         else
-            angularAccelerationPort = null;
-
          AngularVelocityProcessModelElement angularVelocityProcessModelElement = new AngularVelocityProcessModelElement(estimationFrame, angularVelocityPort,
-                                                                                    angularAccelerationPort, "angularVelocity", registry);
+               desiredAngularAccelerationInputPort, "angularVelocity", registry);
 
          angularVelocityProcessModelElement.setProcessNoiseCovarianceBlock(angularAccelerationNoiseCovariance);
          addProcessModelElement(angularVelocityPort, angularVelocityProcessModelElement);
@@ -237,6 +231,16 @@ public class ComposableOrientationEstimatorCreator
       public void setState(DenseMatrix64F x, DenseMatrix64F covariance)
       {
          kalmanFilter.setState(x, covariance);
+      }
+
+      public ControlFlowInputPort<FrameVector> getDesiredAngularAccelerationInputPort()
+      {
+         return desiredAngularAccelerationInputPort;
+      }
+
+      public ControlFlowInputPort<FrameVector> getDesiredCenterOfMassAccelerationInputPort()
+      {
+         return null;
       }
 
    }
