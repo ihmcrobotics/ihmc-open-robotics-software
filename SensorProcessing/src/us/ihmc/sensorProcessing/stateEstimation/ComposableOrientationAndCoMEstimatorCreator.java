@@ -119,13 +119,12 @@ public class ComposableOrientationAndCoMEstimatorCreator
    }
    
    public OrientationEstimatorWithPorts createOrientationEstimator(ControlFlowGraph controlFlowGraph, double controlDT, SixDoFJoint rootJoint, RigidBody estimationLink,
-         ReferenceFrame estimationFrame, ControlFlowOutputPort<FrameVector> desiredAngularAccelerationOutputPort,
-         ControlFlowOutputPort<FrameVector> desiredCenterOfMassAccelerationOutputPort, YoVariableRegistry registry)
+         ReferenceFrame estimationFrame, YoVariableRegistry registry)
    {
       return new ComposableOrientationAndCoMEstimator("orientationEstimator", controlDT, rootJoint, estimationLink, 
             estimationFrame, controlFlowGraph,
             inverseDynamicsStructureOutputPort,
-            desiredAngularAccelerationOutputPort, desiredCenterOfMassAccelerationOutputPort, registry);
+            registry);
    }
 
    private class ComposableOrientationAndCoMEstimator extends ComposableStateEstimator implements OrientationEstimatorWithPorts
@@ -147,8 +146,7 @@ public class ComposableOrientationAndCoMEstimatorCreator
       public ComposableOrientationAndCoMEstimator(String name, double controlDT, SixDoFJoint rootJoint, RigidBody estimationLink,
             ReferenceFrame estimationFrame, ControlFlowGraph controlFlowGraph, 
             ControlFlowOutputPort<FullInverseDynamicsStructure> inverseDynamicsStructureOutputPort,
-            ControlFlowOutputPort<FrameVector> desiredAngularAccelerationOutputPort,
-            ControlFlowOutputPort<FrameVector> desiredCenterOfMassAccelerationOutputPort, YoVariableRegistry parentRegistry)
+            YoVariableRegistry parentRegistry)
       {
          super(name, controlDT, parentRegistry);
          
@@ -167,10 +165,7 @@ public class ComposableOrientationAndCoMEstimatorCreator
          this.updatedInverseDynamicsStructureOutputPort = createOutputPort();
          
          desiredAngularAccelerationInputPort = createProcessInputPort(VECTOR3D_LENGTH);
-         controlFlowGraph.connectElements(desiredAngularAccelerationOutputPort, desiredAngularAccelerationInputPort);
-
          desiredCenterOfMassAccelerationInputPort = createProcessInputPort(VECTOR3D_LENGTH);
-         controlFlowGraph.connectElements(desiredCenterOfMassAccelerationOutputPort, desiredCenterOfMassAccelerationInputPort);
 
          addOrientationProcessModelElement();
          addAngularVelocityProcessModelElement(estimationFrame, desiredAngularAccelerationInputPort);

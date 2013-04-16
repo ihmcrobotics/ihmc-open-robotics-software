@@ -78,9 +78,9 @@ public class ComposableOrientationEstimatorCreator
    }
 
    public OrientationEstimatorWithPorts createOrientationEstimator(ControlFlowGraph controlFlowGraph, double controlDT, ReferenceFrame estimationFrame,
-           ControlFlowOutputPort<FrameVector> angularAccelerationOutputPort, YoVariableRegistry registry)
+           YoVariableRegistry registry)
    {
-      return new ComposableOrientationEstimator("orientationEstimator", controlDT, estimationFrame, controlFlowGraph, angularAccelerationOutputPort, registry);
+      return new ComposableOrientationEstimator("orientationEstimator", controlDT, estimationFrame, controlFlowGraph, registry);
    }
 
    private class ComposableOrientationEstimator extends ComposableStateEstimator implements OrientationEstimatorWithPorts
@@ -92,7 +92,7 @@ public class ComposableOrientationEstimatorCreator
       private final ControlFlowInputPort<FrameVector> desiredAngularAccelerationInputPort;
 
       public ComposableOrientationEstimator(String name, double controlDT, ReferenceFrame estimationFrame, ControlFlowGraph controlFlowGraph,
-              ControlFlowOutputPort<FrameVector> angularAccelerationOutputPort, YoVariableRegistry parentRegistry)
+              YoVariableRegistry parentRegistry)
       {
          super(name, controlDT, parentRegistry);
 
@@ -115,7 +115,6 @@ public class ComposableOrientationEstimatorCreator
             addAngularVelocitySensor(estimationFrame, controlFlowGraph, angularVelocitySensorConfiguration);
          }
 
-         controlFlowGraph.connectElements(angularAccelerationOutputPort, desiredAngularAccelerationInputPort);
          controlFlowGraph.connectElements(inverseDynamicsStructureOutputPort, inverseDynamicsStructureInputPort);
 
          initialize();
