@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.bipedSupportPolygons;
 import java.awt.Color;
 import java.util.List;
 
+import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorTools;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
@@ -138,6 +139,7 @@ public class BipedSupportPolygons
       for (RobotSide robotSide : RobotSide.values())
       {
          List<FramePoint> contactPointsForSide = contactPoints.get(robotSide);
+         contactPointsForSide = DesiredFootstepCalculatorTools.fixTwoPointsAndCopy(contactPointsForSide); // TODO: terrible
          boolean isSupportFoot = contactPointsForSide.size() > 0;
          if (isSupportFoot)
          {
