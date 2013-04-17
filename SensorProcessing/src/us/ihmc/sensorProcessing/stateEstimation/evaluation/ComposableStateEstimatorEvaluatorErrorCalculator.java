@@ -8,11 +8,14 @@ import javax.vecmath.Vector3d;
 import us.ihmc.sensorProcessing.stateEstimation.OrientationEstimator;
 import us.ihmc.utilities.math.geometry.AngleTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.Joint;
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 
 public class ComposableStateEstimatorEvaluatorErrorCalculator
 {
@@ -27,6 +30,9 @@ public class ComposableStateEstimatorEvaluatorErrorCalculator
    private final DoubleYoVariable comPositionError = new DoubleYoVariable("comPositionError", registry);
    private final DoubleYoVariable comVelocityError = new DoubleYoVariable("comVelocityError", registry);
 
+   private final YoFramePoint perfectCoMPosition = new YoFramePoint("perfectCoMPosition", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector perfectCoMVelocity = new YoFrameVector("perfectCoMVelocity", ReferenceFrame.getWorldFrame(), registry);
+   
    public ComposableStateEstimatorEvaluatorErrorCalculator(Robot robot, Joint estimationJoint, OrientationEstimator orientationEstimator,
            YoVariableRegistry parentRegistry)
    {
@@ -73,7 +79,8 @@ public class ComposableStateEstimatorEvaluatorErrorCalculator
       Vector3d angularMomentum = new Vector3d();
 
       robot.computeCOMMomentum(comPoint, linearVelocity, angularMomentum);
-
+      perfectCoMPosition.set(comPoint);
+      
       Vector3d comError = new Vector3d();
       comError.set(orientationEstimator.getEstimatedCoMPosition().getPointCopy());
       comError.sub(comPoint);
@@ -89,7 +96,8 @@ public class ComposableStateEstimatorEvaluatorErrorCalculator
 
       double mass = robot.computeCOMMomentum(comPoint, linearVelocity, angularMomentum);
       linearVelocity.scale(1.0 / mass);
-
+      perfectCoMVelocity.set(linearVelocity);
+      
       Vector3d estimatedCoMVelocity = orientationEstimator.getEstimatedCoMVelocity().getVectorCopy();
 
       estimatedCoMVelocity.sub(linearVelocity);
