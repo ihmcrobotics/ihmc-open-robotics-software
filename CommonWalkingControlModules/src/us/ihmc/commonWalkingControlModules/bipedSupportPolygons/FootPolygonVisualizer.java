@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.Updatable;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorTools;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -59,7 +58,6 @@ public class FootPolygonVisualizer implements Updatable
          if (yoFootPolygon != null)
          {
             List<FramePoint> contactPoints = contactState.getContactPoints();
-            contactPoints = DesiredFootstepCalculatorTools.fixTwoPointsAndCopy(contactPoints); // TODO: terrible
             if (contactPoints.size() > 0)
                yoFootPolygon.setFrameConvexPolygon2d(FrameConvexPolygon2d.constructByProjectionOntoXYPlane(contactPoints, yoFootPolygon.getReferenceFrame()));
             else
