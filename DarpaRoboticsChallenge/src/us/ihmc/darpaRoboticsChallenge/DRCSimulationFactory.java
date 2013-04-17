@@ -13,6 +13,7 @@ import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonAvatarInterfaces.CommonAvatarEnvironmentInterface;
 import us.ihmc.commonWalkingControlModules.controllers.ControllerFactory;
 import us.ihmc.commonWalkingControlModules.controllers.HandControllerInterface;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.HandStatePacket;
 import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.CenterOfMassJacobianUpdater;
@@ -74,7 +75,7 @@ public class DRCSimulationFactory
    private static final boolean CREATE_DYNAMICALLY_CONSISTENT_NULLSPACE_EVALUATOR = false;
    private static final boolean CREATE_STATE_ESTIMATOR = false;
    private static final boolean USE_STATE_ESTIMATOR = false;
-   private static final boolean STEAL_DESIRED_COM_ACCELERATIONS_FROM_ROBOT = true;
+   private static final boolean STEAL_DESIRED_COM_ACCELERATIONS_FROM_ROBOT = false;
    private static final boolean VISUALIZE_CONTROL_FLOW_GRAPH = false;
 
    public static HumanoidRobotSimulation<SDFRobot> createSimulation(ControllerFactory controllerFactory,
@@ -135,7 +136,18 @@ public class DRCSimulationFactory
          }
 
          ArrayList<IMUMount> imuMounts = new ArrayList<IMUMount>();
-         simulatedRobot.getIMUMounts(imuMounts);
+         ArrayList<IMUMount> allIMUMounts = new ArrayList<IMUMount>();
+         simulatedRobot.getIMUMounts(allIMUMounts);
+         
+         for (IMUMount imuMount : allIMUMounts)
+         {
+//            System.out.println("IMUMount: " + imuMount.getName());
+            // Only add the main one now. Not the head one.
+//            if (imuMount.getName().equals("head_imu_sensor")) imuMounts.add(imuMount);
+            if (imuMount.getName().equals("imu_sensor")) imuMounts.add(imuMount);
+         }
+         
+         
          ArrayList<KinematicPoint> velocityPoints = new ArrayList<KinematicPoint>();    
          //TODO: Get the velocity points
          ArrayList<GroundContactPoint> allKinematicPoints = simulatedRobot.getAllGroundContactPoints();
@@ -151,8 +163,9 @@ public class DRCSimulationFactory
             }
          }
          
+         SensorNoiseParameters sensorNoiseParamters = DRCSimulatedSensorNoiseParameters.createSensorNoiseParametersGazeboSDF();
 //         SensorNoiseParameters sensorNoiseParamters = DRCSimulatedSensorNoiseParameters.createSensorNoiseParametersALittleNoise();
-         SensorNoiseParameters sensorNoiseParamters = DRCSimulatedSensorNoiseParameters.createSensorNoiseParametersZeroNoise();
+//         SensorNoiseParameters sensorNoiseParamters = DRCSimulatedSensorNoiseParameters.createSensorNoiseParametersZeroNoise();
 
          SensorMapFromRobotFactory sensorMapFromRobotFactory = new SensorMapFromRobotFactory(scsToInverseDynamicsJointMapForEstimator, 
                simulatedRobot, sensorNoiseParamters,
@@ -164,17 +177,6 @@ public class DRCSimulationFactory
               
          ControlFlowGraph controlFlowGraph = orientationEstimator.getControlFlowGraph();
 
-         SensorAndEstimatorAssembler.connectDesiredAccelerationPorts(controlFlowGraph, orientationEstimator,
-               desiredCoMAndAngularAccelerationOutputPortsHolder);
-
-         controlFlowGraph.initializeAfterConnections();
-         
-         
-         if (VISUALIZE_CONTROL_FLOW_GRAPH)
-         {
-            controlFlowGraph.visualize();
-         }
-         
          Joint estimationJoint = simulatedRobot.getRootJoints().get(0);
          ComposableStateEstimatorEvaluatorController composableStateEstimatorEvaluatorController =
             new ComposableStateEstimatorEvaluatorController(controlFlowGraph, orientationEstimator, simulatedRobot, estimationJoint, controlDT, sensorMap);
@@ -249,11 +251,34 @@ public class DRCSimulationFactory
          lidarJoint = fullRobotModelForController.getOneDoFJointByName(jointMap.getLidarJointName());
       }
 
-      RobotController robotController = controllerFactory.getController(inverseDynamicsStructure.getEstimationLink(),
+      //TODO: Get rid of this type cast.
+      MomentumBasedController robotController = (MomentumBasedController) controllerFactory.getController(inverseDynamicsStructure.getEstimationLink(),
             inverseDynamicsStructure.getEstimationFrame(), fullRobotModelForController, referenceFramesForController, controlDT,
             simulatedRobot.getYoTime(), dynamicGraphicObjectsListRegistry, guiSetterUpperRegistry, twistCalculator,
             centerOfMassJacobian, footSwitches, handControllers, lidarJoint);
 
+      
+      if (CREATE_STATE_ESTIMATOR)
+      {
+         if (desiredCoMAndAngularAccelerationOutputPortsHolder == null)
+         {
+            desiredCoMAndAngularAccelerationOutputPortsHolder = robotController;
+         }
+
+         ControlFlowGraph controlFlowGraph = orientationEstimator.getControlFlowGraph();
+
+         SensorAndEstimatorAssembler.connectDesiredAccelerationPorts(controlFlowGraph, orientationEstimator,
+               desiredCoMAndAngularAccelerationOutputPortsHolder);
+
+         controlFlowGraph.initializeAfterConnections();
+
+         if (VISUALIZE_CONTROL_FLOW_GRAPH)
+         {
+            controlFlowGraph.visualize();
+         }
+      }
+ 
+      
       AbstractModularRobotController modularRobotController;
 
 
@@ -343,7 +368,7 @@ public class DRCSimulationFactory
 
       // The following few lines are what you need to do to get the state estimator working with a robot.
       // You also need to either add the controlFlowGraph to another one, or make sure to run it's startComputation method at the right time:
-      SensorNoiseParameters sensorNoiseParametersForEstimator = DRCSimulatedSensorNoiseParameters.createNoiseParametersForEstimator();
+      SensorNoiseParameters sensorNoiseParametersForEstimator = DRCSimulatedSensorNoiseParameters.createNoiseParametersForEstimatorBasedOnGazeboSDF();
       
       SensorAndEstimatorAssembler sensorAndEstimatorAssembler = new SensorAndEstimatorAssembler(sensorNoiseParametersForEstimator, gravitationalAcceleration, inverseDynamicsStructure, controlDT,
                                                                    sensorMap, registry);
