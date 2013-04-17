@@ -73,7 +73,7 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject
 
 public class DRCSimulationFactory
 {
-   public static boolean SHOW_INERTIA_ELLIPSOIDS = true;
+   public static boolean SHOW_INERTIA_ELLIPSOIDS = false;
    private static final boolean SHOW_REFERENCE_FRAMES = false;
    private static final boolean CREATE_DYNAMICALLY_CONSISTENT_NULLSPACE_EVALUATOR = false;
    private static final boolean CREATE_STATE_ESTIMATOR = false;
