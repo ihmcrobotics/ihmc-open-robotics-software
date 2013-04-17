@@ -137,7 +137,7 @@ public class GeometricStairsGroundReactionWrenchDistributor implements GroundRea
       FrameConvexPolygon2d supportPolygonInMidFeetZUp = bipedSupportPolygons.getSupportPolygonInMidFeetZUp();
       centerOfPressure2d.changeFrame(supportPolygonInMidFeetZUp.getReferenceFrame());
       GeometryTools.projectOntoPolygonAndCheckDistance(centerOfPressure2d, supportPolygonInMidFeetZUp, Double.POSITIVE_INFINITY);    // fix CoP slightly outside support polygon
-
+      
       // compute deltaCMP
       FramePoint lineEnd = new FramePoint(com);
       lineEnd.add(force);
@@ -152,6 +152,7 @@ public class GeometricStairsGroundReactionWrenchDistributor implements GroundRea
       {
          virtualToePointCalculator.packVirtualToePoints(centersOfPressureInZUp, bipedSupportPolygons, centerOfPressure2d, upcomingSupportSide);
       }
+      
       else
       {
          RobotSide supportLeg = getSupportLeg(contactStates);
