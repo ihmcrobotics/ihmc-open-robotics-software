@@ -32,7 +32,6 @@ import us.ihmc.utilities.screwTheory.TwistCalculator;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.gui.GUISetterUpperRegistry;
-import com.yobotics.simulationconstructionset.robotController.RobotController;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class MultiContactTestHumanoidControllerFactory implements HighLevelHumanoidControllerFactory
