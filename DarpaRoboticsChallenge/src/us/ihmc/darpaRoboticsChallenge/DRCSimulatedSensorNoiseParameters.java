@@ -65,9 +65,53 @@ public class DRCSimulatedSensorNoiseParameters
 
       return sensorNoiseParameters;
    }
+   
+   
+   public static SensorNoiseParameters createSensorNoiseParametersGazeboSDF()
+   {
+      SensorNoiseParameters sensorNoiseParameters = new SensorNoiseParameters();
+
+      sensorNoiseParameters.setOrientationMeasurementStandardDeviation(0.002);
+      sensorNoiseParameters.setAngularVelocityMeasurementStandardDeviation(0.002);
+      sensorNoiseParameters.setLinearAccelerationMeasurementStandardDeviation(0.017);
+      sensorNoiseParameters.setPointVelocityMeasurementStandardDeviation(0.05);
+
+      sensorNoiseParameters.setAngularVelocityBiasProcessNoiseStandardDeviation(0.0);
+      sensorNoiseParameters.setLinearAccelerationBiasProcessNoiseStandardDeviation(0.0);
+
+      double gazeboAngularVelocityBiasStandardDeviation = 0.000008;
+      double gazeboAngularVelocityBiasMean = 0.000001;
+      
+      double gazeboLinearAccelerationBiasStandardDeviation = 0.017000;
+      double gazeboLinearAccelerationBiasMean = 0.100000;
+      
+      Vector3d initialLinearAccelerationBias = computeGazeboBiasVector(gazeboLinearAccelerationBiasMean, gazeboLinearAccelerationBiasStandardDeviation, random);
+      Vector3d initialAngularVelocityBias = computeGazeboBiasVector(gazeboAngularVelocityBiasMean, gazeboAngularVelocityBiasStandardDeviation, random);
+
+      sensorNoiseParameters.setInitialLinearVelocityBias(initialLinearAccelerationBias);
+      sensorNoiseParameters.setInitialAngularVelocityBias(initialAngularVelocityBias);
+
+      return sensorNoiseParameters;
+   }
 
 
-   public static SensorNoiseParameters createNoiseParametersForEstimator()
+   public static SensorNoiseParameters createNoiseParametersForEstimatorBasedOnGazeboSDF()
+   {
+      SensorNoiseParameters sensorNoiseParameters = new SensorNoiseParameters();
+
+      sensorNoiseParameters.setOrientationMeasurementStandardDeviation(0.002);
+      sensorNoiseParameters.setAngularVelocityMeasurementStandardDeviation(0.002);
+      sensorNoiseParameters.setLinearAccelerationMeasurementStandardDeviation(0.017);
+      sensorNoiseParameters.setPointVelocityMeasurementStandardDeviation(0.05);
+
+      sensorNoiseParameters.setAngularVelocityBiasProcessNoiseStandardDeviation(1e-8);
+      sensorNoiseParameters.setLinearAccelerationBiasProcessNoiseStandardDeviation(1e-8);
+
+      return sensorNoiseParameters;
+   }
+   
+   
+   public static SensorNoiseParameters createNoiseParametersForEstimatorJerryTuning()
    {
       SensorNoiseParameters sensorNoiseParameters = new SensorNoiseParameters();
 
