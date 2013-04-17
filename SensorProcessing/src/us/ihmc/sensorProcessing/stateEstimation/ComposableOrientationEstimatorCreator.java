@@ -85,6 +85,8 @@ public class ComposableOrientationEstimatorCreator
 
    private class ComposableOrientationEstimator extends ComposableStateEstimator implements OrientationEstimatorWithPorts
    {
+      private final ControlFlowGraph controlFlowGraph;
+      
       private final ControlFlowOutputPort<FrameOrientation> orientationPort;
       private final ControlFlowOutputPort<FrameVector> angularVelocityPort;
 
@@ -96,6 +98,8 @@ public class ComposableOrientationEstimatorCreator
       {
          super(name, controlDT, parentRegistry);
 
+         this.controlFlowGraph = controlFlowGraph;
+         
          orientationPort = new YoFrameQuaternionControlFlowOutputPort(this, name, ReferenceFrame.getWorldFrame(), parentRegistry);
          angularVelocityPort = new YoFrameVectorControlFlowOutputPort(this, name + "Omega", estimationFrame, registry);
 
@@ -240,6 +244,11 @@ public class ComposableOrientationEstimatorCreator
       public ControlFlowInputPort<FrameVector> getDesiredCenterOfMassAccelerationInputPort()
       {
          return null;
+      }
+
+      public ControlFlowGraph getControlFlowGraph()
+      {
+         return controlFlowGraph;
       }
 
    }
