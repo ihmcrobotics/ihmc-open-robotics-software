@@ -1,48 +1,65 @@
 package us.ihmc.commonWalkingControlModules.sensors;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
+import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
 import org.ejml.data.DenseMatrix64F;
+import org.ejml.factory.SingularMatrixException;
 import org.ejml.ops.CommonOps;
 
+import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.kalman.YoKalmanFilter;
-import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.math.MatrixTools;
-import us.ihmc.utilities.math.geometry.FrameLine;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
+import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.CenterOfMassCalculator;
+import us.ihmc.utilities.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
+import us.ihmc.utilities.screwTheory.RigidBodyInertia;
 import us.ihmc.utilities.screwTheory.ScrewTools;
+import us.ihmc.utilities.screwTheory.SixDoFJoint;
+import us.ihmc.utilities.screwTheory.SpatialAccelerationCalculator;
+import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
+import us.ihmc.utilities.screwTheory.TwistCalculator;
 import us.ihmc.utilities.screwTheory.Wrench;
 
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.VariableChangedListener;
+import com.yobotics.simulationconstructionset.YoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicLineSegment;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoVariable;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 
 
 public class MassMatrixEstimatingToolRigidBody
 {
-   private static final int numberOfLines = 200;
    
    private final YoVariableRegistry registry;
    
    private final double gravity;
-//   private final RigidBodyInertia estimatedInertia;
+   
+   private final PoseReferenceFrame toolFrame; 
+   private final RigidBody toolBody;
    
    private final ReferenceFrame handFixedFrame;
+   private final ReferenceFrame wristFrame;
    private final CenterOfMassCalculator comCalculator;
    
    private final Wrench calculatedObjectWrench;
    
    private final YoFramePoint objectCenterOfMass;
    
+   private final AlphaFilteredYoVariable objectMass;
    private final YoKalmanFilter objectCoMFilter;
    private final DenseMatrix64F F = new DenseMatrix64F(3, 3);
    private final DenseMatrix64F G = new DenseMatrix64F(3, 0);
@@ -55,57 +72,113 @@ public class MassMatrixEstimatingToolRigidBody
    
    private final DenseMatrix64F y = new DenseMatrix64F(3, 1);
    
+   private final DenseMatrix64F x = new DenseMatrix64F(3, 1);
+   private final DenseMatrix64F P = new DenseMatrix64F(3, 3);
+   
+   private final InverseDynamicsCalculator inverseDynamicsCalculator;
+   private final SixDoFJoint toolJoint;
+   private final ReferenceFrame elevatorFrame;
+   
    // Visualization lines
-   @SuppressWarnings("unchecked")
-   private final Pair<YoFramePoint, YoFramePoint>[] yoLinePoints = new Pair[numberOfLines];
-   private final FrameLine[] centerOfMassLines = new FrameLine[numberOfLines];
+//   private final int numberOfLines = 200;
+//   @SuppressWarnings("unchecked")
+//   private final Pair<YoFramePoint, YoFramePoint>[] yoLinePoints = new Pair[numberOfLines];
+//   private final FrameLine[] centerOfMassLines = new FrameLine[numberOfLines];
+//   
+//   private int currentIndex = 0;
    
-   private int currentIndex = 0;
+   private final DoubleYoVariable RDiagonal;
+   private final DoubleYoVariable QDiagonal;
    
-   public MassMatrixEstimatingToolRigidBody(String name, InverseDynamicsJoint wristJoint, double gravity, YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+   
+   
+   public MassMatrixEstimatingToolRigidBody(String name, final InverseDynamicsJoint wristJoint, final FullRobotModel fullRobotModel, double gravity, double controlDT, YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
-//      super(name, new RigidBodyInertia(wristJoint.getFrameAfterJoint(), 0.0, 0.0, 0.0, 0.0), wristJoint);
       this.registry = new YoVariableRegistry(name);
       this.gravity = gravity;
-//      this.estimatedInertia = getInertia();
+      
+      
+      this.handFixedFrame = wristJoint.getSuccessor().getBodyFixedFrame();
+      this.wristFrame = wristJoint.getFrameAfterJoint();
       
       
       
-      this.handFixedFrame = wristJoint.getSuccessor().getBodyFixedFrame();//.getFrameAfterJoint();
+      
+      this.elevatorFrame = fullRobotModel.getElevatorFrame();
+      toolFrame = new PoseReferenceFrame(name + "Frame", elevatorFrame);
+      
+      RigidBodyInertia inertia = new RigidBodyInertia(toolFrame, new Matrix3d(), 0.0);
       
       
+      this.toolJoint = new SixDoFJoint("toolJoint", fullRobotModel.getElevator(), fullRobotModel.getElevator().getBodyFixedFrame());
+      this.toolBody = new RigidBody("toolBody", inertia, toolJoint);
+      
+      TwistCalculator twistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), toolBody);
+      SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(toolBody, elevatorFrame,
+            ScrewTools.createGravitationalSpatialAcceleration(fullRobotModel.getElevator(), gravity), twistCalculator, true, true);
+      
+      ArrayList<InverseDynamicsJoint> jointsToIgnore = new ArrayList<InverseDynamicsJoint>();
+      jointsToIgnore.addAll(twistCalculator.getRootBody().getChildrenJoints());
+      jointsToIgnore.remove(toolJoint);
+      
+      inverseDynamicsCalculator = new InverseDynamicsCalculator(ReferenceFrame.getWorldFrame(), new HashMap<RigidBody, Wrench>(),
+            jointsToIgnore, spatialAccelerationCalculator, twistCalculator);
+
+         
+         
       RigidBody[] rigidBodies = ScrewTools.computeRigidBodiesInOrder(wristJoint);
-      this.comCalculator = new CenterOfMassCalculator(rigidBodies, handFixedFrame);
-      calculatedObjectWrench = new Wrench(handFixedFrame, handFixedFrame);
+      this.comCalculator = new CenterOfMassCalculator(rigidBodies, wristFrame);
+      calculatedObjectWrench = new Wrench(wristFrame, wristFrame);
       
-      
+      objectMass = new AlphaFilteredYoVariable("objectMass", registry, AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(1.0, controlDT));
       objectCoMFilter = new YoKalmanFilter(name + "Filter", 3, 0, 3, registry);
       CommonOps.setIdentity(F);
       
       CommonOps.setIdentity(R);
-      CommonOps.scale(0.1, R);
+      CommonOps.scale(2.0, R);
       
       CommonOps.setIdentity(Q);
-      CommonOps.scale(0.01, Q);
+      CommonOps.scale(1e-6, Q);
       
-      //Initialize
-      DenseMatrix64F x = new DenseMatrix64F(3, 1);
-      DenseMatrix64F P = new DenseMatrix64F(3, 3);
       CommonOps.setIdentity(P);
       CommonOps.scale(100.0, P);
-      objectCoMFilter.setState(x, P);
+      reset();
+      
+      RDiagonal = new DoubleYoVariable("RDiagonal", registry);
+      
+      RDiagonal.addVariableChangedListener(new VariableChangedListener()
+      {
+         
+         public void variableChanged(YoVariable v)
+         {
+            CommonOps.setIdentity(R);
+            CommonOps.scale(RDiagonal.getDoubleValue(), R);
+         }
+      });
+      
+      QDiagonal = new DoubleYoVariable("QDiagonal", registry);
+      QDiagonal.addVariableChangedListener(new VariableChangedListener()
+      {
+         
+         public void variableChanged(YoVariable v)
+         {
+            CommonOps.setIdentity(Q);
+            CommonOps.scale(QDiagonal.getDoubleValue(), Q);
+         }
+      });
+      
+      RDiagonal.set(R.get(0,0));
+      QDiagonal.set(Q.get(0,0));
       
       
       this.objectCenterOfMass = new YoFramePoint(name + "CenterOfMass", ReferenceFrame.getWorldFrame(), registry);
       
-      
-      for(int i = 0; i < numberOfLines; i++)
-      {
-         Pair<YoFramePoint, YoFramePoint> linePair = new Pair<YoFramePoint, YoFramePoint>(
-               new YoFramePoint(name + "CoMStartPoint" + i, ReferenceFrame.getWorldFrame(), registry),
-               new YoFramePoint(name + "CoMEndPoint" + i, ReferenceFrame.getWorldFrame(), registry));
-         yoLinePoints[i] = linePair;
-      }
+//      for (int i = 0; i < numberOfLines; i++)
+//      {
+//         Pair<YoFramePoint, YoFramePoint> linePair = new Pair<YoFramePoint, YoFramePoint>(new YoFramePoint(name + "CoMStartPoint" + i,
+//               ReferenceFrame.getWorldFrame(), registry), new YoFramePoint(name + "CoMEndPoint" + i, ReferenceFrame.getWorldFrame(), registry));
+//         yoLinePoints[i] = linePair;
+//      }
       
       if(dynamicGraphicObjectsListRegistry != null)
       {
@@ -114,11 +187,11 @@ public class MassMatrixEstimatingToolRigidBody
          DynamicGraphicObject comViz = objectCenterOfMass.createDynamicGraphicPosition(name + "CenterOfMassViz", 0.05, YoAppearance.Red());
          dynamicGraphicObjectsList.add(comViz);
          
-         for(Pair<YoFramePoint, YoFramePoint> linePair : yoLinePoints)
-         {
-            DynamicGraphicObject comLineViz = new DynamicGraphicLineSegment(name + "CoMApplicationLineViz", linePair.first(), linePair.second(), 1.0, YoAppearance.Red(), false, 0.0002);
-            dynamicGraphicObjectsList.add(comLineViz);
-         }         
+//         for(Pair<YoFramePoint, YoFramePoint> linePair : yoLinePoints)
+//         {
+//            DynamicGraphicObject comLineViz = new DynamicGraphicLineSegment(name + "CoMApplicationLineViz", linePair.first(), linePair.second(), 1.0, YoAppearance.Red(), false, 0.0002);
+//            dynamicGraphicObjectsList.add(comLineViz);
+//         }                  
          
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectsList);
       }
@@ -130,97 +203,152 @@ public class MassMatrixEstimatingToolRigidBody
    {
       comCalculator.compute();
       FrameVector gravityVector = new FrameVector(ReferenceFrame.getWorldFrame(), 0.0, 0.0, -gravity);
-      gravityVector.changeFrame(handFixedFrame);
+      gravityVector.changeFrame(wristFrame);
       gravityVector.scale(comCalculator.getTotalMass());
       
       FramePoint com = comCalculator.getCenterOfMass();
       
-      FrameVector torque = new FrameVector(handFixedFrame);
+      FrameVector torque = new FrameVector(wristFrame);
       torque.cross(com, gravityVector);
       
-      calculatedObjectWrench.set(handFixedFrame, gravityVector.getVector(), torque.getVector());
+      calculatedObjectWrench.set(wristFrame, gravityVector.getVector(), torque.getVector());
       
+      if(measuredWristWrench.getBodyFrame() == null || measuredWristWrench.getExpressedInFrame() == null)
+      {
+         return;
+      }
       
+      calculatedObjectWrench.changeBodyFrameAttachedToSameBody(wristFrame);
+      calculatedObjectWrench.changeFrame(wristFrame);
       
-//      measuredWristWrench.add(calculatedObjectWrench);
+      measuredWristWrench.sub(calculatedObjectWrench);
       
-     
-      // TODO: Use calculated wrench for testing, switch to measured to make it work!
+      // Use calculated wrench for testing, switch to measured to make it work!
 //      measuredWristWrench = calculatedObjectWrench;
       
+      
+      measuredWristWrench.changeFrame(wristFrame);
+      measuredWristWrench.changeBodyFrameAttachedToSameBody(wristFrame);
       
       FrameVector torqueDueObject = measuredWristWrench.getAngularPartAsFrameVectorCopy();
       FrameVector forceDueObject = measuredWristWrench.getLinearPartAsFrameVectorCopy();
       
-      
-      System.out.println(calculatedObjectWrench);
-      System.out.println(measuredWristWrench);
       if(torqueDueObject.getVector().epsilonEquals(new Vector3d(), 1e-4) || forceDueObject.getVector().epsilonEquals(new Vector3d(), 1e-4))
       {
          return;
       }
       
+      
       MatrixTools.insertTuple3dIntoEJMLVector(torqueDueObject.getVector(), y, 0);
       MatrixTools.vectorToSkewSymmetricMatrix(H, forceDueObject.getVector());
       CommonOps.scale(-1.0, H);
       
-      objectCoMFilter.configure(F, G, H);
+      forceDueObject.changeFrame(ReferenceFrame.getWorldFrame());
+      objectMass.update(-forceDueObject.getZ()/gravity);
+      toolBody.getInertia().setMass(objectMass.getDoubleValue());
       
-      objectCoMFilter.setProcessNoiseCovariance(Q);
-      objectCoMFilter.setMeasurementNoiseCovariance(R);
-      
-      
-      objectCoMFilter.predict(u);
-      objectCoMFilter.update(y);
+      try
+      {
+         objectCoMFilter.configure(F, G, H);
+         
+         objectCoMFilter.setProcessNoiseCovariance(Q);
+         objectCoMFilter.setMeasurementNoiseCovariance(R);
+         
+         
+         objectCoMFilter.predict(u);
+         objectCoMFilter.update(y);
+      }
+      catch(SingularMatrixException e)
+      {
+         System.err.println("Matrix is singular, resetting");
+         reset();
+         return;
+      }
 
-      FramePoint objectCoM = new FramePoint(handFixedFrame);
+      FramePoint objectCoM = new FramePoint(wristFrame);
       MatrixTools.denseMatrixToVector3d(objectCoMFilter.getState(), objectCoM.getPoint(), 0, 0);
       
       
+      objectCoM.changeFrame(elevatorFrame);
+      toolFrame.updatePosition(objectCoM);
+      
+      
+      FramePoint toolFramePoint = new FramePoint(toolFrame);
+      toolFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
       
       // Visualization stuff
-      objectCoM.changeFrame(ReferenceFrame.getWorldFrame());
-      objectCenterOfMass.set(objectCoM);
+      objectCenterOfMass.set(toolFramePoint);
       
-      FrameVector radius = new FrameVector(measuredWristWrench.getExpressedInFrame());
-      radius.cross(torqueDueObject, forceDueObject);
-      radius.scale(-1.0/forceDueObject.dot(forceDueObject));
+//      FrameVector radius = new FrameVector(measuredWristWrench.getExpressedInFrame());
+//      radius.cross(torqueDueObject, forceDueObject);
+//      radius.scale(-1.0/forceDueObject.dot(forceDueObject));
+//      
+//      
+//      FrameLine line = new FrameLine(radius.getReferenceFrame(), radius.getVector(), forceDueObject.getVector());
+//      centerOfMassLines[currentIndex] = line;
+//      
+//      currentIndex++;
+//      if(currentIndex >= numberOfLines)
+//      {
+//         currentIndex = 0;
+//      }
+//      
+//      updateVisuals();
+   }
+
+   public void control(SpatialAccelerationVector spatialAccelerationVector, Wrench toolWrench)
+   {
+      
+      SpatialAccelerationVector toolAcceleration = new SpatialAccelerationVector(spatialAccelerationVector);
+      toolAcceleration.changeFrameNoRelativeMotion(toolJoint.getFrameAfterJoint());
+      
+      // TODO: Take relative acceleration between uTorsoCoM and elevator in account
+      toolAcceleration.changeBaseFrameNoRelativeAcceleration(elevatorFrame);
       
       
-      FrameLine line = new FrameLine(radius.getReferenceFrame(), radius.getVector(), forceDueObject.getVector());
-      centerOfMassLines[currentIndex] = line;
+      toolAcceleration.changeBodyFrameNoRelativeAcceleration(toolJoint.getFrameAfterJoint());
       
-      currentIndex++;
-      if(currentIndex >= numberOfLines)
-      {
-         currentIndex = 0;
-      }
+      toolJoint.setDesiredAcceleration(toolAcceleration);
+      inverseDynamicsCalculator.compute();
+      inverseDynamicsCalculator.getJointWrench(toolJoint, toolWrench);
       
-      updateVisuals();
+      
+      toolWrench.negate();
+      
+      toolWrench.changeFrame(handFixedFrame);
+      toolWrench.changeBodyFrameAttachedToSameBody(handFixedFrame);
+      
+   }
+
+   public void reset()
+   {
+    //Initialize
+      objectMass.reset();
+      objectCoMFilter.setState(x, P);
    }
    
-   private void updateVisuals()
-   {
-      for(int i = 0; i < numberOfLines; i++)
-      {
-         FrameLine line = centerOfMassLines[i];
-         if(line != null)
-         {
-            FramePoint origin = line.getOriginInFrame(ReferenceFrame.getWorldFrame());
-            FrameVector direction = line.getDirectionInFrame(ReferenceFrame.getWorldFrame());
-            
-            
-            FramePoint end = new FramePoint(origin);
-            end.add(direction);
-            
-            origin.sub(direction);
-            
-            
-            yoLinePoints[i].first().set(origin);
-            yoLinePoints[i].second().set(end);
-            
-            
-         }
-      }
-   }
+//   private void updateVisuals()
+//   {
+//      for(int i = 0; i < numberOfLines; i++)
+//      {
+//         FrameLine line = centerOfMassLines[i];
+//         if(line != null)
+//         {
+//            FramePoint origin = line.getOriginInFrame(ReferenceFrame.getWorldFrame());
+//            FrameVector direction = line.getDirectionInFrame(ReferenceFrame.getWorldFrame());
+//            
+//            
+//            FramePoint end = new FramePoint(origin);
+//            end.add(direction);
+//            
+//            origin.sub(direction);
+//            
+//            
+//            yoLinePoints[i].first().set(origin);
+//            yoLinePoints[i].second().set(end);
+//            
+//            
+//         }
+//      }
+//   }
 }

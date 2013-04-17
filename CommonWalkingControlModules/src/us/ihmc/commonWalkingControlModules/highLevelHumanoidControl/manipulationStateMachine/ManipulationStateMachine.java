@@ -12,6 +12,7 @@ import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.states.IndividualHandControlState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.states.IndividualManipulationState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
+import us.ihmc.commonWalkingControlModules.sensors.MassMatrixEstimatingToolRigidBody;
 import us.ihmc.commonWalkingControlModules.trajectories.OrientationInterpolationTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.SE3ConfigurationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.StraightLinePositionTrajectoryGenerator;
@@ -23,6 +24,7 @@ import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 import us.ihmc.utilities.screwTheory.Wrench;
@@ -48,6 +50,8 @@ public class ManipulationStateMachine extends AbstractControlFlowElement
    private final YoVariableRegistry registry;
 
    private final RobotSide robotSide;
+   
+   private final InverseDynamicsCalculator inverseDynamicsCalculator;
 
    private final Collection<DynamicGraphicReferenceFrame> dynamicGraphicReferenceFrames = new ArrayList<DynamicGraphicReferenceFrame>();
 
@@ -60,20 +64,21 @@ public class ManipulationStateMachine extends AbstractControlFlowElement
 
    private final HandControllerInterface handController;
 
-//   private final MassMatrixEstimatingToolRigidBody toolBody;
+   private final MassMatrixEstimatingToolRigidBody toolBody;
    private final Wrench measuredWristWrench = new Wrench();
      
 
 
    public ManipulationStateMachine(final DoubleYoVariable simulationTime, final RobotSide robotSide, final FullRobotModel fullRobotModel,
-         final TwistCalculator twistCalculator, WalkingControllerParameters walkingControllerParameters, final DesiredHandPoseProvider handPoseProvider,
-         final DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, HandControllerInterface handController, double gravity,
+         final TwistCalculator twistCalculator, InverseDynamicsCalculator inverseDynamicsCalculator, WalkingControllerParameters walkingControllerParameters, final DesiredHandPoseProvider handPoseProvider,
+         final DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, HandControllerInterface handController, double gravity, final double controlDT,
          final YoVariableRegistry parentRegistry)
    {
       String name = robotSide.getCamelCaseNameForStartOfExpression() + getClass().getSimpleName();
       registry = new YoVariableRegistry(name);
       stateMachine = new StateMachine<ManipulationState>(name, name + "SwitchTime", ManipulationState.class, simulationTime, registry);
       this.robotSide = robotSide;
+      this.inverseDynamicsCalculator = inverseDynamicsCalculator;
 
       String frameName = robotSide.getCamelCaseNameForStartOfExpression() + "HandPositionControlFrame";
       final ReferenceFrame frameAfterJoint = fullRobotModel.getHand(robotSide).getParentJoint().getFrameAfterJoint();
@@ -176,9 +181,16 @@ public class ManipulationStateMachine extends AbstractControlFlowElement
       }
 
       
-      
-      this.handController = handController;
-//      this.toolBody = new MassMatrixEstimatingToolRigidBody(name + "Tool", handController.getWristJoint(), gravity, registry, dynamicGraphicObjectsListRegistry);
+      if(handController != null)
+      {
+         this.handController = handController;
+         this.toolBody = new MassMatrixEstimatingToolRigidBody(name + "Tool", handController.getWristJoint(), fullRobotModel, gravity, controlDT, registry, dynamicGraphicObjectsListRegistry);
+      }
+      else
+      {
+         this.handController = null;
+         this.toolBody = null;
+      }
 
       parentRegistry.addChild(registry);
    }
@@ -197,18 +209,34 @@ public class ManipulationStateMachine extends AbstractControlFlowElement
       {
          frame.update();
       }
+      
 
       if (handController != null)
       {
+         if(handController.isClosed())
+         {
+            Wrench wrench = new Wrench();
+            toolBody.control(manipulationState.getDesiredHandAcceleration(), wrench);
+            inverseDynamicsCalculator.setExternalWrench(handController.getWristJoint().getSuccessor(), wrench);
+         }
          handController.doControl();
       }
    }
 
    private void estimateObjectWrench()
    {
-//      handController.packWristWrench(measuredWristWrench); JESPER: FIX THIS!
-//      toolBody.update(measuredWristWrench);
-      
+      if (handController != null)
+      {
+         if (handController.isClosed())
+         {
+            handController.packWristWrench(measuredWristWrench);
+            toolBody.update(measuredWristWrench);
+         }
+         else
+         {
+            toolBody.reset();
+         }
+      }
    }
 
    public void waitUntilComputationIsDone()
