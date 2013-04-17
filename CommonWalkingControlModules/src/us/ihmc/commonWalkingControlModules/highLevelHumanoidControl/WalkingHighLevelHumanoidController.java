@@ -336,8 +336,8 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
          }
 
          manipulationStateMachines.put(robotSide,
-                                       new ManipulationStateMachine(yoTime, robotSide, fullRobotModel, twistCalculator, walkingControllerParameters,
-                                          handPoseProvider, dynamicGraphicObjectsListRegistry, handControllerInterface, gravityZ, registry));
+                                       new ManipulationStateMachine(yoTime, robotSide, fullRobotModel, twistCalculator, inverseDynamicsCalculator, walkingControllerParameters,
+                                          handPoseProvider, dynamicGraphicObjectsListRegistry, handControllerInterface, gravityZ, controlDT, registry));
       }
 
       this.desiredHeadOrientationProvider = desiredHeadOrientationProvider;
@@ -346,11 +346,11 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       String[] chestOrientationControlJointNames = walkingControllerParameters.getChestOrientationControlJointNames();
 
       RigidBody elevator = fullRobotModel.getElevator();
-      InverseDynamicsJoint[] allJoints = ScrewTools.computeJointsInOrder(elevator);
+      RigidBody pelvis = fullRobotModel.getPelvis();
+      InverseDynamicsJoint[] allJoints = ScrewTools.computeJointsInOrder(pelvis);
       InverseDynamicsJoint[] headOrientationControlJoints = ScrewTools.findJointsWithNames(allJoints, headOrientationControlJointNames);
       InverseDynamicsJoint[] chestOrientationControlJoints = ScrewTools.findJointsWithNames(allJoints, chestOrientationControlJointNames);
 
-      RigidBody pelvis = fullRobotModel.getPelvis();
       if (headOrientationControlJoints.length > 0)
       {
          final RigidBody head = fullRobotModel.getHead();
@@ -1141,7 +1141,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
    public void initializeTrajectory(Footstep nextFootstep, RobotSide swingSide, SpatialAccelerationVector taskSpaceAcceleration)
    {
       RobotSide supportSide = swingSide.getOppositeSide();
-      ReferenceFrame trajectoryGeneratorFrame = ReferenceFrame.getWorldFrame();
+//      ReferenceFrame trajectoryGeneratorFrame = ReferenceFrame.getWorldFrame();
 
       // ReferenceFrame swingAnkleZUpFrame = referenceFrames.getAnkleZUpFrame(swingSide);
       // ReferenceFrame swingFootFrame = referenceFrames.getFootFrame(swingSide);

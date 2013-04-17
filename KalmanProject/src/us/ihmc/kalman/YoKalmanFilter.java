@@ -16,6 +16,7 @@ import org.ejml.alg.dense.mult.MatrixVectorMult;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.LinearSolver;
 import org.ejml.factory.LinearSolverFactory;
+import org.ejml.factory.SingularMatrixException;
 import org.ejml.ops.MatrixFeatures;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
@@ -257,7 +258,7 @@ public class YoKalmanFilter implements KalmanFilter
 
       // K = PH'S^(-1)
       if (!solver.setA(S))
-         throw new RuntimeException("Invert failed S = " + S);
+         throw new SingularMatrixException();
       solver.invert(S_inv);
       MatrixMatrixMult.multTransA_small(H, S_inv, d);
       MatrixMatrixMult.mult_small(P, d, K);
