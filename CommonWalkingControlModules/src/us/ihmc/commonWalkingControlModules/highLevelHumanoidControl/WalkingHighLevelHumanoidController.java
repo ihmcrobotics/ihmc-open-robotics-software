@@ -1063,7 +1063,6 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       if (stayOnToes.getBooleanValue())
       {
          List<FramePoint> contactPoints = getContactPointsForWalkingOnToes(contactableBody);
-         contactPoints = DesiredFootstepCalculatorTools.fixTwoPointsAndCopy(contactPoints);    // TODO: terrible
          footPolygon = FrameConvexPolygon2d.constructByProjectionOntoXYPlane(contactPoints, referenceFrames.getSoleFrame(swingSide));
       }
       else
@@ -1509,7 +1508,6 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
    private FrameConvexPolygon2d computeFootPolygon(RobotSide robotSide, ReferenceFrame referenceFrame)
    {
       List<FramePoint> contactPoints = contactStates.get(bipedFeet.get(robotSide)).getContactPoints();
-      contactPoints = DesiredFootstepCalculatorTools.fixTwoPointsAndCopy(contactPoints);    // TODO: terrible
       FrameConvexPolygon2d footPolygon = FrameConvexPolygon2d.constructByProjectionOntoXYPlane(contactPoints, referenceFrame);
 
       return footPolygon;

@@ -89,7 +89,7 @@ public class ContactPointGroundReactionWrenchDistributor implements GroundReacti
    }
 
    public void solve(GroundReactionWrenchDistributorOutputData distributedWrench, GroundReactionWrenchDistributorInputData inputData)
-   {
+   {      
       distributedWrench.reset();
 
       SpatialForceVector desiredGroundReactionWrench = inputData.getDesiredNetSpatialForceVector();
