@@ -3478,6 +3478,118 @@ I & R_{p}^{w}\left(\tilde{r}_{p}-\tilde{p}_{i}^{p}\right) & -R_{p}^{w}\tilde{v}_
 
 \end_layout
 
+\begin_layout Subsection
+Point position measurements
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+TODO: cleanup.
+ Possible move before point acceleration and point velocity measurements
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Let point 
+\begin_inset Formula $p_{i}$
+\end_inset
+
+ be fixed in frame 
+\begin_inset Formula $i$
+\end_inset
+
+, so that the augmented coordinate vector 
+\begin_inset Formula $\bar{p}_{i}^{i}=\left(\begin{array}{c}
+p_{i}^{i}\\
+1
+\end{array}\right)\in\mathbb{R}^{4}$
+\end_inset
+
+ is constant.
+ The position of point 
+\begin_inset Formula $p_{i}$
+\end_inset
+
+ can be expressed in 
+\begin_inset Formula $w$
+\end_inset
+
+ using
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\bar{p}_{i}^{w} & =H_{p}^{w}H_{i}^{p}\bar{p}_{i}^{i}\\
+ & =H_{p}^{w}\bar{p}_{i}^{p}
+\end{align*}
+
+\end_inset
+
+or, in terms of 3D vectors,
+\begin_inset Formula 
+\[
+p_{i}^{w}=R_{p}^{w}p_{i}^{p}+p_{p}^{w}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Using 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:rootjoint-position"
+
+\end_inset
+
+, we get
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+p_{i}^{w} & =R_{p}^{w}p_{i}^{p}+r-R_{p}^{w}r^{p}\\
+ & =R_{p}^{w}\left(p_{i}^{p}-r^{p}\right)+r
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The Jacobians are thus
+\begin_inset Formula 
+\[
+\frac{\partial p_{i}^{w}}{\partial r}=I
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\frac{\partial p_{i}^{w}}{\partial\phi}=\frac{\partial}{\partial\phi}R_{p}^{w}\left(p_{i}^{p}-r^{p}\right)=-R_{p}^{w}\widetilde{p_{i}^{p}-r^{p}}
+\]
+
+\end_inset
+
+
+\end_layout
+
 \begin_layout Section
 Appendix: Primer on using screw theory for kinematics
 \begin_inset CommandInset label
