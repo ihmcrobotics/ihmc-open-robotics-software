@@ -11,6 +11,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ListOfPointsCont
 import us.ihmc.commonWalkingControlModules.calculators.GainCalculator;
 import us.ihmc.commonWalkingControlModules.controlModules.ContactPointGroundReactionWrenchDistributor;
 import us.ihmc.commonWalkingControlModules.controllers.HandControllerInterface;
+import us.ihmc.commonWalkingControlModules.controllers.LidarControllerInterface;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.CoMBasedMomentumRateOfChangeControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.RootJointAngularAccelerationControlModule;
@@ -23,7 +24,6 @@ import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
-import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTools;
 import us.ihmc.utilities.screwTheory.TotalMassCalculator;
@@ -57,7 +57,7 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
    public MomentumBasedController create(RigidBody estimationLink, ReferenceFrame estimationFrame, FullRobotModel fullRobotModel, CommonWalkingReferenceFrames referenceFrames, FingerForceSensors fingerForceSensors,
                                  DoubleYoVariable yoTime, double gravityZ, TwistCalculator twistCalculator, CenterOfMassJacobian centerOfMassJacobian,
                                  SideDependentList<ContactablePlaneBody> feet, double controlDT, SideDependentList<FootSwitchInterface> footSwitches,
-                                 SideDependentList<HandControllerInterface> handControllers, OneDoFJoint lidarJoint, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
+                                 SideDependentList<HandControllerInterface> handControllers, LidarControllerInterface lidarControllerInterface, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
                                  YoVariableRegistry registry, GUISetterUpperRegistry guiSetterUpperRegistry, ProcessedOutputsInterface processedOutputs)
    {
       HashMap<ContactablePlaneBody, RigidBody> contactablePlaneBodiesAndBases = new HashMap<ContactablePlaneBody, RigidBody>();

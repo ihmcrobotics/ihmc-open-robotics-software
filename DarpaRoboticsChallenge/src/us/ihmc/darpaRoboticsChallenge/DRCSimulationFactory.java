@@ -13,6 +13,9 @@ import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonAvatarInterfaces.CommonAvatarEnvironmentInterface;
 import us.ihmc.commonWalkingControlModules.controllers.ControllerFactory;
 import us.ihmc.commonWalkingControlModules.controllers.HandControllerInterface;
+import us.ihmc.commonWalkingControlModules.controllers.LidarControllerInterface;
+import us.ihmc.commonWalkingControlModules.controllers.NullLidarController;
+import us.ihmc.commonWalkingControlModules.controllers.PIDLidarTorqueController;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulationStateMachine.HandStatePacket;
 import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
@@ -241,21 +244,23 @@ public class DRCSimulationFactory
       SDFPerfectSimulatedOutputWriter outputWriter = new SDFPerfectSimulatedOutputWriter(simulatedRobot, fullRobotModelForController);
 
       // PathTODO: Build LIDAR here
-      OneDoFJoint lidarJoint;
+      LidarControllerInterface lidarControllerInterface;
+      OneDoFJoint lidarJoint = fullRobotModelForController.getOneDoFJointByName(jointMap.getLidarJointName()); 
+      
       if (simulatedRobot instanceof GazeboRobot)
       {
-         lidarJoint = null;
+         lidarControllerInterface = new NullLidarController(lidarJoint);
       }
       else
       {
-         lidarJoint = fullRobotModelForController.getOneDoFJointByName(jointMap.getLidarJointName());
+         lidarControllerInterface = new PIDLidarTorqueController(lidarJoint, DRCConfigParameters.LIDAR_SPINDLE_VELOCITY, controlDT, registry);
       }
 
       //TODO: Get rid of this type cast.
       MomentumBasedController robotController = (MomentumBasedController) controllerFactory.getController(inverseDynamicsStructure.getEstimationLink(),
             inverseDynamicsStructure.getEstimationFrame(), fullRobotModelForController, referenceFramesForController, controlDT,
             simulatedRobot.getYoTime(), dynamicGraphicObjectsListRegistry, guiSetterUpperRegistry, twistCalculator,
-            centerOfMassJacobian, footSwitches, handControllers, lidarJoint);
+            centerOfMassJacobian, footSwitches, handControllers, lidarControllerInterface);
 
       
       if (CREATE_STATE_ESTIMATOR)
