@@ -7,9 +7,12 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 import org.ejml.data.DenseMatrix64F;
+import org.ejml.factory.DecompositionFactory;
 import org.ejml.factory.LinearSolver;
+import org.ejml.factory.SingularValueDecomposition;
 import org.ejml.ops.CommonOps;
 
+import org.ejml.ops.NormOps;
 import us.ihmc.utilities.CheckTools;
 import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.NullspaceCalculator;
@@ -70,6 +73,7 @@ public class MomentumSolver
 
 
    private final List<InverseDynamicsJoint> unconstrainedJoints = new ArrayList<InverseDynamicsJoint>();
+   private final DoubleYoVariable aHatRootCondition = new DoubleYoVariable("aHatRootCondition", registry);
 
    public MomentumSolver(SixDoFJoint rootJoint, RigidBody elevator, ReferenceFrame centerOfMassFrame, TwistCalculator twistCalculator,
                          LinearSolver<DenseMatrix64F> jacobianSolver, double controlDT, YoVariableRegistry parentRegistry)
@@ -239,7 +243,13 @@ public class MomentumSolver
    public void solve(DenseMatrix64F accelerationSubspace, DenseMatrix64F accelerationMultipliers, DenseMatrix64F momentumSubspace,
                      DenseMatrix64F momentumMultipliers)
    {
-      rootJointSolver.solveAndSetRootJointAcceleration(vdotRoot, aHats.get(rootJoint), b, accelerationSubspace, accelerationMultipliers, momentumSubspace,
+      DenseMatrix64F aHatRoot = aHats.get(rootJoint);
+
+      DenseMatrix64F aHatRootMomentum = new DenseMatrix64F(momentumSubspace.getNumCols(), aHatRoot.getNumCols());
+      CommonOps.multTransA(momentumSubspace, aHatRoot, aHatRootMomentum);
+      this.aHatRootCondition.set(NormOps.conditionP2(aHatRootMomentum));
+
+      rootJointSolver.solveAndSetRootJointAcceleration(vdotRoot, aHatRoot, b, accelerationSubspace, accelerationMultipliers, momentumSubspace,
               momentumMultipliers, rootJoint, jointAccelerationValidMap);
       jointSpaceConstraintResolver.solveAndSetJointspaceAccelerations(jointSpaceAccelerations, jointAccelerationValidMap);
       taskSpaceConstraintResolver.solveAndSetTaskSpaceAccelerations(jointAccelerationValidMap);
