@@ -1447,20 +1447,20 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
    {
       List<FramePoint> contactPoints = getContactPointsForWalkingOnToes(contactableBody);
       List<FramePoint2d> contactPoints2d = getContactPoints2d(contactableBody, contactPoints);
-      setContactState(contactableBody, contactPoints2d);
+      setContactState(contactableBody, contactPoints2d, ConstraintType.TOES);
    }
 
    private void setFlatFootContactState(ContactablePlaneBody contactableBody)
    {
-      setContactState(contactableBody, contactableBody.getContactPoints2d());
+      setContactState(contactableBody, contactableBody.getContactPoints2d(), ConstraintType.FULL);
    }
 
    private void setContactStateForSwing(ContactablePlaneBody contactableBody)
    {
-      setContactState(contactableBody, new ArrayList<FramePoint2d>());
+      setContactState(contactableBody, new ArrayList<FramePoint2d>(), ConstraintType.UNCONSTRAINED);
    }
 
-   private void setContactState(ContactablePlaneBody contactableBody, List<FramePoint2d> contactPoints)
+   private void setContactState(ContactablePlaneBody contactableBody, List<FramePoint2d> contactPoints, ConstraintType constraintType)
    {
       if (contactPoints.size() == 0)
       {
@@ -1470,7 +1470,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       YoPlaneContactState contactState = contactStates.get(contactableBody);
       int oldNumberOfContactPoints = contactState.getNumberOfContactPoints();
       contactState.set(contactPoints, coefficientOfFriction.getDoubleValue());
-      updateEndEffectorControlModule(contactableBody, contactState);
+      updateEndEffectorControlModule(contactableBody, contactState, constraintType);
 
       if (contactPoints.size() < oldNumberOfContactPoints)
       {
@@ -1499,16 +1499,9 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       return contactPoints;
    }
 
-   private void updateEndEffectorControlModule(ContactablePlaneBody contactablePlaneBody, PlaneContactState contactState)
-   {
-      updateEndEffectorControlModuleGivenConstraintType(contactablePlaneBody, contactState);
-   }
-   
-   // TODO call this directly when setting up toe/heel state
-   private void updateEndEffectorControlModuleGivenConstraintType(ContactablePlaneBody contactablePlaneBody, PlaneContactState contactState)
+   private void updateEndEffectorControlModule(ContactablePlaneBody contactablePlaneBody, PlaneContactState contactState, ConstraintType constraintType)
    {
       List<FramePoint2d> contactPoints = contactState.getContactPoints2d();
-      ConstraintType constraintType = EndEffectorControlModule.getUnconstrainedForZeroAndFullyConstrainedForFourContactPoints(contactPoints.size());
       endEffectorControlModules.get(contactablePlaneBody).setContactPoints(contactPoints, constraintType);
    }
 
