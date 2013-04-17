@@ -13,7 +13,7 @@ import us.ihmc.sensorProcessing.simulatedSensors.SensorMapFromRobotFactory;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.stateEstimation.DesiredCoMAccelerationsFromRobotStealerController;
 import us.ihmc.sensorProcessing.stateEstimation.DesiredCoMAndAngularAccelerationOutputPortsHolder;
-import us.ihmc.sensorProcessing.stateEstimation.OrientationEstimator;
+import us.ihmc.sensorProcessing.stateEstimation.OrientationEstimatorWithPorts;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FrameVector;
 
@@ -68,11 +68,16 @@ public class ComposableStateEstimatorEvaluator
       
       SensorAndEstimatorAssembler sensorAndEstimatorAssembler = new SensorAndEstimatorAssembler(sensorNoiseParametersForEstimator, gravitationalAcceleration,
                                                                    inverseDynamicsStructure, controlDT, sensorMap,
-                                                                   desiredCoMAndAngularAccelerationOutputPortsHolder, registry);
+                                                                   registry);
 
       ControlFlowGraph controlFlowGraph = sensorAndEstimatorAssembler.getControlFlowGraph();
-      OrientationEstimator orientationEstimator = sensorAndEstimatorAssembler.getOrientationEstimator();
+      OrientationEstimatorWithPorts orientationEstimator = sensorAndEstimatorAssembler.getOrientationEstimator();
 
+      SensorAndEstimatorAssembler.connectDesiredAccelerationPorts(controlFlowGraph, orientationEstimator,
+            desiredCoMAndAngularAccelerationOutputPortsHolder);
+
+      controlFlowGraph.initializeAfterConnections();
+      
 
       ComposableStateEstimatorEvaluatorController composableStateEstimatorEvaluatorController =
          new ComposableStateEstimatorEvaluatorController(controlFlowGraph, orientationEstimator, robot, estimationJoint, controlDT, sensorMap);

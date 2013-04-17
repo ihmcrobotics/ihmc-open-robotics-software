@@ -129,6 +129,8 @@ public class ComposableOrientationAndCoMEstimatorCreator
 
    private class ComposableOrientationAndCoMEstimator extends ComposableStateEstimator implements OrientationEstimatorWithPorts
    {
+      private final ControlFlowGraph controlFlowGraph;
+      
       private final ControlFlowInputPort<FullInverseDynamicsStructure> inverseDynamicsStructureInputPort;
       private final ControlFlowInputPort<FrameVector> desiredCenterOfMassAccelerationInputPort;
       private final ControlFlowInputPort<FrameVector> desiredAngularAccelerationInputPort;
@@ -150,6 +152,7 @@ public class ComposableOrientationAndCoMEstimatorCreator
       {
          super(name, controlDT, parentRegistry);
          
+         this.controlFlowGraph = controlFlowGraph;
          this.inverseDynamicsStructureInputPort = createInputPort();
          controlFlowGraph.connectElements(inverseDynamicsStructureOutputPort, inverseDynamicsStructureInputPort);
          
@@ -437,6 +440,11 @@ public class ComposableOrientationAndCoMEstimatorCreator
       public ControlFlowInputPort<FrameVector> getDesiredCenterOfMassAccelerationInputPort()
       {
          return desiredCenterOfMassAccelerationInputPort;
+      }
+
+      public ControlFlowGraph getControlFlowGraph()
+      {
+         return controlFlowGraph;
       }
 
    }

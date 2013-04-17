@@ -41,9 +41,10 @@ public class SensorAndEstimatorAssembler
    private final ControlFlowGraph controlFlowGraph;
    private final OrientationEstimatorWithPorts orientationEstimator;
 
-   public SensorAndEstimatorAssembler(SensorNoiseParameters sensorNoiseParametersForEstimator, Vector3d gravitationalAcceleration, FullInverseDynamicsStructure inverseDynamicsStructure, double controlDT,
-                                      SensorMap sensorMap, DesiredCoMAndAngularAccelerationOutputPortsHolder desiredCoMAndAngularAccelerationOutputPortsHolder,
-                                      YoVariableRegistry parentRegistry)
+   public SensorAndEstimatorAssembler(SensorNoiseParameters sensorNoiseParametersForEstimator, Vector3d gravitationalAcceleration, 
+         FullInverseDynamicsStructure inverseDynamicsStructure, double controlDT,
+         SensorMap sensorMap,
+         YoVariableRegistry parentRegistry)
    {
       SensorConfigurationFactory SensorConfigurationFactory = new SensorConfigurationFactory(sensorNoiseParametersForEstimator, gravitationalAcceleration);
 
@@ -99,12 +100,6 @@ public class SensorAndEstimatorAssembler
 
          orientationEstimator = orientationEstimatorCreator.createOrientationEstimator(controlFlowGraph, controlDT, estimationFrame, registry);
       }
-      
- 
-      connectDesiredAccelerationPorts(controlFlowGraph, orientationEstimator,
-            desiredCoMAndAngularAccelerationOutputPortsHolder);
-
-      controlFlowGraph.initializeAfterConnections();
 
       parentRegistry.addChild(registry);
    }
