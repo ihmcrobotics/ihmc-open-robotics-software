@@ -10,12 +10,10 @@ import org.ejml.ops.EjmlUnitTests;
 
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.sensorProcessing.stateEstimation.measurmentModelElements.MeasurementModelElement;
+import us.ihmc.sensorProcessing.stateEstimation.measurmentModelElements.PointPositionMeasurementModelElement;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.MatrixTools;
-import us.ihmc.utilities.math.geometry.Direction;
-import us.ihmc.utilities.math.geometry.FrameOrientation;
-import us.ihmc.utilities.math.geometry.FrameVector;
-import us.ihmc.utilities.math.geometry.RotationFunctions;
+import us.ihmc.utilities.math.geometry.*;
 
 public class MeasurementModelTestTools
 {
@@ -34,6 +32,32 @@ public class MeasurementModelTestTools
       CommonOps.scale(-1.0, residualFromOutputMatrix);
 
       return residualFromOutputMatrix;
+   }
+
+
+   public static void assertOutputMatrixCorrectUsingPerturbation(ControlFlowOutputPort<FramePoint> statePort, MeasurementModelElement modelElement,
+                                                                 FramePoint nominalState, double perturbationMagnitude, double tolerance, Runnable runnable)
+   {
+      DenseMatrix64F outputMatrixBlock = modelElement.getOutputMatrixBlock(statePort);
+      for (Direction direction : Direction.values())
+      {
+         FrameVector perturbationVector = new FrameVector(nominalState.getReferenceFrame());
+         perturbationVector.set(direction, perturbationMagnitude);
+
+         DenseMatrix64F perturbationEjmlVector = new DenseMatrix64F(3, 1);
+         MatrixTools.setDenseMatrixFromTuple3d(perturbationEjmlVector, perturbationVector.getVector(), 0, 0);
+
+         FramePoint perturbedState = new FramePoint(nominalState);
+         perturbedState.add(perturbationVector);
+         statePort.setData(perturbedState);
+
+         if (runnable != null)
+            runnable.run();
+
+         MeasurementModelTestTools.assertDeltaResidualCorrect(modelElement, outputMatrixBlock, perturbationEjmlVector, tolerance);
+      }
+
+      statePort.setData(nominalState);
    }
 
    public static void assertOutputMatrixCorrectUsingPerturbation(ControlFlowOutputPort<FrameVector> statePort, MeasurementModelElement modelElement,

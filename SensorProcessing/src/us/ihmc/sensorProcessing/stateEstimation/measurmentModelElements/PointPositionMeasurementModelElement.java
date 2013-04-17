@@ -92,7 +92,7 @@ public class PointPositionMeasurementModelElement extends AbstractMeasurementMod
 
    public DenseMatrix64F computeResidual()
    {
-      tempFramePoint.set(stationaryPoint);
+      tempFramePoint.setAndChangeFrame(stationaryPoint);
       tempFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
 
       residualVector.set(pointPositionMeasurementInputPort.getData());
