@@ -3582,7 +3582,7 @@ p_{i}^{w} & =R_{p}^{w}p_{i}^{p}+r-R_{p}^{w}r^{p}\\
 \begin_layout Standard
 \begin_inset Formula 
 \[
-\frac{\partial p_{i}^{w}}{\partial\phi}=\frac{\partial}{\partial\phi}R_{p}^{w}\left(p_{i}^{p}-r^{p}\right)=-R_{p}^{w}\widetilde{p_{i}^{p}-r^{p}}
+\frac{\partial p_{i}^{w}}{\partial\phi}=\frac{\partial}{\partial\phi}R_{p}^{w}\left(p_{i}^{p}-r^{p}\right)=R_{p}^{w}\widetilde{r^{p}-p_{i}^{p}}
 \]
 
 \end_inset
