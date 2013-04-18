@@ -8,6 +8,8 @@ import com.yobotics.simulationconstructionset.robotController.RobotController;
 public class RunnableRunnerController implements RobotController
 {
    private final String name = getClass().getSimpleName();
+   
+   private final YoVariableRegistry registry = new YoVariableRegistry(name);
    private final ArrayList<Runnable> runnables = new ArrayList<Runnable>();
 
    public RunnableRunnerController()
@@ -16,9 +18,13 @@ public class RunnableRunnerController implements RobotController
 
    public RunnableRunnerController(Runnable runnable)
    {
-      this.runnables.add(runnable);
+      addRunnable(runnable);
    }
 
+   public void addRunnable(Runnable runnable)
+   {
+      this.runnables.add(runnable);
+   }
 
    public void initialize()
    {
@@ -26,7 +32,7 @@ public class RunnableRunnerController implements RobotController
 
    public YoVariableRegistry getYoVariableRegistry()
    {
-      return null;
+      return registry;
    }
 
    public String getName()
