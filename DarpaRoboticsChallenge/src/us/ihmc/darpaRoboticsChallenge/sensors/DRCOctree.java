@@ -35,7 +35,7 @@ public class DRCOctree extends Octree implements QuadTreeListener
 
    public void PopToOctree(Point3f location, Point3f LidarHeadLocation)
    {
-      this.putLidar(new Point3d(LidarHeadLocation), new Point3d(location));
+      this.putLidarAtGraduallyMoreAccurateResolution(new Point3d(LidarHeadLocation), new Point3d(location));
    }
 
 }
