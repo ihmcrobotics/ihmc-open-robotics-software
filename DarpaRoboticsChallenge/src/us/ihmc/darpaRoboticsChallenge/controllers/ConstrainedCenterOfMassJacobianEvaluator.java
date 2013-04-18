@@ -54,47 +54,54 @@ public class ConstrainedCenterOfMassJacobianEvaluator implements RobotController
 
    public ConstrainedCenterOfMassJacobianEvaluator(FullRobotModel fullRobotModel)
    {
-      Map<RigidBody, DenseMatrix64F> constrainedBodiesAndSelectionMatrices = new HashMap<RigidBody, DenseMatrix64F>();
-      for (RobotSide robotSide : RobotSide.values())
-      {
-         RigidBody foot = fullRobotModel.getFoot(robotSide);
-         DenseMatrix64F selectionMatrix = new DenseMatrix64F(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
-         CommonOps.setIdentity(selectionMatrix);
-         constrainedBodiesAndSelectionMatrices.put(foot, selectionMatrix);
-      }
-
-      allJoints = ScrewTools.computeJointsInOrder(fullRobotModel.getElevator());
-      v = new DenseMatrix64F(ScrewTools.computeDegreesOfFreedom(allJoints), 1);
-
-//      DenseMatrix64F orientationSelectionMatrix = new DenseMatrix64F(SpatialMotionVector.SIZE / 2, SpatialMotionVector.SIZE);
-//      orientationSelectionMatrix.set(0, 0, 1.0);
-//      orientationSelectionMatrix.set(1, 1, 1.0);
-//      orientationSelectionMatrix.set(2, 2, 1.0);
-//      constrainedBodiesAndSelectionMatrices.put(fullRobotModel.getPelvis(), orientationSelectionMatrix);
-
-      actuatedJoints = new ArrayList<InverseDynamicsJoint>();
-//      for (RobotSide robotSide : RobotSide.values())
-//      {
-//         InverseDynamicsJoint[] jointPath = ScrewTools.createJointPath(fullRobotModel.getPelvis(), fullRobotModel.getFoot(robotSide));
-//         actuatedJoints.addAll(Arrays.asList(jointPath));
-//      }
-      actuatedJoints.addAll(Arrays.asList(allJoints));
-      actuatedJoints.remove(fullRobotModel.getRootJoint());
-
-      vActuated = new DenseMatrix64F(ScrewTools.computeDegreesOfFreedom(actuatedJoints), 1);
-
-      centerOfMassFrame = new CenterOfMassReferenceFrame("CoM", ReferenceFrame.getWorldFrame(), fullRobotModel.getElevator());
-
-      constrainedCenterOfMassJacobianCalculator = new ConstrainedCenterOfMassJacobianCalculator(fullRobotModel.getRootJoint(),
-              constrainedBodiesAndSelectionMatrices, actuatedJoints);
+      constrainedCenterOfMassJacobianCalculator = new ConstrainedCenterOfMassJacobianCalculator(fullRobotModel.getRootJoint());
 
       DenseMatrix64F linearMomentumSelectionMatrix = new DenseMatrix64F(SpatialMotionVector.SIZE / 2, SpatialMotionVector.SIZE);
       linearMomentumSelectionMatrix.set(0, 3, 1.0);
       linearMomentumSelectionMatrix.set(1, 4, 1.0);
       linearMomentumSelectionMatrix.set(2, 5, 1.0);
 
+      centerOfMassFrame = new CenterOfMassReferenceFrame("CoM", ReferenceFrame.getWorldFrame(), fullRobotModel.getElevator());
       constrainedCentroidalMomentumMatrixCalculator = new ConstrainedCentroidalMomentumMatrixCalculator(fullRobotModel.getRootJoint(), centerOfMassFrame,
-              constrainedBodiesAndSelectionMatrices, actuatedJoints, linearMomentumSelectionMatrix);
+            linearMomentumSelectionMatrix);
+
+      for (RobotSide robotSide : RobotSide.values())
+      {
+         RigidBody foot = fullRobotModel.getFoot(robotSide);
+         DenseMatrix64F selectionMatrix = new DenseMatrix64F(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
+         CommonOps.setIdentity(selectionMatrix);
+         constrainedCenterOfMassJacobianCalculator.addConstraint(foot, selectionMatrix);
+         constrainedCentroidalMomentumMatrixCalculator.addConstraint(foot, selectionMatrix);
+      }
+
+      allJoints = ScrewTools.computeSupportAndSubtreeJoints(fullRobotModel.getRootJoint().getSuccessor());
+      v = new DenseMatrix64F(ScrewTools.computeDegreesOfFreedom(allJoints), 1);
+
+      DenseMatrix64F orientationSelectionMatrix = new DenseMatrix64F(SpatialMotionVector.SIZE / 2, SpatialMotionVector.SIZE);
+      orientationSelectionMatrix.set(0, 0, 1.0);
+      orientationSelectionMatrix.set(1, 1, 1.0);
+      orientationSelectionMatrix.set(2, 2, 1.0);
+      constrainedCenterOfMassJacobianCalculator.addConstraint(fullRobotModel.getPelvis(), orientationSelectionMatrix);
+      constrainedCentroidalMomentumMatrixCalculator.addConstraint(fullRobotModel.getPelvis(), orientationSelectionMatrix);
+
+      actuatedJoints = new ArrayList<InverseDynamicsJoint>();
+      for (RobotSide robotSide : RobotSide.values())
+      {
+         InverseDynamicsJoint[] jointPath = ScrewTools.createJointPath(fullRobotModel.getPelvis(), fullRobotModel.getFoot(robotSide));
+         actuatedJoints.addAll(Arrays.asList(jointPath));
+      }
+//      actuatedJoints.addAll(Arrays.asList(allJoints));
+      actuatedJoints.remove(fullRobotModel.getRootJoint());
+
+      for (InverseDynamicsJoint actuatedJoint : actuatedJoints)
+      {
+         constrainedCenterOfMassJacobianCalculator.addActuatedJoint(actuatedJoint);
+         constrainedCentroidalMomentumMatrixCalculator.addActuatedJoint(actuatedJoint);
+      }
+
+      vActuated = new DenseMatrix64F(ScrewTools.computeDegreesOfFreedom(actuatedJoints), 1);
+
+
    }
 
    public void doControl()
