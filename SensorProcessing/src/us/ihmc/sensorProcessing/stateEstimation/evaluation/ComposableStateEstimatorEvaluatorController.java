@@ -17,16 +17,13 @@ public class ComposableStateEstimatorEvaluatorController implements RobotControl
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final ControlFlowGraph controlFlowGraph;
-   private final Runnable sensorReader;
    
    private final ComposableStateEstimatorEvaluatorErrorCalculator composableStateEstimatorEvaluatorErrorCalculator;
 
-   public ComposableStateEstimatorEvaluatorController(Runnable sensorReader,
-         ControlFlowGraph controlFlowGraph, OrientationEstimator orientationEstimator,
+   public ComposableStateEstimatorEvaluatorController(ControlFlowGraph controlFlowGraph, 
+         OrientationEstimator orientationEstimator,
            Robot robot, Joint estimationJoint, double controlDT)
-   {
-      this.sensorReader = sensorReader;
-      
+   {      
       this.gravitationalAcceleration = new Vector3d();
       robot.getGravity(gravitationalAcceleration);
 
@@ -55,9 +52,7 @@ public class ComposableStateEstimatorEvaluatorController implements RobotControl
    }
 
    public void doControl()
-   {
-      sensorReader.run();
-      
+   {      
       controlFlowGraph.startComputation();
       controlFlowGraph.waitUntilComputationIsDone();
 

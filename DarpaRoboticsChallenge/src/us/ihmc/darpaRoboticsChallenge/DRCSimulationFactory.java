@@ -49,6 +49,7 @@ import us.ihmc.sensorProcessing.stateEstimation.JointSensorDataSource;
 import us.ihmc.sensorProcessing.stateEstimation.OrientationEstimatorWithPorts;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.ComposableStateEstimatorEvaluatorController;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
+import us.ihmc.sensorProcessing.stateEstimation.evaluation.RunnableRunnerController;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.SensorAndEstimatorAssembler;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -81,8 +82,8 @@ public class DRCSimulationFactory
    public static boolean SHOW_INERTIA_ELLIPSOIDS = false;
    private static final boolean SHOW_REFERENCE_FRAMES = false;
    private static final boolean CREATE_DYNAMICALLY_CONSISTENT_NULLSPACE_EVALUATOR = false;
-   private static final boolean CREATE_STATE_ESTIMATOR = false;
-   private static final boolean USE_STATE_ESTIMATOR = false;
+   private static final boolean CREATE_STATE_ESTIMATOR = true;
+   private static final boolean USE_STATE_ESTIMATOR = true;
    private static final boolean STEAL_DESIRED_COM_ACCELERATIONS_FROM_ROBOT = false;
    private static final boolean VISUALIZE_CONTROL_FLOW_GRAPH = false;
 
@@ -90,15 +91,10 @@ public class DRCSimulationFactory
            CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, DRCRobotInterface robotInterface, RobotInitialSetup<SDFRobot> robotInitialSetup,
            ScsInitialSetup scsInitialSetup, GuiInitialSetup guiInitialSetup, KryoObjectServer networkServer, ObjectCommunicator networkProccesorCommunicator)
    {
-      SensorNoiseParameters sensorNoiseParamters = DRCSimulatedSensorNoiseParameters.createSensorNoiseParametersGazeboSDF();
-//    SensorNoiseParameters sensorNoiseParamters = DRCSimulatedSensorNoiseParameters.createSensorNoiseParametersALittleNoise();
-//    SensorNoiseParameters sensorNoiseParamters = DRCSimulatedSensorNoiseParameters.createSensorNoiseParametersZeroNoise();
-
       GUISetterUpperRegistry guiSetterUpperRegistry = new GUISetterUpperRegistry();
       DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
 
       DRCRobotJointMap jointMap = robotInterface.getJointMap();
-      SCSToInverseDynamicsJointMap scsToInverseDynamicsJointMap = robotInterface.getSCSToInverseDynamicsJointMap();
 
       double simulateDT = robotInterface.getSimulateDT();
       double controlDT = controllerFactory.getControlDT();
@@ -114,6 +110,10 @@ public class DRCSimulationFactory
       ArrayList<RobotControllerAndParameters> robotControllersAndParameters = new ArrayList<RobotControllerAndParameters>();
       FullInverseDynamicsStructure inverseDynamicsStructure = createInverseDynamicsStructure(fullRobotModelForController);
 
+      SensorNoiseParameters sensorNoiseParamters = DRCSimulatedSensorNoiseParameters.createSensorNoiseParametersGazeboSDF();
+//    SensorNoiseParameters sensorNoiseParamters = DRCSimulatedSensorNoiseParameters.createSensorNoiseParametersALittleNoise();
+//    SensorNoiseParameters sensorNoiseParamters = DRCSimulatedSensorNoiseParameters.createSensorNoiseParametersZeroNoise();
+      
       DesiredCoMAccelerationsFromRobotStealerController desiredCoMAccelerationsFromRobotStealerController = null;
       if (STEAL_DESIRED_COM_ACCELERATIONS_FROM_ROBOT)
       {
@@ -125,7 +125,6 @@ public class DRCSimulationFactory
       }
 
 
-      TwistCalculator twistCalculator = inverseDynamicsStructure.getTwistCalculator();
       CenterOfMassJacobian centerOfMassJacobian = new CenterOfMassJacobian(fullRobotModelForController.getElevator());
 
       ReferenceFrames referenceFramesForController = new ReferenceFrames(fullRobotModelForSimulation, jointMap, jointMap.getAnkleHeight());
@@ -133,6 +132,8 @@ public class DRCSimulationFactory
       OrientationEstimatorWithPorts orientationEstimator = null;
       if (CREATE_STATE_ESTIMATOR)
       {
+         SCSToInverseDynamicsJointMap scsToInverseDynamicsJointMap = robotInterface.getSCSToInverseDynamicsJointMap();
+
          SCSToInverseDynamicsJointMap scsToInverseDynamicsJointMapForEstimator;
          FullInverseDynamicsStructure inverseDynamicsStructureForEstimator;
 
@@ -195,8 +196,14 @@ public class DRCSimulationFactory
          Joint estimationJoint = simulatedRobot.getRootJoints().get(0);
          simulatedSensorHolderAndReader.setJointSensorDataSource(jointSensorDataSource);
          
+         RunnableRunnerController runnableRunnerController = new RunnableRunnerController();
+         runnableRunnerController.addRunnable(simulatedSensorHolderAndReader);
+         RobotControllerAndParameters simulatedSensorHolderAndReaderControllerAndParameters =
+               new RobotControllerAndParameters(runnableRunnerController, simulationTicksPerControlTick);
+         robotControllersAndParameters.add(simulatedSensorHolderAndReaderControllerAndParameters);
+
          ComposableStateEstimatorEvaluatorController composableStateEstimatorEvaluatorController =
-            new ComposableStateEstimatorEvaluatorController(simulatedSensorHolderAndReader, controlFlowGraph, orientationEstimator, simulatedRobot, estimationJoint, controlDT);
+            new ComposableStateEstimatorEvaluatorController(controlFlowGraph, orientationEstimator, simulatedRobot, estimationJoint, controlDT);
 
          RobotControllerAndParameters humanoidStateEstimatorControllerAndParameters =
             new RobotControllerAndParameters(composableStateEstimatorEvaluatorController, simulationTicksPerControlTick);
@@ -269,6 +276,8 @@ public class DRCSimulationFactory
       {
          lidarControllerInterface = new PIDLidarTorqueController(lidarJoint, DRCConfigParameters.LIDAR_SPINDLE_VELOCITY, controlDT, registry);
       }
+
+      TwistCalculator twistCalculator = inverseDynamicsStructure.getTwistCalculator();
 
       //TODO: Get rid of this type cast.
       MomentumBasedController robotController = (MomentumBasedController) controllerFactory.getController(inverseDynamicsStructure.getEstimationLink(),

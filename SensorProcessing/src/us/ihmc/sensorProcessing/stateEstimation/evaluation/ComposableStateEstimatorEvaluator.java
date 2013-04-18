@@ -101,11 +101,14 @@ public class ComposableStateEstimatorEvaluator
 
       controlFlowGraph.initializeAfterConnections();
       
+      RunnableRunnerController runnableRunnerController = new RunnableRunnerController();
+      runnableRunnerController.addRunnable(simulatedSensorHolderAndReader);
+      robot.setController(runnableRunnerController, simTicksPerControlDT);
 
       ComposableStateEstimatorEvaluatorController composableStateEstimatorEvaluatorController =
-         new ComposableStateEstimatorEvaluatorController(simulatedSensorHolderAndReader,
-               controlFlowGraph, 
+         new ComposableStateEstimatorEvaluatorController(controlFlowGraph, 
                orientationEstimator, robot, estimationJoint, controlDT);
+      
       robot.setController(desiredCoMAccelerationsFromRobotStealerController, simTicksPerControlDT);
       robot.setController(composableStateEstimatorEvaluatorController, simTicksPerControlDT);
 
