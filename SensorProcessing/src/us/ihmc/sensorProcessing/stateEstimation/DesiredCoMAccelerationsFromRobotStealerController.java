@@ -2,8 +2,6 @@ package us.ihmc.sensorProcessing.stateEstimation;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.controlFlow.AbstractControlFlowElement;
-import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.sensorProcessing.signalCorruption.GaussianVectorCorruptor;
 import us.ihmc.sensorProcessing.simulatedSensors.InverseDynamicsJointsFromSCSRobotGenerator;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
@@ -24,7 +22,7 @@ import com.yobotics.simulationconstructionset.robotController.RobotController;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 
-public class DesiredCoMAccelerationsFromRobotStealerController implements RobotController, DesiredCoMAndAngularAccelerationOutputPortsHolder
+public class DesiredCoMAccelerationsFromRobotStealerController implements RobotController
 {
    private static final boolean CORRUPT_DESIRED_ACCELERATIONS = true;
 
@@ -47,12 +45,17 @@ public class DesiredCoMAccelerationsFromRobotStealerController implements RobotC
 
    private final double controlDT;
 
-   private final ControlFlowOutputPort<FrameVector> desiredCenterOfMassAccelerationOutputPort;
-   private final ControlFlowOutputPort<FrameVector> desiredAngularAccelerationOutputPort;
-
-   public DesiredCoMAccelerationsFromRobotStealerController(SensorNoiseParameters sensorNoiseParameters, 
+   private DesiredCoMAndAngularAccelerationDataSource desiredCoMAndAngularAccelerationDataSource;
+   private final CenterOfMassAccelerationFromFullRobotModelStealer centerOfMassAccelerationFromFullRobotModelStealer;
+   private final AngularAccelerationFromRobotStealer angularAccelerationFromRobotStealer;
+      
+   private final ReferenceFrame estimationFrame;
+   
+   public DesiredCoMAccelerationsFromRobotStealerController(ReferenceFrame estimationFrame,
+         SensorNoiseParameters sensorNoiseParameters, 
          InverseDynamicsJointsFromSCSRobotGenerator generator, Joint estimationJoint, double controlDT)
    {
+      this.estimationFrame = estimationFrame;
       this.comAccelerationProcessNoiseStandardDeviation = sensorNoiseParameters.getComAccelerationProcessNoiseStandardDeviation();
       this.angularAccelerationProcessNoiseStandardDeviation = sensorNoiseParameters.getAngularAccelerationProcessNoiseStandardDeviation();
       
@@ -68,23 +71,10 @@ public class DesiredCoMAccelerationsFromRobotStealerController implements RobotC
       perfectCenterOfMassJacobian = new CenterOfMassJacobian(elevator);
       perfectCenterOfMassAccelerationCalculator = new CenterOfMassAccelerationCalculator(elevator, perfectSpatialAccelerationCalculator);
 
-      CenterOfMassAccelerationFromFullRobotModelStealer centerOfMassAccelerationFromFullRobotModelStealer =
+      centerOfMassAccelerationFromFullRobotModelStealer =
          new CenterOfMassAccelerationFromFullRobotModelStealer(elevator, perfectSpatialAccelerationCalculator);
-      desiredCenterOfMassAccelerationOutputPort = centerOfMassAccelerationFromFullRobotModelStealer.getOutputPort();
 
-      AngularAccelerationFromRobotStealer angularAccelerationFromRobotStealer = new AngularAccelerationFromRobotStealer(estimationJoint);
-      desiredAngularAccelerationOutputPort = angularAccelerationFromRobotStealer.getOutputPort();
-   }
-
-
-   public ControlFlowOutputPort<FrameVector> getDesiredCenterOfMassAccelerationOutputPort()
-   {
-      return desiredCenterOfMassAccelerationOutputPort;
-   }
-
-   public ControlFlowOutputPort<FrameVector> getDesiredAngularAccelerationOutputPort()
-   {
-      return desiredAngularAccelerationOutputPort;
+      angularAccelerationFromRobotStealer = new AngularAccelerationFromRobotStealer(estimationJoint);
    }
 
    public void doControl()
@@ -96,6 +86,9 @@ public class DesiredCoMAccelerationsFromRobotStealerController implements RobotC
       perfectSpatialAccelerationCalculator.compute();
 
       updateGroundTruth();
+      
+      centerOfMassAccelerationFromFullRobotModelStealer.run();
+      angularAccelerationFromRobotStealer.run();
    }
 
    private void updateGroundTruth()
@@ -118,13 +111,12 @@ public class DesiredCoMAccelerationsFromRobotStealerController implements RobotC
    }
 
 
-   private class CenterOfMassAccelerationFromFullRobotModelStealer extends AbstractControlFlowElement
+   private class CenterOfMassAccelerationFromFullRobotModelStealer implements Runnable
    {
       private final CenterOfMassAccelerationCalculator centerOfMassAccelerationCalculator;
       private final FrameVector comAccelerationFrameVector = new FrameVector(ReferenceFrame.getWorldFrame());
       private final Vector3d comAcceleration = new Vector3d();
 
-      private final ControlFlowOutputPort<FrameVector> outputPort = createOutputPort();
       private final GaussianVectorCorruptor signalCorruptor = new GaussianVectorCorruptor(123412L, getClass().getSimpleName() + "Corruptor", registry);
 
       public CenterOfMassAccelerationFromFullRobotModelStealer(RigidBody rootBody, SpatialAccelerationCalculator spatialAccelerationCalculator)
@@ -135,12 +127,7 @@ public class DesiredCoMAccelerationsFromRobotStealerController implements RobotC
          signalCorruptor.setStandardDeviation(discreteStdDev);
       }
 
-      public ControlFlowOutputPort<FrameVector> getOutputPort()
-      {
-         return outputPort;
-      }
-
-      public void startComputation()
+      public void run()
       {
          centerOfMassAccelerationCalculator.packCoMAcceleration(comAccelerationFrameVector);
          comAccelerationFrameVector.changeFrame(ReferenceFrame.getWorldFrame());
@@ -150,20 +137,16 @@ public class DesiredCoMAccelerationsFromRobotStealerController implements RobotC
             signalCorruptor.corrupt(comAcceleration);
 
          comAccelerationFrameVector.set(comAcceleration);
-         outputPort.setData(comAccelerationFrameVector);
-      }
-
-      public void waitUntilComputationIsDone()
-      {
+         
+         desiredCoMAndAngularAccelerationDataSource.setDesiredCenterOfMassAcceleration(comAccelerationFrameVector);
       }
    }
 
 
 
-   private class AngularAccelerationFromRobotStealer extends AbstractControlFlowElement
+   private class AngularAccelerationFromRobotStealer implements Runnable
    {
       private final Joint estimationJoint;
-      private final ControlFlowOutputPort<FrameVector> outputPort = createOutputPort();
 
       // Note: Null reference frame!
       // TODO: This should probably just have a Vector3d port rather than a FrameVector port. Since we don't
@@ -181,25 +164,16 @@ public class DesiredCoMAccelerationsFromRobotStealerController implements RobotC
          signalCorruptor.setStandardDeviation(discreteStdDev);
       }
 
-      public void startComputation()
+      public void run()
       {
          estimationJoint.getAngularAccelerationsInBodyFrame(desiredAngularAcceleration);
 
          if (CORRUPT_DESIRED_ACCELERATIONS)
             signalCorruptor.corrupt(desiredAngularAcceleration);
 
-         // TODO: Null frame?
-         desiredAngularAccelerationFrameVector.set(null, desiredAngularAcceleration);
-         outputPort.setData(desiredAngularAccelerationFrameVector);
-      }
-
-      public ControlFlowOutputPort<FrameVector> getOutputPort()
-      {
-         return outputPort;
-      }
-
-      public void waitUntilComputationIsDone()
-      {
+         desiredAngularAccelerationFrameVector.set(estimationFrame, desiredAngularAcceleration);
+         
+         desiredCoMAndAngularAccelerationDataSource.setDesiredAngularAcceleration(desiredAngularAccelerationFrameVector);
       }
 
    }
@@ -233,5 +207,11 @@ public class DesiredCoMAccelerationsFromRobotStealerController implements RobotC
    {
       return getName();
    }
+   
+   public void attachDesiredCoMAndAngularAccelerationDataSource(DesiredCoMAndAngularAccelerationDataSource desiredCoMAndAngularAccelerationDataSource)
+   {
+      this.desiredCoMAndAngularAccelerationDataSource = desiredCoMAndAngularAccelerationDataSource;
+   }
+
 
 }

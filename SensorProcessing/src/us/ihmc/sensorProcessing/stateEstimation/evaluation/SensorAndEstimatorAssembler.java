@@ -121,23 +121,23 @@ public class SensorAndEstimatorAssembler
       return orientationEstimator;
    }
    
-   public static void connectDesiredAccelerationPorts(ControlFlowGraph controlFlowGraph, OrientationEstimatorWithPorts orientationEstimatorWithPorts,
-         DesiredCoMAndAngularAccelerationOutputPortsHolder desiredCoMAndAngularAccelerationOutputPortsHolder)
-   {
-      ControlFlowOutputPort<FrameVector> desiredAngularAccelerationOutputPort = desiredCoMAndAngularAccelerationOutputPortsHolder.getDesiredAngularAccelerationOutputPort();
-      ControlFlowOutputPort<FrameVector> desiredCenterOfMassAccelerationOutputPort = desiredCoMAndAngularAccelerationOutputPortsHolder.getDesiredCenterOfMassAccelerationOutputPort();
-      
-      ControlFlowInputPort<FrameVector> desiredAngularAccelerationInputPort = orientationEstimatorWithPorts.getDesiredAngularAccelerationInputPort();
-      ControlFlowInputPort<FrameVector> desiredCenterOfMassAccelerationInputPort = orientationEstimatorWithPorts.getDesiredCenterOfMassAccelerationInputPort();
-
-      if (desiredAngularAccelerationOutputPort != null)
-      {
-         controlFlowGraph.connectElements(desiredAngularAccelerationOutputPort, desiredAngularAccelerationInputPort);
-      }
-
-      if (desiredCenterOfMassAccelerationOutputPort != null)
-      {
-         controlFlowGraph.connectElements(desiredCenterOfMassAccelerationOutputPort, desiredCenterOfMassAccelerationInputPort);
-      }
-   }
+//   public static void connectDesiredAccelerationPorts(ControlFlowGraph controlFlowGraph, OrientationEstimatorWithPorts orientationEstimatorWithPorts,
+//         DesiredCoMAndAngularAccelerationOutputPortsHolder desiredCoMAndAngularAccelerationOutputPortsHolder)
+//   {
+//      ControlFlowOutputPort<FrameVector> desiredAngularAccelerationOutputPort = desiredCoMAndAngularAccelerationOutputPortsHolder.getDesiredAngularAccelerationOutputPort();
+//      ControlFlowOutputPort<FrameVector> desiredCenterOfMassAccelerationOutputPort = desiredCoMAndAngularAccelerationOutputPortsHolder.getDesiredCenterOfMassAccelerationOutputPort();
+//      
+//      ControlFlowInputPort<FrameVector> desiredAngularAccelerationInputPort = orientationEstimatorWithPorts.getDesiredAngularAccelerationInputPort();
+//      ControlFlowInputPort<FrameVector> desiredCenterOfMassAccelerationInputPort = orientationEstimatorWithPorts.getDesiredCenterOfMassAccelerationInputPort();
+//
+//      if (desiredAngularAccelerationOutputPort != null)
+//      {
+//         controlFlowGraph.connectElements(desiredAngularAccelerationOutputPort, desiredAngularAccelerationInputPort);
+//      }
+//
+//      if (desiredCenterOfMassAccelerationOutputPort != null)
+//      {
+//         controlFlowGraph.connectElements(desiredCenterOfMassAccelerationOutputPort, desiredCenterOfMassAccelerationInputPort);
+//      }
+//   }
 }

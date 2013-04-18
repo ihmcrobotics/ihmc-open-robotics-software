@@ -42,12 +42,13 @@ import us.ihmc.sensorProcessing.simulatedSensors.SensorMap;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorMapFromRobotFactory;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.stateEstimation.DesiredCoMAccelerationsFromRobotStealerController;
-import us.ihmc.sensorProcessing.stateEstimation.DesiredCoMAndAngularAccelerationOutputPortsHolder;
+import us.ihmc.sensorProcessing.stateEstimation.DesiredCoMAndAngularAccelerationDataSource;
 import us.ihmc.sensorProcessing.stateEstimation.OrientationEstimatorWithPorts;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.ComposableStateEstimatorEvaluatorController;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.SensorAndEstimatorAssembler;
 import us.ihmc.utilities.math.geometry.FramePoint;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.net.KryoObjectServer;
 import us.ihmc.utilities.net.ObjectCommunicator;
 import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
@@ -107,18 +108,18 @@ public class DRCSimulationFactory
       SDFFullRobotModel fullRobotModelForController = fullRobotModelForSimulation;
 
       ArrayList<RobotControllerAndParameters> robotControllersAndParameters = new ArrayList<RobotControllerAndParameters>();
+      FullInverseDynamicsStructure inverseDynamicsStructure = createInverseDynamicsStructure(fullRobotModelForController);
 
-      DesiredCoMAndAngularAccelerationOutputPortsHolder desiredCoMAndAngularAccelerationOutputPortsHolder = null;
+      DesiredCoMAccelerationsFromRobotStealerController desiredCoMAccelerationsFromRobotStealerController = null;
       if (STEAL_DESIRED_COM_ACCELERATIONS_FROM_ROBOT)
       {
-         DesiredCoMAccelerationsFromRobotStealerController desiredCoMAccelerationsFromRobotStealerController = createAndAddDesiredCoMAccelerationFromRobotStealerController(
+         desiredCoMAccelerationsFromRobotStealerController = createAndAddDesiredCoMAccelerationFromRobotStealerController(
+               inverseDynamicsStructure.getEstimationFrame(),
                sensorNoiseParamters, controlDT, 
                simulationTicksPerControlTick, simulatedRobot,
                robotControllersAndParameters);
-         desiredCoMAndAngularAccelerationOutputPortsHolder = desiredCoMAccelerationsFromRobotStealerController;
       }
 
-      FullInverseDynamicsStructure inverseDynamicsStructure = createInverseDynamicsStructure(fullRobotModelForController);
 
       TwistCalculator twistCalculator = inverseDynamicsStructure.getTwistCalculator();
       CenterOfMassJacobian centerOfMassJacobian = new CenterOfMassJacobian(fullRobotModelForController.getElevator());
@@ -177,7 +178,7 @@ public class DRCSimulationFactory
          SensorMap sensorMap = sensorMapFromRobotFactory.getSensorMap();
 
          orientationEstimator = createStateEstimator(sensorMap, inverseDynamicsStructureForEstimator, controlDT, simulationTicksPerControlTick, simulatedRobot,
-                 registry, robotControllersAndParameters, desiredCoMAndAngularAccelerationOutputPortsHolder);
+                 registry, robotControllersAndParameters);
               
          ControlFlowGraph controlFlowGraph = orientationEstimator.getControlFlowGraph();
 
@@ -266,15 +267,26 @@ public class DRCSimulationFactory
       
       if (CREATE_STATE_ESTIMATOR)
       {
-         if (desiredCoMAndAngularAccelerationOutputPortsHolder == null)
+         RigidBody estimationLink = inverseDynamicsStructure.getEstimationLink();
+         ReferenceFrame estimationFrame = inverseDynamicsStructure.getEstimationFrame();
+         DesiredCoMAndAngularAccelerationDataSource desiredCoMAndAngularAccelerationDataSource = new DesiredCoMAndAngularAccelerationDataSource(estimationLink, estimationFrame);
+         
+         if (STEAL_DESIRED_COM_ACCELERATIONS_FROM_ROBOT)
          {
-            desiredCoMAndAngularAccelerationOutputPortsHolder = robotController;
+            desiredCoMAccelerationsFromRobotStealerController.attachDesiredCoMAndAngularAccelerationDataSource(desiredCoMAndAngularAccelerationDataSource);
          }
+         else
+         {
+            robotController.attachDesiredCoMAndAngularAccelerationDataSource(desiredCoMAndAngularAccelerationDataSource);
+         }
+         
 
          ControlFlowGraph controlFlowGraph = orientationEstimator.getControlFlowGraph();
 
-         SensorAndEstimatorAssembler.connectDesiredAccelerationPorts(controlFlowGraph, orientationEstimator,
-               desiredCoMAndAngularAccelerationOutputPortsHolder);
+         desiredCoMAndAngularAccelerationDataSource.connectDesiredAccelerationPorts(controlFlowGraph, orientationEstimator);
+
+//         SensorAndEstimatorAssembler.connectDesiredAccelerationPorts(controlFlowGraph, orientationEstimator,
+//               desiredCoMAndAngularAccelerationOutputPortsHolder);
 
          controlFlowGraph.initializeAfterConnections();
 
@@ -366,8 +378,7 @@ public class DRCSimulationFactory
 
    public static OrientationEstimatorWithPorts createStateEstimator(SensorMap sensorMap, FullInverseDynamicsStructure inverseDynamicsStructure, double controlDT,
            int simulationTicksPerControlTick, SDFRobot simulatedRobot, YoVariableRegistry registry,
-           ArrayList<RobotControllerAndParameters> robotControllersAndParameters,
-           DesiredCoMAndAngularAccelerationOutputPortsHolder desiredCoMAndAngularAccelerationOutputPortsHolder)
+           ArrayList<RobotControllerAndParameters> robotControllersAndParameters)
    {
       Vector3d gravitationalAcceleration = new Vector3d();
       simulatedRobot.getGravity(gravitationalAcceleration);
@@ -386,6 +397,7 @@ public class DRCSimulationFactory
 
 
    public static DesiredCoMAccelerationsFromRobotStealerController createAndAddDesiredCoMAccelerationFromRobotStealerController(
+         ReferenceFrame estimationFrame,
          SensorNoiseParameters simulatedSensorNoiseParameters, 
          double controlDT,
          int simulationTicksPerControlTick, SDFRobot simulatedRobot, ArrayList<RobotControllerAndParameters> robotControllersAndParameters)
@@ -395,7 +407,7 @@ public class DRCSimulationFactory
       // TODO: Better way to get estimationJoint
       Joint estimationJoint = simulatedRobot.getRootJoints().get(0);
       DesiredCoMAccelerationsFromRobotStealerController desiredCoMAccelerationsFromRobotStealerController =
-         new DesiredCoMAccelerationsFromRobotStealerController(simulatedSensorNoiseParameters, generator, estimationJoint, controlDT);
+         new DesiredCoMAccelerationsFromRobotStealerController(estimationFrame, simulatedSensorNoiseParameters, generator, estimationJoint, controlDT);
 
       RobotControllerAndParameters desiredCoMAccelerationsFromRobotStealerControllerAndParameters =
          new RobotControllerAndParameters(desiredCoMAccelerationsFromRobotStealerController, simulationTicksPerControlTick);

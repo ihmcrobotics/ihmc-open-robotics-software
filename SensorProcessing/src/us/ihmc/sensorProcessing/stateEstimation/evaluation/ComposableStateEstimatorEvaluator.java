@@ -12,10 +12,13 @@ import us.ihmc.sensorProcessing.simulatedSensors.SensorMap;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorMapFromRobotFactory;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.stateEstimation.DesiredCoMAccelerationsFromRobotStealerController;
+import us.ihmc.sensorProcessing.stateEstimation.DesiredCoMAndAngularAccelerationDataSource;
 import us.ihmc.sensorProcessing.stateEstimation.DesiredCoMAndAngularAccelerationOutputPortsHolder;
 import us.ihmc.sensorProcessing.stateEstimation.OrientationEstimatorWithPorts;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FrameVector;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.screwTheory.RigidBody;
 
 import com.yobotics.simulationconstructionset.IMUMount;
 import com.yobotics.simulationconstructionset.Joint;
@@ -52,15 +55,16 @@ public class ComposableStateEstimatorEvaluator
       SensorMap sensorMap = sensorMapFromRobotFactory.getSensorMap();
 
       Joint estimationJoint = robot.getRootJoint();
-      DesiredCoMAccelerationsFromRobotStealerController desiredCoMAccelerationsFromRobotStealerController =
-         new DesiredCoMAccelerationsFromRobotStealerController(simulatedSensorNoiseParameters, generator, estimationJoint, controlDT);
-
       robot.update();
       FullInverseDynamicsStructure inverseDynamicsStructure = generator.getInverseDynamicsStructure();
 
+      ReferenceFrame estimationFrame = inverseDynamicsStructure.getEstimationFrame();
+
+      DesiredCoMAccelerationsFromRobotStealerController desiredCoMAccelerationsFromRobotStealerController =
+         new DesiredCoMAccelerationsFromRobotStealerController(estimationFrame, simulatedSensorNoiseParameters, generator, estimationJoint, controlDT);
+
       Vector3d gravitationalAcceleration = new Vector3d();
       robot.getGravity(gravitationalAcceleration);
-      DesiredCoMAndAngularAccelerationOutputPortsHolder desiredCoMAndAngularAccelerationOutputPortsHolder = desiredCoMAccelerationsFromRobotStealerController;
 
       // The following few lines are what you need to do to get the state estimator working with a robot.
       // You also need to either add the controlFlowGraph to another one, or make sure to run it's startComputation method at the right time:
@@ -73,8 +77,15 @@ public class ComposableStateEstimatorEvaluator
       ControlFlowGraph controlFlowGraph = sensorAndEstimatorAssembler.getControlFlowGraph();
       OrientationEstimatorWithPorts orientationEstimator = sensorAndEstimatorAssembler.getOrientationEstimator();
 
-      SensorAndEstimatorAssembler.connectDesiredAccelerationPorts(controlFlowGraph, orientationEstimator,
-            desiredCoMAndAngularAccelerationOutputPortsHolder);
+      RigidBody estimationLink = inverseDynamicsStructure.getEstimationLink();
+      DesiredCoMAndAngularAccelerationDataSource desiredCoMAndAngularAccelerationDataSource = new DesiredCoMAndAngularAccelerationDataSource(estimationLink, estimationFrame);
+
+      desiredCoMAccelerationsFromRobotStealerController.attachDesiredCoMAndAngularAccelerationDataSource(desiredCoMAndAngularAccelerationDataSource);
+
+      desiredCoMAndAngularAccelerationDataSource.connectDesiredAccelerationPorts(controlFlowGraph, orientationEstimator);
+
+//      SensorAndEstimatorAssembler.connectDesiredAccelerationPorts(controlFlowGraph, orientationEstimator,
+//            desiredCoMAndAngularAccelerationOutputPortsHolder);
 
       controlFlowGraph.initializeAfterConnections();
       

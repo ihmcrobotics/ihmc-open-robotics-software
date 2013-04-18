@@ -27,10 +27,9 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.RootJointAcce
 import us.ihmc.commonWalkingControlModules.momentumBasedController.RootJointAccelerationData;
 import us.ihmc.commonWalkingControlModules.outputs.ProcessedOutputsInterface;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
-import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotSide.RobotSide;
-import us.ihmc.sensorProcessing.stateEstimation.DesiredCoMAndAngularAccelerationOutputPortsHolder;
+import us.ihmc.sensorProcessing.stateEstimation.DesiredCoMAndAngularAccelerationDataSource;
 import us.ihmc.utilities.math.DampedLeastSquaresSolver;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -67,7 +66,7 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint2d;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 
-public abstract class MomentumBasedController implements RobotController, DesiredCoMAndAngularAccelerationOutputPortsHolder
+public abstract class MomentumBasedController implements RobotController
 {
    private final String name = getClass().getSimpleName();
    protected final YoVariableRegistry registry = new YoVariableRegistry(name);
@@ -238,16 +237,6 @@ public abstract class MomentumBasedController implements RobotController, Desire
 
       gravitationalWrench = new SpatialForceVector(centerOfMassFrame, new Vector3d(0.0, 0.0, totalMass * gravityZ), new Vector3d());
 
-   }
-   
-   public ControlFlowOutputPort<FrameVector> getDesiredCenterOfMassAccelerationOutputPort()
-   {
-      return desiredCoMAndAngularAccelerationGrabber.getDesiredCenterOfMassAccelerationOutputPort();
-   }
-
-   public ControlFlowOutputPort<FrameVector> getDesiredAngularAccelerationOutputPort()
-   {
-      return desiredCoMAndAngularAccelerationGrabber.getDesiredAngularAccelerationOutputPort();
    }
    
    protected static LinearSolver<DenseMatrix64F> createJacobianSolver()
@@ -505,4 +494,10 @@ public abstract class MomentumBasedController implements RobotController, Desire
    {
       return filteredCentersOfPressure2d.get(contactablePlaneBody).getFramePoint2dCopy();
    }
+   
+   public void attachDesiredCoMAndAngularAccelerationDataSource(DesiredCoMAndAngularAccelerationDataSource desiredCoMAndAngularAccelerationDataSource)
+   {
+      desiredCoMAndAngularAccelerationGrabber.attachDesiredCoMAndAngularAccelerationDataSource(desiredCoMAndAngularAccelerationDataSource);
+   }
+
 }
