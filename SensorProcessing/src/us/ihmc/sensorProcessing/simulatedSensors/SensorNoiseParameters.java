@@ -4,6 +4,9 @@ import javax.vecmath.Vector3d;
 
 public class SensorNoiseParameters
 {
+   private double comAccelerationProcessNoiseStandardDeviation = 0.0;
+   private double angularAccelerationProcessNoiseStandardDeviation = 0.0;
+
    private double orientationMeasurementStandardDeviation = 0.0;
    private double angularVelocityMeasurementStandardDeviation = 0.0;
    private double linearAccelerationMeasurementStandardDeviation = 0.0;
@@ -15,6 +18,27 @@ public class SensorNoiseParameters
    private final Vector3d initialLinearVelocityBias = new Vector3d();
    private final Vector3d initialAngularVelocityBias = new Vector3d();
 
+   public double getComAccelerationProcessNoiseStandardDeviation()
+   {
+      return comAccelerationProcessNoiseStandardDeviation;
+   }
+
+   public void setComAccelerationProcessNoiseStandardDeviation(double comAccelerationProcessNoiseStandardDeviation)
+   {
+      this.comAccelerationProcessNoiseStandardDeviation = comAccelerationProcessNoiseStandardDeviation;
+   }
+
+   public double getAngularAccelerationProcessNoiseStandardDeviation()
+   {
+      return angularAccelerationProcessNoiseStandardDeviation;
+   }
+
+   public void setAngularAccelerationProcessNoiseStandardDeviation(double angularAccelerationProcessNoiseStandardDeviation)
+   {
+      this.angularAccelerationProcessNoiseStandardDeviation = angularAccelerationProcessNoiseStandardDeviation;
+   }
+
+   
    public double getOrientationMeasurementStandardDeviation()
    {
       return orientationMeasurementStandardDeviation;

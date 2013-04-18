@@ -32,10 +32,6 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 public class SensorAndEstimatorAssembler
 {
    private static final boolean ESTIMATE_COM = true;
-
-   private final double comAccelerationProcessNoiseStandardDeviation = Math.sqrt(1e-1);
-   private final double angularAccelerationProcessNoiseStandardDeviation = Math.sqrt(1e-1);
-
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final ControlFlowGraph controlFlowGraph;
@@ -71,10 +67,12 @@ public class SensorAndEstimatorAssembler
       RigidBody estimationLink = inverseDynamicsStructure.getEstimationLink();
       ReferenceFrame estimationFrame = estimationLink.getParentJoint().getFrameAfterJoint();
 
+      double angularAccelerationProcessNoiseStandardDeviation = sensorNoiseParametersForEstimator.getAngularAccelerationProcessNoiseStandardDeviation();
       DenseMatrix64F angularAccelerationNoiseCovariance = createDiagonalCovarianceMatrix(angularAccelerationProcessNoiseStandardDeviation, 3);
 
       if (ESTIMATE_COM)
       {
+         double comAccelerationProcessNoiseStandardDeviation = sensorNoiseParametersForEstimator.getComAccelerationProcessNoiseStandardDeviation();
          DenseMatrix64F comAccelerationNoiseCovariance = createDiagonalCovarianceMatrix(comAccelerationProcessNoiseStandardDeviation, 3);
 
          ComposableOrientationAndCoMEstimatorCreator orientationEstimatorCreator =
