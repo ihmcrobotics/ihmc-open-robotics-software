@@ -53,7 +53,7 @@ public class ComposableStateEstimatorEvaluator
 
       Joint estimationJoint = robot.getRootJoint();
       DesiredCoMAccelerationsFromRobotStealerController desiredCoMAccelerationsFromRobotStealerController =
-         new DesiredCoMAccelerationsFromRobotStealerController(generator, estimationJoint, controlDT);
+         new DesiredCoMAccelerationsFromRobotStealerController(simulatedSensorNoiseParameters, generator, estimationJoint, controlDT);
 
       robot.update();
       FullInverseDynamicsStructure inverseDynamicsStructure = generator.getInverseDynamicsStructure();

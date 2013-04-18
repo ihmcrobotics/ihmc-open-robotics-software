@@ -6,6 +6,7 @@ import us.ihmc.controlFlow.AbstractControlFlowElement;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.sensorProcessing.signalCorruption.GaussianVectorCorruptor;
 import us.ihmc.sensorProcessing.simulatedSensors.InverseDynamicsJointsFromSCSRobotGenerator;
+import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -27,9 +28,8 @@ public class DesiredCoMAccelerationsFromRobotStealerController implements RobotC
 {
    private static final boolean CORRUPT_DESIRED_ACCELERATIONS = true;
 
-   // TODO: Name these something else or make same as estimator.
-   private final double comAccelerationProcessNoiseStandardDeviation = Math.sqrt(1e-1);
-   private final double angularAccelerationProcessNoiseStandardDeviation = Math.sqrt(1e-1);
+   private double comAccelerationProcessNoiseStandardDeviation = Math.sqrt(1e-1);
+   private double angularAccelerationProcessNoiseStandardDeviation = Math.sqrt(1e-1);
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -50,8 +50,12 @@ public class DesiredCoMAccelerationsFromRobotStealerController implements RobotC
    private final ControlFlowOutputPort<FrameVector> desiredCenterOfMassAccelerationOutputPort;
    private final ControlFlowOutputPort<FrameVector> desiredAngularAccelerationOutputPort;
 
-   public DesiredCoMAccelerationsFromRobotStealerController(InverseDynamicsJointsFromSCSRobotGenerator generator, Joint estimationJoint, double controlDT)
+   public DesiredCoMAccelerationsFromRobotStealerController(SensorNoiseParameters sensorNoiseParameters, 
+         InverseDynamicsJointsFromSCSRobotGenerator generator, Joint estimationJoint, double controlDT)
    {
+      this.comAccelerationProcessNoiseStandardDeviation = sensorNoiseParameters.getComAccelerationProcessNoiseStandardDeviation();
+      this.angularAccelerationProcessNoiseStandardDeviation = sensorNoiseParameters.getAngularAccelerationProcessNoiseStandardDeviation();
+      
       this.controlDT = controlDT;
 
       this.generator = generator;

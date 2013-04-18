@@ -10,6 +10,9 @@ public class SensorNoiseParametersForEvaluator
    {
       SensorNoiseParameters sensorNoiseParameters = new SensorNoiseParameters();
 
+      sensorNoiseParameters.setComAccelerationProcessNoiseStandardDeviation(Math.sqrt(1e-1));
+      sensorNoiseParameters.setAngularAccelerationProcessNoiseStandardDeviation(1e-1);
+      
       sensorNoiseParameters.setOrientationMeasurementStandardDeviation(Math.sqrt(1e-2));
       sensorNoiseParameters.setAngularVelocityMeasurementStandardDeviation(1e-1);
       sensorNoiseParameters.setLinearAccelerationMeasurementStandardDeviation(1e0);

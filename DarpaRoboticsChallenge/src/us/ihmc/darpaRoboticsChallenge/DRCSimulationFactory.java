@@ -85,6 +85,10 @@ public class DRCSimulationFactory
            CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, DRCRobotInterface robotInterface, RobotInitialSetup<SDFRobot> robotInitialSetup,
            ScsInitialSetup scsInitialSetup, GuiInitialSetup guiInitialSetup, KryoObjectServer networkServer, ObjectCommunicator networkProccesorCommunicator)
    {
+      SensorNoiseParameters sensorNoiseParamters = DRCSimulatedSensorNoiseParameters.createSensorNoiseParametersGazeboSDF();
+//    SensorNoiseParameters sensorNoiseParamters = DRCSimulatedSensorNoiseParameters.createSensorNoiseParametersALittleNoise();
+//    SensorNoiseParameters sensorNoiseParamters = DRCSimulatedSensorNoiseParameters.createSensorNoiseParametersZeroNoise();
+
       GUISetterUpperRegistry guiSetterUpperRegistry = new GUISetterUpperRegistry();
       DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
 
@@ -107,8 +111,9 @@ public class DRCSimulationFactory
       DesiredCoMAndAngularAccelerationOutputPortsHolder desiredCoMAndAngularAccelerationOutputPortsHolder = null;
       if (STEAL_DESIRED_COM_ACCELERATIONS_FROM_ROBOT)
       {
-         DesiredCoMAccelerationsFromRobotStealerController desiredCoMAccelerationsFromRobotStealerController =
-            createAndAddDesiredCoMAccelerationFromRobotStealerController(controlDT, simulationTicksPerControlTick, simulatedRobot,
+         DesiredCoMAccelerationsFromRobotStealerController desiredCoMAccelerationsFromRobotStealerController = createAndAddDesiredCoMAccelerationFromRobotStealerController(
+               sensorNoiseParamters, controlDT, 
+               simulationTicksPerControlTick, simulatedRobot,
                robotControllersAndParameters);
          desiredCoMAndAngularAccelerationOutputPortsHolder = desiredCoMAccelerationsFromRobotStealerController;
       }
@@ -166,10 +171,6 @@ public class DRCSimulationFactory
             }
          }
          
-         SensorNoiseParameters sensorNoiseParamters = DRCSimulatedSensorNoiseParameters.createSensorNoiseParametersGazeboSDF();
-//         SensorNoiseParameters sensorNoiseParamters = DRCSimulatedSensorNoiseParameters.createSensorNoiseParametersALittleNoise();
-//         SensorNoiseParameters sensorNoiseParamters = DRCSimulatedSensorNoiseParameters.createSensorNoiseParametersZeroNoise();
-
          SensorMapFromRobotFactory sensorMapFromRobotFactory = new SensorMapFromRobotFactory(scsToInverseDynamicsJointMapForEstimator, 
                simulatedRobot, sensorNoiseParamters,
                controlDT, imuMounts, velocityPoints, registry);
@@ -384,15 +385,17 @@ public class DRCSimulationFactory
    }
 
 
-   public static DesiredCoMAccelerationsFromRobotStealerController createAndAddDesiredCoMAccelerationFromRobotStealerController(double controlDT,
-           int simulationTicksPerControlTick, SDFRobot simulatedRobot, ArrayList<RobotControllerAndParameters> robotControllersAndParameters)
+   public static DesiredCoMAccelerationsFromRobotStealerController createAndAddDesiredCoMAccelerationFromRobotStealerController(
+         SensorNoiseParameters simulatedSensorNoiseParameters, 
+         double controlDT,
+         int simulationTicksPerControlTick, SDFRobot simulatedRobot, ArrayList<RobotControllerAndParameters> robotControllersAndParameters)
    {
       InverseDynamicsJointsFromSCSRobotGenerator generator = new InverseDynamicsJointsFromSCSRobotGenerator(simulatedRobot);
 
       // TODO: Better way to get estimationJoint
       Joint estimationJoint = simulatedRobot.getRootJoints().get(0);
       DesiredCoMAccelerationsFromRobotStealerController desiredCoMAccelerationsFromRobotStealerController =
-         new DesiredCoMAccelerationsFromRobotStealerController(generator, estimationJoint, controlDT);
+         new DesiredCoMAccelerationsFromRobotStealerController(simulatedSensorNoiseParameters, generator, estimationJoint, controlDT);
 
       RobotControllerAndParameters desiredCoMAccelerationsFromRobotStealerControllerAndParameters =
          new RobotControllerAndParameters(desiredCoMAccelerationsFromRobotStealerController, simulationTicksPerControlTick);
