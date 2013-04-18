@@ -63,12 +63,12 @@ public class CenterOfMassBasedFullRobotModelUpdater implements Runnable
       RigidBody elevator = inverseDynamicsStructure.getElevator();
       SixDoFJoint rootJoint = inverseDynamicsStructure.getRootJoint();
       this.centerOfMassCalculator = new CenterOfMassCalculator(elevator, rootJoint.getFrameAfterJoint());
-      this.centerOfMassJacobianBody = new CenterOfMassJacobian(ScrewTools.computeRigidBodiesInOrder(elevator),
-              ScrewTools.computeJointsInOrder(rootJoint.getSuccessor()), rootJoint.getFrameAfterJoint());
+      this.centerOfMassJacobianBody = new CenterOfMassJacobian(ScrewTools.computeSupportAndSubtreeBodies(false, elevator),
+              ScrewTools.computeSubtreeJoints(rootJoint.getSuccessor()), rootJoint.getFrameAfterJoint());
 
       // TODO: Should pass the input port for the spatial acceleration calculator here too...
       this.centerOfMassAccelerationCalculator = new CenterOfMassAccelerationCalculator(rootJoint.getSuccessor(),
-              ScrewTools.computeRigidBodiesInOrder(elevator), inverseDynamicsStructure.getSpatialAccelerationCalculator());
+              ScrewTools.computeSupportAndSubtreeBodies(false, elevator), inverseDynamicsStructure.getSpatialAccelerationCalculator());
    }
 
    public void run()
