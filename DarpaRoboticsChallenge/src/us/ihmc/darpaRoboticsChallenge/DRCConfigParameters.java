@@ -15,8 +15,7 @@ public class DRCConfigParameters
    public static final String ROS_MASTER_URI = "http://" + GAZEBO_HOST + ":11311";
 
    public static final boolean SHOW_BANDWIDTH_DIALOG = false;
-   public static final boolean USE_QUAD_TREE = true;
-
+   public static final boolean USE_QUAD_TREE = false;
 
    // Set to simulate one tick delay between, as it will be in Gazebo. This will also run the controller in a different thread!
    public static final boolean SIMULATE_DELAY = true;
@@ -52,8 +51,7 @@ public class DRCConfigParameters
 
    // public static final VideoSettings VIDEOSETTINGS = new VideoSettingsH264LowLatency(200, 150, Quality.LOW);
 
-
-   public static final double LIDAR_SPINDLE_VELOCITY = 5.0;
+   public static final double LIDAR_SPINDLE_VELOCITY = 0.25;
 
    static final int LIDAR_UPDATE_RATE_OVERRIDE = 3;
 
@@ -67,10 +65,8 @@ public class DRCConfigParameters
 
    static final boolean OVERRIDE_DRC_LIDAR_CONFIG = true;
 
-
    public static final float LIDAR_MIN_DISTANCE = 0.2f;
    public static final float LIDAR_MAX_DISTANCE = 10.0f;
-
 
    public static final float LIDAR_SWEEP_MAX_YAW = 0.8f;
 
@@ -80,7 +76,7 @@ public class DRCConfigParameters
 
    public static final float LDIAR_SCAN_MIN_ROLL = -0.3f;
 
-   public static final double GRID_RESOLUTION = 0.01;    // 5 centimeter resolution
+   public static final double GRID_RESOLUTION = 0.025;    // 2.5 centimeter resolution
 
    public static final double LIDAR_BLINDNESS_CYLINDAR_SQUARED_RADIUS = 0.1;
 
@@ -94,7 +90,7 @@ public class DRCConfigParameters
       (1 + 0.3) * 2
       * Math.sqrt(DRCRobotParameters.DRC_ROBOT_FOOT_FORWARD * DRCRobotParameters.DRC_ROBOT_FOOT_FORWARD
                   + 0.25 * DRCRobotParameters.DRC_ROBOT_FOOT_WIDTH * DRCRobotParameters.DRC_ROBOT_FOOT_WIDTH);
-   public static final boolean POPULATE_OCTREE_FROM_REJECTS = true;
+   public static final boolean POPULATE_OCTREE_FROM_REJECTS = false;
    public static final boolean USE_UPREZZING_IN_LIDAR_UPDATE_TO_OCTREE = false;
 
 
