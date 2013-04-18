@@ -38,15 +38,19 @@ import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.simulatedSensors.InverseDynamicsJointsFromSCSRobotGenerator;
 import us.ihmc.sensorProcessing.simulatedSensors.SCSToInverseDynamicsJointMap;
-import us.ihmc.sensorProcessing.simulatedSensors.SensorMap;
-import us.ihmc.sensorProcessing.simulatedSensors.SensorMapFromRobotFactory;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
+import us.ihmc.sensorProcessing.simulatedSensors.SimulatedSensorHolderAndReader;
+import us.ihmc.sensorProcessing.simulatedSensors.SimulatedSensorHolderAndReaderFromRobotFactory;
+import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions;
+import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitionsFromRobotFactory;
 import us.ihmc.sensorProcessing.stateEstimation.DesiredCoMAccelerationsFromRobotStealerController;
 import us.ihmc.sensorProcessing.stateEstimation.DesiredCoMAndAngularAccelerationDataSource;
+import us.ihmc.sensorProcessing.stateEstimation.JointSensorDataSource;
 import us.ihmc.sensorProcessing.stateEstimation.OrientationEstimatorWithPorts;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.ComposableStateEstimatorEvaluatorController;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.SensorAndEstimatorAssembler;
+import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.net.KryoObjectServer;
@@ -171,20 +175,28 @@ public class DRCSimulationFactory
                velocityPoints.add(kinematicPoint);
             }
          }
-         
-         SensorMapFromRobotFactory sensorMapFromRobotFactory = new SensorMapFromRobotFactory(scsToInverseDynamicsJointMapForEstimator, 
-               simulatedRobot, sensorNoiseParamters,
-               controlDT, imuMounts, velocityPoints, registry);
-         SensorMap sensorMap = sensorMapFromRobotFactory.getSensorMap();
 
-         orientationEstimator = createStateEstimator(sensorMap, inverseDynamicsStructureForEstimator, controlDT, simulationTicksPerControlTick, simulatedRobot,
+         StateEstimatorSensorDefinitionsFromRobotFactory stateEstimatorSensorDefinitionsFromRobotFactory = new StateEstimatorSensorDefinitionsFromRobotFactory(scsToInverseDynamicsJointMap, 
+               simulatedRobot, controlDT, imuMounts, velocityPoints);
+         StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions = stateEstimatorSensorDefinitionsFromRobotFactory.getStateEstimatorSensorDefinitions();;
+         
+         SimulatedSensorHolderAndReaderFromRobotFactory sensorReaderFactory = new SimulatedSensorHolderAndReaderFromRobotFactory(stateEstimatorSensorDefinitionsFromRobotFactory,
+               scsToInverseDynamicsJointMapForEstimator, simulatedRobot, sensorNoiseParamters, controlDT, allIMUMounts, velocityPoints, registry);
+         SimulatedSensorHolderAndReader simulatedSensorHolderAndReader = sensorReaderFactory.getSimulatedSensorHolderAndReader();
+         
+         
+         Pair<OrientationEstimatorWithPorts, JointSensorDataSource> pair = createStateEstimator(stateEstimatorSensorDefinitions, simulatedSensorHolderAndReader, inverseDynamicsStructureForEstimator, controlDT, simulationTicksPerControlTick, simulatedRobot,
                  registry, robotControllersAndParameters);
               
+         orientationEstimator = pair.first();
          ControlFlowGraph controlFlowGraph = orientationEstimator.getControlFlowGraph();
 
+         JointSensorDataSource jointSensorDataSource = pair.second();
          Joint estimationJoint = simulatedRobot.getRootJoints().get(0);
+         simulatedSensorHolderAndReader.setJointSensorDataSource(jointSensorDataSource);
+         
          ComposableStateEstimatorEvaluatorController composableStateEstimatorEvaluatorController =
-            new ComposableStateEstimatorEvaluatorController(controlFlowGraph, orientationEstimator, simulatedRobot, estimationJoint, controlDT, sensorMap);
+            new ComposableStateEstimatorEvaluatorController(simulatedSensorHolderAndReader, controlFlowGraph, orientationEstimator, simulatedRobot, estimationJoint, controlDT);
 
          RobotControllerAndParameters humanoidStateEstimatorControllerAndParameters =
             new RobotControllerAndParameters(composableStateEstimatorEvaluatorController, simulationTicksPerControlTick);
@@ -376,7 +388,7 @@ public class DRCSimulationFactory
    }
 
 
-   public static OrientationEstimatorWithPorts createStateEstimator(SensorMap sensorMap, FullInverseDynamicsStructure inverseDynamicsStructure, double controlDT,
+   public static Pair<OrientationEstimatorWithPorts, JointSensorDataSource> createStateEstimator(StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions, SimulatedSensorHolderAndReader simulatedSensorHolderAndReader, FullInverseDynamicsStructure inverseDynamicsStructure, double controlDT,
            int simulationTicksPerControlTick, SDFRobot simulatedRobot, YoVariableRegistry registry,
            ArrayList<RobotControllerAndParameters> robotControllersAndParameters)
    {
@@ -386,13 +398,16 @@ public class DRCSimulationFactory
       // The following few lines are what you need to do to get the state estimator working with a robot.
       // You also need to either add the controlFlowGraph to another one, or make sure to run it's startComputation method at the right time:
       SensorNoiseParameters sensorNoiseParametersForEstimator = DRCSimulatedSensorNoiseParameters.createNoiseParametersForEstimatorBasedOnGazeboSDF();
-      
-      SensorAndEstimatorAssembler sensorAndEstimatorAssembler = new SensorAndEstimatorAssembler(sensorNoiseParametersForEstimator, gravitationalAcceleration, inverseDynamicsStructure, controlDT,
-                                                                   sensorMap, registry);
+
+      SensorAndEstimatorAssembler sensorAndEstimatorAssembler = new SensorAndEstimatorAssembler(stateEstimatorSensorDefinitions,
+            sensorNoiseParametersForEstimator, gravitationalAcceleration, inverseDynamicsStructure, controlDT,
+            registry);
 
       OrientationEstimatorWithPorts orientationEstimator = sensorAndEstimatorAssembler.getOrientationEstimator();
       
-      return orientationEstimator;
+      JointSensorDataSource jointSensorDataSource = sensorAndEstimatorAssembler.getJointSensorDataSource();
+      
+      return new Pair<OrientationEstimatorWithPorts, JointSensorDataSource>(orientationEstimator, jointSensorDataSource);
    }
 
 

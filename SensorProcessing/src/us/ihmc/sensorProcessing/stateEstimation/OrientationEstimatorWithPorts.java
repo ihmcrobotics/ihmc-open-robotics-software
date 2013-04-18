@@ -8,5 +8,5 @@ public interface OrientationEstimatorWithPorts extends OrientationEstimator
 {
    public abstract ControlFlowGraph getControlFlowGraph();
    public abstract ControlFlowInputPort<FrameVector> getDesiredAngularAccelerationInputPort();
-   public abstract ControlFlowInputPort<FrameVector> getDesiredCenterOfMassAccelerationInputPort();
+   public abstract ControlFlowInputPort<FrameVector> getDesiredCenterOfMassAccelerationInputPort();   
 }

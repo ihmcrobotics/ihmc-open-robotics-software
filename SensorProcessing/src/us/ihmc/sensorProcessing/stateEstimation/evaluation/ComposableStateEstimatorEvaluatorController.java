@@ -3,7 +3,6 @@ package us.ihmc.sensorProcessing.stateEstimation.evaluation;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.controlFlow.ControlFlowGraph;
-import us.ihmc.sensorProcessing.simulatedSensors.SensorMap;
 import us.ihmc.sensorProcessing.stateEstimation.OrientationEstimator;
 
 import com.yobotics.simulationconstructionset.Joint;
@@ -18,12 +17,16 @@ public class ComposableStateEstimatorEvaluatorController implements RobotControl
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final ControlFlowGraph controlFlowGraph;
-
+   private final Runnable sensorReader;
+   
    private final ComposableStateEstimatorEvaluatorErrorCalculator composableStateEstimatorEvaluatorErrorCalculator;
 
-   public ComposableStateEstimatorEvaluatorController(ControlFlowGraph controlFlowGraph, OrientationEstimator orientationEstimator,
-           Robot robot, Joint estimationJoint, double controlDT, SensorMap sensorMap)
+   public ComposableStateEstimatorEvaluatorController(Runnable sensorReader,
+         ControlFlowGraph controlFlowGraph, OrientationEstimator orientationEstimator,
+           Robot robot, Joint estimationJoint, double controlDT)
    {
+      this.sensorReader = sensorReader;
+      
       this.gravitationalAcceleration = new Vector3d();
       robot.getGravity(gravitationalAcceleration);
 
@@ -53,6 +56,8 @@ public class ComposableStateEstimatorEvaluatorController implements RobotControl
 
    public void doControl()
    {
+      sensorReader.run();
+      
       controlFlowGraph.startComputation();
       controlFlowGraph.waitUntilComputationIsDone();
 

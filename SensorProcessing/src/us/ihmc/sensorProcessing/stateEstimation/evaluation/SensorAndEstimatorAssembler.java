@@ -8,13 +8,13 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.controlFlow.ControlFlowGraph;
-import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorMap;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
+import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions;
 import us.ihmc.sensorProcessing.stateEstimation.ComposableOrientationAndCoMEstimatorCreator;
 import us.ihmc.sensorProcessing.stateEstimation.ComposableOrientationEstimatorCreator;
-import us.ihmc.sensorProcessing.stateEstimation.DesiredCoMAndAngularAccelerationOutputPortsHolder;
+import us.ihmc.sensorProcessing.stateEstimation.JointSensorDataSource;
 import us.ihmc.sensorProcessing.stateEstimation.JointStateFullRobotModelUpdater;
 import us.ihmc.sensorProcessing.stateEstimation.OrientationEstimatorWithPorts;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.AngularVelocitySensorConfiguration;
@@ -23,7 +23,6 @@ import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.OrientationS
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.PointVelocitySensorConfiguration;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.SensorConfigurationFactory;
 import us.ihmc.utilities.math.MathTools;
-import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.RigidBody;
 
@@ -36,14 +35,19 @@ public class SensorAndEstimatorAssembler
 
    private final ControlFlowGraph controlFlowGraph;
    private final OrientationEstimatorWithPorts orientationEstimator;
-
-   public SensorAndEstimatorAssembler(SensorNoiseParameters sensorNoiseParametersForEstimator, Vector3d gravitationalAcceleration, 
+   private final JointSensorDataSource jointSensorDataSource;
+   
+   public SensorAndEstimatorAssembler(StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions,
+         SensorNoiseParameters sensorNoiseParametersForEstimator, Vector3d gravitationalAcceleration, 
          FullInverseDynamicsStructure inverseDynamicsStructure, double controlDT,
-         SensorMap sensorMap,
          YoVariableRegistry parentRegistry)
    {
       SensorConfigurationFactory SensorConfigurationFactory = new SensorConfigurationFactory(sensorNoiseParametersForEstimator, gravitationalAcceleration);
 
+      jointSensorDataSource = new JointSensorDataSource(stateEstimatorSensorDefinitions);
+      
+      SensorMap sensorMap = jointSensorDataSource.getSensorMap();
+      
       // Sensor configurations for estimator
       Collection<OrientationSensorConfiguration> orientationSensorConfigurations =
          SensorConfigurationFactory.createOrientationSensorConfigurations(sensorMap.getOrientationSensors());
@@ -121,23 +125,9 @@ public class SensorAndEstimatorAssembler
       return orientationEstimator;
    }
    
-//   public static void connectDesiredAccelerationPorts(ControlFlowGraph controlFlowGraph, OrientationEstimatorWithPorts orientationEstimatorWithPorts,
-//         DesiredCoMAndAngularAccelerationOutputPortsHolder desiredCoMAndAngularAccelerationOutputPortsHolder)
-//   {
-//      ControlFlowOutputPort<FrameVector> desiredAngularAccelerationOutputPort = desiredCoMAndAngularAccelerationOutputPortsHolder.getDesiredAngularAccelerationOutputPort();
-//      ControlFlowOutputPort<FrameVector> desiredCenterOfMassAccelerationOutputPort = desiredCoMAndAngularAccelerationOutputPortsHolder.getDesiredCenterOfMassAccelerationOutputPort();
-//      
-//      ControlFlowInputPort<FrameVector> desiredAngularAccelerationInputPort = orientationEstimatorWithPorts.getDesiredAngularAccelerationInputPort();
-//      ControlFlowInputPort<FrameVector> desiredCenterOfMassAccelerationInputPort = orientationEstimatorWithPorts.getDesiredCenterOfMassAccelerationInputPort();
-//
-//      if (desiredAngularAccelerationOutputPort != null)
-//      {
-//         controlFlowGraph.connectElements(desiredAngularAccelerationOutputPort, desiredAngularAccelerationInputPort);
-//      }
-//
-//      if (desiredCenterOfMassAccelerationOutputPort != null)
-//      {
-//         controlFlowGraph.connectElements(desiredCenterOfMassAccelerationOutputPort, desiredCenterOfMassAccelerationInputPort);
-//      }
-//   }
+   public JointSensorDataSource getJointSensorDataSource()
+   {
+      return jointSensorDataSource;
+   }
+  
 }
