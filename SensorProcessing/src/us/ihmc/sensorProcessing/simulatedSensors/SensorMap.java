@@ -66,7 +66,7 @@ public class SensorMap
       return jointPositionSensors.get(oneDoFJoint);
    }
 
-   public ControlFlowOutputPort<Double> getJointVelocityPort(OneDoFJoint oneDoFJoint)
+   public ControlFlowOutputPort<Double> getJointVelocitySensorPort(OneDoFJoint oneDoFJoint)
    {
       return jointVelocitySensors.get(oneDoFJoint);
    }
