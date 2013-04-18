@@ -3,6 +3,9 @@ package us.ihmc.sensorProcessing.simulatedSensors;
 import java.util.LinkedHashMap;
 import java.util.Set;
 
+import javax.vecmath.Matrix3d;
+import javax.vecmath.Vector3d;
+
 import us.ihmc.sensorProcessing.stateEstimation.JointSensorDataSource;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
@@ -72,13 +75,62 @@ public class SimulatedSensorHolderAndReader implements Runnable
       Set<OneDoFJoint> jointsForPositionSensors = jointPositionSensors.keySet();
       for (OneDoFJoint oneDoFJoint : jointsForPositionSensors)
       {
-         SimulatedOneDoFJointPositionSensor simulatedOneDoFJointPositionSensor = jointPositionSensors.get(jointsForPositionSensors);
+         SimulatedOneDoFJointPositionSensor simulatedOneDoFJointPositionSensor = jointPositionSensors.get(oneDoFJoint);
          simulatedOneDoFJointPositionSensor.startComputation();
          simulatedOneDoFJointPositionSensor.waitUntilComputationIsDone();
          Double value = simulatedOneDoFJointPositionSensor.getJointPositionOutputPort().getData();
          jointSensorDataSource.setJointPositionSensorValue(oneDoFJoint, value);
       }
 
+      Set<OneDoFJoint> jointsForVelocitySensors = jointVelocitySensors.keySet();
+      for (OneDoFJoint oneDoFJoint : jointsForVelocitySensors)
+      {
+         SimulatedOneDoFJointVelocitySensor simulatedOneDoFJointVelocitySensor = jointVelocitySensors.get(oneDoFJoint);
+         simulatedOneDoFJointVelocitySensor.startComputation();
+         simulatedOneDoFJointVelocitySensor.waitUntilComputationIsDone();
+         Double value = simulatedOneDoFJointVelocitySensor.getJointVelocityOutputPort().getData();
+         jointSensorDataSource.setJointVelocitySensorValue(oneDoFJoint, value);
+      }
+
+      Set<IMUDefinition> orientationSensorDefinitions = orientationSensors.keySet();
+      for (IMUDefinition imuDefinition : orientationSensorDefinitions)
+      {
+         SimulatedOrientationSensorFromRobot orientationSensor = orientationSensors.get(imuDefinition);
+         orientationSensor.startComputation();
+         orientationSensor.waitUntilComputationIsDone();
+         Matrix3d value = orientationSensor.getOrientationOutputPort().getData();
+         jointSensorDataSource.setOrientationSensorValue(imuDefinition, value);
+      }
+      
+      Set<IMUDefinition> angularVelocitySensorDefinitions = angularVelocitySensors.keySet();
+      for (IMUDefinition imuDefinition : angularVelocitySensorDefinitions)
+      {
+         SimulatedAngularVelocitySensorFromRobot angularVelocitySensor = angularVelocitySensors.get(imuDefinition);
+         angularVelocitySensor.startComputation();
+         angularVelocitySensor.waitUntilComputationIsDone();
+         Vector3d value = angularVelocitySensor.getAngularVelocityOutputPort().getData();
+         jointSensorDataSource.setAngularVelocitySensorValue(imuDefinition, value);
+      }
+      
+      Set<IMUDefinition> linearAccelerationSensorDefinitions = linearAccelerationSensors.keySet();
+      for (IMUDefinition imuDefinition : linearAccelerationSensorDefinitions)
+      {
+         SimulatedLinearAccelerationSensorFromRobot linearAccelerationSensor = linearAccelerationSensors.get(imuDefinition);
+         linearAccelerationSensor.startComputation();
+         linearAccelerationSensor.waitUntilComputationIsDone();
+         Vector3d value = linearAccelerationSensor.getLinearAccelerationOutputPort().getData();
+         jointSensorDataSource.setLinearAccelerationSensorValue(imuDefinition, value);
+      }
+
+      Set<PointVelocitySensorDefinition> pointVelocitySensorDefinitions = pointVelocitySensors.keySet();
+      for (PointVelocitySensorDefinition pointVelocitySensorDefinition : pointVelocitySensorDefinitions)
+      {
+         SimulatedPointVelocitySensorFromRobot pointVelocitySensor = pointVelocitySensors.get(pointVelocitySensorDefinition);
+         pointVelocitySensor.startComputation();
+         pointVelocitySensor.waitUntilComputationIsDone();
+         Vector3d value = pointVelocitySensor.getPointVelocityOutputPort().getData();
+         jointSensorDataSource.setPointVelocitySensorValue(pointVelocitySensorDefinition, value);
+      }
 
    }
 }

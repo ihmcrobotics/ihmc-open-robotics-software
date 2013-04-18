@@ -8,7 +8,7 @@ import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJoint;
 
 public class SimulatedOneDoFJointVelocitySensor extends SimulatedSensor<MutableDouble>
 {
-   private final ControlFlowOutputPort<Double> jointPositionOutputPort = createOutputPort();
+   private final ControlFlowOutputPort<Double> jointVelocityOutputPort = createOutputPort();
    private final OneDegreeOfFreedomJoint joint;
    private final MutableDouble jointVelocity = new MutableDouble();
 
@@ -21,7 +21,7 @@ public class SimulatedOneDoFJointVelocitySensor extends SimulatedSensor<MutableD
    {
       jointVelocity.setValue(joint.getQD().getDoubleValue());
       corrupt(jointVelocity);
-      jointPositionOutputPort.setData(jointVelocity.toDouble());
+      jointVelocityOutputPort.setData(jointVelocity.toDouble());
    }
 
    public void waitUntilComputationIsDone()
@@ -29,8 +29,8 @@ public class SimulatedOneDoFJointVelocitySensor extends SimulatedSensor<MutableD
       // empty
    }
 
-   public ControlFlowOutputPort<Double> getJointPositionOutputPort()
+   public ControlFlowOutputPort<Double> getJointVelocityOutputPort()
    {
-      return jointPositionOutputPort;
+      return jointVelocityOutputPort;
    }
 }
