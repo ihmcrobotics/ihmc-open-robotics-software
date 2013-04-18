@@ -559,6 +559,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
          this.transferToSide = transferToSide;
       }
 
+      // TODO put in going into heel state
       @Override
       public void doAction()
       {
@@ -894,12 +895,12 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
          readyToGrabNextFootstep.set(true);
       }
 
-      private void switchTrajectoryParametersMapping(Footstep oldFootstep, Footstep newFootstep)
+     private void switchTrajectoryParametersMapping(Footstep oldFootstep, Footstep newFootstep)
       {
          mapFromFootstepsToTrajectoryParameters.put(newFootstep, mapFromFootstepsToTrajectoryParameters.get(oldFootstep));
          mapFromFootstepsToTrajectoryParameters.remove(oldFootstep);
       }
-
+ 
       @Override
       public void doTransitionOutOfAction()
       {
@@ -1062,7 +1063,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       ContactablePlaneBody contactableBody = bipedFeet.get(swingSide);
       if (stayOnToes.getBooleanValue())
       {
-         List<FramePoint> contactPoints = getContactPointsForWalkingOnToes(contactableBody);
+         List<FramePoint> contactPoints = getContactPointsForWalkingOnEdge(contactableBody, ConstraintType.TOES);
          footPolygon = FrameConvexPolygon2d.constructByProjectionOntoXYPlane(contactPoints, referenceFrames.getSoleFrame(swingSide));
       }
       else
@@ -1444,9 +1445,16 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 
    private void setOnToesContactState(ContactablePlaneBody contactableBody)
    {
-      List<FramePoint> contactPoints = getContactPointsForWalkingOnToes(contactableBody);
+      List<FramePoint> contactPoints = getContactPointsForWalkingOnEdge(contactableBody, ConstraintType.TOES);
       List<FramePoint2d> contactPoints2d = getContactPoints2d(contactableBody, contactPoints);
       setContactState(contactableBody, contactPoints2d, ConstraintType.TOES);
+   }
+   
+   private void setOnHeelContactState(ContactablePlaneBody contactableBody)
+   {
+      List<FramePoint> contactPoints = getContactPointsForWalkingOnEdge(contactableBody, ConstraintType.HEEL);
+      List<FramePoint2d> contactPoints2d = getContactPoints2d(contactableBody, contactPoints);
+      setContactState(contactableBody, contactPoints2d, ConstraintType.HEEL); 
    }
 
    private void setFlatFootContactState(ContactablePlaneBody contactableBody)
@@ -1490,12 +1498,13 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       return contactPoints2d;
    }
 
-   private List<FramePoint> getContactPointsForWalkingOnToes(ContactablePlaneBody contactableBody)
+   private List<FramePoint> getContactPointsForWalkingOnEdge(ContactablePlaneBody contactableBody, ConstraintType constraintType)
    {
-      FrameVector forward = new FrameVector(contactableBody.getBodyFrame(), 1.0, 0.0, 0.0);
-      List<FramePoint> contactPoints = DesiredFootstepCalculatorTools.computeMaximumPointsInDirection(contactableBody.getContactPoints(), forward, 2);
-
-      return contactPoints;
+      FrameVector direction = new FrameVector(contactableBody.getBodyFrame(), 1.0, 0.0, 0.0);
+      if(constraintType == ConstraintType.HEEL)
+         direction.scale(-1.0);
+         
+      return DesiredFootstepCalculatorTools.computeMaximumPointsInDirection(contactableBody.getContactPoints(), direction, 2);
    }
 
    private void updateEndEffectorControlModule(ContactablePlaneBody contactablePlaneBody, PlaneContactState contactState, ConstraintType constraintType)
