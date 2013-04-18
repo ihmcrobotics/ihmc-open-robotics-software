@@ -8,14 +8,14 @@ import us.ihmc.graphics3DAdapter.camera.VideoSettingsH264LowLatency;
 public class DRCConfigParameters
 {
    public static final boolean USE_GAZEBO_PHYSICS = false;
-   public static final String GAZEBO_HOST = "localhost";    // "localhost";
+   public static final String GAZEBO_HOST = "localhost";//"10.4.42.2";    // "localhost";
    public static final String[] JOINTS_TO_IGNORE_FOR_GAZEBO = {"hokuyo_joint"};
    public static final boolean SHOW_SCS_GUI_FOR_GAZEBO = true;
 
    public static final String ROS_MASTER_URI = "http://" + GAZEBO_HOST + ":11311";
 
    public static final boolean SHOW_BANDWIDTH_DIALOG = false;
-   public static final boolean USE_QUAD_TREE = false;
+   public static final boolean USE_QUAD_TREE = true;
 
 
    // Set to simulate one tick delay between, as it will be in Gazebo. This will also run the controller in a different thread!
@@ -94,7 +94,8 @@ public class DRCConfigParameters
       (1 + 0.3) * 2
       * Math.sqrt(DRCRobotParameters.DRC_ROBOT_FOOT_FORWARD * DRCRobotParameters.DRC_ROBOT_FOOT_FORWARD
                   + 0.25 * DRCRobotParameters.DRC_ROBOT_FOOT_WIDTH * DRCRobotParameters.DRC_ROBOT_FOOT_WIDTH);
-   public static final boolean POPULATE_OCTREE = false;
+   public static final boolean POPULATE_OCTREE_FROM_REJECTS = true;
+   public static final boolean USE_UPREZZING_IN_LIDAR_UPDATE_TO_OCTREE = false;
 
 
 
