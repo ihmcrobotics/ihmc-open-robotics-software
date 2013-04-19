@@ -173,20 +173,25 @@ public class DRCSimulationFactory
 
          StateEstimatorSensorDefinitionsFromRobotFactory stateEstimatorSensorDefinitionsFromRobotFactory = new StateEstimatorSensorDefinitionsFromRobotFactory(scsToInverseDynamicsJointMapForEstimator, 
                simulatedRobot, controlDT, imuMounts, velocityPoints);
-         StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions = stateEstimatorSensorDefinitionsFromRobotFactory.getStateEstimatorSensorDefinitions();;
          
          SimulatedSensorHolderAndReaderFromRobotFactory sensorReaderFactory = new SimulatedSensorHolderAndReaderFromRobotFactory(stateEstimatorSensorDefinitionsFromRobotFactory,
                scsToInverseDynamicsJointMapForEstimator, simulatedRobot, sensorNoiseParamters, controlDT, allIMUMounts, velocityPoints, registry);
          SimulatedSensorHolderAndReader simulatedSensorHolderAndReader = sensorReaderFactory.getSimulatedSensorHolderAndReader();
+         RunnableRunnerController runnableRunnerController = new RunnableRunnerController();
+         runnableRunnerController.addRunnable(simulatedSensorHolderAndReader);
+         RobotControllerAndParameters simulatedSensorHolderAndReaderControllerAndParameters =
+               new RobotControllerAndParameters(runnableRunnerController, simulationTicksPerControlTick);
+         robotControllersAndParameters.add(simulatedSensorHolderAndReaderControllerAndParameters);
+         
          
          Vector3d gravitationalAcceleration = new Vector3d();
          simulatedRobot.getGravity(gravitationalAcceleration);
 
-         // The following few lines are what you need to do to get the state estimator working with a robot.
-         // You also need to either add the controlFlowGraph to another one, or make sure to run it's startComputation method at the right time:
-//         SensorNoiseParameters sensorNoiseParametersForEstimator = DRCSimulatedSensorNoiseParameters.createNoiseParametersForEstimatorBasedOnGazeboSDF();
+ 
+         // Make the estimator here.
          SensorNoiseParameters sensorNoiseParametersForEstimator = DRCSimulatedSensorNoiseParameters.createNoiseParametersForEstimatorJerryTuning();
-
+         StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions = stateEstimatorSensorDefinitionsFromRobotFactory.getStateEstimatorSensorDefinitions();
+         
          SensorAndEstimatorAssembler sensorAndEstimatorAssembler = new SensorAndEstimatorAssembler(stateEstimatorSensorDefinitions,
                sensorNoiseParametersForEstimator, gravitationalAcceleration, inverseDynamicsStructureForEstimator, controlDT,
                registry);
@@ -194,18 +199,12 @@ public class DRCSimulationFactory
          orientationEstimator = sensorAndEstimatorAssembler.getOrientationEstimator();
          
          JointSensorDataSource jointSensorDataSource = sensorAndEstimatorAssembler.getJointSensorDataSource();
+         simulatedSensorHolderAndReader.setJointSensorDataSource(jointSensorDataSource);
+  
          desiredCoMAndAngularAccelerationDataSource = sensorAndEstimatorAssembler.getDesiredCoMAndAngularAccelerationDataSource();
          
-         ControlFlowGraph controlFlowGraph = orientationEstimator.getControlFlowGraph();
-
          Joint estimationJoint = simulatedRobot.getRootJoints().get(0);
-         simulatedSensorHolderAndReader.setJointSensorDataSource(jointSensorDataSource);
-         
-         RunnableRunnerController runnableRunnerController = new RunnableRunnerController();
-         runnableRunnerController.addRunnable(simulatedSensorHolderAndReader);
-         RobotControllerAndParameters simulatedSensorHolderAndReaderControllerAndParameters =
-               new RobotControllerAndParameters(runnableRunnerController, simulationTicksPerControlTick);
-         robotControllersAndParameters.add(simulatedSensorHolderAndReaderControllerAndParameters);
+         ControlFlowGraph controlFlowGraph = sensorAndEstimatorAssembler.getControlFlowGraph();
 
          ComposableStateEstimatorEvaluatorController composableStateEstimatorEvaluatorController =
             new ComposableStateEstimatorEvaluatorController(controlFlowGraph, orientationEstimator, simulatedRobot, estimationJoint, controlDT);
