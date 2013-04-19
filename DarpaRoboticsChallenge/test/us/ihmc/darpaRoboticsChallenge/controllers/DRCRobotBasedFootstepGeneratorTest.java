@@ -180,7 +180,7 @@ public class DRCRobotBasedFootstepGeneratorTest
 
    private void setupRobotParameters()
    {
-      DRCRobotJointMap jointMap = new DRCRobotJointMap(DRCRobotModel.getDefaultRobotModel());
+      DRCRobotJointMap jointMap = new DRCRobotJointMap(DRCRobotModel.getDefaultRobotModel(), false);
       JaxbSDFLoader jaxbSDFLoader = DRCRobotSDFLoader.loadDRCRobot(jointMap);
       fullRobotModel = jaxbSDFLoader.createFullRobotModel(jointMap);
       referenceFrames = new ReferenceFrames(fullRobotModel, jointMap, jointMap.getAnkleHeight());

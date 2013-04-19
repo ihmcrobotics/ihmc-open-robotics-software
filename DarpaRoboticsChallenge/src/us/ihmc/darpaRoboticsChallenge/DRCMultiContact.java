@@ -44,7 +44,7 @@ public class DRCMultiContact
 //      RobotSide[] handContactSides = RobotSide.values();
 //      RobotInitialSetup<SDFRobot> robotInitialSetup = new PushUpDRCRobotInitialSetup();
 
-      DRCRobotJointMap jointMap = new DRCRobotJointMap(robotModel);
+      DRCRobotJointMap jointMap = new DRCRobotJointMap(robotModel, true);
 
       DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
 
