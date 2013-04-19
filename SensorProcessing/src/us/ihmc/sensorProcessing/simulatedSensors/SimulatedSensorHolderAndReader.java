@@ -72,7 +72,7 @@ public class SimulatedSensorHolderAndReader implements Runnable
       this.jointAndIMUSensorDataSource = jointAndIMUSensorDataSource;
    }
 
-   public void setPointVelocityDataSource(PointVelocitySensorDataSource pointVelocitySensorDataSource)
+   public void setPointVelocitySensorDataSource(PointVelocitySensorDataSource pointVelocitySensorDataSource)
    {
       this.pointVelocitySensorDataSource = pointVelocitySensorDataSource;
    }
@@ -129,14 +129,17 @@ public class SimulatedSensorHolderAndReader implements Runnable
          jointAndIMUSensorDataSource.setLinearAccelerationSensorValue(imuDefinition, value);
       }
 
-      Set<PointVelocitySensorDefinition> pointVelocitySensorDefinitions = pointVelocitySensors.keySet();
-      for (PointVelocitySensorDefinition pointVelocitySensorDefinition : pointVelocitySensorDefinitions)
+      if (pointVelocitySensorDataSource != null)
       {
-         SimulatedPointVelocitySensorFromRobot pointVelocitySensor = pointVelocitySensors.get(pointVelocitySensorDefinition);
-         pointVelocitySensor.startComputation();
-         pointVelocitySensor.waitUntilComputationIsDone();
-         Vector3d value = pointVelocitySensor.getPointVelocityOutputPort().getData();
-         pointVelocitySensorDataSource.setPointVelocitySensorValue(pointVelocitySensorDefinition, value);
+         Set<PointVelocitySensorDefinition> pointVelocitySensorDefinitions = pointVelocitySensors.keySet();
+         for (PointVelocitySensorDefinition pointVelocitySensorDefinition : pointVelocitySensorDefinitions)
+         {
+            SimulatedPointVelocitySensorFromRobot pointVelocitySensor = pointVelocitySensors.get(pointVelocitySensorDefinition);
+            pointVelocitySensor.startComputation();
+            pointVelocitySensor.waitUntilComputationIsDone();
+            Vector3d value = pointVelocitySensor.getPointVelocityOutputPort().getData();
+            pointVelocitySensorDataSource.setPointVelocitySensorValue(pointVelocitySensorDefinition, value);
+         }
       }
 
    }

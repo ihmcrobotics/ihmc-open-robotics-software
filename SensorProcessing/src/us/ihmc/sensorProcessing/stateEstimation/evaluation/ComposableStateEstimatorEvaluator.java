@@ -99,7 +99,7 @@ public class ComposableStateEstimatorEvaluator
       DesiredCoMAndAngularAccelerationDataSource desiredCoMAndAngularAccelerationDataSource = new DesiredCoMAndAngularAccelerationDataSource(estimationFrame);
 
       PointVelocitySensorDataSource pointVelocityDataSource = sensorAndEstimatorAssembler.getPointVelocitySensorDataSource();
-      simulatedSensorHolderAndReader.setPointVelocityDataSource(pointVelocityDataSource);
+      simulatedSensorHolderAndReader.setPointVelocitySensorDataSource(pointVelocityDataSource);
 
       desiredCoMAccelerationsFromRobotStealerController.attachDesiredCoMAndAngularAccelerationDataSource(desiredCoMAndAngularAccelerationDataSource);
       

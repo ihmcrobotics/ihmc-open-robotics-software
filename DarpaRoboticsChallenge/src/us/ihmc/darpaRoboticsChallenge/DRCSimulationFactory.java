@@ -1,6 +1,7 @@
 package us.ihmc.darpaRoboticsChallenge;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import us.ihmc.GazeboStateCommunicator.GazeboRobot;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
@@ -34,8 +35,10 @@ import us.ihmc.projectM.R2Sim02.initialSetup.ScsInitialSetup;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.simulatedSensors.InverseDynamicsJointsFromSCSRobotGenerator;
+import us.ihmc.sensorProcessing.simulatedSensors.PointVelocitySensorDefinition;
 import us.ihmc.sensorProcessing.stateEstimation.DesiredCoMAccelerationsFromRobotStealerController;
 import us.ihmc.sensorProcessing.stateEstimation.DesiredCoMAndAngularAccelerationDataSource;
+import us.ihmc.sensorProcessing.stateEstimation.PointVelocitySensorDataSource;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.net.KryoObjectServer;
@@ -64,6 +67,7 @@ public class DRCSimulationFactory
    private static final boolean SHOW_REFERENCE_FRAMES = false;
    private static final boolean CREATE_DYNAMICALLY_CONSISTENT_NULLSPACE_EVALUATOR = false;
    private static final boolean USE_STATE_ESTIMATOR = false;
+   private static final boolean READ_POINT_VELOCITIES_FROM_ROBOT = true;
 
    public static HumanoidRobotSimulation<SDFRobot> createSimulation(ControllerFactory controllerFactory,
            CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, DRCRobotInterface robotInterface, RobotInitialSetup<SDFRobot> robotInitialSetup,
@@ -92,11 +96,17 @@ public class DRCSimulationFactory
       DRCSensorReaderAndStateEstimatorFromRobot drcStateEstimatorFromRobot = new DRCSensorReaderAndStateEstimatorFromRobot(robotInterface, inverseDynamicsStructure, 
             controlDT, simulationTicksPerControlTick, USE_STATE_ESTIMATOR, registry);
       DesiredCoMAndAngularAccelerationDataSource desiredCoMAndAngularAccelerationDataSource = drcStateEstimatorFromRobot.getDesiredCoMAndAngularAccelerationDataSource();
+      
+      PointVelocitySensorDataSource pointVelocitySensorDataSource = drcStateEstimatorFromRobot.getPointVelocitySensorDataSource();
+      List<PointVelocitySensorDefinition> pointVelocitySensorDefinitions = pointVelocitySensorDataSource.getPointVelocitySensorDefinitions();
+      
       ArrayList<RobotControllerAndParameters> robotControllersAndParameters = new ArrayList<RobotControllerAndParameters>();
       drcStateEstimatorFromRobot.getRobotControllersAndParameters(robotControllersAndParameters);
 
-      
-      
+      if (READ_POINT_VELOCITIES_FROM_ROBOT)
+      {
+         drcStateEstimatorFromRobot.setPointVelocitySensorDataSourceForReadingFromVirtualSensors(pointVelocitySensorDataSource);
+      }
       
       SideDependentList<FootSwitchInterface> footSwitches = robotInterface.getFootSwitches();
 
@@ -170,6 +180,12 @@ public class DRCSimulationFactory
       if (desiredCoMAndAngularAccelerationDataSource != null)
       {   
          robotController.attachDesiredCoMAndAngularAccelerationDataSource(desiredCoMAndAngularAccelerationDataSource);
+      }
+      
+      if (pointVelocitySensorDataSource != null)
+      {
+         robotController.attachPointVelocitySensorDataSource(pointVelocitySensorDefinitions, pointVelocitySensorDataSource);
+
       }
       
       AbstractModularRobotController modularRobotController;
