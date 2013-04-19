@@ -8,6 +8,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.sensorProcessing.stateEstimation.JointAndIMUSensorDataSource;
 import us.ihmc.sensorProcessing.stateEstimation.PointVelocitySensorDataSource;
+import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.PointVelocityDataObject;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
 public class SimulatedSensorHolderAndReader implements Runnable
@@ -137,7 +138,7 @@ public class SimulatedSensorHolderAndReader implements Runnable
             SimulatedPointVelocitySensorFromRobot pointVelocitySensor = pointVelocitySensors.get(pointVelocitySensorDefinition);
             pointVelocitySensor.startComputation();
             pointVelocitySensor.waitUntilComputationIsDone();
-            Vector3d value = pointVelocitySensor.getPointVelocityOutputPort().getData();
+            PointVelocityDataObject value = pointVelocitySensor.getPointVelocityOutputPort().getData();
             pointVelocitySensorDataSource.setPointVelocitySensorValue(pointVelocitySensorDefinition, value);
          }
       }

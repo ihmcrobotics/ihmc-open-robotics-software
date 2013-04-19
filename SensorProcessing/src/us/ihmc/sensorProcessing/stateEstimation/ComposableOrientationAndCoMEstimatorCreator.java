@@ -31,6 +31,7 @@ import us.ihmc.sensorProcessing.stateEstimation.processModelElements.ProcessMode
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.AngularVelocitySensorConfiguration;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.LinearAccelerationSensorConfiguration;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.OrientationSensorConfiguration;
+import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.PointVelocityDataObject;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.PointVelocitySensorConfiguration;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -342,7 +343,7 @@ public class ComposableOrientationAndCoMEstimatorCreator
          RigidBody measurementLink = pointVelocitySensorConfiguration.getPointVelocityMeasurementLink();
          FramePoint stationaryPoint = pointVelocitySensorConfiguration.getPointVelocityMeasurementPoint();
 
-         ControlFlowInputPort<Vector3d> pointVelocityMeasurementInputPort = createMeasurementInputPort(VECTOR3D_LENGTH);
+         ControlFlowInputPort<PointVelocityDataObject> pointVelocityMeasurementInputPort = createInputPort();
 
          String name = pointVelocitySensorConfiguration.getName();
 

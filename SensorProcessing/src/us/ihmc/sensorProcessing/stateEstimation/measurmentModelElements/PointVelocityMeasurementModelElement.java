@@ -10,6 +10,7 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
+import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.PointVelocityDataObject;
 import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -29,7 +30,7 @@ public class PointVelocityMeasurementModelElement extends AbstractMeasurementMod
    private final ControlFlowOutputPort<FrameOrientation> orientationPort;
    private final ControlFlowOutputPort<FrameVector> angularVelocityPort;
 
-   private final ControlFlowInputPort<Vector3d> pointVelocityMeasurementInputPort;
+   private final ControlFlowInputPort<PointVelocityDataObject> pointVelocityMeasurementInputPort;
 
    private final ReferenceFrame estimationFrame;
    private final ControlFlowInputPort<FullInverseDynamicsStructure> inverseDynamicsStructureInputPort;
@@ -44,10 +45,11 @@ public class PointVelocityMeasurementModelElement extends AbstractMeasurementMod
    private final FramePoint tempFramePoint = new FramePoint(ReferenceFrame.getWorldFrame());
    private final Twist tempTwist = new Twist();
    private final FrameVector tempFrameVector = new FrameVector(ReferenceFrame.getWorldFrame());
+   private final Vector3d tempVector = new Vector3d();
    private final FrameVector residualVector = new FrameVector(ReferenceFrame.getWorldFrame());
 
 
-   public PointVelocityMeasurementModelElement(String name, ControlFlowInputPort<Vector3d> pointVelocityMeasurementInputPort,
+   public PointVelocityMeasurementModelElement(String name, ControlFlowInputPort<PointVelocityDataObject> pointVelocityMeasurementInputPort,
            ControlFlowOutputPort<FramePoint> centerOfMassPositionPort, ControlFlowOutputPort<FrameVector> centerOfMassVelocityPort,
            ControlFlowOutputPort<FrameOrientation> orientationPort, ControlFlowOutputPort<FrameVector> angularVelocityPort, ReferenceFrame estimationFrame,
            RigidBody stationaryPointLink, FramePoint stationaryPoint, ControlFlowInputPort<FullInverseDynamicsStructure> inverseDynamicsStructureInputPort,
@@ -124,7 +126,8 @@ public class PointVelocityMeasurementModelElement extends AbstractMeasurementMod
       computeVelocityOfStationaryPoint(tempFrameVector);
       tempFrameVector.changeFrame(ReferenceFrame.getWorldFrame());
 
-      residualVector.set(pointVelocityMeasurementInputPort.getData());
+      pointVelocityMeasurementInputPort.getData().getVelocity(tempVector);
+      residualVector.set(tempVector);
       residualVector.sub(tempFrameVector);
 
       MatrixTools.insertTuple3dIntoEJMLVector(residualVector.getVector(), residual, 0);

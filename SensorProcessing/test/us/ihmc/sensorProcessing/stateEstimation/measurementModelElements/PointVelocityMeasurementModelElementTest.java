@@ -18,6 +18,7 @@ import us.ihmc.controlFlow.NullControlFlowElement;
 import us.ihmc.sensorProcessing.stateEstimation.CenterOfMassBasedFullRobotModelUpdater;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.sensorProcessing.stateEstimation.measurmentModelElements.PointVelocityMeasurementModelElement;
+import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.PointVelocityDataObject;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -65,7 +66,7 @@ public class PointVelocityMeasurementModelElementTest
       String name = "test";
       YoVariableRegistry registry = new YoVariableRegistry(name);
 
-      ControlFlowInputPort<Vector3d> pointVelocityMeasurementInputPort = new ControlFlowInputPort<Vector3d>(controlFlowElement);
+      ControlFlowInputPort<PointVelocityDataObject> pointVelocityMeasurementInputPort = new ControlFlowInputPort<PointVelocityDataObject>(controlFlowElement);
 
       ControlFlowOutputPort<FramePoint> centerOfMassPositionPort = new ControlFlowOutputPort<FramePoint>(controlFlowElement);
       ControlFlowOutputPort<FrameVector> centerOfMassVelocityPort = new ControlFlowOutputPort<FrameVector>(controlFlowElement);
@@ -124,7 +125,7 @@ public class PointVelocityMeasurementModelElementTest
    }
 
    private void setMeasuredPointVelocityToActual(TwistCalculator twistCalculator, RigidBody stationaryPointLink, FramePoint point,
-           ControlFlowInputPort<Vector3d> pointVelocityMeasurementInputPort)
+           ControlFlowInputPort<PointVelocityDataObject> pointVelocityMeasurementInputPort)
    {
       Twist twist = new Twist();
       twistCalculator.packTwistOfBody(twist, stationaryPointLink);
@@ -133,6 +134,9 @@ public class PointVelocityMeasurementModelElementTest
       FrameVector pointVelocity = new FrameVector(twist.getBaseFrame());
       twist.packVelocityOfPointFixedInBodyFrame(pointVelocity, point);
       pointVelocity.changeFrame(ReferenceFrame.getWorldFrame());
-      pointVelocityMeasurementInputPort.setData(pointVelocity.getVectorCopy());
+      
+      PointVelocityDataObject pointVelocityDataObject = new PointVelocityDataObject();
+      pointVelocityDataObject.setVelocity(pointVelocity.getVectorCopy());
+      pointVelocityMeasurementInputPort.setData(pointVelocityDataObject);
    }
 }

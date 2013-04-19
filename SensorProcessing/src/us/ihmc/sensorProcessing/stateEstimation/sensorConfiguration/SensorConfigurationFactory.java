@@ -127,7 +127,7 @@ public class SensorConfigurationFactory
 
 
    public ArrayList<PointVelocitySensorConfiguration> createPointVelocitySensorConfigurations(Map<PointVelocitySensorDefinition,
-                    ControlFlowOutputPort<Vector3d>> pointVelocitySensors)
+                    ControlFlowOutputPort<PointVelocityDataObject>> pointVelocitySensors)
    {
       ArrayList<PointVelocitySensorConfiguration> pointVelocitySensorConfigurations = new ArrayList<PointVelocitySensorConfiguration>();
 
@@ -146,7 +146,7 @@ public class SensorConfigurationFactory
          pointVelocitySensorDefinition.getOffset(offset);
          FramePoint estimatedVelocityPoint = new FramePoint(estimatedFrameAfterJoint, offset);
 
-         ControlFlowOutputPort<Vector3d> outputPort = pointVelocitySensors.get(pointVelocitySensorDefinition);
+         ControlFlowOutputPort<PointVelocityDataObject> outputPort = pointVelocitySensors.get(pointVelocitySensorDefinition);
 
          PointVelocitySensorConfiguration pointVelocitySensorConfiguration = new PointVelocitySensorConfiguration(outputPort, sensorName,
                                                                                 estimatedMeasurementBody, estimatedVelocityPoint, pointVelocityNoiseCovariance);

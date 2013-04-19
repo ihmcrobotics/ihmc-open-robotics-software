@@ -3,6 +3,7 @@ package us.ihmc.sensorProcessing.simulatedSensors;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.controlFlow.ControlFlowOutputPort;
+import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.PointVelocityDataObject;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import com.yobotics.simulationconstructionset.KinematicPoint;
@@ -14,9 +15,11 @@ public class SimulatedPointVelocitySensorFromRobot extends SimulatedSensor<Vecto
    private final KinematicPoint kinematicPoint;
    
    private final Vector3d pointVelocity = new Vector3d();
+   private final PointVelocityDataObject pointVelocityDataObject = new PointVelocityDataObject();
+   
    private final YoFrameVector yoFrameVectorPerfect, yoFrameVectorNoisy;
 
-   private final ControlFlowOutputPort<Vector3d> pointVelocityOutputPort = createOutputPort();
+   private final ControlFlowOutputPort<PointVelocityDataObject> pointVelocityOutputPort = createOutputPort();
 
    public SimulatedPointVelocitySensorFromRobot(String name, KinematicPoint kinematicPoint, YoVariableRegistry registry)
    {
@@ -34,7 +37,8 @@ public class SimulatedPointVelocitySensorFromRobot extends SimulatedSensor<Vecto
       corrupt(pointVelocity);
       yoFrameVectorNoisy.set(pointVelocity);
       
-      pointVelocityOutputPort.setData(pointVelocity);
+      pointVelocityDataObject.setVelocity(pointVelocity);
+      pointVelocityOutputPort.setData(pointVelocityDataObject);
    }
 
    public void waitUntilComputationIsDone()
@@ -42,7 +46,7 @@ public class SimulatedPointVelocitySensorFromRobot extends SimulatedSensor<Vecto
       // empty
    }
 
-   public ControlFlowOutputPort<Vector3d> getPointVelocityOutputPort()
+   public ControlFlowOutputPort<PointVelocityDataObject> getPointVelocityOutputPort()
    {
       return pointVelocityOutputPort;
    }
