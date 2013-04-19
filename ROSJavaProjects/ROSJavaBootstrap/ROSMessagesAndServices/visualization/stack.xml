@@ -1,15 +1,24 @@
 <stack>
   <description brief="Visualization tools for ROS">
-     Visualization tools for robots.  This is a meta-package depending
-     only on <a href="http://www.ros.org/wiki/rviz">rviz</a>, a 3d
-     visualization environment for robots using ROS.  This
-     meta-package exists only for backwards compatibility with things
-     looking for the visualization stack.
-  </description>
-  <author>Dave Hershberger</author>
-  <license>BSD</license>  
 
+     Visualization tools for robots.  Currently just <a href="http://www.ros.org/wiki/rviz">rviz</a>, a 3d visualization environment for robots using ROS, as well as <a href="http://www.ros.org/wiki/rxbag_plugins">rxbag_plugins</a>, which extend the visualization capabilities of <a href="http://www.ros.org/wiki/rxbag">rxbag</a>. 
+
+  </description>
+  <author>Josh Faust, Dave Hershberger</author>
+  <license>BSD,Creative Commons,wxWindows</license>  
+  <review status="Doc reviewed" notes="2011/01/04"/>
   <url>http://ros.org/wiki/visualization</url>
-  <depend stack="ros" /> <!-- for rosmake -->
-  <depend stack="rviz" />
+  <depend stack="common_msgs" /> <!-- nav_msgs, sensor_msgs, geometry_msgs, visualization_msgs -->
+  <depend stack="common_rosdeps" /> <!-- common_rosdeps -->
+  <depend stack="geometry" /> <!-- tf -->
+  <depend stack="image_common" /> <!-- image_transport -->
+  <depend stack="laser_pipeline" /> <!-- laser_geometry -->
+  <depend stack="pluginlib" /> <!-- pluginlib -->
+  <depend stack="python_qt_binding" /> <!-- python_qt_binding -->
+  <depend stack="robot_model" /> <!-- urdf_interface, urdf, resource_retriever -->
+  <depend stack="ros" /> <!-- roslib -->
+  <depend stack="ros_comm" /> <!-- rosconsole, std_srvs, roscpp, message_filters, std_msgs, rospy, rosbag -->
+  <depend stack="rx" /> <!-- rxbag -->
+  <depend stack="visualization_common" /> <!-- ogre, ogre_tools -->
+
 </stack>

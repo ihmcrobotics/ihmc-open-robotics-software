@@ -14,10 +14,15 @@ public class SpoofROSDirectoryCreator
 {
 
    private static final int DEPTH = 3;
-   private static final boolean DEBUG = true;
+   private static final boolean DEBUG = false;
+   private int numberOfFilesCopied = 0;
 
    public SpoofROSDirectoryCreator()
    {
+   }
+   public int getCopiesMade()
+   {
+      return this.numberOfFilesCopied;
    }
 
    public void generate(File outputDirectory, Collection<String> packages, Collection<File> packagePath) throws IOException
@@ -33,7 +38,18 @@ public class SpoofROSDirectoryCreator
          for (File returnedFile : returnedFiles)
          {
             String newFileName = returnedFile.toString().replaceFirst(packagePathDirectoryregex, outputDirectoryStart);
-            FileUtils.copyFile(returnedFile, new File(newFileName));
+            File destFile = new File(newFileName);
+            try
+            {
+               FileUtils.copyFile(returnedFile, destFile);
+               this.numberOfFilesCopied++;
+               if (DEBUG)
+                  System.out.println("SpoofROSDirectoryCreator copying a file to "+newFileName);
+            }
+            catch (IOException e)
+            {
+               System.out.println("file failed to copy, perhaps it already exists:" + newFileName);
+            }
          }
       }
    }
@@ -87,6 +103,7 @@ public class SpoofROSDirectoryCreator
       }
       SpoofROSDirectoryCreator spoofROSDirectoryCreator = new SpoofROSDirectoryCreator();
       spoofROSDirectoryCreator.generate(outputDirectory, arguments, packagePath);
+      System.out.println("Copied "+spoofROSDirectoryCreator.getCopiesMade()+" files to root directory: "+outputDirectory.getCanonicalPath());
    }
 
 }

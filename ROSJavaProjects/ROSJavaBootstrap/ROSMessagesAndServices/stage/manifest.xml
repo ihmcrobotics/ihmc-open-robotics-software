@@ -36,7 +36,6 @@ This package also provides stageros, a ROS node that uses Stage.
 <rosdep name="fltk"/>
 <rosdep name="pkg-config"/>
 <rosdep name="libjpeg"/>
-<rosdep name="opengl"/>
   <platform os="ubuntu" version="9.04"/>
   <platform os="ubuntu" version="9.10"/>
   <platform os="ubuntu" version="10.04"/>

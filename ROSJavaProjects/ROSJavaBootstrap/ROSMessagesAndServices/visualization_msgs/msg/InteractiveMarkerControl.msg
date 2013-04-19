@@ -38,13 +38,6 @@ uint8 MOVE_AXIS = 3
 uint8 MOVE_PLANE = 4
 uint8 ROTATE_AXIS = 5
 uint8 MOVE_ROTATE = 6
-# "3D" interaction modes have been added to support 3D cursors. 
-# MOVE_3D: Translate freely in 3D space.
-# ROTATE_3D: Rotate freely in 3D space about the origin of parent frame.
-# MOVE_ROTATE_3D: Full 6-DOF freedom of translation and rotation about the cursor origin.
-uint8 MOVE_3D = 7
-uint8 ROTATE_3D = 8
-uint8 MOVE_ROTATE_3D = 9
 
 uint8 interaction_mode
 

@@ -20,7 +20,7 @@ uint32 width          # image width, that is, number of columns
 # ros-users@lists.sourceforge.net and send an email proposing a new encoding.
 
 string encoding       # Encoding of pixels -- channel meaning, ordering, size
-                      # taken from the list of strings in include/sensor_msgs/image_encodings.h
+                      # taken from the list of strings in src/image_encodings.cpp
 
 uint8 is_bigendian    # is this data bigendian?
 uint32 step           # Full row length in bytes
