@@ -144,7 +144,7 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
 
    public boolean finishSwingWhenTrajectoryDone()
    {
-      return true;
+      return false;
    }
 
    public double getFootForwardOffset()
