@@ -111,7 +111,7 @@ public class MultiContactTestHumanoidController extends MomentumBasedController
          swingOrientationTrajectoryGenerators.put(contactablePlaneBody, swingOrientationTrajectoryGenerator);
 
          EndEffectorControlModule endEffectorControlModule = new EndEffectorControlModule(contactablePlaneBody, jacobian, swingPositionTrajectoryGenerator,
-                                                                swingOrientationTrajectoryGenerator, null, yoTime, twistCalculator, registry);
+                                                                swingOrientationTrajectoryGenerator, null, null, yoTime, twistCalculator, registry);
          endEffectorControlModules.put(contactablePlaneBody, endEffectorControlModule);
 
          positionControlJoints.removeAll(Arrays.asList(jacobian.getJointsInOrder()));
