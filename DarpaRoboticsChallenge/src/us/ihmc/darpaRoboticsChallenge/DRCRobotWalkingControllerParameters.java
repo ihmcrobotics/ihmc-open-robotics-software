@@ -144,7 +144,7 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
 
    public boolean finishSwingWhenTrajectoryDone()
    {
-      return false;
+      return true;
    }
 
    public double getFootForwardOffset()
@@ -160,5 +160,10 @@ public class DRCRobotWalkingControllerParameters implements WalkingControllerPar
    public double getAnkleHeight()
    {
       return DRCRobotParameters.DRC_ROBOT_ANKLE_HEIGHT;
+   }
+
+   public boolean landOnHeels()
+   {
+      return false;
    }
 }

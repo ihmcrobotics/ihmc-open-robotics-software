@@ -45,6 +45,7 @@ import us.ihmc.commonWalkingControlModules.outputs.ProcessedOutputsInterface;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LimbName;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
+import us.ihmc.commonWalkingControlModules.sensors.HeelSwitch;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightPartialDerivativesData;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesCalculator;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesData;
@@ -203,7 +204,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 
 
    private final DoubleYoVariable coefficientOfFriction = new DoubleYoVariable("coefficientOfFriction", registry);
-//   private final OneDoFJoint lidarJoint;
+//    private final OneDoFJoint lidarJoint;
    private final LidarControllerInterface lidarControllerInterface;
    private final List<OneDoFJoint> torqueControlJoints = new ArrayList<OneDoFJoint>();
    private final BooleanYoVariable toeOff = new BooleanYoVariable("toeOff", registry);
@@ -211,10 +212,12 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
    private final BooleanYoVariable doToeOffIfPossible = new BooleanYoVariable("doToeOffIfPossible", registry);
    private final DoubleYoVariable onToesTriangleArea = new DoubleYoVariable("onToesTriangleArea", registry);
    private final DoubleYoVariable onToesTriangleAreaLimit = new DoubleYoVariable("onToesTriangleAreaLimit", registry);
+   private final BooleanYoVariable landOnHeels = new BooleanYoVariable("landOnHeels", registry);
 
 
-   public WalkingHighLevelHumanoidController(RigidBody estimationLink, ReferenceFrame estimationFrame, FullRobotModel fullRobotModel, CommonWalkingReferenceFrames referenceFrames, TwistCalculator twistCalculator,
-           CenterOfMassJacobian centerOfMassJacobian, SideDependentList<? extends ContactablePlaneBody> bipedFeet, BipedSupportPolygons bipedSupportPolygons,
+   public WalkingHighLevelHumanoidController(RigidBody estimationLink, ReferenceFrame estimationFrame, FullRobotModel fullRobotModel,
+           CommonWalkingReferenceFrames referenceFrames, TwistCalculator twistCalculator, CenterOfMassJacobian centerOfMassJacobian,
+           SideDependentList<? extends ContactablePlaneBody> bipedFeet, BipedSupportPolygons bipedSupportPolygons,
            SideDependentList<FootSwitchInterface> footSwitches, double gravityZ, DoubleYoVariable yoTime, double controlDT,
            DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, FootstepProvider footstepProvider, DesiredHandPoseProvider handPoseProvider,
            HashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters, DesiredHeadOrientationProvider desiredHeadOrientationProvider,
@@ -227,14 +230,10 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
            ControlFlowInputPort<OrientationTrajectoryData> desiredPelvisOrientationTrajectoryInputPort, LidarControllerInterface lidarControllerInterface,
            FinalDesiredICPCalculator finalDesiredICPCalculator, SideDependentList<HandControllerInterface> handControllers)
    {
-      super(estimationLink, estimationFrame, fullRobotModel, centerOfMassJacobian, referenceFrames, yoTime, gravityZ, twistCalculator, bipedFeet, bipedSupportPolygons, controlDT,
-            processedOutputs, groundReactionWrenchDistributor, updatables, momentumRateOfChangeControlModule, rootJointAccelerationControlModule,
-            walkingControllerParameters.getGroundReactionWrenchBreakFrequencyHertz(), dynamicGraphicObjectsListRegistry);
+      super(estimationLink, estimationFrame, fullRobotModel, centerOfMassJacobian, referenceFrames, yoTime, gravityZ, twistCalculator, bipedFeet,
+            bipedSupportPolygons, controlDT, processedOutputs, groundReactionWrenchDistributor, updatables, momentumRateOfChangeControlModule,
+            rootJointAccelerationControlModule, walkingControllerParameters.getGroundReactionWrenchBreakFrequencyHertz(), dynamicGraphicObjectsListRegistry);
 
-      this.debugSwitch.set(false);
-      
-      
-            
       this.finalDesiredICPCalculator = finalDesiredICPCalculator;
       this.icpBasedMomentumRateOfChangeControlModule = momentumRateOfChangeControlModule;
       this.desiredPelvisOrientationTrajectoryInputPort = desiredPelvisOrientationTrajectoryInputPort;
@@ -327,6 +326,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       kUpperBody.set(100.0);
       zetaUpperBody.set(1.0);
       onToesTriangleAreaLimit.set(0.01);
+      landOnHeels.set(walkingControllerParameters.landOnHeels());
 
       this.walkingControllerParameters = walkingControllerParameters;
 
@@ -350,8 +350,9 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
          }
 
          manipulationStateMachines.put(robotSide,
-                                       new ManipulationStateMachine(yoTime, robotSide, fullRobotModel, twistCalculator, inverseDynamicsCalculator, walkingControllerParameters,
-                                          handPoseProvider, dynamicGraphicObjectsListRegistry, handControllerInterface, gravityZ, controlDT, registry));
+                                       new ManipulationStateMachine(yoTime, robotSide, fullRobotModel, twistCalculator, inverseDynamicsCalculator,
+                                          walkingControllerParameters, handPoseProvider, dynamicGraphicObjectsListRegistry, handControllerInterface, gravityZ,
+                                          controlDT, registry));
       }
 
       this.desiredHeadOrientationProvider = desiredHeadOrientationProvider;
@@ -566,7 +567,7 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
 
       stateMachine.setCurrentState(WalkingState.DOUBLE_SUPPORT);
    }
-   
+
    private class DoubleSupportState extends State<WalkingState>
    {
       private final RobotSide transferToSide;
@@ -580,6 +581,11 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       @Override
       public void doAction()
       {
+         if (endEffectorControlModules.get(transferToSide) != null && endEffectorControlModules.get(transferToSide).onHeel() && footSwitches.get(transferToSide).hasFootHitGround())
+         {
+            setFlatFootContactState(bipedFeet.get(transferToSide));
+         }
+         
          // note: this has to be done before the ICP trajectory generator is initialized, since it is using nextFootstep
          checkForFootsteps();
 
@@ -733,10 +739,13 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
                   setFlatFootContactState(bipedFeet.get(robotSide));
                }
             }
+            else if (landOnHeels.getBooleanValue())
+            {
+               setOnHeelContactState(bipedFeet.get(transferToSide));
+            }
             else
             {
-                  setOnHeelContactState(bipedFeet.get(transferToSide));
-//                  setFlatFootContactState(bipedFeet.get(transferToSide));
+               setFlatFootContactState(bipedFeet.get(transferToSide));
 
                // still need to determine contact state for trailing leg. This is done in doAction as soon as the previous ICP trajectory is done
             }
@@ -913,12 +922,12 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
          readyToGrabNextFootstep.set(true);
       }
 
-     private void switchTrajectoryParametersMapping(Footstep oldFootstep, Footstep newFootstep)
+      private void switchTrajectoryParametersMapping(Footstep oldFootstep, Footstep newFootstep)
       {
          mapFromFootstepsToTrajectoryParameters.put(newFootstep, mapFromFootstepsToTrajectoryParameters.get(oldFootstep));
          mapFromFootstepsToTrajectoryParameters.remove(oldFootstep);
       }
- 
+
       @Override
       public void doTransitionOutOfAction()
       {
@@ -979,16 +988,12 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
          }
       }
    }
-   
-   BooleanYoVariable debugSwitch = new BooleanYoVariable("debugSwitch", registry);
+
 
    private class DoneWithSingleSupportCondition implements StateTransitionCondition
    {
-      private final EndEffectorControlModule endEffectorControlModule;
-      
       public DoneWithSingleSupportCondition(EndEffectorControlModule endEffectorControlModule)
       {
-         this.endEffectorControlModule = endEffectorControlModule;
       }
 
       public boolean checkCondition()
@@ -996,14 +1001,35 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
          RobotSide swingSide = getSupportLeg().getOppositeSide();
          double minimumSwingFraction = 0.5;
          double minimumSwingTime = swingTimeCalculationProvider.getValue() * minimumSwingFraction;
-         boolean footHitGround = (stateMachine.timeInCurrentState() > minimumSwingTime) && footSwitches.get(swingSide).hasFootHitGround();
+         
+         FootSwitchInterface footSwitch = footSwitches.get(swingSide);
+         boolean footSwitchActivated;
+         
+         //TODO probably make all FootSwitches in this class be HeelSwitches and get rid of instanceof
+         if (landOnHeels.getBooleanValue())
+         {
+            if (!(footSwitch instanceof HeelSwitch))
+            {
+               throw new RuntimeException("landOnHeels should not be set to true if Robot is not using a HeelSwitch.");
+            }
+            
+            HeelSwitch heelSwitch = (HeelSwitch)footSwitch;
+            footSwitchActivated = heelSwitch.hasHeelHitGround();
+         }
+         
+         else
+         {
+            footSwitchActivated = footSwitch.hasFootHitGround();
+         }
+         
+         boolean footHitGround = (stateMachine.timeInCurrentState() > minimumSwingTime) && footSwitchActivated;
 
 
          if (walkingControllerParameters.finishSwingWhenTrajectoryDone())
          {
-//            boolean trajectoryDone = icpTrajectoryGenerator.isDone();    // endEffectorControlModule.isTrajectoryDone();
-            
-            return footHitGround;
+            boolean trajectoryDone = icpTrajectoryGenerator.isDone();    // endEffectorControlModule.isTrajectoryDone();
+
+            return trajectoryDone || footHitGround;
          }
          else
          {
@@ -1158,7 +1184,8 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
    public void initializeTrajectory(Footstep nextFootstep, RobotSide swingSide, SpatialAccelerationVector taskSpaceAcceleration)
    {
       RobotSide supportSide = swingSide.getOppositeSide();
-//      ReferenceFrame trajectoryGeneratorFrame = ReferenceFrame.getWorldFrame();
+
+//    ReferenceFrame trajectoryGeneratorFrame = ReferenceFrame.getWorldFrame();
 
       // ReferenceFrame swingAnkleZUpFrame = referenceFrames.getAnkleZUpFrame(swingSide);
       // ReferenceFrame swingFootFrame = referenceFrames.getFootFrame(swingSide);
@@ -1298,8 +1325,8 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       setICPBasedMomentumRateOfChangeControlModuleInputs();
 
       setTorqueControlJointsToZeroDersiredAcceleration();
-      
-      if(lidarControllerInterface != null)
+
+      if (lidarControllerInterface != null)
       {
          setOneDoFJointAcceleration(lidarControllerInterface.getLidarJoint(), lidarControllerInterface.getDesiredAcceleration());
       }
@@ -1475,12 +1502,12 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
       List<FramePoint2d> contactPoints2d = getContactPoints2d(contactableBody, contactPoints);
       setContactState(contactableBody, contactPoints2d, ConstraintType.TOES);
    }
-   
+
    private void setOnHeelContactState(ContactablePlaneBody contactableBody)
    {
       List<FramePoint> contactPoints = getContactPointsForWalkingOnEdge(contactableBody, ConstraintType.HEEL);
       List<FramePoint2d> contactPoints2d = getContactPoints2d(contactableBody, contactPoints);
-      setContactState(contactableBody, contactPoints2d, ConstraintType.HEEL); 
+      setContactState(contactableBody, contactPoints2d, ConstraintType.HEEL);
    }
 
    private void setFlatFootContactState(ContactablePlaneBody contactableBody)
@@ -1527,9 +1554,9 @@ public class WalkingHighLevelHumanoidController extends ICPAndMomentumBasedContr
    private List<FramePoint> getContactPointsForWalkingOnEdge(ContactablePlaneBody contactableBody, ConstraintType constraintType)
    {
       FrameVector direction = new FrameVector(contactableBody.getBodyFrame(), 1.0, 0.0, 0.0);
-      if(constraintType == ConstraintType.HEEL)
+      if (constraintType == ConstraintType.HEEL)
          direction.scale(-1.0);
-         
+
       return DesiredFootstepCalculatorTools.computeMaximumPointsInDirection(contactableBody.getContactPoints(), direction, 2);
    }
 
