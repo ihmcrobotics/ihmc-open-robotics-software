@@ -92,6 +92,7 @@ public class DRCConfigParameters
                   + 0.25 * DRCRobotParameters.DRC_ROBOT_FOOT_WIDTH * DRCRobotParameters.DRC_ROBOT_FOOT_WIDTH);
    public static final boolean POPULATE_OCTREE_FROM_REJECTS = false;
    public static final boolean USE_UPREZZING_IN_LIDAR_UPDATE_TO_OCTREE = false;
+   public static final boolean HIDE_THINGS_ABOVE_HEAD_FROM_LIDAR = false;
 
 
 
