@@ -106,9 +106,10 @@ public class DRCSimulationFactory
 
       SDFFullRobotModel fullRobotModelForSimulation = robotInterface.getFullRobotModel();
       SDFFullRobotModel fullRobotModelForController = fullRobotModelForSimulation;
-
-      ArrayList<RobotControllerAndParameters> robotControllersAndParameters = new ArrayList<RobotControllerAndParameters>();
       FullInverseDynamicsStructure inverseDynamicsStructure = createInverseDynamicsStructure(fullRobotModelForController);
+
+      
+      ArrayList<RobotControllerAndParameters> robotControllersAndParameters = new ArrayList<RobotControllerAndParameters>();
 
       DesiredCoMAccelerationsFromRobotStealerController desiredCoMAccelerationsFromRobotStealerController = null;
       if (STEAL_DESIRED_COM_ACCELERATIONS_FROM_ROBOT)
@@ -301,14 +302,6 @@ public class DRCSimulationFactory
          else
          {
             robotController.attachDesiredCoMAndAngularAccelerationDataSource(desiredCoMAndAngularAccelerationDataSource);
-         }
-         
-         ControlFlowGraph controlFlowGraph = stateEstimatorWithPorts.getControlFlowGraph();
-         controlFlowGraph.initializeAfterConnections();
-
-         if (VISUALIZE_CONTROL_FLOW_GRAPH)
-         {
-            controlFlowGraph.visualize();
          }
       }
  

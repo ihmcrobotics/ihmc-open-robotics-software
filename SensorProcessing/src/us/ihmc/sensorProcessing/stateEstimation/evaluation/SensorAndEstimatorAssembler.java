@@ -32,6 +32,7 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 public class SensorAndEstimatorAssembler
 {
    private static final boolean ESTIMATE_COM = true;
+   private static final boolean VISUALIZE_CONTROL_FLOW_GRAPH = false;
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final ControlFlowGraph controlFlowGraph;
@@ -110,6 +111,13 @@ public class SensorAndEstimatorAssembler
       desiredCoMAndAngularAccelerationDataSource.connectDesiredAccelerationPorts(controlFlowGraph, orientationEstimator);
 
       parentRegistry.addChild(registry);
+      
+      controlFlowGraph.initializeAfterConnections();
+
+      if (VISUALIZE_CONTROL_FLOW_GRAPH)
+      {
+         controlFlowGraph.visualize();
+      }
    }
 
    private static DenseMatrix64F createDiagonalCovarianceMatrix(double standardDeviation, int size)
