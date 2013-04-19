@@ -2,8 +2,6 @@ package us.ihmc.darpaRoboticsChallenge;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Vector3d;
-
 import us.ihmc.GazeboStateCommunicator.GazeboRobot;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFNoisySimulatedSensorReader;
@@ -25,7 +23,6 @@ import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.sensors.ForceSensorInterface;
 import us.ihmc.commonWalkingControlModules.sensors.TwistUpdater;
 import us.ihmc.commonWalkingControlModules.visualizer.CommonInertiaElipsoidsVisualizer;
-import us.ihmc.controlFlow.ControlFlowGraph;
 import us.ihmc.darpaRoboticsChallenge.controllers.ConstrainedCenterOfMassJacobianEvaluator;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.handControl.SandiaHandModel;
@@ -37,22 +34,9 @@ import us.ihmc.projectM.R2Sim02.initialSetup.ScsInitialSetup;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.simulatedSensors.InverseDynamicsJointsFromSCSRobotGenerator;
-import us.ihmc.sensorProcessing.simulatedSensors.SCSToInverseDynamicsJointMap;
-import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
-import us.ihmc.sensorProcessing.simulatedSensors.SimulatedSensorHolderAndReader;
-import us.ihmc.sensorProcessing.simulatedSensors.SimulatedSensorHolderAndReaderFromRobotFactory;
-import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions;
-import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitionsFromRobotFactory;
 import us.ihmc.sensorProcessing.stateEstimation.DesiredCoMAccelerationsFromRobotStealerController;
 import us.ihmc.sensorProcessing.stateEstimation.DesiredCoMAndAngularAccelerationDataSource;
-import us.ihmc.sensorProcessing.stateEstimation.JointSensorDataSource;
-import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorWithPorts;
-import us.ihmc.sensorProcessing.stateEstimation.evaluation.StateEstimatorErrorCalculatorController;
-import us.ihmc.sensorProcessing.stateEstimation.evaluation.ControlFlowGraphExecutorController;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
-import us.ihmc.sensorProcessing.stateEstimation.evaluation.RunnableRunnerController;
-import us.ihmc.sensorProcessing.stateEstimation.evaluation.SensorAndEstimatorAssembler;
-import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.net.KryoObjectServer;
 import us.ihmc.utilities.net.ObjectCommunicator;
@@ -62,11 +46,8 @@ import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 
-import com.yobotics.simulationconstructionset.GroundContactPoint;
-import com.yobotics.simulationconstructionset.IMUMount;
 import com.yobotics.simulationconstructionset.InverseDynamicsMechanismReferenceFrameVisualizer;
 import com.yobotics.simulationconstructionset.Joint;
-import com.yobotics.simulationconstructionset.KinematicPoint;
 import com.yobotics.simulationconstructionset.RobotControllerAndParameters;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.gui.GUISetterUpperRegistry;
@@ -82,8 +63,7 @@ public class DRCSimulationFactory
    public static boolean SHOW_INERTIA_ELLIPSOIDS = false;
    private static final boolean SHOW_REFERENCE_FRAMES = false;
    private static final boolean CREATE_DYNAMICALLY_CONSISTENT_NULLSPACE_EVALUATOR = false;
-   private static final boolean CREATE_STATE_ESTIMATOR = true;
-   private static final boolean USE_STATE_ESTIMATOR = true;
+   private static final boolean USE_STATE_ESTIMATOR = false;
 
    public static HumanoidRobotSimulation<SDFRobot> createSimulation(ControllerFactory controllerFactory,
            CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, DRCRobotInterface robotInterface, RobotInitialSetup<SDFRobot> robotInitialSetup,
@@ -107,110 +87,17 @@ public class DRCSimulationFactory
       FullInverseDynamicsStructure inverseDynamicsStructure = createInverseDynamicsStructure(fullRobotModelForController);
 
       
+
+      // Create the sensor readers and state estimator here:
+      DRCSensorReaderAndStateEstimatorFromRobot drcStateEstimatorFromRobot = new DRCSensorReaderAndStateEstimatorFromRobot(robotInterface, inverseDynamicsStructure, 
+            controlDT, simulationTicksPerControlTick, USE_STATE_ESTIMATOR, registry);
+      DesiredCoMAndAngularAccelerationDataSource desiredCoMAndAngularAccelerationDataSource = drcStateEstimatorFromRobot.getDesiredCoMAndAngularAccelerationDataSource();
       ArrayList<RobotControllerAndParameters> robotControllersAndParameters = new ArrayList<RobotControllerAndParameters>();
+      drcStateEstimatorFromRobot.getRobotControllersAndParameters(robotControllersAndParameters);
 
-      StateEstimatorWithPorts stateEstimatorWithPorts = null;
-      DesiredCoMAndAngularAccelerationDataSource desiredCoMAndAngularAccelerationDataSource = null;
-      if (CREATE_STATE_ESTIMATOR)
-      {
-//         SensorNoiseParameters sensorNoiseParamters = DRCSimulatedSensorNoiseParameters.createSensorNoiseParametersGazeboSDF();
-       SensorNoiseParameters sensorNoiseParamters = DRCSimulatedSensorNoiseParameters.createSensorNoiseParametersALittleNoise();
-//       SensorNoiseParameters sensorNoiseParamters = DRCSimulatedSensorNoiseParameters.createSensorNoiseParametersZeroNoise();
-         
-         SCSToInverseDynamicsJointMap scsToInverseDynamicsJointMapForEstimator;
-         FullInverseDynamicsStructure inverseDynamicsStructureForEstimator;
-
-         if (USE_STATE_ESTIMATOR)
-         {
-            scsToInverseDynamicsJointMapForEstimator = robotInterface.getSCSToInverseDynamicsJointMap();
-            inverseDynamicsStructureForEstimator = inverseDynamicsStructure;   
-         }
-         else
-         {
-            InverseDynamicsJointsFromSCSRobotGenerator generator = new InverseDynamicsJointsFromSCSRobotGenerator(simulatedRobot);
-            scsToInverseDynamicsJointMapForEstimator = generator.getSCSToInverseDynamicsJointMap();
-            inverseDynamicsStructureForEstimator = generator.getInverseDynamicsStructure();
-         }
-
-         ArrayList<IMUMount> imuMounts = new ArrayList<IMUMount>();
-         ArrayList<IMUMount> allIMUMounts = new ArrayList<IMUMount>();
-         simulatedRobot.getIMUMounts(allIMUMounts);
-         
-         for (IMUMount imuMount : allIMUMounts)
-         {
-//            System.out.println("IMUMount: " + imuMount.getName());
-            // Only add the main one now. Not the head one.
-//            if (imuMount.getName().equals("head_imu_sensor")) imuMounts.add(imuMount);
-            if (imuMount.getName().equals("imu_sensor")) imuMounts.add(imuMount);
-         }
-         
-         
-         ArrayList<KinematicPoint> velocityPoints = new ArrayList<KinematicPoint>();    
-         //TODO: Get the velocity points
-         ArrayList<GroundContactPoint> allKinematicPoints = simulatedRobot.getAllGroundContactPoints();
-         
-         for (KinematicPoint kinematicPoint : allKinematicPoints)
-         {
-//            System.out.println("kinematicPoint.getName() = " + kinematicPoint.getName());
-            if (kinematicPoint.getName().equals("gc_l_leg_lax_0") || (kinematicPoint.getName().equals("gc_r_leg_lax_0")))
-            {
-               System.out.println("Adding VelocityPoint " + kinematicPoint.getName());
-
-               velocityPoints.add(kinematicPoint);
-            }
-         }
-
-         StateEstimatorSensorDefinitionsFromRobotFactory stateEstimatorSensorDefinitionsFromRobotFactory = new StateEstimatorSensorDefinitionsFromRobotFactory(scsToInverseDynamicsJointMapForEstimator, 
-               simulatedRobot, controlDT, imuMounts, velocityPoints);
-         
-         SimulatedSensorHolderAndReaderFromRobotFactory sensorReaderFactory = new SimulatedSensorHolderAndReaderFromRobotFactory(stateEstimatorSensorDefinitionsFromRobotFactory,
-               scsToInverseDynamicsJointMapForEstimator, simulatedRobot, sensorNoiseParamters, controlDT, allIMUMounts, velocityPoints, registry);
-         SimulatedSensorHolderAndReader simulatedSensorHolderAndReader = sensorReaderFactory.getSimulatedSensorHolderAndReader();
-         RunnableRunnerController runnableRunnerController = new RunnableRunnerController();
-         runnableRunnerController.addRunnable(simulatedSensorHolderAndReader);
-         RobotControllerAndParameters simulatedSensorHolderAndReaderControllerAndParameters =
-               new RobotControllerAndParameters(runnableRunnerController, simulationTicksPerControlTick);
-         robotControllersAndParameters.add(simulatedSensorHolderAndReaderControllerAndParameters);
-         
-         
-         Vector3d gravitationalAcceleration = new Vector3d();
-         simulatedRobot.getGravity(gravitationalAcceleration);
-
- 
-         // Make the estimator here.
-         SensorNoiseParameters sensorNoiseParametersForEstimator = DRCSimulatedSensorNoiseParameters.createNoiseParametersForEstimatorJerryTuning();
-         StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions = stateEstimatorSensorDefinitionsFromRobotFactory.getStateEstimatorSensorDefinitions();
-         
-         SensorAndEstimatorAssembler sensorAndEstimatorAssembler = new SensorAndEstimatorAssembler(stateEstimatorSensorDefinitions,
-               sensorNoiseParametersForEstimator, gravitationalAcceleration, inverseDynamicsStructureForEstimator, controlDT,
-               registry);
-
-         stateEstimatorWithPorts = sensorAndEstimatorAssembler.getOrientationEstimator();
-         FramePoint estimatedCoMPosition = new FramePoint(stateEstimatorWithPorts.getEstimatedCoMPosition());
-         estimatedCoMPosition.setZ(estimatedCoMPosition.getZ() + 1.2);
-         stateEstimatorWithPorts.setEstimatedCoMPosition(estimatedCoMPosition);
-         
-         JointSensorDataSource jointSensorDataSource = sensorAndEstimatorAssembler.getJointSensorDataSource();
-         simulatedSensorHolderAndReader.setJointSensorDataSource(jointSensorDataSource);
-  
-         desiredCoMAndAngularAccelerationDataSource = sensorAndEstimatorAssembler.getDesiredCoMAndAngularAccelerationDataSource();
-         
-         Joint estimationJoint = simulatedRobot.getRootJoints().get(0);
-         ControlFlowGraph controlFlowGraph = sensorAndEstimatorAssembler.getControlFlowGraph();
-
-         ControlFlowGraphExecutorController controlFlowGraphExecutorController = new ControlFlowGraphExecutorController(controlFlowGraph);
-         RobotControllerAndParameters controlFlowGraphExecutorControllerAndParameters =
-               new RobotControllerAndParameters(controlFlowGraphExecutorController, simulationTicksPerControlTick);
-            robotControllersAndParameters.add(controlFlowGraphExecutorControllerAndParameters);
-         
-         StateEstimatorErrorCalculatorController stateEstimatorErrorCalculatorController =
-            new StateEstimatorErrorCalculatorController(stateEstimatorWithPorts, simulatedRobot, estimationJoint, controlDT);
-
-         RobotControllerAndParameters stateEstimatorErrorCalculatorControllerAndParameters =
-            new RobotControllerAndParameters(stateEstimatorErrorCalculatorController, simulationTicksPerControlTick);
-         robotControllersAndParameters.add(stateEstimatorErrorCalculatorControllerAndParameters);
-      }
-
+      
+      
+      
       SideDependentList<FootSwitchInterface> footSwitches = robotInterface.getFootSwitches();
 
       SideDependentList<HandControllerInterface> handControllers = null;
