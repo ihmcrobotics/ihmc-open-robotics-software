@@ -13,6 +13,7 @@
   <author>Nate Koenig, Andrew Howard, with contributions from many others. See web page for a full credits llist.</author>
   <license>Apache 2.0</license>
   <review status="simulator_gazebo" notes=""/>
+  <depend package="ogre" />
   <depend package="gazebo_msgs" />
 
   <!-- uncomment for cuda for parallel_quickstep
@@ -21,22 +22,24 @@
 
   <url>http://playerstage.sf.net</url>
   <export>
-    <cpp lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib `xml2-config --libs` `rosboost-cfg --lflags thread,signals` `fltk-config --use-gl --ldflags` -lfreeimage `PKG_CONFIG_PATH=${prefix}/gazebo/lib/pkgconfig pkg-config --libs gazebo` `PKG_CONFIG_PATH=${prefix}/gazebo/lib/pkgconfig pkg-config --libs gazebo_transport` `PKG_CONFIG_PATH=${prefix}/gazebo/lib/pkgconfig pkg-config --libs gazebo_ode` `pkg-config --libs OGRE`" cflags="-I${prefix}/include `PKG_CONFIG_PATH=${prefix}/gazebo/lib/pkgconfig pkg-config --cflags gazebo` `PKG_CONFIG_PATH=${prefix}/gazebo/lib/pkgconfig pkg-config --cflags gazebo_ode` `PKG_CONFIG_PATH=${prefix}/gazebo/lib/pkgconfig pkg-config --cflags gazebo_transport` `pkg-config --cflags OGRE`"/>
+    <cpp lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -lurdf2gazebo `xml2-config --libs` `rosboost-cfg --lflags thread,signals` `fltk-config --use-gl --ldflags` -lfreeimage `PKG_CONFIG_PATH=${prefix}/gazebo/lib/pkgconfig pkg-config --libs gazebo` `PKG_CONFIG_PATH=${prefix}/gazebo/lib/pkgconfig pkg-config --libs gazebo_transport` `PKG_CONFIG_PATH=${prefix}/gazebo/lib/pkgconfig pkg-config --libs gazebo_ode`" cflags="-I${prefix}/include `PKG_CONFIG_PATH=${prefix}/gazebo/lib/pkgconfig pkg-config --cflags gazebo` `PKG_CONFIG_PATH=${prefix}/gazebo/lib/pkgconfig pkg-config --cflags gazebo_ode` `PKG_CONFIG_PATH=${prefix}/gazebo/lib/pkgconfig pkg-config --cflags gazebo_transport`"/>
     <doxymaker external="http://playerstage.sourceforge.net/doc/Gazebo-manual-svn-html/"/>
-    <gazebo gazebo_media_path="${prefix}/gazebo/share/gazebo-1.3" />
-    <gazebo plugin_path="${prefix}/gazebo/lib/gazebo-1.3/plugins" />
+    <gazebo gazebo_media_path="${prefix}/gazebo/share/gazebo-1.0.2" />
+    <gazebo plugin_path="${prefix}/gazebo/lib/gazebo-1.0.2/plugins" />
   </export>
   <versioncontrol type="svn" url="https://playerstage.svn.sourceforge.net/svnroot/playerstage/code/gazebo/trunk"/>
   <depend package="roslib" />
   <depend package="bullet" />
+  <depend package="common_rosdeps" />
   <depend package="roscpp"/>
   <depend package="geometry_msgs"/>
+  <depend package="urdf"/>
+  <depend package="urdf_interface"/>
   <depend package="std_srvs"/>
   <depend package="tf"/> <!-- use tf python transforms -->
   <depend package="rosgraph_msgs"/>
   <depend package="dynamic_reconfigure" />
-  <rosdep name="libogre-dev" />
-  <rosdep name="protobuf-dev" />
+  <depend package="protobuf" />
   <rosdep name="libtool"/>
   <rosdep name="fltk"/>
   <rosdep name="libxml2"/>
@@ -46,12 +49,6 @@
   <rosdep name="libqt4-dev"/>
   <rosdep name="libqt4-opengl-dev"/>
   <rosdep name="tbb"/>
-  <rosdep name="urdfdom"/>
-  <rosdep name="urdfdom_headers"/>
-  <rosdep name="console_bridge"/>
-  <rosdep name="curl"/>
-  <rosdep name="tar"/>
-  <rosdep name="freeimage"/>
 
   <platform os="ubuntu" version="9.04"/>
   <platform os="ubuntu" version="9.10"/>

@@ -1,6 +1,7 @@
 <package>
   <description brief="Gazebo Tools for Personal Robots">
-    DEPRECATED package, utilities have been mvoed to gazebo package itself.
+    Gazebo tools for working with 3D simulator in the ROS environment:
+    urdf2gazebo parser, spawn/remove robots in simulation, 
   </description>
   <author>John Hsu</author>
   <license>BSD</license>
@@ -12,8 +13,9 @@
   <depend package="std_msgs" />
   <depend package="angles" />
   <depend package="bullet" />
+  <depend package="urdf" />
   <export>
-    <cpp cflags="-I${prefix}/include" lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib" />
+    <cpp cflags="-I${prefix}/include" lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -lurdf2gazebo" />
   </export>
   <rosdep name="python-numpy"/>
   <rosdep name="tinyxml" />
