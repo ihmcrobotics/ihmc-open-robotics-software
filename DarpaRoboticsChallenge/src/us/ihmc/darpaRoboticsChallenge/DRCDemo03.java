@@ -46,7 +46,7 @@ public class DRCDemo03
          recordFrequency = 1;
       scsInitialSetup.setRecordFrequency(recordFrequency);
 
-      DRCRobotJointMap jointMap = new DRCRobotJointMap(robotModel);
+      DRCRobotJointMap jointMap = new DRCRobotJointMap(robotModel, true);
 
       //      SideDependentList<ContactablePlaneBody> thighs = new SideDependentList<ContactablePlaneBody>();
       //      InverseDynamicsJoint[] allJoints = ScrewTools.computeJointsInOrder(fullRobotModel.getElevator());
