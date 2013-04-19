@@ -158,7 +158,7 @@ public class StateEstimatorEvaluatorRobot extends Robot
          imuMounts.add(imuMount1);
          imuMounts.add(imuMount2);
 
-//         velocityPoints.add(velocityPoint0);
+         velocityPoints.add(velocityPoint0);
          velocityPoints.add(velocityPoint2);
       }
 
