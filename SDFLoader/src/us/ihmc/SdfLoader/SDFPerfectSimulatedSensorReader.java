@@ -3,14 +3,13 @@ package us.ihmc.SdfLoader;
 import java.util.ArrayList;
 
 import javax.media.j3d.Transform3D;
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.math.geometry.RotationFunctions;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
 import us.ihmc.utilities.screwTheory.Twist;
@@ -70,8 +69,6 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader
    }
 
    private Transform3D temporaryRootToWorldTransform = new Transform3D();
-   private Vector3d temporaryRootToWorldTranslation = new Vector3d();
-   private Matrix3d temporaryRootToWorldRotation = new Matrix3d();
 
    public void read()
    {
@@ -107,22 +104,9 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader
 
    private void readAndUpdateRootJointPositionAndOrientation()
    {
-      readAndUpdateRootJointPosition();
-      readAndUpdateRootJointOrientation();
-   }
-
-   private void readAndUpdateRootJointPosition()
-   {
       packRootTransform(robot, temporaryRootToWorldTransform);
-      temporaryRootToWorldTransform.get(temporaryRootToWorldTranslation);
-      rootJoint.setPosition(temporaryRootToWorldTranslation);
-   }
-
-   private void readAndUpdateRootJointOrientation()
-   {
-      packRootTransform(robot, temporaryRootToWorldTransform);
-      temporaryRootToWorldTransform.get(temporaryRootToWorldRotation);
-      rootJoint.setRotation(temporaryRootToWorldRotation);
+      assert (RotationFunctions.isRotationProper(temporaryRootToWorldTransform));
+      rootJoint.setPositionAndRotation(temporaryRootToWorldTransform);
    }
 
    private void readAndUpdateOneDoFJointPositionsVelocitiesAndAccelerations()

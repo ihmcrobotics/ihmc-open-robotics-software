@@ -1196,7 +1196,8 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
       rotationMatrix.setColumn(2, zAxis);
       
       
-      currXform.set(rotationMatrix, positionOffset, 1.0);
+      currXform.set(rotationMatrix);
+      currXform.setTranslation(positionOffset);
 
    }
 
