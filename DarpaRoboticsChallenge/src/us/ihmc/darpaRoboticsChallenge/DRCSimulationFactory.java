@@ -84,8 +84,6 @@ public class DRCSimulationFactory
    private static final boolean CREATE_DYNAMICALLY_CONSISTENT_NULLSPACE_EVALUATOR = false;
    private static final boolean CREATE_STATE_ESTIMATOR = true;
    private static final boolean USE_STATE_ESTIMATOR = true;
-   private static final boolean STEAL_DESIRED_COM_ACCELERATIONS_FROM_ROBOT = false;
-   private static final boolean VISUALIZE_CONTROL_FLOW_GRAPH = false;
 
    public static HumanoidRobotSimulation<SDFRobot> createSimulation(ControllerFactory controllerFactory,
            CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, DRCRobotInterface robotInterface, RobotInitialSetup<SDFRobot> robotInitialSetup,
@@ -110,17 +108,6 @@ public class DRCSimulationFactory
 
       
       ArrayList<RobotControllerAndParameters> robotControllersAndParameters = new ArrayList<RobotControllerAndParameters>();
-
-      DesiredCoMAccelerationsFromRobotStealerController desiredCoMAccelerationsFromRobotStealerController = null;
-      if (STEAL_DESIRED_COM_ACCELERATIONS_FROM_ROBOT)
-      {
-         desiredCoMAccelerationsFromRobotStealerController = createAndAddDesiredCoMAccelerationFromRobotStealerController(
-               inverseDynamicsStructure.getEstimationFrame(),
-               controlDT, 
-               simulationTicksPerControlTick, simulatedRobot,
-               robotControllersAndParameters);
-      }
-
 
       StateEstimatorWithPorts stateEstimatorWithPorts = null;
       DesiredCoMAndAngularAccelerationDataSource desiredCoMAndAngularAccelerationDataSource = null;
@@ -293,18 +280,10 @@ public class DRCSimulationFactory
             centerOfMassJacobian, footSwitches, handControllers, lidarControllerInterface);
 
       
-      if (CREATE_STATE_ESTIMATOR)
-      {
-         if (STEAL_DESIRED_COM_ACCELERATIONS_FROM_ROBOT)
-         {
-            desiredCoMAccelerationsFromRobotStealerController.attachDesiredCoMAndAngularAccelerationDataSource(desiredCoMAndAngularAccelerationDataSource);
-         }
-         else
-         {
-            robotController.attachDesiredCoMAndAngularAccelerationDataSource(desiredCoMAndAngularAccelerationDataSource);
-         }
+      if (desiredCoMAndAngularAccelerationDataSource != null)
+      {   
+         robotController.attachDesiredCoMAndAngularAccelerationDataSource(desiredCoMAndAngularAccelerationDataSource);
       }
- 
       
       AbstractModularRobotController modularRobotController;
 
