@@ -121,7 +121,7 @@ public class DRCSimulationFactory
       }
 
 
-      StateEstimatorWithPorts orientationEstimator = null;
+      StateEstimatorWithPorts stateEstimatorWithPorts = null;
       DesiredCoMAndAngularAccelerationDataSource desiredCoMAndAngularAccelerationDataSource = null;
       if (CREATE_STATE_ESTIMATOR)
       {
@@ -197,7 +197,10 @@ public class DRCSimulationFactory
                sensorNoiseParametersForEstimator, gravitationalAcceleration, inverseDynamicsStructureForEstimator, controlDT,
                registry);
 
-         orientationEstimator = sensorAndEstimatorAssembler.getOrientationEstimator();
+         stateEstimatorWithPorts = sensorAndEstimatorAssembler.getOrientationEstimator();
+         FramePoint estimatedCoMPosition = new FramePoint(stateEstimatorWithPorts.getEstimatedCoMPosition());
+         estimatedCoMPosition.setZ(estimatedCoMPosition.getZ() + 1.2);
+         stateEstimatorWithPorts.setEstimatedCoMPosition(estimatedCoMPosition);
          
          JointSensorDataSource jointSensorDataSource = sensorAndEstimatorAssembler.getJointSensorDataSource();
          simulatedSensorHolderAndReader.setJointSensorDataSource(jointSensorDataSource);
@@ -212,16 +215,12 @@ public class DRCSimulationFactory
                new RobotControllerAndParameters(controlFlowGraphExecutorController, simulationTicksPerControlTick);
             robotControllersAndParameters.add(controlFlowGraphExecutorControllerAndParameters);
          
-         StateEstimatorErrorCalculatorController composableStateEstimatorEvaluatorController =
-            new StateEstimatorErrorCalculatorController(orientationEstimator, simulatedRobot, estimationJoint, controlDT);
+         StateEstimatorErrorCalculatorController stateEstimatorErrorCalculatorController =
+            new StateEstimatorErrorCalculatorController(stateEstimatorWithPorts, simulatedRobot, estimationJoint, controlDT);
 
-         RobotControllerAndParameters humanoidStateEstimatorControllerAndParameters =
-            new RobotControllerAndParameters(composableStateEstimatorEvaluatorController, simulationTicksPerControlTick);
-         robotControllersAndParameters.add(humanoidStateEstimatorControllerAndParameters);
-         
-         FramePoint estimatedCoMPosition = new FramePoint(orientationEstimator.getEstimatedCoMPosition());
-         estimatedCoMPosition.setZ(estimatedCoMPosition.getZ() + 1.2);
-         orientationEstimator.setEstimatedCoMPosition(estimatedCoMPosition);
+         RobotControllerAndParameters stateEstimatorErrorCalculatorControllerAndParameters =
+            new RobotControllerAndParameters(stateEstimatorErrorCalculatorController, simulationTicksPerControlTick);
+         robotControllersAndParameters.add(stateEstimatorErrorCalculatorControllerAndParameters);
       }
 
       SideDependentList<FootSwitchInterface> footSwitches = robotInterface.getFootSwitches();
@@ -304,7 +303,7 @@ public class DRCSimulationFactory
             robotController.attachDesiredCoMAndAngularAccelerationDataSource(desiredCoMAndAngularAccelerationDataSource);
          }
          
-         ControlFlowGraph controlFlowGraph = orientationEstimator.getControlFlowGraph();
+         ControlFlowGraph controlFlowGraph = stateEstimatorWithPorts.getControlFlowGraph();
          controlFlowGraph.initializeAfterConnections();
 
          if (VISUALIZE_CONTROL_FLOW_GRAPH)

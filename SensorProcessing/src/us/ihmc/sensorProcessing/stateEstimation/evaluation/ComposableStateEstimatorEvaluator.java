@@ -100,10 +100,8 @@ public class ComposableStateEstimatorEvaluator
 
       desiredCoMAccelerationsFromRobotStealerController.attachDesiredCoMAndAngularAccelerationDataSource(desiredCoMAndAngularAccelerationDataSource);
 
-      desiredCoMAndAngularAccelerationDataSource.connectDesiredAccelerationPorts(controlFlowGraph, orientationEstimator);
+//      desiredCoMAndAngularAccelerationDataSource.connectDesiredAccelerationPorts(controlFlowGraph, orientationEstimator);
 
-//      SensorAndEstimatorAssembler.connectDesiredAccelerationPorts(controlFlowGraph, orientationEstimator,
-//            desiredCoMAndAngularAccelerationOutputPortsHolder);
 
       controlFlowGraph.initializeAfterConnections();
       

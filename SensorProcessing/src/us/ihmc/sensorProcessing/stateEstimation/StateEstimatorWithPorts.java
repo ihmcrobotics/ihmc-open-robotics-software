@@ -9,4 +9,6 @@ public interface StateEstimatorWithPorts extends StateEstimator
    public abstract ControlFlowGraph getControlFlowGraph();
    public abstract ControlFlowInputPort<FrameVector> getDesiredAngularAccelerationInputPort();
    public abstract ControlFlowInputPort<FrameVector> getDesiredCenterOfMassAccelerationInputPort();   
+   
+   
 }

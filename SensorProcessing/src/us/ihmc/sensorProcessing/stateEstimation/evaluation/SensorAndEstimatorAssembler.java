@@ -95,6 +95,7 @@ public class SensorAndEstimatorAssembler
 
          orientationEstimator = orientationEstimatorCreator.createOrientationEstimator(controlFlowGraph, controlDT,
                  inverseDynamicsStructure.getRootJoint(), estimationLink, estimationFrame, registry);
+         
       }
       else
       {
