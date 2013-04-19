@@ -29,7 +29,9 @@ import us.ihmc.commonWalkingControlModules.outputs.ProcessedOutputsInterface;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotSide.RobotSide;
+import us.ihmc.sensorProcessing.simulatedSensors.PointVelocitySensorDefinition;
 import us.ihmc.sensorProcessing.stateEstimation.DesiredCoMAndAngularAccelerationDataSource;
+import us.ihmc.sensorProcessing.stateEstimation.PointVelocitySensorDataSource;
 import us.ihmc.utilities.math.DampedLeastSquaresSolver;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -118,8 +120,10 @@ public abstract class MomentumBasedController implements RobotController
    protected final GroundReactionWrenchDistributor groundReactionWrenchDistributor;
    protected final MomentumSolver solver;
    protected final InverseDynamicsCalculator inverseDynamicsCalculator;
-   private final DesiredCoMAndAngularAccelerationGrabber desiredCoMAndAngularAccelerationGrabber;
    
+   private final DesiredCoMAndAngularAccelerationGrabber desiredCoMAndAngularAccelerationGrabber;
+   private PointVelocitySensorGrabber pointVelocitySensorGrabber;
+
    protected final EnumYoVariable<RobotSide> upcomingSupportLeg; // FIXME: not general enough; this should not be here
 
 
@@ -154,7 +158,7 @@ public abstract class MomentumBasedController implements RobotController
       double totalMass = TotalMassCalculator.computeSubTreeMass(elevator);
 
       this.desiredCoMAndAngularAccelerationGrabber = new DesiredCoMAndAngularAccelerationGrabber(estimationLink, estimationFrame, totalMass);
-      
+
       this.groundReactionWrenchDistributor = groundReactionWrenchDistributor;
 
       ReferenceFrame pelvisFrame = referenceFrames.getPelvisFrame();
@@ -384,6 +388,11 @@ public abstract class MomentumBasedController implements RobotController
 
       this.desiredCoMAndAngularAccelerationGrabber.set(inverseDynamicsCalculator.getSpatialAccelerationCalculator(), desiredCentroidalMomentumRate);
       
+      if (pointVelocitySensorGrabber != null)
+      {
+         pointVelocitySensorGrabber.set();
+      }
+      
       inverseDynamicsCalculator.compute();
       
       doAdditionalTorqueControl();
@@ -498,6 +507,14 @@ public abstract class MomentumBasedController implements RobotController
    public void attachDesiredCoMAndAngularAccelerationDataSource(DesiredCoMAndAngularAccelerationDataSource desiredCoMAndAngularAccelerationDataSource)
    {
       desiredCoMAndAngularAccelerationGrabber.attachDesiredCoMAndAngularAccelerationDataSource(desiredCoMAndAngularAccelerationDataSource);
+   }
+   
+   public void attachPointVelocitySensorDataSource(Collection<PointVelocitySensorDefinition> pointVelocitySensorDefinitions, PointVelocitySensorDataSource pointVelocitySensorDataSource)
+   {
+      if (this.pointVelocitySensorGrabber != null) throw new RuntimeException("Already have set pointVelocitySensorDataSource");
+
+      this.pointVelocitySensorGrabber = new PointVelocitySensorGrabber(pointVelocitySensorDefinitions);
+      pointVelocitySensorGrabber.attachPointVelocitySensorDataSource(pointVelocitySensorDataSource);
    }
 
 }
