@@ -4,7 +4,6 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.sensorProcessing.signalCorruption.GaussianVectorCorruptor;
 import us.ihmc.sensorProcessing.simulatedSensors.InverseDynamicsJointsFromSCSRobotGenerator;
-import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -26,8 +25,8 @@ public class DesiredCoMAccelerationsFromRobotStealerController implements RobotC
 {
    private static final boolean CORRUPT_DESIRED_ACCELERATIONS = true;
 
-   private double comAccelerationProcessNoiseStandardDeviation = Math.sqrt(1e-1);
-   private double angularAccelerationProcessNoiseStandardDeviation = Math.sqrt(1e-1);
+   private double comAccelerationProcessNoiseStandardDeviation;
+   private double angularAccelerationProcessNoiseStandardDeviation;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -52,12 +51,13 @@ public class DesiredCoMAccelerationsFromRobotStealerController implements RobotC
    private final ReferenceFrame estimationFrame;
    
    public DesiredCoMAccelerationsFromRobotStealerController(ReferenceFrame estimationFrame,
-         SensorNoiseParameters sensorNoiseParameters, 
+         double comAccelerationProcessNoiseStandardDeviation,
+         double angularAccelerationProcessNoiseStandardDeviation, 
          InverseDynamicsJointsFromSCSRobotGenerator generator, Joint estimationJoint, double controlDT)
    {
       this.estimationFrame = estimationFrame;
-      this.comAccelerationProcessNoiseStandardDeviation = sensorNoiseParameters.getComAccelerationProcessNoiseStandardDeviation();
-      this.angularAccelerationProcessNoiseStandardDeviation = sensorNoiseParameters.getAngularAccelerationProcessNoiseStandardDeviation();
+      this.comAccelerationProcessNoiseStandardDeviation = comAccelerationProcessNoiseStandardDeviation;
+      this.angularAccelerationProcessNoiseStandardDeviation = angularAccelerationProcessNoiseStandardDeviation;
       
       this.controlDT = controlDT;
 

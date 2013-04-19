@@ -14,6 +14,7 @@ import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions;
 import us.ihmc.sensorProcessing.stateEstimation.ComposableOrientationAndCoMEstimatorCreator;
 import us.ihmc.sensorProcessing.stateEstimation.ComposableOrientationEstimatorCreator;
+import us.ihmc.sensorProcessing.stateEstimation.DesiredCoMAndAngularAccelerationDataSource;
 import us.ihmc.sensorProcessing.stateEstimation.JointSensorDataSource;
 import us.ihmc.sensorProcessing.stateEstimation.JointStateFullRobotModelUpdater;
 import us.ihmc.sensorProcessing.stateEstimation.OrientationEstimatorWithPorts;
@@ -36,6 +37,7 @@ public class SensorAndEstimatorAssembler
    private final ControlFlowGraph controlFlowGraph;
    private final OrientationEstimatorWithPorts orientationEstimator;
    private final JointSensorDataSource jointSensorDataSource;
+   private final DesiredCoMAndAngularAccelerationDataSource desiredCoMAndAngularAccelerationDataSource;
    
    public SensorAndEstimatorAssembler(StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions,
          SensorNoiseParameters sensorNoiseParametersForEstimator, Vector3d gravitationalAcceleration, 
@@ -45,9 +47,11 @@ public class SensorAndEstimatorAssembler
       SensorConfigurationFactory SensorConfigurationFactory = new SensorConfigurationFactory(sensorNoiseParametersForEstimator, gravitationalAcceleration);
 
       jointSensorDataSource = new JointSensorDataSource(stateEstimatorSensorDefinitions);
-      
       SensorMap sensorMap = jointSensorDataSource.getSensorMap();
       
+      ReferenceFrame estimationFrame = inverseDynamicsStructure.getEstimationFrame();
+      desiredCoMAndAngularAccelerationDataSource = new DesiredCoMAndAngularAccelerationDataSource(estimationFrame);      
+
       // Sensor configurations for estimator
       Collection<OrientationSensorConfiguration> orientationSensorConfigurations =
          SensorConfigurationFactory.createOrientationSensorConfigurations(sensorMap.getOrientationSensors());
@@ -68,11 +72,10 @@ public class SensorAndEstimatorAssembler
       ControlFlowOutputPort<FullInverseDynamicsStructure> inverseDynamicsStructureOutputPort =
          jointStateFullRobotModelUpdater.getInverseDynamicsStructureOutputPort();
 
-      RigidBody estimationLink = inverseDynamicsStructure.getEstimationLink();
-      ReferenceFrame estimationFrame = estimationLink.getParentJoint().getFrameAfterJoint();
-
       double angularAccelerationProcessNoiseStandardDeviation = sensorNoiseParametersForEstimator.getAngularAccelerationProcessNoiseStandardDeviation();
       DenseMatrix64F angularAccelerationNoiseCovariance = createDiagonalCovarianceMatrix(angularAccelerationProcessNoiseStandardDeviation, 3);
+
+      RigidBody estimationLink = inverseDynamicsStructure.getEstimationLink();
 
       if (ESTIMATE_COM)
       {
@@ -102,6 +105,8 @@ public class SensorAndEstimatorAssembler
 
          orientationEstimator = orientationEstimatorCreator.createOrientationEstimator(controlFlowGraph, controlDT, estimationFrame, registry);
       }
+      
+      desiredCoMAndAngularAccelerationDataSource.connectDesiredAccelerationPorts(controlFlowGraph, orientationEstimator);
 
       parentRegistry.addChild(registry);
    }
@@ -128,6 +133,11 @@ public class SensorAndEstimatorAssembler
    public JointSensorDataSource getJointSensorDataSource()
    {
       return jointSensorDataSource;
+   }
+
+   public DesiredCoMAndAngularAccelerationDataSource getDesiredCoMAndAngularAccelerationDataSource()
+   {
+      return desiredCoMAndAngularAccelerationDataSource;
    }
   
 }
