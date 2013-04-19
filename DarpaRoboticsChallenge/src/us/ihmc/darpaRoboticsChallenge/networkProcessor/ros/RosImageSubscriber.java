@@ -11,7 +11,7 @@ import java.net.URISyntaxException;
 
 import us.ihmc.graphics3DAdapter.camera.JPanelCameraStreamer;
 
-public abstract class RosImageSubscriber extends RosTopicSubscriber<sensor_msgs.CompressedImage>
+public abstract class RosImageSubscriber extends AbstractRosTopicSubscriber<sensor_msgs.CompressedImage>
 {
    private final ColorModel colorModel;
    

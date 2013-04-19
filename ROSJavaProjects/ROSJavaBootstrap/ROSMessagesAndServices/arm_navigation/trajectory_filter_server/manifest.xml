@@ -1,0 +1,25 @@
+<package>
+  <description brief="trajectory_filter_server">
+  This package contains a server that advertises a ROS service over which joint trajectories can be filtered. Internally, it creates and uses a chain of filters that can filter joint trajectories. The filters are configured using a yaml configuration file. 
+  </description>
+  <author>Sachin Chitta</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/trajectory_filter</url>
+  <depend package="filters" />
+  <depend package="roscpp" />
+  <depend package="trajectory_msgs" />
+  <depend package="arm_navigation_msgs" />
+  <depend package="spline_smoother" />
+  <depend package="joint_normalization_filters" />
+  <depend package="urdf" />
+  <export>
+    <cpp cflags="-I${prefix}/include"/>
+  </export>
+
+  <platform os="ubuntu" version="9.04"/>
+  <platform os="ubuntu" version="9.10"/>
+  <platform os="ubuntu" version="10.04"/>
+</package>
+
+

@@ -1,0 +1,16 @@
+int32 request_id
+string result
+arm_navigation_msgs/ArmNavigationErrorCodes error_code
+
+float64 planning_time
+float64 smoothing_time
+float64 ik_time
+float64 time_to_execution
+float64 time_to_result
+
+bool preempted
+
+float64 num_replans
+float64 trajectory_duration
+
+string planner_service_name

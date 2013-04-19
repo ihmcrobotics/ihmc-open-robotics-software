@@ -1,0 +1,11 @@
+#Whether or not to include the points in the collision map
+#if set to false, collision map in feedback will contain
+#no points
+bool include_points
+---
+#points in the collision map if include_points is set to true
+arm_navigation_msgs/CollisionMap points
+#vector of collision objects in the collision map
+arm_navigation_msgs/CollisionObject[] collision_objects
+#vector of attached collision objects in the collision map
+arm_navigation_msgs/AttachedCollisionObject[] attached_collision_objects

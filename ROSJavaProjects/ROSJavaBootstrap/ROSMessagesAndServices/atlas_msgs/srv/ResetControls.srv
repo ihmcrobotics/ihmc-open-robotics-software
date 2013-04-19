@@ -1,4 +1,4 @@
-osrf_msgs/JointCommands joint_commands
+atlas_msgs/AtlasCommand atlas_command
 ---
 bool success
 string status_message
