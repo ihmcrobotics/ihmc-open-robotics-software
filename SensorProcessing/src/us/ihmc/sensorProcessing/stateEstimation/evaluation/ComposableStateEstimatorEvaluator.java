@@ -15,7 +15,8 @@ import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions
 import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitionsFromRobotFactory;
 import us.ihmc.sensorProcessing.stateEstimation.DesiredCoMAccelerationsFromRobotStealerController;
 import us.ihmc.sensorProcessing.stateEstimation.DesiredCoMAndAngularAccelerationDataSource;
-import us.ihmc.sensorProcessing.stateEstimation.JointSensorDataSource;
+import us.ihmc.sensorProcessing.stateEstimation.JointAndIMUSensorDataSource;
+import us.ihmc.sensorProcessing.stateEstimation.PointVelocitySensorDataSource;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorWithPorts;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -93,15 +94,15 @@ public class ComposableStateEstimatorEvaluator
 
       ControlFlowGraph controlFlowGraph = sensorAndEstimatorAssembler.getControlFlowGraph();
       StateEstimatorWithPorts orientationEstimator = sensorAndEstimatorAssembler.getOrientationEstimator();
-      JointSensorDataSource jointSensorDataSource = sensorAndEstimatorAssembler.getJointSensorDataSource();
+      JointAndIMUSensorDataSource jointSensorDataSource = sensorAndEstimatorAssembler.getJointAndIMUSensorDataSource();
       
-      simulatedSensorHolderAndReader.setJointSensorDataSource(jointSensorDataSource);
+      simulatedSensorHolderAndReader.setJointAndIMUSensorDataSource(jointSensorDataSource);
       DesiredCoMAndAngularAccelerationDataSource desiredCoMAndAngularAccelerationDataSource = new DesiredCoMAndAngularAccelerationDataSource(estimationFrame);
 
+      PointVelocitySensorDataSource pointVelocityDataSource = sensorAndEstimatorAssembler.getPointVelocitySensorDataSource();
+      simulatedSensorHolderAndReader.setPointVelocityDataSource(pointVelocityDataSource);
+
       desiredCoMAccelerationsFromRobotStealerController.attachDesiredCoMAndAngularAccelerationDataSource(desiredCoMAndAngularAccelerationDataSource);
-
-//      desiredCoMAndAngularAccelerationDataSource.connectDesiredAccelerationPorts(controlFlowGraph, orientationEstimator);
-
 
       controlFlowGraph.initializeAfterConnections();
       

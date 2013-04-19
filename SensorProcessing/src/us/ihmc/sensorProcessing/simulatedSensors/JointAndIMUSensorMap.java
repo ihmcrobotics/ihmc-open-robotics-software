@@ -10,7 +10,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
-public class SensorMap
+public class JointAndIMUSensorMap
 {
    private final LinkedHashMap<OneDoFJoint, ControlFlowOutputPort<Double>> jointPositionSensors = new LinkedHashMap<OneDoFJoint,
                                                                                                      ControlFlowOutputPort<Double>>();
@@ -24,10 +24,7 @@ public class SensorMap
    private final LinkedHashMap<IMUDefinition, ControlFlowOutputPort<Vector3d>> linearAccelerationSensors = new LinkedHashMap<IMUDefinition,
                                                                                                               ControlFlowOutputPort<Vector3d>>();
 
-   private final LinkedHashMap<PointVelocitySensorDefinition, ControlFlowOutputPort<Vector3d>> pointVelocitySensors =
-      new LinkedHashMap<PointVelocitySensorDefinition, ControlFlowOutputPort<Vector3d>>();
-   
-   public SensorMap()
+   public JointAndIMUSensorMap()
    {
    }
 
@@ -55,11 +52,6 @@ public class SensorMap
    {
       return linearAccelerationSensors;
    }
-   
-   public Map<PointVelocitySensorDefinition, ControlFlowOutputPort<Vector3d>> getPointVelocitySensors()
-   {
-      return pointVelocitySensors;
-   }
 
    public ControlFlowOutputPort<Double> getJointPositionSensorPort(OneDoFJoint oneDoFJoint)
    {
@@ -84,11 +76,6 @@ public class SensorMap
    public ControlFlowOutputPort<Vector3d> getLinearAccelerationSensorPort(IMUDefinition imuDefinition)
    {
       return linearAccelerationSensors.get(imuDefinition);
-   }
-
-   public ControlFlowOutputPort<Vector3d> getPointVelocitySensorPort(PointVelocitySensorDefinition pointVelocitySensorDefinition)
-   {
-      return pointVelocitySensors.get(pointVelocitySensorDefinition);
    }
 
    public void addJointPositionSensorPort(OneDoFJoint oneDoFJoint, ControlFlowOutputPort<Double> jointPositionSensorPort)
@@ -116,11 +103,6 @@ public class SensorMap
       linearAccelerationSensors.put(imuDefinition, linearAccelerationSensorPort);
    }
 
-   public void addPointVelocitySensorPort(PointVelocitySensorDefinition pointVelocitySensorDefinition, ControlFlowOutputPort<Vector3d> pointVelocitySensorPort)
-   {
-      pointVelocitySensors.put(pointVelocitySensorDefinition, pointVelocitySensorPort);
-   }
-
    public Collection<ControlFlowOutputPort<Matrix3d>> getOrientationOutputPorts()
    {
       return orientationSensors.values();
@@ -134,11 +116,6 @@ public class SensorMap
    public Collection<ControlFlowOutputPort<Vector3d>> getLinearAccelerationOutputPorts()
    {
       return linearAccelerationSensors.values();
-   }
-
-   public Collection<ControlFlowOutputPort<Vector3d>> getPointVelocitySensorOutputPorts()
-   {
-      return pointVelocitySensors.values();
    }
 
 }

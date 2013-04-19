@@ -9,14 +9,16 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.controlFlow.ControlFlowGraph;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
-import us.ihmc.sensorProcessing.simulatedSensors.SensorMap;
+import us.ihmc.sensorProcessing.simulatedSensors.JointAndIMUSensorMap;
+import us.ihmc.sensorProcessing.simulatedSensors.PointVelocitySensorMap;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions;
 import us.ihmc.sensorProcessing.stateEstimation.ComposableOrientationAndCoMEstimatorCreator;
 import us.ihmc.sensorProcessing.stateEstimation.ComposableOrientationEstimatorCreator;
 import us.ihmc.sensorProcessing.stateEstimation.DesiredCoMAndAngularAccelerationDataSource;
-import us.ihmc.sensorProcessing.stateEstimation.JointSensorDataSource;
+import us.ihmc.sensorProcessing.stateEstimation.JointAndIMUSensorDataSource;
 import us.ihmc.sensorProcessing.stateEstimation.JointStateFullRobotModelUpdater;
+import us.ihmc.sensorProcessing.stateEstimation.PointVelocitySensorDataSource;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorWithPorts;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.AngularVelocitySensorConfiguration;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.LinearAccelerationSensorConfiguration;
@@ -37,7 +39,9 @@ public class SensorAndEstimatorAssembler
 
    private final ControlFlowGraph controlFlowGraph;
    private final StateEstimatorWithPorts orientationEstimator;
-   private final JointSensorDataSource jointSensorDataSource;
+   private final JointAndIMUSensorDataSource jointSensorDataSource;
+   private final PointVelocitySensorDataSource pointVelocitySensorDataSource;
+   
    private final DesiredCoMAndAngularAccelerationDataSource desiredCoMAndAngularAccelerationDataSource;
    
    public SensorAndEstimatorAssembler(StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions,
@@ -47,27 +51,30 @@ public class SensorAndEstimatorAssembler
    {
       SensorConfigurationFactory SensorConfigurationFactory = new SensorConfigurationFactory(sensorNoiseParametersForEstimator, gravitationalAcceleration);
 
-      jointSensorDataSource = new JointSensorDataSource(stateEstimatorSensorDefinitions);
-      SensorMap sensorMap = jointSensorDataSource.getSensorMap();
+      jointSensorDataSource = new JointAndIMUSensorDataSource(stateEstimatorSensorDefinitions);
+      JointAndIMUSensorMap jointAndIMUSensorMap = jointSensorDataSource.getSensorMap();
+      
+      pointVelocitySensorDataSource = new PointVelocitySensorDataSource(stateEstimatorSensorDefinitions);
+      PointVelocitySensorMap pointVelocitySensorMap = pointVelocitySensorDataSource.getSensorMap();
       
       ReferenceFrame estimationFrame = inverseDynamicsStructure.getEstimationFrame();
       desiredCoMAndAngularAccelerationDataSource = new DesiredCoMAndAngularAccelerationDataSource(estimationFrame);      
 
       // Sensor configurations for estimator
       Collection<OrientationSensorConfiguration> orientationSensorConfigurations =
-         SensorConfigurationFactory.createOrientationSensorConfigurations(sensorMap.getOrientationSensors());
+         SensorConfigurationFactory.createOrientationSensorConfigurations(jointAndIMUSensorMap.getOrientationSensors());
 
       Collection<AngularVelocitySensorConfiguration> angularVelocitySensorConfigurations =
-         SensorConfigurationFactory.createAngularVelocitySensorConfigurations(sensorMap.getAngularVelocitySensors());
+         SensorConfigurationFactory.createAngularVelocitySensorConfigurations(jointAndIMUSensorMap.getAngularVelocitySensors());
 
       Collection<LinearAccelerationSensorConfiguration> linearAccelerationSensorConfigurations =
-         SensorConfigurationFactory.createLinearAccelerationSensorConfigurations(sensorMap.getLinearAccelerationSensors());
+         SensorConfigurationFactory.createLinearAccelerationSensorConfigurations(jointAndIMUSensorMap.getLinearAccelerationSensors());
 
       Collection<PointVelocitySensorConfiguration> pointVelocitySensorConfigurations =
-         SensorConfigurationFactory.createPointVelocitySensorConfigurations(sensorMap.getPointVelocitySensors());
+         SensorConfigurationFactory.createPointVelocitySensorConfigurations(pointVelocitySensorMap.getPointVelocitySensors());
 
       controlFlowGraph = new ControlFlowGraph();
-      JointStateFullRobotModelUpdater jointStateFullRobotModelUpdater = new JointStateFullRobotModelUpdater(controlFlowGraph, sensorMap,
+      JointStateFullRobotModelUpdater jointStateFullRobotModelUpdater = new JointStateFullRobotModelUpdater(controlFlowGraph, jointAndIMUSensorMap,
                                                                            inverseDynamicsStructure);
 
       ControlFlowOutputPort<FullInverseDynamicsStructure> inverseDynamicsStructureOutputPort =
@@ -139,9 +146,14 @@ public class SensorAndEstimatorAssembler
       return orientationEstimator;
    }
    
-   public JointSensorDataSource getJointSensorDataSource()
+   public JointAndIMUSensorDataSource getJointAndIMUSensorDataSource()
    {
       return jointSensorDataSource;
+   }
+   
+   public PointVelocitySensorDataSource getPointVelocitySensorDataSource()
+   {
+      return pointVelocitySensorDataSource;
    }
 
    public DesiredCoMAndAngularAccelerationDataSource getDesiredCoMAndAngularAccelerationDataSource()
