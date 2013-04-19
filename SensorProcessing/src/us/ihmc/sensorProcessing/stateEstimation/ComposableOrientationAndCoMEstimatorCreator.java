@@ -118,7 +118,7 @@ public class ComposableOrientationAndCoMEstimatorCreator
       this.pointVelocitySensorConfigurations.add(pointVelocitySensorConfiguration);      
    }
    
-   public OrientationEstimatorWithPorts createOrientationEstimator(ControlFlowGraph controlFlowGraph, double controlDT, SixDoFJoint rootJoint, RigidBody estimationLink,
+   public StateEstimatorWithPorts createOrientationEstimator(ControlFlowGraph controlFlowGraph, double controlDT, SixDoFJoint rootJoint, RigidBody estimationLink,
          ReferenceFrame estimationFrame, YoVariableRegistry registry)
    {
       return new ComposableOrientationAndCoMEstimator("orientationEstimator", controlDT, rootJoint, estimationLink, 
@@ -127,7 +127,7 @@ public class ComposableOrientationAndCoMEstimatorCreator
             registry);
    }
 
-   private class ComposableOrientationAndCoMEstimator extends ComposableStateEstimator implements OrientationEstimatorWithPorts
+   private class ComposableOrientationAndCoMEstimator extends ComposableStateEstimator implements StateEstimatorWithPorts
    {
       private final ControlFlowGraph controlFlowGraph;
       

@@ -1,6 +1,6 @@
 package us.ihmc.sensorProcessing.stateEstimation.evaluation;
 
-import us.ihmc.sensorProcessing.stateEstimation.OrientationEstimator;
+import us.ihmc.sensorProcessing.stateEstimation.StateEstimator;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -68,7 +68,7 @@ public class FullInverseDynamicsStructure
       spatialAccelerationCalculator.compute();
    }
 
-   public void updateRootJointBasedOnEstimator(OrientationEstimator estimator)
+   public void updateRootJointBasedOnEstimator(StateEstimator estimator)
    {
       FrameOrientation estimatedOrientation = estimator.getEstimatedOrientation();
       FrameVector estimatedAngularVelocity = estimator.getEstimatedAngularVelocity();

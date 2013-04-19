@@ -5,7 +5,7 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.sensorProcessing.stateEstimation.OrientationEstimator;
+import us.ihmc.sensorProcessing.stateEstimation.StateEstimator;
 import us.ihmc.utilities.math.geometry.AngleTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -17,11 +17,11 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 
-public class ComposableStateEstimatorEvaluatorErrorCalculator
+public class StateEstimatorErrorCalculator
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final OrientationEstimator orientationEstimator;
+   private final StateEstimator orientationEstimator;
    private final Robot robot;
    private final Joint estimationJoint;
 
@@ -33,7 +33,7 @@ public class ComposableStateEstimatorEvaluatorErrorCalculator
    private final YoFramePoint perfectCoMPosition = new YoFramePoint("perfectCoMPosition", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector perfectCoMVelocity = new YoFrameVector("perfectCoMVelocity", ReferenceFrame.getWorldFrame(), registry);
    
-   public ComposableStateEstimatorEvaluatorErrorCalculator(Robot robot, Joint estimationJoint, OrientationEstimator orientationEstimator,
+   public StateEstimatorErrorCalculator(Robot robot, Joint estimationJoint, StateEstimator orientationEstimator,
            YoVariableRegistry parentRegistry)
    {
       this.robot = robot;

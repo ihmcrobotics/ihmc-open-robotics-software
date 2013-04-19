@@ -6,7 +6,7 @@ import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 
-public interface OrientationEstimator
+public interface StateEstimator
 {
    public abstract FrameOrientation getEstimatedOrientation();
    

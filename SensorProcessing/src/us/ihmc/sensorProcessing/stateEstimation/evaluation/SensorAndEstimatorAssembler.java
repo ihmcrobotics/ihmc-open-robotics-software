@@ -17,7 +17,7 @@ import us.ihmc.sensorProcessing.stateEstimation.ComposableOrientationEstimatorCr
 import us.ihmc.sensorProcessing.stateEstimation.DesiredCoMAndAngularAccelerationDataSource;
 import us.ihmc.sensorProcessing.stateEstimation.JointSensorDataSource;
 import us.ihmc.sensorProcessing.stateEstimation.JointStateFullRobotModelUpdater;
-import us.ihmc.sensorProcessing.stateEstimation.OrientationEstimatorWithPorts;
+import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorWithPorts;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.AngularVelocitySensorConfiguration;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.LinearAccelerationSensorConfiguration;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.OrientationSensorConfiguration;
@@ -35,7 +35,7 @@ public class SensorAndEstimatorAssembler
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final ControlFlowGraph controlFlowGraph;
-   private final OrientationEstimatorWithPorts orientationEstimator;
+   private final StateEstimatorWithPorts orientationEstimator;
    private final JointSensorDataSource jointSensorDataSource;
    private final DesiredCoMAndAngularAccelerationDataSource desiredCoMAndAngularAccelerationDataSource;
    
@@ -125,7 +125,7 @@ public class SensorAndEstimatorAssembler
       return controlFlowGraph;
    }
 
-   public OrientationEstimatorWithPorts getOrientationEstimator()
+   public StateEstimatorWithPorts getOrientationEstimator()
    {
       return orientationEstimator;
    }

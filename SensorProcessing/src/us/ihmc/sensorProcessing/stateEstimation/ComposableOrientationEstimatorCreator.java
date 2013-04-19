@@ -77,13 +77,13 @@ public class ComposableOrientationEstimatorCreator
       orientationSensorConfigurations.add(orientationSensorConfiguration);
    }
 
-   public OrientationEstimatorWithPorts createOrientationEstimator(ControlFlowGraph controlFlowGraph, double controlDT, ReferenceFrame estimationFrame,
+   public StateEstimatorWithPorts createOrientationEstimator(ControlFlowGraph controlFlowGraph, double controlDT, ReferenceFrame estimationFrame,
            YoVariableRegistry registry)
    {
       return new ComposableOrientationEstimator("orientationEstimator", controlDT, estimationFrame, controlFlowGraph, registry);
    }
 
-   private class ComposableOrientationEstimator extends ComposableStateEstimator implements OrientationEstimatorWithPorts
+   private class ComposableOrientationEstimator extends ComposableStateEstimator implements StateEstimatorWithPorts
    {
       private final ControlFlowGraph controlFlowGraph;
       

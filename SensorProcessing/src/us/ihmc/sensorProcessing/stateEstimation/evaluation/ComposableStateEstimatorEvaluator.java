@@ -16,7 +16,7 @@ import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions
 import us.ihmc.sensorProcessing.stateEstimation.DesiredCoMAccelerationsFromRobotStealerController;
 import us.ihmc.sensorProcessing.stateEstimation.DesiredCoMAndAngularAccelerationDataSource;
 import us.ihmc.sensorProcessing.stateEstimation.JointSensorDataSource;
-import us.ihmc.sensorProcessing.stateEstimation.OrientationEstimatorWithPorts;
+import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorWithPorts;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -24,6 +24,7 @@ import us.ihmc.utilities.screwTheory.RigidBody;
 
 import com.yobotics.simulationconstructionset.IMUMount;
 import com.yobotics.simulationconstructionset.Joint;
+import com.yobotics.simulationconstructionset.RobotControllerAndParameters;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
@@ -91,7 +92,7 @@ public class ComposableStateEstimatorEvaluator
             registry);
 
       ControlFlowGraph controlFlowGraph = sensorAndEstimatorAssembler.getControlFlowGraph();
-      OrientationEstimatorWithPorts orientationEstimator = sensorAndEstimatorAssembler.getOrientationEstimator();
+      StateEstimatorWithPorts orientationEstimator = sensorAndEstimatorAssembler.getOrientationEstimator();
       JointSensorDataSource jointSensorDataSource = sensorAndEstimatorAssembler.getJointSensorDataSource();
       
       simulatedSensorHolderAndReader.setJointSensorDataSource(jointSensorDataSource);
@@ -110,11 +111,13 @@ public class ComposableStateEstimatorEvaluator
       runnableRunnerController.addRunnable(simulatedSensorHolderAndReader);
       robot.setController(runnableRunnerController, simTicksPerControlDT);
 
-      ComposableStateEstimatorEvaluatorController composableStateEstimatorEvaluatorController =
-         new ComposableStateEstimatorEvaluatorController(controlFlowGraph, 
-               orientationEstimator, robot, estimationJoint, controlDT);
+      ControlFlowGraphExecutorController controlFlowGraphExecutorController = new ControlFlowGraphExecutorController(controlFlowGraph);
+      
+      StateEstimatorErrorCalculatorController composableStateEstimatorEvaluatorController =
+         new StateEstimatorErrorCalculatorController(orientationEstimator, robot, estimationJoint, controlDT);
       
       robot.setController(desiredCoMAccelerationsFromRobotStealerController, simTicksPerControlDT);
+      robot.setController(controlFlowGraphExecutorController, simTicksPerControlDT);
       robot.setController(composableStateEstimatorEvaluatorController, simTicksPerControlDT);
 
       if (INITIALIZE_ANGULAR_VELOCITY_ESTIMATE_TO_ACTUAL)
