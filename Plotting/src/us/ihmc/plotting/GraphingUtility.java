@@ -1,8 +1,11 @@
 package us.ihmc.plotting;
 
-import org.jfree.chart.*;
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.axis.ValueAxis;
+import org.jfree.chart.labels.StandardXYToolTipGenerator;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.plot.XYPlot;
@@ -55,6 +58,7 @@ public class GraphingUtility
       
       
       final XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer();
+       renderer.setBaseToolTipGenerator(new StandardXYToolTipGenerator());
 
       // renderer.setSeriesLinesVisible(0, false);
       // renderer.setSeriesShapesVisible(1, false);
@@ -128,11 +132,12 @@ public class GraphingUtility
       }
 
       plot.setDataset(seriesCount, dataset);
-      
-      XYLineAndShapeRenderer xyLineAndShapeRenderer = new XYLineAndShapeRenderer();
+
+//       XYLineAndShapeRenderer xyLineAndShapeRenderer = new XYLineAndShapeRenderer();
+       XYLineAndShapeRenderer xyLineAndShapeRenderer = (XYLineAndShapeRenderer) plot.getRenderer();           // get the base xyrenderer
 //      xyLineAndShapeRenderer.setSeriesPaint(seriesCount, plot.getDrawingSupplier().getNextPaint());
       plot.setRenderer(seriesCount, xyLineAndShapeRenderer);
-      
+       xyLineAndShapeRenderer.setSeriesToolTipGenerator(seriesCount, new StandardXYToolTipGenerator());
       if (!showSeriesShape)
       {
 //         xyLineAndShapeRenderer = (XYLineAndShapeRenderer) plot.getRenderer();
@@ -227,6 +232,7 @@ public class GraphingUtility
       plot.setRangeGridlinePaint(Color.lightGray);
 
       final XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer();
+       renderer.setBaseToolTipGenerator(new StandardXYToolTipGenerator());
 
       // renderer.setSeriesLinesVisible(0, false);
       // renderer.setSeriesShapesVisible(1, false);
