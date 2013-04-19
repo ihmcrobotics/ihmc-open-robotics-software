@@ -17,7 +17,7 @@ import org.ros.node.topic.Subscriber;
 
 public class RosMainNode implements NodeMain
 {
-   private final HashMap<String, RosTopicSubscriber<? extends Message>> subscribers = new HashMap<String, RosTopicSubscriber<? extends Message>>();
+   private final HashMap<String, RosTopicSubscriberInterface<? extends Message>> subscribers = new HashMap<String, RosTopicSubscriberInterface<? extends Message>>();
    private final HashMap<String, RosTopicPublisher<? extends Message>> publishers = new HashMap<String, RosTopicPublisher<? extends Message>>();
    
    private final URI masterURI;
@@ -37,7 +37,7 @@ public class RosMainNode implements NodeMain
       
    }
    
-   public void attachSubscriber(String topicName, RosTopicSubscriber<? extends Message> subscriber)
+   public void attachSubscriber(String topicName, RosTopicSubscriberInterface<? extends Message> subscriber)
    {
       checkNotStarted();
       
@@ -57,9 +57,9 @@ public class RosMainNode implements NodeMain
    {
       isStarted = true;
       
-      for(Entry<String, RosTopicSubscriber<? extends Message>> entry : subscribers.entrySet())
+      for(Entry<String, RosTopicSubscriberInterface<? extends Message>> entry : subscribers.entrySet())
       {
-         final RosTopicSubscriber rosTopicSubscriber = entry.getValue();
+         final RosTopicSubscriberInterface rosTopicSubscriber = entry.getValue();
          Subscriber<? extends Message> subscriber = connectedNode.newSubscriber(entry.getKey(), rosTopicSubscriber.getMessageType());
          subscriber.addMessageListener(rosTopicSubscriber);
          rosTopicSubscriber.connected();

@@ -3,7 +3,7 @@ package us.ihmc.darpaRoboticsChallenge.networkProcessor.ros;
 import sensor_msgs.LaserScan;
 import us.ihmc.utilities.polarLidarGeometry.PolarLidarScanDefinition;
 
-public abstract class RosLidarSubscriber extends RosTopicSubscriber<sensor_msgs.LaserScan>
+public abstract class RosLidarSubscriber extends AbstractRosTopicSubscriber<sensor_msgs.LaserScan>
 {
    public RosLidarSubscriber()
    {

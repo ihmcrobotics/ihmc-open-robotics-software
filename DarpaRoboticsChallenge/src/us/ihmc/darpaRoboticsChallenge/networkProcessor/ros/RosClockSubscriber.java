@@ -2,7 +2,7 @@ package us.ihmc.darpaRoboticsChallenge.networkProcessor.ros;
 
 import us.ihmc.utilities.net.TimestampProvider;
 
-public class RosClockSubscriber extends RosTopicSubscriber<rosgraph_msgs.Clock> implements TimestampProvider
+public class RosClockSubscriber extends AbstractRosTopicSubscriber<rosgraph_msgs.Clock> implements TimestampProvider
 {
    private long timeStamp = 0;
    

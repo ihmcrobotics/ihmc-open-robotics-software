@@ -1,0 +1,9 @@
+<stack>
+  <description brief="Common code for Willow Garage robots.">Stores pakages that are widely useful to robots operating at Willow Garage.</description>
+  <author>Maintained by Eitan Marder-Eppstein</author>
+  <license>BSD</license>  
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/wg_common</url>
+  <depend stack="ros" />
+
+</stack>

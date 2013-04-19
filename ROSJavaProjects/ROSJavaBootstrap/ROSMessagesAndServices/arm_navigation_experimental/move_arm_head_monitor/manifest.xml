@@ -1,0 +1,27 @@
+<package>
+  <description brief="move_arm_head_monitor">
+
+     A node that provides monitoring capability for robot arms by continuously pointing the head at the location in space where an arm will be in the future.
+
+  </description>
+  <author>Adam Harmat</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/move_arm_head_monitor</url>
+  <depend package="roscpp"/>
+  <depend package="actionlib"/>
+  <depend package="actionlib_msgs"/>
+  <depend package="pr2_controllers_msgs" />
+  <depend package="control_msgs" />
+  <depend package="visualization_msgs" /> 
+  <depend package="tf" />
+  <depend package="planning_environment" />
+  <depend package="head_monitor_msgs" />
+  <depend package="common_rosdeps"/>
+
+  <rosdep name="eigen" />
+
+
+</package>
+
+

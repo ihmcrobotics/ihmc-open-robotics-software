@@ -1,0 +1,49 @@
+<package>
+  <description brief="CHOMP - Covariant Hamiltonian Optimization for Motion Planning">
+
+CHOMP is a motion planner based on trajectory optimization.
+It generates smooth, collision-free trajectories. For technical, algorithmic details,
+please refer to:
+
+"CHOMP: Gradient Optimization Techniques for Efficient Motion Planning".
+Nathan Ratliff, Matthew Zucker, J. Andrew Bagnell and Siddhartha Srinivasa.
+IEEE International Conference on Robotics and Automation, May 2009. 
+
+  </description>
+  <author>Mrinal Kalakrishnan / mail@mrinal.net</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/chomp_motion_planner</url>
+
+  <depend package="rosconsole"/>
+  <depend package="roscpp" />
+  <depend package="planning_models" />
+  <depend package="planning_environment" />
+  <depend package="arm_navigation_msgs" />
+  <depend package="kdl" />
+  <depend package="kdl_parser" />
+  <depend package="angles" />
+  <depend package="visualization_msgs" />
+  <depend package="tf" />
+  <depend package="distance_field" />
+  <depend package="sensor_msgs" />
+  <depend package="trajectory_msgs" />
+  <depend package="filters" />
+  <depend package="spline_smoother" />
+  <depend package="collision_proximity"/>
+  <depend package="constraint_aware_spline_smoother"/>
+  <depend package="common_rosdeps"/>
+
+  <rosdep name="eigen" />
+
+  <export>
+    <cpp cflags="-I${prefix}/include -I${prefix}/srv/cpp  -I${prefix}/msg/cpp"/>
+  </export>
+
+
+  <platform os="ubuntu" version="9.04"/>
+  <platform os="ubuntu" version="9.10"/>
+  <platform os="ubuntu" version="10.04"/>
+</package>
+
+

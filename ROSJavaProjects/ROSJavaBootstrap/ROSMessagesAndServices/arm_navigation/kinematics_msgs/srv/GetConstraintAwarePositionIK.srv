@@ -1,0 +1,11 @@
+# A service call to carry out an inverse kinematics computation
+# The inverse kinematics request
+kinematics_msgs/PositionIKRequest ik_request
+# A set of constraints that the IK must obey
+arm_navigation_msgs/Constraints constraints
+# Maximum allowed time for IK calculation
+duration timeout
+---
+# The returned solution 
+arm_navigation_msgs/RobotState solution
+arm_navigation_msgs/ArmNavigationErrorCodes error_code

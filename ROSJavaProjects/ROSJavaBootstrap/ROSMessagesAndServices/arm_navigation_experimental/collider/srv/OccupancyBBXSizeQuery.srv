@@ -1,0 +1,13 @@
+# center of the query box in global frame
+geometry_msgs/Point center
+# Size of the axis-aligned bounding box around the center (complete edge length!)
+geometry_msgs/Point size
+---
+# centers of all occupied voxels
+geometry_msgs/Point[] occupied
+
+# centers of all free voxels
+geometry_msgs/Point[] free
+
+# resolution of the octree = side length of all returned voxels
+float64 resolution

@@ -1,0 +1,16 @@
+<package>
+  <description brief="head_monitor_msgs">
+
+     head_monitor_msgs
+
+  </description>
+  <author>Gil Jones</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/head_monitor_msgs</url>
+  <depend package="actionlib_msgs"/>
+  <depend package="arm_navigation_msgs"/>
+
+</package>
+
+
