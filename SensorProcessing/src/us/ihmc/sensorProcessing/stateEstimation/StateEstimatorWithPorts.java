@@ -4,7 +4,7 @@ import us.ihmc.controlFlow.ControlFlowGraph;
 import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.utilities.math.geometry.FrameVector;
 
-public interface OrientationEstimatorWithPorts extends OrientationEstimator
+public interface StateEstimatorWithPorts extends StateEstimator
 {
    public abstract ControlFlowGraph getControlFlowGraph();
    public abstract ControlFlowInputPort<FrameVector> getDesiredAngularAccelerationInputPort();

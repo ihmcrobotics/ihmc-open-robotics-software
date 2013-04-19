@@ -46,8 +46,9 @@ import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions
 import us.ihmc.sensorProcessing.stateEstimation.DesiredCoMAccelerationsFromRobotStealerController;
 import us.ihmc.sensorProcessing.stateEstimation.DesiredCoMAndAngularAccelerationDataSource;
 import us.ihmc.sensorProcessing.stateEstimation.JointSensorDataSource;
-import us.ihmc.sensorProcessing.stateEstimation.OrientationEstimatorWithPorts;
-import us.ihmc.sensorProcessing.stateEstimation.evaluation.ComposableStateEstimatorEvaluatorController;
+import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorWithPorts;
+import us.ihmc.sensorProcessing.stateEstimation.evaluation.StateEstimatorErrorCalculatorController;
+import us.ihmc.sensorProcessing.stateEstimation.evaluation.ControlFlowGraphExecutorController;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.RunnableRunnerController;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.SensorAndEstimatorAssembler;
@@ -120,7 +121,7 @@ public class DRCSimulationFactory
       }
 
 
-      OrientationEstimatorWithPorts orientationEstimator = null;
+      StateEstimatorWithPorts orientationEstimator = null;
       DesiredCoMAndAngularAccelerationDataSource desiredCoMAndAngularAccelerationDataSource = null;
       if (CREATE_STATE_ESTIMATOR)
       {
@@ -206,8 +207,13 @@ public class DRCSimulationFactory
          Joint estimationJoint = simulatedRobot.getRootJoints().get(0);
          ControlFlowGraph controlFlowGraph = sensorAndEstimatorAssembler.getControlFlowGraph();
 
-         ComposableStateEstimatorEvaluatorController composableStateEstimatorEvaluatorController =
-            new ComposableStateEstimatorEvaluatorController(controlFlowGraph, orientationEstimator, simulatedRobot, estimationJoint, controlDT);
+         ControlFlowGraphExecutorController controlFlowGraphExecutorController = new ControlFlowGraphExecutorController(controlFlowGraph);
+         RobotControllerAndParameters controlFlowGraphExecutorControllerAndParameters =
+               new RobotControllerAndParameters(controlFlowGraphExecutorController, simulationTicksPerControlTick);
+            robotControllersAndParameters.add(controlFlowGraphExecutorControllerAndParameters);
+         
+         StateEstimatorErrorCalculatorController composableStateEstimatorEvaluatorController =
+            new StateEstimatorErrorCalculatorController(orientationEstimator, simulatedRobot, estimationJoint, controlDT);
 
          RobotControllerAndParameters humanoidStateEstimatorControllerAndParameters =
             new RobotControllerAndParameters(composableStateEstimatorEvaluatorController, simulationTicksPerControlTick);
@@ -299,10 +305,6 @@ public class DRCSimulationFactory
          }
          
          ControlFlowGraph controlFlowGraph = orientationEstimator.getControlFlowGraph();
-
-//         SensorAndEstimatorAssembler.connectDesiredAccelerationPorts(controlFlowGraph, orientationEstimator,
-//               desiredCoMAndAngularAccelerationOutputPortsHolder);
-
          controlFlowGraph.initializeAfterConnections();
 
          if (VISUALIZE_CONTROL_FLOW_GRAPH)
