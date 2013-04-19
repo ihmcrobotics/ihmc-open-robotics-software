@@ -7,7 +7,7 @@ import us.ihmc.controlFlow.AbstractControlFlowElement;
 import us.ihmc.controlFlow.ControlFlowGraph;
 import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
-import us.ihmc.sensorProcessing.simulatedSensors.SensorMap;
+import us.ihmc.sensorProcessing.simulatedSensors.JointAndIMUSensorMap;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
@@ -24,7 +24,7 @@ public class JointStateFullRobotModelUpdater extends AbstractControlFlowElement
 
    private final ControlFlowOutputPort<FullInverseDynamicsStructure> inverseDynamicsStructureOutputPort;
 
-   public JointStateFullRobotModelUpdater(ControlFlowGraph controlFlowGraph, SensorMap sensorMap, FullInverseDynamicsStructure inverseDynamicsStructure)
+   public JointStateFullRobotModelUpdater(ControlFlowGraph controlFlowGraph, JointAndIMUSensorMap sensorMap, FullInverseDynamicsStructure inverseDynamicsStructure)
    {
       this(controlFlowGraph, sensorMap.getJointPositionSensors(), sensorMap.getJointVelocitySensors(), inverseDynamicsStructure);
    }

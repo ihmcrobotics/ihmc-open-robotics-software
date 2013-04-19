@@ -6,7 +6,8 @@ import java.util.Set;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.sensorProcessing.stateEstimation.JointSensorDataSource;
+import us.ihmc.sensorProcessing.stateEstimation.JointAndIMUSensorDataSource;
+import us.ihmc.sensorProcessing.stateEstimation.PointVelocitySensorDataSource;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
 public class SimulatedSensorHolderAndReader implements Runnable
@@ -27,7 +28,8 @@ public class SimulatedSensorHolderAndReader implements Runnable
    private final LinkedHashMap<PointVelocitySensorDefinition, SimulatedPointVelocitySensorFromRobot> pointVelocitySensors =
       new LinkedHashMap<PointVelocitySensorDefinition, SimulatedPointVelocitySensorFromRobot>();
 
-   private JointSensorDataSource jointSensorDataSource;
+   private JointAndIMUSensorDataSource jointAndIMUSensorDataSource;
+   private PointVelocitySensorDataSource pointVelocitySensorDataSource;
 
    public SimulatedSensorHolderAndReader()
    {
@@ -65,9 +67,14 @@ public class SimulatedSensorHolderAndReader implements Runnable
    }
 
 
-   public void setJointSensorDataSource(JointSensorDataSource jointSensorDataSource)
+   public void setJointAndIMUSensorDataSource(JointAndIMUSensorDataSource jointAndIMUSensorDataSource)
    {
-      this.jointSensorDataSource = jointSensorDataSource;
+      this.jointAndIMUSensorDataSource = jointAndIMUSensorDataSource;
+   }
+
+   public void setPointVelocityDataSource(PointVelocitySensorDataSource pointVelocitySensorDataSource)
+   {
+      this.pointVelocitySensorDataSource = pointVelocitySensorDataSource;
    }
 
    public void run()
@@ -79,7 +86,7 @@ public class SimulatedSensorHolderAndReader implements Runnable
          simulatedOneDoFJointPositionSensor.startComputation();
          simulatedOneDoFJointPositionSensor.waitUntilComputationIsDone();
          Double value = simulatedOneDoFJointPositionSensor.getJointPositionOutputPort().getData();
-         jointSensorDataSource.setJointPositionSensorValue(oneDoFJoint, value);
+         jointAndIMUSensorDataSource.setJointPositionSensorValue(oneDoFJoint, value);
       }
 
       Set<OneDoFJoint> jointsForVelocitySensors = jointVelocitySensors.keySet();
@@ -89,7 +96,7 @@ public class SimulatedSensorHolderAndReader implements Runnable
          simulatedOneDoFJointVelocitySensor.startComputation();
          simulatedOneDoFJointVelocitySensor.waitUntilComputationIsDone();
          Double value = simulatedOneDoFJointVelocitySensor.getJointVelocityOutputPort().getData();
-         jointSensorDataSource.setJointVelocitySensorValue(oneDoFJoint, value);
+         jointAndIMUSensorDataSource.setJointVelocitySensorValue(oneDoFJoint, value);
       }
 
       Set<IMUDefinition> orientationSensorDefinitions = orientationSensors.keySet();
@@ -99,9 +106,9 @@ public class SimulatedSensorHolderAndReader implements Runnable
          orientationSensor.startComputation();
          orientationSensor.waitUntilComputationIsDone();
          Matrix3d value = orientationSensor.getOrientationOutputPort().getData();
-         jointSensorDataSource.setOrientationSensorValue(imuDefinition, value);
+         jointAndIMUSensorDataSource.setOrientationSensorValue(imuDefinition, value);
       }
-      
+
       Set<IMUDefinition> angularVelocitySensorDefinitions = angularVelocitySensors.keySet();
       for (IMUDefinition imuDefinition : angularVelocitySensorDefinitions)
       {
@@ -109,9 +116,9 @@ public class SimulatedSensorHolderAndReader implements Runnable
          angularVelocitySensor.startComputation();
          angularVelocitySensor.waitUntilComputationIsDone();
          Vector3d value = angularVelocitySensor.getAngularVelocityOutputPort().getData();
-         jointSensorDataSource.setAngularVelocitySensorValue(imuDefinition, value);
+         jointAndIMUSensorDataSource.setAngularVelocitySensorValue(imuDefinition, value);
       }
-      
+
       Set<IMUDefinition> linearAccelerationSensorDefinitions = linearAccelerationSensors.keySet();
       for (IMUDefinition imuDefinition : linearAccelerationSensorDefinitions)
       {
@@ -119,7 +126,7 @@ public class SimulatedSensorHolderAndReader implements Runnable
          linearAccelerationSensor.startComputation();
          linearAccelerationSensor.waitUntilComputationIsDone();
          Vector3d value = linearAccelerationSensor.getLinearAccelerationOutputPort().getData();
-         jointSensorDataSource.setLinearAccelerationSensorValue(imuDefinition, value);
+         jointAndIMUSensorDataSource.setLinearAccelerationSensorValue(imuDefinition, value);
       }
 
       Set<PointVelocitySensorDefinition> pointVelocitySensorDefinitions = pointVelocitySensors.keySet();
@@ -129,7 +136,7 @@ public class SimulatedSensorHolderAndReader implements Runnable
          pointVelocitySensor.startComputation();
          pointVelocitySensor.waitUntilComputationIsDone();
          Vector3d value = pointVelocitySensor.getPointVelocityOutputPort().getData();
-         jointSensorDataSource.setPointVelocitySensorValue(pointVelocitySensorDefinition, value);
+         pointVelocitySensorDataSource.setPointVelocitySensorValue(pointVelocitySensorDefinition, value);
       }
 
    }
