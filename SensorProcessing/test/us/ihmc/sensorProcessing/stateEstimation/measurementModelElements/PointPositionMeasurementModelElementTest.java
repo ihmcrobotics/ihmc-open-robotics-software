@@ -81,7 +81,7 @@ public class PointPositionMeasurementModelElementTest
       FramePoint stationaryPoint = new FramePoint(measurementFrame, RandomTools.generateRandomPoint(random, 1.0, 1.0, 1.0));
       PointPositionMeasurementModelElement modelElement = new PointPositionMeasurementModelElement(name, pointPositionMeasurementInputPort,
                                                              centerOfMassPositionPort, orientationPort, estimationFrame, stationaryPoint,
-                                                             inverseDynamicsStructureInputPort, registry);
+                                                             registry);
 
       randomFloatingChain.setRandomPositionsAndVelocities(random);
       twistCalculator.compute();

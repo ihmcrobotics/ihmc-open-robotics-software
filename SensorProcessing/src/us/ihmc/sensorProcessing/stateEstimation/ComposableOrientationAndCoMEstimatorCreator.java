@@ -365,7 +365,6 @@ public class ComposableOrientationAndCoMEstimatorCreator
       private void addPointPositionSensor(ReferenceFrame estimationFrame, ControlFlowGraph controlFlowGraph,
             PointPositionSensorConfiguration pointPositionSensorConfiguration)
       {
-         RigidBody measurementLink = pointPositionSensorConfiguration.getPointPositionMeasurementLink();
          FramePoint stationaryPoint = pointPositionSensorConfiguration.getPointPositionMeasurementPoint();
 
          ControlFlowInputPort<PointPositionDataObject> pointPositionMeasurementInputPort = createInputPort();
@@ -374,21 +373,10 @@ public class ComposableOrientationAndCoMEstimatorCreator
 
          DenseMatrix64F pointPositionNoiseCovariance = pointPositionSensorConfiguration.getPointPositionNoiseCovariance();
 
-
-//         String name, ControlFlowInputPort<Point3d> pointPositionMeasurementInputPort,
-//         ControlFlowOutputPort<FramePoint> centerOfMassPositionPort,
-//         ControlFlowOutputPort<FrameOrientation> orientationPort, ReferenceFrame estimationFrame,
-//         FramePoint stationaryPoint, ControlFlowInputPort<FullInverseDynamicsStructure> inverseDynamicsStructureInputPort,
-//         YoVariableRegistry registry
-         
          PointPositionMeasurementModelElement pointPositionMeasurementModelElement = new PointPositionMeasurementModelElement(
                name, pointPositionMeasurementInputPort, 
                centerOfMassPositionStatePort, orientationStatePort, 
-               estimationFrame, stationaryPoint, inverseDynamicsStructureInputPort, registry);
-//               name, pointPositionMeasurementInputPort, 
-//               centerOfMassPositionStatePort, orientationStatePort, 
-//               estimationFrame, 
-//               stationaryPoint, inverseDynamicsStructureInputPort, registry);
+               estimationFrame, stationaryPoint, registry);
 
          pointPositionMeasurementModelElement.setNoiseCovariance(pointPositionNoiseCovariance);
 

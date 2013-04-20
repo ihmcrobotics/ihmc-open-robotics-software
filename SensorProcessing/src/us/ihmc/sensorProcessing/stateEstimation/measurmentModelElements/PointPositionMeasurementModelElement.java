@@ -10,7 +10,6 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
-import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.PointPositionDataObject;
 import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
@@ -29,7 +28,6 @@ public class PointPositionMeasurementModelElement extends AbstractMeasurementMod
    private final ControlFlowInputPort<PointPositionDataObject> pointPositionMeasurementInputPort;
 
    private final ReferenceFrame estimationFrame;
-   private final ControlFlowInputPort<FullInverseDynamicsStructure> inverseDynamicsStructureInputPort;
    private final FramePoint stationaryPoint;
 
    private final DenseMatrix64F residual = new DenseMatrix64F(SIZE, 1);
@@ -45,7 +43,7 @@ public class PointPositionMeasurementModelElement extends AbstractMeasurementMod
    public PointPositionMeasurementModelElement(String name, ControlFlowInputPort<PointPositionDataObject> pointPositionMeasurementInputPort,
                                                ControlFlowOutputPort<FramePoint> centerOfMassPositionPort,
                                                ControlFlowOutputPort<FrameOrientation> orientationPort, ReferenceFrame estimationFrame,
-                                               FramePoint stationaryPoint, ControlFlowInputPort<FullInverseDynamicsStructure> inverseDynamicsStructureInputPort,
+                                               FramePoint stationaryPoint,
                                                YoVariableRegistry registry)
    {
       super(pointPositionMeasurementInputPort, SIZE, name, registry);
@@ -54,10 +52,10 @@ public class PointPositionMeasurementModelElement extends AbstractMeasurementMod
       this.orientationPort = orientationPort;
 
       this.pointPositionMeasurementInputPort = pointPositionMeasurementInputPort;
-
+      this.pointPositionMeasurementInputPort.setData(new PointPositionDataObject());
+      
       this.estimationFrame = estimationFrame;
       this.stationaryPoint = stationaryPoint;
-      this.inverseDynamicsStructureInputPort = inverseDynamicsStructureInputPort;
 
       outputMatrixBlocks.put(centerOfMassPositionPort, new DenseMatrix64F(SIZE, SIZE));
       outputMatrixBlocks.put(orientationPort, new DenseMatrix64F(SIZE, SIZE));
@@ -94,6 +92,13 @@ public class PointPositionMeasurementModelElement extends AbstractMeasurementMod
       MatrixTools.setDenseMatrixFromMatrix3d(0, 0, tempMatrix, outputMatrixBlocks.get(orientationPort));
    }
 
+   @Override
+   public DenseMatrix64F getMeasurementCovarianceMatrixBlock()
+   {
+      this.setCovarianceMatrixScaling(pointPositionMeasurementInputPort.getData().getCovarianceScaling());
+      return super.getMeasurementCovarianceMatrixBlock();
+   }
+   
    public DenseMatrix64F computeResidual()
    {
       tempFramePoint.setAndChangeFrame(stationaryPoint);

@@ -1,17 +1,29 @@
 package us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration;
 
 import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
 
 public class PointPositionDataObject
 {
+   private Vector3d offsetFromJointInJointFrame = new Vector3d();
    private final Point3d position = new Point3d();
 
-   public double positionTrustFactor = 0.0;
+   public double covarianceScaling = 1.0;
 
    public PointPositionDataObject()
    {
    }
 
+   public void getOffsetFromJointInJointFrame(Vector3d offsetFromJointInJointFrameToPack)
+   {
+      offsetFromJointInJointFrameToPack.set(this.offsetFromJointInJointFrame );
+   }
+   
+   public void setOffsetFromJointInJointFrame(Vector3d offsetFromJointInJointFrame)
+   {
+      this.offsetFromJointInJointFrame.set(offsetFromJointInJointFrame);
+   }  
+   
    public void getPosition(Point3d positionToPack)
    {
       positionToPack.set(position);
@@ -22,19 +34,20 @@ public class PointPositionDataObject
       this.position.set(position);
    }
 
-   public double getPositionTrustFactor()
+   public double getCovarianceScaling()
    {
-      return positionTrustFactor;
+      return covarianceScaling;
    }
 
-   public void setPositionTrustFactor(double positionTrustFactor)
+   public void setCovarianceScaling(double covarianceScaling)
    {
-      this.positionTrustFactor = positionTrustFactor;
+      this.covarianceScaling = covarianceScaling;
    }
 
    public void set(PointPositionDataObject pointPositionDataObject)
    {
+      this.offsetFromJointInJointFrame.set(pointPositionDataObject.offsetFromJointInJointFrame);
       this.position.set(pointPositionDataObject.position);
-      this.positionTrustFactor = pointPositionDataObject.positionTrustFactor;
+      this.covarianceScaling = pointPositionDataObject.covarianceScaling;
    }
 }
