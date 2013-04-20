@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.List;
 
 import javax.vecmath.Matrix3d;
+import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import org.ejml.data.DenseMatrix64F;
@@ -19,6 +20,7 @@ import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsSt
 import us.ihmc.sensorProcessing.stateEstimation.measurmentModelElements.AngularVelocityMeasurementModelElement;
 import us.ihmc.sensorProcessing.stateEstimation.measurmentModelElements.LinearAccelerationMeasurementModelElement;
 import us.ihmc.sensorProcessing.stateEstimation.measurmentModelElements.OrientationMeasurementModelElement;
+import us.ihmc.sensorProcessing.stateEstimation.measurmentModelElements.PointPositionMeasurementModelElement;
 import us.ihmc.sensorProcessing.stateEstimation.measurmentModelElements.PointVelocityMeasurementModelElement;
 import us.ihmc.sensorProcessing.stateEstimation.processModelElements.AngularAccelerationProcessModelElement;
 import us.ihmc.sensorProcessing.stateEstimation.processModelElements.AngularVelocityProcessModelElement;
@@ -31,6 +33,8 @@ import us.ihmc.sensorProcessing.stateEstimation.processModelElements.ProcessMode
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.AngularVelocitySensorConfiguration;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.LinearAccelerationSensorConfiguration;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.OrientationSensorConfiguration;
+import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.PointPositionDataObject;
+import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.PointPositionSensorConfiguration;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.PointVelocityDataObject;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.PointVelocitySensorConfiguration;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
@@ -56,6 +60,8 @@ public class ComposableOrientationAndCoMEstimatorCreator
    private final List<OrientationSensorConfiguration> orientationSensorConfigurations = new ArrayList<OrientationSensorConfiguration>();
    private final List<AngularVelocitySensorConfiguration> angularVelocitySensorConfigurations = new ArrayList<AngularVelocitySensorConfiguration>();
    private final List<LinearAccelerationSensorConfiguration> linearAccelerationSensorConfigurations = new ArrayList<LinearAccelerationSensorConfiguration>();
+   
+   private final List<PointPositionSensorConfiguration> pointPositionSensorConfigurations = new ArrayList<PointPositionSensorConfiguration>();
    private final List<PointVelocitySensorConfiguration> pointVelocitySensorConfigurations = new ArrayList<PointVelocitySensorConfiguration>();
 
    public ComposableOrientationAndCoMEstimatorCreator(DenseMatrix64F angularAccelerationNoiseCovariance, DenseMatrix64F comAccelerationNoiseCovariance,
@@ -106,6 +112,19 @@ public class ComposableOrientationAndCoMEstimatorCreator
       this.linearAccelerationSensorConfigurations.add(linearAccelerationSensorConfiguration);
    }
 
+   public void addPointPositionSensorConfigurations(Collection<PointPositionSensorConfiguration> pointPositionSensorConfigurations)
+   {
+      for (PointPositionSensorConfiguration pointPositionSensorConfiguration : pointPositionSensorConfigurations)
+      {
+         this.addPointPositionSensorConfiguration(pointPositionSensorConfiguration);
+      }
+   }
+   
+   public void addPointPositionSensorConfiguration(PointPositionSensorConfiguration pointPositionSensorConfiguration)
+   {
+      this.pointPositionSensorConfigurations.add(pointPositionSensorConfiguration);      
+   }
+   
    public void addPointVelocitySensorConfigurations(Collection<PointVelocitySensorConfiguration> pointVelocitySensorConfigurations)
    {
       for (PointVelocitySensorConfiguration pointVelocitySensorConfiguration : pointVelocitySensorConfigurations)
@@ -192,6 +211,11 @@ public class ComposableOrientationAndCoMEstimatorCreator
          for (LinearAccelerationSensorConfiguration linearAccelerationSensorConfiguration : linearAccelerationSensorConfigurations)
          {
             addLinearAccelerationSensor(estimationFrame, controlFlowGraph, linearAccelerationSensorConfiguration);
+         }
+         
+         for (PointPositionSensorConfiguration pointPositionSensorConfiguration : pointPositionSensorConfigurations)
+         {
+            addPointPositionSensor(estimationFrame, controlFlowGraph, pointPositionSensorConfiguration);
          }
          
          for (PointVelocitySensorConfiguration pointVelocitySensorConfiguration : pointVelocitySensorConfigurations)
@@ -336,6 +360,42 @@ public class ComposableOrientationAndCoMEstimatorCreator
          addMeasurementModelElement(linearAccelerationMeasurementModel);
          controlFlowGraph.connectElements(linearAccelerationSensorConfiguration.getOutputPort(), linearAccelerationMeasurementInputPort);
       }
+      
+      
+      private void addPointPositionSensor(ReferenceFrame estimationFrame, ControlFlowGraph controlFlowGraph,
+            PointPositionSensorConfiguration pointPositionSensorConfiguration)
+      {
+         RigidBody measurementLink = pointPositionSensorConfiguration.getPointPositionMeasurementLink();
+         FramePoint stationaryPoint = pointPositionSensorConfiguration.getPointPositionMeasurementPoint();
+
+         ControlFlowInputPort<PointPositionDataObject> pointPositionMeasurementInputPort = createInputPort();
+
+         String name = pointPositionSensorConfiguration.getName();
+
+         DenseMatrix64F pointPositionNoiseCovariance = pointPositionSensorConfiguration.getPointPositionNoiseCovariance();
+
+
+//         String name, ControlFlowInputPort<Point3d> pointPositionMeasurementInputPort,
+//         ControlFlowOutputPort<FramePoint> centerOfMassPositionPort,
+//         ControlFlowOutputPort<FrameOrientation> orientationPort, ReferenceFrame estimationFrame,
+//         FramePoint stationaryPoint, ControlFlowInputPort<FullInverseDynamicsStructure> inverseDynamicsStructureInputPort,
+//         YoVariableRegistry registry
+         
+         PointPositionMeasurementModelElement pointPositionMeasurementModelElement = new PointPositionMeasurementModelElement(
+               name, pointPositionMeasurementInputPort, 
+               centerOfMassPositionStatePort, orientationStatePort, 
+               estimationFrame, stationaryPoint, inverseDynamicsStructureInputPort, registry);
+//               name, pointPositionMeasurementInputPort, 
+//               centerOfMassPositionStatePort, orientationStatePort, 
+//               estimationFrame, 
+//               stationaryPoint, inverseDynamicsStructureInputPort, registry);
+
+         pointPositionMeasurementModelElement.setNoiseCovariance(pointPositionNoiseCovariance);
+
+         addMeasurementModelElement(pointPositionMeasurementModelElement);
+         controlFlowGraph.connectElements(pointPositionSensorConfiguration.getOutputPort(), pointPositionMeasurementInputPort);
+      }
+      
       
       private void addPointVelocitySensor(ReferenceFrame estimationFrame, ControlFlowGraph controlFlowGraph,
             PointVelocitySensorConfiguration pointVelocitySensorConfiguration)

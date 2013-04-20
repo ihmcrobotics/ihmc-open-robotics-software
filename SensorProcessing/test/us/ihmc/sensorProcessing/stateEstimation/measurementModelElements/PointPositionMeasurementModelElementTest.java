@@ -20,6 +20,7 @@ import us.ihmc.sensorProcessing.stateEstimation.CenterOfMassBasedFullRobotModelU
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.sensorProcessing.stateEstimation.measurmentModelElements.PointPositionMeasurementModelElement;
 import us.ihmc.sensorProcessing.stateEstimation.measurmentModelElements.PointVelocityMeasurementModelElement;
+import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.PointPositionDataObject;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -67,7 +68,7 @@ public class PointPositionMeasurementModelElementTest
       String name = "test";
       YoVariableRegistry registry = new YoVariableRegistry(name);
 
-      ControlFlowInputPort<Point3d> pointPositionMeasurementInputPort = new ControlFlowInputPort<Point3d>(controlFlowElement);
+      ControlFlowInputPort<PointPositionDataObject> pointPositionMeasurementInputPort = new ControlFlowInputPort<PointPositionDataObject>(controlFlowElement);
 
       ControlFlowOutputPort<FramePoint> centerOfMassPositionPort = new ControlFlowOutputPort<FramePoint>(controlFlowElement);
       ControlFlowOutputPort<FrameVector> centerOfMassVelocityPort = new ControlFlowOutputPort<FrameVector>(controlFlowElement);
@@ -119,9 +120,11 @@ public class PointPositionMeasurementModelElementTest
               perturbation, tol, updater);
    }
 
-   private void setMeasuredPointPositionToActual(FramePoint point, ControlFlowInputPort<Point3d> pointPositionMeasurementInputPort)
+   private void setMeasuredPointPositionToActual(FramePoint point, ControlFlowInputPort<PointPositionDataObject> pointPositionMeasurementInputPort)
    {
       FramePoint pointInWorld = point.changeFrameCopy(ReferenceFrame.getWorldFrame());
-      pointPositionMeasurementInputPort.setData(pointInWorld.getPoint());
+      PointPositionDataObject pointPositionDataObject = new PointPositionDataObject();
+      pointPositionDataObject.setPosition(pointInWorld.getPoint());
+      pointPositionMeasurementInputPort.setData(pointPositionDataObject);
    }
 }

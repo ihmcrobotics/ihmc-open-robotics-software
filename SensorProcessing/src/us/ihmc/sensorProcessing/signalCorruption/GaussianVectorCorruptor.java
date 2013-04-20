@@ -2,12 +2,13 @@ package us.ihmc.sensorProcessing.signalCorruption;
 
 import java.util.Random;
 
+import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
-public class GaussianVectorCorruptor implements SignalCorruptor<Vector3d>
+public class GaussianVectorCorruptor implements SignalCorruptor<Tuple3d>
 {
    private final YoVariableRegistry registry;
    private final Random random;
@@ -23,7 +24,7 @@ public class GaussianVectorCorruptor implements SignalCorruptor<Vector3d>
       parentRegistry.addChild(registry);
    }
 
-   public void corrupt(Vector3d signal)
+   public void corrupt(Tuple3d signal)
    {
       double std = standardDeviation.getDoubleValue();
       double noiseX = std * random.nextGaussian();

@@ -25,12 +25,14 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory
    private final SensorNoiseParameters sensorNoiseParameters;
 
    private final Map<IMUMount, IMUDefinition> imuDefinitions;
+   private final Map<KinematicPoint, PointPositionSensorDefinition> pointPositionSensorDefinitions;
    private final Map<KinematicPoint, PointVelocitySensorDefinition> pointVelocitySensorDefinitions;
    private final SimulatedSensorHolderAndReader simulatedSensorHolderAndReader;
 
    public SimulatedSensorHolderAndReaderFromRobotFactory(StateEstimatorSensorDefinitionsFromRobotFactory stateEstimatorSensorDefinitionsFromRobotFactory,
          SCSToInverseDynamicsJointMap scsToInverseDynamicsJointMap, Robot robot,
-           SensorNoiseParameters sensorNoiseParameters, double controlDT, ArrayList<IMUMount> imuMounts, ArrayList<KinematicPoint> velocityPoints,
+           SensorNoiseParameters sensorNoiseParameters, double controlDT, ArrayList<IMUMount> imuMounts, 
+           ArrayList<KinematicPoint> positionPoints, ArrayList<KinematicPoint> velocityPoints,
            YoVariableRegistry registry)
    {
       this.scsToInverseDynamicsJointMap = scsToInverseDynamicsJointMap;
@@ -40,6 +42,7 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory
       this.controlDT = controlDT;
 
       this.imuDefinitions = stateEstimatorSensorDefinitionsFromRobotFactory.getIMUDefinitions();
+      this.pointPositionSensorDefinitions = stateEstimatorSensorDefinitionsFromRobotFactory.getPointPositionSensorDefinitions();
       this.pointVelocitySensorDefinitions = stateEstimatorSensorDefinitionsFromRobotFactory.getPointVelocitySensorDefinitions();
 
       simulatedSensorHolderAndReader = new SimulatedSensorHolderAndReader();
@@ -48,6 +51,8 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory
       createAndAddOrientationSensors(imuDefinitions, registry);
       createAndAddAngularVelocitySensors(imuDefinitions, registry);
       createAndAddLinearAccelerationSensors(imuDefinitions, registry);
+      
+      createAndAddPointPositionSensors(positionPoints, registry);
       createAndAddPointVelocitySensors(velocityPoints, registry);
    }
 
@@ -168,6 +173,30 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory
       }
    }
 
+   public void createAndAddPointPositionSensors(ArrayList<KinematicPoint> positionPoints, YoVariableRegistry registry)
+   {
+      for (KinematicPoint kinematicPoint : positionPoints)
+      {
+         String sensorName = kinematicPoint.getName() + "PointPosition";
+
+         SimulatedPointPositionSensorFromRobot pointPositionSensor = new SimulatedPointPositionSensorFromRobot(sensorName, kinematicPoint, registry);
+
+
+         if (sensorNoiseParameters != null)
+         {
+            GaussianVectorCorruptor pointPositionCorruptor = new GaussianVectorCorruptor(1257L, sensorName, registry);
+
+            double pointPositionMeasurementStandardDeviation = sensorNoiseParameters.getPointPositionMeasurementStandardDeviation();
+            pointPositionCorruptor.setStandardDeviation(pointPositionMeasurementStandardDeviation);
+            pointPositionSensor.addSignalCorruptor(pointPositionCorruptor);
+         }
+
+         PointPositionSensorDefinition pointPositionSensorDefinition = pointPositionSensorDefinitions.get(kinematicPoint);
+
+         simulatedSensorHolderAndReader.addPointPositionSensorPort(pointPositionSensorDefinition, pointPositionSensor);
+      }
+   }
+   
    public void createAndAddPointVelocitySensors(ArrayList<KinematicPoint> velocityPoints, YoVariableRegistry registry)
    {
       for (KinematicPoint kinematicPoint : velocityPoints)

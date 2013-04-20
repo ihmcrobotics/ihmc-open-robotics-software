@@ -35,9 +35,11 @@ import us.ihmc.projectM.R2Sim02.initialSetup.ScsInitialSetup;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.simulatedSensors.InverseDynamicsJointsFromSCSRobotGenerator;
+import us.ihmc.sensorProcessing.simulatedSensors.PointPositionSensorDefinition;
 import us.ihmc.sensorProcessing.simulatedSensors.PointVelocitySensorDefinition;
 import us.ihmc.sensorProcessing.stateEstimation.DesiredCoMAccelerationsFromRobotStealerController;
 import us.ihmc.sensorProcessing.stateEstimation.DesiredCoMAndAngularAccelerationDataSource;
+import us.ihmc.sensorProcessing.stateEstimation.PointPositionSensorDataSource;
 import us.ihmc.sensorProcessing.stateEstimation.PointVelocitySensorDataSource;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -97,6 +99,9 @@ public class DRCSimulationFactory
             controlDT, simulationTicksPerControlTick, USE_STATE_ESTIMATOR, registry);
       DesiredCoMAndAngularAccelerationDataSource desiredCoMAndAngularAccelerationDataSource = drcStateEstimatorFromRobot.getDesiredCoMAndAngularAccelerationDataSource();
       
+      PointPositionSensorDataSource pointPositionSensorDataSource = drcStateEstimatorFromRobot.getPointPositionSensorDataSource();
+      List<PointPositionSensorDefinition> pointPositionSensorDefinitions = pointPositionSensorDataSource.getPointPositionSensorDefinitions();
+      
       PointVelocitySensorDataSource pointVelocitySensorDataSource = drcStateEstimatorFromRobot.getPointVelocitySensorDataSource();
       List<PointVelocitySensorDefinition> pointVelocitySensorDefinitions = pointVelocitySensorDataSource.getPointVelocitySensorDefinitions();
       
@@ -105,6 +110,7 @@ public class DRCSimulationFactory
 
       if (READ_POINT_VELOCITIES_FROM_ROBOT)
       {
+         drcStateEstimatorFromRobot.setPointPositionSensorDataSourceForReadingFromVirtualSensors(pointPositionSensorDataSource);
          drcStateEstimatorFromRobot.setPointVelocitySensorDataSourceForReadingFromVirtualSensors(pointVelocitySensorDataSource);
       }
       
@@ -182,8 +188,9 @@ public class DRCSimulationFactory
          robotController.attachDesiredCoMAndAngularAccelerationDataSource(desiredCoMAndAngularAccelerationDataSource);
       }
       
-      if (pointVelocitySensorDataSource != null)
+      if (!READ_POINT_VELOCITIES_FROM_ROBOT)
       {
+         robotController.attachPointPositionSensorDataSource(pointPositionSensorDefinitions, pointPositionSensorDataSource);
          robotController.attachPointVelocitySensorDataSource(pointVelocitySensorDefinitions, pointVelocitySensorDataSource);
 
       }

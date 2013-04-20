@@ -14,6 +14,7 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.sensorProcessing.simulatedSensors.IMUDefinition;
+import us.ihmc.sensorProcessing.simulatedSensors.PointPositionSensorDefinition;
 import us.ihmc.sensorProcessing.simulatedSensors.PointVelocitySensorDefinition;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.utilities.math.MathTools;
@@ -25,7 +26,7 @@ public class SensorConfigurationFactory
 {
    private final Vector3d gravitationalAcceleration;
    private final SensorNoiseParameters sensorNoiseParameters;
-   
+
    public SensorConfigurationFactory(SensorNoiseParameters sensorNoiseParameters, Vector3d gravitationalAcceleration)
    {
       this.gravitationalAcceleration = new Vector3d();
@@ -44,11 +45,11 @@ public class SensorConfigurationFactory
          String sensorName = estimatedIMUDefinition.getName() + "Orientation";
 
          double orientationMeasurementStandardDeviation = sensorNoiseParameters.getOrientationMeasurementStandardDeviation();
-         DenseMatrix64F orientationNoiseCovariance = createDiagonalCovarianceMatrix(orientationMeasurementStandardDeviation , 3);
+         DenseMatrix64F orientationNoiseCovariance = createDiagonalCovarianceMatrix(orientationMeasurementStandardDeviation, 3);
 
          RigidBody estimatedMeasurementBody = estimatedIMUDefinition.getRigidBody();
-         ReferenceFrame estimatedMeasurementFrame = createMeasurementFrame(sensorName, "EstimatedMeasurementFrame",
-                                                       estimatedIMUDefinition, estimatedMeasurementBody);
+         ReferenceFrame estimatedMeasurementFrame = createMeasurementFrame(sensorName, "EstimatedMeasurementFrame", estimatedIMUDefinition,
+                                                       estimatedMeasurementBody);
 
          ControlFlowOutputPort<Matrix3d> outputPort = orientationSensors.get(estimatedIMUDefinition);
 
@@ -72,13 +73,13 @@ public class SensorConfigurationFactory
          String sensorName = estimatedIMUDefinition.getName() + "AngularVelocity";
 
          double angularVelocityMeasurementStandardDeviation = sensorNoiseParameters.getAngularVelocityMeasurementStandardDeviation();
-         DenseMatrix64F angularVelocityNoiseCovariance = createDiagonalCovarianceMatrix(angularVelocityMeasurementStandardDeviation , 3);
+         DenseMatrix64F angularVelocityNoiseCovariance = createDiagonalCovarianceMatrix(angularVelocityMeasurementStandardDeviation, 3);
          double angularVelocityBiasProcessNoiseStandardDeviation = sensorNoiseParameters.getAngularVelocityBiasProcessNoiseStandardDeviation();
-         DenseMatrix64F angularVelocityBiasProcessNoiseCovariance = createDiagonalCovarianceMatrix(angularVelocityBiasProcessNoiseStandardDeviation , 3);
+         DenseMatrix64F angularVelocityBiasProcessNoiseCovariance = createDiagonalCovarianceMatrix(angularVelocityBiasProcessNoiseStandardDeviation, 3);
 
          RigidBody estimatedMeasurementBody = estimatedIMUDefinition.getRigidBody();
-         ReferenceFrame estimatedMeasurementFrame = createMeasurementFrame(sensorName, "EstimatedMeasurementFrame",
-                                                       estimatedIMUDefinition, estimatedMeasurementBody);
+         ReferenceFrame estimatedMeasurementFrame = createMeasurementFrame(sensorName, "EstimatedMeasurementFrame", estimatedIMUDefinition,
+                                                       estimatedMeasurementBody);
 
          ControlFlowOutputPort<Vector3d> outputPort = angularVelocitySensors.get(estimatedIMUDefinition);
 
@@ -109,8 +110,8 @@ public class SensorConfigurationFactory
          DenseMatrix64F linearAccelerationBiasProcessNoiseCovariance = createDiagonalCovarianceMatrix(linearAccelerationBiasProcessNoiseStandardDeviation, 3);
 
          RigidBody estimatedMeasurementBody = estimatedIMUDefinition.getRigidBody();
-         ReferenceFrame estimatedMeasurementFrame = createMeasurementFrame(sensorName, "EstimatedMeasurementFrame",
-                                                       estimatedIMUDefinition, estimatedMeasurementBody);
+         ReferenceFrame estimatedMeasurementFrame = createMeasurementFrame(sensorName, "EstimatedMeasurementFrame", estimatedIMUDefinition,
+                                                       estimatedMeasurementBody);
 
          ControlFlowOutputPort<Vector3d> outputPort = linearAccelerationSensors.get(estimatedIMUDefinition);
 
@@ -125,6 +126,37 @@ public class SensorConfigurationFactory
       return linearAccelerationSensorConfigurations;
    }
 
+   public ArrayList<PointPositionSensorConfiguration> createPointPositionSensorConfigurations(Map<PointPositionSensorDefinition,
+                    ControlFlowOutputPort<PointPositionDataObject>> pointPositionSensors)
+   {
+      ArrayList<PointPositionSensorConfiguration> pointPositionSensorConfigurations = new ArrayList<PointPositionSensorConfiguration>();
+
+      Set<PointPositionSensorDefinition> pointPositionSensorDefinitions = pointPositionSensors.keySet();
+      for (PointPositionSensorDefinition pointPositionSensorDefinition : pointPositionSensorDefinitions)
+      {
+         String sensorName = pointPositionSensorDefinition.getName() + "PointPosition";
+
+         double pointPositionMeasurementStandardDeviation = sensorNoiseParameters.getPointPositionMeasurementStandardDeviation();
+         DenseMatrix64F pointPositionNoiseCovariance = createDiagonalCovarianceMatrix(pointPositionMeasurementStandardDeviation, 3);
+
+         RigidBody estimatedMeasurementBody = pointPositionSensorDefinition.getRigidBody();
+         ReferenceFrame estimatedFrameAfterJoint = estimatedMeasurementBody.getParentJoint().getFrameAfterJoint();
+
+         Vector3d offset = new Vector3d();
+         pointPositionSensorDefinition.getOffset(offset);
+         FramePoint estimatedPositionPoint = new FramePoint(estimatedFrameAfterJoint, offset);
+
+         ControlFlowOutputPort<PointPositionDataObject> outputPort = pointPositionSensors.get(pointPositionSensorDefinition);
+
+         PointPositionSensorConfiguration pointPositionSensorConfiguration = new PointPositionSensorConfiguration(outputPort, sensorName,
+                                                                                estimatedMeasurementBody, estimatedPositionPoint, pointPositionNoiseCovariance);
+
+         pointPositionSensorConfigurations.add(pointPositionSensorConfiguration);
+      }
+
+      return pointPositionSensorConfigurations;
+   }
+
 
    public ArrayList<PointVelocitySensorConfiguration> createPointVelocitySensorConfigurations(Map<PointVelocitySensorDefinition,
                     ControlFlowOutputPort<PointVelocityDataObject>> pointVelocitySensors)
@@ -137,7 +169,7 @@ public class SensorConfigurationFactory
          String sensorName = pointVelocitySensorDefinition.getName() + "PointVelocity";
 
          double pointVelocityMeasurementStandardDeviation = sensorNoiseParameters.getPointVelocityMeasurementStandardDeviation();
-         DenseMatrix64F pointVelocityNoiseCovariance = createDiagonalCovarianceMatrix(pointVelocityMeasurementStandardDeviation , 3);
+         DenseMatrix64F pointVelocityNoiseCovariance = createDiagonalCovarianceMatrix(pointVelocityMeasurementStandardDeviation, 3);
 
          RigidBody estimatedMeasurementBody = pointVelocitySensorDefinition.getRigidBody();
          ReferenceFrame estimatedFrameAfterJoint = estimatedMeasurementBody.getParentJoint().getFrameAfterJoint();
@@ -165,7 +197,7 @@ public class SensorConfigurationFactory
 
       return orientationCovarianceMatrix;
    }
-   
+
    public static ReferenceFrame createMeasurementFrame(String sensorName, String frameName, IMUDefinition imuDefinition, RigidBody measurementBody)
    {
       Transform3D transformFromIMUToJoint = new Transform3D();

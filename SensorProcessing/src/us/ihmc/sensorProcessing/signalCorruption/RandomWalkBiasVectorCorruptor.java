@@ -2,6 +2,7 @@ package us.ihmc.sensorProcessing.signalCorruption;
 
 import java.util.Random;
 
+import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -10,7 +11,7 @@ import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 
-public class RandomWalkBiasVectorCorruptor implements SignalCorruptor<Vector3d>
+public class RandomWalkBiasVectorCorruptor implements SignalCorruptor<Tuple3d>
 {
    private final YoVariableRegistry registry;
    private final Random random;
@@ -31,7 +32,7 @@ public class RandomWalkBiasVectorCorruptor implements SignalCorruptor<Vector3d>
       parentRegistry.addChild(registry);
    }
 
-   public void corrupt(Vector3d signal)
+   public void corrupt(Tuple3d signal)
    {
       double std = standardDeviation.getDoubleValue();
       double biasUpdateX = std * random.nextGaussian() * squareRootOfUpdateDT;
